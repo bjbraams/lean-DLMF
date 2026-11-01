@@ -5,17 +5,15 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.NumberTheory.Basic.GeneratingFunctions
 public import DLMF.NumberTheory.Inversion
 
 /-!
 # Divisor sums and Lambert series (DLMF §§27.6–27.7)
 
 Identities for divisor sums of the classical arithmetic functions (DLMF §27.6) and Lambert
-series (DLMF §27.7).
-
-## Main definitions
-
-* `lambertSeries`: the Lambert series `∑_{n≥1} f(n) xⁿ/(1 - xⁿ)` (DLMF 27.7.1).
+series (DLMF §27.7). The Lambert series `lambertSeries` (DLMF 27.7.1) is defined in
+`DLMF.NumberTheory.Basic.GeneratingFunctions`.
 
 ## Main results
 
@@ -298,12 +296,6 @@ theorem sum_divisors_moebius_pow (k : ℕ) {n : ℕ} (hn : 0 < n) :
   ring
 
 /-! ### §27.7 Lambert series as generating functions -/
-
-/-- DLMF 27.7.1: the Lambert series `∑_{n≥1} f(n) xⁿ/(1 - xⁿ)` (a totalized `tsum`; the
-statements below assert convergence). -/
-@[dlmf 27.7.E1]
-def lambertSeries (f : ℕ → ℂ) (x : ℂ) : ℂ :=
-  ∑' n : ℕ, f (n + 1) * x ^ (n + 1) / (1 - x ^ (n + 1))
 
 /-- `∑_{b≥1} y^b = y/(1 - y)` for `‖y‖ < 1`, over `ℕ+`. -/
 private lemma hasSum_geometric_pnat {K : Type*} [NormedDivisionRing K]

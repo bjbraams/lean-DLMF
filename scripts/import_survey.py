@@ -11,16 +11,20 @@ needed) and reports
 * the number of areas, modules and cross-area import lines;
 * the pairs of areas that import each other (two-way pairs), with an example file edge each way;
 * the strongly connected components of the area graph (areas that depend on each other);
-* all imports from foundational files into theorem files, within or across areas;
+* every import of a foundational file that is neither another foundational file nor a module
+  of Mathlib, TauCeti or `DLMFMathlib` (in particular theorem modules, non-foundational
+  `DLMF.Core` modules and `lean-codes` modules);
+* every module in the import closure of `DLMF.Basic` outside Mathlib, TauCeti, `DLMFMathlib`
+  and the foundational layer (for example a `lean-codes` module reached through `DLMFMathlib`);
 * missing project modules and file-import cycles.
 
 An area is the second component of a module name (`DLMF.Bessel.Basic` lies in `Bessel`). An
 area umbrella `DLMF/<Area>.lean` (one with a directory `DLMF/<Area>/`) and the
 `DLMF.Basic` foundational entry point are ignored in the area graph. A
 foundational file is recognised by name: a `Basic` module, any module below a `Basic/`
-directory, or a legacy `Defs`/`Definitions` module. Imports of `DLMF.Core.*` modules
-(the project framework) are exempt. Both same-area and cross-area foundational imports
-are checked; area umbrellas are not foundational modules.
+directory, or a legacy `Defs`/`Definitions` module; `DLMF.Core.Basic` is foundational.
+Both same-area and cross-area foundational imports are checked; area umbrellas are not
+foundational modules. `DLMF.Core` modules are left out of the area graph.
 
 With `--baseline`, two-way pairs and definitions-file imports that are already in the baseline
 are listed as known and the new ones are marked NEW. Foundational violations, missing
@@ -35,14 +39,20 @@ import os
 import re
 import sys
 
-IMPORT_RE = re.compile(r'^(?:public\s+)?import\s+(\S+)', re.M)
+IMPORT_RE = re.compile(r'^(?:public\s+)?(?:meta\s+)?import\s+(\S+)', re.M)
 DEF_NAMES = {'Basic', 'Defs', 'Definitions'}
+# Libraries a foundational file may import besides other foundational files.
+EXTERNAL_ROOTS = {'Mathlib', 'TauCeti', 'DLMFMathlib'}
+# Roots that may occur below Mathlib and TauCeti in the closure of `DLMF.Basic`.
+TOOLCHAIN_ROOTS = EXTERNAL_ROOTS | {'Init', 'Lean', 'Std', 'Batteries', 'Aesop', 'Qq',
+                                    'Plausible', 'ProofWidgets', 'LeanSearchClient',
+                                    'ImportGraph'}
 
 
-def read_modules(root):
-    """Map each module under `DLMF/` to the list of modules it imports."""
+def read_modules(root, top='DLMF'):
+    """Map each module under `top/` to the list of modules it imports."""
     mods = {}
-    for d, _, files in os.walk(os.path.join(root, 'DLMF')):
+    for d, _, files in os.walk(os.path.join(root, top)):
         for f in files:
             if f.endswith('.lean'):
                 path = os.path.join(d, f)
@@ -75,7 +85,8 @@ def survey(root):
     defs_imports = []
     for m, imps in sorted(mods.items()):
         for i in imps:
-            if (is_defs(m) and i in mods and area(i) != 'Core' and not is_defs(i)):
+            if is_defs(m) and not (i.split('.')[0] in EXTERNAL_ROOTS
+                                   or (i in mods and is_defs(i))):
                 defs_imports.append(f'{m} -> {i}')
             if m in umb or m == 'DLMF':
                 continue
@@ -87,6 +98,26 @@ def survey(root):
         graph[a].add(b)
     two_way = sorted(f'{a} <-> {b}' for (a, b) in edges if (b, a) in edges and a < b)
     return mods, umb, edges, two_way, strongly_connected(graph), defs_imports
+
+
+def basic_closure_violations(root, mods):
+    """Modules in the import closure of `DLMF.Basic` outside the allowed libraries."""
+    lib = read_modules(root, 'DLMFMathlib')
+    seen, stack, bad = set(), ['DLMF.Basic'], set()
+    while stack:
+        m = stack.pop()
+        if m in seen:
+            continue
+        seen.add(m)
+        if m in mods:
+            if not (is_defs(m) or m == 'DLMF.Basic'):
+                bad.add(m)
+            stack += mods[m]
+        elif m in lib:
+            stack += lib[m]
+        elif m.split('.')[0] not in TOOLCHAIN_ROOTS:
+            bad.add(m)
+    return sorted(bad)
 
 
 def strongly_connected(graph):
@@ -135,9 +166,10 @@ def main():
     module_graph = {m: {i for i in imports if i in mods} for m, imports in mods.items()}
     cycles = strongly_connected(module_graph)
     self_imports = sorted(m for m, imports in mods.items() if m in imports)
+    closure_bad = basic_closure_violations(args.root, mods) if 'DLMF.Basic' in mods else []
 
     if args.write_baseline:
-        if defs_imports or missing or cycles or self_imports:
+        if defs_imports or closure_bad or missing or cycles or self_imports:
             ap.error('foundational violations, missing imports and file cycles cannot be baselined')
         if not args.baseline:
             ap.error('--write-baseline needs --baseline FILE')
@@ -169,11 +201,16 @@ def main():
     print(f'\nStrongly connected groups of areas ({len(comps)}):')
     for c in comps:
         print(f'  {len(c)}: {", ".join(c)}')
-    print(f'\nFoundational files importing non-foundational DLMF modules ({len(defs_imports)}):')
+    print(f'\nFoundational files importing modules outside the foundational layer, Mathlib, '
+          f'TauCeti and DLMFMathlib ({len(defs_imports)}):')
     for d in defs_imports:
         tag = '' if d in known['defs_imports'] or not args.baseline else '  NEW'
         new += bool(tag)
         print(f'  {d}{tag}')
+    print(f'\nModules in the closure of DLMF.Basic outside the allowed libraries '
+          f'({len(closure_bad)}):')
+    for item in closure_bad:
+        print(f'  {item}')
     if args.baseline:
         print(f'\n{new} new item(s) relative to {args.baseline}')
     print(f'\nMissing project imports ({len(missing)}):')
@@ -184,7 +221,7 @@ def main():
         print('  ' + ', '.join(component))
     for module in self_imports:
         print(f'  {module} imports itself')
-    return 1 if new or defs_imports or missing or cycles or self_imports else 0
+    return 1 if new or defs_imports or closure_bad or missing or cycles or self_imports else 0
 
 
 if __name__ == '__main__':

@@ -39,11 +39,6 @@ open scoped Topology Nat
 
 namespace DLMF.AsymptoticApproximations
 
-/-- The legacy zeta binomial coefficient is Mathlib's generalized binomial coefficient. -/
-private lemma zeta_binomial_eq_choose (z : ℂ) (n : ℕ) :
-    cbinom z n = Ring.choose z n :=
-  (Ring.choose_eq_descPochhammer_div z n).symm
-
 /-- The even power-sum coefficient agrees with the falling-factorial coefficient
 in the zeta Euler–Maclaurin expansion. -/
 private lemma powerSum_evenCoeff {α : ℝ} (hα : α ≠ -1) {k : ℕ} (hk : 1 ≤ k) :
@@ -105,11 +100,10 @@ private lemma powerSum_em_integral (α : ℝ) (m n : ℕ) (hn : 1 ≤ n) :
 power-sum Bernoulli term. -/
 private lemma powerSum_em_term {α : ℝ} (hα : α ≠ -1) {k : ℕ} (hk : 1 ≤ k)
     (n : ℕ) :
-    cbinom (-(α : ℂ) + 2 * k - 2) (2 * k - 1) *
+    Ring.choose (-(α : ℂ) + 2 * k - 2) (2 * k - 1) *
         ((bernoulli (2 * k) : ℂ) / (2 * k)) * (n : ℂ) ^ (1 - -(α : ℂ) - 2 * k) =
       -(((n : ℝ) ^ (α + 1 - 2 * k) * powSumCoeff α (2 * k) : ℝ) : ℂ) := by
-  rw [zeta_binomial_eq_choose,
-    show -(α : ℂ) + 2 * k - 2 = ((-α + 2 * k - 2 : ℝ) : ℂ) by push_cast; ring,
+  rw [show -(α : ℂ) + 2 * k - 2 = ((-α + 2 * k - 2 : ℝ) : ℂ) by push_cast; ring,
     ← Complex.ofReal_choose,
     show (1 : ℂ) - -(α : ℂ) - 2 * k = ((α + 1 - 2 * k : ℝ) : ℂ) by push_cast; ring,
     ← Complex.ofReal_natCast n, ← Complex.ofReal_cpow (Nat.cast_nonneg n), powerSum_evenCoeff hα hk]
@@ -139,7 +133,7 @@ private lemma powerSum_eq_truncation_add_remainder {α : ℝ} (hα : α ≠ -1) 
     simp_rw [one_div, Complex.cpow_neg, inv_inv, ← Complex.ofReal_natCast,
       ← Complex.ofReal_cpow (Nat.cast_nonneg _), Complex.ofReal_sum]
   have hsumEven : (∑ k ∈ Icc 1 m,
-      cbinom (-(α : ℂ) + 2 * k - 2) (2 * k - 1) *
+      Ring.choose (-(α : ℂ) + 2 * k - 2) (2 * k - 1) *
         ((bernoulli (2 * k) : ℂ) / (2 * k)) * (n : ℂ) ^ (1 - -(α : ℂ) - 2 * k)) =
       -((∑ k ∈ Icc 1 m, (n : ℝ) ^ (α + 1 - 2 * k) * powSumCoeff α (2 * k) : ℝ) : ℂ) := by
     rw [Complex.ofReal_sum, ← sum_neg_distrib]
@@ -157,10 +151,9 @@ private lemma powerSum_eq_truncation_add_remainder {α : ℝ} (hα : α ≠ -1) 
     rw [neg_neg, ← Complex.ofReal_natCast n, ← Complex.ofReal_cpow (Nat.cast_nonneg n)]
     push_cast
     ring
-  have hchoose : cbinom (-(α : ℂ) + 2 * m) (2 * m + 1) =
+  have hchoose : Ring.choose (-(α : ℂ) + 2 * m) (2 * m + 1) =
       ((Ring.choose (-α + 2 * m) (2 * m + 1) : ℝ) : ℂ) := by
-    rw [zeta_binomial_eq_choose,
-      show -(α : ℂ) + 2 * m = ((-α + 2 * m : ℝ) : ℂ) by push_cast; ring,
+    rw [show -(α : ℂ) + 2 * m = ((-α + 2 * m : ℝ) : ℂ) by push_cast; ring,
       ← Complex.ofReal_choose]
   rw [hsum, hfirst, hhalf, hsumEven, hchoose, powerSum_em_integral α m n hn] at he
   have hr := congrArg Complex.re he

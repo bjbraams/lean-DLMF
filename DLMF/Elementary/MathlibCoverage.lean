@@ -59,7 +59,7 @@ not upstream are in the sibling modules of `DLMF.Elementary`.
 ## Implementation notes
 
 The principal logarithm uses argument in `(-π,π]`; closed cut values and conditionally
-convergent boundary series are treated in `DLMF.Elementary.LogExpBasic` and
+convergent boundary series are treated in `DLMF.Elementary.Basic.LogExp` and
 `DLMF.Elementary.LogExpAnalysis`. Reciprocal functions and division are totalized at poles in
 Lean. The real orthogonality and hyperbolic and `artanh` pointers credit the Tau Ceti
 contributors.

@@ -5,19 +5,19 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.QHypergeometric.Basic.Elementary
 public import DLMF.QHypergeometric.BasicSummations
 
 /-!
 # `q`-elementary functions and Carlitz polynomials (DLMF §17.3)
 
-This file defines the `q`-exponential, `q`-sine and `q`-cosine functions of DLMF §17.3 and
-Carlitz's `q`-Bernoulli, Eulerian and `q`-Stirling expressions, and proves their series
-expansions and closed forms.
+This file proves the series expansions of the `q`-exponential, `q`-sine and `q`-cosine
+functions of DLMF §17.3, which are defined in `DLMF.QHypergeometric.Basic.Elementary`, and
+defines Carlitz's `q`-Bernoulli, Eulerian and `q`-Stirling expressions and proves their closed
+forms.
 
 ## Main definitions
 
-* `qExp`, `qExpBig`: the scaled little and big `q`-exponentials (DLMF 17.3.1–17.3.2).
-* `qSin`, `qSinBig`, `qCos`, `qCosBig`: the `q`-sines and `q`-cosines (DLMF 17.3.3–17.3.6).
 * `qBernoulli`: Carlitz's `q`-Bernoulli expression (DLMF 17.3.7).
 * `qEulerian`, `qStirlingSecond`: Carlitz's Eulerian polynomial and second-kind `q`-Stirling
   polynomial.
@@ -46,24 +46,6 @@ open Complex Filter Finset Set MeasureTheory DLMF.QSeries
 open scoped Real Topology
 namespace DLMF.QHypergeometric
 
-/-- The scaled little q-exponential, including its meromorphic product continuation. -/
-@[dlmf 17.3.E1]
-def qExp (q x : ℂ) : ℂ := (qPochhammerInf ((1-q)*x) q)⁻¹
-/-- The scaled big q-exponential, an entire product in its argument when |q|<1. -/
-@[dlmf 17.3.E2]
-def qExpBig (q x : ℂ) : ℂ := qPochhammerInf (-(1-q)*x) q
-/-- The little q-sine. -/
-@[dlmf 17.3.E3]
-def qSin (q x : ℂ) : ℂ := (qExp q (I*x)-qExp q (-I*x))/(2*I)
-/-- The big q-sine. -/
-@[dlmf 17.3.E4]
-def qSinBig (q x : ℂ) : ℂ := (qExpBig q (I*x)-qExpBig q (-I*x))/(2*I)
-/-- The little q-cosine. -/
-@[dlmf 17.3.E5]
-def qCos (q x : ℂ) : ℂ := (qExp q (I*x)+qExp q (-I*x))/2
-/-- The big q-cosine. -/
-@[dlmf 17.3.E6]
-def qCosBig (q x : ℂ) : ℂ := (qExpBig q (I*x)+qExpBig q (-I*x))/2
 /-- Carlitz's q-Bernoulli expression, with the principal power q^(rx). -/
 @[dlmf 17.3.E7]
 def qBernoulli (n : ℕ) (x q : ℂ) : ℂ :=

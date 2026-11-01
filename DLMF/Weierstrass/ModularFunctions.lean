@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Weierstrass.Basic.Modular
 public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 public import DLMF.JacobiElliptic.AnalyticProperties
 public import DLMF.Weierstrass.SpecialLattices
@@ -14,20 +15,15 @@ public import Mathlib.LinearAlgebra.Matrix.FixedDetMatrices
 # Elliptic modular functions
 
 The elliptic modular function `λ(τ)`, Klein's complete invariant `J(τ)` and Dedekind's eta
-function (DLMF §§23.15–23.19): definitions, special values, `q`-expansions, products,
-transformations under `SL(2, ℤ)` and the relations with the lattice invariants.
-
-## Main definitions
-
-* `mobius`: the bilinear transformation `𝒜τ = (aτ + b)/(cτ + d)` of DLMF 23.15.3.
-* `IsModularFunction`, `IsModularForm`, `IsCuspForm`: the notions of DLMF §23.15(i).
-* `modularLambda`: `λ(τ) = θ₂⁴(0|τ)/θ₃⁴(0|τ)` (DLMF 23.15.6).
-* `kleinJ`: Klein's complete invariant (DLMF 23.15.7).
-* `dedekindSum`, `etaMultiplier`: the Dedekind sum and eta multiplier (DLMF 23.18.6–23.18.7).
+function (DLMF §§23.15–23.19): special values, `q`-expansions, products, transformations under
+`SL(2, ℤ)` and the relations with the lattice invariants. The definitions of `λ`, `J`, the
+bilinear transformations, the notions of §23.15(i), the Dedekind sum and the eta multiplier are
+in `DLMF.Weierstrass.Basic.Modular`; `J` is `ModularForm.kleinJ = E₄³/(E₄³ - E₆²)`.
 
 ## Main results
 
 * `nome_eq_modulus`, `modulus_eq_theta`: DLMF 23.15.1–23.15.2.
+* `kleinJ_eq_jacobiTheta`: the theta-function formula for `J` (DLMF 23.15.7).
 * `eta_hasProd`, `eta_pow_three_eq_theta`, `eta_hasSum`: DLMF 23.17.8, 23.15.9, 23.17.6.
 * `modularLambda_special`, `kleinJ_special`, `eta_special`: values at `i` and `e^{πi/3}`
   (DLMF 23.17.1–23.17.3).
@@ -35,15 +31,17 @@ transformations under `SL(2, ℤ)` and the relations with the lattice invariants
   23.17.7.
 * `modularLambda_smul`, `modularLambda_smul_of_even`, `isCuspForm_modularLambda`: DLMF
   23.18.1–23.18.3.
-* `kleinJ_smul`, `isModularFunction_kleinJ`: DLMF 23.18.4.
+* `isModularFunction_kleinJ`: DLMF 23.18.4 (the invariance itself is
+  `ModularForm.kleinJ_smul`).
 * `eta_smul`, `isModularFunction_eta`: DLMF 23.18.5.
 * `modularLambda_eq_eta`, `kleinJ_eq_modularLambda`, `kleinJ_eq_invariants`,
   `latticeDiscriminant_eq_eta`: DLMF 23.19.1–23.19.4.
 
 ## Implementation notes
 
-`λ` and `J` are defined from the project's theta functions in lattice-parameter form `θⱼ(0|τ)`
-(`DLMF.Theta.jacobiThetaTwoNullTau` etc.); Dedekind's eta function is Mathlib's
+`λ` is defined from the project's theta functions in lattice-parameter form `θⱼ(0|τ)`
+(`DLMF.Theta.jacobiThetaTwoNullTau` etc.), and the theta formula 23.15.7 for `J` is proved from
+the lattice form 23.19.3 and Mathlib's Eisenstein series; Dedekind's eta function is Mathlib's
 `ModularForm.eta`. DLMF writes `θⱼ(0, q)` with `q = e^{iπτ}`; the nome form of `θ₂` and of `θ₁'`
 carries a branch of `q^{1/4}` which only changes them by a fourth root of unity, and `λ`
 (fourth powers) and `J` (eighth powers) are unaffected by it.
@@ -72,6 +70,7 @@ noncomputable section
 namespace DLMF.Weierstrass
 
 open DLMF.Elliptic DLMF.Theta DLMF.JacobiElliptic
+open ModularForm (kleinJ)
 
 /-! ### §23.15(i) General modular functions -/
 
@@ -93,69 +92,7 @@ theorem modulus_eq_theta {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   obtain ⟨h1, h2, -⟩ := jacobi_inversion_k hk
   exact ⟨h1.symm, h2.symm⟩
 
-/-- The bilinear transformation `𝒜τ = (aτ + b)/(cτ + d)` (DLMF 23.15.3) of
-`𝒜 = [a b; c d] ∈ SL(2, ℤ)`. -/
-@[dlmf 23.15.E3]
-def mobius (A : SL(2, ℤ)) (τ : ℂ) : ℂ :=
-  ((A 0 0 : ℂ) * τ + A 0 1) / ((A 1 0 : ℂ) * τ + A 1 1)
-
-/-- DLMF 23.15.4: the entries of `𝒜 ∈ SL(2, ℤ)` satisfy `ad - bc = 1`. -/
-@[dlmf 23.15.E4]
-theorem mobius_det (A : SL(2, ℤ)) : A 0 0 * A 1 1 - A 0 1 * A 1 0 = 1 := by
-  have h := A.2
-  rwa [Matrix.det_fin_two] at h
-
-/-- The Möbius action of `SL(2, ℤ)` on `ℍ` is the transformation 23.15.3. -/
-@[dlmf 23.15.E3]
-theorem mobius_coe (A : SL(2, ℤ)) (τ : ℍ) : ((A • τ : ℍ) : ℂ) = mobius A τ := by
-  rw [coe_specialLinearGroup_apply, mobius]
-  simp
-
-/-- A modular function of level `ℓ = ℓ₂/2` for a subgroup `Γ ⊆ SL(2, ℤ)` (DLMF 23.15.5,
-§23.15(i)): `f` is meromorphic in `ℑτ > 0` and for each `𝒜 ∈ Γ` there is a constant `c_𝒜` with
-`f(𝒜τ) = c_𝒜 (cτ + d)^ℓ f(τ)` for `ℑτ > 0` (principal power). -/
-@[dlmf 23.15.E5]
-def IsModularFunction (Γ : Subgroup SL(2, ℤ)) (ℓ₂ : ℤ) (f : ℂ → ℂ) : Prop :=
-  MeromorphicOn f {τ : ℂ | 0 < τ.im} ∧
-    ∀ A ∈ Γ, ∃ c : ℂ, ∀ τ : ℍ,
-      f (A • τ : ℍ) = c * ((A 1 0 : ℂ) * τ + A 1 1) ^ ((ℓ₂ : ℂ) / 2) * f τ
-
-/-- A modular form (DLMF §23.15(i)): a modular function that, as a function of `q = e^{iπτ}`,
-is analytic at `q = 0`. -/
-@[dlmf 23.15.i]
-def IsModularForm (Γ : Subgroup SL(2, ℤ)) (ℓ₂ : ℤ) (f : ℂ → ℂ) : Prop :=
-  IsModularFunction Γ ℓ₂ f ∧
-    ∃ F : ℂ → ℂ, AnalyticAt ℂ F 0 ∧ ∀ τ : ℍ, f τ = F (cexp (π * I * τ))
-
-/-- A cusp form (DLMF §23.15(i)): a modular form with `f(τ) → 0` as `q → 0`. -/
-@[dlmf 23.15.i]
-def IsCuspForm (Γ : Subgroup SL(2, ℤ)) (ℓ₂ : ℤ) (f : ℂ → ℂ) : Prop :=
-  IsModularFunction Γ ℓ₂ f ∧
-    ∃ F : ℂ → ℂ, AnalyticAt ℂ F 0 ∧ F 0 = 0 ∧ ∀ τ : ℍ, f τ = F (cexp (π * I * τ))
-
 /-! ### §23.15(ii) `λ(τ)`, `J(τ)`, `η(τ)` -/
-
-/-- The elliptic modular function `λ(τ) = θ₂⁴(0|τ)/θ₃⁴(0|τ)` (DLMF 23.15.6), for `ℑτ > 0`. -/
-@[dlmf 23.15.E6]
-def modularLambda (τ : ℂ) : ℂ := jacobiThetaTwoNullTau τ ^ 4 / jacobiThetaThreeNullTau τ ^ 4
-
-/-- 23.15.6, "compare also 23.15.2": `λ(τ) = k²` with `k = θ₂²/θ₃²`. -/
-@[dlmf 23.15.E6]
-theorem modularLambda_eq_modulus_sq (τ : ℂ) : modularLambda τ = jacobiModulusTau τ ^ 2 := by
-  rw [modularLambda, jacobiModulusTau, div_pow, ← pow_mul, ← pow_mul]
-
-/-- Klein's complete invariant
-`J(τ) = (θ₂⁸(0|τ) + θ₃⁸(0|τ) + θ₄⁸(0|τ))³/(54 θ₁'(0|τ)⁸)` (DLMF 23.15.7), for `ℑτ > 0`. -/
-@[dlmf 23.15.E7]
-def kleinJ (τ : ℂ) : ℂ :=
-  (jacobiThetaTwoNullTau τ ^ 8 + jacobiThetaThreeNullTau τ ^ 8 + jacobiThetaFourNullTau τ ^ 8) ^ 3 /
-    (54 * jacobiThetaOneDerivNullTau τ ^ 8)
-
-/-- DLMF 23.15.8: `θ₁'(0|τ) = ∂θ₁(z|τ)/∂z` at `z = 0` (the definition of
-`jacobiThetaOneDerivNullTau`). -/
-@[dlmf 23.15.E8]
-theorem jacobiThetaOneDerivNullTau_eq (τ : ℂ) :
-    jacobiThetaOneDerivNullTau τ = deriv (fun z ↦ jacobiThetaOneTau z τ) 0 := rfl
 
 /-- `e^{2πiτ} = (e^{iπτ})²`. -/
 private lemma exp_two_pi_I_mul_eq_sq (τ : ℂ) : cexp (2 * π * I * τ) = cexp (π * I * τ) ^ 2 := by
@@ -243,11 +180,16 @@ private lemma eta_eq_exp_mul_jacobiThetaThreeTau (τ : ℍ) :
   simp_rw [key] at hm3 ht
   rw [ht, tprod_blocks_three hm.multipliable hm3, he]
 
+/-- The right-hand side `(θ₂⁸ + θ₃⁸ + θ₄⁸)³/(54 θ₁'⁸)` of DLMF 23.15.7. -/
+private def thetaKleinJ (τ : ℂ) : ℂ :=
+  (jacobiThetaTwoNullTau τ ^ 8 + jacobiThetaThreeNullTau τ ^ 8 + jacobiThetaFourNullTau τ ^ 8) ^ 3 /
+    (54 * jacobiThetaOneDerivNullTau τ ^ 8)
+
 /-- `J` and `λ` in terms of `A = θ₂⁴`, `C = θ₄⁴` (with `θ₃⁴ = A + C`). -/
-private lemma kleinJ_eq_jacobiThetaNull {τ : ℂ} (hτ : 0 < τ.im) :
+private lemma thetaKleinJ_eq_jacobiThetaNull {τ : ℂ} (hτ : 0 < τ.im) :
     jacobiThetaTwoNullTau τ ^ 4 ≠ 0 ∧ jacobiThetaFourNullTau τ ^ 4 ≠ 0 ∧
     jacobiThetaTwoNullTau τ ^ 4 + jacobiThetaFourNullTau τ ^ 4 ≠ 0 ∧
-    kleinJ τ = ((jacobiThetaTwoNullTau τ ^ 4) ^ 2 +
+    thetaKleinJ τ = ((jacobiThetaTwoNullTau τ ^ 4) ^ 2 +
         (jacobiThetaTwoNullTau τ ^ 4 + jacobiThetaFourNullTau τ ^ 4) ^ 2 +
         (jacobiThetaFourNullTau τ ^ 4) ^ 2) ^ 3 /
       (54 * (jacobiThetaTwoNullTau τ ^ 4) ^ 2 *
@@ -259,12 +201,12 @@ private lemma kleinJ_eq_jacobiThetaNull {τ : ℂ} (hτ : 0 < τ.im) :
   have hJ := jacobiThetaNull_fourth_power τ hτ
   have h3 : jacobiThetaThreeNullTau τ ^ 4 ≠ 0 := pow_ne_zero _ n3
   refine ⟨pow_ne_zero _ n2, pow_ne_zero _ n4, hJ ▸ h3, ?_, ?_⟩
-  · rw [kleinJ, jacobiThetaOneDerivNullTau_eq_mul hτ, ← hJ]
+  · rw [thetaKleinJ, jacobiThetaOneDerivNullTau_eq_mul hτ, ← hJ]
     ring
   · rw [modularLambda, ← hJ]
 
 /-- The algebraic identity behind DLMF 23.19.2. -/
-private lemma kleinJ_modularLambda_algebra {A C : ℂ} (hA : A ≠ 0) (hC : C ≠ 0) (hAC : A + C ≠ 0) :
+private lemma thetaKleinJ_modularLambda_algebra {A C : ℂ} (hA : A ≠ 0) (hC : C ≠ 0) (hAC : A + C ≠ 0) :
     (A ^ 2 + (A + C) ^ 2 + C ^ 2) ^ 3 / (54 * A ^ 2 * (A + C) ^ 2 * C ^ 2) =
       4 / 27 * (1 - A / (A + C) + (A / (A + C)) ^ 2) ^ 3 /
         (A / (A + C) * (1 - A / (A + C))) ^ 2 := by
@@ -273,13 +215,77 @@ private lemma kleinJ_modularLambda_algebra {A C : ℂ} (hA : A ≠ 0) (hC : C �
   field_simp
   ring
 
-/-- DLMF 23.19.2 in helper form. -/
-private lemma kleinJ_coe_eq_modularLambda (τ : ℍ) :
-    kleinJ τ = 4 / 27 * (1 - modularLambda τ + modularLambda τ ^ 2) ^ 3 /
+/-- DLMF 23.19.2 for the theta form of `J`. -/
+private lemma thetaKleinJ_eq_modularLambda (τ : ℍ) :
+    thetaKleinJ τ = 4 / 27 * (1 - modularLambda τ + modularLambda τ ^ 2) ^ 3 /
       (modularLambda τ * (1 - modularLambda τ)) ^ 2 := by
-  obtain ⟨hA, hC, hAC, hJ, hl⟩ := kleinJ_eq_jacobiThetaNull (τ := (τ : ℂ)) τ.im_pos
+  obtain ⟨hA, hC, hAC, hJ, hl⟩ := thetaKleinJ_eq_jacobiThetaNull (τ := (τ : ℂ)) τ.im_pos
   rw [hJ, hl]
-  exact kleinJ_modularLambda_algebra hA hC hAC
+  exact thetaKleinJ_modularLambda_algebra hA hC hAC
+
+/-- DLMF 23.19.3 for the theta form of `J`. -/
+private lemma thetaKleinJ_eq_invariants (τ : ℍ) :
+    thetaKleinJ τ = (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).g₂ ^ 3 /
+      ((HalfPeriods.ofTau (1 / 2) (by norm_num) τ).g₂ ^ 3 -
+        27 * (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).g₃ ^ 2) := by
+  set H := HalfPeriods.ofTau (1 / 2) (by norm_num) τ
+  have hτH : H.tau = τ := by
+    simp only [HalfPeriods.tau, H, HalfPeriods.ofTau_ω₁, HalfPeriods.ofTau_ω₃]; field_simp
+  obtain ⟨hA, hC, hAC, hJ, -⟩ := thetaKleinJ_eq_jacobiThetaNull (τ := (τ : ℂ)) τ.im_pos
+  obtain ⟨d3, d2⟩ := H.e_one_sub_e_three_and_e_one_sub_e_two
+  have hj := jacobiThetaNull_fourth_power τ τ.im_pos
+  simp only [jacobiThetaThreeNullTau, jacobiThetaFourNullTau, jacobiThetaTwoNullTau] at hj hJ hA hC hAC
+  rw [hτH] at d3 d2
+  rw [hj] at d3
+  have hs := H.e_sum
+  have hD : H.g₂ ^ 3 - 27 * H.g₃ ^ 2 =
+      16 * (H.e 2 - H.e 3) ^ 2 * (H.e 3 - H.e 1) ^ 2 * (H.e 1 - H.e 2) ^ 2 :=
+    H.latticeDiscriminant_eq
+  rw [hD, hJ]
+  set A := jacobiThetaTwoTau 0 τ ^ 4
+  set C := jacobiThetaFourTau 0 τ ^ 4
+  set c := (π / (2 * H.ω₁)) ^ 2
+  have hc : c ≠ 0 := by
+    simp only [c, H, HalfPeriods.ofTau_ω₁]
+    have := Real.pi_ne_zero
+    exact pow_ne_zero _ (div_ne_zero (by exact_mod_cast this) (by norm_num))
+  have e1 : H.e 1 = c * (2 * C + A) / 3 := by linear_combination (d3 + d2 + hs) / 3
+  have e2 : H.e 2 = H.e 1 - c * C := by linear_combination -d2
+  have e3 : H.e 3 = H.e 1 - c * (A + C) := by linear_combination -d3
+  have hg : H.g₂ = 2 / 3 * c ^ 2 * (A ^ 2 + (A + C) ^ 2 + C ^ 2) := by
+    rw [H.g₂_eq_e.1, e2, e3, e1]; ring
+  have f1 : H.e 2 - H.e 3 = c * A := by rw [e2, e3]; ring
+  have f2 : H.e 3 - H.e 1 = -(c * (A + C)) := by rw [e3]; ring
+  rw [hg, f1, f2, d2]
+  field_simp
+  ring
+
+open ModularForm EisensteinSeries in
+/-- The theta form of `J` is `E₄³/(E₄³ - E₆²)`. -/
+private lemma thetaKleinJ_eq_kleinJ (τ : ℍ) : thetaKleinJ τ = kleinJ τ := by
+  rw [thetaKleinJ_eq_invariants]
+  set L0 := (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair
+  have z4 : riemannZeta ((4 : ℕ) : ℂ) = π ^ 4 / 90 := by exact_mod_cast riemannZeta_four
+  have z6 : riemannZeta ((6 : ℕ) : ℂ) = π ^ 6 / 945 := by exact_mod_cast riemannZeta_six_eq_pi_pow
+  have ha : L0.g₂ = 4 * π ^ 4 / 3 * E₄ τ := by
+    rw [PeriodPair.g₂, G_ofTau_eq_two_mul_riemannZeta_mul_E τ (k := 4) (by norm_num), z4]; ring
+  have hb : L0.g₃ = 8 * π ^ 6 / 27 * E₆ τ := by
+    rw [PeriodPair.g₃, G_ofTau_eq_two_mul_riemannZeta_mul_E τ (k := 6) (by norm_num), z6]; ring
+  have hD := E₄_cube_sub_E₆_sq_ne_zero τ
+  have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+  simp only [HalfPeriods.g₂, HalfPeriods.g₃]
+  rw [ha, hb, ModularForm.kleinJ,
+    show (4 * π ^ 4 / 3 * E₄ τ) ^ 3 - 27 * (8 * π ^ 6 / 27 * E₆ τ) ^ 2 =
+    64 * (π : ℂ) ^ 12 / 27 * (E₄ τ ^ 3 - E₆ τ ^ 2) by ring]
+  rw [div_eq_div_iff (mul_ne_zero (by simp [hπ]) hD) hD]
+  ring
+
+/-- DLMF 23.15.7: `J(τ) = (θ₂⁸(0|τ) + θ₃⁸(0|τ) + θ₄⁸(0|τ))³/(54 θ₁'(0|τ)⁸)`, `ℑτ > 0`. -/
+@[dlmf 23.15.E7]
+theorem kleinJ_eq_jacobiTheta (τ : ℍ) :
+    kleinJ τ = (jacobiThetaTwoNullTau τ ^ 8 + jacobiThetaThreeNullTau τ ^ 8 +
+        jacobiThetaFourNullTau τ ^ 8) ^ 3 / (54 * jacobiThetaOneDerivNullTau τ ^ 8) :=
+  (thetaKleinJ_eq_kleinJ τ).symm
 
 /-- The lattice of an equianharmonic `H` is invariant under multiplication by `e^{πi/3}`. -/
 private lemma mem_lattice_iff_div_exp_pi_I_div_three {H : HalfPeriods} (h3 : H.ω₃ = cexp (π * I / 3) * H.ω₁) :
@@ -427,19 +433,21 @@ theorem modularLambda_special :
 
 /-- DLMF 23.17.2: `J(i) = 1` and `J(e^{πi/3}) = 0`. -/
 @[dlmf 23.17.E2]
-theorem kleinJ_special : kleinJ I = 1 ∧ kleinJ (cexp (π * I / 3)) = 0 := by
+theorem kleinJ_special : kleinJ upperHalfPlaneI = 1 ∧ kleinJ upperHalfPlaneRho = 0 := by
   obtain ⟨l1, l2⟩ := modularLambda_special
   refine ⟨?_, ?_⟩
-  · have := kleinJ_coe_eq_modularLambda upperHalfPlaneI
+  · have := thetaKleinJ_eq_modularLambda upperHalfPlaneI
     simp only [show ((upperHalfPlaneI : ℍ) : ℂ) = I from rfl] at this
-    rw [this, l1]; norm_num
-  · have := kleinJ_coe_eq_modularLambda upperHalfPlaneRho
+    rw [← thetaKleinJ_eq_kleinJ, show ((upperHalfPlaneI : ℍ) : ℂ) = I from rfl, this, l1]
+    norm_num
+  · have := thetaKleinJ_eq_modularLambda upperHalfPlaneRho
     simp only [show ((upperHalfPlaneRho : ℍ) : ℂ) = cexp (π * I / 3) from rfl] at this
     have hs : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
       rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; push_cast; ring
     have hρ2 : cexp (π * I / 3) ^ 2 = cexp (π * I / 3) - 1 := by
       rw [HalfPeriods.exp_pi_I_div_three_eq]; ring_nf; rw [I_sq, hs]; ring
-    rw [this, l2, show 1 - cexp (π * I / 3) + cexp (π * I / 3) ^ 2 = 0 by
+    rw [← thetaKleinJ_eq_kleinJ, show ((upperHalfPlaneRho : ℍ) : ℂ) = cexp (π * I / 3) from rfl,
+      this, l2, show 1 - cexp (π * I / 3) + cexp (π * I / 3) ^ 2 = 0 by
       linear_combination hρ2]
     simp
 
@@ -775,18 +783,6 @@ theorem isCuspForm_modularLambda : IsCuspForm (CongruenceSubgroup.Gamma 2) 0 mod
     push_cast
     ring
 
-/-- The Dedekind sum `s(d, c) = ∑_{r=1}^{c-1} (r/c)(dr/c - ⌊dr/c⌋ - 1/2)` (DLMF 23.18.7, as
-corrected in DLMF V1.0.11: no coprimality condition on `r`), for `c > 0`. -/
-@[dlmf 23.18.E7]
-def dedekindSum (d c : ℤ) : ℝ :=
-  ∑ r ∈ Finset.Ico (1 : ℤ) c, (r / c : ℝ) * ((d * r / c : ℝ) - ⌊(d * r / c : ℝ)⌋ - 1 / 2)
-
-/-- The eta multiplier `ε(𝒜) = exp(πi((a + d)/(12c) + s(-d, c)))` (DLMF 23.18.6), `c > 0`. -/
-@[dlmf 23.18.E6]
-def etaMultiplier (A : SL(2, ℤ)) : ℂ :=
-  cexp (π * I * (((A 0 0 + A 1 1 : ℤ) : ℂ) / (12 * (A 1 0 : ℂ)) +
-    (dedekindSum (-A 1 1) (A 1 0) : ℂ)))
-
 /-- DLMF 23.18.5: for `𝒜 ∈ SL(2, ℤ)` with `c > 0` and `ℑτ > 0`,
 `η(𝒜τ) = ε(𝒜)(-i(cτ + d))^{1/2} η(τ)` with the principal square root. -/
 @[dlmf 23.18.E5]
@@ -873,7 +869,6 @@ theorem isModularFunction_eta : IsModularFunction ⊤ 1 ModularForm.eta := by
   rw [show ((1 : ℂ) / 2) = 1 / 2 from rfl]
   field_simp [hs0 τ, hη0 τ]
   rfl
-
 
 /-! ### §23.19 Interrelations -/
 
@@ -968,13 +963,12 @@ theorem modularLambda_eq_eta (τ : ℍ) :
   rw [show η (τ : ℂ) ^ 12 = (η (τ : ℂ) ^ 3) ^ 4 by ring, hC]
   ring
 
-
 /-- DLMF 23.19.2: `J(τ) = (4/27)(1 - λ + λ²)³/(λ(1 - λ))²`, `ℑτ > 0`. -/
 @[dlmf 23.19.E2]
 theorem kleinJ_eq_modularLambda (τ : ℍ) :
     kleinJ τ = 4 / 27 * (1 - modularLambda τ + modularLambda τ ^ 2) ^ 3 /
       (modularLambda τ * (1 - modularLambda τ)) ^ 2 := by
-  exact kleinJ_coe_eq_modularLambda τ
+  rw [← thetaKleinJ_eq_kleinJ, thetaKleinJ_eq_modularLambda]
 
 /-- DLMF 23.19.3: `J(τ) = g₂³/(g₂³ - 27g₃²)` for the invariants of the lattice with generators
 `1` and `τ` (half-periods `ω₁ = 1/2`, `ω₃ = τ/2`), `ℑτ > 0`. -/
@@ -983,80 +977,18 @@ theorem kleinJ_eq_invariants (τ : ℍ) :
     kleinJ τ = (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).g₂ ^ 3 /
       ((HalfPeriods.ofTau (1 / 2) (by norm_num) τ).g₂ ^ 3 -
         27 * (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).g₃ ^ 2) := by
-  set H := HalfPeriods.ofTau (1 / 2) (by norm_num) τ
-  have hτH : H.tau = τ := by
-    simp only [HalfPeriods.tau, H, HalfPeriods.ofTau_ω₁, HalfPeriods.ofTau_ω₃]; field_simp
-  obtain ⟨hA, hC, hAC, hJ, -⟩ := kleinJ_eq_jacobiThetaNull (τ := (τ : ℂ)) τ.im_pos
-  obtain ⟨d3, d2⟩ := H.e_one_sub_e_three_and_e_one_sub_e_two
-  have hj := jacobiThetaNull_fourth_power τ τ.im_pos
-  simp only [jacobiThetaThreeNullTau, jacobiThetaFourNullTau, jacobiThetaTwoNullTau] at hj hJ hA hC hAC
-  rw [hτH] at d3 d2
-  rw [hj] at d3
-  have hs := H.e_sum
-  have hD : H.g₂ ^ 3 - 27 * H.g₃ ^ 2 =
-      16 * (H.e 2 - H.e 3) ^ 2 * (H.e 3 - H.e 1) ^ 2 * (H.e 1 - H.e 2) ^ 2 :=
-    H.latticeDiscriminant_eq
-  rw [hD, hJ]
-  set A := jacobiThetaTwoTau 0 τ ^ 4
-  set C := jacobiThetaFourTau 0 τ ^ 4
-  set c := (π / (2 * H.ω₁)) ^ 2
-  have hc : c ≠ 0 := by
-    simp only [c, H, HalfPeriods.ofTau_ω₁]
-    have := Real.pi_ne_zero
-    exact pow_ne_zero _ (div_ne_zero (by exact_mod_cast this) (by norm_num))
-  have e1 : H.e 1 = c * (2 * C + A) / 3 := by linear_combination (d3 + d2 + hs) / 3
-  have e2 : H.e 2 = H.e 1 - c * C := by linear_combination -d2
-  have e3 : H.e 3 = H.e 1 - c * (A + C) := by linear_combination -d3
-  have hg : H.g₂ = 2 / 3 * c ^ 2 * (A ^ 2 + (A + C) ^ 2 + C ^ 2) := by
-    rw [H.g₂_eq_e.1, e2, e3, e1]; ring
-  have f1 : H.e 2 - H.e 3 = c * A := by rw [e2, e3]; ring
-  have f2 : H.e 3 - H.e 1 = -(c * (A + C)) := by rw [e3]; ring
-  rw [hg, f1, f2, d2]
-  field_simp
-  ring
-
-
-open ModularForm EisensteinSeries in
-/-- `J(τ)` is Mathlib's `E₄³/(E₄³ - E₆²)`. -/
-private lemma kleinJ_eq_modularFormJ (τ : ℍ) : kleinJ τ = ModularForm.kleinJ τ := by
-  rw [kleinJ_eq_invariants]
-  set L0 := (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair
-  have z4 : riemannZeta ((4 : ℕ) : ℂ) = π ^ 4 / 90 := by exact_mod_cast riemannZeta_four
-  have z6 : riemannZeta ((6 : ℕ) : ℂ) = π ^ 6 / 945 := by exact_mod_cast riemannZeta_six_eq_pi_pow
-  have ha : L0.g₂ = 4 * π ^ 4 / 3 * E₄ τ := by
-    rw [PeriodPair.g₂, G_ofTau_eq_two_mul_riemannZeta_mul_E τ (k := 4) (by norm_num), z4]; ring
-  have hb : L0.g₃ = 8 * π ^ 6 / 27 * E₆ τ := by
-    rw [PeriodPair.g₃, G_ofTau_eq_two_mul_riemannZeta_mul_E τ (k := 6) (by norm_num), z6]; ring
-  have hD := E₄_cube_sub_E₆_sq_ne_zero τ
-  have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
-  simp only [HalfPeriods.g₂, HalfPeriods.g₃]
-  rw [ha, hb, ModularForm.kleinJ,
-    show (4 * π ^ 4 / 3 * E₄ τ) ^ 3 - 27 * (8 * π ^ 6 / 27 * E₆ τ) ^ 2 =
-    64 * (π : ℂ) ^ 12 / 27 * (E₄ τ ^ 3 - E₆ τ ^ 2) by ring]
-  rw [div_eq_div_iff (mul_ne_zero (by simp [hπ]) hD) hD]
-  ring
-
-/-- DLMF 23.18.4: `J(𝒜τ) = J(τ)` for `𝒜 ∈ SL(2, ℤ)`, `ℑτ > 0`. -/
-@[dlmf 23.18.E4]
-theorem kleinJ_smul (A : SL(2, ℤ)) (τ : ℍ) : kleinJ (A • τ : ℍ) = kleinJ τ := by
-  rw [kleinJ_eq_modularFormJ, kleinJ_eq_modularFormJ, ModularForm.kleinJ_smul]
+  rw [← thetaKleinJ_eq_kleinJ, thetaKleinJ_eq_invariants]
 
 /-- §23.18 after 23.18.4: `J` is a modular function of level zero for `SL(2, ℤ)`.
 Corrected from the printed DLMF statement: DLMF calls `J` a "modular form of level zero", but `J`
 has a pole at `q = 0`, so it is not a modular form in the sense of DLMF 23.15(i) (which requires
 analyticity at `q = 0`); it is a modular function. -/
 @[dlmf 23.18.E4]
-theorem isModularFunction_kleinJ : IsModularFunction ⊤ 0 kleinJ := by
-  refine ⟨?_, fun A _ => ⟨1, fun τ => ?_⟩⟩
-  · have hU : IsOpen {z : ℂ | 0 < z.im} := isOpen_upperHalfPlaneSet
-    refine AnalyticOnNhd.meromorphicOn fun z hz => ?_
-    refine (ModularForm.analyticOnNhd_kleinJ_comp_ofComplex z hz).congr ?_
-    filter_upwards [hU.mem_nhds hz] with w hw
-    simp only [Function.comp_apply]
-    have : kleinJ w = kleinJ ((⟨w, hw⟩ : ℍ) : ℂ) := rfl
-    rw [this, kleinJ_eq_modularFormJ, ofComplex_apply_of_im_pos hw]
-  · simp only [Int.cast_zero, zero_div, cpow_zero, one_mul]
-    exact kleinJ_smul A τ
+theorem isModularFunction_kleinJ : IsModularFunction ⊤ 0 (kleinJ ∘ ofComplex) := by
+  refine ⟨ModularForm.analyticOnNhd_kleinJ_comp_ofComplex.meromorphicOn,
+    fun A _ => ⟨1, fun τ => ?_⟩⟩
+  simp only [Function.comp_apply, ofComplex_apply, Int.cast_zero, zero_div, cpow_zero, one_mul]
+  exact ModularForm.kleinJ_smul A τ
 
 open ModularForm in
 /-- DLMF 23.19.4: `Δ = (2π)¹²η²⁴(τ)` for the lattice with generators `1` and `τ`, `ℑτ > 0`. -/

@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Series
+public import DLMF.Hypergeometric.Basic.ParameterAnalyticity
 
 /-!
 # Contiguous relations (AAR §2.5 and §3.7)
@@ -20,8 +21,11 @@ one parameter by `±1`. This file proves the basic ones; the others are in
 * `ordinaryHypergeometric_mul_one_sub_mul_deriv_eq`: `z(1-z) F' = (c-a) F(a-) + (a-c+bz) F`,
   DLMF 15.5.20 (AAR (2.5.8)).
 * `contiguous_a`: the three-term relation in `a`, DLMF 15.5.11.
-* `contiguous_shift_b`: DLMF 15.5.16_5.
-* `contiguous_c`: a relation shifting the denominator parameter.
+
+## Implementation notes
+
+`contiguous_shift_b` (DLMF 15.5.16_5) and `contiguous_c` (shifting the denominator parameter)
+are in `DLMF.Hypergeometric.Basic.ParameterAnalyticity`.
 
 ## References
 
@@ -35,79 +39,6 @@ open Complex
 noncomputable section
 
 namespace DLMF.Hypergeometric
-
-/-- Helper lemma for contiguous relations: `a (a+1)_n = (a+n) (a)_n`. -/
-theorem poch_succ_left_mul (a : ℂ) (n : ℕ) : a * poch (a + 1) n = (a + n) * poch a n := by
-  rw [← poch_succ_left, poch_succ, mul_comm]
-
-/-- Helper lemma for `contiguous_shift_b`. -/
-theorem poch_sub_succ (b : ℂ) (n : ℕ) :
-    poch b (n + 1) - poch (b + 1) (n + 1) = -(n + 1 : ℂ) * poch (b + 1) n := by
-  rw [poch_succ_left, poch_succ]
-  ring
-
-/-- Helper lemma for `contiguous_shift_b`. The identity is false at `c = 0` without this
-regularity hypothesis: both left-hand hypergeometric series collapse to `1` in Lean's
-totalization, while the right-hand side need not vanish. -/
-theorem gaussHGCoeff_contiguous_shift_b {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
-    c * gaussHGCoeff a b c (n + 1) - c * gaussHGCoeff a (b + 1) c (n + 1) =
-      -a * gaussHGCoeff (a + 1) (b + 1) (c + 1) n := by
-  have hc0 : c ≠ 0 := by simpa using hc 0
-  have hcp1 := poch_ne_zero_of_not_neg_nat (not_neg_nat_add_nat hc 1) n
-  have hn : (n + 1 : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
-  have hf0 : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-  have hdiff := poch_sub_succ b n
-  have hfac : ((n + 1).factorial : ℂ) = (n + 1) * n.factorial := by
-    rw [Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one, mul_comm]
-  simp only [gaussHGCoeff, poch_succ_left a n, poch_succ_left c n, hfac]
-  field_simp [hc0, hcp1, hn, hf0]
-  rw [hdiff]
-  ring
-
-/-- One of Gauss's contiguous relations, under the standing AAR convention that the
-denominator parameter is not a nonpositive integer. Without that hypothesis the identity
-fails at `c = 0`. -/
-@[dlmf 15.5.E16_5]
-theorem contiguous_shift_b {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :
-    c * ₂F₁ a b c z - c * ₂F₁ a (b + 1) c z =
-      -(a * z) * ₂F₁ (a + 1) (b + 1) (c + 1) z := by
-  have hz' := mem_eball_one_of_norm_lt_one hz
-  have hs1 := (hasFPowerSeriesOnBall_ordinaryHypergeometric a b c).hasSum_mul_pow hz'
-  have hs2 := (hasFPowerSeriesOnBall_ordinaryHypergeometric a (b + 1) c).hasSum_mul_pow hz'
-  have hs3 :=
-    (hasFPowerSeriesOnBall_ordinaryHypergeometric (a + 1) (b + 1) (c + 1)).hasSum_mul_pow hz'
-  have hL := (hs1.mul_left c).sub (hs2.mul_left c)
-  have hR0 := hs3.mul_left (-a)
-  let d : ℕ → ℂ := fun n =>
-    match n with
-    | 0 => 0
-    | n + 1 => -a * gaussHGCoeff (a + 1) (b + 1) (c + 1) n
-  have hd_succ : ∀ n, d (n + 1) = -a * gaussHGCoeff (a + 1) (b + 1) (c + 1) n := fun n => rfl
-  have hds : HasSum (fun n => d (n + 1) * z ^ n)
-      (-a * ₂F₁ (a + 1) (b + 1) (c + 1) z) := by
-    have hfun : (fun n => d (n + 1) * z ^ n) =
-        fun n => -a * (gaussHGCoeff (a + 1) (b + 1) (c + 1) n * z ^ n) := by
-      funext n
-      rw [hd_succ]
-      ring
-    rwa [hfun]
-  have hR := HasSum.mul_pow_shift hds rfl
-  have hfunL : (fun n : ℕ =>
-      c * (gaussHGCoeff a b c n * z ^ n) - c * (gaussHGCoeff a (b + 1) c n * z ^ n)) =
-      fun n => d n * z ^ n := by
-    funext n
-    cases n with
-    | zero => simp [d, gaussHGCoeff, poch_zero]
-    | succ n =>
-      simp only [d]
-      have hcoeff := gaussHGCoeff_contiguous_shift_b (a := a) (b := b) (c := c) hc n
-      linear_combination hcoeff * z ^ (n + 1)
-  have hL' : HasSum (fun n => d n * z ^ n)
-      (c * ₂F₁ a b c z - c * ₂F₁ a (b + 1) c z) := by
-    rwa [← hfunL]
-  have hval : z * (-a * ₂F₁ (a + 1) (b + 1) (c + 1) z) =
-      -(a * z) * ₂F₁ (a + 1) (b + 1) (c + 1) z := by ring
-  exact hL'.unique (hval ▸ hR)
 
 /-- Helper lemma for AAR (2.5.5): the coefficient identity
 `n (a)_n = a ((a+1)_n - (a)_n)`. -/
@@ -287,61 +218,6 @@ theorem contiguous_a {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ 
           (1 - z) * a * (₂F₁ (a + 1) b c z - ₂F₁ a b c z) := by
     ring
   rw [hrearr, heq]
-  ring
-
-/-- Helper lemma for `contiguous_c`. -/
-theorem gaussHGCoeff_contiguous_c {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
-    c * gaussHGCoeff a b c n - (c - a) * gaussHGCoeff a b (c + 1) n -
-      a * gaussHGCoeff (a + 1) b (c + 1) n = 0 := by
-  have hcp := poch_ne_zero_of_not_neg_nat hc n
-  have hcp1 : poch (c + 1) n ≠ 0 := by
-    simpa using poch_ne_zero_of_not_neg_nat (not_neg_nat_add_nat hc 1) n
-  have hfact : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-  have hA := poch_succ_left_mul a n
-  have hC := poch_succ_left_mul c n
-  have hnum :
-      c * poch a n * poch (c + 1) n - (c - a) * poch a n * poch c n -
-        a * poch (a + 1) n * poch c n = 0 := by
-    rw [show c * poch a n * poch (c + 1) n = poch a n * (c * poch (c + 1) n) by ring, hC]
-    rw [show a * poch (a + 1) n * poch c n = poch c n * (a * poch (a + 1) n) by ring, hA]
-    ring
-  have hden : poch c n * poch (c + 1) n * (n.factorial : ℂ) ≠ 0 :=
-    mul_ne_zero (mul_ne_zero hcp hcp1) hfact
-  simp only [gaussHGCoeff]
-  apply mul_left_cancel₀ hden
-  rw [mul_zero]
-  field_simp [hcp, hcp1, hfact]
-  linear_combination poch b n * hnum
-
-/-- Contiguous relation shifting the denominator parameter. The previous combination
-`(c-a-b) F(a,b;c) + a F(a+1,b;c+1) + b F(a,b+1;c+1) - c F(a,b;c+1)` is false already
-at degree one (the residual is proportional to `3c-a-b`). The identity below is the
-standard Gauss relation among `F(c)`, `F(c+1)` and `F(a+1,c+1)`, and requires the
-standing restriction that `c` is not a nonpositive integer. -/
-theorem contiguous_c {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :
-    c * ₂F₁ a b c z - (c - a) * ₂F₁ a b (c + 1) z -
-      a * ₂F₁ (a + 1) b (c + 1) z = 0 := by
-  have hz' := mem_eball_one_of_norm_lt_one hz
-  have hs0 := (hasFPowerSeriesOnBall_ordinaryHypergeometric a b c).hasSum_mul_pow hz'
-  have hs1 := (hasFPowerSeriesOnBall_ordinaryHypergeometric a b (c + 1)).hasSum_mul_pow hz'
-  have hs2 :=
-    (hasFPowerSeriesOnBall_ordinaryHypergeometric (a + 1) b (c + 1)).hasSum_mul_pow hz'
-  have hsum := (hs0.mul_left c).sub ((hs1.mul_left (c - a)).add (hs2.mul_left a))
-  have hfun : (fun n : ℕ =>
-      c * (gaussHGCoeff a b c n * z ^ n) -
-        ((c - a) * (gaussHGCoeff a b (c + 1) n * z ^ n) +
-          a * (gaussHGCoeff (a + 1) b (c + 1) n * z ^ n))) =
-      fun _ => 0 := by
-    funext n
-    have hcoeff := gaussHGCoeff_contiguous_c (a := a) (b := b) (c := c) hc n
-    linear_combination hcoeff * z ^ n
-  have hsum' : HasSum (fun _ : ℕ => (0 : ℂ))
-      (c * ₂F₁ a b c z - ((c - a) * ₂F₁ a b (c + 1) z + a * ₂F₁ (a + 1) b (c + 1) z)) := by
-    rwa [hfun] at hsum
-  have hval := hsum'.tsum_eq
-  rw [tsum_zero] at hval
-  rw [eq_comm] at hval
-  convert hval using 1
   ring
 
 end DLMF.Hypergeometric

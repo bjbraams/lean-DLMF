@@ -22,7 +22,6 @@ for `ℓ ∈ ℕ`.
 
 ## Main results
 
-* `conj_kummerM`: Kummer's function commutes with complex conjugation.
 * `hasDerivAt_coulombWave`, `hasDerivAt_coulombWaveDeriv`, `deriv_deriv_coulombWave`: the Coulomb
   wave equation `w'' + (1 - 2η/ρ - ℓ(ℓ+1)/ρ²) w = 0` (DLMF 33.2.1), from Kummer's equation.
 * `coulombWave_eq_conj_form`: the lower-sign form of 33.2.4, by Kummer's transformation.
@@ -43,20 +42,6 @@ open DLMF.Hypergeometric
 noncomputable section
 
 namespace DLMF.Confluent
-
-/-- Complex conjugation commutes with the Pochhammer symbol: `conj((a)_n) = (conj a)_n`. -/
-theorem conj_poch (a : ℂ) (n : ℕ) : conj (poch a n) = poch (conj a) n := by
-  induction n with
-  | zero => simp [poch_zero]
-  | succ n ih => rw [poch_succ, poch_succ, map_mul, ih, map_add, map_natCast]
-
-/-- Kummer's function commutes with complex conjugation. -/
-theorem conj_kummerM (a c z : ℂ) :
-    conj (kummerM a c z) = kummerM (conj a) (conj c) (conj z) := by
-  rw [kummerM, kummerM, Complex.conj_tsum]
-  congr 1
-  funext n
-  simp [conj_poch, map_div₀, map_mul, map_pow]
 
 /-- `2ℓ + 2` is not a nonpositive integer. -/
 theorem two_mul_nat_add_two_ne_neg_nat (ℓ : ℕ) : ∀ k : ℕ, (2 * (ℓ : ℂ) + 2) ≠ -k := fun k h => by

@@ -1563,7 +1563,7 @@ order:
 - [Distributions/DiracDelta](DLMF/AlgebraicAnalytic/Distributions/DiracDelta.lean) (§1.17;
   imports `Basic` and the special-function modules `DLMF.Bessel.Basic`, `DLMF.Airy.Basic`,
   `DLMF.Coulomb.Energy.Basic`, `DLMF.OrthogonalPolynomials.Classical`,
-  `DLMF.Legendre.Harmonics`, `DLMF.Core.Framework`)
+  `DLMF.Legendre.Harmonics`, `DLMF.Core.Basic`)
 - [Spectral/Basic](DLMF/AlgebraicAnalytic/Spectral/Basic.lean) (imports Mathlib only)
 - [Spectral/MathlibCoverage](DLMF/AlgebraicAnalytic/Spectral/MathlibCoverage.lean)
 - [Spectral/Theory](DLMF/AlgebraicAnalytic/Spectral/Theory.lean) (§1.18; imports `Spectral/Basic`

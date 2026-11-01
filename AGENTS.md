@@ -48,18 +48,47 @@ DLMF 27.14(v); both remain in the DLMF priority scope.
 - The top-level module prefix `ToMathlib` belongs to lean-codes. Lean locates a module's
   build files by its package, so two packages must never share a top-level prefix; put new
   general results of this project under `DLMFMathlib/`.
+- Purpose of the foundational layer (2026-11-01). The `Basic` files are the part of the
+  library that we offer to the TauCeti and Mathlib communities as the starting point for
+  bringing DLMF into TauCeti first and Mathlib later. A reader must be able to work from the
+  foundational layer alone: it contains the central definitions of every DLMF chapter in
+  scope, together with their basic API, and it depends on nothing outside Mathlib, TauCeti,
+  `DLMFMathlib` and the foundational layer itself.
 - Foundational layout (adopted 2026-10-30). Use `Basic.lean` for a small foundational
   file or an umbrella; larger collections use descriptive files under `Basic/`. Each
-  mathematical definition has exactly one canonical home, together with the minimal
-  supporting facts needed to use it. Preserve names, namespaces, statements, branches,
-  normalizations and definition bodies when reorganizing files. Substantive theorem
-  developments belong outside `Basic/`.
-- A foundational module (`Basic.lean`, any file below `Basic/`, or a remaining legacy
-  `Defs.lean`/`Definitions.lean`) may import Mathlib, TauCeti, lean-codes, `DLMFMathlib`,
-  actual `DLMF.Core.*` modules, and other foundational modules. It must not import a
-  DLMF theorem module, even in its own area. The old grandfathered Basic-to-theorem
-  exceptions have been removed; no such exceptions remain. `DLMF.Core` denotes the
-  framework family, not an existing `DLMF/Core.lean` file.
+  mathematical definition has exactly one canonical home. Preserve names, namespaces,
+  statements, branches, normalizations and definition bodies when reorganizing files.
+- Content of the foundational layer (refined 2026-11-01). For each central function or
+  family of a chapter, the foundational layer holds:
+  - the definition, with a docstring stating its domain, branch and normalization;
+  - unfolding, `simp` and special-value lemmas (values at `0`, at integer parameters and at
+    exceptional parameters);
+  - symmetries, parity and conjugation;
+  - continuity, differentiability or analyticity on the stated domain;
+  - the defining differential equation, recurrence or functional equation, and the
+    Wronskian where DLMF gives one;
+  - the bridge to the corresponding Mathlib or TauCeti function where one exists.
+
+  All of these are proved from foundational imports only. Put such properties in files
+  below `Basic/` (for example `Airy/Basic/Properties.lean`) so that the definition files
+  stay short. A theorem moved down keeps its name, statement, `dlmf` tags and docstring; only
+  its proof may change. Where the existing proof sits on a deep theorem-layer stack, give
+  the theorem a new proof from foundational imports rather than moving the stack down, and
+  do not leave a duplicate in the theorem layer. Only fully proved results go into the
+  foundational layer: no `sorry` and no dependence on admitted lemmas. Everything else
+  (asymptotics, zeros, integrals, expansions, inequalities, transformations, computation)
+  belongs to the theorem layer, as do auxiliary definitions used only there (expansion
+  coefficients, error-bound data, reduction data, zero-counting functions).
+- A foundational module (`Basic.lean`, any file below `Basic/`, `DLMF.Core.Basic`, or a
+  remaining legacy `Defs.lean`/`Definitions.lean`) may import only Mathlib, TauCeti,
+  `DLMFMathlib` and other foundational modules. It must not import a DLMF theorem module
+  (even in its own area), a non-foundational `DLMF.Core` module, or a lean-codes module.
+  The import closure of `DLMF.Basic` must contain no lean-codes module, so a `DLMFMathlib`
+  module imported by a foundational file must not import lean-codes either. A definition
+  that needs lean-codes (for example `symEllIntR`, built on Carlson's `R`-function) lives in
+  the theorem layer. `DLMF.Core.Basic` holds the shared conventions (improper integrals,
+  principal values, segment primitives, sector filters, continued fractions); the other
+  `DLMF.Core` modules are theorem-layer modules.
 - `DLMF.Basic` is the foundational entry point. When adding a new `Basic.lean` entry
   point, include it there. The complete area and top-level umbrellas may import both
   foundational and theorem modules.
@@ -69,9 +98,10 @@ DLMF 27.14(v); both remain in the DLMF priority scope.
   current file, move it down unchanged rather than copying it or adding a theorem-file
   dependency to a foundation.
 - At integration run `scripts/import_survey.py`. Report new two-way area pairs. The
-  survey checks the entire foundational layer (including `Basic/` submodules and
-  same-area imports), missing project modules and file-import cycles. These violations
-  fail regardless of the two-way-area baseline.
+  survey checks the imports of the entire foundational layer (including `Basic/`
+  submodules and same-area imports), the import closure of `DLMF.Basic`, missing project
+  modules and file-import cycles. These violations fail regardless of the two-way-area
+  baseline.
 
 Mathlib and TauCeti are allowed throughout the DLMF library, including when filling
 existing admissions. Preserve complex branches, normalizations, exceptional parameters

@@ -13,8 +13,6 @@ public import DLMF.Hypergeometric.ConnectionFormulas
 
 ## Main results
 
-* `regularized_at_neg_nat`, `tendsto_regularized_at_neg_nat`: the regularized function at a
-  nonpositive integer denominator parameter, DLMF 15.2.3_5.
 * `entire_regularized_parameters`: `𝐅(a,b;c;z)` is jointly entire in `(a, b, c)` on the unit
   disk (§15.2(ii)).
 * `conditional_convergence_on_circle`, `divergence_on_circle`: conditional convergence and
@@ -33,7 +31,9 @@ series radius of §15.2(i) is `ordinaryHypergeometricSeries_radius_eq_one` and
 `ordinaryHypergeometric_radius_top_of_neg_nat₁/₂/₃`. These Mathlib functions are sums of series;
 their values outside convergence are not DLMF's analytic continuations, so conditional
 convergence is stated with ordered finite partial sums. The terminating identity 15.2.4 and
-absolute convergence on the unit circle are in `DLMF.Hypergeometric.SeriesProperties`. DLMF 15.2.5
+absolute convergence on the unit circle are in `DLMF.Hypergeometric.Basic.GaussSeries`, and the
+values at a nonpositive integer denominator (DLMF 15.2.3_5, `regularized_at_neg_nat`) are in
+`DLMF.Hypergeometric.Basic.ParameterAnalyticity`. DLMF 15.2.5
 and 15.2.6 prescribe different singular-parameter limit conventions; the diagonal convention
 15.2.6 must not be confused with totalized division.
 -/
@@ -47,60 +47,6 @@ noncomputable section
 
 namespace DLMF.Hypergeometric
 
-/-- Identity under the stated parameter and domain assumptions: `regularizedGaussHGFun a b (-n) z
-= poch a (n + 1) * poch b (n + 1) / ((n + 1).factorial : ℂ) * z ^ (n + 1) * ₂F₁ (a + n + 1) (b
-+ n + 1) (n + 2) z`. -/
-@[dlmf 15.2.E3_5]
-theorem regularized_at_neg_nat (a b : ℂ) (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
-    regularizedGaussHGFun a b (-n) z =
-      poch a (n + 1) * poch b (n + 1) / ((n + 1).factorial : ℂ) * z ^ (n + 1) *
-        ₂F₁ (a + n + 1) (b + n + 1) (n + 2) z := by
-  rw [regularizedGaussHGFun_eq_tsum]
-  have hs := summable_regularizedGaussHGFun_term a b (-n) hz
-  rw [← hs.sum_add_tsum_nat_add (n + 1)]
-  have hzero : ∀ k ∈ Finset.range (n + 1),
-      (ascPochhammer ℂ k).eval a * (ascPochhammer ℂ k).eval b * z ^ k / k.factorial *
-        (Gamma (-(n : ℂ) + k))⁻¹ = 0 := by
-    intro k hk
-    have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
-    have : (-(n : ℂ) + k) = -((n - k : ℕ) : ℂ) := by push_cast [Nat.cast_sub hk']; ring
-    rw [this, Complex.Gamma_neg_nat_eq_zero, inv_zero, mul_zero]
-  rw [Finset.sum_eq_zero hzero, zero_add]
-  have hF := (hasFPowerSeriesOnBall_ordinaryHypergeometric (a + n + 1) (b + n + 1)
-    (n + 2)).hasSum_mul_pow (mem_eball_one_of_norm_lt_one hz)
-  rw [← hF.tsum_eq, ← tsum_mul_left]
-  congr 1
-  funext j
-  have hpole : ∀ k : ℕ, ((n : ℂ) + 2) ≠ -(k : ℂ) := fun k h => by
-    have := congrArg Complex.re h
-    simp only [Complex.add_re, Complex.natCast_re, Complex.re_ofNat, Complex.neg_re] at this
-    linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k), (Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
-  have hΓ : Gamma ((n : ℂ) + 2 + j) = (ascPochhammer ℂ j).eval ((n : ℂ) + 2) * Gamma ((n : ℂ) + 2) := by
-    rw [← Gamma_add_nat_div_Gamma_eq (n := j) ((n : ℂ) + 2) hpole]
-    field_simp [Gamma_ne_zero hpole]
-  have hΓ1 : Gamma ((n : ℂ) + 2 + j) = ((n + 1 + j).factorial : ℂ) := by
-    rw [show (n : ℂ) + 2 + j = ((n + 1 + j : ℕ) : ℂ) + 1 by push_cast; ring]
-    exact Complex.Gamma_nat_eq_factorial _
-  have hΓ2 : Gamma ((n : ℂ) + 2) = ((n + 1).factorial : ℂ) := by
-    rw [show (n : ℂ) + 2 = ((n + 1 : ℕ) : ℂ) + 1 by push_cast; ring]
-    exact Complex.Gamma_nat_eq_factorial _
-  have hΓ3 : Gamma (-(n : ℂ) + ((n + 1 + j : ℕ) : ℂ)) = (j.factorial : ℂ) := by
-    rw [show -(n : ℂ) + ((n + 1 + j : ℕ) : ℂ) = (j : ℂ) + 1 by push_cast; ring]
-    exact Complex.Gamma_nat_eq_factorial _
-  have hp : (ascPochhammer ℂ j).eval ((n : ℂ) + 2) ≠ 0 := poch_ne_zero_of_not_neg_nat hpole j
-  have hf1 : ((n + 1).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
-  have hf2 : (j.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
-  have hf3 : ((n + 1 + j).factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
-  rw [hΓ1, hΓ2] at hΓ
-  simp only [gaussHGCoeff, poch]
-  rw [add_comm j (n + 1), ascPochhammer_eval_add a, ascPochhammer_eval_add b, hΓ3,
-    show a + ((n + 1 : ℕ) : ℂ) = a + n + 1 by push_cast; ring,
-    show b + ((n + 1 : ℕ) : ℂ) = b + n + 1 by push_cast; ring, pow_add]
-  field_simp
-  linear_combination (-((ascPochhammer ℂ (n + 1)).eval a * (ascPochhammer ℂ j).eval (a + n + 1) *
-    (ascPochhammer ℂ (n + 1)).eval b * (ascPochhammer ℂ j).eval (b + n + 1) *
-    z ^ (n + 1) * z ^ j)) * hΓ
-
 /-- Differentiability of the indicated parameterized function: `Differentiable ℂ (fun p : ℂ × ℂ ×
 ℂ => regularizedGaussHGFun p.1 p.2.1 p.2.2 z)`. -/
 @[dlmf 15.2.ii]
@@ -109,18 +55,6 @@ theorem entire_regularized_parameters {z : ℂ} (hz : ‖z‖ < 1) :
       regularizedGaussHGFun p.1 p.2.1 p.2.2 z) :=
   differentiable_regularizedGaussHGFun_of_differentiable differentiable_fst
     (differentiable_fst.comp differentiable_snd) (differentiable_snd.comp differentiable_snd) hz
-
-/-- The map `(fun c : ℂ => ₂F₁ a b c z / Gamma c)` tends to `(𝓝 (regularizedGaussHGFun a b (-n)
-z))` along `(𝓝[≠] (-(n : ℂ)))`. -/
-@[dlmf 15.2.E3_5]
-theorem tendsto_regularized_at_neg_nat (a b : ℂ) (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
-    Tendsto (fun c : ℂ => ₂F₁ a b c z / Gamma c) (𝓝[≠] (-(n : ℂ)))
-      (𝓝 (regularizedGaussHGFun a b (-n) z)) := by
-  have hcont : ContinuousAt (fun c => regularizedGaussHGFun a b c z) (-(n : ℂ)) :=
-    ((analyticOnNhd_regularizedGaussHGFun_c a b hz) _ (Set.mem_univ _)).continuousAt
-  refine (hcont.tendsto.mono_left nhdsWithin_le_nhds).congr' ?_
-  filter_upwards [eventually_nhdsWithin_ne_neg_nat n] with c hc
-  exact regularizedGaussHGFun_eq_div_Gamma hc z
 
 /-- Dirichlet's test with a sequence of bounded variation tending to zero. -/
 theorem exists_tendsto_sum_mul_of_bdd_variation {f g : ℕ → ℂ} {B : ℝ}

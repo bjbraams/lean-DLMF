@@ -6,20 +6,19 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Airy.Properties
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import DLMF.IncompleteGamma.Basic
 
 /-!
 # Conventions for the Airy functions
 
-Real restrictions of the Airy functions, oriented ray, arc and contour integrals, principal
+Oriented ray, arc and contour integrals, principal
 values, the Airy variable `ζ` with its logarithm, the sector filter, Bessel functions on the
 logarithmic plane and numerically satisfactory pairs, as used throughout DLMF §9.2 and
 §§9.4–9.14.
 
 ## Main definitions
 
-* `airyAiReal`, `airyBiReal`, `airyAiDerivReal`, `airyBiDerivReal`: restrictions to `ℝ`.
 * `improperAtBot`, `rayIntegral`, `arcIntegral`, `contourIntegral`: improper and contour
   integrals.
 * `principalValueIoi`, `HasPrincipalValueIoi`: Cauchy principal values on the half-line.
@@ -38,22 +37,13 @@ integrals. Complex powers of the Bessel argument use an explicit logarithmic coo
 so that the substitution `ζ = 2 z^(3/2)/3` retains its analytically continued branch.
 The sector filter contains the whole closed sector, hence Big-O statements are uniform
 there. Improper convergence and straight-segment primitives use the canonical definitions
-in `DLMF.Core.Framework`.
+in `DLMF.Core.Basic`.
 -/
 
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory DLMF.Hypergeometric
 open scoped Real Topology
 namespace DLMF.Airy
-
-/-- Ai restricted to the real axis. -/
-def airyAiReal (x : ℝ) : ℝ := (airyAi x).re
-/-- Bi restricted to the real axis. -/
-def airyBiReal (x : ℝ) : ℝ := (airyBi x).re
-/-- Ai' restricted to the real axis. -/
-def airyAiDerivReal (x : ℝ) : ℝ := (airyAiDeriv x).re
-/-- Bi' restricted to the real axis. -/
-def airyBiDerivReal (x : ℝ) : ℝ := (airyBiDeriv x).re
 
 /-- The totalized value of an improper integral with infinite lower endpoint. -/
 def improperAtBot (f : ℝ → ℂ) (b : ℝ) : ℂ :=

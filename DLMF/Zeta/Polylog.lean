@@ -7,7 +7,8 @@ module
 
 public import DLMF.Polylog.Dilog
 public import DLMF.Zeta.LerchContinuation
-public import DLMF.Zeta.HurwitzEulerMaclaurin
+public import DLMF.Zeta.Basic.Hurwitz
+public import DLMF.Zeta.Basic.Polylog
 public import Mathlib.Analysis.CStarAlgebra.Classes
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
 public import Mathlib.Analysis.SpecialFunctions.Integrability.Log
@@ -40,14 +41,8 @@ analytic continuation to the cut plane `ℂ \ [1, ∞)` (principal branch), the 
 identities of §25.12(i), and the Fermi–Dirac and Bose–Einstein integrals. The real dilogarithm
 `DLMF.Polylog.Real.dilog` and its identities are in `DLMF/Polylog/Dilog.lean`.
 
-## Main definitions
-
-* `polylogSeriesC`: the series `∑_{n≥1} zⁿ/n^s` (DLMF 25.12.10) as a `tsum`.
-* `slitContinuation`: the analytic continuation from the unit disk to `ℂ \ [1, ∞)`, if one
-  exists.
-* `polylog`: DLMF's `Li_s(z)`.
-* `fermiDiracF`, `boseEinsteinG`: the Fermi–Dirac and Bose–Einstein integrals
-  (DLMF 25.12.14–25.12.15).
+The definitions (`polylogSeries`, `slitContinuation`, `polylog`, `fermiDiracF`,
+`boseEinsteinG`) are in the foundational module `DLMF.Zeta.Basic.Polylog`.
 
 ## Main results
 
@@ -55,8 +50,9 @@ identities of §25.12(i), and the Fermi–Dirac and Bose–Einstein integrals. T
   continuation and is analytic on `ℂ \ [1, ∞)`.
 * `hasSum_polylog`, `hasSum_polylog_of_norm_eq_one`, `polylog_one`: the series in the unit disk
   and on the unit circle for `Re s > 1`, and `Li_s(1) = ζ(s)`.
-* `polylogSeriesC_natCast`, `polylog_natCast_eq_polylogSeries`: bridges to
-  `DLMF.Polylog.polylogSeries` for natural order.
+* `polylog_natCast_eq_polylogSeries`: for natural order `n ≥ 2`, `Li_n(z)` is the series on
+  the closed unit disk.
+* `polylog_two_ofReal_eq_dilog`: `Li₂(x)` is the real dilogarithm for `x < 1`.
 * `hasSum_dilog`, `polylog_two_eq_integral`: the dilogarithm series and integral
   (DLMF 25.12.1–25.12.2).
 * `polylog_two_add_polylog_two_div_sub_one`, `polylog_two_add_polylog_two_inv`,
@@ -94,44 +90,9 @@ noncomputable section
 
 namespace DLMF.Zeta
 
-open DLMF.Confluent (hurwitzZetaComplex)
-
-/-! ### Definitions -/
-
-open scoped Classical in
-/-- The analytic continuation of `f` from the open unit disk to `ℂ \ [1, ∞)`, if one exists
-(unique, the cut plane being connected); otherwise `f` itself. -/
-def slitContinuation (f : ℂ → ℂ) : ℂ → ℂ :=
-  if h : ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F slitOne ∧ ∀ z, ‖z‖ < 1 → F z = f z then h.choose
-  else f
-
-/-- **The polylogarithm series of complex order** `∑_{n≥1} zⁿ/n^s` (DLMF 25.12.10), as a `tsum`
-(principal powers `n^s = e^{s ln n}`). Convergent for `|z| < 1`, and for `|z| = 1` when
-`Re s > 1`. -/
-@[dlmf 25.12.E10]
-def polylogSeriesC (s z : ℂ) : ℂ := ∑' n : ℕ, z ^ (n + 1) / ((n : ℂ) + 1) ^ s
-
-open scoped Classical in
-/-- **The polylogarithm** `Li_s(z)` (DLMF §25.12(ii), and `Li₂` of §25.12(i)): the analytic
-continuation of 25.12.10 to `ℂ \ [1, ∞)` (principal branch); on `[1, ∞)` the value of the series
-(so `Li_s(1) = ζ(s)` for `Re s > 1`, and junk on `(1, ∞)`). -/
-@[dlmf 25.12.ii]
-def polylog (s z : ℂ) : ℂ :=
-  if z ∈ slitOne then slitContinuation (polylogSeriesC s) z else polylogSeriesC s z
-
-/-! ### Basic properties -/
-
-/-- Formula under the stated hypotheses: `z ∈ slitOne`. -/
-theorem mem_slitOne_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : z ∈ slitOne :=
-  Or.inr (lt_of_le_of_lt (re_le_norm z) hz)
-
-/-- The indicated domain is open: `IsOpen slitOne`. -/
-theorem isOpen_slitOne : IsOpen slitOne :=
-  (isOpen_ne_fun continuous_im continuous_const).union
-    (isOpen_lt continuous_re continuous_const)
 
 /-- The series 25.12.10 converges absolutely in the open unit disk, for every complex `s`. -/
-theorem summable_polylogSeriesC_of_norm_lt_one (s : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem summable_polylogSeries_of_norm_lt_one (s : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     Summable fun n : ℕ => z ^ (n + 1) / ((n : ℂ) + 1) ^ s := by
   obtain ⟨K, hK⟩ := exists_nat_ge (-s.re)
   have hg : Summable fun n : ℕ => ((n + 1 : ℕ) : ℝ) ^ K * ‖z‖ ^ (n + 1) := by
@@ -149,7 +110,7 @@ theorem summable_polylogSeriesC_of_norm_lt_one (s : ℂ) {z : ℂ} (hz : ‖z‖
 /-- The series 25.12.10 converges absolutely on the closed unit disk when `Re s > 1`
 (DLMF §25.12(ii)). -/
 @[dlmf 25.12.ii]
-theorem summable_polylogSeriesC_of_norm_le_one {s : ℂ} (hs : 1 < s.re) {z : ℂ} (hz : ‖z‖ ≤ 1) :
+theorem summable_polylogSeries_of_norm_le_one {s : ℂ} (hs : 1 < s.re) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     Summable fun n : ℕ => z ^ (n + 1) / ((n : ℂ) + 1) ^ s := by
   have h := (Real.summable_one_div_nat_add_rpow 1 s.re).mpr hs
   refine Summable.of_norm_bounded h fun n => ?_
@@ -160,7 +121,7 @@ theorem summable_polylogSeriesC_of_norm_le_one {s : ℂ} (hs : 1 < s.re) {z : �
   exact pow_le_one₀ (norm_nonneg _) hz
 
 /-- The polylogarithm series from Lerch's series with `a = 1`. -/
-private lemma hasSum_polylogSeriesC_of_hasSum_lerch {s z w : ℂ}
+private lemma hasSum_polylogSeries_of_hasSum_lerch {s z w : ℂ}
     (h : HasSum (fun n : ℕ => z ^ n / (1 + n) ^ s) w) :
     HasSum (fun n : ℕ => z ^ (n + 1) / ((n : ℂ) + 1) ^ s) (z * w) :=
   (h.mul_left z).congr_fun fun n => by rw [pow_succ, add_comm (1 : ℂ)]; ring
@@ -169,17 +130,17 @@ private lemma hasSum_polylogSeriesC_of_hasSum_lerch {s z w : ℂ}
 analytically from the unit disk to `ℂ \ [1, ∞)`. -/
 @[dlmf 25.12.ii]
 theorem exists_polylog_continuation (s : ℂ) :
-    ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F slitOne ∧ ∀ z, ‖z‖ < 1 → F z = polylogSeriesC s z := by
+    ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F slitOne ∧ ∀ z, ‖z‖ < 1 → F z = polylogSeries s z := by
   obtain ⟨F, hF⟩ := exists_isLerchContinuation s 1
   exact ⟨fun z => z * F z, analyticOnNhd_id.mul hF.1, fun z hz =>
-    (hasSum_polylogSeriesC_of_hasSum_lerch (hF.2 z hz)).tsum_eq.symm⟩
+    (hasSum_polylogSeries_of_hasSum_lerch (hF.2 z hz)).tsum_eq.symm⟩
 
 /-- Analyticity on a neighborhood of the specified domain: `AnalyticOnNhd ℂ (slitContinuation
-(polylogSeriesC s)) slitOne ∧ ∀ z, ‖z‖ < 1 → slitContinuation (polylogSeriesC s) z =
-polylogSeriesC s z`. -/
+(polylogSeries s)) slitOne ∧ ∀ z, ‖z‖ < 1 → slitContinuation (polylogSeries s) z =
+polylogSeries s z`. -/
 private lemma polylog_slitContinuation_spec (s : ℂ) :
-    AnalyticOnNhd ℂ (slitContinuation (polylogSeriesC s)) slitOne ∧
-      ∀ z, ‖z‖ < 1 → slitContinuation (polylogSeriesC s) z = polylogSeriesC s z := by
+    AnalyticOnNhd ℂ (slitContinuation (polylogSeries s)) slitOne ∧
+      ∀ z, ‖z‖ < 1 → slitContinuation (polylogSeries s) z = polylogSeries s z := by
   have h := exists_polylog_continuation s
   unfold slitContinuation
   simp only [h, ↓reduceDIte]
@@ -192,7 +153,7 @@ private lemma polylog_eq_mul_of_isLerchContinuation {s : ℂ} {F : ℂ → ℂ} 
   simp only [polylog, hz, ↓reduceIte]
   refine eqOn_slitOne_of_eq_on_ball (polylog_slitContinuation_spec s).1 (analyticOnNhd_id.mul hF.1) (fun w hw => ?_) hz
   rw [(polylog_slitContinuation_spec s).2 w hw]
-  exact (hasSum_polylogSeriesC_of_hasSum_lerch (hF.2 w hw)).tsum_eq
+  exact (hasSum_polylogSeries_of_hasSum_lerch (hF.2 w hw)).tsum_eq
 
 /-- `z ∈ ℂ \ [1, ∞)` for `|z| ≤ 1`, `z ≠ 1`. -/
 theorem mem_slitOne_of_norm_le_one {z : ℂ} (hz : ‖z‖ ≤ 1) (h1 : z ≠ 1) : z ∈ slitOne := by
@@ -210,7 +171,7 @@ private lemma polylog_eq_mul_lerchIntegral {s z : ℂ}
   · rw [polylog_eq_mul_of_isLerchContinuation hF hz, hF.eq_lerchInt hs one_pos hz]
   · have h1 : (1 : ℂ) ∉ slitOne := by simp [slitOne]
     simp only [polylog, h1, ↓reduceIte]
-    exact (hasSum_polylogSeriesC_of_hasSum_lerch
+    exact (hasSum_polylogSeries_of_hasSum_lerch
       (hasSum_lerch_lerchIntegral (z := 1) (by linarith) one_pos (Or.inr ⟨by simp, hs⟩))).tsum_eq
 
 /-- **The series in the unit disk** (DLMF 25.12.10, 25.12.1 for `s = 2`): for `|z| < 1`,
@@ -220,7 +181,7 @@ theorem hasSum_polylog {s z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => z ^ (n + 1) / ((n : ℂ) + 1) ^ s) (polylog s z) := by
   simp only [polylog, mem_slitOne_of_norm_lt_one hz, ↓reduceIte]
   rw [(polylog_slitContinuation_spec s).2 z hz]
-  exact (summable_polylogSeriesC_of_norm_lt_one s hz).hasSum
+  exact (summable_polylogSeries_of_norm_lt_one s hz).hasSum
 
 /-- **Analyticity** (DLMF §25.12(i)–(ii)): `Li_s` is analytic on `ℂ \ [1, ∞)`. -/
 @[dlmf 25.12.ii]
@@ -287,8 +248,8 @@ private lemma hasDerivAt_polylog_two_zero : HasDerivAt (polylog 2) 1 0 := by
   exact hd
 
 open DLMF.Polylog in
-/-- **Bridge to the real dilogarithm**: `Li₂(x) = DLMF.Polylog.Real.dilog x` for real `x < 1`. -/
-private lemma polylog_two_ofReal {x : ℝ} (hx : x < 1) :
+/-- `Li₂(x)` is the real dilogarithm `DLMF.Polylog.Real.dilog x` for real `x < 1`. -/
+theorem polylog_two_ofReal_eq_dilog {x : ℝ} (hx : x < 1) :
     polylog 2 x = (Real.dilog x : ℂ) := by
   have hmem : ∀ y : ℝ, y < 1 → (y : ℂ) ∈ slitOne := fun y hy => Or.inr (by simpa using hy)
   have hder : ∀ y : ℝ, y < 1 → HasDerivAt (fun t : ℝ => polylog 2 t - (Real.dilog t : ℂ)) 0 y := by
@@ -328,30 +289,25 @@ theorem hasSum_polylog_of_norm_eq_one {s z : ℂ} (hs : 1 < s.re) (hz : ‖z‖ 
   · subst h1
     have h1' : (1 : ℂ) ∉ slitOne := by simp [slitOne]
     simp only [polylog, h1', ↓reduceIte]
-    exact (summable_polylogSeriesC_of_norm_le_one hs (by simp)).hasSum
+    exact (summable_polylogSeries_of_norm_le_one hs (by simp)).hasSum
   · obtain ⟨F, hF⟩ := exists_isLerchContinuation s 1
     have hzs := mem_slitOne_of_norm_le_one hz.le h1
     rw [polylog_eq_mul_of_isLerchContinuation hF hzs]
-    exact hasSum_polylogSeriesC_of_hasSum_lerch (hF.hasSum_of_norm_le_one hs hz.le hzs)
+    exact hasSum_polylogSeries_of_hasSum_lerch (hF.hasSum_of_norm_le_one hs hz.le hzs)
 
 /-- **`Li_s(1) = ζ(s)`** (DLMF §25.12(ii)) for `Re s > 1`. -/
 @[dlmf 25.12.ii]
 theorem polylog_one {s : ℂ} (hs : 1 < s.re) : polylog s 1 = riemannZeta s := by
   have h1 : (1 : ℂ) ∉ slitOne := by simp [slitOne]
   simp only [polylog, h1, ↓reduceIte]
-  rw [polylogSeriesC, zeta_eq_tsum_one_div_nat_add_one_cpow hs]
+  rw [polylogSeries, zeta_eq_tsum_one_div_nat_add_one_cpow hs]
   simp
 
-/-- For natural order the series is the project's `DLMF.Polylog.polylogSeries`. -/
-theorem polylogSeriesC_natCast (n : ℕ) (z : ℂ) :
-    polylogSeriesC n z = DLMF.Polylog.polylogSeries n z := by
-  simp only [polylogSeriesC, DLMF.Polylog.polylogSeries, cpow_natCast]
-
-/-- Bridge: on the closed unit disk, `Li_n(z)` for natural `n ≥ 2` is
-`DLMF.Polylog.polylogSeries n z`. -/
+/-- On the closed unit disk, `Li_n(z)` for natural `n ≥ 2` is the value of the series
+25.12.10. -/
 theorem polylog_natCast_eq_polylogSeries {n : ℕ} (hn : 2 ≤ n) {z : ℂ} (hz : ‖z‖ ≤ 1) :
-    polylog n z = DLMF.Polylog.polylogSeries n z := by
-  rw [← polylogSeriesC_natCast, polylogSeriesC]
+    polylog n z = polylogSeries n z := by
+  rw [polylogSeries]
   rcases hz.lt_or_eq with h | h
   · exact (hasSum_polylog h).tsum_eq.symm
   · exact (hasSum_polylog_of_norm_eq_one (by simp; exact_mod_cast hn) h).tsum_eq.symm
@@ -486,7 +442,7 @@ theorem polylog_two_add_polylog_two_div_sub_one {z : ℂ} (hz : z ∈ slitOne) :
   have hd : x / (x - 1) < 1 := by
     rw [div_lt_one_of_neg (by linarith)]; linarith
   rw [show (x : ℂ) / (x - 1) = ((x / (x - 1) : ℝ) : ℂ) by push_cast; ring,
-    polylog_two_ofReal hx', polylog_two_ofReal hd,
+    polylog_two_ofReal_eq_dilog hx', polylog_two_ofReal_eq_dilog hd,
     show (1 : ℂ) - x = ((1 - x : ℝ) : ℂ) by push_cast; ring, ← ofReal_log (by linarith)]
   have hC := congrArg (fun t : ℝ => (t : ℂ)) h
   push_cast at hC ⊢
@@ -543,7 +499,7 @@ theorem polylog_two_add_polylog_two_inv {z : ℂ} (hz : z.im ≠ 0 ∨ z.re < 0)
   have hx' : x < 0 := hx
   have h := DLMF.Polylog.Real.dilog_add_dilog_recip hx'
   rw [show (1 : ℂ) / x = ((x⁻¹ : ℝ) : ℂ) by push_cast; ring,
-    polylog_two_ofReal (by linarith), polylog_two_ofReal (by
+    polylog_two_ofReal_eq_dilog (by linarith), polylog_two_ofReal_eq_dilog (by
       have := inv_lt_zero.mpr hx'; linarith),
     show -(x : ℂ) = ((-x : ℝ) : ℂ) by push_cast; ring, ← ofReal_log (by linarith)]
   have hC := congrArg (fun t : ℝ => (t : ℂ)) h
@@ -679,7 +635,7 @@ theorem polylog_two_add_polylog_two_one_sub {z : ℂ} (hz : z.im ≠ 0 ∨ (0 < 
     with x hx
   have h := DLMF.Polylog.Real.dilog_add_dilog_one_sub hx
   rw [show (1 : ℂ) - x = ((1 - x : ℝ) : ℂ) by push_cast; ring,
-    polylog_two_ofReal hx.2, polylog_two_ofReal (by linarith [hx.1]),
+    polylog_two_ofReal_eq_dilog hx.2, polylog_two_ofReal_eq_dilog (by linarith [hx.1]),
     ← ofReal_log hx.1.le, ← ofReal_log (by linarith [hx.2])]
   exact_mod_cast h
 
@@ -857,18 +813,6 @@ theorem polylog_add_exp_mul_polylog_inv {s z : ℂ} (hs : s ≠ 0) (hz : z.im �
   sorry
 
 /-! ### §25.12(iii) Fermi–Dirac and Bose–Einstein integrals -/
-
-/-- **Fermi–Dirac integral** (DLMF 25.12.14): `F_s(x) = (1/Γ(s+1)) ∫_0^∞ t^s/(e^{t-x} + 1) dt`,
-`s > -1`. -/
-@[dlmf 25.12.E14]
-def fermiDiracF (s x : ℝ) : ℝ :=
-  1 / Real.Gamma (s + 1) * ∫ t in Ioi (0 : ℝ), t ^ s / (Real.exp (t - x) + 1)
-
-/-- **Bose–Einstein integral** (DLMF 25.12.15): `G_s(x) = (1/Γ(s+1)) ∫_0^∞ t^s/(e^{t-x} - 1) dt`,
-for `s > -1`, `x < 0`, or `s > 0`, `x ≤ 0`. -/
-@[dlmf 25.12.E15]
-def boseEinsteinG (s x : ℝ) : ℝ :=
-  1 / Real.Gamma (s + 1) * ∫ t in Ioi (0 : ℝ), t ^ s / (Real.exp (t - x) - 1)
 
 /-- **`F_s` as a polylogarithm** (DLMF 25.12.16): `F_s(x) = -Li_{s+1}(-e^x)` for `s > -1`. -/
 @[dlmf 25.12.E16]

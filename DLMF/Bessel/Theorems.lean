@@ -15,8 +15,6 @@ Named identities of AAR Chapter 4 for `J_ν` that are absent from Mathlib.
 
 ## Main results
 
-* `besselJ_add_sub`: `(2ν/z) J_ν(z) = J_{ν-1}(z) + J_{ν+1}(z)` (DLMF 10.6.1; AAR (4.6.5)).
-* `two_deriv_besselJ`: `2 J_ν'(z) = J_{ν-1}(z) - J_{ν+1}(z)` (DLMF 10.6.1; AAR (4.6.6)).
 * `besselJ_eq_poisson_integral`: Poisson's integral (DLMF 10.9.4; AAR §4.7).
 * `besselJ_generating_function`: the generating function for integer orders (DLMF 10.12.1;
   AAR (4.9.10)).
@@ -33,24 +31,6 @@ open DLMF.Confluent
 noncomputable section
 
 namespace DLMF.Bessel
-
-/-- Recurrence `(2ν/z) J_ν(z) = J_{ν-1}(z) + J_{ν+1}(z)` (AAR (4.6.5), p. 202). -/
-@[dlmf 10.6.E1]
-theorem besselJ_add_sub {ν z : ℂ} (hz : z ≠ 0) :
-    (2 * ν / z) * besselJ ν z = besselJ (ν - 1) z + besselJ (ν + 1) z := by
-  have he := regularized0F1_contiguous ν (-(z ^ 2 / 4))
-  simp only [besselJ_eq_regularized]
-  rw [cpow_sub _ _ (div_ne_zero hz (by norm_num)),
-    cpow_add _ _ (div_ne_zero hz (by norm_num)), cpow_one]
-  rw [show ν - 1 + 1 = ν by ring]
-  linear_combination (norm := (field_simp [hz]; ring)) (-2 * (z / 2) ^ ν / z) * he
-
-/-- Derivative identity `2 J_ν'(z) = J_{ν-1}(z) - J_{ν+1}(z)` (AAR (4.6.6), p. 202). -/
-@[dlmf 10.6.E1]
-theorem two_deriv_besselJ {ν z : ℂ} (hz : z ∈ slitPlane) :
-    2 * deriv (besselJ ν) z = besselJ (ν - 1) z - besselJ (ν + 1) z := by
-  rw [(hasDerivAt_besselJ hz).deriv]
-  linear_combination besselJ_add_sub (ν := ν) (slitPlane_ne_zero hz)
 
 /-- Poisson's integral (AAR §4.7). -/
 @[dlmf 10.9.E4]

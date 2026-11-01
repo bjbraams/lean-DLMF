@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Combinatorics.Basic.Partitions
 public import DLMF.Partitions
 public import DLMF.QSeries.QBinomial
 public import Mathlib.Combinatorics.Enumerative.Partition.YoungDiagram
@@ -20,17 +21,17 @@ functions, recurrences and the asymptotic form. The unrestricted `p(n)` is the p
 `DLMF.Partitions.partitionFunction`, and the Gaussian polynomial `[m n]_q` of (26.9.4) is the
 project's `DLMF.QSeries.qBinom` (defined by the `q`-Pascal rule).
 
+The counts `partitionCountAtMostParts` (`p_k(n)`) and `partitionCountBoxed` (`p_k(≤ m, n)`), with
+the values 26.9.2 and 26.9.3 (first line), are in `DLMF.Combinatorics.Basic.Partitions`.
+
 ## Main definitions
 
-* `partitionCountAtMostParts`: `p_k(n)`, partitions of `n` into at most `k` parts.
-* `partitionCountBoxed`: `p_k(≤ m, n)`, those with every part at most `m`.
 * `latticePathArea`: the area statistic of a north-east lattice path.
 
 ## Main results
 
-* `partitionCountAtMostParts_of_le`, `partitionCountAtMostParts_zero`,
-  `partitionCountAtMostParts_one`, `partitionCountAtMostParts_two`,
-  `partitionCountAtMostParts_three`: special values (DLMF 26.9.1–26.9.3).
+* `partitionCountAtMostParts_of_le`, `partitionCountAtMostParts_two`,
+  `partitionCountAtMostParts_three`: special values (DLMF 26.9.1, 26.9.3).
 * `partitionCountAtMostParts_eq_card_parts_le`, `card_parts_conjugate`: conjugation
   (DLMF §26.9(i)).
 * `partitionCountBoxed_eq_card_latticePaths`: `p_k(≤ m, n)` counts lattice paths by area
@@ -68,69 +69,12 @@ open DLMF.QSeries DLMF.Partitions
 
 namespace DLMF.Combinatorics
 
-/-- `p_k(n)`: the number of partitions of `n` into at most `k` parts (DLMF §26.9(i), §27.14(i)). -/
-@[dlmf 26.9.i, dlmf 27.14.i]
-def partitionCountAtMostParts (k n : ℕ) : ℕ :=
-  #{p : n.Partition | p.parts.card ≤ k}
-
-/-- `p_k(≤ m, n)`: the number of partitions of `n` into at most `k` parts, each at most `m`
-(DLMF §26.9(i)). -/
-@[dlmf 26.9.i]
-def partitionCountBoxed (k m n : ℕ) : ℕ :=
-  #{p : n.Partition | p.parts.card ≤ k ∧ ∀ i ∈ p.parts, i ≤ m}
-
-/-- A partition of `n` has at most `n` parts. -/
-theorem card_parts_le {n : ℕ} (p : n.Partition) : p.parts.card ≤ n := by
-  have h : p.parts.card • 1 ≤ p.parts.sum :=
-    Multiset.card_nsmul_le_sum fun x hx => p.parts_pos hx
-  simpa [p.parts_sum] using h
-
 /-- (26.9.1): `p_k(n) = p(n)` for `k ≥ n`. -/
 @[dlmf 26.9.E1]
 theorem partitionCountAtMostParts_of_le {k n : ℕ} (h : n ≤ k) :
     partitionCountAtMostParts k n = partitionFunction n := by
   unfold partitionCountAtMostParts partitionFunction
   rw [Finset.filter_true_of_mem fun p _ => (card_parts_le p).trans h, card_univ]
-
-/-- (26.9.2): `p_0(n) = 0` for `n > 0`. -/
-@[dlmf 26.9.E2]
-theorem partitionCountAtMostParts_zero {n : ℕ} (hn : 0 < n) :
-    partitionCountAtMostParts 0 n = 0 := by
-  unfold partitionCountAtMostParts
-  rw [Finset.card_eq_zero, Finset.filter_eq_empty_iff]
-  intro p _ hp
-  have h0 : p.parts = 0 := Multiset.card_eq_zero.mp (Nat.le_zero.mp hp)
-  have := p.parts_sum
-  rw [h0, Multiset.sum_zero] at this
-  omega
-
-/-- (26.9.3), first line: `p_1(n) = 1`. -/
-@[dlmf 26.9.E3]
-theorem partitionCountAtMostParts_one (n : ℕ) : partitionCountAtMostParts 1 n = 1 := by
-  unfold partitionCountAtMostParts
-  rw [Finset.card_eq_one]
-  rcases Nat.eq_zero_or_pos n with rfl | hn
-  · refine ⟨⟨0, by simp, by simp⟩, ?_⟩
-    ext p
-    simp only [mem_filter, mem_univ, true_and, mem_singleton]
-    constructor
-    · intro _; exact Subsingleton.elim _ _
-    · rintro rfl; simp
-  · refine ⟨Nat.Partition.indiscrete n, ?_⟩
-    ext p
-    simp only [mem_filter, mem_univ, true_and, mem_singleton]
-    constructor
-    · intro hp
-      ext1
-      have hsum := p.parts_sum
-      rcases Nat.le_one_iff_eq_zero_or_eq_one.mp hp with h | h
-      · rw [Multiset.card_eq_zero.mp h, Multiset.sum_zero] at hsum; omega
-      · obtain ⟨a, ha⟩ := Multiset.card_eq_one.mp h
-        rw [ha, Multiset.sum_singleton] at hsum
-        rw [ha, hsum]
-        simp [Nat.Partition.indiscrete, Nat.Partition.ofSums, Multiset.filter_singleton, hn.ne']
-    · rintro rfl
-      simp [Nat.Partition.indiscrete, Nat.Partition.ofSums, Multiset.filter_singleton, hn.ne']
 
 /-- The largest row length of a Young diagram is the first one. -/
 private lemma sup_rowLens (μ : YoungDiagram) : (μ.rowLens : Multiset ℕ).sup = μ.rowLen 0 := by

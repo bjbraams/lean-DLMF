@@ -11,19 +11,15 @@ public import DLMF.ErrorFunctions.Integrals
 # Voigt functions (DLMF §7.19)
 
 The Voigt functions `U(x, t)`, `V(x, t)` and the line-broadening function `H(a, u)`: their
-relation to `erfc`, limits, symmetry, bounds, derivative relations and Fourier–Laplace
-representations.
-
-## Main definitions
-
-* `Real.voigtU`, `Real.voigtV`: the Voigt functions for `t > 0` (DLMF 7.19.1, 7.19.2).
-* `Real.voigtH`: the line-broadening function for `a > 0` (DLMF 7.19.4).
+relation to `erfc`, limits, bounds, derivative relations and Fourier–Laplace representations.
+The functions are defined in `DLMF.ErrorFunctions.Basic.Functions`, and their symmetry
+`Real.voigt_symmetry` (DLMF 7.19.6) is in `DLMF.ErrorFunctions.Basic.Properties`.
 
 ## Main results
 
 * `voigt_erfc`: `U + iV` in terms of `erfc` (DLMF 7.19.3).
 * `Real.voigtH_eq_voigtU`: `H(a, u)` in terms of `U` (DLMF 7.19.4).
-* `Real.voigt_limits`, `Real.voigt_symmetry`, `Real.voigt_bounds`: DLMF 7.19.5–7.19.7.
+* `Real.voigt_limits`, `Real.voigt_bounds`: DLMF 7.19.5, 7.19.7.
 * `Real.voigtV_derivative_relation`, `Real.voigtU_derivative_relation`: DLMF 7.19.8, 7.19.9.
 * `Real.voigtU_fourier_laplace`, `Real.voigtV_fourier_laplace`: DLMF 7.19.10, 7.19.11.
 * `voigt_laplace`: the Laplace representation `U + iV = ∫₀^∞ exp(-s(1 - ix) - t s²) ds`.
@@ -33,21 +29,6 @@ representations.
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Confluent
-
-/-- Voigt U for t>0. -/
-@[dlmf 7.19.E1]
-def Real.voigtU (x t : ℝ) : ℝ :=
-  1/Real.sqrt (4*π*t)*(∫ y : ℝ, Real.exp (-(x-y)^2/(4*t))/(1+y^2))
-
-/-- Voigt V for t>0. -/
-@[dlmf 7.19.E2]
-def Real.voigtV (x t : ℝ) : ℝ :=
-  1/Real.sqrt (4*π*t)*(∫ y : ℝ, y*Real.exp (-(x-y)^2/(4*t))/(1+y^2))
-
-/-- Voigt line-broadening profile for a>0. -/
-@[dlmf 7.19.E4]
-def Real.voigtH (a u : ℝ) : ℝ :=
-  a/π*(∫ t : ℝ, Real.exp (-t^2)/((u-t)^2+a^2))
 
 /-- The shifted Gaussian kernel of the Voigt functions is integrable. -/
 theorem integrable_voigt_kernel (x : ℝ) {t : ℝ} (ht : 0 < t) :
@@ -399,20 +380,6 @@ theorem Real.voigt_limits (x : ℝ) :
     simp only [Function.comp_def, add_im, ofReal_re, mul_im, I_re, I_im, ofReal_im,
       one_mul, mul_zero, zero_add] at this
     exact this
-
-/-- Identity under the stated parameter and domain assumptions: `Real.voigtU (-x) t=Real.voigtU x
-t ∧ Real.voigtV (-x) t = -Real.voigtV x t`. -/
-@[dlmf 7.19.E6]
-theorem Real.voigt_symmetry (x : ℝ) {t : ℝ} :
-    Real.voigtU (-x) t=Real.voigtU x t ∧ Real.voigtV (-x) t = -Real.voigtV x t := by
-  constructor
-  · rw [Real.voigtU, Real.voigtU, ← integral_neg_eq_self]
-    congr 1; congr 1; funext y
-    rw [show -x - -y = -(x-y) by ring, neg_sq, neg_sq]
-  · rw [Real.voigtV, Real.voigtV, ← integral_neg_eq_self, ← mul_neg, ← integral_neg]
-    congr 1; congr 1; funext y
-    rw [show -(-x - -y)^2 = -(x-y)^2 by ring, neg_sq]
-    ring
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < Real.voigtU x t ∧ Real.voigtU
 x t ≤ 1 ∧ -1 ≤ Real.voigtV x t ∧ Real.voigtV x t ≤ 1`. -/

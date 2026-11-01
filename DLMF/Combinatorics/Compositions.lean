@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Combinatorics.Basic.Partitions
 public import Mathlib.Combinatorics.Enumerative.Composition
 public import Mathlib.Analysis.SpecificLimits.Normed
 public import Mathlib.Analysis.Complex.Basic
@@ -16,17 +17,17 @@ public import Mathlib.Data.Nat.Fib.Basic
 The compositions of DLMF §26.11. Compositions are Mathlib's `Composition n` (ordered lists of
 positive integers summing to `n`; the empty composition of `0` included).
 
+The counts `compositionCount` (`c(n)`), `compositionCountLength` (`c_m(n)`) and
+`compositionCountNoOne` (`c(∈ T, n)`), with the initial values 26.11.1–26.11.2 and the closed
+form 26.11.3, are in `DLMF.Combinatorics.Basic.Partitions`.
+
 ## Main definitions
 
-* `compositionCount`: `c(n)`, the number of compositions of `n`.
-* `compositionCountLength`: `c_m(n)`, the number of compositions of `n` into exactly `m` parts.
-* `compositionCountNoOne`: `c(∈ T, n)`, the number of compositions of `n` with no part `1`.
+* `compositionConsTwo`, `compositionSuccHead`: prepend a block `2`, and increase the first
+  block by one.
 
 ## Main results
 
-* `compositionCount_zero`, `compositionCountLength_zero`: the initial values (DLMF 26.11.1,
-  26.11.2).
-* `compositionCountLength_eq_choose`: `c_m(n) = C(n-1, m-1)` for `n ≥ 1` (DLMF 26.11.3).
 * `hasSum_compositionCountLength`: the generating function `q^m/(1 - q)^m` (DLMF 26.11.4).
 * `compositionCountNoOne_eq_fib`: `c(∈ T, n) = F_{n-1}` for `n ≥ 1` (DLMF 26.11.6).
 
@@ -48,117 +49,6 @@ noncomputable section
 open Finset
 
 namespace DLMF.Combinatorics
-
-/-- `c(n)`: the number of compositions of `n` (DLMF §26.11). -/
-@[dlmf 26.11]
-def compositionCount (n : ℕ) : ℕ := Fintype.card (Composition n)
-
-/-- `c_m(n)`: the number of compositions of `n` into exactly `m` parts (DLMF §26.11). -/
-@[dlmf 26.11]
-def compositionCountLength (m n : ℕ) : ℕ := #{c : Composition n | c.length = m}
-
-/-- `c(∈ T, n)`: the number of compositions of `n` with no part `1`, `T = {2, 3, …}`
-(DLMF §26.11). -/
-@[dlmf 26.11]
-def compositionCountNoOne (n : ℕ) : ℕ := #{c : Composition n | ∀ i ∈ c.blocks, 2 ≤ i}
-
-/-- (26.11.1): `c(0) = c(∈ T, 0) = 1`. -/
-@[dlmf 26.11.E1]
-theorem compositionCount_zero : compositionCount 0 = 1 ∧ compositionCountNoOne 0 = 1 := by
-  refine ⟨by simp [compositionCount, composition_card], ?_⟩
-  unfold compositionCountNoOne
-  rw [Finset.filter_true_of_mem, card_univ]
-  · simp [composition_card]
-  · intro c _ i hi
-    have h0 : c.blocks = [] := by
-      have := c.blocks_sum; rcases h : c.blocks with _ | ⟨a, l⟩
-      · rfl
-      · have ha := c.blocks_pos (show a ∈ c.blocks by simp [h]); simp [h] at this; omega
-    simp [h0] at hi
-
-/-- (26.11.2): `c_m(0) = δ_{0,m}`. -/
-@[dlmf 26.11.E2]
-theorem compositionCountLength_zero (m : ℕ) :
-    compositionCountLength m 0 = if m = 0 then 1 else 0 := by
-  unfold compositionCountLength
-  have hlen : ∀ c : Composition 0, c.length = 0 := fun c => (Composition.length_eq_zero c).mpr rfl
-  split_ifs with hm
-  · subst hm
-    rw [Finset.filter_true_of_mem fun c _ => hlen c, card_univ]
-    simp [composition_card]
-  · rw [Finset.card_eq_zero, Finset.filter_eq_empty_iff]
-    intro c _ hc
-    exact hm (hc ▸ hlen c)
-
-/-- For `n ≥ 1`, the boundary-set model of a composition has one element fewer than its
-number of blocks. -/
-private lemma card_compositionAsSetEquiv_add_one {n : ℕ} (hn : 1 ≤ n) (d : CompositionAsSet n) :
-    ((compositionAsSetEquiv n) d).card + 1 = d.length := by
-  classical
-  set T := (compositionAsSetEquiv n) d
-  have hT : ∀ i : Fin (n - 1), i ∈ T ↔ (⟨1 + (i : ℕ), by omega⟩ : Fin n.succ) ∈ d.boundaries := by
-    intro i
-    simp [T, compositionAsSetEquiv]
-  let emb : Fin (n - 1) ↪ Fin (n + 1) :=
-    ⟨fun i => ⟨1 + (i : ℕ), by omega⟩, fun a b h => by
-      simp only [Fin.mk.injEq] at h; exact Fin.ext (by omega)⟩
-  have hemb : ∀ i, ((emb i : Fin (n + 1)) : ℕ) = 1 + i := fun i => rfl
-  have hB : d.boundaries = insert 0 (insert (Fin.last n) (T.map emb)) := by
-    ext x
-    simp only [mem_insert, mem_map]
-    constructor
-    · intro hx
-      by_cases h0 : x = 0
-      · exact Or.inl h0
-      by_cases hl : x = Fin.last n
-      · exact Or.inr (Or.inl hl)
-      right; right
-      have h0' : (x : ℕ) ≠ 0 := fun h => h0 (Fin.ext h)
-      have hl' : (x : ℕ) ≠ n := fun h => hl (Fin.ext h)
-      have hx' := x.isLt
-      refine ⟨⟨(x : ℕ) - 1, by omega⟩, ?_, Fin.ext (by rw [hemb]; simp only; omega)⟩
-      rw [hT]
-      convert hx using 1
-      exact Fin.ext (show 1 + ((x : ℕ) - 1) = x by omega)
-    · rintro (rfl | rfl | ⟨i, hi, rfl⟩)
-      · exact d.zero_mem
-      · exact d.getLast_mem
-      · exact (hT i).1 hi
-  have hlen : d.length = d.boundaries.card - 1 := rfl
-  rw [hlen, hB, card_insert_of_notMem, card_insert_of_notMem, card_map]
-  · omega
-  · simp only [mem_map, not_exists, not_and]
-    intro i _ h
-    have := congrArg Fin.val h
-    rw [hemb, Fin.val_last] at this
-    omega
-  · simp only [mem_insert, mem_map, not_or, not_exists, not_and]
-    refine ⟨fun h => ?_, fun i _ h => ?_⟩
-    · have := congrArg Fin.val h; simp at this; omega
-    · have := congrArg Fin.val h; rw [hemb] at this; simp at this
-
-/-- (26.11.3): `c_m(n) = C(n-1, m-1)` for `n ≥ 1`, with DLMF's convention `C(n-1, -1) = 0`
-for `m = 0` made explicit. -/
-@[dlmf 26.11.E3]
-theorem compositionCountLength_eq_choose {n : ℕ} (hn : 1 ≤ n) (m : ℕ) :
-    compositionCountLength m n = if m = 0 then 0 else (n - 1).choose (m - 1) := by
-  classical
-  unfold compositionCountLength
-  have h := Finset.card_equiv ((compositionEquiv n).trans (compositionAsSetEquiv n))
-    (s := univ.filter fun c : Composition n => c.length = m)
-    (t := univ.filter fun s : Finset (Fin (n - 1)) => s.card + 1 = m) (by
-      intro c
-      simp only [mem_filter, mem_univ, true_and, Equiv.trans_apply]
-      rw [card_compositionAsSetEquiv_add_one hn]
-      simp [compositionEquiv])
-  rw [h]
-  split_ifs with hm
-  · subst hm
-    simp
-  · rw [show (univ.filter fun s : Finset (Fin (n - 1)) => s.card + 1 = m) =
-        powersetCard (m - 1) univ by
-      ext s; simp only [mem_filter, mem_univ, true_and, mem_powersetCard, subset_univ]; omega]
-    simp
 
 /-- (26.11.4): `∑ₙ c_m(n) qⁿ = q^m/(1 - q)^m` for `|q| < 1`. -/
 @[dlmf 26.11.E4]

@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import DLMF.Legendre.AssociatedRecurrences
 public import DLMF.Legendre.Laplace
 public import DLMFMathlib.Analysis.SpecialFunctions.Complex.ArgLog

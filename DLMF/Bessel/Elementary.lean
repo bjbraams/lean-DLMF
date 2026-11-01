@@ -23,8 +23,6 @@ Beals–Wong Ch. 9.
 ## Main results
 
 * `besselY_half`, `besselY_neg_half`, `hankelH1_half`, … : half-integer orders (DLMF 10.16.1).
-* `besselJ_neg_eq`, `hankelH1_neg`, `hankelH2_neg`: `J_{-ν} = cos(νπ) J_ν - sin(νπ) Y_ν` and
-  `H^{(1)}_{-ν} = e^{iπν} H^{(1)}_ν`, `H^{(2)}_{-ν} = e^{-iπν} H^{(2)}_ν` (DLMF 10.4.6).
 * `hankelH1_add_sub`, `hankelH2_add_sub`: the Hankel recurrence (DLMF 10.6.1).
 * `norm_besselJ_int_le_one`: `|J_n(x)| ≤ 1` for real `x` and integer `n` (DLMF 10.14.1).
 * `hasSum_besselJ_add`: Neumann's addition theorem (DLMF 10.23.3), from Bessel's integral.
@@ -136,45 +134,7 @@ theorem hankelH2_neg_half {z : ℂ} (hz : z ∈ slitPlane) :
     show -(I * z) = -z * I by ring, ← cos_add_sin_I, cos_neg, sin_neg]
   ring
 
-/-! ### Hankel functions of negative order and their recurrence -/
-
-/-- `J_{-ν} = cos(νπ) J_ν - sin(νπ) Y_ν` for every order. -/
-theorem besselJ_neg_eq (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    besselJ (-ν) z = cos (ν * π) * besselJ ν z - sin (ν * π) * besselY ν z := by
-  refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement
-    (f := fun μ => besselJ (-μ) z)
-    (g := fun μ => cos (μ * π) * besselJ μ z - sin (μ * π) * besselY μ z)
-    (continuousAt_besselJ_order (fun μ => -μ) continuous_neg ν hz)
-    (((by fun_prop : Continuous fun μ : ℂ => cos (μ * π)).continuousAt.mul
-      (continuousAt_besselJ_order (fun μ => μ) continuous_id ν hz)).sub
-      ((by fun_prop : Continuous fun μ : ℂ => sin (μ * π)).continuousAt.mul
-      (continuousAt_besselY_order (fun μ => μ) continuous_id ν hz)))
-    (fun c hc => ?_)
-  have hc' := DLMF.Confluent.forall_of_mem_integerComplement hc
-  have hs := sin_mul_pi_ne_zero hc'
-  rw [besselY_eq_of_not_int hc', besselD]
-  field_simp
-  ring
-
-/-- `H^{(1)}_{-ν}(z) = e^{iπν} H^{(1)}_ν(z)` (DLMF 10.4.6). -/
-@[dlmf 10.4.E6]
-theorem hankelH1_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    hankelH1 (-ν) z = exp (π * ν * I) * hankelH1 ν z := by
-  rw [hankelH1, hankelH1, besselJ_neg_eq ν hz, besselY_neg ν hz,
-    show (π : ℂ) * ν * I = (ν * π) * I by ring, ← cos_add_sin_I]
-  ring_nf
-  rw [I_sq]
-  ring
-
-/-- `H^{(2)}_{-ν}(z) = e^{-iπν} H^{(2)}_ν(z)` (DLMF 10.4.6). -/
-@[dlmf 10.4.E6]
-theorem hankelH2_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    hankelH2 (-ν) z = exp (-(π * ν * I)) * hankelH2 ν z := by
-  rw [hankelH2, hankelH2, besselJ_neg_eq ν hz, besselY_neg ν hz,
-    show -((π : ℂ) * ν * I) = -(ν * π) * I by ring, ← cos_add_sin_I, cos_neg, sin_neg]
-  ring_nf
-  rw [I_sq]
-  ring
+/-! ### The Hankel recurrence -/
 
 /-- The recurrence `H_{ν-1} + H_{ν+1} = (2ν/z) H_ν` for `H^{(1)}` (DLMF 10.6.1). -/
 @[dlmf 10.6.E1]

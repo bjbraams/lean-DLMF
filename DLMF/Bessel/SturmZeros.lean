@@ -62,15 +62,6 @@ namespace DLMF.Bessel
 
 section RealZeros
 
-/-- `₀F̃₁(c; ·)` with real parameter commutes with complex conjugation. -/
-theorem regularized0F1_conj (c : ℝ) (w : ℂ) :
-    regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} (conj w) =
-      conj (regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} w) := by
-  rw [regularized0F1_eq_tsum, regularized0F1_eq_tsum, Complex.conj_tsum]
-  refine tsum_congr fun n => ?_
-  simp only [map_mul, map_div₀, map_pow, map_inv₀, map_natCast, ← Complex.Gamma_conj, map_add,
-    conj_ofReal]
-
 /-- The Lommel identity for `g = ₀F̃₁(c; ·)` along the rays `A t²`, `B t²`. -/
 theorem hasDerivAt_lommel_regularized0F1 (c : ℝ) (A B : ℂ) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun s : ℝ => ((s ^ (2 * c) : ℝ) : ℂ) *

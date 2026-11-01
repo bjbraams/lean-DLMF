@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import TauCeti.Analysis.Complex.Conformal.Rouche
 public import Mathlib.Analysis.Convex.Contractible
 

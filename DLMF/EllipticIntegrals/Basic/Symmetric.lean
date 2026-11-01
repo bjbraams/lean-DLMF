@@ -5,8 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Carlson.Elliptic.ReductionTables
-public import Carlson.Elliptic.Standard
+public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
+public import Mathlib.MeasureTheory.Integral.Bochner.Set
+public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
+public import Mathlib.Order.Filter.AtTopBot.Basic
+public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Definitions of the symmetric elliptic integrals
@@ -24,15 +27,14 @@ elliptic integrals, following DLMF §§19.2(iv), 19.15–19.16.
 * `symEllIntRF`, `symEllIntRJ`, `symEllIntRG`, `symEllIntRD`: the integrals `R_F`, `R_J`,
   `R_G`, `R_D` (DLMF 19.16.1, 19.16.2, 19.16.2_5, 19.16.5).
 * `symEllIntRC`: the integral `R_C(x, y)` (DLMF 19.2.17).
-* `symEllIntR`: the multivariate hypergeometric function `R_{-a}(𝐛; 𝐳)` (DLMF 19.16.8).
 
 ## Implementation notes
 
-Negative real pole parameters use a Cauchy principal value. `symEllIntR` uses Carlson's
-multivariate continuation on the product slit plane and its limit at admissible boundary
-points. Divergent integrals and nonexistent limits remain totalized; the theorem layer states
-convergence and branch assumptions explicitly. The comparison theorems with the Carlson
-functions are in `DLMF.EllipticIntegrals.Symmetric`.
+Negative real pole parameters use a Cauchy principal value. Divergent integrals and
+nonexistent limits remain totalized; the theorem layer states convergence and branch
+assumptions explicitly. The multivariate hypergeometric function `symEllIntR` (DLMF 19.16.8),
+which is defined through Carlson's `R`-function in `lean-codes`, and the comparison theorems
+with the Carlson functions are in `DLMF.EllipticIntegrals.Symmetric`.
 -/
 
 @[expose] public noncomputable section
@@ -110,18 +112,5 @@ def symEllIntRC (x y : ℂ) : ℂ := by
     if IsNegReal y then
       cauchyPVIoi (fun t => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹) (-y.re)
     else ∫ t in Ioi (0 : ℝ), (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹
-
-/-- DLMF 19.16.8: the multivariate hypergeometric function `R_{-a}(𝐛; 𝐳)` (written
-`R(a; 𝐛; 𝐳)` before 1969). On the product slit plane it is Carlson's `R`-function
-`Carlson.carlsonR (-a) b z` (all complex `a` and `𝐛`; DLMF's (19.16.9) has real `𝐛` with
-`∑ bⱼ > a > 0`, and Carlson's continuation in the parameters is used elsewhere in DLMF, e.g.
-`R_{1/2}` in (19.16.17)). When some `zⱼ` lies off the slit plane (DLMF allows `zⱼ = 0`
-"without destroying convergence", §19.16(iii)), the value is the limit from the slit domain;
-where that limit does not exist the value is junk. -/
-@[dlmf 19.16.E8]
-def symEllIntR {ι : Type*} [Fintype ι] (a : ℂ) (b z : ι → ℂ) : ℂ := by
-  classical
-  exact if z ∈ Carlson.carlsonRSlitDomain then Carlson.carlsonR (-a) b z
-    else limUnder (𝓝[Carlson.carlsonRSlitDomain] z) (Carlson.carlsonR (-a) b)
 
 end DLMF.EllipticIntegrals

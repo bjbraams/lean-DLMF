@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import DLMF.Hypergeometric.Basic.GaussCoefficients
 public import Mathlib.RingTheory.PowerSeries.Basic
 
@@ -22,6 +22,8 @@ public import Mathlib.RingTheory.PowerSeries.Basic
 * `genFormalSeries`, `genFiniteHG`: the formal series and finite retained sums.
 * `GenSeriesConvergesTo`, `GenSeriesAbsolutelyConverges`: natural-order and absolute
   convergence of the series.
+* `GenWellPoised`, `GenVeryWellPoised`: well-poised parameter vectors, DLMF 16.4.1.
+* `GenKBalanced`: `k`-balanced terminating series, DLMF 16.4.2.
 -/
 
 @[expose] public noncomputable section
@@ -59,7 +61,8 @@ def genFormalSeries (a b : Multiset ℂ) : PowerSeries ℂ := PowerSeries.mk (ge
 def genFiniteHG (m : ℕ) (a b : Multiset ℂ) (z : ℂ) : ℂ :=
   ∑ n ∈ range (m + 1), genCoeff a b n * z ^ n
 
-/-- Natural-order hypergeometric series convergence; unlike `HasSum`, permits conditional convergence. -/
+/-- Natural-order hypergeometric series convergence; unlike `HasSum`, permits conditional
+convergence. -/
 def GenSeriesConvergesTo (a b : Multiset ℂ) (z v : ℂ) : Prop :=
   Tendsto (fun N : ℕ => ∑ n ∈ range N, genCoeff a b n * z ^ n) atTop (𝓝 v)
 
@@ -73,5 +76,19 @@ def genExcess (a b : Multiset ℂ) : ℂ := b.sum - a.sum
 
 /-- Shifting every parameter by the same complex number. -/
 def genShift (a : Multiset ℂ) (t : ℂ) : Multiset ℂ := a.map (· + t)
+
+/-- Well-poised parameter vectors, in exactly the indexing order of16.4.1. -/
+@[dlmf 16.4.E1]
+def GenWellPoised {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ) : Prop :=
+  ∀ j, a j.castSucc + b j = a (Fin.last q) + 1
+
+/-- Very well-poised vectors also differ by one in their first corresponding entries. -/
+def GenVeryWellPoised {q : ℕ} (a : Fin (q + 2) → ℂ) (b : Fin (q + 1) → ℂ) : Prop :=
+  GenWellPoised a b ∧ a 0 = b 0 + 1
+
+/-- A k-balanced terminating unity series (16.4.2); balanced means k=1. -/
+@[dlmf 16.4.E2]
+def GenKBalanced {q : ℕ} (k : ℤ) (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ) : Prop :=
+  (∃ n : ℕ, a (Fin.last q) = -n) ∧ (∑ j, a j) + k = ∑ j, b j
 
 end DLMF.Hypergeometric

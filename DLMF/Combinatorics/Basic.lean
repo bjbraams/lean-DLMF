@@ -5,13 +5,22 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Combinatorics.Basic.LatticeNumbers
+public import DLMF.Combinatorics.Basic.Partitions
+public import DLMF.Combinatorics.Basic.Permutations
+public import DLMF.Combinatorics.Basic.PlanePartitions
+public import DLMF.Combinatorics.Basic.Stirling
 public import Mathlib.RingTheory.Polynomial.Pochhammer
 
 /-!
 # Notation and basic definitions for combinatorial analysis
 
 The notation and basic notions of DLMF §§26.1–26.2: rising and falling factorials,
-permutations, set and integer partitions, and lattice paths.
+permutations, set and integer partitions, and lattice paths. This module also imports the
+foundational modules of Chapter 26 below `DLMF/Combinatorics/Basic/`: the Delannoy, Motzkin and
+Narayana numbers (`LatticeNumbers`), the restricted partition and composition counts
+(`Partitions`), permutation statistics, rook polynomials and `q`-multinomials (`Permutations`),
+plane partitions (`PlanePartitions`) and the signed Stirling numbers (`Stirling`).
 
 ## Main definitions
 

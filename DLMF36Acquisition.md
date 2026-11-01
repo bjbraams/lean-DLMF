@@ -16,7 +16,7 @@ agents: part A (agent cs1, helper prefix `s36a_`) covers §§36.1–36.6, part B
 (namespace `DLMF.CoalescingSaddles`). The part A modules, in import order, are
 [Basic](DLMF/CoalescingSaddles/Basic.lean) (the foundational umbrella),
 [CanonicalIntegrals](DLMF/CoalescingSaddles/CanonicalIntegrals.lean) (§36.2; imports `Basic`,
-`DLMF.Core.Framework` and `DLMF.Airy.IntegralRepresentations`),
+`DLMF.Core.Basic` and `DLMF.Airy.IntegralRepresentations`),
 [BifurcationSets](DLMF/CoalescingSaddles/BifurcationSets.lean) (§36.4; imports `Basic`),
 [StokesSets](DLMF/CoalescingSaddles/StokesSets.lean) (§36.5; imports `Basic`) and
 [Scaling](DLMF/CoalescingSaddles/Scaling.lean) (§36.6; imports `Basic`). There are no upstream
@@ -126,22 +126,22 @@ declarations:
 - [36.2.E9](https://dlmf.nist.gov/36.2.E9): [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_eq_airy`](DLMF/CoalescingSaddles/CanonicalIntegrals/OscillatoryRepresentations.lean#L691) (proved)
 - [36.2.E10](https://dlmf.nist.gov/36.2.E10): [`DLMF.CoalescingSaddles.cuspoidDiffraction`](DLMF/CoalescingSaddles/Basic/CanonicalIntegrals.lean#L167) (definition); [`DLMF.CoalescingSaddles.hasIntegralWholeLine_cuspoidDiffraction`](DLMF/CoalescingSaddles/CanonicalIntegrals/OscillatoryRepresentations.lean#L337) (proved)
 - [36.2.E11](https://dlmf.nist.gov/36.2.E11): [`DLMF.CoalescingSaddles.hyperbolicUmbilicDiffraction`](DLMF/CoalescingSaddles/Basic/CanonicalIntegrals.lean#L175) (definition); [`DLMF.CoalescingSaddles.ellipticUmbilicDiffraction`](DLMF/CoalescingSaddles/Basic/CanonicalIntegrals.lean#L183) (definition); [`DLMF.CoalescingSaddles.hasIteratedIntegral_hyperbolicUmbilicDiffraction`](DLMF/CoalescingSaddles/CanonicalIntegrals/OscillatoryRepresentations.lean#L345) (admitted); [`DLMF.CoalescingSaddles.hasIteratedIntegral_ellipticUmbilicDiffraction`](DLMF/CoalescingSaddles/CanonicalIntegrals/OscillatoryRepresentations.lean#L354) (admitted)
-- [36.2.E12](https://dlmf.nist.gov/36.2.E12): [`DLMF.CoalescingSaddles.cuspoidIntegral_zero_dim`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L227) (proved)
-- [36.2.E13](https://dlmf.nist.gov/36.2.E13): [`DLMF.CoalescingSaddles.cuspoidIntegral_one`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L397) (proved)
+- [36.2.E12](https://dlmf.nist.gov/36.2.E12): [`DLMF.CoalescingSaddles.cuspoidIntegral_zero_dim`](DLMF/CoalescingSaddles/Basic/ContoursAndSymmetries.lean#L230) (proved)
+- [36.2.E13](https://dlmf.nist.gov/36.2.E13): [`DLMF.CoalescingSaddles.cuspoidIntegral_one`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L65) (proved)
 - [36.2.E14](https://dlmf.nist.gov/36.2.E14): [`DLMF.CoalescingSaddles.pearcey`](DLMF/CoalescingSaddles/Basic/CanonicalIntegrals.lean#L190) (definition); [`DLMF.CoalescingSaddles.hasIntegralWholeLine_pearcey`](DLMF/CoalescingSaddles/CanonicalIntegrals/OscillatoryRepresentations.lean#L755) (proved)
-- [36.2.E15](https://dlmf.nist.gov/36.2.E15): [`DLMF.CoalescingSaddles.cuspoidIntegral_at_zero`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L266) (proved)
+- [36.2.E15](https://dlmf.nist.gov/36.2.E15): [`DLMF.CoalescingSaddles.cuspoidIntegral_at_zero`](DLMF/CoalescingSaddles/Basic/ContoursAndSymmetries.lean#L269) (proved)
 - [36.2.E16](https://dlmf.nist.gov/36.2.E16): excluded: numerical (decimal values of `Ψ₁(0)`, …, `Ψ₄(0)`; the exact values are 36.2.15).
 - [36.2.E17](https://dlmf.nist.gov/36.2.E17): [`DLMF.CoalescingSaddles.iteratedDeriv_cuspoidIntegral_odd`](DLMF/CoalescingSaddles/DifferentialEquations/Cuspoid.lean#L255) (proved); [`DLMF.CoalescingSaddles.iteratedDeriv_cuspoidIntegral_even`](DLMF/CoalescingSaddles/DifferentialEquations/Cuspoid.lean#L278) (proved)
-- [36.2.E18](https://dlmf.nist.gov/36.2.E18): [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_zero`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L498) (proved); [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_zero`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L791) (proved)
+- [36.2.E18](https://dlmf.nist.gov/36.2.E18): [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_zero`](DLMF/CoalescingSaddles/Basic/ContoursAndSymmetries.lean#L414) (proved); [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_zero`](DLMF/CoalescingSaddles/Basic/ContoursAndSymmetries.lean#L712) (proved)
 - [36.2.E19](https://dlmf.nist.gov/36.2.E19): [`DLMF.CoalescingSaddles.cuspoidIntegral_two_zero_left`](DLMF/CoalescingSaddles/CanonicalIntegrals/OscillatoryRepresentations.lean#L848) (admitted) Stated for `y ≠ 0`: at `y = 0` the right side is a `0 · ∞` limit (equal to `Ψ₂(0)`).
 - [36.2.E20](https://dlmf.nist.gov/36.2.E20): [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_z_zero`](DLMF/CoalescingSaddles/CanonicalIntegrals/OscillatoryRepresentations.lean#L982) (proved)
-- [36.2.E21](https://dlmf.nist.gov/36.2.E21): [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_z_zero`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L486) (proved)
-- [36.2.E22](https://dlmf.nist.gov/36.2.E22): [`DLMF.CoalescingSaddles.cuspoidIntegral_even_symm`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L334) (proved)
-- [36.2.E23](https://dlmf.nist.gov/36.2.E23): [`DLMF.CoalescingSaddles.cuspoidIntegral_odd_conj`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L347) (proved)
-- [36.2.E24](https://dlmf.nist.gov/36.2.E24): [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_conj`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L513) (proved); [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_conj`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L720) (proved)
-- [36.2.E25](https://dlmf.nist.gov/36.2.E25): [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_neg_y`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L593) (proved)
-- [36.2.E26](https://dlmf.nist.gov/36.2.E26): [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_rotate`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L618) (proved)
-- [36.2.E27](https://dlmf.nist.gov/36.2.E27): [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_swap`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L531) (proved)
+- [36.2.E21](https://dlmf.nist.gov/36.2.E21): [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_z_zero`](DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean#L118) (proved)
+- [36.2.E22](https://dlmf.nist.gov/36.2.E22): [`DLMF.CoalescingSaddles.cuspoidIntegral_even_symm`](DLMF/CoalescingSaddles/Basic/ContoursAndSymmetries.lean#L337) (proved)
+- [36.2.E23](https://dlmf.nist.gov/36.2.E23): [`DLMF.CoalescingSaddles.cuspoidIntegral_odd_conj`](DLMF/CoalescingSaddles/Basic/ContoursAndSymmetries.lean#L350) (proved)
+- [36.2.E24](https://dlmf.nist.gov/36.2.E24): [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_conj`](DLMF/CoalescingSaddles/Basic/ContoursAndSymmetries.lean#L429) (proved); [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_conj`](DLMF/CoalescingSaddles/Basic/ContoursAndSymmetries.lean#L639) (proved)
+- [36.2.E25](https://dlmf.nist.gov/36.2.E25): [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_neg_y`](DLMF/CoalescingSaddles/Basic/ContoursAndSymmetries.lean#L510) (proved)
+- [36.2.E26](https://dlmf.nist.gov/36.2.E26): [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_rotate`](DLMF/CoalescingSaddles/Basic/ContoursAndSymmetries.lean#L536) (proved)
+- [36.2.E27](https://dlmf.nist.gov/36.2.E27): [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_swap`](DLMF/CoalescingSaddles/Basic/ContoursAndSymmetries.lean#L447) (proved)
 - [36.2.E28](https://dlmf.nist.gov/36.2.E28): [`DLMF.CoalescingSaddles.ellipticUmbilicIntegral_axis`](DLMF/CoalescingSaddles/CanonicalIntegrals/OscillatoryRepresentations.lean#L1051) (admitted) Stated for `z > 0`: at `z = 0` the right side is read as its limit `Ψ^{(E)}(0)`.
 - [36.2.E29](https://dlmf.nist.gov/36.2.E29): [`DLMF.CoalescingSaddles.hyperbolicUmbilicIntegral_axis`](DLMF/CoalescingSaddles/CanonicalIntegrals/OscillatoryRepresentations.lean#L1062) (admitted)
 

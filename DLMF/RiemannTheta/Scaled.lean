@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.RiemannTheta.Convergence
+public import DLMF.RiemannTheta.Basic.Convergence
 
 /-!
 # Boundedness and nonholomorphy of the scaled Riemann theta function (DLMF §21.2(i))

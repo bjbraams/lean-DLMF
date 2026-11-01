@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.QHypergeometric.Basic.Calculus
 public import DLMF.QHypergeometric.Convergence
 public import DLMF.QSeries.QCalculus
 public import DLMF.QSeries.Saalschutz
@@ -20,15 +21,15 @@ public import DLMF.QHypergeometric.Calculus.QBinomial
 
 Jackson's q-derivative `qDerivExtended` reuses `DLMF.QSeries.qDeriv` at nonzero arguments
 and takes the ordinary derivative at the origin, as DLMF prescribes; `qDerivIterate` is its
-`n`-fold iterate.
+`n`-fold iterate. Both are defined in `DLMF.QHypergeometric.Basic.Calculus`, together with the
+product rule `qDeriv_product_extended` and the limit `qDeriv_limit`.
 
 ## Main results
 
 * `qDeriv_iterate_finite_difference`, `qDeriv_iterate_origin`: the finite-difference form
   17.2.42, away from and at the origin.
-* `qDeriv_product_extended`, `qDeriv_leibniz`, `qDeriv_leibniz_origin`: 17.2.43–17.2.44.
-* `qDeriv_limit`, `qDeriv_iterate_limit`: the q-derivatives tend to ordinary derivatives as
-  `q → 1`.
+* `qDeriv_leibniz`, `qDeriv_leibniz_origin`: the q-Leibniz rule 17.2.44.
+* `qDeriv_iterate_limit`: the iterated q-derivatives tend to ordinary derivatives as `q → 1`.
 -/
 
 @[expose] public noncomputable section
@@ -37,19 +38,6 @@ open scoped Real Topology
 open DLMF.QSeries
 namespace DLMF.QHypergeometric
 
-/-- Jackson's q-derivative with the derivative value at the origin specified in DLMF. -/
-@[dlmf 17.2.E41]
-def qDerivExtended (q : ℂ) (f : ℂ → ℂ) (z : ℂ) : ℂ :=
-  if z=0 then deriv f 0 else DLMF.QSeries.qDeriv q f z
-/-- The n-fold q-derivative, including its DLMF value at the origin. -/
-def qDerivIterate (n : ℕ) (q : ℂ) (f : ℂ → ℂ) : ℂ → ℂ :=
-  (fun g : ℂ → ℂ => qDerivExtended q g)^[n] f
-/-- Away from the origin the existing q-derivative is reused exactly. -/
-theorem qDerivExtended_of_ne_zero {z : ℂ} (hz : z≠0) (q : ℂ) (f : ℂ → ℂ) :
-    qDerivExtended q f z=DLMF.QSeries.qDeriv q f z := by simp [qDerivExtended,hz]
-/-- The value at the origin is the ordinary derivative, rather than division by zero. -/
-theorem qDerivExtended_zero (q : ℂ) (f : ℂ → ℂ) : qDerivExtended q f 0=deriv f 0 := by
-  simp [qDerivExtended]
 /-- Away from the origin the `n`-th q-derivative is a finite q-difference: an alternating sum of
 `f(zq^j)` weighted by q-binomials (DLMF 17.2.E42). -/
 @[dlmf 17.2.E42]
@@ -152,17 +140,6 @@ theorem qDeriv_iterate_origin {q : ℂ} (hq1 : q≠1) {f : ℂ → ℂ} (hf : An
   have hc' : p.coeff n = iteratedDeriv n f 0 / n.factorial := by simpa using hc
   rw [hc']
   field_simp
-
-/-- The q-product rule `D_q(fg)(z) = g(z) D_q f(z) + f(zq) D_q g(z)` (DLMF 17.2.E43). -/
-@[dlmf 17.2.E43]
-theorem qDeriv_product_extended (q z : ℂ) (f g : ℂ → ℂ)
-    (hf : z=0 → DifferentiableAt ℂ f 0) (hg : z=0 → DifferentiableAt ℂ g 0) :
-    qDerivExtended q (fun w => f w*g w) z=
-      g z*qDerivExtended q f z+f (z*q)*qDerivExtended q g z := by
-  by_cases hz : z=0
-  · subst z
-    simpa [qDerivExtended,mul_comm] using deriv_fun_mul (hf rfl) (hg rfl)
-  · simpa [qDerivExtended,hz,mul_comm] using qDeriv_mul q f g z
 
 /-- The q-Pascal recurrence combines the two finite sums arising in the product rule. -/
 private lemma qLeibniz_sum (q : ℂ) (n : ℕ) (F G : ℕ → ℂ) :
@@ -405,14 +382,6 @@ theorem qDeriv_leibniz_origin {q : ℂ} (hq1 : q≠1) {f g : ℂ → ℂ}
   have h := tendsto_nhds_unique (hL.tendsto.mono_left nhdsWithin_le_nhds)
     ((hR.tendsto.mono_left nhdsWithin_le_nhds).congr' he.symm)
   simpa using h
-
-/-- As `q → 1`, the q-derivative of a differentiable function tends to its derivative. -/
-theorem qDeriv_limit {f : ℂ → ℂ} {z : ℂ} (hf : DifferentiableAt ℂ f z) :
-    Tendsto (fun q : ℂ => qDerivExtended q f z) (𝓝[≠] 1) (𝓝 (deriv f z)) := by
-  by_cases hz : z=0
-  · subst z
-    simp [qDerivExtended]
-  · simpa [qDerivExtended,hz] using DLMF.QSeries.tendsto_qDeriv hf.hasDerivAt hz
 
 /-- The finite geometric q-number tends to its integer index as the complex base tends to one. -/
 private lemma qLimit_qnum_limit (m : ℕ) :

@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Polylog.Dilog
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
 
 /-!
@@ -36,7 +36,7 @@ integrals of DLMF §4.10. DLMF §4.11 contains only bibliographic references.
 
 ## Implementation notes
 
-Continued fractions use continuants from `DLMF.Core.Framework`, so an intermediate zero
+Continued fractions use continuants from `DLMF.Core.Basic`, so an intermediate zero
 denominator is not interpreted as a terminating nested quotient; convergence means convergence of
 the finite convergents. Indefinite integrals are stated as derivative identities on their full
 branch domains.
@@ -150,7 +150,7 @@ private lemma intervalIntegrable_dilogKernel_zero_one :
   have hcont := DLMF.Polylog.continuousOn_re_polylogSeries_two.mono
     (Icc_subset_Icc (by norm_num : (-1:ℝ) ≤ 0) le_rfl)
   refine intervalIntegral.intervalIntegrable_deriv_of_nonneg
-    (g := fun t : ℝ => (DLMF.Polylog.polylogSeries 2 t).re)
+    (g := fun t : ℝ => (DLMF.Zeta.polylogSeries 2 t).re)
     (by rwa [Set.uIcc_of_le zero_le_one]) ?_ ?_
   · intro t ht
     rw [min_eq_left zero_le_one, max_eq_right zero_le_one] at ht

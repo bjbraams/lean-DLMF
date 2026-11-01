@@ -16,8 +16,13 @@ complex value on the upper half-plane. Proof: the function is holomorphic and `S
 on `ℍ` and tends to `∞` at `i∞`; its image is open (open mapping theorem) and closed (reduction to
 the fundamental domain `𝒟`, whose part below any horizontal line is compact).
 
+## Main definitions
+
+* `ModularForm.kleinJ`: Klein's complete invariant `J = E₄³/(E₄³ - E₆²)`.
+
 ## Main results
 
+* `ModularForm.kleinJ_smul`: `SL(2, ℤ)`-invariance (DLMF 23.18.4).
 * `ModularForm.exists_kleinJ_eq`: every `w : ℂ` equals `E₄(τ)³/(E₄(τ)³ - E₆(τ)²)` for
   some `τ ∈ ℍ`.
 -/
@@ -29,7 +34,7 @@ open scoped MatrixGroups Modular
 
 namespace ModularForm
 
-/-- The modular invariant `J = E₄³/(E₄³ - E₆²)` (`j/1728`). -/
+/-- Klein's complete invariant `J = E₄³/(E₄³ - E₆²)`, which is `j/1728` (DLMF §23.15(ii)). -/
 def kleinJ (τ : ℍ) : ℂ := E₄ τ ^ 3 / (E₄ τ ^ 3 - E₆ τ ^ 2)
 
 /-- Nonvanishing under the stated hypotheses: `E₄ τ ^ 3 - E₆ τ ^ 2 ≠ 0`. -/
@@ -40,7 +45,8 @@ theorem E₄_cube_sub_E₆_sq_ne_zero (τ : ℍ) : E₄ τ ^ 3 - E₆ τ ^ 2 ≠
   rw [h'] at h
   simp at h
 
-/-- Identity under the stated parameter and domain assumptions: `kleinJ (g • τ) = kleinJ τ`. -/
+/-- DLMF 23.18.4: `J(𝒜τ) = J(τ)` for `𝒜 ∈ SL(2, ℤ)`. -/
+@[dlmf 23.18.E4]
 theorem kleinJ_smul (g : SL(2, ℤ)) (τ : ℍ) : kleinJ (g • τ) = kleinJ τ := by
   have hg : (Matrix.SpecialLinearGroup.mapGL ℝ g : GL (Fin 2) ℝ) ∈ 𝒮ℒ :=
     MonoidHom.mem_range.mpr ⟨g, rfl⟩

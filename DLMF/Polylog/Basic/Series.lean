@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Zeta.Basic.Polylog
 public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 public import Mathlib.Analysis.Calculus.SmoothSeries
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
@@ -12,12 +13,11 @@ public import Mathlib.NumberTheory.LSeries.RiemannZeta
 /-!
 # The polylogarithm (Duverney Chapter 8; DLMF §25.12)
 
-This file defines the polylogarithm `Li_n(z) = ∑_{k ≥ 1} z^k/k^n` as a series on the closed
-unit disk (`n ≥ 2`) or the open disk, and proves its basic properties.
-
-## Main definitions
-
-* `polylogSeries`: the polylogarithm `Li_n(z)` (DLMF 25.12.10), as a `tsum`.
+Basic properties of the polylogarithm series `Li_n(z) = ∑_{k ≥ 1} z^k/k^n` of natural order
+`n` on the closed unit disk (`n ≥ 2`) or the open disk. The series is
+`DLMF.Zeta.polylogSeries` (DLMF 25.12.10) at `s = n`; the polylogarithm itself, continued to
+`ℂ \ [1, ∞)`, is `DLMF.Zeta.polylog`, and `DLMF.Zeta.polylog_natCast_eq_polylogSeries`
+identifies the two on the closed disk for `n ≥ 2`.
 
 ## Main results
 
@@ -43,12 +43,7 @@ open scoped Topology Real
 noncomputable section
 namespace DLMF.Polylog
 
-/-- The polylogarithm `Li_n(z) = ∑_{k ≥ 1} z^k/k^n` (DLMF 25.12.10), as a `tsum`. It is meaningful
-on the closed unit disk for `n ≥ 2` and on the open disk for all `n`. The plain name `polylog` is
-reserved for the continuation to `ℂ ∖ [1, ∞)`, which is not yet defined; the real integral forms
-are `Real.dilog` and `Real.trilog`. -/
-@[dlmf 25.12.E10]
-def polylogSeries (n : ℕ) (z : ℂ) : ℂ := ∑' k : ℕ, z ^ (k + 1) / ((k : ℂ) + 1) ^ n
+open DLMF.Zeta (polylogSeries polylogSeries_natCast)
 
 /-- The terms are bounded by `1/(k+1)^n` on the closed disk. -/
 theorem norm_term_le (n : ℕ) {z : ℂ} (hz : ‖z‖ ≤ 1) (k : ℕ) :
@@ -84,7 +79,9 @@ theorem summable_polylogSeries_of_norm_lt_one (n : ℕ) {z : ℂ} (hz : ‖z‖ 
 
 /-- `Li₁(z) = -log(1 - z)` on the open unit disk. -/
 theorem polylogSeries_one {z : ℂ} (hz : ‖z‖ < 1) : polylogSeries 1 z = -log (1 - z) := by
-  rw [polylogSeries, ← (hasSum_taylorSeries_neg_log' hz).tsum_eq]
+  have h := polylogSeries_natCast 1 z
+  rw [Nat.cast_one] at h
+  rw [h, ← (hasSum_taylorSeries_neg_log' hz).tsum_eq]
   simp
 
 /-- `HasSum` form of the series, indexed from `0` (the `k = 0` term vanishes for `n ≥ 1`). -/
@@ -95,7 +92,7 @@ theorem hasSum_polylogSeries_zero_index {n : ℕ} (hn : 1 ≤ n) {z : ℂ}
   have h0 : z ^ 0 / ((0 : ℕ) : ℂ) ^ n = 0 := by
     simp [zero_pow (by omega : n ≠ 0)]
   rw [← hasSum_nat_add_iff' 1, Finset.sum_range_one, h0, sub_zero]
-  simpa only [polylogSeries, Nat.cast_add, Nat.cast_one] using h
+  simpa only [polylogSeries_natCast, Nat.cast_add, Nat.cast_one] using h
 
 /-- `Li_n(1) = ζ(n)` for `n ≥ 2` (DLMF 25.12.12 generalized). -/
 @[dlmf 25.12.ii]
@@ -155,7 +152,9 @@ theorem polylogSeries_neg_one {n : ℕ} (hn : 2 ≤ n) :
 /-- Termwise differentiation on the open unit disk:
 `d/dz Li_{n+1}(z) = ∑_{k ≥ 0} z^k/(k+1)^n`. -/
 theorem hasDerivAt_polylogSeries (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
-    HasDerivAt (polylogSeries (n + 1)) (∑' k : ℕ, z ^ k / ((k : ℂ) + 1) ^ n) z := by
+    HasDerivAt (polylogSeries (n + 1 : ℕ)) (∑' k : ℕ, z ^ k / ((k : ℂ) + 1) ^ n) z := by
+  rw [show polylogSeries (n + 1 : ℕ) = fun w => ∑' k : ℕ, w ^ (k + 1) / ((k : ℂ) + 1) ^ (n + 1)
+    from funext fun w => polylogSeries_natCast _ w]
   set r : ℝ := (1 + ‖z‖) / 2
   have hr1 : r < 1 := by simp only [r]; linarith
   have hzr : ‖z‖ < r := by simp only [r]; linarith
@@ -187,9 +186,9 @@ theorem hasDerivAt_polylogSeries (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
 
 /-- `z ∑ z^k/(k+1)^n = Li_n(z)`, so `Li_{n+1}'(z) = Li_n(z)/z` for `z ≠ 0` (Duverney (8.2)). -/
 theorem hasDerivAt_polylogSeries_div (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1) (hz0 : z ≠ 0) :
-    HasDerivAt (polylogSeries (n + 1)) (polylogSeries n z / z) z := by
+    HasDerivAt (polylogSeries (n + 1 : ℕ)) (polylogSeries n z / z) z := by
   refine (hasDerivAt_polylogSeries n hz).congr_deriv ?_
-  rw [polylogSeries, eq_div_iff hz0, ← tsum_mul_right]
+  rw [polylogSeries_natCast, eq_div_iff hz0, ← tsum_mul_right]
   exact tsum_congr fun k => by ring
 
 /-- On the unit circle, `Li_n(e^{2πia})` is Mathlib's `expZeta a n` for `n ≥ 2`. -/
@@ -207,12 +206,16 @@ theorem polylogSeries_exp_eq_expZeta {n : ℕ} (hn : 2 ≤ n) (a : ℝ) :
 
 /-- `Li₂(1) = π²/6` (Duverney (8.17)). -/
 theorem polylogSeries_two_one : polylogSeries 2 1 = (π : ℂ) ^ 2 / 6 := by
-  rw [polylogSeries_one_eq_zeta le_rfl]; exact_mod_cast riemannZeta_two
+  have h := polylogSeries_one_eq_zeta (n := 2) le_rfl
+  rw [Nat.cast_ofNat] at h
+  rw [h]; exact_mod_cast riemannZeta_two
 
 /-- `Li₂(-1) = -π²/12` (Duverney (8.17)). -/
 theorem polylogSeries_two_neg_one : polylogSeries 2 (-1) = -(π : ℂ) ^ 2 / 12 := by
-  rw [polylogSeries_neg_one le_rfl]
-  have h : riemannZeta ((2 : ℕ) : ℂ) = (π : ℂ) ^ 2 / 6 := by exact_mod_cast riemannZeta_two
+  have h0 := polylogSeries_neg_one (n := 2) le_rfl
+  rw [Nat.cast_ofNat] at h0
+  rw [h0]
+  have h : riemannZeta 2 = (π : ℂ) ^ 2 / 6 := riemannZeta_two
   rw [h]; ring
 
 /-- `Li₃(1) = ζ(3)` and `Li₃(-1) = -¾ ζ(3)` (Duverney (8.31)). -/

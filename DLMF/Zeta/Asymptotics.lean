@@ -5,18 +5,15 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.NumberTheory.LSeries.RiemannZeta
+public import DLMF.Zeta.Basic.Riemann
 
 /-!
 # Asymptotic approximations of the Riemann zeta function
 
 The approximate functional equation of Hardy and Littlewood (DLMF 25.9.1) with the factor
 `χ(s) = π^{s-½} Γ(½ - s/2)/Γ(s/2)` (DLMF 25.9.2) of the functional equation
-`ζ(s) = χ(s) ζ(1-s)`, and its symmetric case on the critical line (DLMF 25.9.3).
-
-## Main definitions
-
-* `riemannChi`: the factor `χ(s)` of DLMF 25.9.2.
+`ζ(s) = χ(s) ζ(1-s)`, and its symmetric case on the critical line (DLMF 25.9.3). The factor
+`riemannChi` is defined in `DLMF.Zeta.Basic.Riemann`.
 
 ## Main results
 
@@ -37,11 +34,6 @@ open Complex Filter Topology Finset Asymptotics
 open scoped Real
 
 namespace DLMF.Zeta
-
-/-- DLMF 25.9.2: `χ(s) = π^{s-½} Γ(½ - s/2) / Γ(s/2)`. -/
-@[dlmf 25.9.E2]
-def riemannChi (s : ℂ) : ℂ :=
-  (π : ℂ) ^ (s - 1 / 2) * Gamma (1 / 2 - s / 2) / Gamma (s / 2)
 
 /-- DLMF 25.9.1 (approximate functional equation): for fixed `0 ≤ σ ≤ 1`, as `t → ∞`,
 `ζ(σ+it) = ∑_{1≤n≤x} n^{-s} + χ(s) ∑_{1≤n≤y} n^{s-1} + O(x^{-σ}) + O(y^{σ-1} t^{½-σ})`,

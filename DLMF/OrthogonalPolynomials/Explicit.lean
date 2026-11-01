@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.OrthogonalPolynomials.Basic.Classical
+public import DLMF.OrthogonalPolynomials.Basic.Definitions
 public import DLMF.Confluent.Relations
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.Basic
 
@@ -15,23 +17,12 @@ Explicit finite sums (DLMF §18.5), values and symmetry (DLMF §18.6) and interr
 (DLMF §18.7) of the classical orthogonal polynomials, together with the Chebyshev polynomials
 of the third and fourth kinds.
 
-## Main definitions
-
-* `laguerreExtended`: the Laguerre polynomial as a polynomial in its parameter, including
-  negative integer parameters (DLMF 18.5.12).
-* `chebyshevV`, `chebyshevW`: the Chebyshev polynomials of the third and fourth kinds
-  (DLMF 18.7.5–18.7.6).
-
 ## Main results
 
 * `jacobi_finite_sum`, `jacobi_binomial_sum`: the explicit sums DLMF 18.5.7 and 18.5.8.
 * `hermitePolyH_finite_sum`: DLMF 18.5.13.
 * `chebyshevT_finite_sum`, `chebyshevU_finite_sum`: explicit sums for `T_n` and `U_n`
   (DLMF §18.5).
-* `laguerrePolyL_at_zero`, `jacobiPolyP_one`, `ultrasphPoly_at_one`, `chebyshevV_at_one`,
-  `chebyshevW_at_one`: values at the endpoints (DLMF 18.6.1 and Table 18.6.1).
-* `hermitePolyH_reflection`, `hermitePolyH_even_at_zero`: symmetry and values at `0`.
-* `legendre_eq_ultrasphPoly`: `P_n = C_n^{(1/2)}` (DLMF 18.7.9).
 * `hermitePolyH_even_eq_laguerrePolyL`, `hermitePolyH_odd_eq_laguerrePolyL`: Hermite in terms
   of Laguerre polynomials (DLMF 18.7.19–18.7.20).
 * `chebyshevT_discrete_orthogonality`: discrete orthogonality of `T_n` at the Chebyshev–Gauss
@@ -39,6 +30,9 @@ of the third and fourth kinds.
 
 ## Implementation notes
 
+The definitions of `laguerreExtended`, `chebyshevV` and `chebyshevW` are in
+`DLMF.OrthogonalPolynomials.Basic.Definitions`; the endpoint values, the Hermite parity and
+`legendre_eq_ultrasphPoly` are in `DLMF.OrthogonalPolynomials.Basic.Classical`.
 Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
 hypergeometric definitions do not implement continuation in singular parameters.
 The Gegenbauer sums 18.5.10–18.5.11 and the quadratic transformations 18.7.13–18.7.16
@@ -58,35 +52,6 @@ noncomputable section
 set_option autoImplicit false
 
 namespace DLMF.OrthogonalPolynomials
-
-/-- Polynomial continuation of Laguerre in its parameter, including negative
-integers. The existing `laguerrePolyL` uses a totalized hypergeometric quotient and
-agrees with this definition only at regular denominator parameters. -/
-@[dlmf 18.5.E12]
-def laguerreExtended (α : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  ∑ k ∈ Finset.range (n + 1), poch (α + k + 1) (n - k) /
-    ((k.factorial : ℂ) * (n - k).factorial) * (-x) ^ k
-
-/-- Identity under the stated parameter and domain assumptions: `laguerreExtended α n x =
-laguerrePolyL α n x`. -/
-@[dlmf 18.5.E12]
-theorem laguerreExtended_eq {α : ℂ} (hα : ∀ k : ℕ, α + 1 ≠ -(k : ℂ)) (n : ℕ) (x : ℂ) :
-    laguerreExtended α n x = laguerrePolyL α n x := by
-  rw [laguerrePolyL_eq_sum hα]
-  unfold laguerreExtended
-  apply Finset.sum_congr rfl
-  intro k _
-  congr 2 <;> ring
-
-/-- Chebyshev polynomials of the third kind, in the DLMF normalization. -/
-@[dlmf 18.7.E5]
-def chebyshevV (n : ℕ) (x : ℂ) : ℂ :=
-  jacobiPolyP (-1 / 2) (1 / 2) n x / jacobiPolyP (-1 / 2) (1 / 2) n 1
-
-/-- Chebyshev polynomials of the fourth kind, in the DLMF normalization. -/
-@[dlmf 18.7.E6]
-def chebyshevW (n : ℕ) (x : ℂ) : ℂ :=
-  (2 * n + 1) * jacobiPolyP (1 / 2) (-1 / 2) n x / jacobiPolyP (1 / 2) (-1 / 2) n 1
 
 /-- Formula under the stated hypotheses: `jacobiPolyP α β n x = ∑ k ∈ Finset.range (n + 1), poch
 (n + α + β + 1) k * poch (α + k + 1) (n - k) / ((k.factorial : ℂ) * (n - k).factorial) * ((x -
@@ -287,99 +252,6 @@ theorem laguerrePolyL_eq_Gamma_mul_regularized {α : ℂ}
   have hG := Gamma_add_nat_div_Gamma_eq (n := n) (α + 1) hα
   rw [show (n : ℂ) + α + 1 = (α + 1) + n by ring, poch, ← hG]
   field_simp [Gamma_ne_zero hα]
-
-/-- Identity under the stated parameter and domain assumptions: `laguerrePolyL α n 0 = poch (α +
-1) n / n.factorial`. -/
-@[dlmf 18.6.E1]
-theorem laguerrePolyL_at_zero (α : ℂ) (n : ℕ) : laguerrePolyL α n 0 = poch (α + 1) n
-    / n.factorial := by
-  simp [laguerrePolyL]
-
-/-- Identity under the stated parameter and domain assumptions: `jacobiPolyP α β n 1 = poch (α +
-1) n / n.factorial`. -/
-@[dlmf 18.6.T1]
-theorem jacobiPolyP_one {α β : ℂ} (n : ℕ) :
-    jacobiPolyP α β n 1 = poch (α + 1) n / n.factorial := by
-  simp [jacobiPolyP]
-
-/-- Jacobi polynomials do not vanish at `x = 1` for `Re α > -1`. -/
-theorem jacobiPolyP_one_ne_zero {α β : ℂ} (hα : -1 < α.re) (n : ℕ) : jacobiPolyP α β n 1 ≠ 0 := by
-  rw [jacobiPolyP_one]
-  exact div_ne_zero (poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by
-    simp only [Complex.add_re, Complex.one_re]
-    linarith)) n) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
-
-/-- Identity under the stated parameter and domain assumptions: `ultrasphPoly lam n 1 = poch (2 *
-lam) n / n.factorial`. -/
-@[dlmf 18.6.T1]
-theorem ultrasphPoly_at_one {lam : ℂ} (n : ℕ) :
-    ultrasphPoly lam n 1 = poch (2 * lam) n / n.factorial := by
-  simp [ultrasphPoly]
-
-/-- Identity under the stated parameter and domain assumptions: `aeval (-x) (hermitePolyH n) = (-1
-: ℂ) ^ n * aeval x (hermitePolyH n)`. -/
-@[dlmf 18.6.T1]
-theorem hermitePolyH_reflection (n : ℕ) (x : ℂ) :
-    aeval (-x) (hermitePolyH n) = (-1 : ℂ) ^ n * aeval x (hermitePolyH n) := by
-  have hp (n : ℕ) : (hermitePolyH n).comp (-X) = C ((-1 : ℤ) ^ n) * hermitePolyH n := by
-    induction n with
-    | zero => simp
-    | succ n ih =>
-      have hd := congrArg derivative ih
-      simp only [derivative_comp, derivative_neg, derivative_X, derivative_C_mul,
-        neg_mul, one_mul] at hd
-      have hd' := congrArg Neg.neg hd
-      simp only [neg_neg] at hd'
-      simp only [hermitePolyH_succ, sub_comp, mul_comp, ofNat_comp, X_comp, ih, hd',
-        pow_succ, map_mul, map_neg, map_one]
-      ring
-  have he := congrArg (aeval x : ℤ[X] → ℂ) (hp n)
-  simpa [aeval_comp] using he
-
-/-- Identity under the stated parameter and domain assumptions: `(hermitePolyH (2 * n)).eval 0 =
-(-1 : ℤ) ^ n * ((2 * n).factorial / n.factorial : ℕ)`. -/
-@[dlmf 18.6.T1]
-theorem hermitePolyH_even_at_zero (n : ℕ) :
-    (hermitePolyH (2 * n)).eval 0 = (-1 : ℤ) ^ n * ((2 * n).factorial / n.factorial : ℕ) := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-    have hstep : (hermitePolyH (2 * (n + 1))).eval 0 =
-        -(2 * (2 * n + 1)) * (hermitePolyH (2 * n)).eval 0 := by
-      rw [show 2 * (n + 1) = 2 * n + 1 + 1 by ring, hermitePolyH_succ, hermitePolyH_derivative]
-      simp only [eval_sub, eval_mul, eval_ofNat, eval_X, eval_C, mul_zero, zero_mul, zero_sub]
-      push_cast
-      ring
-    obtain ⟨q, hq⟩ := Nat.factorial_dvd_factorial (show n ≤ 2 * n by omega)
-    have h1 : (2 * n).factorial / n.factorial = q := by
-      rw [hq, Nat.mul_div_cancel_left _ (Nat.factorial_pos n)]
-    have h2 : (2 * (n + 1)).factorial / (n + 1).factorial = 2 * (2 * n + 1) * q := by
-      rw [show 2 * (n + 1) = 2 * n + 1 + 1 by ring, Nat.factorial_succ, Nat.factorial_succ,
-        Nat.factorial_succ n, hq,
-        show (2 * n + 1 + 1) * ((2 * n + 1) * (n.factorial * q)) =
-          ((n + 1) * n.factorial) * (2 * (2 * n + 1) * q) by ring]
-      exact Nat.mul_div_cancel_left _ (by positivity)
-    rw [hstep, ih, h1, h2]
-    push_cast
-    ring
-
-/-- Identity under the stated parameter and domain assumptions: `chebyshevV n 1 = 1`. -/
-@[dlmf 18.6.T1]
-theorem chebyshevV_at_one (n : ℕ) : chebyshevV n 1 = 1 := by
-  exact div_self (jacobiPolyP_one_ne_zero (by norm_num) n)
-
-/-- Identity under the stated parameter and domain assumptions: `chebyshevW n 1 = 2 * n + 1`. -/
-@[dlmf 18.6.T1]
-theorem chebyshevW_at_one (n : ℕ) : chebyshevW n 1 = 2 * n + 1 := by
-  unfold chebyshevW
-  exact mul_div_cancel_right₀ _ (jacobiPolyP_one_ne_zero (by norm_num) n)
-
-/-- Identity under the stated parameter and domain assumptions: `legendrePolyP n x = ultrasphPoly
-(1 / 2) n x`. -/
-@[dlmf 18.7.E9]
-theorem legendre_eq_ultrasphPoly (n : ℕ) (x : ℂ) : legendrePolyP n x
-    = ultrasphPoly (1 / 2) n x := by
-  norm_num [legendrePolyP, jacobiPolyP, ultrasphPoly]
 
 /-- `4^n (1/2)_n n! = (2n)!`. -/
 theorem two_pow_mul_poch_half (n : ℕ) :

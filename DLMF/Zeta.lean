@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Zeta.Basic
 public import DLMF.Zeta.Riemann
 public import DLMF.Zeta.Reflection
 public import DLMF.Zeta.IntegralReps
@@ -34,5 +35,5 @@ through `Zeros`), the Hurwitz zeta function, polylogarithms, periodic zeta funct
 transcendent and Dirichlet `L`-functions (§§25.11–25.15, files `Hurwitz` through `DirichletL`).
 `ζ(s)` is Mathlib's `riemannZeta`; `ζ(s,a)`, `F(x,s)` and `L(s,χ)` reuse Mathlib's Hurwitz zeta,
 `HurwitzZeta.expZeta` and `DirichletCharacter.LFunction` (and the project's
-`DLMF.Confluent.hurwitzZetaComplex` for complex `a`).
+`DLMF.Zeta.hurwitzZetaComplex` for complex `a`).
 -/

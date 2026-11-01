@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
-public import DLMF.Elementary.LogExpBasic
+public import DLMF.Elementary.Basic
 public import DLMF.Elementary.LogExpAnalysis
 public import DLMF.Elementary.LogExpIntegrals
 public import DLMF.Elementary.Generalized

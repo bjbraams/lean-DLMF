@@ -10,7 +10,9 @@ public import Mathlib.Analysis.SpecialFunctions.Elliptic.Weierstrass
 public import Mathlib.Analysis.Meromorphic.NormalForm
 public import Mathlib.Analysis.Calculus.LogDerivUniformlyOn
 public import Mathlib.Analysis.Normed.Module.Connected
-public import DLMFMathlib.NumberTheory.ModularForms.KleinJSurjective
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
+public import Mathlib.Analysis.Normed.Module.MultipliableUniformlyOn
+public import Mathlib.Analysis.SpecialFunctions.Log.Summable
 
 /-!
 # Weierstrass lattices, zeta and sigma functions
@@ -214,7 +216,8 @@ theorem weierstrassZeta_summand_eq (z w : ℂ) (hw : w ≠ 0) (hz : z ≠ w) :
   ring
 
 /-- Locally uniform bound for the zeta summand: `‖z²/(w²(z-w))‖ ≤ 2r²‖w‖⁻³`. -/
-private lemma norm_weierstrassZeta_summand_le (r : ℝ) (hr : 0 < r) (s : ℂ) (hs : ‖s‖ < r) (l : ℂ) (h : 2 * r ≤ ‖l‖) :
+private lemma norm_weierstrassZeta_summand_le (r : ℝ) (hr : 0 < r) (s : ℂ) (hs : ‖s‖ < r) (l : ℂ)
+    (h : 2 * r ≤ ‖l‖) :
     ‖1 / (s - l) + 1 / l + s / l ^ 2‖ ≤ 2 * r ^ 2 * ‖l‖ ^ (-3 : ℝ) := by
   have hl : 0 < ‖l‖ := by linarith
   have hl0 : l ≠ 0 := norm_pos_iff.mp hl
@@ -310,10 +313,12 @@ private lemma norm_elementary_factor_sub_one_le {u : ℂ} (hu : ‖u‖ ≤ 1 / 
     _ ≤ 2 * ‖u‖ ^ 3 := by nlinarith [pow_nonneg (norm_nonneg u) 3]
 
 /-- The Weierstrass factor of `σ` at the lattice point `l`. -/
-noncomputable def weierstrassSigmaFactor (l z : ℂ) : ℂ := (1 - z / l) * cexp (z / l + z ^ 2 / (2 * l ^ 2))
+noncomputable def weierstrassSigmaFactor (l z : ℂ) : ℂ :=
+    (1 - z / l) * cexp (z / l + z ^ 2 / (2 * l ^ 2))
 
 /-- Bound for the Weierstrass factor of `σ` on `‖z‖ < r` when `‖l‖ ≥ 2r`. -/
-private lemma norm_weierstrassSigmaFactor_sub_one_le {r : ℝ} {l z : ℂ} (hz : ‖z‖ < r) (hl : 2 * r ≤ ‖l‖) :
+private lemma norm_weierstrassSigmaFactor_sub_one_le {r : ℝ} {l z : ℂ} (hz : ‖z‖ < r)
+    (hl : 2 * r ≤ ‖l‖) :
     ‖weierstrassSigmaFactor l z - 1‖ ≤ 2 * r ^ 3 * ‖l‖ ^ (-3 : ℝ) := by
   have hr : 0 < r := lt_of_le_of_lt (norm_nonneg z) hz
   have hl0 : 0 < ‖l‖ := by linarith
@@ -392,12 +397,14 @@ private lemma logDeriv_weierstrassSigmaFactor (L : PeriodPair) {x : ℂ} (hx : x
   · have hxl : x - l ≠ 0 := sub_ne_zero.mpr fun h => hx (h ▸ l.2)
     have h1 : HasDerivAt (fun z : ℂ => 1 - z / l) (-(1 / l)) x := by
       simpa using ((hasDerivAt_id x).div_const (l : ℂ)).const_sub 1
-    have h2 : HasDerivAt (fun z : ℂ => z / l + z ^ 2 / (2 * l ^ 2)) (1 / l + 2 * x / (2 * l ^ 2)) x := by
+    have h2 : HasDerivAt (fun z : ℂ => z / l + z ^ 2 / (2 * l ^ 2))
+        (1 / l + 2 * x / (2 * l ^ 2)) x := by
       have := ((hasDerivAt_id' x).div_const (l : ℂ)).fun_add
         ((hasDerivAt_pow 2 x).div_const (2 * (l : ℂ) ^ 2))
       convert this using 1; simp
     have hd := h1.fun_mul h2.cexp
-    have hf : weierstrassSigmaFactor l = fun z => (1 - z / l) * cexp (z / l + z ^ 2 / (2 * l ^ 2)) := rfl
+    have hf : weierstrassSigmaFactor l =
+        fun z => (1 - z / l) * cexp (z / l + z ^ 2 / (2 * l ^ 2)) := rfl
     rw [logDeriv_apply, hf, hd.deriv]
     simp only [hl, ite_false, sub_zero]
     have he := Complex.exp_ne_zero (x / l + x ^ 2 / (2 * l ^ 2))
@@ -491,7 +498,8 @@ theorem weierstrassSigma_eq_zero_iff (L : PeriodPair) {z : ℂ} :
   refine ⟨fun h => ?_, weierstrassSigma_eq_zero_of_mem L⟩
   by_contra hz
   have hz0 : z ≠ 0 := fun h0 => hz (h0 ▸ zero_mem _)
-  have hne := tprod_one_add_ne_zero_of_summable (f := fun l : L.lattice => weierstrassSigmaFactor l z - 1)
+  have hne := tprod_one_add_ne_zero_of_summable
+      (f := fun l : L.lattice => weierstrassSigmaFactor l z - 1)
     (fun l => by simpa using weierstrassSigmaFactor_ne_zero L hz l)
     (summable_norm_weierstrassSigmaFactor_sub_one L z)
   simp only [add_sub_cancel] at hne
@@ -664,7 +672,8 @@ private lemma deriv_weierstrassSigma_eq_mul (L : PeriodPair) {z : ℂ} (hz : z �
 /-- Quasi-periodicity of `σ` along any lattice vector, with an unspecified nonzero constant. -/
 theorem exists_weierstrassSigma_add_mem (L : PeriodPair) {w : ℂ} (hw : w ∈ L.lattice) {z₀ : ℂ}
     (hz₀ : z₀ ∉ L.lattice) : ∃ a : ℂ, a ≠ 0 ∧ ∀ z, weierstrassSigma L (z + w) =
-      a * cexp ((weierstrassZeta L (z₀ + w) - weierstrassZeta L z₀) * z) * weierstrassSigma L z := by
+      a * cexp ((weierstrassZeta L (z₀ + w) - weierstrassZeta L z₀) * z) *
+        weierstrassSigma L z := by
   set c := weierstrassZeta L (z₀ + w) - weierstrassZeta L z₀ with hc
   have hU : IsOpen (L.latticeᶜ : Set ℂ) := L.isClosed_lattice.isOpen_compl
   have hshift : ∀ z, z ∉ L.lattice → z + w ∉ L.lattice := fun z hz h =>

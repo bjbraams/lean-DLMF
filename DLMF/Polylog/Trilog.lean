@@ -44,6 +44,8 @@ noncomputable section
 
 namespace DLMF.Polylog
 
+open DLMF.Zeta (polylogSeries polylogSeries_zero_arg)
+
 /-- The kernel `Li₂(t)/t`, extended by `1` at `t = 0`. -/
 def trilogKernel (t : ℝ) : ℝ := dslope Real.dilog 0 t
 
@@ -106,6 +108,7 @@ theorem polylogSeries_three_ofReal_eq_trilog {x : ℝ} (hx : x ∈ Icc (-1 : ℝ
     have hD (t : ℝ) (ht : t ∈ Ioo (-1 : ℝ) 1) : HasDerivAt D 0 t := by
       have ht' : ‖(t : ℂ)‖ < 1 := by rw [norm_real, Real.norm_eq_abs]; exact abs_lt.mpr ht
       have h3 : HasDerivAt (fun s : ℝ => polylogSeries 3 s) (trilogKernel t : ℂ) t := by
+        rw [show (3 : ℂ) = ((2 + 1 : ℕ) : ℂ) by norm_num]
         refine (hasDerivAt_polylogSeries 2 ht').comp_ofReal.congr_deriv ?_
         by_cases h0 : t = 0
         · subst h0
@@ -113,7 +116,7 @@ theorem polylogSeries_three_ofReal_eq_trilog {x : ℝ} (hx : x ∈ Icc (-1 : ℝ
           simp
         · have hd := (hasDerivAt_polylogSeries_div 2 ht' (ofReal_ne_zero.mpr h0)).deriv
           rw [(hasDerivAt_polylogSeries 2 ht').deriv] at hd
-          rw [hd, trilogKernel_of_ne h0,
+          rw [hd, Nat.cast_ofNat, trilogKernel_of_ne h0,
             polylogSeries_two_ofReal_eq_dilog ⟨ht.1.le, ht.2.le⟩]
           push_cast; ring
       have h := h3.fun_sub (Real.hasDerivAt_trilog (by linarith [ht.2])).ofReal_comp
@@ -125,7 +128,9 @@ theorem polylogSeries_three_ofReal_eq_trilog {x : ℝ} (hx : x ∈ Icc (-1 : ℝ
     simp only [D, ofReal_zero, polylogSeries_zero_arg, Real.trilog_zero, sub_zero] at hc
     exact sub_eq_zero.mp hc
   have hc1 : ContinuousOn (fun t : ℝ => polylogSeries 3 t) (Icc (-1) 1) :=
-    (continuousOn_polylogSeries (by norm_num)).comp continuous_ofReal.continuousOn fun t ht => by
+    (by simpa using continuousOn_polylogSeries (n := 3) (by norm_num) :
+      ContinuousOn (polylogSeries 3) (Metric.closedBall 0 1)).comp
+        continuous_ofReal.continuousOn fun t ht => by
       simp only [Metric.mem_closedBall, dist_zero_right, norm_real, Real.norm_eq_abs]
       exact abs_le.mpr ht
   have hc2 : ContinuousOn (fun t : ℝ => (Real.trilog t : ℂ)) (Icc (-1) 1) :=

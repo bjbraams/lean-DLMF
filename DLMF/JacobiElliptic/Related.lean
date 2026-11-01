@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.JacobiElliptic.Basic.Epsilon
 public import DLMF.JacobiElliptic.Integrals
 public import DLMF.Elementary.Trigonometric
 public import DLMF.Elliptic.JacobiIdentities
@@ -20,11 +21,6 @@ public import Mathlib.Analysis.Complex.RealDeriv
 
 The Jacobi amplitude `am(x, k)`, Jacobi's Epsilon function `ℰ(x, k)` and Jacobi's Zeta function
 `Z(x|k)` for real `x` and real modulus (DLMF §22.16).
-
-## Main definitions
-
-* `Real.jacobiEpsilonk`: `ℰ(x, k) = ∫₀ˣ dn²(t, k) dt` (DLMF 22.16.17).
-* `Real.jacobiZetaFunctionk`: `Z(x|k) = ℰ(x, k) - (E(k)/K(k)) x` (DLMF 22.16.32).
 
 ## Main results
 
@@ -307,18 +303,6 @@ theorem Real.jacobiAmm_eq_iff_jacobiCnm_eq_cos (hm : m < 1) {x φ : ℝ} (hx0 : 
 end Amplitude
 
 /-! ### Jacobi's Epsilon function -/
-
-/-- Jacobi's Epsilon function `ℰ(x, k) = ∫₀ˣ dn²(t, k) dt` for real `x` and real modulus `k`
-with `k² < 1` (DLMF 22.16.17, valid for all real `x`; DLMF's 22.16.14 is the equivalent form for
-`-K < x < K`). Miller's `JacobiEpsilon`. -/
-@[dlmf 22.16.E17]
-def Real.jacobiEpsilonk (x k : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, Real.jacobiDnm t (k ^ 2) ^ 2
-
-/-- Jacobi's Zeta function `Z(x|k) = ℰ(x, k) - (E(k)/K(k)) x` for real `x` (DLMF 22.16.32);
-Miller's `JacobiZeta`. -/
-@[dlmf 22.16.E32]
-def Real.jacobiZetaFunctionk (x k : ℝ) : ℝ :=
-  Real.jacobiEpsilonk x k - Real.compEllIntEm (k ^ 2) / Real.compEllIntKm (k ^ 2) * x
 
 section Epsilon
 

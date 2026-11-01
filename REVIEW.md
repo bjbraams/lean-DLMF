@@ -9044,7 +9044,7 @@ moves, so the moves do not preserve several copies of the same foundation.
   [Airy/Framework](DLMF/Airy/Framework.lean), lines 35–56, redeclares
   `HasIntegralAtTop`, `HasIntegralAtBot`, `HasIntegralWholeLine`, `improperAtTop`,
   `lineIntegral` and `primitive`, already represented in
-  [Core/Framework](DLMF/Core/Framework.lean), lines 33–54. Lean accepts `rfl` for all six
+  [Core/Framework](DLMF/Core/Basic.lean), lines 33–54. Lean accepts `rfl` for all six
   comparisons, including `Airy.lineIntegral = DLMF.segmentIntegral`. Use one implementation
   in the common layer and update users; a compatibility abbreviation can retain an old name.
   The Airy and core principal-value predicates have different arguments and assumptions and
@@ -9851,3 +9851,133 @@ missing modules or file-import cycles, and one new two-way area pair, Asymptotic
 `cbinom`), and `AsymptoticApproximations.Sums.PowerSums` imports `Zeta.Riemann`. The ledgers are
 regenerated from a fresh tag dump (10,697 entries); every link resolves and regeneration is
 idempotent.
+
+## The Basic layer as the entry point for TauCeti and Mathlib (2026-11-01)
+
+Following [the review of the Basic layer](reports/BasicLayerReview20261101.tex), the foundational
+files are reorganized so that they can be offered to the TauCeti and Mathlib communities on
+their own. AGENTS.md now states the purpose and the content of the layer: the central
+definitions of each chapter with their basic API (special values, symmetries, analyticity, the
+defining equations and Wronskians, bridges to Mathlib and TauCeti), proved from foundational
+imports only, with no admitted dependency.
+
+Imports:
+
+- `DLMF/Core/Framework.lean` is renamed `DLMF/Core/Basic.lean`; no declaration changes, and its
+  36 importers are updated. It is now part of the foundational layer.
+- `symEllIntR` (DLMF 19.16.8), the only definition in a Basic file built on lean-codes
+  (Carlson's `R`-function), moves unchanged to `DLMF/EllipticIntegrals/Symmetric.lean`, and
+  `EllipticIntegrals/Basic/Symmetric.lean` imports Mathlib only. The import closure of
+  `DLMF.Basic` dropped 183 lean-codes modules and now contains none.
+- `scripts/import_survey.py` fails when a foundational file imports anything but Mathlib,
+  TauCeti, `DLMFMathlib` or another foundational file, and when the closure of `DLMF.Basic`
+  reaches a module outside those libraries.
+
+Content: eight parallel agents, one per group of areas, moved central definitions into the
+Basic layer unchanged and moved down their basic theorems, deleting them from the theorem
+files; a few proofs were rewritten from foundational imports (for example the Gauss ODE on the
+cut plane and Kummer's transformation via ODE uniqueness), and about 45 small facts were added
+(values at `0`, parity, differentiability). The layer grew from 122 files with 15,265 lines,
+1,233 public definitions and 180 public theorems to 225 files with 45,036 lines, 1,590 public
+definitions and 1,656 public theorems. New Basic layers exist for Elementary, Constants, Zeta and
+NumberTheory. Highlights:
+
+- Ch. 4–5, 17: log/exp and general powers (§4.2), reciprocal and inverse trigonometric and
+  hyperbolic functions with their DLMF branches, the Gudermannian, Catalan's constant, the real
+  digamma, Barnes `G` (5.17.1–2) and Glaisher–Kinkelin, q-shifted factorials (17.2.2–26), the
+  q-binomial and q-Gamma basics, q-exponentials and q-trigonometric functions, q-Appell.
+- Ch. 6–8, 12–13: Kummer's ODE, transformation, contiguous relations and analyticity; Whittaker
+  `M`, `W`; the series, derivatives and segment integrals of erf, Dawson, Fresnel, Ein, Si, Cin;
+  the inverse error functions and Voigt functions; the real incomplete beta function; Weber's
+  equation, recurrences, Wronskians and connection formula for `U`, `V`.
+- Ch. 9–11, 33: the Airy Maclaurin series, Wronskians, connection formulas, modulus and phase
+  and Scorer functions, now independent of the 137-module stack that `Airy.Equation` needed;
+  Bessel's equation, recurrences, continuity in the order and Wronskians for `J`, `Y`, `I`, `K`,
+  the Hankel functions; Anger, Weber and Lommel functions; Coulomb normalizations.
+- Ch. 14–16: the Gauss series, ODE, Kummer solutions and Wronskians, parameter analyticity and
+  cut-plane continuation; the generalized hypergeometric §16.2 basics and Meijer `G`; `legendreQ`,
+  the associated Legendre and Ferrers functions, conical functions, spherical harmonics, and
+  Legendre's and Ferrers' equations.
+- Ch. 18, 34: `IsOrthogonalPolynomials` with the three-term recurrence and Christoffel–Darboux,
+  norms and kernels, the Askey scheme and q-families, associated, Pollaczek and Bessel
+  polynomials, Mathlib bridges for Hermite, shifted Legendre and Chebyshev `U`; the 3j selection
+  rules.
+- Ch. 19–23: the Legendre-form and Bulirsch integrals with 19.2.8–9, the elementary symmetric
+  integral facts, the inverse Jacobian functions, Jacobi's `ε` and `Z`, Glaisher's relations,
+  theta series, quasi-periodicity and analyticity (§20.2), Riemann-theta convergence and the
+  genus-one reduction (§21.2), all of §23.2, and the modular functions (`kleinJ`,
+  `modularLambda`, `dedekindSum`).
+- Ch. 24–27: higher-order Bernoulli and Euler polynomials, Genocchi and tangent numbers, the
+  §24.2 generating functions; ξ, χ, the Stieltjes constants, Riemann–Siegel `θ` and `Z`, the
+  construction of `hurwitzZetaComplex`, polylogarithm and Lerch `Φ`; lattice-path numbers, signed
+  Stirling numbers, permutation statistics, partition, composition and plane-partition counts;
+  all of §27.2, Dirichlet characters, Ramanujan and Gauss sums, `ramanujanTau`.
+- Ch. 28–32, 36: the Mathieu fundamental solutions, Wronskian, Floquet criteria and
+  eigenfunction basics; the whole of Heun §31.2; the spheroidal and Lamé equation forms; the
+  Painlevé alternative forms and coalescence cascade (`Painleve/Equations.lean` keeps only its
+  admitted results); the coalescing-saddle symmetries.
+
+Renamed modules: `DLMF.Core.Framework` → `DLMF.Core.Basic`; `DLMF.Elementary.LogExpBasic` →
+`DLMF.Elementary.Basic.LogExp`; `DLMF.Heun.Equation`, `DLMF.Mathieu.FundamentalSolutions`,
+`DLMF.RiemannTheta.Convergence` and `DLMF.Weierstrass.LatticesAndSigma` move below their areas'
+`Basic/` directories. The former single-file `Polylog.Basic` and `BernoulliEuler.Basic` are now
+umbrellas, so their module names are unchanged. `Airy.Properties`, `Bessel.SecondKind`,
+`Elliptic.Jacobi` and `Zeta.HurwitzEulerMaclaurin` remain as thin entry modules for their
+importers.
+
+Left for review:
+
+- Overlapping definitions: three polylogarithms (`Polylog.polylogSeries`, `Zeta.polylog`,
+  `Polylog.Real.dilog`); two `kleinJ` (`ModularForm.kleinJ` in `DLMFMathlib`,
+  `Weierstrass.kleinJ`); `compEllIntKk` in JacobiElliptic beside its siblings in
+  EllipticIntegrals; spherical harmonics in `SphericalHarmonics.Basic` and
+  `Legendre.Basic.Harmonics`; `jacobiPolyP` and the matrix-argument `jacobiP`;
+  `arctanCutPlane` and `arcsinhDomain`; `hurwitzZetaComplex` still in namespace `DLMF.Confluent`.
+- Duplicate lemmas: private copies of general power-series, continuity and Gamma/Pochhammer
+  helpers (`besselBasic_*`, `airyBasic_*`) that should move to `DLMFMathlib`;
+  `airyRot_neg_connection_*` and `airyDer_*_ofReal_im` duplicating the new Basic Airy results; `half_ne_neg_nat`,
+  `three_half_ne_neg_nat`, `poch_succ_left`, `Gamma_one_half_eq_sqrt` in several areas.
+- Not moved because the proofs are deep or admitted: the Lambert `W` definitions (admitted
+  existence), the Laguerre, Jacobi and Gegenbauer recurrences, the Legendre and Kummer
+  Wronskians, the Struve §11.2 series, the incomplete gamma §8.2 results, θ zeros (triple
+  product), Mathieu results needing Hartogs or the spectral stack.
+
+Validation: the full build passes 15,226 jobs. All 6,672 constants defined in foundational
+modules depend only on `propext`, `Classical.choice` and `Quot.sound`, and all 1,754 DLMF-tagged
+declarations there are proved. The project-wide count of direct admissions is unchanged at
+1,482. The import survey reports no foundational or closure violations, missing modules or
+file-import cycles; its only new item is the AsymptoticApproximations ↔ Zeta pair recorded
+above. All Lean sources are at most 1,500 lines, `git diff --check` is clean, the ledgers are
+regenerated from a fresh tag dump (10,698 entries) and regeneration is idempotent, and every file
+link in the Markdown catalogues resolves.
+
+## Consolidation of overlapping definitions (2026-11-01)
+
+These follow the overlap list above; the renames and removals are rows of
+`reports/RenameMap20261101.tsv`.
+
+- `hurwitzZetaComplex` moved from namespace `DLMF.Confluent` to `DLMF.Zeta` (its file,
+  `DLMF.Zeta.Basic.Hurwitz`, is unchanged), with a new docstring.
+- `AsymptoticApproximations.cbinom` is removed; its uses (binomial series coefficients of §2.3,
+  the Euler–Maclaurin form of `ζ`, the power-sum expansion) now use Mathlib's `Ring.choose`,
+  with `Ring.choose_eq_descPochhammer_div` from `DLMFMathlib.RingTheory.Binomial` where a proof
+  needs the falling factorial. `Zeta.cbinom_one` is replaced by `Ring.choose_one_right`.
+  `Zeta.Riemann` no longer imports `AsymptoticApproximations.Integrals.Basic`.
+- Klein's invariant: `ModularForm.kleinJ = E₄³/(E₄³ - E₆²)` in `DLMFMathlib` is the one
+  definition. `Weierstrass.kleinJ` (the theta formula 23.15.7, a function on `ℂ`) is removed and
+  23.15.7 is now the theorem `Weierstrass.kleinJ_eq_jacobiTheta` on `ℍ`, proved through the
+  lattice form 23.19.3 and the Eisenstein series. `Weierstrass.kleinJ_smul` duplicated
+  `ModularForm.kleinJ_smul`, which now carries the 23.18.4 tag. The statements of
+  `kleinJ_special` (now at `upperHalfPlaneI` and `upperHalfPlaneRho`) and
+  `isModularFunction_kleinJ` (for `kleinJ ∘ ofComplex`) changed accordingly; the other `kleinJ`
+  theorems keep their statements. `Weierstrass.Basic.Modular` imports the `DLMFMathlib` file, so
+  `kleinJ` stays in the closure of `DLMF.Basic`.
+- Polylogarithm: `Zeta.polylog` is the canonical polylogarithm and `Zeta.polylogSeries`
+  (renamed from `polylogSeriesC`) the canonical series 25.12.10. `Polylog.polylogSeries` of
+  natural order is removed; the theorems of the `Polylog` area now speak of
+  `Zeta.polylogSeries (n : ℂ)`, using the new `polylogSeries_natCast`, `polylogSeries_ofNat`
+  and `polylogSeries_zero_arg` of `Zeta.Basic.Polylog`. The real integral forms
+  `Polylog.Real.dilog` and `Polylog.Real.trilog` remain as the real functions, bridged by
+  `Zeta.polylog_two_ofReal_eq_dilog` (made public, renamed from the private
+  `polylog_two_ofReal`), and
+  `Zeta.polylog_natCast_eq_polylogSeries` identifies `Li_n` with the series on the closed disk.

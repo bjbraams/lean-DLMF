@@ -19,26 +19,23 @@ public import Mathlib.Analysis.Complex.RemovableSingularity
 /-!
 # Lommel functions and parameter continuation (DLMF §11.9)
 
-This file defines the Lommel functions `s_{μ,ν}(z)` and `S_{μ,ν}(z)`, proves their
-differential equation, series and symmetry properties, and continues the capital Lommel
-function to exceptional parameters.
+This file proves the differential equation and the series of the Lommel functions
+`s_{μ,ν}(z)` and `S_{μ,ν}(z)`, and continues the capital Lommel function to exceptional
+parameters.
 
 ## Main definitions
 
-* `lommelA`: the product of the first `k` factors `(μ+2j+1)² - ν²` (DLMF 11.9.4).
-* `LommelRegular`: the nonexceptional parameters of the small Lommel function.
-* `lommelS`: the Lommel series `s_{μ,ν}(z)` (DLMF 11.9.3), on the principal power branch.
-* `lommelCapitalRegular`, `lommelCapital`: the capital Lommel function `S_{μ,ν}(z)`
-  (DLMF 11.9.5) at regular parameters and its removable continuation to all parameters.
+* `lommelCapital`: the removable continuation of the capital Lommel function `S_{μ,ν}(z)`
+  (DLMF 11.9.5) to all parameters.
 * `lommelNumerator`: the entire numerator of the regular capital Lommel function.
 
 ## Main results
 
-* `lommelA_poch`, `hasSum_lommelS`: DLMF 11.9.3–11.9.4.
+* `hasSum_lommelS`: DLMF 11.9.3.
 * `lommelS_ode`, `lommelCapital_ode`: the inhomogeneous Bessel equation DLMF 11.9.1.
 * `lommel_general_solution`: the general solution DLMF 11.9.2.
 * `lommelCapital_regular`: the capital Lommel function at regular parameters (DLMF 11.9.5).
-* `lommelS_neg_order`, `lommelCapital_neg_order`: DLMF 11.9.6.
+* `lommelCapital_neg_order`: DLMF 11.9.6.
 * `lommelS_bessel_series_7`, `lommelS_bessel_series_8`: the Bessel series DLMF 11.9.7–11.9.8.
 * `lommelCapital_asymptotic`, `lommelCapital_terminates`: the asymptotic expansion DLMF 11.9.9
   and its termination when `μ ± ν` is a positive odd integer.
@@ -48,6 +45,8 @@ function to exceptional parameters.
 
 ## Implementation notes
 
+The definitions `lommelA`, `LommelRegular`, `lommelS` and `lommelCapitalRegular`, with
+DLMF 11.9.4 and the evenness in `ν`, are in `DLMF.Struve.Basic.Lommel`.
 The small-Lommel equation and general solution use the regularized `₁F₂` forcing and the
 all-order Bessel fundamental system of `DLMF.Struve.Basic`. The capital-Lommel parameter limit
 is proved by cancelling the Gamma poles against a jointly entire regularized numerator; at
@@ -62,41 +61,6 @@ open scoped Real Topology Nat
 namespace DLMF.Struve
 
 open DLMF.Bessel
-
-/-- The finite product of the first `k` factors `(μ+2j+1)²-ν²` in the Lommel series denominator. -/
-@[dlmf 11.9.E4]
-def lommelA (μ ν : ℂ) (k : ℕ) : ℂ :=
-  ∏ j ∈ Finset.range k, ((μ+2*j+1)^2-ν^2)
-
-/-- Nonexceptional parameters of the small Lommel function. -/
-def LommelRegular (μ ν : ℂ) : Prop :=
-  ∀ n : ℕ, μ-ν ≠ -(2*n+1) ∧ μ+ν ≠ -(2*n+1)
-
-/-- The totalized Lommel series `z^(μ+1) Σ (-1)^k z^(2k)/A(μ,ν,k+1)` on the principal power
-branch. -/
-@[dlmf 11.9.E3]
-def lommelS (μ ν z : ℂ) : ℂ :=
-  z^(μ+1) * ∑' k : ℕ, (-1)^k*z^(2*k)/lommelA μ ν (k+1)
-
-/-- The regular-parameter capital Lommel solution obtained by adding the prescribed Gamma-weighted
-J and Y connection terms to the Lommel series. -/
-@[dlmf 11.9.E5]
-def lommelCapitalRegular (μ ν z : ℂ) : ℂ :=
-  lommelS μ ν z + 2^(μ-1)*Gamma ((μ+ν+1)/2)*Gamma ((μ-ν+1)/2)*(sin ((μ-ν)*π/2)*besselJ ν z-cos ((μ-ν)*π/2)*besselY ν z)
-
-/-- The regular capital Lommel function is even in the order `ν`, for every parameter. -/
-theorem lommelCapitalRegular_neg_order (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    lommelCapitalRegular μ (-ν) z = lommelCapitalRegular μ ν z := by
-  have hA : ∀ k, lommelA μ (-ν) k = lommelA μ ν k := fun k => by simp [lommelA]
-  have hS : lommelS μ (-ν) z = lommelS μ ν z := by simp only [lommelS, hA]
-  unfold lommelCapitalRegular
-  rw [hS, besselJ_neg_eq ν hz, besselY_neg ν hz]
-  have e1 : (μ+-ν+1)/2 = (μ-ν+1)/2 := by ring
-  have e2 : (μ- -ν+1)/2 = (μ+ν+1)/2 := by ring
-  have e3 : (μ- -ν)*π/2 = (μ-ν)*π/2 + ν*π := by ring
-  rw [e1, e2, e3, sin_add, cos_add]
-  linear_combination (2^(μ-1)*Gamma ((μ-ν+1)/2)*Gamma ((μ+ν+1)/2)*
-    (sin ((μ-ν)*π/2)*besselJ ν z-cos ((μ-ν)*π/2)*besselY ν z))*sin_sq_add_cos_sq (ν*π)
 
 /-- Removable parameter continuation of the capital Lommel function, including exceptional parameters. -/
 def lommelCapital (μ ν z : ℂ) : ℂ :=
@@ -254,20 +218,6 @@ theorem lommelCapital_regular {μ ν z : ℂ} (h : LommelRegular μ ν) (hz : z 
   ((continuousAt_lommelCapitalRegular h (slitPlane_ne_zero hz)).tendsto.mono_left
     nhdsWithin_le_nhds).limUnder_eq
 
-/-- Identity under the stated parameter and domain assumptions: `lommelA μ ν k = 4^k*poch
-((μ-ν+1)/2) k*poch ((μ+ν+1)/2) k`. -/
-@[dlmf 11.9.E4]
-theorem lommelA_poch (μ ν : ℂ) (k : ℕ) :
-    lommelA μ ν k = 4^k*poch ((μ-ν+1)/2) k*poch ((μ+ν+1)/2) k := by
-  induction k with
-  | zero => simp [lommelA, poch_zero]
-  | succ k ih =>
-    have h : lommelA μ ν (k+1) = lommelA μ ν k*((μ+2*k+1)^2-ν^2) := by
-      simp [lommelA, Finset.prod_range_succ]
-    rw [h, ih, poch_succ, poch_succ, pow_succ]
-    push_cast
-    ring
-
 /-- Regular Lommel parameters give nonpolar half-parameters of its hypergeometric series. -/
 theorem lommelRegular_half_nonpole {μ ν : ℂ} (h : LommelRegular μ ν) :
     (∀ k : ℕ, (μ-ν+1)/2 ≠ -k) ∧ (∀ k : ℕ, (μ+ν+1)/2 ≠ -k) := by
@@ -394,14 +344,6 @@ theorem lommelS_ode {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} (hz : z �
   generalize iteratedDeriv 2 (lommelS μ ν) z=A, deriv (lommelS μ ν) z=B,
     lommelS μ ν z=C at he ⊢
   linear_combination (norm := (field_simp [slitPlane_ne_zero hz]; ring)) he/z^2
-
-/-- Identity under the stated parameter and domain assumptions: `lommelS μ (-ν) z = lommelS μ ν
-z`. -/
-@[dlmf 11.9.E6]
-theorem lommelS_neg_order {μ ν : ℂ} {z : ℂ} :
-    lommelS μ (-ν) z = lommelS μ ν z := by
-  have h (k : ℕ) : lommelA μ (-ν) k=lommelA μ ν k := by simp [lommelA]
-  simp only [lommelS, h]
 
 /-- Identity under the stated parameter and domain assumptions: `lommelCapital μ (-ν) z =
 lommelCapital μ ν z`. -/
@@ -569,29 +511,6 @@ z-z^(μ-1)*∑ k ∈ Finset.range N, (-1)^k*lommelA (-μ) ν k*z^(-(2*k:ℤ))) =
 theorem lommelCapital_asymptotic (μ ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
     (fun z : ℂ => lommelCapital μ ν z-z^(μ-1)*∑ k ∈ Finset.range N, (-1)^k*lommelA (-μ) ν k*z^(-(2*k:ℤ))) =O[sector (π-δ)] (fun z : ℂ => z^(μ-1-2*N)) := by
   sorry
-
-/-- Shifting the degree by two preserves the regular Lommel parameter domain. -/
-theorem LommelRegular.add_two {μ ν : ℂ} (h : LommelRegular μ ν) :
-    LommelRegular (μ + 2) ν := by
-  intro n
-  constructor
-  · intro hn
-    exact (h (n + 1)).1 (by push_cast at *; linear_combination hn)
-  · intro hn
-    exact (h (n + 1)).2 (by push_cast at *; linear_combination hn)
-
-/-- Removing the first Lommel product factor shifts the degree by two. -/
-theorem lommelA_add_two (μ ν : ℂ) (k : ℕ) :
-    lommelA μ ν (k + 1) = ((μ + 1)^2 - ν^2) * lommelA (μ + 2) ν k := by
-  induction k with
-  | zero => simp [lommelA]
-  | succ k ih =>
-    rw [show lommelA μ ν (k + 1 + 1) =
-      lommelA μ ν (k + 1) * ((μ + 2 * (k + 1) + 1)^2 - ν^2) by
-        simp [lommelA, Finset.prod_range_succ]]
-    rw [ih]
-    simp only [lommelA, Finset.prod_range_succ]
-    ring
 
 set_option maxHeartbeats 1000000 in
 /-- The degree-two recurrence of the small Lommel function on its regular domain. -/

@@ -6,16 +6,16 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Heun.Basic
+public import DLMF.Lame.Basic.EquationForms
 public import DLMF.Lame.Eigenvalues
 public import DLMF.Lame.WeierstrassForm
 public import DLMFMathlib.Analysis.ODE.Singularities
 
 /-!
-# Lamé's equation: singularities and other forms (DLMF §§29.2, 29.10, 29.11)
+# Lamé's equation: singularities and other forms (DLMF §§29.2, 29.10)
 
-The singular points of Lamé's equation, its algebraic, trigonometric and Weierstrass forms,
-its identification with Heun's equation, the change to the complementary modulus, and the
-reduction of the Lamé wave equation.
+The singular points of Lamé's equation, its algebraic, trigonometric and Weierstrass forms, and
+the change to the complementary modulus.
 
 ## Main results
 
@@ -26,20 +26,17 @@ reduction of the Lamé wave equation.
   `φ = π/2 - am`.
 * `isLameWeierstrassSolutionOn_of_isLameSolutionOn`, `isLameWeierstrassSolutionOn_comp_wp`: the
   Weierstrass forms DLMF 29.2.6–29.2.12.
-* `isLameAlgebraicSolutionOn_iff_isHeunSolOn`: 29.2.2 is Heun's equation 31.2.1 (DLMF §29.2(ii)
-  states this for the equivalent 29.2.10).
 * `isLameSolutionOn_imaginary`: with `h = ν(ν+1) - h'` and `z' = i(z - K - iK')`, Lamé's
   equation with modulus `k'` becomes that with modulus `k` (DLMF 29.10.1–29.10.3).
 * `Real.lameEck_imaginary_solution`, `Real.lameEsk_imaginary_solution`,
   `Real.lame_imaginary_periods`: the functions 29.10.4 on the line `Re z = K` solve 29.2.1, and
   their periods (DLMF §29.10).
-* `isLameWaveSolutionOn_zero_iff`: for `ω = 0` the Lamé wave equation reduces to 29.2.1
-  (DLMF §29.11).
 
 ## Implementation notes
 
 The ordinary points are found from the zeros of `θ₄` (§20.2(iv)); the functions 29.10.4 solve
-29.2.1 because `sn(K + is, k) = nd(s, k')`, and their periods come from Table 29.3.2.
+29.2.1 because `sn(K + is, k) = nd(s, k')`, and their periods come from Table 29.3.2. The identification of 29.2.2 with Heun's equation and
+the reduction of the Lamé wave equation are in `DLMF.Lame.Basic.EquationForms`.
 -/
 
 @[expose] public section
@@ -408,28 +405,6 @@ theorem isLameWeierstrassSolutionOn_comp_wp {e₁ e₂ e₃ : ℝ} (h12 : e₂ <
   rw [hs]
   ring
 
-/-- §29.2(ii): the algebraic form 29.2.2 is Heun's equation 31.2.1 with `a = k⁻²`,
-`q = -hk⁻²/4`, `α = -ν/2`, `β = (ν+1)/2`, `γ = δ = ε = 1/2`. DLMF states this for 29.2.10,
-which is 29.2.2 after the affine change `ζ = e₃ + (e₁ - e₃)ξ`. -/
-@[dlmf 29.2.ii "29.2.2 as Heun's equation (DLMF states it for the equivalent 29.2.10)"]
-theorem isLameAlgebraicSolutionOn_iff_isHeunSolOn {h ν k : ℂ} {w : ℂ → ℂ} {U : Set ℂ} :
-    IsLameAlgebraicSolutionOn h ν k w U ↔
-      DLMF.Heun.IsHeunSolOn (k ^ 2)⁻¹ (-(h * (k ^ 2)⁻¹) / 4) (-ν / 2) ((ν + 1) / 2) (1 / 2)
-        (1 / 2) (1 / 2) w U := by
-  constructor
-  · intro hw
-    refine ⟨hw.differentiableAt, fun z hz => (hw.hasDerivAt_deriv z hz).congr_deriv ?_⟩
-    simp only [DLMF.Heun.heunCoeffP, DLMF.Heun.heunCoeffR]
-    rw [show ∀ x : ℂ, x / (4 * z * (z - 1) * (z - (k ^ 2)⁻¹)) =
-      x / 4 / (z * (z - 1) * (z - (k ^ 2)⁻¹)) from fun x => by rw [div_div]; congr 1; ring]
-    ring
-  · intro hw
-    refine ⟨hw.differentiableAt, fun z hz => (hw.hasDerivAt_deriv z hz).congr_deriv ?_⟩
-    simp only [DLMF.Heun.heunCoeffP, DLMF.Heun.heunCoeffR]
-    rw [show ∀ x : ℂ, x / (4 * z * (z - 1) * (z - (k ^ 2)⁻¹)) =
-      x / 4 / (z * (z - 1) * (z - (k ^ 2)⁻¹)) from fun x => by rw [div_div]; congr 1; ring]
-    ring
-
 /-! ### Imaginary periods (§29.10) -/
 
 /-- `k' = √(1 - k²)` as the complex comodulus of a real modulus. -/
@@ -723,17 +698,5 @@ theorem Real.lame_imaginary_periods (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
   constructor
   · rw [hc, ← mul_assoc, ← pow_add, ← two_mul, pow_mul]; simp
   · rw [hs, ← mul_assoc, ← pow_add, ← two_mul, pow_mul]; simp
-
-/-! ### The Lamé wave equation (§29.11) -/
-
-/-- §29.11: for `ω = 0` the Lamé wave equation 29.11.1 reduces to Lamé's equation 29.2.1. -/
-@[dlmf 29.11]
-theorem isLameWaveSolutionOn_zero_iff {h ν k : ℂ} {w : ℂ → ℂ} {U : Set ℂ} :
-    IsLameWaveSolutionOn h ν k 0 w U ↔ IsLameSolutionOn h ν k w U := by
-  constructor
-  · intro hw
-    exact ⟨hw.differentiableAt, fun z hz => (hw.hasDerivAt_deriv z hz).congr_deriv (by ring)⟩
-  · intro hw
-    exact ⟨hw.differentiableAt, fun z hz => (hw.hasDerivAt_deriv z hz).congr_deriv (by ring)⟩
 
 end DLMF.Lame

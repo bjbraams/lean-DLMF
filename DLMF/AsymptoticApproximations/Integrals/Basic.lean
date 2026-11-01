@@ -8,7 +8,7 @@ module
 public import Mathlib.Analysis.Calculus.Deriv.Basic
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import Mathlib.RingTheory.PowerSeries.Basic
-public import Mathlib.RingTheory.Polynomial.Pochhammer
+public import Mathlib.RingTheory.Binomial
 
 /-!
 # Asymptotics of integrals: definitions (DLMF §§2.3–2.4)
@@ -16,8 +16,8 @@ public import Mathlib.RingTheory.Polynomial.Pochhammer
 ## Main definitions
 
 * `variationalOperator a b f` (2.3.6): `𝒱_{a,b}(f) = ∫ₐᵇ |f'(t)| dt`.
-* `cbinom`, `binomSeriesCoeff p β n`: complex binomial coefficients and the coefficients of
-  the binomial series `(P/p₀)^β`.
+* `binomSeriesCoeff p β n`: the coefficients of the binomial series `(P/p₀)^β`, written with
+  Mathlib's generalized binomial coefficient `Ring.choose`.
 * `laplaceCoeff L₀ p q λ μ s` (2.3.16–2.3.18, 2.4.12–2.4.13): the coefficients `bₛ` of Laplace's
   method, defined by the residue formula 2.3.18 in its formal form
   `bₛ = μ⁻¹ [τˢ] Q(τ) P(τ)^{-(λ+s)/μ}`, where `p(t) - p(a) = (t-a)^μ P(t-a)` and
@@ -51,15 +51,11 @@ def variationalOperator {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] (
     (f : ℝ → E) : ℝ :=
   ∫ t in a..b, ‖deriv f t‖
 
-/-- The binomial coefficient `(β choose k) = β(β-1)⋯(β-k+1)/k!` for complex `β`. -/
-def cbinom (β : ℂ) (k : ℕ) : ℂ :=
-  (descPochhammer ℂ k).eval β / (k.factorial : ℂ)
-
 /-- The coefficient `[τⁿ] (P(τ)/p₀)^β` of the binomial series, where `P(τ) = ∑ pₖ τᵏ` with
 `p₀ ≠ 0`: `(P/p₀)^β = ∑ₖ (β choose k) (P/p₀ - 1)ᵏ`, and `P/p₀ - 1` has no constant term, so only
 `k ≤ n` contributes to `[τⁿ]`. -/
 def binomSeriesCoeff (p : ℕ → ℂ) (β : ℂ) (n : ℕ) : ℂ :=
-  ∑ k ∈ range (n + 1), cbinom β k *
+  ∑ k ∈ range (n + 1), Ring.choose β k *
     PowerSeries.coeff n ((PowerSeries.mk fun j => if j = 0 then 0 else p j / p 0) ^ k)
 
 /-- DLMF 2.3.18 (formal residue form, defining the `bₛ` of 2.3.15–2.3.16):

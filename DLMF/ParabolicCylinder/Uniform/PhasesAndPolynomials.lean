@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.ParabolicCylinder
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
 public import DLMFMathlib.Analysis.Calculus.InverseSeries
 public import Mathlib.Analysis.SpecialFunctions.Sqrt

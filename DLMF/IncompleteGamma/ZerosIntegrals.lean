@@ -990,17 +990,17 @@ theorem lowerIncGamma_multiplication_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ -
         scIncGamma (a+k) (exp u) * (1-exp v)^k / k.factorial := by ring
     _ = _ := by rw [hg, he]; ring
 
--- `hurwitzZetaComplex` (Euler–Maclaurin continuation) is defined in `DLMF.Zeta.HurwitzEulerMaclaurin`.
+-- `hurwitzZetaComplex` (Euler–Maclaurin continuation) is defined in `DLMF.Zeta.Basic.Hurwitz`.
 
 /-- Bridge to Mathlib; its existing Hurwitz zeta is periodic in a real second argument. -/
 theorem hurwitzZetaComplex_mathlib {x : ℝ} (hx : 0 < x) (hx1 : x ≤ 1) {s : ℂ} (hs : s ≠ 1) :
-    hurwitzZetaComplex s x=HurwitzZeta.hurwitzZeta (x : UnitAddCircle) s :=
+    DLMF.Zeta.hurwitzZetaComplex s x=HurwitzZeta.hurwitzZeta (x : UnitAddCircle) s :=
   DLMF.Zeta.hurwitzZetaComplex_eq_hurwitzZeta hx hx1 hs
 
 /-- Inherited logarithms and a right-half-plane convergence domain are explicit. -/
 @[dlmf 8.15.E2]
 theorem incompleteGamma_hurwitz_fourier_sum {a z : ℂ} (ha : a ≠ -1) (hz : 0 < z.re) {h : ℝ} (hh0 : 0 ≤ h) (hh1 : h ≤ 1) :
-    HasSum (fun k : ℕ => let j : ℂ := k+1; a*(exp (2*π*I*j*(z+h))/(2*π*I*j)^(a+1)*upperIncGammaOnLog a (log z+log (2*π*j)+π*I/2)+exp (-2*π*I*j*(z+h))/(-2*π*I*j)^(a+1)*upperIncGammaOnLog a (log z+log (2*π*j)-π*I/2))) (hurwitzZetaComplex (-a) (z+h)+z^(a+1)/(a+1)+(h-1/2)*z^a) := by
+    HasSum (fun k : ℕ => let j : ℂ := k+1; a*(exp (2*π*I*j*(z+h))/(2*π*I*j)^(a+1)*upperIncGammaOnLog a (log z+log (2*π*j)+π*I/2)+exp (-2*π*I*j*(z+h))/(-2*π*I*j)^(a+1)*upperIncGammaOnLog a (log z+log (2*π*j)-π*I/2))) (DLMF.Zeta.hurwitzZetaComplex (-a) (z+h)+z^(a+1)/(a+1)+(h-1/2)*z^a) := by
   sorry
 
 /-- The function F(p,x) approximated in DLMF §8.27(i). -/

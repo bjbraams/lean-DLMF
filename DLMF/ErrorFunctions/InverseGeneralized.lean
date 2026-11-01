@@ -8,6 +8,7 @@ module
 public import Mathlib.Analysis.Calculus.Taylor
 public import DLMF.Confluent.IncompleteGamma
 public import DLMF.ErrorFunctions.AnalyticProperties
+public import DLMF.ErrorFunctions.Basic.Inverse
 
 /-!
 # Generalized and inverse error functions (DLMF §§7.16–7.17)
@@ -20,8 +21,6 @@ asymptotic expansion of the inverse complementary error function.
 
 * `Real.generalizedErrorIntegral`, `Real.generalizedDawsonIntegral`: the generalized error and
   Dawson integrals (DLMF §7.16).
-* `Real.invErf`, `Real.invErfc`: the inverse error functions on `(-1, 1)` and `(0, 2)`
-  (DLMF 7.17.1), totalized by `0` outside these intervals.
 * `invErfSeriesCoeff`: the coefficients of the inverse-erf series, from the recurrence after
   DLMF 7.17.2.
 * `invErfcAsymptoticU`, `invErfcAsymptoticV`: the variables `u`, `v` of DLMF 7.17.5, 7.17.6.
@@ -30,19 +29,19 @@ asymptotic expansion of the inverse complementary error function.
 
 * `Real.generalizedErrorIntegral_gamma`, `Real.generalizedDawsonIntegral_gamma`: the
   generalized integrals in terms of incomplete Gamma functions (DLMF §7.16).
-* `Real.invErf_spec`, `Real.invErfc_spec`: the inverse identities.
 * `invErfSeriesCoeff_initial`, `invErfSeriesCoeff_recurrence`: the first coefficients and the
   recurrence (DLMF 7.17.2).
 * `hasSum_invErf`: the power series of the inverse error function, convergent on the whole
   interval `(-1, 1)` (DLMF 7.17.2).
-* `invErf_analyticAt`, `iteratedDeriv_invErf`, `iteratedDeriv_invErf_nonneg`: analyticity and the
-  derivatives of the inverse error function.
+* `iteratedDeriv_invErf`, `iteratedDeriv_invErf_nonneg`: the derivatives of the inverse error
+  function.
 * `invErfc_asymptotic`: the all-order small-argument expansion of `inverfc` (DLMF 7.17.3,
   7.17.4).
 
 ## Implementation notes
 
-`Real.invErf` reuses TauCeti's real inverse error function (`Real.erf_erfInv`). The power series
+`Real.invErf` and `Real.invErfc`, with their inverse identities, analyticity and first
+derivative, are in `DLMF.ErrorFunctions.Basic.Inverse`. The power series
 is obtained from the nonnegativity of all derivatives on `[0, 1)` (explicit derivative
 polynomials with nonnegative coefficients), which gives convergence of the Taylor series on the
 full interval.
@@ -200,32 +199,6 @@ theorem Real.generalizedDawsonIntegral_gamma {p x : ℝ} (hp : 0 < p) (hx : 0 < 
   field_simp
   linear_combination (-(Real.generalizedDawsonIntegral p x:ℂ))*he'
 
-/-- Inverse erf on (-1,1), reusing TauCeti; zero outside that interval. -/
-@[dlmf 7.17.E1]
-def Real.invErf (x : ℝ) : ℝ :=
-  _root_.Real.erfInv x
-
-/-- Inverse erfc on (0,2), with totalization inherited from invErf. -/
-@[dlmf 7.17.E1]
-def Real.invErfc (x : ℝ) : ℝ :=
-  Real.invErf (1-x)
-
-/-- Inverse identity; `Real.erf_erfInv` from TauCeti supplies the real theorem. -/
-theorem Real.invErf_spec {x : ℝ} (hx : |x| < 1) :
-    (erf (Real.invErf x)).re=x := by
-  rw [erf_ofReal]
-  simpa [Real.invErf] using _root_.Real.erf_erfInv (abs_lt.mp hx)
-
-/-- Inverse complementary error function identity. -/
-theorem Real.invErfc_spec {x : ℝ} (hx : 0 < x) (hx2 : x < 2) :
-    (erfc (Real.invErfc x)).re=x := by
-  have h : |1-x| < 1 := abs_lt.mpr (by constructor <;> linarith)
-  have he := Real.invErf_spec h
-  change (erfc (Real.invErf (1-x))).re=x
-  change (1-erf (Real.invErf (1-x))).re=x
-  simp only [Complex.sub_re, Complex.one_re, he]
-  ring
-
 /-- Coefficients of the inverse-erf series from the unnumbered recurrence after 7.17.2. -/
 def invErfSeriesCoeff : ℕ → ℝ
   | 0 => 1
@@ -249,28 +222,6 @@ theorem invErfSeriesCoeff_recurrence (m : ℕ) :
   refine Finset.sum_congr rfl fun n hn => ?_
   rw [Nat.sub_sub_self (Nat.lt_succ_iff.mp (Finset.mem_range.mp hn))]
   ring
-
-/-- Analyticity of the real inverse error function on its full interval. -/
-theorem invErf_analyticAt {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
-    AnalyticAt ℝ Real.invErf x := by
-  have hf : AnalyticAt ℝ TauCeti.Real.erf (_root_.Real.erfInv x) := by
-    have h := (differentiable_erf_complex.analyticAt (_root_.Real.erfInv x : ℂ)).re_ofReal
-    simpa only [erf_ofReal, Complex.ofReal_re] using h
-  have hd : deriv TauCeti.Real.erf (_root_.Real.erfInv x) ≠ 0 := by
-    rw [(TauCeti.Real.hasDerivAt_erf _).deriv]
-    positivity
-  have hcomp : AnalyticAt ℝ (_root_.Real.erfInv ∘ TauCeti.Real.erf) (_root_.Real.erfInv x) := by
-    apply (analyticAt_id : AnalyticAt ℝ id (_root_.Real.erfInv x)).congr
-    exact Eventually.of_forall fun y => (_root_.Real.erfInv_erf y).symm
-  have h := (analyticAt_comp_iff_of_deriv_ne_zero hf hd).mp hcomp
-  rw [_root_.Real.erf_erfInv hx] at h
-  exact h.congr (Eventually.of_forall fun y => rfl)
-
-/-- The derivative of the project's real inverse error function. -/
-theorem hasDerivAt_invErf {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
-    HasDerivAt Real.invErf (Real.sqrt π / 2 * Real.exp (Real.invErf x ^ 2)) x := by
-  change HasDerivAt _root_.Real.erfInv _ x
-  exact _root_.Real.hasDerivAt_erfInv hx
 
 /-- Polynomials controlling the successive inverse-erf derivatives. -/
 def invErfDerivativePoly : ℕ → Polynomial ℝ
@@ -320,13 +271,6 @@ theorem iteratedDeriv_invErf (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
       Function.comp_apply, Pi.pow_apply, Nat.reduceSub]
     rw [add_mul, Real.exp_add]
     ring
-
-/-- The real inverse error function is nonnegative on the positive half-interval. -/
-theorem invErf_nonneg {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) : 0 ≤ Real.invErf x := by
-  have h := _root_.Real.strictMonoOn_erfInv.monotoneOn
-    (show (0 : ℝ) ∈ Ioo (-1 : ℝ) 1 by norm_num)
-    (show x ∈ Ioo (-1 : ℝ) 1 from ⟨by linarith, hx1⟩) hx0
-  simpa only [_root_.Real.erfInv_zero, Real.invErf] using h
 
 /-- Every real derivative of inverse erf is nonnegative on `[0,1)`. -/
 theorem iteratedDeriv_invErf_nonneg (n : ℕ) {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :

@@ -8,7 +8,7 @@ module
 public import DLMF.Coulomb.RhoEtaProperties
 public import DLMF.Bessel.Modified
 public import DLMF.Bessel.Asymptotics
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import DLMF.Gamma.ComplexBinet
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.EulerSineProd
 public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog

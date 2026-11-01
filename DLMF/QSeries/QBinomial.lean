@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.QSeries.Basic.Calculus
+public import DLMF.QSeries.Basic.CalculusProperties
 public import DLMF.QSeries.Pochhammer
 
 /-!
@@ -14,14 +14,14 @@ public import DLMF.QSeries.Pochhammer
 The Gaussian coefficient `qBinom q n k = [n k]_q` is defined by the `q`-Pascal rule
 (Duverney (10.6)–(10.7)). Mathlib has no Gaussian binomial coefficients.
 
+The special values, the `q`-Pascal rule and the limit `q → 1` are in
+`DLMF.QSeries.Basic.CalculusProperties`.
+
 ## Main results
 
-* `qBinom_succ_succ`: the `q`-Pascal rule (DLMF 17.2.31).
-* `qBinom_one`: `[n k]_1 = C(n, k)`.
 * `qBinom_mul_qPochhammer`: `[k+m, k]_q (q;q)_k (q;q)_m = (q;q)_{k+m}` (Duverney (10.4)).
 * `qPochhammer_eq_sum_qBinom`: Cauchy's finite `q`-binomial theorem
   `(x;q)_n = ∑_k [n k]_q (-1)^k q^{k(k-1)/2} x^k` (Duverney (10.8), DLMF 17.2.35).
-* `tendsto_qBinom`: `[n k]_q → C(n, k)` as `q → 1` (Duverney (10.5), DLMF 17.2.28).
 -/
 
 @[expose] public section
@@ -31,49 +31,6 @@ open Complex Finset
 noncomputable section
 
 namespace DLMF.QSeries
-
-/-- `[n 0]_q = 1`. -/
-@[simp] theorem qBinom_zero_right (q : ℂ) (n : ℕ) : qBinom q n 0 = 1 := by
-  cases n <;> rfl
-
-/-- `[0, k+1]_q = 0`. -/
-@[simp] theorem qBinom_zero_succ (q : ℂ) (k : ℕ) : qBinom q 0 (k + 1) = 0 := rfl
-
-/-- The `q`-Pascal rule `[n+1, k+1]_q = [n, k]_q + q^{k+1} [n, k+1]_q` (Duverney (10.7)). -/
-@[dlmf 17.2.E31 "exact: first polynomial q-Pascal rule after successor reindexing"]
-theorem qBinom_succ_succ (q : ℂ) (n k : ℕ) :
-    qBinom q (n + 1) (k + 1) = qBinom q n k + q ^ (k + 1) * qBinom q n (k + 1) := rfl
-
-/-- `[n k]_q = 0` for `k > n`. -/
-theorem qBinom_eq_zero_of_lt (q : ℂ) {n k : ℕ} (h : n < k) : qBinom q n k = 0 := by
-  induction n generalizing k with
-  | zero => obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : k ≠ 0); rfl
-  | succ n ih =>
-    obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : k ≠ 0)
-    rw [qBinom_succ_succ, ih (by omega), ih (by omega)]; ring
-
-/-- `[n n]_q = 1` (Duverney (10.6)). -/
-@[simp] theorem qBinom_self (q : ℂ) (n : ℕ) : qBinom q n n = 1 := by
-  induction n with
-  | zero => rfl
-  | succ n ih => rw [qBinom_succ_succ, ih, qBinom_eq_zero_of_lt q (Nat.lt_succ_self n)]; ring
-
-/-- At `q = 1` the Gaussian coefficients are the binomial coefficients. -/
-theorem qBinom_one (n k : ℕ) : qBinom 1 n k = n.choose k := by
-  induction n generalizing k with
-  | zero => cases k <;> simp
-  | succ n ih =>
-    cases k with
-    | zero => simp
-    | succ k => rw [qBinom_succ_succ, ih, ih, Nat.choose_succ_succ]; push_cast; ring
-
-/-- Splitting the first factor: `(x;q)_{n+1} = (1-x)(xq;q)_n`. -/
-theorem qPochhammer_succ' (x q : ℂ) (n : ℕ) :
-    qPochhammer x q (n + 1) = (1 - x) * qPochhammer (x * q) q n := by
-  induction n with
-  | zero => simp [qPochhammer_succ]
-  | succ n ih =>
-    rw [qPochhammer_succ, ih, qPochhammer_succ]; ring
 
 /-- The finite `q`-binomial theorem (Cauchy), Duverney (10.8):
 `(x;q)_n = ∑_k [n k]_q (-1)^k q^{k(k-1)/2} x^k`. -/
@@ -127,22 +84,6 @@ theorem qBinom_mul_qPochhammer (q : ℂ) (k m : ℕ) :
     rw [qPochhammer_succ q q m] at h1
     rw [qPochhammer_succ q q k] at h2
     linear_combination (1 - q * q ^ k) * h1 + q ^ (k + 1) * (1 - q * q ^ m) * h2
-
-/-- `q ↦ [n k]_q` is continuous (it is a polynomial in `q`). -/
-theorem continuous_qBinom (n k : ℕ) : Continuous fun q : ℂ => qBinom q n k := by
-  induction n generalizing k with
-  | zero => cases k <;> simp only [qBinom_zero_right, qBinom_zero_succ] <;> fun_prop
-  | succ n ih =>
-    cases k with
-    | zero => simp only [qBinom_zero_right]; fun_prop
-    | succ k => simp only [qBinom_succ_succ]; exact (ih k).add ((continuous_pow _).mul (ih (k + 1)))
-
-/-- `[n k]_q → C(n, k)` as `q → 1` (Duverney (10.5)). -/
-@[dlmf 17.2.E28 "exact: complex q tends to1, using polynomial Gaussian binomials"]
-theorem tendsto_qBinom (n k : ℕ) :
-    Filter.Tendsto (fun q : ℂ => qBinom q n k) (nhds 1) (nhds (n.choose k : ℂ)) := by
-  rw [← qBinom_one]
-  exact (continuous_qBinom n k).tendsto 1
 
 end DLMF.QSeries
 

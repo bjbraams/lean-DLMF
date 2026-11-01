@@ -8,7 +8,7 @@ module
 public import DLMF.Struve.Basic
 
 public import DLMF.Confluent.Relations
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import DLMF.Hypergeometric.GeneralizedCalculus
 
 /-!

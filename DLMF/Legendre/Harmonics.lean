@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Legendre.Basic.Harmonics
 public import DLMF.Legendre.IntegerTheory
 public import DLMF.Legendre.Integrals
 public import DLMF.Legendre.SpecialValues
@@ -13,18 +14,15 @@ public import DLMF.SphericalHarmonics.AdditionTools
 /-!
 # Normalized spherical harmonics and endpoint values
 
-This file defines the spherical harmonics `Y_{l,m}(θ, φ)` of DLMF §14.30 through a polynomial
-form of the Ferrers functions of integer degree and order (DLMF 14.7.8), which extends them
-continuously to both endpoints `x = ±1`. It proves the Rodrigues form, the values at the north
+The spherical harmonics `Y_{l,m}(θ, φ)` of DLMF §14.30 are defined in
+`DLMF.Legendre.Basic.Harmonics` (`ferrersPNat`, `sphericalHarmonicNonneg`, `sphericalHarmonic`,
+`surfaceHarmonic`) through a polynomial form of the Ferrers functions of integer degree and order
+(DLMF 14.7.8), which extends them continuously to both endpoints `x = ±1`. This file proves the Rodrigues form, the values at the north
 pole and the equator, the symmetry relations, the orthonormality and the addition theorem, and
 the Herglotz generating function of DLMF §14.30(ii).
 
 ## Main definitions
 
-* `ferrersPNat`: the polynomial form `(-1)^m (1-x²)^{m/2} d^m P_l(x)/dx^m` of `𝖯^m_l(x)`.
-* `sphericalHarmonicNonneg`, `sphericalHarmonic`: the spherical harmonic `Y_{l,m}(θ, φ)`
-  (DLMF 14.30.1) for `m ≥ 0` and for integer `m`.
-* `surfaceHarmonic`: the real surface harmonics of the first kind (DLMF 14.30.2).
 * `herglotzNullVector`: the null vector in the Herglotz generating function.
 * `scaledOblateR`, `scaledOblateT`: the scaled oblate harmonics of DLMF §14.30(i).
 
@@ -54,10 +52,6 @@ namespace DLMF.Legendre
 
 open DLMF.OrthogonalPolynomials
 
-/-- Polynomial definition extends integral-degree Ferrers P continuously to both endpoints. -/
-def ferrersPNat (l m : ℕ) (x : ℝ) : ℂ :=
-  (-1)^m*(Real.sqrt (1-x^2):ℂ)^m*iteratedDeriv m (legendrePolyP l) x
-
 /-- DLMF 14.7.8: for natural `l, m` and `-1 < x < 1`, the explicit form `(-1)^m (1-x²)^{m/2} d^m
 P_l(x)/dx^m` agrees with the Ferrers function `𝖯^m_l(x)`. -/
 @[dlmf 14.7.E8]
@@ -72,19 +66,6 @@ theorem ferrersPNat_eq (l m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   congr 2
   rw [← Complex.ofReal_pow, Real.sqrt_eq_rpow, ← Real.rpow_natCast, ← Real.rpow_mul h1]
   congr 2; ring
-
-/-- DLMF 14.30.1 for `m ≥ 0`: the spherical harmonic `Y_{l,m}(θ, φ) = √((l-m)! (2l+1)/(4π (l+m)!))
-e^{imφ} 𝖯^m_l(cos θ)`. -/
-@[dlmf 14.30.E1]
-def sphericalHarmonicNonneg (l m : ℕ) (θ phi : ℝ) : ℂ :=
-  Real.sqrt (((l-m).factorial:ℝ)*(2*l+1)/(4*π*(l+m).factorial))*exp (I*m*phi)*ferrersPNat l m (Real.cos θ)
-
-/-- DLMF 14.30.1: the spherical harmonic `Y_{l,m}(θ, φ)` for integer `m`, equal to
-`sphericalHarmonicNonneg l m` for `m ≥ 0`, to `(-1)^{|m|}` times the complex conjugate of
-`Y_{l,|m|}` for `m < 0`, and to `0` when `|m| > l`. -/
-@[dlmf 14.30.E1]
-def sphericalHarmonic (l : ℕ) (m : ℤ) (θ phi : ℝ) : ℂ :=
-  if l < m.natAbs then 0 else if m < 0 then (-1)^m.natAbs*star (sphericalHarmonicNonneg l m.natAbs θ phi) else sphericalHarmonicNonneg l m.natAbs θ phi
 
 /-- Derivatives of the Legendre polynomial are real on the real axis. -/
 theorem iteratedDeriv_legendrePolyP_ofReal (l m : ℕ) (x : ℝ) :
@@ -147,12 +128,6 @@ theorem sphericalHarmonic_ferrers (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) {θ 
     rw [show ((l:ℤ) - (k:ℤ)).toNat = l - k by omega, show ((l:ℤ) + (k:ℤ)).toNat = l + k by omega,
       sphericalHarmonicNonneg, ferrersPNat_eq l k hx]
     push_cast; ring_nf
-
-/-- DLMF 14.30.2: the real surface harmonic of the first kind `cos(mφ) 𝖯^m_l(cos θ)` (or `sin(mφ)
-𝖯^m_l(cos θ)` when `sine` is true), for natural `l, m`. -/
-@[dlmf 14.30.E2]
-def surfaceHarmonic (sine : Bool) (l m : ℕ) (θ phi : ℝ) : ℂ :=
-  (if sine then Real.sin (m*phi) else Real.cos (m*phi))*ferrersPNat l m (Real.cos θ)
 
 /-- Derivatives of order `< n` of `(z²-1)ⁿ` vanish at `z = 1`. -/
 private lemma rod_iteratedDeriv_at_one (n j : ℕ) (hj : j < n) :

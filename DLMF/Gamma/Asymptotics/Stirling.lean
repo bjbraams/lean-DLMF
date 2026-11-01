@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Calculus.Deriv.Polynomial
+public import DLMF.Gamma.Basic.ScaledGamma
 public import DLMF.Gamma.ComplexBinet
 public import DLMF.Gamma.MellinBarnes
 public import DLMF.Hypergeometric.SeriesProperties
@@ -16,11 +17,11 @@ public import Mathlib.NumberTheory.BernoulliPolynomials
 
 Stirling's series for `ln Γ` and `ψ`, the scaled Gamma function and the Stirling coefficients,
 and asymptotics of `|Γ(x + iy)|`, `Γ(at + b)` and `Γ(t + a)/Γ(t + b)`, obtained from Binet's
-integral, the Bernoulli expansion of its kernel and Watson's lemma.
+integral, the Bernoulli expansion of its kernel and Watson's lemma. The scaled Gamma function
+`scaledGamma` (DLMF 5.11.3) is defined in `DLMF.Gamma.Basic.ScaledGamma`.
 
 ## Main definitions
 
-* `scaledGamma`: the scaled Gamma function `Γ*(z)` (DLMF 5.11.3).
 * `stirlingG`: the Stirling coefficients (DLMF 5.11.4).
 * `stirlingRatioG`: the Gamma-ratio coefficients (DLMF 5.11.15).
 * `binetPoly`, `binetCoeff`: the Bernoulli polynomial part of Binet's kernel `β(t)/t` and its
@@ -54,11 +55,6 @@ open DLMF.Hypergeometric
 noncomputable section
 
 namespace DLMF.Gamma
-
-/-- Scaled Gamma `Γ*(z)` in DLMF 5.11.3. -/
-@[dlmf 5.11.E3]
-def scaledGamma (z : ℂ) : ℂ :=
-  Complex.Gamma z / (Complex.exp (-z) * z ^ z * (2 * π / z) ^ (1 / 2 : ℂ))
 
 section StirlingSeries
 

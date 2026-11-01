@@ -42,7 +42,7 @@ function.
 
 ## Implementation notes
 
-Statements use DLMF's `ζ(s, a)` in the form `DLMF.Confluent.hurwitzZetaComplex s a` for complex
+Statements use DLMF's `ζ(s, a)` in the form `DLMF.Zeta.hurwitzZetaComplex s a` for complex
 `a` (see `DLMF.Zeta.Hurwitz`), and Mathlib's `hurwitzZeta` where DLMF's range is `0 < a ≤ 1`.
 
 * Integrals `∫_0^a` with complex `a` are taken along the segment `[0, a]`, written
@@ -69,7 +69,6 @@ noncomputable section
 
 namespace DLMF.Zeta
 
-open DLMF.Confluent (hurwitzZetaComplex)
 open DLMF.Hypergeometric (poch)
 
 /-! ### §25.11(vii) Integral representations -/

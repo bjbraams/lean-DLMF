@@ -101,33 +101,33 @@ declarations:
 
 ## [§34.2 Definition: 3j Symbol](https://dlmf.nist.gov/34.2)
 
-- [34.2.E1](https://dlmf.nist.gov/34.2.E1): [`DLMF.WignerSymbols.IsTriad`](DLMF/WignerSymbols/Basic.lean#L86) (definition); [`DLMF.WignerSymbols.isTriad_iff`](DLMF/WignerSymbols/ThreeJ.lean#L162) (proved); [`DLMF.WignerSymbols.wigner3j_eq_zero_of_not_isTriad`](DLMF/WignerSymbols/ThreeJ.lean#L191) (proved). The triangle conditions with the parity condition of §34.2 (`IsTriad`); `isTriad_iff` gives the DLMF form.
-- [34.2.E2](https://dlmf.nist.gov/34.2.E2): [`DLMF.WignerSymbols.IsProjection`](DLMF/WignerSymbols/Basic.lean#L81) (definition); [`DLMF.WignerSymbols.wigner3j_eq_zero_of_not_isProjection`](DLMF/WignerSymbols/ThreeJ.lean#L204) (proved). `IsProjection j m`: `j - m, j + m ∈ ℕ`.
-- [34.2.E3](https://dlmf.nist.gov/34.2.E3): [`DLMF.WignerSymbols.wigner3j_eq_zero_of_sum_ne_zero`](DLMF/WignerSymbols/ThreeJ.lean#L198) (proved)
+- [34.2.E1](https://dlmf.nist.gov/34.2.E1): [`DLMF.WignerSymbols.IsTriad`](DLMF/WignerSymbols/Basic.lean#L86) (definition); [`DLMF.WignerSymbols.isTriad_iff`](DLMF/WignerSymbols/Basic/TriangleConditions.lean#L33) (proved); [`DLMF.WignerSymbols.wigner3j_eq_zero_of_not_isTriad`](DLMF/WignerSymbols/Basic/TriangleConditions.lean#L62) (proved). The triangle conditions with the parity condition of §34.2 (`IsTriad`); `isTriad_iff` gives the DLMF form.
+- [34.2.E2](https://dlmf.nist.gov/34.2.E2): [`DLMF.WignerSymbols.IsProjection`](DLMF/WignerSymbols/Basic.lean#L81) (definition); [`DLMF.WignerSymbols.wigner3j_eq_zero_of_not_isProjection`](DLMF/WignerSymbols/Basic/TriangleConditions.lean#L75) (proved). `IsProjection j m`: `j - m, j + m ∈ ℕ`.
+- [34.2.E3](https://dlmf.nist.gov/34.2.E3): [`DLMF.WignerSymbols.wigner3j_eq_zero_of_sum_ne_zero`](DLMF/WignerSymbols/Basic/TriangleConditions.lean#L69) (proved)
 - [34.2.E4](https://dlmf.nist.gov/34.2.E4): [`DLMF.WignerSymbols.wigner3j`](DLMF/WignerSymbols/Basic.lean#L132) (definition). Racah's formula; the definition is `0` outside the admissible range (34.2.1–34.2.3).
 - [34.2.E5](https://dlmf.nist.gov/34.2.E5): [`DLMF.WignerSymbols.triangleDelta`](DLMF/WignerSymbols/Basic.lean#L120) (definition)
-- [34.2.E6](https://dlmf.nist.gov/34.2.E6): [`DLMF.WignerSymbols.wigner3j_eq_hyp3F2`](DLMF/WignerSymbols/ThreeJ.lean#L212) (admitted). `₃F₂` at unit argument as `DLMF.Hypergeometric.genFiniteHG` (terminating), over ℂ.
+- [34.2.E6](https://dlmf.nist.gov/34.2.E6): [`DLMF.WignerSymbols.wigner3j_eq_hyp3F2`](DLMF/WignerSymbols/ThreeJ.lean#L158) (admitted). `₃F₂` at unit argument as `DLMF.Hypergeometric.genFiniteHG` (terminating), over ℂ.
 
 ## [§34.3 Basic Properties: 3j Symbol](https://dlmf.nist.gov/34.3)
 
-- [34.3.E1](https://dlmf.nist.gov/34.3.E1): [`DLMF.WignerSymbols.wigner3j_j_j_zero`](DLMF/WignerSymbols/ThreeJ.lean#L233) (proved)
-- [34.3.E2](https://dlmf.nist.gov/34.3.E2): [`DLMF.WignerSymbols.wigner3j_j_j_one_zero`](DLMF/WignerSymbols/ThreeJ.lean#L355) (proved)
-- [34.3.E3](https://dlmf.nist.gov/34.3.E3): [`DLMF.WignerSymbols.wigner3j_j_j_one_one`](DLMF/WignerSymbols/ThreeJ.lean#L416) (proved)
-- [34.3.E4](https://dlmf.nist.gov/34.3.E4): [`DLMF.WignerSymbols.wigner3j_zero_zero_zero_of_even`](DLMF/WignerSymbols/ThreeJ.lean#L452) (admitted); [`DLMF.WignerSymbols.wigner3j_zero_zero_zero_of_odd`](DLMF/WignerSymbols/ThreeJ.lean#L678) (proved). Odd `J`: proved for all integer `j`s satisfying the triangle conditions.
-- [34.3.E5](https://dlmf.nist.gov/34.3.E5): [`DLMF.WignerSymbols.wigner3j_zero_zero_zero_of_even`](DLMF/WignerSymbols/ThreeJ.lean#L452) (admitted); [`DLMF.WignerSymbols.wigner3j_zero_zero_zero_of_odd`](DLMF/WignerSymbols/ThreeJ.lean#L678) (proved). Even `J = 2n`: admitted.
-- [34.3.E6](https://dlmf.nist.gov/34.3.E6): [`DLMF.WignerSymbols.wigner3j_stretched`](DLMF/WignerSymbols/ThreeJ.lean#L491) (proved)
-- [34.3.E7](https://dlmf.nist.gov/34.3.E7): [`DLMF.WignerSymbols.wigner3j_top`](DLMF/WignerSymbols/ThreeJ.lean#L523) (proved)
-- [34.3.E8](https://dlmf.nist.gov/34.3.E8): [`DLMF.WignerSymbols.wigner3j_cycle`](DLMF/WignerSymbols/ThreeJ.lean#L558) (proved); [`DLMF.WignerSymbols.wigner3j_cycle₂`](DLMF/WignerSymbols/ThreeJ.lean#L595) (proved)
-- [34.3.E9](https://dlmf.nist.gov/34.3.E9): [`DLMF.WignerSymbols.wigner3j_swap`](DLMF/WignerSymbols/ThreeJ.lean#L601) (proved)
-- [34.3.E10](https://dlmf.nist.gov/34.3.E10): [`DLMF.WignerSymbols.wigner3j_neg`](DLMF/WignerSymbols/ThreeJ.lean#L640) (proved)
-- [34.3.E11](https://dlmf.nist.gov/34.3.E11): [`DLMF.WignerSymbols.wigner3j_regge₁`](DLMF/WignerSymbols/ThreeJ.lean#L689) (proved)
-- [34.3.E12](https://dlmf.nist.gov/34.3.E12): [`DLMF.WignerSymbols.wigner3j_regge₂`](DLMF/WignerSymbols/ThreeJ.lean#L731) (proved)
-- [34.3.E13](https://dlmf.nist.gov/34.3.E13): [`DLMF.WignerSymbols.wigner3j_recursion_half`](DLMF/WignerSymbols/ThreeJ.lean#L822) (proved). Stated for all arguments (both sides vanish outside the admissible ranges); stronger than DLMF.
-- [34.3.E14](https://dlmf.nist.gov/34.3.E14): [`DLMF.WignerSymbols.wigner3j_recursion_m`](DLMF/WignerSymbols/ThreeJ.lean#L978) (admitted). Stated for all arguments; stronger than DLMF.
-- [34.3.E15](https://dlmf.nist.gov/34.3.E15): [`DLMF.WignerSymbols.wigner3j_recursion_j`](DLMF/WignerSymbols/ThreeJ.lean#L989) (admitted). Stated for all arguments; stronger than DLMF.
-- [34.3.E16](https://dlmf.nist.gov/34.3.E16): [`DLMF.WignerSymbols.wigner3j_orthogonality_m`](DLMF/WignerSymbols/ThreeJ.lean#L1008) (admitted)
-- [34.3.E17](https://dlmf.nist.gov/34.3.E17): [`DLMF.WignerSymbols.wigner3j_orthogonality_j`](DLMF/WignerSymbols/ThreeJ.lean#L1017) (admitted)
-- [34.3.E18](https://dlmf.nist.gov/34.3.E18): [`DLMF.WignerSymbols.wigner3j_sum_sq`](DLMF/WignerSymbols/ThreeJ.lean#L1026) (admitted)
+- [34.3.E1](https://dlmf.nist.gov/34.3.E1): [`DLMF.WignerSymbols.wigner3j_j_j_zero`](DLMF/WignerSymbols/ThreeJ.lean#L179) (proved)
+- [34.3.E2](https://dlmf.nist.gov/34.3.E2): [`DLMF.WignerSymbols.wigner3j_j_j_one_zero`](DLMF/WignerSymbols/ThreeJ.lean#L301) (proved)
+- [34.3.E3](https://dlmf.nist.gov/34.3.E3): [`DLMF.WignerSymbols.wigner3j_j_j_one_one`](DLMF/WignerSymbols/ThreeJ.lean#L362) (proved)
+- [34.3.E4](https://dlmf.nist.gov/34.3.E4): [`DLMF.WignerSymbols.wigner3j_zero_zero_zero_of_even`](DLMF/WignerSymbols/ThreeJ.lean#L398) (admitted); [`DLMF.WignerSymbols.wigner3j_zero_zero_zero_of_odd`](DLMF/WignerSymbols/ThreeJ.lean#L624) (proved). Odd `J`: proved for all integer `j`s satisfying the triangle conditions.
+- [34.3.E5](https://dlmf.nist.gov/34.3.E5): [`DLMF.WignerSymbols.wigner3j_zero_zero_zero_of_even`](DLMF/WignerSymbols/ThreeJ.lean#L398) (admitted); [`DLMF.WignerSymbols.wigner3j_zero_zero_zero_of_odd`](DLMF/WignerSymbols/ThreeJ.lean#L624) (proved). Even `J = 2n`: admitted.
+- [34.3.E6](https://dlmf.nist.gov/34.3.E6): [`DLMF.WignerSymbols.wigner3j_stretched`](DLMF/WignerSymbols/ThreeJ.lean#L437) (proved)
+- [34.3.E7](https://dlmf.nist.gov/34.3.E7): [`DLMF.WignerSymbols.wigner3j_top`](DLMF/WignerSymbols/ThreeJ.lean#L469) (proved)
+- [34.3.E8](https://dlmf.nist.gov/34.3.E8): [`DLMF.WignerSymbols.wigner3j_cycle`](DLMF/WignerSymbols/ThreeJ.lean#L504) (proved); [`DLMF.WignerSymbols.wigner3j_cycle₂`](DLMF/WignerSymbols/ThreeJ.lean#L541) (proved)
+- [34.3.E9](https://dlmf.nist.gov/34.3.E9): [`DLMF.WignerSymbols.wigner3j_swap`](DLMF/WignerSymbols/ThreeJ.lean#L547) (proved)
+- [34.3.E10](https://dlmf.nist.gov/34.3.E10): [`DLMF.WignerSymbols.wigner3j_neg`](DLMF/WignerSymbols/ThreeJ.lean#L586) (proved)
+- [34.3.E11](https://dlmf.nist.gov/34.3.E11): [`DLMF.WignerSymbols.wigner3j_regge₁`](DLMF/WignerSymbols/ThreeJ.lean#L635) (proved)
+- [34.3.E12](https://dlmf.nist.gov/34.3.E12): [`DLMF.WignerSymbols.wigner3j_regge₂`](DLMF/WignerSymbols/ThreeJ.lean#L677) (proved)
+- [34.3.E13](https://dlmf.nist.gov/34.3.E13): [`DLMF.WignerSymbols.wigner3j_recursion_half`](DLMF/WignerSymbols/ThreeJ.lean#L768) (proved). Stated for all arguments (both sides vanish outside the admissible ranges); stronger than DLMF.
+- [34.3.E14](https://dlmf.nist.gov/34.3.E14): [`DLMF.WignerSymbols.wigner3j_recursion_m`](DLMF/WignerSymbols/ThreeJ.lean#L924) (admitted). Stated for all arguments; stronger than DLMF.
+- [34.3.E15](https://dlmf.nist.gov/34.3.E15): [`DLMF.WignerSymbols.wigner3j_recursion_j`](DLMF/WignerSymbols/ThreeJ.lean#L935) (admitted). Stated for all arguments; stronger than DLMF.
+- [34.3.E16](https://dlmf.nist.gov/34.3.E16): [`DLMF.WignerSymbols.wigner3j_orthogonality_m`](DLMF/WignerSymbols/ThreeJ.lean#L954) (admitted)
+- [34.3.E17](https://dlmf.nist.gov/34.3.E17): [`DLMF.WignerSymbols.wigner3j_orthogonality_j`](DLMF/WignerSymbols/ThreeJ.lean#L963) (admitted)
+- [34.3.E18](https://dlmf.nist.gov/34.3.E18): [`DLMF.WignerSymbols.wigner3j_sum_sq`](DLMF/WignerSymbols/ThreeJ.lean#L972) (admitted)
 - [34.3.E19](https://dlmf.nist.gov/34.3.E19): [`DLMF.WignerSymbols.legendrePolyP_mul_legendrePolyP`](DLMF/WignerSymbols/ThreeJLegendre.lean#L42) (admitted). Stated for all complex `x` (polynomial identity); stronger than DLMF.
 - [34.3.E20](https://dlmf.nist.gov/34.3.E20): [`DLMF.WignerSymbols.sphericalHarmonic_mul_sphericalHarmonic`](DLMF/WignerSymbols/ThreeJLegendre.lean#L51) (admitted)
 - [34.3.E21](https://dlmf.nist.gov/34.3.E21): [`DLMF.WignerSymbols.integral_legendrePolyP_mul_mul`](DLMF/WignerSymbols/ThreeJLegendre.lean#L62) (admitted)
@@ -197,7 +197,7 @@ declarations:
 
 ## [§34.10 Zeros](https://dlmf.nist.gov/34.10)
 
-- [34.10](https://dlmf.nist.gov/34.10): [`DLMF.WignerSymbols.wigner6j_eq_zero_of_not`](DLMF/WignerSymbols/SixJ.lean#L751) (proved); [`DLMF.WignerSymbols.wigner3j_eq_zero_of_not_isTriad`](DLMF/WignerSymbols/ThreeJ.lean#L191) (proved); [`DLMF.WignerSymbols.wigner3j_eq_zero_of_sum_ne_zero`](DLMF/WignerSymbols/ThreeJ.lean#L198) (proved); [`DLMF.WignerSymbols.wigner3j_one_one_one_zero`](DLMF/WignerSymbols/ThreeJ.lean#L1035) (proved). The vanishing of symbols outside the triangle conditions, and the "nontrivial zero" `(1 1 1; 0 0 0) = 0`.
+- [34.10](https://dlmf.nist.gov/34.10): [`DLMF.WignerSymbols.wigner6j_eq_zero_of_not`](DLMF/WignerSymbols/SixJ.lean#L751) (proved); [`DLMF.WignerSymbols.wigner3j_eq_zero_of_not_isTriad`](DLMF/WignerSymbols/Basic/TriangleConditions.lean#L62) (proved); [`DLMF.WignerSymbols.wigner3j_eq_zero_of_sum_ne_zero`](DLMF/WignerSymbols/Basic/TriangleConditions.lean#L69) (proved); [`DLMF.WignerSymbols.wigner3j_one_one_one_zero`](DLMF/WignerSymbols/ThreeJ.lean#L981) (proved). The vanishing of symbols outside the triangle conditions, and the "nontrivial zero" `(1 1 1; 0 0 0) = 0`.
 
 ## [§34.11 Higher-Order 3nj Symbols](https://dlmf.nist.gov/34.11)
 

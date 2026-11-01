@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.BernoulliEuler.Basic
+public import DLMF.Zeta.Basic.RiemannProperties
 public import DLMF.Constants.Dirichlet
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import Mathlib.Analysis.Analytic.Order
@@ -23,7 +24,7 @@ public import Mathlib.NumberTheory.LSeries.Deriv
 public import Mathlib.NumberTheory.LSeries.Dirichlet
 public import Mathlib.NumberTheory.ZetaValues
 public import Mathlib.RingTheory.Polynomial.Pochhammer
-public import DLMF.AsymptoticApproximations.Integrals.Basic
+public import DLMFMathlib.RingTheory.Binomial
 
 /-!
 # The Riemann zeta function: definition and expansions (DLMF §§25.1–25.2)
@@ -32,23 +33,16 @@ The Riemann zeta function `ζ(s)` of DLMF Chapter 25 is Mathlib's `riemannZeta`,
 of `ℂ` by analytic continuation (via the Hurwitz zeta function), with the junk value
 `riemannZeta 1 = (γ - log (4π))/2` at the pole. The Dirichlet series 25.2.1, the residue at
 `s = 1`, the constant term of the Laurent expansion and the Euler product 25.2.11 are Mathlib
-theorems; their `dlmf_upstream` pointers are in `DLMF.Core.UpstreamElementary`. This file
+theorems; their `dlmf_upstream` pointers are in `DLMF.Core.UpstreamElementary`. The Stieltjes
+constants (25.2.5), the Laurent expansion (25.2.4) and the Dirichlet series of the derivatives
+(25.2.6–25.2.7) are in the foundational module `DLMF.Zeta.Basic.RiemannProperties`. This file
 covers the remaining items of §25.2.
-
-## Main definitions
-
-* `stieltjesSeq`, `stieltjesConstant`: the Stieltjes constants `γₙ` (DLMF 25.2.5).
-* `riemannZetaRegular`: the regular part `ζ(s) - 1/(s-1)` of `ζ` at `s = 1`.
 
 ## Main results
 
 * `riemannZeta_eq_odd_series`: the odd-term series (DLMF 25.2.2).
 * `tendsto_alternating_partial_sums`, `riemannZeta_eq_alternating`: the alternating series
   (DLMF 25.2.3).
-* `tendsto_stieltjesSeq`, `stieltjesConstant_zero`: the limit defining `γₙ` exists, and `γ₀ = γ`.
-* `hasSum_riemannZeta_laurent`: the Laurent expansion at `s = 1` (DLMF 25.2.4).
-* `hasSum_deriv_riemannZeta`, `hasSum_iteratedDeriv_riemannZeta`: the Dirichlet series of the
-  derivatives (DLMF 25.2.6–25.2.7).
 * `riemannZeta_eq_sum_add_integral_fract`, `riemannZeta_eq_eulerMaclaurin`,
   `riemannZeta_eq_eulerMaclaurin_one`: the Euler–Maclaurin representations
   (DLMF 25.2.8–25.2.10).
@@ -60,10 +54,9 @@ covers the remaining items of §25.2.
 sums. Where DLMF divides by `1 - 2^{1-s}`, which vanishes at `s = 1 + 2πik/ln 2`, the statement
 is also given in the multiplied form, valid for every `s ≠ 1` with `Re s > 0`.
 
-`stieltjesConstant n` is a `limUnder` of the defining sequence, with the existence of the limit
-stated separately. In 25.2.8–25.2.10, `x - ⌊x⌋` is `Int.fract x`, the periodic Bernoulli function
+In 25.2.8–25.2.10, `x - ⌊x⌋` is `Int.fract x`, the periodic Bernoulli function
 `B̃ₙ(x) = Bₙ(x - ⌊x⌋)` of §25.1 / §24.2(iii) is the project's `periodicBernoulli`, and the
-generalized binomial coefficient is `AsymptoticApproximations.cbinom`. The Hadamard product runs
+generalized binomial coefficient is `Ring.choose`. The Hadamard product runs
 over the zeros `ρ` with `Re ρ > 0`, counted with multiplicity (`analyticOrderNatAt`).
 
 §25.1 (notation) has no formulas: `γ` is `Real.eulerMascheroniConstant`, `ψ` is
@@ -101,505 +94,6 @@ theorem riemannZeta_eq_odd_series {s : ℂ} (hs : 1 < s.re) :
     simp at h2
   rw [h]
   field_simp
-
-/-- The sequence `∑_{k=1}^{m} (ln k)ⁿ/k - (ln m)^{n+1}/(n+1)` whose limit defines the Stieltjes
-constant `γₙ` (DLMF 25.2.5). -/
-@[dlmf 25.2.E5]
-def stieltjesSeq (n m : ℕ) : ℝ :=
-  ∑ k ∈ Finset.Icc 1 m, Real.log k ^ n / k - Real.log m ^ (n + 1) / (n + 1)
-
-/-- DLMF 25.2.5: the Stieltjes constants `γₙ = lim_{m→∞} (∑_{k=1}^{m} (ln k)ⁿ/k -
-(ln m)^{n+1}/(n+1))`, as the `limUnder` of `stieltjesSeq n`; the limit exists by
-`tendsto_stieltjesSeq`. -/
-@[dlmf 25.2.E5]
-def stieltjesConstant (n : ℕ) : ℝ :=
-  limUnder atTop (stieltjesSeq n)
-
-/-- `(ln x)ⁿ/x` is antitone on `[eⁿ, ∞)`. -/
-private lemma antitoneOn_log_pow_div (n : ℕ) :
-    AntitoneOn (fun x : ℝ => Real.log x ^ n / x) (Ici (Real.exp n)) := by
-  rcases Nat.eq_zero_or_pos n with rfl | hn
-  · intro x hx y hy hxy
-    simp only [pow_zero, Nat.cast_zero, Real.exp_zero, Set.mem_Ici] at *
-    exact one_div_le_one_div_of_le (by linarith) hxy
-  · have hA := Real.log_div_self_rpow_antitoneOn (a := (n : ℝ)⁻¹) (by positivity)
-    rw [inv_inv] at hA
-    intro x hx y hy hxy
-    have hx0 : 0 < x := (Real.exp_pos _).trans_le hx
-    have hy0 : 0 < y := (Real.exp_pos _).trans_le hy
-    have hlogy : 0 ≤ Real.log y := by
-      rw [Set.mem_Ici] at hy
-      have := Real.add_one_le_exp (n : ℝ)
-      exact Real.log_nonneg (by linarith [n.cast_nonneg (α := ℝ)])
-    have e : ∀ z : ℝ, 0 < z → Real.log z ^ n / z = (Real.log z / z ^ (n : ℝ)⁻¹) ^ n := by
-      intro z hz
-      rw [div_pow, Real.rpow_inv_natCast_pow hz.le hn.ne']
-    simp only
-    rw [e x hx0, e y hy0]
-    exact pow_le_pow_left₀ (div_nonneg hlogy (Real.rpow_nonneg hy0.le _)) (hA hx hy hxy) n
-
-/-- `∫_a^b (ln x)ⁿ/x dx = ((ln b)^{n+1} - (ln a)^{n+1})/(n+1)` for `0 < a ≤ b`. -/
-private lemma integral_log_pow_div (n : ℕ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
-    IntervalIntegrable (fun x : ℝ => Real.log x ^ n / x) volume a b ∧
-    ∫ x in a..b, Real.log x ^ n / x =
-      Real.log b ^ (n + 1) / (n + 1) - Real.log a ^ (n + 1) / (n + 1) := by
-  have hpos : ∀ x ∈ uIcc a b, 0 < x := fun x hx => by
-    rw [uIcc_of_le hab] at hx; linarith [hx.1]
-  have hc : ContinuousOn (fun x : ℝ => Real.log x ^ n / x) (uIcc a b) :=
-    ((Real.continuousOn_log.mono fun x hx => (hpos x hx).ne').pow n).div continuousOn_id
-      fun x hx => (hpos x hx).ne'
-  have hi := hc.intervalIntegrable (μ := volume)
-  refine ⟨hi, ?_⟩
-  refine intervalIntegral.integral_eq_sub_of_hasDerivAt
-    (f := fun x : ℝ => Real.log x ^ (n + 1) / (n + 1)) (fun x hx => ?_) hi
-  have h := ((Real.hasDerivAt_log (hpos x hx).ne').pow (n + 1)).div_const ((n : ℝ) + 1)
-  convert h using 1
-  have : (n : ℝ) + 1 ≠ 0 := by positivity
-  push_cast
-  field_simp
-
-/-- One step of `stieltjesSeq`: `a_{m+1} - a_m = f(m+1) - ∫_m^{m+1} f`. -/
-private lemma stieltjesSeq_succ (n : ℕ) {m : ℕ} (hm : 1 ≤ m) :
-    stieltjesSeq n (m + 1) = stieltjesSeq n m + Real.log (m + 1) ^ n / (m + 1) -
-      ∫ x in (m : ℝ)..(m + 1), Real.log x ^ n / x := by
-  rw [(integral_log_pow_div n (by exact_mod_cast hm) (by linarith)).2]
-  simp only [stieltjesSeq]
-  rw [sum_Icc_succ_top (by omega)]
-  push_cast
-  ring
-
-/-- DLMF 25.2.5: the limit defining the Stieltjes constant `γₙ` exists. -/
-@[dlmf 25.2.E5]
-theorem tendsto_stieltjesSeq (n : ℕ) :
-    Tendsto (stieltjesSeq n) atTop (𝓝 (stieltjesConstant n)) := by
-  set M := ⌈Real.exp n⌉₊ + 1 with hM
-  have hM1 : 1 ≤ M := by omega
-  have hMe : Real.exp n ≤ M := by
-    rw [hM]; push_cast; linarith [Nat.le_ceil (Real.exp n)]
-  set f : ℝ → ℝ := fun x => Real.log x ^ n / x with hf
-  -- for `m ≥ M`, `f(m+1) ≤ ∫_m^{m+1} f ≤ f(m)`
-  have hbd : ∀ m : ℕ, M ≤ m → f (m + 1) ≤ ∫ x in (m : ℝ)..(m + 1), f x ∧
-      ∫ x in (m : ℝ)..(m + 1), f x ≤ f m := by
-    intro m hm
-    have hm' : Real.exp n ≤ m := hMe.trans (by exact_mod_cast hm)
-    have hi := (integral_log_pow_div n (a := m) (b := m + 1)
-      (by exact_mod_cast (show 0 < m by omega)) (by linarith)).1
-    have hA := antitoneOn_log_pow_div n
-    have hle : (m : ℝ) ≤ m + 1 := by linarith
-    constructor
-    · have := intervalIntegral.integral_mono_on hle intervalIntegrable_const hi
-        (fun x hx => hA (show Real.exp n ≤ x by linarith [hx.1])
-          (show Real.exp n ≤ (m : ℝ) + 1 by linarith) hx.2)
-      simpa using this
-    · have := intervalIntegral.integral_mono_on hle hi intervalIntegrable_const
-        (fun x hx => hA hm' (show Real.exp n ≤ x by linarith [hx.1]) hx.1)
-      simpa using this
-  set g : ℕ → ℝ := fun j => stieltjesSeq n (j + M) with hg
-  have hstep : ∀ j, g (j + 1) = g j + f ((j + M : ℕ) + 1) -
-      ∫ x in ((j + M : ℕ) : ℝ)..((j + M : ℕ) + 1), f x := by
-    intro j
-    simp only [hg, hf]
-    rw [show j + 1 + M = (j + M) + 1 by ring, stieltjesSeq_succ n (by omega)]
-  have hanti : Antitone g := antitone_nat_of_succ_le fun j => by
-    rw [hstep]; linarith [(hbd (j + M) (by omega)).1]
-  have hfnn : ∀ x : ℝ, 1 ≤ x → 0 ≤ f x := fun x hx =>
-    div_nonneg (pow_nonneg (Real.log_nonneg hx) _) (by linarith)
-  have hlow : ∀ j, g 0 - f M ≤ g j - f ((j + M : ℕ) : ℝ) := by
-    intro j
-    induction j with
-    | zero => simp
-    | succ j ih =>
-      have h1 := (hbd (j + M) (by omega)).2
-      rw [hstep]
-      push_cast at ih h1 ⊢
-      rw [show (j : ℝ) + 1 + M = j + M + 1 by ring]
-      linarith
-  have hbdd : BddBelow (range g) := ⟨g 0 - f M, by
-    rintro _ ⟨j, rfl⟩
-    have := hlow j
-    have := hfnn ((j + M : ℕ) : ℝ) (by exact_mod_cast (show 1 ≤ j + M by omega))
-    linarith⟩
-  have hT := tendsto_atTop_ciInf hanti hbdd
-  have hT' : Tendsto (stieltjesSeq n) atTop (𝓝 (⨅ j, g j)) :=
-    (tendsto_add_atTop_iff_nat M).mp hT
-  rw [stieltjesConstant, hT'.limUnder_eq]
-  exact hT'
-
-/-- The `n = 0` case of DLMF 25.2.5: the sequence `H_m - ln m` tends to Euler's constant. -/
-theorem tendsto_stieltjesSeq_zero :
-    Tendsto (stieltjesSeq 0) atTop (𝓝 Real.eulerMascheroniConstant) := by
-  refine Real.tendsto_harmonic_sub_log.congr fun m => ?_
-  simp [stieltjesSeq, harmonic_eq_sum_Icc, div_eq_mul_inv]
-
-/-- DLMF 25.2.5 (with 25.2.4): `γ₀ = γ`, Euler's constant. -/
-@[dlmf 25.2.E5]
-theorem stieltjesConstant_zero : stieltjesConstant 0 = Real.eulerMascheroniConstant :=
-  tendsto_stieltjesSeq_zero.limUnder_eq
-
-/-- The `k`-fold `logMul` of the constant sequence `1` is `(ln n)^k`. -/
-private lemma logMul_iterate_one (k n : ℕ) :
-    (LSeries.logMul^[k] (1 : ℕ → ℂ)) n = (Real.log n : ℂ) ^ k := by
-  induction k with
-  | zero => simp
-  | succ k ih =>
-    rw [Function.iterate_succ_apply', LSeries.logMul, ih, pow_succ, Complex.natCast_log, mul_comm]
-
-/-- DLMF 25.2.7: `ζ^{(k)}(s) = (-1)^k ∑_{n≥2} (ln n)^k n^{-s}` for `Re s > 1`. The sum is over
-all `n : ℕ`; the terms `n = 0` (`0^{-s} = 0`) and, for `k ≥ 1`, `n = 1` (`ln 1 = 0`) vanish.
-Stronger than DLMF: also `k = 0`. Proved from Mathlib's `LSeries_iteratedDeriv`. -/
-@[dlmf 25.2.E7]
-theorem hasSum_iteratedDeriv_riemannZeta {s : ℂ} (hs : 1 < s.re) (k : ℕ) :
-    HasSum (fun n : ℕ => (-1 : ℂ) ^ k * (Real.log n : ℂ) ^ k * (n : ℂ) ^ (-s))
-      (iteratedDeriv k riemannZeta s) := by
-  have hopen : IsOpen {z : ℂ | 1 < z.re} := isOpen_lt continuous_const continuous_re
-  have heq : riemannZeta =ᶠ[𝓝 s] LSeries 1 := by
-    filter_upwards [hopen.mem_nhds hs] with z hz
-    exact (LSeries_one_eq_riemannZeta hz).symm
-  have habs : LSeries.abscissaOfAbsConv (1 : ℕ → ℂ) < s.re := by
-    rw [LSeries.abscissaOfAbsConv_one]; exact_mod_cast hs
-  rw [(heq.iteratedDeriv k).eq_of_nhds, LSeries_iteratedDeriv k habs]
-  have hsum : LSeriesSummable (LSeries.logMul^[k] (1 : ℕ → ℂ)) s :=
-    LSeriesSummable_of_abscissaOfAbsConv_lt_re
-      (by rw [LSeries.abscissaOfAbsConv_logPowMul]; exact habs)
-  refine (hsum.LSeriesHasSum.mul_left ((-1 : ℂ) ^ k)).congr_fun fun n => ?_
-  rcases eq_or_ne n 0 with rfl | hn
-  · have : (-s) ≠ 0 := by
-      intro h; have := congrArg re h; simp at this; linarith
-    simp [LSeries.term, zero_cpow this]
-  · simp only [LSeries.term, hn, ite_false, logMul_iterate_one, cpow_neg]
-    ring
-
-/-- DLMF 25.2.6: `ζ'(s) = -∑_{n≥2} (ln n) n^{-s}` for `Re s > 1` (the terms `n = 0, 1`
-vanish). -/
-@[dlmf 25.2.E6]
-theorem hasSum_deriv_riemannZeta {s : ℂ} (hs : 1 < s.re) :
-    HasSum (fun n : ℕ => -(Real.log n : ℂ) * (n : ℂ) ^ (-s)) (deriv riemannZeta s) := by
-  have := hasSum_iteratedDeriv_riemannZeta hs 1
-  simp only [iteratedDeriv_one, pow_one] at this
-  exact this.congr_fun fun n => by ring
-
-/-- `g_σ(x) = (ln x)ⁿ x^{-σ}`. -/
-noncomputable def logPowMulRpowNeg (n : ℕ) (σ x : ℝ) : ℝ := Real.log x ^ n * x ^ (-σ)
-
-/-- `c_k(σ) = g_σ(k+1) - ∫_{k+1}^{k+2} g_σ`. -/
-noncomputable def stieltjesIncrement (n : ℕ) (σ : ℝ) (k : ℕ) : ℝ :=
-  logPowMulRpowNeg n σ (k + 1) - ∫ x in ((k : ℝ) + 1)..((k : ℝ) + 2), logPowMulRpowNeg n σ x
-
-/-- `(ln x)^m ≤ 4ⁿ n! x^{1/4}` for `x ≥ 1`, `m ≤ n`. -/
-private lemma log_pow_le_mul_rpow {x : ℝ} (hx : 1 ≤ x) {m n : ℕ} (hmn : m ≤ n) :
-    Real.log x ^ m ≤ 4 ^ n * n ! * x ^ (1 / 4 : ℝ) := by
-  have hl : 0 ≤ Real.log x := Real.log_nonneg hx
-  have h := Real.pow_div_factorial_le_exp (Real.log x / 4) (by positivity) m
-  rw [show Real.exp (Real.log x / 4) = x ^ (1 / 4 : ℝ) by
-    rw [Real.rpow_def_of_pos (by linarith)]; congr 1; ring] at h
-  rw [div_pow, div_div, div_le_iff₀ (by positivity)] at h
-  have h4 : (4 : ℝ) ^ m * m ! ≤ 4 ^ n * n ! := by
-    gcongr
-    · norm_num
-  calc Real.log x ^ m ≤ x ^ (1 / 4 : ℝ) * (4 ^ m * m !) := h
-    _ ≤ x ^ (1 / 4 : ℝ) * (4 ^ n * n !) := by gcongr
-    _ = _ := by ring
-
-/-- The derivative of `g_σ`. -/
-private lemma hasDerivAt_logPowMulRpowNeg (n : ℕ) (σ : ℝ) {x : ℝ} (hx : 0 < x) :
-    HasDerivAt (logPowMulRpowNeg n σ) (n * Real.log x ^ (n - 1) * x⁻¹ * x ^ (-σ) +
-      Real.log x ^ n * (-σ * x ^ (-σ - 1))) x := by
-  have h1 : HasDerivAt (fun y => Real.log y ^ n) (n * Real.log x ^ (n - 1) * x⁻¹) x := by
-    exact (hasDerivAt_pow n (Real.log x)).comp x (Real.hasDerivAt_log hx.ne')
-  have h2 := Real.hasDerivAt_rpow_const (x := x) (p := -σ) (Or.inl hx.ne')
-  exact h1.mul h2
-
-/-- Uniform bound on `c_k(σ)` for `1 ≤ σ ≤ 2`. -/
-private lemma abs_stieltjesIncrement_le (n : ℕ) {σ : ℝ} (hσ1 : 1 ≤ σ) (hσ2 : σ ≤ 2) (k : ℕ) :
-    |stieltjesIncrement n σ k| ≤ (n + 2) * (4 ^ n * n !) * ((k : ℝ) + 1) ^ (-(7 / 4 : ℝ)) := by
-  set a : ℝ := (k : ℝ) + 1 with ha_def
-  have ha : 1 ≤ a := by simp [a]
-  set C : ℝ := (n + 2) * (4 ^ n * n !) * a ^ (-(7 / 4 : ℝ)) with hC
-  have hderiv : ∀ x ∈ Icc a (a + 1), ‖n * Real.log x ^ (n - 1) * x⁻¹ * x ^ (-σ) +
-      Real.log x ^ n * (-σ * x ^ (-σ - 1))‖ ≤ C := by
-    intro x hx
-    have hx1 : 1 ≤ x := ha.trans hx.1
-    have hx0 : 0 < x := by linarith
-    have hl : 0 ≤ Real.log x := Real.log_nonneg hx1
-    have hp : x⁻¹ * x ^ (-σ) = x ^ (-σ - 1) := by
-      rw [Real.rpow_sub hx0, Real.rpow_one]; field_simp
-    have hq : x ^ (1 / 4 : ℝ) * x ^ (-σ - 1) ≤ a ^ (-(7 / 4 : ℝ)) := by
-      rw [← Real.rpow_add hx0]
-      calc x ^ (1 / 4 + (-σ - 1)) ≤ x ^ (-(7 / 4 : ℝ)) :=
-            Real.rpow_le_rpow_of_exponent_le hx1 (by linarith)
-        _ ≤ a ^ (-(7 / 4 : ℝ)) :=
-            Real.rpow_le_rpow_of_nonpos (by linarith) hx.1 (by norm_num)
-    have hpos : 0 ≤ x ^ (-σ - 1) := Real.rpow_nonneg hx0.le _
-    have hb1 := log_pow_le_mul_rpow hx1 (Nat.sub_le n 1)
-    have hb2 := log_pow_le_mul_rpow hx1 (le_refl n)
-    have hK : 0 ≤ (4 : ℝ) ^ n * n ! := by positivity
-    rw [Real.norm_eq_abs]
-    calc |n * Real.log x ^ (n - 1) * x⁻¹ * x ^ (-σ) + Real.log x ^ n * (-σ * x ^ (-σ - 1))|
-        ≤ n * Real.log x ^ (n - 1) * x ^ (-σ - 1) + 2 * (Real.log x ^ n * x ^ (-σ - 1)) := by
-          rw [mul_assoc _ x⁻¹, hp]
-          refine (abs_add_le _ _).trans ?_
-          rw [abs_of_nonneg (by positivity), abs_mul, abs_of_nonneg (by positivity), abs_mul,
-            abs_neg, abs_of_nonneg (by linarith), abs_of_nonneg hpos]
-          nlinarith [mul_nonneg (pow_nonneg hl n) hpos]
-      _ ≤ n * (4 ^ n * n ! * x ^ (1 / 4 : ℝ)) * x ^ (-σ - 1) +
-            2 * ((4 ^ n * n ! * x ^ (1 / 4 : ℝ)) * x ^ (-σ - 1)) := by gcongr
-      _ = (n + 2) * (4 ^ n * n !) * (x ^ (1 / 4 : ℝ) * x ^ (-σ - 1)) := by ring
-      _ ≤ C := by rw [hC]; gcongr
-  have hmvt := norm_image_sub_le_of_norm_deriv_le_segment' (f := logPowMulRpowNeg n σ) (C := C)
-    (fun x hx => (hasDerivAt_logPowMulRpowNeg n σ (by linarith [hx.1])).hasDerivWithinAt)
-    (fun x hx => hderiv x (Ico_subset_Icc_self hx))
-  have hint : IntervalIntegrable (logPowMulRpowNeg n σ) volume a (a + 1) := by
-    refine ContinuousOn.intervalIntegrable fun x hx => ?_
-    rw [Set.uIcc_of_le (by linarith)] at hx
-    exact (hasDerivAt_logPowMulRpowNeg n σ (by linarith [hx.1])).continuousAt.continuousWithinAt
-  have he : stieltjesIncrement n σ k = ∫ x in a..(a + 1), (logPowMulRpowNeg n σ a - logPowMulRpowNeg n σ x) := by
-    rw [intervalIntegral.integral_sub intervalIntegrable_const hint,
-      intervalIntegral.integral_const, stieltjesIncrement]
-    simp only [a, smul_eq_mul]
-    ring_nf
-  rw [he, ← Real.norm_eq_abs]
-  have := intervalIntegral.norm_integral_le_of_norm_le_const (a := a) (b := a + 1)
-    (f := fun x => logPowMulRpowNeg n σ a - logPowMulRpowNeg n σ x) (C := C) (fun x hx => by
-      rw [uIoc_of_le (by linarith)] at hx
-      have h := hmvt x (Ioc_subset_Icc_self hx)
-      rw [norm_sub_rev] at h
-      calc _ ≤ C * (x - a) := h
-        _ ≤ C * 1 :=
-          mul_le_mul_of_nonneg_left (by linarith [hx.2]) (by rw [hC]; positivity)
-        _ = C := mul_one C)
-  rw [show |a + 1 - a| = 1 by norm_num, mul_one] at this
-  exact this
-
-/-- The bound of `abs_stieltjesIncrement_le` is summable. -/
-private lemma summable_stieltjesIncrement_bound (n : ℕ) :
-    Summable fun k : ℕ => (n + 2) * (4 ^ n * n !) * ((k : ℝ) + 1) ^ (-(7 / 4 : ℝ)) := by
-  refine Summable.mul_left _ ?_
-  have h := (summable_nat_add_iff 1).mpr (Real.summable_nat_rpow.mpr (show -(7 / 4 : ℝ) < -1 by
-    norm_num))
-  simpa using h
-
-/-- `σ ↦ c_k(σ)` is continuous. -/
-private lemma continuous_stieltjesIncrement (n : ℕ) (k : ℕ) : Continuous fun σ => stieltjesIncrement n σ k := by
-  have hcont : Continuous fun p : ℝ × ℝ => Real.log (max p.2 1) ^ n * (max p.2 1) ^ (-p.1) := by
-    have hm : Continuous fun p : ℝ × ℝ => max p.2 1 := by fun_prop
-    have hne : ∀ p : ℝ × ℝ, max p.2 1 ≠ 0 := fun p => by positivity
-    exact ((hm.log hne).pow n).mul (hm.rpow (by fun_prop) fun p => Or.inl (hne p))
-  have he : ∀ σ : ℝ, (∫ x in ((k : ℝ) + 1)..((k : ℝ) + 2), logPowMulRpowNeg n σ x) =
-      ∫ x in ((k : ℝ) + 1)..((k : ℝ) + 2), Real.log (max x 1) ^ n * (max x 1) ^ (-σ) := by
-    intro σ
-    refine intervalIntegral.integral_congr fun x hx => ?_
-    rw [Set.uIcc_of_le (by linarith)] at hx
-    have : max x 1 = x := max_eq_left (by linarith [hx.1, (k.cast_nonneg : (0 : ℝ) ≤ k)])
-    simp only [logPowMulRpowNeg, this]
-  simp only [stieltjesIncrement, he]
-  refine Continuous.sub ?_ ?_
-  · simp only [logPowMulRpowNeg]
-    exact continuous_const.mul
-      (continuous_const.rpow continuous_neg fun σ => Or.inl (by positivity))
-  · exact intervalIntegral.continuous_parametric_intervalIntegral_of_continuous'
-      (f := fun σ x => Real.log (max x 1) ^ n * (max x 1) ^ (-σ)) hcont _ _
-
-/-- `c_k(1) = (ln(k+1))ⁿ/(k+1) - ((ln(k+2))^{n+1} - (ln(k+1))^{n+1})/(n+1)`. -/
-private lemma stieltjesIncrement_one (n k : ℕ) : stieltjesIncrement n 1 k = Real.log ((k : ℝ) + 1) ^ n / ((k : ℝ) + 1) -
-    (Real.log ((k : ℝ) + 2) ^ (n + 1) / (n + 1) - Real.log ((k : ℝ) + 1) ^ (n + 1) / (n + 1)) := by
-  have hg : ∀ x : ℝ, logPowMulRpowNeg n 1 x = Real.log x ^ n / x := fun x => by
-    simp [logPowMulRpowNeg, Real.rpow_neg_one, div_eq_mul_inv]
-  simp only [stieltjesIncrement, hg]
-  rw [(integral_log_pow_div n (by positivity) (by linarith)).2]
-
-/-- DLMF 25.2.5 rearranged: `∑_k c_k(1) = γₙ`. -/
-private lemma hasSum_stieltjesIncrement_one (n : ℕ) : HasSum (stieltjesIncrement n 1) (stieltjesConstant n) := by
-  have hs : Summable (stieltjesIncrement n 1) := (summable_stieltjesIncrement_bound n).of_norm_bounded
-    (fun k => abs_stieltjesIncrement_le n le_rfl one_le_two k)
-  rw [hs.hasSum_iff_tendsto_nat]
-  have hpart : ∀ m : ℕ, ∑ k ∈ Finset.range m, stieltjesIncrement n 1 k =
-      stieltjesSeq n (m + 1) - Real.log ((m : ℝ) + 1) ^ n / ((m : ℝ) + 1) := by
-    intro m
-    induction m with
-    | zero => simp [stieltjesSeq]
-    | succ m ih =>
-      rw [Finset.sum_range_succ, ih, stieltjesIncrement_one, stieltjesSeq_succ n (m := m + 1) (by omega),
-        (integral_log_pow_div n (a := ((m + 1 : ℕ) : ℝ)) (b := ((m + 1 : ℕ) : ℝ) + 1)
-          (by positivity) (by linarith)).2]
-      push_cast
-      ring_nf
-  simp_rw [hpart]
-  have h1 : Tendsto (fun m : ℕ => stieltjesSeq n (m + 1)) atTop (𝓝 (stieltjesConstant n)) :=
-    (tendsto_stieltjesSeq n).comp (tendsto_add_atTop_nat 1)
-  have h2 : Tendsto (fun m : ℕ => Real.log ((m : ℝ) + 1) ^ n / ((m : ℝ) + 1)) atTop (𝓝 0) := by
-    have := (Real.tendsto_pow_log_div_mul_add_atTop 1 0 n one_ne_zero).comp
-      ((tendsto_natCast_atTop_atTop (R := ℝ)).atTop_add (tendsto_const_nhds (x := (1 : ℝ))))
-    simpa [Function.comp_def] using this
-  simpa using h1.sub h2
-
-/-- `∫₁^∞ (ln x)ⁿ x^{-σ} dx = n!/(σ-1)^{n+1}` for `σ > 1`. -/
-private lemma integral_logPowMulRpowNeg (n : ℕ) {σ : ℝ} (hσ : 1 < σ) :
-    IntegrableOn (logPowMulRpowNeg n σ) (Ioi 1) ∧
-      ∫ x in Ioi (1 : ℝ), logPowMulRpowNeg n σ x = n ! / (σ - 1) ^ (n + 1) := by
-  have hr : 0 < σ - 1 := by linarith
-  have he : ∀ x : ℝ, Real.exp x • logPowMulRpowNeg n σ (Real.exp x) =
-      x ^ (((n : ℝ) + 1) - 1) * Real.exp (-((σ - 1) * x)) := by
-    intro x
-    rw [smul_eq_mul, logPowMulRpowNeg, Real.log_exp, Real.rpow_def_of_pos (Real.exp_pos x), Real.log_exp,
-      add_sub_cancel_right, Real.rpow_natCast, mul_left_comm, ← Real.exp_add]
-    congr 2; ring
-  have hval := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := (n : ℝ) + 1) (by positivity) hr
-  rw [Real.Gamma_nat_eq_factorial] at hval
-  have hne : (∫ t in Ioi (0 : ℝ), t ^ (((n : ℝ) + 1) - 1) * Real.exp (-((σ - 1) * t))) ≠ 0 := by
-    rw [hval]; positivity
-  have hint := Integrable.of_integral_ne_zero hne
-  have h1 : IntegrableOn (fun x => Real.exp x • logPowMulRpowNeg n σ (Real.exp x)) (Ioi 0) := by
-    simp_rw [he]; exact hint
-  rw [integrableOn_comp_exp_Ioi, Real.exp_zero] at h1
-  refine ⟨h1, ?_⟩
-  have h2 := integral_comp_exp_Ioi (logPowMulRpowNeg n σ) 0
-  rw [Real.exp_zero] at h2
-  rw [← h2]
-  simp_rw [he]
-  rw [hval, Real.div_rpow zero_le_one hr.le, Real.one_rpow,
-    show (n : ℝ) + 1 = ((n + 1 : ℕ) : ℝ) by push_cast; ring, Real.rpow_natCast]
-  ring
-
-/-- For `1 < σ ≤ 2`, `∑_k c_k(σ) = ∑_k (ln k)ⁿ k^{-σ} - n!/(σ-1)^{n+1}`. -/
-private lemma hasSum_stieltjesIncrement (n : ℕ) {σ : ℝ} (hσ1 : 1 < σ) (hσ2 : σ ≤ 2) {S : ℝ}
-    (hS : HasSum (fun k : ℕ => logPowMulRpowNeg n σ k) S) :
-    HasSum (stieltjesIncrement n σ) (S - n ! / (σ - 1) ^ (n + 1)) := by
-  have hs : Summable (stieltjesIncrement n σ) := (summable_stieltjesIncrement_bound n).of_norm_bounded
-    (fun k => abs_stieltjesIncrement_le n hσ1.le hσ2 k)
-  rw [hs.hasSum_iff_tendsto_nat]
-  obtain ⟨hI, hIv⟩ := integral_logPowMulRpowNeg n hσ1
-  have hii : ∀ a b : ℝ, 1 ≤ a → a ≤ b → IntervalIntegrable (logPowMulRpowNeg n σ) volume a b := by
-    intro a b ha hab
-    refine ContinuousOn.intervalIntegrable fun x hx => ?_
-    rw [Set.uIcc_of_le hab] at hx
-    exact (hasDerivAt_logPowMulRpowNeg n σ (by linarith [hx.1])).continuousAt.continuousWithinAt
-  have hpart : ∀ m : ℕ, ∑ k ∈ Finset.range m, stieltjesIncrement n σ k =
-      ∑ k ∈ Finset.range m, logPowMulRpowNeg n σ ((k : ℝ) + 1) -
-        ∫ x in (1 : ℝ)..((m : ℝ) + 1), logPowMulRpowNeg n σ x := by
-    intro m
-    have h := intervalIntegral.sum_integral_adjacent_intervals (f := logPowMulRpowNeg n σ) (μ := volume)
-      (a := fun k : ℕ => (k : ℝ) + 1) (n := m)
-      (fun k _ => hii _ _ (by simp) (by push_cast; linarith))
-    simp only [Nat.cast_zero, zero_add, Nat.cast_add, Nat.cast_one] at h
-    rw [← h, ← Finset.sum_sub_distrib]
-    refine Finset.sum_congr rfl fun k _ => ?_
-    rw [stieltjesIncrement]; congr 2; ring
-  simp_rw [hpart]
-  have hg0 : logPowMulRpowNeg n σ 0 = 0 := by
-    simp [logPowMulRpowNeg, Real.zero_rpow (show -σ ≠ 0 by linarith)]
-  have h1 : Tendsto (fun m : ℕ => ∑ k ∈ Finset.range m, logPowMulRpowNeg n σ ((k : ℝ) + 1)) atTop (𝓝 S) := by
-    have := ((hasSum_nat_add_iff' 1).mpr hS).tendsto_sum_nat
-    simpa [hg0] using this
-  have h2 : Tendsto (fun m : ℕ => ∫ x in (1 : ℝ)..((m : ℝ) + 1), logPowMulRpowNeg n σ x) atTop
-      (𝓝 (n ! / (σ - 1) ^ (n + 1))) := by
-    rw [← hIv]
-    exact (intervalIntegral_tendsto_integral_Ioi 1 hI tendsto_id).comp
-      ((tendsto_natCast_atTop_atTop (R := ℝ)).atTop_add (tendsto_const_nhds (x := (1 : ℝ))))
-  exact h1.sub h2
-
-/-- The regular part `ζ(s) - 1/(s-1)` of `ζ` at `s = 1`, extended by `γ` at `s = 1`. -/
-noncomputable def riemannZetaRegular : ℂ → ℂ :=
-  Function.update (fun s : ℂ => riemannZeta s - 1 / (s - 1)) 1 (Real.eulerMascheroniConstant : ℂ)
-
-/-- The regular part of `ζ` at `1` is entire. -/
-lemma differentiable_riemannZetaRegular : Differentiable ℂ riemannZetaRegular := by
-  rw [← differentiableOn_univ, ← differentiableOn_compl_singleton_and_continuousAt_iff
-    (c := 1) Filter.univ_mem]
-  refine ⟨fun s hs => ?_, ?_⟩
-  · have hs1 : s ≠ 1 := hs.2
-    have hd : DifferentiableAt ℂ (fun s : ℂ => riemannZeta s - 1 / (s - 1)) s :=
-      (differentiableAt_riemannZeta hs1).sub
-        ((differentiableAt_const _).div (differentiableAt_id.sub (differentiableAt_const _))
-          (sub_ne_zero.mpr hs1))
-    refine (hd.congr_of_eventuallyEq ?_).differentiableWithinAt
-    filter_upwards [isOpen_compl_singleton.mem_nhds hs1] with z hz
-    exact Function.update_of_ne hz _ _
-  · rw [riemannZetaRegular, continuousAt_update_same]
-    exact tendsto_riemannZeta_sub_one_div
-
-/-- `ζ^{(n)}(σ) = (-1)ⁿ ∑_k (ln k)ⁿ k^{-σ}` as a real sum, for real `σ > 1`. -/
-private lemma exists_hasSum_iteratedDeriv_riemannZeta_real (n : ℕ) {σ : ℝ} (hσ : 1 < σ) :
-    ∃ S : ℝ, HasSum (fun k : ℕ => logPowMulRpowNeg n σ k) S ∧
-      iteratedDeriv n riemannZeta σ = (-1) ^ n * (S : ℂ) := by
-  have h := hasSum_iteratedDeriv_riemannZeta (s := (σ : ℂ)) (by simpa using hσ) n
-  have hterm : ∀ k : ℕ, (-1 : ℂ) ^ n * (Real.log k : ℂ) ^ n * (k : ℂ) ^ (-(σ : ℂ)) =
-      (-1) ^ n * ((logPowMulRpowNeg n σ k : ℝ) : ℂ) := by
-    intro k
-    rw [logPowMulRpowNeg, ofReal_mul, ofReal_pow, ofReal_cpow (Nat.cast_nonneg k)]
-    push_cast; ring
-  simp_rw [hterm] at h
-  have h' := h.mul_left ((-1 : ℂ) ^ n)
-  have hpm : ((-1 : ℂ) ^ n) * (-1) ^ n = 1 := by rw [← mul_pow]; simp
-  simp_rw [← mul_assoc, hpm, one_mul] at h'
-  have hre : HasSum (fun k : ℕ => logPowMulRpowNeg n σ k) ((-1) ^ n * iteratedDeriv n riemannZeta σ).re := by
-    simpa using Complex.hasSum_re h'
-  refine ⟨_, hre, ?_⟩
-  have := (Complex.ofRealCLM.hasSum hre).unique h'
-  simp only [ofRealCLM_apply] at this
-  rw [this, ← mul_assoc, hpm, one_mul]
-
-/-- The `n`-th derivative of `1/(s-1)`. -/
-private lemma iteratedDeriv_one_div_sub_one (n : ℕ) (s : ℂ) :
-    iteratedDeriv n (fun s : ℂ => 1 / (s - 1)) s = (-1) ^ n * n ! * (s - 1) ^ (-1 - n : ℤ) := by
-  have := congrFun (iteratedDeriv_comp_sub_const (n := n) (f := fun z : ℂ => z⁻¹) (s := 1)) s
-  simp only [one_div]
-  rw [this, iteratedDeriv_eq_iterate, iter_deriv_inv]
-
-/-- The Taylor coefficients of the regular part at `1`: `G^{(n)}(1) = (-1)ⁿ γₙ`. -/
-lemma iteratedDeriv_riemannZetaRegular_one (n : ℕ) :
-    iteratedDeriv n riemannZetaRegular 1 = (-1) ^ n * (stieltjesConstant n : ℂ) := by
-  have hG := differentiable_riemannZetaRegular
-  have hcont : Continuous (iteratedDeriv n riemannZetaRegular) :=
-    (hG.contDiff (n := (n : WithTop ℕ∞))).continuous_iteratedDeriv n le_rfl
-  have hL : Tendsto (fun σ : ℝ => iteratedDeriv n riemannZetaRegular σ) (𝓝[>] 1)
-      (𝓝 (iteratedDeriv n riemannZetaRegular 1)) := by
-    have := (hcont.comp continuous_ofReal).tendsto 1
-    rw [Function.comp_apply, ofReal_one] at this
-    exact this.mono_left nhdsWithin_le_nhds
-  have hT : Tendsto (fun σ : ℝ => ∑' k, stieltjesIncrement n σ k) (𝓝[>] 1)
-      (𝓝 (∑' k, stieltjesIncrement n 1 k)) := by
-    refine tendsto_tsum_of_dominated_convergence (summable_stieltjesIncrement_bound n)
-      (fun k => ((continuous_stieltjesIncrement n k).tendsto 1).mono_left nhdsWithin_le_nhds) ?_
-    filter_upwards [Ioo_mem_nhdsGT (show (1 : ℝ) < 2 by norm_num)] with σ hσ k
-    rw [Real.norm_eq_abs]
-    exact abs_stieltjesIncrement_le n hσ.1.le hσ.2.le k
-  rw [(hasSum_stieltjesIncrement_one n).tsum_eq] at hT
-  have hR : Tendsto (fun σ : ℝ => (-1) ^ n * ((∑' k, stieltjesIncrement n σ k : ℝ) : ℂ)) (𝓝[>] 1)
-      (𝓝 ((-1) ^ n * (stieltjesConstant n : ℂ))) :=
-    ((continuous_ofReal.tendsto _).comp hT).const_mul _
-  refine tendsto_nhds_unique (hL.congr' ?_) hR
-  filter_upwards [Ioo_mem_nhdsGT (show (1 : ℝ) < 2 by norm_num)] with σ hσ
-  obtain ⟨S, hS, hd⟩ := exists_hasSum_iteratedDeriv_riemannZeta_real n hσ.1
-  have hσ1 : (σ : ℂ) ≠ 1 := by
-    intro h; have := congrArg re h; simp at this; linarith [hσ.1]
-  have hev : riemannZetaRegular =ᶠ[𝓝 (σ : ℂ)] fun s => riemannZeta s - 1 / (s - 1) := by
-    filter_upwards [isOpen_compl_singleton.mem_nhds hσ1] with z hz
-    exact Function.update_of_ne hz _ _
-  have hopen : IsOpen ({1}ᶜ : Set ℂ) := isOpen_compl_singleton
-  have hζ : ContDiffAt ℂ n riemannZeta σ :=
-    (DifferentiableOn.contDiffOn (f := riemannZeta) (s := {1}ᶜ)
-      (fun z hz => (differentiableAt_riemannZeta hz).differentiableWithinAt) hopen).contDiffAt
-        (hopen.mem_nhds hσ1)
-  have hinv : ContDiffAt ℂ n (fun s : ℂ => 1 / (s - 1)) σ :=
-    contDiffAt_const.div (contDiffAt_id.sub contDiffAt_const) (sub_ne_zero.mpr hσ1)
-  rw [hev.iteratedDeriv_eq, iteratedDeriv_fun_sub hζ hinv, hd, iteratedDeriv_one_div_sub_one,
-    (hasSum_stieltjesIncrement n hσ.1 hσ.2.le hS).tsum_eq]
-  have hr : (σ : ℂ) - 1 ≠ 0 := sub_ne_zero.mpr hσ1
-  rw [show (-1 - n : ℤ) = -((n + 1 : ℕ) : ℤ) by push_cast; ring, zpow_neg, zpow_natCast]
-  push_cast
-  field_simp
-
-/-- DLMF 25.2.4: the Laurent expansion `ζ(s) = 1/(s-1) + ∑_{n≥0} (-1)ⁿ γₙ (s-1)ⁿ/n!` at the pole
-`s = 1`, valid for every `s ≠ 1` (the regular part is entire). -/
-@[dlmf 25.2.E4]
-theorem hasSum_riemannZeta_laurent {s : ℂ} (hs : s ≠ 1) :
-    HasSum (fun n : ℕ => (-1 : ℂ) ^ n / n ! * stieltjesConstant n * (s - 1) ^ n)
-      (riemannZeta s - 1 / (s - 1)) := by
-  have h := Complex.hasSum_taylorSeries_of_entire differentiable_riemannZetaRegular 1 s
-  rw [riemannZetaRegular, Function.update_of_ne hs] at h
-  refine h.congr_fun fun n => ?_
-  rw [← riemannZetaRegular, iteratedDeriv_riemannZetaRegular_one, smul_eq_mul, smul_eq_mul]
-  ring
 
 /-! ### §25.2(iii) Representations by the Euler–Maclaurin formula -/
 
@@ -893,9 +387,9 @@ private lemma riemannZeta_eq_sum_add_integral_periodicBernoulli_one {s : ℂ} (h
   ring
 
 /-- `binom(z+1, m+1) = binom(z, m) (z+1)/(m+1)`. -/
-private lemma cbinom_add_one_succ (z : ℂ) (m : ℕ) :
-    AsymptoticApproximations.cbinom (z + 1) (m + 1) = AsymptoticApproximations.cbinom z m * (z + 1) / (m + 1) := by
-  rw [AsymptoticApproximations.cbinom, AsymptoticApproximations.cbinom, descPochhammer_succ_left, Polynomial.eval_mul,
+private lemma choose_add_one_succ (z : ℂ) (m : ℕ) :
+    Ring.choose (z + 1) (m + 1) = Ring.choose z m * (z + 1) / (m + 1) := by
+  rw [Ring.choose_eq_descPochhammer_div, Ring.choose_eq_descPochhammer_div, descPochhammer_succ_left, Polynomial.eval_mul,
     Polynomial.eval_comp, Polynomial.eval_X, Polynomial.eval_sub, Polynomial.eval_X,
     Polynomial.eval_one, add_sub_cancel_right, Nat.factorial_succ]
   have h1 : ((m ! : ℕ) : ℂ) ≠ 0 := by exact_mod_cast (Nat.factorial_pos m).ne'
@@ -909,12 +403,12 @@ private lemma periodicBernoulli_natCast (q N : ℕ) :
   rw [periodicBernoulli, Int.fract_natCast, bernoulliFun_eval_zero]
 
 /-- The double integration-by-parts step from `B̃_{2n+1}` to `B̃_{2n+3}`, `Re s > -2n`. -/
-private lemma cbinom_mul_integral_periodicBernoulli_double_step {s : ℂ} {n N : ℕ} (hN : 1 ≤ N) (hs : -(2 * n : ℝ) < s.re) :
-    AsymptoticApproximations.cbinom (s + 2 * n) (2 * n + 1) * ∫ x in Ioi (N : ℝ),
+private lemma choose_mul_integral_periodicBernoulli_double_step {s : ℂ} {n N : ℕ} (hN : 1 ≤ N) (hs : -(2 * n : ℝ) < s.re) :
+    Ring.choose (s + 2 * n) (2 * n + 1) * ∫ x in Ioi (N : ℝ),
         (periodicBernoulli (2 * n + 1) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 1) =
-      -(AsymptoticApproximations.cbinom (s + 2 * n) (2 * n + 1) * ((bernoulli (2 * n + 2) : ℂ) / (2 * n + 2)) *
+      -(Ring.choose (s + 2 * n) (2 * n + 1) * ((bernoulli (2 * n + 2) : ℂ) / (2 * n + 2)) *
           (N : ℂ) ^ (-(s + 2 * n + 1))) +
-        AsymptoticApproximations.cbinom (s + 2 * n + 2) (2 * n + 3) * ∫ x in Ioi (N : ℝ),
+        Ring.choose (s + 2 * n + 2) (2 * n + 3) * ∫ x in Ioi (N : ℝ),
           (periodicBernoulli (2 * n + 3) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 3) := by
   have hN0 : (0 : ℝ) < N := by exact_mod_cast hN
   have h1 := integral_Ioi_periodicBernoulli_div_cpow_recursion (p := 2 * n + 1) (by omega) (w := s + 2 * n + 1)
@@ -930,12 +424,12 @@ private lemma cbinom_mul_integral_periodicBernoulli_double_step {s : ℂ} {n N :
   rw [e1] at h1
   rw [e2] at h2
   push_cast at h1 h2
-  have hb1 : AsymptoticApproximations.cbinom (s + 2 * n + 1) (2 * n + 2) =
-      AsymptoticApproximations.cbinom (s + 2 * n) (2 * n + 1) * (s + 2 * n + 1) / (2 * n + 2) := by
-    rw [cbinom_add_one_succ]; push_cast; ring
-  have hb2 : AsymptoticApproximations.cbinom (s + 2 * n + 2) (2 * n + 3) =
-      AsymptoticApproximations.cbinom (s + 2 * n + 1) (2 * n + 2) * (s + 2 * n + 2) / (2 * n + 3) := by
-    rw [show s + 2 * (n : ℂ) + 2 = s + 2 * n + 1 + 1 by ring, cbinom_add_one_succ]; push_cast; ring
+  have hb1 : Ring.choose (s + 2 * n + 1) (2 * n + 2) =
+      Ring.choose (s + 2 * n) (2 * n + 1) * (s + 2 * n + 1) / (2 * n + 2) := by
+    rw [choose_add_one_succ]; push_cast; ring
+  have hb2 : Ring.choose (s + 2 * n + 2) (2 * n + 3) =
+      Ring.choose (s + 2 * n + 1) (2 * n + 2) * (s + 2 * n + 2) / (2 * n + 3) := by
+    rw [show s + 2 * (n : ℂ) + 2 = s + 2 * n + 1 + 1 by ring, choose_add_one_succ]; push_cast; ring
   have hn2 : (2 * (n : ℂ) + 2) ≠ 0 := by
     have : (0 : ℝ) < 2 * n + 2 := by positivity
     exact_mod_cast this.ne'
@@ -948,7 +442,7 @@ private lemma cbinom_mul_integral_periodicBernoulli_double_step {s : ℂ} {n N :
   set A := ∫ x in Ioi (N : ℝ), (periodicBernoulli (2 * n + 1) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 1)
   set B := ∫ x in Ioi (N : ℝ), (periodicBernoulli (2 * n + 2) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 2)
   set C := ∫ x in Ioi (N : ℝ), (periodicBernoulli (2 * n + 3) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 3)
-  set g := AsymptoticApproximations.cbinom (s + 2 * n) (2 * n + 1)
+  set g := Ring.choose (s + 2 * n) (2 * n + 1)
   have hA : A = (-((bernoulli (2 * n + 2) : ℂ) / (N : ℂ) ^ (s + 2 * n + 1)) +
       (s + 2 * n + 1) * B) / (2 * n + 2) := by
     rw [eq_div_iff hn2, mul_comm]; linear_combination h1
@@ -961,16 +455,16 @@ private lemma cbinom_mul_integral_periodicBernoulli_double_step {s : ℂ} {n N :
 noncomputable def eulerMaclaurinZetaRHS (N n : ℕ) (s : ℂ) : ℂ :=
   ∑ k ∈ Finset.Icc (1 : ℕ) N, 1 / (k : ℂ) ^ s + (N : ℂ) ^ (1 - s) / (s - 1) -
     1 / 2 * (N : ℂ) ^ (-s) +
-    ∑ k ∈ Finset.Icc (1 : ℕ) n, AsymptoticApproximations.cbinom (s + 2 * k - 2) (2 * k - 1) *
+    ∑ k ∈ Finset.Icc (1 : ℕ) n, Ring.choose (s + 2 * k - 2) (2 * k - 1) *
       ((bernoulli (2 * k) : ℂ) / (2 * k)) * (N : ℂ) ^ (1 - s - 2 * k) -
-    AsymptoticApproximations.cbinom (s + 2 * n) (2 * n + 1) *
+    Ring.choose (s + 2 * n) (2 * n + 1) *
       ∫ x in Ioi (N : ℝ), (periodicBernoulli (2 * n + 1) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 1)
 
 /-- Identity under the stated parameter and domain assumptions: `eulerMaclaurinZetaRHS N (n + 1) s =
 eulerMaclaurinZetaRHS N n s`. -/
 private lemma eulerMaclaurinZetaRHS_succ {s : ℂ} {n N : ℕ} (hN : 1 ≤ N) (hs : -(2 * n : ℝ) < s.re) :
     eulerMaclaurinZetaRHS N (n + 1) s = eulerMaclaurinZetaRHS N n s := by
-  have h := cbinom_mul_integral_periodicBernoulli_double_step hN hs
+  have h := choose_mul_integral_periodicBernoulli_double_step hN hs
   unfold eulerMaclaurinZetaRHS
   rw [sum_Icc_succ_top (by omega), show 2 * (n + 1) - 1 = 2 * n + 1 by omega,
     show 2 * (n + 1) = 2 * n + 2 by ring, show 2 * n + 2 + 1 = 2 * n + 3 by ring, h]
@@ -982,10 +476,6 @@ private lemma eulerMaclaurinZetaRHS_succ {s : ℂ} {n N : ℕ} (hN : 1 ≤ N) (h
   rw [e1, e3, e2, e4, e5]
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `AsymptoticApproximations.cbinom z 1 = z`. -/
-theorem cbinom_one (z : ℂ) : AsymptoticApproximations.cbinom z 1 = z := by
-  simp [AsymptoticApproximations.cbinom]
-
 /-- Identity under the stated parameter and domain assumptions: `riemannZeta s = eulerMaclaurinZetaRHS N n
 s`. -/
 private lemma riemannZeta_eq_eulerMaclaurinZetaRHS_of_one_lt_re {s : ℂ} (hs : 1 < s.re) {N : ℕ} (hN : 1 ≤ N) (n : ℕ) :
@@ -993,7 +483,7 @@ private lemma riemannZeta_eq_eulerMaclaurinZetaRHS_of_one_lt_re {s : ℂ} (hs : 
   induction n with
   | zero =>
     rw [riemannZeta_eq_sum_add_integral_periodicBernoulli_one hs hN, eulerMaclaurinZetaRHS]
-    simp [cbinom_one]
+    simp [Ring.choose_one_right]
   | succ n ih =>
     rw [eulerMaclaurinZetaRHS_succ hN (by have : (0 : ℝ) ≤ n := n.cast_nonneg; linarith), ih]
 
@@ -1061,10 +551,12 @@ private lemma differentiableOn_eulerMaclaurinZetaRHS {N : ℕ} (hN : 1 ≤ N) (n
   · exact (differentiableAt_id.neg.const_cpow (Or.inl hN0)).const_mul _
   · refine DifferentiableAt.fun_sum fun k _ => ?_
     refine DifferentiableAt.mul (DifferentiableAt.mul ?_ (differentiableAt_const _)) ?_
-    · exact (((hpoly _) _).comp s ((differentiableAt_id.add_const _).sub_const _)).div_const _
+    · simp_rw [Ring.choose_eq_descPochhammer_div]
+      exact (((hpoly _) _).comp s ((differentiableAt_id.add_const _).sub_const _)).div_const _
     · exact (((differentiableAt_const _).sub differentiableAt_id).sub_const _).const_cpow
         (Or.inl hN0)
-  · exact (((hpoly _) _).comp s (differentiableAt_id.add_const _)).div_const _
+  · simp_rw [Ring.choose_eq_descPochhammer_div]
+    exact (((hpoly _) _).comp s (differentiableAt_id.add_const _)).div_const _
   · have hmem : s ∈ {s : ℂ | 1 < (s + (2 * n + 1)).re} := by
       simp only [mem_ofPred_eq, add_re]; simp; linarith
     have := (hJ s hmem).differentiableAt ((isOpen_lt continuous_const
@@ -1163,7 +655,7 @@ theorem riemannZeta_eq_sum_add_integral_fract {s : ℂ} (hs : 0 < s.re) (hs1 : s
   have h1 := riemannZeta_eq_eulerMaclaurinZetaRHS (n := 1) le_rfl hN (by simp; linarith) hs1
   have h0 : eulerMaclaurinZetaRHS N 1 s = eulerMaclaurinZetaRHS N 0 s := eulerMaclaurinZetaRHS_succ hN (by simpa using hs)
   rw [h0, eulerMaclaurinZetaRHS] at h1
-  simp [cbinom_one] at h1
+  simp at h1
   have hsplit : ∫ x in Ioi (N : ℝ), ((Int.fract x : ℝ) : ℂ) / (x : ℂ) ^ (s + 1) =
       (∫ x in Ioi (N : ℝ), (periodicBernoulli 1 x : ℂ) / (x : ℂ) ^ (s + 1)) +
         1 / 2 * ∫ x in Ioi (N : ℝ), (x : ℂ) ^ (-(s + 1)) := by
@@ -1311,9 +803,9 @@ theorem riemannZeta_eq_eulerMaclaurin {s : ℂ} {n N : ℕ} (hn : 1 ≤ n) (hN :
         (x : ℂ) ^ (s + 2 * n + 1)) (Ioi (N : ℝ)) ∧
       riemannZeta s = ∑ k ∈ Finset.Icc (1 : ℕ) N, 1 / (k : ℂ) ^ s + (N : ℂ) ^ (1 - s) / (s - 1) -
         1 / 2 * (N : ℂ) ^ (-s) +
-        ∑ k ∈ Finset.Icc (1 : ℕ) n, AsymptoticApproximations.cbinom (s + 2 * k - 2) (2 * k - 1) *
+        ∑ k ∈ Finset.Icc (1 : ℕ) n, Ring.choose (s + 2 * k - 2) (2 * k - 1) *
           ((bernoulli (2 * k) : ℂ) / (2 * k)) * (N : ℂ) ^ (1 - s - 2 * k) -
-        AsymptoticApproximations.cbinom (s + 2 * n) (2 * n + 1) *
+        Ring.choose (s + 2 * n) (2 * n + 1) *
           ∫ x in Ioi (N : ℝ), (periodicBernoulli (2 * n + 1) x : ℂ) /
             (x : ℂ) ^ (s + 2 * n + 1) := by
   obtain ⟨D, hD⟩ := exists_abs_periodicBernoulli_le (2 * n + 1)
@@ -1328,9 +820,9 @@ theorem riemannZeta_eq_eulerMaclaurin {s : ℂ} {n N : ℕ} (hn : 1 ≤ n) (hN :
 theorem riemannZeta_eq_eulerMaclaurin_one {s : ℂ} {n : ℕ} (hn : 1 ≤ n)
     (hs : -(2 * n : ℝ) < s.re) (hs1 : s ≠ 1) :
     riemannZeta s = 1 / (s - 1) + 1 / 2 +
-        ∑ k ∈ Finset.Icc (1 : ℕ) n, AsymptoticApproximations.cbinom (s + 2 * k - 2) (2 * k - 1) *
+        ∑ k ∈ Finset.Icc (1 : ℕ) n, Ring.choose (s + 2 * k - 2) (2 * k - 1) *
           ((bernoulli (2 * k) : ℂ) / (2 * k)) -
-        AsymptoticApproximations.cbinom (s + 2 * n) (2 * n + 1) *
+        Ring.choose (s + 2 * n) (2 * n + 1) *
           ∫ x in Ioi (1 : ℝ), (periodicBernoulli (2 * n + 1) x : ℂ) /
             (x : ℂ) ^ (s + 2 * n + 1) := by
   have h := (riemannZeta_eq_eulerMaclaurin hn le_rfl hs hs1).2

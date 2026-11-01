@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Heun.Basic
-public import DLMF.Heun.Equation
+public import DLMF.Heun.Basic.Equation
 public import DLMF.Heun.LocalSolutions
 public import DLMF.Heun.HeunFunctions
 public import DLMF.Heun.Hypergeometric

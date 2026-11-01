@@ -53,6 +53,9 @@ Outside the disk `|z| < min(1, |a|)`, and when `aγ = 0` or `γ ∈ {-1, -2, …
 denominator `R_j` vanishes), the `tsum` and the totalized divisions in `heunLocal` are junk
 values. The biconfluent equation carries the sign as corrected in DLMF 1.0.7, and `heunHypK`,
 `heunHypM` follow the corrections of DLMF 1.1.7.
+
+The basic properties of Heun's equation (singularities, exponents, normal and trigonometric
+forms and the automorphisms of §31.2) are in `DLMF.Heun.Basic.Equation`.
 -/
 
 @[expose] public section

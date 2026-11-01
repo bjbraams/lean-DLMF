@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Combinatorics.Basic.LatticeNumbers
 public import DLMF.Combinatorics.Basic
 public import Mathlib.Combinatorics.Enumerative.Catalan.Basic
 public import Mathlib.Combinatorics.Enumerative.Schroder
@@ -17,25 +18,23 @@ public import DLMF.Combinatorics.Catalan
 
 The Delannoy, Motzkin, Narayana and Schröder numbers of DLMF §26.6, which DLMF defines as numbers
 of lattice paths (§26.6(i)). Mathlib has the large Schröder numbers `Nat.largeSchroder`
-(`1, 2, 6, 22, 90, …`), which are DLMF's `r(n)`; the other three are defined here, and the path
-counts in DLMF's definitions are theorems about `latticePaths`.
+(`1, 2, 6, 22, 90, …`), which are DLMF's `r(n)`; the other three, `delannoy`, `motzkin` and
+`narayana`, are defined with their recurrences in `DLMF.Combinatorics.Basic.LatticeNumbers`, and
+the path counts in DLMF's definitions are theorems about `latticePaths`.
 
 ## Main definitions
 
-* `delannoy`: the Delannoy number `D(m, n)`, by the recurrence 26.6.10.
-* `motzkin`: the Motzkin number `M(n)`, by the recurrence 26.6.11.
-* `narayana`: the Narayana number `N(n, k)`, by the explicit formula 26.6.3, with `N(n, 0) = 0`.
+* `numPeaks`: the number of peaks (a step `(0, 1)` followed by `(1, 0)`) of a path.
 
 ## Main results
 
 * `card_latticePaths_eq_delannoy`, `card_latticePaths_above_eq_motzkin`,
   `card_latticePaths_peaks_eq_narayana`, `card_latticePaths_above_eq_largeSchroder`: the lattice
   path counts (DLMF §26.6(i)).
-* `delannoy_eq_sum`, `motzkin_eq_sum`, `narayana_eq`, `largeSchroder_eq_delannoy_sub`: explicit
-  formulas (DLMF 26.6.1–26.6.4).
+* `delannoy_eq_sum`, `motzkin_eq_sum`, `largeSchroder_eq_delannoy_sub`: explicit
+  formulas (DLMF 26.6.1, 26.6.2, 26.6.4).
 * `hasSum_delannoy`, `hasSum_delannoy_diag`, `hasSum_motzkin`, `hasSum_narayana`,
   `hasSum_largeSchroder`: the generating functions (DLMF 26.6.5–26.6.9).
-* `delannoy_succ_succ`, `motzkin_eq`: the recurrences (DLMF 26.6.10, 26.6.11).
 * `catalan_eq_sum_narayana`, `motzkin_eq_sum_catalan`, `catalan_eq_sum_motzkin`: relations with
   the Catalan numbers (DLMF 26.6.12–26.6.14).
 
@@ -54,98 +53,6 @@ open Finset Filter Topology
 noncomputable section
 
 namespace DLMF.Combinatorics
-
-/-! ### Definitions (§26.6(i)) -/
-
-/-- DLMF §26.6(i): the Delannoy number `D(m, n)`, defined by `D(0, n) = D(m, 0) = 1` and the
-recurrence 26.6.10. -/
-@[dlmf 26.6.i]
-def delannoy : ℕ → ℕ → ℕ
-  | 0, _ => 1
-  | _ + 1, 0 => 1
-  | m + 1, n + 1 => delannoy m (n + 1) + delannoy (m + 1) n + delannoy m n
-
-/-- Identity under the stated parameter and domain assumptions: `delannoy 0 n = 1`. -/
-@[simp] theorem delannoy_zero_left (n : ℕ) : delannoy 0 n = 1 := by cases n <;> simp [delannoy]
-
-/-- Identity under the stated parameter and domain assumptions: `delannoy m 0 = 1`. -/
-@[simp] theorem delannoy_zero_right (m : ℕ) : delannoy m 0 = 1 := by cases m <;> simp [delannoy]
-
-/-- DLMF 26.6.10: `D(m, n) = D(m, n-1) + D(m-1, n) + D(m-1, n-1)`, `m, n ≥ 1` (written with
-`m + 1`, `n + 1`). -/
-@[dlmf 26.6.E10]
-theorem delannoy_succ_succ (m n : ℕ) :
-    delannoy (m + 1) (n + 1) = delannoy (m + 1) n + delannoy m (n + 1) + delannoy m n := by
-  rw [delannoy]; ring
-
-/-- DLMF §26.6(i): the Motzkin number `M(n)`, defined by `M(0) = 1` and the recurrence 26.6.11,
-`M(n+1) = M(n) + ∑_{i=0}^{n-1} M(i) M(n-1-i)`. -/
-@[dlmf 26.6.i]
-def motzkin : ℕ → ℕ
-  | 0 => 1
-  | n + 1 => motzkin n + ∑ i : Fin n,
-      have := i.2
-      have : n - 1 - i < n + 1 := by omega
-      motzkin i * motzkin (n - 1 - i)
-
-/-- DLMF 26.6.11: `M(n) = M(n-1) + ∑_{k=2}^{n} M(k-2) M(n-k)`, `n ≥ 2`. -/
-@[dlmf 26.6.E11]
-theorem motzkin_eq {n : ℕ} (hn : 2 ≤ n) :
-    motzkin n = motzkin (n - 1) + ∑ k ∈ Icc 2 n, motzkin (k - 2) * motzkin (n - k) := by
-  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  rw [motzkin, Nat.add_sub_cancel]
-  congr 1
-  rw [Fin.sum_univ_eq_sum_range (fun i => motzkin i * motzkin (m - 1 - i)) m]
-  rw [show Icc 2 (m + 1) = (range m).map ⟨(· + 2), add_left_injective 2⟩ by
-    ext k; simp only [mem_Icc, Finset.mem_map, Finset.mem_range, Function.Embedding.coeFn_mk]
-    constructor
-    · intro h; exact ⟨k - 2, by omega, by omega⟩
-    · rintro ⟨j, hj, rfl⟩; omega, sum_map]
-  refine sum_congr rfl fun i hi => ?_
-  simp only [Function.Embedding.coeFn_mk, Nat.add_sub_cancel]
-  congr 2; omega
-
-/-- DLMF §26.6(i): the Narayana number `N(n, k) = C(n, k) C(n, k-1) / n` (26.6.3), with
-`N(n, 0) = 0`. The division is exact (`narayana_mul`). -/
-@[dlmf 26.6.i]
-def narayana : ℕ → ℕ → ℕ
-  | _, 0 => 0
-  | n, k + 1 => n.choose (k + 1) * n.choose k / n
-
-/-- The divisibility behind `narayana`: `n ∣ C(n, k+1) C(n, k)`. -/
-private lemma dvd_choose_succ_mul_choose (n k : ℕ) : n ∣ n.choose (k + 1) * n.choose k := by
-  rcases n with _ | a
-  · simp
-  · -- `(a+2) C(a+1,k+1) C(a+1,k) = (a+1) C(a,k) C(a+2,k+1)`
-    have h1 := Nat.add_one_mul_choose_eq a k
-    have h2 := Nat.add_one_mul_choose_eq (a + 1) k
-    have key : (a + 1).choose (k + 1) * (a + 1).choose k * (a + 1 + 1) =
-        (a + 1) * (a.choose k * (a + 1 + 1).choose (k + 1)) := by
-      have : (a + 1).choose (k + 1) * (a + 1).choose k * (a + 1 + 1) * (k + 1) =
-          (a + 1) * (a.choose k * (a + 1 + 1).choose (k + 1)) * (k + 1) := by
-        calc _ = (a + 1).choose (k + 1) * ((a + 1 + 1) * (a + 1).choose k) * (k + 1) := by ring
-          _ = (a + 1).choose (k + 1) * ((a + 1 + 1).choose (k + 1) * (k + 1)) * (k + 1) := by
-            rw [h2]
-          _ = ((a + 1).choose (k + 1) * (k + 1)) * (a + 1 + 1).choose (k + 1) * (k + 1) := by ring
-          _ = _ := by rw [← h1]; ring
-      exact Nat.eq_of_mul_eq_mul_right (by omega) this
-    have hcop : Nat.Coprime (a + 1) (a + 1 + 1) :=
-      Nat.coprime_self_add_right.mpr (Nat.coprime_one_right _)
-    exact hcop.dvd_of_dvd_mul_right ⟨_, key⟩
-
-/-- DLMF 26.6.3: `n N(n, k) = C(n, k) C(n, k-1)` for `k ≥ 1`. -/
-theorem narayana_mul (n k : ℕ) : n * narayana n (k + 1) = n.choose (k + 1) * n.choose k := by
-  rw [narayana, Nat.mul_div_cancel' (dvd_choose_succ_mul_choose n k)]
-
-/-- DLMF 26.6.3: `N(n, k) = (1/n) C(n, k) C(n, k-1)`, `n, k ≥ 1`. -/
-@[dlmf 26.6.E3]
-theorem narayana_eq {n k : ℕ} (hn : 1 ≤ n) (hk : 1 ≤ k) :
-    (narayana n k : ℚ) = (n.choose k * n.choose (k - 1) : ℚ) / n := by
-  obtain ⟨j, rfl⟩ : ∃ j, k = j + 1 := ⟨k - 1, by omega⟩
-  have := narayana_mul n j
-  have hn' : (n : ℚ) ≠ 0 := by exact_mod_cast (by omega : n ≠ 0)
-  rw [Nat.add_sub_cancel, eq_div_iff hn', mul_comm]
-  exact_mod_cast this
 
 /-! ### Lattice path counts (§26.6(i)) -/
 

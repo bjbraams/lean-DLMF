@@ -5,20 +5,19 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Combinatorics.Basic.Permutations
 public import DLMF.Combinatorics.Permutations.EulerianNumbers
 
 /-!
 # Permutation matrices, rook polynomials and hit polynomials (DLMF §26.15)
 
 The matrix notation for permutations and the rook and hit polynomials of a board `B`, a set of
-squares of the `n × n` board.
+squares of the `n × n` board. The rook and hit numbers and polynomials (`IsNonattacking`,
+`rookNumber`, `rookPolynomial` (26.15.3), `hitNumber`, `hitPolynomial` (26.15.6)) are defined in
+`DLMF.Combinatorics.Basic.Permutations`.
 
 ## Main definitions
 
-* `rookNumber`, `rookPolynomial`: `r_j(B)`, the number of placements of `j` nonattacking rooks
-  (`IsNonattacking`), and `R(x, B) = ∑ r_j(B) x^j` (DLMF 26.15.3).
-* `hitNumber`, `hitPolynomial`: `N_k(B)`, the number of permutations with exactly `k` pairs
-  `(j, σ(j))` in `B`, and `N(x, B) = ∑ N_k(B) x^k` (DLMF 26.15.6).
 * `diagonalBoard`: the derangement board.
 * `menageBoard`: the ménage board `{(j, j), (j, j+1)}`, indices modulo `n`.
 
@@ -90,36 +89,6 @@ theorem inversionNumber_eq_sum_permMatrix {n : ℕ} (σ : Perm (Fin n)) :
     Finset.sum_product]
   push_cast
   simp only [Fin.val_fin_lt]
-
-/-- A set of squares of the `n × n` board is nonattacking if no two share a row or a column. -/
-def IsNonattacking {n : ℕ} (C : Finset (Fin n × Fin n)) : Prop :=
-  ∀ x ∈ C, ∀ y ∈ C, x ≠ y → x.1 ≠ y.1 ∧ x.2 ≠ y.2
-
-/-- The nonattacking condition on a finite rook placement is decidable. -/
-instance {n : ℕ} (C : Finset (Fin n × Fin n)) : Decidable (IsNonattacking C) := by
-  unfold IsNonattacking; infer_instance
-
-/-- `r_j(B)`: the number of ways of placing `j` nonattacking rooks on the squares of `B`
-(`r_0(B) = 1`) (DLMF §26.15). -/
-@[dlmf 26.15]
-def rookNumber {n : ℕ} (B : Finset (Fin n × Fin n)) (j : ℕ) : ℕ :=
-  #{C ∈ B.powerset | C.card = j ∧ IsNonattacking C}
-
-/-- (26.15.3): the rook polynomial `R(x, B) = ∑_{j=0}^n r_j(B) x^j`. -/
-@[dlmf 26.15.E3]
-def rookPolynomial {n : ℕ} (B : Finset (Fin n × Fin n)) : ℤ[X] :=
-  ∑ j ∈ range (n + 1), C (rookNumber B j : ℤ) * X ^ j
-
-/-- `N_k(B)`: the number of `σ ∈ 𝔖_n` for which exactly `k` of the pairs `(j, σ(j))` lie in
-`B` (DLMF §26.15). -/
-@[dlmf 26.15]
-def hitNumber {n : ℕ} (B : Finset (Fin n × Fin n)) (k : ℕ) : ℕ :=
-  #{σ : Perm (Fin n) | #{j : Fin n | (j, σ j) ∈ B} = k}
-
-/-- (26.15.6): `N(x, B) = ∑_{k=0}^n N_k(B) x^k`. -/
-@[dlmf 26.15.E6]
-def hitPolynomial {n : ℕ} (B : Finset (Fin n × Fin n)) : ℤ[X] :=
-  ∑ k ∈ range (n + 1), C (hitNumber B k : ℤ) * X ^ k
 
 /-- The diagonal board `{(1,1), …, (n,n)}`. -/
 def diagonalBoard (n : ℕ) : Finset (Fin n × Fin n) := univ.image fun i => (i, i)

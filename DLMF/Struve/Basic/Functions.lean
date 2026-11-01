@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Bessel.Basic
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 
 /-!
 # Struve functions, power series and inhomogeneous equations (DLMF §11.2)

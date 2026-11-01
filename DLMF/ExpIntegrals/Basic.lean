@@ -6,11 +6,14 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.ExpIntegrals.Basic.Functions
+public import DLMF.ExpIntegrals.Basic.Properties
 
 /-!
 # Definitions of exponential and trigonometric integrals
 
 This entry point exposes the complex exponential, sine, cosine and hyperbolic integrals, the
 real `Ei` and logarithmic integral, and the auxiliary functions `f`, `g`, defined in
-`DLMF.ExpIntegrals.Basic.Functions`.
+`DLMF.ExpIntegrals.Basic.Functions`, with their basic properties
+(`DLMF.ExpIntegrals.Basic.Properties`). The series of the real functions are in
+`DLMF.Confluent.Basic.ExponentialIntegralSeries`.
 -/

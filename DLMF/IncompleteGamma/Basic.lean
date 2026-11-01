@@ -6,7 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Statistical.Basic.IncompleteGamma
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
+public import DLMF.IncompleteGamma.Basic.IncompleteBeta
 
 /-!
 # Continued incomplete Gamma functions: definitions
@@ -22,6 +23,9 @@ The incomplete Gamma functions on the logarithmic plane and the continued normal
 * `normIncGammaPOnLog`, `normIncGammaQOnLog`: the continued `P` and `Q` on the logarithmic plane.
 * `normIncGammaPContinued`, `normIncGammaQContinued`: the analytically continued `P` and `Q`,
   DLMF 8.2.4.
+
+The continued incomplete Beta functions `incBeta` and `normIncBetaI` (DLMF §8.17) are defined in
+`DLMF.IncompleteGamma.Basic.IncompleteBeta`.
 -/
 
 @[expose] public noncomputable section

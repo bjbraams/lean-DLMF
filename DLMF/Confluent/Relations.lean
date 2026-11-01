@@ -7,6 +7,7 @@ module
 
 public import DLMF.Confluent.Basic.ExpansionData
 public import DLMF.Confluent.Basic.IncompleteGamma
+public import DLMF.Confluent.Basic.KummerContiguous
 public import DLMF.OrthogonalPolynomials.Basic.Definitions
 
 public import ComplexAnalysis.HalfPlane
@@ -664,16 +665,6 @@ theorem hermitePolyHEval_two_step (k : ℕ) (z : ℂ) :
   rw [show k + 1 + 2 = k + 3 by ring, show k + 1 + 1 = k + 2 by ring] at r2
   push_cast at r1 r2 r3
   linear_combination r1 + 2 * z * r2 + 2 * ((k : ℂ) + 2) * r3
-
-/-- `1/2` is not a nonpositive integer. -/
-theorem half_ne_neg_nat : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -(k : ℂ) := fun k hk => by
-  have := congrArg Complex.re hk
-  simp at this
-  linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
-
-/-- `3/2` is not a nonpositive integer. -/
-theorem three_half_ne_neg_nat : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -(k : ℂ) :=
-  DLMF.Hypergeometric.three_halves_not_neg_nat
 
 /-- 13.6.16 in division-free form: `H_{2n}(z) · n! = (-1)^n (2n)! M(-n, 1/2, z²)`. -/
 theorem hermitePolyHEval_even_mul (n : ℕ) (z : ℂ) :

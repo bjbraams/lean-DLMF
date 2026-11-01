@@ -22,8 +22,8 @@ There are two Hurwitz zeta functions.
   `s` of `∑ (n + a)^{-s}` for real `0 ≤ a ≤ 1`; its parameter lives in `ℝ/ℤ`, so it is periodic
   in `a` and agrees with DLMF's `ζ(s, a)` only for `0 < a ≤ 1` (and `hurwitzZeta 0 = ζ(s, 1)`).
 * DLMF's `ζ(s, a)` (25.11.1) is defined for complex `a ≠ 0, -1, -2, …` with principal powers.
-  The project's definition is `DLMF.Confluent.hurwitzZetaComplex s a`
-  (in `DLMF.Zeta.HurwitzEulerMaclaurin`, also used for DLMF 8.15.2), the limit as `N → ∞` of the
+  The project's definition is `DLMF.Zeta.hurwitzZetaComplex s a`
+  (in `DLMF.Zeta.Basic.Hurwitz`, also used for DLMF 8.15.2), the limit as `N → ∞` of the
   Euler–Maclaurin form `∑_{n<N} (a+n)^{-s} + (a+N)^{1-s}/(s-1) + (a+N)^{-s}/2 + ∑_{k<M} …`
   with `M` large enough for `Re s`. Its bridge to Mathlib for `0 < a ≤ 1` is
   `DLMF.Zeta.hurwitzZetaComplex_eq_hurwitzZeta`.

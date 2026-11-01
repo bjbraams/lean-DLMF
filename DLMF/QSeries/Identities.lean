@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.QSeries.Basic.Series
+public import DLMF.QSeries.Basic.SeriesProperties
 public import DLMF.QSeries.QBinomial
 public import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
 
@@ -14,7 +14,8 @@ public import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
 
 This file proves the Jacobi triple product as a `q`-Pochhammer identity, the product expansion
 of `jacobiTheta`, Ramanujan's `₁ψ₁` summation, Heine's transformation of `₂φ₁` and Jackson's
-`q`-beta integral. Mathlib has Jacobi theta functions but not these identities.
+`q`-beta integral. Mathlib has Jacobi theta functions but not these identities. The unfolding
+lemmas of the integer-index shifted factorial are in `DLMF.QSeries.Basic.SeriesProperties`.
 
 ## Main results
 
@@ -22,8 +23,6 @@ of `jacobiTheta`, Ramanujan's `₁ψ₁` summation, Heine's transformation of `�
   `(q/z;q)_m (z;q)_m = ∑_{|n| ≤ m} [2m, m+n]_q (-1)ⁿ q^{n(n-1)/2} zⁿ`.
 * `jacobi_triple_product`: the Jacobi triple product (DLMF 17.8.1, AAR §10.4).
 * `jacobiTheta_eq_qPochhammer`: the product expansion of `jacobiTheta` (AAR §10.7).
-* `qPochhammerInt_natCast`, `qPochhammerInt_negSucc`: the integer-index shifted factorial
-  (AAR (10.5.2)).
 * `ramanujan_1psi1`: Ramanujan's `₁ψ₁` summation (AAR §10.5).
 * `heine_transformation`: Heine's transformation of `₂φ₁` (DLMF 17.6.6, AAR §10.10).
 * `q_beta_integral`: Jackson's `q`-beta integral (DLMF 5.18.12, AAR §10.8).
@@ -48,43 +47,6 @@ passes to the limit `m → ∞` using `[2m, m+n]_q → 1/(q;q)_∞` and a unifor
 
 open Finset Filter
 open scoped Topology
-
-/-- `2 tri n = n (n - 1)`: the integer division in `tri` is exact. -/
-theorem tri_mul_two (n : ℤ) : tri n * 2 = n * (n - 1) :=
-  Int.ediv_mul_cancel (even_iff_two_dvd.mp (Int.even_mul_pred_self n))
-
-/-- `q^{n(n-1)/2}` as a complex power equals the integer power `q^{tri n}`. -/
-theorem cpow_tri (q : ℂ) (n : ℤ) :
-    q ^ ((n : ℂ) * ((n : ℂ) - 1) / 2) = q ^ tri n := by
-  have h : ((tri n : ℤ) : ℂ) = (n : ℂ) * ((n : ℂ) - 1) / 2 := by
-    rw [eq_div_iff two_ne_zero]; exact_mod_cast tri_mul_two n
-  rw [← h, cpow_intCast]
-
-/-- `(z q^{-m};q)_m q^{C(m+1,2)} = (-z)^m (q/z;q)_m`: reversing a finite `q`-shifted
-factorial. -/
-theorem qPochhammer_shift_down {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (m : ℕ) :
-    qPochhammer (z / q ^ m) q m * q ^ (m + 1).choose 2 = (-z) ^ m * qPochhammer (q / z) q m := by
-  induction m with
-  | zero => simp
-  | succ m ih =>
-    have hc : (m + 2).choose 2 = (m + 1).choose 2 + (m + 1) := by
-      rw [Nat.choose_succ_succ', Nat.choose_one_right, add_comm]
-    have hx : z / q ^ (m + 1) * q = z / q ^ m := by field_simp; ring
-    rw [qPochhammer_succ', hx, hc, qPochhammer_succ, pow_add]
-    have hqm : q ^ (m + 1) ≠ 0 := pow_ne_zero _ hq
-    linear_combination (norm := (field_simp; ring)) ((1 - z / q ^ (m + 1)) * q ^ (m + 1)) * ih
-
-/-- `C(k,2) + C(m+1,2) - m k = tri (k - m)`. -/
-theorem tri_sub_cast (k m : ℕ) :
-    ((k.choose 2 : ℕ) : ℤ) + ((m + 1).choose 2 : ℕ) - (m : ℤ) * k = tri ((k : ℤ) - m) := by
-  apply Int.cast_injective (α := ℚ)
-  have h := tri_mul_two ((k : ℤ) - m)
-  have h' : ((tri ((k : ℤ) - m) : ℤ) : ℚ) = ((k : ℚ) - m) * ((k : ℚ) - m - 1) / 2 := by
-    rw [eq_div_iff two_ne_zero]; exact_mod_cast h
-  push_cast
-  rw [h', Nat.cast_choose_two, Nat.cast_choose_two]
-  push_cast
-  ring
 
 /-- Shifting the summation index by `m` in the finite triple product turns the `q`-binomial
 summand into `(-z)^m` times the triple-product term at `k - m`. -/
@@ -349,15 +311,6 @@ theorem jacobiTheta_eq_qPochhammer {τ : ℂ} (hτ : 0 < τ.im) :
     show ((-1 : ℂ) * -1) = 1 by norm_num, one_zpow, one_mul, ← Complex.exp_add, ht]
   congr 1
   ring
-
-/-- At a natural index `qPochhammerInt` is the ordinary `q`-shifted factorial. -/
-@[simp] theorem qPochhammerInt_natCast (a q : ℂ) (n : ℕ) :
-    qPochhammerInt a q n = qPochhammer a q n := rfl
-
-/-- At the index `-(n+1)`, `(a;q)_{-(n+1)} = 1/(a q^{-(n+1)};q)_{n+1}` (AAR (10.5.2)). -/
-@[simp] theorem qPochhammerInt_negSucc (a q : ℂ) (n : ℕ) :
-    qPochhammerInt a q (Int.negSucc n) =
-      (qPochhammer (a * q ^ (-(n + 1 : ℤ))) q (n + 1))⁻¹ := rfl
 
 /-- Ramanujan's `₁ψ₁` summation (AAR §10.5). -/
 theorem ramanujan_1psi1 {a b q z : ℂ}

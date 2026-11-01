@@ -18,8 +18,6 @@ expansion.
 
 ## Main definitions
 
-* `iteratedErfc`: the repeated integrals `iⁿ erfc(z)` (DLMF 7.18.1, 7.18.2); only indices
-  `n ≥ -1` are meaningful.
 * `gaussianProbabilityHh`: Jeffreys's probability function `Hh_n`.
 
 ## Main results
@@ -41,6 +39,7 @@ expansion.
 
 ## Implementation notes
 
+The repeated integrals `iteratedErfc` are defined in `DLMF.ErrorFunctions.Basic.Functions`.
 The power series uses Mathlib's `Complex.hasSum_taylorSeries_of_entire` and the weighted
 parabolic-cylinder derivative ladder, retaining the zeros of the reciprocal Gamma function in
 the higher coefficients. The asymptotic expansion follows from a rotated Laplace form by
@@ -51,11 +50,6 @@ Watson's lemma.
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat Interval
 namespace DLMF.Confluent
-
-/-- Repeated complementary Gaussian tail; only indices at least -1 have mathematical meaning. -/
-@[dlmf 7.18.E1, dlmf 7.18.E2]
-def iteratedErfc (n : ℤ) (z : ℂ) : ℂ :=
-  if n = -1 then 2/Real.sqrt π*exp (-z^2) else if n < 0 then 0 else 2/Real.sqrt π*(∫ t : ℝ in Ioi 0, (t : ℂ)^n.toNat/(n.toNat.factorial : ℂ)*exp (-(z+t)^2))
 
 /-- Jeffreys probability function Hh_n with its Gaussian-tail normalization. -/
 def gaussianProbabilityHh (n : ℕ) (z : ℂ) : ℂ :=

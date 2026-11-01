@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.SeriesProperties
+public import DLMF.Hypergeometric.Basic.Pochhammer
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
 public import Mathlib.NumberTheory.LSeries.HurwitzZeta
 public import Mathlib.NumberTheory.ZetaValues
@@ -15,12 +15,13 @@ public import Mathlib.Analysis.Calculus.Deriv.Polynomial
 # Euler–Maclaurin continuation of the Hurwitz zeta function
 
 The definition of the complex-parameter Hurwitz zeta function
-`DLMF.Confluent.hurwitzZetaComplex s z` (DLMF §25.11(i)) as the limit of the Euler–Maclaurin
+`DLMF.Zeta.hurwitzZetaComplex s z` (DLMF §25.11(i)) as the limit of the Euler–Maclaurin
 sequence
 `E_N(s, z) = ∑_{n<N} (z+n)^{-s} + (z+N)^{1-s}/(s-1) + (z+N)^{-s}/2
   + ∑_{k<M} B_{2k+2}/(2k+2)! (s)_{2k+1} (z+N)^{-s-2k-1}`,
-together with the existence of the limit and its basic properties. This module does not
-depend on `DLMF.IncompleteGamma.ZerosIntegrals`, so that the latter can import it.
+together with the existence of the limit, holomorphy in `s` and the bridge to Mathlib's
+`hurwitzZeta`. This is the foundational module of the Hurwitz zeta function; the further
+properties of §25.11 are in `DLMF.Zeta.Hurwitz` and `DLMF.Zeta.HurwitzIntegrals`.
 
 ## Main definitions
 
@@ -35,7 +36,8 @@ depend on `DLMF.IncompleteGamma.ZerosIntegrals`, so that the latter can import i
 * `cpow_add_eulerMaclaurinTail_sub_eq_integral`: the one-step Euler–Maclaurin identity for
   `t ↦ (w+t)^{-s}`.
 * `tendsto_eulerMaclaurinSeq_hurwitzZetaComplex`,
-  `tendstoUniformlyOn_eulerMaclaurinSeq_hurwitzZetaComplex`: the limit exists for every `s ≠ 1` and every `z`, locally uniformly.
+  `tendstoUniformlyOn_eulerMaclaurinSeq_hurwitzZetaComplex`: the limit exists for every `s ≠ 1`
+  and every `z`, locally uniformly.
 * `hurwitzZetaComplex_eq_limUnder_eulerMaclaurinSeq`: the limit is the same for every
   admissible number `M` of correction terms (`Re s > -2M`).
 * `differentiableAt_hurwitzZetaComplex_of_add_ne_zero`: holomorphy in `s ≠ 1` for
@@ -124,7 +126,8 @@ theorem add_ofReal_mem_slitPlane {w : ℂ} (hw : 0 < w.re) {t : ℝ} (ht : 0 ≤
 /-- The derivative family of `t ↦ (w+t)^{-s}`. -/
 def cpowDerivFamily (s w : ℂ) (j : ℕ) (t : ℝ) : ℂ := (-1) ^ j * poch s j * (w + t) ^ (-s - j)
 
-/-- At `t`, the function `(cpowDerivFamily s w j)` has derivative `(cpowDerivFamily s w (j + 1) t)`. -/
+/-- At `t`, the function `(cpowDerivFamily s w j)` has derivative `(cpowDerivFamily s w (j + 1)
+t)`. -/
 theorem hasDerivAt_cpowDerivFamily {s w : ℂ} (hw : 0 < w.re) (j : ℕ) {t : ℝ} (ht : 0 ≤ t) :
     HasDerivAt (cpowDerivFamily s w j) (cpowDerivFamily s w (j + 1) t) t := by
   have h := (hasDerivAt_add_ofReal_cpow (c := -s - j) (add_ofReal_mem_slitPlane hw ht)).const_mul
@@ -207,7 +210,8 @@ theorem cpow_add_eulerMaclaurinTail_sub_eq_integral {s w : ℂ} (hs : s ≠ 1) (
       rw [bernoulliFun_endpoints_eq_of_ne_one (by omega), hb0]
     simp [hb, hb0]
   simp only [hodd, heven, add_zero] at EM
-  have hR : ∫ x in (0 : ℝ)..1, cpowDerivFamily s w (2 * M + 1) x * (bernoulliFun (2 * M + 1) x : ℂ) =
+  have hR : ∫ x in (0 : ℝ)..1, cpowDerivFamily s w (2 * M + 1) x *
+      (bernoulliFun (2 * M + 1) x : ℂ) =
       (-1) ^ (2 * M + 1) * poch s (2 * M + 1) * ∫ t in (0 : ℝ)..1,
         (w + t) ^ (-s - (2 * M + 1 : ℕ)) * (bernoulliFun (2 * M + 1) t : ℂ) := by
     rw [← intervalIntegral.integral_const_mul]
@@ -226,7 +230,8 @@ theorem cpow_add_eulerMaclaurinTail_sub_eq_integral {s w : ℂ} (hs : s ≠ 1) (
   linear_combination (-1 : ℂ) * EM - (poch s (2 * M + 1) / ((2 * M + 1)! : ℕ) * I) * hm
 
 /-- Bound for a principal power on a right half-plane with nonpositive real exponent. -/
-private lemma norm_cpow_le_of_re_nonpos {x u : ℂ} {c : ℝ} (hc : 0 < c) (hx : c ≤ x.re) (hu : u.re ≤ 0) :
+private lemma norm_cpow_le_of_re_nonpos {x u : ℂ} {c : ℝ} (hc : 0 < c) (hx : c ≤ x.re)
+    (hu : u.re ≤ 0) :
     ‖x ^ u‖ ≤ c ^ u.re * Real.exp (π * |u.im|) := by
   refine (norm_cpow_le _ _).trans ?_
   rw [div_eq_mul_inv, ← Real.exp_neg]
@@ -241,7 +246,8 @@ private lemma norm_cpow_le_of_re_nonpos {x u : ℂ} {c : ℝ} (hc : 0 < c) (hx :
 /-- **Bound for the Euler–Maclaurin step**: there is `C` with
 `‖w^{-s} + F(w+1) - F(w)‖ ≤ C ‖(s)_{2M+1}‖ (Re w)^{-(Re s + 2M + 1)} e^{π |Im s|}`
 for `Re w > 0`, `Re s + 2M + 1 ≥ 0`, `s ≠ 1`. -/
-private lemma exists_norm_cpow_add_eulerMaclaurinTail_sub_le (M : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ s w : ℂ, s ≠ 1 → 0 < w.re →
+private lemma exists_norm_cpow_add_eulerMaclaurinTail_sub_le
+    (M : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ s w : ℂ, s ≠ 1 → 0 < w.re →
     0 ≤ s.re + (2 * M + 1) →
     ‖w ^ (-s) + eulerMaclaurinTail M s (w + 1) - eulerMaclaurinTail M s w‖ ≤
       C * ‖poch s (2 * M + 1)‖ * w.re ^ (-(s.re + (2 * M + 1))) * Real.exp (π * |s.im|) := by
@@ -250,7 +256,8 @@ private lemma exists_norm_cpow_add_eulerMaclaurinTail_sub_le (M : ℕ) : ∃ C :
       (continuous_bernoulliFun (2 * M + 1)).continuousOn
   have hB0 : 0 ≤ B := (norm_nonneg _).trans (hB 0 ⟨le_rfl, zero_le_one⟩)
   refine ⟨B / ((2 * M + 1 : ℕ)! : ℝ), by positivity, fun s w hs hw hsM => ?_⟩
-  rw [cpow_add_eulerMaclaurinTail_sub_eq_integral hs hw M, norm_mul, norm_neg, norm_div, Complex.norm_natCast]
+  rw [cpow_add_eulerMaclaurinTail_sub_eq_integral hs hw M, norm_mul, norm_neg, norm_div,
+      Complex.norm_natCast]
   have hI : ‖∫ t in (0 : ℝ)..1, (w + t) ^ (-s - (2 * M + 1 : ℕ)) *
       (bernoulliFun (2 * M + 1) t : ℂ)‖ ≤
       (w.re ^ (-(s.re + (2 * M + 1))) * Real.exp (π * |s.im|)) * B := by
@@ -282,11 +289,13 @@ def eulerMaclaurinSeq (M : ℕ) (s z : ℂ) (N : ℕ) : ℂ :=
 def eulerMaclaurinIncrement (M : ℕ) (s w : ℂ) : ℂ :=
   w ^ (-s) + eulerMaclaurinTail M s (w + 1) - eulerMaclaurinTail M s w
 
-/-- Formula under the stated hypotheses: `eulerMaclaurinSeq M s z (N₀ + N) = eulerMaclaurinSeq M s z N₀ + ∑ n ∈
+/-- Formula under the stated hypotheses: `eulerMaclaurinSeq M s z (N₀ + N) = eulerMaclaurinSeq M
+s z N₀ + ∑ n ∈
 Finset.range N, eulerMaclaurinIncrement M s (z + (N₀ + n : ℕ))`. -/
 theorem eulerMaclaurinSeq_add (M : ℕ) (s z : ℂ) (N₀ N : ℕ) :
     eulerMaclaurinSeq M s z (N₀ + N) =
-      eulerMaclaurinSeq M s z N₀ + ∑ n ∈ Finset.range N, eulerMaclaurinIncrement M s (z + (N₀ + n : ℕ)) := by
+      eulerMaclaurinSeq M s z N₀ + ∑ n ∈ Finset.range N, eulerMaclaurinIncrement M s
+          (z + (N₀ + n : ℕ)) := by
   induction N with
   | zero => simp
   | succ N ih =>
@@ -309,7 +318,8 @@ private lemma norm_poch_le_add_pow {s : ℂ} {R : ℝ} (hR : 0 ≤ R) (hs : ‖s
 
 /-- A summable majorant for the Euler–Maclaurin increments on a bounded set of `(s, z)` with
 `Re s ≥ σ > -2M` and `s ≠ 1`. -/
-theorem exists_summable_bound_eulerMaclaurinIncrement {M : ℕ} {K : Set (ℂ × ℂ)} {R σ : ℝ} (hR : 0 ≤ R)
+theorem exists_summable_bound_eulerMaclaurinIncrement {M : ℕ} {K : Set (ℂ × ℂ)} {R σ : ℝ}
+    (hR : 0 ≤ R)
     (hσ : 0 < σ + 2 * M) (hK : ∀ q ∈ K, ‖q.1‖ ≤ R ∧ ‖q.2‖ ≤ R ∧ σ ≤ q.1.re ∧ q.1 ≠ 1) :
     ∃ u : ℕ → ℝ, Summable u ∧ (∀ n, 0 ≤ u n) ∧
       ∀ n : ℕ, ∀ q ∈ K, ‖eulerMaclaurinIncrement M q.1 (q.2 + (⌈R⌉₊ + 1 + n : ℕ))‖ ≤ u n := by
@@ -369,7 +379,8 @@ private lemma tendstoUniformlyOn_eulerMaclaurinSeq {M : ℕ} {K : Set (ℂ × �
   exact hN q hq
 
 /-- Pointwise form of `tendstoUniformlyOn_eulerMaclaurinSeq`. -/
-private lemma tendsto_eulerMaclaurinSeq_shift {M : ℕ} {s z : ℂ} (hs : s ≠ 1) (hM : 0 < s.re + 2 * M) :
+private lemma tendsto_eulerMaclaurinSeq_shift {M : ℕ} {s z : ℂ} (hs : s ≠ 1)
+    (hM : 0 < s.re + 2 * M) :
     Tendsto (fun N => eulerMaclaurinSeq M s z (⌈max ‖s‖ ‖z‖⌉₊ + 1 + N)) atTop
       (𝓝 (eulerMaclaurinSeq M s z (⌈max ‖s‖ ‖z‖⌉₊ + 1) +
         ∑' n : ℕ, eulerMaclaurinIncrement M s (z + (⌈max ‖s‖ ‖z‖⌉₊ + 1 + n : ℕ)))) := by
@@ -384,7 +395,8 @@ private lemma tendsto_eulerMaclaurinSeq_shift {M : ℕ} {s z : ℂ} (hs : s ≠ 
   exact h2
 
 /-- **Existence of the Euler–Maclaurin limit** with any admissible number `M` of corrections. -/
-private lemma tendsto_eulerMaclaurinSeq_limUnder {M : ℕ} {s z : ℂ} (hs : s ≠ 1) (hM : 0 < s.re + 2 * M) :
+private lemma tendsto_eulerMaclaurinSeq_limUnder {M : ℕ} {s z : ℂ} (hs : s ≠ 1)
+    (hM : 0 < s.re + 2 * M) :
     Tendsto (eulerMaclaurinSeq M s z) atTop (𝓝 (limUnder atTop (eulerMaclaurinSeq M s z))) := by
   have h := tendsto_eulerMaclaurinSeq_shift (z := z) hs hM
   simp_rw [add_comm (⌈max ‖s‖ ‖z‖⌉₊ + 1)] at h
@@ -422,7 +434,8 @@ theorem eulerMaclaurinSeq_succ_left (M : ℕ) (s z : ℂ) (N : ℕ) :
   ring
 
 /-- The Euler–Maclaurin limit does not depend on the admissible `M`. -/
-private lemma limUnder_eulerMaclaurinSeq_eq {M₁ M₂ : ℕ} {s z : ℂ} (hs : s ≠ 1) (h₁ : 0 < s.re + 2 * M₁)
+private lemma limUnder_eulerMaclaurinSeq_eq {M₁ M₂ : ℕ} {s z : ℂ} (hs : s ≠ 1)
+    (h₁ : 0 < s.re + 2 * M₁)
     (h₂ : 0 < s.re + 2 * M₂) :
     limUnder atTop (eulerMaclaurinSeq M₁ s z) = limUnder atTop (eulerMaclaurinSeq M₂ s z) := by
   wlog h : M₁ ≤ M₂ generalizing M₁ M₂
@@ -441,32 +454,26 @@ private lemma limUnder_eulerMaclaurinSeq_eq {M₁ M₂ : ℕ} {s z : ℂ} (hs : 
     simp_rw [← eulerMaclaurinSeq_succ_left] at hT2
     rw [← add_assoc, hT2.limUnder_eq]
 
-end DLMF.Zeta
-
-namespace DLMF.Confluent
-
-open DLMF.Hypergeometric in
-/-- Complex-argument Hurwitz zeta by Euler–Maclaurin continuation; used for 8.15.2 and in
-Chapter 25. (Moved here from `DLMF.IncompleteGamma.ZerosIntegrals` on 2026-10-26 so that the
-continuation results of this module can refer to it directly.) -/
+/-- The Hurwitz zeta function `ζ(s, z)` for complex `s` and `z` (DLMF §25.11(i)), by
+Euler–Maclaurin continuation: the limit as `N → ∞` of
+`∑_{n<N} (z+n)^{-s} + (z+N)^{1-s}/(s-1) + (z+N)^{-s}/2
+  + ∑_{k<M} B_{2k+2}/(2k+2)! (s)_{2k+1} (z+N)^{-s-2k-1}` with `M = ⌈(1 - Re s)/2⌉₊ + 1`,
+using principal powers. The limit exists for every `s ≠ 1`
+(`tendsto_eulerMaclaurinSeq_hurwitzZetaComplex`); at `s = 1` the value is junk (`limUnder`).
+For `0 < z ≤ 1` it agrees with Mathlib's `hurwitzZeta` (`hurwitzZetaComplex_eq_hurwitzZeta`). -/
 def hurwitzZetaComplex (s z : ℂ) : ℂ :=
   let M := ⌈(1-s.re)/2⌉₊+1; limUnder atTop (fun N : ℕ => (∑ n ∈ Finset.range N, (z+n)^(-s)) +
     (z+N)^(1-s)/(s-1)+(z+N)^(-s)/2+∑ k ∈ Finset.range M,
       (bernoulli (2*k+2) : ℂ)/(2*k+2).factorial*poch s (2*k+1)*(z+N)^(-s-(2*k+1)))
 
-end DLMF.Confluent
-
-namespace DLMF.Zeta
-
-open DLMF.Hypergeometric (poch poch_succ poch_zero)
-
 /-- The project's `hurwitzZetaComplex` is the Euler–Maclaurin limit for any admissible `M`. -/
 theorem hurwitzZetaComplex_eq_limUnder_eulerMaclaurinSeq {M : ℕ} {s z : ℂ} (hs : s ≠ 1)
     (hM : 0 < s.re + 2 * M) :
-    DLMF.Confluent.hurwitzZetaComplex s z = limUnder atTop (eulerMaclaurinSeq M s z) := by
-  have hdef : DLMF.Confluent.hurwitzZetaComplex s z =
+    DLMF.Zeta.hurwitzZetaComplex s z = limUnder atTop (eulerMaclaurinSeq M s z) := by
+  have hdef : DLMF.Zeta.hurwitzZetaComplex s z =
       limUnder atTop (eulerMaclaurinSeq (⌈(1 - s.re) / 2⌉₊ + 1) s z) := by
-    unfold DLMF.Confluent.hurwitzZetaComplex eulerMaclaurinSeq eulerMaclaurinTail eulerMaclaurinCoeff
+    unfold DLMF.Zeta.hurwitzZetaComplex eulerMaclaurinSeq eulerMaclaurinTail
+        eulerMaclaurinCoeff
     simp only []
     congr 1; funext N; ring
   rw [hdef]
@@ -475,17 +482,19 @@ theorem hurwitzZetaComplex_eq_limUnder_eulerMaclaurinSeq {M : ℕ} {s z : ℂ} (
   push_cast; linarith
 
 /-- **Existence of the defining limit of `hurwitzZetaComplex`** for `s ≠ 1`, any `z`. -/
-theorem tendsto_eulerMaclaurinSeq_hurwitzZetaComplex {M : ℕ} {s z : ℂ} (hs : s ≠ 1) (hM : 0 < s.re + 2 * M) :
-    Tendsto (eulerMaclaurinSeq M s z) atTop (𝓝 (DLMF.Confluent.hurwitzZetaComplex s z)) := by
+theorem tendsto_eulerMaclaurinSeq_hurwitzZetaComplex {M : ℕ} {s z : ℂ} (hs : s ≠ 1)
+    (hM : 0 < s.re + 2 * M) :
+    Tendsto (eulerMaclaurinSeq M s z) atTop (𝓝 (DLMF.Zeta.hurwitzZetaComplex s z)) := by
   rw [hurwitzZetaComplex_eq_limUnder_eulerMaclaurinSeq hs hM]
   exact tendsto_eulerMaclaurinSeq_limUnder hs hM
 
 /-- **Uniform convergence to `hurwitzZetaComplex`** on bounded sets with `Re s ≥ σ > -2M`,
 `s ≠ 1`. -/
-theorem tendstoUniformlyOn_eulerMaclaurinSeq_hurwitzZetaComplex {M : ℕ} {K : Set (ℂ × ℂ)} {R σ : ℝ} (hR : 0 ≤ R)
+theorem tendstoUniformlyOn_eulerMaclaurinSeq_hurwitzZetaComplex {M : ℕ} {K : Set (ℂ × ℂ)} {R σ : ℝ}
+    (hR : 0 ≤ R)
     (hσ : 0 < σ + 2 * M) (hK : ∀ q ∈ K, ‖q.1‖ ≤ R ∧ ‖q.2‖ ≤ R ∧ σ ≤ q.1.re ∧ q.1 ≠ 1) :
     TendstoUniformlyOn (fun N (q : ℂ × ℂ) => eulerMaclaurinSeq M q.1 q.2 (⌈R⌉₊ + 1 + N))
-      (fun q => DLMF.Confluent.hurwitzZetaComplex q.1 q.2) atTop K := by
+      (fun q => DLMF.Zeta.hurwitzZetaComplex q.1 q.2) atTop K := by
   have hU := tendstoUniformlyOn_eulerMaclaurinSeq hR hσ hK
   refine hU.congr_right fun q hq => ?_
   obtain ⟨-, -, hσq, hq1⟩ := hK q hq
@@ -519,7 +528,7 @@ private lemma differentiableAt_eulerMaclaurinSeq_exponent (M : ℕ) {s z : ℂ} 
 /-- **Holomorphy of `ζ(s, z)` in `s ≠ 1`** for `z ≠ 0, -1, -2, …`. -/
 theorem differentiableAt_hurwitzZetaComplex_of_add_ne_zero {s₀ z : ℂ} (hs₀ : s₀ ≠ 1)
     (hz : ∀ n : ℕ, z + n ≠ 0) :
-    DifferentiableAt ℂ (fun s => DLMF.Confluent.hurwitzZetaComplex s z) s₀ := by
+    DifferentiableAt ℂ (fun s => DLMF.Zeta.hurwitzZetaComplex s z) s₀ := by
   have hd : 0 < ‖s₀ - 1‖ := norm_pos_iff.mpr (sub_ne_zero.mpr hs₀)
   set r : ℝ := min (1 / 2) (‖s₀ - 1‖ / 2)
   have hr : 0 < r := lt_min (by norm_num) (by linarith)
@@ -548,7 +557,8 @@ theorem differentiableAt_hurwitzZetaComplex_of_add_ne_zero {s₀ z : ℂ} (hs₀
     · rintro rfl
       have : ‖s₀ - 1‖ = ‖1 - s₀‖ := norm_sub_rev _ _
       linarith
-  have hU := (tendstoUniformlyOn_eulerMaclaurinSeq_hurwitzZetaComplex hR hσ hK).comp (fun s : ℂ => (s, z))
+  have hU := (tendstoUniformlyOn_eulerMaclaurinSeq_hurwitzZetaComplex hR hσ hK).comp
+      (fun s : ℂ => (s, z))
   have hpre : (fun s : ℂ => (s, z)) ⁻¹' (Metric.closedBall s₀ r ×ˢ ({z} : Set ℂ)) =
       Metric.closedBall s₀ r := by
     ext s; simp
@@ -567,7 +577,8 @@ private lemma tendsto_eulerMaclaurinSeq_of_hasSum (M : ℕ) {s z L : ℂ} (hs : 
     (h : HasSum (fun n : ℕ => (z + n) ^ (-s)) L) :
     Tendsto (eulerMaclaurinSeq M s z) atTop (𝓝 L) := by
   have h1 : Tendsto (fun N : ℕ => (z + N) ^ (1 - s) / (s - 1)) atTop (𝓝 0) := by
-    simpa using (tendsto_add_natCast_cpow_atTop z (w := 1 - s) (by simp; linarith)).div_const (s - 1)
+    simpa using (tendsto_add_natCast_cpow_atTop z (w := 1 - s) (by simp; linarith)).div_const
+        (s - 1)
   have h2 : Tendsto (fun N : ℕ => (z + N) ^ (-s) / 2) atTop (𝓝 0) := by
     simpa using (tendsto_add_natCast_cpow_atTop z (w := -s) (by simp; linarith)).div_const 2
   have h3 : Tendsto (fun N : ℕ => ∑ k ∈ Finset.range M,
@@ -583,12 +594,12 @@ private lemma tendsto_eulerMaclaurinSeq_of_hasSum (M : ℕ) {s z L : ℂ} (hs : 
 /-- **Bridge to Mathlib's Hurwitz zeta function** for real `0 < x ≤ 1` and `s ≠ 1`
 (a proved form of `DLMF.Confluent.hurwitzZetaComplex_mathlib`). -/
 theorem hurwitzZetaComplex_eq_hurwitzZeta {x : ℝ} (hx : 0 < x) (hx1 : x ≤ 1) {s : ℂ} (hs : s ≠ 1) :
-    DLMF.Confluent.hurwitzZetaComplex s x = HurwitzZeta.hurwitzZeta (x : UnitAddCircle) s := by
+    DLMF.Zeta.hurwitzZetaComplex s x = HurwitzZeta.hurwitzZeta (x : UnitAddCircle) s := by
   have hU : IsOpen ({1}ᶜ : Set ℂ) := isOpen_compl_singleton
   have hx' : ∀ n : ℕ, (x : ℂ) + n ≠ 0 := fun n h => by
     have := congrArg Complex.re h
     simp at this; linarith [(n.cast_nonneg : (0 : ℝ) ≤ n)]
-  have hf' : DifferentiableOn ℂ (fun t => DLMF.Confluent.hurwitzZetaComplex t x) {1}ᶜ :=
+  have hf' : DifferentiableOn ℂ (fun t => DLMF.Zeta.hurwitzZetaComplex t x) {1}ᶜ :=
     fun t ht => (differentiableAt_hurwitzZetaComplex_of_add_ne_zero ht hx').differentiableWithinAt
   have hg' : DifferentiableOn ℂ (HurwitzZeta.hurwitzZeta (x : UnitAddCircle)) {1}ᶜ :=
     fun t ht => (HurwitzZeta.differentiableAt_hurwitzZeta _ ht).differentiableWithinAt

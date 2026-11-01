@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.NumberTheory.Basic.GeneratingFunctions
 public import DLMF.NumberTheory.Functions
 public import DLMF.NumberTheory.HeckeOperators
 public import DLMF.Partitions
@@ -26,18 +27,13 @@ congruences, and Ramanujan's `τ` function (DLMF §27.14).
 ## Main definitions
 
 * `partitionPowerSeries`: the partition generating function as a formal power series.
-* `eulerReciprocal`: Euler's reciprocal function `f(x) = ∏_{m≥1} (1 - xᵐ)` (DLMF 27.14.2).
 * `rademacherA`: the sums `A_k(n)` of DLMF 27.14.10.
-* `discriminantDLMF`: the discriminant `Δ(τ) = (2π)¹² η(τ)²⁴` (DLMF 27.14.16).
-* `ramanujanTau`: Ramanujan's `τ(n)` (DLMF 27.14.18).
 * `LehmerConjecture`: Lehmer's conjecture `τ(n) ≠ 0`, as a proposition.
 
 ## Main results
 
 * `partitionFunction_eq_card`, `hasSum_partitionFunction`: `p(n)` counts partitions
   (DLMF 27.14.1) and has the generating function `1/f(x)` (DLMF 27.14.3).
-* `eulerReciprocal_eq_qPochhammerInf`, `hasProd_eulerReciprocal`: `f(x) = (x; x)_∞`, and
-  convergence of the product for `|x| < 1`.
 * `eulerReciprocal_pentagonal`, `pentagonal_pm`: Euler's pentagonal number theorem
   (DLMF 27.14.4–27.14.5).
 * `partitionFunction_recursion`, `partitionFunction_sigma_recursion`: the recursions
@@ -49,7 +45,6 @@ congruences, and Ramanujan's `τ` function (DLMF §27.14).
 * `hasSum_partitionFunction_five`, `exists_partition_congruence`,
   `partitionFunction_mod_thirteen`: Ramanujan's identity DLMF 27.14.15 and the partition
   congruences of DLMF §27.14(v).
-* `discriminantDLMF_eq`, `discriminantDLMF_transform`: DLMF 27.14.16 and 27.14.17.
 * `hasSum_ramanujanTau`, `isMultiplicativeFn_ramanujanTau`, `ramanujanTau_mul`,
   `ramanujanTau_modEq`: the generating function of `τ`, its multiplicativity, the Hecke
   relation DLMF 27.14.19 and the congruence DLMF 27.14.20.
@@ -60,6 +55,10 @@ congruences, and Ramanujan's `τ` function (DLMF §27.14).
 (27.14.1) and `p_k(n)` is `Combinatorics.partitionCountAtMostParts k n`. Euler's reciprocal
 function `f(x) = ∏_{m≥1} (1 - xᵐ)` (27.14.2) is `eulerReciprocal x`; it equals `(x; x)_∞`
 (`DLMF.QSeries.qPochhammerInf x x`) for every `x` and Mathlib's `eulerFunction x` for `|x| < 1`.
+The definitions `eulerReciprocal`, `discriminantDLMF` and `ramanujanTau`, with the bridges
+`hasProd_eulerReciprocal`, `discriminantDLMF_eq` and the transformation law 27.14.17
+(`discriminantDLMF_transform`), are in the foundational module
+`DLMF.NumberTheory.Basic.GeneratingFunctions`.
 The pentagonal numbers `ω(±k) = (3k² ∓ k)/2` (27.14.5) are Mathlib's `pentagonal (±k)`.
 
 The Dedekind sum `s(h, k)` (27.14.11) is `DLMF.Weierstrass.dedekindSum h k` (DLMF 23.18.7, the
@@ -395,25 +394,6 @@ theorem partitionFunction_five : partitionFunction 5 = 7 := by
 
 /-! ### §27.14(ii) Generating functions and recursions -/
 
-/-- DLMF 27.14.2: Euler's reciprocal function `f(x) = ∏_{m≥1} (1 - xᵐ)`, `|x| < 1`
-(a totalized `tprod`). -/
-@[dlmf 27.14.E2]
-def eulerReciprocal (x : ℂ) : ℂ := ∏' m : ℕ, (1 - x ^ (m + 1))
-
-/-- DLMF 27.14.2: `f(x) = (x; x)_∞`. -/
-@[dlmf 27.14.E2]
-theorem eulerReciprocal_eq_qPochhammerInf (x : ℂ) :
-    eulerReciprocal x = DLMF.QSeries.qPochhammerInf x x := by
-  simp only [eulerReciprocal, DLMF.QSeries.qPochhammerInf, pow_succ']
-
-/-- DLMF 27.14.2: for `|x| < 1` the product converges to Mathlib's `eulerFunction x`. -/
-@[dlmf 27.14.E2]
-theorem hasProd_eulerReciprocal {x : ℂ} (hx : ‖x‖ < 1) :
-    HasProd (fun m : ℕ ↦ 1 - x ^ (m + 1)) (eulerReciprocal x) ∧
-      eulerReciprocal x = eulerFunction x := by
-  have h := hasProd_eulerFunction hx
-  exact ⟨by rw [eulerReciprocal, h.tprod_eq]; exact h, h.tprod_eq⟩
-
 /-- DLMF 27.14.3: `1/f(x) = ∑_{n≥0} p(n) xⁿ`, `|x| < 1`. -/
 @[dlmf 27.14.E3]
 theorem hasSum_partitionFunction {x : ℂ} (hx : ‖x‖ < 1) :
@@ -583,34 +563,6 @@ theorem partitionFunction_mod_thirteen (n : ℕ) :
   sorry
 
 /-! ### §27.14(vi) Ramanujan's tau function -/
-
-/-- DLMF 27.14.16: the discriminant `Δ(τ) = (2π)¹² η(τ)²⁴`, `ℑτ > 0`. -/
-@[dlmf 27.14.E16]
-def discriminantDLMF (τ : ℂ) : ℂ := (2 * π) ^ 12 * η τ ^ 24
-
-/-- DLMF 27.14.16: `Δ_DLMF = (2π)¹² Δ_Mathlib`. -/
-@[dlmf 27.14.E16]
-theorem discriminantDLMF_eq (τ : ℍ) :
-    discriminantDLMF τ = (2 * π) ^ 12 * ModularForm.discriminant τ := rfl
-
-/-- DLMF 27.14.17: `Δ((aτ + b)/(cτ + d)) = (cτ + d)¹² Δ(τ)` for all `𝒜 ∈ SL(2, ℤ)`
-(stronger than DLMF, which assumes `c > 0`). -/
-@[dlmf 27.14.E17]
-theorem discriminantDLMF_transform (A : SL(2, ℤ)) (τ : ℍ) :
-    discriminantDLMF (A • τ : ℍ) = ((A 1 0 : ℂ) * τ + A 1 1) ^ 12 * discriminantDLMF τ := by
-  have h := SlashInvariantForm.slash_action_eqn' CuspForm.discriminant (Γ := 𝒮ℒ)
-    (γ := Matrix.SpecialLinearGroup.mapGL ℝ A) (MonoidHom.mem_range.mpr ⟨A, rfl⟩) τ
-  simp only [CuspForm.coe_discriminant] at h
-  have h' : ModularForm.discriminant (A • τ : ℍ) =
-      ((A 1 0 : ℂ) * τ + A 1 1) ^ 12 * ModularForm.discriminant τ := by
-    convert h using 2 <;> rfl
-  rw [discriminantDLMF_eq, discriminantDLMF_eq, h']
-  ring
-
-/-- DLMF 27.14.18: Ramanujan's `τ(n)`, the `n`th coefficient of `x ∏_{m≥1} (1 - xᵐ)²⁴`. -/
-@[dlmf 27.14.E18]
-def ramanujanTau (n : ℕ) : ℤ :=
-  PowerSeries.coeff n (PowerSeries.X * PowerSeries.pentagonalSeries ℤ ^ 24)
 
 /-- DLMF 27.14.18: `x ∏_{n≥1} (1 - xⁿ)²⁴ = ∑_{n≥1} τ(n) xⁿ`, `|x| < 1`. -/
 @[dlmf 27.14.E18]

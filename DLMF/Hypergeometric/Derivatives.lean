@@ -27,7 +27,8 @@ public import DLMFMathlib.Analysis.Calculus.DifferentialOperators
 
 ## Implementation notes
 
-15.5.1 and 15.5.11 are in `DLMF.Hypergeometric.DiffEq` and `DLMF.Hypergeometric.Contiguous`;
+15.5.1 and the symmetry `ordinaryHypergeometric_symm` are in
+`DLMF.Hypergeometric.Basic.GaussEquation`; 15.5.11 is in `DLMF.Hypergeometric.Contiguous`;
 15.5.16_5 is a parameter-swapped instance of `contiguous_shift_b`. 15.5.20 is
 `ordinaryHypergeometric_mul_one_sub_mul_deriv_eq`; its second equality follows by swapping
 `a, b`. Shifted denominator parameters are kept away from nonpositive integers. The factors
@@ -42,12 +43,6 @@ open scoped Real Topology ContDiff
 noncomputable section
 
 namespace DLMF.Hypergeometric
-
-/-- `₂F₁(a, b; c; z)` is symmetric in the numerator parameters `a` and `b`. -/
-theorem ordinaryHypergeometric_symm (a b c : ℂ) : (₂F₁ a b c : ℂ → ℂ) = ₂F₁ b a c := by
-  funext z
-  unfold ordinaryHypergeometric
-  rw [ordinaryHypergeometricSeries_symm]
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (₂F₁ a b c) z =
 poch a n * poch b n / poch c n * ₂F₁ (a + n) (b + n) (c + n) z`. -/

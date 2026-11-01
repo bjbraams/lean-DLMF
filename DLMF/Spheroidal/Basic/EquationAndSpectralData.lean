@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Bessel.Basic
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 
 /-!
 # Spheroidal wave functions: definitions (DLMF §§30.2–30.4, 30.6, 30.8, 30.11, 30.12)

@@ -529,8 +529,8 @@ theorem riemannZeta_eq_integral_exp_add_one_sq {s : ℂ} (hs : 0 < s.re) (hs1 : 
 
 open DLMF.BernoulliEuler in
 /-- `binom(s+2, 3) = (s+2)(s+1)s/6`. -/
-private lemma cbinom_add_two_three (s : ℂ) : AsymptoticApproximations.cbinom (s + 2) 3 = (s + 2) * (s + 1) * s / 6 := by
-  simp only [AsymptoticApproximations.cbinom, descPochhammer_succ_right, descPochhammer_zero, Polynomial.eval_mul,
+private lemma choose_add_two_three (s : ℂ) : Ring.choose (s + 2) 3 = (s + 2) * (s + 1) * s / 6 := by
+  simp only [Ring.choose_eq_descPochhammer_div, descPochhammer_succ_right, descPochhammer_zero, Polynomial.eval_mul,
     Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_natCast, Polynomial.eval_one,
     Polynomial.eval_ofNat, Nat.factorial, Nat.cast_ofNat]
   push_cast
@@ -542,7 +542,7 @@ private lemma riemannZeta_eq_integral_periodicBernoulli_two {s : ℂ} (hs : -1 <
     riemannZeta s = 1 / 2 + 1 / (s - 1) + s / 12 - s * (s + 1) / 2 *
       ∫ x in Ioi (1 : ℝ), (periodicBernoulli 2 x : ℂ) / (x : ℂ) ^ (s + 2) := by
   have h := riemannZeta_eq_eulerMaclaurinZetaRHS (n := 1) (N := 1) le_rfl le_rfl (by simp; linarith) hs1
-  simp [eulerMaclaurinZetaRHS, cbinom_one] at h
+  simp [eulerMaclaurinZetaRHS, Ring.choose_one_right] at h
   have hr := integral_Ioi_periodicBernoulli_div_cpow_recursion (p := 2) (by norm_num) (w := s + 2) (by simp; linarith)
     (a := 1) one_pos
   have hB3 : periodicBernoulli 3 1 = 0 := by
@@ -550,7 +550,7 @@ private lemma riemannZeta_eq_integral_periodicBernoulli_two {s : ℂ} (hs : -1 <
       ⟨1, rfl⟩ (by norm_num)]
   rw [hB3] at hr
   simp only [ofReal_zero, ofReal_one, one_cpow, div_one, neg_zero, zero_add] at hr
-  rw [h, cbinom_add_two_three]
+  rw [h, choose_add_two_three]
   push_cast at hr
   have e : (2 : ℂ) + 1 = 3 := by norm_num
   rw [e] at hr

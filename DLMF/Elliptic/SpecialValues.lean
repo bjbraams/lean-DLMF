@@ -10,15 +10,15 @@ public import DLMF.Hypergeometric.Elementary
 public import DLMF.Elliptic.Jacobi
 
 /-!
-# The algebraic form of `F`, `arcsn`, and special values
+# The algebraic form of `F` and special values
 
-This file proves the algebraic form of the incomplete elliptic integral of the first kind,
-defines Jacobi's inverse function `arcsn`, and evaluates `K` and `E` at special parameters, the
-lemniscate integral and the perimeter of an ellipse (Duverney Ch. 5).
+This file proves the algebraic form of the incomplete elliptic integral of the first kind and
+evaluates `K` and `E` at special parameters, the lemniscate integral and the perimeter of an
+ellipse (Duverney Ch. 5). Jacobi's inverse function `arcsn` is in
+`DLMF.Elliptic.Basic.Jacobi`.
 
 ## Main definitions
 
-* `Real.jacobiArcsnm`: Jacobi's inverse function `arcsn(x|m) = F(arcsin x|m)` (DLMF 22.15.4).
 * `ellipsePerimeter`: the perimeter of the ellipse `(a sin θ, b cos θ)`.
 
 ## Main results
@@ -26,8 +26,6 @@ lemniscate integral and the perimeter of an ellipse (Duverney Ch. 5).
 * `Real.integral_recip_sqrt_eq_incEllIntFm`: `∫₀ˣ dt/√((1-t²)(1-mt²)) = F(arcsin x|m)` for
   `0 ≤ x ≤ 1` (Duverney Thm 5.9).
 * `Real.compEllIntKm_eq_integral_algebraic`: `K(m) = ∫₀¹ dt/√((1-t²)(1-mt²))` (DLMF 19.2.8).
-* `Real.jacobiSnm_jacobiArcsnm`, `Real.jacobiArcsnm_jacobiSnm`, `Real.hasDerivAt_jacobiArcsnm`:
-  `arcsn` inverts `sn` (DLMF 22.15.1), with `arcsn' = ((1-x²)(1-mx²))^{-1/2}`.
 * `Real.compEllIntKm_one_half`: `K(1/2) = Γ(1/4)²/(4√π)` (Duverney (5.38)).
 * `Gamma_one_fourth_sq_mul_agm`: Gauss's constant, `Γ(1/4)² M(1, 1/√2) = 2π^{3/2}`.
 * `Real.compEllIntEm_one_half`: `E(1/2) = π^{3/2}/Γ(1/4)² + Γ(1/4)²/(8√π)` (Duverney Ex. 5.9).
@@ -100,41 +98,6 @@ theorem Real.compEllIntKm_eq_integral_algebraic {m : ℝ} (hm : m < 1) :
     Real.compEllIntKm m = ∫ t in (0 : ℝ)..1, 1 / Real.sqrt ((1 - t ^ 2) * (1 - m * t ^ 2)) := by
   rw [Real.integral_recip_sqrt_eq_incEllIntFm hm zero_le_one le_rfl, arcsin_one,
       Real.incEllIntFm_pi_div_two]
-
-/-- Jacobi's inverse function `arcsn(x|m) = F(arcsin x|m)` (Duverney (5.56)). -/
-@[dlmf 22.15.E4]
-def Real.jacobiArcsnm (x m : ℝ) : ℝ := Real.incEllIntFm (arcsin x) m
-
-/-- `sn(arcsn x) = x` for `|x| ≤ 1`. -/
-@[dlmf 22.15.E1]
-theorem Real.jacobiSnm_jacobiArcsnm {m : ℝ} (hm : m < 1) {x : ℝ} (hx : -1 ≤ x) (hx1 : x ≤ 1) :
-    Real.jacobiSnm (Real.jacobiArcsnm x m) m = x := by
-  rw [Real.jacobiSnm, Real.jacobiArcsnm, Real.jacobiAmm_incEllIntFm hm, sin_arcsin hx hx1]
-
-/-- `arcsn(sn u) = u` for `|u| ≤ K`. -/
-theorem Real.jacobiArcsnm_jacobiSnm {m : ℝ} (hm : m < 1) {u : ℝ} (hu : |u| ≤ Real.compEllIntKm m) :
-    Real.jacobiArcsnm (Real.jacobiSnm u m) m = u := by
-  have hmono : StrictMono fun u => Real.jacobiAmm u m := by
-    simp only [Real.jacobiAmm, hm, ↓reduceDIte]; exact (Real.incEllIntFmOrderIso hm).symm.strictMono
-  have h1 : Real.jacobiAmm u m ≤ π / 2 := by
-    rw [← Real.jacobiAmm_compEllIntKm hm]; exact hmono.monotone (le_of_abs_le hu)
-  have h2 : -(π / 2) ≤ Real.jacobiAmm u m := by
-    rw [← Real.jacobiAmm_compEllIntKm hm, ← Real.jacobiAmm_neg hm]
-    exact hmono.monotone (neg_le_of_abs_le hu)
-  rw [Real.jacobiArcsnm, Real.jacobiSnm, arcsin_sin h2 h1, Real.incEllIntFm_jacobiAmm hm]
-
-/-- `d arcsn/dx = ((1-x²)(1-mx²))^{-1/2}` for `|x| < 1` (Duverney (5.57)). -/
-theorem Real.hasDerivAt_jacobiArcsnm {m : ℝ} (hm : m < 1) {x : ℝ} (hx : -1 < x) (hx1 : x < 1) :
-    HasDerivAt (fun x => Real.jacobiArcsnm x m)
-      (1 / Real.sqrt ((1 - x ^ 2) * (1 - m * x ^ 2))) x := by
-  have ha := hasDerivAt_arcsin hx.ne' hx1.ne
-  have h := (Real.hasDerivAt_incEllIntFm hm (arcsin x)).comp x ha
-  refine h.congr_deriv ?_
-  have hp : 0 < 1 - m * x ^ 2 := by
-    have := one_sub_mul_sin_sq_pos hm (arcsin x); rwa [sin_arcsin hx.le hx1.le] at this
-  have hq : 0 < 1 - x ^ 2 := by nlinarith
-  rw [sin_arcsin hx.le hx1.le, rpow_neg hp.le, ← Real.sqrt_eq_rpow, Real.sqrt_mul hq.le]
-  field_simp
 
 /-- `K(1/2) = Γ(1/4)²/(4√π)` (Duverney (5.38)), from Gauss's second
 summation theorem and the reflection formula. -/

@@ -5,7 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Basic
+public import DLMF.Mathieu.Basic.EquationAndSolutions
+public import DLMF.Mathieu.Basic.Functions
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import DLMFMathlib.Analysis.ODE.EntireLinear
 public import DLMFMathlib.Analysis.ODE.ParamHolomorphic
@@ -46,6 +47,9 @@ equation with the appropriate characteristic values.
 * `exists_isMathieuSolution`: existence for arbitrary initial data (DLMF §28.2(ii)).
 * `mathieuWI_spec`, `mathieuWII_spec`, `isMathieuSolution_mathieuWI`,
   `isMathieuSolution_mathieuWII`: the basic solutions `w_I`, `w_II` (DLMF 28.2.5).
+* `mathieuWI_apply_zero`, `deriv_mathieuWI_apply_zero`, `mathieuWII_apply_zero`,
+  `deriv_mathieuWII_apply_zero`, `differentiable_mathieuWI`, `differentiable_mathieuWII`: the
+  initial values and entireness of `w_I`, `w_II`.
 * `IsMathieuSolution.eq_combination`: every solution is `w(0) w_I + w'(0) w_II`.
 * `isMathieuSolution_mathieuCe`, `isMathieuSolution_mathieuSe`: `ce_n` and `se_n` solve the
   equation with `a = a_n(q)` and `a = b_n(q)`.
@@ -148,6 +152,30 @@ theorem isMathieuSolution_mathieuWI (a q : ℂ) : IsMathieuSolution a q (mathieu
 /-- `w_II(z; a, q)` solves Mathieu's equation (DLMF 28.2.5). -/
 theorem isMathieuSolution_mathieuWII (a q : ℂ) : IsMathieuSolution a q (mathieuWII a q) :=
   (mathieuWII_spec a q).1
+
+/-- `w_I(0; a, q) = 1` (DLMF 28.2.5). -/
+theorem mathieuWI_apply_zero (a q : ℂ) : mathieuWI a q 0 = 1 :=
+  (mathieuWI_spec a q).2.1
+
+/-- `w_I'(0; a, q) = 0` (DLMF 28.2.5). -/
+theorem deriv_mathieuWI_apply_zero (a q : ℂ) : deriv (mathieuWI a q) 0 = 0 :=
+  (mathieuWI_spec a q).2.2
+
+/-- `w_II(0; a, q) = 0` (DLMF 28.2.5). -/
+theorem mathieuWII_apply_zero (a q : ℂ) : mathieuWII a q 0 = 0 :=
+  (mathieuWII_spec a q).2.1
+
+/-- `w_II'(0; a, q) = 1` (DLMF 28.2.5). -/
+theorem deriv_mathieuWII_apply_zero (a q : ℂ) : deriv (mathieuWII a q) 0 = 1 :=
+  (mathieuWII_spec a q).2.2
+
+/-- `w_I(·; a, q)` is entire. -/
+theorem differentiable_mathieuWI (a q : ℂ) : Differentiable ℂ (mathieuWI a q) :=
+  (isMathieuSolution_mathieuWI a q).differentiable
+
+/-- `w_II(·; a, q)` is entire. -/
+theorem differentiable_mathieuWII (a q : ℂ) : Differentiable ℂ (mathieuWII a q) :=
+  (isMathieuSolution_mathieuWII a q).differentiable
 
 /-- Every solution is the combination `w(z₀)… ` of the basic solutions:
 `w = w(0) w_I + w'(0) w_II` (DLMF §28.2(ii), fundamental pair). -/

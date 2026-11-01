@@ -62,7 +62,6 @@ noncomputable section
 
 namespace DLMF.Zeta
 
-open DLMF.Confluent (hurwitzZetaComplex)
 
 open DLMF.Hypergeometric (poch)
 

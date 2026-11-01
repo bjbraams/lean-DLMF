@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.NumberTheory.LSeries.RiemannZeta
+public import DLMF.Zeta.Basic.RiemannProperties
 
 /-!
 # Reflection formulas for the Riemann zeta function (DLMF §25.4)
@@ -13,19 +13,14 @@ public import Mathlib.NumberTheory.LSeries.RiemannZeta
 The functional equation 25.4.1 is Mathlib's `riemannZeta_one_sub`, and 25.4.3 in the
 normalization `Λ(s) = π^{-s/2} Γ(s/2) ζ(s)` is `completedRiemannZeta_one_sub` (pointers in
 `DLMF.Core.UpstreamElementary`). This file covers the rest of DLMF §25.4: the functional equation
-solved for `ζ(s)`, Riemann's `ξ`-function and the derivative reflection formulas.
-
-## Main definitions
-
-* `riemannXi`: Riemann's `ξ`-function (DLMF 25.4.4).
-* `reflectionConst`: the constant `c = -ln(2π) - πi/2` (DLMF 25.4.6).
+solved for `ζ(s)` and the derivative reflection formulas. Riemann's `ξ`-function
+`riemannXi` (DLMF 25.4.4) and the constant `reflectionConst` (DLMF 25.4.6) are defined in
+`DLMF.Zeta.Basic.Riemann`; the basic properties of `ξ` (it is entire, the product formula 25.4.4
+and the symmetry 25.4.3) are in `DLMF.Zeta.Basic.RiemannProperties`.
 
 ## Main results
 
 * `riemannZeta_eq_reflection`: `ζ(s) = 2 (2π)^{s-1} sin(πs/2) Γ(1-s) ζ(1-s)` (DLMF 25.4.2).
-* `differentiable_riemannXi`: `ξ` is entire.
-* `riemannXi_eq`: the printed product formula 25.4.4 wherever every factor is defined.
-* `riemannXi_one_sub`: `ξ(s) = ξ(1-s)` for all `s` (DLMF 25.4.3).
 * `iteratedDeriv_riemannZeta_one_sub`: the derivative reflection formula (DLMF 25.4.5).
 
 ## Implementation notes
@@ -63,54 +58,6 @@ theorem riemannZeta_eq_reflection {s : ℂ} (hs0 : s ≠ 0) (hs : ∀ n : ℕ, s
   rw [h, show -(1 - s) = s - 1 by ring,
     show π * (1 - s) / 2 = π / 2 - π * s / 2 by ring, cos_pi_div_two_sub]
   ring
-
-/-- DLMF 25.4.4: Riemann's `ξ`-function `ξ(s) = ½ s(s-1) Γ(s/2) π^{-s/2} ζ(s)`, defined as the
-entire function `½ s(s-1) Λ₀(s) + ½`, where `Λ₀ = completedRiemannZeta₀` is Mathlib's entire
-completion `Λ(s) + 1/s + 1/(1-s)` of `Λ(s) = π^{-s/2} Γ(s/2) ζ(s)`. The printed formula is
-`riemannXi_eq`. -/
-@[dlmf 25.4.E4]
-def riemannXi (s : ℂ) : ℂ :=
-  s * (s - 1) / 2 * completedRiemannZeta₀ s + 1 / 2
-
-/-- DLMF 25.4.4: `ξ` is entire. -/
-@[dlmf 25.4.E4]
-theorem differentiable_riemannXi : Differentiable ℂ riemannXi := by
-  have := differentiable_completedZeta₀
-  unfold riemannXi
-  fun_prop
-
-/-- `ξ(s) = ½ s(s-1) Λ(s)` with Mathlib's completed zeta function, for `s ≠ 0, 1`. -/
-theorem riemannXi_eq_completed {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠ 1) :
-    riemannXi s = s * (s - 1) / 2 * completedRiemannZeta s := by
-  have h1 : (1 : ℂ) - s ≠ 0 := sub_ne_zero.mpr (Ne.symm hs1)
-  have h2 : s - 1 ≠ 0 := sub_ne_zero.mpr hs1
-  rw [riemannXi, completedRiemannZeta_eq]
-  field_simp
-  ring
-
-/-- DLMF 25.4.4: `ξ(s) = ½ s(s-1) Γ(s/2) π^{-s/2} ζ(s)` for `s ≠ 1` and `s ∉ {0, -2, -4, …}`,
-where every factor of the printed product is defined. -/
-@[dlmf 25.4.E4]
-theorem riemannXi_eq {s : ℂ} (hs1 : s ≠ 1) (hs : ∀ n : ℕ, s ≠ -(2 * n)) :
-    riemannXi s = 1 / 2 * s * (s - 1) * Gamma (s / 2) * (π : ℂ) ^ (-s / 2) * riemannZeta s := by
-  have hs0 : s ≠ 0 := by simpa using hs 0
-  have hG : Gammaℝ s ≠ 0 := by
-    rw [Ne, Gammaℝ_eq_zero_iff, not_exists]; exact hs
-  rw [riemannXi_eq_completed hs0 hs1, riemannZeta_def_of_ne_zero hs0]
-  rw [Gammaℝ_def] at hG ⊢
-  have hG2 : Gamma (s / 2) ≠ 0 := right_ne_zero_of_mul hG
-  field_simp
-
-/-- DLMF 25.4.3: `ξ(s) = ξ(1-s)` for all `s`. -/
-@[dlmf 25.4.E3]
-theorem riemannXi_one_sub (s : ℂ) : riemannXi (1 - s) = riemannXi s := by
-  rw [riemannXi, riemannXi, completedRiemannZeta₀_one_sub]
-  ring
-
-/-- DLMF 25.4.6: the constant `c = -ln(2π) - πi/2` of the derivative reflection formulas. -/
-@[dlmf 25.4.E6]
-def reflectionConst : ℂ :=
-  -(Real.log (2 * π) : ℂ) - π * I / 2
 
 /-- `2 (2π)^{-z} cos(πz/2) = e^{cz} + e^{c̄z}` with `c = reflectionConst`. -/
 private lemma two_mul_cpow_mul_cos_eq_exp_add_exp (z : ℂ) :

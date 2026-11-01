@@ -8,6 +8,8 @@ module -- shake: keep-all
 public import DLMF.GeneralizedHypergeometric.Basic.ParametersAndSeries
 public import DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuation
 public import DLMF.GeneralizedHypergeometric.Basic.BilateralAndBarnes
+public import DLMF.GeneralizedHypergeometric.Basic.SeriesProperties
+public import DLMF.GeneralizedHypergeometric.Basic.MeijerG
 
 /-!
 # Definitions of generalized hypergeometric functions and branches
@@ -15,6 +17,7 @@ public import DLMF.GeneralizedHypergeometric.Basic.BilateralAndBarnes
 This module collects the definitions of DLMF Chapter 16 for `ₚF_q`: parameter multisets,
 coefficients and finite series (`DLMF.GeneralizedHypergeometric.Basic.ParametersAndSeries`), the
 normalized principal continuation (`DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuation`),
-and bilateral series and Barnes integrals
-(`DLMF.GeneralizedHypergeometric.Basic.BilateralAndBarnes`).
+bilateral series and Barnes integrals (`DLMF.GeneralizedHypergeometric.Basic.BilateralAndBarnes`),
+the series facts of §16.2 (`DLMF.GeneralizedHypergeometric.Basic.SeriesProperties`), and the
+Meijer G function of §16.17 (`DLMF.GeneralizedHypergeometric.Basic.MeijerG`).
 -/

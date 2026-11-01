@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Constants.Basic
 public import DLMF.Constants.BBP
 public import DLMF.Constants.Catalan
 public import DLMF.Constants.Dirichlet

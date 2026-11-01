@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Legendre.Basic.Associated
 public import DLMF.Legendre.Toroidal
 
 /-!
@@ -13,12 +14,11 @@ public import DLMF.Legendre.Toroidal
 The conical functions `𝖯^{-μ}_{-1/2+iτ}(x)` and Dunster's companion `𝖰̂^{-μ}_{-1/2+iτ}(x)`:
 their differential equation, connection formulas, Wronskians, behaviour at the singularities,
 Mehler's integral, power series, positivity and the generalized Mehler–Fock transform
-(DLMF 14.20.1–14.20.14).
+(DLMF 14.20.1–14.20.14). The definitions `conicalP` and `conicalQHat` are in
+`DLMF.Legendre.Basic.Associated`.
 
 ## Main definitions
 
-* `conicalP`: the conical Ferrers function `𝖯^{-μ}_{-1/2+iτ}(x)` for real `τ, μ, x`.
-* `conicalQHat`: Dunster's conical companion `𝖰̂^{-μ}_{-1/2+iτ}(x)` (DLMF 14.20.2).
 * `mehlerFockTransform`, `mehlerFockInverse`: the generalized Mehler–Fock transform and its
   inverse (DLMF 14.20.11–14.20.12).
 
@@ -45,16 +45,6 @@ convergence assertion of DLMF 14.20.10.
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Legendre
-
-/-- The conical Ferrers function `𝖯^{-μ}_{-1/2+iτ}(x)`, i.e. `ferrersP (-1/2 + iτ) (-μ) x`, for real
-`τ, μ, x`. -/
-def conicalP (τ μ x : ℝ) : ℂ :=
-  ferrersP (-1/2+I*τ) (-μ) x
-
-/-- Dunster’s conical companion; the order is minus the parameter μ. -/
-@[dlmf 14.20.E2]
-def conicalQHat (τ μ x : ℝ) : ℂ :=
-  ((exp (μ*π*I)*ferrersQ (-1/2+I*τ) (-μ) x).re:ℂ)-π/2*Real.sin (μ*π)*conicalP τ μ x
 
 /-- DLMF 14.20.1: for `μ, τ ≥ 0`, the conical function `w = 𝖯^{-μ}_{-1/2+iτ}(x)` satisfies `(1-x²)
 w'' - 2x w' - (τ² + 1/4 + μ²/(1-x²)) w = 0` on `-1 < x < 1`. -/

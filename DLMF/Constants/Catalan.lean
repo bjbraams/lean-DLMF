@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Constants.Basic
 public import DLMF.Constants.Dirichlet
 public import DLMF.Gamma.Polygamma
 public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
@@ -12,16 +13,12 @@ public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 /-!
 # Catalan's constant
 
-This file defines Catalan's constant `G = ∑ (-1)^k/(2k+1)² = β(2)` (DLMF 25.11.40, Duverney
-Remark 2.9), which is not in Mathlib, and evaluates the trigamma function at `1/4` and `3/4`.
-
-## Main definitions
-
-* `catalanConstant`: Catalan's constant `G`.
+This file evaluates the series of odd reciprocal squares and the trigamma function at `1/4` and
+`3/4` in terms of Catalan's constant `G = ∑ (-1)^k/(2k+1)² = β(2)` (DLMF 25.11.40, Duverney
+Remark 2.9), which is defined in `DLMF.Constants.Basic`.
 
 ## Main results
 
-* `hasSum_catalanConstant`: the series of `G` converges absolutely.
 * `hasSum_one_div_odd_sq_complex`: `∑ 1/(2k+1)² = π²/8`.
 * `hasSum_quarter_sq`: `∑ 1/(4k+1)² = (π²/8 + G)/2` and `∑ 1/(4k+3)² = (π²/8 - G)/2`.
 * `trigamma_one_quarter`, `trigamma_three_quarters`: `ψ'(1/4) = π² + 8G` and
@@ -41,27 +38,6 @@ open scoped Real
 noncomputable section
 
 namespace DLMF.Constants
-
-/-- **Catalan's constant** `G = ∑ (-1)^k/(2k+1)² = β(2)` (Duverney Remark 2.9). -/
-@[dlmf 25.11.E40]
-def catalanConstant : ℝ := ∑' k : ℕ, (-1 : ℝ) ^ k / (2 * k + 1) ^ 2
-
-/-- `∑ 1/(2k+1)²` converges. -/
-theorem summable_one_div_odd_sq : Summable fun k : ℕ => 1 / (2 * (k : ℝ) + 1) ^ 2 := by
-  have h := (Real.summable_one_div_nat_pow (p := 2)).mpr (by norm_num)
-  refine Summable.of_nonneg_of_le (fun k => by positivity) (fun k => ?_)
-    (h.comp_injective (add_left_injective 1))
-  simp only [Function.comp]
-  push_cast
-  gcongr
-  linarith [(k.cast_nonneg : (0 : ℝ) ≤ k)]
-
-/-- The series of Catalan's constant converges absolutely. -/
-theorem hasSum_catalanConstant :
-    HasSum (fun k : ℕ => (-1 : ℝ) ^ k / (2 * k + 1) ^ 2) catalanConstant := by
-  refine (Summable.of_norm ?_).hasSum
-  refine summable_one_div_odd_sq.congr fun k => ?_
-  rw [norm_div, norm_pow, norm_neg, norm_one, one_pow, Real.norm_of_nonneg (by positivity)]
 
 /-- `∑ 1/(2k+1)² = π²/8`, from `λ(2) = (3/4) ζ(2)`. -/
 theorem hasSum_one_div_odd_sq_complex :

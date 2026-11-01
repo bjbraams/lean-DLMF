@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Combinatorics.Basic.PlanePartitions
 public import Mathlib.NumberTheory.ArithmeticFunction.Misc
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
 public import TauCeti.RingTheory.MvPolynomial.Symmetric.Schur.Bialternant
@@ -15,16 +16,18 @@ public import TauCeti.RingTheory.MvPolynomial.Symmetric.Schur.Bialternant
 A plane partition is, following DLMF §26.12(i), a finite set `π ⊆ ℕ × ℕ × ℕ` of points with
 positive coordinates such that `(r, s, t) ∈ π` implies `B(r, s, t) ⊆ π`, where
 `B(r, s, t) = [1, r] × [1, s] × [1, t]`; `|π|` is `π.card`. This file proves MacMahon's box
-formula (26.12.4) and the product formulas for the symmetry classes.
+formula (26.12.4) and the product formulas for the symmetry classes. The definitions (`planeBox`,
+`IsPlanePartition`, `planePartitionsIn`, `planePartitionCount`, the symmetry classes, complement
+and transpose, and the strict shifted and descending plane partitions) are in
+`DLMF.Combinatorics.Basic.PlanePartitions`.
 
 ## Main definitions
 
-* `planeBox`: the box `B(r, s, t)` (DLMF 26.12.3).
-* `IsPlanePartition`, `planePartitionCount`: plane partitions and `pp(n)`.
-* `IsSymmetricPP`, `IsCyclicallySymmetricPP`, `IsTotallySymmetricPP`: the symmetry classes.
-* `planeComplement`, `planeTranspose`: the complement `π^c` in a box and the transpose.
-* `IsStrictShiftedPP`, `IsDescendingPP`: strict shifted and descending plane partitions, as lists
-  of rows, row `i` indented by `i` places.
+* `rectangleDiagram`, `planePartitionToTableau`, `tableauToPlanePartition`: plane partitions in
+  a box as semistandard tableaux of rectangular shape.
+* `IsPlaneArray`, `planePartitionToArray`, `arrayToPlanePartition`: the array description.
+* `planePartitionExample`: the plane partition of 75 of (26.12.2).
+* `planeBoxProduct`, `asmProduct`: the products in 26.12.9–26.12.11 and 26.12.16–26.12.19.
 
 ## Main results
 
@@ -68,25 +71,6 @@ open Finset Filter Asymptotics
 
 namespace DLMF.Combinatorics
 
-/-- (26.12.3): the box `B(r, s, t) = {(h, j, k) | 1 ≤ h ≤ r, 1 ≤ j ≤ s, 1 ≤ k ≤ t}`. -/
-@[dlmf 26.12.E3]
-def planeBox (r s t : ℕ) : Finset (ℕ × ℕ × ℕ) := Icc 1 r ×ˢ Icc 1 s ×ˢ Icc 1 t
-
-/-- A plane partition (DLMF §26.12(i), second definition): a finite set of points of
-`ℕ × ℕ × ℕ` with positive coordinates such that `(r, s, t) ∈ π` and
-`(1, 1, 1) ≤ (h, j, k) ≤ (r, s, t)` imply `(h, j, k) ∈ π`. -/
-@[dlmf 26.12.i]
-def IsPlanePartition (π : Finset (ℕ × ℕ × ℕ)) : Prop :=
-  ∀ x ∈ π, 1 ≤ x.1 ∧ 1 ≤ x.2.1 ∧ 1 ≤ x.2.2 ∧ planeBox x.1 x.2.1 x.2.2 ⊆ π
-
-/-- The downward-closure condition defining a finite plane partition is decidable. -/
-instance (π : Finset (ℕ × ℕ × ℕ)) : Decidable (IsPlanePartition π) := by
-  unfold IsPlanePartition; infer_instance
-
-/-- The plane partitions contained in the box `B(r, s, t)`. -/
-def planePartitionsIn (r s t : ℕ) : Finset (Finset (ℕ × ℕ × ℕ)) :=
-  (planeBox r s t).powerset.filter IsPlanePartition
-
 /-! ### MacMahon's box formula
 
 Proof of (26.12.4) and (26.12.21) via Jacobi's bialternant formula
@@ -111,22 +95,6 @@ def rectangleDiagram (r t : ℕ) : YoungDiagram where
 private lemma mem_rectangleDiagram {r t i c : ℕ} : (i, c) ∈ rectangleDiagram r t ↔ i < r ∧ c < t := by
   change (i, c) ∈ range r ×ˢ range t ↔ _
   simp
-
-/-- Membership in `planePartitionsIn`. -/
-lemma mem_planePartitionsIn {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} :
-    π ∈ planePartitionsIn r s t ↔ π ⊆ planeBox r s t ∧ IsPlanePartition π := by
-  simp [planePartitionsIn]
-
-/-- Membership in `planeBox`. -/
-lemma mem_planeBox {r s t h j k : ℕ} :
-    (h, j, k) ∈ planeBox r s t ↔ 1 ≤ h ∧ h ≤ r ∧ 1 ≤ j ∧ j ≤ s ∧ 1 ≤ k ∧ k ≤ t := by
-  simp [planeBox, and_assoc]
-
-/-- Down-closure of a plane partition. -/
-lemma mem_of_isPlanePartition_of_le {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {h j k h' j' k' : ℕ}
-    (hx : (h, j, k) ∈ π) (h1 : 1 ≤ h') (h2 : h' ≤ h) (j1 : 1 ≤ j') (j2 : j' ≤ j) (k1 : 1 ≤ k')
-    (k2 : k' ≤ k) : (h', j', k') ∈ π :=
-  (hπ _ hx).2.2.2 (mem_planeBox.mpr ⟨h1, h2, j1, j2, k1, k2⟩)
 
 /-- The column of heights over `(h, k)`. -/
 def planeColumn (π : Finset (ℕ × ℕ × ℕ)) (s h k : ℕ) : Finset ℕ :=
@@ -820,23 +788,6 @@ lemma sum_planePartitionsIn_pow_eq_prod_div {q : ℂ} (hq : ∀ m : ℕ, 0 < m �
 
 end MacMahonBox
 
-/-- `pp(n)`: the number of plane partitions of `n` (DLMF §26.12(i)). A plane partition with `n`
-points lies in `B(n, n, n)`. -/
-@[dlmf 26.12.i]
-def planePartitionCount (n : ℕ) : ℕ :=
-  #{π ∈ (planeBox n n n).powerset | IsPlanePartition π ∧ π.card = n}
-
-/-- §26.12(i): `pp(0) = 1`. -/
-@[dlmf 26.12.i]
-theorem planePartitionCount_zero : planePartitionCount 0 = 1 := by
-  decide
-
-/-- Table 26.12.1, the first entries: `pp(1) = 1`, `pp(2) = 3` (the rest of the table is not
-acquired: finite table of exact values, see the ledger). -/
-@[dlmf 26.12.T1]
-theorem planePartitionCount_one_two : planePartitionCount 1 = 1 ∧ planePartitionCount 2 = 3 := by
-  decide +kernel
-
 /-- §26.12(i), the array definition: `pp(n)` is the number of arrays `(a_{ij})` of
 nonnegative integers with finitely many nonzero entries, weakly decreasing across rows and down
 columns, with sum `n`. -/
@@ -972,40 +923,6 @@ theorem card_planePartitionsIn (r s t : ℕ) :
     push_cast; ring
   exact ⟨h2.trans (prod_planeBox_div_eq_prod_Icc r s t).symm, h2⟩
 
-/-- Symmetric plane partition: `(h, j, k) ∈ π` implies `(j, h, k) ∈ π`. -/
-@[dlmf 26.12.i]
-def IsSymmetricPP (π : Finset (ℕ × ℕ × ℕ)) : Prop := ∀ x ∈ π, (x.2.1, x.1, x.2.2) ∈ π
-
-/-- Cyclically symmetric plane partition: `(h, j, k) ∈ π` implies `(j, k, h) ∈ π`. -/
-@[dlmf 26.12.i]
-def IsCyclicallySymmetricPP (π : Finset (ℕ × ℕ × ℕ)) : Prop := ∀ x ∈ π, (x.2.1, x.2.2, x.1) ∈ π
-
-/-- Totally symmetric: symmetric and cyclically symmetric. -/
-@[dlmf 26.12.i]
-def IsTotallySymmetricPP (π : Finset (ℕ × ℕ × ℕ)) : Prop :=
-  IsSymmetricPP π ∧ IsCyclicallySymmetricPP π
-
-/-- The complement `π^c = {(h, j, k) | (r-h+1, s-j+1, t-k+1) ∉ π}` of `π ⊆ B(r, s, t)`. -/
-@[dlmf 26.12.i]
-def planeComplement (r s t : ℕ) (π : Finset (ℕ × ℕ × ℕ)) : Finset (ℕ × ℕ × ℕ) :=
-  (planeBox r s t).filter fun x => (r + 1 - x.1, s + 1 - x.2.1, t + 1 - x.2.2) ∉ π
-
-/-- The transpose `{(j, h, k) | (h, j, k) ∈ π}`. -/
-def planeTranspose (π : Finset (ℕ × ℕ × ℕ)) : Finset (ℕ × ℕ × ℕ) :=
-  π.map ⟨fun x => (x.2.1, x.1, x.2.2), fun x y h => by
-    simp only [Prod.mk.injEq] at h; exact Prod.ext h.2.1 (Prod.ext h.1 h.2.2)⟩
-
-/-- Symmetry of a finite plane partition under interchange of its first two coordinates is
-decidable. -/
-instance (π : Finset (ℕ × ℕ × ℕ)) : Decidable (IsSymmetricPP π) := by
-  unfold IsSymmetricPP; infer_instance
-/-- Cyclic symmetry of a finite plane partition is decidable. -/
-instance (π : Finset (ℕ × ℕ × ℕ)) : Decidable (IsCyclicallySymmetricPP π) := by
-  unfold IsCyclicallySymmetricPP; infer_instance
-/-- Symmetry of a finite plane partition under all coordinate permutations is decidable. -/
-instance (π : Finset (ℕ × ℕ × ℕ)) : Decidable (IsTotallySymmetricPP π) := by
-  unfold IsTotallySymmetricPP; infer_instance
-
 /-- (26.12.5): the number of symmetric plane partitions in `B(r, r, t)` is
 `∏_{h=1}^r (2h+t-1)/(2h-1) ∏_{1≤h<j≤r} (h+j+t-1)/(h+j-1)`. -/
 @[dlmf 26.12.E5]
@@ -1128,26 +1045,6 @@ theorem card_totallySymmetric_selfComplementary (r : ℕ) :
         π = planeComplement (2 * r) (2 * r) (2 * r) π).card = asmProduct r := by
   sorry
 
-/-- A strict shifted plane partition (DLMF §26.12(i)): rows of positive integers, row `i`
-indented `i` places, rows weakly decreasing, columns strictly decreasing; the row lengths are
-strictly decreasing (each entry has an entry above it). Entry `p` of row `i+1` lies below entry
-`p+1` of row `i`. -/
-@[dlmf 26.12.i]
-def IsStrictShiftedPP (d : List (List ℕ)) : Prop :=
-  (∀ row ∈ d, row ≠ [] ∧ (∀ a ∈ row, 1 ≤ a) ∧ row.Pairwise (· ≥ ·)) ∧
-    ∀ i (hi : i + 1 < d.length),
-      (d[i + 1]).length < (d[i]).length ∧
-        ∀ p (hp : p < (d[i + 1]).length), (d[i + 1])[p] < (d[i]).getD (p + 1) 0
-
-/-- A descending plane partition (DLMF §26.12(i)): a strict shifted plane partition in which the
-number of parts of each row is strictly less than the largest part of that row and at least the
-largest part of the next row. -/
-@[dlmf 26.12.i]
-def IsDescendingPP (d : List (List ℕ)) : Prop :=
-  IsStrictShiftedPP d ∧
-    ∀ i (hi : i < d.length), (d[i]).length < (d[i]).headD 0 ∧
-      ∀ hi' : i + 1 < d.length, (d[i + 1]).headD 0 ≤ (d[i]).length
-
 /-- (26.12.18): the example `6 6 6 4 3 / 3 3 / 2` is a strict shifted (indeed descending) plane
 partition. -/
 @[dlmf 26.12.E18]
@@ -1168,10 +1065,6 @@ theorem isDescendingPP_example : IsDescendingPP [[6, 6, 6, 4, 3], [3, 3], [2]] :
   · intro i hi
     have hi3 : i < 3 := by simp at hi; omega
     interval_cases i <;> simp
-
-/-- The descending plane partitions with all parts at most `r` ("in `B(r, r, r)`"). -/
-def DescendingPPIn (r : ℕ) : Type :=
-  {d : List (List ℕ) // IsDescendingPP d ∧ ∀ row ∈ d, ∀ a ∈ row, a ≤ r}
 
 /-- (26.12.19): the number of descending plane partitions in `B(r, r, r)` is
 `∏_{h=0}^{r-1} (3h+1)!/(r+h)!`. -/

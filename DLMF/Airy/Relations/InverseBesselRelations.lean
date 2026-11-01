@@ -320,14 +320,6 @@ theorem kummerM_two_mul_eq {ν a b c : ℂ} (ha : ν + 1 / 2 = a) (hb : 2 * ν +
   subst ha hb hc
   exact DLMF.Bessel.kummerM_eq_exp_mul_regularized0F1 hν h2ν w
 
-/-- `Γ(4/3) = Γ(1/3)/3`. -/
-theorem Gamma_four_thirds : Gamma (4 / 3) = 1 / 3 * Gamma (1 / 3) := by
-  rw [show (4 / 3 : ℂ) = 1 / 3 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
-
-/-- `Γ(5/3) = (2/3)Γ(2/3)`. -/
-theorem Gamma_five_thirds : Gamma (5 / 3) = 2 / 3 * Gamma (2 / 3) := by
-  rw [show (5 / 3 : ℂ) = 2 / 3 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
-
 /-- Complex powers of `2` and `3` as exponentials. -/
 theorem cpow_two_three (a : ℂ) : (2 : ℂ) ^ a = exp (a * log 2) ∧ (3 : ℂ) ^ a = exp (a * log 3) := by
   rw [cpow_def_of_ne_zero (by norm_num), cpow_def_of_ne_zero (by norm_num)]

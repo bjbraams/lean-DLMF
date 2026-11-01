@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.NumberTheory.Basic.GeneratingFunctions
 public import DLMFMathlib.RingTheory.PowerSeriesEvaluation
 public import Mathlib.CategoryTheory.Category.Init
 public import Mathlib.Combinatorics.Matroid.Init
@@ -26,9 +27,6 @@ of integers as sums of squares (§27.13(iv)).
 * `waringSmallG`, `waringBigG`: Waring's `g(k)` and `G(k)`.
 * `HardyLittlewoodWaringConjecture`: the Hardy–Littlewood conjectures on `G(k)`, as a
   proposition.
-* `sumSquaresCount`: `r_k(n)`, the number of representations of `n` as a sum of `k` squares
-  (DLMF 27.13.3).
-* `jacobiThetaSeries`: `ϑ(x) = 1 + 2 ∑_{m≥1} x^{m²}` (DLMF 27.13.4).
 
 ## Main results
 
@@ -39,7 +37,6 @@ of integers as sums of squares (§27.13(iv)).
   `waring_rem_condition_eventually`: the lower bound DLMF 27.13.2 and the cases of equality.
 * `waringSmallG_values`, `waringBigG_values`, `waringBigG_bounds`, `waringBigG_le_waringSmallG`,
   `waringBigG_lt`: known values and bounds for `g(k)` and `G(k)`.
-* `jacobiTheta_eq_jacobiThetaSeries`: `ϑ(e^{πiτ})` is Mathlib's `jacobiTheta τ`.
 * `jacobiThetaSeries_sq`, `jacobiThetaSeries_pow`, `jacobiThetaSeries_sq_divisors`: the
   generating functions DLMF 27.13.5, Mordell's formula and DLMF 27.13.6.
 * `sumSquaresCount_two`, `sumSquaresCount_four`: Jacobi's formulas for `r₂(n)` (DLMF 27.13.7)
@@ -49,8 +46,10 @@ of integers as sums of squares (§27.13(iv)).
 
 Waring's `g(k)` and `G(k)` are defined as infima of the admissible numbers of `k`th powers;
 `sInf ∅ = 0` is only a junk value, and Hilbert's theorem shows that the sets are nonempty.
-`sumSquaresCount k n` counts the `(x₁, …, x_k) ∈ ℤ^k` with `x₁² + ⋯ + x_k² = n`. DLMF's `ϑ(x)` is
-also the project's `θ₃(0, q)`.
+`sumSquaresCount k n` (DLMF 27.13.3) counts the `(x₁, …, x_k) ∈ ℤ^k` with
+`x₁² + ⋯ + x_k² = n`. It and DLMF's `ϑ(x)` (`jacobiThetaSeries`, DLMF 27.13.4, also the project's
+`θ₃(0, q)`) are defined in `DLMF.NumberTheory.Basic.GeneratingFunctions`, together with the
+bridge `jacobiTheta_eq_jacobiThetaSeries` to Mathlib's `jacobiTheta`.
 
 Goldbach's conjecture and the Hardy–Littlewood conjectures on `G(k)` are open: they are named
 as propositions and not asserted. Lagrange's four-square theorem is Mathlib's
@@ -211,29 +210,6 @@ theorem waringBigG_lt : ∃ c : ℝ, ∀ k : ℕ, 2 ≤ k → (waringBigG k : �
   sorry
 
 /-! ### §27.13(iv) Representation by squares -/
-
-/-- DLMF 27.13.3: `r_k(n)`, the number of solutions of `n = x₁² + ⋯ + x_k²` in integers
-(positive, negative or zero, order taken into account). -/
-@[dlmf 27.13.E3]
-def sumSquaresCount (k n : ℕ) : ℕ :=
-  ((Fintype.piFinset fun _ : Fin k ↦ Finset.Icc (-(n : ℤ)) n).filter
-    fun x ↦ ∑ i, x i ^ 2 = (n : ℤ)).card
-
-/-- DLMF 27.13.4: `ϑ(x) = 1 + 2 ∑_{m≥1} x^{m²}`, `|x| < 1` (a totalized `tsum`). -/
-@[dlmf 27.13.E4]
-def jacobiThetaSeries (x : ℂ) : ℂ := 1 + 2 * ∑' m : ℕ, x ^ ((m + 1) ^ 2)
-
-/-- §27.13(iv) after 27.13.4: `ϑ(e^{πiτ})` is Mathlib's `jacobiTheta τ` (`= θ₃(0|τ)`),
-`ℑτ > 0`. -/
-@[dlmf 27.13.E4]
-theorem jacobiTheta_eq_jacobiThetaSeries {τ : ℂ} (hτ : 0 < τ.im) :
-    jacobiTheta τ = jacobiThetaSeries (Complex.exp (π * Complex.I * τ)) := by
-  rw [jacobiTheta_eq_tsum_nat hτ, jacobiThetaSeries]
-  congr 3
-  funext n
-  rw [← Complex.exp_nat_mul]
-  push_cast
-  ring_nf
 
 section Helpers
 open PowerSeries

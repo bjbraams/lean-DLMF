@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.QHypergeometric.Basic.Calculus
 public import DLMF.QHypergeometric.Convergence
 public import DLMF.QSeries.QCalculus
 public import DLMF.QSeries.Saalschutz
@@ -20,7 +21,8 @@ public import DLMF.QHypergeometric.Calculus.QBinomial
 
 Finite-interval and bilateral Jackson integrals as adapters around `DLMF.QSeries.jacksonIntegral`.
 Natural partial-sum predicates keep conditional convergence distinct from Lean's totalized,
-unordered `tsum`.
+unordered `tsum`. The bilateral integral `jacksonBilateral` is defined in
+`DLMF.QHypergeometric.Basic.Calculus`.
 
 ## Main results
 
@@ -39,10 +41,6 @@ namespace DLMF.QHypergeometric
 /-- A finite two-endpoint Jackson integral, reusing the existing integral from zero. -/
 def jacksonBetween (q a b : ℂ) (f : ℂ → ℂ) : ℂ :=
   DLMF.QSeries.jacksonIntegral q b f-DLMF.QSeries.jacksonIntegral q a f
-/-- The bilateral Jackson integral, used only together with convergence hypotheses. -/
-@[dlmf 17.2.E48]
-def jacksonBilateral (q : ℂ) (f : ℂ → ℂ) : ℂ :=
-  (1-q)*∑' n : ℤ, q^n*f (q^n)
 /-- Natural-order convergence of the finite-interval Jackson series, permitting conditional sums. -/
 def HasNaturalJacksonIntegral (q a : ℂ) (f : ℂ → ℂ) (v : ℂ) : Prop :=
   Tendsto (fun N : ℕ => a*(1-q)*∑ j∈range N, f (a*q^j)*q^j) atTop (𝓝 v)

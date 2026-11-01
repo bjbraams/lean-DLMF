@@ -6,22 +6,18 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Contiguous
+public import DLMF.Hypergeometric.Basic.GaussEquation
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.InverseDeriv
 
 /-!
-# The hypergeometric equation (AAR §2.3)
+# The arcsine evaluation (AAR §2.3)
 
-Termwise differentiation of the series gives `d/dz ₂F₁(a,b;c;z) = (ab/c) ₂F₁(a+1,b+1;c+1;z)`.
-The function then satisfies Euler's hypergeometric equation
-
-$$
-z(1-z)y'' + \bigl(c-(a+b+1)z\bigr)y' - ab\,y = 0.
-$$
+The derivative formula DLMF 15.5.1 and the hypergeometric equation DLMF 15.10.1,
+`z(1-z)y'' + (c-(a+b+1)z)y' - ab y = 0`, are in `DLMF.Hypergeometric.Basic.GaussEquation`.
+They give the arcsine series by comparing derivatives.
 
 ## Main results
 
-* `hasDerivAt_ordinaryHypergeometric`, `deriv_ordinaryHypergeometric`: DLMF 15.5.1.
-* `ordinaryHypergeometric_ode`: the hypergeometric equation, DLMF 15.10.1.
 * `arcsin_eq_ordinaryHypergeometric`: `arcsin x = x ₂F₁(1/2,1/2;3/2;x²)`, DLMF 15.4.4
   (AAR (2.1.5)).
 
@@ -38,72 +34,6 @@ open scoped Real Topology
 noncomputable section
 
 namespace DLMF.Hypergeometric
-
-/-- The coefficient identity underlying termwise differentiation. No nonvanishing
-condition on the numerator parameters is needed. -/
-theorem gaussHGCoeff_shift {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
-    (n + 1 : ℂ) * gaussHGCoeff a b c (n + 1) =
-      a * b / c * gaussHGCoeff (a + 1) (b + 1) (c + 1) n := by
-  have hc0 : c ≠ 0 := by simpa using hc 0
-  have hcp : poch (c + 1) n ≠ 0 :=
-    poch_ne_zero_of_not_neg_nat (by simpa using not_neg_nat_add_nat hc 1) n
-  have hn : (n + 1 : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
-  simp only [gaussHGCoeff, poch_succ_left, Nat.factorial_succ,
-    Nat.cast_mul, Nat.cast_add, Nat.cast_one]
-  field [hc0, hcp, hn, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
-
-/-- The coefficient recurrence underlying the Gauss differential equation. -/
-theorem gaussHGCoeff_recurrence {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
-    (n + 1 : ℂ) * (c + n) * gaussHGCoeff a b c (n + 1) =
-      (a + n) * (b + n) * gaussHGCoeff a b c n := by
-  have hcp := poch_ne_zero_of_not_neg_nat hc n
-  have hcn : c + (n : ℂ) ≠ 0 := by
-    simpa only [ne_eq, eq_neg_iff_add_eq_zero] using hc n
-  have hn : (n + 1 : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
-  simp only [gaussHGCoeff, poch_succ, Nat.factorial_succ,
-    Nat.cast_mul, Nat.cast_add, Nat.cast_one]
-  field [hcp, hcn, hn, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
-
-/-- Termwise derivative of the hypergeometric series, for `|z| < 1`. -/
-@[dlmf 15.5.E1]
-theorem hasDerivAt_ordinaryHypergeometric {a b c z : ℂ}
-    (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :
-    HasDerivAt (₂F₁ a b c) (a * b / c * ₂F₁ (a + 1) (b + 1) (c + 1) z) z := by
-  have hz' := mem_eball_one_of_norm_lt_one hz
-  have hf := hasFPowerSeriesOnBall_ordinaryHypergeometric a b c
-  have hd := hf.deriv_ofScalars.hasSum_mul_pow hz'
-  have hs := ((hasFPowerSeriesOnBall_ordinaryHypergeometric
-    (a + 1) (b + 1) (c + 1)).hasSum_mul_pow hz').mul_left (a * b / c)
-  have heq : (fun n : ℕ => (n + 1 : ℂ) * gaussHGCoeff a b c (n + 1) * z ^ n) =
-      (fun n : ℕ => a * b / c * (gaussHGCoeff (a + 1) (b + 1) (c + 1) n * z ^ n)) := by
-    funext n
-    rw [gaussHGCoeff_shift hc]
-    ring
-  rw [heq] at hd
-  rw [← hd.unique hs]
-  exact (hf.analyticAt_of_mem hz').differentiableAt.hasDerivAt
-
-/-- Identity under the stated parameter and domain assumptions: `deriv (₂F₁ a b c) z = a * b / c *
-₂F₁ (a + 1) (b + 1) (c + 1) z`. -/
-@[dlmf 15.5.E1]
-theorem deriv_ordinaryHypergeometric {a b c z : ℂ}
-    (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :
-    deriv (₂F₁ a b c) z = a * b / c * ₂F₁ (a + 1) (b + 1) (c + 1) z :=
-  (hasDerivAt_ordinaryHypergeometric hc hz).deriv
-
-/-- The Gaussian hypergeometric equation, AAR §2.3. -/
-@[dlmf 15.10.E1]
-theorem ordinaryHypergeometric_ode {a b c z : ℂ}
-    (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :
-    z * (1 - z) * iteratedDeriv 2 (₂F₁ a b c) z +
-        (c - (a + b + 1) * z) * deriv (₂F₁ a b c) z -
-        a * b * ₂F₁ a b c z = 0 := by
-  have h := (hasFPowerSeriesOnBall_ordinaryHypergeometric a b c).ode_of_recurrence
-    (A := 1) (B := a + b + 1) (C := a * b) (D := c) (fun n => ?_)
-    (mem_eball_one_of_norm_lt_one hz)
-  · simpa [iteratedDeriv_succ, iteratedDeriv_zero] using h
-  · rw [gaussHGCoeff_recurrence hc]
-    ring
 
 /-- Helper lemma for `arcsin_eq_ordinaryHypergeometric`. -/
 theorem three_halves_not_neg_nat : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := by

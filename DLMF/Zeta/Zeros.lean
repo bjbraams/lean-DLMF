@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Analytic.Order
+public import DLMF.Zeta.Basic.RiemannProperties
 public import Mathlib.NumberTheory.LSeries.HardyZ
 public import Mathlib.NumberTheory.LSeries.ZetaZeros
 
@@ -22,8 +23,6 @@ Mathlib's `RiemannHypothesis` is the statement (pointer only).
 ## Main definitions
 
 * `criticalStripZeros`: the zeros of `ζ` in the critical strip `0 < Re s < 1`.
-* `riemannSiegelTheta`: `θ(t) = ph Γ(¼ + ½it) - ½ t ln π` (DLMF 25.10.2).
-* `riemannSiegelZ`: `Z(t) = e^{iθ(t)} ζ(½ + it)` (DLMF 25.10.1).
 * `riemannZeroCount`, `criticalLineZeroCount`: `N(T)`, the number of zeros in the critical strip
   with `0 < Im s < T` counted with multiplicity, and the number of those on the critical line.
 * `riemannSiegelRemainder`: the remainder `R(t)` of the Riemann–Siegel formula (DLMF 25.10.3).
@@ -33,9 +32,6 @@ Mathlib's `RiemannHypothesis` is the statement (pointer only).
 * `riemannZeta_ne_zero_of_re_nonpos`: `ζ(s) ≠ 0` for `Re s ≤ 0` except at the trivial zeros.
 * `riemannZeta_conj_eq_zero_iff`, `riemannZeta_one_sub_eq_zero_iff`: the symmetries of the zeros
   about the real axis and about the critical line.
-* `riemannSiegelZ_eq_hardyZ`, `riemannSiegelZ_im`, `norm_riemannSiegelZ`,
-  `riemannSiegelZ_eq_zero_iff`: `Z` is Mathlib's `hardyZ`, real, `|Z(t)| = |ζ(½+it)|`, and it
-  vanishes exactly at the zeros on the critical line.
 * `riemannSiegelZ_sign_changes`: Hardy's theorem, `Z` changes sign infinitely often.
 * `exists_riemannZeta_critical_line_zero_gt`, `criticalStripZeros_infinite`: infinitely many
   zeros on the critical line and in the critical strip, derived from Hardy's theorem.
@@ -47,6 +43,9 @@ Mathlib's `RiemannHypothesis` is the statement (pointer only).
 
 ## Implementation notes
 
+The Riemann–Siegel functions `riemannSiegelTheta` and `riemannSiegelZ` (DLMF 25.10.1–25.10.2)
+are defined in `DLMF.Zeta.Basic.Riemann`, and their basic properties (`Z` is Mathlib's `hardyZ`,
+real, with `|Z(t)| = |ζ(½+it)|`) are in `DLMF.Zeta.Basic.RiemannProperties`.
 `riemannSiegelTheta` uses the principal phase, as DLMF prescribes. It is then discontinuous (it
 differs from the usual continuous Riemann–Siegel theta function by integer multiples of `2π`),
 but `e^{iθ}`, and hence `Z`, do not depend on the choice. The asymptotic term 25.10.4 is stated
@@ -157,82 +156,6 @@ theorem riemannZeta_one_sub_eq_zero_iff {s : ℂ} (hs0 : 0 < s.re) (hs1 : s.re <
 @[dlmf 25.10.i]
 def criticalStripZeros : Set ℂ :=
   {ρ | riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1}
-
-/-- DLMF 25.10.2: the Riemann–Siegel theta function `θ(t) = ph Γ(¼ + ½it) - ½ t ln π`, with the
-principal value of the phase (`Complex.arg`), as DLMF prescribes. -/
-@[dlmf 25.10.E2]
-def riemannSiegelTheta (t : ℝ) : ℝ :=
-  arg (Gamma (1 / 4 + t / 2 * I)) - t / 2 * Real.log π
-
-/-- DLMF 25.10.1: `Z(t) = e^{iθ(t)} ζ(½ + it)`. -/
-@[dlmf 25.10.E1]
-def riemannSiegelZ (t : ℝ) : ℂ :=
-  cexp (I * riemannSiegelTheta t) * riemannZeta (1 / 2 + t * I)
-
-/-- `e^z = e^{Re z} e^{i Im z}`. -/
-private lemma cexp_eq_exp_re_mul_cexp_im (z : ℂ) : cexp z = (Real.exp z.re : ℂ) * cexp (z.im * I) := by
-  rw [ofReal_exp, ← Complex.exp_add]
-  congr 1
-  exact (re_add_im z).symm
-
-/-- `e^{iθ(t)} = Γ_ℝ(½+it)/|Γ_ℝ(½+it)|`: the phase of the archimedean factor. -/
-private lemma norm_Gammaℝ_mul_cexp_riemannSiegelTheta (t : ℝ) :
-    ((‖Gammaℝ (1 / 2 + t * I)‖ : ℝ) : ℂ) * cexp (I * riemannSiegelTheta t) =
-      Gammaℝ (1 / 2 + t * I) := by
-  have hw : (1 / 2 + t * I) / 2 = 1 / 4 + t / 2 * I := by ring
-  have hG : Gamma (1 / 4 + t / 2 * I) ≠ 0 :=
-    Gamma_ne_zero_of_re_pos (by simp)
-  have hπ : (π : ℂ) ≠ 0 := by simp [Real.pi_ne_zero]
-  set z : ℂ := Complex.log π * (-(1 / 2 + t * I) / 2) with hz
-  have hcp : (π : ℂ) ^ (-(1 / 2 + t * I) / 2) = cexp z := by
-    rw [cpow_def_of_ne_zero hπ]
-  have hzre : z.re = -(1 / 4) * Real.log π := by
-    rw [hz, ← ofReal_log Real.pi_pos.le]
-    simp; ring
-  have hzim : z.im = -(t / 2) * Real.log π := by
-    rw [hz, ← ofReal_log Real.pi_pos.le]
-    simp; ring
-  set G := Gamma (1 / 4 + t / 2 * I) with hGdef
-  have hG' : G = ((‖G‖ : ℝ) : ℂ) * cexp ((arg G : ℂ) * I) :=
-    (Complex.norm_mul_exp_arg_mul_I G).symm
-  have he : cexp (I * ((riemannSiegelTheta t : ℝ) : ℂ)) =
-      cexp ((z.im : ℂ) * I) * cexp ((arg G : ℂ) * I) := by
-    rw [← Complex.exp_add, hzim, riemannSiegelTheta]
-    congr 1
-    push_cast
-    ring
-  rw [Gammaℝ_def, hw, ← hGdef, hcp, norm_mul, Complex.norm_exp, he]
-  conv_rhs => rw [cexp_eq_exp_re_mul_cexp_im z, hG']
-  push_cast
-  ring
-
-/-- DLMF §25.10(i): `Z(t)` is Mathlib's Hardy `Z`-function `hardyZ t`; in particular `Z` is real. -/
-@[dlmf 25.10.E1]
-theorem riemannSiegelZ_eq_hardyZ (t : ℝ) : riemannSiegelZ t = hardyZ t := by
-  have hs0 : (1 / 2 + t * I : ℂ) ≠ 0 := by
-    intro h; have := congrArg re h; simp at this
-  have hg : Gammaℝ (1 / 2 + t * I) ≠ 0 := Gammaℝ_ne_zero_of_re_pos (by simp)
-  have hn : ((‖Gammaℝ (1 / 2 + t * I)‖ : ℝ) : ℂ) ≠ 0 := by
-    exact_mod_cast norm_ne_zero_iff.mpr hg
-  rw [ofReal_hardyZ, riemannSiegelZ, riemannZeta_def_of_ne_zero hs0]
-  conv_lhs => rw [← norm_Gammaℝ_mul_cexp_riemannSiegelTheta t]
-  field_simp
-
-/-- DLMF 25.10.1–25.10.2: `Z(t)` is real. -/
-@[dlmf 25.10.E1]
-theorem riemannSiegelZ_im (t : ℝ) : (riemannSiegelZ t).im = 0 := by
-  rw [riemannSiegelZ_eq_hardyZ, ofReal_im]
-
-/-- DLMF §25.10(i): `|Z(t)| = |ζ(½ + it)|`. -/
-@[dlmf 25.10.i]
-theorem norm_riemannSiegelZ (t : ℝ) : ‖riemannSiegelZ t‖ = ‖riemannZeta (1 / 2 + t * I)‖ := by
-  rw [riemannSiegelZ_eq_hardyZ, norm_real, Real.norm_eq_abs, abs_hardyZ]
-
-/-- DLMF §25.10(i): `Z(t)` vanishes exactly at the zeros of `ζ(½ + it)`. -/
-@[dlmf 25.10.i]
-theorem riemannSiegelZ_eq_zero_iff (t : ℝ) :
-    riemannSiegelZ t = 0 ↔ riemannZeta (1 / 2 + t * I) = 0 := by
-  rw [← norm_eq_zero, norm_riemannSiegelZ, norm_eq_zero]
 
 /-- DLMF §25.10(i) (Hardy's theorem): `Z(t)` changes sign infinitely often as `t → ∞`. -/
 @[dlmf 25.10.i]

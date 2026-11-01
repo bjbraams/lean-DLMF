@@ -67,7 +67,8 @@ theorem im_ofReal_dotProduct_mulVec_ofReal (x : ι → ℝ) (Ω : Matrix ι ι �
 omit [Fintype ι] in
 /-- Identity under the stated parameter and domain assumptions: `(fun i => (n i : ℂ)) = fun i =>
 (((n i : ℝ)) : ℂ)`. -/
-private lemma intCast_vec_eq_ofReal_intCast (n : ι → ℤ) : (fun i => (n i : ℂ)) = fun i => (((n i : ℝ)) : ℂ) := by
+private lemma intCast_vec_eq_ofReal_intCast (n : ι → ℤ) :
+    (fun i => (n i : ℂ)) = fun i => (((n i : ℝ)) : ℂ) := by
   simp
 
 /-- `‖exp(2πi(½ n·Ω·n + n·z))‖ = exp(-π n·(Im Ω)·n - 2π n·Im z)`. -/
@@ -92,7 +93,8 @@ theorem posIm_of_mem_siegelUpperHalfSpace {Ω : Matrix ι ι ℂ} (h : Ω ∈ si
 
 /-- Estimate under the stated parameter and domain assumptions: `∃ c > 0, ∀ x : ι → ℝ, c * ∑ i, x
 i ^ 2 ≤ x ⬝ᵥ (Y *ᵥ x)`. -/
-lemma exists_pos_mul_sum_sq_le_dotProduct_mulVec {Y : Matrix ι ι ℝ} (hY : ∀ x : ι → ℝ, x ≠ 0 → 0 < x ⬝ᵥ (Y *ᵥ x)) :
+lemma exists_pos_mul_sum_sq_le_dotProduct_mulVec {Y : Matrix ι ι ℝ}
+    (hY : ∀ x : ι → ℝ, x ≠ 0 → 0 < x ⬝ᵥ (Y *ᵥ x)) :
     ∃ c > 0, ∀ x : ι → ℝ, c * ∑ i, x i ^ 2 ≤ x ⬝ᵥ (Y *ᵥ x) := by
   classical
   rcases isEmpty_or_nonempty ι with hι | hι
@@ -135,7 +137,8 @@ lemma exists_pos_mul_sum_sq_le_dotProduct_mulVec {Y : Matrix ι ι ℝ} (hY : �
 
 /-- Estimate under the stated parameter and domain assumptions: `x ⬝ᵥ (Y *ᵥ x) - δ * Fintype.card
 ι * ∑ i, x i ^ 2 ≤ x ⬝ᵥ (Y' *ᵥ x)`. -/
-private lemma dotProduct_mulVec_perturb_le {Y Y' : Matrix ι ι ℝ} {δ : ℝ} (hδ : ∀ i j, |Y' i j - Y i j| ≤ δ)
+private lemma dotProduct_mulVec_perturb_le {Y Y' : Matrix ι ι ℝ} {δ : ℝ}
+    (hδ : ∀ i j, |Y' i j - Y i j| ≤ δ)
     (x : ι → ℝ) :
     x ⬝ᵥ (Y *ᵥ x) - δ * Fintype.card ι * ∑ i, x i ^ 2 ≤ x ⬝ᵥ (Y' *ᵥ x) := by
   rcases isEmpty_or_nonempty ι with hι | ⟨⟨i0⟩⟩
@@ -204,7 +207,8 @@ private lemma summable_prod_comp_of_nonneg {f : ℤ → ℝ} (hf0 : ∀ k, 0 ≤
           (fun i _ => hf.sum_le_tsum _ (fun k _ => hf0 k))
 
 /-- Estimate under the stated parameter and domain assumptions: `∀ᶠ x in 𝓝 x0, |f x - f x0| < ε`. -/
-private lemma eventually_abs_sub_lt_of_continuous {X : Type*} [TopologicalSpace X] {f : X → ℝ} (hf : Continuous f)
+private lemma eventually_abs_sub_lt_of_continuous {X : Type*} [TopologicalSpace X] {f : X → ℝ}
+    (hf : Continuous f)
     (x0 : X) {ε : ℝ} (hε : 0 < ε) : ∀ᶠ x in 𝓝 x0, |f x - f x0| < ε := by
   have := (hf.tendsto x0).eventually (Metric.ball_mem_nhds (f x0) hε)
   filter_upwards [this] with x hx
@@ -212,7 +216,8 @@ private lemma eventually_abs_sub_lt_of_continuous {X : Type*} [TopologicalSpace 
 
 /-- Local summable majorant: near a point `(z₀, Ω₀)` with `Im Ω₀` positive definite there is a
 summable bound for the theta terms, uniform on a neighbourhood. -/
-private lemma exists_summable_majorant_riemannThetaTerm_nhds {z0 : ι → ℂ} {Ω0 : Matrix ι ι ℂ} (h0 : IsPosDefIm Ω0) :
+private lemma exists_summable_majorant_riemannThetaTerm_nhds {z0 : ι → ℂ} {Ω0 : Matrix ι ι ℂ}
+    (h0 : IsPosDefIm Ω0) :
     ∃ t ∈ 𝓝 (z0, Ω0), ∃ u : (ι → ℤ) → ℝ, Summable u ∧
       ∀ p ∈ t, ∀ n, ‖riemannThetaTerm p.1 p.2 n‖ ≤ u n := by
   obtain ⟨c, hc, hlow⟩ := exists_pos_mul_sum_sq_le_dotProduct_mulVec h0
@@ -260,7 +265,8 @@ private lemma exists_summable_majorant_riemannThetaTerm_nhds {z0 : ι → ℂ} {
 @[dlmf 21.2.i "absolute convergence of the g-tuple Fourier series"]
 theorem summable_norm_riemannThetaTerm (z : ι → ℂ) {Ω : Matrix ι ι ℂ}
     (hΩ : Ω ∈ siegelUpperHalfSpace ι) : Summable fun n => ‖riemannThetaTerm z Ω n‖ := by
-  obtain ⟨t, ht, u, hu, hb⟩ := exists_summable_majorant_riemannThetaTerm_nhds (z0 := z) (posIm_of_mem_siegelUpperHalfSpace hΩ)
+  obtain ⟨t, ht, u, hu, hb⟩ := exists_summable_majorant_riemannThetaTerm_nhds (z0 := z)
+      (posIm_of_mem_siegelUpperHalfSpace hΩ)
   exact hu.of_nonneg_of_le (fun n => norm_nonneg _) (hb (z, Ω) (mem_of_mem_nhds ht))
 
 /-- The theta series sums to `θ(z|Ω)` (DLMF 21.2.1). -/
@@ -277,7 +283,8 @@ theorem tendstoLocallyUniformlyOn_riemannTheta :
         ∑ n ∈ s, riemannThetaTerm p.1 p.2 n) (fun p => riemannTheta p.1 p.2) atTop
       {p | IsPosDefIm p.2} := by
   intro u hu p hp
-  obtain ⟨t, ht, v, hv, hb⟩ := exists_summable_majorant_riemannThetaTerm_nhds (z0 := p.1) (Ω0 := p.2) hp
+  obtain ⟨t, ht, v, hv, hb⟩ := exists_summable_majorant_riemannThetaTerm_nhds (z0 := p.1)
+      (Ω0 := p.2) hp
   exact ⟨t, mem_nhdsWithin_of_mem_nhds ht,
     tendstoUniformlyOn_tsum hv (fun n x hx => hb x hx n) u hu⟩
 
@@ -289,7 +296,8 @@ theorem tendstoUniformlyOn_riemannTheta {K : Set ((ι → ℂ) × Matrix ι ι �
     TendstoUniformlyOn (fun (s : Finset (ι → ℤ)) (p : (ι → ℂ) × Matrix ι ι ℂ) =>
         ∑ n ∈ s, riemannThetaTerm p.1 p.2 n) (fun p => riemannTheta p.1 p.2) atTop K := by
   rw [← tendstoLocallyUniformlyOn_iff_tendstoUniformlyOn_of_compact hK]
-  exact tendstoLocallyUniformlyOn_riemannTheta.mono fun p hp => posIm_of_mem_siegelUpperHalfSpace (hKS p hp)
+  exact tendstoLocallyUniformlyOn_riemannTheta.mono fun p hp => posIm_of_mem_siegelUpperHalfSpace
+      (hKS p hp)
 
 /-- Continuity of the indicated function: `Continuous fun p : (ι → ℂ) × Matrix ι ι ℂ =>
 riemannThetaTerm p.1 p.2 n`. -/
@@ -314,7 +322,8 @@ lemma differentiableAt_riemannTheta_comp {L : ℂ → (ι → ℂ) × Matrix ι 
     (hL : Continuous L) (h0 : IsPosDefIm (L w0).2)
     (hd : ∀ n, Differentiable ℂ fun w => riemannThetaTerm (L w).1 (L w).2 n) :
     DifferentiableAt ℂ (fun w => riemannTheta (L w).1 (L w).2) w0 := by
-  obtain ⟨t, ht, u, hu, hb⟩ := exists_summable_majorant_riemannThetaTerm_nhds (z0 := (L w0).1) (Ω0 := (L w0).2) h0
+  obtain ⟨t, ht, u, hu, hb⟩ := exists_summable_majorant_riemannThetaTerm_nhds (z0 := (L w0).1)
+      (Ω0 := (L w0).2) h0
   have hpre : L ⁻¹' t ∈ 𝓝 w0 := hL.continuousAt.preimage_mem_nhds ht
   obtain ⟨r, hr, hball⟩ := Metric.mem_nhds_iff.mp hpre
   have hD := differentiableOn_tsum_of_summable_norm hu (fun n => (hd n).differentiableOn)

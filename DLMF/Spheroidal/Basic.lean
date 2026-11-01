@@ -7,12 +7,14 @@ module -- shake: keep-all
 
 public import DLMF.Spheroidal.Basic.EquationAndSpectralData
 public import DLMF.Spheroidal.Basic.Ferrers
+public import DLMF.Spheroidal.Basic.Equation
 
 /-!
-# Definitions of spheroidal wave functions
+# Spheroidal wave functions: definitions and the spheroidal equation
 
 This file collects the foundational definitions of the spheroidal area: the equation
 predicates and spectral data (`DLMF.Spheroidal.Basic.EquationAndSpectralData`), and the
 Ferrers coefficients, functions of the second kind, radial functions and Flammer's
-normalization (`DLMF.Spheroidal.Basic.Ferrers`).
+normalization (`DLMF.Spheroidal.Basic.Ferrers`), and the basic properties of the spheroidal
+equation of §30.2 (`DLMF.Spheroidal.Basic.Equation`).
 -/

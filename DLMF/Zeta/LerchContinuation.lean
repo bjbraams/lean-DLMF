@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Zeta.Basic.Polylog
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
@@ -21,7 +22,8 @@ from the open unit disk to an analytic function on the cut plane `ℂ \ [1, ∞)
 
 ## Main definitions
 
-* `slitOne`: the cut plane `ℂ \ [1, ∞)`.
+The cut plane `slitOne` is defined in `DLMF.Zeta.Basic.Polylog`.
+
 * `lerchIntegral`: the integral `∫_0^∞ x^{s-1} e^{-ax}/(1 - z e^{-x}) dx` of DLMF 25.14.5
   (without the factor `1/Γ(s)`).
 * `IsLerchContinuation`: `F` is analytic on the cut plane and sums `∑ zⁿ/(a+n)^s` on the open
@@ -49,9 +51,6 @@ open scoped Topology Real
 noncomputable section
 
 namespace DLMF.Zeta
-
-/-- The cut plane `ℂ \ [1, ∞)`. -/
-def slitOne : Set ℂ := {z | z.im ≠ 0 ∨ z.re < 1}
 
 /-- The indicated domain is open: `IsOpen slitOne`. -/
 private lemma isOpen_slitOne' : IsOpen slitOne :=

@@ -186,7 +186,7 @@ Traversal: all §§4.1–4.48 checked; matching headings are §4.2, §4.14,
 - **General logarithm, principal logarithm, and the two banks of the closed
   principal cut**, [4.2.1–7](https://dlmf.nist.gov/4.2.i):
   `DLMF.Elementary.generalLogValues`, `logSheet`, `closedLogValues`, and
-  `logBranchCut` in [LogExpBasic](DLMF/Elementary/LogExpBasic.lean#L57);
+  `logBranchCut` in [LogExpBasic](DLMF/Elementary/Basic/LogExp.lean#L57);
   Mathlib `Complex.log` and `Real.log` are the single-valued complex and real
   functions, defined in
   [Complex/Log](.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Complex/Log.lean#L30)
@@ -196,7 +196,7 @@ Traversal: all §§4.1–4.48 checked; matching headings are §4.2, §4.14,
   logarithm is defined.
 - **Logarithm to base a**, [4.2.8](https://dlmf.nist.gov/4.2.E8):
   `DLMF.Elementary.complexLogb` in
-  [LogExpBasic](DLMF/Elementary/LogExpBasic.lean#L322), and Mathlib `Real.logb`
+  [LogExpBasic](DLMF/Elementary/Basic/LogExp.lean#L322), and Mathlib `Real.logb`
   in [Log/Base](.lake/packages/mathlib/Mathlib/Analysis/SpecialFunctions/Log/Base.lean#L44).
   The complex definition divides principal logarithms and inherits their cuts.
 - **Natural base e and exponential**, [4.2.12–13](https://dlmf.nist.gov/4.2.E12),
@@ -209,7 +209,7 @@ Traversal: all §§4.1–4.48 checked; matching headings are §4.2, §4.14,
   definition objects in this inventory.
 - **General and principal powers**, [4.2.26–28](https://dlmf.nist.gov/4.2.E26):
   `DLMF.Elementary.generalPowerValues` and `closedPowerValues` in
-  [LogExpBasic](DLMF/Elementary/LogExpBasic.lean#L365);
+  [LogExpBasic](DLMF/Elementary/Basic/LogExp.lean#L365);
   Mathlib `Complex.cpow` selects the principal logarithm, `Real.rpow` treats
   real powers, and ordinary natural/integer powers cover the single-valued
   cases. The definitions are in
@@ -580,7 +580,7 @@ Traversal: all §§10.1–10.77 checked; matching headings are §10.2,
   the whole Y function.
 - **Hankel H¹ and H²**, [defining asymptotics 10.2.5–6](https://dlmf.nist.gov/10.2.E5):
   `DLMF.Bessel.hankelH1`, `hankelH2` in
-  [SecondKind](DLMF/Bessel/SecondKind.lean#L510), defined as `J ± iY`.
+  [Basic](DLMF/Bessel/Basic.lean#L63), defined as `J ± iY`.
 - **General cylinder function Cν**, [§10.2(ii) prose](https://dlmf.nist.gov/10.2.ii):
   finite constant linear combinations of the preceding functions; no separate
   local definition or structure for this notation.
@@ -620,7 +620,7 @@ These logarithmic formulas must be used with their parameter hypotheses.
 - **Spherical jₙ and modified i¹ₙ**, [10.47.3](https://dlmf.nist.gov/10.47.E3),
   [10.47.7](https://dlmf.nist.gov/10.47.E7):
   `DLMF.sphericalJ`, `DLMF.sphericalI` in
-  [Framework](DLMF/Core/Framework.lean#L179), defined by regularized series
+  [Framework](DLMF/Core/Basic.lean#L179), defined by regularized series
   that include their removable values at zero. These avoid interpreting a
   totalized square-root quotient as the value at zero.
 - **Spherical yₙ, h¹ₙ, h²ₙ**,
@@ -782,7 +782,7 @@ Traversal: all §§14.1–14.34 checked; matching headings are §14.3,
   meaningful where classical Q has parameter poles. Separate logarithms of
   `z-1` and `z+1` preserve continuation from `z > 1` on the DLMF cut.
   The order-zero functions `legendreP` in [Basic](DLMF/Legendre/Basic/Functions.lean#L23)
-  and `legendreQ` in [SecondKind](DLMF/Legendre/SecondKind.lean#L105)
+  and `legendreQ` in [Functions](DLMF/Legendre/Basic/Functions.lean#L47)
   are separate definitions with their own representations.
 - **Olver's regularized hypergeometric F-bold**, [14.3.3](https://dlmf.nist.gov/14.3.E3):
   `DLMF.Hypergeometric.regularizedGaussHG`, as detailed in Chapter 15.
@@ -1112,7 +1112,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
   cubic/quartic square-root curve. The particular functions below are defined.
 - **Legendre incomplete F, E, D and Π**, [19.2.4–7](https://dlmf.nist.gov/19.2.E4):
   `DLMF.EllipticIntegrals.incEllIntFk`, `incEllIntEk`, `incEllIntDk`,
-  `incEllIntPik` in [Legendre](DLMF/EllipticIntegrals/Legendre.lean#L147),
+  `incEllIntPik` in [Legendre](DLMF/EllipticIntegrals/Basic/Legendre.lean#L185),
   complex segment integrals using principal square roots and a principal-value
   construction for interior Π poles. The Π argument is the characteristic
   `α²` itself, followed by modulus k. Independent real parameter-m integrals
@@ -1127,7 +1127,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
   `DLMF.JacobiElliptic.compEllIntKk` in
   [Definitions](DLMF/JacobiElliptic/Basic/Definitions.lean#L93) is a complex
   t-integral; `DLMF.EllipticIntegrals.compEllIntEk`, `compEllIntDk`,
-  `compEllIntPik` in [Legendre](DLMF/EllipticIntegrals/Legendre.lean#L180)
+  `compEllIntPik` in [Legendre](DLMF/EllipticIntegrals/Basic/Legendre.lean#L204)
   specialize the amplitude to π/2. Real parameter-m K/E are
   `DLMF.Elliptic.Real.compEllIntKm`, `compEllIntEm` in
   [Complete](DLMF/Elliptic/Basic/Integrals.lean#L38), and real Π is
@@ -1137,12 +1137,12 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 - **Complementary K-prime and E-prime**, [19.2.8_1–9](https://dlmf.nist.gov/19.2.E8_1):
   `DLMF.JacobiElliptic.compEllIntKpk` is the literal complementary-modulus
   integral; `DLMF.EllipticIntegrals.cCompEllIntKk`, `cCompEllIntEk` in
-  [Legendre](DLMF/EllipticIntegrals/Legendre.lean#L197) include the extra
+  [Legendre](DLMF/EllipticIntegrals/Basic/Legendre.lean#L215) include the extra
   continuation terms on the left half-plane. These are materially different
   branch constructions, not interchangeable aliases for `K(sqrt(1-k²))`.
 - **Bulirsch cel, el1, el2 and el3**, [19.2.11–16](https://dlmf.nist.gov/19.2.E11):
   `DLMF.EllipticIntegrals.bulirschCel`, `bulirschEl1`, `bulirschEl2`,
-  `bulirschEl3` in [Legendre](DLMF/EllipticIntegrals/Legendre.lean#L222).
+  `bulirschEl3` in [Legendre](DLMF/EllipticIntegrals/Basic/Legendre.lean#L265).
   The complementary modulus is complex; coefficients/characteristic p are real
   where typed so, and the specified singular cases use principal values.
 - **Elementary degenerate RC**, [19.2.17](https://dlmf.nist.gov/19.2.E17):
@@ -1339,12 +1339,13 @@ Traversal: all §§23.1–23.24 checked; matching sections are §23.2 and §23.1
   doubled integer weight `ℓ₂`; this is not simply an alias for Mathlib's
   integral-weight `ModularForm` and `CuspForm` structures.
 - **Modular λ and Klein J**, [23.15.6–7](https://dlmf.nist.gov/23.15.E6):
-  `DLMF.Weierstrass.modularLambda`, `kleinJ` in
-  [ModularFunctions](DLMF/Weierstrass/ModularFunctions.lean#L112).
+  `DLMF.Weierstrass.modularLambda` in
+  [Modular](DLMF/Weierstrass/Basic/Modular.lean#L106), and `ModularForm.kleinJ`
+  = E₄³/(E₄³ − E₆²) in
+  [KleinJSurjective](DLMFMathlib/NumberTheory/ModularForms/KleinJSurjective.lean#L38).
   J uses DLMF's normalization, so the classical j-invariant has an extra
-  factor 1728. `DLMFMathlib`'s `p3wJ` in
-  [KleinJSurjective](DLMFMathlib/NumberTheory/ModularForms/KleinJSurjective.lean#L33)
-  is an independent Eisenstein-series quotient with that same J normalization.
+  factor 1728. The theta formula 23.15.7 is the theorem
+  `DLMF.Weierstrass.kleinJ_eq_jacobiTheta`.
 - **Dedekind eta and θ₁ derivative**, [23.15.8–9](https://dlmf.nist.gov/23.15.E8):
   the derivative is `DLMF.Theta.jacobiThetaOneDerivNullTau`; Mathlib's
   `ModularForm.eta` construction in
@@ -1368,7 +1369,7 @@ are numerical and introduce no further functions.
   the real evaluation `bernoulliFun` in
   [ZetaValues](.lake/packages/mathlib/Mathlib/NumberTheory/ZetaValues.lean#L48),
   and complex-evaluation wrapper `DLMF.BernoulliEuler.bernoulliPolyB` in
-  [Basic](DLMF/BernoulliEuler/Basic.lean#L51). DLMF uses `B₁=-1/2`;
+  [Polynomials](DLMF/BernoulliEuler/Basic/Polynomials.lean#L62). DLMF uses `B₁=-1/2`;
   Mathlib `bernoulli'` has the other sign convention and is not its direct equivalent.
   The native formal generating function `bernoulliPowerSeries` is defined in
   [Bernoulli](.lake/packages/mathlib/Mathlib/NumberTheory/Bernoulli.lean#L266).
@@ -1376,7 +1377,7 @@ are numerical and introduce no further functions.
   `Polynomial.euler`, `eulerNumber`, `eulerFun` in
   [EulerPolynomials](DLMFMathlib/NumberTheory/EulerPolynomials.lean#L60),
   and complex wrapper `DLMF.BernoulliEuler.eulerPolyE` in
-  [Basic](DLMF/BernoulliEuler/Basic.lean#L56). The number normalization is
+  [Polynomials](DLMF/BernoulliEuler/Basic/Polynomials.lean#L67). The number normalization is
   `2ⁿ Eₙ(1/2)`, retaining DLMF's alternating even Euler numbers.
 - **Periodic Bernoulli and antiperiodic Euler functions**,
   [24.2.11–12](https://dlmf.nist.gov/24.2.E11):
@@ -1414,8 +1415,8 @@ Traversal: all §§25.1–25.21 checked; matching headings are §25.2
 ### §25.11(i): Hurwitz definition
 
 - **Hurwitz ζ(s,a)**, [25.11.1](https://dlmf.nist.gov/25.11.E1):
-  `DLMF.Confluent.hurwitzZetaComplex` in
-  [HurwitzEulerMaclaurin](DLMF/Zeta/HurwitzEulerMaclaurin.lean#L431), a complex-a
+  `DLMF.Zeta.hurwitzZetaComplex` in
+  [Hurwitz](DLMF/Zeta/Basic/Hurwitz.lean#L464), a complex-a
   Euler–Maclaurin limit using principal powers. Mathlib `hurwitzZeta` in
   [HurwitzZeta](.lake/packages/mathlib/Mathlib/NumberTheory/LSeries/HurwitzZeta.lean#L53)
   has a `UnitAddCircle` parameter; comparison with DLMF's positive real a
@@ -1437,11 +1438,12 @@ Traversal: all §§25.1–25.21 checked; matching headings are §25.2
   without a separate local function.
 - **Referenced polylogarithm**, [25.14.3](https://dlmf.nist.gov/25.14.E3),
   complementing [definition 25.12.10](https://dlmf.nist.gov/25.12.E10):
-  `DLMF.Zeta.polylogSeriesC`, `polylog` in
-  [Polylog](DLMF/Zeta/Polylog.lean#L82), and natural-order series
-  `DLMF.Polylog.polylogSeries` in [Basic](DLMF/Polylog/Basic.lean#L29).
+  `DLMF.Zeta.polylogSeries`, `polylog` in
+  [Polylog](DLMF/Zeta/Basic/Polylog.lean#L74); the natural-order series is
+  `DLMF.Zeta.polylogSeries n`, developed in
+  [Series](DLMF/Polylog/Basic/Series.lean#L1).
   The complex-order continuation has the same cut/fallback distinction as
-  Lerch Φ; the natural-order series is not its global continuation.
+  Lerch Φ; the series is not its global continuation.
 
 ### §25.15(i): Dirichlet L definitions
 
@@ -1585,7 +1587,7 @@ the definitions; displayed examples do not introduce new families.
   [prose around 26.12.18–19](https://dlmf.nist.gov/26.12.E18):
   `DLMF.Combinatorics.IsStrictShiftedPP`, `IsDescendingPP`, and
   `DescendingPPIn` in
-  [BoxFormula](DLMF/Combinatorics/PlanePartitions/BoxFormula.lean#L1089),
+  [PlanePartitions](DLMF/Combinatorics/Basic/PlanePartitions.lean#L142),
   using finite lists of rows rather than the unshifted triple-set representation.
 
 ### §26.14(i): Permutation statistics

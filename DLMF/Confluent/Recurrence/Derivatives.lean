@@ -15,7 +15,6 @@ contiguous relations and derivative identities for Whittaker's functions (DLMF �
 
 ## Main results
 
-* `hasDerivAt_kummerM_shift`: `M'(a,b,z) = (a/b) M(a+1,b+1,z)`.
 * `hasDerivAt_kummerU`, `deriv_kummerU`: `U'(a,b,z) = -a U(a+1,b+1,z)` for every second
   parameter, on the slit plane (DLMF 13.3.22).
 * `iteratedDeriv_kummerU`, `iterate_mulDerivMul_kummerU`, `iteratedDeriv_mul_cpow_kummerU`,
@@ -54,14 +53,6 @@ noncomputable section
 namespace DLMF.Confluent
 
 /-! ### Derivatives of Tricomi's function -/
-
-/-- Kummer's function has derivative `(a/b) M(a+1,b+1,z)`. -/
-theorem hasDerivAt_kummerM_shift {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
-    HasDerivAt (kummerM a b) (a / b * kummerM (a + 1) (b + 1) z) z := by
-  have h := (hasFPowerSeriesOnBall_kummerM (a := a) hb).analyticAt_of_mem (y := z) (by simp)
-  have hb0 : b ≠ 0 := by simpa using hb 0
-  rw [← deriv_kummerM hb hb0]
-  exact h.differentiableAt.hasDerivAt
 
 /-- Derivative of Tricomi's function at noninteger second parameter. -/
 theorem hasDerivAt_kummerU_of_mem (a : ℂ) {c w : ℂ} (hc : c ∈ integerComplement)

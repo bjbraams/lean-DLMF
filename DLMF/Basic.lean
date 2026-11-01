@@ -6,6 +6,10 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Airy.Basic
+public import DLMF.Airy.Basic.Connections
+public import DLMF.Airy.Basic.Maclaurin
+public import DLMF.Airy.Basic.ModulusPhase
+public import DLMF.Airy.Basic.Scorer
 public import DLMF.AlgebraicAnalytic.Algebra.Basic
 public import DLMF.AlgebraicAnalytic.Calculus.Basic
 public import DLMF.AlgebraicAnalytic.Complex.Basic
@@ -29,16 +33,22 @@ public import DLMF.Bessel.Basic
 public import DLMF.CoalescingSaddles.Basic
 public import DLMF.Combinatorics.Basic
 public import DLMF.Confluent.Basic
+public import DLMF.Constants.Basic
+public import DLMF.Core.Basic
 public import DLMF.Coulomb.Basic
 public import DLMF.Coulomb.Energy.Basic
+public import DLMF.Elementary.Basic
 public import DLMF.Elliptic.Basic
 public import DLMF.EllipticIntegrals.Basic
 public import DLMF.ErrorFunctions.Basic
 public import DLMF.ExpIntegrals.Basic
 public import DLMF.Gamma.Basic
+public import DLMF.Gamma.Basic.BarnesG
+public import DLMF.Gamma.Basic.ScaledGamma
 public import DLMF.GeneralizedHypergeometric.Appell.Basic
 public import DLMF.GeneralizedHypergeometric.Basic
 public import DLMF.Heun.Basic
+public import DLMF.Heun.Basic.Equation
 public import DLMF.Hypergeometric.Basic
 public import DLMF.IncompleteGamma.Basic
 public import DLMF.JacobiElliptic.Basic
@@ -50,6 +60,7 @@ public import DLMF.Mathieu.Hill.Basic
 public import DLMF.Mathieu.Modified.Basic
 public import DLMF.Mathieu.Noninteger.Basic
 public import DLMF.MatrixArgument.Basic
+public import DLMF.NumberTheory.Basic
 public import DLMF.OrthogonalPolynomials.Basic
 public import DLMF.Painleve.Basic
 public import DLMF.ParabolicCylinder.Basic
@@ -65,6 +76,8 @@ public import DLMF.Struve.Basic
 public import DLMF.Theta.Basic
 public import DLMF.Weierstrass.Basic
 public import DLMF.WignerSymbols.Basic
+public import DLMF.WignerSymbols.Basic.TriangleConditions
+public import DLMF.Zeta.Basic
 
 /-!
 # The foundational DLMF collection
@@ -72,5 +85,5 @@ public import DLMF.WignerSymbols.Basic
 This entry point imports all `Basic.lean` entry points and their foundational `Basic/`
 submodules: the definitions of the library with their minimal supporting APIs. Differential,
 integral, asymptotic and transformation results are in separate theorem modules. External
-libraries, `DLMFMathlib` and `DLMF.Core.*` provide the general mathematical framework.
+libraries, `DLMFMathlib` and `DLMF.Core.Basic` provide the general mathematical framework.
 -/

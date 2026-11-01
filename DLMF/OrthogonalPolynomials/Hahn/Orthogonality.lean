@@ -243,16 +243,6 @@ theorem summable_charlierWeight {a : ℝ} (ha : 0 < a) (K : ℕ) :
   have := ((tendsto_one_div_add_atTop_nhds_zero_nat.const_mul a).mul (tendsto_succ_div_pow K))
   simpa using this
 
-/-- `C_0(x; a) = 1`. -/
-theorem charlier_zero (a x : ℂ) : charlier a 0 x = 1 := by
-  simp [charlier, terminatingHG, poch_zero]
-
-/-- `C_1(x; a) = 1 - x/a`. -/
-theorem charlier_one {a : ℂ} (ha : a ≠ 0) (x : ℂ) : charlier a 1 x = 1 - x / a := by
-  simp [charlier, terminatingHG, Finset.sum_range_succ, poch_zero, poch_one]
-  field_simp
-  ring
-
 /-- The Charlier recurrence in the form `x C_n = …`. -/
 theorem charlier_mul_x {a : ℂ} (ha : a ≠ 0) (n : ℕ) (x : ℂ) :
     x * charlier a n x = (n + a) * charlier a n x - a * charlier a (n + 1) x -
@@ -315,10 +305,6 @@ theorem summable_meixnerWeight {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c
   have := (((tendsto_one_div_add_atTop_nhds_zero_nat.const_mul (β - 1)).const_add 1).mul_const
     c).mul (tendsto_succ_div_pow K)
   simpa using this
-
-/-- `M_0(x; β, c) = 1`. -/
-theorem meixner_zero (β c x : ℂ) : meixner β c 0 x = 1 := by
-  simp [meixner, terminatingHG, poch_zero]
 
 end DiscreteOrtho
 
@@ -564,10 +550,6 @@ theorem meixner_orthogonality {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c 
   · subst hmn
     simpa only [hwdef, mul_div_assoc, mul_assoc] using hN m
   · simpa only [hwdef, mul_div_assoc, mul_assoc] using hO m n hmn
-
-/-- `K_0(x; p, N) = 1`. -/
-theorem krawtchouk_zero (p : ℂ) (N : ℕ) (x : ℂ) : krawtchouk p N 0 x = 1 := by
-  simp [krawtchouk, terminatingHG, poch_zero]
 
 /-- The Krawtchouk recurrence in the degree at the lattice points (DLMF 18.22.2). -/
 theorem krawtchouk_mul_x_nat {p : ℂ} (hp : p ≠ 0) {N n m : ℕ} (hn : n ≤ N) (hm : m ≤ N) :

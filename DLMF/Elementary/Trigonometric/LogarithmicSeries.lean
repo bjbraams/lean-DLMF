@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import DLMFMathlib.NumberTheory.BernoulliTaylor
 public import DLMFMathlib.Analysis.Complex.TrigSeriesExtension
 public import Mathlib.Analysis.Convex.SpecificFunctions.Deriv

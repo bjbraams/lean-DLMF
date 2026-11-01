@@ -78,23 +78,6 @@ theorem ne_one_of_mem_connLens {z : ℂ} (hz : z ∈ connLens) : z ≠ 1 := by
   rintro rfl
   simp [connLens] at hz
 
-/-- `₂F₁(a, b; c; ·)` is analytic on the open unit disk. -/
-theorem analyticAt_ordinaryHypergeometric {a b c z : ℂ} (hz : ‖z‖ < 1) :
-    AnalyticAt ℂ (₂F₁ a b c) z :=
-  (hasFPowerSeriesOnBall_ordinaryHypergeometric a b c).analyticAt_of_mem
-    (mem_eball_one_of_norm_lt_one hz)
-
-/-- The first local solution at `1` is analytic on the disk `‖1 - z‖ < 1`. -/
-theorem analyticAt_oneFirst {a b c z : ℂ} (hz : ‖1 - z‖ < 1) : AnalyticAt ℂ (oneFirst a b c) z :=
-  (analyticAt_ordinaryHypergeometric hz).comp (analyticAt_const.sub analyticAt_id)
-
-/-- The second local solution at `1` is analytic on the disk `‖1 - z‖ < 1` inside the slit-plane
-  condition. -/
-theorem analyticAt_oneSecond {a b c z : ℂ} (hz : ‖1 - z‖ < 1) (hs : 1 - z ∈ slitPlane) :
-    AnalyticAt ℂ (oneSecond a b c) z :=
-  ((analyticAt_const.sub analyticAt_id).cpow analyticAt_const hs).mul
-    ((analyticAt_ordinaryHypergeometric hz).comp (analyticAt_const.sub analyticAt_id))
-
 /-- On the lens, `₂F₁(a,b;c;z)` is a combination of the two local solutions at `z = 1`. -/
 theorem exists_connection_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (hC : ∀ k : ℕ, a + b - c + 1 ≠ -(k : ℂ)) (hS : ∀ k : ℕ, c - a - b + 1 ≠ -(k : ℂ))

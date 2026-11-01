@@ -6,10 +6,15 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.ErrorFunctions.Basic.Functions
+public import DLMF.ErrorFunctions.Basic.Properties
+public import DLMF.ErrorFunctions.Basic.Inverse
 
 /-!
 # Definitions of error functions and related primitives
 
 This entry point exposes the complex Faddeeva, Dawson, Fresnel and Goodwin–Staton functions and
-the alternative normalizations of DLMF §7.1, defined in `DLMF.ErrorFunctions.Basic.Functions`.
+the alternative normalizations of DLMF §7.1, the repeated integrals of `erfc` and the Voigt
+functions, defined in `DLMF.ErrorFunctions.Basic.Functions`; their basic properties
+(`DLMF.ErrorFunctions.Basic.Properties`); and the inverse error functions
+(`DLMF.ErrorFunctions.Basic.Inverse`).
 -/

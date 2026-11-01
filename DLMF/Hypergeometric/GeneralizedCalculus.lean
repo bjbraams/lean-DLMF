@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Generalized
+public import DLMF.Hypergeometric.Basic.GaussSeries
 
 /-!
 # Calculus of the generalized hypergeometric function (Duverney §§3.4–3.6)
@@ -23,6 +24,11 @@ parameters.
   is a multiple of `𝐅` when no `bⱼ` is a nonpositive integer (Duverney Thm 3.8).
 * `regularized1F2_one_inhomogeneous_ode`: the inhomogeneous equation for `₁F₂(1;b,c;z)` with
   its reciprocal-Gamma forcing, for every parameter.
+
+## Implementation notes
+
+The expansion `regularizedHGFun_eq_tsum'` is in
+`DLMF.Hypergeometric.Basic.GaussSeries`.
 
 ## References
 
@@ -64,12 +70,6 @@ theorem regularizedHGFunCoeff_succ_deriv (a b : Multiset ℂ) (n : ℕ) :
   have hn : ((n : ℂ) + 1) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
   push_cast
   field_simp
-
-/-- The regularized function as a `tsum` of its coefficients. -/
-theorem regularizedHGFun_eq_tsum' (a b : Multiset ℂ) (z : ℂ) :
-    regularizedHGFun a b z = ∑' n : ℕ, regularizedHGFunCoeff a b n * z ^ n := by
-  simp only [regularizedHGFun, FormalMultilinearSeries.sum, regularizedHGFunSeries,
-    ofScalars_apply_eq, smul_eq_mul]
 
 /-- **Derivative of the generalized hypergeometric function** (Duverney Thm 3.11; DLMF 16.3.1):
 `𝐅'(a; b; z) = (∏ a) 𝐅(a+1; b+1; z)` inside the disc of convergence, for all parameters. -/

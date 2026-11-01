@@ -91,10 +91,6 @@ theorem charlier_generating_function (a : ℂ) (x : ℕ) (z : ℂ) :
     rw [show z / a = (-a⁻¹) * (-z) by ring, mul_pow]
     ring
 
-/-- The Meixner–Pollaczek polynomial of degree zero. -/
-theorem meixnerPollaczek_zero (lam phi x : ℂ) : meixnerPollaczek lam phi 0 x = 1 := by
-  simp [meixnerPollaczek, terminatingHG, poch_zero]
-
 /-- `e^{iφ} + e^{-iφ} = 2 cos φ` and `e^{-iφ} - e^{iφ} = -2 i sin φ`, in the form used below. -/
 theorem exp_I_mul_add_recip (phi : ℂ) :
     exp (I * phi) + (exp (I * phi))⁻¹ = 2 * cos phi ∧

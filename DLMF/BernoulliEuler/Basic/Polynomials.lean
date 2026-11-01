@@ -74,7 +74,8 @@ theorem aeval_ofReal_eq_eval_map (p : ℚ[X]) (x : ℝ) :
   rw [h, aeval_def, eval₂_eq_eval_map]; rfl
 
 /-- Complex evaluation of a rational polynomial at a rational point. -/
-private lemma aeval_ratCast_eq_eval (p : ℚ[X]) (x : ℚ) : aeval (x : ℂ) p = ((p.eval x : ℚ) : ℂ) := by
+private lemma aeval_ratCast_eq_eval (p : ℚ[X]) (x : ℚ) :
+    aeval (x : ℂ) p = ((p.eval x : ℚ) : ℂ) := by
   have h := Polynomial.aeval_algebraMap_apply (R := ℚ) (A := ℚ) (B := ℂ) x p
   rw [show (algebraMap ℚ ℂ) x = (x : ℂ) from rfl] at h
   rw [h, Polynomial.coe_aeval_eq_eval]; rfl

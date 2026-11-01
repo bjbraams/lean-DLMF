@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.JacobiElliptic.Basic.Definitions
+public import DLMF.JacobiElliptic.Basic.ThetaShifts
 
 public import DLMF.Theta.Identities
 public import DLMF.Elliptic.ThetaAGM
@@ -14,24 +14,15 @@ public import Carlson.Elliptic.Addition
 /-!
 # Theta constants and elliptic quarter periods
 
-Nonvanishing of the theta constants, the half-period shifts of the theta functions, and the
-position of the lattice parameter `τ = iK'/K` in the upper half-plane: the preparation for the
-modulus inversion DLMF 22.2.2.
-
-## Main definitions
-
-* `jacobiThetaShiftFactor`: the multiplier `e^{-iπτ/4 - iζ}` of the shift `ζ ↦ ζ + πτ/2`.
+Nonvanishing of the theta constants and the position of the lattice parameter `τ = iK'/K` in
+the upper half-plane: the preparation for the modulus inversion DLMF 22.2.2. The half-period
+shifts of the theta functions and the nome are in `DLMF.JacobiElliptic.Basic.ThetaShifts`.
 
 ## Main results
 
 * `jacobiThetaTwoTau_zero_ne_zero`, `jacobiThetaThreeTau_zero_ne_zero`,
   `jacobiThetaFourTau_zero_ne_zero`: `θ_j(0|τ) ≠ 0` for `Im τ > 0`, by the Jacobi triple
   product.
-* `jacobiThetaOneTau_add_pi_div_two`, …, `jacobiThetaFourTau_add_pi_div_two`: the shifts by
-  `π/2`.
-* `jacobiThetaOneTau_add_pi_mul_div_two`, …, `jacobiThetaFourTau_add_pi_mul_div_two`: the
-  shifts by `πτ/2`.
-* `jacobiNomek_eq_exp_tau`: the nome is `q = e^{iπτ}` (DLMF 22.2.1, 22.2.12).
 * `jacobiTauk_im_pos`: `Im τ > 0` for `k ∈ jacobiModulusDomain`.
 * `compEllIntKk_ofReal`, `compEllIntKpk_ofReal`: for real `k` the complex `K(k)`, `K'(k)` are
   the real complete integrals.
@@ -147,85 +138,6 @@ theorem jacobiThetaTwoTau_zero_ne_zero {τ : ℂ} (hτ : 0 < τ.im) : jacobiThet
     rw [norm_pow] at h1
     have : ‖cexp (2 * π * I * τ)‖ ^ (n + 1) < 1 := pow_lt_one₀ (norm_nonneg _) hQ' (by omega)
     linarith
-
-/-- `θ₁(0|τ) = 0`. -/
-theorem jacobiThetaOneTau_zero (τ : ℂ) : jacobiThetaOneTau 0 τ = 0 := by
-  have h := jacobiThetaOneTau_neg 0 τ
-  rw [neg_zero] at h
-  exact CharZero.eq_neg_self_iff.mp h
-
-/-- `θ₁(ζ + π/2) = θ₂(ζ)`. -/
-theorem jacobiThetaOneTau_add_pi_div_two (ζ τ : ℂ) :
-    jacobiThetaOneTau (ζ + π / 2) τ = jacobiThetaTwoTau ζ τ := by
-  rw [jacobiThetaOneTau, show ζ + π / 2 + π / 2 = ζ + π by ring, jacobiThetaTwoTau_add_pi, neg_neg]
-
-/-- `θ₂(ζ + π/2) = -θ₁(ζ)`. -/
-theorem jacobiThetaTwoTau_add_pi_div_two (ζ τ : ℂ) :
-    jacobiThetaTwoTau (ζ + π / 2) τ = -jacobiThetaOneTau ζ τ := by
-  rw [jacobiThetaOneTau, neg_neg]
-
-/-- `θ₃(ζ + π/2) = θ₄(ζ)`. -/
-theorem jacobiThetaThreeTau_add_pi_div_two (ζ τ : ℂ) :
-    jacobiThetaThreeTau (ζ + π / 2) τ = jacobiThetaFourTau ζ τ := rfl
-
-/-- `θ₄(ζ + π/2) = θ₃(ζ)`. -/
-theorem jacobiThetaFourTau_add_pi_div_two (ζ τ : ℂ) :
-    jacobiThetaFourTau (ζ + π / 2) τ = jacobiThetaThreeTau ζ τ := by
-  rw [jacobiThetaFourTau, show ζ + π / 2 + π / 2 = ζ + π by ring, jacobiThetaThreeTau_add_pi]
-
-/-- The multiplier `e^{-iπτ/4 - iζ}` of the half-period shift `ζ ↦ ζ + πτ/2`. -/
-def jacobiThetaShiftFactor (ζ τ : ℂ) : ℂ := cexp (-(π * I * τ / 4 + I * ζ))
-
-/-- Nonvanishing under the stated hypotheses: `jacobiThetaShiftFactor ζ τ ≠ 0`. -/
-theorem jacobiThetaShiftFactor_ne_zero (ζ τ : ℂ) : jacobiThetaShiftFactor ζ τ ≠ 0 := Complex.exp_ne_zero _
-
-/-- `θ₃(ζ + πτ/2) = e^{-iπτ/4-iζ} θ₂(ζ)`. -/
-theorem jacobiThetaThreeTau_add_pi_mul_div_two (ζ τ : ℂ) :
-    jacobiThetaThreeTau (ζ + π * τ / 2) τ = jacobiThetaShiftFactor ζ τ * jacobiThetaTwoTau ζ τ := by
-  rw [jacobiThetaTwoTau, jacobiThetaShiftFactor, ← mul_assoc, ← exp_add, neg_add_cancel, exp_zero,
-    one_mul]
-
-/-- `θ₂(ζ + πτ/2) = e^{-iπτ/4-iζ} θ₃(ζ)`. -/
-theorem jacobiThetaTwoTau_add_pi_mul_div_two (ζ τ : ℂ) :
-    jacobiThetaTwoTau (ζ + π * τ / 2) τ = jacobiThetaShiftFactor ζ τ * jacobiThetaThreeTau ζ τ := by
-  rw [jacobiThetaTwoTau, show ζ + π * τ / 2 + π * τ / 2 = ζ + π * τ by ring,
-    jacobiThetaThreeTau_add_pi_mul, jacobiThetaShiftFactor, ← mul_assoc, ← exp_add]
-  congr 2
-  ring
-
-/-- Identity under the stated parameter and domain assumptions: `cexp (-(π / 2 * I)) = -I`. -/
-private lemma exp_neg_pi_div_two_mul_I_eq_neg_I : cexp (-(π / 2 * I)) = -I := by
-  rw [Complex.exp_neg, Complex.exp_pi_div_two_mul_I, inv_I]
-
-/-- `θ₁(ζ + πτ/2) = i e^{-iπτ/4-iζ} θ₄(ζ)`. -/
-theorem jacobiThetaOneTau_add_pi_mul_div_two (ζ τ : ℂ) :
-    jacobiThetaOneTau (ζ + π * τ / 2) τ = I * jacobiThetaShiftFactor ζ τ * jacobiThetaFourTau ζ τ := by
-  rw [jacobiThetaOneTau, jacobiThetaTwoTau, show ζ + π * τ / 2 + π / 2 + π * τ / 2 =
-    (ζ + π / 2) + π * τ by ring, jacobiThetaThreeTau_add_pi_mul, jacobiThetaShiftFactor,
-    ← jacobiThetaFourTau, ← mul_assoc, ← exp_add]
-  have h : π * I * τ / 4 + I * (ζ + π * τ / 2 + π / 2) + (-(π * I * τ) - 2 * I * (ζ + π / 2)) =
-      -(π * I * τ / 4 + I * ζ) + (-(π / 2 * I)) := by ring
-  rw [h, exp_add, exp_neg_pi_div_two_mul_I_eq_neg_I]
-  ring
-
-/-- `θ₄(ζ + πτ/2) = i e^{-iπτ/4-iζ} θ₁(ζ)`. -/
-theorem jacobiThetaFourTau_add_pi_mul_div_two (ζ τ : ℂ) :
-    jacobiThetaFourTau (ζ + π * τ / 2) τ = I * jacobiThetaShiftFactor ζ τ * jacobiThetaOneTau ζ τ := by
-  rw [jacobiThetaFourTau, show ζ + π * τ / 2 + π / 2 = (ζ + π / 2) + π * τ / 2 by ring,
-    jacobiThetaThreeTau_add_pi_mul_div_two, jacobiThetaTwoTau_add_pi_div_two, jacobiThetaShiftFactor,
-    jacobiThetaShiftFactor, show -(π * I * τ / 4 + I * (ζ + π / 2)) =
-      -(π * I * τ / 4 + I * ζ) + (-(π / 2 * I)) by ring, exp_add, exp_neg_pi_div_two_mul_I_eq_neg_I]
-  ring
-
-/-! ### Basic relations between the parametrizations -/
-
-/-- The nome is `q = e^{iπτ}` with `τ = iK'/K` (DLMF 22.2.1 and 22.2.12). -/
-@[dlmf 22.2.E1]
-theorem jacobiNomek_eq_exp_tau (k : ℂ) : jacobiNomek k = cexp (π * I * jacobiTauk k) := by
-  rw [jacobiNomek, jacobiTauk]
-  congr 1
-  rw [mul_div_assoc', ← mul_assoc, mul_assoc (π : ℂ) I I, I_mul_I]
-  ring
 
 /-! ### `Im τ > 0`: positivity of `Re(K' conj K)` -/
 /-- Sign facts for the principal square root `w^{1/2}`. -/

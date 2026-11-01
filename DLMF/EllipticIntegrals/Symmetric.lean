@@ -7,17 +7,22 @@ module
 
 public import Carlson.Elliptic.ReductionTables
 public import Carlson.Elliptic.Standard
-public import DLMF.EllipticIntegrals.Basic.Symmetric
+public import DLMF.EllipticIntegrals.Basic.SymmetricProperties
 public import DLMF.EllipticIntegrals.SymmetricBounds
 
 /-!
 # Symmetric elliptic integrals: Carlson bridges and elementary identities
 
 DLMF's symmetric standard integrals `R_F`, `R_J`, `R_G`, `R_D`, `R_C` and the multivariate
-hypergeometric `R`-function `R_{-a}(𝐛; 𝐳)` of §19.16(ii), defined in
+hypergeometric `R`-function `R_{-a}(𝐛; 𝐳)` of §19.16(ii). The standard integrals are defined in
 `DLMF.EllipticIntegrals.Basic.Symmetric` by DLMF's own integrals (19.16.1), (19.16.2),
-(19.16.2_5), (19.16.5), (19.2.17) and (19.16.8). This file relates them to Carlson's functions
-in `lean-codes` and proves the elementary identities of §§19.15–19.16.
+(19.16.2_5), (19.16.5) and (19.2.17); the `R`-function (19.16.8) is defined here, through
+Carlson's `R`-function in `lean-codes`. This file relates them to Carlson's functions and
+proves the elementary identities of §§19.15–19.16.
+
+## Main definitions
+
+* `symEllIntR`: the multivariate hypergeometric function `R_{-a}(𝐛; 𝐳)` (DLMF 19.16.8).
 
 ## Main results
 
@@ -30,10 +35,9 @@ in `lean-codes` and proves the elementary identities of §§19.15–19.16.
   stronger than DLMF).
 * `symEllIntRF_zero_left`, `symEllIntRD_zero_left`, `symEllIntRJ_zero_left`,
   `symEllIntRG_zero_left`: the complete cases (DLMF 19.16.20–19.16.23).
-* `symEllIntRD_eq_integral`, `symEllIntRC_eq_symEllIntRF`, `symEllIntRJ_eq_hyperelliptic`:
-  DLMF 19.16.5–19.16.7.
-* `symEllIntRF_comm_left`, `symEllIntRJ_comm_left`, `symEllIntRG_comm_left`,
-  `symEllIntR_comp_perm` and their variants: permutation symmetry (§19.15, DLMF 19.16.8).
+* `symEllIntR_comp_perm`: permutation symmetry of the `R`-function (DLMF 19.16.8); the
+  symmetry of the standard integrals and DLMF 19.16.5–19.16.7 are in
+  `DLMF.EllipticIntegrals.Basic.SymmetricProperties`.
 * `symEllIntR_mul`, `symEllIntR_const`: homogeneity and the value at equal arguments
   (DLMF 19.16.11).
 * `symEllIntRF_one_one_one`, `symEllIntRJ_one_one_one_one`: the normalizations of §19.16(i).
@@ -82,33 +86,20 @@ open scoped Real Topology
 
 namespace DLMF.EllipticIntegrals
 
-/-! ### Elementary facts -/
+/-! ### The multivariate hypergeometric `R`-function -/
 
-/-- Identity under the stated parameter and domain assumptions: `(w ^ (1 / 2 : ℂ))⁻¹ = w ^ (-1 / 2
-: ℂ)`. -/
-theorem inv_cpow_half_eq_cpow_neg_half (w : ℂ) : (w ^ (1 / 2 : ℂ))⁻¹ = w ^ (-1 / 2 : ℂ) := by
-  rw [show (-1 / 2 : ℂ) = -(1 / 2) by ring, cpow_neg]
-
-/-- Identity under the stated parameter and domain assumptions: `w ^ (1 / 2 : ℂ) * w ^ (1 / 2 : ℂ)
-= w`. -/
-theorem cpow_half_mul_cpow_half (w : ℂ) : w ^ (1 / 2 : ℂ) * w ^ (1 / 2 : ℂ) = w := by
-  rw [← sq, show (1 / 2 : ℂ) = ((2 : ℕ) : ℂ)⁻¹ by norm_num, cpow_nat_inv_pow _ two_ne_zero]
-
-/-- The stated relation follows from the given hypotheses: `¬ IsNegReal p`. -/
-theorem not_isNegReal_of_mem_slitPlane {p : ℂ} (hp : p ∈ slitPlane) : ¬ IsNegReal p := by
-  rintro ⟨h1, h2⟩
-  rcases mem_slitPlane_iff.mp hp with h | h
-  · linarith
-  · exact h h1
-
-/-- Formula under the stated hypotheses: `(t : ℂ) + z ∈ slitPlane`. -/
-private lemma ofReal_add_mem_slitPlane_of_symEllIntArg {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : SymEllIntArg z) :
-    (t : ℂ) + z ∈ slitPlane := by
-  rcases hz with hz | rfl
-  · rcases mem_slitPlane_iff.mp hz with h | h
-    · exact mem_slitPlane_iff.mpr (Or.inl (by simp; linarith))
-    · exact mem_slitPlane_iff.mpr (Or.inr (by simpa using h))
-  · simpa using ofReal_mem_slitPlane.mpr ht
+/-- DLMF 19.16.8: the multivariate hypergeometric function `R_{-a}(𝐛; 𝐳)` (written
+`R(a; 𝐛; 𝐳)` before 1969). On the product slit plane it is Carlson's `R`-function
+`Carlson.carlsonR (-a) b z` (all complex `a` and `𝐛`; DLMF's (19.16.9) has real `𝐛` with
+`∑ bⱼ > a > 0`, and Carlson's continuation in the parameters is used elsewhere in DLMF, e.g.
+`R_{1/2}` in (19.16.17)). When some `zⱼ` lies off the slit plane (DLMF allows `zⱼ = 0`
+"without destroying convergence", §19.16(iii)), the value is the limit from the slit domain;
+where that limit does not exist the value is junk. -/
+@[dlmf 19.16.E8]
+def symEllIntR {ι : Type*} [Fintype ι] (a : ℂ) (b z : ι → ℂ) : ℂ := by
+  classical
+  exact if z ∈ Carlson.carlsonRSlitDomain then Carlson.carlsonR (-a) b z
+    else limUnder (𝓝[Carlson.carlsonRSlitDomain] z) (Carlson.carlsonR (-a) b)
 
 /-- Identity under the stated parameter and domain assumptions: `symEllIntR a b z =
 Carlson.carlsonR (-a) b z`. -/
@@ -207,16 +198,6 @@ theorem symEllIntRF_eq_carlsonRF {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y �
   rw [symEllIntRF_eq_symEllIntR hx hy hz, symEllIntR_of_mem _ _ (vec3_mem_carlsonRSlitDomain hx hy hz),
     Carlson.carlsonRF]
   congr 1; ring
-
-/-- Identity under the stated parameter and domain assumptions: `w ^ (-(3 / 2) : ℂ) = w ^ (-(1 /
-2) : ℂ) * w⁻¹`. -/
-theorem cpow_neg_three_halves_eq {w : ℂ} (hw : w ≠ 0) :
-    w ^ (-(3 / 2) : ℂ) = w ^ (-(1 / 2) : ℂ) * w⁻¹ := by
-  rw [show -(3 / 2 : ℂ) = -(1 / 2) + -1 by norm_num, cpow_add _ _ hw, cpow_neg_one]
-
-/-- Nonvanishing under the stated hypotheses: `(t : ℂ) + z ≠ 0`. -/
-theorem ofReal_add_ne_zero_of_symEllIntArg {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : SymEllIntArg z) :
-    (t : ℂ) + z ≠ 0 := slitPlane_ne_zero (ofReal_add_mem_slitPlane_of_symEllIntArg ht hz)
 
 /-- DLMF 19.16.16: `R_J(x, y, z, p) = R_{-3/2}(1/2, 1/2, 1/2, 1; x, y, z, p)` on the slit plane
 (`p ∈ slitPlane`: no principal value). -/
@@ -345,70 +326,7 @@ theorem symEllIntRJ_zero_left {y z p : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ s
   simp only [symEllIntS, add_zero, mul_inv, inv_cpow_half_eq_cpow_neg_half, neg_div]
   ring
 
-/-! ### Degenerate cases and the hyperelliptic integral (19.16.5–19.16.7) -/
-
-/-- DLMF 19.16.5: `R_D(x, y, z) = (3/2) ∫₀^∞ dt / (s(t) (t + z))` (for `z` not a negative real;
-DLMF: `z ≠ 0`, `z ∈ ℂ \ (-∞, 0]`). -/
-@[dlmf 19.16.E5]
-theorem symEllIntRD_eq_integral {x y z : ℂ} (hz : ¬ IsNegReal z) :
-    symEllIntRD x y z = (3 / 2) * ∫ t in Ioi (0 : ℝ), (symEllIntS x y z t * ((t : ℂ) + z))⁻¹ := by
-  simp [symEllIntRD, symEllIntRJ, hz]
-
-/-- DLMF 19.16.6: `R_C(x, y) = R_F(x, y, y)`, **stronger than DLMF**: for every `x` and every
-`y` that is not a negative real (for `y < 0` DLMF's `R_C` is a principal value and `R_F(x, y, y)`
-is outside DLMF's domain). The integrands agree pointwise. -/
-@[dlmf 19.16.E6]
-theorem symEllIntRC_eq_symEllIntRF (x : ℂ) {y : ℂ} (hy : ¬ IsNegReal y) :
-    symEllIntRC x y = symEllIntRF x y y := by
-  simp only [symEllIntRC, symEllIntRF, hy, ↓reduceIte, symEllIntS, mul_assoc, cpow_half_mul_cpow_half]
-
-/-- DLMF 19.16.7: `R_J` is the degenerate case `x₄ = x₅ = p` of the hyperelliptic integral
-`(3/2) ∫₀^∞ dt / ∏_{j=1}^5 √(t + xⱼ)`; for `p` not a negative real (no principal value). -/
-@[dlmf 19.16.E7]
-theorem symEllIntRJ_eq_hyperelliptic (x y z : ℂ) {p : ℂ} (hp : ¬ IsNegReal p) :
-    symEllIntRJ x y z p =
-      (3 / 2) * ∫ t in Ioi (0 : ℝ), (∏ j : Fin 5, ((t : ℂ) + ![x, y, z, p, p] j) ^ (1 / 2 : ℂ))⁻¹ := by
-  simp only [symEllIntRJ, hp, ↓reduceIte, Fin.prod_univ_five, Matrix.cons_val_zero, Matrix.cons_val_one,
-    Matrix.cons_val_two, Matrix.cons_val_three, Matrix.cons_val_four, Matrix.head_cons,
-    Matrix.tail_cons, symEllIntS, mul_assoc, cpow_half_mul_cpow_half]
-
 /-! ### Symmetry, homogeneity and normalization -/
-
-/-- DLMF 19.15.p2 / 19.16.8: `R_F` is symmetric in its first two arguments (all arguments). -/
-@[dlmf 19.15]
-theorem symEllIntRF_comm_left (x y z : ℂ) : symEllIntRF y x z = symEllIntRF x y z := by
-  simp only [symEllIntRF, symEllIntS, mul_comm (((_ : ℂ) + y) ^ (1 / 2 : ℂ))]
-
-/-- `R_F` is symmetric in its last two arguments (all arguments). -/
-@[dlmf 19.15]
-theorem symEllIntRF_comm_right (x y z : ℂ) : symEllIntRF x z y = symEllIntRF x y z := by
-  simp only [symEllIntRF, symEllIntS, mul_assoc, mul_comm (((_ : ℂ) + z) ^ (1 / 2 : ℂ))]
-
-/-- `R_J(x, y, z, p)` is symmetric in its first two arguments (all arguments). -/
-@[dlmf 19.15]
-theorem symEllIntRJ_comm_left (x y z p : ℂ) : symEllIntRJ y x z p = symEllIntRJ x y z p := by
-  simp only [symEllIntRJ, symEllIntS, mul_comm (((_ : ℂ) + y) ^ (1 / 2 : ℂ))]
-
-/-- `R_J(x, y, z, p)` is symmetric in `y, z` (all arguments). -/
-@[dlmf 19.15]
-theorem symEllIntRJ_comm_right (x y z p : ℂ) : symEllIntRJ x z y p = symEllIntRJ x y z p := by
-  simp only [symEllIntRJ, symEllIntS, mul_assoc, mul_comm (((_ : ℂ) + z) ^ (1 / 2 : ℂ))]
-
-/-- `R_D(x, y, z)` is symmetric in `x, y` (DLMF 19.16.5; all arguments). -/
-theorem symEllIntRD_comm (x y z : ℂ) : symEllIntRD y x z = symEllIntRD x y z :=
-  symEllIntRJ_comm_left x y z z
-
-/-- `R_G` is symmetric in its first two arguments (all arguments). -/
-@[dlmf 19.15]
-theorem symEllIntRG_comm_left (x y z : ℂ) : symEllIntRG y x z = symEllIntRG x y z := by
-  unfold symEllIntRG symEllIntS
-  congr 2; funext t; ring
-
-/-- `R_G` is symmetric in its last two arguments (all arguments). -/
-@[dlmf 19.15]
-theorem symEllIntRG_comm_right (x y z : ℂ) : symEllIntRG x z y = symEllIntRG x y z := by
-  unfold symEllIntRG symEllIntS
-  congr 2; funext t; ring
 
 /-- DLMF 19.16.8: `R_{-a}(𝐛; 𝐳)` is unchanged when the same permutation is applied to `𝐛` and
 `𝐳` (slit-plane nodes). From `Carlson.regCarlsonR_comp_perm`. -/

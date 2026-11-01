@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.OrthogonalPolynomials.Basic.AskeyScheme
 public import DLMF.Confluent.Relations
 public import DLMF.OrthogonalPolynomials.Hahn
 /-!
@@ -52,41 +53,6 @@ noncomputable section
 set_option autoImplicit false
 
 namespace DLMF.OrthogonalPolynomials
-
-/-- Wilson polynomials in the polynomial argument `x = y²`. The product form
-avoids choosing a square root. -/
-@[dlmf 18.26.E1]
-def wilson (a b c d : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  poch (a + b) n * poch (a + c) n * poch (a + d) n *
-    ∑ k ∈ Finset.range (n + 1),
-      poch (-(n : ℂ)) k * poch (n + a + b + c + d - 1) k *
-        (∏ j ∈ Finset.range k, ((a + j) ^ 2 + x)) /
-        (poch (a + b) k * poch (a + c) k * poch (a + d) k * k.factorial)
-
-/-- The continuous dual Hahn polynomial `S_n(x; a, b, c)` with polynomial argument `x = y²`,
-as the finite `₃F₂` sum of DLMF 18.26.2. -/
-@[dlmf 18.26.E2]
-def continuousDualHahn (a b c : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  poch (a + b) n * poch (a + c) n *
-    ∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k *
-      (∏ j ∈ Finset.range k, ((a + j) ^ 2 + x)) /
-      (poch (a + b) k * poch (a + c) k * k.factorial)
-
-/-- The Racah polynomial `R_n(x; α, β, γ, δ)` in the variable `x = λ(y)`, as the finite `₄F₃`
-sum of DLMF 18.26.3. -/
-@[dlmf 18.26.E3]
-def racah (α β γ δ : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  ∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k * poch (n + α + β + 1) k *
-    (∏ j ∈ Finset.range k, ((j : ℂ) * (j + γ + δ + 1) - x)) /
-    (poch (α + 1) k * poch (β + δ + 1) k * poch (γ + 1) k * k.factorial)
-
-/-- The dual Hahn polynomial `R_n(x; γ, δ, N)` in the variable `x = λ(y)`, as the finite `₃F₂`
-sum of DLMF 18.26.4. -/
-@[dlmf 18.26.E4]
-def dualHahn (γ δ : ℂ) (N n : ℕ) (x : ℂ) : ℂ :=
-  ∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k *
-    (∏ j ∈ Finset.range k, ((j : ℂ) * (j + γ + δ + 1) - x)) /
-    (poch (γ + 1) k * poch (-(N : ℂ)) k * k.factorial)
 
 /-- Factoring the quadratic product into two Pochhammer symbols. -/
 theorem poch_mul_eq_prod (u v : ℂ) (k : ℕ) :

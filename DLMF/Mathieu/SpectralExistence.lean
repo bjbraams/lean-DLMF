@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.FundamentalSolutions
+public import DLMF.Mathieu.Basic.FundamentalSolutions
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import DLMFMathlib.Analysis.ODE.EntireLinear
 public import DLMFMathlib.Analysis.ODE.ParamHolomorphic

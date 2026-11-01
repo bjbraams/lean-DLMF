@@ -308,7 +308,7 @@ theorem tendsto_bessel_kernel {ν : ℂ} (hν : -1 < ν.re) {φ : ℝ → ℂ}
   sorry
 
 /-- DLMF 1.17.14: `δ(x - a) = (2xa/π) ∫_0^∞ t² 𝗃_ℓ(xt) 𝗃_ℓ(at) dt` for `x, a > 0`, with the
-spherical Bessel function `sphericalJ` of `DLMF.Core.Framework`. -/
+spherical Bessel function `sphericalJ` of `DLMF.Core.Basic`. -/
 @[dlmf 1.17.E14]
 theorem tendsto_sphericalBessel_kernel (ℓ : ℕ) {φ : ℝ → ℂ} (hφ : IsTestFunctionOn (Ioi 0) φ)
     {a : ℝ} (ha : 0 < a) :

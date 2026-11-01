@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Combinatorics.Basic.Partitions
 public import DLMF.Combinatorics.RestrictedPartitions
 public import DLMF.Bessel.Modified
 public import Mathlib.Combinatorics.Enumerative.Partition.Glaisher
@@ -17,26 +18,15 @@ public import DLMF.Bailey
 /-!
 # Generating products for restricted partitions (DLMF §26.10(i)–(ii))
 
-Restricted partition counts of DLMF §26.10(i), on Mathlib's `Nat.Partition`, and the
-generating products (26.10.2), (26.10.3).
-
-## Main definitions
-
-* `partitionCountDistinct`, `partitionCountOdd`: `p(𝒟, n) = #(Nat.Partition.distincts n)` and
-  `p(𝒪, n) = #(Nat.Partition.odds n)`.
-* `partitionCountAtMostDistinct`, `partitionCountAtMostDistinctBoxed`: `p_m(𝒟, n)`, at most `m`
-  distinct parts, and `p_m(≤ k, 𝒟, n)`, moreover every part at most `k`.
-* `partitionCountDiff`: `p(𝒟k, n)`, any two parts differ by at least `k` (`PartsDifferAtLeast`;
-  for `k = 0` all partitions, for `k = 1` distinct parts).
-* `partitionCountSchur`: `p(𝒟'3, n)`, parts differ by at least 3 and multiples of 3 by at least 6
-  (`SchurCondition`).
-* `partitionCountIn`: `p(∈ S, n)`, parts taken from `S`; `residueSetPM j k` is `A_{j,k}` and
-  `setGeTwo` is `T = {2, 3, …}`.
-* `partitionCountDiffTwoNoOne`: `p(𝒟2, ∈ T, n)`. Combined restrictions are conjunctions.
+The generating products (26.10.2), (26.10.3) of the restricted partition counts of
+DLMF §26.10(i). The counts themselves (`partitionCountDistinct`, `partitionCountOdd`,
+`partitionCountAtMostDistinct`, `partitionCountAtMostDistinctBoxed`, `partitionCountDiff`,
+`partitionCountSchur`, `partitionCountIn`, `partitionCountDiffTwoNoOne` and the predicates
+`PartsDifferAtLeast`, `SchurCondition`) and the initial values 26.10.1 are in
+`DLMF.Combinatorics.Basic.Partitions`.
 
 ## Main results
 
-* `partitionCount_zero`: `p(𝒟, 0) = p(𝒟k, 0) = p(∈ S, 0) = 1` (DLMF 26.10.1).
 * `hasSum_partitionCountDistinct`, `hasProd_one_sub_odd_pow_inv`,
   `hasSum_pow_triangle_div_qPochhammer`, `hasSum_pow_mul_prod_one_add`: the four members of
   DLMF 26.10.2 for `|q| < 1`.
@@ -64,98 +54,6 @@ open Finset Filter Asymptotics
 open DLMF.QSeries DLMF.Partitions
 
 namespace DLMF.Combinatorics
-
-/-- `p(𝒟, n)`: partitions of `n` into distinct parts (DLMF §26.10(i)). -/
-@[dlmf 26.10.i]
-def partitionCountDistinct (n : ℕ) : ℕ := #(Nat.Partition.distincts n)
-
-/-- `p(𝒪, n)`: partitions of `n` into odd parts (DLMF §26.10(i)). -/
-@[dlmf 26.10.i]
-def partitionCountOdd (n : ℕ) : ℕ := #(Nat.Partition.odds n)
-
-/-- `p_m(𝒟, n)`: partitions of `n` into at most `m` distinct parts (DLMF §26.10(i)). -/
-@[dlmf 26.10.i]
-def partitionCountAtMostDistinct (m n : ℕ) : ℕ :=
-  #{p ∈ Nat.Partition.distincts n | p.parts.card ≤ m}
-
-/-- `p_m(≤ k, 𝒟, n)`: partitions of `n` into at most `m` distinct parts, each at most `k`
-(DLMF (26.10.3)). -/
-@[dlmf 26.10.E3]
-def partitionCountAtMostDistinctBoxed (m k n : ℕ) : ℕ :=
-  #{p ∈ Nat.Partition.distincts n | p.parts.card ≤ m ∧ ∀ i ∈ p.parts, i ≤ k}
-
-/-- Any two parts of `p` (two different occurrences) differ by at least `k`. -/
-def PartsDifferAtLeast {n : ℕ} (k : ℕ) (p : n.Partition) : Prop :=
-  ∀ a ∈ p.parts, ∀ b ∈ p.parts.erase a, a + k ≤ b ∨ b + k ≤ a
-
-/-- The minimum-gap condition on the finitely many parts of a partition is decidable. -/
-instance {n : ℕ} (k : ℕ) (p : n.Partition) : Decidable (PartsDifferAtLeast k p) := by
-  unfold PartsDifferAtLeast; infer_instance
-
-/-- `p(𝒟k, n)`: partitions of `n` into parts with difference at least `k` (DLMF §26.10(i)). -/
-@[dlmf 26.10.i]
-def partitionCountDiff (k n : ℕ) : ℕ := #{p : n.Partition | PartsDifferAtLeast k p}
-
-/-- Schur's condition: parts differ by at least 3, and multiples of 3 by at least 6. -/
-def SchurCondition {n : ℕ} (p : n.Partition) : Prop :=
-  PartsDifferAtLeast 3 p ∧
-    ∀ a ∈ p.parts, ∀ b ∈ p.parts.erase a, 3 ∣ a → 3 ∣ b → a + 6 ≤ b ∨ b + 6 ≤ a
-
-/-- Schur condition on the finitely many parts of a partition is decidable. -/
-instance {n : ℕ} (p : n.Partition) : Decidable (SchurCondition p) := by
-  unfold SchurCondition; infer_instance
-
-/-- `p(𝒟'3, n)`: partitions of `n` into parts with difference at least 3, except that
-multiples of 3 must differ by at least 6 (DLMF §26.10(i)). -/
-@[dlmf 26.10.i]
-def partitionCountSchur (n : ℕ) : ℕ := #{p : n.Partition | SchurCondition p}
-
-/-- `p(∈ S, n)`: partitions of `n` into parts taken from `S` (DLMF §26.10(i)). -/
-@[dlmf 26.10.i]
-def partitionCountIn (S : Set ℕ) [DecidablePred (· ∈ S)] (n : ℕ) : ℕ :=
-  #(Nat.Partition.restricted n (· ∈ S))
-
-/-- `A_{j,k} = {n ≥ 1 | n ≡ ±j (mod k)}` (DLMF §26.10(i)). -/
-@[dlmf 26.10.i]
-def residueSetPM (j k : ℕ) : Set ℕ :=
-  {n | 1 ≤ n ∧ ((n : ℤ) ≡ j [ZMOD k] ∨ (n : ℤ) ≡ -j [ZMOD k])}
-
-/-- Membership in the two prescribed residue classes is decidable. -/
-instance (j k : ℕ) : DecidablePred (· ∈ residueSetPM j k) := fun n => by
-  unfold residueSetPM; simp only [Set.mem_ofPred_eq]; infer_instance
-
-/-- `T = {2, 3, 4, …}` (DLMF §26.10(i)). -/
-@[dlmf 26.10.i]
-def setGeTwo : Set ℕ := {n | 2 ≤ n}
-
-/-- Membership in the set of natural parts at least two is decidable. -/
-instance : DecidablePred (· ∈ setGeTwo) := fun n => by
-  unfold setGeTwo; simp only [Set.mem_ofPred_eq]; infer_instance
-
-/-- `p(𝒟2, ∈ T, n)`: difference at least 2 and no part 1. -/
-@[dlmf 26.10.i]
-def partitionCountDiffTwoNoOne (n : ℕ) : ℕ :=
-  #{p : n.Partition | PartsDifferAtLeast 2 p ∧ ∀ i ∈ p.parts, i ∈ setGeTwo}
-
-/-- Identity under the stated parameter and domain assumptions: `#{p : (0 : ℕ).Partition | P p} =
-1`. -/
-private lemma card_filter_partition_zero (P : (0 : ℕ).Partition → Prop) [DecidablePred P]
-    (h : ∀ p, p.parts = 0 → P p) : #{p : (0 : ℕ).Partition | P p} = 1 := by
-  rw [Finset.filter_true_of_mem fun p _ => h p (Nat.Partition.partition_zero_parts p), card_univ]
-  exact partitionFunction_zero
-
-/-- (26.10.1): `p(𝒟, 0) = p(𝒟k, 0) = p(∈ S, 0) = 1`. -/
-@[dlmf 26.10.E1]
-theorem partitionCount_zero (k : ℕ) (S : Set ℕ) [DecidablePred (· ∈ S)] :
-    partitionCountDistinct 0 = 1 ∧ partitionCountDiff k 0 = 1 ∧ partitionCountIn S 0 = 1 := by
-  refine ⟨?_, ?_, ?_⟩
-  · unfold partitionCountDistinct Nat.Partition.distincts
-    exact card_filter_partition_zero _ fun p hp => by rw [hp]; simp
-  · unfold partitionCountDiff
-    exact card_filter_partition_zero _ fun p hp => by
-      unfold PartsDifferAtLeast; rw [hp]; simp
-  · unfold partitionCountIn Nat.Partition.restricted
-    exact card_filter_partition_zero _ fun p hp => by rw [hp]; simp
 
 /-- `(w; q)_∞` as an unconditional product. -/
 lemma hasProd_one_sub_mul_pow {w q : ℂ} (hq : ‖q‖ < 1) :

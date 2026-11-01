@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Heun.Equation
+public import DLMF.Heun.Basic.Equation
 
 /-!
 # Confluent forms of Heun's equation (DLMF §31.12)

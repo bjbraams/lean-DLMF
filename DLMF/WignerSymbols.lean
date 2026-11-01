@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.WignerSymbols.Basic
+public import DLMF.WignerSymbols.Basic.TriangleConditions
 public import DLMF.WignerSymbols.FactorialHelpers
 public import DLMF.WignerSymbols.ThreeJ
 public import DLMF.WignerSymbols.SixJ

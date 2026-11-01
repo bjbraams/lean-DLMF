@@ -15,5 +15,8 @@ public import DLMF.Mathieu.Properties.Eigenfunctions
 
 Umbrella module for DLMF §28.2: the algebraic forms and symmetries of Mathieu's equation, the
 basic solutions `w_I`, `w_II`, Floquet theory and characteristic exponents, the eigenvalues
-`a_n(q)`, `b_n(q)` (Table 28.2.1) and the eigenfunctions `ce_n`, `se_n` (Table 28.2.2).
+`a_n(q)`, `b_n(q)` (Table 28.2.1) and the eigenfunctions `ce_n`, `se_n` (Table 28.2.2). The
+algebraic forms, symmetries, Wronskian and half-period relations of the basic solutions are in
+the foundational module `DLMF.Mathieu.Basic.Properties`; `Properties.BasicSolutions` adds their
+joint analyticity in `(z, a, q)`.
 -/

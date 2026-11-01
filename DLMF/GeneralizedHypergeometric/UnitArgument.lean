@@ -16,8 +16,6 @@ public import DLMF.QHypergeometric.HigherSummations
 
 ## Main definitions
 
-* `GenWellPoised`, `GenVeryWellPoised`: well-poised parameter vectors, DLMF 16.4.1.
-* `GenKBalanced`: `k`-balanced terminating series, DLMF 16.4.2.
 * `gen3F2UnitThomae`: the Thomae expression continuing `₃F₂(1)` in its parameters.
 
 ## Main results
@@ -37,17 +35,19 @@ public import DLMF.QHypergeometric.HigherSummations
 
 ## Implementation notes
 
-Finite parity and finite Dougall identities use Pochhammer quotients, which retain the
-removable cases hidden by quotients of poles in the printed Gamma formulas. Lower parameters
-retain the chapter's nonpositive-integer exclusions, except the explicitly cancelled finite
-pair in 16.4.2_5. Convergence at unity is always stated before a nonterminating sum is used.
-The odd terminating Dixon evaluation follows from finite inversion. The bilateral evaluation
-uses `dougall_bilateral` and Mathlib's `Complex.Gamma_mul_Gamma_one_sub`, preserving integral
-lower parameters. The finite Dougall `₅F₄` evaluation is the `q → 1` limit of the rational
-terminating `₆φ₅` identity `DLMF.QHypergeometric.sum_sixTerm_eq`, with Bailey's polynomial unit
-factor handling the very-well-poised pair without square-root branch restrictions. The finite
-Dougall `₇F₆` follows from Whipple's transformation and Saalschütz's sum, with continuity of
-finite rational sums retaining the removable cancelled-parameter cases.
+The predicates `GenWellPoised`, `GenVeryWellPoised` and `GenKBalanced` (DLMF 16.4.1–16.4.2) are in
+`DLMF.GeneralizedHypergeometric.Basic.ParametersAndSeries`. Finite parity and finite Dougall
+identities use Pochhammer quotients, which retain the removable cases hidden by quotients of poles
+in the printed Gamma formulas. Lower parameters retain the chapter's nonpositive-integer exclusions,
+except the explicitly cancelled finite pair in 16.4.2_5. Convergence at unity is always stated
+before a nonterminating sum is used. The odd terminating Dixon evaluation follows from finite
+inversion. The bilateral evaluation uses `dougall_bilateral` and Mathlib's
+`Complex.Gamma_mul_Gamma_one_sub`, preserving integral lower parameters. The finite Dougall `₅F₄`
+evaluation is the `q → 1` limit of the rational terminating `₆φ₅` identity
+`DLMF.QHypergeometric.sum_sixTerm_eq`, with Bailey's polynomial unit factor handling the
+very-well-poised pair without square-root branch restrictions. The finite Dougall `₇F₆` follows from
+Whipple's transformation and Saalschütz's sum, with continuity of finite rational sums retaining the
+removable cancelled-parameter cases.
 -/
 
 @[expose] public section
@@ -55,20 +55,6 @@ open Complex Filter Set Finset
 open scoped Topology Real
 noncomputable section
 namespace DLMF.Hypergeometric
-
-/-- Well-poised parameter vectors, in exactly the indexing order of16.4.1. -/
-@[dlmf 16.4.E1]
-def GenWellPoised {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ) : Prop :=
-  ∀ j, a j.castSucc + b j = a (Fin.last q) + 1
-
-/-- Very well-poised vectors also differ by one in their first corresponding entries. -/
-def GenVeryWellPoised {q : ℕ} (a : Fin (q + 2) → ℂ) (b : Fin (q + 1) → ℂ) : Prop :=
-  GenWellPoised a b ∧ a 0 = b 0 + 1
-
-/-- A k-balanced terminating unity series (16.4.2); balanced means k=1. -/
-@[dlmf 16.4.E2]
-def GenKBalanced {q : ℕ} (k : ℤ) (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ) : Prop :=
-  (∃ n : ℕ, a (Fin.last q) = -n) ∧ (∑ j, a j) + k = ∑ j, b j
 
 /-- The canceled finite 3F2 sum in a form without an artificial singularity at c=1. -/
 @[dlmf 16.4.E2_5]
@@ -782,7 +768,6 @@ private lemma tendsto_genCoeff_boundary_zero (a b c d e : ℂ) (hb : GenDenRegul
   have hn0 : (n : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
   field_simp
   ring
-
 
 /-- The contiguous unity recurrence with convergence of every displayed series. -/
 @[dlmf 16.4.E12]

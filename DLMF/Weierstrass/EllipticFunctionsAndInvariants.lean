@@ -6,7 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Weierstrass.Basic.Invariants
-public import DLMF.Weierstrass.LatticesAndSigma
+public import DLMF.Weierstrass.Basic.LatticesAndSigma
+public import DLMFMathlib.NumberTheory.ModularForms.KleinJSurjective
 
 /-!
 # Weierstrass elliptic functions and lattice invariants

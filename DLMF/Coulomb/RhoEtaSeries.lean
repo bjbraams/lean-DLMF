@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Bessel.Modified
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 public import Mathlib.Analysis.Calculus.IteratedDeriv.Analytic
 public import DLMF.Confluent.CoulombIrregular

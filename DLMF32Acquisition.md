@@ -100,9 +100,9 @@ declarations:
 
 ## [§32.2 Differential Equations](https://dlmf.nist.gov/32.2)
 
-- [32.2.i](https://dlmf.nist.gov/32.2.i): [`DLMF.Painleve.IsPainleveIOn.exists_meromorphic`](DLMF/Painleve/Equations.lean#L933) (admitted); [`DLMF.Painleve.IsPainleveIIOn.exists_meromorphic`](DLMF/Painleve/Equations.lean#L941) (admitted); [`DLMF.Painleve.IsPainleveIVOn.exists_meromorphic`](DLMF/Painleve/Equations.lean#L949) (admitted); [`DLMF.Painleve.IsPainleveIIIOn.exists_meromorphic_exp`](DLMF/Painleve/Equations.lean#L957) (admitted); [`DLMF.Painleve.IsPainleveVOn.exists_meromorphic_exp`](DLMF/Painleve/Equations.lean#L967) (admitted)
-- [32.2.ii](https://dlmf.nist.gov/32.2.ii): [`DLMF.Painleve.painleveIII_renormalize_gamma_delta`](DLMF/Painleve/Equations.lean#L117) (proved); [`DLMF.Painleve.painleveIII_renormalize_alpha_delta`](DLMF/Painleve/Equations.lean#L133) (proved); [`DLMF.Painleve.painleveIII_renormalize_beta_gamma`](DLMF/Painleve/Equations.lean#L146) (proved); [`DLMF.Painleve.painleveV_renormalize_delta`](DLMF/Painleve/Equations.lean#L178) (proved); [`DLMF.Painleve.IsPainleveIIIOn.renormalize_gamma_delta`](DLMF/Painleve/Equations.lean#L190) (proved); [`DLMF.Painleve.IsPainleveIIIOn.renormalize_alpha_delta`](DLMF/Painleve/Equations.lean#L201) (proved); [`DLMF.Painleve.IsPainleveIIIOn.renormalize_beta_gamma`](DLMF/Painleve/Equations.lean#L212) (proved); [`DLMF.Painleve.IsPainleveVOn.renormalize_delta`](DLMF/Painleve/Equations.lean#L223) (proved)
-- [32.2.vi](https://dlmf.nist.gov/32.2.vi): [`DLMF.Painleve.painleveII_coalescence_I_tendsto`](DLMF/Painleve/Equations.lean#L701) (proved)
+- [32.2.i](https://dlmf.nist.gov/32.2.i): [`DLMF.Painleve.IsPainleveIOn.exists_meromorphic`](DLMF/Painleve/Equations.lean#L68) (admitted); [`DLMF.Painleve.IsPainleveIIOn.exists_meromorphic`](DLMF/Painleve/Equations.lean#L76) (admitted); [`DLMF.Painleve.IsPainleveIVOn.exists_meromorphic`](DLMF/Painleve/Equations.lean#L84) (admitted); [`DLMF.Painleve.IsPainleveIIIOn.exists_meromorphic_exp`](DLMF/Painleve/Equations.lean#L92) (admitted); [`DLMF.Painleve.IsPainleveVOn.exists_meromorphic_exp`](DLMF/Painleve/Equations.lean#L102) (admitted)
+- [32.2.ii](https://dlmf.nist.gov/32.2.ii): [`DLMF.Painleve.painleveIII_renormalize_gamma_delta`](DLMF/Painleve/Basic/Transformations.lean#L107) (proved); [`DLMF.Painleve.painleveIII_renormalize_alpha_delta`](DLMF/Painleve/Basic/Transformations.lean#L123) (proved); [`DLMF.Painleve.painleveIII_renormalize_beta_gamma`](DLMF/Painleve/Basic/Transformations.lean#L136) (proved); [`DLMF.Painleve.painleveV_renormalize_delta`](DLMF/Painleve/Basic/Transformations.lean#L168) (proved); [`DLMF.Painleve.IsPainleveIIIOn.renormalize_gamma_delta`](DLMF/Painleve/Basic/Transformations.lean#L180) (proved); [`DLMF.Painleve.IsPainleveIIIOn.renormalize_alpha_delta`](DLMF/Painleve/Basic/Transformations.lean#L191) (proved); [`DLMF.Painleve.IsPainleveIIIOn.renormalize_beta_gamma`](DLMF/Painleve/Basic/Transformations.lean#L202) (proved); [`DLMF.Painleve.IsPainleveVOn.renormalize_delta`](DLMF/Painleve/Basic/Transformations.lean#L213) (proved)
+- [32.2.vi](https://dlmf.nist.gov/32.2.vi): [`DLMF.Painleve.painleveII_coalescence_I_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L61) (proved)
 - [32.2.E1](https://dlmf.nist.gov/32.2.E1): [`DLMF.Painleve.painleveIRhs`](DLMF/Painleve/Basic/Equations.lean#L114) (definition); [`DLMF.Painleve.IsPainleveIOn`](DLMF/Painleve/Basic/Equations.lean#L151) (definition)
 - [32.2.E2](https://dlmf.nist.gov/32.2.E2): [`DLMF.Painleve.painleveIIRhs`](DLMF/Painleve/Basic/Equations.lean#L118) (definition); [`DLMF.Painleve.IsPainleveIIOn`](DLMF/Painleve/Basic/Equations.lean#L156) (definition)
 - [32.2.E3](https://dlmf.nist.gov/32.2.E3): [`DLMF.Painleve.painleveIIIRhs`](DLMF/Painleve/Basic/Equations.lean#L122) (definition); [`DLMF.Painleve.IsPainleveIIIOn`](DLMF/Painleve/Basic/Equations.lean#L162) (definition)
@@ -111,35 +111,35 @@ declarations:
 - [32.2.E6](https://dlmf.nist.gov/32.2.E6): [`DLMF.Painleve.painleveVIRhs`](DLMF/Painleve/Basic/Equations.lean#L142) (definition); [`DLMF.Painleve.IsPainleveVIOn`](DLMF/Painleve/Basic/Equations.lean#L194) (definition)
 - [32.2.E7](https://dlmf.nist.gov/32.2.E7): [`DLMF.Painleve.IsODE2SolutionOn`](DLMF/Painleve/Basic/Equations.lean#L67) (definition)
 - [32.2.E8](https://dlmf.nist.gov/32.2.E8): not formalized. The Möbius transformation of the classification of the fifty equations with the Painlevé property (Painlevé–Gambier); the classification theorem is not acquired (see "Prose, informal and excluded items").
-- [32.2.E9](https://dlmf.nist.gov/32.2.E9): [`DLMF.Painleve.painleveIIIPrimeRhs`](DLMF/Painleve/Basic/Equations.lean#L211) (definition); [`DLMF.Painleve.IsPainleveIIIPrimeOn`](DLMF/Painleve/Basic/Equations.lean#L217) (definition); [`DLMF.Painleve.IsPainleveIIIPrimeOn.isPainleveIIIOn`](DLMF/Painleve/Equations.lean#L235) (proved)
-- [32.2.E10](https://dlmf.nist.gov/32.2.E10): [`DLMF.Painleve.isPainleveIIIOn_exp_of_sineGordon`](DLMF/Painleve/Equations.lean#L270) (proved)
-- [32.2.E11](https://dlmf.nist.gov/32.2.E11): [`DLMF.Painleve.isPainleveIVOn_of_quintic`](DLMF/Painleve/Equations.lean#L301) (proved). Any `r` with `r² = 2` (both signs).
-- [32.2.E12](https://dlmf.nist.gov/32.2.E12): [`DLMF.Painleve.isPainleveVOn_coth_sq`](DLMF/Painleve/Equations.lean#L338) (proved)
-- [32.2.E13](https://dlmf.nist.gov/32.2.E13): [`DLMF.Painleve.IsPainleveVIOn.elliptic_form`](DLMF/Painleve/Equations.lean#L526) (admitted). Branch convention: ray path from 0 and the principal square root in the elliptic integral.
-- [32.2.E14](https://dlmf.nist.gov/32.2.E14): [`DLMF.Painleve.IsPainleveVIOn.elliptic_form`](DLMF/Painleve/Equations.lean#L526) (admitted).
-- [32.2.E15](https://dlmf.nist.gov/32.2.E15): [`DLMF.Painleve.isPainleveIVOn_of_symmetric`](DLMF/Painleve/Equations.lean#L552) (proved)
-- [32.2.E16](https://dlmf.nist.gov/32.2.E16): [`DLMF.Painleve.isPainleveIVOn_of_symmetric`](DLMF/Painleve/Equations.lean#L552) (proved)
-- [32.2.E17](https://dlmf.nist.gov/32.2.E17): [`DLMF.Painleve.isPainleveIVOn_of_symmetric`](DLMF/Painleve/Equations.lean#L552) (proved)
-- [32.2.E18](https://dlmf.nist.gov/32.2.E18): [`DLMF.Painleve.isPainleveIVOn_of_symmetric`](DLMF/Painleve/Equations.lean#L552) (proved)
-- [32.2.E19](https://dlmf.nist.gov/32.2.E19): [`DLMF.Painleve.isPainleveVOn_of_symmetric`](DLMF/Painleve/Equations.lean#L581) (proved)
-- [32.2.E20](https://dlmf.nist.gov/32.2.E20): [`DLMF.Painleve.isPainleveVOn_of_symmetric`](DLMF/Painleve/Equations.lean#L581) (proved)
-- [32.2.E21](https://dlmf.nist.gov/32.2.E21): [`DLMF.Painleve.isPainleveVOn_of_symmetric`](DLMF/Painleve/Equations.lean#L581) (proved)
-- [32.2.E22](https://dlmf.nist.gov/32.2.E22): [`DLMF.Painleve.isPainleveVOn_of_symmetric`](DLMF/Painleve/Equations.lean#L581) (proved)
-- [32.2.E23](https://dlmf.nist.gov/32.2.E23): [`DLMF.Painleve.isPainleveVOn_of_symmetric`](DLMF/Painleve/Equations.lean#L581) (proved)
-- [32.2.E24](https://dlmf.nist.gov/32.2.E24): [`DLMF.Painleve.painleveIII_coalescence_II_tendsto`](DLMF/Painleve/Equations.lean#L727) (proved); [`DLMF.Painleve.painleveIV_coalescence_II_tendsto`](DLMF/Painleve/Equations.lean#L755) (proved); [`DLMF.Painleve.painleveV_coalescence_III_tendsto`](DLMF/Painleve/Equations.lean#L798) (proved); [`DLMF.Painleve.painleveV_coalescence_IV_tendsto`](DLMF/Painleve/Equations.lean#L830) (proved); [`DLMF.Painleve.painleveVI_coalescence_V_tendsto`](DLMF/Painleve/Equations.lean#L877) (proved). The limit statements of the cascade are stated per coalescence (32.2.28–32.2.37).
-- [32.2.E25](https://dlmf.nist.gov/32.2.E25): [`DLMF.Painleve.IsPainleveIIOn.coalescence_I`](DLMF/Painleve/Equations.lean#L680) (proved)
-- [32.2.E26](https://dlmf.nist.gov/32.2.E26): [`DLMF.Painleve.IsPainleveIIOn.coalescence_I`](DLMF/Painleve/Equations.lean#L680) (proved)
-- [32.2.E27](https://dlmf.nist.gov/32.2.E27): [`DLMF.Painleve.IsPainleveIIOn.coalescence_I`](DLMF/Painleve/Equations.lean#L680) (proved)
-- [32.2.E28](https://dlmf.nist.gov/32.2.E28): [`DLMF.Painleve.painleveIII_coalescence_II_tendsto`](DLMF/Painleve/Equations.lean#L727) (proved)
-- [32.2.E29](https://dlmf.nist.gov/32.2.E29): [`DLMF.Painleve.painleveIII_coalescence_II_tendsto`](DLMF/Painleve/Equations.lean#L727) (proved)
-- [32.2.E30](https://dlmf.nist.gov/32.2.E30): [`DLMF.Painleve.painleveIV_coalescence_II_tendsto`](DLMF/Painleve/Equations.lean#L755) (proved)
-- [32.2.E31](https://dlmf.nist.gov/32.2.E31): [`DLMF.Painleve.painleveIV_coalescence_II_tendsto`](DLMF/Painleve/Equations.lean#L755) (proved)
-- [32.2.E32](https://dlmf.nist.gov/32.2.E32): [`DLMF.Painleve.painleveV_coalescence_III_tendsto`](DLMF/Painleve/Equations.lean#L798) (proved)
-- [32.2.E33](https://dlmf.nist.gov/32.2.E33): [`DLMF.Painleve.painleveV_coalescence_III_tendsto`](DLMF/Painleve/Equations.lean#L798) (proved)
-- [32.2.E34](https://dlmf.nist.gov/32.2.E34): [`DLMF.Painleve.painleveV_coalescence_IV_tendsto`](DLMF/Painleve/Equations.lean#L830) (proved)
-- [32.2.E35](https://dlmf.nist.gov/32.2.E35): [`DLMF.Painleve.painleveV_coalescence_IV_tendsto`](DLMF/Painleve/Equations.lean#L830) (proved)
-- [32.2.E36](https://dlmf.nist.gov/32.2.E36): [`DLMF.Painleve.painleveVI_coalescence_V_tendsto`](DLMF/Painleve/Equations.lean#L877) (proved)
-- [32.2.E37](https://dlmf.nist.gov/32.2.E37): [`DLMF.Painleve.painleveVI_coalescence_V_tendsto`](DLMF/Painleve/Equations.lean#L877) (proved)
+- [32.2.E9](https://dlmf.nist.gov/32.2.E9): [`DLMF.Painleve.painleveIIIPrimeRhs`](DLMF/Painleve/Basic/Equations.lean#L211) (definition); [`DLMF.Painleve.IsPainleveIIIPrimeOn`](DLMF/Painleve/Basic/Equations.lean#L217) (definition); [`DLMF.Painleve.IsPainleveIIIPrimeOn.isPainleveIIIOn`](DLMF/Painleve/Basic/Transformations.lean#L225) (proved)
+- [32.2.E10](https://dlmf.nist.gov/32.2.E10): [`DLMF.Painleve.isPainleveIIIOn_exp_of_sineGordon`](DLMF/Painleve/Basic/Transformations.lean#L260) (proved)
+- [32.2.E11](https://dlmf.nist.gov/32.2.E11): [`DLMF.Painleve.isPainleveIVOn_of_quintic`](DLMF/Painleve/Basic/Transformations.lean#L291) (proved). Any `r` with `r² = 2` (both signs).
+- [32.2.E12](https://dlmf.nist.gov/32.2.E12): [`DLMF.Painleve.isPainleveVOn_coth_sq`](DLMF/Painleve/Basic/Transformations.lean#L328) (proved)
+- [32.2.E13](https://dlmf.nist.gov/32.2.E13): [`DLMF.Painleve.IsPainleveVIOn.elliptic_form`](DLMF/Painleve/Equations.lean#L42) (admitted). Branch convention: ray path from 0 and the principal square root in the elliptic integral.
+- [32.2.E14](https://dlmf.nist.gov/32.2.E14): [`DLMF.Painleve.IsPainleveVIOn.elliptic_form`](DLMF/Painleve/Equations.lean#L42) (admitted).
+- [32.2.E15](https://dlmf.nist.gov/32.2.E15): [`DLMF.Painleve.isPainleveIVOn_of_symmetric`](DLMF/Painleve/Basic/Transformations.lean#L518) (proved)
+- [32.2.E16](https://dlmf.nist.gov/32.2.E16): [`DLMF.Painleve.isPainleveIVOn_of_symmetric`](DLMF/Painleve/Basic/Transformations.lean#L518) (proved)
+- [32.2.E17](https://dlmf.nist.gov/32.2.E17): [`DLMF.Painleve.isPainleveIVOn_of_symmetric`](DLMF/Painleve/Basic/Transformations.lean#L518) (proved)
+- [32.2.E18](https://dlmf.nist.gov/32.2.E18): [`DLMF.Painleve.isPainleveIVOn_of_symmetric`](DLMF/Painleve/Basic/Transformations.lean#L518) (proved)
+- [32.2.E19](https://dlmf.nist.gov/32.2.E19): [`DLMF.Painleve.isPainleveVOn_of_symmetric`](DLMF/Painleve/Basic/Transformations.lean#L547) (proved)
+- [32.2.E20](https://dlmf.nist.gov/32.2.E20): [`DLMF.Painleve.isPainleveVOn_of_symmetric`](DLMF/Painleve/Basic/Transformations.lean#L547) (proved)
+- [32.2.E21](https://dlmf.nist.gov/32.2.E21): [`DLMF.Painleve.isPainleveVOn_of_symmetric`](DLMF/Painleve/Basic/Transformations.lean#L547) (proved)
+- [32.2.E22](https://dlmf.nist.gov/32.2.E22): [`DLMF.Painleve.isPainleveVOn_of_symmetric`](DLMF/Painleve/Basic/Transformations.lean#L547) (proved)
+- [32.2.E23](https://dlmf.nist.gov/32.2.E23): [`DLMF.Painleve.isPainleveVOn_of_symmetric`](DLMF/Painleve/Basic/Transformations.lean#L547) (proved)
+- [32.2.E24](https://dlmf.nist.gov/32.2.E24): [`DLMF.Painleve.painleveIII_coalescence_II_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L87) (proved); [`DLMF.Painleve.painleveIV_coalescence_II_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L116) (proved); [`DLMF.Painleve.painleveV_coalescence_III_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L160) (proved); [`DLMF.Painleve.painleveV_coalescence_IV_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L193) (proved); [`DLMF.Painleve.painleveVI_coalescence_V_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L240) (proved). The limit statements of the cascade are stated per coalescence (32.2.28–32.2.37).
+- [32.2.E25](https://dlmf.nist.gov/32.2.E25): [`DLMF.Painleve.IsPainleveIIOn.coalescence_I`](DLMF/Painleve/Basic/Coalescence.lean#L40) (proved)
+- [32.2.E26](https://dlmf.nist.gov/32.2.E26): [`DLMF.Painleve.IsPainleveIIOn.coalescence_I`](DLMF/Painleve/Basic/Coalescence.lean#L40) (proved)
+- [32.2.E27](https://dlmf.nist.gov/32.2.E27): [`DLMF.Painleve.IsPainleveIIOn.coalescence_I`](DLMF/Painleve/Basic/Coalescence.lean#L40) (proved)
+- [32.2.E28](https://dlmf.nist.gov/32.2.E28): [`DLMF.Painleve.painleveIII_coalescence_II_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L87) (proved)
+- [32.2.E29](https://dlmf.nist.gov/32.2.E29): [`DLMF.Painleve.painleveIII_coalescence_II_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L87) (proved)
+- [32.2.E30](https://dlmf.nist.gov/32.2.E30): [`DLMF.Painleve.painleveIV_coalescence_II_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L116) (proved)
+- [32.2.E31](https://dlmf.nist.gov/32.2.E31): [`DLMF.Painleve.painleveIV_coalescence_II_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L116) (proved)
+- [32.2.E32](https://dlmf.nist.gov/32.2.E32): [`DLMF.Painleve.painleveV_coalescence_III_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L160) (proved)
+- [32.2.E33](https://dlmf.nist.gov/32.2.E33): [`DLMF.Painleve.painleveV_coalescence_III_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L160) (proved)
+- [32.2.E34](https://dlmf.nist.gov/32.2.E34): [`DLMF.Painleve.painleveV_coalescence_IV_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L193) (proved)
+- [32.2.E35](https://dlmf.nist.gov/32.2.E35): [`DLMF.Painleve.painleveV_coalescence_IV_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L193) (proved)
+- [32.2.E36](https://dlmf.nist.gov/32.2.E36): [`DLMF.Painleve.painleveVI_coalescence_V_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L240) (proved)
+- [32.2.E37](https://dlmf.nist.gov/32.2.E37): [`DLMF.Painleve.painleveVI_coalescence_V_tendsto`](DLMF/Painleve/Basic/Coalescence.lean#L240) (proved)
 
 ## [§32.4 Isomonodromy Problems](https://dlmf.nist.gov/32.4)
 

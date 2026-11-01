@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.NumberTheory.Basic.Characters
 public import Mathlib.Algebra.Order.Ring.Star
 public import Mathlib.Analysis.SpecialFunctions.Bernstein
 public import Mathlib.Analysis.SpecialFunctions.Complex.CircleAddChar
@@ -24,24 +25,21 @@ arithmetic functions with their finite Fourier expansions, Ramanujan sums and Ga
 
 ## Main definitions
 
-* `IsDirichletCharacterFn`: DLMF's definition of a Dirichlet character mod `k` by the
-  properties DLMF 27.8.1–27.8.4.
-* `IsPrimitiveDLMF`, `IsInducedModulus`: DLMF's primitive characters and induced moduli
-  (DLMF 27.8.7).
-* `IsPeriodicFn`: periodic functions mod `k` (DLMF 27.10.1).
+DLMF's definitions of §§27.8 and 27.10 (`IsDirichletCharacterFn`, `IsPrimitiveDLMF`,
+`IsInducedModulus`, `IsPeriodicFn`, `ramanujanSum`, `gaussSumDLMF`, `GaussSumSeparable`) are in
+the foundational module `DLMF.NumberTheory.Basic.Characters`, with the bridges
+`DirichletCharacter.isDirichletCharacterFn`, `principalCharacter_apply` and
+`gaussSumDLMF_eq_gaussSum`.
+
 * `finiteFourierCoeff`: the finite Fourier coefficients (DLMF 27.10.3).
-* `ramanujanSum`: Ramanujan's sum `c_k(n)` (DLMF 27.10.4).
 * `divisorConvolutionSum`: the sums `s_k(n)` of DLMF 27.10.6.
-* `gaussSumDLMF`, `GaussSumSeparable`: the Gauss sum `G(n, χ)` (DLMF 27.10.9) and its
-  separability (DLMF 27.10.10).
 
 ## Main results
 
-* `DirichletCharacter.isDirichletCharacterFn`, `IsDirichletCharacterFn.exists_dirichletCharacter`:
-  DLMF's characters are Mathlib's `DirichletCharacter ℂ k`.
-* `principalCharacter_apply`, `card_dirichletCharacter`, `sum_dirichletCharacter_mul_conj`: the
-  principal character (DLMF 27.8.5), the number `φ(k)` of characters and orthogonality
-  (DLMF 27.8.6).
+* `IsDirichletCharacterFn.exists_dirichletCharacter`: DLMF's characters are Mathlib's
+  `DirichletCharacter ℂ k`.
+* `card_dirichletCharacter`, `sum_dirichletCharacter_mul_conj`: the number `φ(k)` of characters
+  and orthogonality (DLMF 27.8.6).
 * `isPrimitiveDLMF_iff`, `isPrimitive_of_prime`, `DirichletCharacter.eq_mul_principal`:
   primitivity and the factorization DLMF 27.8.8.
 * `real_character_eq_jacobiSym`: the real characters for odd moduli.
@@ -50,7 +48,7 @@ arithmetic functions with their finite Fourier expansions, Ramanujan sums and Ga
 * `finiteFourier_expansion`: the finite Fourier series DLMF 27.10.2–27.10.3.
 * `ramanujanSum_eq_sum_divisors`, `divisorConvolutionSum_fourier`: DLMF 27.10.5 and
   27.10.7–27.10.8.
-* `gaussSumDLMF_eq_gaussSum`, `gaussSumDLMF_primitive`, `isPrimitive_of_separable`,
+* `gaussSumDLMF_primitive`, `isPrimitive_of_separable`,
   `dirichletCharacter_fourier`: Gauss sums of primitive characters (DLMF 27.10.11–27.10.12).
 
 ## Implementation notes
@@ -75,22 +73,6 @@ open scoped ArithmeticFunction.Moebius Real
 namespace DLMF.NumberTheory
 
 /-! ### §27.8 Dirichlet characters -/
-
-/-- DLMF 27.8.1–27.8.4: `χ` is a Dirichlet character mod `k` if `χ(1) = 1`,
-`χ(mn) = χ(m)χ(n)`, `χ(n + k) = χ(n)` (`m, n = 1, 2, …`) and `χ(n) = 0` when `(n, k) > 1`. -/
-@[dlmf 27.8.E1, dlmf 27.8.E2, dlmf 27.8.E3, dlmf 27.8.E4]
-def IsDirichletCharacterFn (k : ℕ) (χ : ℕ → ℂ) : Prop :=
-  χ 1 = 1 ∧ (∀ m n : ℕ, 0 < m → 0 < n → χ (m * n) = χ m * χ n) ∧
-    (∀ n : ℕ, 0 < n → χ (n + k) = χ n) ∧ ∀ n : ℕ, 0 < n → n.gcd k ≠ 1 → χ n = 0
-
-/-- Every Mathlib Dirichlet character `χ : DirichletCharacter ℂ k` satisfies 27.8.1–27.8.4. -/
-@[dlmf 27.8.E1, dlmf 27.8.E2, dlmf 27.8.E3, dlmf 27.8.E4]
-theorem _root_.DirichletCharacter.isDirichletCharacterFn {k : ℕ} (χ : DirichletCharacter ℂ k) :
-    IsDirichletCharacterFn k fun n ↦ χ n := by
-  refine ⟨by simp, fun m n _ _ ↦ by simp, fun n _ ↦ by simp, fun n _ hn ↦ ?_⟩
-  apply MulChar.map_nonunit
-  rw [ZMod.isUnit_iff_coprime]
-  exact hn
 
 /-- A function with the properties 27.8.1–27.8.4 only depends on `n mod k` (`n ≥ 1`). -/
 private lemma isDirichletCharacterFn_apply_eq_mod_add {k : ℕ} (hk : 0 < k) {f : ℕ → ℂ} (hf : IsDirichletCharacterFn k f)
@@ -149,15 +131,6 @@ theorem IsDirichletCharacterFn.exists_dirichletCharacter {k : ℕ} (hk : 0 < k) 
   refine ⟨χ, fun n hn ↦ ?_⟩
   show f n = f ((n : ZMod k).val + k)
   rw [hval, ← isDirichletCharacterFn_apply_eq_mod_add hk hf hn]
-
-/-- DLMF 27.8.5: the principal character `χ₁ (mod k)` is `1` for `(n, k) = 1` and `0`
-otherwise; it is Mathlib's `1 : DirichletCharacter ℂ k`. -/
-@[dlmf 27.8.E5]
-theorem principalCharacter_apply (k n : ℕ) :
-    (1 : DirichletCharacter ℂ k) n = if n.Coprime k then 1 else 0 := by
-  split_ifs with h
-  · exact MulChar.one_apply ((ZMod.isUnit_iff_coprime n k).mpr h)
-  · exact MulChar.map_nonunit _ (by rwa [ZMod.isUnit_iff_coprime])
 
 /-- §27.8 after 27.8.5: `χ(n) ≠ 0` iff `(n, k) = 1`, and then `χ(n)^{φ(k)} = 1`. -/
 @[dlmf 27.8]
@@ -219,12 +192,6 @@ theorem sum_dirichletCharacter_mul_conj (k : ℕ) [NeZero k] (m n : ℕ) (hn : n
     ∑ χ : DirichletCharacter ℂ k, χ m * starRingEnd ℂ (χ n) =
       if m ≡ n [MOD k] then (k.totient : ℂ) else 0 :=
   sum_dirichletCharacter_mul_conj_eq_ite k m n hn
-
-/-- §27.8 after 27.8.6: DLMF's definition of a primitive character mod `k`: for every divisor
-`d < k` of `k` there is `a ≡ 1 (mod d)` with `(a, k) = 1` and `χ(a) ≠ 1`. -/
-@[dlmf 27.8]
-def IsPrimitiveDLMF {k : ℕ} (χ : DirichletCharacter ℂ k) : Prop :=
-  ∀ d, d ∣ k → d < k → ∃ a : ℕ, a ≡ 1 [MOD d] ∧ a.Coprime k ∧ χ a ≠ 1
 
 /-- `χ(a) = χ₀(a)` for the primitive character `χ₀` and `(a, k) = 1`. -/
 private lemma dirichletCharacter_apply_eq_primitiveCharacter {k : ℕ} (χ : DirichletCharacter ℂ k) (a : ℕ)
@@ -293,12 +260,6 @@ private lemma dirichletCharacter_isPrimitive_of_prime {k : ℕ} (hk : k.Prime) (
 theorem isPrimitive_of_prime {k : ℕ} (hk : k.Prime) (χ : DirichletCharacter ℂ k) (hχ : χ ≠ 1) :
     χ.IsPrimitive :=
   dirichletCharacter_isPrimitive_of_prime hk χ hχ
-
-/-- DLMF 27.8.7: a divisor `d` of `k` is an induced modulus for `χ` if `χ(a) = 1` for all
-`a ≡ 1 (mod d)` with `(a, k) = 1`. -/
-@[dlmf 27.8.E7]
-def IsInducedModulus {k : ℕ} (χ : DirichletCharacter ℂ k) (d : ℕ) : Prop :=
-  d ∣ k ∧ ∀ a : ℕ, a.Coprime k → a ≡ 1 [MOD d] → χ a = 1
 
 /-- DLMF 27.8.8 (proof), with `χ₀` the primitive character. -/
 private lemma isInducedModulus_conductor_and_exists_eq_mul_one {k : ℕ} (χ : DirichletCharacter ℂ k) :
@@ -457,52 +418,10 @@ theorem jacobiSym_reciprocity {P Q : ℕ} (hP : Odd P) (hQ : Odd Q) (hPQ : P.Cop
 
 /-! ### §27.10 Periodic number-theoretic functions -/
 
-/-- DLMF 27.10.1: `f` is periodic mod `k` if `f(n + k) = f(n)`, `n = 1, 2, …`. -/
-@[dlmf 27.10.E1]
-def IsPeriodicFn {α : Type*} (k : ℕ) (f : ℕ → α) : Prop :=
-  ∀ n : ℕ, 0 < n → f (n + k) = f n
-
-/-- §27.10 after 27.10.1: the Dirichlet characters mod `k` and `n ↦ (n, k)` are periodic
-mod `k`. -/
-@[dlmf 27.10.E1]
-theorem isPeriodicFn_examples {k : ℕ} (χ : DirichletCharacter ℂ k) :
-    IsPeriodicFn k (fun n ↦ χ n) ∧ IsPeriodicFn k (fun n ↦ n.gcd k) :=
-  ⟨χ.isDirichletCharacterFn.2.2.1, fun n _ ↦ Nat.gcd_add_self_left k n⟩
-
-/-- The exponential `e^{2πi m n/k}` of §27.10. -/
-def expFrac (m n k : ℕ) : ℂ := Complex.exp (2 * π * I * m * n / k)
-
 /-- DLMF 27.10.3: the finite Fourier coefficients `g(m) = k⁻¹ ∑_{n=1}^k f(n) e^{-2πimn/k}`. -/
 @[dlmf 27.10.E3]
 def finiteFourierCoeff (k : ℕ) (f : ℕ → ℂ) (m : ℕ) : ℂ :=
   (k : ℂ)⁻¹ * ∑ n ∈ Finset.Icc 1 k, f n * Complex.exp (-(2 * π * I * m * n / k))
-
-/-- `∑_{m=1}^k g(m) = ∑_{a ∈ ℤ/k} g(a)`. -/
-private lemma sum_Icc_one_eq_sum_zmod {M : Type*} [AddCommMonoid M] {k : ℕ} [NeZero k]
-    (g : ZMod k → M) : ∑ m ∈ Icc 1 k, g m = ∑ a : ZMod k, g a := by
-  have hk : 0 < k := Nat.pos_of_ne_zero (NeZero.ne k)
-  refine sum_nbij' (fun m ↦ (m : ZMod k)) (fun a ↦ if a = 0 then k else a.val) ?_ ?_ ?_ ?_ ?_
-  · intro m _; exact mem_univ _
-  · intro a _
-    rw [mem_Icc]
-    split_ifs with h
-    · exact ⟨hk, le_rfl⟩
-    · exact ⟨Nat.pos_of_ne_zero ((ZMod.val_ne_zero a).mpr h), (ZMod.val_lt a).le⟩
-  · intro m hm
-    rw [mem_Icc] at hm
-    split_ifs with h
-    · rw [ZMod.natCast_eq_zero_iff] at h
-      exact le_antisymm (Nat.le_of_dvd (by omega) h) hm.2
-    · rw [ZMod.val_natCast]
-      apply Nat.mod_eq_of_lt
-      rcases hm.2.lt_or_eq with h' | h'
-      · exact h'
-      · exact absurd (by rw [h', ZMod.natCast_self]) h
-  · intro a _
-    split_ifs with h
-    · rw [h, ZMod.natCast_self]
-    · exact ZMod.natCast_zmod_val a
-  · intro m _; rfl
 
 /-- Group `1 ≤ m ≤ n` by `e = n/(m, n)`: `m = (n/e) r` with `1 ≤ r ≤ e`, `(r, e) = 1`. -/
 private lemma sum_Icc_eq_sum_divisors_sum_coprime {M : Type*} [AddCommMonoid M] (n : ℕ)
@@ -699,12 +618,6 @@ theorem finiteFourier_expansion {k : ℕ} (hk : 0 < k) {f : ℕ → ℂ} (hf : I
       IsPeriodicFn k (finiteFourierCoeff k f) := by
   exact finiteFourierCoeff_expansion hk hf
 
-/-- DLMF 27.10.4: Ramanujan's sum `c_k(n) = ∑_{m=1}^k χ₁(m) e^{2πimn/k}`, the sum over
-`1 ≤ m ≤ k` with `(m, k) = 1`. -/
-@[dlmf 27.10.E4]
-def ramanujanSum (k n : ℕ) : ℂ :=
-  ∑ m ∈ (Finset.Icc 1 k).filter (fun m ↦ m.Coprime k), expFrac m n k
-
 /-- `c_k(n)` as a power sum over primitive roots (proof). -/
 private lemma ramanujanSum_eq_sum_primitiveRoots_pow {k : ℕ} (hk : 0 < k) (n : ℕ) :
     ramanujanSum k n = ∑ ζ ∈ primitiveRoots k ℂ, ζ ^ n := by
@@ -890,44 +803,6 @@ theorem divisorConvolutionSum_fourier (f g : ℕ → ℂ) {k : ℕ} (hk : 0 < k)
     simp only [Nat.mem_divisors, Nat.dvd_gcd_iff] at he
     rw [Nat.div_div_self he.1.2 hk.ne', mul_comm]
 
-/-- DLMF 27.10.9: the Gauss sum `G(n, χ) = ∑_{m=1}^k χ(m) e^{2πimn/k}`. -/
-@[dlmf 27.10.E9]
-def gaussSumDLMF {k : ℕ} (χ : DirichletCharacter ℂ k) (n : ℕ) : ℂ :=
-  ∑ m ∈ Finset.Icc 1 k, χ m * expFrac m n k
-
-/-- §27.10 after 27.10.9: `G(n, χ₁) = c_k(n)`. -/
-@[dlmf 27.10.E9]
-theorem gaussSumDLMF_one (k n : ℕ) : gaussSumDLMF (1 : DirichletCharacter ℂ k) n =
-    ramanujanSum k n := by
-  rw [gaussSumDLMF, ramanujanSum, Finset.sum_filter]
-  refine Finset.sum_congr rfl fun m _ ↦ ?_
-  rw [principalCharacter_apply]
-  split_ifs <;> simp
-
-/-- DLMF 27.10.9 bridge to Mathlib (proof). -/
-private lemma gaussSumDLMF_eq_gaussSum_mulShift {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) (n : ℕ) :
-    gaussSumDLMF χ n = gaussSum χ ((ZMod.stdAddChar (N := k)).mulShift (n : ZMod k)) := by
-  rw [gaussSumDLMF, gaussSum, ← sum_Icc_one_eq_sum_zmod]
-  refine sum_congr rfl fun m _ ↦ ?_
-  have h := ZMod.stdAddChar_coe (N := k) ((n * m : ℕ) : ℤ)
-  rw [Int.cast_natCast] at h
-  rw [AddChar.mulShift_apply, ← Nat.cast_mul, h, expFrac]
-  congr 2
-  push_cast
-  ring
-
-/-- DLMF's `G(n, χ)` is Mathlib's `gaussSum χ (ψ.mulShift n)` with the standard additive
-character `ψ = ZMod.stdAddChar` of `ZMod k`. -/
-@[dlmf 27.10.E9]
-theorem gaussSumDLMF_eq_gaussSum {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) (n : ℕ) :
-    gaussSumDLMF χ n = gaussSum χ ((ZMod.stdAddChar (N := k)).mulShift (n : ZMod k)) := by
-  exact gaussSumDLMF_eq_gaussSum_mulShift χ n
-
-/-- DLMF 27.10.10: `G(n, χ)` is separable for `n` if `G(n, χ) = χ̄(n) G(1, χ)`. -/
-@[dlmf 27.10.E10]
-def GaussSumSeparable {k : ℕ} (χ : DirichletCharacter ℂ k) (n : ℕ) : Prop :=
-  gaussSumDLMF χ n = starRingEnd ℂ (χ n) * gaussSumDLMF χ 1
-
 /-- Separability of Gauss sums (proof). -/
 private lemma gaussSumSeparable_of_coprime_and_iff {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) :
     (∀ n : ℕ, n.Coprime k → GaussSumSeparable χ n) ∧
@@ -935,7 +810,7 @@ private lemma gaussSumSeparable_of_coprime_and_iff {k : ℕ} [NeZero k] (χ : Di
   have h1 : ∀ n : ℕ, n.Coprime k → GaussSumSeparable χ n := by
     intro n hn
     obtain ⟨u, hu⟩ := (ZMod.isUnit_iff_coprime n k).mpr hn
-    rw [GaussSumSeparable, gaussSumDLMF_eq_gaussSum_mulShift, gaussSumDLMF_eq_gaussSum_mulShift,
+    rw [GaussSumSeparable, gaussSumDLMF_eq_gaussSum, gaussSumDLMF_eq_gaussSum,
       Nat.cast_one, AddChar.mulShift_one, ← hu, gaussSum_mulShift_eq]
     congr 1
     exact (MulChar.star_apply' χ _).symm

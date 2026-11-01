@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Combinatorics.Basic.Permutations
 public import DLMF.Combinatorics.Permutations
 public import DLMF.QSeries.QBinomial
 public import Mathlib.GroupTheory.Perm.DomMulAct
@@ -19,7 +20,6 @@ The permutations of a multiset (DLMF §26.16). For `a : Fin m → ℕ`, the mult
 ## Main definitions
 
 * `multisetPermutations`: the set `𝔖_S` of multiset permutations.
-* `qMultinomial`: the `q`-multinomial coefficient (DLMF 26.16.1).
 
 ## Main results
 
@@ -33,8 +33,9 @@ The permutations of a multiset (DLMF §26.16). For `a : Fin m → ℕ`, the mult
 ## Implementation notes
 
 Inversion number and major index are the word statistics `wordInversions`, `wordMajorIndex` of
-§26.14. `qMultinomial q a` is built from the project's Gaussian coefficients `qBinom`; the
-product is taken over all `k`, the factor `k = m` being `[a_m, a_m]_q = 1`.
+§26.14. `qMultinomial q a` (DLMF 26.16.1, in `DLMF.Combinatorics.Basic.Permutations`) is built
+from the project's Gaussian coefficients `qBinom`; the product is taken over all `k`, the factor
+`k = m` being `[a_m, a_m]_q = 1`.
 
 ## References
 
@@ -123,12 +124,6 @@ theorem multisetPermutation_example :
     wordInversions (![3, 5, 1, 3, 2, 2, 4, 5, 3, 1, 5, 4] : Fin 12 → ℕ) = 24 ∧
       wordMajorIndex (![3, 5, 1, 3, 2, 2, 4, 5, 3, 1, 5, 4] : Fin 12 → ℕ) = 34 := by
   decide
-
-/-- (26.16.1): the `q`-multinomial coefficient
-`[a_1+⋯+a_m; a_1, …, a_m]_q = ∏_{k=1}^{m-1} [a_k + a_{k+1} + ⋯ + a_m, a_k]_q`. -/
-@[dlmf 26.16.E1]
-def qMultinomial (q : ℂ) {m : ℕ} (a : Fin m → ℕ) : ℂ :=
-  ∏ k : Fin m, DLMF.QSeries.qBinom q (∑ i ∈ univ.filter (k ≤ ·), a i) (a k)
 
 /-- (26.16.2): `∑_{σ ∈ 𝔖_S} q^{inv(σ)} = [a_1+⋯+a_m; a_1, …, a_m]_q` (every `q`). -/
 @[dlmf 26.16.E2]

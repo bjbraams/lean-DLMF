@@ -17,8 +17,6 @@ Duverney Ch. 7 and DLMF §§10.2–10.12.
 
 ## Main results
 
-* `besselY_neg`, `besselY_neg_int`: `Y_{-ν} = sin(νπ) J_ν + cos(νπ) Y_ν`, hence `Y_{-n} = (-1)ⁿ Y_n`
-  (DLMF 10.4.1).
 * `besselY_int_eq_deriv`: `Y_n = π⁻¹(∂_ν J_ν|_{ν=n} + (-1)ⁿ ∂_ν J_ν|_{ν=-n})` (DLMF 10.2.4).
 * `hasSum_deriv_regularized0F1_param`, `deriv_besselJ_order`: termwise differentiation of `₀F̃₁`
   in its parameter, by locally uniform convergence of holomorphic functions, and `∂_ν J_ν`.
@@ -42,33 +40,6 @@ open DLMF.Hypergeometric
 noncomputable section
 
 namespace DLMF.Bessel
-
-/-- `Y_{-ν} = sin(νπ) J_ν + cos(νπ) Y_ν` for every order (DLMF §10.4). -/
-theorem besselY_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    besselY (-ν) z = sin (ν * π) * besselJ ν z + cos (ν * π) * besselY ν z := by
-  refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement
-    (f := fun μ => besselY (-μ) z)
-    (g := fun μ => sin (μ * π) * besselJ μ z + cos (μ * π) * besselY μ z)
-    (continuousAt_besselY_order (fun μ => -μ) continuous_neg ν hz)
-    (((by fun_prop : Continuous fun μ : ℂ => sin (μ * π)).continuousAt.mul
-      (continuousAt_besselJ_order (fun μ => μ) continuous_id ν hz)).add
-      ((by fun_prop : Continuous fun μ : ℂ => cos (μ * π)).continuousAt.mul
-      (continuousAt_besselY_order (fun μ => μ) continuous_id ν hz)))
-    (fun c hc => ?_)
-  have hc' := DLMF.Confluent.forall_of_mem_integerComplement hc
-  have hcn : ∀ k : ℤ, -c ≠ k := fun k h => hc' (-k) (by push_cast; linear_combination -h)
-  have hs := sin_mul_pi_ne_zero hc'
-  rw [besselY_eq_of_not_int hcn, besselY_eq_of_not_int hc', besselD, besselD, neg_neg,
-    neg_mul, Complex.sin_neg, Complex.cos_neg]
-  field_simp
-  have := sin_sq_add_cos_sq (c * π)
-  linear_combination (-besselJ c z) * this
-
-/-- `Y_{-n} = (-1)ⁿ Y_n` (DLMF 10.4.1). -/
-@[dlmf 10.4.E1]
-theorem besselY_neg_int (n : ℤ) {z : ℂ} (hz : z ∈ slitPlane) :
-    besselY (-n) z = (-1) ^ n * besselY n z := by
-  rw [besselY_neg _ hz, Complex.sin_int_mul_pi, cos_int_mul_pi_complex]; ring
 
 /-- `Y_n(z) = π⁻¹ (∂J_ν/∂ν |_{ν=n} + (-1)ⁿ ∂J_ν/∂ν |_{ν=-n})` (DLMF 10.2.4, Duverney (7.48)). -/
 @[dlmf 10.2.E4]

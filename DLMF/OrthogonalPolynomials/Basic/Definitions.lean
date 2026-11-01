@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import DLMF.Hypergeometric.Basic.GaussCoefficients
 public import DLMF.Confluent.Basic.KummerM
 public import Mathlib.Analysis.Complex.TaylorSeries
@@ -28,13 +28,18 @@ Mathlib, following AAR Chapter 6 and DLMF §18.5.
 * `jacobiPolyP`: the Jacobi polynomials `P_n^{(α,β)}` as a `₂F₁` (DLMF 18.5.7).
 * `legendrePolyP`: the Legendre polynomials, the Jacobi case `α = β = 0` (DLMF 18.7.9).
 * `ultrasphPoly`: the Gegenbauer polynomials `C_n^{(λ)}` as a `₂F₁` (DLMF 18.5.9).
+* `laguerreExtended`: the Laguerre polynomial as a polynomial in its parameter, including
+  negative integer parameters (DLMF 18.5.12).
+* `chebyshevV`, `chebyshevW`: the Chebyshev polynomials of the third and fourth kinds
+  (DLMF 18.7.5–18.7.6).
 * `jacobiMeasure`: the Jacobi weight measure on `(-1, 1)`.
 * `hermitePolyHEval`: the physicists' Hermite polynomial evaluated in `ℂ`.
 
 ## Implementation notes
 
 The hypergeometric realizations of `laguerrePolyL`, `jacobiPolyP` and `ultrasphPoly` are
-intended for `α + 1` (resp. `λ + 1/2`) not a nonpositive integer.
+intended for `α + 1` (resp. `λ + 1/2`) not a nonpositive integer. The basic API of these
+families is in `DLMF.OrthogonalPolynomials.Basic.Classical`.
 -/
 
 @[expose] public noncomputable section
@@ -88,6 +93,24 @@ def gegenbauerB (n k : ℕ) : ℂ :=
 def jacobiMeasure (α β : ℝ) : Measure ℝ :=
   (volume.restrict (Set.Ioo (-1 : ℝ) 1)).withDensity
     (fun x => ENNReal.ofReal ((1 - x) ^ α * (1 + x) ^ β))
+
+/-- Polynomial continuation of Laguerre in its parameter, including negative
+integers. The existing `laguerrePolyL` uses a totalized hypergeometric quotient and
+agrees with this definition only at regular denominator parameters. -/
+@[dlmf 18.5.E12]
+def laguerreExtended (α : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
+  ∑ k ∈ Finset.range (n + 1), poch (α + k + 1) (n - k) /
+    ((k.factorial : ℂ) * (n - k).factorial) * (-x) ^ k
+
+/-- Chebyshev polynomials of the third kind, in the DLMF normalization. -/
+@[dlmf 18.7.E5]
+def chebyshevV (n : ℕ) (x : ℂ) : ℂ :=
+  jacobiPolyP (-1 / 2) (1 / 2) n x / jacobiPolyP (-1 / 2) (1 / 2) n 1
+
+/-- Chebyshev polynomials of the fourth kind, in the DLMF normalization. -/
+@[dlmf 18.7.E6]
+def chebyshevW (n : ℕ) (x : ℂ) : ℂ :=
+  (2 * n + 1) * jacobiPolyP (1 / 2) (-1 / 2) n x / jacobiPolyP (1 / 2) (-1 / 2) n 1
 
 end DLMF.OrthogonalPolynomials
 

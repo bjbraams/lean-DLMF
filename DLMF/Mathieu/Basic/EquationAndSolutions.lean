@@ -50,7 +50,7 @@ basic solutions `w_I`, `w_II` (DLMF 28.2.5) and the Floquet notions of DLMF §28
 `IsMathieuSolution` asks for genuine complex differentiability. The basic solutions are defined
 by choice; the existence theorem `exists_isMathieuSolution` (entire solutions of linear ODEs with
 entire coefficients, by majorant series) and the uniqueness theorem
-`IsMathieuSolution.eq_of_initial` are in `DLMF.Mathieu.FundamentalSolutions`.
+`IsMathieuSolution.eq_of_initial` are in `DLMF.Mathieu.Basic.FundamentalSolutions`.
 -/
 
 @[expose] public noncomputable section

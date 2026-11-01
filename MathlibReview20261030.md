@@ -153,7 +153,7 @@ The syntactic audit deliberately misses assumptions that a proof uses but could 
 Three additional simplifications were proved in strict Lean experiments, with only
 `propext`, `Classical.choice` and `Quot.sound` as axioms:
 
-1. In [hasSum_primitive_monomials](DLMF/Core/Framework.lean#L73), `hb` follows from `hs`.
+1. In [hasSum_primitive_monomials](DLMF/Core/Basic.lean#L73), `hb` follows from `hs`.
    Apply `(hs (R : ℂ)).summable.norm` and simplify the norm for `R ≥ 0`. The theorem should
    accept the global `HasSum` hypothesis alone. A separate theorem with local domination
    assumptions could still be useful when a series is known only on a disc.
@@ -161,7 +161,7 @@ Three additional simplifications were proved in strict Lean experiments, with on
    the hypothesis `∀ z, HasDerivAt g (f z) z` already implies continuity of `f`:
    `g` is entire, `f = deriv g`, and Mathlib's `Differentiable.deriv` makes that derivative
    entire. Remove the independent `Continuous f` hypothesis here and in the two adapters
-   [primitive_eq_sub and segmentIntegral_eq_sub](DLMF/Core/Framework.lean#L56).
+   [primitive_eq_sub and segmentIntegral_eq_sub](DLMF/Core/Basic.lean#L56).
    This argument uses complex holomorphy; it should not be transferred to arbitrary real
    differentiable functions.
 3. [r27_absEval](DLMFMathlib/RingTheory/PowerSeriesEvaluation.lean#L31) is equivalent to its
@@ -179,7 +179,7 @@ transport helpers also often use `AddCommMonoid` rather than concrete scalars.
 The following are useful next generalizations, not claimed completed changes:
 
 - The half-line integral convergence predicates in
-  [Core/Framework.lean](DLMF/Core/Framework.lean#L32) can use an appropriate normed real
+  [Core/Framework.lean](DLMF/Core/Basic.lean#L32) can use an appropriate normed real
   vector-space target instead of being restricted to `ℂ`. Their limit conventions should
   stay explicit: convergence of finite integrals is not synonymous with absolute
   Bochner integrability on the infinite interval.
@@ -325,7 +325,7 @@ Semantic quality is less uniform:
   Many include a useful formula and are acceptable for elementary identities. For major
   results, explain the mathematical role, branch and convergence convention instead of
   merely copying a long type into prose. This count is not a list of 1,833 defective docs.
-- [Core/Framework.lean](DLMF/Core/Framework.lean#L20) still advertises only the Chapters
+- [Core/Framework.lean](DLMF/Core/Basic.lean#L20) still advertises only the Chapters
   6–8 acquisition, although it now serves the whole project and includes primitives,
   continued fractions, spherical functions and other support. Expand its scope description
   or split these topics into clearer modules.

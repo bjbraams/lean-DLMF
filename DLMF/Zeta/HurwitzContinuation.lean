@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Zeta.HurwitzEulerMaclaurin
+public import DLMF.Zeta.Basic.Hurwitz
 public import Mathlib.Analysis.CStarAlgebra.Classes
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
@@ -49,7 +49,7 @@ pole at `s = 1` (DLMF §25.11(i), 25.11.17).
 
 ## Implementation notes
 
-The project's `DLMF.Confluent.hurwitzZetaComplex s z` is defined as the limit of the
+The project's `DLMF.Zeta.hurwitzZetaComplex s z` is defined as the limit of the
 Euler–Maclaurin sequence
 `E_N(s, z) = ∑_{n<N} (z+n)^{-s} + (z+N)^{1-s}/(s-1) + (z+N)^{-s}/2
   + ∑_{k<M} B_{2k+2}/(2k+2)! (s)_{2k+1} (z+N)^{-s-2k-1}`.
@@ -58,8 +58,8 @@ The limit exists for every `s ≠ 1` and every `z`, and is the same for every ad
 for `t ↦ (w+t)^{-s}` on `[0, 1]` (`cpow_add_eulerMaclaurinTail_sub_eq_integral`), which gives
 `E_{N+1} - E_N = O(N^{-Re s - 2M - 1})` locally uniformly in `(s, z)`.
 
-The general parts, and the definition of `DLMF.Confluent.hurwitzZetaComplex` itself, live in
-`DLMF.Zeta.HurwitzEulerMaclaurin`; this file restates some of them in primed form and derives
+The general parts, and the definition of `DLMF.Zeta.hurwitzZetaComplex` itself, live in
+`DLMF.Zeta.Basic.Hurwitz`; this file restates some of them in primed form and derives
 the consequences above.
 -/
 
@@ -77,7 +77,7 @@ open DLMF.Hypergeometric (poch poch_succ poch_zero)
 /-- The project's `hurwitzZetaComplex` is the Euler–Maclaurin limit for any admissible `M`. -/
 private lemma hurwitzZetaComplex_eq_limUnder_eulerMaclaurinSeq' {M : ℕ} {s z : ℂ} (hs : s ≠ 1)
     (hM : 0 < s.re + 2 * M) :
-    DLMF.Confluent.hurwitzZetaComplex s z = limUnder atTop (eulerMaclaurinSeq M s z) :=
+    DLMF.Zeta.hurwitzZetaComplex s z = limUnder atTop (eulerMaclaurinSeq M s z) :=
   hurwitzZetaComplex_eq_limUnder_eulerMaclaurinSeq hs hM
 
 /-- **Uniform convergence to `hurwitzZetaComplex`** on bounded sets with `Re s ≥ σ > -2M`,
@@ -85,13 +85,13 @@ private lemma hurwitzZetaComplex_eq_limUnder_eulerMaclaurinSeq' {M : ℕ} {s z :
 private lemma tendstoUniformlyOn_eulerMaclaurinSeq_hurwitzZetaComplex' {M : ℕ} {K : Set (ℂ × ℂ)} {R σ : ℝ} (hR : 0 ≤ R)
     (hσ : 0 < σ + 2 * M) (hK : ∀ q ∈ K, ‖q.1‖ ≤ R ∧ ‖q.2‖ ≤ R ∧ σ ≤ q.1.re ∧ q.1 ≠ 1) :
     TendstoUniformlyOn (fun N (q : ℂ × ℂ) => eulerMaclaurinSeq M q.1 q.2 (⌈R⌉₊ + 1 + N))
-      (fun q => DLMF.Confluent.hurwitzZetaComplex q.1 q.2) atTop K :=
+      (fun q => DLMF.Zeta.hurwitzZetaComplex q.1 q.2) atTop K :=
   tendstoUniformlyOn_eulerMaclaurinSeq_hurwitzZetaComplex hR hσ hK
 
 /-- **Holomorphy of `ζ(s, z)` in `s ≠ 1`** for `z ≠ 0, -1, -2, …`. -/
 theorem differentiableAt_hurwitzZetaComplex_of_add_natCast_ne_zero' {s₀ z : ℂ} (hs₀ : s₀ ≠ 1)
     (hz : ∀ n : ℕ, z + n ≠ 0) :
-    DifferentiableAt ℂ (fun s => DLMF.Confluent.hurwitzZetaComplex s z) s₀ :=
+    DifferentiableAt ℂ (fun s => DLMF.Zeta.hurwitzZetaComplex s z) s₀ :=
   differentiableAt_hurwitzZetaComplex_of_add_ne_zero hs₀ hz
 
 /-- At `w`, the function `(fun x => (x + n) ^ c)` has derivative `(c * (w + n) ^ (c - 1))`. -/
@@ -159,7 +159,7 @@ private lemma differentiableAt_eulerMaclaurinSeq_param (M : ℕ) (s : ℂ) {w : 
 private lemma tendstoUniformlyOn_eulerMaclaurinSeq_param {s : ℂ} (a₀ : ℂ) (hs : s ≠ 1) :
     TendstoUniformlyOn (fun N (a : ℂ) => eulerMaclaurinSeq (⌈|s.re|⌉₊ + 1) s a
         (⌈max (‖s‖ + 1) (‖a₀‖ + a₀.re / 2)⌉₊ + 1 + N))
-      (DLMF.Confluent.hurwitzZetaComplex s) atTop (Metric.closedBall a₀ (a₀.re / 2)) := by
+      (DLMF.Zeta.hurwitzZetaComplex s) atTop (Metric.closedBall a₀ (a₀.re / 2)) := by
   set r := a₀.re / 2
   set R : ℝ := max (‖s‖ + 1) (‖a₀‖ + r)
   have hR : 0 ≤ R := le_max_of_le_left (by positivity)
@@ -194,7 +194,7 @@ private lemma re_pos_of_mem_ball_half_re {a₀ a : ℂ} (ha₀ : 0 < a₀.re) (h
 
 /-- **Holomorphy of `ζ(s, a)` in `a`** on `Re a > 0`, for fixed `s ≠ 1`. -/
 theorem differentiableOn_hurwitzZetaComplex_param' {s : ℂ} (hs : s ≠ 1) :
-    DifferentiableOn ℂ (DLMF.Confluent.hurwitzZetaComplex s) {a | 0 < a.re} := by
+    DifferentiableOn ℂ (DLMF.Zeta.hurwitzZetaComplex s) {a | 0 < a.re} := by
   intro a₀ ha₀
   have ha₀' : 0 < a₀.re := ha₀
   have hr : 0 < a₀.re / 2 := by linarith
@@ -208,8 +208,8 @@ theorem differentiableOn_hurwitzZetaComplex_param' {s : ℂ} (hs : s ≠ 1) :
 /-- **`∂ζ(s, a)/∂a = -s ζ(s+1, a)`** (DLMF 25.11.17) for `s ≠ 0, 1`, `Re a > 0`. -/
 theorem hasDerivAt_hurwitzZetaComplex_param' {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠ 1) {a₀ : ℂ}
     (ha₀ : 0 < a₀.re) :
-    HasDerivAt (DLMF.Confluent.hurwitzZetaComplex s)
-      (-s * DLMF.Confluent.hurwitzZetaComplex (s + 1) a₀) a₀ := by
+    HasDerivAt (DLMF.Zeta.hurwitzZetaComplex s)
+      (-s * DLMF.Zeta.hurwitzZetaComplex (s + 1) a₀) a₀ := by
   have hr : 0 < a₀.re / 2 := by linarith
   have hU := ((tendstoUniformlyOn_eulerMaclaurinSeq_param a₀ hs1).mono
     Metric.ball_subset_closedBall).tendstoLocallyUniformlyOn
@@ -221,7 +221,7 @@ theorem hasDerivAt_hurwitzZetaComplex_param' {s : ℂ} (hs0 : s ≠ 0) (hs1 : s 
   have hD := (hU.deriv hF Metric.isOpen_ball).tendsto_at (Metric.mem_ball_self hr)
   have hD' : Tendsto (fun N => -s * eulerMaclaurinSeq (⌈|s.re|⌉₊ + 1) (s + 1) a₀
       (⌈max (‖s‖ + 1) (‖a₀‖ + a₀.re / 2)⌉₊ + 1 + N)) atTop
-      (𝓝 (-s * DLMF.Confluent.hurwitzZetaComplex (s + 1) a₀)) := by
+      (𝓝 (-s * DLMF.Zeta.hurwitzZetaComplex (s + 1) a₀)) := by
     have hs1' : s + 1 ≠ 1 := by intro h; exact hs0 (by linear_combination h)
     have hM : 0 < (s + 1).re + 2 * ((⌈|s.re|⌉₊ + 1 : ℕ) : ℝ) := by
       have := Nat.le_ceil |s.re|
@@ -236,8 +236,8 @@ theorem hasDerivAt_hurwitzZetaComplex_param' {s : ℂ} (hs0 : s ≠ 0) (hs1 : s 
         (⌈max (‖s‖ + 1) (‖a₀‖ + a₀.re / 2)⌉₊ + 1 + N) := by
     funext N
     exact (hasDerivAt_eulerMaclaurinSeq_param _ hs0 hs1 ha₀ _).deriv
-  have hval : deriv (DLMF.Confluent.hurwitzZetaComplex s) a₀ =
-      -s * DLMF.Confluent.hurwitzZetaComplex (s + 1) a₀ := by
+  have hval : deriv (DLMF.Zeta.hurwitzZetaComplex s) a₀ =
+      -s * DLMF.Zeta.hurwitzZetaComplex (s + 1) a₀ := by
     refine tendsto_nhds_unique ?_ hD'
     rw [← heq]
     exact hD
@@ -284,7 +284,7 @@ private lemma continuous_subOneMulEulerMaclaurinSeq (M : ℕ) {a : ℂ} (ha : �
 
 /-- **The pole at `s = 1`**: `(s - 1) ζ(s, a) → 1` as `s → 1`, for `a ≠ 0, -1, -2, …`. -/
 theorem tendsto_sub_one_mul_hurwitzZetaComplex {a : ℂ} (ha : ∀ n : ℕ, a + n ≠ 0) :
-    Tendsto (fun s => (s - 1) * DLMF.Confluent.hurwitzZetaComplex s a) (𝓝[≠] 1) (𝓝 1) := by
+    Tendsto (fun s => (s - 1) * DLMF.Zeta.hurwitzZetaComplex s a) (𝓝[≠] 1) (𝓝 1) := by
   set B := Metric.closedBall (1 : ℂ) (1 / 2)
   set R : ℝ := max 2 ‖a‖
   have hR : 0 ≤ R := le_max_of_le_left (by norm_num)
@@ -326,7 +326,7 @@ theorem tendsto_sub_one_mul_hurwitzZetaComplex {a : ℂ} (ha : ∀ n : ℕ, a + 
   have hHc : ContinuousOn H B :=
     hU.continuousOn (Frequently.of_forall fun N => (continuous_subOneMulEulerMaclaurinSeq 0 ha _).continuousOn)
   have hH1 : H 1 = 1 := by simp [H, subOneMulEulerMaclaurinSeq]
-  have hHeq : ∀ s ∈ B, s ≠ 1 → (s - 1) * DLMF.Confluent.hurwitzZetaComplex s a = H s := by
+  have hHeq : ∀ s ∈ B, s ≠ 1 → (s - 1) * DLMF.Zeta.hurwitzZetaComplex s a = H s := by
     intro s hs hs1
     have hT1 := hU.tendsto_at hs
     have hM : 0 < s.re + 2 * ((0 : ℕ) : ℝ) := by simp; linarith [(hB s hs).2.1]

@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Heun.Basic
-public import DLMF.Heun.Equation
+public import DLMF.Heun.Basic.Equation
 public import DLMF.Hypergeometric.Series
 
 /-!

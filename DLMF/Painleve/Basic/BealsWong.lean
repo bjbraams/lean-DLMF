@@ -145,6 +145,7 @@ theorem IsPIIOn.hasDerivAt_energy {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
   have hu := h.hasDerivAt hx
   have hv := h.hasDerivAt_deriv x hx
   exact ((((hv.pow 2).sub (hu.pow 4)).sub
-    ((hasDerivAt_id x).mul (hu.pow 2))).add (hu.const_mul (2 * c))).congr_deriv (by simp only [id_eq, Pi.pow_apply]; ring)
+    ((hasDerivAt_id x).mul (hu.pow 2))).add (hu.const_mul (2 * c))).congr_deriv
+        (by simp only [id_eq, Pi.pow_apply]; ring)
 
 end DLMF.Painleve

@@ -17,7 +17,6 @@ formula 13.2.41 and the jump of `U` across the negative real axis (DLMF §13.2).
 
 ## Main results
 
-* `analyticOnNhd_kummerM`: `M(a,b,·)` is entire for `b` not a nonpositive integer.
 * `differentiableOn_kummerU`: `U(a,b,·)` is holomorphic on the slit plane, for every `b`.
 * `wronskian_kummer_pair`, `wronskian_kummerM_pair`: the Wronskian of `M(a,b,z)` and
   `z^{1-b} M(a-b+1,2-b,z)` (DLMF 13.2.26).
@@ -51,11 +50,6 @@ noncomputable section
 namespace DLMF.Confluent
 
 /-! ### Wronskians -/
-
-/-- For `b` not a nonpositive integer, `M(a,b,·)` is entire. -/
-theorem analyticOnNhd_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) :
-    AnalyticOnNhd ℂ (kummerM a b) Set.univ := fun z _ =>
-  (hasFPowerSeriesOnBall_kummerM (a := a) hb).analyticAt_of_mem (by simp)
 
 /-- The entire part of the Wronskian of Kummer's pair `M(a,b,z)`, `z^{1-b} M(a-b+1,2-b,z)`
 equals `(1-b) e^z`. -/

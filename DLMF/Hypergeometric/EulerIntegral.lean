@@ -10,6 +10,7 @@ public import DLMF.Hypergeometric.Basic.Pochhammer
 public import DLMF.Hypergeometric.Series
 public import Mathlib.Analysis.Normed.Group.Tannery
 public import Carlson.TwoVariable.GaussHypergeometric
+public import DLMF.Hypergeometric.Basic.CutPlane
 
 /-!
 # Euler's integral representation (AAR §2.2)
@@ -23,10 +24,14 @@ $$
 
 ## Main results
 
-* `ordinaryHypergeometric_eq_integral`: Euler's integral, DLMF 15.6.1.
 * `gauss_summation`: Gauss's summation theorem, DLMF 15.4.20; its proof is
   `Carlson.ordinaryHypergeometric_one` from lean-codes.
 * `chu_vandermonde`: the Chu–Vandermonde sum, DLMF 15.4.24.
+
+## Implementation notes
+
+Euler's integral itself, `ordinaryHypergeometric_eq_integral` (DLMF 15.6.1), is in
+`DLMF.Hypergeometric.Basic.CutPlane`.
 
 ## References
 
@@ -41,124 +46,6 @@ open scoped Real
 noncomputable section
 
 namespace DLMF.Hypergeometric
-
-/-- Helper lemma for `ordinaryHypergeometric_eq_integral`. -/
-theorem re_c_pos_of {b c : ℂ} (hb : 0 < b.re) (hcb : 0 < (c - b).re) : 0 < c.re := by
-  have : c.re = b.re + (c - b).re := by simp [sub_re]
-  linarith
-
-/-- Helper lemma for `ordinaryHypergeometric_eq_integral`. -/
-theorem not_neg_nat_of_re_pos {w : ℂ} (hw : 0 < w.re) : ∀ k : ℕ, w ≠ -k := by
-  intro k hk
-  have : w.re = -k := by simpa using congrArg Complex.re hk
-  have hk0 : (0 : ℝ) ≤ k := Nat.cast_nonneg k
-  linarith
-
-/-- Helper lemma for `ordinaryHypergeometric_eq_integral`.
-AAR's binomial expansion of `(1-zt)^{-a}` on `t ∈ [0,1]`. -/
-theorem hasSum_one_sub_mul_cpow {a z : ℂ} {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) 1)
-    (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => poch a n / n.factorial * (z * t) ^ n) ((1 - z * t) ^ (-a)) := by
-  have hzt : ‖z * (t : ℂ)‖ < 1 := by
-    rw [norm_mul]
-    have htnorm : ‖(t : ℂ)‖ = |t| := by simp
-    rw [htnorm]
-    have ht' : |t| ≤ 1 := abs_le.mpr ⟨by linarith [ht.1], ht.2⟩
-    nlinarith [norm_nonneg z, hz, abs_nonneg t]
-  simpa using hasSum_poch_div_factorial (β := a) (z := z * t) hzt
-
-/-- Helper lemma for `ordinaryHypergeometric_eq_integral`. -/
-theorem euler_term_eq_gaussHGCoeff {a b c : ℂ} (n : ℕ)
-    (hb : 0 < b.re) (hcb : 0 < (c - b).re) :
-    Gamma c / (Gamma b * Gamma (c - b)) *
-        (poch a n / n.factorial * betaIntegral (b + n) (c - b)) =
-      gaussHGCoeff a b c n := by
-  have hb' : 0 < (b + n).re := by
-    have : (b + n).re = b.re + n := by simp
-    have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n
-    linarith
-  have hGamma := Gamma_mul_Gamma_eq_betaIntegral hb' hcb
-  have hcpos := re_c_pos_of hb hcb
-  have hc : ∀ k : ℕ, c ≠ -k := not_neg_nat_of_re_pos hcpos
-  have hbn : ∀ k : ℕ, b ≠ -k := not_neg_nat_of_re_pos hb
-  have hcn : Gamma (c + n) ≠ 0 := Gamma_ne_zero (not_neg_nat_add_nat hc n)
-  have hb0 : Gamma b ≠ 0 := Gamma_ne_zero_of_re_pos hb
-  have hc0 : Gamma c ≠ 0 := Gamma_ne_zero_of_re_pos hcpos
-  have hcb0 : Gamma (c - b) ≠ 0 := Gamma_ne_zero_of_re_pos hcb
-  have hbeta : betaIntegral (b + n) (c - b) =
-      Gamma (b + n) * Gamma (c - b) / Gamma (c + n) := by
-    have hsum : b + n + (c - b) = c + n := by ring
-    rw [hsum] at hGamma
-    exact eq_div_of_mul_eq hcn (by rw [mul_comm]; exact hGamma.symm)
-  have hpochb : Gamma (b + n) / Gamma b = poch b n := Gamma_add_nat_div_Gamma_eq b hbn
-  have hpochc : Gamma (c + n) / Gamma c = poch c n := Gamma_add_nat_div_Gamma_eq c hc
-  have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-  have hcp : poch c n ≠ 0 := poch_ne_zero_of_not_neg_nat hc n
-  have hbmul : Gamma (b + n) = poch b n * Gamma b := (div_eq_iff hb0).mp hpochb
-  have hcmul : Gamma (c + n) = poch c n * Gamma c := (div_eq_iff hc0).mp hpochc
-  rw [hbeta, gaussHGCoeff, hbmul, hcmul]
-  field [hb0, hc0, hcb0, hcn, hf, hcp]
-
-/-- Euler's integral representation of `₂F₁`, AAR Theorem 2.2.1. -/
-@[dlmf 15.6.E1]
-theorem ordinaryHypergeometric_eq_integral {a b c z : ℂ}
-    (hb : 0 < b.re) (hcb : 0 < (c - b).re) (hz : ‖z‖ < 1) :
-    ₂F₁ a b c z =
-      Gamma c / (Gamma b * Gamma (c - b)) *
-        ∫ t : ℝ in (0 : ℝ)..1,
-          (t : ℂ) ^ (b - 1) * (1 - (t : ℂ)) ^ (c - b - 1) * (1 - z * t) ^ (-a) := by
-  let w : ℝ → ℂ := fun t => (t : ℂ) ^ (b - 1) * (1 - (t : ℂ)) ^ (c - b - 1)
-  let d : ℕ → ℂ := fun n => poch a n / n.factorial * z ^ n
-  let F : ℕ → ℝ → ℂ := fun n t => w t * (d n * (t : ℂ) ^ n)
-  have hw : IntervalIntegrable w volume 0 1 := betaIntegral_convergent hb hcb
-  have hd : Summable (fun n => ‖d n‖) := (hasSum_poch_div_factorial (β := a) hz).summable.norm
-  have hFi (n : ℕ) : IntervalIntegrable (F n) volume 0 1 :=
-    hw.mul_continuousOn (by fun_prop)
-  have hs := intervalIntegral.hasSum_integral_of_dominated_convergence
-    (a := (0 : ℝ)) (b := 1) (μ := volume)
-    (F := F) (f := fun t => w t * (1 - z * t) ^ (-a))
-    (fun n t => ‖d n‖ * ‖w t‖) (fun n => (hFi n).def'.aestronglyMeasurable)
-    (fun n => Filter.Eventually.of_forall fun t ht => ?_)
-    (Filter.Eventually.of_forall fun t _ => hd.mul_right ‖w t‖)
-    (by
-      simp_rw [tsum_mul_right]
-      exact hw.norm.const_mul _)
-    (Filter.Eventually.of_forall fun t ht => ?_)
-  · have hterm (n : ℕ) :
-        ∫ t : ℝ in (0 : ℝ)..1, F n t =
-          (poch a n / n.factorial * betaIntegral (b + n) (c - b)) * z ^ n := by
-      rw [betaIntegral, ← intervalIntegral.integral_const_mul,
-        ← intervalIntegral.integral_mul_const]
-      apply intervalIntegral.integral_congr_Ioo_of_le (by norm_num)
-      intro t ht
-      have ht0 : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr (ne_of_gt ht.1)
-      have hp : (t : ℂ) ^ (b + n - 1) = (t : ℂ) ^ (b - 1) * (t : ℂ) ^ n := by
-        rw [show b + n - 1 = (b - 1) + n by ring, cpow_add _ _ ht0, cpow_natCast]
-      dsimp [F, w, d]
-      rw [hp]
-      ring
-    have hs' := hs.mul_left (Gamma c / (Gamma b * Gamma (c - b)))
-    have hscaled (n : ℕ) : Gamma c / (Gamma b * Gamma (c - b)) *
-        (∫ t : ℝ in (0 : ℝ)..1, F n t) = gaussHGCoeff a b c n * z ^ n := by
-      rw [hterm, ← mul_assoc, euler_term_eq_gaussHGCoeff n hb hcb]
-    simp_rw [hscaled] at hs'
-    exact ((hasFPowerSeriesOnBall_ordinaryHypergeometric a b c).hasSum_mul_pow
-      (mem_eball_one_of_norm_lt_one hz)).unique hs'
-  · rw [Set.uIoc_of_le (by norm_num : (0 : ℝ) ≤ 1)] at ht
-    have ht1 : ‖(t : ℂ)‖ ≤ 1 := by
-      simpa [Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht.1] using ht.2
-    calc
-      ‖F n t‖ = ‖w t‖ * (‖d n‖ * ‖(t : ℂ)‖ ^ n) := by
-        simp only [F, norm_mul, norm_pow]
-      _ ≤ ‖w t‖ * (‖d n‖ * 1) :=
-        mul_le_mul_of_nonneg_left
-          (mul_le_mul_of_nonneg_left (pow_le_one₀ (norm_nonneg _) ht1) (norm_nonneg _))
-          (norm_nonneg _)
-      _ = _ := by ring
-  · rw [Set.uIoc_of_le (by norm_num : (0 : ℝ) ≤ 1)] at ht
-    have ht' : t ∈ Set.Icc (0 : ℝ) 1 := ⟨ht.1.le, ht.2⟩
-    have h := (hasSum_one_sub_mul_cpow (a := a) ht' hz).mul_left (w t)
-    simpa only [F, d, mul_pow, mul_assoc] using h
 
 section GaussSummation
 
@@ -306,8 +193,6 @@ theorem chu_vandermonde (n : ℕ) {b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
   refine (Finset.sum_congr rfl fun k hk => ?_).trans (chu_vandermonde_sum n b c)
   convert hterm k hk using 1
   ring
-
-
 
 /-- The binomial theorem for rising factorials (Chu–Vandermonde). -/
 theorem poch_add_binomial_sum (u v : ℂ) (n : ℕ) :

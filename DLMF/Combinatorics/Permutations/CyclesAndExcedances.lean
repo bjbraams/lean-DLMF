@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Combinatorics.Basic.Permutations
 public import DLMF.Combinatorics.Stirling
 public import DLMF.BernoulliEuler.Explicit
 public import Mathlib.Combinatorics.Derangements.Finite
@@ -17,17 +18,16 @@ public import TauCeti.GroupTheory.Perm.SwapFactors
 
 `𝔖_n` is `Equiv.Perm (Fin n)`. Positions and values are `0, …, n-1` in Lean against DLMF's
 `1, …, n`; all statistics are invariant under this shift (the major index adds `1` to each
-descent position, as DLMF counts positions from `1`).
+descent position, as DLMF counts positions from `1`). The statistics `numCycles`,
+`wordInversions`, `wordDescentSet`, `wordMajorIndex`, `inversionNumber`, `descentNumber`,
+`majorIndex`, `eulerianNumber`, `excedanceNumber` and `weakExcedanceNumber` are defined in
+`DLMF.Combinatorics.Basic.Permutations`.
 
 ## Main definitions
 
-* `numCycles`: the number of cycles of a permutation, fixed points included.
-* `wordInversions`, `wordDescentSet`, `wordMajorIndex`: inversions, descents and the major
-  index of a word `w : Fin n → ℕ` (DLMF 26.14.1, 26.14.2); these are reused for multiset
-  permutations (§26.16).
-* `inversionNumber`, `descentNumber`, `majorIndex`: the same statistics of a permutation.
-* `eulerianNumber`: `⟨n k⟩`, the number of `σ ∈ 𝔖_n` with exactly `k` descents.
-* `excedanceNumber`, `weakExcedanceNumber`: the numbers of (weak) excedances.
+* `IsAdjacentSwap`: adjacent transpositions.
+* `insertMinEquiv`, `descentIndicator`, `majorIndexIncrement`: tools for the insertion
+  bijections behind the Eulerian-number recurrences.
 * `dlmfExamplePerm`: the example permutation (26.13.2).
 
 ## Main results
@@ -80,11 +80,6 @@ def dlmfExamplePerm : Perm (Fin 8) where
 @[dlmf 26.13.E2]
 theorem dlmfExamplePerm_eq_cycles : dlmfExamplePerm = c[0, 2, 1, 4, 6] * c[5, 7] := by
   decide
-
-/-- The number of cycles of `σ`, fixed points included: the length of its cycle type
-`(a_1, …, a_n)` counted with multiplicity, `a_1 + ⋯ + a_n`. -/
-@[dlmf 26.13]
-def numCycles {n : ℕ} (σ : Perm (Fin n)) : ℕ := σ.partition.parts.card
 
 /-- (26.13.3): the Stirling cycle number `[n k]`, the number of permutations of `{1, …, n}` with
 exactly `k` cycles, is `|s(n, k)|`, with DLMF's signed `s(n, k)` = ACQ26A's
@@ -244,33 +239,6 @@ def IsAdjacentSwap {n : ℕ} (τ : Perm (Fin n)) : Prop :=
 
 /-! ### §26.14 Order notation -/
 
-/-- The inversion number of a word `w`: pairs of positions `j < k` with `w j > w k`
-((26.14.1); extended to multiset permutations in §26.16). -/
-@[dlmf 26.14.E1]
-def wordInversions {n : ℕ} (w : Fin n → ℕ) : ℕ := #{p : Fin n × Fin n | p.1 < p.2 ∧ w p.2 < w p.1}
-
-/-- The descent positions of a word `w` (`0`-based): `j` with `w j > w (j+1)`. -/
-@[dlmf 26.14.i]
-def wordDescentSet {n : ℕ} (w : Fin n → ℕ) : Finset ℕ :=
-  (range n).filter fun j => ∃ h : j + 1 < n, w ⟨j + 1, h⟩ < w ⟨j, by omega⟩
-
-/-- The major index (26.14.2): the sum of the (`1`-based) positions of the first elements of
-the descents. -/
-@[dlmf 26.14.E2]
-def wordMajorIndex {n : ℕ} (w : Fin n → ℕ) : ℕ := ∑ j ∈ wordDescentSet w, (j + 1)
-
-/-- `inv(σ)` (26.14.1). -/
-@[dlmf 26.14.E1]
-def inversionNumber {n : ℕ} (σ : Perm (Fin n)) : ℕ := wordInversions fun i => (σ i : ℕ)
-
-/-- The number of descents of `σ`. -/
-@[dlmf 26.14.i]
-def descentNumber {n : ℕ} (σ : Perm (Fin n)) : ℕ := #(wordDescentSet fun i => (σ i : ℕ))
-
-/-- `maj(σ)` (26.14.2). -/
-@[dlmf 26.14.E2]
-def majorIndex {n : ℕ} (σ : Perm (Fin n)) : ℕ := wordMajorIndex fun i => (σ i : ℕ)
-
 /-- §26.13 and §26.14(i), the example `35247816`: `inv = 11`, the descents are `52` and `81`,
 `maj = 2 + 6 = 8`. -/
 @[dlmf 26.14.i]
@@ -288,36 +256,6 @@ private lemma mem_wordDescentSet_perm {n : ℕ} (σ : Perm (Fin n)) (j : ℕ) :
   constructor
   · rintro ⟨-, h, h'⟩; exact ⟨h, h'⟩
   · rintro ⟨h, h'⟩; exact ⟨by omega, h, h'⟩
-
-/-- The only permutation without descents is the identity. -/
-lemma descentNumber_eq_zero_iff {n : ℕ} (σ : Perm (Fin n)) : descentNumber σ = 0 ↔ σ = 1 := by
-  constructor
-  · intro h
-    have hD : ∀ j (hj : j + 1 < n), σ ⟨j, by omega⟩ < σ ⟨j + 1, hj⟩ := by
-      intro j hj
-      have hj' : j ∉ wordDescentSet (fun i => (σ i : ℕ)) := by
-        rw [descentNumber, Finset.card_eq_zero] at h; rw [h]; exact Finset.notMem_empty j
-      rw [mem_wordDescentSet_perm] at hj'
-      have hj'' : ∀ h : j + 1 < n, σ ⟨j, by omega⟩ ≤ σ ⟨j + 1, h⟩ :=
-        fun h => not_lt.mp fun h' => hj' ⟨h, h'⟩
-      have hne : σ ⟨j, by omega⟩ ≠ σ ⟨j + 1, hj⟩ := fun h' => by
-        have := σ.injective h'; simp [Fin.ext_iff] at this
-      exact lt_of_le_of_ne (hj'' hj) hne
-    rcases n with _ | m
-    · exact Subsingleton.elim _ _
-    have hmono : StrictMono σ := by
-      rw [Fin.strictMono_iff_lt_succ]
-      intro i
-      exact hD i (by omega)
-    have := hmono.range_inj_of_wellFoundedLT strictMono_id
-    have h2 : (⇑σ : Fin (m + 1) → Fin (m + 1)) = id := this.mp (by simp)
-    exact Equiv.ext fun i => congrFun h2 i
-  · rintro rfl
-    rw [descentNumber, Finset.card_eq_zero]
-    refine Finset.eq_empty_of_forall_notMem fun j hj => ?_
-    obtain ⟨h, h'⟩ := (mem_wordDescentSet_perm _ j).1 hj
-    simp only [Perm.one_apply, Fin.mk_lt_mk] at h'
-    omega
 
 /-- A permutation of `Fin n` has at most `n - 1` descents. -/
 private lemma descentNumber_le {n : ℕ} (σ : Perm (Fin n)) : descentNumber σ ≤ n - 1 := by
@@ -501,17 +439,6 @@ theorem inversionNumber_eq_min_adjacent {n : ℕ} (σ : Perm (Fin n)) :
       rw [inversionNumber_inv] at h2
       simp only [List.length_cons]
       omega
-
-/-- The Eulerian number `⟨n k⟩`: permutations of `{1, …, n}` with exactly `k` descents
-(DLMF §26.14(i)). -/
-@[dlmf 26.14.i]
-def eulerianNumber (n k : ℕ) : ℕ := #{σ : Perm (Fin n) | descentNumber σ = k}
-
-/-- The number of excedances `σ(j) > j` of `σ`. -/
-def excedanceNumber {n : ℕ} (σ : Perm (Fin n)) : ℕ := #{j : Fin n | j < σ j}
-
-/-- The number of weak excedances `σ(j) ≥ j` of `σ`. -/
-def weakExcedanceNumber {n : ℕ} (σ : Perm (Fin n)) : ℕ := #{j : Fin n | j ≤ σ j}
 
 /-- Insertion of the letter `0` at position `p` into the word `σ + 1`. -/
 noncomputable def insertMinEquiv {n : ℕ} : Fin (n + 2) × Perm (Fin (n + 1)) ≃ Perm (Fin (n + 2)) :=

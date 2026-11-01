@@ -5,16 +5,16 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import DLMF.Hypergeometric.ArgumentContinuation
 public import DLMF.Statistical.IncompleteBeta
+public import DLMF.IncompleteGamma.Basic.IncompleteBeta
 
 /-!
 # Incomplete Beta function: continuation, recurrences and continued fraction (DLMF §8.17)
 
 ## Main definitions
 
-* `incBeta`, `normIncBetaI`: the continued incomplete Beta function and its normalized form.
 * `incBetaComplement`, `incBetaContiguousParameter`: the data of the contiguous recurrences,
   DLMF 8.17.11.
 * `incBetaFractionD`, `incBetaFractionConvergent`: the continued fraction, DLMF 8.17.22–8.17.23.
@@ -39,22 +39,16 @@ public import DLMF.Statistical.IncompleteBeta
 
 ## Implementation notes
 
-Results already in Mathlib are referenced, not reproved. At parameter poles `incBeta` keeps its
-totalized values; `normIncBetaI` preserves the removable specialization `a = 0`.
+The continued functions `incBeta` and `normIncBetaI` are defined in
+`DLMF.IncompleteGamma.Basic.IncompleteBeta`; at parameter poles `incBeta` keeps its totalized
+values and `normIncBetaI` preserves the removable specialization `a = 0`. Results already in
+Mathlib are referenced, not reproved.
 -/
 
 @[expose] public noncomputable section
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Statistical
-
-/-- Continued incomplete Beta; at parameter poles the formula keeps its totalized values. -/
-def incBeta (a b z : ℂ) : ℂ :=
-  if z=1 then Gamma a*Gamma b/Gamma (a+b) else Gamma a*z^a*DLMF.Hypergeometric.regularizedGaussHG a (1-b) (a+1) z
-
-/-- Continued normalized incomplete Beta, preserving the removable a=0 specialization. -/
-def normIncBetaI (a b z : ℂ) : ℂ :=
-  if z=1 then 1 else Gamma (a+b)/Gamma b*z^a*DLMF.Hypergeometric.regularizedGaussHG a (1-b) (a+1) z
 
 /-- Identity under the stated parameter and domain assumptions: `incBeta a b x=Real.incBeta a b
 x`. -/

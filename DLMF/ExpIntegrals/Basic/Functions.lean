@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import DLMF.Confluent.Basic.ExponentialIntegrals
 public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 

@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.OrthogonalPolynomials.Basic.AskeyScheme
 public import DLMF.Confluent.Recurrence
 public import DLMF.OrthogonalPolynomials.BinomialSeries
 public import DLMF.OrthogonalPolynomials.PollaczekMoments
@@ -54,24 +55,6 @@ noncomputable section
 set_option autoImplicit false
 
 namespace DLMF.OrthogonalPolynomials
-
-/-- A terminating hypergeometric sum, with an explicit cutoff. This implements
-DLMF's convention when a lower parameter is a negative integer. -/
-def terminatingHG (n : ℕ) (a b : List ℂ) (z : ℂ) : ℂ :=
-  ∑ k ∈ Finset.range (n + 1),
-    (a.map (fun t => poch t k)).prod / (b.map (fun t => poch t k)).prod *
-      z ^ k / (k.factorial : ℂ)
-
-/-- A negative integral first upper parameter makes the finite sum a genuine infinite sum. -/
-theorem terminatingHG_hasSum_neg_nat (n : ℕ) (a b : List ℂ) (z : ℂ) :
-    HasSum (fun k : ℕ => (((-(n : ℂ) :: a).map (fun t => poch t k)).prod /
-      (b.map (fun t => poch t k)).prod * z ^ k / (k.factorial : ℂ)))
-      (terminatingHG n (-(n : ℂ) :: a) b z) := by
-  unfold terminatingHG
-  apply hasSum_sum_of_ne_finset_zero
-  intro k hk
-  have hnk : n < k := by simpa using hk
-  simp [poch_neg_nat_eq_zero hnk]
 
 /-- Pochhammer symbols at points of positive real part do not vanish. -/
 theorem poch_ne_zero_of_re_pos {z : ℂ} (hz : 0 < z.re) (k : ℕ) : poch z k ≠ 0 :=
@@ -133,50 +116,6 @@ theorem hahn_basis_succ (α β N u : ℂ) (n k : ℕ) :
     rw [← poch_succ, poch_succ_left]
   rw [poch_succ_left (u - 1), show u - 1 + 1 = u by ring, poch_succ u k, poch_succ (u + 1) k]
   linear_combination (-((k + u + 1) * (N + β + u + 1))) * hrel
-
-/-- The Hahn polynomial `Q_n(x; α, β, N) = ₃F₂(-n, n+α+β+1, -x; α+1, -N; 1)` (DLMF 18.20.5). -/
-@[dlmf 18.20.E5]
-def hahn (α β : ℂ) (N n : ℕ) (x : ℂ) : ℂ :=
-  terminatingHG n [-(n : ℂ), n + α + β + 1, -x] [α + 1, -(N : ℂ)] 1
-
-/-- The Krawtchouk polynomial `K_n(x; p, N) = ₂F₁(-n, -x; -N; 1/p)` (DLMF 18.20.6). -/
-@[dlmf 18.20.E6]
-def krawtchouk (p : ℂ) (N n : ℕ) (x : ℂ) : ℂ :=
-  terminatingHG n [-(n : ℂ), -x] [-(N : ℂ)] p⁻¹
-
-/-- The Meixner polynomial `M_n(x; β, c) = ₂F₁(-n, -x; β; 1 - 1/c)` (DLMF 18.20.7). -/
-@[dlmf 18.20.E7]
-def meixner (β c : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  terminatingHG n [-(n : ℂ), -x] [β] (1 - c⁻¹)
-
-/-- The Charlier polynomial `C_n(x; a) = ₂F₀(-n, -x; ; -1/a)` (DLMF 18.20.8). -/
-@[dlmf 18.20.E8]
-def charlier (a : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  terminatingHG n [-(n : ℂ), -x] [] (-a⁻¹)
-
-/-- The four-parameter polynomial; the orthogonality regime has `c = conj a`,
-`d = conj b`. -/
-@[dlmf 18.20.E9]
-def continuousHahn (a b c d : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  I ^ n * poch (a + c) n * poch (a + d) n / n.factorial *
-    terminatingHG n [-(n : ℂ), n + a + b + c + d - 1, a + I * x] [a + c, a + d] 1
-
-/-- The Meixner–Pollaczek polynomial
-`P_n^{(λ)}(x; φ) = (2λ)_n/n! e^{inφ} ₂F₁(-n, λ+ix; 2λ; 1 - e^{-2iφ})` (DLMF 18.20.10). -/
-@[dlmf 18.20.E10]
-def meixnerPollaczek (lam phi : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  poch (2 * lam) n / n.factorial * exp (I * n * phi) *
-    terminatingHG n [-(n : ℂ), lam + I * x] [2 * lam] (1 - exp (-2 * I * phi))
-
-/-- The continuous Hahn weight `Γ(a+ix) Γ(b+ix) Γ(ā-ix) Γ(b̄-ix)` (DLMF 18.19.2). -/
-@[dlmf 18.19.E2]
-def continuousHahnWeight (a b : ℂ) (x : ℂ) : ℂ :=
-  Gamma (a + I * x) * Gamma (b + I * x) * Gamma (star a - I * x) * Gamma (star b - I * x)
-
-/-- The Meixner–Pollaczek weight `Γ(λ+ix) Γ(λ-ix) e^{(2φ-π)x}` (DLMF 18.19.7). -/
-@[dlmf 18.19.E7]
-def meixnerPollaczekWeight (lam phi : ℂ) (x : ℂ) : ℂ :=
-  Gamma (lam + I * x) * Gamma (lam - I * x) * exp ((2 * phi - Real.pi) * x)
 
 /-- The continuous Hahn normalization times its finite Pochhammer sum. -/
 theorem continuousHahn_eq_hahnSum (a b c d : ℂ) (n : ℕ) (x : ℝ) :
@@ -776,23 +715,6 @@ theorem meixnerPollaczek_recurrence {lam : ℂ} (hlam : 0 < lam.re) (phi : ℂ) 
   set E := cexp (I * n * phi)
   field_simp at hcont ⊢
   linear_combination (poch (2 * lam) n * (2 * lam + n) * E) * hcont
-
-/-- The Meixner–Pollaczek polynomial of degree one. -/
-theorem meixnerPollaczek_one {lam : ℂ} (hlam : lam ≠ 0) (phi x : ℂ) :
-    meixnerPollaczek lam phi 1 x = 2 * (x * sin phi + lam * cos phi) := by
-  unfold meixnerPollaczek terminatingHG
-  set u := cexp (I * phi) with hu
-  have hu0 : u ≠ 0 := exp_ne_zero _
-  have e2 : cexp (-2 * I * phi) = (u ^ 2)⁻¹ := by
-    rw [hu, ← Complex.exp_nat_mul, ← Complex.exp_neg]; congr 1; push_cast; ring
-  have hcos : cos phi = (u + u⁻¹) / 2 := by
-    rw [Complex.cos, hu, ← Complex.exp_neg]; congr 2 <;> ring_nf
-  have hsin : sin phi = (u⁻¹ - u) * I / 2 := by
-    rw [Complex.sin, hu, ← Complex.exp_neg]; congr 3 <;> ring_nf
-  rw [e2]
-  simp [Finset.sum_range_succ, poch_zero, poch_one, hcos, hsin, ← hu]
-  field_simp
-  ring_nf
 
 /-- Identity under the stated parameter and domain assumptions: `(meixnerPollaczek lam phi (n + 1)
 (x + I / 2) - meixnerPollaczek lam phi (n + 1) (x - I / 2)) / I = 2 * sin phi *

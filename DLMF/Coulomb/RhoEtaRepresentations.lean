@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Coulomb.RhoEtaProperties
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import DLMF.IncompleteGamma.FractionTools
 
 /-!
@@ -38,7 +38,7 @@ Noninteger powers and the arctangent take their principal values (DLMF §33.7). 
 representation asserts the integrability of the integrand together with the formula, so the Lean
 convention for nonintegrable functions never enters. The contour of 33.7.4, from `-1` to `-i∞`,
 is the ray `t = -1 - is`, `s ≥ 0` (`dt = -i ds`). The continued fractions use
-`HasContinuedFraction a b v`, meaning `v = a₀/(b₀ + a₁/(b₁ + ⋯))`, from `DLMF.Core.Framework`.
+`HasContinuedFraction a b v`, meaning `v = a₀/(b₀ + a₁/(b₁ + ⋯))`, from `DLMF.Core.Basic`.
 Barnett's formulas are proved from the Wronskian 33.2.12.
 -/
 

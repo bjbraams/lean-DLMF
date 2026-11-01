@@ -5,7 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
+public import DLMF.Elementary.Basic.Trigonometric
 public import DLMF.Elementary.Trigonometric.LogarithmicSeries
 public import DLMF.Gamma.IntegralRepresentations
 public import DLMFMathlib.Analysis.Complex.TrigSeriesExtension
@@ -33,29 +34,22 @@ public import TauCeti.Analysis.SpecialFunctions.Trigonometric.Orthogonality
 /-!
 # Complex trigonometric functions: identities, inequalities and products
 
-This file defines the cosecant and secant of a complex variable and proves the reciprocal
-relations, zeros and poles, inequalities, the secant series, derivatives, differential
-equations, addition, multiple-angle and Cartesian identities, and products and partial fractions
-of DLMF §§4.14–4.22.
+This file proves the inequalities, the secant series, differential equations, addition,
+multiple-angle and Cartesian identities, and products and partial fractions of DLMF
+§§4.18–4.22. The cosecant and secant, their reciprocal relations, zeros, poles and derivatives
+are in `DLMF.Elementary.Basic.Trigonometric`.
 
 ## Main definitions
 
-* `csc`, `sec`: the complex cosecant and secant, totalized to zero at their poles
-  (DLMF 4.14.5–4.14.6).
 * `trigRealSign`: the real sign, including zero, used in branch and table formulas.
 * `IsTrigLinearSolution`, `IsTrigEnergySolution`, `IsTrigRiccatiSolution`: the differential
   equations DLMF 4.20.9–4.20.11.
 
 ## Main results
 
-* `cot_eq_inv_tan`, `cot_eq_neg_tan_add_half_pi`, `sec_eq_csc_add_half_pi`: DLMF 4.14.7,
-  4.15.2, 4.15.3.
-* `meromorphic_reciprocal_trig`, `reciprocal_trig_poles`, `cot_zeros`,
-  `reciprocal_trig_nonzero`: zeros, poles and meromorphy (DLMF §4.14).
 * `cos_le_sinc_le_one`, `sine_parabolic_bounds`, `norm_sin_le_sinh_norm`,
   `trig_unit_disc_bounds`: inequalities (DLMF 4.18.3–4.18.10).
 * `hasSum_sec_euler`: the secant series (DLMF 4.19.5).
-* `hasDerivAt_csc`, `hasDerivAt_sec`, `hasDerivAt_cot`: derivatives (DLMF 4.20.4–4.20.6).
 * `trig_linear_ode_general`, `trig_energy_ode_general`, `trig_riccati_ode_general`: general
   solutions of DLMF 4.20.12–4.20.14, including the singular constant solutions.
 * `sin_add_cos_phase`, `cot_add_sub`, `two_sin_mul_sin`, `sin_half_roots`, `cos_half_roots`,
@@ -115,98 +109,6 @@ private lemma trig_norm_sq_cos (z : ℂ) : ‖Complex.cos z‖^2=(Real.cos z.re)
 
 /-- Real sign, including zero, used in the DLMF branch and table formulas. -/
 def trigRealSign (x : ℝ) : ℝ := if 0<x then 1 else if x<0 then -1 else 0
-
-/-- Complex cosecant, totalized to zero at its poles. -/
-@[dlmf 4.14.E5]
-def csc (z : ℂ) : ℂ := (Complex.sin z)⁻¹
-
-/-- Complex secant, totalized to zero at its poles. -/
-@[dlmf 4.14.E6]
-def sec (z : ℂ) : ℂ := (Complex.cos z)⁻¹
-
-/-- DLMF 4.14.E7: cot eq inv tan. -/
-@[dlmf 4.14.E7]
-theorem cot_eq_inv_tan (z : ℂ) : Complex.cot z = (Complex.tan z)⁻¹ := by
-  simp [Complex.cot,Complex.tan]
-
-/-- DLMF 4.15.E2: cot eq neg tan add half pi. -/
-@[dlmf 4.15.E2]
-theorem cot_eq_neg_tan_add_half_pi (z : ℂ) : Complex.cot z = -Complex.tan (z+π/2) := by
-  simp [Complex.tan,Complex.cot,Complex.sin_add_pi_div_two,Complex.cos_add_pi_div_two,div_neg]
-
-/-- DLMF 4.15.E3: sec eq csc add half pi. -/
-@[dlmf 4.15.E3]
-theorem sec_eq_csc_add_half_pi (z : ℂ) : sec z = csc (z+π/2) := by
-  simp [sec,csc,Complex.sin_add_pi_div_two]
-
-/-- DLMF 4.14: meromorphic reciprocal trig. -/
-@[dlmf 4.14]
-theorem meromorphic_reciprocal_trig : Meromorphic csc ∧ Meromorphic sec ∧ Meromorphic Complex.cot := by
-  have hs : Meromorphic Complex.sin := fun z => (Complex.differentiable_sin.analyticAt z).meromorphicAt
-  have hc : Meromorphic Complex.cos := fun z => (Complex.differentiable_cos.analyticAt z).meromorphicAt
-  exact ⟨hs.inv,hc.inv,hc.div hs⟩
-
-/-- A product with a reciprocal has norm tending to infinity exactly at an isolated zero. -/
-private lemma tendsto_norm_mul_inv_atTop_iff {g h : ℂ → ℂ} {z : ℂ} (hgc : ContinuousAt g z) (hhc : ContinuousAt h z)
-    (hiso : g z = 0 → ∀ᶠ w in 𝓝[≠] z, g w ≠ 0) (hh : g z = 0 → h z ≠ 0) :
-    Tendsto (fun w => ‖h w * (g w)⁻¹‖) (𝓝[≠] z) atTop ↔ g z = 0 := by
-  constructor
-  · intro ht
-    by_contra hz
-    have hc : ContinuousAt (fun w => ‖h w * (g w)⁻¹‖) z :=
-      (hhc.mul (hgc.inv₀ hz)).norm
-    exact not_tendsto_atTop_of_tendsto_nhds (hc.tendsto.mono_left nhdsWithin_le_nhds) ht
-  · intro hz
-    have h0 : Tendsto (fun w => ‖g w‖) (𝓝[≠] z) (𝓝[>] 0) := by
-      apply tendsto_nhdsWithin_iff.mpr
-      refine ⟨?_, ?_⟩
-      · have := (hgc.norm).tendsto.mono_left (nhdsWithin_le_nhds (s := {z}ᶜ))
-        simpa [hz] using this
-      · filter_upwards [hiso hz] with w hw
-        exact norm_pos_iff.mpr hw
-    have hinv := tendsto_inv_nhdsGT_zero.comp h0
-    have hn : Tendsto (fun w => ‖h w‖) (𝓝[≠] z) (𝓝 ‖h z‖) :=
-      (hhc.norm).tendsto.mono_left nhdsWithin_le_nhds
-    have := hn.pos_mul_atTop (norm_pos_iff.mpr (hh hz)) hinv
-    refine this.congr' (Eventually.of_forall fun w => ?_)
-    simp [norm_inv]
-
-/-- DLMF 4.14: reciprocal trig poles. -/
-@[dlmf 4.14]
-theorem reciprocal_trig_poles (z : ℂ) :
-    (Tendsto (fun w => ‖csc w‖) (𝓝[≠] z) atTop ↔ Complex.sin z=0) ∧
-    (Tendsto (fun w => ‖sec w‖) (𝓝[≠] z) atTop ↔ Complex.cos z=0) ∧
-    (Tendsto (fun w => ‖Complex.cot w‖) (𝓝[≠] z) atTop ↔ Complex.sin z=0) := by
-  have hsc := Complex.sin_sq_add_cos_sq z
-  have hs : Complex.sin z = 0 → ∀ᶠ w in 𝓝[≠] z, Complex.sin w ≠ 0 := by
-    intro h0
-    have hc : Complex.cos z ≠ 0 := by intro hc; rw [h0, hc] at hsc; norm_num at hsc
-    simpa [h0] using (Complex.hasDerivAt_sin z).eventually_ne hc
-  have hcz : Complex.cos z = 0 → ∀ᶠ w in 𝓝[≠] z, Complex.cos w ≠ 0 := by
-    intro h0
-    have hc : -Complex.sin z ≠ 0 := by
-      intro hc; rw [neg_eq_zero] at hc; rw [h0, hc] at hsc; norm_num at hsc
-    simpa [h0] using (Complex.hasDerivAt_cos z).eventually_ne hc
-  refine ⟨?_, ?_, ?_⟩
-  · simpa [csc] using tendsto_norm_mul_inv_atTop_iff (g := Complex.sin) (h := fun _ => 1)
-      Complex.continuous_sin.continuousAt continuousAt_const hs (fun _ => one_ne_zero)
-  · simpa [sec] using tendsto_norm_mul_inv_atTop_iff (g := Complex.cos) (h := fun _ => 1)
-      Complex.continuous_cos.continuousAt continuousAt_const hcz (fun _ => one_ne_zero)
-  · have := tendsto_norm_mul_inv_atTop_iff (g := Complex.sin) (h := Complex.cos)
-      Complex.continuous_sin.continuousAt Complex.continuous_cos.continuousAt hs
-      (fun h0 hc => by rw [h0, hc] at hsc; norm_num at hsc)
-    simpa [Complex.cot, div_eq_mul_inv] using this
-
-/-- DLMF 4.14: cot zeros. -/
-@[dlmf 4.14]
-theorem cot_zeros {z : ℂ} (hz : Complex.sin z ≠ 0) :
-    Complex.cot z=0 ↔ ∃ k : ℤ,z=(2*k+1)*π/2 := by
-  simp only [Complex.cot,div_eq_zero_iff,hz,or_false,Complex.cos_eq_zero_iff]
-
-/-- DLMF 4.14: reciprocal trig nonzero. -/
-@[dlmf 4.14]
-theorem reciprocal_trig_nonzero {z : ℂ} (hs : Complex.sin z≠0) (hc : Complex.cos z≠0) : csc z≠0 ∧ sec z≠0 := by
-  exact ⟨inv_ne_zero hs,inv_ne_zero hc⟩
 
 /-- DLMF 4.18.E3: cos le sinc le one. -/
 @[dlmf 4.18.E3]
@@ -435,32 +337,6 @@ theorem hasSum_sec_euler {z : ℂ} (hz : ‖z‖<π/2) :
   have h := Complex.hasSum_pow_of_differentiableOn_ball (by norm_num) hf hsmall hz
   rw [hconv] at h
   exact Complex.hasSum_ite_even_iff.mp h
-
-/-- DLMF 4.20.E4: hasDerivAt csc. -/
-@[dlmf 4.20.E4]
-theorem hasDerivAt_csc {z : ℂ} (hz : Complex.sin z≠0) :
-    HasDerivAt csc (-csc z*Complex.cot z) z := by
-  refine ((Complex.hasDerivAt_sin z).inv hz).congr_deriv ?_
-  simp only [csc,Complex.cot,div_eq_mul_inv,inv_pow,pow_two]
-  ring
-
-/-- DLMF 4.20.E5: hasDerivAt sec. -/
-@[dlmf 4.20.E5]
-theorem hasDerivAt_sec {z : ℂ} (hz : Complex.cos z≠0) :
-    HasDerivAt sec (sec z*Complex.tan z) z := by
-  refine ((Complex.hasDerivAt_cos z).inv hz).congr_deriv ?_
-  simp only [sec,Complex.tan,div_eq_mul_inv,inv_pow,pow_two]
-  ring
-
-/-- DLMF 4.20.E6: hasDerivAt cot. -/
-@[dlmf 4.20.E6]
-theorem hasDerivAt_cot {z : ℂ} (hz : Complex.sin z≠0) :
-    HasDerivAt Complex.cot (-(csc z)^2) z := by
-  have h := (Complex.hasDerivAt_cos z).div (Complex.hasDerivAt_sin z) hz
-  refine h.congr_deriv ?_
-  simp only [csc]
-  field_simp
-  linear_combination -(Complex.sin_sq_add_cos_sq z)
 
 /-- Solutions of `f' = c f` on a preconnected open set are multiples of `exp (c z)`. -/
 private lemma exists_eq_mul_exp_of_hasDerivAt_eq_mul {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U) {f : ℂ → ℂ} {c : ℂ}
@@ -792,20 +668,6 @@ theorem cot_add_sub_values {u v : ℂ} (hu : Complex.sin u≠0) (hv : Complex.si
   · rw [Complex.cot,Complex.cot,Complex.sin_sub]
     field_simp <;> ring
 
-/-- DLMF 4.21.E13: sec sq eq. -/
-@[dlmf 4.21.E13]
-theorem sec_sq_eq {z : ℂ} (hz : Complex.cos z≠0) : (sec z)^2=1+(Complex.tan z)^2 := by
-  unfold sec Complex.tan
-  field_simp
-  linear_combination -(Complex.sin_sq_add_cos_sq z)
-
-/-- DLMF 4.21.E14: csc sq eq. -/
-@[dlmf 4.21.E14]
-theorem csc_sq_eq {z : ℂ} (hz : Complex.sin z≠0) : (csc z)^2=1+(Complex.cot z)^2 := by
-  unfold csc Complex.cot
-  field_simp
-  linear_combination -(Complex.sin_sq_add_cos_sq z)
-
 /-- DLMF 4.21.E15: two sin mul sin. -/
 @[dlmf 4.21.E15]
 theorem two_sin_mul_sin (u v : ℂ) : 2*Complex.sin u*Complex.sin v=Complex.cos (u-v)-Complex.cos (u+v) := by
@@ -843,11 +705,6 @@ theorem cos_sq_sub_sin_sq (u v : ℂ) : (Complex.cos u)^2-(Complex.sin v)^2=Comp
   rw [Complex.cos_add,Complex.cos_sub]
   linear_combination -(Complex.cos u)^2*(Complex.sin_sq_add_cos_sq v)+
     (Complex.sin v)^2*(Complex.sin_sq_add_cos_sq u)
-
-/-- Squaring the principal complex square root returns its argument, including zero. -/
-theorem trig_sqrt_sq (z : ℂ) : (Complex.sqrt z)^2=z := by
-  rw [Complex.sqrt,← Complex.cpow_mul_nat]
-  norm_num
 
 /-- DLMF 4.21.E21: sin half roots. -/
 @[dlmf 4.21.E21]

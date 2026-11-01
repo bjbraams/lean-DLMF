@@ -5,13 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import DLMF.Confluent.Basic.ErrorFunctions
 
 /-!
 # Complex error, Fresnel, Dawson and Gaussian primitives
 
-Definitions of the entire functions of DLMF §7.2 and of the alternative notations of DLMF §7.1.
+Definitions of the entire functions of DLMF §7.2, of the alternative notations of DLMF §7.1,
+of the repeated integrals of `erfc` (DLMF §7.18) and of the Voigt functions (DLMF §7.19).
 The complex error functions `erf` and `erfc` themselves are defined in
 `DLMF.Confluent.Basic.ErrorFunctions`.
 
@@ -28,6 +29,10 @@ The complex error functions `erf` and `erfc` themselves are defined in
   `Q`, `P`, `Erf` and `Erfi` of DLMF §7.1.
 * `fresnelC1`, `fresnelS1`, `fresnelC2`, `fresnelS2`: the alternative Fresnel normalizations of
   DLMF §7.1.
+* `iteratedErfc`: the repeated integrals `iⁿ erfc(z)` (DLMF 7.18.1, 7.18.2); only indices
+  `n ≥ -1` are meaningful.
+* `Real.voigtU`, `Real.voigtV`: the Voigt functions for `t > 0` (DLMF 7.19.1, 7.19.2).
+* `Real.voigtH`: the line-broadening function for `a > 0` (DLMF 7.19.4).
 -/
 
 @[expose] public noncomputable section
@@ -110,5 +115,26 @@ def fresnelC2 (z : ℂ) : ℂ :=
 /-- Alternative Fresnel S₂ normalization with the principal square root. -/
 def fresnelS2 (z : ℂ) : ℂ :=
   fresnelSinInt ((2*z/π)^(1/2 : ℂ))
+
+/-- Repeated complementary Gaussian tail; only indices at least -1 have mathematical meaning. -/
+@[dlmf 7.18.E1, dlmf 7.18.E2]
+def iteratedErfc (n : ℤ) (z : ℂ) : ℂ :=
+  if n = -1 then 2/Real.sqrt π*exp (-z^2) else if n < 0 then 0 else
+    2/Real.sqrt π*(∫ t : ℝ in Ioi 0, (t : ℂ)^n.toNat/(n.toNat.factorial : ℂ)*exp (-(z+t)^2))
+
+/-- Voigt U for t>0. -/
+@[dlmf 7.19.E1]
+def Real.voigtU (x t : ℝ) : ℝ :=
+  1/Real.sqrt (4*π*t)*(∫ y : ℝ, Real.exp (-(x-y)^2/(4*t))/(1+y^2))
+
+/-- Voigt V for t>0. -/
+@[dlmf 7.19.E2]
+def Real.voigtV (x t : ℝ) : ℝ :=
+  1/Real.sqrt (4*π*t)*(∫ y : ℝ, y*Real.exp (-(x-y)^2/(4*t))/(1+y^2))
+
+/-- Voigt line-broadening profile for a>0. -/
+@[dlmf 7.19.E4]
+def Real.voigtH (a u : ℝ) : ℝ :=
+  a/π*(∫ t : ℝ, Real.exp (-t^2)/((u-t)^2+a^2))
 
 end DLMF.Confluent

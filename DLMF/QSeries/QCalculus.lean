@@ -5,22 +5,19 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.QSeries.Basic.Calculus
+public import DLMF.QSeries.Basic.CalculusProperties
 public import DLMF.QSeries.Pochhammer
 
 /-!
 # The `q`-derivative and the `q`-fundamental theorem (Duverney §10.1.2)
 
-This file develops Jackson's `q`-derivative `qDeriv q f x = (f(x) - f(qx))/((1-q)x)` and
-proves both halves of the `q`-fundamental theorem of calculus for the Jackson integral
-`jacksonIntegral`.
+This file proves both halves of the `q`-fundamental theorem of calculus for Jackson's
+`q`-derivative `qDeriv q f x = (f(x) - f(qx))/((1-q)x)` and the Jackson integral
+`jacksonIntegral`. The rules for `qDeriv` (powers, linearity, the product rule and the limit
+`q → 1`) are in `DLMF.QSeries.Basic.CalculusProperties`.
 
 ## Main results
 
-* `qDeriv_pow`: `δ_q xⁿ = [n]_q x^{n-1}` (Duverney (10.11)).
-* `qDeriv_add`, `qDeriv_const_mul`, `qDeriv_mul`: linearity and the `q`-product rule
-  (Duverney (10.14)).
-* `tendsto_qDeriv`: `δ_q f(x) → f'(x)` as `q → 1` (DLMF §17.2(iv)).
 * `qDeriv_jacksonIntegral`: `δ_q ∫₀ˣ f d_q t = f(x)` (Duverney, Theorem 10.4).
 * `jacksonIntegral_qDeriv`: `∫₀ˣ δ_q f d_q t = f(x) - f(0)`.
 -/
@@ -33,54 +30,6 @@ open scoped Topology
 noncomputable section
 
 namespace DLMF.QSeries
-
-/-- `δ_q xⁿ = [n]_q x^{n-1}` (Duverney (10.11)). -/
-theorem qDeriv_pow {q x : ℂ} (hq : q ≠ 1) (hx : x ≠ 0) (n : ℕ) :
-    qDeriv q (fun t => t ^ n) x = qNum q n * x ^ (n - 1) := by
-  have hq' : 1 - q ≠ 0 := sub_ne_zero.mpr (Ne.symm hq)
-  rcases n with _ | n
-  · simp [qDeriv, qNum]
-  simp only [qDeriv, qNum, mul_pow, Nat.add_sub_cancel, pow_succ]
-  field_simp
-
-/-- The `q`-product rule `δ_q(uv)(x) = δ_q u(x) v(x) + u(qx) δ_q v(x)` (Duverney (10.14)). -/
-theorem qDeriv_mul (q : ℂ) (u v : ℂ → ℂ) (x : ℂ) :
-    qDeriv q (fun t => u t * v t) x = qDeriv q u x * v x + u (q * x) * qDeriv q v x := by
-  simp only [qDeriv]
-  rw [div_mul_eq_mul_div, mul_div_assoc', ← add_div]
-  congr 1; ring
-
-/-- Linearity of `δ_q`. -/
-theorem qDeriv_add (q : ℂ) (u v : ℂ → ℂ) (x : ℂ) :
-    qDeriv q (fun t => u t + v t) x = qDeriv q u x + qDeriv q v x := by
-  simp only [qDeriv]; rw [← add_div]; congr 1; ring
-
-/-- Homogeneity of `δ_q`. -/
-theorem qDeriv_const_mul (q c : ℂ) (u : ℂ → ℂ) (x : ℂ) :
-    qDeriv q (fun t => c * u t) x = c * qDeriv q u x := by
-  simp only [qDeriv]; rw [mul_div_assoc']; congr 1; ring
-
-/-- `δ_q f(x) → f'(x)` as `q → 1` (Duverney (10.12)). -/
-@[dlmf 17.2.iv "partial: q-derivative limit away from zero; extended origin convention handled by the proved local adapter"]
-theorem tendsto_qDeriv {f : ℂ → ℂ} {f' x : ℂ} (hf : HasDerivAt f f' x) (hx : x ≠ 0) :
-    Tendsto (fun q => qDeriv q f x) (𝓝[≠] 1) (𝓝 f') := by
-  have hs := hasDerivAt_iff_tendsto_slope.mp hf
-  have hmap : Tendsto (fun q : ℂ => q * x) (𝓝[≠] 1) (𝓝[≠] x) := by
-    apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
-    · have hc : Tendsto (fun q : ℂ => q * x) (𝓝 1) (𝓝 x) := by
-        have hcont : Continuous fun q : ℂ => q * x := by fun_prop
-        simpa using hcont.tendsto (1 : ℂ)
-      exact hc.mono_left nhdsWithin_le_nhds
-    · filter_upwards [self_mem_nhdsWithin] with q hq
-      simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hq ⊢
-      intro h
-      exact hq (by simpa [hx] using congrArg (· / x) h)
-  refine (hs.comp hmap).congr' ?_
-  filter_upwards [self_mem_nhdsWithin] with q hq
-  simp only [Function.comp, slope_def_field, qDeriv]
-  have hq' : (1 : ℂ) - q ≠ 0 := sub_ne_zero.mpr (Ne.symm hq)
-  rw [show q * x - x = -((1 - q) * x) by ring, show f (q * x) - f x = -(f x - f (q * x)) by ring,
-    neg_div_neg_eq]
 
 /-- **The `q`-fundamental theorem of calculus** (Duverney, Theorem 10.4): the Jackson integral
 `F(x) = ∫₀ˣ f d_q t` satisfies `δ_q F = f`, when the defining series converges. -/

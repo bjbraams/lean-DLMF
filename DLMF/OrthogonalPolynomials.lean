@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.OrthogonalPolynomials.Basic
 public import DLMF.OrthogonalPolynomials.HahnMoments
 public import DLMF.OrthogonalPolynomials.ScalarSeries
 public import DLMF.OrthogonalPolynomials.Mehler

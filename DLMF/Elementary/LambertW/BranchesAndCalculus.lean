@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Elementary.LogExpBasic
+public import DLMF.Elementary.Basic.LogExp
 public import DLMF.Gamma.Asymptotics
 public import DLMFMathlib.Analysis.Complex.LagrangeBurmann
-public import DLMF.Core.Framework
+public import DLMF.Core.Basic
 public import Mathlib.Analysis.Real.Pi.Bounds
 
 /-!

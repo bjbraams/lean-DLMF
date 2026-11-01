@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Elementary.Basic.Hyperbolic
 public import DLMF.Elementary.Trigonometric
 public import DLMF.Elementary.LogExpAnalysis
 public import TauCeti.Analysis.SpecialFunctions.Artanh
@@ -15,26 +16,20 @@ public import DLMFMathlib.Analysis.Complex.TrigSeriesExtension
 /-!
 # Hyperbolic functions: definitions, identities and series
 
-This file defines the reciprocal hyperbolic functions and the principal and multivalued inverse
-hyperbolic functions, and proves the interrelations, special values, inequalities, power series,
-derivatives and differential equations of DLMF §§4.28–4.34.
+This file defines the multivalued inverse hyperbolic functions and proves the interrelations,
+special values, inequalities, power series and differential equations of DLMF §§4.28–4.34.
+The reciprocal and principal inverse hyperbolic functions, the relations to the trigonometric
+functions, the zeros of `sinh` and `cosh` and the derivatives are in
+`DLMF.Elementary.Basic.Hyperbolic`.
 
 ## Main definitions
 
-* `csch`, `sech`, `coth`: the reciprocal hyperbolic functions (DLMF 4.28.5–4.28.7).
-* `arcsinh`, `arccosh`, `arctanh`, `arccsch`, `arcsech`, `arccoth`: the principal inverse
-  hyperbolic functions (DLMF §4.37).
-* `arcsinhDomain`, `arccoshDomain`, `arctanhDomain`, `arccschDomain`, `arcsechDomain`,
-  `arccothDomain`: their open principal domains.
 * `arcsinhValues`, `arccoshValues`, `arctanhValues`, `arccschValues`, `arcsechValues`,
   `arccothValues`: the sets of all finite inverse values.
 * `sinhc`, `tanhc`: the removable quotients `sinh z / z` and `tanh z / z`.
 
 ## Main results
 
-* `csc_mul_I`, `sec_mul_I`, `cot_mul_I`: relations to trigonometric functions
-  (DLMF 4.28.11–4.28.13).
-* `sinh_zeros`, `cosh_zeros`: the zeros of `sinh` and `cosh`.
 * `hyperbolic_interrelations_0`–`hyperbolic_interrelations_5`: Table 4.30.1.
 * `sinh_div_limit`, `tanh_div_limit`, `cosh_sub_one_div_sq_limit`: DLMF 4.31.1–4.31.3.
 * `hyperbolic_special_values`, `hyperbolic_real_infinity`: Table 4.31.1.
@@ -43,8 +38,6 @@ derivatives and differential equations of DLMF §§4.28–4.34.
 * `hasSum_tanh`, `hasSum_csch`, `hasSum_sech`, `hasSum_coth`: Maclaurin series (DLMF §4.33).
 * `hasSum_log_sinhc`, `hasSum_log_cosh`, `hasSum_log_tanhc`: Bernoulli expansions of normalized
   logarithms (DLMF §4.33).
-* `hasDerivAt_tanh`, `hasDerivAt_csch`, `hasDerivAt_sech`, `hasDerivAt_coth`: derivatives
-  (DLMF 4.34.3–4.34.6).
 * `hyperbolic_linear_ode`, `hyperbolic_squared_ode_plus`, `hyperbolic_squared_ode_minus`,
   `hyperbolic_riccati_ode`: the differential equations DLMF 4.34.7–4.34.14, including the
   equilibrium solutions omitted in DLMF.
@@ -69,43 +62,6 @@ open scoped Real Topology
 
 namespace DLMF.Elementary
 
-/-- The hyperbolic cosecant, totalized at its poles. -/
-@[dlmf 4.28.E5]
-def csch (z : ℂ) : ℂ := (Complex.sinh z)⁻¹
-/-- The hyperbolic secant, totalized at its poles. -/
-@[dlmf 4.28.E6]
-def sech (z : ℂ) : ℂ := (Complex.cosh z)⁻¹
-/-- The hyperbolic cotangent, totalized at its poles. -/
-@[dlmf 4.28.E7]
-def coth (z : ℂ) : ℂ := Complex.cosh z/Complex.sinh z
-/-- The open principal domain of arcsinh (the imaginary rays beyond ±i are cut). -/
-def arcsinhDomain : Set ℂ := {z | z.re ≠ 0 ∨ |z.im| < 1}
-/-- The open principal domain of arccosh, with the real ray up to 1 removed. -/
-def arccoshDomain : Set ℂ := {z | z.im ≠ 0 ∨ 1 < z.re}
-/-- The open principal domain of arctanh (the real rays beyond ±1 are cut). -/
-def arctanhDomain : Set ℂ := {z | z.im ≠ 0 ∨ |z.re| < 1}
-/-- The open principal domain of arccsch, obtained by inversion of the arcsinh domain. -/
-def arccschDomain : Set ℂ := {z | z ≠ 0 ∧ z⁻¹ ∈ arcsinhDomain}
-/-- The open principal domain of arcsech, obtained by inversion of the arccosh domain. -/
-def arcsechDomain : Set ℂ := {z | z ≠ 0 ∧ z⁻¹ ∈ arccoshDomain}
-/-- The open principal domain of arccoth, with the segment [-1,1] removed. -/
-def arccothDomain : Set ℂ := {z | z.im ≠ 0 ∨ 1 < |z.re|}
-/-- Principal inverse sinh; cut-side statements below remove the tie at the square-root cut. -/
-@[dlmf 4.37.E16]
-def arcsinh (z : ℂ) : ℂ := Complex.log (Complex.sqrt (z^2+1)+z)
-/-- Principal inverse cosh, with the square roots factored to preserve the negative half-plane. -/
-def arccosh (z : ℂ) : ℂ := Complex.log (z+Complex.sqrt (z-1)*Complex.sqrt (z+1))
-/-- Principal inverse tanh off its poles, with the principal logarithm's cut convention. -/
-@[dlmf 4.37.E24]
-def arctanh (z : ℂ) : ℂ := Complex.log ((1+z)/(1-z))/2
-/-- Principal inverse hyperbolic cosecant. -/
-@[dlmf 4.37.E7]
-def arccsch (z : ℂ) : ℂ := arcsinh z⁻¹
-/-- Principal inverse hyperbolic secant. -/
-@[dlmf 4.37.E8]
-def arcsech (z : ℂ) : ℂ := arccosh z⁻¹
-/-- Principal inverse hyperbolic cotangent; the value at zero is a cut-side value. -/
-def arccoth (z : ℂ) : ℂ := if z=0 then π*I/2 else arctanh z⁻¹
 /-- All finite inverse-sinh values. -/
 def arcsinhValues (z : ℂ) : Set ℂ := {w | Complex.sinh w=z}
 /-- All finite inverse-cosh values. -/
@@ -132,65 +88,6 @@ def HyperbolicPositive (z : ℂ) : Prop :=
   0 ≤ (Complex.cosh z).re ∧ (Complex.cosh z).im=0
 /-- The six hyperbolic functions in the row order of Table4.30.1. -/
 def hyperbolicSix (z : ℂ) : Fin 6 → ℂ := ![Complex.sinh z,Complex.cosh z,Complex.tanh z,csch z,sech z,coth z]
-/-- Identity under the stated parameter and domain assumptions: `coth z=(Complex.tanh z)⁻¹`. -/
-@[dlmf 4.28.E7]
-theorem coth_eq_inv_tanh (z : ℂ) : coth z=(Complex.tanh z)⁻¹ := by
-  simp [coth, Complex.tanh_eq_sinh_div_cosh, inv_div]
-
-/-- Identity under the stated parameter and domain assumptions: `(Complex.sin (I*z))⁻¹= -I*csch
-z`. -/
-@[dlmf 4.28.E11]
-theorem csc_mul_I (z : ℂ) : (Complex.sin (I*z))⁻¹= -I*csch z := by
-  simp [mul_comm I z, Complex.sin_mul_I, csch, mul_inv_rev, Complex.inv_I, mul_comm]
-
-/-- Identity under the stated parameter and domain assumptions: `(Complex.cos (I*z))⁻¹=sech z`. -/
-@[dlmf 4.28.E12]
-theorem sec_mul_I (z : ℂ) : (Complex.cos (I*z))⁻¹=sech z := by
-  rw [mul_comm I z, Complex.cos_mul_I]; rfl
-
-/-- Identity under the stated parameter and domain assumptions: `(Complex.tan (I*z))⁻¹= -I*coth
-z`. -/
-@[dlmf 4.28.E13]
-theorem cot_mul_I (z : ℂ) : (Complex.tan (I*z))⁻¹= -I*coth z := by
-  simp [mul_comm I z, Complex.tan_mul_I, coth_eq_inv_tanh, mul_inv_rev, Complex.inv_I, mul_comm]
-
-/-- Identity under the stated parameter and domain assumptions: `Complex.sinh z=0 ↔ ∃ k : ℤ,
-z=(k:ℂ)*π*I`. -/
-theorem sinh_zeros (z : ℂ) : Complex.sinh z=0 ↔ ∃ k : ℤ, z=(k:ℂ)*π*I := by
-  constructor
-  · intro h
-    have hs:Complex.sin (z*I)=0 := by rw [Complex.sin_mul_I,h,zero_mul]
-    obtain ⟨k,hk⟩:=Complex.sin_eq_zero_iff.mp hs
-    refine ⟨-k,?_⟩
-    have hh:=congrArg (fun w:ℂ=>w*(-I)) hk
-    simp [mul_assoc] at hh
-    convert hh using 1 <;> push_cast <;> ring
-  · rintro ⟨k,rfl⟩
-    have hs:Complex.sin (((k:ℂ)*π*I)*I)=0 := by
-      rw [mul_assoc,Complex.I_mul_I,mul_neg_one]
-      exact Complex.sin_eq_zero_iff.mpr ⟨-k,by push_cast;ring⟩
-    rw [Complex.sin_mul_I] at hs
-    exact (mul_eq_zero.mp hs).resolve_right Complex.I_ne_zero
-
-/-- Identity under the stated parameter and domain assumptions: `Complex.cosh z=0 ↔ ∃ k : ℤ,
-z=((k:ℂ)+1/2)*π*I`. -/
-theorem cosh_zeros (z : ℂ) : Complex.cosh z=0 ↔ ∃ k : ℤ, z=((k:ℂ)+1/2)*π*I := by
-  constructor
-  · intro h
-    have hs:Complex.cos (z*I)=0 := by rwa [Complex.cos_mul_I]
-    obtain ⟨k,hk⟩:=Complex.cos_eq_zero_iff.mp hs
-    refine ⟨-k-1,?_⟩
-    have hh:=congrArg (fun w:ℂ=>w*(-I)) hk
-    simp [mul_assoc] at hh
-    convert hh using 1 <;> push_cast <;> ring
-  · rintro ⟨k,rfl⟩
-    rw [← Complex.cos_mul_I]
-    apply Complex.cos_eq_zero_iff.mpr
-    refine ⟨-k-1,?_⟩
-    simp [mul_assoc]
-    push_cast
-    ring
-
 /-- The principal square root of the square of a nonnegative real number. -/
 private lemma complexSqrt_ofReal_sq {x : ℝ} (hx : 0 ≤ x) : Complex.sqrt ((x:ℂ)^2) = x := by
   have h : Complex.sqrt ((x^2:ℝ):ℂ) = (Real.sqrt (x^2):ℂ) :=
@@ -981,15 +878,6 @@ theorem hasSum_log_cosh {L : ℂ → ℂ} (hL : HyperbolicNormalizedLog (Metric.
   field_simp
   ring
 
-/-- At `z`, the function `Complex.tanh` has derivative `(sech z^2)`. -/
-@[dlmf 4.34.E3]
-theorem hasDerivAt_tanh {z : ℂ} (hz : Complex.cosh z≠0) : HasDerivAt Complex.tanh (sech z^2) z := by
-  convert (Complex.hasDerivAt_sinh z).div (Complex.hasDerivAt_cosh z) hz using 1
-  · ext w; exact Complex.tanh_eq_sinh_div_cosh w
-  · simp only [sech]
-    field_simp
-    linear_combination -(Complex.cosh_sq_sub_sinh_sq z)
-
 /-- The Bernoulli expansion of an analytic logarithm of the removable quotient `tanh z / z`,
 normalized to vanish at zero, on the disk `‖z‖ < π / 2`. -/
 theorem hasSum_log_tanhc {L : ℂ → ℂ} (hL : HyperbolicNormalizedLog (Metric.ball 0 (π/2)) tanhc L)
@@ -1053,31 +941,6 @@ theorem hasSum_log_tanhc {L : ℂ → ℂ} (hL : HyperbolicNormalizedLog (Metric
   have hf : ((2*n+1+1).factorial : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
   field_simp
   ring
-
-/-- At `z`, the function `csch` has derivative `(-csch z*coth z)`. -/
-@[dlmf 4.34.E4]
-theorem hasDerivAt_csch {z : ℂ} (hz : Complex.sinh z≠0) : HasDerivAt csch (-csch z*coth z) z := by
-  convert (Complex.hasDerivAt_sinh z).inv hz using 1
-  · rfl
-  · simp only [csch, coth]
-    field_simp <;> ring
-
-/-- At `z`, the function `sech` has derivative `(-sech z*Complex.tanh z)`. -/
-@[dlmf 4.34.E5]
-theorem hasDerivAt_sech {z : ℂ} (hz : Complex.cosh z≠0) : HasDerivAt sech (-sech z*Complex.tanh z) z := by
-  convert (Complex.hasDerivAt_cosh z).inv hz using 1
-  · rfl
-  · simp only [sech, Complex.tanh_eq_sinh_div_cosh]
-    field_simp <;> ring
-
-/-- At `z`, the function `coth` has derivative `(-csch z^2)`. -/
-@[dlmf 4.34.E6]
-theorem hasDerivAt_coth {z : ℂ} (hz : Complex.sinh z≠0) : HasDerivAt coth (-csch z^2) z := by
-  convert (Complex.hasDerivAt_cosh z).div (Complex.hasDerivAt_sinh z) hz using 1
-  · rfl
-  · simp only [coth, csch]
-    field_simp
-    linear_combination (Complex.cosh_sq_sub_sinh_sq z)
 
 /-- Formula under the stated hypotheses: `(∀ z ∈ U, deriv (deriv f) z-a^2*f z=0) ↔ ∃ A B : ℂ, ∀ z
 ∈ U, f z=A*Complex.cosh (a*z)+B*Complex.sinh (a*z)`. -/

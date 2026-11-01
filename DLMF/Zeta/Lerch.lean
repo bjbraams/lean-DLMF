@@ -7,6 +7,7 @@ module
 
 public import DLMF.Zeta.Hurwitz
 public import DLMF.Zeta.Polylog
+public import DLMF.Zeta.Basic.Polylog
 
 /-!
 # Lerch's transcendent
@@ -16,8 +17,9 @@ continuation, special cases, expansions, recurrence and integral representations
 
 ## Main definitions
 
-* `lerchPhiSeries`: Lerch's series `∑_{n≥0} zⁿ/(a+n)^s` (DLMF 25.14.1).
-* `lerchPhi`: Lerch's transcendent `Φ(z, s, a)` (DLMF §25.14(i)).
+Lerch's series `lerchPhiSeries` (DLMF 25.14.1) and Lerch's transcendent `lerchPhi`
+(DLMF §25.14(i)) are defined in `DLMF.Zeta.Basic.Polylog`.
+
 * `LerchParamAdmissible`: DLMF's conditions on `a` in 25.14.1.
 
 ## Main results
@@ -65,19 +67,6 @@ noncomputable section
 
 namespace DLMF.Zeta
 
-open DLMF.Confluent (hurwitzZetaComplex)
-
-/-- **Lerch's series** `∑_{n≥0} zⁿ/(a+n)^s` (DLMF 25.14.1), as a `tsum`, principal powers. -/
-@[dlmf 25.14.E1]
-def lerchPhiSeries (z s a : ℂ) : ℂ := ∑' n : ℕ, z ^ n / (a + n) ^ s
-
-open scoped Classical in
-/-- **Lerch's transcendent** `Φ(z, s, a)` (DLMF §25.14(i)): the analytic continuation in `z` of
-25.14.1 from the unit disk to `ℂ \ [1, ∞)`, and the series on `[1, ∞)`. -/
-@[dlmf 25.14.i]
-def lerchPhi (z s a : ℂ) : ℂ :=
-  if z ∈ slitOne then slitContinuation (fun w => lerchPhiSeries w s a) z
-  else lerchPhiSeries z s a
 
 /-- DLMF's conditions on `a` in 25.14.1: `|ph a| < π` if `s` is not an integer, and
 `a ≠ 0, -1, -2, …` if `s` is a positive integer (no condition if `s = 0, -1, -2, …`). -/

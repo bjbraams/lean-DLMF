@@ -5,26 +5,20 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Legendre.Basic.Associated
+public import DLMF.Hypergeometric.Basic.CutPlane
 public import DLMF.Legendre.Ferrers
 public import DLMF.Legendre.Integer
 
 /-!
 # Quadratic bases for associated Legendre and Ferrers functions
 
-The definitions of the associated Legendre functions `P^μ_ν`, `Q^μ_ν`, Olver's `𝑸^μ_ν` and the
-Ferrers function `𝖰^μ_ν` (DLMF §14.3), and the even and odd quadratic hypergeometric bases on
-`(-1, 1)` in which the Ferrers functions are expanded.
+The even and odd quadratic hypergeometric bases on `(-1, 1)` in which the Ferrers functions are
+expanded. The definitions of the associated Legendre functions `P^μ_ν`, `Q^μ_ν`, Olver's `𝑸^μ_ν`
+and the Ferrers function `𝖰^μ_ν` (DLMF §14.3) are in `DLMF.Legendre.Basic.Associated`.
 
 ## Main definitions
 
-* `legendreBranchPower`: the power `(z² - 1)^{c/2}`, continued from `z > 1`.
-* `associatedP`: `P^μ_ν(z) = ((z+1)/(z-1))^{μ/2} 𝐅(ν+1, -ν; 1-μ; (1-z)/2)` (DLMF 14.3.6).
-* `olverQ`: Olver's `𝑸^μ_ν` (DLMF 14.3.10), regularized before multiplying by Gamma so that
-  exceptional parameters are retained.
-* `associatedQ`: the classical `Q^μ_ν` (DLMF 14.3.7).
-* `LegendreQRegular`: the condition `ν + μ ∉ {-1, -2, …}`.
-* `ferrersW1`, `ferrersW2`: the auxiliary functions `w₁`, `w₂` of DLMF 14.3.13–14.3.14.
-* `ferrersQ`: the Ferrers function `𝖰^μ_ν` (DLMF 14.3.12).
 * `ferrersEven`, `ferrersOdd`: the even and odd quadratic Ferrers solutions.
 
 ## Main results
@@ -54,64 +48,10 @@ open scoped Real Topology Nat ComplexConjugate
 
 namespace DLMF.Legendre
 
-/-- The inherited power of z squared minus one, continued from z greater than one. -/
-def legendreBranchPower (μ z : ℂ) : ℂ :=
-  exp (μ/2*(log (z-1)+log (z+1)))
-
-/-- DLMF 14.3.6: the associated Legendre function of the first kind, `P^μ_ν(z) =
-((z+1)/(z-1))^{μ/2} 𝐅(ν+1, -ν; 1-μ; (1-z)/2)` with principal branches and the regularized
-hypergeometric function `𝐅`. -/
-@[dlmf 14.3.E6]
-def associatedP (ν μ z : ℂ) : ℂ :=
-  exp (μ/2*(log (z+1)-log (z-1)))*regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-z)/2)
-
-/-- Olver Q is regularized before multiplying by Gamma, so exceptional parameters are retained. -/
-@[dlmf 14.3.E10]
-def olverQ (ν μ z : ℂ) : ℂ :=
-  Real.sqrt π*legendreBranchPower μ z/(2^(ν+1)*z^(ν+μ+1))*regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/z^2)
-
-/-- Classical associated Q, defined mathematically when degree plus order is not a negative integer. -/
-@[dlmf 14.3.E7]
-def associatedQ (ν μ z : ℂ) : ℂ :=
-  exp (μ*π*I)*Gamma (ν+μ+1)*olverQ ν μ z
-
-/-- The parameter condition `ν + μ ∉ {-1, -2, -3, …}` under which the classical `Q^μ_ν` and Ferrers
-`𝖰^μ_ν` are defined. -/
-def LegendreQRegular (ν μ : ℂ) : Prop :=
-  ∀ n : ℕ, ν+μ ≠ -(n+1)
-
-/-- DLMF 14.3.13: the even Ferrers auxiliary function `w₁(ν, μ, x) = 2^μ Γ((ν+μ+1)/2)/Γ((ν-μ+2)/2)
-(1-x²)^{-μ/2} 𝐅(-(ν+μ)/2, (ν-μ+1)/2; 1/2; x²)`. -/
-@[dlmf 14.3.E13]
-def ferrersW1 (ν μ : ℂ) (x : ℝ) : ℂ :=
-  2^μ*Gamma ((ν+μ+1)/2)/Gamma ((ν-μ+2)/2)*(1-x^2:ℂ)^(-μ/2)*regularizedGaussHG (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) (x^2)
-
-/-- DLMF 14.3.14: the odd Ferrers auxiliary function `w₂(ν, μ, x) = 2^μ Γ((ν+μ+2)/2)/Γ((ν-μ+1)/2) x
-(1-x²)^{-μ/2} 𝐅((1-ν-μ)/2, (ν-μ+2)/2; 3/2; x²)`. -/
-@[dlmf 14.3.E14]
-def ferrersW2 (ν μ : ℂ) (x : ℝ) : ℂ :=
-  2^μ*Gamma ((ν+μ+2)/2)/Gamma ((ν-μ+1)/2)*x*(1-x^2:ℂ)^(-μ/2)*regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) (x^2)
-
-/-- This representation supplies integer-order limiting values without division by sin of the order. -/
-@[dlmf 14.3.E12]
-def ferrersQ (ν μ : ℂ) (x : ℝ) : ℂ :=
-  -π/2*sin ((ν+μ)*π/2)*ferrersW1 ν μ x+π/2*cos ((ν+μ)*π/2)*ferrersW2 ν μ x
-
 /-- `Γ(1/2) = √π` in the complex Gamma function. -/
 theorem legendre_Gamma_one_half : Gamma (1 / 2 : ℂ) = (Real.sqrt π : ℂ) := by
   rw [Complex.Gamma_one_half_eq, Real.sqrt_eq_rpow, Complex.ofReal_cpow Real.pi_pos.le]
   norm_num
-
-/-- `𝐅(a,b;c;0) = 1/Γ(c)` for regular `c`. -/
-theorem regularizedGaussHGFun_zero_of_regular {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
-    regularizedGaussHGFun a b c 0 = 1/Gamma c := by
-  rw [regularizedGaussHGFun_eq_div_Gamma hc, ordinaryHypergeometric_zero]
-
-/-- `𝐅(a,b;c;0) = 1/Γ(c)` for regular `c`, on the cut plane. -/
-theorem regularizedGaussHG_zero_of_regular {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
-    regularizedGaussHG a b c 0 = 1/Gamma c := by
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by simp),
-    regularizedGaussHGFun_zero_of_regular hc]
 
 /-- `1/2` is not a pole of `Γ`. -/
 theorem half_ne_neg_nat : ∀ k : ℕ, (1/2:ℂ) ≠ -(k:ℂ) := fun k h => by

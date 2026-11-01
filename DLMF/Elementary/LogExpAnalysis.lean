@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
-public import DLMF.Elementary.LogExpBasic
+public import DLMF.Core.Basic
+public import DLMF.Elementary.Basic.LogExp
 public import DLMFMathlib.Analysis.SpecialFunctions.Complex.LogBoundary
 public import Mathlib.Algebra.Order.Ring.Star
 public import Mathlib.Analysis.Analytic.Binomial
