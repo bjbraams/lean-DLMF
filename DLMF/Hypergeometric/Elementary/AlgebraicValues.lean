@@ -8,14 +8,25 @@ module
 public import DLMF.Hypergeometric.SpecialValueTools
 public import DLMF.Gamma.Digamma
 public import DLMF.Gamma.SpecialValues
+public import ToMathlib.Analysis.SpecialFunctions.Pow
 
 /-!
-# Elementary and algebraic Gauss values
+# Elementary and algebraic values of `₂F₁` (DLMF §15.4)
 
-Elementary specializations and exact algebraic values of Gaussian hypergeometric functions.
+## Main results
 
-Source references and common attribution are retained in
-`DLMF.Hypergeometric.Elementary`.
+* `log_ratio`, `log_add_sqrt`: logarithmic values, DLMF 15.4.2 and 15.4.5.
+* `even_binomial`, `tan_cos`, `odd_binomial`, `tan_sin`: DLMF 15.4.7–15.4.10.
+* `opposite_parameters_sqrt`, `sin_sq_cos`: DLMF 15.4.11–15.4.12.
+* `complementary_parameters_sqrt`, `sin_sq_cos_quotient`, `complementary_parameters_odd_sqrt`,
+  `sin_sq_sin`: DLMF 15.4.13–15.4.16.
+* `quadratic_binomial`, `quadratic_binomial_derivative`, `successor_binomial`:
+  DLMF 15.4.17–15.4.19.
+* `gauss_second_summation`, `gauss_second_summation_contiguous`, `bailey_summation`: values at
+  `z = 1/2`, DLMF 15.4.28–15.4.30.
+* `value_neg_one_third`, `value_one_ninth`: DLMF 15.4.31–15.4.32.
+
+See `DLMF.Hypergeometric.Elementary` for the conventions.
 -/
 
 @[expose] public section
@@ -412,11 +423,6 @@ theorem analyticAt_ordinaryHypergeometric_sin_sq (a b c : ℂ) {x0 : ℝ} (hx : 
     hF.comp (f := fun w : ℂ => sin w ^ 2) (by fun_prop)
   simpa [ofReal_sin] using analyticAt_comp_ofReal hG
 
-/-- Positive real bases: `r^w = exp (log r * w)`. -/
-theorem ofReal_cpow_eq_exp {r : ℝ} (hr : 0 < r) (w : ℂ) :
-    (r : ℂ) ^ w = exp ((Real.log r : ℂ) * w) := by
-  rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hr.ne'), ofReal_log hr.le]
-
 /-- Extension from `|x| < π/4` to `|x| < π/2` of an identity between real-analytic
 functions. -/
 theorem eq_of_analytic_of_abs_lt_pi_div_four {f g : ℝ → ℂ}
@@ -470,7 +476,7 @@ theorem ordinaryHypergeometric_neg_tan_sq (a b : ℂ) {c : ℂ} (hc : ∀ k : �
     push_cast; ring
   have hpos : 0 < 1 + Real.tan x ^ 2 := by positivity
   have hcos : (Real.cos x : ℂ) ^ (2 * a) = ((1 + Real.tan x ^ 2 : ℝ) : ℂ) ^ (-a) := by
-    rw [ofReal_cpow_eq_exp hcx, ofReal_cpow_eq_exp hpos, ← inv_inv (1 + Real.tan x ^ 2),
+    rw [Complex.ofReal_cpow_eq_exp hcx, Complex.ofReal_cpow_eq_exp hpos, ← inv_inv (1 + Real.tan x ^ 2),
       Real.inv_one_add_tan_sq hcx.ne', Real.log_inv, Real.log_pow]
     push_cast; ring_nf
   rw [hP, h1t, hcos]
@@ -493,7 +499,7 @@ theorem sin_sq_cos (a : ℂ) {x : ℝ} (hx : |x| < Real.pi / 2) :
   have hP := ordinaryHypergeometric_neg_tan_sq a (a + 1 / 2) hc hx
   rw [tan_cos a hx, show (1 / 2 : ℂ) - (a + 1 / 2) = -a by ring,
     ordinaryHypergeometric_symm] at hP
-  exact (mul_left_cancel₀ (by rw [ofReal_cpow_eq_exp hcx]; exact exp_ne_zero _) hP).symm
+  exact (mul_left_cancel₀ (by rw [Complex.ofReal_cpow_eq_exp hcx]; exact exp_ne_zero _) hP).symm
 
 /-- Identity under the stated parameter and domain assumptions: `₂F₁ a (1 - a) (1 / 2) (-z ^ 2) =
 (((1 + z ^ 2) ^ (1 / 2 : ℂ) + z) ^ (2 * a - 1) + ((1 + z ^ 2) ^ (1 / 2 : ℂ) - z) ^ (2 * a -
@@ -535,7 +541,7 @@ theorem sin_sq_cos_quotient (a : ℂ) {x : ℝ} (hx : |x| < Real.pi / 2) :
     show (1 : ℂ) - (Real.sin x : ℂ) ^ 2 = ((Real.cos x ^ 2 : ℝ) : ℂ) by
       rw [ofReal_pow]; linear_combination -(by exact_mod_cast Real.sin_sq_add_cos_sq x :
         (Real.sin x : ℂ) ^ 2 + (Real.cos x : ℂ) ^ 2 = 1),
-    ofReal_cpow_eq_exp (by positivity), Real.log_pow]
+    Complex.ofReal_cpow_eq_exp (by positivity), Real.log_pow]
   have hc' : (Real.cos x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hcx.ne'
   rw [show ((((2 : ℕ) : ℝ) * Real.log (Real.cos x) : ℝ) : ℂ) * -(1 / 2) =
     -(Real.log (Real.cos x) : ℂ) by push_cast; ring, exp_neg, ofReal_log hcx.le,
@@ -642,7 +648,7 @@ theorem sin_sq_sin (a : ℂ) {x : ℝ} (hx : |x| < Real.pi / 2) :
   have hT := tan_sin a hx
   rw [hP, show (3 / 2 : ℂ) - (a + 1 / 2) = 1 - a by ring] at hT
   have hne : (Real.cos x : ℂ) ^ (2 * a) ≠ 0 := by
-    rw [ofReal_cpow_eq_exp hcx]; exact exp_ne_zero _
+    rw [Complex.ofReal_cpow_eq_exp hcx]; exact exp_ne_zero _
   have h := mul_left_cancel₀ hne (show (Real.cos x : ℂ) ^ (2 * a) *
     ((1 - 2 * a) * (Real.sin x : ℂ) * ₂F₁ a (1 - a) (3 / 2) ((Real.sin x : ℂ) ^ 2)) =
     (Real.cos x : ℂ) ^ (2 * a) * sin ((1 - 2 * a) * x) by rw [← hT]; ring)
@@ -861,13 +867,13 @@ theorem value_neg_one_third {a : ℂ} (hc : ∀ k : ℕ, 3 / 2 - 2 * a ≠ -(k :
   have hpow : (4 / 3 : ℂ) ^ (1 - 4 * a) * (4 : ℂ) ^ (-2 * A) =
       2 / 3 * (8 / 9 : ℂ) ^ (-2 * a) * (2 : ℂ) ^ (1 - 2 * (2 / 3 - a)) := by
     have e1 : (4 / 3 : ℂ) ^ (1 - 4 * a) = exp (Real.log (4 / 3) * (1 - 4 * a)) := by
-      have := ofReal_cpow_eq_exp_log (u := 4 / 3) (by norm_num) (1 - 4 * a); push_cast at this; exact this
+      have := Complex.ofReal_cpow_eq_exp (q := 4 / 3) (by norm_num) (1 - 4 * a); push_cast at this; exact this
     have e2 : (4 : ℂ) ^ (-2 * A) = exp (Real.log 4 * (-2 * A)) := by
-      have := ofReal_cpow_eq_exp_log (u := 4) (by norm_num) (-2 * A); push_cast at this; exact this
+      have := Complex.ofReal_cpow_eq_exp (q := 4) (by norm_num) (-2 * A); push_cast at this; exact this
     have e3 : (8 / 9 : ℂ) ^ (-2 * a) = exp (Real.log (8 / 9) * (-2 * a)) := by
-      have := ofReal_cpow_eq_exp_log (u := 8 / 9) (by norm_num) (-2 * a); push_cast at this; exact this
+      have := Complex.ofReal_cpow_eq_exp (q := 8 / 9) (by norm_num) (-2 * a); push_cast at this; exact this
     have e4 : (2 : ℂ) ^ (1 - 2 * (2 / 3 - a)) = exp (Real.log 2 * (1 - 2 * (2 / 3 - a))) := by
-      have := ofReal_cpow_eq_exp_log (u := 2) (by norm_num) (1 - 2 * (2 / 3 - a))
+      have := Complex.ofReal_cpow_eq_exp (q := 2) (by norm_num) (1 - 2 * (2 / 3 - a))
       push_cast at this; exact this
     have e5 : (2 / 3 : ℂ) = exp (Real.log (2 / 3)) := by
       rw [← ofReal_exp, Real.exp_log (by norm_num)]; push_cast; ring
@@ -977,11 +983,11 @@ theorem value_one_ninth {a : ℂ} (hc : ∀ k : ℕ, 5 / 6 + 2 * a / 3 ≠ -(k :
     rw [Real.sqrt_eq_rpow, ofReal_cpow Real.pi_pos.le]; push_cast; ring_nf
   have hpow : (8 / 9 : ℂ) ^ (-a) * (3 / 2 : ℂ) ^ (-3 * A) = (3 / 4 : ℂ) ^ a := by
     have e1 : (8 / 9 : ℂ) ^ (-a) = exp (Real.log (8 / 9) * (-a)) := by
-      have := ofReal_cpow_eq_exp_log (u := 8 / 9) (by norm_num) (-a); push_cast at this; exact this
+      have := Complex.ofReal_cpow_eq_exp (q := 8 / 9) (by norm_num) (-a); push_cast at this; exact this
     have e2 : (3 / 2 : ℂ) ^ (-3 * A) = exp (Real.log (3 / 2) * (-3 * A)) := by
-      have := ofReal_cpow_eq_exp_log (u := 3 / 2) (by norm_num) (-3 * A); push_cast at this; exact this
+      have := Complex.ofReal_cpow_eq_exp (q := 3 / 2) (by norm_num) (-3 * A); push_cast at this; exact this
     have e3 : (3 / 4 : ℂ) ^ a = exp (Real.log (3 / 4) * a) := by
-      have := ofReal_cpow_eq_exp_log (u := 3 / 4) (by norm_num) a; push_cast at this; exact this
+      have := Complex.ofReal_cpow_eq_exp (q := 3 / 4) (by norm_num) a; push_cast at this; exact this
     rw [e1, e2, e3, ← exp_add]
     congr 1
     have l1 : Real.log (8 / 9) = 3 * Real.log 2 - 2 * Real.log 3 := by

@@ -18,20 +18,29 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 /-!
 # Reductions of partial differential equations (DLMF §32.13)
 
-The PDE predicates `IsMKdVOn`, `IsKdVOn`, `IsSineGordonOn`, `IsBoussinesqOn` are in
-`DLMF.Painleve.Basic.Solutions`. The scaling reductions of mKdV and KdV to `PII` (32.13.2,
-32.13.4; verified symbolically for every `α`), the similarity reduction of KdV (32.13.5), the
-scaling reduction of sine-Gordon (32.13.7) and the travelling-wave reduction of Boussinesq
-(32.13.9–32.13.10) are proved as PDE statements, with the principal branch of `(3t)^{-1/3}`
-(`3t` in the slit plane), from the chain rule and `d/dt (3t)^{-1/3} = -((3t)^{-1/3})⁴`.
+Reductions of the mKdV, KdV, sine-Gordon and Boussinesq equations to Painlevé equations. The
+PDE predicates `IsMKdVOn`, `IsKdVOn`, `IsSineGordonOn`, `IsBoussinesqOn` are in
+`DLMF.Painleve.Basic.Solutions`.
 
-The ODE parts are proved: the sine-Gordon reduction `zv'' + v' = sin v` gives `PIII` with
-`α = -β = 1/2`, `γ = δ = 0` for `w = exp(-iv)` (§32.13(ii)); the similarity reduction of KdV,
-`W'' = -3W² + λz + C`, is solved by `W(z) = -2μ²w(μz - C/(2μ⁴))` with `w` a solution of `PI`
-and `μ⁵ = -λ/2` (the "expressible in terms of `PI`" of §32.13(i), for `λ ≠ 0`); and the
-Boussinesq travelling-wave equation 32.13.10 with `A ≠ 0` is solved by
-`v(z) = λ²w(λz + μ) - (c² - 1)/12` with `w` a solution of `PI`, `λ⁵ = A` (§32.13(iii)). The
-case `A = 0` (Weierstrass function) is not formalized.
+## Main results
+
+* `mKdV_scalingReduction`, `kdV_scalingReduction`: the scaling reductions of mKdV and KdV to
+  `PII`, for every `α` (DLMF 32.13.2, 32.13.4).
+* `kdV_similarityReduction`, `kdV_similarity_painleveI`: the similarity reduction of KdV
+  (DLMF 32.13.5); `W'' = -3W² + λz + C` is solved by `W(z) = -2μ²w(μz - C/(2μ⁴))` with `w` a
+  solution of `PI` and `μ⁵ = -λ/2` (§32.13(i), for `λ ≠ 0`).
+* `sineGordon_scalingReduction`, `painleveIII_of_sineGordon`: the scaling reduction of
+  sine-Gordon (DLMF 32.13.7); `zv'' + v' = sin v` gives `PIII` with `α = -β = 1/2`,
+  `γ = δ = 0` for `w = exp(-iv)` (§32.13(ii)).
+* `boussinesq_travellingWave`, `boussinesq_painleveI`: the travelling-wave reduction of
+  Boussinesq (DLMF 32.13.9–32.13.10); for `A ≠ 0` it is solved by
+  `v(z) = λ²w(λz + μ) - (c² - 1)/12` with `w` a solution of `PI`, `λ⁵ = A` (§32.13(iii)).
+
+## Implementation notes
+
+The PDE statements use the principal branch of `(3t)^{-1/3}` (`3t` in the slit plane), with
+`d/dt (3t)^{-1/3} = -((3t)^{-1/3})⁴`. The case `A = 0` of 32.13.10 (Weierstrass function) is
+not included.
 -/
 
 @[expose] public noncomputable section
@@ -43,7 +52,7 @@ namespace DLMF.Painleve
 
 /-- The third derivative of a solution of a second-order equation, from the derivative of
 the right-hand side along the solution. -/
-private lemma p3b_deriv3 {F : ℂ → ℂ → ℂ → ℂ} {W : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+private lemma deriv_deriv_deriv_eq_of_isODE2SolutionOn {F : ℂ → ℂ → ℂ → ℂ} {W : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (h : IsODE2SolutionOn F W U) {y G : ℂ} (hy : y ∈ U)
     (hG : HasDerivAt (fun y => F y (W y) (deriv W y)) G y) :
     deriv (deriv (deriv W)) y = G := by
@@ -52,13 +61,13 @@ private lemma p3b_deriv3 {F : ℂ → ℂ → ℂ → ℂ} {W : ℂ → ℂ} {U 
   rw [he.deriv_eq, hG.deriv]
 
 /-- Solutions of a second-order equation on an open set are smooth there. -/
-private lemma p3b_contDiffAt {F : ℂ → ℂ → ℂ → ℂ} {W : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+private lemma contDiffAt_of_isODE2SolutionOn {F : ℂ → ℂ → ℂ → ℂ} {W : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (h : IsODE2SolutionOn F W U) {y : ℂ} (hy : y ∈ U) (n : ℕ) : ContDiffAt ℂ n W y :=
   (DifferentiableOn.contDiffOn (fun x hx => (h.differentiableAt x hx).differentiableWithinAt)
     hU).contDiffAt (hU.mem_nhds hy)
 
 /-- Three successive explicit derivatives on an open set give the third iterated derivative. -/
-private lemma p3b_iteratedDeriv_three {f0 f1 f2 f3 : ℂ → ℂ} {V : Set ℂ} (hV : IsOpen V)
+private lemma iteratedDeriv_three_eq_of_hasDerivAt {f0 f1 f2 f3 : ℂ → ℂ} {V : Set ℂ} (hV : IsOpen V)
     (h1 : ∀ y ∈ V, HasDerivAt f0 (f1 y) y) (h2 : ∀ y ∈ V, HasDerivAt f1 (f2 y) y)
     (h3 : ∀ y ∈ V, HasDerivAt f2 (f3 y) y) {y : ℂ} (hy : y ∈ V) :
     iteratedDeriv 3 f0 y = f3 y := by
@@ -71,7 +80,7 @@ private lemma p3b_iteratedDeriv_three {f0 f1 f2 f3 : ℂ → ℂ} {V : Set ℂ} 
     (h3 y hy).deriv]
 
 /-- The derivative of the principal power `(3t)^{-1/3}` is `-((3t)^{-1/3})⁴`. -/
-private lemma p3b_hasDerivAt_r {t : ℂ} (ht : 3 * t ∈ slitPlane) :
+private lemma hasDerivAt_three_mul_cpow_neg_third {t : ℂ} (ht : 3 * t ∈ slitPlane) :
     HasDerivAt (fun t : ℂ => (3 * t) ^ (-1 / 3 : ℂ)) (-((3 * t) ^ (-1 / 3 : ℂ)) ^ 4) t := by
   have h3 : HasDerivAt (fun t : ℂ => 3 * t) 3 t := by
     simpa using (hasDerivAt_id t).const_mul (3 : ℂ)
@@ -79,7 +88,7 @@ private lemma p3b_hasDerivAt_r {t : ℂ} (ht : 3 * t ∈ slitPlane) :
   rw [show (-1 / 3 : ℂ) - 1 = ((4 : ℕ) : ℂ) * (-1 / 3) by push_cast; ring, cpow_nat_mul]
   ring
 /-- Scaling the variable of a function with a derivative. -/
-private lemma p3b_scale {A A' : ℂ → ℂ} {R K x : ℂ} (h : HasDerivAt A (A' (x * R)) (x * R)) :
+private lemma hasDerivAt_const_mul_comp_mul {A A' : ℂ → ℂ} {R K x : ℂ} (h : HasDerivAt A (A' (x * R)) (x * R)) :
     HasDerivAt (fun x => K * A (x * R)) (K * R * A' (x * R)) x := by
   have := (h.comp x (hasDerivAt_mul_const R)).const_mul K
   exact this.congr_deriv (by ring)
@@ -102,17 +111,17 @@ theorem mKdV_scalingReduction {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ} (hU : I
   refine ⟨fun p hp => ?_, fun p hp => ?_, fun p hp => ?_⟩
   · exact contDiffAt_const.mul (((hd.contDiffOn hU).contDiffAt (hU.mem_nhds hp.2)).comp p.1
       (contDiffAt_id.mul contDiffAt_const))
-  · exact (p3b_hasDerivAt_r hp.1).differentiableAt.mul ((hw.differentiableAt _ hp.2).comp p.2
-      (((p3b_hasDerivAt_r hp.1).const_mul p.1).differentiableAt))
+  · exact (hasDerivAt_three_mul_cpow_neg_third hp.1).differentiableAt.mul ((hw.differentiableAt _ hp.2).comp p.2
+      (((hasDerivAt_three_mul_cpow_neg_third hp.1).const_mul p.1).differentiableAt))
   · obtain ⟨hp1, hp2⟩ := hp
     set R := (3 * p.2) ^ (-1 / 3 : ℂ) with hR
     have hin : HasDerivAt (fun t : ℂ => p.1 * (3 * t) ^ (-1 / 3 : ℂ)) (p.1 * -R ^ 4) p.2 :=
-      (p3b_hasDerivAt_r hp1).const_mul p.1
+      (hasDerivAt_three_mul_cpow_neg_third hp1).const_mul p.1
     have hc : HasDerivAt (fun t : ℂ => w (p.1 * (3 * t) ^ (-1 / 3 : ℂ)))
         (deriv w (p.1 * R) * (p.1 * -R ^ 4)) p.2 := (hw.hasDerivAt hp2).comp p.2 hin
     have ht : HasDerivAt (fun t : ℂ => (3 * t) ^ (-1 / 3 : ℂ) * w (p.1 * (3 * t) ^ (-1 / 3 : ℂ)))
         (-R ^ 4 * w (p.1 * R) + R * (deriv w (p.1 * R) * (p.1 * -R ^ 4))) p.2 :=
-      (p3b_hasDerivAt_r hp1).mul hc
+      (hasDerivAt_three_mul_cpow_neg_third hp1).mul hc
     have hV : IsOpen {x : ℂ | x * R ∈ U} := hU.preimage (continuous_id.mul continuous_const)
     have hlin : ∀ x : ℂ, HasDerivAt (fun x => x * R) R x := fun x => hasDerivAt_mul_const R
     have h1 : ∀ x ∈ {x : ℂ | x * R ∈ U}, HasDerivAt (fun x => R * w (x * R))
@@ -130,7 +139,7 @@ theorem mKdV_scalingReduction {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ} (hU : I
       have hd3 := hw2 _ hx
       have := (((hd3.comp x (hlin x)).mul_const R).mul_const R).const_mul R
       exact this
-    rw [ht.deriv, (h1 p.1 hp2).deriv, p3b_iteratedDeriv_three hV h1 h2 h3 hp2]
+    rw [ht.deriv, (h1 p.1 hp2).deriv, iteratedDeriv_three_eq_of_hasDerivAt hV h1 h2 h3 hp2]
     ring
 
 
@@ -177,33 +186,33 @@ theorem kdV_scalingReduction {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ} (hU : Is
       ((hd1.contDiffOn hU).contDiffAt (hU.mem_nhds hp.2)).add
         (((hd.contDiffOn hU).contDiffAt (hU.mem_nhds hp.2)).pow 2)
     exact contDiffAt_const.mul (hc.comp p.1 (contDiffAt_id.mul contDiffAt_const))
-  · have hin := (p3b_hasDerivAt_r hp.1).const_mul p.1
-    exact ((p3b_hasDerivAt_r hp.1).differentiableAt.pow 2).neg.mul
+  · have hin := (hasDerivAt_three_mul_cpow_neg_third hp.1).const_mul p.1
+    exact ((hasDerivAt_three_mul_cpow_neg_third hp.1).differentiableAt.pow 2).neg.mul
       ((hAd _ hp.2).differentiableAt.comp p.2 hin.differentiableAt)
   · obtain ⟨hp1, hp2⟩ := hp
     set R := (3 * p.2) ^ (-1 / 3 : ℂ) with hR
     have hin : HasDerivAt (fun t : ℂ => p.1 * (3 * t) ^ (-1 / 3 : ℂ)) (p.1 * -R ^ 4) p.2 :=
-      (p3b_hasDerivAt_r hp1).const_mul p.1
+      (hasDerivAt_three_mul_cpow_neg_third hp1).const_mul p.1
     have ht : HasDerivAt (fun t : ℂ => -((3 * t) ^ (-1 / 3 : ℂ)) ^ 2 *
         A (p.1 * (3 * t) ^ (-1 / 3 : ℂ)))
         (-(2 * R * -R ^ 4) * A (p.1 * R) + -R ^ 2 * (B (p.1 * R) * (p.1 * -R ^ 4))) p.2 := by
-      have := (((p3b_hasDerivAt_r hp1).pow 2).neg).mul ((hAd _ hp2).comp p.2 hin)
+      have := (((hasDerivAt_three_mul_cpow_neg_third hp1).pow 2).neg).mul ((hAd _ hp2).comp p.2 hin)
       refine this.congr_deriv ?_
       simp only [Function.comp_apply, Pi.neg_apply, Pi.pow_apply, ← hR]
       push_cast; ring
     have hV : IsOpen {x : ℂ | x * R ∈ U} := hU.preimage (continuous_id.mul continuous_const)
     have h1 : ∀ x ∈ {x : ℂ | x * R ∈ U}, HasDerivAt (fun x => -R ^ 2 * A (x * R))
-        (-R ^ 2 * R * B (x * R)) x := fun x hx => p3b_scale (hAd _ hx)
+        (-R ^ 2 * R * B (x * R)) x := fun x hx => hasDerivAt_const_mul_comp_mul (hAd _ hx)
     have h2 : ∀ x ∈ {x : ℂ | x * R ∈ U}, HasDerivAt (fun x => -R ^ 2 * R * B (x * R))
-        (-R ^ 2 * R * R * C' (x * R)) x := fun x hx => p3b_scale (hBd _ hx)
+        (-R ^ 2 * R * R * C' (x * R)) x := fun x hx => hasDerivAt_const_mul_comp_mul (hBd _ hx)
     have h3 : ∀ x ∈ {x : ℂ | x * R ∈ U}, HasDerivAt (fun x => -R ^ 2 * R * R * C' (x * R))
-        (-R ^ 2 * R * R * R * D (x * R)) x := fun x hx => p3b_scale (hCd _ hx)
+        (-R ^ 2 * R * R * R * D (x * R)) x := fun x hx => hasDerivAt_const_mul_comp_mul (hCd _ hx)
     have hu : (fun x => -R ^ 2 * (deriv w (x * R) + w (x * R) ^ 2)) =
         fun x => -R ^ 2 * A (x * R) := rfl
     have hut : (fun t : ℂ => -((3 * t) ^ (-1 / 3 : ℂ)) ^ 2 *
         (deriv w (p.1 * (3 * t) ^ (-1 / 3 : ℂ)) + w (p.1 * (3 * t) ^ (-1 / 3 : ℂ)) ^ 2)) =
         fun t : ℂ => -((3 * t) ^ (-1 / 3 : ℂ)) ^ 2 * A (p.1 * (3 * t) ^ (-1 / 3 : ℂ)) := rfl
-    rw [hut, hu, ht.deriv, (h1 p.1 hp2).deriv, p3b_iteratedDeriv_three hV h1 h2 h3 hp2]
+    rw [hut, hu, ht.deriv, (h1 p.1 hp2).deriv, iteratedDeriv_three_eq_of_hasDerivAt hV h1 h2 h3 hp2]
     simp only [hA, hB, hD]
     ring
 
@@ -217,7 +226,7 @@ theorem kdV_similarityReduction {lam C : ℂ} {W : ℂ → ℂ} {U : Set ℂ} (h
     IsKdVOn (fun x t => W (x + 3 * lam * t ^ 2) - lam * t)
       {p | p.1 + 3 * lam * p.2 ^ 2 ∈ U} := by
   refine ⟨fun p hp => ?_, fun p hp => ?_, fun p hp => ?_⟩
-  · exact ((p3b_contDiffAt hU hW hp 3).comp p.1 (contDiffAt_id.add contDiffAt_const)).sub
+  · exact ((contDiffAt_of_isODE2SolutionOn hU hW hp 3).comp p.1 (contDiffAt_id.add contDiffAt_const)).sub
       contDiffAt_const
   · exact ((hW.differentiableAt _ hp).comp p.2 (by fun_prop)).sub (by fun_prop)
   · have hin : HasDerivAt (fun t => p.1 + 3 * lam * t ^ 2) (6 * lam * p.2) p.2 := by
@@ -234,7 +243,7 @@ theorem kdV_similarityReduction {lam C : ℂ} {W : ℂ → ℂ} {U : Set ℂ} (h
         -6 * W (p.1 + 3 * lam * p.2 ^ 2) * deriv W (p.1 + 3 * lam * p.2 ^ 2) + lam := by
       rw [iteratedDeriv_succ', hdx, iteratedDeriv_comp_add_const, iteratedDeriv_succ,
         iteratedDeriv_one]
-      refine p3b_deriv3 hU hW hp ?_
+      refine deriv_deriv_deriv_eq_of_isODE2SolutionOn hU hW hp ?_
       have := ((((hW.hasDerivAt hp).pow 2).const_mul (-3)).add ((hasDerivAt_id _).const_mul lam)
         ).add_const C
       exact this.congr_deriv (by simp; ring)
@@ -324,8 +333,8 @@ theorem boussinesq_travellingWave {c A B : ℂ} {v : ℂ → ℂ} {U : Set ℂ} 
     (hv : IsODE2SolutionOn (fun z v _ => 6 * v ^ 2 + (c ^ 2 - 1) * v + A * z + B) v U) :
     IsBoussinesqOn (fun x t => v (x - c * t)) {p | p.1 - c * p.2 ∈ U} := by
   refine ⟨fun p hp => ?_, fun p hp => ?_, fun p hp => ?_⟩
-  · exact (p3b_contDiffAt hU hv hp 4).comp p.1 (contDiffAt_id.sub contDiffAt_const)
-  · exact (p3b_contDiffAt hU hv hp 2).comp p.2 (contDiffAt_const.sub
+  · exact (contDiffAt_of_isODE2SolutionOn hU hv hp 4).comp p.1 (contDiffAt_id.sub contDiffAt_const)
+  · exact (contDiffAt_of_isODE2SolutionOn hU hv hp 2).comp p.2 (contDiffAt_const.sub
       (contDiffAt_const.mul contDiffAt_id))
   set y0 := p.1 - c * p.2 with hy0
   change y0 ∈ U at hp
@@ -336,7 +345,7 @@ theorem boussinesq_travellingWave {c A B : ℂ} {v : ℂ → ℂ} {U : Set ℂ} 
       (c ^ 2 - 1))).add ((hasDerivAt_id y).const_mul A) |>.add_const B
     exact this.congr_deriv (by simp; ring)
   have h3 : deriv (deriv (deriv v)) =ᶠ[𝓝 y0] fun y => (12 * v y + (c ^ 2 - 1)) * deriv v y + A := by
-    filter_upwards [hU.mem_nhds hp] with y hy using p3b_deriv3 hU hv hy (hF y hy)
+    filter_upwards [hU.mem_nhds hp] with y hy using deriv_deriv_deriv_eq_of_isODE2SolutionOn hU hv hy (hF y hy)
   have hv2 : deriv (deriv v) y0 = 6 * v y0 ^ 2 + (c ^ 2 - 1) * v y0 + A * y0 + B := hv.ode hp
   have hdd := hv.hasDerivAt_deriv y0 hp
   rw [← hv2] at hdd

@@ -12,15 +12,20 @@ public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 # Mellin transform methods: definitions (DLMF §2.5)
 
 The Mellin transform 2.5.1 is Mathlib's `mellin f s = ∫₀^∞ t^{s-1} f(t) dt` and its inverse
-2.5.2 is `mellinInv`. This file defines
+2.5.2 is `mellinInv`.
+
+## Main definitions
 
 * `mellinTruncLow f`, `mellinTruncHigh f` (2.5.21–2.5.24): the truncations `f₁ = f` on
-  `(0, 1]`, `0` on `(1, ∞)`, and `f₂ = f - f₁`;
+  `(0, 1]`, `0` on `(1, ∞)`, and `f₂ = f - f₁`.
 * `besselSqMellinKernel ν z`, `besselSqMellinA ν n`, `besselSqMellinB ν n` (2.5.10–2.5.13): the
   meromorphic factor `2^{z-1}Γ(ν + z/2)/(Γ²(1 - z/2) Γ(1 + ν - z/2) Γ(z))` of the Mellin
-  transform of `J_ν²`, and `aₙ = A(n)`, `bₙ = -A'(n)` of the example 2.5.8. Reciprocals of
-  `Γ` use Mathlib's `Complex.Gamma`, which is `0` at the poles, so that `(Γ w)⁻¹` is the entire
-  function `1/Γ(w)` everywhere.
+  transform of `J_ν²`, and `aₙ = A(n)`, `bₙ = -A'(n)` of the example 2.5.8.
+
+## Implementation notes
+
+Reciprocals of `Γ` use Mathlib's `Complex.Gamma`, which is `0` at the poles, so that `(Γ w)⁻¹`
+is the entire function `1/Γ(w)` everywhere.
 -/
 
 @[expose] public noncomputable section

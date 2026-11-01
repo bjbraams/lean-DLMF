@@ -11,13 +11,43 @@ public import Mathlib.Analysis.ODE.Gronwall
 public import Mathlib.Tactic.Monotonicity.Lemmas
 
 /-!
-# Logarithmic branches of associated Legendre functions
+# Boundary values and transport of associated Legendre functions
 
-Principal-to-logarithmic-plane identities and the zeta-coordinate representation of the second-
-kind solution.
+The boundary values of `P^μ_ν` and `𝑸^μ_ν` on either side of the cut `(-1, 1)` and their
+relation to the Ferrers functions (DLMF §14.23), the continuation of the Ferrers functions into
+the unit disk, the Legendre transport along paths, and the `ζ`-form of `𝑸^μ_ν`.
 
-Source references and common attribution are retained in
-`DLMF.Legendre.Continuation`.
+## Main definitions
+
+* `legendreBoundary`: a boundary value, with convergence asserted separately.
+* `ferrersPCont`, `ferrersQCont`: `𝖯^μ_ν` and `𝖰^μ_ν` continued analytically off `(-1, 1)` into
+  the unit disk.
+* `olverQSide`, `olverQSideHyp`: the boundary representatives of `𝑸^μ_ν` continued into the
+  disk, the latter the right side of DLMF 14.23.3.
+* `IsLegendreTransport`, `legendreTransport`: continuation of value and derivative along a path
+  by the first-order system, and its endpoint value.
+* `legendreEllipsePath`, `legendreEllipseContinued`: half-circuits of the confocal ellipse and
+  the continued value along them.
+
+## Main results
+
+* `associatedP_boundary_upper`, `associatedP_boundary_lower`: DLMF 14.23.1.
+* `olverQ_boundary_upper`, `olverQ_boundary_lower`: DLMF 14.23.2.
+* `olverQ_boundary_hypergeometric_upper`, `olverQ_boundary_hypergeometric_lower`: DLMF 14.23.3.
+* `ferrersP_boundary_inverse_upper`, `ferrersP_boundary_inverse_lower`: DLMF 14.23.4.
+* `ferrersQ_boundary_average`: DLMF 14.23.5.
+* `ferrersQ_boundary_inverse_upper`, `ferrersQ_boundary_inverse_lower`: DLMF 14.23.6.
+* `conicalQHat_boundary`: DLMF 14.23.7, corrected.
+* `legendreTransport_exists`, `legendreTransport_unique`: existence of the transport on a
+  compact path avoiding `±1`, and uniqueness.
+* `legFS_olverQ_eq_G`: the `ζ`-form of `𝑸^μ_ν`, the complex continuation of DLMF 14.19.3.
+
+## Implementation notes
+
+**Correction.** DLMF 14.23.7 as printed, with second factor `e^{-3μπi/2}`, is false. With
+DLMF's own conventions 14.20.2 and 14.23.1–14.23.6 the second factor is `e^{μπi/2}`; then the
+two terms are complex conjugates and the right side is real, as `𝖰̂` is. The standing
+assumptions `τ ≥ 0`, `μ ≥ 0` of §14.20 are not needed (stronger than DLMF).
 -/
 
 @[expose] public noncomputable section
@@ -92,7 +122,7 @@ lemma associatedP_boundary_aux (ν μ : ℂ) (s : ℝ) (hs : s = 1 ∨ s = -1) {
   unfold associatedP
   convert this using 2
   · rfl
-  rw [ferrersP, ofReal_cpow_eq_exp (div_pos h1 h2), Real.log_div h1.ne' h2.ne', ← mul_assoc,
+  rw [ferrersP, Complex.ofReal_cpow_eq_exp (div_pos h1 h2), Real.log_div h1.ne' h2.ne', ← mul_assoc,
     ← exp_add]
   congr 2; push_cast; ring
 
@@ -135,7 +165,7 @@ theorem ferrersPCont_ofReal (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) 
     ferrersPCont ν μ x = ferrersP ν μ x := by
   have h1 : 0 < 1 + x := by linarith [hx.1]
   have h2 : 0 < 1 - x := by linarith [hx.2]
-  rw [ferrersPCont, ferrersP, ofReal_cpow_eq_exp (div_pos h1 h2), Real.log_div h1.ne' h2.ne',
+  rw [ferrersPCont, ferrersP, Complex.ofReal_cpow_eq_exp (div_pos h1 h2), Real.log_div h1.ne' h2.ne',
     show (1:ℂ)+x = ((1+x:ℝ):ℂ) by push_cast; ring, show (1:ℂ)-x = ((1-x:ℝ):ℂ) by push_cast; ring,
     ← ofReal_log h1.le, ← ofReal_log h2.le]
   push_cast; ring_nf

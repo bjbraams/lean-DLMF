@@ -11,7 +11,26 @@ public import Mathlib.Analysis.SpecialFunctions.Trigonometric.ArctanDeriv
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
-# Real Legendre elliptic integrals and their elementary integrands
+# Real Legendre elliptic integrals
+
+This file defines the complete and incomplete Legendre elliptic integrals of the first, second
+and third kinds for a real parameter `m = k²` (DLMF §19.2, Temme §12.2).
+
+## Main definitions
+
+* `Real.compEllIntKm`, `Real.compEllIntEm`: the complete integrals `K(m)` and `E(m)`
+  (DLMF 19.2.8).
+* `Real.incEllIntFm`, `Real.incEllIntEm`: the incomplete integrals `F(φ|m)` and `E(φ|m)`
+  (DLMF 19.2.4–19.2.5).
+* `Real.incEllIntPim`, `Real.compEllIntPim`: the integrals of the third kind `Π(φ, n, m)` and
+  `Π(n, m)`, with DLMF's argument order (DLMF 19.2.7).
+* `piIntegrand`: the integrand of the third kind.
+* `piZeroPrimitive`: a smooth antiderivative of `(cos²φ + c² sin²φ)⁻¹`.
+
+## Main results
+
+* `one_sub_mul_sin_sq_pos`: for `m < 1` the base `1 - m sin²θ` is positive.
+* `continuous_one_sub_mul_sin_sq_rpow`: continuity of the integrands `(1 - m sin²θ)^p`.
 -/
 
 @[expose] public noncomputable section

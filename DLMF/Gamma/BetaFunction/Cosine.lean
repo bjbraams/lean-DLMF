@@ -8,12 +8,20 @@ module
 public import DLMF.Gamma.BetaFunction.ParameterIntegrals
 
 /-!
-# Cosine Beta integrals
+# Cosine and hyperbolic Beta integrals (DLMF 5.12.5–5.12.7)
 
-Trigonometric Beta integrals with cosine kernels and their continuation in complex parameters.
+Trigonometric Beta integrals with cosine and exponential kernels, obtained by Abel summation of
+the binomial series (Mathlib's `Complex.one_add_cpow_hasFPowerSeriesOnBall_zero`) and
+integration by parts, and the hyperbolic Beta integral, by the substitution `u = e^{2t}`.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.BetaFunction`.
+## Main results
+
+* `beta_cos_cos`, `integral_cos_rpow_mul_cos`: `∫₀^{π/2} cos^{a-1}t cos(bt) dt` for `a > 0`,
+  `|b| < a + 1` (DLMF 5.12.5).
+* `beta_sin_exp`: `∫₀^π sin^{a-1}t e^{ibt} dt` (DLMF 5.12.6).
+* `beta_cosh`: `∫₀^∞ cosh(2bt)/cosh^{2a}t dt = 4^{a-1} B(a + b, a - b)` for `|b| < a`
+  (DLMF 5.12.7).
+* `real_beta_on_Ioi`: the real form of `beta_on_Ioi` with integrability of the integrand.
 -/
 
 @[expose] public section
@@ -738,7 +746,7 @@ theorem real_beta_on_Ioi {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
     push_cast
     rw [← Complex.Gamma_ofReal, ← Complex.Gamma_ofReal, ← Complex.Gamma_ofReal,
       Complex.ofReal_add, eq_div_iff hne, hG, ← integral_complex_ofReal, mul_comm,
-      ← beta_on_Ioi (a := (p : ℂ)) (b := (q : ℂ)) (by simpa using hp) (by simpa using hq)]
+      ← beta_on_Ioi (a := (p : ℂ)) (b := (q : ℂ))]
     congr 1
     refine setIntegral_congr_fun (measurableSet_Ioi (a := (0 : ℝ))) fun u hu => ?_
     have hu0 : (0 : ℝ) ≤ u := (Set.mem_Ioi.mp hu).le

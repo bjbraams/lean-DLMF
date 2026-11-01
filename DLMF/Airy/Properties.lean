@@ -60,7 +60,7 @@ theorem hasDerivAt_reg0F1_cube {c c' : ℂ} (hc : c + 1 = c') (z : ℂ) :
 
 /-- The contiguous relation `₀F̃₁(;c;w) = c ₀F̃₁(;c+1;w) + w ₀F̃₁(;c+2;w)`, with the shifted
 parameters given as equations. -/
-theorem reg0F1_contiguous' {c c₁ c₂ : ℂ} (h₁ : c + 1 = c₁) (h₂ : c + 1 + 1 = c₂) (w : ℂ) :
+theorem reg0F1_contiguous_of_eq {c c₁ c₂ : ℂ} (h₁ : c + 1 = c₁) (h₂ : c + 1 + 1 = c₂) (w : ℂ) :
     regularizedHGFun (∅ : Multiset ℂ) {c} w =
       c * regularizedHGFun ∅ {c₁} w + w * regularizedHGFun ∅ {c₂} w := by
   subst h₁ h₂
@@ -75,7 +75,7 @@ theorem hasDerivAt_airyFDeriv (z : ℂ) : HasDerivAt airyFDeriv (z * airyF z) z 
   have h := ((hasDerivAt_pow 2 z).div_const 3).mul (hasDerivAt_reg0F1_cube
     (c := 5 / 3) (c' := 8 / 3) (by norm_num) z)
   have e : z * airyF z = z * regularizedHGFun (∅ : Multiset ℂ) {2 / 3} (z ^ 3 / 9) := rfl
-  rw [e, reg0F1_contiguous' (c := 2 / 3) (c₁ := 5 / 3) (c₂ := 8 / 3) (by norm_num)
+  rw [e, reg0F1_contiguous_of_eq (c := 2 / 3) (c₁ := 5 / 3) (c₂ := 8 / 3) (by norm_num)
     (by norm_num)]
   refine h.congr_deriv ?_
   norm_num
@@ -95,7 +95,7 @@ theorem hasDerivAt_airyGDeriv (z : ℂ) : HasDerivAt airyGDeriv (z * airyG z) z 
     (((hasDerivAt_pow 3 z).div_const 3).mul (hasDerivAt_reg0F1_cube
       (c := 7 / 3) (c' := 10 / 3) (by norm_num) z))
   have e : z * airyG z = z * (z * regularizedHGFun (∅ : Multiset ℂ) {4 / 3} (z ^ 3 / 9)) := rfl
-  rw [e, reg0F1_contiguous' (c := 4 / 3) (c₁ := 7 / 3) (c₂ := 10 / 3) (by norm_num)
+  rw [e, reg0F1_contiguous_of_eq (c := 4 / 3) (c₁ := 7 / 3) (c₂ := 10 / 3) (by norm_num)
     (by norm_num)]
   refine h.congr_deriv ?_
   norm_num
@@ -103,7 +103,7 @@ theorem hasDerivAt_airyGDeriv (z : ℂ) : HasDerivAt airyGDeriv (z * airyG z) z 
 
 /-- The regularized `₀F̃₁(;c;·)` takes the value `1/Γ(c)` at the origin. -/
 theorem reg0F1_zero (c : ℂ) : regularizedHGFun (∅ : Multiset ℂ) {c} 0 = (Gamma c)⁻¹ := by
-  rw [regularizedHGFun_zero]
+  rw [Complex.regularizedHGFun_zero]
   exact (regularizedHGFunCoeff_empty c 0).trans (by simp)
 
 /-- `f(0) = 1/Γ(2/3)`. -/
@@ -348,18 +348,18 @@ theorem omega_cube : exp (2 * π * I / 3) ^ 3 = 1 := by
     exp_two_pi_mul_I]
 
 /-- `₀F̃₁(;c;(ωz)³/9) = ₀F̃₁(;c;z³/9)` when `ω³ = 1`. -/
-lemma reg0F1_cube_mul {c ω : ℂ} (hω : ω ^ 3 = 1) (z : ℂ) :
+private lemma reg0F1_root_unity_mul_cube {c ω : ℂ} (hω : ω ^ 3 = 1) (z : ℂ) :
     regularizedHGFun (∅ : Multiset ℂ) {c} ((ω * z) ^ 3 / 9) =
       regularizedHGFun (∅ : Multiset ℂ) {c} (z ^ 3 / 9) := by
   rw [mul_pow, hω, one_mul]
 
 /-- `f(ωz) = f(z)` when `ω³ = 1`. -/
 theorem airyF_mul {ω : ℂ} (hω : ω ^ 3 = 1) (z : ℂ) : airyF (ω * z) = airyF z :=
-  reg0F1_cube_mul hω z
+  reg0F1_root_unity_mul_cube hω z
 
 /-- `g(ωz) = ω g(z)` when `ω³ = 1`. -/
 theorem airyG_mul {ω : ℂ} (hω : ω ^ 3 = 1) (z : ℂ) : airyG (ω * z) = ω * airyG z := by
-  simp only [airyG, reg0F1_cube_mul hω z]; ring
+  simp only [airyG, reg0F1_root_unity_mul_cube hω z]; ring
 
 /-- `(√3)² = 3` in `ℂ`. -/
 theorem sqrt_three_sq : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
@@ -480,20 +480,20 @@ theorem airyBi_add_omega (z : ℂ) :
 /-! ### Real values on the real line -/
 
 /-- For real `c`, `₀F̃₁(;c;(z̄)³/9)` is the conjugate of `₀F̃₁(;c;z³/9)`. -/
-lemma reg0F1_conj_rat (c : ℝ) (z : ℂ) :
+private lemma reg0F1_conj_cube_div_nine (c : ℝ) (z : ℂ) :
     regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} (conj z ^ 3 / 9) =
       conj (regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} (z ^ 3 / 9)) := by
   rw [← regularized0F1_conj, map_div₀, map_pow, map_ofNat]
 
 /-- `f(z̄) = conj (f z)`. -/
 theorem airyF_conj (z : ℂ) : airyF (conj z) = conj (airyF z) := by
-  have h := reg0F1_conj_rat (2 / 3) z
+  have h := reg0F1_conj_cube_div_nine (2 / 3) z
   push_cast at h
   exact h
 
 /-- `g(z̄) = conj (g z)`. -/
 theorem airyG_conj (z : ℂ) : airyG (conj z) = conj (airyG z) := by
-  have h := reg0F1_conj_rat (4 / 3) z
+  have h := reg0F1_conj_cube_div_nine (4 / 3) z
   push_cast at h
   simp only [airyG, map_mul, h]
 

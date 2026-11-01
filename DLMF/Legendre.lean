@@ -47,16 +47,15 @@ public import DLMF.Legendre.QAdditionTools
 public import DLMF.Legendre.FourierTools
 
 /-!
-# Legendre and related functions (Temme Chapter 8; DLMF Chapter 14)
+# Legendre and related functions (DLMF Chapter 14; Temme Chapter 8)
 
-The original seven modules retain their proved degree-only P/Q and Ferrers P
-APIs. The additional modules acquire associated P/Q, regularized Olver Q,
-Ferrers Q, parameter derivatives, integrals, series, uniform approximations,
-toroidal and conical functions, continuation by ODE transport and normalized
-spherical harmonics. Their remaining `sorry` declarations are admissions.
+This umbrella module collects the Legendre functions of DLMF Chapter 14: the degree-only
+Legendre functions `P_ν`, `Q_ν` and Ferrers functions, the associated Legendre functions
+`P^μ_ν`, `Q^μ_ν` and Olver's `𝑸^μ_ν`, the Ferrers functions `𝖯^μ_ν`, `𝖰^μ_ν`, their
+recurrences, connections, integral representations, integrals, series, addition theorems,
+zeros, asymptotic and uniform approximations, conical and toroidal functions, continuation
+beyond the principal sheet, and spherical harmonics.
 
-Mathlib's shifted Legendre Rodrigues formula is referenced in IntegerTheory;
-its normalization bridge already exists in OrthogonalPolynomials.Classical.
-`DLMF111214Acquisition.md` records every equation, source counterexamples,
-remaining domain extensions and the current proof and axiom audits.
+Mathlib's shifted Legendre polynomials and their Rodrigues formula are referenced in
+`DLMF.Legendre.IntegerTheory`.
 -/

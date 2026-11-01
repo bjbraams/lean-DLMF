@@ -12,22 +12,32 @@ public import Mathlib.Algebra.Polynomial.FieldDivision
 /-!
 # The general Fuchsian equation and Stieltjes polynomials (DLMF §§31.14–31.15)
 
-* §31.14(i): the general Fuchsian equation 31.14.1 (`IsFuchsianSolOn`, DLMF/Heun/Basic.lean):
-  the exponents `{0, 1-γ_j}` at `a_j` and `{α, β}` at `∞` with 31.14.2, the case `N = 3`
-  (Heun's equation, proved), the normal form 31.14.3–31.14.5 and `∑ q̃_j = 0` (proved; it holds
-  without the condition `∑ q_j = 0`, stronger than DLMF).
-* §31.15: Stieltjes and Van Vleck polynomials (`IsVanVleckStieltjes`), the bound on their
-  number, the equilibrium equations 31.15.2–31.15.3, the critical points of `G` (31.15.4), the
-  existence and uniqueness of `S_𝐦` under 31.15.5–31.15.6 and the accessory parameters 31.15.7,
-  the orthogonality of the products 31.15.8–31.15.12 and their completeness in `L²_ρ(Q)`.
+## Main results
 
-The real configuration of §31.15(ii)–(iii) uses `N + 1` singular points `a_0 < ⋯ < a_N`
-(DLMF's `N`), so the box `Q` has `N` factors and DLMF's count `(n+N-2 choose N-2)` becomes
-`(n+N-1 choose N-1)`.
+* `fuchsian_exponents_finite`, `fuchsian_exponents_infinity`, `fuchsian_indicial_infinity`:
+  the exponents `{0, 1-γ_j}` at `a_j` and `{α, β}` at `∞` of the general Fuchsian equation
+  31.14.1 (`IsFuchsianSolOn`), with 31.14.2.
+* `isHeunSolOn_iff_isFuchsianSolOn`: Heun's equation is the case `N = 3`.
+* `fuchsian_normalForm`, `fuchsianNormalQ_sum`, `fuchsianNormalQ_sum_eq_zero`: the normal form
+  31.14.3–31.14.5 and `∑ q̃_j = 0`.
+* `vanVleck_card_le`: the bound on the number of Van Vleck polynomials (§31.15(i)).
+* `stieltjes_zeros_equilibrium`, `vanVleck_zeros`, `stieltjes_zeros_critical`: the equilibrium
+  equations 31.15.2–31.15.3 and the critical points of `G` (31.15.4).
+* `existsUnique_stieltjesOfIndex`, `stieltjes_card`: existence and uniqueness of `S_𝐦` under
+  31.15.5–31.15.6.
+* `stieltjes_accessory`: the accessory parameters, DLMF 31.15.7.
+* `stieltjesProduct_orthogonal`, `stieltjesProduct_norm_pos`, `stieltjesProduct_complete`:
+  orthogonality and completeness in `L²_ρ(Q)` of the products 31.15.8–31.15.12.
 
-The parameter count `3N - 3` (§31.14(i)) and Kovacic's algorithm (§31.14(ii)) are not
-acquired: the first is a remark, the second an algorithm. The electrostatic interpretation
-(§31.15(ii)) is the reading of 31.15.2 and is covered by it.
+## Implementation notes
+
+`fuchsianNormalQ_sum` holds without the condition `∑ q_j = 0` (stronger than DLMF). The real
+configuration of §31.15(ii)–(iii) uses `N + 1` singular points `a_0 < ⋯ < a_N` (DLMF's `N`), so
+the box `Q` has `N` factors and DLMF's count `(n+N-2 choose N-2)` becomes `(n+N-1 choose N-1)`.
+
+The parameter count `3N - 3` (§31.14(i)) is a remark and Kovacic's algorithm (§31.14(ii)) is an
+algorithm; neither is formalized. The electrostatic interpretation (§31.15(ii)) is the reading of
+31.15.2 and is covered by it.
 -/
 
 @[expose] public section
@@ -42,14 +52,14 @@ namespace DLMF.Heun
 /-! ### The general Fuchsian equation (§31.14) -/
 
 /-- Helper for DLMF 31.14.2: `(z - c)⁻¹ → 0` as `z → ∞` (in `ℂ`, any `c`). -/
-lemma h31_tendsto_sub_inv_cobounded (c : ℂ) :
+private lemma tendsto_sub_inv_cobounded (c : ℂ) :
     Tendsto (fun z : ℂ => (z - c)⁻¹) (Bornology.cobounded ℂ) (𝓝 0) := by
   have : Tendsto (fun z : ℂ => z - c) (Bornology.cobounded ℂ) (Bornology.cobounded ℂ) := by
     simp [sub_eq_add_neg]
   exact tendsto_inv₀_cobounded.comp this
 
 /-- Helper for DLMF 31.14.2: eventually `z - c ≠ 0` as `z → ∞` (in `ℂ`, any `c`). -/
-lemma h31_eventually_sub_ne_zero_cobounded (c : ℂ) :
+private lemma eventually_sub_ne_zero_cobounded (c : ℂ) :
     ∀ᶠ z in Bornology.cobounded ℂ, z - c ≠ 0 := by
   filter_upwards [eventually_cobounded_le_norm (‖c‖ + 1)] with z hz h
   rw [sub_eq_zero] at h; subst h; linarith
@@ -116,12 +126,12 @@ theorem fuchsian_exponents_infinity {N : ℕ} (a γ q : Fin N → ℂ) (hq : ∑
     Tendsto (fun z => z ^ 2 * fuchsianCoeffR a q z) (Bornology.cobounded ℂ)
       (𝓝 (∑ j, a j * q j)) := by
   have hev : ∀ᶠ z in Bornology.cobounded ℂ, ∀ j, z - a j ≠ 0 :=
-    Filter.eventually_all.mpr fun j => h31_eventually_sub_ne_zero_cobounded (a j)
+    Filter.eventually_all.mpr fun j => eventually_sub_ne_zero_cobounded (a j)
   constructor
   · have : Tendsto (fun z => ∑ j, γ j * (1 + a j * (z - a j)⁻¹)) (Bornology.cobounded ℂ)
         (𝓝 (∑ j, γ j)) := by
       have := tendsto_finsetSum (Finset.univ : Finset (Fin N)) fun j _ =>
-        ((h31_tendsto_sub_inv_cobounded (a j)).const_mul (a j)).const_add 1 |>.const_mul (γ j)
+        ((tendsto_sub_inv_cobounded (a j)).const_mul (a j)).const_add 1 |>.const_mul (γ j)
       simpa using this
     refine this.congr' ?_
     filter_upwards [hev] with z hz
@@ -132,7 +142,7 @@ theorem fuchsian_exponents_infinity {N : ℕ} (a γ q : Fin N → ℂ) (hq : ∑
   · have : Tendsto (fun z => ∑ j, (a j * q j + q j * a j ^ 2 * (z - a j)⁻¹))
         (Bornology.cobounded ℂ) (𝓝 (∑ j, a j * q j)) := by
       have := tendsto_finsetSum (Finset.univ : Finset (Fin N)) fun j _ =>
-        ((h31_tendsto_sub_inv_cobounded (a j)).const_mul (q j * a j ^ 2)).const_add (a j * q j)
+        ((tendsto_sub_inv_cobounded (a j)).const_mul (q j * a j ^ 2)).const_add (a j * q j)
       simpa using this
     refine this.congr' ?_
     filter_upwards [hev] with z hz
@@ -220,7 +230,7 @@ theorem fuchsianNormalQ_sum_eq_zero {N : ℕ} (a γ q : Fin N → ℂ) (hq : ∑
 
 /-- Algebraic identity behind 31.14.4: with `L = ∑ (γ_j/2)/(z - a_j)`,
 `L² + L' - ∑ q_j/(z - a_j)` is the normal-form coefficient. -/
-lemma p2h_fuchsian_normal_identity {N : ℕ} {a γ q : Fin N → ℂ} (ha : Function.Injective a)
+private lemma fuchsianCoeffR_eq_normalForm {N : ℕ} {a γ q : Fin N → ℂ} (ha : Function.Injective a)
     {z : ℂ} (hz : ∀ j, z - a j ≠ 0) :
     fuchsianCoeffR a q z = -fuchsianNormalCoeff a γ q z + 0 * (∑ j, γ j / 2 / (z - a j)) +
       (∑ j, γ j / 2 / (z - a j)) ^ 2 + -∑ j, γ j / 2 / (z - a j) ^ 2 := by
@@ -291,7 +301,7 @@ every `z - a_j` lies in `slitPlane`, then `W(z) = ∏_j (z - a_j)^{γ_j/2} w(z)`
 so that `w = ∏_j (z - a_j)^{-γ_j/2} W` as in 31.14.3) solves
 `W'' = ∑_j (γ̃_j/(z - a_j)² + q̃_j/(z - a_j)) W` (31.14.4). The singular points must be
 distinct (`Function.Injective a`, implicit in DLMF; added 2026-10-26 after the counterexample
-`p1h_fuchsian_normalForm_counterexample` for coinciding points). -/
+`not_fuchsian_normalForm_of_not_injective` for coinciding points). -/
 @[dlmf 31.14.E3, dlmf 31.14.E4, dlmf 31.14.E5]
 theorem fuchsian_normalForm {N : ℕ} {a γ q : Fin N → ℂ} {w : ℂ → ℂ} {U : Set ℂ}
     (ha : Function.Injective a)
@@ -301,12 +311,12 @@ theorem fuchsian_normalForm {N : ℕ} {a γ q : Fin N → ℂ} {w : ℂ → ℂ}
       (fun z => (∏ j, (z - a j) ^ (γ j / 2)) * w z) U := by
   classical
   have hz0 : ∀ z ∈ U, ∀ j, z - a j ≠ 0 := fun z hz j => slitPlane_ne_zero (hUa z hz j)
-  refine p1h_isLinearODE2On_mul (L := fun z => ∑ j, γ j / 2 / (z - a j))
+  refine isLinearODE2On_gauge_mul (L := fun z => ∑ j, γ j / 2 / (z - a j))
     (L' := fun z => -∑ j, γ j / 2 / (z - a j) ^ 2) hU (fun z hz => ?_) (fun z hz => ?_)
-    (fun z hz => ?_) (fun z hz => p2h_fuchsian_normal_identity ha (hz0 z hz)) hw
+    (fun z hz => ?_) (fun z hz => fuchsianCoeffR_eq_normalForm ha (hz0 z hz)) hw
   · have hf : ∀ i ∈ (Finset.univ : Finset (Fin N)), HasDerivAt (fun z => (z - a i) ^ (γ i / 2))
         (γ i / 2 * 1 / (z - a i) * (z - a i) ^ (γ i / 2)) z := fun i _ =>
-      p1h_hasDerivAt_cpow ((hasDerivAt_id z).sub_const (a i)) (hUa z hz i)
+      hasDerivAt_cpow_comp ((hasDerivAt_id z).sub_const (a i)) (hUa z hz i)
     have h := HasDerivAt.fun_finsetProd hf
     convert h using 1
     rw [Finset.sum_mul]
@@ -314,7 +324,7 @@ theorem fuchsian_normalForm {N : ℕ} {a γ q : Fin N → ℂ} {w : ℂ → ℂ}
     rw [smul_eq_mul, ← Finset.prod_erase_mul _ _ (Finset.mem_univ i)]
     ring
   · have h := HasDerivAt.fun_sum (u := Finset.univ) (fun i _ =>
-      p1h_hasDerivAt_const_div_sub (γ i / 2) (a i) z (hz0 z hz i))
+      hasDerivAt_const_div_sub (γ i / 2) (a i) z (hz0 z hz i))
     convert h using 1
     rw [← Finset.sum_neg_distrib]
     refine Finset.sum_congr rfl fun i _ => ?_
@@ -326,7 +336,7 @@ theorem fuchsian_normalForm {N : ℕ} {a γ q : Fin N → ℂ} {w : ℂ → ℂ}
 /-- `fuchsian_normalForm` (DLMF 31.14.3–31.14.5) fails without distinct singular points:
 for `a = (0, 0)`, `γ = (2, 2)`, `q = 0`, `w = 1` on `slitPlane`, `W = z²` but the junk
 `1/(a_j - a_k) = 0` makes the right-hand side `0`. -/
-lemma p1h_fuchsian_normalForm_counterexample :
+private lemma not_fuchsian_normalForm_of_not_injective :
     ¬ ∀ (N : ℕ) (a γ q : Fin N → ℂ) (w : ℂ → ℂ) (U : Set ℂ), IsOpen U →
       (∀ z ∈ U, ∀ j, z - a j ∈ slitPlane) → IsFuchsianSolOn a γ q w U →
       IsLinearODE2On 0 (fun z => -fuchsianNormalCoeff a γ q z)
@@ -350,7 +360,7 @@ lemma p1h_fuchsian_normalForm_counterexample :
 
 /-- Helper for DLMF 31.15.7: for `S = c ∏_k (X - z_k)` and `S(x) ≠ 0`,
 `S'(x) = S(x) ∑_k 1/(x - z_k)`. -/
-lemma h31_logDeriv_prod {n : ℕ} (c : ℂ) (z : Fin n → ℂ) (x : ℂ)
+private lemma eval_derivative_C_mul_prod {n : ℕ} (c : ℂ) (z : Fin n → ℂ) (x : ℂ)
     (hx : (C c * ∏ k, (X - C (z k))).eval x ≠ 0) :
     (derivative (C c * ∏ k, (X - C (z k)))).eval x =
       (C c * ∏ k, (X - C (z k))).eval x * ∑ k, 1 / (x - z k) := by
@@ -377,7 +387,7 @@ theorem vanVleck_card_le {N : ℕ} (hN : 2 ≤ N) {a : Fin N → ℂ} (ha : Func
 
 /-- A zero of a nonzero polynomial solution of `Π S'' + Γ S' + V S = 0` at which `Π` does not
 vanish is simple. -/
-lemma p2h_derivative_eval_ne_zero {P G V S : ℂ[X]} {x₀ : ℂ}
+private lemma eval_derivative_ne_zero_of_ode {P G V S : ℂ[X]} {x₀ : ℂ}
     (hE : P * derivative (derivative S) + G * derivative S + V * S = 0) (hS : S ≠ 0)
     (hroot : S.IsRoot x₀) (hP : P.eval x₀ ≠ 0) : (derivative S).eval x₀ ≠ 0 := by
   intro h
@@ -413,7 +423,7 @@ lemma p2h_derivative_eval_ne_zero {P G V S : ℂ[X]} {x₀ : ℂ}
     omega
 
 /-- Logarithmic derivative of `c ∏_{j ∈ s} (X - z_j)`. -/
-lemma p2h_logDeriv_prod_finset {ι : Type*} [DecidableEq ι] (s : Finset ι) (c : ℂ)
+private lemma eval_derivative_C_mul_prod_finset {ι : Type*} [DecidableEq ι] (s : Finset ι) (c : ℂ)
     (z : ι → ℂ) (x : ℂ) (hx : ∀ j ∈ s, x - z j ≠ 0) :
     (derivative (C c * ∏ j ∈ s, (X - C (z j)))).eval x =
       (C c * ∏ j ∈ s, (X - C (z j))).eval x * ∑ j ∈ s, 1 / (x - z j) := by
@@ -447,7 +457,7 @@ theorem stieltjes_zeros_equilibrium {N n : ℕ} {a γ : Fin N → ℂ} {V S : �
   have hST : S = (X - C x₀) * T := by
     rw [hSz, hT, ← Finset.mul_prod_erase _ _ (Finset.mem_univ k)]; ring
   have hroot : S.IsRoot x₀ := by rw [hST]; simp
-  have hD := p2h_derivative_eval_ne_zero hS.2.2.2 hS.2.2.1 hroot hPi
+  have hD := eval_derivative_ne_zero_of_ode hS.2.2.2 hS.2.2.1 hroot hPi
   have hd1 : derivative S = T + (X - C x₀) * derivative T := by
     rw [hST, derivative_mul]; simp
   have hd2 : derivative (derivative S) = 2 * derivative T +
@@ -460,7 +470,7 @@ theorem stieltjes_zeros_equilibrium {N n : ℕ} {a γ : Fin N → ℂ} {V S : �
     apply hT0
     simp only [hT, eval_mul, eval_C, eval_prod, eval_sub, eval_X]
     rw [Finset.prod_eq_zero hj h0, mul_zero]
-  have hTd := p2h_logDeriv_prod_finset (Finset.univ.erase k) c z x₀ hzj
+  have hTd := eval_derivative_C_mul_prod_finset (Finset.univ.erase k) c z x₀ hzj
   rw [← hT] at hTd
   have hE := congrArg (Polynomial.eval x₀) hS.2.2.2
   rw [hd2, hd1] at hE
@@ -499,7 +509,7 @@ theorem vanVleck_zeros {N n : ℕ} {a γ : Fin N → ℂ} {V S : ℂ[X]}
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [← Finset.mul_prod_erase _ _ (Finset.mem_univ j)]
     field_simp [hne j]
-  have hD2 := h31_logDeriv_prod c z' t (hSz ▸ hD)
+  have hD2 := eval_derivative_C_mul_prod c z' t (hSz ▸ hD)
   rw [← hSz] at hD2
   have hE := congrArg (Polynomial.eval t) hS.2.2.2
   simp only [eval_add, eval_mul, ht, zero_mul, add_zero, eval_zero,
@@ -512,7 +522,7 @@ theorem vanVleck_zeros {N n : ℕ} {a γ : Fin N → ℂ} {V S : ℂ[X]}
   · exact h
 
 /-- The zeros of a Stieltjes polynomial that avoid the singular points are distinct. -/
-lemma p2h_stieltjes_injective {N n : ℕ} {a γ : Fin N → ℂ} {V S : ℂ[X]}
+private lemma injective_stieltjes_roots {N n : ℕ} {a γ : Fin N → ℂ} {V S : ℂ[X]}
     (hS : IsVanVleckStieltjes a γ n V S) {c : ℂ} {z : Fin n → ℂ}
     (hSz : S = C c * ∏ k, (X - C (z k))) (hk : ∀ k j, z k ≠ a j) : Function.Injective z := by
   classical
@@ -527,7 +537,7 @@ lemma p2h_stieltjes_injective {N n : ℕ} {a γ : Fin N → ℂ} {V S : ℂ[X]}
   have hST : S = (X - C x₀) * T := by
     rw [hSz, hT, ← Finset.mul_prod_erase _ _ (Finset.mem_univ k)]; ring
   have hroot : S.IsRoot x₀ := by rw [hST]; simp
-  have hD := p2h_derivative_eval_ne_zero hS.2.2.2 hS.2.2.1 hroot hPi
+  have hD := eval_derivative_ne_zero_of_ode hS.2.2.2 hS.2.2.1 hroot hPi
   have hd1 : derivative S = T + (X - C x₀) * derivative T := by
     rw [hST, derivative_mul]; simp
   have hT0 : T.eval x₀ ≠ 0 := by
@@ -538,14 +548,14 @@ lemma p2h_stieltjes_injective {N n : ℕ} {a γ : Fin N → ℂ} {V S : ℂ[X]}
     mul_zero]
 
 /-- Derivative of a coordinate of `Function.update z k x` in `x`. -/
-lemma p2h_hasDerivAt_update_apply {n : ℕ} (z : Fin n → ℂ) (k i : Fin n) (t : ℂ) :
+private lemma hasDerivAt_update_apply {n : ℕ} (z : Fin n → ℂ) (k i : Fin n) (t : ℂ) :
     HasDerivAt (fun x => Function.update z k x i) (if i = k then 1 else 0) t := by
   by_cases h : i = k
   · subst h; simpa using hasDerivAt_id' t
   · simp only [Function.update_of_ne h, h, ite_false]; exact hasDerivAt_const t _
 
 /-- `logDeriv g x = g'/g(x)` from `HasDerivAt`. -/
-lemma p2h_logDeriv_of_hasDerivAt {g : ℂ → ℂ} {g' x : ℂ} (h : HasDerivAt g g' x) :
+private lemma logDeriv_eq_of_hasDerivAt {g : ℂ → ℂ} {g' x : ℂ} (h : HasDerivAt g g' x) :
     logDeriv g x = g' / g x := by
   rw [logDeriv_apply, h.deriv]
 
@@ -561,19 +571,19 @@ theorem stieltjes_zeros_critical {N n : ℕ} {a γ : Fin N → ℂ} {V S : ℂ[X
   classical
   have hk : ∀ k j, z k ≠ a j := fun k j h => by
     have := hza k j; rw [h, sub_self] at this; exact slitPlane_ne_zero this rfl
-  have hinj := p2h_stieltjes_injective hS hSz hk
+  have hinj := injective_stieltjes_roots hS hSz hk
   have heq := stieltjes_zeros_equilibrium hS hSz k (hk k)
   set u : ℂ → Fin n → ℂ := fun x => Function.update z k x with hu
   have hu0 : u (z k) = z := Function.update_eq_self k z
   have hud : ∀ i t, HasDerivAt (fun x => u x i) (if i = k then 1 else 0) t :=
-    fun i t => p2h_hasDerivAt_update_apply z k i t
+    fun i t => hasDerivAt_update_apply z k i t
   -- factors
   set A : Fin n → Fin N → ℂ → ℂ := fun i ℓ x => (u x i - a ℓ) ^ (γ ℓ / 2) with hA
   set B : Fin n → Fin n → ℂ → ℂ := fun i j x => u x i - u x j with hB
   have hAd : ∀ i ℓ, HasDerivAt (A i ℓ) (γ ℓ / 2 * (if i = k then 1 else 0) / (z i - a ℓ) *
       A i ℓ (z k)) (z k) := by
     intro i ℓ
-    have h := p1h_hasDerivAt_cpow (s := γ ℓ / 2) ((hud i (z k)).sub_const (a ℓ))
+    have h := hasDerivAt_cpow_comp (s := γ ℓ / 2) ((hud i (z k)).sub_const (a ℓ))
       (by simp only [hu0]; exact hza i ℓ)
     convert h using 1
     simp only [hA, hu0]
@@ -610,9 +620,9 @@ theorem stieltjes_zeros_critical {N n : ℕ} {a γ : Fin N → ℂ} {V S : ℂ[X
         (fun j _ => (hBd i j).differentiableAt)]
     congr 1
     · refine Finset.sum_congr rfl fun ℓ _ => ?_
-      rw [p2h_logDeriv_of_hasDerivAt (hAd i ℓ), mul_div_cancel_right₀ _ (hA0 i ℓ)]
+      rw [logDeriv_eq_of_hasDerivAt (hAd i ℓ), mul_div_cancel_right₀ _ (hA0 i ℓ)]
     · refine Finset.sum_congr rfl fun j _ => ?_
-      rw [p2h_logDeriv_of_hasDerivAt (hBd i j)]
+      rw [logDeriv_eq_of_hasDerivAt (hBd i j)]
       simp only [hB, hu0]
   have hlog : logDeriv (fun x => ∏ i, F i x) (z k) = 0 := by
     rw [logDeriv_fun_prod (fun i _ => hF0 i) (fun i _ => hFd i)]
@@ -705,7 +715,7 @@ theorem stieltjes_accessory {N n : ℕ} {a γ : Fin N → ℂ} (ha : Function.In
     refine Finset.sum_eq_zero fun i hi => ?_
     rw [Finset.prod_eq_zero (Finset.mem_erase.mpr ⟨(Finset.ne_of_mem_erase hi).symm,
       Finset.mem_univ j⟩) (sub_self _), mul_zero]
-  have hD := h31_logDeriv_prod c z (a j) (hSz ▸ hSa)
+  have hD := eval_derivative_C_mul_prod c z (a j) (hSz ▸ hSa)
   rw [← hSz] at hD
   simp only [eval_add, eval_mul, hPi, hG, zero_mul, zero_add,
     eval_zero] at hE

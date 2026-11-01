@@ -8,13 +8,25 @@ module
 public import DLMF.ParabolicCylinder.UniformLG2.ExpansionAlgebra
 
 /-!
-# Uniform parabolic cylinder expansions and their derivatives
+# Uniform expansions of parabolic cylinder functions and their derivatives
 
-Positive- and negative-parameter uniform expansions for U and its derivative, with the error and
-normalizer conditions explicit.
+This file proves the uniform large-parameter expansions of `U(a,z)` and `U'(a,z)` for
+positive and negative parameter (DLMF §12.10), with the error terms and the normalizer
+conditions explicit.
 
-Source references and common attribution are retained in
-`DLMF.ParabolicCylinder.UniformLG2`.
+## Main definitions
+
+* `pcfLG2_Pb`: the barred derivative coefficient `B̄_s = Ā_s - AA'Ā_{s-1} - A²Ā_{s-1}'`.
+* `pcfLG2_negB`: Olver's derivative coefficient `B_s = A_s - AA'A_{s-1} - A²A_{s-1}'`,
+  `t > 1`.
+
+## Main results
+
+* `pcf_positive_parameter_uniform`: DLMF 12.10.25 and 12.10.29 with a normalizer satisfying
+  DLMF 12.10.28.
+* `pcfLG2_neg_core`: the recessive Liouville–Green core for negative parameter.
+* `pcf_negative_parameter_uniform_U_UDeriv`: DLMF 12.10.3 and 12.10.4 with one normalizer
+  satisfying DLMF 12.10.14.
 -/
 
 @[expose] public noncomputable section

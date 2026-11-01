@@ -48,18 +48,21 @@ public import TauCeti.Analysis.SpecialFunctions.Hyperbolic
 public import TauCeti.Analysis.SpecialFunctions.Trigonometric.Orthogonality
 
 /-!
-# DLMF Chapter 4 coverage already available in Mathlib and TauCeti
+# DLMF Chapter 4 results already in Mathlib and TauCeti
 
-Checked pointers replace duplicate local statements. Native upstream DLMF tags are
-also harvested by `scripts/DumpDLMF.lean` and listed in `DLMF4Acquisition.md`.
-Comments distinguish exact results, partial coverage, and differences of branch,
-normalization or domain. The principal logarithm uses argument in `(-π,π]`;
-closed cut values and conditional boundary series are acquired separately.
-Reciprocal functions and division are totalized at poles in Lean.
+The `dlmf_upstream` commands below are checked pointers that replace duplicate local statements;
+native upstream DLMF tags are harvested by `scripts/DumpDLMF.lean`. Comments distinguish exact
+results, partial coverage, and differences of branch, normalization or domain. This module
+imports upstream libraries and the pointer facility; the elementary-function statements that are
+not upstream are in the sibling modules of `DLMF.Elementary`.
 
-The real orthogonality and hyperbolic/artanh pointers credit the Tau Ceti
-contributors. This module imports upstream libraries and the pointer facility;
-the new elementary-function statements are in the sibling theory modules.
+## Implementation notes
+
+The principal logarithm uses argument in `(-π,π]`; closed cut values and conditionally
+convergent boundary series are treated in `DLMF.Elementary.LogExpBasic` and
+`DLMF.Elementary.LogExpAnalysis`. Reciprocal functions and division are totalized at poles in
+Lean. The real orthogonality and hyperbolic and `artanh` pointers credit the Tau Ceti
+contributors.
 -/
 
 dlmf_upstream 4.2.E3 Complex.log "exact off the cut: real part log norm and imaginary part arg"

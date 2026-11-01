@@ -11,28 +11,49 @@ public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 public import Mathlib.Algebra.ContinuedFractions.Basic
 
 /-!
-# Continued fractions (DLMF §§13.5, 13.17)
+# Continued fractions for confluent hypergeometric functions
 
-Partial numerators follow DLMF 13.5.2, 13.5.4, 13.17.2, and 13.17.4.
-Convergence is acquired on a convenient real domain, matching the Chapter 15
-restriction of meromorphic continued fractions.
+This file defines the continued fractions of DLMF §13.5 for ratios of Kummer and Tricomi
+functions and of DLMF §13.17 for ratios of Whittaker functions, and proves their convergence.
+Partial numerators follow DLMF 13.5.2, 13.5.4, 13.17.2 and 13.17.4.
 
-Kummer's fraction 13.5.1 is proved for complex parameters
-(`kummerM_continued_fraction_tendsto`) by Pincherle's theorem in the form
-`GenContFract.cfConv_tendsto_of_ratio`: the backward solution
-`M(a+m, b+2m, z)`, `M(a+m+1, b+2m+1, z)` comes from two contiguous relations
-(`kumCF_contig_I`, `kumCF_contig_II`), it tends to `e^{z/2}`
-(`kumCF_tendsto_exp_half`, dominated convergence), and the partial numerators tend to `0`.
-`kummerM_continued_fraction_tendsto_of_ne` removes the conditions on the partial numerators by
-attaching the head of the fraction through the Pincherle invariant
-(`GenContFract.cfConv_tendsto_of_tail_invariant`).
+## Main definitions
 
-The fraction 13.5.3 for `U(a,b,x)/U(a,b-1,x)` is proved for all real `a`, `b`, `x > 0` with
-nonzero denominator (`kummerU_continued_fraction_tendsto_real`): the backward solution
-`x^n U(a+n, b-1, x)`, `x^{n+1} U(a+n+1, b, x)` (`kumCF_UW`, contiguous relations 13.3.9–13.3.10)
-is positive far out, where the fraction is a positive S-fraction with linearly growing elements
-(`GenContFract.cfConv_tendsto_of_pos_linear`). Whittaker's fractions 13.17.1 and 13.17.3 follow,
-with the denominators assumed nonzero.
+* `kummerMContFractCoeff`, `kummerMContinuedFraction`: Kummer's continued fraction
+  (DLMF 13.5.2).
+* `kummerUContFractCoeff`, `kummerUContinuedFraction`: the continued fraction for Tricomi's
+  function (DLMF 13.5.4).
+* `whittakerMContFractCoeff`, `whittakerMContinuedFraction`: the continued fraction for
+  Whittaker's `M` (DLMF 13.17.2).
+* `whittakerWContFractCoeff`, `whittakerWContinuedFraction`: the continued fraction for
+  Whittaker's `W` (DLMF 13.17.4).
+
+## Main results
+
+* `kummerM_continued_fraction_tendsto`, `kummerM_continued_fraction_limit`: Kummer's continued
+  fraction for `M(a,b,z)/M(a+1,b+1,z)` (DLMF 13.5.1) for complex parameters.
+* `kummerM_continued_fraction_tendsto_of_ne`: the same without conditions on the partial
+  numerators; stronger than DLMF.
+* `kummerU_continued_fraction_limit`, `kummerU_continued_fraction_tendsto_real`: the continued
+  fraction for `U(a,b,x)/U(a,b-1,x)` (DLMF 13.5.3) for all real `a`, `b` and `x > 0` with
+  nonzero denominator; stronger than DLMF.
+* `whittakerM_continued_fraction_limit`, `whittakerW_continued_fraction_limit`: Whittaker's
+  continued fractions DLMF 13.17.1 and 13.17.3, with the denominators assumed nonzero.
+
+## Implementation notes
+
+Kummer's fraction is proved by Pincherle's theorem in the form
+`GenContFract.cfConv_tendsto_of_ratio`: the backward solution `M(a+m, b+2m, z)`,
+`M(a+m+1, b+2m+1, z)` comes from two contiguous relations (`kumCF_contig_I`, `kumCF_contig_II`),
+it tends to `e^{z/2}` (`kumCF_tendsto_exp_half`, by dominated convergence), and the partial
+numerators tend to `0`. `kummerM_continued_fraction_tendsto_of_ne` attaches the head of the
+fraction through the Pincherle invariant (`GenContFract.cfConv_tendsto_of_tail_invariant`).
+
+For the Tricomi fraction the backward solution `x^n U(a+n, b-1, x)`, `x^{n+1} U(a+n+1, b, x)`
+(`kumCF_UW`, contiguous relations 13.3.9–13.3.10) is positive far out, where the fraction is a
+positive S-fraction with linearly growing elements (`GenContFract.cfConv_tendsto_of_pos_linear`).
+
+The Whittaker fractions are stated with nonzero denominators because Lean's `x / 0 = 0`.
 -/
 
 @[expose] public section

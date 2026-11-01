@@ -7,19 +7,31 @@ module
 
 public import DLMF.CoalescingSaddles.Basic
 public import Mathlib.MeasureTheory.Measure.Haar.NormedSpace
+public import Mathlib.Analysis.SpecialFunctions.PolarCoord
 
 /-!
-# Scaling relations (DLMF §36.6)
+# Scaling relations
 
-Statements acquired from the NIST DLMF (version 1.2.8), checked 2026-10-26.
+The diffraction catastrophes `Ψ(x; k)` (DLMF 36.2.10, 36.2.11) are expressed through the
+canonical integrals at scaled coordinates (DLMF §36.6, 36.6.1): with `t = k^{-1/(K+2)} τ`, the
+phase `kΦ_K(t; x)` becomes `Φ_K(τ; y(k))`. The exponents (36.6.3–36.6.5) are defined in
+`DLMF.CoalescingSaddles.Basic`; their sums and the special cases of Table 36.6.1 are proved here.
 
-The diffraction catastrophes `Ψ(x; k)` (36.2.10, 36.2.11) are expressed through the canonical
-integrals at scaled coordinates (36.6.1): with `t = k^{-1/(K+2)} τ`, the phase `kΦ_K(t; x)`
-becomes `Φ_K(τ; y(k))`. The proofs are linear changes of variables in the defining contour
-integrals (`MeasureTheory.Measure.integral_comp_mul_left`, `integral_comp_smul`,
-`setIntegral_comp_smul_of_pos`); the rotated contours are invariant under positive scaling. The
-exponents (36.6.3–36.6.5) are defined in `DLMF.CoalescingSaddles.Basic`; their sums and the
-special cases of Table 36.6.1 are proved here.
+## Main results
+
+* `cuspoidDiffraction_eq_scale`: `Ψ_K(x; k) = k^{β_K} Ψ_K(y(k))` for `k > 0` (DLMF 36.6.1).
+* `hyperbolicUmbilicDiffraction_eq_scale`, `ellipticUmbilicDiffraction_eq_scale`: the umbilic
+  scaling laws (DLMF 36.6.1).
+* `cuspoidVolumeIndex_eq`, `umbilicVolumeIndex_eq`: `γ_K = K(K+3)/(2(K+2))` and
+  `γ^{(U)} = 5/3` (DLMF 36.6.5).
+* `scalingExponents_fold`, `scalingExponents_cusp`, `scalingExponents_swallowtail`: the entries
+  of Table 36.6.1.
+
+## Implementation notes
+
+The proofs are linear changes of variables in the defining contour integrals
+(`MeasureTheory.Measure.integral_comp_mul_left`, `integral_comp_smul`,
+`setIntegral_comp_smul_of_pos`); the rotated contours are invariant under positive scaling.
 -/
 
 @[expose] public noncomputable section
@@ -32,41 +44,41 @@ namespace DLMF.CoalescingSaddles
 /-! ### Scaling of contours and potentials -/
 
 /-- The contour direction is invariant under positive rescaling of the parameter. -/
-lemma s36a_dir_smul (K : ℕ) {c : ℝ} (hc : 0 < c) (r : ℝ) :
+private lemma cuspoidContourDir_mul_of_pos (K : ℕ) {c : ℝ} (hc : 0 < c) (r : ℝ) :
     cuspoidContourDir K (c * r) = cuspoidContourDir K r := by
   unfold cuspoidContourDir
   simp only [mul_nonneg_iff_of_pos_left hc]
 
 /-- The cuspoid contour is homogeneous: `t(c r) = c t(r)` for `c > 0`. -/
-lemma s36a_contour_smul (K : ℕ) {c : ℝ} (hc : 0 < c) (r : ℝ) :
+private lemma cuspoidContour_mul_of_pos (K : ℕ) {c : ℝ} (hc : 0 < c) (r : ℝ) :
     cuspoidContour K (c * r) = (c : ℂ) * cuspoidContour K r := by
   unfold cuspoidContour
-  rw [s36a_dir_smul K hc]; push_cast; ring
+  rw [cuspoidContourDir_mul_of_pos K hc]; push_cast; ring
 
 /-- `(k^{1/n})ⁿ = k` for `k > 0`, `n > 0`. -/
-lemma s36a_rpow_root_pow {k : ℝ} (hk : 0 < k) (n : ℕ) (hn : 0 < n) :
+private lemma rpow_one_div_pow {k : ℝ} (hk : 0 < k) (n : ℕ) (hn : 0 < n) :
     (k ^ (1 / (n : ℝ))) ^ n = k := by
   rw [← Real.rpow_natCast, ← Real.rpow_mul hk.le, one_div_mul_cancel (by exact_mod_cast hn.ne'),
     Real.rpow_one]
 
 /-- `(k^{1/n})^m k^{1 - m/n} = k` for `k > 0`, `n > 0`. -/
-lemma s36a_rpow_root_pow_mul {k : ℝ} (hk : 0 < k) (n m : ℕ) (hn : 0 < n) :
+private lemma rpow_one_div_pow_mul_rpow_one_sub {k : ℝ} (hk : 0 < k) (n m : ℕ) (hn : 0 < n) :
     (k ^ (1 / (n : ℝ))) ^ m * k ^ (1 - (m : ℝ) / n) = k := by
   rw [← Real.rpow_natCast, ← Real.rpow_mul hk.le, ← Real.rpow_add hk]
   convert Real.rpow_one k using 2
   field_simp; ring
 
 /-- `k Φ_K(w; x) = Φ_K(k^{1/(K+2)} w; y(k))` (the substitution behind DLMF 36.6.1). -/
-lemma s36a_cuspoid_potential_scale (K : ℕ) (x : Fin K → ℝ) {k : ℝ} (hk : 0 < k) (w : ℂ) :
+private lemma mul_cuspoidPotential_eq_scaled (K : ℕ) (x : Fin K → ℝ) {k : ℝ} (hk : 0 < k) (w : ℂ) :
     (k : ℂ) * cuspoidPotential K w x =
       cuspoidPotential K (((k ^ (1 / ((K : ℝ) + 2)) : ℝ) : ℂ) * w)
         (cuspoidScaledCoords K x k) := by
   set c : ℝ := k ^ (1 / ((K : ℝ) + 2)) with hc
   have hc1 : c ^ (K + 2) = k := by
-    have := s36a_rpow_root_pow hk (K + 2) (by omega); push_cast at this; exact this
+    have := rpow_one_div_pow hk (K + 2) (by omega); push_cast at this; exact this
   have hc2 : ∀ m : Fin K, c ^ ((m : ℕ) + 1) * k ^ cuspoidCoordinateIndex ((m : ℕ) + 1) K = k := by
     intro m
-    have := s36a_rpow_root_pow_mul hk (K + 2) ((m : ℕ) + 1) (by omega)
+    have := rpow_one_div_pow_mul_rpow_one_sub hk (K + 2) ((m : ℕ) + 1) (by omega)
     unfold cuspoidCoordinateIndex; push_cast at this ⊢; exact this
   unfold cuspoidPotential cuspoidScaledCoords
   rw [mul_add, Finset.mul_sum, mul_pow, ← ofReal_pow, hc1]
@@ -92,8 +104,8 @@ theorem cuspoidDiffraction_eq_scale (K : ℕ) (x : Fin K → ℝ) {k : ℝ} (hk 
         (cuspoidScaledCoords K x k))) (c * r) := by
     congr 1; funext r
     simp only
-    rw [s36a_dir_smul K hcpos, s36a_contour_smul K hcpos, mul_assoc I,
-      s36a_cuspoid_potential_scale K x hk]
+    rw [cuspoidContourDir_mul_of_pos K hcpos, cuspoidContour_mul_of_pos K hcpos, mul_assoc I,
+      mul_cuspoidPotential_eq_scaled K x hk]
   unfold cuspoidDiffraction cuspoidIntegral
   rw [hint, Measure.integral_comp_mul_left (fun ρ => cuspoidContourDir K ρ *
     exp (I * cuspoidPotential K (cuspoidContour K ρ) (cuspoidScaledCoords K x k))) c,
@@ -108,24 +120,24 @@ theorem cuspoidDiffraction_eq_scale (K : ℕ) (x : Fin K → ℝ) {k : ℝ} (hk 
 
 /-- The exponent identities `(k^{1/3})³ = k`, `k^{1/3} k^{2/3} = k` and `(k^{1/3})² k^{1/3} = k`
 behind the umbilic scaling. -/
-lemma s36a_umbilic_coeffs {k : ℝ} (hk : 0 < k) :
+private lemma rpow_one_third_identities {k : ℝ} (hk : 0 < k) :
     (k ^ (1 / (3 : ℝ))) ^ 3 = k ∧ k ^ (1 / (3 : ℝ)) * k ^ ((2 : ℝ) / 3) = k ∧
       (k ^ (1 / (3 : ℝ))) ^ 2 * k ^ ((1 : ℝ) / 3) = k := by
-  have h1 := s36a_rpow_root_pow hk 3 (by norm_num)
-  have h2 := s36a_rpow_root_pow_mul hk 3 1 (by norm_num)
-  have h3 := s36a_rpow_root_pow_mul hk 3 2 (by norm_num)
+  have h1 := rpow_one_div_pow hk 3 (by norm_num)
+  have h2 := rpow_one_div_pow_mul_rpow_one_sub hk 3 1 (by norm_num)
+  have h3 := rpow_one_div_pow_mul_rpow_one_sub hk 3 2 (by norm_num)
   push_cast at h1 h2 h3
   refine ⟨h1, ?_, ?_⟩
   · rw [pow_one] at h2; convert h2 using 3; norm_num
   · convert h3 using 3; norm_num
 
 /-- `k Φ^{(H)}(s, t; x) = Φ^{(H)}(k^{1/3}s, k^{1/3}t; y^{(U)}(k))`. -/
-lemma s36a_hyperbolic_potential_scale (x y z : ℝ) {k : ℝ} (hk : 0 < k) (s t : ℂ) :
+private lemma mul_hyperbolicUmbilicPotential_eq_scaled (x y z : ℝ) {k : ℝ} (hk : 0 < k) (s t : ℂ) :
     (k : ℂ) * hyperbolicUmbilicPotential s t x y z =
       hyperbolicUmbilicPotential (((k ^ (1 / (3 : ℝ)) : ℝ) : ℂ) * s)
         (((k ^ (1 / (3 : ℝ)) : ℝ) : ℂ) * t) (x * k ^ umbilicCoordinateIndex 0)
         (y * k ^ umbilicCoordinateIndex 1) (z * k ^ umbilicCoordinateIndex 2) := by
-  obtain ⟨h1, h2, h3⟩ := s36a_umbilic_coeffs hk
+  obtain ⟨h1, h2, h3⟩ := rpow_one_third_identities hk
   set c : ℝ := k ^ (1 / (3 : ℝ))
   have e1 : (k : ℂ) = (c : ℂ) ^ 3 := by rw [← ofReal_pow, h1]
   have e2 : (k : ℂ) = (c : ℂ) * ((k ^ ((2 : ℝ) / 3) : ℝ) : ℂ) := by rw [← ofReal_mul, h2]
@@ -137,12 +149,12 @@ lemma s36a_hyperbolic_potential_scale (x y z : ℝ) {k : ℝ} (hk : 0 < k) (s t 
   linear_combination (s ^ 3 + t ^ 3) * e1 + (y * t + x * s) * e2 + (z * s * t) * e3
 
 /-- `k Φ^{(E)}(s, t; x) = Φ^{(E)}(k^{1/3}s, k^{1/3}t; y^{(U)}(k))`. -/
-lemma s36a_elliptic_potential_scale (x y z : ℝ) {k : ℝ} (hk : 0 < k) (s t : ℂ) :
+private lemma mul_ellipticUmbilicPotential_eq_scaled (x y z : ℝ) {k : ℝ} (hk : 0 < k) (s t : ℂ) :
     (k : ℂ) * ellipticUmbilicPotential s t x y z =
       ellipticUmbilicPotential (((k ^ (1 / (3 : ℝ)) : ℝ) : ℂ) * s)
         (((k ^ (1 / (3 : ℝ)) : ℝ) : ℂ) * t) (x * k ^ umbilicCoordinateIndex 0)
         (y * k ^ umbilicCoordinateIndex 1) (z * k ^ umbilicCoordinateIndex 2) := by
-  obtain ⟨h1, h2, h3⟩ := s36a_umbilic_coeffs hk
+  obtain ⟨h1, h2, h3⟩ := rpow_one_third_identities hk
   set c : ℝ := k ^ (1 / (3 : ℝ))
   have e1 : (k : ℂ) = (c : ℂ) ^ 3 := by rw [← ofReal_pow, h1]
   have e2 : (k : ℂ) = (c : ℂ) * ((k ^ ((2 : ℝ) / 3) : ℝ) : ℂ) := by rw [← ofReal_mul, h2]
@@ -155,21 +167,16 @@ lemma s36a_elliptic_potential_scale (x y z : ℝ) {k : ℝ} (hk : 0 < k) (s t : 
     (z * (s ^ 2 + t ^ 2)) * e3
 
 /-- `ℝ × ℝ` has real dimension `2`. -/
-lemma s36a_finrank_prod : Module.finrank ℝ (ℝ × ℝ) = 2 := by
+private lemma finrank_real_prod_real : Module.finrank ℝ (ℝ × ℝ) = 2 := by
   rw [Module.finrank_prod, Module.finrank_self]
 
 /-- `k (k^{1/3})^{-2} = k^{β^{(U)}}` with the umbilic singularity index `β^{(U)} = 1/3`. -/
-lemma s36a_umbilic_prefactor {k : ℝ} (hk : 0 < k) :
+private lemma mul_inv_rpow_one_third_sq {k : ℝ} (hk : 0 < k) :
     k * ((k ^ (1 / (3 : ℝ))) ^ 2)⁻¹ = k ^ umbilicSingularityIndex := by
   have h : ((k ^ (1 / (3 : ℝ))) ^ 2)⁻¹ = k ^ (-(2 / 3 : ℝ)) := by
     rw [← Real.rpow_natCast, ← Real.rpow_mul hk.le, ← Real.rpow_neg hk.le]; norm_num
   rw [h, umbilicSingularityIndex, show (1 / 3 : ℝ) = 1 + -(2 / 3) by norm_num,
     Real.rpow_add hk, Real.rpow_one]
-
-/-- Lebesgue measure on `ℝ × ℝ` is an additive Haar measure (as in Mathlib's
-`Mathlib.Analysis.SpecialFunctions.PolarCoord`, which this file does not import). -/
-instance s36a_isAddHaar_prod : (volume : Measure (ℝ × ℝ)).IsAddHaarMeasure := by
-  rw [Measure.volume_eq_prod]; infer_instance
 
 /-- The scaling law of the hyperbolic umbilic diffraction catastrophe (DLMF 36.6.1, umbilics):
 `Ψ^{(H)}(x; k) = k^{β^{(U)}} Ψ^{(H)}(y^{(U)}(k))` for `k > 0`, with `β^{(U)} = 1/3` and
@@ -192,15 +199,15 @@ theorem hyperbolicUmbilicDiffraction_eq_scale (x y z : ℝ) {k : ℝ} (hk : 0 < 
       ∫ p : ℝ × ℝ, g (c • p) := by
     congr 1; funext p
     simp only [hg, Prod.smul_fst, Prod.smul_snd, smul_eq_mul]
-    rw [s36a_dir_smul 1 hcpos, s36a_dir_smul 1 hcpos, s36a_contour_smul 1 hcpos,
-      s36a_contour_smul 1 hcpos, mul_assoc I, s36a_hyperbolic_potential_scale x y z hk]
+    rw [cuspoidContourDir_mul_of_pos 1 hcpos, cuspoidContourDir_mul_of_pos 1 hcpos, cuspoidContour_mul_of_pos 1 hcpos,
+      cuspoidContour_mul_of_pos 1 hcpos, mul_assoc I, mul_hyperbolicUmbilicPotential_eq_scaled x y z hk]
   unfold hyperbolicUmbilicDiffraction hyperbolicUmbilicIntegral
-  rw [hint, Measure.integral_comp_smul, s36a_finrank_prod,
+  rw [hint, Measure.integral_comp_smul, finrank_real_prod_real,
     abs_of_pos (inv_pos.2 (pow_pos hcpos 2)), real_smul, ← mul_assoc, ← ofReal_mul,
-    s36a_umbilic_prefactor hk]
+    mul_inv_rpow_one_third_sq hk]
 
 /-- Positive dilations preserve the open positive quadrant. -/
-lemma s36a_smul_quadrant {c : ℝ} (hc : 0 < c) :
+private lemma smul_Ioi_prod_Ioi {c : ℝ} (hc : 0 < c) :
     c • (Ioi (0 : ℝ) ×ˢ Ioi (0 : ℝ)) = Ioi 0 ×ˢ Ioi 0 := by
   ext p
   rw [mem_smul_set_iff_inv_smul_mem₀ hc.ne']
@@ -213,7 +220,7 @@ lemma s36a_smul_quadrant {c : ℝ} (hc : 0 < c) :
     exact ⟨mul_pos (inv_pos.2 hc) h1, mul_pos (inv_pos.2 hc) h2⟩
 
 /-- Scaling law for one quadrant integral of the elliptic umbilic diffraction catastrophe. -/
-lemma s36a_quadrant_scale (x y z : ℝ) {k : ℝ} (hk : 0 < k) (j l : Fin 3) :
+private lemma ellipticUmbilicQuadrant_scale (x y z : ℝ) {k : ℝ} (hk : 0 < k) (j l : Fin 3) :
     ellipticUmbilicQuadrant k x y z j l =
       (((k ^ (1 / (3 : ℝ))) ^ 2)⁻¹ : ℝ) * ellipticUmbilicQuadrant 1
         (x * k ^ umbilicCoordinateIndex 0) (y * k ^ umbilicCoordinateIndex 1)
@@ -235,10 +242,10 @@ lemma s36a_quadrant_scale (x y z : ℝ) {k : ℝ} (hk : 0 < k) (j l : Fin 3) :
     rw [mul_assoc I]
     congr 1
     unfold ellipticUmbilicPotentialAB
-    rw [s36a_elliptic_potential_scale x y z hk]
+    rw [mul_ellipticUmbilicPotential_eq_scaled x y z hk]
     congr 1 <;> push_cast <;> ring
-  rw [hint, Measure.setIntegral_comp_smul_of_pos _ _ _ hcpos, s36a_finrank_prod,
-    s36a_smul_quadrant hcpos, real_smul]
+  rw [hint, Measure.setIntegral_comp_smul_of_pos _ _ _ hcpos, finrank_real_prod_real,
+    smul_Ioi_prod_Ioi hcpos, real_smul]
 
 /-- The scaling law of the elliptic umbilic diffraction catastrophe (DLMF 36.6.1, umbilics):
 `Ψ^{(E)}(x; k) = k^{β^{(U)}} Ψ^{(E)}(y^{(U)}(k))` for `k > 0`. -/
@@ -249,8 +256,8 @@ theorem ellipticUmbilicDiffraction_eq_scale (x y z : ℝ) {k : ℝ} (hk : 0 < k)
         ellipticUmbilicIntegral (x * k ^ umbilicCoordinateIndex 0)
           (y * k ^ umbilicCoordinateIndex 1) (z * k ^ umbilicCoordinateIndex 2) := by
   unfold ellipticUmbilicDiffraction ellipticUmbilicIntegral
-  simp only [s36a_quadrant_scale x y z hk]
-  rw [← s36a_umbilic_prefactor hk]
+  simp only [ellipticUmbilicQuadrant_scale x y z hk]
+  rw [← mul_inv_rpow_one_third_sq hk]
   simp only [Finset.mul_sum]
   push_cast
   refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun l _ => ?_
@@ -259,7 +266,7 @@ theorem ellipticUmbilicDiffraction_eq_scale (x y z : ℝ) {k : ℝ} (hk : 0 < k)
 /-! ### Scaling exponents (36.6.3–36.6.5, Table 36.6.1) -/
 
 /-- `∑_{m=1}^K m = K(K+1)/2` in `ℝ`. -/
-lemma s36a_sum_Icc_cast (K : ℕ) : ∑ m ∈ Finset.Icc 1 K, (m : ℝ) = K * (K + 1) / 2 := by
+private lemma sum_Icc_cast_eq (K : ℕ) : ∑ m ∈ Finset.Icc 1 K, (m : ℝ) = K * (K + 1) / 2 := by
   induction K with
   | zero => simp
   | succ n ih =>
@@ -272,7 +279,7 @@ theorem cuspoidVolumeIndex_eq (K : ℕ) :
     cuspoidVolumeIndex K = K * (K + 3) / (2 * (K + 2)) := by
   unfold cuspoidVolumeIndex cuspoidCoordinateIndex
   rw [Finset.sum_sub_distrib, Finset.sum_const, Nat.card_Icc, ← Finset.sum_div,
-    s36a_sum_Icc_cast]
+    sum_Icc_cast_eq]
   simp only [nsmul_eq_mul, mul_one, Nat.add_sub_cancel]
   field_simp; ring
 

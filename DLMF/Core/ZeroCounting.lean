@@ -15,22 +15,26 @@ public import Mathlib.Analysis.Convex.Contractible
 DLMF lists the complex zeros of a special function in a sector "arranged in order of increasing
 absolute value". The project encodes this by `DLMF.orderedZero f S k`, an `epsilon`-choice of a
 zero `z ∈ S` of `f` with exactly `k - 1` zeros of `f` in `S` of smaller modulus. This file gives
-the combinatorics behind that encoding and the bridge from Rouché's theorem
-(`TauCeti.rouche`, Tau Ceti) to it.
+the combinatorics behind that encoding and the bridge to it from Rouché's theorem
+(`TauCeti.rouche`).
 
-Write `Z = {z ∈ S | f z = 0}` and assume that every bounded part of `Z` is finite (true for an
-entire function that is not identically zero, `zcnt_finite_zeros_lt`). Then:
+Write `Z = {z ∈ S | f z = 0}` and assume that every bounded part of `Z` is finite, as is true
+for an entire function that is not identically zero.
 
+## Main results
+
+* `zcnt_finite_zeros_closedBall`, `zcnt_finite_zeros_lt`: the zeros of a nonzero entire
+  function in a bounded region form a finite set.
 * `zcnt_orderedZero_spec_iff`: the enumeration is well defined for every `k ≥ 1` if and only if
-  the zeros in `S` have pairwise distinct moduli and there are infinitely many of them;
-* `zcnt_orderedZero_strictMonoOn`: the enumeration is then strictly increasing in modulus;
-* `zcnt_eq_orderedZero`: every zero in `S` is enumerated;
-* `zcnt_injOn_infinite_of_discs`: "exactly one zero in each disc `D_k`, the discs lie in disjoint
-  annuli of increasing radius, and every zero lies in some `D_k`" gives distinct moduli and
-  infinitely many zeros;
+  the zeros in `S` have pairwise distinct moduli and there are infinitely many of them.
+* `zcnt_orderedZero_strictMonoOn`: the enumeration is then strictly increasing in modulus.
+* `zcnt_eq_orderedZero`: every zero in `S` is enumerated.
+* `zcnt_injOn_infinite_of_discs`: exactly one zero in each disc `D_k`, with the discs in
+  disjoint annuli of increasing radius and every zero in some `D_k`, gives distinct moduli and
+  infinitely many zeros.
 * `zcnt_existsUnique_of_count_eq_one`, `zcnt_existsUnique_zero_of_rouche`: a zero count `1`
-  (with multiplicity) on a disc, for instance transferred by Rouché's theorem from a model, gives
-  exactly one zero in the disc.
+  (with multiplicity) on a disc, for instance transferred by Rouché's theorem from a model,
+  gives exactly one zero in the disc.
 -/
 
 @[expose] public noncomputable section

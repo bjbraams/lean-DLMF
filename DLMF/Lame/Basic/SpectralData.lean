@@ -9,6 +9,38 @@ public import DLMF.Lame.Basic.Equations
 
 /-!
 # Lamé boundary conditions, eigenvalues and normalized eigenfunctions
+
+The four Sturm–Liouville problems of Table 29.3.2 on `[0, K]`, their eigenvalues `a^m_ν(k²)`,
+`b^m_ν(k²)` and the normalized eigenfunctions `Ec^m_ν(x, k²)`, `Es^m_ν(x, k²)` for real `x`
+(DLMF §29.3).
+
+## Main definitions
+
+* `Real.LameBoundary`: the Neumann or Dirichlet boundary conditions at `0` and `K = K(k)`.
+* `Real.IsLameEigenfunction`, `Real.lameSpectrum`: eigenfunctions and the spectrum of a problem.
+* `Real.IsNthLameEigenvalue`, `Real.lameEigenvalue`: the `j`th eigenvalue (counting from `0`).
+* `Real.lameAk`, `Real.lameBk`: the eigenvalues `a^m_ν(k²)` and `b^m_ν(k²)` (Table 29.3.1).
+* `Real.IsNormalizedLameEigenfunction`, `Real.lameEigenfunction`: the normalized `j`th
+  eigenfunction.
+* `Real.lameEck`, `Real.lameEsk`: the Lamé functions `Ec^m_ν(x, k²)` and `Es^m_ν(x, k²)`.
+
+## Implementation notes
+
+`Real.lameEigenvalue ν k odd0 oddK j` is the unique `h` in the spectrum of the problem with
+boundary types `odd0`, `oddK` (Neumann `w' = 0`, "even", or Dirichlet `w = 0`, "odd") with
+exactly `j` spectral points below it (`if h : ∃! … then … else 0`; **definition by choice**;
+existence and ordering of the spectrum are `Real.lameEigenvalue_spec`). Then
+`a^{2m} = (even, even, m)`, `a^{2m+1} = (odd, even, m)`, `b^{2m+1} = (even, odd, m)`,
+`b^{2m+2} = (odd, odd, m)`; the superscript of DLMF is the natural number argument, and `b^0`
+is not used.
+
+`Real.lameEigenfunction ν k odd0 oddK j` is the unique real eigenfunction for that eigenvalue
+normalized by 29.3.18, `∫₀^K dn(x, k) w(x)² dx = π/4`, with the sign rule of §29.3(v)
+(`w(K) > 0` for `Ec`, `w'(K) < 0` for `Es`); **definition by choice**, with existence and
+uniqueness `Real.lameEigenfunction_spec`. Lamé functions are real-variable functions here:
+DLMF's eigenvalue problem, normalization, orthogonality, Fourier series in `φ` and integral
+equations are all on the real line. The Lamé polynomials (§29.12), which are meromorphic in
+`z`, are explicit complex functions in `DLMF.Lame.Polynomials.Basic`.
 -/
 
 @[expose] public noncomputable section

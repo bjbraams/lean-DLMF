@@ -17,12 +17,31 @@ It satisfies the generating-function differential equation, whose coefficients g
 three-term recurrence. Comparing with `ultrasphPoly_recurrence` identifies its coefficients
 with `C_n^{(λ)}((w + w⁻¹)/2)` for `Re λ > -1/2`. This gives the trigonometric sum
 DLMF 18.5.11 (`ultrasphPoly_cos_sum`) and, with `|w| = 1` and binomial series, the
-generating functions. The explicit sum DLMF 18.5.10 (`ultrasphPoly_finite_sum`) is proved
+generating functions. The explicit sum DLMF 18.5.10 (`ultrasphPoly_finite_sum`) is obtained
 separately: its terms satisfy the same three-term recurrence. Comparing coefficients
 with the Jacobi hypergeometric sum in `x²` then gives the quadratic transformations
 DLMF 18.7.15–18.7.16; the Jacobi forms 18.7.13–18.7.14 follow by the Gegenbauer–Jacobi
 relation, extended to `α = -1/2` by continuity in `α`. The multiplicativity `G_λ G_μ = G_{λ+μ}`
 (Chu–Vandermonde, `poch_add_binomial_sum`) gives the convolution identities in `Series.lean`.
+
+## Main definitions
+
+* `gegenbauerSeries`: the formal Gegenbauer generating series `G_λ(wX) G_λ(X/w)`.
+* `weightedGegenbauerSeries`: the weighted series `∑ (n + 2λ)/(2λ) tₙ Xⁿ`.
+* `gegenbauerCoeff`: the totalized coefficients of the explicit sum DLMF 18.5.10.
+
+## Main results
+
+* `ultrasphPoly_eq_coeff_gegenbauerSeries`: `C_n^{(λ)}((w + w⁻¹)/2)` is the `n`th coefficient of
+  the series.
+* `gegenbauerSeries_mul`, `sum_coeff_mul_coeff_gegenbauerSeries`: products of Gegenbauer series
+  add the parameters.
+* `ultrasphPoly_cos_sum`: the trigonometric sum DLMF 18.5.11, for complex angles.
+* `ultrasphPoly_finite_sum`: the explicit sum DLMF 18.5.10.
+* `ultrasphPoly_quadratic_even`, `ultrasphPoly_quadratic_odd`: DLMF 18.7.15 and 18.7.16.
+* `jacobi_quadratic_even`, `jacobi_quadratic_odd`: DLMF 18.7.13 and 18.7.14.
+* `hasSum_coeff_gegenbauerSeries_mul_pow`: the analytic generating function
+  `∑ C_n^{(λ)}(x) zⁿ = (1 - 2xz + z²)^{-λ}` at `x = cos θ`.
 -/
 
 @[expose] public section
@@ -619,7 +638,7 @@ theorem hasSum_coeff_gegenbauerSeries_mul_pow (lam : ℂ) (θ : ℝ) {z : ℂ} (
       rw [hwdef, ← Complex.exp_neg, Complex.ofReal_cos, Complex.cos]; ring_nf
     have : w * w⁻¹ = 1 := mul_inv_cancel₀ hw0
     linear_combination (-z) * hcos - z ^ 2 * this
-  rw [hx, DLMF.Hypergeometric.mul_cpow_of_re_pos (re_one_sub_mul_pos_of_norm_eq_one hw hz)
+  rw [hx, Carlson.mul_cpow_of_re_pos (re_one_sub_mul_pos_of_norm_eq_one hw hz)
     (re_one_sub_mul_pos_of_norm_eq_one hwi hz)]
   exact hasSum_coeff_binomProductSeries_mul_pow lam lam h1 h2
 

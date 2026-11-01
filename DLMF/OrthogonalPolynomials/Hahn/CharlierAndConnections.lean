@@ -10,11 +10,28 @@ public import DLMF.OrthogonalPolynomials.Hahn.HahnAndMeixner
 /-!
 # Charlier polynomials and discrete-family connections
 
-Charlier generating functions and connection identities among discrete orthogonal polynomial
-families.
+Generating functions (DLMF §18.23), limit relations (DLMF §18.21) and difference equations
+(DLMF §18.22) for the Charlier, Meixner–Pollaczek and continuous Hahn polynomials, and the
+limits connecting the discrete families of the Hahn class to each other and to the Jacobi,
+Laguerre and Hermite polynomials.
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Hahn`.
+## Main definitions
+
+* `charlierPoly`: the Charlier polynomial as a polynomial in `x`.
+
+## Main results
+
+* `charlier_generating_function`, `meixnerPollaczek_generating_function`,
+  `continuousHahn_generating_function`: DLMF 18.23.5, 18.23.7 and 18.23.6.
+* `hahn_limit_krawtchouk`, `hahn_limit_meixner`, `hahn_limit_jacobi`: DLMF 18.21.3–18.21.5.
+* `krawtchouk_limit_charlier`, `meixner_limit_charlier`: DLMF 18.21.6 and 18.21.7.
+* `meixner_limit_laguerrePolyL`, `charlier_limit_hermite`: DLMF 18.21.8 and 18.21.9.
+* `meixnerPollaczek_limit_laguerrePolyL`, `meixnerPollaczek_limit_hermite`: DLMF 18.21.12
+  and 18.21.13.
+* `continuousHahn_difference_equation`, `meixnerPollaczek_difference_equation`: DLMF 18.22.14
+  and 18.22.17.
+* `continuousHahn_central_difference`: DLMF 18.22.27.
+* `charlier_recurrence`: the three-term recurrence of the Charlier polynomials in the degree.
 -/
 
 @[expose] public section

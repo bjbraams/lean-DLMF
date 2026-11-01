@@ -8,11 +8,25 @@ module
 public import DLMF.ErrorFunctions.Integrals
 
 /-!
-# Voigt functions and their properties, DLMF §7.19
+# Voigt functions (DLMF §7.19)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+The Voigt functions `U(x, t)`, `V(x, t)` and the line-broadening function `H(a, u)`: their
+relation to `erfc`, limits, symmetry, bounds, derivative relations and Fourier–Laplace
+representations.
+
+## Main definitions
+
+* `Real.voigtU`, `Real.voigtV`: the Voigt functions for `t > 0` (DLMF 7.19.1, 7.19.2).
+* `Real.voigtH`: the line-broadening function for `a > 0` (DLMF 7.19.4).
+
+## Main results
+
+* `voigt_erfc`: `U + iV` in terms of `erfc` (DLMF 7.19.3).
+* `Real.voigtH_eq_voigtU`: `H(a, u)` in terms of `U` (DLMF 7.19.4).
+* `Real.voigt_limits`, `Real.voigt_symmetry`, `Real.voigt_bounds`: DLMF 7.19.5–7.19.7.
+* `Real.voigtV_derivative_relation`, `Real.voigtU_derivative_relation`: DLMF 7.19.8, 7.19.9.
+* `Real.voigtU_fourier_laplace`, `Real.voigtV_fourier_laplace`: DLMF 7.19.10, 7.19.11.
+* `voigt_laplace`: the Laplace representation `U + iV = ∫₀^∞ exp(-s(1 - ix) - t s²) ds`.
 -/
 
 @[expose] public noncomputable section

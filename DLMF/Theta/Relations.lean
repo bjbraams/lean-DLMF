@@ -12,29 +12,49 @@ public import DLMF.EllipticIntegrals.SymmetricRelations
 /-!
 # Theta functions: relations to other functions (DLMF §20.9)
 
-The modulus `k = θ₂²(0|τ)/θ₃²(0|τ)` (20.9.1), Jacobi's `K = (π/2)θ₃²(0|τ)`, `K' = -iτK`
-(20.9.2), the symmetric-integral forms 20.9.3–20.9.5, Jacobi's inversion problem and the
-elliptic modular function `k²` (§20.9(ii)).
+The modulus `k = θ₂²(0|τ)/θ₃²(0|τ)`, Jacobi's `K = (π/2)θ₃²(0|τ)`, `K' = -iτK`, the
+symmetric-integral forms DLMF 20.9.3–20.9.5, Jacobi's inversion problem and the elliptic
+modular function `k²` (DLMF §20.9(ii)).
 
-**Domains.** The project's complete elliptic integral `Real.compEllIntKm` is real, so 20.9.2 is
-stated in the rectangular case `τ = it`, `t > 0` (real nome `q = e^{-πt}`), which is DLMF's
-principal case (§20.1); for complex `τ` the printed `K(k) = (π/2)θ₃²` holds only on part of the
-upper half-plane with the principal branch of `K` (checked numerically): the translates
-`F + 2n` of the fundamental region `F` of `Γ(2)`, stated with the complex principal `K` of
-Chapter 22 in `compEllIntKk_eq_jacobiThetaThreeNullTau_fundamental`. Carlson's `R_F` is the complex
-Chapter 19 integral `DLMF.EllipticIntegrals.symEllIntRF` (DLMF 19.16.1). **Domain correction
-(20.9.3):** the printed identity holds for real `z` only when `|z| ≤ π/2` (and `z ≠ 0`, where the
-right side is a removable singularity); the left side is `π`-periodic and even in `z` while the
-right side is not, and numerically (mpmath, `τ = 0.8i`) the two sides differ for
-`z = 1.6, 2, 2.5`. For `τ = it` the identity holds for complex `z` in the open period rectangle
-`|Re z| < π/2`, `|Im z| < πt/2`, and for general `τ` it holds near `z = 0`; it fails at some
-points of the period parallelogram `π(s + rτ)`, `|s|, |r| < 1/2`, for non-rectangular `τ`.
-The relation between
-`θⱼ` and the Jacobian and Weierstrass elliptic functions (§20.9(ii), DLMF §§22.2, 23.6(i)) is
-acquired in the chapters 22 and 23 modules.
+## Main definitions
 
-The existing `DLMF.Elliptic.Real.compEllIntKm_eq_jacobiThetaThreeNullQ` proves 20.9.2 for a real
-nome in the form `m = 1 - θ₄⁴/θ₃⁴`.
+* `thetaModulusK`: the modulus `k = θ₂²(0|τ)/θ₃²(0|τ)` (DLMF 20.9.1).
+* `thetaComplModulusK`: the complementary modulus `k' = θ₄²(0|τ)/θ₃²(0|τ)`.
+
+## Main results
+
+* `compEllIntK_eq_jacobiThetaThreeNullTau`: DLMF 20.9.2 in the rectangular case.
+* `compEllIntKk_eq_jacobiThetaThreeNullTau_fundamental`: DLMF 20.9.2 for complex `τ` on the
+  region where it holds.
+* `carlsonRF_jacobiTheta`, `carlsonRF_jacobiTheta_rect`, `carlsonRF_jacobiTheta_eventually`:
+  domain-corrected forms of DLMF 20.9.3.
+* `carlsonRF_zero_jacobiThetaNull`: DLMF 20.9.4.
+* `exp_carlsonRF_ratio_eq_nome`: DLMF 20.9.5.
+* `thetaModulusK_inversion`: Jacobi's inversion problem (DLMF §20.9(ii)).
+* `thetaModulusK_sq_modular`: `k²` is the elliptic modular function (DLMF §20.9(ii)).
+
+## Implementation notes
+
+The project's complete elliptic integral `Real.compEllIntKm` is real, so 20.9.2 is stated in
+the rectangular case `τ = it`, `t > 0` (real nome `q = e^{-πt}`), which is DLMF's principal
+case (§20.1). For complex `τ` the printed `K(k) = (π/2)θ₃²` holds only on part of the upper
+half-plane with the principal branch of `K` (checked numerically): the translates `F + 2n` of
+the fundamental region `F` of `Γ(2)`, stated with the complex principal `K` of Chapter 22 in
+`compEllIntKk_eq_jacobiThetaThreeNullTau_fundamental`. Carlson's `R_F` is the complex
+Chapter 19 integral `DLMF.EllipticIntegrals.symEllIntRF` (DLMF 19.16.1).
+
+**Domain correction (20.9.3).** The printed identity holds for real `z` only when
+`|z| ≤ π/2` (and `z ≠ 0`, where the right side is a removable singularity); the left side is
+`π`-periodic and even in `z` while the right side is not, and numerically (mpmath,
+`τ = 0.8i`) the two sides differ for `z = 1.6, 2, 2.5`. For `τ = it` the identity holds for
+complex `z` in the open period rectangle `|Re z| < π/2`, `|Im z| < πt/2`, and for general `τ`
+it holds near `z = 0`; it fails at some points of the period parallelogram `π(s + rτ)`,
+`|s|, |r| < 1/2`, for non-rectangular `τ`.
+
+The relation between `θⱼ` and the Jacobian and Weierstrass elliptic functions (§20.9(ii),
+DLMF §§22.2, 23.6(i)) is treated in the Chapter 22 and 23 modules.
+`DLMF.Elliptic.Real.compEllIntKm_eq_jacobiThetaThreeNullQ` proves 20.9.2 for a real nome in
+the form `m = 1 - θ₄⁴/θ₃⁴`.
 -/
 
 @[expose] public section
@@ -56,25 +76,25 @@ def thetaModulusK (τ : ℂ) : ℂ := jacobiThetaTwoNullTau τ ^ 2 / jacobiTheta
 /-- The complementary modulus `k' = θ₄²(0|τ)/θ₃²(0|τ)` (DLMF 20.9.1 with 20.7.5). -/
 def thetaComplModulusK (τ : ℂ) : ℂ := jacobiThetaFourNullTau τ ^ 2 / jacobiThetaThreeNullTau τ ^ 2
 
-/-- On the imaginary axis `k(it) = ρ(t)` is real (from `DLMF.JacobiElliptic.p22R1_real_at`). -/
-theorem p22R1_thetaModulusK_I_mul {t : ℝ} (ht : 0 < t) :
-    thetaModulusK (I * t) = (p22R1_rho t : ℂ) :=
-  (p22R1_real_at ht).2.2.2.1
+/-- On the imaginary axis `k(it) = ρ(t)` is real (from `DLMF.JacobiElliptic.jacobiModulusImag_spec`). -/
+theorem thetaModulusK_I_mul {t : ℝ} (ht : 0 < t) :
+    thetaModulusK (I * t) = (jacobiModulusImag t : ℂ) :=
+  (jacobiModulusImag_spec ht).2.2.2.1
 /-- `R_F(0, 1 - k², 1) = K(k)` and `R_F(0, k², 1) = K'(k)` at `k = ρ(t)`, in terms of
 `B = θ₃(0|it)`. -/
-lemma p22R1_symEllIntRF_rho {t : ℝ} (ht : 0 < t) :
-    symEllIntRF 0 ((1 - p22R1_rho t ^ 2 : ℝ) : ℂ) 1 = π / 2 * (p22R1_B t : ℂ) ^ 2 ∧
-      symEllIntRF 0 ((p22R1_rho t ^ 2 : ℝ) : ℂ) 1 = π / 2 * t * (p22R1_B t : ℂ) ^ 2 := by
-  obtain ⟨h0, h1, -, -, -, -, a1, a2⟩ := p22R1_real_at ht
-  have hk2 : p22R1_rho t ^ 2 < 1 := by nlinarith
+private lemma symEllIntRF_realThetaModulus {t : ℝ} (ht : 0 < t) :
+    symEllIntRF 0 ((1 - jacobiModulusImag t ^ 2 : ℝ) : ℂ) 1 = π / 2 * (jacobiThetaThreeImag t : ℂ) ^ 2 ∧
+      symEllIntRF 0 ((jacobiModulusImag t ^ 2 : ℝ) : ℂ) 1 = π / 2 * t * (jacobiThetaThreeImag t : ℂ) ^ 2 := by
+  obtain ⟨h0, h1, -, -, -, -, a1, a2⟩ := jacobiModulusImag_spec ht
+  have hk2 : jacobiModulusImag t ^ 2 < 1 := by nlinarith
   constructor
   · rw [← DLMF.EllipticIntegrals.compEllIntKk_ofReal_eq_symEllIntRF hk2,
       compEllIntKk_ofReal hk2, a1]
     push_cast; ring
-  · set κ := Real.sqrt (1 - p22R1_rho t ^ 2)
-    have hκ : κ ^ 2 = 1 - p22R1_rho t ^ 2 := Real.sq_sqrt (by linarith)
+  · set κ := Real.sqrt (1 - jacobiModulusImag t ^ 2)
+    have hκ : κ ^ 2 = 1 - jacobiModulusImag t ^ 2 := Real.sq_sqrt (by linarith)
     have hκ1 : κ ^ 2 < 1 := by rw [hκ]; nlinarith
-    have e : (1 - κ ^ 2 : ℝ) = p22R1_rho t ^ 2 := by rw [hκ]; ring
+    have e : (1 - κ ^ 2 : ℝ) = jacobiModulusImag t ^ 2 := by rw [hκ]; ring
     rw [← e, ← DLMF.EllipticIntegrals.compEllIntKk_ofReal_eq_symEllIntRF hκ1,
       compEllIntKk_ofReal hκ1, hκ, a2]
     push_cast; ring
@@ -93,9 +113,9 @@ theorem compEllIntK_eq_jacobiThetaThreeNullTau {t : ℝ} (ht : 0 < t) :
       π / 2 * jacobiThetaThreeNullTau (I * t) ^ 2) ∧
     ((Real.compEllIntKm (1 - (thetaModulusK (I * t)).re ^ 2) : ℂ) =
       -I * (I * t) * Real.compEllIntKm ((thetaModulusK (I * t)).re ^ 2)) := by
-  obtain ⟨-, -, -, -, -, -, h1, h2⟩ := p22R1_real_at ht
-  rw [p22R1_thetaModulusK_I_mul ht, ofReal_re, ofReal_im, h1, h2, jacobiThetaThreeNullTau,
-    p22R1_three]
+  obtain ⟨-, -, -, -, -, -, h1, h2⟩ := jacobiModulusImag_spec ht
+  rw [thetaModulusK_I_mul ht, ofReal_re, ofReal_im, h1, h2, jacobiThetaThreeNullTau,
+    jacobiThetaThreeTau_zero_I_mul_eq_imag]
   refine ⟨rfl, by push_cast; ring, ?_⟩
   rw [← mul_assoc, neg_mul, I_mul_I]
   push_cast; ring
@@ -177,40 +197,40 @@ theorem carlsonRF_jacobiTheta_eventually {τ : ℂ} (hτ : 0 < τ.im) :
 theorem carlsonRF_zero_jacobiThetaNull {t : ℝ} (ht : 0 < t) :
     symEllIntRF 0 ((jacobiThetaThreeNullTau (I * t) ^ 4).re : ℂ)
       ((jacobiThetaFourNullTau (I * t) ^ 4).re : ℂ) = π / 2 := by
-  have hB1 := p22R1_B_ge ht
-  have hB : 0 < p22R1_B t := by linarith
-  have hC := p22R1_C_pos ht
-  have hf := p22R1_fourth ht
-  rw [jacobiThetaThreeNullTau, jacobiThetaFourNullTau, p22R1_three, p22R1_four, ← ofReal_pow,
+  have hB1 := one_le_jacobiThetaThreeImag ht
+  have hB : 0 < jacobiThetaThreeImag t := by linarith
+  have hC := jacobiThetaFourImag_pos ht
+  have hf := jacobiThetaThreeImag_pow_four ht
+  rw [jacobiThetaThreeNullTau, jacobiThetaFourNullTau, jacobiThetaThreeTau_zero_I_mul_eq_imag, jacobiThetaFourTau_zero_I_mul_eq_imag, ← ofReal_pow,
     ← ofReal_pow, ofReal_re, ofReal_re]
-  set b := p22R1_B t ^ 4
-  set c := p22R1_C t ^ 4
+  set b := jacobiThetaThreeImag t ^ 4
+  set c := jacobiThetaFourImag t ^ 4
   have hb : 0 < b := by positivity
   have hc : 0 < c := by positivity
   have hslit (x : ℝ) (hx : 0 < x) : (x : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.mpr hx
-  have hρ2 : 1 - p22R1_rho t ^ 2 = c / b := by
-    simp only [p22R1_rho, b, c]; field_simp; linarith
-  have hK := (p22R1_symEllIntRF_rho ht).1
+  have hρ2 : 1 - jacobiModulusImag t ^ 2 = c / b := by
+    simp only [jacobiModulusImag, b, c]; field_simp; linarith
+  have hK := (symEllIntRF_realThetaModulus ht).1
   rw [hρ2] at hK
-  rw [DLMF.EllipticIntegrals.ei19d_symEllIntRF_zero_eq_carlsonRK (hslit b hb) (hslit c hc)]
-  rw [DLMF.EllipticIntegrals.ei19d_symEllIntRF_zero_eq_carlsonRK (hslit _ (by positivity))
+  rw [DLMF.EllipticIntegrals.symEllIntRF_zero_eq_pi_div_two_mul_carlsonRK (hslit b hb) (hslit c hc)]
+  rw [DLMF.EllipticIntegrals.symEllIntRF_zero_eq_pi_div_two_mul_carlsonRK (hslit _ (by positivity))
     one_mem_slitPlane, Carlson.TwoVariable.carlsonRK_comm (hslit _ (by positivity))
     one_mem_slitPlane] at hK
   have hsc := Carlson.carlsonRK_mul_of_pos hb (x := 1) (y := ((c / b : ℝ) : ℂ)) one_mem_slitPlane
     (hslit _ (by positivity))
   rw [mul_one, ← ofReal_mul, mul_div_cancel₀ _ hb.ne'] at hsc
   rw [hsc]
-  have hpow : ((b : ℝ) : ℂ) ^ (-1 / 2 : ℂ) = ((p22R1_B t ^ 2)⁻¹ : ℝ) := by
+  have hpow : ((b : ℝ) : ℂ) ^ (-1 / 2 : ℂ) = ((jacobiThetaThreeImag t ^ 2)⁻¹ : ℝ) := by
     rw [show (-1 / 2 : ℂ) = ((-1 / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hb.le]
     congr 1
-    rw [show b = (p22R1_B t ^ 2) ^ (2 : ℝ) by simp only [b]; rw [Real.rpow_two]; ring,
+    rw [show b = (jacobiThetaThreeImag t ^ 2) ^ (2 : ℝ) by simp only [b]; rw [Real.rpow_two]; ring,
       ← Real.rpow_mul (by positivity)]
     norm_num
     exact Real.rpow_neg_one _
   rw [hpow]
-  have hB2 : (p22R1_B t : ℂ) ≠ 0 := ofReal_ne_zero.mpr hB.ne'
-  calc (π / 2 : ℂ) * (((p22R1_B t ^ 2)⁻¹ : ℝ) * Carlson.TwoVariable.carlsonRK 1 ((c / b : ℝ) : ℂ))
-      = ((p22R1_B t ^ 2)⁻¹ : ℝ) * ((π / 2 : ℂ) * Carlson.TwoVariable.carlsonRK 1
+  have hB2 : (jacobiThetaThreeImag t : ℂ) ≠ 0 := ofReal_ne_zero.mpr hB.ne'
+  calc (π / 2 : ℂ) * (((jacobiThetaThreeImag t ^ 2)⁻¹ : ℝ) * Carlson.TwoVariable.carlsonRK 1 ((c / b : ℝ) : ℂ))
+      = ((jacobiThetaThreeImag t ^ 2)⁻¹ : ℝ) * ((π / 2 : ℂ) * Carlson.TwoVariable.carlsonRK 1
           ((c / b : ℝ) : ℂ)) := by ring
     _ = π / 2 := by
       rw [hK]; push_cast; field_simp
@@ -222,9 +242,9 @@ theorem exp_carlsonRF_ratio_eq_nome {t : ℝ} (ht : 0 < t) :
     Complex.exp (-(π * symEllIntRF 0 (((thetaModulusK (I * t)).re ^ 2 : ℝ) : ℂ) 1 /
       symEllIntRF 0 ((1 - (thetaModulusK (I * t)).re ^ 2 : ℝ) : ℂ) 1)) =
       Real.exp (-(π * t)) := by
-  obtain ⟨e1, e2⟩ := p22R1_symEllIntRF_rho ht
-  rw [p22R1_thetaModulusK_I_mul ht, ofReal_re, e1, e2, ofReal_exp]
-  have hB : (p22R1_B t : ℂ) ≠ 0 := ofReal_ne_zero.mpr (by linarith [p22R1_B_ge ht])
+  obtain ⟨e1, e2⟩ := symEllIntRF_realThetaModulus ht
+  rw [thetaModulusK_I_mul ht, ofReal_re, e1, e2, ofReal_exp]
+  have hB : (jacobiThetaThreeImag t : ℂ) ≠ 0 := ofReal_ne_zero.mpr (by linarith [one_le_jacobiThetaThreeImag ht])
   congr 1
   push_cast
   field_simp [pi_ne_zero']
@@ -234,21 +254,21 @@ for exactly one `t > 0` (and then `t = K'(k)/K(k)` by 20.9.2). -/
 @[dlmf 20.9.ii]
 theorem thetaModulusK_inversion {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
     ∃! t : ℝ, 0 < t ∧ thetaModulusK (I * t) = k := by
-  obtain ⟨t, ht, hρ⟩ := p22R1_exists_rho hk0 hk1
-  refine ⟨t, ⟨ht, by rw [p22R1_thetaModulusK_I_mul ht, hρ]⟩, ?_⟩
+  obtain ⟨t, ht, hρ⟩ := exists_jacobiModulusImag_eq hk0 hk1
+  refine ⟨t, ⟨ht, by rw [thetaModulusK_I_mul ht, hρ]⟩, ?_⟩
   rintro s ⟨hs, hsk⟩
-  rw [p22R1_thetaModulusK_I_mul hs] at hsk
-  have hsk' : p22R1_rho s = k := by exact_mod_cast hsk
-  obtain ⟨-, -, -, -, -, -, a1, a2⟩ := p22R1_real_at ht
-  obtain ⟨-, -, -, -, -, -, b1, b2⟩ := p22R1_real_at hs
+  rw [thetaModulusK_I_mul hs] at hsk
+  have hsk' : jacobiModulusImag s = k := by exact_mod_cast hsk
+  obtain ⟨-, -, -, -, -, -, a1, a2⟩ := jacobiModulusImag_spec ht
+  obtain ⟨-, -, -, -, -, -, b1, b2⟩ := jacobiModulusImag_spec hs
   rw [hρ] at a1 a2
   rw [hsk'] at b1 b2
-  have hB : 0 < p22R1_B s := by linarith [p22R1_B_ge hs]
-  have hB' : 0 < p22R1_B t := by linarith [p22R1_B_ge ht]
-  have e1 : π / 2 * p22R1_B s ^ 2 = π / 2 * p22R1_B t ^ 2 := by rw [← b1, a1]
-  have e2 : π / 2 * s * p22R1_B s ^ 2 = π / 2 * t * p22R1_B t ^ 2 := by rw [← b2, a2]
-  have hc : 0 < π / 2 * p22R1_B t ^ 2 := by positivity
-  have e3 : (s - t) * (π / 2 * p22R1_B t ^ 2) = 0 := by linear_combination e2 - s * e1
+  have hB : 0 < jacobiThetaThreeImag s := by linarith [one_le_jacobiThetaThreeImag hs]
+  have hB' : 0 < jacobiThetaThreeImag t := by linarith [one_le_jacobiThetaThreeImag ht]
+  have e1 : π / 2 * jacobiThetaThreeImag s ^ 2 = π / 2 * jacobiThetaThreeImag t ^ 2 := by rw [← b1, a1]
+  have e2 : π / 2 * s * jacobiThetaThreeImag s ^ 2 = π / 2 * t * jacobiThetaThreeImag t ^ 2 := by rw [← b2, a2]
+  have hc : 0 < π / 2 * jacobiThetaThreeImag t ^ 2 := by positivity
+  have e3 : (s - t) * (π / 2 * jacobiThetaThreeImag t ^ 2) = 0 := by linear_combination e2 - s * e1
   rcases mul_eq_zero.mp e3 with h | h
   · linarith
   · linarith

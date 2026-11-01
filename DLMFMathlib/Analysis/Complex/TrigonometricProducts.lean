@@ -16,7 +16,12 @@ public import Mathlib.Analysis.PSeries
 
 The normalized hyperbolic sine product follows from Mathlib's Euler sine product. Splitting its
 factors into even and odd indices gives the hyperbolic cosine product, including its zeros by
-locally uniform convergence. These proofs were moved from the DLMF elementary layer.
+locally uniform convergence.
+
+## Main results
+
+* `hasProd_sinh_div`: Euler's product for `sinh z / z`, with its removable value at zero.
+* `hasProd_cosh_product`: Euler's product for `cosh z` over the odd positive integers.
 -/
 
 @[expose] public noncomputable section

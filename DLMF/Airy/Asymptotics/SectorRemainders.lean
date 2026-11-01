@@ -10,11 +10,27 @@ public import DLMF.Airy.Asymptotics.RealRemainders
 /-!
 # Sector bounds for Airy remainders
 
-Uniform bounds for the Airy function and its derivative on the boundary rays and the remaining
-closed sectors.
+Real-axis and complex error bounds for the Airy expansions (DLMF §9.7(iv)–(v)): the bounds
+9.7.15–9.7.16 on the positive axis, the sector bounds 9.7.17 on the slit plane, the exact
+remainders 9.7.18–9.7.19 and their re-expansion in terminants (9.7.20–9.7.23).
 
-Source references and common attribution are retained in
-`DLMF.Airy.Asymptotics`.
+## Main definitions
+
+* `airyOscComponent`: the exact even/odd coefficients obtained by inverting the real
+  sine/cosine system.
+
+## Main results
+
+* `airySt_ai_third`, `airySt_ai_boundary`: the third sector of DLMF 9.7.17 and the boundary
+  rays `|arg z| = 2π/3`.
+* `airy_bi_real_error`, `airy_biDeriv_real_error`: first-neglected-term bounds for `Bi`, `Bi'`
+  (DLMF §9.7(iii)).
+* `airy_ai_bound`, `airy_aiDeriv_bound`: DLMF 9.7.15.
+* `airy_bi_bound`, `airy_biDeriv_bound`: DLMF 9.7.16.
+* `airy_ai_complex_error`, `airy_aiDeriv_complex_error`: DLMF 9.7.17.
+* `airy_ai_exact_remainder`, `airy_aiDeriv_exact_remainder`: DLMF 9.7.18, 9.7.19.
+* `airy_R_hyper_reexpansion`, `airy_S_hyper_reexpansion`: DLMF 9.7.20, 9.7.21.
+* `airy_R_hyper_error`, `airy_S_hyper_error`: DLMF 9.7.23.
 -/
 
 @[expose] public noncomputable section
@@ -422,7 +438,7 @@ theorem airySt_norm_prefactor_bi {x : ℝ} (hx : 0 < x) :
     Complex.norm_real, Real.norm_of_nonneg (Real.sqrt_nonneg _)]
 
 /-- First-neglected-term remainder bound and its sign, DLMF §9.7(iii). -/
-theorem airy_bi_real_error {x : ℝ} (hx : 0 < x) {N : ℕ} (hN : 0 ≤ N) :
+theorem airy_bi_real_error {x : ℝ} (hx : 0 < x) {N : ℕ} :
     ‖airyRemainder .bi N x‖ ≤ (airyChi (N + 1 / 6) + 1) *
       ‖airyExpansionCoeff .bi N / airyZetaComplex x ^ N‖ := by
   have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
@@ -506,7 +522,7 @@ theorem airy_aiDeriv_bound {x : ℝ} (hx : 0 < x) :
 @[dlmf 9.7.E16]
 theorem airy_bi_bound {x : ℝ} (hx : 0 < x) :
     airyBiReal x ≤ Real.exp (airyZeta x) / (Real.sqrt π * x ^ (1 / 4 : ℝ)) * (1 + (airyChi (7 / 6) + 1) * 5 / (72 * airyZeta x)) := by
-  have h := airy_bi_real_error hx (N := 1) (Nat.zero_le _)
+  have h := airy_bi_real_error hx (N := 1)
   have hz := airyZeta_pos hx
   have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   have hp : airyPrefactor .bi x ≠ 0 := airyRot_prefactor_ne_zero .bi hx0

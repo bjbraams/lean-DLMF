@@ -12,16 +12,31 @@ public import Mathlib.RingTheory.Binomial
 public import Mathlib.Analysis.SpecialFunctions.Stirling
 
 /-!
-# Lattice paths: binomial coefficients (DLMF §26.3)
+# Lattice paths: binomial coefficients
 
-DLMF's binomial coefficient `C(m, n)` for nonnegative integers is Mathlib's `Nat.choose m n`
-(with `C(m, n) = 0` for `n > m`, 26.3.2). Most of §26.3 is in Mathlib; the pointers are in
-`DLMF/Combinatorics/MathlibCoverage.lean`. Here are the DLMF forms that Mathlib states
-differently, the lattice-path counts of §26.3(i), and the asymptotic form 26.3.12 (derived from
-Mathlib's Stirling formula `Stirling.tendsto_stirlingSeq_sqrt_pi`).
+The binomial coefficients of DLMF §26.3. DLMF's `C(m, n)` for nonnegative integers is Mathlib's
+`Nat.choose m n` (with `C(m, n) = 0` for `n > m`, 26.3.2). Most of §26.3 is in Mathlib; the
+pointers are in `DLMF/Combinatorics/MathlibCoverage.lean`. This file contains the DLMF forms that
+Mathlib states differently, the lattice-path counts of §26.3(i), and the asymptotic form 26.3.12.
+
+## Main results
+
+* `card_latticePaths_unitSteps`, `card_latticePaths_unitSteps_above`: `C(m+n, n)` counts lattice
+  paths to `(m, n)`, and `C(m+n, m) - C(m+n, m-1)` those staying on or above `y = x`
+  (DLMF §26.3(i)).
+* `sum_choose_mul_pow`, `hasSum_choose_mul_pow`: the generating functions (DLMF 26.3.3, 26.3.4).
+* `choose_eq_div_mul`: DLMF 26.3.6.
+* `choose_eq_sum_ringChoose`: DLMF 26.3.8.
+* `choose_eq_alternating_sum`: DLMF 26.3.10, for all `m, n` (DLMF states `m ≥ n`).
+* `centralBinom_eq_doubleFactorial`, `centralBinom_isEquivalent`: the central binomial
+  coefficient and `C(2n, n) ~ 4ⁿ/√(πn)` (DLMF 26.3.11, 26.3.12).
+
+## Implementation notes
 
 In 26.3.8 the term `k = 0` for `m = n` is `C(-1, 0) = 1`; the identity is stated with the
 generalized binomial coefficient `Ring.choose` on `ℤ`, so that this boundary case is covered.
+The asymptotic form 26.3.12 is derived from Mathlib's Stirling formula
+`Stirling.tendsto_stirlingSeq_sqrt_pi`.
 -/
 
 @[expose] public section
@@ -42,9 +57,9 @@ theorem card_latticePaths_unitSteps (m n : ℕ) :
   induction m generalizing n with
   | zero =>
     induction n with
-    | zero => simp [q26a_latticePaths_zero h0]
+    | zero => simp [latticePaths_zero_zero h0]
     | succ n ih =>
-      have := q26a_card_filter_latticePaths h0 (m := 0) (n := n + 1) (by simp) (fun _ => True)
+      have := card_filter_latticePaths h0 (m := 0) (n := n + 1) (by simp) (fun _ => True)
       simp only [filter_true] at this
       rw [this, show unitSteps.filter (fun s => s.1 ≤ 0 ∧ s.2 ≤ n + 1) = {(0, 1)} by
         ext ⟨a, b⟩; simp only [unitSteps, mem_filter, mem_insert, mem_singleton, Prod.mk.injEq]
@@ -53,14 +68,14 @@ theorem card_latticePaths_unitSteps (m n : ℕ) :
   | succ m ih =>
     induction n with
     | zero =>
-      have := q26a_card_filter_latticePaths h0 (m := m + 1) (n := 0) (by simp) (fun _ => True)
+      have := card_filter_latticePaths h0 (m := m + 1) (n := 0) (by simp) (fun _ => True)
       simp only [filter_true] at this
       rw [this, show unitSteps.filter (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ 0) = {(1, 0)} by
         ext ⟨a, b⟩; simp only [unitSteps, mem_filter, mem_insert, mem_singleton, Prod.mk.injEq]
         omega]
       simp [ih]
     | succ n ihn =>
-      have := q26a_card_filter_latticePaths h0 (m := m + 1) (n := n + 1) (by simp) (fun _ => True)
+      have := card_filter_latticePaths h0 (m := m + 1) (n := n + 1) (by simp) (fun _ => True)
       simp only [filter_true] at this
       rw [this, show unitSteps.filter (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ n + 1) = unitSteps by
         ext ⟨a, b⟩; simp only [unitSteps, mem_filter, mem_insert, mem_singleton, Prod.mk.injEq]
@@ -80,8 +95,8 @@ on or above the line `y = x` is `C(m+n, m) - C(m+n, m-1)` (with `C(m+n, -1) = 0`
 theorem card_latticePaths_unitSteps_above {m n : ℕ} (hmn : m ≤ n) :
     (#{l ∈ latticePaths unitSteps m n | StaysWeaklyAboveDiagonal l} : ℤ) =
       (m + n).choose m - if m = 0 then 0 else ((m + n).choose (m - 1) : ℤ) := by
-  have h := q26a_ballot_eq (m + n) 0 m n rfl (by omega)
-  simp only [q26a_ballot, Nat.cast_zero, q26a_staysAbove_zero_iff] at h
+  have h := ballotCount_eq_choose_sub (m + n) 0 m n rfl (by omega)
+  simp only [ballotCount, Nat.cast_zero, staysAbove_zero_iff] at h
   rw [h, Nat.choose_symm_add]
   rcases m with _ | m <;> simp
 
@@ -129,7 +144,7 @@ theorem choose_eq_div_mul {m n : ℕ} (hn : 1 ≤ n) (hnm : n ≤ m) :
   · rw [div_mul_eq_mul_div]; push_cast; rw [eq_div_iff hk]; linarith
 
 /-- `∑_{k=0}^{n} C(r+k, k) = C(r+n+1, n)`. -/
-lemma c26a_sum_choose_add (r n : ℕ) :
+private lemma sum_range_choose_add (r n : ℕ) :
     ∑ k ∈ range (n + 1), (r + k).choose k = (r + n + 1).choose n := by
   induction n with
   | zero => simp
@@ -147,7 +162,7 @@ theorem choose_eq_sum_ringChoose {m n : ℕ} (hnm : n ≤ m) :
     have : ∀ k : ℕ, ((n + r + 1 : ℕ) : ℤ) - n - 1 + k = ((r + k : ℕ) : ℤ) := by
       intro k; push_cast; ring
     simp_rw [this, Ring.choose_natCast]
-    rw [← Nat.cast_sum, c26a_sum_choose_add, show r + n + 1 = n + r + 1 by omega]
+    rw [← Nat.cast_sum, sum_range_choose_add, show r + n + 1 = n + r + 1 by omega]
   · rw [sum_range_succ', Nat.choose_self]
     have : ∀ k ∈ range n, Ring.choose ((n : ℤ) - n - 1 + ((k + 1 : ℕ) : ℤ)) (k + 1) = 0 := by
       intro k _
@@ -197,7 +212,7 @@ theorem centralBinom_eq_doubleFactorial (n : ℕ) :
 
 /-- Central binomial coefficients via Stirling's sequence: for `n ≥ 1`,
 `C(2n, n) √(πn) / 4ⁿ = stirlingSeq(2n) √π / stirlingSeq(n)²`. -/
-lemma c26a_centralBinom_stirling {n : ℕ} (hn : 1 ≤ n) :
+private lemma centralBinom_mul_sqrt_div_four_pow {n : ℕ} (hn : 1 ≤ n) :
     ((2 * n).choose n : ℝ) * Real.sqrt (Real.pi * n) / 4 ^ n =
       Stirling.stirlingSeq (2 * n) * Real.sqrt Real.pi / Stirling.stirlingSeq n ^ 2 := by
   unfold Stirling.stirlingSeq
@@ -242,6 +257,6 @@ theorem centralBinom_isEquivalent :
     field_simp] at hlim
   refine hlim.congr' ?_
   filter_upwards [eventually_ge_atTop 1] with n hn
-  rw [Pi.div_apply, ← c26a_centralBinom_stirling hn, div_div_eq_mul_div]
+  rw [Pi.div_apply, ← centralBinom_mul_sqrt_div_four_pow hn, div_div_eq_mul_div]
 
 end DLMF.Combinatorics

@@ -15,6 +15,18 @@ public import DLMF.Hypergeometric.Elementary
 `ℂ ∖ (-∞, 1]`, where `1/z²` lies in the cut plane of `𝐅`. It satisfies Legendre's equation for
 every complex `ν`, and `Q₀(z) = ½ log((z+1)/(z-1))`; the latter is proved near `z = 2` from
 DLMF 15.4.2 and extended by the identity principle.
+
+## Main definitions
+
+* `legendreQ`: the Legendre function of the second kind `Q_ν(z)` (DLMF 14.3.7 with `μ = 0`).
+
+## Main results
+
+* `legendreQ_ode`: Legendre's equation for `Q_ν` (DLMF 14.2.2 with `μ = 0`).
+* `analyticAt_legendreQ`: `Q_ν` is analytic on `ℂ ∖ (-∞, 1]`.
+* `isOpen_sub_one_mem_slitPlane`, `isPreconnected_sub_one_mem_slitPlane`: the domain
+  `ℂ ∖ (-∞, 1]` is open and connected.
+* `legendreQ_zero`: `Q₀(z) = ½ log((z+1)/(z-1))` (Temme (8.24)).
 -/
 
 @[expose] public section

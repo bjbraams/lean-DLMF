@@ -10,13 +10,33 @@ public import DLMF.Gamma.Integrals.BarnesAndRamanujan
 import DLMF.Gamma.RecipGammaDeriv
 
 /-!
-# Fourier kernels and trigamma sums
+# Ramanujan and de Branges–Wilson integrals; trigamma sums (DLMF 5.13.4, 5.13.5, §5.16)
 
-Fourier transforms of trigonometric Gamma kernels, their complex continuation and trigamma
-summations.
+Ramanujan's integral of `1/(Γ(a+t)Γ(b+t)Γ(c-t)Γ(d-t))` is first proved for real parameters
+from the Fourier transform of the kernel `cos^p φ e^{iζφ}` on `(-π/2, π/2]`, then continued to
+complex parameters one argument at a time by the identity theorem. The file also contains the
+de Branges–Wilson integral and the two trigamma sums of DLMF §5.16.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.Integrals`.
+## Main definitions
+
+* `kern`: the kernel `1_{(-π/2,π/2]}(φ) cos^p φ e^{iζφ}`.
+* `ramanujanR`: the right-hand side of 5.13.4.
+
+## Main results
+
+* `fourier_kern`, `fourier_fourier_kern`: the Fourier transform of `kern` and its inversion.
+* `integral_ramanujanIntegrand_of_real`: Ramanujan's integral for real parameters.
+* `mellin_barnes_recip_four`: Ramanujan's integral (DLMF 5.13.4).
+* `mellin_barnes_selberg`: the de Branges–Wilson integral (DLMF 5.13.5).
+* `sum_alternating_trigamma`: the alternating trigamma series (DLMF 5.16.1).
+* `sum_trigamma_div`: `∑_{k≥1} ψ'(k + 1)/k = ζ(3)` (DLMF 5.16.2).
+
+## Implementation notes
+
+The alternating series 5.16.1 converges only conditionally, so it is stated with ordered
+partial sums; the even and odd partial sums have closed forms
+(`sum_alternating_trigamma_even`, `sum_alternating_trigamma_odd`), and the limit uses
+`hasSum_one_div_odd_sq`, the odd part of `ζ(2)`.
 -/
 
 @[expose] public section

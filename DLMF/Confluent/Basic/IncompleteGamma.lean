@@ -8,7 +8,14 @@ module
 public import DLMF.Confluent.Basic.Tricomi
 
 /-!
-# Lower and upper incomplete-gamma normalizations
+# Incomplete gamma functions through confluent functions
+
+## Main definitions
+
+* `lowerIncGamma`: the lower incomplete gamma function `γ(s,z) = z^s / s · M(s, s+1, -z)`
+  (DLMF 13.6.5).
+* `upperIncGamma`: the upper incomplete gamma function `Γ(s,z) = e^{-z} U(1-s, 1-s, z)`
+  (DLMF 13.6.6).
 -/
 
 @[expose] public noncomputable section

@@ -25,9 +25,10 @@ public import DLMF.ParabolicCylinder.MathlibCoverage
 public import DLMF.ParabolicCylinder.ContourTools
 
 /-!
-# Parabolic cylinder U/V/D and oscillatory W functions
+# Parabolic cylinder functions
 
-DLMF statement acquisition and first proofs. The original cylinder theory is
-in `DLMF.Confluent.ParabolicCylinder`. Coverage, source qualifications and
-remaining admissions are documented in `DLMF111214Acquisition.md`.
+This umbrella collects the DLMF Chapter 12 development of the parabolic cylinder functions
+`U(a,z)`, `V(a,z)`, `D_ν(z)` and the oscillatory functions `W(a,±x)`: integral
+representations, asymptotic and uniform expansions, zeros, relations and computation. The
+original cylinder theory is in `DLMF.Confluent.ParabolicCylinder`.
 -/

@@ -8,12 +8,32 @@ module
 public import DLMF.Struve.Asymptotics.BinomialAndAnger
 
 /-!
-# Oscillatory Anger-Weber asymptotic kernels
+# Large-order expansions of the Anger–Weber functions (DLMF 11.11.6–11.11.13)
 
-Trigonometric exponential integrals and their bounds establish the Anger-Weber expansions.
+This file proves the large-order expansions of the Weber function, the expansions of `𝐄_n` for
+large integer `n`, and the scaled expansions of `𝐀_ν(λν)` and `𝐀_{-ν}(λν)`, including the saddle
+point expansion.
 
-Source references and common attribution are retained in
-`DLMF.Struve.Asymptotics`.
+## Main definitions
+
+* `angerScaledA`: the coefficients `A_k(λ)` of the scaled Anger–Weber expansion.
+* `angerMu`: the phase `√(1-λ²) - log((1+√(1-λ²))/λ)` (DLMF 11.11.12), on the principal branch.
+* `angerScaledB`: the coefficients of the saddle point expansion.
+
+## Main results
+
+* `weberE_large_order`: the large-order expansion DLMF 11.11.6.
+* `weberE_large_integer_0`, `weberE_large_integer_1`: the expansions DLMF 11.11.7 for even and
+  odd integer orders.
+* `angerScaledA_initial`: the initial coefficients DLMF 11.11.9.
+* `angerA_scaled_8`, `angerA_scaled_10`: the scaled expansions DLMF 11.11.8 and 11.11.10.
+* `angerA_scaled_saddle`, `angerScaledB_initial`: the saddle point expansion DLMF 11.11.11 and
+  its initial coefficients DLMF 11.11.13.
+
+## Implementation notes
+
+`weberE_large_order` states the error term as `e^{π|Im ν|} ν⁻²`, a different convention from
+DLMF 11.11.6.
 -/
 
 @[expose] public noncomputable section

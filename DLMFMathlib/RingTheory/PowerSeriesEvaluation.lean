@@ -15,64 +15,139 @@ public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
 public import Mathlib.RingTheory.PowerSeries.Basic
 
 /-!
-# Convergent evaluation of integer power series
+# Convergent evaluation of formal power series
 
-`PowerSeries.HasSumAt P x s` states that the series of monomials of `P : ℤ⟦X⟧` has
-sum `s : ℂ` at `x`. Mathlib's `HasSum` implies absolute convergence for complex series,
-so no separate norm-summability assumption is stored. The evaluation respects sums,
-products and finite products, and bounded coefficients give convergence in the unit disc.
+For a formal power series `P` over a commutative semiring `R` and an `R`-algebra `A` that is
+a normed ring, `PowerSeries.HasSumAt P x s` states that the monomial series
+`∑ₙ algebraMap R A (coeff n P) * x ^ n` has sum `s`. The integer geometric series on degrees
+divisible by `k` supports the partition generating functions of DLMF Chapter 27.
 
-`PowerSeries.geomSeriesOnMultiples k` is the formal geometric series on degrees divisible
-by `k`; its product identity and convergent evaluation support the partition generating
-functions of DLMF Chapter 27. Multiplicativity uses Mathlib's absolutely convergent
-Cauchy-product theorem.
+## Main definitions
+
+* `PowerSeries.HasSumAt`: convergent evaluation of a power series at a point.
+* `PowerSeries.geomSeriesOnMultiples`: the integer formal geometric series on degrees
+  divisible by `k`.
+
+## Main results
+
+* `PowerSeries.HasSumAt.unique`, `PowerSeries.HasSumAt.add`, `PowerSeries.HasSumAt.neg`,
+  `PowerSeries.HasSumAt.sub`: uniqueness and additivity of evaluation.
+* `PowerSeries.HasSumAt.mul`, `PowerSeries.HasSumAt.pow`, `PowerSeries.HasSumAt.prod`:
+  multiplicativity of evaluation (Cauchy product).
+* `PowerSeries.hasSumAt_of_bounded`: bounded coefficients give absolute convergence in the
+  open unit ball.
+* `PowerSeries.geomSeriesOnMultiples_mul_one_sub_X_pow`,
+  `PowerSeries.hasSumAt_geomSeriesOnMultiples`: `∑_j x^{kj} = 1/(1 - x^k)` for `‖x‖ < 1`
+  and `k ≥ 1`.
+
+## Implementation notes
+
+Only `HasSum` is stored. Evaluation respects sums and differences in general. It respects
+products, powers and finite products when `A` is a complete commutative normed ring that is
+finite-dimensional over `ℝ` (for example `ℂ`), because there `HasSum` implies absolute
+convergence; multiplicativity uses Mathlib's absolutely convergent Cauchy-product theorem.
 -/
 
 @[expose] public noncomputable section
 
-open PowerSeries Finset
+open Finset
 
-/-- The integer power series `P` converges absolutely at `x` with sum `s`. -/
-def PowerSeries.HasSumAt (P : PowerSeries ℤ) (x s : ℂ) : Prop :=
-  HasSum (fun n ↦ ((coeff n P : ℤ) : ℂ) * x ^ n) s
+namespace PowerSeries
 
-/-- The sum of an absolutely convergent evaluation is unique. -/
-theorem PowerSeries.HasSumAt.unique {P : PowerSeries ℤ} {x s t : ℂ}
-    (hs : PowerSeries.HasSumAt P x s)
-    (ht : PowerSeries.HasSumAt P x t) : s = t :=
+variable {R A : Type*}
+
+section Semiring
+
+variable [CommSemiring R] [NormedRing A] [Algebra R A]
+
+/-- The monomial series of `P` evaluated at `x` has sum `s`: `∑ₙ (coeff n P) xⁿ = s`, with the
+coefficients mapped into `A` by `algebraMap R A`. -/
+def HasSumAt (P : PowerSeries R) (x s : A) : Prop :=
+  HasSum (fun n ↦ algebraMap R A (coeff n P) * x ^ n) s
+
+/-- For integer power series the coefficients enter through the integer cast. -/
+theorem hasSumAt_int_iff {P : PowerSeries ℤ} {x s : A} :
+    HasSumAt P x s ↔ HasSum (fun n ↦ ((coeff n P : ℤ) : A) * x ^ n) s := by
+  simp only [HasSumAt, algebraMap_int_eq, eq_intCast]
+
+/-- The sum of a convergent evaluation is unique. -/
+theorem HasSumAt.unique {P : PowerSeries R} {x s t : A}
+    (hs : HasSumAt P x s) (ht : HasSumAt P x t) : s = t :=
   HasSum.unique hs ht
 
 /-- Evaluation of `1`. -/
-theorem PowerSeries.hasSumAt_one (x : ℂ) : PowerSeries.HasSumAt 1 x 1 := by
-  have h : (fun n ↦ ((coeff n (1 : PowerSeries ℤ) : ℤ) : ℂ) * x ^ n) =
+theorem hasSumAt_one (x : A) : HasSumAt (1 : PowerSeries R) x 1 := by
+  have h : (fun n ↦ algebraMap R A (coeff n (1 : PowerSeries R)) * x ^ n) =
       fun n ↦ if n = 0 then 1 else 0 := by
-    funext n; rcases n with _ | n <;> simp
-  simpa only [PowerSeries.HasSumAt, h] using hasSum_ite_eq 0 (1 : ℂ)
+    funext n; rcases n with _ | n <;> simp [coeff_one]
+  simpa only [HasSumAt, h] using hasSum_ite_eq 0 (1 : A)
 
 /-- The monomial series of `X` has sum `x` at `x`. -/
-theorem PowerSeries.hasSumAt_X (x : ℂ) : PowerSeries.HasSumAt X x x := by
-  have h : (fun n ↦ ((coeff n (X : PowerSeries ℤ) : ℤ) : ℂ) * x ^ n) =
+theorem hasSumAt_X (x : A) : HasSumAt (X : PowerSeries R) x x := by
+  have h : (fun n ↦ algebraMap R A (coeff n (X : PowerSeries R)) * x ^ n) =
       fun n ↦ if n = 1 then x else 0 := by
     funext n; by_cases hn : n = 1 <;> simp [coeff_X, hn]
-  simpa only [PowerSeries.HasSumAt, h] using hasSum_ite_eq 1 x
+  simpa only [HasSumAt, h] using hasSum_ite_eq 1 x
 
-/-- Absolutely convergent evaluation is multiplicative (Cauchy product). -/
-theorem PowerSeries.HasSumAt.mul {P Q : PowerSeries ℤ} {x s t : ℂ} (hP : PowerSeries.HasSumAt P x s)
-    (hQ : PowerSeries.HasSumAt Q x t) : PowerSeries.HasSumAt (P * Q) x (s * t) := by
-  set f : ℕ → ℂ := fun n ↦ ((coeff n P : ℤ) : ℂ) * x ^ n
-  set g : ℕ → ℂ := fun n ↦ ((coeff n Q : ℤ) : ℂ) * x ^ n
-  have hfg : (fun n ↦ ((coeff n (P * Q) : ℤ) : ℂ) * x ^ n) =
+/-- Evaluation preserves addition of power series. -/
+lemma HasSumAt.add {P Q : PowerSeries R} {x s t : A}
+    (hP : HasSumAt P x s) (hQ : HasSumAt Q x t) : HasSumAt (P + Q) x (s + t) := by
+  simpa [HasSumAt, add_mul] using HasSum.add hP hQ
+
+/-- A power series with bounded coefficients converges absolutely in the open unit ball. -/
+theorem hasSumAt_of_bounded [CompleteSpace A] [NormOneClass A] {P : PowerSeries R} {C : ℝ}
+    (hC : ∀ n, ‖algebraMap R A (coeff n P)‖ ≤ C) {x : A} (hx : ‖x‖ < 1) :
+    HasSumAt P x (∑' n, algebraMap R A (coeff n P) * x ^ n) := by
+  have hs : Summable (fun n ↦ ‖algebraMap R A (coeff n P) * x ^ n‖) := by
+    refine ((summable_geometric_of_lt_one (norm_nonneg x) hx).mul_left C).of_nonneg_of_le
+      (fun _ ↦ norm_nonneg _) fun n ↦ ?_
+    calc ‖algebraMap R A (coeff n P) * x ^ n‖
+        ≤ ‖algebraMap R A (coeff n P)‖ * ‖x‖ ^ n :=
+          (norm_mul_le _ _).trans (by gcongr; exact norm_pow_le x n)
+      _ ≤ C * ‖x‖ ^ n := by gcongr; exact hC n
+  exact hs.of_norm.hasSum
+
+end Semiring
+
+section Ring
+
+variable [CommRing R] [NormedRing A] [Algebra R A]
+
+/-- Evaluation of a negation. -/
+lemma HasSumAt.neg {P : PowerSeries R} {x s : A}
+    (hP : HasSumAt P x s) : HasSumAt (-P) x (-s) := by
+  simpa [HasSumAt, neg_mul] using HasSum.neg hP
+
+/-- Evaluation of a difference. -/
+lemma HasSumAt.sub {P Q : PowerSeries R} {x s t : A} (hP : HasSumAt P x s)
+    (hQ : HasSumAt Q x t) : HasSumAt (P - Q) x (s - t) := by
+  simpa [sub_eq_add_neg] using hP.add hQ.neg
+
+end Ring
+
+section Multiplicative
+
+variable [CommSemiring R] [NormedCommRing A] [Algebra R A] [NormedSpace ℝ A]
+  [FiniteDimensional ℝ A] [CompleteSpace A]
+
+/-- Evaluation is multiplicative (Cauchy product); in a finite-dimensional real normed space
+`HasSum` implies absolute convergence. -/
+theorem HasSumAt.mul {P Q : PowerSeries R} {x s t : A} (hP : HasSumAt P x s)
+    (hQ : HasSumAt Q x t) : HasSumAt (P * Q) x (s * t) := by
+  set f : ℕ → A := fun n ↦ algebraMap R A (coeff n P) * x ^ n
+  set g : ℕ → A := fun n ↦ algebraMap R A (coeff n Q) * x ^ n
+  have hfg : (fun n ↦ algebraMap R A (coeff n (P * Q)) * x ^ n) =
       fun n ↦ ∑ kl ∈ antidiagonal n, f kl.1 * g kl.2 := by
     funext n
-    rw [coeff_mul, Int.cast_sum, Finset.sum_mul]
+    rw [coeff_mul, map_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun kl hkl ↦ ?_
     rw [mem_antidiagonal] at hkl
-    simp only [f, g, Int.cast_mul, ← hkl, pow_add]
+    simp only [f, g, map_mul, ← hkl, pow_add]
     ring
   change HasSum _ _
   rw [hfg]
-  have hPnorm := (show HasSum _ _ from hP).summable.norm
-  have hQnorm := (show HasSum _ _ from hQ).summable.norm
+  have hPnorm := summable_norm_iff.mpr (show HasSum _ _ from hP).summable
+  have hQnorm := summable_norm_iff.mpr (show HasSum _ _ from hQ).summable
   have hsum := summable_norm_sum_mul_antidiagonal_of_summable_norm hPnorm hQnorm
   have h := tsum_mul_tsum_eq_tsum_sum_antidiagonal_of_summable_norm hPnorm hQnorm
   rw [(show HasSum _ _ from hP).tsum_eq, (show HasSum _ _ from hQ).tsum_eq] at h
@@ -80,57 +155,42 @@ theorem PowerSeries.HasSumAt.mul {P Q : PowerSeries ℤ} {x s t : ℂ} (hP : Pow
   exact hsum.of_norm.hasSum
 
 /-- Evaluation of a power. -/
-theorem PowerSeries.HasSumAt.pow {P : PowerSeries ℤ} {x s : ℂ}
-    (hP : PowerSeries.HasSumAt P x s) (k : ℕ) :
-    PowerSeries.HasSumAt (P ^ k) x (s ^ k) := by
+theorem HasSumAt.pow {P : PowerSeries R} {x s : A} (hP : HasSumAt P x s) (k : ℕ) :
+    HasSumAt (P ^ k) x (s ^ k) := by
   induction k with
-  | zero => simpa using PowerSeries.hasSumAt_one x
-  | succ k ih => rw [pow_succ, pow_succ]; exact PowerSeries.HasSumAt.mul ih hP
+  | zero => simpa using hasSumAt_one (R := R) x
+  | succ k ih => rw [pow_succ, pow_succ]; exact ih.mul hP
 
-/-- Evaluation of a negation. -/
-lemma PowerSeries.HasSumAt.neg {P : PowerSeries ℤ} {x s : ℂ}
-    (hP : PowerSeries.HasSumAt P x s) : PowerSeries.HasSumAt (-P) x (-s) := by
-  simpa [PowerSeries.HasSumAt, neg_mul] using HasSum.neg hP
+/-- Evaluation of a finite product. -/
+theorem HasSumAt.prod {ι : Type*} (s : Finset ι) {P : ι → PowerSeries R} {x : A}
+    {v : ι → A} (h : ∀ i ∈ s, HasSumAt (P i) x (v i)) :
+    HasSumAt (∏ i ∈ s, P i) x (∏ i ∈ s, v i) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simpa using hasSumAt_one (R := R) x
+  | insert a s ha ih =>
+    rw [prod_insert ha, prod_insert ha]
+    exact (h a (mem_insert_self a s)).mul (ih fun i hi ↦ h i (mem_insert_of_mem hi))
 
-/-- Evaluation preserves addition of power series. -/
-lemma PowerSeries.HasSumAt.add {P Q : PowerSeries ℤ} {x s t : ℂ}
-    (hP : PowerSeries.HasSumAt P x s) (hQ : PowerSeries.HasSumAt Q x t) :
-    PowerSeries.HasSumAt (P + Q) x (s + t) := by
-  simpa [PowerSeries.HasSumAt, add_mul] using HasSum.add hP hQ
-
-/-- Evaluation of a difference. -/
-lemma PowerSeries.HasSumAt.sub {P Q : PowerSeries ℤ} {x s t : ℂ} (hP : PowerSeries.HasSumAt P x s)
-    (hQ : PowerSeries.HasSumAt Q x t) : PowerSeries.HasSumAt (P - Q) x (s - t) := by
-  simpa [sub_eq_add_neg] using PowerSeries.HasSumAt.add hP (PowerSeries.HasSumAt.neg hQ)
-
-/-- A power series with bounded coefficients converges absolutely in the unit disc. -/
-theorem PowerSeries.hasSumAt_of_bounded {P : PowerSeries ℤ} {C : ℝ}
-    (hC : ∀ n, |((coeff n P : ℤ) : ℝ)| ≤ C)
-    {x : ℂ} (hx : ‖x‖ < 1) : PowerSeries.HasSumAt P x (∑' n, ((coeff n P : ℤ) : ℂ) * x ^ n) := by
-  have hs : Summable (fun n ↦ ‖((coeff n P : ℤ) : ℂ) * x ^ n‖) := by
-    refine ((summable_geometric_of_lt_one (norm_nonneg x) hx).mul_left C).of_nonneg_of_le
-      (fun _ ↦ norm_nonneg _) fun n ↦ ?_
-    rw [norm_mul, norm_pow, Complex.norm_intCast]
-    exact mul_le_mul_of_nonneg_right (hC n) (by positivity)
-  exact hs.of_norm.hasSum
+end Multiplicative
 
 /-- Evaluation of `1 - X ^ k`. -/
-lemma PowerSeries.hasSumAt_one_sub_X_pow (x : ℂ) (k : ℕ) :
-    PowerSeries.HasSumAt (1 - X ^ k) x (1 - x ^ k) :=
-  PowerSeries.HasSumAt.sub (PowerSeries.hasSumAt_one x)
-    (PowerSeries.HasSumAt.pow (PowerSeries.hasSumAt_X x) k)
+lemma hasSumAt_one_sub_X_pow [CommRing R] [NormedCommRing A] [Algebra R A] [NormedSpace ℝ A]
+    [FiniteDimensional ℝ A] [CompleteSpace A] (x : A) (k : ℕ) :
+    HasSumAt (1 - X ^ k : PowerSeries R) x (1 - x ^ k) :=
+  (hasSumAt_one x).sub ((hasSumAt_X x).pow k)
 
 /-- The integer power series with coefficient `1` in degrees divisible by `k` and `0`
 elsewhere. For positive `k` it is the geometric series `∑_{j ≥ 0} X^{kj}`; for `k = 0`
 it is the constant series `1`. -/
-def PowerSeries.geomSeriesOnMultiples (k : ℕ) : PowerSeries ℤ :=
+def geomSeriesOnMultiples (k : ℕ) : PowerSeries ℤ :=
   PowerSeries.mk fun n ↦ if k ∣ n then 1 else 0
 
 /-- `(∑_j X^{kj}) (1 - X^k) = 1` for `k ≥ 1`. -/
-theorem PowerSeries.geomSeriesOnMultiples_mul_one_sub_X_pow {k : ℕ} (hk : 0 < k) :
-    PowerSeries.geomSeriesOnMultiples k * (1 - X ^ k) = 1 := by
+theorem geomSeriesOnMultiples_mul_one_sub_X_pow {k : ℕ} (hk : 0 < k) :
+    geomSeriesOnMultiples k * (1 - X ^ k) = 1 := by
   ext n
-  rw [mul_sub, mul_one, map_sub, coeff_mul_X_pow', PowerSeries.geomSeriesOnMultiples,
+  rw [mul_sub, mul_one, map_sub, coeff_mul_X_pow', geomSeriesOnMultiples,
     coeff_mk, coeff_one]
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp [show ¬ k ≤ 0 by omega]
@@ -142,23 +202,13 @@ theorem PowerSeries.geomSeriesOnMultiples_mul_one_sub_X_pow {k : ℕ} (hk : 0 < 
       · exact h
 
 /-- `∑_j x^{kj} = 1/(1 - x^k)`, absolutely, for `‖x‖ < 1` and `k ≥ 1`. -/
-theorem PowerSeries.hasSumAt_geomSeriesOnMultiples {k : ℕ} (hk : 0 < k) {x : ℂ} (hx : ‖x‖ < 1) :
-    PowerSeries.HasSumAt (PowerSeries.geomSeriesOnMultiples k) x (1 - x ^ k)⁻¹ := by
-  have hb := PowerSeries.hasSumAt_of_bounded (P := PowerSeries.geomSeriesOnMultiples k) (C := 1)
-    (fun n ↦ by simp only [PowerSeries.geomSeriesOnMultiples, coeff_mk]; split_ifs <;> simp) hx
-  have h1 := PowerSeries.HasSumAt.mul hb (PowerSeries.hasSumAt_one_sub_X_pow x k)
-  rw [PowerSeries.geomSeriesOnMultiples_mul_one_sub_X_pow hk] at h1
-  have h2 := PowerSeries.HasSumAt.unique h1 (PowerSeries.hasSumAt_one x)
+theorem hasSumAt_geomSeriesOnMultiples {k : ℕ} (hk : 0 < k) {x : ℂ} (hx : ‖x‖ < 1) :
+    HasSumAt (geomSeriesOnMultiples k) x (1 - x ^ k)⁻¹ := by
+  have hb := hasSumAt_of_bounded (P := geomSeriesOnMultiples k) (C := 1)
+    (fun n ↦ by simp only [geomSeriesOnMultiples, coeff_mk]; split_ifs <;> simp) hx
+  have h1 := hb.mul (hasSumAt_one_sub_X_pow x k)
+  rw [geomSeriesOnMultiples_mul_one_sub_X_pow hk] at h1
+  have h2 := h1.unique (hasSumAt_one x)
   rwa [eq_inv_of_mul_eq_one_left h2] at hb
 
-/-- Evaluation of a finite product. -/
-theorem PowerSeries.HasSumAt.prod {ι : Type*} (s : Finset ι) {P : ι → PowerSeries ℤ} {x : ℂ}
-    {v : ι → ℂ} (h : ∀ i ∈ s, PowerSeries.HasSumAt (P i) x (v i)) :
-    PowerSeries.HasSumAt (∏ i ∈ s, P i) x (∏ i ∈ s, v i) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simpa using PowerSeries.hasSumAt_one x
-  | insert a s ha ih =>
-    rw [prod_insert ha, prod_insert ha]
-    exact PowerSeries.HasSumAt.mul (h a (mem_insert_self a s))
-      (ih fun i hi ↦ h i (mem_insert_of_mem hi))
+end PowerSeries

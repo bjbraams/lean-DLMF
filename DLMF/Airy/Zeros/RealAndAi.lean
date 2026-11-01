@@ -11,11 +11,27 @@ public import DLMF.ErrorFunctions.ZeroTools
 /-!
 # Real Airy zeros and the absence of nonreal Ai zeros
 
-Monotone phases enumerate the real zeros; analytic estimates exclude nonreal zeros of Ai and its
-derivative.
+Monotone phases enumerate the real zeros of `Ai`, `Ai'`, `Bi` and `Bi'`, which are all
+negative; an energy identity excludes nonreal zeros of `Ai` and `Ai'` (DLMF §9.9(i)).
 
-Source references and common attribution are retained in
-`DLMF.Airy.Zeros`.
+## Main definitions
+
+* `airyRealZero`, `airyAiZero`, `airyAiDerivZero`, `airyBiZero`, `airyBiDerivZero`: the
+  negative real zeros, ordered from zero towards `-∞`.
+* `airyComplexZero`, `airyBiComplexZero`, `airyBiDerivComplexZero`, `airyUpperZeroSet`: the
+  complex zeros of `Bi` and `Bi'` in the upper sector, ordered by modulus.
+* `airyAiZeroContinuous`, `airyAiDerivZeroContinuous`: continuous extensions of the zero index.
+* `HasAiryZeroExpansion`, `airyZeroArgument`, `airyComplexZeroArgument`: data for the
+  asymptotic expansions of the zeros.
+
+## Main results
+
+* `airyAi_real_zeros_negative`, `airyAi_infinite_real_zeros`, `airyAiZero_spec`,
+  `airyAiZero_enumeration`: the real zeros of `Ai`; the analogous results for `Ai'`, `Bi`,
+  `Bi'` follow the same pattern (e.g. `airyBiDerivZero_enumeration`).
+* `airyAi_complex_zeros_real`, `airyAiDeriv_complex_zeros_real`: all zeros of `Ai` and `Ai'`
+  are real.
+* `airyZeroC_real_neg`: the energy identity argument.
 -/
 
 @[expose] public noncomputable section

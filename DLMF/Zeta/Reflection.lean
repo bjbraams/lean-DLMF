@@ -12,21 +12,34 @@ public import Mathlib.NumberTheory.LSeries.RiemannZeta
 
 The functional equation 25.4.1 is Mathlib's `riemannZeta_one_sub`, and 25.4.3 in the
 normalization `Λ(s) = π^{-s/2} Γ(s/2) ζ(s)` is `completedRiemannZeta_one_sub` (pointers in
-`DLMF.Core.UpstreamElementary`). This file adds:
+`DLMF.Core.UpstreamElementary`). This file covers the rest of DLMF §25.4: the functional equation
+solved for `ζ(s)`, Riemann's `ξ`-function and the derivative reflection formulas.
 
-* 25.4.2, the functional equation solved for `ζ(s)`;
-* Riemann's `ξ`-function `riemannXi` (25.4.4). The printed product
-  `½ s(s-1) Γ(s/2) π^{-s/2} ζ(s)` has removable singularities at `s = 0, 1` and at the trivial
-  zeros, where Lean's totalized `Γ` and `ζ` give wrong values; `riemannXi` is therefore defined
-  through Mathlib's entire function `completedRiemannZeta₀` as `½ s(s-1) Λ₀(s) + ½`, and the
-  printed formula is proved wherever every factor is defined (`riemannXi_eq`). `ξ` is entire
-  (`differentiable_riemannXi`) and satisfies `ξ(s) = ξ(1-s)` (25.4.3);
-* the derivative reflection formula 25.4.5 with the constant `c = -ln(2π) - πi/2` (25.4.6).
+## Main definitions
+
+* `riemannXi`: Riemann's `ξ`-function (DLMF 25.4.4).
+* `reflectionConst`: the constant `c = -ln(2π) - πi/2` (DLMF 25.4.6).
+
+## Main results
+
+* `riemannZeta_eq_reflection`: `ζ(s) = 2 (2π)^{s-1} sin(πs/2) Γ(1-s) ζ(1-s)` (DLMF 25.4.2).
+* `differentiable_riemannXi`: `ξ` is entire.
+* `riemannXi_eq`: the printed product formula 25.4.4 wherever every factor is defined.
+* `riemannXi_one_sub`: `ξ(s) = ξ(1-s)` for all `s` (DLMF 25.4.3).
+* `iteratedDeriv_riemannZeta_one_sub`: the derivative reflection formula (DLMF 25.4.5).
+
+## Implementation notes
+
+The printed product `½ s(s-1) Γ(s/2) π^{-s/2} ζ(s)` has removable singularities at `s = 0, 1`
+and at the trivial zeros, where Lean's totalized `Γ` and `ζ` give wrong values; `riemannXi` is
+therefore defined through Mathlib's entire function `completedRiemannZeta₀` as
+`½ s(s-1) Λ₀(s) + ½`.
 
 As for Mathlib's 25.4.1, the Lean statements of 25.4.2 and 25.4.5 exclude, besides DLMF's
 `s ≠ 0, 1`, the points where a Gamma factor has a pole (`s = 2, 3, …` in 25.4.2 and
 `s = -1, -2, …` in 25.4.5): there the printed right sides are limits of `0 · ∞` forms and Lean's
-value `Γ = 0` at the poles would make the statements false.
+value `Γ = 0` at the poles would make the statements false. The formula 25.4.5 is also stated
+for `k = 0`, where it is 25.4.1.
 -/
 
 @[expose] public noncomputable section
@@ -100,7 +113,7 @@ def reflectionConst : ℂ :=
   -(Real.log (2 * π) : ℂ) - π * I / 2
 
 /-- `2 (2π)^{-z} cos(πz/2) = e^{cz} + e^{c̄z}` with `c = reflectionConst`. -/
-lemma q25a_two_mul_cpow_cos (z : ℂ) :
+private lemma two_mul_cpow_mul_cos_eq_exp_add_exp (z : ℂ) :
     2 * (2 * π : ℂ) ^ (-z) * cos (π * z / 2) =
       cexp (reflectionConst * z) + cexp ((starRingEnd ℂ) reflectionConst * z) := by
   have hL : Complex.log (2 * π) = (Real.log (2 * π) : ℂ) := by
@@ -117,7 +130,7 @@ lemma q25a_two_mul_cpow_cos (z : ℂ) :
   rw [show -(↑π * z / 2) * I = -(↑π * z / 2 * I) by ring]; ring1
 
 /-- `c^j e^{cs} + c̄^j e^{c̄s} = 2 (2π)^{-s} (Re(c^j) cos(πs/2) + Im(c^j) sin(πs/2))`. -/
-lemma q25a_exp_pair (j : ℕ) (s : ℂ) :
+private lemma reflectionConst_pow_mul_exp_add_conj (j : ℕ) (s : ℂ) :
     reflectionConst ^ j * cexp (reflectionConst * s) +
         (starRingEnd ℂ) reflectionConst ^ j * cexp ((starRingEnd ℂ) reflectionConst * s) =
       2 / (2 * π) ^ s * (((reflectionConst ^ j).re : ℂ) * cos (π * s / 2) +
@@ -192,7 +205,7 @@ theorem iteratedDeriv_riemannZeta_one_sub {s : ℂ} (hs : ∀ n : ℕ, s ≠ -n)
     rw [riemannZeta_one_sub h1 h2]
     show _ = (cexp (reflectionConst * z) + cexp ((starRingEnd ℂ) reflectionConst * z)) *
       (Gamma z * riemannZeta z)
-    rw [← q25a_two_mul_cpow_cos]
+    rw [← two_mul_cpow_mul_cos_eq_exp_add_exp]
     ring1
   have hlhs : (-1 : ℂ) ^ k * iteratedDeriv k riemannZeta (1 - s) =
       iteratedDeriv k (fun z => riemannZeta (1 - z)) s := by
@@ -210,7 +223,7 @@ theorem iteratedDeriv_riemannZeta_one_sub {s : ℂ} (hs : ∀ n : ℕ, s ≠ -n)
   have hm' : m ≤ k := Nat.lt_succ_iff.mp (mem_range.mp hm)
   rw [show k + 1 - 1 - m = k - m by omega,
     iteratedDeriv_mul (f := Gamma) (g := riemannZeta) (hGc.of_le ?_) (hZc.of_le ?_), hAder,
-    q25a_exp_pair, show k - (k - m) = m by omega, Nat.choose_symm hm', mul_sum, mul_sum]
+    reflectionConst_pow_mul_exp_add_conj, show k - (k - m) = m by omega, Nat.choose_symm hm', mul_sum, mul_sum]
   · refine sum_congr rfl fun r _ => ?_
     ring1
   all_goals exact_mod_cast (by omega : k - (k - m) ≤ k)

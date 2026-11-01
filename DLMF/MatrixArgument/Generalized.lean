@@ -11,20 +11,34 @@ public import Mathlib.Analysis.SpecialFunctions.OrdinaryHypergeometric
 /-!
 # Generalized hypergeometric functions of matrix argument (DLMF §35.8)
 
-The series `hypergeometricPFQ a b T` (35.8.1) is defined in `DLMF.MatrixArgument.Basic`. This
-file proves
+Properties of the generalized hypergeometric series `pFq(a; b; T)` of a real symmetric matrix
+argument. The series `hypergeometricPFQ a b T` (DLMF 35.8.1) is defined in
+`DLMF.MatrixArgument.Basic`.
 
-* the partitions of weight `k` (`mem_partitions`, `partitions_zero`), and the nonvanishing of
-  `[b]_κ` when `Γ_m(b) ≠ 0` (which is DLMF's condition `-b + (j+1)/2 ∉ ℕ`, `1 ≤ j ≤ m`);
-* termination when some `a_j` is a nonpositive integer (§35.8(i), **corrected**, see below);
-* 35.8.8 (`hypergeometricPFQ_zero`), 35.8.11 (`hypergeometricPFQ_conj`), the first equality of
-  35.8.3 (`hyp2F1_self_right`) and 35.8.4 (`besselA_eq_hyp0F1`);
-* the case `m = 1`: the series reduces to the classical one (`hypergeometricPFQ_fin_one`), and
-  `₂F₁` is Mathlib's `ordinaryHypergeometric` (`hyp2F1_fin_one`).
+## Main results
 
-The convergence statements of §35.8(i), 35.8.2, the second equality of 35.8.3, the `₃F₂`
-formulas 35.8.5–35.8.7, the confluence limits 35.8.9–35.8.10 and the integrals 35.8.12–35.8.13
-are admitted.
+* `mem_partitions`, `partitions_zero`: the partitions of weight `k`.
+* `partitionalShiftedFactorial_ne_zero`: no `[b]_κ` vanishes when `Γ_m(b) ≠ 0` (which is DLMF's
+  condition `-b + (j+1)/2 ∉ ℕ`, `1 ≤ j ≤ m`).
+* `hypergeometricPFQ_eq_sum_of_neg_nat`: termination when some `a_j` is a nonpositive integer
+  (DLMF §35.8(i), corrected, see below).
+* `hypergeometricPFQ_summable_of_le`, `hypergeometricPFQ_summable_of_eq_succ`,
+  `not_summable_hypergeometricPFQ_of_eq_succ`, `not_summable_hypergeometricPFQ_of_lt`: the
+  convergence and divergence statements of DLMF §35.8(i).
+* `hyp0F0_eq_etr`, `hyp2F1_self_right`, `hyp1F0_eq_det_cpow`, `besselA_eq_hyp0F1`: the special
+  cases DLMF 35.8.2–35.8.4.
+* `hyp3F2_one_kummer`, `hyp3F2_one_saalschutz`, `hyp3F2_one_thomae`: the `₃F₂` formulas
+  DLMF 35.8.5–35.8.7 (the last two corrected).
+* `hypergeometricPFQ_zero`, `hypergeometricPFQ_conj`: `pFq(a; b; 0) = 1` and orthogonal
+  invariance (DLMF 35.8.8 and 35.8.11).
+* `tendsto_hypergeometricPFQ_snoc`, `tendsto_hypergeometricPFQ_snoc_denom`: the confluence
+  limits DLMF 35.8.9 and 35.8.10.
+* `hasIntegralOn_hypergeometricPFQ_laplace`, `hasIntegralOn_hypergeometricPFQ_euler`: the
+  Laplace transform DLMF 35.8.12 and the Euler integral DLMF 35.8.13 (corrected).
+* `hypergeometricPFQ_fin_one`: for `m = 1` the series reduces to the classical one; `₂F₁` is
+  then Mathlib's `ordinaryHypergeometric`.
+
+## Implementation notes
 
 **Source corrections** (all checked numerically for `m = 2` with zonal polynomials computed
 from 35.4.2–35.4.3, and for `m = 1` against mpmath):
@@ -396,7 +410,7 @@ theorem hypergeometricPFQ_fin_one {p q : ℕ} (a : Fin p → ℂ) (b : Fin q →
   rfl
 
 /-- For `m = 1`, `₂F₁(a, b; c; T)` is Mathlib's `ordinaryHypergeometric` at `t = T₁₁`. -/
-lemma hyp2F1_fin_one (a b c : ℂ) (T : Matrix (Fin 1) (Fin 1) ℝ) :
+private lemma hyp2F1_fin_one (a b c : ℂ) (T : Matrix (Fin 1) (Fin 1) ℝ) :
     hyp2F1 a b c T = ordinaryHypergeometric a b c (T 0 0 : ℂ) := by
   rw [hyp2F1, hypergeometricPFQ_fin_one, ordinaryHypergeometric_eq_tsum]
   refine tsum_congr fun k => ?_

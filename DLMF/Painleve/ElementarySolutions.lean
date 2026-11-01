@@ -17,13 +17,30 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 /-!
 # Other elementary solutions of the Painlevé equations (DLMF §32.9)
 
-DLMF normalization (`DLMF.Painleve.Basic`). The nonrational elementary solutions 32.9.1–32.9.3,
-32.9.7, 32.9.8 and 32.9.13 involve powers and logarithms; they are stated with the principal
-branches (`Complex.cpow`, `Complex.log`) on open subsets of the slit plane `ℂ ∖ (-∞, 0]`,
-where these are holomorphic. Any other branch differs by a constant factor (a root of unity)
-or a constant shift of `ln z`, which is absorbed into the arbitrary constants. The first
-integrals 32.9.6 and 32.9.12 are proved on preconnected open sets. The classification of
-algebraic solutions (32.9.4–32.9.5, 32.9.9–32.9.11) is admitted.
+Elementary and algebraic solutions and first integrals of `PIII`, `PV` and `PVI` in the DLMF
+normalization (`DLMF.Painleve.Basic`).
+
+## Main results
+
+* `painleveIII_cbrt`, `painleveIII_log`, `painleveIII_power`: the solutions DLMF 32.9.1–32.9.3.
+* `painleveIII_algebraic_iff`: the algebraic solutions of `PIII` (DLMF 32.9.4–32.9.5).
+* `painleveIII_firstIntegral`, `painleveIII_firstIntegral'`: first integrals of `PIII` with
+  `β = δ = 0` (DLMF 32.9.6) and with `α = γ = 0`.
+* `painleveIII_zero_power`, `painleveIII_zero_eq_power`: the solutions `Cz^μ` of `PIII` with
+  all parameters zero, and that there are no others.
+* `painleveV_sqrt`, `painleveV_exp`, `painleveV_exp'`: the solutions DLMF 32.9.7–32.9.8 of `PV`.
+* `painleveV_exists_algebraic`: algebraic solutions of `PV` with `δ = 0` (DLMF 32.9.9–32.9.11).
+* `painleveV_firstIntegral`: the first integral DLMF 32.9.12.
+* `painleveVI_sqrt`: the solution `w = z^{1/2}` of `PVI` (DLMF 32.9.13).
+
+## Implementation notes
+
+The nonrational elementary solutions 32.9.1–32.9.3, 32.9.7, 32.9.8 and 32.9.13 involve powers
+and logarithms; they are stated with the principal branches (`Complex.cpow`, `Complex.log`) on
+open subsets of the slit plane `ℂ ∖ (-∞, 0]`, where these are holomorphic. Any other branch
+differs by a constant factor (a root of unity) or a constant shift of `ln z`, which is absorbed
+into the arbitrary constants. The first integrals 32.9.6 and 32.9.12 hold on preconnected open
+sets.
 -/
 
 @[expose] public noncomputable section
@@ -34,7 +51,7 @@ open scoped Topology
 namespace DLMF.Painleve
 
 /-- The derivative of the principal power `z^a` on the slit plane, written as `a z^a / z`. -/
-private lemma b32_hasDerivAt_cpow {a z : ℂ} (hz : z ∈ slitPlane) :
+private lemma hasDerivAt_cpow_of_mem_slitPlane {a z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (fun z : ℂ => z ^ a) (a * z ^ a / z) z := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   refine (hasDerivAt_id z |>.cpow_const (c := a) (by simpa using hz)).congr_deriv ?_
@@ -59,11 +76,11 @@ theorem painleveIII_cbrt {κ μ : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs : U �
   refine ⟨isODE2SolutionOn_of_hasDerivAt hU
     (v := fun z => κ * (1 / 3 * z ^ (1 / 3 : ℂ) / z)) (fun z hz => ?_) (fun z hz => ?_), hz0,
     fun z hz => mul_ne_zero hκ (ht0 z hz)⟩
-  · exact (b32_hasDerivAt_cpow (hUs hz)).const_mul κ
+  · exact (hasDerivAt_cpow_of_mem_slitPlane (hUs hz)).const_mul κ
   · have hzU := hz
     have ht := ht0 z hzU
     have hz := hz0 z hzU
-    have h := (((b32_hasDerivAt_cpow (a := 1 / 3) (hUs hzU)).const_mul (1 / 3 : ℂ)).div
+    have h := (((hasDerivAt_cpow_of_mem_slitPlane (a := 1 / 3) (hUs hzU)).const_mul (1 / 3 : ℂ)).div
       (hasDerivAt_id z) hz).const_mul κ
     refine h.congr_deriv ?_
     have h3 := ht3 z
@@ -126,14 +143,14 @@ theorem painleveIII_power {κ l μ ν : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs 
     filter_upwards [hU.mem_nhds hz] with y hy using hfun y hy
   have hDd : ∀ z ∈ U, HasDerivAt (fun z => κ * (z ^ ν) ^ 2 + l * z ^ ν + μ)
       ((2 * κ * z ^ ν + l) * (ν * z ^ ν / z)) z := fun z hz => by
-    have hs := b32_hasDerivAt_cpow (a := ν) (hUs hz)
+    have hs := hasDerivAt_cpow_of_mem_slitPlane (a := ν) (hUs hz)
     have := (((hs.pow 2).const_mul κ).add (hs.const_mul l)).add_const μ
     exact this.congr_deriv (by push_cast; ring)
   refine ⟨isODE2SolutionOn_of_hasDerivAt hU
     (v := fun z => z ^ ν * (-(ν + 1) * κ * (z ^ ν) ^ 2 - l * z ^ ν + (ν - 1) * μ) /
       (z ^ 2 * (κ * (z ^ ν) ^ 2 + l * z ^ ν + μ) ^ 2)) (fun z hz => ?_) (fun z hz => ?_), hz0,
     fun z hz => ?_⟩
-  · have hs := b32_hasDerivAt_cpow (a := ν) (hUs hz)
+  · have hs := hasDerivAt_cpow_of_mem_slitPlane (a := ν) (hUs hz)
     have hq := (hasDerivAt_id z).mul (hDd z hz)
     have h := hs.div hq (mul_ne_zero (hz0 z hz) (hD' z hz))
     refine (h.congr_deriv ?_).congr_of_eventuallyEq (hev z hz)
@@ -141,7 +158,7 @@ theorem painleveIII_power {κ l μ ν : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs 
     simp only [id_eq, Pi.mul_apply]
     field_simp
     ring
-  · have hs := b32_hasDerivAt_cpow (a := ν) (hUs hz)
+  · have hs := hasDerivAt_cpow_of_mem_slitPlane (a := ν) (hUs hz)
     have hN := hs.mul ((((hs.pow 2).const_mul (-(ν + 1) * κ)).sub (hs.const_mul l)).add_const
       ((ν - 1) * μ))
     have hq := ((hasDerivAt_id z).pow 2).mul ((hDd z hz).pow 2)
@@ -177,7 +194,7 @@ theorem painleveIII_algebraic_iff (β : ℂ) :
 
 /-- The derivative of a first integral along a solution vanishes, so it is constant on a
 preconnected open set. -/
-private lemma b32_const_of_hasDerivAt_zero {I : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+private lemma exists_const_of_hasDerivAt_zero {I : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hc : IsPreconnected U) (hI : ∀ z ∈ U, HasDerivAt I 0 z) : ∃ C, ∀ z ∈ U, I z = C :=
   hU.exists_is_const_of_deriv_eq_zero hc
     (fun z hz => (hI z hz).differentiableAt.differentiableWithinAt) fun z hz => (hI z hz).deriv
@@ -190,7 +207,7 @@ theorem painleveIII_firstIntegral {α γ : ℂ} {w : ℂ → ℂ} {U : Set ℂ} 
     (hc : IsPreconnected U) (h : IsPainleveIIIOn α 0 γ 0 w U) :
     ∃ C : ℂ, ∀ z ∈ U, z ^ 2 * deriv w z ^ 2 + 2 * z * w z * deriv w z =
       (C + 2 * α * z * w z + γ * z ^ 2 * w z ^ 2) * w z ^ 2 := by
-  obtain ⟨C, hC⟩ := b32_const_of_hasDerivAt_zero (I := fun z =>
+  obtain ⟨C, hC⟩ := exists_const_of_hasDerivAt_zero (I := fun z =>
       (z ^ 2 * deriv w z ^ 2 + 2 * z * w z * deriv w z) / w z ^ 2 - 2 * α * z * w z -
         γ * z ^ 2 * w z ^ 2) hU hc fun z hz => by
     have hw := h.ode.hasDerivAt hz
@@ -221,7 +238,7 @@ theorem painleveIII_firstIntegral' {β δ : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
     (hc : IsPreconnected U) (h : IsPainleveIIIOn 0 β 0 δ w U) :
     ∃ C : ℂ, ∀ z ∈ U, z ^ 2 * deriv w z ^ 2 - 2 * z * w z * deriv w z + 2 * β * z * w z +
       δ * z ^ 2 = C * w z ^ 2 := by
-  obtain ⟨C, hC⟩ := b32_const_of_hasDerivAt_zero (I := fun z =>
+  obtain ⟨C, hC⟩ := exists_const_of_hasDerivAt_zero (I := fun z =>
       (z ^ 2 * deriv w z ^ 2 - 2 * z * w z * deriv w z + 2 * β * z * w z + δ * z ^ 2) /
         w z ^ 2) hU hc fun z hz => by
     have hw := h.ode.hasDerivAt hz
@@ -251,12 +268,12 @@ theorem painleveIII_zero_power {C μ : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs :
   have hw0 : ∀ z ∈ U, C * z ^ μ ≠ 0 := fun z hz =>
     mul_ne_zero hC (by rw [Ne, cpow_eq_zero_iff]; exact fun h => hz0 z hz h.1)
   refine ⟨isODE2SolutionOn_of_hasDerivAt hU (v := fun z => C * (μ * z ^ μ / z))
-    (fun z hz => (b32_hasDerivAt_cpow (hUs hz)).const_mul C) (fun z hz => ?_), hz0, hw0⟩
+    (fun z hz => (hasDerivAt_cpow_of_mem_slitPlane (hUs hz)).const_mul C) (fun z hz => ?_), hz0, hw0⟩
   have hzU := hz
   have hz := hz0 z hzU
   have hw := hw0 z hzU
   have ht : z ^ μ ≠ 0 := right_ne_zero_of_mul hw
-  refine ((((b32_hasDerivAt_cpow (a := μ) (hUs hzU)).const_mul μ).div (hasDerivAt_id z)
+  refine ((((hasDerivAt_cpow_of_mem_slitPlane (a := μ) (hUs hzU)).const_mul μ).div (hasDerivAt_id z)
     hz).const_mul C).congr_deriv ?_
   simp only [painleveIIIRhs, id_eq]
   field_simp
@@ -268,7 +285,7 @@ preconnected open subset of the slit plane is `w = Cz^μ` for constants `C`, `μ
 theorem painleveIII_zero_eq_power {w : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
     (hUs : U ⊆ slitPlane) (h : IsPainleveIIIOn 0 0 0 0 w U) :
     ∃ C μ : ℂ, ∀ z ∈ U, w z = C * z ^ μ := by
-  obtain ⟨μ, hμ⟩ := b32_const_of_hasDerivAt_zero (I := fun z => z * deriv w z / w z) hU hc
+  obtain ⟨μ, hμ⟩ := exists_const_of_hasDerivAt_zero (I := fun z => z * deriv w z / w z) hU hc
     fun z hz => by
       have hw := h.ode.hasDerivAt hz
       have hv := h.ode.hasDerivAt_deriv z hz
@@ -278,14 +295,14 @@ theorem painleveIII_zero_eq_power {w : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U
       simp only [painleveIIIRhs, id_eq, Pi.mul_apply]
       field_simp
       ring
-  obtain ⟨C, hC⟩ := b32_const_of_hasDerivAt_zero (I := fun z => w z * z ^ (-μ)) hU hc
+  obtain ⟨C, hC⟩ := exists_const_of_hasDerivAt_zero (I := fun z => w z * z ^ (-μ)) hU hc
     fun z hz => by
       have hw := h.ode.hasDerivAt hz
       have hw0 := h.w_ne_zero z hz
       have hz0 := h.ne_zero z hz
       have hm := hμ z hz
       have ht : z ^ μ ≠ 0 := by rw [Ne, cpow_eq_zero_iff]; exact fun h => hz0 h.1
-      refine (hw.mul (b32_hasDerivAt_cpow (a := -μ) (hUs hz))).congr_deriv ?_
+      refine (hw.mul (hasDerivAt_cpow_of_mem_slitPlane (a := -μ) (hUs hz))).congr_deriv ?_
       rw [cpow_neg]
       field_simp at hm ⊢
       linear_combination hm
@@ -312,12 +329,12 @@ theorem painleveV_sqrt {κ μ : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs : U ⊆ 
   refine ⟨isODE2SolutionOn_of_hasDerivAt hU
     (v := fun z => κ * (1 / 2 * z ^ (1 / 2 : ℂ) / z)) (fun z hz => ?_) (fun z hz => ?_), hz0,
     hw, fun z hz h => mul_ne_zero hκ (ht0 z hz) (by linear_combination h)⟩
-  · exact ((b32_hasDerivAt_cpow (hUs hz)).const_mul κ).const_add 1
+  · exact ((hasDerivAt_cpow_of_mem_slitPlane (hUs hz)).const_mul κ).const_add 1
   · have hzU := hz
     have ht := ht0 z hzU
     have hz := hz0 z hzU
     have hwz := hw z hzU
-    have h := (((b32_hasDerivAt_cpow (a := 1 / 2) (hUs hzU)).const_mul (1 / 2 : ℂ)).div
+    have h := (((hasDerivAt_cpow_of_mem_slitPlane (a := 1 / 2) (hUs hzU)).const_mul (1 / 2 : ℂ)).div
       (hasDerivAt_id z) hz).const_mul κ
     refine h.congr_deriv ?_
     have h2 := ht2 z
@@ -381,7 +398,7 @@ theorem painleveV_firstIntegral {α β : ℂ} {w : ℂ → ℂ} {U : Set ℂ} (h
     (hc : IsPreconnected U) (h : IsPainleveVOn α β 0 0 w U) :
     ∃ C : ℂ, ∀ z ∈ U, z ^ 2 * deriv w z ^ 2 = (w z - 1) ^ 2 * (2 * α * w z ^ 2 + C * w z -
       2 * β) := by
-  obtain ⟨C, hC⟩ := b32_const_of_hasDerivAt_zero (I := fun z =>
+  obtain ⟨C, hC⟩ := exists_const_of_hasDerivAt_zero (I := fun z =>
       (z ^ 2 * deriv w z ^ 2 / (w z - 1) ^ 2 - 2 * α * w z ^ 2 + 2 * β) / w z) hU hc
     fun z hz => by
       have hw := h.ode.hasDerivAt hz
@@ -426,7 +443,7 @@ theorem painleveVI_sqrt {κ μ : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs : U ⊆
     have hzz : z * z = z * 1 := by rw [← pow_two, h2, mul_one]
     exact h1 z hz (mul_left_cancel₀ (hz0 z hz) hzz)
   refine ⟨isODE2SolutionOn_of_hasDerivAt hU
-    (v := fun z => 1 / 2 * z ^ (1 / 2 : ℂ) / z) (fun z hz => b32_hasDerivAt_cpow (hUs hz))
+    (v := fun z => 1 / 2 * z ^ (1 / 2 : ℂ) / z) (fun z hz => hasDerivAt_cpow_of_mem_slitPlane (hUs hz))
     (fun z hz => ?_), hz0, h1, ht0, ht1, htz⟩
   have hzU := hz
   have ht := ht0 z hzU
@@ -434,7 +451,7 @@ theorem painleveVI_sqrt {κ μ : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs : U ⊆
   have hta := sub_ne_zero.mpr (ht1 z hzU)
   have htb := sub_ne_zero.mpr (htz z hzU)
   have hz1 := sub_ne_zero.mpr (h1 z hzU)
-  have h := ((b32_hasDerivAt_cpow (a := 1 / 2) (hUs hzU)).const_mul (1 / 2 : ℂ)).div
+  have h := ((hasDerivAt_cpow_of_mem_slitPlane (a := 1 / 2) (hUs hzU)).const_mul (1 / 2 : ℂ)).div
     (hasDerivAt_id z) hz
   refine h.congr_deriv ?_
   have h2 := ht2 z

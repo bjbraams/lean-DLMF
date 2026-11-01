@@ -105,10 +105,6 @@ theorem hasSum_thetaPoly {f : ℂ → ℂ} {c : ℕ → ℂ} {r : ℝ≥0∞}
   refine Finset.sum_congr rfl fun k _ => ?_
   ring
 
-/-- `1/Γ(z) = z/Γ(z+1)` for every `z`, with the totalized `Γ`. -/
-theorem recip_Gamma_eq_mul_recip_Gamma_add_one (z : ℂ) : (Gamma z)⁻¹ = z * (Gamma (z + 1))⁻¹ :=
-  Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one z
-
 /-- The coefficient recurrence behind DLMF 16.8.3, for all parameters. -/
 theorem regularizedHGFunCoeff_succ_mul (a b : Multiset ℂ) (n : ℕ) :
     ((n : ℂ) + 1) * (b.map fun j : ℂ => j + n).prod * regularizedHGFunCoeff a b (n + 1) =
@@ -121,7 +117,7 @@ theorem regularizedHGFunCoeff_succ_mul (a b : Multiset ℂ) (n : ℕ) :
     rw [← Multiset.prod_map_inv, ← Multiset.prod_map_inv, ← Multiset.prod_map_mul]
     congr 1
     refine Multiset.map_congr rfl fun j _ => ?_
-    rw [recip_Gamma_eq_mul_recip_Gamma_add_one (j + n)]
+    rw [Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (j + n)]
     push_cast; ring_nf
   have ha : (a.map (ascPochhammer ℂ (n + 1)).eval).prod =
       (a.map (ascPochhammer ℂ n).eval).prod * (a.map fun i => (n : ℂ) + i).prod := by

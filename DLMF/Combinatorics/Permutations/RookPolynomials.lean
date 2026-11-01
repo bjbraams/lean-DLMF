@@ -8,12 +8,37 @@ module
 public import DLMF.Combinatorics.Permutations.EulerianNumbers
 
 /-!
-# Rook polynomials and permutation matrices
+# Permutation matrices, rook polynomials and hit polynomials (DLMF §26.15)
 
-Matrix interpretations of permutations and deletion and union identities for rook polynomials.
+The matrix notation for permutations and the rook and hit polynomials of a board `B`, a set of
+squares of the `n × n` board.
 
-Source references and common attribution are retained in
-`DLMF.Combinatorics.Permutations`.
+## Main definitions
+
+* `rookNumber`, `rookPolynomial`: `r_j(B)`, the number of placements of `j` nonattacking rooks
+  (`IsNonattacking`), and `R(x, B) = ∑ r_j(B) x^j` (DLMF 26.15.3).
+* `hitNumber`, `hitPolynomial`: `N_k(B)`, the number of permutations with exactly `k` pairs
+  `(j, σ(j))` in `B`, and `N(x, B) = ∑ N_k(B) x^k` (DLMF 26.15.6).
+* `diagonalBoard`: the derangement board.
+* `menageBoard`: the ménage board `{(j, j), (j, j+1)}`, indices modulo `n`.
+
+## Main results
+
+* `dlmfExamplePerm_permMatrix`, `inversionNumber_eq_sum_permMatrix`: the permutation matrix of
+  the example and the inversion number in matrix form (DLMF 26.15.1, 26.15.2).
+* `hitNumber_diagonalBoard_zero`, `rookNumber_diagonalBoard`: derangements (DLMF §26.15).
+* `rookPolynomial_union`, `rookPolynomial_delete`: the product and deletion rules
+  (DLMF 26.15.4, 26.15.5).
+* `hitPolynomial_eq`, `hitNumber_zero_eq`: hit numbers from rook numbers (DLMF 26.15.7, 26.15.8).
+
+## Implementation notes
+
+`σ.permMatrix R` (Mathlib) has entry `1` at `(j, σ j)`. The rook and hit polynomials are
+elements of `ℤ[X]`.
+
+## References
+
+* NIST DLMF §26.15.
 -/
 
 @[expose] public section
@@ -144,7 +169,7 @@ theorem rookNumber_diagonalBoard (n j : ℕ) : rookNumber (diagonalBoard n) j = 
   exact ⟨hab, hab⟩
 
 /-- A nonattacking placement has at most `n` rooks. -/
-lemma q26b_card_le_of_nonattacking {n : ℕ} {C : Finset (Fin n × Fin n)} (hC : IsNonattacking C) :
+private lemma card_le_of_isNonattacking {n : ℕ} {C : Finset (Fin n × Fin n)} (hC : IsNonattacking C) :
     #C ≤ n := by
   have : #(C.image Prod.fst) = #C := card_image_of_injOn fun x hx y hy h => by
     by_contra hne; exact (hC x hx y hy hne).1 h
@@ -152,13 +177,13 @@ lemma q26b_card_le_of_nonattacking {n : ℕ} {C : Finset (Fin n × Fin n)} (hC :
   exact (card_le_univ _).trans (by simp)
 
 /-- The rook polynomial as a sum over nonattacking placements. -/
-lemma q26b_rookPolynomial_eq_sum {n : ℕ} (B : Finset (Fin n × Fin n)) :
+private lemma rookPolynomial_eq_sum_powerset {n : ℕ} (B : Finset (Fin n × Fin n)) :
     rookPolynomial B = ∑ D ∈ B.powerset.filter IsNonattacking, (X : ℤ[X]) ^ #D := by
   classical
   rw [← Finset.sum_fiberwise_of_maps_to (g := fun D => #D) (t := range (n + 1))
     (fun D hD => by
       simp only [mem_filter] at hD
-      rw [mem_range]; exact Nat.lt_succ_of_le (q26b_card_le_of_nonattacking hD.2))]
+      rw [mem_range]; exact Nat.lt_succ_of_le (card_le_of_isNonattacking hD.2))]
   refine sum_congr rfl fun k _ => ?_
   rw [Finset.sum_congr rfl (fun D hD => by rw [(mem_filter.mp hD).2]), sum_const, nsmul_eq_mul,
     rookNumber, Finset.filter_filter]
@@ -177,7 +202,7 @@ theorem rookPolynomial_union {n : ℕ} {B₁ B₂ : Finset (Fin n × Fin n)}
     rw [Finset.disjoint_left]
     intro x hx hx2
     exact (h x hx x hx2).1 rfl
-  simp only [q26b_rookPolynomial_eq_sum]
+  simp only [rookPolynomial_eq_sum_powerset]
   rw [Finset.sum_mul_sum, ← Finset.sum_product']
   symm
   refine Finset.sum_bij (fun p _ => p.1 ∪ p.2) ?_ ?_ ?_ ?_
@@ -244,7 +269,7 @@ theorem rookPolynomial_delete {n : ℕ} {B : Finset (Fin n × Fin n)} {j k : Fin
       X * rookPolynomial (B.filter fun x => x.1 ≠ j ∧ x.2 ≠ k) +
         rookPolynomial (B.erase (j, k)) := by
   classical
-  simp only [q26b_rookPolynomial_eq_sum]
+  simp only [rookPolynomial_eq_sum_powerset]
   rw [← Finset.sum_filter_add_sum_filter_not _ (fun D => (j, k) ∈ D)]
   congr 1
   · rw [Finset.mul_sum]
@@ -290,7 +315,7 @@ theorem rookPolynomial_delete {n : ℕ} {B : Finset (Fin n × Fin n)} {j k : Fin
       exact ⟨h1.trans (erase_subset _ _), h2, fun h => (mem_erase.mp (h1 h)).1 rfl⟩
 
 /-- The number of permutations of `Fin n` fixing every point of `R` is `(n - #R)!`. -/
-lemma q26b_card_perm_fix {n : ℕ} (R : Finset (Fin n)) :
+private lemma card_perm_fixing {n : ℕ} (R : Finset (Fin n)) :
     #{τ : Perm (Fin n) | ∀ r ∈ R, τ r = r} = (n - #R).factorial := by
   classical
   rw [← Fintype.card_subtype]
@@ -299,7 +324,7 @@ lemma q26b_card_perm_fix {n : ℕ} (R : Finset (Fin n)) :
   rw [Fintype.card_perm, Fintype.card_subtype_compl, Fintype.card_fin, Fintype.card_coe]
 
 /-- The number of permutations containing a nonattacking placement `C` is `(n - #C)!`. -/
-lemma q26b_card_perm_extend {n : ℕ} {C : Finset (Fin n × Fin n)} (hC : IsNonattacking C) :
+private lemma card_perm_extending_isNonattacking {n : ℕ} {C : Finset (Fin n × Fin n)} (hC : IsNonattacking C) :
     #{σ : Perm (Fin n) | ∀ x ∈ C, σ x.1 = x.2} = (n - #C).factorial := by
   classical
   have hinj1 : Function.Injective fun x : C => x.1.1 := by
@@ -310,11 +335,11 @@ lemma q26b_card_perm_extend {n : ℕ} {C : Finset (Fin n × Fin n)} (hC : IsNona
     rintro ⟨x, hx⟩ ⟨y, hy⟩ h
     by_contra hne
     exact (hC x hx y hy fun h' => hne (Subtype.ext h')).2 h
-  obtain ⟨σ0, hσ0⟩ := q26b_exists_perm_comp_of_injective hinj1 hinj2
+  obtain ⟨σ0, hσ0⟩ := Function.Injective.exists_perm_comp_eq hinj1 hinj2
   have hσ0' : ∀ x ∈ C, σ0 x.1 = x.2 := fun x hx => (congrFun hσ0 ⟨x, hx⟩).symm
   have hR : #(C.image Prod.fst) = #C := card_image_of_injOn fun x hx y hy h => by
     by_contra hne; exact (hC x hx y hy hne).1 h
-  rw [← hR, ← q26b_card_perm_fix]
+  rw [← hR, ← card_perm_fixing]
   refine Finset.card_bij (fun σ _ => σ0⁻¹ * σ) ?_ ?_ ?_
   · intro σ hσ
     simp only [mem_filter, mem_univ, true_and] at hσ ⊢
@@ -400,13 +425,13 @@ theorem hitPolynomial_eq {n : ℕ} (B : Finset (Fin n × Fin n)) :
     refine sum_congr rfl fun D hD => ?_
     rw [← Finset.sum_filter, sum_const, nsmul_eq_mul]
     simp only [mem_filter, hNA, mem_powerset] at hD
-    rw [q26b_card_perm_extend hD.2]
+    rw [card_perm_extending_isNonattacking hD.2]
     simp
   -- Step 4
   rw [h1, h3, ← Finset.sum_fiberwise_of_maps_to (g := fun D => #D) (t := range (n + 1))
     (fun D hD => by
       simp only [hNA, mem_filter] at hD
-      rw [mem_range]; exact Nat.lt_succ_of_le (q26b_card_le_of_nonattacking hD.2))]
+      rw [mem_range]; exact Nat.lt_succ_of_le (card_le_of_isNonattacking hD.2))]
   refine sum_congr rfl fun k _ => ?_
   rw [Finset.sum_congr rfl (fun D hD => by rw [(mem_filter.mp hD).2]), sum_const, nsmul_eq_mul]
   have hr : #(NA.filter fun D => #D = k) = rookNumber B k := by

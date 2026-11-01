@@ -14,10 +14,40 @@ public import DLMF.Legendre.IntegralTools
 /-!
 # Green identities and Ferrers product integrals
 
-Green identities, endpoint constants and off-diagonal product integrals for Ferrers functions.
+This file proves the Barnes-type integral DLMF 14.17.5 and the orthogonality relations
+DLMF 14.17.6–14.17.9 of Ferrers functions of integer degree and order, and prepares the
+off-diagonal integrals of products of order-zero Ferrers functions over `(-1, 1)`. The latter
+use Green's identity together with the logarithmic expansions of `𝖯_α` and `𝖰_α` at `±1`
+(DLMF 14.8.3) and the domination of Ferrers functions by `(1-x²)^{-1/4}`. Helper names carry the
+prefix `legPI`.
 
-Source references and common attribution are retained in
-`DLMF.Legendre.Integrals`.
+## Main definitions
+
+* `legPIw`: the weight `(1-x²)^{-1/4}` that dominates Ferrers functions on `(-1, 1)`.
+* `legPIK`, `legPIC`: the logarithmic coefficient and the constant term of `𝖯_α` at `-1`.
+* `legPIcpos`, `legPIcneg`: the constant terms of `𝖰_α` at `+1` and `-1`.
+* `legPIR`, `legPIRp`: the polynomial remainders of the Green boundary form at `-1` and `+1`.
+
+## Main results
+
+* `ferrers_barnes_integral`: DLMF 14.17.5.
+* `ferrers_orthogonality_6`, `ferrers_orthogonality_7`: DLMF 14.17.6, 14.17.7.
+* `ferrers_orthogonality_8`, `ferrers_orthogonality_9`: DLMF 14.17.8, 14.17.9.
+* `legPI_ferrersP_neg_one_isBigO`, `legPI_ferrersQ_pos_isBigO`, `legPI_ferrersQ_neg_isBigO`:
+  logarithmic expansions of `𝖯_α` and `𝖰_α` at the endpoints.
+* `legPI_ferrersQ_neg`: DLMF 14.9.10 solved for `𝖰_ν(-x)`, for every regular `ν`.
+* `legPI_bdry_neg`, `legPI_bdry_pos`, `legPI_integral_green`: Green's identity on `[-1, 1]`
+  with the limits of the boundary form at `±1`.
+* `legPI_integral_PP`, `legPI_integral_QQ`, `legPI_integral_PQ`: the Green integrals of
+  `𝖯_ν 𝖯_λ`, `𝖰_ν 𝖰_λ` and `𝖯_ν 𝖰_λ`.
+* `legPI_boundary_const`: closed form of the boundary constant `K_ν C_λ - K_λ C_ν`.
+
+## Implementation notes
+
+DLMF 14.17.6 assumes `m ≤ l` as well as `m ≤ n`; `ferrers_orthogonality_6` needs only `m ≤ n`.
+In `ferrers_orthogonality_8` and `ferrers_orthogonality_9` (DLMF 14.17.8, 14.17.9, with weight
+`1/(1-x²)`) one of the orders is assumed positive, since the integral diverges when both orders
+vanish.
 -/
 
 @[expose] public noncomputable section
@@ -35,10 +65,10 @@ theorem ferrers_barnes_integral {σ μ : ℂ} (hσ : -1 < σ.re) (hμ : -1 < μ.
     (∫ x : ℝ in 0..1, (x:ℂ)^σ*(1-x^2:ℂ)^(μ/2)*ferrersP ν (-μ) x)=Gamma ((σ+1)/2)*Gamma (σ/2+1)/(2^(μ+1)*Gamma ((σ-ν+μ)/2+1)*Gamma ((σ+ν+μ+3)/2)) := by
   sorry
 
-/-- DLMF 14.17.6: for natural numbers `m ≤ l` and `m ≤ n`, `∫_{-1}^{1} 𝖯^m_l(x) 𝖯^m_n(x) dx =
+/-- DLMF 14.17.6: for natural numbers `m ≤ n` (DLMF also assumes `m ≤ l`, which is not needed), `∫_{-1}^{1} 𝖯^m_l(x) 𝖯^m_n(x) dx =
 (n+m)!/((n-m)! (n+1/2)) δ_{l,n}`. -/
 @[dlmf 14.17.E6]
-theorem ferrers_orthogonality_6 (l m n : ℕ) (hl : m ≤ l) (hn : m ≤ n) :
+theorem ferrers_orthogonality_6 (l m n : ℕ) (hn : m ≤ n) :
     ∫ x : ℝ in -1..1, 1*ferrersP l (m) x*ferrersP n (m) x=if l=n then ((n+m).factorial:ℂ)/((n-m).factorial*(n+1/2:ℂ)) else 0 := by
   have hI : (∫ x : ℝ in -1..1, 1*ferrersP l (m) x*ferrersP n (m) x) = legInt_I m l n := by
     refine intervalIntegral.integral_congr_ae ?_
@@ -57,10 +87,10 @@ theorem ferrers_orthogonality_6 (l m n : ℕ) (hl : m ≤ l) (hn : m ≤ n) :
     field_simp
   · simp
 
-/-- For natural numbers `m ≤ l` and `m ≤ n`, `∫_{-1}^{1} 𝖯^m_l(x) 𝖯^{-m}_n(x) dx = (-1)^m/(l+1/2)
+/-- For natural numbers `m ≤ n` (no condition on `l`), `∫_{-1}^{1} 𝖯^m_l(x) 𝖯^{-m}_n(x) dx = (-1)^m/(l+1/2)
 δ_{l,n}`. -/
 @[dlmf 14.17.E7]
-theorem ferrers_orthogonality_7 (l m n : ℕ) (hl : m ≤ l) (hn : m ≤ n) :
+theorem ferrers_orthogonality_7 (l m n : ℕ) (hn : m ≤ n) :
     ∫ x : ℝ in -1..1, 1*ferrersP l (m) x*ferrersP n (-m) x=if l=n then (-1)^m/(l+1/2:ℂ) else 0 := by
   have hk : ((n:ℂ)-m+1) = ((n-m:ℕ):ℂ)+1 := by rw [Nat.cast_sub hn]
   have hreg : ∀ k : ℕ, (n:ℂ)-m+1 ≠ -k := fun k h => by
@@ -75,7 +105,7 @@ theorem ferrers_orthogonality_7 (l m n : ℕ) (hl : m ≤ l) (hn : m ≤ n) :
     rw [uIoc_of_le (by norm_num)] at htm
     rw [ferrersP_negative_integer_order (n:ℂ) m hreg ⟨htm.1, lt_of_le_of_ne htm.2 ht⟩]
     ring
-  rw [hI, ferrers_orthogonality_6 l m n hl hn, hk, show (n:ℂ)+m+1 = ((n+m:ℕ):ℂ)+1 by push_cast; ring,
+  rw [hI, ferrers_orthogonality_6 l m n hn, hk, show (n:ℂ)+m+1 = ((n+m:ℕ):ℂ)+1 by push_cast; ring,
     Gamma_nat_eq_factorial, Gamma_nat_eq_factorial]
   split_ifs with h
   · subst h

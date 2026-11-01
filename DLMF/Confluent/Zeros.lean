@@ -9,10 +9,9 @@ public import DLMF.Confluent.Zeros.RealZeros
 public import DLMF.Confluent.Zeros.ComplexZeros
 
 /-!
-# Zeros (DLMF §§13.9, 13.22)
+# Zeros of confluent hypergeometric functions
 
-`p(a,b)` and `n(a,b)` count positive zeros of `M(a,b,x)` and of
-`M(a,b,x)` in the left half-plane after Kummer's transformation, respectively.
-`T(a,b)` and `P(a,b)` count zeros of `U(a,b,x)` on `(0,∞)`. Bessel-zero
-expansions 13.9.8 and 13.22.1 are deferred pending indexed Bessel zeros.
+Counts of real zeros and asymptotics of large complex zeros of Kummer's and Tricomi's functions
+(DLMF §13.9). The Bessel-zero expansions 13.9.8 and 13.22.1 are not formalized; they need
+indexed Bessel zeros.
 -/

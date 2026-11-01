@@ -11,34 +11,49 @@ public import Mathlib.Analysis.SpecialFunctions.Log.Summable
 public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 
 /-!
-# The Gamma and Beta functions, after AAR Chapter 1, §1.1
+# The Gamma function after AAR §1.1: Weierstrass's product
 
-Andrews–Askey–Roy (AAR), *Special Functions*, Chapter 1, §1.1 takes Gauss's product
-as the definition of `Γ`. Mathlib instead defines `Complex.Gamma` / `Real.Gamma` by Euler's
-integral on `{s | 0 < re s}` and meromorphic continuation. The two definitions agree:
-Euler's limit formula is `Complex.GammaSeq_tendsto_Gamma` (and the real analogue), which
-lives in `Mathlib.Analysis.SpecialFunctions.Gamma.Beta` together with the reflection
-formula `Complex.Gamma_mul_Gamma_one_sub`.
+Andrews–Askey–Roy (AAR), *Special Functions*, §1.1 takes Gauss's product as the definition of
+`Γ`. Mathlib instead defines `Complex.Gamma` and `Real.Gamma` by Euler's integral on
+`{s | 0 < re s}` and meromorphic continuation. The two definitions agree: Euler's limit formula
+is `Complex.GammaSeq_tendsto_Gamma` (and the real analogue), in
+`Mathlib.Analysis.SpecialFunctions.Gamma.Beta` together with the reflection formula
+`Complex.Gamma_mul_Gamma_one_sub`. This file proves Weierstrass's product for `1/Γ`.
 
-## Correspondence with AAR §1.1
+## Main definitions
 
-* **Definition 1.1.1** (Gauss product). Mathlib: `Complex.GammaSeq` and
-  `Complex.GammaSeq_tendsto_Gamma` in `Gamma.Beta`.
-* **Theorem 1.1.2** (Weierstrass product). Proved below as
-  `Complex.one_div_Gamma_eq_tprod`.
-* **Definition 1.1.3** (Beta integral). Mathlib: `Complex.betaIntegral`.
-* **Theorem 1.1.4** (`B(x,y) = Γ(x)Γ(y)/Γ(x+y)`). Mathlib:
-  `Complex.betaIntegral_eq_Gamma_mul_div` and
-  `Complex.Gamma_mul_Gamma_eq_betaIntegral`.
-* **Corollary 1.1.5** (Euler's integral). Mathlib: `Complex.Gamma_eq_integral`,
+* `Complex.weierstrassGammaTerm`, `Real.weierstrassGammaTerm`: the factors
+  `(1 + s/(n+1)) e^{-s/(n+1)}` of the Weierstrass product.
+
+## Main results
+
+* `Complex.multipliable_weierstrassGammaTerm`, `Complex.tendsto_weierstrassGamma_prod`:
+  convergence of the Weierstrass product.
+* `Complex.one_div_Gamma_eq_tprod`, `Real.one_div_Gamma_eq_tprod`: Weierstrass's product
+  `1/Γ(s) = s e^{γ s} ∏_{n≥1} (1 + s/n) e^{-s/n}` (DLMF 5.8.2, AAR Theorem 1.1.2).
+
+## Implementation notes
+
+The statements use Mathlib's convention that `Γ` vanishes at non-positive integers and that
+`0⁻¹ = 0` in a field, so `1 / Γ` is an entire function (`Complex.differentiable_one_div_Gamma`)
+and the Weierstrass formula holds at the poles as well.
+
+Correspondence with AAR §1.1:
+* Definition 1.1.1 (Gauss product): Mathlib's `Complex.GammaSeq` and
+  `Complex.GammaSeq_tendsto_Gamma`.
+* Theorem 1.1.2 (Weierstrass product): `Complex.one_div_Gamma_eq_tprod`.
+* Definition 1.1.3 (Beta integral): Mathlib's `Complex.betaIntegral`.
+* Theorem 1.1.4 (`B(x,y) = Γ(x)Γ(y)/Γ(x+y)`): Mathlib's
+  `Complex.betaIntegral_eq_Gamma_mul_div` and `Complex.Gamma_mul_Gamma_eq_betaIntegral`.
+* Corollary 1.1.5 (Euler's integral): Mathlib's `Complex.Gamma_eq_integral`,
   `Real.Gamma_eq_integral`.
-* Recurrence `Γ(x+1) = x Γ(x)` and `Γ(n+1) = n!`: `Complex.Gamma_add_one`,
+* The recurrence `Γ(x+1) = x Γ(x)` and `Γ(n+1) = n!`: Mathlib's `Complex.Gamma_add_one`,
   `Complex.Gamma_nat_eq_factorial`.
 
-The statements below use Mathlib's convention that `Γ` vanishes at non-positive integers
-and that `0⁻¹ = 0` in a field, so `1 / Γ` is an entire function
-(`Complex.differentiable_one_div_Gamma`) and the Weierstrass formula holds at the poles
-as well.
+## References
+
+* G. E. Andrews, R. Askey and R. Roy, *Special Functions*, Cambridge University Press, 1999,
+  §1.1.
 -/
 
 @[expose] public section

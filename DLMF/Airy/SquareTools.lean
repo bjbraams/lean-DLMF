@@ -12,10 +12,24 @@ public import DLMFMathlib.Analysis.SpecialFunctions.Pow.ComplexReal
 /-!
 # Ai² as a Gaussian average of Ai
 
-The representation `Ai(x)² = (2^{2/3}/π) ∫₀^∞ Ai(2^{2/3}(x + t²)) dt` for real `x`
-(`airyAi_sq_eq_integral`), the basic tool for the product integrals of DLMF §9.11.
+The representation `Ai(x)² = (2^{2/3}/π) ∫₀^∞ Ai(2^{2/3}(x + t²)) dt` for real `x`, the basic
+tool for the product integrals of DLMF §9.11.
 
-Proof: with `c = 2^{2/3}` and `F(x) = ∫₀^∞ Ai(c(x+t²)) dt`,
+## Main definitions
+
+* `airySq_c`, `airySq_F`: the scale `c = 2^{2/3}` and `F(x) = ∫₀^∞ Ai(c(x+t²)) dt`.
+* `AirySqIsProdSol`, `airySq_det`: solutions of the product equation 9.11.1 and their
+  Wronskian.
+* `airySq_Φ`, `airySq_kr`: kernels for the Mellin transform of `Ai²`.
+
+## Main results
+
+* `airySq_rep`, `airyAi_sq_eq_integral`: `Ai(x)² = (c/π) ∫₀^∞ Ai(c(x+t²)) dt`.
+* `airySq_double`, `airySq_scaled_mellin`: the Fubini and scaling steps for DLMF 9.11.15.
+
+## Implementation notes
+
+With `c = 2^{2/3}` and `F(x) = ∫₀^∞ Ai(c(x+t²)) dt`,
 * differentiation under the integral sign (Gaussian domination from the bounds 9.7.15) gives
   `F' = c ∫ Ai'`, `F'' = c² ∫ u Ai(u)`, `F''' = c³ ∫ (Ai + u Ai')`, and an integration by parts
   in `t` turns this into the product equation `F''' - 4xF' - 2F = 0` (DLMF 9.11.1);

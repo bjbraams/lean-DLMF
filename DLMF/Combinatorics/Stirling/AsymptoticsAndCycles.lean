@@ -8,12 +8,24 @@ module
 public import DLMF.Combinatorics.Stirling.RecurrencesAndIdentities
 
 /-!
-# Stirling asymptotics and cycle interpretations
+# Stirling numbers: asymptotics and combinatorial interpretations (DLMF §26.8(i), §26.8(v))
 
-Asymptotic formulas and permutation-cycle counting interpretations of Stirling numbers.
+## Main results
 
-Source references and common attribution are retained in
-`DLMF.Combinatorics.Stirling`.
+* `tendsto_signedStirlingFirst_div`: `s(n+1, k+1) ∼ (-1)^{n-k} (n!/k!) (γ + ln n)^k`
+  (DLMF 26.8.40).
+* `signedStirlingFirst_add_isEquivalent`: `s(n+k, k) ∼ (-1)ⁿ k^{2n}/(2ⁿ n!)` as `k → ∞`
+  (DLMF 26.8.41).
+* `stirlingSecond_isEquivalent`: `S(n, k) ∼ kⁿ/k!` as `n → ∞` (DLMF 26.8.42).
+* `tendsto_stirlingSecond_add_div`: `S(n+k, k) ∼ k^{2n}/(2ⁿ n!)` as `k → ∞` (DLMF 26.8.43).
+* `card_perm_numCycles`, `signedStirlingFirst_eq_card`: `|s(n, k)|` counts permutations of
+  `{1, …, n}` with exactly `k` cycles (DLMF §26.8(i)).
+* `card_finpartition_eq_stirlingSecond`: `S(n, k)` counts partitions of `{1, …, n}` into `k`
+  blocks (DLMF §26.8(i)).
+
+## References
+
+* NIST DLMF §26.8.
 -/
 
 @[expose] public section
@@ -37,7 +49,7 @@ theorem tendsto_signedStirlingFirst_div (k : ℕ → ℕ)
   sorry
 
 /-- Faulhaber asymptotics: `∑_{j<K} j^p ~ K^{p+1}/(p+1)`. -/
-lemma q26a_sum_range_pow_isEquivalent (p : ℕ) :
+private lemma isEquivalent_sum_range_pow (p : ℕ) :
     (fun K : ℕ => ∑ j ∈ range K, (j : ℝ) ^ p) ~[atTop] fun K => (K : ℝ) ^ (p + 1) / (p + 1) := by
   apply isEquivalent_of_tendsto_one
   have hval : ∀ K : ℕ, 0 < K → (∑ j ∈ range K, (j : ℝ) ^ p) / ((K : ℝ) ^ (p + 1) / (p + 1)) =
@@ -68,7 +80,7 @@ lemma q26a_sum_range_pow_isEquivalent (p : ℕ) :
   rw [Pi.div_apply, hval K hK]
 
 /-- Summing asymptotic equivalents of a nonnegative divergent comparison sequence. -/
-lemma q26a_sum_range_isEquivalent {u v : ℕ → ℝ} (h : u ~[atTop] v) (hv : 0 ≤ v)
+private lemma isEquivalent_sum_range_of_isEquivalent {u v : ℕ → ℝ} (h : u ~[atTop] v) (hv : 0 ≤ v)
     (hs : Tendsto (fun n => ∑ i ∈ range n, v i) atTop atTop) :
     (fun n => ∑ i ∈ range n, u i) ~[atTop] fun n => ∑ i ∈ range n, v i := by
   have := h.isLittleO.sum_range hv hs
@@ -77,7 +89,7 @@ lemma q26a_sum_range_isEquivalent {u v : ℕ → ℝ} (h : u ~[atTop] v) (hv : 0
   ext n; simp [sum_sub_distrib]
 
 /-- Unsigned form of DLMF 26.8.41: `c(n+k, k) ~ k^{2n}/(2ⁿ n!)`. -/
-lemma q26a_stirlingFirst_add_isEquivalent (n : ℕ) :
+private lemma isEquivalent_stirlingFirst_add_self (n : ℕ) :
     (fun k : ℕ => (Nat.stirlingFirst (n + k) k : ℝ)) ~[atTop]
       fun k => (k : ℝ) ^ (2 * n) / (2 ^ n * n.factorial) := by
   induction n with
@@ -137,7 +149,7 @@ lemma q26a_stirlingFirst_add_isEquivalent (n : ℕ) :
     have hp : (fun K : ℕ => ∑ j ∈ range K, c * (j : ℝ) ^ (2 * n + 1)) ~[atTop]
         fun K : ℕ => c * ((K : ℝ) ^ (2 * n + 1 + 1) / (((2 * n + 1 : ℕ) : ℝ) + 1)) := by
       have := (IsEquivalent.refl (u := fun _ : ℕ => c)).mul
-        (q26a_sum_range_pow_isEquivalent (2 * n + 1))
+        (isEquivalent_sum_range_pow (2 * n + 1))
       convert this using 1
       ext K; simp [mul_sum]
     have hdiv : Tendsto
@@ -146,7 +158,7 @@ lemma q26a_stirlingFirst_add_isEquivalent (n : ℕ) :
       apply Tendsto.const_mul_atTop hcpos
       apply Tendsto.atTop_div_const (by positivity)
       exact (tendsto_pow_atTop (by omega)).comp tendsto_natCast_atTop_atTop
-    have hsum := q26a_sum_range_isEquivalent hu (fun j => by positivity) (by
+    have hsum := isEquivalent_sum_range_of_isEquivalent hu (fun j => by positivity) (by
       exact hp.symm.tendsto_atTop hdiv)
     have hsum' : (fun K : ℕ => ∑ j ∈ range K, c * (j : ℝ) ^ (2 * n + 1)) ~[atTop]
         fun K : ℕ => c * ((K : ℝ) ^ (2 * n + 1 + 1) / (((2 * n + 1 : ℕ) : ℝ) + 1)) := hp
@@ -161,7 +173,7 @@ theorem signedStirlingFirst_add_isEquivalent (n : ℕ) :
     (fun k : ℕ => (signedStirlingFirst (n + k) k : ℝ)) ~[atTop]
       fun k => (-1) ^ n / (2 ^ n * n.factorial) * (k : ℝ) ^ (2 * n) := by
   have h := (IsEquivalent.refl (u := fun _ : ℕ => (-1 : ℝ) ^ n)).mul
-    (q26a_stirlingFirst_add_isEquivalent n)
+    (isEquivalent_stirlingFirst_add_self n)
   convert h using 1
   · ext k; simp [signedStirlingFirst]
   · ext k; simp only [Pi.mul_apply]; ring
@@ -180,7 +192,7 @@ theorem stirlingSecond_isEquivalent (k : ℕ) :
   have hc : ∀ n, (Nat.stirlingSecond n k : ℝ) / ((k : ℝ) ^ n / k.factorial) =
       ∑ j ∈ range (k + 1), (-1 : ℝ) ^ (k - j) * (k.choose j : ℝ) * ((j : ℝ) / k) ^ n := by
     intro n
-    have := congrArg (Rat.cast : ℚ → ℝ) (q26a_sum_alt_choose_pow n k)
+    have := congrArg (Rat.cast : ℚ → ℝ) (sum_neg_one_pow_choose_mul_pow n k)
     push_cast at this
     simp_rw [div_pow, ← mul_div_assoc, ← sum_div, this]
     have : (k.factorial : ℝ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
@@ -218,7 +230,7 @@ section CycleCount
 open Equiv Equiv.Perm
 
 /-- A relation that is an equivalence and relates every point to its image contains `SameCycle`. -/
-lemma q26a_sameCycle_le {α : Type*} {f : Perm α} {R : α → α → Prop} (hR : Equivalence R)
+private lemma sameCycle_le_of_equivalence {α : Type*} {f : Perm α} {R : α → α → Prop} (hR : Equivalence R)
     (hf : ∀ x, R x (f x)) {x y : α} (h : SameCycle f x y) : R x y := by
   obtain ⟨i, rfl⟩ := h
   induction i using Int.induction_on with
@@ -232,12 +244,12 @@ lemma q26a_sameCycle_le {α : Type*} {f : Perm α} {R : α → α → Prop} (hR 
     exact hR.trans ih (hR.symm h1)
 
 /-- The cycle maxima of a permutation. -/
-def q26a_cycleMax {α : Type*} [Fintype α] [LinearOrder α] (σ : Perm α) : Finset α :=
+def cycleMaxima {α : Type*} [Fintype α] [LinearOrder α] (σ : Perm α) : Finset α :=
   {a | ∀ b, SameCycle σ a b → b ≤ a}
 
 /-- Inserting `0` into a permutation of `Fin n` (via `decomposeFin`) does not change which
 nonzero points lie in a common cycle. -/
-lemma q26a_sameCycle_succ {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n)) (x y : Fin n) :
+private lemma sameCycle_decomposeFin_symm_succ_iff {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n)) (x y : Fin n) :
     SameCycle (decomposeFin.symm (p, τ)) x.succ y.succ ↔ SameCycle τ x y := by
   set σ := decomposeFin.symm (p, τ)
   constructor
@@ -270,7 +282,7 @@ lemma q26a_sameCycle_succ {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n)) (x y :
         · right
           rw [swap_apply_of_ne_of_ne (Fin.succ_ne_zero _) hx]
           exact ⟨x, τ x, by simp [g], by simp [g], (SameCycle.refl _ _).apply_right⟩
-    rcases q26a_sameCycle_le hR hstep h with h | ⟨x', y', hx, hy, h⟩
+    rcases sameCycle_le_of_equivalence hR hstep h with h | ⟨x', y', hx, hy, h⟩
     · simp only [g, Fin.succ_ne_zero, ite_false, Fin.succ_inj] at h
       subst h; exact SameCycle.refl _ _
     · simp only [g, Fin.succ_ne_zero, ite_false, Fin.succ_inj] at hx hy
@@ -279,7 +291,7 @@ lemma q26a_sameCycle_succ {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n)) (x y :
     let R : Fin n → Fin n → Prop := fun a b => SameCycle σ a.succ b.succ
     have hR : Equivalence R :=
       ⟨fun a => SameCycle.refl _ _, fun h => h.symm, fun h h' => h.trans h'⟩
-    refine q26a_sameCycle_le (R := R) hR (fun a => ?_) h
+    refine sameCycle_le_of_equivalence (R := R) hR (fun a => ?_) h
     simp only [R]
     by_cases hx : (τ a).succ = p
     · have h1 : σ a.succ = 0 := by simp [σ, ← hx]
@@ -291,9 +303,9 @@ lemma q26a_sameCycle_succ {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n)) (x y :
       rw [← h1]; exact (SameCycle.refl _ _).apply_right
 
 /-- Inserting `0` adds a cycle exactly when `0` becomes a fixed point. -/
-lemma q26a_card_cycleMax_decomposeFin {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n)) :
-    #(q26a_cycleMax (decomposeFin.symm (p, τ))) = #(q26a_cycleMax τ) + if p = 0 then 1 else 0 := by
-  simp only [q26a_cycleMax, card_filter, Fin.sum_univ_succ]
+private lemma card_cycleMaxima_decomposeFin_symm {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n)) :
+    #(cycleMaxima (decomposeFin.symm (p, τ))) = #(cycleMaxima τ) + if p = 0 then 1 else 0 := by
+  simp only [cycleMaxima, card_filter, Fin.sum_univ_succ]
   rw [add_comm]
   congr 1
   · refine Finset.sum_congr rfl fun x _ => ?_
@@ -301,10 +313,10 @@ lemma q26a_card_cycleMax_decomposeFin {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fi
     apply propext
     constructor
     · intro h y hy
-      exact Fin.succ_le_succ_iff.mp (h _ ((q26a_sameCycle_succ p τ x y).2 hy))
+      exact Fin.succ_le_succ_iff.mp (h _ ((sameCycle_decomposeFin_symm_succ_iff p τ x y).2 hy))
     · intro h b hb
       refine Fin.cases (fun _ => Fin.zero_le _) (fun y hy => ?_) b hb
-      exact Fin.succ_le_succ_iff.mpr (h y ((q26a_sameCycle_succ p τ x y).1 hy))
+      exact Fin.succ_le_succ_iff.mpr (h y ((sameCycle_decomposeFin_symm_succ_iff p τ x y).1 hy))
   · by_cases hp : p = 0
     · subst hp
       simp only [ite_true]
@@ -323,11 +335,11 @@ lemma q26a_card_cycleMax_decomposeFin {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fi
         simpa using this
       exact hp (le_antisymm (h p hs) (Fin.zero_le _))
 /-- The number of cycles (fixed points included) equals the number of cycle maxima. -/
-lemma q26a_card_parts_partition {α : Type*} [Fintype α] [LinearOrder α] (σ : Perm α) :
-    Multiset.card σ.partition.parts = #(q26a_cycleMax σ) := by
+private lemma card_parts_partition_eq_card_cycleMaxima {α : Type*} [Fintype α] [LinearOrder α] (σ : Perm α) :
+    Multiset.card σ.partition.parts = #(cycleMaxima σ) := by
   rw [parts_partition, Multiset.card_add, Multiset.card_replicate, cycleType_def,
     Multiset.card_map]
-  rw [← card_filter_add_card_filter_not (s := q26a_cycleMax σ) (fun x => x ∈ σ.support)]
+  rw [← card_filter_add_card_filter_not (s := cycleMaxima σ) (fun x => x ∈ σ.support)]
   congr 1
   · change #σ.cycleFactorsFinset = _
     symm
@@ -336,7 +348,7 @@ lemma q26a_card_parts_partition {α : Type*} [Fintype α] [LinearOrder α] (σ :
       simp only [mem_filter] at ha
       exact cycleOf_mem_cycleFactorsFinset_iff.2 ha.2
     · intro a ha b hb hab
-      simp only [mem_filter, q26a_cycleMax, mem_univ, true_and] at ha hb
+      simp only [mem_filter, cycleMaxima, mem_univ, true_and] at ha hb
       have : SameCycle σ a b := by
         have hb' : b ∈ (σ.cycleOf b).support :=
           (mem_support_cycleOf_iff.2 ⟨SameCycle.refl _ _, hb.2⟩)
@@ -352,14 +364,14 @@ lemma q26a_card_parts_partition {α : Type*} [Fintype α] [LinearOrder α] (σ :
       have hcm := cycle_is_cycleOf hm hc
       have hms : m ∈ σ.support := mem_cycleFactorsFinset_support_le hc hm
       refine ⟨m, ?_, hcm.symm⟩
-      simp only [mem_filter, q26a_cycleMax, mem_univ, true_and]
+      simp only [mem_filter, cycleMaxima, mem_univ, true_and]
       refine ⟨fun b hb => ?_, hms⟩
       apply c.support.le_max'
       rw [hcm]
       exact mem_support_cycleOf_iff.2 ⟨hb, hms⟩
-  · have : (q26a_cycleMax σ).filter (fun x => x ∉ σ.support) = univ \ σ.support := by
+  · have : (cycleMaxima σ).filter (fun x => x ∉ σ.support) = univ \ σ.support := by
       ext a
-      simp only [mem_filter, q26a_cycleMax, mem_univ, true_and, Finset.mem_sdiff]
+      simp only [mem_filter, cycleMaxima, mem_univ, true_and, Finset.mem_sdiff]
       constructor
       · exact fun h => h.2
       · intro h
@@ -367,8 +379,8 @@ lemma q26a_card_parts_partition {α : Type*} [Fintype α] [LinearOrder α] (σ :
     rw [this, card_sdiff_of_subset (subset_univ _), card_univ]
 
 /-- Permutations of `Fin n` with `k` cycle maxima are counted by `Nat.stirlingFirst n k`. -/
-lemma q26a_card_cycleMax_eq (n k : ℕ) :
-    #{σ : Perm (Fin n) | #(q26a_cycleMax σ) = k} = Nat.stirlingFirst n k := by
+private lemma card_filter_card_cycleMaxima_eq (n k : ℕ) :
+    #{σ : Perm (Fin n) | #(cycleMaxima σ) = k} = Nat.stirlingFirst n k := by
   induction n generalizing k with
   | zero =>
     rcases k with _ | k
@@ -379,18 +391,18 @@ lemma q26a_card_cycleMax_eq (n k : ℕ) :
       simp only [mem_filter, mem_univ, true_and, mem_singleton]
       constructor
       · intro _; exact Subsingleton.elim _ _
-      · intro _; simp [q26a_cycleMax]
+      · intro _; simp [cycleMaxima]
     · simp only [Nat.stirlingFirst_zero_succ, card_eq_zero, filter_eq_empty_iff]
       intro σ _
-      simp [q26a_cycleMax]
+      simp [cycleMaxima]
   | succ n ih =>
-    have key : ∀ m, #{σ : Perm (Fin (n + 1)) | #(q26a_cycleMax σ) = m} =
-        #{τ : Perm (Fin n) | #(q26a_cycleMax τ) + 1 = m} +
-          n * #{τ : Perm (Fin n) | #(q26a_cycleMax τ) = m} := by
+    have key : ∀ m, #{σ : Perm (Fin (n + 1)) | #(cycleMaxima σ) = m} =
+        #{τ : Perm (Fin n) | #(cycleMaxima τ) + 1 = m} +
+          n * #{τ : Perm (Fin n) | #(cycleMaxima τ) = m} := by
       intro m
       simp only [card_filter]
       rw [← Equiv.sum_comp decomposeFin.symm, Fintype.sum_prod_type, Fin.sum_univ_succ]
-      simp only [q26a_card_cycleMax_decomposeFin, Fin.succ_ne_zero, ite_true, ite_false, add_zero,
+      simp only [card_cycleMaxima_decomposeFin_symm, Fin.succ_ne_zero, ite_true, ite_false, add_zero,
         sum_const, card_univ, Fintype.card_fin, smul_eq_mul]
     rcases k with _ | k
     · rw [Nat.stirlingFirst_succ_zero, key, ih]
@@ -407,8 +419,8 @@ number of parts of the cycle-type partition `σ.partition`). -/
 @[dlmf 26.8.i]
 theorem card_perm_numCycles (n k : ℕ) :
     #{σ : Equiv.Perm (Fin n) | σ.partition.parts.card = k} = Nat.stirlingFirst n k := by
-  simp only [q26a_card_parts_partition]
-  exact q26a_card_cycleMax_eq n k
+  simp only [card_parts_partition_eq_card_cycleMaxima]
+  exact card_filter_card_cycleMaxima_eq n k
 
 /-- DLMF §26.8(i): `s(n, k) = (-1)^{n-k}` times the number of permutations of `{1, …, n}`
 with exactly `k` cycles. -/
@@ -424,9 +436,9 @@ nonempty subsets. -/
 theorem card_finpartition_eq_stirlingSecond (n k : ℕ) :
     #{P : Finpartition (univ : Finset (Fin n)) | P.parts.card = k} = Nat.stirlingSecond n k := by
   -- each finpartition with `k` parts comes from `k!` surjections `Fin n → Fin k`
-  have h := r26a_card_surjective_filter (α := Fin n) k (fun _ => True)
+  have h := Finpartition.card_filter_surjective_eq_factorial_mul (α := Fin n) k (fun _ => True)
   simp only [and_true] at h
-  rw [q26b_card_surjective_fin] at h
+  rw [Fin.card_filter_surjective] at h
   exact (Nat.eq_of_mul_eq_mul_left (Nat.factorial_pos k) h).symm
 
 end DLMF.Combinatorics

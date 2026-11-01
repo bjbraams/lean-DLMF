@@ -16,7 +16,23 @@ expansion of `U` in rotated sectors give Hankel's expansion
 
 `e^z K_ν(z) ~ √π ∑ₖ (-1)^k (ν+½)ₖ (½-ν)ₖ / k! · (2z)^{-k-½}` (DLMF 10.40.2)
 
-as `z → ∞` in every closed sector `|arg z| ≤ π - ε`.
+as `z → ∞` in every closed sector `|arg z| ≤ π - ε`. Through the Hankel–Macdonald connection
+this yields the expansion of `H_ν^{(1)}` on the positive axis, the large-argument behaviour of
+`J_ν` and the existence of infinitely many real zeros.
+
+## Main results
+
+* `hasAsymptoticExpansion_besselK`: Hankel's expansion of `K_ν` (DLMF 10.40.2).
+* `hankelH1_eq_besselK`: `H_ν^{(1)}(z) = (2/(πi)) e^{-iνπ/2} K_ν(-iz)` (DLMF 10.27.8).
+* `besselI_neg_I_mul`, `besselI_I_mul`: `I_ν(∓iz) = e^{∓iνπ/2} J_ν(z)` (DLMF 10.27.6).
+* `besselJ_eq_besselK`: `J_ν` through `K_ν(∓iz)` for `re z > 0`.
+* `hasAsymptoticExpansion_hankelH1`: Hankel's expansion of `H_ν^{(1)}(x)` (DLMF 10.17.5).
+* `besselJ_sub_cos_isBigO`: `J_ν(x) = √(2/(πx)) cos(x - νπ/2 - π/4) + O(x^{-3/2})`
+  (DLMF 10.7.8).
+* `besselJ_infinite_zeros_of_real`, `besselJ_infinite_zeros`: `J_ν` has infinitely many
+  positive zeros for real `ν`.
+* `exists_besselJ_succ_zero_between`, `exists_besselJ_zero_between`: interlacing of the zeros
+  of `J_ν` and `J_{ν+1}` (DLMF 10.21.3).
 -/
 
 @[expose] public section

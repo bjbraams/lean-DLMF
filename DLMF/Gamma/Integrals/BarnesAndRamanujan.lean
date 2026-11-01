@@ -10,13 +10,30 @@ public import Mathlib.NumberTheory.LSeries.RiemannZeta
 import DLMF.Gamma.RecipGammaDeriv
 
 /-!
-# Barnes and Ramanujan Gamma integrals
+# Barnes-type integrals of the Gamma function (DLMF 5.13.1–5.13.3)
 
-Barnes-type and Ramanujan integral identities, with contour tails and holomorphic parameter
-dependence.
+Barnes's beta integral, the vertical integral of `|Γ(a + it)|²`, and Barnes's first lemma, with
+the Gamma-ratio bounds and holomorphic parameter dependence used for Ramanujan's integral
+5.13.4. Vertical integrals are taken along `s = σ + it`, so DLMF's `1/(2πi) ds` is `1/(2π) dt`.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.Integrals`.
+## Main definitions
+
+* `normSqHalfB`: `Γ(α + is/2) Γ(α - is/2)`, the integrand of 5.13.2 in the variable `s = 2t`.
+* `GammaShiftBound`: the two-sided comparison `c t^w Γ(t) ≤ Γ(t+w) ≤ C t^w Γ(t)` for large `t`.
+* `ramanujanIntegrand`: the integrand of Ramanujan's integral 5.13.4.
+
+## Main results
+
+* `mellin_barnes_beta`: Barnes's beta integral (DLMF 5.13.1).
+* `mellin_barnes_norm_sq`: `(1/2π) ∫ |Γ(a + it)|² e^{(2b - π)t} dt = Γ(2a)/(2 sin b)^{2a}`
+  (DLMF 5.13.2).
+* `mellin_barnes_four`: Barnes's first lemma (DLMF 5.13.3).
+* `gammaShiftBound`, `exists_Gamma_ratio_le`, `exists_norm_Gamma_ratio_le`: real and complex
+  Gamma-ratio bounds `Γ(t+α)/Γ(t+β) = O(t^{α-β})`.
+* `differentiableOn_integral_ramanujanIntegrand`: Ramanujan's integral is holomorphic in `a` on
+  `Re(a+b+c+d) > 3`.
+* `integral_cos_rpow_mul_cexp`: the integral `∫_{-π/2}^{π/2} cos^α x e^{iζx} dx` for all complex
+  `ζ`.
 -/
 
 @[expose] public section
@@ -33,7 +50,7 @@ namespace DLMF.Gamma
 x)^(a+b)` along `s = σ + it` with `-Re a < σ < Re b`. -/
 @[dlmf 5.13.E1]
 theorem mellin_barnes_beta {a b : ℂ} {x σ : ℝ}
-    (hx : 0 < x) (hab : 0 < (a + b).re) (hσa : -a.re < σ) (hσb : σ < b.re) :
+    (hx : 0 < x) (hσa : -a.re < σ) (hσb : σ < b.re) :
     (1 / (2 * π)) * ∫ t : ℝ,
         Complex.Gamma (σ + I * t + a) * Complex.Gamma (b - (σ + I * t)) *
           (x : ℂ) ^ (-(σ + I * t)) =
@@ -119,8 +136,7 @@ theorem integral_normSqHalfB_ofReal {α : ℝ} (hα : 0 < α) {v : ℝ} (hv : 0 
       4 * π * Complex.Gamma (2 * α) * ((v : ℂ) + (v : ℂ)⁻¹) ^ (-(2 * α : ℂ)) := by
   set x : ℝ := (v ^ 2)⁻¹ with hxdef
   have hx : 0 < x := by positivity
-  have h := mellin_barnes_beta (a := (α : ℂ)) (b := (α : ℂ)) (σ := 0) hx
-    (by simp; linarith) (by simpa using hα) (by simpa using hα)
+  have h := mellin_barnes_beta (a := (α : ℂ)) (b := (α : ℂ)) (σ := 0) hx (by simpa using hα) (by simpa using hα)
   have hv0 : (v : ℂ) ≠ 0 := ofReal_ne_zero.2 hv.ne'
   have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.2 hx.ne'
   -- substitute `s = 2t`

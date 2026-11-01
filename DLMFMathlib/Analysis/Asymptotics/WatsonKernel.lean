@@ -14,6 +14,23 @@ public import Mathlib.Analysis.MellinTransform
 The substitution `u = t^κ` transports the Laplace remainder estimate to stretched
 exponentials. Domination then gives Watson's lemma for kernels bounded by such an
 exponential. The moment coefficients are Mellin transforms.
+
+## Main results
+
+* `isLittleO_rpow_exp_mul_rpow_atTop`, `isLittleO_exp_neg_mul_rpow_rpow_atTop`: comparison of
+  real powers with stretched exponentials.
+* `integral_exp_neg_mul_rpow_mul_eq`, `integrableOn_exp_neg_mul_rpow_mul_iff`: the power
+  substitution for stretched Laplace integrals.
+* `isBigO_integral_exp_neg_mul_rpow_mul`: the Laplace remainder estimate for stretched
+  exponentials.
+* `mellinConvergent_of_norm_le_exp_rpow`: Mellin moments of stretched-exponentially bounded
+  kernels converge.
+* `isBigO_integral_kernel_mul`: a power-law remainder at zero gives a power-law remainder at
+  infinity.
+* `integral_kernel_mul_rpow`, `integral_kernel_mul_rpow_expansion`: dilated power moments are
+  Mellin moments, term by term for finite expansions.
+* `hasAsymptoticExpansion_integral_kernel_mul_rpow_seq`: Watson's lemma for a measurable kernel
+  dominated by a stretched exponential.
 -/
 
 @[expose] public noncomputable section

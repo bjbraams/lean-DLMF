@@ -15,28 +15,39 @@ Infrastructure for the addition theorems DLMF 14.18.1–14.18.5 and 14.28.1 for 
 proved coefficientwise in the Fourier expansion in the angle `φ`, with Carlson's theorem in `ν`
 carrying the integer case (the polynomial addition theorem) to all degrees.
 
-* `legAdd_coeff`, `legAdd_hasSum_cos`: Fourier coefficients on `[-π, π]` and the cosine expansion
-  of an even, `2π`-periodic `C²` function (absolute convergence from two integrations by parts).
+## Main definitions
+
+* `legAdd_coeff`: the Fourier coefficient on `[-π, π]`.
+* `legAdd_hX`: the argument `cosh ξ₁ cosh ξ₂ - sinh ξ₁ sinh ξ₂ cos t` of the hyperbolic addition
+  theorem.
+* `legAdd_fY`: the argument `cos θ₁ cos θ₂ + sin θ₁ sin θ₂ cos t` of the Ferrers addition
+  theorem.
+
+## Main results
+
+* `legAdd_hasSum_cos`: the cosine expansion of an even, `2π`-periodic `C²` function (absolute
+  convergence from two integrations by parts, `legAdd_coeff_bound`).
 * `legAdd_carlson`: Carlson's theorem (`Complex.eqOn_zero_of_natCast_eq_zero`) for entire
   functions bounded by `C exp (A |Re ν| + B |Im ν|)`, `B < π`, extended to all of `ℂ` by the
   identity theorem.
-* Laplace-type bounds on `(1, ∞)`: `legAdd_norm_legendreP_le` (`|P_ν(x)| ≤ (2x)^{|Re ν|}`, from
-  Laplace's first integral `legendreP_laplace`), `legAdd_norm_associatedP_nat_le` (from 14.12.7) and
-  `legAdd_norm_associatedP_neg_le` (from the fractional integral 14.12.5).
+* `legAdd_norm_legendreP_le`, `legAdd_norm_associatedP_nat_le`, `legAdd_norm_associatedP_neg_le`:
+  Laplace-type bounds on `(1, ∞)`: `|P_ν(x)| ≤ (2x)^{|Re ν|}` from Laplace's first integral
+  `legendreP_laplace`, and bounds from 14.12.7 and from the fractional integral 14.12.5.
 * `legAdd_coeff_kernel`, `legAdd_hyp_nat`: Fourier coefficients of the finite Legendre angular
   kernel, giving the integer-degree identity.
 * `legAdd_hyp_coeff_eq`, `legAdd_associatedP_addition`: the Fourier coefficients of
-  `φ ↦ P_ν(cosh ξ₁ cosh ξ₂ - sinh ξ₁ sinh ξ₂ cos φ)` for all complex `ν`, and 14.18.4.
-
-* `legAdd_regGHG_one_eq_integral`, `legAdd_norm_ferrersP_zero_le`: the representation
+  `φ ↦ P_ν(cosh ξ₁ cosh ξ₂ - sinh ξ₁ sinh ξ₂ cos φ)` for all complex `ν`, and DLMF 14.18.4.
+* `legAdd_regGHG_one_eq_integral`: the representation
   `𝖯_ν(cos θ) = π^{-1/2} ∫₀^π 𝐅(ν+1, -ν; 1/2; sin²(θ/2) sin² t) dt` (termwise, with Wallis'
-  integral), which with 15.4.14 is the Mehler–Dirichlet integral in disguise, and the sharp bound
-  `|𝖯_ν(cos θ)| ≤ e^{θ |Im ν|} / cos (θ/2)` for `0 ≤ θ < π` and all complex `ν`.
+  integral `legAdd_integral_sin_pow_even`), which with 15.4.14 is the Mehler–Dirichlet integral
+  in disguise.
+* `legAdd_norm_ferrersP_zero_le`: the sharp bound `|𝖯_ν(cos θ)| ≤ e^{θ |Im ν|} / cos (θ/2)` for
+  `0 ≤ θ < π` and all complex `ν`.
 * `legAdd_norm_ferrersP_neg_le`, `legAdd_ferrersP_nat_eq`: bounds for `𝖯^{-m}_ν` (from 14.12.2)
   and `𝖯^m_ν = (-1)^m (ν-m+1)_{2m} 𝖯^{-m}_ν` for every complex `ν`.
-* `legAdd_fer_coeff_eq`, `legAdd_ferrersP_addition_of_nat`: Carlson's theorem with type
-  `θ₁ + θ₂ < π` and 14.18.1, given the integer case `legAdd_fer_nat` (from the polynomial
-  addition theorem).
+* `legAdd_fer_coeff_eq`, `legAdd_ferrersP_addition_of_nat`, `legAdd_fer_nat`: Carlson's theorem
+  with type `θ₁ + θ₂ < π`, and DLMF 14.18.1 from its integer case (the polynomial addition
+  theorem).
 -/
 
 @[expose] public noncomputable section

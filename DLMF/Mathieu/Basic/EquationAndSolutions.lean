@@ -6,9 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-public import DLMFMathlib.Analysis.ODE.P1oEntireLinear
-public import DLMFMathlib.Analysis.ODE.P1oParamHolomorphic
-public import DLMFMathlib.Analysis.ODE.P2sSturmSpectrum
+public import DLMFMathlib.Analysis.ODE.EntireLinear
+public import DLMFMathlib.Analysis.ODE.ParamHolomorphic
+public import DLMFMathlib.Analysis.ODE.SturmSpectrum
 public import Mathlib.Tactic.Echelon.Zsqrtd
 public import Mathlib.Tactic.Inclusion.Extension.Core.Core
 public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
@@ -29,7 +29,28 @@ public import Mathlib.Tactic.Polynomial.Basic
 public import Mathlib.Tactic.ReduceModChar
 
 /-!
-# Mathieu equation, canonical solutions and Floquet data
+# Mathieu's equation, basic solutions and Floquet data
+
+Mathieu's equation `w'' + (a - 2q cos 2z) w = 0` with complex `z`, `a`, `q` (DLMF 28.2.1), its
+basic solutions `w_I`, `w_II` (DLMF 28.2.5) and the Floquet notions of DLMF §28.2(iii)–(iv).
+
+## Main definitions
+
+* `IsMathieuSolution a q w`: `w` is an entire solution of Mathieu's equation (DLMF 28.2.1).
+* `mathieuWI`, `mathieuWII`: the basic solutions `w_I(z; a, q)`, `w_II(z; a, q)` with initial
+  data `(1, 0)` and `(0, 1)` at `z = 0` (DLMF 28.2.5).
+* `mathieuMonodromy`: the monodromy matrix (DLMF 28.2.15).
+* `IsMathieuCharExp a q ν`: `ν` solves the characteristic equation `cos πν = w_I(π; a, q)`
+  (DLMF 28.2.16).
+* `IsFloquetSolution a q ν w`: `w` is a nontrivial solution with `w(z + π) = e^{πiν} w(z)`
+  (DLMF 28.2.14).
+
+## Implementation notes
+
+`IsMathieuSolution` asks for genuine complex differentiability. The basic solutions are defined
+by choice; the existence theorem `exists_isMathieuSolution` (entire solutions of linear ODEs with
+entire coefficients, by majorant series) and the uniqueness theorem
+`IsMathieuSolution.eq_of_initial` are in `DLMF.Mathieu.FundamentalSolutions`.
 -/
 
 @[expose] public noncomputable section

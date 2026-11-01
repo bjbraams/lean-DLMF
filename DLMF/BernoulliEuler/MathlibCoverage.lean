@@ -12,12 +12,12 @@ public import Mathlib.NumberTheory.BernoulliPolynomials
 public import Mathlib.NumberTheory.ZetaValues
 
 /-!
-# DLMF Chapter 24, §§24.1–24.10: results already in Mathlib
+# DLMF §§24.1–24.10: results already in Mathlib
 
-Checked pointers from DLMF items to Mathlib declarations, in addition to the Chapter 24 pointers
-already in `DLMF.Core.UpstreamElementary` (24.2.E2–E5, 24.4.E1, E3, E7, E18, E25, E27, E34,
-24.8.E1–E3, 24.13.E1–E2), which are not repeated. Mathlib's `bernoulli` uses `B₁ = -1/2` (DLMF's
-convention), `bernoulli'` uses `B'₁ = +1/2`; `Polynomial.bernoulli` lives in `ℚ[X]` and
+Pointers from DLMF items in §§24.1–24.10 to Mathlib declarations, in addition to the Chapter 24
+pointers in `DLMF.Core.UpstreamElementary` (24.2.E2–E5, 24.4.E1, E3, E7, E18, E25, E27, E34,
+24.8.E1–E3, 24.13.E1–E2), which are not repeated. Mathlib's `bernoulli` uses `B₁ = -1/2`
+(DLMF's convention), `bernoulli'` uses `B'₁ = +1/2`; `Polynomial.bernoulli` lives in `ℚ[X]` and
 `bernoulliFun` is its real evaluation.
 -/
 

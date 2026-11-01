@@ -6,22 +6,38 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Continuation
+public import ToMathlib.Analysis.SpecialFunctions.Pow
 
 /-!
 # The loop integral for `₂F₁` (DLMF 15.6.2, Temme §5.2.2)
 
 DLMF 15.6.2 represents `F(a,b;c;z)/Γ(c)` by an integral over a loop that starts at `t = 0`,
 encircles `t = 1` once in the positive sense and returns to `0`, with `t^{b-1}` and `(t-1)^{c-b-1}`
-taking their principal values where the loop crosses the positive real axis beyond `1`. We use the
-explicit loop of radius `0 < ρ < 1` about `1`: the segment `[0, 1-ρ]` below the cut, where
-`(t-1)^{c-b-1} = (1-t)^{c-b-1} e^{-πi(c-b-1)}`, the circle `t = 1 + ρ e^{iθ}`, `-π < θ < π`, and the
-segment back above the cut, where `(t-1)^{c-b-1} = (1-t)^{c-b-1} e^{πi(c-b-1)}`
-(`hypergeometricLoop`).
+taking their principal values where the loop crosses the positive real axis beyond `1`.
 
-In the coordinate `w = log (t-1)` the loop becomes three sides of a rectangle, so Cauchy's theorem
-for rectangles shows that the loop integral does not depend on `ρ`. For `re (c-b) > 0` the
-circle contributes nothing as `ρ → 0`, and the two segments give `-2i sin(π(c-b-1))` times Euler's
-integral 15.6.1. Analytic continuation in `c` removes the restriction.
+## Main definitions
+
+* `hypergeometricLoop`: the loop integral over the explicit loop of radius `0 < ρ < 1` about
+  `1`: the segment `[0, 1-ρ]` below the cut, where `(t-1)^{c-b-1} = (1-t)^{c-b-1} e^{-πi(c-b-1)}`,
+  the circle `t = 1 + ρ e^{iθ}`, `-π < θ < π`, and the segment back above the cut, where
+  `(t-1)^{c-b-1} = (1-t)^{c-b-1} e^{πi(c-b-1)}`.
+
+## Main results
+
+* `hypergeometricLoop_eq`: the loop integral does not depend on `ρ`.
+* `hypergeometricLoop_eq_euler`: for `re (c-b) > 0` the loop integral is `-2i sin(π(c-b-1))`
+  times Euler's integral 15.6.1.
+* `regularizedGaussHGFun_eq_loop`: the loop integral representation, DLMF 15.6.2.
+
+## Implementation notes
+
+In the coordinate `w = log (t-1)` the loop becomes three sides of a rectangle, so Cauchy's
+theorem for rectangles shows that the loop integral does not depend on `ρ`. For `re (c-b) > 0`
+the circle contributes nothing as `ρ → 0`. Analytic continuation in `c` removes the restriction.
+
+## References
+
+* N. M. Temme, *Special Functions*, §5.2.2.
 -/
 
 @[expose] public section
@@ -54,17 +70,10 @@ def hypergeometricLoop (a b c z : ℂ) (ρ : ℝ) : ℂ :=
 def loopLogIntegrand (a b c z : ℂ) (w : ℂ) : ℂ :=
   (1 + exp w) ^ (b - 1) * exp ((c - b - 1) * w) * (1 - z * (1 + exp w)) ^ (-a) * exp w
 
-/-- `(eˣ)^s = e^{s x}` for real `x`. -/
-theorem ofReal_exp_cpow (x : ℝ) (s : ℂ) : ((Real.exp x : ℝ) : ℂ) ^ s = exp (s * x) := by
-  rw [cpow_def_of_ne_zero (by exact_mod_cast (Real.exp_pos x).ne'), ofReal_exp, log_exp]
-  · ring
-  · simp [Real.pi_pos]
-  · simp [Real.pi_pos.le]
-
 /-- `ρ^s = e^{s log ρ}` for real `ρ > 0`. -/
 theorem ofReal_cpow_eq_exp_mul_log {ρ : ℝ} (hρ : 0 < ρ) (s : ℂ) :
     (ρ : ℂ) ^ s = exp (s * Real.log ρ) := by
-  rw [← Real.exp_log hρ, ofReal_exp_cpow, Real.log_exp]
+  rw [← Real.exp_log hρ, Complex.ofReal_exp_cpow, Real.log_exp]
 
 /-- The log-coordinate integrand is holomorphic where `|e^w| < 1` and `|z| (1 + |e^w|) < 1`. -/
 theorem differentiableAt_loopLogIntegrand (a b c z : ℂ) {w : ℂ} (hw : w.re < 0)
@@ -199,7 +208,7 @@ theorem integral_loopLogIntegrand_horizontal (a b c z : ℂ) {s : ℂ} (hs : s =
   rw [exp_add, hexp, show (1 : ℂ) + exp x * -1 = ((1 - Real.exp x : ℝ) : ℂ) by
       push_cast; ring,
     show ((1 - (1 - Real.exp x) : ℝ) : ℂ) = ((Real.exp x : ℝ) : ℂ) by push_cast; ring,
-    ofReal_exp_cpow, ← ofReal_exp]
+    Complex.ofReal_exp_cpow, ← ofReal_exp]
   have hsre : (s.re : ℂ) = s := by rcases hs with rfl | rfl <;> simp
   rw [show (c - b - 1) * ((x : ℂ) + ((s.re * π : ℝ) : ℂ) * I) =
       (c - b - 1) * x + s * π * I * (c - b - 1) by push_cast; rw [hsre]; ring, exp_add]

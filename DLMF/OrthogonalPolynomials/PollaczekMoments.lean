@@ -9,16 +9,37 @@ public import DLMF.Bessel.ProductIntegral
 public import DLMF.OrthogonalPolynomials.HahnMoments
 public import DLMF.Hypergeometric.FiniteConvolution
 /-!
-# Tilted Gamma moments and Meixner--Pollaczek orthogonality
+# Tilted Gamma moments and Meixner–Pollaczek orthogonality
 
-The two-Gamma Mellin--Barnes transform is continued to the full strip needed by
-DLMF 18.19.9, using the project's proved vertical Gamma bounds and holomorphic
-integral theorem. Chu--Vandermonde then evaluates all polynomial moments, including
-the exact square norm. Every finite integral exchange uses absolute integrability.
+Orthogonality and square norms of the Meixner–Pollaczek polynomials (DLMF 18.19.9) with
+respect to the tilted two-Gamma weight. The two-Gamma Mellin–Barnes transform is continued to
+the full strip, using vertical Gamma bounds and holomorphy of parameter integrals, and the
+Chu–Vandermonde sum evaluates all polynomial moments, including the exact square norm.
 
-The analytic continuation step reuses `DLMF.Bessel.frequently_of_forall_nat_add`
-and `DLMF.Bessel.ofReal_mul_cpow_of_pos` from `Bessel/ProductIntegral`. The finite
-basis change and Gamma-shift formula reuse `HahnMoments`, avoiding a second proof.
+## Main definitions
+
+* `pairHalf`: a rescaled Gamma pair for the half-plane Mellin–Barnes transform.
+* `weight`, `scale`, `phase`: the tilted two-Gamma weight and the scale and phase of its
+  transform.
+* `moment`: the reversed rising-factorial moment.
+* `poly`: a terminating Pollaczek sum with its transform-adapted argument.
+
+## Main results
+
+* `pairHalf_transform`: the rescaled Barnes transform throughout the right half-plane.
+* `tilted_Gamma_integral`, `integrable_tilted_Gamma`: the tilted two-Gamma integral and its
+  absolute integrability throughout the strip.
+* `mixed_moment`: polynomial factors shift the two Gamma parameters.
+* `poly_orthogonal`: orthogonality of Pollaczek sums of unequal degree.
+* `poly_square`, `normalized_square`: the square norm, unnormalized and in the standard
+  normalization.
+
+## Implementation notes
+
+Every exchange of a finite sum and an integral uses absolute integrability. The analytic
+continuation uses `DLMF.Bessel.frequently_of_forall_nat_add` and
+`DLMF.Bessel.ofReal_mul_cpow_of_pos` from `DLMF.Bessel.ProductIntegral`; the basis change and
+Gamma-shift formula come from `DLMF.OrthogonalPolynomials.HahnMoments`.
 -/
 
 @[expose] public section

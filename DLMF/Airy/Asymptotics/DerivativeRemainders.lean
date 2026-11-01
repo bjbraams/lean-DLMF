@@ -10,10 +10,23 @@ public import DLMF.Airy.Asymptotics.OscillatoryRemainders
 /-!
 # Stieltjes representations for Airy derivative remainders
 
-Exact chi constants and a positive Stieltjes representation control the derivative error kernel.
+The normalized Kummer form of the Airy derivative is written as a Stieltjes transform of a
+nonnegative density on the positive axis; together with exact values of the Gamma-ratio
+multiplier `χ` this controls the error kernel of the expansions of `Ai'` and `Bi'` (DLMF §9.7).
 
-Source references and common attribution are retained in
-`DLMF.Airy.Asymptotics`.
+## Main definitions
+
+* `airyDer_normalizedU`: the normalized Kummer form of the Airy derivative.
+* `airyDer_density`: the real density of its Stieltjes transform.
+
+## Main results
+
+* `airyChi_zero`, `airyChi_one`, `airyChi_add_two`, `airyChi_two_mul`,
+  `airyChi_two_mul_add_one`: exact values and the two-step recurrence of `χ`.
+* `airyDer_stieltjes`: the normalized Kummer function has a positive Stieltjes remainder.
+* `airyDer_density_nonneg`, `airyDer_density_moment`: positivity and moments of the density.
+* `airyDer_normalizedU_eq`: the normalized Airy derivative is the positive Stieltjes function on
+  its principal sector.
 -/
 
 @[expose] public noncomputable section

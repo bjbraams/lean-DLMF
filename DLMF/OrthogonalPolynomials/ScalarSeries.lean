@@ -10,8 +10,17 @@ public import DLMFMathlib.Analysis.Complex.ScalarSeries
 /-!
 # Scalar power series helpers
 
-Multiplication of a scalar power series by a monomial. Uniqueness of scalar coefficients
-from their sums on the unit disk is `Complex.powerSeries_coefficients_unique`, imported from
+Multiplication of a scalar power series by a monomial.
+
+## Main results
+
+* `hasSum_scalar_shift`: multiplication of a power series by a monomial inserts a zero
+  prefix.
+
+## Implementation notes
+
+Uniqueness of scalar coefficients from their sums on the unit disk is
+`Complex.powerSeries_coefficients_unique`, imported from
 `DLMFMathlib.Analysis.Complex.ScalarSeries`.
 -/
 

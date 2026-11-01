@@ -10,11 +10,26 @@ public import DLMF.Legendre.Continuation.Monodromy
 /-!
 # Continuity of continued Legendre connection formulas
 
-Continuity and linear connection arguments complete the logarithmic-plane continuation
-identities.
+Continuous dependence of the Legendre transport on its parameters, and the continuation
+formulas DLMF 14.24.1 and 14.24.4 obtained from 14.24.2–14.24.3 by connection formulas and
+parameter limits.
 
-Source references and common attribution are retained in
-`DLMF.Legendre.Continuation`.
+## Main results
+
+* `legTr_transport_tendsto`: continuous dependence of the transport on the degree, the order and
+  the initial data (Gronwall).
+* `legTr_transport_neg_order`, `legTr_transport_degree_eq`, `legTr_transport_linear`: the
+  transport depends on the parameters only through `μ²` and `ν(ν+1)`, and is linear in the
+  initial data.
+* `associatedP_ellipse_continuation`: DLMF 14.24.1.
+* `olverQ_one_continuation`: DLMF 14.24.4.
+
+## Implementation notes
+
+DLMF 14.24.1 is proved off the zeros of `cos νπ` from 14.24.2 and 14.9.12, and at the odd
+half-integral degrees by a parameter limit. In DLMF 14.24.4 integer orders use the removable
+parameter limit of the complete expression; non-integer orders follow from 14.24.3 for
+`P^{±μ}_ν` and the connection formula.
 -/
 
 @[expose] public noncomputable section

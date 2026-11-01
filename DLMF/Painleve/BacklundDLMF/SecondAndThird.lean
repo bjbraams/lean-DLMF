@@ -9,13 +9,30 @@ public import DLMF.Painleve.Backlund
 public import DLMF.Painleve.Equations
 
 /-!
-# Backlund transformations for Painleve II and III
+# Bäcklund transformations for Painlevé II and III (DLMF §32.7(ii)–(iii))
 
-Parameter-changing transformations of Painleve II and III, including denominator and domain
-conditions.
+The Bäcklund transformations of Painlevé II and III in the DLMF normalization.
 
-Source references and common attribution are retained in
-`DLMF.Painleve.BacklundDLMF`.
+## Main results
+
+* `IsPainleveIIOn.neg`, `IsPainleveIIOn.backlund_plus`, `IsPainleveIIOn.backlund_minus`: the
+  transformations `S` and `T^±` of `PII` (DLMF 32.7.1–32.7.2).
+* `IsPainleveIIOn.special`, `IsPainleveIIOn.special_sq`: the special transformation from
+  `α = 0` to `α = ±1/2` (DLMF 32.7.3–32.7.4).
+* `painleveII_recurrence`: the nonlinear recurrence for `w_{α±1} = T^± w_α` (DLMF 32.7.5).
+* `IsPainleveIIIOn.neg`, `IsPainleveIIIOn.inv`: the transformations `S₁` and `S₂` of `PIII`
+  (DLMF 32.7.6–32.7.9).
+* `IsPainleveIIIOn.t₁`, `IsPainleveIIIOn.t₂`, `IsPainleveIIIOn.t₃`, `IsPainleveIIIOn.t₄`: the
+  transformations `T₁`–`T₄` of `PIII` with `γ = 1`, `δ = -1` (DLMF 32.7.10–32.7.14).
+* `IsPainleveIIIOn.t₅`, `IsPainleveIIIOn.t₆`: the transformations for `γ = 0`
+  (DLMF 32.7.15–32.7.17).
+* `isPainleveIIIOn_sq_of_isPainleveIIIOn`: the quadratic transformation DLMF 32.7.18.
+
+## Implementation notes
+
+All maps are stated on open sets where their denominators do not vanish. Square roots such as
+`ζ = √(2z)` are replaced by arbitrary functions with the right square and derivative, so both
+branches are covered at once.
 -/
 
 @[expose] public noncomputable section
@@ -38,10 +55,10 @@ solution of `PII` with parameter `α + 1` on every open set where the denominato
 vanish. Stronger than DLMF: no restriction `α ≠ -1/2` is needed on such a set (at
 `α = -1/2` the map is `w ↦ -w`). -/
 @[dlmf 32.7.E2]
-theorem IsPainleveIIOn.tPlus {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ} (h : IsPainleveIIOn α w U)
+theorem IsPainleveIIOn.backlund_plus {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ} (h : IsPainleveIIOn α w U)
     (hU : IsOpen U) (hD : ∀ z ∈ U, 2 * w z ^ 2 + 2 * deriv w z + z ≠ 0) :
     IsPainleveIIOn (α + 1) (painleveIITPlus α w) U := by
-  have h1 := (isPainleveIIOn_iff_isPIIOn.mp h).shiftDown hU (fun z hz => by
+  have h1 := (isPainleveIIOn_iff_isPIIOn.mp h).shift_down hU (fun z hz => by
     simpa [backlundDenom, add_comm, add_left_comm, add_assoc] using hD z hz)
   rw [isPainleveIIOn_iff_isPIIOn]
   have he : backlundDown (-α) w = painleveIITPlus α w := by
@@ -56,11 +73,11 @@ theorem IsPainleveIIOn.tPlus {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ} (h : IsP
 /-- DLMF 32.7.2, the transformation `T⁻`: `w(z; α-1) = -w - (2α-1)/(2w² - 2w' + z)` is a
 solution of `PII` with parameter `α - 1` where the denominator does not vanish. -/
 @[dlmf 32.7.E2]
-theorem IsPainleveIIOn.tMinus {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ} (h : IsPainleveIIOn α w U)
+theorem IsPainleveIIOn.backlund_minus {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ} (h : IsPainleveIIOn α w U)
     (hU : IsOpen U) (hD : ∀ z ∈ U, 2 * w z ^ 2 - 2 * deriv w z + z ≠ 0) :
     IsPainleveIIOn (α - 1) (painleveIITMinus α w) U := by
   have hneg (z : ℂ) : deriv (fun x => -w x) z = -deriv w z := deriv.neg
-  have h1 := (isPainleveIIOn_iff_isPIIOn.mp h).shiftUp hU (fun z hz => by
+  have h1 := (isPainleveIIOn_iff_isPIIOn.mp h).shift_up hU (fun z hz => by
     simp only [backlundDenom, hneg]
     convert hD z hz using 1; ring)
   rw [isPainleveIIOn_iff_isPIIOn]
@@ -74,7 +91,7 @@ theorem IsPainleveIIOn.tMinus {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ} (h : Is
   exact h1
 
 /-- The explicit derivative of the special transformation 32.7.3. -/
-private lemma a32_special_hasDerivAt {w : ℂ → ℂ} {U : Set ℂ} (h : IsPainleveIIOn 0 w U)
+private lemma hasDerivAt_specialTransform {w : ℂ → ℂ} {U : Set ℂ} (h : IsPainleveIIOn 0 w U)
     (hw0 : ∀ z ∈ U, w z ≠ 0) {t ε : ℂ} (ht : t ≠ 0) {ζ : ℂ} (hζ : -ζ / t ∈ U) :
     HasDerivAt (fun ζ => ε / t * deriv w (-ζ / t) / w (-ζ / t))
       (-(ε / t ^ 2) * (2 * w (-ζ / t) ^ 2 + -ζ / t - deriv w (-ζ / t) ^ 2 / w (-ζ / t) ^ 2))
@@ -104,7 +121,7 @@ theorem IsPainleveIIOn.special {w : ℂ → ℂ} {U : Set ℂ} (h : IsPainleveII
   have ht0 : t ≠ 0 := by rintro rfl; norm_num at ht
   have hV : IsOpen ((fun ζ : ℂ => -ζ / t) ⁻¹' U) :=
     hU.preimage (continuous_neg.div_const t)
-  refine isODE2SolutionOn_of_hasDerivAt hV (fun ζ hζ => a32_special_hasDerivAt h hw0 ht0 hζ)
+  refine isODE2SolutionOn_of_hasDerivAt hV (fun ζ hζ => hasDerivAt_specialTransform h hw0 ht0 hζ)
     (fun ζ hζ => ?_)
   have hζ : -ζ / t ∈ U := hζ
   have hφ : HasDerivAt (fun ζ : ℂ => -ζ / t) (-1 / t) ζ := by
@@ -136,7 +153,7 @@ theorem IsPainleveIIOn.special_sq {w : ℂ → ℂ} {U : Set ℂ} (h : IsPainlev
     w (-ζ / t) ^ 2 = 1 / t * (W ζ ^ 2 - ε * deriv W ζ + ζ / 2) := by
   have ht0 : t ≠ 0 := by rintro rfl; norm_num at ht
   intro W
-  rw [(a32_special_hasDerivAt (ε := ε) h hw0 ht0 hζ).deriv]
+  rw [(hasDerivAt_specialTransform (ε := ε) h hw0 ht0 hζ).deriv]
   have h0 := hw0 _ hζ
   simp only [W]
   generalize w (-ζ / t) = a at h0 ⊢

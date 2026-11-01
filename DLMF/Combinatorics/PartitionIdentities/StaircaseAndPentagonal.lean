@@ -8,12 +8,37 @@ module
 public import DLMF.Combinatorics.PartitionIdentities.RestrictedProducts
 
 /-!
-# Staircase and pentagonal partition identities
+# Staircase and pentagonal partition identities (DLMF §26.10(ii), §26.10(v))
 
-Staircase bijections, distinct-part generating functions and the pentagonal theorem.
+Generating functions for partitions with parts differing by at least `k` and with parts from a
+set, the recurrences of DLMF §26.10(v) and the pentagonal-number identities (26.10.7), (26.10.8).
 
-Source references and common attribution are retained in
-`DLMF.Combinatorics.PartitionIdentities`.
+## Main results
+
+* `hasSum_partitionCountDiff`: `∑ p(𝒟k, n) qⁿ = 1 + ∑_{m ≥ 1} q^{(km² + (2-k)m)/2}/(q;q)_m`
+  (DLMF 26.10.4).
+* `hasSum_partitionCountIn`: `∑ p(∈ S, n) qⁿ = ∏_{j ∈ S} (1 - q^j)⁻¹` (DLMF 26.10.5).
+* `partitionCountDistinct_recurrence`, `partitionCountIn_recurrence`: the divisor-sum
+  recurrences (DLMF 26.10.6, 26.10.11).
+* `sum_neg_one_pow_partitionCountDistinct_pentagonal`,
+  `sum_neg_one_pow_partitionCountDistinct_two_pentagonal`: DLMF 26.10.7, 26.10.8.
+* `card_distinct_card_eq_recurrence`, `partitionCountAtMostDistinct_recurrence`: the corrected
+  form of DLMF 26.10.9.
+* `partitionCountDiff_eq_sum`: `p(𝒟k, n)` as a sum of `p_m` (DLMF 26.10.10).
+
+## Implementation notes
+
+* (26.10.9) as printed, `p_m(𝒟, n) = p_m(𝒟, n - m) + p_{m-1}(𝒟, n)`, is false for the stated
+  definition (`m = n = 2`: `1 ≠ 2`; checked by brute force). Removing one from each of `m`
+  distinct parts leaves `m` or `m - 1` distinct parts, so the correct analogue of (26.9.8) is
+  `p_m(𝒟, n) = p_{m-1}(𝒟, n) + p_m(𝒟, n - m) - p_{m-2}(𝒟, n - m)` (equivalently, for exactly
+  `m` distinct parts, `q_m(n) = q_m(n - m) + q_{m-1}(n - m)`); this corrected form is stated.
+* (26.10.7), (26.10.8): the printed sums over `k ≥ 0` with both signs `±` (the `k = 0` term once)
+  are sums over `k ∈ ℤ` of the pentagonal numbers `k(3k-1)/2` (Mathlib's `pentagonal`).
+
+## References
+
+* NIST DLMF §26.10.
 -/
 
 @[expose] public section
@@ -29,11 +54,11 @@ namespace DLMF.Combinatorics
 /-! ### Staircase generating functions (agent p26a) -/
 
 /-- DLMF (26.10.10) (helper): the staircase count with minimal part `1`. -/
-lemma s26a_partitionCountDiff_eq_sum (k n : ℕ) :
+private lemma partitionCountDiff_eq_sum_partitionCountAtMostParts (k n : ℕ) :
     partitionCountDiff k n =
       ∑ m ∈ range (n + 1) with k * m.choose 2 + m ≤ n,
         partitionCountAtMostParts m (n - (k * m.choose 2 + m)) := by
-  have h := s26a_card_diff_min_eq_sum k 1 n le_rfl
+  have h := card_partsDiffer_ge_eq_sum k 1 n le_rfl
   simp only [one_mul] at h
   rw [← h, partitionCountDiff]
   congr 1
@@ -41,7 +66,7 @@ lemma s26a_partitionCountDiff_eq_sum (k n : ℕ) :
   exact ⟨fun hp => ⟨hp, fun i hi => p.parts_pos hi⟩, fun hp => hp.1⟩
 
 /-- `(q;q)_m = ∏_{j=1}^m (1 - q^j)`. -/
-lemma s26a_qPochhammer_eq_prod (q : ℂ) (m : ℕ) :
+lemma qPochhammer_self_eq_prod (q : ℂ) (m : ℕ) :
     qPochhammer q q m = ∏ j ∈ Icc 1 m, (1 - q ^ j) := by
   induction m with
   | zero => simp
@@ -49,7 +74,7 @@ lemma s26a_qPochhammer_eq_prod (q : ℂ) (m : ℕ) :
     rw [qPochhammer_succ, ih, Finset.prod_Icc_succ_top (by omega), pow_succ' q m]
 
 /-- Generating function of `c n = ∑_{m, e m ≤ n} p_m(n - e m)` for `e m ≥ m`. -/
-lemma s26a_hasSum_staircase {q : ℂ} (hq : ‖q‖ < 1) (e : ℕ → ℕ) (he : ∀ m, m ≤ e m)
+lemma hasSum_staircase {q : ℂ} (hq : ‖q‖ < 1) (e : ℕ → ℕ) (he : ∀ m, m ≤ e m)
     (c : ℕ → ℕ) (hc : ∀ n, c n = ∑ m ∈ range (n + 1) with e m ≤ n,
       partitionCountAtMostParts m (n - e m)) :
     HasSum (fun n => (c n : ℂ) * q ^ n) (∑' m : ℕ, q ^ e m * ∏ j ∈ Icc 1 m, (1 - q ^ j)⁻¹) ∧
@@ -77,7 +102,7 @@ lemma s26a_hasSum_staircase {q : ℂ} (hq : ‖q‖ < 1) (e : ℕ → ℕ) (he :
       Real.exp (1 / (1 - r) ^ 2) * r ^ m := by
     intro m
     rw [mul_comm]
-    exact mul_le_mul (r26a_prod_inv_le hr0 hq _ (by simp))
+    exact mul_le_mul (prod_one_sub_pow_inv_le hr0 hq _ (by simp))
       (pow_le_pow_of_le_one hr0 hq.le (he m)) (by positivity) (by positivity)
   have hsumF : Summable F := by
     refine Summable.of_norm ?_
@@ -124,11 +149,11 @@ theorem hasSum_partitionCountDiff {q : ℂ} (hq : ‖q‖ < 1) (k : ℕ) :
     HasSum (fun n => (partitionCountDiff k n : ℂ) * q ^ n)
         (∑' m : ℕ, q ^ (k * m.choose 2 + m) / qPochhammer q q m) ∧
       Summable fun m : ℕ => q ^ (k * m.choose 2 + m) / qPochhammer q q m := by
-  have h := s26a_hasSum_staircase hq (fun m => k * m.choose 2 + m) (fun m => by omega)
-    (partitionCountDiff k) (s26a_partitionCountDiff_eq_sum k)
+  have h := hasSum_staircase hq (fun m => k * m.choose 2 + m) (fun m => by omega)
+    (partitionCountDiff k) (partitionCountDiff_eq_sum_partitionCountAtMostParts k)
   have he : (fun m : ℕ => q ^ (k * m.choose 2 + m) / qPochhammer q q m) =
       fun m => q ^ (k * m.choose 2 + m) * ∏ j ∈ Icc 1 m, (1 - q ^ j)⁻¹ := by
-    ext m; rw [s26a_qPochhammer_eq_prod, div_eq_mul_inv, prod_inv_distrib]
+    ext m; rw [qPochhammer_self_eq_prod, div_eq_mul_inv, prod_inv_distrib]
   rw [he]
   exact h
 
@@ -140,11 +165,11 @@ theorem hasSum_partitionCountIn {q : ℂ} (hq : ‖q‖ < 1) (S : Set ℕ) [Deci
         (∏' j : ℕ, if j + 1 ∈ S then (1 - q ^ (j + 1))⁻¹ else 1) ∧
       HasProd (fun j : ℕ => if j + 1 ∈ S then (1 - q ^ (j + 1))⁻¹ else 1)
         (∏' j : ℕ, if j + 1 ∈ S then (1 - q ^ (j + 1))⁻¹ else 1) :=
-  r26a_hasSum_partitionCountIn hq S
+  hasSum_partitionCountIn_and_hasProd hq S
 
 /-- Removing `k` copies of an allowed part `a`: partitions of `n` with parts in `P` and at least `k`
 copies of `a` correspond to partitions of `n - k a` with parts in `P`. -/
-lemma r26a_card_restricted_count_ge (P : ℕ → Prop) [DecidablePred P] {a : ℕ} (ha1 : 1 ≤ a)
+private lemma card_restricted_count_ge (P : ℕ → Prop) [DecidablePred P] {a : ℕ} (ha1 : 1 ≤ a)
     (hP : P a) : ∀ k n : ℕ, k * a ≤ n →
       #{p ∈ Nat.Partition.restricted n P | k ≤ p.parts.count a} =
         #(Nat.Partition.restricted (n - k * a) P) := by
@@ -183,7 +208,7 @@ lemma r26a_card_restricted_count_ge (P : ℕ → Prop) [DecidablePred P] {a : �
       · rw [Multiset.count_cons_self]; omega
 
 /-- (26.10.11) for a predicate: `n p(P, n) = ∑_{t=1}^n p(P, n - t) ∑_{j ∣ t, P j} j`. -/
-lemma r26a_card_restricted_recurrence (P : ℕ → Prop) [DecidablePred P] (n : ℕ) :
+private lemma mul_card_restricted_eq_sum_divisors (P : ℕ → Prop) [DecidablePred P] (n : ℕ) :
     n * #(Nat.Partition.restricted n P) =
       ∑ t ∈ Icc 1 n, #(Nat.Partition.restricted (n - t) P) * ∑ j ∈ t.divisors with P j, j := by
   set R := Nat.Partition.restricted n P
@@ -228,7 +253,7 @@ lemma r26a_card_restricted_recurrence (P : ℕ → Prop) [DecidablePred P] (n : 
         if k * j ≤ n then #(Nat.Partition.restricted (n - k * j) P) else 0 := by
       intro k _
       split_ifs with hkj
-      · exact r26a_card_restricted_count_ge P hj.1.1 hj.2 k n hkj
+      · exact card_restricted_count_ge P hj.1.1 hj.2 k n hkj
       · rw [card_eq_zero, filter_eq_empty_iff]
         intro p _ hp
         apply hkj
@@ -281,7 +306,7 @@ theorem partitionCountDistinct_recurrence (n : ℕ) :
   have h : ∀ m, partitionCountDistinct m = #(Nat.Partition.restricted m (¬ Even ·)) := fun m => by
     rw [partitionCountDistinct, ← Nat.Partition.card_odds_eq_card_distincts]; rfl
   simp_rw [h]
-  rw [r26a_card_restricted_recurrence]
+  rw [mul_card_restricted_eq_sum_divisors]
   refine sum_congr rfl fun t _ => ?_
   congr 1
   refine sum_congr (filter_congr fun j _ => Nat.not_even_iff_odd) fun _ _ => rfl
@@ -289,7 +314,7 @@ theorem partitionCountDistinct_recurrence (n : ℕ) :
 open PowerSeries PowerSeries.WithPiTopology in
 /-- Coefficients of the partial products `∏_{i ∈ s} (1 + X^{i+1})` are eventually the distinct
 partition counts. -/
-lemma r26a_coeff_prod_one_add_eventually (n : ℕ) :
+private lemma eventually_coeff_prod_one_add_X_pow (n : ℕ) :
     ∀ᶠ s in atTop, coeff n (∏ i ∈ s, (1 + X ^ (i + 1) : ℤ⟦X⟧)) = partitionCountDistinct n := by
   have h := Nat.Partition.hasProd_powerSeriesMk_card_countRestricted ℤ (m := 2) two_pos
   rw [HasProd, tendsto_iff_coeff_tendsto] at h
@@ -303,7 +328,7 @@ lemma r26a_coeff_prod_one_add_eventually (n : ℕ) :
 open PowerSeries PowerSeries.WithPiTopology in
 /-- `(q;q)_∞ ∏ (1 + q^j) = (q²;q²)_∞`, coefficientwise:
 `∑_{i ≤ n} [q^i](q;q)_∞ · p(𝒟, n - i) = [q^n](q²;q²)_∞`. -/
-lemma r26a_sum_pentagonal_mul_distinct (n : ℕ) :
+private lemma sum_coeff_pentagonalSeries_mul_partitionCountDistinct (n : ℕ) :
     ∑ i ∈ range (n + 1), coeff i (pentagonalSeries ℤ) * partitionCountDistinct (n - i) =
       if 2 ∣ n then coeff (n / 2) (pentagonalSeries ℤ) else 0 := by
   have e1 : ∀ᶠ s in atTop, ∀ j ∈ range (n + 1),
@@ -311,7 +336,7 @@ lemma r26a_sum_pentagonal_mul_distinct (n : ℕ) :
     (eventually_all_finset _).2 fun j _ => coeff_prod_one_sub_X_pow_eventually_eq ℤ j
   have e2 : ∀ᶠ s in atTop, ∀ j ∈ range (n + 1),
       coeff j (∏ i ∈ s, (1 + X ^ (i + 1) : ℤ⟦X⟧)) = partitionCountDistinct j :=
-    (eventually_all_finset _).2 fun j _ => r26a_coeff_prod_one_add_eventually j
+    (eventually_all_finset _).2 fun j _ => eventually_coeff_prod_one_add_X_pow j
   obtain ⟨s, h1, h2, h3⟩ :=
     (e1.and (e2.and (coeff_prod_one_sub_X_pow_eventually_eq ℤ (n / 2)))).exists
   have hprod : (∏ i ∈ s, (1 - X ^ (i + 1) : ℤ⟦X⟧)) * ∏ i ∈ s, (1 + X ^ (i + 1) : ℤ⟦X⟧) =
@@ -330,12 +355,12 @@ lemma r26a_sum_pentagonal_mul_distinct (n : ℕ) :
 
 open PowerSeries PowerSeries.WithPiTopology in
 /-- `(-1)^k = (-1)^{|k|}` for the `negOnePow` sign. -/
-lemma r26a_coe_negOnePow (k : ℤ) : ((k.negOnePow : ℤˣ) : ℤ) = (-1) ^ k.natAbs := by
+private lemma coe_negOnePow_eq_pow_natAbs (k : ℤ) : ((k.negOnePow : ℤˣ) : ℤ) = (-1) ^ k.natAbs := by
   rw [← Int.negOnePow_abs, ← Int.natCast_natAbs, Int.coe_negOnePow_natCast]
 
 open PowerSeries PowerSeries.WithPiTopology in
 /-- `|k| ≤ k(3k-1)/2`. -/
-lemma r26a_natAbs_le_pentagonal (k : ℤ) : k.natAbs ≤ pentagonal k := by
+private lemma natAbs_le_pentagonal' (k : ℤ) : k.natAbs ≤ pentagonal k := by
   have h := two_mul_natCast_pentagonal k
   have : (k.natAbs : ℤ) ≤ pentagonal k := by
     rcases le_or_gt 0 k with hk | hk
@@ -345,7 +370,7 @@ lemma r26a_natAbs_le_pentagonal (k : ℤ) : k.natAbs ≤ pentagonal k := by
 
 open PowerSeries PowerSeries.WithPiTopology in
 /-- (26.10.7), proved via `(q;q)_∞ (-q;q)_∞ = (q²;q²)_∞` and the pentagonal number theorem. -/
-lemma r26a_pentagonal_distinct (n : ℕ) :
+private lemma sum_neg_one_pow_partitionCountDistinct_sub_pentagonal (n : ℕ) :
     ∑ k ∈ Icc (-(n : ℤ)) n with pentagonal k ≤ n,
         (-1 : ℤ) ^ k.natAbs * partitionCountDistinct (n - pentagonal k) =
       ∑ r ∈ Icc (-(n : ℤ)) n, if (n : ℤ) = r * (3 * r - 1) then (-1 : ℤ) ^ r.natAbs else 0 := by
@@ -357,7 +382,7 @@ lemma r26a_pentagonal_distinct (n : ℕ) :
     rw [← sum_subset (s₁ := K.image pentagonal)]
     · rw [sum_image (fun x _ y _ h => pentagonal_injective h)]
       refine sum_congr rfl fun k _ => ?_
-      rw [pentagonal_injective.extend_apply, r26a_coe_negOnePow, Int.cast_id]
+      rw [pentagonal_injective.extend_apply, coe_negOnePow_eq_pow_natAbs, Int.cast_id]
     · intro i hi
       obtain ⟨k, hk, rfl⟩ := mem_image.mp hi
       simp only [K, mem_filter] at hk
@@ -367,20 +392,20 @@ lemma r26a_pentagonal_distinct (n : ℕ) :
       · obtain ⟨k, rfl⟩ := hr
         exfalso; apply hiK
         refine mem_image_of_mem _ ?_
-        have h1 := r26a_natAbs_le_pentagonal k
+        have h1 := natAbs_le_pentagonal' k
         have h2 : pentagonal k ≤ n := Nat.lt_succ_iff.mp (mem_range.mp hi)
         simp only [K, mem_filter, mem_Icc]
         refine ⟨⟨?_, ?_⟩, h2⟩ <;> omega
       · rw [Function.extend_apply' _ _ _ (by simpa using hr)]; rfl
-  rw [hL, r26a_sum_pentagonal_mul_distinct]
+  rw [hL, sum_coeff_pentagonalSeries_mul_partitionCountDistinct]
   have hcond : ∀ r : ℤ, ((n : ℤ) = r * (3 * r - 1) ↔ 2 * pentagonal r = n) := by
     intro r
     rw [← two_mul_natCast_pentagonal]; constructor <;> intro h <;> omega
   by_cases hex : ∃ r : ℤ, 2 * pentagonal r = n
   · obtain ⟨r, hr⟩ := hex
-    have hr1 := r26a_natAbs_le_pentagonal r
+    have hr1 := natAbs_le_pentagonal' r
     rw [ite_eq_left_of_eq_true _ _ (eq_true ⟨_, hr.symm⟩), show n / 2 = pentagonal r by omega,
-      coeff_pentagonalSeries_pentagonal, r26a_coe_negOnePow, Int.cast_id]
+      coeff_pentagonalSeries_pentagonal, coe_negOnePow_eq_pow_natAbs, Int.cast_id]
     rw [sum_eq_single r]
     · rw [ite_eq_left_of_eq_true _ _ (eq_true ((hcond r).2 hr))]
     · intro b _ hb
@@ -406,7 +431,7 @@ theorem sum_neg_one_pow_partitionCountDistinct_pentagonal (n : ℕ) :
     ∑ k ∈ Icc (-(n : ℤ)) n with pentagonal k ≤ n,
         (-1 : ℤ) ^ k.natAbs * partitionCountDistinct (n - pentagonal k) =
       ∑ r ∈ Icc (-(n : ℤ)) n, if (n : ℤ) = r * (3 * r - 1) then (-1 : ℤ) ^ r.natAbs else 0 :=
-  r26a_pentagonal_distinct n
+  sum_neg_one_pow_partitionCountDistinct_sub_pentagonal n
 
 /-- (26.10.8): `∑_{k ∈ ℤ} (-1)^k p(𝒟, n - k(3k-1)) = 1` if `n = r(r ± 1)/2` (a triangular
 number) and `0` otherwise (same reading of the `±` sum as in (26.10.7)); the right side is a sum
@@ -419,26 +444,26 @@ theorem sum_neg_one_pow_partitionCountDistinct_two_pentagonal (n : ℕ) :
   sorry
 
 /-- Helper for (26.10.9) (agent p26a). -/
-lemma r26a_sum_map_succ (s : Multiset ℕ) : (s.map (· + 1)).sum = s.sum + Multiset.card s := by
+private lemma sum_map_add_one (s : Multiset ℕ) : (s.map (· + 1)).sum = s.sum + Multiset.card s := by
   rw [Multiset.sum_map_add, Multiset.map_id', Multiset.map_const', Multiset.sum_replicate,
     smul_eq_mul, mul_one]
 
 /-- Helper for (26.10.9) (agent p26a). -/
-lemma r26a_map_pred_succ {s : Multiset ℕ} (hs : ∀ i ∈ s, 0 < i) :
+private lemma map_add_one_map_sub_one {s : Multiset ℕ} (hs : ∀ i ∈ s, 0 < i) :
     (s.map (· - 1)).map (· + 1) = s := by
   rw [Multiset.map_map]
   conv_rhs => rw [← Multiset.map_id s]
   exact Multiset.map_congr rfl fun i hi => by simp only [Function.comp, id]; have := hs i hi; omega
 
 /-- Adding `1` to each part of a partition of `N` into `m` parts. -/
-def r26a_shift {N : ℕ} (q : N.Partition) (n : ℕ) (h : N + Multiset.card q.parts = n) :
+def partitionShift {N : ℕ} (q : N.Partition) (n : ℕ) (h : N + Multiset.card q.parts = n) :
     n.Partition where
   parts := q.parts.map (· + 1)
   parts_pos := by intro i hi; obtain ⟨j, -, rfl⟩ := Multiset.mem_map.mp hi; omega
-  parts_sum := by rw [r26a_sum_map_succ, q.parts_sum, h]
+  parts_sum := by rw [sum_map_add_one, q.parts_sum, h]
 
 /-- Adding `1` to each part of a partition of `N` into `m - 1` parts and adjoining a part `1`. -/
-def r26a_shiftCons {N : ℕ} (q : N.Partition) (n : ℕ) (h : N + Multiset.card q.parts + 1 = n) :
+def partitionShiftCons {N : ℕ} (q : N.Partition) (n : ℕ) (h : N + Multiset.card q.parts + 1 = n) :
     n.Partition where
   parts := 1 ::ₘ q.parts.map (· + 1)
   parts_pos := by
@@ -446,10 +471,10 @@ def r26a_shiftCons {N : ℕ} (q : N.Partition) (n : ℕ) (h : N + Multiset.card 
     rcases Multiset.mem_cons.mp hi with rfl | hi
     · exact one_pos
     · obtain ⟨j, -, rfl⟩ := Multiset.mem_map.mp hi; omega
-  parts_sum := by rw [Multiset.sum_cons, r26a_sum_map_succ, q.parts_sum, ← h]; ring
+  parts_sum := by rw [Multiset.sum_cons, sum_map_add_one, q.parts_sum, ← h]; ring
 
 /-- Subtracting `1` from each part. -/
-def r26a_unshift {n : ℕ} (p : n.Partition) (N : ℕ) (h : N + Multiset.card p.parts = n)
+def partitionUnshift {n : ℕ} (p : n.Partition) (N : ℕ) (h : N + Multiset.card p.parts = n)
     (h1 : 1 ∉ p.parts) : N.Partition where
   parts := p.parts.map (· - 1)
   parts_pos := by
@@ -459,66 +484,66 @@ def r26a_unshift {n : ℕ} (p : n.Partition) (N : ℕ) (h : N + Multiset.card p.
     have : j ≠ 1 := fun e => h1 (e ▸ hj)
     omega
   parts_sum := by
-    have := r26a_sum_map_succ (p.parts.map (· - 1))
-    rw [r26a_map_pred_succ (fun i hi => p.parts_pos hi), Multiset.card_map, p.parts_sum] at this
+    have := sum_map_add_one (p.parts.map (· - 1))
+    rw [map_add_one_map_sub_one (fun i hi => p.parts_pos hi), Multiset.card_map, p.parts_sum] at this
     omega
 
 /-- Helper for (26.10.9) (agent p26a). -/
-lemma r26a_parts_shift {N : ℕ} (q : N.Partition) (n : ℕ) (h : N + Multiset.card q.parts = n) :
-    (r26a_shift q n h).parts = q.parts.map (· + 1) := rfl
+private lemma parts_partitionShift {N : ℕ} (q : N.Partition) (n : ℕ) (h : N + Multiset.card q.parts = n) :
+    (partitionShift q n h).parts = q.parts.map (· + 1) := rfl
 
 /-- Helper for (26.10.9) (agent p26a). -/
-lemma r26a_parts_shiftCons {N : ℕ} (q : N.Partition) (n : ℕ)
+private lemma parts_partitionShiftCons {N : ℕ} (q : N.Partition) (n : ℕ)
     (h : N + Multiset.card q.parts + 1 = n) :
-    (r26a_shiftCons q n h).parts = 1 ::ₘ q.parts.map (· + 1) := rfl
+    (partitionShiftCons q n h).parts = 1 ::ₘ q.parts.map (· + 1) := rfl
 
 /-- Helper for (26.10.9) (agent p26a). -/
-lemma r26a_parts_unshift {n : ℕ} (p : n.Partition) (N : ℕ) (h : N + Multiset.card p.parts = n)
-    (h1 : 1 ∉ p.parts) : (r26a_unshift p N h h1).parts = p.parts.map (· - 1) := rfl
+private lemma parts_partitionUnshift {n : ℕ} (p : n.Partition) (N : ℕ) (h : N + Multiset.card p.parts = n)
+    (h1 : 1 ∉ p.parts) : (partitionUnshift p N h h1).parts = p.parts.map (· - 1) := rfl
 
 /-- Helper for (26.10.9) (agent p26a). -/
-lemma r26a_nodup_map_pred {s : Multiset ℕ} (hs : ∀ i ∈ s, 0 < i) (hn : s.Nodup) :
+private lemma nodup_map_sub_one {s : Multiset ℕ} (hs : ∀ i ∈ s, 0 < i) (hn : s.Nodup) :
     (s.map (· - 1)).Nodup :=
   hn.map_on fun x hx y hy hxy => by have := hs x hx; have := hs y hy; omega
 
 /-- Helper for (26.10.9) (agent p26a). -/
-lemma r26a_card_distinct_no_one {m n : ℕ} (hmn : m ≤ n) :
+private lemma card_distincts_card_parts_one_not_mem {m n : ℕ} (hmn : m ≤ n) :
     #{p ∈ Nat.Partition.distincts n | p.parts.card = m ∧ 1 ∉ p.parts} =
       #{p ∈ Nat.Partition.distincts (n - m) | p.parts.card = m} := by
   symm
-  refine card_bij (fun q hq => r26a_shift q n (by
+  refine card_bij (fun q hq => partitionShift q n (by
     simp only [mem_filter] at hq; rw [hq.2]; omega)) ?_ ?_ ?_
   · intro q hq
     simp only [mem_filter, Nat.Partition.distincts, mem_univ, true_and] at hq ⊢
-    rw [r26a_parts_shift]
+    rw [parts_partitionShift]
     refine ⟨hq.1.map (add_left_injective 1), by rw [Multiset.card_map, hq.2], fun h => ?_⟩
     obtain ⟨j, hj, hj1⟩ := Multiset.mem_map.mp h
     have := q.parts_pos hj
     omega
   · intro q _ q' _ h
     have := congrArg Nat.Partition.parts h
-    rw [r26a_parts_shift, r26a_parts_shift] at this
+    rw [parts_partitionShift, parts_partitionShift] at this
     exact Nat.Partition.ext (Multiset.map_injective (add_left_injective 1) this)
   · intro p hp
     simp only [mem_filter, Nat.Partition.distincts, mem_univ, true_and] at hp
     have hN : n - m + Multiset.card p.parts = n := by rw [hp.2.1]; omega
-    refine ⟨r26a_unshift p (n - m) hN hp.2.2, ?_, ?_⟩
+    refine ⟨partitionUnshift p (n - m) hN hp.2.2, ?_, ?_⟩
     · simp only [mem_filter, Nat.Partition.distincts, mem_univ, true_and]
-      rw [r26a_parts_unshift, Multiset.card_map]
-      exact ⟨r26a_nodup_map_pred (fun i hi => p.parts_pos hi) hp.1, hp.2.1⟩
+      rw [parts_partitionUnshift, Multiset.card_map]
+      exact ⟨nodup_map_sub_one (fun i hi => p.parts_pos hi) hp.1, hp.2.1⟩
     · apply Nat.Partition.ext
-      rw [r26a_parts_shift, r26a_parts_unshift, r26a_map_pred_succ (fun i hi => p.parts_pos hi)]
+      rw [parts_partitionShift, parts_partitionUnshift, map_add_one_map_sub_one (fun i hi => p.parts_pos hi)]
 
 /-- Helper for (26.10.9) (agent p26a). -/
-lemma r26a_card_distinct_one {m n : ℕ} (hm : 1 ≤ m) (hmn : m ≤ n) :
+private lemma card_distincts_card_parts_one_mem {m n : ℕ} (hm : 1 ≤ m) (hmn : m ≤ n) :
     #{p ∈ Nat.Partition.distincts n | p.parts.card = m ∧ 1 ∈ p.parts} =
       #{p ∈ Nat.Partition.distincts (n - m) | p.parts.card = m - 1} := by
   symm
-  refine card_bij (fun q hq => r26a_shiftCons q n (by
+  refine card_bij (fun q hq => partitionShiftCons q n (by
     simp only [mem_filter] at hq; rw [hq.2]; omega)) ?_ ?_ ?_
   · intro q hq
     simp only [mem_filter, Nat.Partition.distincts, mem_univ, true_and] at hq ⊢
-    rw [r26a_parts_shiftCons]
+    rw [parts_partitionShiftCons]
     refine ⟨Multiset.nodup_cons.mpr ⟨fun h => ?_, hq.1.map (add_left_injective 1)⟩,
       by rw [Multiset.card_cons, Multiset.card_map, hq.2]; omega, Multiset.mem_cons_self _ _⟩
     obtain ⟨j, hj, hj1⟩ := Multiset.mem_map.mp h
@@ -526,7 +551,7 @@ lemma r26a_card_distinct_one {m n : ℕ} (hm : 1 ≤ m) (hmn : m ≤ n) :
     omega
   · intro q _ q' _ h
     have := congrArg Nat.Partition.parts h
-    rw [r26a_parts_shiftCons, r26a_parts_shiftCons, Multiset.cons_inj_right] at this
+    rw [parts_partitionShiftCons, parts_partitionShiftCons, Multiset.cons_inj_right] at this
     exact Nat.Partition.ext (Multiset.map_injective (add_left_injective 1) this)
   · intro p hp
     simp only [mem_filter, Nat.Partition.distincts, mem_univ, true_and] at hp
@@ -543,18 +568,18 @@ lemma r26a_card_distinct_one {m n : ℕ} (hm : 1 ≤ m) (hmn : m ≤ n) :
           have h2 := Multiset.count_pos.mpr hm1
           omega)
     have hN : n - m + Multiset.card p'.parts = n - 1 := by rw [hcard]; omega
-    refine ⟨r26a_unshift p' (n - m) hN h1, ?_, ?_⟩
+    refine ⟨partitionUnshift p' (n - m) hN h1, ?_, ?_⟩
     · simp only [mem_filter, Nat.Partition.distincts, mem_univ, true_and]
-      rw [r26a_parts_unshift, Multiset.card_map, hcard]
-      refine ⟨r26a_nodup_map_pred (fun i hi => p'.parts_pos hi) ?_, rfl⟩
+      rw [parts_partitionUnshift, Multiset.card_map, hcard]
+      refine ⟨nodup_map_sub_one (fun i hi => p'.parts_pos hi) ?_, rfl⟩
       rw [hp']; exact hp.1.erase 1
     · apply Nat.Partition.ext
-      rw [r26a_parts_shiftCons, r26a_parts_unshift,
-        r26a_map_pred_succ (fun i hi => p'.parts_pos hi), hp']
+      rw [parts_partitionShiftCons, parts_partitionUnshift,
+        map_add_one_map_sub_one (fun i hi => p'.parts_pos hi), hp']
       exact Multiset.cons_erase hp.2.2
 
 /-- Helper for (26.10.9) (agent p26a). -/
-lemma r26a_atMost_succ (m N : ℕ) :
+private lemma partitionCountAtMostDistinct_succ (m N : ℕ) :
     partitionCountAtMostDistinct (m + 1) N = partitionCountAtMostDistinct m N +
       #{p ∈ Nat.Partition.distincts N | p.parts.card = m + 1} := by
   unfold partitionCountAtMostDistinct
@@ -565,7 +590,7 @@ lemma r26a_atMost_succ (m N : ℕ) :
   · exact filter_congr fun p _ => by omega
 
 /-- Helper for (26.10.9) (agent p26a). -/
-lemma r26a_atMost_zero (N : ℕ) :
+private lemma partitionCountAtMostDistinct_zero (N : ℕ) :
     partitionCountAtMostDistinct 0 N = #{p ∈ Nat.Partition.distincts N | p.parts.card = 0} := by
   unfold partitionCountAtMostDistinct
   congr 1
@@ -582,7 +607,7 @@ theorem card_distinct_card_eq_recurrence {m n : ℕ} (hm : 1 ≤ m) (hmn : m ≤
   rw [← card_filter_add_card_filter_not (fun p : n.Partition => 1 ∉ p.parts), filter_filter,
     filter_filter, add_comm]
   simp only [not_not]
-  rw [← r26a_card_distinct_no_one hmn, ← r26a_card_distinct_one hm hmn, add_comm]
+  rw [← card_distincts_card_parts_one_not_mem hmn, ← card_distincts_card_parts_one_mem hm hmn, add_comm]
 
 /-- (26.10.9), corrected: `p_m(𝒟, n) = p_{m-1}(𝒟, n) + p_m(𝒟, n - m) - p_{m-2}(𝒟, n - m)`
 for `1 ≤ m ≤ n` (with `p_{-1} = 0`). DLMF prints `p_m(𝒟, n) = p_m(𝒟, n - m) + p_{m-1}(𝒟, n)`,
@@ -594,17 +619,17 @@ theorem partitionCountAtMostDistinct_recurrence {m n : ℕ} (hm : 1 ≤ m) (hmn 
       partitionCountAtMostDistinct (m - 1) n + partitionCountAtMostDistinct m (n - m) -
         if 2 ≤ m then (partitionCountAtMostDistinct (m - 2) (n - m) : ℤ) else 0 := by
   obtain ⟨k, rfl⟩ : ∃ k, m = k + 1 := ⟨m - 1, by omega⟩
-  have h1 := r26a_atMost_succ k n
-  have h2 := r26a_atMost_succ k (n - (k + 1))
+  have h1 := partitionCountAtMostDistinct_succ k n
+  have h2 := partitionCountAtMostDistinct_succ k (n - (k + 1))
   have h3 := card_distinct_card_eq_recurrence hm hmn
   simp only [Nat.add_sub_cancel] at h3 ⊢
   rcases k with _ | k
-  · have h4 := r26a_atMost_zero (n - 1)
+  · have h4 := partitionCountAtMostDistinct_zero (n - 1)
     simp only [zero_add] at h1 h2 h3 h4 ⊢
     norm_num
     push_cast [h1, h2, h3, h4]
     ring
-  · have h4 := r26a_atMost_succ k (n - (k + 1 + 1))
+  · have h4 := partitionCountAtMostDistinct_succ k (n - (k + 1 + 1))
     have h2le : 2 ≤ k + 1 + 1 := by omega
     simp only [h2le, ↓reduceIte, show k + 1 + 1 - 2 = k by omega]
     push_cast [h1, h2, h3, h4]
@@ -617,7 +642,7 @@ theorem partitionCountDiff_eq_sum (k n : ℕ) :
     partitionCountDiff k n =
       ∑ m ∈ range (n + 1) with k * m.choose 2 + m ≤ n,
         partitionCountAtMostParts m (n - (k * m.choose 2 + m)) :=
-  s26a_partitionCountDiff_eq_sum k n
+  partitionCountDiff_eq_sum_partitionCountAtMostParts k n
 
 /-- (26.10.11): `n p(∈ S, n) = ∑_{t=1}^n p(∈ S, n - t) ∑_{j ∣ t, j ∈ S} j` (stated multiplied
 by `n`). -/
@@ -625,7 +650,7 @@ by `n`). -/
 theorem partitionCountIn_recurrence (S : Set ℕ) [DecidablePred (· ∈ S)] (n : ℕ) :
     n * partitionCountIn S n =
       ∑ t ∈ Icc 1 n, partitionCountIn S (n - t) * ∑ j ∈ t.divisors with j ∈ S, j :=
-  r26a_card_restricted_recurrence (· ∈ S) n
+  mul_card_restricted_eq_sum_divisors (· ∈ S) n
 
 end DLMF.Combinatorics
 end

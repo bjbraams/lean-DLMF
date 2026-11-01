@@ -11,13 +11,19 @@ public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 /-!
 # Sturm–Liouville systems and the Liouville normal form (DLMF §1.13(viii))
 
-For the Sturm–Liouville equation 1.13.26 `(p u')' + (λρ - q) u = 0` on `[a, b]` with unmixed
-(1.13.27) or periodic (1.13.28) boundary conditions:
+The Sturm–Liouville equation 1.13.26 `(p u')' + (λρ - q) u = 0` on `[a, b]` with unmixed
+(1.13.27) or periodic (1.13.28) boundary conditions, and its Liouville normal form.
 
-* the eigenvalues of a regular system form a sequence tending to `+∞` (admitted);
-* the Liouville transformation 1.13.30 `t = ∫_a^x √(ρ/p)`, `w(t) = u(x) (pρ)^{1/4}` to the
-  normal form 1.13.29 `ẅ + (λ - q̂(t)) w = 0` with `q̂` as in 1.13.31 (admitted);
-* the correspondence of eigenvalues (admitted) and of nodes (proved) under the transformation.
+## Main results
+
+* `regularSL_eigenvalues`: the eigenvalues of a regular system form a sequence tending to `+∞`.
+* `liouville_normal_form`: the Liouville transformation 1.13.30 `t = ∫_a^x √(ρ/p)`,
+  `w(t) = u(x) (pρ)^{1/4}` to the normal form 1.13.29 `ẅ + (λ - q̂(t)) w = 0` with `q̂` as in
+  1.13.31.
+* `liouville_nodes`, `liouville_eigenvalues_unmixed`, `liouville_eigenvalues_periodic`: the
+  correspondence of nodes and eigenvalues under the transformation.
+
+## Implementation notes
 
 The transformation is stated with `m = (pρ)^{1/4}`, `T(x) = ∫_a^x √(ρ/p)` and its inverse `X`
 given by hypotheses, so that no new definitions are needed.
@@ -25,7 +31,7 @@ given by hypotheses, so that no new definitions are needed.
 DLMF §1.13(viii) also says that periodic boundary conditions are carried to periodic ones. This
 holds only when `pρ`, its derivative and `ρ/p` agree at `a` and `b` (for example for
 `(b - a)`-periodic coefficients), since `w(0) = m(a) u(a)` and `w(c) = m(b) u(b)`; the periodic
-statement below carries these hypotheses.
+statement carries these hypotheses.
 -/
 
 @[expose] public noncomputable section

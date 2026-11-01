@@ -24,18 +24,23 @@ tempered distributions) and §1.17 (delta sequences). Mathlib already provides t
   derivatives `∂_{v}`, the Fourier transform `𝓕` on `𝓢'` (Mathlib's convention
   `𝓕 f ξ = ∫ e^{-2πi⟪x, ξ⟫} f x dx`).
 
-This file adds the DLMF objects that are not upstream:
+## Main definitions
 
-* `heaviside` (1.16.13), `xPlusRpow` (1.16.19), `logPlus` (1.16.22);
-* `stieltjesDistribution α` (1.16.3_5), the distribution `φ ↦ ∫ φ dα` of a Stieltjes function;
-* `distribIterDeriv k T` (1.16.9), the `k`-th distributional derivative on the line;
-* `xPlusDistrib α` (1.16.19, 1.16.21, 1.16.23), the distributions `x₊^α` for all real `α`;
+* `heaviside` (1.16.13), `xPlusRpow` (1.16.19), `logPlus` (1.16.22).
+* `stieltjesDistribution α` (1.16.3_5): the distribution `φ ↦ ∫ φ dα` of a Stieltjes function.
+* `distribIterDeriv k T` (1.16.9): the `k`-th distributional derivative on the line;
+  `smoothMul` (1.16.6): multiplication by a smooth function.
+* `lineDistrib f`: the regular distribution of `f` on the line.
+* `xPlusDistrib α` (1.16.19, 1.16.21, 1.16.23): the distributions `x₊^α` for all real `α`.
 * `dlmfFourierSchwartz` (1.16.29): DLMF's Fourier transform
   `𝓕φ(x) = (2π)^{-n/2} ∫ φ(t) e^{i x·t} dt` on Schwartz space (DLMF convention 1.14.1, not
-  Mathlib's), and `dlmfFourierTempered` (1.16.35) its transpose on `𝓢'`;
-* `dlmfD j` (1.16.30), `polyOp` and `polyDiffOp P` (1.16.32), `polyMul P` (1.16.31) on
-  Schwartz space, and their transposes `temperedPolyDiffOp P`, `temperedPolyMul P` on `𝓢'`;
-* `IsDeltaSequence` (1.17.3), `gaussianDeltaSeq` (1.17.5), `dirichletKernel` (1.17.20).
+  Mathlib's), and `dlmfFourierTempered` (1.16.35) its transpose on `𝓢'`.
+* `boundedTempered`, `signTempered`, `heavisideTempered`: tempered distributions of bounded
+  functions.
+* `dlmfD j` (1.16.30), `polyOp` and `polyDiffOp P` (1.16.32), `polyEval`, `polyMul P` (1.16.31)
+  on Schwartz space, and their transposes `temperedD`, `temperedPolyDiffOp P`,
+  `temperedPolyMul P` on `𝓢'`.
+* `IsDeltaSequence` (1.17.3–1.17.4), `gaussianDeltaSeq` (1.17.5), `dirichletKernel` (1.17.20).
 -/
 
 @[expose] public noncomputable section

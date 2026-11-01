@@ -13,10 +13,23 @@ public import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
 /-!
 # Zeta integrals with elementary kernels
 
-Real elementary-kernel representations of the Riemann zeta function, with endpoint estimates.
+Integral representations of the Riemann zeta function with exponential, hyperbolic and
+`arctan` kernels (DLMF 25.5.1–25.5.12), together with the integrability and endpoint
+estimates they need. The conventions are described in `DLMF.Zeta.IntegralReps`.
 
-Source references and common attribution are retained in
-`DLMF.Zeta.IntegralReps`.
+## Main results
+
+* `riemannZeta_eq_integral_exp_sub_one`, `riemannZeta_eq_integral_exp_sub_one_sq`:
+  DLMF 25.5.1–25.5.2.
+* `riemannZeta_eq_integral_exp_add_one`, `riemannZeta_eq_integral_exp_add_one_sq`:
+  DLMF 25.5.3–25.5.4 in multiplied form.
+* `tendsto_integral_fract_sub_half`: DLMF 25.5.5 as a limit of truncated integrals.
+* `riemannZeta_eq_half_add_integral`, `riemannZeta_eq_half_add_bernoulli_integral`:
+  DLMF 25.5.6–25.5.7.
+* `riemannZeta_eq_integral_sinh`, `riemannZeta_eq_integral_sinh_sq`: DLMF 25.5.8–25.5.9.
+* `riemannZeta_eq_integral_arctan_cosh`: DLMF 25.5.10 in multiplied form.
+* `riemannZeta_eq_integral_arctan_exp_sub_one`, `riemannZeta_eq_integral_arctan_exp_add_one`:
+  DLMF 25.5.11–25.5.12.
 -/
 
 @[expose] public noncomputable section
@@ -28,7 +41,7 @@ open scoped Real
 namespace DLMF.Zeta
 
 /-- `t^{s-1} e^{-t}/(1 - e^{-t}) = t^{s-1}/(e^t - 1)` for `t > 0`. -/
-lemma q25a_exp_div_one_sub_exp {s : ℂ} {t : ℝ} (ht : 0 < t) :
+private lemma cpow_mul_exp_neg_div_one_sub_exp_neg {s : ℂ} {t : ℝ} (ht : 0 < t) :
     (t : ℂ) ^ (s - 1) * cexp (-((1 : ℝ) * (t : ℂ))) / (1 - cexp (-(t : ℂ))) =
       (t : ℂ) ^ (s - 1) / (cexp t - 1) := by
   have h1 : cexp (t : ℂ) - 1 ≠ 0 := by
@@ -41,7 +54,7 @@ lemma q25a_exp_div_one_sub_exp {s : ℂ} {t : ℝ} (ht : 0 < t) :
   rw [ofReal_one, one_mul, Complex.exp_neg]
   field_simp
 /-- The integrand of 25.5.1 is integrable for `Re s > 1`. -/
-lemma q25a_integrableOn_exp_sub_one {s : ℂ} (hs : 1 < s.re) :
+lemma integrableOn_cpow_div_exp_sub_one {s : ℂ} (hs : 1 < s.re) :
     IntegrableOn (fun x : ℝ => (x : ℂ) ^ (s - 1) / (cexp x - 1)) (Ioi 0) := by
   set σ : ℂ := (s.re : ℂ)
   have hσ : 1 < σ.re := by simpa [σ] using hs
@@ -66,12 +79,12 @@ lemma q25a_integrableOn_exp_sub_one {s : ℂ} (hs : 1 < s.re) :
       exact_mod_cast (Real.one_lt_exp_iff.mpr hx0).ne'
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
     have ht0 : (0 : ℝ) < t := ht
-    rw [q25a_exp_div_one_sub_exp ht0, norm_div, norm_div,
+    rw [cpow_mul_exp_neg_div_one_sub_exp_neg ht0, norm_div, norm_div,
       norm_cpow_eq_rpow_re_of_pos ht0, norm_cpow_eq_rpow_re_of_pos ht0]
     simp [σ]
 /-- `∫₀^∞ eᵗ tˢ/(eᵗ-1)² dt = Γ(s+1) ζ(s)` for `Re s > 1`, by termwise integration of
 `eᵗ/(eᵗ-1)² = ∑ k e^{-kt}`. -/
-lemma q25a_integral_exp_sub_one_sq {s : ℂ} (hs : 1 < s.re) :
+private lemma integral_exp_mul_cpow_div_exp_sub_one_sq {s : ℂ} (hs : 1 < s.re) :
     ∫ t in Ioi (0 : ℝ), cexp t * (t : ℂ) ^ s / (cexp t - 1) ^ 2 =
       Gamma (s + 1) * riemannZeta s := by
   have hs1 : 0 < (s + 1).re := by simp; linarith
@@ -152,54 +165,54 @@ lemma q25a_integral_exp_sub_one_sq {s : ℂ} (hs : 1 < s.re) :
 theorem riemannZeta_eq_integral_exp_sub_one {s : ℂ} (hs : 1 < s.re) :
     IntegrableOn (fun x : ℝ => (x : ℂ) ^ (s - 1) / (cexp x - 1)) (Ioi 0) ∧
       riemannZeta s = 1 / Gamma s * ∫ x in Ioi (0 : ℝ), (x : ℂ) ^ (s - 1) / (cexp x - 1) := by
-  refine ⟨q25a_integrableOn_exp_sub_one hs, ?_⟩
+  refine ⟨integrableOn_cpow_div_exp_sub_one hs, ?_⟩
   have hval := DLMF.Gamma.integral_cpow_mul_exp_div_one_sub_exp hs (x := 1) one_pos
-  rw [setIntegral_congr_fun measurableSet_Ioi (fun t ht => q25a_exp_div_one_sub_exp ht)] at hval
+  rw [setIntegral_congr_fun measurableSet_Ioi (fun t ht => cpow_mul_exp_neg_div_one_sub_exp_neg ht)] at hval
   rw [hval, show (∑' k : ℕ, 1 / ((k : ℂ) + ((1 : ℝ) : ℂ)) ^ s) = riemannZeta s by
       rw [zeta_eq_tsum_one_div_nat_add_one_cpow hs]; push_cast; rfl]
   have hG : Gamma s ≠ 0 := Gamma_ne_zero_of_re_pos (by linarith)
   field_simp
 
 /-- `eᵗ - 1 ≠ 0` for `t > 0`. -/
-lemma q25a_exp_sub_one_ne {t : ℝ} (ht : 0 < t) : cexp (t : ℂ) - 1 ≠ 0 := by
+lemma exp_ofReal_sub_one_ne_zero {t : ℝ} (ht : 0 < t) : cexp (t : ℂ) - 1 ≠ 0 := by
   rw [sub_ne_zero, ← ofReal_exp]
   exact_mod_cast (Real.one_lt_exp_iff.mpr ht).ne'
 /-- Integrability transfers along equal norms on `(0, ∞)` for functions continuous there. -/
-lemma q25a_integrableOn_of_norm_eq {f g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0))
+private lemma integrableOn_Ioi_of_norm_eq {f g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0))
     (hf : ContinuousOn f (Ioi 0)) (h : ∀ t : ℝ, 0 < t → ‖f t‖ = ‖g t‖) :
     IntegrableOn f (Ioi 0) := by
   refine hg.norm.mono' (hf.aestronglyMeasurable measurableSet_Ioi) ?_
   filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
   exact (h t ht).le
 /-- Integrability and value under the scaling `x ↦ 2x` on `(0, ∞)`. -/
-lemma q25a_scale_two {f : ℝ → ℂ} (hf : IntegrableOn f (Ioi 0)) :
+private lemma integrableOn_comp_two_mul_and_integral_eq {f : ℝ → ℂ} (hf : IntegrableOn f (Ioi 0)) :
     IntegrableOn (fun x => f (2 * x)) (Ioi 0) ∧
       ∫ x in Ioi (0 : ℝ), f (2 * x) = 1 / 2 * ∫ x in Ioi (0 : ℝ), f x := by
   refine ⟨(integrableOn_Ioi_comp_mul_left_iff f 0 two_pos).mpr (by simpa using hf), ?_⟩
   rw [integral_comp_mul_left_Ioi f 0 two_pos, mul_zero, Complex.real_smul]
   push_cast; ring
 /-- The continuity of `t ↦ eᵗ tˢ / (eᵗ - 1)²` on `(0, ∞)`. -/
-lemma q25a_continuousOn_exp_sq (s : ℂ) :
+private lemma continuousOn_exp_mul_cpow_div_exp_sub_one_sq (s : ℂ) :
     ContinuousOn (fun t : ℝ => cexp t * (t : ℂ) ^ s / (cexp t - 1) ^ 2) (Ioi 0) := by
   intro x hx
   have hx0 : (0 : ℝ) < x := hx
   refine ContinuousAt.continuousWithinAt ?_
-  refine ContinuousAt.div ?_ ?_ (pow_ne_zero _ (q25a_exp_sub_one_ne hx0))
+  refine ContinuousAt.div ?_ ?_ (pow_ne_zero _ (exp_ofReal_sub_one_ne_zero hx0))
   · exact (Complex.continuous_exp.comp continuous_ofReal).continuousAt.mul
       (continuousAt_ofReal_cpow_const _ _ (Or.inr hx0.ne'))
   · exact ((Complex.continuous_exp.comp continuous_ofReal).continuousAt.sub
       continuousAt_const).pow 2
 /-- The integrand of 25.5.2 is integrable for `Re s > 1`. -/
-lemma q25a_integrableOn_exp_sub_one_sq {s : ℂ} (hs : 1 < s.re) :
+private lemma integrableOn_exp_mul_cpow_div_exp_sub_one_sq {s : ℂ} (hs : 1 < s.re) :
     IntegrableOn (fun x : ℝ => cexp x * (x : ℂ) ^ s / (cexp x - 1) ^ 2) (Ioi 0) := by
   set σ : ℂ := (s.re : ℂ)
   have hσ : 1 < σ.re := by simpa [σ] using hs
   have hne : (∫ t in Ioi (0 : ℝ), cexp t * (t : ℂ) ^ σ / (cexp t - 1) ^ 2) ≠ 0 := by
-    rw [q25a_integral_exp_sub_one_sq hσ]
+    rw [integral_exp_mul_cpow_div_exp_sub_one_sq hσ]
     exact mul_ne_zero (Gamma_ne_zero_of_re_pos (by simp; linarith))
       (riemannZeta_ne_zero_of_one_lt_re hσ)
-  refine q25a_integrableOn_of_norm_eq (Integrable.of_integral_ne_zero hne)
-    (q25a_continuousOn_exp_sq s) fun t ht => ?_
+  refine integrableOn_Ioi_of_norm_eq (Integrable.of_integral_ne_zero hne)
+    (continuousOn_exp_mul_cpow_div_exp_sub_one_sq s) fun t ht => ?_
   rw [norm_div, norm_div, norm_mul, norm_mul, norm_cpow_eq_rpow_re_of_pos ht,
     norm_cpow_eq_rpow_re_of_pos ht]
   simp [σ]
@@ -210,13 +223,13 @@ theorem riemannZeta_eq_integral_exp_sub_one_sq {s : ℂ} (hs : 1 < s.re) :
     IntegrableOn (fun x : ℝ => cexp x * (x : ℂ) ^ s / (cexp x - 1) ^ 2) (Ioi 0) ∧
       riemannZeta s =
         1 / Gamma (s + 1) * ∫ x in Ioi (0 : ℝ), cexp x * (x : ℂ) ^ s / (cexp x - 1) ^ 2 := by
-  refine ⟨q25a_integrableOn_exp_sub_one_sq hs, ?_⟩
-  rw [q25a_integral_exp_sub_one_sq hs]
+  refine ⟨integrableOn_exp_mul_cpow_div_exp_sub_one_sq hs, ?_⟩
+  rw [integral_exp_mul_cpow_div_exp_sub_one_sq hs]
   have hG : Gamma (s + 1) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
   field_simp
 
 /-- `x^a ≤ x^{a₁} + x^{a₂}` for `x > 0`, `a₁ ≤ a ≤ a₂`. -/
-lemma q25a_rpow_le_add {x a a₁ a₂ : ℝ} (hx : 0 < x) (h1 : a₁ ≤ a) (h2 : a ≤ a₂) :
+private lemma rpow_le_rpow_add_rpow {x a a₁ a₂ : ℝ} (hx : 0 < x) (h1 : a₁ ≤ a) (h2 : a ≤ a₂) :
     x ^ a ≤ x ^ a₁ + x ^ a₂ := by
   rcases le_or_gt x 1 with hx1 | hx1
   · have := Real.rpow_le_rpow_of_exponent_ge hx hx1 h1
@@ -225,7 +238,7 @@ lemma q25a_rpow_le_add {x a a₁ a₂ : ℝ} (hx : 0 < x) (h1 : a₁ ≤ a) (h2 
     linarith [Real.rpow_nonneg hx.le a₁]
 /-- `s ↦ ∫₀^∞ x^{s-1} φ(x) dx` is holomorphic on `Re s > 0` when `φ` is continuous on
 `(0, ∞)` and `|φ(x)| ≤ e^{-x}`. -/
-lemma q25a_differentiableOn_mellin {φ : ℝ → ℂ} (hφc : ContinuousOn φ (Ioi 0))
+private lemma differentiableOn_mellin_of_norm_le_exp_neg {φ : ℝ → ℂ} (hφc : ContinuousOn φ (Ioi 0))
     (hφ : ∀ x : ℝ, 0 < x → ‖φ x‖ ≤ Real.exp (-x)) :
     DifferentiableOn ℂ (fun s : ℂ => ∫ x in Ioi (0 : ℝ), (x : ℂ) ^ (s - 1) * φ x)
       {s | 0 < s.re} := by
@@ -255,13 +268,13 @@ lemma q25a_differentiableOn_mellin {φ : ℝ → ℂ} (hφc : ContinuousOn φ (I
       have ht0 : (0 : ℝ) < t := ht
       obtain ⟨hs1, hs2⟩ := hs
       rw [norm_mul, norm_cpow_eq_rpow_re_of_pos ht0, sub_re, one_re, ← mul_add]
-      have h1 := q25a_rpow_le_add ht0 (a := s.re - 1) (a₁ := s0.re / 2 - 1)
+      have h1 := rpow_le_rpow_add_rpow ht0 (a := s.re - 1) (a₁ := s0.re / 2 - 1)
         (a₂ := s0.re + 1 - 1) (by linarith) (by linarith)
       have := mul_le_mul h1 (hφ t ht0) (norm_nonneg _) (by positivity)
       exact this.trans_eq (by ring)
 /-- The domain `Re s > a` minus the ray `[1, ∞)`, star-shaped about a real point `c`,
 `a < c < 1`. -/
-lemma q25a_isPreconnected_ray {a c : ℝ} (hac : a < c) (hc1 : c < 1) :
+private lemma isPreconnected_re_gt_diff_ray {a c : ℝ} (hac : a < c) (hc1 : c < 1) :
     IsPreconnected ({s : ℂ | a < s.re} \ {s : ℂ | s.im = 0 ∧ 1 ≤ s.re}) := by
   refine (StarConvex.isPathConnected (a := (c : ℂ)) ?_ ?_).isConnected.isPreconnected
   · intro z hz u v hu hv huv
@@ -291,13 +304,13 @@ lemma q25a_isPreconnected_ray {a c : ℝ} (hac : a < c) (hc1 : c < 1) :
       simpa using hac
     · rintro ⟨-, h⟩; simp at h; linarith
 /-- `|1/(eˣ+1)| ≤ e^{-x}`. -/
-lemma q25a_norm_inv_exp_add_one_le {x : ℝ} :
+private lemma norm_one_div_exp_add_one_le {x : ℝ} :
     ‖1 / (cexp x + 1)‖ ≤ Real.exp (-x) := by
   rw [show cexp (x : ℂ) + 1 = ((Real.exp x + 1 : ℝ) : ℂ) by push_cast; rfl, norm_div, norm_one,
     Complex.norm_real, Real.norm_eq_abs, abs_of_pos (by positivity), Real.exp_neg]
   exact (one_div_le_one_div_of_le (Real.exp_pos x) (by linarith)).trans_eq (one_div _)
 /-- `|eˣ/(eˣ+1)²| ≤ e^{-x}`. -/
-lemma q25a_norm_exp_div_exp_add_one_sq_le {x : ℝ} :
+private lemma norm_exp_div_exp_add_one_sq_le {x : ℝ} :
     ‖cexp x / (cexp x + 1) ^ 2‖ ≤ Real.exp (-x) := by
   rw [show cexp (x : ℂ) + 1 = ((Real.exp x + 1 : ℝ) : ℂ) by push_cast; rfl, ← ofReal_exp,
     ← ofReal_pow, ← ofReal_div, Complex.norm_real, Real.norm_eq_abs,
@@ -306,12 +319,12 @@ lemma q25a_norm_exp_div_exp_add_one_sq_le {x : ℝ} :
   field_simp
   nlinarith
 /-- 25.5.3 for `Re s > 1`: the integrand of 25.5.3 splits as `h(x) - 2^{2-s} h(2x)`. -/
-lemma q25a_exp_add_one_split {s : ℂ} {x : ℝ} (hx : 0 < x) :
+private lemma cpow_div_exp_add_one_eq_sub {s : ℂ} {x : ℝ} (hx : 0 < x) :
     (x : ℂ) ^ (s - 1) / (cexp x + 1) = (x : ℂ) ^ (s - 1) / (cexp x - 1) -
       2 * (2 : ℂ) ^ (1 - s) * (((2 * x : ℝ) : ℂ) ^ (s - 1) / (cexp ((2 * x : ℝ) : ℂ) - 1)) := by
   have h2 : (2 : ℂ) ≠ 0 := two_ne_zero
   rw [ofReal_mul, mul_cpow_ofReal_nonneg (by norm_num) hx.le, ofReal_ofNat]
-  have hE := q25a_exp_sub_one_ne hx
+  have hE := exp_ofReal_sub_one_ne_zero hx
   have hE1 : cexp (x : ℂ) + 1 ≠ 0 := by
     rw [← ofReal_exp]; exact_mod_cast (by positivity : Real.exp x + 1 ≠ 0)
   have hc : (2 : ℂ) ^ (1 - s) * (2 : ℂ) ^ (s - 1) = 1 := by
@@ -350,17 +363,17 @@ theorem riemannZeta_eq_integral_exp_add_one {s : ℂ} (hs : 0 < s.re) (hs1 : s �
       have hx0 : (0 : ℝ) < x := hx
       rw [div_eq_mul_one_div, norm_mul, norm_mul, ofReal_one, one_mul,
         show -((x : ℂ)) = ((-x : ℝ) : ℂ) by push_cast; ring, norm_exp_ofReal]
-      exact mul_le_mul_of_nonneg_left q25a_norm_inv_exp_add_one_le (norm_nonneg _)
+      exact mul_le_mul_of_nonneg_left norm_one_div_exp_add_one_le (norm_nonneg _)
   refine ⟨hint s hs, ?_⟩
   -- the case `Re s > 1`
   have hgt : ∀ z : ℂ, 1 < z.re → (1 - 2 ^ (1 - z)) * Gamma z * riemannZeta z =
       ∫ x in Ioi (0 : ℝ), (x : ℂ) ^ (z - 1) / (cexp x + 1) := by
     intro z hz
-    have hI := q25a_integrableOn_exp_sub_one hz
-    obtain ⟨hI2, hV2⟩ := q25a_scale_two hI
+    have hI := integrableOn_cpow_div_exp_sub_one hz
+    obtain ⟨hI2, hV2⟩ := integrableOn_comp_two_mul_and_integral_eq hI
     have hval := (riemannZeta_eq_integral_exp_sub_one hz).2
     have hG : Gamma z ≠ 0 := Gamma_ne_zero_of_re_pos (by linarith)
-    rw [setIntegral_congr_fun measurableSet_Ioi (fun x hx => q25a_exp_add_one_split hx),
+    rw [setIntegral_congr_fun measurableSet_Ioi (fun x hx => cpow_div_exp_add_one_eq_sub hx),
       integral_sub hI (hI2.const_mul _), integral_const_mul, hV2]
     have hJ : ∫ x in Ioi (0 : ℝ), (x : ℂ) ^ (z - 1) / (cexp x - 1) = Gamma z * riemannZeta z := by
       rw [hval]; field_simp
@@ -382,7 +395,7 @@ theorem riemannZeta_eq_integral_exp_add_one {s : ℂ} (hs : 0 < s.re) (hs1 : s �
       have := congrArg re hm; simp at this; linarith [(m.cast_nonneg : (0 : ℝ) ≤ m)]
   have hG : DifferentiableOn ℂ (fun z => ∫ x in Ioi (0 : ℝ), (x : ℂ) ^ (z - 1) / (cexp x + 1)) U
       := by
-    have := q25a_differentiableOn_mellin hφc (fun x _ => q25a_norm_inv_exp_add_one_le)
+    have := differentiableOn_mellin_of_norm_le_exp_neg hφc (fun x _ => norm_one_div_exp_add_one_le)
     refine (this.mono (fun z (hz : z ∈ U) => hz.1)).congr fun z _ => ?_
     show ∫ x in Ioi (0 : ℝ), _ = ∫ x in Ioi (0 : ℝ), _
     congr 1; funext x; rw [div_eq_mul_one_div]
@@ -394,7 +407,7 @@ theorem riemannZeta_eq_integral_exp_add_one {s : ℂ} (hs : 0 < s.re) (hs1 : s �
       (show (1 : ℝ) < (2 + I : ℂ).re by simp)] with z hz
     exact hgt z hz
   have heq := (hF.analyticOnNhd hUo).eqOn_of_preconnected_of_eventuallyEq
-    (hG.analyticOnNhd hUo) (q25a_isPreconnected_ray (a := 0) (c := 1 / 2) (by norm_num)
+    (hG.analyticOnNhd hUo) (isPreconnected_re_gt_diff_ray (a := 0) (c := 1 / 2) (by norm_num)
       (by norm_num)) hz0 hev
   by_cases hsU : s ∈ U
   · exact heq hsU
@@ -407,13 +420,13 @@ theorem riemannZeta_eq_integral_exp_add_one {s : ℂ} (hs : 0 < s.re) (hs1 : s �
     exact hgt s hre
 
 /-- The integrand of 25.5.4 splits as `h(x) - 4·2^{-s} h(2x)` with `h(u) = eᵘ uˢ/(eᵘ-1)²`. -/
-lemma q25a_exp_add_one_sq_split {s : ℂ} {x : ℝ} (hx : 0 < x) :
+private lemma exp_mul_cpow_div_exp_add_one_sq_eq_sub {s : ℂ} {x : ℝ} (hx : 0 < x) :
     cexp x * (x : ℂ) ^ s / (cexp x + 1) ^ 2 = cexp x * (x : ℂ) ^ s / (cexp x - 1) ^ 2 -
       4 * (2 : ℂ) ^ (-s) * (cexp ((2 * x : ℝ) : ℂ) * ((2 * x : ℝ) : ℂ) ^ s /
         (cexp ((2 * x : ℝ) : ℂ) - 1) ^ 2) := by
   have h2 : (2 : ℂ) ≠ 0 := two_ne_zero
   rw [ofReal_mul, mul_cpow_ofReal_nonneg (by norm_num) hx.le, ofReal_ofNat]
-  have hE := q25a_exp_sub_one_ne hx
+  have hE := exp_ofReal_sub_one_ne_zero hx
   have hE1 : cexp (x : ℂ) + 1 ≠ 0 := by
     rw [← ofReal_exp]; exact_mod_cast (by positivity : Real.exp x + 1 ≠ 0)
   have hc : (2 : ℂ) ^ (-s) * (2 : ℂ) ^ s = 1 := by
@@ -457,16 +470,16 @@ theorem riemannZeta_eq_integral_exp_add_one_sq {s : ℂ} (hs : 0 < s.re) (hs1 : 
       have hx0 : (0 : ℝ) < x := hx
       rw [hform z x hx0, norm_mul, norm_mul, ofReal_one, one_mul,
         show -((x : ℂ)) = ((-x : ℝ) : ℂ) by push_cast; ring, norm_exp_ofReal]
-      exact mul_le_mul_of_nonneg_left q25a_norm_exp_div_exp_add_one_sq_le (norm_nonneg _)
+      exact mul_le_mul_of_nonneg_left norm_exp_div_exp_add_one_sq_le (norm_nonneg _)
   refine ⟨hint s hs, ?_⟩
   have hgt : ∀ z : ℂ, 1 < z.re → (1 - 2 ^ (1 - z)) * Gamma (z + 1) * riemannZeta z =
       ∫ x in Ioi (0 : ℝ), cexp x * (x : ℂ) ^ z / (cexp x + 1) ^ 2 := by
     intro z hz
-    have hI := q25a_integrableOn_exp_sub_one_sq hz
-    obtain ⟨hI2, hV2⟩ := q25a_scale_two hI
-    rw [setIntegral_congr_fun measurableSet_Ioi (fun x hx => q25a_exp_add_one_sq_split hx),
+    have hI := integrableOn_exp_mul_cpow_div_exp_sub_one_sq hz
+    obtain ⟨hI2, hV2⟩ := integrableOn_comp_two_mul_and_integral_eq hI
+    rw [setIntegral_congr_fun measurableSet_Ioi (fun x hx => exp_mul_cpow_div_exp_add_one_sq_eq_sub hx),
       integral_sub hI (hI2.const_mul _), integral_const_mul, hV2,
-      q25a_integral_exp_sub_one_sq hz]
+      integral_exp_mul_cpow_div_exp_sub_one_sq hz]
     have h1s : (2 : ℂ) ^ (1 - z) = 2 * (2 : ℂ) ^ (-z) := by
       rw [sub_eq_add_neg, cpow_add _ _ two_ne_zero, cpow_one]
     rw [h1s]
@@ -488,7 +501,7 @@ theorem riemannZeta_eq_integral_exp_add_one_sq {s : ℂ} (hs : 0 < s.re) (hs1 : 
       have := congrArg re hm; simp at this; linarith [(m.cast_nonneg : (0 : ℝ) ≤ m)]
   have hG : DifferentiableOn ℂ
       (fun z => ∫ x in Ioi (0 : ℝ), cexp x * (x : ℂ) ^ z / (cexp x + 1) ^ 2) U := by
-    have hM := q25a_differentiableOn_mellin hφc (fun x _ => q25a_norm_exp_div_exp_add_one_sq_le)
+    have hM := differentiableOn_mellin_of_norm_le_exp_neg hφc (fun x _ => norm_exp_div_exp_add_one_sq_le)
     have hcomp := hM.comp (differentiableOn_id.add_const (1 : ℂ))
       (fun z (hz : z ∈ U) => show 0 < (z + 1).re by have : 0 < z.re := hz.1; simp; linarith)
     refine hcomp.congr fun z _ => ?_
@@ -502,7 +515,7 @@ theorem riemannZeta_eq_integral_exp_add_one_sq {s : ℂ} (hs : 0 < s.re) (hs1 : 
       (show (1 : ℝ) < (2 + I : ℂ).re by simp)] with z hz
     exact hgt z hz
   have heq := (hF.analyticOnNhd hUo).eqOn_of_preconnected_of_eventuallyEq
-    (hG.analyticOnNhd hUo) (q25a_isPreconnected_ray (a := 0) (c := 1 / 2) (by norm_num)
+    (hG.analyticOnNhd hUo) (isPreconnected_re_gt_diff_ray (a := 0) (c := 1 / 2) (by norm_num)
       (by norm_num)) hz0 hev
   by_cases hsU : s ∈ U
   · exact heq hsU
@@ -516,8 +529,8 @@ theorem riemannZeta_eq_integral_exp_add_one_sq {s : ℂ} (hs : 0 < s.re) (hs1 : 
 
 open DLMF.BernoulliEuler in
 /-- `binom(s+2, 3) = (s+2)(s+1)s/6`. -/
-lemma r25a_gbinom_three (s : ℂ) : z25a_gbinom (s + 2) 3 = (s + 2) * (s + 1) * s / 6 := by
-  simp only [z25a_gbinom, descPochhammer_succ_right, descPochhammer_zero, Polynomial.eval_mul,
+private lemma cbinom_add_two_three (s : ℂ) : AsymptoticApproximations.cbinom (s + 2) 3 = (s + 2) * (s + 1) * s / 6 := by
+  simp only [AsymptoticApproximations.cbinom, descPochhammer_succ_right, descPochhammer_zero, Polynomial.eval_mul,
     Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_natCast, Polynomial.eval_one,
     Polynomial.eval_ofNat, Nat.factorial, Nat.cast_ofNat]
   push_cast
@@ -525,19 +538,19 @@ lemma r25a_gbinom_three (s : ℂ) : z25a_gbinom (s + 2) 3 = (s + 2) * (s + 1) * 
 
 open DLMF.BernoulliEuler in
 /-- For `-1 < Re s`, `s ≠ 1`: `ζ(s) = ½ + 1/(s-1) + s/12 - s(s+1)/2 ∫₁^∞ B̃₂(x) x^{-s-2} dx`. -/
-lemma r25a_zeta_eq_B2 {s : ℂ} (hs : -1 < s.re) (hs1 : s ≠ 1) :
+private lemma riemannZeta_eq_integral_periodicBernoulli_two {s : ℂ} (hs : -1 < s.re) (hs1 : s ≠ 1) :
     riemannZeta s = 1 / 2 + 1 / (s - 1) + s / 12 - s * (s + 1) / 2 *
       ∫ x in Ioi (1 : ℝ), (periodicBernoulli 2 x : ℂ) / (x : ℂ) ^ (s + 2) := by
-  have h := q25a_zeta_eq_emRHS (n := 1) (N := 1) le_rfl le_rfl (by simp; linarith) hs1
-  simp [q25a_emRHS, q25a_gbinom_one] at h
-  have hr := q25a_recursion (p := 2) (by norm_num) (w := s + 2) (by simp; linarith)
+  have h := riemannZeta_eq_eulerMaclaurinZetaRHS (n := 1) (N := 1) le_rfl le_rfl (by simp; linarith) hs1
+  simp [eulerMaclaurinZetaRHS, cbinom_one] at h
+  have hr := integral_Ioi_periodicBernoulli_div_cpow_recursion (p := 2) (by norm_num) (w := s + 2) (by simp; linarith)
     (a := 1) one_pos
   have hB3 : periodicBernoulli 3 1 = 0 := by
     simp [periodicBernoulli, bernoulliFun_eval_zero, bernoulli_eq_zero_of_odd (n := 3)
       ⟨1, rfl⟩ (by norm_num)]
   rw [hB3] at hr
   simp only [ofReal_zero, ofReal_one, one_cpow, div_one, neg_zero, zero_add] at hr
-  rw [h, r25a_gbinom_three]
+  rw [h, cbinom_add_two_three]
   push_cast at hr
   have e : (2 : ℂ) + 1 = 3 := by norm_num
   rw [e] at hr
@@ -584,8 +597,8 @@ theorem tendsto_integral_fract_sub_half {s : ℂ} (hs : -1 < s.re) (hs' : s.re <
     field_simp
     ring
   -- on `[1, R]`, integration by parts against `B̃₂`
-  obtain ⟨C1, hC1⟩ := q25a_periodicBernoulliB_bound 1
-  obtain ⟨C2, hC2⟩ := q25a_periodicBernoulliB_bound 2
+  obtain ⟨C1, hC1⟩ := exists_abs_periodicBernoulli_le 1
+  obtain ⟨C2, hC2⟩ := exists_abs_periodicBernoulli_le 2
   have hfB : ∀ x, f x = (periodicBernoulli 1 x : ℂ) / (x : ℂ) ^ (s + 1) := fun x => by
     simp [hf, periodicBernoulli, bernoulliFun_one]
   set I2 := ∫ x in Ioi (1 : ℝ), (periodicBernoulli 2 x : ℂ) / (x : ℂ) ^ (s + 2) with hI2
@@ -593,10 +606,10 @@ theorem tendsto_integral_fract_sub_half {s : ℂ} (hs : -1 < s.re) (hs' : s.re <
       ((periodicBernoulli 2 R : ℂ) / (R : ℂ) ^ (s + 1) - 1 / 6 +
         (s + 1) * ∫ x in (1 : ℝ)..R, (periodicBernoulli 2 x : ℂ) / (x : ℂ) ^ (s + 2)) / 2 := by
     intro R hR
-    have h := q25a_integral_ibp (p := 1) le_rfl (s + 1) one_pos hR
-    have i1 := q25a_intervalIntegrable_bdd_div_cpow (q25a_measurable_periodicBernoulliB 1) hC1
+    have h := integral_periodicBernoulli_div_cpow_by_parts (p := 1) le_rfl (s + 1) one_pos hR
+    have i1 := intervalIntegrable_bdd_div_cpow (measurable_periodicBernoulli 1) hC1
       (s + 1) one_pos hR
-    have i2 := q25a_intervalIntegrable_bdd_div_cpow (q25a_measurable_periodicBernoulliB 2) hC2
+    have i2 := intervalIntegrable_bdd_div_cpow (measurable_periodicBernoulli 2) hC2
       (s + 1 + 1) one_pos hR
     rw [intervalIntegral.integral_sub (i1.const_mul _) (i2.const_mul _),
       intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul] at h
@@ -609,11 +622,11 @@ theorem tendsto_integral_fract_sub_half {s : ℂ} (hs : -1 < s.re) (hs' : s.re <
     push_cast at h ⊢
     linear_combination h / 2
   have hlimB : Tendsto (fun R : ℝ => (periodicBernoulli 2 R : ℂ) / (R : ℂ) ^ (s + 1)) atTop
-      (𝓝 0) := q25a_tendsto_pB_div_cpow 2 (by simp; linarith)
+      (𝓝 0) := tendsto_periodicBernoulli_div_cpow 2 (by simp; linarith)
   have hlimI : Tendsto (fun R : ℝ => ∫ x in (1 : ℝ)..R,
       (periodicBernoulli 2 x : ℂ) / (x : ℂ) ^ (s + 2)) atTop (𝓝 I2) :=
-    intervalIntegral_tendsto_integral_Ioi 1 (q25a_integrableOn_bdd_div_cpow
-      (q25a_measurable_periodicBernoulliB 2) hC2 (by simp; linarith) one_pos) tendsto_id
+    intervalIntegral_tendsto_integral_Ioi 1 (integrableOn_bdd_div_cpow
+      (measurable_periodicBernoulli 2) hC2 (by simp; linarith) one_pos) tendsto_id
   have hlim : Tendsto (fun R : ℝ => -s * ((1 / (1 - s) + 1 / (2 * s)) +
       ((periodicBernoulli 2 R : ℂ) / (R : ℂ) ^ (s + 1) - 1 / 6 +
         (s + 1) * ∫ x in (1 : ℝ)..R, (periodicBernoulli 2 x : ℂ) / (x : ℂ) ^ (s + 2)) / 2))
@@ -621,7 +634,7 @@ theorem tendsto_integral_fract_sub_half {s : ℂ} (hs : -1 < s.re) (hs' : s.re <
     ((((hlimB.sub_const _).add (hlimI.const_mul _)).div_const _).const_add _).const_mul _
   have hval : -s * ((1 / (1 - s) + 1 / (2 * s)) + (0 - 1 / 6 + (s + 1) * I2) / 2) =
       riemannZeta s := by
-    rw [r25a_zeta_eq_B2 hs hs1]
+    rw [riemannZeta_eq_integral_periodicBernoulli_two hs hs1]
     have h1 : (1 : ℂ) - s ≠ 0 := sub_ne_zero.mpr (Ne.symm hs1)
     have h2 : s - 1 ≠ 0 := sub_ne_zero.mpr hs1
     field_simp
@@ -630,13 +643,13 @@ theorem tendsto_integral_fract_sub_half {s : ℂ} (hs : -1 < s.re) (hs' : s.re <
   refine hlim.congr' ?_
   filter_upwards [eventually_ge_atTop 1] with R hR
   have hfR : IntervalIntegrable f volume 1 R := by
-    have := q25a_intervalIntegrable_bdd_div_cpow (q25a_measurable_periodicBernoulliB 1) hC1
+    have := intervalIntegrable_bdd_div_cpow (measurable_periodicBernoulli 1) hC1
       (s + 1) one_pos hR
     refine this.congr_ae (ae_of_all _ fun x => (hfB x).symm)
   rw [← intervalIntegral.integral_add_adjacent_intervals hfI hfR, hint01, hstep R hR]
 
 /-- `|1/(eˣ-1) - 1/x + 1/2| ≤ x` for `x > 0`. -/
-lemma r25a_abs_bose_sub_le {x : ℝ} (hx : 0 < x) :
+private lemma abs_one_div_exp_sub_one_sub_le {x : ℝ} (hx : 0 < x) :
     |1 / (Real.exp x - 1) - 1 / x + 1 / 2| ≤ x := by
   set E := Real.exp x - 1 with hE
   have hq := Real.quadratic_le_exp_of_nonneg hx.le
@@ -678,13 +691,13 @@ theorem riemannZeta_eq_half_add_integral {s : ℂ} (hs : -1 < s.re) (hs1 : s ≠
     rw [hreal x hx, norm_div, norm_div, Complex.norm_real, Real.norm_eq_abs, Complex.norm_real,
       Real.norm_eq_abs, abs_of_pos hx, Complex.norm_exp_ofReal, Real.exp_neg]
     rw [div_div, div_le_iff₀ (by positivity)]
-    have := r25a_abs_bose_sub_le hx
+    have := abs_one_div_exp_sub_one_sub_le hx
     calc _ ≤ x := this
       _ = (Real.exp x)⁻¹ * (x * Real.exp x) := by field_simp
   have hphc : ContinuousOn ph (Ioi 0) := by
     intro x hx
     have hx0 : (0 : ℝ) < x := hx
-    have h1 : cexp (x : ℂ) - 1 ≠ 0 := q25a_exp_sub_one_ne hx0
+    have h1 : cexp (x : ℂ) - 1 ≠ 0 := exp_ofReal_sub_one_ne_zero hx0
     have h2 : (x : ℂ) ≠ 0 := by exact_mod_cast hx0.ne'
     refine ContinuousAt.continuousWithinAt ?_
     simp only [hph]
@@ -722,7 +735,7 @@ theorem riemannZeta_eq_half_add_integral {s : ℂ} (hs : -1 < s.re) (hs1 : s ≠
     intro z hz
     have hz0 : 0 < z.re := by linarith
     have hz1 : 0 < (z - 1).re := by simp; linarith
-    have hA := q25a_integrableOn_exp_sub_one hz
+    have hA := integrableOn_cpow_div_exp_sub_one hz
     have hB := Complex.GammaIntegral_convergent hz0
     have hC := Complex.GammaIntegral_convergent hz1
     have hsplit : ∀ x ∈ Ioi (0 : ℝ), Jf z x = (x : ℂ) ^ (z - 1) / (cexp x - 1) -
@@ -730,7 +743,7 @@ theorem riemannZeta_eq_half_add_integral {s : ℂ} (hs : -1 < s.re) (hs1 : s ≠
         1 / 2 * ((((-x).exp : ℝ) : ℂ) * (x : ℂ) ^ (z - 1)) := by
       intro x hx
       have hx0 : (0 : ℝ) < x := hx
-      have h1 := q25a_exp_sub_one_ne hx0
+      have h1 := exp_ofReal_sub_one_ne_zero hx0
       have h2 : (x : ℂ) ≠ 0 := by exact_mod_cast hx0.ne'
       have h3 : cexp (x : ℂ) ≠ 0 := Complex.exp_ne_zero _
       simp only [hJf]
@@ -771,7 +784,7 @@ theorem riemannZeta_eq_half_add_integral {s : ℂ} (hs : -1 < s.re) (hs1 : s ≠
   have hne1 : ∀ z ∈ U, z ≠ 1 := fun z hz h => hz.2 ⟨by rw [h]; simp, by rw [h]; simp⟩
   have hF : DifferentiableOn ℂ riemannZeta U := fun z hz =>
     (differentiableAt_riemannZeta (hne1 z hz)).differentiableWithinAt
-  have hM := q25a_differentiableOn_mellin hphc hphb
+  have hM := differentiableOn_mellin_of_norm_le_exp_neg hphc hphb
   have hG : DifferentiableOn ℂ (fun z => 1 / 2 + 1 / (z - 1) + 1 / Gamma z *
       ∫ x in Ioi (0 : ℝ), Jf z x) U := by
     have hMI : DifferentiableOn ℂ (fun z => ∫ x in Ioi (0 : ℝ), Jf z x) U := by
@@ -796,7 +809,7 @@ theorem riemannZeta_eq_half_add_integral {s : ℂ} (hs : -1 < s.re) (hs1 : s ≠
       (show (1 : ℝ) < (2 + I : ℂ).re by simp)] with z hz
     exact hgt z hz
   have heq := (hF.analyticOnNhd hUo).eqOn_of_preconnected_of_eventuallyEq
-    (hG.analyticOnNhd hUo) (q25a_isPreconnected_ray (a := -1) (c := 1 / 2) (by norm_num)
+    (hG.analyticOnNhd hUo) (isPreconnected_re_gt_diff_ray (a := -1) (c := 1 / 2) (by norm_num)
       (by norm_num)) hz0 hev
   by_cases hsU : s ∈ U
   · exact heq hsU
@@ -834,8 +847,8 @@ theorem riemannZeta_eq_integral_sinh {s : ℂ} (hs : 1 < s.re) :
       riemannZeta s = 1 / (2 * (1 - 2 ^ (-s)) * Gamma s) *
         ∫ x in Ioi (0 : ℝ), (x : ℂ) ^ (s - 1) / sinh x := by
   set h : ℝ → ℂ := fun x => (x : ℂ) ^ (s - 1) / (cexp x - 1) with hh
-  have hI := q25a_integrableOn_exp_sub_one hs
-  obtain ⟨hI2, hV2⟩ := q25a_scale_two hI
+  have hI := integrableOn_cpow_div_exp_sub_one hs
+  obtain ⟨hI2, hV2⟩ := integrableOn_comp_two_mul_and_integral_eq hI
   have hval := (riemannZeta_eq_integral_exp_sub_one hs).2
   have hG : Gamma s ≠ 0 := Gamma_ne_zero_of_re_pos (by linarith)
   have h2 : (2 : ℂ) ≠ 0 := two_ne_zero
@@ -844,9 +857,9 @@ theorem riemannZeta_eq_integral_sinh {s : ℂ} (hs : 1 < s.re) :
     intro x hx
     simp only [hh]
     rw [ofReal_mul, mul_cpow_ofReal_nonneg (by norm_num) hx.le, ofReal_ofNat]
-    have hE := q25a_exp_sub_one_ne hx
+    have hE := exp_ofReal_sub_one_ne_zero hx
     have hE2 : cexp (2 * (x : ℂ)) - 1 ≠ 0 := by
-      have := q25a_exp_sub_one_ne (by linarith : (0 : ℝ) < 2 * x); push_cast at this; exact this
+      have := exp_ofReal_sub_one_ne_zero (by linarith : (0 : ℝ) < 2 * x); push_cast at this; exact this
     have hc : (2 : ℂ) ^ (1 - s) * (2 : ℂ) ^ (s - 1) = 1 := by
       rw [← cpow_add _ _ h2]; simp
     have hsh : sinh (x : ℂ) = (cexp x - 1) * (cexp x + 1) / (2 * cexp x) := by
@@ -890,8 +903,8 @@ theorem riemannZeta_eq_integral_sinh_sq {s : ℂ} (hs : 1 < s.re) :
       riemannZeta s = 2 ^ (s - 1) / Gamma (s + 1) *
         ∫ x in Ioi (0 : ℝ), (x : ℂ) ^ s / sinh x ^ 2 := by
   set h : ℝ → ℂ := fun x => cexp x * (x : ℂ) ^ s / (cexp x - 1) ^ 2 with hh
-  have hI := q25a_integrableOn_exp_sub_one_sq hs
-  obtain ⟨hI2, hV2⟩ := q25a_scale_two hI
+  have hI := integrableOn_exp_mul_cpow_div_exp_sub_one_sq hs
+  obtain ⟨hI2, hV2⟩ := integrableOn_comp_two_mul_and_integral_eq hI
   have hG : Gamma (s + 1) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
   have h2 : (2 : ℂ) ≠ 0 := two_ne_zero
   have hpt : ∀ x : ℝ, 0 < x → (x : ℂ) ^ s / sinh x ^ 2 = 4 * (2 : ℂ) ^ (-s) * h (2 * x) := by
@@ -904,7 +917,7 @@ theorem riemannZeta_eq_integral_sinh_sq {s : ℂ} (hs : 1 < s.re) :
       rw [Complex.sinh, Complex.exp_neg]
       field_simp
       ring
-    have hE := q25a_exp_sub_one_ne hx
+    have hE := exp_ofReal_sub_one_ne_zero hx
     have h0 : cexp (x : ℂ) ≠ 0 := Complex.exp_ne_zero _
     have hE1 : cexp (x : ℂ) + 1 ≠ 0 := by
       rw [← ofReal_exp]; exact_mod_cast (by positivity : Real.exp x + 1 ≠ 0)
@@ -922,7 +935,7 @@ theorem riemannZeta_eq_integral_sinh_sq {s : ℂ} (hs : 1 < s.re) :
       (fun x hx => (hpt x hx).symm) measurableSet_Ioi
   refine ⟨hInt', ?_⟩
   rw [setIntegral_congr_fun measurableSet_Ioi hpt, integral_const_mul, hV2,
-    q25a_integral_exp_sub_one_sq hs]
+    integral_exp_mul_cpow_div_exp_sub_one_sq hs]
   have hc : (2 : ℂ) ^ (s - 1) * (2 : ℂ) ^ (-s) = 1 / 2 := by
     rw [← cpow_add _ _ h2, show s - 1 + -s = -1 by ring, cpow_neg_one, one_div]
   rw [show 2 ^ (s - 1) / Gamma (s + 1) * (4 * 2 ^ (-s) * (1 / 2 * (Gamma (s + 1) *

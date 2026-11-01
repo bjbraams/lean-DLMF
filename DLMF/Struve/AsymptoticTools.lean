@@ -9,6 +9,7 @@ public import DLMF.Struve.AngerWeber
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import Mathlib.Analysis.SpecialFunctions.Arsinh
+public import Carlson.Elliptic.Addition
 
 /-!
 # Tools for the Struve and Anger–Weber asymptotics
@@ -16,16 +17,35 @@ public import Mathlib.Analysis.SpecialFunctions.Arsinh
 The substitution `s = sinh t` turns the Schläfli-type integral (DLMF 11.10.4 via 11.10.1)
 `A_ν(z) = π⁻¹ ∫₀^∞ e^{-νt - z sinh t} dt` into a Laplace transform
 
-`A_ν(z) = π⁻¹ ∫₀^∞ e^{-zs} K_ν(s) ds`,  `K_ν(s) = (s + √(1+s²))^{-ν} (1+s²)^{-1/2}`
+`A_ν(z) = π⁻¹ ∫₀^∞ e^{-zs} K_ν(s) ds`,  `K_ν(s) = (s + √(1+s²))^{-ν} (1+s²)^{-1/2}`.
 
-(`struveAs_angerA_eq_integral`). The kernel is holomorphic off the cuts `±i[1, ∞)`, grows at
-most polynomially in closed sectors `|arg s| ≤ α < π/2`, and satisfies
-`(1+s²) K'' + 3 s K' + (1-ν²) K = 0` (`struveAs_ode`), so its Taylor coefficients at `0` are
-`dₙ/n!` with `d₀ = 1`, `d₁ = -ν`, `d_{n+2} = (ν² - (n+1)²) dₙ` (`struveAs_iteratedDeriv_kernel`).
-Rotating the ray (`struveAs_angerA_eq_rot`, by analytic continuation in `z` at nonintegral
-order and continuity in the order at integral order) and Watson's lemma give
-`A_ν(z) ~ π⁻¹ ∑ dₙ z^{-n-1}` in every rotated sector (`struveAs_angerA_hasAsymptoticExpansion`),
-the basis of DLMF 11.11.2–11.11.4.
+This file studies the kernel `K_ν` and proves the asymptotic expansion of `A_ν(z)` by Watson's
+lemma, the basis of DLMF 11.11.2–11.11.4.
+
+## Main definitions
+
+* `struveAs_dom`: the domain `1 + s² ∈ ℂ ∖ (-∞, 0]`.
+* `struveAs_kernel`: the Laplace kernel `K_ν(s)`.
+* `struveAs_coeffD`: the Taylor data `dₙ` of the kernel.
+* `struveAs_rotInt`: the Laplace integral of the kernel along the ray `arg s = θ`.
+
+## Main results
+
+* `struveAs_ode`: `(1+s²) K'' + 3 s K' + (1-ν²) K = 0`.
+* `struveAs_iteratedDeriv_kernel`: the Taylor coefficients of `K_ν` at `0` are `dₙ/n!` with
+  `d₀ = 1`, `d₁ = -ν`, `d_{n+2} = (ν² - (n+1)²) dₙ`.
+* `struveAs_exists_ray_bound`: polynomial growth of the kernel in closed sectors
+  `|arg s| ≤ α < π/2`.
+* `struveAs_angerA_eq_integral`: the Laplace representation of `A_ν(z)` for `re z > 0`.
+* `struveAs_angerA_eq_rot`: the rotated Laplace representation of `A_ν`.
+* `struveAs_angerA_hasAsymptoticExpansion`: `A_ν(z) ~ π⁻¹ ∑ dₙ z^{-n-1}` in every rotated
+  sector.
+
+## Implementation notes
+
+The kernel is holomorphic off the cuts `±i[1, ∞)`. The rotation of the ray is proved by
+analytic continuation in `z` at nonintegral order and by continuity in the order at integral
+order.
 -/
 
 @[expose] public noncomputable section
@@ -46,29 +66,13 @@ def struveAs_kernel (ν s : ℂ) : ℂ :=
 theorem struveAs_isOpen_dom : IsOpen struveAs_dom :=
   isOpen_slitPlane.preimage (by fun_prop)
 
-/-- Estimate under the stated parameter and domain assumptions: `0 < (x ^ (1 / 2 : ℂ)).re`. -/
-theorem struveAs_re_cpow_half_pos {x : ℂ} (hx : x ∈ slitPlane) : 0 < (x ^ (1 / 2 : ℂ)).re := by
-  have hx0 := slitPlane_ne_zero hx
-  rw [cpow_def_of_ne_zero hx0, exp_re]
-  refine mul_pos (Real.exp_pos _) (Real.cos_pos_of_mem_Ioo ⟨?_, ?_⟩)
-  · have h1 := neg_pi_lt_arg x
-    have : (log x * (1 / 2)).im = arg x / 2 := by simp [log_im, div_eq_mul_inv]
-    rw [this]; linarith
-  · have h2 : arg x < π := lt_of_le_of_ne (arg_le_pi x) (mem_slitPlane_iff_arg.mp hx).1
-    have : (log x * (1 / 2)).im = arg x / 2 := by simp [log_im, div_eq_mul_inv]
-    rw [this]; linarith [Real.pi_pos]
-
-/-- Identity under the stated parameter and domain assumptions: `(x ^ (1 / 2 : ℂ)) ^ 2 = x`. -/
-theorem struveAs_cpow_half_sq (x : ℂ) : (x ^ (1 / 2 : ℂ)) ^ 2 = x := by
-  rw [one_div]; exact_mod_cast cpow_ofNat_inv_pow x 2
-
 /-- Formula under the stated hypotheses: `s + (1 + s ^ 2) ^ (1 / 2 : ℂ) ∈ slitPlane`. -/
 theorem struveAs_add_sqrt_mem {s : ℂ} (hs : s ∈ struveAs_dom) :
     s + (1 + s ^ 2) ^ (1 / 2 : ℂ) ∈ slitPlane := by
   set w := (1 + s ^ 2) ^ (1 / 2 : ℂ) with hw
-  have hre := struveAs_re_cpow_half_pos hs
+  have hre := Carlson.re_cpow_half_pos hs
   rw [← hw] at hre
-  have hw2 : w ^ 2 = 1 + s ^ 2 := struveAs_cpow_half_sq _
+  have hw2 : w ^ 2 = 1 + s ^ 2 := Carlson.cpow_half_sq _
   rw [mem_slitPlane_iff]
   by_contra h
   push Not at h
@@ -299,7 +303,7 @@ theorem struveAs_norm_kernel_le (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) {
     (hcs : c ≤ ‖1 + s ^ 2‖) :
     ‖struveAs_kernel ν s‖ ≤ c ^ (-(1 / 2 : ℝ)) * (1 + 2 * ‖s‖) ^ |ν.re| * Real.exp (π * |ν.im|) := by
   set w := (1 + s ^ 2) ^ (1 / 2 : ℂ) with hw
-  have hw2 : w ^ 2 = 1 + s ^ 2 := struveAs_cpow_half_sq _
+  have hw2 : w ^ 2 = 1 + s ^ 2 := Carlson.cpow_half_sq _
   have hv0 := slitPlane_ne_zero (struveAs_add_sqrt_mem hs)
   rw [← hw] at hv0
   have hwn : ‖w‖ ≤ 1 + ‖s‖ := by

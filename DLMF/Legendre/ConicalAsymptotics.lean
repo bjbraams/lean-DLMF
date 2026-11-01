@@ -11,10 +11,31 @@ public import DLMF.Legendre.Conical
 /-!
 # Uniform conical asymptotics and coordinate maps
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+Uniform asymptotic expansions of the conical functions for large `τ` and for large `μ`
+(DLMF 14.20.15–14.20.24), with the coordinates `η(α, x)` and `ρ(β, x)` and their mapping
+properties (DLMF §14.20(viii)–(ix)).
+
+## Main definitions
+
+* `conicalAlpha`, `conicalSigma`: `α = μ/τ` and the normalizing factor `σ(μ, τ)` (DLMF 14.20.19,
+  14.20.20).
+* `ConicalEtaRelation`, `conicalEta`: the relation DLMF 14.20.21 and its positive solution
+  `η(α, x)`.
+* `conicalBeta`, `conicalRho`: `β = τ/μ` and the variable `ρ(β, x)` (DLMF 14.20.23, 14.20.24).
+
+## Main results
+
+* `conicalP_large_tau_uniform`, `conicalQHat_large_tau_uniform`: DLMF 14.20.15–14.20.16.
+* `conicalEta_spec`, `conicalEta_mapping`: `η` solves 14.20.21, and maps `(-1, 1)` bijectively
+  and decreasingly onto `(0, ∞)` (DLMF §14.20(viii)).
+* `conicalP_two_large_tau_uniform`, `conicalQHat_two_large_tau_uniform`: DLMF 14.20.17–14.20.18.
+* `conicalRho_mapping`: the mapping properties of `ρ` (DLMF §14.20(ix)).
+* `conicalP_two_large_mu_uniform`: DLMF 14.20.22.
+
+## Implementation notes
+
+The mapping statement for `η` assumes `0 < α`: at `α = 0` the relation is `√η = arccos x`, so
+`η → π²` as `x → -1`.
 -/
 
 @[expose] public noncomputable section

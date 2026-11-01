@@ -13,31 +13,38 @@ public import Mathlib.Analysis.Complex.LocallyUniformLimit
 
 A *Neumann series* is an expansion `∑ₖ aₖ J_{ν+nₖ}(z)` (or with `I`) in Bessel functions whose
 orders increase by integers. Writing `J_{ν+n}(z) = (z/2)^ν (z/2)^n ₀F̃₁(;ν+n+1;-(z/2)²)`, such a
-series is a double series in `(k, m)`. This file proves:
+series is a double series in `(k, m)`, which this file rearranges into a power series.
 
-* `exists_norm_recip_Gamma_add_nat_le`: `|1/Γ(c+n)| ≤ C 2ⁿ/n!`, uniformly in `n`, for every `c`;
-  hence `exists_norm_regularized0F1Coeff_le`, a bound on the `₀F̃₁` coefficients uniform in
-  the integer shift of the order;
+## Main definitions
+
+* `neumannTerm`: the term `(k, m)` of the double series of a Neumann-type series.
+* `neumannCoeff`, `neumannLinCoeff`: the power-series coefficients for `eₖ = 2k` and `eₖ = k`.
+* `powerNeumannCoeff`: the coefficients of Neumann's expansion of `(z/2)^λ`.
+
+## Main results
+
+* `exists_norm_recip_Gamma_add_nat_le`, `exists_norm_regularized0F1Coeff_le`: `|1/Γ(c+n)| ≤
+  C 2ⁿ/n!` uniformly in `n` for every `c`, and the resulting bound on the `₀F̃₁` coefficients,
+  uniform in the integer shift of the order.
 * `hasSum_neumann`: under `∑ₖ |aₖ| |w|^{eₖ} 2^{nₖ}/nₖ! < ∞` the double series is absolutely
-  summable and the Neumann series is its sum (rearrangement theorem);
-* `hasSum_neumannCoeff`: for `eₖ = 2k` the same sum is the power series `∑ⱼ bⱼ w^{2j}` whose
-  coefficients `bⱼ = neumannCoeff` are finite antidiagonal convolutions;
+  summable and the Neumann series is its sum (rearrangement theorem).
+* `hasSum_neumannCoeff`: for `eₖ = 2k` the sum is a power series whose coefficients are finite
+  antidiagonal convolutions.
 * `hasSum_besselJ_neumann`, `hasSum_besselI_neumann`: the corresponding statements for
-  `∑ₖ aₖ (z/2)^{pₖ} J_{ν+nₖ}(z)` and `I`, with `pₖ + nₖ = 2k`, and `differentiable_neumann`;
-* coefficient identities: the partial-fraction sum `sum_antidiagonal_neg_one_pow_div_add`,
-  Neumann's expansion of a power `(z/2)^λ = ∑ₖ (λ+2k)Γ(λ+k)/k! J_{λ+2k}(z)`
-  (`hasSum_besselJ_neumann_power`), and the Lommel-type coefficients
-  (`neumannCoeff_lommel`, `hasSum_besselJ_neumann_lommel`), obtained from the Bessel operator at
-  coefficient level;
-* growth bounds for the coefficients (`exists_norm_powerNeumannCoeff_le`,
-  `summable_neumann_of_norm_le`) and small Pochhammer/binomial helpers;
-* Neumann series with `eₖ = k` (orders of both parities): `hasSum_neumannLinCoeff`,
-  `hasSum_besselJ_neumann_linear`, `hasSum_besselI_neumann_linear`, via the fibre-summation
-  lemma `hasSum_sum_range_fiber`;
-* two terminating hypergeometric identities in polynomial form, proved by WZ certificates and
-  valid for all parameters: the very-well-poised `₄F₃(-1)` sum `sum_range_vwpTerm` and
-  `sum_range_kumTerm`, which gives the power series of `₀F̃₁(;c;w²) e^{2w}`
-  (`hasSum_regularized0F1_mul_exp`, the regularized DLMF 13.6.9).
+  `∑ₖ aₖ (z/2)^{pₖ} J_{ν+nₖ}(z)` and `I`, with `pₖ + nₖ = 2k`.
+* `differentiable_neumann`: Neumann series are entire.
+* `hasSum_besselJ_neumann_power`: Neumann's expansion of a power,
+  `(z/2)^λ = ∑ₖ (λ+2k)Γ(λ+k)/k! J_{λ+2k}(z)` (Watson §5.2).
+* `neumannCoeff_lommel`, `hasSum_besselJ_neumann_lommel`: Lommel-type Neumann series, obtained
+  from the Bessel operator at coefficient level.
+* `exists_norm_powerNeumannCoeff_le`, `summable_neumann_of_norm_le`: growth bounds for the
+  coefficients.
+* `hasSum_neumannLinCoeff`, `hasSum_besselJ_neumann_linear`, `hasSum_besselI_neumann_linear`:
+  Neumann series with `eₖ = k` (orders of both parities).
+* `sum_range_vwpTerm`, `sum_range_kumTerm`: two terminating hypergeometric identities in
+  polynomial form, proved by WZ certificates and valid for all parameters.
+* `hasSum_regularized0F1_mul_exp`: the power series of `₀F̃₁(;c;w²) e^{2w}` (the regularized
+  form of DLMF 13.6.9).
 -/
 
 @[expose] public noncomputable section

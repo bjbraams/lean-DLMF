@@ -8,12 +8,46 @@ module
 public import DLMF.Combinatorics.PartitionIdentities.StaircaseAndPentagonal
 
 /-!
-# Rogers-Ramanujan partition identities
+# Rogers–Ramanujan identities and Schur's theorem (DLMF §26.10(iii)–(vi))
 
-Rogers-Ramanujan generating functions and their partition interpretations.
+Partition identities of DLMF §26.10(iii), the inequalities of §26.10(iv), the asymptotic form
+(26.10.16) and the Bessel series (26.10.17) for the number `p(𝒟, n)` of partitions into distinct
+parts.
 
-Source references and common attribution are retained in
-`DLMF.Combinatorics.PartitionIdentities`.
+## Main definitions
+
+* `sawtooth`: `[[x]] = x - ⌊x⌋ - 1/2` off the integers, `0` on them (DLMF 26.10.20).
+* `distinctPartitionDedekindSum`: the Dedekind-type sum `f(h, k)` (DLMF 26.10.19).
+* `distinctPartitionKloosterman`: the exponential sum `A_k(n)` (DLMF 26.10.18, corrected).
+
+## Main results
+
+* `partitionCountDiff_two_eq`, `partitionCountDiffTwoNoOne_eq`: the Rogers–Ramanujan identities
+  (DLMF 26.10.13, 26.10.14).
+* `partitionCountSchur_eq`: Schur's theorem `p(𝒟'3, n) = p(∈ A_{1,6}, n)` (DLMF 26.10.15).
+* `partitionCountSchur_le`, `partitionCountSchur_lt_iff`: `p(𝒟'3, n) ≤ p(𝒟3, n)`, strict exactly
+  for `n = 9` and `n ≥ 15` (DLMF §26.10(iv), corrected).
+* `partitionCountIn_le_partitionCountDiff`, `eventually_partitionCountIn_lt_partitionCountDiff`:
+  Alder's conjecture (Yee) and its eventual strict form (DLMF §26.10(iv)).
+* `partitionCountDistinct_isEquivalent`: `p(𝒟, n) ∼ e^{π √(n/3)}/(768 n³)^{1/4}`
+  (DLMF 26.10.16).
+* `distinctPartitionKloosterman_im`: `A_k(n)` is real (DLMF §26.10(vi)).
+* `hasSum_partitionCountDistinct_bessel`: the convergent series (DLMF 26.10.17).
+
+## Implementation notes
+
+Corrections, verified by brute force:
+
+* §26.10(iv): `p(𝒟'3, n) < p(𝒟3, n)` holds for `n = 9` and `n ≥ 15`, not for all `n ≥ 9`:
+  `p(𝒟'3, n) = p(𝒟3, n)` for `10 ≤ n ≤ 14` (for instance both are 4 at `n = 10`). The corrected
+  range is stated.
+* (26.10.18): the sum over `1 < h ≤ k` would make `A_1(n) = 0` and the leading term of
+  (26.10.17) vanish; with `1 ≤ h ≤ k` the series reproduces `p(𝒟, n)` (checked numerically for
+  `n ≤ 20`). The corrected range is used.
+
+## References
+
+* NIST DLMF §26.10.
 -/
 
 @[expose] public section
@@ -29,7 +63,7 @@ namespace DLMF.Combinatorics
 /-! ### Rogers–Ramanujan (agent p26a) -/
 
 /-- Coefficients of two natural-number power series agreeing on the unit disk are equal. -/
-lemma s26a_coeff_unique_nat {a b : ℕ → ℕ} {F : ℂ → ℂ}
+private lemma coeff_eq_of_hasSum_nat_mul_pow {a b : ℕ → ℕ} {F : ℂ → ℂ}
     (ha : ∀ q : ℂ, ‖q‖ < 1 → HasSum (fun n => (a n : ℂ) * q ^ n) (F q))
     (hb : ∀ q : ℂ, ‖q‖ < 1 → HasSum (fun n => (b n : ℂ) * q ^ n) (F q)) : a = b := by
   have hser : ∀ c : ℕ → ℕ, (∀ q : ℂ, ‖q‖ < 1 → HasSum (fun n => (c n : ℂ) * q ^ n) (F q)) →
@@ -66,7 +100,7 @@ lemma s26a_coeff_unique_nat {a b : ℕ → ℕ} {F : ℂ → ℂ}
   exact_mod_cast congrFun this n
 
 /-- A product over two residue classes mod 5. -/
-lemma s26a_hasProd_two_progressions {q : ℂ} (hq : ‖q‖ < 1) {a b : ℕ} (ha : 1 ≤ a)
+private lemma hasProd_two_residues_mod_five {q : ℂ} (hq : ‖q‖ < 1) {a b : ℕ} (ha : 1 ≤ a)
     (hab : a < b) (hb : b < 5) (S : Set ℕ) [DecidablePred (· ∈ S)]
     (hS : ∀ n, n ∈ S ↔ 1 ≤ n ∧ (n % 5 = a ∨ n % 5 = b)) :
     HasProd (fun j : ℕ => if j + 1 ∈ S then (1 - q ^ (j + 1))⁻¹ else 1)
@@ -79,14 +113,14 @@ lemma s26a_hasProd_two_progressions {q : ℂ} (hq : ‖q‖ < 1) {a b : ℕ} (ha
       Sum.inr.injEq, reduceCtorEq] at h ⊢ <;> omega
   rw [← hιinj.hasProd_iff]
   · apply HasProd.sum
-    · convert (r26a_hasProd_one_sub (w := q ^ a) (hpos 5 (by norm_num))).inv₀
+    · convert (hasProd_one_sub_mul_pow (w := q ^ a) (hpos 5 (by norm_num))).inv₀
         (qPochhammerInf_ne_zero_of_norm_lt_one (hpos a (by omega)) (hpos 5 (by norm_num)))
         using 1
       ext i
       simp only [Function.comp, hι, Sum.elim_inl]
       rw [ite_eq_left ((hS _).mpr ⟨by omega, Or.inl (by omega)⟩), ← pow_mul, ← pow_add,
         show 5 * i + (a - 1) + 1 = a + 5 * i by omega]
-    · convert (r26a_hasProd_one_sub (w := q ^ b) (hpos 5 (by norm_num))).inv₀
+    · convert (hasProd_one_sub_mul_pow (w := q ^ b) (hpos 5 (by norm_num))).inv₀
         (qPochhammerInf_ne_zero_of_norm_lt_one (hpos b (by omega)) (hpos 5 (by norm_num)))
         using 1
       ext i
@@ -102,13 +136,13 @@ lemma s26a_hasProd_two_progressions {q : ℂ} (hq : ‖q‖ < 1) {a b : ℕ} (ha
 
 /-- Estimate under the stated parameter and domain assumptions: `n ∈ residueSetPM j 5 ↔ 1 ≤ n ∧ (n
 % 5 = j % 5 ∨ n % 5 = (5 - j) % 5)`. -/
-lemma s26a_mem_residueSetPM_five (j n : ℕ) (hj : j < 5) :
+private lemma mem_residueSetPM_five (j n : ℕ) (hj : j < 5) :
     n ∈ residueSetPM j 5 ↔ 1 ≤ n ∧ (n % 5 = j % 5 ∨ n % 5 = (5 - j) % 5) := by
   simp only [residueSetPM, Set.mem_ofPred_eq, Int.ModEq]
   omega
 
 /-- Identity under the stated parameter and domain assumptions: `2 * m.choose 2 + m = m * m`. -/
-lemma s26a_two_choose_add (m : ℕ) : 2 * m.choose 2 + m = m * m := by
+private lemma two_mul_choose_two_add (m : ℕ) : 2 * m.choose 2 + m = m * m := by
   rcases m with _ | m
   · simp
   · rw [Nat.choose_two_right, Nat.add_sub_cancel]
@@ -118,25 +152,25 @@ lemma s26a_two_choose_add (m : ℕ) : 2 * m.choose 2 + m = m * m := by
     nlinarith
 
 /-- The generating function of `p(∈ S, n)` for `S` two residue classes mod 5. -/
-lemma s26a_hasSum_partitionCountIn_five {q : ℂ} (hq : ‖q‖ < 1) {a b : ℕ} (ha : 1 ≤ a)
+private lemma hasSum_partitionCountIn_two_residues_mod_five {q : ℂ} (hq : ‖q‖ < 1) {a b : ℕ} (ha : 1 ≤ a)
     (hab : a < b) (hb : b < 5) (S : Set ℕ) [DecidablePred (· ∈ S)]
     (hS : ∀ n, n ∈ S ↔ 1 ≤ n ∧ (n % 5 = a ∨ n % 5 = b)) :
     HasSum (fun n => (partitionCountIn S n : ℂ) * q ^ n)
       (1 / (qPochhammerInf (q ^ a) (q ^ 5) * qPochhammerInf (q ^ b) (q ^ 5))) := by
   obtain ⟨h1, h2⟩ := hasSum_partitionCountIn hq S
-  rw [h2.unique (s26a_hasProd_two_progressions hq ha hab hb S hS), ← mul_inv, ← one_div] at h1
+  rw [h2.unique (hasProd_two_residues_mod_five hq ha hab hb S hS), ← mul_inv, ← one_div] at h1
   exact h1
 
 /-- (26.10.13), first Rogers–Ramanujan identity: `p(𝒟2, n) = p(∈ A_{1,5}, n)`. -/
 @[dlmf 26.10.E13]
 theorem partitionCountDiff_two_eq (n : ℕ) :
     partitionCountDiff 2 n = partitionCountIn (residueSetPM 1 5) n := by
-  refine congrFun (s26a_coeff_unique_nat (F := fun q =>
+  refine congrFun (coeff_eq_of_hasSum_nat_mul_pow (F := fun q =>
     1 / (qPochhammerInf (q ^ 1) (q ^ 5) * qPochhammerInf (q ^ 4) (q ^ 5))) (fun q hq => ?_)
-    (fun q hq => s26a_hasSum_partitionCountIn_five hq le_rfl (by norm_num) (by norm_num) _
-      fun n => s26a_mem_residueSetPM_five 1 n (by norm_num))) n
+    (fun q hq => hasSum_partitionCountIn_two_residues_mod_five hq le_rfl (by norm_num) (by norm_num) _
+      fun n => mem_residueSetPM_five 1 n (by norm_num))) n
   have h := (hasSum_partitionCountDiff hq 2).1
-  simp_rw [s26a_two_choose_add] at h
+  simp_rw [two_mul_choose_two_add] at h
   rw [DLMF.Bailey.rogers_ramanujan_first hq] at h
   simpa using h
 
@@ -144,24 +178,24 @@ theorem partitionCountDiff_two_eq (n : ℕ) :
 @[dlmf 26.10.E14]
 theorem partitionCountDiffTwoNoOne_eq (n : ℕ) :
     partitionCountDiffTwoNoOne n = partitionCountIn (residueSetPM 2 5) n := by
-  refine congrFun (s26a_coeff_unique_nat (F := fun q =>
+  refine congrFun (coeff_eq_of_hasSum_nat_mul_pow (F := fun q =>
     1 / (qPochhammerInf (q ^ 2) (q ^ 5) * qPochhammerInf (q ^ 3) (q ^ 5))) (fun q hq => ?_)
-    (fun q hq => s26a_hasSum_partitionCountIn_five hq (by norm_num) (by norm_num) (by norm_num)
-      _ fun n => s26a_mem_residueSetPM_five 2 n (by norm_num))) n
+    (fun q hq => hasSum_partitionCountIn_two_residues_mod_five hq (by norm_num) (by norm_num) (by norm_num)
+      _ fun n => mem_residueSetPM_five 2 n (by norm_num))) n
   have hc : ∀ n, partitionCountDiffTwoNoOne n = ∑ m ∈ range (n + 1) with m * (m + 1) ≤ n,
       partitionCountAtMostParts m (n - m * (m + 1)) := by
     intro n
-    have h := s26a_card_diff_min_eq_sum 2 2 n (by norm_num)
+    have h := card_partsDiffer_ge_eq_sum 2 2 n (by norm_num)
     have he : ∀ m : ℕ, 2 * m.choose 2 + 2 * m = m * (m + 1) := fun m => by
-      have := s26a_two_choose_add m; nlinarith
+      have := two_mul_choose_two_add m; nlinarith
     simp only [he] at h
     rw [← h]
     rfl
-  have h := (s26a_hasSum_staircase hq (fun m => m * (m + 1)) (fun m => by nlinarith)
+  have h := (hasSum_staircase hq (fun m => m * (m + 1)) (fun m => by nlinarith)
     partitionCountDiffTwoNoOne hc).1
   have he : (∑' m : ℕ, q ^ (m * (m + 1)) * ∏ j ∈ Icc 1 m, (1 - q ^ j)⁻¹) =
       ∑' m : ℕ, q ^ (m * (m + 1) : ℕ) / qPochhammer q q m := by
-    congr 1; ext m; rw [s26a_qPochhammer_eq_prod, div_eq_mul_inv, prod_inv_distrib]
+    congr 1; ext m; rw [qPochhammer_self_eq_prod, div_eq_mul_inv, prod_inv_distrib]
   rw [he, DLMF.Bailey.rogers_ramanujan_second hq] at h
   exact h
 
@@ -178,11 +212,11 @@ theorem partitionCountSchur_le (n : ℕ) : partitionCountSchur n ≤ partitionCo
   exact Finset.card_le_card fun p => by simp only [mem_filter]; exact fun h => ⟨h.1, h.2.1⟩
 
 /-- A partition of `n` from a multiset of positive parts. -/
-def r26a_ofParts (n : ℕ) (s : Multiset ℕ) (hpos : ∀ i ∈ s, 0 < i) (hs : s.sum = n) :
+def partitionOfParts (n : ℕ) (s : Multiset ℕ) (hpos : ∀ i ∈ s, 0 < i) (hs : s.sum = n) :
     n.Partition := ⟨s, fun hi => hpos _ hi, hs⟩
 
 /-- For distinct parts, `PartsDifferAtLeast` is a condition on pairs of different parts. -/
-lemma r26a_partsDiffer_iff_of_nodup {n : ℕ} (k : ℕ) (p : n.Partition) (hp : p.parts.Nodup) :
+private lemma partsDifferAtLeast_iff_of_nodup {n : ℕ} (k : ℕ) (p : n.Partition) (hp : p.parts.Nodup) :
     PartsDifferAtLeast k p ↔ ∀ x ∈ p.parts, ∀ y ∈ p.parts, x ≠ y → x + k ≤ y ∨ y + k ≤ x := by
   unfold PartsDifferAtLeast
   refine forall₂_congr fun x hx => ⟨fun h y hy hxy => h y ((hp.mem_erase_iff).2 ⟨Ne.symm hxy, hy⟩),
@@ -192,7 +226,7 @@ lemma r26a_partsDiffer_iff_of_nodup {n : ℕ} (k : ℕ) (p : n.Partition) (hp : 
 
 /-- A witness against Schur's condition: parts differ by at least `3`, two multiples of `3`
 differ by `3`. -/
-lemma r26a_exists_bad (n : ℕ) (hn : n = 9 ∨ 15 ≤ n) :
+private lemma exists_partsDifferAtLeast_three_not_schurCondition (n : ℕ) (hn : n = 9 ∨ 15 ≤ n) :
     ∃ p : n.Partition, PartsDifferAtLeast 3 p ∧ ¬ SchurCondition p := by
   -- the parts: two multiples of 3 at distance 3 and possibly a third part
   obtain ⟨a, c, ha, hcs, hsum⟩ : ∃ a c : ℕ, (a = 3 ∨ a = 6) ∧
@@ -208,7 +242,7 @@ lemma r26a_exists_bad (n : ℕ) (hn : n = 9 ∨ 15 ≤ n) :
       (∀ x ∈ s, ∀ y ∈ s, x ≠ y → x + 3 ≤ y ∨ y + 3 ≤ x) →
       ∃ p : n.Partition, PartsDifferAtLeast 3 p ∧ ¬ SchurCondition p := by
     intro s hnd has has3 hpos hs hd
-    refine ⟨r26a_ofParts n s hpos hs, (r26a_partsDiffer_iff_of_nodup 3 _ hnd).2 hd, fun h => ?_⟩
+    refine ⟨partitionOfParts n s hpos hs, (partsDifferAtLeast_iff_of_nodup 3 _ hnd).2 hd, fun h => ?_⟩
     have := h.2 a has (a + 3) ((hnd.mem_erase_iff).2 ⟨by omega, has3⟩) h3a (by omega)
     omega
   rcases hcs with rfl | ⟨hc1, hc⟩
@@ -223,7 +257,7 @@ lemma r26a_exists_bad (n : ℕ) (hn : n = 9 ∨ 15 ≤ n) :
 
 /-- A partition with parts differing by at least `3` that violates Schur's condition has
 `n = 9` or `n ≥ 15`. -/
-lemma r26a_bad_imp {n : ℕ} (p : n.Partition) (hd : PartsDifferAtLeast 3 p)
+private lemma eq_nine_or_le_of_not_schurCondition {n : ℕ} (p : n.Partition) (hd : PartsDifferAtLeast 3 p)
     (hs : ¬ SchurCondition p) : n = 9 ∨ 15 ≤ n := by
   unfold SchurCondition at hs
   simp only [hd, true_and, not_forall] at hs
@@ -278,9 +312,9 @@ theorem partitionCountSchur_lt_iff (n : ℕ) :
     obtain ⟨p, hpB, hpA⟩ := exists_of_ssubset (ssubset_of_subset_of_ne hsub (fun e => by
       rw [e] at h; exact lt_irrefl _ h))
     simp only [mem_filter, mem_univ, true_and] at hpB hpA
-    exact r26a_bad_imp p hpB hpA
+    exact eq_nine_or_le_of_not_schurCondition p hpB hpA
   · intro hn
-    obtain ⟨p, hd, hs⟩ := r26a_exists_bad n hn
+    obtain ⟨p, hd, hs⟩ := exists_partsDifferAtLeast_three_not_schurCondition n hn
     refine card_lt_card (Finset.ssubset_iff_subset_ne.mpr ⟨hsub, fun e => ?_⟩)
     have : p ∈ univ.filter fun p : n.Partition => PartsDifferAtLeast 3 p := by simp [hd]
     rw [← e] at this
@@ -327,13 +361,13 @@ def distinctPartitionKloosterman (k n : ℕ) : ℂ :=
       2 * Real.pi * Complex.I * n * h / k)
 
 /-- The sawtooth function has period `1`. -/
-lemma r26a_sawtooth_add_int (x : ℝ) (m : ℤ) : sawtooth (x + m) = sawtooth x := by
+private lemma sawtooth_add_intCast (x : ℝ) (m : ℤ) : sawtooth (x + m) = sawtooth x := by
   unfold sawtooth
   rw [Int.fract_add_intCast, Int.floor_add_intCast]
   push_cast; ring_nf
 
 /-- The sawtooth function is odd. -/
-lemma r26a_sawtooth_neg (x : ℝ) : sawtooth (-x) = -sawtooth x := by
+private lemma sawtooth_neg (x : ℝ) : sawtooth (-x) = -sawtooth x := by
   unfold sawtooth
   by_cases hx : Int.fract x = 0
   · have h0 : Int.fract (-x) = 0 := Int.fract_neg_eq_zero.mpr hx
@@ -345,7 +379,7 @@ lemma r26a_sawtooth_neg (x : ℝ) : sawtooth (-x) = -sawtooth x := by
     linarith
 
 /-- `f(k - h, k) = -f(h, k)`. -/
-lemma r26a_dedekind_sub (h k : ℕ) (hhk : h ≤ k) (hk : 0 < k) :
+private lemma distinctPartitionDedekindSum_sub (h k : ℕ) (hhk : h ≤ k) (hk : 0 < k) :
     distinctPartitionDedekindSum (k - h) k = -distinctPartitionDedekindSum h k := by
   unfold distinctPartitionDedekindSum
   rw [← sum_neg_distrib]
@@ -354,11 +388,11 @@ lemma r26a_dedekind_sub (h k : ℕ) (hhk : h ≤ k) (hk : 0 < k) :
   have : ((k - h : ℕ) : ℝ) * (2 * j - 1) / k =
       -((h : ℝ) * (2 * j - 1) / k) + ((2 * j - 1 : ℤ) : ℝ) := by
     push_cast [Nat.cast_sub hhk]; field_simp; ring
-  rw [this, r26a_sawtooth_add_int, r26a_sawtooth_neg]; ring
+  rw [this, sawtooth_add_intCast, sawtooth_neg]; ring
 
 open Complex in
 /-- §26.10(vi): the terms for `h` and `k - h` are complex conjugates. -/
-lemma r26a_kloosterman_im (k n : ℕ) : (distinctPartitionKloosterman k n).im = 0 := by
+private lemma distinctPartitionKloosterman_im_eq_zero (k n : ℕ) : (distinctPartitionKloosterman k n).im = 0 := by
   rcases Nat.lt_or_ge k 2 with hk | hk
   · interval_cases k
     · simp [distinctPartitionKloosterman]
@@ -393,7 +427,7 @@ lemma r26a_kloosterman_im (k n : ℕ) : (distinctPartitionKloosterman k n).im = 
   · intro h hh
     simp only [mem_filter, mem_Icc] at hh
     have hk0 : (k : ℂ) ≠ 0 := by exact_mod_cast (by omega : k ≠ 0)
-    rw [← exp_conj, r26a_dedekind_sub h k hh.1.2 (by omega)]
+    rw [← exp_conj, distinctPartitionDedekindSum_sub h k hh.1.2 (by omega)]
     have e : (Real.pi : ℂ) * I * ((-distinctPartitionDedekindSum h k : ℝ) : ℂ) -
         2 * Real.pi * I * n * ((k - h : ℕ) : ℂ) / k =
         (starRingEnd ℂ) ((Real.pi : ℂ) * I * (distinctPartitionDedekindSum h k : ℂ) -
@@ -406,7 +440,7 @@ lemma r26a_kloosterman_im (k n : ℕ) : (distinctPartitionKloosterman k n).im = 
 /-- §26.10(vi): `A_k(n)` is real-valued. -/
 @[dlmf 26.10.vi]
 theorem distinctPartitionKloosterman_im (k n : ℕ) : (distinctPartitionKloosterman k n).im = 0 :=
-  r26a_kloosterman_im k n
+  distinctPartitionKloosterman_im_eq_zero k n
 
 /-- (26.10.17): `p(𝒟, n) = π ∑_{k ≥ 1} A_{2k-1}(n)/((2k-1)√(24n+1)) I₁(π/(2k-1) √((24n+1)/72))`
 (with the corrected `A_k`, (26.10.18)); `I₁` is the project's `DLMF.Bessel.besselI 1`. -/

@@ -10,30 +10,48 @@ public import DLMF.Combinatorics.Stirling
 public import Pochhammer.PochhammerTransform
 
 /-!
-# Sequences of numbers related to Bernoulli and Euler numbers (DLMF §24.15)
+# Sequences of numbers related to Bernoulli and Euler numbers
 
-* §24.15(i): the Genocchi numbers `Gₙ = 2(1 - 2ⁿ) Bₙ` (`genocchiNumber`; DLMF defines them by
-  the generating function 24.15.1, which is proved here for `‖t‖ < π`, the closed form 24.15.2
-  being the definition).
-* §24.15(ii): the tangent numbers `Tₙ` (`tangentNumber`), defined by the closed forms 24.15.4,
-  24.15.5; the generating function `tan t = ∑ Tₙ tⁿ/n!` (24.15.3) is proved for `‖t‖ < π/2`.
-* Table 24.15.1 (`G₀ … G₈`, `T₀ … T₈`, exact integers) is proved.
-* §24.15(iii): Stirling numbers. DLMF's `S(n, m)` (§26.8) is Mathlib's `Nat.stirlingSecond`;
-  DLMF's signed `s(n, m) = (-1)^{n-m} |s(n, m)|` is written with Mathlib's unsigned
-  `Nat.stirlingFirst`. The congruences 24.15.9, 24.15.10 between rationals are stated with the
-  `p`-adic norm: `a ≡ b (mod pᵏ)` means `padicNorm p (a - b) ≤ p^{-k}`, i.e. `a - b ∈ pᵏ ℤ_(p)`.
-* §24.15(iv): Fibonacci numbers `uₙ` are Mathlib's `Nat.fib`; the Lucas numbers `vₙ` are
-  `lucasNumber`. In 24.15.11 the term `(n/6) v_{n-1}` has the factor `n`, so the value of
-  `v_{n-1}` at `n = 0` is immaterial (natural subtraction); `1/2^{n-1}` in 24.15.12 is `2/2ⁿ`.
+This file covers DLMF §24.15: Genocchi numbers, tangent numbers, relations with Stirling
+numbers, and identities with Fibonacci and Lucas numbers.
 
-24.15.6 and 24.15.8 are proved with the umbral functional `Xⁿ ↦ Bₙ` applied to the expansion of
-`Xⁿ` in falling factorials (Stirling numbers of the second kind, `DLMF.Combinatorics.Stirling`)
-and to the coefficients of the rising factorial (`coeff_ascPochhammer` from lean-codes'
-`Pochhammer.PochhammerTransform`). 24.15.11 and 24.15.12 are proved from the Binet formulas and
-the shift relations of the polynomials. 24.15.7 is proved with formal power series: by
-`[tᵐ] (eᵗ - 1)ᵏ = k! S(m, k)/m!` its right side is `n! [tⁿ] ∑ₖ (n+1 choose k+1) (-E)ᵏ` with
-`E = (eᵗ - 1)/t`, and `E ∑ₖ (n+1 choose k+1)(-E)ᵏ = 1 - (1 - E)ⁿ⁺¹ = 1 + O(tⁿ⁺¹)`. 24.15.9 and
-24.15.10 remain admitted.
+## Main definitions
+
+* `genocchiNumber`: the Genocchi numbers `Gₙ = 2(1 - 2ⁿ) Bₙ` (DLMF 24.15.2).
+* `tangentNumber`: the tangent numbers `Tₙ`, by the closed forms DLMF 24.15.4, 24.15.5.
+* `lucasNumber`: the Lucas numbers `vₙ` (DLMF §24.15(iv)).
+
+## Main results
+
+* `hasSum_genocchiNumber`: `2t/(eᵗ + 1) = ∑ Gₙ tⁿ/n!` for `‖t‖ < π` (DLMF 24.15.1).
+* `hasSum_tangentNumber`, `tangentNumber_odd`, `tangentNumber_even`: `tan t = ∑ Tₙ tⁿ/n!` for
+  `‖t‖ < π/2` and the closed forms (DLMF 24.15.3–24.15.5).
+* `genocchiNumber_table`, `tangentNumber_table`: Table 24.15.1 (exact integers).
+* `bernoulli_eq_sum_stirlingSecond`, `bernoulli_eq_sum_stirlingSecond_choose`,
+  `sum_stirlingFirst_mul_bernoulli`: DLMF 24.15.6–24.15.8.
+* `padicNorm_bernoulli_sub_stirlingSecond`, `padicNorm_bernoulli_sub_stirlingSecond_cube`:
+  the congruences DLMF 24.15.9, 24.15.10.
+* `sum_choose_bernoulli_fib`, `sum_choose_eulerNumber_lucas`: DLMF 24.15.11, 24.15.12.
+
+## Implementation notes
+
+DLMF defines `Gₙ` and `Tₙ` by the generating functions 24.15.1 and 24.15.3; here the closed
+forms are the definitions and the generating functions are theorems. DLMF's `S(n, m)` (§26.8)
+is Mathlib's `Nat.stirlingSecond`; DLMF's signed `s(n, m) = (-1)^{n-m} |s(n, m)|` is written with
+Mathlib's unsigned `Nat.stirlingFirst`. The congruences 24.15.9, 24.15.10 between rationals are
+stated with the `p`-adic norm: `a ≡ b (mod pᵏ)` means `padicNorm p (a - b) ≤ p^{-k}`, i.e.
+`a - b ∈ pᵏ ℤ_(p)`. Fibonacci numbers `uₙ` are Mathlib's `Nat.fib`. In 24.15.11 the term
+`(n/6) v_{n-1}` has the factor `n`, so the value of `v_{n-1}` at `n = 0` is immaterial (natural
+subtraction); `1/2^{n-1}` in 24.15.12 is `2/2ⁿ`.
+
+24.15.6 and 24.15.8 are proved with the umbral functional `Xⁿ ↦ Bₙ` (`umbralBernoulliRat`)
+applied to the expansion of `Xⁿ` in falling factorials (Stirling numbers of the second kind,
+`DLMF.Combinatorics.Stirling`) and to the coefficients of the rising factorial
+(`coeff_ascPochhammer` from lean-codes' `Pochhammer.PochhammerTransform`). 24.15.11 and
+24.15.12 follow from the Binet formulas and the shift relations of the polynomials. 24.15.7 is
+proved with formal power series: by `[tᵐ] (eᵗ - 1)ᵏ = k! S(m, k)/m!` its right side is
+`n! [tⁿ] ∑ₖ (n+1 choose k+1) (-E)ᵏ` with `E = (eᵗ - 1)/t`, and
+`E ∑ₖ (n+1 choose k+1)(-E)ᵏ = 1 - (1 - E)ⁿ⁺¹ = 1 + O(tⁿ⁺¹)`.
 
 ## References
 
@@ -59,7 +77,7 @@ def genocchiNumber (n : ℕ) : ℚ := 2 * (1 - 2 ^ n) * bernoulli n
 theorem genocchiNumber_eq (n : ℕ) : genocchiNumber n = 2 * (1 - 2 ^ n) * bernoulli n := rfl
 
 /-- Nonvanishing under the stated hypotheses: `Complex.exp w ≠ 1`. -/
-lemma b24b_exp_ne_one {w : ℂ} (hw : ‖w‖ < 2 * π) (hw0 : w ≠ 0) : Complex.exp w ≠ 1 := by
+private lemma exp_ne_one_of_norm_lt {w : ℂ} (hw : ‖w‖ < 2 * π) (hw0 : w ≠ 0) : Complex.exp w ≠ 1 := by
   intro h
   obtain ⟨n, hn⟩ := Complex.exp_eq_one_iff.mp h
   have hn0 : n ≠ 0 := by rintro rfl; simp at hn; exact hw0 hn
@@ -84,8 +102,8 @@ theorem hasSum_genocchiNumber {t : ℂ} (ht : ‖t‖ < π) :
   have hpi := Real.pi_pos
   have h1 := Complex.hasSum_bernoulli_mul_pow_div (z := t) (by linarith) ht0
   have h2 := Complex.hasSum_bernoulli_mul_pow_div h2t h2t0
-  have he1 : Complex.exp t - 1 ≠ 0 := sub_ne_zero.mpr (b24b_exp_ne_one (by linarith) ht0)
-  have he2 : Complex.exp (2 * t) - 1 ≠ 0 := sub_ne_zero.mpr (b24b_exp_ne_one h2t h2t0)
+  have he1 : Complex.exp t - 1 ≠ 0 := sub_ne_zero.mpr (exp_ne_one_of_norm_lt (by linarith) ht0)
+  have he2 : Complex.exp (2 * t) - 1 ≠ 0 := sub_ne_zero.mpr (exp_ne_one_of_norm_lt h2t h2t0)
   have he3 : Complex.exp t + 1 ≠ 0 := by
     intro h; apply he2
     rw [show 2 * t = t + t by ring, Complex.exp_add,
@@ -170,7 +188,7 @@ theorem hasSum_tangentNumber {t : ℂ} (ht : ‖t‖ < π / 2) :
 /-- Identity under the stated parameter and domain assumptions: `bernoulli 0 = 1 ∧ bernoulli 1 =
 -1 / 2 ∧ bernoulli 2 = 1 / 6 ∧ bernoulli 3 = 0 ∧ bernoulli 4 = -1 / 30 ∧ bernoulli 5 = 0 ∧
 bernoulli 6 = 1 / 42 ∧ bernoulli 7 = 0 ∧ bernoulli 8 = -1 / 30 ∧ bernoulli 9 = 0`. -/
-lemma b24b_bernoulli_values :
+private lemma bernoulli_values_zero_to_nine :
     bernoulli 0 = 1 ∧ bernoulli 1 = -1 / 2 ∧ bernoulli 2 = 1 / 6 ∧ bernoulli 3 = 0 ∧
       bernoulli 4 = -1 / 30 ∧ bernoulli 5 = 0 ∧ bernoulli 6 = 1 / 42 ∧ bernoulli 7 = 0 ∧
       bernoulli 8 = -1 / 30 ∧ bernoulli 9 = 0 := by
@@ -203,7 +221,7 @@ theorem genocchiNumber_table :
     genocchiNumber 0 = 0 ∧ genocchiNumber 1 = 1 ∧ genocchiNumber 2 = -1 ∧
       genocchiNumber 3 = 0 ∧ genocchiNumber 4 = 1 ∧ genocchiNumber 5 = 0 ∧
       genocchiNumber 6 = -3 ∧ genocchiNumber 7 = 0 ∧ genocchiNumber 8 = 17 := by
-  obtain ⟨b0, b1, b2, b3, b4, b5, b6, b7, b8, -⟩ := b24b_bernoulli_values
+  obtain ⟨b0, b1, b2, b3, b4, b5, b6, b7, b8, -⟩ := bernoulli_values_zero_to_nine
   simp only [genocchiNumber, b0, b1, b2, b3, b4, b5, b6, b7, b8]
   norm_num
 
@@ -213,7 +231,7 @@ theorem tangentNumber_table :
     tangentNumber 0 = 0 ∧ tangentNumber 1 = 1 ∧ tangentNumber 2 = 0 ∧
       tangentNumber 3 = 2 ∧ tangentNumber 4 = 0 ∧ tangentNumber 5 = 16 ∧
       tangentNumber 6 = 0 ∧ tangentNumber 7 = 272 ∧ tangentNumber 8 = 0 := by
-  obtain ⟨-, -, b2, -, b4, -, b6, -, b8, -⟩ := b24b_bernoulli_values
+  obtain ⟨-, -, b2, -, b4, -, b6, -, b8, -⟩ := bernoulli_values_zero_to_nine
   simp only [tangentNumber]
   norm_num [b2, b4, b6, b8, Nat.even_iff]
 
@@ -224,15 +242,15 @@ section Umbral
 open Polynomial
 
 /-- The umbral functional `L(Xⁿ) = Bₙ` on `ℚ[X]`. -/
-def q24b_L : ℚ[X] →ₗ[ℚ] ℚ := Polynomial.lsum fun i => (_root_.bernoulli i) • LinearMap.id
+def umbralBernoulliRat : ℚ[X] →ₗ[ℚ] ℚ := Polynomial.lsum fun i => (_root_.bernoulli i) • LinearMap.id
 
 /-- `L` on monomials. -/
-lemma q24b_L_monomial (n : ℕ) (a : ℚ) : q24b_L (monomial n a) = a * _root_.bernoulli n := by
-  simp [q24b_L]; ring
+private lemma umbralBernoulliRat_monomial (n : ℕ) (a : ℚ) : umbralBernoulliRat (monomial n a) = a * _root_.bernoulli n := by
+  simp [umbralBernoulliRat]; ring
 
 /-- `L(p(X+1)) - L(p) = p'(0)`. -/
-lemma q24b_L_shift (p : ℚ[X]) :
-    q24b_L (p.comp (X + 1)) - q24b_L p = (derivative p).eval 0 := by
+private lemma umbralBernoulliRat_comp_add_one_sub (p : ℚ[X]) :
+    umbralBernoulliRat (p.comp (X + 1)) - umbralBernoulliRat p = (derivative p).eval 0 := by
   induction p using Polynomial.induction_on' with
   | add p q hp hq => rw [add_comp, map_add, map_add, derivative_add, eval_add, ← hp, ← hq]; ring
   | monomial n a =>
@@ -242,7 +260,7 @@ lemma q24b_L_shift (p : ℚ[X]) :
       refine sum_congr rfl fun k _ => ?_
       rw [one_pow, mul_one, ← C_mul_X_pow_eq_monomial, map_mul, ← C_eq_natCast]; ring
     rw [h1, map_sum, sum_range_succ]
-    simp only [q24b_L_monomial, Nat.choose_self, Nat.cast_one, mul_one, add_sub_cancel_right]
+    simp only [umbralBernoulliRat_monomial, Nat.choose_self, Nat.cast_one, mul_one, add_sub_cancel_right]
     have h2 := _root_.sum_bernoulli n
     rw [show ∑ k ∈ range n, a * (n.choose k : ℚ) * _root_.bernoulli k =
       a * ∑ k ∈ range n, (n.choose k : ℚ) * _root_.bernoulli k by rw [mul_sum]; ring_nf, h2]
@@ -250,7 +268,7 @@ lemma q24b_L_shift (p : ℚ[X]) :
     rcases n with _ | _ | n <;> simp
 
 /-- `(-1)(-2)⋯(-k) = (-1)ᵏ k!`. -/
-lemma q24b_descPochhammer_eval_neg_one (k : ℕ) :
+private lemma descPochhammer_eval_neg_one (k : ℕ) :
     (descPochhammer ℚ k).eval (-1) = (-1) ^ k * k ! := by
   induction k with
   | zero => simp
@@ -259,37 +277,37 @@ lemma q24b_descPochhammer_eval_neg_one (k : ℕ) :
     push_cast; ring
 
 /-- `L(x(x-1)⋯(x-k+1)) = (-1)ᵏ k!/(k+1)`. -/
-lemma q24b_L_descPochhammer (k : ℕ) :
-    q24b_L (descPochhammer ℚ k) = (-1) ^ k * k ! / (k + 1) := by
+private lemma umbralBernoulliRat_descPochhammer (k : ℕ) :
+    umbralBernoulliRat (descPochhammer ℚ k) = (-1) ^ k * k ! / (k + 1) := by
   have h := descPochhammer_succ_comp_X_sub_one (R := ℚ) k
   have hcomp : ((X : ℚ[X]) - 1).comp (X + 1) = X := by simp
   have h' := congrArg (fun p => p.comp (X + 1)) h
   simp only [smul_eq_mul, sub_comp, mul_comp, comp_assoc, hcomp, comp_X, add_comp,
     natCast_comp, one_comp] at h'
-  have hs := q24b_L_shift (descPochhammer ℚ (k + 1))
+  have hs := umbralBernoulliRat_comp_add_one_sub (descPochhammer ℚ (k + 1))
   have hD : (descPochhammer ℚ (k + 1)).comp (X + 1) - descPochhammer ℚ (k + 1) =
       C ((k : ℚ) + 1) * descPochhammer ℚ k := by
     rw [C_add, C_1, map_natCast]; linear_combination -h'
   rw [← map_sub, hD, ← smul_eq_C_mul, map_smul, smul_eq_mul, descPochhammer_succ_left,
     derivative_mul, derivative_X, eval_add, eval_mul, eval_mul, eval_X, zero_mul, add_zero,
     eval_one, one_mul, eval_comp, eval_sub, eval_X, eval_one, zero_sub,
-    q24b_descPochhammer_eval_neg_one] at hs
+    descPochhammer_eval_neg_one] at hs
   have hk : (k : ℚ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero k
   rw [eq_div_iff hk, mul_comm, hs]
 
 /-- DLMF 24.15.6 (helper form). -/
-lemma q24b_bernoulli_eq_sum_stirlingSecond (n : ℕ) :
+private lemma bernoulli_eq_sum_factorial_stirlingSecond (n : ℕ) :
     _root_.bernoulli n = ∑ k ∈ range (n + 1),
       (-1) ^ k * (k ! * Nat.stirlingSecond n k : ℚ) / (k + 1) := by
-  have h := congrArg q24b_L (DLMF.Combinatorics.X_pow_eq_sum_stirlingSecond_mul_descPochhammer ℚ n)
-  rw [← monomial_one_right_eq_X_pow, q24b_L_monomial, one_mul, map_sum] at h
+  have h := congrArg umbralBernoulliRat (DLMF.Combinatorics.X_pow_eq_sum_stirlingSecond_mul_descPochhammer ℚ n)
+  rw [← monomial_one_right_eq_X_pow, umbralBernoulliRat_monomial, one_mul, map_sum] at h
   rw [h]
   refine sum_congr rfl fun k _ => ?_
-  rw [← smul_eq_C_mul, map_smul, q24b_L_descPochhammer, smul_eq_mul]
+  rw [← smul_eq_C_mul, map_smul, umbralBernoulliRat_descPochhammer, smul_eq_mul]
   ring
 
 /-- DLMF 24.15.8 (helper form). -/
-lemma q24b_sum_stirlingFirst_mul_bernoulli (n : ℕ) :
+private lemma sum_neg_one_pow_stirlingFirst_mul_bernoulli (n : ℕ) :
     ∑ k ∈ range (n + 1), (-1) ^ (n + k) *
         ((-1) ^ (n - k) * (Nat.stirlingFirst (n + 1) (k + 1) : ℚ)) * _root_.bernoulli k =
       n ! / (n + 1) := by
@@ -302,14 +320,14 @@ lemma q24b_sum_stirlingFirst_mul_bernoulli (n : ℕ) :
     rw [Nat.lt_succ_iff, natDegree_le_iff_coeff_eq_zero]
     intro N hN
     rw [hcoeff, Nat.stirlingFirst_eq_zero_of_lt (by omega), Nat.cast_zero]
-  have h1 : q24b_L r =
+  have h1 : umbralBernoulliRat r =
       ∑ k ∈ range (n + 1), (Nat.stirlingFirst (n + 1) (k + 1) : ℚ) * _root_.bernoulli k := by
     conv_lhs => rw [as_sum_range' r (n + 1) hdeg]
     rw [map_sum]
     refine sum_congr rfl fun k _ => ?_
-    rw [q24b_L_monomial, hcoeff]
-  have h2 : q24b_L r = n ! / (n + 1) := by
-    have hs := q24b_L_shift (ascPochhammer ℚ (n + 1))
+    rw [umbralBernoulliRat_monomial, hcoeff]
+  have h2 : umbralBernoulliRat r = n ! / (n + 1) := by
+    have hs := umbralBernoulliRat_comp_add_one_sub (ascPochhammer ℚ (n + 1))
     rw [ascPochhammer_succ_comp_X_add_one, map_add, add_sub_cancel_left, map_nsmul, nsmul_eq_mul,
       hA, derivative_mul, derivative_X, eval_add, eval_mul, eval_mul, eval_X, zero_mul, add_zero,
       eval_one, one_mul] at hs
@@ -333,10 +351,10 @@ end Umbral
 theorem bernoulli_eq_sum_stirlingSecond (n : ℕ) :
     bernoulli n = ∑ k ∈ range (n + 1),
       (-1) ^ k * (k ! * Nat.stirlingSecond n k : ℚ) / (k + 1) :=
-  q24b_bernoulli_eq_sum_stirlingSecond n
+  bernoulli_eq_sum_factorial_stirlingSecond n
 
 /-- `[tᵐ] (eᵗ - 1)ᵏ = k! S(m, k)/m!`. -/
-lemma r24b_coeff_exp_sub_one_pow (m k : ℕ) :
+private lemma coeff_exp_sub_one_pow (m k : ℕ) :
     PowerSeries.coeff m ((PowerSeries.exp ℚ - 1) ^ k) =
       (k ! * Nat.stirlingSecond m k : ℚ) / m ! := by
   induction m generalizing k with
@@ -386,7 +404,7 @@ theorem bernoulli_eq_sum_stirlingSecond_choose (n : ℕ) :
     linear_combination h
   have hEk : ∀ k, PowerSeries.coeff n (E ^ k) = k ! * Nat.stirlingSecond (n + k) k / (n + k)! := by
     intro k
-    rw [← r24b_coeff_exp_sub_one_pow, ← hXE, mul_pow, add_comm n k, PowerSeries.coeff_X_pow_mul']
+    rw [← coeff_exp_sub_one_pow, ← hXE, mul_pow, add_comm n k, PowerSeries.coeff_X_pow_mul']
     simp
   have hterm : ∀ k ∈ range (n + 1), (-1) ^ k * ((n + 1).choose (k + 1) *
       Nat.stirlingSecond (n + k) k : ℚ) / (n + k).choose k =
@@ -430,7 +448,7 @@ theorem sum_stirlingFirst_mul_bernoulli (n : ℕ) :
     ∑ k ∈ range (n + 1), (-1) ^ (n + k) *
         ((-1) ^ (n - k) * (Nat.stirlingFirst (n + 1) (k + 1) : ℚ)) * bernoulli k =
       n ! / (n + 1) :=
-  q24b_sum_stirlingFirst_mul_bernoulli n
+  sum_neg_one_pow_stirlingFirst_mul_bernoulli n
 
 /-- DLMF 24.15.9: for a prime `p` and `1 ≤ n ≤ p - 2`,
 `p Bₙ/n ≡ S(p - 1 + n, p - 1) (mod p²)`. -/
@@ -481,7 +499,7 @@ theorem lucasNumber_succ (n : ℕ) : lucasNumber (n + 1) = Nat.fib n + Nat.fib (
 /-! ### Binet formulas and shifted sums (helpers for §24.15(iv)) -/
 
 /-- A sum over `j ≤ n` whose odd terms vanish is the sum of its even terms. -/
-lemma q24b_sum_range_even {M : Type*} [AddCommMonoid M] (n : ℕ) (f : ℕ → M)
+private lemma sum_range_half_eq_of_odd_eq_zero {M : Type*} [AddCommMonoid M] (n : ℕ) (f : ℕ → M)
     (hf : ∀ j, Odd j → f j = 0) :
     ∑ k ∈ range (n / 2 + 1), f (2 * k) = ∑ j ∈ range (n + 1), f j := by
   induction n with
@@ -495,19 +513,19 @@ lemma q24b_sum_range_even {M : Type*} [AddCommMonoid M] (n : ℕ) (f : ℕ → M
     · rw [hf _ ho, add_zero, show (n + 1) / 2 = n / 2 by obtain ⟨m, hm⟩ := ho; omega]
 
 /-- The complex number `√5`. -/
-noncomputable def q24b_s : ℂ := ((Real.sqrt 5 : ℝ) : ℂ)
+noncomputable def sqrtFive : ℂ := ((Real.sqrt 5 : ℝ) : ℂ)
 
 /-- `(√5)² = 5`. -/
-lemma q24b_s_sq : q24b_s ^ 2 = 5 := by
-  rw [q24b_s, ← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num
+private lemma sqrtFive_sq : sqrtFive ^ 2 = 5 := by
+  rw [sqrtFive, ← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num
 
 /-- `√5 ≠ 0`. -/
-lemma q24b_s_ne_zero : q24b_s ≠ 0 := by
-  intro h; have := q24b_s_sq; rw [h] at this; norm_num at this
+private lemma sqrtFive_ne_zero : sqrtFive ≠ 0 := by
+  intro h; have := sqrtFive_sq; rw [h] at this; norm_num at this
 
 /-- Binet's formula for the Lucas numbers, in `ℂ`. -/
-lemma q24b_lucas_eq (m : ℕ) :
-    (lucasNumber m : ℂ) = ((1 + q24b_s) / 2) ^ m + ((1 - q24b_s) / 2) ^ m := by
+private lemma lucasNumber_eq_binet (m : ℕ) :
+    (lucasNumber m : ℂ) = ((1 + sqrtFive) / 2) ^ m + ((1 - sqrtFive) / 2) ^ m := by
   induction m using Nat.strong_induction_on with
   | _ m ih =>
     match m with
@@ -515,13 +533,13 @@ lemma q24b_lucas_eq (m : ℕ) :
     | 1 => simp [lucasNumber]; ring
     | m + 2 =>
       rw [lucasNumber_add_two, Nat.cast_add, ih (m + 1) (by omega), ih m (by omega)]
-      have h := q24b_s_sq
-      linear_combination (-(((1 + q24b_s) / 2) ^ m + ((1 - q24b_s) / 2) ^ m) / 4) * h
+      have h := sqrtFive_sq
+      linear_combination (-(((1 + sqrtFive) / 2) ^ m + ((1 - sqrtFive) / 2) ^ m) / 4) * h
 
 /-- Binet's formula for the Fibonacci numbers, in `ℂ`. -/
-lemma q24b_fib_eq (m : ℕ) :
-    (Nat.fib m : ℂ) = (((1 + q24b_s) / 2) ^ m - ((1 - q24b_s) / 2) ^ m) / q24b_s := by
-  rw [eq_div_iff q24b_s_ne_zero]
+private lemma fib_eq_binet (m : ℕ) :
+    (Nat.fib m : ℂ) = (((1 + sqrtFive) / 2) ^ m - ((1 - sqrtFive) / 2) ^ m) / sqrtFive := by
+  rw [eq_div_iff sqrtFive_ne_zero]
   induction m using Nat.strong_induction_on with
   | _ m ih =>
     match m with
@@ -529,11 +547,11 @@ lemma q24b_fib_eq (m : ℕ) :
     | 1 => simp; ring
     | m + 2 =>
       rw [Nat.fib_add_two, Nat.cast_add, add_mul, ih (m + 1) (by omega), ih m (by omega)]
-      have h := q24b_s_sq
-      linear_combination (-(((1 + q24b_s) / 2) ^ m - ((1 - q24b_s) / 2) ^ m) / 4) * h
+      have h := sqrtFive_sq
+      linear_combination (-(((1 + sqrtFive) / 2) ^ m - ((1 - sqrtFive) / 2) ^ m) / 4) * h
 
 /-- `Eₙ(x+1) + Eₙ(x) = 2xⁿ` for complex `x`. -/
-lemma q24b_eulerPolyE_add_one_add (n : ℕ) (x : ℂ) :
+private lemma eulerPolyE_add_one_add' (n : ℕ) (x : ℂ) :
     eulerPolyE n (x + 1) + eulerPolyE n x = 2 * x ^ n := by
   have h := congrArg (Polynomial.aeval x) (Polynomial.euler_comp_X_add_one_add n)
   simp only [map_add, Polynomial.aeval_comp, Polynomial.aeval_X, map_one, map_mul, map_pow,
@@ -541,19 +559,19 @@ lemma q24b_eulerPolyE_add_one_add (n : ℕ) (x : ℂ) :
   exact h
 
 /-- `∑ⱼ (n choose j) (s/2)ʲ Eⱼ y^{n-j} = sⁿ Eₙ(1/2 + y/s)`. -/
-lemma q24b_sum_euler_shift (n : ℕ) (y : ℂ) :
-    ∑ j ∈ range (n + 1), (n.choose j : ℂ) * (q24b_s / 2) ^ j * eulerNumber j * y ^ (n - j) =
-      q24b_s ^ n * eulerPolyE n (1 / 2 + y / q24b_s) := by
+private lemma sum_choose_sqrtFive_pow_eulerNumber (n : ℕ) (y : ℂ) :
+    ∑ j ∈ range (n + 1), (n.choose j : ℂ) * (sqrtFive / 2) ^ j * eulerNumber j * y ^ (n - j) =
+      sqrtFive ^ n * eulerPolyE n (1 / 2 + y / sqrtFive) := by
   rw [eulerPolyE_add, mul_sum]
   refine sum_congr rfl fun j hj => ?_
   have hjn : j ≤ n := Nat.lt_succ_iff.mp (mem_range.mp hj)
-  rw [eulerPolyE_half, show q24b_s ^ n = q24b_s ^ j * q24b_s ^ (n - j) by
+  rw [eulerPolyE_half, show sqrtFive ^ n = sqrtFive ^ j * sqrtFive ^ (n - j) by
     rw [← pow_add, Nat.add_sub_cancel' hjn], div_pow, div_pow]
-  have := q24b_s_ne_zero
+  have := sqrtFive_ne_zero
   field_simp
 
 /-- `Bₙ(x+1) = Bₙ(x) + n x^{n-1}` for complex `x`. -/
-lemma q24b_bernoulliPolyB_add_one (n : ℕ) (x : ℂ) :
+private lemma bernoulliPolyB_add_one (n : ℕ) (x : ℂ) :
     bernoulliPolyB n (x + 1) = bernoulliPolyB n x + n * x ^ (n - 1) := by
   have h := congrArg (Polynomial.aeval x) (Polynomial.bernoulli_comp_one_add_X n)
   simp only [Polynomial.aeval_comp, map_add, map_one, Polynomial.aeval_X, nsmul_eq_mul, map_mul,
@@ -561,7 +579,7 @@ lemma q24b_bernoulliPolyB_add_one (n : ℕ) (x : ℂ) :
   rw [bernoulliPolyB, add_comm x, h, bernoulliPolyB]
 
 /-- `∑ⱼ (n choose j) aʲ Bⱼ y^{n-j} = aⁿ Bₙ(y/a)`. -/
-lemma q24b_sum_bernoulli_shift (n : ℕ) {a : ℂ} (ha : a ≠ 0) (y : ℂ) :
+private lemma sum_choose_pow_mul_bernoulli_eq_bernoulliPolyB (n : ℕ) {a : ℂ} (ha : a ≠ 0) (y : ℂ) :
     ∑ j ∈ range (n + 1), (n.choose j : ℂ) * a ^ j * bernoulli j * y ^ (n - j) =
       a ^ n * bernoulliPolyB n (y / a) := by
   rw [bernoulliPolyB_eq_sum, mul_sum]
@@ -582,19 +600,19 @@ theorem sum_choose_bernoulli_fib (n : ℕ) :
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
   apply Rat.cast_injective (α := ℂ)
   push_cast
-  have hs := q24b_s_sq
-  have hs0 := q24b_s_ne_zero
-  have hl1 := q24b_lucas_eq (m + 1 - 1)
-  have hl2 := q24b_lucas_eq (2 * (m + 1) - 2)
+  have hs := sqrtFive_sq
+  have hs0 := sqrtFive_ne_zero
+  have hl1 := lucasNumber_eq_binet (m + 1 - 1)
+  have hl2 := lucasNumber_eq_binet (2 * (m + 1) - 2)
   rw [show m + 1 - 1 = m by omega] at hl1
   rw [show 2 * (m + 1) - 2 = 2 * m by omega] at hl2
   rw [show 2 * (m + 1) - 2 = 2 * m by omega, hl2]
   rw [hl1]
-  have hfib : ∀ k, (Nat.fib (m + 1 - 2 * k) : ℂ) = _ := fun k => q24b_fib_eq (m + 1 - 2 * k)
+  have hfib : ∀ k, (Nat.fib (m + 1 - 2 * k) : ℂ) = _ := fun k => fib_eq_binet (m + 1 - 2 * k)
   simp_rw [hfib]
-  generalize hP : (1 + q24b_s) / 2 = P
-  generalize hQ : (1 - q24b_s) / 2 = Q
-  generalize q24b_s = s at hs hs0 hP hQ
+  generalize hP : (1 + sqrtFive) / 2 = P
+  generalize hQ : (1 - sqrtFive) / 2 = Q
+  generalize sqrtFive = s at hs hs0 hP hQ
   set a := s / 3 with ha
   have ha0 : a ≠ 0 := by rw [ha]; exact div_ne_zero hs0 (by norm_num)
   set g : ℕ → ℂ := fun j => (((m + 1).choose j : ℕ) : ℂ) * a ^ j * (bernoulli j : ℂ) *
@@ -604,7 +622,7 @@ theorem sum_choose_bernoulli_fib (n : ℕ) :
     intro k
     simp only [hg, pow_mul, ha, div_pow, hs]; norm_num
   simp_rw [hL]
-  have key := q24b_sum_range_even (m + 1) (fun j => if j = 1 then 0 else g j) (fun j hj => by
+  have key := sum_range_half_eq_of_odd_eq_zero (m + 1) (fun j => if j = 1 then 0 else g j) (fun j hj => by
     by_cases h1 : j = 1
     · simp [h1]
     · simp only [h1, ite_false, hg]
@@ -627,14 +645,14 @@ theorem sum_choose_bernoulli_fib (n : ℕ) :
   rw [hsplit]
   have hsum : ∑ j ∈ range (m + 1 + 1), g j = (a ^ (m + 1) * (bernoulliPolyB (m + 1) (P / a) -
       bernoulliPolyB (m + 1) (Q / a))) / s := by
-    rw [mul_sub, ← q24b_sum_bernoulli_shift _ ha0, ← q24b_sum_bernoulli_shift _ ha0,
+    rw [mul_sub, ← sum_choose_pow_mul_bernoulli_eq_bernoulliPolyB _ ha0, ← sum_choose_pow_mul_bernoulli_eq_bernoulliPolyB _ ha0,
       ← sum_sub_distrib, sum_div]
     refine sum_congr rfl fun j _ => ?_
     simp only [hg]; ring
   have hPQ : P / a = Q / a + 1 + 1 + 1 := by
     rw [ha, ← hP, ← hQ]; field_simp; ring
-  rw [hsum, hPQ, q24b_bernoulliPolyB_add_one, q24b_bernoulliPolyB_add_one,
-    q24b_bernoulliPolyB_add_one, Nat.add_sub_cancel]
+  rw [hsum, hPQ, bernoulliPolyB_add_one, bernoulliPolyB_add_one,
+    bernoulliPolyB_add_one, Nat.add_sub_cancel]
   have hg1 : g 1 = -((m + 1 : ℂ) * (P ^ m - Q ^ m) / 6) := by
     simp only [hg, Nat.choose_one_right, pow_one, bernoulli_one, Nat.add_sub_cancel, ha]
     push_cast; field_simp; ring
@@ -666,24 +684,24 @@ theorem sum_choose_eulerNumber_lucas (n : ℕ) :
         lucasNumber (n - 2 * k) = 2 / 2 ^ n := by
   apply Rat.cast_injective (α := ℂ)
   push_cast
-  have hs := q24b_s_sq
-  have hs0 := q24b_s_ne_zero
-  have key := q24b_sum_range_even n (fun j => (n.choose j : ℂ) * (q24b_s / 2) ^ j *
-    eulerNumber j * (((1 + q24b_s) / 2) ^ (n - j) + ((1 - q24b_s) / 2) ^ (n - j))) (fun j hj => by
+  have hs := sqrtFive_sq
+  have hs0 := sqrtFive_ne_zero
+  have key := sum_range_half_eq_of_odd_eq_zero n (fun j => (n.choose j : ℂ) * (sqrtFive / 2) ^ j *
+    eulerNumber j * (((1 + sqrtFive) / 2) ^ (n - j) + ((1 - sqrtFive) / 2) ^ (n - j))) (fun j hj => by
       simp [eulerNumber_eq_zero_of_odd hj])
   have hL : ∀ k, (n.choose (2 * k) : ℂ) * (5 / 4) ^ k * (eulerNumber (2 * k) : ℂ) *
-      (lucasNumber (n - 2 * k) : ℂ) = (n.choose (2 * k) : ℂ) * (q24b_s / 2) ^ (2 * k) *
+      (lucasNumber (n - 2 * k) : ℂ) = (n.choose (2 * k) : ℂ) * (sqrtFive / 2) ^ (2 * k) *
       eulerNumber (2 * k) *
-        (((1 + q24b_s) / 2) ^ (n - 2 * k) + ((1 - q24b_s) / 2) ^ (n - 2 * k)) := by
+        (((1 + sqrtFive) / 2) ^ (n - 2 * k) + ((1 - sqrtFive) / 2) ^ (n - 2 * k)) := by
     intro k
-    rw [q24b_lucas_eq, pow_mul, show (q24b_s / 2) ^ 2 = 5 / 4 by rw [div_pow, hs]; norm_num]
+    rw [lucasNumber_eq_binet, pow_mul, show (sqrtFive / 2) ^ 2 = 5 / 4 by rw [div_pow, hs]; norm_num]
   simp_rw [hL]
   rw [key]
   simp_rw [mul_add, sum_add_distrib]
-  rw [q24b_sum_euler_shift, q24b_sum_euler_shift]
-  have h1 : 1 / 2 + (1 + q24b_s) / 2 / q24b_s = 1 / (2 * q24b_s) + 1 := by field_simp; ring
-  have h2 : 1 / 2 + (1 - q24b_s) / 2 / q24b_s = 1 / (2 * q24b_s) := by field_simp; ring
-  rw [h1, h2, ← mul_add, q24b_eulerPolyE_add_one_add, div_pow, one_pow, mul_pow]
+  rw [sum_choose_sqrtFive_pow_eulerNumber, sum_choose_sqrtFive_pow_eulerNumber]
+  have h1 : 1 / 2 + (1 + sqrtFive) / 2 / sqrtFive = 1 / (2 * sqrtFive) + 1 := by field_simp; ring
+  have h2 : 1 / 2 + (1 - sqrtFive) / 2 / sqrtFive = 1 / (2 * sqrtFive) := by field_simp; ring
+  rw [h1, h2, ← mul_add, eulerPolyE_add_one_add', div_pow, one_pow, mul_pow]
   field_simp
 
 end DLMF.BernoulliEuler

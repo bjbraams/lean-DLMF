@@ -10,7 +10,32 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
 
 /-!
-# Jacobi amplitude as the inverse elliptic integral
+# Jacobi's amplitude and elliptic functions
+
+This file proves the basic properties of the incomplete elliptic integrals in the amplitude and
+defines Jacobi's amplitude as the inverse of `φ ↦ F(φ|m)`, together with `sn`, `cn` and `dn`.
+
+## Main definitions
+
+* `Real.incEllIntFmOrderIso`: `φ ↦ F(φ|m)` as an order isomorphism of `ℝ`, for `m < 1`.
+* `Real.jacobiAmm`: Jacobi's amplitude `am(u|m)` (Temme (12.21), DLMF §22.16(i)).
+* `Real.jacobiSnm`, `Real.jacobiCnm`: `sn(u|m) = sin am(u|m)` and `cn(u|m) = cos am(u|m)`.
+* `Real.jacobiDnm`: `dn(u|m) = (1 - m sn²(u|m))^{1/2}` (DLMF 22.6.1).
+
+## Main results
+
+* `Real.incEllIntFm_add_pi`, `Real.incEllIntEm_add_pi`: `F(φ + π|m) = F(φ|m) + 2K(m)` and
+  `E(φ + π|m) = E(φ|m) + 2E(m)` (DLMF §19.2(ii)).
+* `Real.incEllIntFm_pi_div_two`, `Real.incEllIntEm_pi_div_two`: `F(π/2|m) = K(m)` and
+  `E(π/2|m) = E(m)`.
+* `Real.incEllIntFm_neg`, `Real.incEllIntFm_zero_param`: oddness and `F(φ|0) = φ`.
+* `Real.hasDerivAt_incEllIntFm`, `Real.hasDerivAt_incEllIntEm`: derivatives in `φ`.
+* `Real.strictMono_incEllIntFm`, `Real.surjective_incEllIntFm`: `φ ↦ F(φ|m)` is a strictly
+  increasing bijection of `ℝ` for `m < 1`.
+
+## Implementation notes
+
+For `m ≥ 1` the amplitude is set to `am(u|m) = u`.
 -/
 
 @[expose] public noncomputable section

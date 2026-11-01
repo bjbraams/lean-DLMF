@@ -8,12 +8,34 @@ module
 public import DLMF.Confluent.BasicProperties.Continuity
 
 /-!
-# Integer Tricomi parameters and endpoint limits
+# Tricomi's function at integer parameters and near the origin
 
-Finite and logarithmic formulas at integer parameters and estimates near the origin.
+This file gives the logarithmic expansion of Tricomi's `U(a,b,z)` at integer second parameter,
+the polynomial and shift formulas at integer parameters, monodromy around the origin, and the
+behaviour of `M` and `U` as `z → 0` (DLMF §13.2(i)–(iii)).
 
-Source references and common attribution are retained in
-`DLMF.Confluent.BasicProperties`.
+## Main results
+
+* `kummerU_nat_log`, `kummerU_nat_log_recipGamma`: at a positive integer second parameter, `U`
+  is a logarithm times an analytic function plus an analytic remainder and a finite singular
+  part.
+* `kummerU_nat_denom`, `kummerU_nat_denom_recipGamma`: the expansion DLMF 13.2.9.
+* `kummerU_neg_nat_nat_denom`: the polynomial case DLMF 13.2.10.
+* `kummerU_neg_nat_shift`: `U(a,-n,z) = z^{n+1} U(a+n+1,n+2,z)` (DLMF 13.2.11).
+* `kummerU_analytic_continuation`: monodromy on the logarithmic argument plane for noninteger
+  second parameter (DLMF 13.2.12).
+* `isBigO_kummerM_sub_one`: `M(a,b,z) = 1 + O(z)` (DLMF 13.2.13).
+* `isBigO_kummerU_neg_nat`, `isBigO_kummerU_neg_nat_shift`: DLMF 13.2.14 and 13.2.15.
+* `isBigO_kummerU_at_zero_re_ge_two`, `isBigO_kummerU_at_zero_b_two`,
+  `isBigO_kummerU_at_zero_re_one_to_two`, `isBigO_kummerU_at_zero_b_one_recipGamma`,
+  `isBigO_kummerU_at_zero_re_zero_to_one`, `isBigO_kummerU_at_zero_b_zero`,
+  `isBigO_kummerU_at_zero_re_nonpos`: the behaviour of `U` at the origin (DLMF 13.2.16–13.2.22).
+* `kummerU_zero_arg`: `U(a,b,0) = Γ(1-b)/Γ(a-b+1)` for `Re b < 1`.
+
+## Implementation notes
+
+The `recipGamma` variants write `ψ(a+k)/Γ(a-n)` through the derivative of `1/Γ`; they are
+stronger than DLMF since they hold for all `a`.
 -/
 
 @[expose] public section

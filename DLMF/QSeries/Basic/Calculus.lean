@@ -8,7 +8,13 @@ module
 public import DLMF.QSeries.Basic.Pochhammer
 
 /-!
-# Gaussian coefficients, q-numbers and q-derivatives
+# Gaussian coefficients, `q`-numbers and `q`-derivatives
+
+## Main definitions
+
+* `qBinom`: the Gaussian `q`-binomial coefficients `[n k]_q`, by the `q`-Pascal rule.
+* `qDeriv`: the `q`-derivative `δ_q f(x) = (f(x) - f(qx))/((1-q)x)` (Duverney (10.10)).
+* `qNum`: the `q`-number `[n]_q = (1 - qⁿ)/(1 - q)`.
 -/
 
 @[expose] public noncomputable section

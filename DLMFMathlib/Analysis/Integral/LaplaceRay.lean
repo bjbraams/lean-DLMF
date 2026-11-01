@@ -11,8 +11,17 @@ public import Mathlib.MeasureTheory.Integral.Prod
 /-!
 # Integrating exponential kernels along a horizontal ray
 
-The identity follows from Mathlib's Fubini theorem after proving absolute
-integrability using the weighted quotient `exp(-st) f(t)/t`.
+Exchanging a horizontal ray integral with a half-line exponential integral. The identity
+follows from Mathlib's Fubini theorem after proving absolute integrability using the weighted
+quotient `exp(-st) f(t)/t`.
+
+## Main results
+
+* `integral_Ioi_cexp_add_mul`: along a positive horizontal ray the exponential kernel has
+  integral `exp(-st)/t`, with its full complex phase.
+* `integral_Ioi_norm_cexp_add_mul`: the corresponding integral of the norm.
+* `integral_Ioi_integral_cexp_add_mul`: absolute convergence of the weighted quotient justifies
+  exchanging the two integrals.
 -/
 
 @[expose] public noncomputable section

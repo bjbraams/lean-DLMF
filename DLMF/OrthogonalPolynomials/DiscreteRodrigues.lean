@@ -17,6 +17,19 @@ negative integers. Its iterated backward difference is `w(x) C_n(x;a)`
 Meixner and Krawtchouk use shifted weights expressed by Pochhammer symbols,
 with both finite-support endpoints retained in the Krawtchouk case.
 We use Mathlib's `fwdDiff (-1)`, the negative of the backward difference.
+
+## Main definitions
+
+* `charlierWeightInt`: the Charlier weight on the integers, extended by zero.
+* `meixnerRodriguesWeight`, `krawtchoukRodriguesWeight`: the shifted Meixner and Krawtchouk
+  weights, extended by zero outside their support.
+
+## Main results
+
+* `charlier_rodrigues`: Charlier's discrete Rodrigues formula at every integer argument.
+* `meixner_rodrigues`, `meixner_rodrigues_of_ne_zero`: Meixner's discrete Rodrigues formula,
+  the second form allowing negative integral `β`.
+* `krawtchouk_rodrigues`: Krawtchouk's discrete Rodrigues formula at every integer argument.
 -/
 
 @[expose] public noncomputable section

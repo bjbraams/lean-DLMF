@@ -12,11 +12,32 @@ public import DLMFMathlib.Analysis.ODE.SturmCount
 /-!
 # Series and integral representations of Scorer functions
 
-Series, differential equations, connection formulas and integral representations of the
-inhomogeneous Airy functions.
+The Scorer functions `Hi` and `Gi` (DLMF 9.12.1–9.12.24): differential equations, initial
+values, connection formulas, Maclaurin series and integral representations.
 
-Source references and common attribution are retained in
-`DLMF.Airy.Scorer`.
+## Main definitions
+
+* `scorerHi`: the entire function `Hi`, defined by its Maclaurin series (DLMF 9.12.17).
+* `scorerGi`: the complementary function, with `Gi + Hi = Bi`.
+* `scorerHiDeriv`, `scorerGiDeriv`, `scorerHiCoeff`, `scorerGiCoeff`: derivatives and
+  Maclaurin coefficients.
+* `IsScorerSol`, `IsAiryInhomSol`: solutions of the inhomogeneous Airy equation.
+* `airyWronskian3`, `IsWellConditionedTripleOn`: third-order fundamental systems.
+
+## Main results
+
+* `scorerHi_ode`, `scorerGi_ode`, `scorerHi_rotated_ode`: DLMF 9.12.1, 9.12.3.
+* `scorer_general_solution`: DLMF 9.12.2.
+* `scorerGi_variation`, `scorerHi_variation`: DLMF 9.12.4, 9.12.5.
+* `scorer_zero`, `scorerDeriv_zero`: DLMF 9.12.6, 9.12.7.
+* `scorerGi_standard_system`, `scorerHi_standard_system`, `scorerHi_rotated_standard_system`:
+  DLMF 9.12.8–9.12.10.
+* `scorerGi_add_scorerHi`, `scorerGi_rotations`, `scorerGi_eq_rotated_scorerHi`,
+  `scorerHi_connection`: DLMF 9.12.11–9.12.14.
+* `hasSum_scorerGi`, `hasSum_scorerGiDeriv`, `hasSum_scorerHi`, `hasSum_scorerHiDeriv`:
+  DLMF 9.12.15–9.12.18.
+* `scorerHi_exp_integral`, `scorerGi_exp_cos_integral`, `scorerHi_stieltjes_integral`,
+  `scorerGi_principalValue`, `scorerHi_mellinBarnes`: DLMF 9.12.20–9.12.24.
 -/
 
 @[expose] public noncomputable section

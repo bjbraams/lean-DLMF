@@ -10,10 +10,13 @@ public import DLMF.Confluent.ParabolicCylinder
 /-!
 # A source discrepancy in DLMF 12.13.6
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+At `n = 0` and `z = 0` the printed formula DLMF 12.13.6 would give `U(1/2, 0) = 1`, but
+`U(1/2, 0) = √π/√2`. This file records the counterexample.
+
+## Main results
+
+* `pcfU_half_zero_ne_one`: `U(1/2, 0) ≠ 1`.
+* `dlmf_12_13_6_counterexample`: the printed formula DLMF 12.13.6 fails at `n = 0`, `z = 0`.
 -/
 
 @[expose] public noncomputable section

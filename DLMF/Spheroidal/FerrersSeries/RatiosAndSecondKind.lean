@@ -8,12 +8,14 @@ module
 public import DLMF.Spheroidal.FerrersSeries.RecurrencesAndConvergence
 
 /-!
-# Spheroidal coefficient ratios and second-kind series
+# Ratio asymptotics of spheroidal coefficients and the expansion of `𝖰s` (DLMF §30.8)
 
-Ratio asymptotics of the spheroidal coefficients and Ferrers expansions of the second kind.
+## Main results
 
-Source references and common attribution are retained in
-`DLMF.Spheroidal.FerrersSeries`.
+* `spheroidalCoeff_ratio_isBigO`, `spheroidalCoeff_ratio_isBigO_four`: the ratio asymptotics
+  DLMF 30.8.7–30.8.8 of the coefficients `a^m_{n,k}(γ²)`.
+* `spheroidalQs_eq_ferrers_series`: the expansion DLMF 30.8.9–30.8.11 of `𝖰s^m_n` in Ferrers
+  functions.
 -/
 
 @[expose] public noncomputable section
@@ -31,7 +33,7 @@ and 30.8.1 would give `𝖯s = 0`); with `|a_{j+1}| ≤ (|a_j| + |a_{j+2}|)/8` a
 this forces `|a_{j+1}| ≤ |a_j|/4` eventually. -/
 
 /-- `A_k ≠ 0` for `k > -R` when `γ² ≠ 0`. -/
-lemma p2y_recA_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) {k : ℤ}
+private lemma spheroidalRecA_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) {k : ℤ}
     (hk : -(((n - m) / 2 : ℕ) : ℤ) < k) : spheroidalRecA n m γ2 k ≠ 0 := by
   unfold spheroidalRecA
   have h1 : ((n : ℤ) - m + 2 * k - 1) ≠ 0 := by omega
@@ -46,7 +48,7 @@ lemma p2y_recA_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0)
     (mul_ne_zero h3' h4')
 
 /-- For `γ² ≠ 0` the coefficients `a^m_{n,k}`, `k ≥ -R`, are not eventually zero. -/
-lemma p2y_coeff_not_eventually_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
+private lemma not_eventually_spheroidalCoeff_eq_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
     ¬ ∃ J : ℕ, ∀ j : ℕ, J ≤ j → spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) = 0 := by
   rintro ⟨J, hJ⟩
   have hall : ∀ d j : ℕ, J ≤ j + d → spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) = 0 := by
@@ -66,27 +68,27 @@ lemma p2y_coeff_not_eventually_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ
         show ((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ) + 1 = ((j + 2 : ℕ) : ℤ) - ((n - m) / 2 : ℕ) by
           push_cast; ring, h1, h2] at hrec
       simp only [mul_zero, add_zero] at hrec
-      exact (mul_eq_zero.mp hrec).resolve_left (p2y_recA_ne_zero hmn hγ (by omega))
+      exact (mul_eq_zero.mp hrec).resolve_left (spheroidalRecA_ne_zero hmn hγ (by omega))
   have hz : ∀ j : ℕ, spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) = 0 :=
     fun j => hall J j (by omega)
   have hG : ∀ x ∈ Ioo (-1 : ℝ) 1, (spheroidalPsFactor n m γ2 x).re = 0 := by
     intro x hx
-    have h := p2y_factor_expansion hmn γ2 x hx
+    have h := hasSum_spheroidalPsFactor_expansion hmn γ2 x hx
     have h0 : ∀ j : ℕ, (2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
           ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
           (2 * ((n - 2 * ((n - m) / 2) + 2 * j + m).factorial : ℝ)) *
         (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
-          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m y).re) = 0 := by
+          (OrthogonalPolynomials.LegendreAddition.jet (n - 2 * ((n - m) / 2) + 2 * j) m y).re) = 0 := by
       intro j
       have := hz j
-      rw [p2y_coeff_eq hmn γ2 j] at this
+      rw [spheroidalCoeff_eq_integral_factor_mul_jet hmn γ2 j] at this
       exact (mul_eq_zero.mp this).resolve_left (mul_ne_zero (zpow_ne_zero _ (by norm_num))
         (pow_ne_zero _ (by norm_num)))
     simp only [h0, zero_mul] at h
     exact h.unique hasSum_zero
   have hnorm := (spheroidalPsFactor_spec hmn γ2).normalized
   have h0 : ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * (spheroidalPsFactor n m γ2 x).re ^ 2 = 0 := by
-    rw [p2y_integral_congr_Ioo (f₂ := fun _ => (0 : ℝ)) (fun x hx => by
+    rw [intervalIntegral_neg_one_one_congr_Ioo (f₂ := fun _ => (0 : ℝ)) (fun x hx => by
       simp only [hG x hx]; ring)]
     simp
   rw [h0] at hnorm
@@ -95,12 +97,12 @@ lemma p2y_coeff_not_eventually_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ
   linarith
 
 /-- Eventually `|a_{j+1}| ≤ |a_j|/4`. -/
-lemma p2y_coeff_ratio_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+private lemma eventually_abs_spheroidalCoeff_succ_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     ∃ J : ℕ, ∀ j : ℕ, J ≤ j →
       |spheroidalCoeff n m γ2 (((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))| ≤
         |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| / 4 := by
-  obtain ⟨J, hJ⟩ := p2y_coeff_eps hmn γ2 (by norm_num : (0 : ℝ) < 1 / 8)
-  obtain ⟨M, hM0, hM⟩ := p2y_coeff_linear hmn γ2
+  obtain ⟨J, hJ⟩ := eventually_abs_spheroidalCoeff_succ_le_eps hmn γ2 (by norm_num : (0 : ℝ) < 1 / 8)
+  obtain ⟨M, hM0, hM⟩ := exists_abs_spheroidalCoeff_le_linear hmn γ2
   refine ⟨J, fun j0 hj0 => ?_⟩
   set a : ℕ → ℝ := fun j => |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| with ha
   change a (j0 + 1) ≤ a j0 / 4
@@ -140,7 +142,7 @@ lemma p2y_coeff_ratio_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
   nlinarith
 
 /-- `|B_k - (n+2k)(n+2k+1)| ≤ 2|γ²|(1+m²)` for `k ≥ 1`. -/
-lemma p2y_recB_close {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
+private lemma abs_spheroidalRecB_sub_le {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
     |spheroidalRecB n m γ2 k - ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1)| ≤
       2 * |γ2| * (1 + m ^ 2) := by
   have kr : (1 : ℝ) ≤ k := by exact_mod_cast hk
@@ -164,7 +166,7 @@ lemma p2y_recB_close {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
   gcongr
 
 /-- `|-4A_k - γ²| ≤ |γ²|(4m²+12m+7)/k` for `k ≥ 2`. -/
-lemma p2y_recA_close {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 2 ≤ k) :
+private lemma abs_neg_four_mul_spheroidalRecA_sub_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 2 ≤ k) :
     |-4 * spheroidalRecA n m γ2 k - γ2| ≤ |γ2| * (4 * m ^ 2 + 12 * m + 7) / k := by
   have kr : (2 : ℝ) ≤ k := by exact_mod_cast hk
   have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
@@ -200,7 +202,7 @@ lemma p2y_recA_close {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 2 �
     _ ≤ _ := by rw [mul_assoc]; exact mul_le_mul_of_nonneg_left (by nlinarith [hQ]) (by positivity)
 
 /-- The algebra of 30.8.7: from `16 D E = 4k² X + γ² Y`, `D ≥ k²`, `|X| ≤ c₃/k`, `|Y| ≤ c₂ k`. -/
-lemma p2y_alg_ratio {k D X Y E γ2 c₂ c₃ : ℝ} (hk : 1 ≤ k) (hD : k ^ 2 ≤ D)
+private lemma abs_le_of_sixteen_mul_eq {k D X Y E γ2 c₂ c₃ : ℝ} (hk : 1 ≤ k) (hD : k ^ 2 ≤ D)
     (h : 16 * D * E = 4 * k ^ 2 * X + γ2 * Y) (hX : |X| ≤ c₃ / k) (hY : |Y| ≤ c₂ * k) :
     |E| ≤ (4 * c₃ + |γ2| * c₂) / 16 * k⁻¹ := by
   have hk0 : 0 < k := by linarith
@@ -221,13 +223,13 @@ lemma p2y_alg_ratio {k D X Y E γ2 c₂ c₃ : ℝ} (hk : 1 ≤ k) (hD : k ^ 2 �
   nlinarith
 
 /-- For `γ² ≠ 0`, eventually `a_j ≠ 0` and `|a_{j+1}| ≤ |a_j|/4`. -/
-lemma p2y_coeff_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
+private lemma eventually_spheroidalCoeff_ne_zero_and_ratio_le {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
     ∃ J : ℕ, ∀ j : ℕ, J ≤ j → spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) ≠ 0 ∧
       |spheroidalCoeff n m γ2 (((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))| ≤
         |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| / 4 := by
-  obtain ⟨J, hJ⟩ := p2y_coeff_ratio_le hmn γ2
+  obtain ⟨J, hJ⟩ := eventually_abs_spheroidalCoeff_succ_le hmn γ2
   refine ⟨J, fun j hj => ⟨fun h0 => ?_, hJ j hj⟩⟩
-  apply p2y_coeff_not_eventually_zero hmn hγ
+  apply not_eventually_spheroidalCoeff_eq_zero hmn hγ
   refine ⟨j, fun i hi => ?_⟩
   obtain ⟨d, rfl⟩ : ∃ d, i = j + d := ⟨i - j, by omega⟩
   induction d with
@@ -254,7 +256,7 @@ theorem spheroidalCoeff_ratio_isBigO {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     have hC : spheroidalRecC n m 0 k = 0 := by simp [spheroidalRecC]
     have hB : spheroidalRecB n m 0 k = ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) := by
       simp [spheroidalRecB]
-    rw [hA, hC, hB, p1s_spheroidalEigenvalue_zero hmn] at hrec
+    rw [hA, hC, hB, spheroidalEigenvalue_gamma_zero hmn] at hrec
     have hk1 : (1 : ℝ) ≤ k := by exact_mod_cast hk
     have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
     have hpos : ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - n * (n + 1) ≠ 0 := by
@@ -265,7 +267,7 @@ theorem spheroidalCoeff_ratio_isBigO {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
       exact (mul_eq_zero.mp hrec).resolve_left hpos
     simp [h0]
   -- `γ² ≠ 0`
-  obtain ⟨J1, hJ1⟩ := p2y_coeff_ne_zero hmn hγ
+  obtain ⟨J1, hJ1⟩ := eventually_spheroidalCoeff_ne_zero_and_ratio_le hmn hγ
   set R := (n - m) / 2 with hR
   set lam := spheroidalEigenvalue n m γ2
   set c₀ : ℝ := 2 * |γ2| * (1 + m ^ 2) + |lam| + |γ2| / 4 with hc₀
@@ -294,9 +296,9 @@ theorem spheroidalCoeff_ratio_isBigO {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     linarith
   have hrec := spheroidalCoeff_recurrence_of_le hmn γ2 (k := (k : ℤ)) (by omega)
   simp only [show -(((n - m) / 2 : ℕ) : ℤ) ≤ (k : ℤ) - 1 by omega, ↓reduceIte] at hrec
-  obtain ⟨hA, hC, -⟩ := p2y_rec_bounds hmn γ2 hk1
-  have hBc := p2y_recB_close (n := n) (m := m) γ2 hk1
-  have hX := p2y_recA_close hmn γ2 hk2
+  obtain ⟨hA, hC, -⟩ := spheroidalRec_bounds hmn γ2 hk1
+  have hBc := abs_spheroidalRecB_sub_le (n := n) (m := m) γ2 hk1
+  have hX := abs_neg_four_mul_spheroidalRecA_sub_le hmn γ2 hk2
   set a0 := spheroidalCoeff n m γ2 ((k : ℤ) - 1)
   set a1 := spheroidalCoeff n m γ2 (k : ℤ)
   set a2 := spheroidalCoeff n m γ2 ((k : ℤ) + 1)
@@ -346,18 +348,18 @@ theorem spheroidalCoeff_ratio_isBigO {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
       4 * (k : ℝ) ^ 2 * (-4 * A - γ2) + γ2 * (4 * (k : ℝ) ^ 2 - D) := by
     rw [mul_div_assoc, ← hr]
     linear_combination 16 * (k : ℝ) ^ 2 * hrD
-  have hfin := p2y_alg_ratio (c₃ := c₃) (by linarith) hDk hE (by rw [hc₃]; exact hX) hY
+  have hfin := abs_le_of_sixteen_mul_eq (c₃ := c₃) (by linarith) hDk hE (by rw [hc₃]; exact hX) hY
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_inv, abs_of_nonneg (Nat.cast_nonneg (α := ℝ) k)]
   exact hfin
 
 /-- For `γ² ≠ 0`, eventually `a_{k-1} ≠ 0`, `a_k ≠ 0` and `|a_k/a_{k-1}| ≤ |γ²|/k²`. -/
-lemma p2y_ratio_small {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
+private lemma eventually_abs_spheroidalCoeff_ratio_le {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
     ∃ K : ℕ, ∀ k : ℕ, K ≤ k → spheroidalCoeff n m γ2 ((k : ℤ) - 1) ≠ 0 ∧
       spheroidalCoeff n m γ2 (k : ℤ) ≠ 0 ∧
       |spheroidalCoeff n m γ2 (k : ℤ) / spheroidalCoeff n m γ2 ((k : ℤ) - 1)| ≤
         |γ2| / (k : ℝ) ^ 2 := by
   -- `γ² ≠ 0`
-  obtain ⟨J1, hJ1⟩ := p2y_coeff_ne_zero hmn hγ
+  obtain ⟨J1, hJ1⟩ := eventually_spheroidalCoeff_ne_zero_and_ratio_le hmn hγ
   set R := (n - m) / 2 with hR
   set lam := spheroidalEigenvalue n m γ2
   set c₀ : ℝ := 2 * |γ2| * (1 + m ^ 2) + |lam| + |γ2| / 4 with hc₀
@@ -385,9 +387,9 @@ lemma p2y_ratio_small {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) 
     linarith
   have hrec := spheroidalCoeff_recurrence_of_le hmn γ2 (k := (k : ℤ)) (by omega)
   simp only [show -(((n - m) / 2 : ℕ) : ℤ) ≤ (k : ℤ) - 1 by omega, ↓reduceIte] at hrec
-  obtain ⟨hA, hC, -⟩ := p2y_rec_bounds hmn γ2 hk1
-  have hBc := p2y_recB_close (n := n) (m := m) γ2 hk1
-  have hX := p2y_recA_close hmn γ2 hk2
+  obtain ⟨hA, hC, -⟩ := spheroidalRec_bounds hmn γ2 hk1
+  have hBc := abs_spheroidalRecB_sub_le (n := n) (m := m) γ2 hk1
+  have hX := abs_neg_four_mul_spheroidalRecA_sub_le hmn γ2 hk2
   set a0 := spheroidalCoeff n m γ2 ((k : ℤ) - 1)
   set a1 := spheroidalCoeff n m γ2 (k : ℤ)
   set a2 := spheroidalCoeff n m γ2 ((k : ℤ) + 1)
@@ -437,7 +439,7 @@ lemma p2y_ratio_small {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) 
     _ ≤ |γ2| := hA
 
 /-- `|A_k| ≥ |γ²|/16` when `n + 2k ≥ 2m + 2`. -/
-lemma p2y_recA_ge {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 2 * (m : ℤ) + 2 ≤ n + 2 * k) :
+private lemma abs_spheroidalRecA_ge {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 2 * (m : ℤ) + 2 ≤ n + 2 * k) :
     |γ2| / 16 ≤ |spheroidalRecA n m γ2 k| := by
   have hkr : 2 * (m : ℝ) + 2 ≤ n + 2 * k := by exact_mod_cast hk
   have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
@@ -453,7 +455,7 @@ lemma p2y_recA_ge {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 2 * (m : ℤ) + 2 ≤ 
 /-- **Ratio asymptotics** (DLMF 30.8.8):
 `(λ^m_n(γ²) - B_k)/A_k · a^m_{n,k}(γ²)/a^m_{n,k-1}(γ²) = 1 + O(k⁻⁴)` as `k → ∞`.
 Corrected: the hypothesis `γ2 ≠ 0` was added (2026-10-26), since at `γ² = 0` the statement fails
-(`p2y_not_spheroidalCoeff_ratio_isBigO_four_zero`). Proved: by 30.8.4 the expression equals
+(`not_spheroidalCoeff_ratio_isBigO_zero`). Proved: by 30.8.4 the expression equals
 `C_k (a_k/a_{k-1})(a_{k+1}/a_k)/A_k`, and both ratios are `O(k⁻²)` while `|A_k| ≥ |γ²|/16`. -/
 @[dlmf 30.8.E8]
 theorem spheroidalCoeff_ratio_isBigO_four {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
@@ -461,7 +463,7 @@ theorem spheroidalCoeff_ratio_isBigO_four {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ
         spheroidalRecA n m γ2 k *
           (spheroidalCoeff n m γ2 k / spheroidalCoeff n m γ2 ((k : ℤ) - 1)) - 1)
       =O[atTop] (fun k : ℕ => ((k : ℝ) ^ 4)⁻¹) := by
-  obtain ⟨K, hK⟩ := p2y_ratio_small hmn hγ
+  obtain ⟨K, hK⟩ := eventually_abs_spheroidalCoeff_ratio_le hmn hγ
   refine IsBigO.of_bound (16 * |γ2| ^ 2) ?_
   filter_upwards [eventually_ge_atTop (K + m + 2)] with k hk
   obtain ⟨ha0, ha1, hr⟩ := hK k (by omega)
@@ -469,9 +471,9 @@ theorem spheroidalCoeff_ratio_isBigO_four {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ
   push_cast at ha2' hs
   rw [show ((k : ℤ) + 1 - 1) = (k : ℤ) by ring] at hs
   have hk1 : (1 : ℤ) ≤ (k : ℤ) := by omega
-  have hA0 := p2y_recA_ne_zero hmn hγ (k := (k : ℤ)) (by omega)
-  have hAge := p2y_recA_ge (n := n) (m := m) γ2 (k := (k : ℤ)) (by omega)
-  obtain ⟨-, hC, -⟩ := p2y_rec_bounds hmn γ2 hk1
+  have hA0 := spheroidalRecA_ne_zero hmn hγ (k := (k : ℤ)) (by omega)
+  have hAge := abs_spheroidalRecA_ge (n := n) (m := m) γ2 (k := (k : ℤ)) (by omega)
+  obtain ⟨-, hC, -⟩ := spheroidalRec_bounds hmn γ2 hk1
   have hrec := spheroidalCoeff_recurrence_of_le hmn γ2 (k := (k : ℤ)) (by omega)
   simp only [show -(((n - m) / 2 : ℕ) : ℤ) ≤ (k : ℤ) - 1 by omega, ↓reduceIte] at hrec
   set a0 := spheroidalCoeff n m γ2 ((k : ℤ) - 1)
@@ -500,7 +502,7 @@ theorem spheroidalCoeff_ratio_isBigO_four {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ
 
 /-- **30.8.8 fails at `γ² = 0`** as stated: then `A_k = 0`, the Lean quotient
 `(λ - B_k)/A_k` is `0`, and the expression is the constant `-1`, which is not `O(k⁻⁴)`. -/
-lemma p2y_not_spheroidalCoeff_ratio_isBigO_four_zero (n m : ℕ) :
+private lemma not_spheroidalCoeff_ratio_isBigO_zero (n m : ℕ) :
     ¬ (fun k : ℕ => (spheroidalEigenvalue n m 0 - spheroidalRecB n m 0 k) /
         spheroidalRecA n m 0 k *
           (spheroidalCoeff n m 0 k / spheroidalCoeff n m 0 ((k : ℤ) - 1)) - 1)

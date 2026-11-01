@@ -9,16 +9,30 @@ public import DLMF.Combinatorics.Stirling
 public import Mathlib.Combinatorics.Enumerative.Bell
 
 /-!
-# Bell numbers (DLMF §26.7)
+# Bell numbers
 
-DLMF's Bell number `B(n)` (the number of partitions of `{1, …, n}`) is Mathlib's `Nat.bell n`,
-defined there by the recurrence 26.7.6 (`Nat.bell_succ`); no new definition is made. The
-counting statement (Mathlib's TODO) is acquired here as `card_finpartition_eq_bell`.
+The Bell numbers of DLMF §26.7. DLMF's Bell number `B(n)` (the number of partitions of
+`{1, …, n}`) is Mathlib's `Nat.bell n`, defined there by the recurrence 26.7.6
+(`Nat.bell_succ`); no new definition is made.
+
+## Main results
+
+* `card_finpartition_eq_bell`: `B(n)` is the number of partitions of `{1, …, n}` (DLMF §26.7(i)).
+* `bell_eq_sum_stirlingSecond`: `B(n) = ∑_k S(n, k)` (DLMF 26.7.2).
+* `bell_eq_sum_mul_sum`: the finite sum 26.7.3, for `n ≥ 1`.
+* `hasSum_pow_div_factorial`, `bell_eq_exp_neg_one_mul_tsum`, `bell_eq_one_add_floor`:
+  Dobiński's formula and its floor form (DLMF 26.7.4).
+* `hasSum_bell_div_factorial`: the exponential generating function `exp(eˣ - 1)` (DLMF 26.7.5).
+* `bell_succ_eq_sum`: `B(n+1) = ∑_k C(n, k) B(k)` (DLMF 26.7.6).
+* `bell_isBigO`, `existsUnique_mul_log_eq`: the asymptotic form of `B(n)` with `N ln N = n`
+  (DLMF 26.7.7, 26.7.8).
+
+## Implementation notes
 
 **Source corrections (implicit conditions).** 26.7.3 (`B(n) = ∑_{k=1}^m kⁿ/k! ∑_{j=0}^{m-k}
 (-1)^j/j!`, `m ≥ n`) and the first form of 26.7.4 (Dobiński, `B(n) = e⁻¹ ∑_{k=1}^∞ kⁿ/k!`)
 fail for `n = 0` (e.g. `m = 2` gives `1/2`, Dobiński gives `1 - e⁻¹`): the omitted `k = 0`
-term `0⁰/0! = 1` matters only there. Both are acquired for `n ≥ 1`, together with the `k = 0`
+term `0⁰/0! = 1` matters only there. Both are stated for `n ≥ 1`, together with the `k = 0`
 forms valid for all `n`. The floor form of 26.7.4 holds for all `n ≥ 0`.
 -/
 
@@ -50,7 +64,7 @@ theorem bell_eq_sum_stirlingSecond (n : ℕ) :
     · simp
     · rw [bell_succ_eq_sum, sum_range_succ' (fun k => Nat.stirlingSecond (n + 1) k) (n + 1),
         Nat.stirlingSecond_succ_zero, add_zero]
-      simp_rw [c26a_stirlingSecond_succ_succ_eq_sum_range]
+      simp_rw [stirlingSecond_succ_succ_eq_sum_range]
       rw [sum_comm]
       refine sum_congr rfl fun j hj => ?_
       have hj : j ≤ n := Nat.lt_succ_iff.mp (mem_range.mp hj)
@@ -75,7 +89,7 @@ theorem card_finpartition_eq_bell (n : ℕ) :
     simpa [Nat.lt_succ_iff] using P.card_parts_le_card
 
 /-- DLMF 26.7.3, `k = 0` form valid for all `n` (`m ≥ n`). -/
-lemma q26a_bell_eq_sum_range_mul_sum {n m : ℕ} (hm : n ≤ m) :
+private lemma bell_eq_sum_pow_div_factorial_mul_sum {n m : ℕ} (hm : n ≤ m) :
     (Nat.bell n : ℚ) = ∑ k ∈ range (m + 1), (k : ℚ) ^ n / k.factorial *
       ∑ j ∈ range (m - k + 1), (-1 : ℚ) ^ j / j.factorial := by
   have h1 : (Nat.bell n : ℚ) = ∑ k ∈ range (m + 1), (Nat.stirlingSecond n k : ℚ) := by
@@ -109,7 +123,7 @@ lemma q26a_bell_eq_sum_range_mul_sum {n m : ℕ} (hm : n ≤ m) :
     omega
 
 /-- `∑_k k(k-1)⋯(k-j+1)/k! = e`. -/
-theorem q26a_hasSum_descFactorial_div_factorial(j : ℕ) :
+private theorem hasSum_descFactorial_div_factorial(j : ℕ) :
     HasSum (fun k : ℕ => (k.descFactorial j : ℝ) / k.factorial) (Real.exp 1) := by
   rw [← hasSum_nat_add_iff' j]
   have h0 : ∑ i ∈ range j, ((i.descFactorial j : ℕ) : ℝ) / i.factorial = 0 :=
@@ -135,7 +149,7 @@ theorem q26a_hasSum_descFactorial_div_factorial(j : ℕ) :
 theorem bell_eq_sum_mul_sum {n m : ℕ} (hn : 1 ≤ n) (hm : n ≤ m) :
     (Nat.bell n : ℚ) = ∑ k ∈ Icc 1 m, (k : ℚ) ^ n / k.factorial *
       ∑ j ∈ range (m - k + 1), (-1 : ℚ) ^ j / j.factorial := by
-  rw [q26a_bell_eq_sum_range_mul_sum hm, range_eq_Ico, sum_eq_sum_Ico_succ_bot (by omega)]
+  rw [bell_eq_sum_pow_div_factorial_mul_sum hm, range_eq_Ico, sum_eq_sum_Ico_succ_bot (by omega)]
   simp only [CharP.cast_eq_zero, zero_pow (by omega : n ≠ 0), zero_div, zero_mul, zero_add]
   rfl
 
@@ -145,7 +159,7 @@ theorem bell_eq_sum_mul_sum {n m : ℕ} (hn : 1 ≤ n) (hm : n ≤ m) :
 theorem hasSum_pow_div_factorial (n : ℕ) :
     HasSum (fun k : ℕ => (k : ℝ) ^ n / k.factorial) (Real.exp 1 * Nat.bell n) := by
   have hs := hasSum_sum (s := range (n + 1)) fun j _ =>
-    (q26a_hasSum_descFactorial_div_factorial j).mul_left (Nat.stirlingSecond n j : ℝ)
+    (hasSum_descFactorial_div_factorial j).mul_left (Nat.stirlingSecond n j : ℝ)
   rw [← sum_mul, mul_comm] at hs
   have hb : (Nat.bell n : ℝ) = ∑ j ∈ range (n + 1), (Nat.stirlingSecond n j : ℝ) := by
     rw [bell_eq_sum_stirlingSecond]; push_cast; rfl
@@ -167,7 +181,7 @@ theorem bell_eq_exp_neg_one_mul_tsum {n : ℕ} (hn : 1 ≤ n) :
   rw [h.tsum_eq, ← mul_assoc, ← Real.exp_add]; simp
 
 /-- `kⁿ/k! ≤ 2ⁿ/(k-n)!` for `k ≥ 2n`. -/
-lemma q26a_pow_div_factorial_le {n k : ℕ} (hk : 2 * n ≤ k) :
+private lemma pow_div_factorial_le {n k : ℕ} (hk : 2 * n ≤ k) :
     (k : ℝ) ^ n / k.factorial ≤ 2 ^ n / (k - n).factorial := by
   have h1 : k ^ n ≤ 2 ^ n * k.descFactorial n := by
     calc k ^ n ≤ (2 * (k + 1 - n)) ^ n := Nat.pow_le_pow_left (by omega) n
@@ -183,7 +197,7 @@ lemma q26a_pow_div_factorial_le {n k : ℕ} (hk : 2 * n ≤ k) :
   nlinarith
 
 /-- `2ⁿ ≤ (n+1)!`. -/
-lemma q26a_two_pow_le_factorial_succ (n : ℕ) : 2 ^ n ≤ (n + 1).factorial := by
+private lemma two_pow_le_factorial_succ (n : ℕ) : 2 ^ n ≤ (n + 1).factorial := by
   induction n with
   | zero => simp
   | succ m ih =>
@@ -220,14 +234,14 @@ theorem bell_eq_one_add_floor (n : ℕ) :
     ext i; simp [div_eq_mul_inv]
   have hle : T ≤ 2 ^ n * (Real.exp 1 - ∑ i ∈ range (n + 1), (1 : ℝ) ^ i / i.factorial) := by
     refine hasSum_le (fun i => ?_) hT hg
-    have := q26a_pow_div_factorial_le (n := n) (k := i + (2 * n + 1)) (by omega)
+    have := pow_div_factorial_le (n := n) (k := i + (2 * n + 1)) (by omega)
     rw [show i + (2 * n + 1) - n = i + (n + 1) by omega] at this
     simpa [hf] using this
   have hexp := Real.exp_bound (x := 1) (by simp) (n := n + 1) (by omega)
   simp only [abs_one, one_pow, one_mul] at hexp
   have hfac : (2 : ℝ) ^ n * ((n + 1 + 1 : ℕ) / ((n + 1).factorial * (n + 1 : ℕ))) ≤ 3 / 2 := by
     have h1' : (2 : ℝ) ^ n ≤ (n + 1).factorial := by
-      exact_mod_cast q26a_two_pow_le_factorial_succ n
+      exact_mod_cast two_pow_le_factorial_succ n
     have hF : (0 : ℝ) < (n + 1).factorial := by exact_mod_cast (n + 1).factorial_pos
     rw [mul_div_assoc', div_le_div_iff₀ (by positivity) (by norm_num)]
     push_cast

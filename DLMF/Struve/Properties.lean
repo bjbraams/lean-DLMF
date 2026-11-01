@@ -13,14 +13,38 @@ public import DLMF.Bessel.NeumannSeries
 /-!
 # Struve half-integer orders, recurrences and Bessel expansions
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+Elementary values of the Struve functions at half-integer orders, the nonnegativity of
+`H_ν` on the positive axis, expansions in Bessel functions, and the recurrences and
+derivative formulas (DLMF §11.4, with the weighted derivatives of DLMF 11.7.1–11.7.4).
 
-The proved calculus uses the regularized quadratic gauge from `Basic`; integral
-orders extend across the origin by entire-function uniqueness. Half-integer
-formulas reuse the proved Bessel derivative ladders and elementary values.
+## Main definitions
+
+* `struveHalfCoeff`, `struveHalfPoly`: the factorial coefficients and the finite Laurent
+  polynomial occurring at positive half-integer orders.
+
+## Main results
+
+* `struveH_neg_nat_sub_half`, `struveL_neg_nat_sub_half`: DLMF 11.4.3–11.4.4.
+* `struve_special_5`, …, `struve_special_12`: the elementary values DLMF 11.4.5–11.4.12.
+* `struveK_nat_add_half`, `struveL_nat_add_half`: DLMF 11.4.1–11.4.2.
+* `struveH_nonneg`: `H_ν(x) ≥ 0` for `x > 0` and `ν ≥ 1/2` (DLMF 11.4.13).
+* `struveH_bessel_series_18`, `struveH_bessel_series_19`, `struveH_bessel_series_20`:
+  expansions in Bessel functions, DLMF 11.4.18–11.4.20.
+* `struveH_zero_odd`, `struveH_zero_products`, `struveH_one_even`, `struveH_one_products`:
+  DLMF 11.4.21–11.4.22.
+* `struveH_recurrence`, `struveH_derivative`, `struveL_recurrence`, `struveL_derivative`:
+  DLMF 11.4.23–11.4.26.
+* `struveH_weighted_deriv_27`, `struveH_weighted_deriv_28`, `struveL_weighted_deriv_29`,
+  `struveL_weighted_deriv_30`: DLMF 11.4.27–11.4.30.
+* `struveH_iterated_weighted_deriv`, `struveL_iterated_weighted_deriv`: DLMF 11.4.31.
+* `struveH_zero_deriv`, `struveH_one_weighted_deriv`, `struveL_zero_deriv`,
+  `struveL_one_weighted_deriv`: DLMF 11.4.32–11.4.33.
+
+## Implementation notes
+
+The calculus uses the regularized quadratic gauge from `DLMF.Struve.Basic`; integral
+orders extend across the origin by entire-function uniqueness. Half-integer formulas reuse
+the Bessel derivative ladders and elementary values.
 -/
 
 @[expose] public noncomputable section

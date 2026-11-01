@@ -12,10 +12,46 @@ public import DLMF.Legendre.ZeroCounts
 /-!
 # Real zeros of Ferrers and associated Legendre functions
 
-Wronskians, integer-degree comparisons and real zero bounds for the Legendre solution families.
+Zero counts of the Ferrers functions `𝖯^μ_ν`, `𝖰^μ_ν` in `(-1, 1)` for real parameters
+(DLMF §14.16(ii)), interlacing of their zeros, and the exterior zeros of `𝑸^μ_ν` on `(1, ∞)`
+(DLMF §14.16(iii)).
 
-Source references and common attribution are retained in
-`DLMF.Legendre.Zeros`.
+## Main definitions
+
+* `legendreIntegerPart`, `legendreFractionalPart`: `⌊μ⌋` and `δ_μ = μ - ⌊μ⌋` (DLMF 14.16.1).
+* `ferrersZeroSet`: the set of zeros of `𝖯^μ_ν` or `𝖰^μ_ν` in `(-1, 1)`.
+* `ferrersPExtraZero`: the cases of DLMF §14.16(ii) in which `𝖯^μ_ν` has an extra zero.
+* `InterlacesZeros`: separation of successive distinct zeros of two sets in both directions.
+* `AssociatedPOneZero`: the condition of DLMF §14.16(iii) for `P^μ_ν` to have one zero in
+  `(1, ∞)`.
+
+## Main results
+
+* `ferrersP_zero_count`: for nonintegral `ν ≥ -1/2` and `μ`, `𝖯^μ_ν` has
+  `max(⌈ν - |μ|⌉, 0)` zeros in `(-1, 1)`, plus one in the extra-zero cases (DLMF §14.16(ii)).
+* `ferrersP_nonpositive_order_zero_count`, `lzero_posInt_zero_count`,
+  `ferrersP_nat_degree_zero_count`: the cases `μ ≤ 0`, integral order, and integral degree.
+* `ferrersQ_nat_zero_count`: `𝖰_n` has `n + 1` zeros in `(-1, 1)`.
+* `ferrersQ_zero_count_range`: the range and parity of the number of zeros of `𝖰^μ_ν`.
+* `ferrersPQ_interlace`: the zeros of `𝖯^μ_ν` and `𝖰^μ_ν` interlace when their Wronskian is
+  nonzero.
+* `olverQ_no_exterior_zero`, `olverQ_at_most_one_exterior_zero`: `𝑸^μ_ν` has no zeros in
+  `(1, ∞)` for `ν > -1`, and at most one for `ν < -1` (DLMF §14.16(iii)).
+
+## Implementation notes
+
+DLMF errata, all confirmed by counterexamples:
+* DLMF §14.16(ii) prints the first extra-zero case as `n > m, δ_ν ≤ δ_μ`; together with the
+  count case `n ≥ m, δ_ν > δ_μ` this omits `n = m, δ_ν ≤ δ_μ`, where `𝖯^μ_ν` has the extra
+  zero (for example at `(ν, μ) = (1/4, 3/4)`). `ferrersPExtraZero` uses `n ≥ m`.
+* The parity statement for the zeros of `𝖰^μ_ν` in DLMF §14.16(ii) fails for `μ < 0` (for
+  example at `ν = -0.369`, `μ = -0.206`), so `ferrersQ_zero_count_range` asserts it for `μ ≥ 0`
+  only.
+* Case (b) of DLMF §14.16(iii) (`μ ≤ ν`, `μ` nonintegral, `⌊μ⌋` odd) needs `μ > 0`: for
+  `μ < 0`, `P^μ_ν > 0` on `(1, ∞)` (for example at `ν = 0.184`, `μ = -0.088`).
+
+Degenerate cases are excluded explicitly: identically zero solutions in the count theorems and
+proportional solutions in `ferrersPQ_interlace`. Helper names carry the prefix `lzero_`.
 -/
 
 @[expose] public noncomputable section
@@ -373,14 +409,14 @@ theorem lzero_P_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ((lzero_evIoo hx).mono fun y hy => ferrersP_real ν μ hy)
   exact ⟨h1, h3, h4⟩
 
-/-- For real `ν, μ` with `LegendreQRegular ν μ` and `x ∈ (-1, 1)`, `ferrersQ ν μ` and its derivative
+/-- For real `ν, μ` and `x ∈ (-1, 1)`, `ferrersQ ν μ` and its derivative
 at `x` are the real numbers `lzero_q ν μ x` and `lzero_q' ν μ x`, and `lzero_q ν μ` has derivative
 `lzero_q' ν μ x` at `x`. -/
-theorem lzero_Q_data {ν μ : ℝ} (hr : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem lzero_Q_data {ν μ : ℝ} {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (lzero_q ν μ) (lzero_q' ν μ x) x ∧
       ferrersQ ν μ x = (lzero_q ν μ x : ℂ) ∧ deriv (ferrersQ ν μ) x = (lzero_q' ν μ x : ℂ) := by
   obtain ⟨h1, -, h3, h4⟩ := lzero_hasDerivAt_re ((ferrersQ_isFerrersSolution ν μ x hx).1)
-    ((lzero_evIoo hx).mono fun y hy => ferrersQ_real ν μ hy hr)
+    ((lzero_evIoo hx).mono fun y hy => ferrersQ_real ν μ hy)
   exact ⟨h1, h3, h4⟩
 
 /-- The real Wronskian of `𝖯^μ_ν` and `𝖰^μ_ν` (DLMF 14.2.4). -/
@@ -389,8 +425,8 @@ theorem lzero_wronskian {ν μ : ℝ} (hr : LegendreQRegular ν μ) {x : ℝ} (h
       Real.Gamma (ν + μ + 1) / Real.Gamma (ν - μ + 1) / (1 - x ^ 2) := by
   have hW := ferrers_wronskian_4 ν μ hr hx
   unfold ODE.wronskian at hW
-  rw [(lzero_P_data ν μ hx).2.1, (lzero_P_data ν μ hx).2.2, (lzero_Q_data hr hx).2.1,
-    (lzero_Q_data hr hx).2.2,
+  rw [(lzero_P_data ν μ hx).2.1, (lzero_P_data ν μ hx).2.2, (lzero_Q_data hx).2.1,
+    (lzero_Q_data hx).2.2,
     show (ν : ℂ) + μ + 1 = ((ν + μ + 1 : ℝ) : ℂ) by push_cast; ring,
     show (ν : ℂ) - μ + 1 = ((ν - μ + 1 : ℝ) : ℂ) by push_cast; ring,
     Complex.Gamma_ofReal, Complex.Gamma_ofReal,
@@ -435,7 +471,7 @@ theorem lzero_nat_ratio {y : ℝ} (hy : y ∈ Ioo (-1:ℝ) 1) (hp : lzero_p n 0 
       (lzero_q' n 0 y * lzero_p n 0 y - lzero_q n 0 y * lzero_p' n 0 y) / lzero_p n 0 y ^ 2 ∧
     1 / 2 / (y - -1) ≤
       (lzero_q' n 0 y * lzero_p n 0 y - lzero_q n 0 y * lzero_p' n 0 y) / lzero_p n 0 y ^ 2 := by
-  refine ⟨HasDerivAt.fun_div (lzero_Q_data (lzero_nat_regular n) hy).1 (lzero_P_data n 0 hy).1 hp,
+  refine ⟨HasDerivAt.fun_div (lzero_Q_data hy).1 (lzero_P_data n 0 hy).1 hp,
     ?_⟩
   have hW := lzero_nat_wronskian n hy
   have e : lzero_q' n 0 y * lzero_p n 0 y - lzero_q n 0 y * lzero_p' n 0 y = 1 / (1 - y ^ 2) := by
@@ -507,7 +543,7 @@ theorem ferrersQ_nat_zero_count (n : ℕ) :
   have hP : ∀ t ∈ Ioo (-1:ℝ) 1, HasDerivAt (lzero_p n 0) (lzero_p' n 0 t) t :=
     fun t ht => (lzero_P_data n 0 ht).1
   have hQ : ∀ t ∈ Ioo (-1:ℝ) 1, HasDerivAt (lzero_q n 0) (lzero_q' n 0 t) t :=
-    fun t ht => (lzero_Q_data hr ht).1
+    fun t ht => (lzero_Q_data ht).1
   -- `p ≠ 0` between consecutive zeros
   have hgap : ∀ {a b : ℝ}, -1 ≤ a → b ≤ 1 → (∀ i, x i ∉ Ioo a b) →
       ∀ t ∈ Ioo a b, lzero_p n 0 t ≠ 0 := by
@@ -524,7 +560,7 @@ theorem ferrersQ_nat_zero_count (n : ℕ) :
     ext y
     simp only [ferrersZeroSet, ite_true, mem_ofPred_eq]
     refine and_congr_right fun hy => ?_
-    rw [(lzero_Q_data hr hy).2.1, ofReal_eq_zero]
+    rw [(lzero_Q_data hy).2.1, ofReal_eq_zero]
   rw [hset]
   refine ODE.sturmCount_ncard_of_partition (P := fun y => lzero_q n 0 y = 0) ?_ ?_ ?_
   · intro k hk
@@ -641,17 +677,17 @@ theorem ferrersPQ_interlace {ν μ : ℝ} (hr : LegendreQRegular ν μ) (hind : 
     intro x
     simp only [ferrersZeroSet, ite_true, mem_ofPred_eq]
     refine and_congr_right fun hx => ?_
-    rw [(lzero_Q_data hr hx).2.1, ofReal_eq_zero]
+    rw [(lzero_Q_data hx).2.1, ofReal_eq_zero]
   have hden : ∀ x ∈ Ioo (-1:ℝ) 1, 0 < 1 - x ^ 2 := fun x hx => by nlinarith [hx.1, hx.2]
   rcases hG.lt_or_gt with hneg | hpos
   · refine lzero_interlace_of_wronskian (q := fun x => -lzero_q ν μ x) (q' := fun x => -lzero_q' ν μ x)
-      (fun x hx => (lzero_P_data ν μ hx).1) (fun x hx => (lzero_Q_data hr hx).1.neg)
+      (fun x hx => (lzero_P_data ν μ hx).1) (fun x hx => (lzero_Q_data hx).1.neg)
       (fun x hx => ?_) hS (fun x => by rw [hT x, neg_eq_zero])
     have := lzero_wronskian hr hx
     have : G / (1 - x ^ 2) < 0 := div_neg_of_neg_of_pos hneg (hden x hx)
     linarith
   · refine lzero_interlace_of_wronskian (fun x hx => (lzero_P_data ν μ hx).1)
-      (fun x hx => (lzero_Q_data hr hx).1) (fun x hx => ?_) hS hT
+      (fun x hx => (lzero_Q_data hx).1) (fun x hx => ?_) hS hT
     rw [lzero_wronskian hr hx]
     exact div_pos hpos (hden x hx)
 
@@ -675,7 +711,7 @@ theorem ferrersQ_zero_count_range {ν μ : ℝ} (hν : -1/2 ≤ ν) (hr : Legend
     ext x
     simp only [ferrersZeroSet, ite_true, mem_ofPred_eq]
     refine and_congr_right fun hx => ?_
-    rw [(lzero_Q_data hr hx).2.1, ofReal_eq_zero]
+    rw [(lzero_Q_data hx).2.1, ofReal_eq_zero]
   have hZp : ferrersZeroSet false ν μ = {x | x ∈ Ioo (-1:ℝ) 1 ∧ lzero_p ν μ x = 0} :=
     lzero_zeroSet_P ν μ
   have hsubI : ∀ {a b : ℝ}, a ∈ Ioo (-1:ℝ) 1 → b ∈ Ioo (-1:ℝ) 1 → Icc a b ⊆ Ioo (-1:ℝ) 1 :=
@@ -738,13 +774,13 @@ theorem ferrersQ_zero_count_range {ν μ : ℝ} (hν : -1/2 ≤ ν) (hr : Legend
     (T := {x | x ∈ Ioo (-1:ℝ) 1 ∧ lzero_q ν μ x = 0}) fun a ha b hb hab => by
       obtain ⟨e, he, he0⟩ := lzc_exists_zero_between (p := lzero_p ν μ) (q := lzero_q ν μ) hab
         (fun x hx => (lzero_P_data ν μ (hsubI ha.1 hb.1 hx)).1)
-        (fun x hx => (lzero_Q_data hr (hsubI ha.1 hb.1 hx)).1)
+        (fun x hx => (lzero_Q_data (hsubI ha.1 hb.1 hx)).1)
         (fun x hx => hW x (hsubI ha.1 hb.1 hx)) ha.2 hb.2
       exact ⟨e, ⟨hsubI ha.1 hb.1 (Ioo_subset_Icc_self he), he0⟩, he.1, he.2⟩
   obtain ⟨-, hQlo⟩ := lzc_ncard_le_succ hQfin
     (T := {x | x ∈ Ioo (-1:ℝ) 1 ∧ lzero_p ν μ x = 0}) fun a ha b hb hab => by
       obtain ⟨e, he, he0⟩ := lzc_exists_zero_between (p := lzero_q ν μ) (q := lzero_p ν μ) hab
-        (fun x hx => (lzero_Q_data hr (hsubI ha.1 hb.1 hx)).1)
+        (fun x hx => (lzero_Q_data (hsubI ha.1 hb.1 hx)).1)
         (fun x hx => (lzero_P_data ν μ (hsubI ha.1 hb.1 hx)).1)
         (fun x hx h0 => hW x (hsubI ha.1 hb.1 hx) (by linarith)) ha.2 hb.2
       exact ⟨e, ⟨hsubI ha.1 hb.1 (Ioo_subset_Icc_self he), he0⟩, he.1, he.2⟩
@@ -761,7 +797,7 @@ theorem ferrersQ_zero_count_range {ν μ : ℝ} (hν : -1/2 ≤ ν) (hr : Legend
         lzero_q ν μ x * (deriv (ferrersP ν (-μ:ℝ)) x).re) = Real.cos (μ * π) := fun x hx => by
       refine lzero_real_wronskian (f := fun t => (ferrersP ν (-μ:ℝ) t).re)
         (f' := fun t => (deriv (ferrersP ν (-μ:ℝ)) t).re) hx (lzt_ferrersP_real_data ν (-μ) hx).1
-        (lzt_ferrersP_real_data ν (-μ) hx).2 (lzero_Q_data hr hx).2.1 (lzero_Q_data hr hx).2.2 ?_
+        (lzt_ferrersP_real_data ν (-μ) hx).2 (lzero_Q_data hx).2.1 (lzero_Q_data hx).2.2 ?_
       have h := ferrers_wronskian_6 (ν:ℂ) (μ:ℂ) hr hx
       rw [show -(μ:ℂ) = ((-μ:ℝ):ℂ) by push_cast; ring] at h
       rw [h]; push_cast; rfl
@@ -770,11 +806,11 @@ theorem ferrersQ_zero_count_range {ν μ : ℝ} (hν : -1/2 ≤ ν) (hr : Legend
       refine lzero_real_wronskian (f := fun t => (ferrersP ν (-μ:ℝ) (-t)).re)
         (f' := fun t => -(deriv (ferrersP ν (-μ:ℝ)) (-t)).re) hx
         (lzero_reflect_data ν μ hx).1 (lzero_reflect_data ν μ hx).2
-        (lzero_Q_data hr hx).2.1 (lzero_Q_data hr hx).2.2 ?_
+        (lzero_Q_data hx).2.1 (lzero_Q_data hx).2.2 ?_
       have h := lzc_wronskian_reflect_Q (ν:ℂ) (μ:ℂ) hr hx
       rw [show -(μ:ℂ) = ((-μ:ℝ):ℂ) by push_cast; ring] at h
       rw [h]; push_cast; rfl
-    exact lzc_ferrers_parity hμ (fun x hx => (lzero_Q_data hr hx).1)
+    exact lzc_ferrers_parity hμ (fun x hx => (lzero_Q_data hx).1)
       (fun x hx h0 h1 => hW x hx (by rw [h0, h1]; ring)) hQfin hc₁ hc₂ hW₁ hW₂
   refine ⟨fun hμ hneg => ?_, fun hμ hpos => ?_⟩
   · have h := hpar hμ hneg.ne

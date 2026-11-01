@@ -13,15 +13,31 @@ public import Mathlib.Analysis.Complex.SummableUniformlyOn
 /-!
 # Polygamma functions (DLMF §5.15)
 
-The trigamma series 5.15.1 is `trigamma_eq_tsum` in `Digamma.lean` (real
-positive argument). Complex polygamma is the iterated derivative of Mathlib's
-`Complex.digamma`.
+Complex polygamma functions are the iterated derivatives of Mathlib's `Complex.digamma`. The
+trigamma series 5.15.1 for real positive argument is `trigamma_eq_tsum` in
+`DLMF.Gamma.Digamma`.
 
-The complex digamma series 5.7.6 (`digamma_eq_cDigammaSeries`) is obtained from the
-real one by the identity theorem on the complement of the poles, which is connected.
-Termwise differentiation (Mathlib's `iteratedDerivWithin_tsum`) gives the polygamma
-series 5.15.1 for all non-pole arguments (`polygamma_eq_tsum`). From this follow the
-values at `1` and `1/2` and the multiplication formula.
+## Main definitions
+
+* `polygamma`: the polygamma function `ψ^{(n)}(z)`.
+* `cDigammaSeries`: the digamma series as a function on `ℂ`.
+
+## Main results
+
+* `digamma_eq_cDigammaSeries`: the digamma series 5.7.6 for all complex non-pole arguments.
+* `polygamma_eq_tsum`: the polygamma series 5.15.1 for positive order.
+* `polygamma_one`, `polygamma_one_div_two`: values at `1` and `1/2`, DLMF 5.15.2–5.15.3.
+* `trigamma_nat_sub_half`: `ψ'(n - 1/2)`, DLMF 5.15.4.
+* `polygamma_add_one`: the recurrence, DLMF 5.15.5.
+* `polygamma_reflection`: the reflection formula, DLMF 5.15.6.
+* `polygamma_multiplication`: the multiplication formula, DLMF 5.15.7.
+* `trigamma_asymptotic`, `polygamma_asymptotic`: asymptotic expansions, DLMF 5.15.8–5.15.9.
+
+## Implementation notes
+
+The complex digamma series is obtained from the real one by the identity theorem on the
+complement of the poles, which is connected. Termwise differentiation (Mathlib's
+`iteratedDerivWithin_tsum`) gives the polygamma series for all non-pole arguments.
 -/
 
 @[expose] public section

@@ -26,7 +26,7 @@ public import DLMF.BernoulliEuler.MathlibCoverageB
 # Bernoulli and Euler polynomials (DLMF Chapter 24)
 
 DLMF's `B_n`, `B_n(x)` are Mathlib's `bernoulli` and `Polynomial.bernoulli`; `E_n`, `E_n(x)`
-are `eulerNumber` and `Polynomial.euler` from DLMFMathlib. Part A (§§24.1–24.10): `Basic`
-through `Arithmetic`; part B (§§24.11–24.16): `Asymptotics` through `Generalizations`.
-The ledger is DLMF24Acquisition.md.
+are `eulerNumber` and `Polynomial.euler` from DLMFMathlib. The modules from `Basic` through
+`Arithmetic` cover §§24.1–24.10; those from `Asymptotics` through `Generalizations` cover
+§§24.11–24.16.
 -/

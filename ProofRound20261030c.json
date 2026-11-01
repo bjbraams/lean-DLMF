@@ -493,7 +493,7 @@
     },
     {
       "name": "Complex.hasFPowerSeriesOnBall_of_hasSum_ball",
-      "file": "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean",
+      "file": "DLMFMathlib/Analysis/Complex/TrigSeriesExtension.lean",
       "line": 31,
       "proofLines": 11,
       "axioms": [
@@ -505,7 +505,7 @@
     },
     {
       "name": "Complex.hasSum_mul_powerSeries",
-      "file": "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean",
+      "file": "DLMFMathlib/Analysis/Complex/TrigSeriesExtension.lean",
       "line": 48,
       "proofLines": 11,
       "axioms": [
@@ -614,7 +614,7 @@
         "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMFMathlib_Analysis_Complex_PowerSeriesOperations.lean.log"
       },
       {
-        "file": "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean",
+        "file": "DLMFMathlib/Analysis/Complex/TrigSeriesExtension.lean",
         "exitCode": 0,
         "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMFMathlib_Analysis_Complex_TrigR4SeriesExtension.lean.log"
       },
@@ -663,7 +663,7 @@
       "DLMFMathlib/Analysis/Complex/BivariateSeries.lean",
       "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
       "DLMFMathlib/Analysis/Complex/PowerSeriesOperations.lean",
-      "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean"
+      "DLMFMathlib/Analysis/Complex/TrigSeriesExtension.lean"
     ],
     "compiledDeclarationCount": 26866,
     "newSourceDeclarations": 30,

@@ -8,13 +8,31 @@ module
 public import DLMF.Airy.Integrals.PrimitivesAndLaplace
 
 /-!
-# One-sided Laplace transforms of Airy functions
+# One-sided Laplace and Mellin transforms of Airy functions
 
-Laplace transforms of Ai and Bi on the positive and negative real half-lines, with the relevant
-decay estimates.
+Laplace transforms of `Ai` and `Bi` on the positive and negative half-lines, the Mellin
+transform of `Ai`, the Stieltjes-type representations of `Ai` and `Bi`, and repeated integrals
+(DLMF 9.10.14–9.10.22). Each transform is identified by the first-order differential equation
+it satisfies in the transform variable.
 
-Source references and common attribution are retained in
-`DLMF.Airy.Integrals`.
+## Main definitions
+
+* `airyLapL`: `L(p) = ∫₀^∞ e^{-pt} Ai(t) dt`.
+* `airyLapNB`: `∫₀^∞ e^{-qt} Bi(-t) dt`.
+* `airyRepeatedTail`: repeated upper improper integrals.
+
+## Main results
+
+* `airyLapL_ode`: the transform equation `L'(p) = -p² L(p) + Ai'(0) + p Ai(0)`.
+* `airyAi_laplace`: DLMF 9.10.14.
+* `airyAi_negative_laplace`: DLMF 9.10.15.
+* `airyBi_negative_laplace`: DLMF 9.10.16.
+* `airyAi_mellin`: the Mellin transform of `Ai` (DLMF 9.10.17).
+* `airyAi_stieltjes`: DLMF 9.10.18.
+* `airyBi_stieltjes_principalValue`, `airyBi_stieltjes_principalValue_converges`: the
+  principal-value representation of `Bi` (DLMF 9.10.19).
+* `airyAi_double_integral`, `airyBi_double_integral`: DLMF 9.10.20, 9.10.21.
+* `airyAi_repeated_integrals`: DLMF 9.10.22.
 -/
 
 @[expose] public noncomputable section
@@ -355,9 +373,9 @@ section AiryLaplaceNeg
 /-- The logarithmic-plane upper incomplete Gamma function through Kummer's function:
 `Γ(a, e^w) = Γ(a) - e^{aw} M(a, a+1, -e^w)/a` on the whole logarithmic plane. -/
 theorem airyLap_upperGamma_eq {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
-    airyUpperGammaOnLog a w = Gamma a - exp (a * w) * kummerM a (a + 1) (-exp w) / a := by
+    upperIncGammaOnLog a w = Gamma a - exp (a * w) * kummerM a (a + 1) (-exp w) / a := by
   have ha0 : a ≠ 0 := by simpa using ha 0
-  have h1 : airyUpperGammaOnLog a w = upperIncGammaOnLog a w := rfl
+  have h1 : upperIncGammaOnLog a w = upperIncGammaOnLog a w := rfl
   rw [h1, upperIncGammaOnLog_eq_Gamma_sub ha w, lowerIncGammaOnLog]
   have hz : exp w ≠ 0 := Complex.exp_ne_zero w
   have hl := lowerIncGamma_eq_regularized ha (exp w)
@@ -424,8 +442,8 @@ theorem airyLap_neg_eq {p : ℂ} (hp : 0 < p.re) :
 /-- **9.10.15 (proof)**. -/
 theorem airyLap_negative_laplace {p : ℂ} (hp : 0 < p.re) :
     (∫ t : ℝ in Ioi 0, exp (-p * t) * airyAi (-t)) = exp (p ^ 3 / 3) / 3 *
-      (airyUpperGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3) +
-        airyUpperGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3)) := by
+      (upperIncGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3) +
+        upperIncGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3)) := by
   have hp0 : p ≠ 0 := by intro h; rw [h] at hp; simp at hp
   rw [(airyLap_neg_eq hp).2, airyLapL_eq, airyLapR, airyAiDeriv_zero, airyAi_zero]
   have h13 : ∀ n : ℕ, (1 / 3 : ℂ) ≠ -n := Hypergeometric.not_neg_nat_of_re_pos (by norm_num)
@@ -451,7 +469,7 @@ continued on the logarithmic plane (DLMF 9.10.15). -/
 @[dlmf 9.10.E15]
 theorem airyAi_negative_laplace {p : ℂ} (hp : 0 < p.re) :
     IntegrableOn (fun t : ℝ => exp (-p * t) * airyAi (-t)) (Ioi 0) ∧
-      (∫ t : ℝ in Ioi 0, exp (-p * t) * airyAi (-t)) = exp (p ^ 3 / 3) / 3 * (airyUpperGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3) + airyUpperGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3)) :=
+      (∫ t : ℝ in Ioi 0, exp (-p * t) * airyAi (-t)) = exp (p ^ 3 / 3) / 3 * (upperIncGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3) + upperIncGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3)) :=
   ⟨(airyLap_neg_eq hp).1, airyLap_negative_laplace hp⟩
 
 /-! ### The Laplace transform of `Bi(-t)`, 9.10.16 -/
@@ -711,8 +729,8 @@ theorem airyLapB_consts :
 /-- The closed form `R_B` agrees with the printed right-hand side of 9.10.16. -/
 theorem airyLapRB_eq_printed {p : ℂ} (hp0 : p ≠ 0) :
     airyLapRB p = exp (p ^ 3 / 3) / Real.sqrt 3 *
-      (airyUpperGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3) -
-        airyUpperGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3)) := by
+      (upperIncGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3) -
+        upperIncGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3)) := by
   have h13 : ∀ n : ℕ, (1 / 3 : ℂ) ≠ -n := Hypergeometric.not_neg_nat_of_re_pos (by norm_num)
   have h23 : ∀ n : ℕ, (2 / 3 : ℂ) ≠ -n := Hypergeometric.not_neg_nat_of_re_pos (by norm_num)
   rw [airyLapRB, airyBiDeriv_zero, airyBi_zero, airyLap_upperGamma_eq h13, airyLap_upperGamma_eq h23]
@@ -728,7 +746,7 @@ theorem airyLapRB_eq_printed {p : ℂ} (hp0 : p ≠ 0) :
 
 /-- On the positive axis the logarithmic-plane upper Gamma is the ordinary one. -/
 theorem airyLap_upperGamma_real (a : ℂ) {x : ℝ} (hx : 0 < x) :
-    airyUpperGammaOnLog a (3 * log (x : ℂ) - log 3) = upperIncGamma a ((x ^ 3 / 3 : ℝ) : ℂ) := by
+    upperIncGammaOnLog a (3 * log (x : ℂ) - log 3) = upperIncGamma a ((x ^ 3 / 3 : ℝ) : ℂ) := by
   have hw : 3 * log (x : ℂ) - log 3 = ((3 * Real.log x - Real.log 3 : ℝ) : ℂ) := by
     rw [← Complex.ofReal_log hx.le, show (3 : ℂ) = ((3 : ℝ) : ℂ) by norm_num,
       ← Complex.ofReal_log (by norm_num : (0 : ℝ) ≤ 3)]
@@ -741,7 +759,7 @@ theorem airyLap_upperGamma_real (a : ℂ) {x : ℝ} (hx : 0 < x) :
   have he : exp (((3 * Real.log x - Real.log 3 : ℝ) : ℂ)) = ((x ^ 3 / 3 : ℝ) : ℂ) := by
     rw [← Complex.ofReal_exp, Real.exp_sub, show 3 * Real.log x = ((3 : ℕ) : ℝ) * Real.log x by
       norm_num, Real.exp_nat_mul, Real.exp_log hx, Real.exp_log (by norm_num)]
-  rw [hw, airyUpperGammaOnLog, hlog, he]
+  rw [hw, upperIncGammaOnLog, hlog, he]
   simp [segmentIntegral]
 
 /-- `Γ(a, y) → 0` as `y → +∞` for `Re a > 0`. -/
@@ -842,7 +860,7 @@ continued on the logarithmic plane (DLMF 9.10.16). -/
 @[dlmf 9.10.E16]
 theorem airyBi_negative_laplace {p : ℂ} (hp : 0 < p.re) :
     IntegrableOn (fun t : ℝ => exp (-p * t) * airyBi (-t)) (Ioi 0) ∧
-      (∫ t : ℝ in Ioi 0, exp (-p * t) * airyBi (-t)) = exp (p ^ 3 / 3) / Real.sqrt 3 * (airyUpperGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3) - airyUpperGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3)) := by
+      (∫ t : ℝ in Ioi 0, exp (-p * t) * airyBi (-t)) = exp (p ^ 3 / 3) / Real.sqrt 3 * (upperIncGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3) - upperIncGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3)) := by
   have hp0 : p ≠ 0 := by intro h; rw [h] at hp; simp at hp
   exact ⟨(airyLapB_integrableOn hp).1, (airyLapNB_eq hp).trans (airyLapRB_eq_printed hp0)⟩
 
@@ -1063,7 +1081,7 @@ theorem airyPV_cpow_ne {t x : ℝ} (ht : 0 ≤ t) (hx : 0 ≤ x) (htx : t ≠ x)
   · exact (Real.rpow_lt_rpow hx h (by norm_num)).ne'
 
 /-- The disc `|s - x| < x` around `x > 0` lies in the slit plane. -/
-private lemma airyPV_ball_slitPlane {x : ℝ} (_hx : 0 < x) :
+private lemma airyPV_ball_slitPlane {x : ℝ} :
     ∀ s ∈ Metric.ball (x : ℂ) x, s ∈ slitPlane := by
   intro s hs
   refine mem_slitPlane_iff.mpr (Or.inl ?_)
@@ -1081,7 +1099,7 @@ private lemma airyPV_dslope_facts {x : ℝ} (hx : 0 < x) :
       ∀ t : ℝ, 0 ≤ t → ContinuousAt (dslope (fun s : ℂ => s ^ (3 / 2 : ℂ)) x) t := by
   set φ : ℂ → ℂ := fun s => s ^ (3 / 2 : ℂ) with hφ
   set D : ℂ → ℂ := dslope φ x with hD
-  have hslit := airyPV_ball_slitPlane hx
+  have hslit := airyPV_ball_slitPlane (x := x)
   have hball : Metric.ball (x : ℂ) x ∈ 𝓝 (x : ℂ) := Metric.ball_mem_nhds _ hx
   have hφd : DifferentiableOn ℂ φ (Metric.ball (x : ℂ) x) := fun s hs =>
     (Complex.hasStrictDerivAt_cpow_const (c := (3/2 : ℂ)) (hslit s hs)).hasDerivAt
@@ -1213,7 +1231,7 @@ theorem airyBi_stieltjes_principalValue_converges {x : ℝ} (hx : 0 < x) :
       field_simp
       ring
   have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
-  have hslit := airyPV_ball_slitPlane hx
+  have hslit := airyPV_ball_slitPlane (x := x)
   obtain ⟨hDd, hDx, hDne, hDc⟩ := airyPV_dslope_facts hx
   have hζc : Continuous airyZeta := by
     unfold airyZeta; exact continuous_const.mul (Real.continuous_rpow_const (by norm_num))

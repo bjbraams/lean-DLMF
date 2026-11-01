@@ -9,12 +9,26 @@ public import DLMF.ParabolicCylinder.TurningPoint
 public import DLMF.ParabolicCylinder.Weber
 
 /-!
-# Uniform expansions of the oscillatory W solution
+# Uniform expansions of the Weber function `W(a,x)` (DLMF §12.14)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This file states the parameter scaling of the oscillatory Weber equation and the uniform
+large-parameter expansions of `W(a,x)`, in elementary functions away from the turning points
+and in Airy functions near them.
+
+## Main definitions
+
+* `pcfWSigma`, `pcfWSigmaBar`: the uniform phases `μ²ξ(t) + π/4` and `μ²ξ̄(t) + π/4`
+  (DLMF 12.14.27, 12.14.36).
+* `pcfWOlverL`: the rotated cylinder normalizer (DLMF 12.14.28).
+* `IsCylinderLNormalizer`: the normalizer expansion in reciprocal fourth powers of `μ`
+  (DLMF 12.14.29–12.14.30).
+
+## Main results
+
+* `pcfW_parameter_scaling`: the scaled equation DLMF 12.14.24.
+* `pcfW_elementary_uniform`: the elementary-function expansions DLMF 12.14.25–12.14.26,
+  12.14.31, 12.14.34–12.14.35.
+* `pcfW_airy_uniform`: the Airy-type expansions DLMF 12.14.32–12.14.33.
 -/
 
 @[expose] public noncomputable section

@@ -19,19 +19,35 @@ solving the equation on a real interval (`IsRealODE2SolutionOn`, `DLMF.Painleve.
 Asymptotic relations use `Asymptotics.IsEquivalent` (`~`), `IsLittleO` and `IsBigO` at
 `atTop`, `atBot` or a one-sided neighbourhood. `ph` is `Complex.arg` (DLMF: the branch is
 immaterial, the phases enter only through `sin` or `cos`), `Ai` is `airyAiReal`, `U` is the real
-part of `pcfU` on the real line.
+part of `pcfU` on the real line. The results are the connection theorems of Hastings–McLeod,
+Ablowitz–Segur, Deift–Zhou, McCoy–Tracy–Wu and Its–Kapaev.
 
-All statements are admitted; they are deep connection results (Hastings–McLeod, Ablowitz–Segur,
-Deift–Zhou, McCoy–Tracy–Wu, Its–Kapaev). Numerical checks (ODE integration) confirmed
-32.11.8–32.11.9, 32.11.15–32.11.17, 32.11.19–32.11.24 and 32.11.25–32.11.28 for sample
-parameters.
+## Main results
+
+* `painleveI_oscillating`, `painleveI_sqrt`, `painleveI_not_global`, `painleveI_trichotomy`:
+  real solutions of `PI` (DLMF 32.11.1–32.11.3, §32.11(i)).
+* `painleveII_decaying_airy`, `painleveII_existsUnique_airy`: decaying solutions of `PII` with
+  `α = 0` are asymptotic to `k Ai(x)` (DLMF 32.11.4–32.11.5).
+* `painleveII_ablowitzSegur`, `painleveII_hastingsMcLeod`, `painleveII_pole`: the behaviour of
+  `w_k` at `-∞` for `|k| < 1`, `|k| = 1` and `|k| > 1` (DLMF 32.11.6–32.11.11).
+* `modifiedPainleveII_negInfty`, `modifiedPainleveII_airy`, `modifiedPainleveII_generic`: the
+  modified `PII` equation (DLMF 32.11.12–32.11.24).
+* `painleveIII_connection`: the connection formulas for `PIII` (DLMF 32.11.25–32.11.28).
+* `painleveIV_decaying_pcf`, `painleveIV_existsUnique_pcf`: decaying solutions of `PIV`
+  (DLMF 32.11.29–32.11.30).
+* `painleveIV_noPoles`, `painleveIV_hermiteAsymptotics`, `painleveIV_oscillating`,
+  `painleveIV_critical`, `painleveIV_pole`: the behaviour of `w_h` (DLMF 32.11.31–32.11.38).
+
+## Implementation notes
+
+`painleveII_ablowitzSegur` and `painleveII_hastingsMcLeod` assert that `w_k` exists on all
+of `ℝ` (stronger than DLMF).
 
 **Conventions made explicit.** In 32.11.6–32.11.9, 32.11.13–32.11.24 and 32.11.33–32.11.36 the
 pair `(d, θ₀)` (or `(d, χ)`) is determined by the solution only up to `(d, θ₀) ↦ (-d, θ₀ + π)`;
 the connection formulas fix the sign `d > 0` (with `d < 0` the parity in 32.11.17 and the sign
 `σ` in 32.11.21 would flip). DLMF states `d > 0` only in 32.11.34; the statements below take
-`d > 0` throughout. The numerical bounds on `k₁`, `k₂` in §32.11(i) are not formalized
-(excluded: numerical).
+`d > 0` throughout. The numerical bounds on `k₁`, `k₂` in §32.11(i) are out of scope.
 -/
 
 @[expose] public noncomputable section

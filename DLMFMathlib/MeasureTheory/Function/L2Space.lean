@@ -10,8 +10,15 @@ public import Mathlib.MeasureTheory.Function.L2Space
 /-!
 # Squared norms of square-integrable representatives
 
-The squared `L²` norm is the integral of the squared pointwise norm. This form
-avoids the square roots and extended-real norms in the general `Lp` API.
+The squared `L²` norm is the integral of the squared pointwise norm. This form avoids the
+square roots and extended-real norms in the general `Lp` API.
+
+## Main results
+
+* `MeasureTheory.MemLp.integral_norm_sq_eq_norm_toLp_sq`: the integral of the squared
+  pointwise norm equals the squared norm of the `L²` class.
+* `MeasureTheory.Lp.integral_norm_sq_eq_norm_sq`: the squared norm of an `L²` element is the
+  integral of its representative's squared pointwise norm.
 -/
 
 @[expose] public noncomputable section

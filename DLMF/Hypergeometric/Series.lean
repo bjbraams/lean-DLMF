@@ -13,7 +13,17 @@ public import DLMF.Hypergeometric.SeriesProperties
 # Scalar power series for hypergeometric differential equations
 
 These lemmas specialize Mathlib's analytic differentiation machinery to complex scalar
-coefficients. They also keep track of multiplication by the independent variable.
+coefficients and keep track of multiplication by the independent variable.
+
+## Main results
+
+* `HasFPowerSeriesOnBall.deriv_ofScalars`, `HasFPowerSeriesOnBall.hasSum_z_mul_deriv`:
+  termwise differentiation of scalar power series.
+* `HasFPowerSeriesOnBall.ode_of_recurrence`: a quadratic coefficient recurrence gives a
+  second-order differential equation.
+* `ordinaryHypergeometricSeries_radius_ge_one`, `hasFPowerSeriesOnBall_ordinaryHypergeometric`:
+  the Gauss series represents `₂F₁` on the unit disk.
+* `hasSum_poch_div_factorial`: the binomial series `∑ (β)_n / n! z^n = (1-z)^{-β}`.
 -/
 
 @[expose] public section

@@ -14,6 +14,13 @@ public import DLMF.Bessel.SecondKind
 For complex `ν` and `re z > 0`,
 `Y_ν(z) = π⁻¹ ∫₀^π sin(z sin θ - νθ) dθ - π⁻¹ ∫₀^∞ (e^{νt} + e^{-νt} cos νπ) e^{-z sinh t} dt`.
 
+## Main results
+
+* `besselY_eq_schlafli`: Schläfli's integral for `Y_ν` (DLMF 10.9.7).
+* `schlafli_integral_cos_add`: the reflection `θ ↦ π - θ` in the angular integral.
+
+## Implementation notes
+
 At noninteger order this is `Y_ν = (J_ν cos νπ - J_{-ν}) / sin νπ` with Schläfli's integral for
 `J_{±ν}` (`besselJ_eq_schlafli`, DLMF 10.9.6) and the reflection `θ ↦ π - θ` of the angular
 integral; both sides are continuous in `ν`, which covers the integer orders.

@@ -7,6 +7,7 @@ module
 
 public import Carlson.Elliptic.QuarticIntegral
 public import DLMF.EllipticIntegrals.Symmetric
+public import DLMF.EllipticIntegrals.Reduction
 
 /-!
 # Reduction of general elliptic integrals (DLMF §19.29)
@@ -16,40 +17,65 @@ root of a quartic or cubic polynomial, written as a product of linear factors
 `a_α + b_α t`, to the symmetric integrals `R_F`, `R_D`, `R_J`, `R_C` of
 `DLMF.EllipticIntegrals.Symmetric`.
 
-* §19.29(i): the notation (19.29.1)–(19.29.3), (19.29.5), (19.29.9) as definitions
-  (`ellRedRoot`, `ellRedDet`, `ellRedS`, `ellRedU`, `ellRedUInf`, `ellRedUNegInf`,
-  `ellRedU5Sq`, `ellRedS5`, `ellRedQ5Sq`); the algebraic identities of (19.29.5) and (19.29.9)
-  are **proved** for arbitrary complex coefficients; the reduction theorems (19.29.4), (19.29.6),
-  (19.29.7), (19.29.8) and the example (19.29.10) are stated for DLMF's complex coefficients.
-  The real case of (19.29.4) with four positive linear factors is **proved** from Carlson's
-  (9.8-12) in `lean-codes` (`Carlson.integral_quartic_eq_carlsonRF`).
-* §19.29(ii): the integrals `I(𝐦)` (19.29.11), the unit vectors (19.29.12), the basic
-  integrals (19.29.13), (19.29.14), the partial-fraction relation (19.29.15) and the
-  recurrence (19.29.18) (**proved**, under explicit integrability hypotheses that DLMF leaves
-  implicit), the cubic recurrence (19.29.16) and the reduction statement of 19.29.ii.p3.
-* §19.29(iii): the examples (19.29.19)–(19.29.33). The case `0 < y` of (19.29.19) is
-  **proved** from Carlson's Exercise 9.8-3 (`Carlson.integral_quadratic_mul_quadratic`).
+## Main definitions
 
-## Conventions
+* `ellRedRoot`, `ellRedDet`, `ellRedS`, `ellRedU`, `ellRedUInf`, `ellRedUNegInf`: the notation
+  of DLMF 19.29.1–19.29.3, 19.29.5, 19.29.6.
+* `ellRedU5Sq`, `ellRedS5`, `ellRedQ5Sq`: the quantities of DLMF 19.29.9.
+* `EllRedHyp`, `EllRedPerm`: the standing hypotheses of §19.29(i) and permutations of the
+  four factors.
+* `ellRedI`, `ellRedE`, `ellRedBasic`, `ellRedS3`: the integrals `I(𝐦)`, unit vectors, basic
+  integrals and the cubic `s(t)` of §19.29(ii) (DLMF 19.29.11–19.29.14, 19.29.17).
+* `ellRedQuadS`, `ellRedQuadD`, `ellRedQuadRF`, `ellRedBiquadU`: the notation of
+  DLMF 19.29.24, 19.29.25 and 19.29.31.
 
-**Convergence.** In §19.29(iii) DLMF assumes only that the quadratics are positive on the open
-interval; an integrand can then still be non-integrable (a double zero at an endpoint, e.g.
-`Q₁ = Q₂ = 1 - t²` on `(0, 1)`, or `t⁴` at `y = 0`). The theorems (19.29.19)–(19.29.21), (19.29.24),
-(19.29.26), (19.29.27), (19.29.30) therefore carry an explicit integrability hypothesis
-(`IntegrableOn … (Ioo y x)`), which is DLMF's implicit convergence assumption.
+## Main results
 
-The coefficients `a_α`, `b_α` are complex, indexed by `Fin 5` (DLMF's `α = 1, …, 5` is Lean's
-`0, …, 4`; the fifth factor occurs only in (19.29.8), (19.29.9)). Square roots are principal.
-All integrals over `(y, x)` with `y < x` are Lebesgue integrals over `Ioo y x`; for a
-non-integrable integrand the Lean value is `0`, so integrability is either implied by the
-hypotheses or assumed explicitly. DLMF's condition that the segment with endpoints
-`a_α + b_α y`, `a_α + b_α x` lie in `ℂ \ (-∞, 0)` is `∀ t ∈ [y, x], SymEllIntArg (a_α + b_α t)`.
+* `ellRedU_symm`, `ellRedU_sq_sub_sq`, `ellRedU5Sq_eq`, `ellRedS5_sq_sub_Q5Sq`: the algebraic
+  identities of DLMF 19.29.5 and 19.29.9, for arbitrary complex coefficients.
+* `ellRed_integral_inv_s`, `ellRed_integral_inv_s_Ioi`, `ellRed_integral_inv_s_Iio`,
+  `ellRed_integral_inv_s_of_pos`: `∫ dt/s(t) = 2 R_F(U_{12}², U_{13}², U_{23}²)`
+  (DLMF 19.29.4, 19.29.6).
+* `ellRed_integral_ratio_s`, `ellRed_integral_ratio5_s`: DLMF 19.29.7, 19.29.8.
+* `ellRed_example_GR3142`: the example DLMF 19.29.10.
+* `ellRedI_reduction`, `ellRedI_partial_fraction`, `ellRedI_cubic_recurrence`,
+  `ellRedI_recurrence`: the reduction of `I(𝐦)` to basic integrals (DLMF 19.29.ii.p3,
+  19.29.15, 19.29.16, 19.29.18).
+* `ellRed_quad_first`, `ellRed_quad_first_of_pos`, `ellRed_quad_second`, `ellRed_quad_third`,
+  `ellRed_quad_degenerate`, `ellRed_quad_infinite`: DLMF 19.29.19–19.29.23.
+* `ellRed_two_quadratics`, `ellRedQuadS_linear_mul`, `ellRed_linear_linear_quadratic`,
+  `ellRed_linear_quadratic`: DLMF 19.29.24–19.29.27.
+* `ellRed_cube_difference`, `ellRed_biquadratic`, `ellRed_quartic_plus`:
+  DLMF 19.29.28–19.29.33.
+
+## Implementation notes
+
+* The reduction theorems (19.29.4), (19.29.6)–(19.29.8) and the example (19.29.10) are stated
+  for DLMF's complex coefficients. The real case of (19.29.4) with four positive linear factors
+  comes from Carlson's (9.8-12) in `lean-codes` (`Carlson.integral_quartic_eq_carlsonRF`), and
+  the case `0 < y` of (19.29.19) from Carlson's Exercise 9.8-3
+  (`Carlson.integral_quadratic_mul_quadratic`). The relations (19.29.15) and (19.29.18) carry
+  explicit integrability hypotheses that DLMF leaves implicit.
+* **Convergence.** In §19.29(iii) DLMF assumes only that the quadratics are positive on the
+  open interval; an integrand can then still be non-integrable (a double zero at an endpoint,
+  e.g. `Q₁ = Q₂ = 1 - t²` on `(0, 1)`, or `t⁴` at `y = 0`). The theorems (19.29.19)–(19.29.21),
+  (19.29.24), (19.29.26), (19.29.27), (19.29.30) therefore carry an explicit integrability
+  hypothesis (`IntegrableOn … (Ioo y x)`), which is DLMF's implicit convergence assumption.
+* The coefficients `a_α`, `b_α` are complex, indexed by `Fin 5` (DLMF's `α = 1, …, 5` is
+  Lean's `0, …, 4`; the fifth factor occurs only in (19.29.8), (19.29.9)). Square roots are
+  principal. All integrals over `(y, x)` with `y < x` are Lebesgue integrals over `Ioo y x`;
+  for a non-integrable integrand the Lean value is `0`, so integrability is either implied by
+  the hypotheses or assumed explicitly. DLMF's condition that the segment with endpoints
+  `a_α + b_α y`, `a_α + b_α x` lie in `ℂ \ (-∞, 0)` is
+  `∀ t ∈ [y, x], SymEllIntArg (a_α + b_α t)`.
 
 ## References
 
-* NIST DLMF §19.29; B. C. Carlson, *Toward symbolic integration of elliptic integrals*,
-  J. Symbolic Comput. 28 (1999); B. C. Carlson, *Special Functions of Applied Mathematics*,
-  1977, §9.8 (formalized in `lean-codes`, reused here).
+* NIST DLMF §19.29.
+* B. C. Carlson, *Toward symbolic integration of elliptic integrals*, J. Symbolic Comput. 28
+  (1999).
+* B. C. Carlson, *Special Functions of Applied Mathematics*, 1977, §9.8 (formalized in
+  `lean-codes`, reused here).
 -/
 
 @[expose] public noncomputable section
@@ -135,9 +161,9 @@ def EllRedPerm (α β γ δ : Fin 5) : Prop :=
 
 /-- Identity under the stated parameter and domain assumptions: `ellRedRoot a b x α ^ 2 = a α + b
 α * x`. -/
-lemma ei19e_root_sq {ι : Type*} (a b : ι → ℂ) (x : ℝ) (α : ι) :
+private lemma ellRedRoot_sq {ι : Type*} (a b : ι → ℂ) (x : ℝ) (α : ι) :
     ellRedRoot a b x α ^ 2 = a α + b α * x := by
-  rw [sq, ellRedRoot, ei19c_cpow_half_sq]
+  rw [sq, ellRedRoot, cpow_half_mul_cpow_half]
 
 /-- DLMF 19.29.5: `U_{αβ} = U_{βα} = U_{γδ} = U_{δγ}` (also independent of the order of the
 complementary pair). -/
@@ -156,14 +182,14 @@ theorem ellRedU_sq_sub_sq (a b : Fin 5 → ℂ) {x y : ℝ} (hxy : x ≠ y) (α 
     ellRedU a b x y α β γ δ ^ 2 - ellRedU a b x y α γ β δ ^ 2 =
       ellRedDet a b α δ * ellRedDet a b β γ := by
   have hd : (x : ℂ) - y ≠ 0 := sub_ne_zero.mpr (by exact_mod_cast hxy)
-  have hXa := ei19e_root_sq a b x α
-  have hXb := ei19e_root_sq a b x β
-  have hXc := ei19e_root_sq a b x γ
-  have hXd := ei19e_root_sq a b x δ
-  have hYa := ei19e_root_sq a b y α
-  have hYb := ei19e_root_sq a b y β
-  have hYc := ei19e_root_sq a b y γ
-  have hYd := ei19e_root_sq a b y δ
+  have hXa := ellRedRoot_sq a b x α
+  have hXb := ellRedRoot_sq a b x β
+  have hXc := ellRedRoot_sq a b x γ
+  have hXd := ellRedRoot_sq a b x δ
+  have hYa := ellRedRoot_sq a b y α
+  have hYb := ellRedRoot_sq a b y β
+  have hYc := ellRedRoot_sq a b y γ
+  have hYd := ellRedRoot_sq a b y δ
   simp only [ellRedU, ellRedDet, div_pow]
   rw [← sub_div, div_eq_iff (pow_ne_zero 2 hd)]
   set Xa := ellRedRoot a b x α; set Xb := ellRedRoot a b x β
@@ -203,7 +229,7 @@ theorem ellRedU5Sq_eq (a b : Fin 5 → ℂ) {x y : ℝ} (hxy : x ≠ y) (α β �
   linear_combination h1 + key
 
 /-- Polynomial identity behind (19.29.9) (coefficients found by Gröbner reduction). -/
-lemma ei19e_S5_aux (Xa Xb Xc Xd X5 Ya Yb Yc Yd Y5 aa ab ac ad a5 ba bb bc bd b5 x y : ℂ)
+private lemma ellRed_five_factor_identity (Xa Xb Xc Xd X5 Ya Yb Yc Yd Y5 aa ab ac ad a5 ba bb bc bd b5 x y : ℂ)
     (hxy : x - y ≠ 0) (hXa0 : Xa ≠ 0) (hYa0 : Ya ≠ 0) (h5 : aa * b5 - a5 * ba ≠ 0)
     (hXa : Xa ^ 2 = aa + ba * x) (hYa : Ya ^ 2 = aa + ba * y) (hXb : Xb ^ 2 = ab + bb * x) (hYb : Yb ^ 2 = ab + bb * y) (hXc : Xc ^ 2 = ac + bc * x) (hYc : Yc ^ 2 = ac + bc * y) (hXd : Xd ^ 2 = ad + bd * x) (hYd : Yd ^ 2 = ad + bd * y) (hX5 : X5 ^ 2 = a5 + b5 * x) (hY5 : Y5 ^ 2 = a5 + b5 * y) :
     ((Xb * Xc * Xd / Xa * Y5 ^ 2 + Yb * Yc * Yd / Ya * X5 ^ 2) / (x - y)) ^ 2 -
@@ -233,14 +259,14 @@ theorem ellRedS5_sq_sub_Q5Sq (a b : Fin 5 → ℂ) {x y : ℝ} (hxy : x ≠ y) (
     ellRedS5 a b x y α β γ δ ^ 2 - ellRedQ5Sq a b x y α β γ δ =
       ellRedDet a b β 4 * ellRedDet a b γ 4 * ellRedDet a b δ 4 / ellRedDet a b α 4 := by
   have hd : (x : ℂ) - y ≠ 0 := sub_ne_zero.mpr (by exact_mod_cast hxy)
-  have H := ei19e_S5_aux (ellRedRoot a b x α) (ellRedRoot a b x β) (ellRedRoot a b x γ)
+  have H := ellRed_five_factor_identity (ellRedRoot a b x α) (ellRedRoot a b x β) (ellRedRoot a b x γ)
     (ellRedRoot a b x δ) (ellRedRoot a b x 4) (ellRedRoot a b y α) (ellRedRoot a b y β)
     (ellRedRoot a b y γ) (ellRedRoot a b y δ) (ellRedRoot a b y 4) (a α) (a β) (a γ) (a δ) (a 4)
     (b α) (b β) (b γ) (b δ) (b 4) x y hd hX hY h5
-    (ei19e_root_sq a b x α) (ei19e_root_sq a b y α) (ei19e_root_sq a b x β)
-    (ei19e_root_sq a b y β) (ei19e_root_sq a b x γ) (ei19e_root_sq a b y γ)
-    (ei19e_root_sq a b x δ) (ei19e_root_sq a b y δ) (ei19e_root_sq a b x 4)
-    (ei19e_root_sq a b y 4)
+    (ellRedRoot_sq a b x α) (ellRedRoot_sq a b y α) (ellRedRoot_sq a b x β)
+    (ellRedRoot_sq a b y β) (ellRedRoot_sq a b x γ) (ellRedRoot_sq a b y γ)
+    (ellRedRoot_sq a b x δ) (ellRedRoot_sq a b y δ) (ellRedRoot_sq a b x 4)
+    (ellRedRoot_sq a b y 4)
   simp only [ellRedS5, ellRedQ5Sq, ellRedU5Sq, ellRedU, ellRedDet]
   exact H
 
@@ -333,12 +359,6 @@ theorem ellRed_example_GR3142 {a b u c : ℝ} (hab : b < a) (hbu : u < b) (huc :
 
 /-! ### Real positive factors: (19.29.4) from `lean-codes` -/
 
-/-- Identity under the stated parameter and domain assumptions: `(r : ℂ) ^ (1 / 2 : ℂ) = ((√r : ℝ)
-: ℂ)`. -/
-lemma ei19e_cpow_half_ofReal {r : ℝ} (hr : 0 ≤ r) : (r : ℂ) ^ (1 / 2 : ℂ) = ((√r : ℝ) : ℂ) := by
-  rw [Real.sqrt_eq_rpow, Complex.ofReal_cpow hr]
-  push_cast; rfl
-
 /-- DLMF 19.29.4 for **real** coefficients with the four linear factors positive on `[y, x]`
 (proved): `∫_y^x dt / s(t) = 2 R_F(U_{12}², U_{13}², U_{23}²)`. This is Carlson's (9.8-12),
 `Carlson.integral_quartic_eq_carlsonRF` of `lean-codes`, transported to DLMF's notation. -/
@@ -362,7 +382,7 @@ theorem ellRed_integral_inv_s_of_pos {a b : Fin 5 → ℝ} {x y : ℝ} (hxy : y 
     intro i t ht
     simp only [ellRedRoot]
     rw [show (a i : ℂ) + (b i : ℂ) * (t : ℂ) = ((a i + b i * t : ℝ) : ℂ) by push_cast; ring]
-    exact ei19e_cpow_half_ofReal ht
+    exact Carlson.ofReal_cpow_half ht
   have hx : x ∈ Icc y x := ⟨hxy.le, le_rfl⟩
   have hy : y ∈ Icc y x := ⟨le_rfl, hxy.le⟩
   -- the integrand
@@ -469,14 +489,14 @@ theorem ellRedI_reduction {h n : ℕ} (hh : h = 3 ∨ h = 4) (hn : h ≤ n) {a b
 
 /-- Identity under the stated parameter and domain assumptions: `∏ k, f k ^ ((Pi.single j q : Fin
 n → ℤ) k) = f j ^ q`. -/
-lemma ei19e_prod_single {n : ℕ} (f : Fin n → ℂ) (j : Fin n) (q : ℤ) :
+private lemma prod_pow_single {n : ℕ} (f : Fin n → ℂ) (j : Fin n) (q : ℤ) :
     ∏ k, f k ^ ((Pi.single j q : Fin n → ℤ) k) = f j ^ q := by
   rw [Finset.prod_eq_single j (fun k _ hk => by simp [hk]) (by simp)]
   simp
 
 /-- Identity under the stated parameter and domain assumptions: `∏ k, f k ^ ((ellRedE l - ellRedE
 j) k) = f l * (f j)⁻¹`. -/
-lemma ei19e_prod_sub {n : ℕ} (f : Fin n → ℂ) {l j : Fin n} (hlj : l ≠ j) :
+private lemma prod_pow_ellRedE_sub {n : ℕ} (f : Fin n → ℂ) {l j : Fin n} (hlj : l ≠ j) :
     ∏ k, f k ^ ((ellRedE l - ellRedE j) k) = f l * (f j)⁻¹ := by
   rw [← Finset.prod_subset (Finset.subset_univ {l, j}) (fun k _ hk => by
     simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hk
@@ -503,12 +523,12 @@ theorem ellRedI_partial_fraction {h n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (
   have h1 : ∏ k, (a k + b k * t) ^ ((-ellRedE j) k) = (a j + b j * t)⁻¹ := by
     rw [show (-ellRedE j : Fin n → ℤ) = Pi.single j (-1) by
       funext k; simp [ellRedE, Pi.single_apply]; split_ifs <;> simp]
-    rw [ei19e_prod_single (fun k => a k + b k * t), zpow_neg_one]
+    rw [prod_pow_single (fun k => a k + b k * t), zpow_neg_one]
   rw [h0, h1]
   by_cases hlj : l = j
   · subst hlj
     simp [ellRedDet]
-  · rw [ei19e_prod_sub (fun k => a k + b k * t) hlj]
+  · rw [prod_pow_ellRedE_sub (fun k => a k + b k * t) hlj]
     set P := ∏ α ∈ Finset.univ.filter (fun α : Fin n => (α : ℕ) < h), (a α + b α * t) ^ (-1 / 2 : ℂ)
     have key : b j * (a l + b l * t) = ellRedDet a b l j + b l * (a j + b j * t) := by
       simp only [ellRedDet]; ring
@@ -533,7 +553,7 @@ theorem ellRedI_recurrence {h n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (j l : 
   refine setIntegral_congr_fun measurableSet_Ioo fun t _ => ?_
   have hsm : ∀ (i : Fin n) (p : ℕ), ((p : ℤ) • ellRedE i : Fin n → ℤ) = Pi.single i (p : ℤ) := by
     intro i p; funext k; simp [ellRedE, Pi.single_apply]
-  simp only [ellRedIntegrand, hsm, ei19e_prod_single (fun k => a k + b k * t), zpow_natCast]
+  simp only [ellRedIntegrand, hsm, prod_pow_single (fun k => a k + b k * t), zpow_natCast]
   have key : b j * (a l + b l * t) = b l * (a j + b j * t) + ellRedDet a b l j := by
     simp only [ellRedDet]; ring
   rw [← mul_assoc, mul_comm (b j ^ q), mul_assoc, ← mul_pow, key, add_pow, Finset.mul_sum]
@@ -564,7 +584,7 @@ theorem ellRedI_cubic_recurrence {n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (hx
   have hne : ∀ ε : Fin n, (ε : ℕ) < 3 → ∀ t ∈ Icc y x, r ε t ≠ 0 := by
     intro ε hε t ht h
     exact slitPlane_ne_zero (hf ε hε t ht) ((cpow_eq_zero_iff _ _).mp h).1
-  have hsq : ∀ ε : Fin n, ∀ t : ℝ, r ε t ^ 2 = a ε + b ε * t := fun ε t => ei19e_root_sq a b t ε
+  have hsq : ∀ ε : Fin n, ∀ t : ℝ, r ε t ^ 2 = a ε + b ε * t := fun ε t => ellRedRoot_sq a b t ε
   have hderiv : ∀ ε : Fin n, (ε : ℕ) < 3 → ∀ t ∈ Icc y x,
       HasDerivAt (r ε) (b ε / (2 * r ε t)) t := by
     intro ε hε t ht
@@ -628,18 +648,18 @@ theorem ellRedI_cubic_recurrence {n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (hx
   have hI1 : ∀ t ∈ Ioo y x, ellRedIntegrand 3 a b (ellRedE α) t =
       r α t ^ 2 * ((r α t)⁻¹ * (r β t)⁻¹ * (r γ t)⁻¹) := by
     intro t ht
-    simp only [ellRedIntegrand, ellRedE, ei19e_prod_single (fun k => a k + b k * t), zpow_one]
+    simp only [ellRedIntegrand, ellRedE, prod_pow_single (fun k => a k + b k * t), zpow_one]
     rw [hprod, hsq α t]
-    simp only [hr_def, ellRedRoot, ei19c_inv_cpow_half]
+    simp only [hr_def, ellRedRoot, inv_cpow_half_eq_cpow_neg_half]
     ring
   have hI2 : ∀ t ∈ Ioo y x, ellRedIntegrand 3 a b (-ellRedE α) t =
       (r α t ^ 2)⁻¹ * ((r α t)⁻¹ * (r β t)⁻¹ * (r γ t)⁻¹) := by
     intro t ht
     have hneg : (-ellRedE α : Fin n → ℤ) = Pi.single α (-1) := by
       funext k; simp [ellRedE, Pi.single_apply]; split_ifs <;> simp
-    simp only [ellRedIntegrand, hneg, ei19e_prod_single (fun k => a k + b k * t), zpow_neg_one]
+    simp only [ellRedIntegrand, hneg, prod_pow_single (fun k => a k + b k * t), zpow_neg_one]
     rw [hprod, hsq α t]
-    simp only [hr_def, ellRedRoot, ei19c_inv_cpow_half]
+    simp only [hr_def, ellRedRoot, inv_cpow_half_eq_cpow_neg_half]
     ring
   have hinv : ∀ ε : Fin n, (ε : ℕ) < 3 → ContinuousOn (fun t => (r ε t)⁻¹) (Icc y x) :=
     fun ε hε => (hcont ε hε).inv₀ fun t ht => hne ε hε t ht
@@ -689,13 +709,6 @@ theorem ellRedI_cubic_recurrence {n : ℕ} (a b : Fin n → ℂ) {x y : ℝ} (hx
 
 /-! ### §19.29(iii) Examples -/
 
-/-- DLMF 19.29.22: `U` defined by `(x² - y²) U = x √(Q₁(y) Q₂(y)) + y √(Q₁(x) Q₂(x))`,
-`Q_j(t) = a_j + b_j t²`. -/
-@[dlmf 19.29.E22]
-def ellRedQuadU (a₁ b₁ a₂ b₂ x y : ℝ) : ℝ :=
-  (x * √((a₁ + b₁ * y ^ 2) * (a₂ + b₂ * y ^ 2)) + y * √((a₁ + b₁ * x ^ 2) * (a₂ + b₂ * x ^ 2))) /
-    (x ^ 2 - y ^ 2)
-
 /-- DLMF 19.29.19: with `Q_j(t) = a_j + b_j t²` positive for `0 ≤ y < t < x`,
 `∫_y^x dt / √(Q₁(t) Q₂(t)) = R_F(U² + a₁b₂, U² + a₂b₁, U²)` (replaces (19.14.4)–(19.14.10)). -/
 @[dlmf 19.29.E19]
@@ -710,7 +723,7 @@ theorem ellRed_quad_first {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 ≤ y) (hxy : 
 /-- The algebra behind the positivity of the arguments in (19.29.19): with
 `(x² - y²) U = x P₁(y) P₂(y) + y P₁(x) P₂(x)` and `(x² - y²) W = x P₁(x) P₂(y) + y P₁(y) P₂(x)`,
 `P_j(t)² = a_j + b_j t²`, one has `W² - U² = a₂ b₁` (`U_{12}² - U_{14}² = d_{13} d_{24}`, 19.29.5). -/
-lemma ei19e_quad_sq_sub_sq {a₁ b₁ a₂ b₂ x y p₁ q₁ p₂ q₂ : ℝ} (hxy : x ^ 2 - y ^ 2 ≠ 0)
+private lemma quadratic_product_sq_identity {a₁ b₁ a₂ b₂ x y p₁ q₁ p₂ q₂ : ℝ} (hxy : x ^ 2 - y ^ 2 ≠ 0)
     (h₁ : p₁ ^ 2 = a₁ + b₁ * x ^ 2) (h₂ : p₂ ^ 2 = a₂ + b₂ * x ^ 2)
     (k₁ : q₁ ^ 2 = a₁ + b₁ * y ^ 2) (k₂ : q₂ ^ 2 = a₂ + b₂ * y ^ 2) :
     ((x * p₁ * q₂ + y * q₁ * p₂) / (x ^ 2 - y ^ 2)) ^ 2 =
@@ -721,7 +734,7 @@ lemma ei19e_quad_sq_sub_sq {a₁ b₁ a₂ b₂ x y p₁ q₁ p₂ q₂ : ℝ} (
 
 /-- DLMF 19.29.19 for `0 < y` and both `Q_j` positive on `[y, x]` (proved): Carlson's
 Exercise 9.8-3, `Carlson.integral_quadratic_mul_quadratic` of `lean-codes`, in DLMF's notation;
-the arguments of `R_F` are positive (`ei19e_quad_sq_sub_sq`). -/
+the arguments of `R_F` are positive (`quadratic_product_sq_identity`). -/
 @[dlmf 19.29.E19]
 theorem ellRed_quad_first_of_pos {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 < y) (hxy : y < x)
     (hQ : ∀ t ∈ Icc y x, 0 < a₁ + b₁ * t ^ 2 ∧ 0 < a₂ + b₂ * t ^ 2) :
@@ -747,7 +760,7 @@ theorem ellRed_quad_first_of_pos {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 < y) (h
       0 < ellRedQuadU c₁ d₁ c₂ d₂ x y ^ 2 + c₂ * d₁ := by
     intro c₁ d₁ c₂ d₂ g1 g2 g3 g4
     unfold ellRedQuadU
-    rw [Real.sqrt_mul g3.le, Real.sqrt_mul g1.le, ← ei19e_quad_sq_sub_sq hd.ne'
+    rw [Real.sqrt_mul g3.le, Real.sqrt_mul g1.le, ← quadratic_product_sq_identity hd.ne'
       (Real.sq_sqrt g1.le) (Real.sq_sqrt g2.le) (Real.sq_sqrt g3.le) (Real.sq_sqrt g4.le)]
     have := Real.sqrt_pos.mpr g1; have := Real.sqrt_pos.mpr g4
     positivity
@@ -859,7 +872,7 @@ theorem ellRed_two_quadratics {f₁ g₁ h₁ f₂ g₂ h₂ x y : ℝ} (hxy : y
   sorry
 
 /-- Estimate under the stated parameter and domain assumptions: `0 ≤ c + d * x ∧ 0 ≤ c + d * y`. -/
-lemma ei19e_endpoints_nonneg {c d x y : ℝ} (hxy : y < x) (h : ∀ t ∈ Ioo y x, 0 < c + d * t) :
+private lemma linear_endpoints_nonneg {c d x y : ℝ} (hxy : y < x) (h : ∀ t ∈ Ioo y x, 0 < c + d * t) :
     0 ≤ c + d * x ∧ 0 ≤ c + d * y := by
   have hc : IsClosed {t : ℝ | 0 ≤ c + d * t} :=
     isClosed_le continuous_const (continuous_const.add (continuous_const.mul continuous_id))
@@ -902,8 +915,8 @@ theorem ellRed_linear_linear_quadratic {a₁ b₁ a₂ b₂ f₂ g₂ h₂ x y :
         (ellRedQuadD f₂ g₂ h₂ f₂ g₂ h₂) x y := by
   have e : ∀ t : ℝ, a₁ * a₂ + (a₁ * b₂ + a₂ * b₁) * t + b₁ * b₂ * t ^ 2 =
       (a₁ + b₁ * t) * (a₂ + b₂ * t) := fun t => by ring
-  obtain ⟨hx₁, hy₁⟩ := ei19e_endpoints_nonneg hxy fun t ht => (hQ t ht).1
-  obtain ⟨hx₂, hy₂⟩ := ei19e_endpoints_nonneg hxy fun t ht => (hQ t ht).2.1
+  obtain ⟨hx₁, hy₁⟩ := linear_endpoints_nonneg hxy fun t ht => (hQ t ht).1
+  obtain ⟨hx₂, hy₂⟩ := linear_endpoints_nonneg hxy fun t ht => (hQ t ht).2.1
   have H := ellRed_two_quadratics (f₁ := a₁ * a₂) (g₁ := a₁ * b₂ + a₂ * b₁) (h₁ := b₁ * b₂)
     (f₂ := f₂) (g₂ := g₂) (h₂ := h₂) hxy
     (fun t ht => ⟨by rw [e]; exact mul_pos (hQ t ht).1 (hQ t ht).2.1, (hQ t ht).2.2⟩)
@@ -1015,7 +1028,7 @@ theorem ellRed_quartic_plus {a x y : ℝ} (hy : 0 ≤ y) (hxy : y < x) (ha : a �
   have H := ellRed_biquadratic (f := a ^ 4) (g := 0) (h := 1) hxy hpos (Or.inl hmono)
     ((hcont.integrableOn_Icc).mono_set Ioo_subset_Icc_self)
   have hs : ((a ^ 4 * 1 : ℝ) : ℂ) ^ (1 / 2 : ℂ) = ((a ^ 2 : ℝ) : ℂ) := by
-    rw [ei19e_cpow_half_ofReal (by positivity), show a ^ 4 * 1 = (a ^ 2) ^ 2 by ring,
+    rw [Carlson.ofReal_cpow_half (by positivity), show a ^ 4 * 1 = (a ^ 2) ^ 2 by ring,
       Real.sqrt_sq (sq_nonneg a)]
   have e' : ∀ t : ℝ, a ^ 4 + 0 * t ^ 2 + t ^ 4 = t ^ 4 + a ^ 4 := fun t => by ring
   simp only [ellRedBiquadU, hs, one_mul, sub_zero, e'] at H

@@ -15,14 +15,29 @@ public import Mathlib.Tactic.NormNum.OfScientific
 public import Mathlib.Tactic.NormNum.Pow
 
 /-!
-# Partitions (AAR Chapter 11)
+# Partitions and Ramanujan's congruences (AAR Chapter 11; DLMF §27.14)
 
-Mathlib already has `Nat.Partition`, the generating-function formalism `Nat.Partition.genFun`,
-Euler's theorem `card_odds_eq_card_distincts`, Glaisher's theorem, and the pentagonal number
-theorem. This file records Ramanujan's congruences (AAR §11.7), which are absent.
-MacMahon's partition analysis (AAR §§11.2–11.3) is an algorithm, not a theorem list, and is
-omitted. Graphical methods (§11.6, Ferrers diagrams) are the Mathlib TODO linking partitions
-to Young diagrams.
+This file defines the partition function `p(n)` through Mathlib's `Nat.Partition` and proves
+Ramanujan's congruences (AAR §11.7, DLMF §27.14(v)).
+
+## Main definitions
+
+* `partitionFunction`: the partition function `p(n)`.
+
+## Main results
+
+* `partitionFunction_zero`: `p(0) = 1` (DLMF 27.14.3).
+* `ramanujan_mod_five`, `ramanujan_mod_seven`, `ramanujan_mod_eleven`: the congruences
+  `p(5n + 4) ≡ 0 (mod 5)`, `p(7n + 5) ≡ 0 (mod 7)` and `p(11n + 6) ≡ 0 (mod 11)`.
+
+## Implementation notes
+
+Mathlib already has `Nat.Partition`, the generating-function formalism
+`Nat.Partition.genFun`, Euler's theorem `Nat.Partition.card_odds_eq_card_distincts`,
+Glaisher's theorem and the pentagonal number theorem. MacMahon's partition analysis
+(AAR §§11.2–11.3) is an algorithm, not a theorem list, and is omitted. Graphical methods
+(AAR §11.6, Ferrers diagrams) correspond to the Mathlib TODO linking partitions to Young
+diagrams.
 -/
 
 @[expose] public section

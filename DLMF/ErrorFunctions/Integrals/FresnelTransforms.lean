@@ -6,15 +6,30 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ErrorFunctions.Integrals.GaussianAndCauchy
+public import ToMathlib.Analysis.SpecialFunctions.Pow
 
 /-!
-# Mellin-Barnes and Laplace transforms of Fresnel functions
+# Mellin–Barnes and Laplace transforms of Fresnel functions (DLMF §§7.7, 7.14)
 
-Mellin-Barnes representations of auxiliary Fresnel functions and Laplace transforms of
-oscillatory Gaussian kernels.
+Mellin transforms and Mellin–Barnes representations of the Fresnel auxiliary functions, Laplace
+transforms of the oscillatory Gaussian kernels `cos t²`, `sin t²`, and the Laplace and Fourier
+transforms of error functions of DLMF 7.14.1–7.14.3.
 
-Source references and common attribution are retained in
-`DLMF.ErrorFunctions.Integrals`.
+## Main definitions
+
+* `fresMB_aux`: the Fresnel auxiliary functions `f` and `g` on the real line.
+* `fresMB_E`, `fresMB_G`: the Mellin–Barnes integrand of DLMF 7.7.13–7.7.14 and its Gamma
+  product.
+
+## Main results
+
+* `fresMB_mellin`: the Mellin transforms of the Fresnel auxiliary functions.
+* `fresnelAuxFComplex_mellinBarnes`, `fresnelAuxGComplex_mellinBarnes`: the Mellin–Barnes
+  integrals for `f(z)` and `g(z)` (DLMF 7.7.13, 7.7.14).
+* `laplace_exp_I_sq`: the Laplace transform of `exp(± i t²)`.
+* `fresnelAuxFComplex_laplace_square`, `fresnelAuxGComplex_laplace_square`: Laplace transforms of
+  `cos t²` and `sin t²` (DLMF 7.7.15, 7.7.16).
+* `erfc_fourier_halfLine`, `erf_laplace`, `erf_sqrt_laplace`: DLMF 7.14.1–7.14.3.
 -/
 
 @[expose] public noncomputable section
@@ -38,7 +53,7 @@ section FresnelMellinBarnes
 theorem fresMB_integral_cpow_div {a : ℂ} (h0 : 0 < a.re) (h1 : a.re < 1) :
     ∫ t : ℝ in Ioi 0, (t : ℂ) ^ (2 * a - 1) / ((t : ℂ) ^ 2 + 1) = Gamma a * Gamma (1 - a) / 2 := by
   have h1a : 0 < (1 - a).re := by simp; linarith
-  have hb := DLMF.Gamma.beta_on_Ioi h0 h1a
+  have hb := DLMF.Gamma.beta_on_Ioi (a := a) (b := 1 - a)
   rw [show a + (1 - a) = 1 by ring] at hb
   simp only [cpow_one] at hb
   have hG := Complex.Gamma_mul_Gamma_eq_betaIntegral h0 h1a
@@ -267,12 +282,6 @@ theorem fresMB_integrable_G {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c
 def fresMB_g (aux : Bool) : ℝ → ℂ :=
   fun X => fresMB_aux aux (((2 / Real.sqrt π * X ^ (1 / 4 : ℝ) : ℝ)) : ℂ)
 
-/-- Identity under the stated parameter and domain assumptions: `((r : ℝ) : ℂ) ^ z = exp
-(((Real.log r : ℝ) : ℂ) * z)`. -/
-theorem fresMB_cpow_eq_exp {r : ℝ} (hr : 0 < r) (z : ℂ) :
-    ((r : ℝ) : ℂ) ^ z = exp (((Real.log r : ℝ) : ℂ) * z) := by
-  rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hr.ne'), ← ofReal_log hr.le]
-
 /-- Identity under the stated parameter and domain assumptions: `(2 * π : ℂ) ^ (3 / 2 : ℂ) = 2 * π
 * ((Real.sqrt 2 * Real.sqrt π : ℝ) : ℂ)`. -/
 theorem fresMB_two_pi_cpow :
@@ -314,8 +323,8 @@ theorem fresMB_mellin_g (aux : Bool) {s : ℂ} (hs : 0 < s.re)
   have hP : (2 : ℂ) ^ (2 * s) ≠ 0 := by rw [cpow_def_of_ne_zero two_ne_zero]; exact exp_ne_zero _
   have hE : ((2 / Real.sqrt π : ℝ) : ℂ) ^ (-(4 * s)) * ((2 / π : ℝ) : ℂ) ^ (4 * s / 2) *
       (2 : ℂ) ^ (2 * s) = 1 := by
-    rw [show (2 : ℂ) = ((2 : ℝ) : ℂ) by norm_num, fresMB_cpow_eq_exp hsq,
-      fresMB_cpow_eq_exp (by positivity), fresMB_cpow_eq_exp two_pos, ← exp_add, ← exp_add,
+    rw [show (2 : ℂ) = ((2 : ℝ) : ℂ) by norm_num, Complex.ofReal_cpow_eq_exp hsq,
+      Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp two_pos, ← exp_add, ← exp_add,
       Real.log_div (by norm_num) (Real.sqrt_pos.mpr Real.pi_pos).ne',
       Real.log_div (by norm_num) Real.pi_ne_zero, Real.log_sqrt Real.pi_pos.le]
     rw [← exp_zero]; congr 1; push_cast; ring
@@ -393,7 +402,7 @@ theorem fresMB_real (aux : Bool) {c : ℝ} (hc : 0 < c)
   have hpow : ∀ y : ℝ, ((X : ℝ) : ℂ) ^ (-((c : ℂ) + y * I)) =
       exp (-((c : ℂ) + y * I) * (2 * log (π : ℂ) - log 16 + 4 * log (x : ℂ))) := by
     intro y
-    rw [fresMB_cpow_eq_exp hX0, hlog, ← ofReal_log Real.pi_pos.le, ← ofReal_log hx.le,
+    rw [Complex.ofReal_cpow_eq_exp hX0, hlog, ← ofReal_log Real.pi_pos.le, ← ofReal_log hx.le,
       show (16 : ℂ) = ((16 : ℝ) : ℂ) by norm_num, ← ofReal_log (by norm_num)]
     congr 1; push_cast; ring
   -- Mellin inversion

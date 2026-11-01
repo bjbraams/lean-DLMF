@@ -10,27 +10,19 @@ public import Mathlib.Analysis.Calculus.Deriv.Add
 public import Mathlib.Analysis.Calculus.Deriv.Mul
 
 /-!
-# Hill's equation and the equations of Whittaker–Hill and Ince: definitions (DLMF §§28.29–28.31)
+# Hill's equation and the equations of Whittaker–Hill and Ince
 
-Hill's equation (DLMF 28.29.1) is `w'' + (λ + Q(x)) w = 0` with a `π`-periodic potential `Q`
-of mean zero (28.29.2, 28.29.3). DLMF allows either a continuous real-valued `Q` on `ℝ` or a
-`Q` analytic in a strip around the real axis. Here the independent variable is real and
-`Q : ℝ → ℂ` is continuous; this covers both cases on the real axis (an analytic `Q` restricts
-to a continuous complex-valued function, and the solutions in the strip are determined by
-their restrictions). The results of §28.29(iii) and §28.30 assume `Q` real-valued; they take
-`Q : ℝ → ℝ` and use the coercion `fun x => (Q x : ℂ)`.
+This file contains the definitions for DLMF §§28.29–28.31. Hill's equation (DLMF 28.29.1) is
+`w'' + (λ + Q(x)) w = 0` with a `π`-periodic potential `Q` of mean zero (28.29.2, 28.29.3).
+The equations of Whittaker–Hill (28.31.1) and Ince (28.31.3) are considered over `ℂ`, with
+entire solutions.
 
-* `IsHillSolution Q λ w`: `w` is differentiable on `ℝ`, `deriv w` is differentiable and
-  `(deriv w)' = -(λ + Q) w` (genuine derivatives, so a totalized `deriv` cannot fake a
-  solution).
-* `IsHillPotential Q`: continuity, period `π` (28.29.2) and mean zero (28.29.3). DLMF's remark
-  that `π` is the *minimum* period of `Q` is not part of the predicate; no result below needs
-  it.
+## Main definitions
+
+* `IsHillSolution Q λ w`: `w` solves Hill's equation 28.29.1 on `ℝ`.
+* `IsHillPotential Q`: continuity, period `π` (28.29.2) and mean zero (28.29.3).
 * `hillWI Q z λ`, `hillWII Q z λ`: the basic solutions `w_I`, `w_II` with
-  `w_I(0) = 1, w_I'(0) = 0`, `w_II(0) = 0, w_II'(0) = 1` (as in DLMF 28.2(ii)). They are
-  **definitions by choice**: the chosen solution when one exists (existence for continuous
-  `Q` is the flagged theorem `DLMF.Mathieu.hill_exists_solution`; uniqueness is proved), and
-  `0` otherwise.
+  `w_I(0) = 1, w_I'(0) = 0`, `w_II(0) = 0, w_II'(0) = 1` (as in DLMF 28.2(ii)).
 * `hillDiscriminant Q λ = w_I(π, λ) + w_II'(π, λ)` (28.29.15) and the monodromy matrix
   `hillMonodromy Q λ` (28.29.8).
 * `IsHillFloquetSolution Q λ ν w`: a nontrivial solution with `w(x + π) = e^{πiν} w(x)`
@@ -38,40 +30,56 @@ their restrictions). The results of §28.29(iii) and §28.30 assume `Q` real-val
 * `hillMultiplierSolutions Q λ s`: the `ℂ`-submodule of solutions with `w(x + π) = s w(x)`;
   `s = 1` gives the `π`-periodic and `s = -1` the `π`-antiperiodic (period `2π`) solutions.
 * `hillPeriodicEigenvalue Q n` (`λ_n`, `n = 0, 1, …`, 28.29.16) and
-  `hillAntiperiodicEigenvalue Q n` (`μ_n`, `n = 1, 2, …`, 28.29.17) for real `Q`: the real
-  `λ` with a nontrivial `π`-periodic (resp. antiperiodic) solution, listed increasingly and
-  counted with the dimension of the solution space (which is the multiplicity in DLMF's
-  interlacing 28.29.18, where `λ_{2m-1} = λ_{2m}` or `μ_{2m-1} = μ_{2m}` when both solutions
-  are periodic). **Definition by counting:** `λ_n` is the infimum of the `t` such that the
-  eigenvalues `≤ t`, counted with multiplicity, number at least `n + 1`. If the counting
-  function is not finite (which does not happen for real continuous `Q`, see
-  `DLMF.Mathieu.hillPeriodicEigenvalue_spec`) the value is a junk value.
+  `hillAntiperiodicEigenvalue Q n` (`μ_n`, `n = 1, 2, …`, 28.29.17) for real `Q`, defined
+  through the counting function `hillEigenCount`.
 * `hillEigenvalueHat Q m` (`λ̂_m`, 28.30(i)): `λ_0, μ_1, μ_2, λ_1, λ_2, μ_3, …` merged in the
   natural order 28.29.18; `IsHillEigenfunctionFamily Q w`: `w` is an orthonormal family of
-  real `2π`-periodic eigenfunctions for the `λ̂_m` (28.30.1–28.30.2; DLMF's eigenfunctions are
-  such a choice).
+  real `2π`-periodic eigenfunctions for the `λ̂_m` (28.30.1–28.30.2).
 * `hillMeanSquare Q` (`N`, 28.29.19).
-
-§28.31 (Whittaker–Hill and Ince):
-
-* `IsWhittakerHillSolution A B k c W` (28.31.1) and `IsInceSolution ξ η p w` (28.31.3), over
-  `ℂ` (entire solutions).
+* `IsWhittakerHillSolution A B k c W` (28.31.1) and `IsInceSolution ξ η p w` (28.31.3).
 * `IsEntireFourierCoeff A`: summability of `‖A_k‖ (k+1)² e^{kR}` for every `R` (the Fourier
   series 28.31.4–28.31.5 then define entire functions differentiable termwise).
 * `IsInceCosPoly p f`, `IsInceSinPoly p f`: real trigonometric polynomials
   `∑ A_k cos(kz)` resp. `∑ B_k sin(kz)` with `k ≤ p`, `k ≡ p (mod 2)`.
-* `inceA p m ξ` (`a_p^m(ξ)`) and `inceB p m ξ` (`b_p^m(ξ)`) for real `ξ`: **definitions by
-  choice**, the unique real `η` for which Ince's equation has a nontrivial Ince polynomial
-  solution of the right type with exactly `m` zeros in `[0, π)` (DLMF §28.31(ii), "can be
-  ordered so that `C_p^m` and `S_p^m` have precisely `m` zeros, all simple, in `0 ≤ z < π`"),
-  and `0` if there is no such unique `η`.
-* `inceC p m z ξ` (`C_p^m(z, ξ)`) and `inceS p m z ξ` (`S_p^m(z, ξ)`): **definitions by
-  choice**, the unique Ince polynomial with eigenvalue `a_p^m(ξ)` (resp. `b_p^m(ξ)`),
-  normalized by 28.31.12 and with `C_p^m(0, ξ) > 0` (resp. `S_p^m'(0, ξ) > 0`); `0` if it does
-  not exist uniquely. For `m ≢ p (mod 2)` or `m > p` (and `m = 0` for `S`) the values are
-  junk `0`.
+* `inceA p m ξ` (`a_p^m(ξ)`), `inceB p m ξ` (`b_p^m(ξ)`), `inceC p m z ξ` (`C_p^m(z, ξ)`,
+  28.31.10) and `inceS p m z ξ` (`S_p^m(z, ξ)`, 28.31.11) for real `ξ`.
 * `paraboloidalHc p m z ξ`, `paraboloidalHs p m z ξ`: the paraboloidal wave functions
   `hc_p^m`, `hs_p^m` (28.31.16, 28.31.17).
+
+## Implementation notes
+
+DLMF allows either a continuous real-valued `Q` on `ℝ` or a `Q` analytic in a strip around
+the real axis. Here the independent variable is real and `Q : ℝ → ℂ` is continuous; this
+covers both cases on the real axis (an analytic `Q` restricts to a continuous complex-valued
+function, and the solutions in the strip are determined by their restrictions). The results
+of §28.29(iii) and §28.30 assume `Q` real-valued; they take `Q : ℝ → ℝ` and use the coercion
+`fun x => (Q x : ℂ)`.
+
+* `IsHillSolution` asks that `w` be differentiable on `ℝ`, that `deriv w` be differentiable
+  and that `(deriv w)' = -(λ + Q) w` (genuine derivatives, so a totalized `deriv` cannot fake
+  a solution).
+* DLMF's remark that `π` is the *minimum* period of `Q` is not part of `IsHillPotential`; no
+  result needs it.
+* `hillWI` and `hillWII` are **definitions by choice**: the chosen solution when one exists
+  (existence for continuous `Q` is `DLMF.Mathieu.hill_exists_solution`; uniqueness is
+  proved), and `0` otherwise.
+* The eigenvalues `λ_n`, `μ_n` are listed increasingly and counted with the dimension of the
+  solution space (which is the multiplicity in DLMF's interlacing 28.29.18, where
+  `λ_{2m-1} = λ_{2m}` or `μ_{2m-1} = μ_{2m}` when both solutions are periodic).
+  **Definition by counting:** `λ_n` is the infimum of the `t` such that the eigenvalues
+  `≤ t`, counted with multiplicity, number at least `n + 1`. If the counting function is not
+  finite (which does not happen for real continuous `Q`, see
+  `DLMF.Mathieu.hillPeriodicEigenvalue_spec`) the value is a junk value.
+* DLMF's eigenfunctions `w_m` in §28.30 are a choice; `IsHillEigenfunctionFamily` describes
+  every such choice.
+* `inceA` and `inceB` are **definitions by choice**: the unique real `η` for which Ince's
+  equation has a nontrivial Ince polynomial solution of the right type with exactly `m`
+  zeros in `[0, π)` (DLMF §28.31(ii), "can be ordered so that `C_p^m` and `S_p^m` have
+  precisely `m` zeros, all simple, in `0 ≤ z < π`"), and `0` if there is no such unique `η`.
+* `inceC` and `inceS` are **definitions by choice**: the unique Ince polynomial with
+  eigenvalue `a_p^m(ξ)` (resp. `b_p^m(ξ)`), normalized by 28.31.12 and with `C_p^m(0, ξ) > 0`
+  (resp. `S_p^m'(0, ξ) > 0`); `0` if it does not exist uniquely. For `m ≢ p (mod 2)` or
+  `m > p` (and `m = 0` for `S`) the values are junk `0`.
 -/
 
 @[expose] public noncomputable section

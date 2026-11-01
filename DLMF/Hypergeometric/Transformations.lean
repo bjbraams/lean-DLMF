@@ -7,12 +7,24 @@ module
 
 public import DLMF.Hypergeometric.EulerIntegral
 public import ComplexAnalysis.Pow
+public import Carlson.RPolynomial.GeneratingIdentities
 
 /-!
-# Linear and quadratic transformations (AAR §2.2 and §3.1)
+# Euler's and Pfaff's transformations (AAR §2.2)
 
-Euler's and Pfaff's linear transformations follow from the Euler integral by a change of
-variables. Quadratic transformations (AAR §3.1) are recorded as statements.
+Euler's and Pfaff's linear transformations follow from Euler's integral by a change of
+variables. The quadratic transformations of AAR §3.1 are in
+`DLMF.Hypergeometric.FurtherTransformations.Quadratic`.
+
+## Main results
+
+* `pfaff_transformation`, `pfaff_transformation_symm`:
+  `₂F₁(a,b;c;z) = (1-z)^{-a} ₂F₁(a, c-b; c; z/(z-1))`, DLMF 15.8.1.
+* `euler_transformation`: `₂F₁(a,b;c;z) = (1-z)^{c-a-b} ₂F₁(c-a, c-b; c; z)`, DLMF 15.8.1.
+
+## References
+
+* G. E. Andrews, R. Askey, R. Roy, *Special Functions*, §2.2.
 -/
 
 @[expose] public section
@@ -23,11 +35,6 @@ open scoped Real Topology
 noncomputable section
 
 namespace DLMF.Hypergeometric
-
-/-- Powers multiply without a branch correction when both factors have positive real part. -/
-theorem mul_cpow_of_re_pos {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) (a : ℂ) :
-    (u * v) ^ a = u ^ a * v ^ a :=
-  Complex.mul_cpow_of_re_pos hu hv a
 
 /-- The factors in Pfaff's change of variable stay in the right half-plane. -/
 theorem re_one_sub_mul_pos {z : ℂ} (hz : ‖z‖ < 1) {t : ℝ} (ht : t ∈ Set.Icc 0 1) :
@@ -74,7 +81,7 @@ theorem pfaff_transformation {a b c z : ℂ}
     have hfactor : 1 - z * (1 - (t : ℂ)) =
         (1 - z) * (1 - z / (z - 1) * t) := by field_simp; ring
     simp only [ofReal_sub, ofReal_one, sub_sub_cancel]
-    rw [hfactor, mul_cpow_of_re_pos hpos (re_one_sub_mul_pos hzt ht)]
+    rw [hfactor, Carlson.mul_cpow_of_re_pos hpos (re_one_sub_mul_pos hzt ht)]
     ring
   rw [hi]
   ring

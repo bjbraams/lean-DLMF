@@ -11,8 +11,13 @@ public import Mathlib.Tactic.Ring
 /-!
 # Positive real scaling of the principal square root
 
-Mathlib's real-and-imaginary-part formula `Complex.sqrt_eq_real_add_ite`
-shows that nonnegative real scaling preserves the selected bank, including on the cut.
+A nonnegative real factor scales the principal complex square root without changing the
+selected branch, including on the cut. The proof uses Mathlib's real-and-imaginary-part
+formula `Complex.sqrt_eq_real_add_ite`.
+
+## Main results
+
+* `sqrt_ofReal_mul`: `√(r z) = √r √z` for real `r ≥ 0`.
 -/
 
 @[expose] public section

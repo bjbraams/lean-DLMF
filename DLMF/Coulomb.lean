@@ -13,17 +13,17 @@ public import DLMF.Coulomb.RhoEtaSeries
 public import DLMF.Coulomb.RhoEtaRepresentations
 public import DLMF.Coulomb.RhoEtaAsymptotics
 public import DLMF.Coulomb.Energy.Basic
-public import DLMF.Coulomb.Energy.Q2eRegular
+public import DLMF.Coulomb.Energy.RegularSolution
 public import DLMF.Coulomb.Energy.Properties
 public import DLMF.Coulomb.Energy.Connection
 public import DLMF.Coulomb.Energy.Recurrence
 public import DLMF.Coulomb.Energy.Series
 public import DLMF.Coulomb.Energy.Asymptotics
 
-/-! # Coulomb functions: DLMF Chapter 33
+/-!
+# Coulomb functions
 
-Variables ρ, η (§§33.2–33.13): `Basic` holds the Coulomb functions moved down unchanged from the
-Confluent area (namespace `DLMF.Confluent`: `coulombF`, `coulombG`, `coulombHPlus`, …), `Basic.AuxiliaryData` the
-further definitions of Chapter 33 (namespace `DLMF.Coulomb`). Variables r, ε (§§33.14–33.21): the
-`Energy` modules, with the functions f, h, s, c of §33.14. Ledger: `DLMF33Acquisition.md`.
+Coulomb functions of DLMF Chapter 33. The functions of the variables `ρ, η` (DLMF §§33.2–33.13)
+are in `DLMF.Coulomb.Basic` and the `RhoEta` modules; the functions `f, h, s, c` of the
+variables `r, ε` (DLMF §§33.14–33.21) are in the `Energy` modules.
 -/

@@ -11,8 +11,13 @@ public import Mathlib.Order.Filter.AtTopBot.Field
 /-!
 # Limits incompatible with a nonconstant oscillating phase
 
-Even and odd integer subsequences detect when multiplication by a periodic
-complex phase prevents convergence to a nonzero limit.
+Even and odd integer subsequences detect when multiplication by a periodic complex phase
+prevents convergence to a nonzero limit.
+
+## Main results
+
+* `Complex.eq_zero_of_tendsto_mul_exp_pi_I`: if `f(t) → A` and `f(t) e^{πit} → B` as
+  `t → ∞`, then `A = 0`.
 -/
 
 @[expose] public noncomputable section

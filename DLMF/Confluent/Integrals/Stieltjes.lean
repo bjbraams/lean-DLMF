@@ -8,12 +8,34 @@ module
 public import DLMF.Confluent.Integrals.WhittakerTransforms
 
 /-!
-# Gauss and Stieltjes representations of Tricomi functions
+# Gauss and Stieltjes representations of Tricomi's function
 
-Gauss and Stieltjes integral representations, with local domination and analytic continuation.
+This file proves the Gauss-type and Stieltjes integral representations of Tricomi's `U` and of
+Whittaker's `W` (DLMF §§13.4(ii), 13.16(ii)).
 
-Source references and common attribution are retained in
-`DLMF.Confluent.Integrals`.
+## Main definitions
+
+* `kummerUGaussKernel`: the kernel of the Gauss–Laplace representation DLMF 13.4.8.
+
+## Main results
+
+* `kummerU_gauss`: `U(a,b,z) = z^{c-a} ∫₀^∞ e^{-zt} t^{c-1} ₂F̃₁(a, a-b+1; c; -t) dt`
+  (DLMF 13.4.8).
+* `whittakerW_gauss`: the corresponding representation of `W_{κ,μ}` (DLMF 13.16.9).
+* `kummerU_stieltjes`: Tricomi's Stieltjes representation (DLMF 13.4.5).
+* `kummerU_stieltjes_regularized`: the Stieltjes representation DLMF 13.4.6 for every
+  admissible `n`.
+* `whittakerW_stieltjes`: the Stieltjes representation of `W_{κ,μ}` (DLMF 13.16.6).
+* `differentiableOn_stieltjes_integral`: the Stieltjes transform of an integrable function on
+  the positive half-line is holomorphic on the slit plane.
+
+## Implementation notes
+
+The Gauss representation is proved for `Re a > 0` from the Laplace integrals, then for every
+first parameter by Tricomi's contiguous relation in `a` and the matching regularized Gauss
+recurrence. The Stieltjes representations are proved in the right half-plane by Fubini against
+`1/(t+z) = ∫ e^{-(t+z)s} ds` and extended to the slit plane by holomorphy; the general `n`
+case of 13.4.6 follows by the recurrence `cfInt_kummerU_rel`.
 -/
 
 @[expose] public section

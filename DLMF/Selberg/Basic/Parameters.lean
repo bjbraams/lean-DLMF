@@ -9,7 +9,12 @@ public import DLMF.Selberg.Basic.Integrands
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 
 /-!
-# Selberg product formula and convergence domain definitions
+# The right-hand side of Selberg's formula and its convergence domain
+
+## Main definitions
+
+* `selbergRHS`: the right-hand side of Selberg's formula.
+* `cDomain`: the domain of convergence in `c` for fixed `a`, `b`.
 -/
 
 @[expose] public noncomputable section

@@ -12,12 +12,22 @@ public import DLMF.Theta.SeriesAndZeros
 /-!
 # Theta functions: power series (DLMF §20.6)
 
-The exponential power series 20.6.2–20.6.5 of `θⱼ(πz|τ)` about `z = 0`, with the lattice sums
-`δ_{2j}, α_{2j}, β_{2j}, γ_{2j}` of 20.6.6–20.6.9. The lattice sums are defined as iterated sums,
-inner over `m` and outer over `n` (the Eisenstein order of DLMF); for `2j ≥ 4` the order is
-irrelevant (`thetaDelta_hasSum_lattice`), for `2j = 2` it matters. The power series are stated with
-an explicit summability claim, so that Lean's convention `∑' = 0` for divergent series plays no
-role.
+The exponential power series DLMF 20.6.2–20.6.5 of `θⱼ(πz|τ)` about `z = 0`, with the
+lattice sums `δ_{2j}, α_{2j}, β_{2j}, γ_{2j}` of DLMF 20.6.6–20.6.9.
+
+## Main results
+
+* `jacobiThetaOneTau_powerSeries`, `jacobiThetaTwoTau_powerSeries`,
+  `jacobiThetaThreeTau_powerSeries`, `jacobiThetaFourTau_powerSeries`: DLMF 20.6.2–20.6.5.
+* `thetaAlpha_thetaBeta_eq`: the relations DLMF 20.6.10 between the lattice sums.
+* `thetaDelta_hasSum_lattice`: for `2j ≥ 4` the order of summation is irrelevant.
+* `thetaDelta_two_not_summable`: for `2j = 2` the double series is not summable.
+
+## Implementation notes
+
+The lattice sums are iterated sums, inner over `m` and outer over `n` (the Eisenstein order
+of DLMF). The power series are stated with an explicit summability claim, so that Lean's
+convention `∑' = 0` for divergent series plays no role.
 -/
 
 @[expose] public section
@@ -75,7 +85,7 @@ theorem jacobiThetaFourTau_powerSeries {τ z : ℂ} (hτ : 0 < τ.im)
   sorry
 
 /-- Absolute convergence of the (doubled, shifted) lattice sums for `k ≥ 3` (helper). -/
-lemma p20R1_lattice_summable {τ : ℂ} (hτ : 0 < τ.im) (a b : ℤ) {k : ℕ} (hk : 3 ≤ k) :
+private lemma summable_norm_inv_shifted_lattice_pow {τ : ℂ} (hτ : 0 < τ.im) (a b : ℤ) {k : ℕ} (hk : 3 ≤ k) :
     Summable (fun p : ℤ × ℤ =>
       (‖(((2 * p.1 + a : ℤ) : ℂ) + ((2 * p.2 + b : ℤ) : ℂ) * τ)‖⁻¹) ^ k) := by
   set z : UpperHalfPlane := ⟨τ, hτ⟩
@@ -110,11 +120,11 @@ lemma p20R1_lattice_summable {τ : ℂ} (hτ : 0 < τ.im) (a b : ℤ) {k : ℕ} 
     exact inv_anti₀ (by positivity) hb
 
 /-- Summability of `g^{-k}` when `2g` runs over a shifted lattice (helper). -/
-lemma p20R1_point_summable {τ : ℂ} (hτ : 0 < τ.im) (a b : ℤ) {k : ℕ} (hk : 3 ≤ k)
+private lemma summable_zpow_neg_of_two_mul_eq_lattice {τ : ℂ} (hτ : 0 < τ.im) (a b : ℤ) {k : ℕ} (hk : 3 ≤ k)
     {g : ℤ × ℤ → ℂ}
     (hg : ∀ p : ℤ × ℤ, 2 * g p = ((2 * p.1 + a : ℤ) : ℂ) + ((2 * p.2 + b : ℤ) : ℂ) * τ) :
     Summable (fun p : ℤ × ℤ => g p ^ (-(k : ℤ))) := by
-  refine Summable.of_norm_bounded ((p20R1_lattice_summable hτ a b hk).mul_left (2 ^ k))
+  refine Summable.of_norm_bounded ((summable_norm_inv_shifted_lattice_pow hτ a b hk).mul_left (2 ^ k))
     (fun p => ?_)
   have hgp : g p = (((2 * p.1 + a : ℤ) : ℂ) + ((2 * p.2 + b : ℤ) : ℂ) * τ) / 2 := by
     rw [← hg p]; ring
@@ -122,7 +132,7 @@ lemma p20R1_point_summable {τ : ℂ} (hτ : 0 < τ.im) (a b : ℤ) {k : ℕ} (h
     show ‖(2 : ℂ)‖ = 2 by norm_num, div_eq_mul_inv]
 
 /-- Bound for a row sum `∑_m (m + w)^{-2}` with `Im w > 0`, via the `q`-expansion (helper). -/
-lemma p3t_row_norm_le_pos {w : ℂ} (hw : 0 < w.im) :
+private lemma norm_tsum_row_zpow_two_le_of_im_pos {w : ℂ} (hw : 0 < w.im) :
     ‖∑' m : ℤ, ((m : ℂ) + w) ^ (-2 : ℤ)‖ ≤
       4 * π ^ 2 * (Real.exp (-2 * π * w.im) / (1 - Real.exp (-2 * π * w.im)) ^ 2) := by
   have h := EisensteinSeries.qExpansion_identity (k := 1) le_rfl ⟨w, hw⟩
@@ -149,7 +159,7 @@ lemma p3t_row_norm_le_pos {w : ℂ} (hw : 0 < w.im) :
   gcongr
 
 /-- A row sum `∑_m (m + w)^{-k}` is unchanged under `w ↦ -w` for even `k` (helper). -/
-lemma p3t_row_neg (w : ℂ) {k : ℕ} (hk : Even k) :
+private lemma tsum_row_neg_of_even (w : ℂ) {k : ℕ} (hk : Even k) :
     ∑' m : ℤ, ((m : ℂ) + -w) ^ (-(k : ℤ)) = ∑' m : ℤ, ((m : ℂ) + w) ^ (-(k : ℤ)) := by
   rw [← (Equiv.neg ℤ).tsum_eq]
   congr 1; funext m
@@ -157,7 +167,7 @@ lemma p3t_row_neg (w : ℂ) {k : ℕ} (hk : Even k) :
   rw [show -(m : ℂ) + -w = -((m : ℂ) + w) by ring, hk.neg_pow]
 
 /-- Uniform bound `‖∑_m (m + w)^{-2}‖ ≤ C e^{-2π|Im w|}` for `|Im w| ≥ δ > 0` (helper). -/
-lemma p3t_row_norm_le {δ : ℝ} (hδ : 0 < δ) {w : ℂ} (hw : δ ≤ |w.im|) :
+private lemma norm_tsum_row_zpow_two_le {δ : ℝ} (hδ : 0 < δ) {w : ℂ} (hw : δ ≤ |w.im|) :
     ‖∑' m : ℤ, ((m : ℂ) + w) ^ (-2 : ℤ)‖ ≤
       4 * π ^ 2 / (1 - Real.exp (-2 * π * δ)) ^ 2 * Real.exp (-2 * π * |w.im|) := by
   have hρ : Real.exp (-2 * π * δ) < 1 := by
@@ -165,7 +175,7 @@ lemma p3t_row_norm_le {δ : ℝ} (hδ : 0 < δ) {w : ℂ} (hw : δ ≤ |w.im|) :
   have key : ∀ v : ℂ, 0 < v.im → δ ≤ v.im → ‖∑' m : ℤ, ((m : ℂ) + v) ^ (-2 : ℤ)‖ ≤
       4 * π ^ 2 / (1 - Real.exp (-2 * π * δ)) ^ 2 * Real.exp (-2 * π * v.im) := by
     intro v hv hδv
-    refine (p3t_row_norm_le_pos hv).trans ?_
+    refine (norm_tsum_row_zpow_two_le_of_im_pos hv).trans ?_
     have h1 : Real.exp (-2 * π * v.im) ≤ Real.exp (-2 * π * δ) :=
       Real.exp_le_exp.mpr (by nlinarith [Real.pi_pos])
     have h0 : 0 < 1 - Real.exp (-2 * π * δ) := by linarith
@@ -181,7 +191,7 @@ lemma p3t_row_norm_le {δ : ℝ} (hδ : 0 < δ) {w : ℂ} (hw : δ ≤ |w.im|) :
   · rw [abs_of_nonneg h] at hw ⊢
     exact key w (by linarith) hw
   · rw [abs_of_neg h] at hw ⊢
-    have e := p3t_row_neg (-w) (k := 2) even_two
+    have e := tsum_row_neg_of_even (-w) (k := 2) even_two
     rw [neg_neg] at e
     push_cast at e
     rw [e]
@@ -189,7 +199,7 @@ lemma p3t_row_norm_le {δ : ℝ} (hδ : 0 < δ) {w : ℂ} (hw : δ ≤ |w.im|) :
 
 /-- Summability over `n` of the rows `∑_m (m + w_n)^{-2}` when `Im w_n = (n + s) t`,
 `|s| ≤ 1/2`, `t > 0` (helper). -/
-lemma p3t_row_summable_two {t s : ℝ} (ht : 0 < t) (hs : |s| ≤ 1 / 2) {w : ℤ → ℂ}
+private lemma summable_tsum_row_zpow_two {t s : ℝ} (ht : 0 < t) (hs : |s| ≤ 1 / 2) {w : ℤ → ℂ}
     (hw : ∀ n, (w n).im = (n + s) * t) :
     Summable (fun n : ℤ => ∑' m : ℤ, ((m : ℂ) + w n) ^ (-2 : ℤ)) := by
   set C := 4 * π ^ 2 / (1 - Real.exp (-2 * π * (t / 2))) ^ 2
@@ -213,7 +223,7 @@ lemma p3t_row_summable_two {t s : ℝ} (ht : 0 < t) (hs : |s| ≤ 1 / 2) {w : �
   have him : |(w n).im| = |(n : ℝ) + s| * t := by rw [hw, abs_mul, abs_of_pos ht]
   have hδ : t / 2 ≤ |(w n).im| := by rw [him]; nlinarith
   have hC : 0 ≤ C := by positivity
-  calc _ ≤ C * Real.exp (-2 * π * |(w n).im|) := p3t_row_norm_le (by linarith) hδ
+  calc _ ≤ C * Real.exp (-2 * π * |(w n).im|) := norm_tsum_row_zpow_two_le (by linarith) hδ
     _ ≤ C * Real.exp (π * t) * ρ ^ n.natAbs := by
       refine le_of_le_of_eq (mul_le_mul_of_nonneg_left ?_ hC) (mul_assoc _ _ _).symm
       rw [show ρ ^ n.natAbs = Real.exp (-2 * π * t * n.natAbs) by
@@ -225,16 +235,16 @@ lemma p3t_row_summable_two {t s : ℝ} (ht : 0 < t) (hs : |s| ≤ 1 / 2) {w : �
 
 /-- Summability over `n` of the shifted lattice rows `∑_m (m + a/2 + (n + b/2)τ)^{-2j}`,
 `j ≥ 1` (helper). -/
-lemma p3t_rows_summable {τ : ℂ} (hτ : 0 < τ.im) {j : ℕ} (hj : 1 ≤ j) (a b : ℤ)
+private lemma summable_tsum_shifted_row {τ : ℂ} (hτ : 0 < τ.im) {j : ℕ} (hj : 1 ≤ j) (a b : ℤ)
     (hb : b = 0 ∨ b = -1) :
     Summable (fun n : ℤ => ∑' m : ℤ,
       ((m : ℂ) + ((a : ℂ) / 2 + ((n : ℂ) + (b : ℂ) / 2) * τ)) ^ (-((2 * j : ℕ) : ℤ))) := by
   rcases Nat.lt_or_ge j 2 with h1 | h2
   · obtain rfl : j = 1 := by omega
-    refine p3t_row_summable_two (s := b / 2) hτ ?_ (fun n => ?_)
+    refine summable_tsum_row_zpow_two (s := b / 2) hτ ?_ (fun n => ?_)
     · rcases hb with rfl | rfl <;> norm_num [abs_of_neg]
     · simp
-  · have hs := p20R1_point_summable hτ a b (k := 2 * j) (by omega)
+  · have hs := summable_zpow_neg_of_two_mul_eq_lattice hτ a b (k := 2 * j) (by omega)
       (g := fun p => (p.1 : ℂ) + ((a : ℂ) / 2 + ((p.2 : ℂ) + (b : ℂ) / 2) * τ))
       (fun p => by push_cast; ring)
     have hs' : Summable ((fun p : ℤ × ℤ => ((p.1 : ℂ) + ((a : ℂ) / 2 +
@@ -244,7 +254,7 @@ lemma p3t_rows_summable {τ : ℂ} (hτ : 0 < τ.im) {j : ℕ} (hj : 1 ≤ j) (a
 
 /-- Even/odd splitting of a row: `2^k ∑_m (m + 2w)^{-k} = ∑_m (m + w)^{-k} + ∑_m (m - 1/2 + w)^{-k}`
 for `k ≥ 2` (helper). -/
-lemma p3t_row_split {k : ℕ} (hk : 2 ≤ k) (w : ℂ) :
+private lemma two_pow_mul_tsum_row_two_mul {k : ℕ} (hk : 2 ≤ k) (w : ℂ) :
     2 ^ k * ∑' m : ℤ, ((m : ℂ) + 2 * w) ^ (-(k : ℤ)) =
       ∑' m : ℤ, ((m : ℂ) + w) ^ (-(k : ℤ)) + ∑' m : ℤ, ((m : ℂ) - 1 / 2 + w) ^ (-(k : ℤ)) := by
   have hsum : ∀ c : ℂ, Summable (fun m : ℤ => ((m : ℂ) + c) ^ (-(k : ℤ))) := fun c =>
@@ -260,18 +270,18 @@ lemma p3t_row_split {k : ℕ} (hk : 2 ≤ k) (w : ℂ) :
     · congr 1; funext m; ring_nf
   have h2 : (2 : ℂ) ^ (-(k : ℤ)) * 2 ^ k = 1 := by
     rw [zpow_neg, zpow_natCast, inv_mul_cancel₀ (pow_ne_zero _ two_ne_zero)]
-  have hP := (p20R1_parityEquivInt.hasSum_iff).mpr (hsum (2 * w)).hasSum
-  have hA' : HasSum ((fun m : ℤ => ((m : ℂ) + 2 * w) ^ (-(k : ℤ))) ∘ p20R1_parityEquivInt ∘
+  have hP := (parityEquivInt.hasSum_iff).mpr (hsum (2 * w)).hasSum
+  have hA' : HasSum ((fun m : ℤ => ((m : ℂ) + 2 * w) ^ (-(k : ℤ))) ∘ parityEquivInt ∘
       Sum.inl) ((2 : ℂ) ^ (-(k : ℤ)) * ∑' m : ℤ, ((m : ℂ) + w) ^ (-(k : ℤ))) := by
     convert hA.mul_left ((2 : ℂ) ^ (-(k : ℤ))) using 1
     funext j
-    simp only [Function.comp_apply, p20R1_parityEquivInt, Equiv.coe_fn_mk, Sum.elim_inl]
+    simp only [Function.comp_apply, parityEquivInt, Equiv.coe_fn_mk, Sum.elim_inl]
     rw [← mul_zpow]; push_cast; ring_nf
-  have hB' : HasSum ((fun m : ℤ => ((m : ℂ) + 2 * w) ^ (-(k : ℤ))) ∘ p20R1_parityEquivInt ∘
+  have hB' : HasSum ((fun m : ℤ => ((m : ℂ) + 2 * w) ^ (-(k : ℤ))) ∘ parityEquivInt ∘
       Sum.inr) ((2 : ℂ) ^ (-(k : ℤ)) * ∑' m : ℤ, ((m : ℂ) - 1 / 2 + w) ^ (-(k : ℤ))) := by
     convert hB.mul_left ((2 : ℂ) ^ (-(k : ℤ))) using 1
     funext j
-    simp only [Function.comp_apply, p20R1_parityEquivInt, Equiv.coe_fn_mk, Sum.elim_inr]
+    simp only [Function.comp_apply, parityEquivInt, Equiv.coe_fn_mk, Sum.elim_inr]
     rw [← mul_zpow]; push_cast; ring_nf
   rw [(hP.unique (hA'.sum hB'))]
   linear_combination (∑' m : ℤ, ((m : ℂ) + w) ^ (-(k : ℤ)) +
@@ -295,19 +305,19 @@ theorem thetaAlpha_thetaBeta_eq {τ : ℂ} (hτ : 0 < τ.im) (j : ℕ) (hj : 1 �
       exact (zero_zpow _ (neg_ne_zero.mpr hk0)).symm
     · rfl
   have sE : Summable (fun n : ℤ => ∑' m : ℤ, ((m : ℂ) + n * τ) ^ (-((2 * j : ℕ) : ℤ))) :=
-    (p3t_rows_summable hτ hj 0 0 (Or.inl rfl)).congr fun n => tsum_congr fun m => by
+    (summable_tsum_shifted_row hτ hj 0 0 (Or.inl rfl)).congr fun n => tsum_congr fun m => by
       congr 1; push_cast; ring
   have sA : Summable (fun n : ℤ => ∑' m : ℤ,
       ((m : ℂ) - 1 / 2 + n * τ) ^ (-((2 * j : ℕ) : ℤ))) :=
-    (p3t_rows_summable hτ hj (-1) 0 (Or.inl rfl)).congr fun n => tsum_congr fun m => by
+    (summable_tsum_shifted_row hτ hj (-1) 0 (Or.inl rfl)).congr fun n => tsum_congr fun m => by
       congr 1; push_cast; ring
   have sG : Summable (fun n : ℤ => ∑' m : ℤ,
       ((m : ℂ) + (n - 1 / 2) * τ) ^ (-((2 * j : ℕ) : ℤ))) :=
-    (p3t_rows_summable hτ hj 0 (-1) (Or.inr rfl)).congr fun n => tsum_congr fun m => by
+    (summable_tsum_shifted_row hτ hj 0 (-1) (Or.inr rfl)).congr fun n => tsum_congr fun m => by
       congr 1; push_cast; ring
   have sB : Summable (fun n : ℤ => ∑' m : ℤ,
       ((m : ℂ) - 1 / 2 + (n - 1 / 2) * τ) ^ (-((2 * j : ℕ) : ℤ))) :=
-    (p3t_rows_summable hτ hj (-1) (-1) (Or.inr rfl)).congr fun n => tsum_congr fun m => by
+    (summable_tsum_shifted_row hτ hj (-1) (-1) (Or.inr rfl)).congr fun n => tsum_congr fun m => by
       congr 1; push_cast; ring
   constructor
   · rw [hD, hD, thetaAlpha, ← tsum_mul_left]
@@ -315,7 +325,7 @@ theorem thetaAlpha_thetaBeta_eq {τ : ℂ} (hτ : 0 < τ.im) (j : ℕ) (hj : 1 �
         ∑' m : ℤ, ((m : ℂ) + n * τ) ^ (-((2 * j : ℕ) : ℤ)) +
           ∑' m : ℤ, ((m : ℂ) - 1 / 2 + n * τ) ^ (-((2 * j : ℕ) : ℤ)) := by
       intro n
-      have := p3t_row_split hk (n * τ)
+      have := two_pow_mul_tsum_row_two_mul hk (n * τ)
       rw [show (n : ℂ) * (2 * τ) = 2 * (n * τ) by ring]
       exact_mod_cast this
     rw [tsum_congr e, Summable.tsum_add sE sA]
@@ -326,14 +336,14 @@ theorem thetaAlpha_thetaBeta_eq {τ : ℂ} (hτ : 0 < τ.im) (j : ℕ) (hj : 1 �
         ∑' m : ℤ, ((m : ℂ) + (n - 1 / 2) * τ) ^ (-((2 * j : ℕ) : ℤ)) +
           ∑' m : ℤ, ((m : ℂ) - 1 / 2 + (n - 1 / 2) * τ) ^ (-((2 * j : ℕ) : ℤ)) := by
       intro n
-      have := p3t_row_split hk ((n - 1 / 2) * τ)
+      have := two_pow_mul_tsum_row_two_mul hk ((n - 1 / 2) * τ)
       rw [show ((n : ℂ) - 1 / 2) * (2 * τ) = 2 * ((n - 1 / 2) * τ) by ring]
       exact_mod_cast this
     rw [tsum_congr e, Summable.tsum_add sG sB]
     ring
 
 /-- `∑_{a,b ≥ 0} (a + b + 2)^{-2}` diverges (helper). -/
-lemma p20R1_not_summable_sq_add :
+private lemma not_summable_one_div_add_two_sq :
     ¬ Summable (fun p : ℕ × ℕ => (1 : ℝ) / ((p.1 : ℝ) + p.2 + 2) ^ 2) := by
   intro h
   have h0 : ∀ p : ℕ × ℕ, 0 ≤ (1 : ℝ) / ((p.1 : ℝ) + p.2 + 2) ^ 2 := fun _ => by positivity
@@ -359,7 +369,7 @@ lemma p20R1_not_summable_sq_add :
 
 /-- An absolutely summable double series equals its iterated sum, inner over the first
 coordinate (helper). -/
-lemma p20R1_hasSum_iter {f : ℤ × ℤ → ℂ} (hf : Summable f) :
+private lemma hasSum_iterated_tsum {f : ℤ × ℤ → ℂ} (hf : Summable f) :
     HasSum f (∑' n : ℤ, ∑' m : ℤ, f (m, n)) := by
   have hs : Summable (f ∘ Prod.swap) := (Equiv.prodComm ℤ ℤ).summable_iff.mpr hf
   have h1 := hs.hasSum.prod_fiberwise (fun n => (hs.prod_factor n).hasSum)
@@ -382,17 +392,17 @@ theorem thetaDelta_hasSum_lattice {τ : ℂ} (hτ : 0 < τ.im) {j : ℕ} (hj : 2
         (thetaGamma (2 * j) τ) := by
   have hk : 3 ≤ 2 * j := by omega
   refine ⟨?_, ?_, ?_, ?_⟩
-  · have hs := p20R1_point_summable hτ 0 0 hk (g := fun p => (p.1 : ℂ) + p.2 * τ)
+  · have hs := summable_zpow_neg_of_two_mul_eq_lattice hτ 0 0 hk (g := fun p => (p.1 : ℂ) + p.2 * τ)
       (fun p => by push_cast; ring)
     have hs' : Summable (fun p : ℤ × ℤ => if p.1 = 0 ∧ p.2 = 0 then 0 else
         ((p.1 : ℂ) + p.2 * τ) ^ (-((2 * j : ℕ) : ℤ))) := by
       refine Summable.of_norm_bounded hs.norm (fun p => ?_)
       split_ifs <;> simp
       positivity
-    exact p20R1_hasSum_iter hs'
-  · exact p20R1_hasSum_iter (p20R1_point_summable hτ (-1) 0 hk (fun p => by push_cast; ring))
-  · exact p20R1_hasSum_iter (p20R1_point_summable hτ (-1) (-1) hk (fun p => by push_cast; ring))
-  · exact p20R1_hasSum_iter (p20R1_point_summable hτ 0 (-1) hk (fun p => by push_cast; ring))
+    exact hasSum_iterated_tsum hs'
+  · exact hasSum_iterated_tsum (summable_zpow_neg_of_two_mul_eq_lattice hτ (-1) 0 hk (fun p => by push_cast; ring))
+  · exact hasSum_iterated_tsum (summable_zpow_neg_of_two_mul_eq_lattice hτ (-1) (-1) hk (fun p => by push_cast; ring))
+  · exact hasSum_iterated_tsum (summable_zpow_neg_of_two_mul_eq_lattice hτ 0 (-1) hk (fun p => by push_cast; ring))
 
 /-- DLMF §20.6: for `j = 1` the order matters: the double series for `δ₂` is not absolutely
 summable. -/
@@ -406,7 +416,7 @@ theorem thetaDelta_two_not_summable {τ : ℂ} (hτ : 0 < τ.im) :
       intro p q hpq
       simp only [Prod.mk.injEq, Nat.cast_inj, Nat.add_right_cancel_iff] at hpq
       exact Prod.ext hpq.1 hpq.2)
-  apply p20R1_not_summable_sq_add
+  apply not_summable_one_div_add_two_sq
   set C := 1 + ‖τ‖ with hC
   have hC0 : 0 < C := by positivity
   refine Summable.of_nonneg_of_le (fun _ => by positivity) (fun p => ?_) (hn.mul_left (C ^ 2))

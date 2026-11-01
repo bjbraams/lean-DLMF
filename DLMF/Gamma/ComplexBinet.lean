@@ -13,16 +13,29 @@ public import Mathlib.Analysis.SpecialFunctions.Trigonometric.InverseDeriv
 /-!
 # Binet's formula for complex arguments (DLMF 5.11.1, 5.6.9)
 
-Binet's function is taken in Stieltjes' form
-`μ(z) = ∫₀^∞ P(t)/(z+t)² dt`, with the periodic weight `P(t) = ({t} - {t}²)/2 ∈ [0, 1/8]`.
-This integral is holomorphic on the whole slit plane. On the positive reals it agrees with
-the Laplace form `binetIntegral`: both differ from their unit shift by
-`(x + 1/2) log(1 + 1/x) - 1` and tend to `0`. The identity theorem then gives
-
-`Γ(z) = exp((z - 1/2) log z - z + (1/2) log 2π + μ(z))` for `z ∈ slitPlane`.
-
-From `|z + t|² ≥ ((|z| + Re z)/(2|z|)) (|z| + t)²` follows Stieltjes' bound
+Binet's function is taken in Stieltjes' form `μ(z) = ∫₀^∞ P(t)/(z+t)² dt`, with the periodic
+weight `P(t) = ({t} - {t}²)/2 ∈ [0, 1/8]`. This integral is holomorphic on the whole slit plane.
+On the positive reals it agrees with the Laplace form `binetIntegral`: both differ from their
+unit shift by `(x + 1/2) log(1 + 1/x) - 1` and tend to `0`. The identity theorem then gives
+`Γ(z) = exp((z - 1/2) log z - z + (1/2) log 2π + μ(z))` for `z ∈ slitPlane`. From
+`|z + t|² ≥ ((|z| + Re z)/(2|z|)) (|z| + t)²` follows Stieltjes' bound
 `|μ(z)| ≤ 1/(6(|z| + Re z))`, in particular `|μ(z)| ≤ 1/(6|z|)` for `Re z ≥ 0`.
+
+## Main definitions
+
+* `binetWeight`: Stieltjes' periodic weight `P(t) = ({t} - {t}²)/2`.
+* `binetMu`, `binetMuReal`: Binet's function in Stieltjes' form and its real form.
+* `binetExponent`: the Stirling exponent `(z - 1/2) log z - z + (1/2) log 2π + μ(z)`.
+
+## Main results
+
+* `differentiableOn_binetMu`: `μ` is holomorphic on the slit plane.
+* `binetMuReal_eq_binetIntegral`: for `x > 0` the Stieltjes and Laplace forms agree.
+* `Gamma_eq_exp_binetExponent`: Binet's formula on the slit plane (DLMF 5.11.1 with the
+  remainder in closed form).
+* `norm_binetMu_le`, `norm_binetMu_le_of_re_nonneg`: Stieltjes' bounds for `μ`.
+* `norm_Gamma_eq_binet`: `|Γ(z)| = √(2π) |z|^{Re z - 1/2} e^{-(Re z + Im z · arg z)} e^{Re μ(z)}`.
+* `tendsto_norm_Gamma_vertical_div`: `|Γ(x+iy)| ~ √(2π) y^{x-1/2} e^{-πy/2}` as `y → +∞`.
 -/
 
 @[expose] public section

@@ -7,14 +7,33 @@ module
 
 public import DLMF.Confluent.LogSeries
 public import DLMFMathlib.Analysis.ODE.Wronskian
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent
 
 /-!
-# Existence and continuity of Tricomi functions
+# Existence and continuity of Tricomi's function
 
-Parameter limits at integer second parameters and joint continuity of Tricomi functions.
+This file shows that the connection formula for Tricomi's `U(a,b,z)` has a limit at integer
+second parameters, so that `kummerU` is well defined for every `b`, and that `U` is jointly
+continuous in its parameters and argument on the slit plane (DLMF §13.2).
 
-Source references and common attribution are retained in
-`DLMF.Confluent.BasicProperties`.
+## Main definitions
+
+* `tricomiD`: the entire numerator of the connection formula,
+  `U(a,c,z) = π / sin(πc) · tricomiD a c z` for noninteger `c`.
+
+## Main results
+
+* `tendsto_kummerUConnection`: for `z ≠ 0` the connection formula converges along noninteger
+  parameters to `U(a,b,z)`.
+* `continuousAt_kummerU`, `continuousAt_kummerU_param`: joint continuity of `U` in the
+  parameters and the argument, including integer second parameters.
+* `kummerU_kummer_transform_all`: Kummer's transformation `U(a,b,z) = z^{1-b} U(a-b+1,2-b,z)`
+  for every `b` (DLMF 13.2.40).
+* `regularizedHGFun_of_neg_nat`: the regularized series at a nonpositive integer denominator
+  (DLMF 13.2.5).
+* `kummerU_neg_nat`, `kummerU_neg_nat_sum`: `U(-m,b,z)` as a polynomial (DLMF 13.2.7).
+* `kummerU_shift_nat`, `kummerU_shift_nat_sum`: `U(a, a+n+1, z)` as a finite sum
+  (DLMF 13.2.8).
 -/
 
 @[expose] public section
@@ -199,14 +218,6 @@ theorem integerComplement_nhdsWithin_neBot (b : ℂ) : (𝓝[integerComplement] 
     (Set.countable_range (fun k : ℤ => (k : ℂ))).dense_compl ℂ
   exact mem_closure_iff_nhdsWithin_neBot.mp (hd b)
 
-/-- `sin(πc) ≠ 0` for noninteger `c`. -/
-theorem sin_pi_mul_ne_zero_of_mem {c : ℂ} (hc : c ∈ integerComplement) : sin (π * c) ≠ 0 := by
-  rw [Complex.sin_ne_zero_iff]
-  intro k hk
-  exact hc ⟨k, by
-    have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-    field_simp at hk; linear_combination -hk⟩
-
 /-- **Existence of Tricomi's function at every second parameter**: for `z ≠ 0`, the
 connection formula converges along noninteger parameters to `U(a,b,z)`. -/
 theorem tendsto_kummerUConnection (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
@@ -223,7 +234,7 @@ theorem tendsto_kummerUConnection (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
     have hc1 : ContinuousAt (fun c : ℂ => sin (π * c)) b :=
       (continuous_sin.comp (continuous_const.mul continuous_id)).continuousAt
     have hc2 : ContinuousAt (fun c : ℂ => π / sin (π * c) * tricomiD a c z) b :=
-      (continuousAt_const.div hc1 (sin_pi_mul_ne_zero_of_mem hb)).mul (hD b).continuousAt
+      (continuousAt_const.div hc1 (_root_.sin_pi_mul_ne_zero hb)).mul (hD b).continuousAt
     exact (hc2.tendsto.mono_left nhdsWithin_le_nhds).congr' hev
   · obtain ⟨n, rfl⟩ : ∃ n : ℤ, (n : ℂ) = b := by
       by_contra h; exact hb fun ⟨k, hk⟩ => h ⟨k, hk⟩
@@ -257,7 +268,7 @@ theorem tendsto_kummerUConnection (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
       have e2 := sub_smul_dslope S (n : ℂ) c
       rw [hD0, sub_zero, smul_eq_mul] at e1
       rw [hS0, sub_zero, smul_eq_mul] at e2
-      have hsc : sin (π * c) ≠ 0 := sin_pi_mul_ne_zero_of_mem hc
+      have hsc : sin (π * c) ≠ 0 := _root_.sin_pi_mul_ne_zero hc
       have hd2 : dslope S n c ≠ 0 := by
         intro h0; apply hsc; simp only [hS] at e2; rw [← e2, h0, mul_zero]
       simp only [hS] at e2 hd2
@@ -427,7 +438,7 @@ theorem kummerU_eq_dslope (a : ℂ) {z : ℂ} (hz : z ≠ 0) (n : ℤ) {b : ℂ}
     have e2 := sub_smul_dslope S (n : ℂ) c
     rw [hD0, sub_zero, smul_eq_mul] at e1
     rw [hS0, sub_zero, smul_eq_mul] at e2
-    have hsc : sin (π * c) ≠ 0 := sin_pi_mul_ne_zero_of_mem hc
+    have hsc : sin (π * c) ≠ 0 := _root_.sin_pi_mul_ne_zero hc
     have hd2 : dslope S n c ≠ 0 := by
       intro h0; apply hsc; simp only [hS] at e2; rw [← e2, h0, mul_zero]
     rw [kummerU_eq_connection a c z (forall_of_mem_integerComplement hc),
@@ -471,7 +482,7 @@ theorem continuousAt_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
         kummerUConnection_eq_tricomiD hq]
     refine ContinuousAt.congr ?_ hev
     have hs : ContinuousAt (fun q : ℂ × ℂ × ℂ => sin (π * q.2.1)) (a, b, z) := by fun_prop
-    exact (continuousAt_const.div hs (sin_pi_mul_ne_zero_of_mem hb)).mul
+    exact (continuousAt_const.div hs (_root_.sin_pi_mul_ne_zero hb)).mul
       (continuousAt_tricomiD hz)
   · obtain ⟨n, rfl⟩ : ∃ n : ℤ, (n : ℂ) = b := by
       by_contra h; exact hb fun ⟨k, hk⟩ => h ⟨k, hk⟩
@@ -555,7 +566,7 @@ theorem continuousAt_kummerU_param (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
         kummerUConnection_eq_tricomiD hp]
     refine ContinuousAt.congr ?_ hev
     have hs : ContinuousAt (fun p : ℂ × ℂ => sin (π * p.2)) (a, b) := by fun_prop
-    exact (continuousAt_const.div hs (sin_pi_mul_ne_zero_of_mem hb)).mul
+    exact (continuousAt_const.div hs (_root_.sin_pi_mul_ne_zero hb)).mul
       (continuous_tricomiD_param hz).continuousAt
   · obtain ⟨n, rfl⟩ : ∃ n : ℤ, (n : ℂ) = b := by
       by_contra h; exact hb fun ⟨k, hk⟩ => h ⟨k, hk⟩

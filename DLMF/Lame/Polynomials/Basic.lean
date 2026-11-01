@@ -13,31 +13,44 @@ public import Mathlib.RingTheory.Polynomial.Chebyshev
 # Lamé polynomials: explicit construction (DLMF §§29.12, 29.14, 29.15)
 
 For a nonnegative integer order `ν` the Lamé functions `Ec^m_ν`, `m ≤ ν`, and `Es^m_ν`,
-`1 ≤ m ≤ ν`, are polynomials in `sn, cn, dn`, of the eight types of Table 29.12.1
-(`LamePolyType`): `uE^m_{2n}`, `sE^m_{2n+1}`, `cE^m_{2n+1}`, `dE^m_{2n+1}`, `scE^m_{2n+2}`,
-`sdE^m_{2n+2}`, `cdE^m_{2n+2}`, `scdE^m_{2n+3}`, `0 ≤ m ≤ n`.
+`1 ≤ m ≤ ν`, are polynomials in `sn, cn, dn`, of the eight types of Table 29.12.1:
+`uE^m_{2n}`, `sE^m_{2n+1}`, `cE^m_{2n+1}`, `dE^m_{2n+1}`, `scE^m_{2n+2}`, `sdE^m_{2n+2}`,
+`cdE^m_{2n+2}`, `scdE^m_{2n+3}`, `0 ≤ m ≤ n`. This file constructs them explicitly following
+DLMF §29.15(i), and defines the inner product of §29.14.
 
-## Explicit construction (DLMF §29.15)
+## Main definitions
 
-Following §29.15(i) each polynomial is built from the `(n+1) × (n+1)` tridiagonal matrix
-29.15.2 (`lameMatrix`, with the `α_p, β_p, γ_p` of the type's recurrence, `LameRecurrence`):
+* `LamePolyType`: the eight types of Table 29.12.1, with `LamePolyType.recurrence`,
+  `LamePolyType.order`, `LamePolyType.normForm`, `LamePolyType.signForm`,
+  `LamePolyType.prefactor` and `LamePolyType.basis`.
+* `lameMatrix`: the tridiagonal matrix of DLMF 29.15.2.
+* `lameMatrixEigenvalue`, `lamePolyH`: its `m`th smallest eigenvalue `H_m`.
+* `lameRecVec`: the eigenvector by forward recursion from `v₀ = 1`.
+* `lamePolyCoeff`: the normalized coefficients (DLMF 29.15.4, 29.15.9, …).
+* `lamePolyEk`: the Lamé polynomial of type `t`, index `n` and `m` zeros in `(0, K)`, with the
+  named functions `lameUEk`, `lameSEk`, `lameCEk`, `lameDEk`, `lameSCEk`, `lameSDEk`, `lameCDEk`,
+  `lameSCDEk` (DLMF 29.15.43–29.15.50).
+* `lameOrthWeight`, `lameInner`, `lameProduct`: the weight, inner product and products of
+  DLMF 29.14.1–29.14.11.
 
-* `H_m` is the `m`th smallest root of the characteristic polynomial (`lameMatrixEigenvalue`,
-  the roots sorted increasingly; 29.15.3 says they are real and distinct);
+## Implementation notes
+
+Each polynomial is built from the `(n+1) × (n+1)` tridiagonal matrix 29.15.2 with the
+`α_p, β_p, γ_p` of the type's recurrence (`LameRecurrence`):
+
+* `H_m` is the `m`th smallest root of the characteristic polynomial, the roots sorted
+  increasingly (29.15.3 says they are real and distinct);
 * the eigenvector is computed by forward recursion from the first `n` rows of `M v = H v`
-  starting with `v₀ = 1` (`lameRecVec`; all `α_p`, `p < n`, are nonzero for these orders and
-  `0 < k`), then scaled to satisfy the normalization (29.15.5, 29.15.10, …) and the sign
-  condition (29.15.6, 29.15.11, …) of its type (`lamePolyCoeff`);
-* the function is the Chebyshev series 29.15.43–29.15.50 in `sn(z, k)` (`lamePolyEk`), with
-  the project's complex `sn, cn, dn` (`DLMF.JacobiElliptic.jacobiSnk` etc.) and Mathlib's
+  starting with `v₀ = 1` (all `α_p`, `p < n`, are nonzero for these orders and `0 < k`), then
+  scaled to satisfy the normalization (29.15.5, 29.15.10, …) and the sign condition (29.15.6,
+  29.15.11, …) of its type;
+* the function is the Chebyshev series 29.15.43–29.15.50 in `sn(z, k)`, with the project's
+  complex `sn, cn, dn` (`DLMF.JacobiElliptic.jacobiSnk` etc.) and Mathlib's
   `Polynomial.Chebyshev.T`, `U`.
 
 No choice is involved. The identification with the eigenfunctions `Ec`, `Es` of §29.3
-(29.12.1–29.12.8) and of `½(H_m + ν(ν+1)k²)` with the eigenvalues (29.15.7, …) are theorems
-in `DLMF.Lame.Polynomials`.
-
-The inner product of §29.14 (`lameInner`, weight `lameOrthWeight`, 29.14.2–29.14.3) is also
-defined here.
+(29.12.1–29.12.8) and of `½(H_m + ν(ν+1)k²)` with the eigenvalues (29.15.7, …) are theorems in
+`DLMF.Lame.Polynomials.Series`.
 -/
 
 @[expose] public section

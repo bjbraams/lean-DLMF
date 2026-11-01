@@ -16,6 +16,16 @@ With `h = √q → +∞` (real): the eigenvalue expansion 28.8.1 and the exponen
 away from `π/2`, both in terms of `D_m(ξ) = e^{-ξ²/4} He_m(ξ)` (`He_m` is Mathlib's
 probabilists' Hermite polynomial `Polynomial.hermite m`).
 
+## Main results
+
+* `mathieuA_large_q`, `mathieuB_large_q`: the expansion of `a_m(h²)` and `b_{m+1}(h²)`
+  (DLMF 28.8.1).
+* `mathieuB_sub_mathieuA_large_q`: the exponentially small gap `b_{m+1} - a_m` (DLMF 28.8.2).
+* `mathieu_sips`: Sips' expansions (DLMF 28.8.3–28.8.7).
+* `mathieu_goldstein`: Goldstein's expansions (DLMF 28.8.8–28.8.12).
+
+## Implementation notes
+
 DLMF gives the functions `U_m`, `V_m`, `Ĉ_m`, `Ŝ_m`, `σ_m`, `τ_{m+1}`, `P_m`, `Q_m` only through
 their asymptotic series. Here the printed truncations are inserted and the resulting
 approximation is stated with a relative error: `O(h⁻³)` for Sips' expansions at fixed `λ`
@@ -26,7 +36,7 @@ Sips: `h = 10, 20, 40`, `m ≤ 2`, `λ ∈ {0, 0.5, 1}`; Goldstein: `h = 6, 9, 1
 `μ ∈ {1.5, 2.5}`). DLMF notes that Sips' results are derived formally.
 
 The uniform approximations of Barrett and Dunster (§28.8(iv)) are described only in words in
-DLMF and are not acquired.
+DLMF and are not formalized.
 -/
 
 @[expose] public noncomputable section

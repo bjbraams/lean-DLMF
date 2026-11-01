@@ -10,13 +10,34 @@ public import DLMF.Core.Framework
 /-!
 # Meijer G contours, normalization and convergence (DLMF §16.17)
 
-Acquired 2026-10-24. Parameters retain their order and the numerator/denominator Gamma blocks.
-The logarithmic argument is explicit: the kernel contains exp(w*s), so z=exp w and all sheets
-are retained. Admissible contours have actual affine tails, smooth compact middle portions,
-separate both pole families by winding certificates, and avoid every numerator Gamma pole.
-All three DLMF contour types and their orientations are represented. Convergence is a theorem,
-not part of the geometric contour certificate. Every integral value requires integrability.
-The totalized choice function is used only with an explicit convergence predicate.
+## Main definitions
+
+* `MeijerGParameters`: the ordered upper and lower parameter blocks and the numerator counts.
+* `MeijerContourKind`, `MeijerGContour`, `MeijerGContour.Admissible`: the three DLMF contour
+  types and their geometric admissibility.
+* `meijerGKernelLog`: the Gamma-ratio kernel of DLMF 16.17.1.
+* `MeijerGContourRegion`: the convergence region for each contour type.
+* `MeijerGConvergesLog`, `MeijerGHasValueLog`: convergence and value of a contour integral.
+* `meijerGLog`, `meijerG`: the Meijer G function on the logarithmic plane and on the
+  principal nonzero plane, DLMF 16.17.1.
+
+## Main results
+
+* `meijerG_contour_exists`, `meijerG_contour_integrable`: admissible contours exist and the
+  integrals converge in the regions stated by DLMF.
+* `meijerG_contour_independent`: the value does not depend on the contour type.
+* `meijerGLog_has_value`, `meijerGLog_eq_of_value`, `meijerGLog_analytic`,
+  `meijerGLog_parameter_continuous`: the value, its analyticity and parameter continuity.
+
+## Implementation notes
+
+Parameters retain their order and the numerator and denominator Gamma blocks. The logarithmic
+argument is explicit: the kernel contains `exp(w s)`, so `z = exp w` and all sheets are
+retained. Admissible contours have affine tails and smooth compact middle portions, separate
+both pole families by winding certificates, and avoid every numerator Gamma pole. All three
+DLMF contour types and their orientations are represented. Convergence is a theorem, not part
+of the geometric contour certificate, and every integral value requires integrability. The
+totalized choice function is used only together with an explicit convergence predicate.
 -/
 
 @[expose] public noncomputable section

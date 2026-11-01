@@ -12,20 +12,27 @@ public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
 # Path, line and surface integrals; Gauss's theorem (DLMF §1.6(iv)–(v))
 
 Paths are `c : ℝ → ℝ³`, surfaces are parametrized by `Φ : ℝ × ℝ → ℝ³` on a parameter set
-`D ⊆ ℝ²` (definitions in `DLMF.AlgebraicAnalytic.Calculus.Basic`). This file has:
+`D ⊆ ℝ²` (definitions in `DLMF.AlgebraicAnalytic.Calculus.Basic`). Green's theorem in the
+plane (1.6.43–1.6.44) and Stokes's theorem (1.6.57) are in
+`DLMF.AlgebraicAnalytic.Calculus.GreenStokes`.
 
-* reparametrization invariance of line and path integrals (1.6.39–1.6.41) and the gradient
-  theorem 1.6.42;
-* the normal `T_u × T_v`, the area element 1.6.49 in terms of Jacobians, the sphere 1.6.50,
-  graphs 1.6.51 and surfaces of revolution 1.6.52–1.6.53;
-* invariance of surface area and flux under reparametrization (§1.6(v), 1.6.56);
-* Gauss's divergence theorem 1.6.58 for a compact `V` whose boundary is covered by finitely
-  many smooth parametrized patches with outward normals, and Green's identities 1.6.59–1.6.60
-  derived from it.
+## Main results
 
-Green's theorem in the plane (1.6.43–1.6.44) and Stokes's theorem (1.6.57) are in
-`DLMF.AlgebraicAnalytic.Calculus.GreenStokes`, which uses TauCeti's winding-number form of
-Green's theorem.
+* `lineIntegral_comp`, `lineIntegral_comp_reverse`, `pathIntegral_comp`: reparametrization
+  invariance (DLMF 1.6.39–1.6.41).
+* `lineIntegral_grad`: the gradient theorem (DLMF 1.6.42).
+* `tangent_dotProduct_cross`, `vecNorm_tangent_cross`: the normal `T_u × T_v` and the area
+  element in terms of Jacobians (DLMF 1.6.49).
+* `vecNorm_tangent_cross_sphere`, `surfaceArea_graph`, `surfaceArea_revolution_x`,
+  `surfaceArea_revolution_y`: the sphere, graphs and surfaces of revolution
+  (DLMF 1.6.50–1.6.53).
+* `surfaceArea_comp_diffeomorph`, `fluxIntegral_comp_diffeomorph`: invariance under
+  reparametrization (§1.6(v), 1.6.56).
+* `integral_divergence_eq_sum_fluxIntegral`: Gauss's divergence theorem (DLMF 1.6.58) for a
+  compact `V` whose boundary is covered by finitely many smooth parametrized patches with
+  outward normals.
+* `integral_green_first_identity`, `integral_green_second_identity`: Green's identities
+  (DLMF 1.6.59–1.6.60).
 -/
 
 @[expose] public noncomputable section
@@ -38,18 +45,18 @@ namespace DLMF.AlgebraicAnalytic
 /-! ### §1.6(iv) Path and line integrals -/
 
 /-- `vecNorm (r • v) = |r| vecNorm v`. -/
-lemma g1b_vecNorm_smul (r : ℝ) (v : Fin 3 → ℝ) : vecNorm (r • v) = |r| * vecNorm v := by
+private lemma vecNorm_smul (r : ℝ) (v : Fin 3 → ℝ) : vecNorm (r • v) = |r| * vecNorm v := by
   rw [vecNorm, vecNorm, dotProduct_smul, smul_dotProduct, smul_eq_mul, smul_eq_mul, ← mul_assoc,
     Real.sqrt_mul (mul_self_nonneg r), Real.sqrt_mul_self_eq_abs]
 
 /-- The derivative of a reparametrized `C¹` path: `(c ∘ h)' = h' c' ∘ h`. -/
-lemma g1b_deriv_comp_path {c : ℝ → Fin 3 → ℝ} {h : ℝ → ℝ} (hc : ContDiff ℝ 1 c)
+private lemma deriv_path_comp {c : ℝ → Fin 3 → ℝ} {h : ℝ → ℝ} (hc : ContDiff ℝ 1 c)
     (hh : ContDiff ℝ 1 h) (t : ℝ) : deriv (c ∘ h) t = deriv h t • deriv c (h t) :=
   ((hc.differentiable one_ne_zero (h t)).hasDerivAt.scomp t
     (hh.differentiable one_ne_zero t).hasDerivAt).deriv
 
 /-- Continuity of the indicated function: `Continuous fun s => F (c s) ⬝ᵥ deriv c s`. -/
-lemma g1b_continuous_dot {F : (Fin 3 → ℝ) → Fin 3 → ℝ} {c : ℝ → Fin 3 → ℝ}
+private lemma continuous_dotProduct_deriv {F : (Fin 3 → ℝ) → Fin 3 → ℝ} {c : ℝ → Fin 3 → ℝ}
     (hF : Continuous F) (hc : ContDiff ℝ 1 c) :
     Continuous fun s => F (c s) ⬝ᵥ deriv c s := by
   have h1 : Continuous fun s => F (c s) := hF.comp hc.continuous
@@ -64,11 +71,11 @@ theorem lineIntegral_comp {F : (Fin 3 → ℝ) → Fin 3 → ℝ} {c : ℝ → F
     (hF : Continuous F) (hc : ContDiff ℝ 1 c) (hh : ContDiff ℝ 1 h) (a b : ℝ) :
     lineIntegral F (c ∘ h) a b = lineIntegral F c (h a) (h b) := by
   unfold lineIntegral
-  simp_rw [g1b_deriv_comp_path hc hh, dotProduct_smul, smul_eq_mul]
+  simp_rw [deriv_path_comp hc hh, dotProduct_smul, smul_eq_mul]
   have := intervalIntegral.integral_comp_mul_deriv (a := a) (b := b) (f := h) (f' := deriv h)
     (g := fun s => F (c s) ⬝ᵥ deriv c s)
     (fun x _ => (hh.differentiable one_ne_zero x).hasDerivAt)
-    (hh.continuous_deriv le_rfl).continuousOn (g1b_continuous_dot hF hc)
+    (hh.continuous_deriv le_rfl).continuousOn (continuous_dotProduct_deriv hF hc)
   rw [← this]
   exact intervalIntegral.integral_congr fun t _ => by simp [Function.comp, mul_comm]
 
@@ -100,7 +107,7 @@ theorem pathIntegral_comp {f : (Fin 3 → ℝ) → ℝ} {c : ℝ → Fin 3 → �
     (fun x _ => (hh.differentiable one_ne_zero x).hasDerivAt)
     (hh.continuous_deriv le_rfl).continuousOn hg
   unfold pathIntegral
-  simp_rw [g1b_deriv_comp_path hc hh, g1b_vecNorm_smul]
+  simp_rw [deriv_path_comp hc hh, vecNorm_smul]
   constructor
   · intro hm
     rw [← key]
@@ -133,7 +140,7 @@ theorem lineIntegral_grad {f : (Fin 3 → ℝ) → ℝ} {c : ℝ → Fin 3 → �
     rw [((hasDerivAt_pi.mp (hc.differentiable one_ne_zero t).hasDerivAt) i).deriv]
     rfl
   have hcont : Continuous fun t => grad f (c t) ⬝ᵥ deriv c t := by
-    refine g1b_continuous_dot (F := grad f) ?_ hc
+    refine continuous_dotProduct_deriv (F := grad f) ?_ hc
     rw [hgrad]
     have := hf.continuous_fderiv one_ne_zero
     exact continuous_pi fun i => this.clm_apply continuous_const
@@ -153,14 +160,14 @@ theorem tangent_dotProduct_cross (Φ : ℝ × ℝ → Fin 3 → ℝ) (p : ℝ ×
 
 /-- Identity under the stated parameter and domain assumptions: `tangentU Φ p i = deriv (fun u =>
 Φ (u, p.2) i) p.1`. -/
-lemma g1b_tangentU_apply {Φ : ℝ × ℝ → Fin 3 → ℝ} {p : ℝ × ℝ}
+private lemma tangentU_apply {Φ : ℝ × ℝ → Fin 3 → ℝ} {p : ℝ × ℝ}
     (hu : DifferentiableAt ℝ (fun u => Φ (u, p.2)) p.1) (i : Fin 3) :
     tangentU Φ p i = deriv (fun u => Φ (u, p.2) i) p.1 :=
   ((hasDerivAt_pi.mp hu.hasDerivAt) i).deriv.symm
 
 /-- Identity under the stated parameter and domain assumptions: `tangentV Φ p i = deriv (fun v =>
 Φ (p.1, v) i) p.2`. -/
-lemma g1b_tangentV_apply {Φ : ℝ × ℝ → Fin 3 → ℝ} {p : ℝ × ℝ}
+private lemma tangentV_apply {Φ : ℝ × ℝ → Fin 3 → ℝ} {p : ℝ × ℝ}
     (hv : DifferentiableAt ℝ (fun v => Φ (p.1, v)) p.2) (i : Fin 3) :
     tangentV Φ p i = deriv (fun v => Φ (p.1, v) i) p.2 :=
   ((hasDerivAt_pi.mp hv.hasDerivAt) i).deriv.symm
@@ -178,13 +185,13 @@ theorem vecNorm_tangent_cross {Φ : ℝ × ℝ → Fin 3 → ℝ} {p : ℝ × �
   rw [vecNorm]
   congr 1
   simp only [dotProduct_fin_three, cross_apply, jacobianDet2, Matrix.det_fin_two_of,
-    g1b_tangentU_apply hu, g1b_tangentV_apply hv]
+    tangentU_apply hu, tangentV_apply hv]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons,
     Matrix.tail_cons]
   ring
 
 /-- `HasDerivAt` for a vector `![u₀, u₁, u₂]` of scalar functions. -/
-lemma g1b_hasDerivAt_vec3 {u₀ u₁ u₂ : ℝ → ℝ} {d₀ d₁ d₂ t : ℝ} (h₀ : HasDerivAt u₀ d₀ t)
+private lemma hasDerivAt_vecCons_three {u₀ u₁ u₂ : ℝ → ℝ} {d₀ d₁ d₂ t : ℝ} (h₀ : HasDerivAt u₀ d₀ t)
     (h₁ : HasDerivAt u₁ d₁ t) (h₂ : HasDerivAt u₂ d₂ t) :
     HasDerivAt (fun s => ![u₀ s, u₁ s, u₂ s]) ![d₀, d₁, d₂] t := by
   refine hasDerivAt_pi.mpr fun i => ?_
@@ -201,14 +208,14 @@ theorem vecNorm_tangent_cross_sphere (ρ θ φ : ℝ) :
   have hu : tangentU Φ (θ, φ) = ![ρ * Real.cos θ * Real.cos φ, ρ * Real.cos θ * Real.sin φ,
       -(ρ * Real.sin θ)] := by
     refine HasDerivAt.deriv ?_
-    refine g1b_hasDerivAt_vec3 ?_ ?_ ?_
+    refine hasDerivAt_vecCons_three ?_ ?_ ?_
     · simpa using ((Real.hasDerivAt_sin θ).const_mul ρ).mul_const (Real.cos φ)
     · simpa using ((Real.hasDerivAt_sin θ).const_mul ρ).mul_const (Real.sin φ)
     · simpa using (Real.hasDerivAt_cos θ).const_mul ρ
   have hv : tangentV Φ (θ, φ) = ![-(ρ * Real.sin θ * Real.sin φ), ρ * Real.sin θ * Real.cos φ,
       0] := by
     refine HasDerivAt.deriv ?_
-    refine g1b_hasDerivAt_vec3 ?_ ?_ ?_
+    refine hasDerivAt_vecCons_three ?_ ?_ ?_
     · simpa using (Real.hasDerivAt_cos φ).const_mul (ρ * Real.sin θ)
     · simpa using (Real.hasDerivAt_sin φ).const_mul (ρ * Real.sin θ)
     · exact hasDerivAt_const φ (ρ * Real.cos θ)
@@ -237,10 +244,10 @@ theorem vecNorm_tangent_cross_graph {f : ℝ × ℝ → ℝ} {p : ℝ × ℝ}
         deriv (fun t => f (p.1, t)) p.2 ^ 2) := by
   have hu : tangentU (fun q => ![q.1, q.2, f q]) p =
       ![1, 0, deriv (fun t => f (t, p.2)) p.1] :=
-    (g1b_hasDerivAt_vec3 (hasDerivAt_id' p.1) (hasDerivAt_const p.1 p.2) hx.hasDerivAt).deriv
+    (hasDerivAt_vecCons_three (hasDerivAt_id' p.1) (hasDerivAt_const p.1 p.2) hx.hasDerivAt).deriv
   have hv : tangentV (fun q => ![q.1, q.2, f q]) p =
       ![0, 1, deriv (fun t => f (p.1, t)) p.2] :=
-    (g1b_hasDerivAt_vec3 (hasDerivAt_const p.2 p.1) (hasDerivAt_id' p.2) hy.hasDerivAt).deriv
+    (hasDerivAt_vecCons_three (hasDerivAt_const p.2 p.1) (hasDerivAt_id' p.2) hy.hasDerivAt).deriv
   rw [hu, hv, vecNorm]
   congr 1
   simp only [cross_apply, dotProduct_fin_three]
@@ -260,7 +267,7 @@ theorem surfaceArea_graph {f : ℝ × ℝ → ℝ} {D : Set (ℝ × ℝ)}
   setIntegral_congr_fun hD fun p hp => vecNorm_tangent_cross_graph (hx p hp) (hy p hp)
 
 /-- An integral over `(a, b) × (0, c)` of a function of the first coordinate. -/
-lemma g1b_setIntegral_Ioo_prod (g : ℝ → ℝ) {a b : ℝ} (hab : a ≤ b) {c : ℝ} (hc : 0 ≤ c) :
+private lemma setIntegral_Ioo_prod_Ioo_fst (g : ℝ → ℝ) {a b : ℝ} (hab : a ≤ b) {c : ℝ} (hc : 0 ≤ c) :
     ∫ p in Ioo a b ×ˢ Ioo 0 c, g p.1 = c * ∫ x in a..b, g x := by
   rw [Measure.volume_eq_prod, ← Measure.prod_restrict]
   have := integral_prod_mul (μ := volume.restrict (Ioo a b)) (ν := volume.restrict (Ioo 0 c))
@@ -279,11 +286,11 @@ theorem vecNorm_tangent_cross_revolution_x {f : ℝ → ℝ} {x t : ℝ}
       |f x| * Real.sqrt (1 + deriv f x ^ 2) := by
   have hu : tangentU (fun q => ![q.1, f q.1 * Real.cos q.2, f q.1 * Real.sin q.2]) (x, t) =
       ![1, deriv f x * Real.cos t, deriv f x * Real.sin t] :=
-    (g1b_hasDerivAt_vec3 (hasDerivAt_id' x) (hf.hasDerivAt.mul_const (Real.cos t))
+    (hasDerivAt_vecCons_three (hasDerivAt_id' x) (hf.hasDerivAt.mul_const (Real.cos t))
       (hf.hasDerivAt.mul_const (Real.sin t))).deriv
   have hv : tangentV (fun q => ![q.1, f q.1 * Real.cos q.2, f q.1 * Real.sin q.2]) (x, t) =
       ![0, -(f x * Real.sin t), f x * Real.cos t] := by
-    refine (g1b_hasDerivAt_vec3 (hasDerivAt_const t x) ?_
+    refine (hasDerivAt_vecCons_three (hasDerivAt_const t x) ?_
       ((Real.hasDerivAt_sin t).const_mul (f x))).deriv
     simpa using (Real.hasDerivAt_cos t).const_mul (f x)
   rw [hu, hv, vecNorm, ← Real.sqrt_sq_eq_abs, ← Real.sqrt_mul (sq_nonneg _)]
@@ -303,7 +310,7 @@ theorem surfaceArea_revolution_x {f : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
     surfaceArea (fun q => ![q.1, f q.1 * Real.cos q.2, f q.1 * Real.sin q.2])
         (Ioo a b ×ˢ Ioo 0 (2 * Real.pi)) =
       2 * Real.pi * ∫ x in a..b, |f x| * Real.sqrt (1 + deriv f x ^ 2) := by
-  rw [surfaceArea, ← g1b_setIntegral_Ioo_prod _ hab (by positivity)]
+  rw [surfaceArea, ← setIntegral_Ioo_prod_Ioo_fst _ hab (by positivity)]
   refine setIntegral_congr_fun (measurableSet_Ioo.prod measurableSet_Ioo) fun p _ => ?_
   obtain ⟨x, t⟩ := p
   exact vecNorm_tangent_cross_revolution_x (hf x)
@@ -318,12 +325,12 @@ theorem vecNorm_tangent_cross_revolution_y {f : ℝ → ℝ} {x t : ℝ}
       |x| * Real.sqrt (1 + deriv f x ^ 2) := by
   have hu : tangentU (fun q => ![q.1 * Real.cos q.2, f q.1, q.1 * Real.sin q.2]) (x, t) =
       ![Real.cos t, deriv f x, Real.sin t] := by
-    refine (g1b_hasDerivAt_vec3 ?_ hf.hasDerivAt ?_).deriv
+    refine (hasDerivAt_vecCons_three ?_ hf.hasDerivAt ?_).deriv
     · simpa using (hasDerivAt_id x).mul_const (Real.cos t)
     · simpa using (hasDerivAt_id x).mul_const (Real.sin t)
   have hv : tangentV (fun q => ![q.1 * Real.cos q.2, f q.1, q.1 * Real.sin q.2]) (x, t) =
       ![-(x * Real.sin t), 0, x * Real.cos t] := by
-    refine (g1b_hasDerivAt_vec3 ?_ (hasDerivAt_const t (f x))
+    refine (hasDerivAt_vecCons_three ?_ (hasDerivAt_const t (f x))
       ((Real.hasDerivAt_sin t).const_mul x)).deriv
     simpa using (Real.hasDerivAt_cos t).const_mul x
   rw [hu, hv, vecNorm, ← Real.sqrt_sq_eq_abs, ← Real.sqrt_mul (sq_nonneg _)]
@@ -343,7 +350,7 @@ theorem surfaceArea_revolution_y {f : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
     surfaceArea (fun q => ![q.1 * Real.cos q.2, f q.1, q.1 * Real.sin q.2])
         (Ioo a b ×ˢ Ioo 0 (2 * Real.pi)) =
       2 * Real.pi * ∫ x in a..b, |x| * Real.sqrt (1 + deriv f x ^ 2) := by
-  rw [surfaceArea, ← g1b_setIntegral_Ioo_prod _ hab (by positivity)]
+  rw [surfaceArea, ← setIntegral_Ioo_prod_Ioo_fst _ hab (by positivity)]
   refine setIntegral_congr_fun (measurableSet_Ioo.prod measurableSet_Ioo) fun p _ => ?_
   obtain ⟨x, t⟩ := p
   exact vecNorm_tangent_cross_revolution_y (hf x)
@@ -386,7 +393,7 @@ theorem integral_divergence_eq_sum_fluxIntegral {V : Set (Fin 3 → ℝ)} {ι : 
   sorry
 
 /-- The gradient of a `C²` function on an open set is `C¹` there. -/
-lemma g1b_contDiffOn_grad {g : (Fin 3 → ℝ) → ℝ} {U : Set (Fin 3 → ℝ)} (hU : IsOpen U)
+private lemma contDiffOn_grad {g : (Fin 3 → ℝ) → ℝ} {U : Set (Fin 3 → ℝ)} (hU : IsOpen U)
     (hg : ContDiffOn ℝ 2 g U) : ContDiffOn ℝ 1 (grad g) U := by
   have hfd := hg.fderiv_of_isOpen hU (m := 1) (by norm_num)
   refine contDiffOn_pi.mpr fun i => ?_
@@ -408,13 +415,13 @@ theorem integral_green_first_identity {V : Set (Fin 3 → ℝ)} {ι : Type*} [Fi
     ∫ x in V, (f x * laplacian g x + grad f x ⬝ᵥ grad g x) =
       ∑ i, fluxIntegral (fun y => f y • grad g y) (Φ i) (D i) := by
   have hF : ContDiffOn ℝ 1 (fun y => f y • grad g y) U :=
-    (hf.of_le (by norm_num)).smul (g1b_contDiffOn_grad hU hg)
+    (hf.of_le (by norm_num)).smul (contDiffOn_grad hU hg)
   rw [← integral_divergence_eq_sum_fluxIntegral hV hU hVU hF]
   refine setIntegral_congr_fun hV.compact.isClosed.measurableSet fun x hx => ?_
   have hfx := hf.contDiffAt (hU.mem_nhds (hVU hx))
   have hgx := hg.contDiffAt (hU.mem_nhds (hVU hx))
   have hdg : DifferentiableAt ℝ (grad g) x :=
-    differentiableAt_pi.mpr fun j => g1b_differentiableAt_partialDeriv j hgx
+    differentiableAt_pi.mpr fun j => differentiableAt_partialDeriv j hgx
   rw [divergence_smul (hfx.differentiableAt (by simp)) hdg, laplacian_eq_divergence_grad,
     dotProduct_comm]
 
@@ -430,8 +437,8 @@ theorem integral_green_second_identity {V : Set (Fin 3 → ℝ)} {ι : Type*} [F
     ∫ x in V, (f x * laplacian g x - g x * laplacian f x) =
       ∑ i, fluxIntegral (fun y => f y • grad g y - g y • grad f y) (Φ i) (D i) := by
   have hF : ContDiffOn ℝ 1 (fun y => f y • grad g y - g y • grad f y) U :=
-    ((hf.of_le (by norm_num)).smul (g1b_contDiffOn_grad hU hg)).sub
-      ((hg.of_le (by norm_num)).smul (g1b_contDiffOn_grad hU hf))
+    ((hf.of_le (by norm_num)).smul (contDiffOn_grad hU hg)).sub
+      ((hg.of_le (by norm_num)).smul (contDiffOn_grad hU hf))
   rw [← integral_divergence_eq_sum_fluxIntegral hV hU hVU hF]
   refine setIntegral_congr_fun hV.compact.isClosed.measurableSet fun x hx => ?_
   exact (divergence_smul_grad_sub (hf.contDiffAt (hU.mem_nhds (hVU hx)))

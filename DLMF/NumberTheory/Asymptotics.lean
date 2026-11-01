@@ -11,6 +11,12 @@ public import DLMF.NumberTheory.Asymptotics.PrimeAndComplexSums
 /-!
 # Asymptotic formulas: partial sums (DLMF §27.11)
 
+This umbrella collects the asymptotic formulas of DLMF §27.11 for divisor sums
+(`Asymptotics.DivisorSums`) and for sums over primes and complex powers
+(`Asymptotics.PrimeAndComplexSums`).
+
+## Implementation notes
+
 DLMF's `∑_{n≤x}` is the sum over `1 ≤ n ≤ ⌊x⌋` (`Finset.Icc 1 ⌊x⌋₊`) and `∑_{p≤x}` the sum over
 the primes `p ≤ ⌊x⌋` (`Nat.primesLE ⌊x⌋₊`). The error terms `O(g(x))` are
 `Asymptotics.IsBigO atTop`; DLMF's "for all `x ≥ 1`" (resp. `x ≥ 2`) uniform bounds imply these
@@ -19,5 +25,5 @@ the case here. Constants that DLMF only asserts to exist (`A` in 27.11.8, `B` in
 27.11.12) are existentially quantified. `γ` is `Real.eulerMascheroniConstant`.
 
 Dirichlet's theorem on primes in arithmetic progressions (§27.11 after 27.11.11) is Mathlib's
-`Nat.infinite_setOfPred_prime_and_modEq` (`Nat.setOf_prime_and_eq_mod_infinite`).
+`Nat.infinite_setOfPred_prime_and_modEq` (`Nat.infinite_setOfPred_prime_and_eq_mod`).
 -/

@@ -15,9 +15,16 @@ public import Mathlib.Tactic.Positivity.Finset
 /-!
 # Uniqueness and multiplication of scalar power series
 
-Shared helpers formerly proved independently in the hypergeometric and orthogonal-polynomial
-libraries. The proofs use Mathlib's uniqueness of formal multilinear series and its absolutely
-summable Cauchy product. They do not depend on any special-function definitions.
+Helpers shared by the hypergeometric and orthogonal-polynomial libraries. The proofs use
+Mathlib's uniqueness of formal multilinear series and its absolutely summable Cauchy product.
+They do not depend on any special-function definitions.
+
+## Main results
+
+* `Complex.powerSeries_coefficients_unique`: a scalar power series is determined by its sums on
+  the unit disk.
+* `Complex.hasSum_powerSeries_convolution`: the Cauchy product of scalar series as a coefficient
+  convolution.
 -/
 
 @[expose] public noncomputable section

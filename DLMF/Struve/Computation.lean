@@ -8,12 +8,15 @@ module
 public import DLMF.Struve.SeriesAndEquations
 
 /-!
-# Mathematical approximation claims in DLMF computational sections
+# Computation of Struve functions (DLMF §§11.13–11.15)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+The computational sections of DLMF Chapter 11 consist mainly of bibliographic guidance and
+numerical method recommendations; the convergence statements of §11.13(ii) are covered by the
+series results of the area, and the numerical approximations of §11.15(ii) are out of scope.
+
+## Main results
+
+* `struveH_nat_ofReal_im`: Struve functions of natural order are real on the real axis.
 -/
 
 @[expose] public noncomputable section

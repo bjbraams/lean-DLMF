@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Coulomb.Energy.Basic
-public import DLMF.Coulomb.Energy.Q2eRegular
+public import DLMF.Coulomb.Energy.RegularSolution
 public import DLMF.Confluent.Whittaker
 public import DLMF.OrthogonalPolynomials.Classical
 
@@ -108,19 +108,19 @@ theorem coulombf_ode (ε : ℝ) (ℓ : ℕ) {r : ℝ} (hr : r ≠ 0) :
     HasDerivAt (coulombf ε ℓ) (deriv (coulombf ε ℓ) r) r ∧
       HasDerivAt (deriv (coulombf ε ℓ))
         (-(ε + 2 / r - ℓ * (ℓ + 1) / r ^ 2) * coulombf ε ℓ r) r := by
-  have hf : coulombf ε ℓ = fun x : ℝ => (q2e_Phi ε ℓ x).re :=
-    funext (q2e_coulombf_eq_re ε ℓ)
-  have hd : ∀ x : ℝ, HasDerivAt (coulombf ε ℓ) (deriv (q2e_Phi ε ℓ) x).re x := by
+  have hf : coulombf ε ℓ = fun x : ℝ => (coulombfComplex ε ℓ x).re :=
+    funext (coulombf_eq_re_coulombfComplex ε ℓ)
+  have hd : ∀ x : ℝ, HasDerivAt (coulombf ε ℓ) (deriv (coulombfComplex ε ℓ) x).re x := by
     intro x
     rw [hf]
-    exact ((q2e_Phi_differentiable ε ℓ x).hasDerivAt).real_of_complex
-  have hd' : deriv (coulombf ε ℓ) = fun x : ℝ => (deriv (q2e_Phi ε ℓ) x).re :=
+    exact ((differentiable_coulombfComplex ε ℓ x).hasDerivAt).real_of_complex
+  have hd' : deriv (coulombf ε ℓ) = fun x : ℝ => (deriv (coulombfComplex ε ℓ) x).re :=
     funext fun x => (hd x).deriv
   refine ⟨(hd r).deriv ▸ hd r, ?_⟩
   rw [hd']
-  have h := (q2e_Phi_ode ε ℓ (z := (r : ℂ)) (by exact_mod_cast hr)).real_of_complex
+  have h := (hasDerivAt_deriv_coulombfComplex ε ℓ (z := (r : ℂ)) (by exact_mod_cast hr)).real_of_complex
   convert h using 1
-  rw [q2e_coulombf_eq_re, ← Complex.re_ofReal_mul]
+  rw [coulombf_eq_re_coulombfComplex, ← Complex.re_ofReal_mul]
   push_cast
   rfl
 
@@ -214,7 +214,7 @@ theorem analyticAt_coulombh (ℓ : ℕ) :
 /-! ### `A(ε,ℓ)`, `s` and `c` -/
 
 /-- For `z` not a nonpositive integer, `Γ(z+n) = Γ(z) ∏_{j<n} (z+j)`. -/
-lemma c33b_Gamma_add_nat {z : ℂ} (hz : ∀ m : ℕ, z ≠ -(m : ℂ)) (n : ℕ) :
+private lemma Gamma_add_nat_eq_mul_prod {z : ℂ} (hz : ∀ m : ℕ, z ≠ -(m : ℂ)) (n : ℕ) :
     Gamma (z + n) = Gamma z * ∏ j ∈ Finset.range n, (z + j) := by
   induction n with
   | zero => simp
@@ -226,7 +226,7 @@ lemma c33b_Gamma_add_nat {z : ℂ} (hz : ∀ m : ℕ, z ≠ -(m : ℂ)) (n : ℕ
     ring
 
 /-- `∏_{j=0}^{2ℓ} (κ - ℓ + j) = κ ∏_{k<ℓ} (κ² - (k+1)²)`. -/
-lemma c33b_prod_sym (κ : ℂ) (ℓ : ℕ) :
+private lemma prod_range_sub_add_eq_mul_prod_sq_sub (κ : ℂ) (ℓ : ℕ) :
     ∏ j ∈ Finset.range (2 * ℓ + 1), (κ - ℓ + j) =
       κ * ∏ k ∈ Finset.range ℓ, (κ ^ 2 - ((k : ℂ) + 1) ^ 2) := by
   induction ℓ generalizing κ with
@@ -252,10 +252,10 @@ theorem coulombAProd_eq_Gamma {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) (r : ℝ)
   have hk := coulombKappa_ne_zero hε r
   have hsq := coulombKappa_sq hε r
   set κ := coulombKappa ε r
-  have hG := c33b_Gamma_add_nat hpole (2 * ℓ + 1)
+  have hG := Gamma_add_nat_eq_mul_prod hpole (2 * ℓ + 1)
   rw [show κ - ℓ + ((2 * ℓ + 1 : ℕ) : ℂ) = 1 + ℓ + κ by push_cast; ring] at hG
   have hG0 : Gamma (κ - ℓ) ≠ 0 := Complex.Gamma_ne_zero hpole
-  rw [hG, mul_div_cancel_left₀ _ hG0, c33b_prod_sym, coulombAProd, Finset.prod_range_succ']
+  rw [hG, mul_div_cancel_left₀ _ hG0, prod_range_sub_add_eq_mul_prod_sq_sub, coulombAProd, Finset.prod_range_succ']
   push_cast
   have hε' : (ε : ℂ) = -1 / κ ^ 2 := by
     rw [hsq]; field_simp
@@ -308,7 +308,7 @@ theorem coulombs_orthogonality_dirac (ℓ : ℕ) {ε₂ : ℝ} (hε₂ : 0 < ε�
 /-! ### Hydrogenic functions -/
 
 /-- For `ℓ + 1 ≤ n`, `A(-1/n², ℓ) ≥ 0`. -/
-lemma c33b_coulombAProd_nonneg {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) :
+private lemma coulombAProd_neg_one_div_sq_nonneg {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) :
     0 ≤ coulombAProd (-1 / (n : ℝ) ^ 2) ℓ := by
   unfold coulombAProd
   apply Finset.prod_nonneg
@@ -334,7 +334,7 @@ theorem hydrogenRadial_eq_coulombs {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) (r : ℝ) 
     have : (0 : ℝ) ≤ 1 / (n : ℝ) ^ 2 := by positivity
     have h : ¬ (0 < -1 / (n : ℝ) ^ 2) := by rw [neg_div]; linarith
     simp only [coulombBFactor, h, ↓reduceIte]
-  have hA := c33b_coulombAProd_nonneg hn
+  have hA := coulombAProd_neg_one_div_sq_nonneg hn
   rw [hydrogenRadial, coulombs, hB, Real.sqrt_eq_rpow (coulombAProd _ ℓ / 2),
     show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← Complex.ofReal_cpow (by positivity)]
@@ -342,7 +342,7 @@ theorem hydrogenRadial_eq_coulombs {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) (r : ℝ) 
   ring
 
 /-- `∏_{k=0}^{ℓ} (n² - k²) · N! = n (2ℓ+1+N)!` for `n = ℓ+1+N`. -/
-lemma q2e_prod_sq_sub (ℓ N : ℕ) :
+private lemma prod_range_sq_sub_sq_mul_factorial (ℓ N : ℕ) :
     (∏ k ∈ Finset.range (ℓ + 1), (((ℓ + 1 + N : ℕ) : ℝ) ^ 2 - (k : ℝ) ^ 2)) * N ! =
       ((ℓ + 1 + N : ℕ) : ℝ) * (2 * ℓ + 1 + N)! := by
   induction ℓ generalizing N with
@@ -360,11 +360,11 @@ lemma q2e_prod_sq_sub (ℓ N : ℕ) :
     linear_combination ((ℓ : ℝ) + 1 + 1 + N + (ℓ + 1)) * h
 
 /-- `A(-1/n², ℓ) N! n^{2ℓ+1} = (n+ℓ)!` for `n = ℓ+1+N`. -/
-lemma q2e_coulombAProd_hydrogen (ℓ N : ℕ) :
+private lemma coulombAProd_hydrogen (ℓ N : ℕ) :
     coulombAProd (-1 / ((ℓ + 1 + N : ℕ) : ℝ) ^ 2) ℓ * N ! * ((ℓ + 1 + N : ℕ) : ℝ) ^ (2 * ℓ + 1) =
       (2 * ℓ + 1 + N)! := by
   have hn : ((ℓ + 1 + N : ℕ) : ℝ) ≠ 0 := by positivity
-  have h := q2e_prod_sq_sub ℓ N
+  have h := prod_range_sq_sub_sq_mul_factorial ℓ N
   have hA : coulombAProd (-1 / ((ℓ + 1 + N : ℕ) : ℝ) ^ 2) ℓ =
       (∏ k ∈ Finset.range (ℓ + 1), (((ℓ + 1 + N : ℕ) : ℝ) ^ 2 - (k : ℝ) ^ 2)) /
         ((ℓ + 1 + N : ℕ) : ℝ) ^ (2 * (ℓ + 1)) := by
@@ -380,7 +380,7 @@ lemma q2e_coulombAProd_hydrogen (ℓ N : ℕ) :
   linear_combination ((ℓ + 1 + N : ℕ) : ℝ) ^ (2 * ℓ + 1) * h
 
 /-- `κ(-1/n², 1) = n`. -/
-lemma q2e_coulombKappa_hydrogen {n : ℕ} (hn : 0 < n) :
+private lemma coulombKappa_hydrogen {n : ℕ} (hn : 0 < n) :
     coulombKappa (-1 / (n : ℝ) ^ 2) 1 = n := by
   have hpos : (0 : ℝ) < n := by exact_mod_cast hn
   have hε : -1 / (n : ℝ) ^ 2 < 0 := by
@@ -410,14 +410,14 @@ theorem hydrogenRadial_eq_laguerre {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) (r : ℝ) 
     have : (0 : ℝ) ≤ 1 / (n : ℝ) ^ 2 := by positivity
     have h : ¬ (0 < ε) := by rw [hε_def, neg_div]; linarith
     simp only [coulombBFactor, h, ↓reduceIte]
-  have hA := c33b_coulombAProd_nonneg (n := n) (ℓ := ℓ) (by omega)
-  have hAe := q2e_coulombAProd_hydrogen ℓ N
+  have hA := coulombAProd_neg_one_div_sq_nonneg (n := n) (ℓ := ℓ) (by omega)
+  have hAe := coulombAProd_hydrogen ℓ N
   rw [← hn_def, ← hε_def] at hAe
   have hf : (coulombf ε ℓ r : ℂ) = coulombfKummer (n : ℂ) ℓ r := by
     rw [ofReal_coulombf hε0]
-    rcases q2e_coulombKappa_eq_or ε r with h | h
-    · rw [h, hε_def, q2e_coulombKappa_hydrogen (by omega)]
-    · rw [h, coulombfKummer_neg, hε_def, q2e_coulombKappa_hydrogen (by omega)]
+    rcases coulombKappa_eq_or_eq_neg ε r with h | h
+    · rw [h, hε_def, coulombKappa_hydrogen (by omega)]
+    · rw [h, coulombfKummer_neg, hε_def, coulombKappa_hydrogen (by omega)]
   have hK : coulombfKummer (n : ℂ) ℓ r = (((2 * r) ^ (ℓ + 1) * Real.exp (-r / n) *
       (N ! / (2 * ℓ + 1 + N)!) : ℝ) : ℂ) * laguerrePolyL (2 * ℓ + 1) N (2 * r / n) := by
     unfold coulombfKummer laguerrePolyL

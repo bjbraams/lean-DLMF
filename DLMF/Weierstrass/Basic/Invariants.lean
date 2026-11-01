@@ -9,6 +9,23 @@ public import DLMF.Weierstrass.Basic.Functions
 
 /-!
 # Chosen period pairs and Weierstrass functions from their invariants
+
+The Weierstrass functions `℘(z; g₂, g₃)`, `ζ(z; g₂, g₃)` and `σ(z; g₂, g₃)` of given
+invariants (DLMF §23.3(i)).
+
+## Main definitions
+
+* `periodPairOfInvariants`: a chosen period pair with invariants `g₂, g₃`.
+* `weierstrassPInvariants`: `℘(z; g₂, g₃)` (DLMF 23.3.8).
+* `weierstrassZetaInvariants`, `weierstrassSigmaInvariants`: `ζ(z; g₂, g₃)` and
+  `σ(z; g₂, g₃)`.
+
+## Implementation notes
+
+The functions are defined through a chosen lattice with the given invariants (a junk
+`PeriodPair` when none exists). They agree with the functions of every lattice with those
+invariants, by the uniqueness of the lattice proved in
+`DLMF.Weierstrass.EllipticFunctionsAndInvariants`.
 -/
 
 @[expose] public noncomputable section

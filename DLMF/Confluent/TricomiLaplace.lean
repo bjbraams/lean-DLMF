@@ -9,12 +9,28 @@ public import DLMF.Confluent.IntegralRepresentations
 public import DLMF.Hypergeometric.EulerHalfLine
 
 /-!
-# Tricomi's Laplace transform with unrestricted first parameter
+# Laplace transform of Tricomi's function with unrestricted first parameter
 
-Fubini and the half-line Euler integral evaluate the transform for `Re a > 0`.
-Tricomi's contiguous relation then lowers `a` by natural steps, preserving both
-endpoint convergence inequalities. The regularized Gauss contiguous relation
-satisfies the same recursion even when its denominator parameter is singular.
+This file evaluates the weighted Laplace transform of Tricomi's `U` in terms of the regularized
+Gauss function, with absolute integrability, on its full parameter region.
+
+## Main definitions
+
+* `tricomiLaplaceKernel`: the kernel of the weighted Tricomi Laplace transform.
+
+## Main results
+
+* `integrable_tricomi_double_kernel`: absolute integrability of the double Laplace kernel in the
+  initial parameter region.
+* `laplace_kummerU_gauss_of_re_pos`: the transform for `Re a > 0`.
+* `laplace_kummerU_gauss`: the transform on its full parameter region.
+
+## Implementation notes
+
+Fubini and the half-line Euler integral evaluate the transform for `Re a > 0`. Tricomi's
+contiguous relation then lowers `a` by natural steps, preserving both endpoint convergence
+inequalities. The regularized Gauss contiguous relation satisfies the same recursion even when
+its denominator parameter is singular.
 -/
 
 @[expose] public section

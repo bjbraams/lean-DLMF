@@ -11,11 +11,23 @@ public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 /-!
 # Modified Mathieu functions: asymptotics (DLMF §§28.25–28.26)
 
-* 28.25.1–28.25.5: the asymptotic expansions of `M^{(3)}_ν`, `M^{(4)}_ν` for large `Re z`, with
-  the coefficients `D^±_m` of the recurrence 28.25.3 (`modMathieuAsympD`); the initial values
-  and the recurrence are proved from the definition.
-* 28.26.1–28.26.5: Goldstein's expansions for large `h`; 28.26.1–28.26.2 are proved from the
-  definitions of `Fc_m`, `Gc_m`, `Fs_m`, `Gs_m` and 28.20.13.
+The asymptotic expansions of `M^{(3)}_ν`, `M^{(4)}_ν` for large `Re z` (DLMF 28.25.1–28.25.5),
+with the coefficients `D^±_m` of the recurrence 28.25.3 (`modMathieuAsympD`), and Goldstein's
+representations and expansions for large `h` (DLMF 28.26.1–28.26.5).
+
+## Main results
+
+* `modMathieuAsympD_zero`, `modMathieuAsympD_recurrence`, `modMathieuAsympDPair_fst`: the
+  initial values and the recurrence of `D^±_m` (DLMF 28.25.2–28.25.3).
+* `modMathieuM_three_hasAsymptoticExpansion`, `modMathieuM_four_hasAsymptoticExpansion`: the
+  expansions of `M^{(3)}_ν` and `M^{(4)}_ν` (DLMF 28.25.1, 28.25.4–28.25.5).
+* `radialMathieuMc_three_eq_goldstein`, `radialMathieuMs_three_eq_goldstein`: Goldstein's
+  representations (DLMF 28.26.1–28.26.2), from the definitions of `Fc_m`, `Gc_m`, `Fs_m`,
+  `Gs_m` and 28.20.13.
+* `goldsteinFc_isBigO`, `goldsteinGc_isBigO`, `goldsteinFs_Gs_isBigO`: Goldstein's expansions
+  (DLMF 28.26.4–28.26.5 and §28.26(i)).
+
+## Implementation notes
 
 The expansion 28.25.1 and Goldstein's expansions 28.26.4–28.26.5 (with `Fs`, `Gs`) were
 checked numerically (`ν = 0.3`, `h = 1.2`, `Re z ∈ {2.5, 3.5}`; `m ≤ 1`, `h ∈ {4, 8}`,

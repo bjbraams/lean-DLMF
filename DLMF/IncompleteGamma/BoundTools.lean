@@ -10,6 +10,20 @@ public import DLMF.IncompleteGamma.ContinuedProperties
 /-!
 # Real-variable tools for the incomplete Gamma inequalities, DLMF §8.10
 
+Sign lemmas, comparison functions and convexity facts used to prove the real inequalities
+of DLMF §8.10 for the incomplete Gamma functions, in particular the bounds 8.10.10 and
+Alzer's bounds 8.10.11.
+
+## Main definitions
+
+* `igBd_Q`: the sign function `Q(w) = w(1+w)^{a-1} + (λ-1)w - (λ/a)((1+w)^a-1)` for
+  DLMF 8.10.10, with derivatives `igBd_dQ`, `igBd_ddQ`.
+* `igBd_G`: the comparison function `e^{-x}((x+λ)^a-x^a)/(aλ) - Γ(a,x)` for DLMF 8.10.10.
+* `igBd_ell`: `ℓ(u) = log((1-e^{-u})/u)`.
+* `igBd_k`: the logarithm of the ratio of the derivatives of `(1-e^{-γx})^a` and `P(a,x)`.
+
+## Main results
+
 * `igBd_pos_of_leftProp`: a function vanishing at `0` and at `∞` whose derivative has the sign
   pattern `+ … + − … −` (positivity of `H'` propagates to the left) is positive on `(0,∞)`;
   `igBd_rightProp`, `igBd_neg_of_deriv_pos` are companion sign lemmas.
@@ -17,17 +31,21 @@ public import DLMF.IncompleteGamma.ContinuedProperties
   the Gamma law), by the reflection `t ↦ a²/t`.
 * `igBd_two_lower_mode_lt_Gamma`: `2γ(a,a-1) < Γ(a)` for `a > 1` (median above the mode), by
   the reflection `t ↦ 2(a-1)-t`.
-* `igBd_regGamma_lt_pow`, `igBd_pow_lt_regGamma` with `igBd_prop_*`: Alzer's bounds
-  `(1-e^{-αx})^a < P(a,x) < (1-e^{-βx})^a` (DLMF 8.10.11), via the sign of the logarithmic
-  derivative ratio `igBd_k` and the strict convexity of `ℓ(u) = log((1-e^{-u})/u)`.
 * `igBd_upper_gt`, `igBd_upper_lt`: the bounds of DLMF 8.10.10 in the form
   `e^{-x}((x+2)^a-x^a)/(2a) < Γ(a,x) < e^{-x}((x+c)^a-x^a)/(ac)`, `c = Γ(1+a)^{1/(a-1)}`;
-  the derivative of the difference is `e^{-x} x^a λ^{-2} Q(λ/x)` with an explicit `igBd_Q`
-  whose second derivative changes sign once.
-* `igBd_normIncGammaQ_re`, `igBd_normIncGammaP_re`: the continued `P`, `Q` at real `a > 0`,
+  the derivative of the difference is `e^{-x} x^a λ^{-2} Q(λ/x)`, and the second derivative
+  of `igBd_Q` changes sign once.
+* `igBd_ell_strictConvexOn`: strict convexity of `ℓ` on `[0,∞)`.
+* `igBd_regGamma_lt_pow`, `igBd_pow_lt_regGamma`, with `igBd_prop_da_lt_one`,
+  `igBd_prop_da_gt_one`, `igBd_prop_one_gt_one`, `igBd_prop_one_lt_one`: Alzer's bounds
+  `(1-e^{-αx})^a < P(a,x) < (1-e^{-βx})^a` (DLMF 8.10.11), via the sign of `igBd_k`.
+* `igBd_normIncGammaP_re`, `igBd_normIncGammaQ_re`: the continued `P`, `Q` at real `a > 0`,
   `x ≥ 0` in terms of TauCeti's `lowerIncompleteGamma`.
 
-Lower incomplete Gamma API from TauCeti (`TauCeti.lowerIncompleteGamma`).
+## Implementation notes
+
+The lower incomplete Gamma API comes from TauCeti (`TauCeti.lowerIncompleteGamma`). Lean's
+conventions `x/0 = 0` and `log 0 = 0` give `ℓ(0) = 0`, the limit of `ℓ` at `0`.
 -/
 
 @[expose] public noncomputable section

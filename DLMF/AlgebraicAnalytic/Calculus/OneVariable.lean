@@ -19,26 +19,33 @@ public import Mathlib.Topology.EMetricSpace.BoundedVariation
 # Calculus of one variable (DLMF §1.4)
 
 Most of DLMF §1.4 is in Mathlib; the pointers are in
-`DLMF.AlgebraicAnalytic.Calculus.MathlibCoverage`. This file states the remaining items:
+`DLMF.AlgebraicAnalytic.Calculus.MathlibCoverage`. This file states the remaining items.
 
-* the ε–δ form 1.4.2 of right continuity;
-* the antiderivatives 1.4.17 and the linear combination 1.4.19;
-* improper integrals at a finite endpoint 1.4.23 and absolute convergence (§1.4(v));
-* absolutely continuous and discrete Stieltjes measures 1.4.23_1–1.4.23_3;
-* principal values of integrable functions (1.4.24–1.4.25);
-* the first and second mean value theorems for integrals 1.4.29–1.4.30, repeated integrals
-  1.4.31, the total variation formula 1.4.34;
-* L'Hôpital's rule for `∞/∞` (1.4.14–1.4.15) and Faà di Bruno's formula 1.4.13;
-* extrema on a closed interval (§1.4(vii)) and the derivative criteria for convexity
-  (§1.4(viii)).
+## Main results
 
-The integral mean-value formulas use Mathlib’s
-`exists_eq_const_mul_intervalIntegral_of_nonneg` and
-`exists_eq_const_mul_intervalIntegral_of_nonneg_of_monotoneOn`. The mixed Stieltjes measure
-formula uses Mathlib’s `integral_add_measure`, `integral_finsetSum_measure`, and the integral
-identity for a measure with density; the finite atomic measure is unchanged by restriction
-because all its mass points lie inside the integration interval. L’Hôpital’s rule with an
-unbounded denominator uses the Mathlib-based increment comparison theorem in
+* `continuousWithinAt_Ici_iff_eps_delta`: the ε–δ form of right continuity (DLMF 1.4.1–1.4.2).
+* `iteratedDeriv_comp_faaDiBruno`: Faà di Bruno's formula (DLMF 1.4.13).
+* `lhopital_atTop_nhdsNE`: L'Hôpital's rule for `∞/∞` (DLMF 1.4.14–1.4.15).
+* `hasDerivAt_zpow_succ_div`, `hasDerivAt_pow_succ_div`, `hasDerivAt_log_abs`: the
+  antiderivatives 1.4.17; `integral_const_mul_add_const_mul`: linearity 1.4.19.
+* `tendsto_integral_nhdsLT_of_integrableOn`, `tendsto_integral_of_tendsto_integral_abs`:
+  improper integrals at a finite endpoint (DLMF 1.4.23) and absolute convergence (§1.4(v)).
+* `stieltjes_measure_eq_withDensity`, `setIntegral_stieltjes_eq_integral_mul`,
+  `setIntegral_withDensity_add_dirac`: Stieltjes measures (DLMF 1.4.23_1–1.4.23_3).
+* `hasCauchyPrincipalValue_of_intervalIntegrable`, `hasPrincipalValueAtInfinity_of_integrable`:
+  principal values of integrable functions (DLMF 1.4.24–1.4.25).
+* `exists_integral_mul_eq_mul_integral`, `exists_integral_mul_eq_secondMeanValue`: the first
+  and second mean value theorems for integrals (DLMF 1.4.29–1.4.30).
+* `iterate_primitive_eq_integral`: repeated integrals (DLMF 1.4.31).
+* `eVariationOn_eq_integral_norm_deriv`: the total variation formula (DLMF 1.4.34).
+* `exists_isMaxOn_Icc_endpoint_or_isLocalMax`, `exists_isMinOn_Icc_endpoint_or_isLocalMin`:
+  extrema on a closed interval (§1.4(vii)).
+* `convexOn_Ioo_iff_deriv2_nonneg`, `convexOn_Ioo_iff_tangent_le`: derivative criteria for
+  convexity (§1.4(viii)).
+
+## Implementation notes
+
+L'Hôpital's rule with an unbounded denominator uses the increment comparison theorem in
 `DLMFMathlib.Analysis.Calculus.LHopitalInfinity`.
 -/
 

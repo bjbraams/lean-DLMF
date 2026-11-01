@@ -13,8 +13,6 @@ public import DLMF.Struve.Representations.IntegralRelations
 /-!
 # Struve integrals and Laplace transforms
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+Integral representations of the Struve functions (DLMF §11.5) and integrals of Struve
+functions, including Mellin and Laplace transforms (DLMF §11.7).
 -/

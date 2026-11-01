@@ -15,6 +15,18 @@ The change of variables `t = exp(-u)` converts the Mellin integrand to
 `exp(-s*u) f(exp(-u))` and multiplicative convolution to ordinary convolution on the real line.
 This proves both absolute convergence and the product formula for the Mellin transform.
 
+## Main results
+
+* `mellinConvergent_iff_integrable_exp_mul`: absolute Mellin convergence is integrability on
+  the real line in logarithmic coordinates.
+* `mellin_eq_integral_exp_mul`: the Mellin transform as an integral in logarithmic coordinates.
+* `hasMellin_integral_mul_div`: the Mellin transform of a multiplicative convolution is the
+  product of the Mellin transforms.
+* `MellinConvergent.of_re_eq`: absolute Mellin convergence depends only on the real part of
+  the exponent.
+
+## Implementation notes
+
 The convergence adapter follows the change-of-variables argument in Mathlib's
 `mellinInv_mellin_eq`. Evaluation reuses `mellin_eq_fourier`, and the convolution step uses
 `MeasureTheory.integral_convolution` and `MeasureTheory.Integrable.integrable_convolution`.

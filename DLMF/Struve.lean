@@ -21,9 +21,10 @@ public import DLMF.Struve.LargeOrderTools
 public import DLMF.Struve.RelativeBounds
 
 /-!
-# Struve, Lommel and Anger–Weber functions
+# Struve, Lommel and Anger–Weber functions (DLMF Chapter 11)
 
-DLMF statement acquisition and first proofs. The original cylinder theory is
-in `DLMF.Confluent.ParabolicCylinder`. Coverage, source qualifications and
-remaining admissions are documented in `DLMF111214Acquisition.md`.
+This umbrella collects the DLMF Chapter 11 development: the Struve functions `𝐇_ν`, `𝐋_ν`,
+`𝐊_ν`, `𝐌_ν` with their series, equations, representations and properties, the Lommel
+functions, the Anger and Weber functions, the asymptotic expansions, and the computational
+claims of the chapter.
 -/

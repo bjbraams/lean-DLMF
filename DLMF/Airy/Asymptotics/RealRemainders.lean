@@ -10,11 +10,27 @@ public import DLMF.Airy.Asymptotics.RotatedBi
 /-!
 # Real Airy remainders and Stieltjes bounds
 
-Binomial remainders and Stieltjes representations give signed and absolute error bounds for real
-Airy expansions.
+Binomial remainders and real Laplace representations give signed first-neglected-term bounds
+for the expansions of `Ai` and `Ai'` on the positive axis (DLMF §9.7(iii)), and Stieltjes ray
+representations give the bounds of DLMF 9.7.17 for `Ai` in `|arg z| < 2π/3`.
 
-Source references and common attribution are retained in
-`DLMF.Airy.Asymptotics`.
+## Main definitions
+
+* `airyReal_rho`: the remainder of the binomial series of `(1 + t)^β`.
+* `airySt_p`, `airySt_q`: the products `(1/6)_N (5/6)_N` and the auxiliary sequence behind the
+  sharp Gamma inequality.
+
+## Main results
+
+* `airyReal_rho_btw`, `airyReal_integral_btw`: the binomial remainder and its Laplace transform
+  lie between `0` and the first neglected term.
+* `airy_ai_real_error`, `airy_aiDeriv_real_error`: first-neglected-term remainder bounds and
+  signs for `Ai` and `Ai'` (DLMF §9.7(iii)).
+* `airySt_F_eq`: the normalized `Ai` as a rotated Laplace integral.
+* `airySt_ai_remainder`, `airySt_ai_le_M`, `airySt_ai_le_chi`: the `Ai` remainder as a ray
+  remainder and its bounds in `|arg z| < 2π/3`.
+* `airySt_gamma_ineq`: the sharp Gamma inequality `(N/(2e))^N ≤ √(2π(N+1/6)) u_N` behind the
+  last sector of DLMF 9.7.17.
 -/
 
 @[expose] public noncomputable section
@@ -486,7 +502,7 @@ theorem airyReal_airyV_one : airyV 1 = -7 / 72 := by
   rw [airyV, airyReal_airyU_one]; norm_num
 
 /-- First-neglected-term remainder bound and its sign, DLMF §9.7(iii). -/
-theorem airy_ai_real_error {x : ℝ} (hx : 0 < x) {N : ℕ} (hN : 0 ≤ N) :
+theorem airy_ai_real_error {x : ℝ} (hx : 0 < x) {N : ℕ} :
     ‖airyRemainder .ai N x‖ ≤ 
       ‖airyExpansionCoeff .ai N / airyZetaComplex x ^ N‖ ∧
       0 ≤ (airyRemainder .ai N x).re * (airyExpansionCoeff .ai N).re :=

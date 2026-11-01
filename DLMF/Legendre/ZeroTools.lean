@@ -16,25 +16,34 @@ public import DLMFMathlib.Analysis.ODE.SturmDeformation
 Tools for the real zero counts of DLMF §14.16(ii). The Ferrers functions of real parameters
 satisfy the self-adjoint equation `((1-x²)y')' + (ν(ν+1) - μ²/(1-x²)) y = 0` on `(-1, 1)`
 (`lzt_ferrersP_sol`). For two solutions `y`, `u` with coefficients `qy < qu`, the weighted
-Wronskian `W = (1-x²)(u'y - uy')` is strictly monotone wherever `u y > 0`; this gives
+Wronskian `W = (1-x²)(u'y - uy')` is strictly monotone wherever `u y > 0`.
 
-* the classical Sturm comparison between consecutive zeros (`lzt_between`);
-* comparisons at the ends `x = ±1`, where a sign of `W` forces `y/u` to diverge like
-  `log(1∓x)` as soon as `(1-x²)u² = O(1∓x)` (`lzt_upper_right`, `lzt_lower_right`,
-  `lzt_lower_left`, `lzt_lower_whole`), using `ODE.sturmCount_exists_pos_of_deriv_ge`;
-* lower and upper zero counts from an exactly known comparison function (`lzt_lower_count`,
-  `lzt_upper_count`).
+## Main definitions
 
-The comparison functions are the polynomial cases
-`𝖯^{-m}_{m+j}(x) = B (1-x²)^{m/2} C_j^{(m+1/2)}(x)` (`lzt_ferrersP_base`, from DLMF 14.3.1 and
-Euler's transformation 15.8.1), whose zeros are those of the Gegenbauer polynomial
-(`ultrasphPoly_zeros_Ioo`, DLMF 18.16(i)). Zeros of `𝖯^{-m}_ν` are simple by the Wronskians
-14.2.3–14.2.4 (`lzt_ferrersP_simple`), and `𝖯^{-m}_ν` has no zeros near `1`
-(`lzt_ferrersP_near_one`). The result is the exact count `max(⌈ν - m⌉, 0)` of zeros of
-`𝖯^{-m}_ν`, `m ≥ 0`, `ν ≥ -1/2`, in `(-1, 1)` (`lzt_ferrersP_neg_order_zero_count`); no
-continuity in the parameters is needed.
+* `LztIsSol`: `y` with derivative `y'` solves `((1-x²) y')' + q y = 0` on `(-1, 1)`.
+* `lzt_W`: the weighted Wronskian `(1-x²)(u'y - uy')`.
 
-All helper names carry the prefix `lzt_`.
+## Main results
+
+* `lzt_between`: the classical Sturm comparison between consecutive zeros.
+* `lzt_upper_right`, `lzt_lower_right`, `lzt_lower_left`, `lzt_lower_whole`: comparisons at the
+  ends `x = ±1`, where a sign of `W` forces `y/u` to diverge like `log(1∓x)` as soon as
+  `(1-x²)u² = O(1∓x)`.
+* `lzt_lower_count`, `lzt_upper_count`: lower and upper zero counts from an exactly known
+  comparison function.
+* `lzt_ferrersP_base`: the polynomial cases `𝖯^{-m}_{m+j}(x) = B (1-x²)^{m/2} C_j^{(m+1/2)}(x)`.
+* `lzt_ferrersP_simple`, `lzt_ferrersP_near_one`: zeros of `𝖯^{-m}_ν` are simple, and there are
+  none near `1`.
+* `lzt_ferrersP_neg_order_zero_count`: `𝖯^{-m}_ν` (`m ≥ 0`, `ν ≥ -1/2`) has exactly
+  `max(⌈ν - m⌉, 0)` zeros in `(-1, 1)` (DLMF §14.16(ii)).
+
+## Implementation notes
+
+The end comparisons use `ODE.sturmCount_exists_pos_of_deriv_ge`. The comparison functions are
+the polynomial cases, obtained from DLMF 14.3.1 and Euler's transformation 15.8.1, whose zeros
+are those of the Gegenbauer polynomial (`ultrasphPoly_zeros_Ioo`, DLMF §18.16(i)). Simplicity of
+the zeros follows from the Wronskians DLMF 14.2.3–14.2.4. The zero count needs no continuity in
+the parameters. All helper names carry the prefix `lzt_`.
 -/
 
 @[expose] public noncomputable section

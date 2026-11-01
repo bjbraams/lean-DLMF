@@ -12,17 +12,38 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 
 /-!
-# Analytic properties and zeros: DLMF §§16.2,16.9
+# Analytic properties and zeros of `ₚF_q` (DLMF §§16.2, 16.9)
 
-Natural-order convergence is distinguished from absolute convergence on the unit
-circle. The statement for `p>q+1` concerns the formal coefficient series, without
-assigning its divergent sum an analytic meaning. Analytic continuation uses the
-pinned TauCeti predicate for continuation along a path; no new continuation notion
-is introduced. Parameter holomorphy applies to every such continued branch.
+Convergence of the generalized hypergeometric series, on and off the unit circle, analyticity
+of its principal branch and of its analytic continuations, holomorphy in the parameters, and
+finiteness of zeros.
 
-The finite-product coefficient-ratio estimates adapt Moritz Doll's private lemmas
-in `Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric`, extending them
-to positive degree. The adaptation is identified again at the helper lemmas.
+## Main results
+
+* `genHG_entire`, `genHG_hasSum_entire`: for `p ≤ q` the series converges everywhere and
+  defines an entire function.
+* `genHG_terminating_entire`: terminating series are polynomials.
+* `genHG_radius_one`, `genHG_radius_zero`, `genHG_diverges_nonzero`: the radius is `1` for
+  `p = q + 1` and `0` for nonterminating `p > q + 1`.
+* `genHG_unit_absolute_iff`, `genHG_unit_conditional`, `genHG_unit_diverges`: absolute and
+  conditional convergence and divergence on the unit circle.
+* `genHG_one_hasSum`, `genHG_one_converges_iff`: convergence at `z = 1`.
+* `genHG_principal_analytic`, `genHG_continuation_along`: analyticity on the cut plane and
+  continuation along paths avoiding `0` and `1`.
+* `genRegularizedHG_parameter_entire`, `genContinued_parameter_entire`: joint holomorphy in the
+  parameters, DLMF 16.2.5.
+* `genHG_finite_zeros_iff`, `genHG_finite_real_zeros`: finiteness of zeros (DLMF §16.9).
+
+## Implementation notes
+
+Natural-order convergence is distinguished from absolute convergence on the unit circle. The
+statement for `p > q + 1` concerns the formal coefficient series, without assigning its
+divergent sum an analytic meaning. Analytic continuation uses the TauCeti predicate for
+continuation along a path; parameter holomorphy applies to every such continued branch.
+
+The finite-product coefficient-ratio estimates adapt Moritz Doll's private lemmas in
+`Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric`, extending them to positive
+degree; the adaptation is identified again at the helper lemmas.
 -/
 
 @[expose] public section
@@ -31,8 +52,9 @@ open scoped Topology Real ENNReal
 noncomputable section
 namespace DLMF.Hypergeometric
 
-/-- For p≤q the full ordinary principal function is entire, with regular lower parameters. -/
-theorem genHG_entire {a b : Multiset ℂ} (h : a.card ≤ b.card) (hb : GenDenRegular b) :
+/-- For `p ≤ q` the full ordinary principal function is entire, for all lower parameters (at
+non-regular ones Lean's division by zero applies). -/
+theorem genHG_entire {a b : Multiset ℂ} (h : a.card ≤ b.card) :
     AnalyticOnNhd ℂ (genHG a b) univ := by
   have hne : a.card ≠ b.card + 1 := by omega
   unfold genHG genRegularizedHG
@@ -75,7 +97,7 @@ theorem genHG_radius_one {a b : Multiset ℂ} (h : a.card = b.card + 1)
   exact ha ⟨x, hx, n, hxn⟩
 
 /-- Gauss asymptotics of one rising factorial: `(s)ₙ n^(1-s)/n! → 1/Γ(s)`. -/
-lemma ghbR4_poch_tendsto {s : ℂ} (hs : ∀ k : ℕ, s ≠ -k) :
+private lemma tendsto_poch_mul_cpow_div_factorial {s : ℂ} (hs : ∀ k : ℕ, s ≠ -k) :
     Tendsto (fun n : ℕ => poch s n * (n : ℂ) ^ (1 - s) / (n.factorial : ℂ)) atTop
       (𝓝 (Gamma s)⁻¹) := by
   have hlim : Tendsto (fun n : ℕ => 1 + s / (n : ℂ)) atTop (𝓝 1) := by
@@ -94,13 +116,13 @@ lemma ghbR4_poch_tendsto {s : ℂ} (hs : ∀ k : ℕ, s ≠ -k) :
   rw [add_comm (n : ℂ) s, div_self hsn]
 
 /-- Gauss asymptotics of a multiset rising-factorial product. -/
-lemma ghbR4_genPoch_tendsto (a : Multiset ℂ) (ha : ∀ x ∈ a, ∀ k : ℕ, x ≠ -k) :
+private lemma tendsto_genPoch_mul_cpow_div_factorial_pow (a : Multiset ℂ) (ha : ∀ x ∈ a, ∀ k : ℕ, x ≠ -k) :
     Tendsto (fun n : ℕ => genPoch a n * (n : ℂ) ^ (a.map (fun x => 1 - x)).sum /
       (n.factorial : ℂ) ^ a.card) atTop (𝓝 (a.map fun x => (Gamma x)⁻¹).prod) := by
   induction a using Multiset.induction_on with
   | empty => simp [genPoch]
   | @cons x a ih =>
-    have hx := ghbR4_poch_tendsto (ha x (Multiset.mem_cons_self x a))
+    have hx := tendsto_poch_mul_cpow_div_factorial (ha x (Multiset.mem_cons_self x a))
     have ih' := ih (fun y hy => ha y (Multiset.mem_cons_of_mem hy))
     simp only [Multiset.map_cons, Multiset.prod_cons]
     apply (hx.mul ih').congr'
@@ -111,14 +133,14 @@ lemma ghbR4_genPoch_tendsto (a : Multiset ℂ) (ha : ∀ x ∈ a, ∀ k : ℕ, x
     ring
 
 /-- Sum of `1 - x` over a multiset. -/
-lemma ghbR4_sum_one_sub (a : Multiset ℂ) :
+private lemma multiset_sum_map_one_sub (a : Multiset ℂ) :
     (a.map (fun x => 1 - x)).sum = a.card - a.sum := by
   induction a using Multiset.induction_on with
   | empty => simp
   | @cons x a ih => simp [Multiset.sum_cons, ih]; ring
 
 /-- A product of reciprocal Gamma values at regular points is nonzero. -/
-lemma ghbR4_prod_inv_Gamma_ne_zero {a : Multiset ℂ} (ha : ∀ x ∈ a, ∀ k : ℕ, x ≠ -k) :
+private lemma prod_map_inv_Gamma_ne_zero {a : Multiset ℂ} (ha : ∀ x ∈ a, ∀ k : ℕ, x ≠ -k) :
     (a.map fun x => (Gamma x)⁻¹).prod ≠ 0 := by
   apply Multiset.prod_ne_zero
   intro h0
@@ -126,16 +148,16 @@ lemma ghbR4_prod_inv_Gamma_ne_zero {a : Multiset ℂ} (ha : ∀ x ∈ a, ∀ k :
   exact inv_ne_zero (Gamma_ne_zero (ha x hx)) heq
 
 /-- Balanced coefficients satisfy `genCoeff a b n · n^(γ+1) → Π Γ(a)⁻¹ / Π Γ(b)⁻¹`. -/
-lemma ghbR4_genCoeff_tendsto {a b : Multiset ℂ} (h : a.card = b.card + 1)
+private lemma tendsto_genCoeff_mul_cpow {a b : Multiset ℂ} (h : a.card = b.card + 1)
     (ha : ∀ x ∈ a, ∀ k : ℕ, x ≠ -k) (hb : GenDenRegular b) :
     Tendsto (fun n : ℕ => genCoeff a b n * (n : ℂ) ^ (genExcess a b + 1)) atTop
       (𝓝 ((a.map fun x => (Gamma x)⁻¹).prod / (b.map fun x => (Gamma x)⁻¹).prod)) := by
-  apply ((ghbR4_genPoch_tendsto a ha).div (ghbR4_genPoch_tendsto b hb)
-    (ghbR4_prod_inv_Gamma_ne_zero hb)).congr'
+  apply ((tendsto_genPoch_mul_cpow_div_factorial_pow a ha).div (tendsto_genPoch_mul_cpow_div_factorial_pow b hb)
+    (prod_map_inv_Gamma_ne_zero hb)).congr'
   filter_upwards [eventually_ne_atTop 0] with n hn
   have hn0 : (n : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hn
   have hexp : genExcess a b + 1 = (a.map (fun x => 1 - x)).sum - (b.map (fun x => 1 - x)).sum := by
-    rw [ghbR4_sum_one_sub, ghbR4_sum_one_sub, h, genExcess]; push_cast; ring
+    rw [multiset_sum_map_one_sub, multiset_sum_map_one_sub, h, genExcess]; push_cast; ring
   rw [hexp, cpow_sub _ _ hn0, h, genCoeff, Pi.div_apply]
   have := genPoch_ne_zero hb n
   have := (Nat.cast_ne_zero (R := ℂ)).mpr n.factorial_ne_zero
@@ -144,18 +166,18 @@ lemma ghbR4_genCoeff_tendsto {a b : Multiset ℂ} (h : a.card = b.card + 1)
   ring
 
 /-- Norm form: `‖genCoeff a b n‖ · n^(Re γ + 1)` tends to a positive limit. -/
-lemma ghbR4_norm_genCoeff_tendsto {a b : Multiset ℂ} (h : a.card = b.card + 1)
+private lemma exists_tendsto_norm_genCoeff_mul_rpow {a b : Multiset ℂ} (h : a.card = b.card + 1)
     (ha : ∀ x ∈ a, ∀ k : ℕ, x ≠ -k) (hb : GenDenRegular b) :
     ∃ L : ℝ, 0 < L ∧ Tendsto (fun n : ℕ => ‖genCoeff a b n‖ * (n : ℝ) ^ ((genExcess a b).re + 1))
       atTop (𝓝 L) := by
-  refine ⟨_, norm_pos_iff.mpr (div_ne_zero (ghbR4_prod_inv_Gamma_ne_zero ha)
-    (ghbR4_prod_inv_Gamma_ne_zero hb)), (ghbR4_genCoeff_tendsto h ha hb).norm.congr' ?_⟩
+  refine ⟨_, norm_pos_iff.mpr (div_ne_zero (prod_map_inv_Gamma_ne_zero ha)
+    (prod_map_inv_Gamma_ne_zero hb)), (tendsto_genCoeff_mul_cpow h ha hb).norm.congr' ?_⟩
   filter_upwards [eventually_ne_atTop 0] with n hn
   rw [norm_mul, norm_natCast_cpow_of_pos (Nat.pos_of_ne_zero hn)]
   simp
 
 /-- A nonterminating upper multiset has no nonpositive integer entry. -/
-lemma ghbR4_not_neg_of_not_terminates {a : Multiset ℂ} (ha : ¬GenTerminates a) :
+private lemma ne_neg_nat_of_not_genTerminates {a : Multiset ℂ} (ha : ¬GenTerminates a) :
     ∀ x ∈ a, ∀ k : ℕ, x ≠ -k := fun x hx k hxk => ha ⟨x, hx, k, hxk⟩
 
 /-- Balanced hypergeometric coefficients still tend to zero after multiplication by a
@@ -171,8 +193,8 @@ theorem genCoeff_mul_pow_tendsto_zero {a b : Multiset ℂ} (h : a.card = b.card 
     unfold genCoeff genPoch
     rw [Multiset.prod_eq_zero (Multiset.mem_map.mpr ⟨_, hx, poch_neg_nat_eq_zero hn⟩),
       zero_div, zero_mul]
-  · obtain ⟨L, _, ht⟩ := ghbR4_norm_genCoeff_tendsto h
-      (ghbR4_not_neg_of_not_terminates ha) hb
+  · obtain ⟨L, _, ht⟩ := exists_tendsto_norm_genCoeff_mul_rpow h
+      (ne_neg_nat_of_not_genTerminates ha) hb
     have he : 0 < (genExcess a b).re + 1 - (k : ℝ) := by
       have hγ := hγ.resolve_right ha
       linarith
@@ -197,10 +219,10 @@ theorem genCoeff_tendsto_zero {a b : Multiset ℂ} (h : a.card = b.card + 1) (hb
     genCoeff_mul_pow_tendsto_zero h hb 0 (by simpa only [Nat.cast_zero, zero_sub] using hγ)
 
 /-- The balanced nonterminating coefficients are absolutely summable iff `Re γ > 0`. -/
-lemma ghbR4_summable_norm_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
+private lemma summable_norm_genCoeff_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
     (hb : GenDenRegular b) (ha : ¬GenTerminates a) :
     Summable (fun n : ℕ => ‖genCoeff a b n‖) ↔ 0 < (genExcess a b).re := by
-  obtain ⟨L, hL, hlim⟩ := ghbR4_norm_genCoeff_tendsto h (ghbR4_not_neg_of_not_terminates ha) hb
+  obtain ⟨L, hL, hlim⟩ := exists_tendsto_norm_genCoeff_mul_rpow h (ne_neg_nat_of_not_genTerminates ha) hb
   set e := (genExcess a b).re + 1
   have heq : Asymptotics.IsEquivalent atTop (fun n : ℕ => ‖genCoeff a b n‖)
       (fun n : ℕ => L * (n : ℝ) ^ (-e)) := by
@@ -217,7 +239,7 @@ lemma ghbR4_summable_norm_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
   constructor <;> intro hh <;> linarith
 
 /-- Convergence of natural partial sums forces the terms to tend to zero. -/
-lemma ghbR4_tendsto_zero_of_converges {a b : Multiset ℂ} {z v : ℂ}
+private lemma tendsto_genCoeff_mul_pow_zero_of_converges {a b : Multiset ℂ} {z v : ℂ}
     (hv : GenSeriesConvergesTo a b z v) :
     Tendsto (fun n : ℕ => genCoeff a b n * z ^ n) atTop (𝓝 0) := by
   have hS : Tendsto (fun N : ℕ => ∑ n ∈ range N, genCoeff a b n * z ^ n) atTop (𝓝 v) := hv
@@ -226,7 +248,7 @@ lemma ghbR4_tendsto_zero_of_converges {a b : Multiset ℂ} {z v : ℂ}
   simpa only [Finset.sum_range_succ, add_sub_cancel_left, sub_self] using hS'.sub hS
 
 /-- At one the guarded principal value is always the totalized series value. -/
-lemma ghbR4_genRegularizedHG_one (a b : Multiset ℂ) :
+private lemma genRegularizedHG_one_eq_regularizedHGFun (a b : Multiset ℂ) :
     genRegularizedHG a b 1 = Complex.regularizedHGFun a b 1 := by
   classical
   unfold genRegularizedHG
@@ -246,7 +268,7 @@ theorem genHG_unit_absolute_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
     GenSeriesAbsolutelyConverges a b z ↔ 0 < (genExcess a b).re := by
   unfold GenSeriesAbsolutelyConverges
   simp only [norm_mul, norm_pow, hz, one_pow, mul_one]
-  exact ghbR4_summable_norm_iff h hb ha
+  exact summable_norm_genCoeff_iff h hb ha
 
 /-- Every nonunit point of the unit circle converges in natural order when the excess exceeds minus one. -/
 theorem genHG_unit_conditional {a b : Multiset ℂ} (h : a.card = b.card + 1)
@@ -270,7 +292,7 @@ as its sum. This uses only the endpoint normalization, not existence of continua
 lemma genHG_one_hasSum_of_summable {a b : Multiset ℂ} (hb : GenDenRegular b)
     (hs : Summable (genCoeff a b)) : HasSum (genCoeff a b) (genHG a b 1) := by
   convert hs.hasSum using 1
-  rw [genHG, ghbR4_genRegularizedHG_one, regularizedHGFun_eq_tsum', ← tsum_mul_left]
+  rw [genHG, genRegularizedHG_one_eq_regularizedHGFun, regularizedHGFun_eq_tsum', ← tsum_mul_left]
   congr 1
   funext n
   rw [genCoeff_eq_gamma_mul_regularized hb, one_pow, mul_one]
@@ -282,7 +304,7 @@ theorem genHG_one_hasSum {a b : Multiset ℂ} (h : a.card = b.card + 1)
   have hs : Summable (fun n : ℕ => genCoeff a b n) := by
     by_cases ha : GenTerminates a
     · exact genCoeff_summable_of_terminates ha
-    · exact Summable.of_norm ((ghbR4_summable_norm_iff h hb ha).mpr hγ)
+    · exact Summable.of_norm ((summable_norm_genCoeff_iff h hb ha).mpr hγ)
   exact genHG_one_hasSum_of_summable hb hs
 
 /-- At real excess at most minus one, no point of the unit circle converges in the nonterminating case. -/
@@ -290,10 +312,10 @@ theorem genHG_unit_diverges {a b : Multiset ℂ} (h : a.card = b.card + 1)
     (hb : GenDenRegular b) (ha : ¬GenTerminates a) {z : ℂ} (hz : ‖z‖ = 1)
     (hγ : (genExcess a b).re ≤ -1) : ¬∃ v : ℂ, GenSeriesConvergesTo a b z v := by
   rintro ⟨v, hv⟩
-  obtain ⟨L, hL, hlim⟩ := ghbR4_norm_genCoeff_tendsto h (ghbR4_not_neg_of_not_terminates ha) hb
+  obtain ⟨L, hL, hlim⟩ := exists_tendsto_norm_genCoeff_mul_rpow h (ne_neg_nat_of_not_genTerminates ha) hb
   have ht : Tendsto (fun n : ℕ => ‖genCoeff a b n‖) atTop (𝓝 0) := by
     simpa only [norm_mul, norm_pow, hz, one_pow, mul_one, norm_zero] using
-      (ghbR4_tendsto_zero_of_converges hv).norm
+      (tendsto_genCoeff_mul_pow_zero_of_converges hv).norm
   have h0 : Tendsto (fun n : ℕ => ‖genCoeff a b n‖ * (n : ℝ) ^ ((genExcess a b).re + 1))
       atTop (𝓝 0) := by
     refine squeeze_zero' (Eventually.of_forall fun n => by positivity) ?_ ht
@@ -354,7 +376,7 @@ private lemma gen_prod_normalized_ratio_tendsto (a b : Multiset ℂ) :
   simp
 
 /-- Telescoping (hockey-stick) identity for partial sums of Pochhammer ratios. -/
-lemma ghbR4_hockey (x : ℂ) (N : ℕ) :
+private lemma sum_range_poch_div_factorial (x : ℂ) (N : ℕ) :
     ∑ n ∈ range (N + 1), poch x n / (n.factorial : ℂ) = poch (x + 1) N / (N.factorial : ℂ) := by
   induction N with
   | zero => simp [poch_zero]
@@ -367,7 +389,7 @@ lemma ghbR4_hockey (x : ℂ) (N : ℕ) :
     ring
 
 /-- The powers `N^(-γ)` with `γ ≠ 0` cannot converge to a nonzero limit. -/
-lemma ghbR4_not_tendsto_cpow {γ : ℂ} (hγ : γ ≠ 0) {L : ℂ} (hL : L ≠ 0) :
+private lemma not_tendsto_natCast_cpow_neg {γ : ℂ} (hγ : γ ≠ 0) {L : ℂ} (hL : L ≠ 0) :
     ¬Tendsto (fun N : ℕ => (N : ℂ) ^ (-γ)) atTop (𝓝 L) := by
   intro ht
   have hm : ∀ m : ℕ, 1 ≤ m → (m : ℂ) ^ (-γ) = 1 := by
@@ -416,18 +438,18 @@ lemma ghbR4_not_tendsto_cpow {γ : ℂ} (hγ : γ ≠ 0) {L : ℂ} (hL : L ≠ 0
     linarith
 
 /-- The model series `∑ (-γ)_n/n!` diverges when `Re γ ≤ 0` and `γ ≠ 0`. -/
-lemma ghbR4_model_not_conv {γ : ℂ} (hσ : γ.re ≤ 0) (hγ0 : γ ≠ 0) :
+private lemma not_tendsto_sum_poch_neg_div_factorial {γ : ℂ} (hσ : γ.re ≤ 0) (hγ0 : γ ≠ 0) :
     ¬∃ L, Tendsto (fun N : ℕ => ∑ n ∈ range N, poch (-γ) n / (n.factorial : ℂ)) atTop (𝓝 L) := by
   rintro ⟨L, hL⟩
   have hL' := (tendsto_add_atTop_iff_nat 1).2 hL
-  simp only [ghbR4_hockey] at hL'
+  simp only [sum_range_poch_div_factorial] at hL'
   set s := -γ + 1 with hs
   have hsp : ∀ k : ℕ, s ≠ -k := by
     intro k hk
     have := congrArg Complex.re hk
     simp [hs] at this
     linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
-  have hG := ghbR4_poch_tendsto hsp
+  have hG := tendsto_poch_mul_cpow_div_factorial hsp
   have hGne : (Gamma s)⁻¹ ≠ 0 := inv_ne_zero (Gamma_ne_zero hsp)
   have hq := hL'.div hG hGne
   have hpow : Tendsto (fun N : ℕ => (N : ℂ) ^ (-γ)) atTop (𝓝 (L / (Gamma s)⁻¹)) := by
@@ -446,10 +468,10 @@ lemma ghbR4_model_not_conv {γ : ℂ} (hσ : γ.re ≤ 0) (hγ0 : γ ≠ 0) :
     filter_upwards [eventually_ge_atTop 1] with N hN
     rw [norm_natCast_cpow_of_pos (by omega)]
     exact Real.one_le_rpow (by exact_mod_cast hN) (by simp; linarith)
-  exact ghbR4_not_tendsto_cpow hγ0 (norm_pos_iff.mp (by linarith)) hpow
+  exact not_tendsto_natCast_cpow_neg hγ0 (norm_pos_iff.mp (by linarith)) hpow
 
 /-- The model series `∑ (1)_n/(2)_n = ∑ 1/(n+1)` diverges. -/
-lemma ghbR4_harmonic_not_conv :
+private lemma not_tendsto_sum_poch_one_div_poch_two :
     ¬∃ L, Tendsto (fun N : ℕ => ∑ n ∈ range N, poch 1 n / poch 2 n) atTop (𝓝 L) := by
   rintro ⟨L, hL⟩
   have hre := (Complex.continuous_re.tendsto L).comp hL
@@ -468,12 +490,12 @@ lemma ghbR4_harmonic_not_conv :
   exact not_tendsto_nhds_of_tendsto_atTop Real.tendsto_sum_range_one_div_nat_succ_atTop _ hre
 
 /-- The first elementary symmetric function of a multiset is its sum. -/
-lemma ghbR4_esymm_one (s : Multiset ℂ) : s.esymm 1 = s.sum := by
+private lemma multiset_esymm_one (s : Multiset ℂ) : s.esymm 1 = s.sum := by
   simp [Multiset.esymm, Multiset.powersetCard_one, Multiset.map_map]
 
 /-- Two monic linear-factor products with equal degree and equal root sums differ
 by a polynomial of degree at most `card - 2`. -/
-lemma ghbR4_prod_diff_bound (u v : Multiset ℂ) (hc : u.card = v.card) (hs : u.sum = v.sum) :
+private lemma exists_norm_prod_add_sub_prod_add_le (u v : Multiset ℂ) (hc : u.card = v.card) (hs : u.sum = v.sum) :
     ∃ K : ℝ, ∀ x : ℝ, 1 ≤ x →
       ‖(u.map (· + (x : ℂ))).prod - (v.map (· + (x : ℂ))).prod‖ ≤ K * x ^ (u.card - 2) := by
   open Polynomial in
@@ -497,7 +519,7 @@ lemma ghbR4_prod_diff_bound (u v : Multiset ℂ) (hc : u.card = v.card) (hs : u.
       have : u.card - k = 0 ∨ u.card - k = 1 := by omega
       rcases this with h | h <;> rw [h]
       · simp
-      · rw [ghbR4_esymm_one, ghbR4_esymm_one, hs, sub_self]
+      · rw [multiset_esymm_one, multiset_esymm_one, hs, sub_self]
     · rw [coeff_eq_zero_of_natDegree_lt (by omega), coeff_eq_zero_of_natDegree_lt (by omega),
         sub_zero]
   have hDdeg : D.natDegree ≤ d := natDegree_le_iff_coeff_eq_zero.mpr hD
@@ -512,7 +534,7 @@ lemma ghbR4_prod_diff_bound (u v : Multiset ℂ) (hc : u.card = v.card) (hs : u.
   exact Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
 
 /-- Lower bound `(x/2)^card` for `∏ (y + x)` when `2‖y‖ ≤ x` for all roots `y`. -/
-lemma ghbR4_prod_lower (v : Multiset ℂ) {x : ℝ} (hx0 : 0 ≤ x) (hx : ∀ y ∈ v, 2 * ‖y‖ ≤ x) :
+private lemma pow_le_norm_prod_map_add (v : Multiset ℂ) {x : ℝ} (hx0 : 0 ≤ x) (hx : ∀ y ∈ v, 2 * ‖y‖ ≤ x) :
     (x / 2) ^ v.card ≤ ‖(v.map (· + (x : ℂ))).prod‖ := by
   induction v using Multiset.induction_on with
   | empty => simp
@@ -527,7 +549,7 @@ lemma ghbR4_prod_lower (v : Multiset ℂ) {x : ℝ} (hx0 : 0 ≤ x) (hx : ∀ y 
       (norm_nonneg _)
 
 /-- Successor step for generalized Pochhammer products. -/
-lemma ghbR4_genPoch_succ (a : Multiset ℂ) (n : ℕ) :
+private lemma genPoch_succ (a : Multiset ℂ) (n : ℕ) :
     genPoch a (n + 1) = genPoch a n * (a.map (· + (n : ℂ))).prod := by
   unfold genPoch
   rw [← Multiset.prod_map_mul]
@@ -535,22 +557,22 @@ lemma ghbR4_genPoch_succ (a : Multiset ℂ) (n : ℕ) :
   exact Multiset.map_congr rfl fun x _ => poch_succ x n
 
 /-- Ratio identity between consecutive generalized hypergeometric coefficients. -/
-lemma ghbR4_genCoeff_succ {a b : Multiset ℂ} (hb : GenDenRegular b) (n : ℕ) :
+lemma genCoeff_succ_mul {a b : Multiset ℂ} (hb : GenDenRegular b) (n : ℕ) :
     genCoeff a b (n + 1) * ((b.map (· + (n : ℂ))).prod * (n + 1)) =
       genCoeff a b n * (a.map (· + (n : ℂ))).prod := by
   have h1 := genPoch_ne_zero hb n
   have h2 := genPoch_ne_zero hb (n + 1)
-  rw [ghbR4_genPoch_succ] at h2
+  rw [genPoch_succ] at h2
   have h3 := (Nat.cast_ne_zero (R := ℂ)).mpr n.factorial_ne_zero
   have h4 : ((n : ℂ) + 1) ≠ 0 := by exact_mod_cast n.succ_ne_zero
   have h5 : (b.map (· + (n : ℂ))).prod ≠ 0 := right_ne_zero_of_mul h2
   unfold genCoeff
-  rw [ghbR4_genPoch_succ, ghbR4_genPoch_succ, Nat.factorial_succ]
+  rw [genPoch_succ, genPoch_succ, Nat.factorial_succ]
   push_cast
   field_simp
 
 /-- Summable tail bound from a summable-difference bound `‖d (n+1) - d n‖ ≤ K/n²`. -/
-lemma ghbR4_tail_bound {d : ℕ → ℂ} {D : ℂ} {K : ℝ} {n₀ : ℕ} (hn₀ : 2 ≤ n₀)
+private lemma norm_sub_lim_le_of_norm_succ_sub_le {d : ℕ → ℂ} {D : ℂ} {K : ℝ} {n₀ : ℕ} (hn₀ : 2 ≤ n₀)
     (hd : Tendsto d atTop (𝓝 D)) (hK : ∀ n, n₀ ≤ n → ‖d (n + 1) - d n‖ ≤ K / (n : ℝ) ^ 2) :
     ∀ n, n₀ ≤ n → ‖d n - D‖ ≤ K / ((n : ℝ) - 1) := by
   intro n hn
@@ -600,7 +622,7 @@ private lemma gen_one_model {γ : ℂ} (hγ : γ.re ≤ 0) :
       ¬∃ L, Tendsto (fun N : ℕ => ∑ n ∈ range N, poch α n / poch β n) atTop (𝓝 L) := by
   by_cases h0 : γ = 0
   · refine ⟨1, 2, fun k hk => ?_, fun k hk => ?_, by rw [h0]; ring,
-      ghbR4_harmonic_not_conv⟩ <;>
+      not_tendsto_sum_poch_one_div_poch_two⟩ <;>
     · have := congrArg Complex.re hk; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
   · refine ⟨-γ, 1, fun k hk => ?_, fun k hk => ?_, by ring, ?_⟩
     · rw [neg_inj] at hk
@@ -609,7 +631,7 @@ private lemma gen_one_model {γ : ℂ} (hγ : γ.re ≤ 0) :
       have hk0 : (k : ℝ) = 0 := by linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
       apply h0; rw [hk]; exact_mod_cast hk0
     · have := congrArg Complex.re hk; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
-    · simpa only [poch_nat_one] using ghbR4_model_not_conv hγ h0
+    · simpa only [poch_nat_one] using not_tendsto_sum_poch_neg_div_factorial hγ h0
 
 /-- If `d (n+1) ∏(wᵢ+n) = d n ∏(uᵢ+n)` for bounded `d`, where `u, w` have equal cardinality
 and equal sums, then the increments `d (n+1) - d n` are `O(n⁻²)`. -/
@@ -618,7 +640,7 @@ private lemma gen_ratio_step {d : ℕ → ℂ} {u w : Multiset ℂ} {k : ℕ} (h
     (hratio : ∀ n : ℕ, d (n + 1) * (w.map (· + (n : ℂ))).prod =
       d n * (u.map (· + (n : ℂ))).prod) :
     ∃ K2 : ℝ, ∃ n₀ : ℕ, 2 ≤ n₀ ∧ ∀ n, n₀ ≤ n → ‖d (n + 1) - d n‖ ≤ K2 / (n : ℝ) ^ 2 := by
-  obtain ⟨K, hK⟩ := ghbR4_prod_diff_bound u w (hu.trans hw.symm) hsum
+  obtain ⟨K, hK⟩ := exists_norm_prod_add_sub_prod_add_le u w (hu.trans hw.symm) hsum
   have hB0 : 0 ≤ B := (norm_nonneg _).trans (hB' 0)
   set R : ℝ := (w.map (‖·‖)).sum
   have hR : ∀ y ∈ w, ‖y‖ ≤ R := fun y hy =>
@@ -628,7 +650,7 @@ private lemma gen_ratio_step {d : ℕ → ℂ} {u w : Multiset ℂ} {k : ℕ} (h
   refine ⟨B * K * 2 ^ (k + 2), max 2 ⌈2 * R⌉₊, le_max_left _ _, fun n hn => ?_⟩
   have hn2 : (2 : ℝ) ≤ n := by exact_mod_cast (le_max_left _ _).trans hn
   have hnR : 2 * R ≤ n := (Nat.le_ceil _).trans (by exact_mod_cast (le_max_right _ _).trans hn)
-  have hlow := ghbR4_prod_lower w (x := n) (by positivity)
+  have hlow := pow_le_norm_prod_map_add w (x := n) (by positivity)
     (fun y hy => by linarith [hR y hy])
   have hdiff := hK n (by linarith)
   rw [hu, Nat.add_sub_cancel] at hdiff
@@ -730,17 +752,17 @@ theorem genHG_one_converges_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
   set m : ℕ → ℂ := fun n => poch α n / poch β n with hm
   have hmne : ∀ n, m n ≠ 0 := fun n =>
     div_ne_zero (poch_ne_zero_of_not_neg_nat hαp n) (poch_ne_zero_of_not_neg_nat hβp n)
-  have ha' := ghbR4_not_neg_of_not_terminates ha
+  have ha' := ne_neg_nat_of_not_genTerminates ha
   set c : ℕ → ℂ := fun n => genCoeff a b n with hc
   -- asymptotics of both sequences
-  have hC1 := ghbR4_genCoeff_tendsto h ha' hb
+  have hC1 := tendsto_genCoeff_mul_cpow h ha' hb
   rw [← hγdef] at hC1
   set C1 := (a.map fun x => (Gamma x)⁻¹).prod / (b.map fun x => (Gamma x)⁻¹).prod
-  have hC1ne : C1 ≠ 0 := div_ne_zero (ghbR4_prod_inv_Gamma_ne_zero ha')
-    (ghbR4_prod_inv_Gamma_ne_zero hb)
+  have hC1ne : C1 ≠ 0 := div_ne_zero (prod_map_inv_Gamma_ne_zero ha')
+    (prod_map_inv_Gamma_ne_zero hb)
   have hC2 : Tendsto (fun n : ℕ => m n * (n : ℂ) ^ (γ + 1)) atTop
       (𝓝 ((Gamma α)⁻¹ / (Gamma β)⁻¹)) := by
-    refine ((ghbR4_poch_tendsto hαp).div (ghbR4_poch_tendsto hβp)
+    refine ((tendsto_poch_mul_cpow_div_factorial hαp).div (tendsto_poch_mul_cpow_div_factorial hβp)
       (inv_ne_zero (Gamma_ne_zero hβp))).congr' ?_
     filter_upwards [eventually_ne_atTop 0] with n hn
     have hn0 : (n : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hn
@@ -772,7 +794,7 @@ theorem genHG_one_converges_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
   have hratio : ∀ n : ℕ, d (n + 1) * (w.map (· + (n : ℂ))).prod =
       d n * (u.map (· + (n : ℂ))).prod := by
     intro n
-    have hcs := ghbR4_genCoeff_succ (a := a) hb n
+    have hcs := genCoeff_succ_mul (a := a) hb n
     have hαn : α + n ≠ 0 := by simpa [eq_neg_iff_add_eq_zero] using hαp n
     have hβn : β + n ≠ 0 := by simpa [eq_neg_iff_add_eq_zero] using hβp n
     have hms : m (n + 1) = m n * (α + n) / (β + n) := by
@@ -796,7 +818,7 @@ theorem genHG_one_converges_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
   obtain ⟨K2, n₀, hn₀, hstep⟩ := gen_ratio_step (k := b.card) (by simp [u, h]) (by simp [w])
     hsum (fun n => hB _ ⟨n, rfl⟩) hratio
   exact hmodel (gen_one_compare hn₀ hle hmne (div_ne_zero hC1ne hC2ne) hC2
-    (ghbR4_tail_bound hn₀ hdlim hstep) hv')
+    (norm_sub_lim_le_of_norm_succ_sub_le hn₀ hdlim hstep) hv')
 
 /-- The nonterminating p>q+1 formal series has radius zero. -/
 theorem genHG_radius_zero {a b : Multiset ℂ} (h : b.card + 1 < a.card)

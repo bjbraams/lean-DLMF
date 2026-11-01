@@ -8,13 +8,27 @@ module
 public import DLMF.Combinatorics.Permutations.RookPolynomials
 
 /-!
-# Menage numbers and Ferrers-board rook numbers
+# The problème des ménages and Ferrers boards (DLMF §26.15)
 
-Inclusion-exclusion for menage numbers and the column recurrence for rook numbers of Ferrers
-boards.
+Rook numbers of the ménage board (`menageBoard`) and of Ferrers boards.
 
-Source references and common attribution are retained in
-`DLMF.Combinatorics.Permutations`.
+## Main definitions
+
+* `ferrersBoard`: the Ferrers board of shape `(b_1, …, b_n)`.
+
+## Main results
+
+* `rookNumber_menageBoard`: `r_k(B) = (2n/(2n-k)) C(2n-k, k)` for the ménage board
+  (DLMF 26.15.9).
+* `hitNumber_menageBoard_zero`: the number of permutations avoiding the ménage board
+  (DLMF 26.15.10).
+* `sum_rookNumber_ferrersBoard`: the factorization theorem for Ferrers boards (DLMF 26.15.11).
+* `sum_rookNumber_staircase`, `rookNumber_staircase`: for the staircase board
+  `(0, 1, …, n-1)`, `r_{n-k}(B) = S(n, k)` (DLMF 26.15.12, 26.15.13).
+
+## References
+
+* NIST DLMF §26.15.
 -/
 
 @[expose] public section
@@ -38,19 +52,19 @@ section MenageHelpers
 open Fin.NatCast
 
 /-- `k`-subsets of `range M` without two consecutive elements. -/
-def s26b_P (M k : ℕ) : ℕ := #{S ∈ (range M).powersetCard k | ∀ i ∈ S, i + 1 ∉ S}
+def linearNonConsecutiveCount (M k : ℕ) : ℕ := #{S ∈ (range M).powersetCard k | ∀ i ∈ S, i + 1 ∉ S}
 
-/-- Identity under the stated parameter and domain assumptions: `s26b_P M 0 = 1`. -/
-lemma s26b_P_zero_right (M : ℕ) : s26b_P M 0 = 1 := by
-  rw [s26b_P, powersetCard_zero, filter_true_of_mem (by simp), card_singleton]
+/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount M 0 = 1`. -/
+private lemma linearNonConsecutiveCount_zero_right (M : ℕ) : linearNonConsecutiveCount M 0 = 1 := by
+  rw [linearNonConsecutiveCount, powersetCard_zero, filter_true_of_mem (by simp), card_singleton]
 
-/-- Identity under the stated parameter and domain assumptions: `s26b_P (M + 2) (k + 1) = s26b_P
-(M + 1) (k + 1) + s26b_P M k`. -/
-lemma s26b_P_succ_succ (M k : ℕ) :
-    s26b_P (M + 2) (k + 1) = s26b_P (M + 1) (k + 1) + s26b_P M k := by
-  rw [s26b_P, ← card_filter_add_card_filter_not (p := fun S => M + 1 ∉ S)]
+/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount (M + 2) (k + 1) = linearNonConsecutiveCount
+(M + 1) (k + 1) + linearNonConsecutiveCount M k`. -/
+private lemma linearNonConsecutiveCount_succ_succ (M k : ℕ) :
+    linearNonConsecutiveCount (M + 2) (k + 1) = linearNonConsecutiveCount (M + 1) (k + 1) + linearNonConsecutiveCount M k := by
+  rw [linearNonConsecutiveCount, ← card_filter_add_card_filter_not (p := fun S => M + 1 ∉ S)]
   congr 1
-  · rw [filter_filter, s26b_P]
+  · rw [filter_filter, linearNonConsecutiveCount]
     congr 1
     ext S
     simp only [mem_filter, mem_powersetCard]
@@ -63,7 +77,7 @@ lemma s26b_P_succ_succ (M k : ℕ) :
     · rintro ⟨⟨hS, hc⟩, hn⟩
       exact ⟨⟨hS.trans (range_subset_range.mpr (by omega)), hc⟩, hn, fun h =>
         by have := mem_range.mp (hS h); omega⟩
-  · rw [filter_filter, s26b_P]
+  · rw [filter_filter, linearNonConsecutiveCount]
     refine card_nbij' (fun S => S.erase (M + 1)) (fun S => insert (M + 1) S) ?_ ?_ ?_ ?_
     · intro S hS
       simp only [mem_coe, mem_filter, mem_powersetCard, not_not] at hS ⊢
@@ -98,31 +112,31 @@ lemma s26b_P_succ_succ (M k : ℕ) :
       have hM : M + 1 ∉ S := fun h => by have := mem_range.mp (hS.1.1 h); omega
       exact erase_insert hM
 
-/-- Identity under the stated parameter and domain assumptions: `s26b_P 0 (k + 1) = 0`. -/
-lemma s26b_P_zero_succ (k : ℕ) : s26b_P 0 (k + 1) = 0 := by
-  simp [s26b_P]
+/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount 0 (k + 1) = 0`. -/
+private lemma linearNonConsecutiveCount_zero_succ (k : ℕ) : linearNonConsecutiveCount 0 (k + 1) = 0 := by
+  simp [linearNonConsecutiveCount]
 
-/-- Identity under the stated parameter and domain assumptions: `s26b_P 1 (k + 2) = 0`. -/
-lemma s26b_P_one_succ_succ (k : ℕ) : s26b_P 1 (k + 2) = 0 := by
-  rw [s26b_P, powersetCard_eq_empty.mpr (by simp)]
+/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount 1 (k + 2) = 0`. -/
+private lemma linearNonConsecutiveCount_one_succ_succ (k : ℕ) : linearNonConsecutiveCount 1 (k + 2) = 0 := by
+  rw [linearNonConsecutiveCount, powersetCard_eq_empty.mpr (by simp)]
   rfl
 
-/-- Identity under the stated parameter and domain assumptions: `s26b_P 1 1 = 1`. -/
-lemma s26b_P_one_one : s26b_P 1 1 = 1 := by decide
+/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount 1 1 = 1`. -/
+private lemma linearNonConsecutiveCount_one_one : linearNonConsecutiveCount 1 1 = 1 := by decide
 
-/-- Identity under the stated parameter and domain assumptions: `s26b_P M k = (M + 1 - k).choose
+/-- Identity under the stated parameter and domain assumptions: `linearNonConsecutiveCount M k = (M + 1 - k).choose
 k`. -/
-lemma s26b_P_eq (M k : ℕ) : s26b_P M k = (M + 1 - k).choose k := by
+private lemma linearNonConsecutiveCount_eq_choose (M k : ℕ) : linearNonConsecutiveCount M k = (M + 1 - k).choose k := by
   induction M using Nat.strong_induction_on generalizing k with
   | _ M ih =>
     rcases k with _ | k
-    · simp [s26b_P_zero_right]
+    · simp [linearNonConsecutiveCount_zero_right]
     rcases M with _ | _ | M
-    · rw [s26b_P_zero_succ]; simp
+    · rw [linearNonConsecutiveCount_zero_succ]; simp
     · rcases k with _ | k
-      · rw [s26b_P_one_one]; rfl
-      · rw [s26b_P_one_succ_succ]; simp
-    · rw [s26b_P_succ_succ, ih (M + 1) (by omega), ih M (by omega)]
+      · rw [linearNonConsecutiveCount_one_one]; rfl
+      · rw [linearNonConsecutiveCount_one_succ_succ]; simp
+    · rw [linearNonConsecutiveCount_succ_succ, ih (M + 1) (by omega), ih M (by omega)]
       rcases Nat.lt_or_ge (M + 1) k with hk | hk
       · rw [show M + 1 + 1 - (k + 1) = 0 by omega, show M + 1 - k = 0 by omega,
           show M + 2 + 1 - (k + 1) = 0 by omega]
@@ -131,10 +145,10 @@ lemma s26b_P_eq (M k : ℕ) : s26b_P M k = (M + 1 - k).choose k := by
           show M + 2 + 1 - (k + 1) = (M + 1 - k) + 1 by omega, Nat.choose_succ_succ', add_comm]
 
 /-- Formula under the stated hypotheses: `#{S ∈ (Ico a (a + M)).powersetCard k | ∀ i ∈ S, i + 1 ∉
-S} = s26b_P M k`. -/
-lemma s26b_P_shift (a M k : ℕ) :
-    #{S ∈ (Ico a (a + M)).powersetCard k | ∀ i ∈ S, i + 1 ∉ S} = s26b_P M k := by
-  rw [s26b_P]
+S} = linearNonConsecutiveCount M k`. -/
+private lemma card_nonConsecutive_Ico_eq_linearNonConsecutiveCount (a M k : ℕ) :
+    #{S ∈ (Ico a (a + M)).powersetCard k | ∀ i ∈ S, i + 1 ∉ S} = linearNonConsecutiveCount M k := by
+  rw [linearNonConsecutiveCount]
   symm
   refine card_nbij' (fun T => T.image (· + a)) (fun S => S.image (· - a)) ?_ ?_ ?_ ?_
   · intro T hT
@@ -172,18 +186,18 @@ lemma s26b_P_shift (a M k : ℕ) :
     have := mem_Ico.mp (hS.1.1 hx); simp only [Function.comp_apply, id]; omega
 
 /-- `k`-subsets of `range N` without two cyclically consecutive elements. -/
-def s26b_Q (N k : ℕ) : ℕ := #{S ∈ (range N).powersetCard k | ∀ i ∈ S, (i + 1) % N ∉ S}
+def cyclicNonConsecutiveCount (N k : ℕ) : ℕ := #{S ∈ (range N).powersetCard k | ∀ i ∈ S, (i + 1) % N ∉ S}
 
-/-- Identity under the stated parameter and domain assumptions: `s26b_Q N 0 = 1`. -/
-lemma s26b_Q_zero (N : ℕ) : s26b_Q N 0 = 1 := by
-  rw [s26b_Q, powersetCard_zero, filter_true_of_mem (by simp), card_singleton]
+/-- Identity under the stated parameter and domain assumptions: `cyclicNonConsecutiveCount N 0 = 1`. -/
+private lemma cyclicNonConsecutiveCount_zero (N : ℕ) : cyclicNonConsecutiveCount N 0 = 1 := by
+  rw [cyclicNonConsecutiveCount, powersetCard_zero, filter_true_of_mem (by simp), card_singleton]
 
-/-- Identity under the stated parameter and domain assumptions: `s26b_Q N (k + 1) = s26b_P (N - 1)
-(k + 1) + s26b_P (N - 3) k`. -/
-lemma s26b_Q_succ {N : ℕ} (hN : 3 ≤ N) (k : ℕ) :
-    s26b_Q N (k + 1) = s26b_P (N - 1) (k + 1) + s26b_P (N - 3) k := by
-  rw [s26b_Q, ← card_filter_add_card_filter_not (p := fun S => 0 ∉ S), filter_filter,
-    filter_filter, ← s26b_P_shift 1, ← s26b_P_shift 2]
+/-- Identity under the stated parameter and domain assumptions: `cyclicNonConsecutiveCount N (k + 1) = linearNonConsecutiveCount (N - 1)
+(k + 1) + linearNonConsecutiveCount (N - 3) k`. -/
+private lemma cyclicNonConsecutiveCount_succ {N : ℕ} (hN : 3 ≤ N) (k : ℕ) :
+    cyclicNonConsecutiveCount N (k + 1) = linearNonConsecutiveCount (N - 1) (k + 1) + linearNonConsecutiveCount (N - 3) k := by
+  rw [cyclicNonConsecutiveCount, ← card_filter_add_card_filter_not (p := fun S => 0 ∉ S), filter_filter,
+    filter_filter, ← card_nonConsecutive_Ico_eq_linearNonConsecutiveCount 1, ← card_nonConsecutive_Ico_eq_linearNonConsecutiveCount 2]
   congr 1
   · congr 1
     ext S
@@ -248,14 +262,14 @@ lemma s26b_Q_succ {N : ℕ} (hN : 3 ≤ N) (k : ℕ) :
       have h0 : 0 ∉ S := fun h => by have := mem_Ico.mp (hS.1.1 h); omega
       exact erase_insert h0
 
-/-- Identity under the stated parameter and domain assumptions: `(s26b_Q (2 * n) k : ℚ) = 2 * n /
+/-- Identity under the stated parameter and domain assumptions: `(cyclicNonConsecutiveCount (2 * n) k : ℚ) = 2 * n /
 (2 * n - k) * (2 * n - k).choose k`. -/
-lemma s26b_Q_formula {n : ℕ} (hn : 2 ≤ n) {k : ℕ} (hk : k ≤ n) :
-    (s26b_Q (2 * n) k : ℚ) = 2 * n / (2 * n - k) * (2 * n - k).choose k := by
+private lemma cyclicNonConsecutiveCount_two_mul_eq {n : ℕ} (hn : 2 ≤ n) {k : ℕ} (hk : k ≤ n) :
+    (cyclicNonConsecutiveCount (2 * n) k : ℚ) = 2 * n / (2 * n - k) * (2 * n - k).choose k := by
   rcases k with _ | k
-  · rw [s26b_Q_zero]; have : (2 * n : ℚ) ≠ 0 := by positivity
+  · rw [cyclicNonConsecutiveCount_zero]; have : (2 * n : ℚ) ≠ 0 := by positivity
     simp [this]
-  rw [s26b_Q_succ (by omega), s26b_P_eq, s26b_P_eq]
+  rw [cyclicNonConsecutiveCount_succ (by omega), linearNonConsecutiveCount_eq_choose, linearNonConsecutiveCount_eq_choose]
   obtain ⟨M, hM⟩ : ∃ M, 2 * n = M + k + 2 := ⟨2 * n - k - 2, by omega⟩
   rw [show 2 * n - 1 + 1 - (k + 1) = M + 1 by omega, show 2 * n - 3 + 1 - k = M by omega,
     show 2 * n - (k + 1) = M + 1 by omega]
@@ -272,12 +286,12 @@ lemma s26b_Q_formula {n : ℕ} (hn : 2 ≤ n) {k : ℕ} (hk : k ≤ n) :
 
 /-- The `m`-th square of the ménage board in cyclic order: `ψ (2i) = (i, i)`,
 `ψ (2i + 1) = (i, i + 1)`. -/
-def s26b_ψ (n : ℕ) [NeZero n] (m : ℕ) : Fin n × Fin n :=
+def menageSquare (n : ℕ) [NeZero n] (m : ℕ) : Fin n × Fin n :=
   (((m / 2 : ℕ) : Fin n), (((m + 1) / 2 : ℕ) : Fin n))
 
 /-- Identity under the stated parameter and domain assumptions: `((x : Fin n) = (y : Fin n)) ↔ x =
 y ∨ (x = 0 ∧ y = n) ∨ (x = n ∧ y = 0)`. -/
-lemma s26b_cast_eq_iff {n : ℕ} [NeZero n] {x y : ℕ} (hx : x ≤ n) (hy : y ≤ n) :
+private lemma finCast_eq_finCast_iff {n : ℕ} [NeZero n] {x y : ℕ} (hx : x ≤ n) (hy : y ≤ n) :
     ((x : Fin n) = (y : Fin n)) ↔ x = y ∨ (x = 0 ∧ y = n) ∨ (x = n ∧ y = 0) := by
   have hn : 0 < n := Nat.pos_of_ne_zero (NeZero.ne n)
   rw [Fin.ext_iff, Fin.val_natCast, Fin.val_natCast]
@@ -287,52 +301,52 @@ lemma s26b_cast_eq_iff {n : ℕ} [NeZero n] {x y : ℕ} (hx : x ≤ n) (hy : y �
   · rw [Nat.mod_eq_of_lt hy, Nat.mod_self]; omega
   · simp
 
-/-- Identity under the stated parameter and domain assumptions: `(range (2 * n)).image (s26b_ψ n)
+/-- Identity under the stated parameter and domain assumptions: `(range (2 * n)).image (menageSquare n)
 = menageBoard n`. -/
-lemma s26b_image_ψ {n : ℕ} [NeZero n] : (range (2 * n)).image (s26b_ψ n) = menageBoard n := by
+private lemma image_menageSquare_range {n : ℕ} [NeZero n] : (range (2 * n)).image (menageSquare n) = menageBoard n := by
   ext ⟨i, j⟩
   simp only [mem_image, mem_range, menageBoard, mem_union, mem_univ, true_and, Prod.mk.injEq]
   constructor
   · rintro ⟨m, hm, h⟩
     obtain ⟨a, rfl | rfl⟩ := Nat.even_or_odd' m
     · left; refine ⟨(a : Fin n), ?_⟩
-      simp only [s26b_ψ, Prod.mk.injEq] at h
+      simp only [menageSquare, Prod.mk.injEq] at h
       rw [show 2 * a / 2 = a by omega, show (2 * a + 1) / 2 = a by omega] at h
       exact ⟨h.1, h.2⟩
     · right; refine ⟨(a : Fin n), ?_⟩
-      simp only [s26b_ψ, Prod.mk.injEq] at h
+      simp only [menageSquare, Prod.mk.injEq] at h
       rw [show (2 * a + 1) / 2 = a by omega, show (2 * a + 1 + 1) / 2 = a + 1 by omega,
         Nat.cast_succ] at h
       exact ⟨h.1, h.2⟩
   · rintro (⟨a, ha, hb⟩ | ⟨a, ha, hb⟩)
     · refine ⟨2 * a.val, by omega, ?_⟩
-      simp only [s26b_ψ, Prod.mk.injEq]
+      simp only [menageSquare, Prod.mk.injEq]
       rw [show 2 * a.val / 2 = a.val by omega, show (2 * a.val + 1) / 2 = a.val by omega,
         Fin.cast_val_eq_self]
       exact ⟨ha, hb⟩
     · refine ⟨2 * a.val + 1, by omega, ?_⟩
-      simp only [s26b_ψ, Prod.mk.injEq]
+      simp only [menageSquare, Prod.mk.injEq]
       rw [show (2 * a.val + 1) / 2 = a.val by omega,
         show (2 * a.val + 1 + 1) / 2 = a.val + 1 by omega, Nat.cast_succ, Fin.cast_val_eq_self]
       exact ⟨ha, hb⟩
 
-/-- The stated relation follows from the given hypotheses: `Set.InjOn (s26b_ψ n) (range (2 * n) :
+/-- The stated relation follows from the given hypotheses: `Set.InjOn (menageSquare n) (range (2 * n) :
 Set ℕ)`. -/
-lemma s26b_injOn_ψ {n : ℕ} [NeZero n] (hn : 2 ≤ n) :
-    Set.InjOn (s26b_ψ n) (range (2 * n) : Set ℕ) := by
+private lemma injOn_menageSquare {n : ℕ} [NeZero n] (hn : 2 ≤ n) :
+    Set.InjOn (menageSquare n) (range (2 * n) : Set ℕ) := by
   intro a ha b hb h
   have ha := mem_range.mp ha; have hb := mem_range.mp hb
-  simp only [s26b_ψ, Prod.mk.injEq] at h
-  rw [s26b_cast_eq_iff (by omega) (by omega), s26b_cast_eq_iff (by omega) (by omega)] at h
+  simp only [menageSquare, Prod.mk.injEq] at h
+  rw [finCast_eq_finCast_iff (by omega) (by omega), finCast_eq_finCast_iff (by omega) (by omega)] at h
   omega
 
-/-- Identity under the stated parameter and domain assumptions: `((s26b_ψ n a).1 = (s26b_ψ n b).1
-∨ (s26b_ψ n a).2 = (s26b_ψ n b).2) ↔ a = b ∨ (a + 1) % (2 * n) = b ∨ (b + 1) % (2 * n) = a`. -/
-lemma s26b_adj {n : ℕ} [NeZero n] (hn : 2 ≤ n) {a b : ℕ} (ha : a < 2 * n) (hb : b < 2 * n) :
-    ((s26b_ψ n a).1 = (s26b_ψ n b).1 ∨ (s26b_ψ n a).2 = (s26b_ψ n b).2) ↔
+/-- Identity under the stated parameter and domain assumptions: `((menageSquare n a).1 = (menageSquare n b).1
+∨ (menageSquare n a).2 = (menageSquare n b).2) ↔ a = b ∨ (a + 1) % (2 * n) = b ∨ (b + 1) % (2 * n) = a`. -/
+private lemma menageSquare_attack_iff {n : ℕ} [NeZero n] (hn : 2 ≤ n) {a b : ℕ} (ha : a < 2 * n) (hb : b < 2 * n) :
+    ((menageSquare n a).1 = (menageSquare n b).1 ∨ (menageSquare n a).2 = (menageSquare n b).2) ↔
       a = b ∨ (a + 1) % (2 * n) = b ∨ (b + 1) % (2 * n) = a := by
-  simp only [s26b_ψ]
-  rw [s26b_cast_eq_iff (by omega) (by omega), s26b_cast_eq_iff (by omega) (by omega)]
+  simp only [menageSquare]
+  rw [finCast_eq_finCast_iff (by omega) (by omega), finCast_eq_finCast_iff (by omega) (by omega)]
   rcases Nat.lt_or_ge (a + 1) (2 * n) with h1 | h1 <;>
     rcases Nat.lt_or_ge (b + 1) (2 * n) with h2 | h2
   · rw [Nat.mod_eq_of_lt h1, Nat.mod_eq_of_lt h2]; omega
@@ -340,12 +354,12 @@ lemma s26b_adj {n : ℕ} [NeZero n] (hn : 2 ≤ n) {a b : ℕ} (ha : a < 2 * n) 
   · rw [Nat.mod_eq_of_lt h2, show a + 1 = 2 * n by omega, Nat.mod_self]; omega
   · omega
 
-/-- Formula under the stated hypotheses: `IsNonattacking (S.image (s26b_ψ n)) ↔ ∀ i ∈ S, (i + 1) %
+/-- Formula under the stated hypotheses: `IsNonattacking (S.image (menageSquare n)) ↔ ∀ i ∈ S, (i + 1) %
 (2 * n) ∉ S`. -/
-lemma s26b_nonattacking_iff {n : ℕ} [NeZero n] (hn : 2 ≤ n) {S : Finset ℕ}
+private lemma isNonattacking_image_menageSquare_iff {n : ℕ} [NeZero n] (hn : 2 ≤ n) {S : Finset ℕ}
     (hS : S ⊆ range (2 * n)) :
-    IsNonattacking (S.image (s26b_ψ n)) ↔ ∀ i ∈ S, (i + 1) % (2 * n) ∉ S := by
-  have hinj := (s26b_injOn_ψ hn).mono (coe_subset.mpr hS)
+    IsNonattacking (S.image (menageSquare n)) ↔ ∀ i ∈ S, (i + 1) % (2 * n) ∉ S := by
+  have hinj := (injOn_menageSquare hn).mono (coe_subset.mpr hS)
   constructor
   · intro h i hi hj
     have hi' := mem_range.mp (hS hi)
@@ -354,76 +368,76 @@ lemma s26b_nonattacking_iff {n : ℕ} [NeZero n] (hn : 2 ≤ n) {S : Finset ℕ}
       rcases Nat.lt_or_ge (i + 1) (2 * n) with h1 | h1
       · rw [Nat.mod_eq_of_lt h1]; omega
       · rw [show i + 1 = 2 * n by omega, Nat.mod_self]; omega
-    have hψ : s26b_ψ n i ≠ s26b_ψ n ((i + 1) % (2 * n)) := fun e => hne (hinj hj hi e.symm)
+    have hψ : menageSquare n i ≠ menageSquare n ((i + 1) % (2 * n)) := fun e => hne (hinj hj hi e.symm)
     have := h _ (mem_image_of_mem _ hi) _ (mem_image_of_mem _ hj) hψ
-    have := (s26b_adj hn hi' hj').mpr (Or.inr (Or.inl rfl))
+    have := (menageSquare_attack_iff hn hi' hj').mpr (Or.inr (Or.inl rfl))
     tauto
   · intro h x hx y hy hxy
     obtain ⟨a, ha, rfl⟩ := mem_image.mp hx
     obtain ⟨b, hb, rfl⟩ := mem_image.mp hy
     have hab : a ≠ b := fun e => hxy (e ▸ rfl)
     by_contra hc
-    have hc : (s26b_ψ n a).1 = (s26b_ψ n b).1 ∨ (s26b_ψ n a).2 = (s26b_ψ n b).2 := by tauto
-    rcases (s26b_adj hn (mem_range.mp (hS ha)) (mem_range.mp (hS hb))).mp hc with e | e | e
+    have hc : (menageSquare n a).1 = (menageSquare n b).1 ∨ (menageSquare n a).2 = (menageSquare n b).2 := by tauto
+    rcases (menageSquare_attack_iff hn (mem_range.mp (hS ha)) (mem_range.mp (hS hb))).mp hc with e | e | e
     · exact hab e
     · exact h a ha (e ▸ hb)
     · exact h b hb (e ▸ ha)
 
-/-- Formula under the stated hypotheses: `(range (2 * n)).filter (fun m => s26b_ψ n m ∈ S.image
-(s26b_ψ n)) = S`. -/
-lemma s26b_filter_image_ψ {n : ℕ} [NeZero n] (hn : 2 ≤ n) {S : Finset ℕ}
+/-- Formula under the stated hypotheses: `(range (2 * n)).filter (fun m => menageSquare n m ∈ S.image
+(menageSquare n)) = S`. -/
+private lemma filter_menageSquare_mem_image {n : ℕ} [NeZero n] (hn : 2 ≤ n) {S : Finset ℕ}
     (hS : S ⊆ range (2 * n)) :
-    (range (2 * n)).filter (fun m => s26b_ψ n m ∈ S.image (s26b_ψ n)) = S := by
+    (range (2 * n)).filter (fun m => menageSquare n m ∈ S.image (menageSquare n)) = S := by
   ext m
   simp only [mem_filter, mem_image]
   constructor
   · rintro ⟨hm, a, ha, e⟩
-    rwa [← s26b_injOn_ψ hn (coe_subset.mpr hS ha) hm e]
+    rwa [← injOn_menageSquare hn (coe_subset.mpr hS ha) hm e]
   · intro hm; exact ⟨hS hm, m, hm, rfl⟩
 
-/-- Formula under the stated hypotheses: `((range (2 * n)).filter (fun m => s26b_ψ n m ∈ C)).image
-(s26b_ψ n) = C`. -/
-lemma s26b_image_filter_ψ {n : ℕ} [NeZero n] {C : Finset (Fin n × Fin n)}
+/-- Formula under the stated hypotheses: `((range (2 * n)).filter (fun m => menageSquare n m ∈ C)).image
+(menageSquare n) = C`. -/
+private lemma image_filter_menageSquare_mem {n : ℕ} [NeZero n] {C : Finset (Fin n × Fin n)}
     (hC : C ⊆ menageBoard n) :
-    ((range (2 * n)).filter (fun m => s26b_ψ n m ∈ C)).image (s26b_ψ n) = C := by
+    ((range (2 * n)).filter (fun m => menageSquare n m ∈ C)).image (menageSquare n) = C := by
   ext x
   simp only [mem_image, mem_filter]
   constructor
   · rintro ⟨m, ⟨_, hm⟩, rfl⟩; exact hm
   · intro hx
-    have hx' : x ∈ (range (2 * n)).image (s26b_ψ n) := by rw [s26b_image_ψ]; exact hC hx
+    have hx' : x ∈ (range (2 * n)).image (menageSquare n) := by rw [image_menageSquare_range]; exact hC hx
     obtain ⟨m, hm, e⟩ := mem_image.mp hx'
     exact ⟨m, ⟨hm, e ▸ hx⟩, e⟩
 
 /-- Identity under the stated parameter and domain assumptions: `rookNumber (menageBoard n) k =
-s26b_Q (2 * n) k`. -/
-lemma s26b_rook_menage {n : ℕ} [NeZero n] (hn : 2 ≤ n) (k : ℕ) :
-    rookNumber (menageBoard n) k = s26b_Q (2 * n) k := by
-  rw [rookNumber, s26b_Q]
+cyclicNonConsecutiveCount (2 * n) k`. -/
+private lemma rookNumber_menageBoard_eq_cyclicNonConsecutiveCount {n : ℕ} [NeZero n] (hn : 2 ≤ n) (k : ℕ) :
+    rookNumber (menageBoard n) k = cyclicNonConsecutiveCount (2 * n) k := by
+  rw [rookNumber, cyclicNonConsecutiveCount]
   symm
-  refine card_nbij' (fun S => S.image (s26b_ψ n))
-    (fun C => (range (2 * n)).filter (fun m => s26b_ψ n m ∈ C)) ?_ ?_ ?_ ?_
+  refine card_nbij' (fun S => S.image (menageSquare n))
+    (fun C => (range (2 * n)).filter (fun m => menageSquare n m ∈ C)) ?_ ?_ ?_ ?_
   · intro S hS
     simp only [mem_coe, mem_filter, mem_powersetCard, mem_powerset] at hS ⊢
     obtain ⟨⟨hS, hc⟩, h⟩ := hS
-    refine ⟨by rw [← s26b_image_ψ]; exact image_subset_image hS, ?_,
-      (s26b_nonattacking_iff hn hS).mpr h⟩
-    rw [card_image_of_injOn ((s26b_injOn_ψ hn).mono (coe_subset.mpr hS)), hc]
+    refine ⟨by rw [← image_menageSquare_range]; exact image_subset_image hS, ?_,
+      (isNonattacking_image_menageSquare_iff hn hS).mpr h⟩
+    rw [card_image_of_injOn ((injOn_menageSquare hn).mono (coe_subset.mpr hS)), hc]
   · intro C hC
     simp only [mem_coe, mem_filter, mem_powerset] at hC
     rw [mem_coe, mem_filter, mem_powersetCard]
     obtain ⟨hC, hc, h⟩ := hC
-    have hsub : (range (2 * n)).filter (fun m => s26b_ψ n m ∈ C) ⊆ range (2 * n) :=
+    have hsub : (range (2 * n)).filter (fun m => menageSquare n m ∈ C) ⊆ range (2 * n) :=
       filter_subset _ _
-    have e := s26b_image_filter_ψ hC
-    refine ⟨⟨hsub, ?_⟩, (s26b_nonattacking_iff hn hsub).mp (by rw [e]; exact h)⟩
-    rw [← hc, ← card_image_of_injOn ((s26b_injOn_ψ hn).mono (coe_subset.mpr hsub)), e]
+    have e := image_filter_menageSquare_mem hC
+    refine ⟨⟨hsub, ?_⟩, (isNonattacking_image_menageSquare_iff hn hsub).mp (by rw [e]; exact h)⟩
+    rw [← hc, ← card_image_of_injOn ((injOn_menageSquare hn).mono (coe_subset.mpr hsub)), e]
   · intro S hS
     simp only [mem_coe, mem_filter, mem_powersetCard] at hS
-    exact s26b_filter_image_ψ hn hS.1.1
+    exact filter_menageSquare_mem_image hn hS.1.1
   · intro C hC
     simp only [mem_coe, mem_filter, mem_powerset] at hC
-    exact s26b_image_filter_ψ hC.1
+    exact image_filter_menageSquare_mem hC.1
 
 end MenageHelpers
 
@@ -432,7 +446,7 @@ end MenageHelpers
 @[dlmf 26.15.E9]
 theorem rookNumber_menageBoard {n : ℕ} [NeZero n] (hn : 2 ≤ n) {k : ℕ} (hk : k ≤ n) :
     (rookNumber (menageBoard n) k : ℚ) = 2 * n / (2 * n - k) * (2 * n - k).choose k := by
-  rw [s26b_rook_menage hn, s26b_Q_formula hn hk]
+  rw [rookNumber_menageBoard_eq_cyclicNonConsecutiveCount hn, cyclicNonConsecutiveCount_two_mul_eq hn hk]
 
 /-- (26.15.10): the number of permutations avoiding the ménage board (the placements of the
 husbands; the solution of the problème des ménages is `2 (n!)` times this) is
@@ -460,31 +474,31 @@ def ferrersBoard {n : ℕ} (b : Fin n → ℕ) : Finset (Fin n × Fin n) :=
 
 /-! ### Rook numbers of Ferrers boards, column by column
 
-`s26b_NA b m k`: nonattacking placements of `k` rooks in the first `m` columns of the Ferrers
+`ferrersPlacements b m k`: nonattacking placements of `k` rooks in the first `m` columns of the Ferrers
 board; adding column `m` gives `r_{k+1} = r_{k+1}' + (b_m - k) r_k'`, from which (26.15.11)
 follows by induction with `(X + c)(x)_k = (x)_{k+1} + (c + k)(x)_k`. -/
 
 /-- The first `m` columns of the Ferrers board. -/
-def s26b_fb {n : ℕ} (b : Fin n → ℕ) (m : ℕ) : Finset (Fin n × Fin n) :=
+def ferrersBoardColumns {n : ℕ} (b : Fin n → ℕ) (m : ℕ) : Finset (Fin n × Fin n) :=
   (ferrersBoard b).filter fun x => (x.1 : ℕ) < m
 
 /-- Nonattacking placements of `k` rooks on the first `m` columns. -/
-def s26b_NA {n : ℕ} (b : Fin n → ℕ) (m k : ℕ) : Finset (Finset (Fin n × Fin n)) :=
-  (s26b_fb b m).powerset.filter fun C => C.card = k ∧ IsNonattacking C
+def ferrersPlacements {n : ℕ} (b : Fin n → ℕ) (m k : ℕ) : Finset (Finset (Fin n × Fin n)) :=
+  (ferrersBoardColumns b m).powerset.filter fun C => C.card = k ∧ IsNonattacking C
 
-/-- Membership in `s26b_NA`. -/
-lemma s26b_mem_NA {n : ℕ} {b : Fin n → ℕ} {m k : ℕ} {C : Finset (Fin n × Fin n)} :
-    C ∈ s26b_NA b m k ↔ (∀ x ∈ C, (x.2 : ℕ) < b x.1 ∧ (x.1 : ℕ) < m) ∧ C.card = k ∧
+/-- Membership in `ferrersPlacements`. -/
+private lemma mem_ferrersPlacements {n : ℕ} {b : Fin n → ℕ} {m k : ℕ} {C : Finset (Fin n × Fin n)} :
+    C ∈ ferrersPlacements b m k ↔ (∀ x ∈ C, (x.2 : ℕ) < b x.1 ∧ (x.1 : ℕ) < m) ∧ C.card = k ∧
       IsNonattacking C := by
-  simp only [s26b_NA, mem_filter, mem_powerset]
+  simp only [ferrersPlacements, mem_filter, mem_powerset]
   constructor
-  · rintro ⟨h1, h2⟩; exact ⟨fun x hx => by simpa [s26b_fb, ferrersBoard] using h1 hx, h2⟩
-  · rintro ⟨h1, h2⟩; exact ⟨fun x hx => by simpa [s26b_fb, ferrersBoard] using h1 x hx, h2⟩
+  · rintro ⟨h1, h2⟩; exact ⟨fun x hx => by simpa [ferrersBoardColumns, ferrersBoard] using h1 hx, h2⟩
+  · rintro ⟨h1, h2⟩; exact ⟨fun x hx => by simpa [ferrersBoardColumns, ferrersBoard] using h1 x hx, h2⟩
 
 /-- Distinct columns: a placement on `m` columns has at most `m` rooks. -/
-lemma s26b_card_le {n : ℕ} {b : Fin n → ℕ} {m k : ℕ} {C : Finset (Fin n × Fin n)}
-    (hC : C ∈ s26b_NA b m k) : k ≤ m := by
-  obtain ⟨h1, rfl, h3⟩ := s26b_mem_NA.mp hC
+private lemma le_of_mem_ferrersPlacements {n : ℕ} {b : Fin n → ℕ} {m k : ℕ} {C : Finset (Fin n × Fin n)}
+    (hC : C ∈ ferrersPlacements b m k) : k ≤ m := by
+  obtain ⟨h1, rfl, h3⟩ := mem_ferrersPlacements.mp hC
   have hinj : Set.InjOn (fun x : Fin n × Fin n => (x.1 : ℕ)) C := fun x hx y hy h => by
     by_contra hne; exact (h3 x hx y hy hne).1 (Fin.ext h)
   rw [← card_image_of_injOn hinj]
@@ -494,18 +508,18 @@ lemma s26b_card_le {n : ℕ} {b : Fin n → ℕ} {m k : ℕ} {C : Finset (Fin n 
   simpa using card_le_card this
 
 /-- The recurrence for the column-by-column rook numbers of a Ferrers board. -/
-lemma s26b_NA_succ {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j, b j ≤ n) {m : ℕ}
+private lemma card_ferrersPlacements_succ_succ {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j, b j ≤ n) {m : ℕ}
     (hm : m < n) (k : ℕ) :
-    ((s26b_NA b (m + 1) (k + 1)).card : ℤ) =
-      (s26b_NA b m (k + 1)).card + ((b ⟨m, hm⟩ : ℤ) - k) * (s26b_NA b m k).card := by
+    ((ferrersPlacements b (m + 1) (k + 1)).card : ℤ) =
+      (ferrersPlacements b m (k + 1)).card + ((b ⟨m, hm⟩ : ℤ) - k) * (ferrersPlacements b m k).card := by
   set bm := b ⟨m, hm⟩ with hbm
   have hbmn : bm ≤ n := hbn ⟨m, hm⟩
-  set A := s26b_NA b (m + 1) (k + 1)
+  set A := ferrersPlacements b (m + 1) (k + 1)
   have hsplit := card_filter_add_card_filter_not
     (s := A) (fun C => ∀ x ∈ C, (x.1 : ℕ) < m)
-  have h0 : A.filter (fun C => ∀ x ∈ C, (x.1 : ℕ) < m) = s26b_NA b m (k + 1) := by
+  have h0 : A.filter (fun C => ∀ x ∈ C, (x.1 : ℕ) < m) = ferrersPlacements b m (k + 1) := by
     ext C
-    simp only [A, mem_filter, s26b_mem_NA]
+    simp only [A, mem_filter, mem_ferrersPlacements]
     constructor
     · rintro ⟨⟨h1, h2, h3⟩, h4⟩; exact ⟨fun x hx => ⟨(h1 x hx).1, h4 x hx⟩, h2, h3⟩
     · rintro ⟨h1, h2, h3⟩
@@ -513,12 +527,12 @@ lemma s26b_NA_succ {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j,
         fun x hx => (h1 x hx).2⟩
   -- the placements using column `m`
   set A1 := A.filter (fun C => ¬∀ x ∈ C, (x.1 : ℕ) < m)
-  have hmaps : ∀ C ∈ A1, C.filter (fun x => (x.1 : ℕ) < m) ∈ s26b_NA b m k := by
+  have hmaps : ∀ C ∈ A1, C.filter (fun x => (x.1 : ℕ) < m) ∈ ferrersPlacements b m k := by
     intro C hC
-    simp only [A1, A, mem_filter, s26b_mem_NA, not_forall] at hC
+    simp only [A1, A, mem_filter, mem_ferrersPlacements, not_forall] at hC
     obtain ⟨⟨h1, h2, h3⟩, x0, hx0, hx0m⟩ := hC
     have hx0' : (x0.1 : ℕ) = m := by have := (h1 x0 hx0).2; omega
-    refine s26b_mem_NA.mpr ⟨fun x hx => ⟨(h1 x (mem_filter.mp hx).1).1, (mem_filter.mp hx).2⟩,
+    refine mem_ferrersPlacements.mpr ⟨fun x hx => ⟨(h1 x (mem_filter.mp hx).1).1, (mem_filter.mp hx).2⟩,
       ?_, fun x hx y hy => h3 x (mem_filter.mp hx).1 y (mem_filter.mp hy).1⟩
     have : C.filter (fun x => (x.1 : ℕ) < m) = C.erase x0 := by
       ext x
@@ -532,10 +546,10 @@ lemma s26b_NA_succ {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j,
         have hxeq : (x.1 : ℕ) = m := by omega
         exact (h3 x hx x0 hx0 hne).1 (Fin.ext (hxeq.trans hx0'.symm))
     rw [this, card_erase_of_mem hx0, h2, Nat.add_sub_cancel]
-  have hfib : ∀ C' ∈ s26b_NA b m k,
+  have hfib : ∀ C' ∈ ferrersPlacements b m k,
       #{C ∈ A1 | C.filter (fun x => (x.1 : ℕ) < m) = C'} = bm - k ∧ k ≤ bm := by
     intro C' hC'
-    obtain ⟨h1, h2, h3⟩ := s26b_mem_NA.mp hC'
+    obtain ⟨h1, h2, h3⟩ := mem_ferrersPlacements.mp hC'
     set mc : Fin n := ⟨m, hm⟩
     set Rows := (univ : Finset (Fin n)).filter fun ρ : Fin n => (ρ : ℕ) < bm
     have hRows : #Rows = bm := by
@@ -566,7 +580,7 @@ lemma s26b_NA_succ {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j,
     · intro ρ hρ
       simp only [mem_sdiff, Rows, mem_filter, mem_univ, true_and, mem_image] at hρ
       have hnot : (mc, ρ) ∉ C' := fun h => by have := (h1 _ h).2; simp [mc] at this
-      simp only [A1, A, mem_filter, s26b_mem_NA, not_forall]
+      simp only [A1, A, mem_filter, mem_ferrersPlacements, not_forall]
       refine ⟨⟨⟨fun x hx => ?_, by rw [card_insert_of_notMem hnot, h2], ?_⟩, ⟨(mc, ρ),
         mem_insert_self _ _, by simp [mc]⟩⟩, ?_⟩
       · rcases mem_insert.mp hx with rfl | hx
@@ -593,7 +607,7 @@ lemma s26b_NA_succ {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j,
       · exact (Prod.mk.inj h').2
       · have := (h1 _ h').2; simp [mc] at this
     · intro C hC
-      simp only [A1, A, mem_filter, s26b_mem_NA, not_forall] at hC
+      simp only [A1, A, mem_filter, mem_ferrersPlacements, not_forall] at hC
       obtain ⟨⟨⟨g1, g2, g3⟩, x0, hx0, hx0m⟩, hfil⟩ := hC
       have hx0' : x0.1 = mc := Fin.ext (by have := (g1 x0 hx0).2; simp [mc]; omega)
       have hCe : C.filter (fun x => (x.1 : ℕ) < m) = C.erase x0 := by
@@ -615,77 +629,77 @@ lemma s26b_NA_succ {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j,
         obtain ⟨hne, hy⟩ := mem_erase.mp hy
         exact (g3 y hy x0 hx0 hne).2 hyx
       · rw [← hfil, hCe, show (mc, x0.2) = x0 from Prod.ext hx0'.symm rfl, insert_erase hx0]
-  have hA1 : (#A1 : ℤ) = (bm - k : ℤ) * #(s26b_NA b m k) := by
+  have hA1 : (#A1 : ℤ) = (bm - k : ℤ) * #(ferrersPlacements b m k) := by
     rw [card_eq_sum_card_fiberwise hmaps, Nat.cast_sum, sum_congr rfl fun C' hC' => by
       rw [(hfib C' hC').1, Nat.cast_sub (hfib C' hC').2], sum_const, nsmul_eq_mul, mul_comm]
   rw [← hsplit, h0, Nat.cast_add, hA1]
 
 /-- One empty placement. -/
-lemma s26b_NA_zero {n : ℕ} (b : Fin n → ℕ) (m : ℕ) : #(s26b_NA b m 0) = 1 := by
+private lemma card_ferrersPlacements_zero {n : ℕ} (b : Fin n → ℕ) (m : ℕ) : #(ferrersPlacements b m 0) = 1 := by
   rw [card_eq_one]
   refine ⟨∅, ?_⟩
   ext C
-  simp only [mem_singleton, s26b_mem_NA, card_eq_zero]
+  simp only [mem_singleton, mem_ferrersPlacements, card_eq_zero]
   constructor
   · exact fun h => h.2.1
   · rintro rfl; exact ⟨by simp, rfl, by simp [IsNonattacking]⟩
 
 /-- No placement of more rooks than columns. -/
-lemma s26b_NA_gt {n : ℕ} (b : Fin n → ℕ) {m k : ℕ} (h : m < k) : #(s26b_NA b m k) = 0 := by
+private lemma card_ferrersPlacements_of_lt {n : ℕ} (b : Fin n → ℕ) {m k : ℕ} (h : m < k) : #(ferrersPlacements b m k) = 0 := by
   rw [card_eq_zero, eq_empty_iff_forall_notMem]
   intro C hC
-  have := s26b_card_le hC
+  have := le_of_mem_ferrersPlacements hC
   omega
 
 /-- All `n` columns give the rook numbers of the board. -/
-lemma s26b_NA_full {n : ℕ} (b : Fin n → ℕ) (k : ℕ) :
-    #(s26b_NA b n k) = rookNumber (ferrersBoard b) k := by
-  have : s26b_fb b n = ferrersBoard b :=
+private lemma card_ferrersPlacements_eq_rookNumber {n : ℕ} (b : Fin n → ℕ) (k : ℕ) :
+    #(ferrersPlacements b n k) = rookNumber (ferrersBoard b) k := by
+  have : ferrersBoardColumns b n = ferrersBoard b :=
     filter_true_of_mem fun (x : Fin n × Fin n) _ => x.1.isLt
-  rw [s26b_NA, this, rookNumber]
+  rw [ferrersPlacements, this, rookNumber]
 
 /-- `(X + c) (x)_k = (x)_{k+1} + (c + k) (x)_k`. -/
-lemma s26b_X_add_mul_desc (c : ℤ) (k : ℕ) :
+private lemma X_add_C_mul_descPochhammer (c : ℤ) (k : ℕ) :
     (X + C c) * descPochhammer ℤ k = descPochhammer ℤ (k + 1) + C (c + k) * descPochhammer ℤ k := by
   rw [descPochhammer_succ_right, map_add, map_natCast]; ring
 
 /-- `b` extended by `0` to all of `ℕ`. -/
-def s26b_bb {n : ℕ} (b : Fin n → ℕ) (j : ℕ) : ℕ := if h : j < n then b ⟨j, h⟩ else 0
+def ferrersHeight {n : ℕ} (b : Fin n → ℕ) (j : ℕ) : ℕ := if h : j < n then b ⟨j, h⟩ else 0
 
 /-- The column-by-column form of the Ferrers board identity. -/
-lemma s26b_ferrers_poly {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j, b j ≤ n) :
-    ∀ m, m ≤ n → ∑ k ∈ range (m + 1), C (#(s26b_NA b m (m - k)) : ℤ) * descPochhammer ℤ k =
-      ∏ j ∈ range m, (X + C ((s26b_bb b j : ℤ) - j)) := by
+private lemma sum_card_ferrersPlacements_mul_descPochhammer {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j, b j ≤ n) :
+    ∀ m, m ≤ n → ∑ k ∈ range (m + 1), C (#(ferrersPlacements b m (m - k)) : ℤ) * descPochhammer ℤ k =
+      ∏ j ∈ range m, (X + C ((ferrersHeight b j : ℤ) - j)) := by
   intro m
   induction m with
-  | zero => intro _; simp [s26b_NA_zero]
+  | zero => intro _; simp [card_ferrersPlacements_zero]
   | succ m ih =>
     intro hm
     have hmn : m < n := by omega
-    rw [prod_range_succ, ← ih hmn.le, sum_mul, sum_range_succ, Nat.sub_self, s26b_NA_zero,
+    rw [prod_range_succ, ← ih hmn.le, sum_mul, sum_range_succ, Nat.sub_self, card_ferrersPlacements_zero,
       Nat.cast_one, map_one, one_mul]
-    have hbb : s26b_bb b m = b ⟨m, hmn⟩ := by simp only [s26b_bb, hmn, ↓reduceDIte]
-    have hL : ∀ k ∈ range (m + 1), C (#(s26b_NA b (m + 1) (m + 1 - k)) : ℤ) *
-        descPochhammer ℤ k = C (#(s26b_NA b m (m - k + 1)) : ℤ) * descPochhammer ℤ k +
-        C (#(s26b_NA b m (m - k)) : ℤ) * C ((b ⟨m, hmn⟩ : ℤ) - m + k) * descPochhammer ℤ k := by
+    have hbb : ferrersHeight b m = b ⟨m, hmn⟩ := by simp only [ferrersHeight, hmn, ↓reduceDIte]
+    have hL : ∀ k ∈ range (m + 1), C (#(ferrersPlacements b (m + 1) (m + 1 - k)) : ℤ) *
+        descPochhammer ℤ k = C (#(ferrersPlacements b m (m - k + 1)) : ℤ) * descPochhammer ℤ k +
+        C (#(ferrersPlacements b m (m - k)) : ℤ) * C ((b ⟨m, hmn⟩ : ℤ) - m + k) * descPochhammer ℤ k := by
       intro k hk
       rw [mem_range] at hk
-      rw [show m + 1 - k = (m - k) + 1 by omega, s26b_NA_succ hb hbn hmn, Nat.cast_sub (by omega)]
+      rw [show m + 1 - k = (m - k) + 1 by omega, card_ferrersPlacements_succ_succ hb hbn hmn, Nat.cast_sub (by omega)]
       simp only [map_add, map_mul, map_sub, map_natCast]
       ring
-    have hR : ∀ k ∈ range (m + 1), C (#(s26b_NA b m (m - k)) : ℤ) * descPochhammer ℤ k *
-        (X + C ((s26b_bb b m : ℤ) - m)) = C (#(s26b_NA b m (m - k)) : ℤ) *
+    have hR : ∀ k ∈ range (m + 1), C (#(ferrersPlacements b m (m - k)) : ℤ) * descPochhammer ℤ k *
+        (X + C ((ferrersHeight b m : ℤ) - m)) = C (#(ferrersPlacements b m (m - k)) : ℤ) *
           descPochhammer ℤ (k + 1) +
-        C (#(s26b_NA b m (m - k)) : ℤ) * C ((b ⟨m, hmn⟩ : ℤ) - m + k) * descPochhammer ℤ k := by
+        C (#(ferrersPlacements b m (m - k)) : ℤ) * C ((b ⟨m, hmn⟩ : ℤ) - m + k) * descPochhammer ℤ k := by
       intro k _
-      rw [hbb, mul_assoc, mul_comm (descPochhammer ℤ k), s26b_X_add_mul_desc]
+      rw [hbb, mul_assoc, mul_comm (descPochhammer ℤ k), X_add_C_mul_descPochhammer]
       ring
     rw [sum_congr rfl hL, sum_congr rfl hR, sum_add_distrib, sum_add_distrib]
-    rw [sum_range_succ' (fun k => C (#(s26b_NA b m (m - k + 1)) : ℤ) * descPochhammer ℤ k),
-      sum_range_succ (fun k => C (#(s26b_NA b m (m - k)) : ℤ) * descPochhammer ℤ (k + 1)),
-      Nat.sub_zero, s26b_NA_gt b (Nat.lt_succ_self m), Nat.sub_self, s26b_NA_zero]
-    have hre : ∀ k ∈ range m, C (#(s26b_NA b m (m - (k + 1) + 1)) : ℤ) *
-        descPochhammer ℤ (k + 1) = C (#(s26b_NA b m (m - k)) : ℤ) * descPochhammer ℤ (k + 1) := by
+    rw [sum_range_succ' (fun k => C (#(ferrersPlacements b m (m - k + 1)) : ℤ) * descPochhammer ℤ k),
+      sum_range_succ (fun k => C (#(ferrersPlacements b m (m - k)) : ℤ) * descPochhammer ℤ (k + 1)),
+      Nat.sub_zero, card_ferrersPlacements_of_lt b (Nat.lt_succ_self m), Nat.sub_self, card_ferrersPlacements_zero]
+    have hre : ∀ k ∈ range m, C (#(ferrersPlacements b m (m - (k + 1) + 1)) : ℤ) *
+        descPochhammer ℤ (k + 1) = C (#(ferrersPlacements b m (m - k)) : ℤ) * descPochhammer ℤ (k + 1) := by
       intro k hk
       rw [mem_range] at hk
       rw [show m - (k + 1) + 1 = m - k by omega]
@@ -694,7 +708,7 @@ lemma s26b_ferrers_poly {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : �
     ring
 
 /-- Coefficients in the falling-factorial basis are unique. -/
-lemma s26b_descPochhammer_coeff_unique (N : ℕ) (d : ℕ → ℤ)
+private lemma eq_zero_of_sum_C_mul_descPochhammer_eq_zero (N : ℕ) (d : ℕ → ℤ)
     (h : ∑ k ∈ range (N + 1), C (d k) * descPochhammer ℤ k = 0) : ∀ k ≤ N, d k = 0 := by
   induction N with
   | zero =>
@@ -730,11 +744,11 @@ factorial `x(x-1)⋯(x-k+1)` (`descPochhammer`); `0`-based `j` gives the factor 
 theorem sum_rookNumber_ferrersBoard {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j, b j ≤ n) :
     ∑ k ∈ range (n + 1), C (rookNumber (ferrersBoard b) (n - k) : ℤ) * descPochhammer ℤ k =
       ∏ j : Fin n, (X + C ((b j : ℤ) - j)) := by
-  have := s26b_ferrers_poly hb hbn n le_rfl
-  simp only [s26b_NA_full] at this
-  rw [this, ← Fin.prod_univ_eq_prod_range (fun j => X + C ((s26b_bb b j : ℤ) - j))]
+  have := sum_card_ferrersPlacements_mul_descPochhammer hb hbn n le_rfl
+  simp only [card_ferrersPlacements_eq_rookNumber] at this
+  rw [this, ← Fin.prod_univ_eq_prod_range (fun j => X + C ((ferrersHeight b j : ℤ) - j))]
   refine prod_congr rfl fun j _ => ?_
-  simp only [s26b_bb, j.isLt, ↓reduceDIte]
+  simp only [ferrersHeight, j.isLt, ↓reduceDIte]
 
 /-- (26.15.12): for the Ferrers board of shape `(0, 1, …, n-1)`,
 `∑_{k=0}^n r_{n-k}(B) (x-k+1)_k = xⁿ`. -/
@@ -751,7 +765,7 @@ theorem rookNumber_staircase {n k : ℕ} (hk : k ≤ n) :
     rookNumber (ferrersBoard fun j : Fin n => (j : ℕ)) (n - k) = Nat.stirlingSecond n k := by
   have h1 := sum_rookNumber_staircase n
   have h2 := X_pow_eq_sum_stirlingSecond_mul_descPochhammer ℤ n
-  have := s26b_descPochhammer_coeff_unique n
+  have := eq_zero_of_sum_C_mul_descPochhammer_eq_zero n
     (fun k => (rookNumber (ferrersBoard fun j : Fin n => (j : ℕ)) (n - k) : ℤ) -
       Nat.stirlingSecond n k) (by
         simp only [map_sub, sub_mul, sum_sub_distrib]

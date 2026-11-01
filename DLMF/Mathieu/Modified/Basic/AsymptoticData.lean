@@ -11,6 +11,22 @@ public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
 
 /-!
 # Defining data for large-argument and Goldstein Mathieu expansions
+
+The coefficients, prefactors and filters of the asymptotic expansions of `M^{(3)}_ν`,
+`M^{(4)}_ν` for large `Re z` (DLMF §28.25), and Goldstein's functions `Fc_m`, `Gc_m`, `Fs_m`,
+`Gs_m` with their truncated expansions for large `h` (DLMF §28.26).
+
+## Main definitions
+
+* `modMathieuAsympD`: the coefficients `D^±_m` of DLMF 28.25.1, defined by 28.25.2 and the
+  recurrence 28.25.3 (via the pair `modMathieuAsympDPair`).
+* `modMathieuAsympPrefactor`, `modMathieuAsympFilter`: the prefactor of DLMF 28.25.1 and the
+  sector filter of 28.25.4–28.25.5.
+* `goldsteinPhase`: the phase `φ` of DLMF 28.26.3.
+* `goldsteinFc`, `goldsteinGc`, `goldsteinFs`, `goldsteinGs`: Goldstein's functions, defined
+  so that 28.26.1–28.26.2 hold.
+* `goldsteinFcApprox`, `goldsteinGcApprox`: the partial sums of 28.26.4–28.26.5 through the
+  `h⁻³` terms.
 -/
 
 @[expose] public noncomputable section

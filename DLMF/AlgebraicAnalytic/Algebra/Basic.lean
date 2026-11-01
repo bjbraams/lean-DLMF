@@ -14,13 +14,20 @@ public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 Most of DLMF §§1.2–1.3 is about objects that Mathlib already has (binomial coefficients,
 matrices, determinants, norms); the pointers are in
 `DLMF/AlgebraicAnalytic/Algebra/MathlibCoverage.lean`. This file defines the few notions that
-are not upstream:
+are not upstream.
 
-* the arithmetic, geometric and harmonic means of finitely many reals (1.2.17–1.2.19) and the
-  weighted power mean `M(r)` (1.2.20–1.2.22);
-* tridiagonal square matrices (1.2.57);
-* the symmetric truncations `D_n[a_{j,k}]` of a doubly infinite matrix, convergence of the
-  infinite determinant, and determinants of Hill's type (1.3.18–1.3.19).
+## Main definitions
+
+* `arithmeticMean`, `geometricMean`, `harmonicMean`: the means of finitely many reals
+  (DLMF 1.2.17–1.2.19).
+* `weightedPowerMean`: the weighted power mean `M(r)` (DLMF 1.2.20–1.2.22).
+* `IsTridiagonal`: tridiagonal square matrices (DLMF 1.2.57).
+* `truncDet`: the symmetric truncations `D_n[a_{j,k}]` of a doubly infinite matrix
+  (DLMF 1.3.18).
+* `HasInfiniteDet`: convergence of an infinite determinant (DLMF §1.3(iii)).
+* `IsHillType`: determinants of Hill's type (DLMF 1.3.19).
+
+## Implementation notes
 
 The finitely many numbers `a₁, …, aₙ` of DLMF are a family `a : ι → ℝ` over a finite type `ι`;
 `n` is `Fintype.card ι`.

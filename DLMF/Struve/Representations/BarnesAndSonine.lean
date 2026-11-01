@@ -6,14 +6,34 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Struve.Representations.PoissonAndBarnesLoop
+public import DLMFMathlib.Analysis.SpecialFunctions.Complex.ArgLog
 
 /-!
 # Barnes and Sonine representations of Struve functions
 
-The Barnes integral for H and Sonine-type integral identities, including analytic continuation.
+The Barnes integral for `H_ν` (DLMF 11.5.8), the primitive of `t^ν H_ν(t)` and its
+recurrence (DLMF 11.7.5–11.7.6), Sonine's integral (DLMF 11.7.7) and the improper integrals
+of DLMF 11.7.8.
 
-Source references and common attribution are retained in
-`DLMF.Struve.Representations`.
+## Main definitions
+
+* `struveHPrimitive`: the straight-segment primitive of `t^ν H_ν(t)` based at zero
+  (DLMF 11.7.5).
+
+## Main results
+
+* `struveH_barnes`: the Barnes integral for `H_ν`, DLMF 11.5.8.
+* `struveHPrimitive_recurrence`: DLMF 11.7.6.
+* `trig_beta_integral`: the trigonometric Beta integral, with integrability.
+* `struveH_sonine`: DLMF 11.7.7.
+* `tendsto_integral_integral_mul_sinc`: Dirichlet's integral under a parametric integral.
+* `struveH_integral_zero_div`, `struveH_integral_one_div_sq`: the integrals
+  `∫₀^∞ H₀(t)/t dt = π/2` and `∫₀^∞ H₁(t)/t² dt = π/4` (DLMF 11.7.8).
+
+## Implementation notes
+
+The Barnes integral is proved with the residue theorem on rectangles
+`[c, N + 1/2] × [-h, h]`, as for `struveL_barnes_loop`.
 -/
 
 @[expose] public noncomputable section
@@ -264,14 +284,6 @@ the integrand. -/
 def struveHPrimitive (ν z : ℂ) : ℂ :=
   primitive (fun t => t^ν*struveH ν t) z
 
-/-- A positive real multiple of a slit-plane point lies in the slit plane. -/
-theorem ofReal_mul_mem_slitPlane {s : ℝ} (hs : 0 < s) {z : ℂ} (hz : z ∈ slitPlane) :
-    (s:ℂ)*z ∈ slitPlane := by
-  rw [mem_slitPlane_iff] at hz ⊢
-  rcases hz with h | h
-  · left; simp; positivity
-  · right; simp; exact ⟨hs.ne', h⟩
-
 /-- Derivative of the antiderivative used in the primitive recurrence. -/
 lemma hasDerivAt_struveHPrimitive_aux {ν : ℂ} (hν1 : ν + 1 ≠ 0) {w : ℂ} (hw : w ∈ slitPlane) :
     HasDerivAt (fun w : ℂ => -(w^(ν+1)*struveH ν w) +
@@ -363,7 +375,7 @@ theorem struveHPrimitive_recurrence {ν : ℂ} (hν : -1 < ν.re) {z : ℂ} (hz 
       (z * (((s:ℂ)*z)^(ν+1)*struveH (ν+1) ((s:ℂ)*z) -
         (2*ν+1)*(((s:ℂ)*z)^ν*struveH ν ((s:ℂ)*z)))) s := by
     intro s hs
-    have h1 := hasDerivAt_struveHPrimitive_aux hν1 (ofReal_mul_mem_slitPlane hs.1 hz)
+    have h1 := hasDerivAt_struveHPrimitive_aux hν1 (Complex.ofReal_mul_mem_slitPlane hs.1 hz)
     have h2 : HasDerivAt (fun s : ℝ => (s:ℂ)*z) z s :=
       ((hasDerivAt_id s).ofReal_comp.mul_const z).congr_deriv (by simp)
     refine (h1.comp s h2).congr_deriv ?_
@@ -437,7 +449,7 @@ theorem trigBeta_integrand_eq {a b : ℂ} {θ : ℝ} (hθ : θ ∈ Ioo 0 (π/2))
   rw [← e1, ← e2]; push_cast; ring
 
 /-- **Trigonometric Beta integral**, with integrability. -/
-theorem trigBeta {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
+theorem trig_beta_integral {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
     IntervalIntegrable (fun θ : ℝ => (Real.sin θ:ℂ)^(2*a-1)*(Real.cos θ:ℂ)^(2*b-1)) volume 0 (π/2) ∧
     (∫ θ : ℝ in 0..π/2, (Real.sin θ:ℂ)^(2*a-1)*(Real.cos θ:ℂ)^(2*b-1)) =
       Gamma a * Gamma b / (2*Gamma (a+b)) := by
@@ -486,7 +498,7 @@ theorem struveH_sonine {ν : ℂ} (hν0 : -3/2 < ν.re) (hν1 : ν.re < 1/2) {z 
     simp; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   set W : ℕ → ℝ → ℂ := fun k θ =>
     (Real.sin θ:ℂ)^(2*((k:ℂ)+ν+3/2)-1)*(Real.cos θ:ℂ)^(2*(1/2-ν)-1)
-  have hTB := fun k => trigBeta (ha k) hb
+  have hTB := fun k => trig_beta_integral (ha k) hb
   set c : ℕ → ℂ := fun k => (z/2)^(ν+1)*((-1)^k*(z/2)^(2*k)*struveCoeff ν k)
   have hc : Summable fun k => ‖c k‖ := by
     rw [summable_norm_iff]

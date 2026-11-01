@@ -10,12 +10,28 @@ public import DLMF.IncompleteGamma.FractionTools
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 
 /-!
-# Continued fractions and bounds for error functions
+# Inequalities and continued fractions for error functions (DLMF §§7.8–7.9)
 
-Real and complex error-function bounds and convergent continued-fraction representations.
+Bounds for the Mills ratio, for integrals of `exp(a t²)`, for Dawson's integral and for the
+error function (DLMF §7.8), and the continued fractions for `erfc` (DLMF §7.9). The bounds are
+obtained from a comparison principle: a candidate `g` with `g' - 2yg + 1` of one sign and
+`g → 0` bounds the Mills ratio from one side.
 
-Source references and common attribution are retained in
-`DLMF.ErrorFunctions.BoundsAsymptotics`.
+## Main definitions
+
+* `Real.millsRatio`: the Mills ratio `M(x) = e^{x²} ∫ₓ^∞ e^{-t²} dt` (DLMF 7.8.1).
+
+## Main results
+
+* `Real.millsRatio_integral`: the integral form of the Mills ratio (DLMF 7.8.1).
+* `Real.millsRatio_bound_2`, `Real.millsRatio_bound_3`, `Real.millsRatio_bound_four`,
+  `Real.millsRatio_rational_bounds`: bounds for the Mills ratio (DLMF 7.8.2–7.8.5).
+* `Real.exp_sq_integral_bound`, `Real.dawsonF_integral_bounds`: DLMF 7.8.6, 7.8.7.
+* `Real.erf_exponential_bound`: `erf x < √(1 - e^{-4x²/π})` (DLMF 7.8.8).
+* `Real.dawsonF_normalized_strictAnti`: the monotonicity statement in the prose of DLMF §7.8.
+* `bndAsy_millsRatio_lt`, `bndAsy_lt_millsRatio`: the comparison principle.
+* `erfc_continuedFraction_one`, `erfc_continuedFraction_two`: the continued fractions for
+  `erfc` (DLMF 7.9.1, 7.9.2).
 -/
 
 @[expose] public noncomputable section

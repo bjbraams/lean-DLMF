@@ -11,7 +11,24 @@ public import Mathlib.Analysis.Analytic.IsolatedZeros
 public import Mathlib.Analysis.Complex.Order
 
 /-!
-# Cut plane and defining Euler continuation of the Gauss function
+# Cut plane and Euler continuation of the Gauss function
+
+## Main definitions
+
+* `cutPlane`: the cut plane `ℂ ∖ [1, ∞)`, the natural domain of `₂F₁` in its argument.
+* `eulerKernel`, `regularizedGaussHGIntegral`: Euler's integral 15.6.1 in the regularized
+  normalization.
+* `shiftB`, `shiftC`, `shiftMeasure`, `regularizedGaussHGAux`: the contiguous shifts into the
+  Euler region and the recursion.
+* `regularizedGaussHG`: the continuation of the regularized function `𝐅(a,b;c;z)` to the cut
+  plane, for all parameters.
+
+## Main results
+
+* `isOpen_cutPlane`, `starConvex_zero_cutPlane`, `isPreconnected_cutPlane`: topology of the cut
+  plane.
+* `eqOn_cutPlane_of_eventuallyEq`, `eqOn_cutPlane_of_eqOn_disk`: the identity principle on the
+  cut plane.
 -/
 
 @[expose] public noncomputable section

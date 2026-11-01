@@ -10,14 +10,30 @@ public import DLMF.OrthogonalPolynomials.Differential
 /-!
 # Limits between families and Mehler–Heine formulas
 
-Statements from NIST DLMF Chapter 18, each tagged with its equation number by `@[dlmf]`.
-Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
-hypergeometric definitions do not implement continuation in singular parameters.
+Limits of the classical orthogonal polynomials to monomials (DLMF §18.6(ii)), limit relations
+between the Jacobi, Gegenbauer, Laguerre, Hermite and Chebyshev families (DLMF 18.7.21–18.7.26)
+and the Mehler–Heine formulas (DLMF 18.11.5–18.11.8).
 
-The Jacobi Mehler–Heine proof uses Mathlib’s dominated convergence theorem for
-series (Tannery), descending-factorial bounds and continuity of the sinc function.
-The terminating range supplies a geometric majorant for the two varying numerator
-parameters; the existing local Gamma-ratio limit supplies the normalization.
+## Main results
+
+* `jacobi_limit_alpha`, `jacobi_limit_beta`, `ultrasphPoly_limit_monomial`,
+  `laguerrePolyL_limit_monomial`: DLMF 18.6.2–18.6.5.
+* `jacobi_limit_laguerrePolyL`, `jacobi_limit_laguerrePolyL_reflected`: DLMF 18.7.21 and
+  18.7.22.
+* `jacobi_limit_hermite`, `ultrasphPoly_limit_hermite`: DLMF 18.7.23 and 18.7.24.
+* `ultrasphPoly_limit_chebyshev`: DLMF 18.7.25.
+* `laguerrePolyL_limit_hermite`: DLMF 18.7.26.
+* `jacobi_mehler_heine`, `jacobi_mehler_heine_regularized`: DLMF 18.11.5.
+* `laguerrePolyL_mehler_heine`, `laguerrePolyL_mehler_heine_regularized`: DLMF 18.11.6.
+* `hermite_even_mehler_heine`, `hermite_odd_mehler_heine`: DLMF 18.11.7 and 18.11.8.
+
+## Implementation notes
+
+Jacobi and Gegenbauer statements keep regularity hypotheses because the hypergeometric
+definitions used here are not continued in singular parameters. The Jacobi Mehler–Heine
+formula uses dominated convergence for series (Tannery's theorem): the terminating range
+supplies a geometric majorant for the two varying numerator parameters, and a local
+Gamma-ratio limit supplies the normalization.
 -/
 
 @[expose] public section
@@ -679,12 +695,10 @@ theorem jacobi_mehler_heine_regularized {α : ℝ} (hα : -1 < α) (β : ℂ)
   ring
 /-- The Jacobi Mehler–Heine formula with the original Bessel normalization. -/
 @[dlmf 18.11.E5]
-theorem jacobi_mehler_heine {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {z : ℝ} (hz : 0 < z) :
+theorem jacobi_mehler_heine {α β : ℝ} (hα : -1 < α) {z : ℝ} (hz : 0 < z) :
     Tendsto (fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) * jacobiPolyP α β n (cos ((z : ℂ) / n)))
         atTop
       (𝓝 ((Real.rpow (2 / z) α : ℂ) * besselJ α z)) := by
-  -- The series argument allows arbitrary complex β; retain the original real-parameter interface.
-  clear hβ
   let wseq (n : ℕ) : ℂ := (n : ℂ) ^ 2 * ((1 - cos ((z : ℂ) / n)) / 2)
   have ht : Tendsto (fun n : ℕ => (z / (n : ℝ)) / 2) atTop (𝓝 0) := by
     simpa using (tendsto_const_nhds.div_atTop

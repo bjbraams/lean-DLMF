@@ -12,10 +12,27 @@ public import Mathlib.NumberTheory.LSeries.RiemannZeta
 /-!
 # The polylogarithm (Duverney Chapter 8; DLMF §25.12)
 
-`Li_n(z) = ∑_{k ≥ 1} z^k/k^n` on the closed unit disk (`n ≥ 2`) or the open disk. This file
-proves `Li₁(z) = -log(1-z)`, the termwise derivative `Li_{n+1}' = Li_n/z`, `Li_n(1) = ζ(n)`, the
-duplication formula `Li_n(z) + Li_n(-z) = 2^{1-n} Li_n(z²)`, the value
-`Li_n(-1) = -(1 - 2^{1-n})ζ(n)`, and the identification with Mathlib's `expZeta` on the circle.
+This file defines the polylogarithm `Li_n(z) = ∑_{k ≥ 1} z^k/k^n` as a series on the closed
+unit disk (`n ≥ 2`) or the open disk, and proves its basic properties.
+
+## Main definitions
+
+* `polylogSeries`: the polylogarithm `Li_n(z)` (DLMF 25.12.10), as a `tsum`.
+
+## Main results
+
+* `summable_polylogSeries`, `summable_polylogSeries_of_norm_lt_one`: absolute convergence on
+  the closed disk for `n ≥ 2` and on the open disk for every `n`.
+* `polylogSeries_one`: `Li₁(z) = -log(1 - z)`.
+* `hasDerivAt_polylogSeries_div`: `Li_{n+1}'(z) = Li_n(z)/z` (Duverney (8.2)).
+* `polylogSeries_one_eq_zeta`: `Li_n(1) = ζ(n)` for `n ≥ 2` (DLMF §25.12(ii)).
+* `polylogSeries_add_polylogSeries_neg`, `polylogSeries_add_polylogSeries_neg_of_norm_le`: the
+  duplication formula `Li_n(z) + Li_n(-z) = 2^{1-n} Li_n(z²)` (Duverney (8.11)).
+* `polylogSeries_neg_one`: `Li_n(-1) = -(1 - 2^{1-n})ζ(n)` (Duverney (8.9)).
+* `polylogSeries_exp_eq_expZeta`: on the unit circle `Li_n(e^{2πia})` is Mathlib's
+  `expZeta a n` (DLMF §25.13).
+* `polylogSeries_two_one`, `polylogSeries_two_neg_one`, `polylogSeries_three_one_neg_one`:
+  `Li₂(±1)` and `Li₃(±1)`.
 -/
 
 @[expose] public section

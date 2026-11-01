@@ -14,8 +14,8 @@ public import DLMF.Airy.Asymptotics.OscillatoryRemainders
 public import DLMF.Airy.Asymptotics.DerivativeRemainders
 
 /-!
-# Airy asymptotic expansions and error bounds, DLMF §9.7
+# Airy asymptotic expansions and error bounds (DLMF §9.7)
 
-Statements acquired from the NIST DLMF, checked 2026-10-19.
-New statements are initially admitted; existing proved Airy results are retained.
+Exponential and oscillatory Poincaré expansions of `Ai`, `Bi` and their derivatives, the
+expansions on rotated rays, and the real and complex remainder bounds of DLMF §9.7(iii)–(v).
 -/

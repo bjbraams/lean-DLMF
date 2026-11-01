@@ -12,14 +12,16 @@ public import DLMF.Spheroidal.Eigenvalues
 public import DLMF.Spheroidal.Angular
 public import DLMF.Spheroidal.FerrersSeries
 public import DLMF.Spheroidal.Radial
-public import DLMF.Spheroidal.P2yFerrersTools
+public import DLMF.Spheroidal.FerrersTools
 public import DLMF.Spheroidal.Existence
-public import DLMF.Spheroidal.P3lParity
-public import DLMF.Spheroidal.P3lSpectrum
+public import DLMF.Spheroidal.Parity
+public import DLMF.Spheroidal.Spectrum
 
 /-!
 # Spheroidal wave functions (DLMF Chapter 30)
 
-The spheroidal equation, eigenvalues λ_n^m(γ²), angular functions Ps, Qs, their Ferrers
-series and the radial functions S_n^{m(j)}. The ledger is DLMF30Acquisition.md.
+This umbrella collects the DLMF Chapter 30 development of spheroidal wave functions: the
+spheroidal equation, the eigenvalues `λ^m_n(γ²)` and their existence and parity, the angular
+functions `𝖯s`, `𝖰s`, `𝑃s`, `𝑄s`, their expansions in Ferrers functions, and the radial functions
+`S^{m(j)}_n`.
 -/

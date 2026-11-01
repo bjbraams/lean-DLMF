@@ -9,4 +9,7 @@ public import DLMF.ErrorFunctions.Basic.Functions
 
 /-!
 # Definitions of error functions and related primitives
+
+This entry point exposes the complex Faddeeva, Dawson, Fresnel and Goodwin–Staton functions and
+the alternative normalizations of DLMF §7.1, defined in `DLMF.ErrorFunctions.Basic.Functions`.
 -/

@@ -14,21 +14,43 @@ public import TauCeti.Combinatorics.Enumerative.Partition.Conjugate
 /-!
 # Integer partitions: restricted number and part size (DLMF §26.9)
 
-`p_k(n)` (`partitionCountAtMostParts k n`) is the number of partitions of `n` into at most `k`
-parts and `p_k(≤ m, n)` (`partitionCountBoxed k m n`) the number of those with every part at
-most `m`. Partitions are Mathlib's `Nat.Partition`; the unrestricted `p(n)` is the project's
-`DLMF.Partitions.partitionFunction`. The Gaussian polynomial `[m n]_q` of (26.9.4) is the
-project's `DLMF.QSeries.qBinom` (defined by the `q`-Pascal rule); (26.9.4) is proved as its
-product form.
+Partitions of `n` into at most `k` parts, possibly with every part at most `m`, on Mathlib's
+`Nat.Partition`: special values, conjugation, the lattice-path interpretation, generating
+functions, recurrences and the asymptotic form. The unrestricted `p(n)` is the project's
+`DLMF.Partitions.partitionFunction`, and the Gaussian polynomial `[m n]_q` of (26.9.4) is the
+project's `DLMF.QSeries.qBinom` (defined by the `q`-Pascal rule).
 
-Conventions and corrections:
+## Main definitions
+
+* `partitionCountAtMostParts`: `p_k(n)`, partitions of `n` into at most `k` parts.
+* `partitionCountBoxed`: `p_k(≤ m, n)`, those with every part at most `m`.
+* `latticePathArea`: the area statistic of a north-east lattice path.
+
+## Main results
+
+* `partitionCountAtMostParts_of_le`, `partitionCountAtMostParts_zero`,
+  `partitionCountAtMostParts_one`, `partitionCountAtMostParts_two`,
+  `partitionCountAtMostParts_three`: special values (DLMF 26.9.1–26.9.3).
+* `partitionCountAtMostParts_eq_card_parts_le`, `card_parts_conjugate`: conjugation
+  (DLMF §26.9(i)).
+* `partitionCountBoxed_eq_card_latticePaths`: `p_k(≤ m, n)` counts lattice paths by area
+  (DLMF §26.9(i)).
+* `qBinom_eq_prod`: the product form of the Gaussian polynomial (DLMF 26.9.4).
+* `hasSum_partitionCountAtMostParts`, `hasSum_qBinom_mul_pow`: DLMF 26.9.5.
+* `hasSum_partitionCountBoxed`: `∑ₙ p_k(≤ m, n) qⁿ = [m+k, k]_q` (DLMF 26.9.6).
+* `hasSum_partitionCountBoxed_two`, `hasSum_qBinom_mul_pow_x`: DLMF 26.9.7, corrected.
+* `partitionCountAtMostParts_succ`, `partitionCountAtMostParts_recurrence`: the recurrences
+  (DLMF 26.9.8, 26.9.9).
+* `partitionCountAtMostParts_isEquivalent`: `p_k(n) ∼ n^{k-1}/(k! (k-1)!)` (DLMF 26.9.10).
+
+## Implementation notes
 
 * DLMF evaluates `p_k` at negative arguments as `0` (26.9.8); the Lean statements make the case
   split explicit because natural-number subtraction truncates.
 * (26.9.7) as printed sums over `m, n` while the summand and both right-hand sides involve a
   fixed `m` and a free `k`; the sum is over `k, n` (verified numerically). The printed
   convergence condition `|xq| < 1` is insufficient: the `n = 0` terms give `∑_k x^k`, so the
-  series needs `|x| < 1` (with `|q| < 1`). The corrected statement is acquired.
+  series needs `|x| < 1` (with `|q| < 1`). The corrected statement is used.
 * All generating functions are stated with `HasSum`/`HasProd` over `ℂ` for `|q| < 1`; finite
   (polynomial) identities are stated for every `q`, which is stronger than DLMF.
 
@@ -46,8 +68,8 @@ open DLMF.QSeries DLMF.Partitions
 
 namespace DLMF.Combinatorics
 
-/-- `p_k(n)`: the number of partitions of `n` into at most `k` parts (DLMF §26.9(i)). -/
-@[dlmf 26.9.i]
+/-- `p_k(n)`: the number of partitions of `n` into at most `k` parts (DLMF §26.9(i), §27.14(i)). -/
+@[dlmf 26.9.i, dlmf 27.14.i]
 def partitionCountAtMostParts (k n : ℕ) : ℕ :=
   #{p : n.Partition | p.parts.card ≤ k}
 
@@ -58,7 +80,7 @@ def partitionCountBoxed (k m n : ℕ) : ℕ :=
   #{p : n.Partition | p.parts.card ≤ k ∧ ∀ i ∈ p.parts, i ≤ m}
 
 /-- A partition of `n` has at most `n` parts. -/
-theorem c26b_card_parts_le {n : ℕ} (p : n.Partition) : p.parts.card ≤ n := by
+theorem card_parts_le {n : ℕ} (p : n.Partition) : p.parts.card ≤ n := by
   have h : p.parts.card • 1 ≤ p.parts.sum :=
     Multiset.card_nsmul_le_sum fun x hx => p.parts_pos hx
   simpa [p.parts_sum] using h
@@ -68,7 +90,7 @@ theorem c26b_card_parts_le {n : ℕ} (p : n.Partition) : p.parts.card ≤ n := b
 theorem partitionCountAtMostParts_of_le {k n : ℕ} (h : n ≤ k) :
     partitionCountAtMostParts k n = partitionFunction n := by
   unfold partitionCountAtMostParts partitionFunction
-  rw [Finset.filter_true_of_mem fun p _ => (c26b_card_parts_le p).trans h, card_univ]
+  rw [Finset.filter_true_of_mem fun p _ => (card_parts_le p).trans h, card_univ]
 
 /-- (26.9.2): `p_0(n) = 0` for `n > 0`. -/
 @[dlmf 26.9.E2]
@@ -111,7 +133,7 @@ theorem partitionCountAtMostParts_one (n : ℕ) : partitionCountAtMostParts 1 n 
       simp [Nat.Partition.indiscrete, Nat.Partition.ofSums, Multiset.filter_singleton, hn.ne']
 
 /-- The largest row length of a Young diagram is the first one. -/
-lemma q26b_sup_rowLens (μ : YoungDiagram) : (μ.rowLens : Multiset ℕ).sup = μ.rowLen 0 := by
+private lemma sup_rowLens (μ : YoungDiagram) : (μ.rowLens : Multiset ℕ).sup = μ.rowLen 0 := by
   apply le_antisymm
   · rw [Multiset.sup_le]
     intro x hx
@@ -127,24 +149,24 @@ lemma q26b_sup_rowLens (μ : YoungDiagram) : (μ.rowLens : Multiset ℕ).sup = �
       exact h
 
 /-- The number of parts of the conjugate is the largest part. -/
-lemma q26b_card_parts_conjugate {n : ℕ} (p : n.Partition) :
+private lemma card_parts_conjugate_eq_sup {n : ℕ} (p : n.Partition) :
     p.conjugate.parts.card = p.parts.sup := by
   rw [Nat.Partition.conjugate_parts, Multiset.coe_card, YoungDiagram.length_rowLens,
     YoungDiagram.colLen_transpose]
   have h := YoungDiagram.rowLens_ofPartition_eq_sort_parts p
   have hp : p.parts = ((YoungDiagram.ofPartition p).rowLens : Multiset ℕ) := by
     rw [h, Multiset.sort_eq]
-  rw [hp, q26b_sup_rowLens]
+  rw [hp, sup_rowLens]
 
 /-- §26.9(i) by conjugation (used for (26.9.8)). -/
-lemma q26b_partitionCountAtMostParts_eq_card_parts_le (k n : ℕ) :
+private lemma partitionCountAtMostParts_eq_card_forall_parts_le (k n : ℕ) :
     partitionCountAtMostParts k n = #{p : n.Partition | ∀ i ∈ p.parts, i ≤ k} := by
   unfold partitionCountAtMostParts
   refine Finset.card_bij (fun p _ => p.conjugate) ?_ ?_ ?_
   · intro p hp
     simp only [mem_filter, mem_univ, true_and] at hp ⊢
     rw [← Multiset.sup_le]
-    have := q26b_card_parts_conjugate p.conjugate
+    have := card_parts_conjugate_eq_sup p.conjugate
     rw [Nat.Partition.conjugate_conjugate] at this
     rw [← this]; exact hp
   · intro p _ p' _ h
@@ -153,16 +175,16 @@ lemma q26b_partitionCountAtMostParts_eq_card_parts_le (k n : ℕ) :
     simp only [mem_filter, mem_univ, true_and] at hp
     refine ⟨p.conjugate, ?_, Nat.Partition.conjugate_conjugate p⟩
     simp only [mem_filter, mem_univ, true_and]
-    rw [q26b_card_parts_conjugate]
+    rw [card_parts_conjugate_eq_sup]
     exact Multiset.sup_le.mpr hp
 
 /-- (26.9.8), used for (26.9.3). -/
-lemma q26b_partitionCountAtMostParts_succ (k n : ℕ) :
+private lemma partitionCountAtMostParts_succ_eq (k n : ℕ) :
     partitionCountAtMostParts (k + 1) n =
       (if k + 1 ≤ n then partitionCountAtMostParts (k + 1) (n - (k + 1)) else 0) +
         partitionCountAtMostParts k n := by
   classical
-  simp only [q26b_partitionCountAtMostParts_eq_card_parts_le]
+  simp only [partitionCountAtMostParts_eq_card_forall_parts_le]
   rw [← Finset.card_filter_add_card_filter_not (p := fun p : n.Partition => k + 1 ∈ p.parts)]
   rw [Finset.filter_filter, Finset.filter_filter]
   congr 1
@@ -210,7 +232,7 @@ lemma q26b_partitionCountAtMostParts_succ (k n : ℕ) :
 theorem partitionCountAtMostParts_two (n : ℕ) : partitionCountAtMostParts 2 n = 1 + n / 2 := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
-    rw [q26b_partitionCountAtMostParts_succ 1 n, partitionCountAtMostParts_one]
+    rw [partitionCountAtMostParts_succ_eq 1 n, partitionCountAtMostParts_one]
     split_ifs with h
     · rw [ih (n - 2) (by omega)]; omega
     · omega
@@ -223,13 +245,13 @@ theorem partitionCountAtMostParts_three (n : ℕ) :
     intro n
     induction n using Nat.strong_induction_on with
     | _ n ih =>
-      rw [q26b_partitionCountAtMostParts_succ 1 n, partitionCountAtMostParts_one]
+      rw [partitionCountAtMostParts_succ_eq 1 n, partitionCountAtMostParts_one]
       split_ifs with h
       · rw [ih (n - 2) (by omega)]; omega
       · omega
   induction n using Nat.strong_induction_on with
   | _ n ih =>
-    rw [q26b_partitionCountAtMostParts_succ 2 n, h2]
+    rw [partitionCountAtMostParts_succ_eq 2 n, h2]
     split_ifs with h
     · rw [ih (n - 3) (by omega)]
       obtain ⟨m, rfl⟩ : ∃ m, n = m + 3 := ⟨n - 3, by omega⟩
@@ -244,15 +266,15 @@ are at most `k` (conjugation of Ferrers graphs, `Nat.Partition.conjugate`). -/
 @[dlmf 26.9.i]
 theorem partitionCountAtMostParts_eq_card_parts_le (k n : ℕ) :
     partitionCountAtMostParts k n = #{p : n.Partition | ∀ i ∈ p.parts, i ≤ k} := by
-  exact q26b_partitionCountAtMostParts_eq_card_parts_le k n
+  exact partitionCountAtMostParts_eq_card_forall_parts_le k n
 
 /-- §26.9(i), conjugation is a bijection: it exchanges the number of parts and the largest
 part (Mathlib's `Nat.Partition.conjugate`, the transpose of the Young diagram). -/
 @[dlmf 26.9.i]
 theorem card_parts_conjugate {n : ℕ} (p : n.Partition) :
     p.conjugate.parts.card = p.parts.sup ∧ p.conjugate.parts.sup = p.parts.card := by
-  refine ⟨q26b_card_parts_conjugate p, ?_⟩
-  have := q26b_card_parts_conjugate p.conjugate
+  refine ⟨card_parts_conjugate_eq_sup p, ?_⟩
+  have := card_parts_conjugate_eq_sup p.conjugate
   rw [Nat.Partition.conjugate_conjugate] at this
   exact this.symm
 
@@ -264,7 +286,7 @@ def latticePathArea {m k : ℕ} (w : Fin (m + k) → Bool) : ℕ :=
   ∑ i : Fin (m + k), if w i then 0 else k - #{i' : Fin (m + k) | i' < i ∧ w i'}
 
 /-- `p_0(n) = δ_{n,0}`. -/
-lemma q26b_partitionCountAtMostParts_zero_left (n : ℕ) :
+private lemma partitionCountAtMostParts_zero_left (n : ℕ) :
     partitionCountAtMostParts 0 n = if n = 0 then 1 else 0 := by
   split_ifs with h
   · subst h
@@ -273,7 +295,7 @@ lemma q26b_partitionCountAtMostParts_zero_left (n : ℕ) :
 
 /-- Boxed partitions by conjugation: `p_k(≤ m, n)` counts the partitions with parts `≤ k` and at
 most `m` parts. -/
-lemma q26b_partitionCountBoxed_conj (k m n : ℕ) :
+private lemma partitionCountBoxed_eq_card_conj (k m n : ℕ) :
     partitionCountBoxed k m n =
       #{p : n.Partition | (∀ i ∈ p.parts, i ≤ k) ∧ Multiset.card p.parts ≤ m} := by
   unfold partitionCountBoxed
@@ -296,11 +318,11 @@ lemma q26b_partitionCountBoxed_conj (k m n : ℕ) :
     exact ⟨Multiset.sup_le.mpr hp.1, hp.2⟩
 
 /-- The recurrence `p_{k+1}(≤ m+1, n) = p_k(≤ m+1, n) + p_{k+1}(≤ m, n-k-1)`. -/
-lemma q26b_partitionCountBoxed_succ (k m n : ℕ) :
+private lemma partitionCountBoxed_succ_succ (k m n : ℕ) :
     partitionCountBoxed (k + 1) (m + 1) n = partitionCountBoxed k (m + 1) n +
       (if k + 1 ≤ n then partitionCountBoxed (k + 1) m (n - (k + 1)) else 0) := by
   classical
-  simp only [q26b_partitionCountBoxed_conj]
+  simp only [partitionCountBoxed_eq_card_conj]
   rw [← Finset.card_filter_add_card_filter_not (p := fun p : n.Partition => k + 1 ∈ p.parts)]
   rw [Finset.filter_filter, Finset.filter_filter, add_comm]
   congr 1
@@ -349,7 +371,7 @@ lemma q26b_partitionCountBoxed_succ (k m n : ℕ) :
       omega
 
 /-- `p_0(≤ m, n) = δ_{n,0}`. -/
-lemma q26b_partitionCountBoxed_zero_left (m n : ℕ) :
+private lemma partitionCountBoxed_zero_left (m n : ℕ) :
     partitionCountBoxed 0 m n = if n = 0 then 1 else 0 := by
   have : partitionCountBoxed 0 m n = partitionCountAtMostParts 0 n := by
     unfold partitionCountBoxed partitionCountAtMostParts
@@ -357,12 +379,12 @@ lemma q26b_partitionCountBoxed_zero_left (m n : ℕ) :
     simp only [mem_filter, mem_univ, true_and, and_iff_left_iff_imp, Nat.le_zero,
       Multiset.card_eq_zero]
     intro h i hi; rw [h] at hi; simp at hi
-  rw [this, q26b_partitionCountAtMostParts_zero_left]
+  rw [this, partitionCountAtMostParts_zero_left]
 
 /-- `p_k(≤ 0, n) = δ_{n,0}`. -/
-lemma q26b_partitionCountBoxed_zero_right (k n : ℕ) :
+private lemma partitionCountBoxed_zero_right (k n : ℕ) :
     partitionCountBoxed k 0 n = if n = 0 then 1 else 0 := by
-  rw [q26b_partitionCountBoxed_conj]
+  rw [partitionCountBoxed_eq_card_conj]
   have : #{p : n.Partition | (∀ i ∈ p.parts, i ≤ k) ∧ Multiset.card p.parts ≤ 0} =
       partitionCountAtMostParts 0 n := by
     unfold partitionCountAtMostParts
@@ -370,43 +392,43 @@ lemma q26b_partitionCountBoxed_zero_right (k n : ℕ) :
     simp only [mem_filter, mem_univ, true_and, and_iff_right_iff_imp, Nat.le_zero,
       Multiset.card_eq_zero]
     intro h i hi; rw [h] at hi; simp at hi
-  rw [this, q26b_partitionCountAtMostParts_zero_left]
+  rw [this, partitionCountAtMostParts_zero_left]
 
 /-- The area statistic of a Boolean word of any length, with `k` the target height. -/
-def r26b_area {N : ℕ} (k : ℕ) (w : Fin N → Bool) : ℕ :=
+def wordArea {N : ℕ} (k : ℕ) (w : Fin N → Bool) : ℕ :=
   ∑ i : Fin N, if w i then 0 else k - #{i' : Fin N | i' < i ∧ w i'}
 
 /-- Lattice paths of length `N` with `k` north steps and area `n`. -/
-def r26b_L (N k n : ℕ) : ℕ := #{w : Fin N → Bool | #{i | w i} = k ∧ r26b_area k w = n}
+def areaPathCount (N k n : ℕ) : ℕ := #{w : Fin N → Bool | #{i | w i} = k ∧ wordArea k w = n}
 
 /-- North steps of a word with a first letter. -/
-lemma r26b_card_true_cons {N : ℕ} (b : Bool) (w : Fin N → Bool) :
+private lemma card_filter_cons_eq_true {N : ℕ} (b : Bool) (w : Fin N → Bool) :
     #{i | (Fin.cons b w : Fin (N + 1) → Bool) i} = (if b then 1 else 0) + #{i | w i} := by
   rw [card_filter, card_filter, Fin.sum_univ_succ]
   simp
 
 /-- Earlier north steps of a word with a first letter. -/
-lemma r26b_card_lt_cons {N : ℕ} (b : Bool) (w : Fin N → Bool) (i : Fin N) :
+private lemma card_filter_lt_succ_cons_eq_true {N : ℕ} (b : Bool) (w : Fin N → Bool) (i : Fin N) :
     #{i' : Fin (N + 1) | i' < i.succ ∧ (Fin.cons b w : Fin (N + 1) → Bool) i'} =
       (if b then 1 else 0) + #{i' : Fin N | i' < i ∧ w i'} := by
   rw [card_filter, card_filter, Fin.sum_univ_succ]
   simp [Fin.succ_pos, Fin.succ_lt_succ_iff]
 
 /-- Area after a first north step. -/
-lemma r26b_area_cons_true {N : ℕ} (k : ℕ) (w : Fin N → Bool) :
-    r26b_area (k + 1) (Fin.cons true w : Fin (N + 1) → Bool) = r26b_area k w := by
-  unfold r26b_area
+private lemma wordArea_cons_true {N : ℕ} (k : ℕ) (w : Fin N → Bool) :
+    wordArea (k + 1) (Fin.cons true w : Fin (N + 1) → Bool) = wordArea k w := by
+  unfold wordArea
   rw [Fin.sum_univ_succ]
   simp only [Fin.cons_zero, Fin.cons_succ, ite_true, zero_add]
   refine sum_congr rfl fun i _ => ?_
-  rw [r26b_card_lt_cons]
+  rw [card_filter_lt_succ_cons_eq_true]
   simp only [ite_true]
   split_ifs <;> omega
 
 /-- Area after a first east step. -/
-lemma r26b_area_cons_false {N : ℕ} (k : ℕ) (w : Fin N → Bool) :
-    r26b_area k (Fin.cons false w : Fin (N + 1) → Bool) = k + r26b_area k w := by
-  unfold r26b_area
+private lemma wordArea_cons_false {N : ℕ} (k : ℕ) (w : Fin N → Bool) :
+    wordArea k (Fin.cons false w : Fin (N + 1) → Bool) = k + wordArea k w := by
+  unfold wordArea
   rw [Fin.sum_univ_succ]
   simp only [Fin.cons_zero, Fin.cons_succ, Bool.false_eq_true, ite_false]
   congr 1
@@ -414,23 +436,23 @@ lemma r26b_area_cons_false {N : ℕ} (k : ℕ) (w : Fin N → Bool) :
       rw [card_eq_zero, filter_eq_empty_iff]; intro x _ h; exact Fin.not_lt_zero _ h.1
     rw [this]; rfl
   · refine sum_congr rfl fun i _ => ?_
-    rw [r26b_card_lt_cons]
+    rw [card_filter_lt_succ_cons_eq_true]
     simp
 
 /-- The lattice-path counts satisfy the recurrence of `p_k(≤ m, n)`. -/
-lemma r26b_L_succ (N k n : ℕ) :
-    r26b_L (N + 1) (k + 1) n =
-      r26b_L N k n + (if k + 1 ≤ n then r26b_L N (k + 1) (n - (k + 1)) else 0) := by
-  unfold r26b_L
+private lemma areaPathCount_succ_succ (N k n : ℕ) :
+    areaPathCount (N + 1) (k + 1) n =
+      areaPathCount N k n + (if k + 1 ≤ n then areaPathCount N (k + 1) (n - (k + 1)) else 0) := by
+  unfold areaPathCount
   rw [card_filter]
   set G : (Fin (N + 1) → Bool) → ℕ := fun w =>
-    if #{i | w i} = k + 1 ∧ r26b_area (k + 1) w = n then 1 else 0 with hG
+    if #{i | w i} = k + 1 ∧ wordArea (k + 1) w = n then 1 else 0 with hG
   have hsum : ∑ w : Fin (N + 1) → Bool, G w =
       ∑ p : Bool × (Fin N → Bool), G (Fin.cons p.1 p.2) :=
     Fintype.sum_equiv (Fin.consEquiv (fun _ : Fin (N + 1) => Bool)).symm _ _
       (fun w => by simp [Fin.consEquiv])
   rw [hsum, Fintype.sum_prod_type, Fintype.sum_bool]
-  simp only [hG, r26b_card_true_cons, r26b_area_cons_true, r26b_area_cons_false, ite_true,
+  simp only [hG, card_filter_cons_eq_true, wordArea_cons_true, wordArea_cons_false, ite_true,
     Bool.false_eq_true, ite_false, zero_add]
   rw [card_filter]
   congr 1
@@ -443,9 +465,9 @@ lemma r26b_L_succ (N k n : ℕ) :
   · exact sum_eq_zero fun w _ => ite_eq_right fun h => by omega
 
 /-- Lattice paths without north steps. -/
-lemma r26b_L_zero (N n : ℕ) : r26b_L N 0 n = if n = 0 then 1 else 0 := by
-  unfold r26b_L
-  have harea : ∀ w : Fin N → Bool, r26b_area 0 w = 0 := fun w => by simp [r26b_area]
+private lemma areaPathCount_zero (N n : ℕ) : areaPathCount N 0 n = if n = 0 then 1 else 0 := by
+  unfold areaPathCount
+  have harea : ∀ w : Fin N → Bool, wordArea 0 w = 0 := fun w => by simp [wordArea]
   have hc : ∀ w : Fin N → Bool, #{i | w i} = 0 ↔ w = fun _ => false := by
     intro w
     rw [card_eq_zero, filter_eq_empty_iff]
@@ -458,8 +480,8 @@ lemma r26b_L_zero (N n : ℕ) : r26b_L N 0 n = if n = 0 then 1 else 0 := by
   · rw [card_eq_zero, filter_eq_empty_iff]; intro w _ h; exact hn h.2.symm
 
 /-- Lattice paths without east steps. -/
-lemma r26b_L_self (N n : ℕ) : r26b_L N N n = if n = 0 then 1 else 0 := by
-  unfold r26b_L
+private lemma areaPathCount_self (N n : ℕ) : areaPathCount N N n = if n = 0 then 1 else 0 := by
+  unfold areaPathCount
   have hc : ∀ w : Fin N → Bool, #{i | w i} = N ↔ w = fun _ => true := by
     intro w
     have := card_filter_eq_iff (s := (univ : Finset (Fin N))) (p := fun i => w i = true)
@@ -468,7 +490,7 @@ lemma r26b_L_self (N n : ℕ) : r26b_L N N n = if n = 0 then 1 else 0 := by
     constructor
     · intro h; funext i; exact h i (mem_univ i)
     · rintro rfl; simp
-  have harea : r26b_area N (fun _ : Fin N => true) = 0 := by simp [r26b_area]
+  have harea : wordArea N (fun _ : Fin N => true) = 0 := by simp [wordArea]
   simp only [hc]
   split_ifs with hn
   · subst hn
@@ -484,16 +506,16 @@ lemma r26b_L_self (N n : ℕ) : r26b_L N N n = if n = 0 then 1 else 0 := by
     exact hn (h.symm.trans harea)
 
 /-- Boxed partitions and lattice paths satisfy the same recurrence. -/
-lemma r26b_partitionCountBoxed_eq_L (k m n : ℕ) :
-    partitionCountBoxed k m n = r26b_L (m + k) k n := by
+private lemma partitionCountBoxed_eq_areaPathCount (k m n : ℕ) :
+    partitionCountBoxed k m n = areaPathCount (m + k) k n := by
   induction k generalizing m n with
-  | zero => rw [q26b_partitionCountBoxed_zero_left, r26b_L_zero]
+  | zero => rw [partitionCountBoxed_zero_left, areaPathCount_zero]
   | succ k ihk =>
     induction m generalizing n with
-    | zero => rw [q26b_partitionCountBoxed_zero_right, zero_add, r26b_L_self]
+    | zero => rw [partitionCountBoxed_zero_right, zero_add, areaPathCount_self]
     | succ m ihm =>
-      rw [q26b_partitionCountBoxed_succ, show m + 1 + (k + 1) = (m + 1 + k) + 1 by omega,
-        r26b_L_succ, ihk, ihm, show m + (k + 1) = m + 1 + k by omega]
+      rw [partitionCountBoxed_succ_succ, show m + 1 + (k + 1) = (m + 1 + k) + 1 by omega,
+        areaPathCount_succ_succ, ihk, ihm, show m + (k + 1) = m + 1 + k by omega]
 
 /-- §26.9(i): `p_k(≤ m, n)` equals the number of lattice paths from `(0, 0)` to `(m, k)` (unit
 east and north steps) with exactly `n` lattice points `(h, j)`, `1 ≤ h ≤ m`, `1 ≤ j ≤ k`, above
@@ -502,10 +524,10 @@ and to the left of the path. -/
 theorem partitionCountBoxed_eq_card_latticePaths (k m n : ℕ) :
     partitionCountBoxed k m n =
       #{w : Fin (m + k) → Bool | #{i | w i} = k ∧ latticePathArea w = n} :=
-  r26b_partitionCountBoxed_eq_L k m n
+  partitionCountBoxed_eq_areaPathCount k m n
 
 /-- The polynomial identity `[m n]_q (q;q)_n = ∏_{i<n} (1 - q^{m-i})` for `n ≤ m`. -/
-lemma c26b_qBinom_mul_qPochhammer (q : ℂ) :
+private lemma qBinom_mul_qPochhammer_eq_prod (q : ℂ) :
     ∀ m n : ℕ, n ≤ m → qBinom q m n * qPochhammer q q n = ∏ i ∈ range n, (1 - q ^ (m - i)) := by
   intro m
   induction m with
@@ -556,18 +578,18 @@ theorem qBinom_eq_prod {q : ℂ} {m n : ℕ} (hnm : n ≤ m) (hq : ∀ j ∈ Icc
     refine prod_congr rfl fun i hi => ?_
     simp only [mem_range] at hi
     congr 2; omega
-  rw [Finset.prod_div_distrib, hnum, ← hP, ← c26b_qBinom_mul_qPochhammer q m n hnm,
+  rw [Finset.prod_div_distrib, hnum, ← hP, ← qBinom_mul_qPochhammer_eq_prod q m n hnm,
     mul_div_cancel_right₀ _ hne]
 
 /-- Polynomial growth: `p_k(n) ≤ (n+1)^k`. -/
-lemma q26b_partitionCountAtMostParts_le (k n : ℕ) :
+private lemma partitionCountAtMostParts_le_pow (k n : ℕ) :
     partitionCountAtMostParts k n ≤ (n + 1) ^ k := by
   induction k generalizing n with
-  | zero => rw [q26b_partitionCountAtMostParts_zero_left]; split_ifs <;> simp
+  | zero => rw [partitionCountAtMostParts_zero_left]; split_ifs <;> simp
   | succ k ihk =>
     induction n using Nat.strong_induction_on with
     | _ n ihn =>
-      rw [q26b_partitionCountAtMostParts_succ]
+      rw [partitionCountAtMostParts_succ_eq]
       have h1 := ihk n
       split_ifs with h
       · have h2 := ihn (n - (k + 1)) (by omega)
@@ -582,7 +604,7 @@ lemma q26b_partitionCountAtMostParts_le (k n : ℕ) :
         exact h1.trans (Nat.pow_le_pow_right (by omega) (by omega))
 
 /-- The generating series of `p_k(n)` converges for `|q| < 1`. -/
-lemma q26b_summable_partitionCountAtMostParts {q : ℂ} (hq : ‖q‖ < 1) (k : ℕ) :
+private lemma summable_partitionCountAtMostParts_mul_pow {q : ℂ} (hq : ‖q‖ < 1) (k : ℕ) :
     Summable (fun n => (partitionCountAtMostParts k n : ℂ) * q ^ n) := by
   have hr : ‖(‖q‖ : ℝ)‖ < 1 := by rwa [norm_norm]
   have hs : Summable (fun n : ℕ => (2 : ℝ) ^ k * ((n : ℝ) ^ k * ‖q‖ ^ n + ‖q‖ ^ n)) :=
@@ -591,7 +613,7 @@ lemma q26b_summable_partitionCountAtMostParts {q : ℂ} (hq : ‖q‖ < 1) (k : 
   refine Summable.of_norm_bounded hs fun n => ?_
   rw [norm_mul, norm_pow, Complex.norm_natCast]
   have hb : (partitionCountAtMostParts k n : ℝ) ≤ ((n : ℝ) + 1) ^ k := by
-    exact_mod_cast q26b_partitionCountAtMostParts_le k n
+    exact_mod_cast partitionCountAtMostParts_le_pow k n
   have hb2 : ((n : ℝ) + 1) ^ k ≤ 2 ^ k * ((n : ℝ) ^ k + 1) := by
     rcases Nat.eq_zero_or_pos n with rfl | hn
     · have h1 : (1 : ℝ) ≤ 2 ^ k := one_le_pow₀ (by norm_num)
@@ -618,11 +640,11 @@ theorem hasSum_partitionCountAtMostParts {q : ℂ} (hq : ‖q‖ < 1) (k : ℕ) 
   | zero =>
     simp only [show Icc 1 0 = (∅ : Finset ℕ) from rfl, prod_empty]
     convert hasSum_single (f := fun n => (partitionCountAtMostParts 0 n : ℂ) * q ^ n) 0 ?_ using 1
-    · simp [q26b_partitionCountAtMostParts_zero_left]
-    · intro n hn; simp [q26b_partitionCountAtMostParts_zero_left, hn]
+    · simp [partitionCountAtMostParts_zero_left]
+    · intro n hn; simp [partitionCountAtMostParts_zero_left, hn]
   | succ k ih =>
     set S := ∑' n, (partitionCountAtMostParts (k + 1) n : ℂ) * q ^ n
-    have hS := (q26b_summable_partitionCountAtMostParts hq (k + 1)).hasSum
+    have hS := (summable_partitionCountAtMostParts_mul_pow hq (k + 1)).hasSum
     have hb : HasSum (fun n => if k + 1 ≤ n then
         (partitionCountAtMostParts (k + 1) (n - (k + 1)) : ℂ) * q ^ n else 0)
         (q ^ (k + 1) * S) := by
@@ -640,7 +662,7 @@ theorem hasSum_partitionCountAtMostParts {q : ℂ} (hq : ‖q‖ < 1) (k : ℕ) 
       refine hS.unique ?_
       convert hsum using 1
       funext n
-      rw [q26b_partitionCountAtMostParts_succ]
+      rw [partitionCountAtMostParts_succ_eq]
       split_ifs <;> push_cast <;> ring
     have hne : (1 : ℂ) - q ^ (k + 1) ≠ 0 := by
       have h1 : ‖q ^ (k + 1)‖ < 1 := by
@@ -655,7 +677,7 @@ theorem hasSum_partitionCountAtMostParts {q : ℂ} (hq : ‖q‖ < 1) (k : ℕ) 
     linear_combination heq
 
 /-- `[m+1+k, k]_q = ∑_{i ≤ k} q^i [m+i, i]_q` (iterated `q`-Pascal rule). -/
-lemma q26b_qBinom_succ_eq_sum (q : ℂ) (m k : ℕ) :
+private lemma qBinom_add_succ_eq_sum (q : ℂ) (m k : ℕ) :
     qBinom q (m + 1 + k) k = ∑ i ∈ range (k + 1), q ^ i * qBinom q (m + i) i := by
   induction k with
   | zero => simp
@@ -665,7 +687,7 @@ lemma q26b_qBinom_succ_eq_sum (q : ℂ) (m k : ℕ) :
 
 /-- The `q`-binomial series `∑_k [m+k, k]_q x^k = ∏_{j=0}^m (1 - x q^j)⁻¹`, with absolute
 convergence. -/
-lemma q26b_hasSum_qBinom (q : ℂ) (hq : ‖q‖ < 1) (m : ℕ) :
+private lemma summable_and_hasSum_qBinom_add_mul_pow (q : ℂ) (hq : ‖q‖ < 1) (m : ℕ) :
     ∀ x : ℂ, ‖x‖ < 1 → (Summable fun k => ‖qBinom q (m + k) k * x ^ k‖) ∧
       HasSum (fun k => qBinom q (m + k) k * x ^ k) (∏ j ∈ range (m + 1), (1 - x * q ^ j)⁻¹) := by
   induction m with
@@ -686,7 +708,7 @@ lemma q26b_hasSum_qBinom (q : ℂ) (hq : ‖q‖ < 1) (m : ℕ) :
     have hc : ∀ k, ∑ i ∈ range (k + 1), qBinom q (m + i) i * (q * x) ^ i * x ^ (k - i) =
         qBinom q (m + 1 + k) k * x ^ k := by
       intro k
-      rw [q26b_qBinom_succ_eq_sum, sum_mul]
+      rw [qBinom_add_succ_eq_sum, sum_mul]
       refine sum_congr rfl fun i hi => ?_
       have hik : i ≤ k := by simp only [mem_range] at hi; omega
       rw [mul_pow, show x ^ k = x ^ i * x ^ (k - i) by rw [← pow_add]; congr 1; omega]
@@ -713,7 +735,7 @@ theorem hasSum_qBinom_mul_pow {q : ℂ} (hq : ‖q‖ < 1) (k : ℕ) :
     · simp
     · intro m hm
       rw [qBinom_eq_zero_of_lt q (by omega), zero_mul]
-  · have h := (q26b_hasSum_qBinom q hq k q hq).2
+  · have h := (summable_and_hasSum_qBinom_add_mul_pow q hq k q hq).2
     rw [← Finset.Ico_add_one_right_eq_Icc, Finset.prod_Ico_eq_prod_range]
     simp only [show k + 1 + 1 - 1 = k + 1 by omega]
     convert h using 1
@@ -733,12 +755,12 @@ theorem hasSum_partitionCountBoxed (q : ℂ) (k m : ℕ) :
   induction k generalizing m with
   | zero =>
     simp only [qBinom_zero_right, add_zero]
-    simpa [q26b_partitionCountBoxed_zero_left] using hδ
+    simpa [partitionCountBoxed_zero_left] using hδ
   | succ k ihk =>
     induction m with
     | zero =>
       simp only [zero_add, qBinom_self]
-      simpa [q26b_partitionCountBoxed_zero_right] using hδ
+      simpa [partitionCountBoxed_zero_right] using hδ
     | succ m ihm =>
       have hb : HasSum (fun n => ((if k + 1 ≤ n then partitionCountBoxed (k + 1) m (n - (k + 1))
           else 0 : ℕ) : ℂ) * q ^ n) (q ^ (k + 1) * qBinom q (m + (k + 1)) (k + 1)) := by
@@ -754,13 +776,13 @@ theorem hasSum_partitionCountBoxed (q : ℂ) (k m : ℕ) :
       have h := (ihk (m + 1)).add hb
       convert h using 1
       · funext n
-        rw [q26b_partitionCountBoxed_succ]
+        rw [partitionCountBoxed_succ_succ]
         push_cast; ring
       · rw [show m + 1 + (k + 1) = (m + 1 + k) + 1 by omega, qBinom_succ_succ,
           show m + 1 + k = m + (k + 1) by omega]
 
 /-- Boxed partitions vanish beyond `n = k m`. -/
-lemma q26b_partitionCountBoxed_eq_zero {k m n : ℕ} (h : k * m < n) :
+private lemma partitionCountBoxed_eq_zero_of_lt {k m n : ℕ} (h : k * m < n) :
     partitionCountBoxed k m n = 0 := by
   unfold partitionCountBoxed
   rw [Finset.card_eq_zero, Finset.filter_eq_empty_iff]
@@ -771,7 +793,7 @@ lemma q26b_partitionCountBoxed_eq_zero {k m n : ℕ} (h : k * m < n) :
   omega
 
 /-- The total number of boxed partitions is `C(m+k, k)`. -/
-lemma q26b_sum_partitionCountBoxed (k m : ℕ) :
+private lemma sum_partitionCountBoxed (k m : ℕ) :
     ∑ n ∈ range (k * m + 1), partitionCountBoxed k m n = (m + k).choose k := by
   have h := hasSum_partitionCountBoxed 1 k m
   rw [qBinom_one] at h
@@ -779,7 +801,7 @@ lemma q26b_sum_partitionCountBoxed (k m : ℕ) :
       (∑ n ∈ range (k * m + 1), (partitionCountBoxed k m n : ℂ) * 1 ^ n) :=
     hasSum_sum_of_ne_finset_zero (fun n hn => by
       simp only [mem_range, not_lt] at hn
-      rw [q26b_partitionCountBoxed_eq_zero (by omega)]; simp)
+      rw [partitionCountBoxed_eq_zero_of_lt (by omega)]; simp)
   have := h.unique h2
   simp only [one_pow, mul_one] at this
   exact_mod_cast this.symm
@@ -799,11 +821,11 @@ theorem hasSum_partitionCountBoxed_two {q x : ℂ} (hq : ‖q‖ < 1) (hx : ‖x
     have h2 : HasSum (fun n => g (k, n)) (∑ n ∈ range (k * m + 1), g (k, n)) :=
       hasSum_sum_of_ne_finset_zero (fun n hn => by
         simp only [mem_range, not_lt] at hn
-        simp only [g, q26b_partitionCountBoxed_eq_zero (show k * m < n by omega)]; simp)
+        simp only [g, partitionCountBoxed_eq_zero_of_lt (show k * m < n by omega)]; simp)
     convert h2 using 1
     simp only [g, ← sum_mul]
     congr 1
-    exact_mod_cast (q26b_sum_partitionCountBoxed k m).symm
+    exact_mod_cast (sum_partitionCountBoxed k m).symm
   have hgs : Summable g := by
     rw [summable_prod_of_nonneg hg0]
     refine ⟨fun k => (hfib k).summable, ?_⟩
@@ -823,7 +845,7 @@ theorem hasSum_partitionCountBoxed_two {q x : ℂ} (hq : ‖q‖ < 1) (hx : ‖x
     convert (hasSum_partitionCountBoxed q k m).mul_right (x ^ k) using 1
     funext n; simp only [f]; ring
   have h1 := hfs.hasSum.prod_fiberwise hrow
-  have h2 := (q26b_hasSum_qBinom q hq m x hx).2
+  have h2 := (summable_and_hasSum_qBinom_add_mul_pow q hq m x hx).2
   rw [h2.unique h1]
   exact hfs.hasSum
 
@@ -832,7 +854,7 @@ theorem hasSum_partitionCountBoxed_two {q x : ℂ} (hq : ‖q‖ < 1) (hx : ‖x
 @[dlmf 26.9.E7 "corrected condition |x|<1"]
 theorem hasSum_qBinom_mul_pow_x {q x : ℂ} (hq : ‖q‖ < 1) (hx : ‖x‖ < 1) (m : ℕ) :
     HasSum (fun k => qBinom q (m + k) k * x ^ k) (∏ j ∈ range (m + 1), (1 - x * q ^ j)⁻¹) := by
-  exact (q26b_hasSum_qBinom q hq m x hx).2
+  exact (summable_and_hasSum_qBinom_add_mul_pow q hq m x hx).2
 
 /-- (26.9.8): `p_k(n) = p_k(n - k) + p_{k-1}(n)` for `k ≥ 1`, with DLMF's convention
 `p_k(n - k) = 0` for `n < k` made explicit. -/
@@ -841,42 +863,41 @@ theorem partitionCountAtMostParts_succ (k n : ℕ) :
     partitionCountAtMostParts (k + 1) n =
       (if k + 1 ≤ n then partitionCountAtMostParts (k + 1) (n - (k + 1)) else 0) +
         partitionCountAtMostParts k n := by
-  exact q26b_partitionCountAtMostParts_succ k n
+  exact partitionCountAtMostParts_succ_eq k n
 
-section r26bLogDeriv
-
+section LogDerivative
 open PowerSeries
 
 
 /-- The generating function of `p_k(n)` as a formal power series. -/
-noncomputable def r26b_P (k : ℕ) : ℚ⟦X⟧ :=
+noncomputable def atMostPartsSeries (k : ℕ) : ℚ⟦X⟧ :=
   PowerSeries.mk fun n => (partitionCountAtMostParts k n : ℚ)
 
 /-- `∑ₙ [j ∣ n] Xⁿ = 1/(1 - X^j)`. -/
-noncomputable def r26b_G (j : ℕ) : ℚ⟦X⟧ := PowerSeries.mk fun n => if j ∣ n then 1 else 0
+noncomputable def multiplesSeries (j : ℕ) : ℚ⟦X⟧ := PowerSeries.mk fun n => if j ∣ n then 1 else 0
 
 /-- `∑_t (∑_{d ∣ t, d ≤ k} d) X^t`. -/
-noncomputable def r26b_D (k : ℕ) : ℚ⟦X⟧ :=
+noncomputable def boundedDivisorSumSeries (k : ℕ) : ℚ⟦X⟧ :=
   PowerSeries.mk fun t => ((∑ j ∈ t.divisors with j ≤ k, j : ℕ) : ℚ)
 
 /-- `P₀ = 1`. -/
-lemma r26b_P_zero : r26b_P 0 = 1 := by
+private lemma atMostPartsSeries_zero : atMostPartsSeries 0 = 1 := by
   ext n
-  rw [r26b_P, coeff_mk, q26b_partitionCountAtMostParts_zero_left, coeff_one]
+  rw [atMostPartsSeries, coeff_mk, partitionCountAtMostParts_zero_left, coeff_one]
   split_ifs <;> simp
 
 /-- (26.9.8) as a power series identity. -/
-lemma r26b_P_rec (k : ℕ) : r26b_P (k + 1) = X ^ (k + 1) * r26b_P (k + 1) + r26b_P k := by
+private lemma atMostPartsSeries_succ_eq_X_pow_mul_add (k : ℕ) : atMostPartsSeries (k + 1) = X ^ (k + 1) * atMostPartsSeries (k + 1) + atMostPartsSeries k := by
   ext n
   rw [map_add, coeff_X_pow_mul']
-  simp only [r26b_P, coeff_mk]
-  rw [q26b_partitionCountAtMostParts_succ]
+  simp only [atMostPartsSeries, coeff_mk]
+  rw [partitionCountAtMostParts_succ_eq]
   split_ifs <;> simp
 
 /-- `(1 - X^j) G_j = 1`. -/
-lemma r26b_G_mul {j : ℕ} (hj : 1 ≤ j) : (1 - X ^ j) * r26b_G j = 1 := by
+private lemma one_sub_X_pow_mul_multiplesSeries {j : ℕ} (hj : 1 ≤ j) : (1 - X ^ j) * multiplesSeries j = 1 := by
   ext n
-  rw [sub_mul, one_mul, map_sub, coeff_X_pow_mul', r26b_G, coeff_mk, coeff_mk, coeff_one]
+  rw [sub_mul, one_mul, map_sub, coeff_X_pow_mul', multiplesSeries, coeff_mk, coeff_mk, coeff_one]
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp; omega
   · rw [ite_eq_right (by omega : n ≠ 0)]
@@ -889,35 +910,35 @@ lemma r26b_G_mul {j : ℕ} (hj : 1 ≤ j) : (1 - X ^ j) * r26b_G j = 1 := by
     · rw [ite_eq_right hjn, ite_eq_right (fun h => hjn (Nat.le_of_dvd hn h))]; ring
 
 /-- `P_{k+1} = P_k G_{k+1}`. -/
-lemma r26b_P_succ (k : ℕ) : r26b_P (k + 1) = r26b_P k * r26b_G (k + 1) := by
-  have h1 : r26b_P (k + 1) * (1 - X ^ (k + 1)) = r26b_P k := by
+private lemma atMostPartsSeries_succ (k : ℕ) : atMostPartsSeries (k + 1) = atMostPartsSeries k * multiplesSeries (k + 1) := by
+  have h1 : atMostPartsSeries (k + 1) * (1 - X ^ (k + 1)) = atMostPartsSeries k := by
     rw [mul_sub, mul_one]
-    nth_rewrite 1 [r26b_P_rec k]
+    nth_rewrite 1 [atMostPartsSeries_succ_eq_X_pow_mul_add k]
     ring
-  calc r26b_P (k + 1) = r26b_P (k + 1) * ((1 - X ^ (k + 1)) * r26b_G (k + 1)) := by
-        rw [r26b_G_mul (by omega), mul_one]
-    _ = r26b_P k * r26b_G (k + 1) := by rw [← mul_assoc, h1]
+  calc atMostPartsSeries (k + 1) = atMostPartsSeries (k + 1) * ((1 - X ^ (k + 1)) * multiplesSeries (k + 1)) := by
+        rw [one_sub_X_pow_mul_multiplesSeries (by omega), mul_one]
+    _ = atMostPartsSeries k * multiplesSeries (k + 1) := by rw [← mul_assoc, h1]
 
 /-- `X G_j' = G_j · j X^j G_j`. -/
-lemma r26b_X_derivative_G {j : ℕ} (hj : 1 ≤ j) :
-    X * d⁄dX (r26b_G j) = r26b_G j * ((j : ℚ⟦X⟧) * X ^ j * r26b_G j) := by
-  have h := congrArg (fun f : ℚ⟦X⟧ => d⁄dX f) (r26b_G_mul hj)
+private lemma X_mul_derivative_multiplesSeries {j : ℕ} (hj : 1 ≤ j) :
+    X * d⁄dX (multiplesSeries j) = multiplesSeries j * ((j : ℚ⟦X⟧) * X ^ j * multiplesSeries j) := by
+  have h := congrArg (fun f : ℚ⟦X⟧ => d⁄dX f) (one_sub_X_pow_mul_multiplesSeries hj)
   rw [Derivation.leibniz, derivative_one, map_sub, derivative_one, derivative_pow, derivative_X,
     zero_sub, mul_one, smul_eq_mul, smul_eq_mul] at h
   have hX : X * X ^ (j - 1) = (X : ℚ⟦X⟧) ^ j := by
     rw [← pow_succ']; congr 1; omega
-  have hG := r26b_G_mul hj
-  calc X * d⁄dX (r26b_G j)
-      = X * d⁄dX (r26b_G j) * ((1 - X ^ j) * r26b_G j) := by rw [hG, mul_one]
-    _ = X * r26b_G j * ((1 - X ^ j) * d⁄dX (r26b_G j)) := by ring
-    _ = X * r26b_G j * (r26b_G j * ((j : ℚ⟦X⟧) * X ^ (j - 1))) := by
+  have hG := one_sub_X_pow_mul_multiplesSeries hj
+  calc X * d⁄dX (multiplesSeries j)
+      = X * d⁄dX (multiplesSeries j) * ((1 - X ^ j) * multiplesSeries j) := by rw [hG, mul_one]
+    _ = X * multiplesSeries j * ((1 - X ^ j) * d⁄dX (multiplesSeries j)) := by ring
+    _ = X * multiplesSeries j * (multiplesSeries j * ((j : ℚ⟦X⟧) * X ^ (j - 1))) := by
         congr 1; linear_combination h
     _ = _ := by rw [← hX]; ring
 
 /-- `D₀ = 0`. -/
-lemma r26b_D_zero : r26b_D 0 = 0 := by
+private lemma boundedDivisorSumSeries_zero : boundedDivisorSumSeries 0 = 0 := by
   ext t
-  rw [r26b_D, coeff_mk, map_zero]
+  rw [boundedDivisorSumSeries, coeff_mk, map_zero]
   have : (t.divisors.filter fun j => j ≤ 0) = ∅ := by
     ext j; simp only [mem_filter, Nat.mem_divisors, notMem_empty, iff_false, not_and]
     intro hj h0
@@ -926,12 +947,12 @@ lemma r26b_D_zero : r26b_D 0 = 0 := by
   rw [this]; simp
 
 /-- `D_{k+1} = D_k + (k+1) X^{k+1} G_{k+1}`. -/
-lemma r26b_D_succ (k : ℕ) :
-    r26b_D (k + 1) = r26b_D k + ((k + 1 : ℕ) : ℚ⟦X⟧) * X ^ (k + 1) * r26b_G (k + 1) := by
+private lemma boundedDivisorSumSeries_succ (k : ℕ) :
+    boundedDivisorSumSeries (k + 1) = boundedDivisorSumSeries k + ((k + 1 : ℕ) : ℚ⟦X⟧) * X ^ (k + 1) * multiplesSeries (k + 1) := by
   ext t
   rw [map_add, show ((k + 1 : ℕ) : ℚ⟦X⟧) = C ((k + 1 : ℕ) : ℚ) by simp, mul_assoc, coeff_C_mul,
     coeff_X_pow_mul']
-  simp only [r26b_D, r26b_G, coeff_mk]
+  simp only [boundedDivisorSumSeries, multiplesSeries, coeff_mk]
   have hsplit : ∑ j ∈ t.divisors with j ≤ k + 1, j =
       ∑ j ∈ t.divisors with j ≤ k, j + ∑ j ∈ t.divisors with j = k + 1, j := by
     rw [sum_filter, sum_filter, sum_filter, ← sum_add_distrib]
@@ -954,34 +975,34 @@ lemma r26b_D_succ (k : ℕ) :
     · omega
 
 /-- The logarithmic derivative `X P_k' = P_k D_k`. -/
-lemma r26b_X_derivative_P (k : ℕ) : X * d⁄dX (r26b_P k) = r26b_P k * r26b_D k := by
+private lemma X_mul_derivative_atMostPartsSeries (k : ℕ) : X * d⁄dX (atMostPartsSeries k) = atMostPartsSeries k * boundedDivisorSumSeries k := by
   induction k with
-  | zero => rw [r26b_P_zero, r26b_D_zero, derivative_one]; ring
+  | zero => rw [atMostPartsSeries_zero, boundedDivisorSumSeries_zero, derivative_one]; ring
   | succ k ih =>
-    rw [r26b_P_succ, Derivation.leibniz, smul_eq_mul, smul_eq_mul, r26b_D_succ]
-    have hG := r26b_X_derivative_G (j := k + 1) (by omega)
-    calc X * (r26b_P k * d⁄dX (r26b_G (k + 1)) + r26b_G (k + 1) * d⁄dX (r26b_P k))
-        = r26b_P k * (X * d⁄dX (r26b_G (k + 1))) + r26b_G (k + 1) * (X * d⁄dX (r26b_P k)) := by
+    rw [atMostPartsSeries_succ, Derivation.leibniz, smul_eq_mul, smul_eq_mul, boundedDivisorSumSeries_succ]
+    have hG := X_mul_derivative_multiplesSeries (j := k + 1) (by omega)
+    calc X * (atMostPartsSeries k * d⁄dX (multiplesSeries (k + 1)) + multiplesSeries (k + 1) * d⁄dX (atMostPartsSeries k))
+        = atMostPartsSeries k * (X * d⁄dX (multiplesSeries (k + 1))) + multiplesSeries (k + 1) * (X * d⁄dX (atMostPartsSeries k)) := by
           ring
       _ = _ := by rw [hG, ih]; push_cast; ring
 
 /-- Coefficients of `X f'`. -/
-lemma r26b_coeff_X_mul_derivative (f : ℚ⟦X⟧) (n : ℕ) :
+private lemma coeff_X_mul_derivative (f : ℚ⟦X⟧) (n : ℕ) :
     coeff n (X * d⁄dX f) = n * coeff n f := by
   rcases n with _ | m
   · simp
   · rw [coeff_succ_X_mul, coeff_derivative]; push_cast; ring
 
 /-- (26.9.9) via the logarithmic derivative of the generating function. -/
-lemma r26b_partitionCountAtMostParts_recurrence (k n : ℕ) :
+private lemma mul_partitionCountAtMostParts_eq_sum_divisors (k n : ℕ) :
     n * partitionCountAtMostParts k n =
       ∑ t ∈ Icc 1 n, partitionCountAtMostParts k (n - t) *
         ∑ j ∈ t.divisors with j ≤ k, j := by
-  have h := congrArg (coeff n) (r26b_X_derivative_P k)
-  rw [r26b_coeff_X_mul_derivative, coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ
-    (fun a b => coeff a (r26b_P k) * coeff b (r26b_D k)), ← sum_range_reflect] at h
-  have hp : ∀ m, coeff m (r26b_P k) = (partitionCountAtMostParts k m : ℚ) := fun m => coeff_mk _ _
-  have hd : ∀ m, coeff m (r26b_D k) = ((∑ j ∈ m.divisors with j ≤ k, j : ℕ) : ℚ) :=
+  have h := congrArg (coeff n) (X_mul_derivative_atMostPartsSeries k)
+  rw [coeff_X_mul_derivative, coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ
+    (fun a b => coeff a (atMostPartsSeries k) * coeff b (boundedDivisorSumSeries k)), ← sum_range_reflect] at h
+  have hp : ∀ m, coeff m (atMostPartsSeries k) = (partitionCountAtMostParts k m : ℚ) := fun m => coeff_mk _ _
+  have hd : ∀ m, coeff m (boundedDivisorSumSeries k) = ((∑ j ∈ m.divisors with j ≤ k, j : ℕ) : ℚ) :=
     fun m => coeff_mk _ _
   simp only [hp, hd, Nat.succ_eq_add_one] at h
   rw [sum_range_succ'] at h
@@ -1000,8 +1021,7 @@ lemma r26b_partitionCountAtMostParts_recurrence (k n : ℕ) :
   rw [h2]
   exact_mod_cast h
 
-end r26bLogDeriv
-
+end LogDerivative
 /-- (26.9.9): `n p_k(n) = ∑_{t=1}^n p_k(n - t) ∑_{j ∣ t, j ≤ k} j` (stated multiplied by `n`,
 equivalent to DLMF's form for `n ≥ 1`). -/
 @[dlmf 26.9.E9]
@@ -1009,7 +1029,7 @@ theorem partitionCountAtMostParts_recurrence (k n : ℕ) :
     n * partitionCountAtMostParts k n =
       ∑ t ∈ Icc 1 n, partitionCountAtMostParts k (n - t) *
         ∑ j ∈ t.divisors with j ≤ k, j :=
-  r26b_partitionCountAtMostParts_recurrence k n
+  mul_partitionCountAtMostParts_eq_sum_divisors k n
 
 /-- (26.9.10): `p_k(n) ∼ n^{k-1}/(k! (k-1)!)` as `n → ∞` with `k ≥ 1` fixed. -/
 @[dlmf 26.9.E10]

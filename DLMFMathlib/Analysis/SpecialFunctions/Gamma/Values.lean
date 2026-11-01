@@ -12,12 +12,15 @@ public import DLMFMathlib.Analysis.Complex.BarnesResidue
 /-!
 # Values and basic identities of the complex Gamma function
 
-* `Complex.Gamma_one_half_eq_sqrt`: `Γ(1/2) = √π`, with the real square root;
-* `Complex.Gamma_one_half_sub_nat_mul_factorial`: `Γ(1/2 - s) (2s)! = (-4)^s s! √π`;
-* `Complex.pi_mul_inv_Gamma_mul_inv_Gamma_one_sub`: `π / (Γ(s) Γ(1-s)) = sin (π s)`
-  for every `s`, including the poles;
-* `Complex.analyticAt_Gamma`: `Γ` is analytic off the nonpositive integers;
-* the everywhere convergent series of the regularized `₀F₁`.
+## Main results
+
+* `Gamma_one_half_eq_sqrt`: `Γ(1/2) = √π`, with the real square root.
+* `Gamma_one_half_sub_nat_mul_factorial`: `Γ(1/2 - s) (2s)! = (-4)^s s! √π`.
+* `pi_mul_inv_Gamma_mul_inv_Gamma_one_sub`: `π / (Γ(s) Γ(1-s)) = sin (π s)`
+  for every `s`, including the poles.
+* `analyticAt_Gamma`: `Γ` is analytic off the nonpositive integers.
+* `hasSum_regularizedHGFun_empty_singleton`: the everywhere convergent series of the
+  regularized `₀F₁`.
 -/
 
 @[expose] public section

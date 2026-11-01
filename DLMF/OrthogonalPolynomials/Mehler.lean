@@ -35,10 +35,29 @@ public import Mathlib.Tactic.ReduceModChar
 /-!
 # Mehler's Hermite kernel
 
-The closed Gaussian kernel is holomorphic on the unit disk. Its first-order
-ordinary differential equation determines its Taylor coefficients uniquely.
-The Hermite recurrence verifies the same coefficient relation for the products
-of Hermite polynomials. Convergence follows from Mathlib's complex Taylor theorem.
+Mehler's formula for the bilinear generating function of the Hermite polynomials
+(DLMF 18.18.28), for arbitrary complex spatial arguments on the open unit disk. The closed
+Gaussian kernel is holomorphic on the unit disk, and its first-order differential equation
+determines its Taylor coefficients uniquely. The Hermite recurrence gives the same coefficient
+relation for the products of Hermite polynomials.
+
+## Main definitions
+
+* `kernel`: the closed form of Mehler's bilinear kernel.
+* `coeff`: the products of Hermite polynomials, with their exponential generating
+  normalization.
+
+## Main results
+
+* `hasDerivAt_kernel`: the differential equation of the kernel.
+* `rec_unique`, `rec_coeff`: uniqueness of the coefficient recurrence, and the recurrence for
+  the Hermite products.
+* `hasSum_kernel`: Mehler's formula on the open unit disk.
+
+## Implementation notes
+
+The tagged statement of DLMF 18.18.28 is `mehler_formula` in
+`DLMF.OrthogonalPolynomials.Series.JacobiParameterSeries`.
 -/
 
 @[expose] public section

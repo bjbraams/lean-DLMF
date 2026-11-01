@@ -8,13 +8,33 @@ module
 public import DLMF.OrthogonalPolynomials.Series.ClassicalGenerating
 
 /-!
-# Parameter series and convergence for Jacobi polynomials
+# Connection, linearization and convolution formulas
 
-Monomial expansions and analytic convergence arguments give the Jacobi parameter generating
-functions.
+Connection formulas and monomial expansions (DLMF 18.18.16–18.18.20), the Legendre addition
+theorem (DLMF 18.18.9), linearization of Gegenbauer and Hermite products (DLMF 18.18.22–23),
+Mehler's formula (DLMF 18.18.28), the convolution and finite-sum identities
+DLMF 18.18.29–18.18.40, and the regularized Jacobi generating function (DLMF 18.12.2).
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Series`.
+## Main definitions
+
+* `gegenbauerProductCoeff`: the Gegenbauer linearization coefficient in three gap indices.
+* `gegenbauerLinearizationSum`: the finite product expansion of two Gegenbauer polynomials.
+
+## Main results
+
+* `ultrasphPoly_connection`, `monomial_ultrasphPoly_expansion`: DLMF 18.18.16 and 18.18.17.
+* `laguerrePolyL_connection`, `monomial_laguerrePolyL_expansion`: DLMF 18.18.18 and 18.18.19.
+* `monomial_hermitePolyH_expansion`: DLMF 18.18.20.
+* `legendre_addition`: DLMF 18.18.9.
+* `ultrasphPoly_linearization`, `hermitePolyH_linearization`: DLMF 18.18.22 and 18.18.23.
+* `mehler_formula`: DLMF 18.18.28.
+* `ultrasphPoly_convolution`, `ultrasphPoly_geometric_convolution`: DLMF 18.18.29 and
+  18.18.30.
+* `chebyshev_geometric_sum`, `chebyshevT_even_sum`, `chebyshevT_odd_sum`,
+  `chebyshevU_even_sum`, `chebyshevU_odd_sum`: DLMF 18.18.31–18.18.35.
+* `legendre_convolution`, `laguerrePolyL_sum`, `hermitePolyH_even_convolution`:
+  DLMF 18.18.36, 18.18.37 and 18.18.40.
+* `jacobi_regularized_generating_function`: DLMF 18.12.2.
 -/
 
 @[expose] public section

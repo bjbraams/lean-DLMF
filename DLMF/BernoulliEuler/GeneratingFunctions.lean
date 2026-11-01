@@ -9,17 +9,32 @@ public import DLMF.BernoulliEuler.Basic
 public import DLMF.Elementary.Hyperbolic
 
 /-!
-# Bernoulli and Euler polynomials: generating functions and tables (DLMF §24.2)
+# Bernoulli and Euler polynomials: generating functions and tables
 
-* 24.2.1 is the project's `Complex.hasSum_bernoulli_mul_pow_div` (`DLMFMathlib`, tagged there).
-* 24.2.2 and 24.2.7: odd numbers vanish; the signs of `B₂ₙ` (from Mathlib's `ζ(2n)`) and of `E₂ₙ`.
-* 24.2.3 and 24.2.8: the generating functions of the polynomials, on DLMF's full discs
-  `|t| < 2π` and `|t| < π`, by a Cauchy product with `e^{xt}`.
-* 24.2.5 and 24.2.10: the explicit sums; 24.2.6 on the full disc `|t| < π/2`; 24.2.9.
-* 24.2.11–24.2.12: the periodic functions `periodicBernoulli`, `antiperiodicEuler` (Basic).
-* Tables 24.2.1 and 24.2.2: the first entries (exact values).
+This file covers DLMF §24.2: the generating functions of the Bernoulli and Euler numbers and
+polynomials, the vanishing and signs of the numbers, the explicit sums, the periodic functions
+and the first entries of Tables 24.2.1 and 24.2.2.
 
-Helper declarations carry the prefix `b24a_`.
+## Main results
+
+* `bernoulli_two_mul_add_one_eq_zero_and_sign`, `eulerNumber_two_mul_add_one_eq_zero_and_sign`:
+  the odd numbers vanish, and the signs of `B₂ₙ` and `E₂ₙ` (DLMF 24.2.2, 24.2.7).
+* `hasSum_bernoulliPolyB_mul_pow_div`, `hasSum_eulerPolyE_mul_pow_div`: the generating functions
+  of the polynomials on DLMF's full discs `|t| < 2π` and `|t| < π` (DLMF 24.2.3, 24.2.8).
+* `bernoulli_eq_bernoulliPolyB_zero`: `Bₙ = Bₙ(0)` (DLMF 24.2.4).
+* `bernoulliPolyB_eq_sum`, `eulerPolyE_eq_sum`: the explicit sums (DLMF 24.2.5, 24.2.10).
+* `hasSum_eulerNumber_mul_pow_div'`: `sech t = ∑ Eₙ tⁿ/n!` on the full disc `|t| < π/2`
+  (DLMF 24.2.6).
+* `eulerNumber_eq_two_pow_mul_and_integer`: `Eₙ = 2ⁿ Eₙ(1/2)` is an integer (DLMF 24.2.9).
+* `periodic_eq_of_mem_Ico`, `periodic_add_one`: the periodic functions `periodicBernoulli` and
+  `antiperiodicEuler` (DLMF 24.2.11–24.2.12).
+* `table_24_2_1`, `table_24_2_2`: the first entries of Tables 24.2.1 and 24.2.2 (exact values).
+
+## Implementation notes
+
+DLMF 24.2.1 is `Complex.hasSum_bernoulli_mul_pow_div` in `DLMFMathlib`, tagged there. The sign
+of `B₂ₙ` comes from Mathlib's formula for `ζ(2n)`. The polynomial generating functions are
+proved by a Cauchy product with `e^{xt}`.
 -/
 
 @[expose] public section
@@ -35,7 +50,7 @@ namespace DLMF.BernoulliEuler
 /-! ### Power-series helpers -/
 
 /-- A power series that converges on the disc `‖z‖ < R` converges absolutely there. -/
-theorem b24a_summable_norm_of_summable {a : ℕ → ℂ} {R : ℝ}
+theorem summable_norm_mul_pow_of_summable {a : ℕ → ℂ} {R : ℝ}
     (h : ∀ z : ℂ, ‖z‖ < R → Summable (fun n => a n * z ^ n)) {z : ℂ} (hz : ‖z‖ < R) :
     Summable (fun n => ‖a n * z ^ n‖) := by
   obtain ⟨r, hzr, hrR⟩ := exists_between hz
@@ -54,7 +69,7 @@ theorem b24a_summable_norm_of_summable {a : ℕ → ℂ} {R : ℝ}
   gcongr
 
 /-- Cauchy product of an exponential-type series with `e^{wz}`. -/
-theorem b24a_hasSum_mul_exp {a : ℕ → ℂ} {S z w : ℂ}
+theorem hasSum_binomialConv_mul_exp {a : ℕ → ℂ} {S z w : ℂ}
     (hs : Summable fun n => ‖a n * z ^ n / (n ! : ℂ)‖) (h : HasSum (fun n => a n * z ^ n / n !) S) :
     HasSum (fun n => (∑ k ∈ range (n + 1), (n.choose k : ℂ) * a k * w ^ (n - k)) * z ^ n / n !)
       (S * Complex.exp (w * z)) := by
@@ -128,9 +143,9 @@ theorem hasSum_bernoulliPolyB_mul_pow_div (x : ℂ) {t : ℂ} (ht : ‖t‖ < 2 
     · exact ((Complex.hasSum_bernoulli_mul_pow_div hz hz0).congr_fun
         fun n => by ring).summable
   have hs : Summable fun n => ‖(bernoulli n : ℂ) * t ^ n / (n ! : ℂ)‖ := by
-    refine (b24a_summable_norm_of_summable hsum ht).congr fun n => ?_
+    refine (summable_norm_mul_pow_of_summable hsum ht).congr fun n => ?_
     congr 1; ring
-  have h := b24a_hasSum_mul_exp (w := x) hs (Complex.hasSum_bernoulli_mul_pow_div ht ht0)
+  have h := hasSum_binomialConv_mul_exp (w := x) hs (Complex.hasSum_bernoulli_mul_pow_div ht ht0)
   rw [show t / (Complex.exp t - 1) * Complex.exp (x * t) =
     t * Complex.exp (x * t) / (Complex.exp t - 1) by ring] at h
   refine h.congr_fun fun n => ?_
@@ -176,7 +191,7 @@ theorem hasSum_eulerNumber_mul_pow_div' {t : ℂ} (ht : ‖t‖ < π / 2) :
 
 /-- Dirichlet's beta at odd integers through Euler numbers, as an alternating series over odd
 numbers: `∑_{m≥0} (-1)ᵐ/(2m+1)^{2k+1} = (-1)ᵏ E₂ₖ π^{2k+1}/(4^{k+1}(2k)!)`, `k ≥ 1`. -/
-theorem q24a_hasSum_alt_odd_eulerNumber {k : ℕ} (hk : k ≠ 0) :
+theorem hasSum_alt_inv_odd_pow_eulerNumber {k : ℕ} (hk : k ≠ 0) :
     HasSum (fun m : ℕ => (-1 : ℝ) ^ m * (1 / (2 * (m : ℝ) + 1) ^ (2 * k + 1)))
       ((-1) ^ k * (eulerNumber (2 * k) : ℝ) * π ^ (2 * k + 1) / (4 ^ (k + 1) * (2 * k)!)) := by
   have h := Polynomial.hasSum_sin_pi_div_two_div_pow_eulerNumber hk
@@ -196,12 +211,12 @@ theorem q24a_hasSum_alt_odd_eulerNumber {k : ℕ} (hk : k ≠ 0) :
     rw [show π * ((j : ℝ) + j) / 2 = j * π by ring, Real.sin_nat_mul_pi, mul_zero]
 
 /-- Alternating-series bounds for `β(2k+1)`. -/
-theorem q24a_dirichletBeta_bounds {k : ℕ} (hk : k ≠ 0) :
+theorem dirichletBeta_odd_alternating_bounds {k : ℕ} (hk : k ≠ 0) :
     1 - (1 / 3 : ℝ) ^ (2 * k + 1) + (1 / 5) ^ (2 * k + 1) - (1 / 7) ^ (2 * k + 1) ≤
         (-1) ^ k * (eulerNumber (2 * k) : ℝ) * π ^ (2 * k + 1) / (4 ^ (k + 1) * (2 * k)!) ∧
       (-1) ^ k * (eulerNumber (2 * k) : ℝ) * π ^ (2 * k + 1) / (4 ^ (k + 1) * (2 * k)!) ≤
         1 - (1 / 3 : ℝ) ^ (2 * k + 1) + (1 / 5) ^ (2 * k + 1) := by
-  have h := (q24a_hasSum_alt_odd_eulerNumber hk).tendsto_sum_nat
+  have h := (hasSum_alt_inv_odd_pow_eulerNumber hk).tendsto_sum_nat
   have hanti : Antitone (fun m : ℕ => 1 / (2 * (m : ℝ) + 1) ^ (2 * k + 1)) := by
     intro a b hab
     have : (a : ℝ) ≤ b := by exact_mod_cast hab
@@ -223,7 +238,7 @@ theorem eulerNumber_two_mul_add_one_eq_zero_and_sign (n : ℕ) :
   refine ⟨eulerNumber_eq_zero_of_odd (odd_two_mul_add_one n), ?_⟩
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp
-  have hb := (q24a_dirichletBeta_bounds hn.ne').1
+  have hb := (dirichletBeta_odd_alternating_bounds hn.ne').1
   have h3 : (1 / 7 : ℝ) ^ (2 * n + 1) ≤ (1 / 5) ^ (2 * n + 1) := by gcongr; norm_num
   have h4 : (1 / 3 : ℝ) ^ (2 * n + 1) < 1 := pow_lt_one₀ (by norm_num) (by norm_num) (by omega)
   have hpos : (0 : ℝ) < (-1) ^ n * (eulerNumber (2 * n) : ℝ) * π ^ (2 * n + 1) /
@@ -265,9 +280,9 @@ theorem hasSum_eulerPolyE_mul_pow_div (x : ℂ) {t : ℂ} (ht : ‖t‖ < π) :
       (2 * Complex.exp (t / 2) / (Complex.exp (2 * (t / 2)) + 1)) :=
     hE.congr_fun fun n => by rw [div_pow]; ring
   have hs : Summable fun n => ‖((eulerNumber n : ℂ) / 2 ^ n) * t ^ n / (n ! : ℂ)‖ := by
-    refine (b24a_summable_norm_of_summable hsum ht).congr fun n => ?_
+    refine (summable_norm_mul_pow_of_summable hsum ht).congr fun n => ?_
     congr 1; ring
-  have h := b24a_hasSum_mul_exp (w := x - 1 / 2) hs hE'
+  have h := hasSum_binomialConv_mul_exp (w := x - 1 / 2) hs hE'
   have hval : 2 * Complex.exp (t / 2) / (Complex.exp (2 * (t / 2)) + 1) *
       Complex.exp ((x - 1 / 2) * t) = 2 * Complex.exp (x * t) / (Complex.exp t + 1) := by
     rw [show 2 * (t / 2) = t by ring, div_mul_eq_mul_div, mul_assoc, ← Complex.exp_add,

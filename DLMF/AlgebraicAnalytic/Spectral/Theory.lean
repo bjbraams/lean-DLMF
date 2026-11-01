@@ -21,21 +21,37 @@ public import Mathlib.Analysis.Complex.RealDeriv
 
 DLMF §1.18 surveys the spectral theory of `𝓛 = -d²/dx² + q(x)` (1.18.28). The Hilbert-space
 facts of §1.18(i)–(ii) are Mathlib's (`HilbertBasis`, `lp`, `MeasureTheory.L2`; pointers in
-`DLMF.AlgebraicAnalytic.Spectral.MathlibCoverage`). This file states:
+`DLMF.AlgebraicAnalytic.Spectral.MathlibCoverage`).
 
-* §1.18(ii): the `L²` mean convergence 1.18.16;
-* §1.18(iii): reality of eigenvalues and orthogonality of eigenvectors of symmetric operators
-  (1.18.24), the integration by parts 1.18.26 and formal self-adjointness 1.18.27;
-* §1.18(v): eigenfunction expansions for a self-adjoint operator with an orthonormal basis of
-  eigenvectors (1.18.29–1.18.35), the examples 1.18.36–1.18.43;
-* §1.18(vi), §1.18(viii): expansions over continuous and mixed spectra in the form of
-  `IsEigenfunctionTransform` (1.18.46–1.18.52, 1.18.64–1.18.66), Stieltjes inversion 1.18.53,
-  the Sokhotski–Plemelj formula 1.18.54, the Hankel and Fourier integral theorems
-  1.18.56–1.18.59, and Simon's bound-state theorem (§1.18(viii));
-* §1.18(ix): spectra of self-adjoint operators, deficiency indices, Weyl's alternative.
+## Main results
 
-The Hermite oscillator equation and Hilbert basis use the proved TauCeti Hermite-function
-APIs, after `hermiteFunction_eq_ofReal` verifies the DLMF normalization exactly.
+* `tendsto_integral_sq_sub_partialSum`: `L²` mean convergence (DLMF 1.18.13–1.18.16).
+* `IsSymmetricOp.eigenvalue_real`, `IsSymmetricOp.inner_eq_zero`: reality of eigenvalues and
+  orthogonality of eigenvectors of symmetric operators (DLMF 1.18.24).
+* `integral_deriv2_mul_eq`, `integral_deriv2_mul_eq_of_dirichlet`: integration by parts and
+  formal self-adjointness (DLMF 1.18.25–1.18.27).
+* `hasSum_eigen_expansion`, `hasSum_resolvent_expansion`: eigenfunction expansions for a
+  self-adjoint operator with an orthonormal basis of eigenvectors (DLMF 1.18.29–1.18.35).
+* `sinEigenfunction_hilbertBasis`, `cosEigenfunction_hilbertBasis`,
+  `expEigenfunction_hilbertBasis`, `hermiteFunction_eigen`, `hermiteFunction_hilbertBasis`:
+  the examples 1.18.36–1.18.43.
+* `IsEigenfunctionTransform.integral_norm_sq`, `IsEigenfunctionTransform.ae_eq_integral`,
+  `IsDiagonalizedBy.inner_apply`, `IsDiagonalizedBy.inner_resolvent`: expansions over
+  continuous and mixed spectra (DLMF 1.18.46–1.18.52, 1.18.64–1.18.66).
+* `tendsto_stieltjes_inversion`, `tendsto_sokhotski_plemelj`: DLMF 1.18.53, 1.18.54.
+* `besselOp_sqrt_mul_besselJ`, `tendsto_hankel_kernel`, `tendsto_fourier_cos_sin`: the Hankel
+  and Fourier integral theorems (DLMF 1.18.55–1.18.59).
+* `exists_bound_state_of_integral_nonpos`: Simon's bound-state theorem (§1.18(viii)).
+* `opSpectrum_eq_union`, `IsSelfAdjoint.opSpectrum_real`,
+  `IsSymmetricOp.exists_selfAdjoint_extension_iff`, `IsSymmetricOp.adjoint_domain_eq`:
+  spectra, deficiency indices and von Neumann's theory (§1.18(ix)).
+* `allSolutionsL2Left_of_exists`, `rank_l2SolutionSpace_left`, `rank_l2SolutionSpace_add_two`,
+  `limitPoint_iff_wronskian_tendsto_zero`: Weyl's alternative (§1.18(ix), 1.18.71).
+
+## Implementation notes
+
+The Hermite results use the TauCeti Hermite-function API, after `hermiteFunction_eq_ofReal`
+identifies the DLMF normalization.
 
 DLMF's `⟨u, v⟩` is linear in `u`, Mathlib's `⟪u, v⟫` in `v`: DLMF's `⟨f, φₙ⟩` is `⟪φₙ, f⟫`.
 -/
@@ -167,7 +183,7 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E] [CompleteS
   {ι : Type*}
 
 /-- A self-adjoint operator is symmetric. -/
-lemma g1f_isFormalAdjoint_self {T : E →ₗ.[ℂ] E} (hT : IsSelfAdjoint T) :
+private lemma isFormalAdjoint_self_of_isSelfAdjoint {T : E →ₗ.[ℂ] E} (hT : IsSelfAdjoint T) :
     T.IsFormalAdjoint T := by
   have h := LinearPMap.adjoint_isFormalAdjoint (T := T) hT.dense_domain
   rw [LinearPMap.isSelfAdjoint_def.mp hT] at h
@@ -187,7 +203,7 @@ theorem hasSum_eigen_expansion {T : E →ₗ.[ℂ] E} (hT : IsSelfAdjoint T)
   refine hs.congr_fun fun i => ?_
   rw [b.repr_apply_apply]
   congr 1
-  have h := g1f_isFormalAdjoint_self hT ⟨b i, hmem i⟩ f
+  have h := isFormalAdjoint_self_of_isSelfAdjoint hT ⟨b i, hmem i⟩ f
   simp only at h
   rw [← h, hb, inner_smul_left, conj_ofReal]
 
@@ -203,7 +219,7 @@ theorem hasSum_resolvent_expansion {T : E →ₗ.[ℂ] E} (hT : IsSelfAdjoint T)
   refine hs.congr_fun fun i => ?_
   rw [b.repr_apply_apply]
   congr 1
-  have h := g1f_isFormalAdjoint_self hT ⟨b i, hmem i⟩ u
+  have h := isFormalAdjoint_self_of_isSelfAdjoint hT ⟨b i, hmem i⟩ u
   simp only at h
   have hne : z - lam i ≠ 0 := sub_ne_zero.mpr (hz i)
   rw [← hf, inner_sub_right, inner_smul_right, ← h, hb, inner_smul_left, conj_ofReal]
@@ -215,7 +231,7 @@ end PointSpectrum
 
 /-- Identity under the stated parameter and domain assumptions: `deriv (fun x : ℝ => cexp (c * x))
 = fun x : ℝ => c * cexp (c * x)`. -/
-private lemma g1f_deriv_cexp_mul (c : ℂ) :
+private lemma deriv_cexp_mul_ofReal (c : ℂ) :
     deriv (fun x : ℝ => cexp (c * x)) = fun x : ℝ => c * cexp (c * x) := by
   ext x
   have h : HasDerivAt (fun x : ℝ => c * (x : ℂ)) (c * 1) x :=
@@ -225,7 +241,7 @@ private lemma g1f_deriv_cexp_mul (c : ℂ) :
 
 /-- Identity under the stated parameter and domain assumptions: `deriv (fun x : ℝ => Complex.sin
 (c * x)) = fun x : ℝ => c * Complex.cos (c * x)`. -/
-private lemma g1f_deriv_csin_mul (c : ℂ) :
+private lemma deriv_csin_mul_ofReal (c : ℂ) :
     deriv (fun x : ℝ => Complex.sin (c * x)) = fun x : ℝ => c * Complex.cos (c * x) := by
   ext x
   have h : HasDerivAt (fun x : ℝ => c * (x : ℂ)) (c * 1) x :=
@@ -236,7 +252,7 @@ private lemma g1f_deriv_csin_mul (c : ℂ) :
 
 /-- Identity under the stated parameter and domain assumptions: `deriv (fun x : ℝ => Complex.cos
 (c * x)) = fun x : ℝ => -(c * Complex.sin (c * x))`. -/
-private lemma g1f_deriv_ccos_mul (c : ℂ) :
+private lemma deriv_ccos_mul_ofReal (c : ℂ) :
     deriv (fun x : ℝ => Complex.cos (c * x)) = fun x : ℝ => -(c * Complex.sin (c * x)) := by
   ext x
   have h : HasDerivAt (fun x : ℝ => c * (x : ℂ)) (c * 1) x :=
@@ -255,7 +271,7 @@ theorem sinEigenfunction_spec (n : ℕ) :
     ext x; simp [sinEigenfunction]
   refine ⟨fun x => ?_, ?_, ?_⟩
   · rw [schrodingerOp, hf]
-    simp only [deriv_const_mul_field', g1f_deriv_csin_mul, g1f_deriv_ccos_mul]
+    simp only [deriv_const_mul_field', deriv_csin_mul_ofReal, deriv_ccos_mul_ofReal]
     simp
     ring
   · simp [sinEigenfunction]
@@ -286,11 +302,11 @@ theorem cosEigenfunction_spec (n : ℕ) :
     ext x; simp [cosEigenfunction, hn.ne']
   have hd : deriv (cosEigenfunction n) = fun x : ℝ =>
       (Real.sqrt (2 / Real.pi) : ℂ) * -((n : ℂ) * Complex.sin ((n : ℂ) * x)) := by
-    rw [hf]; ext x; simp only [deriv_const_mul_field', g1f_deriv_ccos_mul]
+    rw [hf]; ext x; simp only [deriv_const_mul_field', deriv_ccos_mul_ofReal]
   refine ⟨fun x => ?_, ?_, ?_⟩
   · rw [schrodingerOp, hd, hf]
     simp
-    rw [g1f_deriv_csin_mul]
+    rw [deriv_csin_mul_ofReal]
     ring
   · simp [hd]
   · rw [hd]
@@ -321,7 +337,7 @@ theorem expEigenfunction_spec (n : ℤ) :
   have hd : deriv (expEigenfunction n) = fun x : ℝ =>
       (1 / Real.sqrt Real.pi : ℂ) * ((2 * I * n) * cexp ((2 * I * n) * x)) := by
     rw [hf]; ext x
-    rw [deriv_const_mul _ (by fun_prop), g1f_deriv_cexp_mul]
+    rw [deriv_const_mul _ (by fun_prop), deriv_cexp_mul_ofReal]
   have hpi : cexp ((2 * I * n) * (Real.pi : ℝ)) = 1 := by
     rw [show (2 * I * n) * ((Real.pi : ℝ) : ℂ) = n * (2 * Real.pi * I) by ring]
     exact Complex.exp_int_mul_two_pi_mul_I n
@@ -329,7 +345,7 @@ theorem expEigenfunction_spec (n : ℤ) :
   · have hdd : deriv (deriv (expEigenfunction n)) x =
         (1 / Real.sqrt Real.pi : ℂ) * ((2 * I * n) * ((2 * I * n) * cexp ((2 * I * n) * x))) := by
       rw [hd, deriv_const_mul _ (by fun_prop), deriv_const_mul _ (by fun_prop),
-        g1f_deriv_cexp_mul]
+        deriv_cexp_mul_ofReal]
     rw [schrodingerOp, hdd, hf]
     simp only [Pi.zero_apply, Complex.ofReal_zero, zero_mul, add_zero]
     ring_nf; rw [I_sq]; ring
@@ -585,7 +601,7 @@ orthogonal. -/
 theorem IsSelfAdjoint.inner_eigenvectors_eq_zero {T : E →ₗ.[ℂ] E} (hT : IsSelfAdjoint T)
     {z w : ℂ} (u v : T.domain) (hu : (u : E) ≠ 0) (hTu : T u = z • (u : E))
     (hTv : T v = w • (v : E)) (hzw : z ≠ w) : ⟪(u : E), (v : E)⟫_ℂ = 0 :=
-  IsSymmetricOp.inner_eq_zero ⟨hT.dense_domain, g1f_isFormalAdjoint_self hT⟩ u v hu hTu hTv hzw
+  IsSymmetricOp.inner_eq_zero ⟨hT.dense_domain, isFormalAdjoint_self_of_isSelfAdjoint hT⟩ u v hu hTu hTv hzw
 
 /-- §1.18(ix): for a symmetric operator, `dim N_z` is constant on the upper and on the lower
 half-plane, so the deficiency indices `n₊ = dim N_i`, `n₋ = dim N_{-i}` describe all `N_z`. -/

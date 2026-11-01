@@ -15,6 +15,13 @@ For `z ∉ (-∞, 1]`, `½ ∫₋₁¹ dt/(z - t) = Q₀(z)`. The polynomials `R
 are `½ ∫₋₁¹ (P_n(z) - P_n(t))/(z - t) dt`: both satisfy the Legendre recurrence, by the
 recurrence for `P_n` and `∫₋₁¹ P_{n+1} = 0`. Together these give Neumann's integral
 `Q_n(z) = ½ ∫₋₁¹ P_n(t)/(z - t) dt`.
+
+## Main results
+
+* `integral_recip_sub`: `½ ∫₋₁¹ dt/(z - t) = Q₀(z)`.
+* `integral_legendrePolyP_succ`: `∫₋₁¹ P_{n+1} = 0`.
+* `legendreQPoly_eq_integral`: `R_n(z) = ½ ∫₋₁¹ (P_n(z) - P_n(t))/(z - t) dt`.
+* `legendreQ_nat_eq_integral`: Neumann's integral (Temme (8.33)).
 -/
 
 @[expose] public section

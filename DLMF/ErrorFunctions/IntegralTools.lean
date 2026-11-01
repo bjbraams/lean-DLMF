@@ -10,11 +10,17 @@ public import DLMF.ErrorFunctions.BoundsAsymptotics
 /-!
 # Tools for the integral representations of DLMF §§7.7 and 7.14
 
-Helpers (prefix `erfInt_`) for `DLMF.ErrorFunctions.Integrals`:
+Supporting results for `DLMF.ErrorFunctions.Integrals`, mainly on the closed sector
+`|ph z| ≤ π/4`.
+
+## Main results
 
 * `erfInt_fresnelAux_laplace`: the Laplace forms of the Fresnel auxiliary functions
-  (DLMF 7.7.10–7.7.11) on the closed sector `|arg z| ≤ π/4`, extending
+  (DLMF 7.7.10–7.7.11) on the closed sector `|ph z| ≤ π/4`, including `z = 0`, extending
   `fresnelAux_laplace_open` by continuity.
+* `erfInt_abs_arg_lt_of_re_sq`, `erfInt_re_nonneg_of_abs_arg_le`: sector conditions in terms
+  of `Re z` and `Re z²`.
+* `erfInt_integrableOn_rpow_div`: integrability of `t^{k-1/2}/(t²+1)` on `(0, ∞)`.
 -/
 
 @[expose] public noncomputable section

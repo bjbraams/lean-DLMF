@@ -11,9 +11,22 @@ public import Mathlib.Algebra.Group.ForwardDiff
 /-!
 # The finite Hahn Rodrigues formula
 
-The weight in the existing Hahn orthogonality theorem is extended by zero to
-all integers. The Hahn forward difference and second-order difference equation
-give the Rodrigues raising step; iteration produces Beals–Wong §§6.2 and 6.6.
+The Rodrigues formula for the Hahn polynomials (Beals–Wong §§6.2 and 6.6). The weight of the
+Hahn orthogonality relation is extended by zero to all integers; the Hahn forward difference
+and the second-order difference equation give the Rodrigues raising step, and iteration gives
+the formula.
+
+## Main definitions
+
+* `hahnWeightInt`: the Hahn weight, extended by zero to `ℤ`.
+* `hahnRodriguesWeight`: the `n`th shifted Hahn weight.
+
+## Main results
+
+* `hahnRodriguesWeight_eq`: the shifted weight as the original weight times two Pochhammer
+  symbols.
+* `hahn_rodrigues`: Hahn's finite Rodrigues formula at all integer arguments, including the
+  endpoints of the support.
 -/
 
 @[expose] public noncomputable section
@@ -143,7 +156,7 @@ private lemma hahn_rodrigues_step {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < �
     linarith [Nat.cast_nonneg (α := ℝ) n]
   have hα0 : α + 1 ≠ 0 := ne_zero_of_re_pos (by simp; linarith)
   have hN0 : (N : ℂ) + 1 ≠ 0 := by exact_mod_cast N.succ_ne_zero
-  have hfd (t : ℂ) := hahn_forward_difference (β := β) hα (by omega : n + 1 ≤ N + 1) t
+  have hfd (t : ℂ) := hahn_forward_difference (β := β) (N := N) (n := n) hα t
   have hfd' (t : ℂ) : (α + 1) * ((N : ℂ) + 1) *
       (hahn α β (N + 1) (n + 1) (t + 1) - hahn α β (N + 1) (n + 1) t) =
         -ev * hahn (α + 1) (β + 1) N n t := by

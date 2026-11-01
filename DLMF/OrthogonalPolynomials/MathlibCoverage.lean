@@ -15,25 +15,29 @@ public import Mathlib.RingTheory.Polynomial.Hermite.Gaussian
 public import Mathlib.RingTheory.Polynomial.ShiftedLegendre
 
 /-!
-# DLMF Chapter 18 results already in Mathlib 4.35.0-rc2
+# DLMF Chapter 18 results already in Mathlib
 
-The `dlmf_upstream` commands below are checked pointers to Mathlib declarations,
-deliberately not duplicate local theorems; Mathlib's cross-reference attribute cannot modify
-documentation on imported declarations. Some polynomial normalizations differ; notably
-Mathlib's shifted Legendre is `P_n(1 - 2x)`, and `hermite` is the probabilists' family `He_n`.
-Mathlib's Chebyshev polynomials `T R n`, `U R n` are indexed by `n : ℤ` over a commutative ring.
+The `dlmf_upstream` commands below are checked pointers to Mathlib declarations, deliberately
+not duplicate local theorems; Mathlib's cross-reference attribute cannot modify documentation
+on imported declarations.
+
+## Implementation notes
+
+Some polynomial normalizations differ; notably Mathlib's shifted Legendre is `P_n(1 - 2x)`,
+and `hermite` is the probabilists' family `He_n`. Mathlib's Chebyshev polynomials `T R n`,
+`U R n` are indexed by `n : ℤ` over a commutative ring.
 
 DLMF items that Mathlib already tags with `@[dlmf]` get no pointer here: 18.5.1
 (`T_real_cos`, `T_real_cosh`; also `T_complex_cos`), 18.5.2 (`U_real_cos`, `U_real_cosh`; also
 `U_complex_cos`), 18.9.9 (`two_mul_T_eq_U_sub_U`), 18.9.21 (`T_derivative_eq_U`) and 18.18.21
 (`T_mul_T`). The untagged rearrangement `U_eq_two_mul_T_add_U` of 18.9.9 does get a pointer.
 
-`Polynomial.Chebyshev.abs_eval_T_real_eq_one_iff` (`|T_n(x)| = 1` iff `x = cos(kπ/n)`) was
-formerly listed under Table 18.6.1, which does not contain it; it has no DLMF pointer.
+`Polynomial.Chebyshev.abs_eval_T_real_eq_one_iff` (`|T_n(x)| = 1` iff `x = cos(kπ/n)`) is not
+in Table 18.6.1 and has no DLMF pointer.
 
 DLMF 18.1(i) repeats the q-Pochhammer definitions from Chapter 17; the single project
-definitions `qPochhammer`, `qPochhammerInf` are in DLMF/QSeries/Pochhammer.lean. DLMF 18.28.13
-is the Laurent form `qGegenbauer` already defined in DLMF/QSeries/Identities.lean.
+definitions `qPochhammer`, `qPochhammerInf` are in `DLMF.QSeries.Basic.Pochhammer`.
+DLMF 18.28.13 is the Laurent form `qGegenbauer` defined in `DLMF.QSeries.Basic.Series`.
 -/
 
 /- §18.1(ii): the rescaled Chebyshev polynomials `C_n`, `S_n`. -/

@@ -16,27 +16,43 @@ public import DLMFMathlib.Analysis.ODE.SturmDeformation
 # Zero counts of Tricomi's `U` by Sturm comparison
 
 Tools for the real zero counts of DLMF §13.9(ii). For real parameters `a`, `b` and `x > 0`,
-`U(a,b,x)` is real (`kzt_U_real`) and satisfies the self-adjoint form
+`U(a,b,x)` is real (`kzt_U_im`, `kzt_U_eq`) and satisfies the self-adjoint form
 `(x^b e^{-x} y')' - a x^{b-1} e^{-x} y = 0` of Kummer's equation on `(0, ∞)` (`kzt_U_isSol`).
+
+## Main definitions
+
+* `KztIsSol`: `y`, with derivative `y'`, solves `(p y')' + q y = 0` on `(0, ∞)`.
+* `kzt_U`, `kzt_dU`: `U(a,b,·)` and its derivative on the positive real axis, as real functions.
+* `kzt_q`: the coefficient `q(x) = -a x^{b-1} e^{-x}` of the self-adjoint form.
+
+## Main results
+
+* `kzt_between`: Sturm comparison between consecutive zeros.
+* `kzt_upper_right`, `kzt_lower_right`, `kzt_lower_left`, `kzt_lower_whole`: comparisons at the
+  ends of the half-line and on the whole half-line.
+* `kzt_lower_count`, `kzt_upper_count`: lower and upper zero counts from exactly known
+  comparison functions.
+* `kzt_U_simple`: for `a ∉ -ℕ` the zeros of `U(a,b,·)` on `(0, ∞)` are simple.
+* `kzt_U_asymp`: `U(a,b,x) x^a → 1` as `x → ∞` (DLMF 13.2.6), for real parameters.
+* `kzt_U_posZeros_count`: for `b ≥ 1` and `a < 0` nonintegral, `U(a,b,·)` has exactly `⌈-a⌉`
+  positive zeros.
+* `kzt_connection_neg`, `kzt_wronskian_neg`: the connection formula 13.2.41 and the Wronskian
+  13.2.34 on the negative real axis.
+* `kzt_U_neg_ne_zero`: for real `a ∉ -ℕ` and real `b ≤ a + 1`, the principal branch of `U` has
+  no zeros on the negative axis (DLMF 13.9.13 in pointwise form).
+
+## Implementation notes
 
 The comparison theory is that of `DLMF/Legendre/ZeroTools.lean` (prefix `lzt_`), transplanted
 from `(-1, 1)` to `(0, ∞)` with a general positive weight `p`: for two solutions `y`, `u` of
 `(p y')' + q y = 0` with coefficients `qy < qu`, the weighted Wronskian `W = p (u'y - uy')` is
-strictly monotone wherever `u y > 0`. This gives
-
-* the classical Sturm comparison between consecutive zeros (`kzt_between`);
-* comparisons at the ends, where a sign of `W` forces `y/u` to diverge as soon as
-  `p u² = O(x)` at `0` (`kzt_lower_left`) or `p u² = O(1)` at `∞` (`kzt_upper_right`,
-  `kzt_lower_right`), and on the whole half-line (`kzt_lower_whole`);
-* lower and upper zero counts from exactly known comparison functions (`kzt_lower_count`,
-  `kzt_upper_count`).
+strictly monotone wherever `u y > 0`. At the ends, a sign of `W` forces `y/u` to diverge as soon
+as `p u² = O(x)` at `0` or `p u² = O(1)` at `∞`.
 
 The comparison functions are the polynomial cases `U(-n,b,x) = (-1)ⁿ n! L_n^{(b-1)}(x)`
 (DLMF 13.6.19), whose zeros are those of the Laguerre polynomial (`laguerrePolyL_zeros_pos`,
-DLMF 18.16(iv)). Zeros of `U(a,b,·)`, `a ∉ -ℕ`, are simple by the Wronskian 13.2.34
-(`kzt_U_simple`), and `U(a,b,x) ~ x^{-a}` at `∞` (`kzt_U_asymp`, DLMF 13.2.6). The result is the
-count `⌈-a⌉` of positive zeros of `U(a,b,·)` for `a < 0` nonintegral and `b ≥ 1`
-(`kzt_U_posZeros_count`), which gives DLMF 13.9.14 by Kummer's transformation.
+DLMF 18.16(iv)). Simplicity of zeros comes from the Wronskian 13.2.34. The positive-zero count
+gives DLMF 13.9.14 by Kummer's transformation.
 
 All helper names carry the prefix `kzt_`.
 -/
@@ -686,14 +702,11 @@ def kzt_U (a b : ℝ) (x : ℝ) : ℝ := (kummerU (a : ℂ) (b : ℂ) (x : ℂ))
 /-- The derivative `-a U(a+1,b+1,x)` of `kzt_U` (DLMF 13.3.22). -/
 def kzt_dU (a b : ℝ) (x : ℝ) : ℝ := -a * (kummerU ((a : ℂ) + 1) ((b : ℂ) + 1) (x : ℂ)).re
 
-/-- The weight `p(x) = x^b e^{-x}` of the self-adjoint form of Kummer's equation. -/
-def kzt_p (b : ℝ) (x : ℝ) : ℝ := x ^ b * Real.exp (-x)
-
 /-- The coefficient `q(x) = -a x^{b-1} e^{-x}` of the self-adjoint form of Kummer's equation. -/
 def kzt_q (a b : ℝ) (x : ℝ) : ℝ := -a * (x ^ (b - 1) * Real.exp (-x))
 
 /-- The weight `x^b e^{-x}` is positive on `(0, ∞)`. -/
-theorem kzt_p_pos (b : ℝ) : ∀ x ∈ Ioi (0:ℝ), 0 < kzt_p b x := fun _ hx =>
+theorem kzt_p_pos (b : ℝ) : ∀ x ∈ Ioi (0:ℝ), 0 < laguerreWeight b x := fun _ hx =>
   mul_pos (Real.rpow_pos_of_pos hx b) (Real.exp_pos _)
 
 /-- `U(a,b,x)` is real for real `a`, `b` and `x > 0`. -/
@@ -717,7 +730,7 @@ theorem kzt_U_eq_add (a b : ℝ) (k : ℕ) {x : ℝ} (hx : 0 < x) :
 
 /-- **Self-adjoint form of Kummer's equation.** For real `a`, `b`, the function `U(a,b,·)`
 solves `(x^b e^{-x} y')' - a x^{b-1} e^{-x} y = 0` on `(0, ∞)` (DLMF 13.2.1 with 13.3.22). -/
-theorem kzt_U_isSol (a b : ℝ) : KztIsSol (kzt_p b) (kzt_q a b) (kzt_U a b) (kzt_dU a b) := by
+theorem kzt_U_isSol (a b : ℝ) : KztIsSol (laguerreWeight b) (kzt_q a b) (kzt_U a b) (kzt_dU a b) := by
   intro x hx
   have hx' : (0:ℝ) < x := hx
   have hz : (x : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.2 hx'
@@ -737,7 +750,7 @@ theorem kzt_U_isSol (a b : ℝ) : KztIsSol (kzt_p b) (kzt_q a b) (kzt_U a b) (kz
     have hpow := Real.hasDerivAt_rpow_const (x := x) (p := b) (Or.inl hx'.ne')
     have hexp : HasDerivAt (fun t : ℝ => Real.exp (-t)) (Real.exp (-x) * (-1)) x :=
       (Real.hasDerivAt_exp (-x)).comp x (hasDerivAt_neg x)
-    have hp : HasDerivAt (kzt_p b) (b * x ^ (b - 1) * Real.exp (-x) +
+    have hp : HasDerivAt (laguerreWeight b) (b * x ^ (b - 1) * Real.exp (-x) +
         x ^ b * (Real.exp (-x) * (-1))) x := hpow.mul hexp
     have hprod := hp.mul hdU
     convert hprod using 1
@@ -753,7 +766,7 @@ theorem kzt_U_isSol (a b : ℝ) : KztIsSol (kzt_p b) (kzt_q a b) (kzt_U a b) (kz
     have hr : (a + 1) * x * U2 + (x - b) * U1 - U0 = 0 := by exact_mod_cast hc
     have hxb : x ^ b = x * x ^ (b - 1) := by
       rw [Real.rpow_sub_one hx'.ne']; field_simp
-    simp only [kzt_q, kzt_p, kzt_dU]
+    simp only [kzt_q, laguerreWeight, kzt_dU]
     rw [hxb]
     linear_combination (-(a * x ^ (b - 1) * Real.exp (-x))) * hr
 
@@ -765,7 +778,7 @@ theorem kzt_U_simple (a b : ℝ) (ha : ∀ n : ℕ, a ≠ -(n : ℝ)) :
   have hx' : (0:ℝ) < x := hx
   have hz : (x : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.2 hx'
   have ha' : ∀ k : ℕ, (a : ℂ) ≠ -(k : ℂ) := fun k h => ha k (by exact_mod_cast h)
-  have hW := wronskian_regularizedHGFun_kummerU (a : ℂ) (b : ℂ) hz ha'
+  have hW := wronskian_regularizedHGFun_kummerU (a : ℂ) (b : ℂ) hz
   have hU : kummerU (a : ℂ) (b : ℂ) (x : ℂ) = 0 := by rw [kzt_U_eq a b hx', h0]; simp
   have hdU : deriv (kummerU (a : ℂ) (b : ℂ)) (x : ℂ) = 0 := by
     have e1 := kzt_U_eq_add a b 1 hx'
@@ -848,8 +861,8 @@ theorem kzt_base_poly {b : ℝ} (hb : 0 < b) (n : ℕ) {x : ℝ} (hx : 0 < x) :
 /-- **Weight bounds for the polynomial case.** For `b ≥ 1`, `p U(-n,b,·)² = O(x)` on `(0, 1)` and
 `p U(-n,b,·)² = O(1)` near `∞`. -/
 theorem kzt_base_bounds {b : ℝ} (hb : 1 ≤ b) (n : ℕ) :
-    ∃ K > 0, (∀ x ∈ Ioo (0:ℝ) 1, kzt_p b x * kzt_U (-(n : ℝ)) b x ^ 2 ≤ K * x) ∧
-      ∃ s₀, ∀ x ∈ Ioi s₀, kzt_p b x * kzt_U (-(n : ℝ)) b x ^ 2 ≤ K := by
+    ∃ K > 0, (∀ x ∈ Ioo (0:ℝ) 1, laguerreWeight b x * kzt_U (-(n : ℝ)) b x ^ 2 ≤ K * x) ∧
+      ∃ s₀, ∀ x ∈ Ioi s₀, laguerreWeight b x * kzt_U (-(n : ℝ)) b x ^ 2 ≤ K := by
   set P := laguerrePolyLR (b - 1) n
   obtain ⟨Mp, hMp⟩ := isCompact_Icc.exists_bound_of_continuousOn
     (P.continuous.continuousOn (s := Icc (0:ℝ) 1))
@@ -865,15 +878,15 @@ theorem kzt_base_bounds {b : ℝ} (hb : 1 ≤ b) (n : ℕ) :
       have : P.eval x ^ 2 ≤ Mp ^ 2 := by
         rw [← sq_abs]; exact pow_le_pow_left₀ (abs_nonneg _) hM 2
       nlinarith [sq_nonneg (n.factorial : ℝ)]
-    have hp1 : kzt_p b x ≤ x := by
-      simp only [kzt_p]
+    have hp1 : laguerreWeight b x ≤ x := by
+      simp only [laguerreWeight]
       have h1 : x ^ b ≤ x ^ (1:ℝ) := Real.rpow_le_rpow_of_exponent_ge hx.1 hx.2.le hb
       rw [Real.rpow_one] at h1
       have h2 : Real.exp (-x) ≤ 1 := Real.exp_le_one_iff.2 (by linarith [hx.1])
       have h3 : 0 ≤ x ^ b := (Real.rpow_pos_of_pos hx.1 b).le
       nlinarith [Real.exp_pos (-x)]
-    have hp0 : 0 ≤ kzt_p b x := (kzt_p_pos b x hx.1).le
-    calc kzt_p b x * _ ≤ x * K := mul_le_mul hp1 hsq (sq_nonneg _) hx.1.le
+    have hp0 : 0 ≤ laguerreWeight b x := (kzt_p_pos b x hx.1).le
+    calc laguerreWeight b x * _ ≤ x * K := mul_le_mul hp1 hsq (sq_nonneg _) hx.1.le
       _ = K * x := by ring
   · have hlim := tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero (b + 2 * n) 1 one_pos
     have hev := (hlim.eventually (gt_mem_nhds (show (0:ℝ) < 1 / 4 by norm_num))).and
@@ -892,8 +905,8 @@ theorem kzt_base_bounds {b : ℝ} (hb : 1 ≤ b) (n : ℕ) :
       rw [Real.rpow_add hx0, ← pow_mul, show (2 * (n : ℝ)) = ((n * 2 : ℕ) : ℝ) by push_cast; ring,
         Real.rpow_natCast]
     rw [hpow, neg_one_mul] at h1
-    have hp0 : 0 ≤ kzt_p b x := (kzt_p_pos b x hx0).le
-    simp only [kzt_p] at hp0 ⊢
+    have hp0 : 0 ≤ laguerreWeight b x := (kzt_p_pos b x hx0).le
+    simp only [laguerreWeight] at hp0 ⊢
     calc x ^ b * Real.exp (-x) * kzt_U (-(n : ℝ)) b x ^ 2
         ≤ x ^ b * Real.exp (-x) * (4 * (x ^ n) ^ 2) := mul_le_mul_of_nonneg_left hU2 hp0
       _ = 4 * (x ^ b * (x ^ n) ^ 2 * Real.exp (-x)) := by ring

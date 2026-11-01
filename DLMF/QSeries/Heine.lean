@@ -10,16 +10,27 @@ public import DLMF.QSeries.Identities
 /-!
 # Heine's transformations and summations (Duverney §§10.2–10.3)
 
-From the `q`-binomial theorem and Heine's first transformation `heine_transformation`
-(AAR §10.10):
-* Euler's identity `∑ xⁿ/(q;q)_n = 1/(x;q)_∞` (Duverney (10.28)), and the product formula
-  `₁φ₀(a;x) ₁φ₀(b;ax) = ₁φ₀(ab;x)` (Exercise 10.11);
-* Heine's second and third transformations (Duverney (10.50)–(10.51)), by applying the first
-  transformation twice and three times;
-* Heine's `q`-Gauss summation (10.53) and its terminating case, `q`-Chu–Vandermonde (10.54).
+This file derives Euler's identity, the product formula for `₁φ₀`, Heine's second and third
+transformations and the `q`-Gauss and `q`-Chu–Vandermonde summations from the `q`-binomial
+theorem and Heine's first transformation `heine_transformation` (AAR §10.10).
 
-The convergence hypotheses are those of the series manipulations (`|b| < 1`, `|c/b| < 1`, …).
-Duverney removes them by viewing both sides as rational functions; that step is not formalized.
+## Main results
+
+* `tsum_div_qPochhammer`: Euler's identity `∑ xⁿ/(q;q)_n = 1/(x;q)_∞` (Duverney (10.28),
+  DLMF 17.5.4).
+* `one_phi_zero_mul`: `₁φ₀(a; x) ₁φ₀(b; ax) = ₁φ₀(ab; x)` (Duverney, Exercise 10.11).
+* `heine_transformation_two`, `heine_transformation_three`: Heine's second and third
+  transformations (Duverney (10.50)–(10.51), DLMF 17.6.7–17.6.8), by applying the first
+  transformation twice and three times.
+* `q_gauss_summation`: Heine's `q`-Gauss summation (Duverney (10.53), DLMF 17.6.1).
+* `q_chu_vandermonde`: its terminating case (Duverney (10.54), DLMF 17.6.2).
+
+## Implementation notes
+
+The convergence hypotheses are those of the series manipulations (`|b| < 1`, `|c/b| < 1`, …),
+so these results are partial forms of the DLMF statements. Duverney removes the hypotheses by
+viewing both sides as rational functions; that step is not formalized here. The full-domain
+versions are in `DLMF.QHypergeometric.BasicSummations`.
 -/
 
 @[expose] public section

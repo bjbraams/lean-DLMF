@@ -11,21 +11,43 @@ public import DLMF.JacobiElliptic.Related
 /-!
 # Inverse Jacobian elliptic functions (DLMF §22.15)
 
-For real variables and real parameter `m = k² < 1` (`k'² = 1 - m`):
+The inverse Jacobian elliptic functions for real variables and real parameter `m = k² < 1`
+(`k'² = 1 - m`): definitions, principal ranges, general solutions and integral
+representations (DLMF §22.15).
 
-* `arcsn(x, k)` is the existing `DLMF.Elliptic.Real.jacobiArcsnm x m = F(arcsin x | m)`
-  (`DLMF.Elliptic.SpecialValues`), with `sn(arcsn x) = x` (`Real.jacobiSnm_jacobiArcsnm`).
-* `Real.jacobiArccnm x m = F(arccos x | m)` and
-  `Real.jacobiArcdnm x m = F(arcsin √((1 - x²)/m) | m)` are the solutions of 22.15.2–22.15.3 in
-  the principal ranges 22.15.6–22.15.7; their inverse properties and ranges are proved.
-* The other nine inverse functions are *defined* by DLMF's integral representations
-  22.15.15–22.15.23 (on DLMF's ranges of `x`; outside them the integrals are Lean's totalized
-  values); that they invert `cd, sd, nd, dc, nc, sc, ns, ds, cs` is proved (by substitution in
-  the integrals; the reciprocal ones by `t ↦ 1/t` from `arcdn, arccd, arccn, arcsn, arcsd`, and
-  `arccs x = F(π/2 - arctan x | m)` by `t = cot φ`).
+## Main definitions
 
-The representations 22.15.12–22.15.14 (and so 22.15.11, proved for `-K ≤ x ≤ K`, stronger than
-DLMF's `-1 ≤ x ≤ 1`) and the general solutions 22.15.8–22.15.10 are proved.
+* `Real.jacobiArccnm`, `Real.jacobiArcdnm`: `arccn(x, k) = F(arccos x | m)` and
+  `arcdn(x, k) = F(arcsin √((1 - x²)/m) | m)`, the solutions of DLMF 22.15.2–22.15.3 in the
+  principal ranges 22.15.6–22.15.7.
+* `Real.jacobiArccdm`, `Real.jacobiArcsdm`, `Real.jacobiArcndm`, `Real.jacobiArcdcm`,
+  `Real.jacobiArcncm`, `Real.jacobiArcscm`, `Real.jacobiArcnsm`, `Real.jacobiArcdsm`,
+  `Real.jacobiArccsm`: the other inverse functions, defined by DLMF's integral representations
+  22.15.15–22.15.23.
+
+## Main results
+
+* `Real.jacobiCnm_jacobiArccnm`, `Real.jacobiDnm_jacobiArcdnm`: DLMF 22.15.2–22.15.4.
+* `Real.jacobiArcsnm_mem_Icc`, `Real.jacobiArccnm_mem_Icc`, `Real.jacobiArcdnm_mem_Icc`: the
+  principal ranges DLMF 22.15.5–22.15.7.
+* `Real.jacobiSnm_eq_iff`, `Real.jacobiCnm_eq_iff`, `Real.jacobiDnm_eq_iff`: the general
+  solutions DLMF 22.15.8–22.15.10.
+* `Real.eq_integral_jacobiSnm`: DLMF 22.15.11 for `-K ≤ x ≤ K` (stronger than DLMF's
+  `-1 ≤ x ≤ 1`).
+* `Real.jacobiArcsnm_eq_integral`, `Real.jacobiArccnm_eq_integral`,
+  `Real.jacobiArcdnm_eq_integral`: DLMF 22.15.12–22.15.14.
+* `Real.jacobiCdm_jacobiArccdm`, `Real.jacobiSdm_jacobiArcsdm`, `Real.jacobiNdm_jacobiArcndm`,
+  `Real.jacobiDcm_jacobiArcdcm`, `Real.jacobiNcm_jacobiArcncm`, `Real.jacobiScm_jacobiArcscm`,
+  `Real.jacobiNsm_jacobiArcnsm`, `Real.jacobiDsm_jacobiArcdsm`, `Real.jacobiCsm_jacobiArccsm`:
+  the integrals 22.15.15–22.15.23 invert `cd, sd, nd, dc, nc, sc, ns, ds, cs`.
+
+## Implementation notes
+
+`arcsn(x, k)` is the existing `DLMF.Elliptic.Real.jacobiArcsnm x m = F(arcsin x | m)`, with
+`sn(arcsn x) = x` (`Real.jacobiSnm_jacobiArcsnm`). Outside DLMF's ranges of `x` the integral
+definitions take Lean's totalized values. The inverse properties of the integral definitions
+are proved by substitution; the reciprocal ones by `t ↦ 1/t` from
+`arcdn, arccd, arccn, arcsn, arcsd`, and `arccs x = F(π/2 - arctan x | m)` by `t = cot φ`.
 -/
 
 @[expose] public section
@@ -163,7 +185,7 @@ theorem Real.jacobiArcdnm_mem_Icc (hm : m < 1) (x : ℝ) :
 
 /-- Identity under the stated parameter and domain assumptions: `Real.incEllIntFm (φ + n * π) m =
 Real.incEllIntFm φ m + 2 * n * Real.compEllIntKm m`. -/
-lemma p22R1_F_add_int_pi {m : ℝ} (hm : m < 1) (φ : ℝ) (n : ℤ) :
+private lemma incEllIntFm_add_intCast_mul_pi {m : ℝ} (hm : m < 1) (φ : ℝ) (n : ℤ) :
     Real.incEllIntFm (φ + n * π) m = Real.incEllIntFm φ m + 2 * n * Real.compEllIntKm m := by
   induction n using Int.induction_on with
   | zero => simp
@@ -178,7 +200,7 @@ lemma p22R1_F_add_int_pi {m : ℝ} (hm : m < 1) (φ : ℝ) (n : ℤ) :
 
 /-- Identity under the stated parameter and domain assumptions: `ξ = Real.incEllIntFm B m ↔
 Real.jacobiAmm ξ m = B`. -/
-lemma p22R1_eq_F_iff {m : ℝ} (hm : m < 1) (ξ B : ℝ) :
+private lemma eq_incEllIntFm_iff_jacobiAmm_eq {m : ℝ} (hm : m < 1) (ξ B : ℝ) :
     ξ = Real.incEllIntFm B m ↔ Real.jacobiAmm ξ m = B := by
   constructor
   · rintro rfl; exact Real.jacobiAmm_incEllIntFm hm B
@@ -186,7 +208,7 @@ lemma p22R1_eq_F_iff {m : ℝ} (hm : m < 1) (ξ B : ℝ) :
 
 /-- Identity under the stated parameter and domain assumptions: `Real.incEllIntFm ((-1) ^ n * a) m
 = (-1) ^ n * Real.incEllIntFm a m`. -/
-lemma p22R1_neg_one_zpow_F {m : ℝ} (n : ℤ) (a : ℝ) :
+private lemma incEllIntFm_neg_one_zpow_mul {m : ℝ} (n : ℤ) (a : ℝ) :
     Real.incEllIntFm ((-1) ^ n * a) m = (-1) ^ n * Real.incEllIntFm a m := by
   rcases Int.even_or_odd n with h | h
   · simp [h.neg_one_zpow]
@@ -194,7 +216,7 @@ lemma p22R1_neg_one_zpow_F {m : ℝ} (n : ℤ) (a : ℝ) :
 
 /-- Identity under the stated parameter and domain assumptions: `sin A = sin a ↔ ∃ n : ℤ, A = (-1)
 ^ n * a + n * π`. -/
-lemma p22R1_sin_eq_iff (A a : ℝ) :
+private lemma sin_eq_sin_iff_neg_one_zpow (A a : ℝ) :
     sin A = sin a ↔ ∃ n : ℤ, A = (-1) ^ n * a + n * π := by
   rw [eq_comm, Real.sin_eq_sin_iff]
   constructor
@@ -215,9 +237,9 @@ theorem Real.jacobiSnm_eq_iff (hm : m < 1) {x ξ : ℝ} (hx0 : -1 ≤ x) (hx1 : 
       ∃ n : ℤ, ξ = (-1) ^ n * Real.jacobiArcsnm x m + 2 * n * Real.compEllIntKm m := by
   have key : ∀ n : ℤ, (-1) ^ n * Real.jacobiArcsnm x m + 2 * n * Real.compEllIntKm m =
       Real.incEllIntFm ((-1) ^ n * arcsin x + n * π) m := by
-    intro n; rw [p22R1_F_add_int_pi hm, p22R1_neg_one_zpow_F, Real.jacobiArcsnm]
-  simp only [key, p22R1_eq_F_iff hm]
-  rw [Real.jacobiSnm, ← p22R1_sin_eq_iff, Real.sin_arcsin hx0 hx1]
+    intro n; rw [incEllIntFm_add_intCast_mul_pi hm, incEllIntFm_neg_one_zpow_mul, Real.jacobiArcsnm]
+  simp only [key, eq_incEllIntFm_iff_jacobiAmm_eq hm]
+  rw [Real.jacobiSnm, ← sin_eq_sin_iff_neg_one_zpow, Real.sin_arcsin hx0 hx1]
 
 /-- DLMF 22.15.9: the general real solution of `cn(η, k) = x`, `-1 ≤ x ≤ 1`, is
 `η = ± arccn(x, k) + 4mK`, `m ∈ ℤ`. -/
@@ -229,7 +251,7 @@ theorem Real.jacobiCnm_eq_iff (hm : m < 1) {x η : ℝ} (hx0 : -1 ≤ x) (hx1 : 
       σ * Real.jacobiArccnm x m + 4 * n * Real.compEllIntKm m =
       Real.incEllIntFm (σ * arccos x + ((2 * n : ℤ) : ℝ) * π) m := by
     intro n σ hσ
-    rw [p22R1_F_add_int_pi hm, Real.jacobiArccnm]
+    rw [incEllIntFm_add_intCast_mul_pi hm, Real.jacobiArccnm]
     rcases hσ with rfl | rfl
     · push_cast; ring
     · simp only [neg_one_mul, Real.incEllIntFm_neg]; push_cast; ring
@@ -238,11 +260,11 @@ theorem Real.jacobiCnm_eq_iff (hm : m < 1) {x η : ℝ} (hx0 : -1 ≤ x) (hx1 : 
     rw [Real.jacobiCnm, ← Real.cos_arccos hx0 hx1, Real.cos_eq_cos_iff] at h
     obtain ⟨n, h | h⟩ := h
     · refine ⟨-n, 1, Or.inl rfl, ?_⟩
-      rw [key (-n) 1 (Or.inl rfl), p22R1_eq_F_iff hm]; push_cast; linarith
+      rw [key (-n) 1 (Or.inl rfl), eq_incEllIntFm_iff_jacobiAmm_eq hm]; push_cast; linarith
     · refine ⟨n, -1, Or.inr rfl, ?_⟩
-      rw [key n (-1) (Or.inr rfl), p22R1_eq_F_iff hm]; push_cast; linarith
+      rw [key n (-1) (Or.inr rfl), eq_incEllIntFm_iff_jacobiAmm_eq hm]; push_cast; linarith
   · rintro ⟨n, σ, hσ, h⟩
-    rw [key n σ hσ, p22R1_eq_F_iff hm] at h
+    rw [key n σ hσ, eq_incEllIntFm_iff_jacobiAmm_eq hm] at h
     rw [Real.jacobiCnm, h]
     push_cast
     rw [show σ * arccos x + 2 * n * π = σ * arccos x + (n : ℤ) * (2 * π) by ring,
@@ -272,7 +294,7 @@ theorem Real.jacobiDnm_eq_iff (hm0 : 0 < m) (hm : m < 1) {x ζ : ℝ} (hx0 : √
       σ * Real.jacobiArcdnm x m + 2 * n * Real.compEllIntKm m =
       Real.incEllIntFm (σ * arcsin s0 + n * π) m := by
     intro n σ hσ
-    rw [p22R1_F_add_int_pi hm, Real.jacobiArcdnm]
+    rw [incEllIntFm_add_intCast_mul_pi hm, Real.jacobiArcdnm]
     rcases hσ with rfl | rfl
     · simp [hs0]
     · simp [Real.incEllIntFm_neg, hs0]
@@ -298,20 +320,20 @@ theorem Real.jacobiDnm_eq_iff (hm0 : 0 < m) (hm : m < 1) {x ζ : ℝ} (hx0 : √
       · exact Or.inl h
       · exact Or.inr h
     rcases h' with h' | h'
-    · obtain ⟨n, hn⟩ := (p22R1_sin_eq_iff _ _).mp h'
+    · obtain ⟨n, hn⟩ := (sin_eq_sin_iff_neg_one_zpow _ _).mp h'
       rcases Int.even_or_odd n with he | ho
       · refine ⟨n, 1, Or.inl rfl, ?_⟩
-        rw [key n 1 (Or.inl rfl), p22R1_eq_F_iff hm, hn, he.neg_one_zpow]
+        rw [key n 1 (Or.inl rfl), eq_incEllIntFm_iff_jacobiAmm_eq hm, hn, he.neg_one_zpow]
       · refine ⟨n, -1, Or.inr rfl, ?_⟩
-        rw [key n (-1) (Or.inr rfl), p22R1_eq_F_iff hm, hn, ho.neg_one_zpow]
-    · obtain ⟨n, hn⟩ := (p22R1_sin_eq_iff _ _).mp h'
+        rw [key n (-1) (Or.inr rfl), eq_incEllIntFm_iff_jacobiAmm_eq hm, hn, ho.neg_one_zpow]
+    · obtain ⟨n, hn⟩ := (sin_eq_sin_iff_neg_one_zpow _ _).mp h'
       rcases Int.even_or_odd n with he | ho
       · refine ⟨n, -1, Or.inr rfl, ?_⟩
-        rw [key n (-1) (Or.inr rfl), p22R1_eq_F_iff hm, hn, he.neg_one_zpow]; ring
+        rw [key n (-1) (Or.inr rfl), eq_incEllIntFm_iff_jacobiAmm_eq hm, hn, he.neg_one_zpow]; ring
       · refine ⟨n, 1, Or.inl rfl, ?_⟩
-        rw [key n 1 (Or.inl rfl), p22R1_eq_F_iff hm, hn, ho.neg_one_zpow]; ring
+        rw [key n 1 (Or.inl rfl), eq_incEllIntFm_iff_jacobiAmm_eq hm, hn, ho.neg_one_zpow]; ring
   · rintro ⟨n, σ, hσ, h⟩
-    rw [key n σ hσ, p22R1_eq_F_iff hm] at h
+    rw [key n σ hσ, eq_incEllIntFm_iff_jacobiAmm_eq hm] at h
     rw [h, Real.sin_add_int_mul_pi, mul_pow, ← zpow_natCast, ← zpow_mul]
     rcases hσ with rfl | rfl
     · rw [one_mul, hsn]; rw [Even.neg_one_zpow ⟨n, by push_cast; ring⟩]; ring
@@ -346,13 +368,13 @@ theorem Real.jacobiArcsnm_eq_integral (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (h
 @[dlmf 22.15.E11 "stronger than DLMF: -K ≤ x ≤ K; real parameter m = k² < 1"]
 theorem Real.eq_integral_jacobiSnm (hm : m < 1) {x : ℝ} (hx : |x| ≤ Real.compEllIntKm m) :
     x = ∫ t in (0 : ℝ)..Real.jacobiSnm x m, 1 / √((1 - t ^ 2) * (1 - m * t ^ 2)) := by
-  have hs := (je22b_abs_le_one (m := m) x).1
+  have hs := (abs_jacobiSnm_le_one_and_abs_jacobiCnm_le_one (m := m) x).1
   rw [← Real.jacobiArcsnm_eq_integral hm (neg_le_of_abs_le hs) (le_of_abs_le hs),
     Real.jacobiArcsnm_jacobiSnm hm hx]
 
 open MeasureTheory Set in
 /-- Substitution `t = f θ` for a continuous strictly decreasing `f` on `[a, b]`. -/
-lemma p22R1_subst_anti {f f' g h : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
+private lemma integral_comp_strictAntiOn_eq {f f' g h : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
     (hc : ContinuousOn f (Icc a b)) (ha : StrictAntiOn f (Icc a b))
     (hd : ∀ θ ∈ Ioo a b, HasDerivAt f (f' θ) θ)
     (hg : ∀ θ ∈ Ioo a b, |f' θ| * g (f θ) = h θ) :
@@ -372,7 +394,7 @@ theorem Real.jacobiArccnm_eq_integral (hm : m < 1) {x : ℝ} (hx0 : -1 ≤ x) (h
     Real.jacobiArccnm x m = ∫ t in x..1, 1 / √((1 - t ^ 2) * ((1 - m) + m * t ^ 2)) := by
   have hb := Real.arccos_nonneg x
   have hbπ := Real.arccos_le_pi x
-  have h := p22R1_subst_anti (f := cos) (f' := fun θ => -sin θ)
+  have h := integral_comp_strictAntiOn_eq (f := cos) (f' := fun θ => -sin θ)
     (g := fun t => 1 / √((1 - t ^ 2) * ((1 - m) + m * t ^ 2)))
     (h := fun θ => (1 - m * sin θ ^ 2) ^ (-(1 / 2) : ℝ)) hb continuous_cos.continuousOn
     (Real.strictAntiOn_cos.mono (Set.Icc_subset_Icc le_rfl hbπ))
@@ -416,7 +438,7 @@ theorem Real.jacobiArcdnm_eq_integral (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx0 
     apply Real.sqrt_lt_sqrt (hpos v).le
     have h2 : sin u ^ 2 < sin v ^ 2 := pow_lt_pow_left₀ hsuv hsu (by norm_num)
     nlinarith
-  have h := p22R1_subst_anti (f := fun θ => √(1 - m * sin θ ^ 2))
+  have h := integral_comp_strictAntiOn_eq (f := fun θ => √(1 - m * sin θ ^ 2))
     (f' := fun θ => -(m * sin θ * cos θ) / √(1 - m * sin θ ^ 2))
     (g := fun t => 1 / √((1 - t ^ 2) * (t ^ 2 - (1 - m))))
     (h := fun θ => (1 - m * sin θ ^ 2) ^ (-(1 / 2) : ℝ)) hb0
@@ -443,7 +465,7 @@ theorem Real.jacobiArcdnm_eq_integral (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx0 
 open Set in
 /-- `∫_{t₀}^{f φ} g = F(φ|m)` for an increasing substitution `t = f θ` with `f 0 = t₀` and
 `f' · g ∘ f = (1 - m sin²)^{-1/2}`. -/
-lemma p22R1_arc_subst {m : ℝ} {f f' g : ℝ → ℝ} {a b φ : ℝ} (ha : a ≤ 0) (hb : 0 ≤ b)
+private lemma integral_eq_incEllIntFm_of_subst {m : ℝ} {f f' g : ℝ → ℝ} {a b φ : ℝ} (ha : a ≤ 0) (hb : 0 ≤ b)
     (hφ : φ ∈ Icc a b) (hc : ContinuousOn f (Icc a b))
     (hd : ∀ θ ∈ Ioo a b, HasDerivAt f (f' θ) θ) (hpos : ∀ θ ∈ Ioo a b, 0 < f' θ)
     {t0 : ℝ} (f0 : f 0 = t0)
@@ -457,12 +479,12 @@ lemma p22R1_arc_subst {m : ℝ} {f f' g : ℝ → ℝ} {a b φ : ℝ} (ha : a �
   rcases le_total 0 φ with h | h
   · have hs : Icc 0 φ ⊆ Icc a b := Icc_subset_Icc ha hφ.2
     have hs' : Ioo 0 φ ⊆ Ioo a b := Ioo_subset_Ioo ha hφ.2
-    have := p22R1_subst_mono h (hc.mono hs) (mono.mono hs) (fun θ hθ => hd θ (hs' hθ))
+    have := integral_comp_strictMonoOn_eq h (hc.mono hs) (mono.mono hs) (fun θ hθ => hd θ (hs' hθ))
       (fun θ hθ => hg' θ (hs' hθ))
     rwa [f0] at this
   · have hs : Icc φ 0 ⊆ Icc a b := Icc_subset_Icc hφ.1 hb
     have hs' : Ioo φ 0 ⊆ Ioo a b := Ioo_subset_Ioo hφ.1 hb
-    have := p22R1_subst_mono h (hc.mono hs) (mono.mono hs) (fun θ hθ => hd θ (hs' hθ))
+    have := integral_comp_strictMonoOn_eq h (hc.mono hs) (mono.mono hs) (fun θ hθ => hd θ (hs' hθ))
       (fun θ hθ => hg' θ (hs' hθ))
     rw [f0] at this
     rw [intervalIntegral.integral_symm, this, ← intervalIntegral.integral_symm]
@@ -528,7 +550,7 @@ theorem Real.jacobiSdm_jacobiArcsdm (hm : m < 1) {x : ℝ} (hx : |x| ≤ 1 / √
     rw [hsinφ, hy2, show 1 - m * (x ^ 2 / (1 + m * x ^ 2)) = 1 / (1 + m * x ^ 2) by
       field_simp; ring, Real.sqrt_div' _ hD.le, Real.sqrt_one, hy, div_div_eq_mul_div, div_one,
       div_mul_cancel₀ x hsD.ne']
-  have key := p22R1_arc_subst (m := m) (t0 := 0) (f := fun θ => sin θ / √(1 - m * sin θ ^ 2))
+  have key := integral_eq_incEllIntFm_of_subst (m := m) (t0 := 0) (f := fun θ => sin θ / √(1 - m * sin θ ^ 2))
     (f' := fun θ => cos θ / √(1 - m * sin θ ^ 2) ^ 3)
     (g := fun t => 1 / √((1 - (1 - m) * t ^ 2) * (1 + m * t ^ 2)))
     (a := -(π / 2)) (b := π / 2) (φ := φ) (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])
@@ -566,10 +588,10 @@ theorem Real.jacobiSdm_jacobiArcsdm (hm : m < 1) {x : ℝ} (hx : |x| ≤ 1 / √
 
 open Set in
 /-- The substitution `s = 1/t` on `[1, x]`. -/
-lemma p22R1_recip_subst {g h : ℝ → ℝ} {x : ℝ} (hx : 1 ≤ x)
+private lemma integral_one_div_subst {g h : ℝ → ℝ} {x : ℝ} (hx : 1 ≤ x)
     (hg : ∀ t ∈ Ioo 1 x, 1 / t ^ 2 * g (1 / t) = h t) :
     ∫ s in (1 / x)..1, g s = ∫ t in (1 : ℝ)..x, h t := by
-  have h := p22R1_subst_anti (f := fun t : ℝ => 1 / t) (f' := fun t => -(1 / t ^ 2)) (g := g)
+  have h := integral_comp_strictAntiOn_eq (f := fun t : ℝ => 1 / t) (f' := fun t => -(1 / t ^ 2)) (g := g)
     (h := h) hx ?_ ?_ ?_ ?_
   · simpa using h
   · exact continuousOn_const.div continuousOn_id fun t ht => by linarith [ht.1]
@@ -602,7 +624,7 @@ theorem Real.jacobiNdm_jacobiArcndm (hm : m < 1) {x : ℝ} (hx0 : 1 ≤ x) (hx1 
   have hy1 : 1 / x ≤ 1 := by rw [div_le_one hxpos]; exact hx0
   have key : Real.jacobiArcndm x m = Real.jacobiArcdnm (1 / x) m := by
     rw [Real.jacobiArcdnm_eq_integral hm0 hm hy0 hy1, Real.jacobiArcndm]
-    refine (p22R1_recip_subst hx0 fun t ht => ?_).symm
+    refine (integral_one_div_subst hx0 fun t ht => ?_).symm
     have ht1 : 1 < t := ht.1
     have htx : t < x := ht.2
     have h1 : 0 < t ^ 2 - 1 := by nlinarith
@@ -634,7 +656,7 @@ theorem Real.jacobiDcm_jacobiArcdcm (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
   have hy1 : 1 / x ≤ 1 := by rw [div_le_one hxpos]; exact hx
   have key : Real.jacobiArcdcm x m = Real.jacobiArccdm (1 / x) m := by
     rw [Real.jacobiArccdm, Real.jacobiArcdcm]
-    refine (p22R1_recip_subst hx fun t ht => ?_).symm
+    refine (integral_one_div_subst hx fun t ht => ?_).symm
     have ht1 : 1 < t := ht.1
     have h1 : 0 < t ^ 2 - 1 := by nlinarith
     have h2 : 0 < t ^ 2 - m := by nlinarith
@@ -659,7 +681,7 @@ theorem Real.jacobiNcm_jacobiArcncm (hm0 : 0 ≤ m) (hm : m < 1) {x : ℝ} (hx :
   have hy1 : 1 / x ≤ 1 := by rw [div_le_one hxpos]; exact hx
   have key : Real.jacobiArcncm x m = Real.jacobiArccnm (1 / x) m := by
     rw [Real.jacobiArccnm_eq_integral hm hy0 hy1, Real.jacobiArcncm]
-    refine (p22R1_recip_subst hx fun t ht => ?_).symm
+    refine (integral_one_div_subst hx fun t ht => ?_).symm
     have ht1 : 1 < t := ht.1
     have h1 : 0 < t ^ 2 - 1 := by nlinarith
     have h2 : 0 < m + (1 - m) * t ^ 2 := by nlinarith
@@ -675,7 +697,7 @@ theorem Real.jacobiNcm_jacobiArcncm (hm0 : 0 ≤ m) (hm : m < 1) {x : ℝ} (hx :
 
 open Set MeasureTheory in
 /-- The substitution `t = 1/s` taking `(0, 1/x)` onto `(x, ∞)`. -/
-lemma p22R1_recip_subst_Ioi {g h : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
+private lemma integral_Ioi_one_div_subst {g h : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
     (hg : ∀ s ∈ Ioo 0 (1 / x), 1 / s ^ 2 * g (1 / s) = h s) :
     ∫ t in Ioi x, g t = ∫ s in (0 : ℝ)..(1 / x), h s := by
   have himg : (fun s : ℝ => 1 / s) '' Ioo 0 (1 / x) = Ioi x := by
@@ -713,7 +735,7 @@ theorem Real.jacobiNsm_jacobiArcnsm (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
   have hy1 : 1 / x ≤ 1 := by rw [div_le_one hxpos]; exact hx
   have key : Real.jacobiArcnsm x m = Real.jacobiArcsnm (1 / x) m := by
     rw [Real.jacobiArcsnm_eq_integral hm hy0 hy1, Real.jacobiArcnsm]
-    refine p22R1_recip_subst_Ioi hxpos fun s hs => ?_
+    refine integral_Ioi_one_div_subst hxpos fun s hs => ?_
     have hs0 : 0 < s := hs.1
     have hs1 : s < 1 := lt_of_lt_of_le hs.2 hy1
     have h1 : 0 < 1 - s ^ 2 := by nlinarith
@@ -736,7 +758,7 @@ theorem Real.jacobiDsm_jacobiArcdsm (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx : �
     rw [abs_of_pos (by positivity)]; exact one_div_le_one_div_of_le hsq hx
   have key : Real.jacobiArcdsm x m = Real.jacobiArcsdm (1 / x) m := by
     rw [Real.jacobiArcsdm, Real.jacobiArcdsm]
-    refine p22R1_recip_subst_Ioi hxpos fun s hs => ?_
+    refine integral_Ioi_one_div_subst hxpos fun s hs => ?_
     have hs0 : 0 < s := hs.1
     have hsx : s * x < 1 := by
       have h' := hs.2; rw [lt_div_iff₀ hxpos] at h'; linarith
@@ -765,7 +787,7 @@ theorem Real.jacobiScm_jacobiArcscm (hm : m < 1) (x : ℝ) :
   have hb : |φ| < π / 2 := by rw [abs_lt]; exact ⟨Real.neg_pi_div_two_lt_arctan x, Real.arctan_lt_pi_div_two x⟩
   have hcos : ∀ θ ∈ Set.Icc (-|φ|) |φ|, 0 < cos θ := fun θ hθ =>
     Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1], by linarith [hθ.2]⟩
-  have key := p22R1_arc_subst (m := m) (t0 := 0) (f := tan) (f' := fun θ => 1 / cos θ ^ 2)
+  have key := integral_eq_incEllIntFm_of_subst (m := m) (t0 := 0) (f := tan) (f' := fun θ => 1 / cos θ ^ 2)
     (g := fun t => 1 / √((1 + t ^ 2) * (1 + (1 - m) * t ^ 2)))
     (a := -|φ|) (b := |φ|) (φ := φ) (by simp) (abs_nonneg _) ⟨neg_abs_le φ, le_abs_self φ⟩
     (fun θ hθ => (Real.continuousAt_tan.mpr (hcos θ hθ).ne').continuousWithinAt)

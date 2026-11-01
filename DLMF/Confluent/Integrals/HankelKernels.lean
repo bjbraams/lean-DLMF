@@ -8,13 +8,34 @@ module
 public import DLMF.Confluent.Integrals.Laplace
 
 /-!
-# Hankel kernels for confluent hypergeometric transforms
+# Hankel kernels and the cosine transform of Kummer's function
 
-Bounds, continuity and Laplace transforms of the Hankel kernels used in the confluent integral
-formulas.
+This file develops bounds, continuity and the Laplace transform of the Hankel kernel
+`t^{ν/2} J_ν(2√(xt))` used in the confluent integral transforms, and proves the cosine
+transform of the regularized Kummer function (DLMF 13.10.12).
 
-Source references and common attribution are retained in
-`DLMF.Confluent.Integrals`.
+## Main results
+
+* `cfInt_exists_norm_besselJ_le`: `|J_ν(y)| ≤ C y^{re ν} (1+y)^{-re ν - 1/2}` on the positive
+  axis.
+* `cfInt_exists_norm_kernel_le`: the corresponding bound for the Hankel kernel.
+* `cfInt_laplace_kernel`: `∫₀^∞ e^{-st} t^{ν/2} J_ν(2√(xt)) dt = x^{ν/2} s^{-ν-1} e^{-x/s}`.
+* `cfInt_integral_cos_gauss`: `∫₀^∞ cos(2xt) e^{-st²} dt = (√π/2) s^{-1/2} e^{-x²/s}`.
+* `cfInt_differentiable_kummerU_fst`: `U(a,b,z)` is entire in `a` for fixed `b` and `z ≠ 0`.
+* `cfInt_bessel_M_euler`: DLMF 13.10.14 in the Euler region.
+* `cosine_regularizedHGFun`: a cosine transform of `𝐌` (DLMF 13.10.12).
+
+## Implementation notes
+
+The Hankel-type transforms use the power bound for the kernel, its termwise Laplace transform,
+Fubini against Tricomi's Laplace integral or Euler's integral, and the substitutions `s ↦ 1/s`
+and `s = 1/(1+v)`. The cosine transform uses the Gaussian Fourier integral in the same way. In
+the Euler cases the result is extended to all parameters by the identity theorem: the integrals
+are holomorphic in a parameter by the locally uniform decay bound of
+`DLMF.Confluent.KummerDecay`, and `U` is entire in its first parameter.
+
+For `a ≤ 1/2` the cosine integral converges only conditionally, which Lean's integral does not
+capture, so `1/2 < a` is required.
 -/
 
 @[expose] public section

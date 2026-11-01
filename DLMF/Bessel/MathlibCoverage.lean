@@ -9,12 +9,12 @@ public import DLMF.Core.Upstream
 public import Mathlib.Analysis.SpecialFunctions.Bessel
 
 /-!
-# DLMF Chapter 10 results already in Mathlib 4.35.0-rc2
+# DLMF Chapter 10 results in Mathlib
 
-The `dlmf_upstream` commands below are checked pointers to Mathlib declarations,
-deliberately not duplicate local theorems. `J_ν` is Mathlib's `Complex.besselJ`, used
-directly by the project; the project's `besselJ_eq_regularized` carries the `@[dlmf 10.2.E2]`
-tag for the regularized `₀F₁` form.
+The `dlmf_upstream` commands below are checked pointers to Mathlib declarations, deliberately
+not duplicate local theorems. `J_ν` is Mathlib's `Complex.besselJ`, used directly by the
+project; the project's `besselJ_eq_regularized` carries the `@[dlmf 10.2.E2]` tag for the
+regularized `₀F₁` form.
 -/
 
 -- DLMF 10.2.2: Mathlib's definition of `J_ν`.

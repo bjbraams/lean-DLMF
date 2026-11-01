@@ -15,14 +15,29 @@ public import Mathlib.RingTheory.Trace.Defs
 /-!
 # Applications of the Selberg integral (AAR §§8.5–8.11)
 
-Stieltjes electrostatics, Siegel's inequality, Dyson's constant-term identity, the
-Hasse–Davenport relation for Gauss sums (Mathlib already defines `gaussSum`), and the
-finite-field analogue of Selberg.
+This file treats Siegel's inequality, a nearly poised `₃F₂(1)` evaluation obtained from
+Aomoto's integral, the Hasse–Davenport relation for Gauss sums and the finite-field analogue
+of Selberg's integral.
 
-The discriminant of a Jacobi polynomial (AAR Theorem 8.5.3) is
-`DLMF.OrthogonalPolynomials.jacobiPolyP_prod_sq_sub`, proved by Schur's resultant route. The
-nearly poised `₃F₂(1)` of Theorem 8.9.1(a) is proved here from Aomoto's integral. Siegel's
-inequality, the Hasse–Davenport relation and the finite-field Selberg formula remain admitted.
+## Main definitions
+
+* `siegelP`, `siegelQ`, `siegelDiscriminant`: the polynomial, rational function and squared
+  Vandermonde product of AAR §8.6.
+* `selbergMonicPolynomial`: the monic polynomial with a given vector of lower coefficients.
+
+## Main results
+
+* `siegel_inequality`, `siegel_inequality_two`: Siegel's refinement of the arithmetic–geometric
+  mean inequality (AAR Theorem 8.6.2) and the equality case for two numbers.
+* `aomoto_two_expand`: the two-variable Aomoto integral expanded by the binomial theorem.
+* `nearly_poised_3F2`: a terminating nearly poised `₃F₂(1)` evaluation (AAR Theorem 8.9.1(a)).
+* `hasse_davenport`: the Hasse–Davenport lifting relation (AAR Theorem 8.10.4).
+* `selberg_finite_field`: the finite-field Selberg evaluation (AAR Theorem 8.11.2).
+
+## Implementation notes
+
+Mathlib already defines `gaussSum`. The discriminant of a Jacobi polynomial (AAR
+Theorem 8.5.3) is `DLMF.OrthogonalPolynomials.jacobiPolyP_prod_sq_sub`.
 -/
 
 @[expose] public section

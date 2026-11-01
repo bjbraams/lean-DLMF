@@ -10,10 +10,32 @@ public import DLMF.Legendre.Associated
 /-!
 # Degree and order recurrences and integer derivatives
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+The recurrence relations DLMF 14.10.1–14.10.7 for the Ferrers functions and the associated
+Legendre functions, the Casoratians DLMF 14.2.5 and 14.2.11, and the integer-order derivative
+formulas of DLMF §§14.6–14.7.
+
+## Main results
+
+* `ferrersP_recurrence_1`, …, `ferrersP_recurrence_5`: DLMF 14.10.1–14.10.5 for `𝖯^μ_ν`.
+* `ferrersQ_recurrence_1`, …, `ferrersQ_recurrence_5`: DLMF 14.10.1–14.10.5 for `𝖰^μ_ν`.
+* `ferrers_wronskian_5`: the Casoratian DLMF 14.2.5.
+* `associatedP_recurrence_3`, `associatedP_recurrence_4`, `associatedP_recurrence_5`,
+  `associatedP_recurrence_6`, `associatedP_recurrence_7`: DLMF 14.10.3–14.10.7 for `P^μ_ν`.
+* `associatedQ_recurrence_3`, …, `associatedQ_recurrence_7`: DLMF 14.10.3–14.10.7 for `Q^μ_ν`.
+* `olverQ_recurrence_3`, …, `olverQ_recurrence_7`, `olverQ_casoratian`: the corresponding forms
+  for Olver's `𝑸^μ_ν`, valid for all parameters.
+* `associated_wronskian_11`: the Casoratian DLMF 14.2.11.
+* `ferrersQ_reflection`: `𝖰^μ_ν` through `𝖯^μ_ν(±x)` (DLMF 14.9.10 with `μ ↦ -μ`).
+* `ferrersQ_nat_order_derivative`, `associatedP_nat_order_derivative`,
+  `olverQ_nat_order_derivative`, `associatedQ_nat_order_derivative`: DLMF 14.6.2–14.6.5 and
+  14.7.9, 14.7.11, 14.7.12.
+
+## Implementation notes
+
+The underlying contiguous relations of the regularized Gauss function keep all reciprocal-Gamma
+exceptional values. Identities for `𝖰^μ_ν` are first proved for non-real `ν + μ` and extended
+by continuity in the degree (`eq_zero_of_im_ne_zero`); those for `𝑸^μ_ν` first for non-integer
+order.
 -/
 
 @[expose] public noncomputable section

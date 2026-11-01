@@ -10,12 +10,54 @@ public import Mathlib.NumberTheory.LSeries.RiemannZeta
 public import TauCeti.RingTheory.MvPolynomial.Symmetric.Schur.Bialternant
 
 /-!
-# MacMahon box formula for plane partitions
+# Plane partitions in a box (DLMF §26.12(i)–(ii))
 
-Array encodings, counting bijections and the finite-box product formula for plane partitions.
+A plane partition is, following DLMF §26.12(i), a finite set `π ⊆ ℕ × ℕ × ℕ` of points with
+positive coordinates such that `(r, s, t) ∈ π` implies `B(r, s, t) ⊆ π`, where
+`B(r, s, t) = [1, r] × [1, s] × [1, t]`; `|π|` is `π.card`. This file proves MacMahon's box
+formula (26.12.4) and the product formulas for the symmetry classes.
 
-Source references and common attribution are retained in
-`DLMF.Combinatorics.PlanePartitions`.
+## Main definitions
+
+* `planeBox`: the box `B(r, s, t)` (DLMF 26.12.3).
+* `IsPlanePartition`, `planePartitionCount`: plane partitions and `pp(n)`.
+* `IsSymmetricPP`, `IsCyclicallySymmetricPP`, `IsTotallySymmetricPP`: the symmetry classes.
+* `planeComplement`, `planeTranspose`: the complement `π^c` in a box and the transpose.
+* `IsStrictShiftedPP`, `IsDescendingPP`: strict shifted and descending plane partitions, as lists
+  of rows, row `i` indented by `i` places.
+
+## Main results
+
+* `planePartitionCount_eq_card_arrays`: the equivalent array description (DLMF §26.12(i)).
+* `planePartitionCount_three`, `planePartitionExample_spec`: the examples (DLMF 26.12.1, 26.12.2).
+* `card_planePartitionsIn`: MacMahon's box formula (DLMF 26.12.4).
+* `card_symmetric_planePartitionsIn`, `card_cyclicallySymmetric_planePartitionsIn`,
+  `card_cyclicallySymmetric_planePartitionsIn'`, `card_totallySymmetric_planePartitionsIn`:
+  DLMF 26.12.5–26.12.8.
+* `card_selfComplementary_even`, `card_selfComplementary_odd_even`,
+  `card_selfComplementary_odd_odd`: self-complementary plane partitions (DLMF 26.12.9–26.12.11).
+* `card_transposeComplement`, `card_symmetric_selfComplementary_even`,
+  `card_symmetric_selfComplementary_odd`, `card_cyclicallySymmetric_transposeComplement`:
+  DLMF 26.12.12–26.12.15.
+* `card_cyclicallySymmetric_selfComplementary`, `card_totallySymmetric_selfComplementary`:
+  DLMF 26.12.16, 26.12.17.
+* `isDescendingPP_example`, `card_descendingPPIn`: descending plane partitions
+  (DLMF 26.12.18, 26.12.19).
+
+## Implementation notes
+
+* Counts in boxes are stated as rational numbers (`ℚ`), as DLMF's products are. A descending
+  plane partition "in `B(r, r, r)`" is one with all parts at most `r` (`DescendingPPIn`).
+* §26.12(i), transpose complement: DLMF says "equal to the reflection through the `(x, y)`-plane
+  of its complement". The count (26.12.12) is that of plane partitions whose complement is their
+  transpose `(h, j, k) ↦ (j, h, k)` (reflection in the plane `x = y`); with the literal
+  reflection `k ↦ t + 1 - k` the counts differ (`r = 1`, `t = 1`: none versus one; verified by
+  brute force). The transpose reading is used.
+* Table 26.12.1 beyond its first entries is numerical and out of scope.
+
+## References
+
+* NIST DLMF §26.12.
 -/
 
 @[expose] public section
@@ -58,7 +100,7 @@ section MacMahonBox
 open Polynomial
 
 /-- The rectangular Young diagram with `r` rows of length `t`. -/
-def s26b_rect (r t : ℕ) : YoungDiagram where
+def rectangleDiagram (r t : ℕ) : YoungDiagram where
   cells := range r ×ˢ range t
   isLowerSet := by
     intro a b hba ha
@@ -66,70 +108,70 @@ def s26b_rect (r t : ℕ) : YoungDiagram where
     exact ⟨lt_of_le_of_lt hba.1 ha.1, lt_of_le_of_lt hba.2 ha.2⟩
 
 /-- Membership in the rectangle. -/
-lemma s26b_mem_rect {r t i c : ℕ} : (i, c) ∈ s26b_rect r t ↔ i < r ∧ c < t := by
+private lemma mem_rectangleDiagram {r t i c : ℕ} : (i, c) ∈ rectangleDiagram r t ↔ i < r ∧ c < t := by
   change (i, c) ∈ range r ×ˢ range t ↔ _
   simp
 
 /-- Membership in `planePartitionsIn`. -/
-lemma s26b_mem_planePartitionsIn {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} :
+lemma mem_planePartitionsIn {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} :
     π ∈ planePartitionsIn r s t ↔ π ⊆ planeBox r s t ∧ IsPlanePartition π := by
   simp [planePartitionsIn]
 
 /-- Membership in `planeBox`. -/
-lemma s26b_mem_planeBox {r s t h j k : ℕ} :
+lemma mem_planeBox {r s t h j k : ℕ} :
     (h, j, k) ∈ planeBox r s t ↔ 1 ≤ h ∧ h ≤ r ∧ 1 ≤ j ∧ j ≤ s ∧ 1 ≤ k ∧ k ≤ t := by
   simp [planeBox, and_assoc]
 
 /-- Down-closure of a plane partition. -/
-lemma s26b_down {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {h j k h' j' k' : ℕ}
+lemma mem_of_isPlanePartition_of_le {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {h j k h' j' k' : ℕ}
     (hx : (h, j, k) ∈ π) (h1 : 1 ≤ h') (h2 : h' ≤ h) (j1 : 1 ≤ j') (j2 : j' ≤ j) (k1 : 1 ≤ k')
     (k2 : k' ≤ k) : (h', j', k') ∈ π :=
-  (hπ _ hx).2.2.2 (s26b_mem_planeBox.mpr ⟨h1, h2, j1, j2, k1, k2⟩)
+  (hπ _ hx).2.2.2 (mem_planeBox.mpr ⟨h1, h2, j1, j2, k1, k2⟩)
 
 /-- The column of heights over `(h, k)`. -/
-def s26b_fiber (π : Finset (ℕ × ℕ × ℕ)) (s h k : ℕ) : Finset ℕ :=
+def planeColumn (π : Finset (ℕ × ℕ × ℕ)) (s h k : ℕ) : Finset ℕ :=
   (Icc 1 s).filter fun j => (h, j, k) ∈ π
 
 /-- The column over `(h, k)` of a plane partition is an initial segment `[1, m]`. -/
-lemma s26b_mem_iff_le_card {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {s h j k : ℕ}
-    (hj1 : 1 ≤ j) (hjs : j ≤ s) : (h, j, k) ∈ π ↔ j ≤ #(s26b_fiber π s h k) := by
+private lemma mem_iff_le_card_planeColumn {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {s h j k : ℕ}
+    (hj1 : 1 ≤ j) (hjs : j ≤ s) : (h, j, k) ∈ π ↔ j ≤ #(planeColumn π s h k) := by
   constructor
   · intro hx
-    have : Icc 1 j ⊆ s26b_fiber π s h k := by
+    have : Icc 1 j ⊆ planeColumn π s h k := by
       intro j' hj'
       rw [mem_Icc] at hj'
       have := hπ _ hx
-      simp only [s26b_fiber, mem_filter, mem_Icc]
+      simp only [planeColumn, mem_filter, mem_Icc]
       exact ⟨⟨hj'.1, hj'.2.trans hjs⟩,
-        s26b_down hπ hx this.1 le_rfl hj'.1 hj'.2 this.2.2.1 le_rfl⟩
+        mem_of_isPlanePartition_of_le hπ hx this.1 le_rfl hj'.1 hj'.2 this.2.2.1 le_rfl⟩
     simpa using card_le_card this
   · intro hle
     by_contra hx
-    have : s26b_fiber π s h k ⊆ Icc 1 (j - 1) := by
+    have : planeColumn π s h k ⊆ Icc 1 (j - 1) := by
       intro j' hj'
-      simp only [s26b_fiber, mem_filter, mem_Icc] at hj' ⊢
+      simp only [planeColumn, mem_filter, mem_Icc] at hj' ⊢
       refine ⟨hj'.1.1, ?_⟩
       by_contra hlt
-      exact hx (s26b_down hπ hj'.2 (hπ _ hj'.2).1 le_rfl hj1 (by omega) (hπ _ hj'.2).2.2.1
+      exact hx (mem_of_isPlanePartition_of_le hπ hj'.2 (hπ _ hj'.2).1 le_rfl hj1 (by omega) (hπ _ hj'.2).2.2.1
         le_rfl)
     have := card_le_card this
     simp at this; omega
 
 /-- A column of a plane partition in `B(r, s, t)` has height at most `s`. -/
-lemma s26b_card_fiber_le (π : Finset (ℕ × ℕ × ℕ)) (s h k : ℕ) :
-    #(s26b_fiber π s h k) ≤ s := by
-  simpa [s26b_fiber] using card_le_card (filter_subset (fun j => (h, j, k) ∈ π) (Icc 1 s))
+private lemma card_planeColumn_le (π : Finset (ℕ × ℕ × ℕ)) (s h k : ℕ) :
+    #(planeColumn π s h k) ≤ s := by
+  simpa [planeColumn] using card_le_card (filter_subset (fun j => (h, j, k) ∈ π) (Icc 1 s))
 
 /-- Column heights of a plane partition are antitone. -/
-lemma s26b_fiber_mono {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {s h k h' k' : ℕ}
+private lemma card_planeColumn_antitone {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {s h k h' k' : ℕ}
     (h1 : 1 ≤ h') (h2 : h' ≤ h) (k1 : 1 ≤ k') (k2 : k' ≤ k) :
-    #(s26b_fiber π s h k) ≤ #(s26b_fiber π s h' k') := by
+    #(planeColumn π s h k) ≤ #(planeColumn π s h' k') := by
   refine card_le_card fun j hj => ?_
-  simp only [s26b_fiber, mem_filter] at hj ⊢
-  exact ⟨hj.1, s26b_down hπ hj.2 h1 h2 (mem_Icc.mp hj.1).1 le_rfl k1 k2⟩
+  simp only [planeColumn, mem_filter] at hj ⊢
+  exact ⟨hj.1, mem_of_isPlanePartition_of_le hπ hj.2 h1 h2 (mem_Icc.mp hj.1).1 le_rfl k1 k2⟩
 
 /-- Entries of a semistandard tableau grow by at least one per row down a column. -/
-lemma s26b_col_add {μ : YoungDiagram} (T : SemistandardYoungTableau μ) {i i' c : ℕ}
+private lemma add_sub_le_ssyt_of_le {μ : YoungDiagram} (T : SemistandardYoungTableau μ) {i i' c : ℕ}
     (hii : i ≤ i') (hc : (i', c) ∈ μ) : T i c + (i' - i) ≤ T i' c := by
   induction i', hii using Nat.le_induction with
   | base => simp
@@ -140,110 +182,110 @@ lemma s26b_col_add {μ : YoungDiagram} (T : SemistandardYoungTableau μ) {i i' c
     omega
 
 /-- The tableau of a plane partition. -/
-def s26b_toT (r s t : ℕ) (π : Finset (ℕ × ℕ × ℕ)) (hπ : IsPlanePartition π) :
-    SemistandardYoungTableau (s26b_rect r t) where
-  entry i c := if i < r ∧ c < t then #(s26b_fiber π s (r - i) (t - c)) + i else 0
+def planePartitionToTableau (r s t : ℕ) (π : Finset (ℕ × ℕ × ℕ)) (hπ : IsPlanePartition π) :
+    SemistandardYoungTableau (rectangleDiagram r t) where
+  entry i c := if i < r ∧ c < t then #(planeColumn π s (r - i) (t - c)) + i else 0
   row_weak' := by
     intro i c1 c2 hc hcell
-    rw [s26b_mem_rect] at hcell
+    rw [mem_rectangleDiagram] at hcell
     have e1 : i < r ∧ c1 < t := ⟨hcell.1, by omega⟩
     simp only [e1, hcell, and_self, ↓reduceIte]
-    have := s26b_fiber_mono (s := s) hπ (h := r - i) (h' := r - i) (k := t - c1) (k' := t - c2)
+    have := card_planeColumn_antitone (s := s) hπ (h := r - i) (h' := r - i) (k := t - c1) (k' := t - c2)
       (by omega) le_rfl (by omega) (by omega)
     omega
   col_strict' := by
     intro i1 i2 c hi hcell
-    rw [s26b_mem_rect] at hcell
+    rw [mem_rectangleDiagram] at hcell
     have e1 : i1 < r ∧ c < t := ⟨by omega, hcell.2⟩
     simp only [e1, hcell, and_self, ↓reduceIte]
-    have := s26b_fiber_mono (s := s) hπ (h := r - i1) (h' := r - i2) (k := t - c) (k' := t - c)
+    have := card_planeColumn_antitone (s := s) hπ (h := r - i1) (h' := r - i2) (k := t - c) (k' := t - c)
       (by omega) (by omega) (by omega) le_rfl
     omega
   zeros' := by
     intro i c hc
-    rw [s26b_mem_rect] at hc
+    rw [mem_rectangleDiagram] at hc
     simp only [hc, ↓reduceIte]
 
-/-- The entries of `s26b_toT`. -/
-lemma s26b_toT_apply (r s t : ℕ) (π : Finset (ℕ × ℕ × ℕ)) (hπ : IsPlanePartition π) (i c : ℕ) :
-    s26b_toT r s t π hπ i c = if i < r ∧ c < t then #(s26b_fiber π s (r - i) (t - c)) + i else 0 :=
+/-- The entries of `planePartitionToTableau`. -/
+private lemma planePartitionToTableau_apply (r s t : ℕ) (π : Finset (ℕ × ℕ × ℕ)) (hπ : IsPlanePartition π) (i c : ℕ) :
+    planePartitionToTableau r s t π hπ i c = if i < r ∧ c < t then #(planeColumn π s (r - i) (t - c)) + i else 0 :=
   rfl
 
 /-- The plane partition of a tableau. -/
-def s26b_ofT (r s t : ℕ) (T : SemistandardYoungTableau (s26b_rect r t)) : Finset (ℕ × ℕ × ℕ) :=
+def tableauToPlanePartition (r s t : ℕ) (T : SemistandardYoungTableau (rectangleDiagram r t)) : Finset (ℕ × ℕ × ℕ) :=
   (planeBox r s t).filter fun x => x.2.1 + (r - x.1) ≤ T (r - x.1) (t - x.2.2)
 
-/-- `s26b_ofT` produces a plane partition in the box. -/
-lemma s26b_ofT_mem (r s t : ℕ) (T : SemistandardYoungTableau (s26b_rect r t)) :
-    s26b_ofT r s t T ∈ planePartitionsIn r s t := by
-  rw [s26b_mem_planePartitionsIn]
+/-- `tableauToPlanePartition` produces a plane partition in the box. -/
+private lemma tableauToPlanePartition_mem (r s t : ℕ) (T : SemistandardYoungTableau (rectangleDiagram r t)) :
+    tableauToPlanePartition r s t T ∈ planePartitionsIn r s t := by
+  rw [mem_planePartitionsIn]
   refine ⟨filter_subset _ _, ?_⟩
   rintro ⟨h, j, k⟩ hx
-  simp only [s26b_ofT, mem_filter, s26b_mem_planeBox] at hx
+  simp only [tableauToPlanePartition, mem_filter, mem_planeBox] at hx
   obtain ⟨⟨h1, h2, j1, j2, k1, k2⟩, hle⟩ := hx
   refine ⟨h1, j1, k1, ?_⟩
   rintro ⟨h', j', k'⟩ hy
-  simp only [s26b_mem_planeBox] at hy
-  simp only [s26b_ofT, mem_filter, s26b_mem_planeBox]
+  simp only [mem_planeBox] at hy
+  simp only [tableauToPlanePartition, mem_filter, mem_planeBox]
   refine ⟨⟨hy.1, by omega, hy.2.2.1, by omega, hy.2.2.2.2.1, by omega⟩, ?_⟩
   have hrow := T.row_weak (i := r - h) (j1 := t - k) (j2 := t - k')
-  have hcol := s26b_col_add T (i := r - h) (i' := r - h') (c := t - k') (by omega)
-    (s26b_mem_rect.mpr ⟨by omega, by omega⟩)
+  have hcol := add_sub_le_ssyt_of_le T (i := r - h) (i' := r - h') (c := t - k') (by omega)
+    (mem_rectangleDiagram.mpr ⟨by omega, by omega⟩)
   rcases Nat.lt_or_ge (t - k) (t - k') with hlt | hge
-  · have := hrow hlt (s26b_mem_rect.mpr ⟨by omega, by omega⟩)
+  · have := hrow hlt (mem_rectangleDiagram.mpr ⟨by omega, by omega⟩)
     omega
   · have : t - k = t - k' := by omega
     rw [this] at hle
     omega
 
-/-- `s26b_ofT` inverts `s26b_toT`. -/
-lemma s26b_ofT_toT {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π ∈ planePartitionsIn r s t) :
-    s26b_ofT r s t (s26b_toT r s t π (s26b_mem_planePartitionsIn.mp hπ').2) = π := by
-  obtain ⟨hsub, hπ⟩ := s26b_mem_planePartitionsIn.mp hπ'
+/-- `tableauToPlanePartition` inverts `planePartitionToTableau`. -/
+private lemma tableauToPlanePartition_planePartitionToTableau {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π ∈ planePartitionsIn r s t) :
+    tableauToPlanePartition r s t (planePartitionToTableau r s t π (mem_planePartitionsIn.mp hπ').2) = π := by
+  obtain ⟨hsub, hπ⟩ := mem_planePartitionsIn.mp hπ'
   ext ⟨h, j, k⟩
-  rw [s26b_ofT, mem_filter]
-  simp only [s26b_toT_apply]
+  rw [tableauToPlanePartition, mem_filter]
+  simp only [planePartitionToTableau_apply]
   constructor
   · rintro ⟨hb, hle⟩
-    rw [s26b_mem_planeBox] at hb
+    rw [mem_planeBox] at hb
     have e1 : r - h < r ∧ t - k < t := ⟨by omega, by omega⟩
     simp only [e1, and_self, ↓reduceIte] at hle
     rw [show r - (r - h) = h by omega, show t - (t - k) = k by omega] at hle
-    exact (s26b_mem_iff_le_card hπ (s := s) (by omega) (by omega)).mpr (by omega)
+    exact (mem_iff_le_card_planeColumn hπ (s := s) (by omega) (by omega)).mpr (by omega)
   · intro hx
     have hb := hsub hx
     refine ⟨hb, ?_⟩
-    rw [s26b_mem_planeBox] at hb
+    rw [mem_planeBox] at hb
     have e1 : r - h < r ∧ t - k < t := ⟨by omega, by omega⟩
     simp only [e1, and_self, ↓reduceIte]
     rw [show r - (r - h) = h by omega, show t - (t - k) = k by omega]
-    have := (s26b_mem_iff_le_card hπ (s := s) (by omega) (by omega)).mp hx
+    have := (mem_iff_le_card_planeColumn hπ (s := s) (by omega) (by omega)).mp hx
     omega
 
 /-- Entry bounds `i ≤ T i c ≤ i + s` for a tableau with entries below `r + s`. -/
-lemma s26b_entry_le {r s t : ℕ} (T : SemistandardYoungTableau (s26b_rect r t))
-    (hT : ∀ i c, (i, c) ∈ s26b_rect r t → T i c < r + s) {i c : ℕ}
-    (hc : (i, c) ∈ s26b_rect r t) : i ≤ T i c ∧ T i c ≤ i + s := by
-  have hc' := s26b_mem_rect.mp hc
+private lemma le_ssyt_entry_le_add {r s t : ℕ} (T : SemistandardYoungTableau (rectangleDiagram r t))
+    (hT : ∀ i c, (i, c) ∈ rectangleDiagram r t → T i c < r + s) {i c : ℕ}
+    (hc : (i, c) ∈ rectangleDiagram r t) : i ≤ T i c ∧ T i c ≤ i + s := by
+  have hc' := mem_rectangleDiagram.mp hc
   refine ⟨SemistandardYoungTableau.le_entry T hc, ?_⟩
-  have h1 := s26b_col_add T (i := i) (i' := r - 1) (c := c) (by omega)
-    (s26b_mem_rect.mpr ⟨by omega, hc'.2⟩)
-  have h2 := hT (r - 1) c (s26b_mem_rect.mpr ⟨by omega, hc'.2⟩)
+  have h1 := add_sub_le_ssyt_of_le T (i := i) (i' := r - 1) (c := c) (by omega)
+    (mem_rectangleDiagram.mpr ⟨by omega, hc'.2⟩)
+  have h2 := hT (r - 1) c (mem_rectangleDiagram.mpr ⟨by omega, hc'.2⟩)
   omega
 
-/-- `s26b_toT` inverts `s26b_ofT` on bounded tableaux. -/
-lemma s26b_toT_ofT {r s t : ℕ} (T : SemistandardYoungTableau (s26b_rect r t))
-    (hT : ∀ i c, (i, c) ∈ s26b_rect r t → T i c < r + s) :
-    s26b_toT r s t (s26b_ofT r s t T)
-      (s26b_mem_planePartitionsIn.mp (s26b_ofT_mem r s t T)).2 = T := by
+/-- `planePartitionToTableau` inverts `tableauToPlanePartition` on bounded tableaux. -/
+private lemma planePartitionToTableau_tableauToPlanePartition {r s t : ℕ} (T : SemistandardYoungTableau (rectangleDiagram r t))
+    (hT : ∀ i c, (i, c) ∈ rectangleDiagram r t → T i c < r + s) :
+    planePartitionToTableau r s t (tableauToPlanePartition r s t T)
+      (mem_planePartitionsIn.mp (tableauToPlanePartition_mem r s t T)).2 = T := by
   ext i c
-  rw [s26b_toT_apply]
+  rw [planePartitionToTableau_apply]
   split_ifs with hc
-  · have hc' := s26b_mem_rect.mpr hc
-    obtain ⟨hle1, hle2⟩ := s26b_entry_le T hT hc'
-    have hf : s26b_fiber (s26b_ofT r s t T) s (r - i) (t - c) = Icc 1 (T i c - i) := by
+  · have hc' := mem_rectangleDiagram.mpr hc
+    obtain ⟨hle1, hle2⟩ := le_ssyt_entry_le_add T hT hc'
+    have hf : planeColumn (tableauToPlanePartition r s t T) s (r - i) (t - c) = Icc 1 (T i c - i) := by
       ext j
-      simp only [s26b_fiber, s26b_ofT, mem_filter, mem_Icc, s26b_mem_planeBox]
+      simp only [planeColumn, tableauToPlanePartition, mem_filter, mem_Icc, mem_planeBox]
       rw [show r - (r - i) = i by omega, show t - (t - c) = c by omega]
       constructor
       · rintro ⟨⟨hj1, _⟩, _, hj⟩; exact ⟨hj1, by omega⟩
@@ -251,34 +293,34 @@ lemma s26b_toT_ofT {r s t : ℕ} (T : SemistandardYoungTableau (s26b_rect r t))
         exact ⟨⟨hj1, by omega⟩, ⟨by omega, by omega, hj1, by omega, by omega, by omega⟩, by omega⟩
     rw [hf, Nat.card_Icc]
     omega
-  · exact (T.zeros (fun h => hc (s26b_mem_rect.mp h))).symm
+  · exact (T.zeros (fun h => hc (mem_rectangleDiagram.mp h))).symm
 
 /-- The tableau of a plane partition in `B(r, s, t)` has entries below `r + s`. -/
-lemma s26b_toT_lt {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) :
-    ∀ i c, (i, c) ∈ s26b_rect r t → s26b_toT r s t π hπ i c < r + s := by
+private lemma planePartitionToTableau_lt {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) :
+    ∀ i c, (i, c) ∈ rectangleDiagram r t → planePartitionToTableau r s t π hπ i c < r + s := by
   intro i c hc
-  rw [s26b_mem_rect] at hc
-  rw [s26b_toT_apply]
+  rw [mem_rectangleDiagram] at hc
+  rw [planePartitionToTableau_apply]
   simp only [hc, and_self, ↓reduceIte]
-  have := s26b_card_fiber_le π s (r - i) (t - c)
+  have := card_planeColumn_le π s (r - i) (t - c)
   omega
 
 /-- The entry sum of the tableau of a plane partition. -/
-lemma s26b_sum_toT {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π ∈ planePartitionsIn r s t) :
-    ∑ x ∈ (s26b_rect r t).cells,
-        s26b_toT r s t π (s26b_mem_planePartitionsIn.mp hπ').2 x.1 x.2 =
+private lemma sum_planePartitionToTableau {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π ∈ planePartitionsIn r s t) :
+    ∑ x ∈ (rectangleDiagram r t).cells,
+        planePartitionToTableau r s t π (mem_planePartitionsIn.mp hπ').2 x.1 x.2 =
       #π + t * ∑ i ∈ range r, i := by
-  obtain ⟨hsub, hπ⟩ := s26b_mem_planePartitionsIn.mp hπ'
-  have hcells : (s26b_rect r t).cells = range r ×ˢ range t := rfl
+  obtain ⟨hsub, hπ⟩ := mem_planePartitionsIn.mp hπ'
+  have hcells : (rectangleDiagram r t).cells = range r ×ˢ range t := rfl
   rw [hcells, sum_product]
-  have h1 : ∀ i ∈ range r, ∑ c ∈ range t, s26b_toT r s t π hπ i c =
-      ∑ c ∈ range t, #(s26b_fiber π s (r - i) (t - c)) + t * i := by
+  have h1 : ∀ i ∈ range r, ∑ c ∈ range t, planePartitionToTableau r s t π hπ i c =
+      ∑ c ∈ range t, #(planeColumn π s (r - i) (t - c)) + t * i := by
     intro i hi
     rw [mem_range] at hi
     rw [show t * i = ∑ c ∈ range t, i by simp, ← sum_add_distrib]
     refine sum_congr rfl fun c hc => ?_
     rw [mem_range] at hc
-    rw [s26b_toT_apply]
+    rw [planePartitionToTableau_apply]
     simp only [hi, hc, and_self, ↓reduceIte]
   rw [sum_congr rfl h1, sum_add_distrib, ← mul_sum]
   congr 1
@@ -302,13 +344,13 @@ lemma s26b_sum_toT {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π �
         simp only [mem_range] at hc
         refine card_nbij' (fun j => (r - i, j, t - c)) (fun x => x.2.1) ?_ ?_ ?_ ?_
         · intro j hj
-          simp only [s26b_fiber, mem_coe, mem_filter] at hj
+          simp only [planeColumn, mem_coe, mem_filter] at hj
           simp [hj.2]
         · rintro ⟨h, j, k⟩ hx
           simp only [mem_coe, mem_filter, Prod.mk.injEq] at hx
           obtain ⟨hx, rfl, rfl⟩ := hx
-          have := s26b_mem_planeBox.mp (hsub hx)
-          simp only [s26b_fiber, mem_coe, mem_filter, mem_Icc]
+          have := mem_planeBox.mp (hsub hx)
+          simp only [planeColumn, mem_coe, mem_filter, mem_Icc]
           exact ⟨⟨this.2.2.1, this.2.2.2.1⟩, hx⟩
         · intro j _; rfl
         · rintro ⟨h, j, k⟩ hx
@@ -316,12 +358,12 @@ lemma s26b_sum_toT {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π �
           obtain ⟨_, rfl, rfl⟩ := hx
           rfl
   · rintro ⟨h, j, k⟩ hx
-    have := s26b_mem_planeBox.mp (hsub hx)
+    have := mem_planeBox.mp (hsub hx)
     simp only [mem_coe, mem_product, mem_Icc]
     omega
 
 /-- A product over pairs `i < j` in `Fin N` as a double product over `range N`. -/
-lemma s26b_prod_Ioi_fin {M : Type*} [CommMonoid M] (N : ℕ) (f : ℕ → ℕ → M) :
+private lemma prod_fin_Ioi_eq_prod_range_ite {M : Type*} [CommMonoid M] (N : ℕ) (f : ℕ → ℕ → M) :
     ∏ i : Fin N, ∏ j ∈ Ioi i, f i j =
       ∏ i ∈ range N, ∏ j ∈ range N, if i < j then f i j else 1 := by
   rw [← Fin.prod_univ_eq_prod_range (fun i => ∏ j ∈ range N, if i < j then f i j else 1)]
@@ -331,7 +373,7 @@ lemma s26b_prod_Ioi_fin {M : Type*} [CommMonoid M] (N : ℕ) (f : ℕ → ℕ �
   ext j; simp
 
 /-- A sum over pairs `i < j` in `Fin N` as a double sum over `range N`. -/
-lemma s26b_sum_Ioi_fin (N : ℕ) (f : ℕ → ℕ → ℕ) :
+private lemma sum_fin_Ioi_eq_sum_range_ite (N : ℕ) (f : ℕ → ℕ → ℕ) :
     ∑ i : Fin N, ∑ j ∈ Ioi i, f i j =
       ∑ i ∈ range N, ∑ j ∈ range N, if i < j then f i j else 0 := by
   rw [← Fin.sum_univ_eq_sum_range (fun i => ∑ j ∈ range N, if i < j then f i j else 0)]
@@ -341,17 +383,17 @@ lemma s26b_sum_Ioi_fin (N : ℕ) (f : ℕ → ℕ → ℕ) :
   ext j; simp
 
 /-- `1 - X ^ m ≠ 0` in `ℤ[X]` for `m > 0`. -/
-lemma s26b_one_sub_X_pow_ne_zero {m : ℕ} (hm : 0 < m) : (1 - X ^ m : ℤ[X]) ≠ 0 := by
+private lemma one_sub_X_pow_ne_zero {m : ℕ} (hm : 0 < m) : (1 - X ^ m : ℤ[X]) ≠ 0 := by
   have := X_pow_sub_C_ne_zero (R := ℤ) hm 1
   rw [map_one] at this
   intro h; apply this; rw [← neg_sub, h, neg_zero]
 
 /-- Vandermonde product for a strictly decreasing exponent sequence. -/
-lemma s26b_vand_decr (N : ℕ) (α : ℕ → ℕ) (hα : ∀ i j, i < j → j < N → α j < α i) :
+private lemma prod_X_pow_sub_X_pow_of_strictAnti (N : ℕ) (α : ℕ → ℕ) (hα : ∀ i j, i < j → j < N → α j < α i) :
     ∏ i : Fin N, ∏ j ∈ Ioi i, ((X : ℤ[X]) ^ α j - X ^ α i) =
       X ^ (∑ i : Fin N, ∑ j ∈ Ioi i, α j) *
         ∏ i ∈ range N, ∏ j ∈ range N, if i < j then (1 - X ^ (α i - α j)) else 1 := by
-  rw [← s26b_prod_Ioi_fin N (fun i j => 1 - (X : ℤ[X]) ^ (α i - α j)), ← prod_pow_eq_pow_sum,
+  rw [← prod_fin_Ioi_eq_prod_range_ite N (fun i j => 1 - (X : ℤ[X]) ^ (α i - α j)), ← prod_pow_eq_pow_sum,
     ← prod_mul_distrib]
   refine prod_congr rfl fun i _ => ?_
   rw [← prod_pow_eq_pow_sum, ← prod_mul_distrib]
@@ -361,7 +403,7 @@ lemma s26b_vand_decr (N : ℕ) (α : ℕ → ℕ) (hα : ∀ i j, i < j → j < 
   rw [mul_sub, mul_one, ← pow_add, Nat.add_sub_cancel' this.le]
 
 /-- Splitting the pairs `i < j` into the cross pairs `i < r ≤ j` and the rest. -/
-lemma s26b_prod_split_cross {M : Type*} [CommMonoid M] (N r : ℕ) (hr : r ≤ N) (F : ℕ → ℕ → M) :
+private lemma prod_range_ite_lt_split {M : Type*} [CommMonoid M] (N r : ℕ) (hr : r ≤ N) (F : ℕ → ℕ → M) :
     ∏ i ∈ range N, ∏ j ∈ range N, (if i < j then F i j else 1) =
       (∏ i ∈ range N, ∏ j ∈ range N, if i < j ∧ ¬(i < r ∧ r ≤ j) then F i j else 1) *
         ∏ i ∈ range r, ∏ j ∈ Ico r N, F i j := by
@@ -389,7 +431,7 @@ lemma s26b_prod_split_cross {M : Type*} [CommMonoid M] (N r : ℕ) (hr : r ≤ N
 
 /-- The Vandermonde algebra behind MacMahon's formula: the bialternant identity for the
 rectangle `r × t` in `r + s` variables at `xₖ = Xᵏ`, reduced to the cross pairs. -/
-lemma s26b_alg_main (r s t : ℕ) (G : ℤ[X])
+private lemma bialternant_rectangle_cross (r s t : ℕ) (G : ℤ[X])
     (h : X ^ (∑ i : Fin (r + s), ∑ j ∈ Ioi i, (if (j : ℕ) < r then t else 0)) * G *
         ∏ i : Fin (r + s), ∏ j ∈ Ioi i,
           ((X : ℤ[X]) ^ (r + s - 1 - (j : ℕ)) - X ^ (r + s - 1 - (i : ℕ))) =
@@ -409,7 +451,7 @@ lemma s26b_alg_main (r s t : ℕ) (G : ℤ[X])
   change X ^ (∑ i : Fin N, ∑ j ∈ Ioi i, g j) * G *
       ∏ i : Fin N, ∏ j ∈ Ioi i, ((X : ℤ[X]) ^ δ j - X ^ δ i) =
     ∏ i : Fin N, ∏ j ∈ Ioi i, ((X : ℤ[X]) ^ β j - X ^ β i) at h'
-  rw [s26b_vand_decr N δ hδd, s26b_vand_decr N β hβd] at h'
+  rw [prod_X_pow_sub_X_pow_of_strictAnti N δ hδd, prod_X_pow_sub_X_pow_of_strictAnti N β hβd] at h'
   have hE : ∑ i : Fin N, ∑ j ∈ Ioi i, β j =
       ∑ i : Fin N, ∑ j ∈ Ioi i, δ j + ∑ i : Fin N, ∑ j ∈ Ioi i, g j := by
     rw [← sum_add_distrib]
@@ -417,7 +459,7 @@ lemma s26b_alg_main (r s t : ℕ) (G : ℤ[X])
     rw [← sum_add_distrib]
     exact sum_congr rfl fun j _ => by simp only [hβ]; ring
   have hr : r ≤ N := by omega
-  rw [hE, s26b_prod_split_cross N r hr, s26b_prod_split_cross N r hr] at h'
+  rw [hE, prod_range_ite_lt_split N r hr, prod_range_ite_lt_split N r hr] at h'
   have hC : (∏ i ∈ range N, ∏ j ∈ range N,
         if i < j ∧ ¬(i < r ∧ r ≤ j) then (1 - (X : ℤ[X]) ^ (β i - β j)) else 1) =
       ∏ i ∈ range N, ∏ j ∈ range N,
@@ -434,7 +476,7 @@ lemma s26b_alg_main (r s t : ℕ) (G : ℤ[X])
     refine prod_ne_zero_iff.mpr fun i hi => prod_ne_zero_iff.mpr fun j hj => ?_
     simp only [mem_range] at hi hj
     split_ifs with hc
-    · exact s26b_one_sub_X_pow_ne_zero (by simp only [hδ]; omega)
+    · exact one_sub_X_pow_ne_zero (by simp only [hδ]; omega)
     · exact one_ne_zero
   have hX : (X : ℤ[X]) ^ (∑ i : Fin N, ∑ j ∈ Ioi i, δ j + ∑ i : Fin N, ∑ j ∈ Ioi i, g j) * C ≠ 0 :=
     mul_ne_zero (pow_ne_zero _ X_ne_zero) hC0
@@ -454,7 +496,7 @@ lemma s26b_alg_main (r s t : ℕ) (G : ℤ[X])
     congr 2; simp only [hβ, hδ, hg]; split_ifs <;> omega
 
 /-- An alternant evaluated at the geometric progression `xₖ = Xᵏ` is a Vandermonde product. -/
-lemma s26b_eval_alternant {N : ℕ} (α : Fin N → ℕ) :
+private lemma eval_X_pow_alternant {N : ℕ} (α : Fin N → ℕ) :
     MvPolynomial.eval (fun k : Fin N => (X : ℤ[X]) ^ (k : ℕ))
         (TauCeti.alternant (Fin N) ℤ[X] α) =
       ∏ i : Fin N, ∏ j ∈ Ioi i, ((X : ℤ[X]) ^ α j - X ^ α i) := by
@@ -464,7 +506,7 @@ lemma s26b_eval_alternant {N : ℕ} (α : Fin N → ℕ) :
   simp [Matrix.vandermonde, ← pow_mul, mul_comm]
 
 /-- The monomial of a tableau at a geometric progression. -/
-lemma s26b_prod_weight {N : ℕ} {μ : YoungDiagram} (T : TauCeti.BoundedSSYT N μ) :
+private lemma prod_X_pow_weight {N : ℕ} {μ : YoungDiagram} (T : TauCeti.BoundedSSYT N μ) :
     ∏ k : Fin N, ((X : ℤ[X]) ^ (k : ℕ)) ^ TauCeti.BoundedSSYT.weight T k =
       X ^ (∑ x ∈ μ.cells, T.1 x.1 x.2) := by
   simp only [← pow_mul]
@@ -480,9 +522,9 @@ lemma s26b_prod_weight {N : ℕ} {μ : YoungDiagram} (T : TauCeti.BoundedSSYT N 
     mul_comm]
 
 /-- The exponent `∑_{i<j} λ_j` for the rectangle `r × t`. -/
-lemma s26b_sum_g (r s t : ℕ) :
+private lemma sum_rectangle_exponent (r s t : ℕ) :
     ∑ i : Fin (r + s), ∑ j ∈ Ioi i, (if (j : ℕ) < r then t else 0) = t * ∑ i ∈ range r, i := by
-  rw [s26b_sum_Ioi_fin (r + s) (fun _ j => if j < r then t else 0), sum_comm]
+  rw [sum_fin_Ioi_eq_sum_range_ite (r + s) (fun _ j => if j < r then t else 0), sum_comm]
   have : ∀ j ∈ range (r + s), (∑ i ∈ range (r + s), if i < j then (if j < r then t else 0) else 0) =
       if j < r then t * j else 0 := by
     intro j hj
@@ -498,50 +540,50 @@ lemma s26b_sum_g (r s t : ℕ) :
   ext i; simp only [mem_filter, mem_range]; omega
 
 /-- MacMahon's box formula as a polynomial identity (proof via Jacobi's bialternant formula). -/
-lemma s26b_box_poly (r s t : ℕ) :
+lemma sum_planePartitionsIn_X_pow_mul_prod (r s t : ℕ) :
     (∑ π ∈ planePartitionsIn r s t, (X : ℤ[X]) ^ #π) *
         ∏ h ∈ Icc 1 r, ∏ k ∈ Icc 1 s, (1 - (X : ℤ[X]) ^ (h + k - 1)) =
       ∏ h ∈ Icc 1 r, ∏ k ∈ Icc 1 s, (1 - (X : ℤ[X]) ^ (h + k + t - 1)) := by
   set N := r + s with hN
-  have hcol : (s26b_rect r t).colLen 0 ≤ N := by
+  have hcol : (rectangleDiagram r t).colLen 0 ≤ N := by
     by_contra h
     push Not at h
     have := YoungDiagram.mem_iff_lt_colLen.mpr h
-    rw [s26b_mem_rect] at this; omega
-  have hrow : ∀ i, (s26b_rect r t).rowLen i = if i < r then t else 0 := by
+    rw [mem_rectangleDiagram] at this; omega
+  have hrow : ∀ i, (rectangleDiagram r t).rowLen i = if i < r then t else 0 := by
     intro i
     apply le_antisymm
     · by_contra h
       push Not at h
       have := YoungDiagram.mem_iff_lt_rowLen.mpr h
-      rw [s26b_mem_rect] at this
+      rw [mem_rectangleDiagram] at this
       split_ifs at this with hi <;> omega
     · split_ifs with hi
       · by_contra h
         push Not at h
-        have := (s26b_mem_rect (r := r) (t := t) (i := i)
-          (c := (s26b_rect r t).rowLen i)).mpr ⟨hi, h⟩
+        have := (mem_rectangleDiagram (r := r) (t := t) (i := i)
+          (c := (rectangleDiagram r t).rowLen i)).mpr ⟨hi, h⟩
         exact absurd (YoungDiagram.mem_iff_lt_rowLen.mp this) (lt_irrefl _)
       · exact Nat.zero_le _
   have hb := congrArg (MvPolynomial.eval (fun k : Fin N => (X : ℤ[X]) ^ (k : ℕ)))
-    (TauCeti.diagramSchurPoly_mul_alternant (R := ℤ[X]) N (s26b_rect r t) hcol)
-  rw [map_mul, s26b_eval_alternant, s26b_eval_alternant, TauCeti.eval_diagramSchurPoly] at hb
-  simp only [YoungDiagram.betaNumber_def, hrow, s26b_prod_weight] at hb
+    (TauCeti.diagramSchurPoly_mul_alternant (R := ℤ[X]) N (rectangleDiagram r t) hcol)
+  rw [map_mul, eval_X_pow_alternant, eval_X_pow_alternant, TauCeti.eval_diagramSchurPoly] at hb
+  simp only [YoungDiagram.betaNumber_def, hrow, prod_X_pow_weight] at hb
   -- the tableau sum
-  have hsum : ∑ T : TauCeti.BoundedSSYT N (s26b_rect r t),
-      (X : ℤ[X]) ^ (∑ x ∈ (s26b_rect r t).cells, T.1 x.1 x.2) =
+  have hsum : ∑ T : TauCeti.BoundedSSYT N (rectangleDiagram r t),
+      (X : ℤ[X]) ^ (∑ x ∈ (rectangleDiagram r t).cells, T.1 x.1 x.2) =
       X ^ (t * ∑ i ∈ range r, i) * ∑ π ∈ planePartitionsIn r s t, (X : ℤ[X]) ^ #π := by
     rw [mul_sum]
     symm
-    refine sum_bij' (fun π hπ => ⟨s26b_toT r s t π (s26b_mem_planePartitionsIn.mp hπ).2,
-        s26b_toT_lt _⟩) (fun T _ => s26b_ofT r s t T.1) (fun _ _ => mem_univ _)
-      (fun T _ => s26b_ofT_mem r s t T.1) (fun π hπ => s26b_ofT_toT hπ)
-      (fun T _ => Subtype.ext (s26b_toT_ofT T.1 T.2)) ?_
+    refine sum_bij' (fun π hπ => ⟨planePartitionToTableau r s t π (mem_planePartitionsIn.mp hπ).2,
+        planePartitionToTableau_lt _⟩) (fun T _ => tableauToPlanePartition r s t T.1) (fun _ _ => mem_univ _)
+      (fun T _ => tableauToPlanePartition_mem r s t T.1) (fun π hπ => tableauToPlanePartition_planePartitionToTableau hπ)
+      (fun T _ => Subtype.ext (planePartitionToTableau_tableauToPlanePartition T.1 T.2)) ?_
     intro π hπ
     rw [← pow_add]
-    exact congrArg _ (by rw [s26b_sum_toT hπ]; ring)
-  rw [hsum, ← s26b_sum_g r s t] at hb
-  have key := s26b_alg_main r s t _ hb
+    exact congrArg _ (by rw [sum_planePartitionToTableau hπ]; ring)
+  rw [hsum, ← sum_rectangle_exponent r s t] at hb
+  have key := bialternant_rectangle_cross r s t _ hb
   convert key using 1
   · congr 1
     refine prod_nbij' (fun h => r - h) (fun i => r - i) ?_ ?_ ?_ ?_ ?_
@@ -576,7 +618,7 @@ lemma s26b_box_poly (r s t : ℕ) :
         congr 2; omega
 
 /-- Telescoping product in a field. -/
-lemma s26b_prod_Icc_div {K : Type*} [Field K] (f : ℕ → K) (t : ℕ) (hf : ∀ k ≤ t, f k ≠ 0) :
+lemma prod_Icc_div_sub_one {K : Type*} [Field K] (f : ℕ → K) (t : ℕ) (hf : ∀ k ≤ t, f k ≠ 0) :
     ∏ k ∈ Icc 1 t, f k / f (k - 1) = f t / f 0 := by
   induction t with
   | zero => simp [div_self (hf 0 le_rfl)]
@@ -587,14 +629,14 @@ lemma s26b_prod_Icc_div {K : Type*} [Field K] (f : ℕ → K) (t : ℕ) (hf : �
     field_simp
 
 /-- The counting form: `#PP(r,s,t) ∏ (h+k-1) = ∏ (h+k+t-1)`. -/
-lemma s26b_box_count (r s t : ℕ) :
+private lemma card_planePartitionsIn_mul_prod (r s t : ℕ) :
     ((planePartitionsIn r s t).card : ℚ) * ∏ h ∈ Icc 1 r, ∏ k ∈ Icc 1 s, ((h + k - 1 : ℕ) : ℚ) =
       ∏ h ∈ Icc 1 r, ∏ k ∈ Icc 1 s, ((h + k + t - 1 : ℕ) : ℚ) := by
-  have hp := s26b_box_poly r s t
+  have hp := sum_planePartitionsIn_X_pow_mul_prod r s t
   simp only [← mul_neg_geom_sum (X : ℤ[X]), prod_mul_distrib, prod_const, Nat.card_Icc,
     Nat.add_sub_cancel] at hp
   have hne : ((1 - X : ℤ[X]) ^ s) ^ r ≠ 0 :=
-    pow_ne_zero _ (pow_ne_zero _ (by simpa using s26b_one_sub_X_pow_ne_zero (m := 1) one_pos))
+    pow_ne_zero _ (pow_ne_zero _ (by simpa using one_sub_X_pow_ne_zero (m := 1) one_pos))
   have hp' : (∑ π ∈ planePartitionsIn r s t, (X : ℤ[X]) ^ #π) *
       ∏ h ∈ Icc 1 r, ∏ k ∈ Icc 1 s, ∑ i ∈ range (h + k - 1), (X : ℤ[X]) ^ i =
       ∏ h ∈ Icc 1 r, ∏ k ∈ Icc 1 s, ∑ i ∈ range (h + k + t - 1), (X : ℤ[X]) ^ i := by
@@ -604,7 +646,7 @@ lemma s26b_box_count (r s t : ℕ) :
   simpa [map_prod, map_sum] using this
 
 /-- Box product equals the double product (rational form). -/
-lemma s26b_box_prod_rat (r s t : ℕ) :
+private lemma prod_planeBox_div_eq_prod_Icc (r s t : ℕ) :
     ∏ x ∈ planeBox r s t, ((x.1 + x.2.1 + x.2.2 - 1 : ℚ) / (x.1 + x.2.1 + x.2.2 - 2)) =
       ∏ h ∈ Icc 1 r, ∏ j ∈ Icc 1 s, ((h + j + t - 1 : ℚ) / (h + j - 1)) := by
   rw [planeBox, prod_product]
@@ -612,7 +654,7 @@ lemma s26b_box_prod_rat (r s t : ℕ) :
   rw [prod_product]
   refine prod_congr rfl fun j hj => ?_
   simp only [mem_Icc] at hh hj
-  have := s26b_prod_Icc_div (fun k : ℕ => (h + j + k - 1 : ℚ)) t (fun k _ => by
+  have := prod_Icc_div_sub_one (fun k : ℕ => (h + j + k - 1 : ℚ)) t (fun k _ => by
     have : (1 : ℚ) ≤ h := by exact_mod_cast hh.1
     have : (1 : ℚ) ≤ j := by exact_mod_cast hj.1
     have : (0 : ℚ) ≤ k := by positivity
@@ -627,13 +669,13 @@ lemma s26b_box_prod_rat (r s t : ℕ) :
 /-! The array description of §26.12(i). -/
 
 /-- The array condition of §26.12(i). -/
-def S26bIsPPArray (n : ℕ) (a : ℕ → ℕ → ℕ) : Prop :=
+def IsPlaneArray (n : ℕ) (a : ℕ → ℕ → ℕ) : Prop :=
   (∀ i j, a (i + 1) j ≤ a i j) ∧ (∀ i j, a i (j + 1) ≤ a i j) ∧
     (Function.support (Function.uncurry a)).Finite ∧
     ∑ᶠ ij : ℕ × ℕ, Function.uncurry a ij = n
 
 /-- Arrays are antitone in both indices. -/
-lemma s26b_array_anti {a : ℕ → ℕ → ℕ} (h1 : ∀ i j, a (i + 1) j ≤ a i j)
+private lemma planeArray_antitone {a : ℕ → ℕ → ℕ} (h1 : ∀ i j, a (i + 1) j ≤ a i j)
     (h2 : ∀ i j, a i (j + 1) ≤ a i j) {i i' j j' : ℕ} (hi : i ≤ i') (hj : j ≤ j') :
     a i' j' ≤ a i j := by
   have hA : ∀ j, Antitone fun i => a i j := fun j => antitone_nat_of_succ_le fun i => h1 i j
@@ -641,7 +683,7 @@ lemma s26b_array_anti {a : ℕ → ℕ → ℕ} (h1 : ∀ i j, a (i + 1) j ≤ a
   exact (hB i' hj).trans (hA j hi)
 
 /-- Bounds for an array of sum `n`: nonzero entries lie in `[0, n)²` and are at most `n`. -/
-lemma s26b_array_bound {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : S26bIsPPArray n a) {i j : ℕ}
+private lemma planeArray_bound {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : IsPlaneArray n a) {i j : ℕ}
     (hij : a i j ≠ 0) : i < n ∧ j < n ∧ a i j ≤ n := by
   obtain ⟨h1, h2, hfin, hsum⟩ := ha
   rw [finsum_eq_sum_of_support_subset _ hfin.coe_toFinset.symm.subset] at hsum
@@ -655,7 +697,7 @@ lemma s26b_array_bound {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : S26bIsPPArray n
     simp only [Function.uncurry_apply_pair] at this
     have hge : ∑ i' ∈ range (i + 1), 1 ≤ ∑ i' ∈ range (i + 1), Function.uncurry a (i', j) :=
       sum_le_sum fun i' hi' => by
-        have := s26b_array_anti h1 h2 (i := i') (i' := i) (j := j) (j' := j)
+        have := planeArray_antitone h1 h2 (i := i') (i' := i) (j := j) (j' := j)
           (by simp at hi'; omega) le_rfl
         simp only [Function.uncurry_apply_pair]; omega
     simp only [Function.uncurry_apply_pair, sum_const, card_range, smul_eq_mul, mul_one] at hge
@@ -665,7 +707,7 @@ lemma s26b_array_bound {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : S26bIsPPArray n
     simp only [Function.uncurry_apply_pair] at this
     have hge : ∑ j' ∈ range (j + 1), 1 ≤ ∑ j' ∈ range (j + 1), Function.uncurry a (i, j') :=
       sum_le_sum fun j' hj' => by
-        have := s26b_array_anti h1 h2 (i := i) (i' := i) (j := j') (j' := j) le_rfl
+        have := planeArray_antitone h1 h2 (i := i) (i' := i) (j := j') (j' := j) le_rfl
           (by simp at hj'; omega)
         simp only [Function.uncurry_apply_pair]; omega
     simp only [Function.uncurry_apply_pair, sum_const, card_range, smul_eq_mul, mul_one] at hge
@@ -673,16 +715,16 @@ lemma s26b_array_bound {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : S26bIsPPArray n
   · simpa using key {(i, j)}
 
 /-- The array of a plane partition. -/
-def s26b_toArr (n : ℕ) (π : Finset (ℕ × ℕ × ℕ)) : ℕ → ℕ → ℕ :=
-  fun i j => #(s26b_fiber π n (i + 1) (j + 1))
+def planePartitionToArray (n : ℕ) (π : Finset (ℕ × ℕ × ℕ)) : ℕ → ℕ → ℕ :=
+  fun i j => #(planeColumn π n (i + 1) (j + 1))
 
 /-- The plane partition of an array. -/
-def s26b_ofArr (n : ℕ) (a : ℕ → ℕ → ℕ) : Finset (ℕ × ℕ × ℕ) :=
+def arrayToPlanePartition (n : ℕ) (a : ℕ → ℕ → ℕ) : Finset (ℕ × ℕ × ℕ) :=
   (planeBox n n n).filter fun x => x.2.1 ≤ a (x.1 - 1) (x.2.2 - 1)
 
 /-- `|π|` as the sum of its column heights. -/
-lemma s26b_card_eq_sum_fiber {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hsub : π ⊆ planeBox r s t) :
-    #π = ∑ h ∈ Icc 1 r, ∑ k ∈ Icc 1 t, #(s26b_fiber π s h k) := by
+private lemma card_eq_sum_card_planeColumn {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hsub : π ⊆ planeBox r s t) :
+    #π = ∑ h ∈ Icc 1 r, ∑ k ∈ Icc 1 t, #(planeColumn π s h k) := by
   rw [card_eq_sum_card_fiberwise (f := fun x : ℕ × ℕ × ℕ => (x.1, x.2.2))
     (t := Icc 1 r ×ˢ Icc 1 t), sum_product]
   · refine sum_congr rfl fun h _ => sum_congr rfl fun k _ => ?_
@@ -690,11 +732,11 @@ lemma s26b_card_eq_sum_fiber {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hs
     · rintro ⟨h', j, k'⟩ hx
       simp only [mem_coe, mem_filter, Prod.mk.injEq] at hx
       obtain ⟨hx, rfl, rfl⟩ := hx
-      have := s26b_mem_planeBox.mp (hsub hx)
-      simp only [s26b_fiber, mem_coe, mem_filter, mem_Icc]
+      have := mem_planeBox.mp (hsub hx)
+      simp only [planeColumn, mem_coe, mem_filter, mem_Icc]
       exact ⟨⟨this.2.2.1, this.2.2.2.1⟩, hx⟩
     · intro j hj
-      simp only [s26b_fiber, mem_coe, mem_filter] at hj
+      simp only [planeColumn, mem_coe, mem_filter] at hj
       simp [hj.2]
     · rintro ⟨h', j, k'⟩ hx
       simp only [mem_coe, mem_filter, Prod.mk.injEq] at hx
@@ -702,45 +744,45 @@ lemma s26b_card_eq_sum_fiber {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hs
       rfl
     · intro j _; rfl
   · rintro ⟨h, j, k⟩ hx
-    have := s26b_mem_planeBox.mp (hsub hx)
+    have := mem_planeBox.mp (hsub hx)
     simp only [mem_coe, mem_product, mem_Icc]
     omega
 
-/-- The columns of `s26b_ofArr`. -/
-lemma s26b_fiber_ofArr {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : S26bIsPPArray n a) {h k : ℕ}
+/-- The columns of `arrayToPlanePartition`. -/
+private lemma planeColumn_arrayToPlanePartition {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : IsPlaneArray n a) {h k : ℕ}
     (hh : 1 ≤ h ∧ h ≤ n) (hk : 1 ≤ k ∧ k ≤ n) :
-    s26b_fiber (s26b_ofArr n a) n h k = Icc 1 (a (h - 1) (k - 1)) := by
+    planeColumn (arrayToPlanePartition n a) n h k = Icc 1 (a (h - 1) (k - 1)) := by
   have hle : a (h - 1) (k - 1) ≤ n := by
     by_cases h0 : a (h - 1) (k - 1) = 0
     · omega
-    · exact (s26b_array_bound ha h0).2.2
+    · exact (planeArray_bound ha h0).2.2
   ext j
-  simp only [s26b_fiber, s26b_ofArr, mem_filter, mem_Icc, s26b_mem_planeBox]
+  simp only [planeColumn, arrayToPlanePartition, mem_filter, mem_Icc, mem_planeBox]
   constructor
   · rintro ⟨⟨hj1, _⟩, _, hj⟩; exact ⟨hj1, hj⟩
   · rintro ⟨hj1, hj2⟩; exact ⟨⟨hj1, by omega⟩, ⟨hh.1, hh.2, hj1, by omega, hk.1, hk.2⟩, hj2⟩
 
-/-- `s26b_ofArr` of an array is a plane partition of `n` in `B(n, n, n)`. -/
-lemma s26b_ofArr_mem {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : S26bIsPPArray n a) :
-    s26b_ofArr n a ∈ {π ∈ (planeBox n n n).powerset | IsPlanePartition π ∧ π.card = n} := by
+/-- `arrayToPlanePartition` of an array is a plane partition of `n` in `B(n, n, n)`. -/
+private lemma arrayToPlanePartition_mem {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : IsPlaneArray n a) :
+    arrayToPlanePartition n a ∈ {π ∈ (planeBox n n n).powerset | IsPlanePartition π ∧ π.card = n} := by
   simp only [mem_filter, mem_powerset]
   refine ⟨filter_subset _ _, ?_, ?_⟩
   · rintro ⟨h, j, k⟩ hx
-    simp only [s26b_ofArr, mem_filter, s26b_mem_planeBox] at hx
+    simp only [arrayToPlanePartition, mem_filter, mem_planeBox] at hx
     obtain ⟨⟨h1, h2, j1, j2, k1, k2⟩, hle⟩ := hx
     refine ⟨h1, j1, k1, ?_⟩
     rintro ⟨h', j', k'⟩ hy
-    simp only [s26b_mem_planeBox] at hy
-    simp only [s26b_ofArr, mem_filter, s26b_mem_planeBox]
+    simp only [mem_planeBox] at hy
+    simp only [arrayToPlanePartition, mem_filter, mem_planeBox]
     refine ⟨⟨hy.1, by omega, hy.2.2.1, by omega, hy.2.2.2.2.1, by omega⟩, ?_⟩
-    have := s26b_array_anti ha.1 ha.2.1 (i := h' - 1) (i' := h - 1) (j := k' - 1) (j' := k - 1)
+    have := planeArray_antitone ha.1 ha.2.1 (i := h' - 1) (i' := h - 1) (j := k' - 1) (j' := k - 1)
       (by omega) (by omega)
     omega
-  · rw [s26b_card_eq_sum_fiber (π := s26b_ofArr n a) (r := n) (s := n) (t := n)
+  · rw [card_eq_sum_card_planeColumn (π := arrayToPlanePartition n a) (r := n) (s := n) (t := n)
       (filter_subset _ _)]
     have hsupp : Function.support (Function.uncurry a) ⊆ ↑(range n ×ˢ range n) := by
       rintro ⟨i, j⟩ hx
-      have := s26b_array_bound ha hx
+      have := planeArray_bound ha hx
       simp only [coe_product, coe_range, Set.mem_prod, Set.mem_Iio]
       omega
     have hs := ha.2.2.2
@@ -760,15 +802,15 @@ lemma s26b_ofArr_mem {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : S26bIsPPArray n a
       · intro j hj; simp
       · intro k hk
         simp only [mem_Icc] at hk
-        rw [s26b_fiber_ofArr ha hh hk, Nat.card_Icc, Nat.add_sub_cancel]
+        rw [planeColumn_arrayToPlanePartition ha hh hk, Nat.card_Icc, Nat.add_sub_cancel]
         rfl
 
 /-- The second form of (26.12.21) (helper used before its statement). -/
-lemma s26b_sum_box_pow {q : ℂ} (hq : ∀ m : ℕ, 0 < m → q ^ m ≠ 1) (r s t : ℕ) :
+lemma sum_planePartitionsIn_pow_eq_prod_div {q : ℂ} (hq : ∀ m : ℕ, 0 < m → q ^ m ≠ 1) (r s t : ℕ) :
     ∑ π ∈ planePartitionsIn r s t, q ^ π.card =
       ∏ h ∈ Icc 1 r, ∏ j ∈ Icc 1 s, (1 - q ^ (h + j + t - 1)) / (1 - q ^ (h + j - 1)) := by
   have hne : ∀ m : ℕ, 0 < m → (1 - q ^ m) ≠ 0 := fun m hm h => hq m hm (sub_eq_zero.mp h).symm
-  have hp := congrArg (Polynomial.aeval q) (s26b_box_poly r s t)
+  have hp := congrArg (Polynomial.aeval q) (sum_planePartitionsIn_X_pow_mul_prod r s t)
   simp only [map_mul, map_sum, map_prod, map_sub, map_one, map_pow, Polynomial.aeval_X] at hp
   have hD : ∏ h ∈ Icc 1 r, ∏ k ∈ Icc 1 s, (1 - q ^ (h + k - 1)) ≠ 0 :=
     prod_ne_zero_iff.mpr fun h hh => prod_ne_zero_iff.mpr fun k hk => by
@@ -804,30 +846,30 @@ theorem planePartitionCount_eq_card_arrays (n : ℕ) :
       Nat.card {a : ℕ → ℕ → ℕ // (∀ i j, a (i + 1) j ≤ a i j) ∧ (∀ i j, a i (j + 1) ≤ a i j) ∧
         (Function.support (Function.uncurry a)).Finite ∧
         ∑ᶠ ij : ℕ × ℕ, Function.uncurry a ij = n} := by
-  change _ = Nat.card {a : ℕ → ℕ → ℕ // S26bIsPPArray n a}
+  change _ = Nat.card {a : ℕ → ℕ → ℕ // IsPlaneArray n a}
   rw [planePartitionCount, ← Nat.card_eq_finsetCard]
   -- forward map facts
   have hfwd : ∀ π : Finset (ℕ × ℕ × ℕ), π ∈ {π ∈ (planeBox n n n).powerset |
-      IsPlanePartition π ∧ π.card = n} → S26bIsPPArray n (s26b_toArr n π) := by
+      IsPlanePartition π ∧ π.card = n} → IsPlaneArray n (planePartitionToArray n π) := by
     intro π hπ
     simp only [mem_filter, mem_powerset] at hπ
     obtain ⟨hsub, hπ, hcard⟩ := hπ
-    have hsupp : Function.support (Function.uncurry (s26b_toArr n π)) ⊆
+    have hsupp : Function.support (Function.uncurry (planePartitionToArray n π)) ⊆
         ↑(range n ×ˢ range n) := by
       rintro ⟨i, j⟩ hx
-      simp only [Function.mem_support, Function.uncurry_apply_pair, s26b_toArr, ne_eq,
+      simp only [Function.mem_support, Function.uncurry_apply_pair, planePartitionToArray, ne_eq,
         card_eq_zero, ← nonempty_iff_ne_empty] at hx
       obtain ⟨j', hj'⟩ := hx
-      simp only [s26b_fiber, mem_filter] at hj'
-      have := s26b_mem_planeBox.mp (hsub hj'.2)
+      simp only [planeColumn, mem_filter] at hj'
+      have := mem_planeBox.mp (hsub hj'.2)
       simp only [coe_product, coe_range, Set.mem_prod, Set.mem_Iio]
       omega
-    refine ⟨fun i j => s26b_fiber_mono hπ (by omega) (by omega) (by omega) le_rfl,
-      fun i j => s26b_fiber_mono hπ (by omega) le_rfl (by omega) (by omega),
+    refine ⟨fun i j => card_planeColumn_antitone hπ (by omega) (by omega) (by omega) le_rfl,
+      fun i j => card_planeColumn_antitone hπ (by omega) le_rfl (by omega) (by omega),
       (finite_toSet _).subset hsupp, ?_⟩
     rw [finsum_eq_sum_of_support_subset _ hsupp, sum_product]
     refine Eq.trans ?_ hcard
-    rw [s26b_card_eq_sum_fiber hsub]
+    rw [card_eq_sum_card_planeColumn hsub]
     refine sum_nbij' (· + 1) (· - 1) ?_ ?_ ?_ ?_ ?_
     · intro i hi; simp at hi ⊢; omega
     · intro i hi; simp at hi ⊢; omega
@@ -841,8 +883,8 @@ theorem planePartitionCount_eq_card_arrays (n : ℕ) :
       · intro j hj; simp at hj; omega
       · intro j _; rfl
   refine Nat.card_congr
-    { toFun := fun π => ⟨s26b_toArr n π, hfwd π π.2⟩
-      invFun := fun a => ⟨s26b_ofArr n a, s26b_ofArr_mem a.2⟩
+    { toFun := fun π => ⟨planePartitionToArray n π, hfwd π π.2⟩
+      invFun := fun a => ⟨arrayToPlanePartition n a, arrayToPlanePartition_mem a.2⟩
       left_inv := ?_
       right_inv := ?_ }
   · rintro ⟨π, hπ⟩
@@ -852,32 +894,32 @@ theorem planePartitionCount_eq_card_arrays (n : ℕ) :
     ext ⟨h, j, k⟩
     change (h, j, k) ∈ (planeBox n n n).filter _ ↔ _
     rw [mem_filter]
-    simp only [s26b_toArr]
+    simp only [planePartitionToArray]
     constructor
     · rintro ⟨hb, hle⟩
-      have hb' := s26b_mem_planeBox.mp hb
+      have hb' := mem_planeBox.mp hb
       rw [show h - 1 + 1 = h by omega, show k - 1 + 1 = k by omega] at hle
-      exact (s26b_mem_iff_le_card hπ (by omega) (by omega)).mpr hle
+      exact (mem_iff_le_card_planeColumn hπ (by omega) (by omega)).mpr hle
     · intro hx
       have hb := hsub hx
-      have hb' := s26b_mem_planeBox.mp hb
+      have hb' := mem_planeBox.mp hb
       refine ⟨hb, ?_⟩
       rw [show h - 1 + 1 = h by omega, show k - 1 + 1 = k by omega]
-      exact (s26b_mem_iff_le_card hπ (by omega) (by omega)).mp hx
+      exact (mem_iff_le_card_planeColumn hπ (by omega) (by omega)).mp hx
   · rintro ⟨a, ha⟩
     refine Subtype.ext ?_
     funext i j
-    simp only [s26b_toArr]
+    simp only [planePartitionToArray]
     by_cases hij : i < n ∧ j < n
-    · rw [s26b_fiber_ofArr ha (by omega) (by omega), Nat.card_Icc]
+    · rw [planeColumn_arrayToPlanePartition ha (by omega) (by omega), Nat.card_Icc]
       simp
     · have h0 : a i j = 0 := by
         by_contra h0
-        have := s26b_array_bound ha h0
+        have := planeArray_bound ha h0
         omega
       rw [h0, card_eq_zero]
       ext j'
-      simp only [s26b_fiber, s26b_ofArr, mem_filter, s26b_mem_planeBox, notMem_empty,
+      simp only [planeColumn, arrayToPlanePartition, mem_filter, mem_planeBox, notMem_empty,
         iff_false]
       omega
 
@@ -917,7 +959,7 @@ theorem card_planePartitionsIn (r s t : ℕ) :
         ∏ h ∈ Icc 1 r, ∏ j ∈ Icc 1 s, ((h + j + t - 1 : ℚ) / (h + j - 1)) := by
   have h2 : ((planePartitionsIn r s t).card : ℚ) =
       ∏ h ∈ Icc 1 r, ∏ j ∈ Icc 1 s, ((h + j + t - 1 : ℚ) / (h + j - 1)) := by
-    have hc := s26b_box_count r s t
+    have hc := card_planePartitionsIn_mul_prod r s t
     have hD : ∏ h ∈ Icc 1 r, ∏ k ∈ Icc 1 s, ((h + k - 1 : ℕ) : ℚ) ≠ 0 :=
       prod_ne_zero_iff.mpr fun h hh => prod_ne_zero_iff.mpr fun k hk => by
         simp only [mem_Icc] at hh hk; exact_mod_cast (by omega : h + k - 1 ≠ 0)
@@ -928,7 +970,7 @@ theorem card_planePartitionsIn (r s t : ℕ) :
     simp only [mem_Icc] at hh hk
     rw [Nat.cast_sub (by omega), Nat.cast_sub (by omega)]
     push_cast; ring
-  exact ⟨h2.trans (s26b_box_prod_rat r s t).symm, h2⟩
+  exact ⟨h2.trans (prod_planeBox_div_eq_prod_Icc r s t).symm, h2⟩
 
 /-- Symmetric plane partition: `(h, j, k) ∈ π` implies `(j, h, k) ∈ π`. -/
 @[dlmf 26.12.i]

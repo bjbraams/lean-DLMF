@@ -6,15 +6,30 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Zeta.IntegralReps.ElementaryKernels
+public import ToMathlib.Analysis.Complex.Carlson
 
 /-!
 # Polygamma and contour representations of zeta
 
-Integral formulas involving polygamma functions and the contour representations of the Riemann
-zeta function.
+The theta-function integral (DLMF 25.5.13–25.5.14), integrals involving polygamma functions
+(DLMF 25.5.15–25.5.19) and the contour integrals (DLMF §25.5(iii)) of the Riemann zeta
+function. The conventions are described in `DLMF.Zeta.IntegralReps`.
 
-Source references and common attribution are retained in
-`DLMF.Zeta.IntegralReps`.
+## Main definitions
+
+* `zetaOmega`: `ω(x) = ∑_{n≥1} e^{-n²πx}` (DLMF 25.5.14).
+* `keyholeLoopIntegral`: the keyhole loop integral around the negative real axis.
+
+## Main results
+
+* `zetaOmega_eq_jacobiTheta`: DLMF 25.5.14, `ω(x) = ½ (θ₃(0|ix) - 1)`.
+* `riemannZeta_eq_integral_zetaOmega`: DLMF 25.5.13.
+* `riemannZeta_eq_integral_log_sub_digamma`, `riemannZeta_eq_integral_inv_sub_trigamma`:
+  DLMF 25.5.15–25.5.16.
+* `riemannZeta_one_add_eq_integral_digamma`, `riemannZeta_one_add_eq_integral_trigamma`,
+  `riemannZeta_nat_add_eq_integral_polygamma`: DLMF 25.5.17–25.5.19.
+* `riemannZeta_eq_loop_integral`: DLMF 25.5.20.
+* `riemannZeta_eq_loop_integral_add`: DLMF 25.5.21 in multiplied form.
 -/
 
 @[expose] public noncomputable section
@@ -53,17 +68,17 @@ theorem zetaOmega_eq_jacobiTheta {x : ℝ} (hx : 0 < x) :
   simp_rw [this]
   ring
 
-section s25a
+section StieltjesConstants
 open HurwitzZeta
 
 /-- The tail `x ↦ θ(x) - 1` of the even kernel on `(1, ∞)`. -/
-noncomputable def s25a_tail : ℝ → ℂ :=
+noncomputable def evenKernelTail : ℝ → ℂ :=
   (Set.Ioi 1).indicator (fun x => (hurwitzEvenFEPair 0).f x - (hurwitzEvenFEPair 0).f₀)
 
 /-- On `(1, ∞)` the tail is `2ω(x)`. -/
-lemma s25a_tail_eq {x : ℝ} (hx : 1 < x) : s25a_tail x = 2 * (zetaOmega x : ℂ) := by
+private lemma evenKernelTail_eq {x : ℝ} (hx : 1 < x) : evenKernelTail x = 2 * (zetaOmega x : ℂ) := by
   have hx0 : 0 < x := by linarith
-  rw [s25a_tail, indicator_of_mem (Set.mem_Ioi.mpr hx), zetaOmega_eq_jacobiTheta hx0]
+  rw [evenKernelTail, indicator_of_mem (Set.mem_Ioi.mpr hx), zetaOmega_eq_jacobiTheta hx0]
   simp only [hurwitzEvenFEPair, Function.comp_apply, ite_true]
   rw [show (0 : UnitAddCircle) = ((0 : ℝ) : UnitAddCircle) by simp, evenKernel_def,
     jacobiTheta_eq_jacobiTheta₂]
@@ -71,13 +86,13 @@ lemma s25a_tail_eq {x : ℝ} (hx : 1 < x) : s25a_tail x = 2 * (zetaOmega x : ℂ
   ring_nf
 
 /-- The modified even kernel is `tail(x) + x^{-1/2} tail(1/x)` on `(0, ∞)`. -/
-lemma s25a_f_modif_eq {x : ℝ} (hx : 0 < x) :
+private lemma hurwitzEvenFEPair_zero_f_modif_eq {x : ℝ} (hx : 0 < x) :
     (hurwitzEvenFEPair 0).f_modif x =
-      s25a_tail x + (x : ℂ) ^ (-(1 / 2 : ℂ)) * s25a_tail x⁻¹ := by
+      evenKernelTail x + (x : ℂ) ^ (-(1 / 2 : ℂ)) * evenKernelTail x⁻¹ := by
   rcases lt_trichotomy x 1 with h | rfl | h
   · have hi : 1 < x⁻¹ := one_lt_inv_iff₀.mpr ⟨hx, h⟩
     rw [WeakFEPair.f_modif, Pi.add_apply, indicator_of_notMem (notMem_Ioi.mpr h.le),
-      indicator_of_mem (Set.mem_Ioo.mpr ⟨hx, h⟩), s25a_tail,
+      indicator_of_mem (Set.mem_Ioo.mpr ⟨hx, h⟩), evenKernelTail,
       indicator_of_notMem (notMem_Ioi.mpr h.le), indicator_of_mem (Set.mem_Ioi.mpr hi)]
     simp only [hurwitzEvenFEPair, Function.comp_apply, ite_true, zero_add, smul_eq_mul, mul_one,
       one_mul]
@@ -87,15 +102,15 @@ lemma s25a_f_modif_eq {x : ℝ} (hx : 0 < x) :
     push_cast
     rw [cpow_neg, one_div x, one_div (2 : ℂ)]
     ring
-  · simp [WeakFEPair.f_modif, s25a_tail]
+  · simp [WeakFEPair.f_modif, evenKernelTail]
   · have hi : x⁻¹ < 1 := inv_lt_one_of_one_lt₀ h
     rw [WeakFEPair.f_modif, Pi.add_apply, indicator_of_notMem (notMem_Ioo_of_ge h.le),
-      s25a_tail, indicator_of_notMem (notMem_Ioi.mpr hi.le)]
+      evenKernelTail, indicator_of_notMem (notMem_Ioi.mpr hi.le)]
     simp
 
 /-- The tail has a convergent Mellin transform everywhere. -/
-lemma s25a_tail_mellinConvergent (a : ℂ) : MellinConvergent s25a_tail a := by
-  have hloc : LocallyIntegrableOn s25a_tail (Set.Ioi 0) := by
+private lemma mellinConvergent_evenKernelTail (a : ℂ) : MellinConvergent evenKernelTail a := by
+  have hloc : LocallyIntegrableOn evenKernelTail (Set.Ioi 0) := by
     intro x hx
     obtain ⟨t, ht, ht'⟩ := (hurwitzEvenFEPair 0).hf_int.sub (locallyIntegrableOn_const _) x hx
     exact ⟨t, ht, ht'.indicator measurableSet_Ioi⟩
@@ -103,57 +118,56 @@ lemma s25a_tail_mellinConvergent (a : ℂ) : MellinConvergent s25a_tail a := by
     (by linarith) ?_ (by linarith)
   · refine ((hurwitzEvenFEPair 0).hf_top (-(a.re + 1))).congr' ?_ .rfl
     filter_upwards [eventually_gt_atTop 1] with x hx
-    rw [s25a_tail, indicator_of_mem (Set.mem_Ioi.mpr hx)]
+    rw [evenKernelTail, indicator_of_mem (Set.mem_Ioi.mpr hx)]
   · refine (Asymptotics.isBigO_zero _ _).congr' ?_ .rfl
     filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with x hx
-    rw [s25a_tail, indicator_of_notMem (notMem_Ioi.mpr hx.2.le)]
+    rw [evenKernelTail, indicator_of_notMem (notMem_Ioi.mpr hx.2.le)]
 
 /-- The Mellin transform of the tail as an integral of `ω` over `(1, ∞)`. -/
-lemma s25a_tail_mellin (a : ℂ) :
-    mellin s25a_tail a = 2 * ∫ x in Set.Ioi (1 : ℝ), (x : ℂ) ^ a * zetaOmega x / x := by
+private lemma mellin_evenKernelTail (a : ℂ) :
+    mellin evenKernelTail a = 2 * ∫ x in Set.Ioi (1 : ℝ), (x : ℂ) ^ a * zetaOmega x / x := by
   rw [mellin, ← integral_const_mul]
-  have : ∀ x ∈ Set.Ioi (0 : ℝ), (x : ℂ) ^ (a - 1) • s25a_tail x =
+  have : ∀ x ∈ Set.Ioi (0 : ℝ), (x : ℂ) ^ (a - 1) • evenKernelTail x =
       (Set.Ioi 1).indicator (fun x : ℝ => 2 * ((x : ℂ) ^ a * zetaOmega x / x)) x := by
     intro x hx
     by_cases h : 1 < x
-    · rw [indicator_of_mem (Set.mem_Ioi.mpr h), s25a_tail_eq h, smul_eq_mul,
+    · rw [indicator_of_mem (Set.mem_Ioi.mpr h), evenKernelTail_eq h, smul_eq_mul,
         cpow_sub _ _ (ofReal_ne_zero.mpr (ne_of_gt hx)), cpow_one]
       ring
-    · rw [indicator_of_notMem (notMem_Ioi.mpr (not_lt.mp h)), s25a_tail,
+    · rw [indicator_of_notMem (notMem_Ioi.mpr (not_lt.mp h)), evenKernelTail,
         indicator_of_notMem (notMem_Ioi.mpr (not_lt.mp h)), smul_zero]
   rw [setIntegral_congr_fun measurableSet_Ioi this, setIntegral_indicator measurableSet_Ioi,
     Set.Ioi_inter_Ioi, max_eq_right zero_le_one]
 
 /-- `x^a ω(x)/x` is integrable on `(1, ∞)`. -/
-lemma s25a_integrableOn (a : ℂ) :
+private lemma integrableOn_cpow_mul_zetaOmega_div (a : ℂ) :
     IntegrableOn (fun x : ℝ => (x : ℂ) ^ a * zetaOmega x / x) (Set.Ioi 1) := by
-  have h := ((s25a_tail_mellinConvergent a).mono_set (Set.Ioi_subset_Ioi zero_le_one)).const_mul
+  have h := ((mellinConvergent_evenKernelTail a).mono_set (Set.Ioi_subset_Ioi zero_le_one)).const_mul
     (1 / 2 : ℂ)
   refine IntegrableOn.congr_fun h (fun x hx => ?_) measurableSet_Ioi
   have hx0 : (0 : ℝ) < x := lt_trans zero_lt_one hx
   simp only [smul_eq_mul]
-  rw [s25a_tail_eq hx, cpow_sub _ _ (ofReal_ne_zero.mpr hx0.ne'), cpow_one]
+  rw [evenKernelTail_eq hx, cpow_sub _ _ (ofReal_ne_zero.mpr hx0.ne'), cpow_one]
   ring
 
 /-- The theta split of `Λ₀(s/2)`. -/
-lemma s25a_Λ₀ (s : ℂ) : (hurwitzEvenFEPair 0).Λ₀ (s / 2) =
-    mellin s25a_tail (s / 2) + mellin s25a_tail ((1 - s) / 2) := by
-  have h2 : MellinConvergent (fun x : ℝ => (x : ℂ) ^ (-(1 / 2 : ℂ)) • s25a_tail x⁻¹)
+private lemma hurwitzEvenFEPair_zero_Λ₀_eq (s : ℂ) : (hurwitzEvenFEPair 0).Λ₀ (s / 2) =
+    mellin evenKernelTail (s / 2) + mellin evenKernelTail ((1 - s) / 2) := by
+  have h2 : MellinConvergent (fun x : ℝ => (x : ℂ) ^ (-(1 / 2 : ℂ)) • evenKernelTail x⁻¹)
       (s / 2) := by
     rw [MellinConvergent.cpow_smul]
     have e : (s / 2 + -(1 / 2)) / ((-1 : ℝ) : ℂ) = (1 - s) / 2 := by push_cast; ring
-    have := (MellinConvergent.comp_rpow (f := s25a_tail) (s := s / 2 + -(1 / 2))
-      (a := -1) (by norm_num)).mpr (by rw [e]; exact s25a_tail_mellinConvergent _)
+    have := (MellinConvergent.comp_rpow (f := evenKernelTail) (s := s / 2 + -(1 / 2))
+      (a := -1) (by norm_num)).mpr (by rw [e]; exact mellinConvergent_evenKernelTail _)
     simpa only [Real.rpow_neg_one] using this
-  have h3 : mellin (fun x : ℝ => (x : ℂ) ^ (-(1 / 2 : ℂ)) • s25a_tail x⁻¹) (s / 2) =
-      mellin s25a_tail ((1 - s) / 2) := by
+  have h3 : mellin (fun x : ℝ => (x : ℂ) ^ (-(1 / 2 : ℂ)) • evenKernelTail x⁻¹) (s / 2) =
+      mellin evenKernelTail ((1 - s) / 2) := by
     rw [mellin_cpow_smul, mellin_comp_inv]; congr 1; ring
-  rw [WeakFEPair.Λ₀, ← h3, ← (hasMellin_add (s25a_tail_mellinConvergent _) h2).2]
+  rw [WeakFEPair.Λ₀, ← h3, ← (hasMellin_add (mellinConvergent_evenKernelTail _) h2).2]
   refine setIntegral_congr_fun measurableSet_Ioi (fun x hx => ?_)
-  simp only [s25a_f_modif_eq hx, smul_eq_mul]
+  simp only [hurwitzEvenFEPair_zero_f_modif_eq hx, smul_eq_mul]
 
-end s25a
-
+end StieltjesConstants
 /-- DLMF 25.5.13: for `s ≠ 0, 1`,
 `ζ(s) = π^{s/2}/(s(s-1)Γ(s/2)) + π^{s/2}/Γ(s/2) ∫₁^∞ (x^{s/2} + x^{(1-s)/2}) ω(x)/x dx`
 (DLMF: `s ≠ 1`; at `s = 0` the printed first term is a removable `1/(0·∞)` form). -/
@@ -168,11 +182,11 @@ theorem riemannZeta_eq_integral_zetaOmega {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠
       fun x : ℝ => (x : ℂ) ^ (s / 2) * zetaOmega x / x +
         (x : ℂ) ^ ((1 - s) / 2) * zetaOmega x / x := by
     funext x; ring
-  refine ⟨he ▸ (s25a_integrableOn _).add (s25a_integrableOn _), ?_⟩
-  rw [he, integral_add (s25a_integrableOn _) (s25a_integrableOn _),
+  refine ⟨he ▸ (integrableOn_cpow_mul_zetaOmega_div _).add (integrableOn_cpow_mul_zetaOmega_div _), ?_⟩
+  rw [he, integral_add (integrableOn_cpow_mul_zetaOmega_div _) (integrableOn_cpow_mul_zetaOmega_div _),
     riemannZeta_eq_completedRiemannZeta₀ hs0]
   have hc : completedRiemannZeta₀ s = (HurwitzZeta.hurwitzEvenFEPair 0).Λ₀ (s / 2) / 2 := rfl
-  rw [hc, s25a_Λ₀, s25a_tail_mellin, s25a_tail_mellin]
+  rw [hc, hurwitzEvenFEPair_zero_Λ₀_eq, mellin_evenKernelTail, mellin_evenKernelTail]
   have hs1' : s - 1 ≠ 0 := sub_ne_zero.mpr hs1
   have hs1'' : 1 - s ≠ 0 := sub_ne_zero.mpr (Ne.symm hs1)
   have hπ : (π : ℂ) ^ (-s / 2) = ((π : ℂ) ^ (s / 2))⁻¹ := by
@@ -207,37 +221,37 @@ theorem riemannZeta_eq_integral_inv_sub_trigamma {s : ℂ} (hs : 0 < s.re) (hs' 
   sorry
 
 /-- The real kernel `tᵐ e^{-t}/(1 - e^{-t})` of the polygamma Laplace integral. -/
-noncomputable def r25a_Ar (m : ℕ) (t : ℝ) : ℝ := t ^ m * Real.exp (-t) / (1 - Real.exp (-t))
+noncomputable def polygammaKernel (m : ℕ) (t : ℝ) : ℝ := t ^ m * Real.exp (-t) / (1 - Real.exp (-t))
 
-/-- Estimate under the stated parameter and domain assumptions: `0 < r25a_Ar m t`. -/
-lemma r25a_Ar_pos (m : ℕ) {t : ℝ} (ht : 0 < t) : 0 < r25a_Ar m t := by
+/-- Estimate under the stated parameter and domain assumptions: `0 < polygammaKernel m t`. -/
+private lemma polygammaKernel_pos (m : ℕ) {t : ℝ} (ht : 0 < t) : 0 < polygammaKernel m t := by
   have : Real.exp (-t) < 1 := Real.exp_lt_one_iff.mpr (by linarith)
-  unfold r25a_Ar
+  unfold polygammaKernel
   have := Real.exp_pos (-t)
   positivity
 
-/-- `r25a_Ar m t · t^{σ-1} = t^{m+σ-1}/(eᵗ-1)`. -/
-lemma r25a_Ar_mul_rpow (m : ℕ) (σ : ℝ) {t : ℝ} (ht : 0 < t) :
-    r25a_Ar m t * t ^ (σ - 1) = t ^ ((m : ℝ) + σ - 1) / (Real.exp t - 1) := by
+/-- `polygammaKernel m t · t^{σ-1} = t^{m+σ-1}/(eᵗ-1)`. -/
+private lemma polygammaKernel_mul_rpow (m : ℕ) (σ : ℝ) {t : ℝ} (ht : 0 < t) :
+    polygammaKernel m t * t ^ (σ - 1) = t ^ ((m : ℝ) + σ - 1) / (Real.exp t - 1) := by
   have h1 : Real.exp t - 1 ≠ 0 := by
     have := Real.add_one_lt_exp (x := t) ht.ne'; linarith
   have h2 : 1 - Real.exp (-t) ≠ 0 := by
     have : Real.exp (-t) < 1 := Real.exp_lt_one_iff.mpr (by linarith)
     linarith
   rw [show (m : ℝ) + σ - 1 = (m : ℝ) + (σ - 1) by ring, Real.rpow_add ht, Real.rpow_natCast]
-  unfold r25a_Ar
+  unfold polygammaKernel
   rw [Real.exp_neg]
   have := Real.exp_pos t
   field_simp
 
 /-- DLMF 25.5.19 core: `∫₀^∞ ψ^{(m)}(1+x) x^{-s} dx = (-1)^{m+1} Γ(1-s) Γ(m+s) ζ(m+s)`. -/
-lemma r25a_integral_polygamma {s : ℂ} {m : ℕ} (hm : 1 ≤ m) (hs : 0 < s.re) (hs' : s.re < 1) :
+private lemma integral_polygamma_one_add_mul_cpow {s : ℂ} {m : ℕ} (hm : 1 ≤ m) (hs : 0 < s.re) (hs' : s.re < 1) :
     IntegrableOn (fun x : ℝ => DLMF.Gamma.polygamma m (1 + x) * (x : ℂ) ^ (-s)) (Ioi 0) ∧
       ∫ x in Ioi (0 : ℝ), DLMF.Gamma.polygamma m (1 + x) * (x : ℂ) ^ (-s) =
         (-1) ^ (m + 1) * (Gamma (1 - s) * Gamma (m + s) * riemannZeta (m + s)) := by
   set μ := volume.restrict (Ioi (0 : ℝ))
   set K : ℝ → ℝ → ℂ := fun x t =>
-    (x : ℂ) ^ (-s) * cexp (-((t : ℂ) * x)) * (r25a_Ar m t : ℂ) with hK
+    (x : ℂ) ^ (-s) * cexp (-((t : ℂ) * x)) * (polygammaKernel m t : ℂ) with hK
   have h1s : 0 < (1 - s).re := by simp; linarith
   -- pointwise: the polygamma Laplace integral
   have hpt : ∀ x : ℝ, 0 < x → DLMF.Gamma.polygamma m (1 + x) * (x : ℂ) ^ (-s) =
@@ -250,18 +264,18 @@ lemma r25a_integral_polygamma {s : ℂ} {m : ℕ} (hm : 1 ≤ m) (hs : 0 < s.re)
     congr 1
     refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
     have ht0 : (0 : ℝ) < t := ht
-    simp only [hK, r25a_Ar]
+    simp only [hK, polygammaKernel]
     push_cast
     rw [show -((1 + (x : ℂ)) * t) = -(t : ℂ) + -((t : ℂ) * x) by ring, Complex.exp_add]
     ring
   -- the `x`-integral for fixed `t`
   have hxint : ∀ t : ℝ, 0 < t → Integrable (fun x => K x t) μ := by
     intro t ht
-    have := (DLMF.Gamma.integrableOn_cpow_mul_exp_neg_mul h1s ht).mul_const (r25a_Ar m t : ℂ)
+    have := (DLMF.Gamma.integrableOn_cpow_mul_exp_neg_mul h1s ht).mul_const (polygammaKernel m t : ℂ)
     simp only [sub_sub_cancel_left] at this
     exact this
   have hxval : ∀ t : ℝ, 0 < t → ∫ x in Ioi (0 : ℝ), K x t =
-      Gamma (1 - s) * (t : ℂ) ^ (s - 1) * (r25a_Ar m t : ℂ) := by
+      Gamma (1 - s) * (t : ℂ) ^ (s - 1) * (polygammaKernel m t : ℂ) := by
     intro t ht
     simp only [hK]
     rw [integral_mul_const]
@@ -271,9 +285,9 @@ lemma r25a_integral_polygamma {s : ℂ} {m : ℕ} (hm : 1 ≤ m) (hs : 0 < s.re)
   have hxnorm : ∀ t : ℝ, 0 < t → ∫ x in Ioi (0 : ℝ), ‖K x t‖ =
       Real.Gamma (1 - s.re) * (t ^ ((m : ℝ) + s.re - 1) / (Real.exp t - 1)) := by
     intro t ht
-    have hA := r25a_Ar_pos m ht
+    have hA := polygammaKernel_pos m ht
     have e : ∀ x ∈ Ioi (0 : ℝ), ‖K x t‖ = x ^ ((1 - s.re) - 1) * Real.exp (-(t * x)) *
-        r25a_Ar m t := by
+        polygammaKernel m t := by
       intro x hx
       have hx0 : (0 : ℝ) < x := hx
       simp only [hK, norm_mul, norm_cpow_eq_rpow_re_of_pos hx0, Complex.norm_real,
@@ -282,7 +296,7 @@ lemma r25a_integral_polygamma {s : ℂ} {m : ℕ} (hm : 1 ≤ m) (hs : 0 < s.re)
       ring_nf
     rw [setIntegral_congr_fun measurableSet_Ioi e, integral_mul_const,
       Real.integral_rpow_mul_exp_neg_mul_Ioi (by linarith) ht,
-      ← r25a_Ar_mul_rpow m s.re ht, one_div, Real.inv_rpow ht.le, ← Real.rpow_neg ht.le]
+      ← polygammaKernel_mul_rpow m s.re ht, one_div, Real.inv_rpow ht.le, ← Real.rpow_neg ht.le]
     ring_nf
   -- product integrability
   have hcont : ContinuousOn (fun p : ℝ × ℝ => K p.1 p.2) (Set.Ioi (0 : ℝ) ×ˢ Set.Ioi (0 : ℝ)) := by
@@ -294,7 +308,7 @@ lemma r25a_integral_polygamma {s : ℂ} {m : ℕ} (hm : 1 ≤ m) (hs : 0 < s.re)
       have : Real.exp (-p.2) < 1 := Real.exp_lt_one_iff.mpr (by linarith)
       linarith
     refine ContinuousAt.continuousWithinAt ?_
-    simp only [hK, r25a_Ar]
+    simp only [hK, polygammaKernel]
     refine ContinuousAt.mul (ContinuousAt.mul ?_ (by fun_prop)) ?_
     · exact (continuousAt_ofReal_cpow_const _ _ (Or.inr hp1'.ne')).comp continuousAt_fst
     · refine Complex.continuous_ofReal.continuousAt.comp ?_
@@ -310,7 +324,7 @@ lemma r25a_integral_polygamma {s : ℂ} {m : ℕ} (hm : 1 ≤ m) (hs : 0 < s.re)
   have hint : Integrable (Function.uncurry K) (μ.prod μ) := by
     refine (integrable_prod_iff' hmeas).mpr ⟨?_, ?_⟩
     · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht using hxint t ht
-    · have h := ((q25a_integrableOn_exp_sub_one hms).norm.const_mul (Real.Gamma (1 - s.re)))
+    · have h := ((integrableOn_cpow_div_exp_sub_one hms).norm.const_mul (Real.Gamma (1 - s.re)))
       refine h.congr ?_
       filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
       have ht0 : (0 : ℝ) < t := ht
@@ -333,12 +347,12 @@ lemma r25a_integral_polygamma {s : ℂ} {m : ℕ} (hm : 1 ≤ m) (hs : 0 < s.re)
     rw [hsw, setIntegral_congr_fun measurableSet_Ioi (fun t ht => hxval t ht)]
     have hval := DLMF.Gamma.integral_cpow_mul_exp_div_one_sub_exp (s := (m : ℂ) + s)
       (by simpa using hms) (x := 1) one_pos
-    have e : ∀ t ∈ Ioi (0 : ℝ), Gamma (1 - s) * (t : ℂ) ^ (s - 1) * (r25a_Ar m t : ℂ) =
+    have e : ∀ t ∈ Ioi (0 : ℝ), Gamma (1 - s) * (t : ℂ) ^ (s - 1) * (polygammaKernel m t : ℂ) =
         Gamma (1 - s) * ((t : ℂ) ^ ((m : ℂ) + s - 1) * cexp (-(((1 : ℝ) : ℂ) * t)) /
           (1 - cexp (-(t : ℂ)))) := by
       intro t ht
       have ht0 : (t : ℂ) ≠ 0 := by exact_mod_cast (ne_of_gt ht)
-      simp only [r25a_Ar]
+      simp only [polygammaKernel]
       push_cast
       rw [show (m : ℂ) + s - 1 = (m : ℂ) + (s - 1) by ring, cpow_add _ _ ht0, cpow_natCast]
       ring_nf
@@ -347,31 +361,16 @@ lemma r25a_integral_polygamma {s : ℂ} {m : ℕ} (hm : 1 ≤ m) (hs : 0 < s.re)
     push_cast
     ring
 
-/-- Nonvanishing under the stated hypotheses: `sin (π * s) ≠ 0`. -/
-lemma r25a_sin_pi_ne_zero {s : ℂ} (hs : 0 < s.re) (hs' : s.re < 1) : sin (π * s) ≠ 0 := by
-  rw [Ne, Complex.sin_eq_zero_iff]
-  rintro ⟨k, hk⟩
-  have h := congrArg re hk
-  simp at h
-  have hk' : s.re = k := by
-    have := Real.pi_pos
-    field_simp at h
-    linarith
-  rw [hk'] at hs hs'
-  have h1 : (0 : ℤ) < k := by exact_mod_cast hs
-  have h2 : k < (1 : ℤ) := by exact_mod_cast hs'
-  omega
-
 /-- DLMF 25.5.19 in the form proved, for use in 25.5.18. -/
-lemma r25a_zeta_nat_add_eq_integral {s : ℂ} {m : ℕ} (hm : 1 ≤ m)
+private lemma riemannZeta_natCast_add_eq_integral_polygamma {s : ℂ} {m : ℕ} (hm : 1 ≤ m)
     (hs : 0 < s.re) (hs' : s.re < 1) :
     IntegrableOn (fun x : ℝ => DLMF.Gamma.polygamma m (1 + x) * (x : ℂ) ^ (-s)) (Ioi 0) ∧
       riemannZeta (m + s) = (-1) ^ (m - 1) * (Gamma s * sin (π * s) / (π * Gamma (m + s))) *
         ∫ x in Ioi (0 : ℝ), DLMF.Gamma.polygamma m (1 + x) * (x : ℂ) ^ (-s) := by
-  obtain ⟨hI, hv⟩ := r25a_integral_polygamma hm hs hs'
+  obtain ⟨hI, hv⟩ := integral_polygamma_one_add_mul_cpow hm hs hs'
   refine ⟨hI, ?_⟩
   rw [hv]
-  have hsin := r25a_sin_pi_ne_zero hs hs'
+  have hsin := Complex.sin_pi_mul_ne_zero_of_re_mem hs hs'
   have hG : Gamma ((m : ℂ) + s) ≠ 0 := Gamma_ne_zero_of_re_pos (by
     simp; have : (0 : ℝ) ≤ m := m.cast_nonneg; linarith)
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
@@ -387,7 +386,7 @@ lemma r25a_zeta_nat_add_eq_integral {s : ℂ} {m : ℕ} (hm : 1 ≤ m)
     _ = _ := by ring
 
 /-- `∫₀^∞ u^{-s-1}(1 - e^{-u}) du = -Γ(-s)` for `0 < Re s < 1`, with integrability. -/
-lemma r25a_integral_cpow_one_sub_exp {s : ℂ} (hs : 0 < s.re) (hs' : s.re < 1) :
+private lemma integral_cpow_mul_one_sub_exp_neg {s : ℂ} (hs : 0 < s.re) (hs' : s.re < 1) :
     IntegrableOn (fun u : ℝ => (u : ℂ) ^ (-s - 1) * (1 - cexp (-(u : ℂ)))) (Ioi 0) ∧
     ∫ u in Ioi (0 : ℝ), (u : ℂ) ^ (-s - 1) * (1 - cexp (-(u : ℂ))) = -Gamma (-s) := by
   have h := DLMF.Gamma.Gamma_truncated_exp (z := -s) (n := 0) (by simp; linarith)
@@ -410,7 +409,7 @@ lemma r25a_integral_cpow_one_sub_exp {s : ℂ} (hs : 0 < s.re) (hs' : s.re < 1) 
   ring
 
 /-- Scaling: `x^w (1 - e^{-tx}) = t^{-w} g(tx)` with `g(u) = u^w (1 - e^{-u})`. -/
-lemma r25a_cpow_one_sub_exp_scale (w : ℂ) {t x : ℝ} (ht : 0 < t) (hx : 0 < x) :
+private lemma cpow_mul_one_sub_exp_neg_scale (w : ℂ) {t x : ℝ} (ht : 0 < t) (hx : 0 < x) :
     (x : ℂ) ^ w * (1 - cexp (-((t : ℂ) * x))) =
       (t : ℂ) ^ (-w) * (((t * x : ℝ) : ℂ) ^ w * (1 - cexp (-((t * x : ℝ) : ℂ)))) := by
   rw [Complex.ofReal_mul, mul_cpow_ofReal_nonneg ht.le hx.le, cpow_neg]
@@ -428,7 +427,7 @@ theorem riemannZeta_one_add_eq_integral_digamma {s : ℂ} (hs : 0 < s.re) (hs' :
   set μ := volume.restrict (Ioi (0 : ℝ))
   set w : ℂ := -s - 1 with hw
   set g : ℝ → ℂ := fun u => (u : ℂ) ^ w * (1 - cexp (-(u : ℂ))) with hg
-  obtain ⟨hgI, hgV⟩ := r25a_integral_cpow_one_sub_exp hs hs'
+  obtain ⟨hgI, hgV⟩ := integral_cpow_mul_one_sub_exp_neg hs hs'
   set C := ∫ u in Ioi (0 : ℝ), g u with hC
   set Cn := ∫ u in Ioi (0 : ℝ), ‖g u‖ with hCn
   set K : ℝ → ℝ → ℂ := fun x t =>
@@ -440,7 +439,7 @@ theorem riemannZeta_one_add_eq_integral_digamma {s : ℂ} (hs : 0 < s.re) (hs' :
     intro t ht
     have hgt : IntegrableOn (fun x => g (t * x)) (Ioi 0) :=
       (integrableOn_Ioi_comp_mul_left_iff g 0 ht).mpr (by simpa using hgI)
-    have e := fun x (hx : x ∈ Ioi (0 : ℝ)) => r25a_cpow_one_sub_exp_scale w ht hx
+    have e := fun x (hx : x ∈ Ioi (0 : ℝ)) => cpow_mul_one_sub_exp_neg_scale w ht hx
     refine ⟨IntegrableOn.congr_fun (hgt.const_mul ((t : ℂ) ^ (-w)))
       (fun x hx => (e x hx).symm) measurableSet_Ioi, ?_, ?_⟩
     · rw [setIntegral_congr_fun measurableSet_Ioi e, integral_const_mul]
@@ -472,7 +471,7 @@ theorem riemannZeta_one_add_eq_integral_digamma {s : ℂ} (hs : 0 < s.re) (hs' :
       ← integral_mul_const]
     refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
     have ht0 : (0 : ℝ) < t := ht
-    have h1 : cexp (t : ℂ) - 1 ≠ 0 := q25a_exp_sub_one_ne ht0
+    have h1 : cexp (t : ℂ) - 1 ≠ 0 := exp_ofReal_sub_one_ne_zero ht0
     have h2 : (1 : ℂ) - cexp (-(t : ℂ)) ≠ 0 := by
       rw [sub_ne_zero, ← ofReal_neg, ← ofReal_exp]
       exact_mod_cast (Real.exp_lt_one_iff.mpr (by linarith)).ne'
@@ -492,7 +491,7 @@ theorem riemannZeta_one_add_eq_integral_digamma {s : ℂ} (hs : 0 < s.re) (hs' :
     simp only [hK]
     refine ContinuousAt.mul (ContinuousAt.mul ?_ (by fun_prop)) ?_
     · exact (continuousAt_ofReal_cpow_const _ _ (Or.inr hp1'.ne')).comp continuousAt_fst
-    · exact continuousAt_const.div (by fun_prop) (q25a_exp_sub_one_ne hp2')
+    · exact continuousAt_const.div (by fun_prop) (exp_ofReal_sub_one_ne_zero hp2')
   have hmeas : AEStronglyMeasurable (Function.uncurry K) (μ.prod μ) := by
     rw [show μ.prod μ = volume.restrict (Set.Ioi (0 : ℝ) ×ˢ Set.Ioi (0 : ℝ)) by
       rw [Measure.volume_eq_prod, Measure.prod_restrict]]
@@ -508,7 +507,7 @@ theorem riemannZeta_one_add_eq_integral_digamma {s : ℂ} (hs : 0 < s.re) (hs' :
     · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
       simpa only [Function.uncurry_apply_pair, hK] using
         (hscale t ht).1.mul_const ((1 : ℂ) / (cexp (t : ℂ) - 1))
-    · have h := ((q25a_integrableOn_exp_sub_one hms).norm.mul_const Cn)
+    · have h := ((integrableOn_cpow_div_exp_sub_one hms).norm.mul_const Cn)
       refine h.congr ?_
       filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
       have ht0 : (0 : ℝ) < t := ht
@@ -547,7 +546,7 @@ theorem riemannZeta_one_add_eq_integral_digamma {s : ℂ} (hs : 0 < s.re) (hs' :
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx using (hLHS x hx).symm
   · rw [hval, hgV, add_comm (1 : ℂ) s]
     have hs0 : s ≠ 0 := by rintro rfl; simp at hs
-    have hsin := r25a_sin_pi_ne_zero hs hs'
+    have hsin := Complex.sin_pi_mul_ne_zero_of_re_mem hs hs'
     have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
     have hr := Complex.Gamma_mul_Gamma_one_sub s
     have h1 : Gamma (1 - s) = -s * Gamma (-s) := by
@@ -566,7 +565,7 @@ theorem riemannZeta_one_add_eq_integral_trigamma {s : ℂ} (hs : 0 < s.re) (hs' 
     IntegrableOn (fun x : ℝ => DLMF.Gamma.polygamma 1 (1 + x) * (x : ℂ) ^ (-s)) (Ioi 0) ∧
       riemannZeta (1 + s) = sin (π * s) / (π * s) * ∫ x in Ioi (0 : ℝ),
         DLMF.Gamma.polygamma 1 (1 + x) * (x : ℂ) ^ (-s) := by
-  obtain ⟨hI, hv⟩ := r25a_zeta_nat_add_eq_integral (m := 1) le_rfl hs hs'
+  obtain ⟨hI, hv⟩ := riemannZeta_natCast_add_eq_integral_polygamma (m := 1) le_rfl hs hs'
   refine ⟨hI, ?_⟩
   have hs0 : s ≠ 0 := by rintro rfl; simp at hs
   have hG : Gamma s ≠ 0 := Gamma_ne_zero_of_re_pos hs
@@ -584,7 +583,7 @@ theorem riemannZeta_nat_add_eq_integral_polygamma {s : ℂ} {m : ℕ} (hm : 1 �
     IntegrableOn (fun x : ℝ => DLMF.Gamma.polygamma m (1 + x) * (x : ℂ) ^ (-s)) (Ioi 0) ∧
       riemannZeta (m + s) = (-1) ^ (m - 1) * (Gamma s * sin (π * s) / (π * Gamma (m + s))) *
         ∫ x in Ioi (0 : ℝ), DLMF.Gamma.polygamma m (1 + x) * (x : ℂ) ^ (-s) :=
-  r25a_zeta_nat_add_eq_integral hm hs hs'
+  riemannZeta_natCast_add_eq_integral_polygamma hm hs hs'
 
 /-! ### §25.5(iii) Contour integrals -/
 

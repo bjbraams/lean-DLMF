@@ -10,11 +10,30 @@ public import DLMF.Legendre.Integrals.FerrersDiagonal
 /-!
 # Exterior Legendre Green identities and diagonal integrals
 
-Green identities on the exterior half-line and uniform bounds for the corresponding diagonal
-integrals.
+This file evaluates the integrals of products of Legendre functions of order zero over
+`(1, ∞)` (DLMF 14.17.18–14.17.20). The off-diagonal integrals come from Green's identity, with
+the logarithmic expansions DLMF 14.8.9 at `1⁺` and the power bounds DLMF 14.8.12, 14.8.15 at
+`∞`; the diagonal integral 14.17.20 follows by dominated convergence from bounds on `𝑸_λ` that
+are uniform for `λ` near `ν`. Helper names carry the prefixes `legExt_` and `legPIU_`.
 
-Source references and common attribution are retained in
-`DLMF.Legendre.Integrals`.
+## Main definitions
+
+* `legExtU`: the domain `{z | z - 1 ∈ slitPlane}` of `P_ν` and `𝑸_ν`.
+* `legExtR`: the polynomial remainder of the Green boundary form at `1⁺`.
+
+## Main results
+
+* `legExt_green`, `legExt_integral_green`: Green's identity for two order-zero solutions, and
+  its improper-integral form on `(1, ∞)`.
+* `legExt_bdry`, `legExt_tendsto_zero_atTop`: limits of the boundary form at `1⁺` and at `∞`.
+* `legExt_Q_isBigO`: DLMF 14.8.9 in the variable `τ = (x-1)/2`.
+* `legExt_olverQ_isBigO_atTop`, `legExt_associatedP_isBigO_atTop`,
+  `legExt_associatedQ_isBigO_atTop`: power bounds at `∞`.
+* `legExt_rec_P`, `legExt_rec_Q`: the case `μ = 0` of DLMF 14.10.5 on `(1, ∞)`.
+* `legPIU_bound_Qext`, `legPIU_continuousAt_Qext`: bounds and continuity of `𝑄_λ(x)` uniform in
+  `λ` near a regular `ν`.
+* `legendre_product_integral_18`, `legendre_product_integral_19`,
+  `legendre_product_integral_20`: DLMF 14.17.18, 14.17.19, 14.17.20.
 -/
 
 @[expose] public noncomputable section

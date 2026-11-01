@@ -15,17 +15,31 @@ The Abel and Cesàro summability of integrals over `(-∞, ∞)` (`HasAbelIntegr
 `HasCesaroIntegral`, 1.15.29–1.15.32), and the Poisson and Fejér kernels of Fourier integrals
 (1.15.33–1.15.46) with DLMF's Fourier transform 1.14.1.
 
-Proved: the normalization 1.15.34 of the half-plane Poisson kernel (from Mathlib's
-`integral_univ_inv_one_add_sq`), the Abel summability of an absolutely integrable function to its
-integral (dominated convergence), and the formulas 1.15.40 and `Re Φ = h` of §1.15(v) by
-computing real and imaginary parts under the integral. The other statements are admitted.
+## Main results
+
+* `hasAbelIntegral_of_integrable`, `hasCesaroIntegral_of_integrable`,
+  `hasAbelIntegral_of_tendsto`, `hasCesaroIntegral_of_tendsto`: regularity of Abel and Cesàro
+  summation of integrals (§1.15(iv)).
+* `integral_halfPlanePoissonKernel`, `tendsto_integral_halfPlanePoissonKernel_tail`: the
+  half-plane Poisson kernel (DLMF 1.15.34–1.15.35).
+* `fourierAbelMean_eq_poisson`, `tendsto_integral_norm_fourierAbelMean_sub`: Abel means of
+  Fourier integrals (DLMF 1.15.37–1.15.38).
+* `re_poissonCauchyIntegral`, `im_poissonCauchyIntegral`,
+  `differentiableOn_poissonCauchyIntegral`, `tendsto_im_poissonCauchyIntegral`: the Cauchy
+  integral `Φ` (§1.15(v), 1.15.40).
+* `integral_fejerKernelLine`, `tendsto_integral_fejerKernelLine_tail`: the Fejér kernel on the
+  line (DLMF 1.15.42–1.15.43).
+* `fourierCesaroMeanIntegral_eq`, `tendsto_integral_norm_fourierCesaroMeanIntegral_sub`: Cesàro
+  means of Fourier integrals (DLMF 1.15.45–1.15.46).
+
+## Implementation notes
 
 **Correction (§1.15(v), after 1.15.40).** DLMF says that `lim_{y→0+} ℑΦ(x + iy)` "is the Hilbert
 transform of `f(x)` (§1.14(v))". With DLMF's own normalization 1.14.41 (denominator `t - x`) the
 limit is `-ℋ(f)(x)`: by 1.15.40 and 1.14.42 the kernels are `(x - t)/((x - t)² + y²)` and
 `(t - x)/((t - x)² + y²)`. Numerically, for `f(t) = 1/(1 + t²)` and `x = 0.6`,
-`ℑΦ(x + 0.001i) = 0.4405` while `ℋf(x) = -x/(1 + x²) = -0.4412` (1.14.43). The corrected form is
-acquired (`tendsto_im_poissonCauchyIntegral`).
+`ℑΦ(x + 0.001i) = 0.4405` while `ℋf(x) = -x/(1 + x²) = -0.4412` (1.14.43).
+`tendsto_im_poissonCauchyIntegral` states the corrected form.
 -/
 
 @[expose] public noncomputable section
@@ -168,7 +182,7 @@ theorem tendsto_integral_norm_fourierAbelMean_sub {f : ℝ → ℂ} (hf : Integr
   sorry
 
 /-- The integrand of 1.15.39 is integrable for integrable `f` and `y > 0`. -/
-private lemma g1e_integrable_cauchy {f : ℝ → ℝ} (hf : Integrable f) (x y : ℝ) (hy : 0 < y) :
+private lemma integrable_poissonCauchy_integrand {f : ℝ → ℝ} (hf : Integrable f) (x y : ℝ) (hy : 0 < y) :
     Integrable fun t : ℝ => (f t : ℂ) / ((x - t : ℝ) + I * y) := by
   have hne : ∀ t : ℝ, ((x - t : ℝ) : ℂ) + I * y ≠ 0 := by
     intro t h
@@ -189,7 +203,7 @@ private lemma g1e_integrable_cauchy {f : ℝ → ℝ} (hf : Integrable f) (x y :
   exact (hc.inv₀ hne).aestronglyMeasurable
 
 /-- Pointwise splitting of the integrand of 1.15.39 into real and imaginary parts. -/
-private lemma g1e_cauchy_split (F u y : ℝ) (hy : 0 < y) :
+private lemma poissonCauchy_integrand_split (F u y : ℝ) (hy : 0 < y) :
     I / Real.pi * ((F : ℂ) / ((u : ℂ) + I * y)) =
       ((F * y / (Real.pi * (u ^ 2 + y ^ 2)) : ℝ) : ℂ) +
         I * ((F * u / (Real.pi * (u ^ 2 + y ^ 2)) : ℝ) : ℂ) := by
@@ -208,7 +222,7 @@ private lemma g1e_cauchy_split (F u y : ℝ) (hy : 0 < y) :
     ring
 
 /-- The integral in 1.15.39 at `x + iy`, rewritten with a real-coordinate integrand. -/
-private lemma g1e_poissonCauchy_eq {f : ℝ → ℝ} (x y : ℝ) :
+private lemma poissonCauchyIntegral_ofReal_eq {f : ℝ → ℝ} (x y : ℝ) :
     poissonCauchyIntegral (fun t => (f t : ℂ)) (x + y * I) =
       ∫ t : ℝ, I / Real.pi * ((f t : ℂ) / ((x - t : ℝ) + I * y)) := by
   unfold poissonCauchyIntegral
@@ -221,11 +235,11 @@ of `Φ(x + iy)` is the Poisson integral `h(x, y) = (1/2π) ∫ f(t) P(x - t, y) 
 theorem re_poissonCauchyIntegral {f : ℝ → ℝ} (hf : Integrable f) (x : ℝ) {y : ℝ} (hy : 0 < y) :
     (poissonCauchyIntegral (fun t => (f t : ℂ)) (x + y * I)).re =
       (2 * Real.pi)⁻¹ * ∫ t, f t * halfPlanePoissonKernel (x - t) y := by
-  have hI := (g1e_integrable_cauchy hf x y hy).const_mul (I / Real.pi)
-  rw [g1e_poissonCauchy_eq, ← RCLike.re_to_complex, ← integral_re hI, ← integral_const_mul]
+  have hI := (integrable_poissonCauchy_integrand hf x y hy).const_mul (I / Real.pi)
+  rw [poissonCauchyIntegral_ofReal_eq, ← RCLike.re_to_complex, ← integral_re hI, ← integral_const_mul]
   congr 1
   funext t
-  rw [RCLike.re_to_complex, g1e_cauchy_split _ _ _ hy]
+  rw [RCLike.re_to_complex, poissonCauchy_integrand_split _ _ _ hy]
   simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im,
     Complex.ofReal_im]
   unfold halfPlanePoissonKernel
@@ -240,11 +254,11 @@ theorem re_poissonCauchyIntegral {f : ℝ → ℝ} (hf : Integrable f) (x : ℝ)
 theorem im_poissonCauchyIntegral {f : ℝ → ℝ} (hf : Integrable f) (x : ℝ) {y : ℝ} (hy : 0 < y) :
     (poissonCauchyIntegral (fun t => (f t : ℂ)) (x + y * I)).im =
       Real.pi⁻¹ * ∫ t, f t * ((x - t) / ((x - t) ^ 2 + y ^ 2)) := by
-  have hI := (g1e_integrable_cauchy hf x y hy).const_mul (I / Real.pi)
-  rw [g1e_poissonCauchy_eq, ← RCLike.im_to_complex, ← integral_im hI, ← integral_const_mul]
+  have hI := (integrable_poissonCauchy_integrand hf x y hy).const_mul (I / Real.pi)
+  rw [poissonCauchyIntegral_ofReal_eq, ← RCLike.im_to_complex, ← integral_im hI, ← integral_const_mul]
   congr 1
   funext t
-  rw [RCLike.im_to_complex, g1e_cauchy_split _ _ _ hy]
+  rw [RCLike.im_to_complex, poissonCauchy_integrand_split _ _ _ hy]
   simp only [Complex.add_im, Complex.ofReal_re, Complex.mul_im, Complex.I_re, Complex.I_im,
     Complex.ofReal_im]
   have hD : 0 < (x - t) ^ 2 + y ^ 2 := by positivity

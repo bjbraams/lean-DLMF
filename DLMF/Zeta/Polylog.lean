@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Polylog.Dilog
-public import DLMF.Zeta.Q25bLerchContinuation
-public import DLMF.Zeta.S25bHurwitzCore
+public import DLMF.Zeta.LerchContinuation
+public import DLMF.Zeta.HurwitzEulerMaclaurin
 public import Mathlib.Analysis.CStarAlgebra.Classes
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
 public import Mathlib.Analysis.SpecialFunctions.Integrability.Log
@@ -35,25 +35,54 @@ public import Mathlib.Tactic.ReduceModChar
 /-!
 # Polylogarithms of complex order (DLMF §25.12)
 
-* `polylogSeriesC s z = ∑_{n≥1} zⁿ/n^s` (DLMF 25.12.10) for complex order `s`, as a `tsum`; for
-  natural `s = n` it is the project's `DLMF.Polylog.polylogSeries n z`
-  (`polylogSeriesC_natCast`).
-* `polylog s z` is DLMF's `Li_s(z)`: the analytic continuation of the series from the unit disk to
-  the cut plane `ℂ \ [1, ∞)` (principal branch, §25.12(i)–(ii)), and the value of the series on the
-  cut `[1, ∞)` (meaningful at `z = 1` for `Re s > 1`, where `Li_s(1) = ζ(s)`). It is defined by
-  choosing the continuation when one exists (`z25b_slitContinuation`); the existence, i.e. DLMF's
-  statement that `Li_s` is defined by analytic continuation, is the admitted
-  `exists_polylog_continuation`. Since `ℂ \ [1, ∞)` is connected, the continuation is unique.
-* The Fermi–Dirac and Bose–Einstein integrals `fermiDiracF`, `boseEinsteinG` (25.12.14–25.12.15).
+The polylogarithm `Li_s(z)` of complex order `s` (DLMF §25.12): the series 25.12.10, its
+analytic continuation to the cut plane `ℂ \ [1, ∞)` (principal branch), the dilogarithm
+identities of §25.12(i), and the Fermi–Dirac and Bose–Einstein integrals. The real dilogarithm
+`DLMF.Polylog.Real.dilog` and its identities are in `DLMF/Polylog/Dilog.lean`.
 
-The real dilogarithm `DLMF.Polylog.Real.dilog` and its identities are in `DLMF/Polylog/Dilog.lean`.
+## Main definitions
+
+* `polylogSeriesC`: the series `∑_{n≥1} zⁿ/n^s` (DLMF 25.12.10) as a `tsum`.
+* `slitContinuation`: the analytic continuation from the unit disk to `ℂ \ [1, ∞)`, if one
+  exists.
+* `polylog`: DLMF's `Li_s(z)`.
+* `fermiDiracF`, `boseEinsteinG`: the Fermi–Dirac and Bose–Einstein integrals
+  (DLMF 25.12.14–25.12.15).
+
+## Main results
+
+* `exists_polylog_continuation`, `analyticOnNhd_polylog`: `Li_s` is defined by analytic
+  continuation and is analytic on `ℂ \ [1, ∞)`.
+* `hasSum_polylog`, `hasSum_polylog_of_norm_eq_one`, `polylog_one`: the series in the unit disk
+  and on the unit circle for `Re s > 1`, and `Li_s(1) = ζ(s)`.
+* `polylogSeriesC_natCast`, `polylog_natCast_eq_polylogSeries`: bridges to
+  `DLMF.Polylog.polylogSeries` for natural order.
+* `hasSum_dilog`, `polylog_two_eq_integral`: the dilogarithm series and integral
+  (DLMF 25.12.1–25.12.2).
+* `polylog_two_add_polylog_two_div_sub_one`, `polylog_two_add_polylog_two_inv`,
+  `polylog_two_pow`, `polylog_two_add_polylog_two_one_sub`: the dilogarithm identities
+  DLMF 25.12.3–25.12.6.
+* `polylog_two_exp_mul_I`, `hasSum_cos_div_sq`, `hasSum_sin_div_sq`: `Li₂` on the unit circle
+  (DLMF 25.12.7–25.12.9).
+* `polylog_eq_integral`: the integral representation (DLMF 25.12.11).
+* `hasSum_polylog_log`: the expansion about `z = 1` (DLMF 25.12.12).
+* `polylog_add_exp_mul_polylog_inv`: the inversion formula (DLMF 25.12.13, branch corrected).
+* `fermiDiracF_eq_polylog`, `boseEinsteinG_eq_polylog`: both integrals as polylogarithms
+  (DLMF 25.12.16).
+
+## Implementation notes
+
+`polylog s z` is the analytic continuation on `ℂ \ [1, ∞)` and the value of the series on the
+cut `[1, ∞)` (meaningful at `z = 1` for `Re s > 1`). It is defined by choosing the continuation
+when one exists (`slitContinuation`); since `ℂ \ [1, ∞)` is connected, the continuation is
+unique.
 
 **Correction (branch).** 25.12.13 as printed (`ln z` principal) holds for `Im z ≥ 0` only; for
 `Im z < 0` it fails (mpmath: `s = 2.5 + 0.2i`, `z = 0.5 - 0.9i`; `s = 0.7 + 0.3i`,
 `z = -0.3 - 0.4i`; `s = 2`, `z = -2 - 0.5i`). It holds for all `z ∈ ℂ \ [0, ∞)` with
 `ln z` taken with `0 < ph z < 2π` (the branch cut along `[0, ∞)` named by DLMF's domain), i.e.
-`ln z/(2πi) = 1/2 + ln(-z)/(2πi)` with principal `ln(-z)`; this form is acquired. We also exclude
-`s = 0`, where `1/Γ(s)` vanishes and `ζ(1 - s, ·)` has its pole.
+`ln z/(2πi) = 1/2 + ln(-z)/(2πi)` with principal `ln(-z)`; this form is the one stated. We also
+exclude `s = 0`, where `1/Γ(s)` vanishes and `ζ(1 - s, ·)` has its pole.
 -/
 
 @[expose] public section
@@ -69,14 +98,11 @@ open DLMF.Confluent (hurwitzZetaComplex)
 
 /-! ### Definitions -/
 
-/-- The cut plane `ℂ \ [1, ∞)`. -/
-def z25b_slitOne : Set ℂ := {z | z.im ≠ 0 ∨ z.re < 1}
-
 open scoped Classical in
 /-- The analytic continuation of `f` from the open unit disk to `ℂ \ [1, ∞)`, if one exists
 (unique, the cut plane being connected); otherwise `f` itself. -/
-def z25b_slitContinuation (f : ℂ → ℂ) : ℂ → ℂ :=
-  if h : ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F z25b_slitOne ∧ ∀ z, ‖z‖ < 1 → F z = f z then h.choose
+def slitContinuation (f : ℂ → ℂ) : ℂ → ℂ :=
+  if h : ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F slitOne ∧ ∀ z, ‖z‖ < 1 → F z = f z then h.choose
   else f
 
 /-- **The polylogarithm series of complex order** `∑_{n≥1} zⁿ/n^s` (DLMF 25.12.10), as a `tsum`
@@ -91,16 +117,16 @@ continuation of 25.12.10 to `ℂ \ [1, ∞)` (principal branch); on `[1, ∞)` t
 (so `Li_s(1) = ζ(s)` for `Re s > 1`, and junk on `(1, ∞)`). -/
 @[dlmf 25.12.ii]
 def polylog (s z : ℂ) : ℂ :=
-  if z ∈ z25b_slitOne then z25b_slitContinuation (polylogSeriesC s) z else polylogSeriesC s z
+  if z ∈ slitOne then slitContinuation (polylogSeriesC s) z else polylogSeriesC s z
 
 /-! ### Basic properties -/
 
-/-- Formula under the stated hypotheses: `z ∈ z25b_slitOne`. -/
-theorem z25b_mem_slitOne_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : z ∈ z25b_slitOne :=
+/-- Formula under the stated hypotheses: `z ∈ slitOne`. -/
+theorem mem_slitOne_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : z ∈ slitOne :=
   Or.inr (lt_of_le_of_lt (re_le_norm z) hz)
 
-/-- The indicated domain is open: `IsOpen z25b_slitOne`. -/
-theorem z25b_isOpen_slitOne : IsOpen z25b_slitOne :=
+/-- The indicated domain is open: `IsOpen slitOne`. -/
+theorem isOpen_slitOne : IsOpen slitOne :=
   (isOpen_ne_fun continuous_im continuous_const).union
     (isOpen_lt continuous_re continuous_const)
 
@@ -134,7 +160,7 @@ theorem summable_polylogSeriesC_of_norm_le_one {s : ℂ} (hs : 1 < s.re) {z : �
   exact pow_le_one₀ (norm_nonneg _) hz
 
 /-- The polylogarithm series from Lerch's series with `a = 1`. -/
-lemma q25b_hasSum_polylogSeriesC {s z w : ℂ}
+private lemma hasSum_polylogSeriesC_of_hasSum_lerch {s z w : ℂ}
     (h : HasSum (fun n : ℕ => z ^ n / (1 + n) ^ s) w) :
     HasSum (fun n : ℕ => z ^ (n + 1) / ((n : ℂ) + 1) ^ s) (z * w) :=
   (h.mul_left z).congr_fun fun n => by rw [pow_succ, add_comm (1 : ℂ)]; ring
@@ -143,97 +169,97 @@ lemma q25b_hasSum_polylogSeriesC {s z w : ℂ}
 analytically from the unit disk to `ℂ \ [1, ∞)`. -/
 @[dlmf 25.12.ii]
 theorem exists_polylog_continuation (s : ℂ) :
-    ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F z25b_slitOne ∧ ∀ z, ‖z‖ < 1 → F z = polylogSeriesC s z := by
-  obtain ⟨F, hF⟩ := q25b_exists_isLerchCont s 1
+    ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F slitOne ∧ ∀ z, ‖z‖ < 1 → F z = polylogSeriesC s z := by
+  obtain ⟨F, hF⟩ := exists_isLerchContinuation s 1
   exact ⟨fun z => z * F z, analyticOnNhd_id.mul hF.1, fun z hz =>
-    (q25b_hasSum_polylogSeriesC (hF.2 z hz)).tsum_eq.symm⟩
+    (hasSum_polylogSeriesC_of_hasSum_lerch (hF.2 z hz)).tsum_eq.symm⟩
 
-/-- Analyticity on a neighborhood of the specified domain: `AnalyticOnNhd ℂ (z25b_slitContinuation
-(polylogSeriesC s)) z25b_slitOne ∧ ∀ z, ‖z‖ < 1 → z25b_slitContinuation (polylogSeriesC s) z =
+/-- Analyticity on a neighborhood of the specified domain: `AnalyticOnNhd ℂ (slitContinuation
+(polylogSeriesC s)) slitOne ∧ ∀ z, ‖z‖ < 1 → slitContinuation (polylogSeriesC s) z =
 polylogSeriesC s z`. -/
-lemma z25b_polylog_spec (s : ℂ) :
-    AnalyticOnNhd ℂ (z25b_slitContinuation (polylogSeriesC s)) z25b_slitOne ∧
-      ∀ z, ‖z‖ < 1 → z25b_slitContinuation (polylogSeriesC s) z = polylogSeriesC s z := by
+private lemma polylog_slitContinuation_spec (s : ℂ) :
+    AnalyticOnNhd ℂ (slitContinuation (polylogSeriesC s)) slitOne ∧
+      ∀ z, ‖z‖ < 1 → slitContinuation (polylogSeriesC s) z = polylogSeriesC s z := by
   have h := exists_polylog_continuation s
-  unfold z25b_slitContinuation
+  unfold slitContinuation
   simp only [h, ↓reduceDIte]
   exact h.choose_spec
 
 /-- On the cut plane, `Li_s(z) = z Φ(z, s, 1)` for any continuation `Φ(·, s, 1)` of Lerch's
 series. -/
-lemma q25b_polylog_eq_mul {s : ℂ} {F : ℂ → ℂ} (hF : Q25bIsLerchCont s 1 F) {z : ℂ}
-    (hz : z ∈ z25b_slitOne) : polylog s z = z * F z := by
+private lemma polylog_eq_mul_of_isLerchContinuation {s : ℂ} {F : ℂ → ℂ} (hF : IsLerchContinuation s 1 F) {z : ℂ}
+    (hz : z ∈ slitOne) : polylog s z = z * F z := by
   simp only [polylog, hz, ↓reduceIte]
-  refine q25b_eqOn_slit (z25b_polylog_spec s).1 (analyticOnNhd_id.mul hF.1) (fun w hw => ?_) hz
-  rw [(z25b_polylog_spec s).2 w hw]
-  exact (q25b_hasSum_polylogSeriesC (hF.2 w hw)).tsum_eq
+  refine eqOn_slitOne_of_eq_on_ball (polylog_slitContinuation_spec s).1 (analyticOnNhd_id.mul hF.1) (fun w hw => ?_) hz
+  rw [(polylog_slitContinuation_spec s).2 w hw]
+  exact (hasSum_polylogSeriesC_of_hasSum_lerch (hF.2 w hw)).tsum_eq
 
 /-- `z ∈ ℂ \ [1, ∞)` for `|z| ≤ 1`, `z ≠ 1`. -/
-theorem q25b_mem_slitOne_of_norm_le_one {z : ℂ} (hz : ‖z‖ ≤ 1) (h1 : z ≠ 1) : z ∈ z25b_slitOne := by
+theorem mem_slitOne_of_norm_le_one {z : ℂ} (hz : ‖z‖ ≤ 1) (h1 : z ≠ 1) : z ∈ slitOne := by
   by_contra h
-  simp only [z25b_slitOne, mem_ofPred_eq, not_or, not_lt, ne_eq, not_not] at h
+  simp only [slitOne, mem_ofPred_eq, not_or, not_lt, ne_eq, not_not] at h
   have hre : z.re ≤ 1 := (re_le_norm z).trans hz
   exact h1 (Complex.ext (by simp; linarith [h.2]) (by simp [h.1]))
 
 /-- `Li_s(z) = (z/Γ(s)) ∫_0^∞ x^{s-1}e^{-x}/(1 - z e^{-x}) dx` (the form 25.14.5 of 25.12.11). -/
-lemma q25b_polylog_eq_lerchInt {s z : ℂ}
-    (h : (0 < s.re ∧ z ∈ z25b_slitOne) ∨ (1 < s.re ∧ z = 1)) :
-    polylog s z = z * ((Gamma s)⁻¹ * q25b_lerchInt s 1 z) := by
-  obtain ⟨F, hF⟩ := q25b_exists_isLerchCont s 1
+private lemma polylog_eq_mul_lerchIntegral {s z : ℂ}
+    (h : (0 < s.re ∧ z ∈ slitOne) ∨ (1 < s.re ∧ z = 1)) :
+    polylog s z = z * ((Gamma s)⁻¹ * lerchIntegral s 1 z) := by
+  obtain ⟨F, hF⟩ := exists_isLerchContinuation s 1
   rcases h with ⟨hs, hz⟩ | ⟨hs, rfl⟩
-  · rw [q25b_polylog_eq_mul hF hz, hF.eq_lerchInt hs one_pos hz]
-  · have h1 : (1 : ℂ) ∉ z25b_slitOne := by simp [z25b_slitOne]
+  · rw [polylog_eq_mul_of_isLerchContinuation hF hz, hF.eq_lerchInt hs one_pos hz]
+  · have h1 : (1 : ℂ) ∉ slitOne := by simp [slitOne]
     simp only [polylog, h1, ↓reduceIte]
-    exact (q25b_hasSum_polylogSeriesC
-      (q25b_hasSum_lerchInt (z := 1) (by linarith) one_pos (Or.inr ⟨by simp, hs⟩))).tsum_eq
+    exact (hasSum_polylogSeriesC_of_hasSum_lerch
+      (hasSum_lerch_lerchIntegral (z := 1) (by linarith) one_pos (Or.inr ⟨by simp, hs⟩))).tsum_eq
 
 /-- **The series in the unit disk** (DLMF 25.12.10, 25.12.1 for `s = 2`): for `|z| < 1`,
 `Li_s(z) = ∑_{n≥1} zⁿ/n^s`. -/
 @[dlmf 25.12.E10]
 theorem hasSum_polylog {s z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => z ^ (n + 1) / ((n : ℂ) + 1) ^ s) (polylog s z) := by
-  simp only [polylog, z25b_mem_slitOne_of_norm_lt_one hz, ↓reduceIte]
-  rw [(z25b_polylog_spec s).2 z hz]
+  simp only [polylog, mem_slitOne_of_norm_lt_one hz, ↓reduceIte]
+  rw [(polylog_slitContinuation_spec s).2 z hz]
   exact (summable_polylogSeriesC_of_norm_lt_one s hz).hasSum
 
 /-- **Analyticity** (DLMF §25.12(i)–(ii)): `Li_s` is analytic on `ℂ \ [1, ∞)`. -/
 @[dlmf 25.12.ii]
-theorem analyticOnNhd_polylog (s : ℂ) : AnalyticOnNhd ℂ (polylog s) z25b_slitOne := by
-  refine (z25b_polylog_spec s).1.congr z25b_isOpen_slitOne fun z hz => ?_
+theorem analyticOnNhd_polylog (s : ℂ) : AnalyticOnNhd ℂ (polylog s) slitOne := by
+  refine (polylog_slitContinuation_spec s).1.congr isOpen_slitOne fun z hz => ?_
   simp only [polylog, hz, ↓reduceIte]
 
 /-- `Li_s` is differentiable on the cut plane; in terms of `Φ(z, s, 1) = F z`,
 `Li_s'(z) = F z + z F'(z)`. -/
-lemma q25b_hasDerivAt_polylog (s : ℂ) {z : ℂ} (hz : z ∈ z25b_slitOne) :
-    ∃ F : ℂ → ℂ, Q25bIsLerchCont s 1 F ∧ HasDerivAt (polylog s) (F z + z * deriv F z) z := by
-  obtain ⟨F, hF⟩ := q25b_exists_isLerchCont s 1
+private lemma exists_hasDerivAt_polylog (s : ℂ) {z : ℂ} (hz : z ∈ slitOne) :
+    ∃ F : ℂ → ℂ, IsLerchContinuation s 1 F ∧ HasDerivAt (polylog s) (F z + z * deriv F z) z := by
+  obtain ⟨F, hF⟩ := exists_isLerchContinuation s 1
   refine ⟨F, hF, ?_⟩
   have hev : polylog s =ᶠ[𝓝 z] fun w => w * F w := by
-    filter_upwards [z25b_isOpen_slitOne.mem_nhds hz] with w hw
-    exact q25b_polylog_eq_mul hF hw
+    filter_upwards [isOpen_slitOne.mem_nhds hz] with w hw
+    exact polylog_eq_mul_of_isLerchContinuation hF hw
   have hd : HasDerivAt (fun w => w * F w) (1 * F z + z * deriv F z) z :=
     (hasDerivAt_id z).mul ((hF.1 z hz).differentiableAt.hasDerivAt)
   rw [one_mul] at hd
   exact hd.congr_of_eventuallyEq hev
 
 /-- `z Li_s'(z) = Li_{s-1}(z)` on the cut plane. -/
-lemma q25b_mul_deriv_polylog (s : ℂ) {z : ℂ} (hz : z ∈ z25b_slitOne) :
+private lemma mul_deriv_polylog (s : ℂ) {z : ℂ} (hz : z ∈ slitOne) :
     z * deriv (polylog s) z = polylog (s - 1) z := by
-  obtain ⟨F, hF, hd⟩ := q25b_hasDerivAt_polylog s hz
+  obtain ⟨F, hF, hd⟩ := exists_hasDerivAt_polylog s hz
   have h1 : ∀ n : ℕ, (1 : ℂ) + n ≠ 0 := fun n => by
     have : (0 : ℝ) < 1 + n := by positivity
     exact_mod_cast this.ne'
-  rw [hd.deriv, q25b_polylog_eq_mul (q25b_isLerchCont_sub_one h1 hF) hz]
+  rw [hd.deriv, polylog_eq_mul_of_isLerchContinuation (isLerchContinuation_sub_one h1 hF) hz]
   ring
 
 /-- `Li_1(z) = -ln(1 - z)` on the cut plane. -/
-lemma q25b_polylog_one_eq {z : ℂ} (hz : z ∈ z25b_slitOne) :
+private lemma polylog_one_eq_neg_log {z : ℂ} (hz : z ∈ slitOne) :
     polylog 1 z = -Complex.log (1 - z) := by
-  have hmem : ∀ w ∈ z25b_slitOne, 1 - w ∈ slitPlane := fun w hw => by
+  have hmem : ∀ w ∈ slitOne, 1 - w ∈ slitPlane := fun w hw => by
     rcases hw with h | h
     · right; simpa using h
     · left; simp; linarith
-  refine q25b_eqOn_slit (F := polylog 1) (G := fun z => -Complex.log (1 - z))
+  refine eqOn_slitOne_of_eq_on_ball (F := polylog 1) (G := fun z => -Complex.log (1 - z))
     (analyticOnNhd_polylog 1) (fun w hw => ((analyticAt_clog (hmem w hw)).comp
       (analyticAt_const.sub analyticAt_id)).neg) (fun w hw => ?_) hz
   have h := hasSum_polylog (s := 1) hw
@@ -241,18 +267,18 @@ lemma q25b_polylog_one_eq {z : ℂ} (hz : z ∈ z25b_slitOne) :
   exact h.unique (Complex.hasSum_taylorSeries_neg_log' hw)
 
 /-- `Li₂'(z) = -ln(1 - z)/z` on the cut plane, `z ≠ 0`. -/
-lemma q25b_hasDerivAt_polylog_two {z : ℂ} (hz : z ∈ z25b_slitOne) (hz0 : z ≠ 0) :
+private lemma hasDerivAt_polylog_two {z : ℂ} (hz : z ∈ slitOne) (hz0 : z ≠ 0) :
     HasDerivAt (polylog 2) (-Complex.log (1 - z) / z) z := by
-  obtain ⟨F, hF, hd⟩ := q25b_hasDerivAt_polylog 2 hz
-  have h := q25b_mul_deriv_polylog 2 hz
-  rw [hd.deriv, show (2 : ℂ) - 1 = 1 by norm_num, q25b_polylog_one_eq hz] at h
+  obtain ⟨F, hF, hd⟩ := exists_hasDerivAt_polylog 2 hz
+  have h := mul_deriv_polylog 2 hz
+  rw [hd.deriv, show (2 : ℂ) - 1 = 1 by norm_num, polylog_one_eq_neg_log hz] at h
   rw [← h, mul_div_cancel_left₀ _ hz0]
   exact hd
 
 /-- `Li₂'(0) = 1`. -/
-lemma q25b_hasDerivAt_polylog_two_zero : HasDerivAt (polylog 2) 1 0 := by
+private lemma hasDerivAt_polylog_two_zero : HasDerivAt (polylog 2) 1 0 := by
   obtain ⟨F, hF, hd⟩ :=
-    q25b_hasDerivAt_polylog 2 (z25b_mem_slitOne_of_norm_lt_one (z := 0) (by simp))
+    exists_hasDerivAt_polylog 2 (mem_slitOne_of_norm_lt_one (z := 0) (by simp))
   have h0 : HasSum (fun n : ℕ => (0 : ℂ) ^ n / (1 + n) ^ (2 : ℂ)) 1 := by
     convert hasSum_ite_eq 0 (1 : ℂ) using 1
     funext n
@@ -262,9 +288,9 @@ lemma q25b_hasDerivAt_polylog_two_zero : HasDerivAt (polylog 2) 1 0 := by
 
 open DLMF.Polylog in
 /-- **Bridge to the real dilogarithm**: `Li₂(x) = DLMF.Polylog.Real.dilog x` for real `x < 1`. -/
-lemma q25b_polylog_two_ofReal {x : ℝ} (hx : x < 1) :
+private lemma polylog_two_ofReal {x : ℝ} (hx : x < 1) :
     polylog 2 x = (Real.dilog x : ℂ) := by
-  have hmem : ∀ y : ℝ, y < 1 → (y : ℂ) ∈ z25b_slitOne := fun y hy => Or.inr (by simpa using hy)
+  have hmem : ∀ y : ℝ, y < 1 → (y : ℂ) ∈ slitOne := fun y hy => Or.inr (by simpa using hy)
   have hder : ∀ y : ℝ, y < 1 → HasDerivAt (fun t : ℝ => polylog 2 t - (Real.dilog t : ℂ)) 0 y := by
     intro y hy
     have h2 : HasDerivAt (fun t : ℝ => (Real.dilog t : ℂ)) (dilogKernel y : ℂ) y :=
@@ -272,9 +298,9 @@ lemma q25b_polylog_two_ofReal {x : ℝ} (hx : x < 1) :
     have h1 : HasDerivAt (fun t : ℝ => polylog 2 t) (dilogKernel y : ℂ) y := by
       rcases eq_or_ne y 0 with rfl | hy0
       · rw [dilogKernel_zero, ofReal_one]
-        have := q25b_hasDerivAt_polylog_two_zero.comp_ofReal (z := (0 : ℝ))
+        have := hasDerivAt_polylog_two_zero.comp_ofReal (z := (0 : ℝ))
         exact this
-      · have hc := (q25b_hasDerivAt_polylog_two (hmem y hy)
+      · have hc := (hasDerivAt_polylog_two (hmem y hy)
           (by exact_mod_cast hy0)).comp_ofReal (z := y)
         rw [dilogKernel_of_ne hy0]
         convert hc using 1
@@ -300,18 +326,18 @@ theorem hasSum_polylog_of_norm_eq_one {s z : ℂ} (hs : 1 < s.re) (hz : ‖z‖ 
     HasSum (fun n : ℕ => z ^ (n + 1) / ((n : ℂ) + 1) ^ s) (polylog s z) := by
   by_cases h1 : z = 1
   · subst h1
-    have h1' : (1 : ℂ) ∉ z25b_slitOne := by simp [z25b_slitOne]
+    have h1' : (1 : ℂ) ∉ slitOne := by simp [slitOne]
     simp only [polylog, h1', ↓reduceIte]
     exact (summable_polylogSeriesC_of_norm_le_one hs (by simp)).hasSum
-  · obtain ⟨F, hF⟩ := q25b_exists_isLerchCont s 1
-    have hzs := q25b_mem_slitOne_of_norm_le_one hz.le h1
-    rw [q25b_polylog_eq_mul hF hzs]
-    exact q25b_hasSum_polylogSeriesC (hF.hasSum_of_norm_le_one hs hz.le hzs)
+  · obtain ⟨F, hF⟩ := exists_isLerchContinuation s 1
+    have hzs := mem_slitOne_of_norm_le_one hz.le h1
+    rw [polylog_eq_mul_of_isLerchContinuation hF hzs]
+    exact hasSum_polylogSeriesC_of_hasSum_lerch (hF.hasSum_of_norm_le_one hs hz.le hzs)
 
 /-- **`Li_s(1) = ζ(s)`** (DLMF §25.12(ii)) for `Re s > 1`. -/
 @[dlmf 25.12.ii]
 theorem polylog_one {s : ℂ} (hs : 1 < s.re) : polylog s 1 = riemannZeta s := by
-  have h1 : (1 : ℂ) ∉ z25b_slitOne := by simp [z25b_slitOne]
+  have h1 : (1 : ℂ) ∉ slitOne := by simp [slitOne]
   simp only [polylog, h1, ↓reduceIte]
   rw [polylogSeriesC, zeta_eq_tsum_one_div_nat_add_one_cpow hs]
   simp
@@ -332,7 +358,7 @@ theorem polylog_natCast_eq_polylogSeries {n : ℕ} (hn : 2 ≤ n) {z : ℂ} (hz 
 
 /-- Real points accumulate: a property holding near `x₀` on `ℝ` holds frequently near `x₀`
 in `ℂ`. -/
-lemma q25b_frequently_ofReal {P : ℂ → Prop} {x₀ : ℝ} (h : ∀ᶠ x : ℝ in 𝓝 x₀, P (x : ℂ)) :
+private lemma frequently_ofReal_of_eventually {P : ℂ → Prop} {x₀ : ℝ} (h : ∀ᶠ x : ℝ in 𝓝 x₀, P (x : ℂ)) :
     ∃ᶠ z in 𝓝[≠] (x₀ : ℂ), P z := by
   have ht : Tendsto (fun x : ℝ => (x : ℂ)) (𝓝[≠] x₀) (𝓝[≠] (x₀ : ℂ)) :=
     tendsto_nhdsWithin_iff.mpr ⟨(continuous_ofReal.tendsto x₀).mono_left nhdsWithin_le_nhds,
@@ -340,8 +366,8 @@ lemma q25b_frequently_ofReal {P : ℂ → Prop} {x₀ : ℝ} (h : ∀ᶠ x : ℝ
   exact ht.frequently (h.filter_mono nhdsWithin_le_nhds).frequently
 
 /-- The function `(fun w => polylog 2 (f w))` is analytic over `ℂ` at `z`. -/
-lemma q25b_analyticAt_polylog_two_comp {f : ℂ → ℂ} {z : ℂ} (hf : AnalyticAt ℂ f z)
-    (hz : f z ∈ z25b_slitOne) : AnalyticAt ℂ (fun w => polylog 2 (f w)) z :=
+private lemma analyticAt_polylog_two_comp {f : ℂ → ℂ} {z : ℂ} (hf : AnalyticAt ℂ f z)
+    (hz : f z ∈ slitOne) : AnalyticAt ℂ (fun w => polylog 2 (f w)) z :=
   (analyticOnNhd_polylog 2 _ hz).comp hf
 
 /-! ### §25.12(i) Dilogarithms -/
@@ -362,11 +388,11 @@ theorem hasSum_dilog {z : ℂ} (hz : ‖z‖ ≤ 1) :
 @[dlmf 25.12.E2]
 theorem polylog_two_eq_integral {z : ℂ} (hz : z.im ≠ 0 ∨ z.re ≤ 1) :
     polylog 2 z = -∫ u in (0 : ℝ)..1, Complex.log (1 - u * z) / u := by
-  by_cases hzs : z ∈ z25b_slitOne
-  · have hmem : ∀ u ∈ Icc (0 : ℝ) 1, (u : ℂ) * z ∈ z25b_slitOne := fun u hu => by
-      have := q25b_starConvex_slit hzs (a := 1 - u) (b := u) (by linarith [hu.2]) hu.1
+  by_cases hzs : z ∈ slitOne
+  · have hmem : ∀ u ∈ Icc (0 : ℝ) 1, (u : ℂ) * z ∈ slitOne := fun u hu => by
+      have := starConvex_slitOne hzs (a := 1 - u) (b := u) (by linarith [hu.2]) hu.1
         (by ring)
-      have h2 : (u : ℂ) * z ∈ q25b_slit := by simpa [Complex.real_smul] using this
+      have h2 : (u : ℂ) * z ∈ slitOne := by simpa [Complex.real_smul] using this
       exact h2
     have hd : ∀ u ∈ uIcc (0 : ℝ) 1, HasDerivAt (fun u : ℝ => polylog 2 (u * z))
         (deriv (polylog 2) (u * z) * z) u := by
@@ -394,10 +420,10 @@ theorem polylog_two_eq_integral {z : ℂ} (hz : z.im ≠ 0 ∨ z.re ≤ 1) :
     rcases eq_or_ne z 0 with rfl | hz0
     · simp
     have hu0 : (u : ℂ) ≠ 0 := by exact_mod_cast hu.1.ne'
-    rw [(q25b_hasDerivAt_polylog_two (hmem u ⟨hu.1.le, hu.2⟩) (mul_ne_zero hu0 hz0)).deriv]
+    rw [(hasDerivAt_polylog_two (hmem u ⟨hu.1.le, hu.2⟩) (mul_ne_zero hu0 hz0)).deriv]
     field_simp
   · have hz1 : z = 1 := by
-      simp only [z25b_slitOne, Set.mem_ofPred_eq, not_or, not_lt, ne_eq, not_not] at hzs
+      simp only [slitOne, Set.mem_ofPred_eq, not_or, not_lt, ne_eq, not_not] at hzs
       rcases hz with h | h
       · exact absurd hzs.1 h
       · exact Complex.ext (by simp; linarith [hzs.2]) (by simp [hzs.1])
@@ -416,14 +442,14 @@ theorem polylog_two_eq_integral {z : ℂ} (hz : z.im ≠ 0 ∨ z.re ≤ 1) :
 /-- **Landen-type identity** (DLMF 25.12.3): `Li₂(z) + Li₂(z/(z-1)) = -½ (ln(1-z))²` for
 `z ∈ ℂ \ [1, ∞)`. (Real case: `DLMF.Polylog.Real.dilog_add_dilog_div_sub_one`.) -/
 @[dlmf 25.12.E3]
-theorem polylog_two_add_polylog_two_div_sub_one {z : ℂ} (hz : z ∈ z25b_slitOne) :
+theorem polylog_two_add_polylog_two_div_sub_one {z : ℂ} (hz : z ∈ slitOne) :
     polylog 2 z + polylog 2 (z / (z - 1)) = -(1 / 2) * Complex.log (1 - z) ^ 2 := by
-  have hne : ∀ w ∈ z25b_slitOne, w - 1 ≠ 0 := fun w hw h => by
+  have hne : ∀ w ∈ slitOne, w - 1 ≠ 0 := fun w hw h => by
     rw [sub_eq_zero] at h; subst h; rcases hw with h | h <;> simp at h
-  have hmem : ∀ w ∈ z25b_slitOne, w / (w - 1) ∈ z25b_slitOne := by
+  have hmem : ∀ w ∈ slitOne, w / (w - 1) ∈ slitOne := by
     intro w hw
     by_contra hc
-    simp only [z25b_slitOne, Set.mem_ofPred_eq, not_or, not_lt, ne_eq, not_not] at hc
+    simp only [slitOne, Set.mem_ofPred_eq, not_or, not_lt, ne_eq, not_not] at hc
     set r := (w / (w - 1)).re
     have hr : w / (w - 1) = r := Complex.ext (by simp [r]) (by simp [hc.1])
     have hr1 : r ≠ 1 := fun h => by
@@ -442,25 +468,25 @@ theorem polylog_two_add_polylog_two_div_sub_one {z : ℂ} (hz : z ∈ z25b_slitO
     · rw [show (r : ℂ) / (r - 1) = ((r / (r - 1) : ℝ) : ℂ) by push_cast; ring, ofReal_re] at h
       rw [div_lt_one (by linarith)] at h
       linarith
-  have hlog : ∀ w ∈ z25b_slitOne, 1 - w ∈ slitPlane := fun w hw => by
+  have hlog : ∀ w ∈ slitOne, 1 - w ∈ slitPlane := fun w hw => by
     rcases hw with h | h
     · right; simpa using h
     · left; simp; linarith
-  have hf : AnalyticOnNhd ℂ (fun w => polylog 2 w + polylog 2 (w / (w - 1))) z25b_slitOne :=
-    fun w hw => (analyticOnNhd_polylog 2 w hw).add (q25b_analyticAt_polylog_two_comp
+  have hf : AnalyticOnNhd ℂ (fun w => polylog 2 w + polylog 2 (w / (w - 1))) slitOne :=
+    fun w hw => (analyticOnNhd_polylog 2 w hw).add (analyticAt_polylog_two_comp
       (analyticAt_id.div (analyticAt_id.sub analyticAt_const) (hne w hw)) (hmem w hw))
-  have hg : AnalyticOnNhd ℂ (fun w => -(1 / 2) * Complex.log (1 - w) ^ 2) z25b_slitOne :=
+  have hg : AnalyticOnNhd ℂ (fun w => -(1 / 2) * Complex.log (1 - w) ^ 2) slitOne :=
     fun w hw => analyticAt_const.mul
       (((analyticAt_clog (hlog w hw)).comp (analyticAt_const.sub analyticAt_id)).pow 2)
-  refine hf.eqOn_of_preconnected_of_frequently_eq hg q25b_isPreconnected_slit
-    (z₀ := ((0 : ℝ) : ℂ)) (Or.inr (by simp)) (q25b_frequently_ofReal (x₀ := 0) ?_) hz
+  refine hf.eqOn_of_preconnected_of_frequently_eq hg isPreconnected_slitOne
+    (z₀ := ((0 : ℝ) : ℂ)) (Or.inr (by simp)) (frequently_ofReal_of_eventually (x₀ := 0) ?_) hz
   filter_upwards [Iio_mem_nhds (by norm_num : (0 : ℝ) < 1)] with x hx
   have hx' : x < 1 := hx
   have h := DLMF.Polylog.Real.dilog_add_dilog_div_sub_one hx'
   have hd : x / (x - 1) < 1 := by
     rw [div_lt_one_of_neg (by linarith)]; linarith
   rw [show (x : ℂ) / (x - 1) = ((x / (x - 1) : ℝ) : ℂ) by push_cast; ring,
-    q25b_polylog_two_ofReal hx', q25b_polylog_two_ofReal hd,
+    polylog_two_ofReal hx', polylog_two_ofReal hd,
     show (1 : ℂ) - x = ((1 - x : ℝ) : ℂ) by push_cast; ring, ← ofReal_log (by linarith)]
   have hC := congrArg (fun t : ℝ => (t : ℂ)) h
   push_cast at hC ⊢
@@ -473,9 +499,9 @@ theorem polylog_two_add_polylog_two_inv {z : ℂ} (hz : z.im ≠ 0 ∨ z.re < 0)
     polylog 2 z + polylog 2 (1 / z) = -(π : ℂ) ^ 2 / 6 - (1 / 2) * Complex.log (-z) ^ 2 := by
   set U : Set ℂ := {z | z.im ≠ 0 ∨ z.re < 0}
   have hU0 : ∀ w ∈ U, w ≠ 0 := fun w hw h => by subst h; rcases hw with h | h <;> simp at h
-  have hU1 : ∀ w ∈ U, w ∈ z25b_slitOne := fun w hw => by
+  have hU1 : ∀ w ∈ U, w ∈ slitOne := fun w hw => by
     rcases hw with h | h; exacts [Or.inl h, Or.inr (by linarith)]
-  have hU2 : ∀ w ∈ U, 1 / w ∈ z25b_slitOne := fun w hw => by
+  have hU2 : ∀ w ∈ U, 1 / w ∈ slitOne := fun w hw => by
     have hw0 := hU0 w hw
     rcases hw with h | h
     · left
@@ -506,18 +532,18 @@ theorem polylog_two_add_polylog_two_inv {z : ℂ} (hz : z.im ≠ 0 ∨ z.re < 0)
         nlinarith
     · right; norm_num
   have hf : AnalyticOnNhd ℂ (fun w => polylog 2 w + polylog 2 (1 / w)) U := fun w hw =>
-    (analyticOnNhd_polylog 2 w (hU1 w hw)).add (q25b_analyticAt_polylog_two_comp
+    (analyticOnNhd_polylog 2 w (hU1 w hw)).add (analyticAt_polylog_two_comp
       (analyticAt_const.div analyticAt_id (hU0 w hw)) (hU2 w hw))
   have hg : AnalyticOnNhd ℂ (fun w => -(π : ℂ) ^ 2 / 6 - (1 / 2) * Complex.log (-w) ^ 2) U :=
     fun w hw => analyticAt_const.sub (analyticAt_const.mul
       (((analyticAt_clog (hU3 w hw)).comp analyticAt_id.neg).pow 2))
   refine hf.eqOn_of_preconnected_of_frequently_eq hg hUc (z₀ := ((-1 : ℝ) : ℂ))
-    (Or.inr (by norm_num)) (q25b_frequently_ofReal (x₀ := -1) ?_) hz
+    (Or.inr (by norm_num)) (frequently_ofReal_of_eventually (x₀ := -1) ?_) hz
   filter_upwards [Iio_mem_nhds (by norm_num : (-1 : ℝ) < 0)] with x hx
   have hx' : x < 0 := hx
   have h := DLMF.Polylog.Real.dilog_add_dilog_recip hx'
   rw [show (1 : ℂ) / x = ((x⁻¹ : ℝ) : ℂ) by push_cast; ring,
-    q25b_polylog_two_ofReal (by linarith), q25b_polylog_two_ofReal (by
+    polylog_two_ofReal (by linarith), polylog_two_ofReal (by
       have := inv_lt_zero.mpr hx'; linarith),
     show -(x : ℂ) = ((-x : ℝ) : ℂ) by push_cast; ring, ← ofReal_log (by linarith)]
   have hC := congrArg (fun t : ℝ => (t : ℂ)) h
@@ -613,9 +639,9 @@ theorem polylog_two_add_polylog_two_one_sub {z : ℂ} (hz : z.im ≠ 0 ∨ (0 < 
     polylog 2 z + polylog 2 (1 - z) =
       (π : ℂ) ^ 2 / 6 - Complex.log z * Complex.log (1 - z) := by
   set U : Set ℂ := {z | z.im ≠ 0 ∨ (0 < z.re ∧ z.re < 1)}
-  have hU1 : ∀ w ∈ U, w ∈ z25b_slitOne := fun w hw => by
+  have hU1 : ∀ w ∈ U, w ∈ slitOne := fun w hw => by
     rcases hw with h | h; exacts [Or.inl h, Or.inr h.2]
-  have hU2 : ∀ w ∈ U, 1 - w ∈ z25b_slitOne := fun w hw => by
+  have hU2 : ∀ w ∈ U, 1 - w ∈ slitOne := fun w hw => by
     rcases hw with h | h
     · left; simpa using h
     · right; simp; linarith [h.1]
@@ -643,17 +669,17 @@ theorem polylog_two_add_polylog_two_one_sub {z : ℂ} (hz : z.im ≠ 0 ∨ (0 < 
     · right; norm_num
   have hf : AnalyticOnNhd ℂ (fun w => polylog 2 w + polylog 2 (1 - w)) U := fun w hw =>
     (analyticOnNhd_polylog 2 w (hU1 w hw)).add
-      (q25b_analyticAt_polylog_two_comp (analyticAt_const.sub analyticAt_id) (hU2 w hw))
+      (analyticAt_polylog_two_comp (analyticAt_const.sub analyticAt_id) (hU2 w hw))
   have hg : AnalyticOnNhd ℂ (fun w => (π : ℂ) ^ 2 / 6 - Complex.log w * Complex.log (1 - w)) U :=
     fun w hw => analyticAt_const.sub ((analyticAt_clog (hU3 w hw)).mul
       ((analyticAt_clog (hU4 w hw)).comp (analyticAt_const.sub analyticAt_id)))
   refine hf.eqOn_of_preconnected_of_frequently_eq hg hUc (z₀ := ((1 / 2 : ℝ) : ℂ))
-    (Or.inr (by norm_num)) (q25b_frequently_ofReal (x₀ := 1 / 2) ?_) hz
+    (Or.inr (by norm_num)) (frequently_ofReal_of_eventually (x₀ := 1 / 2) ?_) hz
   filter_upwards [Ioo_mem_nhds (by norm_num : (0 : ℝ) < 1 / 2) (by norm_num : (1 / 2 : ℝ) < 1)]
     with x hx
   have h := DLMF.Polylog.Real.dilog_add_dilog_one_sub hx
   rw [show (1 : ℂ) - x = ((1 - x : ℝ) : ℂ) by push_cast; ring,
-    q25b_polylog_two_ofReal hx.2, q25b_polylog_two_ofReal (by linarith [hx.1]),
+    polylog_two_ofReal hx.2, polylog_two_ofReal (by linarith [hx.1]),
     ← ofReal_log hx.1.le, ← ofReal_log (by linarith [hx.2])]
   exact_mod_cast h
 
@@ -707,7 +733,7 @@ theorem hasSum_cos_div_sq {θ : ℝ} (h0 : 0 ≤ θ) (h1 : θ ≤ 2 * π) :
     ring
 
 /-- `|1 - e^{ix}| = 2 sin(x/2)` for `0 < x < 2π`. -/
-lemma s25b_norm_one_sub_exp {x : ℝ} (hx0 : 0 < x) (hx1 : x < 2 * π) :
+private lemma norm_one_sub_exp_mul_I {x : ℝ} (hx0 : 0 < x) (hx1 : x < 2 * π) :
     ‖1 - cexp (x * I)‖ = 2 * Real.sin (x / 2) := by
   have hs : 0 < Real.sin (x / 2) := Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
   have h2 : ‖1 - cexp (x * I)‖ ^ 2 = (2 * Real.sin (x / 2)) ^ 2 := by
@@ -723,29 +749,29 @@ lemma s25b_norm_one_sub_exp {x : ℝ} (hx0 : 0 < x) (hx1 : x < 2 * π) :
   exact (sq_eq_sq₀ (norm_nonneg _) (by positivity)).mp h2
 
 /-- `d/dx Im Li₂(e^{ix}) = -ln(2 sin(x/2))` for `0 < x < 2π`. -/
-lemma s25b_hasDerivAt_im_polylog_two_exp {x : ℝ} (hx0 : 0 < x) (hx1 : x < 2 * π) :
+private lemma hasDerivAt_im_polylog_two_exp {x : ℝ} (hx0 : 0 < x) (hx1 : x < 2 * π) :
     HasDerivAt (fun y : ℝ => (polylog 2 (cexp (y * I))).im)
       (-Real.log (2 * Real.sin (x / 2))) x := by
   set z := cexp (x * I)
   have hz1 : ‖z‖ = 1 := norm_exp_ofReal_mul_I x
   have hzne : z ≠ 1 := by
     intro h
-    have := s25b_norm_one_sub_exp hx0 hx1
+    have := norm_one_sub_exp_mul_I hx0 hx1
     rw [show cexp (x * I) = z from rfl, h, sub_self, norm_zero] at this
     have hs : 0 < Real.sin (x / 2) := Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
     linarith
   have hz0 : z ≠ 0 := Complex.exp_ne_zero _
-  have hmem := q25b_mem_slitOne_of_norm_le_one hz1.le hzne
+  have hmem := mem_slitOne_of_norm_le_one hz1.le hzne
   have he : HasDerivAt (fun y : ℝ => cexp (y * I)) (z * I) x := by
     have := ((hasDerivAt_id x).ofReal_comp.mul_const I).cexp
     simpa using this
-  have hg := (q25b_hasDerivAt_polylog_two hmem hz0).comp x he
+  have hg := (hasDerivAt_polylog_two hmem hz0).comp x he
   have him := Complex.imCLM.hasFDerivAt.comp_hasDerivAt x hg
   convert him using 1
   · rfl
   show _ = (-Complex.log (1 - z) / z * (z * I)).im
   rw [show -Complex.log (1 - z) / z * (z * I) = -Complex.log (1 - z) * I by field_simp]
-  simp [Complex.log_re, z, s25b_norm_one_sub_exp hx0 hx1]
+  simp [Complex.log_re, z, norm_one_sub_exp_mul_I hx0 hx1]
 
 /-- **Clausen's integral** (DLMF 25.12.9): `∑_{n≥1} sin(nθ)/n² = -∫_0^θ ln(2 sin(x/2)) dx` for
 `0 ≤ θ ≤ 2π`. -/
@@ -779,7 +805,7 @@ theorem hasSum_sin_div_sq {θ : ℝ} (h0 : 0 ≤ θ) (h1 : θ ≤ 2 * π) :
   rcases h0.eq_or_lt with rfl | hθ
   · simp
   have hI := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hθ.le hcont.continuousOn
-    (fun x hx => hFeq ▸ s25b_hasDerivAt_im_polylog_two_exp hx.1 (hx.2.trans_le h1)) hint
+    (fun x hx => hFeq ▸ hasDerivAt_im_polylog_two_exp hx.1 (hx.2.trans_le h1)) hint
   have hF0 : F 0 = 0 := by simp [F]
   rw [hF0, sub_zero, intervalIntegral.integral_neg] at hI
   rw [hI]
@@ -791,9 +817,9 @@ theorem hasSum_sin_div_sq {θ : ℝ} (h0 : 0 ≤ θ) (h1 : θ ≤ 2 * π) :
 valid for `Re s > 0` and `|ph(1-z)| < π` (i.e. `z ∈ ℂ \ [1, ∞)`), or `Re s > 1` and `z = 1`. -/
 @[dlmf 25.12.E11]
 theorem polylog_eq_integral {s z : ℂ}
-    (h : (0 < s.re ∧ z ∈ z25b_slitOne) ∨ (1 < s.re ∧ z = 1)) :
+    (h : (0 < s.re ∧ z ∈ slitOne) ∨ (1 < s.re ∧ z = 1)) :
     polylog s z = z / Gamma s * ∫ x in Ioi (0 : ℝ), (x : ℂ) ^ (s - 1) / (Real.exp x - z) := by
-  rw [q25b_polylog_eq_lerchInt h, q25b_lerchInt, div_eq_mul_inv, mul_assoc]
+  rw [polylog_eq_mul_lerchIntegral h, lerchIntegral, div_eq_mul_inv, mul_assoc]
   congr 2
   refine setIntegral_congr_fun measurableSet_Ioi fun x _ => ?_
   have he : (Real.exp x : ℂ) ≠ 0 := by exact_mod_cast (Real.exp_pos x).ne'
@@ -813,7 +839,7 @@ theorem polylog_eq_integral {s z : ℂ}
 (domain qualification: on the cut `(1, e^{2π})` the principal branch of `Li_s` is not defined, and
 at `z = 1` with `Re s ≤ 1` the left side is infinite). -/
 @[dlmf 25.12.E12]
-theorem hasSum_polylog_log {s z : ℂ} (hs : ∀ n : ℕ, s ≠ n + 1) (hz : z ∈ z25b_slitOne)
+theorem hasSum_polylog_log {s z : ℂ} (hs : ∀ n : ℕ, s ≠ n + 1) (hz : z ∈ slitOne)
     (hz0 : z ≠ 0) (hlog : ‖Complex.log z‖ < 2 * π) :
     HasSum (fun n : ℕ => riemannZeta (s - n) * Complex.log z ^ n / n !)
       (polylog s z - Gamma (1 - s) * Complex.log (1 / z) ^ (s - 1)) := by
@@ -848,7 +874,7 @@ def boseEinsteinG (s x : ℝ) : ℝ :=
 @[dlmf 25.12.E16]
 theorem fermiDiracF_eq_polylog {s : ℝ} (hs : -1 < s) (x : ℝ) :
     (fermiDiracF s x : ℂ) = -polylog (s + 1) (-Real.exp x) := by
-  have hz : (-(Real.exp x : ℂ)) ∈ z25b_slitOne := Or.inr (by
+  have hz : (-(Real.exp x : ℂ)) ∈ slitOne := Or.inr (by
     show (-(Real.exp x : ℂ)).re < 1
     rw [neg_re, ofReal_re]; linarith [Real.exp_pos x])
   rw [polylog_eq_integral (Or.inl ⟨by simp; linarith, hz⟩)]
@@ -874,7 +900,7 @@ theorem fermiDiracF_eq_polylog {s : ℝ} (hs : -1 < s) (x : ℝ) :
 @[dlmf 25.12.E16]
 theorem boseEinsteinG_eq_polylog {s x : ℝ} (h : (-1 < s ∧ x < 0) ∨ (0 < s ∧ x ≤ 0)) :
     (boseEinsteinG s x : ℂ) = polylog (s + 1) (Real.exp x) := by
-  have h' : (0 < ((s : ℂ) + 1).re ∧ (Real.exp x : ℂ) ∈ z25b_slitOne) ∨
+  have h' : (0 < ((s : ℂ) + 1).re ∧ (Real.exp x : ℂ) ∈ slitOne) ∨
       (1 < ((s : ℂ) + 1).re ∧ (Real.exp x : ℂ) = 1) := by
     rcases lt_or_eq_of_le (show x ≤ 0 by rcases h with h | h; exacts [h.2.le, h.2]) with hx | hx
     · refine Or.inl ⟨?_, Or.inr ?_⟩

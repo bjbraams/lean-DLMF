@@ -9,4 +9,8 @@ public import DLMF.ExpIntegrals.Basic.Functions
 
 /-!
 # Definitions of exponential and trigonometric integrals
+
+This entry point exposes the complex exponential, sine, cosine and hyperbolic integrals, the
+real `Ei` and logarithmic integral, and the auxiliary functions `f`, `g`, defined in
+`DLMF.ExpIntegrals.Basic.Functions`.
 -/

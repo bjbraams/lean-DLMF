@@ -18,13 +18,31 @@ public import TauCeti.MeasureTheory.Constructions.HaarToSphere
 /-!
 # Harmonic polynomials (AAR §§9.1–9.5)
 
-Mathlib has harmonic *functions* (`InnerProductSpace.HarmonicAt`) and the Laplacian, but
-not the finite-dimensional spaces of homogeneous harmonic polynomials (spherical harmonics).
-The orthogonality of harmonic polynomials of different degrees integrates by parts against the
-Gaussian `exp (-‖x‖²)` with Mathlib's line-derivative integration by parts and Euler identity,
-and passes to the sphere with the Tau Ceti contributors' polar-coordinate formula
-`TauCeti.integral_eq_integral_Ioi_integral_toSphere`; the homogeneous scaling lemma is adapted
-from their `MvPolynomial.IsHomogeneous.eval₂_const_mul`.
+This file defines the homogeneous harmonic polynomials (spherical harmonics), their surface
+inner product and dimension, and proves the orthogonality of harmonic polynomials of different
+degrees on the sphere. Mathlib has harmonic functions (`InnerProductSpace.HarmonicAt`) and the
+Laplacian, but not these finite-dimensional spaces.
+
+## Main definitions
+
+* `laplacianMv`: the Laplacian on multivariate polynomials.
+* `IsHarmonicHomogeneous`: homogeneous harmonic polynomials of degree `k` in `n` variables.
+* `sphericalHarmonicInner`: the surface inner product on the unit sphere (AAR (9.4)).
+* `harmonicHomogeneousDim`: the dimension of the space of harmonic homogeneous polynomials.
+
+## Main results
+
+* `harmonicHomogeneousDim_three`: in three variables the dimension is `2k + 1`.
+* `sphericalHarmonicInner_one_three`: the unnormalized area `4π` of the sphere in `ℝ³`.
+* `harmonicHomogeneous_orthogonal`: orthogonality of harmonic homogeneous polynomials of
+  different degrees on the sphere.
+
+## Implementation notes
+
+The orthogonality integrates by parts against the Gaussian `exp (-‖x‖²)` with Mathlib's
+line-derivative integration by parts and Euler identity, and passes to the sphere with the
+TauCeti polar-coordinate formula `TauCeti.integral_eq_integral_Ioi_integral_toSphere`; the
+homogeneous scaling lemma is adapted from TauCeti's `MvPolynomial.IsHomogeneous.eval₂_const_mul`.
 -/
 
 @[expose] public section

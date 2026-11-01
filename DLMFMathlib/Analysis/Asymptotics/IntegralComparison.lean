@@ -18,6 +18,22 @@ to the tail integral, by integrating the uniform tail bound on the error.
 For nonintegrable powers, asymptotic equivalence instead passes to growing
 primitives; the fixed initial segment becomes negligible. The borderline
 comparison with `1/x` gives a logarithmic primitive.
+
+## Main results
+
+* `ContinuousOn.integrableOn_Ici_of_isBigO_cpow`: integrability from an integrable power-law
+  bound at infinity.
+* `Asymptotics.IsEquivalent.integral_Ioi_cpow`: tail integrals of functions asymptotic to a
+  complex power with real part below `-1`.
+* `Asymptotics.IsLittleO.intervalIntegral_of_nonneg`,
+  `Asymptotics.IsEquivalent.intervalIntegral_of_integral_norm`: little-o bounds and asymptotic
+  equivalence pass to primitives when the comparison integral diverges.
+* `Asymptotics.IsEquivalent.intervalIntegral_cpow`: growing power-law primitives, for real part
+  above `-1`.
+* `Asymptotics.IsEquivalent.intervalIntegral_inv`: a function asymptotic to `1/x` has a primitive
+  asymptotic to `log x`.
+* `isBigO_integral_Ioi_bdd_mul_rpow`: tail integrals of a bounded function times an integrable
+  real power.
 -/
 
 @[expose] public noncomputable section
@@ -116,7 +132,7 @@ theorem Asymptotics.IsLittleO.intervalIntegral_of_nonneg {E : Type*}
 /-- Asymptotic equivalence passes to primitives if the integral of the reference
 norm diverges and is bounded by the proposed leading primitive. -/
 theorem Asymptotics.IsEquivalent.intervalIntegral_of_integral_norm {E : Type*}
-    [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    [NormedAddCommGroup E] [NormedSpace ℝ E]
     {f g F : ℝ → E} {a : ℝ} (h : f ~[atTop] g)
     (hf : ContinuousOn f (Ici a)) (hg : ContinuousOn g (Ici a))
     (hF : (fun x => ∫ t in a..x, g t) ~[atTop] F)

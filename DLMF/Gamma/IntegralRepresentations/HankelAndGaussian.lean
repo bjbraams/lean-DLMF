@@ -13,12 +13,31 @@ public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 
 /-!
-# Hankel and Gaussian Gamma representations
+# Laplace-type, Hankel-loop and Gaussian representations of the Gamma function (DLMF 5.9.1–5.9.3)
 
-Laplace scaling, the reciprocal-Gamma Hankel loop and Gaussian forms of the Gamma integral.
+A Laplace-type integral for `Γ`, the reciprocal-Gamma Hankel loop taken on Binet's
+steepest-descent path `w = θ e^{iθ}/sin θ`, and the Gaussian form of Euler's integral. The loop
+integral is evaluated without contour deformation: its imaginary part `W(a)` satisfies
+`W(a) = a W(a+1)`, and Laplace's method at `a → ∞` together with Stirling's formula gives
+`W(a) Γ(a) = π`.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.IntegralRepresentations`.
+## Main definitions
+
+* `binetPhi`: Binet's phase `φ(t) = 1 - t cot t + ln(t/sin t)` (DLMF 5.9.2).
+* `binetPathLog`, `binetPathTerm`, `binetPathInt`: the path of the loop integral in the
+  logarithmic coordinate, its integrand and its integral.
+* `binetW`: the normalized loop integral `W(a) = Im ∫ e^{w} w^{-a} dw`.
+
+## Main results
+
+* `Gamma_laplace_power`: a Laplace-type integral for `Γ`, with real exponent `μ` as in DLMF
+  (DLMF 5.9.1).
+* `recip_Gamma_binet`: `1/Γ(x) = e^x x^{1-x}/(2π) ∫_{-π}^{π} e^{-x φ(t)} dt` for `x > 0`
+  (DLMF 5.9.2, second form).
+* `binetW_mul_Gamma`: `W(a) Γ(a) = π` for `a > 0`.
+* `tendsto_sqrt_mul_binetLaplace`: Laplace's method for `√x ∫₀^π e^{-x φ(θ)} dθ`.
+* `Gamma_gaussian`: `c^{-z} Γ(z) = ∫ |t|^{2z-1} e^{-c t²} dt` for `Re c, Re z > 0`
+  (DLMF 5.9.3).
 -/
 
 @[expose] public section

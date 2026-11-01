@@ -8,11 +8,22 @@ module
 public import DLMF.Gamma.Digamma
 
 /-!
-# Integrals of `log Γ` and `ψ` (AAR §1.6)
+# Integrals of `ψ` (AAR §1.6)
 
-The integrated form of the digamma series is the identity
-`∫_1^x ψ(t) dt = log Γ(x)`, which is the fundamental theorem of calculus for
-`log ∘ Γ` on `(0,∞)`. This is the source of AAR Theorem 1.6.2.
+The integrated form of the digamma series, `∫₁^x ψ(t) dt = log Γ(x)`, which is the fundamental
+theorem of calculus for `log ∘ Γ` on `(0, ∞)` and the source of AAR Theorem 1.6.2.
+
+## Main results
+
+* `intervalIntegral_digamma`: integrating `ψ` recovers `log Γ` (AAR Theorem 1.6.2, integrated
+  form).
+* `continuousOn_digamma`, `intervalIntegrable_digamma`: continuity and integrability of `ψ` on
+  `(0, ∞)`.
+
+## References
+
+* G. E. Andrews, R. Askey and R. Roy, *Special Functions*, Cambridge University Press, 1999,
+  §1.6.
 -/
 
 @[expose] public section

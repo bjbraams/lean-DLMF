@@ -17,16 +17,27 @@ public import Mathlib.Analysis.Complex.Order
 /-!
 # Binomial coefficients, finite series and partial fractions (DLMF §1.2(i)–(iii))
 
+The DLMF forms of binomial sums, finite series and partial-fraction decompositions that Mathlib
+states differently or not at all. The binomial theorem 1.2.2, the sums 1.2.3–1.2.4, Pascal's
+rule 1.2.7 and the geometric sum 1.2.11 are upstream; the pointers are in
+`DLMF/AlgebraicAnalytic/Algebra/MathlibCoverage.lean`.
+
+## Main results
+
+* `sum_choose_even`: the even-index sum of binomial coefficients (DLMF 1.2.5).
+* `ringChoose_eq_descPochhammer`: the Pochhammer form of `C(z, k)` (DLMF 1.2.6).
+* `sum_ringChoose_add`, `alternating_sum_ringChoose`: complex binomial sums (DLMF 1.2.8, 1.2.9).
+* `sum_arithmetic_progression`, `sum_geometric_progression`: DLMF 1.2.10, 1.2.11.
+* `div_prod_sub_eq_sum`, `div_pow_sub_eq_sum`, `exists_div_prod_pow_sub_eq_sum`:
+  partial-fraction decompositions (DLMF 1.2.12–1.2.16).
+
+## Implementation notes
+
 The binomial coefficient `C(n, k)` of nonnegative integers is Mathlib's `Nat.choose`, and for
 complex `z` the coefficient `C(z, k)` of 1.2.6 is Mathlib's generalized binomial coefficient
-`Ring.choose z k` (on `ℂ`, a binomial ring as a `ℚ≥0`-module). The binomial theorem 1.2.2, the
-sums 1.2.3–1.2.4, Pascal's rule 1.2.7 and the geometric sum 1.2.11 are upstream; the pointers are
-in `DLMF/AlgebraicAnalytic/Algebra/MathlibCoverage.lean`. Here are the DLMF forms that Mathlib
-states differently or not at all: the even-index sum 1.2.5, the Pochhammer forms 1.2.6, the
-complex sums 1.2.8–1.2.9, the arithmetic progression 1.2.10, the factor `a` in 1.2.11, and the
-partial-fraction decompositions 1.2.12–1.2.16. The decompositions are stated for the values of
-the rational functions at points `x` off the poles, over an arbitrary field (DLMF: constants,
-real or complex); 1.2.14–1.2.15 need characteristic zero for the factorials.
+`Ring.choose z k` (on `ℂ`, a binomial ring as a `ℚ≥0`-module). The decompositions are stated
+for the values of the rational functions at points `x` off the poles, over an arbitrary field
+(DLMF: constants, real or complex); 1.2.14–1.2.15 need characteristic zero for the factorials.
 -/
 
 @[expose] public noncomputable section

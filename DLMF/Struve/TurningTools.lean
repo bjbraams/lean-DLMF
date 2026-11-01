@@ -13,14 +13,21 @@ public import DLMFMathlib.Analysis.Asymptotics.StationaryPhase
 
 For real `ν`, DLMF 11.10.1–11.10.2 at `z = ν` read
 
-`𝐉_ν(ν) = π⁻¹ Re ∫₀^π e^{iν(θ - sin θ)} dθ`,  `𝐄_ν(ν) = π⁻¹ Im ∫₀^π e^{iν(θ - sin θ)} dθ`
+`𝐉_ν(ν) = π⁻¹ Re ∫₀^π e^{iν(θ - sin θ)} dθ`,  `𝐄_ν(ν) = π⁻¹ Im ∫₀^π e^{iν(θ - sin θ)} dθ`.
 
-(`struveTP_angerJ_eq`, `struveTP_weberE_eq`). The phase `θ - sin θ = θ³/6 + O(θ⁴)` has a cubic
-stationary point at `θ = 0`, so the stationary-phase lemma
-`Complex.statPh_tendsto_cubic` gives `ν^{1/3} ∫₀^π e^{iν(θ - sin θ)} dθ → 6^{1/3} Γ(4/3) e^{iπ/6}`
-(`struveTP_tendsto_integral`). The constants are reduced to the DLMF form with
-`Γ(4/3) Γ(2/3) = 2π/(3√3)` (`struveTP_const_J`, `struveTP_const_E`); these are the inputs of
-DLMF 11.11.18 and 11.11.19 in `DLMF.Struve.Asymptotics`.
+The phase `θ - sin θ = θ³/6 + O(θ⁴)` has a cubic stationary point at `θ = 0`, so the
+stationary-phase lemma `Complex.statPh_tendsto_cubic` gives the limit of
+`ν^{1/3} ∫₀^π e^{iν(θ - sin θ)} dθ`. These are the inputs of DLMF 11.11.18 and 11.11.19 in
+`DLMF.Struve.Asymptotics`.
+
+## Main results
+
+* `struveTP_angerJ_eq`, `struveTP_weberE_eq`: DLMF 11.10.1–11.10.2 at `z = ν`.
+* `struveTP_tendsto_integral`:
+  `ν^{1/3} ∫₀^π e^{iν(θ - sin θ)} dθ → 6^{1/3} Γ(4/3) e^{iπ/6}`.
+* `struveTP_Gamma_four_thirds_mul`: `Γ(4/3) Γ(2/3) = 2π/(3√3)`.
+* `struveTP_const_J`, `struveTP_const_E`: the constants in the DLMF form.
+* `struveTP_isEquivalent_of_tendsto`: asymptotic equivalence from a real limit.
 -/
 
 @[expose] public noncomputable section

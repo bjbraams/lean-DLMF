@@ -10,12 +10,27 @@ public import DLMF.JacobiElliptic.AnalyticProperties
 /-!
 # Jacobian elliptic functions: Landen transformations (DLMF §22.7)
 
-The descending modulus `k₁ = (1 - k')/(1 + k')` and the ascending pair
-`k₂ = 2√k/(1 + k)`, `k₂' = (1 - k)/(1 + k)` (principal square root) are defined as in
-DLMF 22.7.1 and 22.7.5. DLMF *defines* `k₂'` by the quotient; it satisfies `k₂'² = 1 - k₂²`
-(proved), and it is the principal `√(1 - k₂²)` for `0 < k < 1` but not for all complex `k`
-(e.g. `k = 1.3 + 0.4i`). The transformation formulas 22.7.2–22.7.4 and 22.7.6–22.7.8 are
-admitted; they were checked numerically for real and complex `k` with these definitions.
+The descending and ascending Landen moduli and the Landen transformations of the Jacobian
+elliptic functions (DLMF §22.7).
+
+## Main definitions
+
+* `jacobiLandenDescModulus`: the descending modulus `k₁ = (1 - k')/(1 + k')` (DLMF 22.7.1).
+* `jacobiLandenAscModulus`, `jacobiLandenAscComodulus`: the ascending pair `k₂ = 2√k/(1 + k)`,
+  `k₂' = (1 - k)/(1 + k)` (DLMF 22.7.5, principal square root).
+
+## Main results
+
+* `jacobiLandenAscComodulus_sq`: `k₂'² = 1 - k₂²` for `k ≠ -1`.
+* `jacobi_landen_descending`: the descending transformation DLMF 22.7.2–22.7.4.
+* `jacobi_landen_ascending`: the ascending transformation DLMF 22.7.6–22.7.8.
+
+## Implementation notes
+
+DLMF *defines* `k₂'` by the quotient; it satisfies `k₂'² = 1 - k₂²`, and it is the principal
+`√(1 - k₂²)` for `0 < k < 1` but not for all complex `k` (e.g. `k = 1.3 + 0.4i`). The
+transformation formulas have been checked numerically for real and complex `k` with these
+definitions.
 -/
 
 @[expose] public section

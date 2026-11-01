@@ -8,19 +8,34 @@ module
 public import DLMF.Weierstrass.DifferentialEquations
 
 /-!
-# Integral representations and indefinite integrals (DLMF §§23.11, 23.14)
+# Integral representations and indefinite integrals of Weierstrass functions
 
-**Source corrections in §23.11.** DLMF 23.11.2–23.11.3 are stated with `τ = ω₃/ω₁` only, but
-they are not homogeneous in the lattice: 23.11.2 holds exactly for the normalization
-`2ω₁ = 1` (lattice generators `1, τ`) and fails for other `ω₁` (checked for
-`ω₁ = 1, π, π/2, i, i/2`). With `2ω₁ = 1`, the integral in the printed 23.11.3 must be
-multiplied by `4`: `ζ(z) = 1/z + 4∫₀^∞ (…) ds` (the printed form fails by about `0.08`
-for `τ = 0.3 + 0.9i`, `z = 0.3 + 0.2i`; the corrected form agrees to `10⁻¹⁰`, and its
-derivative is `-℘` by 23.11.2). The printed convergence condition `-1 < ℜ(z + τ) < 1` is also
-insufficient: the `f₁` part of the integrands grows like `e^{(|ℜ(z ± τ)| - 1)s}`, so we
-assume `|ℜz| + |ℜτ| < 1` (which gives `|ℜ(z ± τ)| < 1`) together with `|ℑz| < ℑτ`.
+Integral representations of `℘` and `ζ` (DLMF §23.11) and the indefinite integrals of `℘`,
+`℘²` and `℘³` (DLMF §23.14), the latter stated as derivative identities for `z ∉ 𝕃`.
 
-Indefinite integrals (§23.14) are stated as derivative identities for `z ∉ 𝕃`.
+## Main definitions
+
+* `integralKernelOne`, `integralKernelTwo`: the kernels `f₁`, `f₂` of DLMF 23.11.1.
+
+## Main results
+
+* `weierstrassP_integral`: DLMF 23.11.2 for the normalization `2ω₁ = 1`.
+* `weierstrassZeta_integral`: DLMF 23.11.3, corrected (see below).
+* `hasDerivAt_neg_weierstrassZeta`: DLMF 23.14.1, `(-ζ)' = ℘`.
+* `hasDerivAt_weierstrassP_sq_primitive`, `hasDerivAt_weierstrassP_cube_primitive`:
+  DLMF 23.14.2–23.14.3.
+
+## Implementation notes
+
+DLMF 23.11.2–23.11.3 are stated with `τ = ω₃/ω₁` only, but they are not homogeneous in the
+lattice: 23.11.2 holds exactly for the normalization `2ω₁ = 1` (lattice generators `1, τ`) and
+fails for other `ω₁` (checked for `ω₁ = 1, π, π/2, i, i/2`). With `2ω₁ = 1`, the integral in
+the printed 23.11.3 must be multiplied by `4`: `ζ(z) = 1/z + 4∫₀^∞ (…) ds` (the printed form
+fails by about `0.08` for `τ = 0.3 + 0.9i`, `z = 0.3 + 0.2i`; the corrected form agrees to
+`10⁻¹⁰`, and its derivative is `-℘` by 23.11.2). The printed convergence condition
+`-1 < ℜ(z + τ) < 1` is also insufficient: the `f₁` part of the integrands grows like
+`e^{(|ℜ(z ± τ)| - 1)s}`, so we assume `|ℜz| + |ℜτ| < 1` (which gives `|ℜ(z ± τ)| < 1`)
+together with `|ℑz| < ℑτ`.
 -/
 
 @[expose] public section
@@ -96,7 +111,7 @@ theorem hasDerivAt_neg_weierstrassZeta (L : PeriodPair) {z : ℂ} (hz : z ∉ L.
   exact h
 
 /-- `℘'` has derivative `6℘² - g₂/2` off the lattice. -/
-lemma wp23_hasDerivAt_derivWeierstrassP (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) :
+private lemma hasDerivAt_derivWeierstrassP_off_lattice (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) :
     HasDerivAt ℘'[L] (6 * ℘[L] z ^ 2 - L.g₂ / 2) z := by
   have hU : IsOpen (L.latticeᶜ : Set ℂ) := L.isClosed_lattice.isOpen_compl
   have hd := (L.analyticOnNhd_derivWeierstrassP z hz).differentiableAt
@@ -108,7 +123,7 @@ lemma wp23_hasDerivAt_derivWeierstrassP (L : PeriodPair) {z : ℂ} (hz : z ∉ L
 @[dlmf 23.14.E2]
 theorem hasDerivAt_weierstrassP_sq_primitive (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) :
     HasDerivAt (fun w ↦ ℘'[L] w / 6 + L.g₂ * w / 12) (℘[L] z ^ 2) z := by
-  have h1 := (wp23_hasDerivAt_derivWeierstrassP L hz).div_const 6
+  have h1 := (hasDerivAt_derivWeierstrassP_off_lattice L hz).div_const 6
   have h2 := ((hasDerivAt_id z).const_mul L.g₂).div_const 12
   have h := h1.add h2
   have e : (fun w ↦ ℘'[L] w / 6 + L.g₂ * w / 12) =
@@ -130,7 +145,7 @@ theorem hasDerivAt_weierstrassP_cube_primitive (L : PeriodPair) {z : ℂ} (hz : 
   have hP : HasDerivAt ℘[L] (℘'[L] z) z := by
     have := (L.differentiableOn_weierstrassP z hz).differentiableAt (hU.mem_nhds hz)
     simpa using this.hasDerivAt
-  have hP' := wp23_hasDerivAt_derivWeierstrassP L hz
+  have hP' := hasDerivAt_derivWeierstrassP_off_lattice L hz
   have h3 : HasDerivAt (deriv (deriv ℘'[L]))
       (12 * (℘'[L] z * ℘'[L] z + ℘[L] z * (6 * ℘[L] z ^ 2 - L.g₂ / 2))) z := by
     refine HasDerivAt.congr_of_eventuallyEq ?_ hev

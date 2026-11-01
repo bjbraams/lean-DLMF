@@ -9,12 +9,29 @@ public import DLMF.ParabolicCylinder.Hermite
 public import DLMF.ParabolicCylinder.SectorAsymptotics
 
 /-!
-# Cylinder asymptotic sectors and real and complex zeros
+# Asymptotic expansions in sectors and zeros of parabolic cylinder functions
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This file treats the large-argument expansions of `U(a,z)` and `V(a,z)` in sectors
+(DLMF §12.9) and the real and complex zeros of `U(a,z)` and `V(a,z)` (DLMF §12.11).
+
+## Main definitions
+
+* `pcfUTerm`, `pcfVTerm`: the terms of the large-argument expansions of `U` and `V`.
+* `pcfZeroTau`, `pcfZeroLambda`: the phase coordinate and logarithmic correction in the
+  expansion of the large complex zeros (DLMF 12.11.2–12.11.3).
+
+## Main results
+
+* `pcfU_sector_asymptotic`, `pcfV_sector_asymptotic`: the Poincaré expansions
+  DLMF 12.9.1–12.9.2.
+* `pcfU_adjacent_asymptotic_pos`, `pcfU_adjacent_asymptotic_neg`: the two-exponential
+  expansion of `U` (DLMF 12.9.3).
+* `pcfV_adjacent_asymptotic_pos`, `pcfV_adjacent_asymptotic_neg`: the two-exponential
+  expansion of `V` (DLMF 12.9.4).
+* `pcfU_no_real_zero`, `pcfU_no_positive_zero`, `pcfU_positive_zero_count`,
+  `pcfU_hermite_zero_count`: real zeros of `U(a,x)` (DLMF §12.11(i)).
+* `pcfV_no_positive_zero`, `pcfV_integer_zero`: real zeros of `V(a,x)` (DLMF §12.11(i)).
+* `pcfU_complex_zero_strings`: the strings of complex zeros of `U(a,z)` (DLMF 12.11.1).
 -/
 
 @[expose] public noncomputable section
@@ -36,7 +53,7 @@ def pcfVTerm (a z : ℂ) (s : ℕ) : ℂ :=
 (z^2/4)*z^(a+1/2)*pcfU a z-∑ s ∈ Finset.range N, pcfUTerm a z s) =O[sector (3*π/4-δ)] (fun z :
 ℂ => z^(-(2*N:ℤ)))`. -/
 @[dlmf 12.9.E1]
-theorem pcfU_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < 3*π/4) (N : ℕ) :
+theorem pcfU_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (N : ℕ) :
     (fun z : ℂ => exp (z^2/4)*z^(a+1/2)*pcfU a z-∑ s ∈ Finset.range N, pcfUTerm a z s) =O[sector (3*π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ))) := by
   exact pcfSect_U_sector a hδ N
 
@@ -47,11 +64,6 @@ theorem pcfU_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ <
 theorem pcfV_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/4) (N : ℕ) :
     (fun z : ℂ => (Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2)*pcfV a z-∑ s ∈ Finset.range N, pcfVTerm a z s) =O[sector (π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ))) := by
   exact pcfSect_V_sector a hδ hδπ N
-
-/-- Approach to infinity in logarithmic coordinates with imaginary part between `lo` and `hi`; the
-inherited argument is not reduced modulo `2π`. -/
-def pcfLogWedge (lo hi : ℝ) : Filter ℂ :=
-  comap (fun w : ℂ => Real.exp w.re) atTop ⊓ 𝓟 {w : ℂ | lo ≤ w.im ∧ w.im ≤ hi}
 
 /-- Two-exponential expansion with an absolute sum-of-envelopes remainder and inherited powers. -/
 @[dlmf 12.9.E3]

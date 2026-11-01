@@ -10,11 +10,30 @@ public import DLMF.Legendre.IntegralRepresentations.Exterior
 /-!
 # Ferrers integral representations
 
-Real-angle and fractional integral representations of Ferrers functions with their endpoint
-bounds.
+This file proves the real-variable integral representations of DLMF §14.12 and the iterated
+integrals of DLMF §14.6(ii): the Mehler–Dirichlet integral and the fractional integrals of
+Ferrers and associated Legendre functions, integrals over `(0, π)` and `(0, ∞)` for real
+`x > 1`, and the integrals of Neumann and Heine for `𝑸_n`.
 
-Source references and common attribution are retained in
-`DLMF.Legendre.IntegralRepresentations`.
+## Main definitions
+
+* `legInt_md`: the substitution `u = (1 - cos s)/(1 - cos θ)` used for DLMF 14.12.1.
+* `legendreUCoordinate`: the limit `u = ½ ln((x+1)/(x-1))` of DLMF 14.12.10.
+
+## Main results
+
+* `ferrersP_mehler_dirichlet`: the Mehler–Dirichlet integral (DLMF 14.12.1).
+* `ferrersP_fractional_integral`, `associatedP_fractional_integral`: DLMF 14.12.2, 14.12.5.
+* `associatedP_cosh_integral`, `olverQ_real_integral`: DLMF 14.12.4, 14.12.6.
+* `associatedP_fourier_integral`, `associatedP_nat_integral`: DLMF 14.12.7, 14.12.8.
+* `olverQ_nat_finite_integral`, `olverQ_nat_interval_integral`: DLMF 14.12.9, 14.12.11.
+* `olverQ_nat_reduction_integral`: DLMF 14.12.12, as an improper integral over `(x, ∞)`.
+* `olverQ_nat_neumann`, `olverQ_nat_heine`: the integrals of Neumann and Heine (DLMF 14.12.13,
+  14.12.14).
+* `ferrersP_negative_order_integral`, `associatedP_negative_order_integral`,
+  `associatedQ_negative_order_integral`: `m`-fold iterated integrals (DLMF 14.6.6–14.6.8).
+* `associatedP_negative_order_integral_complex`, `associatedQ_negative_order_integral_complex`:
+  DLMF 14.6.7 and 14.6.8 on the principal complex sheet.
 -/
 
 @[expose] public noncomputable section
@@ -108,11 +127,11 @@ theorem legInt_md_point (ν μ : ℂ) {θ s : ℝ} (hs0 : 0 < s) (hsθ : s < θ)
   rw [show (1:ℂ) - (ν+1) = -ν by ring, ← hc2] at hF
   rw [hz, regularizedGaussHGFun_eq_div_Gamma hc12, hF, legendre_Gamma_one_half,
     show (1 - (legInt_md θ s : ℂ)) = ((1 - legInt_md θ s : ℝ):ℂ) by rw [ofReal_sub, ofReal_one], hmd1,
-    legInt_cpow_ofReal (div_pos hB hD),
+    Complex.ofReal_cpow_eq_exp (div_pos hB hD),
     show ((1/2:ℂ)-1) = (((-1/2:ℝ)):ℂ) by push_cast; ring,
     ← ofReal_cpow (by rw [hmd]; positivity),
     show (Real.cos s - Real.cos θ : ℂ) = (B:ℂ) by rw [hBdef, ofReal_sub],
-    legInt_cpow_ofReal hB, Real.log_div hB.ne' hD.ne', ← hDdef]
+    Complex.ofReal_cpow_eq_exp hB, Real.log_div hB.ne' hD.ne', ← hDdef]
   have ht : legInt_md θ s ^ (-1/2:ℝ) = Real.sqrt D / (Real.sqrt 2 * s2) := by
     rw [hmd, show (-1/2:ℝ) = -(1/2) by ring, Real.rpow_neg (by positivity), ← Real.sqrt_eq_rpow,
       Real.sqrt_div' _ hD.le, Real.sqrt_mul (by norm_num), Real.sqrt_sq hs2p.le, inv_div]
@@ -164,7 +183,7 @@ theorem ferrersP_mehler_dirichlet {μ : ℂ} (hμ : μ.re < 1/2) (ν : ℂ) {θ 
     have := congrArg Real.log h2
     rw [Real.log_pow, Real.log_mul hD.ne' hP.ne'] at this
     push_cast at this; linarith
-  rw [legInt_cpow_ofReal (div_pos hP hD), legInt_cpow_ofReal hS, hlog, Real.log_div hP.ne' hD.ne',
+  rw [Complex.ofReal_cpow_eq_exp (div_pos hP hD), Complex.ofReal_cpow_eq_exp hS, hlog, Real.log_div hP.ne' hD.ne',
     show (1:ℂ) - μ - 1/2 = 1/2 - μ by ring]
   have hπ0 : (Real.sqrt π:ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hG : Gamma (1/2 - μ) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)
@@ -228,8 +247,8 @@ theorem ferrersP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) {x 
     rw [hfr]; field_simp
   have hpow : (((1+x)/(1-x):ℝ):ℂ)^(-μ/2) = (1-(x:ℂ)^2)^(-μ/2) * ((1-x:ℝ):ℂ)^μ := by
     rw [show (1-(x:ℂ)^2) = (((1+x)*(1-x):ℝ):ℂ) by push_cast; ring,
-      legInt_cpow_ofReal (div_pos h1 h2), legInt_cpow_ofReal (mul_pos h1 h2),
-      legInt_cpow_ofReal h2, ← exp_add, Real.log_div h1.ne' h2.ne', Real.log_mul h1.ne' h2.ne']
+      Complex.ofReal_cpow_eq_exp (div_pos h1 h2), Complex.ofReal_cpow_eq_exp (mul_pos h1 h2),
+      Complex.ofReal_cpow_eq_exp h2, ← exp_add, Real.log_div h1.ne' h2.ne', Real.log_mul h1.ne' h2.ne']
     congr 1; push_cast; ring
   rw [hsub, hI, ferrersP, show (1:ℂ) - -μ = 1+μ by ring,
     regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hzn, show -μ/2 = (-μ)/2 by ring]
@@ -275,7 +294,7 @@ theorem associatedP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) 
   rw [hsub, ← legInt_fractional_cutPlane _ _ hμ hzc]
   have hpow : exp (-μ/2*(log ((x:ℂ)+1)-log ((x:ℂ)-1))) = ((x:ℂ)^2-1)^(-μ/2) * ((x-1:ℝ):ℂ)^μ := by
     rw [show ((x:ℂ)^2-1) = (((x+1)*(x-1):ℝ):ℂ) by push_cast; ring,
-      legInt_cpow_ofReal (mul_pos h2 h1), legInt_cpow_ofReal h1, ← exp_add, Real.log_mul h2.ne' h1.ne',
+      Complex.ofReal_cpow_eq_exp (mul_pos h2 h1), Complex.ofReal_cpow_eq_exp h1, ← exp_add, Real.log_mul h2.ne' h1.ne',
       show (x:ℂ)+1 = ((x+1:ℝ):ℂ) by push_cast; ring, show (x:ℂ)-1 = ((x-1:ℝ):ℂ) by push_cast; ring,
       ← ofReal_log h2.le, ← ofReal_log h1.le]
     congr 1; push_cast; ring
@@ -414,7 +433,7 @@ theorem olverQ_nat_finite_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
     simp only [legInt_f, legInt_V]; push_cast; ring
   rw [hI]
   have h0 : ∀ k : ℕ, olverQ k 0 x = legInt_M x k 0 / k.factorial := fun k => by
-    rw [legInt_olverQ_nat_zero_order _ hx1, legInt_legendreQ_M hx]
+    rw [legInt_olverQ_nat_zero_order _, legInt_legendreQ_M hx]
   have key : ∀ m : ℕ, olverQ n m x = legInt_M x n m / n.factorial ∧
       olverQ n (m+1:ℕ) x = legInt_M x n (m+1) / n.factorial := by
     intro m
@@ -478,7 +497,7 @@ theorem olverQ_nat_interval_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
   rw [hI, hpow]
   set C : ℂ := 1/(2^(n+1)*(n.factorial:ℂ)) with hC
   have h0 : ∀ k : ℕ, olverQ k 0 x = legInt_A x k (k+1) / (2^(k+1)*k.factorial) := fun k => by
-    rw [legInt_olverQ_nat_zero_order _ hx1, legInt_legendreQ_A hx, div_div]
+    rw [legInt_olverQ_nat_zero_order _, legInt_legendreQ_A hx, div_div]
   have key : ∀ m : ℕ, olverQ n m x = C * s^m * legInt_A x n (n+m+1) ∧
       olverQ n (m+1:ℕ) x = C * s^(m+1) * legInt_A x n (n+(m+1)+1) := by
     intro m
@@ -693,7 +712,7 @@ theorem olverQ_nat_neumann (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     filter_upwards [this] with t ht htm
     rw [uIoc_of_le (by norm_num)] at htm
     rw [legendreP_nat n (Or.inl (by simp; linarith [htm.1]))]
-  rw [olverQ_normalization hreg, associatedQ_zero_order _ hz, add_zero, Gamma_nat_eq_factorial, hi,
+  rw [olverQ_normalization hreg, associatedQ_zero_order _, add_zero, Gamma_nat_eq_factorial, hi,
     legendreQ_nat_eq_integral n hz]
   simp
   field_simp
@@ -703,7 +722,7 @@ theorem olverQ_nat_neumann (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
 @[dlmf 14.12.E14]
 theorem olverQ_nat_heine (n : ℕ) {x : ℝ} (hx : 1 < x) :
     HasIntegralAtTop (fun t : ℝ => 1/((n.factorial:ℂ)*(x+Real.sqrt (x^2-1)*Real.cosh t:ℂ)^(n+1))) 0 (olverQ n 0 x) := by
-  rw [legInt_olverQ_nat_zero_order _ (legInt_one_lt_mem hx)]
+  rw [legInt_olverQ_nat_zero_order _]
   refine ((legInt_heine x hx n).div_const (n.factorial:ℂ)).congr fun R => ?_
   rw [← intervalIntegral.integral_ofReal, ← intervalIntegral.integral_div]
   refine intervalIntegral.integral_congr fun t _ => ?_

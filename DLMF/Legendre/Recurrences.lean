@@ -14,6 +14,16 @@ public import DLMF.Hypergeometric.Elementary
 The three-term recurrence and the derivative relation for `P_ν` are linear combinations of
 Gauss's contiguous relations for `𝐅(-ν, ν+1; 1; (1-z)/2)` on the cut plane. The value `P_ν(0)`
 follows from Gauss's second summation theorem, and the higher derivatives of `P_ν` from 15.5.2.
+
+## Main results
+
+* `legendreP_recurrence`: `(ν+1) P_{ν+1} - (2ν+1) z P_ν + ν P_{ν-1} = 0` (DLMF 14.10.3 with
+  `μ = 0`).
+* `legendreP_deriv_recurrence`: `(1 - z²) P_ν'(z) = ν (P_{ν-1}(z) - z P_ν(z))` (DLMF 14.10.5
+  with `μ = 0`; Temme, Exercise 8.3).
+* `iteratedDeriv_legendreP`: `P_ν⁽ᵐ⁾(z) = (-1/2)ᵐ (-ν)ₘ (ν+1)ₘ 𝐅(m-ν, ν+1+m; 1+m; (1-z)/2)`.
+* `legendreP_zero_arg`: `P_ν(0) = √π / (Γ(ν/2 + 1) Γ((1-ν)/2))` (DLMF 14.5.1 with `μ = 0`,
+  Temme (8.17)).
 -/
 
 @[expose] public section

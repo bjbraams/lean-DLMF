@@ -11,17 +11,21 @@ public import DLMF.Bessel.SphericalSeriesTools
 # Series in products of spherical Bessel functions (DLMF §§6.10, 10.51, 10.60)
 
 The series `Cin(z) = ∑ aₙ jₙ(z/2)²` of DLMF 6.10.5 does not telescope termwise. It is reduced
-here to three sums of squares of spherical Bessel functions, each of which does telescope:
+to three sums of squares of spherical Bessel functions, each of which does telescope.
 
-* `sphProd_hasSum_sq`: `∑ (2n+1) jₙ(z)² = 1`;
+## Main results
+
+* `sphProd_hasSum_sq`: `∑ (2n+1) jₙ(z)² = 1`.
 * `sphProd_hasSum_alt_mul`: `∑ (-1)ⁿ (2n+1) jₙ(x) jₙ(y) = j₀(x+y)` (a case of the addition
   theorem DLMF 10.60.2); along the line `x + y = const` the derivative of the `n`-th term is a
-  difference `Eₙ - Eₙ₊₁` of antisymmetric products;
+  difference `Eₙ - Eₙ₊₁` of antisymmetric products.
 * `sphProd_hasSum_alt_sq`: `∑ (-1)ⁿ (2n+1) jₙ(z)² = j₀(2z)`.
-
-Also provided: the unified derivative `(2n+1) jₙ' = n jₙ₋₁ - (n+1) jₙ₊₁` (DLMF 10.51.2),
-the Euler form `z jₙ'(z) = n jₙ(z) - z jₙ₊₁(z)`, the values `jₙ(0)`, and summable bounds for
-spherical Bessel functions weighted by geometrically growing coefficients.
+* `sphProd_hasDerivAt_sphericalJ`, `sphProd_mul_deriv_sphericalJ`: the unified derivative
+  `(2n+1) jₙ' = n jₙ₋₁ - (n+1) jₙ₊₁` and the Euler form `z jₙ'(z) = n jₙ(z) - z jₙ₊₁(z)`
+  (DLMF 10.51.2).
+* `sphProd_sphericalJ_succ_zero`: `jₙ(0) = 0` for `n ≥ 1`.
+* `sphProd_bound_coeff_mul`, `sphProd_summable_coeff_mul`: summable bounds for spherical Bessel
+  functions weighted by geometrically growing coefficients.
 -/
 
 @[expose] public noncomputable section

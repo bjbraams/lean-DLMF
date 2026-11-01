@@ -14,7 +14,20 @@ For real parameter `a` and `x > 0` the upper and lower incomplete Gamma function
 integrals: `Γ(a,x) = ∫ₓ^∞ t^{a-1} e^{-t} dt` and, for `a > 0`, `γ(a,x) = ∫₀ˣ t^{a-1} e^{-t} dt`.
 This file records these real forms together with the elementary pointwise comparisons behind
 DLMF 8.10.1, 8.10.2 and 8.10.4 and the finite integration-by-parts expansion behind the
-remainder bound of DLMF §8.11(i). Helper names carry the prefix `incG_`.
+remainder bound of DLMF §8.11(i).
+
+## Main results
+
+* `incG_upperIncGamma_re_eq`, `incG_lowerIncGamma_re_eq`: the real integral forms of
+  `Γ(a,x)` and `γ(a,x)`.
+* `incG_upperIncGamma_re_le`, `incG_upperIncGamma_re_ge`: `Γ(a,x) ≤ x^{a-1} e^{-x}` for
+  `a ≤ 1` and the reverse inequality for `a ≥ 1` (DLMF 8.10.1).
+* `incG_upperIncGamma_re_pos`: positivity of the real upper incomplete Gamma function.
+* `incG_lowerIncGamma_bound_ge`, `incG_lowerIncGamma_bound_le`: DLMF 8.10.2 for `0 < a ≤ 1`
+  and its reverse for `a ≥ 1`.
+* `incG_upperIncGamma_expansion`: `N` integrations by parts,
+  `Γ(a,z) = ∑_{k<N} (-1)^k (1-a)_k z^{a-1-k} e^{-z} + (-1)^N (1-a)_N Γ(a-N,z)`.
+* `incG_upperIncGamma_ofReal_re`: for real `b` and `x > 0`, `Γ(b,x)` is real.
 -/
 
 @[expose] public noncomputable section

@@ -10,21 +10,36 @@ public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
 
 /-!
-# Integrals with coalescing saddles: definitions (DLMF Chapter 36)
+# Canonical integrals with coalescing saddles
 
-This file defines the canonical integrals, catastrophe sets and scaling data of
-DLMF Chapter 36 (namespace `DLMF.CoalescingSaddles`). Auxiliary moments, series
+This file defines the canonical integrals, catastrophe sets and scaling data of DLMF
+Chapter 36 (§§36.2, 36.4–36.6; namespace `DLMF.CoalescingSaddles`). Auxiliary moments, series
 coefficients and zero models are in `DLMF.CoalescingSaddles.Basic.AuxiliaryData`.
 
-## Potentials (DLMF 36.2.1–36.2.3)
+## Main definitions
 
-* `cuspoidPotential K t x = t^(K+2) + ∑ₘ xₘ t^m` (36.2.1), for complex `t` and real
-  parameters `x : Fin K → ℝ`; the coefficient of `t^(m+1)` is `x m`, so DLMF's `x₁, x₂, …`
-  are `x 0, x 1, …`. `K = 1, 2, 3` are the fold, cusp and swallowtail.
-* `ellipticUmbilicPotential s t x y z` (36.2.2), `hyperbolicUmbilicPotential s t x y z`
-  (36.2.3), for complex `s, t` and real `x, y, z`.
+* `cuspoidPotential`: `Φ_K(t; x) = t^(K+2) + ∑ₘ xₘ t^m` (DLMF 36.2.1), for complex `t` and
+  real parameters `x : Fin K → ℝ`; `K = 1, 2, 3` are the fold, cusp and swallowtail.
+* `ellipticUmbilicPotential`, `hyperbolicUmbilicPotential`: the umbilic potentials
+  (DLMF 36.2.2, 36.2.3), for complex `s, t` and real `x, y, z`.
+* `cuspoidIntegral`, `ellipticUmbilicIntegral`, `hyperbolicUmbilicIntegral`: the canonical
+  integrals `Ψ_K(x)` and `Ψ^{(U)}(x)` (DLMF 36.2.4, 36.2.5).
+* `cuspoidDiffraction`, `ellipticUmbilicDiffraction`, `hyperbolicUmbilicDiffraction`: the
+  diffraction catastrophes `Ψ(x; k)` (DLMF 36.2.10, 36.2.11).
+* `pearcey`: the Pearcey integral `P(x₂, x₁) = Ψ₂(x₁, x₂)` (DLMF 36.2.14).
+* `cuspoidCriticalPoints`, `umbilicCriticalPoints`: real critical points (DLMF 36.4.1, 36.4.2).
+* `cuspoidBifurcationSet`, `umbilicBifurcationSet`: bifurcation sets (DLMF 36.4.3, 36.4.4),
+  with `cuspoidCuspLines`, `cuspoidSelfIntersection` and `umbilicCuspLines`.
+* `cuspoidStokesSet`, `umbilicStokesSet`: Stokes sets (DLMF 36.5.1), with the complex parts
+  `cuspoidComplexStokesSet`, `umbilicComplexStokesSet` and the auxiliary functions of
+  DLMF 36.5.3–36.5.21 (`swallowtailStokesQuintic`, `ellipticStokesW`, `hyperbolicStokesY`, …).
+* `cuspoidSingularityIndex`, `cuspoidCoordinateIndex`, `cuspoidVolumeIndex`, the umbilic
+  analogues and `cuspoidScaledCoords`: the scaling exponents and coordinates of §36.6.
 
-## Canonical integrals (DLMF 36.2.4, 36.2.5, 36.2.10, 36.2.11)
+## Implementation notes
+
+In `cuspoidPotential` the coefficient of `t^(m+1)` is `x m`, so DLMF's `x₁, x₂, …` are
+`x 0, x 1, …`.
 
 The integrals `∫ exp(iΦ)` of DLMF over `ℝ` or `ℝ²` are oscillatory and not absolutely
 convergent. Following the DLMF remark in §36.2(i) ("the convergence … can be confirmed by
@@ -43,20 +58,13 @@ integrals of DLMF is stated separately (`DLMF.CoalescingSaddles.CanonicalIntegra
   `ε = [[-1,0,1],[0,1,-1],[1,-1,0]]` (`ellipticUmbilicCycle`) and Jacobian `ds dt = (i/2) da db`.
   This choice was checked numerically against 36.2.6, 36.2.7, 36.2.18, 36.2.20, 36.2.24–36.2.26
   and 36.2.28 at sample points (agreement to 12 digits).
-* Diffraction catastrophes `Ψ(x; k)` (36.2.10, 36.2.11) use the same contours with phase `kΦ`;
-  DLMF requires `k > 0`.
-
-## Critical points, bifurcation sets and Stokes sets (§§36.4, 36.5)
+* Diffraction catastrophes `Ψ(x; k)` use the same contours with phase `kΦ`; DLMF requires
+  `k > 0`.
 
 Derivatives are complex derivatives of the polynomial potentials (`deriv`, `iteratedDeriv`), and
 real critical points are real arguments at which they vanish. Stokes sets are formalized by the
 exponential dominance condition 36.5.1 together with a connecting path on which `Re Φ` is constant
 (DLMF's steepest-descent path).
-
-## Scaling exponents (§36.6)
-
-`cuspoidSingularityIndex` (`β_K`), `cuspoidCoordinateIndex` (`γ_{mK}`), `cuspoidVolumeIndex`
-(`γ_K`), and the umbilic exponents.
 -/
 
 @[expose] public noncomputable section

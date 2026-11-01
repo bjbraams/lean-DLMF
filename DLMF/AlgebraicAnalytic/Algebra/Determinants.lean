@@ -14,21 +14,30 @@ public import Mathlib.RingTheory.RootsOfUnity.Complex
 /-!
 # Determinants (DLMF §1.3(i)–(iii))
 
-The elementary properties of determinants (1.3.1–1.3.7, the row and column rules of §1.3(i),
-triangular matrices) and the Vandermonde determinant 1.3.13 are in Mathlib; the pointers are in
-`DLMF/AlgebraicAnalytic/Algebra/MathlibCoverage.lean`. This file has the DLMF forms of 1.3.6, the
-alternant property 1.3.11–1.3.12, Hadamard's inequality 1.3.8–1.3.10, the Cauchy determinant
-1.3.14, the circulant 1.3.15, Krattenthaler's formula 1.3.16–1.3.17 and the convergence of
-infinite determinants of Hill's type (1.3.19); the truncations `D_n` (1.3.18) are defined in
-`DLMF/AlgebraicAnalytic/Algebra/Basic.lean`.
+The DLMF forms of determinant identities and inequalities that are not upstream. The elementary
+properties of determinants (1.3.1–1.3.7, the row and column rules of §1.3(i), triangular
+matrices) and the Vandermonde determinant 1.3.13 are in Mathlib; the pointers are in
+`DLMF/AlgebraicAnalytic/Algebra/MathlibCoverage.lean`. The truncations `D_n` (1.3.18) are
+defined in `DLMF/AlgebraicAnalytic/Algebra/Basic.lean`.
+
+## Main results
+
+* `det_inv_eq_one_div`: `det(A⁻¹) = 1/det(A)` (DLMF 1.3.6).
+* `det_fin_two_sq_le`, `det_sq_le_prod_sum_sq`, `det_sq_eq_prod_sum_sq_iff`: Hadamard's
+  inequality and its equality case (DLMF 1.3.8–1.3.10).
+* `det_alternant_swap`, `det_alternant₂_swap`: alternants (DLMF 1.3.11, 1.3.12).
+* `det_cauchy`: the Cauchy determinant (DLMF 1.3.14).
+* `det_circulant`: the circulant determinant (DLMF 1.3.15).
+* `det_krattenthaler`: Krattenthaler's formula (DLMF 1.3.16, 1.3.17).
+* `IsHillType.exists_hasInfiniteDet`: infinite determinants of Hill's type converge
+  (DLMF §1.3(iii), 1.3.19).
+
+## Implementation notes
 
 DLMF's circulant (1.3.15) has rows `(a₁, …, aₙ)`, `(aₙ, a₁, …, a_{n-1})`, …, that is the entry
 `a_{k-j}` (indices mod `n`) in row `j`, column `k`; it is the transpose of Mathlib's
 `Matrix.circulant a` (entry `a (j - k)`). Indices run over `Fin n` from `0`, so DLMF's `a₁` is
 `a 0`, and the `n`th roots of unity are `ω_k = e^{2πik/n}`, `k = 0, …, n-1`.
-
-The formulas 1.3.14, 1.3.15 and 1.3.17 were checked numerically (mpmath, `n ≤ 6`, random
-real data) before acquisition.
 -/
 
 @[expose] public noncomputable section
@@ -57,18 +66,18 @@ theorem det_fin_two_sq_le (A : Matrix (Fin 2) (Fin 2) ℝ) :
   nlinarith [sq_nonneg (A 0 0 * A 1 0 + A 0 1 * A 1 1)]
 
 /-- Helper: `‖v‖² = ∑ v_k²` for the vector of a matrix row. -/
-lemma g1a_norm_sq_eq {n : ℕ} (v : EuclideanSpace ℝ (Fin n)) : ‖v‖ ^ 2 = ∑ k, v k ^ 2 := by
+private lemma euclidean_norm_sq_eq_sum {n : ℕ} (v : EuclideanSpace ℝ (Fin n)) : ‖v‖ ^ 2 = ∑ k, v k ^ 2 := by
   rw [EuclideanSpace.real_norm_sq_eq]
 
 /-- Helper: the real inner product of two vectors of `EuclideanSpace`. -/
-lemma g1a_inner_eq {n : ℕ} (v w : EuclideanSpace ℝ (Fin n)) :
+private lemma euclidean_inner_eq_sum {n : ℕ} (v w : EuclideanSpace ℝ (Fin n)) :
     inner ℝ v w = ∑ l, v l * w l := by
   rw [EuclideanSpace.inner_eq_star_dotProduct]
   simp [dotProduct, mul_comm]
 
 /-- Helper: Gram–Schmidt form of the determinant of the matrix with rows `v_j`:
 `|det| = ∏ |⟪b_j, v_j⟫|` for the Gram–Schmidt orthonormal basis `b` of the `v_j`. -/
-lemma g1a_abs_det_eq {n : ℕ} (v : Fin n → EuclideanSpace ℝ (Fin n)) :
+private lemma abs_det_eq_prod_abs_inner_gramSchmidt {n : ℕ} (v : Fin n → EuclideanSpace ℝ (Fin n)) :
     ∃ b : OrthonormalBasis (Fin n) ℝ (EuclideanSpace ℝ (Fin n)),
       |(Matrix.of fun j k => v j k).det| = ∏ j, |inner ℝ (b j) (v j)| := by
   set std := EuclideanSpace.basisFun (Fin n) ℝ
@@ -87,14 +96,14 @@ lemma g1a_abs_det_eq {n : ℕ} (v : Fin n → EuclideanSpace ℝ (Fin n)) :
   rw [← h1, h2, abs_mul, h3, one_mul, gramSchmidtOrthonormalBasis_det, abs_prod]
 
 /-- Helper: `|⟪b, v⟫| ≤ ‖v‖` for a unit vector `b`. -/
-lemma g1a_abs_inner_le {n : ℕ} (b : OrthonormalBasis (Fin n) ℝ (EuclideanSpace ℝ (Fin n)))
+private lemma abs_inner_orthonormalBasis_le_norm {n : ℕ} (b : OrthonormalBasis (Fin n) ℝ (EuclideanSpace ℝ (Fin n)))
     (j : Fin n) (v : EuclideanSpace ℝ (Fin n)) : |inner ℝ (b j) v| ≤ ‖v‖ := by
   calc |inner ℝ (b j) v| ≤ ‖b j‖ * ‖v‖ := abs_real_inner_le_norm _ _
     _ = ‖v‖ := by rw [b.orthonormal.1 j, one_mul]
 
 /-- Helper: termwise equality from equality of products of nonnegative factors bounded by
 positive ones. -/
-lemma g1a_eq_of_prod_eq {ι : Type*} [Fintype ι] {x y : ι → ℝ} (hx : ∀ i, 0 ≤ x i)
+private lemma eq_of_prod_eq_of_le {ι : Type*} [Fintype ι] {x y : ι → ℝ} (hx : ∀ i, 0 ≤ x i)
     (hxy : ∀ i, x i ≤ y i) (hy : ∀ i, 0 < y i) (h : ∏ i, x i = ∏ i, y i) (i : ι) :
     x i = y i := by
   by_contra hne
@@ -116,12 +125,12 @@ theorem det_sq_le_prod_sum_sq {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ) :
     A.det ^ 2 ≤ ∏ j, ∑ k, A j k ^ 2 := by
   set v : Fin n → EuclideanSpace ℝ (Fin n) := fun j => WithLp.toLp 2 (A j)
   have hA : A = Matrix.of fun j k => v j k := rfl
-  have hsq : ∀ j, ∑ k, A j k ^ 2 = ‖v j‖ ^ 2 := fun j => (g1a_norm_sq_eq (v j)).symm
-  obtain ⟨b, hb⟩ := g1a_abs_det_eq v
+  have hsq : ∀ j, ∑ k, A j k ^ 2 = ‖v j‖ ^ 2 := fun j => (euclidean_norm_sq_eq_sum (v j)).symm
+  obtain ⟨b, hb⟩ := abs_det_eq_prod_abs_inner_gramSchmidt v
   simp only [hsq, prod_pow]
   rw [← sq_abs, hA, hb]
   exact pow_le_pow_left₀ (prod_nonneg fun i _ => abs_nonneg _)
-    (prod_le_prod₀ (fun i _ => abs_nonneg _) fun i _ => g1a_abs_inner_le b i (v i)) 2
+    (prod_le_prod₀ (fun i _ => abs_nonneg _) fun i _ => abs_inner_orthonormalBasis_le_norm b i (v i)) 2
 
 /-- DLMF 1.3.10: equality holds in Hadamard's inequality 1.3.9 iff the rows are pairwise
 orthogonal, `a_{j1}a_{k1} + ⋯ + a_{jn}a_{kn} = 0` for `j ≠ k`, or one of the factors
@@ -132,7 +141,7 @@ theorem det_sq_eq_prod_sum_sq_iff {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ) :
       (∀ j k, j ≠ k → ∑ l, A j l * A k l = 0) ∨ ∃ j, ∑ k, A j k ^ 2 = 0 := by
   set v : Fin n → EuclideanSpace ℝ (Fin n) := fun j => WithLp.toLp 2 (A j)
   have hA : A = Matrix.of fun j k => v j k := rfl
-  have hsq : ∀ j, ∑ k, A j k ^ 2 = ‖v j‖ ^ 2 := fun j => (g1a_norm_sq_eq (v j)).symm
+  have hsq : ∀ j, ∑ k, A j k ^ 2 = ‖v j‖ ^ 2 := fun j => (euclidean_norm_sq_eq_sum (v j)).symm
   constructor
   · intro h
     by_cases h0 : ∃ j, ∑ k, A j k ^ 2 = 0
@@ -141,14 +150,14 @@ theorem det_sq_eq_prod_sum_sq_iff {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ) :
     push Not at h0
     have hne : ∀ j, v j ≠ 0 := fun j hj => h0 j (by rw [hsq, hj, norm_zero]; ring)
     have hnpos : ∀ j, 0 < ‖v j‖ := fun j => norm_pos_iff.2 (hne j)
-    obtain ⟨b, hb⟩ := g1a_abs_det_eq v
+    obtain ⟨b, hb⟩ := abs_det_eq_prod_abs_inner_gramSchmidt v
     have habs : |A.det| = ∏ j, ‖v j‖ := by
       have h' : |A.det| ^ 2 = (∏ j, ‖v j‖) ^ 2 := by
         rw [sq_abs, h, ← prod_pow]; simp only [hsq]
       exact (pow_left_inj₀ (abs_nonneg _) (prod_nonneg fun j _ => norm_nonneg _)
         two_ne_zero).1 h'
     rw [hA, hb] at habs
-    have heq := g1a_eq_of_prod_eq (fun j => abs_nonneg _) (fun j => g1a_abs_inner_le b j (v j))
+    have heq := eq_of_prod_eq_of_le (fun j => abs_nonneg _) (fun j => abs_inner_orthonormalBasis_le_norm b j (v j))
       hnpos habs
     have hpar : ∀ j, ∃ r : ℝ, v j = r • b j := fun j => by
       have hbj : b j ≠ 0 := fun h => by simpa [h] using b.orthonormal.1 j
@@ -156,7 +165,7 @@ theorem det_sq_eq_prod_sum_sq_iff {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ) :
         rw [Real.norm_eq_abs, heq j, b.orthonormal.1 j, one_mul])
       exact ⟨r, hr⟩
     intro j k hjk
-    have hjk' : ∑ l, A j l * A k l = inner ℝ (v j) (v k) := (g1a_inner_eq (v j) (v k)).symm
+    have hjk' : ∑ l, A j l * A k l = inner ℝ (v j) (v k) := (euclidean_inner_eq_sum (v j) (v k)).symm
     rw [hjk']
     obtain ⟨r, hr⟩ := hpar j
     obtain ⟨s, hs⟩ := hpar k
@@ -204,7 +213,7 @@ theorem det_alternant₂_swap {n R : Type*} [Fintype n] [DecidableEq n] [CommRin
   det_alternant_swap (fun k t => f t (y k)) x h
 
 /-- Helper: `∏_j ∏_{l ≠ j} (b_j - b_l) = (-1)^{n(n-1)/2} (∏_{j<k} (b_k - b_j))²`. -/
-lemma g1a_prod_erase_sub {n : ℕ} {K : Type*} [CommRing K] (b : Fin n → K) :
+private lemma prod_prod_erase_sub_eq_sq {n : ℕ} {K : Type*} [CommRing K] (b : Fin n → K) :
     ∏ j, ∏ l ∈ univ.erase j, (b j - b l) =
       (-1) ^ (n * (n - 1) / 2) * (∏ j, ∏ k ∈ Ioi j, (b k - b j)) ^ 2 := by
   have hsplit : ∀ j : Fin n, ∏ l ∈ univ.erase j, (b j - b l) =
@@ -286,7 +295,7 @@ theorem det_cauchy {n : ℕ} {K : Type*} [Field K] (a b : Fin n → K)
   have hVb : (vandermonde b).det ≠ 0 := det_vandermonde_ne_zero_iff.2 hb
   have hT : T.det = (-1) ^ (n * (n - 1) / 2) * (vandermonde b).det := by
     have h := congrArg det (hM b)
-    rw [hMb, det_diagonal, det_mul, g1a_prod_erase_sub, det_vandermonde] at h
+    rw [hMb, det_diagonal, det_mul, prod_prod_erase_sub_eq_sq, det_vandermonde] at h
     rw [det_vandermonde] at hVb ⊢
     apply mul_left_cancel₀ hVb
     rw [← h]; ring
@@ -339,7 +348,7 @@ theorem det_circulant {n : ℕ} [NeZero n] (a : Fin n → ℂ) :
   exact mul_left_cancel₀ hdetF this
 
 /-- Helper: the column polynomials of Krattenthaler's determinant. -/
-lemma g1a_kpoly_natDegree {n : ℕ} {R : Type*} [CommRing R] [Nontrivial R] (a b : Fin n → R)
+private lemma krattenthaler_column_natDegree_lt {n : ℕ} {R : Type*} [CommRing R] [Nontrivial R] (a b : Fin n → R)
     (k : Fin n) :
     ((∏ i ∈ Ioi k, (X + C (a i))) *
       ∏ i ∈ (Iic k).filter (fun i : Fin n => 0 < (i : ℕ)), (X + C (b i))).natDegree < n := by
@@ -361,7 +370,7 @@ lemma g1a_kpoly_natDegree {n : ℕ} {R : Type*} [CommRing R] [Nontrivial R] (a b
   omega
 
 /-- Helper: `∏_{j<k} (x_j - x_k) = (-1)^{n(n-1)/2} ∏_{j<k} (x_k - x_j)`. -/
-lemma g1a_prod_Ioi_sub_swap {n : ℕ} {R : Type*} [CommRing R] (x : Fin n → R) :
+private lemma prod_prod_Ioi_sub_comm {n : ℕ} {R : Type*} [CommRing R] (x : Fin n → R) :
     ∏ j, ∏ k ∈ Ioi j, (x j - x k) = (-1) ^ (n * (n - 1) / 2) * ∏ j, ∏ k ∈ Ioi j, (x k - x j) := by
   have hneg : ∀ j : Fin n, ∏ k ∈ Ioi j, (x j - x k) =
       (-1) ^ #(Ioi j) * ∏ k ∈ Ioi j, (x k - x j) := by
@@ -377,7 +386,7 @@ lemma g1a_prod_Ioi_sub_swap {n : ℕ} {R : Type*} [CommRing R] (x : Fin n → R)
 
 /-- Helper: if every `p_k` has degree less than `n`, then
 `det[p_k(x_j)] = det(vandermonde x) · det[coeff_i p_k]`. -/
-lemma g1a_det_eval_eq_vandermonde_mul {n : ℕ} {R : Type*} [CommRing R] (p : Fin n → R[X])
+private lemma det_eval_eq_det_vandermonde_mul {n : ℕ} {R : Type*} [CommRing R] (p : Fin n → R[X])
     (hp : ∀ k, (p k).natDegree < n) (x : Fin n → R) :
     (Matrix.of fun j k => (p k).eval (x j)).det =
       (vandermonde x).det * (Matrix.of fun (i k : Fin n) => (p k).coeff i).det := by
@@ -426,11 +435,11 @@ theorem det_krattenthaler {n : ℕ} {R : Type*} [CommRing R] (x a b : Fin n → 
     · intro j k hkj
       simp only [of_apply, hp₀, eval_mul, eval_prod, eval_add, eval_X, eval_C]
       rw [prod_eq_zero (i := j) (mem_Ioi.2 (by simpa using hkj)) (by simp), zero_mul]
-  have hfac₀ := g1a_det_eval_eq_vandermonde_mul p₀ (fun k => g1a_kpoly_natDegree A₀ B₀ k)
+  have hfac₀ := det_eval_eq_det_vandermonde_mul p₀ (fun k => krattenthaler_column_natDegree_lt A₀ B₀ k)
     (fun j => -A₀ j)
   have hV : (vandermonde fun j => -A₀ j).det = (-1) ^ N * V₀ := by
     rw [det_vandermonde]
-    have := g1a_prod_Ioi_sub_swap A₀
+    have := prod_prod_Ioi_sub_comm A₀
     simp only [neg_sub_neg]
     rw [this]
   have hVne : V₀ ≠ 0 := by
@@ -463,8 +472,8 @@ theorem det_krattenthaler {n : ℕ} {R : Type*} [CommRing R] (x a b : Fin n → 
       Matrix.of fun j k => (p k).eval (x j) := by
     ext j k
     simp [hp, eval_prod]
-  rw [hM, g1a_det_eval_eq_vandermonde_mul p (fun k => g1a_kpoly_natDegree a b k) x,
-    det_vandermonde, g1a_prod_Ioi_sub_swap x, ← hTR]
+  rw [hM, det_eval_eq_det_vandermonde_mul p (fun k => krattenthaler_column_natDegree_lt a b k) x,
+    det_vandermonde, prod_prod_Ioi_sub_comm x, ← hTR]
   linear_combination (-(∏ i, ∏ j ∈ Ioi i, (x j - x i)) *
     (Matrix.of fun (i k : Fin n) => (p k).coeff i).det) * hsq
 

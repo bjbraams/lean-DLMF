@@ -8,7 +8,30 @@ module
 public import DLMF.Mathieu.Basic.EquationAndSolutions
 
 /-!
-# Defining data for the Mathieu characteristic spectra
+# Characteristic values of Mathieu's equation
+
+The eigenvalues `a_n(q)` and `b_n(q)` of Mathieu's equation for real `q` (DLMF §28.2(v),
+Table 28.2.1, DLMF 28.2.21–28.2.22), as ordered roots of the boundary conditions of
+Table 28.2.1.
+
+## Main definitions
+
+* `nthLeast`: the `n`-th smallest element (counting from `0`) of a set of reals.
+* `mathieuSpecA`, `mathieuSpecB`: the sets of real `a` satisfying the boundary condition of
+  Table 28.2.1 for `a_n(q)` and `b_n(q)`.
+* `mathieuA n q`, `mathieuB n q`: the eigenvalues `a_n(q)` and `b_n(q)`, the `⌊n/2⌋`-th and
+  `⌊(n-1)/2⌋`-th smallest real roots of these boundary conditions.
+
+## Implementation notes
+
+* The eigenvalues are defined for real `q` only (DLMF §28.2(v)); the analytic continuation to
+  complex `q` of DLMF §28.7 is stated as theorems. For real `q` the four boundary-value
+  problems of Table 28.2.1 are regular Sturm–Liouville problems with simple real eigenvalues, so
+  the `k`-th smallest root is DLMF's `a_{2k}`, `a_{2k+1}`, `b_{2k+1}`, `b_{2k+2}`.
+* The existence of these roots is `mathieuSpecA_exists`, `mathieuSpecB_exists` in
+  `DLMF.Mathieu.SpectralExistence`, proved by Sturm–Liouville arguments
+  (`DLMFMathlib/Analysis/ODE/SturmSpectrum.lean`).
+* `b_0` is not defined by DLMF; `mathieuB 0 q = 0` is a junk value.
 -/
 
 @[expose] public noncomputable section

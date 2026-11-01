@@ -58,12 +58,12 @@ public import DLMF.AlgebraicAnalytic.Transforms.MathlibCoverage
 public import DLMF.AlgebraicAnalytic.Transforms.MellinHilbertStieltjes
 public import DLMF.AlgebraicAnalytic.Transforms.Tables
 
-/-! # Algebraic and analytic methods: DLMF Chapter 1
+/-!
+# Algebraic and analytic methods (DLMF Chapter 1)
 
 Namespace `DLMF.AlgebraicAnalytic`. One subdirectory per group of sections, each with its own
 `Basic` file and, where something is upstream, a `MathlibCoverage` file of `dlmf_upstream` pointers:
 `Algebra` (§§1.1–1.3), `Calculus` (§§1.4–1.7), `Fourier` (§1.8), `Complex` (§§1.9–1.10),
 `Polynomials` (§1.11), `ContinuedFractions` (§1.12), `ODE` (§1.13), `Transforms` (§1.14),
 `Summability` (§1.15), `Distributions` (§§1.16–1.17) and `Spectral` (§1.18).
-Ledger: `DLMF1Acquisition.md`.
 -/

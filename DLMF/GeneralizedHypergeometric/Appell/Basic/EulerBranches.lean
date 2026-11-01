@@ -9,6 +9,16 @@ public import DLMF.GeneralizedHypergeometric.Appell.Basic.Series
 
 /-!
 # Euler domains, kernels and integral branches of Appell functions
+
+The Euler integrals of DLMF §16.15 define branches of the Appell functions beyond the domains
+of their double series. All powers in the kernels are principal on the stated domains.
+
+## Main definitions
+
+* `appellEulerDomain`, `AppellSquareSlit`, `appellTriangle`: the domains of the Euler integrals.
+* `appF1EulerKernel`, `appF2EulerKernel`, `appF3EulerKernel`, `appF4EulerKernel`: the kernels.
+* `appF1Euler`, `appF2Euler`, `appF3Euler`, `appF4Euler`: the Euler-integral branches,
+  DLMF 16.15.1–16.15.4.
 -/
 
 @[expose] public noncomputable section

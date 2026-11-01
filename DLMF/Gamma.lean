@@ -39,18 +39,16 @@ public import DLMF.Gamma.ShiftedLineBounds
 public import DLMF.Gamma.Simplex.PochhammerIdentities
 
 /-!
-# The Gamma and Beta functions (AAR Chapter 1; DLMF Chapter 5)
+# The Gamma and Beta functions (DLMF Chapter 5; AAR Chapter 1)
 
-Mathlib supplies Euler's integral, the recurrence, factorial values, reflection,
-Legendre duplication, the Beta integral, Gauss's product, and the complex digamma
-function. The modules below record AAR Chapter 1 identities and suitable statements
-from DLMF §§5.2 and 5.4–5.18 that are absent from Mathlib.
-
-Graphics §5.3, applications §§5.19–5.20, and computation §§5.21–5.24 are excluded.
-Each statement taken from the DLMF records its equation number in a `@[dlmf]`
-attribute. Many newly acquired statements are admitted and remain proof obligations.
+Mathlib supplies Euler's integral, the recurrence, factorial values, reflection, Legendre
+duplication, the Beta integral, Gauss's product and the complex digamma function. The modules
+collected here contain the identities of AAR Chapter 1 and the statements of DLMF §§5.2 and
+5.4–5.18 that are absent from Mathlib; each statement taken from DLMF records its equation number
+in a `@[dlmf]` attribute. Graphics (§5.3), applications (§§5.19–5.20) and computation
+(§§5.21–5.24) are not formalized.
 
 `DLMF.Gamma.RecipGammaDeriv` defines the entire derivatives `(1/Γ)^{(n)}`. Statements in which
-digamma occurs only through products with a reciprocal Gamma are given in that form, valid
-for all parameters, because Mathlib's digamma takes the value `0` at its poles.
+digamma occurs only through products with a reciprocal Gamma are given in that form, valid for
+all parameters, because Mathlib's digamma takes the value `0` at its poles.
 -/

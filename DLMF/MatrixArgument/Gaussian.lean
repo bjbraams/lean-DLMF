@@ -13,10 +13,25 @@ public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 /-!
 # Gaussian hypergeometric function of matrix argument (DLMF §35.7)
 
-`hyp2F1 a b c T` (35.7.1), the Jacobi form `jacobiP γ δ ν T` (35.7.2) and the operators
-`gaussPDEOperator` of 35.7.9 are defined in `DLMF.MatrixArgument.Basic`. This file proves the
-series form 35.7.1 and states 35.7.3, 35.7.5–35.7.9 and the uniqueness theorem of §35.7(iii)
-(admitted). The function `₂F₁` of matrix argument is the series 35.7.1, defined for `‖T‖ < 1`
+Properties of the Gaussian hypergeometric function `₂F₁(a, b; c; T)` of a real symmetric
+matrix argument. The function `hyp2F1 a b c T` (DLMF 35.7.1), the Jacobi form
+`jacobiP γ δ ν T` (DLMF 35.7.2) and the operators `gaussPDEOperator` of DLMF 35.7.9 are defined
+in `DLMF.MatrixArgument.Basic`.
+
+## Main results
+
+* `hyp2F1_eq_tsum`: the zonal polynomial series for `₂F₁` (DLMF 35.7.1).
+* `hyp2F1_diagonal_two`: the case `m = 2` of DLMF 35.7.3.
+* `hasIntegralOn_hyp2F1`: the beta integral representation (DLMF 35.7.5).
+* `hyp2F1_euler`, `hyp2F1_pfaff`: the Euler and Pfaff transformations (DLMF 35.7.6).
+* `hyp2F1_one`: the Gauss formula for `₂F₁(a, b; c; I)` (DLMF 35.7.7).
+* `hyp2F1_reflection`: the reflection formula DLMF 35.7.8, corrected (see below).
+* `hyp2F1_gaussPDE`, `eq_hyp2F1_of_gaussPDE`: the system of partial differential equations
+  DLMF 35.7.9 and the uniqueness theorem of DLMF §35.7(iii).
+
+## Implementation notes
+
+The function `₂F₁` of matrix argument is the series 35.7.1, defined for `‖T‖ < 1`
 (and at `T = I` where it converges); formulas whose argument leaves that region are stated on
 the part of their domain where all arguments stay in it:
 

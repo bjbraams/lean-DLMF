@@ -11,7 +11,7 @@ public import DLMF.IncompleteGamma.Representations.UpperBarnes
 /-!
 # Real, contour and Mellin–Barnes representations, DLMF §8.6
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+This umbrella module collects the integral representations of the incomplete Gamma functions
+in DLMF §8.6: real and contour integrals and the Mellin–Barnes representations of the lower
+and upper functions.
 -/

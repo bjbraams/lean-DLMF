@@ -7,23 +7,39 @@ module
 
 public import DLMF.Heun.Basic
 public import DLMF.Lame.Eigenvalues
-public import DLMF.Lame.P3lWeierstrass
+public import DLMF.Lame.WeierstrassForm
 public import DLMFMathlib.Analysis.ODE.Singularities
 
 /-!
 # Lamé's equation: singularities and other forms (DLMF §§29.2, 29.10, 29.11)
 
-* §29.2(i): the singularities `2pK + (2q+1)iK'` of 29.2.1 are regular singular points, all
-  other points are ordinary (proved).
-* §29.2(ii): the algebraic form 29.2.2 in `ξ = sn²` (proved), the trigonometric form 29.2.4
-  in `φ = π/2 - am` (proved), the Weierstrass forms 29.2.9 (admitted) and 29.2.10 (proved),
-  and the identification of 29.2.2 as Heun's equation 31.2.1 (proved; DLMF states this for the
-  equivalent 29.2.10).
-* §29.10: the substitution `h = ν(ν+1) - h'`, `z' = i(z - K - iK')` maps Lamé's equation with
-  modulus `k'` to that with modulus `k` (admitted); the functions 29.10.4 on the line
-  `Re z = K` solve 29.2.1 (proved from `sn(K + is, k) = nd(s, k')`) and their imaginary
-  periods (proved from Table 29.3.2).
-* §29.11: the Lamé wave equation reduces to 29.2.1 for `ω = 0` (proved).
+The singular points of Lamé's equation, its algebraic, trigonometric and Weierstrass forms,
+its identification with Heun's equation, the change to the complementary modulus, and the
+reduction of the Lamé wave equation.
+
+## Main results
+
+* `lame_regularSingularAt`, `lame_ordinaryAt`: the points `2pK + (2q+1)iK'` are regular
+  singular points of 29.2.1 and all other points are ordinary (DLMF §29.2(i)).
+* `isLameSolutionOn_comp_sn_sq`: the algebraic form DLMF 29.2.2–29.2.3 in `ξ = sn²`.
+* `Real.isLameSolution_comp_lamePhi`: the trigonometric form DLMF 29.2.4–29.2.5 in
+  `φ = π/2 - am`.
+* `isLameWeierstrassSolutionOn_of_isLameSolutionOn`, `isLameWeierstrassSolutionOn_comp_wp`: the
+  Weierstrass forms DLMF 29.2.6–29.2.12.
+* `isLameAlgebraicSolutionOn_iff_isHeunSolOn`: 29.2.2 is Heun's equation 31.2.1 (DLMF §29.2(ii)
+  states this for the equivalent 29.2.10).
+* `isLameSolutionOn_imaginary`: with `h = ν(ν+1) - h'` and `z' = i(z - K - iK')`, Lamé's
+  equation with modulus `k'` becomes that with modulus `k` (DLMF 29.10.1–29.10.3).
+* `Real.lameEck_imaginary_solution`, `Real.lameEsk_imaginary_solution`,
+  `Real.lame_imaginary_periods`: the functions 29.10.4 on the line `Re z = K` solve 29.2.1, and
+  their periods (DLMF §29.10).
+* `isLameWaveSolutionOn_zero_iff`: for `ω = 0` the Lamé wave equation reduces to 29.2.1
+  (DLMF §29.11).
+
+## Implementation notes
+
+The ordinary points are found from the zeros of `θ₄` (§20.2(iv)); the functions 29.10.4 solve
+29.2.1 because `sn(K + is, k) = nd(s, k')`, and their periods come from Table 29.3.2.
 -/
 
 @[expose] public section
@@ -40,19 +56,19 @@ variable {h ν k : ℝ}
 /-! ### Singularities (§29.2(i)) -/
 
 /-- `0` is not a pole of `sn, cn, dn`. -/
-lemma p1l_regular_at_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+private lemma jacobiRegular_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     jacobiLetterTheta .n (jacobiZetak 0 k) (jacobiTauk k) ≠ 0 := by
   have hτ := jacobiTauk_im_pos hk
   simp only [jacobiZetak, mul_zero, zero_div, jacobiLetterTheta]
-  exact div_ne_zero (je22a_thetaFour_zero_ne_zero hτ) (je22a_thetaFour_zero_ne_zero hτ)
+  exact div_ne_zero (jacobiThetaFourTau_zero_ne_zero hτ) (jacobiThetaFourTau_zero_ne_zero hτ)
 
 /-- For real `0 < k < 1`, `sn(·, k)` is analytic at every point other than the poles
 `2pK + (2q+1)iK'` (the zeros of `θ₄` at `ζ = πz/(2K)`, §20.2(iv)). -/
-lemma p1l_analyticAt_sn (hk0 : 0 < k) (hk1 : k < 1) {z : ℂ}
+private lemma analyticAt_jacobiSnk (hk0 : 0 < k) (hk1 : k < 1) {z : ℂ}
     (hz : ∀ p q : ℤ,
       z ≠ 2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)) :
     AnalyticAt ℂ (fun z => jacobiSnk z k) z := by
-  have hkD : (k : ℂ) ∈ jacobiModulusDomain := p22R1_ofReal_mem hk0 hk1
+  have hkD : (k : ℂ) ∈ jacobiModulusDomain := ofReal_mem_jacobiModulusDomain hk0 hk1
   have hτ := jacobiTauk_im_pos hkD
   have hK : compEllIntKk (k : ℂ) = (Real.compEllIntKm (k ^ 2) : ℂ) :=
     compEllIntKk_ofReal (by nlinarith)
@@ -61,15 +77,15 @@ lemma p1l_analyticAt_sn (hk0 : 0 < k) (hk1 : k < 1) {z : ℂ}
   have hK0 := compEllIntKk_ne_zero hkD
   set W : Set ℂ := {w | jacobiLetterTheta .n (jacobiZetak w k) (jacobiTauk k) ≠ 0}
   have hcont : Continuous fun w => jacobiLetterTheta .n (jacobiZetak w k) (jacobiTauk k) := by
-    simp only [p22R1_letter_eq]
-    exact continuous_const.mul ((p22R1_differentiable_th .n hτ).continuous.comp
+    simp only [jacobiLetterTheta_eq_const_mul_raw]
+    exact continuous_const.mul ((differentiable_jacobiLetterThetaRaw .n hτ).continuous.comp
       (by unfold jacobiZetak; fun_prop))
   have hW : IsOpen W := isOpen_ne_fun hcont continuous_const
   have hzW : z ∈ W := by
     intro h0
     have h4 : jacobiThetaFourTau (jacobiZetak z k) (jacobiTauk k) = 0 := by
       simp only [jacobiLetterTheta, div_eq_zero_iff] at h0
-      exact h0.resolve_right (je22a_thetaFour_zero_ne_zero hτ)
+      exact h0.resolve_right (jacobiThetaFourTau_zero_ne_zero hτ)
     obtain ⟨m, n, hmn⟩ := ((DLMF.Theta.jacobiThetaTau_eq_zero_iff hτ _).2.2.2).1 h4
     apply hz m n
     rw [jacobiZetak, jacobiTauk, hK', hK] at hmn
@@ -82,10 +98,10 @@ lemma p1l_analyticAt_sn (hk0 : 0 < k) (hk1 : k < 1) {z : ℂ}
 
 /-- Near a pole `z₀ = 2pK + (2q+1)iK'`: `sn²(z₀ + u, k) = 1/(k² sn²(u, k))`
 (Table 22.4.3, `sn(z + iK') = ns(z)/k`, and the periods `2K`, `2iK'` of `sn²`). -/
-lemma p1l_sn_sq_pole (hk0 : 0 < k) (hk1 : k < 1) (p q : ℤ) (u : ℂ) :
+private lemma jacobiSnk_pole_add_sq (hk0 : 0 < k) (hk1 : k < 1) (p q : ℤ) (u : ℂ) :
     jacobiSnk (2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)
       + u) k ^ 2 = 1 / ((k : ℂ) ^ 2 * jacobiSnk u k ^ 2) := by
-  have hkD : (k : ℂ) ∈ jacobiModulusDomain := p22R1_ofReal_mem hk0 hk1
+  have hkD : (k : ℂ) ∈ jacobiModulusDomain := ofReal_mem_jacobiModulusDomain hk0 hk1
   have hK : compEllIntKk (k : ℂ) = (Real.compEllIntKm (k ^ 2) : ℂ) :=
     compEllIntKk_ofReal (by nlinarith)
   have hK' : compEllIntKpk (k : ℂ) = (Real.compEllIntKm (1 - k ^ 2) : ℂ) :=
@@ -115,13 +131,13 @@ theorem lame_regularSingularAt (hk0 : 0 < k) (hk1 : k < 1) (hν : ν * (ν + 1) 
     Complex.LinearODERegularSingularAt (lameODECoeff h ν k)
       (2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)) := by
   set z₀ : ℂ := 2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)
-  have hkD : (k : ℂ) ∈ jacobiModulusDomain := p22R1_ofReal_mem hk0 hk1
+  have hkD : (k : ℂ) ∈ jacobiModulusDomain := ofReal_mem_jacobiModulusDomain hk0 hk1
   have hk0' : (k : ℂ) ≠ 0 := by exact_mod_cast hk0.ne'
   have hν' : (ν : ℂ) * (ν + 1) ≠ 0 := by exact_mod_cast hν
   -- `sn` is analytic at `0` with `sn(0) = 0`, `sn'(0) = 1`
   have hK'pos : 0 < Real.compEllIntKm (1 - k ^ 2) := Real.compEllIntKm_pos (by nlinarith)
   have ha0 : AnalyticAt ℂ (fun z => jacobiSnk z k) 0 := by
-    refine p1l_analyticAt_sn hk0 hk1 fun p q h0 => ?_
+    refine analyticAt_jacobiSnk hk0 hk1 fun p q h0 => ?_
     have := congrArg Complex.im h0
     simp at this
     have : (2 * (q : ℝ) + 1) = 0 := by
@@ -134,7 +150,7 @@ theorem lame_regularSingularAt (hk0 : 0 < k) (hk1 : k < 1) (hν : ν * (ν + 1) 
   have hGa : AnalyticAt ℂ G 0 := ha0.dslope 0
   have hG0 : G 0 = 1 := by
     simp only [G, dslope_same]
-    rw [(hasDerivAt_jacobiSnk hkD (p1l_regular_at_zero hkD)).deriv, jacobiCnk_zero hkD,
+    rw [(hasDerivAt_jacobiSnk hkD (jacobiRegular_zero hkD)).deriv, jacobiCnk_zero hkD,
       jacobiDnk_zero hkD, mul_one]
   have hsnG : ∀ u, jacobiSnk u k = u * G u := fun u => by
     have := sub_smul_dslope (fun z => jacobiSnk z k) 0 u
@@ -145,7 +161,7 @@ theorem lame_regularSingularAt (hk0 : 0 < k) (hk1 : k < 1) (hν : ν * (ν + 1) 
       (z - z₀) ^ 2 * h - ν * (ν + 1) / G (z - z₀) ^ 2 := by
     intro z hz
     have hu : z - z₀ ≠ 0 := sub_ne_zero.2 hz
-    have := p1l_sn_sq_pole hk0 hk1 p q (z - z₀)
+    have := jacobiSnk_pole_add_sq hk0 hk1 p q (z - z₀)
     rw [show z₀ + (z - z₀) = z by ring] at this
     simp only [lameODECoeff, Matrix.cons_val_zero]
     rw [this, hsnG]
@@ -182,7 +198,7 @@ theorem lame_ordinaryAt (hk0 : 0 < k) (hk1 : k < 1) (h z : ℂ)
     (hz : ∀ p q : ℤ,
       z ≠ 2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)) :
     Complex.LinearODEOrdinaryAt (lameODECoeff h ν k) z := by
-  have ha := p1l_analyticAt_sn hk0 hk1 hz
+  have ha := analyticAt_jacobiSnk hk0 hk1 hz
   intro j
   refine ⟨lameODECoeff h ν k j, ?_, Filter.EventuallyEq.rfl⟩
   fin_cases j
@@ -194,7 +210,7 @@ theorem lame_ordinaryAt (hk0 : 0 < k) (hk1 : k < 1) (h z : ℂ)
 /-! ### Other forms (§29.2(ii)) -/
 
 /-- Where `sn(z, k) ≠ 0`, the point `z` is not a pole of `sn, cn, dn`. -/
-lemma p1l_regular_of_sn_ne_zero {z k : ℂ} (hs : jacobiSnk z k ≠ 0) :
+private lemma jacobiRegular_of_jacobiSnk_ne_zero {z k : ℂ} (hs : jacobiSnk z k ≠ 0) :
     jacobiLetterTheta .n (jacobiZetak z k) (jacobiTauk k) ≠ 0 := by
   intro h0
   apply hs
@@ -209,11 +225,11 @@ theorem isLameSolutionOn_comp_sn_sq (hk0 : 0 < k) (hk1 : k < 1) {w : ℂ → ℂ
     (hV : IsOpen V) (h0 : (0 : ℂ) ∉ V) (h1 : (1 : ℂ) ∉ V) (h2 : ((k : ℂ) ^ 2)⁻¹ ∉ V)
     (hw : IsLameAlgebraicSolutionOn h ν k w V) :
     IsLameSolutionOn h ν k (fun z => w (jacobiSnk z k ^ 2)) {z | jacobiSnk z k ^ 2 ∈ V} := by
-  have hkD : (k : ℂ) ∈ jacobiModulusDomain := p22R1_ofReal_mem hk0 hk1
+  have hkD : (k : ℂ) ∈ jacobiModulusDomain := ofReal_mem_jacobiModulusDomain hk0 hk1
   have hk0' : (k : ℂ) ≠ 0 := by exact_mod_cast hk0.ne'
   have hreg : ∀ z, jacobiSnk z k ^ 2 ∈ V →
       jacobiLetterTheta .n (jacobiZetak z k) (jacobiTauk k) ≠ 0 := fun z hz =>
-    p1l_regular_of_sn_ne_zero fun hs => h0 (by simpa [hs] using hz)
+    jacobiRegular_of_jacobiSnk_ne_zero fun hs => h0 (by simpa [hs] using hz)
   have hW : ∀ z, jacobiSnk z k ^ 2 ∈ V → HasDerivAt (fun z => w (jacobiSnk z k ^ 2))
       (deriv w (jacobiSnk z k ^ 2) * (2 * jacobiSnk z k * (jacobiCnk z k * jacobiDnk z k))) z :=
     fun z hz => ((hw.differentiableAt _ hz).hasDerivAt.comp z
@@ -267,7 +283,7 @@ theorem isLameSolutionOn_comp_sn_sq (hk0 : 0 < k) (hk1 : k < 1) {w : ℂ → ℂ
 theorem Real.isLameSolution_comp_lamePhi (hk0 : 0 < k) (hk1 : k < 1) {W : ℝ → ℝ}
     (hW : Real.IsLameTrigSolution h ν k W) :
     Real.IsLameSolution h ν k (fun x => W (Real.lamePhi x k)) := by
-  have hm : k ^ 2 < 1 := l29_sq_lt_one hk0 hk1
+  have hm : k ^ 2 < 1 := modulus_sq_lt_one hk0 hk1
   have hφ : ∀ x, HasDerivAt (fun x => Real.lamePhi x k) (-Real.jacobiDnm x (k ^ 2)) x := by
     intro x
     have := (Real.hasDerivAt_jacobiAmm hm x).const_sub (π / 2)
@@ -297,7 +313,7 @@ theorem Real.isLameSolution_comp_lamePhi (hk0 : 0 < k) (hk1 : k < 1) {W : ℝ �
 `(e₂ - e₃)/(e₁ - e₃) = k²`, `g = (e₁ - e₃)h + ν(ν+1)e₃` (29.2.7), `η = (e₁-e₃)^{-1/2}(z - iK')`
 (29.2.8) and `g₂ = -4(e₂e₃ + e₃e₁ + e₁e₂)`, `g₃ = 4e₁e₂e₃` (29.2.12). If `w` solves Lamé's
 equation 29.2.1 on `U`, then `η ↦ w((e₁-e₃)^{1/2} η + iK')` solves the Weierstrass form 29.2.9
-on the corresponding set. Proved in `DLMF.Lame.P3lWeierstrass` (`p3l_weierstrass`). -/
+on the corresponding set. Proved in `DLMF.Lame.WeierstrassForm` (`lameWeierstrassForm_of_isLameSolutionOn`). -/
 @[dlmf 29.2.E6, dlmf 29.2.E7, dlmf 29.2.E8, dlmf 29.2.E9, dlmf 29.2.E12]
 theorem isLameWeierstrassSolutionOn_of_isLameSolutionOn (hk0 : 0 < k) (hk1 : k < 1)
     {e₁ e₂ e₃ : ℝ} (h12 : e₂ < e₁) (h23 : e₃ < e₂) (hsum : e₁ + e₂ + e₃ = 0)
@@ -307,7 +323,7 @@ theorem isLameWeierstrassSolutionOn_of_isLameSolutionOn (hk0 : 0 < k) (hk1 : k <
       (-4 * (e₂ * e₃ + e₃ * e₁ + e₁ * e₂)) (4 * e₁ * e₂ * e₃)
       (fun η => w (Real.sqrt (e₁ - e₃) * η + I * Real.compEllIntKm (1 - k ^ 2)))
       {η | (Real.sqrt (e₁ - e₃) : ℂ) * η + I * Real.compEllIntKm (1 - k ^ 2) ∈ U} :=
-  p3l_weierstrass hk0 hk1 h12 h23 hsum hk2 hU hw
+  lameWeierstrassForm_of_isLameSolutionOn hk0 hk1 h12 h23 hsum hk2 hU hw
 
 open PeriodPair in
 /-- 29.2.10–29.2.11: if `v` solves the algebraic Weierstrass form 29.2.10 on an open set `V`
@@ -417,7 +433,7 @@ theorem isLameAlgebraicSolutionOn_iff_isHeunSolOn {h ν k : ℂ} {w : ℂ → �
 /-! ### Imaginary periods (§29.10) -/
 
 /-- `k' = √(1 - k²)` as the complex comodulus of a real modulus. -/
-lemma p2l_comod_ofReal {x : ℝ} (hx : x ^ 2 ≤ 1) :
+private lemma jacobiComodulusk_ofReal {x : ℝ} (hx : x ^ 2 ≤ 1) :
     jacobiComodulusk (x : ℂ) = ((Real.sqrt (1 - x ^ 2) : ℝ) : ℂ) := by
   rw [jacobiComodulusk, show (1 - (x : ℂ) ^ 2) = ((1 - x ^ 2 : ℝ) : ℂ) by push_cast; ring,
     show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
@@ -425,22 +441,22 @@ lemma p2l_comod_ofReal {x : ℝ} (hx : x ^ 2 ≤ 1) :
 
 /-- The imaginary transformation behind 29.10: with `k' = √(1 - k²)`,
 `k'² sn²(i(z - K - iK'), k') = dn²(z, k)` (identically, including Lean's junk values). -/
-lemma p2l_comod_sq_sn_imag (hk0 : 0 < k) (hk1 : k < 1) (z : ℂ) :
+private lemma comodulus_sq_mul_jacobiSnk_sq_imag (hk0 : 0 < k) (hk1 : k < 1) (z : ℂ) :
     ((Real.sqrt (1 - k ^ 2) : ℝ) : ℂ) ^ 2 *
       jacobiSnk (I * (z - Real.compEllIntKm (k ^ 2) - I * Real.compEllIntKm (1 - k ^ 2)))
         ((Real.sqrt (1 - k ^ 2) : ℝ) : ℂ) ^ 2 = jacobiDnk z k ^ 2 := by
-  obtain ⟨hc0, hc1, hc2⟩ := l29_comodulus hk0 hk1
+  obtain ⟨hc0, hc1, hc2⟩ := comodulus_mem_Ioo hk0 hk1
   set c := Real.sqrt (1 - k ^ 2)
-  have hkD : (k : ℂ) ∈ jacobiModulusDomain := p22R1_ofReal_mem hk0 hk1
-  have hcD : (c : ℂ) ∈ jacobiModulusDomain := p22R1_ofReal_mem hc0 hc1
+  have hkD : (k : ℂ) ∈ jacobiModulusDomain := ofReal_mem_jacobiModulusDomain hk0 hk1
+  have hcD : (c : ℂ) ∈ jacobiModulusDomain := ofReal_mem_jacobiModulusDomain hc0 hc1
   have hKc : compEllIntKk (c : ℂ) = (Real.compEllIntKm (1 - k ^ 2) : ℂ) := by
     rw [compEllIntKk_ofReal (by nlinarith), hc2]
   have hK : compEllIntKk (k : ℂ) = (Real.compEllIntKm (k ^ 2) : ℂ) :=
     compEllIntKk_ofReal (by nlinarith)
   have hcc : jacobiComodulusk (c : ℂ) = k := by
-    rw [p2l_comod_ofReal (by nlinarith), hc2, show 1 - (1 - k ^ 2) = k ^ 2 by ring,
+    rw [jacobiComodulusk_ofReal (by nlinarith), hc2, show 1 - (1 - k ^ 2) = k ^ 2 by ring,
       Real.sqrt_sq hk0.le]
-  have hck : jacobiComodulusk (k : ℂ) = c := p2l_comod_ofReal (by nlinarith)
+  have hck : jacobiComodulusk (k : ℂ) = c := jacobiComodulusk_ofReal (by nlinarith)
   have hc0' : (c : ℂ) ≠ 0 := by exact_mod_cast hc0.ne'
   rw [show I * (z - Real.compEllIntKm (k ^ 2) - I * Real.compEllIntKm (1 - k ^ 2)) =
       I * (z - Real.compEllIntKm (k ^ 2)) + compEllIntKk (c : ℂ) by
@@ -453,18 +469,18 @@ lemma p2l_comod_sq_sn_imag (hk0 : 0 < k) (hk1 : k < 1) (z : ℂ) :
 
 /-- A solution of Lamé's equation on an open set containing a pole `2pK + (2q+1)iK'` of `sn`
 vanishes there (for `ν(ν+1) ≠ 0`). -/
-lemma p2l_lame_eq_zero_at_pole (hk0 : 0 < k) (hk1 : k < 1) {a b : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
+private lemma isLameSolutionOn_eq_zero_at_pole (hk0 : 0 < k) (hk1 : k < 1) {a b : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
     (hU : IsOpen U) (hw : IsLameSolutionOn a b k w U) (hb : b * (b + 1) ≠ 0) (p q : ℤ)
     (hz : (2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2) :
       ℂ) ∈ U) :
     w (2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)) =
       0 := by
   set z₀ : ℂ := 2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)
-  have hkD : (k : ℂ) ∈ jacobiModulusDomain := p22R1_ofReal_mem hk0 hk1
+  have hkD : (k : ℂ) ∈ jacobiModulusDomain := ofReal_mem_jacobiModulusDomain hk0 hk1
   have hk0' : (k : ℂ) ≠ 0 := by exact_mod_cast hk0.ne'
   have hK'pos : 0 < Real.compEllIntKm (1 - k ^ 2) := Real.compEllIntKm_pos (by nlinarith)
   have ha0 : AnalyticAt ℂ (fun z => jacobiSnk z k) 0 := by
-    refine p1l_analyticAt_sn hk0 hk1 fun p q h0 => ?_
+    refine analyticAt_jacobiSnk hk0 hk1 fun p q h0 => ?_
     have := congrArg Complex.im h0
     simp at this
     have : (2 * (q : ℝ) + 1) = 0 := by
@@ -477,7 +493,7 @@ lemma p2l_lame_eq_zero_at_pole (hk0 : 0 < k) (hk1 : k < 1) {a b : ℂ} {w : ℂ 
   have hGa : AnalyticAt ℂ G 0 := ha0.dslope 0
   have hG0 : G 0 = 1 := by
     simp only [G, dslope_same]
-    rw [(hasDerivAt_jacobiSnk hkD (p1l_regular_at_zero hkD)).deriv, jacobiCnk_zero hkD,
+    rw [(hasDerivAt_jacobiSnk hkD (jacobiRegular_zero hkD)).deriv, jacobiCnk_zero hkD,
       jacobiDnk_zero hkD, mul_one]
   have hsnG : ∀ u, jacobiSnk u k = u * G u := fun u => by
     have := sub_smul_dslope (fun z => jacobiSnk z k) 0 u
@@ -515,7 +531,7 @@ lemma p2l_lame_eq_zero_at_pole (hk0 : 0 < k) (hk1 : k < 1) {a b : ℂ} {w : ℂ 
     filter_upwards [nhdsWithin_le_nhds hU', nhdsWithin_le_nhds hG', self_mem_nhdsWithin]
       with u hu hGu hu0
     have hu0' : u ≠ 0 := hu0
-    have hpole := p1l_sn_sq_pole hk0 hk1 p q u
+    have hpole := jacobiSnk_pole_add_sq hk0 hk1 p q u
     have hode := (hw.hasDerivAt_deriv _ hu).deriv
     rw [hpole, hsnG] at hode
     simp only [R]
@@ -528,17 +544,17 @@ lemma p2l_lame_eq_zero_at_pole (hk0 : 0 < k) (hk1 : k < 1) {a b : ℂ} {w : ℂ 
 Lamé's equation with modulus `k' = √(1 - k²)` and eigenparameter `h'` (29.10.3) gives the
 solution `z ↦ w(i(z - K - iK'))` of 29.2.1 with modulus `k` and parameter `h`. Proved from
 `k'² sn²(z', k') = dn²(z, k)` (Jacobi's imaginary transformation and Table 22.4.3,
-`p2l_comod_sq_sn_imag`); at the poles of `sn(z, k)` the solution `w` vanishes
-(`p2l_lame_eq_zero_at_pole`). -/
+`comodulus_sq_mul_jacobiSnk_sq_imag`); at the poles of `sn(z, k)` the solution `w` vanishes
+(`isLameSolutionOn_eq_zero_at_pole`). -/
 @[dlmf 29.10.E1, dlmf 29.10.E2, dlmf 29.10.E3]
 theorem isLameSolutionOn_imaginary (hk0 : 0 < k) (hk1 : k < 1) {h' : ℂ} {w : ℂ → ℂ}
     {U : Set ℂ} (hU : IsOpen U) (hw : IsLameSolutionOn h' ν (Real.sqrt (1 - k ^ 2)) w U) :
     IsLameSolutionOn (ν * (ν + 1) - h') ν k
       (fun z => w (I * (z - Real.compEllIntKm (k ^ 2) - I * Real.compEllIntKm (1 - k ^ 2))))
       {z | I * (z - Real.compEllIntKm (k ^ 2) - I * Real.compEllIntKm (1 - k ^ 2)) ∈ U} := by
-  obtain ⟨hc0, hc1, hc2⟩ := l29_comodulus hk0 hk1
+  obtain ⟨hc0, hc1, hc2⟩ := comodulus_mem_Ioo hk0 hk1
   set c := Real.sqrt (1 - k ^ 2)
-  have hkD : (k : ℂ) ∈ jacobiModulusDomain := p22R1_ofReal_mem hk0 hk1
+  have hkD : (k : ℂ) ∈ jacobiModulusDomain := ofReal_mem_jacobiModulusDomain hk0 hk1
   set φ : ℂ → ℂ := fun z => I * (z - Real.compEllIntKm (k ^ 2) - I * Real.compEllIntKm (1 - k ^ 2))
   have hφ : ∀ z, HasDerivAt φ I z := fun z => by
     simpa using (((hasDerivAt_id z).sub_const _).sub_const _).const_mul I
@@ -554,8 +570,8 @@ theorem isLameSolutionOn_imaginary (hk0 : 0 < k) (hk1 : k < 1) {h' : ℂ} {w : �
       (c : ℂ) ^ 2 * jacobiSnk (φ z) c ^ 2) * w (φ z) = 0 := by
     by_cases hpole : ∀ p q : ℤ,
         z ≠ 2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)
-    · have hreg := p2p_regular hk0 hk1 hpole
-      rw [p2l_comod_sq_sn_imag hk0 hk1 z, ← (jacobi_sq_sum hkD hreg).2]
+    · have hreg := jacobiRegulark_of_ne_pole hk0 hk1 hpole
+      rw [comodulus_sq_mul_jacobiSnk_sq_imag hk0 hk1 z, ← (jacobi_sq_sum hkD hreg).2]
       ring
     · simp only [not_forall, not_not] at hpole
       obtain ⟨p, q, hpq⟩ := hpole
@@ -571,29 +587,29 @@ theorem isLameSolutionOn_imaginary (hk0 : 0 < k) (hk1 : k < 1) {h' : ℂ} {w : �
         ring
       have hz' : φ z ∈ U := hz
       rw [e] at hz'
-      rw [show w (φ z) = 0 by rw [e]; exact p2l_lame_eq_zero_at_pole hc0 hc1 hU hw hb _ _ hz',
+      rw [show w (φ z) = 0 by rw [e]; exact isLameSolutionOn_eq_zero_at_pole hc0 hc1 hU hw hb _ _ hz',
         mul_zero]
   linear_combination hkey + (-(h' - ν * (ν + 1) * (c : ℂ) ^ 2 *
     jacobiSnk (φ z) c ^ 2) * w (φ z)) * I_sq
 
 /-- On the line `Re z = K`: `k'² sn²(K' - s, k') = 1 - k² sn²(K + is, k)` for real `s`, in the
 form used for 29.10.4 (`sn(K + is, k) = 1/dn(s, k')`, `sn(K' - s, k') = cn(s, k')/dn(s, k')`). -/
-lemma p1l_sn_line (hk0 : 0 < k) (hk1 : k < 1) (s : ℝ) :
+private lemma jacobiSnk_K_add_I_mul_comodulus (hk0 : 0 < k) (hk1 : k < 1) (s : ℝ) :
     jacobiSnk ((Real.compEllIntKm (k ^ 2) : ℂ) + I * s) k =
         1 / (Real.jacobiDnm s (Real.sqrt (1 - k ^ 2) ^ 2) : ℂ) ∧
       (Real.jacobiSnm (Real.compEllIntKm (1 - k ^ 2) - s) (Real.sqrt (1 - k ^ 2) ^ 2) : ℂ) =
         (Real.jacobiCnm s (Real.sqrt (1 - k ^ 2) ^ 2) : ℂ) /
           (Real.jacobiDnm s (Real.sqrt (1 - k ^ 2) ^ 2) : ℂ) := by
-  obtain ⟨h0, h1, h2⟩ := l29_comodulus hk0 hk1
+  obtain ⟨h0, h1, h2⟩ := comodulus_mem_Ioo hk0 hk1
   set k' := Real.sqrt (1 - k ^ 2)
-  have hkD : (k : ℂ) ∈ jacobiModulusDomain := p22R1_ofReal_mem hk0 hk1
-  have hk'D : (k' : ℂ) ∈ jacobiModulusDomain := p22R1_ofReal_mem h0 h1
+  have hkD : (k : ℂ) ∈ jacobiModulusDomain := ofReal_mem_jacobiModulusDomain hk0 hk1
+  have hk'D : (k' : ℂ) ∈ jacobiModulusDomain := ofReal_mem_jacobiModulusDomain h0 h1
   have hcomod : jacobiComodulusk (k : ℂ) = k' := by
     rw [jacobiComodulusk, show (1 - (k : ℂ) ^ 2) = ((1 - k ^ 2 : ℝ) : ℂ) by push_cast; ring,
       show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
       ← Complex.ofReal_cpow (by nlinarith)]
     simp only [k', Real.sqrt_eq_rpow]
-  have hreg := p22R1_reg_real h0 h1 s
+  have hreg := jacobiLetterTheta_n_ne_zero_of_real h0 h1 s
   constructor
   · rw [show (Real.compEllIntKm (k ^ 2) : ℂ) + I * s = I * s + compEllIntKk (k : ℂ) by
       rw [compEllIntKk_ofReal (by nlinarith)]; ring, (jacobiSnk_shift hkD _).1,
@@ -612,14 +628,14 @@ lemma p1l_sn_line (hk0 : 0 < k) (hk1 : k < 1) (s : ℝ) :
 
 /-- The computation behind 29.10.4 for any real solution `f` of Lamé's equation with modulus
 `k' = √(1 - k²)`. -/
-lemma p1l_imaginary_solution (hk0 : 0 < k) (hk1 : k < 1) {a : ℝ} {f : ℝ → ℝ}
+private lemma lameSolution_imaginary_transform (hk0 : 0 < k) (hk1 : k < 1) {a : ℝ} {f : ℝ → ℝ}
     (hf : Real.IsLameSolution a ν (Real.sqrt (1 - k ^ 2)) f) (s : ℝ) :
     -(deriv (deriv fun s => f (Real.compEllIntKm (1 - k ^ 2) - s)) s : ℂ) +
       ((ν * (ν + 1) - a : ℝ) -
         ν * (ν + 1) * k ^ 2 * jacobiSnk (Real.compEllIntKm (k ^ 2) + I * s) k ^ 2) *
       f (Real.compEllIntKm (1 - k ^ 2) - s) = 0 := by
-  obtain ⟨h0, h1, h2⟩ := l29_comodulus hk0 hk1
-  obtain ⟨e1, e2⟩ := p1l_sn_line hk0 hk1 s
+  obtain ⟨h0, h1, h2⟩ := comodulus_mem_Ioo hk0 hk1
+  obtain ⟨e1, e2⟩ := jacobiSnk_K_add_I_mul_comodulus hk0 hk1 s
   generalize Real.sqrt (1 - k ^ 2) = k' at hf h0 h1 h2 e1 e2 ⊢
   generalize Real.compEllIntKm (1 - k ^ 2) = K' at e2 ⊢
   have hl : ∀ y : ℝ, HasDerivAt (fun s => K' - s) (-1) y := fun y => by
@@ -661,34 +677,34 @@ lemma p1l_imaginary_solution (hk0 : 0 < k) (hk1 : k < 1) {a : ℝ} {f : ℝ → 
 Special case: DLMF's complex `z`, here restricted to the line `Re z = K` on which the
 argument is real. Proved from `sn(K + is, k) = nd(s, k')` (Tables 22.4.3 and 22.6.1). -/
 @[dlmf 29.10.E4 "special case: on the line Re z = K"]
-theorem Real.lameEck_imaginary_solution (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
+theorem Real.lameEck_imaginary_solution (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
     (s : ℝ) :
     -(deriv (deriv fun s => Real.lameEck ν m (Real.compEllIntKm (1 - k ^ 2) - s)
         (Real.sqrt (1 - k ^ 2))) s : ℂ) +
       ((ν * (ν + 1) - Real.lameAk ν m (Real.sqrt (1 - k ^ 2)) : ℝ) -
         ν * (ν + 1) * k ^ 2 * jacobiSnk (Real.compEllIntKm (k ^ 2) + I * s) k ^ 2) *
       Real.lameEck ν m (Real.compEllIntKm (1 - k ^ 2) - s) (Real.sqrt (1 - k ^ 2)) = 0 := by
-  obtain ⟨h0, h1, -⟩ := l29_comodulus hk0 hk1
-  exact p1l_imaginary_solution hk0 hk1 (Real.lameEck_isLameEigenfunction hν h0 h1 m).1 s
+  obtain ⟨h0, h1, -⟩ := comodulus_mem_Ioo hk0 hk1
+  exact lameSolution_imaginary_transform hk0 hk1 (Real.lameEck_isLameEigenfunction h0 h1 m).1 s
 
 /-- 29.10.4, `Es`: as `Real.lameEck_imaginary_solution` with `h = ν(ν+1) - b^m_ν(k'²)`.
 Special case: on the line `Re z = K`. Proved as `Real.lameEck_imaginary_solution`. -/
 @[dlmf 29.10.E4 "special case: on the line Re z = K"]
-theorem Real.lameEsk_imaginary_solution (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
+theorem Real.lameEsk_imaginary_solution (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
     (s : ℝ) :
     -(deriv (deriv fun s => Real.lameEsk ν m (Real.compEllIntKm (1 - k ^ 2) - s)
         (Real.sqrt (1 - k ^ 2))) s : ℂ) +
       ((ν * (ν + 1) - Real.lameBk ν m (Real.sqrt (1 - k ^ 2)) : ℝ) -
         ν * (ν + 1) * k ^ 2 * jacobiSnk (Real.compEllIntKm (k ^ 2) + I * s) k ^ 2) *
       Real.lameEsk ν m (Real.compEllIntKm (1 - k ^ 2) - s) (Real.sqrt (1 - k ^ 2)) = 0 := by
-  obtain ⟨h0, h1, -⟩ := l29_comodulus hk0 hk1
-  exact p1l_imaginary_solution hk0 hk1 (Real.lameEsk_isLameEigenfunction hν h0 h1 m).1 s
+  obtain ⟨h0, h1, -⟩ := comodulus_mem_Ioo hk0 hk1
+  exact lameSolution_imaginary_transform hk0 hk1 (Real.lameEsk_isLameEigenfunction h0 h1 m).1 s
 
 /-- §29.10, periods: on the line `z = K + is`, the functions 29.10.4 built from `Ec^{2m}_ν`
 and `Es^{2m+2}_ν` have period `2iK'` (period `2K'` in `s`), those from `Ec^{2m+1}_ν` and
 `Es^{2m+1}_ν` have period `4iK'`. Proved from Table 29.3.2 for the modulus `k'`. -/
 @[dlmf 29.10 "periods along the line Re z = K"]
-theorem Real.lame_imaginary_periods (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
+theorem Real.lame_imaginary_periods (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
     (s : ℝ) :
     Real.lameEck ν m (Real.compEllIntKm (1 - k ^ 2) - (s + 2 * Real.compEllIntKm (1 - k ^ 2)))
         (Real.sqrt (1 - k ^ 2)) =
@@ -696,12 +712,12 @@ theorem Real.lame_imaginary_periods (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k
     Real.lameEsk ν m (Real.compEllIntKm (1 - k ^ 2) - (s + 2 * Real.compEllIntKm (1 - k ^ 2)))
         (Real.sqrt (1 - k ^ 2)) =
       (-1) ^ m * Real.lameEsk ν m (Real.compEllIntKm (1 - k ^ 2) - s) (Real.sqrt (1 - k ^ 2)) := by
-  obtain ⟨h0, h1, h2⟩ := l29_comodulus hk0 hk1
+  obtain ⟨h0, h1, h2⟩ := comodulus_mem_Ioo hk0 hk1
   have hK : Real.compEllIntKm (Real.sqrt (1 - k ^ 2) ^ 2) = Real.compEllIntKm (1 - k ^ 2) := by
     rw [h2]
   set K' := Real.compEllIntKm (1 - k ^ 2)
-  have hc := (Real.lameEck_parity hν h0 h1 m (K' - s - 2 * K')).2.2.2.1
-  have hs := (Real.lameEsk_parity hν h0 h1 m (K' - s - 2 * K')).2.2.2.1
+  have hc := (Real.lameEck_parity (ν := ν) h0 h1 m (K' - s - 2 * K')).2.2.2.1
+  have hs := (Real.lameEsk_parity (ν := ν) h0 h1 m (K' - s - 2 * K')).2.2.2.1
   rw [hK, show K' - s - 2 * K' + 2 * K' = K' - s by ring] at hc hs
   rw [show K' - (s + 2 * K') = K' - s - 2 * K' by ring]
   constructor

@@ -14,7 +14,31 @@ public import Mathlib.MeasureTheory.Integral.Pi
 public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
-# Riemann matrices, theta series and characteristics
+# Riemann matrices, theta series and characteristics (DLMF §§21.1–21.2)
+
+For a finite index type `ι` (DLMF's genus `g = card ι`), a Riemann matrix is a complex
+symmetric `ι × ι` matrix whose imaginary part is positive definite (DLMF §21.1); these form
+the Siegel upper half-space. The Riemann theta function and the theta functions with real
+characteristics are defined as `tsum`s over the lattice `ι → ℤ`.
+
+## Main definitions
+
+* `siegelUpperHalfSpace`: the Riemann matrices (DLMF §21.1).
+* `riemannThetaTerm`, `riemannTheta`: the Riemann theta function
+  `θ(z|Ω) = ∑_{n ∈ ℤ^g} exp(2πi(½ n·Ω·n + n·z))` (DLMF 21.2.1).
+* `riemannThetaCharTerm`, `riemannThetaChar`: the theta function with characteristics
+  `[α; β]` (DLMF 21.2.5).
+* `riemannThetaScaled`: the scaled theta function `θ̂(z|Ω)` (DLMF 21.2.2).
+* `riemannThetaBig`: the alternative notation `Θ(φ|B) = θ(φ/(2πi)|B/(2πi))` (DLMF §21.1).
+* `IsPosDefIm`: positivity of the quadratic form of `Im Ω` on nonzero real vectors.
+* `riemannMatrixExample`, `riemannMatrixOmegaTwo`: the Riemann matrices of DLMF 21.2.3 and
+  21.4.3.
+* `halfPeriodCharacteristics`: the set of half-period characteristics (DLMF §21.2(ii)).
+
+## Implementation notes
+
+`tsum` is totalized: outside the convergence region the defined value is `0`, and identities
+state the hypothesis `Ω ∈ siegelUpperHalfSpace ι` where it is needed.
 -/
 
 @[expose] public noncomputable section
@@ -69,7 +93,7 @@ def riemannThetaBig (φ : ι → ℂ) (B : Matrix ι ι ℂ) : ℂ :=
 
 /-- Positivity of the quadratic form of `Im Ω` on nonzero real vectors. This open condition
 holds on the Siegel upper half-space and does not require `Ω` to be symmetric. -/
-def Rth21PosIm (Ω : Matrix ι ι ℂ) : Prop :=
+def IsPosDefIm (Ω : Matrix ι ι ℂ) : Prop :=
   ∀ x : ι → ℝ, x ≠ 0 → 0 < x ⬝ᵥ (Ω.map Complex.im *ᵥ x)
 
 /-- The Riemann matrix `[[i, -1/2], [-1/2, i]]` of DLMF 21.2.3 (also `Ω₁` of 21.4.2). -/

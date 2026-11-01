@@ -13,7 +13,22 @@ public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 DLMF writes `C = b₀ + a₁/(b₁ + a₂/(b₂ + ⋯))` with partial numerators `a_n` (`n ≥ 1`) and partial
 denominators `b_n` (`n ≥ 0`). Mathlib's `GenContFract K` is `h + a₀'/(b₀' + a₁'/(b₁' + ⋯))` with
 pairs indexed from `0`, and `GenContFract.cfConv_ofFun h a b` (DLMFMathlib) builds it from two
-sequences. `contFrac a b` is DLMF's fraction in DLMF's indexing (the value `a 0` is unused):
+sequences.
+
+## Main definitions
+
+* `contFrac`: DLMF's continued fraction in DLMF's indexing (DLMF 1.12.1–1.12.3).
+* `contFracTail`: the nested tails of the approximants.
+* `contFracApprox`: the approximants `C_n(w)` (DLMF 1.12.20).
+* `ContFracEquiv`, `contFracUnitFactor`: equivalence of continued fractions (§1.12(ii), 1.12.17).
+* `IsContraction`: contractions and extensions (§1.12(iv)).
+* `ContFracConverges`: convergence (§1.12(v)).
+* `evenPartA`, `evenPartB`, `oddPartA`, `oddPartB`: the elements of the even and odd parts
+  (DLMF 1.12.23–1.12.24).
+
+## Implementation notes
+
+In `contFrac a b` the value `a 0` is unused, and
 
 * `(contFrac a b).nums n = A_n`, `(contFrac a b).dens n = B_n` (the canonical numerators and
   denominators of 1.12.4–1.12.6), and `(contFrac a b).convs n = A_n/B_n`;
@@ -21,10 +36,6 @@ sequences. `contFrac a b` is DLMF's fraction in DLMF's indexing (the value `a 0`
   with Lean's `x / 0 = 0`, it equals `A_n/B_n` when its nested denominators do not vanish
   (`DLMF.AlgebraicAnalytic.contFrac_convs'_eq_convs`);
 * `(contFrac a b).contsAux 0 = ⟨1, 0⟩ = ⟨A_{-1}, B_{-1}⟩`.
-
-Further definitions: the nested tails `contFracTail`, the approximants `C_n(w)` of 1.12.20
-(`contFracApprox`), equivalence and contraction of continued fractions, convergence, and the
-elements of the even and odd parts (1.12.23–1.12.24).
 -/
 
 @[expose] public noncomputable section

@@ -17,33 +17,40 @@ public import Carlson.R.IntegralExercises
 # Integrals of elliptic integrals (DLMF §19.28)
 
 Mellin transforms on `(0, 1)` of the complete integrals `R_F(0, t, 1)`, `R_G(0, t, 1)`,
-`R_D(0, t, 1)` and of the two-variable `R_{-a}(b₁, b₂; t, 1)` (19.28.1)–(19.28.4), with
-`B` Mathlib's `Complex.betaIntegral`; and integrals of `R_D`, `R_J`, `R_F` over one of their
-variables (19.28.5)–(19.28.10).
+`R_D(0, t, 1)` and of the two-variable `R_{-a}(b₁, b₂; t, 1)`, with `B` Mathlib's
+`Complex.betaIntegral`; and integrals of `R_D`, `R_J`, `R_F` over one of their variables.
 
-All functions are DLMF's (`DLMF.EllipticIntegrals.symEllIntRF` etc. of
-`DLMF.EllipticIntegrals.Symmetric`). The integrals are Lebesgue integrals; each left side is
-absolutely convergent under the stated hypotheses (the integrands have at worst logarithmic or
-integrable power singularities), so the Lean statements carry DLMF's meaning.
+## Main results
+
+* `integral_cpow_mul_symEllIntRF_zero`, `integral_cpow_mul_symEllIntRG_zero`,
+  `integral_cpow_mul_symEllIntRD_zero`, `integral_cpow_mul_symEllIntR_two`: the Mellin
+  transforms (DLMF 19.28.1–19.28.4).
+* `integral_Ioi_symEllIntRD`: `∫_z^∞ R_D(x, y, t) dt = 6 R_F(x, y, z)` (DLMF 19.28.5).
+* `integral_symEllIntRD_interp`: `R_J` as an integral of `R_D` (DLMF 19.28.6).
+* `integral_symEllIntRJ_sq`, `integral_symEllIntRJ_scale`: DLMF 19.28.7, 19.28.8.
+* `integral_symEllIntRF_sin_cos`: DLMF 19.28.9, with the added hypothesis `x + y ≤ π/2`.
+* `integral_symEllIntRF_cosh`: DLMF 19.28.10.
+
+## Implementation notes
+
+All functions are DLMF's (`DLMF.EllipticIntegrals.symEllIntRF` etc.). The integrals are
+Lebesgue integrals; each left side is absolutely convergent under the stated hypotheses (the
+integrands have at worst logarithmic or integrable power singularities), so the Lean statements
+carry DLMF's meaning. The standing assumptions `ℜσ > 0` and `x, y, z, p > 0` (19.28.p1,
+19.28.p2) are carried as hypotheses; 19.28.p3 points to (19.16.24) and to Carlson (1963, (7.9))
+with no further formula.
 
 **Correction.** DLMF states (19.28.5)–(19.28.9) under "x, y, z, p real and positive". For
-(19.28.9), where `x` and `y` are angles, this is not sufficient: numerically (mpmath, 2026-10-25)
-the identity holds for `x, y > 0` with `x + y ≤ π/2` and fails beyond, e.g. at
-`x = 2, y = 1.3` the two sides are `2.6343` and `6.3569`, and at `x = y = 0.8` they differ by
-`0.0918`. The statement below adds the hypothesis `x + y ≤ π/2`.
+(19.28.9), where `x` and `y` are angles, this is not sufficient: numerically (mpmath) the
+identity holds for `x, y > 0` with `x + y ≤ π/2` and fails beyond, e.g. at `x = 2, y = 1.3`
+the two sides are `2.6343` and `6.3569`, and at `x = y = 0.8` they differ by `0.0918`. The
+statement here adds the hypothesis `x + y ≤ π/2`.
 
-## §19.28 prose
-
-* 19.28.p1, 19.28.p2: the standing assumptions `ℜσ > 0` and `x, y, z, p > 0`, carried as
-  hypotheses.
-* 19.28.p3: pointers to (19.16.24) and to Carlson (1963, (7.9)); no further formula.
-
-The integral (19.28.5) follows from the node derivative of `R_F`, Mathlib's improper
-fundamental theorem for a nonpositive derivative, and the proved Carlson asymptotic
+**Proofs.** The integral (19.28.5) follows from the node derivative of `R_F`, Mathlib's improper
+fundamental theorem for a nonpositive derivative, and the Carlson asymptotic
 `Carlson.isEquivalent_carlsonRF_atTop`. Positivity and real-valuedness of `R_D` use
-`Carlson.ofReal_carlsonRReal` and `Carlson.carlsonRReal_pos`.
-
-The interpolation identity (19.28.6) uses the proved positive-parameter merging formula
+`Carlson.ofReal_carlsonRReal` and `Carlson.carlsonRReal_pos`. The interpolation identity
+(19.28.6) uses the positive-parameter merging formula
 `Dirichlet.regCarlsonDirichletAverage_ofReal_eq_merge` from `lean-codes`, followed by the
 change of variable `u = v²` (`Carlson.integral_Ioo_sq_eq`).
 
@@ -108,7 +115,7 @@ lemma symEllIntRD_real_nonneg {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < 
   rw [hnodes, hparams] at H
   rw [symEllIntRD_eq_symEllIntR (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)
     (ofReal_mem_slitPlane.mpr hz), symEllIntR_of_mem _ _
-      (ei19c_slit3 (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)
+      (vec3_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)
         (ofReal_mem_slitPlane.mpr hz)), show (-(3 / 2) : ℂ) = ((-3 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← H]
   simp only [ofReal_re]
@@ -235,7 +242,7 @@ theorem integral_symEllIntRD_interp {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (h
     rw [← Carlson.regCarlsonRIntegral, ← Carlson.regCarlsonR_eq_regCarlsonRIntegral _ hbeta
       hdom, ← heq, symEllIntRD_eq_symEllIntR (ofReal_mem_slitPlane.mpr hx)
       (ofReal_mem_slitPlane.mpr hy) (Or.inl hw), symEllIntR_of_mem _ _
-      (ei19c_slit3 (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy) (Or.inl hw)),
+      (vec3_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy) (Or.inl hw)),
       Carlson.carlsonR]
     simp only [Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two]
     norm_num
@@ -245,7 +252,7 @@ theorem integral_symEllIntRD_interp {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (h
       (u : ℂ) ^ (-(1 / 2) : ℂ) * symEllIntRD x y (u * z + (1 - u) * p : ℝ) := by
     rw [symEllIntRJ_eq_symEllIntR (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)
       (ofReal_mem_slitPlane.mpr hz) (ofReal_mem_slitPlane.mpr hp), symEllIntR_of_mem _ _
-      (ei19c_slit4 (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)
+      (vec4_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy)
         (ofReal_mem_slitPlane.mpr hz) (ofReal_mem_slitPlane.mpr hp)), Carlson.carlsonR,
       Carlson.regCarlsonR_eq_regCarlsonRIntegral _ (fun i => by fin_cases i <;> norm_num) hZ,
       Carlson.regCarlsonRIntegral, H]
@@ -261,10 +268,10 @@ theorem integral_symEllIntRD_interp {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (h
       change (u : ℂ) * (z : ℂ) + (1 - u) * (p : ℂ) = _
       push_cast; ring
     rw [hwC, hinner (by exact hw)]
-    rw [ei19c_Gamma_five_halves, ei19c_Gamma_three_halves]
+    rw [Gamma_five_halves_eq_mul, Carlson.Gamma_three_halves]
     push_cast
     field_simp
-    have hcancel := mul_inv_cancel₀ ei19c_Gamma_half_ne
+    have hcancel := mul_inv_cancel₀ Gamma_one_half_ne_zero
     linear_combination ((u : ℂ) ^ (-(1 / 2) : ℂ) *
       symEllIntRD x y ((u : ℂ) * z + (1 - u) * p)) * hcancel
   rw [H']

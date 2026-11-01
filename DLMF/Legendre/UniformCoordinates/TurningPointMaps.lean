@@ -16,10 +16,33 @@ public import Mathlib.Analysis.SpecialFunctions.Sqrt
 /-!
 # Turning-point coordinate maps for Legendre functions
 
-Construction and monotonicity of the uniform Legendre turning-point coordinate maps.
+The parameters and implicitly defined coordinates of the large-order and large-degree uniform
+approximations of DLMF §14.15(ii) and §14.15(iv), with the existence, uniqueness and monotonicity
+of the coordinate maps.
 
-Source references and common attribution are retained in
-`DLMF.Legendre.UniformCoordinates`.
+## Main definitions
+
+* `legendreOrderAlpha`, `legendreOrderP`, `legendreOrderRho`: the quantities `α`, `p`, `ρ` of the
+  large-order expansions (DLMF 14.15.5–14.15.7).
+* `LegendreEtaRelation`, `legendreOrderEta`: the relation of DLMF 14.15.10 and the variable `η`
+  chosen as its positive solution.
+* `legendreDegreeAlpha`, `legendreDegreeBeta`: the quantities `α`, `β` of the large-degree
+  expansions (DLMF 14.15.19, 14.15.20).
+* `LegendreYRelation`, `legendreDegreeY`: the relations of DLMF 14.15.21–14.15.22 and the
+  variable `y` chosen as their solution.
+
+## Main results
+
+* `legendreOrderEta_spec`, `legendreOrderEta_bijective`: for `0 ≤ α < 1` and `x > 1`, `η` is the
+  unique positive solution of DLMF 14.15.10, and `x ↦ η` is a strictly decreasing bijection of
+  `(1,∞)` onto `(0,∞)` (DLMF §14.15(ii)).
+* `legY_existsUnique`: existence and uniqueness of the solution `y` of DLMF 14.15.21–14.15.22.
+
+## Implementation notes
+
+Since DLMF defines `η`, `y` only implicitly, `legendreOrderEta` and `legendreDegreeY` are chosen
+solutions; `legendreOrderEta_spec` and `legendreDegreeY_spec` (in `InverseCoordinates`) give
+the defining relations and uniqueness. Helper names carry the prefixes `legO_` and `legY_`.
 -/
 
 @[expose] public noncomputable section

@@ -8,13 +8,26 @@ module
 public import DLMF.OrthogonalPolynomials.Series.BrafmanAndWeighted
 
 /-!
-# Generating functions for adjacent Jacobi families
+# Generating functions for adjacent Jacobi families, Chebyshev, Laguerre and Hermite
 
-Generating functions relating adjacent Jacobi parameters, with normalization and convergence
-retained.
+The generating function for Jacobi polynomials with adjacent parameters `(β + 1, β)`
+(DLMF 18.12.3_5), Poisson's generating function for Chebyshev polynomials (DLMF 18.12.7),
+the Bessel-type Laguerre generating function (DLMF 18.12.14) and a Hermite generating function
+(DLMF 18.12.17).
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Series`.
+## Main results
+
+* `jacobi_adjacent_generating_function`: DLMF 18.12.3_5.
+* `chebyshevT_poisson_generating_function`: DLMF 18.12.7.
+* `laguerrePolyL_bessel_generating_function`: DLMF 18.12.14.
+* `hermitePolyH_half_factorial_generating_function`: DLMF 18.12.17 on the corrected disk
+  `|z| < 1/2`.
+
+## Implementation notes
+
+The adjacent Jacobi generating function combines a parameter-raising relation
+(`jacobi_adjacent_coefficient`) with the Gegenbauer generating function. DLMF 18.12.17 prints
+the convergence condition `|z| < 1`; the correct disk is `|z| < 1/2`.
 -/
 
 @[expose] public section

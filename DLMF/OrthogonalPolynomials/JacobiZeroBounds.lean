@@ -11,12 +11,29 @@ public import DLMFMathlib.Analysis.ODE.SturmComparison
 /-!
 # Bounds for individual Jacobi zero angles
 
-Beals–Wong Theorem 5.5.1: if `α², β² ≤ 1/4` and `cos θ_k` are the zeros in
-increasing angular order, then `(k-1+γ)π/(n+γ) ≤ θ_k ≤ kπ/(n+γ)`,
-where `γ = (α+β+1)/2`. The angular Liouville transformation is proved specifically
-for the Jacobi polynomial, and the existing Sturm comparison theorem controls the gaps.
-A uniform improvement of the comparison coefficient gives strict inequalities unless
-both squared parameters equal `1/4`.
+Beals–Wong Theorem 5.5.1: if `α², β² ≤ 1/4` and `cos θ_k` are the zeros of `P_n^{(α,β)}` in
+increasing angular order, then `(k-1+γ)π/(n+γ) ≤ θ_k ≤ kπ/(n+γ)`, where `γ = (α+β+1)/2`.
+An angular Liouville transformation of the Jacobi equation gives `u'' + q u = 0`, and Sturm
+comparison controls the gaps between zeros. A uniform improvement of the comparison
+coefficient gives strict inequalities unless both squared parameters equal `1/4`.
+
+## Main definitions
+
+* `u`, `u'`: the angular Jacobi function and its derivative.
+* `q`: the coefficient of the angular Jacobi equation `u'' + q u = 0`.
+
+## Main results
+
+* `hasDerivAt_u'`: the angular Jacobi differential equation.
+* `freq_sq_le_q`, `improved_freq_sq_le_q`: comparison of `q` with a constant frequency.
+* `jacobi_zero_angle_bounds`: the zero-angle bounds of Beals–Wong Theorem 5.5.1.
+* `jacobi_zero_angle_bounds_strict`: strict bounds when at least one squared parameter is
+  below `1/4`.
+
+## Implementation notes
+
+Zeros are indexed from zero, so the bounds read `(k+γ)π/(n+γ) ≤ θ_k ≤ (k+1)π/(n+γ)` in the
+Lean statements, which also identify the `cos θ_k` as all complex zeros.
 -/
 
 @[expose] public noncomputable section

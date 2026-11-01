@@ -14,11 +14,22 @@ public import DLMFMathlib.Analysis.Complex.TaylorParameter
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 
 /-!
-# The Whittaker–Buchholz expansion (DLMF §13.24)
+# The Whittaker–Buchholz expansion
 
-The Buchholz generating function defines the coefficients of Whittaker's expansion in Bessel
-functions. Cauchy bounds control the coefficient series, and a differential recurrence relates
-the coefficients to the normalized Whittaker equation.
+This file proves the expansion of Whittaker's `M_{κ,μ}` in Bessel functions of consecutive
+orders (DLMF §13.24). The Buchholz generating function defines the coefficients; Cauchy bounds
+control the coefficient series, and a differential recurrence relates the coefficients to the
+normalized Whittaker equation.
+
+## Main results
+
+* `whittakerBesselGenerating_differentiableOn`: the generating function of DLMF 13.24.3 is
+  holomorphic in `t` on the unit disc.
+* `whittakerBesselGenerating_deriv_z`: `∂_z G(μ,z,t) = -(coth t - 1/t)/2 · G(μ,z,t)`.
+* `whittakerBesselCoeff_hasSum`: the generating-function identity DLMF 13.24.3.
+* `exists_norm_whittakerBesselCoeff_le`: an exponential bound on the coefficients.
+* `summable_whittakerM_besselJ_series`: the Bessel series of DLMF 13.24.2 converges absolutely.
+* `whittakerM_besselJ_series`: the Whittaker–Buchholz expansion (DLMF 13.24.2).
 -/
 
 @[expose] public noncomputable section

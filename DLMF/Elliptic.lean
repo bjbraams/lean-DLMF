@@ -16,11 +16,13 @@ public import DLMF.Elliptic.ThetaAGM
 public import DLMF.Elliptic.MathlibCoverage
 
 /-!
-# Elliptic integrals and elliptic functions (Temme Chapter 12; DLMF Chapters 19, 20, 22)
+# Elliptic integrals and elliptic functions
 
-Mathlib provides the arithmetic-geometric mean `NNReal.agm`, Jacobi's two-variable theta function
-`jacobiTheta₂` and the Weierstrass `℘` function, but no elliptic integrals or Jacobi elliptic
-functions. This area adds, for a real parameter `m = k² < 1`:
+Real elliptic integrals, Jacobi elliptic functions and theta functions following Temme
+Chapter 12 and DLMF Chapters 19, 20 and 22. Mathlib provides the arithmetic-geometric mean
+`NNReal.agm`, Jacobi's two-variable theta function `jacobiTheta₂` and the Weierstrass `℘`
+function, but no elliptic integrals or Jacobi elliptic functions. The modules cover, for a real
+parameter `m = k² < 1`:
 
 * `Complete`: `K(m)`, `E(m)`, their derivatives, Legendre's relation and the hypergeometric
   forms (DLMF 19.2.8, 19.4.1–2, 19.5.1–2, 19.7.1), with the derivatives in both `m` and `k`.

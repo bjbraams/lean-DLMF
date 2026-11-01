@@ -10,8 +10,19 @@ public import Mathlib.NumberTheory.ModularForms.JacobiTheta.TwoVariable
 /-!
 # Jacobi theta functions in the DLMF argument convention
 
-The four theta functions are defined using Mathlib's two-variable theta series, with
-period `π` in the argument and nome `q = exp (π * I * τ)`.
+This file defines the four Jacobi theta functions through Mathlib's two-variable theta series
+`jacobiTheta₂`, with period `π` in the argument and nome `q = exp (π * I * τ)` (DLMF §20.2).
+
+## Main definitions
+
+* `jacobiThetaThreeTau`: `θ₃(z|τ) = ∑ₙ q^{n²} e^{2inz}` (DLMF 20.2.3).
+* `jacobiThetaFourTau`: `θ₄(z|τ) = θ₃(z + π/2|τ)` (DLMF 20.2.4, 20.2.14).
+* `jacobiThetaTwoTau`: `θ₂(z|τ) = q^{1/4} e^{iz} θ₃(z + πτ/2|τ)` (DLMF 20.2.2, 20.2.12).
+* `jacobiThetaOneTau`: `θ₁(z|τ) = -θ₂(z + π/2|τ)` (DLMF 20.2.11).
+
+## Main results
+
+* `jacobiThetaThreeTau_eq_tsum`: the series for `θ₃` (DLMF 20.2.3).
 -/
 
 @[expose] public section

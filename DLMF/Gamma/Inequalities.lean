@@ -13,11 +13,30 @@ public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
 public import Mathlib.Analysis.Real.Pi.Bounds
 
 /-!
-# Inequalities (DLMF §5.6)
+# Inequalities for the Gamma function (DLMF §5.6)
 
-Real-variable inequalities and complex Gamma bounds from DLMF §5.6.
-The Gamma-ratio bound has real shifts `0 ≤ a` and `1 ≤ b - a` and holds
-on the open right half-plane. The final Gamma bound assumes `0 ≤ z.re`.
+Real-variable inequalities for `Γ`, `ψ` and Gamma ratios, and bounds for the complex Gamma
+function, from DLMF §5.6.
+
+## Main results
+
+* `Gamma_stirling_bounds`: the two-sided Stirling bounds (DLMF 5.6.1).
+* `recip_Gamma_add_recip_Gamma_recip`: `1/Γ(x) + 1/Γ(1/x) ≤ 2` for `x > 0` (DLMF 5.6.2).
+* `recip_Gamma_sq_add`: `Γ(x)⁻² + Γ(1/x)⁻² ≤ 2` for `x > 0` (DLMF 5.6.3).
+* `Gamma_ratio_bounds`: Gautschi's inequality (DLMF 5.6.4).
+* `Gamma_ratio_digamma_bounds`: the bounds of Elezović, Giordano and Pečarić (DLMF 5.6.5).
+* `norm_Gamma_add_mul_I_le`, `norm_Gamma_add_mul_I_ge`: `|Γ(x + iy)| ≤ |Γ(x)|` and the
+  `sech` lower bound (DLMF 5.6.6, 5.6.7).
+* `Gamma_ratio_norm_le`: a Gamma-ratio bound on the right half-plane (DLMF 5.6.8).
+* `norm_Gamma_bound`: a complex Gamma bound in the closed right half-plane (DLMF 5.6.9).
+* `digamma_strictMonoOn`, `strictConvexOn_log_Gamma`: monotonicity of `ψ` and strict
+  log-convexity of `Γ` on `(0, ∞)`.
+* `eulerMascheroniConstant_lt_three_fifths`: the crude bound `γ < 3/5` used in the proofs.
+
+## Implementation notes
+
+The Gamma-ratio bound 5.6.8 is stated for real shifts `0 ≤ a` and `1 ≤ b - a` and holds on the
+open right half-plane; these restrictions are essential. The bound 5.6.9 assumes `0 ≤ z.re`.
 -/
 
 @[expose] public section

@@ -12,7 +12,9 @@ public import DLMF.OrthogonalPolynomials.Hahn.Orthogonality
 /-!
 # The Hahn class: definitions, orthogonality, differences, and generating functions
 
-Statements from NIST DLMF Chapter 18, each tagged with its equation number by `@[dlmf]`.
-Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
-hypergeometric definitions do not implement continuation in singular parameters.
+The Hahn class of DLMF §§18.19–18.23: the Hahn, Krawtchouk, Meixner, Charlier, continuous
+Hahn and Meixner–Pollaczek polynomials, with their orthogonality, recurrences, difference
+equations, limit relations and generating functions. Jacobi and Gegenbauer statements keep
+regularity hypotheses because the hypergeometric definitions used here are not continued in
+singular parameters.
 -/

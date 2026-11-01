@@ -9,13 +9,24 @@ public import DLMF.Hypergeometric.Solutions
 public import DLMF.Hypergeometric.ArgumentContinuation
 
 /-!
-# Quadratic transformations of Gauss functions
+# Linear, terminating and quadratic transformations of `₂F₁` (DLMF §15.8(i)–(iii))
 
-Regularized Euler identities, origin uniqueness and quadratic transformations of Gaussian
-hypergeometric functions.
+## Main results
 
-Source references and common attribution are retained in
-`DLMF.Hypergeometric.FurtherTransformations`.
+* `regularized_euler`, `regularized_pfaff`: Euler's and Pfaff's transformations in the
+  regularized normalization, DLMF 15.8.1 (and 15.8.12).
+* `regularized_connection_one_div_one_sub`, `regularized_connection_one_sub`,
+  `regularized_connection_one_sub_recip`: the connection formulas DLMF 15.8.3–15.8.5.
+* `terminating_reciprocal`, `terminating_reciprocal_one_sub`, `terminating_one_sub_recip`,
+  `terminating_one_sub`: terminating transformations, DLMF 15.8.6–15.8.7.
+* `eq_ordinaryHypergeometric_of_gaussOperator`: uniqueness of the analytic solution of the
+  Gauss equation at the origin.
+* `quadratic_double_denominator`, `quadratic_double_denominator_one_sub`: DLMF 15.8.13–15.8.14.
+* `quadratic_well_poised_plus`, `quadratic_well_poised_minus`: DLMF 15.8.15–15.8.16.
+* `gauss_quadratic`, `kummer_quadratic`: Gauss's and Kummer's quadratic transformations,
+  DLMF 15.8.18 (AAR §3.1).
+
+See `DLMF.Hypergeometric.FurtherTransformations` for the conventions.
 -/
 
 @[expose] public section

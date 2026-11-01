@@ -9,5 +9,8 @@ public import DLMF.Coulomb.Basic.Functions
 public import DLMF.Coulomb.Basic.AuxiliaryData
 
 /-!
-# Definitions and auxiliary data of Coulomb functions
+# Coulomb functions: foundational definitions
+
+The Coulomb wave functions of DLMF §33.2 and the auxiliary coefficients, phases and amplitudes
+used in the statements of DLMF §§33.4–33.13.
 -/

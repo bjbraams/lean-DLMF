@@ -10,12 +10,29 @@ public import DLMF.Polylog.Dilog
 /-!
 # The real trilogarithm (Duverney §8.1.3)
 
-`Real.trilog x = ∫₀ˣ Li₂(t)/t dt` for real `x ≤ 1`, with the kernel extended by `1` at `t = 0`.
-It agrees with the series `Li₃` on `[-1, 1]` (on the open interval by the derivative, at the
-endpoints by continuity), so `Li₃(1) = ζ(3)` and `Li₃(-1) = -¾ζ(3)`. Landen's identity for `Li₃`
-(Duverney (8.33)) follows from the reflection, inversion and Landen identities for `Li₂` by the
-derivative-equals-zero method, with the constant fixed by the limit `x → 1⁻`; at `x = 1/2` it gives
-`Li₃(1/2) = (7/8)ζ(3) - (π²/12) ln 2 + (ln 2)³/6`.
+This file defines the real trilogarithm `Real.trilog x = ∫₀ˣ Li₂(t)/t dt` for `x ≤ 1`,
+identifies it with the series `Li₃` on `[-1, 1]`, and proves Landen's identity for `Li₃`.
+
+## Main definitions
+
+* `trilogKernel`: the kernel `Li₂(t)/t`, extended by `1` at `t = 0`.
+* `Real.trilog`: the real trilogarithm (Duverney (8.28)).
+
+## Main results
+
+* `Real.hasDerivAt_trilog`: `Li₃'(x) = Li₂(x)/x` on `(-∞, 1)`.
+* `polylogSeries_three_ofReal_eq_trilog`: the series `Li₃` agrees with `Real.trilog` on
+  `[-1, 1]`.
+* `Real.trilog_one`, `Real.trilog_neg_one`: `Li₃(1) = ζ(3)`, `Li₃(-1) = -¾ζ(3)`.
+* `Real.trilog_landen`: Landen's identity for `Li₃` on `(0, 1)` (Duverney (8.33)).
+* `Real.trilog_one_half`: `Li₃(1/2) = (7/8)ζ(3) - (π²/12) ln 2 + (ln 2)³/6`.
+
+## Implementation notes
+
+The identification with the series holds on the open interval by the derivative and at the
+endpoints by continuity. Landen's identity follows from the reflection, inversion and Landen
+identities for `Li₂` by the derivative-equals-zero method, with the constant fixed by the limit
+`x → 1⁻`.
 -/
 
 @[expose] public section

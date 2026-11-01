@@ -12,11 +12,26 @@ public import DLMF.Painleve.Basic
 /-!
 # Isomonodromy problems and the integral equation: DLMF §§32.4–32.5
 
-The Lax pairs of §32.4 are stated in jet form, as the existing Beals–Wong file
-`DLMF.Painleve.LaxPair` does: the `z`-derivative of `A(z, λ)` along a function `w` is written
-out explicitly in terms of `w, w', w''` (for `PIII` in terms of the four unknowns and their
-derivatives), and the zero-curvature condition 32.4.3 is shown to be the Painlevé equation.
-The integral equation of §32.5 (Ablowitz–Segur) is acquired as an admitted statement.
+The Lax pairs of PI, PII and PIII (DLMF §32.4), whose compatibility conditions are the
+Painlevé equations, and the Ablowitz–Segur integral equation for PII (DLMF §32.5).
+
+## Main results
+
+* `lax_mixed_derivatives`, `lax_mixed_derivatives_eq`: the compatibility condition
+  DLMF 32.4.1–32.4.3.
+* `painleveI_lax_compatibility_iff`, `painleveII_lax_compatibility_iff`: `PI` and `PII` are the
+  compatibility conditions of the Lax pairs DLMF 32.4.4–32.4.7.
+* `painleveIII_lax_compatibility`, `painleveIII_lax_system_of_compatibility`: for `PIII` the
+  compatibility condition is the system DLMF 32.4.10–32.4.13.
+* `painleveIII_lax_riccati`, `painleveIII_lax_firstIntegral`, `painleveIII_lax_isPainleveIIIOn`:
+  from the system to `PIII` (DLMF 32.4.14–32.4.16).
+* `painleveII_integralEquation`: the Ablowitz–Segur integral equation (DLMF 32.5.1–32.5.3).
+
+## Implementation notes
+
+The Lax pairs are stated in jet form, as in the Beals–Wong file `DLMF.Painleve.LaxPair`: the
+`z`-derivative of `A(z, λ)` along a function `w` is written out explicitly in terms of
+`w, w', w''` (for `PIII` in terms of the four unknowns and their derivatives).
 -/
 
 @[expose] public noncomputable section

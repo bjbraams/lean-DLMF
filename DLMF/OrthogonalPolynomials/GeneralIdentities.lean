@@ -13,13 +13,47 @@ public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 /-!
 # Kernels, moments, recurrence coefficients, and zeros
 
-Statements from NIST DLMF Chapter 18, each tagged with its equation number by `@[dlmf]`.
-Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
+Further identities of the general theory of orthogonal polynomials (DLMF §18.2): squared
+norms, recurrence coefficients, the Christoffel–Darboux kernel, moments and Hankel
+determinants, interlacing of zeros, and the `L²` expansion for compactly supported measures.
+
+## Main definitions
+
+* `squaredNorm`: the squared norm `h_n = ∫ p_n² dμ` (DLMF 18.2.5).
+* `recurrenceDiagonal`: the diagonal recurrence coefficient (DLMF 18.2.11).
+* `christoffelDarbouxKernel`: the kernel `K_n(x, y) = ∑_{k ≤ n} p_k(x) p_k(y)/h_k`
+  (DLMF 18.2.12).
+* `moment`, `hankelDeterminant`, `shiftedHankelDeterminant`: moments and Hankel determinants
+  (DLMF 18.2.26–18.2.28).
+* `firstWeightedSquaredNorm`: the weighted squared norm `∫ x p_n² dμ` (DLMF 18.2.6).
+* `poissonKernel`: the Poisson kernel (DLMF 18.2.41).
+* `IsSzegoWeight`, `IsNevaiClass`: the Szegő condition (DLMF 18.2.39) and the Nevai class
+  `M(a, b)` (DLMF 18.2.40).
+
+## Main results
+
+* `integral_product`: the orthogonality relation with squared norms.
+* `recurrenceDiagonal_eq_integral`, `sum_recurrenceDiagonal`, `monic_squaredNorm_ratio`:
+  the recurrence coefficients (DLMF 18.2.11).
+* `kernel_reproduces`, `kernel_annihilates`, `christoffel_darboux_diagonal`,
+  `kernel_difference`, `kernel_polynomials_orthogonal`: properties of the Christoffel–Darboux
+  kernel (DLMF 18.2.13, 18.2.15, 18.2.16).
+* `hankelDeterminant_pos`: positivity of the Hankel determinants (DLMF 18.2.27).
+* `monic_moment_determinant`, `monic_offdiagonal_moment_determinant`,
+  `monic_diagonal_moment_determinant`: determinant formulas DLMF 18.2.29–18.2.30.
+* `zeros_interlace`: interlacing of the zeros of consecutive polynomials (DLMF §18.2(vi)).
+* `symmetric_measure_parity`: parity for a symmetric measure (DLMF 18.2.21).
+* `compact_support_L2_expansion`: convergence of the orthogonal expansion in `L²(μ)`
+  (DLMF 18.2.25).
+
+## Implementation notes
+
+DLMF 18.2.11₁ has a sign error: the telescoping sum of 18.2.11 is the negative coefficient
+ratio, as in `sum_recurrenceDiagonal`. The moment determinant formulas use Tau Ceti's
+corner-minor lemma with Mathlib's column-replacement identity. The compact-support expansion
+uses Tau Ceti's polynomial completeness and weighted Hilbert-basis construction, as in
+`General`. Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
 hypergeometric definitions do not implement continuation in singular parameters.
-The moment determinant proofs use the Tau Ceti contributors’ corner-minor lemma
-with Mathlib’s column-replacement identity.
-The compact-support expansion uses the Tau Ceti contributors' polynomial
-completeness and weighted Hilbert-basis construction, as in `General`.
 -/
 
 @[expose] public section

@@ -19,6 +19,11 @@ Laplace integral for `U` (DLMF 13.4.4) give, for `Re ν > -½` and `Re z > 0`,
 and the substitution `u = 1 + 2t` turns this into DLMF 10.32.8,
 
 `K_ν(z) = √π (z/2)^ν / Γ(ν+½) ∫₁^∞ e^{-zu} (u²-1)^{ν-½} du`.
+
+## Main results
+
+* `besselK_eq_integral_tricomi`: the Tricomi form of the Laplace integral for `K_ν`.
+* `besselK_eq_integral_Ioi_one`: the Laplace-type integral DLMF 10.32.8.
 -/
 
 @[expose] public section

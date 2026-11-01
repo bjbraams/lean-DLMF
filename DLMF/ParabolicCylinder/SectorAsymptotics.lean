@@ -10,22 +10,44 @@ public import DLMF.ParabolicCylinder.ElementaryProperties
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 
 /-!
-# Sector asymptotics of `U(a,z)` past `|ph z| = π/2` (DLMF 12.9)
+# Sector asymptotics of `U(a,z)` past `|ph z| = π/2` (DLMF §12.9)
+
+This file proves the Poincaré expansions DLMF 12.9.1 of `U(a,z)` in the sector
+`|ph z| ≤ 3π/4 - δ` and DLMF 12.9.2 of `V(a,z)` in `|ph z| ≤ π/4 - δ`, together with the
+expansion along the logarithmic plane needed for DLMF 12.9.3–12.9.4.
+
+## Main definitions
+
+* `pcfSect_kernel`: the Laplace kernel `t^{μ-1} e^{-t²/2}` of DLMF 12.5.1, `μ = a + 1/2`.
+* `pcfSect_uTerm`, `pcfSect_vTerm`: the terms of DLMF 12.9.1 and 12.9.2.
+* `pcfSect_G`: the normalized function `e^{z²/4} z^{a+1/2} U(a,z)`.
+* `PcfSectIsExp`: the expansion DLMF 12.9.1 along a filter, as a family of `O`-bounds.
+* `pcfLogWedge`: the filter `re w → +∞` with `lo ≤ im w ≤ hi` in logarithmic coordinates.
+
+## Main results
+
+* `pcfSect_integral_rotate`: the rotated Laplace representation of `U(a,z)`.
+* `pcfSect_isExp_of_re`: DLMF 12.9.1 for `re a > -1/2`.
+* `pcfSect_isExp_sub_one`: the expansions for `a` and `a + 1` give the expansion for `a - 1`.
+* `pcfSect_U_sector`: DLMF 12.9.1 for all complex `a`, uniformly in `|ph z| ≤ 3π/4 - δ`.
+* `pcfSect_U_logWedge`: DLMF 12.9.1 on the logarithmic plane.
+* `pcfSect_V_sector`: DLMF 12.9.2, uniformly in `|ph z| ≤ π/4 - δ`.
+
+## Implementation notes
 
 For `re a > -1/2` and `|θ| < π/4`, rotating the ray in the Laplace integral DLMF 12.5.1 gives
 
 `Γ(1/2 + a) e^{z²/4} U(a,z) = e^{iθ} ∫₀^∞ e^{-z e^{iθ} r} (r e^{iθ})^{a-1/2} e^{-(r e^{iθ})²/2} dr`
 
-for every complex `z` (`pcfSect_integral_rotate`). Watson's lemma along the rotated rays
-(`hasAsymptoticExpansion_integral_cexp_smul_rotate_comap`) then gives the Poincaré expansion
-DLMF 12.9.1 of `e^{z²/4} z^{a+1/2} U(a,z)` uniformly in `|ph z| ≤ 3π/4 - δ`; the recurrence
-DLMF 12.8.1 removes the restriction on `a` (`pcfSect_U_sector`).
+for every complex `z`. Watson's lemma along the rotated rays
+(`hasAsymptoticExpansion_integral_cexp_smul_rotate_comap`) then gives DLMF 12.9.1 uniformly in
+`|ph z| ≤ 3π/4 - δ`, and the recurrence DLMF 12.8.1 removes the restriction on `a`.
 
-We also record the expansion along the logarithmic plane (`pcfSect_U_logWedge`), which is the
-input for the two-exponential expansions DLMF 12.9.3–12.9.4 obtained from the connection
-formulas 12.2.19–12.2.20, and DLMF 12.9.2 for `V(a,z)` from 12.2.20 (`pcfSect_V_sector`); there
-the `U(a,z)` contribution is exponentially small (`pcfSect_exp_neg_sq_mul_cpow_isBigO`).
-The expansion 12.9.1 holds for every `δ > 0` (no upper bound on `δ` is needed).
+The expansion along the logarithmic plane is the input for the two-exponential expansions
+DLMF 12.9.3–12.9.4, obtained from the connection formulas 12.2.19–12.2.20. DLMF 12.9.2 for
+`V(a,z)` follows from 12.2.20; there the `U(a,z)` contribution is exponentially small
+(`pcfSect_exp_neg_sq_mul_cpow_isBigO`). The expansion 12.9.1 holds for every `δ > 0` (no
+upper bound on `δ` is needed).
 -/
 
 @[expose] public noncomputable section
@@ -550,24 +572,25 @@ theorem pcfSect_exp_cpow {v : ℂ} (h1 : -π < v.im) (h2 : v.im ≤ π) (c : ℂ
 theorem pcfSect_arg_exp {v : ℂ} (h1 : -π < v.im) (h2 : v.im ≤ π) : arg (exp v) = v.im := by
   rw [← Complex.log_im, Complex.log_exp h1 h2]
 
-/-- The filter `re w → +∞` with `lo ≤ im w ≤ hi` on the logarithmic plane. -/
-def pcfSect_logWedge (lo hi : ℝ) : Filter ℂ :=
+/-- Approach to infinity in logarithmic coordinates: the filter `re w → +∞` with
+`lo ≤ im w ≤ hi`. The argument `im w` is not reduced modulo `2π`. -/
+def pcfLogWedge (lo hi : ℝ) : Filter ℂ :=
   comap (fun w : ℂ => Real.exp w.re) atTop ⊓ 𝓟 {w : ℂ | lo ≤ w.im ∧ w.im ≤ hi}
 
 /-- Eventually `lo ≤ im w ≤ hi` along the logarithmic wedge. -/
 theorem pcfSect_eventually_logWedge (lo hi : ℝ) :
-    ∀ᶠ w in pcfSect_logWedge lo hi, lo ≤ w.im ∧ w.im ≤ hi :=
-  (inf_le_right : pcfSect_logWedge lo hi ≤ _) (mem_principal.mpr fun _ hw => hw)
+    ∀ᶠ w in pcfLogWedge lo hi, lo ≤ w.im ∧ w.im ≤ hi :=
+  (inf_le_right : pcfLogWedge lo hi ≤ _) (mem_principal.mpr fun _ hw => hw)
 
 /-- `w ↦ e^{w + iκ}` maps the logarithmic wedge into the sector `|ph z| ≤ 3π/4 - δ`. -/
 theorem pcfSect_tendsto_exp_logWedge {δ : ℝ} (hδ : 0 < δ) (κ : ℝ) {lo hi : ℝ}
     (hlo : -(3 * π / 4 - δ) ≤ lo + κ) (hhi : hi + κ ≤ 3 * π / 4 - δ) :
-    Tendsto (fun w : ℂ => exp (w + κ * I)) (pcfSect_logWedge lo hi) (sector (3 * π / 4 - δ)) := by
+    Tendsto (fun w : ℂ => exp (w + κ * I)) (pcfLogWedge lo hi) (sector (3 * π / 4 - δ)) := by
   refine tendsto_inf.mpr ⟨tendsto_comap_iff.mpr ?_, tendsto_principal.mpr ?_⟩
   · have hn : (fun z : ℂ => ‖z‖) ∘ (fun w : ℂ => exp (w + κ * I)) = fun w => Real.exp w.re := by
       funext w; simp [Complex.norm_exp]
     rw [hn]
-    exact (inf_le_left : pcfSect_logWedge lo hi ≤ _).trans_eq rfl |> tendsto_comap.mono_left
+    exact (inf_le_left : pcfLogWedge lo hi ≤ _).trans_eq rfl |> tendsto_comap.mono_left
   · filter_upwards [pcfSect_eventually_logWedge lo hi] with w hw
     have him : (w + κ * I).im = w.im + κ := by simp
     have h1 : -π < (w + κ * I).im := by rw [him]; linarith [Real.pi_pos]
@@ -592,12 +615,12 @@ theorem pcfSect_U_logWedge (b : ℂ) {δ : ℝ} (hδ : 0 < δ) (κ : ℝ) {lo hi
     (hlo : -(3 * π / 4 - δ) ≤ lo + κ) (hhi : hi + κ ≤ 3 * π / 4 - δ) (N : ℕ) :
     (fun w : ℂ => pcfU b (exp (w + κ * I)) - exp (-exp (2 * (w + κ * I)) / 4 -
         (b + 1 / 2) * (w + κ * I)) * ∑ s ∈ Finset.range N, pcfSect_uTerm b (exp (w + κ * I)) s)
-      =O[pcfSect_logWedge lo hi] (fun w : ℂ => ‖exp (-exp (2 * (w + κ * I)) / 4 -
+      =O[pcfLogWedge lo hi] (fun w : ℂ => ‖exp (-exp (2 * (w + κ * I)) / 4 -
         (b + 1 / 2) * (w + κ * I))‖ * Real.exp (-2 * N * w.re)) := by
   set E : ℂ → ℂ := fun w => exp (-exp (2 * (w + κ * I)) / 4 - (b + 1 / 2) * (w + κ * I))
   have h := ((pcfSect_U_sector b hδ N).comp_tendsto
     (pcfSect_tendsto_exp_logWedge hδ κ hlo hhi))
-  have hm := (isBigO_refl E (pcfSect_logWedge lo hi)).mul h
+  have hm := (isBigO_refl E (pcfLogWedge lo hi)).mul h
   have hev := pcfSect_eventually_logWedge lo hi
   refine (hm.congr' ?_ EventuallyEq.rfl).trans ?_
   · filter_upwards [hev] with w hw

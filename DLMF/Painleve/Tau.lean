@@ -10,9 +10,19 @@ public import DLMF.Painleve.Basic
 /-!
 # The entire-quotient equations for Painlevé II
 
-Beals–Wong (15.3.10)–(15.3.11) imply that `u = v/w` solves `PII(c)`
-wherever `w` is nonzero. The proof is local differentiation and does not
-assume or claim the global existence of entire `v` and `w`.
+The bilinear equations Beals–Wong (15.3.10)–(15.3.11) imply that `u = v/w` solves `PII(c)`
+wherever `w` is nonzero. The proof is local differentiation and does not assume or claim the
+global existence of entire `v` and `w`.
+
+## Main definitions
+
+* `TauEquationsAt`: the two bilinear quotient equations (15.3.10)–(15.3.11) at a point.
+* `tauQuotientDeriv`: the first derivative of the quotient `v/w`.
+
+## Main results
+
+* `isPIIOn_quotient_of_tau`: a twice differentiable solution of the two tau equations gives a
+  Painlevé II solution on an open set avoiding the zeros of its denominator.
 -/
 
 @[expose] public noncomputable section

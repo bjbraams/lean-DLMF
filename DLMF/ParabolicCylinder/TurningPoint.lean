@@ -9,12 +9,34 @@ public import DLMF.Airy.Zeros
 public import DLMF.ParabolicCylinder.Uniform
 
 /-!
-# Cylinder turning-point expansions and large-parameter zeros
+# Turning-point expansions and large-parameter zeros of parabolic cylinder functions
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This file treats the parameter scaling of Weber's equation (DLMF 12.10.1–12.10.2), uniform
+Airy-type expansions near the turning points (DLMF 12.10.35–12.10.38), and the asymptotic
+expansions of the real zeros for large parameter (DLMF 12.11.4–12.11.9).
+
+## Main definitions
+
+* `pcfAiryEnvelope`: absolute Airy envelopes, which give uniform error bounds through zeros.
+* `HasCylinderAiryExpansion`: a uniform Airy-type cylinder expansion on a real set.
+* `pcfDescendingZero`: the real zeros counted in descending order.
+* `pcfZeroP1`: the first correction in the turning-point zero expansion (DLMF 12.11.6).
+* `pcfFirstZeroCoeff`: the exact coefficients of DLMF 12.11.9.
+
+## Main results
+
+* `pcf_parameter_scaling`: the scaled form of Weber's equation (DLMF 12.10.1–12.10.2).
+* `pcf_airy_uniform`: uniform Airy-type expansions (DLMF 12.10.35–12.10.38).
+* `pcfZeroP1_limit`: the removable limit defining `pcfZeroP1` (DLMF 12.11.6).
+* `pcf_real_zero_expansion_4`, `pcf_real_zero_expansion_7`: the zero expansions
+  DLMF 12.11.4–12.11.5 and 12.11.7–12.11.8.
+* `pcfFirstZero_expansion`, `pcfFirstZero_coefficients`: the expansion of the largest zero
+  and the structure of its coefficients (DLMF 12.11.9).
+
+## Implementation notes
+
+The coefficients of DLMF 12.11.9 are given exactly rather than by the rounded decimals of the
+source; their decimal values are out of scope.
 -/
 
 @[expose] public noncomputable section

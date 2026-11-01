@@ -9,13 +9,42 @@ public import DLMF.ErrorFunctions.BoundsAsymptotics
 public import DLMF.ParabolicCylinder.ElementaryProperties
 
 /-!
-# Repeated complementary error integrals, DLMF §7.18
+# Repeated integrals of the complementary error function (DLMF §7.18)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Remaining admitted statements are not completed proofs. The Taylor HasSum uses
-Mathlib's `Complex.hasSum_taylorSeries_of_entire` and the proved weighted cylinder
-derivative ladder, retaining reciprocal-Gamma zeros in all higher coefficients.
+The repeated integrals `iⁿ erfc(z)`: definition, derivatives and recurrence, the differential
+equation and its general solution, the power series, relations to Hermite polynomials, confluent
+hypergeometric and parabolic cylinder functions, a continued fraction, and the asymptotic
+expansion.
+
+## Main definitions
+
+* `iteratedErfc`: the repeated integrals `iⁿ erfc(z)` (DLMF 7.18.1, 7.18.2); only indices
+  `n ≥ -1` are meaningful.
+* `gaussianProbabilityHh`: Jeffreys's probability function `Hh_n`.
+
+## Main results
+
+* `iteratedErfc_initial`, `iteratedErfc_tail`: the initial values and the recursive integral
+  definition (DLMF 7.18.1, 7.18.2).
+* `hasDerivAt_iteratedErfc`, `iteratedDeriv_scaled_erfc`: derivatives (DLMF 7.18.3, 7.18.4).
+* `iteratedErfc_ode`, `iteratedErfc_general_solution`: the differential equation and its
+  general solution (DLMF 7.18.5).
+* `iteratedErfc_hasSum`: the power series (DLMF 7.18.6).
+* `iteratedErfc_recurrence`: the three-term recurrence (DLMF 7.18.7).
+* `iteratedErfc_hermite`: the relation to Hermite polynomials (DLMF 7.18.8).
+* `iteratedErfc_kummerM`, `iteratedErfc_kummerU`, `iteratedErfc_kummerUOnLog`,
+  `iteratedErfc_pcfU`, `iteratedErfc_probability`: confluent hypergeometric, parabolic cylinder
+  and probability-function representations (DLMF 7.18.9–7.18.12).
+* `iteratedErfc_continuedFraction`: the continued fraction (DLMF 7.18.13).
+* `iteratedErfc_asymptotic`: the asymptotic expansion in the sector `|ph z| ≤ 3π/4 - δ`
+  (DLMF 7.18.14).
+
+## Implementation notes
+
+The power series uses Mathlib's `Complex.hasSum_taylorSeries_of_entire` and the weighted
+parabolic-cylinder derivative ladder, retaining the zeros of the reciprocal Gamma function in
+the higher coefficients. The asymptotic expansion follows from a rotated Laplace form by
+Watson's lemma.
 -/
 
 @[expose] public noncomputable section

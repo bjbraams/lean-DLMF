@@ -19,10 +19,19 @@ evaluated at a pole. Here every such product is rewritten through the entire fun
 `recipGammaDeriv 1 = (1/Γ)'`, using `ψ(x+n)/Γ(x) = -(x)_n (1/Γ)'(x+n)` and
 `ψ(x)/Γ(x) = -(1/Γ)'(x)`, and the formulas are proved for all parameters.
 
+## Main results
+
+* `logarithmic_connection_one_div_one_sub_recipGamma`: DLMF 15.8.9.
+* `logarithmic_connection_one_sub_recipGamma`: DLMF 15.8.10.
+* `logarithmic_connection_one_sub_recip_recipGamma`: DLMF 15.8.11.
+* `recip_Gamma_mul_deriv_poch`, `recip_Gamma_mul_deriv_poch_one_sub`: pole-free derivatives of
+  Pochhammer symbols.
+
+## Implementation notes
+
 The proofs repeat the parameter differentiation of the original ones with the everywhere-valid
-`hasDerivAt_recip_Gamma'`. The derivatives of the Pochhammer symbols are handled by the
-pole-free identities `recip_Gamma_mul_deriv_poch` and `recip_Gamma_mul_deriv_poch_one_sub`,
-obtained by differentiating `(x)_n / Γ(x+n) = 1/Γ(x)` and `(1-y)_n / Γ(y) = (-1)^n / Γ(y-n)`.
+`hasDerivAt_recip_Gamma'`. The derivatives of the Pochhammer symbols are obtained by
+differentiating `(x)_n / Γ(x+n) = 1/Γ(x)` and `(1-y)_n / Γ(y) = (-1)^n / Γ(y-n)`.
 -/
 
 @[expose] public section

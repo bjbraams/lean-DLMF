@@ -10,14 +10,34 @@ public import DLMF.Bessel.SecondKind
 /-!
 # Lommel's integral and Fourier–Bessel orthogonality (DLMF 10.22.5, 10.22.37)
 
+Lommel's integral on `[0, 1]`, orthogonality and normalization of the Fourier–Bessel functions
+`t ↦ J_ν(j t)` over positive zeros `j` of `J_ν`, for `re ν > -1`.
+
+## Main definitions
+
+* `besselJCore`: the entire factor `₀F̃₁(μ+1; -s/4)` of `J_μ`.
+* `besselNormPrimitive`: a primitive of `t J_ν(αt)²`.
+
+## Main results
+
+* `hasDerivAt_lommel`: the derivative of the Lommel primitive.
+* `integral_mul_besselJ_mul_besselJ`: Lommel's integral (DLMF 10.22.5 on `[0, 1]`).
+* `integral_besselJ_orthogonal`: orthogonality of Fourier–Bessel functions (DLMF 10.22.37).
+* `integral_mul_besselJ_sq`: `∫₀¹ t J_ν(jt)² dt = J_{ν+1}(j)²/2` (DLMF 10.22.37 with `ℓ = m`).
+* `integral_mul_fourierBessel_sum`: Fourier–Bessel coefficients of a finite combination.
+
+## Implementation notes
+
 The function `F(t) = t (β J_ν(αt) J_{ν-1}(βt) - α J_{ν-1}(αt) J_ν(βt))` has derivative
 `(α² - β²) t J_ν(αt) J_ν(βt)`. For `re ν > -1` the leading terms of the two products cancel at
 `t = 0`, so `F(t) = O(t^{2 re ν + 2})` and `F(0⁺) = 0`; the integrand is `O(t^{2 re ν + 1})` and
-hence integrable. The fundamental theorem of calculus then gives Lommel's integral on `[0, 1]`,
-and orthogonality of `t ↦ J_ν(j t)` over distinct positive zeros `j` of `J_ν`. The normalization
-`∫₀¹ t J_ν(jt)² dt = J_{ν+1}(j)²/2` uses the primitive
-`t²(J_{ν+1}(jt)² + J_ν(jt)²)/2 - (ν/j) t J_ν(jt) J_{ν+1}(jt)`, whose `ν²` terms have cancelled so
-that it vanishes at `0⁺` for every `re ν > -1`.
+hence integrable, and the fundamental theorem of calculus applies. The normalization uses the
+primitive `t²(J_{ν+1}(jt)² + J_ν(jt)²)/2 - (ν/j) t J_ν(jt) J_{ν+1}(jt)`, whose `ν²` terms have
+cancelled so that it vanishes at `0⁺` for every `re ν > -1`.
+
+## References
+
+* Temme, *Special Functions*, §9.9 and §10.3.1.
 -/
 
 @[expose] public section

@@ -11,9 +11,19 @@ public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
 /-!
 # Natural convergence of the complex logarithm series on its closed disk
 
-The integral-remainder argument adapts Michael Stoll's proof of
+The Taylor polynomials of `log (1 + z)` converge to it at every point of the closed unit disk
+other than `z = -1`. The integral-remainder argument adapts Michael Stoll's proof of
 `Complex.norm_log_sub_logTaylor_le` in Mathlib. A compact-path bound replaces
 its open-disk geometric bound, retaining all convergent points of the unit circle.
+
+## Main results
+
+* `exists_norm_log_sub_logTaylor_le`: a uniform path bound for the logarithm remainder,
+  independent of its order.
+* `one_add_mem_slitPlane_of_norm_le_one`: `1 + z` lies in the slit plane for `‖z‖ ≤ 1`,
+  `z ≠ -1`.
+* `tendsto_logTaylor_closed`: convergence of the log Taylor polynomials in natural order on
+  the closed disk.
 -/
 
 @[expose] public section

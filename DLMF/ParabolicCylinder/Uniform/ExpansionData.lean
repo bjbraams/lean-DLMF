@@ -8,13 +8,45 @@ module
 public import DLMF.ParabolicCylinder.Uniform.PhasesAndPolynomials
 
 /-!
-# Uniform cylinder expansion data and turning-point coordinates
+# Uniform expansion data and turning-point coordinates for parabolic cylinder functions
 
-Uniform expansion predicates, normalizers, Temme coefficients and the Airy turning-point
-coordinate and amplitude.
+This file contains the data of the uniform large-parameter expansions of DLMF §12.10: the
+Olver coefficient functions, the uniform expansion predicates and normalizers, the Temme
+polynomials, and the Airy turning-point coordinate, amplitude and coefficients.
 
-Source references and common attribution are retained in
-`DLMF.ParabolicCylinder.Uniform`.
+## Main definitions
+
+* `pcfOlverA`, `pcfOlverB`, `pcfOlverATilde`, `pcfOlverBTilde`, `pcfOlverUBar`,
+  `pcfOlverVBar`: the coefficient functions of DLMF 12.10.8, 12.10.24, 12.10.27, 12.10.30.
+* `HasCylinderUniformExpansion`: an expansion in even reciprocal powers of `μ`, uniform over
+  a set, along `pcfUniformFilter`.
+* `IsCylinderGNormalizer`, `IsCylinderGBarNormalizer`: the normalization conditions
+  DLMF 12.10.14 and 12.10.28.
+* `pcfKappa`, `pcfChi`: the oscillatory phases `μ²η(t) ∓ π/4` (DLMF 12.10.22).
+* `pcfTau`, `pcfTemmePoly`: Temme's coordinate and polynomials (DLMF 12.10.32–12.10.34).
+* `pcfZeta`, `pcfInverseZeta`, `pcfPhi`: the Airy turning-point coordinate, its inverse and
+  the amplitude (DLMF 12.10.39–12.10.40).
+* `pcfAiryAlpha`, `pcfAiryBeta`, `pcfAiryA`, `pcfAiryB`, `pcfAiryC`, `pcfAiryD`, `pcfAiryChi`:
+  the coefficients of the Airy-type expansions (DLMF 12.10.42–12.10.46).
+
+## Main results
+
+* `pcf_negative_parameter_uniform`: the uniform expansions DLMF 12.10.3–12.10.6 with a
+  normalizer satisfying DLMF 12.10.14.
+* `pcf_oscillatory_parameter_uniform`: the oscillatory expansions DLMF 12.10.18–12.10.21.
+* `pcfTemmePoly_initial`, `pcfTemmePoly_recurrence`: DLMF 12.10.34 and 12.10.33.
+* `pcfZ_eq_airyCoord`, `pcfZ_zeta_strictMonoOn`, `pcfInverseZeta_spec`: properties of the
+  turning-point coordinate (DLMF 12.10.39).
+* `pcfInverseZeta_taylor`: the expansion of the inverse coordinate (DLMF 12.10.41).
+* `pcfAiryA_limit`, `pcfAiryB_limit`, `pcfAiryC_limit`, `pcfAiryD_limit`: the removable
+  limits at the turning point (DLMF 12.10.42, 12.10.46).
+* `pcfAiryChi_formula`: DLMF 12.10.45.
+
+## Implementation notes
+
+The coefficient functions use the principal complex branch of `(t² - 1)^{3s/2}`. The
+coefficients `pcfAiryA`–`pcfAiryD` are continued to the turning point by their removable
+limits.
 -/
 
 @[expose] public noncomputable section

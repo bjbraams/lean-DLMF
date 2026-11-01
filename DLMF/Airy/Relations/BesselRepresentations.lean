@@ -11,11 +11,26 @@ public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.ComplexValues
 /-!
 # Airy functions expressed through Bessel functions
 
-Bessel and Hankel representations of the Airy functions, with the real and complex branch
-conventions retained.
+Bessel and Hankel representations of the Airy functions and their derivatives for complex `z`
+(DLMF 9.6.2–9.6.11), with `ζ = (2/3) z^{3/2}` taken on the logarithmic plane so that the
+analytically continued branch is retained.
 
-Source references and common attribution are retained in
-`DLMF.Airy.Relations`.
+## Main definitions
+
+* `airyInverseZetaOnLog`: the inverse substitution on the logarithmic `ζ`-plane (DLMF 9.6.10).
+
+## Main results
+
+* `airyInverseZeta_logZeta`: the inverse substitution recovers `z` (DLMF 9.6.10).
+* `airyAi_eq_besselI_complex`, `airyAi_eq_besselK_complex`, `airyAi_eq_hankel1_pos_complex`:
+  forms of DLMF 9.6.2.
+* `airyAiDeriv_eq_besselI_complex`, `airyAiDeriv_eq_besselK_complex`: DLMF 9.6.3.
+* `airyBi_eq_besselI_complex`, `airyBiDeriv_eq_besselI_complex`: DLMF 9.6.4, 9.6.5.
+* `airyAi_neg_eq_besselJ_complex`, `airyAiDeriv_neg_eq_besselJ_complex`,
+  `airyBi_neg_eq_besselJ_complex`, `airyBiDeriv_neg_eq_besselJ_complex`: DLMF 9.6.6–9.6.9.
+* The Hankel forms `airyAi_eq_hankel2_pos_complex`, `airyBi_eq_hankel_pos_complex`,
+  `airyAi_neg_eq_hankel_pos_complex` and their companions: DLMF 9.6.2–9.6.9.
+* `besselJ_third_eq_airy_complex`: `J_{±1/3}(ζ)` through `Ai(-z)`, `Bi(-z)` (DLMF 9.6.11).
 -/
 
 @[expose] public noncomputable section
@@ -160,10 +175,10 @@ theorem airyBi_eq_besselI_complex {z : ℂ} (hz : z ≠ 0) :
   linear_combination (-F) * f1 - G * f2
 
 /-- Contiguous relation for the regularized `0F1` at parameter `1/3`. -/
-lemma reg0F1_one_third (w : ℂ) :
+lemma reg0F1_one_third_contiguous (w : ℂ) :
     regularizedHGFun (∅ : Multiset ℂ) {1 / 3} w =
       1 / 3 * regularizedHGFun ∅ {4 / 3} w + w * regularizedHGFun ∅ {7 / 3} w :=
-  reg0F1_contiguous' (by norm_num) (by norm_num) w
+  reg0F1_contiguous_of_eq (by norm_num) (by norm_num) w
 
 /-- Exponent relations for the derivative forms: `z · 3^{-2/3} z = 3^{-2/3} z²`
 and `z · 3^{2/3} z^{-1} = 9 · 3^{-4/3}`. -/
@@ -195,7 +210,7 @@ theorem airyAiDeriv_eq_besselI_complex {z : ℂ} (hz : z ≠ 0) :
   rw [airyBesselIOnLog_airyLogZeta _ hz, airyBesselIOnLog_airyLogZeta _ hz]
   simp only [airyAiDeriv, airyFDeriv, airyGDeriv]
   obtain ⟨g1, g2⟩ := airy_deriv_exp_relations hz
-  have hC := reg0F1_one_third (z ^ 3 / 9)
+  have hC := reg0F1_one_third_contiguous (z ^ 3 / 9)
   rw [show (-(2 / 3 : ℂ)) + 1 = 1 / 3 by norm_num, show (2 / 3 : ℂ) + 1 = 5 / 3 by norm_num]
   set F53 := regularizedHGFun (∅ : Multiset ℂ) {5 / 3} (z ^ 3 / 9)
   set F13 := regularizedHGFun (∅ : Multiset ℂ) {1 / 3} (z ^ 3 / 9)
@@ -213,7 +228,7 @@ theorem airyBiDeriv_eq_besselI_complex {z : ℂ} (hz : z ≠ 0) :
   rw [airyBesselIOnLog_airyLogZeta _ hz, airyBesselIOnLog_airyLogZeta _ hz]
   simp only [airyBiDeriv, airyFDeriv, airyGDeriv]
   obtain ⟨g1, g2⟩ := airy_deriv_exp_relations hz
-  have hC := reg0F1_one_third (z ^ 3 / 9)
+  have hC := reg0F1_one_third_contiguous (z ^ 3 / 9)
   have hs : ((Real.sqrt 3 : ℝ) : ℂ) * ((Real.sqrt 3 : ℝ) : ℂ) = 3 := by
     exact_mod_cast Real.mul_self_sqrt (by norm_num : (0 : ℝ) ≤ 3)
   have hs0 : ((Real.sqrt 3 : ℝ) : ℂ) ≠ 0 := by
@@ -359,7 +374,7 @@ theorem airyAiDeriv_neg_eq_besselJ_complex {z : ℂ} (hz : z ≠ 0) :
   simp only [airyAiDeriv, airyFDeriv, airyGDeriv]
   rw [show (-z) ^ 3 / 9 = -(z ^ 3 / 9) by ring]
   obtain ⟨g1, g2⟩ := airy_deriv_exp_relations hz
-  have hC := reg0F1_one_third (-(z ^ 3 / 9))
+  have hC := reg0F1_one_third_contiguous (-(z ^ 3 / 9))
   rw [show (-(2 / 3 : ℂ)) + 1 = 1 / 3 by norm_num, show (2 / 3 : ℂ) + 1 = 5 / 3 by norm_num]
   set F53 := regularizedHGFun (∅ : Multiset ℂ) {5 / 3} (-(z ^ 3 / 9))
   set F13 := regularizedHGFun (∅ : Multiset ℂ) {1 / 3} (-(z ^ 3 / 9))
@@ -378,7 +393,7 @@ theorem airyBiDeriv_neg_eq_besselJ_complex {z : ℂ} (hz : z ≠ 0) :
   simp only [airyBiDeriv, airyFDeriv, airyGDeriv]
   rw [show (-z) ^ 3 / 9 = -(z ^ 3 / 9) by ring]
   obtain ⟨g1, g2⟩ := airy_deriv_exp_relations hz
-  have hC := reg0F1_one_third (-(z ^ 3 / 9))
+  have hC := reg0F1_one_third_contiguous (-(z ^ 3 / 9))
   have hs : ((Real.sqrt 3 : ℝ) : ℂ) * ((Real.sqrt 3 : ℝ) : ℂ) = 3 := by
     exact_mod_cast Real.mul_self_sqrt (by norm_num : (0 : ℝ) ≤ 3)
   have hs0 : ((Real.sqrt 3 : ℝ) : ℂ) ≠ 0 := by

@@ -13,11 +13,11 @@ public import Mathlib.Analysis.Calculus.Deriv.Pow
 
 Sonine's function `S = y² + (k/φ) y'²` for the self-adjoint form `(k y')' + φ y = 0` (see
 `DLMFMathlib.Analysis.ODE.SoninePolya`) applied to the Jacobi, Hermite and Laguerre equations
-(Szegő, §§7.2, 7.31–7.32; Beals–Wong, §3.5). Here `k` vanishes at the ends of the Jacobi and
-Laguerre intervals, so `S` is written directly in terms of the equation in its usual form
-and differentiated by hand. The results are stated for arbitrary solutions `y` with derivatives
-`y'`, `y''`, so they apply to the classical polynomials once their differential equations are
-supplied.
+(Szegő, §§7.2, 7.31–7.32; Beals–Wong, §3.5). The results are stated for arbitrary solutions
+`y` with derivatives `y'`, `y''`, so they apply to the classical polynomials once their
+differential equations are supplied.
+
+## Main results
 
 * `jacobi_ode_abs_le_max`: if `λ > 0` and `α + β + 1 > 0`, a solution of
   `(1 - x²) y'' + (β - α - (α + β + 2) x) y' + λ y = 0` satisfies
@@ -32,6 +32,11 @@ supplied.
 * `laguerre_ode_abs_le_right`, `laguerre_ode_abs_le_left`: for
   `x y'' + (α + 1 - x) y' + λ y = 0`, the relative maxima of `|y|` decrease on
   `[0, α + 1/2]` and increase on `[α + 1/2, ∞)`.
+
+## Implementation notes
+
+The coefficient `k` vanishes at the ends of the Jacobi and Laguerre intervals, so `S` is
+written directly in terms of the equation in its usual form and differentiated by hand.
 -/
 
 @[expose] public section

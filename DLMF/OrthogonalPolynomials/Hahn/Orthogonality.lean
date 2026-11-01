@@ -10,11 +10,25 @@ public import DLMF.OrthogonalPolynomials.Hahn.CharlierAndConnections
 /-!
 # Orthogonality and recurrences of discrete polynomial families
 
-Moment summation and generating functions establish orthogonality and recurrence relations of
-discrete polynomial families.
+Orthogonality (DLMF Table 18.19.1) and three-term recurrences (DLMF 18.22.2 with
+Table 18.22.1) of the Hahn, Krawtchouk, Meixner and Charlier polynomials. Orthogonality is
+derived from the second-order difference equation by summation by parts, on `{0, …, N}` for
+the finite families and on `ℕ` for the infinite ones.
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Hahn`.
+## Main definitions
+
+* `op`: the second-order difference operator `B Δ⁺ + D Δ⁻` at a point.
+* `hgPoly`: the terminating sum `F(-n, -x; b; z)` as a polynomial in `x`.
+
+## Main results
+
+* `sum_range_orthogonal`, `tsum_orthogonal`, `hasSum_orthogonal_poly`: orthogonality from the
+  eigenvalue equation of `op`.
+* `charlier_orthogonality`, `meixner_orthogonality`, `krawtchouk_orthogonality`,
+  `hahn_orthogonal`: DLMF Table 18.19.1.
+* `hahn_weight_sum`: the total mass of the Hahn weight.
+* `meixner_recurrence`, `krawtchouk_recurrence`, `hahn_recurrence`: DLMF 18.22.2.
+* `poch_mul_meixner_eq_sum`: an explicit sum for the Meixner polynomials (Beals–Wong (6.5.2)).
 -/
 
 @[expose] public section
@@ -561,12 +575,12 @@ theorem krawtchouk_mul_x_nat {p : ℂ} (hp : p ≠ 0) {N n m : ℕ} (hn : n ≤ 
       p * (n - N) * (krawtchouk p N (n + 1) m - krawtchouk p N n m) +
         (p - 1) * n * (krawtchouk p N (n - 1) m - krawtchouk p N n m) := by
   have h := krawtchouk_difference_equation hp hm (n : ℂ)
-  have e0 : krawtchouk p N m n = krawtchouk p N n m := krawtchouk_duality p hm hn
+  have e0 : krawtchouk p N m n = krawtchouk p N n m := krawtchouk_duality p
   have e1 : p * (n - N) * krawtchouk p N m ((n : ℂ) + 1) =
       p * (n - N) * krawtchouk p N (n + 1) m := by
     rcases Nat.lt_or_ge n N with h' | h'
     · rw [show (n : ℂ) + 1 = ((n + 1 : ℕ) : ℂ) by push_cast; ring,
-        krawtchouk_duality p hm (by omega)]
+        krawtchouk_duality p]
     · have : (n : ℂ) = N := by exact_mod_cast le_antisymm hn h'
       rw [this]; ring
   have e2 : (p - 1) * n * krawtchouk p N m ((n : ℂ) - 1) =
@@ -575,7 +589,7 @@ theorem krawtchouk_mul_x_nat {p : ℂ} (hp : p ≠ 0) {N n m : ℕ} (hn : n ≤ 
     | zero => simp
     | succ k =>
       rw [show ((k + 1 : ℕ) : ℂ) - 1 = (k : ℂ) by push_cast; ring,
-        krawtchouk_duality p hm (by omega), Nat.add_sub_cancel]
+        krawtchouk_duality p, Nat.add_sub_cancel]
   rw [e0] at h
   linear_combination -h + e1 + e2
 

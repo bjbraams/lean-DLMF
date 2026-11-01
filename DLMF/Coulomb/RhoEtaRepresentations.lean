@@ -10,17 +10,36 @@ public import DLMF.Core.Framework
 public import DLMF.IncompleteGamma.FractionTools
 
 /-!
-# Coulomb functions: integral representations and continued fractions (DLMF §§33.7–33.8)
+# Coulomb functions: integral representations and continued fractions
 
-* §33.7: the integral representations 33.7.1–33.7.4. Noninteger powers and the arctangent take
-  their principal values (DLMF §33.7). Each statement asserts the integrability of the integrand
-  together with the formula, so the Lean convention for nonintegrable functions never enters.
-  The contour of 33.7.4, from `-1` to `-i∞`, is the ray `t = -1 - is`, `s ≥ 0`
-  (`dt = -i ds`).
-* §33.8: the continued fractions 33.8.1–33.8.2 (with `HasContinuedFraction a b v`, meaning
-  `v = a₀/(b₀ + a₁/(b₁ + ⋯))`, from `DLMF.Core.Framework`) and Barnett's formulas 33.8.4–33.8.5
-  recovering `F_ℓ`, `F_ℓ'`, `G_ℓ`, `G_ℓ'` from `u = F_ℓ'/F_ℓ` and `p + iq = H^+_ℓ'/H^+_ℓ`. The
-  latter are proved from the Wronskian 33.2.12.
+This file proves the integral representations of `F_ℓ` and `H^±_ℓ` (DLMF §33.7), the continued
+fractions for their logarithmic derivatives and Barnett's formulas (DLMF §33.8).
+
+## Main definitions
+
+* `normalizedKummerFactor`: the normalized Kummer factor `e^{-iρ} M(m+1-iη, 2m+2, 2iρ)` of `F_m`.
+* `scaledBackwardSolution`: the scaled backward solution of the Coulomb recurrence in
+  continued-fraction form.
+
+## Main results
+
+* `coulombF_eq_integral`: DLMF 33.7.1.
+* `coulombHMinus_eq_integral`, `coulombHMinus_eq_integral_tanh`: DLMF 33.7.2 and 33.7.3.
+* `coulombHPlus_eq_integral`: DLMF 33.7.4.
+* `coulombF_logDeriv_contFrac`: the continued fraction for `F_ℓ'/F_ℓ` (DLMF 33.8.1).
+* `coulombHPlus_logDeriv_contFrac`, `coulombHMinus_logDeriv_contFrac`: the continued fractions
+  for `H^±_ℓ'/H^±_ℓ` (DLMF 33.8.2–33.8.3).
+* `coulomb_barnett`: Barnett's formulas recovering `F_ℓ`, `F_ℓ'`, `G_ℓ`, `G_ℓ'` from
+  `u = F_ℓ'/F_ℓ` and `p + iq = H^+_ℓ'/H^+_ℓ` (DLMF 33.8.4–33.8.5).
+
+## Implementation notes
+
+Noninteger powers and the arctangent take their principal values (DLMF §33.7). Each integral
+representation asserts the integrability of the integrand together with the formula, so the Lean
+convention for nonintegrable functions never enters. The contour of 33.7.4, from `-1` to `-i∞`,
+is the ray `t = -1 - is`, `s ≥ 0` (`dt = -i ds`). The continued fractions use
+`HasContinuedFraction a b v`, meaning `v = a₀/(b₀ + a₁/(b₁ + ⋯))`, from `DLMF.Core.Framework`.
+Barnett's formulas are proved from the Wronskian 33.2.12.
 -/
 
 @[expose] public section
@@ -67,7 +86,7 @@ theorem coulombF_eq_integral (ℓ : ℕ) (η ρ : ℝ) :
   have hfac : Gamma (2 * (ℓ : ℂ) + 2) = ((2 * ℓ + 1)! : ℂ) := by
     rw [show 2 * (ℓ : ℂ) + 2 = ((2 * ℓ + 1 : ℕ) : ℂ) + 1 by push_cast; ring,
       Complex.Gamma_nat_eq_factorial]
-  have hg : Gamma a ≠ 0 := c33a_Gamma_ne_zero ℓ η
+  have hg : Gamma a ≠ 0 := Gamma_nat_add_one_add_I_mul_ne_zero ℓ η
   have hn : (‖Gamma a‖ : ℂ) ≠ 0 := by exact_mod_cast (norm_pos_iff.mpr hg).ne'
   have hsq : Gamma a * conj (Gamma a) = (‖Gamma a‖ : ℂ) ^ 2 := by
     rw [Complex.mul_conj, Complex.normSq_eq_norm_sq]; push_cast; ring
@@ -81,12 +100,11 @@ theorem coulombF_eq_integral (ℓ : ℕ) (η ρ : ℝ) :
   field_simp
   linear_combination (-((ρ : ℂ) ^ (ℓ + 1) * J)) * hsq
 
-section q2aRot
-
+section Rotation
 open scoped Interval
 
 /-- Tricomi's kernel is differentiable at `t ≠ 0` with `re t ≥ 0`. -/
-lemma q2a_differentiableAt_kernel (a b z : ℂ) {t : ℂ} (ht : 0 ≤ t.re) (ht0 : t ≠ 0) :
+private lemma differentiableAt_tricomiKernel_of_re_nonneg (a b z : ℂ) {t : ℂ} (ht : 0 ≤ t.re) (ht0 : t ≠ 0) :
     DifferentiableAt ℂ (tricomiKernel a b z) t := by
   have h1 : t ∈ slitPlane := by
     rcases ht.lt_or_eq with h | h
@@ -99,18 +117,18 @@ lemma q2a_differentiableAt_kernel (a b z : ℂ) {t : ℂ} (ht : 0 ≤ t.re) (ht0
     ((differentiableAt_const _ |>.add differentiableAt_id).cpow (differentiableAt_const _) h2)
 
 /-- `re (2iρ · r e^{iθ}) = -2ρ r sin θ`. -/
-lemma q2a_re_two_I_mul (ρ r θ : ℝ) :
+private lemma re_two_I_mul_mul_ofReal_mul_exp (ρ r θ : ℝ) :
     (2 * I * ρ * ((r : ℂ) * exp (θ * I))).re = -(2 * ρ * r * Real.sin θ) := by
   simp [Complex.mul_re, Complex.mul_im, Complex.exp_ofReal_mul_I_re,
     Complex.exp_ofReal_mul_I_im]
   ring
 
 /-- `re (r e^{iθ}) = r cos θ`. -/
-lemma q2a_re_ray (r θ : ℝ) : ((r : ℂ) * exp (θ * I)).re = r * Real.cos θ := by
+private lemma re_ofReal_mul_exp_ofReal_mul_I (r θ : ℝ) : ((r : ℂ) * exp (θ * I)).re = r * Real.cos θ := by
   rw [re_ofReal_mul, exp_ofReal_mul_I_re]
 
 /-- Bounds for Tricomi's kernel at `z = 2iρ` along rays of angle `θ ∈ [-π/2, -π/4]`. -/
-lemma q2a_kernel_bounds (a b : ℂ) {ρ : ℝ} (hρ : 0 < ρ) :
+private lemma tricomiKernel_bound_on_rays (a b : ℂ) {ρ : ℝ} (hρ : 0 < ρ) :
     ∃ C : ℝ, ∀ θ : ℝ, -(π / 2) ≤ θ → θ ≤ -(π / 4) →
       (∀ r : ℝ, 0 < r → r ≤ 1 →
         ‖tricomiKernel a b (2 * I * ρ) (r * exp (θ * I))‖ ≤ C * r ^ (a.re - 1)) ∧
@@ -135,9 +153,9 @@ lemma q2a_kernel_bounds (a b : ℂ) {ρ : ℝ} (hρ : 0 < ρ) :
       Real.exp (-(ρ * r)) * r ^ (a.re - 1) * (1 + r) ^ N * E := by
     intro r hr
     have hre : 0 ≤ ((r : ℂ) * exp (θ * I)).re := by
-      rw [q2a_re_ray]; positivity
+      rw [re_ofReal_mul_exp_ofReal_mul_I]; positivity
     have h := norm_tricomiKernel_le a b (2 * I * ρ) _ hre hN
-    rw [norm_mul_exp_I_eq r hr.le, q2a_re_two_I_mul] at h
+    rw [norm_mul_exp_I_eq r hr.le, re_two_I_mul_mul_ofReal_mul_exp] at h
     refine h.trans ?_
     have : 0 < ρ * r := mul_pos hρ hr
     gcongr
@@ -170,22 +188,22 @@ lemma q2a_kernel_bounds (a b : ℂ) {ρ : ℝ} (hρ : 0 < ρ) :
 /-- **Tricomi's integral on the imaginary axis**: for `re a > 0`, `ρ > 0`,
 `Γ(a) U(a,b,2iρ) = e^{-iπ/2} ∫₀^∞ K(r e^{-iπ/2}) dr` with `K` Tricomi's kernel at `z = 2iρ`,
 and the integrand is integrable. -/
-lemma q2a_kummerU_two_I (a b : ℂ) (ha : 0 < a.re) {ρ : ℝ} (hρ : 0 < ρ) :
+private lemma Gamma_mul_kummerU_two_I_mul_eq_integral (a b : ℂ) (ha : 0 < a.re) {ρ : ℝ} (hρ : 0 < ρ) :
     IntegrableOn (fun r : ℝ => tricomiKernel a b (2 * I * ρ) (r * exp (-(π / 2) * I))) (Ioi 0) ∧
     Gamma a * kummerU a b (2 * I * ρ) = exp (-(π / 2) * I) *
       ∫ r in Ioi (0 : ℝ), tricomiKernel a b (2 * I * ρ) (r * exp (-(π / 2) * I)) := by
-  obtain ⟨C, hC⟩ := q2a_kernel_bounds a b hρ
+  obtain ⟨C, hC⟩ := tricomiKernel_bound_on_rays a b hρ
   have hρ2 : 0 < ρ / 2 := by positivity
   have hcont : ∀ θ : ℝ, -(π / 2) ≤ θ → θ ≤ -(π / 4) → ∀ r : ℝ, 0 < r →
       ContinuousAt (fun r : ℝ => tricomiKernel a b (2 * I * ρ) (r * exp (θ * I))) r := by
     intro θ h1 h2 r hr
     have hre : 0 ≤ ((r : ℂ) * exp (θ * I)).re := by
-      rw [q2a_re_ray]
+      rw [re_ofReal_mul_exp_ofReal_mul_I]
       exact mul_nonneg hr.le (Real.cos_nonneg_of_mem_Icc ⟨h1, by linarith [Real.pi_pos]⟩)
     have hne : ((r : ℂ) * exp (θ * I)) ≠ 0 :=
       mul_ne_zero (by exact_mod_cast hr.ne') (exp_ne_zero _)
     exact ContinuousAt.comp (g := tricomiKernel a b (2 * I * ρ))
-      (q2a_differentiableAt_kernel a b _ hre hne).continuousAt (by fun_prop)
+      (differentiableAt_tricomiKernel_of_re_nonneg a b _ hre hne).continuousAt (by fun_prop)
   have hpi := Real.pi_pos
   refine ⟨by
     have := integrableOn_ray_of_bounds ha hρ2 (hcont _ le_rfl (by linarith))
@@ -193,7 +211,7 @@ lemma q2a_kummerU_two_I (a b : ℂ) (ha : 0 < a.re) {ρ : ℝ} (hρ : 0 < ρ) :
     simpa only [ofReal_neg, ofReal_div, ofReal_ofNat] using this, ?_⟩
   -- the representation on the ray of angle `-π/4`
   have hz : 0 < (2 * I * (ρ : ℂ) * exp ((-(π / 4) : ℝ) * I)).re := by
-    have := q2a_re_two_I_mul ρ 1 (-(π / 4))
+    have := re_two_I_mul_mul_ofReal_mul_exp ρ 1 (-(π / 4))
     simp only [ofReal_one, one_mul, mul_one] at this
     rw [this, Real.sin_neg, Real.sin_pi_div_four]
     have : 0 < Real.sqrt 2 := by positivity
@@ -216,11 +234,11 @@ lemma q2a_kummerU_two_I (a b : ℂ) (ha : 0 < a.re) {ρ : ℝ} (hρ : 0 < ρ) :
   rotate_left
   · obtain ⟨h1, h2⟩ := hy y hy'
     have hre : 0 ≤ ((r : ℂ) * exp (((y + -(π / 4) : ℝ) : ℂ) * I)).re := by
-      rw [q2a_re_ray]
+      rw [re_ofReal_mul_exp_ofReal_mul_I]
       exact mul_nonneg hr.le (Real.cos_nonneg_of_mem_Icc ⟨h1, by linarith⟩)
     have hne : ((r : ℂ) * exp (((y + -(π / 4) : ℝ) : ℂ) * I)) ≠ 0 :=
       mul_ne_zero (by exact_mod_cast hr.ne') (exp_ne_zero _)
-    have hd := q2a_differentiableAt_kernel a b (2 * I * ρ) hre hne
+    have hd := differentiableAt_tricomiKernel_of_re_nonneg a b (2 * I * ρ) hre hne
     rw [← hshift] at hd
     exact hd.comp (f := fun w : ℂ => w * ω) _ (differentiableAt_id.mul_const ω)
   · obtain ⟨h1, h2⟩ := hy y hy'
@@ -240,16 +258,16 @@ lemma q2a_kummerU_two_I (a b : ℂ) (ha : 0 < a.re) {ρ : ℝ} (hρ : 0 < ρ) :
   field_simp
 
 /-- `(x u)^w = x^w u^w` for real `x > 0` and `u ≠ 0`. -/
-lemma q2a_ofReal_mul_cpow {x : ℝ} (hx : 0 < x) {u : ℂ} (hu : u ≠ 0) (w : ℂ) :
+private lemma ofReal_mul_cpow_eq_of_pos_of_ne_zero {x : ℝ} (hx : 0 < x) {u : ℂ} (hu : u ≠ 0) (w : ℂ) :
     ((x : ℂ) * u) ^ w = (x : ℂ) ^ w * u ^ w := by
   have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
   rw [cpow_def_of_ne_zero (mul_ne_zero hx0 hu), cpow_def_of_ne_zero hx0, cpow_def_of_ne_zero hu,
     log_ofReal_mul hx hu, ← exp_add, ← ofReal_log hx.le]
   ring_nf
 
-/-- The kernel of `q2a_kummerU_two_I` at `a = ℓ+1-iη`, `b = 2ℓ+2` in terms of the integrand
+/-- The kernel of `Gamma_mul_kummerU_two_I_mul_eq_integral` at `a = ℓ+1-iη`, `b = 2ℓ+2` in terms of the integrand
 of DLMF 33.7.2: `(2ρ)^{2ℓ} K(r e^{-iπ/2}) = (-1)^ℓ e^{-t} t^{ℓ-iη} (t+2iρ)^{ℓ+iη}`, `t = 2ρr`. -/
-lemma q2a_kernel_eq (ℓ : ℕ) (η : ℝ) {ρ r : ℝ} (hρ : 0 < ρ) (hr : 0 < r) :
+private lemma tricomiKernel_coulomb_eq_integrand (ℓ : ℕ) (η : ℝ) {ρ r : ℝ} (hρ : 0 < ρ) (hr : 0 < r) :
     tricomiKernel ((ℓ : ℂ) + 1 - I * η) (2 * ℓ + 2) (2 * I * ρ) (r * exp (-(π / 2) * I)) *
       (2 * (ρ : ℂ)) ^ (2 * ℓ) = (-1) ^ ℓ * (exp (-((2 * ρ * r : ℝ) : ℂ)) *
         ((2 * ρ * r : ℝ) : ℂ) ^ ((ℓ : ℂ) - I * η) *
@@ -275,7 +293,7 @@ lemma q2a_kernel_eq (ℓ : ℕ) (η : ℝ) {ρ r : ℝ} (hρ : 0 < ρ) (hr : 0 <
   have e2 : ((2 * ρ * r : ℝ) : ℂ) = ((2 * ρ : ℝ) : ℂ) * r := by push_cast; ring
   have e3 : ((2 * ρ * r : ℝ) : ℂ) + 2 * I * ρ = ((2 * ρ : ℝ) : ℂ) * ((r : ℂ) + I) := by
     push_cast; ring
-  rw [e3, e2, q2a_ofReal_mul_cpow h2ρ hr0, q2a_ofReal_mul_cpow h2ρ hri]
+  rw [e3, e2, ofReal_mul_cpow_eq_of_pos_of_ne_zero h2ρ hr0, ofReal_mul_cpow_eq_of_pos_of_ne_zero h2ρ hri]
   have hP : ((2 * ρ : ℝ) : ℂ) ^ ((ℓ : ℂ) - I * η) * ((2 * ρ : ℝ) : ℂ) ^ ((ℓ : ℂ) + I * η) =
       (2 * (ρ : ℂ)) ^ (2 * ℓ) := by
     rw [← cpow_add _ _ (by exact_mod_cast h2ρ.ne'), show (ℓ : ℂ) - I * η + (ℓ + I * η) =
@@ -296,7 +314,7 @@ lemma q2a_kernel_eq (ℓ : ℕ) (η : ℝ) {ρ r : ℝ} (hρ : 0 < ρ) (hr : 0 <
   ring
 
 /-- `conj (A⁺_ℓ) = e^{-iσ} e^{πη/2} 2^{ℓ+1} (-1)^ℓ i`. -/
-lemma q2a_conj_APlus (ℓ : ℕ) (η : ℝ) :
+private lemma conj_coulombAPlus (ℓ : ℕ) (η : ℝ) :
     conj (coulombAPlus ℓ η) = exp (-(coulombSigma ℓ η * I)) * Real.exp (π * η / 2) *
       2 ^ (ℓ + 1) * (-1) ^ ℓ * I := by
   rw [coulombAPlus, map_mul, map_mul, map_mul, map_mul, ← exp_conj]
@@ -304,7 +322,7 @@ lemma q2a_conj_APlus (ℓ : ℕ) (η : ℝ) :
   ring_nf
 
 /-- `Γ(ℓ+1-iη) = |Γ(ℓ+1+iη)| e^{-iσ_ℓ}`. -/
-lemma q2a_Gamma_conj_polar (ℓ : ℕ) (η : ℝ) :
+private lemma Gamma_nat_add_one_sub_I_mul_eq_polar (ℓ : ℕ) (η : ℝ) :
     Gamma ((ℓ : ℂ) + 1 - I * η) =
       (‖Gamma ((ℓ : ℂ) + 1 + I * η)‖ : ℂ) * exp (-(coulombSigma ℓ η * I)) := by
   set g := Gamma ((ℓ : ℂ) + 1 + I * η) with hg
@@ -317,7 +335,7 @@ lemma q2a_Gamma_conj_polar (ℓ : ℕ) (η : ℝ) :
   simp [map_mul, conj_ofReal, conj_I]
 
 /-- `C_ℓ(η) (2ℓ+1)! = 2^ℓ e^{-πη/2} |Γ(ℓ+1+iη)|`. -/
-lemma q2a_C_mul_factorial (ℓ : ℕ) (η : ℝ) :
+private lemma factorial_mul_coulombC (ℓ : ℕ) (η : ℝ) :
     ((2 * ℓ + 1)! : ℂ) * coulombC ℓ η =
       2 ^ ℓ * ((Real.exp (π * η / 2) : ℝ) : ℂ)⁻¹ * ‖Gamma ((ℓ : ℂ) + 1 + I * η)‖ := by
   rw [coulombC]
@@ -327,12 +345,12 @@ lemma q2a_C_mul_factorial (ℓ : ℕ) (η : ℝ) :
   field_simp
 
 /-- `conj (z^w) = (conj z)^(conj w)` for `arg z ≠ π`. -/
-lemma q2a_conj_cpow {z : ℂ} (hz : z.arg ≠ π) (w : ℂ) : conj (z ^ w) = conj z ^ conj w := by
+private lemma conj_cpow_of_arg_ne_pi {z : ℂ} (hz : z.arg ≠ π) (w : ℂ) : conj (z ^ w) = conj z ^ conj w := by
   rw [conj_cpow _ _ hz, conj_conj]
 
 /-- The integrand of DLMF 33.7.4 on the ray `t = -1 - is` in terms of the conjugate of the
 integrand of 33.7.2 at `t = ρs`. -/
-lemma q2a_integrand_33_7_4 (ℓ : ℕ) (η : ℝ) {ρ s : ℝ} (hρ : 0 < ρ) (hs : 0 < s) :
+private lemma integrand_ray_eq_conj_integrand (ℓ : ℕ) (η : ℝ) {ρ s : ℝ} (hρ : 0 < ρ) (hs : 0 < s) :
     exp (-(I * ρ * (-1 - I * s))) * (2 + I * s) ^ ((ℓ : ℂ) - I * η) *
         (-(I * s)) ^ ((ℓ : ℂ) + I * η) * (-I) * (ρ : ℂ) ^ (2 * ℓ) =
       exp (I * ρ) * (-I) * exp (π * η) * (exp (-((ρ * s : ℝ) : ℂ)) *
@@ -358,7 +376,7 @@ lemma q2a_integrand_33_7_4 (ℓ : ℕ) (η : ℝ) {ρ s : ℝ} (hρ : 0 < ρ) (h
     cpow_mul_exp_mul_I hsi (by linarith) (by linarith)]
   have e3 : ((ρ * s : ℝ) : ℂ) = (ρ : ℂ) * s := by push_cast; ring
   have e4 : ((ρ * s : ℝ) : ℂ) - 2 * I * ρ = (ρ : ℂ) * ((s : ℂ) - 2 * I) := by push_cast; ring
-  rw [e4, e3, q2a_ofReal_mul_cpow hρ hs0, q2a_ofReal_mul_cpow hρ hsi]
+  rw [e4, e3, ofReal_mul_cpow_eq_of_pos_of_ne_zero hρ hs0, ofReal_mul_cpow_eq_of_pos_of_ne_zero hρ hsi]
   have hP : (ρ : ℂ) ^ ((ℓ : ℂ) + I * η) * (ρ : ℂ) ^ ((ℓ : ℂ) - I * η) = (ρ : ℂ) ^ (2 * ℓ) := by
     rw [← cpow_add _ _ (by exact_mod_cast hρ.ne'), show (ℓ : ℂ) + I * η + (ℓ - I * η) =
       ((2 * ℓ : ℕ) : ℂ) by push_cast; ring, cpow_natCast]
@@ -370,8 +388,7 @@ lemma q2a_integrand_33_7_4 (ℓ : ℕ) (η : ℝ) {ρ s : ℝ} (hρ : 0 < ρ) (h
   rw [hE, ← hP, ← hQ]
   ring
 
-end q2aRot
-
+end Rotation
 /-- **DLMF 33.7.2**: `H^-_ℓ(η,ρ) = e^{-iρ} ρ^{-ℓ}/((2ℓ+1)! C_ℓ(η))
 ∫_0^∞ e^{-t} t^{ℓ-iη} (t+2iρ)^{ℓ+iη} dt`, `ρ > 0`. -/
 @[dlmf 33.7.E2]
@@ -385,14 +402,14 @@ theorem coulombHMinus_eq_integral (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < �
         ((t : ℂ) + 2 * I * ρ) ^ ((ℓ : ℂ) + I * η) with hF
   set a : ℂ := (ℓ : ℂ) + 1 - I * η with ha
   have hare : 0 < a.re := by simp [ha]; positivity
-  obtain ⟨hint, hU⟩ := q2a_kummerU_two_I a (2 * ℓ + 2) hare hρ
+  obtain ⟨hint, hU⟩ := Gamma_mul_kummerU_two_I_mul_eq_integral a (2 * ℓ + 2) hare hρ
   have h2ρ : (0 : ℝ) < 2 * ρ := by positivity
   have hP : (2 * (ρ : ℂ)) ^ (2 * ℓ) ≠ 0 := pow_ne_zero _ (by exact_mod_cast h2ρ.ne')
   set c : ℂ := (-1) ^ ℓ / (2 * (ρ : ℂ)) ^ (2 * ℓ) with hc
   have hk : ∀ r ∈ Ioi (0 : ℝ),
       tricomiKernel a (2 * ℓ + 2) (2 * I * ρ) (r * exp (-(π / 2) * I)) = c * F (2 * ρ * r) := by
     intro r hr
-    have := q2a_kernel_eq ℓ η hρ hr
+    have := tricomiKernel_coulomb_eq_integrand ℓ η hρ hr
     rw [hc, div_mul_eq_mul_div, eq_div_iff hP]
     simpa only [hF] using this
   have hFint : IntegrableOn (fun r : ℝ => F (2 * ρ * r)) (Ioi 0) := by
@@ -415,8 +432,8 @@ theorem coulombHMinus_eq_integral (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < �
   have hU' : kummerU a (2 * ℓ + 2) (2 * I * ρ) =
       (Gamma a)⁻¹ * (exp (-(π / 2) * I) * (c * ((2 * ρ : ℝ)⁻¹ : ℂ) * ∫ t in Ioi (0 : ℝ), F t)) := by
     rw [← hU]; field_simp
-  rw [coulombHMinus_eq ℓ η hρ, ← ha, hU', q2a_Gamma_conj_polar, q2a_conj_APlus,
-    q2a_C_mul_factorial]
+  rw [coulombHMinus_eq ℓ η hρ, ← ha, hU', Gamma_nat_add_one_sub_I_mul_eq_polar, conj_coulombAPlus,
+    factorial_mul_coulombC]
   have hmI : exp (-(π / 2 : ℂ) * I) = -I := by
     rw [show (-(π / 2 : ℂ) * I) = -(π / 2 * I) by ring, exp_neg, exp_pi_div_two_mul_I, inv_I]
   rw [hmI, hc]
@@ -479,7 +496,7 @@ theorem coulombHPlus_eq_integral (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ
     have h2 : ((t : ℂ) + 2 * I * ρ).arg ≠ π := by
       refine slitPlane_arg_ne_pi (Or.inl ?_)
       simp; exact ht'
-    simp only [hF, hG, map_mul, q2a_conj_cpow h1, q2a_conj_cpow h2, ← exp_conj]
+    simp only [hF, hG, map_mul, conj_cpow_of_arg_ne_pi h1, conj_cpow_of_arg_ne_pi h2, ← exp_conj]
     simp [map_sub, map_add, conj_ofReal, conj_I, map_natCast, map_ofNat]
     ring_nf
     simp
@@ -495,7 +512,7 @@ theorem coulombHPlus_eq_integral (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ
       (2 + I * s) ^ ((ℓ : ℂ) - I * η) * (-(I * s)) ^ ((ℓ : ℂ) + I * η) * (-I) =
       c * G (ρ * s) := by
     intro s hs
-    have := q2a_integrand_33_7_4 ℓ η hρ hs
+    have := integrand_ray_eq_conj_integrand ℓ η hρ hs
     rw [hc, div_mul_eq_mul_div, eq_div_iff (pow_ne_zero _ hρ0)]
     simpa only [hG] using this
   have hGs : IntegrableOn (fun s : ℝ => G (ρ * s)) (Ioi 0) := by
@@ -524,12 +541,11 @@ theorem coulombHPlus_eq_integral (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ
 
 /-! ### §33.8 Continued fractions -/
 
-section q2aCF
-
+section ContinuedFractions
 open DLMF.Hypergeometric
 
 /-- The factor `(m+1-iη+n)/(2m+2+n)` tends to `1/2`. -/
-lemma q2a_factor_tendsto (η : ℝ) (n : ℕ) :
+private lemma tendsto_ratio_factor_one_half (η : ℝ) (n : ℕ) :
     Tendsto (fun m : ℕ => ((m : ℂ) + 1 - I * η + n) / (2 * (m : ℂ) + 2 + n)) atTop
       (𝓝 (1 / 2)) := by
   have h1 : Tendsto (fun m : ℕ => 2 * (m : ℝ) + 2 + n) atTop atTop :=
@@ -551,7 +567,7 @@ lemma q2a_factor_tendsto (η : ℝ) (n : ℕ) :
   linear_combination (-(1 / 2 : ℂ)) * hD
 
 /-- The factor `(m+1-iη+n)/(2m+2+n)` has modulus at most `1` when `|η| ≤ m`. -/
-lemma q2a_factor_norm_le (η : ℝ) (n : ℕ) {m : ℕ} (hm : |η| ≤ m) :
+private lemma norm_ratio_factor_le_one (η : ℝ) (n : ℕ) {m : ℕ} (hm : |η| ≤ m) :
     ‖((m : ℂ) + 1 - I * η + n) / (2 * (m : ℂ) + 2 + n)‖ ≤ 1 := by
   have hpos : (0 : ℝ) < 2 * (m : ℝ) + 2 + n := by positivity
   rw [norm_div, show (2 * (m : ℂ) + 2 + n) = ((2 * (m : ℝ) + 2 + n : ℝ) : ℂ) by push_cast; ring,
@@ -567,28 +583,28 @@ lemma q2a_factor_norm_le (η : ℝ) (n : ℕ) {m : ℕ} (hm : |η| ≤ m) :
   nlinarith
 
 /-- `(m+1-iη)_n/(2m+2)_n → 2^{-n}` as `m → ∞`. -/
-lemma q2a_poch_ratio_tendsto (η : ℝ) (n : ℕ) :
+private lemma tendsto_poch_div_poch_atTop (η : ℝ) (n : ℕ) :
     Tendsto (fun m : ℕ => poch ((m : ℂ) + 1 - I * η) n / poch (2 * (m : ℂ) + 2) n) atTop
       (𝓝 ((1 / 2) ^ n)) := by
   induction n with
   | zero => simp [poch_zero]
   | succ n ih =>
     rw [pow_succ]
-    refine (ih.mul (q2a_factor_tendsto η n)).congr fun m => ?_
+    refine (ih.mul (tendsto_ratio_factor_one_half η n)).congr fun m => ?_
     rw [poch_succ, poch_succ, mul_div_mul_comm]
 
 /-- `|(m+1-iη)_n/(2m+2)_n| ≤ 1` when `|η| ≤ m`. -/
-lemma q2a_poch_ratio_norm_le (η : ℝ) (n : ℕ) {m : ℕ} (hm : |η| ≤ m) :
+private lemma norm_poch_div_poch_le_one (η : ℝ) (n : ℕ) {m : ℕ} (hm : |η| ≤ m) :
     ‖poch ((m : ℂ) + 1 - I * η) n / poch (2 * (m : ℂ) + 2) n‖ ≤ 1 := by
   induction n with
   | zero => simp [poch_zero]
   | succ n ih =>
     rw [poch_succ, poch_succ, mul_div_mul_comm, norm_mul]
-    have := q2a_factor_norm_le η n hm
+    have := norm_ratio_factor_le_one η n hm
     nlinarith [norm_nonneg (poch ((m : ℂ) + 1 - I * η) n / poch (2 * (m : ℂ) + 2) n)]
 
 /-- `M(m+1-iη, 2m+2, z) → e^{z/2}` as `m → ∞`. -/
-lemma q2a_tendsto_kummerM_large (η : ℝ) (z : ℂ) :
+private lemma tendsto_kummerM_atTop_exp_div_two (η : ℝ) (z : ℂ) :
     Tendsto (fun m : ℕ => kummerM ((m : ℂ) + 1 - I * η) (2 * m + 2) z) atTop
       (𝓝 (exp (z / 2))) := by
   have hexp : exp (z / 2) = ∑' n : ℕ, (z / 2) ^ n / (n ! : ℂ) :=
@@ -598,7 +614,7 @@ lemma q2a_tendsto_kummerM_large (η : ℝ) (z : ℂ) :
   unfold kummerM
   refine tendsto_tsum_of_dominated_convergence (bound := fun n => ‖z‖ ^ n / n !)
     (Real.summable_pow_div_factorial ‖z‖) (fun n => ?_) ?_
-  · have := ((q2a_poch_ratio_tendsto η n).div_const (n ! : ℂ)).mul_const (z ^ n)
+  · have := ((tendsto_poch_div_poch_atTop η n).div_const (n ! : ℂ)).mul_const (z ^ n)
     have he : (1 / 2 : ℂ) ^ n / (n ! : ℂ) * z ^ n = (z / 2) ^ n / (n ! : ℂ) := by
       rw [div_pow, div_pow, one_pow]; ring
     rw [he] at this
@@ -606,7 +622,7 @@ lemma q2a_tendsto_kummerM_large (η : ℝ) (z : ℂ) :
     field_simp
   · filter_upwards [eventually_ge_atTop (Nat.ceil |η|)] with m hm n
     have hm' : |η| ≤ m := (Nat.le_ceil _).trans (by exact_mod_cast hm)
-    have hb := q2a_poch_ratio_norm_le η n hm'
+    have hb := norm_poch_div_poch_le_one η n hm'
     rw [show poch ((m : ℂ) + 1 - I * η) n / (poch (2 * (m : ℂ) + 2) n * n !) * z ^ n =
       poch ((m : ℂ) + 1 - I * η) n / poch (2 * (m : ℂ) + 2) n * (z ^ n / n !) by ring,
       norm_mul]
@@ -616,13 +632,13 @@ lemma q2a_tendsto_kummerM_large (η : ℝ) (z : ℂ) :
     exact mul_le_of_le_one_left (by positivity) hb
 
 /-- The normalized Kummer factor `u_m = e^{-iρ} M(m+1-iη, 2m+2, 2iρ)` of `F_m`. -/
-def q2a_u (η ρ : ℝ) (m : ℕ) : ℂ :=
+def normalizedKummerFactor (η ρ : ℝ) (m : ℕ) : ℂ :=
   exp (-I * ρ) * kummerM ((m : ℂ) + 1 - I * η) (2 * m + 2) (2 * I * ρ)
 
 /-- `|F_m(η,ρ)| = C_m ρ^{m+1} ‖u_m‖` for `ρ > 0`. -/
-lemma q2a_abs_coulombF (m : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
-    |coulombF m η ρ| = coulombC m η * ρ ^ (m + 1) * ‖q2a_u η ρ m‖ := by
-  rw [← Real.norm_eq_abs, ← Complex.norm_real, ofReal_coulombF, coulombWave, q2a_u]
+private lemma abs_coulombF_eq_norm_normalizedKummerFactor (m : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+    |coulombF m η ρ| = coulombC m η * ρ ^ (m + 1) * ‖normalizedKummerFactor η ρ m‖ := by
+  rw [← Real.norm_eq_abs, ← Complex.norm_real, ofReal_coulombF, coulombWave, normalizedKummerFactor]
   rw [show ((ρ : ℂ) ^ (m + 1) * exp (-I * ρ) *
       kummerM ((m : ℂ) + 1 - I * η) (2 * m + 2) (2 * I * ρ)) =
       (ρ : ℂ) ^ (m + 1) * (exp (-I * ρ) *
@@ -632,12 +648,12 @@ lemma q2a_abs_coulombF (m : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   ring
 
 /-- `u_m → 1` as `m → ∞`. -/
-lemma q2a_tendsto_u (η ρ : ℝ) : Tendsto (q2a_u η ρ) atTop (𝓝 1) := by
-  have h := (q2a_tendsto_kummerM_large η (2 * I * ρ)).const_mul (exp (-I * ρ))
+private lemma tendsto_normalizedKummerFactor (η ρ : ℝ) : Tendsto (normalizedKummerFactor η ρ) atTop (𝓝 1) := by
+  have h := (tendsto_kummerM_atTop_exp_div_two η (2 * I * ρ)).const_mul (exp (-I * ρ))
   rwa [← Complex.exp_add, show -I * (ρ : ℂ) + 2 * I * ρ / 2 = 0 by ring, Complex.exp_zero] at h
 
 /-- `R_m² ≤ 1 + η²` for every `m`. -/
-lemma q2a_recurrenceR_sq_le (m : ℕ) (η : ℝ) : recurrenceR m η ^ 2 ≤ 1 + η ^ 2 := by
+private lemma recurrenceR_sq_le (m : ℕ) (η : ℝ) : recurrenceR m η ^ 2 ≤ 1 + η ^ 2 := by
   rw [recurrenceR, Real.sq_sqrt (by positivity)]
   rcases Nat.eq_zero_or_pos m with rfl | hm
   · simp; positivity
@@ -646,11 +662,11 @@ lemma q2a_recurrenceR_sq_le (m : ℕ) (η : ℝ) : recurrenceR m η ^ 2 ≤ 1 + 
     linarith
 
 /-- `R_m > 0`. -/
-lemma q2a_recurrenceR_pos (m : ℕ) (η : ℝ) : 0 < recurrenceR m η := by
+private lemma recurrenceR_pos (m : ℕ) (η : ℝ) : 0 < recurrenceR m η := by
   rw [recurrenceR]; exact Real.sqrt_pos.mpr (by positivity)
 
 /-- `C_{m+2} = C_m R_{m+1} R_{m+2} / ((2m+3)(2m+5))`. -/
-lemma q2a_coulombC_add_two (m : ℕ) (η : ℝ) :
+private lemma coulombC_add_two (m : ℕ) (η : ℝ) :
     coulombC (m + 2) η = coulombC m η * recurrenceR (m + 1) η * recurrenceR (m + 2) η /
       ((2 * m + 3) * (2 * m + 5)) := by
   have h1 := recurrenceR_eq_coulombC_div m η
@@ -664,26 +680,26 @@ lemma q2a_coulombC_add_two (m : ℕ) (η : ℝ) :
 
 /-- The scaled backward solution `w_k = F_{ℓ+k} / ∏_{j<k} R_{ℓ+1+j}` of the Coulomb
 recurrence in continued-fraction form. -/
-def q2a_w (ℓ : ℕ) (η ρ : ℝ) (k : ℕ) : ℝ :=
+def scaledBackwardSolution (ℓ : ℕ) (η ρ : ℝ) (k : ℕ) : ℝ :=
   coulombF (ℓ + k) η ρ / ∏ j ∈ Finset.range k, recurrenceR (ℓ + 1 + j) η
 
 /-- The products `∏_{j<k} R_{ℓ+1+j}` are positive. -/
-lemma q2a_prod_pos (ℓ : ℕ) (η : ℝ) (k : ℕ) :
+private lemma prod_range_recurrenceR_pos (ℓ : ℕ) (η : ℝ) (k : ℕ) :
     0 < ∏ j ∈ Finset.range k, recurrenceR (ℓ + 1 + j) η :=
-  Finset.prod_pos fun _ _ => q2a_recurrenceR_pos _ η
+  Finset.prod_pos fun _ _ => recurrenceR_pos _ η
 
 /-- The backward solution satisfies `w_k = T_{ℓ+1+k} w_{k+1} - R_{ℓ+2+k}² w_{k+2}`. -/
-lemma q2a_w_rec (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) (k : ℕ) :
-    q2a_w ℓ η ρ k = recurrenceT (ℓ + 1 + k) η ρ * q2a_w ℓ η ρ (k + 1) +
-      -(recurrenceR (ℓ + 1 + (k + 1)) η ^ 2) * q2a_w ℓ η ρ (k + 2) := by
+private lemma scaledBackwardSolution_recurrence (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) (k : ℕ) :
+    scaledBackwardSolution ℓ η ρ k = recurrenceT (ℓ + 1 + k) η ρ * scaledBackwardSolution ℓ η ρ (k + 1) +
+      -(recurrenceR (ℓ + 1 + (k + 1)) η ^ 2) * scaledBackwardSolution ℓ η ρ (k + 2) := by
   have hr := coulombF_recurrence (ℓ + k) η hρ
-  have p0 := (q2a_prod_pos ℓ η k).ne'
-  simp only [q2a_w, Finset.prod_range_succ]
+  have p0 := (prod_range_recurrenceR_pos ℓ η k).ne'
+  simp only [scaledBackwardSolution, Finset.prod_range_succ]
   generalize ∏ j ∈ Finset.range k, recurrenceR (ℓ + 1 + j) η = p at p0 ⊢
   rw [show ℓ + 1 + (k + 1) = ℓ + k + 2 by ring, show ℓ + 1 + k = ℓ + k + 1 by ring,
     show ℓ + (k + 1) = ℓ + k + 1 by ring, show ℓ + (k + 2) = ℓ + k + 2 by ring]
-  have r1 := (q2a_recurrenceR_pos (ℓ + k + 1) η).ne'
-  have r2 := (q2a_recurrenceR_pos (ℓ + k + 2) η).ne'
+  have r1 := (recurrenceR_pos (ℓ + k + 1) η).ne'
+  have r2 := (recurrenceR_pos (ℓ + k + 2) η).ne'
   have key : coulombF (ℓ + k) η ρ / p - (recurrenceT (ℓ + k + 1) η ρ *
       (coulombF (ℓ + k + 1) η ρ / (p * recurrenceR (ℓ + k + 1) η)) +
       -recurrenceR (ℓ + k + 2) η ^ 2 * (coulombF (ℓ + k + 2) η ρ /
@@ -698,43 +714,43 @@ lemma q2a_w_rec (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) (k : ℕ) :
   exact key
 
 /-- **DLMF 33.8.1** via the ratio criterion, as a real convergence statement. -/
-lemma q2a_contFrac_real (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ)
+private lemma tendsto_convs_deriv_coulombF_div_coulombF (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ)
     (hF : coulombF ℓ η ρ ≠ 0) :
     Tendsto (GenContFract.cfConv_ofFun 0 (fun k => -(recurrenceR (ℓ + 1 + k) η ^ 2))
       (fun k => recurrenceT (ℓ + 1 + k) η ρ)).convs atTop
       (𝓝 (deriv (coulombF ℓ η) ρ / coulombF ℓ η ρ - recurrenceS (ℓ + 1) η ρ)) := by
   obtain ⟨M0, hM0⟩ := eventually_atTop.mp
-    ((q2a_tendsto_u η ρ).eventually (Metric.ball_mem_nhds (1 : ℂ) (by norm_num : (0:ℝ) < 1/2)))
-  have hu_lo : ∀ m ≥ M0, 1 / 2 ≤ ‖q2a_u η ρ m‖ := by
+    ((tendsto_normalizedKummerFactor η ρ).eventually (Metric.ball_mem_nhds (1 : ℂ) (by norm_num : (0:ℝ) < 1/2)))
+  have hu_lo : ∀ m ≥ M0, 1 / 2 ≤ ‖normalizedKummerFactor η ρ m‖ := by
     intro m hm
     have h := hM0 m hm
     rw [dist_eq_norm] at h
-    have := norm_sub_norm_le (1 : ℂ) (q2a_u η ρ m)
+    have := norm_sub_norm_le (1 : ℂ) (normalizedKummerFactor η ρ m)
     rw [norm_one, norm_sub_rev] at this
     linarith
-  have hu_hi : ∀ m ≥ M0, ‖q2a_u η ρ m‖ ≤ 2 := by
+  have hu_hi : ∀ m ≥ M0, ‖normalizedKummerFactor η ρ m‖ ≤ 2 := by
     intro m hm
     have h := hM0 m hm
     rw [dist_eq_norm] at h
-    have := norm_le_norm_add_norm_sub' (q2a_u η ρ m) 1
+    have := norm_le_norm_add_norm_sub' (normalizedKummerFactor η ρ m) 1
     rw [norm_one] at this
     linarith
-  have habs := fun m => q2a_abs_coulombF m η hρ
+  have habs := fun m => abs_coulombF_eq_norm_normalizedKummerFactor m η hρ
   set N := max M0 (Nat.ceil (12 * (1 + η ^ 2) * ρ ^ 2)) with hN
-  have hw0 : q2a_w ℓ η ρ 0 ≠ 0 := by simpa [q2a_w] using hF
+  have hw0 : scaledBackwardSolution ℓ η ρ 0 ≠ 0 := by simpa [scaledBackwardSolution] using hF
   have ha : ∀ k, -(recurrenceR (ℓ + 1 + k) η ^ 2) ≠ 0 := fun k =>
-    neg_ne_zero.mpr (pow_ne_zero _ (q2a_recurrenceR_pos _ η).ne')
-  have hwN : ∀ k ≥ N, q2a_w ℓ η ρ k ≠ 0 := by
+    neg_ne_zero.mpr (pow_ne_zero _ (recurrenceR_pos _ η).ne')
+  have hwN : ∀ k ≥ N, scaledBackwardSolution ℓ η ρ k ≠ 0 := by
     intro k hk
     have hm : ℓ + k ≥ M0 := le_trans (le_max_left _ _) (hk.trans (Nat.le_add_left _ _))
-    simp only [q2a_w]
-    refine div_ne_zero ?_ (q2a_prod_pos ℓ η k).ne'
+    simp only [scaledBackwardSolution]
+    refine div_ne_zero ?_ (prod_range_recurrenceR_pos ℓ η k).ne'
     rw [← abs_pos, habs]
     have := hu_lo _ hm
     have := coulombC_pos (ℓ + k) η
     positivity
-  have hrat : ∀ k ≥ N, 3 * ‖-(recurrenceR (ℓ + 1 + (k + 1)) η ^ 2) * q2a_w ℓ η ρ (k + 2)‖ ≤
-      ‖q2a_w ℓ η ρ k‖ := by
+  have hrat : ∀ k ≥ N, 3 * ‖-(recurrenceR (ℓ + 1 + (k + 1)) η ^ 2) * scaledBackwardSolution ℓ η ρ (k + 2)‖ ≤
+      ‖scaledBackwardSolution ℓ η ρ k‖ := by
     intro k hk
     have hmM : ℓ + k ≥ M0 := le_trans (le_max_left _ _) (hk.trans (Nat.le_add_left _ _))
     have hmC : 12 * (1 + η ^ 2) * ρ ^ 2 ≤ ((ℓ + k : ℕ) : ℝ) := by
@@ -742,25 +758,25 @@ lemma q2a_contFrac_real (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ)
       have h2 : Nat.ceil (12 * (1 + η ^ 2) * ρ ^ 2) ≤ ℓ + k :=
         le_trans (le_max_right _ _) (hk.trans (Nat.le_add_left _ _))
       exact this.trans (by exact_mod_cast h2)
-    have p0 := q2a_prod_pos ℓ η k
-    simp only [q2a_w, Finset.prod_range_succ]
+    have p0 := prod_range_recurrenceR_pos ℓ η k
+    simp only [scaledBackwardSolution, Finset.prod_range_succ]
     generalize ∏ j ∈ Finset.range k, recurrenceR (ℓ + 1 + j) η = p at p0 ⊢
     rw [show ℓ + 1 + (k + 1) = ℓ + k + 2 by ring, show ℓ + 1 + k = ℓ + k + 1 by ring,
       show ℓ + (k + 2) = ℓ + k + 2 by ring]
     generalize ℓ + k = m at hmM hmC ⊢
     simp only [Real.norm_eq_abs, abs_mul, abs_div, abs_neg]
-    rw [habs, habs, q2a_coulombC_add_two]
-    have r1 := q2a_recurrenceR_pos (m + 1) η
-    have r2 := q2a_recurrenceR_pos (m + 2) η
+    rw [habs, habs, coulombC_add_two]
+    have r1 := recurrenceR_pos (m + 1) η
+    have r2 := recurrenceR_pos (m + 2) η
     have c0 := coulombC_pos m η
     rw [abs_of_pos p0, abs_of_pos r1, abs_of_pos r2, abs_of_pos (by positivity : (0:ℝ) <
       recurrenceR (m + 2) η ^ 2)]
     have hlo := hu_lo m hmM
     have hhi := hu_hi (m + 2) (by omega)
-    have hR := q2a_recurrenceR_sq_le (m + 2) η
-    generalize ‖q2a_u η ρ m‖ = U0 at hlo ⊢
-    have hU2 := norm_nonneg (q2a_u η ρ (m + 2))
-    generalize ‖q2a_u η ρ (m + 2)‖ = U2 at hhi hU2 ⊢
+    have hR := recurrenceR_sq_le (m + 2) η
+    generalize ‖normalizedKummerFactor η ρ m‖ = U0 at hlo ⊢
+    have hU2 := norm_nonneg (normalizedKummerFactor η ρ (m + 2))
+    generalize ‖normalizedKummerFactor η ρ (m + 2)‖ = U2 at hhi hU2 ⊢
     have hmpos : (0 : ℝ) ≤ m := Nat.cast_nonneg m
     have hD : (0 : ℝ) < (2 * m + 3) * (2 * m + 5) := by positivity
     have key : 3 * recurrenceR (m + 2) η ^ 2 * ρ ^ 2 * U2 / ((2 * m + 3) * (2 * m + 5)) ≤ U0 := by
@@ -780,18 +796,17 @@ lemma q2a_contFrac_real (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ)
           ring
       _ ≤ U0 * (coulombC m η * ρ ^ (m + 1) / p) := mul_le_mul_of_nonneg_right key hcp
       _ = coulombC m η * ρ ^ (m + 1) * U0 / p := by ring
-  have := GenContFract.cfConv_tendsto_of_ratio (h := (0 : ℝ)) (q2a_w_rec ℓ η hρ) hw0 ha hwN
+  have := GenContFract.cfConv_tendsto_of_ratio (h := (0 : ℝ)) (scaledBackwardSolution_recurrence ℓ η hρ) hw0 ha hwN
     (by norm_num : (2:ℝ) < 3) hrat
   convert this using 2
-  simp only [q2a_w, Finset.range_zero, Finset.prod_empty, div_one, zero_add,
+  simp only [scaledBackwardSolution, Finset.range_zero, Finset.prod_empty, div_one, zero_add,
     Finset.prod_range_one, add_zero]
   rw [deriv_coulombF_upper ℓ η hρ]
-  have r1 := (q2a_recurrenceR_pos (ℓ + 1) η).ne'
+  have r1 := (recurrenceR_pos (ℓ + 1) η).ne'
   field_simp
   ring
 
-end q2aCF
-
+end ContinuedFractions
 /-- **DLMF 33.8.1**: `F_ℓ'/F_ℓ = S_{ℓ+1} - R_{ℓ+1}²/(T_{ℓ+1} - R_{ℓ+2}²/(T_{ℓ+2} - ⋯))`,
 for `ρ > 0` with `F_ℓ(η,ρ) ≠ 0`; the continued fraction converges for all finite `ρ`
 (DLMF §33.8). -/
@@ -802,10 +817,10 @@ theorem coulombF_logDeriv_contFrac (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < 
       (fun k => (recurrenceT (ℓ + 1 + k) η ρ : ℝ))
       ((deriv (coulombF ℓ η) ρ / coulombF ℓ η ρ - recurrenceS (ℓ + 1) η ρ : ℝ)) := by
   have ha : ∀ k, 1 ≤ k → -(recurrenceR (ℓ + 1 + k) η ^ 2) ≠ 0 := fun k _ =>
-    neg_ne_zero.mpr (pow_ne_zero _ (q2a_recurrenceR_pos _ η).ne')
+    neg_ne_zero.mpr (pow_ne_zero _ (recurrenceR_pos _ η).ne')
   unfold DLMF.HasContinuedFraction
   rw [funext (incGF_cfTail_ofReal (fun _ => rfl) (fun _ => rfl) ha)]
-  exact (continuous_ofReal.tendsto _).comp (q2a_contFrac_real ℓ η hρ hF)
+  exact (continuous_ofReal.tendsto _).comp (tendsto_convs_deriv_coulombF_div_coulombF ℓ η hρ hF)
 
 /-- **DLMF 33.8.2–33.8.3**, upper sign: `H^+_ℓ'/H^+_ℓ = c + (i/ρ) ab/(2(ρ-η+i) +
 (a+1)(b+1)/(2(ρ-η+2i) + ⋯))` with `a = 1+ℓ+iη`, `b = -ℓ+iη`, `c = i(1-η/ρ)`, `ρ > 0`. -/
@@ -848,7 +863,7 @@ theorem coulomb_barnett (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) (hF : c
   have hW : G * F' - G' * F = 1 := coulomb_wronskian ℓ η hρ
   have hH : coulombHPlus ℓ η ρ = G + I * F := (coulombH_eq_G_add_I_mul_F ℓ η hρ).1
   have hH' : deriv (fun x : ℝ => coulombHPlus ℓ η x) ρ = G' + I * F' :=
-    (c33a_hasDerivAt_coulombHPlus ℓ η hρ).deriv
+    (hasDerivAt_coulombHPlus ℓ η hρ).deriv
   have hN : 0 < F ^ 2 + G ^ 2 := by positivity
   have hHne : (G : ℂ) + I * F ≠ 0 := by
     intro h

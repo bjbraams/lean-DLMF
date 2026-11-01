@@ -12,6 +12,10 @@ public import Mathlib.Analysis.Complex.Basic
 # Real polynomials evaluated at real points of `ℂ`
 
 The complexification of a real polynomial takes real values at real points.
+
+## Main results
+
+* `Polynomial.eval_ofReal_map_algebraMap`: `(P.map ℝ→ℂ).eval x = P.eval x` for real `x`.
 -/
 
 @[expose] public section

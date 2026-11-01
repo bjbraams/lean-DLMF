@@ -10,6 +10,60 @@ public import DLMF.Bessel.Basic
 
 /-!
 # Modified Mathieu functions, cylinder expansions and joining factors
+
+Definitions of the modified Mathieu functions of DLMF §28.20, the cylinder functions of
+§28.23 continued analytically in `z`, the cross-product series 28.24.1 that defines
+`M^{(j)}_ν`, the radial functions `Mc^{(j)}_n`, `Ms^{(j)}_n`, `Ie_n`, `Io_n`, `Ke_n`, `Ko_n`,
+and the joining factors of §28.22.
+
+## Main definitions
+
+* `IsModMathieuSolution a q w`: `w` is an entire solution of the modified Mathieu equation
+  28.20.1 `w'' - (a - 2q cosh 2z) w = 0`.
+* `modMathieuCe ν z q = Ce_ν(z, q)`, `modMathieuSe`, `modMathieuMe`, `modMathieuFe`,
+  `modMathieuGe` (28.20.3–28.20.7): Mathieu functions at imaginary argument.
+* `besselJExp μ h z`, `besselYExp μ h z`, `mathieuCylExp j μ h z`: the cylinder functions
+  `𝒞^{(j)}_μ(h e^z)` of 28.23.1 (`J`, `Y`, `H^{(1)}`, `H^{(2)}`), continued analytically in
+  `z`; `mathieuCyl j μ w`: the principal-branch cylinder functions.
+* `mathieuCylCosh j μ h z`, `mathieuCylSinh j μ h z`: `𝒞^{(j)}_μ(2h cosh z)` and
+  `𝒞^{(j)}_μ(2h sinh z)` continued from the positive real axis through `Re z > 0`.
+* `modMathieuM j ν z h = M^{(j)}_ν(z, h)` (§28.20(iii)), defined by the cross-product series
+  28.24.1 (terms `modMathieuTerm`, normalizing index `modMathieuIndex`, parameter condition
+  `ModMathieuAdmissible`).
+* `radialMathieuMc j n z h = Mc^{(j)}_n(z, h)`, `radialMathieuMs j n z h = Ms^{(j)}_n(z, h)`
+  (28.20.15–28.20.16) and `modMathieuIe`, `modMathieuIo`, `modMathieuKe`, `modMathieuKo`
+  (28.20.17–28.20.20).
+* `ModMathieuCoshRegion`, `ModMathieuSinhRegion`: convergence regions of the integer-order
+  series in `2h cosh z` and `2h sinh z` (§28.23).
+* `mathieuJoinGe`, `mathieuJoinGo`, `mathieuJoinFe`, `mathieuJoinFo`: the joining factors
+  `g_{e,m}`, `g_{o,m}`, `f_{e,m}`, `f_{o,m}` (28.22.5–28.22.10).
+* `reAtTopStrip`, `complexWronskian`, `mathieuEpsilon`: auxiliary filter, Wronskian and the
+  factor `ε_s` of §28.24.
+
+## Implementation notes
+
+* `besselJExp`, `besselYExp` and `mathieuCylExp` are **continued analytically in `z`** from
+  the real axis: `(h e^z / 2)^μ` is read as `(h / 2)^μ e^{μ z}` with the principal power of
+  `h / 2`. For `h > 0` and `|Im z| < π` they agree with the principal-branch Bessel functions
+  at `h e^z`; elsewhere they are DLMF's continuations (DLMF continues `M^{(j)}_ν` analytically
+  in `z`, §28.20(iii)).
+* `mathieuCylCosh` and `mathieuCylSinh` are written as `𝒞^{(j)}_μ(h e^{z'})` with
+  `z' = z + log(1 ± e^{-2z})` (principal logarithm; `|e^{-2z}| < 1` for `Re z > 0`).
+* `modMathieuM` is defined by the absolutely convergent series 28.24.1 in cross-products of
+  Bessel functions,
+  `c^ν_{2n}(h²) M^{(j)}_ν(z, h) = ∑_ℓ (-1)^ℓ c^ν_{2ℓ}(h²) J_{ℓ-n}(h e^{-z}) 𝒞^{(j)}_{ν+n+ℓ}(h e^z)`,
+  for one index `n = modMathieuIndex ν h` with `c^ν_{2n}(h²) ≠ 0` (chosen by
+  `Classical.choose`; the independence of `n` is the theorem 28.24.1). The coefficients are
+  `mathieuMeCoeff ν (h²)` of `DLMF.Mathieu.Noninteger.Basic`, which for integer `ν` follow
+  28.12.11.
+* For the general order the definition by 28.24.1 avoids the asymptotic characterization of
+  §28.20(iii) (stated as theorems). For integer `ν = n` the series reduces to
+  28.24.2–28.24.5 (checked numerically); for `ν = -n` some coefficients vanish
+  (e.g. `c^{-2}_0 = 0`), which is why the index `n` is chosen with `c^ν_{2n} ≠ 0`.
+* The integer-order functions of `DLMF.Mathieu.Basic` are defined for real `q` only; the
+  radial functions take a complex `h` and use `q = h²`, so for integer order they are
+  meaningful when `h²` is real (`h` real or purely imaginary, as in `Ie_n`, `Ke_n`).
+* `j ∈ {1, 2, 3, 4}`; other values of `j` give the junk value `0`.
 -/
 
 @[expose] public noncomputable section
@@ -193,12 +247,12 @@ def modMathieuKo (n : ℕ) (z h : ℂ) : ℂ :=
 /-! ### Regions and factors of §§28.20–28.24 -/
 
 /-- The filter `Re z → +∞` with `a ≤ Im z ≤ b`. -/
-def m28c_strip (a b : ℝ) : Filter ℂ :=
+def reAtTopStrip (a b : ℝ) : Filter ℂ :=
   comap Complex.re atTop ⊓ 𝓟 {z : ℂ | a ≤ z.im ∧ z.im ≤ b}
 
 /-- The Wronskian `𝒲{f, g}(z) = f(z) g'(z) - f'(z) g(z)` of two functions of `z`
 (DLMF 1.13.4), written out. -/
-def m28c_wronskian (f g : ℂ → ℂ) (z : ℂ) : ℂ :=
+def complexWronskian (f g : ℂ → ℂ) (z : ℂ) : ℂ :=
   f z * deriv g z - deriv f z * g z
 
 /-- The convergence condition of the integer-order series in `2h cosh z` (DLMF 28.23, after

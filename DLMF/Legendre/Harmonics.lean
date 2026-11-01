@@ -13,10 +13,38 @@ public import DLMF.SphericalHarmonics.AdditionTools
 /-!
 # Normalized spherical harmonics and endpoint values
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This file defines the spherical harmonics `Y_{l,m}(θ, φ)` of DLMF §14.30 through a polynomial
+form of the Ferrers functions of integer degree and order (DLMF 14.7.8), which extends them
+continuously to both endpoints `x = ±1`. It proves the Rodrigues form, the values at the north
+pole and the equator, the symmetry relations, the orthonormality and the addition theorem, and
+the Herglotz generating function of DLMF §14.30(ii).
+
+## Main definitions
+
+* `ferrersPNat`: the polynomial form `(-1)^m (1-x²)^{m/2} d^m P_l(x)/dx^m` of `𝖯^m_l(x)`.
+* `sphericalHarmonicNonneg`, `sphericalHarmonic`: the spherical harmonic `Y_{l,m}(θ, φ)`
+  (DLMF 14.30.1) for `m ≥ 0` and for integer `m`.
+* `surfaceHarmonic`: the real surface harmonics of the first kind (DLMF 14.30.2).
+* `herglotzNullVector`: the null vector in the Herglotz generating function.
+* `scaledOblateR`, `scaledOblateT`: the scaled oblate harmonics of DLMF §14.30(i).
+
+## Main results
+
+* `ferrersPNat_eq`: the polynomial form agrees with `𝖯^m_l` on `(-1, 1)` (DLMF 14.7.8).
+* `sphericalHarmonic_ferrers`: the Ferrers form of `Y_{l,m}` for `m` of either sign
+  (DLMF 14.30.1).
+* `sphericalHarmonic_rodrigues`: the Rodrigues form (DLMF 14.30.3).
+* `sphericalHarmonic_north`, `sphericalHarmonic_equator`: values at `θ = 0` and `θ = π/2`
+  (DLMF 14.30.4, 14.30.5).
+* `sphericalHarmonic_negative_order`, `sphericalHarmonic_parity`: DLMF 14.30.6, 14.30.7.
+* `sphericalHarmonic_orthonormal`: orthonormality on the sphere (DLMF 14.30.8).
+* `sphericalHarmonic_addition`: the addition theorem (DLMF 14.30.9).
+* `herglotz_generating`: the unnumbered Herglotz generating function of DLMF §14.30(ii).
+* `scaledOblate_real`: the scaled oblate harmonics are real for `x > 0`.
+
+## Implementation notes
+
+`sphericalHarmonic l m` is defined as `0` when `|m| > l`.
 -/
 
 @[expose] public noncomputable section
@@ -156,7 +184,7 @@ private lemma rod_ode (n k : ℕ) (z : ℂ) :
       2*(k+1)*z*iteratedDeriv (n+k+1) (fun z : ℂ => (z^2-1)^n) z =
       ((n:ℂ)-k)*(n+k+1) * iteratedDeriv (n+k) (fun z : ℂ => (z^2-1)^n) z := by
   have h := legInt_ode n k z
-  simp only [legInt_D, iteratedDeriv_legendrePolyP_rodrigues] at h
+  simp only [LegendreAddition.jet, iteratedDeriv_legendrePolyP_rodrigues] at h
   have hc : (2^n*(n.factorial:ℂ))⁻¹ ≠ 0 := by
     apply inv_ne_zero; exact mul_ne_zero (pow_ne_zero _ two_ne_zero) (by exact_mod_cast n.factorial_ne_zero)
   rw [show k+2+n = n+k+2 by ring, show k+1+n = n+k+1 by ring, show k+n = n+k by ring] at h
@@ -504,10 +532,10 @@ private lemma integral_ferrersPNat_mul_sin (l₁ l₂ k : ℕ) :
   congr 1; funext θ; simp only [Function.comp, real_smul]; push_cast; ring
 
 /-- Orthogonality of the polynomial Ferrers functions, from DLMF 14.17.6. -/
-private lemma integral_ferrersPNat_orth (l₁ l₂ k : ℕ) (h1 : k ≤ l₁) (h2 : k ≤ l₂) :
+private lemma integral_ferrersPNat_orth (l₁ l₂ k : ℕ) (h2 : k ≤ l₂) :
     (∫ x : ℝ in -1..1, ferrersPNat l₁ k x * ferrersPNat l₂ k x) =
       if l₁ = l₂ then ((l₂+k).factorial:ℂ)/((l₂-k).factorial*(l₂+1/2:ℂ)) else 0 := by
-  rw [← ferrers_orthogonality_6 l₁ k l₂ h1 h2]
+  rw [← ferrers_orthogonality_6 l₁ k l₂ h2]
   refine intervalIntegral.integral_congr_ae ?_
   have : ∀ᵐ t : ℝ ∂volume, t ≠ 1 := by simp [ae_iff]
   filter_upwards [this] with t ht htm
@@ -553,7 +581,7 @@ theorem sphericalHarmonic_orthonormal (l₁ l₂ : ℕ) (m₁ m₂ : ℤ) (h1 : 
   by_cases hm : m₂ = m₁
   · subst hm
     rw [sub_self, ite_eq_left rfl, integral_ferrersPNat_mul_sin,
-        integral_ferrersPNat_orth _ _ _ h1 h2]
+        integral_ferrersPNat_orth _ _ _ h2]
     by_cases hl : l₁ = l₂
     · subst hl
       simp only [and_self, ite_true]
@@ -672,9 +700,9 @@ def herglotzNullVector (lam : ℂ) : ℂ × ℂ × ℂ :=
 
 /-- `(1-z²)P_n'(z) = (n+1)(z P_n(z) - P_{n+1}(z))`. -/
 private lemma herg_E0 (n : ℕ) (z : ℂ) :
-    (1 - z^2) * legInt_D n 1 z = (n+1) * (z * legInt_D n 0 z - legInt_D (n+1) 0 z) := by
+    (1 - z^2) * LegendreAddition.jet n 1 z = (n+1) * (z * LegendreAddition.jet n 0 z - LegendreAddition.jet (n+1) 0 z) := by
   have h := jacobi_raising_derivative (α := 0) (β := 0) (by norm_num) n z
-  simp only [legInt_D, iteratedDeriv_one, iteratedDeriv_zero]
+  simp only [LegendreAddition.jet, iteratedDeriv_one, iteratedDeriv_zero]
   change (1 - z^2) * deriv (jacobiPolyP 0 0 n) z = (n+1) * (z * jacobiPolyP 0 0 n z - jacobiPolyP 0 0 (n+1) z)
   have h2 : (2*(n:ℂ)+2) ≠ 0 := by exact_mod_cast (show (2*n+2:ℕ) ≠ 0 by omega)
   apply mul_left_cancel₀ h2
@@ -683,15 +711,15 @@ private lemma herg_E0 (n : ℕ) (z : ℂ) :
 
 /-- The `k`-fold differentiated form of `herg_E0`. -/
 private lemma herg_Ek (n k : ℕ) (z : ℂ) :
-    (1 - z^2) * legInt_D n (k+2) z - 2*(k+1)*z*legInt_D n (k+1) z - (k+1)*k*legInt_D n k z =
-      (n+1) * (z * legInt_D n (k+1) z + (k+1) * legInt_D n k z - legInt_D (n+1) (k+1) z) := by
+    (1 - z^2) * LegendreAddition.jet n (k+2) z - 2*(k+1)*z*LegendreAddition.jet n (k+1) z - (k+1)*k*LegendreAddition.jet n k z =
+      (n+1) * (z * LegendreAddition.jet n (k+1) z + (k+1) * LegendreAddition.jet n k z - LegendreAddition.jet (n+1) (k+1) z) := by
   induction k generalizing z with
   | zero =>
     have hd := ((((hasDerivAt_pow 2 z).const_sub 1).mul (legInt_hasDerivAt_D n 1 z)).sub
       ((((hasDerivAt_id' z).mul (legInt_hasDerivAt_D n 0 z)).sub (legInt_hasDerivAt_D (n+1) 0 z)).const_mul ((n:ℂ)+1)))
-    have h0 : HasDerivAt (fun z => (1 - z^2) * legInt_D n 1 z -
-        ((n:ℂ)+1) * (z * legInt_D n 0 z - legInt_D (n+1) 0 z)) 0 z := by
-      rw [show (fun z => (1 - z^2) * legInt_D n 1 z - ((n:ℂ)+1) * (z * legInt_D n 0 z - legInt_D (n+1) 0 z))
+    have h0 : HasDerivAt (fun z => (1 - z^2) * LegendreAddition.jet n 1 z -
+        ((n:ℂ)+1) * (z * LegendreAddition.jet n 0 z - LegendreAddition.jet (n+1) 0 z)) 0 z := by
+      rw [show (fun z => (1 - z^2) * LegendreAddition.jet n 1 z - ((n:ℂ)+1) * (z * LegendreAddition.jet n 0 z - LegendreAddition.jet (n+1) 0 z))
         = fun _ => 0 from funext fun w => by rw [herg_E0]; ring]
       exact hasDerivAt_const _ _
     have hu := hd.unique h0
@@ -703,12 +731,12 @@ private lemma herg_Ek (n k : ℕ) (z : ℂ) :
       ((legInt_hasDerivAt_D n k z).const_mul (((k:ℂ)+1)*k))).sub
       (((((hasDerivAt_id' z).mul (legInt_hasDerivAt_D n (k+1) z)).add
         ((legInt_hasDerivAt_D n k z).const_mul ((k:ℂ)+1))).sub (legInt_hasDerivAt_D (n+1) (k+1) z)).const_mul ((n:ℂ)+1))
-    have h0 : HasDerivAt (fun z => (1 - z^2) * legInt_D n (k+2) z - 2*((k:ℂ)+1)*z*legInt_D n (k+1) z
-        - ((k:ℂ)+1)*k*legInt_D n k z - ((n:ℂ)+1) * (z * legInt_D n (k+1) z + ((k:ℂ)+1) * legInt_D n k z
-          - legInt_D (n+1) (k+1) z)) 0 z := by
-      rw [show (fun z => (1 - z^2) * legInt_D n (k+2) z - 2*((k:ℂ)+1)*z*legInt_D n (k+1) z
-        - ((k:ℂ)+1)*k*legInt_D n k z - ((n:ℂ)+1) * (z * legInt_D n (k+1) z + ((k:ℂ)+1) * legInt_D n k z
-          - legInt_D (n+1) (k+1) z)) = fun _ => 0 from funext fun w => by rw [sub_eq_zero]; exact ih w]
+    have h0 : HasDerivAt (fun z => (1 - z^2) * LegendreAddition.jet n (k+2) z - 2*((k:ℂ)+1)*z*LegendreAddition.jet n (k+1) z
+        - ((k:ℂ)+1)*k*LegendreAddition.jet n k z - ((n:ℂ)+1) * (z * LegendreAddition.jet n (k+1) z + ((k:ℂ)+1) * LegendreAddition.jet n k z
+          - LegendreAddition.jet (n+1) (k+1) z)) 0 z := by
+      rw [show (fun z => (1 - z^2) * LegendreAddition.jet n (k+2) z - 2*((k:ℂ)+1)*z*LegendreAddition.jet n (k+1) z
+        - ((k:ℂ)+1)*k*LegendreAddition.jet n k z - ((n:ℂ)+1) * (z * LegendreAddition.jet n (k+1) z + ((k:ℂ)+1) * LegendreAddition.jet n k z
+          - LegendreAddition.jet (n+1) (k+1) z)) = fun _ => 0 from funext fun w => by rw [sub_eq_zero]; exact ih w]
       exact hasDerivAt_const _ _
     have hu := hd.unique h0
     push_cast
@@ -716,9 +744,9 @@ private lemma herg_Ek (n k : ℕ) (z : ℂ) :
 
 /-- Core three-term identity behind the Herglotz generating function. -/
 private lemma herg_core (n k : ℕ) (z : ℂ) :
-    (n+1) * legInt_D (n+1) (k+1) z / ((n+k+2).factorial : ℂ) =
-      z * legInt_D n (k+1) z / ((n+k+1).factorial : ℂ) +
-        (legInt_D n k z / ((n+k).factorial : ℂ) - (1 - z^2) * legInt_D n (k+2) z / ((n+k+2).factorial : ℂ)) / 2 := by
+    (n+1) * LegendreAddition.jet (n+1) (k+1) z / ((n+k+2).factorial : ℂ) =
+      z * LegendreAddition.jet n (k+1) z / ((n+k+1).factorial : ℂ) +
+        (LegendreAddition.jet n k z / ((n+k).factorial : ℂ) - (1 - z^2) * LegendreAddition.jet n (k+2) z / ((n+k+2).factorial : ℂ)) / 2 := by
   have hE := herg_Ek n k z
   have hO := legInt_ode n k z
   have f1 : ((n+k+2).factorial : ℂ) = (n+k+2) * (n+k+1) * (n+k).factorial := by
@@ -733,8 +761,8 @@ private lemma herg_core (n k : ℕ) (z : ℂ) :
   linear_combination 2 * hE - hO
 
 /-- `P_n^{(k)} = 0` for `k > n`. -/
-private lemma herg_D_eq_zero (n k : ℕ) (hk : n < k) (z : ℂ) : legInt_D n k z = 0 := by
-  rw [legInt_D, iteratedDeriv_legendrePolyP_rodrigues]
+private lemma herg_D_eq_zero (n k : ℕ) (hk : n < k) (z : ℂ) : LegendreAddition.jet n k z = 0 := by
+  rw [LegendreAddition.jet, iteratedDeriv_legendrePolyP_rodrigues]
   set Pc : Polynomial ℂ := (Polynomial.X^2 - 1)^n
   have hf : (fun z : ℂ => (z^2-1)^n) = fun z => Pc.eval z := by funext w; simp [Pc]
   rw [hf, iteratedDeriv_eval_polynomial]
@@ -748,16 +776,16 @@ private lemma herg_D_eq_zero (n k : ℕ) (hk : n < k) (z : ℂ) : legInt_D n k z
 
 /-- Normalized coefficient of `wᵏ` in the Herglotz expansion. -/
 private noncomputable def hergC (x s : ℂ) (n : ℕ) (k : ℤ) : ℂ :=
-  (if k < 0 then s^k.natAbs else (-s)^k.natAbs) * legInt_D n k.natAbs x / ((n + k.natAbs).factorial : ℂ)
+  (if k < 0 then s^k.natAbs else (-s)^k.natAbs) * LegendreAddition.jet n k.natAbs x / ((n + k.natAbs).factorial : ℂ)
 
 /-- Coefficients of nonnegative index. -/
 private lemma hergC_nat (x s : ℂ) (n k : ℕ) :
-    hergC x s n (k:ℤ) = (-s)^k * legInt_D n k x / ((n+k).factorial : ℂ) := by
+    hergC x s n (k:ℤ) = (-s)^k * LegendreAddition.jet n k x / ((n+k).factorial : ℂ) := by
   simp [hergC, show ¬ ((k:ℤ) < 0) by omega]
 
 /-- Coefficients of nonpositive index. -/
 private lemma hergC_neg_nat (x s : ℂ) (n k : ℕ) :
-    hergC x s n (-(k:ℤ)) = s^k * legInt_D n k x / ((n+k).factorial : ℂ) := by
+    hergC x s n (-(k:ℤ)) = s^k * LegendreAddition.jet n k x / ((n+k).factorial : ℂ) := by
   rcases k with _ | k
   · simp [hergC]
   · simp only [hergC, Int.natAbs_neg, Int.natAbs_natCast, show -((k+1:ℕ):ℤ) < 0 by omega, ↓reduceIte]
@@ -776,7 +804,7 @@ private lemma hergC_recurrence (x s : ℂ) (hs : s^2 = 1 - x^2) (n : ℕ) (j : �
     rw [e1, e2, hergC_neg_nat, hergC_neg_nat, hergC_neg_nat, hergC_neg_nat,
       show n+1+(k+1) = n+k+2 by ring, show n+(k+1) = n+k+1 by ring]
     have hc := herg_core n k x
-    linear_combination s^(k+1) * hc + (1/2) * s^(k+1) * legInt_D n (k+2) x / ((n+k+2).factorial:ℂ) * hs
+    linear_combination s^(k+1) * hc + (1/2) * s^(k+1) * LegendreAddition.jet n (k+2) x / ((n+k+2).factorial:ℂ) * hs
   · have e1 : (0:ℤ) + 1 = ((1:ℕ):ℤ) := by norm_num
     have e2 : (0:ℤ) - 1 = -((1:ℕ):ℤ) := by norm_num
     rw [e1, e2, hergC_nat, hergC_neg_nat, show (0:ℤ) = ((0:ℕ):ℤ) by norm_num, hergC_nat, hergC_nat]
@@ -787,14 +815,14 @@ private lemma hergC_recurrence (x s : ℂ) (hs : s^2 = 1 - x^2) (n : ℕ) (j : �
     have hn1 : ((n:ℂ)+1) ≠ 0 := by exact_mod_cast (show n+1 ≠ 0 by omega)
     rw [f2, show n+0 = n by ring]
     field_simp
-    linear_combination 2 * h0 + 2 * legInt_D n 1 x * hs
+    linear_combination 2 * h0 + 2 * LegendreAddition.jet n 1 x * hs
   · obtain ⟨k, rfl⟩ : ∃ k : ℕ, j = ((k+1:ℕ):ℤ) := ⟨j.natAbs - 1, by omega⟩
     have e1 : ((k+1:ℕ):ℤ) + 1 = ((k+2:ℕ):ℤ) := by push_cast; ring
     have e2 : ((k+1:ℕ):ℤ) - 1 = ((k:ℕ):ℤ) := by push_cast; ring
     rw [e1, e2, hergC_nat, hergC_nat, hergC_nat, hergC_nat,
       show n+1+(k+1) = n+k+2 by ring, show n+(k+1) = n+k+1 by ring]
     have hc := herg_core n k x
-    linear_combination (-s)^(k+1) * hc + (1/2) * (-s)^(k+1) * legInt_D n (k+2) x / ((n+k+2).factorial:ℂ) * hs
+    linear_combination (-s)^(k+1) * hc + (1/2) * (-s)^(k+1) * LegendreAddition.jet n (k+2) x / ((n+k+2).factorial:ℂ) * hs
 
 /-- Summing a function supported in `[-N, N]` over a larger window. -/
 private lemma herg_sum_window (f : ℤ → ℂ) (N : ℕ) (hf : ∀ k : ℤ, N < k.natAbs → f k = 0) {a b : ℤ}
@@ -814,7 +842,7 @@ private lemma herg_sum (x s : ℂ) (hs : s^2 = 1 - x^2) {w : ℂ} (hw : w ≠ 0)
     ∑ k ∈ Finset.Icc (-(n:ℤ)) n, hergC x s n k * w^k = (x + s/2*(w⁻¹ - w))^n / n.factorial := by
   induction n with
   | zero =>
-    simp [hergC, legInt_D, legendrePolyP_zero]
+    simp [hergC, LegendreAddition.jet, legendrePolyP_zero]
   | succ n ih =>
     set A := x + s/2*(w⁻¹ - w)
     have hz : ∀ (g : ℤ → ℂ) (k : ℤ), n < k.natAbs → hergC x s n k * g k = 0 := fun g k hk => by
@@ -887,11 +915,11 @@ theorem herglotz_generating {lam : ℂ} (hlam : lam ≠ 0) (t : ℂ) (r θ phi :
     have hY := sphericalHarmonic_eq_sign_mul n m hmn θ phi
     rw [← hk] at hY
     rw [hY]
-    have hF : ferrersPNat n k (Real.cos θ) = (-1)^k * s^k * legInt_D n k x := by
-      rw [ferrersPNat, hsqrt]
+    have hF : ferrersPNat n k (Real.cos θ) = (-1)^k * s^k * LegendreAddition.jet n k x := by
+      rw [ferrersPNat, hsqrt]; rfl
     have hW : w^m = lam^m * exp (I*m*phi) := by
       rw [hw, mul_zpow, ← exp_int_mul]; ring_nf
-    have hC : hergC x s n m = shSign m * (-1)^k * s^k * legInt_D n k x / ((n+k).factorial:ℂ) := by
+    have hC : hergC x s n m = shSign m * (-1)^k * s^k * LegendreAddition.jet n k x / ((n+k).factorial:ℂ) := by
       rw [hergC, shSign, ← hk]
       split_ifs
       · rw [← mul_pow]; norm_num
@@ -906,7 +934,7 @@ theorem herglotz_generating {lam : ℂ} (hlam : lam ≠ 0) (t : ℂ) (r θ phi :
     have hf0 : ((n+k).factorial:ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
     calc _ = (((Real.sqrt (4*π) : ℝ) : ℂ) * ((Real.sqrt (((n-k).factorial:ℝ)*(2*n+1)/(4*π*(n+k).factorial)) : ℝ) : ℂ) /
         ((Real.sqrt ((2*n+1:ℝ)*((n:ℤ)+m).toNat.factorial*((n:ℤ)-m).toNat.factorial) : ℝ) : ℂ)) *
-          (t^n * (r:ℂ)^n * lam^m * shSign m * exp (I*m*phi) * ((-1)^k * s^k * legInt_D n k x)) := by ring
+          (t^n * (r:ℂ)^n * lam^m * shSign m * exp (I*m*phi) * ((-1)^k * s^k * LegendreAddition.jet n k x)) := by ring
       _ = _ := by rw [hnC]; ring
   have hexp : t*((herglotzNullVector lam).1*((r*Real.sin θ*Real.cos phi : ℝ) : ℂ) +
       (herglotzNullVector lam).2.1*((r*Real.sin θ*Real.sin phi : ℝ) : ℂ) +

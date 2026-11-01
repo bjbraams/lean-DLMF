@@ -8,12 +8,18 @@ module
 public import DLMF.IncompleteGamma.Asymptotics.PartialSums
 
 /-!
-# The central incomplete Gamma expansion
+# The central incomplete Gamma expansion (DLMF 8.11.10–8.11.11)
 
-Uniform estimates for the central incomplete-Gamma regime and its coefficient expansion.
+Uniform estimates in the transition regime `x = a + √(2a) y`, with `y` bounded, obtained from
+Stirling's formula with Binet's remainder, the saddle substitution and Gaussian integrals.
 
-Source references and common attribution are retained in
-`DLMF.IncompleteGamma.Asymptotics`.
+## Main results
+
+* `normIncGammaP_central_expansion`: the central expansion of `P(a+1, x)`, DLMF 8.11.10.
+* `scIncGamma_central_expansion`: DLMF 8.11.11.
+* `igCen_stirling`: `a^{a+1} e^{-a}/Γ(a+1) = √a/√(2π) e^{-Φ(a)}`.
+
+See `DLMF.IncompleteGamma.Asymptotics` for the overview.
 -/
 
 @[expose] public noncomputable section

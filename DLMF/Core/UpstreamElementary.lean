@@ -25,10 +25,14 @@ public import Mathlib.NumberTheory.ZetaValues
 /-!
 # DLMF Chapters 24 and 25: central results already in Mathlib
 
-The former selected Chapter 4 pointers now live in
-`DLMF.Elementary.MathlibCoverage`, publicly imported here for compatibility.
-This file retains the Bernoulli and zeta pointers. Mathlib's `bernoulli` uses
-`B₁=-1/2`, `bernoulli'` uses `B'₁=+1/2`, and its Hurwitz-zeta parameter is in `ℝ/ℤ`.
+The `dlmf_upstream` commands below are checked pointers to Mathlib's Bernoulli and zeta
+declarations. The Chapter 4 pointers are in `DLMF.Elementary.MathlibCoverage`, which this file
+imports publicly.
+
+## Implementation notes
+
+Mathlib's `bernoulli` uses `B₁ = -1/2`, `bernoulli'` uses `B'₁ = +1/2`, and its Hurwitz-zeta
+parameter is in `ℝ/ℤ`.
 -/
 
 /-! ### Chapter 24: Bernoulli numbers and polynomials -/

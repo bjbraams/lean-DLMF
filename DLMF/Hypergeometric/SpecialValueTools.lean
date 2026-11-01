@@ -11,12 +11,19 @@ public import DLMF.Hypergeometric.FurtherTransformations
 # Cubic transformations for special values (DLMF §15.4(iii))
 
 Two of Goursat's cubic transformations, proved on cone-shaped convex domains around real
-segments, for the special-argument evaluations 15.4.31 and 15.4.32:
+segments, for the special-argument evaluations 15.4.31 and 15.4.32.
+
+## Main results
 
 * `hypSV_cubic_psi`: `F(3a, 3a+1/2; 2a+5/6; z) = (1-9z)^{-2a} F(a, a+1/2; 2a+5/6; ψ(z))`,
-  `ψ(z) = -27z(1-z)²/(1-9z)²`, with `1 - ψ(z) = (1+3z)³/(1-9z)²`;
+  `ψ(z) = -27z(1-z)²/(1-9z)²`, with `1 - ψ(z) = (1+3z)³/(1-9z)²`.
 * `hypSV_cubic_two`: `F(3a, 1/3-a; 2a+5/6; u) = (1-4u)^{-3a} F(a, a+1/3; 2a+5/6; s(u))`,
   `s(u) = 27u/(4u-1)³`, with `1 - s(u) = (1+8u)²(1-u)/(1-4u)³`.
+* `hypSV_cubic_psi_neg_one_third`, `hypSV_cubic_psi_deriv_neg_one_third`: the value and the
+  derivative at `-1/3` of the `ψ`-cubic family.
+* `hypSV_tendsto_ray`: Abel's theorem for `₂F₁` along a radius to a point of the unit circle.
+
+## Implementation notes
 
 The proofs follow `cubic_transformation` (15.8.31): both sides solve the same Gauss equation
 near the origin, and the identity is continued through the cut-plane continuation

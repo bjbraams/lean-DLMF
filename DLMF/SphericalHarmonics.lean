@@ -14,7 +14,8 @@ public import DLMF.SphericalHarmonics.Theorems
 /-!
 # Spherical harmonics (AAR Chapter 9)
 
-Mathlib has harmonic functions, the Laplacian, the planar Poisson kernel, and
-`Matrix.specialUnitaryGroup`. Homogeneous harmonic polynomials, the addition theorem,
-Funk–Hecke, and Jacobi polynomials as `SU(2)` matrix coefficients are absent.
+This area develops homogeneous harmonic polynomials and their orthogonality on the sphere, the
+spherical addition theorem, the Funk–Hecke formula, Gegenbauer's addition theorems, the Poisson
+kernel of the ball and `SU(2)` (AAR Chapter 9). Mathlib has harmonic functions, the Laplacian,
+the planar Poisson kernel and `Matrix.specialUnitaryGroup`, but not these results.
 -/

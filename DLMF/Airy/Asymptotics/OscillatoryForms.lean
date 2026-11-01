@@ -10,11 +10,25 @@ public import DLMF.Airy.Asymptotics.LaplaceSectors
 /-!
 # Rotations and oscillatory forms of Airy expansions
 
-Rotation formulas, branch powers and the even and odd parts of Airy expansions on the negative
-axis.
+Rotation formulas, branch powers and the even and odd parts of the Airy expansions. They give
+the Poincaré expansions of `Bi` and `Bi'` in `|arg z| ≤ π/3 - δ` and the oscillatory expansions
+of `Ai`, `Bi` and their derivatives on the negative axis, in `|arg z| ≤ 2π/3 - δ` (DLMF §9.7).
 
-Source references and common attribution are retained in
-`DLMF.Airy.Asymptotics`.
+## Main definitions
+
+* `airyRot_even`, `airyRot_odd`: the even and odd parts of a function at `z e^{±iπ/3}`.
+
+## Main results
+
+* `airyRot_airyBi_expansion`, `airyRot_airyBiDeriv_expansion`: Poincaré expansions of the
+  normalized `Bi` and `Bi'` (DLMF 9.7.7, 9.7.8).
+* `airyRot_even_expansion`, `airyRot_odd_expansion`: the even and odd subseries.
+* `airyRot_osc_bound`: the oscillatory error envelope.
+* `airyRot_neg_connection_ai`, `airyRot_neg_connection_bi`: the connection formulas
+  DLMF 9.2.14 and 9.2.15, shared with `DLMF.Airy.Equation`.
+* `airy_ai_oscillatory_expansion`, `airy_aiDeriv_oscillatory_expansion`,
+  `airy_bi_oscillatory_expansion`, `airy_biDeriv_oscillatory_expansion`: the oscillatory
+  expansions of `Ai(-z)`, `Ai'(-z)`, `Bi(-z)`, `Bi'(-z)` (DLMF 9.7.9–9.7.12).
 -/
 
 @[expose] public noncomputable section

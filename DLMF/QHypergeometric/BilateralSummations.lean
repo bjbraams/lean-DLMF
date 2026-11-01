@@ -10,14 +10,36 @@ public import DLMF.QHypergeometric.Convergence
 /-!
 # Bilateral basic summations and continuation (DLMF §17.8)
 
-The actual series are asserted only on their convergence annuli. Analytic continuation is
-recorded for their germs using TauCeti's proved `ContinuesInside` API, so a divergent
-`tsum` value is never confused with the continued value. Cancelled product forms retain
-upper-parameter cases where the displayed quotient has a removable 0/0.
+This file proves the bilateral summation formulas of DLMF §17.8, from Ramanujan's `₁ψ₁` sum to
+Bailey's `₆ψ₆` sum, together with the quintuple product identity, and shows that the product
+sides continue the bilateral series analytically.
 
-For 17.8.8 the actual annulus additionally requires |c/b²|<1. The weaker printed inequality
-|cq²/b²|<1 describes a larger continuation region, not convergence of the bilateral sum.
-The native Jacobi triple-product declaration is `DLMF.QSeries.jacobi_triple_product`.
+## Main definitions
+
+* `qRamanujanValue`, `qBilateralTwoValue`, `qBilateralThreeValue`, `qBilateralFourValue`,
+  `qBilateralSixValue`, `qBilateralEvenValue`: the product quotients of the summations.
+* `qQuintupleExponent`: the integer triangular exponent in the quintuple product.
+
+## Main results
+
+* `ramanujan_one_psi_one`: Ramanujan's `₁ψ₁` summation for `|b/a| < |z| < 1` (DLMF 17.8.2).
+* `quintuple_product`: the quintuple product identity (DLMF 17.8.3).
+* `bilateral_two_sum`, `bilateral_three_sum`, `bilateral_four_sum`, `bilateral_six_sum`,
+  `bilateral_even_sum`: DLMF 17.8.4–17.8.8.
+* `ramanujan_continues`, `bilateral_two_continues`, `bilateral_three_continues`,
+  `bilateral_four_continues`, `bilateral_six_continues`, `bilateral_even_continues`: the
+  product sides continue the bilateral series analytically.
+
+## Implementation notes
+
+The series are asserted only on their convergence annuli. Analytic continuation is recorded
+for their germs using TauCeti's `ContinuesInside` API, so a divergent `tsum` value is never
+confused with the continued value. Cancelled product forms retain upper-parameter cases where
+the displayed quotient has a removable `0/0`.
+
+For DLMF 17.8.8 the annulus of convergence additionally requires `|c/b²| < 1`. The weaker
+printed inequality `|cq²/b²| < 1` describes a larger continuation region, not convergence of
+the bilateral sum. The Jacobi triple product is `DLMF.QSeries.jacobi_triple_product`.
 -/
 
 @[expose] public noncomputable section

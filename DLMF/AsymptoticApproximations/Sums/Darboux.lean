@@ -10,15 +10,28 @@ public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 public import DLMF.OrthogonalPolynomials.Series
 
 /-!
-# Entire functions and Darboux's method (DLMF §2.10(iii)–(iv))
+# Entire functions and Darboux's method
 
-* §2.10(iii): the example `₀F₂(-; 1, 1; x)` (2.10.19–2.10.24). The series 2.10.19 is matched with
-  the project's generalized hypergeometric coefficients `genCoeff` (16.2.1, proved); the
-  partial sums are written as contour integrals over the contour `𝒞` of Figure 2.10.1
-  (`contourIntegralC`, 2.10.20, 2.10.22); the cotangent identities 2.10.21 are proved.
-* §2.10(iv): Laurent coefficients (2.10.25–2.10.26) and Darboux's method (2.10.27–2.10.32),
-  with the Legendre example 2.10.33–2.10.36. The generating function 2.10.33 is the project's
-  `DLMF.OrthogonalPolynomials.legendre_generating_function` (18.12.11) at `x = cos α`.
+This file covers DLMF §2.10(iii)–(iv): the example `₀F₂(-; 1, 1; x)` of an entire function
+whose partial sums are written as contour integrals over the contour `𝒞` of Figure 2.10.1
+(`contourIntegralC`), Laurent coefficients, and Darboux's method with the Legendre example.
+
+## Main results
+
+* `hypergeometric0F2OneOne_hasSum`, `genCoeff_zero_one_one`: the series DLMF 2.10.19, matched
+  with the generalized hypergeometric coefficients `genCoeff` of DLMF 16.2.1.
+* `sum_0F2_eq_contourIntegral`, `cot_div_two_I`, `sum_0F2_eq_real_integral_add`: the contour
+  integral representations DLMF 2.10.20–2.10.22.
+* `hypergeometric0F2OneOne_eq_integrals`, `hypergeometric0F2OneOne_sub_integral_isBigO`,
+  `hypergeometric0F2OneOne_isEquivalent`: DLMF 2.10.23–2.10.24.
+* `laurent_expansion`: Laurent coefficients (DLMF 2.10.25–2.10.26).
+* `darboux`, `darboux_singular`, `darboux_smooth`, `darboux_smooth_singular`: Darboux's method
+  (DLMF 2.10.27–2.10.32).
+* `legendre_generating_cos`: DLMF 2.10.33, the generating function
+  `DLMF.OrthogonalPolynomials.legendre_generating_function` (DLMF 18.12.11) at `x = cos α`.
+* `legendreComparison_hasSum`, `legendrePolyP_cos_asymptotic`: DLMF 2.10.35–2.10.36.
+
+## Implementation notes
 
 Erratum: in the Legendre example DLMF takes `α ∈ (0, 2π)`, but 2.10.34–2.10.36 need
 `α ∈ (0, π)`: for `π < α < 2π`, `sin α < 0`, so `(2 sin α)^{-1/2}` and the right side of 2.10.36
@@ -48,7 +61,7 @@ theorem genCoeff_zero_one_one (j : ℕ) :
   field_simp
 
 /-- The series `∑ x^j/(j!)³` converges absolutely for every `x`. -/
-lemma g2b_summable_0F2 (x : ℂ) : Summable fun j : ℕ => x ^ j / (j.factorial : ℂ) ^ 3 := by
+private lemma summable_pow_div_factorial_cube (x : ℂ) : Summable fun j : ℕ => x ^ j / (j.factorial : ℂ) ^ 3 := by
   refine Summable.of_norm_bounded (Real.summable_pow_div_factorial ‖x‖) fun j => ?_
   rw [norm_div, norm_pow, norm_pow, Complex.norm_natCast]
   have h1 : (1 : ℝ) ≤ j.factorial := by exact_mod_cast j.factorial_pos
@@ -63,7 +76,7 @@ hypergeometric series with upper parameters `()` and lower parameters `(1, 1)` c
 theorem hypergeometric0F2OneOne_hasSum (x : ℂ) :
     HasSum (fun j : ℕ => DLMF.Hypergeometric.genCoeff 0 {1, 1} j * x ^ j)
       (hypergeometric0F2OneOne x) := by
-  have h := (g2b_summable_0F2 x).hasSum
+  have h := (summable_pow_div_factorial_cube x).hasSum
   refine h.congr_fun fun j => ?_
   rw [genCoeff_zero_one_one]
   ring
@@ -81,7 +94,7 @@ Figure 2.10.1 (`contourIntegralC`); the residue of `cot(πt)` at `t = j` is `1/�
 @[dlmf 2.10.E20]
 theorem sum_0F2_eq_contourIntegral {x : ℝ} (hx : 0 < x) {n : ℕ} (hn : 1 ≤ n) :
     ∑ j ∈ Finset.range n, (x : ℂ) ^ j / (j.factorial : ℂ) ^ 3 =
-      (2 * I)⁻¹ * contourIntegralC (fun t => g2b_0F2Integrand x t * Complex.cot (π * t)) n := by
+      (2 * I)⁻¹ * contourIntegralC (fun t => hypergeometric0F2OneOneIntegrand x t * Complex.cot (π * t)) n := by
   sorry
 
 /-- DLMF 2.10.21: for `t ∉ ℤ`,
@@ -121,10 +134,10 @@ theorem cot_div_two_I {t : ℂ} (ht : ∀ k : ℤ, t ≠ k) :
 @[dlmf 2.10.E22]
 theorem sum_0F2_eq_real_integral_add {x : ℝ} (hx : 0 < x) {n : ℕ} (hn : 1 ≤ n) :
     ∑ j ∈ Finset.range n, (x : ℂ) ^ j / (j.factorial : ℂ) ^ 3 =
-      (∫ t in (-(1 / 2) : ℝ)..(n - 1 / 2), g2b_0F2Integrand x t) -
-        contourIntegralC₁ (fun t => g2b_0F2Integrand x t / (Complex.exp (-(2 * π * I * t)) - 1))
+      (∫ t in (-(1 / 2) : ℝ)..(n - 1 / 2), hypergeometric0F2OneOneIntegrand x t) -
+        contourIntegralC₁ (fun t => hypergeometric0F2OneOneIntegrand x t / (Complex.exp (-(2 * π * I * t)) - 1))
           n +
-        contourIntegralC₂ (fun t => g2b_0F2Integrand x t / (Complex.exp (2 * π * I * t) - 1))
+        contourIntegralC₂ (fun t => hypergeometric0F2OneOneIntegrand x t / (Complex.exp (2 * π * I * t) - 1))
           n := by
   sorry
 
@@ -134,10 +147,10 @@ the path from `-1/2` to `i∞` being the quarter circle `|t| = 1/2` from `-1/2` 
 by the imaginary axis. The integrals converge absolutely. -/
 @[dlmf 2.10.E23]
 theorem hypergeometric0F2OneOne_eq_integrals {x : ℝ} (hx : 0 < x) :
-    let F : ℂ → ℂ := fun t => g2b_0F2Integrand x t / (Complex.exp (-(2 * π * I * t)) - 1)
+    let F : ℂ → ℂ := fun t => hypergeometric0F2OneOneIntegrand x t / (Complex.exp (-(2 * π * I * t)) - 1)
     hypergeometric0F2OneOne x =
-      (∫ t in Ioi (-(1 / 2) : ℝ), g2b_0F2Integrand x t) +
-        2 * ((g2b_semicirclePath F (1 / 2) π (π / 2) +
+      (∫ t in Ioi (-(1 / 2) : ℝ), hypergeometric0F2OneOneIntegrand x t) +
+        2 * ((arcPathIntegral F (1 / 2) π (π / 2) +
           ∫ y in Ioi (1 / 2 : ℝ), F (I * y) * I).re : ℂ) := by
   sorry
 
@@ -145,7 +158,7 @@ theorem hypergeometric0F2OneOne_eq_integrals {x : ℝ} (hx : 0 < x) :
 `x → +∞`. -/
 @[dlmf 2.10.E23]
 theorem hypergeometric0F2OneOne_sub_integral_isBigO :
-    (fun x : ℝ => hypergeometric0F2OneOne x - ∫ t in Ioi (0 : ℝ), g2b_0F2Integrand x t)
+    (fun x : ℝ => hypergeometric0F2OneOne x - ∫ t in Ioi (0 : ℝ), hypergeometric0F2OneOneIntegrand x t)
       =O[atTop] fun _ => (1 : ℝ) := by
   sorry
 
@@ -163,10 +176,10 @@ theorem hypergeometric0F2OneOne_isEquivalent :
 coefficients `f_n = (2πi)⁻¹ ∮_{|z|=ρ} f(z) z^{-n-1} dz` do not depend on `ρ`, and
 `f(z) = ∑_{n ∈ ℤ} f_n z^n` for `0 < |z| < r`. -/
 @[dlmf 2.10.E25, dlmf 2.10.E26]
-theorem laurent_expansion {f : ℂ → ℂ} {r : ℝ} (hf : DifferentiableOn ℂ f (g2b_punctured r))
+theorem laurent_expansion {f : ℂ → ℂ} {r : ℝ} (hf : DifferentiableOn ℂ f (puncturedDisc r))
     {ρ ρ' : ℝ} (hρ : 0 < ρ) (hρr : ρ < r) (hρ' : 0 < ρ') (hρ'r : ρ' < r) :
     laurentCoeff f ρ = laurentCoeff f ρ' ∧
-      ∀ z ∈ g2b_punctured r, HasSum (fun n : ℤ => laurentCoeff f ρ n * z ^ n) (f z) := by
+      ∀ z ∈ puncturedDisc r, HasSum (fun n : ℤ => laurentCoeff f ρ n * z ^ n) (f z) := by
   sorry
 
 /-- DLMF 2.10.27–2.10.29 (Darboux's method, conditions (a)–(c)): let `f` and the comparison
@@ -176,9 +189,9 @@ function `g` be analytic on `0 < |z| < r` (`g_n` its Laurent coefficients, 2.10.
 `f_n = g_n + o(r^{-n})` as `n → ±∞` (2.10.29). -/
 @[dlmf 2.10.E27, dlmf 2.10.E28, dlmf 2.10.E29, dlmf 2.10.iv]
 theorem darboux {f g h : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
-    (hf : DifferentiableOn ℂ f (g2b_punctured r)) (hg : DifferentiableOn ℂ g (g2b_punctured r))
+    (hf : DifferentiableOn ℂ f (puncturedDisc r)) (hg : DifferentiableOn ℂ g (puncturedDisc r))
     (hh : ContinuousOn h {z : ℂ | 0 < ‖z‖ ∧ ‖z‖ ≤ r})
-    (hfg : EqOn h (f - g) (g2b_punctured r)) {ρ : ℝ} (hρ : 0 < ρ) (hρr : ρ < r) :
+    (hfg : EqOn h (f - g) (puncturedDisc r)) {ρ : ℝ} (hρ : 0 < ρ) (hρr : ρ < r) :
     (∀ n : ℤ, laurentCoeff f ρ n - laurentCoeff g ρ n =
       (2 * π * (r : ℂ) ^ n)⁻¹ *
         ∫ θ in (0 : ℝ)..2 * π, h (r * Complex.exp (θ * I)) * Complex.exp (-(n * θ * I))) ∧
@@ -192,11 +205,11 @@ theorem darboux {f g h : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
 the rest of the closed annulus. -/
 @[dlmf 2.10.E30, dlmf 2.10.iv]
 theorem darboux_singular {f g h : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
-    (hf : DifferentiableOn ℂ f (g2b_punctured r)) (hg : DifferentiableOn ℂ g (g2b_punctured r))
+    (hf : DifferentiableOn ℂ f (puncturedDisc r)) (hg : DifferentiableOn ℂ g (puncturedDisc r))
     {Z : Finset ℂ} (hZ : ∀ w ∈ Z, ‖w‖ = r)
     (hh : ContinuousOn h ({z : ℂ | 0 < ‖z‖ ∧ ‖z‖ ≤ r} \ Z))
-    (hfg : EqOn h (f - g) (g2b_punctured r)) (σ : ℂ → ℝ) (hσ : ∀ w ∈ Z, 0 < σ w)
-    (hsing : ∀ w ∈ Z, (f - g) =O[𝓝[g2b_punctured r] w] fun z => ‖z - w‖ ^ (σ w - 1))
+    (hfg : EqOn h (f - g) (puncturedDisc r)) (σ : ℂ → ℝ) (hσ : ∀ w ∈ Z, 0 < σ w)
+    (hsing : ∀ w ∈ Z, (f - g) =O[𝓝[puncturedDisc r] w] fun z => ‖z - w‖ ^ (σ w - 1))
     {ρ : ℝ} (hρ : 0 < ρ) (hρr : ρ < r) :
     Tendsto (fun n : ℤ => (laurentCoeff f ρ n - laurentCoeff g ρ n) * (r : ℂ) ^ n) cofinite
       (𝓝 0) := by
@@ -206,9 +219,9 @@ theorem darboux_singular {f g h : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
 continuously differentiable, then `f_n = g_n + o(r^{-n} |n|^{-m})` as `n → ±∞`. -/
 @[dlmf 2.10.E31]
 theorem darboux_smooth {f g h : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
-    (hf : DifferentiableOn ℂ f (g2b_punctured r)) (hg : DifferentiableOn ℂ g (g2b_punctured r))
+    (hf : DifferentiableOn ℂ f (puncturedDisc r)) (hg : DifferentiableOn ℂ g (puncturedDisc r))
     (hh : ContinuousOn h {z : ℂ | 0 < ‖z‖ ∧ ‖z‖ ≤ r})
-    (hfg : EqOn h (f - g) (g2b_punctured r)) {m : ℕ}
+    (hfg : EqOn h (f - g) (puncturedDisc r)) {m : ℕ}
     (hm : ContDiff ℝ m fun θ : ℝ => h (r * Complex.exp (θ * I))) {ρ : ℝ} (hρ : 0 < ρ)
     (hρr : ρ < r) :
     Tendsto (fun n : ℤ => (laurentCoeff f ρ n - laurentCoeff g ρ n) * (r : ℂ) ^ n *
@@ -220,12 +233,12 @@ continuously to `|z| = r` except at finitely many points `z_j`, near which
 `f^{(m)}(z) - g^{(m)}(z) = O((z - z_j)^{σ_j - 1})`, `σ_j > 0`. -/
 @[dlmf 2.10.E32]
 theorem darboux_smooth_singular {f g : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
-    (hf : DifferentiableOn ℂ f (g2b_punctured r)) (hg : DifferentiableOn ℂ g (g2b_punctured r))
+    (hf : DifferentiableOn ℂ f (puncturedDisc r)) (hg : DifferentiableOn ℂ g (puncturedDisc r))
     {Z : Finset ℂ} (hZ : ∀ w ∈ Z, ‖w‖ = r) {m : ℕ}
     (hext : ∀ k ≤ m, ∃ hk : ℂ → ℂ, ContinuousOn hk ({z : ℂ | 0 < ‖z‖ ∧ ‖z‖ ≤ r} \ Z) ∧
-      EqOn hk (iteratedDeriv k (f - g)) (g2b_punctured r))
+      EqOn hk (iteratedDeriv k (f - g)) (puncturedDisc r))
     (σ : ℂ → ℝ) (hσ : ∀ w ∈ Z, 0 < σ w)
-    (hsing : ∀ w ∈ Z, iteratedDeriv m (f - g) =O[𝓝[g2b_punctured r] w]
+    (hsing : ∀ w ∈ Z, iteratedDeriv m (f - g) =O[𝓝[puncturedDisc r] w]
       fun z => ‖z - w‖ ^ (σ w - 1))
     {ρ : ℝ} (hρ : 0 < ρ) (hρr : ρ < r) :
     Tendsto (fun n : ℤ => (laurentCoeff f ρ n - laurentCoeff g ρ n) * (r : ℂ) ^ n *

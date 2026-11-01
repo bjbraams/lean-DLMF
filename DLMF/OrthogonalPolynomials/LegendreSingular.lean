@@ -10,14 +10,24 @@ public import DLMF.OrthogonalPolynomials.LegendreAddition
 /-!
 # The singular integral of a Legendre polynomial
 
-The quotient `(P_n(x)-P_n(t))/|x-t|` is interval integrable: on either side
-of `t=x` it agrees with a continuous divided slope up to sign. The Mathlib
-contributors’ `dslope` continuity and interval-integral congruence theorems
-justify the split without changing the totalized diagonal value.
+The integral of `(P_n(x)-P_n(t))/|x-t|` over `[-1, 1]` (DLMF 18.17.44). The quotient is
+interval integrable: on either side of `t = x` it agrees up to sign with a continuous divided
+slope, so the integral splits without changing the totalized diagonal value. The degree
+recurrence reduces the integral to a signed Legendre integral, evaluated by a primitive, and
+the resulting recurrence has eigenvalue twice the finite harmonic sum.
 
-The degree recurrence reduces the integral to a signed Legendre integral.
-The derivative ladders supply its primitive, and the resulting recurrence
-has eigenvalue twice the finite harmonic sum (DLMF 18.17.44).
+## Main definitions
+
+* `dq`: the divided difference with its totalized diagonal value.
+* `signKernel`: the signed kernel of the split integral.
+* `harmonicSum`: finite harmonic sums in the normalization of the singular integral.
+
+## Main results
+
+* `dq_integrable`: integrability on both sides of the diagonal.
+* `integral_signed_legendre`: a signed Legendre integral, evaluated by its primitive.
+* `dq_recurrence`: the recurrence for the divided differences.
+* `singular_integral`: the singular integral of a Legendre polynomial, DLMF 18.17.44.
 -/
 
 @[expose] public section

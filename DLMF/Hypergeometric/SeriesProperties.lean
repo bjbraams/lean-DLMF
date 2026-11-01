@@ -15,11 +15,24 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 /-!
 # The hypergeometric series (AAR §2.1)
 
-Canonical definitions are in `DLMF.Hypergeometric.Basic`; this module develops their properties.
+Mathlib defines `ordinaryHypergeometric` (`₂F₁`) and proves that its radius of convergence is
+`1` (or `⊤` when the series terminates); AAR Theorem 2.1.1 for `p = 2`, `q = 1` is that
+statement. The definitions of this area are in `DLMF.Hypergeometric.Basic`.
 
-Mathlib defines `ordinaryHypergeometric` / `₂F₁` and proves that its radius of convergence is
-`1` (or `⊤` when the series terminates). AAR Theorem 2.1.1 for `p = 2`, `q = 1` is that
-statement. Elementary specializations (2.1.3)–(2.1.6) are recorded below.
+## Main results
+
+* `ordinaryHypergeometric_eq_sum_neg_nat`: a terminating `₂F₁(-n,b;c;z)` is a polynomial,
+  DLMF 15.2.4.
+* `ordinaryHypergeometric_summable_of_mem_sphere`: absolute convergence on the unit circle,
+  §15.2(i) (AAR Theorem 2.1.2).
+* `log_one_add_eq_ordinaryHypergeometric`: `log(1+x) = x ₂F₁(1,1;2;-x)`, DLMF 15.4.1.
+* `arctan_eq_ordinaryHypergeometric`: `arctan x = x ₂F₁(1/2,1;3/2;-x²)`, DLMF 15.4.3.
+* `ordinaryHypergeometric_eq_one_sub_neg_cpow`: `₂F₁(a,c;c;z) = (1-z)^{-a}`, DLMF 15.4.6.
+* `tendsto_gaussHGCoeff_div_cpow`: the normalized Gauss coefficients have a Gamma-ratio limit.
+
+## References
+
+* G. E. Andrews, R. Askey, R. Roy, *Special Functions*, §2.1.
 -/
 
 @[expose] public section

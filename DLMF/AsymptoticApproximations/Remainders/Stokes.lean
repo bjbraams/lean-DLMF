@@ -11,21 +11,36 @@ public import DLMF.ExpIntegrals.Asymptotics
 public import Mathlib.Analysis.SpecialFunctions.Exp
 
 /-!
-# Remainder terms; Stokes phenomenon (DLMF §2.11)
+# Remainder terms; Stokes phenomenon
 
-* §2.11(i): the example `I(m) = ∫_0^π cos(mt)/(t²+1) dt` (2.11.1–2.11.3).
-* §2.11(ii): the generalized exponential integral `E_p(z)` (the project's
-  `DLMF.Confluent.genExpIntE`, on the logarithmic plane `genExpIntEOnLog`): the Stieltjes
-  representation 2.11.5, the Poincaré expansion 2.11.6 and the compound expansion 2.11.7 are
-  the project's 8.19.4, 8.20.2 and 8.20.3.
-* §2.11(iii)–(iv): exponentially improved expansions with the terminant
-  `F_{n+p}(z) = Γ(n+p)/(2π) E_{n+p}(z)/z^{n+p-1}` (2.11.8–2.11.18) and the sign of `ℜ c(θ)`.
-* §2.11(v): re-expansion of the remainders of the rank-one formal solutions 2.7.14 in terminants
-  (2.11.19–2.11.23), on the logarithmic plane `z = e^ζ` with `λ₂ - λ₁ = 1`.
-* §2.11(vi): 2.11.24 (the project's 6.12.1) and the Whittaker expansion 2.11.29–2.11.30 (the
-  project's 13.19.3, for real `x → +∞`).
+This file covers DLMF §2.11: the example `I(m) = ∫_0^π cos(mt)/(t²+1) dt`, the generalized
+exponential integral `E_p(z)` (`DLMF.Confluent.genExpIntE`, on the logarithmic plane
+`genExpIntEOnLog`), exponentially improved expansions with the terminant
+`F_{n+p}(z) = Γ(n+p)/(2π) E_{n+p}(z)/z^{n+p-1}`, and re-expansion in terminants.
 
-Excluded as numerical: 2.11.4, 2.11.25–2.11.28, 2.11.31 and Table 2.11.1.
+## Main results
+
+* `cosRationalIntegral_asymptotic`, `cosRationalCoeff_explicit`: the asymptotic expansion of
+  `I(m)` and its first coefficients (DLMF 2.11.1–2.11.3).
+* `genExpIntE_eq_integral`, `genExpIntE_asymptotic`, `genExpIntE_compound_asymptotic`: the
+  Stieltjes representation, Poincaré expansion and compound expansion of `E_p(z)`
+  (DLMF 2.11.5–2.11.7; corollaries of DLMF 8.19.4, 8.20.2 and 8.20.3).
+* `genExpIntE_eq_sum_add_terminant`, `terminant_eq_integral`, `terminant_eq_saddle_integral`:
+  the expansion with terminant remainder and the integral forms of the terminant
+  (DLMF 2.11.8–2.11.12).
+* `terminant_reexpansions`: re-expansion of the terminant (DLMF 2.11.13–2.11.15, 2.11.17).
+* `stokesC_sq`, `stokesC_continuous_tendsto`, `stokesH_zero`, `stokesC_re_sign`: properties of
+  `c(θ)` and `h₀` (DLMF 2.11.16, 2.11.18, §2.11(iv)).
+* `rankOne_terminant_reexpansion`: re-expansion of the remainders of the rank-one formal
+  solutions 2.7.14 in terminants, on the logarithmic plane `z = e^ζ` with `λ₂ - λ₁ = 1`
+  (DLMF 2.11.19–2.11.23).
+* `expIntE1_asymptotic`: DLMF 2.11.24 (from DLMF 6.12.1).
+* `whittakerW_asymptotic`: the Whittaker expansion for real `x → +∞` (DLMF 2.11.29–2.11.30,
+  from DLMF 13.19.3).
+
+## Implementation notes
+
+Excluded as numerical: DLMF 2.11.4, 2.11.25–2.11.28, 2.11.31 and Table 2.11.1.
 -/
 
 @[expose] public noncomputable section
@@ -405,13 +420,13 @@ singularity at infinity with `λ₂ - λ₁ = 1`, solutions `w₁, w₂` with th
 @[dlmf 2.11.E19, dlmf 2.11.E20, dlmf 2.11.E21, dlmf 2.11.E22, dlmf 2.11.E23, dlmf 2.11.v]
 theorem rankOne_terminant_reexpansion {f g : ℂ → ℂ} {fs gs : ℕ → ℂ} {a : ℝ} {l₁ l₂ : ℂ}
     (h : IsRankOneAtInfinity f g fs gs a l₁ l₂) (h12 : l₂ - l₁ = 1) {W₁ W₂ : ℂ → ℂ}
-    (hW₁ : IsLogPlaneSolOn f g W₁ (g2b_logExterior a))
-    (hW₂ : IsLogPlaneSolOn f g W₂ (g2b_logExterior a))
+    (hW₁ : IsLogPlaneSolOn f g W₁ (logExterior a))
+    (hW₂ : IsLogPlaneSolOn f g W₂ (logExterior a))
     (hE₁ : HasAsymptoticExpansion (logSectorFilter (-π) π 0)
       (rankOneScale l₁ (rankOneExponent fs gs l₁) 0) (rankOneCoeff fs gs l₁) W₁)
     (hE₂ : HasAsymptoticExpansion (logSectorFilter 0 (2 * π) 0)
       (rankOneScale l₂ (rankOneExponent fs gs l₂) 0) (rankOneCoeff fs gs l₂) W₂)
-    {C₁ C₂ : ℂ} (hC : ∀ ζ ∈ g2b_logExterior a,
+    {C₁ C₂ : ℂ} (hC : ∀ ζ ∈ logExterior a,
       W₁ ζ = exp (2 * π * I * rankOneExponent fs gs l₁) * W₁ (ζ - 2 * π * I) + C₁ * W₂ ζ ∧
       W₂ ζ = exp (-(2 * π * I * rankOneExponent fs gs l₂)) * W₂ (ζ + 2 * π * I) + C₂ * W₁ ζ)
     (m : ℕ) {δ B : ℝ} (hδ : 0 < δ) (hB : 0 ≤ B) :
@@ -453,7 +468,7 @@ theorem expIntE1_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3 * π / 2) :
   expIntE1_logSector_asymptotic hδ hδ1
 
 /-- The Pochhammer product `(½+μ-κ)_s (½-μ-κ)_s = (-1)^s ∏_{k=1}^{s} (μ² - (κ-k+½)²)`. -/
-lemma g2b_poch_mul_poch (κ μ : ℂ) (s : ℕ) :
+private lemma poch_mul_poch_eq_prod_sq_sub (κ μ : ℂ) (s : ℕ) :
     poch (1 / 2 + μ - κ) s * poch (1 / 2 - μ - κ) s =
       (-1) ^ s * ∏ k ∈ Finset.Icc 1 s, (μ ^ 2 - (κ - k + 1 / 2) ^ 2) := by
   induction s with
@@ -489,7 +504,7 @@ theorem whittakerW_asymptotic (κ μ : ℂ) (N : ℕ) :
     rw [Complex.cpow_neg, Complex.cpow_natCast, neg_pow]
   have hsub : (x : ℂ) ^ ((s : ℂ) - κ) = (x : ℂ) ^ s / (x : ℂ) ^ κ := by
     rw [Complex.cpow_sub _ _ hx0, Complex.cpow_natCast]
-  rw [whittakerTerm, hsub, hneg, g2b_poch_mul_poch]
+  rw [whittakerTerm, hsub, hneg, poch_mul_poch_eq_prod_sq_sub]
   have hf : (s.factorial : ℂ) ≠ 0 := by exact_mod_cast s.factorial_ne_zero
   have h1 : ((-1 : ℂ) ^ s) ≠ 0 := pow_ne_zero _ (by norm_num)
   field_simp

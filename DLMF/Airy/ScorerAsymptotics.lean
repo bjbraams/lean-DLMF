@@ -10,10 +10,18 @@ public import DLMF.Airy.Scorer
 public import DLMFMathlib.Analysis.SpecialFunctions.ImproperIntegralsExtra
 
 /-!
-# Scorer exponential and integrated asymptotics, DLMF §9.12
+# Exponential and integrated asymptotics of Scorer functions (DLMF §9.12)
 
-Statements acquired from the NIST DLMF, checked 2026-10-19.
-New statements are initially admitted; existing proved Airy results are retained.
+The two-scale expansion of `Hi` in `|arg z| ≤ π - δ` and the asymptotic expansions of the
+primitives of `Hi(-t)` and `Gi`, including their constant term `(2γ + ln 3)/(3π)`.
+
+## Main results
+
+* `scorerHi_two_scale_expansion`: DLMF 9.12.29.
+* `scorerPrim_tendsto_ofReal`: `∫₀^x Hi(-t) dt - (log x)/π → (2γ + ln 3)/(3π)`.
+* `scorerPrim_primitive_scorerGi`: the primitive of `Gi` through that of `Hi(-z)`.
+* `scorerGi_primitive_asymptotic`: DLMF 9.12.30.
+* `scorerHi_primitive_asymptotic`: DLMF 9.12.31.
 -/
 
 @[expose] public noncomputable section

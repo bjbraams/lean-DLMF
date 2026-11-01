@@ -11,19 +11,28 @@ public import DLMF.Lame.Basic
 /-!
 # Lamé functions: integral equations (DLMF §29.8)
 
-The integral equation 29.8.2 for a solution `w` of Lamé's equation 29.2.1 with
-`w(z + 2K) = σw(z)` and its special cases 29.8.5, 29.8.7–29.8.9 for the Lamé functions.
+The integral equation DLMF 29.8.2 for a solution `w` of Lamé's equation 29.2.1 with
+`w(z + 2K) = σw(z)`, and its special cases 29.8.5 and 29.8.7–29.8.9 for the Lamé functions.
 
-Convention: DLMF writes the kernel as the Ferrers function `𝖯_ν`, but the arguments `x` of
-29.8.1 and `y = dn(z) dn(z₁)/k'` of 29.8.6 are not confined to `[-1, 1]` (for real `z, z₁`,
-`k' ≤ dn ≤ 1` gives `y ∈ [k', 1/k']`, which straddles `1`). The function meant is the
-hypergeometric function `F(-ν, ν + 1; 1; (1 - x)/2)`, which is the Legendre function `P_ν` of
-§14.3(ii) and agrees with `𝖯_ν` on `(-1, 1)`; it is `DLMF.Legendre.legendreP ν` (complex,
-principal branch, the real kernel being its restriction). With this reading 29.8.2, 29.8.5 and
-29.8.7–29.8.9 were verified numerically for `ν = 2.7`, `k = 0.6` (ratios `1 ± 10⁻¹²`), the
-second solution `w₂` being computed by shooting. The Wronskian of two solutions of 29.2.1 is
-constant (no first-derivative term), so it is evaluated at `0`.
-All statements are admitted.
+## Main results
+
+* `Real.lame_integral_equation`: DLMF 29.8.1–29.8.4.
+* `Real.lameEck_even_integral_equation`: DLMF 29.8.5–29.8.6 for `Ec^{2m}_ν`.
+* `Real.lameEck_odd_integral_equation`: DLMF 29.8.7 for `Ec^{2m+1}_ν`.
+* `Real.lameEsk_odd_integral_equation`: DLMF 29.8.8 for `Es^{2m+1}_ν`.
+* `Real.lameEsk_even_integral_equation`: DLMF 29.8.9 for `Es^{2m+2}_ν`.
+
+## Implementation notes
+
+DLMF writes the kernel as the Ferrers function `𝖯_ν`, but the arguments `x` of 29.8.1 and
+`y = dn(z) dn(z₁)/k'` of 29.8.6 are not confined to `[-1, 1]` (for real `z, z₁`, `k' ≤ dn ≤ 1`
+gives `y ∈ [k', 1/k']`, which straddles `1`). The function meant is the hypergeometric function
+`F(-ν, ν + 1; 1; (1 - x)/2)`, which is the Legendre function `P_ν` of §14.3(ii) and agrees with
+`𝖯_ν` on `(-1, 1)`; it is `DLMF.Legendre.legendreP ν` (complex, principal branch, the real
+kernel being its restriction). With this reading 29.8.2, 29.8.5 and 29.8.7–29.8.9 have been
+verified numerically for `ν = 2.7`, `k = 0.6` (ratios `1 ± 10⁻¹²`), the second solution `w₂`
+being computed by shooting. The Wronskian of two solutions of 29.2.1 is constant (no
+first-derivative term), so it is evaluated at `0`.
 -/
 
 @[expose] public section

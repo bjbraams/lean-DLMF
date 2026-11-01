@@ -16,6 +16,14 @@ public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 Change-of-variable coordinates used by uniform (turning-point and Temme-type) asymptotic
 expansions, as real analysis on `ℝ`.
 
+## Main definitions
+
+* `dblZero_airyAvg`: the weighted average `K(x) = ∫₀¹ τ^{1/2} √(p(x₀ + (x - x₀)τ)) dτ`.
+* `dblZero_airyCoord`: the Airy-type (Langer) coordinate `ζ(x) = (x - x₀) ((3/2) K(x))^{2/3}`
+  attached to `f(x) = (x - x₀) p(x)`.
+
+## Main results
+
 * `AnalyticAt.dblZero_integral_smul_comp_mul`, `AnalyticAt.dblZero_integral_smul_comp_sub`:
   for `q` analytic at `x₀` and any weight `w` integrable on `[0, 1]`, the weighted average
   `x ↦ ∫₀¹ w(τ) q(x₀ + (x - x₀) τ) dτ` is analytic at `x₀` (termwise integration of the power

@@ -7932,7 +7932,7 @@ The full build passes (10,349 jobs) and `git diff --check` is clean.
   path-integral logarithms for absolutely continuous paths, the logarithm/exponential
   inequality cutoffs and the generalized exponential and logarithm.
   LogExpIntegrals 9 → 6 (three dilogarithm integrals). New Mathlib-only module
-  `DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean`.
+  `DLMFMathlib/Analysis/Complex/TrigSeriesExtension.lean`.
 - Lambert W 43 → 20: uniqueness of the branch family (via a strip-counting
   argument at z = 1), coefficient recurrences, the inverse equation, all-order
   derivatives, primitives, real principal-branch facts, the Maclaurin series of W,
@@ -8313,7 +8313,7 @@ Combinatorics 157 → 95, NumberTheory 97 → 65 (the three Ramanujan congruence
   24.15.6, 8, 11, 12; 24.16.1, 24.16.2, 24.16.10; several §24.12 zero statements.
 - **Chapter 25.** 25.2.8–10 (Euler–Maclaurin form of ζ by integration by parts against B̃ₚ and the
   identity theorem); 25.4.5 and with it 25.6.13–14; 25.6.15–19; 25.5.1–4, 25.5.8–9. A new fully proved
-  module `DLMF/Zeta/Q25bLerchContinuation.lean` continues the Lerch series Σ zⁿ/(a+n)^s to
+  module `DLMF/Zeta/LerchContinuation.lean` continues the Lerch series Σ zⁿ/(a+n)^s to
   ℂ \ [1, ∞) with uniqueness and an integral representation, so `polylog` and `lerchPhi` no longer
   rest on admitted existence theorems; then 25.12.2–6, 25.12.11, 25.12.16, 25.14.2, 25.14.3 (third
   part), 25.14.5, 25.11.1, 11–14, 16, 22, 24, 25, and the trivial-zero description of §25.15(ii).
@@ -8322,7 +8322,7 @@ Combinatorics 157 → 95, NumberTheory 97 → 65 (the three Ramanujan congruence
   26.7.3–5, 26.7.8; 26.5.2 and the Catalan path count; 26.6.1 and Delannoy path counts; 26.4.2,
   26.4.7; all twelve entries of the twelvefold way (Table 26.17.1); 26.18.2, 26.18.4; 26.11.3, 4, 6;
   26.16.1; 26.15.2, 4, 5, 7; 26.14.9, 14; 26.13.4; most of §26.9 (26.9.3, 5–8). New Mathlib-only file
-  `DLMFMathlib/Combinatorics/Q26bSurjections.lean` (surjection counts, quotients of maps).
+  `DLMFMathlib/Combinatorics/Surjections.lean` (surjection counts, quotients of maps).
 - **Chapter 27.** All of `DirichletSeries` (27.4), `Inversion` (27.5) and `DivisorSums` (27.6–27.7,
   Lambert series); multiplicativity of d_k and Jordan's J_k; character orthogonality, primitivity,
   finite Fourier expansion, Ramanujan sums 27.10.5, Gauss sums; Korselt's criterion. The
@@ -8339,8 +8339,8 @@ Both were found by agents with a proved counterexample; recorded in the errata r
 
 ### Integration
 
-Coordinator: `DLMF.Zeta.Q25bLerchContinuation` added to the Zeta umbrella and
-`DLMFMathlib.Combinatorics.Q26bSurjections` to `DLMFMathlib.lean`; ledger status paragraphs and
+Coordinator: `DLMF.Zeta.LerchContinuation` added to the Zeta umbrella and
+`DLMFMathlib.Combinatorics.Surjections` to `DLMFMathlib.lean`; ledger status paragraphs and
 regenerated per-line statuses (idempotent); CREDITS entry. New cross-area imports: `DLMF.Zeta.IntegerArguments`
 imports `DLMF.BernoulliEuler.IntegralsSums`; `DLMF.BernoulliEuler.RelatedNumbers` imports
 `DLMF.Combinatorics.Stirling`.
@@ -8382,7 +8382,7 @@ Ramanujan congruences in `DLMF/Partitions.lean` remain). Project-wide 1,115 → 
 - **Chapter 25.** 25.2.3 (alternating series, so `riemannZeta_eq_alternating` is fully proved),
   25.2.5 (Stieltjes sequence); 25.5.5–6, 25.5.17–19 (digamma/polygamma integrals); 25.6.6–8 (25.6.8
   from the project's central-binomial series), 25.6.20; 25.8.1, 25.8.9. A new fully proved module
-  `DLMF/Zeta/R25bHurwitzContinuation.lean` continues `hurwitzZetaComplex` by a one-interval
+  `DLMF/Zeta/HurwitzContinuation.lean` continues `hurwitzZetaComplex` by a one-interval
   Euler–Maclaurin argument (holomorphy in s and in a, residue at s = 1) and proves the bridge
   `r25b_hurwitzZetaComplex_mathlib` to Mathlib's `hurwitzZeta`; with it 25.11.5–7, 25.11.15, 25.11.17, 25.11.41. Dirichlet L: L(χ̄, s̄) = conj L(χ, s) by the
   identity theorem, giving the corrected 25.15(ii) symmetry and `LFunction_zero_of_ne_one`.
@@ -8391,7 +8391,7 @@ Ramanujan congruences in `DLMF/Partitions.lean` remain). Project-wide 1,115 → 
   excedance characterizations of §26.14(i); §26.13 (inversion number = minimal number of adjacent
   transpositions); §26.9(i) boxed partitions as lattice paths, 26.9.9. Finpartition counts by S(n, k)
   and Bell numbers, 26.4.8, 26.8.19, 26.8.23; partition identities 26.10.2 (first equality), 26.10.3,
-  26.10.5–7, 26.10.9, 26.10.11. New Mathlib-only file `DLMFMathlib/Combinatorics/R26aFinpartition.lean`.
+  26.10.5–7, 26.10.9, 26.10.11. New Mathlib-only file `DLMFMathlib/Combinatorics/Finpartition.lean`.
 - **Chapter 27.** p(5) = 7, 27.14.3, the pentagonal and σ recursions 27.14.6–7, the τ generating
   series 27.14.18; character Fourier expansions and Gauss sums of primitive characters; Legendre's
   sieve for π(x); the elementary partial sums 27.11.4, 27.11.6–7; g(2) = 4, 27.13.5 and Mordell's
@@ -8413,8 +8413,8 @@ Both corrections rest on proved counterexamples; recorded in the errata report (
 
 ### Integration
 
-Coordinator: `DLMF.Zeta.R25bHurwitzContinuation` added to the Zeta umbrella;
-`DLMFMathlib.Combinatorics.R26aFinpartition` and `DLMFMathlib.RingTheory.R27PowerSeriesEval` added
+Coordinator: `DLMF.Zeta.HurwitzContinuation` added to the Zeta umbrella;
+`DLMFMathlib.Combinatorics.Finpartition` and `DLMFMathlib.RingTheory.R27PowerSeriesEval` added
 to `DLMFMathlib.lean`; the two statement corrections; ledger status paragraphs and regenerated
 per-line statuses (idempotent); CREDITS entry. New cross-area imports: `DLMF.Combinatorics.Permutations`
 imports `DLMF.BernoulliEuler.Explicit`; `DLMF.Zeta.IntegerArguments` imports `DLMF.Polylog.Dilog` and
@@ -8465,15 +8465,15 @@ No statement was changed and no statement was found false.
   entire; its Taylor coefficients by Tannery's theorem from 25.2.7); 25.5.13 (theta split of Mathlib's
   completed zeta); 25.8.2–4 and 25.8.8 (25.8.2–3 continued from Re s > 1 by the identity theorem);
   25.11.8, 25.11.9, Lerch's formula 25.11.18, 25.11.19, 25.11.27, 25.11.31, 25.11.38, 25.11.39;
-  Periodic 25.13.1 (Dirichlet test, new Mathlib-only module `DLMF/Zeta/S25bDirichletTest.lean`);
+  Periodic 25.13.1 (Dirichlet test, new Mathlib-only module `DLMF/Zeta/DirichletTest.lean`);
   Clausen 25.12.9. The definition `DLMF.Confluent.hurwitzZetaComplex` moved from
-  `DLMF/IncompleteGamma/ZerosIntegrals.lean` into the new `DLMF/Zeta/S25bHurwitzCore.lean` (same
+  `DLMF/IncompleteGamma/ZerosIntegrals.lean` into the new `DLMF/Zeta/HurwitzEulerMaclaurin.lean` (same
   name, namespace and body), which lets `ZerosIntegrals` close its admitted bridge
   `hurwitzZetaComplex_mathlib` from the round-2 continuation results.
 - **Chapter 26.** Lattice paths 26.6.2, 26.6.4–7, 26.6.9, 26.6.13–14 (Motzkin/Catalan, Delannoy
   and Schröder generating functions; new Mathlib-only modules `S26aQuadraticSeries` and
   `S26aSeriesTransform`); Touchard 26.5.5; the Stirling generating functions 26.8.8–9; 26.10.4 and
-  26.10.10 (staircase bijection, new `DLMF/Combinatorics/S26aStaircase.lean`) and the
+  26.10.10 (staircase bijection, new `DLMF/Combinatorics/Staircase.lean`) and the
   Rogers–Ramanujan partition identities 26.10.13–14 (from the project's proved analytic identities
   in `DLMF/Bailey.lean`); MacMahon's box formula 26.12.4 and 26.12.21 (bounded semistandard
   tableaux and TauCeti's Jacobi bialternant), the generating function 26.12.20 and recurrence
@@ -8484,13 +8484,13 @@ No statement was changed and no statement was found false.
 
 ### Integration
 
-Coordinator: `DLMF.Zeta.S25bHurwitzCore` and `DLMF.Zeta.S25bDirichletTest` added to the Zeta umbrella,
-`DLMF.Combinatorics.S26aStaircase` to the Combinatorics umbrella, and
-`DLMFMathlib.Combinatorics.S26aQuadraticSeries` and `S26aSeriesTransform` to `DLMFMathlib.lean`.
+Coordinator: `DLMF.Zeta.HurwitzEulerMaclaurin` and `DLMF.Zeta.DirichletTest` added to the Zeta umbrella,
+`DLMF.Combinatorics.Staircase` to the Combinatorics umbrella, and
+`DLMFMathlib.Combinatorics.QuadraticSeries` and `S26aSeriesTransform` to `DLMFMathlib.lean`.
 The agent's verbatim copy of the `hurwitzZetaComplex` body was replaced by moving the one definition;
 a duplicated proof of 24.6.9 in `Explicit.lean` was removed by moving `bernoulli_eq_explicit₉`
 before its use in 24.6.2 (statement and tag unchanged). New imports across areas:
-`DLMF.IncompleteGamma.ZerosIntegrals` imports `DLMF.Zeta.S25bHurwitzCore`;
+`DLMF.IncompleteGamma.ZerosIntegrals` imports `DLMF.Zeta.HurwitzEulerMaclaurin`;
 `DLMF.BernoulliEuler.Generalizations` imports `DLMF.Combinatorics.Stirling`;
 `DLMF.Combinatorics.PartitionIdentities` imports `DLMF.Bailey`; PlanePartitions and Permutations import
 TauCeti modules (CREDITS entry). Ledger status paragraphs and regenerated per-line statuses
@@ -8603,10 +8603,10 @@ local `ContinuousMap.coe_coe` patch (`TauCeti-4.36.patch`) is no longer needed. 
 projects build at the new pin.
 
 Two agents then proved, without statement changes:
-- q27b (Partitions.lean, new `DLMF/NumberTheory/T27bHecke.lean`): multiplicativity of τ
+- q27b (Partitions.lean, new `DLMF/NumberTheory/HeckeOperators.lean`): multiplicativity of τ
   (§27.14(vi)), the Hecke relation 27.14.19, and τ(n) ≡ σ₁₁(n) (mod 691) (27.14.20) from
   E₁₂ − E₆² = cΔ (Mathlib's dimension formula) and TauCeti's discriminant eigenform.
-- q27a (new `DLMFMathlib/NumberTheory/T27aPrimeNumberTheorem.lean`, Mathlib and TauCeti only):
+- q27a (new `DLMFMathlib/NumberTheory/PrimeNumberTheorem.lean`, Mathlib and TauCeti only):
   the bridge from TauCeti's prime ideal theorem for ℚ (height-one primes of 𝓞 ℚ counted by norm)
   to `Nat.primeCounting`, giving π(x) ~ x/log x (27.2.3), p_n ~ n log n (27.2.4, by inversion),
   27.12.1, θ(x) ~ x and ψ(x) ~ x, and from TauCeti's natural-density Chebotarev theorem the prime
@@ -8811,7 +8811,7 @@ Highlights:
   lattice ⟨2, 2τ⟩ (`P3jEisenstein`) and the matching eight Fourier series of 22.11. The two
   mixed-theta lemmas of Addition are now adapters over the Theta versions.
 - Weierstrass: existence of a period pair with given invariants via surjectivity of Klein's j
-  (new `DLMFMathlib/NumberTheory/ModularForms/P3wJSurjective`); Klein's j and λ as modular
+  (new `DLMFMathlib/NumberTheory/ModularForms/KleinJSurjective`); Klein's j and λ as modular
   functions, the eta product for λ, the Laurent series of ζ and the recursion 23.9.5, the
   half-period expansion 23.9.6, reality of ℘, the rhombic discriminant. Heun 31.2.9–12 (sn² as ℘,
   the Weierstrass form of Heun's equation).
@@ -8819,7 +8819,7 @@ Highlights:
   perturbation theory (`P3qJacobi` … `P3qCeSeGen`); 28.24.6–13, the Wronskian 28.20.21 (still
   through `mathieuNormalSegment_real`) and the integral representations 28.28.2–5.
 - Bessel: Graf's addition theorem 10.23.7 for J at integer order (`hasSum_besselJ_graf`, new
-  `DLMF/Bessel/P3mGraf`), stronger than DLMF (no |v e^{±iα}| < |u| restriction).
+  `DLMF/Bessel/GrafAddition`), stronger than DLMF (no |v e^{±iα}| < |u| restriction).
 - Lamé and spheroidal: existence of the spheroidal eigenvalues and of the normalized eigenfunction
   with simplicity and parity (§30.3(i), §30.4(i)); the zeros of the Lamé polynomials on both sides
   of the rectangle (§29.12(i), 29.12.9–10); the Weierstrass form of Lamé's equation 29.2.6–12.
@@ -9066,7 +9066,7 @@ moves, so the moves do not preserve several copies of the same foundation.
   an unqualified `sqrt (z^2 - 1)`, whose principal-branch behavior can differ.
 - **Power-series uniqueness:**
   [GeneralizedCalculus](DLMF/Hypergeometric/GeneralizedCalculus.lean), line 294,
-  and [TrigR4SeriesExtension](DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean),
+  and [TrigR4SeriesExtension](DLMFMathlib/Analysis/Complex/TrigSeriesExtension.lean),
   line 27, contain the same 23-line proof. The newer
   `Complex.eq_of_hasSum_mul_pow_ball` in
   [OfScalarsUnique](DLMFMathlib/Analysis/Analytic/OfScalarsUnique.lean), line 59, has
@@ -9326,7 +9326,7 @@ inside theorem names. Most central names such as `kummerM`, `besselY` and
   `ODE`, `MeasureTheory` and `Asymptotics`. However,
   [StieltjesRemainder](DLMFMathlib/Analysis/Asymptotics/StieltjesRemainder.lean), line 46,
   exports a family of `stRem_*` declarations at the root, and
-  [R27PowerSeriesEval](DLMFMathlib/RingTheory/R27PowerSeriesEval.lean), line 30, does the
+  [PowerSeriesEvaluation](DLMFMathlib/RingTheory/PowerSeriesEvaluation.lean), line 30, does the
   same with `r27_*`. A named Stieltjes-transform API and a predicate such as
   `PowerSeries.HasAbsEval`, with methods `.unique`, `.mul`, `.add`, would be easier
   to discover. Root-level general facts are legitimate; the concern is these coherent
@@ -9340,7 +9340,7 @@ inside theorem names. Most central names such as `kummerM`, `besselY` and
   replacements are `P1oEntireLinear` → `LinearEntire`, `P1oParamHolomorphic` →
   `LinearParameterHolomorphy`, `T27aPrimeNumberTheorem` → `PrimeNumberTheorem`,
   `P3wJSurjective` → `JInvariantSurjective`, and `R27PowerSeriesEval` →
-  `PowerSeries/AbsoluteEvaluation`. The prefixes happen to satisfy UpperCamelCase but
+  `PowerSeriesEvaluation`. The prefixes happen to satisfy UpperCamelCase but
   describe development history rather than mathematical contents.
 - `Gamma/IntegralRep.lean` specifically contains integrals of digamma and log Gamma,
   whereas `IntegralRepresentations.lean` covers DLMF §5.9. Rename the former to
@@ -9494,7 +9494,7 @@ Review validation at source commit `0ae4729`:
 - `DLMF/Elementary/LambertW.lean` — 1,821 lines.
 - `DLMF/ExpIntegrals/TransformTools.lean` — 1,815 lines.
 - `DLMF/Weierstrass/Basic.lean` — 1,778 lines.
-- `DLMF/Mathieu/Modified/P2mConnection.lean` — 1,764 lines.
+- `DLMF/Mathieu/Modified/CrossConnection.lean` — 1,764 lines.
 - `DLMF/IncompleteGamma/Representations.lean` — 1,747 lines.
 - `DLMF/Legendre/Zeros.lean` — 1,734 lines.
 - `DLMF/OrthogonalPolynomials/BoundsZeros.lean` — 1,729 lines.
@@ -9511,8 +9511,8 @@ Review validation at source commit `0ae4729`:
 - `DLMF/OrthogonalPolynomials/QFamilies.lean` — 1,585 lines.
 - `DLMF/Gamma/BarnesG.lean` — 1,580 lines.
 - `DLMF/Zeta/IntegralReps.lean` — 1,575 lines.
-- `DLMF/Mathieu/Modified/P2mRadial.lean` — 1,558 lines.
-- `DLMF/Spheroidal/P3lSpectrum.lean` — 1,558 lines.
+- `DLMF/Mathieu/Modified/RadialSeries.lean` — 1,558 lines.
+- `DLMF/Spheroidal/Spectrum.lean` — 1,558 lines.
 - `DLMF/JacobiElliptic/Basic.lean` — 1,540 lines.
 - `DLMF/ParabolicCylinder/Weber.lean` — 1,538 lines.
 - `DLMF/Weierstrass/Relations.lean` — 1,503 lines.
@@ -9748,3 +9748,106 @@ and the errata PDF rebuilds successfully.
 The ledger resolver now distinguishes exact qualified source names from tagged suffixes,
 so the continued incomplete-beta functions keep their own links rather than being redirected
 to the similarly named `Real` functions. All 25 ledgers regenerate idempotently.
+
+## Splitting the files at the length limit (2026-11-01)
+
+Following [the status review](reports/MathlibReview20261101.tex), the four files at or near the
+1,500-line limit are split along their mathematical sections. Each original module is kept as
+an umbrella that imports its pieces and keeps the original module docstring, so no importer
+changes. Declarations, names, namespaces, statements and proofs are moved verbatim; each piece
+has its own module docstring with a main-results list.
+
+- `MatrixArgument/GammaBeta` (1,500 lines): `GammaBeta/LaplaceTransform` (§35.2),
+  `CholeskyCoordinates`, `GammaIntegrals` (35.3.1, 35.3.2, 35.3.4 and the Laplace integrals over
+  `Ω`) and `BetaIntegrals` (35.3.3, 35.3.6–35.3.8).
+- `Zeta/Sums` (1,474): `Sums/ShiftedSeries` (25.8.1–25.8.3), `PowerSeries` (25.8.4–25.8.8) and
+  `OddEven` (25.8.9–25.8.10).
+- `QHypergeometric/BasicSummations` (1,463): `BasicSummations/OnePhiZero` (17.5.2–17.5.4 and the
+  product continuation), `QGauss` (17.5.5, 17.6.1–17.6.3) and `Heine` (17.6.4–17.6.29). The four
+  Heine-representation definitions move with their only users into `Heine`.
+- `QHypergeometric/Calculus` (1,427): `Calculus/QBinomial` (17.2.6–17.2.40), `QDerivative`
+  (17.2.41–17.2.44 and the limit `q → 1`) and `JacksonIntegral` (17.2.45–17.2.48). The
+  q-derivative and Jackson-integral definitions move into the corresponding pieces.
+
+The largest new file has 707 lines. No private declaration is used across pieces. Each piece
+keeps the original file's import list; `lake shake` suggestions were not applied.
+
+Validation: the full build passes 15,032 jobs; all 17 changed Lean files pass direct checks with
+both implicit-variable options disabled; the direct `sorry` counts per file family are unchanged
+(1, 0, 19, 0). The import survey reports no new two-way area pairs, forbidden foundational
+imports, missing modules or file-import cycles, and all Lean sources are at most 1,500 lines.
+Catalogue and ledger links into the moved declarations are remapped, and regeneration of all
+ledgers is idempotent.
+
+## Implicit binders, API generality and duplicates (2026-11-01)
+
+The follow-up work requested after [the status review](reports/MathlibReview20261101.tex).
+
+- Binder cleanup. Explicit arguments that every caller can infer from a hypothesis or the goal
+  are made implicit, and unused binders are removed, iterated to a fixpoint: two passes with
+  141 edits and five further iterations with 77 edits, after which no candidate remains. Seven
+  explicit binders are kept on purpose: the Wigner `factQ`/`invFactQ` `ofNat` lemmas, the four
+  Mathieu `hasDerivAt_{zero,one}_in_{t,z}` lemmas and `abs_two_mul_cos_two_mul_le_add_one`,
+  where the argument is used for rewriting or `simp` instantiation.
+- API generality. `PowerSeries.HasSumAt` is generalized from `ℂ` to an `R`-algebra `A`; the
+  multiplicative derivative operators `mulDerivMul` and `oneSubMulDerivMul` move to the root
+  namespace with general coefficient rings.
+- Duplicates. 55 exact copies of upstream (Mathlib or TauCeti) declarations are removed and
+  their users redirected; 10 pairs of project definitions with identical bodies are
+  consolidated into one canonical home (for example `NumberTheory.partitionsAtMost` into
+  `Combinatorics.partitionCountAtMostParts`). Ledger links to removed copies now point to the
+  upstream declarations. Left for review: single local copies of private upstream lemmas,
+  pairs whose bodies agree only after unfolding (`arctanCutPlane`/`arcsinhDomain`), and `cbinom`,
+  which could become `Ring.choose`.
+
+## Removing development-round names (2026-11-01)
+
+Declarations, files, tactic macros and section labels named after development rounds
+(`p22R1_…`, `q2t_…`, `ei19c_…`, `P3qCeSe`, …) are renamed in Mathlib style. The full map is in
+`reports/RenameMap20261101.tsv` (columns kind, old, new, note).
+
+- 5,223 declarations are renamed: 3,486 of them become `private` and 177 were private
+  already. A theorem is made private when it is untagged, carries no
+  attribute and is used only in its own module. Eleven such helpers stay public because a
+  public definition, instance or tactic macro in another module uses them.
+- Camel-case theorem names become snake case (`mittag_leffler`, `residue_theorem`,
+  `general_bailey_transform`, `IsPainleveVIOn.elliptic_form`, …), and single-letter helper
+  definitions get descriptive names (the q-Gamma `D`/`K`/`L`/`G`/`T` become `logPartialSum`,
+  …; Dixon's `H`/`Lh`/`P`/`K`/`Rh` become `wzCertificate`, …).
+- `ModularForm.p3wJ` becomes `ModularForm.kleinJ`; rewrites that could now resolve to
+  `DLMF.Weierstrass.kleinJ` are qualified.
+- 53 files are renamed (for example `P3qCeSe` → `SmallQCeSe`, `S25bHurwitzCore` →
+  `HurwitzEulerMaclaurin`, `T27aPrimeNumberTheorem` → `PrimeNumberTheorem`), with imports,
+  module docstrings and catalogue links updated.
+- Six primed duplicates of declarations available elsewhere are deleted and redirected.
+  Left for review: 22 public primed wrapper/proof pairs (mostly Mathieu `BesselSeries`,
+  `Connection` and `Integrals` forwarding to proof files), `strictMono_jacobiAmm'`, and some
+  private primed duplicates. Area prefixes such as `airyDer_`, `kzt_` and `legFS_` are not
+  round names and are kept.
+
+## Module docstrings in Mathlib style (2026-11-01)
+
+About 1,135 module docstrings are rewritten to the Mathlib layout: a title, a short
+introduction naming the functions, DLMF sections and conventions, then `Main definitions`,
+`Main results`, `Implementation notes` and `References` as applicable. History and process text
+(dates, rounds, admission counts, "added", "acquired") is removed; conventions, branch choices,
+statements stronger than DLMF, errata and references are kept. Umbrella files get a title and a
+sentence; the MathlibCoverage pointer files are unchanged. Errors found on the way are fixed
+(stale declaration names, wrong module pointers, wrong claims such as an unproved statement
+called stronger than DLMF), and errata notes are surfaced from declaration docstrings into the
+module docstrings. Declaration docstrings are untouched apart from one citation
+(`barnesGSucc_eq_Gamma_mul`: DLMF 5.17.1, not 5.17.2). Open declaration-docstring items: 48
+dated notes ("corrected 2026-10-22", "added on 2026-10-20") in 35 files, a copied docstring
+(`lzero_ext_count`), a docstring naming a missing hypothesis (`associatedP_cosh_integral`),
+citation mismatches (`sum_divisors_sq_dvd_moebius`, `mathieuSe_three_sub_isBigO` and
+siblings, a "5.13.?" in `Gamma_mul_one_add_cpow_neg`), and admitted statements whose
+docstrings do not say so (`det_hankel_*`, LambertW `exists_lambertBranchFamily`, three each in
+Mathieu `Noninteger/Properties`, Spheroidal `FerrersProperties` and Selberg `Applications`).
+
+Validation: the full build passes 15,032 jobs; `git diff --check` is clean; all 1,225 Lean
+sources are at most 1,500 lines. The import survey reports no forbidden foundational imports,
+missing modules or file-import cycles, and one new two-way area pair, AsymptoticApproximations
+↔ Zeta: `Zeta.Riemann` imports `AsymptoticApproximations.Integrals.Basic` (the consolidated
+`cbinom`), and `AsymptoticApproximations.Sums.PowerSums` imports `Zeta.Riemann`. The ledgers are
+regenerated from a fresh tag dump (10,697 entries); every link resolves and regeneration is
+idempotent.

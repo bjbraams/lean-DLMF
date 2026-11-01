@@ -20,6 +20,33 @@ paraboloidal wave functions `hc_p^m`, `hs_p^m` (28.31.16–28.31.24 and the asym
 behaviour). The limits 28.31.14–28.31.15 use the Mathieu functions `ce_m`, `se_m` and
 eigenvalues `a_m`, `b_m` of `DLMF.Mathieu.Basic` (real `q`).
 
+## Main definitions
+
+* `twoSidedSeq`: the two-sided sequence with `c_ℓ = a_ℓ` and `c_{-ℓ-1} = b_ℓ`.
+
+## Main results
+
+* `isWhittakerHillSolution_iff_isInceSolution`: reduction to Ince's equation
+  (DLMF 28.31.2–28.31.3).
+* `isInceSolution_cos_even_iff`, `isInceSolution_cos_odd_iff`, `isInceSolution_sin_odd_iff`,
+  `isInceSolution_sin_even_iff`: Fourier-series solutions and their recurrences
+  (DLMF 28.31.4–28.31.9).
+* `inceC_spec`, `inceS_spec`: the Ince polynomials and their eigenvalues
+  (DLMF 28.31.10–28.31.12).
+* `ince_tendsto_xi_zero`: limits as `ξ → 0` (DLMF 28.31.13).
+* `ince_tendsto_mathieu`: limit to Mathieu functions (DLMF 28.31.14–28.31.15).
+* `paraboloidal_isWhittakerHillSolution`: the differential equation of the paraboloidal wave
+  functions (DLMF 28.31.18).
+* `paraboloidalHc_neg_xi`, `paraboloidalHs_neg_xi`: change of sign of `ξ`
+  (DLMF 28.31.19–28.31.20).
+* `integral_paraboloidal_orthogonal`: orthogonality (DLMF 28.31.21).
+* `paraboloidalHc_double_orthogonal`, `paraboloidalHs_double_orthogonal`,
+  `paraboloidalHc_Hs_double_orthogonal`: double orthogonality (DLMF 28.31.22–28.31.24).
+* `paraboloidal_asymptotic_pos`, `paraboloidal_asymptotic_neg`: asymptotic behaviour
+  (§28.31(iii)), the second in corrected form.
+
+## Implementation notes
+
 The admissible indices are `m ≤ p`, `m ≡ p (mod 2)` (and `m ≥ 1` for `S_p^m`, `hs_p^m`), as in
 DLMF 28.31.10–28.31.11 (`m = 0, 1, …, n` with `p = 2n`, `2n + 1`, `2n + 2`).
 
@@ -33,10 +60,10 @@ the correct factors are `exp(¼ξ cos 2z) (sin z)^p` for `hc_p^m(z, -ξ)`, `hs_p
 (`ξ = 0.8`, `p = 2, 3, 4`, all `m`, `z = ½π + iy`, `y = 2, 3, 4`), the ratio
 `hc_p^m(z, -ξ) / (exp(¼ξ cos 2z) (sin z)^p)` converges (e.g. `-0.416, -0.472, -0.480` for
 `hc_2^0`) while the ratio with DLMF's factor `exp(¼ξ cos 2z) (cos z)^{-p-2}` grows like
-`e^{(2p+2)y}`. The corrected form is acquired (`paraboloidal_asymptotic_neg`).
+`e^{(2p+2)y}`. `paraboloidal_asymptotic_neg` states the corrected form.
 
-All other formulas of §28.31 were checked: 28.31.3 and the recurrences 28.31.6–28.31.9
-symbolically (sympy), and 28.31.13 and the reflection formulas 28.31.19–28.31.20 numerically
+The other formulas of §28.31 were checked: 28.31.3 and the recurrences 28.31.6–28.31.9
+symbolically, and 28.31.13 and the reflection formulas 28.31.19–28.31.20 numerically
 (finite eigenproblems for `p ≤ 6`, `ξ = 0.8`).
 -/
 
@@ -50,13 +77,13 @@ namespace DLMF.Mathieu
 /-! ### §28.31(i)–(ii) Whittaker–Hill and Ince equations -/
 
 /-- `cos 4z = 1 - 2 sin² 2z`. -/
-lemma m28b_cos_four (z : ℂ) : Complex.cos (4 * z) = 1 - 2 * Complex.sin (2 * z) ^ 2 := by
+private lemma cos_four_mul_eq_one_sub_two_mul_sin_sq (z : ℂ) : Complex.cos (4 * z) = 1 - 2 * Complex.sin (2 * z) ^ 2 := by
   rw [show (4 : ℂ) * z = 2 * (2 * z) by ring, Complex.cos_two_mul]
   have := Complex.sin_sq_add_cos_sq (2 * z)
   linear_combination (2 : ℂ) * this
 
 /-- The derivative of `-ξ cos(2z)/4`. -/
-lemma m28b_hasDerivAt_g (ξ z : ℂ) :
+private lemma hasDerivAt_neg_mul_cos_two_mul_div_four (ξ z : ℂ) :
     HasDerivAt (fun z => -(ξ * Complex.cos (2 * z)) / 4) (ξ * Complex.sin (2 * z) / 2) z := by
   have h2 : HasDerivAt (fun z : ℂ => 2 * z) 2 z := by
     simpa using (hasDerivAt_id z).const_mul (2 : ℂ)
@@ -64,7 +91,7 @@ lemma m28b_hasDerivAt_g (ξ z : ℂ) :
   convert this using 1; ring
 
 /-- The derivative of `ξ sin(2z)/2`. -/
-lemma m28b_hasDerivAt_g' (ξ z : ℂ) :
+private lemma hasDerivAt_mul_sin_two_mul_div_two (ξ z : ℂ) :
     HasDerivAt (fun z => ξ * Complex.sin (2 * z) / 2) (ξ * Complex.cos (2 * z)) z := by
   have h2 : HasDerivAt (fun z : ℂ => 2 * z) 2 z := by
     simpa using (hasDerivAt_id z).const_mul (2 : ℂ)
@@ -84,10 +111,10 @@ theorem isWhittakerHillSolution_iff_isInceSolution {k c ξ η p : ℂ}
   set g : ℂ → ℂ := fun z => -(ξ * Complex.cos (2 * z)) / 4
   set g' : ℂ → ℂ := fun z => ξ * Complex.sin (2 * z) / 2
   set E : ℂ → ℂ := fun z => Complex.exp (g z)
-  have hE : ∀ z, HasDerivAt E (E z * g' z) z := fun z => (m28b_hasDerivAt_g ξ z).cexp
+  have hE : ∀ z, HasDerivAt E (E z * g' z) z := fun z => (hasDerivAt_neg_mul_cos_two_mul_div_four ξ z).cexp
   have hF : ∀ z, HasDerivAt (fun z => Complex.exp (-g z)) (Complex.exp (-g z) * -g' z) z :=
-    fun z => (m28b_hasDerivAt_g ξ z).neg.cexp
-  have hg' : ∀ z, HasDerivAt g' (ξ * Complex.cos (2 * z)) z := m28b_hasDerivAt_g' ξ
+    fun z => (hasDerivAt_neg_mul_cos_two_mul_div_four ξ z).neg.cexp
+  have hg' : ∀ z, HasDerivAt g' (ξ * Complex.cos (2 * z)) z := hasDerivAt_mul_sin_two_mul_div_two ξ
   have hEF : ∀ z, E z * Complex.exp (-g z) = 1 := fun z => by
     simp only [E]; rw [← Complex.exp_add, add_neg_cancel, Complex.exp_zero]
   constructor
@@ -105,7 +132,7 @@ theorem isWhittakerHillSolution_iff_isInceSolution {k c ξ η p : ℂ}
     rw [hdw]
     have := (((hW z).sub ((hg' z).mul (hWd' z))).mul (hF z))
     convert this using 1
-    have h4 := m28b_cos_four z
+    have h4 := cos_four_mul_eq_one_sub_two_mul_sin_sq z
     have hwz : w z = W z * Complex.exp (-g z) := congrFun hw z
     rw [hwz]
     simp only [W, g', Pi.sub_apply, Pi.mul_apply]
@@ -122,7 +149,7 @@ theorem isWhittakerHillSolution_iff_isInceSolution {k c ξ η p : ℂ}
     rw [hdW]
     have := (((hw z).add ((hwd' z).mul (hg' z))).mul (hE z))
     convert this using 1
-    have h4 := m28b_cos_four z
+    have h4 := cos_four_mul_eq_one_sub_two_mul_sin_sq z
     simp only [g', Pi.mul_apply, Pi.add_apply]
     rw [h4]
     linear_combination (1/8 * w z * E z * (1 - 2 * Complex.sin (2 * z) ^ 2)) * hξ
@@ -132,7 +159,7 @@ theorem isWhittakerHillSolution_iff_isInceSolution {k c ξ η p : ℂ}
 
 /-- Subsequences `A_{2ℓ+b}` of entire Fourier coefficients decay faster than every
 exponential in `ℓ`. -/
-lemma p1b_summable_coeff {A : ℕ → ℂ} (hA : IsEntireFourierCoeff A) (b : ℕ) (K : ℝ) :
+private lemma summable_entireFourierCoeff_mul_exp {A : ℕ → ℂ} (hA : IsEntireFourierCoeff A) (b : ℕ) (K : ℝ) :
     Summable (fun ℓ : ℕ => ‖A (2 * ℓ + b)‖ * Real.exp (K * ℓ)) := by
   have hinj : Function.Injective (fun ℓ : ℕ => 2 * ℓ + b) := fun i j h => by
     simp only at h; omega
@@ -156,7 +183,7 @@ lemma p1b_summable_coeff {A : ℕ → ℂ} (hA : IsEntireFourierCoeff A) (b : �
         _ ≤ _ := by gcongr
 
 /-- Multiplying `∑ g_m e^{i(ν+2m)z}` by `e^{±2iz}` shifts the coefficients. -/
-lemma p1b_hasSum_shift {ν z X : ℂ} {g : ℤ → ℂ}
+private lemma hasSum_exp_series_shift {ν z X : ℂ} {g : ℤ → ℂ}
     (h : HasSum (fun m : ℤ => g m * Complex.exp (I * (ν + 2 * m) * z)) X) :
     HasSum (fun n : ℤ => g (n - 1) * Complex.exp (I * (ν + 2 * n) * z))
         (Complex.exp (2 * I * z) * X) ∧
@@ -175,7 +202,7 @@ lemma p1b_hasSum_shift {ν z X : ℂ} {g : ℤ → ℂ}
 /-- **Exponential-series solutions of Ince's equation**: for coefficients decaying faster than
 every exponential, `∑ c_n e^{i(ν+2n)z}` solves 28.31.3 iff
 `(η - (ν+2n)²) c_n + ½ξ(ν+2n-2-p) c_{n-1} - ½ξ(ν+2n+2+p) c_{n+1} = 0` for all `n`. -/
-lemma p1b_isInceSolution_series_iff {ξ η p ν : ℂ} {c : ℤ → ℂ}
+private lemma isInceSolution_exp_series_iff {ξ η p ν : ℂ} {c : ℤ → ℂ}
     (hb : ∀ K : ℝ, Summable (fun m : ℤ => ‖c m‖ * Real.exp (K * |(m : ℝ)|))) :
     IsInceSolution ξ η p (fun z => ∑' n : ℤ, c n * Complex.exp (I * (ν + 2 * n) * z)) ↔
       ∀ n : ℤ, (η - (ν + 2 * n) ^ 2) * c n + ξ * (ν + 2 * ((n : ℂ) - 1) - p) / 2 * c (n - 1)
@@ -188,10 +215,10 @@ lemma p1b_isInceSolution_series_iff {ξ η p ν : ℂ} {c : ℤ → ℂ}
   have h0 : (fun z => ∑' n : ℤ, c n * Complex.exp (I * (ν + 2 * n) * z)) = S 0 := by
     funext z; simp [hS, he]
   have hd : ∀ j z, HasDerivAt (S j) (S (j + 1) z) z := fun j z =>
-    p1b_hasDerivAt_series_of hb j z
+    hasDerivAt_tsum_exp_series_of_summable_exp hb j z
   have hderiv : deriv (S 0) = S 1 := funext fun z => (hd 0 z).deriv
   have hsum : ∀ j z, HasSum (fun m => c m * ((I * (ν + 2 * m)) ^ j * e m z)) (S j z) :=
-    fun j z => (p1b_summable_series_of hb j z).of_norm.hasSum
+    fun j z => (summable_exp_series_of_summable_exp hb j z).of_norm.hasSum
   -- the operator applied termwise
   have hL : ∀ z, HasSum (fun n => E n * e n z) (S 2 z + ξ * Complex.sin (2 * z) * S 1 z +
       (η - p * ξ * Complex.cos (2 * z)) * S 0 z) := by
@@ -200,8 +227,8 @@ lemma p1b_isInceSolution_series_iff {ξ η p ν : ℂ} {c : ℤ → ℂ}
     have h1' : HasSum (fun m => (c m * (I * (ν + 2 * m))) * e m z) (S 1 z) := by
       refine (hsum 1 z).congr_fun fun m => ?_; ring
     have h2' := hsum 2 z
-    obtain ⟨a1, b1⟩ := p1b_hasSum_shift h1'
-    obtain ⟨a0, b0⟩ := p1b_hasSum_shift h0'
+    obtain ⟨a1, b1⟩ := hasSum_exp_series_shift h1'
+    obtain ⟨a0, b0⟩ := hasSum_exp_series_shift h0'
     have H := ((h2'.add ((a1.sub b1).mul_left (ξ / (2 * I)))).add (h0'.mul_left η)).sub
       ((a0.add b0).mul_left (p * ξ / 2))
     have hsin : Complex.sin (2 * z) = (Complex.exp (2 * I * z) - Complex.exp (-(2 * I * z))) /
@@ -227,7 +254,7 @@ lemma p1b_isInceSolution_series_iff {ξ η p ν : ℂ} {c : ℤ → ℂ}
   -- summability of the coefficients `E`
   have hu : ∀ j : ℕ, Summable (fun m : ℤ => ‖(ν + 2 * m) ^ j * c m‖) := by
     intro j
-    refine (p1b_summable_series_of (ν := ν) hb j 0).congr fun m => ?_
+    refine (summable_exp_series_of_summable_exp (ν := ν) hb j 0).congr fun m => ?_
     simp [mul_pow, mul_comm]
   have hsh : ∀ (u : ℤ → ℝ), Summable u → Summable (fun n : ℤ => u (n - 1)) ∧
       Summable (fun n : ℤ => u (n + 1)) := fun u h =>
@@ -274,7 +301,7 @@ lemma p1b_isInceSolution_series_iff {ξ η p ν : ℂ} {c : ℤ → ℂ}
       have := (hL x).tsum_eq
       simp only [he] at this
       rw [this, hz]
-    have := p1b_integral_series_mul_exp (ν := ν) hEs n
+    have := integral_tsum_exp_series_mul_exp (ν := ν) hEs n
     simp only [hx, zero_mul, intervalIntegral.integral_zero] at this
     have hπ : (Real.pi : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
     exact (mul_eq_zero.mp this.symm).resolve_left hπ
@@ -292,34 +319,34 @@ lemma p1b_isInceSolution_series_iff {ξ η p ν : ℂ} {c : ℤ → ℂ}
     linear_combination -(hz z)
 
 /-- The two-sided sequence with `c_ℓ = a_ℓ` and `c_{-ℓ-1} = b_ℓ`. -/
-def p1bTwoSided (a b : ℕ → ℂ) : ℤ → ℂ := fun n => match n with
+def twoSidedSeq (a b : ℕ → ℂ) : ℤ → ℂ := fun n => match n with
   | Int.ofNat ℓ => a ℓ
   | Int.negSucc ℓ => b ℓ
 
 /-- `c_ℓ = a_ℓ` for `ℓ ≥ 0`. -/
-lemma p1bTwoSided_natCast (a b : ℕ → ℂ) (ℓ : ℕ) : p1bTwoSided a b ℓ = a ℓ := rfl
+private lemma twoSidedSeq_natCast (a b : ℕ → ℂ) (ℓ : ℕ) : twoSidedSeq a b ℓ = a ℓ := rfl
 
 /-- `c_{-ℓ-1} = b_ℓ`. -/
-lemma p1bTwoSided_neg (a b : ℕ → ℂ) (ℓ : ℕ) : p1bTwoSided a b (-(ℓ : ℤ) - 1) = b ℓ := by
+private lemma twoSidedSeq_neg_sub_one (a b : ℕ → ℂ) (ℓ : ℕ) : twoSidedSeq a b (-(ℓ : ℤ) - 1) = b ℓ := by
   rw [show -(ℓ : ℤ) - 1 = Int.negSucc ℓ by rw [Int.negSucc_eq]; ring]; rfl
 
 /-- Two-sided sequences built from sequences decaying faster than every exponential: decay,
 and the exponential series splits into its two halves. -/
-lemma p1b_twoSided {a b : ℕ → ℂ}
+private lemma summable_twoSidedSeq_and_hasSum {a b : ℕ → ℂ}
     (ha : ∀ K : ℝ, Summable (fun ℓ : ℕ => ‖a ℓ‖ * Real.exp (K * ℓ)))
     (hb : ∀ K : ℝ, Summable (fun ℓ : ℕ => ‖b ℓ‖ * Real.exp (K * ℓ))) (ν : ℂ) :
-    (∀ K : ℝ, Summable (fun m : ℤ => ‖p1bTwoSided a b m‖ * Real.exp (K * |(m : ℝ)|))) ∧
+    (∀ K : ℝ, Summable (fun m : ℤ => ‖twoSidedSeq a b m‖ * Real.exp (K * |(m : ℝ)|))) ∧
     ∀ z : ℂ, Summable (fun ℓ : ℕ => a ℓ * Complex.exp (I * (ν + 2 * ℓ) * z)) ∧
       Summable (fun ℓ : ℕ => b ℓ * Complex.exp (I * (ν + 2 * (-(ℓ : ℂ) - 1)) * z)) ∧
-      HasSum (fun n : ℤ => p1bTwoSided a b n * Complex.exp (I * (ν + 2 * n) * z))
+      HasSum (fun n : ℤ => twoSidedSeq a b n * Complex.exp (I * (ν + 2 * n) * z))
         (∑' ℓ : ℕ, a ℓ * Complex.exp (I * (ν + 2 * ℓ) * z) +
           ∑' ℓ : ℕ, b ℓ * Complex.exp (I * (ν + 2 * (-(ℓ : ℂ) - 1)) * z)) := by
   refine ⟨fun K => ?_, fun z => ?_⟩
   · refine Summable.of_nat_of_neg_add_one ?_ ?_
     · refine (ha K).congr fun ℓ => ?_
-      rw [p1bTwoSided_natCast]; push_cast; rw [abs_of_nonneg (by positivity)]
+      rw [twoSidedSeq_natCast]; push_cast; rw [abs_of_nonneg (by positivity)]
     · refine ((hb K).mul_left (Real.exp K)).congr fun ℓ => ?_
-      rw [show -((ℓ : ℤ) + 1) = -(ℓ : ℤ) - 1 by ring, p1bTwoSided_neg]
+      rw [show -((ℓ : ℤ) + 1) = -(ℓ : ℤ) - 1 by ring, twoSidedSeq_neg_sub_one]
       push_cast
       rw [show -((ℓ : ℝ)) - 1 = -((ℓ : ℝ) + 1) by ring, abs_neg,
         abs_of_nonneg (by positivity), mul_add, Real.exp_add]; ring_nf
@@ -330,7 +357,7 @@ lemma p1b_twoSided {a b : ℕ → ℂ}
     refine Summable.of_norm_bounded
       (((hd (2 * ‖z‖)).mul_left (Real.exp (‖ν‖ * ‖z‖) * Real.exp (2 * ‖z‖)))) fun ℓ => ?_
     rw [norm_mul]
-    have h1 := p1b_norm_pow_exp_le ν z (f ℓ) (le_refl ‖z‖) 0
+    have h1 := norm_pow_mul_exp_le ν z (f ℓ) (le_refl ‖z‖) 0
     simp only [pow_zero, one_mul, CharP.cast_eq_zero, add_zero] at h1
     have h2 : Real.exp (2 * ‖z‖ * |((f ℓ : ℤ) : ℝ)|) ≤
         Real.exp (2 * ‖z‖) * Real.exp (2 * ‖z‖ * ℓ) := by
@@ -351,13 +378,13 @@ lemma p1b_twoSided {a b : ℕ → ℂ}
   refine ⟨sa, sb, ?_⟩
   refine HasSum.of_nat_of_neg_add_one (sa.hasSum.congr_fun fun ℓ => ?_)
     (sb.hasSum.congr_fun fun ℓ => ?_)
-  · rw [p1bTwoSided_natCast]; push_cast; rfl
-  · rw [show -((ℓ : ℤ) + 1) = -(ℓ : ℤ) - 1 by ring, p1bTwoSided_neg]; push_cast; rfl
+  · rw [twoSidedSeq_natCast]; push_cast; rfl
+  · rw [show -((ℓ : ℤ) + 1) = -(ℓ : ℤ) - 1 by ring, twoSidedSeq_neg_sub_one]; push_cast; rfl
 
 /-- Halved subsequences of entire Fourier coefficients. -/
-lemma p1b_summable_coeff_mul {A : ℕ → ℂ} (hA : IsEntireFourierCoeff A) (b : ℕ) (κ : ℂ)
+private lemma summable_const_mul_entireFourierCoeff_mul_exp {A : ℕ → ℂ} (hA : IsEntireFourierCoeff A) (b : ℕ) (κ : ℂ)
     (K : ℝ) : Summable (fun ℓ : ℕ => ‖κ * A (2 * ℓ + b)‖ * Real.exp (K * ℓ)) :=
-  ((p1b_summable_coeff hA b K).mul_left ‖κ‖).congr fun ℓ => by rw [norm_mul]; ring
+  ((summable_entireFourierCoeff_mul_exp hA b K).mul_left ‖κ‖).congr fun ℓ => by rw [norm_mul]; ring
 
 /-- **Even Fourier-series solutions, `s = 0`** (DLMF 28.31.4, 28.31.6):
 `w(z) = ∑_ℓ A_{2ℓ} cos(2ℓz)` solves Ince's equation iff
@@ -380,16 +407,16 @@ theorem isInceSolution_cos_even_iff {ξ η p : ℂ} {A : ℕ → ℂ} (hA : IsEn
       · subst h; simp
       · rw [norm_mul]; simp only [add_zero]
         have : ‖(1 / 2 : ℂ)‖ = 1 / 2 := by norm_num
-        rw [this]; linarith [norm_nonneg (A (2 * ℓ))]) (p1b_summable_coeff hA 0 K)
-  have hb := p1b_summable_coeff_mul hA 2 (1 / 2)
-  have tw := p1b_twoSided ha hb 0
-  set c := p1bTwoSided a b
+        rw [this]; linarith [norm_nonneg (A (2 * ℓ))]) (summable_entireFourierCoeff_mul_exp hA 0 K)
+  have hb := summable_const_mul_entireFourierCoeff_mul_exp hA 2 (1 / 2)
+  have tw := summable_twoSidedSeq_and_hasSum ha hb 0
+  set c := twoSidedSeq a b
   have hc0 : c ((0 : ℕ) : ℤ) = A 0 := rfl
   have hcp : ∀ j : ℕ, c ((j : ℤ) + 1) = 1 / 2 * A (2 * j + 2) := fun j => by
     rw [show (j : ℤ) + 1 = ((j + 1 : ℕ) : ℤ) by push_cast; ring]
     show a (j + 1) = _
     simp only [a, Nat.add_one_ne_zero, ↓reduceIte]; ring_nf
-  have hcn : ∀ ℓ : ℕ, c (-(ℓ : ℤ) - 1) = 1 / 2 * A (2 * ℓ + 2) := p1bTwoSided_neg a b
+  have hcn : ∀ ℓ : ℕ, c (-(ℓ : ℤ) - 1) = 1 / 2 * A (2 * ℓ + 2) := twoSidedSeq_neg_sub_one a b
   have hfun : (fun z => ∑' ℓ : ℕ, A (2 * ℓ) * Complex.cos ((2 * ℓ : ℕ) * z)) =
       fun z => ∑' n : ℤ, c n * Complex.exp (I * ((0 : ℂ) + 2 * n) * z) := by
     funext z
@@ -410,7 +437,7 @@ theorem isInceSolution_cos_even_iff {ξ η p : ℂ} {A : ℕ → ℂ} (hA : IsEn
     rw [sa'.tsum_add sb]
     simp [a]
     ring
-  rw [hfun, p1b_isInceSolution_series_iff tw.1]
+  rw [hfun, isInceSolution_exp_series_iff tw.1]
   have hcm1 : c (((0 : ℕ) : ℤ) - 1) = 1 / 2 * A 2 := by simpa using hcn 0
   have hcp0 : c (((0 : ℕ) : ℤ) + 1) = 1 / 2 * A 2 := by simpa using hcp 0
   constructor
@@ -476,11 +503,11 @@ theorem isInceSolution_cos_odd_iff {ξ η p : ℂ} {A : ℕ → ℂ} (hA : IsEnt
       ∀ ℓ : ℕ, 1 ≤ ℓ → (p / 2 - ℓ + 1 / 2) * ξ * A (2 * ℓ - 1) +
         ((2 * ℓ + 1) ^ 2 - η) * A (2 * ℓ + 1) + (p / 2 + ℓ + 3 / 2) * ξ * A (2 * ℓ + 3) = 0 := by
   set a : ℕ → ℂ := fun ℓ => 1 / 2 * A (2 * ℓ + 1)
-  have ha := p1b_summable_coeff_mul hA 1 (1 / 2)
-  have tw := p1b_twoSided ha ha 1
-  set c := p1bTwoSided a a
+  have ha := summable_const_mul_entireFourierCoeff_mul_exp hA 1 (1 / 2)
+  have tw := summable_twoSidedSeq_and_hasSum ha ha 1
+  set c := twoSidedSeq a a
   have hc1 : ∀ ℓ : ℕ, c ℓ = 1 / 2 * A (2 * ℓ + 1) := fun ℓ => rfl
-  have hc2 : ∀ ℓ : ℕ, c (-(ℓ : ℤ) - 1) = 1 / 2 * A (2 * ℓ + 1) := p1bTwoSided_neg a a
+  have hc2 : ∀ ℓ : ℕ, c (-(ℓ : ℤ) - 1) = 1 / 2 * A (2 * ℓ + 1) := twoSidedSeq_neg_sub_one a a
   have hfun : (fun z => ∑' ℓ : ℕ, A (2 * ℓ + 1) * Complex.cos ((2 * ℓ + 1 : ℕ) * z)) =
       fun z => ∑' n : ℤ, c n * Complex.exp (I * ((1 : ℂ) + 2 * n) * z) := by
     funext z
@@ -488,7 +515,7 @@ theorem isInceSolution_cos_odd_iff {ξ η p : ℂ} {A : ℕ → ℂ} (hA : IsEnt
     rw [H.tsum_eq, ← sa.tsum_add sb]
     congr 1; funext ℓ
     rw [Complex.cos]; push_cast; ring_nf
-  rw [hfun, p1b_isInceSolution_series_iff tw.1]
+  rw [hfun, isInceSolution_exp_series_iff tw.1]
   have hcp : ∀ ℓ : ℕ, c ((ℓ : ℤ) + 1) = 1 / 2 * A (2 * ℓ + 3) := fun ℓ => by
     rw [show (ℓ : ℤ) + 1 = ((ℓ + 1 : ℕ) : ℤ) by push_cast; ring, hc1]; ring_nf
   have hcm : ∀ j : ℕ, c (((j + 1 : ℕ) : ℤ) - 1) = 1 / 2 * A (2 * j + 1) := fun j => by
@@ -552,12 +579,12 @@ theorem isInceSolution_sin_odd_iff {ξ η p : ℂ} {B : ℕ → ℂ} (hB : IsEnt
         ((2 * ℓ + 1) ^ 2 - η) * B (2 * ℓ + 1) + (p / 2 + ℓ + 3 / 2) * ξ * B (2 * ℓ + 3) = 0 := by
   set a : ℕ → ℂ := fun ℓ => -(I / 2) * B (2 * ℓ + 1)
   set b : ℕ → ℂ := fun ℓ => I / 2 * B (2 * ℓ + 1)
-  have ha := p1b_summable_coeff_mul hB 1 (-(I / 2))
-  have hb := p1b_summable_coeff_mul hB 1 (I / 2)
-  have tw := p1b_twoSided ha hb 1
-  set c := p1bTwoSided a b
+  have ha := summable_const_mul_entireFourierCoeff_mul_exp hB 1 (-(I / 2))
+  have hb := summable_const_mul_entireFourierCoeff_mul_exp hB 1 (I / 2)
+  have tw := summable_twoSidedSeq_and_hasSum ha hb 1
+  set c := twoSidedSeq a b
   have hc1 : ∀ ℓ : ℕ, c ℓ = -(I / 2) * B (2 * ℓ + 1) := fun ℓ => rfl
-  have hc2 : ∀ ℓ : ℕ, c (-(ℓ : ℤ) - 1) = I / 2 * B (2 * ℓ + 1) := p1bTwoSided_neg a b
+  have hc2 : ∀ ℓ : ℕ, c (-(ℓ : ℤ) - 1) = I / 2 * B (2 * ℓ + 1) := twoSidedSeq_neg_sub_one a b
   have hfun : (fun z => ∑' ℓ : ℕ, B (2 * ℓ + 1) * Complex.sin ((2 * ℓ + 1 : ℕ) * z)) =
       fun z => ∑' n : ℤ, c n * Complex.exp (I * ((1 : ℂ) + 2 * n) * z) := by
     funext z
@@ -565,7 +592,7 @@ theorem isInceSolution_sin_odd_iff {ξ η p : ℂ} {B : ℕ → ℂ} (hB : IsEnt
     rw [H.tsum_eq, ← sa.tsum_add sb]
     congr 1; funext ℓ
     rw [Complex.sin]; push_cast; ring_nf
-  rw [hfun, p1b_isInceSolution_series_iff tw.1]
+  rw [hfun, isInceSolution_exp_series_iff tw.1]
   have hcp : ∀ ℓ : ℕ, c ((ℓ : ℤ) + 1) = -(I / 2) * B (2 * ℓ + 3) := fun ℓ => by
     rw [show (ℓ : ℤ) + 1 = ((ℓ + 1 : ℕ) : ℤ) by push_cast; ring, hc1]; ring_nf
   have hcm : ∀ j : ℕ, c (((j + 1 : ℕ) : ℤ) - 1) = -(I / 2) * B (2 * j + 1) := fun j => by
@@ -640,16 +667,16 @@ theorem isInceSolution_sin_even_iff {ξ η p : ℂ} {B : ℕ → ℂ} (hB : IsEn
       split_ifs with h
       · simp
       · rw [norm_mul, norm_neg, hI2]; simp only [add_zero]
-        linarith [norm_nonneg (B (2 * ℓ))]) (p1b_summable_coeff hB 0 K)
-  have hb := p1b_summable_coeff_mul hB 2 (I / 2)
-  have tw := p1b_twoSided ha hb 0
-  set c := p1bTwoSided a b
+        linarith [norm_nonneg (B (2 * ℓ))]) (summable_entireFourierCoeff_mul_exp hB 0 K)
+  have hb := summable_const_mul_entireFourierCoeff_mul_exp hB 2 (I / 2)
+  have tw := summable_twoSidedSeq_and_hasSum ha hb 0
+  set c := twoSidedSeq a b
   have hc0 : c ((0 : ℕ) : ℤ) = 0 := rfl
   have hcp : ∀ j : ℕ, c ((j : ℤ) + 1) = -(I / 2) * B (2 * j + 2) := fun j => by
     rw [show (j : ℤ) + 1 = ((j + 1 : ℕ) : ℤ) by push_cast; ring]
     show a (j + 1) = _
     simp only [a, Nat.add_one_ne_zero, ↓reduceIte]; ring_nf
-  have hcn : ∀ ℓ : ℕ, c (-(ℓ : ℤ) - 1) = I / 2 * B (2 * ℓ + 2) := p1bTwoSided_neg a b
+  have hcn : ∀ ℓ : ℕ, c (-(ℓ : ℤ) - 1) = I / 2 * B (2 * ℓ + 2) := twoSidedSeq_neg_sub_one a b
   have hfun : (fun z => ∑' ℓ : ℕ, B (2 * ℓ + 2) * Complex.sin ((2 * ℓ + 2 : ℕ) * z)) =
       fun z => ∑' n : ℤ, c n * Complex.exp (I * ((0 : ℂ) + 2 * n) * z) := by
     funext z
@@ -664,7 +691,7 @@ theorem isInceSolution_sin_even_iff {ξ η p : ℂ} {B : ℕ → ℂ} (hB : IsEn
     simp only [hg]
     rw [sa'.tsum_add sb]
     simp [a]
-  rw [hfun, p1b_isInceSolution_series_iff tw.1]
+  rw [hfun, isInceSolution_exp_series_iff tw.1]
   have hcm1 : c (((0 : ℕ) : ℤ) - 1) = I / 2 * B 2 := by simpa using hcn 0
   have hcp0 : c (((0 : ℕ) : ℤ) + 1) = -(I / 2) * B 2 := by simpa using hcp 0
   have hI : (I / 2 : ℂ) ≠ 0 := by simp [Complex.I_ne_zero]
@@ -834,7 +861,7 @@ theorem paraboloidalHs_neg_xi {n m : ℕ} (hm : m ≤ n) (z : ℂ) (ξ : ℝ) :
 
 /-- Orthogonality of `2π`-periodic solutions of the Whittaker–Hill equation 28.31.1 with
 different `A` (the Wronskian identity `(W₁W₂' - W₂W₁')' = (A₁ - A₂) W₁W₂`). -/
-lemma p1b_whittakerHill_orthogonal {A₁ A₂ B k c : ℂ} {W₁ W₂ : ℂ → ℂ}
+private lemma integral_whittakerHillSolution_mul_eq_zero {A₁ A₂ B k c : ℂ} {W₁ W₂ : ℂ → ℂ}
     (h₁ : IsWhittakerHillSolution A₁ B k c W₁) (h₂ : IsWhittakerHillSolution A₂ B k c W₂)
     (hA : A₁ ≠ A₂) (hp₁ : Function.Periodic W₁ (2 * Real.pi))
     (hp₂ : Function.Periodic W₂ (2 * Real.pi)) :
@@ -870,7 +897,7 @@ lemma p1b_whittakerHill_orthogonal {A₁ A₂ B k c : ℂ} {W₁ W₂ : ℂ → 
   exact (mul_eq_zero.mp hftc).resolve_left (sub_ne_zero.mpr hA)
 
 /-- Cosine Ince polynomials are `2π`-periodic. -/
-lemma p1b_periodic_cosPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceCosPoly p f) :
+private lemma periodic_of_isInceCosPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceCosPoly p f) :
     Function.Periodic f (2 * Real.pi) := by
   obtain ⟨A, hA⟩ := hf
   intro z
@@ -880,7 +907,7 @@ lemma p1b_periodic_cosPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceCosPoly p f) 
     Complex.cos_add_nat_mul_two_pi]
 
 /-- Sine Ince polynomials are `2π`-periodic. -/
-lemma p1b_periodic_sinPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceSinPoly p f) :
+private lemma periodic_of_isInceSinPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceSinPoly p f) :
     Function.Periodic f (2 * Real.pi) := by
   obtain ⟨B, hB⟩ := hf
   intro z
@@ -890,7 +917,7 @@ lemma p1b_periodic_sinPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceSinPoly p f) 
     Complex.sin_add_nat_mul_two_pi]
 
 /-- `e^{-ξ cos 2z / 4}` is `2π`-periodic. -/
-lemma p1b_periodic_expCos (ξ : ℂ) :
+private lemma periodic_exp_cos_two_mul (ξ : ℂ) :
     Function.Periodic (fun z : ℂ => Complex.exp (-(ξ * Complex.cos (2 * z)) / 4))
       (2 * Real.pi) := by
   intro z
@@ -918,11 +945,11 @@ theorem integral_paraboloidal_orthogonal {p m₁ m₂ : ℕ} (h₁ : m₁ ≤ p)
         Function.Periodic (fun z => paraboloidalHc p m z ξ) (2 * Real.pi) :=
       fun {m} hc z => by
         simp only [paraboloidalHc]
-        have e1 := p1b_periodic_expCos ξ z
-        have e2 := p1b_periodic_cosPoly hc z
+        have e1 := periodic_exp_cos_two_mul ξ z
+        have e2 := periodic_of_isInceCosPoly hc z
         simp only at e1 e2
         rw [e1, e2]
-    exact p1b_whittakerHill_orthogonal (paraboloidal_isWhittakerHillSolution h₁ h₁' ξ).1
+    exact integral_whittakerHillSolution_mul_eq_zero (paraboloidal_isWhittakerHillSolution h₁ h₁' ξ).1
       (paraboloidal_isWhittakerHillSolution h₂ h₂' ξ).1 hA (hper s1.1) (hper s2.1)
   · have s1 := inceS_spec k₁ h₁ h₁' ξ
     have s2 := inceS_spec k₂ h₂ h₂' ξ
@@ -933,11 +960,11 @@ theorem integral_paraboloidal_orthogonal {p m₁ m₂ : ℕ} (h₁ : m₁ ≤ p)
         Function.Periodic (fun z => paraboloidalHs p m z ξ) (2 * Real.pi) :=
       fun {m} hc z => by
         simp only [paraboloidalHs]
-        have e1 := p1b_periodic_expCos ξ z
-        have e2 := p1b_periodic_sinPoly hc z
+        have e1 := periodic_exp_cos_two_mul ξ z
+        have e2 := periodic_of_isInceSinPoly hc z
         simp only at e1 e2
         rw [e1, e2]
-    exact p1b_whittakerHill_orthogonal ((paraboloidal_isWhittakerHillSolution h₁ h₁' ξ).2 k₁)
+    exact integral_whittakerHillSolution_mul_eq_zero ((paraboloidal_isWhittakerHillSolution h₁ h₁' ξ).2 k₁)
       ((paraboloidal_isWhittakerHillSolution h₂ h₂' ξ).2 k₂) hA (hper s1.1) (hper s2.1)
 
 /-- **Double orthogonality of `hc`** (DLMF 28.31.22): for real `ξ ≠ 0` and admissible

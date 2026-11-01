@@ -14,8 +14,20 @@ public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 # Means (DLMF §1.2(iv))
 
 Properties of the arithmetic, geometric, harmonic and weighted power means defined in
-`DLMF/AlgebraicAnalytic/Algebra/Basic.lean`: the limits of `M(r)` as `r → ±∞` (1.2.23–1.2.24),
-`M(1) = A` and `M(-1) = H` for equal weights (1.2.25), and `M(r) → G` as `r → 0` (1.2.26).
+`DLMF/AlgebraicAnalytic/Algebra/Basic.lean`.
+
+## Main results
+
+* `inv_harmonicMean`: `1/H = (1/n)(1/a₁ + ⋯ + 1/aₙ)` (DLMF 1.2.19).
+* `weightedPowerMean_of_pos`, `weightedPowerMean_of_ne_zero`: the formula 1.2.21.
+* `tendsto_weightedPowerMean_atTop`, `tendsto_weightedPowerMean_atBot`: the limits of `M(r)` as
+  `r → ±∞` (DLMF 1.2.23, 1.2.24).
+* `weightedPowerMean_one`, `weightedPowerMean_neg_one`: `M(1) = A` and `M(-1) = H` for equal
+  weights (DLMF 1.2.25).
+* `tendsto_weightedPowerMean_zero`, `tendsto_weightedPowerMean_zero_geometricMean`:
+  `M(r) → G` as `r → 0` (DLMF 1.2.26).
+
+## Implementation notes
 
 The limits 1.2.23–1.2.24 and 1.2.26 are proved for arbitrary positive weights `p_j` with
 `∑ p_j = 1`; for 1.2.26 the limit is then the weighted geometric mean `∏ a_j^{p_j}`, which is
@@ -53,7 +65,7 @@ theorem weightedPowerMean_of_ne_zero (p : ι → ℝ) {a : ι → ℝ} (ha : ∀
   rw [weightedPowerMean, ite_eq_right hr, ite_eq_right (fun h => this h.2)]
 
 /-- Helper: `c ^ (1/r) → 1` as `r → ∞`, for `c > 0`. -/
-lemma g1a_tendsto_rpow_one_div {c : ℝ} (hc : 0 < c) :
+private lemma tendsto_rpow_one_div_atTop {c : ℝ} (hc : 0 < c) :
     Tendsto (fun r : ℝ => c ^ (1 / r)) atTop (𝓝 1) := by
   have h : Tendsto (fun r : ℝ => 1 / r) atTop (𝓝 0) := by
     simpa only [one_div] using tendsto_inv_atTop_zero
@@ -63,16 +75,16 @@ lemma g1a_tendsto_rpow_one_div {c : ℝ} (hc : 0 < c) :
 
 /-- Helper: for positive weights `w` and nonnegative `c` with a maximal entry `c i₀`,
 `(∑ w_i c_i^r)^{1/r} → c i₀` as `r → ∞`. -/
-theorem g1a_tendsto_sum_rpow_atTop {w c : ι → ℝ} (hw : ∀ i, 0 < w i) (hc : ∀ i, 0 ≤ c i)
+theorem tendsto_weighted_sum_rpow_rpow_inv_atTop {w c : ι → ℝ} (hw : ∀ i, 0 < w i) (hc : ∀ i, 0 ≤ c i)
     {i₀ : ι} (hi₀ : ∀ i, c i ≤ c i₀) :
     Tendsto (fun r : ℝ => (∑ i, w i * c i ^ r) ^ (1 / r)) atTop (𝓝 (c i₀)) := by
   set W := ∑ i, w i with hW
   have hWpos : 0 < W := lt_of_lt_of_le (hw i₀)
     (single_le_sum (fun i _ => (hw i).le) (mem_univ i₀))
   have hlow : Tendsto (fun r : ℝ => w i₀ ^ (1 / r) * c i₀) atTop (𝓝 (c i₀)) := by
-    simpa using (g1a_tendsto_rpow_one_div (hw i₀)).mul_const (c i₀)
+    simpa using (tendsto_rpow_one_div_atTop (hw i₀)).mul_const (c i₀)
   have hupp : Tendsto (fun r : ℝ => W ^ (1 / r) * c i₀) atTop (𝓝 (c i₀)) := by
-    simpa using (g1a_tendsto_rpow_one_div hWpos).mul_const (c i₀)
+    simpa using (tendsto_rpow_one_div_atTop hWpos).mul_const (c i₀)
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le' hlow hupp ?_ ?_
   · filter_upwards [eventually_gt_atTop 0] with r hr
     have h1 : w i₀ * c i₀ ^ r ≤ ∑ i, w i * c i ^ r :=
@@ -102,7 +114,7 @@ theorem tendsto_weightedPowerMean_atTop [Nonempty ι] {p a : ι → ℝ} (hp : �
   have hsup : (⨆ i, a i) = a i₀ :=
     le_antisymm (ciSup_le hi₀) (le_ciSup (Set.finite_range a).bddAbove i₀)
   rw [hsup]
-  refine (g1a_tendsto_sum_rpow_atTop hp ha hi₀).congr' ?_
+  refine (tendsto_weighted_sum_rpow_rpow_inv_atTop hp ha hi₀).congr' ?_
   filter_upwards [eventually_gt_atTop 0] with r hr
   rw [weightedPowerMean_of_pos p a hr]
 
@@ -127,7 +139,7 @@ theorem tendsto_weightedPowerMean_atBot [Nonempty ι] {p a : ι → ℝ} (hp : �
   have hpos : ∀ i, 0 < a i := fun i =>
     lt_of_le_of_ne (ha i) (Ne.symm fun h => h0 (prod_eq_zero (mem_univ i) h))
   have hmax : ∀ i, (a i)⁻¹ ≤ (a i₀)⁻¹ := fun i => inv_anti₀ (hpos i₀) (hi₀ i)
-  have hT := (g1a_tendsto_sum_rpow_atTop hp (fun i => (inv_pos.2 (hpos i)).le) hmax).comp
+  have hT := (tendsto_weighted_sum_rpow_rpow_inv_atTop hp (fun i => (inv_pos.2 (hpos i)).le) hmax).comp
     tendsto_neg_atBot_atTop
   have hT' := hT.inv₀ (inv_pos.2 (hpos i₀)).ne'
   rw [inv_inv] at hT'

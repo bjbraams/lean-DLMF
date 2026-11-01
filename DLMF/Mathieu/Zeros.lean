@@ -7,20 +7,33 @@ module
 
 public import DLMF.Mathieu.SpectralExistence
 public import Mathlib.RingTheory.Polynomial.Hermite.Basic
-public import DLMFMathlib.Analysis.ODE.P2sOscillation
+public import DLMFMathlib.Analysis.ODE.Oscillation
 public import DLMF.Mathieu.Properties
 
 /-!
-# Zeros of the Mathieu functions (DLMF §28.9)
+# Zeros of the Mathieu functions
 
-For real `q`, each of `ce_{2n}`, `se_{2n+1}`, `ce_{2n+1}`, `se_{2n+2}` has exactly `n` zeros in
+This file states the results of DLMF §28.9 on the zeros of `ce_n(z, q)`, `se_n(z, q)`. For real
+`q`, each of `ce_{2n}`, `se_{2n+1}`, `ce_{2n+1}`, `se_{2n+2}` has exactly `n` zeros in
 `0 < z < π/2`, depending continuously on `q`; as `q → ∞` they approach the zeros of
 `He_{2n}(q^{1/4}(π - 2z))` (resp. `He_{2n+1}`). For `q > 0` there are also purely imaginary
 zeros, and none in the strip `|ℜz| < π/2` off the two axes.
 
+## Main results
+
+* `mathieu_zeros_count`: the number of zeros in `(0, π/2)`.
+* `mathieuCe_even_zeros_continuous`, `mathieuSe_odd_zeros_continuous`,
+  `mathieuCe_odd_zeros_continuous`, `mathieuSe_even_zeros_continuous`: the zeros are continuous
+  functions of real `q`.
+* `mathieu_zeros_large_q_even`, `mathieu_zeros_large_q_odd`: the zeros for large `q`.
+* `mathieu_imaginary_zeros`: infinitely many purely imaginary zeros for `q > 0`.
+* `mathieu_zeros_strip`: no other zeros in the strip `|ℜz| < π/2`.
+
+## Implementation notes
+
 DLMF's further remark that the purely imaginary zeros "correspond uniquely" to those of
 `J_m(2√q cos z)` and are "asymptotically equal as `q → 0` and `|ℑz| → ∞`" is too imprecise to
-be stated faithfully and is not acquired; the existence of infinitely many purely imaginary
+be stated faithfully and is not formalized; the existence of infinitely many purely imaginary
 zeros is.
 -/
 
@@ -43,10 +56,10 @@ theorem mathieu_zeros_count (n : ℕ) (q : ℝ) :
     intro m x; simp [mathieuCe, (mathieuCeZero_pos m q).ne']
   have hse : ∀ m (x : ℝ), mathieuSe m x q = 0 ↔ mathieuWII (mathieuB m q) q x = 0 := by
     intro m x; simp [mathieuSe, (mathieuSeDerivZero_pos m q).ne']
-  have e1 := p2s_zeros_A (2 * n) q
-  have e2 := p2s_zeros_B (n := 2 * n + 1) (by omega) q
-  have e3 := p2s_zeros_A (2 * n + 1) q
-  have e4 := p2s_zeros_B (n := 2 * n + 2) (by omega) q
+  have e1 := encard_zeros_mathieuWI_mathieuA (2 * n) q
+  have e2 := encard_zeros_mathieuWII_mathieuB (n := 2 * n + 1) (by omega) q
+  have e3 := encard_zeros_mathieuWI_mathieuA (2 * n + 1) q
+  have e4 := encard_zeros_mathieuWII_mathieuB (n := 2 * n + 2) (by omega) q
   rw [show 2 * n / 2 = n by omega] at e1
   rw [show (2 * n + 1 - 1) / 2 = n by omega] at e2
   rw [show (2 * n + 1) / 2 = n by omega] at e3
@@ -111,7 +124,7 @@ theorem mathieu_zeros_large_q_odd (n : ℕ) {t : ℝ} (ht : 0 < t)
 
 /-- Along the imaginary axis a solution of Mathieu's equation solves the modified equation:
 `f(y) = c w(iy)` has `f'(y) = i c w'(iy)` and `f'' = -(2q cosh 2y - a) f`. -/
-lemma p2s_hasDerivAt_imag {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w) (c : ℂ)
+private lemma hasDerivAt_along_imaginary_axis {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w) (c : ℂ)
     (y : ℝ) :
     HasDerivAt (fun y : ℝ => c * w (y * I)) (c * (I * deriv w (y * I))) y ∧
       HasDerivAt (fun y : ℝ => c * (I * deriv w (y * I)))
@@ -129,7 +142,7 @@ lemma p2s_hasDerivAt_imag {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a
 
 /-- For real `a`, `q`, a solution with `f = c w(i·)` real data at `0` (`f(0)`, `f'(0)` real) is
 real on `ℝ` and has infinitely many positive zeros when `q > 0`. -/
-lemma p2s_infinite_imag_zeros {a q : ℝ} (hq : 0 < q) {w : ℂ → ℂ}
+private lemma infinite_zeros_imaginary_axis {a q : ℝ} (hq : 0 < q) {w : ℂ → ℂ}
     (h : IsMathieuSolution a q w) (c : ℂ) (h0 : (starRingEnd ℂ) (c * w 0) = c * w 0)
     (h1 : (starRingEnd ℂ) (c * (I * deriv w 0)) = c * (I * deriv w 0)) :
     {y : ℝ | 0 < y ∧ c * w (y * I) = 0}.Infinite := by
@@ -139,11 +152,11 @@ lemma p2s_infinite_imag_zeros {a q : ℝ} (hq : 0 < q) {w : ℂ → ℂ}
   have hd : ∀ y : ℝ, HasDerivAt (fun y : ℝ => c * w (y * I)) (c * (I * deriv w (y * I))) y ∧
       HasDerivAt (fun y : ℝ => c * (I * deriv w (y * I))) (((-P y : ℝ) : ℂ) * (c * w (y * I))) y :=
     fun y => by
-      obtain ⟨k1, k2⟩ := p2s_hasDerivAt_imag h c y
+      obtain ⟨k1, k2⟩ := hasDerivAt_along_imaginary_axis h c y
       refine ⟨k1, k2.congr_deriv ?_⟩
       rw [hPc]; push_cast; ring
   have hPcont : Continuous fun y => -P y := by simp only [P]; fun_prop
-  have hreal := ODE.p2s_conj_eq_of_linear_ode hPcont hd (t₀ := 0) (by simpa using h0)
+  have hreal := ODE.conj_eq_of_linear_ode hPcont hd (t₀ := 0) (by simpa using h0)
     (by simpa using h1)
   have hre : ∀ y : ℝ, c * w (y * I) = ((c * w (y * I)).re : ℂ) := fun y =>
     (Complex.conj_eq_iff_re.mp (hreal y).1).symm
@@ -162,25 +175,25 @@ lemma p2s_infinite_imag_zeros {a q : ℝ} (hq : 0 < q) {w : ℂ → ℂ}
     refine tendsto_atTop_mono (fun y => ?_) h2
     simp only [P, Real.cosh_eq]
     nlinarith [Real.exp_pos (-(2 * y))]
-  refine (ODE.p2s_infinite_zeros_of_tendsto_atTop hPt hv hv').mono ?_
+  refine (ODE.infinite_pos_zeros_of_tendsto_atTop hPt hv hv').mono ?_
   intro y hy
   exact ⟨hy.1, by rw [hre y, hy.2, Complex.ofReal_zero]⟩
 
 /-- **Purely imaginary zeros** (DLMF §28.9): for `q > 0`, `ce_m(·, q)` and `se_m(·, q)`
 (`m ≥ 1` for `se`) have infinitely many purely imaginary zeros. Proved: on the imaginary axis
 they solve `v'' + (2q cosh 2y - a) v = 0` with real data, and the coefficient tends to `+∞`
-(Sturm comparison, `ODE.p2s_infinite_zeros_of_tendsto_atTop`). -/
+(Sturm comparison, `ODE.infinite_pos_zeros_of_tendsto_atTop`). -/
 @[dlmf 28.9]
 theorem mathieu_imaginary_zeros (m : ℕ) {q : ℝ} (hq : 0 < q) :
     {y : ℝ | 0 < y ∧ mathieuCe m (y * I) q = 0}.Infinite ∧
       (m ≠ 0 → {y : ℝ | 0 < y ∧ mathieuSe m (y * I) q = 0}.Infinite) := by
   refine ⟨?_, fun _ => ?_⟩
   · obtain ⟨hs, h0, h1⟩ := mathieuWI_spec (mathieuA m q) q
-    exact p2s_infinite_imag_zeros hq hs (mathieuCeZero m q) (by simp [h0, Complex.conj_ofReal])
+    exact infinite_zeros_imaginary_axis hq hs (mathieuCeZero m q) (by simp [h0, Complex.conj_ofReal])
       (by simp [h1])
   · obtain ⟨hs, h0, h1⟩ := mathieuWII_spec (mathieuB m q) q
     set d : ℂ := (mathieuSeDerivZero m q : ℂ)
-    have hinf := p2s_infinite_imag_zeros hq hs (d * -I) (by simp [h0])
+    have hinf := infinite_zeros_imaginary_axis hq hs (d * -I) (by simp [h0])
       (by rw [h1, show d * -I * (I * 1) = d by linear_combination (-d) * Complex.I_sq]
           simp [d, Complex.conj_ofReal])
     refine hinf.mono ?_

@@ -8,17 +8,37 @@ module
 public import DLMF.QHypergeometric.BasicSummations
 
 /-!
-# q-elementary functions and Carlitz polynomials (DLMF §17.3)
+# `q`-elementary functions and Carlitz polynomials (DLMF §17.3)
 
-DLMF scales the two q-exponentials by 1−q. Their product definitions retain analytic
-continuation, while the series statements below retain their actual convergence domains.
-The existing Jackson calculus, shifted factorials and Gaussian polynomial are reused.
-The q-elementary series use the proved Heine/Euler q-series and Mathlib's even/odd
-HasSum decomposition; all norm bounds retain the original complex convergence domains.
+This file defines the `q`-exponential, `q`-sine and `q`-cosine functions of DLMF §17.3 and
+Carlitz's `q`-Bernoulli, Eulerian and `q`-Stirling expressions, and proves their series
+expansions and closed forms.
 
-The Carlitz Stirling polynomial is defined by its polynomial recurrence, so the values at
-q=0 and q=1 are removable extensions rather than totalized 0/0 values of the closed formula.
-The Eulerian expression likewise uses geometric polynomials at these removable points.
+## Main definitions
+
+* `qExp`, `qExpBig`: the scaled little and big `q`-exponentials (DLMF 17.3.1–17.3.2).
+* `qSin`, `qSinBig`, `qCos`, `qCosBig`: the `q`-sines and `q`-cosines (DLMF 17.3.3–17.3.6).
+* `qBernoulli`: Carlitz's `q`-Bernoulli expression (DLMF 17.3.7).
+* `qEulerian`, `qStirlingSecond`: Carlitz's Eulerian polynomial and second-kind `q`-Stirling
+  polynomial.
+
+## Main results
+
+* `qExp_hasSum`, `qExpBig_hasSum`: the series of the `q`-exponentials (DLMF 17.3.1–17.3.2).
+* `qSin_hasSum`, `qSinBig_hasSum`, `qCos_hasSum`, `qCosBig_hasSum`: the series of the
+  `q`-sines and `q`-cosines (DLMF 17.3.3–17.3.6).
+* `qEulerian_closed`, `qStirling_closed`: the closed forms DLMF 17.3.8–17.3.9.
+* `qEulerian_polynomial`, `qStirling_polynomial`, `qBernoulli_polynomial_in_qpow`: polynomial
+  structure of the Carlitz expressions.
+
+## Implementation notes
+
+DLMF scales the two `q`-exponentials by `1 - q`. Their product definitions retain analytic
+continuation, while the series statements retain their actual complex convergence domains.
+The Carlitz `q`-Stirling polynomial is defined by its polynomial recurrence, so the values at
+`q = 0` and `q = 1` are removable extensions rather than totalized `0/0` values of the closed
+formula. The Eulerian expression likewise uses geometric polynomials at these removable
+points.
 -/
 
 @[expose] public noncomputable section
@@ -226,10 +246,10 @@ theorem qCosBig_hasSum {q : ℂ} (hq : ‖q‖<1) (x : ℂ) : HasSum (fun n : �
     ring
   · simp [qCosBig]
 
-section qaR4_elementary_helpers
+section ElementaryHelpers
 open Polynomial
 /-- The integer triangular number is nonnegative. -/
-lemma qaR4_tri_nonneg (n : ℤ) : 0≤DLMF.QSeries.TripleProduct.tri n := by
+private lemma tri_nonneg (n : ℤ) : 0≤DLMF.QSeries.TripleProduct.tri n := by
   have h := DLMF.QSeries.TripleProduct.tri_mul_two n
   have : 0≤n*(n-1) := by
     rcases le_or_gt n 0 with h0 | h0
@@ -238,35 +258,35 @@ lemma qaR4_tri_nonneg (n : ℤ) : 0≤DLMF.QSeries.TripleProduct.tri n := by
   omega
 
 /-- The Gaussian polynomial as an element of `ℂ[X]`. -/
-noncomputable def qaR4_qBinomPoly : ℕ → ℕ → Polynomial ℂ
+noncomputable def qBinomPoly : ℕ → ℕ → Polynomial ℂ
   | _, 0 => 1
   | 0, _+1 => 0
-  | n+1, k+1 => qaR4_qBinomPoly n k+X^(k+1)*qaR4_qBinomPoly n (k+1)
+  | n+1, k+1 => qBinomPoly n k+X^(k+1)*qBinomPoly n (k+1)
 
 /-- Evaluation of the Gaussian polynomial. -/
-lemma qaR4_qBinomPoly_eval (q : ℂ) (n k : ℕ) : (qaR4_qBinomPoly n k).eval q=qBinom q n k := by
+private lemma eval_qBinomPoly (q : ℂ) (n k : ℕ) : (qBinomPoly n k).eval q=qBinom q n k := by
   induction n generalizing k with
-  | zero => cases k <;> simp [qaR4_qBinomPoly,qBinom]
+  | zero => cases k <;> simp [qBinomPoly,qBinom]
   | succ n ih =>
     cases k with
-    | zero => simp [qaR4_qBinomPoly]
-    | succ k => simp [qaR4_qBinomPoly,qBinom_succ_succ,ih]
+    | zero => simp [qBinomPoly]
+    | succ k => simp [qBinomPoly,qBinom_succ_succ,ih]
 
 /-- The second-kind q-Stirling numbers as elements of `ℂ[X]`. -/
-noncomputable def qaR4_qStirlingPoly : ℕ → ℕ → Polynomial ℂ
+noncomputable def qStirlingPoly : ℕ → ℕ → Polynomial ℂ
   | 0,0 => 1
   | 0,_+1 => 0
   | _+1,0 => 0
-  | m+1,s+1 => qaR4_qStirlingPoly m s+(∑ k∈range (s+1), X^k)*qaR4_qStirlingPoly m (s+1)
+  | m+1,s+1 => qStirlingPoly m s+(∑ k∈range (s+1), X^k)*qStirlingPoly m (s+1)
 
 /-- The unnormalized Carlitz sum `∑(-1)^j q^{C(j,2)}[s,j](1-q^{s-j})^m`. -/
-noncomputable def qaR4_carlitzG (q : ℂ) (m s : ℕ) : ℂ :=
+noncomputable def carlitzSum (q : ℂ) (m s : ℕ) : ℂ :=
   ∑ j∈range (s+1), (-1:ℂ)^j*q^(j.choose 2)*qBinom q s j*(1-q^(s-j))^m
 
 /-- The recursion of the Carlitz sum. -/
-lemma qaR4_carlitzG_succ (q : ℂ) (m s : ℕ) :
-    qaR4_carlitzG q (m+1) (s+1)=(1-q^(s+1))*(qaR4_carlitzG q m (s+1)+q^s*qaR4_carlitzG q m s) := by
-  unfold qaR4_carlitzG
+private lemma carlitzSum_succ_succ (q : ℂ) (m s : ℕ) :
+    carlitzSum q (m+1) (s+1)=(1-q^(s+1))*(carlitzSum q m (s+1)+q^s*carlitzSum q m s) := by
+  unfold carlitzSum
   have hsplit : ∀ j∈range (s+1+1), (-1:ℂ)^j*q^(j.choose 2)*qBinom q (s+1) j*(1-q^(s+1-j))^(m+1)=
       (1-q^(s+1))*((-1:ℂ)^j*q^(j.choose 2)*qBinom q (s+1) j*(1-q^(s+1-j))^m)-
       (-1:ℂ)^j*q^(j.choose 2)*q^(s+1-j)*((1-q^j)*qBinom q (s+1) j)*(1-q^(s+1-j))^m := by
@@ -283,7 +303,7 @@ lemma qaR4_carlitzG_succ (q : ℂ) (m s : ℕ) :
       -((1-q^(s+1))*q^s*((-1:ℂ)^i*q^(i.choose 2)*qBinom q s i*(1-q^(s-i))^m)) := by
     intro i hi
     have his : i≤s := Nat.lt_succ_iff.mp (mem_range.mp hi)
-    rw [qaR4_qBinom_absorb q s i,show s+1-(i+1)=s-i by omega]
+    rw [one_sub_pow_mul_qBinom_succ q s i,show s+1-(i+1)=s-i by omega]
     have e : q^(i.choose 2+i)*q^(s-i)=q^(i.choose 2)*q^s := by
       rw [← pow_add,← pow_add]; congr 1; omega
     rw [show (i+1).choose 2=i.choose 2+i by rw [Nat.choose_succ_succ',Nat.choose_one_right]; ring]
@@ -291,14 +311,14 @@ lemma qaR4_carlitzG_succ (q : ℂ) (m s : ℕ) :
   rw [sum_congr rfl hterm,sum_neg_distrib,← mul_sum]
   ring
 
-end qaR4_elementary_helpers
+end ElementaryHelpers
 
 /-- The closed form of Carlitz's Eulerian polynomial for `q ≠ 1` (DLMF 17.3.E8). -/
 @[dlmf 17.3.E8]
 theorem qEulerian_closed {q : ℂ} (hq1 : q≠1) (m s : ℕ) : qEulerian m s q=q^(DLMF.QSeries.TripleProduct.tri ((s:ℤ)-m)+DLMF.QSeries.TripleProduct.tri s)*(∑ j∈range (s+1), (-1:ℂ)^j*q^(j.choose 2)*qBinom q (m+1) j*(1-q^(s-j))^m/(1-q)^m) := by
   unfold qEulerian
   have hn : 0≤DLMF.QSeries.TripleProduct.tri ((s:ℤ)-m)+DLMF.QSeries.TripleProduct.tri s :=
-    add_nonneg (qaR4_tri_nonneg _) (qaR4_tri_nonneg _)
+    add_nonneg (tri_nonneg _) (tri_nonneg _)
   rw [← zpow_natCast,Int.toNat_of_nonneg hn]
   congr 1
   apply sum_congr rfl
@@ -316,26 +336,26 @@ theorem qEulerian_closed {q : ℂ} (hq1 : q≠1) (m s : ℕ) : qEulerian m s q=q
 @[dlmf 17.3.E9]
 theorem qStirling_closed {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (m s : ℕ) : qStirlingSecond q m s=q^(-(s.choose 2:ℤ))*(1-q)^s/qPochhammer q q s*(∑ j∈range (s+1), (-1:ℂ)^j*q^(j.choose 2)*qBinom q s j*(1-q^(s-j))^m/(1-q)^m) := by
   rw [← sum_div]
-  change _=q^(-(s.choose 2:ℤ))*(1-q)^s/qPochhammer q q s*(qaR4_carlitzG q m s/(1-q)^m)
+  change _=q^(-(s.choose 2:ℤ))*(1-q)^s/qPochhammer q q s*(carlitzSum q m s/(1-q)^m)
   have hq1 : (1:ℂ)-q≠0 := one_sub_ne_zero_of_norm_lt_one hq
   induction m generalizing s with
   | zero =>
     cases s with
-    | zero => simp [qStirlingSecond,qaR4_carlitzG]
+    | zero => simp [qStirlingSecond,carlitzSum]
     | succ s =>
       have h := qPochhammer_eq_sum_qBinom 1 q (s+1)
       rw [qPochhammer_succ',sub_self,zero_mul] at h
       simp only [one_pow,mul_one] at h
-      simp only [qStirlingSecond,qaR4_carlitzG,pow_zero,mul_one]
+      simp only [qStirlingSecond,carlitzSum,pow_zero,mul_one]
       rw [show ∑ j∈range (s+1+1), (-1:ℂ)^j*q^(j.choose 2)*qBinom q (s+1) j=
         ∑ k∈range (s+1+1), qBinom q (s+1) k*(-1)^k*q^(k.choose 2) from
           sum_congr rfl fun k _ => by ring,← h]
       simp
   | succ m ih =>
     cases s with
-    | zero => simp [qStirlingSecond,qaR4_carlitzG]
+    | zero => simp [qStirlingSecond,carlitzSum]
     | succ s =>
-      rw [qStirlingSecond,ih,ih,qaR4_carlitzG_succ,geom_sum_eq (fun h => by simp [h] at hq)]
+      rw [qStirlingSecond,ih,ih,carlitzSum_succ_succ,geom_sum_eq (fun h => by simp [h] at hq)]
       have hqs := qPochhammer_self_ne_zero hq s
       have hqn : 1-q*q^s≠0 := by simpa [pow_succ,mul_comm] using qPochhammerInf_pow_succ_ne_zero hq s
       have hc : (s+1).choose 2=s.choose 2+s := by rw [Nat.choose_succ_succ',Nat.choose_one_right]; ring
@@ -345,8 +365,8 @@ theorem qStirling_closed {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (m s : ℕ) : 
       simp only [zpow_natCast]
       have hq1' : q-1≠0 := fun h => hq1 (by linear_combination -h)
       rw [pow_succ q s] at *
-      generalize qaR4_carlitzG q m (s+1) = A
-      generalize qaR4_carlitzG q m s = B
+      generalize carlitzSum q m (s+1) = A
+      generalize carlitzSum q m s = B
       generalize qPochhammer q q s = P at hqs ⊢
       field_simp
       ring
@@ -355,19 +375,19 @@ theorem qStirling_closed {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (m s : ℕ) : 
 theorem qEulerian_polynomial (m s : ℕ) : ∃ P : Polynomial ℂ, ∀ q : ℂ, qEulerian m s q=P.eval q := by
   open Polynomial in
   refine ⟨X^((DLMF.QSeries.TripleProduct.tri ((s:ℤ)-m)+DLMF.QSeries.TripleProduct.tri s).toNat)*
-    ∑ j∈range (s+1), C ((-1:ℂ)^j)*X^(j.choose 2)*qaR4_qBinomPoly (m+1) j*
+    ∑ j∈range (s+1), C ((-1:ℂ)^j)*X^(j.choose 2)*qBinomPoly (m+1) j*
       (∑ k∈range (s-j), X^k)^m,fun q => ?_⟩
-  simp [qEulerian,eval_finsetSum,qaR4_qBinomPoly_eval]
+  simp [qEulerian,eval_finsetSum,eval_qBinomPoly]
 
 /-- Carlitz's second-kind q-Stirling number is a polynomial in `q`. -/
 theorem qStirling_polynomial (m s : ℕ) : ∃ P : Polynomial ℂ, ∀ q : ℂ, qStirlingSecond q m s=P.eval q := by
-  refine ⟨qaR4_qStirlingPoly m s,fun q => ?_⟩
+  refine ⟨qStirlingPoly m s,fun q => ?_⟩
   induction m generalizing s with
-  | zero => cases s <;> simp [qaR4_qStirlingPoly,qStirlingSecond]
+  | zero => cases s <;> simp [qStirlingPoly,qStirlingSecond]
   | succ m ih =>
     cases s with
-    | zero => simp [qaR4_qStirlingPoly,qStirlingSecond]
-    | succ s => simp [qaR4_qStirlingPoly,qStirlingSecond,ih,Polynomial.eval_finsetSum]
+    | zero => simp [qStirlingPoly,qStirlingSecond]
+    | succ s => simp [qStirlingPoly,qStirlingSecond,ih,Polynomial.eval_finsetSum]
 
 /-- Carlitz's q-Bernoulli expression `β_n(x,q)` is a polynomial of degree at most `n` in `q^x`. -/
 theorem qBernoulli_polynomial_in_qpow {q : ℂ} (n : ℕ) : ∃ P : Polynomial ℂ, P.natDegree≤n ∧ ∀ x : ℂ, qBernoulli n x q=P.eval (q^x) := by

@@ -11,10 +11,34 @@ public import DLMF.IncompleteGamma.SpecialValues
 /-!
 # Series, recurrences and derivatives, DLMF §§8.7–8.8
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs.
+Series expansions of the incomplete Gamma functions (DLMF §8.7), their recurrence relations
+and derivatives (DLMF §8.8), and the upper function on the logarithmic plane at nonpositive
+integral parameters.
+
+## Main results
+
+* `scIncGamma_hasSum_alternating`: the alternating series DLMF 8.7.1.
+* `incompleteGamma_increment_series`: the increment series DLMF 8.7.2.
+* `upperIncGamma_hasSum_alternating`, `upperIncGamma_hasSum_exponential`: DLMF 8.7.3.
+* `lowerIncGamma_besselI_series`, `scIncGamma_sphericalI_series`,
+  `upperIncGamma_laguerre_series`: the Bessel, spherical Bessel and Laguerre series
+  DLMF 8.7.4–8.7.6.
+* `incompleteGamma_threeTerm`: the three-term recurrence DLMF 8.8.3.
+* `lowerIncGamma_shift_up`, `lowerIncGamma_shift_down`, `upperIncGamma_shift_up`,
+  `upperIncGamma_shift_down`: the shift formulas DLMF 8.8.7–8.8.10.
+* `scIncGamma_deriv_parameter_zero`: the parameter derivative DLMF 8.8.14.
+* `lowerIncGamma_iteratedDeriv_scaled_power`, `upperIncGamma_iteratedDeriv_scaled_power`,
+  `lowerIncGamma_iteratedDeriv_scaled_exp`, `scIncGamma_iteratedDeriv_scaled`,
+  `upperIncGamma_iteratedDeriv_scaled_exp`: the derivative formulas DLMF 8.8.15–8.8.19.
+* `upperIncGammaOnLog_zero`, `upperIncGammaOnLog_neg_nat_monodromy`,
+  `upperIncGammaOnLog_eq_upperIncGamma`, `hasDerivAt_upperIncGammaOnLog`: the upper function
+  on the logarithmic plane.
+
+## Implementation notes
+
+In DLMF 8.7.2 the whole segment from `x` to `x + y` must lie in the cut plane; with only
+`x + y` in the cut plane the identity fails. The series DLMF 8.7.5 is proved for every `a`,
+including the poles of `Γ(a)`, by continuity in `a`.
 -/
 
 @[expose] public noncomputable section
@@ -43,18 +67,18 @@ theorem scIncGamma_hasSum_alternating {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z 
 
 /-- Derivative of the exponential partial sum: `e_n' = e_n - z^n/n!`. -/
 theorem incrSer_hasDerivAt_expPartialSum (n : ℕ) (s : ℂ) :
-    HasDerivAt (expPartialSum n) (expPartialSum n s - s^n/(n.factorial : ℂ)) s := by
+    HasDerivAt (Elementary.expPartialSum n) (Elementary.expPartialSum n s - s^n/(n.factorial : ℂ)) s := by
   induction n with
   | zero =>
-    have : expPartialSum 0 = fun _ => 1 := by funext w; simp [expPartialSum]
+    have : Elementary.expPartialSum 0 = fun _ => 1 := by funext w; simp [Elementary.expPartialSum]
     rw [this]; simpa using hasDerivAt_const s (1:ℂ)
   | succ n ih =>
-    have he : expPartialSum (n+1) = fun w => expPartialSum n w + w^(n+1)/((n+1).factorial : ℂ) := by
-      funext w; simp [expPartialSum, Finset.sum_range_succ]
+    have he : Elementary.expPartialSum (n+1) = fun w => Elementary.expPartialSum n w + w^(n+1)/((n+1).factorial : ℂ) := by
+      funext w; simp [Elementary.expPartialSum, Finset.sum_range_succ]
     rw [he]
     have hp := (hasDerivAt_pow (n+1) s).div_const ((n+1).factorial : ℂ)
     refine (ih.add hp).congr_deriv ?_
-    simp only [expPartialSum, Finset.sum_range_succ, Nat.factorial_succ]
+    simp only [Elementary.expPartialSum, Finset.sum_range_succ, Nat.factorial_succ]
     have h1 : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     have h2 : ((n:ℂ)+1) ≠ 0 := by exact_mod_cast n.succ_ne_zero
     push_cast
@@ -63,7 +87,7 @@ theorem incrSer_hasDerivAt_expPartialSum (n : ℕ) (s : ℂ) :
 
 /-- `-n! e^{-s} e_n(s)` is a primitive of `s^n e^{-s}`. -/
 theorem incrSer_hasDerivAt_primitive (n : ℕ) (s : ℂ) :
-    HasDerivAt (fun w => -(n.factorial : ℂ)*(exp (-w)*expPartialSum n w)) (s^n*exp (-s)) s := by
+    HasDerivAt (fun w => -(n.factorial : ℂ)*(exp (-w)*Elementary.expPartialSum n w)) (s^n*exp (-s)) s := by
   have h := (((hasDerivAt_neg s).cexp).mul (incrSer_hasDerivAt_expPartialSum n s)).const_mul
     (-(n.factorial : ℂ))
   refine h.congr_deriv ?_
@@ -77,7 +101,7 @@ theorem incrSer_hasDerivAt_primitive (n : ℕ) (s : ℂ) :
 @[dlmf 8.7.E2]
 theorem incompleteGamma_increment_series {a x y : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hx : x ∈ slitPlane)
     (hxy : ∀ t ∈ Set.Icc (0:ℝ) 1, x + t * y ∈ slitPlane) (hy : ‖y‖ < ‖x‖) :
-    HasSum (fun n : ℕ => exp (-x)*x^(a-1)*poch (1-a) n/(-x)^n*(1-exp (-y)*expPartialSum n y)) (lowerIncGamma a (x+y)-lowerIncGamma a x) ∧ lowerIncGamma a (x+y)-lowerIncGamma a x=upperIncGamma a x-upperIncGamma a (x+y) := by
+    HasSum (fun n : ℕ => exp (-x)*x^(a-1)*poch (1-a) n/(-x)^n*(1-exp (-y)*Elementary.expPartialSum n y)) (lowerIncGamma a (x+y)-lowerIncGamma a x) ∧ lowerIncGamma a (x+y)-lowerIncGamma a x=upperIncGamma a x-upperIncGamma a (x+y) := by
   have hx0 : x ≠ 0 := slitPlane_ne_zero hx
   have hxy1 : x + y ∈ slitPlane := by simpa using hxy 1 ⟨zero_le_one, le_rfl⟩
   refine ⟨?_, ?_⟩
@@ -158,11 +182,11 @@ theorem incompleteGamma_increment_series {a x y : ℂ} (ha : ∀ n : ℕ, a ≠ 
     simp
   -- termwise integrals
   have hterm : ∀ n : ℕ, ∫ t in (0:ℝ)..1, u n t =
-      exp (-x)*x^(a-1)*poch (1-a) n/(-x)^n*(1-exp (-y)*expPartialSum n y) := by
+      exp (-x)*x^(a-1)*poch (1-a) n/(-x)^n*(1-exp (-y)*Elementary.expPartialSum n y) := by
     intro n
     set c : ℂ := exp (-x)*x^(a-1)*poch (1-a) n/(n.factorial : ℂ)/(-x)^n with hc
     have hd : ∀ t ∈ uIcc (0:ℝ) 1, HasDerivAt
-        (fun t:ℝ => c*(-(n.factorial : ℂ)*(exp (-(t*y))*expPartialSum n (t*y)))) (u n t) t := by
+        (fun t:ℝ => c*(-(n.factorial : ℂ)*(exp (-(t*y))*Elementary.expPartialSum n (t*y)))) (u n t) t := by
       intro t _
       have h1 : HasDerivAt (fun s:ℂ => s*y) y (t:ℂ) := by
         simpa using (hasDerivAt_id (t:ℂ)).mul_const y
@@ -178,8 +202,8 @@ theorem incompleteGamma_increment_series {a x y : ℂ} (ha : ∀ n : ℕ, a ≠ 
       ((by rw [hu]; fun_prop : Continuous (u n)).intervalIntegrable _ _)]
     rw [hc]
     have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-    have he0 : expPartialSum n 0 = 1 := by
-      simp [expPartialSum, Finset.sum_range_succ']
+    have he0 : Elementary.expPartialSum n 0 = 1 := by
+      simp [Elementary.expPartialSum, Finset.sum_range_succ']
     simp only [ofReal_one, one_mul, ofReal_zero, zero_mul, neg_zero, Complex.exp_zero, he0]
     field_simp
     ring
@@ -274,25 +298,25 @@ theorem serRec_sum_antidiagonal_neg_one_pow {n : ℕ} (hn : 1 ≤ n) :
     simp
   rw [this, ← hb, zero_div]
 
-/-- Formula under the stated hypotheses: `∑ p ∈ Finset.antidiagonal j, expPartialSum p.1
+/-- Formula under the stated hypotheses: `∑ p ∈ Finset.antidiagonal j, Elementary.expPartialSum p.1
 (-1)/((p.2)! : ℂ) = 1`. -/
 theorem serRec_sum_antidiagonal_expPartialSum (j : ℕ) :
-    ∑ p ∈ Finset.antidiagonal j, expPartialSum p.1 (-1)/((p.2)! : ℂ) = 1 := by
+    ∑ p ∈ Finset.antidiagonal j, Elementary.expPartialSum p.1 (-1)/((p.2)! : ℂ) = 1 := by
   induction j with
-  | zero => simp [expPartialSum]
+  | zero => simp [Elementary.expPartialSum]
   | succ j ih =>
     rw [Finset.Nat.sum_antidiagonal_succ]
-    have hsplit : ∀ p : ℕ × ℕ, expPartialSum (p.1+1) (-1)/((p.2)! : ℂ) =
-        expPartialSum p.1 (-1)/((p.2)! : ℂ) + (-1 : ℂ)^(p.1+1)/(((p.1+1))! * (p.2)!) := by
+    have hsplit : ∀ p : ℕ × ℕ, Elementary.expPartialSum (p.1+1) (-1)/((p.2)! : ℂ) =
+        Elementary.expPartialSum p.1 (-1)/((p.2)! : ℂ) + (-1 : ℂ)^(p.1+1)/(((p.1+1))! * (p.2)!) := by
       intro p
-      rw [expPartialSum, Finset.sum_range_succ, ← expPartialSum]
+      rw [Elementary.expPartialSum, Finset.sum_range_succ, ← Elementary.expPartialSum]
       have h1 : (((p.1+1))! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
       have h2 : ((p.2)! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
       field_simp
     simp only [hsplit, Finset.sum_add_distrib, ih]
     have h0 := serRec_sum_antidiagonal_neg_one_pow (n := j+1) (by omega)
     rw [Finset.Nat.sum_antidiagonal_succ] at h0
-    simp only [expPartialSum, zero_add, Finset.range_one, Finset.sum_singleton, pow_zero,
+    simp only [Elementary.expPartialSum, zero_add, Finset.range_one, Finset.sum_singleton, pow_zero,
       Nat.factorial_zero, Nat.cast_one, div_one, one_div] at h0 ⊢
     simp only [one_mul] at h0
     linear_combination h0
@@ -692,12 +716,12 @@ theorem scSph_series (a z : ℂ) :
   rw [← hval]
   exact hsT.hasSum
 
-/-- The series with terms `(fun n : ℕ => Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ)*expPartialSum n
+/-- The series with terms `(fun n : ℕ => Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ)*Elementary.expPartialSum n
 (-1)*(x : ℂ)^((n : ℂ)/2)*DLMF.Bessel.besselI (n+a) (2*Real.sqrt x))` converges to
 `(lowerIncGamma a x)`. -/
 @[dlmf 8.7.E4]
 theorem lowerIncGamma_besselI_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {x : ℝ} (hx : 0 < x) :
-    HasSum (fun n : ℕ => Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ)*expPartialSum n (-1)*(x : ℂ)^((n : ℂ)/2)*DLMF.Bessel.besselI (n+a) (2*Real.sqrt x)) (lowerIncGamma a x) := by
+    HasSum (fun n : ℕ => Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ)*Elementary.expPartialSum n (-1)*(x : ℂ)^((n : ℂ)/2)*DLMF.Bessel.besselI (n+a) (2*Real.sqrt x)) (lowerIncGamma a x) := by
   set r : ℂ := ((Real.sqrt x : ℝ) : ℂ) with hr
   have hr0 : r ≠ 0 := by simp only [hr]; exact_mod_cast (Real.sqrt_pos.mpr hx).ne'
   have hz : (2*r) ≠ 0 := mul_ne_zero two_ne_zero hr0
@@ -708,29 +732,29 @@ theorem lowerIncGamma_besselI_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {x :
     intro k; rw [pow_mul]; simp only [hr]; rw [← ofReal_pow, Real.sq_sqrt hx.le]
   -- summability of the Neumann coefficients
   set C : ℝ := ∑' i : ℕ, (1:ℝ)^i/(i)! with hC
-  have he : ∀ k : ℕ, ‖expPartialSum k (-1)‖ ≤ C := by
+  have he : ∀ k : ℕ, ‖Elementary.expPartialSum k (-1)‖ ≤ C := by
     intro k
     refine (norm_sum_le _ _).trans ?_
     have : ∀ i ∈ Finset.range (k+1), ‖(-1:ℂ)^i/(i.factorial : ℂ)‖ = (1:ℝ)^i/(i)! := by
       intro i _; simp
     rw [Finset.sum_congr rfl this]
     exact Summable.sum_le_tsum _ (fun i _ => by positivity) (Real.summable_pow_div_factorial 1)
-  have hsum : Summable fun k : ℕ => ‖expPartialSum k (-1)‖ * ‖2*r/2‖^(2*k) * (2^k/(k)!) := by
+  have hsum : Summable fun k : ℕ => ‖Elementary.expPartialSum k (-1)‖ * ‖2*r/2‖^(2*k) * (2^k/(k)!) := by
     refine Summable.of_nonneg_of_le (fun k => by positivity) (fun k => ?_)
       ((Real.summable_pow_div_factorial (2*x)).mul_left C)
     rw [hz2, hnr, pow_mul, Real.sq_sqrt hx.le, mul_pow]
     have := he k
-    calc ‖expPartialSum k (-1)‖ * x^k * (2^k/(k)!) ≤ C * x^k * (2^k/(k)!) := by gcongr
+    calc ‖Elementary.expPartialSum k (-1)‖ * x^k * (2^k/(k)!) ≤ C * x^k * (2^k/(k)!) := by gcongr
       _ = C * (2^k*x^k/(k)!) := by ring
-  have hN := DLMF.Bessel.hasSum_besselI_neumann hz a (fun k => expPartialSum k (-1))
+  have hN := DLMF.Bessel.hasSum_besselI_neumann hz a (fun k => Elementary.expPartialSum k (-1))
     (fun k => k) (fun k => k) (fun k => by ring) hsum
   rw [hz2] at hN
-  have hcoef : ∀ j : ℕ, DLMF.Bessel.neumannCoeff a 1 (fun k => expPartialSum k (-1)) (fun k => k) j
+  have hcoef : ∀ j : ℕ, DLMF.Bessel.neumannCoeff a 1 (fun k => Elementary.expPartialSum k (-1)) (fun k => k) j
       = 1/Gamma (a+j+1) := by
     intro j
     simp only [DLMF.Bessel.neumannCoeff, one_pow, mul_one, DLMF.Bessel.regularizedHGFunCoeff_empty]
-    have : ∀ p ∈ Finset.antidiagonal j, expPartialSum p.1 (-1) * (1/((p.2)! * Gamma (a + p.1 + 1 + p.2)))
-        = (1/Gamma (a+j+1)) * (expPartialSum p.1 (-1)/((p.2)! : ℂ)) := by
+    have : ∀ p ∈ Finset.antidiagonal j, Elementary.expPartialSum p.1 (-1) * (1/((p.2)! * Gamma (a + p.1 + 1 + p.2)))
+        = (1/Gamma (a+j+1)) * (Elementary.expPartialSum p.1 (-1)/((p.2)! : ℂ)) := by
       intro p hp
       rw [Finset.mem_antidiagonal] at hp
       rw [show a + (p.1:ℂ) + 1 + p.2 = a + j + 1 by rw [← hp]; push_cast; ring]
@@ -746,7 +770,7 @@ theorem lowerIncGamma_besselI_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {x :
     field_simp
     linear_combination (-lowerIncGamma a x) * this
   have hval : lowerIncGamma a x = Gamma a*(x : ℂ)^(a/2)*exp (-x : ℂ) *
-      (r^a * ∑' j, DLMF.Bessel.neumannCoeff a 1 (fun k => expPartialSum k (-1)) (fun k => k) j * r^(2*j)) := by
+      (r^a * ∑' j, DLMF.Bessel.neumannCoeff a 1 (fun k => Elementary.expPartialSum k (-1)) (fun k => k) j * r^(2*j)) := by
     rw [hlow, hS]
     simp only [hcoef, hr2]
     have hx0 : (x:ℂ) ≠ 0 := by exact_mod_cast hx.ne'
@@ -1081,7 +1105,7 @@ theorem upperIncGammaOnLog_zero (w : ℂ) :
     field_simp
     ring
   have hi := segmentIntegral_eq_sub hd (log (exp w)) w
-  rw [upperIncGammaOnLog, hi, upperIncGamma_zero_E1 hz, expIntE1_eq_Ein_complex hz,
+  rw [upperIncGammaOnLog, hi, upperIncGamma_zero_E1, expIntE1_eq_Ein_complex hz,
     Complex.exp_log hz]
   ring
 

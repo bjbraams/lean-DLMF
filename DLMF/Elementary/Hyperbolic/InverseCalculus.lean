@@ -8,13 +8,30 @@ module
 public import DLMF.Elementary.Hyperbolic.Products
 
 /-!
-# Principal inverse hyperbolic functions
+# Principal inverse hyperbolic functions: path integrals and analyticity
 
-Path domains, analyticity, derivatives and real restrictions of principal inverse hyperbolic
-functions.
+This file characterizes the multivalued inverse hyperbolic functions by path integrals
+(DLMF 4.37.1–4.37.3), relates the reciprocal inverses to the direct ones, and proves analyticity,
+branch points, reality on the real axis and oddness of the principal inverses.
 
-Source references and common attribution are retained in
-`DLMF.Elementary.Hyperbolic`.
+## Main definitions
+
+* `IsArcsinhPathValue`, `IsArccoshPathValue`, `IsArctanhPathValue`: path-integral values with
+  continued square-root or logarithm branches.
+
+## Main results
+
+* `arcsinh_path_values`, `arccosh_path_values`, `arctanh_path_values`: the multivalued inverses
+  as sets of path-integral values (DLMF 4.37.1–4.37.3).
+* `arccsch_values_inv`, `arcsech_values_inv`, `arccoth_values_inv`: DLMF 4.37.4–4.37.6.
+* `arccoth_eq_inv`: `arccoth z = arctanh z⁻¹` (DLMF 4.37.9).
+* `arcsinh_analytic`, `arccosh_analytic`, `arctanh_analytic`, `arccsch_analytic`,
+  `arcsech_analytic`, `arccoth_analytic`: analyticity on precisely the open cut domains.
+* `arcsinh_branch_points`, `arccosh_branch_points`, `arctanh_branch_points`: the branch points.
+* `arcsinh_ofReal`, `arccosh_ofReal`, `arctanh_ofReal`: agreement with Mathlib's real inverses
+  on the uncut real intervals.
+* `arcsinh_neg`, `arctanh_neg`, `arccsch_neg`, `arccoth_neg`: oddness on the open cut planes
+  (DLMF 4.37.10, 4.37.12, 4.37.13, 4.37.15).
 -/
 
 @[expose] public noncomputable section
@@ -346,14 +363,14 @@ theorem arcsinh_analytic  : AnalyticOnNhd ℂ arcsinh arcsinhDomain := by
     (hyper_hasDerivAt_arcsinh hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
 
 /-- Both linear factors of the factored inverse-cosh root lie in the principal slit plane. -/
-lemma hypR4_acosh_slit {z : ℂ} (hz : z ∈ arccoshDomain) :
+lemma sub_one_add_one_mem_slitPlane_of_mem_arccoshDomain {z : ℂ} (hz : z ∈ arccoshDomain) :
     z-1 ∈ Complex.slitPlane ∧ z+1 ∈ Complex.slitPlane := by
   rcases hz with hi | hr
   · exact ⟨Or.inr (by simpa using hi), Or.inr (by simpa using hi)⟩
   · exact ⟨Or.inl (by simp; linarith), Or.inl (by simp; linarith)⟩
 
 /-- The factored inverse-cosh root does not vanish on the open domain. -/
-lemma hypR4_acosh_root_ne {z : ℂ} (hz : z ∈ arccoshDomain) :
+lemma sqrt_sub_one_mul_sqrt_add_one_ne_zero {z : ℂ} (hz : z ∈ arccoshDomain) :
     Complex.sqrt (z-1)*Complex.sqrt (z+1) ≠ 0 := by
   intro h
   have hs := hyper_arccosh_root_sq z
@@ -366,7 +383,7 @@ lemma hypR4_acosh_root_ne {z : ℂ} (hz : z ∈ arccoshDomain) :
     subst this; rcases hz with h | h <;> norm_num at h
 
 /-- The inverse-cosh logarithm argument lies in the principal slit plane on the open domain. -/
-private lemma hypR4_acosh_log_slit {z : ℂ} (hz : z ∈ arccoshDomain) :
+private lemma add_sqrt_mul_sqrt_mem_slitPlane {z : ℂ} (hz : z ∈ arccoshDomain) :
     z+Complex.sqrt (z-1)*Complex.sqrt (z+1) ∈ Complex.slitPlane := by
   set s := Complex.sqrt (z-1)*Complex.sqrt (z+1)
   have hprod : (z+s)*(z-s) = 1 := by
@@ -394,11 +411,11 @@ private lemma hypR4_acosh_log_slit {z : ℂ} (hz : z ∈ arccoshDomain) :
   · linarith
 
 /-- The derivative of the principal inverse cosh on its open domain. -/
-lemma hypR4_hasDerivAt_arccosh {z : ℂ} (hz : z ∈ arccoshDomain) :
+lemma hasDerivAt_arccosh_of_mem {z : ℂ} (hz : z ∈ arccoshDomain) :
     HasDerivAt arccosh ((Complex.sqrt (z-1)*Complex.sqrt (z+1))⁻¹) z := by
-  obtain ⟨h1, h2⟩ := hypR4_acosh_slit hz
-  have hs := hypR4_acosh_root_ne hz
-  have hg := hypR4_acosh_log_slit hz
+  obtain ⟨h1, h2⟩ := sub_one_add_one_mem_slitPlane_of_mem_arccoshDomain hz
+  have hs := sqrt_sub_one_mul_sqrt_add_one_ne_zero hz
+  have hg := add_sqrt_mul_sqrt_mem_slitPlane hz
   have hA : Complex.sqrt (z-1) ≠ 0 := fun h => hs (by rw [h, zero_mul])
   have hB : Complex.sqrt (z+1) ≠ 0 := fun h => hs (by rw [h, mul_zero])
   have dA : HasDerivAt (fun w => Complex.sqrt (w-1)) ((Complex.sqrt (z-1))⁻¹/2) z := by
@@ -430,7 +447,7 @@ theorem arccosh_analytic  : AnalyticOnNhd ℂ arccosh arccoshDomain := by
     exact (isOpen_ne.preimage Complex.continuous_im).union
       (isOpen_lt continuous_const Complex.continuous_re)
   exact (show DifferentiableOn ℂ arccosh arccoshDomain from fun z hz =>
-    (hypR4_hasDerivAt_arccosh hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
+    (hasDerivAt_arccosh_of_mem hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
 
 /-- Analyticity of the principal inverse on precisely its open cut domain. -/
 theorem arctanh_analytic  : AnalyticOnNhd ℂ arctanh arctanhDomain := by
@@ -462,7 +479,7 @@ theorem arccoth_analytic  : AnalyticOnNhd ℂ arccoth arccothDomain := by
   exact (arccoth_eq_inv hw).symm
 
 /-- A right inverse `g (f z) = z` of an entire `g` cannot be analytic at a point where `g'` vanishes. -/
-private lemma hypR4_not_analytic_of_right_inv {f g g' : ℂ → ℂ} {p : ℂ}
+private lemma not_analyticAt_of_rightInverse_deriv_zero {f g g' : ℂ → ℂ} {p : ℂ}
     (hinv : ∀ z, g (f z) = z) (hg : ∀ w, HasDerivAt g (g' w) w) (h0 : g' (f p) = 0) :
     ¬AnalyticAt ℂ f p := by
   intro ha
@@ -476,7 +493,7 @@ private lemma hypR4_not_analytic_of_right_inv {f g g' : ℂ → ℂ} {p : ℂ}
 
 /-- The principal inverse tanh is not continuous at `±1`, where `exp (2 arctanh z)` has a pole
 or a zero. -/
-lemma hypR4_arctanh_exp (z : ℂ) (h1 : z ≠ 1) (h2 : z ≠ -1) :
+lemma exp_two_mul_arctanh_mul_one_sub (z : ℂ) (h1 : z ≠ 1) (h2 : z ≠ -1) :
     Complex.exp (2*arctanh z)*(1-z) = 1+z := by
   have hm : 1-z ≠ 0 := sub_ne_zero.mpr (Ne.symm h1)
   have hp : 1+z ≠ 0 := by intro h; apply h2; linear_combination h
@@ -489,10 +506,10 @@ theorem arcsinh_branch_points  : ¬AnalyticAt ℂ arcsinh I ∧ ¬AnalyticAt ℂ
   have hc : ∀ w, Complex.cosh (arcsinh w)^2 = 1+w^2 := fun w => by
     rw [Complex.cosh_sq, hyper_sinh_arcsinh]; ring
   constructor
-  · refine hypR4_not_analytic_of_right_inv hyper_sinh_arcsinh Complex.hasDerivAt_sinh ?_
+  · refine not_analyticAt_of_rightInverse_deriv_zero hyper_sinh_arcsinh Complex.hasDerivAt_sinh ?_
     have := hc I; rw [Complex.I_sq] at this
     exact pow_eq_zero_iff two_ne_zero |>.mp (by rw [this]; ring)
-  · refine hypR4_not_analytic_of_right_inv hyper_sinh_arcsinh Complex.hasDerivAt_sinh ?_
+  · refine not_analyticAt_of_rightInverse_deriv_zero hyper_sinh_arcsinh Complex.hasDerivAt_sinh ?_
     have := hc (-I); rw [neg_sq, Complex.I_sq] at this
     exact pow_eq_zero_iff two_ne_zero |>.mp (by rw [this]; ring)
 
@@ -501,9 +518,9 @@ theorem arccosh_branch_points  : ¬AnalyticAt ℂ arccosh (1:ℂ) ∧ ¬Analytic
   have hc : ∀ w, Complex.sinh (arccosh w)^2 = w^2-1 := fun w => by
     rw [Complex.sinh_sq, hyper_cosh_arccosh]
   constructor
-  · refine hypR4_not_analytic_of_right_inv hyper_cosh_arccosh Complex.hasDerivAt_cosh ?_
+  · refine not_analyticAt_of_rightInverse_deriv_zero hyper_cosh_arccosh Complex.hasDerivAt_cosh ?_
     exact pow_eq_zero_iff two_ne_zero |>.mp (by rw [hc]; ring)
-  · refine hypR4_not_analytic_of_right_inv hyper_cosh_arccosh Complex.hasDerivAt_cosh ?_
+  · refine not_analyticAt_of_rightInverse_deriv_zero hyper_cosh_arccosh Complex.hasDerivAt_cosh ?_
     exact pow_eq_zero_iff two_ne_zero |>.mp (by rw [hc]; ring)
 
 /-- The two inverse branch points stated in the definition prose. -/
@@ -525,7 +542,7 @@ theorem arctanh_branch_points  : ¬AnalyticAt ℂ arctanh (1:ℂ) ∧ ¬Analytic
         apply eventually_nhdsWithin_of_eventually_nhds
         exact eventually_ne_nhds (by norm_num)
       filter_upwards [self_mem_nhdsWithin, hne] with z hz hz'
-      exact (hypR4_arctanh_exp z hz hz').symm
+      exact (exp_two_mul_arctanh_mul_one_sub z hz hz').symm
     have := tendsto_nhds_unique hlim hlim2
     norm_num at this
   · intro ha
@@ -544,7 +561,7 @@ theorem arctanh_branch_points  : ¬AnalyticAt ℂ arctanh (1:ℂ) ∧ ¬Analytic
         apply eventually_nhdsWithin_of_eventually_nhds
         exact eventually_ne_nhds (by norm_num)
       filter_upwards [self_mem_nhdsWithin, hne] with z hz hz'
-      have e := hypR4_arctanh_exp z hz' hz
+      have e := exp_two_mul_arctanh_mul_one_sub z hz' hz
       have hm : 1-z ≠ 0 := sub_ne_zero.mpr (Ne.symm hz')
       rw [Complex.exp_neg]
       have hE : Complex.exp (2*arctanh z) ≠ 0 := Complex.exp_ne_zero _

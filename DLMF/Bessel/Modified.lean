@@ -8,10 +8,19 @@ module
 public import DLMF.Bessel.RegularizedSeries
 
 /-!
-# Modified Bessel functions (AAR §4.12)
+# Modified Bessel functions (DLMF §10.25–10.27; AAR §4.12)
 
-`I_ν` is the `₀F₁` series with argument `+z²/4`. `K_ν` is the second-kind combination of
-`I_ν` and `I_{-ν}`.
+`I_ν` is the `₀F₁` series with argument `+z²/4`, and `K_ν` is the second-kind combination of
+`I_ν` and `I_{-ν}`. This file gives their basic values, the connection with `J_ν` and the
+modified Bessel equation.
+
+## Main results
+
+* `besselI_apply_zero`, `besselI_zero_zero`: values at the origin.
+* `besselI_eq_besselJ`: `I_ν(z) = i^{-ν} J_ν(iz)` on the principal branch (DLMF 10.27.6).
+* `besselI_ode`, `besselK_ode`: the modified Bessel equation (DLMF 10.25.1).
+* `analyticAt_besselI`: `I_ν` is analytic on the principal slit plane.
+* `nicholson_integral`: Nicholson's integral for `J_ν² + Y_ν²` (AAR §4.13).
 -/
 
 @[expose] public section
@@ -33,7 +42,7 @@ theorem besselI_zero_zero : besselI 0 0 = 1 := by
   unfold besselI
   rw [zero_div, cpow_zero, one_mul]
   have harg : (0 ^ 2 / 4 : ℂ) = 0 := by ring
-  rw [harg, DLMF.Confluent.regularizedHGFun_zero, regularizedHGFunCoeff_empty]
+  rw [harg, Complex.regularizedHGFun_zero, regularizedHGFunCoeff_empty]
   simp [Gamma_one]
 
 /-- `I_ν(z) = i^{-ν} J_ν(i z)` (principal branch). -/

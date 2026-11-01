@@ -13,25 +13,44 @@ public import DLMF.Legendre.Connections
 # Boundary asymptotics of Legendre functions
 
 Behaviour of the Ferrers functions `𝖯^μ_ν`, `𝖰^μ_ν` as `x → 1⁻` and of `P^μ_ν`, `𝑸^μ_ν` as
-`x → 1⁺` and `x → ∞` (DLMF 14.8), for general complex parameters.
+`x → 1⁺` and `x → ∞` (DLMF §14.8), for general complex parameters.
 
-The basic tool is an Abelian limit for the regularized Gauss function valid for every `c`
-(`legBd_tendsto_rGHG_one`, from the shared regularized Gauss summation and Mathlib's Abel
-limit theorem, including nonpositive integer `c`), together with its Euler-transformed
-form for `Re(c-a-b) < 0` (`legBd_tendsto_rGHG_one_neg`, DLMF 15.4.23) and the zero-balanced
-logarithmic limit (`legBd_tendsto_rGHG_log`, DLMF 15.4.21). Applied to the defining
+## Main definitions
+
+* `legBdK`, `legBdK'`: the constants `Γ(a)⁻¹Γ(b)⁻¹` and `(1/Γ)'(a)/Γ(b) + (1/Γ)'(b)/Γ(a)` of
+  the zero-balanced expansion.
+* `legBdZbH`, `legBdZbCoeff`: the analytic part of the zero-balanced expansion of
+  `𝐅(a,b;a+b;1-w)` and its power-series coefficients.
+
+## Main results
+
+* `legBd_tendsto_rGHG_one`, `legBd_tendsto_rGHG_one_neg`, `legBd_tendsto_rGHG_log`: Abelian
+  limits for the regularized Gauss function valid for every `c` (DLMF 15.4.20, 15.4.23,
+  15.4.21).
+* `legBd_ferrersQ_tendsto`, `legBd_ferrersQ_neg_tendsto`: the boundary limits behind DLMF 14.8.4
+  and 14.8.6 for `Re μ > 0`.
+* `legBd_olverQ_tendsto`: the boundary limit behind DLMF 14.8.11.
+* `legBd_associatedP_tendsto_atTop`, `legBd_associatedP_half_tendsto_atTop`: the limits behind
+  DLMF 14.8.12 and 14.8.14.
+* `legBd_zeroBalanced_eq`, `legBd_zeroBalanced_isBigO`: DLMF 15.8.10 at `m = 0`, structurally
+  and as an asymptotic statement, for all `a, b`.
+* `legBd_ferrersQ_log_isBigO`: DLMF 14.8.3,
+  `𝖰_ν(x) = ½ ln(2/(1-x)) - γ - ψ(ν+1) + O((1-x) ln(1-x))` as `x → 1⁻`.
+* `legBd_olverQ_log_isBigO`: DLMF 14.8.9, with `ψ(ν+1)/Γ(ν+1)` written as `-(1/Γ)'(ν+1)`.
+
+## Implementation notes
+
+The Abelian limit `legBd_tendsto_rGHG_one` comes from the shared regularized Gauss summation
+and Mathlib's Abel limit theorem, including nonpositive integer `c`. Applied to the defining
 hypergeometric representations (DLMF 14.3.11–14.3.14 for `𝖰`, 14.3.7 for `𝑸`, 14.3.18 for `P`)
-they give the leading behaviour at every order with `Re μ > 0`, integer orders included,
-without any connection formula.
+these limits give the leading behaviour at every order with `Re μ > 0`, integer orders
+included, without any connection formula.
 
 For order `0` the logarithmic expansions DLMF 14.8.3 and 14.8.9 rest on DLMF 15.8.10 at
-`m = 0`: `𝐅(a,b;a+b;z) = -Γ(a)⁻¹Γ(b)⁻¹ ln(1-z) 𝐅(a,b;1;1-z) + H(1-z)` with `H` a power
-series (`legBd_zeroBalanced_eq`, obtained from the connection formula 15.10.21 by a limit in
-`c`), whence `𝐅(a,b;a+b;1-t) + K ln t - (K' - 2γK) = O(t ln t)` for all `a, b`
-(`legBd_zeroBalanced_isBigO`), with `K = 1/(Γ(a)Γ(b))` and `K'` written through
-`(1/Γ)'` so that no pole of `ψ` is excluded.
-
-All helper names carry the prefix `legBd_`.
+`m = 0`: `𝐅(a,b;a+b;z) = -Γ(a)⁻¹Γ(b)⁻¹ ln(1-z) 𝐅(a,b;1;1-z) + H(1-z)` with `H` a power series
+(obtained from the connection formula 15.10.21 by a limit in `c`), whence
+`𝐅(a,b;a+b;1-t) + K ln t - (K' - 2γK) = O(t ln t)` for all `a, b`, with `K = 1/(Γ(a)Γ(b))` and
+`K'` written through `(1/Γ)'` so that no pole of `ψ` is excluded.
 -/
 
 @[expose] public noncomputable section

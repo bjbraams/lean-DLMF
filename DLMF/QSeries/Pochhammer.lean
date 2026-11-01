@@ -12,10 +12,22 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 
 /-!
-# The `q`-Pochhammer symbol, `q`-binomial theorem, and `q`-gamma (AAR §§10.1–10.3)
+# The `q`-Pochhammer symbol, `q`-binomial theorem and `q`-gamma (AAR §§10.1–10.3)
 
-Mathlib's Pochhammer file lists `q`-factorials as a TODO. The `q`-Pochhammer symbol
-`(a;q)_n = ∏_{k=0}^{n-1} (1-aq^k)` is defined here.
+This file develops the finite and infinite `q`-Pochhammer symbols, proves the `q`-binomial
+theorem and the basic properties of the `q`-gamma function. Mathlib's Pochhammer file lists
+`q`-factorials as a TODO.
+
+## Main results
+
+* `qPochhammer_eq_prod`: `(a;q)_n = ∏_{k<n} (1 - aqᵏ)` (DLMF 17.2.1).
+* `qPochhammer_add`: `(a;q)_{m+k} = (a;q)_m (aq^m;q)_k`.
+* `tendsto_qPochhammer`: `(w;q)_n → (w;q)_∞` for `|q| < 1` (DLMF §17.2(iii)).
+* `qPochhammer_eq_div_inf`: `(w;q)_n = (w;q)_∞/(wqⁿ;q)_∞` when no factor vanishes.
+* `jacksonIntegral_one`: `∫₀¹ 1 d_q t = 1` for `|q| < 1`.
+* `q_binomial_theorem`: the `q`-binomial theorem (DLMF 17.2.37, 17.5.2).
+* `qGamma_one`, `qGamma_add_one`: `Γ_q(1) = 1` and the recurrence of `Γ_q`
+  (DLMF 5.18.5, 5.18.7).
 -/
 
 @[expose] public section

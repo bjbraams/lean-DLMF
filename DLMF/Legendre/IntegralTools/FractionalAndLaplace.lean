@@ -6,15 +6,49 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.IntegralTools.Orthogonality
+public import ToMathlib.Analysis.SpecialFunctions.Pow
 
 /-!
 # Fractional and Laplace Legendre integral tools
 
-Cut-plane fractional integration, segment substitutions and Laplace estimates used by Legendre
-integral formulas.
+This file collects helper results (prefix `legInt_`) for the integral representations of
+DLMF §14.12 and §14.6(ii):
 
-Source references and common attribution are retained in
-`DLMF.Legendre.IntegralTools`.
+* analyticity of `z ↦ ∫_0^1 w(s) F(zs) ds` on the cut plane and the resulting cut-plane form of
+  the fractional integral DLMF 15.6.8 with `d = 1`, used for DLMF 14.12.5;
+* the primitives `g_k = (z²-1)^{k/2} Q^{-k}_ν` with `g_{k+1}' = g_k` and `g_{k+1} → 0` at
+  infinity, giving the iterated tail integrals of DLMF 14.6.8 on `(1, ∞)` and on the principal
+  sheet;
+* integration-by-parts recurrences in the order for the Laplace-type moments `∫_0^π w^ν cos(mθ)`
+  and `∫_0^π w^p sin^{2q}θ`, `w = x + √(x²-1) cos θ` (DLMF 14.12.7, 14.12.8);
+* Heine's integral `∫_0^∞ dt/(x + √(x²-1) cosh t)^{n+1}` (DLMF 14.12.14) via an explicit
+  primitive and a degree recurrence;
+* recurrences in degree and order for `∫_0^u (x - √(x²-1) cosh t)^n cosh(mt)`, `u = arcoth x`
+  (DLMF 14.12.9), and for `∫_{-1}^1 (1-t²)^n (x-t)^{-p}` (DLMF 14.12.11).
+
+## Main definitions
+
+* `legInt_g`: the primitives `g_k(z) = (z²-1)^{k/2} Q^{-k}_ν(z)`.
+* `legInt_L`, `legInt_Ks`: Fourier and sine moments of powers of the Laplace kernel.
+* `legInt_W`: the Heine kernel `x + √(x²-1) cosh t`.
+* `legInt_u`, `legInt_V`, `legInt_M`: the endpoint `arcoth x`, the kernel
+  `x - √(x²-1) cosh t` and the integrals `M(n, m)` of DLMF 14.12.9.
+* `legInt_A`: the integrals `A(n, p) = ∫_{-1}^1 (1-t²)^n/(x-t)^p`.
+* `legInt_cK`: the constant of DLMF 14.12.8.
+
+## Main results
+
+* `legInt_analyticOnNhd_integral`, `legInt_fractional_cutPlane`: analyticity of the parameter
+  integral and DLMF 15.6.8 with `d = 1` on the cut plane.
+* `legInt_olverQ_order_deriv`: an order-derivative relation for `𝑸^μ_ν`.
+* `legInt_hasIntegralAtTop_g`, `legInt_iterate_Q`, `legInt_iterate_Qc`: iterated tail and
+  segment-plus-tail integrals of `Q_ν`.
+* `legInt_L_rec`: the order recurrence of the Fourier moments.
+* `legInt_heine`: Heine's integral for `Q_n` on `(1, ∞)`, unnormalized.
+* `legInt_M_deg`, `legInt_M_ord`, `legInt_legendreQ_M`: `Q_n(x) = M(n, 0)` for `x > 1`.
+* `legInt_A_ord`, `legInt_A_deg`, `legInt_legendreQ_A`: `Q_n(x) = A(n, n+1)/2^{n+1}` for
+  `x > 1`.
+* `legInt_associatedP_Ks`: DLMF 14.12.8 in the form `P^m_{m+p}(x) = c s^m K(p, m)`.
 -/
 
 @[expose] public noncomputable section
@@ -115,11 +149,6 @@ theorem legInt_fractional_cutPlane (a b : ℂ) {μ : ℂ} (hμ : 0 < μ.re) {z :
     calc ‖z‖*s ≤ ‖z‖*1 := by gcongr; exact hs.2
       _ < 1 := by rw [mul_one]; exact hz
   rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hzs, sub_self, cpow_zero, mul_one, mul_comm]
-
-/-- Complex powers of a positive real as exponentials of the real logarithm. -/
-theorem legInt_cpow_ofReal {r : ℝ} (hr : 0 < r) (c : ℂ) :
-    ((r:ℝ):ℂ)^c = exp (Real.log r * c) := by
-  rw [cpow_def_of_ne_zero (ofReal_ne_zero.2 hr.ne'), ofReal_log hr.le]
 
 /-- Order-derivative relation `(1-z²) 𝑸' + μ z 𝑸^μ_ν = (ν+μ+1) (z²-1)^{1/2} 𝑸^{μ+1}_ν`. -/
 theorem legInt_olverQ_order_deriv (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
@@ -618,8 +647,8 @@ theorem legInt_heine (x : ℝ) (hx : 1 < x) (n : ℕ) :
         hb).div_const ((k:ℂ)+2))
       have hrec := olverQ_recurrence_3 (k:ℂ) 0 hx1
       rw [show (k:ℂ)+2 = ((k+1+1:ℕ):ℂ) by push_cast; ring,
-        show (k:ℂ)+1 = ((k+1:ℕ):ℂ) by push_cast; ring, legInt_olverQ_nat_zero_order _ hx1,
-        legInt_olverQ_nat_zero_order _ hx1, legInt_olverQ_nat_zero_order _ hx1] at hrec
+        show (k:ℂ)+1 = ((k+1:ℕ):ℂ) by push_cast; ring, legInt_olverQ_nat_zero_order _,
+        legInt_olverQ_nat_zero_order _, legInt_olverQ_nat_zero_order _] at hrec
       have hQ : legendreQ ((k+1+1:ℕ):ℂ) x = (-((k:ℂ)+1) * legendreQ k x +
           (2*((k:ℂ)+1)+1)*x * legendreQ ((k+1:ℕ):ℂ) x - 0) / ((k:ℂ)+2) := by
         have hf : (k.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.2 (Nat.factorial_ne_zero k)
@@ -815,8 +844,8 @@ theorem legInt_legendreQ_rec (k : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
       (2*k+3)*z*legendreQ ((k+1:ℕ):ℂ) z - ((k:ℂ)+1) * legendreQ k z := by
   have hrec := olverQ_recurrence_3 (k:ℂ) 0 hz
   rw [show (k:ℂ)+2 = ((k+1+1:ℕ):ℂ) by push_cast; ring,
-    show (k:ℂ)+1 = ((k+1:ℕ):ℂ) by push_cast; ring, legInt_olverQ_nat_zero_order _ hz,
-    legInt_olverQ_nat_zero_order _ hz, legInt_olverQ_nat_zero_order _ hz] at hrec
+    show (k:ℂ)+1 = ((k+1:ℕ):ℂ) by push_cast; ring, legInt_olverQ_nat_zero_order _,
+    legInt_olverQ_nat_zero_order _, legInt_olverQ_nat_zero_order _] at hrec
   have hf : (k.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.2 (Nat.factorial_ne_zero k)
   simp only [Nat.factorial_succ] at hrec
   push_cast at hrec ⊢

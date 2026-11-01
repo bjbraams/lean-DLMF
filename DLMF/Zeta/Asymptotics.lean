@@ -8,16 +8,27 @@ module
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
 
 /-!
-# Asymptotic approximations of the Riemann zeta function (DLMF §25.9)
+# Asymptotic approximations of the Riemann zeta function
 
-The approximate functional equation of Hardy and Littlewood (25.9.1) with the factor
-`χ(s) = π^{s-½} Γ(½ - s/2)/Γ(s/2)` (25.9.2) of the functional equation `ζ(s) = χ(s) ζ(1-s)`, and
-its symmetric case on the critical line (25.9.3).
+The approximate functional equation of Hardy and Littlewood (DLMF 25.9.1) with the factor
+`χ(s) = π^{s-½} Γ(½ - s/2)/Γ(s/2)` (DLMF 25.9.2) of the functional equation
+`ζ(s) = χ(s) ζ(1-s)`, and its symmetric case on the critical line (DLMF 25.9.3).
+
+## Main definitions
+
+* `riemannChi`: the factor `χ(s)` of DLMF 25.9.2.
+
+## Main results
+
+* `approximate_functional_equation`: DLMF 25.9.1.
+* `riemannZeta_critical_line_approx`: DLMF 25.9.3, derived from 25.9.1.
+
+## Implementation notes
 
 The `O`-terms of 25.9.1 are uniform in `x, y ≥ 1` subject to `2πxy = t`: the statement gives a
 constant `C` and a threshold `T₀`, depending only on `σ`, with the error bounded by
 `C (x^{-σ} + y^{σ-1} t^{½-σ})` for all `t ≥ T₀`. Sums `∑_{1 ≤ n ≤ x}` are over
-`n ∈ [1, ⌊x⌋]`. 25.9.3 is proved from 25.9.1.
+`n ∈ [1, ⌊x⌋]`.
 -/
 
 @[expose] public noncomputable section

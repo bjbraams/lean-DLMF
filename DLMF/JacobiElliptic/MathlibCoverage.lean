@@ -10,13 +10,14 @@ public import Mathlib.NumberTheory.ModularForms.JacobiTheta.TwoVariable
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 
 /-!
-# DLMF Chapter 22 (§§22.2–22.9) and Mathlib
+# DLMF Chapter 22 and Mathlib
 
-Mathlib (and the pinned TauCeti) have no Jacobian elliptic functions, no complete elliptic
-integral of complex modulus and no Landen or cyclic identities (checked 2026-10-25). The only
-upstream ingredient is the two-variable theta function, from which the project's `θ₁, …, θ₄`
-and hence all twelve Jacobian functions of `DLMF.JacobiElliptic.Basic` are built. The limiting
-forms of Tables 22.5.3–22.5.4 have Mathlib's elementary functions as their targets.
+Pointers from DLMF Chapter 22 to upstream declarations. Mathlib and TauCeti have no Jacobian
+elliptic functions, no complete elliptic integral of complex modulus and no Landen or cyclic
+identities. The only upstream ingredient is the two-variable theta function `jacobiTheta₂`,
+from which the project's `θ₁, …, θ₄` and hence all twelve Jacobian functions of
+`DLMF.JacobiElliptic.Basic` are built. The limiting forms of Tables 22.5.3–22.5.4 have
+Mathlib's elementary functions as their targets.
 -/
 
 -- DLMF 22.2.4–22.2.11: the theta quotients are built from Mathlib's `jacobiTheta₂`.

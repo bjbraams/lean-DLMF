@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.NumberTheory.Functions
-public import DLMF.NumberTheory.T27bHecke
+public import DLMF.NumberTheory.HeckeOperators
 public import DLMF.Partitions
 public import DLMF.Weierstrass.ModularFunctions
 public import DLMFMathlib.RingTheory.PowerSeriesEvaluation
@@ -14,13 +14,51 @@ public import Mathlib.Algebra.Order.Field.GeomSum
 public import Mathlib.Combinatorics.Enumerative.Partition.Glaisher
 public import Mathlib.Combinatorics.Enumerative.Pentagonal.EulerFunction
 public import TauCeti.NumberTheory.ModularForms.LevelOne.DiscriminantEigenform
+public import DLMF.Combinatorics.RestrictedPartitions
 
 /-!
 # Unrestricted partitions (DLMF §27.14)
 
+The partition function `p(n)`, Euler's reciprocal function and the pentagonal number theorem,
+the Hardy–Ramanujan and Rademacher formulas, Dedekind's `η` and the discriminant, partition
+congruences, and Ramanujan's `τ` function (DLMF §27.14).
+
+## Main definitions
+
+* `partitionPowerSeries`: the partition generating function as a formal power series.
+* `eulerReciprocal`: Euler's reciprocal function `f(x) = ∏_{m≥1} (1 - xᵐ)` (DLMF 27.14.2).
+* `rademacherA`: the sums `A_k(n)` of DLMF 27.14.10.
+* `discriminantDLMF`: the discriminant `Δ(τ) = (2π)¹² η(τ)²⁴` (DLMF 27.14.16).
+* `ramanujanTau`: Ramanujan's `τ(n)` (DLMF 27.14.18).
+* `LehmerConjecture`: Lehmer's conjecture `τ(n) ≠ 0`, as a proposition.
+
+## Main results
+
+* `partitionFunction_eq_card`, `hasSum_partitionFunction`: `p(n)` counts partitions
+  (DLMF 27.14.1) and has the generating function `1/f(x)` (DLMF 27.14.3).
+* `eulerReciprocal_eq_qPochhammerInf`, `hasProd_eulerReciprocal`: `f(x) = (x; x)_∞`, and
+  convergence of the product for `|x| < 1`.
+* `eulerReciprocal_pentagonal`, `pentagonal_pm`: Euler's pentagonal number theorem
+  (DLMF 27.14.4–27.14.5).
+* `partitionFunction_recursion`, `partitionFunction_sigma_recursion`: the recursions
+  DLMF 27.14.6 and 27.14.7.
+* `partitionFunction_isEquivalent`, `partitionFunction_rademacher`: the Hardy–Ramanujan
+  asymptotic DLMF 27.14.8 and Rademacher's series DLMF 27.14.9.
+* `dedekindSum_eq`, `eta_eq_prod`, `eta_eq_eulerReciprocal`, `eta_transform`: Dedekind sums
+  and the eta function (DLMF 27.14.11–27.14.14).
+* `hasSum_partitionFunction_five`, `exists_partition_congruence`,
+  `partitionFunction_mod_thirteen`: Ramanujan's identity DLMF 27.14.15 and the partition
+  congruences of DLMF §27.14(v).
+* `discriminantDLMF_eq`, `discriminantDLMF_transform`: DLMF 27.14.16 and 27.14.17.
+* `hasSum_ramanujanTau`, `isMultiplicativeFn_ramanujanTau`, `ramanujanTau_mul`,
+  `ramanujanTau_modEq`: the generating function of `τ`, its multiplicativity, the Hecke
+  relation DLMF 27.14.19 and the congruence DLMF 27.14.20.
+
+## Implementation notes
+
 `p(n)` is the project's `DLMF.Partitions.partitionFunction n = Fintype.card (Nat.Partition n)`
-(27.14.1) and `p_k(n)` is `partitionsAtMost k n`. Euler's reciprocal function
-`f(x) = ∏_{m≥1} (1 - xᵐ)` (27.14.2) is `eulerReciprocal x`; it equals `(x; x)_∞`
+(27.14.1) and `p_k(n)` is `Combinatorics.partitionCountAtMostParts k n`. Euler's reciprocal
+function `f(x) = ∏_{m≥1} (1 - xᵐ)` (27.14.2) is `eulerReciprocal x`; it equals `(x; x)_∞`
 (`DLMF.QSeries.qPochhammerInf x x`) for every `x` and Mathlib's `eulerFunction x` for `|x| < 1`.
 The pentagonal numbers `ω(±k) = (3k² ∓ k)/2` (27.14.5) are Mathlib's `pentagonal (±k)`.
 
@@ -31,15 +69,15 @@ is `η²⁴` without the factor `(2π)¹²`. Ramanujan's `τ(n)` (27.14.18) is `
 as the `n`th coefficient of the formal power series `X ∏_{m≥1} (1 - Xᵐ)²⁴ ∈ ℤ⟦X⟧`, so that it is
 integer valued by construction; the analytic generating function is `hasSum_ramanujanTau`.
 
-27.14.17 is proved for every `𝒜 ∈ SL(2, ℤ)` (stronger than DLMF, which assumes `c > 0`).
+27.14.17 holds for every `𝒜 ∈ SL(2, ℤ)` (stronger than DLMF, which assumes `c > 0`).
 Ramanujan's congruences are `DLMF.Partitions.ramanujan_mod_five` etc. (tagged there). Lehmer's
 conjecture `τ(n) ≠ 0` is open and stated only as a proposition (`LehmerConjecture`); Lehmer's
-numerical verification bound is excluded (numerical).
+numerical verification bound is out of scope.
 
 The multiplicativity of `τ` and 27.14.19 come from Tau Ceti's Hecke eigenform theory of `Δ`
 (`TauCeti.ModularForm.discriminant_qExpansion_coeff_mul`,
 `TauCeti.ModularForm.discriminant_qExpansion_coeff_prime_pow_add_two`), transported to
-`ramanujanTau` by `t27b_ramanujanTau_eq_coeff` (Mathlib's `qExpansion_coeff_unique`). The
+`ramanujanTau` by `ramanujanTau_eq_coeff_qExpansion` (Mathlib's `qExpansion_coeff_unique`). The
 congruence 27.14.20 compares `q`-expansions in `E₁₂ - E₆² = c Δ` (Mathlib's
 `CuspForm.exists_smul_discriminant_of_weight_eq_twelve` and
 `EisensteinSeries.E_qExpansion_coeff`).
@@ -57,22 +95,21 @@ open DLMF.Partitions
 
 /-! ### Formal and analytic partition generating function (helpers) -/
 
-section R27Helpers
-
+section Helpers
 open PowerSeries
 open scoped PowerSeries.WithPiTopology
 
 /-- The partition generating function as a formal power series. -/
-def r27_partitionSeries : PowerSeries ℤ :=
+def partitionPowerSeries : PowerSeries ℤ :=
   PowerSeries.mk fun n ↦ (partitionFunction n : ℤ)
 
 /-- Formal identity `(∑ p(n) Xⁿ) ∏ (1 - Xᵐ) = 1` in `ℤ⟦X⟧`. -/
-lemma r27_partitionSeries_mul_pentagonal :
-    r27_partitionSeries * pentagonalSeries ℤ = 1 := by
+private lemma partitionPowerSeries_mul_pentagonalSeries :
+    partitionPowerSeries * pentagonalSeries ℤ = 1 := by
   have h1 := Nat.Partition.powerSeriesMk_card_restricted_eq_tprod ℤ (fun _ ↦ True)
-  have h2 : r27_partitionSeries = PowerSeries.mk fun n ↦
+  have h2 : partitionPowerSeries = PowerSeries.mk fun n ↦
       ((Nat.Partition.restricted n (fun _ ↦ True)).card : ℤ) := by
-    ext n; simp [r27_partitionSeries, Nat.Partition.restricted, partitionFunction]
+    ext n; simp [partitionPowerSeries, Nat.Partition.restricted, partitionFunction]
   rw [h2, h1, ← PowerSeries.WithPiTopology.tprod_one_sub_X_pow ℤ]
   simp only [ite_true]
   rw [← Multipliable.tprod_mul ?_ (PowerSeries.WithPiTopology.multipliable_one_sub_X_pow ℤ)]
@@ -82,7 +119,7 @@ lemma r27_partitionSeries_mul_pentagonal :
   · simpa using Nat.Partition.multipliable_powerSeriesMk_card_restricted ℤ (fun _ ↦ True)
 
 /-- `|k| ≤ ω(k)` for every integer `k`. -/
-lemma r27_natAbs_le_pentagonal (k : ℤ) : k.natAbs ≤ pentagonal k := by
+private lemma natAbs_le_pentagonal (k : ℤ) : k.natAbs ≤ pentagonal k := by
   have h := two_mul_natCast_pentagonal k
   have : (k.natAbs : ℤ) ≤ pentagonal k := by
     rcases le_or_gt 0 k with hk | hk
@@ -92,7 +129,7 @@ lemma r27_natAbs_le_pentagonal (k : ℤ) : k.natAbs ≤ pentagonal k := by
   exact_mod_cast this
 
 /-- Reindexing a sum over `i ≤ n` supported on pentagonal numbers by `k ∈ [-n, n]`. -/
-lemma r27_sum_range_extend_pentagonal (g : ℤ → ℤ) (n : ℕ) :
+private lemma sum_range_extend_pentagonal (g : ℤ → ℤ) (n : ℕ) :
     ∑ i ∈ range (n + 1), Function.extend pentagonal g 0 i =
       ∑ k ∈ Icc (-(n : ℤ)) n, if pentagonal k ≤ n then g k else 0 := by
   rw [← sum_filter]
@@ -114,12 +151,12 @@ lemma r27_sum_range_extend_pentagonal (g : ℤ → ℤ) (n : ℕ) :
       rintro ⟨k, rfl⟩
       apply hni
       simp only [mem_range] at hi
-      have := r27_natAbs_le_pentagonal k
+      have := natAbs_le_pentagonal k
       simp only [mem_image, mem_filter, mem_Icc]
       exact ⟨k, ⟨⟨by omega, by omega⟩, by omega⟩, rfl⟩
 
 /-- Splitting a sum over `[-n, n]` into `k = 0` and the pairs `±k`. -/
-lemma r27_sum_Icc_neg_self (h : ℤ → ℤ) (n : ℕ) :
+private lemma sum_Icc_neg_self_eq_add_sum (h : ℤ → ℤ) (n : ℕ) :
     ∑ k ∈ Icc (-(n : ℤ)) n, h k = h 0 + ∑ k ∈ Icc 1 n, (h k + h (-k)) := by
   induction n with
   | zero => simp
@@ -131,7 +168,7 @@ lemma r27_sum_Icc_neg_self (h : ℤ → ℤ) (n : ℕ) :
     push_cast; ring
 
 /-- Generating function of partitions with parts `≤ N` as a finite product. -/
-lemma r27_restrictedSeries_eq (N : ℕ) :
+private lemma mk_card_restricted_le_eq_prod_geomSeriesOnMultiples (N : ℕ) :
     (PowerSeries.mk fun n ↦ ((Nat.Partition.restricted n (· ≤ N)).card : ℤ)) =
       ∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1) := by
   rw [Nat.Partition.powerSeriesMk_card_restricted_eq_tprod ℤ (· ≤ N)]
@@ -150,15 +187,15 @@ lemma r27_restrictedSeries_eq (N : ℕ) :
   exact mul_right_cancel₀ hne (h1.trans h2.symm)
 
 /-- The coefficients `n ≤ N` of `∏_{m ≤ N} 1/(1 - Xᵐ)` are `p(n)`. -/
-lemma r27_coeff_prod_geomSeries {n N : ℕ} (hn : n ≤ N) :
+private lemma coeff_prod_geomSeriesOnMultiples {n N : ℕ} (hn : n ≤ N) :
     coeff n (∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)) = partitionFunction n := by
-  rw [← r27_restrictedSeries_eq, coeff_mk, Nat.Partition.restricted]
+  rw [← mk_card_restricted_le_eq_prod_geomSeriesOnMultiples, coeff_mk, Nat.Partition.restricted]
   congr 1
   rw [Finset.filter_true_of_mem fun p _ i hi ↦ (Nat.Partition.le_of_mem_parts hi).trans hn]
   rfl
 
 /-- `∏_{m ≤ N} (1 - tᵐ)⁻¹ ≤ exp(1/(1 - t)²)` for `0 ≤ t < 1`. -/
-lemma r27_prod_inv_one_sub_le {t : ℝ} (ht0 : 0 ≤ t) (ht : t < 1) (N : ℕ) :
+private lemma prod_inv_one_sub_pow_le_exp {t : ℝ} (ht0 : 0 ≤ t) (ht : t < 1) (N : ℕ) :
     ∏ i ∈ range N, (1 - t ^ (i + 1))⁻¹ ≤ Real.exp (1 / (1 - t) ^ 2) := by
   have h1t : 0 < 1 - t := by linarith
   calc ∏ i ∈ range N, (1 - t ^ (i + 1))⁻¹ ≤ ∏ i ∈ range N, Real.exp (t ^ i / (1 - t)) := by
@@ -188,16 +225,16 @@ lemma r27_prod_inv_one_sub_le {t : ℝ} (ht0 : 0 ≤ t) (ht : t < 1) (N : ℕ) :
           _ = 1 / (1 - t) ^ 2 := by field_simp
 
 /-- `∑ p(n) tⁿ` converges for `0 ≤ t < 1`. -/
-lemma r27_summable_partitionFunction {t : ℝ} (ht0 : 0 ≤ t) (ht : t < 1) :
+private lemma summable_partitionFunction_mul_pow {t : ℝ} (ht0 : 0 ≤ t) (ht : t < 1) :
     Summable fun n ↦ (partitionFunction n : ℝ) * t ^ n := by
   refine summable_of_sum_range_le (c := Real.exp (1 / (1 - t) ^ 2))
     (fun n ↦ by positivity) fun N ↦ ?_
   set Q := ∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)
   have hx : ‖(t : ℂ)‖ < 1 := by
     rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg ht0]; exact ht
-  have hQ : PowerSeries.HasSumAt Q t (∏ i ∈ range N, (1 - (t : ℂ) ^ (i + 1))⁻¹) :=
+  have hQ : PowerSeries.HasSumAt Q (t : ℂ) (∏ i ∈ range N, (1 - (t : ℂ) ^ (i + 1))⁻¹) :=
     PowerSeries.HasSumAt.prod _ fun i _ ↦ PowerSeries.hasSumAt_geomSeriesOnMultiples (Nat.succ_pos i) hx
-  have hre := Complex.hasSum_re hQ
+  have hre := Complex.hasSum_re (PowerSeries.hasSumAt_int_iff.mp hQ)
   have hv : (∏ i ∈ range N, (1 - (t : ℂ) ^ (i + 1))⁻¹).re = ∏ i ∈ range N, (1 - t ^ (i + 1))⁻¹ := by
     rw [show (∏ i ∈ range N, (1 - (t : ℂ) ^ (i + 1))⁻¹) =
       ((∏ i ∈ range N, (1 - t ^ (i + 1))⁻¹ : ℝ) : ℂ) by push_cast; rfl, Complex.ofReal_re]
@@ -210,17 +247,17 @@ lemma r27_summable_partitionFunction {t : ℝ} (ht0 : 0 ≤ t) (ht : t < 1) :
   have hnn : ∀ n, 0 ≤ ((coeff n Q : ℤ) : ℝ) * t ^ n := by
     intro n
     have : coeff n Q = ((Nat.Partition.restricted n (· ≤ N)).card : ℤ) := by
-      simp only [Q]; rw [← r27_restrictedSeries_eq, coeff_mk]
+      simp only [Q]; rw [← mk_card_restricted_le_eq_prod_geomSeriesOnMultiples, coeff_mk]
     rw [this]; positivity
   calc ∑ n ∈ range N, (partitionFunction n : ℝ) * t ^ n
       = ∑ n ∈ range N, ((coeff n Q : ℤ) : ℝ) * t ^ n := by
         refine sum_congr rfl fun n hn ↦ ?_
-        rw [r27_coeff_prod_geomSeries (by simp at hn; omega)]; simp
+        rw [coeff_prod_geomSeriesOnMultiples (by simp at hn; omega)]; simp
     _ ≤ ∏ i ∈ range N, (1 - t ^ (i + 1))⁻¹ := sum_le_hasSum _ (fun n _ ↦ hnn n) hre
-    _ ≤ _ := r27_prod_inv_one_sub_le ht0 ht N
+    _ ≤ _ := prod_inv_one_sub_pow_le_exp ht0 ht N
 
 /-- The pentagonal series converges absolutely to Euler's function in the unit disc. -/
-lemma r27_absEval_pentagonalSeries {x : ℂ} (hx : ‖x‖ < 1) :
+private lemma hasSumAt_pentagonalSeries {x : ℂ} (hx : ‖x‖ < 1) :
     PowerSeries.HasSumAt (pentagonalSeries ℤ) x (eulerFunction x) := by
   have hc : ∀ n, ((coeff n (pentagonalSeries ℤ) : ℤ) : ℂ) = coeff n (pentagonalSeries ℂ) := by
     intro n
@@ -230,39 +267,40 @@ lemma r27_absEval_pentagonalSeries {x : ℂ} (hx : ‖x‖ < 1) :
       rcases Int.even_or_odd k with h | h <;> simp [Int.negOnePow_even, Int.negOnePow_odd, h]
     · simp [coeff_pentagonalSeries_eq_zero _ hn]
   have hb := PowerSeries.hasSumAt_of_bounded (P := pentagonalSeries ℤ) (C := 1) (fun n ↦ by
+    rw [algebraMap_int_eq, eq_intCast, Complex.norm_intCast]
     by_cases hn : n ∈ Set.range pentagonal
     · obtain ⟨k, rfl⟩ := hn
       simp only [coeff_pentagonalSeries_pentagonal]
       rcases Int.even_or_odd k with h | h <;> simp [Int.negOnePow_even, Int.negOnePow_odd, h]
     · simp [coeff_pentagonalSeries_eq_zero _ hn]) hx
-  simp only [PowerSeries.HasSumAt, hc] at hb ⊢
+  simp only [PowerSeries.hasSumAt_int_iff, algebraMap_int_eq, eq_intCast, hc] at hb ⊢
   rwa [← eulerFunction_def] at hb
 
 /-- The partition series converges absolutely in the unit disc. -/
-lemma r27_absEval_partitionSeries {x : ℂ} (hx : ‖x‖ < 1) :
-    PowerSeries.HasSumAt r27_partitionSeries x (∑' n, (partitionFunction n : ℂ) * x ^ n) := by
-  have hc : ∀ n, ((coeff n r27_partitionSeries : ℤ) : ℂ) = (partitionFunction n : ℂ) := by
-    intro n; simp [r27_partitionSeries]
-  have hs : Summable fun n ↦ ‖((coeff n r27_partitionSeries : ℤ) : ℂ) * x ^ n‖ := by
+private lemma hasSumAt_partitionPowerSeries {x : ℂ} (hx : ‖x‖ < 1) :
+    PowerSeries.HasSumAt partitionPowerSeries x (∑' n, (partitionFunction n : ℂ) * x ^ n) := by
+  have hc : ∀ n, ((coeff n partitionPowerSeries : ℤ) : ℂ) = (partitionFunction n : ℂ) := by
+    intro n; simp [partitionPowerSeries]
+  have hs : Summable fun n ↦ ‖((coeff n partitionPowerSeries : ℤ) : ℂ) * x ^ n‖ := by
     simp only [hc, norm_mul, norm_pow, Complex.norm_natCast]
-    exact r27_summable_partitionFunction (norm_nonneg x) hx
-  simp only [PowerSeries.HasSumAt, hc] at hs ⊢
+    exact summable_partitionFunction_mul_pow (norm_nonneg x) hx
+  simp only [PowerSeries.hasSumAt_int_iff, hc] at hs ⊢
   exact hs.of_norm.hasSum
 
 /-- Euler's pentagonal recursion for `p(n)` (DLMF 27.14.6). -/
-lemma r27_rec {n : ℕ} (hn : 1 ≤ n) :
+private lemma partitionFunction_eq_sum_pentagonal {n : ℕ} (hn : 1 ≤ n) :
     (partitionFunction n : ℤ) = ∑ k ∈ Finset.Icc 1 n, (-1) ^ (k + 1) *
       ((if pentagonal k ≤ n then (partitionFunction (n - pentagonal k) : ℤ) else 0) +
         (if pentagonal (-k) ≤ n then (partitionFunction (n - pentagonal (-k)) : ℤ) else 0)) := by
-  have h0 : coeff n (pentagonalSeries ℤ * r27_partitionSeries) = 0 := by
-    rw [mul_comm, r27_partitionSeries_mul_pentagonal, coeff_one,
+  have h0 : coeff n (pentagonalSeries ℤ * partitionPowerSeries) = 0 := by
+    rw [mul_comm, partitionPowerSeries_mul_pentagonalSeries, coeff_one,
       ite_eq_right_iff.mpr (fun h ↦ absurd h (by omega))]
   rw [coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ
-    (fun i j ↦ coeff i (pentagonalSeries ℤ) * coeff j r27_partitionSeries)] at h0
-  simp only [r27_partitionSeries, coeff_mk] at h0
+    (fun i j ↦ coeff i (pentagonalSeries ℤ) * coeff j partitionPowerSeries)] at h0
+  simp only [partitionPowerSeries, coeff_mk] at h0
   simp_rw [coeff_pentagonalSeries_mul_eq_extend _ _ (fun j ↦ (partitionFunction (n - j) : ℤ))]
     at h0
-  rw [r27_sum_range_extend_pentagonal, r27_sum_Icc_neg_self] at h0
+  rw [sum_range_extend_pentagonal, sum_Icc_neg_self_eq_add_sum] at h0
   have hp0 : pentagonal 0 = 0 := by simp [pentagonal_def]
   simp only [hp0, Nat.sub_zero, zero_le, ite_true, Int.negOnePow_zero, Units.val_one,
     Int.cast_id, one_mul] at h0
@@ -272,7 +310,7 @@ lemma r27_rec {n : ℕ} (hn : 1 ≤ n) :
   split_ifs <;> ring
 
 /-- `X g_k' = g_k (k X^k g_k)` for the geometric series `g_k = 1/(1 - X^k)`. -/
-lemma r27_X_derivative_geomSeries {k : ℕ} (hk : 0 < k) :
+private lemma X_mul_derivative_geomSeriesOnMultiples {k : ℕ} (hk : 0 < k) :
     X * d⁄dX (PowerSeries.geomSeriesOnMultiples k) =
       PowerSeries.geomSeriesOnMultiples k * ((k : PowerSeries ℤ) * X ^ k * PowerSeries.geomSeriesOnMultiples k) := by
   have h := PowerSeries.geomSeriesOnMultiples_mul_one_sub_X_pow hk
@@ -292,20 +330,20 @@ lemma r27_X_derivative_geomSeries {k : ℕ} (hk : 0 < k) :
     _ = _ := by rw [key, ← hXk]; ring
 
 /-- Logarithmic derivative of a finite product of geometric series. -/
-lemma r27_X_derivative_prod_geomSeries (N : ℕ) :
+private lemma X_mul_derivative_prod_geomSeriesOnMultiples (N : ℕ) :
     X * d⁄dX (∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)) =
       (∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)) *
         ∑ i ∈ range N, (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) * PowerSeries.geomSeriesOnMultiples (i + 1)) := by
   induction N with
   | zero => simp
   | succ N ih =>
-    have hg := r27_X_derivative_geomSeries (Nat.succ_pos N)
+    have hg := X_mul_derivative_geomSeriesOnMultiples (Nat.succ_pos N)
     rw [prod_range_succ, sum_range_succ, Derivation.leibniz, smul_eq_mul, smul_eq_mul]
     simp only [Nat.succ_eq_add_one] at hg ⊢
     linear_combination (∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)) * hg + PowerSeries.geomSeriesOnMultiples (N + 1) * ih
 
 /-- Coefficients of `∑_{k ≤ N} k X^k/(1 - X^k)`: `σ₁(m)` for `1 ≤ m ≤ N`. -/
-lemma r27_coeff_sigmaSeries {m N : ℕ} (hm : 1 ≤ m) (hmN : m ≤ N) :
+private lemma coeff_sum_mul_X_pow_mul_geomSeriesOnMultiples {m N : ℕ} (hm : 1 ≤ m) (hmN : m ≤ N) :
     coeff m (∑ i ∈ range N, (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) *
       PowerSeries.geomSeriesOnMultiples (i + 1))) = (σ 1 m : ℤ) := by
   rw [map_sum]
@@ -334,8 +372,7 @@ lemma r27_coeff_sigmaSeries {m N : ℕ} (hm : 1 ≤ m) (hmN : m ≤ N) :
     omega
   · intro i _; simp
 
-end R27Helpers
-
+end Helpers
 /-! ### §27.14(i) Partition functions -/
 
 /-- DLMF 27.14.1: `p(n)` is the number of solutions of `n = a₁ + a₂ + ⋯`,
@@ -347,19 +384,14 @@ theorem partitionFunction_eq_card (n : ℕ) :
 /-- §27.14(i): `p(5) = 7`. -/
 @[dlmf 27.14.i]
 theorem partitionFunction_five : partitionFunction 5 = 7 := by
-  have e2 := r27_rec (n := 2) (by norm_num)
-  have e3 := r27_rec (n := 3) (by norm_num)
-  have e4 := r27_rec (n := 4) (by norm_num)
-  have e5 := r27_rec (n := 5) (by norm_num)
+  have e2 := partitionFunction_eq_sum_pentagonal (n := 2) (by norm_num)
+  have e3 := partitionFunction_eq_sum_pentagonal (n := 3) (by norm_num)
+  have e4 := partitionFunction_eq_sum_pentagonal (n := 4) (by norm_num)
+  have e5 := partitionFunction_eq_sum_pentagonal (n := 5) (by norm_num)
   simp only [Finset.sum_Icc_succ_top, Finset.Icc_self, Finset.sum_singleton, Nat.reduceLeDiff,
     pentagonal_def] at e2 e3 e4 e5
   norm_num at e2 e3 e4 e5
   omega
-
-/-- §27.14(i): `p_k(n)`, the number of partitions of `n` into at most `k` parts. -/
-@[dlmf 27.14.i]
-def partitionsAtMost (k n : ℕ) : ℕ :=
-  (Finset.univ.filter fun q : Nat.Partition n ↦ q.parts.card ≤ k).card
 
 /-! ### §27.14(ii) Generating functions and recursions -/
 
@@ -386,15 +418,15 @@ theorem hasProd_eulerReciprocal {x : ℂ} (hx : ‖x‖ < 1) :
 @[dlmf 27.14.E3]
 theorem hasSum_partitionFunction {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ (partitionFunction n : ℂ) * x ^ n) (1 / eulerReciprocal x) := by
-  have hF := r27_absEval_partitionSeries hx
-  have h1 := PowerSeries.HasSumAt.mul hF (r27_absEval_pentagonalSeries hx)
-  rw [r27_partitionSeries_mul_pentagonal] at h1
+  have hF := hasSumAt_partitionPowerSeries hx
+  have h1 := PowerSeries.HasSumAt.mul hF (hasSumAt_pentagonalSeries hx)
+  rw [partitionPowerSeries_mul_pentagonalSeries] at h1
   have h2 := PowerSeries.HasSumAt.unique h1 (PowerSeries.hasSumAt_one x)
   rw [(hasProd_eulerReciprocal hx).2, ← eq_one_div_of_mul_eq_one_left h2]
-  have hc : ∀ n, ((PowerSeries.coeff n r27_partitionSeries : ℤ) : ℂ) =
+  have hc : ∀ n, ((PowerSeries.coeff n partitionPowerSeries : ℤ) : ℂ) =
       (partitionFunction n : ℂ) := by
-    intro n; simp [r27_partitionSeries]
-  simpa only [PowerSeries.HasSumAt, hc] using hF
+    intro n; simp [partitionPowerSeries]
+  simpa only [PowerSeries.hasSumAt_int_iff, hc] using hF
 
 /-- DLMF 27.14.5: the pentagonal numbers `ω(±k) = (3k² ∓ k)/2`. -/
 @[dlmf 27.14.E5]
@@ -429,18 +461,18 @@ theorem partitionFunction_recursion {n : ℕ} (hn : 1 ≤ n) :
     (partitionFunction n : ℤ) = ∑ k ∈ Finset.Icc 1 n, (-1) ^ (k + 1) *
       ((if pentagonal k ≤ n then (partitionFunction (n - pentagonal k) : ℤ) else 0) +
         (if pentagonal (-k) ≤ n then (partitionFunction (n - pentagonal (-k)) : ℤ) else 0)) :=
-  r27_rec hn
+  partitionFunction_eq_sum_pentagonal hn
 
 /-- DLMF 27.14.7: `n p(n) = ∑_{k=1}^{n} σ₁(k) p(n - k)`. -/
 @[dlmf 27.14.E7]
 theorem partitionFunction_sigma_recursion (n : ℕ) :
     n * partitionFunction n = ∑ k ∈ Finset.Icc 1 n, σ 1 k * partitionFunction (n - k) := by
   open PowerSeries in
-  have h := congrArg (coeff n) (r27_X_derivative_prod_geomSeries n)
+  have h := congrArg (coeff n) (X_mul_derivative_prod_geomSeriesOnMultiples n)
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  rw [coeff_succ_X_mul, coeff_derivative, r27_coeff_prod_geomSeries le_rfl, mul_comm _ (∑ i ∈ _, _),
+  rw [coeff_succ_X_mul, coeff_derivative, coeff_prod_geomSeriesOnMultiples le_rfl, mul_comm _ (∑ i ∈ _, _),
     coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ
       (fun i j ↦ coeff i (∑ i ∈ range (m + 1), (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) *
         PowerSeries.geomSeriesOnMultiples (i + 1))) * coeff j (∏ i ∈ range (m + 1), PowerSeries.geomSeriesOnMultiples (i + 1))),
@@ -458,7 +490,7 @@ theorem partitionFunction_sigma_recursion (n : ℕ) :
     Nat.add_sub_cancel]
   refine sum_congr rfl fun k hk ↦ ?_
   rw [mem_range] at hk
-  rw [r27_coeff_sigmaSeries (by omega) (by omega), r27_coeff_prod_geomSeries (by omega),
+  rw [coeff_sum_mul_X_pow_mul_geomSeriesOnMultiples (by omega) (by omega), coeff_prod_geomSeriesOnMultiples (by omega),
     add_comm 1 k]
 
 /-! ### §27.14(iii) Asymptotic formulas -/
@@ -585,12 +617,13 @@ def ramanujanTau (n : ℕ) : ℤ :=
 theorem hasSum_ramanujanTau {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ (ramanujanTau n : ℂ) * x ^ n) (x * eulerReciprocal x ^ 24) := by
   rw [(hasProd_eulerReciprocal hx).2]
-  exact (PowerSeries.HasSumAt.mul (PowerSeries.hasSumAt_X x) (PowerSeries.HasSumAt.pow (r27_absEval_pentagonalSeries hx) 24))
+  exact PowerSeries.hasSumAt_int_iff.mp
+    ((PowerSeries.hasSumAt_X x).mul ((hasSumAt_pentagonalSeries hx).pow 24))
 
 /-! #### Bridge to Mathlib's discriminant and Eisenstein series (helpers) -/
 
 /-- Mathlib's `Δ(τ) = η(τ)²⁴` is `∑ τ(m) qᵐ` with `q = e^{2πiτ}`. -/
-lemma t27b_hasSum_discriminant (τ : ℍ) :
+private lemma hasSum_ramanujanTau_smul_qParam_pow (τ : ℍ) :
     HasSum (fun m : ℕ ↦ (ramanujanTau m : ℂ) • Function.Periodic.qParam 1 τ ^ m)
       (ModularForm.discriminant τ) := by
   have hq : ‖Function.Periodic.qParam 1 τ‖ < 1 :=
@@ -605,107 +638,105 @@ lemma t27b_hasSum_discriminant (τ : ℍ) :
   · congr 2; push_cast; ring
 
 /-- `τ(m)` is the `m`th `q`-expansion coefficient of Mathlib's `Δ`. -/
-lemma t27b_ramanujanTau_eq_coeff (m : ℕ) :
+private lemma ramanujanTau_eq_coeff_qExpansion (m : ℕ) :
     (ramanujanTau m : ℂ) = (UpperHalfPlane.qExpansion 1 ModularForm.discriminant).coeff m :=
   ModularFormClass.qExpansion_coeff_unique one_pos one_mem_strictPeriods_SL
-    (f := CuspForm.discriminant) t27b_hasSum_discriminant m
+    (f := CuspForm.discriminant) hasSum_ramanujanTau_smul_qParam_pow m
 
 /-- `τ(mn) = τ(m) τ(n)` for coprime `m, n` (Tau Ceti). -/
-lemma t27b_ramanujanTau_mul_coprime {m n : ℕ} (h : m.Coprime n) :
+private lemma ramanujanTau_mul_of_coprime {m n : ℕ} (h : m.Coprime n) :
     ramanujanTau (m * n) = ramanujanTau m * ramanujanTau n := by
   have := TauCeti.ModularForm.discriminant_qExpansion_coeff_mul h
-  rw [← t27b_ramanujanTau_eq_coeff, ← t27b_ramanujanTau_eq_coeff,
-    ← t27b_ramanujanTau_eq_coeff] at this
+  rw [← ramanujanTau_eq_coeff_qExpansion, ← ramanujanTau_eq_coeff_qExpansion,
+    ← ramanujanTau_eq_coeff_qExpansion] at this
   exact_mod_cast this
 
 /-- `τ(1) = 1`. -/
-lemma t27b_ramanujanTau_one : ramanujanTau 1 = 1 := by
+private lemma ramanujanTau_one : ramanujanTau 1 = 1 := by
   have := ModularForm.discriminant_qExpansion_coeff_one
-  rw [← t27b_ramanujanTau_eq_coeff] at this
+  rw [← ramanujanTau_eq_coeff_qExpansion] at this
   exact_mod_cast this
 
 /-- `τ(p^{r+2}) = τ(p) τ(p^{r+1}) - p¹¹ τ(p^r)` (Tau Ceti). -/
-lemma t27b_ramanujanTau_prime_pow_add_two {p : ℕ} (hp : p.Prime) (r : ℕ) :
+private lemma ramanujanTau_prime_pow_add_two {p : ℕ} (hp : p.Prime) (r : ℕ) :
     ramanujanTau (p ^ (r + 2)) =
       ramanujanTau p * ramanujanTau (p ^ (r + 1)) - (p : ℤ) ^ 11 * ramanujanTau (p ^ r) := by
   have := TauCeti.ModularForm.discriminant_qExpansion_coeff_prime_pow_add_two hp r
-  simp only [← t27b_ramanujanTau_eq_coeff] at this
+  simp only [← ramanujanTau_eq_coeff_qExpansion] at this
   exact_mod_cast this
 
-section T27b691
-
+section Ramanujan691
 open ModularForm EisensteinSeries
 open scoped ArithmeticFunction.sigma
 
 /-- `B₁₂ = -691/2730`. -/
-private lemma t27b_bernoulli_twelve : bernoulli 12 = -691 / 2730 := by decide +kernel
+private lemma bernoulli_twelve : bernoulli 12 = -691 / 2730 := by decide +kernel
 
 /-- `E₁₂ - E₆²` as a level-one modular form of weight 12. -/
-private def t27b_G : ModularForm 𝒮ℒ 12 :=
+private def e12SubE6Sq : ModularForm 𝒮ℒ 12 :=
   ModularForm.mcast (by decide) (E (k := 12) (by norm_num)) -
     ModularForm.mcast (by decide) (E₆.pow 2)
 
 /-- The `q`-expansion of `E₁₂ - E₆²`. -/
-private lemma t27b_G_qExpansion :
-    qExpansion 1 t27b_G = qExpansion 1 (E (k := 12) (by norm_num)) -
+private lemma qExpansion_e12SubE6Sq :
+    qExpansion 1 e12SubE6Sq = qExpansion 1 (E (k := 12) (by norm_num)) -
       qExpansion 1 E₆ * qExpansion 1 E₆ := by
-  simp only [t27b_G, FunLike.coe_sub, coe_mcast,
+  simp only [e12SubE6Sq, FunLike.coe_sub, coe_mcast,
     ModularForm.qExpansion_sub one_pos one_mem_strictPeriods_SL,
     ModularForm.qExpansion_pow one_pos one_mem_strictPeriods_SL]
   ring
 
 /-- The coefficients of `E₁₂`: `1` and `(65520/691) σ₁₁(m)`. -/
-private lemma t27b_E12_coeff (m : ℕ) :
+private lemma coeff_qExpansion_E12 (m : ℕ) :
     (qExpansion 1 (E (k := 12) (by norm_num))).coeff m =
       if m = 0 then 1 else (65520 / 691 : ℂ) * (σ 11 m : ℂ) := by
-  rw [E_qExpansion_coeff (by norm_num) ⟨6, rfl⟩, t27b_bernoulli_twelve]
+  rw [E_qExpansion_coeff (by norm_num) ⟨6, rfl⟩, bernoulli_twelve]
   norm_num
 
 /-- `E₁₂ - E₆²` is a cusp form. -/
-private lemma t27b_G_isCuspForm : IsCuspForm t27b_G := by
-  simp [isCuspForm_iff_coeffZero_eq_zero, t27b_G_qExpansion,
+private lemma isCuspForm_e12SubE6Sq : IsCuspForm e12SubE6Sq := by
+  simp [isCuspForm_iff_coeffZero_eq_zero, qExpansion_e12SubE6Sq,
     PowerSeries.coeff_mul, -PowerSeries.coeff_zero_eq_constantCoeff,
     E_qExpansion_coeff_zero _ ⟨3, rfl⟩, E_qExpansion_coeff_zero _ ⟨6, rfl⟩]
 
 /-- Integer coefficients of `E₆`. -/
-private def t27b_e6 (m : ℕ) : ℤ := if m = 0 then 1 else -504 * (σ 5 m : ℤ)
+private def e6Coeff (m : ℕ) : ℤ := if m = 0 then 1 else -504 * (σ 5 m : ℤ)
 
-/-- The coefficients of `E₆` are the integers `t27b_e6 m`. -/
-private lemma t27b_E6_coeff (m : ℕ) :
-    (qExpansion 1 E₆).coeff m = (t27b_e6 m : ℂ) := by
-  rw [E_qExpansion_coeff (by norm_num) ⟨3, rfl⟩, t27b_e6]
+/-- The coefficients of `E₆` are the integers `e6Coeff m`. -/
+private lemma coeff_qExpansion_E6 (m : ℕ) :
+    (qExpansion 1 E₆).coeff m = (e6Coeff m : ℂ) := by
+  rw [E_qExpansion_coeff (by norm_num) ⟨3, rfl⟩, e6Coeff]
   have hb : bernoulli 6 = 1 / 42 := by decide +kernel
   split_ifs <;> norm_num [hb]
 
 /-- The coefficients of `E₁₂ - E₆²` for `n ≥ 1`. -/
-private lemma t27b_G_coeff (n : ℕ) (hn : n ≠ 0) :
-    (qExpansion 1 t27b_G).coeff n = (65520 / 691 : ℂ) * (σ 11 n : ℂ) -
-      ((∑ x ∈ Finset.antidiagonal n, t27b_e6 x.1 * t27b_e6 x.2 : ℤ) : ℂ) := by
-  rw [t27b_G_qExpansion, map_sub, t27b_E12_coeff, PowerSeries.coeff_mul]
-  simp [hn, t27b_E6_coeff]
+private lemma coeff_qExpansion_e12SubE6Sq (n : ℕ) (hn : n ≠ 0) :
+    (qExpansion 1 e12SubE6Sq).coeff n = (65520 / 691 : ℂ) * (σ 11 n : ℂ) -
+      ((∑ x ∈ Finset.antidiagonal n, e6Coeff x.1 * e6Coeff x.2 : ℤ) : ℂ) := by
+  rw [qExpansion_e12SubE6Sq, map_sub, coeff_qExpansion_E12, PowerSeries.coeff_mul]
+  simp [hn, coeff_qExpansion_E6]
 
 /-- `E₁₂ - E₆² = c Δ`, coefficientwise. -/
-private lemma t27b_G_eq : ∃ c : ℂ, ∀ n, (qExpansion 1 t27b_G).coeff n =
+private lemma exists_coeff_e12SubE6Sq_eq_mul_ramanujanTau : ∃ c : ℂ, ∀ n, (qExpansion 1 e12SubE6Sq).coeff n =
     c * (ramanujanTau n : ℂ) := by
-  obtain ⟨g, hg⟩ := t27b_G_isCuspForm
+  obtain ⟨g, hg⟩ := isCuspForm_e12SubE6Sq
   obtain ⟨c, hc⟩ := CuspForm.exists_smul_discriminant_of_weight_eq_twelve g
-  have hgE : (g : ℍ → ℂ) = t27b_G := congrArg DFunLike.coe hg
+  have hgE : (g : ℍ → ℂ) = e12SubE6Sq := congrArg DFunLike.coe hg
   have hcΔ : (c • CuspForm.discriminant : ℍ → ℂ) = g := congrArg DFunLike.coe hc
   have hgΔ := ModularForm.qExpansion_smul one_pos one_mem_strictPeriods_SL c
     CuspForm.discriminant
   rw [hcΔ, hgE] at hgΔ
   refine ⟨c, fun n ↦ ?_⟩
   rw [hgΔ, PowerSeries.coeff_smul, smul_eq_mul, CuspForm.coe_discriminant,
-    t27b_ramanujanTau_eq_coeff]
+    ramanujanTau_eq_coeff_qExpansion]
 
-end T27b691
-
+end Ramanujan691
 /-- §27.14(vi): `τ` is multiplicative. -/
 @[dlmf 27.14.vi]
 theorem isMultiplicativeFn_ramanujanTau :
     IsMultiplicativeFn (fun n ↦ (ramanujanTau n : ℂ)) := by
-  refine ⟨by simp [t27b_ramanujanTau_one], fun m n _ _ h ↦ ?_⟩
-  simp only [t27b_ramanujanTau_mul_coprime h, Int.cast_mul]
+  refine ⟨by simp [ramanujanTau_one], fun m n _ _ h ↦ ?_⟩
+  simp only [ramanujanTau_mul_of_coprime h, Int.cast_mul]
 
 /-- DLMF 27.14.19: `τ(m)τ(n) = ∑_{d ∣ (m,n)} d¹¹ τ(mn/d²)`, `m, n ≥ 1`. -/
 @[dlmf 27.14.E19]
@@ -713,10 +744,10 @@ theorem ramanujanTau_mul {m n : ℕ} (hm : 1 ≤ m) (hn : 1 ≤ n) :
     ramanujanTau m * ramanujanTau n =
       ∑ d ∈ (Nat.gcd m n).divisors, (d : ℤ) ^ 11 * ramanujanTau (m * n / d ^ 2) := by
   have hf : IsMultiplicativeFn ramanujanTau :=
-    ⟨t27b_ramanujanTau_one, fun m n _ _ h ↦ t27b_ramanujanTau_mul_coprime h⟩
-  refine t27b_hecke_mul (w := fun d ↦ (d : ℤ) ^ 11) hf (fun i j ↦ by push_cast; ring)
-    (fun p hp a b ↦ t27b_hecke_prime_pow _ _ hp (fun k ↦ by push_cast; ring)
-      t27b_ramanujanTau_one (t27b_ramanujanTau_prime_pow_add_two hp) a b) hm hn
+    ⟨ramanujanTau_one, fun m n _ _ h ↦ ramanujanTau_mul_of_coprime h⟩
+  refine hecke_relation_of_prime_pow (w := fun d ↦ (d : ℤ) ^ 11) hf (fun i j ↦ by push_cast; ring)
+    (fun p hp a b ↦ hecke_relation_prime_pow _ _ hp (fun k ↦ by push_cast; ring)
+      ramanujanTau_one (ramanujanTau_prime_pow_add_two hp) a b) hm hn
 
 /-- §27.14(vi): Lehmer's conjecture `τ(n) ≠ 0` for `n ≥ 1` (open; stated as a proposition
 only). -/
@@ -728,17 +759,17 @@ def LehmerConjecture : Prop := ∀ n : ℕ, 1 ≤ n → ramanujanTau n ≠ 0
 theorem ramanujanTau_modEq (n : ℕ) : ramanujanTau n ≡ (σ 11 n : ℤ) [ZMOD 691] := by
   rcases eq_or_ne n 0 with rfl | hn
   · simp [ramanujanTau]
-  obtain ⟨c, hc⟩ := t27b_G_eq
+  obtain ⟨c, hc⟩ := exists_coeff_e12SubE6Sq_eq_mul_ramanujanTau
   have h1 := hc 1
-  have hA1 : (∑ x ∈ Finset.antidiagonal 1, t27b_e6 x.1 * t27b_e6 x.2) = -1008 := by
-    simp [t27b_e6, Finset.Nat.antidiagonal_succ]
-  rw [t27b_G_coeff 1 one_ne_zero, t27b_ramanujanTau_one, hA1] at h1
+  have hA1 : (∑ x ∈ Finset.antidiagonal 1, e6Coeff x.1 * e6Coeff x.2) = -1008 := by
+    simp [e6Coeff, Finset.Nat.antidiagonal_succ]
+  rw [coeff_qExpansion_e12SubE6Sq 1 one_ne_zero, ramanujanTau_one, hA1] at h1
   have hc' : c = 65520 / 691 + 1008 := by
     simp at h1
     linear_combination -h1
   have hn' := hc n
-  rw [t27b_G_coeff n hn, hc'] at hn'
-  set A := ∑ x ∈ Finset.antidiagonal n, t27b_e6 x.1 * t27b_e6 x.2
+  rw [coeff_qExpansion_e12SubE6Sq n hn, hc'] at hn'
+  set A := ∑ x ∈ Finset.antidiagonal n, e6Coeff x.1 * e6Coeff x.2
   have key : 65520 * (σ 11 n : ℤ) - 691 * A = 762048 * ramanujanTau n := by
     have : ((65520 * (σ 11 n : ℤ) - 691 * A : ℤ) : ℂ) =
         ((762048 * ramanujanTau n : ℤ) : ℂ) := by

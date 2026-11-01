@@ -11,10 +11,19 @@ public import Mathlib.Tactic.Positivity.Finset
 /-!
 # Geometric predicates for separating infinite contours
 
-These are general point-set and parameterization predicates, independent of any
-special function or integral identity. Left and right pole families belong to
-distinct connected components of the complement of the contour. Exact tails fix
-the orientation; finite indentations are unrestricted. All declarations are definitions.
+General point-set and parameterization predicates for the infinite contours of Mellin–Barnes
+type integrals, independent of any special function or integral identity. Left and right pole
+families belong to distinct connected components of the complement of the contour. Exact tails
+fix the orientation; finite indentations are unrestricted. The file contains definitions only.
+
+## Main definitions
+
+* `SeparatesPoleSets`: two sets lie in distinct components of the complement of a contour.
+* `HasVerticalTails`: an upward contour with straight vertical tails, whose two real offsets
+  may differ.
+* `HasHorizontalRightTails`: a right-infinite contour with a lower outgoing and an upper
+  returning horizontal tail.
+* `StaysAwayFrom`: a contour stays a uniform positive distance from a given pole set.
 -/
 
 @[expose] public section

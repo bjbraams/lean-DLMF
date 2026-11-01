@@ -15,8 +15,15 @@ public import Mathlib.NumberTheory.ModularForms.LevelOne.GradedRing
 /-!
 # DLMF Chapter 23 coverage already available in Mathlib
 
+This file records `dlmf_upstream` pointers from DLMF Chapter 23 to the Mathlib declarations
+that already cover them: the Weierstrass `℘` function and its derivative, the invariants
+`g₂, g₃`, the differential equation 23.3.10, the modular group, Dedekind's `η` and the modular
+discriminant.
+
+## Implementation notes
+
 Mathlib's `PeriodPair` is parametrized by the full periods `ω₁, ω₂` (DLMF's `2ω₁, 2ω₃`), and
-`℘[L]`, `℘'[L]` are defined by the lattice sums 23.2.4 and its derivative. Its `G n` is the
+`℘[L]`, `℘'[L]` are defined by the lattice sum 23.2.4 and its derivative. Its `G n` is the
 lattice sum `∑' l, l⁻ⁿ` over all lattice points (the term `l = 0` contributes `0⁻ⁿ = 0`), so
 `g₂ = 60 G 4` and `g₃ = 140 G 6` are exactly 23.3.1–23.3.2. Dedekind's `η` is
 `ModularForm.eta` (`q^{1/24}`-form with `q = e^{2πiτ}`, i.e. DLMF's `e^{iπτ/12}`), and the

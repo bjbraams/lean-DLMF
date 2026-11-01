@@ -18,11 +18,12 @@ public import Mathlib.NumberTheory.Real.GoldenRatio
 public import Mathlib.SetTheory.Cardinal.Finite
 
 /-!
-# DLMF §§26.9–26.18 results already in Mathlib
+# Combinatorial analysis, §§26.9–26.18: results already in Mathlib
 
-Checked `dlmf_upstream` pointers (part B of the Chapter 26 acquisition) to Mathlib declarations
-that formalize DLMF statements of §§26.9–26.18, instead of duplicate local theorems. Part A's
-pointers (§§26.1–26.8) are kept by ACQ26A.
+Checked `dlmf_upstream` pointers to Mathlib declarations that formalize DLMF statements of
+§§26.9–26.18 (among them 26.10.2, 26.10.5, 26.10.12, 26.11.5, 26.11.7, 26.13.4 and 26.18.1),
+instead of duplicate local theorems. The pointers for §§26.1–26.8 are in
+`DLMF/Combinatorics/MathlibCoverage.lean`.
 -/
 
 /- §26.10 -/

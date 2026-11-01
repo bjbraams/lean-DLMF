@@ -10,16 +10,30 @@ public import Mathlib.NumberTheory.LSeries.RiemannZeta
 public import Mathlib.Analysis.PSeriesComplex
 
 /-!
-# The alternating harmonic series and Dirichlet's `η` and `λ` (Duverney §2.5)
+# The alternating harmonic series and Dirichlet's `η` and `λ`
 
-Mathlib has `ζ(s)` but neither the sum `∑ (-1)^{i}/(i+1) = ln 2` nor the companion series
-`η(s) = ∑ (-1)^{n-1} n^{-s}` and `λ(s) = ∑ (2n+1)^{-s}`. This file proves:
-* `tendsto_sum_alternating_harmonic`: the partial sums of `∑ (-1)^i/(i+1)` tend to `ln 2`, by
-  Abel's limit theorem, after the pattern of Mathlib's Leibniz series for `π`;
-* `dirichletLambda_eq`: `λ(s) = (1 - 2^{-s}) ζ(s)` and `dirichletEta_eq`:
-  `η(s) = (1 - 2^{1-s}) ζ(s)` for `Re s > 1`, by splitting `ζ` into odd and even terms;
-* `tendsto_dirichletEta_one`: `η(1) = ln 2` as a limit of partial sums;
+Mathlib has `ζ(s)` but neither the sum `∑ (-1)^i/(i+1) = ln 2` nor the companion series
+`η(s) = ∑ (-1)^{n-1} n^{-s}` and `λ(s) = ∑ (2n+1)^{-s}` (Duverney §2.5, DLMF §25.2).
+
+## Main definitions
+
+* `dirichletEta`: Dirichlet's eta function `η(s)` (Duverney (2.69)).
+* `dirichletLambda`: Dirichlet's lambda function `λ(s)` (Duverney (2.74)).
+
+## Main results
+
+* `tendsto_sum_alternating_harmonic`: the partial sums of `∑ (-1)^i/(i+1)` tend to `ln 2`.
+* `dirichletLambda_eq`: `λ(s) = (1 - 2^{-s}) ζ(s)` for `Re s > 1` (DLMF 25.2.2).
+* `hasSum_dirichletEta`, `dirichletEta_eq`: `η(s) = (1 - 2^{1-s}) ζ(s)` for `Re s > 1`
+  (DLMF 25.2.3).
+* `tendsto_dirichletEta_one`: `η(1) = ln 2` as a limit of partial sums.
 * `tendsto_riemannZeta_atTop`: `ζ(s) → 1` as real `s → ∞`.
+
+## Implementation notes
+
+The alternating harmonic series is summed by Abel's limit theorem, after the pattern of
+Mathlib's Leibniz series for `π`. The relations for `η` and `λ` come from splitting `ζ` into odd
+and even terms.
 -/
 
 @[expose] public section

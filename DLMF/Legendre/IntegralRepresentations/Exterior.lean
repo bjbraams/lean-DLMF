@@ -14,11 +14,29 @@ public import Mathlib.Analysis.SpecialFunctions.Arcosh
 /-!
 # Exterior associated Legendre integral representations
 
-The inverse Joukowski branch and hyperbolic integral kernels represent associated Legendre
-functions outside the cut.
+This file proves the hyperbolic integral representations of the associated Legendre functions
+outside the cut `(-∞, 1]`: DLMF 14.25.1 and 14.25.2 on `ℂ ∖ (-∞, 1]`, and the half-line
+integral behind DLMF 14.12.4. The proofs use the half-angle substitution `s = tanh²(t/2)`,
+Euler's integral for `𝐅`, Pfaff's transformation and, for `𝑸^μ_ν`, the inverse Joukowski map
+`ζ = z - √(z²-1)`. Helper names carry the prefix `legInt_`.
 
-Source references and common attribution are retained in
-`DLMF.Legendre.IntegralRepresentations`.
+## Main definitions
+
+* `legInt_hs`: the half-angle substitution `s = tanh²(t/2)`.
+* `legInt_root`: the branch of `√(z²-1)` on `ℂ ∖ (-∞, 1]` continued from `z > 1`.
+* `legInt_zeta`: the inverse Joukowski map `ζ = z - √(z²-1)`, with `|ζ| < 1`.
+* `legInt_QForm`: the `ζ`-form `√π (z²-1)^{μ/2} 2^μ ζ^{ν+μ+1} 𝐅(ν+μ+1, μ+1/2; ν+3/2; ζ²)`.
+
+## Main results
+
+* `associatedP_complex_integral`: DLMF 14.25.1.
+* `legInt_norm_zeta_lt_one`, `legInt_zeta_analyticAt`: `ζ` is analytic with `|ζ| < 1` on
+  `ℂ ∖ (-∞, 1]`.
+* `legInt_olverQ_eq_QForm`: the `ζ`-form of `𝑸^μ_ν` on `ℂ ∖ (-∞, 1]`, from the quadratic
+  transformation DLMF 15.8.15 on `(1, ∞)`.
+* `olverQ_complex_integral`: DLMF 14.25.2.
+* `legInt_associatedP_cosh_integral`: DLMF 14.12.4, by the substitution `v = e^{±t}/q`, Euler's
+  half-line integral, Pfaff, the quadratic transformation 15.8.13 and DLMF 14.3.18.
 -/
 
 @[expose] public noncomputable section
@@ -198,8 +216,8 @@ theorem legInt_kernel_P {ν μ z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht :
   rw [legInt_cpow_z_add_cosh hz ht, eulerKernel, real_smul,
     show (1:ℂ) - (legInt_hs t : ℂ) = ((1 - legInt_hs t : ℝ) : ℂ) by push_cast; ring,
     cpow_neg, show (2:ℂ)^(2*ν+1) = ((2:ℝ):ℂ)^(2*ν+1) by norm_num,
-    legInt_cpow_ofReal hs, legInt_cpow_ofReal two_pos, legInt_cpow_ofReal hr,
-    legInt_cpow_ofReal hs0, legInt_cpow_ofReal hs1,
+    Complex.ofReal_cpow_eq_exp hs, Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp hr,
+    Complex.ofReal_cpow_eq_exp hs0, Complex.ofReal_cpow_eq_exp hs1,
     show ((|legInt_hs' t| : ℝ) : ℂ) = exp (Real.log |legInt_hs' t| : ℂ) by
       rw [← ofReal_exp, Real.exp_log hd]]
   have hA : (z+1)^(ν+μ+1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hA0)
@@ -287,7 +305,7 @@ theorem associatedP_complex_integral {ν μ : ℂ} (h0 : -1 < ν.re) (h1 : ν.re
   have hl : log ((z+1)/2) = log (z+1) - Real.log 2 := by
     rw [div_eq_mul_inv, show (2:ℂ)⁻¹ = ((2⁻¹:ℝ):ℂ) by push_cast; ring,
       log_mul_ofReal _ (by norm_num) _ hA0, Real.log_inv]; push_cast; ring
-  rw [h2, legInt_cpow_ofReal two_pos, legInt_cpow_ofReal two_pos, ← h2,
+  rw [h2, Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp two_pos, ← h2,
     cpow_def_of_ne_zero (div_ne_zero hA0 two_ne_zero), hl, cpow_def_of_ne_zero hA0,
     legendreBranchPower]
   have e : exp (μ/2*(log (z-1)+log (z+1))) * exp (Real.log 2 * (2*ν+1)) =
@@ -503,8 +521,8 @@ theorem legInt_kernel_Q {ν μ z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht :
   rw [legInt_cpow_root_cosh hz ht, eulerKernel, real_smul,
     show (1:ℂ) - (legInt_hs t : ℂ) = ((1 - legInt_hs t : ℝ) : ℂ) by push_cast; ring,
     cpow_neg, show (2:ℂ)^(2*μ) = ((2:ℝ):ℂ)^(2*μ) by norm_num,
-    legInt_cpow_ofReal hs, legInt_cpow_ofReal two_pos, legInt_cpow_ofReal hr,
-    legInt_cpow_ofReal hs0, legInt_cpow_ofReal hs1,
+    Complex.ofReal_cpow_eq_exp hs, Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp hr,
+    Complex.ofReal_cpow_eq_exp hs0, Complex.ofReal_cpow_eq_exp hs1,
     show ((|legInt_hs' t| : ℝ) : ℂ) = exp (Real.log |legInt_hs' t| : ℂ) by
       rw [← ofReal_exp, Real.exp_log hd]]
   have hA : (legInt_zeta z)^(ν+μ+1) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hζ0)
@@ -582,9 +600,9 @@ theorem legInt_olverQ_eq_QForm_real (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 �
   -- powers of positive reals
   have h1q : (1:ℂ) + ((q^2:ℝ):ℂ) = ((1+q^2:ℝ):ℂ) := by push_cast; ring
   have hpos : 0 < 1 + q^2 := by positivity
-  rw [h1q, cpow_neg, legInt_cpow_ofReal hpos, legInt_cpow_ofReal hq0, legInt_cpow_ofReal hx0,
+  rw [h1q, cpow_neg, Complex.ofReal_cpow_eq_exp hpos, Complex.ofReal_cpow_eq_exp hq0, Complex.ofReal_cpow_eq_exp hx0,
     show (2:ℂ)^μ = ((2:ℝ):ℂ)^μ by norm_num, show (2:ℂ)^(ν+1) = ((2:ℝ):ℂ)^(ν+1) by norm_num,
-    legInt_cpow_ofReal two_pos, legInt_cpow_ofReal two_pos]
+    Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp two_pos]
   have hl : Real.log (1+q^2) = Real.log 2 + Real.log q + Real.log x := by
     rw [← Real.log_mul two_ne_zero hq0.ne', ← Real.log_mul (by positivity) hx0.ne', hxr]
     congr 1; field_simp
@@ -697,9 +715,9 @@ theorem legInt_halfLine_point (ν μ : ℂ) {x q E : ℝ} (hq : 0 < q) (hqx : 1 
   rw [show (1:ℂ) + ((E/q:ℝ):ℂ) = ((1 + E/q : ℝ):ℂ) by push_cast; ring,
     show (((q^2)⁻¹:ℝ):ℂ) + ((E/q:ℝ):ℂ) = (((q^2)⁻¹ + E/q : ℝ):ℂ) by push_cast; ring,
     show (2:ℂ)^(-(μ+1/2)) = ((2:ℝ):ℂ)^(-(μ+1/2)) by norm_num,
-    legInt_cpow_ofReal hv, legInt_cpow_ofReal (by positivity : (0:ℝ) < 1 + E/q),
-    legInt_cpow_ofReal (by positivity : (0:ℝ) < (q^2)⁻¹ + E/q), legInt_cpow_ofReal hq,
-    legInt_cpow_ofReal two_pos, legInt_cpow_ofReal hE, legInt_cpow_ofReal hX,
+    Complex.ofReal_cpow_eq_exp hv, Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < 1 + E/q),
+    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (q^2)⁻¹ + E/q), Complex.ofReal_cpow_eq_exp hq,
+    Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp hE, Complex.ofReal_cpow_eq_exp hX,
     show ((E/q:ℝ):ℂ) = exp (Real.log (E/q) : ℂ) by rw [← ofReal_exp, Real.exp_log hv]]
   simp only [← exp_add]
   congr 1
@@ -821,10 +839,10 @@ theorem legInt_cosh_hyp (ν μ : ℂ) (hμ : -1/2 < μ.re) {x q : ℝ} (hq0 : 0 
       field_simp; ring,
     regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz1, regularizedGaussHGFun_eq_div_Gamma hc,
     hquad, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hz2, regularizedGaussHGFun_eq_div_Gamma hc4,
-    legInt_cpow_ofReal hq2,
+    Complex.ofReal_cpow_eq_exp hq2,
     show (1:ℂ) - ((1-q^2:ℝ):ℂ)/2 = ((q*x:ℝ):ℂ) by
       rw [← show 1 - (1-q^2)/2 = q*x by linarith]; push_cast; ring,
-    legInt_cpow_ofReal (by positivity : (0:ℝ) < q*x), Real.log_inv, Real.log_pow,
+    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < q*x), Real.log_inv, Real.log_pow,
     Real.log_mul hq0.ne' hx0.ne']
   have hG1 : Gamma (2*μ+1) ≠ 0 := Gamma_ne_zero hc
   have hG2 : Gamma (μ+1) ≠ 0 := Gamma_ne_zero hc4
@@ -855,8 +873,8 @@ theorem legInt_cosh_value (ν μ F P : ℂ) {x q : ℝ} (hq0 : 0 < q) (hx0 : 0 <
   have hs2 : ((Real.sqrt 2 : ℝ) : ℂ) = exp (Real.log 2 * (1/2)) := by
     rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos two_pos, ofReal_exp]; push_cast; ring_nf
   have h2 : ∀ w : ℂ, (2:ℂ)^w = exp (Real.log 2 * w) := fun w => by
-    rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, legInt_cpow_ofReal two_pos]
-  rw [hs2, h2, h2, h2, legInt_cpow_ofReal hq0, legInt_cpow_ofReal hx0]
+    rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, Complex.ofReal_cpow_eq_exp two_pos]
+  rw [hs2, h2, h2, h2, Complex.ofReal_cpow_eq_exp hq0, Complex.ofReal_cpow_eq_exp hx0]
   have e : exp (Real.log 2 * (1/2)) * exp (Real.log 2 * (1 - (2*μ+1))) *
       exp (↑(Real.log q) * (2 * (μ - ν))) * exp ((↑(Real.log q) + ↑(Real.log x)) * (ν - μ)) =
       exp (Real.log 2 : ℂ) * (exp (Real.log q * (μ-ν)) * exp (Real.log 2 * (-(μ+1/2)))) *
@@ -906,7 +924,7 @@ theorem legInt_associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hco
     rw [real_smul, real_smul, legInt_halfLine_point ν μ hq0 hqx (Real.exp_pos t),
       legInt_halfLine_point ν μ hq0 hqx (Real.exp_pos (-t)), ← Real.exp_neg, ← Real.exp_neg, neg_neg,
       show Real.exp (-t) + Real.exp t = Real.exp t + Real.exp (-t) by ring, ← Real.cosh_eq,
-      legInt_cpow_ofReal (Real.exp_pos t), legInt_cpow_ofReal (Real.exp_pos (-t)), Real.log_exp,
+      Complex.ofReal_cpow_eq_exp (Real.exp_pos t), Complex.ofReal_cpow_eq_exp (Real.exp_pos (-t)), Real.log_exp,
       Real.log_exp]
     have hc : cosh ((ν+1/2)*t) = (exp ((t:ℂ)*(ν+1/2)) + exp (((-t:ℝ):ℂ)*(ν+1/2)))/2 := by
       rw [Complex.cosh]; push_cast; ring_nf

@@ -8,13 +8,22 @@ module
 public import DLMF.IncompleteGamma.Asymptotics.LargeArgument
 
 /-!
-# Transition estimates and exponential partial sums
+# Exponential partial sums (DLMF 8.11.13–8.11.19)
 
-Incomplete-Gamma transition estimates and asymptotic expansions of remainders of exponential
-partial sums.
+## Main definitions
 
-Source references and common attribution are retained in
-`DLMF.IncompleteGamma.Asymptotics`.
+* `expPartialSumRemainderS`: the remainder `S_n` of the exponential partial sum, DLMF 8.11.15.
+* `expPartialSumRemainderCoeff`: the coefficients `d_k(x)`, DLMF 8.11.19.
+
+## Main results
+
+* `expPartialSum_poisson_limit`: the limit of `e_n(nx)/e^{nx}`, DLMF 8.11.13.
+* `expPartialSumRemainderS_identity`: DLMF 8.11.14.
+* `expPartialSumRemainderS_one_asymptotic`, `expPartialSumRemainderS_neg_one_asymptotic`:
+  DLMF 8.11.16–8.11.17.
+* `expPartialSumRemainderS_uniform_asymptotic`: the uniform expansion, DLMF 8.11.18.
+
+See `DLMF.IncompleteGamma.Asymptotics` for the overview.
 -/
 
 @[expose] public noncomputable section
@@ -29,7 +38,7 @@ open DLMF.Statistical
 
 /-- The identity 8.11.14 with `S_n` unfolded. -/
 theorem igAsy_exp_identity (n : ℕ) (x : ℝ) :
-    exp (n*x : ℂ)=expPartialSum n (n*x)+(n*x : ℂ)^n/n.factorial*
+    exp (n*x : ℂ)=Elementary.expPartialSum n (n*x)+(n*x : ℂ)^n/n.factorial*
       (lowerIncGamma (n+1) (n*x)/((n*x : ℂ)^n*exp (-n*x : ℂ))) := by
   rw [show (-n*x : ℂ) = -(n*x : ℂ) by ring]
   set z : ℂ := (n*x : ℂ)
@@ -38,7 +47,7 @@ theorem igAsy_exp_identity (n : ℕ) (x : ℝ) :
   · have h0 : lowerIncGamma (n+1) z = 0 := by
       rw [lowerIncGamma_eq_regularized (natCast_add_one_ne_neg_nat n), hz,
         zero_cpow (by exact_mod_cast n.succ_ne_zero), mul_zero, zero_mul]
-    rw [h0, zero_div, mul_zero, add_zero, hz, Complex.exp_zero, expPartialSum,
+    rw [h0, zero_div, mul_zero, add_zero, hz, Complex.exp_zero, Elementary.expPartialSum,
       Finset.sum_eq_single 0]
     · simp
     · intro k _ hk; simp [hk]
@@ -229,7 +238,7 @@ theorem igAsy_tendsto_sqrt_J :
 
 /-- `e_n(nx)/e^{nx} = 1 - (nx)^n/n! · S_n(x)/e^{nx}` with the integral form of `S_n`. -/
 theorem igAsy_ratio_eq (m : ℕ) (x : ℝ) :
-    expPartialSum (m+1) (((m+1:ℕ):ℂ)*x)/exp (((m+1:ℕ):ℂ)*x) =
+    Elementary.expPartialSum (m+1) (((m+1:ℕ):ℂ)*x)/exp (((m+1:ℕ):ℂ)*x) =
       ((1 - ((m+1)*x)^(m+1)/((m+1).factorial) * ((m+1)*x*∫ s in (0:ℝ)..1, igAsy_F m x s) /
         Real.exp ((m+1)*x) : ℝ) : ℂ) := by
   have hI := igAsy_exp_identity (m+1) x
@@ -331,14 +340,14 @@ theorem igAsy_term_le {k : ℕ} {y : ℝ} : ∀ n, k ≤ n → (n:ℝ) ≤ y →
 
 /-- 8.11.13 for `x > 1`. -/
 theorem igAsy_poisson_gt {x : ℝ} (hx : 1 < x) :
-    Tendsto (fun m : ℕ => expPartialSum (m+1) (((m+1:ℕ):ℂ)*x)/exp (((m+1:ℕ):ℂ)*x)) atTop (𝓝 0) := by
+    Tendsto (fun m : ℕ => Elementary.expPartialSum (m+1) (((m+1:ℕ):ℂ)*x)/exp (((m+1:ℕ):ℂ)*x)) atTop (𝓝 0) := by
   set r := x*Real.exp (1-x)
   have hr0 : 0 ≤ r := by have : 0 ≤ x := by linarith
                          positivity
   have hr1 : r < 1 := igAsy_mul_exp_lt_one hx.ne'
-  have heq : ∀ m : ℕ, expPartialSum (m+1) (((m+1:ℕ):ℂ)*x)/exp (((m+1:ℕ):ℂ)*x) =
+  have heq : ∀ m : ℕ, Elementary.expPartialSum (m+1) (((m+1:ℕ):ℂ)*x)/exp (((m+1:ℕ):ℂ)*x) =
       (((∑ k ∈ Finset.range (m+1+1), ((m+1:ℕ)*x)^k/k.factorial)/Real.exp ((m+1:ℕ)*x) : ℝ) : ℂ) := by
-    intro m; simp only [expPartialSum]; push_cast; rfl
+    intro m; simp only [Elementary.expPartialSum]; push_cast; rfl
   simp only [heq]
   rw [show (0:ℂ) = ((0:ℝ):ℂ) by simp]
   refine (continuous_ofReal.tendsto _).comp ?_
@@ -361,11 +370,11 @@ theorem igAsy_poisson_gt {x : ℝ} (hx : 1 < x) :
     _ ≤ (n+1) * r^n := by gcongr
     _ = (n:ℝ)*r^n + r^n := by ring
 
-/-- The map `(fun n : ℕ => expPartialSum n (n*x)/exp (n*x : ℂ))` tends to `(𝓝 (if 1 < x then 0
+/-- The map `(fun n : ℕ => Elementary.expPartialSum n (n*x)/exp (n*x : ℂ))` tends to `(𝓝 (if 1 < x then 0
 else if x=1 then 1/2 else 1))` along `atTop`. -/
 @[dlmf 8.11.E13]
 theorem expPartialSum_poisson_limit {x : ℝ} (hx : 0 ≤ x) :
-    Tendsto (fun n : ℕ => expPartialSum n (n*x)/exp (n*x : ℂ)) atTop (𝓝 (if 1 < x then 0 else if x=1 then 1/2 else 1)) := by
+    Tendsto (fun n : ℕ => Elementary.expPartialSum n (n*x)/exp (n*x : ℂ)) atTop (𝓝 (if 1 < x then 0 else if x=1 then 1/2 else 1)) := by
   rw [← tendsto_add_atTop_iff_nat 1]
   split_ifs with h1 h2
   · exact igAsy_poisson_gt h1
@@ -389,11 +398,11 @@ theorem expPartialSum_poisson_limit {x : ℝ} (hx : 0 ≤ x) :
 def expPartialSumRemainderS (n : ℕ) (x : ℝ) : ℂ :=
   lowerIncGamma (n+1) (n*x)/((n*x : ℂ)^n*exp (-n*x : ℂ))
 
-/-- Identity under the stated parameter and domain assumptions: `exp (n*x : ℂ)=expPartialSum n
+/-- Identity under the stated parameter and domain assumptions: `exp (n*x : ℂ)=Elementary.expPartialSum n
 (n*x)+(n*x : ℂ)^n/n.factorial*expPartialSumRemainderS n x`. -/
 @[dlmf 8.11.E14]
 theorem expPartialSumRemainderS_identity (n : ℕ) (x : ℝ) :
-    exp (n*x : ℂ)=expPartialSum n (n*x)+(n*x : ℂ)^n/n.factorial*expPartialSumRemainderS n x := by
+    exp (n*x : ℂ)=Elementary.expPartialSum n (n*x)+(n*x : ℂ)^n/n.factorial*expPartialSumRemainderS n x := by
   rw [expPartialSumRemainderS]
   exact igAsy_exp_identity n x
 

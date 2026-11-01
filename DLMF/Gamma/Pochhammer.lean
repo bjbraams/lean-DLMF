@@ -11,9 +11,15 @@ public import DLMF.Hypergeometric.Series
 /-!
 # Pochhammer identities (DLMF §5.2)
 
-The symbol `(a)_n` is the project's `poch`. `(a)_0 = 1` and the rising product
-are `poch_zero` and `poch_succ` in `Hypergeometric.Basic`. The Gamma quotient
+The symbol `(a)_n` is the project's `poch`. `(a)_0 = 1` and the rising product are `poch_zero`
+and `poch_succ` in `DLMF.Hypergeometric.Basic.Pochhammer`. The Gamma quotient
 `(a)_n = Γ(a+n)/Γ(a)` is Mathlib's `Gamma_add_nat_div_Gamma_eq`.
+
+## Main results
+
+* `poch_neg_eq`: `(-a)_n = (-1)^n (a - n + 1)_n`, DLMF 5.2.6.
+* `poch_neg_nat_eq`: `(-m)_n = (-1)^n m!/(m - n)!` for `n ≤ m` and `0` otherwise, DLMF 5.2.7.
+* `poch_succ_left`: `(a)_{n+1} = a (a + 1)_n`.
 -/
 
 @[expose] public section

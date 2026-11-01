@@ -8,12 +8,33 @@ module
 public import DLMF.Confluent.Asymptotics.LargeArgument
 
 /-!
-# Large-parameter confluent hypergeometric expansions
+# Large-parameter expansions of confluent hypergeometric functions (DLMF §13.8, §13.19)
 
-Large-second-parameter expansions of regularized Kummer functions and their limiting forms.
+Expansions of `M(a,b,z)` and `U(a,b,z)` for large `b` and for large `a` and `b`, and the
+large-argument expansions of the Whittaker functions.
 
-Source references and common attribution are retained in
-`DLMF.Confluent.Asymptotics`.
+## Main definitions
+
+* `hcub_largeBMix`: the coefficients of 13.8.1 re-expanded in powers of `1/b` after
+  multiplication by `b^a Γ(b-a)/Γ(b)`.
+
+## Main results
+
+* `hcub_euler_eq_laplace`: the substitution `s = 1 - e^{-t}` turns Euler's integral for `M` into
+  a Laplace integral.
+* `hcub_largeBMix_eq`: the re-expansion of 13.8.1 has the coefficients `(a)_N q_N(a,z)`, for
+  all `a`.
+* `kummerM_large_b_poincare`: DLMF 13.8.2 for all complex `a`: Watson's lemma for `re a > 0`,
+  then uniqueness of asymptotic expansions against 13.8.1 and the identity theorem in `a`.
+* `kummerM_transition`, `kummerU_transition`: the transition region `z = b` (DLMF 13.8.6,
+  13.8.7).
+* `kummerM_large_a_b`, `kummerU_large_a_b`: `a → ∞` with `b ∼ a/ν` (DLMF 13.8.17, 13.8.18).
+* `whittakerM_poincare_real`, `whittakerW_poincare`: DLMF 13.19.1, 13.19.3.
+
+## Implementation notes
+
+The uniform parabolic-cylinder and Bessel approximations 13.8.4–13.8.16 are not formalized
+here.
 -/
 
 @[expose] public section
@@ -78,10 +99,10 @@ theorem hcub_subst (a z : ℂ) (b : ℝ) {t : ℝ} (ht : 0 < t) :
   have hc : ((1 - Real.exp (-t) : ℝ) : ℂ) ^ (a - 1) =
       exp (-(t : ℂ) * (a - 1)) * ((t : ℂ) ^ (a - 1) * (E : ℂ) ^ (a - 1)) := by
     rw [hs, Complex.ofReal_mul, mul_cpow_ofReal_nonneg (Real.exp_pos _).le
-      (by positivity), Complex.ofReal_mul, mul_cpow_ofReal_nonneg ht.le hE0.le, hcub_ofReal_cpow_exp]
+      (by positivity), Complex.ofReal_mul, mul_cpow_ofReal_nonneg ht.le hE0.le, TauCeti.ofReal_exp_cpow]
     push_cast; ring_nf
   rw [hc, show (1 : ℂ) - ((1 - Real.exp (-t) : ℝ) : ℂ) = ((Real.exp (-t) : ℝ) : ℂ) by push_cast; ring,
-    hcub_ofReal_cpow_exp, abs_of_pos (Real.exp_pos _), Complex.real_smul,
+    TauCeti.ofReal_exp_cpow, abs_of_pos (Real.exp_pos _), Complex.real_smul,
     Complex.real_smul, largeBGenerating, hEc]
   push_cast
   have e1 : exp (-(t : ℂ)) * (exp (-(t : ℂ) * (a - 1)) * ((t : ℂ) ^ (a - 1) * (E : ℂ) ^ (a - 1)) *
@@ -451,7 +472,7 @@ Finset.range n, poch (1 / 2 - μ + κ) s * poch (1 / 2 + μ + κ) s / s.factoria
 : ℂ))) (fun x : ℝ => exp (x / 2) * (x : ℂ) ^ (-κ - n))`. -/
 @[dlmf 13.19.E1]
 theorem whittakerM_poincare_real (κ μ : ℂ) (n : ℕ)
-    (hκ : ∀ k : ℕ, μ - κ ≠ -1 / 2 - k) (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
+    (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
     Asymptotics.IsBigO atTop
       (fun x : ℝ => whittakerM κ μ x -
         Gamma (1 + 2 * μ) / Gamma (1 / 2 + μ - κ) * exp (x / 2) * (x : ℂ) ^ (-κ) *
@@ -459,8 +480,7 @@ theorem whittakerM_poincare_real (κ μ : ℂ) (n : ℕ)
             poch (1 / 2 - μ + κ) s * poch (1 / 2 + μ + κ) s / s.factorial *
               (x : ℂ) ^ (-(s : ℂ)))
       (fun x : ℝ => exp (x / 2) * (x : ℂ) ^ (-κ - n)) := by
-  have h := regularizedHGFun_poincare_real (μ - κ + 1 / 2) (1 + 2 * μ) n (fun k hk =>
-    hκ k (by linear_combination hk))
+  have h := regularizedHGFun_poincare_real (μ - κ + 1 / 2) (1 + 2 * μ) n
   rw [show 1 - (μ - κ + 1 / 2) = 1 / 2 - μ + κ by ring,
     show 1 + 2 * μ - (μ - κ + 1 / 2) = 1 / 2 + μ + κ by ring,
     show μ - κ + 1 / 2 = 1 / 2 + μ - κ by ring] at h
@@ -509,7 +529,7 @@ theorem whittakerW_poincare (κ μ : ℂ) (n : ℕ) :
     ).congr' ?_ ?_
   · filter_upwards [eventually_gt_atTop 0] with x hx
     have hx0 : (x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'
-    rw [whittakerW_eq_kummerU (by simpa using hx)]
+    rw [whittakerW_eq_kummerU]
     have hp : (x : ℂ) ^ (1 / 2 + μ) * (x : ℂ) ^ (-(1 / 2 + μ - κ)) = (x : ℂ) ^ κ := by
       rw [← Complex.cpow_add _ _ hx0]; ring_nf
     linear_combination (-exp (-x / 2) * ∑ s ∈ Finset.range n,

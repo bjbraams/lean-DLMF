@@ -14,17 +14,19 @@ public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 
 Mathlib's `Polynomial` supplies the polynomials, their roots, the division algorithm, the
 discriminant `Polynomial.discr` and Descartes' sign changes `Polynomial.signVariations`. This
-file adds the few objects of DLMF §1.11 that Mathlib does not name:
+file adds the few objects of DLMF §1.11 that Mathlib does not name.
+
+## Main definitions
 
 * `hornerB f α k` (1.11.2–1.11.4): the coefficients `b_k` of Horner's scheme, `b_0 = f(α)` and
-  `b_k` (`k ≥ 1`) the coefficients of the quotient `f /ₘ (X - α)`;
+  `b_k` (`k ≥ 1`) the coefficients of the quotient `f /ₘ (X - α)`.
 * `hornerC f α k` (1.11.5–1.11.6): the coefficients `c_k` (`k ≥ 1`) of the extended scheme,
-  Horner's scheme applied to the quotient;
+  Horner's scheme applied to the quotient.
 * `dlmfResolventCubic p q r` (1.11.18): the resolvent cubic `z³ - 2pz² + (p² - 4r)z + q²` of the
   reduced quartic `w⁴ + pw² + qw + r` in DLMF's normalization (TauCeti's
-  `TauCeti.resolventCubic` is a different normalization);
-* `IsStablePolynomial f` (1.11.24) and the Hurwitz determinants `hurwitzDet f k`
-  (1.11.25–1.11.26).
+  `TauCeti.resolventCubic` is a different normalization).
+* `IsStablePolynomial f` (1.11.24), the Hurwitz matrices `hurwitzMatrix f k` and determinants
+  `hurwitzDet f k` (1.11.25–1.11.26).
 -/
 
 @[expose] public noncomputable section

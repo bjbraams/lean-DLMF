@@ -8,14 +8,26 @@ module
 public import DLMF.Coulomb.Energy.Basic
 
 /-!
-# Coulomb functions `f`, `h`, `s`, `c`: large `|r|` (DLMF §33.21)
+# Coulomb functions `f`, `h`, `s`, `c`: large `|r|`
+
+This file proves the limiting forms of the Whittaker functions `ζ_ℓ`, `ξ_ℓ` as `r → ±∞`
+(DLMF 33.21.1–33.21.2).
+
+## Main results
+
+* `coulombZeta_coulombXi_isEquivalent_atTop`: for `ν > 0`, as `r → ∞`,
+  `ζ_ℓ(ν,r) ~ e^{-r/ν} (2r/ν)^ν` and the companion form for `ξ_ℓ` (DLMF 33.21.1).
+* `coulombZeta_coulombXi_isEquivalent_atBot`: for `ν > 0`, as `r → -∞`,
+  `ζ_ℓ(-ν,r) ~ e^{r/ν} (-2r/ν)^{-ν}` and the companion form for `ξ_ℓ` (DLMF 33.21.2).
+
+## Implementation notes
 
 DLMF §33.21(i) describes how the limiting forms of `f`, `h`, `s`, `c` as `r → ±∞` follow from
-the connection formulas of §33.16 and the limiting forms of `F_ℓ`, `G_ℓ` (33.10.1), of the
-Whittaker functions `ζ_ℓ`, `ξ_ℓ` (33.21.1–33.21.2, acquired here) and of the Bessel functions
-(§§10.7(ii), 10.30(ii)). §33.21(ii) cites Curtis (1964a, §6) for asymptotic expansions. Checked
-numerically (mpmath, 40 digits, `ν = 2.3`, `ℓ = 1`, `|r|` up to 300); the convergence of `ξ_ℓ`
-requires the principal branch `ph(e^{iπ} 2r/ν) = π` built into `coulombXi`.
+the connection formulas of §33.16 and the limiting forms of `F_ℓ`, `G_ℓ` (33.10.1), of `ζ_ℓ`,
+`ξ_ℓ` and of the Bessel functions (§§10.7(ii), 10.30(ii)). §33.21(ii) cites Curtis (1964a, §6)
+for asymptotic expansions. The convergence of `ξ_ℓ` requires the principal branch
+`ph(e^{iπ} 2r/ν) = π` built into `coulombXi`; the limits were also checked numerically
+(mpmath, 40 digits, `ν = 2.3`, `ℓ = 1`, `|r|` up to 300).
 -/
 
 @[expose] public section

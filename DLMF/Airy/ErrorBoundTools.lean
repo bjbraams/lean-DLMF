@@ -10,7 +10,10 @@ public import DLMF.Airy.Asymptotics
 /-!
 # Uniform Airy bounds and numerically satisfactory pairs
 
-Tools behind DLMF Table 9.2.1 (numerically satisfactory pairs of Airy solutions).
+Tools behind DLMF Table 9.2.1 (numerically satisfactory pairs of Airy solutions). The pairs
+themselves are proved in `DLMF.Airy.Equation`.
+
+## Main results
 
 * `airyErr_bound_of_isBigO`: a big-O relation on `airySector α` with an explicit radius.
 * `airyErr_wellConditioned_of_far`: for a pair with constant nonzero Wronskian it suffices to
@@ -20,10 +23,8 @@ Tools behind DLMF Table 9.2.1 (numerically satisfactory pairs of Airy solutions)
   from the Poincaré expansions 9.7.5–9.7.6 and the oscillatory expansions 9.7.9–9.7.10.
 * `airyErr_cross_le`: cross products `|Ai w₁| |Ai' w₂|` are bounded when `|w₁| = |w₂|` and
   `re ζ(w₁) + re ζ(w₂) ≥ 0`.
-* `airyErr_far_real`, `airyErr_far_sector`: boundedness of `|Ai Bi'| + |Ai' Bi|` on the real line
-  and in the closed sector `|arg z| ≤ π/3`.
-
-The pairs themselves are proved in `DLMF.Airy.Equation`.
+* `airyErr_far_real`, `airyErr_far_sector`: boundedness of `|Ai Bi'| + |Ai' Bi|` on the real
+  line and in the closed sector `|arg z| ≤ π/3`.
 -/
 
 @[expose] public noncomputable section

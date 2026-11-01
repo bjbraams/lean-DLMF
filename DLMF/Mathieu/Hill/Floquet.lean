@@ -6,34 +6,57 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Hill.Basic
-public import DLMFMathlib.Analysis.ODE.P1oLinearGlobal
-public import DLMFMathlib.Analysis.ODE.P1oParamHolomorphic
-public import DLMFMathlib.Analysis.ODE.P2sGrowth
-public import DLMFMathlib.Analysis.ODE.P2sSturmSpectrum
+public import DLMFMathlib.Analysis.ODE.LinearGlobal
+public import DLMFMathlib.Analysis.ODE.ParamHolomorphic
+public import DLMFMathlib.Analysis.ODE.SturmGrowth
+public import DLMFMathlib.Analysis.ODE.SturmSpectrum
 public import Mathlib.Analysis.Calculus.ContDiff.Defs
 
 /-!
 # Hill's equation: Floquet theory and the discriminant (DLMF §28.29)
 
 Statements of DLMF §28.29 for Hill's equation `w'' + (λ + Q(x)) w = 0` (definitions in
-`DLMF.Mathieu.Hill.Basic`):
+`DLMF.Mathieu.Hill.Basic`): Mathieu's equation as a special case (§28.29(i)), existence and
+uniqueness of solutions, the basic solutions, Floquet solutions and the characteristic
+equation (§28.29(ii)), and, for real `Q`, the discriminant, the periodic and antiperiodic
+eigenvalues and their asymptotics (§28.29(iii)).
 
-* §28.29(i): Mathieu's equation is the case `Q(x) = -2q cos 2x` (`isHillPotential_mathieu`).
-* §28.29(ii): existence (`hill_exists_solution`, from `ODE.exists_linear_ode`) and uniqueness
-  (`IsHillSolution.eq_of_initial`) of solutions with given initial data, the basic
-  solutions, the shift relations 28.29.4–28.29.5, the
-  characteristic equation 28.29.8–28.29.9, Floquet solutions 28.29.10, the exceptional cases
-  `ν = 0, 1` (28.29.11–28.29.12), 28.29.13 and the symmetric case 28.29.14.
-* §28.29(iii) (real `Q`): the discriminant, the periodic and antiperiodic eigenvalues
-  28.29.16–28.29.18 and their asymptotics 28.29.19–28.29.22.
+## Main results
 
-The basic solutions are definitions by choice (`hillWI`, `hillWII`); the existence theorem
+* `isHillPotential_mathieu`: Mathieu's equation is the case `Q(x) = -2q cos 2x` (§28.29(i)).
+* `hill_exists_solution`, `IsHillSolution.eq_of_initial`, `hillWI_spec`, `hillWII_spec`:
+  existence and uniqueness of solutions with given initial data and the basic solutions.
+* `hillWI_add_pi`, `hillWII_add_pi`: the shift relations (DLMF 28.29.4–28.29.5).
+* `exists_hillCharExp`: characteristic exponents in the strip 28.29.6.
+* `exists_hillFloquet_iff_det`, `exists_hillFloquet_iff_discriminant`: Floquet's theorem and
+  the characteristic equation (DLMF 28.29.7–28.29.9).
+* `differentiable_hillDiscriminant`: the discriminant is an entire function of `λ`.
+* `IsHillFloquetSolution.exists_periodic`, `exists_hillFloquet_fundamental_pair`: Floquet
+  solutions `e^{iνz} P_ν(z)` (DLMF 28.29.10) and a fundamental pair of them.
+* `exists_hill_periodic_of_discriminant`, `hill_coexistence_iff`,
+  `hill_all_periodic_of_minimal_period`: the exceptional exponents `ν = 0, 1`
+  (DLMF 28.29.11–28.29.12) and periodic solutions of period `nπ`, `n ≥ 3`.
+* `IsHillSolution.add_pi_add_sub_pi`, `IsHillSolution.floquet_or`: DLMF 28.29.13 and its
+  consequence.
+* `hillWI_neg_of_even`, `hillWII_neg_of_even`, `hillDiscriminant_of_even`: the symmetric case
+  (DLMF 28.29.14).
+* `hillDiscriminant_order_half`, `infinite_hillDiscriminant_eq`: growth of order `½` of the
+  discriminant and infinitely many roots of the characteristic equation (§28.29(iii)).
+* `hillPeriodicEigenvalue_spec`, `hillAntiperiodicEigenvalue_spec`,
+  `hill_eigenvalue_interlacing`: the periodic and antiperiodic eigenvalues and their
+  interlacing (DLMF 28.29.16–28.29.18).
+* `hillAntiperiodicEigenvalue_asymptotic`, `hillPeriodicEigenvalue_asymptotic`,
+  `hill_gap_asymptotic`: eigenvalue asymptotics and instability intervals
+  (DLMF 28.29.19–28.29.22).
+
+## Implementation notes
+
+The basic solutions `hillWI`, `hillWII` are definitions by choice; the existence theorem
 `hill_exists_solution` for continuous `Q` is proved from the global existence theorem
-`ODE.exists_linear_ode` (`DLMFMathlib.Analysis.ODE.P1oLinearGlobal`). The Floquet theory of
-§28.29(ii) is proved in coordinates: the Wronskian of `w_I`, `w_II` is `1`
-(`p1o_hill_wronskian`), a solution is determined by its data at `0`, and the shift by `π` acts
-on the data by the monodromy matrix (`p1o_hill_data_pi`, `p1o_hill_multiplier_iff`), whose
-characteristic polynomial is `ρ² - Δ(λ) ρ + 1` (`p1o_hill_two_step`).
+`ODE.exists_linear_ode` (`DLMFMathlib.Analysis.ODE.LinearGlobal`). The Floquet theory of
+§28.29(ii) is proved in coordinates: the Wronskian of `w_I`, `w_II` is `1`, a solution is
+determined by its data at `0`, and the shift by `π` acts on the data by the monodromy matrix,
+whose characteristic polynomial is `ρ² - Δ(λ) ρ + 1`.
 -/
 
 @[expose] public noncomputable section
@@ -179,7 +202,7 @@ theorem hillWII_add_pi (hQ : IsHillPotential Q) (lam : ℂ) (z : ℝ) :
 /-! ### Floquet theory in coordinates (helpers) -/
 
 /-- A solution shifted by `π`, in terms of the basic solutions. -/
-lemma p1o_hill_shift (hQ : IsHillPotential Q) {u : ℝ → ℂ} (hu : IsHillSolution Q lam u)
+private lemma hillSolution_add_pi_eq (hQ : IsHillPotential Q) {u : ℝ → ℂ} (hu : IsHillSolution Q lam u)
     (z : ℝ) : u (z + Real.pi) = u Real.pi * hillWI Q z lam + deriv u Real.pi * hillWII Q z lam := by
   have h := (hu.comp_add_pi hQ.periodic).eq_combination hQ.continuous
   have h' := congrFun h z
@@ -188,7 +211,7 @@ lemma p1o_hill_shift (hQ : IsHillPotential Q) {u : ℝ → ℂ} (hu : IsHillSolu
   rw [h', hd, zero_add]
 
 /-- The Wronskian of the basic solutions is identically `1` (no first-derivative term). -/
-lemma p1o_hill_wronskian (hQ : Continuous Q) (x : ℝ) :
+private lemma hillWronskian_eq_one (hQ : Continuous Q) (x : ℝ) :
     hillWI Q x lam * deriv (fun x => hillWII Q x lam) x -
       deriv (fun x => hillWI Q x lam) x * hillWII Q x lam = 1 := by
   obtain ⟨h1, h1a, h1b⟩ := hillWI_spec hQ lam
@@ -205,7 +228,7 @@ lemma p1o_hill_wronskian (hQ : Continuous Q) (x : ℝ) :
   rw [hc]; simp [W, h1a, h1b, h2a, h2b]
 
 /-- The value and derivative at `π` of a solution, through the monodromy entries. -/
-lemma p1o_hill_data_pi (hQ : Continuous Q) {w : ℝ → ℂ} (hw : IsHillSolution Q lam w) :
+private lemma hillSolution_data_pi (hQ : Continuous Q) {w : ℝ → ℂ} (hw : IsHillSolution Q lam w) :
     w Real.pi = w 0 * hillWI Q Real.pi lam + deriv w 0 * hillWII Q Real.pi lam ∧
       deriv w Real.pi = w 0 * deriv (fun x => hillWI Q x lam) Real.pi +
         deriv w 0 * deriv (fun x => hillWII Q x lam) Real.pi := by
@@ -218,7 +241,7 @@ lemma p1o_hill_data_pi (hQ : Continuous Q) {w : ℝ → ℂ} (hw : IsHillSolutio
     ((h2.differentiable _).hasDerivAt.const_mul _)).deriv
 
 /-- A solution has multiplier `ρ` iff its data at `π` are `ρ` times its data at `0`. -/
-lemma p1o_hill_multiplier_iff (hQ : IsHillPotential Q) {w : ℝ → ℂ}
+private lemma hillSolution_multiplier_iff (hQ : IsHillPotential Q) {w : ℝ → ℂ}
     (hw : IsHillSolution Q lam w) (ρ : ℂ) :
     (∀ x, w (x + Real.pi) = ρ * w x) ↔
       (w Real.pi = ρ * w 0 ∧ deriv w Real.pi = ρ * deriv w 0) := by
@@ -231,17 +254,17 @@ lemma p1o_hill_multiplier_iff (hQ : IsHillPotential Q) {w : ℝ → ℂ}
     rw [this]
     exact ((hw.differentiable 0).hasDerivAt.const_mul ρ).deriv
   · rintro ⟨h0, h1⟩ x
-    rw [p1o_hill_shift hQ hw x, h0, h1, congrFun (hw.eq_combination hQ.continuous) x]
+    rw [hillSolution_add_pi_eq hQ hw x, h0, h1, congrFun (hw.eq_combination hQ.continuous) x]
     ring
 
 /-- A solution with vanishing data at `0` vanishes. -/
-lemma p1o_hill_eq_zero (hQ : Continuous Q) {w : ℝ → ℂ} (hw : IsHillSolution Q lam w)
+private lemma hillSolution_eq_zero_of_data_zero (hQ : Continuous Q) {w : ℝ → ℂ} (hw : IsHillSolution Q lam w)
     (h0 : w 0 = 0) (h1 : deriv w 0 = 0) (x : ℝ) : w x = 0 := by
   have := congrFun (hw.eq_combination hQ) x
   simpa [h0, h1] using this
 
 /-- The solution `X w_I + Y w_II`. -/
-lemma p1o_hill_comb (hQ : Continuous Q) (X Y : ℂ) :
+private lemma isHillSolution_hillWI_hillWII_comb (hQ : Continuous Q) (X Y : ℂ) :
     IsHillSolution Q lam (fun x => X * hillWI Q x lam + Y * hillWII Q x lam) ∧
       X * hillWI Q 0 lam + Y * hillWII Q 0 lam = X ∧
       deriv (fun x => X * hillWI Q x lam + Y * hillWII Q x lam) 0 = Y := by
@@ -256,7 +279,7 @@ lemma p1o_hill_comb (hQ : Continuous Q) (X Y : ℂ) :
 
 /-- A nontrivial solution with multiplier `ρ` exists iff `(a - ρ)(d - ρ) - bc = 0`, where
 `[[a, b], [c, d]]` is the monodromy matrix. -/
-lemma p1o_hill_exists_multiplier_iff (hQ : IsHillPotential Q) (ρ : ℂ) :
+private lemma exists_hillSolution_multiplier_iff (hQ : IsHillPotential Q) (ρ : ℂ) :
     (∃ w, IsHillSolution Q lam w ∧ (∃ x, w x ≠ 0) ∧ ∀ x, w (x + Real.pi) = ρ * w x) ↔
       (hillWI Q Real.pi lam - ρ) * (deriv (fun x => hillWII Q x lam) Real.pi - ρ) -
         hillWII Q Real.pi lam * deriv (fun x => hillWI Q x lam) Real.pi = 0 := by
@@ -266,14 +289,14 @@ lemma p1o_hill_exists_multiplier_iff (hQ : IsHillPotential Q) (ρ : ℂ) :
   set d := deriv (fun x => hillWII Q x lam) Real.pi
   constructor
   · rintro ⟨w, hw, ⟨x₀, hx₀⟩, hm⟩
-    obtain ⟨e1, e2⟩ := (p1o_hill_multiplier_iff hQ hw ρ).1 hm
-    obtain ⟨f1, f2⟩ := p1o_hill_data_pi hQ.continuous hw
+    obtain ⟨e1, e2⟩ := (hillSolution_multiplier_iff hQ hw ρ).1 hm
+    obtain ⟨f1, f2⟩ := hillSolution_data_pi hQ.continuous hw
     rw [f1] at e1; rw [f2] at e2
     have hX : w 0 * ((a - ρ) * (d - ρ) - b * c) = 0 := by linear_combination (d - ρ) * e1 - b * e2
     have hY : deriv w 0 * ((a - ρ) * (d - ρ) - b * c) = 0 := by
       linear_combination (a - ρ) * e2 - c * e1
     by_contra hne
-    exact hx₀ (p1o_hill_eq_zero hQ.continuous hw ((mul_eq_zero.mp hX).resolve_right hne)
+    exact hx₀ (hillSolution_eq_zero_of_data_zero hQ.continuous hw ((mul_eq_zero.mp hX).resolve_right hne)
       ((mul_eq_zero.mp hY).resolve_right hne) x₀)
   · intro hdet
     obtain ⟨X, Y, hXY, e1, e2⟩ : ∃ X Y : ℂ, (X ≠ 0 ∨ Y ≠ 0) ∧ X * a + Y * b = ρ * X ∧
@@ -288,8 +311,8 @@ lemma p1o_hill_exists_multiplier_iff (hQ : IsHillPotential Q) (ρ : ℂ) :
       push Not at hd
       obtain ⟨hd, hc⟩ := hd
       exact ⟨1, 0, Or.inl one_ne_zero, by rw [ha']; ring, by rw [hc]; ring⟩
-    obtain ⟨hs, hs0, hs1⟩ := p1o_hill_comb (lam := lam) hQ.continuous X Y
-    refine ⟨_, hs, ?_, (p1o_hill_multiplier_iff hQ hs ρ).2 ?_⟩
+    obtain ⟨hs, hs0, hs1⟩ := isHillSolution_hillWI_hillWII_comb (lam := lam) hQ.continuous X Y
+    refine ⟨_, hs, ?_, (hillSolution_multiplier_iff hQ hs ρ).2 ?_⟩
     · by_contra hall
       push Not at hall
       rcases hXY with hX | hY
@@ -298,20 +321,20 @@ lemma p1o_hill_exists_multiplier_iff (hQ : IsHillPotential Q) (ρ : ℂ) :
         rw [← hs1, show (fun x => X * hillWI Q x lam + Y * hillWII Q x lam) = fun _ => 0 from
           funext hall]
         simp
-    · obtain ⟨f1, f2⟩ := p1o_hill_data_pi hQ.continuous hs
+    · obtain ⟨f1, f2⟩ := hillSolution_data_pi hQ.continuous hs
       rw [f1, f2, hs0, hs1]
       exact ⟨e1, e2⟩
 
 /-- The two-step relation `u(z + 2π) = Δ(λ) u(z + π) - u(z)` (Cayley–Hamilton for the
 monodromy matrix, whose determinant is the Wronskian `1`). -/
-lemma p1o_hill_two_step (hQ : IsHillPotential Q) {u : ℝ → ℂ} (hu : IsHillSolution Q lam u)
+private lemma hillSolution_add_two_pi (hQ : IsHillPotential Q) {u : ℝ → ℂ} (hu : IsHillSolution Q lam u)
     (z : ℝ) : u (z + Real.pi + Real.pi) = hillDiscriminant Q lam * u (z + Real.pi) - u z := by
   have hv := hu.comp_add_pi hQ.periodic
-  have hW := p1o_hill_wronskian (lam := lam) hQ.continuous Real.pi
-  have s1 := p1o_hill_shift hQ hv z
-  have s2 := p1o_hill_shift hQ hu z
-  have d1 := p1o_hill_data_pi hQ.continuous hv
-  have d0 := p1o_hill_data_pi hQ.continuous hu
+  have hW := hillWronskian_eq_one (lam := lam) hQ.continuous Real.pi
+  have s1 := hillSolution_add_pi_eq hQ hv z
+  have s2 := hillSolution_add_pi_eq hQ hu z
+  have d1 := hillSolution_data_pi hQ.continuous hv
+  have d0 := hillSolution_data_pi hQ.continuous hu
   have e := congrFun (hu.eq_combination hQ.continuous) z
   rw [deriv_comp_add_const, zero_add] at d1
   rw [s1, s2, d1.1, d1.2, d0.1, d0.2, hillDiscriminant]
@@ -319,23 +342,23 @@ lemma p1o_hill_two_step (hQ : IsHillPotential Q) {u : ℝ → ℂ} (hu : IsHillS
   linear_combination (-(u 0 * hillWI Q z lam) - deriv u 0 * hillWII Q z lam) * hW
 
 /-- The data of a solution with multiplier `ρ` form an eigenvector of the monodromy matrix. -/
-lemma p1o_hill_multiplier_data (hQ : IsHillPotential Q) {u : ℝ → ℂ}
+private lemma hillSolution_multiplier_data (hQ : IsHillPotential Q) {u : ℝ → ℂ}
     (hu : IsHillSolution Q lam u) {ρ : ℂ} (hm : ∀ x, u (x + Real.pi) = ρ * u x) :
     u 0 * hillWI Q Real.pi lam + deriv u 0 * hillWII Q Real.pi lam = ρ * u 0 ∧
       u 0 * deriv (fun x => hillWI Q x lam) Real.pi +
         deriv u 0 * deriv (fun x => hillWII Q x lam) Real.pi = ρ * deriv u 0 := by
-  obtain ⟨e1, e2⟩ := (p1o_hill_multiplier_iff hQ hu ρ).1 hm
-  obtain ⟨f1, f2⟩ := p1o_hill_data_pi hQ.continuous hu
+  obtain ⟨e1, e2⟩ := (hillSolution_multiplier_iff hQ hu ρ).1 hm
+  obtain ⟨f1, f2⟩ := hillSolution_data_pi hQ.continuous hu
   exact ⟨f1 ▸ e1, f2 ▸ e2⟩
 
 /-- `exp(-πiν) = exp(πiν)⁻¹` and `2 cos πν = exp(πiν) + exp(πiν)⁻¹`. -/
-lemma p1o_two_cos_eq (ν : ℂ) :
+private lemma two_mul_cos_pi_mul_eq_exp_add_inv (ν : ℂ) :
     2 * Complex.cos (Real.pi * ν) = Complex.exp (Real.pi * I * ν) +
       (Complex.exp (Real.pi * I * ν))⁻¹ := by
   rw [Complex.two_cos, ← Complex.exp_neg]; ring_nf
 
 /-- Two eigenvectors of a `2 × 2` matrix `≠ ρ • 1` for the same eigenvalue `ρ` are parallel. -/
-lemma p1o_cross_eq_zero_of_kernel {a b c d x1 y1 x2 y2 ρ : ℂ}
+private lemma cross_eq_zero_of_eigenvectors {a b c d x1 y1 x2 y2 ρ : ℂ}
     (h : ¬(a - ρ = 0 ∧ b = 0 ∧ c = 0 ∧ d - ρ = 0)) (e1 : x1 * a + y1 * b = ρ * x1)
     (e2 : x1 * c + y1 * d = ρ * y1) (f1 : x2 * a + y2 * b = ρ * x2)
     (f2 : x2 * c + y2 * d = ρ * y2) : x1 * y2 - y1 * x2 = 0 := by
@@ -348,7 +371,7 @@ lemma p1o_cross_eq_zero_of_kernel {a b c d x1 y1 x2 y2 ρ : ℂ}
     (mul_eq_zero.mp k3).resolve_right hne, (mul_eq_zero.mp k4).resolve_right hne⟩
 
 /-- A vector with vanishing cross product with a nonzero vector is a multiple of it. -/
-lemma p1o_exists_smul_of_cross {x1 y1 x2 y2 : ℂ} (hne : x1 ≠ 0 ∨ y1 ≠ 0)
+private lemma exists_mul_of_cross_eq_zero {x1 y1 x2 y2 : ℂ} (hne : x1 ≠ 0 ∨ y1 ≠ 0)
     (h : x1 * y2 - y1 * x2 = 0) : ∃ k, x2 = k * x1 ∧ y2 = k * y1 := by
   by_cases hx : x1 ≠ 0
   · refine ⟨x2 / x1, by field_simp, ?_⟩
@@ -361,14 +384,14 @@ lemma p1o_exists_smul_of_cross {x1 y1 x2 y2 : ℂ} (hne : x1 ≠ 0 ∨ y1 ≠ 0)
     simp [(mul_eq_zero.mp this).resolve_left hy]
 
 /-- Derivative at `0` of a combination of solutions. -/
-lemma p1o_deriv_comb {u v : ℝ → ℂ} (hu : IsHillSolution Q lam u) (hv : IsHillSolution Q lam v)
+private lemma deriv_smul_add_smul_hillSolution {u v : ℝ → ℂ} (hu : IsHillSolution Q lam u) (hv : IsHillSolution Q lam v)
     (c₁ c₂ : ℂ) (x : ℝ) : deriv (c₁ • u + c₂ • v) x = c₁ * deriv u x + c₂ * deriv v x := by
   rw [deriv_add ((hu.differentiable x).const_smul _) ((hv.differentiable x).const_smul _),
     deriv_const_smul _ (hu.differentiable x), deriv_const_smul _ (hv.differentiable x)]
   rfl
 
 /-- Two solutions whose data at `0` are proportional are proportional. -/
-lemma p1o_hill_eq_smul (hQ : Continuous Q) {u v : ℝ → ℂ} (hu : IsHillSolution Q lam u)
+private lemma hillSolution_eq_mul_of_data (hQ : Continuous Q) {u v : ℝ → ℂ} (hu : IsHillSolution Q lam u)
     (hv : IsHillSolution Q lam v) {k : ℂ} (h0 : v 0 = k * u 0)
     (h1 : deriv v 0 = k * deriv u 0) (x : ℝ) : v x = k * u x := by
   have := hv.eq_of_initial hQ (hu.const_smul k) (x₀ := 0) (by simp [h0])
@@ -376,7 +399,7 @@ lemma p1o_hill_eq_smul (hQ : Continuous Q) {u v : ℝ → ℂ} (hu : IsHillSolut
   simpa using congrFun this x
 
 /-- Iterating a multiplier: `u(x + kπ) = ρᵏ u(x)`. -/
-lemma p1o_iter_mult {u : ℝ → ℂ} {ρ : ℂ} (hm : ∀ x, u (x + Real.pi) = ρ * u x) (k : ℕ)
+private lemma apply_add_nat_mul_pi_of_multiplier {u : ℝ → ℂ} {ρ : ℂ} (hm : ∀ x, u (x + Real.pi) = ρ * u x) (k : ℕ)
     (x : ℝ) : u (x + k * Real.pi) = ρ ^ k * u x := by
   induction k with
   | zero => simp
@@ -386,18 +409,18 @@ lemma p1o_iter_mult {u : ℝ → ℂ} {ρ : ℂ} (hm : ∀ x, u (x + Real.pi) = 
     ring
 
 /-- Iterating `w(z + π) = s w(z) + c P(z)` with `P(z + π) = s P(z)`. -/
-lemma p1o_iter_jordan {w P : ℝ → ℂ} {s c : ℂ} (hP : ∀ x, P (x + Real.pi) = s * P x)
+private lemma apply_add_nat_mul_pi_of_jordan {w P : ℝ → ℂ} {s c : ℂ} (hP : ∀ x, P (x + Real.pi) = s * P x)
     (hw : ∀ x, w (x + Real.pi) = s * w x + c * P x) (k : ℕ) (x : ℝ) :
     w (x + (k + 1 : ℕ) * Real.pi) = s ^ (k + 1) * w x + (k + 1 : ℕ) * s ^ k * c * P x := by
   induction k with
   | zero => simpa using hw x
   | succ k ih =>
     rw [show x + ((k + 1 + 1 : ℕ) : ℝ) * Real.pi = x + ((k + 1 : ℕ) : ℝ) * Real.pi + Real.pi by
-      push_cast; ring, hw, ih, p1o_iter_mult hP]
+      push_cast; ring, hw, ih, apply_add_nat_mul_pi_of_multiplier hP]
     push_cast; ring
 
 /-- For `ν ∉ {0, 1}` with `-1 < ℜν ≤ 1`, the multipliers `e^{±πiν}` are distinct. -/
-lemma p1o_exp_ne {ν : ℂ} (hν : -1 < ν.re ∧ ν.re ≤ 1) (hν0 : ν ≠ 0) (hν1 : ν ≠ 1) :
+private lemma exp_pi_I_mul_ne_exp_neg {ν : ℂ} (hν : -1 < ν.re ∧ ν.re ≤ 1) (hν0 : ν ≠ 0) (hν1 : ν ≠ 1) :
     Complex.exp (Real.pi * I * ν) ≠ Complex.exp (Real.pi * I * -ν) := by
   intro h
   have h2 : Complex.exp (ν * (2 * Real.pi * I)) = 1 := by
@@ -456,7 +479,7 @@ theorem exists_hillFloquet_iff_det (hQ : IsHillPotential Q) (lam ν : ℂ) :
     Matrix.empty_val', Matrix.cons_val_fin_one, smul_eq_mul, mul_one]
   simp only [Matrix.one_apply_ne (show (0 : Fin 2) ≠ 1 by decide),
     Matrix.one_apply_ne (show (1 : Fin 2) ≠ 0 by decide), mul_zero, sub_zero]
-  rw [← p1o_hill_exists_multiplier_iff hQ]
+  rw [← exists_hillSolution_multiplier_iff hQ]
   rfl
 
 /-- **Characteristic equation** of Hill's equation (DLMF 28.29.9): a Floquet solution with
@@ -465,9 +488,9 @@ respect to `ν` exists iff `2 cos(πν) = w_I(π, λ) + w_II'(π, λ)`. -/
 theorem exists_hillFloquet_iff_discriminant (hQ : IsHillPotential Q) (lam ν : ℂ) :
     (∃ w, IsHillFloquetSolution Q lam ν w) ↔
       2 * Complex.cos (Real.pi * ν) = hillDiscriminant Q lam := by
-  have hW := p1o_hill_wronskian (lam := lam) hQ.continuous Real.pi
+  have hW := hillWronskian_eq_one (lam := lam) hQ.continuous Real.pi
   change (∃ w, IsHillSolution Q lam w ∧ (∃ x, w x ≠ 0) ∧ ∀ x, w (x + Real.pi) = _ * w x) ↔ _
-  rw [p1o_hill_exists_multiplier_iff hQ, Complex.two_cos, hillDiscriminant]
+  rw [exists_hillSolution_multiplier_iff hQ, Complex.two_cos, hillDiscriminant]
   set ρ := Complex.exp (Real.pi * I * ν)
   have hρ : ρ ≠ 0 := Complex.exp_ne_zero _
   have e1 : Complex.exp (↑Real.pi * ν * I) = ρ := by simp only [ρ]; ring_nf
@@ -557,11 +580,11 @@ theorem exists_hillFloquet_fundamental_pair (hQ : IsHillPotential Q) {ν : ℂ}
   have hne1 : (w₁ 0) ≠ 0 ∨ (deriv w₁ 0) ≠ 0 := by
     by_contra hc'
     push Not at hc'
-    exact hz₁ (p1o_hill_eq_zero hQ.continuous s₁ hc'.1 hc'.2 z₁)
+    exact hz₁ (hillSolution_eq_zero_of_data_zero hQ.continuous s₁ hc'.1 hc'.2 z₁)
   have hD : (w₁ 0) * (deriv w₂ 0) - (deriv w₁ 0) * (w₂ 0) ≠ 0 := by
     intro hD
-    obtain ⟨k, hk0, hk1⟩ := p1o_exists_smul_of_cross hne1 hD
-    have hk := p1o_hill_eq_smul hQ.continuous s₁ s₂ hk0 hk1
+    obtain ⟨k, hk0, hk1⟩ := exists_mul_of_cross_eq_zero hne1 hD
+    have hk := hillSolution_eq_mul_of_data hQ.continuous s₁ s₂ hk0 hk1
     apply hρσ
     have e := m₂ z₂
     have e' : w₂ (z₂ + Real.pi) = ρ * w₂ z₂ := by rw [hk, m₁, hk]; ring
@@ -574,7 +597,7 @@ theorem exists_hillFloquet_fundamental_pair (hQ : IsHillPotential Q) {ν : ℂ}
   · simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
     rw [div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, eq_div_iff hD]
     ring
-  · rw [p1o_deriv_comb s₁ s₂]
+  · rw [deriv_smul_add_smul_hillSolution s₁ s₂]
     rw [div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, eq_div_iff hD]
     ring
 
@@ -589,10 +612,10 @@ theorem exists_hill_periodic_of_discriminant (hQ : IsHillPotential Q) {s : ℂ}
     ∃ P ∈ hillMultiplierSolutions Q lam s, P ≠ 0 ∧
       ∀ w, IsHillSolution Q lam w → ∃ c : ℂ, ∀ z, w (z + Real.pi) = s * w z + c * P z := by
   have hs2 : s ^ 2 = 1 := by rcases hs with rfl | rfl <;> norm_num
-  have hW := p1o_hill_wronskian (lam := lam) hQ.continuous Real.pi
+  have hW := hillWronskian_eq_one (lam := lam) hQ.continuous Real.pi
   have hΔ' := hΔ
   rw [hillDiscriminant] at hΔ'
-  obtain ⟨P, hP, ⟨x₀, hx₀⟩, hPm⟩ := (p1o_hill_exists_multiplier_iff (lam := lam) hQ s).2
+  obtain ⟨P, hP, ⟨x₀, hx₀⟩, hPm⟩ := (exists_hillSolution_multiplier_iff (lam := lam) hQ s).2
     (by linear_combination hW - s * hΔ' - hs2)
   refine ⟨P, ⟨hP, hPm⟩, fun h => hx₀ (by rw [h]; rfl), fun w hw => ?_⟩
   set v : ℝ → ℂ := fun z => w (z + Real.pi) - s * w z
@@ -602,28 +625,28 @@ theorem exists_hill_periodic_of_discriminant (hQ : IsHillPotential Q) {s : ℂ}
     funext z; simp only [v, Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
   have hvm : ∀ z, v (z + Real.pi) = s * v z := fun z => by
     simp only [v]
-    rw [p1o_hill_two_step hQ hw z, hΔ]
+    rw [hillSolution_add_two_pi hQ hw z, hΔ]
     linear_combination (w z) * hs2
-  obtain ⟨e1, e2⟩ := p1o_hill_multiplier_data hQ hP hPm
-  obtain ⟨f1, f2⟩ := p1o_hill_multiplier_data hQ hv hvm
+  obtain ⟨e1, e2⟩ := hillSolution_multiplier_data hQ hP hPm
+  obtain ⟨f1, f2⟩ := hillSolution_multiplier_data hQ hv hvm
   by_cases hN : hillWI Q Real.pi lam - s = 0 ∧ hillWII Q Real.pi lam = 0 ∧
       deriv (fun x => hillWI Q x lam) Real.pi = 0 ∧
       deriv (fun x => hillWII Q x lam) Real.pi - s = 0
   · refine ⟨0, fun z => ?_⟩
-    obtain ⟨g1, g2⟩ := p1o_hill_data_pi hQ.continuous hw
-    have := (p1o_hill_multiplier_iff hQ hw s).2 ⟨by rw [g1, hN.2.1,
+    obtain ⟨g1, g2⟩ := hillSolution_data_pi hQ.continuous hw
+    have := (hillSolution_multiplier_iff hQ hw s).2 ⟨by rw [g1, hN.2.1,
       show hillWI Q Real.pi lam = s by linear_combination hN.1]; ring,
       by rw [g2, hN.2.2.1, show deriv (fun x => hillWII Q x lam) Real.pi = s by
         linear_combination hN.2.2.2]; ring⟩ z
     rw [this]; ring
-  · have hcross := p1o_cross_eq_zero_of_kernel hN e1 e2 f1 f2
+  · have hcross := cross_eq_zero_of_eigenvectors hN e1 e2 f1 f2
     have hPne : P 0 ≠ 0 ∨ deriv P 0 ≠ 0 := by
       by_contra hc
       push Not at hc
-      exact hx₀ (p1o_hill_eq_zero hQ.continuous hP hc.1 hc.2 x₀)
-    obtain ⟨k, hk0, hk1⟩ := p1o_exists_smul_of_cross hPne hcross
+      exact hx₀ (hillSolution_eq_zero_of_data_zero hQ.continuous hP hc.1 hc.2 x₀)
+    obtain ⟨k, hk0, hk1⟩ := exists_mul_of_cross_eq_zero hPne hcross
     refine ⟨k, fun z => ?_⟩
-    have := p1o_hill_eq_smul hQ.continuous hP hv hk0 hk1 z
+    have := hillSolution_eq_mul_of_data hQ.continuous hP hv hk0 hk1 z
     simp only [v] at this
     linear_combination this
 
@@ -638,8 +661,8 @@ theorem hill_coexistence_iff (hQ : IsHillPotential Q) {s : ℂ} :
   obtain ⟨h2, h2a, h2b⟩ := hillWII_spec hQ.continuous lam
   constructor
   · intro h
-    obtain ⟨e1, e2⟩ := (p1o_hill_multiplier_iff hQ h1 s).1 (h _ h1).2
-    obtain ⟨f1, f2⟩ := (p1o_hill_multiplier_iff hQ h2 s).1 (h _ h2).2
+    obtain ⟨e1, e2⟩ := (hillSolution_multiplier_iff hQ h1 s).1 (h _ h1).2
+    obtain ⟨f1, f2⟩ := (hillSolution_multiplier_iff hQ h2 s).1 (h _ h2).2
     rw [h1a] at e1; rw [h1b] at e2; rw [h2a] at f1; rw [h2b] at f2
     ext i j
     fin_cases i <;> fin_cases j <;> simp [hillMonodromy, e1, e2, f1, f2]
@@ -649,8 +672,8 @@ theorem hill_coexistence_iff (hQ : IsHillPotential Q) {s : ℂ} :
     have m10 := congrFun (congrFun hM 1) 0
     have m11 := congrFun (congrFun hM 1) 1
     simp [hillMonodromy] at m00 m01 m10 m11
-    obtain ⟨f1, f2⟩ := p1o_hill_data_pi hQ.continuous hw
-    refine ⟨hw, (p1o_hill_multiplier_iff hQ hw s).2 ⟨?_, ?_⟩⟩
+    obtain ⟨f1, f2⟩ := hillSolution_data_pi hQ.continuous hw
+    refine ⟨hw, (hillSolution_multiplier_iff hQ hw s).2 ⟨?_, ?_⟩⟩
     · rw [f1, m00, m01]; ring
     · rw [f2, m10, m11]; ring
 
@@ -668,7 +691,7 @@ theorem hill_all_periodic_of_minimal_period (hQ : IsHillPotential Q) {n : ℕ} (
   have hno : ∀ s : ℂ, s = 1 ∨ s = -1 → ¬ ∀ x, w (x + Real.pi) = s * w x := by
     intro s hs hm
     refine hmin (2 * Real.pi) (by positivity) (by nlinarith) fun x => ?_
-    have := p1o_iter_mult hm 2 x
+    have := apply_add_nat_mul_pi_of_multiplier hm 2 x
     push_cast at this
     rw [this]; rcases hs with rfl | rfl <;> norm_num
   obtain ⟨ν, hν1, hν2, hc⟩ := exists_hillCharExp Q lam
@@ -684,7 +707,7 @@ theorem hill_all_periodic_of_minimal_period (hQ : IsHillPotential Q) {n : ℕ} (
     have hs0 : s ≠ 0 := by rcases hs with rfl | rfl <;> norm_num
     by_cases hc0 : c = 0
     · exact hno s hs fun x => by rw [hcw, hc0]; ring
-    have hit := fun x => p1o_iter_jordan hPm hcw m x
+    have hit := fun x => apply_add_nat_mul_pi_of_jordan hPm hcw m x
     by_cases hsn : s ^ (m + 1) = 1
     · apply hP0
       funext x
@@ -709,7 +732,7 @@ theorem hill_all_periodic_of_minimal_period (hQ : IsHillPotential Q) {n : ℕ} (
       exists_hillFloquet_fundamental_pair hQ ⟨hν1, hν2⟩ hν.1 hν.2 hc
     set ρ := Complex.exp (Real.pi * I * ν)
     set σ := Complex.exp (Real.pi * I * -ν)
-    have hρσ : ρ ≠ σ := p1o_exp_ne ⟨hν1, hν2⟩ hν.1 hν.2
+    have hρσ : ρ ≠ σ := exp_pi_I_mul_ne_exp_neg ⟨hν1, hν2⟩ hν.1 hν.2
     have hprod : ρ * σ = 1 := by
       simp only [ρ, σ]; rw [← Complex.exp_add]; ring_nf; simp
     obtain ⟨c₁, c₂, hwc⟩ := hall w hw
@@ -717,8 +740,8 @@ theorem hill_all_periodic_of_minimal_period (hQ : IsHillPotential Q) {n : ℕ} (
       intro x
       have h := hper x
       rw [hwc] at h
-      simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul, p1o_iter_mult m₁,
-        p1o_iter_mult m₂] at h
+      simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul, apply_add_nat_mul_pi_of_multiplier m₁,
+        apply_add_nat_mul_pi_of_multiplier m₂] at h
       linear_combination h
     have E2 : ∀ x, c₂ * (σ ^ n - 1) * (ρ - σ) * w₂ x = 0 := by
       intro x
@@ -752,7 +775,7 @@ theorem hill_all_periodic_of_minimal_period (hQ : IsHillPotential Q) {n : ℕ} (
     intro v hv x
     obtain ⟨d₁, d₂, hvd⟩ := hall v hv
     rw [hvd]
-    simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul, p1o_iter_mult m₁, p1o_iter_mult m₂,
+    simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul, apply_add_nat_mul_pi_of_multiplier m₁, apply_add_nat_mul_pi_of_multiplier m₂,
       hboth.1, hboth.2, one_mul]
 
 /-- DLMF 28.29.13: every solution satisfies `w(z + π) + w(z - π) = 2 cos(πν) w(z)`, where
@@ -762,7 +785,7 @@ theorem IsHillSolution.add_pi_add_sub_pi (hQ : IsHillPotential Q) {ν : ℂ}
     (hc : 2 * Complex.cos (Real.pi * ν) = hillDiscriminant Q lam) {w : ℝ → ℂ}
     (hw : IsHillSolution Q lam w) (z : ℝ) :
     w (z + Real.pi) + w (z - Real.pi) = 2 * Complex.cos (Real.pi * ν) * w z := by
-  have h := p1o_hill_two_step hQ hw (z - Real.pi)
+  have h := hillSolution_add_two_pi hQ hw (z - Real.pi)
   rw [sub_add_cancel] at h
   rw [h, hc]; ring
 
@@ -783,7 +806,7 @@ theorem IsHillSolution.floquet_or (hQ : IsHillPotential Q) {ν : ℂ}
     simp only [ρ]; rw [← Complex.exp_neg]; ring_nf
   unfold IsHillFloquetSolution
   rw [hρ', hρ'']
-  rw [p1o_two_cos_eq] at hc
+  rw [two_mul_cos_pi_mul_eq_exp_add_inv] at hc
   by_cases hv : ∀ z, w (z + Real.pi) - ρ * w z = 0
   · left
     obtain ⟨x, hx⟩ := Function.ne_iff.mp hw0
@@ -794,7 +817,7 @@ theorem IsHillSolution.floquet_or (hQ : IsHillPotential Q) {ν : ℂ}
     · have := (hw.comp_add_pi hQ.periodic).add (hw.const_smul (-ρ))
       convert this using 1
       funext z; simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
-    · have h := p1o_hill_two_step hQ hw z
+    · have h := hillSolution_add_two_pi hQ hw z
       beta_reduce
       rw [h, ← hc]
       field_simp
@@ -845,7 +868,7 @@ characteristic equation becomes `cos(πν) = w_I(π, λ)`, i.e. `Δ(λ) = 2 w_I(
 @[dlmf 28.29.E14]
 theorem hillDiscriminant_of_even (hQ : IsHillPotential Q) (heven : ∀ x, Q (-x) = Q x)
     (lam : ℂ) : hillDiscriminant Q lam = 2 * hillWI Q Real.pi lam := by
-  have hW := p1o_hill_wronskian (lam := lam) hQ.continuous Real.pi
+  have hW := hillWronskian_eq_one (lam := lam) hQ.continuous Real.pi
   have h1 := hillWI_add_pi hQ lam (-Real.pi)
   have h2 := hillWII_add_pi hQ lam (-Real.pi)
   rw [neg_add_cancel, hillWI_neg_of_even hQ.continuous heven,
@@ -870,7 +893,7 @@ theorem hillDiscriminant_of_even (hQ : IsHillPotential Q) (heven : ∀ x, Q (-x)
 
 /-- Upper growth bound for the discriminant: for `‖λ‖ ≥ 1`,
 `‖Δ(λ)‖ ≤ 2 e^{Mπ/2} e^{π ‖λ‖^{1/2}}`, where `‖Q‖ ≤ M` on `[0, π]`. -/
-lemma p2s_hillDiscriminant_le {Q : ℝ → ℂ} (hQc : Continuous Q) {M : ℝ} (hM : 0 ≤ M)
+private lemma norm_hillDiscriminant_le {Q : ℝ → ℂ} (hQc : Continuous Q) {M : ℝ} (hM : 0 ≤ M)
     (hQM : ∀ x ∈ Icc 0 Real.pi, ‖Q x‖ ≤ M) {lam : ℂ} (hlam : 1 ≤ ‖lam‖) :
     ‖hillDiscriminant Q lam‖ ≤
       2 * Real.exp (M * Real.pi / 2) * Real.exp (Real.pi * Real.sqrt ‖lam‖) := by
@@ -882,8 +905,8 @@ lemma p2s_hillDiscriminant_le {Q : ℝ → ℂ} (hQc : Continuous Q) {M : ℝ} (
   have hπ : Real.pi ∈ Icc 0 Real.pi := ⟨Real.pi_pos.le, le_rfl⟩
   obtain ⟨sI, sI0, sI1⟩ := hillWI_spec hQc lam
   obtain ⟨sII, sII0, sII1⟩ := hillWII_spec hQc lam
-  have eI := ODE.p2s_energy_complex_le hM hk hP sI.hasDerivAt sI.hasDerivAt_deriv hπ
-  have eII := ODE.p2s_energy_complex_le hM hk hP sII.hasDerivAt sII.hasDerivAt_deriv hπ
+  have eI := ODE.norm_deriv_sq_add_sq_mul_norm_sq_le_exp hM hk hP sI.hasDerivAt sI.hasDerivAt_deriv hπ
+  have eII := ODE.norm_deriv_sq_add_sq_mul_norm_sq_le_exp hM hk hP sII.hasDerivAt sII.hasDerivAt_deriv hπ
   rw [sI0, sI1] at eI
   rw [sII0, sII1] at eII
   simp only [norm_zero, norm_one] at eI eII
@@ -913,7 +936,7 @@ lemma p2s_hillDiscriminant_le {Q : ℝ → ℂ} (hQc : Continuous Q) {M : ℝ} (
 
 /-- A solution of Hill's equation with real potential, real `λ = -t` and real data at `0` is
 real, and its real part solves `y'' = (t - Q) y`. -/
-lemma p2s_hill_real {Q : ℝ → ℝ} (hQc : Continuous Q) {t : ℝ} {w : ℝ → ℂ}
+private lemma hillSolution_real_of_real_data {Q : ℝ → ℝ} (hQc : Continuous Q) {t : ℝ} {w : ℝ → ℂ}
     (hw : IsHillSolution (fun x => (Q x : ℂ)) (-(t : ℂ)) w)
     (h0 : (starRingEnd ℂ) (w 0) = w 0) (h1 : (starRingEnd ℂ) (deriv w 0) = deriv w 0) :
     (∀ x, w x = ((w x).re : ℂ) ∧ deriv w x = ((deriv w x).re : ℂ)) ∧
@@ -923,7 +946,7 @@ lemma p2s_hill_real {Q : ℝ → ℝ} (hQc : Continuous Q) {t : ℝ} {w : ℝ �
       HasDerivAt (deriv w) (((t - Q x : ℝ) : ℂ) * w x) x := fun x =>
     ⟨hw.hasDerivAt x, (hw.hasDerivAt_deriv x).congr_deriv (by push_cast; ring)⟩
   have hP : Continuous fun x => t - Q x := by fun_prop
-  have hr := ODE.p2s_conj_eq_of_linear_ode hP hd h0 h1
+  have hr := ODE.conj_eq_of_linear_ode hP hd h0 h1
   refine ⟨fun x => ⟨(Complex.conj_eq_iff_re.mp (hr x).1).symm,
     (Complex.conj_eq_iff_re.mp (hr x).2).symm⟩, fun x => ?_, fun x => ?_⟩
   · exact Complex.reCLM.hasFDerivAt.comp_hasDerivAt x (hd x).1
@@ -933,21 +956,21 @@ lemma p2s_hill_real {Q : ℝ → ℝ} (hQc : Continuous Q) {t : ℝ} {w : ℝ �
 
 /-- Lower growth bound for the discriminant of a real potential on the negative axis:
 `Δ(-t) ≥ e^{π √(t - M)} / 2` when `|Q| ≤ M ≤ t` on `[0, π]`. -/
-lemma p2s_hillDiscriminant_ge {Q : ℝ → ℝ} (hQc : Continuous Q) {M : ℝ}
+private lemma exp_le_norm_hillDiscriminant {Q : ℝ → ℝ} (hQc : Continuous Q) {M : ℝ}
     (hQM : ∀ x ∈ Icc 0 Real.pi, |Q x| ≤ M) {t : ℝ} (ht : M ≤ t) :
     Real.exp (Real.pi * Real.sqrt (t - M)) / 2 ≤
       ‖hillDiscriminant (fun x => (Q x : ℂ)) (-(t : ℂ))‖ := by
   have hQc' : Continuous fun x => (Q x : ℂ) := by fun_prop
   obtain ⟨sI, sI0, sI1⟩ := hillWI_spec hQc' (-(t : ℂ))
   obtain ⟨sII, sII0, sII1⟩ := hillWII_spec hQc' (-(t : ℂ))
-  obtain ⟨rI, dI, dI'⟩ := p2s_hill_real hQc sI (by simp [sI0]) (by simp [sI1])
-  obtain ⟨rII, dII, dII'⟩ := p2s_hill_real hQc sII (by simp [sII0]) (by simp [sII1])
+  obtain ⟨rI, dI, dI'⟩ := hillSolution_real_of_real_data hQc sI (by simp [sI0]) (by simp [sI1])
+  obtain ⟨rII, dII, dII'⟩ := hillSolution_real_of_real_data hQc sII (by simp [sII0]) (by simp [sII1])
   set s := Real.sqrt (t - M)
   have hs2 : s ^ 2 = t - M := Real.sq_sqrt (by linarith)
   have hp : ∀ x ∈ Icc 0 Real.pi, s ^ 2 ≤ t - Q x := fun x hx => by
     rw [hs2]; linarith [(abs_le.mp (hQM x hx)).2]
-  have lI := ODE.p2s_real_lower_I Real.pi_pos.le hp dI dI' (by simp [sI0]) (by simp [sI1])
-  have lII := ODE.p2s_real_lower_II Real.pi_pos.le hp dII dII' (by simp [sII0])
+  have lI := ODE.exp_mul_div_two_le_of_initial_one_zero Real.pi_pos.le hp dI dI' (by simp [sI0]) (by simp [sI1])
+  have lII := ODE.one_le_deriv_of_initial_zero_one Real.pi_pos.le hp dII dII' (by simp [sII0])
     (by simp [sII1])
   have hre : (hillDiscriminant (fun x => (Q x : ℂ)) (-(t : ℂ))).re =
       (hillWI (fun x => (Q x : ℂ)) Real.pi (-(t : ℂ))).re +
@@ -985,7 +1008,7 @@ theorem hillDiscriminant_order_half {Q : ℝ → ℝ} (hQ : IsHillPotential (fun
       (max 1 (Real.pi ^ (1 / ε)))] with lam hlam
     have h1 : 1 ≤ ‖lam‖ := (le_max_left _ _).trans hlam
     have hr : 0 < ‖lam‖ := by linarith
-    refine (p2s_hillDiscriminant_le (by fun_prop) hM hQM' h1).trans ?_
+    refine (norm_hillDiscriminant_le (by fun_prop) hM hQM' h1).trans ?_
     rw [Real.norm_of_nonneg (Real.exp_pos _).le]
     gcongr
     have hpi : Real.pi ≤ ‖lam‖ ^ ε := by
@@ -1012,7 +1035,7 @@ theorem hillDiscriminant_order_half {Q : ℝ → ℝ} (hQ : IsHillPotential (fun
     have htM : 2 * M ≤ t := (le_max_right _ _).trans ht1
     have hnorm : ‖-(t : ℂ)‖ = t := by simp [Complex.norm_real, abs_of_pos ht0]
     rw [hnorm, Real.norm_of_nonneg (Real.exp_pos _).le] at hCt
-    have hlow := p2s_hillDiscriminant_ge hQc hQM (show M ≤ t by linarith)
+    have hlow := exp_le_norm_hillDiscriminant hQc hQM (show M ≤ t by linarith)
     set a := Real.pi / 4 * Real.sqrt t
     -- `π √(t - M) ≥ 2a`
     have h2a : 2 * a ≤ Real.pi * Real.sqrt (t - M) := by

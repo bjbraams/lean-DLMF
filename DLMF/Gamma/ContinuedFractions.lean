@@ -10,11 +10,19 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 
 /-!
-# Continued fractions (DLMF §5.10)
+# Continued fraction for Binet's function (DLMF §5.10)
 
-The Stieltjes-type continued fraction for Binet's function. The source lists
-explicit partial numerators `a_0,…,a_6`; those values are recorded below. The
-general coefficients are not given in closed form, so no convergence statement is made.
+The Stieltjes continued fraction for Binet's function `ln Γ(z) - ((z - 1/2) ln z - z +
+(1/2) ln 2π)`. DLMF lists the partial numerators `a₀, …, a₆` explicitly; these values are
+recorded. The general coefficients are not given in closed form, so no convergence statement is
+made.
+
+## Main definitions
+
+* `logGammaContFractCoeff`: the partial numerators `aₖ` of DLMF 5.10.1, with the seven
+  tabulated values.
+* `logGammaContinuedFraction`: the continued fraction `a₀/(z + a₁/(z + ⋯))` of DLMF 5.10.1.
+* `logGammaBinet`: Binet's function, the left-hand side of DLMF 5.10.1.
 -/
 
 @[expose] public section

@@ -9,12 +9,34 @@ public import DLMF.Weierstrass.Basic.Invariants
 public import DLMF.Weierstrass.LatticesAndSigma
 
 /-!
-# Weierstrass elliptic functions and invariants
+# Weierstrass elliptic functions and lattice invariants
 
-Elliptic-function uniqueness, half-period values, invariants and discriminant identities.
+Periodicity and quasi-periodicity at the half-periods, the lattice roots `e₁, e₂, e₃`, the
+invariants `g₂, g₃` and the discriminant (DLMF §§23.2–23.3), together with the elliptic-function
+facts (Liouville's theorem, pole orders) needed to prove them.
 
-Source references and common attribution are retained in
-`DLMF.Weierstrass.Basic`.
+## Main results
+
+* `exists_eq_const_of_periodic_of_order_nonneg`: Liouville's theorem for elliptic functions.
+* `weierstrassP_add_two_mul_halfPeriod`, `derivWeierstrassP_halfPeriod`: DLMF 23.2.9–23.2.10.
+* `weierstrassZeta_add_two_mul_halfPeriod`, `eta_one_add_eta_two_add_eta_three`: the
+  quasi-periodicity of `ζ` and `η₁ + η₂ + η₃ = 0` (DLMF 23.2.11, 23.2.13).
+* `weierstrassSigma_add_two_mul_halfPeriod`, `deriv_weierstrassSigma_two_mul_halfPeriod`:
+  DLMF 23.2.15–23.2.16.
+* `e_isRoot`, `e_distinct`, `e_sum`, `cubic_eq_mul`: the roots `e_j` of `4z³ - g₂z - g₃`
+  (DLMF 23.3.3, 23.3.5, §23.3(i)).
+* `g₂_eq_e`, `g₃_eq_e`, `latticeDiscriminant_eq`: DLMF 23.3.4, 23.3.6–23.3.7.
+* `latticeDiscriminant_ne_zero'`: the discriminant of every lattice is nonzero.
+* `invariants_roots_eq_of_lattice_eq`: `g₂`, `g₃` and `{e₁, e₂, e₃}` depend only on the lattice.
+* `invariants_scale`: scaling of the invariants (DLMF §23.10(iv)).
+* `exists_periodPair_invariants`, `lattice_eq_of_invariants_eq`: every pair `g₂, g₃` with
+  `g₂³ ≠ 27g₃²` comes from exactly one lattice (DLMF §23.3(i)).
+* `weierstrassPInvariants_eq`: DLMF 23.3.8, `℘(z; g₂, g₃) = ℘(z|𝕃)`.
+* `exists_entire_weierstrassSigmaInvariants`: `σ(z; g₂, g₃)` is entire in `(z, g₂, g₃)`.
+
+## References
+
+Source references are collected in `DLMF.Weierstrass.Basic`.
 -/
 
 @[expose] public section
@@ -29,12 +51,11 @@ namespace DLMF.Weierstrass
 
 /-! ### Liouville's theorem for elliptic functions and the values of `℘` at half-periods -/
 
-section p23R1
-
+section WeierstrassRelations
 open Filter Topology
 
 /-- `℘ - c` has a pole of order exactly `2` at every lattice point. -/
-theorem p23R1_order_weierstrassP_sub (L : PeriodPair) {x : ℂ} (hx : x ∈ L.lattice) (c : ℂ) :
+theorem meromorphicOrderAt_weierstrassP_sub_of_mem (L : PeriodPair) {x : ℂ} (hx : x ∈ L.lattice) (c : ℂ) :
     meromorphicOrderAt (fun z => ℘[L] z - c) x = -2 := by
   have hlt : meromorphicOrderAt ℘[L] x < meromorphicOrderAt (fun _ : ℂ => -c) x := by
     rw [L.order_weierstrassP x hx]
@@ -45,7 +66,7 @@ theorem p23R1_order_weierstrassP_sub (L : PeriodPair) {x : ℂ} (hx : x ∈ L.la
   congr 1
 
 /-- An analytic function with `g x = g'(x) = 0` has order at least `2` at `x`. -/
-theorem p23R1_two_le_order {g : ℂ → ℂ} {x : ℂ} (hg : AnalyticAt ℂ g x) (h0 : g x = 0)
+theorem two_le_meromorphicOrderAt_of_deriv_eq_zero {g : ℂ → ℂ} {x : ℂ} (hg : AnalyticAt ℂ g x) (h0 : g x = 0)
     (h1 : deriv g x = 0) : (2 : WithTop ℤ) ≤ meromorphicOrderAt g x := by
   have h2 : ((2 : ℕ) : ℕ∞) ≤ analyticOrderAt g x := by
     rw [natCast_le_analyticOrderAt_iff_iteratedDeriv_eq_zero hg]
@@ -62,7 +83,7 @@ theorem p23R1_two_le_order {g : ℂ → ℂ} {x : ℂ} (hg : AnalyticAt ℂ g x)
     exact e
 
 /-- `-2 + o ≥ 0` for an order `o ≥ 2`. -/
-lemma p23R1_nonneg_add {o : WithTop ℤ} (h : 2 ≤ o) : 0 ≤ (-2 : WithTop ℤ) + o := by
+private lemma nonneg_neg_two_add_of_two_le {o : WithTop ℤ} (h : 2 ≤ o) : 0 ≤ (-2 : WithTop ℤ) + o := by
   cases o with
   | top => simp
   | coe n =>
@@ -73,7 +94,7 @@ lemma p23R1_nonneg_add {o : WithTop ℤ} (h : 2 ≤ o) : 0 ≤ (-2 : WithTop ℤ
 
 /-- Liouville for elliptic functions: a lattice-periodic meromorphic function with nonnegative
 order everywhere takes one constant value at every point where it is analytic. -/
-theorem p23R1_eq_const_of_elliptic (L : PeriodPair) {f : ℂ → ℂ} (hf : Meromorphic f)
+theorem exists_eq_const_of_periodic_of_order_nonneg (L : PeriodPair) {f : ℂ → ℂ} (hf : Meromorphic f)
     (hper : ∀ z, ∀ l ∈ L.lattice, f (z + l) = f z)
     (hord : ∀ x, 0 ≤ meromorphicOrderAt f x) :
     ∃ c, ∀ x, AnalyticAt ℂ f x → f x = c := by
@@ -110,7 +131,7 @@ theorem p23R1_eq_const_of_elliptic (L : PeriodPair) {f : ℂ → ℂ} (hf : Mero
     (((hQd.continuous.tendsto x).mono_left nhdsWithin_le_nhds).congr' (hQf x))
 
 /-- `℘'(a) = 0` for every half-lattice point `a` (`2a ∈ 𝕃`). -/
-theorem p23R1_derivWeierstrassP_of_two_mul_mem (L : PeriodPair) {a : ℂ}
+theorem derivWeierstrassP_eq_zero_of_two_mul_mem (L : PeriodPair) {a : ℂ}
     (h2a : 2 * a ∈ L.lattice) : ℘'[L] a = 0 := by
   have h1 := L.derivWeierstrassP_sub_coe a ⟨_, h2a⟩
   have h2 := L.derivWeierstrassP_neg a
@@ -118,12 +139,12 @@ theorem p23R1_derivWeierstrassP_of_two_mul_mem (L : PeriodPair) {a : ℂ}
   exact CharZero.eq_neg_self_iff.mp h1.symm
 
 /-- For a half-lattice point `a` the product `(℘(z + a) - ℘(a))(℘(z) - ℘(a))` is constant. -/
-theorem p23R1_halfPeriod_product (L : PeriodPair) {a : ℂ} (ha : a ∉ L.lattice)
+theorem exists_weierstrassP_sub_mul_eq_const_of_two_mul_mem (L : PeriodPair) {a : ℂ} (ha : a ∉ L.lattice)
     (h2a : 2 * a ∈ L.lattice) :
     ∃ K, ∀ z, z ∉ L.lattice → z + a ∉ L.lattice →
       (℘[L] (z + a) - ℘[L] a) * (℘[L] z - ℘[L] a) = K := by
   have hP : AnalyticOnNhd ℂ ℘[L] L.latticeᶜ := L.analyticOnNhd_weierstrassP
-  have hP'a := p23R1_derivWeierstrassP_of_two_mul_mem L h2a
+  have hP'a := derivWeierstrassP_eq_zero_of_two_mul_mem L h2a
   have hneg : ℘[L] (-a) = ℘[L] a := L.weierstrassP_neg a
   have hneg' : ℘'[L] (-a) = 0 := by rw [L.derivWeierstrassP_neg, hP'a, neg_zero]
   have hmer1 : Meromorphic (fun z => ℘[L] (z + a) - ℘[L] a) := fun x =>
@@ -151,26 +172,26 @@ theorem p23R1_halfPeriod_product (L : PeriodPair) {a : ℂ} (ha : a ∉ L.lattic
       meromorphicOrderAt_mul (hmer1 x) (hmer2 x)]
     by_cases hx : x ∈ L.lattice
     · have hxa : x + a ∉ L.lattice := fun h => ha (by simpa using sub_mem h hx)
-      rw [p23R1_order_weierstrassP_sub L hx, add_comm]
-      refine p23R1_nonneg_add (p23R1_two_le_order (hA1 x hxa) ?_ ?_)
+      rw [meromorphicOrderAt_weierstrassP_sub_of_mem L hx, add_comm]
+      refine nonneg_neg_two_add_of_two_le (two_le_meromorphicOrderAt_of_deriv_eq_zero (hA1 x hxa) ?_ ?_)
       · rw [add_comm, L.weierstrassP_add_coe a ⟨x, hx⟩, sub_self]
       · rw [deriv_sub_const, deriv_comp_add_const, deriv_weierstrassP, add_comm,
           L.derivWeierstrassP_add_coe a ⟨x, hx⟩, hP'a]
     · by_cases hxa : x + a ∈ L.lattice
       · have h1 := meromorphicOrderAt_fun_comp_add_const_eq_meromorphicOrderAt
           (f := fun w => ℘[L] w - ℘[L] a) (c := a) (x := x)
-        rw [h1, p23R1_order_weierstrassP_sub L hxa]
+        rw [h1, meromorphicOrderAt_weierstrassP_sub_of_mem L hxa]
         have hx' : x = -a + ((⟨x + a, hxa⟩ : L.lattice) : ℂ) := by simp
-        refine p23R1_nonneg_add (p23R1_two_le_order (hA2 x hx) ?_ ?_)
+        refine nonneg_neg_two_add_of_two_le (two_le_meromorphicOrderAt_of_deriv_eq_zero (hA2 x hx) ?_ ?_)
         · rw [hx', L.weierstrassP_add_coe, hneg, sub_self]
         · rw [deriv_sub_const, deriv_weierstrassP, hx', L.derivWeierstrassP_add_coe, hneg']
       · exact add_nonneg (hA1 x hxa).meromorphicOrderAt_nonneg
           (hA2 x hx).meromorphicOrderAt_nonneg
-  obtain ⟨c, hc⟩ := p23R1_eq_const_of_elliptic L hf hper hord
+  obtain ⟨c, hc⟩ := exists_eq_const_of_periodic_of_order_nonneg L hf hper hord
   exact ⟨c, fun z hz hza => hc z ((hA1 z hza).mul (hA2 z hz))⟩
 
 /-- `℘` is not locally constant at any point off the lattice. -/
-lemma p23R1_weierstrassP_not_eventually_const (L : PeriodPair) {z₀ : ℂ}
+private lemma weierstrassP_not_eventually_const (L : PeriodPair) {z₀ : ℂ}
     (hz₀ : z₀ ∉ L.lattice) (c : ℂ) : ¬ ∀ᶠ z in 𝓝 z₀, ℘[L] z = c := by
   intro h
   have hA : AnalyticOnNhd ℂ (fun z => ℘[L] z - c) L.latticeᶜ :=
@@ -180,7 +201,7 @@ lemma p23R1_weierstrassP_not_eventually_const (L : PeriodPair) {z₀ : ℂ}
     simp [hz]
   have hc : ∀ w ∈ (L.latticeᶜ : Set ℂ), ℘[L] w = c := fun w hw =>
     sub_eq_zero.mp (hA.eqOn_zero_of_preconnected_of_eventuallyEq_zero
-      (wp23_isPreconnected_compl_lattice L) hz₀ h0 hw)
+      (isPreconnected_compl_lattice L) hz₀ h0 hw)
   have hev : ℘[L] =ᶠ[𝓝[≠] 0] fun _ ↦ c := by
     filter_upwards [nhdsWithin_le_nhds (L.compl_lattice_sdiff_singleton_mem_nhds 0),
       self_mem_nhdsWithin] with w hw hw0
@@ -192,11 +213,11 @@ lemma p23R1_weierstrassP_not_eventually_const (L : PeriodPair) {z₀ : ℂ}
   split_ifs at h1 <;> revert h1 <;> decide
 
 /-- `℘(b) ≠ ℘(a)` for a half-lattice point `a` unless `b ≡ ±a` modulo the lattice. -/
-theorem p23R1_weierstrassP_ne_of_halfLattice (L : PeriodPair) {a b : ℂ} (ha : a ∉ L.lattice)
+theorem weierstrassP_ne_of_halfLattice (L : PeriodPair) {a b : ℂ} (ha : a ∉ L.lattice)
     (h2a : 2 * a ∈ L.lattice) (hb : b ∉ L.lattice) (hab : b + a ∉ L.lattice) :
     ℘[L] b ≠ ℘[L] a := by
   intro heq
-  obtain ⟨K, hK⟩ := p23R1_halfPeriod_product L ha h2a
+  obtain ⟨K, hK⟩ := exists_weierstrassP_sub_mul_eq_const_of_two_mul_mem L ha h2a
   have hK0 : K = 0 := by rw [← hK b hb hab, heq, sub_self, mul_zero]
   have hP : AnalyticOnNhd ℂ ℘[L] L.latticeᶜ := L.analyticOnNhd_weierstrassP
   have hopen : IsOpen (L.latticeᶜ : Set ℂ) := L.isClosed_lattice.isOpen_compl
@@ -210,7 +231,7 @@ theorem p23R1_weierstrassP_ne_of_halfLattice (L : PeriodPair) {a b : ℂ} (ha : 
     filter_upwards [hopen.mem_nhds hb, h1] with z hz hza
     rw [hK z hz hza, hK0]
   rcases hA2.eventually_eq_zero_or_eventually_ne_zero with h | h
-  · exact p23R1_weierstrassP_not_eventually_const L hb (℘[L] a)
+  · exact weierstrassP_not_eventually_const L hb (℘[L] a)
       (h.mono fun z hz => sub_eq_zero.mp hz)
   · have hfr : ∃ᶠ z in 𝓝[≠] b, ℘[L] (z + a) - ℘[L] a = 0 := by
       refine Filter.Eventually.frequently ?_
@@ -221,12 +242,11 @@ theorem p23R1_weierstrassP_ne_of_halfLattice (L : PeriodPair) {a b : ℂ} (ha : 
       have hc : Continuous fun w : ℂ => w - a := by fun_prop
       have := hc.tendsto (b + a)
       simpa only [add_sub_cancel_right] using this
-    refine p23R1_weierstrassP_not_eventually_const L hab (℘[L] a) ?_
+    refine weierstrassP_not_eventually_const L hab (℘[L] a) ?_
     filter_upwards [hsub.eventually hev] with w hw
     simpa using sub_eq_zero.mp hw
 
-end p23R1
-
+end WeierstrassRelations
 /-! ### Half-period values, `e_j` and `η_j` -/
 
 namespace HalfPeriods
@@ -280,7 +300,7 @@ theorem weierstrassZeta_add_two_mul_halfPeriod {z : ℂ} (hz : z ∉ H.lattice) 
     H.weierstrassZeta (z + 2 * H.halfPeriod j) = H.weierstrassZeta z + 2 * H.eta j := by
   have hn := H.halfPeriod_notMem hj
   have hn' : -H.halfPeriod j ∉ H.lattice := fun h => hn (by simpa using neg_mem h)
-  have := wp23_zeta_add_sub_const H.periodPair (H.two_mul_halfPeriod_mem hj) hz hn'
+  have := weierstrassZeta_add_sub_eq_of_mem H.periodPair (H.two_mul_halfPeriod_mem hj) hz hn'
   rw [show -H.halfPeriod j + 2 * H.halfPeriod j = H.halfPeriod j by ring,
     DLMF.Weierstrass.weierstrassZeta_neg] at this
   simp only [HalfPeriods.weierstrassZeta, eta]
@@ -323,7 +343,7 @@ theorem weierstrassSigma_add_two_mul_halfPeriod (z : ℂ) {j : ℕ}
   set ω := H.halfPeriod j
   have hω : ω ∉ H.lattice := H.halfPeriod_notMem hj
   have hmω : -ω ∉ H.lattice := fun h => hω (by simpa using neg_mem h)
-  obtain ⟨a, ha, hfa⟩ := p23R1_weierstrassSigma_add_mem H.periodPair
+  obtain ⟨a, ha, hfa⟩ := exists_weierstrassSigma_add_mem H.periodPair
     (H.two_mul_halfPeriod_mem hj) hmω
   have hc : DLMF.Weierstrass.weierstrassZeta H.periodPair (-ω + 2 * ω) - DLMF.Weierstrass.weierstrassZeta H.periodPair (-ω) =
       2 * H.eta j := by
@@ -362,7 +382,7 @@ theorem deriv_weierstrassSigma_two_mul_halfPeriod {j : ℕ} (hj : j ∈ ({1, 2, 
       (cexp (2 * H.eta j * (0 + ω)) * (2 * H.eta j)) 0 := by
     have := (((hasDerivAt_id (0 : ℂ)).add_const ω).const_mul (2 * H.eta j)).cexp
     simpa using this
-  have h2 := he.neg.mul (p23R1_hasDerivAt_weierstrassSigma_zero H.periodPair)
+  have h2 := he.neg.mul (hasDerivAt_weierstrassSigma_zero H.periodPair)
   rw [hfun] at h1
   rw [h1.unique h2]
   simp [DLMF.Weierstrass.weierstrassSigma_eq_zero_of_mem H.periodPair (zero_mem _)]
@@ -386,9 +406,9 @@ theorem e_isRoot (j : ℕ) (hj : j ∈ ({1, 2, 3} : Finset ℕ)) :
   H.e_root_cubic hj
 
 /-- `e_k ≠ e_j` whenever `ω_k + ω_j ∉ 𝕃`. -/
-lemma p23R1_e_ne {j k : ℕ} (hj : j ∈ ({1, 2, 3} : Finset ℕ)) (hk : k ∈ ({1, 2, 3} : Finset ℕ))
+private lemma e_ne_of_halfPeriod_add_not_mem {j k : ℕ} (hj : j ∈ ({1, 2, 3} : Finset ℕ)) (hk : k ∈ ({1, 2, 3} : Finset ℕ))
     (hjk : H.halfPeriod k + H.halfPeriod j ∉ H.lattice) : H.e k ≠ H.e j :=
-  p23R1_weierstrassP_ne_of_halfLattice H.periodPair (H.halfPeriod_notMem hj)
+  weierstrassP_ne_of_halfLattice H.periodPair (H.halfPeriod_notMem hj)
     (H.two_mul_halfPeriod_mem hj) (H.halfPeriod_notMem hk) hjk
 
 /-- DLMF §23.3(i): the lattice roots `e₁, e₂, e₃` are distinct. -/
@@ -396,9 +416,9 @@ lemma p23R1_e_ne {j k : ℕ} (hj : j ∈ ({1, 2, 3} : Finset ℕ)) (hk : k ∈ (
 theorem e_distinct : H.e 1 ≠ H.e 2 ∧ H.e 2 ≠ H.e 3 ∧ H.e 1 ≠ H.e 3 := by
   have hneg : ∀ j ∈ ({1, 2, 3} : Finset ℕ), -H.halfPeriod j ∉ H.lattice := fun j hj h =>
     H.halfPeriod_notMem hj (by simpa using neg_mem h)
-  refine ⟨H.p23R1_e_ne (j := 2) (k := 1) (by simp) (by simp) ?_,
-    H.p23R1_e_ne (j := 3) (k := 2) (by simp) (by simp) ?_,
-    H.p23R1_e_ne (j := 3) (k := 1) (by simp) (by simp) ?_⟩
+  refine ⟨H.e_ne_of_halfPeriod_add_not_mem (j := 2) (k := 1) (by simp) (by simp) ?_,
+    H.e_ne_of_halfPeriod_add_not_mem (j := 3) (k := 2) (by simp) (by simp) ?_,
+    H.e_ne_of_halfPeriod_add_not_mem (j := 3) (k := 1) (by simp) (by simp) ?_⟩
   · rw [show H.halfPeriod 1 + H.halfPeriod 2 = -H.halfPeriod 3 by simp [ω₂]; ring]
     exact hneg 3 (by simp)
   · rw [show H.halfPeriod 2 + H.halfPeriod 3 = -H.halfPeriod 1 by simp [ω₂]]
@@ -433,7 +453,7 @@ theorem e_sum : H.e 1 + H.e 2 + H.e 3 = 0 := by
   · linear_combination h / 4
 
 /-- `4(e₁² + e₁e₂ + e₂²) = g₂`. -/
-lemma wp23_g₂_eq : 4 * (H.e 1 ^ 2 + H.e 1 * H.e 2 + H.e 2 ^ 2) = H.g₂ := by
+private lemma four_mul_e_sq_add_eq_g₂ : 4 * (H.e 1 ^ 2 + H.e 1 * H.e 2 + H.e 2 ^ 2) = H.g₂ := by
   obtain ⟨h12, -, -⟩ := H.e_distinct
   have r1 := H.e_root_cubic (j := 1) (by simp)
   have r2 := H.e_root_cubic (j := 2) (by simp)
@@ -448,7 +468,7 @@ lemma wp23_g₂_eq : 4 * (H.e 1 ^ 2 + H.e 1 * H.e 2 + H.e 2 ^ 2) = H.g₂ := by
 theorem g₂_eq_e : H.g₂ = 2 * (H.e 1 ^ 2 + H.e 2 ^ 2 + H.e 3 ^ 2) ∧
     H.g₂ = -4 * (H.e 2 * H.e 3 + H.e 3 * H.e 1 + H.e 1 * H.e 2) := by
   have hs := H.e_sum
-  have hg := H.wp23_g₂_eq
+  have hg := H.four_mul_e_sq_add_eq_g₂
   have h3 : H.e 3 = -H.e 1 - H.e 2 := by linear_combination hs
   rw [h3] at ⊢
   constructor <;> linear_combination -hg
@@ -458,7 +478,7 @@ theorem g₂_eq_e : H.g₂ = 2 * (H.e 1 ^ 2 + H.e 2 ^ 2 + H.e 3 ^ 2) ∧
 theorem g₃_eq_e : H.g₃ = 4 * H.e 1 * H.e 2 * H.e 3 ∧
     H.g₃ = 4 / 3 * (H.e 1 ^ 3 + H.e 2 ^ 3 + H.e 3 ^ 3) := by
   have hs := H.e_sum
-  have hg := H.wp23_g₂_eq
+  have hg := H.four_mul_e_sq_add_eq_g₂
   have r1 := H.e_root_cubic (j := 1) (by simp)
   have h3 : H.e 3 = -H.e 1 - H.e 2 := by linear_combination hs
   rw [h3]
@@ -535,7 +555,7 @@ end HalfPeriods
 /-! ### The invariants form `℘(z; g₂, g₃)` (DLMF 23.3.8) -/
 
 /-- Identity under the stated parameter and domain assumptions: `L.G n = L'.G n`. -/
-theorem wp23_G_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice = L'.lattice) (n : ℕ) :
+theorem G_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice = L'.lattice) (n : ℕ) :
     L.G n = L'.G n := by
   simp only [PeriodPair.G]
   rw [← (Equiv.subtypeEquivRight (fun x => by rw [h]) : L.lattice ≃ L'.lattice).tsum_eq]
@@ -565,32 +585,31 @@ theorem latticeDiscriminant_ne_zero' (L : PeriodPair) : latticeDiscriminant L �
   have h := (halfPeriodsOf L).latticeDiscriminant_ne_zero
   have hl := halfPeriodsOf_lattice L
   simpa [latticeDiscriminant, PeriodPair.g₂, PeriodPair.g₃,
-    wp23_G_eq_of_lattice_eq _ _ hl] using h
+    G_eq_of_lattice_eq _ _ hl] using h
 
 /-! ### Homogeneity of the invariants (§23.10(iv)) -/
 
 /-- `G_k(c𝕃) = c^{-k}G_k(𝕃)`. -/
-lemma wp23_G_scale (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) (k : ℕ) :
+private lemma G_scalePeriodPair (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) (k : ℕ) :
     (scalePeriodPair c hc L).G k = c⁻¹ ^ k * L.G k := by
   simp only [PeriodPair.G]
-  rw [← (wp23_scaleEquiv c hc L).tsum_eq, ← tsum_mul_left]
+  rw [← (scalePeriodPairLatticeEquiv c hc L).tsum_eq, ← tsum_mul_left]
   refine tsum_congr fun l => ?_
-  simp only [wp23_scaleEquiv, Equiv.coe_fn_mk]
+  simp only [scalePeriodPairLatticeEquiv, Equiv.coe_fn_mk]
   rw [mul_pow, mul_inv, inv_pow]
 
 /-- DLMF §23.10(iv): replacing `𝕃` by `c𝕃` divides `g₂` by `c⁴` and `g₃` by `c⁶`. -/
 @[dlmf 23.10.iv]
 theorem invariants_scale (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) :
     (scalePeriodPair c hc L).g₂ = L.g₂ / c ^ 4 ∧ (scalePeriodPair c hc L).g₃ = L.g₃ / c ^ 6 := by
-  simp only [PeriodPair.g₂, PeriodPair.g₃, wp23_G_scale]
+  simp only [PeriodPair.g₂, PeriodPair.g₃, G_scalePeriodPair]
   constructor <;> field_simp
 
-section p23R1Disc
-
+section Discriminant
 open PeriodPair ModularForm EisensteinSeries UpperHalfPlane
 
 /-- The lattice sums of the lattice `ℤ + ℤτ` are the full Eisenstein sums. -/
-theorem p23R1_G_ofTau (τ : ℍ) (k : ℕ) :
+private theorem G_ofTau_eq_tsum_eisSummand (τ : ℍ) (k : ℕ) :
     (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair.G k =
       ∑' v : Fin 2 → ℤ, eisSummand k v τ := by
   set L := (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair
@@ -605,44 +624,43 @@ theorem p23R1_G_ofTau (τ : ℍ) (k : ℕ) :
   ring_nf
 
 /-- `B₆ = 1/42`. -/
-lemma p23R1_bernoulli_six : bernoulli 6 = 1 / 42 := by decide +kernel
+private lemma bernoulli_six : bernoulli 6 = 1 / 42 := by decide +kernel
 
 /-- `ζ(6) = π⁶/945`. -/
-theorem p23R1_riemannZeta_six : riemannZeta 6 = π ^ 6 / 945 := by
+theorem riemannZeta_six_eq_pi_pow : riemannZeta 6 = π ^ 6 / 945 := by
   have := riemannZeta_two_mul_nat (k := 3) (by norm_num)
-  norm_num [p23R1_bernoulli_six, Nat.factorial] at this
+  norm_num [bernoulli_six, Nat.factorial] at this
   rw [this]; ring
 
 /-- `G_k(ℤ + ℤτ) = 2ζ(k)E_k(τ)` with Mathlib's normalised Eisenstein series. -/
-theorem p23R1_G_eq_E (τ : ℍ) {k : ℕ} (hk : 3 ≤ k) :
+theorem G_ofTau_eq_two_mul_riemannZeta_mul_E (τ : ℍ) {k : ℕ} (hk : 3 ≤ k) :
     (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair.G k =
       2 * riemannZeta k * E hk τ := by
-  rw [p23R1_G_ofTau, tsum_eisSummand_eq_riemannZeta_mul_eisensteinSeries hk]
+  rw [G_ofTau_eq_tsum_eisSummand, tsum_eisSummand_eq_riemannZeta_mul_eisensteinSeries hk]
   have : (E hk : ℍ → ℂ) τ = (1 / 2 : ℂ) * eisensteinSeries 0 k τ := rfl
   rw [this]
   ring
 
-end p23R1Disc
-
+end Discriminant
 open ModularForm EisensteinSeries UpperHalfPlane in
 /-- DLMF §23.3(i): if `g₂³ ≠ 27g₃²` there is a lattice with invariants `g₂, g₃`.  Proved from the
 surjectivity of the modular invariant `E₄³/(E₄³ - E₆²)` and the homogeneity of the invariants. -/
 @[dlmf 23.3.i]
 theorem exists_periodPair_invariants (g₂ g₃ : ℂ) (h : g₂ ^ 3 - 27 * g₃ ^ 2 ≠ 0) :
     ∃ L : PeriodPair, L.g₂ = g₂ ∧ L.g₃ = g₃ := by
-  obtain ⟨τ, hτ⟩ := p3w_exists_E₄_cube_div_eq (g₂ ^ 3 / (g₂ ^ 3 - 27 * g₃ ^ 2))
+  obtain ⟨τ, hτ⟩ := exists_kleinJ_eq (g₂ ^ 3 / (g₂ ^ 3 - 27 * g₃ ^ 2))
   set L0 := (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair with hL0
   have z4 : riemannZeta ((4 : ℕ) : ℂ) = π ^ 4 / 90 := by exact_mod_cast riemannZeta_four
-  have z6 : riemannZeta ((6 : ℕ) : ℂ) = π ^ 6 / 945 := by exact_mod_cast p23R1_riemannZeta_six
+  have z6 : riemannZeta ((6 : ℕ) : ℂ) = π ^ 6 / 945 := by exact_mod_cast riemannZeta_six_eq_pi_pow
   have ha : L0.g₂ = 4 * π ^ 4 / 3 * E₄ τ := by
-    rw [PeriodPair.g₂, p23R1_G_eq_E τ (k := 4) (by norm_num), z4]; ring
+    rw [PeriodPair.g₂, G_ofTau_eq_two_mul_riemannZeta_mul_E τ (k := 4) (by norm_num), z4]; ring
   have hb : L0.g₃ = 8 * π ^ 6 / 27 * E₆ τ := by
-    rw [PeriodPair.g₃, p23R1_G_eq_E τ (k := 6) (by norm_num), z6]; ring
-  have hD := p3w_E₄_cube_sub_E₆_sq_ne_zero τ
+    rw [PeriodPair.g₃, G_ofTau_eq_two_mul_riemannZeta_mul_E τ (k := 6) (by norm_num), z6]; ring
+  have hD := E₄_cube_sub_E₆_sq_ne_zero τ
   have hΔ0 : L0.g₂ ^ 3 - 27 * L0.g₃ ^ 2 ≠ 0 := latticeDiscriminant_ne_zero' L0
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   have key : L0.g₂ ^ 3 * g₃ ^ 2 = g₂ ^ 3 * L0.g₃ ^ 2 := by
-    simp only [p3wJ] at hτ
+    simp only [ModularForm.kleinJ] at hτ
     rw [div_eq_div_iff hD h] at hτ
     rw [ha, hb]
     linear_combination (-(64 : ℂ) * π ^ 12 / 729) * hτ
@@ -687,13 +705,12 @@ theorem exists_periodPair_invariants (g₂ g₃ : ℂ) (h : g₂ ^ 3 - 27 * g₃
   · rw [s2, show c ^ 4 = (c ^ 2) ^ 2 by ring, hc, ← hu2]; field_simp
   · rw [s3, show c ^ 6 = (c ^ 2) ^ 3 by ring, hc, ← hu3]; field_simp
 
-section p23R1Uniq
-
+section Uniqueness
 open Filter Topology
 
 /-- The differential equation of `℘` in terms of the regular part `p = ℘ - 1/z²` near `0`:
 `(z³p' - 2)² = 4(1 + z²p)³ - g₂z⁴(1 + z²p) - g₃z⁶`. -/
-lemma p23R1_ode_regularPart (L : PeriodPair) :
+private lemma weierstrassP_regularPart_ode (L : PeriodPair) :
     ∀ᶠ z in 𝓝[≠] (0 : ℂ), (z ^ 3 * deriv (fun w => ℘[L] w - 1 / w ^ 2) z - 2) ^ 2 =
       4 * (1 + z ^ 2 * (℘[L] z - 1 / z ^ 2)) ^ 3 -
         L.g₂ * z ^ 4 * (1 + z ^ 2 * (℘[L] z - 1 / z ^ 2)) - L.g₃ * z ^ 6 := by
@@ -722,7 +739,7 @@ lemma p23R1_ode_regularPart (L : PeriodPair) :
   linear_combination z ^ 6 * ode
 
 /-- Two lattices with the same invariants have the same `℘` near `0`. -/
-lemma p23R1_weierstrassP_eventuallyEq_of_invariants (L L' : PeriodPair) (h₂ : L.g₂ = L'.g₂)
+private lemma weierstrassP_eventuallyEq_of_invariants (L L' : PeriodPair) (h₂ : L.g₂ = L'.g₂)
     (h₃ : L.g₃ = L'.g₃) :
     ∀ᶠ z in 𝓝 (0 : ℂ), ℘[L] z - 1 / z ^ 2 - (℘[L'] z - 1 / z ^ 2) = 0 := by
   set p : ℂ → ℂ := fun w => ℘[L] w - 1 / w ^ 2 with hp
@@ -751,8 +768,8 @@ lemma p23R1_weierstrassP_eventuallyEq_of_invariants (L L' : PeriodPair) (h₂ : 
     · simp only [Nat.cast_add, Nat.cast_one, Nat.add_sub_cancel]
       ring
   -- the two differential equations
-  have hP := p23R1_ode_regularPart L
-  have hQ := p23R1_ode_regularPart L'
+  have hP := weierstrassP_regularPart_ode L
+  have hQ := weierstrassP_regularPart_ode L'
   set A : ℂ → ℂ := fun z => z ^ 3 * (deriv p z + deriv q z) - 4
   set B : ℂ → ℂ := fun z => 4 * ((1 + z ^ 2 * p z) ^ 2 + (1 + z ^ 2 * p z) * (1 + z ^ 2 * q z) +
     (1 + z ^ 2 * q z) ^ 2) - L.g₂ * z ^ 4
@@ -802,7 +819,7 @@ lemma p23R1_weierstrassP_eventuallyEq_of_invariants (L L' : PeriodPair) (h₂ : 
   · exact hg0 h
 
 /-- If two lattices have the same `℘` near `0`, the first is contained in the second. -/
-theorem p3w_lattice_le_of_eventuallyEq (L L' : PeriodPair)
+theorem lattice_le_of_weierstrassP_eventuallyEq (L L' : PeriodPair)
     (hev' : ∀ᶠ z in 𝓝 (0 : ℂ), ℘[L] z = ℘[L'] z) : L.lattice ≤ L'.lattice := by
   set U : Set ℂ := ((L.lattice : Set ℂ) ∪ L'.lattice)ᶜ with hUdef
   have hcount : ∀ M : PeriodPair, (M.lattice : Set ℂ).Countable := fun M => by
@@ -845,19 +862,18 @@ theorem p3w_lattice_le_of_eventuallyEq (L L' : PeriodPair)
   exact absurd this (by decide)
 
 /-- A lattice with the same `℘` near `0` as another is contained in it. -/
-lemma p23R1_lattice_le_of_invariants (L L' : PeriodPair) (h₂ : L.g₂ = L'.g₂)
+private lemma lattice_le_of_invariants (L L' : PeriodPair) (h₂ : L.g₂ = L'.g₂)
     (h₃ : L.g₃ = L'.g₃) : L.lattice ≤ L'.lattice := by
-  have hev := p23R1_weierstrassP_eventuallyEq_of_invariants L L' h₂ h₃
-  exact p3w_lattice_le_of_eventuallyEq L L' (hev.mono fun z hz => by linear_combination hz)
+  have hev := weierstrassP_eventuallyEq_of_invariants L L' h₂ h₃
+  exact lattice_le_of_weierstrassP_eventuallyEq L L' (hev.mono fun z hz => by linear_combination hz)
 
-end p23R1Uniq
-
+end Uniqueness
 /-- DLMF §23.3(i): the lattice is uniquely determined by its invariants. -/
 @[dlmf 23.3.i]
 theorem lattice_eq_of_invariants_eq (L L' : PeriodPair) (h₂ : L.g₂ = L'.g₂) (h₃ : L.g₃ = L'.g₃) :
     L.lattice = L'.lattice :=
-  le_antisymm (p23R1_lattice_le_of_invariants L L' h₂ h₃)
-    (p23R1_lattice_le_of_invariants L' L h₂.symm h₃.symm)
+  le_antisymm (lattice_le_of_invariants L L' h₂ h₃)
+    (lattice_le_of_invariants L' L h₂.symm h₃.symm)
 
 /-- Identity under the stated parameter and domain assumptions: `(periodPairOfInvariants g₂ g₃).g₂
 = g₂ ∧ (periodPairOfInvariants g₂ g₃).g₃ = g₃`. -/
@@ -867,7 +883,7 @@ theorem periodPairOfInvariants_spec (g₂ g₃ : ℂ) (h : g₂ ^ 3 - 27 * g₃ 
   exact Classical.epsilon_spec (exists_periodPair_invariants g₂ g₃ h)
 
 /-- Identity under the stated parameter and domain assumptions: `℘[L] z = ℘[L'] z`. -/
-theorem wp23_weierstrassP_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice = L'.lattice)
+theorem weierstrassP_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice = L'.lattice)
     (z : ℂ) : ℘[L] z = ℘[L'] z := by
   simp only [PeriodPair.weierstrassP]
   rw [← (Equiv.subtypeEquivRight (fun x => by rw [h]) : L.lattice ≃ L'.lattice).tsum_eq]
@@ -875,7 +891,7 @@ theorem wp23_weierstrassP_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice = 
 
 /-- Identity under the stated parameter and domain assumptions: `weierstrassZeta L z =
 weierstrassZeta L' z`. -/
-theorem wp23_weierstrassZeta_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice = L'.lattice)
+theorem weierstrassZeta_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice = L'.lattice)
     (z : ℂ) : weierstrassZeta L z = weierstrassZeta L' z := by
   simp only [weierstrassZeta]
   rw [← (Equiv.subtypeEquivRight (fun x => by rw [h]) : L.lattice ≃ L'.lattice).tsum_eq]
@@ -883,7 +899,7 @@ theorem wp23_weierstrassZeta_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice
 
 /-- Identity under the stated parameter and domain assumptions: `weierstrassSigma L z =
 weierstrassSigma L' z`. -/
-lemma wp23_weierstrassSigma_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice = L'.lattice)
+private lemma weierstrassSigma_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice = L'.lattice)
     (z : ℂ) : weierstrassSigma L z = weierstrassSigma L' z := by
   simp only [weierstrassSigma]
   rw [← (Equiv.subtypeEquivRight (fun x => by rw [h]) : L.lattice ≃ L'.lattice).tprod_eq]
@@ -895,7 +911,7 @@ theorem weierstrassPInvariants_eq (L : PeriodPair) (z : ℂ) :
     weierstrassPInvariants L.g₂ L.g₃ z = ℘[L] z := by
   have hΔ : L.g₂ ^ 3 - 27 * L.g₃ ^ 2 ≠ 0 := latticeDiscriminant_ne_zero' L
   obtain ⟨h₂, h₃⟩ := periodPairOfInvariants_spec L.g₂ L.g₃ hΔ
-  exact wp23_weierstrassP_eq_of_lattice_eq _ _ (lattice_eq_of_invariants_eq _ _ h₂ h₃) z
+  exact weierstrassP_eq_of_lattice_eq _ _ (lattice_eq_of_invariants_eq _ _ h₂ h₃) z
 
 /-- DLMF §23.3(i): `σ(z; g₂, g₃)` is an entire function of `(z, g₂, g₃)` (restricted to
 `g₂³ ≠ 27g₃²` it is the invariants form of `σ`). -/

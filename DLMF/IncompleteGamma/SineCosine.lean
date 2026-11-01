@@ -11,7 +11,6 @@ public import DLMF.IncompleteGamma.SineCosine.SphericalSeries
 /-!
 # Generalized sine and cosine integrals, DLMF §8.21
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+This umbrella module collects the generalized sine and cosine integrals of DLMF §8.21:
+their representations through incomplete Gamma functions and their series expansions.
 -/

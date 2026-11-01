@@ -9,24 +9,41 @@ public import DLMF.Coulomb.RhoEtaProperties
 public import DLMF.Airy.Properties
 
 /-!
-# Coulomb functions: asymptotic expansions (DLMF §§33.11–33.12)
+# Coulomb functions: asymptotic expansions for large `ρ` and large `η`
 
-* §33.11, large `ρ`: the expansion 33.11.1 of `H^±_ℓ` is `hasAsymptoticExpansion_coulombHPlus`
-  and `hasAsymptoticExpansion_coulombHMinus` in `DLMF.Confluent.CoulombAsymptotics`. Here the
-  equivalent amplitude–phase form 33.11.2–33.11.9: the amplitudes `f, g, f̂, ĝ` are
-  `largeRhoF`, `largeRhoG`, `largeRhoFHat`, `largeRhoGHat` (defined by 33.11.2–33.11.3), their
-  expansions use the terms `largeRhoTerm` (33.11.8–33.11.9), and the expansions 33.11.5–33.11.6
-  are stated in Poincaré form: the remainder after the terms `k ≤ K` is `O(ρ^{-K-1})`.
-* §33.12, large `η`: the transition-region expansions 33.12.2–33.12.3 (uniform for bounded
-  `x = (2η-ρ)/(2η)^{1/3}`; three terms are given, so the remainder is `O(μ^{-4})`), the values
-  at the turning point 33.12.6–33.12.7 (remainder `o` of the last printed term), and the scaled
-  equation 33.12.8.
+This file proves the amplitude–phase form of the large-`ρ` expansions (DLMF §33.11) and the
+transition-region and turning-point expansions for large `η` (DLMF §33.12).
 
-**Source corrections.**
+## Main results
+
+* `coulombFG_eq_largeRho`, `deriv_coulombFG_eq_largeRho`, `coulombH_eq_largeRho`: `F_ℓ`, `G_ℓ`,
+  their derivatives and `H^±_ℓ` in terms of the amplitudes `f, g, f̂, ĝ` and the phase `θ_ℓ`
+  (DLMF 33.11.2–33.11.4).
+* `largeRhoFG_isBigO`, `largeRhoFGHat_isBigO`: the expansions of the amplitudes as `ρ → ∞`
+  (DLMF 33.11.5–33.11.6).
+* `largeRho_wronskian`: the amplitude Wronskian `f ĝ - f̂ g = 1` (DLMF 33.11.7, corrected).
+* `largeRhoTerm_spec`: the recurrence for the terms (DLMF 33.11.8–33.11.9).
+* `coulomb_zero_transition`, `coulomb_zero_deriv_transition`: the transition-region expansions
+  of `F_0`, `G_0` and their derivatives (DLMF 33.12.2, and 33.12.3 corrected).
+* `coulomb_zero_turningPoint`, `coulomb_zero_deriv_turningPoint`: the values at the turning
+  point `ρ = 2η` (DLMF 33.12.6–33.12.7).
+* `coulomb_scaled_equation`: the scaled Coulomb equation (DLMF 33.12.8).
+
+## Implementation notes
+
+The expansion 33.11.1 of `H^±_ℓ` is `hasAsymptoticExpansion_coulombHPlus` and
+`hasAsymptoticExpansion_coulombHMinus` in `DLMF.Confluent.CoulombAsymptotics`; this file gives
+the equivalent amplitude–phase form. The expansions 33.11.5–33.11.6 are stated in Poincaré form:
+the remainder after the terms `k ≤ K` is `O(ρ^{-K-1})`. The transition-region expansions
+33.12.2–33.12.3 are uniform for bounded `x = (2η-ρ)/(2η)^{1/3}`; three terms are given, so the
+remainder is `O(μ^{-4})`. At the turning point the remainder is `o` of the last printed term.
+
+Two formulas are DLMF errata:
+
 * DLMF 33.11.7 prints `g f̂ - f ĝ = 1`. With `f, g, f̂, ĝ` defined by 33.11.2–33.11.3 one has
   `f ĝ - g f̂ = G_ℓ F_ℓ' - G_ℓ' F_ℓ = 1` (the Wronskian 33.2.12); the printed sign is wrong.
   Already the leading terms show it: `f_0 ĝ_0 - g_0 f̂_0 = 1 - η/ρ → 1`. mpmath at `ℓ = 2`,
-  `η = 0.7`, `ρ = 30`: `g f̂ - f ĝ = -1.0`. The corrected form is acquired.
+  `η = 0.7`, `ρ = 30` gives `g f̂ - f ĝ = -1.0`.
 * DLMF 33.12.3 prints the factor of `Ai'(x)` (`Bi'(x)`) as `(B_1 + A_1')/μ + ⋯` without the
   leading `1`. Differentiating the leading term of 33.12.2 (`dx/dρ = -(2η)^{-1/3}`) gives
   `F_0' ∼ -π^{1/2}(2η)^{-1/6} Ai'(x)`, so the factor is `1 + (B_1 + A_1')/μ + ⋯`. mpmath at
@@ -92,7 +109,7 @@ theorem coulombH_eq_largeRho (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   constructor <;> (push_cast; ring_nf; rw [I_sq]; ring)
 
 /-- The terms `f_k + i g_k` are the terms of the expansion 33.11.1 of `e^{-iθ_ℓ} H^+_ℓ`. -/
-lemma q2b_largeRhoTerm_eq (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : ρ ≠ 0) (k : ℕ) :
+private lemma largeRhoTerm_fst_add_I_mul_eq (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : ρ ≠ 0) (k : ℕ) :
     ((largeRhoTerm ℓ η ρ k).1 : ℂ) + I * (largeRhoTerm ℓ η ρ k).2.1 =
       ((ρ : ℂ) ^ k)⁻¹ * (poch (I * η - ℓ) k * poch (I * η + ℓ + 1) k / (k ! * (2 * I) ^ k)) := by
   induction k with
@@ -143,7 +160,7 @@ theorem largeRhoFG_isBigO (ℓ : ℕ) (η : ℝ) (K : ℕ) :
     rw [(coulombH_eq_largeRho ℓ η hρ).1, ← mul_assoc, ← Complex.exp_add,
       show -I * (coulombTheta ℓ η ρ : ℂ) + I * coulombTheta ℓ η ρ = 0 by ring, Complex.exp_zero,
       one_mul]
-    simp only [smul_eq_mul, ← q2b_largeRhoTerm_eq ℓ η hρ.ne']
+    simp only [smul_eq_mul, ← largeRhoTerm_fst_add_I_mul_eq ℓ η hρ.ne']
     push_cast
     rw [Finset.sum_add_distrib, ← Finset.mul_sum]
     ring
@@ -162,7 +179,7 @@ theorem largeRhoFG_isBigO (ℓ : ℕ) (η : ℝ) (K : ℕ) :
     simp
 
 /-- The ray expansion of `z^a U(a,b,z)` along `z = -2iρ`. -/
-lemma q2b_expansion_ray (a b : ℂ) :
+private lemma hasAsymptoticExpansion_cpow_mul_kummerU_neg_two_I (a b : ℂ) :
     HasAsymptoticExpansion atTop (fun (k : ℕ) (ρ : ℝ) => ((ρ : ℂ) ^ k)⁻¹)
       (fun k => poch a k * poch (a - b + 1) k / (k ! * (2 * I) ^ k))
       (fun ρ : ℝ => ((ρ : ℂ) * (-2 * I)) ^ a * kummerU a b ((ρ : ℂ) * (-2 * I))) := by
@@ -181,7 +198,7 @@ lemma q2b_expansion_ray (a b : ℂ) :
     nlinarith [Real.sqrt_nonneg 2, Real.sq_sqrt (show (0 : ℝ) ≤ 2 by norm_num)]
 
 /-- `f̂_k + iĝ_k = i(f_k + ig_k) - (iη + k)(f_k + ig_k)/ρ`. -/
-lemma q2b_largeRhoTermHat_eq (ℓ : ℕ) (η ρ : ℝ) (k : ℕ) :
+private lemma largeRhoTerm_hat_add_I_mul_eq (ℓ : ℕ) (η ρ : ℝ) (k : ℕ) :
     ((largeRhoTerm ℓ η ρ k).2.2.1 : ℂ) + I * (largeRhoTerm ℓ η ρ k).2.2.2 =
       I * (((largeRhoTerm ℓ η ρ k).1 : ℂ) + I * (largeRhoTerm ℓ η ρ k).2.1) -
         (I * η + k) * (((largeRhoTerm ℓ η ρ k).1 : ℂ) + I * (largeRhoTerm ℓ η ρ k).2.1) / ρ := by
@@ -211,7 +228,7 @@ lemma q2b_largeRhoTermHat_eq (ℓ : ℕ) (η ρ : ℝ) (k : ℕ) :
 
 /-- `f̂ + iĝ = i(1 - η/ρ) E₁ + (A/ρ)(E₁ - E₂)` with `E₁ = z^A U(A,B,z)`,
 `E₂ = z^{A+1} U(A+1,B+1,z)`, `z = -2iρ`, `A = ℓ+1+iη`, `B = 2ℓ+2`. -/
-lemma q2b_hat_eq (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+private lemma largeRhoFHat_add_I_mul_largeRhoGHat_eq (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     ((largeRhoFHat ℓ η ρ : ℝ) : ℂ) + I * largeRhoGHat ℓ η ρ =
       I * (1 - η / ρ) * (((ρ : ℂ) * (-2 * I)) ^ ((ℓ : ℂ) + 1 + I * η) *
         kummerU ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2) ((ρ : ℂ) * (-2 * I))) +
@@ -265,7 +282,7 @@ lemma q2b_hat_eq (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     filter_upwards [lt_mem_nhds hρ] with x hx
     simp only [coulombHPlus, A, B, Pi.mul_apply]
     rw [show (-2 * I * (x : ℂ)) = x * (-2 * I) by ring, mul_assoc]
-  have hd := (c33a_hasDerivAt_coulombHPlus ℓ η hρ).unique hH'
+  have hd := (hasDerivAt_coulombHPlus ℓ η hρ).unique hH'
   set θ := coulombTheta ℓ η ρ
   have hl : ((largeRhoFHat ℓ η ρ : ℝ) : ℂ) + I * largeRhoGHat ℓ η ρ =
       exp (-I * θ) * (((deriv (coulombG ℓ η) ρ : ℝ) : ℂ) + I * (deriv (coulombF ℓ η) ρ : ℝ)) := by
@@ -308,9 +325,9 @@ theorem largeRhoFGHat_isBigO (ℓ : ℕ) (η : ℝ) (K : ℕ) :
   set S1 : ℝ → ℂ := fun ρ => ∑ k ∈ Finset.range (K + 1), ((ρ : ℂ) ^ k)⁻¹ • c k
   set S2 : ℝ → ℂ := fun ρ => ∑ k ∈ Finset.range (K + 1), ((ρ : ℂ) ^ k)⁻¹ • c' k
   have hR1 : (fun ρ => E1 ρ - S1 ρ) =O[atTop] (fun ρ : ℝ => ((ρ : ℂ) ^ (K + 1))⁻¹) :=
-    q2b_expansion_ray A B (K + 1)
+    hasAsymptoticExpansion_cpow_mul_kummerU_neg_two_I A B (K + 1)
   have hR2 : (fun ρ => E2 ρ - S2 ρ) =O[atTop] (fun ρ : ℝ => ((ρ : ℂ) ^ (K + 1))⁻¹) :=
-    q2b_expansion_ray (A + 1) (B + 1) (K + 1)
+    hasAsymptoticExpansion_cpow_mul_kummerU_neg_two_I (A + 1) (B + 1) (K + 1)
   have hcc : ∀ k, A * c' k = (A + k) * c k := by
     intro k
     have h1 := poch_succ A k
@@ -321,7 +338,7 @@ theorem largeRhoFGHat_isBigO (ℓ : ℕ) (η : ℝ) (K : ℕ) :
   have hw : ∀ ρ : ℝ, ρ ≠ 0 → ∀ k, ((largeRhoTerm ℓ η ρ k).1 : ℂ) + I * (largeRhoTerm ℓ η ρ k).2.1 =
       ((ρ : ℂ) ^ k)⁻¹ * c k := by
     intro ρ hρ k
-    rw [q2b_largeRhoTerm_eq ℓ η hρ k]
+    rw [largeRhoTerm_fst_add_I_mul_eq ℓ η hρ k]
     simp only [hc, hA, hB]
     congr 2
     rw [mul_comm]
@@ -337,9 +354,9 @@ theorem largeRhoFGHat_isBigO (ℓ : ℕ) (η : ℝ) (K : ℕ) :
       simp only [S1, S2, smul_eq_mul]
       rw [← Finset.sum_sub_distrib, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl fun k _ => ?_
-      rw [q2b_largeRhoTermHat_eq, hw ρ hρ.ne' k]
+      rw [largeRhoTerm_hat_add_I_mul_eq, hw ρ hρ.ne' k]
       linear_combination (((ρ : ℂ) ^ k)⁻¹ / ρ) * hcc k
-    have he := q2b_hat_eq ℓ η hρ
+    have he := largeRhoFHat_add_I_mul_largeRhoGHat_eq ℓ η hρ
     simp only [hD]
     push_cast
     rw [Finset.sum_add_distrib, ← Finset.mul_sum] at hsum

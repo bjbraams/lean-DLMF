@@ -9,11 +9,28 @@ public import DLMF.Airy.Properties
 public import DLMF.CoalescingSaddles.Basic
 
 /-!
-# Integral identities for the canonical integrals: DLMF §36.9
+# Integral identities for the canonical integrals
 
 The squared moduli of the canonical integrals as integrals of canonical integrals of lower
-"dimension" (DLMF 36.9.1–36.9.9). Notation: `Ψ₁(x) = cuspoidIntegral 1 ![x]`,
+"dimension" (DLMF §36.9, 36.9.1–36.9.9). Notation: `Ψ₁(x) = cuspoidIntegral 1 ![x]`,
 `Ψ₂(x, y) = cuspoidIntegral 2 ![x, y]`, `Ψ₃(x, y, z) = cuspoidIntegral 3 ![x, y, z]`.
+
+## Main results
+
+* `normSq_cuspoidIntegral_one_eq_integral`, `airyAi_sq_eq_integral`: `|Ψ₁(x)|²` and `Ai(x)²`
+  as integrals of `Ψ₁` and `Ai` (DLMF 36.9.1, 36.9.2).
+* `normSq_cuspoidIntegral_one_eq_improper`: `|Ψ₁(x)|²` as an improper cosine integral
+  (DLMF 36.9.3).
+* `normSq_cuspoidIntegral_two_eq_integral`, `normSq_cuspoidIntegral_two_eq_integral_cos`:
+  `|Ψ₂(x, y)|²` as integrals of `Ψ₁` (DLMF 36.9.4, 36.9.5).
+* `normSq_cuspoidIntegral_three_eq_integral`, `normSq_cuspoidIntegral_three_eq_integral_re`:
+  `|Ψ₃(x, y, z)|²` as integrals of `Ψ₃` and `Ψ₂` (DLMF 36.9.6, 36.9.7).
+* `normSq_hyperbolicUmbilicIntegral_eq_integral`: `|Ψ^{(H)}|²` as a double integral of Airy
+  functions (DLMF 36.9.8).
+* `normSq_ellipticUmbilicIntegral_eq_integral`: `|Ψ^{(E)}|²` as an iterated integral of
+  `Ai · Bi` (DLMF 36.9.9).
+
+## Implementation notes
 
 Where the integral of DLMF converges absolutely (36.9.1, 36.9.2, 36.9.4–36.9.8) the statement
 includes the integrability of the integrand; 36.9.3 converges only conditionally (the integrand is
@@ -24,8 +41,7 @@ the double integral is not absolutely convergent).
 
 Numerical checks (mpmath, rotated-contour quadrature for the canonical integrals): 36.9.1–36.9.8
 agree to 6–15 digits at sample points. For 36.9.9 the inner `θ`-integral involves cancellation
-from `10^{50}` and the partial `u`-integrals oscillate; the check was inconclusive (see the
-ledger).
+from `10^{50}` and the partial `u`-integrals oscillate; the check was inconclusive.
 -/
 
 @[expose] public noncomputable section

@@ -10,16 +10,38 @@ public import DLMF.ErrorFunctions.AnalyticProperties
 public import DLMF.Hypergeometric.GeneralizedCalculus
 
 /-!
-# Symmetries, differential identities and interrelations, DLMF §§7.4–7.5 and 7.10–7.11
+# Symmetries, derivatives and interrelations of error functions (DLMF §§7.4–7.5, 7.10–7.11)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs.
+Symmetry relations (§7.4), interrelations between the error, Dawson, Faddeeva and Fresnel
+functions (§7.5), derivatives (§7.10), and relations to incomplete Gamma, confluent and
+generalized hypergeometric functions (§7.11).
 
-The Faddeeva ladder follows by differentiating its proved first-order equation.
-The Fresnel representations use Mathlib's regularized hypergeometric coefficients
-and the termwise-integrated sine and cosine series in `Basic`.
+## Main definitions
+
+* `fresnelZetaComplex`: the signed Fresnel-to-Gaussian change of variable (DLMF 7.5.7).
+
+## Main results
+
+* `erf_negative`, `erfc_negative`, `faddeevaW_negative`, `dawsonF_negative`, `fresnel_negative`,
+  `fresnel_mul_I`, `fresnelAux_mul_I`, `fresnelAux_negative`: DLMF 7.4.1–7.4.8.
+* `dawsonF_faddeeva`, `fresnel_sum_tail`, `fresnelCosInt_aux`, `fresnelSinInt_aux`,
+  `fresnelTail_aux`, `fresnel_signed_tail`: DLMF 7.5.1–7.5.6.
+* `fresnel_signed_erf`, `fresnel_signed_faddeeva`, `fresnelAux_signed_erfc`: the Fresnel
+  integrals through `erf`, `w` and `erfc` (DLMF 7.5.8–7.5.10).
+* `fresnelTail_norm_sq_nonneg`, `fresnelTail_norm_sq_nonpos`: DLMF 7.5.11, 7.5.12.
+* `iteratedDeriv_erf_hermite`, `hasDerivAt_faddeevaW`, `iteratedDeriv_faddeevaW_recurrence`,
+  `hasDerivAt_fresnelAux`: derivatives (DLMF 7.10.1–7.10.4).
+* `erf_lowerIncGamma`, `erfc_upperIncGamma`, `erfc_genExpIntE`: DLMF 7.11.1–7.11.3.
+* `erf_kummerM_pair`, `erfc_kummerU_pair`, `fresnel_kummerM_pair`: confluent hypergeometric
+  representations (DLMF 7.11.4–7.11.6).
+* `fresnelCosInt_hypergeometric`, `fresnelSinInt_hypergeometric`: `₁F₂` representations of
+  `C(z)` and `S(z)` (DLMF 7.11.7, 7.11.8).
+
+## Implementation notes
+
+The Faddeeva ladder (7.10.3) follows by differentiating the first-order equation (7.10.2). The
+Fresnel representations use Mathlib's regularized hypergeometric coefficients and the
+termwise-integrated sine and cosine series.
 -/
 
 @[expose] public noncomputable section

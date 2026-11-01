@@ -7,28 +7,54 @@ module
 
 public import DLMF.Mathieu.SpectralExistence
 public import DLMF.Mathieu.Properties
+public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 
 /-!
 # Fourier series of the Mathieu functions (DLMF §28.4)
 
-The Fourier coefficients `A^n_m(q) = mathieuFourierA n m q`, `B^n_m(q) = mathieuFourierB n m q`
-of `ce_n`, `se_n` (real `q`) are defined in `DLMF.Mathieu.Basic` as the Fourier integrals.
+The Fourier expansions of the Mathieu functions `ce_n(z, q)`, `se_n(z, q)` for real `q` and
+complex `z`, with the coefficients `A^n_m(q) = mathieuFourierA n m q` and
+`B^n_m(q) = mathieuFourierB n m q` defined in `DLMF.Mathieu.Basic` as Fourier integrals: the
+expansions, recurrences, normalizations, sign convention, values at `q = 0`, change of sign of
+`q`, convergence, and asymptotic forms of the coefficients (DLMF §28.4).
 
-Proved here (from the definitions and the admitted existence theorems of `DLMF.Mathieu.Basic`):
-the expansions 28.4.1–28.4.4 for every complex `z` (from the Fourier series of entire periodic
-functions, `DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic`, and the parity and periodicity of
-`ce_n`, `se_n`), the recurrences 28.4.5–28.4.8 (integration by parts against `cos mx`, `sin mx`),
-the normalizations 28.4.9–28.4.12 (Parseval together with 28.2.30), the sign convention of
-§28.4(iii), the values 28.4.13–28.4.16 at `q = 0` (from 28.2.29) and the change of sign of `q`
-28.4.17–28.4.20 (from 28.2.34–28.2.37), and the absolute and locally uniform convergence of
-§28.4(i) (exponential decay of the coefficients and the Weierstrass M-test). The integration by
-parts identities `p1a2_cos_rec`, `p1a2_sin_rec` and the decay bounds `p2f_cos_coeff_decay`,
-`p2f_sin_coeff_decay` live in `DLMF.Mathieu.Properties` (used there for Ince's theorem). The
-asymptotic forms 28.4.21–28.4.27 remain admitted.
+## Main results
 
-Small-`q` forms such as 28.4.21, `A_{2s} = (c q^s + O(q^{s+2})) A_0`, are stated with an
-explicit error function `ε` with `ε = O(q^{s+2})` as `q → 0`; the large-`m` forms 28.4.24–28.4.27
-likewise with `ε = O(1/m)` as `m → ∞` (`q ≠ 0` fixed). This avoids dividing by `A_0`.
+* `hasSum_mathieuCe_even`, `hasSum_mathieuCe_odd`, `hasSum_mathieuSe_odd`,
+  `hasSum_mathieuSe_even`: the expansions for every complex `z` (DLMF 28.4.1–28.4.4).
+* `mathieu_fourier_locallyUniform`: absolute and locally uniform convergence (DLMF §28.4(i)).
+* `mathieuFourierA_even_rec`, `mathieuFourierA_odd_rec`, `mathieuFourierB_odd_rec`,
+  `mathieuFourierB_even_rec` and their `_zero`/`_one` first lines: the recurrences
+  (DLMF 28.4.5–28.4.8).
+* `hasSum_mathieuFourierA_even_sq`, `hasSum_mathieuFourierA_odd_sq`,
+  `hasSum_mathieuFourierB_odd_sq`, `hasSum_mathieuFourierB_even_sq`: the normalizations
+  (DLMF 28.4.9–28.4.12).
+* `mathieuFourier_sign`: the sign convention (DLMF §28.4(iii)).
+* `mathieuFourierA_even_q_zero` and its companions: the values at `q = 0`
+  (DLMF 28.4.13–28.4.16).
+* `mathieuFourierA_even_neg_q` and its companions: the change of sign of `q`
+  (DLMF 28.4.17–28.4.20).
+* `mathieuFourierA_zero_small_q`, `mathieuFourierA_up_small_q`, `mathieuFourierA_down_small_q`
+  and the `B` versions: small-`q` forms (DLMF 28.4.21–28.4.23).
+* `mathieuFourierA_even_large_m`, `mathieuFourierA_odd_large_m`, `mathieuFourierB_odd_large_m`,
+  `mathieuFourierB_even_large_m`: large-`m` forms (DLMF 28.4.24–28.4.27).
+
+## Implementation notes
+
+The expansions come from the Fourier series of entire periodic functions
+(`DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic`) and the parity and periodicity of `ce_n`,
+`se_n`; the recurrences from integration by parts against `cos mx`, `sin mx`; the
+normalizations from Parseval's identity together with DLMF 28.2.30; the values at `q = 0` from
+DLMF 28.2.29; the change of sign of `q` from DLMF 28.2.34–28.2.37; and the convergence from
+exponential decay of the coefficients and the Weierstrass M-test. The integration by parts
+identities `integral_mul_cos_rec`, `integral_mul_sin_rec` and the decay bounds
+`norm_integral_mul_cos_le_exp`, `norm_integral_mul_sin_le_exp` are in
+`DLMF.Mathieu.Properties.Floquet`.
+
+The sine series is asserted only for `n ≥ 1`, since DLMF has no `se_0`. Small-`q` forms such as
+DLMF 28.4.21, `A_{2s} = (c q^s + O(q^{s+2})) A_0`, are stated with an explicit error function
+`ε` with `ε = O(q^{s+2})` as `q → 0`; the large-`m` forms DLMF 28.4.24–28.4.27 likewise with
+`ε = O(1/m)` as `m → ∞` (`q ≠ 0` fixed). This avoids dividing by `A_0`.
 -/
 
 @[expose] public noncomputable section
@@ -41,7 +67,7 @@ namespace DLMF.Mathieu
 /-! ### Auxiliary lemmas -/
 
 /-- `ce_n(z, q)` is `2π`-periodic. -/
-lemma p1a2_mathieuCe_two_pi (n : ℕ) (q : ℝ) (z : ℂ) :
+private lemma mathieuCe_periodic_two_pi (n : ℕ) (q : ℝ) (z : ℂ) :
     mathieuCe n (z + 2 * π) q = mathieuCe n z q := by
   rw [show z + 2 * (π : ℂ) = z + π + π by ring]
   obtain ⟨k, rfl | rfl⟩ := Nat.even_or_odd' n
@@ -49,7 +75,7 @@ lemma p1a2_mathieuCe_two_pi (n : ℕ) (q : ℝ) (z : ℂ) :
   · rw [mathieuCe_odd_add_pi, mathieuCe_odd_add_pi, neg_neg]
 
 /-- `se_n(z, q)` is `2π`-periodic for `n ≠ 0`. -/
-lemma p1a2_mathieuSe_two_pi {n : ℕ} (hn : n ≠ 0) (q : ℝ) (z : ℂ) :
+private lemma mathieuSe_periodic_two_pi {n : ℕ} (hn : n ≠ 0) (q : ℝ) (z : ℂ) :
     mathieuSe n (z + 2 * π) q = mathieuSe n z q := by
   rw [show z + 2 * (π : ℂ) = z + π + π by ring]
   obtain ⟨k, rfl | rfl⟩ := Nat.even_or_odd' n
@@ -58,106 +84,106 @@ lemma p1a2_mathieuSe_two_pi {n : ℕ} (hn : n ≠ 0) (q : ℝ) (z : ℂ) :
   · rw [mathieuSe_odd_add_pi, mathieuSe_odd_add_pi, neg_neg]
 
 /-- The recurrence identity for the cosine integrals of `ce_n` with natural indices. -/
-lemma p1a2_ce_rec (n : ℕ) (q : ℝ) (k : ℤ) :
+private lemma integral_mathieuCe_mul_cos_rec (n : ℕ) (q : ℝ) (k : ℤ) :
     ((mathieuA n q : ℂ) - (k : ℂ) ^ 2) *
         ∫ x in (0 : ℝ)..2 * π, mathieuCe n x q * Complex.cos (k * x) =
       q * ((∫ x in (0 : ℝ)..2 * π, mathieuCe n x q * Complex.cos (((k - 2 : ℤ) : ℂ) * x)) +
         ∫ x in (0 : ℝ)..2 * π, mathieuCe n x q * Complex.cos (((k + 2 : ℤ) : ℂ) * x)) :=
-  p1a2_cos_rec (isMathieuSolution_mathieuCe n q) (p1a2_mathieuCe_two_pi n q) k
+  integral_mul_cos_rec (isMathieuSolution_mathieuCe n q) (mathieuCe_periodic_two_pi n q) k
 
 /-- The recurrence identity for the sine integrals of `se_n` with natural indices. -/
-lemma p1a2_se_rec {n : ℕ} (hn : n ≠ 0) (q : ℝ) (k : ℤ) :
+private lemma integral_mathieuSe_mul_sin_rec {n : ℕ} (hn : n ≠ 0) (q : ℝ) (k : ℤ) :
     ((mathieuB n q : ℂ) - (k : ℂ) ^ 2) *
         ∫ x in (0 : ℝ)..2 * π, mathieuSe n x q * Complex.sin (k * x) =
       q * ((∫ x in (0 : ℝ)..2 * π, mathieuSe n x q * Complex.sin (((k - 2 : ℤ) : ℂ) * x)) +
         ∫ x in (0 : ℝ)..2 * π, mathieuSe n x q * Complex.sin (((k + 2 : ℤ) : ℂ) * x)) :=
-  p1a2_sin_rec (isMathieuSolution_mathieuSe n q) (p1a2_mathieuSe_two_pi hn q) k
+  integral_mul_sin_rec (isMathieuSolution_mathieuSe n q) (mathieuSe_periodic_two_pi hn q) k
 
 
 /-- `cos((2j+1)(w + π)) = -cos((2j+1)w)`. -/
-theorem p1a2_cos_odd_add_pi (j : ℕ) (w : ℂ) :
+theorem cos_odd_mul_add_pi (j : ℕ) (w : ℂ) :
     Complex.cos (((2 * j + 1 : ℕ) : ℂ) * (w + π)) = -Complex.cos (((2 * j + 1 : ℕ) : ℂ) * w) := by
   rw [show (((2 * j + 1 : ℕ) : ℂ)) * (w + π) = (((2 * j + 1 : ℕ) : ℂ) * w + π) +
     (j : ℤ) * (2 * π) by push_cast; ring, Complex.cos_add_int_mul_two_pi, Complex.cos_add_pi]
 
 /-- `sin((2j+1)(w + π)) = -sin((2j+1)w)`. -/
-theorem p1a2_sin_odd_add_pi (j : ℕ) (w : ℂ) :
+theorem sin_odd_mul_add_pi (j : ℕ) (w : ℂ) :
     Complex.sin (((2 * j + 1 : ℕ) : ℂ) * (w + π)) = -Complex.sin (((2 * j + 1 : ℕ) : ℂ) * w) := by
   rw [show (((2 * j + 1 : ℕ) : ℂ)) * (w + π) = (((2 * j + 1 : ℕ) : ℂ) * w + π) +
     (j : ℤ) * (2 * π) by push_cast; ring, Complex.sin_add_int_mul_two_pi, Complex.sin_add_pi]
 
 /-- `cos(2j(w + π)) = cos(2jw)`. -/
-theorem p1a2_cos_even_add_pi (j : ℕ) (w : ℂ) :
+theorem cos_even_mul_add_pi (j : ℕ) (w : ℂ) :
     Complex.cos (((2 * j : ℕ) : ℂ) * (w + π)) = Complex.cos (((2 * j : ℕ) : ℂ) * w) := by
   rw [show (((2 * j : ℕ) : ℂ)) * (w + π) = ((2 * j : ℕ) : ℂ) * w +
     (j : ℤ) * (2 * π) by push_cast; ring, Complex.cos_add_int_mul_two_pi]
 
 /-- `sin(2j(w + π)) = sin(2jw)`. -/
-theorem p1a2_sin_even_add_pi (j : ℕ) (w : ℂ) :
+theorem sin_even_mul_add_pi (j : ℕ) (w : ℂ) :
     Complex.sin (((2 * j : ℕ) : ℂ) * (w + π)) = Complex.sin (((2 * j : ℕ) : ℂ) * w) := by
   rw [show (((2 * j : ℕ) : ℂ)) * (w + π) = ((2 * j : ℕ) : ℂ) * w +
     (j : ℤ) * (2 * π) by push_cast; ring, Complex.sin_add_int_mul_two_pi]
 
 /-- A Fourier coefficient `A^n_m` vanishes when the integrand is `π`-antiperiodic. -/
-theorem p1a2_fourierA_eq_zero {n m : ℕ} {q : ℝ}
+theorem mathieuFourierA_eq_zero_of_antiperiodic {n m : ℕ} {q : ℝ}
     (h : ∀ x : ℂ, mathieuCe n (x + π) q * Complex.cos (m * (x + π)) =
       -(mathieuCe n x q * Complex.cos (m * x))) : mathieuFourierA n m q = 0 := by
-  rw [mathieuFourierA, p1a2_integral_antiperiodic, mul_zero]
+  rw [mathieuFourierA, intervalIntegral_eq_zero_of_antiperiodic, mul_zero]
   · have := (isMathieuSolution_mathieuCe n q).differentiable.continuous
     fun_prop
   · intro x; push_cast; exact h x
 
 /-- A Fourier coefficient `B^n_m` vanishes when the integrand is `π`-antiperiodic. -/
-theorem p1a2_fourierB_eq_zero {n m : ℕ} {q : ℝ}
+theorem mathieuFourierB_eq_zero_of_antiperiodic {n m : ℕ} {q : ℝ}
     (h : ∀ x : ℂ, mathieuSe n (x + π) q * Complex.sin (m * (x + π)) =
       -(mathieuSe n x q * Complex.sin (m * x))) : mathieuFourierB n m q = 0 := by
-  rw [mathieuFourierB, p1a2_integral_antiperiodic, mul_zero]
+  rw [mathieuFourierB, intervalIntegral_eq_zero_of_antiperiodic, mul_zero]
   · have := (isMathieuSolution_mathieuSe n q).differentiable.continuous
     fun_prop
   · intro x; push_cast; exact h x
 
 /-- `A^{2n}_{2j+1}(q) = 0`. -/
-theorem p1a2_fourierA_even_odd (n j : ℕ) (q : ℝ) : mathieuFourierA (2 * n) (2 * j + 1) q = 0 :=
-  p1a2_fourierA_eq_zero fun x => by
-    rw [mathieuCe_even_add_pi, p1a2_cos_odd_add_pi, mul_neg]
+theorem mathieuFourierA_even_odd (n j : ℕ) (q : ℝ) : mathieuFourierA (2 * n) (2 * j + 1) q = 0 :=
+  mathieuFourierA_eq_zero_of_antiperiodic fun x => by
+    rw [mathieuCe_even_add_pi, cos_odd_mul_add_pi, mul_neg]
 
 /-- `A^{2n+1}_{2j}(q) = 0`. -/
-theorem p1a2_fourierA_odd_even (n j : ℕ) (q : ℝ) : mathieuFourierA (2 * n + 1) (2 * j) q = 0 :=
-  p1a2_fourierA_eq_zero fun x => by
-    rw [mathieuCe_odd_add_pi, p1a2_cos_even_add_pi, neg_mul]
+theorem mathieuFourierA_odd_even (n j : ℕ) (q : ℝ) : mathieuFourierA (2 * n + 1) (2 * j) q = 0 :=
+  mathieuFourierA_eq_zero_of_antiperiodic fun x => by
+    rw [mathieuCe_odd_add_pi, cos_even_mul_add_pi, neg_mul]
 
 /-- `B^{2n+1}_{2j}(q) = 0`. -/
-theorem p1a2_fourierB_odd_even (n j : ℕ) (q : ℝ) : mathieuFourierB (2 * n + 1) (2 * j) q = 0 :=
-  p1a2_fourierB_eq_zero fun x => by
-    rw [mathieuSe_odd_add_pi, p1a2_sin_even_add_pi, neg_mul]
+theorem mathieuFourierB_odd_even (n j : ℕ) (q : ℝ) : mathieuFourierB (2 * n + 1) (2 * j) q = 0 :=
+  mathieuFourierB_eq_zero_of_antiperiodic fun x => by
+    rw [mathieuSe_odd_add_pi, sin_even_mul_add_pi, neg_mul]
 
 /-- `B^{2n+2}_{2j+1}(q) = 0`. -/
-theorem p1a2_fourierB_even_odd (n j : ℕ) (q : ℝ) :
+theorem mathieuFourierB_even_odd (n j : ℕ) (q : ℝ) :
     mathieuFourierB (2 * n + 2) (2 * j + 1) q = 0 :=
-  p1a2_fourierB_eq_zero fun x => by
-    rw [mathieuSe_even_add_pi, p1a2_sin_odd_add_pi, mul_neg]
+  mathieuFourierB_eq_zero_of_antiperiodic fun x => by
+    rw [mathieuSe_even_add_pi, sin_odd_mul_add_pi, mul_neg]
 
 /-- `B^n_0(q) = 0`. -/
-theorem p1a2_fourierB_zero (n : ℕ) (q : ℝ) : mathieuFourierB n 0 q = 0 := by
+theorem mathieuFourierB_zero_right (n : ℕ) (q : ℝ) : mathieuFourierB n 0 q = 0 := by
   simp [mathieuFourierB]
 
 /-- The full cosine series of `ce_n` (all `m`). -/
-theorem p1a2_hasSum_mathieuCe (n : ℕ) (q : ℝ) (z : ℂ) :
+theorem hasSum_mathieuFourierA_mul_cos (n : ℕ) (q : ℝ) (z : ℂ) :
     HasSum (fun m : ℕ => mathieuFourierA n m q * Complex.cos (m * z)) (mathieuCe n z q) :=
-  p1a2_hasSum_cos (F := fun z => mathieuCe n z q) (isMathieuSolution_mathieuCe n q).differentiable
-    (p1a2_mathieuCe_two_pi n q) (fun z => mathieuCe_neg n z q) z
+  hasSum_cos_of_differentiable_periodic_even (F := fun z => mathieuCe n z q) (isMathieuSolution_mathieuCe n q).differentiable
+    (mathieuCe_periodic_two_pi n q) (fun z => mathieuCe_neg n z q) z
 
 /-- The full sine series of `se_n`, `n ≥ 1` (all `m`). -/
-theorem p1a2_hasSum_mathieuSe {n : ℕ} (hn : n ≠ 0) (q : ℝ) (z : ℂ) :
+theorem hasSum_mathieuFourierB_mul_sin {n : ℕ} (hn : n ≠ 0) (q : ℝ) (z : ℂ) :
     HasSum (fun m : ℕ => mathieuFourierB n m q * Complex.sin (m * z)) (mathieuSe n z q) :=
-  p1a2_hasSum_sin (F := fun z => mathieuSe n z q) (isMathieuSolution_mathieuSe n q).differentiable
-    (p1a2_mathieuSe_two_pi hn q) (fun z => mathieuSe_neg n z q) z
+  hasSum_sin_of_differentiable_periodic_odd (F := fun z => mathieuSe n z q) (isMathieuSolution_mathieuSe n q).differentiable
+    (mathieuSe_periodic_two_pi hn q) (fun z => mathieuSe_neg n z q) z
 
 /-- Parseval for `ce_n` over all indices. -/
-lemma p1a2_hasSum_mathieuFourierA_sq (n : ℕ) (q : ℝ) :
+private lemma hasSum_mathieuFourierA_sq_all (n : ℕ) (q : ℝ) :
     HasSum (fun m : ℕ => (if m = 0 then 2 else 1) * mathieuFourierA n m q ^ 2) 1 := by
-  have h := p1a2_hasSum_cos_sq (F := fun z => mathieuCe n z q)
-    (isMathieuSolution_mathieuCe n q).differentiable (p1a2_mathieuCe_two_pi n q)
+  have h := hasSum_cos_coeff_sq_of_differentiable_periodic_even (F := fun z => mathieuCe n z q)
+    (isMathieuSolution_mathieuCe n q).differentiable (mathieuCe_periodic_two_pi n q)
     (fun z => mathieuCe_neg n z q)
   rw [integral_mathieuCe_sq] at h
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
@@ -165,19 +191,19 @@ lemma p1a2_hasSum_mathieuFourierA_sq (n : ℕ) (q : ℝ) :
   exact h
 
 /-- Parseval for `se_n`, `n ≥ 1`, over all indices. -/
-lemma p1a2_hasSum_mathieuFourierB_sq {n : ℕ} (hn : n ≠ 0) (q : ℝ) :
+private lemma hasSum_mathieuFourierB_sq_all {n : ℕ} (hn : n ≠ 0) (q : ℝ) :
     HasSum (fun m : ℕ => mathieuFourierB n m q ^ 2) 1 := by
-  have h := p1a2_hasSum_sin_sq (F := fun z => mathieuSe n z q)
-    (isMathieuSolution_mathieuSe n q).differentiable (p1a2_mathieuSe_two_pi hn q)
+  have h := hasSum_sin_coeff_sq_of_differentiable_periodic_odd (F := fun z => mathieuSe n z q)
+    (isMathieuSolution_mathieuSe n q).differentiable (mathieuSe_periodic_two_pi hn q)
     (fun z => mathieuSe_neg n z q)
-  rw [integral_mathieuSe_sq hn] at h
+  rw [integral_mathieuSe_sq] at h
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   rw [one_div_mul_cancel hπ] at h
   exact h
 
 
 /-- `∫₀^{2π} cos kx dx = 2π [k = 0]` for integer `k`. -/
-lemma p1a2_integral_cos_int (k : ℤ) :
+private lemma integral_cos_intCast_mul (k : ℤ) :
     ∫ x in (0 : ℝ)..2 * π, Complex.cos (k * x) = if k = 0 then (2 * π : ℂ) else 0 := by
   split_ifs with hk
   · subst hk; simp
@@ -198,7 +224,7 @@ lemma p1a2_integral_cos_int (k : ℤ) :
     simp
 
 /-- `∫₀^{2π} cos ax cos bx dx` by the product formula. -/
-lemma p1a2_integral_cos_mul_cos (a b : ℕ) :
+private lemma integral_cos_mul_cos_two_pi (a b : ℕ) :
     ∫ x in (0 : ℝ)..2 * π, Complex.cos (a * x) * Complex.cos (b * x) =
       ((if (a : ℤ) - b = 0 then (2 * π : ℂ) else 0) +
         if (a : ℤ) + b = 0 then (2 * π : ℂ) else 0) / 2 := by
@@ -215,10 +241,10 @@ lemma p1a2_integral_cos_mul_cos (a b : ℕ) :
       Complex.cos ((((a : ℤ) - b : ℤ) : ℂ) * x)).intervalIntegrable _ _)
     ((by fun_prop : Continuous fun x : ℝ =>
       Complex.cos ((((a : ℤ) + b : ℤ) : ℂ) * x)).intervalIntegrable _ _),
-    p1a2_integral_cos_int, p1a2_integral_cos_int]
+    integral_cos_intCast_mul, integral_cos_intCast_mul]
 
 /-- `∫₀^{2π} sin ax sin bx dx` by the product formula. -/
-lemma p1a2_integral_sin_mul_sin (a b : ℕ) :
+private lemma integral_sin_mul_sin_two_pi (a b : ℕ) :
     ∫ x in (0 : ℝ)..2 * π, Complex.sin (a * x) * Complex.sin (b * x) =
       ((if (a : ℤ) - b = 0 then (2 * π : ℂ) else 0) -
         if (a : ℤ) + b = 0 then (2 * π : ℂ) else 0) / 2 := by
@@ -235,14 +261,14 @@ lemma p1a2_integral_sin_mul_sin (a b : ℕ) :
       Complex.cos ((((a : ℤ) - b : ℤ) : ℂ) * x)).intervalIntegrable _ _)
     ((by fun_prop : Continuous fun x : ℝ =>
       Complex.cos ((((a : ℤ) + b : ℤ) : ℂ) * x)).intervalIntegrable _ _),
-    p1a2_integral_cos_int, p1a2_integral_cos_int]
+    integral_cos_intCast_mul, integral_cos_intCast_mul]
 
 /-- `π⁻¹ ∫₀^{2π} cos ax cos bx dx = [a = b]` for `a, b ≥ 1`. -/
-lemma p1a2_coef_cos_cos {a b : ℕ} (hb : b ≠ 0) :
+private lemma inv_pi_mul_integral_cos_mul_cos {a b : ℕ} (hb : b ≠ 0) :
     (1 / π : ℂ) * ∫ x in (0 : ℝ)..2 * π, Complex.cos (a * x) * Complex.cos (b * x) =
       if a = b then 1 else 0 := by
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
-  rw [p1a2_integral_cos_mul_cos]
+  rw [integral_cos_mul_cos_two_pi]
   have h1 : ¬ (a : ℤ) + b = 0 := by omega
   simp only [h1, ↓reduceIte, add_zero]
   by_cases hab : a = b
@@ -251,11 +277,11 @@ lemma p1a2_coef_cos_cos {a b : ℕ} (hb : b ≠ 0) :
     simp [h2, hab]
 
 /-- `π⁻¹ ∫₀^{2π} sin ax sin bx dx = [a = b]` for `a, b ≥ 1`. -/
-lemma p1a2_coef_sin_sin {a b : ℕ} (hb : b ≠ 0) :
+private lemma inv_pi_mul_integral_sin_mul_sin {a b : ℕ} (hb : b ≠ 0) :
     (1 / π : ℂ) * ∫ x in (0 : ℝ)..2 * π, Complex.sin (a * x) * Complex.sin (b * x) =
       if a = b then 1 else 0 := by
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
-  rw [p1a2_integral_sin_mul_sin]
+  rw [integral_sin_mul_sin_two_pi]
   have h1 : ¬ (a : ℤ) + b = 0 := by omega
   simp only [h1, ↓reduceIte, sub_zero]
   by_cases hab : a = b
@@ -264,7 +290,7 @@ lemma p1a2_coef_sin_sin {a b : ℕ} (hb : b ≠ 0) :
     simp [h2, hab]
 
 /-- Reflection `x ↦ π/2 - x` preserves integrals over a period. -/
-lemma p1a2_integral_half_pi_sub {g : ℝ → ℂ} (hg : Function.Periodic g (2 * π)) :
+private lemma integral_comp_pi_div_two_sub_of_periodic {g : ℝ → ℂ} (hg : Function.Periodic g (2 * π)) :
     ∫ x in (0 : ℝ)..2 * π, g (π / 2 - x) = ∫ x in (0 : ℝ)..2 * π, g x := by
   rw [intervalIntegral.integral_comp_sub_left, sub_zero]
   have h := hg.intervalIntegral_add_eq (π / 2 - 2 * π) 0
@@ -272,42 +298,42 @@ lemma p1a2_integral_half_pi_sub {g : ℝ → ℂ} (hg : Function.Periodic g (2 *
   exact h
 
 /-- `cos(nπ) = (-1)^n` in `ℂ`. -/
-lemma p1a2_cos_nat_mul_pi (n : ℕ) : Complex.cos (n * π) = (-1) ^ n := by
+private lemma cos_natCast_mul_pi_eq_neg_one_pow (n : ℕ) : Complex.cos (n * π) = (-1) ^ n := by
   rw [show (n : ℂ) * π = ((n * π : ℝ) : ℂ) by push_cast; ring, ← Complex.ofReal_cos,
     Real.cos_nat_mul_pi]; push_cast; ring
 
 /-- `cos(2m(π/2 - u)) = (-1)^m cos(2mu)`. -/
-lemma p1a2_cos_even_half_pi_sub (m : ℕ) (u : ℂ) :
+private lemma cos_even_mul_pi_div_two_sub (m : ℕ) (u : ℂ) :
     Complex.cos (((2 * m : ℕ) : ℂ) * (π / 2 - u)) =
       (-1) ^ m * Complex.cos (((2 * m : ℕ) : ℂ) * u) := by
   rw [show ((2 * m : ℕ) : ℂ) * (π / 2 - u) = m * π - ((2 * m : ℕ) : ℂ) * u by push_cast; ring,
-    Complex.cos_sub, p1a2_cos_nat_mul_pi, Complex.sin_nat_mul_pi]; ring
+    Complex.cos_sub, cos_natCast_mul_pi_eq_neg_one_pow, Complex.sin_nat_mul_pi]; ring
 
 /-- `sin(2m(π/2 - u)) = -(-1)^m sin(2mu)`. -/
-lemma p1a2_sin_even_half_pi_sub (m : ℕ) (u : ℂ) :
+private lemma sin_even_mul_pi_div_two_sub (m : ℕ) (u : ℂ) :
     Complex.sin (((2 * m : ℕ) : ℂ) * (π / 2 - u)) =
       -((-1) ^ m * Complex.sin (((2 * m : ℕ) : ℂ) * u)) := by
   rw [show ((2 * m : ℕ) : ℂ) * (π / 2 - u) = m * π - ((2 * m : ℕ) : ℂ) * u by push_cast; ring,
-    Complex.sin_sub, p1a2_cos_nat_mul_pi, Complex.sin_nat_mul_pi]; ring
+    Complex.sin_sub, cos_natCast_mul_pi_eq_neg_one_pow, Complex.sin_nat_mul_pi]; ring
 
 /-- `cos((2m+1)(π/2 - u)) = (-1)^m sin((2m+1)u)`. -/
-lemma p1a2_cos_odd_half_pi_sub (m : ℕ) (u : ℂ) :
+private lemma cos_odd_mul_pi_div_two_sub (m : ℕ) (u : ℂ) :
     Complex.cos (((2 * m + 1 : ℕ) : ℂ) * (π / 2 - u)) =
       (-1) ^ m * Complex.sin (((2 * m + 1 : ℕ) : ℂ) * u) := by
   rw [show ((2 * m + 1 : ℕ) : ℂ) * (π / 2 - u) = (m * π + π / 2) - ((2 * m + 1 : ℕ) : ℂ) * u by
     push_cast; ring, Complex.cos_sub, Complex.cos_add_pi_div_two, Complex.sin_add_pi_div_two,
-    p1a2_cos_nat_mul_pi, Complex.sin_nat_mul_pi]; ring
+    cos_natCast_mul_pi_eq_neg_one_pow, Complex.sin_nat_mul_pi]; ring
 
 /-- `sin((2m+1)(π/2 - u)) = (-1)^m cos((2m+1)u)`. -/
-theorem p1a2_sin_odd_half_pi_sub (m : ℕ) (u : ℂ) :
+theorem sin_odd_mul_pi_div_two_sub (m : ℕ) (u : ℂ) :
     Complex.sin (((2 * m + 1 : ℕ) : ℂ) * (π / 2 - u)) =
       (-1) ^ m * Complex.cos (((2 * m + 1 : ℕ) : ℂ) * u) := by
   rw [show ((2 * m + 1 : ℕ) : ℂ) * (π / 2 - u) = (m * π + π / 2) - ((2 * m + 1 : ℕ) : ℂ) * u by
     push_cast; ring, Complex.sin_sub, Complex.cos_add_pi_div_two, Complex.sin_add_pi_div_two,
-    p1a2_cos_nat_mul_pi, Complex.sin_nat_mul_pi]; ring
+    cos_natCast_mul_pi_eq_neg_one_pow, Complex.sin_nat_mul_pi]; ring
 
 /-- `(-1)^(n - m : ℤ) = (-1)^n (-1)^m` in `ℂ`. -/
-lemma p1a2_neg_one_zpow_sub (n m : ℕ) :
+lemma neg_one_zpow_natCast_sub (n m : ℕ) :
     ((-1 : ℂ) ^ ((n : ℤ) - m)) = (-1) ^ n * (-1) ^ m := by
   rw [zpow_sub₀ (by norm_num), zpow_natCast, zpow_natCast]
   rw [div_eq_mul_inv]
@@ -316,11 +342,11 @@ lemma p1a2_neg_one_zpow_sub (n m : ℕ) :
 
 /-- Reflection of a Fourier-type integral: if `f(x, -q) k(x) = c g(π/2 - x)` with `g`
 `2π`-periodic, the integral over a period is `c ∫ g`. -/
-lemma p1a2_integral_reflect {f g : ℝ → ℂ} (c : ℂ) (hg : Function.Periodic g (2 * π))
+private lemma integral_eq_mul_of_reflect {f g : ℝ → ℂ} (c : ℂ) (hg : Function.Periodic g (2 * π))
     (h : ∀ x : ℝ, f x = c * g (π / 2 - x)) :
     ∫ x in (0 : ℝ)..2 * π, f x = c * ∫ x in (0 : ℝ)..2 * π, g x := by
   simp_rw [h]
-  rw [intervalIntegral.integral_const_mul, p1a2_integral_half_pi_sub hg]
+  rw [intervalIntegral.integral_const_mul, integral_comp_pi_div_two_sub_of_periodic hg]
 
 /-! ### Fourier expansions (§28.4(i)) -/
 
@@ -329,27 +355,27 @@ lemma p1a2_integral_reflect {f g : ℝ → ℂ} (c : ℂ) (hg : Function.Periodi
 theorem hasSum_mathieuCe_even (n : ℕ) (q : ℝ) (z : ℂ) :
     HasSum (fun m : ℕ => mathieuFourierA (2 * n) (2 * m) q * Complex.cos (2 * m * z))
       (mathieuCe (2 * n) z q) := by
-  have h := p1a2_hasSum_mathieuCe (2 * n) q z
+  have h := hasSum_mathieuFourierA_mul_cos (2 * n) q z
   rw [← (Function.Injective.hasSum_iff (g := fun m : ℕ => 2 * m)
     (fun a b h => by simpa using h) ?_)] at h
   · convert h using 2 with m; simp
   · intro x hx
     obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' x
     · exact absurd ⟨j, rfl⟩ hx
-    · rw [p1a2_fourierA_even_odd, zero_mul]
+    · rw [mathieuFourierA_even_odd, zero_mul]
 
 /-- **DLMF 28.4.2**: `ce_{2n+1}(z, q) = ∑_{m ≥ 0} A^{2n+1}_{2m+1}(q) cos(2m+1)z`. -/
 @[dlmf 28.4.E2]
 theorem hasSum_mathieuCe_odd (n : ℕ) (q : ℝ) (z : ℂ) :
     HasSum (fun m : ℕ => mathieuFourierA (2 * n + 1) (2 * m + 1) q *
       Complex.cos ((2 * m + 1) * z)) (mathieuCe (2 * n + 1) z q) := by
-  have h := p1a2_hasSum_mathieuCe (2 * n + 1) q z
+  have h := hasSum_mathieuFourierA_mul_cos (2 * n + 1) q z
   rw [← (Function.Injective.hasSum_iff (g := fun m : ℕ => 2 * m + 1)
     (fun a b h => by simpa using h) ?_)] at h
   · convert h using 2 with m; simp
   · intro x hx
     obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' x
-    · rw [p1a2_fourierA_odd_even, zero_mul]
+    · rw [mathieuFourierA_odd_even, zero_mul]
     · exact absurd ⟨j, rfl⟩ hx
 
 /-- **DLMF 28.4.3**: `se_{2n+1}(z, q) = ∑_{m ≥ 0} B^{2n+1}_{2m+1}(q) sin(2m+1)z`. -/
@@ -357,13 +383,13 @@ theorem hasSum_mathieuCe_odd (n : ℕ) (q : ℝ) (z : ℂ) :
 theorem hasSum_mathieuSe_odd (n : ℕ) (q : ℝ) (z : ℂ) :
     HasSum (fun m : ℕ => mathieuFourierB (2 * n + 1) (2 * m + 1) q *
       Complex.sin ((2 * m + 1) * z)) (mathieuSe (2 * n + 1) z q) := by
-  have h := p1a2_hasSum_mathieuSe (n := 2 * n + 1) (by omega) q z
+  have h := hasSum_mathieuFourierB_mul_sin (n := 2 * n + 1) (by omega) q z
   rw [← (Function.Injective.hasSum_iff (g := fun m : ℕ => 2 * m + 1)
     (fun a b h => by simpa using h) ?_)] at h
   · convert h using 2 with m; simp
   · intro x hx
     obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' x
-    · rw [p1a2_fourierB_odd_even, zero_mul]
+    · rw [mathieuFourierB_odd_even, zero_mul]
     · exact absurd ⟨j, rfl⟩ hx
 
 /-- **DLMF 28.4.4**: `se_{2n+2}(z, q) = ∑_{m ≥ 0} B^{2n+2}_{2m+2}(q) sin(2m+2)z`. -/
@@ -371,50 +397,27 @@ theorem hasSum_mathieuSe_odd (n : ℕ) (q : ℝ) (z : ℂ) :
 theorem hasSum_mathieuSe_even (n : ℕ) (q : ℝ) (z : ℂ) :
     HasSum (fun m : ℕ => mathieuFourierB (2 * n + 2) (2 * m + 2) q *
       Complex.sin ((2 * m + 2) * z)) (mathieuSe (2 * n + 2) z q) := by
-  have h := p1a2_hasSum_mathieuSe (n := 2 * n + 2) (by omega) q z
+  have h := hasSum_mathieuFourierB_mul_sin (n := 2 * n + 2) (by omega) q z
   rw [← (Function.Injective.hasSum_iff (g := fun m : ℕ => 2 * m + 2)
     (fun a b h => by simpa using h) ?_)] at h
   · convert h using 2 with m; simp
   · intro x hx
     obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' x
     · rcases j with _ | j
-      · rw [p1a2_fourierB_zero, zero_mul]
+      · rw [mathieuFourierB_zero_right, zero_mul]
       · exact absurd ⟨j, by ring⟩ hx
-    · rw [p1a2_fourierB_even_odd, zero_mul]
+    · rw [mathieuFourierB_even_odd, zero_mul]
 
 /-- `‖e^{iw}‖ ≤ e^{|ℑw|}`. -/
-lemma p2f_norm_exp_mul_I_le (w : ℂ) : ‖Complex.exp (w * I)‖ ≤ Real.exp |w.im| := by
+private lemma norm_exp_mul_I_le_exp_abs_im (w : ℂ) : ‖Complex.exp (w * I)‖ ≤ Real.exp |w.im| := by
   rw [Complex.norm_exp]
   apply Real.exp_le_exp.mpr
   simp only [mul_re, I_re, mul_zero, I_im, mul_one, zero_sub]
   exact neg_le_abs _
 
-/-- `‖cos w‖ ≤ e^{|ℑw|}`. -/
-theorem p2f_norm_cos_le (w : ℂ) : ‖Complex.cos w‖ ≤ Real.exp |w.im| := by
-  rw [Complex.cos]
-  have h1 := p2f_norm_exp_mul_I_le w
-  have h2 := p2f_norm_exp_mul_I_le (-w)
-  rw [show -w * I = -(w * I) by ring] at h2
-  simp only [neg_im, abs_neg] at h2
-  rw [norm_div, Complex.norm_ofNat, show -w * I = -(w * I) by ring]
-  have := norm_add_le (Complex.exp (w * I)) (Complex.exp (-(w * I)))
-  linarith
-
-/-- `‖sin w‖ ≤ e^{|ℑw|}`. -/
-theorem p2f_norm_sin_le (w : ℂ) : ‖Complex.sin w‖ ≤ Real.exp |w.im| := by
-  rw [Complex.sin]
-  have h1 := p2f_norm_exp_mul_I_le w
-  have h2 := p2f_norm_exp_mul_I_le (-w)
-  rw [show -w * I = -(w * I) by ring] at h2
-  simp only [neg_im, abs_neg] at h2
-  rw [norm_div, norm_mul, Complex.norm_I, mul_one, Complex.norm_ofNat,
-    show -w * I = -(w * I) by ring]
-  have := norm_sub_le (Complex.exp (-(w * I))) (Complex.exp (w * I))
-  linarith
-
 /-- Absolute and locally uniform convergence of a trigonometric series with rapidly decaying
 coefficients. -/
-lemma p2f_trig_series {c : ℕ → ℂ} {g : ℕ → ℂ → ℂ} {F : ℂ → ℂ}
+private lemma summable_and_tendstoLocallyUniformly_trig_series {c : ℕ → ℂ} {g : ℕ → ℂ → ℂ} {F : ℂ → ℂ}
     (hc : ∀ R : ℝ, ∃ C, 0 ≤ C ∧ ∀ m : ℕ, ‖c m‖ ≤ C * Real.exp (-(R * m)))
     (hg : ∀ m z, ‖g m z‖ ≤ Real.exp (m * |z.im|)) (hF : ∀ z, HasSum (fun m => c m * g m z) (F z)) :
     (∀ z, Summable fun m => ‖c m * g m z‖) ∧
@@ -447,10 +450,10 @@ lemma p2f_trig_series {c : ℕ → ℂ} {g : ℕ → ℂ → ℂ} {F : ℂ → �
       linarith
 
 /-- Exponential decay of `A^n_m(q)` in `m`. -/
-theorem p2f_fourierA_decay (n : ℕ) (q : ℝ) (R : ℝ) :
+theorem exists_norm_mathieuFourierA_le_exp (n : ℕ) (q : ℝ) (R : ℝ) :
     ∃ C, 0 ≤ C ∧ ∀ m : ℕ, ‖mathieuFourierA n m q‖ ≤ C * Real.exp (-(R * m)) := by
-  obtain ⟨C, hC0, hC⟩ := p2f_cos_coeff_decay (F := fun z => mathieuCe n z q)
-    (isMathieuSolution_mathieuCe n q).differentiable (p1a2_mathieuCe_two_pi n q)
+  obtain ⟨C, hC0, hC⟩ := norm_integral_mul_cos_le_exp (F := fun z => mathieuCe n z q)
+    (isMathieuSolution_mathieuCe n q).differentiable (mathieuCe_periodic_two_pi n q)
     (fun z => mathieuCe_neg n z q) R
   refine ⟨C, hC0, fun m => ?_⟩
   rw [mathieuFourierA, norm_mul]
@@ -466,10 +469,10 @@ theorem p2f_fourierA_decay (n : ℕ) (q : ℝ) (R : ℝ) :
     _ = _ := one_mul _
 
 /-- Exponential decay of `B^n_m(q)` in `m`, `n ≥ 1`. -/
-theorem p2f_fourierB_decay {n : ℕ} (hn : n ≠ 0) (q : ℝ) (R : ℝ) :
+theorem exists_norm_mathieuFourierB_le_exp {n : ℕ} (hn : n ≠ 0) (q : ℝ) (R : ℝ) :
     ∃ C, 0 ≤ C ∧ ∀ m : ℕ, ‖mathieuFourierB n m q‖ ≤ C * Real.exp (-(R * m)) := by
-  obtain ⟨C, hC0, hC⟩ := p2f_sin_coeff_decay (F := fun z => mathieuSe n z q)
-    (isMathieuSolution_mathieuSe n q).differentiable (p1a2_mathieuSe_two_pi hn q)
+  obtain ⟨C, hC0, hC⟩ := norm_integral_mul_sin_le_exp (F := fun z => mathieuSe n z q)
+    (isMathieuSolution_mathieuSe n q).differentiable (mathieuSe_periodic_two_pi hn q)
     (fun z => mathieuSe_neg n z q) R
   refine ⟨C, hC0, fun m => ?_⟩
   rw [mathieuFourierB, norm_mul]
@@ -495,15 +498,15 @@ theorem mathieu_fourier_locallyUniform (n : ℕ) (q : ℝ) :
       (n ≠ 0 → TendstoLocallyUniformly (fun N z => ∑ m ∈ Finset.range N,
         mathieuFourierB n m q * Complex.sin (m * z)) (fun z => mathieuSe n z q) atTop) := by
   have hg : ∀ (m : ℕ) (z : ℂ), ‖Complex.cos (m * z)‖ ≤ Real.exp (m * |z.im|) := fun m z => by
-    refine (p2f_norm_cos_le _).trans (le_of_eq ?_)
+    refine (Complex.norm_cos_le_exp_abs_im _).trans (le_of_eq ?_)
     rw [show ((m : ℂ) * z).im = m * z.im by simp, abs_mul, Nat.abs_cast]
   have hg' : ∀ (m : ℕ) (z : ℂ), ‖Complex.sin (m * z)‖ ≤ Real.exp (m * |z.im|) := fun m z => by
-    refine (p2f_norm_sin_le _).trans (le_of_eq ?_)
+    refine (Complex.norm_sin_le_exp_abs_im _).trans (le_of_eq ?_)
     rw [show ((m : ℂ) * z).im = m * z.im by simp, abs_mul, Nat.abs_cast]
-  have hA := p2f_trig_series (g := fun m z => Complex.cos (m * z)) (p2f_fourierA_decay n q) hg
-    (p1a2_hasSum_mathieuCe n q)
-  have hB : n ≠ 0 → _ := fun hn => p2f_trig_series (g := fun m z => Complex.sin (m * z))
-    (p2f_fourierB_decay hn q) hg' (p1a2_hasSum_mathieuSe hn q)
+  have hA := summable_and_tendstoLocallyUniformly_trig_series (g := fun m z => Complex.cos (m * z)) (exists_norm_mathieuFourierA_le_exp n q) hg
+    (hasSum_mathieuFourierA_mul_cos n q)
+  have hB : n ≠ 0 → _ := fun hn => summable_and_tendstoLocallyUniformly_trig_series (g := fun m z => Complex.sin (m * z))
+    (exists_norm_mathieuFourierB_le_exp hn q) hg' (hasSum_mathieuFourierB_mul_sin hn q)
   exact ⟨hA.1, fun hn => (hB hn).1, hA.2, fun hn => (hB hn).2⟩
 
 
@@ -515,7 +518,7 @@ theorem mathieu_fourier_locallyUniform (n : ℕ) (q : ℝ) :
 theorem mathieuFourierA_even_rec_zero (n : ℕ) (q : ℝ) :
     (mathieuA (2 * n) q : ℂ) * mathieuFourierA (2 * n) 0 q -
       q * mathieuFourierA (2 * n) 2 q = 0 := by
-  have h := p1a2_ce_rec (2 * n) q 0
+  have h := integral_mathieuCe_mul_cos_rec (2 * n) q 0
   simp only [mathieuFourierA]
   norm_num at h ⊢
   field_simp
@@ -526,7 +529,7 @@ theorem mathieuFourierA_even_rec_zero (n : ℕ) (q : ℝ) :
 theorem mathieuFourierA_even_rec_one (n : ℕ) (q : ℝ) :
     ((mathieuA (2 * n) q : ℂ) - 4) * mathieuFourierA (2 * n) 2 q -
       q * (2 * mathieuFourierA (2 * n) 0 q + mathieuFourierA (2 * n) 4 q) = 0 := by
-  have h := p1a2_ce_rec (2 * n) q 2
+  have h := integral_mathieuCe_mul_cos_rec (2 * n) q 2
   simp only [mathieuFourierA]
   norm_num at h ⊢
   field_simp
@@ -538,7 +541,7 @@ theorem mathieuFourierA_even_rec (n : ℕ) (q : ℝ) {m : ℕ} (hm : 2 ≤ m) :
     ((mathieuA (2 * n) q : ℂ) - 4 * m ^ 2) * mathieuFourierA (2 * n) (2 * m) q -
       q * (mathieuFourierA (2 * n) (2 * m - 2) q + mathieuFourierA (2 * n) (2 * m + 2) q) =
       0 := by
-  have h := p1a2_ce_rec (2 * n) q (2 * m)
+  have h := integral_mathieuCe_mul_cos_rec (2 * n) q (2 * m)
   simp only [mathieuFourierA, (show 2 * m ≠ 0 by omega), ↓reduceIte,
     (show 2 * m - 2 ≠ 0 by omega), (show 2 * m + 2 ≠ 0 by omega)]
   have e : (((2 * m - 2 : ℕ) : ℂ)) = (((2 * m : ℤ) - 2 : ℤ) : ℂ) := by
@@ -552,7 +555,7 @@ theorem mathieuFourierA_even_rec (n : ℕ) (q : ℝ) {m : ℕ} (hm : 2 ≤ m) :
 theorem mathieuFourierA_odd_rec_zero (n : ℕ) (q : ℝ) :
     ((mathieuA (2 * n + 1) q : ℂ) - 1 - q) * mathieuFourierA (2 * n + 1) 1 q -
       q * mathieuFourierA (2 * n + 1) 3 q = 0 := by
-  have h := p1a2_ce_rec (2 * n + 1) q 1
+  have h := integral_mathieuCe_mul_cos_rec (2 * n + 1) q 1
   simp only [mathieuFourierA]
   norm_num at h ⊢
   linear_combination (1 / π : ℂ) * h
@@ -564,7 +567,7 @@ theorem mathieuFourierA_odd_rec (n : ℕ) (q : ℝ) {m : ℕ} (hm : 1 ≤ m) :
     ((mathieuA (2 * n + 1) q : ℂ) - (2 * m + 1) ^ 2) * mathieuFourierA (2 * n + 1) (2 * m + 1) q -
       q * (mathieuFourierA (2 * n + 1) (2 * m - 1) q +
         mathieuFourierA (2 * n + 1) (2 * m + 3) q) = 0 := by
-  have h := p1a2_ce_rec (2 * n + 1) q (2 * m + 1)
+  have h := integral_mathieuCe_mul_cos_rec (2 * n + 1) q (2 * m + 1)
   simp only [mathieuFourierA, (show 2 * m + 1 ≠ 0 by omega), ↓reduceIte,
     (show 2 * m - 1 ≠ 0 by omega), (show 2 * m + 3 ≠ 0 by omega)]
   have e : (((2 * m - 1 : ℕ) : ℂ)) = (((2 * m + 1 : ℤ) - 2 : ℤ) : ℂ) := by
@@ -579,7 +582,7 @@ theorem mathieuFourierA_odd_rec (n : ℕ) (q : ℝ) {m : ℕ} (hm : 1 ≤ m) :
 theorem mathieuFourierB_odd_rec_zero (n : ℕ) (q : ℝ) :
     ((mathieuB (2 * n + 1) q : ℂ) - 1 + q) * mathieuFourierB (2 * n + 1) 1 q -
       q * mathieuFourierB (2 * n + 1) 3 q = 0 := by
-  have h := p1a2_se_rec (n := 2 * n + 1) (by omega) q 1
+  have h := integral_mathieuSe_mul_sin_rec (n := 2 * n + 1) (by omega) q 1
   simp only [mathieuFourierB]
   norm_num at h ⊢
   linear_combination (1 / π : ℂ) * h
@@ -591,7 +594,7 @@ theorem mathieuFourierB_odd_rec (n : ℕ) (q : ℝ) {m : ℕ} (hm : 1 ≤ m) :
     ((mathieuB (2 * n + 1) q : ℂ) - (2 * m + 1) ^ 2) * mathieuFourierB (2 * n + 1) (2 * m + 1) q -
       q * (mathieuFourierB (2 * n + 1) (2 * m - 1) q +
         mathieuFourierB (2 * n + 1) (2 * m + 3) q) = 0 := by
-  have h := p1a2_se_rec (n := 2 * n + 1) (by omega) q (2 * m + 1)
+  have h := integral_mathieuSe_mul_sin_rec (n := 2 * n + 1) (by omega) q (2 * m + 1)
   simp only [mathieuFourierB]
   have e : (((2 * m - 1 : ℕ) : ℂ)) = (((2 * m + 1 : ℤ) - 2 : ℤ) : ℂ) := by
     push_cast [Nat.cast_sub (show 1 ≤ 2 * m by omega)]; ring
@@ -605,7 +608,7 @@ theorem mathieuFourierB_odd_rec (n : ℕ) (q : ℝ) {m : ℕ} (hm : 1 ≤ m) :
 theorem mathieuFourierB_even_rec_zero (n : ℕ) (q : ℝ) :
     ((mathieuB (2 * n + 2) q : ℂ) - 4) * mathieuFourierB (2 * n + 2) 2 q -
       q * mathieuFourierB (2 * n + 2) 4 q = 0 := by
-  have h := p1a2_se_rec (n := 2 * n + 2) (by omega) q 2
+  have h := integral_mathieuSe_mul_sin_rec (n := 2 * n + 2) (by omega) q 2
   simp only [mathieuFourierB]
   norm_num at h ⊢
   linear_combination (1 / π : ℂ) * h
@@ -618,7 +621,7 @@ theorem mathieuFourierB_even_rec (n : ℕ) (q : ℝ) {m : ℕ} (hm : 2 ≤ m) :
     ((mathieuB (2 * n + 2) q : ℂ) - 4 * m ^ 2) * mathieuFourierB (2 * n + 2) (2 * m) q -
       q * (mathieuFourierB (2 * n + 2) (2 * m - 2) q +
         mathieuFourierB (2 * n + 2) (2 * m + 2) q) = 0 := by
-  have h := p1a2_se_rec (n := 2 * n + 2) (by omega) q (2 * m)
+  have h := integral_mathieuSe_mul_sin_rec (n := 2 * n + 2) (by omega) q (2 * m)
   simp only [mathieuFourierB]
   have e : (((2 * m - 2 : ℕ) : ℂ)) = (((2 * m : ℤ) - 2 : ℤ) : ℂ) := by
     push_cast [Nat.cast_sub (show 2 ≤ 2 * m by omega)]; ring
@@ -632,55 +635,55 @@ theorem mathieuFourierB_even_rec (n : ℕ) (q : ℝ) {m : ℕ} (hm : 2 ≤ m) :
 @[dlmf 28.4.E9]
 theorem hasSum_mathieuFourierA_even_sq (n : ℕ) (q : ℝ) :
     HasSum (fun m : ℕ => (if m = 0 then 2 else 1) * mathieuFourierA (2 * n) (2 * m) q ^ 2) 1 := by
-  have h := p1a2_hasSum_mathieuFourierA_sq (2 * n) q
+  have h := hasSum_mathieuFourierA_sq_all (2 * n) q
   rw [← (Function.Injective.hasSum_iff (g := fun m : ℕ => 2 * m)
     (fun a b h => by simpa using h) ?_)] at h
   · convert h using 2 with m; simp
   · intro x hx
     obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' x
     · exact absurd ⟨j, rfl⟩ hx
-    · rw [p1a2_fourierA_even_odd]; simp
+    · rw [mathieuFourierA_even_odd]; simp
 
 /-- **DLMF 28.4.10**: `∑_{m ≥ 0} (A^{2n+1}_{2m+1})² = 1`. -/
 @[dlmf 28.4.E10]
 theorem hasSum_mathieuFourierA_odd_sq (n : ℕ) (q : ℝ) :
     HasSum (fun m : ℕ => mathieuFourierA (2 * n + 1) (2 * m + 1) q ^ 2) 1 := by
-  have h := p1a2_hasSum_mathieuFourierA_sq (2 * n + 1) q
+  have h := hasSum_mathieuFourierA_sq_all (2 * n + 1) q
   rw [← (Function.Injective.hasSum_iff (g := fun m : ℕ => 2 * m + 1)
     (fun a b h => by simpa using h) ?_)] at h
   · convert h using 2 with m; simp
   · intro x hx
     obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' x
-    · rw [p1a2_fourierA_odd_even]; simp
+    · rw [mathieuFourierA_odd_even]; simp
     · exact absurd ⟨j, rfl⟩ hx
 
 /-- **DLMF 28.4.11**: `∑_{m ≥ 0} (B^{2n+1}_{2m+1})² = 1`. -/
 @[dlmf 28.4.E11]
 theorem hasSum_mathieuFourierB_odd_sq (n : ℕ) (q : ℝ) :
     HasSum (fun m : ℕ => mathieuFourierB (2 * n + 1) (2 * m + 1) q ^ 2) 1 := by
-  have h := p1a2_hasSum_mathieuFourierB_sq (n := 2 * n + 1) (by omega) q
+  have h := hasSum_mathieuFourierB_sq_all (n := 2 * n + 1) (by omega) q
   rw [← (Function.Injective.hasSum_iff (g := fun m : ℕ => 2 * m + 1)
     (fun a b h => by simpa using h) ?_)] at h
   · exact h
   · intro x hx
     obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' x
-    · rw [p1a2_fourierB_odd_even]; simp
+    · rw [mathieuFourierB_odd_even]; simp
     · exact absurd ⟨j, rfl⟩ hx
 
 /-- **DLMF 28.4.12**: `∑_{m ≥ 0} (B^{2n+2}_{2m+2})² = 1`. -/
 @[dlmf 28.4.E12]
 theorem hasSum_mathieuFourierB_even_sq (n : ℕ) (q : ℝ) :
     HasSum (fun m : ℕ => mathieuFourierB (2 * n + 2) (2 * m + 2) q ^ 2) 1 := by
-  have h := p1a2_hasSum_mathieuFourierB_sq (n := 2 * n + 2) (by omega) q
+  have h := hasSum_mathieuFourierB_sq_all (n := 2 * n + 2) (by omega) q
   rw [← (Function.Injective.hasSum_iff (g := fun m : ℕ => 2 * m + 2)
     (fun a b h => by simpa using h) ?_)] at h
   · exact h
   · intro x hx
     obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' x
     · rcases j with _ | j
-      · rw [p1a2_fourierB_zero]; simp
+      · rw [mathieuFourierB_zero_right]; simp
       · exact absurd ⟨j, by ring⟩ hx
-    · rw [p1a2_fourierB_even_odd]; simp
+    · rw [mathieuFourierB_even_odd]; simp
 
 /-- **Sign convention** (DLMF §28.4(iii)): the sign ambiguity left by 28.4.9–28.4.12 is resolved
 by 28.4.13–28.4.16 at `q = 0` and by continuity in `q`; for real `q` this is equivalent to the
@@ -693,9 +696,9 @@ theorem mathieuFourier_sign (n : ℕ) (q : ℝ) :
         (deriv (fun z => mathieuSe n z q) 0)) ∧
       0 < (mathieuCe n 0 q).re ∧ (mathieuCe n 0 q).im = 0 := by
   refine ⟨?_, fun hn => ?_, ?_, ?_⟩
-  · simpa using p1a2_hasSum_mathieuCe n q 0
-  · exact p1a2_hasSum_deriv_sin (F := fun z => mathieuSe n z q)
-      (isMathieuSolution_mathieuSe n q).differentiable (p1a2_mathieuSe_two_pi hn q)
+  · simpa using hasSum_mathieuFourierA_mul_cos n q 0
+  · exact hasSum_mul_sin_coeff_deriv_zero (F := fun z => mathieuSe n z q)
+      (isMathieuSolution_mathieuSe n q).differentiable (mathieuSe_periodic_two_pi hn q)
       (fun z => mathieuSe_neg n z q)
   · rw [mathieuCe_zero, Complex.ofReal_re]; exact mathieuCeZero_pos n q
   · rw [mathieuCe_zero, Complex.ofReal_im]
@@ -712,7 +715,7 @@ theorem mathieuFourierA_even_q_zero (n m : ℕ) :
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp only [mathieuFourierA, Nat.mul_zero, mathieuCe_zero_zero]
     rw [intervalIntegral.integral_const_mul]
-    have := p1a2_integral_cos_int ((2 * m : ℕ) : ℤ)
+    have := integral_cos_intCast_mul ((2 * m : ℕ) : ℤ)
     push_cast at this ⊢
     rw [this]
     rcases Nat.eq_zero_or_pos m with rfl | hm
@@ -720,7 +723,7 @@ theorem mathieuFourierA_even_q_zero (n m : ℕ) :
     · simp [hm.ne', hm.ne]
   · simp only [mathieuFourierA]
     simp_rw [mathieuCe_q_zero (by omega : 2 * n ≠ 0)]
-    rw [p1a2_integral_cos_mul_cos]
+    rw [integral_cos_mul_cos_two_pi]
     have h1 : ¬ ((2 * n : ℕ) : ℤ) + ((2 * m : ℕ) : ℤ) = 0 := by omega
     have hn0 : n ≠ 0 := by omega
     have h2n : 2 * n ≠ 0 := by omega
@@ -739,7 +742,7 @@ theorem mathieuFourierA_odd_q_zero (n m : ℕ) :
     mathieuFourierA (2 * n + 1) (2 * m + 1) 0 = if n = m then 1 else 0 := by
   simp only [mathieuFourierA, show 2 * m + 1 ≠ 0 by omega, ↓reduceIte]
   simp_rw [mathieuCe_q_zero (by omega : 2 * n + 1 ≠ 0)]
-  rw [p1a2_coef_cos_cos (by omega)]
+  rw [inv_pi_mul_integral_cos_mul_cos (by omega)]
   simp
 
 /-- **DLMF 28.4.15**: `B^{2n+1}_{2n+1}(0) = 1`, `B^{2n+1}_{2m+1}(0) = 0` (`n ≠ m`). -/
@@ -748,7 +751,7 @@ theorem mathieuFourierB_odd_q_zero (n m : ℕ) :
     mathieuFourierB (2 * n + 1) (2 * m + 1) 0 = if n = m then 1 else 0 := by
   simp only [mathieuFourierB]
   simp_rw [mathieuSe_q_zero (by omega : 2 * n + 1 ≠ 0)]
-  rw [p1a2_coef_sin_sin (by omega)]
+  rw [inv_pi_mul_integral_sin_mul_sin (by omega)]
   simp
 
 /-- **DLMF 28.4.16**: `B^{2n+2}_{2n+2}(0) = 1`, `B^{2n+2}_{2m+2}(0) = 0` (`n ≠ m`). -/
@@ -757,7 +760,7 @@ theorem mathieuFourierB_even_q_zero (n m : ℕ) :
     mathieuFourierB (2 * n + 2) (2 * m + 2) 0 = if n = m then 1 else 0 := by
   simp only [mathieuFourierB]
   simp_rw [mathieuSe_q_zero (by omega : 2 * n + 2 ≠ 0)]
-  rw [p1a2_coef_sin_sin (by omega)]
+  rw [inv_pi_mul_integral_sin_mul_sin (by omega)]
   simp
 
 /-! ### Change of sign of `q` (§28.4(v)) -/
@@ -768,15 +771,15 @@ theorem mathieuFourierA_even_neg_q (n m : ℕ) (q : ℝ) :
     mathieuFourierA (2 * n) (2 * m) (-q) =
       (-1) ^ ((n : ℤ) - m) * mathieuFourierA (2 * n) (2 * m) q := by
   simp only [mathieuFourierA]
-  rw [p1a2_integral_reflect ((-1) ^ n * (-1) ^ m)
+  rw [integral_eq_mul_of_reflect ((-1) ^ n * (-1) ^ m)
     (g := fun x : ℝ => mathieuCe (2 * n) x q * Complex.cos (((2 * m : ℕ) : ℂ) * x))]
-  · rw [p1a2_neg_one_zpow_sub]; ring
+  · rw [neg_one_zpow_natCast_sub]; ring
   · intro y; simp only; push_cast
-    rw [p1a2_mathieuCe_two_pi, show 2 * (m : ℂ) * (y + 2 * π) =
+    rw [mathieuCe_periodic_two_pi, show 2 * (m : ℂ) * (y + 2 * π) =
       2 * m * y + ((2 * m : ℕ) : ℤ) * (2 * π) by
       push_cast; ring, Complex.cos_add_int_mul_two_pi]
   · intro x
-    have e := p1a2_cos_even_half_pi_sub m (π / 2 - x)
+    have e := cos_even_mul_pi_div_two_sub m (π / 2 - x)
     rw [sub_sub_cancel] at e
     rw [mathieuCe_even_neg_q, e]
     push_cast; ring
@@ -787,15 +790,15 @@ theorem mathieuFourierB_even_neg_q (n m : ℕ) (q : ℝ) :
     mathieuFourierB (2 * n + 2) (2 * m + 2) (-q) =
       (-1) ^ ((n : ℤ) - m) * mathieuFourierB (2 * n + 2) (2 * m + 2) q := by
   simp only [mathieuFourierB]
-  rw [p1a2_integral_reflect ((-1) ^ n * (-1) ^ m)
+  rw [integral_eq_mul_of_reflect ((-1) ^ n * (-1) ^ m)
     (g := fun x : ℝ => mathieuSe (2 * n + 2) x q * Complex.sin (((2 * m + 2 : ℕ) : ℂ) * x))]
-  · rw [p1a2_neg_one_zpow_sub]; ring
+  · rw [neg_one_zpow_natCast_sub]; ring
   · intro y; simp only; push_cast
-    rw [p1a2_mathieuSe_two_pi (by omega), show (2 * (m : ℂ) + 2) * (y + 2 * π) =
+    rw [mathieuSe_periodic_two_pi (by omega), show (2 * (m : ℂ) + 2) * (y + 2 * π) =
       (2 * m + 2) * y + ((2 * m + 2 : ℕ) : ℤ) * (2 * π) by push_cast; ring,
       Complex.sin_add_int_mul_two_pi]
   · intro x
-    have e := p1a2_sin_even_half_pi_sub (m + 1) (π / 2 - x)
+    have e := sin_even_mul_pi_div_two_sub (m + 1) (π / 2 - x)
     rw [sub_sub_cancel, show ((2 * (m + 1) : ℕ) : ℂ) = ((2 * m + 2 : ℕ) : ℂ) by push_cast; ring]
       at e
     rw [mathieuSe_even_neg_q, e]
@@ -807,15 +810,15 @@ theorem mathieuFourierA_odd_neg_q (n m : ℕ) (q : ℝ) :
     mathieuFourierA (2 * n + 1) (2 * m + 1) (-q) =
       (-1) ^ ((n : ℤ) - m) * mathieuFourierB (2 * n + 1) (2 * m + 1) q := by
   simp only [mathieuFourierA, mathieuFourierB, show 2 * m + 1 ≠ 0 by omega, ↓reduceIte]
-  rw [p1a2_integral_reflect ((-1) ^ n * (-1) ^ m)
+  rw [integral_eq_mul_of_reflect ((-1) ^ n * (-1) ^ m)
     (g := fun x : ℝ => mathieuSe (2 * n + 1) x q * Complex.sin (((2 * m + 1 : ℕ) : ℂ) * x))]
-  · rw [p1a2_neg_one_zpow_sub]; ring
+  · rw [neg_one_zpow_natCast_sub]; ring
   · intro y; simp only; push_cast
-    rw [p1a2_mathieuSe_two_pi (by omega), show (2 * (m : ℂ) + 1) * (y + 2 * π) =
+    rw [mathieuSe_periodic_two_pi (by omega), show (2 * (m : ℂ) + 1) * (y + 2 * π) =
       (2 * m + 1) * y + ((2 * m + 1 : ℕ) : ℤ) * (2 * π) by push_cast; ring,
       Complex.sin_add_int_mul_two_pi]
   · intro x
-    have e := p1a2_cos_odd_half_pi_sub m (π / 2 - x)
+    have e := cos_odd_mul_pi_div_two_sub m (π / 2 - x)
     rw [sub_sub_cancel] at e
     rw [mathieuCe_odd_neg_q, e]
     push_cast; ring
@@ -826,15 +829,15 @@ theorem mathieuFourierB_odd_neg_q (n m : ℕ) (q : ℝ) :
     mathieuFourierB (2 * n + 1) (2 * m + 1) (-q) =
       (-1) ^ ((n : ℤ) - m) * mathieuFourierA (2 * n + 1) (2 * m + 1) q := by
   simp only [mathieuFourierA, mathieuFourierB, show 2 * m + 1 ≠ 0 by omega, ↓reduceIte]
-  rw [p1a2_integral_reflect ((-1) ^ n * (-1) ^ m)
+  rw [integral_eq_mul_of_reflect ((-1) ^ n * (-1) ^ m)
     (g := fun x : ℝ => mathieuCe (2 * n + 1) x q * Complex.cos (((2 * m + 1 : ℕ) : ℂ) * x))]
-  · rw [p1a2_neg_one_zpow_sub]; ring
+  · rw [neg_one_zpow_natCast_sub]; ring
   · intro y; simp only; push_cast
-    rw [p1a2_mathieuCe_two_pi, show (2 * (m : ℂ) + 1) * (y + 2 * π) =
+    rw [mathieuCe_periodic_two_pi, show (2 * (m : ℂ) + 1) * (y + 2 * π) =
       (2 * m + 1) * y + ((2 * m + 1 : ℕ) : ℤ) * (2 * π) by push_cast; ring,
       Complex.cos_add_int_mul_two_pi]
   · intro x
-    have e := p1a2_sin_odd_half_pi_sub m (π / 2 - x)
+    have e := sin_odd_mul_pi_div_two_sub m (π / 2 - x)
     rw [sub_sub_cancel] at e
     rw [mathieuSe_odd_neg_q, e]
     push_cast; ring

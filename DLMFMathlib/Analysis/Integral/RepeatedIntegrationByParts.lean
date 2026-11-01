@@ -13,6 +13,12 @@ public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 
 A finite sequence of continuous successive derivatives gives an exact boundary
 sum and an integral remainder. One-sided derivatives at interval endpoints suffice.
+
+## Main results
+
+* `integral_cexp_mul_eq_boundary_sub`: one integration by parts against `exp(z t)`.
+* `integral_cexp_mul_eq_sum_add`: repeated integration by parts, with an exact finite boundary
+  sum and remainder.
 -/
 
 @[expose] public noncomputable section

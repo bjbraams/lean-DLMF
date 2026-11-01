@@ -11,13 +11,24 @@ public import Mathlib.Analysis.Complex.TaylorSeries
 public import DLMF.Hypergeometric.Identities
 
 /-!
-# Selberg integration by parts and Aomoto recurrences
+# Integration by parts and Aomoto's recurrence for Selberg's integral (AAR §8.1)
 
-Selberg integral definitions, cube integrability and integration-by-parts identities give the
-Aomoto parameter recurrence.
+This file proves integrability and symmetry properties of the Selberg integrand on the unit
+cube, the one-variable integration by parts with the singular Vandermonde factor, and Aomoto's
+recurrence, which gives the shift of Selberg's integral in `a`.
 
-Source references and common attribution are retained in
-`DLMF.Selberg.Basic`.
+## Main results
+
+* `selbergIntegrand_comp_perm`, `integral_cube_comp_perm`: symmetry of the integrand and of
+  cube integrals under permutations of the variables.
+* `integral_ibpD`: one-variable integration by parts.
+* `integral_cube_ibp`: integration by parts in the zeroth coordinate.
+* `integrableOn_mul_selbergIntegrand`, `integrableOn_mul_div_selbergIntegrand`: integrability
+  of the integrand and of the cross terms.
+* `aomoto_step`: Aomoto's recurrence (AAR (8.1.5)).
+* `aomoto_prod`: Aomoto's formula for `Re c ≥ 1/2`.
+* `selbergInt_add_one`: the `a`-shift of the Selberg integral.
+* `selbergIntegrand_reflect`: the reflection `t ↦ 1 - t` exchanges `a` and `b`.
 -/
 
 @[expose] public section

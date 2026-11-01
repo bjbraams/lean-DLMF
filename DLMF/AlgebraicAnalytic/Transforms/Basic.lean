@@ -18,21 +18,31 @@ DLMF §1.14 defines the Fourier, Fourier cosine and sine, Laplace, Mellin, Hilbe
 transforms. This file gives the definitions in DLMF's normalization, for complex-valued functions
 of a real variable.
 
-* `fourierTransform f x = (2π)^{-1/2} ∫ f(t) e^{ixt} dt` (1.14.1). Mathlib's Fourier transform
-  `𝓕 f w = ∫ e^{-2πitw} f(t) dt` uses the opposite sign and the frequency `w = -x/(2π)`; the bridge
-  `fourierTransform_eq_fourier` proves `fourierTransform f x = (2π)^{-1/2} 𝓕 f (-x/(2π))`.
+## Main definitions
+
+* `fourierTransform f x = (2π)^{-1/2} ∫ f(t) e^{ixt} dt` (1.14.1).
 * `fourierCosTransform`, `fourierSinTransform` (1.14.9, 1.14.10), integrals over `(0, ∞)`.
 * `fourierConvolution f g t = (2π)^{-1/2} ∫ f(t - s) g(s) ds` (1.14.5), DLMF's normalized
   convolution; Mathlib's `MeasureTheory.convolution` has no factor `(2π)^{-1/2}`.
 * `laplaceTransform f s = ∫₀^∞ e^{-st} f(t) dt` (1.14.17), `IsOfExponentialGrowth` (1.14.18)
   and the Laplace convolution `laplaceConvolution f g t = ∫₀^t f(u) g(t - u) du` (1.14.30).
-* The Mellin transform (1.14.32) is Mathlib's `mellin`, the same normalization; only the Mellin
-  convolution `mellinConvolution f g x = ∫₀^∞ f(y) g(x/y) dy/y` (1.14.39) is new.
+* `mellinConvolution f g x = ∫₀^∞ f(y) g(x/y) dy/y` (1.14.39); the Mellin transform (1.14.32)
+  itself is Mathlib's `mellin`, the same normalization.
 * `hilbertTransform f x = (1/π) P.V.∫ f(t)/(t - x) dt` (1.14.41), as the limit as `ε → 0⁺` of
-  the integrals over `|t - x| > ε` (`limUnder`, junk value when the limit does not exist).
-  Note DLMF's sign: `t - x` in the denominator, so that the Fourier multiplier is `-i sign x` in
-  DLMF's Fourier normalization (1.14.46).
+  the truncated integrals `hilbertTruncated` over `|t - x| > ε`.
 * `stieltjesTransform f s = ∫₀^∞ f(t)/(s + t) dt` (1.14.47).
+
+## Main results
+
+* `fourierTransform_eq_fourier`: `fourierTransform f x = (2π)^{-1/2} 𝓕 f (-x/(2π))`, the bridge
+  to Mathlib's Fourier transform `𝓕 f w = ∫ e^{-2πitw} f(t) dt`, which uses the opposite sign
+  and the frequency `w = -x/(2π)`.
+
+## Implementation notes
+
+The Hilbert transform is defined with `limUnder`, with a junk value when the limit does not
+exist. Note DLMF's sign: `t - x` in the denominator, so that the Fourier multiplier is
+`-i sign x` in DLMF's Fourier normalization (1.14.46).
 
 Lean totalization applies: an integral of a non-integrable function is `0`; all theorems carry
 the integrability hypotheses that DLMF leaves implicit.

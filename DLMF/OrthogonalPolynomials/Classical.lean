@@ -19,12 +19,28 @@ public import Mathlib.Analysis.SpecialFunctions.Bernstein
 /-!
 # Classical orthogonal polynomials (AAR Chapter 6)
 
-Canonical function definitions are imported from the focused Basic layer.
-
 Mathlib has the probabilists' Hermite polynomials `Polynomial.hermite` and the shifted
-Legendre polynomials `shiftedLegendre`. This file adds the physicists' Hermite polynomials,
-Laguerre, Jacobi, and Gegenbauer (ultraspherical) families, together with the standard
-hypergeometric representations (AAR §§6.1–6.4, 6.10–6.11).
+Legendre polynomials `shiftedLegendre`. This file develops the physicists' Hermite, Laguerre,
+Jacobi and Gegenbauer (ultraspherical) families, defined in
+`DLMF.OrthogonalPolynomials.Basic.Definitions`, with their standard hypergeometric
+representations (AAR §§6.1–6.4, 6.10–6.11).
+
+## Main results
+
+* `hermitePolyH_zero`, `hermitePolyH_one`, `hermitePolyH_two`, `hermitePolyH_derivative`:
+  initial values (DLMF 18.5.18) and the derivative formula DLMF 18.9.25.
+* `aeval_hermitePolyH_eq_hermite`: `H_n(x) = 2^{n/2} He_n(√2 x)`, relating to Mathlib's
+  probabilists' Hermite polynomials (DLMF 18.7.11–18.7.12).
+* `deriv_gaussian_eq_hermitePolyH`: the Rodrigues formula for `H_n`.
+* `hermitePolyH_generating_function`, `laguerrePolyL_generating_function`: the generating
+  functions DLMF 18.12.15 and 18.12.13.
+* `laguerrePolyL_eq_sum`, `laguerrePolyL_eq_sum_coeff`: explicit sums for `L_n^{(α)}`.
+* `laguerrePolyL_orthogonal`, `jacobiPolyP_orthogonal`: orthogonality of the Laguerre and
+  Jacobi polynomials (DLMF Table 18.3.1).
+* `aeval_shiftedLegendre_eq_legendrePolyP`: Mathlib's shifted Legendre polynomials in terms of
+  `legendrePolyP` (DLMF 18.7.10).
+* `eval_U_eq_ultrasphPoly`: Chebyshev `U_n = C_n^{(1)}` (DLMF 18.7.4).
+* `ultrasphPoly_eq_jacobiPolyP`: Gegenbauer polynomials as Jacobi polynomials (DLMF 18.7.1).
 -/
 
 @[expose] public section
@@ -605,10 +621,9 @@ theorem jacobi_shifted_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β)
     have hd := hdp.mul (((hddf n).mul (hdf m)).sub ((hdf n).mul (hddf m)))
     have ho (k : ℕ) : (t : ℂ) * (1 - t) * deriv (deriv (F k)) t +
         ((α : ℂ) + 1 - ((α : ℂ) + β + 2) * t) * deriv (F k) t + L k * F k t = 0 := by
-      have h := ordinaryHypergeometric_ode (a := -(k : ℂ))
+      have h := ordinaryHypergeometric_ode (a := -(k : ℂ)) (z := (t : ℂ))
         (b := (k : ℂ) + α + β + 1) hc
         (by simpa [Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht.1] using ht.2)
-        ht0 (by exact_mod_cast ne_of_lt ht.2)
       simp only [iteratedDeriv_succ, iteratedDeriv_zero] at h
       dsimp [F, L]
       linear_combination h

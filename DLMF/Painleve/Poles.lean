@@ -31,10 +31,19 @@ public import Mathlib.Tactic.ReduceModChar
 /-!
 # Poles of meromorphic Painlevé II solutions
 
-The leading-order pole analysis in Beals–Wong §15.3 follows from Mathlib's
-meromorphic orders and their behavior under differentiation and ring operations.
-Meromorphicity at the point is an explicit hypothesis; these results do not
-assert the global Painlevé property.
+The leading-order pole analysis of Painlevé II, `u'' = 2u³ + xu - c`, in Beals–Wong §15.3,
+based on Mathlib's meromorphic orders and their behavior under differentiation and ring
+operations.
+
+## Main results
+
+* `pole_order_eq_neg_one`: every pole of a meromorphic PII solution is simple.
+* `pole_analytic_factor`, `pole_residue_limit`: the residue at such a pole is `+1` or `-1`.
+
+## Implementation notes
+
+Meromorphicity at the point is an explicit hypothesis; these results do not assert the global
+Painlevé property.
 -/
 
 @[expose] public noncomputable section

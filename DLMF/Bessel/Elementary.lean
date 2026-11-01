@@ -9,7 +9,18 @@ public import DLMF.Bessel.KIntegrals
 public import DLMF.Bessel.Asymptotics
 
 /-!
-# Elementary properties of the cylinder functions (DLMF Chapter 10, Beals–Wong Ch. 9)
+# Elementary properties of the cylinder functions (DLMF Chapter 10)
+
+Half-integer orders, reflection and recurrence for the Hankel functions, bounds and positivity,
+Neumann's addition theorem, the generating function of `I_n`, leading large-argument behaviour,
+iterated derivative formulas and Poisson's integral for `I_ν`, following DLMF Chapter 10 and
+Beals–Wong Ch. 9.
+
+## Main definitions
+
+* `zRecipDeriv`: the operator `f ↦ z⁻¹ f'`.
+
+## Main results
 
 * `besselY_half`, `besselY_neg_half`, `hankelH1_half`, … : half-integer orders (DLMF 10.16.1).
 * `besselJ_neg_eq`, `hankelH1_neg`, `hankelH2_neg`: `J_{-ν} = cos(νπ) J_ν - sin(νπ) Y_ν` and
@@ -19,8 +30,8 @@ public import DLMF.Bessel.Asymptotics
 * `hasSum_besselJ_add`: Neumann's addition theorem (DLMF 10.23.3), from Bessel's integral.
 * `besselI_int_eq`, `hasSum_besselI_generating_function`, `hasSum_besselI_cos`: `I_n(z) =
   (-i)ⁿ J_n(iz)`, the generating function (DLMF 10.35.1) and `e^{z cos θ}` (DLMF 10.35.3).
-* `besselI_ofReal_pos`, `besselK_neg`, `besselK_ofReal_pos`: `I_ν(x) > 0` for `ν > -1`,
-  `K_{-ν} = K_ν` (DLMF 10.27.3), and `K_ν(x) > 0` for every real `ν`, for `x > 0`.
+* `besselI_ofReal_pos`, `besselK_ofReal_pos`: `I_ν(x) > 0` for `ν > -1`, and `K_ν(x) > 0` for
+  every real `ν`, for `x > 0`.
 * `hankelH1_sub_exp_isBigO`, `besselY_sub_sin_isBigO`: leading large-`x` behaviour of `H^{(1)}_ν`
   and `Y_ν` (DLMF 10.7.8).
 * `iterate_zRecipDeriv_cpow_mul_besselJ`, `iterate_zRecipDeriv_cpow_neg_mul_besselJ`: the iterated
@@ -284,7 +295,7 @@ theorem besselI_int_eq (n : ℤ) (z : ℂ) : besselI n z = (-I) ^ n * besselJ n 
   obtain ⟨n, rfl | rfl⟩ := Int.eq_nat_or_neg n
   · rw [Int.cast_natCast, zpow_natCast, besselI_nat_eq]
   · have hI := besselI_neg_int (n : ℤ) z
-    have hJ := besselJ_neg_int (n : ℤ) (I * z)
+    have hJ := Complex.besselJ_neg_int (n : ℤ) (I * z)
     push_cast at hI hJ ⊢
     rw [hI, hJ, besselI_nat_eq]
     simp only [zpow_neg, zpow_natCast]

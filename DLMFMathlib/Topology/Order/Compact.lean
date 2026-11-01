@@ -14,9 +14,15 @@ public import Mathlib.Tactic.Ring
 /-!
 # Compact regions between continuous graphs
 
-The region between two ordered continuous real-valued functions over a compact base is
-compact, as the continuous image of the base times the unit interval. No separation or
-metrizability assumption is needed on the base space.
+## Main results
+
+* `IsCompact.setOf_mem_Icc`: the region between two ordered continuous real-valued
+  functions over a compact base is compact.
+
+## Implementation notes
+
+The region is the continuous image of the base times the unit interval. No separation or
+metrizability assumption is needed on the base space, and the two bounds may coincide.
 -/
 
 @[expose] public section

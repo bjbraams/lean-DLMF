@@ -10,11 +10,20 @@ public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
 public import Mathlib.Analysis.Calculus.Deriv.Basic
 
 /-!
-# Airy functions and their differential equation: definitions
+# Airy functions: definitions
 
-The regularized hypergeometric series define `Ai`, `Bi`, their derivative functions and
-solutions of Airy's equation. Differential, initial-value and connection properties are
+The Airy functions `Ai` and `Bi` and their derivatives, defined through regularized
+hypergeometric series `₀F̃₁` (DLMF §9.4; Beals–Wong (9.9.4)), and the predicate for solutions
+of Airy's equation `w'' = z w`. Differential, initial-value and connection properties are
 proved in `DLMF.Airy.Properties`.
+
+## Main definitions
+
+* `airyF`, `airyG`, `airyFDeriv`, `airyGDeriv`: the two basic Maclaurin series and their
+  derivatives.
+* `airyAi`, `airyAiDeriv`: `Ai` and `Ai'` (DLMF 9.4.1, 9.4.2).
+* `airyBi`, `airyBiDeriv`: `Bi` and `Bi'` (DLMF 9.4.3, 9.4.4).
+* `IsAirySol`: `w, w'` solve Airy's equation on all of `ℂ`.
 -/
 
 @[expose] public noncomputable section

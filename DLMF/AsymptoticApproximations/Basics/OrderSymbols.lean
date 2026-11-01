@@ -17,12 +17,29 @@ public import DLMFMathlib.Analysis.Complex.Sector
 
 The definitions 2.1.1–2.1.3 of `∼`, `o` and `O` are Mathlib's `Asymptotics.IsEquivalent`,
 `Asymptotics.IsLittleO` and `Asymptotics.IsBigO` (pointers in
-`DLMF.AsymptoticApproximations.Basics.MathlibCoverage`). This file proves the examples
-2.1.4–2.1.9, states the integration rules 2.1.11–2.1.12 and Ritt's theorem (§2.1(ii)), and
-develops the Poincaré expansions of §2.1(iii)–(iv) and the generalized expansions of §2.1(v):
-the characterization 2.1.15, convergent series as asymptotic expansions, the algebra of
-expansions (through the project's `Asymptotics.HasAsymptoticPowerSeries`), uniqueness, null
-expansions 2.1.17, and the explicit form of uniformity 2.1.18.
+`DLMF.AsymptoticApproximations.Basics.MathlibCoverage`). This file has the examples
+2.1.4–2.1.9, the integration rules 2.1.11–2.1.12, Ritt's theorem, and the Poincaré and
+generalized expansions of §2.1(iii)–(v).
+
+## Main results
+
+* `tanh_isEquivalent_id`, `exp_neg_isLittleO_one`, `cexp_neg_isLittleO_one_sector`,
+  `sin_pi_mul_add_inv_isBigO`, `cexp_mul_I_isBigO_one`, `tsum_tail_isBigO_pow`,
+  `cexp_sub_one_sub_isBigO_sq`: the examples 2.1.4–2.1.9.
+* `integral_Ioi_isEquivalent_of_isEquivalent_cpow`, `intervalIntegral_isEquivalent_cpow`,
+  `intervalIntegral_isEquivalent_log`, `exists_tendsto_intervalIntegral_of_isEquivalent_cpow`:
+  integration of asymptotic relations (DLMF 2.1.11–2.1.12).
+* `ritt_isBigO`, `ritt_isLittleO`: Ritt's theorem (§2.1(ii)).
+* `hasPoincareExpansion_iff_tendsto`: the characterization 2.1.15.
+* `hasPoincareExpansion_of_hasSum`: convergent series are asymptotic expansions.
+* `HasPoincareExpansion.add`, `HasPoincareExpansion.mul`, `HasPoincareExpansion.inv`,
+  `HasPoincareExpansion.pow`, `HasPoincareExpansion.unique`: the algebra and uniqueness of
+  Poincaré expansions (§2.1(iii)), through the project's
+  `Asymptotics.HasAsymptoticPowerSeries`.
+* `hasPoincareExpansion_zero`, `hasPoincareExpansion_cexp_neg`,
+  `exists_hasPoincareExpansion_sector`: null expansions (DLMF 2.1.17).
+* `hasUniformPoincareExpansion_iff`: the explicit form of uniformity (DLMF 2.1.18, §2.1(iv)).
+* `hasGeneralizedAsymptoticExpansion_convergent_ne`: generalized expansions (§2.1(v)).
 -/
 
 @[expose] public noncomputable section
@@ -220,14 +237,14 @@ private lemma eventually_norm_sector_iff (S : Set ℂ) (P : ℂ → Prop) :
 /-- The Cauchy estimate has a constant independent of the size of the eventual power
 bound, so the same estimate handles both big-O and little-o. -/
 private lemma ritt_derivative_bound {f : ℂ → ℂ} {θ ω ω' R ν : ℝ}
-    (hω : ω ≤ π) (hω' : 0 ≤ ω') (hωω' : ω' < ω)
+    (hω : ω ≤ π) (hωω' : ω' < ω)
     (hf : DifferentiableOn ℂ f (rittSector θ ω R)) :
     ∃ K > 0, ∀ B : ℝ, 0 ≤ B →
       (∀ᶠ z in comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 (rittSector θ ω R),
         ‖f z‖ ≤ B * ‖z‖ ^ ν) →
       ∀ᶠ z in comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 (rittClosedSector θ ω'),
         ‖deriv f z‖ ≤ K * B * ‖z‖ ^ (ν - 1) := by
-  obtain ⟨K, hK, hder⟩ := Complex.exists_pos_norm_deriv_le_of_sector_bound hω hω' hωω' θ ν
+  obtain ⟨K, hK, hder⟩ := Complex.exists_pos_norm_deriv_le_of_sector_bound hω hωω' θ ν
   refine ⟨K, hK, fun B hB hbound => ?_⟩
   obtain ⟨A, hA⟩ := (eventually_norm_sector_iff _ _).mp hbound
   refine (eventually_norm_sector_iff _ _).mpr ⟨2 * max (max A R) 0 + 1, fun z hz harg => ?_⟩
@@ -242,12 +259,12 @@ private lemma ritt_derivative_bound {f : ℂ → ℂ} {θ ω ω' R ν : ℝ}
 `|z^ν| = |z|^ν`), then `f'(z) = O(z^{ν-1})` as `z → ∞` in every closed sector
 `|ph(z e^{-iθ})| ≤ ω'`, `ω' < ω`, properly interior to `𝐒` with the same vertex. -/
 @[dlmf 2.1.ii]
-theorem ritt_isBigO {f : ℂ → ℂ} {θ ω ω' R ν : ℝ} (hω : ω ≤ π) (hω' : 0 ≤ ω') (hωω' : ω' < ω)
+theorem ritt_isBigO {f : ℂ → ℂ} {θ ω ω' R ν : ℝ} (hω : ω ≤ π) (hωω' : ω' < ω)
     (hf : DifferentiableOn ℂ f (rittSector θ ω R))
     (hfν : f =O[comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 (rittSector θ ω R)] fun z => ‖z‖ ^ ν) :
     deriv f =O[comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 (rittClosedSector θ ω')]
       fun z => ‖z‖ ^ (ν - 1) := by
-  obtain ⟨K, hK, hb⟩ := ritt_derivative_bound (ν := ν) hω hω' hωω' hf
+  obtain ⟨K, hK, hb⟩ := ritt_derivative_bound (ν := ν) hω hωω' hf
   obtain ⟨C, hC, hbound⟩ := hfν.exists_pos
   refine IsBigO.of_bound (K * C) ?_
   have h := hb C hC.le (by
@@ -258,12 +275,12 @@ theorem ritt_isBigO {f : ℂ → ℂ} {θ ω ω' R ν : ℝ} (hω : ω ≤ π) (
 
 /-- DLMF §2.1(ii): Ritt's theorem with both `O`'s replaced by `o`'s. -/
 @[dlmf 2.1.ii]
-theorem ritt_isLittleO {f : ℂ → ℂ} {θ ω ω' R ν : ℝ} (hω : ω ≤ π) (hω' : 0 ≤ ω')
+theorem ritt_isLittleO {f : ℂ → ℂ} {θ ω ω' R ν : ℝ} (hω : ω ≤ π)
     (hωω' : ω' < ω) (hf : DifferentiableOn ℂ f (rittSector θ ω R))
     (hfν : f =o[comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 (rittSector θ ω R)] fun z => ‖z‖ ^ ν) :
     deriv f =o[comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 (rittClosedSector θ ω')]
       fun z => ‖z‖ ^ (ν - 1) := by
-  obtain ⟨K, hK, hb⟩ := ritt_derivative_bound (ν := ν) hω hω' hωω' hf
+  obtain ⟨K, hK, hb⟩ := ritt_derivative_bound (ν := ν) hω hωω' hf
   refine IsLittleO.of_bound fun ε hε => ?_
   have he : 0 < ε / K := div_pos hε hK
   have h := hb (ε / K) he.le (by
@@ -280,18 +297,18 @@ section Poincare
 variable {𝕜 E : Type*} [NormedField 𝕜] [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 
 /-- Nonvanishing under the stated hypotheses: `∀ᶠ x in cobounded 𝕜 ⊓ 𝓟 X, x ≠ 0`. -/
-private lemma g2a_eventually_ne_zero (X : Set 𝕜) :
+private lemma eventually_ne_zero_cobounded_inf_principal (X : Set 𝕜) :
     ∀ᶠ x in cobounded 𝕜 ⊓ 𝓟 X, x ≠ 0 :=
   (eventually_ne_cobounded (0 : 𝕜)).filter_mono inf_le_left
 
 /-- Identity under the stated parameter and domain assumptions: `PowerSeries.mk (fun n =>
 PowerSeries.coeff n P) = P`. -/
-private lemma g2a_mk_coeff (P : PowerSeries 𝕜) :
+private lemma powerSeries_mk_coeff (P : PowerSeries 𝕜) :
     PowerSeries.mk (fun n => PowerSeries.coeff n P) = P :=
   PowerSeries.ext fun n => by simp
 
 /-- The map `(fun x : 𝕜 => x⁻¹)` tends to `(𝓝 0)` along `(cobounded 𝕜 ⊓ 𝓟 X)`. -/
-private lemma g2a_tendsto_inv (X : Set 𝕜) :
+private lemma tendsto_inv_cobounded_inf_principal (X : Set 𝕜) :
     Tendsto (fun x : 𝕜 => x⁻¹) (cobounded 𝕜 ⊓ 𝓟 X) (𝓝 0) :=
   tendsto_inv₀_cobounded.mono_left inf_le_left
 
@@ -303,7 +320,7 @@ theorem hasPoincareExpansion_iff_tendsto {X : Set 𝕜} {a : ℕ → E} {f : �
       ∀ n : ℕ, Tendsto (fun x => x ^ n • poincareRemainder a f n x) (cobounded 𝕜 ⊓ 𝓟 X)
         (𝓝 (a n)) := by
   set l := cobounded 𝕜 ⊓ 𝓟 X
-  have hne := g2a_eventually_ne_zero X
+  have hne := eventually_ne_zero_cobounded_inf_principal X
   have hrec : ∀ n x, poincareRemainder a f n x =
       x⁻¹ ^ n • a n + poincareRemainder a f (n + 1) x := fun n x => by
     simp only [poincareRemainder, sum_range_succ]; abel
@@ -316,7 +333,7 @@ theorem hasPoincareExpansion_iff_tendsto {X : Set 𝕜} {a : ℕ → E} {f : �
       rw [smul_eq_mul, inv_pow, pow_succ, mul_inv, ← mul_assoc, mul_inv_cancel₀ (pow_ne_zero _ hx),
         one_mul]
     have h2 : Tendsto (fun x => x ^ n • poincareRemainder a f (n + 1) x) l (𝓝 0) :=
-      h1.trans_tendsto (g2a_tendsto_inv X)
+      h1.trans_tendsto (tendsto_inv_cobounded_inf_principal X)
     have h3 := h2.const_add (a n)
     rw [add_zero] at h3
     refine h3.congr' ?_
@@ -349,7 +366,7 @@ theorem hasPoincareExpansion_of_hasSum {a : ℕ → ℂ} {f : ℂ → ℂ} {R : 
           rw [lt_inv_comm₀ hR' (norm_pos_iff.mpr hz0)]; exact hz
         linarith [le_max_left R 0]
       simpa using (hf z⁻¹ hlt).summable
-  have h8 := (tsum_tail_isBigO_pow hsum n).comp_tendsto (g2a_tendsto_inv (𝕜 := ℂ) Set.univ)
+  have h8 := (tsum_tail_isBigO_pow hsum n).comp_tendsto (tendsto_inv_cobounded_inf_principal (𝕜 := ℂ) Set.univ)
   refine (h8.congr' ?_ (Eventually.of_forall fun x => rfl))
   have hev : ∀ᶠ x in cobounded ℂ ⊓ 𝓟 Set.univ, R < ‖x‖ :=
     ((tendsto_norm_cobounded_atTop).eventually (eventually_gt_atTop R)).filter_mono inf_le_left
@@ -388,7 +405,7 @@ theorem HasPoincareExpansion.mul {X : Set 𝕜} {a b : ℕ → 𝕜} {f g : 𝕜
     HasPoincareExpansion X (fun n => PowerSeries.coeff n (PowerSeries.mk a * PowerSeries.mk b))
       (fun x => f x * g x) := by
   rw [hasPoincareExpansion_iff_hasAsymptoticPowerSeries] at hf hg ⊢
-  rw [g2a_mk_coeff]; exact hf.mul (g2a_tendsto_inv X) hg
+  rw [powerSeries_mk_coeff]; exact hf.mul (tendsto_inv_cobounded_inf_principal X) hg
 
 /-- DLMF §2.1(iii): division (reciprocal) of a Poincaré expansion with `a₀ ≠ 0`; the
 coefficients are those of the reciprocal formal series. -/
@@ -398,7 +415,7 @@ theorem HasPoincareExpansion.inv {X : Set 𝕜} {a : ℕ → 𝕜} {f : 𝕜 →
     HasPoincareExpansion X (fun n => PowerSeries.coeff n (PowerSeries.mk a)⁻¹)
       (fun x => (f x)⁻¹) := by
   rw [hasPoincareExpansion_iff_hasAsymptoticPowerSeries] at hf ⊢
-  rw [g2a_mk_coeff]; exact hf.recip (g2a_tendsto_inv X) (by simpa using ha)
+  rw [powerSeries_mk_coeff]; exact hf.recip (tendsto_inv_cobounded_inf_principal X) (by simpa using ha)
 
 /-- DLMF §2.1(iii): natural powers of a Poincaré expansion. -/
 @[dlmf 2.1.iii]
@@ -407,7 +424,7 @@ theorem HasPoincareExpansion.pow {X : Set 𝕜} {a : ℕ → 𝕜} {f : 𝕜 →
     HasPoincareExpansion X (fun n => PowerSeries.coeff n (PowerSeries.mk a ^ m))
       (fun x => f x ^ m) := by
   rw [hasPoincareExpansion_iff_hasAsymptoticPowerSeries] at hf ⊢
-  rw [g2a_mk_coeff]; exact hf.pow (g2a_tendsto_inv X) m
+  rw [powerSeries_mk_coeff]; exact hf.pow (tendsto_inv_cobounded_inf_principal X) m
 
 /-- DLMF §2.1(iii): uniqueness of Poincaré expansions (2.1.14) as `x → ∞` in an unbounded
 set `𝐗`. -/
@@ -417,10 +434,10 @@ theorem HasPoincareExpansion.unique {X : Set 𝕜} {a b : ℕ → E} {f : 𝕜 �
     (hb : HasPoincareExpansion X b f) : a = b := by
   refine HasAsymptoticExpansion.unique ?_ (fun n => ?_) ha hb
   · intro n
-    have h := (isLittleO_one_iff 𝕜).mpr (g2a_tendsto_inv (𝕜 := 𝕜) X)
+    have h := (isLittleO_one_iff 𝕜).mpr (tendsto_inv_cobounded_inf_principal (𝕜 := 𝕜) X)
     have := h.mul_isBigO (isBigO_refl (fun x : 𝕜 => x⁻¹ ^ n) (cobounded 𝕜 ⊓ 𝓟 X))
     simpa [pow_succ, mul_comm] using this
-  · exact ((g2a_eventually_ne_zero X).mono fun x hx => pow_ne_zero n (inv_ne_zero hx)).frequently
+  · exact ((eventually_ne_zero_cobounded_inf_principal X).mono fun x hx => pow_ne_zero n (inv_ne_zero hx)).frequently
 
 /-- DLMF 2.1.16 (uniqueness, §2.1(iii)): expansions at a finite point `c` are unique when `c`
 is a limit point of `𝐗`. -/

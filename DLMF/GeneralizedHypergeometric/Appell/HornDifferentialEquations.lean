@@ -9,11 +9,17 @@ public import DLMF.GeneralizedHypergeometric.Appell.SeriesAndDifferentialEquatio
 public import DLMFMathlib.Analysis.Complex.BivariateCalculus
 
 /-!
-# Horn differential equations
+# Horn differential equations (DLMF §16.14(ii))
 
-The gamma-ratio coefficients of Horn G2 and G3 satisfy elementary shift recurrences.
-Normal convergence and the bivariate series differentiation framework turn these
-recurrences into the Euler-operator differential systems of DLMF 16.14(ii).
+The Gamma-ratio coefficients of Horn's `G₂` and `G₃` satisfy elementary shift recurrences.
+Normal convergence and the bivariate series differentiation framework turn these recurrences
+into the Euler-operator differential systems of DLMF §16.14(ii).
+
+## Main results
+
+* `hornG2_second_order_pde`, `hornG3_second_order_pde`: the systems for `G₂` and `G₃` on
+  `‖x‖ + ‖y‖ < 1/4`, for nonintegral parameters.
+* `hornG2_G3_second_order_pde`: both systems together.
 
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
 -/
@@ -244,7 +250,7 @@ private lemma horn_series_local_data (c : ℕ × ℕ → ℂ)
     simpa only [norm_mul, norm_pow, Complex.norm_real, Real.norm_eq_abs,
       abs_of_nonneg hA0, abs_of_nonneg hB0] using hSab
   refine ⟨A, B, hA, hB, hCN, ?_⟩
-  exact (ghaR4_double_series_hasSum_analytic c {p : ℂ × ℂ | ‖p.1‖ < A ∧ ‖p.2‖ < B}
+  exact (hasSum_and_analyticOnNhd_doubleSeries c {p : ℂ × ℂ | ‖p.1‖ < A ∧ ‖p.2‖ < B}
     (fun p hp => ⟨A, B, hp.1, hp.2, hCN⟩)).2 (x, y) ⟨hA, hB⟩
 
 /-- Horn G2 satisfies its two Euler-operator differential equations on the small diamond
@@ -266,8 +272,8 @@ theorem hornG2_second_order_pde (a a' b b' : ℂ) (ha : ∀ k : ℤ, a ≠ k) (h
   have hSc : ∀ z w : ℂ, ‖z‖+‖w‖ < (1 / 4 : ℝ) →
       Summable (fun q => c q * z ^ q.1 * w ^ q.2) := by
     intro z w hzw
-    exact hornG2_summable a a' b b' (ghaR4_regular_of_nonint ha)
-      (ghaR4_regular_of_nonint ha') hb hb' (by
+    exact hornG2_summable a a' b b' (ne_neg_nat_of_ne_int ha)
+      (ne_neg_nat_of_ne_int ha') hb hb' (by
         constructor <;> have := norm_nonneg z <;> have := norm_nonneg w <;> linarith)
   obtain ⟨A, B, hA, hB, hC, hf⟩ := horn_series_local_data c hSc hxy
   change AnalyticAt ℂ (Function.uncurry f) (x, y) at hf

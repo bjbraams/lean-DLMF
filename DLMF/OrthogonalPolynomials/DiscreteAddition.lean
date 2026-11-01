@@ -10,10 +10,26 @@ public import DLMF.OrthogonalPolynomials.Hahn
 /-!
 # Addition formulas for discrete classical polynomials
 
-Beals–Wong §6.3–§6.5, in the normalizations of the existing Charlier, Meixner,
-and Krawtchouk definitions. Formal generating series prove the identities for complex
-polynomial arguments without analytic convergence restrictions. The binomial-series
-product is the existing Chu–Vandermonde identity; no new summability assumptions enter.
+Addition and convolution formulas for the Charlier, Meixner and Krawtchouk polynomials
+(Beals–Wong §§6.3–6.5), in the normalizations of the project's definitions of these families.
+
+## Main definitions
+
+* `charlierSeries`, `meixnerSeries`, `krawtchoukSeries`: formal generating series of the
+  Charlier, Meixner and Krawtchouk polynomials.
+
+## Main results
+
+* `charlier_addition`, `charlier_addition_convolution`: the Charlier translation and convolution
+  formulas, Beals–Wong (6.3.11) and (6.3.10).
+* `meixner_addition`: the Meixner addition formula, Beals–Wong (6.5.11).
+* `krawtchouk_addition`: the Krawtchouk convolution, Beals–Wong (6.4.12).
+
+## Implementation notes
+
+Formal generating series give the identities for complex polynomial arguments without
+analytic convergence restrictions. The product of binomial series is the Chu–Vandermonde
+identity `binomSeries_mul`; no summability assumptions enter.
 -/
 
 @[expose] public noncomputable section

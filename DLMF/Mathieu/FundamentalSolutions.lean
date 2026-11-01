@@ -7,9 +7,9 @@ module
 
 public import DLMF.Mathieu.Basic
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-public import DLMFMathlib.Analysis.ODE.P1oEntireLinear
-public import DLMFMathlib.Analysis.ODE.P1oParamHolomorphic
-public import DLMFMathlib.Analysis.ODE.P2sSturmSpectrum
+public import DLMFMathlib.Analysis.ODE.EntireLinear
+public import DLMFMathlib.Analysis.ODE.ParamHolomorphic
+public import DLMFMathlib.Analysis.ODE.SturmSpectrum
 public import Mathlib.Tactic.Echelon.Zsqrtd
 public import Mathlib.Tactic.Inclusion.Extension.Core.Core
 public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
@@ -31,6 +31,28 @@ public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Existence, uniqueness and normalization of fundamental Mathieu solutions
+
+Mathieu's equation `w'' + (a - 2 q cos 2z) w = 0` (DLMF 28.2.1) is a linear ODE with entire
+coefficients. This file proves that its solutions form a vector space of entire functions, that
+a solution is determined by its value and derivative at one point, and that solutions with
+arbitrary initial data exist (DLMF §28.2(ii)). It characterizes the basic solutions `w_I`, `w_II`
+of DLMF 28.2.5 and shows that the Mathieu functions `ce_n`, `se_n`, `fe_n`, `ge_n` solve the
+equation with the appropriate characteristic values.
+
+## Main results
+
+* `IsMathieuSolution.const_mul`, `IsMathieuSolution.add`: solutions form a vector space.
+* `IsMathieuSolution.eq_of_initial`: uniqueness from initial data (DLMF §28.2(ii)).
+* `exists_isMathieuSolution`: existence for arbitrary initial data (DLMF §28.2(ii)).
+* `mathieuWI_spec`, `mathieuWII_spec`, `isMathieuSolution_mathieuWI`,
+  `isMathieuSolution_mathieuWII`: the basic solutions `w_I`, `w_II` (DLMF 28.2.5).
+* `IsMathieuSolution.eq_combination`: every solution is `w(0) w_I + w'(0) w_II`.
+* `isMathieuSolution_mathieuCe`, `isMathieuSolution_mathieuSe`: `ce_n` and `se_n` solve the
+  equation with `a = a_n(q)` and `a = b_n(q)`.
+* `isMathieuSolution_mathieuFe`, `isMathieuSolution_mathieuGe`: the second solutions `fe_n` and
+  `ge_n` (DLMF 28.5.1, 28.5.2).
+* `mathieuCe_zero`, `deriv_mathieuSe_zero`: the normalizing factors `ce_n(0, q)` and
+  `se_n'(0, q)`.
 -/
 
 @[expose] public noncomputable section

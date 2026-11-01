@@ -8,12 +8,21 @@ module
 public import DLMF.Hypergeometric.Identities.Dixon
 
 /-!
-# Whipple transformations and related finite sums
+# Whipple's transformation, Dougall's sum and the complete elliptic integral
 
-Terminating Whipple transformations and the related finite hypergeometric identities.
+## Main definitions
 
-Source references and common attribution are retained in
-`DLMF.Hypergeometric.Identities`.
+* `compEllIntKkSeries`: `K(k) = (π/2) ₂F₁(1/2,1/2;1;k²)`, AAR §3.2 (DLMF 19.5.1).
+
+## Main results
+
+* `whipple_7F6`: Whipple's terminating very-well-poised `₇F₆(1)` transformation into a balanced
+  `₄F₃(1)`, DLMF 16.4.15 (AAR Theorem 3.4.4).
+* `dougall_bilateral`: Dougall's bilateral `₂H₂` sum in Gamma form, DLMF 15.4.25 and 16.4.17
+  (AAR Theorem 2.8.2).
+* `compEllIntKkSeries_eq_integral`: the integral form of `K(k)`, DLMF 19.2.4.
+
+See `DLMF.Hypergeometric.Identities` for the overview.
 -/
 
 @[expose] public section
@@ -261,7 +270,7 @@ private lemma whipple_qpoch_eventually_ne (a : ℂ) (k : ℕ) (ha : poch a k ≠
 /-- Whipple's terminating very well-poised `₇F₆(1)` transformation into a balanced
 `₄F₃(1)`, AAR Theorem 3.4.4 and the terminating case of DLMF 16.4.15.
 The proof takes the complex-parameter exponential-base limit of the proved rational
-Watson transformation `DLMF.Bailey.watsonR`. -/
+Watson transformation `DLMF.Bailey.watson_transformation_rational`. -/
 @[dlmf 16.4.E15]
 theorem whipple_7F6 {a b c d e : ℂ} (m : ℕ)
     (hden : ∀ z ∈ [a / 2, a - b + 1, a - c + 1, a - d + 1,
@@ -335,7 +344,7 @@ theorem whipple_7F6 {a b c d e : ℂ} (m : ℕ)
       ∑ k ∈ Finset.range (m+1),DLMF.Bailey.watsonR4
         (exp (a*t)) (exp (b*t)) (exp (c*t)) (exp (d*t)) (exp (e*t)) (exp t) m k) := by
     filter_upwards [hQB,hQC,hQD,hQE,hQN,hQY,hQQ] with t hB hC hD hE hN hY hQ
-    refine DLMF.Bailey.watsonR m (exp_ne_zero _) (exp_ne_zero _) (exp_ne_zero _)
+    refine DLMF.Bailey.watson_transformation_rational m (exp_ne_zero _) (exp_ne_zero _) (exp_ne_zero _)
       (exp_ne_zero _) (exp_ne_zero _) (exp_ne_zero _) (fun k hk => hQ k (by simpa using hk))
       ?_ ?_ ?_ ?_ ?_ ?_
     · simpa only [whipple_exp_param] using hB

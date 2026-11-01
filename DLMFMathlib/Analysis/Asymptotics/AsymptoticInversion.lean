@@ -44,7 +44,7 @@ An equation `F(x) = T` with `F(x) ~ x (1 + ∑_{n≥1} cₙ x⁻ⁿ)` is the cas
 * `HasAsymptoticPowerSeries.comp`: composition `H ∘ y ~ P.subst Q`.
 * `HasAsymptoticPowerSeries.analytic_comp`: composition with an analytic function.
 * `HasAsymptoticPowerSeries.inversion`: asymptotic inversion.
-* `HasAsymptoticPowerSeries.mcMahon`, `hasAsymptoticPowerSeries_mcMahon_atTop`: McMahon-type
+* `HasAsymptoticPowerSeries.mcMahon_inversion`, `hasAsymptoticPowerSeries_mcMahon_atTop`: McMahon-type
   inversion `x = T + ∑ dₙ T⁻ⁿ`; `mcMahonSeries_spec`: the formal fixed-point identity.
 * `hasAsymptoticPowerSeries_recip_iff`: translation to the scale `ξ^{-n}` of
   `HasAsymptoticExpansion`.
@@ -375,7 +375,7 @@ namespace HasAsymptoticPowerSeries
 `ξ (y a) + G (y a) = T a` eventually, then
 `ξ (y a) - T a ~ ∑ dₙ (T a)⁻ⁿ` with `d = mcMahonSeries C`, with `O(T⁻ᴺ)` error bounds for
 every `N`. The constant term `c₀` (a phase shift) is allowed. -/
-theorem mcMahon {m : Filter β} {ξ G : β → 𝕜} {C : 𝕜⟦X⟧}
+theorem mcMahon_inversion {m : Filter β} {ξ G : β → 𝕜} {C : 𝕜⟦X⟧}
     (hξ : Tendsto (fun b => (ξ b)⁻¹) m (𝓝 0)) (hξ0 : ∀ᶠ b in m, ξ b ≠ 0)
     (hG : HasAsymptoticPowerSeries m (fun b => (ξ b)⁻¹) C G) {y : α → β} (hy : Tendsto y l m)
     {T : α → 𝕜} (heq : ∀ᶠ a in l, ξ (y a) + G (y a) = T a) :
@@ -550,7 +550,7 @@ theorem hasAsymptoticPowerSeries_mcMahon_atTop {G : ℝ → ℝ} {C : ℝ⟦X⟧
     (hG : HasAsymptoticPowerSeries atTop (fun x => x⁻¹) C G) {y : α → ℝ}
     (hy : Tendsto y l atTop) {T : α → ℝ} (heq : ∀ᶠ a in l, y a + G (y a) = T a) :
     HasAsymptoticPowerSeries l (fun a => (T a)⁻¹) (mcMahonSeries C) (fun a => y a - T a) :=
-  hG.mcMahon (ξ := id) tendsto_inv_atTop_zero (eventually_ne_atTop 0) hy heq
+  hG.mcMahon_inversion (ξ := id) tendsto_inv_atTop_zero (eventually_ne_atTop 0) hy heq
 
 section Analytic
 

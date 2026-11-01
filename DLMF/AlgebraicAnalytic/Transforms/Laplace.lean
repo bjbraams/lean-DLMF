@@ -21,20 +21,28 @@ public import Mathlib.Topology.EMetricSpace.BoundedVariation
 
 Statements of DLMF §1.14(iii) for `laplaceTransform f s = ∫₀^∞ e^{-st} f(t) dt` (1.14.17).
 
+## Main results
+
+* `integrableOn_laplace_integrand`, `differentiableOn_laplaceTransform`: absolute convergence
+  and analyticity for `ℜs > α`.
+* `tendsto_laplaceTransform_re_atTop`: `𝓛(f)(s) → 0` as `ℜs → ∞` (DLMF 1.14.19).
+* `tendsto_laplaceTransform_inversion`, `laplaceTransform_inversion_of_isBigO`: Bromwich
+  inversion (DLMF 1.14.20).
+* `laplaceTransform_sub`, `laplaceTransform_heaviside_shift`: translation (DLMF 1.14.21–1.14.22).
+* `iteratedDeriv_laplaceTransform`: differentiation of every order (DLMF 1.14.23).
+* `integral_laplaceTransform_ray`: integration (DLMF 1.14.24).
+* `laplaceTransform_of_periodic`, `laplaceTransform_of_antiperiodic`: DLMF 1.14.25–1.14.26.
+* `laplaceTransform_deriv`, `laplaceTransform_deriv_of_jumps`, `laplaceTransform_iteratedDeriv`:
+  transforms of derivatives (DLMF 1.14.27–1.14.29).
+* `laplaceTransform_laplaceConvolution`: the convolution theorem (DLMF 1.14.31).
+* `eqOn_of_laplaceTransform_eq`: uniqueness (Lerch).
+
+## Implementation notes
+
 DLMF assumes throughout that `f` is piecewise continuous on `[0, ∞)` and of exponential growth
 (1.14.18) with exponent `α`, and `ℜs > α`. Here "piecewise continuous" is replaced by the weaker
 `LocallyIntegrableOn f (Ici 0)` wherever that suffices (stronger than DLMF), and the exponential
 growth is the predicate `IsOfExponentialGrowth f α`.
-
-Proved: absolute convergence, analyticity and decay for `ℜs > α` (§1.14(iii), 1.14.19),
-the translation rules 1.14.21–1.14.22, and differentiation of every order (1.14.23).
-Analyticity uses the project’s dominated-holomorphy theorem, and differentiation uses Mathlib’s
-`hasDerivAt_integral_of_dominated_loc_of_deriv_le`. Admitted: inversion 1.14.20, integration
-1.14.24, derivatives with jumps 1.14.28, and uniqueness. The convolution theorem 1.14.31
-is proved from Mathlib’s `MeasureTheory.integral_convolution` by extension by zero.
-The periodic and antiperiodic rules 1.14.25–1.14.26 and the derivative rules 1.14.27 and
-1.14.29 are proved by splitting the half-line integral and by Mathlib’s improper-integral
-fundamental theorem `integral_Ioi_of_hasDerivAt_of_tendsto`.
 -/
 
 @[expose] public noncomputable section

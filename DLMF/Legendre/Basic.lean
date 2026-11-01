@@ -9,4 +9,7 @@ public import DLMF.Legendre.Basic.Functions
 
 /-!
 # Definitions of Legendre and Ferrers functions
+
+This entry point collects the foundational definitions of the Legendre function `P_ν` and the
+Ferrers function `𝖯^μ_ν` in the hypergeometric normalization of DLMF §14.3.
 -/

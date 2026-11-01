@@ -8,12 +8,37 @@ module
 public import DLMF.Gamma.Asymptotics.Stirling
 
 /-!
-# Shifted complex Stirling expansions
+# Shifted Stirling expansion and Gamma ratios (DLMF 5.11.8, 5.11.13–5.11.15)
 
-Complex Laplace representations and exponentiation of the shifted Stirling expansion.
+The expansion of `ln Γ(t + a)` in powers of `1/t` with Bernoulli-polynomial coefficients, from
+the Laplace form of Binet's function and Watson's lemma, and its exponentiation to the
+all-order expansion of `Γ(t + a)/Γ(t + b)`.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.Asymptotics`.
+## Main definitions
+
+* `HasSeriesAtZero`: `f(s) = ∑_{n<N} cₙ sⁿ + O(s^N)` as `s → 0⁺`, for every `N`.
+* `stirlingLogPart`, `stirlingLogCoeff`: the elementary part
+  `(t + a - 1/2)(log(t + a) - log t) - a` and its coefficients.
+* `stirlingShiftCoeff`: the coefficients `(-1)ⁿ B_{n+2}(a)/((n+1)(n+2))` of DLMF 5.11.8.
+* `stirlingShiftRem`: the shifted Stirling remainder.
+
+## Main results
+
+* `binetMu_eq_laplace`: the Laplace form `μ(w) = ∫₀^∞ e^{-ws} β(s)/s ds` for `Re w > 0`
+  (Temme (3.27)).
+* `hasAsymptoticExpansion_binetMu_add`: Watson's lemma for `μ(t + a)`.
+* `hasAsymptoticExpansion_stirlingShiftRem`: the shifted Stirling expansion of `ln Γ(t + a)`
+  (DLMF 5.11.8).
+* `isBigO_cexp_sub_of_hasAsymptoticExpansion`: exponentiation of an asymptotic expansion in
+  powers of `1/t`.
+* `stirlingRatioG_zero`, `stirlingRatioG_recurrence`: the coefficients `Gₙ(a, b)` of
+  DLMF 5.11.15.
+* `Gamma_ratio_expansion`: the all-order expansion of `Γ(t + a)/Γ(t + b)` along the positive
+  real axis (DLMF 5.11.13).
+
+## References
+
+* N. M. Temme, *Special Functions*, Wiley, 1996, §3.
 -/
 
 @[expose] public section

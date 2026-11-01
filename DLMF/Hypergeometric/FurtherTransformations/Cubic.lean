@@ -6,14 +6,23 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.FurtherTransformations.Quadratic
+public import Carlson.Elliptic.Addition
+public import ToMathlib.Analysis.SpecialFunctions.Pow
 
 /-!
-# Cubic transformations of Gauss functions
+# Quadratic and cubic transformations of `₂F₁` (DLMF §15.8(iii)–(v))
 
-Branch-power identities and cubic transformations, including the Borwein cubic relation.
+## Main results
 
-Source references and common attribution are retained in
-`DLMF.Hypergeometric.FurtherTransformations`.
+* `quadratic_half_sum`: DLMF 15.8.17.
+* `quadratic_complementary`, `quadratic_complementary_four_mul`: DLMF 15.8.19–15.8.20.
+* `quadratic_sqrt`: DLMF 15.8.21 (and its specialization 15.8.29).
+* `quadratic_reciprocal_sqrt`, `quadratic_reciprocal_sqrt_complementary`: DLMF 15.8.22–15.8.23.
+* `cubic_transformation`: DLMF 15.8.31.
+* `ramanujan_cubic`: Ramanujan's cubic transformation, DLMF 15.8.33.
+* `borwein_cubic`: the Borweins' cubic transformation for `₂F₁(1/3,2/3;1;·)`.
+
+See `DLMF.Hypergeometric.FurtherTransformations` for the conventions.
 -/
 
 @[expose] public section
@@ -227,27 +236,12 @@ theorem quadratic_complementary_four_mul
     show 2 * ((c - a) / 2) = c - a by ring, show 2 * ((a + c - 1) / 2) = c - (1 - a) by ring] at hq
   rw [euler_transformation_of_ne_neg_nat hc hz, show c - a - (1 - a) = c - 1 by ring, hq]
 
-/-- The principal square root of a point of the slit plane lies in the right half-plane. -/
-theorem re_cpow_half_pos_of_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) :
-    0 < (z ^ (1 / 2 : ℂ)).re := by
-  have hz0 : z ≠ 0 := slitPlane_ne_zero hz
-  have h1 : -Real.pi < z.arg := neg_pi_lt_arg z
-  have h2 : z.arg < Real.pi := arg_lt_pi_iff.mpr (by
-    rcases mem_slitPlane_iff.mp hz with h | h
-    · exact Or.inl h.le
-    · exact Or.inr h)
-  rw [cpow_def_of_ne_zero hz0, exp_re]
-  apply mul_pos (Real.exp_pos _)
-  apply Real.cos_pos_of_mem_Ioo
-  simp only [mul_im, log_im, log_re, one_div, inv_re, inv_im, re_ofNat, im_ofNat]
-  constructor <;> norm_num <;> nlinarith [Real.pi_pos]
-
 /-- Branch bookkeeping for the square-root quadratic transformation. -/
 theorem phase_quadratic_sqrt {a z : ℂ} (hz : ‖z‖ < 1) (hs : z ∈ slitPlane) :
     (1 + z ^ (1 / 2 : ℂ)) ^ (-2 * a) *
       ((1 + z) / (1 + z ^ (1 / 2 : ℂ)) ^ 2) ^ (-a) = (1 + z) ^ (-a) := by
   set t := z ^ (1 / 2 : ℂ) with ht
-  have htre : 0 < t.re := re_cpow_half_pos_of_mem_slitPlane hs
+  have htre : 0 < t.re := Carlson.re_cpow_half_pos hs
   have hz0 : z ≠ 0 := slitPlane_ne_zero hs
   have htsq : t ^ 2 = z := cpow_half_sq hz0
   have hre1 : 0 < (1 + z).re := by
@@ -295,7 +289,7 @@ theorem quadratic_sqrt
       (1 + z ^ (1 / 2 : ℂ)) ^ (-2 * a) * ₂F₁ a (a - b + 1 / 2) (2 * a - 2 * b + 1) (4 * z ^ (1 / 2 : ℂ) / (1
         + z ^ (1 / 2 : ℂ)) ^ 2) := by
   set t := z ^ (1 / 2 : ℂ) with htdef
-  have htre : 0 < t.re := re_cpow_half_pos_of_mem_slitPlane hs
+  have htre : 0 < t.re := Carlson.re_cpow_half_pos hs
   have hz0 : z ≠ 0 := slitPlane_ne_zero hs
   have htsq : t ^ 2 = z := cpow_half_sq hz0
   have h1t : 1 + t ≠ 0 := by
@@ -333,11 +327,6 @@ theorem quadratic_sqrt
     rw [hz', ← htsq]; field_simp; ring
   rw [h13, quadratic_well_poised_plus hc hz hw15, h1z', ← mul_assoc,
     phase_quadratic_sqrt hz hs]
-
-/-- Complex powers of a positive real through the real logarithm. -/
-theorem ofReal_cpow_eq_exp_log {u : ℝ} (hu : 0 < u) (s : ℂ) :
-    (u : ℂ) ^ s = exp (Real.log u * s) := by
-  rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hu.ne'), ofReal_log hu.le]
 
 /-- Data for the real quadratic transformations on `(-1, 0)`. -/
 theorem reciprocal_sqrt_data {x : ℝ} (hx : -1 < x) (hx0 : x < 0) :
@@ -410,8 +399,8 @@ theorem quadratic_reciprocal_sqrt
   have hrm : 0 < r - 1 := by linarith
   rw [show (1 : ℂ) - (x : ℂ) = ((1 - x : ℝ) : ℂ) by push_cast; ring,
     show (1 : ℂ) + ((1 / r : ℝ) : ℂ) = ((1 + 1 / r : ℝ) : ℂ) by push_cast; ring,
-    ofReal_cpow_eq_exp_log h1x, ofReal_cpow_eq_exp_log (by positivity),
-    ofReal_cpow_eq_exp_log (by positivity : (0 : ℝ) < (r - 1) / (r + 1)), ← exp_add]
+    Complex.ofReal_cpow_eq_exp h1x, Complex.ofReal_cpow_eq_exp (by positivity),
+    Complex.ofReal_cpow_eq_exp (by positivity : (0 : ℝ) < (r - 1) / (r + 1)), ← exp_add]
   congr 1
   have e1 : 1 - x = r ^ 2 / ((r - 1) * (r + 1)) := by
     have hx' : x ≠ 0 := by linarith
@@ -459,9 +448,9 @@ theorem quadratic_reciprocal_sqrt_complementary
   have hrm : 0 < r - 1 := by linarith
   have h1x : 0 < 1 - x := by linarith
   rw [show (1 : ℂ) - (x : ℂ) = ((1 - x : ℝ) : ℂ) by push_cast; ring,
-    ofReal_cpow_eq_exp_log h1x, ofReal_cpow_eq_exp_log (by positivity : (0 : ℝ) < (r - 1) / (r + 1)),
-    ofReal_cpow_eq_exp_log hrm, ofReal_cpow_eq_exp_log (by positivity : (0 : ℝ) < r + 1),
-    ofReal_cpow_eq_exp_log (by linarith : (0 : ℝ) < q), ← exp_add, ← exp_add, ← exp_add]
+    Complex.ofReal_cpow_eq_exp h1x, Complex.ofReal_cpow_eq_exp (by positivity : (0 : ℝ) < (r - 1) / (r + 1)),
+    Complex.ofReal_cpow_eq_exp hrm, Complex.ofReal_cpow_eq_exp (by positivity : (0 : ℝ) < r + 1),
+    Complex.ofReal_cpow_eq_exp (by linarith : (0 : ℝ) < q), ← exp_add, ← exp_add, ← exp_add]
   congr 1
   have e1 : 1 - x = q / ((r - 1) * (r + 1)) := by
     have hx' : x ≠ 0 := by linarith

@@ -10,9 +10,8 @@ public import ToMathlib.Algebra.Polynomial.PochhammerIdentities
 /-!
 # Algebraic identities for ascending Pochhammer symbols
 
-The division-free identities for ascending Pochhammer symbols (`ascPochhammer_eval_shift`,
-`ascPochhammer_add_eval`, `ascPochhammer_eval_double`, `ascPochhammer_eval_split_reflect`,
-`ascPochhammer_eval_reflect`) come from lean-codes
-`ToMathlib.Algebra.Polynomial.PochhammerIdentities`, which this module re-exports. The former
-local copies in the namespace `DLMF.Gamma.Simplex` were removed in the 2026-10-27 cleanup.
+This module re-exports the division-free identities for ascending Pochhammer symbols
+(`ascPochhammer_eval_shift`, `ascPochhammer_add_eval`, `ascPochhammer_eval_double`,
+`ascPochhammer_eval_split_reflect`, `ascPochhammer_eval_reflect`) from lean-codes
+`ToMathlib.Algebra.Polynomial.PochhammerIdentities`. It declares nothing itself.
 -/

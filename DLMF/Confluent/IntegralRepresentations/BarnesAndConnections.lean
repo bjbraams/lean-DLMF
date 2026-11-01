@@ -8,13 +8,34 @@ module
 public import DLMF.Confluent.IntegralRepresentations.EulerAndBessel
 
 /-!
-# Barnes integrals and continued Tricomi representations
+# Barnes integrals and Whittaker integral representations
 
-Vertical Gamma integrals, Barnes representations and connection identities on the declared
-complex branches.
+This file proves the vertical Mellin–Barnes integrals for Kummer's and Tricomi's functions
+(DLMF §13.4(iii)) and the integral representations of Whittaker's functions (DLMF §13.16).
 
-Source references and common attribution are retained in
-`DLMF.Confluent.IntegralRepresentations`.
+## Main results
+
+* `exp_neg_eq_integral_barnes`: the Cahen–Mellin integral for `e^{-v}` in Barnes's orientation.
+* `regularized_barnes_integral`: Barnes's integral for `𝐌(a,b,-x)`, `x > 0` (DLMF 13.4.16).
+* `kummerM_eq_barnes_integral`: Barnes's integral for `₁F₁` (AAR Theorem 4.2.1).
+* `kummerU_barnes`: Barnes's integral for `U` (DLMF 13.4.17).
+* `kummerU_barnes_exp`: the exponential Barnes integral for `U` (DLMF 13.4.18).
+* `whittakerM_euler`, `whittakerM_parameter_integral`: DLMF 13.16.1 and 13.16.2.
+* `whittakerM_integral_besselJ`, `whittakerM_integral_besselI`: Bessel-kernel integrals for
+  `M_{κ,μ}` (DLMF 13.16.3, 13.16.4).
+* `whittakerW_laplace`: the Laplace integral for `W_{κ,μ}` (DLMF 13.16.5).
+* `whittakerW_integral_besselK`: a Bessel-`K` integral for `W_{κ,μ}` (DLMF 13.16.8).
+* `whittakerW_barnes`, `whittakerW_barnes_exp`: Barnes integrals for `W_{κ,μ}`
+  (DLMF 13.16.11, 13.16.12).
+
+## Implementation notes
+
+Barnes integrals are taken along vertical lines `σ + it`, with the factor `i` from `dt`
+included. The exponential Barnes integrals 13.4.18 and 13.16.12 insert the Cahen–Mellin
+integral for `e^{-x(1+τ)}` into Tricomi's Laplace integral and evaluate Euler's second Beta
+integral in `τ`. Tricomi's contiguous relation in `a`, matched by the reciprocal Gamma
+recurrence, then removes the restriction `Re a > 0`.
+
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
 -/
 
@@ -976,8 +997,8 @@ theorem whittakerW_laplace {κ μ z : ℂ} (hμ : κ.re < μ.re + 1 / 2)
       show (1 + 2 * (u : ℂ)) - 1 = 2 * u by ring,
       show (1 + 2 * (u : ℂ)) + 1 = 2 * (1 + u) by ring,
       Complex.exp_add,
-      mul_cpow_of_re_pos (u := 2) (v := (u : ℂ)) (by norm_num) (by simpa using hu) p,
-      mul_cpow_of_re_pos (u := 2) (v := 1 + (u : ℂ)) (by norm_num) (by simp; linarith) q]
+      Carlson.mul_cpow_of_re_pos (u := 2) (v := (u : ℂ)) (by norm_num) (by simpa using hu) p,
+      Carlson.mul_cpow_of_re_pos (u := 2) (v := 1 + (u : ℂ)) (by norm_num) (by simp; linarith) q]
     linear_combination (exp (-z / 2) * exp (-z * u) * (u : ℂ) ^ p *
       (1 + (u : ℂ)) ^ q) * hpow
   have hI : (∫ t : ℝ in Set.Ioi 1, F t) = ((2 : ℂ) ^ (2 * μ) * exp (-z / 2)) *

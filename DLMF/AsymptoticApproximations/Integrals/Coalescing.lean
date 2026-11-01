@@ -13,19 +13,28 @@ public import Mathlib.Analysis.Calculus.Deriv.Mul
 /-!
 # Coalescing critical points (DLMF §§2.3(v), 2.4(v))
 
-**Bleistein's method** (§2.3(v)) for `I(α, x) = ∫₀ᵏ e^{-xp(α,t)} q(α,t) t^{λ-1} dt` (2.3.24),
-where the minimum of `p(α, ·)` on `[0, k)` is at `t = α`, uses the quadratic change of variable
-`p(α,t) = ½w² - aw + b` (2.3.25) with `a = bleisteinA p α`, `b = bleisteinB p α` (2.3.26) and
-`w = bleisteinW p α t` (2.3.27). Proved here: the identity 2.3.25, the correspondence of `t = 0`
-with `w = 0` and of `t = α` with `w = a`, and the derivative 2.3.28 for `t ≠ α`. The
-transformation 2.3.29–2.3.30 and the uniform expansion 2.3.31–2.3.33 are stated with explicit
-hypotheses: the expansion 2.3.32 is uniform in `α`, with remainder bounded by the comparison
-integral `∫₀^∞ exp(-½τ² + yτ) |τ - y|ᴺ τ^{λ-1} dτ` at `y = a√x` (DLMF obtains 2.3.32
-"formally"; the remainder form is the one produced by term-by-term integration with a uniform
-Taylor remainder for `f(α, w)` about `w = a`).
+Bleistein's method for an endpoint and a stationary point that coalesce, and the cubic change
+of variable of Chester, Friedman and Ursell.
 
-**Chester–Friedman–Ursell** (§2.4(v)): the cubic change of variable 2.4.18 gives 2.4.20 by the
-chain rule (proved) and the substitution 2.4.21 reduces the cubic to Airy form (proved).
+## Main results
+
+* `bleistein_quadratic`: `p(α,t) = ½w² - aw + b` (DLMF 2.3.25) with `a = bleisteinA p α`,
+  `b = bleisteinB p α` (2.3.26) and `w = bleisteinW p α t` (2.3.27).
+* `bleisteinW_zero`, `bleisteinW_self`: `t = 0` corresponds to `w = 0` and `t = α` to `w = a`.
+* `bleisteinW_hasDerivAt`, `bleisteinW_hasDerivAt_self`: the derivative 2.3.28 and regularity
+  of `t ↦ w`.
+* `bleistein_transform`: the transformation 2.3.24, 2.3.29–2.3.30.
+* `bleistein_uniform`: Bleistein's uniform expansion (DLMF 2.3.31–2.3.33).
+* `cfu_deriv`, `cfu_airy_form`: the cubic change of variable 2.4.18–2.4.20 and the reduction
+  2.4.21 to Airy form.
+
+## Implementation notes
+
+Bleistein's method concerns `I(α, x) = ∫₀ᵏ e^{-xp(α,t)} q(α,t) t^{λ-1} dt` (2.3.24), where the
+minimum of `p(α, ·)` on `[0, k)` is at `t = α`. The expansion 2.3.32 is uniform in `α`, with
+remainder bounded by the comparison integral `∫₀^∞ exp(-½τ² + yτ) |τ - y|ᴺ τ^{λ-1} dτ` at
+`y = a√x` (DLMF obtains 2.3.32 "formally"; the remainder form is the one produced by
+term-by-term integration with a uniform Taylor remainder for `f(α, w)` about `w = a`).
 -/
 
 @[expose] public noncomputable section

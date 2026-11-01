@@ -10,15 +10,31 @@ public import DLMF.RiemannTheta.Characteristics
 /-!
 # Symmetry and quasi-periodicity of Riemann theta functions (DLMF §21.3)
 
-Parity, periodicity and quasi-periodicity of `θ(z|Ω)` (DLMF 21.3.1–21.3.3), the
-characteristic shifts and quasi-periodicity of `θ[α;β](z|Ω)` (DLMF 21.3.4–21.3.5), and the
-parity of theta functions with half-period characteristics (DLMF 21.3.6).
+This file proves parity, periodicity and quasi-periodicity of `θ(z|Ω)` and of the theta
+functions with characteristics.
 
-All identities are proved by reindexing the lattice sum with an equivalence of `ℤ^g`; this
+## Main definitions
+
+* `riemannThetaPeriodLattice`: the period lattice `{m₁ + Ωm₂}` (DLMF §21.3(i)).
+
+## Main results
+
+* `riemannTheta_neg`, `riemannTheta_add_int`, `riemannTheta_add_lattice`: parity, periodicity
+  and quasi-periodicity of `θ(z|Ω)` (DLMF 21.3.1–21.3.3).
+* `eq_const_mul_riemannTheta_of_quasiPeriodic`: quasi-periodicity determines `θ` up to a
+  constant factor.
+* `riemannThetaChar_add_int`, `riemannThetaChar_add_lattice`: characteristic shifts and
+  quasi-periodicity of `θ[α;β](z|Ω)` (DLMF 21.3.4–21.3.5).
+* `riemannThetaChar_neg_half`: parity with half-period characteristics (DLMF 21.3.6), stronger
+  than DLMF.
+
+## Implementation notes
+
+The identities are proved by reindexing the lattice sum with an equivalence of `ℤ^g`; this
 needs no summability, so they hold for every matrix `Ω` (symmetry `Ωᵀ = Ω` is assumed where the
-quadratic form is shifted). The parity 21.3.6 is proved in the stronger form
-`θ[a/2; b/2](-z|Ω) = (-1)^{a·b} θ[a/2; b/2](z|Ω)` for all integer vectors `a, b`; DLMF states
-it for half-period characteristics `aᵢ, bᵢ ∈ {0, 1}`.
+quadratic form is shifted). The parity 21.3.6 is proved in the form
+`θ[a/2; b/2](-z|Ω) = (-1)^{a·b} θ[a/2; b/2](z|Ω)` for all integer vectors `a, b`; DLMF states it
+for half-period characteristics `aᵢ, bᵢ ∈ {0, 1}`.
 -/
 
 @[expose] public noncomputable section
@@ -33,25 +49,25 @@ variable {ι : Type*} [Fintype ι]
 omit [Fintype ι] in
 /-- Identity under the stated parameter and domain assumptions: `(fun i => (((-n) i : ℤ) : ℂ)) =
 -fun i => (n i : ℂ)`. -/
-lemma rth21_cast_neg (n : ι → ℤ) :
+private lemma intCast_neg_vec (n : ι → ℤ) :
     (fun i => (((-n) i : ℤ) : ℂ)) = -fun i => (n i : ℂ) := by
   funext i; simp
 
 omit [Fintype ι] in
 /-- Identity under the stated parameter and domain assumptions: `(fun i => (((n - m) i : ℤ) : ℂ))
 = (fun i => (n i : ℂ)) - fun i => (m i : ℂ)`. -/
-lemma rth21_cast_sub (n m : ι → ℤ) :
+private lemma intCast_sub_vec (n m : ι → ℤ) :
     (fun i => (((n - m) i : ℤ) : ℂ)) = (fun i => (n i : ℂ)) - fun i => (m i : ℂ) := by
   funext i; simp
 
 /-- Identity under the stated parameter and domain assumptions: `(fun i => (n i : ℂ)) ⬝ᵥ (fun i =>
 (m i : ℂ)) = ((n ⬝ᵥ m : ℤ) : ℂ)`. -/
-lemma rth21_intDot (n m : ι → ℤ) :
+private lemma intCast_dotProduct (n m : ι → ℤ) :
     (fun i => (n i : ℂ)) ⬝ᵥ (fun i => (m i : ℂ)) = ((n ⬝ᵥ m : ℤ) : ℂ) := by
   simp [dotProduct]
 
 /-- Identity under the stated parameter and domain assumptions: `cexp (2 * π * I * k) = 1`. -/
-theorem rth21_exp_int (k : ℤ) : cexp (2 * π * I * k) = 1 := by
+theorem exp_two_pi_I_intCast (k : ℤ) : cexp (2 * π * I * k) = 1 := by
   rw [show 2 * π * I * (k : ℂ) = k * (2 * π * I) by ring]
   exact Complex.exp_int_mul_two_pi_mul_I k
 
@@ -61,7 +77,7 @@ theorem riemannTheta_neg (z : ι → ℂ) (Ω : Matrix ι ι ℂ) :
     riemannTheta (-z) Ω = riemannTheta z Ω := by
   rw [riemannTheta, ← (Equiv.neg (ι → ℤ)).tsum_eq]
   refine tsum_congr fun n => ?_
-  simp only [Equiv.neg_apply, riemannThetaTerm, rth21_cast_neg, mulVec_neg, neg_dotProduct,
+  simp only [Equiv.neg_apply, riemannThetaTerm, intCast_neg_vec, mulVec_neg, neg_dotProduct,
     dotProduct_neg, neg_neg]
 
 /-- `θ(z + m₁|Ω) = θ(z|Ω)` for `m₁ ∈ ℤ^g` (DLMF 21.3.2). -/
@@ -70,10 +86,10 @@ theorem riemannTheta_add_int (z : ι → ℂ) (Ω : Matrix ι ι ℂ) (m₁ : ι
     riemannTheta (z + fun i => (m₁ i : ℂ)) Ω = riemannTheta z Ω := by
   rw [riemannTheta, riemannTheta]
   refine tsum_congr fun n => ?_
-  rw [riemannThetaTerm, riemannThetaTerm, dotProduct_add, rth21_intDot,
+  rw [riemannThetaTerm, riemannThetaTerm, dotProduct_add, intCast_dotProduct,
     show ∀ a b : ℂ, 2 * π * I * ((1 / 2 : ℂ) * a + (b + ((n ⬝ᵥ m₁ : ℤ) : ℂ))) =
       2 * π * I * ((1 / 2 : ℂ) * a + b) + 2 * π * I * ((n ⬝ᵥ m₁ : ℤ) : ℂ) by intros; ring,
-    Complex.exp_add, rth21_exp_int, mul_one]
+    Complex.exp_add, exp_two_pi_I_intCast, mul_one]
 
 /-- Quasi-periodicity `θ(z + m₁ + Ωm₂|Ω) = exp(-2πi(½ m₂·Ω·m₂ + m₂·z)) θ(z|Ω)` for
 `m₁, m₂ ∈ ℤ^g` and symmetric `Ω` (DLMF 21.3.3). -/
@@ -86,13 +102,13 @@ theorem riemannTheta_add_lattice (z : ι → ℂ) {Ω : Matrix ι ι ℂ} (hΩ :
   rw [riemannTheta, riemannTheta, ← (Equiv.subRight m₂).tsum_eq, ← tsum_mul_left]
   refine tsum_congr fun n => ?_
   rw [Equiv.subRight_apply, riemannThetaTerm, riemannThetaTerm, ← Complex.exp_add,
-    rth21_cast_sub]
+    intCast_sub_vec]
   set N : ι → ℂ := fun i => (n i : ℂ)
   set M₁ : ι → ℂ := fun i => (m₁ i : ℂ)
   set M₂ : ι → ℂ := fun i => (m₂ i : ℂ)
   have hk : (N - M₂) ⬝ᵥ M₁ = (((n - m₂) ⬝ᵥ m₁ : ℤ) : ℂ) := by
-    rw [← rth21_cast_sub, rth21_intDot]
-  have hsym := rth21_dot_mulVec_comm hΩ M₂ N
+    rw [← intCast_sub_vec, intCast_dotProduct]
+  have hsym := dotProduct_mulVec_comm hΩ M₂ N
   have key : 2 * π * I * ((1 / 2 : ℂ) * ((N - M₂) ⬝ᵥ (Ω *ᵥ (N - M₂))) +
       (N - M₂) ⬝ᵥ (z + M₁ + Ω *ᵥ M₂)) =
       (-2 * π * I * ((1 / 2 : ℂ) * (M₂ ⬝ᵥ (Ω *ᵥ M₂)) + M₂ ⬝ᵥ z) +
@@ -102,7 +118,7 @@ theorem riemannTheta_add_lattice (z : ι → ℂ) {Ω : Matrix ι ι ℂ} (hΩ :
     simp only [mulVec_sub, dotProduct_add, dotProduct_sub, sub_dotProduct]
     rw [hsym]
     ring
-  rw [key, Complex.exp_add, rth21_exp_int, mul_one]
+  rw [key, Complex.exp_add, exp_two_pi_I_intCast, mul_one]
 
 /-- The period lattice `{m₁ + Ωm₂ : m₁, m₂ ∈ ℤ^g}` of the Riemann theta function
 (DLMF §21.3(i)). -/
@@ -144,11 +160,11 @@ theorem riemannThetaChar_add_int (α β : ι → ℝ) (z : ι → ℂ) (Ω : Mat
   have hsplit : (fun i => (n i : ℂ) + (α i : ℂ)) ⬝ᵥ (fun i => (m₂ i : ℂ)) =
       (fun i => (α i : ℂ)) ⬝ᵥ (fun i => (m₂ i : ℂ)) + ((n ⬝ᵥ m₂ : ℤ) : ℂ) := by
     rw [show (fun i => (n i : ℂ) + (α i : ℂ)) = (fun i => (n i : ℂ)) + fun i => (α i : ℂ)
-      from rfl, add_dotProduct, rth21_intDot, add_comm]
+      from rfl, add_dotProduct, intCast_dotProduct, add_comm]
   rw [hsplit]
   rw [show ∀ a b c d : ℂ, 2 * π * I * ((1 / 2 : ℂ) * a + (b + (c + d))) =
       (2 * π * I * c + 2 * π * I * ((1 / 2 : ℂ) * a + b)) + 2 * π * I * d by intros; ring,
-    Complex.exp_add, rth21_exp_int, mul_one]
+    Complex.exp_add, exp_two_pi_I_intCast, mul_one]
 
 /-- Quasi-periodicity with characteristics:
 `θ[α;β](z + m₁ + Ωm₂|Ω) = exp(2πi(α·m₁ - β·m₂ - ½ m₂·Ω·m₂ - m₂·z)) θ[α;β](z|Ω)`
@@ -176,7 +192,7 @@ theorem riemannThetaChar_add_lattice (α β : ι → ℝ) (z : ι → ℂ) {Ω :
   have hw' : (fun i => z i + (β i : ℂ)) = z + B := rfl
   rw [hv, hv', hw, hw']
   have hk : N ⬝ᵥ M₁ - M₂ ⬝ᵥ M₁ = (((n - m₂) ⬝ᵥ m₁ : ℤ) : ℂ) := by
-    rw [← rth21_intDot, rth21_cast_sub, sub_dotProduct]
+    rw [← intCast_dotProduct, intCast_sub_vec, sub_dotProduct]
   have key : 2 * π * I * ((1 / 2 : ℂ) * ((N - M₂ + A) ⬝ᵥ (Ω *ᵥ (N - M₂ + A))) +
       (N - M₂ + A) ⬝ᵥ (z + M₁ + Ω *ᵥ M₂ + B)) =
       (2 * π * I * (A ⬝ᵥ M₁ - B ⬝ᵥ M₂ - (1 / 2 : ℂ) * (M₂ ⬝ᵥ (Ω *ᵥ M₂)) - M₂ ⬝ᵥ z) +
@@ -185,10 +201,10 @@ theorem riemannThetaChar_add_lattice (α β : ι → ℝ) (z : ι → ℂ) {Ω :
     rw [← hk]
     simp only [mulVec_sub, mulVec_add, dotProduct_add, dotProduct_sub, sub_dotProduct,
       add_dotProduct]
-    rw [rth21_dot_mulVec_comm hΩ M₂ N, rth21_dot_mulVec_comm hΩ M₂ A,
+    rw [dotProduct_mulVec_comm hΩ M₂ N, dotProduct_mulVec_comm hΩ M₂ A,
       dotProduct_comm B M₂]
     ring
-  rw [key, Complex.exp_add, rth21_exp_int, mul_one]
+  rw [key, Complex.exp_add, exp_two_pi_I_intCast, mul_one]
 
 /-- Parity with half-period characteristics, in the stronger form valid for all integer
 vectors `a, b`: `θ[a/2; b/2](-z|Ω) = (-1)^{a·b} θ[a/2; b/2](z|Ω)`. DLMF 21.3.6 is the case
@@ -226,7 +242,7 @@ theorem riemannThetaChar_neg_half (a b : ι → ℤ) (z : ι → ℂ) (Ω : Matr
     rw [mulVec_neg, neg_dotProduct, dotProduct_neg, neg_neg, this, hUB]
     push_cast
     ring
-  rw [key, Complex.exp_add, Complex.exp_add, rth21_exp_int, mul_one,
+  rw [key, Complex.exp_add, Complex.exp_add, exp_two_pi_I_intCast, mul_one,
     show π * I * ((a ⬝ᵥ b : ℤ) : ℂ) = ((a ⬝ᵥ b : ℤ) : ℂ) * (π * I) by ring,
     Complex.exp_int_mul, Complex.exp_pi_mul_I]
 

@@ -11,20 +11,23 @@ public import DLMF.Hypergeometric.ParameterHolomorphy
 /-!
 # Tools for the cubic connection formula (DLMF 15.8.32)
 
-The proof of `cubic_connection` (DLMF 15.8.32) works in the variable `u = 1/ζ`. With
-`ω = e^{2πi/3}` and `t = √3 i` (so `ω = (-1+t)/2`, `ω² = (-1-t)/2`):
+The proof of `cubic_connection` (DLMF 15.8.32) works in the variable `u = 1/ζ`. Throughout,
+`ω = e^{2πi/3}` and `t = √3 i`, so `ω = (-1+t)/2` and `ω² = (-1-t)/2`.
+
+## Main results
 
 * `hcub_cubic`: Goursat's cubic transformation near `u = 0`,
   `F(a+1/3, 3a; 2a+2/3; u) = (1+ω²u)^{-3a} F(a, a+1/3; 2a+2/3; 3t u(u-1)/(1+ω²u)³)`, proved by
-  the uniqueness of the analytic solution of the Gauss equation at the origin;
+  the uniqueness of the analytic solution of the Gauss equation at the origin.
 * `hcub_conn`: the bracket of 15.8.32 written through `w₁, w₂` at `0` equals
   `√3 Γ(a+1/3)/(2π Γ(2a+2/3)) F(a, a+1/3; 2a+2/3; 1-w)`, from 15.10.17 for generic `a` and
-  holomorphy in `a` (all `a` with `2a+2/3, a+1/3 ∉ -ℕ`);
+  holomorphy in `a` (all `a` with `2a+2/3, a+1/3 ∉ -ℕ`).
 * `hcub_main`: the two combined near `u = 0` (where `w = Z³` with `Z = ω²(1+ωu)/(u+ω)` and the
   principal cube root of `w` is `ω² Z`) and continued by the identity theorem to the convex set
-  `{Im u > 0, |u| < 1}`, where `|Z| < 1`;
-* `hcub_cpow`: the bookkeeping of principal powers on the image `u = 1/2 + iY`, `0 < Y < √3/2`,
-  of the ray `x < -1`, by comparing logarithms whose imaginary parts differ by less than `2π`.
+  `{Im u > 0, |u| < 1}`, where `|Z| < 1`.
+* `hcub_cpow`: the bookkeeping of principal powers on the image `u = 1/2 + iY`,
+  `0 < Y < √3/2`, of the ray `x < -1`, by comparing logarithms whose imaginary parts differ by
+  less than `2π`.
 -/
 
 @[expose] public section

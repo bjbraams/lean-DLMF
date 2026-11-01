@@ -13,15 +13,7 @@ public import Mathlib.RingTheory.Binomial
 
 Definitions for DLMF §2.6 (namespace `DLMF.AsymptoticApproximations`).
 
-DLMF assigns distributions (continuous linear functionals on the space `𝒯` of rapidly
-decreasing functions) to the functions `t^{-s-α}` and to the remainders `f_n` of an
-asymptotic expansion. We record the *values* of these functionals as explicit integrals,
-`φ ↦ ⟨·, φ⟩`, for an arbitrary function `φ : ℝ → ℂ`: the formulas only use `φ` and its
-derivatives on `[0, ∞)`, and they are applied in DLMF both to Schwartz functions and to the
-functions `φ_ε(t) = e^{-εt}/(t+z)` of 2.6.22, which are not Schwartz functions on `ℝ`.
-Continuity of these functionals on the Schwartz space is not asserted by the definitions.
-All integrals use Lean's totalization (the integral of a non-integrable function is `0`), so
-every statement using them carries integrability hypotheses or conclusions where needed.
+## Main definitions
 
 * `stieltjesTransform f z = ∫₀^∞ f(t)/(t+z) dt` (2.6.8) and its generalization
   `generalizedStieltjesTransform ρ f z` (2.6.32).
@@ -31,8 +23,27 @@ every statement using them carries integrability hypotheses or conclusions where
 * `tPowPairing λ φ`: the distribution `t^λ` for real `λ`, as selected by 2.6.12–2.6.14.
 * `diracDerivPairing s φ = (-1)^s φ^{(s)}(0)` (2.6.19).
 * `repeatedTailIntegral n f t` (2.6.15) and `remainderPairing n f φ` (2.6.16).
+* `stieltjesTestFunction`: the test functions `φ_ε(t) = e^{-εt}/(t+z)` (2.6.22).
+* `IsStieltjesExpansion`, `stieltjesRemainder`, `stieltjesRemainderTerm`: the hypotheses and
+  remainders of §2.6(ii) (2.6.9–2.6.10, 2.6.30).
+* `stieltjesDeltaCoeff`, `stieltjesLogCoeff`, `stieltjesLogDeltaCoeff`: the coefficients of
+  2.6.18, 2.6.21 and 2.6.29.
 * `riemannLiouvilleIntegral μ f x` (2.6.33) and `halfLineConvolution f g x` (2.6.34).
 * `kPlusPairing n f φ = ⟨Dⁿ f, φ⟩` for the elements `Dⁿ f` of `K⁺` (2.6.37).
+* `fractionalRemainder` (2.6.47) and `mellinConvolutionIntegral` (2.6.54).
+* `stieltjesCubeRootExample`, `rpowDivOneAddExample`: the examples 2.6.1 and of §2.6(iii).
+
+## Implementation notes
+
+DLMF assigns distributions (continuous linear functionals on the space `𝒯` of rapidly
+decreasing functions) to the functions `t^{-s-α}` and to the remainders `f_n` of an
+asymptotic expansion. We record the *values* of these functionals as explicit integrals,
+`φ ↦ ⟨·, φ⟩`, for an arbitrary function `φ : ℝ → ℂ`: the formulas only use `φ` and its
+derivatives on `[0, ∞)`, and they are applied in DLMF both to Schwartz functions and to the
+functions `φ_ε(t) = e^{-εt}/(t+z)` of 2.6.22, which are not Schwartz functions on `ℝ`.
+Continuity of these functionals on the Schwartz space is not asserted by the definitions.
+All integrals use Lean's totalization (the integral of a non-integrable function is `0`), so
+every statement using them carries integrability hypotheses or conclusions where needed.
 -/
 
 @[expose] public noncomputable section
@@ -173,7 +184,7 @@ open Filter Asymptotics Finset
 open scoped Nat Topology
 
 /-- The product `2 · 5 ⋯ (3s-1)` of DLMF 2.6.7. -/
-def g2b_prod25 (s : ℕ) : ℝ := ∏ k ∈ Icc 1 s, (3 * (k : ℝ) - 1)
+def prodThreeSubOne (s : ℕ) : ℝ := ∏ k ∈ Icc 1 s, (3 * (k : ℝ) - 1)
 
 /-- The integral `S(x) = ∫₀^∞ (1+t)^{-1/3}/(x+t) dt` of DLMF 2.6.1, a Stieltjes transform. -/
 @[dlmf 2.6.E1]
@@ -181,12 +192,12 @@ def stieltjesCubeRootExample (x : ℝ) : ℂ :=
   stieltjesTransform (fun t => (((1 + t) ^ (-(1 / 3 : ℝ)) : ℝ) : ℂ)) x
 
 /-- The first sum of DLMF 2.6.6–2.6.7, `(2π/√3) ∑_{s<n} (-1)^s (-1/3 choose s) x^{-s-1/3}`. -/
-def g2b_naiveSum (n : ℕ) (x : ℝ) : ℝ :=
+def stieltjesCubeRootNaiveSum (n : ℕ) (x : ℝ) : ℝ :=
   2 * π / √3 * ∑ s ∈ range n, (-1) ^ s * Ring.choose (-(1 / 3) : ℝ) s * x ^ (-(s : ℝ) - 1 / 3)
 
 /-- The second sum of DLMF 2.6.7, `∑_{s=1}^{n} 3^s (s-1)!/(2·5⋯(3s-1)) x^{-s}`. -/
-def g2b_missingSum (n : ℕ) (x : ℝ) : ℝ :=
-  ∑ s ∈ Icc 1 n, 3 ^ s * ((s - 1)! : ℝ) / g2b_prod25 s * x ^ (-(s : ℝ))
+def stieltjesCubeRootMissingSum (n : ℕ) (x : ℝ) : ℝ :=
+  ∑ s ∈ Icc 1 n, 3 ^ s * ((s - 1)! : ℝ) / prodThreeSubOne s * x ^ (-(s : ℝ))
 
 /-- The coefficients `c_s = (-1)^s/(s-1)! · 𝓜f(s)` of DLMF 2.6.18, where `M` is the Mellin
 transform of `f` or its analytic continuation. -/
@@ -222,15 +233,15 @@ open Filter Finset
 def IsCompactTest (u : ℝ → ℂ) : Prop := ContDiff ℝ ⊤ u ∧ HasCompactSupport u
 
 /-- The power kernel `t ↦ t^{μ-1}` (real power, cast to `ℂ`). -/
-def g2b_powKernel (μ : ℝ) (t : ℝ) : ℂ := ((t ^ (μ - 1) : ℝ) : ℂ)
+def rpowKernel (μ : ℝ) (t : ℝ) : ℂ := ((t ^ (μ - 1) : ℝ) : ℂ)
 
 /-- The function `t^μ (ln t - γ - ψ(μ+1))` of DLMF 2.6.40, 2.6.44 and 2.6.46. -/
-def g2b_logKernel (μ : ℝ) (t : ℝ) : ℂ :=
+def logRpowKernel (μ : ℝ) (t : ℝ) : ℂ :=
   ((t ^ μ : ℝ) : ℂ) * ((Real.log t : ℂ) - Real.eulerMascheroniConstant -
     Complex.digamma (μ + 1))
 
 /-- The `j`th repeated integral `f_{n,j}` of `f_n` (DLMF 2.6.47; `f_{n,0} = f_n`). -/
-def g2b_repeated (j : ℕ) (fn : ℝ → ℂ) (t : ℝ) : ℂ :=
+def repeatedRemainder (j : ℕ) (fn : ℝ → ℂ) (t : ℝ) : ℂ :=
   if j = 0 then fn t else repeatedTailIntegral j fn t
 
 /-- The remainder `δ_n(x) = ∑_{j=0}^{n} (n choose j) Γ(μ+1)/Γ(μ+1-j) I^μ(t^{n-j} f_{n,j})(x)`
@@ -238,10 +249,10 @@ of DLMF 2.6.47. -/
 @[dlmf 2.6.E47]
 def fractionalRemainder (μ : ℝ) (fn : ℝ → ℂ) (n : ℕ) (x : ℝ) : ℂ :=
   ∑ j ∈ range (n + 1), ((n.choose j : ℝ) * (Real.Gamma (μ + 1) / Real.Gamma (μ + 1 - j)) : ℝ) *
-    riemannLiouvilleIntegral μ (fun t => ((t ^ (n - j) : ℝ) : ℂ) * g2b_repeated j fn t) x
+    riemannLiouvilleIntegral μ (fun t => ((t ^ (n - j) : ℝ) : ℂ) * repeatedRemainder j fn t) x
 
 /-- The function `f(t) = t^{1-α}/(1+t)` of the example in DLMF §2.6(iii). -/
-def g2b_exampleF (α : ℝ) (t : ℝ) : ℂ := ((t ^ (1 - α) / (1 + t) : ℝ) : ℂ)
+def rpowDivOneAddExample (α : ℝ) (t : ℝ) : ℂ := ((t ^ (1 - α) / (1 + t) : ℝ) : ℂ)
 
 end
 

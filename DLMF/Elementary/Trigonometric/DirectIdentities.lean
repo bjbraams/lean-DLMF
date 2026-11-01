@@ -8,7 +8,7 @@ module
 public import DLMF.Core.Framework
 public import DLMF.Elementary.Trigonometric.LogarithmicSeries
 public import DLMF.Gamma.IntegralRepresentations
-public import DLMFMathlib.Analysis.Complex.TrigR4SeriesExtension
+public import DLMFMathlib.Analysis.Complex.TrigSeriesExtension
 public import DLMFMathlib.Analysis.Complex.TrigonometricProducts
 public import DLMFMathlib.NumberTheory.EulerNumbers
 public import Mathlib.Analysis.Complex.SqrtDeriv
@@ -31,18 +31,49 @@ public import TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral
 public import TauCeti.Analysis.SpecialFunctions.Trigonometric.Orthogonality
 
 /-!
-# Complex trigonometric identities and products
+# Complex trigonometric functions: identities, inequalities and products
 
-Direct trigonometric functions, elementary identities, power series, multiple-angle products and
-Cartesian forms.
+This file defines the cosecant and secant of a complex variable and proves the reciprocal
+relations, zeros and poles, inequalities, the secant series, derivatives, differential
+equations, addition, multiple-angle and Cartesian identities, and products and partial fractions
+of DLMF §§4.14–4.22.
 
-Source references and common attribution are retained in
-`DLMF.Elementary.Trigonometric`.
+## Main definitions
+
+* `csc`, `sec`: the complex cosecant and secant, totalized to zero at their poles
+  (DLMF 4.14.5–4.14.6).
+* `trigRealSign`: the real sign, including zero, used in branch and table formulas.
+* `IsTrigLinearSolution`, `IsTrigEnergySolution`, `IsTrigRiccatiSolution`: the differential
+  equations DLMF 4.20.9–4.20.11.
+
+## Main results
+
+* `cot_eq_inv_tan`, `cot_eq_neg_tan_add_half_pi`, `sec_eq_csc_add_half_pi`: DLMF 4.14.7,
+  4.15.2, 4.15.3.
+* `meromorphic_reciprocal_trig`, `reciprocal_trig_poles`, `cot_zeros`,
+  `reciprocal_trig_nonzero`: zeros, poles and meromorphy (DLMF §4.14).
+* `cos_le_sinc_le_one`, `sine_parabolic_bounds`, `norm_sin_le_sinh_norm`,
+  `trig_unit_disc_bounds`: inequalities (DLMF 4.18.3–4.18.10).
+* `hasSum_sec_euler`: the secant series (DLMF 4.19.5).
+* `hasDerivAt_csc`, `hasDerivAt_sec`, `hasDerivAt_cot`: derivatives (DLMF 4.20.4–4.20.6).
+* `trig_linear_ode_general`, `trig_energy_ode_general`, `trig_riccati_ode_general`: general
+  solutions of DLMF 4.20.12–4.20.14, including the singular constant solutions.
+* `sin_add_cos_phase`, `cot_add_sub`, `two_sin_mul_sin`, `sin_half_roots`, `cos_half_roots`,
+  `tan_half_roots_and_ratios`: addition and half-angle identities (DLMF §4.21).
+* `de_moivre_int`, `de_moivre_complex`: De Moivre's formula (DLMF 4.21.34).
+* `norm_sin_explicit`, `norm_cos_explicit`, `norm_tan_explicit`: Cartesian moduli
+  (DLMF 4.21.41–4.21.43).
+* `cos_infinite_product`, `hasSum_csc_sq_partial_fraction`: DLMF 4.22.2 and 4.22.4.
+
+## Implementation notes
+
+Reciprocal functions are totalized at poles; identities that need finite values state the pole
+exclusions. The general solutions of the energy and Riccati equations include constant solutions
+that DLMF omits. The logarithmic Bernoulli expansions are in
+`DLMF.Elementary.Trigonometric.LogarithmicSeries`. The cosecant-square expansion uses Mathlib's
+cotangent derivative, Eisenstein-series summability and dominated convergence for sums.
+
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
-The principal logarithmic Bernoulli expansions are in
-`DLMF.Elementary.Trigonometric.LogarithmicSeries`.
-The cosecant-square expansion reuses Mathlib’s cotangent derivative, Eisenstein-series
-summability and dominated-convergence theorem for sums.
 -/
 
 @[expose] public noncomputable section
@@ -116,7 +147,7 @@ theorem meromorphic_reciprocal_trig : Meromorphic csc ∧ Meromorphic sec ∧ Me
   exact ⟨hs.inv,hc.inv,hc.div hs⟩
 
 /-- A product with a reciprocal has norm tending to infinity exactly at an isolated zero. -/
-lemma trigR4_poles_aux {g h : ℂ → ℂ} {z : ℂ} (hgc : ContinuousAt g z) (hhc : ContinuousAt h z)
+private lemma tendsto_norm_mul_inv_atTop_iff {g h : ℂ → ℂ} {z : ℂ} (hgc : ContinuousAt g z) (hhc : ContinuousAt h z)
     (hiso : g z = 0 → ∀ᶠ w in 𝓝[≠] z, g w ≠ 0) (hh : g z = 0 → h z ≠ 0) :
     Tendsto (fun w => ‖h w * (g w)⁻¹‖) (𝓝[≠] z) atTop ↔ g z = 0 := by
   constructor
@@ -157,11 +188,11 @@ theorem reciprocal_trig_poles (z : ℂ) :
       intro hc; rw [neg_eq_zero] at hc; rw [h0, hc] at hsc; norm_num at hsc
     simpa [h0] using (Complex.hasDerivAt_cos z).eventually_ne hc
   refine ⟨?_, ?_, ?_⟩
-  · simpa [csc] using trigR4_poles_aux (g := Complex.sin) (h := fun _ => 1)
+  · simpa [csc] using tendsto_norm_mul_inv_atTop_iff (g := Complex.sin) (h := fun _ => 1)
       Complex.continuous_sin.continuousAt continuousAt_const hs (fun _ => one_ne_zero)
-  · simpa [sec] using trigR4_poles_aux (g := Complex.cos) (h := fun _ => 1)
+  · simpa [sec] using tendsto_norm_mul_inv_atTop_iff (g := Complex.cos) (h := fun _ => 1)
       Complex.continuous_cos.continuousAt continuousAt_const hcz (fun _ => one_ne_zero)
-  · have := trigR4_poles_aux (g := Complex.sin) (h := Complex.cos)
+  · have := tendsto_norm_mul_inv_atTop_iff (g := Complex.sin) (h := Complex.cos)
       Complex.continuous_sin.continuousAt Complex.continuous_cos.continuousAt hs
       (fun h0 hc => by rw [h0, hc] at hsc; norm_num at hsc)
     simpa [Complex.cot, div_eq_mul_inv] using this
@@ -193,7 +224,7 @@ theorem cos_le_sinc_le_one {x : ℝ} (hx : 0≤x) (hπ : x≤π) :
     exact hcos.trans hsinc
 
 /-- The cubic Taylor bound gives the parabolic lower bound on the left half. -/
-lemma trigR4_sin_pi_lower_half {x : ℝ} (hx : 0 < x) (h1 : x ≤ 1/2) :
+private lemma pi_mul_mul_one_sub_lt_sin_pi_mul {x : ℝ} (hx : 0 < x) (h1 : x ≤ 1/2) :
     π * (x * (1 - x)) < Real.sin (π * x) := by
   have hp := Real.pi_pos
   have hp4 := Real.pi_lt_d2
@@ -208,7 +239,7 @@ lemma trigR4_sin_pi_lower_half {x : ℝ} (hx : 0 < x) (h1 : x ≤ 1/2) :
   nlinarith
 
 /-- Chord bound for sine on `[0, π/4]`. -/
-lemma trigR4_sin_ge_chord {w : ℝ} (hw0 : 0 ≤ w) (hw : w ≤ π/4) :
+private lemma chord_mul_le_sin {w : ℝ} (hw0 : 0 ≤ w) (hw : w ≤ π/4) :
     2 * Real.sqrt 2 / π * w ≤ Real.sin w := by
   have hp := Real.pi_pos
   set t := w / (π/4) with ht
@@ -224,7 +255,7 @@ lemma trigR4_sin_ge_chord {w : ℝ} (hw0 : 0 ≤ w) (hw : w ≤ π/4) :
   linarith
 
 /-- The parabolic upper bound for `sin (π x)`. -/
-lemma trigR4_sin_pi_upper {x : ℝ} (hx : 0 < x) (h1 : x < 1) :
+private lemma sin_pi_mul_le_four_mul_mul_one_sub {x : ℝ} (hx : 0 < x) (h1 : x < 1) :
     Real.sin (π * x) ≤ 4 * (x * (1 - x)) := by
   have hp := Real.pi_pos
   set v := π * x - π / 2 with hv
@@ -235,7 +266,7 @@ lemma trigR4_sin_pi_upper {x : ℝ} (hx : 0 < x) (h1 : x < 1) :
   set w := |v| / 2 with hw
   have hw0 : 0 ≤ w := by positivity
   have hwπ : w ≤ π / 4 := by rw [hw]; linarith
-  have hch := trigR4_sin_ge_chord hw0 hwπ
+  have hch := chord_mul_le_sin hw0 hwπ
   have hs2 : Real.sin (v/2) ^ 2 = Real.sin w ^ 2 := by
     rw [hw]
     rcases abs_cases v with ⟨h, _⟩ | ⟨h, _⟩
@@ -268,12 +299,12 @@ theorem sine_parabolic_bounds {x : ℝ} (hx : 0<x) (h1 : x<1) :
   constructor
   · rw [lt_div_iff₀ hd]
     rcases le_or_gt x (1/2) with h | h
-    · exact trigR4_sin_pi_lower_half hx h
-    · have := trigR4_sin_pi_lower_half (x := 1 - x) (by linarith) (by linarith)
+    · exact pi_mul_mul_one_sub_lt_sin_pi_mul hx h
+    · have := pi_mul_mul_one_sub_lt_sin_pi_mul (x := 1 - x) (by linarith) (by linarith)
       rw [show π * (1 - x) = π - π * x by ring, Real.sin_pi_sub] at this
       linarith [show (1 - x) * (1 - (1 - x)) = x * (1 - x) by ring]
   · rw [div_le_iff₀ hd]
-    linarith [trigR4_sin_pi_upper hx h1]
+    linarith [sin_pi_mul_le_four_mul_mul_one_sub hx h1]
 
 /-- DLMF 4.18.E5: sinh im le norm sin le cosh im. -/
 @[dlmf 4.18.E5]
@@ -365,7 +396,7 @@ theorem trig_unit_disc_bounds {z : ℂ} (hz : ‖z‖<1) :
     linarith
 
 /-- The cosine has no zeros in the open disk of radius `π/2`. -/
-lemma trigR4_cos_ne_zero_of_norm_lt {z : ℂ} (hz : ‖z‖ < π/2) : Complex.cos z ≠ 0 := by
+private lemma cos_ne_zero_of_norm_lt_pi_div_two {z : ℂ} (hz : ‖z‖ < π/2) : Complex.cos z ≠ 0 := by
   intro h
   obtain ⟨k, hk⟩ := Complex.cos_eq_zero_iff.mp h
   have hn : ‖z‖ = |2*(k:ℝ)+1| * π / 2 := by
@@ -396,14 +427,14 @@ theorem hasSum_sec_euler {z : ℂ} (hz : ‖z‖<π/2) :
   have hf : DifferentiableOn ℂ sec (Metric.ball 0 (π/2)) := by
     intro w hw
     have hw' : ‖w‖ < π/2 := by simpa using hw
-    exact ((Complex.differentiableAt_cos).inv (trigR4_cos_ne_zero_of_norm_lt hw')).differentiableWithinAt
+    exact ((Complex.differentiableAt_cos).inv (cos_ne_zero_of_norm_lt_pi_div_two hw')).differentiableWithinAt
   have hsmall : ∀ w : ℂ, ‖w‖ < 1/2 → HasSum (fun m => c m * w^m) (sec w) := by
     intro w hw
     rw [hconv]
-    exact Complex.trigR4_hasSum_even_iff.mpr (Polynomial.hasSum_eulerNumber_sec hw)
-  have h := Complex.trigR4_hasSum_of_differentiableOn_ball (by norm_num) hf hsmall hz
+    exact Complex.hasSum_ite_even_iff.mpr (Polynomial.hasSum_eulerNumber_sec hw)
+  have h := Complex.hasSum_pow_of_differentiableOn_ball (by norm_num) hf hsmall hz
   rw [hconv] at h
-  exact Complex.trigR4_hasSum_even_iff.mp h
+  exact Complex.hasSum_ite_even_iff.mp h
 
 /-- DLMF 4.20.E4: hasDerivAt csc. -/
 @[dlmf 4.20.E4]
@@ -432,7 +463,7 @@ theorem hasDerivAt_cot {z : ℂ} (hz : Complex.sin z≠0) :
   linear_combination -(Complex.sin_sq_add_cos_sq z)
 
 /-- Solutions of `f' = c f` on a preconnected open set are multiples of `exp (c z)`. -/
-lemma trigR4_exp_ode {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U) {f : ℂ → ℂ} {c : ℂ}
+private lemma exists_eq_mul_exp_of_hasDerivAt_eq_mul {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U) {f : ℂ → ℂ} {c : ℂ}
     (hf : ∀ z∈U, HasDerivAt f (c*f z) z) : ∃ C : ℂ, ∀ z∈U, f z = C*Complex.exp (c*z) := by
   have hk : ∀ z∈U, HasDerivAt (fun z => f z*Complex.exp (-(c*z))) 0 z := by
     intro z hz
@@ -449,7 +480,7 @@ lemma trigR4_exp_ode {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U) {f : 
   rw [← this, mul_assoc, ← Complex.exp_add]; simp
 
 /-- On a preconnected open set, a product of analytic functions vanishes only if a factor does. -/
-lemma trigR4_analytic_mul_eq_zero {U : Set ℂ} (hc : IsPreconnected U) {z₀ : ℂ} (hz₀ : z₀∈U)
+private lemma eqOn_zero_or_eqOn_zero_of_mul_eq_zero {U : Set ℂ} (hc : IsPreconnected U) {z₀ : ℂ} (hz₀ : z₀∈U)
     {f g : ℂ → ℂ} (hf : AnalyticOnNhd ℂ f U) (hg : AnalyticOnNhd ℂ g U) (hU : IsOpen U)
     (h : ∀ z∈U, f z*g z=0) : (∀ z∈U, f z=0) ∨ (∀ z∈U, g z=0) := by
   have hev : (f*g) =ᶠ[𝓝 z₀] 0 := by
@@ -465,7 +496,7 @@ lemma trigR4_analytic_mul_eq_zero {U : Set ℂ} (hc : IsPreconnected U) {z₀ : 
       (analyticOrderAt_eq_top.mp h1)) hz
 
 /-- An analytic solution of `g' = h g` vanishing at one point vanishes identically. -/
-lemma trigR4_zero_of_deriv_eq_mul {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
+private lemma eqOn_zero_of_deriv_eq_mul {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
     {g h : ℂ → ℂ} (hg : AnalyticOnNhd ℂ g U) (hh : AnalyticOnNhd ℂ h U)
     (hd : ∀ z∈U, deriv g z=h z*g z) {z₀ : ℂ} (hz₀ : z₀∈U) (h0 : g z₀=0) :
     ∀ z∈U, g z=0 := by
@@ -492,7 +523,7 @@ lemma trigR4_zero_of_deriv_eq_mul {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconne
 
 /-- DLMF 4.20.E12: trig linear ode general. -/
 @[dlmf 4.20.E12]
-theorem trig_linear_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U) (hne : U.Nonempty)
+theorem trig_linear_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
     {a : ℂ} (ha : a≠0) {w : ℂ→ℂ} (hw : AnalyticOnNhd ℂ w U) (h : ∀ z∈U,deriv (deriv w) z+a^2*w z=0) :
     ∃ A B : ℂ,∀ z∈U,w z=A*Complex.cos (a*z)+B*Complex.sin (a*z) := by
   have hw' := hw.deriv
@@ -500,11 +531,11 @@ theorem trig_linear_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnect
   have d1 : ∀ z∈U, HasDerivAt (deriv w) (-(a^2*w z)) z := fun z hz => by
     have := (hw' z hz).differentiableAt.hasDerivAt
     rwa [show deriv (deriv w) z = -(a^2*w z) by linear_combination h z hz] at this
-  obtain ⟨C₁, hC₁⟩ := trigR4_exp_ode hU hc (f := fun z => deriv w z + I*a*w z) (c := I*a)
+  obtain ⟨C₁, hC₁⟩ := exists_eq_mul_exp_of_hasDerivAt_eq_mul hU hc (f := fun z => deriv w z + I*a*w z) (c := I*a)
     (fun z hz => by
       convert (d1 z hz).add ((d0 z hz).const_mul (I*a)) using 1
       linear_combination (a^2)*(w z)*Complex.I_sq)
-  obtain ⟨C₂, hC₂⟩ := trigR4_exp_ode hU hc (f := fun z => deriv w z - I*a*w z) (c := -(I*a))
+  obtain ⟨C₂, hC₂⟩ := exists_eq_mul_exp_of_hasDerivAt_eq_mul hU hc (f := fun z => deriv w z - I*a*w z) (c := -(I*a))
     (fun z hz => by
       convert (d1 z hz).sub ((d0 z hz).const_mul (I*a)) using 1
       linear_combination (a^2)*(w z)*Complex.I_sq)
@@ -522,7 +553,7 @@ theorem trig_linear_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnect
   linear_combination e1 - e2
 
 /-- Every point of the unit "circle" `p^2+q^2=1` is `(cos c, sin c)` for some complex `c`. -/
-lemma trigR4_exists_cos_sin {p q : ℂ} (h : p^2+q^2=1) :
+private lemma exists_cos_eq_sin_eq_of_sq_add_sq_eq_one {p q : ℂ} (h : p^2+q^2=1) :
     ∃ c : ℂ, Complex.cos c=p ∧ Complex.sin c=q := by
   have hpq : (p+I*q)*(p-I*q) = 1 := by linear_combination h - q^2*Complex.I_sq
   have hne : p+I*q ≠ 0 := left_ne_zero_of_mul_eq_one hpq
@@ -564,7 +595,7 @@ theorem trig_energy_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnect
     have := hE.unique hE0
     simp only [Nat.cast_ofNat] at this
     linear_combination this/2
-  rcases trigR4_analytic_mul_eq_zero hc hz₀ hw' (hw''.add (analyticOnNhd_const.mul hw)) hU hprod
+  rcases eqOn_zero_or_eqOn_zero_of_mul_eq_zero hc hz₀ hw' (hw''.add (analyticOnNhd_const.mul hw)) hU hprod
     with h0 | h0
   · right
     obtain ⟨k, hk⟩ := hU.exists_is_const_of_deriv_eq_zero hc hw.differentiableOn
@@ -575,7 +606,7 @@ theorem trig_energy_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnect
     · left; intro z hz; rw [hk z hz]; field_simp; linear_combination e
     · right; intro z hz; rw [hk z hz]; field_simp; linear_combination e
   · left
-    obtain ⟨A, B, hAB⟩ := trig_linear_ode_general hU hc ⟨z₀, hz₀⟩ ha hw
+    obtain ⟨A, B, hAB⟩ := trig_linear_ode_general hU hc ha hw
       (fun z hz => by simpa using h0 z hz)
     have hder : ∀ z∈U, deriv w z = a*(-A*Complex.sin (a*z)+B*Complex.cos (a*z)) := by
       intro z hz
@@ -592,7 +623,7 @@ theorem trig_energy_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnect
       have := h z₀ hz₀
       rw [hder z₀ hz₀, hAB z₀ hz₀] at this
       linear_combination this - a^2*(A^2+B^2)*Complex.sin_sq_add_cos_sq (a*z₀)
-    obtain ⟨c, hc1, hc2⟩ := trigR4_exists_cos_sin hn
+    obtain ⟨c, hc1, hc2⟩ := exists_cos_eq_sin_eq_of_sq_add_sq_eq_one hn
     refine ⟨c, fun z hz => ?_⟩
     rw [hAB z hz, Complex.sin_add, hc1, hc2]
     field_simp
@@ -622,7 +653,7 @@ theorem trig_riccati_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnec
   by_cases h1 : ∃ z∈U, 1-I*a*w z = 0
   · right; right
     obtain ⟨z₁, hz₁, h1⟩ := h1
-    have := trigR4_zero_of_deriv_eq_mul hU hc hg1
+    have := eqOn_zero_of_deriv_eq_mul hU hc hg1
       ((analyticOnNhd_const.mul hg2) : AnalyticOnNhd ℂ (fun z => -I*a*(1+I*a*w z)) U)
       (fun z hz => (dg1 z hz).deriv) hz₁ h1
     intro z hz
@@ -634,7 +665,7 @@ theorem trig_riccati_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnec
   by_cases h2 : ∃ z∈U, 1+I*a*w z = 0
   · right; left
     obtain ⟨z₁, hz₁, h2⟩ := h2
-    have := trigR4_zero_of_deriv_eq_mul hU hc hg2
+    have := eqOn_zero_of_deriv_eq_mul hU hc hg2
       ((analyticOnNhd_const.mul hg1) : AnalyticOnNhd ℂ (fun z => I*a*(1-I*a*w z)) U)
       (fun z hz => (dg2 z hz).deriv) hz₁ h2
     intro z hz
@@ -651,7 +682,7 @@ theorem trig_riccati_ode_general {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnec
     convert (dg2 z hz).div (dg1 z hz) (h1 z hz) using 1
     field_simp
     ring
-  obtain ⟨C, hC⟩ := trigR4_exp_ode hU hc dq
+  obtain ⟨C, hC⟩ := exists_eq_mul_exp_of_hasDerivAt_eq_mul hU hc dq
   have hC0 : C ≠ 0 := by
     intro h0
     have := hC z₀ hz₀
@@ -930,7 +961,7 @@ theorem de_moivre_complex {z : ℂ} (hlo : -π<z.re) (hhi : z.re≤π) (n : ℂ)
   · simpa using hhi
 
 /-- Factorization of `x^n-y^n` over the powers of a primitive root of unity, indexed by `range n`. -/
-lemma trigR4_pow_sub_pow_eq_prod_range {ζ : ℂ} {n : ℕ} (hn : 0<n) (h : IsPrimitiveRoot ζ n)
+private lemma pow_sub_pow_eq_prod_range_sub_primitiveRoot_mul {ζ : ℂ} {n : ℕ} (hn : 0<n) (h : IsPrimitiveRoot ζ n)
     (x y : ℂ) : x^n-y^n = ∏ k∈Finset.range n, (x-ζ^k*y) := by
   classical
   rw [h.pow_sub_pow_eq_prod_sub_mul x y hn]
@@ -977,7 +1008,7 @@ theorem sin_multiple_product (z : ℂ) {n : ℕ} (hn : 0<n) :
     Finset.prod_div_distrib, Finset.prod_const, Finset.card_range, Finset.prod_mul_distrib,
     Finset.prod_const, Finset.card_range]
   have hprod : ∏ k∈Finset.range n, (1-ζ^k*u) = 1-u^n := by
-    rw [← trigR4_pow_sub_pow_eq_prod_range hn hζ, one_pow]
+    rw [← pow_sub_pow_eq_prod_range_sub_primitiveRoot_mul hn hζ, one_pow]
   rw [hprod]
   obtain ⟨m, rfl⟩ : ∃ m, n = m+1 := ⟨n-1, by omega⟩
   have hS : ((∑ i ∈ Finset.range (m+1), i : ℕ) : ℂ) = (m+1)*m/2 := by

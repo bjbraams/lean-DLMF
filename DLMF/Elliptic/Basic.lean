@@ -10,5 +10,8 @@ public import DLMF.Elliptic.Basic.Amplitude
 public import DLMF.Elliptic.Basic.Theta
 
 /-!
-# Definitions of real elliptic integrals, Jacobi amplitude and theta functions
+# Elliptic functions: foundational definitions
+
+Real Legendre elliptic integrals, Jacobi's amplitude and elliptic functions, and the Jacobi theta
+functions in DLMF normalization.
 -/

@@ -8,7 +8,28 @@ module
 public import Mathlib.RingTheory.Polynomial.Pochhammer
 
 /-!
-# Notation and basic definitions (DLMF §§26.1–26.2)
+# Notation and basic definitions for combinatorial analysis
+
+The notation and basic notions of DLMF §§26.1–26.2: rising and falling factorials,
+permutations, set and integer partitions, and lattice paths.
+
+## Main definitions
+
+* `latticePaths`: the lattice paths from `(0, 0)` to `(m, n)` with steps in a finite set
+  (DLMF §26.2).
+* `StaysWeaklyAboveDiagonal`: a path stays on or above the line `y = x` (DLMF §26.2).
+* `latticePathsFin`: `k`-dimensional lattice paths with unit steps (DLMF §26.2).
+* `stepLists`, `unitSteps`, `StaysAbove`, `ballotCount`: auxiliary step lists, the unit steps,
+  paths staying in `x ≤ y + d`, and their count.
+
+## Main results
+
+* `ascPochhammer_eval_eq_prod_range`: the rising factorial `x(x+1)⋯(x+n-1)` is `ascPochhammer`
+  at `x` (DLMF 26.1.1).
+* `mem_latticePaths`: membership in `latticePaths`.
+* `ballotCount_eq_choose_sub`: the ballot (reflection) count of paths staying in `x ≤ y + d`.
+
+## Implementation notes
 
 DLMF 26.1.1 introduces the rising and falling factorials `x^{(n)} = x(x+1)⋯(x+n-1)` and
 `x_{(n)} = x(x-1)⋯(x-n+1)`; these are Mathlib's `ascPochhammer` and `descPochhammer`
@@ -18,15 +39,14 @@ included, in `Equiv.Perm.partition`), a partition of a finite set `S` is a `Finp
 and a partition of an integer `n` is a `Nat.Partition n` (the partition function `p(n)` is
 `DLMF.Partitions.partitionFunction`).
 
-Lattice paths (§26.2) have no Mathlib counterpart and are defined here. A lattice path from
-`(0, 0)` to `(m, n)` with steps in a finite set `steps ⊆ ℕ × ℕ` is the list of its steps, a list
-of elements of `steps` whose sum is `(m, n)`. Every step used in DLMF (`(1,0)`, `(0,1)`,
-`(1,1)`, `(2,0)`, `(0,2)`) is nonzero, so such a path has at most `m + n` steps and
-`latticePaths steps m n` is a finite set (`mem_latticePaths`). A path "stays on or above the
-line `y = x`" when every vertex (every partial sum) does (`StaysWeaklyAboveDiagonal`); since the
+Lattice paths have no Mathlib counterpart. A lattice path from `(0, 0)` to `(m, n)` with steps
+in a finite set `steps ⊆ ℕ × ℕ` is the list of its steps, a list of elements of `steps` whose sum
+is `(m, n)`. Every step used in DLMF (`(1,0)`, `(0,1)`, `(1,1)`, `(2,0)`, `(0,2)`) is nonzero, so
+such a path has at most `m + n` steps and `latticePaths steps m n` is a finite set. A path
+"stays on or above the line `y = x`" when every vertex (every partial sum) does; since the
 segments are straight, this is the same as the whole path staying there. A `k`-dimensional
 lattice path from the origin to `(n₁, …, n_k)` with unit steps is the word of its step
-directions, a list over `Fin k` containing `i` exactly `nᵢ` times (`latticePathsFin`).
+directions, a list over `Fin k` containing `i` exactly `nᵢ` times.
 -/
 
 @[expose] public section
@@ -47,12 +67,6 @@ theorem ascPochhammer_eval_eq_prod_range {R : Type*} [CommSemiring R] (n : ℕ) 
   | zero => simp
   | succ n ih => simp [ascPochhammer_succ_right, ih, Finset.prod_range_succ]
 
-/-- DLMF 26.1.1 (falling factorial): `x(x-1)⋯(x-n+1)` is `descPochhammer` at `x` (Mathlib
-`descPochhammer_eval_eq_prod_range`). -/
-@[dlmf 26.1.E1]
-theorem descPochhammer_eval_eq_prod_range' {R : Type*} [CommRing R] (n : ℕ) (x : R) :
-    (descPochhammer R n).eval x = ∏ j ∈ range n, (x - j) :=
-  descPochhammer_eval_eq_prod_range n x
 
 /-! ### Lattice paths (§26.2) -/
 
@@ -83,7 +97,7 @@ def latticePaths (steps : Finset (ℕ × ℕ)) (m n : ℕ) : Finset (List (ℕ �
 
 /-- A list of nonzero steps has at most as many entries as the sum of the coordinates of its
 endpoint. -/
-lemma c26a_length_le_sum {l : List (ℕ × ℕ)} (h : ∀ s ∈ l, s ≠ (0, 0)) :
+private lemma length_le_sum_fst_add_sum_snd {l : List (ℕ × ℕ)} (h : ∀ s ∈ l, s ≠ (0, 0)) :
     l.length ≤ l.sum.1 + l.sum.2 := by
   induction l with
   | nil => simp
@@ -107,7 +121,7 @@ theorem mem_latticePaths {steps : Finset (ℕ × ℕ)} (h0 : (0, 0) ∉ steps) {
   · rintro ⟨⟨L, _, _, hs⟩, hsum⟩; exact ⟨hs, hsum⟩
   · rintro ⟨hs, hsum⟩
     refine ⟨⟨l.length, ?_, rfl, hs⟩, hsum⟩
-    have := c26a_length_le_sum fun s hs' => fun he => h0 (he ▸ hs s hs')
+    have := length_le_sum_fst_add_sum_snd fun s hs' => fun he => h0 (he ▸ hs s hs')
     rw [hsum] at this
     omega
 
@@ -136,7 +150,7 @@ def latticePathsFin {k : ℕ} (n : Fin k → ℕ) : Finset (List (Fin k)) :=
 /-! ### Lattice path counting by the first step -/
 
 /-- Decomposition of the lattice paths to `(m, n) ≠ (0, 0)` by their first step. -/
-lemma q26a_latticePaths_eq_biUnion {steps : Finset (ℕ × ℕ)} (h0 : (0, 0) ∉ steps) {m n : ℕ}
+private lemma latticePaths_eq_biUnion {steps : Finset (ℕ × ℕ)} (h0 : (0, 0) ∉ steps) {m n : ℕ}
     (hmn : (m, n) ≠ (0, 0)) :
     latticePaths steps m n = (steps.filter fun s => s.1 ≤ m ∧ s.2 ≤ n).biUnion fun s =>
       (latticePaths steps (m - s.1) (n - s.2)).map ⟨List.cons s, List.cons_injective⟩ := by
@@ -160,11 +174,11 @@ lemma q26a_latticePaths_eq_biUnion {steps : Finset (ℕ × ℕ)} (h0 : (0, 0) �
       ext <;> simp [hsum] <;> omega
 
 /-- Counting lattice paths with a property by their first step. -/
-theorem q26a_card_filter_latticePaths {steps : Finset (ℕ × ℕ)} (h0 : (0, 0) ∉ steps) {m n : ℕ}
+theorem card_filter_latticePaths {steps : Finset (ℕ × ℕ)} (h0 : (0, 0) ∉ steps) {m n : ℕ}
     (hmn : (m, n) ≠ (0, 0)) (Q : List (ℕ × ℕ) → Prop) [DecidablePred Q] :
     #{l ∈ latticePaths steps m n | Q l} = ∑ s ∈ steps.filter (fun s => s.1 ≤ m ∧ s.2 ≤ n),
       #{l ∈ latticePaths steps (m - s.1) (n - s.2) | Q (s :: l)} := by
-  rw [q26a_latticePaths_eq_biUnion h0 hmn, filter_biUnion, card_biUnion]
+  rw [latticePaths_eq_biUnion h0 hmn, filter_biUnion, card_biUnion]
   · refine sum_congr rfl fun s _ => ?_
     rw [filter_map, card_map]
     rfl
@@ -178,39 +192,39 @@ theorem q26a_card_filter_latticePaths {steps : Finset (ℕ × ℕ)} (h0 : (0, 0)
     exact hst (List.cons.inj hb).1.symm
 
 /-- The only lattice path to the origin is the empty path. -/
-theorem q26a_latticePaths_zero {steps : Finset (ℕ × ℕ)} (h0 : (0, 0) ∉ steps) :
+theorem latticePaths_zero_zero {steps : Finset (ℕ × ℕ)} (h0 : (0, 0) ∉ steps) :
     latticePaths steps 0 0 = {[]} := by
   ext l
   rw [mem_latticePaths h0, mem_singleton]
   constructor
   · rintro ⟨hs, hsum⟩
-    have := c26a_length_le_sum fun s hs' => fun he => h0 (he ▸ hs s hs')
+    have := length_le_sum_fst_add_sum_snd fun s hs' => fun he => h0 (he ▸ hs s hs')
     rw [hsum] at this
     exact List.eq_nil_of_length_eq_zero (by simpa using this)
   · rintro rfl; simp; rfl
 
 /-- Every vertex `(x, y)` of the path satisfies `x ≤ y + d`. -/
-def Q26aStaysAbove (d : ℤ) (l : List (ℕ × ℕ)) : Prop :=
+def StaysAbove (d : ℤ) (l : List (ℕ × ℕ)) : Prop :=
   ∀ i ∈ range (l.length + 1), (((l.take i).sum).1 : ℤ) ≤ ((l.take i).sum).2 + d
 
-/-- Decidability of `Q26aStaysAbove`. -/
-instance (d : ℤ) (l : List (ℕ × ℕ)) : Decidable (Q26aStaysAbove d l) := by
-  unfold Q26aStaysAbove; infer_instance
+/-- Decidability of `StaysAbove`. -/
+instance (d : ℤ) (l : List (ℕ × ℕ)) : Decidable (StaysAbove d l) := by
+  unfold StaysAbove; infer_instance
 
-/-- With offset `0`, `Q26aStaysAbove` is `StaysWeaklyAboveDiagonal`. -/
-theorem q26a_staysAbove_zero_iff (l : List (ℕ × ℕ)) :
-    Q26aStaysAbove 0 l ↔ StaysWeaklyAboveDiagonal l := by
-  simp only [Q26aStaysAbove, StaysWeaklyAboveDiagonal, add_zero, Nat.cast_le]
+/-- With offset `0`, `StaysAbove` is `StaysWeaklyAboveDiagonal`. -/
+theorem staysAbove_zero_iff (l : List (ℕ × ℕ)) :
+    StaysAbove 0 l ↔ StaysWeaklyAboveDiagonal l := by
+  simp only [StaysAbove, StaysWeaklyAboveDiagonal, add_zero, Nat.cast_le]
 
 /-- The empty path stays in `x ≤ y + d` iff `0 ≤ d`. -/
-lemma q26a_staysAbove_nil (d : ℤ) : Q26aStaysAbove d [] ↔ 0 ≤ d := by
-  simp [Q26aStaysAbove]
+private lemma staysAbove_nil (d : ℤ) : StaysAbove d [] ↔ 0 ≤ d := by
+  simp [StaysAbove]
 
 /-- A path stays in `x ≤ y + d` iff the origin does and the rest stays in the shifted
 half-plane. -/
-lemma q26a_staysAbove_cons (d : ℤ) (s : ℕ × ℕ) (l : List (ℕ × ℕ)) :
-    Q26aStaysAbove d (s :: l) ↔ 0 ≤ d ∧ Q26aStaysAbove (d + s.2 - s.1) l := by
-  simp only [Q26aStaysAbove, mem_range, List.length_cons]
+private lemma staysAbove_cons (d : ℤ) (s : ℕ × ℕ) (l : List (ℕ × ℕ)) :
+    StaysAbove d (s :: l) ↔ 0 ≤ d ∧ StaysAbove (d + s.2 - s.1) l := by
+  simp only [StaysAbove, mem_range, List.length_cons]
   constructor
   · intro h
     refine ⟨by simpa using h 0 (by omega), fun i hi => ?_⟩
@@ -227,41 +241,41 @@ lemma q26a_staysAbove_cons (d : ℤ) (s : ℕ × ℕ) (l : List (ℕ × ℕ)) :
       linarith
 
 /-- The count of unit-step paths to `(m, n)` staying in `x ≤ y + d`. -/
-def q26a_ballot (d : ℤ) (m n : ℕ) : ℕ := #{l ∈ latticePaths unitSteps m n | Q26aStaysAbove d l}
+def ballotCount (d : ℤ) (m n : ℕ) : ℕ := #{l ∈ latticePaths unitSteps m n | StaysAbove d l}
 
 /-- No path stays in `x ≤ y + d` for `d < 0` (the origin fails). -/
-lemma q26a_ballot_neg {d : ℤ} (hd : d < 0) (m n : ℕ) : q26a_ballot d m n = 0 := by
-  rw [q26a_ballot, card_eq_zero, filter_eq_empty_iff]
+private lemma ballotCount_of_neg {d : ℤ} (hd : d < 0) (m n : ℕ) : ballotCount d m n = 0 := by
+  rw [ballotCount, card_eq_zero, filter_eq_empty_iff]
   intro l _ h
   have := h 0 (by simp)
   simp at this; omega
 
 /-- `(0, 0)` is not a unit step. -/
-lemma q26a_unitSteps_h0 : (0, 0) ∉ unitSteps := by decide
+private lemma zero_not_mem_unitSteps : (0, 0) ∉ unitSteps := by decide
 
 /-- The empty path is counted when `0 ≤ d`. -/
-lemma q26a_ballot_zero_zero {d : ℤ} (hd : 0 ≤ d) : q26a_ballot d 0 0 = 1 := by
-  rw [q26a_ballot, q26a_latticePaths_zero q26a_unitSteps_h0]
+private lemma ballotCount_zero_zero {d : ℤ} (hd : 0 ≤ d) : ballotCount d 0 0 = 1 := by
+  rw [ballotCount, latticePaths_zero_zero zero_not_mem_unitSteps]
   rw [filter_singleton]
-  simp [(q26a_staysAbove_nil d).2 hd]
+  simp [(staysAbove_nil d).2 hd]
 
-/-- First-step recurrence for `q26a_ballot`. -/
-lemma q26a_ballot_step {d : ℤ} (hd : 0 ≤ d) {m n : ℕ} (hmn : (m, n) ≠ (0, 0)) :
-    q26a_ballot d m n = ∑ s ∈ unitSteps.filter (fun s => s.1 ≤ m ∧ s.2 ≤ n),
-      q26a_ballot (d + s.2 - s.1) (m - s.1) (n - s.2) := by
-  rw [q26a_ballot, q26a_card_filter_latticePaths q26a_unitSteps_h0 hmn]
+/-- First-step recurrence for `ballotCount`. -/
+private lemma ballotCount_eq_sum_unitSteps {d : ℤ} (hd : 0 ≤ d) {m n : ℕ} (hmn : (m, n) ≠ (0, 0)) :
+    ballotCount d m n = ∑ s ∈ unitSteps.filter (fun s => s.1 ≤ m ∧ s.2 ≤ n),
+      ballotCount (d + s.2 - s.1) (m - s.1) (n - s.2) := by
+  rw [ballotCount, card_filter_latticePaths zero_not_mem_unitSteps hmn]
   refine sum_congr rfl fun s _ => ?_
-  rw [q26a_ballot]
+  rw [ballotCount]
   congr 1
   refine filter_congr fun l _ => ?_
-  rw [q26a_staysAbove_cons]
+  rw [staysAbove_cons]
   simp [hd]
 
-/-- `q26a_ballot` recurrence at `(m+1, n+1)`. -/
-lemma q26a_ballot_succ_succ {d : ℤ} (hd : 0 ≤ d) (m n : ℕ) :
-    q26a_ballot d (m + 1) (n + 1) =
-      q26a_ballot (d - 1) m (n + 1) + q26a_ballot (d + 1) (m + 1) n := by
-  rw [q26a_ballot_step hd (by simp), show unitSteps.filter (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ n + 1)
+/-- `ballotCount` recurrence at `(m+1, n+1)`. -/
+private lemma ballotCount_succ_succ {d : ℤ} (hd : 0 ≤ d) (m n : ℕ) :
+    ballotCount d (m + 1) (n + 1) =
+      ballotCount (d - 1) m (n + 1) + ballotCount (d + 1) (m + 1) n := by
+  rw [ballotCount_eq_sum_unitSteps hd (by simp), show unitSteps.filter (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ n + 1)
       = unitSteps by
     ext ⟨a, b⟩; simp only [unitSteps, mem_filter, mem_insert, mem_singleton, Prod.mk.injEq]
     omega]
@@ -271,52 +285,52 @@ lemma q26a_ballot_succ_succ {d : ℤ} (hd : 0 ≤ d) (m n : ℕ) :
   simp only [Nat.cast_zero, Nat.cast_one, add_zero, Nat.add_sub_cancel, Nat.sub_zero,
     sub_zero]
 
-/-- `q26a_ballot` recurrence at `(0, n+1)`. -/
-lemma q26a_ballot_zero_succ {d : ℤ} (hd : 0 ≤ d) (n : ℕ) :
-    q26a_ballot d 0 (n + 1) = q26a_ballot (d + 1) 0 n := by
-  rw [q26a_ballot_step hd (by simp), show unitSteps.filter (fun s => s.1 ≤ 0 ∧ s.2 ≤ n + 1)
+/-- `ballotCount` recurrence at `(0, n+1)`. -/
+private lemma ballotCount_zero_succ {d : ℤ} (hd : 0 ≤ d) (n : ℕ) :
+    ballotCount d 0 (n + 1) = ballotCount (d + 1) 0 n := by
+  rw [ballotCount_eq_sum_unitSteps hd (by simp), show unitSteps.filter (fun s => s.1 ≤ 0 ∧ s.2 ≤ n + 1)
       = {(0, 1)} by
     ext ⟨a, b⟩; simp only [unitSteps, mem_filter, mem_insert, mem_singleton, Prod.mk.injEq]
     omega]
   simp
 
-/-- `q26a_ballot` recurrence at `(m+1, 0)`. -/
-lemma q26a_ballot_succ_zero {d : ℤ} (hd : 0 ≤ d) (m : ℕ) :
-    q26a_ballot d (m + 1) 0 = q26a_ballot (d - 1) m 0 := by
-  rw [q26a_ballot_step hd (by simp), show unitSteps.filter (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ 0)
+/-- `ballotCount` recurrence at `(m+1, 0)`. -/
+private lemma ballotCount_succ_zero {d : ℤ} (hd : 0 ≤ d) (m : ℕ) :
+    ballotCount d (m + 1) 0 = ballotCount (d - 1) m 0 := by
+  rw [ballotCount_eq_sum_unitSteps hd (by simp), show unitSteps.filter (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ 0)
       = {(1, 0)} by
     ext ⟨a, b⟩; simp only [unitSteps, mem_filter, mem_insert, mem_singleton, Prod.mk.injEq]
     omega]
   simp
 
 /-- The ballot (reflection) count: paths to `(m, n)` staying in `x ≤ y + d`, `m ≤ n + d`. -/
-theorem q26a_ballot_eq (N : ℕ) : ∀ (d m n : ℕ), m + n = N → m ≤ n + d →
-    (q26a_ballot d m n : ℤ) =
+theorem ballotCount_eq_choose_sub (N : ℕ) : ∀ (d m n : ℕ), m + n = N → m ≤ n + d →
+    (ballotCount d m n : ℤ) =
       (m + n).choose n - if d < m then ((m + n).choose (m - d - 1) : ℤ) else 0 := by
   induction N with
   | zero =>
     intro d m n h _
     obtain ⟨rfl, rfl⟩ : m = 0 ∧ n = 0 := by omega
-    simp [q26a_ballot_zero_zero (Int.natCast_nonneg d)]
+    simp [ballotCount_zero_zero (Int.natCast_nonneg d)]
   | succ N ih =>
     intro d m n h hle
     rcases m with _ | m
     · rcases n with _ | n
       · omega
-      rw [q26a_ballot_zero_succ (Int.natCast_nonneg d),
+      rw [ballotCount_zero_succ (Int.natCast_nonneg d),
         show (d : ℤ) + 1 = ((d + 1 : ℕ) : ℤ) by push_cast; ring,
         ih (d + 1) 0 n (by omega) (by omega)]
       simp
     rcases n with _ | n
     · obtain ⟨d, rfl⟩ : ∃ d', d = d' + 1 := ⟨d - 1, by omega⟩
-      rw [q26a_ballot_succ_zero (Int.natCast_nonneg _),
+      rw [ballotCount_succ_zero (Int.natCast_nonneg _),
         show ((d + 1 : ℕ) : ℤ) - 1 = (d : ℤ) by push_cast; ring,
         ih d m 0 (by omega) (by omega)]
       simp [show ¬ d + 1 < m + 1 by omega, show ¬ d < m by omega]
-    rw [q26a_ballot_succ_succ (Int.natCast_nonneg _)]
+    rw [ballotCount_succ_succ (Int.natCast_nonneg _)]
     push_cast
     rcases d with _ | d
-    · rw [q26a_ballot_neg (by norm_num), show ((0 : ℕ) : ℤ) + 1 = ((1 : ℕ) : ℤ) by norm_num,
+    · rw [ballotCount_of_neg (by norm_num), show ((0 : ℕ) : ℤ) + 1 = ((1 : ℕ) : ℤ) by norm_num,
         ih 1 (m + 1) n (by omega) (by omega)]
       rw [show m + 1 + (n + 1) = (m + 1 + n) + 1 by ring]
       rcases m with _ | m

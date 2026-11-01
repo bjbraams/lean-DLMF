@@ -16,12 +16,39 @@ public import DLMF.Hypergeometric.Identities
 public import Mathlib.Tactic.Monotonicity.Lemmas
 
 /-!
-# Laplace integrals of confluent hypergeometric functions
+# Laplace and Mellin transforms of Kummer and Tricomi functions
 
-Initial Laplace-transform identities and the integrability estimates needed for them.
+This file proves the derivative identities of DLMF §13.10(i) and the Laplace and Mellin
+transforms of the regularized Kummer function and of Tricomi's function (DLMF §13.10(ii)–(v)).
 
-Source references and common attribution are retained in
-`DLMF.Confluent.Integrals`.
+## Main results
+
+* `deriv_regularizedHGFun_shift`, `deriv_kummerU_shift`: indefinite integrals, stated as
+  derivative identities (DLMF 13.10.1, 13.10.2).
+* `laplace_regularizedHGFun`: the Laplace transform of `𝐌` in its full convergence half-plane
+  (DLMF 13.10.3).
+* `laplace_regularizedHGFun_self`: the self-transform (DLMF 13.10.4).
+* `mellin_regularizedHGFun_exp`: DLMF 13.10.5.
+* `laplace_kummerU`: the Laplace transform of `U`, for `0 < Re z` (DLMF 13.10.7).
+* `mellin_regularizedHGFun`, `mellin_kummerU`: Mellin transforms of `𝐌` and `U`
+  (DLMF 13.10.10, 13.10.11).
+
+## Implementation notes
+
+Laplace and Mellin transforms are integrals over the positive real half-line, and Gauss
+functions in the results use cut-plane continuation. `U` is not complex-differentiable on the
+cut, so the derivative identity for `U` restricts `z` to the slit plane.
+
+The Laplace transform of `𝐌` is proved by termwise integration when `‖k‖ < Re z`, using
+Mathlib's summable-integral-norm theorem with a regularized Gauss series summing the absolute
+Gamma moments, and then by holomorphic continuation throughout the full convergence
+half-plane, retaining all denominator parameters, including Gamma poles. The self-transform
+specializes it using the binomial identity. The boundary Mellin transform 13.10.5 uses a
+summable Gamma-moment majorant from the Gamma-ratio asymptotics and regularized Gauss
+summation, including singular denominator parameters. Tricomi's Mellin transform follows from
+its Laplace representation and Fubini's theorem; absolute convergence of the double kernel
+reduces to the Tau Ceti contributors' second Beta integrability theorem.
+
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
 -/
 
@@ -493,8 +520,7 @@ theorem mellin_kummerU {a b lam : ℂ}
       rw [setIntegral_congr_fun measurableSet_Ioi (fun u hu => hinner u hu), integral_const_mul]
       congr 2
       rw [show a - b + 1 = (a - lam) + (lam - b + 1) by ring]
-      exact DLMF.Gamma.beta_on_Ioi (by simp; linarith)
-        (by simp only [sub_re, add_re, one_re] at hlam0 ⊢; linarith)
+      exact DLMF.Gamma.beta_on_Ioi
     _ = _ := by
       have hG : Gamma ((a - lam) + (lam - b + 1)) ≠ 0 :=
         Gamma_ne_zero_of_re_pos (by simp only [sub_re, add_re, one_re] at hlam0 ⊢; linarith)

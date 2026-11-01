@@ -11,24 +11,39 @@ public import DLMF.QSeries.Identities
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
 
 /-!
-# Theta functions: definitions and periodic properties (DLMF §§20.1–20.2)
+# Theta functions: series, periodicity and zeros (DLMF §20.2)
 
-The project's theta functions are `DLMF.Elliptic.jacobiThetaOneTau … jacobiThetaFourTau`
-(`θⱼ(z|τ)` in DLMF normalization, defined from Mathlib's `jacobiTheta₂`; `q = e^{iπτ}`,
-period `π` in `z`). As in Mathlib, they are totalized: for `Im τ ≤ 0` they vanish.
+The relation between the nome forms `θⱼ(z,q)` and the lattice forms `θⱼ(z|τ)`, the Fourier
+series DLMF 20.2.1–20.2.4 in DLMF's sine/cosine form, analyticity in `z` and `τ`, the
+lattice quasi-periodicity DLMF 20.2.6–20.2.9, the half-period translations
+DLMF 20.2.11–20.2.14 and the `z`-zeros of DLMF §20.2(iv).
 
-This module adds
+## Main definitions
 
-* the nome forms `jacobiThetaOneQ … jacobiThetaFourQ` (`θⱼ(z,q)`, DLMF §20.1), defined by their
-  Fourier series in `q`. DLMF's convention `q^α = e^{iαπτ}` presupposes a known `τ`; for `θ₁, θ₂`
-  we use the principal `q^{1/4}`, so `θⱼ(z, e^{iπτ}) = θⱼ(z|τ)` holds for `-1 < Re τ ≤ 1`
-  (`jacobiThetaTwoQ_cexp`), while for `θ₃, θ₄` it holds for every `τ`;
-* the theta constants `θⱼ(0|τ)`, `θ₁'(0|τ)` (`…NullTau`, `…DerivNullTau`) and their nome forms;
-* the Fourier series 20.2.1–20.2.4 in DLMF's sine/cosine form, the lattice quasi-periodicity
-  20.2.6–20.2.9, the half-period translations 20.2.10–20.2.14 and the `z`-zeros of §20.2(iv).
+* `thetaDirichletKernel`: the Dirichlet kernel `Uₙ(z) = ∑_{k=0}^{2n} e^{2i(k-n)z}`.
+* `jacobiThetaOneDivSinTerm`: the terms of the series for `θ₁(z|τ)/sin z`.
 
-Statements are given in the lattice-parameter form `θⱼ(z|τ)`, which avoids the branch of `q^{1/4}`;
-results with `q²`, `iq`, … are stated with `2τ`, `τ + 1/2`, … accordingly.
+## Main results
+
+* `jacobiThetaThreeQ_cexp`, `jacobiThetaFourQ_cexp`: `θⱼ(z, e^{iπτ}) = θⱼ(z|τ)` for every `τ`.
+* `jacobiThetaOneQ_cexp`, `jacobiThetaTwoQ_cexp`: the same for `-1 < Re τ ≤ 1`.
+* `jacobiThetaOneTau_hasSum_sin`, `jacobiThetaTwoTau_hasSum_cos`,
+  `jacobiThetaThreeTau_hasSum_cos`, `jacobiThetaFourTau_hasSum_cos`: DLMF 20.2.1–20.2.4.
+* `jacobiThetaOneTau_add_lattice`, …, `jacobiThetaFourTau_add_lattice`: DLMF 20.2.6–20.2.9.
+* `differentiable_jacobiThetaTau`, `jacobiThetaOneTau_div_sin_analytic`,
+  `jacobiThetaThreeTau_natural_boundary`: analyticity and the natural boundary
+  (DLMF §20.2(ii)).
+* `jacobiThetaTau_deriv_hasSum`: termwise differentiated series (DLMF §20.2(i)).
+* `jacobiThetaOneTau_half_periods`, …, `jacobiThetaFourTau_half_periods`:
+  DLMF 20.2.11–20.2.14.
+* `jacobiThetaTau_eq_zero_iff`: the `z`-zeros of the theta functions (DLMF §20.2(iv)).
+* `jacobiThetaNullTau_ne_zero`: `θ₂(0|τ), θ₃(0|τ), θ₄(0|τ) ≠ 0` for `Im τ > 0`.
+
+## Implementation notes
+
+The theta functions are totalized as in Mathlib: for `Im τ ≤ 0` they vanish. Statements are
+given in the lattice-parameter form `θⱼ(z|τ)`, which avoids the branch of `q^{1/4}`; results
+with `q²`, `iq`, … are stated with `2τ`, `τ + 1/2`, … accordingly.
 -/
 
 @[expose] public section
@@ -47,23 +62,19 @@ open DLMF.Elliptic DLMF.QSeries Filter Topology
 /-! ### Elementary helpers -/
 
 /-- `(-1)^k = e^{iπk}` for integer `k`. -/
-theorem th20_neg_one_zpow (k : ℤ) : (-1 : ℂ) ^ k = cexp (π * I * k) := by
+theorem neg_one_zpow_eq_exp (k : ℤ) : (-1 : ℂ) ^ k = cexp (π * I * k) := by
   rw [← exp_pi_mul_I, ← exp_int_mul]; ring_nf
 
 /-- `(e^w)^k = e^{kw}` for integer `k`. -/
-theorem th20_exp_zpow (w : ℂ) (k : ℤ) : cexp w ^ k = cexp (k * w) := by
+theorem exp_zpow_eq_exp_intCast_mul (w : ℂ) (k : ℤ) : cexp w ^ k = cexp (k * w) := by
   rw [← exp_int_mul]
 
 /-- The exponential is unchanged by adding `2πi` times an integer. -/
-lemma th20_exp_add_int (w : ℂ) (k : ℤ) : cexp (w + k * (2 * π * I)) = cexp w := by
+private lemma exp_add_int_mul_two_pi_I (w : ℂ) (k : ℤ) : cexp (w + k * (2 * π * I)) = cexp w := by
   rw [exp_add, exp_int_mul_two_pi_mul_I, mul_one]
 
-/-- `e^{iπ/2} = i`. -/
-theorem th20_exp_pi_div_two_mul_I : cexp (π / 2 * I) = I := by
-  rw [exp_mul_I, cos_pi_div_two, sin_pi_div_two]; ring
-
 /-- `cos(x + nπ) = (-1)ⁿ cos x` for complex `x`. -/
-lemma th20_cos_add_nat_mul_pi (x : ℂ) (n : ℕ) : cos (x + n * π) = (-1) ^ n * cos x := by
+private lemma complex_cos_add_nat_mul_pi (x : ℂ) (n : ℕ) : cos (x + n * π) = (-1) ^ n * cos x := by
   induction n with
   | zero => simp
   | succ k ih => rw [Nat.cast_succ, add_mul, one_mul, ← add_assoc, cos_add_pi, ih]; ring
@@ -75,7 +86,7 @@ theorem jacobiThetaThreeQ_cexp (z τ : ℂ) :
     jacobiThetaThreeQ z (cexp (π * I * τ)) = jacobiThetaThreeTau z τ := by
   rw [jacobiThetaThreeQ, jacobiThetaThreeTau_eq_tsum]
   refine tsum_congr fun n => ?_
-  rw [th20_exp_zpow, ← exp_add]
+  rw [exp_zpow_eq_exp_intCast_mul, ← exp_add]
   congr 1; push_cast; ring
 
 /-- `θ₄(z, e^{iπτ}) = θ₄(z|τ)` for every `τ`. -/
@@ -83,7 +94,7 @@ theorem jacobiThetaFourQ_cexp (z τ : ℂ) :
     jacobiThetaFourQ z (cexp (π * I * τ)) = jacobiThetaFourTau z τ := by
   rw [jacobiThetaFourQ, jacobiThetaFourTau_eq_tsum]
   refine tsum_congr fun n => ?_
-  rw [th20_exp_zpow, mul_assoc, ← exp_add]
+  rw [exp_zpow_eq_exp_intCast_mul, mul_assoc, ← exp_add]
   congr 2; push_cast; ring
 
 /-- `θ₂(z|τ) = e^{iπτ/4} ∑_{n∈ℤ} q^{n(n+1)} e^{(2n+1)iz}`, `q = e^{iπτ}`, for every `τ`. -/
@@ -92,7 +103,7 @@ theorem jacobiThetaTwoTau_eq_tsum (z τ : ℂ) :
       ∑' n : ℤ, cexp (π * I * τ) ^ (n * (n + 1)) * cexp ((2 * n + 1) * I * z) := by
   rw [jacobiThetaTwoTau, jacobiThetaThreeTau_eq_tsum, ← tsum_mul_left, ← tsum_mul_left]
   refine tsum_congr fun n => ?_
-  rw [th20_exp_zpow, ← exp_add, ← exp_add, ← exp_add]
+  rw [exp_zpow_eq_exp_intCast_mul, ← exp_add, ← exp_add, ← exp_add]
   congr 1; push_cast; ring
 
 /-- `θ₁(z|τ) = -i e^{iπτ/4} ∑_{n∈ℤ} (-1)ⁿ q^{n(n+1)} e^{(2n+1)iz}`, `q = e^{iπτ}`, for every `τ`. -/
@@ -102,15 +113,15 @@ theorem jacobiThetaOneTau_eq_tsum (z τ : ℂ) :
   rw [jacobiThetaOneTau, jacobiThetaTwoTau_eq_tsum, mul_assoc, ← tsum_mul_left, ← tsum_mul_left,
     ← tsum_neg]
   refine tsum_congr fun n => ?_
-  rw [th20_neg_one_zpow]
+  rw [neg_one_zpow_eq_exp]
   have key : cexp ((2 * n + 1) * I * (z + π / 2)) =
       cexp (π / 2 * I) * cexp (π * I * n) * cexp ((2 * n + 1) * I * z) := by
     simp only [← exp_add]; congr 1; ring
-  rw [key, th20_exp_pi_div_two_mul_I]
+  rw [key, Complex.exp_pi_div_two_mul_I]
   ring
 
 /-- The principal fourth root of the nome: `(e^{iπτ})^{1/4} = e^{iπτ/4}` when `-1 < Re τ ≤ 1`. -/
-lemma th20_cexp_cpow_quarter {τ : ℂ} (h1 : -1 < τ.re) (h2 : τ.re ≤ 1) :
+private lemma exp_pi_I_mul_cpow_quarter {τ : ℂ} (h1 : -1 < τ.re) (h2 : τ.re ≤ 1) :
     cexp (π * I * τ) ^ (1 / 4 : ℂ) = cexp (π * I * τ / 4) := by
   have him : (π * I * τ).im = π * τ.re := by simp
   rw [cpow_def_of_ne_zero (exp_ne_zero _), log_exp]
@@ -121,17 +132,17 @@ lemma th20_cexp_cpow_quarter {τ : ℂ} (h1 : -1 < τ.re) (h2 : τ.re ≤ 1) :
 /-- `θ₂(z, e^{iπτ}) = θ₂(z|τ)` when `-1 < Re τ ≤ 1` (principal `q^{1/4}`). -/
 theorem jacobiThetaTwoQ_cexp (z : ℂ) {τ : ℂ} (h1 : -1 < τ.re) (h2 : τ.re ≤ 1) :
     jacobiThetaTwoQ z (cexp (π * I * τ)) = jacobiThetaTwoTau z τ := by
-  rw [jacobiThetaTwoQ, jacobiThetaTwoTau_eq_tsum, th20_cexp_cpow_quarter h1 h2]
+  rw [jacobiThetaTwoQ, jacobiThetaTwoTau_eq_tsum, exp_pi_I_mul_cpow_quarter h1 h2]
 
 /-- `θ₁(z, e^{iπτ}) = θ₁(z|τ)` when `-1 < Re τ ≤ 1` (principal `q^{1/4}`). -/
 theorem jacobiThetaOneQ_cexp (z : ℂ) {τ : ℂ} (h1 : -1 < τ.re) (h2 : τ.re ≤ 1) :
     jacobiThetaOneQ z (cexp (π * I * τ)) = jacobiThetaOneTau z τ := by
-  rw [jacobiThetaOneQ, jacobiThetaOneTau_eq_tsum, th20_cexp_cpow_quarter h1 h2]
+  rw [jacobiThetaOneQ, jacobiThetaOneTau_eq_tsum, exp_pi_I_mul_cpow_quarter h1 h2]
 
 /-! ### §20.2(i) Fourier series -/
 
 /-- Summability of the `θ₃` series for `Im τ > 0`. -/
-theorem th20_hasSum_three (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
+theorem hasSum_jacobiThetaThreeTau (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     HasSum (fun n : ℤ => cexp (π * I * n ^ 2 * τ + 2 * I * n * z)) (jacobiThetaThreeTau z τ) := by
   have h := hasSum_jacobiTheta₂_term (z / π) hτ
   rw [jacobiThetaThreeTau]
@@ -146,7 +157,7 @@ theorem th20_hasSum_three (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
 theorem jacobiThetaThreeTau_hasSum_cos (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     HasSum (fun n : ℕ => 2 * cexp (π * I * τ * ((n : ℂ) + 1) ^ 2) * cos (2 * ((n : ℂ) + 1) * z))
       (jacobiThetaThreeTau z τ - 1) := by
-  have h := (th20_hasSum_three z hτ).nat_add_neg
+  have h := (hasSum_jacobiThetaThreeTau z hτ).nat_add_neg
   rw [← hasSum_nat_add_iff' 1] at h
   simp only [Finset.sum_range_one, Int.cast_natCast, Int.cast_neg, Nat.cast_zero, Int.cast_zero]
     at h
@@ -168,7 +179,7 @@ theorem jacobiThetaFourTau_hasSum_cos (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
   rw [jacobiThetaFourTau]
   convert h using 2 with n
   rw [show 2 * ((n : ℂ) + 1) * (z + π / 2) = 2 * ((n : ℂ) + 1) * z + (n + 1 : ℕ) * π by
-    push_cast; ring, th20_cos_add_nat_mul_pi]
+    push_cast; ring, complex_cos_add_nat_mul_pi]
   ring
 
 /-- DLMF 20.2.2: `θ₂(z|τ) = 2∑_{n≥0} q^{(n+1/2)²} cos((2n+1)z)`, `q^{(n+1/2)²} = e^{iπτ(n+1/2)²}`,
@@ -177,7 +188,7 @@ theorem jacobiThetaFourTau_hasSum_cos (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
 theorem jacobiThetaTwoTau_hasSum_cos (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     HasSum (fun n : ℕ => 2 * cexp (π * I * τ * ((n : ℂ) + 1 / 2) ^ 2) * cos ((2 * n + 1) * z))
       (jacobiThetaTwoTau z τ) := by
-  have h := (th20_hasSum_three (z + π * τ / 2) hτ).mul_left (cexp (π * I * τ / 4 + I * z))
+  have h := (hasSum_jacobiThetaThreeTau (z + π * τ / 2) hτ).mul_left (cexp (π * I * τ / 4 + I * z))
   have h2 := h.nat_add_neg_add_one
   rw [jacobiThetaTwoTau]
   convert h2 using 1
@@ -203,13 +214,13 @@ theorem jacobiThetaOneTau_hasSum_sin (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
   rw [jacobiThetaOneTau]
   convert h using 2 with n
   rw [show (2 * (n : ℂ) + 1) * (z + π / 2) = (2 * n + 1) * z + π / 2 + n * π by ring,
-    th20_cos_add_nat_mul_pi, cos_add_pi_div_two]
+    complex_cos_add_nat_mul_pi, cos_add_pi_div_two]
   ring
 
 /-! ### §20.2(ii) Periodicity and quasi-periodicity -/
 
 /-- Lattice quasi-periodicity of `θ₃` in exponential form. -/
-lemma th20_three_add_lattice (z τ : ℂ) (m n : ℤ) :
+private lemma jacobiThetaThreeTau_add_lattice_exp (z τ : ℂ) (m n : ℤ) :
     jacobiThetaThreeTau (z + (m + n * τ) * π) τ =
       cexp (-(π * I * τ * n ^ 2)) * cexp (-2 * I * n * z) * jacobiThetaThreeTau z τ := by
   rw [jacobiThetaThreeTau_eq_tsum, jacobiThetaThreeTau_eq_tsum, ← tsum_mul_left,
@@ -224,7 +235,7 @@ lemma th20_three_add_lattice (z τ : ℂ) (m n : ℤ) :
 theorem jacobiThetaThreeTau_add_lattice (z τ : ℂ) (m n : ℤ) :
     jacobiThetaThreeTau (z + (m + n * τ) * π) τ =
       cexp (-(π * I * τ * n ^ 2)) * cexp (-2 * I * n * z) * jacobiThetaThreeTau z τ :=
-  th20_three_add_lattice z τ m n
+  jacobiThetaThreeTau_add_lattice_exp z τ m n
 
 /-- DLMF 20.2.9: `θ₄(z + (m + nτ)π|τ) = (-1)ⁿ q^{-n²} e^{-2inz} θ₄(z|τ)`. -/
 @[dlmf 20.2.E9]
@@ -233,7 +244,7 @@ theorem jacobiThetaFourTau_add_lattice (z τ : ℂ) (m n : ℤ) :
       (-1 : ℂ) ^ n * cexp (-(π * I * τ * n ^ 2)) * cexp (-2 * I * n * z) *
         jacobiThetaFourTau z τ := by
   rw [jacobiThetaFourTau, jacobiThetaFourTau, show z + (m + n * τ) * π + π / 2 =
-    (z + π / 2) + (m + n * τ) * π by ring, th20_three_add_lattice, th20_neg_one_zpow]
+    (z + π / 2) + (m + n * τ) * π by ring, jacobiThetaThreeTau_add_lattice_exp, neg_one_zpow_eq_exp]
   simp only [← exp_add]
   congr 1
   rw [exp_eq_exp_iff_exists_int]
@@ -246,7 +257,7 @@ theorem jacobiThetaTwoTau_add_lattice (z τ : ℂ) (m n : ℤ) :
       (-1 : ℂ) ^ m * cexp (-(π * I * τ * n ^ 2)) * cexp (-2 * I * n * z) *
         jacobiThetaTwoTau z τ := by
   rw [jacobiThetaTwoTau, jacobiThetaTwoTau, show z + (m + n * τ) * π + π * τ / 2 =
-    (z + π * τ / 2) + (m + n * τ) * π by ring, th20_three_add_lattice, th20_neg_one_zpow]
+    (z + π * τ / 2) + (m + n * τ) * π by ring, jacobiThetaThreeTau_add_lattice_exp, neg_one_zpow_eq_exp]
   simp only [← mul_assoc, ← exp_add]
   congr 2
   ring
@@ -258,8 +269,8 @@ theorem jacobiThetaOneTau_add_lattice (z τ : ℂ) (m n : ℤ) :
       (-1 : ℂ) ^ (m + n) * cexp (-(π * I * τ * n ^ 2)) * cexp (-2 * I * n * z) *
         jacobiThetaOneTau z τ := by
   rw [jacobiThetaOneTau, jacobiThetaOneTau, show z + (m + n * τ) * π + π / 2 =
-    (z + π / 2) + (m + n * τ) * π by ring, jacobiThetaTwoTau_add_lattice, th20_neg_one_zpow,
-    th20_neg_one_zpow]
+    (z + π / 2) + (m + n * τ) * π by ring, jacobiThetaTwoTau_add_lattice, neg_one_zpow_eq_exp,
+    neg_one_zpow_eq_exp]
   have : cexp (-2 * I * n * (z + π / 2)) = cexp (π * I * n) * cexp (-2 * I * n * z) := by
     rw [← exp_add, exp_eq_exp_iff_exists_int]; exact ⟨-n, by push_cast; ring⟩
   rw [this]
@@ -349,11 +360,11 @@ theorem differentiableAt_jacobiThetaOneTau_tau (z : ℂ) {τ : ℂ} (hτ : 0 < �
 /-! ### Helpers for the quotients `θ₁(z|τ)/sin z`, `θ₂(z|τ)/cos z` -/
 
 /-- Dirichlet kernel `Uₙ(z) = ∑_{k=0}^{2n} e^{2i(k-n)z}`. -/
-def thR2_U (n : ℕ) (z : ℂ) : ℂ :=
+def thetaDirichletKernel (n : ℕ) (z : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (2 * n + 1), cexp (2 * I * ((k : ℂ) - n) * z)
 
 /-- `sin z · Uₙ(z) = sin((2n+1)z)`. -/
-lemma thR2_sin_mul_U (n : ℕ) (z : ℂ) : sin z * thR2_U n z = sin ((2 * n + 1) * z) := by
+private lemma sin_mul_thetaDirichletKernel (n : ℕ) (z : ℂ) : sin z * thetaDirichletKernel n z = sin ((2 * n + 1) * z) := by
   set f : ℕ → ℂ := fun k => cexp (I * (2 * k - 2 * n - 1) * z) with hf
   have hterm : ∀ k : ℕ, sin z * cexp (2 * I * ((k : ℂ) - n) * z) = (f (k + 1) - f k) / (2 * I) := by
     intro k
@@ -365,7 +376,7 @@ lemma thR2_sin_mul_U (n : ℕ) (z : ℂ) : sin z * thR2_U n z = sin ((2 * n + 1)
     ring_nf
     simp only [exp_add, exp_sub]
     ring
-  rw [thR2_U, Finset.mul_sum]
+  rw [thetaDirichletKernel, Finset.mul_sum]
   simp_rw [hterm]
   rw [← Finset.sum_div, Finset.sum_range_sub, Complex.sin, hf]
   simp only
@@ -375,8 +386,8 @@ lemma thR2_sin_mul_U (n : ℕ) (z : ℂ) : sin z * thR2_U n z = sin ((2 * n + 1)
   ring_nf
 
 /-- `‖Uₙ(z)‖ ≤ (2n+1) e^{2n|Im z|}`. -/
-lemma thR2_norm_U_le (n : ℕ) (z : ℂ) :
-    ‖thR2_U n z‖ ≤ (2 * n + 1) * Real.exp (2 * n * |z.im|) := by
+private lemma norm_thetaDirichletKernel_le (n : ℕ) (z : ℂ) :
+    ‖thetaDirichletKernel n z‖ ≤ (2 * n + 1) * Real.exp (2 * n * |z.im|) := by
   refine (norm_sum_le _ _).trans ?_
   have : ∀ k ∈ Finset.range (2 * n + 1), ‖cexp (2 * I * ((k : ℂ) - n) * z)‖ ≤
       Real.exp (2 * n * |z.im|) := by
@@ -396,27 +407,27 @@ lemma thR2_norm_U_le (n : ℕ) (z : ℂ) :
   simp
 
 /-- Differentiability of `Uₙ`. -/
-lemma thR2_differentiable_U (n : ℕ) : Differentiable ℂ (thR2_U n) := by
-  unfold thR2_U
+private lemma differentiable_thetaDirichletKernel (n : ℕ) : Differentiable ℂ (thetaDirichletKernel n) := by
+  unfold thetaDirichletKernel
   fun_prop
 
 /-- The terms of the series for `θ₁(z|τ)/sin z`. -/
-def thR2_term (n : ℕ) (z τ : ℂ) : ℂ :=
-  2 * (-1 : ℂ) ^ n * cexp (π * I * τ * ((n : ℂ) + 1 / 2) ^ 2) * thR2_U n z
+def jacobiThetaOneDivSinTerm (n : ℕ) (z τ : ℂ) : ℂ :=
+  2 * (-1 : ℂ) ^ n * cexp (π * I * τ * ((n : ℂ) + 1 / 2) ^ 2) * thetaDirichletKernel n z
 
 /-- Termwise bound. -/
-lemma thR2_norm_term_le (n : ℕ) {z τ : ℂ} {R T : ℝ} (hT : 0 ≤ T) (hz : |z.im| ≤ R)
+private lemma norm_jacobiThetaOneDivSinTerm_le (n : ℕ) {z τ : ℂ} {R T : ℝ} (hT : 0 ≤ T) (hz : |z.im| ≤ R)
     (hτ : T ≤ τ.im) :
-    ‖thR2_term n z τ‖ ≤ 2 * ((2 * n + 1) * Real.exp (-π * T * n ^ 2 + 2 * R * n)) := by
+    ‖jacobiThetaOneDivSinTerm n z τ‖ ≤ 2 * ((2 * n + 1) * Real.exp (-π * T * n ^ 2 + 2 * R * n)) := by
   have he : ‖cexp (π * I * τ * ((n : ℂ) + 1 / 2) ^ 2)‖ = Real.exp (-π * τ.im * (n + 1 / 2) ^ 2) := by
     rw [Complex.norm_exp]
     congr 1
     have : ((n : ℂ) + 1 / 2) = (((n : ℝ) + 1 / 2 : ℝ) : ℂ) := by push_cast; ring
     rw [this, ← ofReal_pow, Complex.re_mul_ofReal]
     simp [mul_re, mul_im]
-  rw [thR2_term, norm_mul, norm_mul, norm_mul, he]
+  rw [jacobiThetaOneDivSinTerm, norm_mul, norm_mul, norm_mul, he]
   simp only [norm_pow, norm_neg, norm_one, one_pow, mul_one, Complex.norm_ofNat]
-  have hU := thR2_norm_U_le n z
+  have hU := norm_thetaDirichletKernel_le n z
   have hexp : Real.exp (-π * τ.im * (n + 1 / 2) ^ 2) * Real.exp (2 * n * |z.im|) ≤
       Real.exp (-π * T * n ^ 2 + 2 * R * n) := by
     rw [← Real.exp_add, Real.exp_le_exp]
@@ -426,7 +437,7 @@ lemma thR2_norm_term_le (n : ℕ) {z τ : ℂ} {R T : ℝ} (hT : 0 ≤ T) (hz : 
       have := mul_le_mul hτ this (sq_nonneg _) (hT.trans hτ)
       nlinarith [Real.pi_pos]
     nlinarith
-  calc 2 * Real.exp (-π * τ.im * (n + 1 / 2) ^ 2) * ‖thR2_U n z‖
+  calc 2 * Real.exp (-π * τ.im * (n + 1 / 2) ^ 2) * ‖thetaDirichletKernel n z‖
       ≤ 2 * Real.exp (-π * τ.im * (n + 1 / 2) ^ 2) *
         ((2 * n + 1) * Real.exp (2 * n * |z.im|)) := by gcongr
     _ = 2 * ((2 * n + 1) * (Real.exp (-π * τ.im * (n + 1 / 2) ^ 2) *
@@ -434,7 +445,7 @@ lemma thR2_norm_term_le (n : ℕ) {z τ : ℂ} {R T : ℝ} (hT : 0 ≤ T) (hz : 
     _ ≤ _ := by gcongr
 
 /-- Summability of the majorant. -/
-lemma thR2_summable_bound (R : ℝ) {T : ℝ} (hT : 0 < T) :
+private lemma summable_jacobiThetaOneDivSin_majorant (R : ℝ) {T : ℝ} (hT : 0 < T) :
     Summable (fun n : ℕ => 2 * ((2 * n + 1) * Real.exp (-π * T * n ^ 2 + 2 * R * n))) := by
   have h1 := (summable_pow_mul_jacobiTheta₂_term_bound (R / π) hT 1).comp_injective
     Nat.cast_injective
@@ -447,47 +458,47 @@ lemma thR2_summable_bound (R : ℝ) {T : ℝ} (hT : 0 < T) :
   rw [this]; ring
 
 /-- Summability of the series for `θ₁(z|τ)/sin z`. -/
-lemma thR2_summable_term (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
-    Summable (fun n : ℕ => thR2_term n z τ) :=
-  (thR2_summable_bound |z.im| hτ).of_norm_bounded fun n => thR2_norm_term_le n hτ.le le_rfl le_rfl
+private lemma summable_jacobiThetaOneDivSinTerm (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
+    Summable (fun n : ℕ => jacobiThetaOneDivSinTerm n z τ) :=
+  (summable_jacobiThetaOneDivSin_majorant |z.im| hτ).of_norm_bounded fun n => norm_jacobiThetaOneDivSinTerm_le n hτ.le le_rfl le_rfl
 
 /-- `sin z · ∑ₙ (2(-1)ⁿ q^{(n+1/2)²} Uₙ(z)) = θ₁(z|τ)`. -/
-lemma thR2_sin_mul_tsum (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
-    sin z * ∑' n : ℕ, thR2_term n z τ = jacobiThetaOneTau z τ := by
-  refine ((thR2_summable_term z hτ).hasSum.mul_left (sin z)).unique ?_
+private lemma sin_mul_tsum_jacobiThetaOneDivSinTerm (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
+    sin z * ∑' n : ℕ, jacobiThetaOneDivSinTerm n z τ = jacobiThetaOneTau z τ := by
+  refine ((summable_jacobiThetaOneDivSinTerm z hτ).hasSum.mul_left (sin z)).unique ?_
   convert jacobiThetaOneTau_hasSum_sin z hτ using 2 with n
-  rw [thR2_term, ← thR2_sin_mul_U]
+  rw [jacobiThetaOneDivSinTerm, ← sin_mul_thetaDirichletKernel]
   ring
 
 /-- For `Im τ > 0`, `z ↦ ∑ₙ 2(-1)ⁿ q^{(n+1/2)²} Uₙ(z)` is entire. -/
-lemma thR2_differentiable_tsum_z {τ : ℂ} (hτ : 0 < τ.im) :
-    Differentiable ℂ (fun z => ∑' n : ℕ, thR2_term n z τ) := by
+private lemma differentiable_tsum_jacobiThetaOneDivSinTerm {τ : ℂ} (hτ : 0 < τ.im) :
+    Differentiable ℂ (fun z => ∑' n : ℕ, jacobiThetaOneDivSinTerm n z τ) := by
   intro z₀
   have hU : IsOpen {z : ℂ | |z.im| < |z₀.im| + 1} :=
     isOpen_lt (continuous_abs.comp continuous_im) continuous_const
-  have h := Complex.differentiableOn_tsum_of_summable_norm (thR2_summable_bound (|z₀.im| + 1) hτ)
+  have h := Complex.differentiableOn_tsum_of_summable_norm (summable_jacobiThetaOneDivSin_majorant (|z₀.im| + 1) hτ)
     (fun n => by
-      simp only [thR2_term]
-      exact ((thR2_differentiable_U n).const_mul _).differentiableOn) hU
-    (fun n w hw => thR2_norm_term_le n hτ.le (le_of_lt hw) le_rfl)
+      simp only [jacobiThetaOneDivSinTerm]
+      exact ((differentiable_thetaDirichletKernel n).const_mul _).differentiableOn) hU
+    (fun n w hw => norm_jacobiThetaOneDivSinTerm_le n hτ.le (le_of_lt hw) le_rfl)
   exact h.differentiableAt (hU.mem_nhds (by simp))
 
 /-- For fixed `z`, `τ ↦ ∑ₙ 2(-1)ⁿ q^{(n+1/2)²} Uₙ(z)` is analytic on the upper half-plane. -/
-lemma thR2_differentiableOn_tsum_tau (z : ℂ) :
-    DifferentiableOn ℂ (fun τ => ∑' n : ℕ, thR2_term n z τ) {τ | 0 < τ.im} := by
+private lemma differentiableOn_tsum_jacobiThetaOneDivSinTerm_tau (z : ℂ) :
+    DifferentiableOn ℂ (fun τ => ∑' n : ℕ, jacobiThetaOneDivSinTerm n z τ) {τ | 0 < τ.im} := by
   intro τ₀ hτ₀
   have hT : 0 < τ₀.im / 2 := half_pos hτ₀
   have hU : IsOpen {τ : ℂ | τ₀.im / 2 < τ.im} := isOpen_lt continuous_const continuous_im
-  have h := Complex.differentiableOn_tsum_of_summable_norm (thR2_summable_bound |z.im| hT)
+  have h := Complex.differentiableOn_tsum_of_summable_norm (summable_jacobiThetaOneDivSin_majorant |z.im| hT)
     (fun n => by
-      simp only [thR2_term]
+      simp only [jacobiThetaOneDivSinTerm]
       exact Differentiable.differentiableOn (by fun_prop)) hU
-    (fun n w hw => thR2_norm_term_le n hT.le le_rfl (le_of_lt hw))
+    (fun n w hw => norm_jacobiThetaOneDivSinTerm_le n hT.le le_rfl (le_of_lt hw))
   exact (h.differentiableAt (hU.mem_nhds (by simp only [Set.mem_ofPred_eq]; linarith))
     ).differentiableWithinAt
 
 /-- `θ₁(π/2 - z|τ) = θ₂(z|τ)`. -/
-lemma thR2_one_pi_div_two_sub (z τ : ℂ) :
+private lemma jacobiThetaOneTau_pi_div_two_sub (z τ : ℂ) :
     jacobiThetaOneTau (π / 2 - z) τ = jacobiThetaTwoTau z τ := by
   rw [jacobiThetaOneTau, show (π : ℂ) / 2 - z + π / 2 = -z + π by ring, jacobiThetaTwoTau_add_pi,
     neg_neg, jacobiThetaTwoTau_neg]
@@ -508,15 +519,15 @@ theorem jacobiThetaOneTau_div_sin_analytic :
     (∃ G : ℂ → ℂ → ℂ, (∀ τ : ℂ, 0 < τ.im → Differentiable ℂ (fun z => G z τ)) ∧
       (∀ z : ℂ, DifferentiableOn ℂ (G z) {τ | 0 < τ.im}) ∧
       ∀ z τ : ℂ, 0 < τ.im → cos z ≠ 0 → G z τ = jacobiThetaTwoTau z τ / cos z) := by
-  refine ⟨⟨fun z τ => ∑' n : ℕ, thR2_term n z τ, fun τ hτ => thR2_differentiable_tsum_z hτ,
-    thR2_differentiableOn_tsum_tau, fun z τ hτ hz => ?_⟩,
-    ⟨fun z τ => ∑' n : ℕ, thR2_term n (π / 2 - z) τ, fun τ hτ => ?_,
-    fun z => thR2_differentiableOn_tsum_tau (π / 2 - z), fun z τ hτ hz => ?_⟩⟩
-  · rw [eq_div_iff hz, mul_comm, thR2_sin_mul_tsum z hτ]
-  · exact (thR2_differentiable_tsum_z hτ).comp ((differentiable_const _).sub differentiable_id)
+  refine ⟨⟨fun z τ => ∑' n : ℕ, jacobiThetaOneDivSinTerm n z τ, fun τ hτ => differentiable_tsum_jacobiThetaOneDivSinTerm hτ,
+    differentiableOn_tsum_jacobiThetaOneDivSinTerm_tau, fun z τ hτ hz => ?_⟩,
+    ⟨fun z τ => ∑' n : ℕ, jacobiThetaOneDivSinTerm n (π / 2 - z) τ, fun τ hτ => ?_,
+    fun z => differentiableOn_tsum_jacobiThetaOneDivSinTerm_tau (π / 2 - z), fun z τ hτ hz => ?_⟩⟩
+  · rw [eq_div_iff hz, mul_comm, sin_mul_tsum_jacobiThetaOneDivSinTerm z hτ]
+  · exact (differentiable_tsum_jacobiThetaOneDivSinTerm hτ).comp ((differentiable_const _).sub differentiable_id)
   · rw [← sin_pi_div_two_sub] at hz
     rw [eq_div_iff (by rwa [← sin_pi_div_two_sub]), ← sin_pi_div_two_sub, mul_comm,
-      thR2_sin_mul_tsum _ hτ, thR2_one_pi_div_two_sub]
+      sin_mul_tsum_jacobiThetaOneDivSinTerm _ hτ, jacobiThetaOneTau_pi_div_two_sub]
 
 /-- DLMF §20.2(ii): `Im τ = 0` is a natural boundary of `θ₃(z|·)`: no real point has a
 neighbourhood on which an analytic function agrees with `θ₃(z|τ)` for `Im τ > 0`. -/
@@ -527,7 +538,7 @@ theorem jacobiThetaThreeTau_natural_boundary (z : ℂ) (x : ℝ) :
   sorry
 
 /-- `sin(x + nπ) = (-1)ⁿ sin x` (helper). -/
-lemma p20R1_sin_add_nat_mul_pi (x : ℂ) (n : ℕ) : sin (x + n * π) = (-1) ^ n * sin x := by
+private lemma complex_sin_add_nat_mul_pi (x : ℂ) (n : ℕ) : sin (x + n * π) = (-1) ^ n * sin x := by
   induction n with
   | zero => simp
   | succ n ih =>
@@ -535,7 +546,7 @@ lemma p20R1_sin_add_nat_mul_pi (x : ℂ) (n : ℕ) : sin (x + n * π) = (-1) ^ n
     ring
 
 /-- The derivative of `θ₃(·|τ)` and its sine series (helper). -/
-lemma p20R1_three_deriv (u : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
+private lemma hasDerivAt_jacobiThetaThreeTau_and_hasSum (u : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     HasDerivAt (fun w => jacobiThetaThreeTau w τ) ((1 / π) * jacobiTheta₂' (u / π) τ) u ∧
     HasSum (fun k : ℕ => -(2 * cexp (π * I * τ * ((k : ℂ) + 1) ^ 2) *
         (2 * ((k : ℂ) + 1) * sin (2 * ((k : ℂ) + 1) * u)))) ((1 / π) * jacobiTheta₂' (u / π) τ) := by
@@ -565,7 +576,7 @@ lemma p20R1_three_deriv (u : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
 
 
 /-- The derivative of `θ₂(·|τ)` and its sine series (helper). -/
-lemma p20R1_two_deriv (u : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
+private lemma exists_hasDerivAt_jacobiThetaTwoTau_and_hasSum (u : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     ∃ D : ℂ, HasDerivAt (fun w => jacobiThetaTwoTau w τ) D u ∧
     HasSum (fun n : ℕ => -(2 * cexp (π * I * τ * ((n : ℂ) + 1 / 2) ^ 2) *
         ((2 * n + 1) * sin ((2 * n + 1) * u)))) D := by
@@ -618,27 +629,27 @@ theorem jacobiThetaTau_deriv_hasSum (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
         (2 * ((n : ℂ) + 1) * sin (2 * ((n : ℂ) + 1) * z))))
       (deriv (fun w => jacobiThetaFourTau w τ) z) := by
   refine ⟨?_, ?_, ?_, ?_⟩
-  · obtain ⟨D, hD, hS⟩ := p20R1_two_deriv (z + π / 2) hτ
+  · obtain ⟨D, hD, hS⟩ := exists_hasDerivAt_jacobiThetaTwoTau_and_hasSum (z + π / 2) hτ
     have hD1 : HasDerivAt (fun w => jacobiThetaOneTau w τ) (-D) z :=
       (hD.comp_add_const z (π / 2)).neg
     rw [hD1.deriv]
     convert hS.neg using 1
     funext n
     rw [neg_neg, show (2 * (n : ℂ) + 1) * (z + π / 2) = ((2 * n + 1) * z + π / 2) + n * π by ring,
-      p20R1_sin_add_nat_mul_pi, sin_add_pi_div_two]
+      complex_sin_add_nat_mul_pi, sin_add_pi_div_two]
     ring
-  · obtain ⟨D, hD, hS⟩ := p20R1_two_deriv z hτ
+  · obtain ⟨D, hD, hS⟩ := exists_hasDerivAt_jacobiThetaTwoTau_and_hasSum z hτ
     rw [hD.deriv]; exact hS
-  · obtain ⟨hD, hS⟩ := p20R1_three_deriv z hτ
+  · obtain ⟨hD, hS⟩ := hasDerivAt_jacobiThetaThreeTau_and_hasSum z hτ
     rw [hD.deriv]; exact hS
-  · obtain ⟨hD, hS⟩ := p20R1_three_deriv (z + π / 2) hτ
+  · obtain ⟨hD, hS⟩ := hasDerivAt_jacobiThetaThreeTau_and_hasSum (z + π / 2) hτ
     have hD4 : HasDerivAt (fun w => jacobiThetaFourTau w τ) ((1 / π) * jacobiTheta₂' ((z + π / 2) / π) τ) z :=
       hD.comp_add_const z (π / 2)
     rw [hD4.deriv]
     convert hS using 1
     funext n
     rw [show 2 * ((n : ℂ) + 1) * (z + π / 2) = 2 * ((n : ℂ) + 1) * z + ((n + 1 : ℕ) : ℂ) * π by
-      push_cast; ring, p20R1_sin_add_nat_mul_pi]
+      push_cast; ring, complex_sin_add_nat_mul_pi]
     ring
 
 /-! ### §20.2(iii) Translation of the argument by half-periods -/
@@ -690,7 +701,7 @@ theorem jacobiThetaThreeTau_half_periods (z τ : ℂ) :
       thetaMultiplierM z τ * jacobiThetaTwoTau (z + π * τ / 2) τ := by
     rw [jacobiThetaTwoTau, thetaMultiplierM, show z + π * τ / 2 + π * τ / 2 =
       z + (((0 : ℤ) : ℂ) + ((1 : ℤ) : ℂ) * τ) * π by
-      push_cast; ring, th20_three_add_lattice]
+      push_cast; ring, jacobiThetaThreeTau_add_lattice_exp]
     have e : cexp (I * z + π * I * τ / 4) * cexp (π * I * τ / 4 + I * (z + π * τ / 2)) *
         cexp (-(π * I * τ * ((1 : ℤ) : ℂ) ^ 2)) * cexp (-2 * I * ((1 : ℤ) : ℂ) * z) = 1 := by
       simp only [← exp_add]; rw [← exp_zero]; congr 1; push_cast; ring
@@ -724,7 +735,7 @@ theorem jacobiThetaFourTau_half_periods (z τ : ℂ) :
 /-! ### Helpers: the triple product in theta form -/
 
 /-- `‖e^{iπτ}‖ < 1` for `Im τ > 0`. -/
-theorem th20_norm_nome_lt_one {τ : ℂ} (hτ : 0 < τ.im) : ‖cexp (π * I * τ)‖ < 1 := by
+theorem norm_nome_lt_one {τ : ℂ} (hτ : 0 < τ.im) : ‖cexp (π * I * τ)‖ < 1 := by
   rw [norm_exp]
   have : (π * I * τ).re = -(π * τ.im) := by simp
   rw [this]
@@ -733,7 +744,7 @@ theorem th20_norm_nome_lt_one {τ : ℂ} (hτ : 0 < τ.im) : ‖cexp (π * I * �
 
 /-- Jacobi's triple product for `θ₃`: with `E = e^{iπτ}`, `Q = E²`, `w = e^{2iz}`,
 `θ₃(z|τ) = (Q;Q)_∞ (-Ew;Q)_∞ (-E/w;Q)_∞`. -/
-theorem th20_three_eq_qPochhammer (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
+theorem jacobiThetaThreeTau_eq_qPochhammerInf (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     jacobiThetaThreeTau z τ =
       qPochhammerInf (cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) *
         qPochhammerInf (-(cexp (π * I * τ) * cexp (2 * I * z))) (cexp (π * I * τ) ^ 2) *
@@ -744,7 +755,7 @@ theorem th20_three_eq_qPochhammer (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
   have hwne : w ≠ 0 := exp_ne_zero _
   have hQn : ‖E ^ 2‖ < 1 := by
     rw [norm_pow]
-    have h := th20_norm_nome_lt_one hτ
+    have h := norm_nome_lt_one hτ
     nlinarith [norm_nonneg E]
   have hZ : -(E * w) ≠ 0 := neg_ne_zero.mpr (mul_ne_zero hEne hwne)
   have hdiv : E ^ 2 / -(E * w) = -(E * w⁻¹) := by field_simp
@@ -761,12 +772,12 @@ theorem th20_three_eq_qPochhammer (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     exact_mod_cast TripleProduct.tri_mul_two n
   have hsq : cexp (π * I * τ) ^ 2 = cexp (2 * (π * I * τ)) := by
     rw [← exp_nat_mul]; norm_num
-  rw [hE, hw, hsq, th20_exp_zpow, th20_exp_zpow, th20_exp_zpow, ← exp_add, ← exp_add]
+  rw [hE, hw, hsq, exp_zpow_eq_exp_intCast_mul, exp_zpow_eq_exp_intCast_mul, exp_zpow_eq_exp_intCast_mul, ← exp_add, ← exp_add]
   congr 1
   linear_combination (-(π * I * τ)) * ht
 
 /-- A `q`-Pochhammer product with a vanishing factor vanishes. -/
-lemma th20_qPochhammerInf_eq_zero {a q : ℂ} (hq : ‖q‖ < 1) {k : ℕ} (hk : 1 - a * q ^ k = 0) :
+private lemma qPochhammerInf_eq_zero_of_factor {a q : ℂ} (hq : ‖q‖ < 1) {k : ℕ} (hk : 1 - a * q ^ k = 0) :
     qPochhammerInf a q = 0 := by
   have ht := tendsto_qPochhammer (w := a) hq
   have hev : ∀ᶠ n in atTop, qPochhammer a q n = 0 := by
@@ -776,30 +787,30 @@ lemma th20_qPochhammerInf_eq_zero {a q : ℂ} (hq : ‖q‖ < 1) {k : ℕ} (hk :
   exact tendsto_nhds_unique ht (tendsto_const_nhds.congr' (hev.mono fun _ h => h.symm))
 
 /-- The `q`-Pochhammer product vanishes exactly when one of its factors does (`|q| < 1`). -/
-lemma th20_qPochhammerInf_eq_zero_iff {a q : ℂ} (hq : ‖q‖ < 1) :
+private lemma qPochhammerInf_eq_zero_iff {a q : ℂ} (hq : ‖q‖ < 1) :
     qPochhammerInf a q = 0 ↔ ∃ k : ℕ, 1 - a * q ^ k = 0 := by
   constructor
   · intro h
     by_contra hne
     exact qPochhammerInf_ne_zero hq (fun n hn => hne ⟨n, hn⟩) h
   · rintro ⟨k, hk⟩
-    exact th20_qPochhammerInf_eq_zero hq hk
+    exact qPochhammerInf_eq_zero_of_factor hq hk
 
 /-- Transport of `HasProd` along a pointwise equality of factors. -/
-theorem th20_hasProd_congr {f g : ℕ → ℂ} {a : ℂ} (h : HasProd f a) (hfg : ∀ k, f k = g k) :
+theorem hasProd_congr_of_eq {f g : ℕ → ℂ} {a : ℂ} (h : HasProd f a) (hfg : ∀ k, f k = g k) :
     HasProd g a := by
   have : f = g := funext hfg
   exact this ▸ h
 
 /-- `e^{2iz} + e^{-2iz} = 2 cos 2z`. -/
-theorem th20_exp_add_inv (z : ℂ) : cexp (2 * I * z) + (cexp (2 * I * z))⁻¹ = 2 * cos (2 * z) := by
+theorem exp_two_I_mul_add_inv (z : ℂ) : cexp (2 * I * z) + (cexp (2 * I * z))⁻¹ = 2 * cos (2 * z) := by
   rw [← exp_neg, cos, show 2 * z * I = 2 * I * z by ring, show -(2 * z) * I = -(2 * I * z) by ring]
   ring
 
 /-- `‖e^{2πiτ}‖ < 1` in the form `‖(e^{iπτ})²‖ < 1`. -/
-theorem th20_norm_nome_sq_lt_one {τ : ℂ} (hτ : 0 < τ.im) : ‖cexp (π * I * τ) ^ 2‖ < 1 := by
+theorem norm_nome_sq_lt_one {τ : ℂ} (hτ : 0 < τ.im) : ‖cexp (π * I * τ) ^ 2‖ < 1 := by
   rw [norm_pow]
-  have h := th20_norm_nome_lt_one hτ
+  have h := norm_nome_lt_one hτ
   nlinarith [norm_nonneg (cexp (π * I * τ))]
 
 /-! ### §20.2(iv) `z`-zeros -/
@@ -816,38 +827,38 @@ theorem jacobiThetaOneTau_lattice_eq_zero (τ : ℂ) (m n : ℤ) :
   exact this
 
 /-- `1 + e^x = 0` iff `x = iπ + 2πim` for some integer `m`. -/
-lemma th20_one_add_exp_eq_zero_iff (x : ℂ) :
+private lemma one_add_exp_eq_zero_iff (x : ℂ) :
     1 + cexp x = 0 ↔ ∃ m : ℤ, x = π * I + m * (2 * π * I) := by
   rw [add_eq_zero_iff_eq_neg', ← exp_pi_mul_I, exp_eq_exp_iff_exists_int]
 
 /-- `2i ≠ 0`. -/
-lemma th20_two_mul_I_ne_zero : (2 * I : ℂ) ≠ 0 := mul_ne_zero two_ne_zero I_ne_zero
+private lemma two_I_ne_zero : (2 * I : ℂ) ≠ 0 := mul_ne_zero two_ne_zero I_ne_zero
 
 /-- The zeros of `θ₃(z|τ)` (DLMF §20.2(iv)), from the triple product. -/
-lemma th20_three_eq_zero_iff {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
+private lemma jacobiThetaThreeTau_eq_zero_iff {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
     jacobiThetaThreeTau z τ = 0 ↔ ∃ m n : ℤ, z = (m + 1 / 2 + (n + 1 / 2) * τ) * π := by
-  have hQn := th20_norm_nome_sq_lt_one hτ
+  have hQn := norm_nome_sq_lt_one hτ
   have hA : qPochhammerInf (cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) ≠ 0 :=
     qPochhammerInf_ne_zero_of_norm_lt_one hQn hQn
   have hQk : ∀ k : ℕ, (cexp (π * I * τ) ^ 2) ^ k = cexp (k * (2 * (π * I * τ))) := fun k => by
     rw [← exp_nat_mul, ← exp_nat_mul]; push_cast; ring_nf
-  rw [th20_three_eq_qPochhammer z hτ]
+  rw [jacobiThetaThreeTau_eq_qPochhammerInf z hτ]
   simp only [mul_eq_zero, hA, false_or]
-  rw [th20_qPochhammerInf_eq_zero_iff hQn, th20_qPochhammerInf_eq_zero_iff hQn]
+  rw [qPochhammerInf_eq_zero_iff hQn, qPochhammerInf_eq_zero_iff hQn]
   constructor
   · rintro (⟨k, hk⟩ | ⟨k, hk⟩)
     · rw [hQk, sub_eq_add_neg, neg_mul, neg_neg, ← exp_add, ← exp_add,
-        th20_one_add_exp_eq_zero_iff] at hk
+        one_add_exp_eq_zero_iff] at hk
       obtain ⟨m, hm⟩ := hk
       refine ⟨m, -((k : ℤ) + 1), ?_⟩
-      apply mul_left_cancel₀ th20_two_mul_I_ne_zero
+      apply mul_left_cancel₀ two_I_ne_zero
       push_cast
       linear_combination hm
     · rw [hQk, sub_eq_add_neg, neg_mul, neg_neg, ← exp_neg, ← exp_add, ← exp_add,
-        th20_one_add_exp_eq_zero_iff] at hk
+        one_add_exp_eq_zero_iff] at hk
       obtain ⟨m, hm⟩ := hk
       refine ⟨-m - 1, k, ?_⟩
-      apply mul_left_cancel₀ th20_two_mul_I_ne_zero
+      apply mul_left_cancel₀ two_I_ne_zero
       push_cast
       linear_combination -hm
   · rintro ⟨m, n, rfl⟩
@@ -856,7 +867,7 @@ lemma th20_three_eq_zero_iff {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       lift n to ℕ using hn
       refine ⟨n, ?_⟩
       rw [hQk, sub_eq_add_neg, neg_mul, neg_neg, ← exp_neg, ← exp_add, ← exp_add,
-        th20_one_add_exp_eq_zero_iff]
+        one_add_exp_eq_zero_iff]
       refine ⟨-m - 1, ?_⟩
       push_cast
       ring
@@ -865,7 +876,7 @@ lemma th20_three_eq_zero_iff {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       subst hk
       refine ⟨k, ?_⟩
       rw [hQk, sub_eq_add_neg, neg_mul, neg_neg, ← exp_add, ← exp_add,
-        th20_one_add_exp_eq_zero_iff]
+        one_add_exp_eq_zero_iff]
       refine ⟨m, ?_⟩
       push_cast
       ring
@@ -879,7 +890,7 @@ theorem jacobiThetaTau_eq_zero_iff {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
     (jacobiThetaThreeTau z τ = 0 ↔ ∃ m n : ℤ, z = (m + 1 / 2 + (n + 1 / 2) * τ) * π) ∧
     (jacobiThetaFourTau z τ = 0 ↔ ∃ m n : ℤ, z = (m + (n + 1 / 2) * τ) * π) := by
   have h3 : ∀ z : ℂ, jacobiThetaThreeTau z τ = 0 ↔
-      ∃ m n : ℤ, z = (m + 1 / 2 + (n + 1 / 2) * τ) * π := fun z => th20_three_eq_zero_iff hτ z
+      ∃ m n : ℤ, z = (m + 1 / 2 + (n + 1 / 2) * τ) * π := fun z => jacobiThetaThreeTau_eq_zero_iff hτ z
   refine ⟨?_, ?_, h3 z, ?_⟩
   · rw [jacobiThetaOneTau, neg_eq_zero, jacobiThetaTwoTau, mul_eq_zero, h3]
     simp only [exp_ne_zero, false_or]
@@ -894,7 +905,7 @@ theorem jacobiThetaTau_eq_zero_iff {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
     constructor <;> intro h <;> linear_combination h
 
 /-- A lattice-type point `(a + bτ)π` with real `a, b` vanishes only if `a = b = 0` (`Im τ > 0`). -/
-theorem th20_lattice_eq_zero {τ : ℂ} (hτ : 0 < τ.im) {a b : ℝ} (h : 0 = ((a : ℂ) + b * τ) * π) :
+theorem eq_zero_of_lattice_point_eq_zero {τ : ℂ} (hτ : 0 < τ.im) {a b : ℝ} (h : 0 = ((a : ℂ) + b * τ) * π) :
     a = 0 ∧ b = 0 := by
   have h' : (a : ℂ) + b * τ = 0 := by
     rcases mul_eq_zero.mp h.symm with h | h
@@ -919,15 +930,15 @@ theorem jacobiThetaNullTau_ne_zero {τ : ℂ} (hτ : 0 < τ.im) :
   have hz := jacobiThetaTau_eq_zero_iff hτ 0
   refine ⟨fun h => ?_, fun h => ?_, fun h => ?_⟩
   · obtain ⟨m, n, hmn⟩ := hz.2.1.mp h
-    have := th20_lattice_eq_zero hτ (a := m + 1 / 2) (b := n) (by push_cast; exact hmn)
+    have := eq_zero_of_lattice_point_eq_zero hτ (a := m + 1 / 2) (b := n) (by push_cast; exact hmn)
     have h2 : (2 * m + 1 : ℝ) = 0 := by linarith [this.1]
     exact absurd (by exact_mod_cast h2 : (2 * m + 1 : ℤ) = 0) (by omega)
   · obtain ⟨m, n, hmn⟩ := hz.2.2.1.mp h
-    have := th20_lattice_eq_zero hτ (a := m + 1 / 2) (b := n + 1 / 2) (by push_cast; exact hmn)
+    have := eq_zero_of_lattice_point_eq_zero hτ (a := m + 1 / 2) (b := n + 1 / 2) (by push_cast; exact hmn)
     have h2 : (2 * m + 1 : ℝ) = 0 := by linarith [this.1]
     exact absurd (by exact_mod_cast h2 : (2 * m + 1 : ℤ) = 0) (by omega)
   · obtain ⟨m, n, hmn⟩ := hz.2.2.2.mp h
-    have := th20_lattice_eq_zero hτ (a := m) (b := n + 1 / 2) (by push_cast; exact hmn)
+    have := eq_zero_of_lattice_point_eq_zero hτ (a := m) (b := n + 1 / 2) (by push_cast; exact hmn)
     have h2 : (2 * n + 1 : ℝ) = 0 := by linarith [this.2]
     exact absurd (by exact_mod_cast h2 : (2 * n + 1 : ℤ) = 0) (by omega)
 

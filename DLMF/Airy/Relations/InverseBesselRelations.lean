@@ -10,10 +10,27 @@ public import DLMF.Airy.Relations.BesselRepresentations
 /-!
 # Bessel functions expressed through Airy functions
 
-Inverse Bessel and Hankel relations and their confluent hypergeometric consequences.
+Bessel and Hankel functions of order `±1/3` and `±2/3` written through Airy functions
+(DLMF 9.6.12–9.6.20), and the representations of Airy functions by Kummer and Whittaker
+functions (DLMF 9.6.21–9.6.26), on the logarithmic plane and in the principal sector.
 
-Source references and common attribution are retained in
-`DLMF.Airy.Relations`.
+## Main definitions
+
+* `airyWhittakerMOnLog`, `airyWhittakerWOnLog`: Whittaker functions on the logarithmic plane.
+
+## Main results
+
+* `besselJ_two_thirds_eq_airy_complex`, `besselI_third_eq_airy_complex`,
+  `besselI_two_thirds_eq_airy_complex`, `besselK_third_eq_airy_complex`,
+  `besselK_two_thirds_eq_airy_complex`: DLMF 9.6.12–9.6.16.
+* `hankel1_third_eq_airy_complex`, `hankel1_two_thirds_eq_airy_complex`,
+  `hankel2_third_eq_airy_complex`, `hankel2_two_thirds_eq_airy_complex` and the negative-order
+  relations: DLMF 9.6.17–9.6.20.
+* `airyAi_eq_kummerU`, `airyAi_eq_whittakerW` and their `_onLog` forms: DLMF 9.6.21.
+* `airyAiDeriv_eq_kummerU`, `airyAiDeriv_eq_whittakerW` and their `_onLog` forms: DLMF 9.6.22.
+* `airyBi_eq_whittakerM`, `airyBiDeriv_eq_whittakerM` and their `_onLog` forms: DLMF 9.6.23,
+  9.6.24.
+* `airyBi_eq_kummerM`, `airyBiDeriv_eq_kummerM`: DLMF 9.6.25, 9.6.26.
 -/
 
 @[expose] public noncomputable section
@@ -424,7 +441,7 @@ theorem airyBiDeriv_eq_kummerM {z : ℂ} (hz : z ≠ 0) :
   rw [exp_log (by norm_num)] at hF
   rw [exp_neg, exp_log (by norm_num)] at hG
   have hζ := exp_neg_mul_exp_two_div (airyZetaComplex z)
-  have hC := reg0F1_one_third (z ^ 3 / 9)
+  have hC := reg0F1_one_third_contiguous (z ^ 3 / 9)
   simp only [airyBiDeriv, airyFDeriv, airyGDeriv]
   set R13 := regularizedHGFun (∅ : Multiset ℂ) {1 / 3} (z ^ 3 / 9)
   set R53 := regularizedHGFun (∅ : Multiset ℂ) {5 / 3} (z ^ 3 / 9)
@@ -689,7 +706,7 @@ theorem airyAiDeriv_eq_kummerU_onLog {z : ℂ} (hz : z ≠ 0) :
   rw [exp_log (by norm_num)] at hA
   rw [exp_neg, exp_log (by norm_num)] at hB
   have hζ := exp_neg_mul_exp_two_div (airyZetaComplex z)
-  have hC := reg0F1_one_third (z ^ 3 / 9)
+  have hC := reg0F1_one_third_contiguous (z ^ 3 / 9)
   simp only [airyAiDeriv, airyFDeriv, airyGDeriv]
   set R13 := regularizedHGFun (∅ : Multiset ℂ) {1 / 3} (z ^ 3 / 9)
   set R53 := regularizedHGFun (∅ : Multiset ℂ) {5 / 3} (z ^ 3 / 9)

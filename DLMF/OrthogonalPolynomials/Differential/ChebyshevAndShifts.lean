@@ -10,11 +10,32 @@ public import DLMF.OrthogonalPolynomials.Differential.ClassicalEquations
 /-!
 # Chebyshev identities and shifted polynomial derivatives
 
-Chebyshev contiguous identities and shifted-parameter differential formulas for classical
-polynomial families.
+Identities for the Chebyshev polynomials of the third and fourth kinds `V_n`, `W_n`, and the
+derivative formulas of DLMF §18.9 for the classical families, including the derivatives of
+the weighted polynomials.
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Differential`.
+## Main results
+
+* `chebyshevV_cos`, `chebyshevW_cos`: the trigonometric forms DLMF 18.5.3 and 18.5.4.
+* `chebyshevV_contiguous`, `chebyshevV_mul_one_add`, `chebyshevW_contiguous`: relations with
+  `T_n` (DLMF 18.9.11–18.9.12).
+* `chebyshevT_quadratic`, `chebyshevU_quadratic`: quadratic transformations DLMF 18.7.17–18.7.18.
+* `chebyshevV_reflection`, `chebyshevW_reflection`: reflection (DLMF Table 18.6.1).
+* `laguerrePolyL_raise_parameter`, `laguerrePolyL_mul_argument`: DLMF 18.9.13 and 18.9.14.
+* `jacobi_derivative`, `jacobi_lowering_derivative`, `jacobi_raising_derivative`: DLMF 18.9.15,
+  18.9.17 and 18.9.18.
+* `ultrasphPoly_derivative`, `laguerrePolyL_derivative`: DLMF 18.9.19 and 18.9.23.
+* `jacobi_weighted_derivative`, `ultrasphPoly_weighted_derivative`,
+  `chebyshevU_weighted_derivative`, `laguerrePolyL_weighted_derivative`: derivatives of the
+  weighted polynomials (DLMF 18.9.16, 18.9.20, 18.9.22, 18.9.24).
+* `hermitePolyH_weighted_derivative`, `hermite_weighted_derivative`: DLMF 18.9.26 and 18.9.28.
+* `deriv_kummerM_regular`: the derivative of Kummer's series at regular lower parameters
+  (DLMF 13.3.15).
+
+## Implementation notes
+
+Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
+hypergeometric definitions do not implement continuation in singular parameters.
 -/
 
 @[expose] public section
@@ -818,7 +839,7 @@ theorem ultrasphPoly_weighted_identity {lam : ℂ} (hlam : 1 / 2 < lam.re) (n : 
 ^ (α : ℂ) * (1 + (t : ℂ)) ^ (β : ℂ) * jacobiPolyP α β n t) x = -2 * (n + 1) * (1 - (x : ℂ)) ^
 ((α : ℂ) - 1) * (1 + (x : ℂ)) ^ ((β : ℂ) - 1) * jacobiPolyP (α - 1) (β - 1) (n + 1) x`. -/
 @[dlmf 18.9.E16]
-theorem jacobi_weighted_derivative {α β : ℝ} (hα : 0 < α) (hβ : 0 < β) (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (-1) 1) :
+theorem jacobi_weighted_derivative {α β : ℝ} (hα : 0 < α) (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (-1) 1) :
     deriv (fun t : ℝ => (1 - (t : ℂ)) ^ (α : ℂ) * (1 + (t : ℂ)) ^ (β : ℂ) * jacobiPolyP α β n t) x =
       -2 * (n + 1) * (1 - (x : ℂ)) ^ ((α : ℂ) - 1) * (1 + (x : ℂ)) ^ ((β : ℂ) - 1) *
         jacobiPolyP (α - 1) (β - 1) (n + 1) x := by

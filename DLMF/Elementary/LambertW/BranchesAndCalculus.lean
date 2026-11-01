@@ -14,10 +14,50 @@ public import Mathlib.Analysis.Real.Pi.Bounds
 /-!
 # Branches and calculus of the Lambert W function
 
-Branch definitions, differential identities and local analytic properties of Lambert W.
+This file defines the integer branches of the Lambert W function, Wright's omega function and
+the tree T-function, and proves the inverse equations, special values, real branches,
+analyticity and derivatives (DLMF §4.13).
 
-Source references and common attribution are retained in
-`DLMF.Elementary.LambertW`.
+## Main definitions
+
+* `LambertBranchFamily`: the analytic and boundary normalization determining every integer
+  branch.
+* `lambertPrincipalDomain`, `lambertBranchDomain`: the open analytic domains of the branches.
+* `lambertW`: the branch `W_k` with integer index, using the upper-side convention on cuts.
+* `lambertWLower`: the lower-side cut values.
+* `wrightOmega`: Wright's omega function with its unwinding-number branch convention.
+* `treeT`: the tree T-function on the principal branch.
+* `lambertDerivPolynomial`: the derivative polynomials of DLMF 4.13.4_2.
+* `lambertC`, `lambertD`, `lambertAsymptoticTerm`: coefficients of the branch-point, Puiseux and
+  large-argument expansions.
+
+## Main results
+
+* `exists_lambertBranchFamily`, `lambertBranchFamily_unique`: existence and uniqueness of the
+  normalized branch family.
+* `lambertW_equation`: `W e^W = z` on every branch (DLMF 4.13.1).
+* `lambertW_leading_asymptotic`: the leading asymptotic of every branch at infinity
+  (DLMF 4.13.1_1).
+* `wrightOmega_equation`, `wrightOmega_equation_principal`: the Wright omega equation
+  (DLMF 4.13.1_2).
+* `treeT_equation`: the inverse equation of the tree T-function (DLMF 4.13.1_3).
+* `lambertW_special_values`: exact values (DLMF 4.13.2).
+* `lambertW_real_nonnegative`, `lambertW_real_two_solutions`, `lambertW_principal_real`: the
+  real branches.
+* `lambertW_principal_analytic`, `lambertW_other_analytic`: holomorphy on the branch domains.
+* `lambertW_exp_inverse`, `lambertW_lower_exp_inverse`: inverses of `x e^x`
+  (DLMF 4.13.3_1–4.13.3_2).
+* `lambertW_hasDerivAt`, `lambertW_deriv_quotient`: the derivative (DLMF 4.13.4).
+* `lambertW_iteratedDeriv`, `lambertDerivPolynomial_natDegree`: higher derivatives
+  (DLMF 4.13.4_1–4.13.4_2).
+
+## Implementation notes
+
+A branch family is characterized by the inverse equation, analytic continuation, branch indexing
+at `1` and upper boundary limits; `lambertW` is chosen from the family whose existence is the
+theorem `exists_lambertBranchFamily`, not an axiom or an unspecified opaque function. Lower cut
+values are separate. Nonprincipal branches at zero are totalized to zero, outside all assertions
+for those branches. The Wright omega equation uses DLMF's closed logarithm at its cut values.
 -/
 
 @[expose] public section
@@ -59,7 +99,7 @@ structure LambertBranchFamily where
     Tendsto (value k) (𝓝[{z : ℂ | 0 < z.im}] (x : ℂ)) (𝓝 (value k x))
 
 /-- `y ↦ y e^y` is strictly increasing on `[-1, ∞)`. -/
-lemma lwR4_strictMonoOn : StrictMonoOn (fun y : ℝ => y * Real.exp y) (Ici (-1)) := by
+private lemma strictMonoOn_mul_exp_Ici_neg_one : StrictMonoOn (fun y : ℝ => y * Real.exp y) (Ici (-1)) := by
   apply strictMonoOn_of_deriv_pos (convex_Ici _)
   · exact (continuous_id.mul Real.continuous_exp).continuousOn
   · intro y hy
@@ -70,7 +110,7 @@ lemma lwR4_strictMonoOn : StrictMonoOn (fun y : ℝ => y * Real.exp y) (Ici (-1)
     rw [this]; exact mul_pos (by simp at hy; linarith) (Real.exp_pos _)
 
 /-- `-1/e` is the strict minimum of `y e^y` on the real line. -/
-lemma lwR4_gt_branchPoint {y : ℝ} (hy : y ≠ -1) : -Real.exp (-1) < y * Real.exp y := by
+private lemma neg_exp_neg_one_lt_mul_exp {y : ℝ} (hy : y ≠ -1) : -Real.exp (-1) < y * Real.exp y := by
   have hu : -(y + 1) ≠ 0 := by intro h; apply hy; linarith
   have h1 := Real.add_one_lt_exp hu
   have he : Real.exp y * Real.exp (-(y + 1)) = Real.exp (-1) := by
@@ -79,7 +119,7 @@ lemma lwR4_gt_branchPoint {y : ℝ} (hy : y ≠ -1) : -Real.exp (-1) < y * Real.
   nlinarith [Real.exp_pos (-(y+1))]
 
 /-- Local injectivity of `w ↦ w e^w` away from the critical point `-1`. -/
-lemma lwR4_locInj {w₀ : ℂ} (h : 1 + w₀ ≠ 0) :
+lemma injOn_mul_exp_ball {w₀ : ℂ} (h : 1 + w₀ ≠ 0) :
     ∃ ε > 0, InjOn (fun w : ℂ => w * Complex.exp w) (Metric.ball w₀ ε) := by
   have hf : HasStrictDerivAt (fun w : ℂ => w * Complex.exp w)
       (1 * Complex.exp w₀ + w₀ * Complex.exp w₀) w₀ :=
@@ -94,28 +134,28 @@ lemma lwR4_locInj {w₀ : ℂ} (h : 1 + w₀ ≠ 0) :
   exact congrArg _ hab
 
 /-- The open analytic domain of the branch `k`. -/
-def lwR4_dom (k : ℤ) : Set ℂ := if k = 0 then lambertPrincipalDomain else Complex.slitPlane
+def lambertBranchDomain (k : ℤ) : Set ℂ := if k = 0 then lambertPrincipalDomain else Complex.slitPlane
 
 /-- The `if`-form of the branch domain hypotheses. -/
-lemma lwR4_mem_dom_iff (k : ℤ) (z : ℂ) :
-    (if k = 0 then z ∈ lambertPrincipalDomain else z ∈ Complex.slitPlane) ↔ z ∈ lwR4_dom k := by
-  unfold lwR4_dom; split_ifs <;> rfl
+lemma ite_mem_iff_mem_lambertBranchDomain (k : ℤ) (z : ℂ) :
+    (if k = 0 then z ∈ lambertPrincipalDomain else z ∈ Complex.slitPlane) ↔ z ∈ lambertBranchDomain k := by
+  unfold lambertBranchDomain; split_ifs <;> rfl
 
 /-- The principal domain is open. -/
-lemma lwR4_isOpen_principal : IsOpen lambertPrincipalDomain :=
+private lemma isOpen_lambertPrincipalDomain : IsOpen lambertPrincipalDomain :=
   (isOpen_lt continuous_const Complex.continuous_re).union
     (isOpen_ne_fun Complex.continuous_im continuous_const)
 
 /-- Each branch domain is open. -/
-lemma lwR4_isOpen_dom (k : ℤ) : IsOpen (lwR4_dom k) := by
-  unfold lwR4_dom; split_ifs
-  · exact lwR4_isOpen_principal
+private lemma isOpen_lambertBranchDomain (k : ℤ) : IsOpen (lambertBranchDomain k) := by
+  unfold lambertBranchDomain; split_ifs
+  · exact isOpen_lambertPrincipalDomain
   · exact Complex.isOpen_slitPlane
 
 /-- The branch point `-1/e` lies in no branch domain. -/
-lemma lwR4_branchPoint_not_mem (k : ℤ) : ((-Real.exp (-1) : ℝ) : ℂ) ∉ lwR4_dom k := by
+private lemma neg_exp_neg_one_not_mem_lambertBranchDomain (k : ℤ) : ((-Real.exp (-1) : ℝ) : ℂ) ∉ lambertBranchDomain k := by
   have he : 0 < Real.exp (-1) := Real.exp_pos _
-  unfold lwR4_dom; split_ifs
+  unfold lambertBranchDomain; split_ifs
   · simp only [lambertPrincipalDomain, mem_ofPred_eq, ofReal_re, ofReal_im, ne_eq,
       not_true_eq_false, or_false, lt_self_iff_false, not_false_eq_true]
   · rw [Complex.mem_slitPlane_iff]
@@ -124,7 +164,7 @@ lemma lwR4_branchPoint_not_mem (k : ℤ) : ((-Real.exp (-1) : ℝ) : ℂ) ∉ lw
 
 /-- Two continuous solutions of `w e^w = z` on a preconnected open set either agree everywhere
 or nowhere, provided one of them avoids the critical value `-1`. -/
-lemma lwR4_eq_or_ne {U : Set ℂ} (hU : IsOpen U) (hUc : IsPreconnected U) {f g : ℂ → ℂ}
+lemma eqOn_or_ne_of_mul_exp_eq {U : Set ℂ} (hU : IsOpen U) (hUc : IsPreconnected U) {f g : ℂ → ℂ}
     (hf : ContinuousOn f U) (hg : ContinuousOn g U)
     (hfe : ∀ z ∈ U, f z * Complex.exp (f z) = z) (hge : ∀ z ∈ U, g z * Complex.exp (g z) = z)
     (hf1 : ∀ z ∈ U, 1 + f z ≠ 0) :
@@ -134,7 +174,7 @@ lemma lwR4_eq_or_ne {U : Set ℂ} (hU : IsOpen U) (hUc : IsPreconnected U) {f g 
   have hu : IsOpen u := by
     rw [isOpen_iff_mem_nhds]
     rintro z0 ⟨hz0, heq⟩
-    obtain ⟨ε, hε, hinj⟩ := lwR4_locInj (hf1 z0 hz0)
+    obtain ⟨ε, hε, hinj⟩ := injOn_mul_exp_ball (hf1 z0 hz0)
     have hfc := (hf.continuousAt (hU.mem_nhds hz0)).preimage_mem_nhds (Metric.ball_mem_nhds _ hε)
     have hball : Metric.ball (f z0) ε ∈ 𝓝 (g z0) := by
       rw [← heq]; exact Metric.ball_mem_nhds _ hε
@@ -162,11 +202,11 @@ lemma lwR4_eq_or_ne {U : Set ℂ} (hU : IsOpen U) (hUc : IsPreconnected U) {f g 
     exact hne ⟨z, hz, hz, heq⟩
 
 /-- The auxiliary function whose zeros are the imaginary parts of roots of `w e^w = 1`. -/
-noncomputable def lwR4_psi (y : ℝ) : ℝ := Real.log (-y / Real.sin y) - y * Real.cos y / Real.sin y
+noncomputable def lambertUnitRootImagFun (y : ℝ) : ℝ := Real.log (-y / Real.sin y) - y * Real.cos y / Real.sin y
 
-/-- The derivative of `lwR4_psi`, with numerator `(sin y - y cos y)² + y² sin² y`. -/
-lemma lwR4_psi_hasDerivAt {y : ℝ} (hy : y ≠ 0) (hs : Real.sin y ≠ 0) :
-    HasDerivAt lwR4_psi (((Real.sin y - y * Real.cos y) ^ 2 + y ^ 2 * Real.sin y ^ 2) /
+/-- The derivative of `lambertUnitRootImagFun`, with numerator `(sin y - y cos y)² + y² sin² y`. -/
+private lemma hasDerivAt_lambertUnitRootImagFun {y : ℝ} (hy : y ≠ 0) (hs : Real.sin y ≠ 0) :
+    HasDerivAt lambertUnitRootImagFun (((Real.sin y - y * Real.cos y) ^ 2 + y ^ 2 * Real.sin y ^ 2) /
       (y * Real.sin y ^ 2)) y := by
   have hg : HasDerivAt (fun y => -y / Real.sin y)
       ((-1 * Real.sin y - -y * Real.cos y) / Real.sin y ^ 2) y :=
@@ -183,8 +223,8 @@ lemma lwR4_psi_hasDerivAt {y : ℝ} (hy : y ≠ 0) (hs : Real.sin y ≠ 0) :
 
 /-- Roots of `w e^w = 1` off the real multiples of `π`: the real part is `-y cot y` and
 `ψ(y) = 0`. -/
-lemma lwR4_root_parts {w : ℂ} (hw : w * Complex.exp w = 1) (hs : Real.sin w.im ≠ 0) :
-    w.re = -w.im * Real.cos w.im / Real.sin w.im ∧ lwR4_psi w.im = 0 := by
+private lemma re_eq_and_lambertUnitRootImagFun_eq_zero {w : ℂ} (hw : w * Complex.exp w = 1) (hs : Real.sin w.im ≠ 0) :
+    w.re = -w.im * Real.cos w.im / Real.sin w.im ∧ lambertUnitRootImagFun w.im = 0 := by
   set x := w.re; set y := w.im
   have hre := congrArg Complex.re hw
   have him := congrArg Complex.im hw
@@ -208,11 +248,11 @@ lemma lwR4_root_parts {w : ℂ} (hw : w * Complex.exp w = 1) (hs : Real.sin w.im
   refine ⟨hx, ?_⟩
   have hg : -y / Real.sin y = Real.exp (-x) := by
     rw [Real.exp_neg]; exact eq_inv_of_mul_eq_one_right h2
-  unfold lwR4_psi
+  unfold lambertUnitRootImagFun
   rw [hg, Real.log_exp, hx]; ring
 
 /-- Uniqueness of the root of `w e^w = 1` in a horizontal strip `mπ < Im w < (m+1)π`. -/
-lemma lwR4_strip_unique (m : ℤ) {w₁ w₂ : ℂ} (h₁ : w₁ * Complex.exp w₁ = 1)
+private lemma eq_of_mul_exp_eq_one_of_im_mem_strip (m : ℤ) {w₁ w₂ : ℂ} (h₁ : w₁ * Complex.exp w₁ = 1)
     (h₂ : w₂ * Complex.exp w₂ = 1)
     (hy₁ : w₁.im ∈ Ioo (m * π) ((m + 1) * π)) (hy₂ : w₂.im ∈ Ioo (m * π) ((m + 1) * π)) :
     w₁ = w₂ := by
@@ -228,16 +268,16 @@ lemma lwR4_strip_unique (m : ℤ) {w₁ w₂ : ℂ} (h₁ : w₁ * Complex.exp w
     omega
   have hy0 : ∀ y ∈ Ioo (m * π) ((m + 1) * π), y ≠ 0 := by
     intro y hy h; apply hsin y hy; rw [h, Real.sin_zero]
-  have hcont : ContinuousOn lwR4_psi (Ioo (m * π) ((m + 1) * π)) := fun y hy =>
-    (lwR4_psi_hasDerivAt (hy0 y hy) (hsin y hy)).continuousAt.continuousWithinAt
-  have hinj : InjOn lwR4_psi (Ioo (m * π) ((m + 1) * π)) := by
+  have hcont : ContinuousOn lambertUnitRootImagFun (Ioo (m * π) ((m + 1) * π)) := fun y hy =>
+    (hasDerivAt_lambertUnitRootImagFun (hy0 y hy) (hsin y hy)).continuousAt.continuousWithinAt
+  have hinj : InjOn lambertUnitRootImagFun (Ioo (m * π) ((m + 1) * π)) := by
     rcases le_or_gt 0 m with hm | hm
     · have hpos : ∀ y ∈ Ioo (m * π) ((m + 1) * π), 0 < y := fun y hy => by
         have : (0 : ℝ) ≤ m := by exact_mod_cast hm
         have := hy.1; nlinarith [Real.pi_pos]
       refine (strictMonoOn_of_deriv_pos (convex_Ioo _ _) hcont fun y hy => ?_).injOn
       rw [interior_Ioo] at hy
-      rw [(lwR4_psi_hasDerivAt (hy0 y hy) (hsin y hy)).deriv]
+      rw [(hasDerivAt_lambertUnitRootImagFun (hy0 y hy) (hsin y hy)).deriv]
       have h1 := hsin y hy; have h2 := hpos y hy
       have hs2 : 0 < Real.sin y ^ 2 := lt_of_le_of_ne (sq_nonneg _) (Ne.symm (pow_ne_zero 2 h1))
       apply div_pos
@@ -249,7 +289,7 @@ lemma lwR4_strip_unique (m : ℤ) {w₁ w₂ : ℂ} (h₁ : w₁ * Complex.exp w
         have := hy.2; nlinarith [Real.pi_pos]
       refine (strictAntiOn_of_deriv_neg (convex_Ioo _ _) hcont fun y hy => ?_).injOn
       rw [interior_Ioo] at hy
-      rw [(lwR4_psi_hasDerivAt (hy0 y hy) (hsin y hy)).deriv]
+      rw [(hasDerivAt_lambertUnitRootImagFun (hy0 y hy) (hsin y hy)).deriv]
       have h1 := hsin y hy; have h2 := hneg y hy
       have hs2 : 0 < Real.sin y ^ 2 := lt_of_le_of_ne (sq_nonneg _) (Ne.symm (pow_ne_zero 2 h1))
       apply div_neg_of_pos_of_neg
@@ -257,42 +297,42 @@ lemma lwR4_strip_unique (m : ℤ) {w₁ w₂ : ℂ} (h₁ : w₁ * Complex.exp w
           mul_pos (lt_of_le_of_ne (sq_nonneg y) (Ne.symm (pow_ne_zero 2 h2.ne))) hs2
         nlinarith [sq_nonneg (Real.sin y - y * Real.cos y)]
       · nlinarith
-  obtain ⟨hx₁, hp₁⟩ := lwR4_root_parts h₁ (hsin _ hy₁)
-  obtain ⟨hx₂, hp₂⟩ := lwR4_root_parts h₂ (hsin _ hy₂)
+  obtain ⟨hx₁, hp₁⟩ := re_eq_and_lambertUnitRootImagFun_eq_zero h₁ (hsin _ hy₁)
+  obtain ⟨hx₂, hp₂⟩ := re_eq_and_lambertUnitRootImagFun_eq_zero h₂ (hsin _ hy₂)
   have hy : w₁.im = w₂.im := hinj hy₁ hy₂ (hp₁.trans hp₂.symm)
   apply Complex.ext
   · rw [hx₁, hx₂, hy]
   · exact hy
 
 /-- Every branch family satisfies the inverse equation on the analytic domains. -/
-lemma lwR4_fam_equation (F : LambertBranchFamily) {k : ℤ} {z : ℂ} (hz : z ∈ lwR4_dom k) :
+private lemma lambertBranchFamily_value_mul_exp (F : LambertBranchFamily) {k : ℤ} {z : ℂ} (hz : z ∈ lambertBranchDomain k) :
     F.value k z * Complex.exp (F.value k z) = z := by
   apply F.equation
-  unfold lwR4_dom at hz; split_ifs at hz with h
+  unfold lambertBranchDomain at hz; split_ifs at hz with h
   · exact Or.inr h
   · exact Or.inl (Complex.slitPlane_ne_zero hz)
 
 /-- Branch families avoid the critical value `-1` on the analytic domains. -/
-lemma lwR4_fam_one_add_ne_zero (F : LambertBranchFamily) {k : ℤ} {z : ℂ} (hz : z ∈ lwR4_dom k) :
+private lemma lambertBranchFamily_one_add_value_ne_zero (F : LambertBranchFamily) {k : ℤ} {z : ℂ} (hz : z ∈ lambertBranchDomain k) :
     1 + F.value k z ≠ 0 := by
   intro h
   have hW : F.value k z = -1 := by linear_combination h
-  have := lwR4_fam_equation F hz
+  have := lambertBranchFamily_value_mul_exp F hz
   rw [hW] at this
-  apply lwR4_branchPoint_not_mem k
+  apply neg_exp_neg_one_not_mem_lambertBranchDomain k
   convert hz using 1
   rw [← this]; push_cast; ring
 
 /-- Continuity of each branch on its analytic domain. -/
-lemma lwR4_fam_continuousOn (F : LambertBranchFamily) (k : ℤ) :
-    ContinuousOn (F.value k) (lwR4_dom k) := by
-  unfold lwR4_dom; split_ifs with h
+private lemma continuousOn_lambertBranchFamily_value (F : LambertBranchFamily) (k : ℤ) :
+    ContinuousOn (F.value k) (lambertBranchDomain k) := by
+  unfold lambertBranchDomain; split_ifs with h
   · subst h; exact F.principal_analytic.continuousOn
   · exact (F.other_analytic k h).continuousOn
 
 /-- Each branch domain is preconnected. -/
-lemma lwR4_isPreconnected_dom (k : ℤ) : IsPreconnected (lwR4_dom k) := by
-  unfold lwR4_dom; split_ifs
+private lemma isPreconnected_lambertBranchDomain (k : ℤ) : IsPreconnected (lambertBranchDomain k) := by
+  unfold lambertBranchDomain; split_ifs
   · have hstar : StarConvex ℝ 0 lambertPrincipalDomain := by
       intro y hy a b ha hb hab
       simp only [smul_zero, zero_add]
@@ -311,17 +351,17 @@ lemma lwR4_isPreconnected_dom (k : ℤ) : IsPreconnected (lwR4_dom k) := by
       (by simp [Complex.mem_slitPlane_iff])).isConnected.isPreconnected
 
 /-- The basepoint `1` lies in every branch domain. -/
-lemma lwR4_one_mem_dom (k : ℤ) : (1 : ℂ) ∈ lwR4_dom k := by
-  unfold lwR4_dom; split_ifs
+private lemma one_mem_lambertBranchDomain (k : ℤ) : (1 : ℂ) ∈ lambertBranchDomain k := by
+  unfold lambertBranchDomain; split_ifs
   · left; simp only [one_re]; linarith [Real.exp_pos (-1)]
   · simp [Complex.mem_slitPlane_iff]
 
 /-- Two branch families agree at the basepoint `1`. -/
-lemma lwR4_fam_basepoint (F G : LambertBranchFamily) (k : ℤ) : F.value k 1 = G.value k 1 := by
-  have hF := lwR4_fam_equation F (lwR4_one_mem_dom k)
-  have hG := lwR4_fam_equation G (lwR4_one_mem_dom k)
+private lemma lambertBranchFamily_value_one_eq (F G : LambertBranchFamily) (k : ℤ) : F.value k 1 = G.value k 1 := by
+  have hF := lambertBranchFamily_value_mul_exp F (one_mem_lambertBranchDomain k)
+  have hG := lambertBranchFamily_value_mul_exp G (one_mem_lambertBranchDomain k)
   rcases lt_trichotomy k 0 with hk | rfl | hk
-  · apply lwR4_strip_unique (2 * k) hF hG
+  · apply eq_of_mul_exp_eq_one_of_im_mem_strip (2 * k) hF hG
     · have := F.negative_basepoint k hk; push_cast; constructor <;> linarith [this.1, this.2]
     · have := G.negative_basepoint k hk; push_cast; constructor <;> linarith [this.1, this.2]
   · obtain ⟨hFi, hFr⟩ := F.principal_basepoint
@@ -332,10 +372,10 @@ lemma lwR4_fam_basepoint (F G : LambertBranchFamily) (k : ℤ) : F.value k 1 = G
       rw [hFw, ← Complex.ofReal_exp, ← Complex.ofReal_mul] at hF; exact_mod_cast hF
     have eG : (G.value 0 1).re * Real.exp (G.value 0 1).re = 1 := by
       rw [hGw, ← Complex.ofReal_exp, ← Complex.ofReal_mul] at hG; exact_mod_cast hG
-    have := lwR4_strictMonoOn.injOn (Set.mem_Ici.mpr (by linarith)) (Set.mem_Ici.mpr (by linarith))
+    have := strictMonoOn_mul_exp_Ici_neg_one.injOn (Set.mem_Ici.mpr (by linarith)) (Set.mem_Ici.mpr (by linarith))
       (eF.trans eG.symm)
     rw [hFw, hGw, this]
-  · apply lwR4_strip_unique (2 * k - 1) hF hG
+  · apply eq_of_mul_exp_eq_one_of_im_mem_strip (2 * k - 1) hF hG
     · have := F.positive_basepoint k hk; push_cast; constructor <;> linarith [this.1, this.2]
     · have := G.positive_basepoint k hk; push_cast; constructor <;> linarith [this.1, this.2]
 
@@ -347,16 +387,16 @@ theorem exists_lambertBranchFamily : Nonempty LambertBranchFamily := by
 theorem lambertBranchFamily_unique (F G : LambertBranchFamily) : F.value = G.value := by
   funext k
   -- agreement on the analytic domain
-  have hdom : ∀ z ∈ lwR4_dom k, F.value k z = G.value k z := by
-    rcases lwR4_eq_or_ne (lwR4_isOpen_dom k) (lwR4_isPreconnected_dom k)
-      (lwR4_fam_continuousOn F k) (lwR4_fam_continuousOn G k)
-      (fun z hz => lwR4_fam_equation F hz) (fun z hz => lwR4_fam_equation G hz)
-      (fun z hz => lwR4_fam_one_add_ne_zero F hz) with h | h
+  have hdom : ∀ z ∈ lambertBranchDomain k, F.value k z = G.value k z := by
+    rcases eqOn_or_ne_of_mul_exp_eq (isOpen_lambertBranchDomain k) (isPreconnected_lambertBranchDomain k)
+      (continuousOn_lambertBranchFamily_value F k) (continuousOn_lambertBranchFamily_value G k)
+      (fun z hz => lambertBranchFamily_value_mul_exp F hz) (fun z hz => lambertBranchFamily_value_mul_exp G hz)
+      (fun z hz => lambertBranchFamily_one_add_value_ne_zero F hz) with h | h
     · exact h
-    · exact absurd (lwR4_fam_basepoint F G k) (h 1 (lwR4_one_mem_dom k))
-  have hupper : ∀ z : ℂ, 0 < z.im → z ∈ lwR4_dom k := by
+    · exact absurd (lambertBranchFamily_value_one_eq F G k) (h 1 (one_mem_lambertBranchDomain k))
+  have hupper : ∀ z : ℂ, 0 < z.im → z ∈ lambertBranchDomain k := by
     intro z hz
-    unfold lwR4_dom; split_ifs
+    unfold lambertBranchDomain; split_ifs
     · right; exact hz.ne'
     · exact Complex.mem_slitPlane_iff.mpr (Or.inr hz.ne')
   -- agreement on the negative real axis via upper boundary values
@@ -373,11 +413,11 @@ theorem lambertBranchFamily_unique (F G : LambertBranchFamily) : F.value = G.val
       exact hdom z (hupper z hz)
     exact tendsto_nhds_unique h1' h2
   funext z
-  by_cases hz : z ∈ lwR4_dom k
+  by_cases hz : z ∈ lambertBranchDomain k
   · exact hdom z hz
   · have him : z.im = 0 := by
       by_contra h
-      apply hz; unfold lwR4_dom; split_ifs
+      apply hz; unfold lambertBranchDomain; split_ifs
       · right; exact h
       · exact Complex.mem_slitPlane_iff.mpr (Or.inr h)
     have hz' : z = (z.re : ℂ) := Complex.ext (by simp) (by simp [him])
@@ -385,7 +425,7 @@ theorem lambertBranchFamily_unique (F G : LambertBranchFamily) : F.value = G.val
     · rw [hz']; exact hcut _ hneg
     · have : z = 0 := by rw [hz', hzero]; simp
       rw [this, F.zero, G.zero]
-    · exfalso; apply hz; unfold lwR4_dom; split_ifs
+    · exfalso; apply hz; unfold lambertBranchDomain; split_ifs
       · left; linarith [Real.exp_pos (-1)]
       · exact Complex.mem_slitPlane_iff.mpr (Or.inl hpos)
 
@@ -473,15 +513,15 @@ theorem treeT_equation (z : ℂ) : treeT z * Complex.exp (-treeT z) = z := by
   linear_combination -this
 
 /-- A real point lies in the principal domain iff it exceeds `-1/e`. -/
-lemma lwR4_mem_principal_real {x : ℝ} : (x : ℂ) ∈ lambertPrincipalDomain ↔ -Real.exp (-1) < x := by
+private lemma ofReal_mem_lambertPrincipalDomain_iff {x : ℝ} : (x : ℂ) ∈ lambertPrincipalDomain ↔ -Real.exp (-1) < x := by
   simp [lambertPrincipalDomain]
 
 /-- On `(-1/e, ∞)` the principal branch is real and larger than `-1`. -/
-lemma lwR4_principal_real_gt {x : ℝ} (hx : -Real.exp (-1) < x) :
+lemma im_lambertW_zero_ofReal_and_neg_one_lt_re {x : ℝ} (hx : -Real.exp (-1) < x) :
     (lambertW 0 x).im = 0 ∧ -1 < (lambertW 0 x).re := by
   set a := -Real.exp (-1)
   have hcont : ∀ x : ℝ, a < x → ContinuousAt (fun x : ℝ => lambertW 0 x) x := fun x hx =>
-    (((Classical.choice exists_lambertBranchFamily).principal_analytic _ (lwR4_mem_principal_real.mpr hx)).continuousAt).comp
+    (((Classical.choice exists_lambertBranchFamily).principal_analytic _ (ofReal_mem_lambertPrincipalDomain_iff.mpr hx)).continuousAt).comp
       Complex.continuous_ofReal.continuousAt
   set u := {x : ℝ | a < x ∧ (lambertW 0 x).im = 0 ∧ -1 < (lambertW 0 x).re}
   set v := {x : ℝ | a < x ∧ ((lambertW 0 x).im ≠ 0 ∨ (lambertW 0 x).re < -1)}
@@ -501,7 +541,7 @@ lemma lwR4_principal_real_gt {x : ℝ} (hx : -Real.exp (-1) < x) :
     set w0 := lambertW 0 x0
     have h1 : 1 + w0 ≠ 0 := by
       intro h; have := congrArg Complex.re h; simp at this; linarith
-    obtain ⟨ε, hε, hinj⟩ := lwR4_locInj h1
+    obtain ⟨ε, hε, hinj⟩ := injOn_mul_exp_ball h1
     set ε' := min ε (w0.re + 1)
     have hε' : 0 < ε' := lt_min hε (by linarith)
     filter_upwards [Ioi_mem_nhds hax, (hcont x0 hax).preimage_mem_nhds
@@ -510,7 +550,7 @@ lemma lwR4_principal_real_gt {x : ℝ} (hx : -Real.exp (-1) < x) :
     have hw0 : (starRingEnd ℂ) w0 = w0 := Complex.conj_eq_iff_im.mpr him
     have hc : dist ((starRingEnd ℂ) (lambertW 0 x)) w0 < ε' := by
       rw [dist_eq_norm, ← hw0, ← map_sub, Complex.norm_conj, ← dist_eq_norm]; exact hball
-    have hmem : (x : ℂ) ∈ lambertPrincipalDomain := lwR4_mem_principal_real.mpr hxa
+    have hmem : (x : ℂ) ∈ lambertPrincipalDomain := ofReal_mem_lambertPrincipalDomain_iff.mpr hxa
     have heq := lambertW_equation 0 x (Or.inr rfl)
     have hconj : (starRingEnd ℂ) (lambertW 0 x) * Complex.exp ((starRingEnd ℂ) (lambertW 0 x)) =
         lambertW 0 x * Complex.exp (lambertW 0 x) := by
@@ -552,10 +592,10 @@ lemma lwR4_principal_real_gt {x : ℝ} (hx : -Real.exp (-1) < x) :
   exact ⟨this.2.1, this.2.2⟩
 
 /-- On `(-1/e, ∞)` the principal branch is the real inverse of `y e^y` on `(-1, ∞)`. -/
-lemma lwR4_principal_ofReal {x : ℝ} (hx : -Real.exp (-1) < x) :
+private lemma lambertW_zero_ofReal_eq_re {x : ℝ} (hx : -Real.exp (-1) < x) :
     lambertW 0 x = ((lambertW 0 x).re : ℂ) ∧ -1 < (lambertW 0 x).re ∧
       (lambertW 0 x).re * Real.exp (lambertW 0 x).re = x := by
-  obtain ⟨him, hre⟩ := lwR4_principal_real_gt hx
+  obtain ⟨him, hre⟩ := im_lambertW_zero_ofReal_and_neg_one_lt_re hx
   have hW : lambertW 0 x = ((lambertW 0 x).re : ℂ) := Complex.ext (by simp) (by simpa using him)
   refine ⟨hW, hre, ?_⟩
   have heq := lambertW_equation 0 x (Or.inr rfl)
@@ -563,15 +603,15 @@ lemma lwR4_principal_ofReal {x : ℝ} (hx : -Real.exp (-1) < x) :
   exact_mod_cast heq
 
 /-- The principal inverse of `y e^y` for `y > -1`. -/
-lemma lwR4_exp_inverse_gt {y : ℝ} (hy : -1 < y) : lambertW 0 ((y * Real.exp y : ℝ) : ℂ) = y := by
-  have hx : -Real.exp (-1) < y * Real.exp y := lwR4_gt_branchPoint (by linarith)
-  obtain ⟨hW, hre, heq⟩ := lwR4_principal_ofReal hx
+private lemma lambertW_zero_mul_exp {y : ℝ} (hy : -1 < y) : lambertW 0 ((y * Real.exp y : ℝ) : ℂ) = y := by
+  have hx : -Real.exp (-1) < y * Real.exp y := neg_exp_neg_one_lt_mul_exp (by linarith)
+  obtain ⟨hW, hre, heq⟩ := lambertW_zero_ofReal_eq_re hx
   have : (lambertW 0 ↑(y * Real.exp y)).re = y :=
-    lwR4_strictMonoOn.injOn (Set.mem_Ici.mpr hre.le) (Set.mem_Ici.mpr hy.le) heq
+    strictMonoOn_mul_exp_Ici_neg_one.injOn (Set.mem_Ici.mpr hre.le) (Set.mem_Ici.mpr hy.le) heq
   rw [hW, this]
 
 /-- The principal branch at the branch point, from the upper boundary normalization. -/
-lemma lwR4_principal_branchPoint : lambertW 0 ((-Real.exp (-1) : ℝ) : ℂ) = -1 := by
+private lemma lambertW_zero_neg_exp_neg_one : lambertW 0 ((-Real.exp (-1) : ℝ) : ℂ) = -1 := by
   set a : ℝ := -Real.exp (-1)
   have hb := (Classical.choice exists_lambertBranchFamily).upper_boundary 0 a
     (by simp only [a]; linarith [Real.exp_pos (-1)])
@@ -595,11 +635,11 @@ lemma lwR4_principal_branchPoint : lambertW 0 ((-Real.exp (-1) : ℝ) : ℂ) = -
   have hxa : dist x a < δ / 2 := by
     have := hfη (x := y) (by simp only [y, Real.dist_eq]; rw [abs_lt]; constructor <;> linarith)
     simpa [a, x] using this
-  have hxa' : a < x := lwR4_gt_branchPoint (by simp only [y]; linarith)
-  have hWx : lambertW 0 x = y := lwR4_exp_inverse_gt (by simp only [y]; linarith)
+  have hxa' : a < x := neg_exp_neg_one_lt_mul_exp (by simp only [y]; linarith)
+  have hWx : lambertW 0 x = y := lambertW_zero_mul_exp (by simp only [y]; linarith)
   -- move into the upper half-plane
   have hcx : ContinuousAt (lambertW 0) (x : ℂ) :=
-    ((Classical.choice exists_lambertBranchFamily).principal_analytic _ (lwR4_mem_principal_real.mpr hxa')).continuousAt
+    ((Classical.choice exists_lambertBranchFamily).principal_analytic _ (ofReal_mem_lambertPrincipalDomain_iff.mpr hxa')).continuousAt
   obtain ⟨δ', hδ', hW'⟩ := Metric.continuousAt_iff.mp hcx ε hε
   set s := min δ' (δ / 2) / 2
   have hs : 0 < s := by positivity
@@ -648,7 +688,7 @@ theorem lambertW_real_nonnegative  :
   -- the real part is nonnegative on the nonnegative axis
   have hnn : ∀ x : ℝ, 0 ≤ x → 0 ≤ (lambertW 0 x).re := by
     intro x hx
-    obtain ⟨_, _, heq⟩ := lwR4_principal_ofReal (hpos x hx)
+    obtain ⟨_, _, heq⟩ := lambertW_zero_ofReal_eq_re (hpos x hx)
     by_contra h
     replace h := not_le.mp h
     have : (lambertW 0 x).re * Real.exp (lambertW 0 x).re < 0 :=
@@ -656,23 +696,23 @@ theorem lambertW_real_nonnegative  :
     linarith
   have hiff : ∀ x : ℝ, 0 ≤ x → ∀ y : ℝ, y * Real.exp y = x ↔ (y : ℂ) = lambertW 0 x := by
     intro x hx y
-    obtain ⟨hW, hre, heq⟩ := lwR4_principal_ofReal (hpos x hx)
+    obtain ⟨hW, hre, heq⟩ := lambertW_zero_ofReal_eq_re (hpos x hx)
     constructor
     · intro hy
       have hy0 : 0 ≤ y := by
         by_contra h; replace h := not_le.mp h
         have : y * Real.exp y < 0 := mul_neg_of_neg_of_pos h (Real.exp_pos _)
         linarith
-      rw [← hy]; exact (lwR4_exp_inverse_gt (by linarith)).symm
+      rw [← hy]; exact (lambertW_zero_mul_exp (by linarith)).symm
     · intro hy
       have : (lambertW 0 x).re = y := by rw [← hy]; simp
       rw [← this]; exact heq
-  refine ⟨fun x1 hx1 x2 hx2 hlt => ?_, fun x hx => ⟨(lwR4_principal_real_gt (hpos x hx)).1,
+  refine ⟨fun x1 hx1 x2 hx2 hlt => ?_, fun x hx => ⟨(im_lambertW_zero_ofReal_and_neg_one_lt_re (hpos x hx)).1,
     hnn x hx, hiff x hx⟩⟩
-  obtain ⟨_, _, h1⟩ := lwR4_principal_ofReal (hpos x1 hx1)
-  obtain ⟨_, _, h2⟩ := lwR4_principal_ofReal (hpos x2 hx2)
+  obtain ⟨_, _, h1⟩ := lambertW_zero_ofReal_eq_re (hpos x1 hx1)
+  obtain ⟨_, _, h2⟩ := lambertW_zero_ofReal_eq_re (hpos x2 hx2)
   have m1 := hnn x1 hx1; have m2 := hnn x2 hx2
-  rw [← lwR4_strictMonoOn.lt_iff_lt (Set.mem_Ici.mpr (by linarith)) (Set.mem_Ici.mpr (by linarith))]
+  rw [← strictMonoOn_mul_exp_Ici_neg_one.lt_iff_lt (Set.mem_Ici.mpr (by linarith)) (Set.mem_Ici.mpr (by linarith))]
   simp only
   rw [h1, h2]; exact hlt
 
@@ -697,48 +737,48 @@ theorem lambertW_other_analytic (k : ℤ) (hk : k ≠ 0) : AnalyticOnNhd ℂ (la
   exact (Classical.choice exists_lambertBranchFamily).other_analytic k hk
 
 /-- Each branch is analytic on its domain. -/
-lemma lwR4_analytic_dom (k : ℤ) : AnalyticOnNhd ℂ (lambertW k) (lwR4_dom k) := by
-  unfold lwR4_dom; split_ifs with h
+private lemma analyticOnNhd_lambertW (k : ℤ) : AnalyticOnNhd ℂ (lambertW k) (lambertBranchDomain k) := by
+  unfold lambertBranchDomain; split_ifs with h
   · subst h; exact lambertW_principal_analytic
   · exact lambertW_other_analytic k h
 
 /-- The inverse equation holds throughout each branch domain. -/
-lemma lwR4_equation_dom {k : ℤ} {z : ℂ} (hz : z ∈ lwR4_dom k) :
+lemma lambertW_mul_exp_lambertW {k : ℤ} {z : ℂ} (hz : z ∈ lambertBranchDomain k) :
     lambertW k z * Complex.exp (lambertW k z) = z := by
   apply lambertW_equation
-  unfold lwR4_dom at hz; split_ifs at hz with h
+  unfold lambertBranchDomain at hz; split_ifs at hz with h
   · exact Or.inr h
   · exact Or.inl (Complex.slitPlane_ne_zero hz)
 
 /-- `1 + W_k(z) ≠ 0` on each branch domain. -/
-lemma lwR4_one_add_ne_zero {k : ℤ} {z : ℂ} (hz : z ∈ lwR4_dom k) : 1 + lambertW k z ≠ 0 := by
+lemma one_add_lambertW_ne_zero {k : ℤ} {z : ℂ} (hz : z ∈ lambertBranchDomain k) : 1 + lambertW k z ≠ 0 := by
   intro h
   have hW : lambertW k z = -1 := by linear_combination h
-  have := lwR4_equation_dom hz
+  have := lambertW_mul_exp_lambertW hz
   rw [hW] at this
-  apply lwR4_branchPoint_not_mem k
+  apply neg_exp_neg_one_not_mem_lambertBranchDomain k
   convert hz using 1
   rw [← this]; push_cast; ring
 
 /-- Branch values at nonzero arguments are nonzero. -/
-lemma lwR4_ne_zero_of_ne {k : ℤ} {z : ℂ} (hz : z ∈ lwR4_dom k) (hne : z ≠ 0) :
+lemma lambertW_ne_zero {k : ℤ} {z : ℂ} (hz : z ∈ lambertBranchDomain k) (hne : z ≠ 0) :
     lambertW k z ≠ 0 := by
-  intro h; have := lwR4_equation_dom hz; rw [h, zero_mul] at this; exact hne this.symm
+  intro h; have := lambertW_mul_exp_lambertW hz; rw [h, zero_mul] at this; exact hne this.symm
 
 /-- The derivative `e^{-W}/(1+W)` on each branch domain. -/
-lemma lwR4_hasDerivAt {k : ℤ} {z : ℂ} (hz : z ∈ lwR4_dom k) :
+lemma hasDerivAt_lambertW {k : ℤ} {z : ℂ} (hz : z ∈ lambertBranchDomain k) :
     HasDerivAt (lambertW k) (Complex.exp (-lambertW k z) / (1 + lambertW k z)) z := by
-  have hd := ((lwR4_analytic_dom k z hz).differentiableAt).hasDerivAt
+  have hd := ((analyticOnNhd_lambertW k z hz).differentiableAt).hasDerivAt
   have hg : HasDerivAt (fun u => lambertW k u * Complex.exp (lambertW k u))
       ((lambertW k z + 1) * Complex.exp (lambertW k z) * deriv (lambertW k) z) z :=
     (((hasDerivAt_id (lambertW k z)).fun_mul (Complex.hasDerivAt_exp (lambertW k z))).congr_deriv
       (by simp only [id_eq, one_mul]; ring)).comp z hd
   have hid : HasDerivAt (fun u => lambertW k u * Complex.exp (lambertW k u)) 1 z := by
     apply (hasDerivAt_id z).congr_of_eventuallyEq
-    filter_upwards [(lwR4_isOpen_dom k).mem_nhds hz] with u hu
-    exact lwR4_equation_dom hu
+    filter_upwards [(isOpen_lambertBranchDomain k).mem_nhds hz] with u hu
+    exact lambertW_mul_exp_lambertW hu
   have hu := hg.unique hid
-  have h1 := lwR4_one_add_ne_zero hz
+  have h1 := one_add_lambertW_ne_zero hz
   convert hd using 1
   rw [Complex.exp_neg]
   field_simp
@@ -747,18 +787,18 @@ lemma lwR4_hasDerivAt {k : ℤ} {z : ℂ} (hz : z ∈ lwR4_dom k) :
 /-- The principal branch is real throughout its full real domain. -/
 theorem lambertW_principal_real {x : ℝ} (hx : -Real.exp (-1) ≤ x) : (lambertW 0 x).im = 0 := by
   rcases hx.lt_or_eq with h | h
-  · exact (lwR4_principal_real_gt h).1
-  · rw [← h, lwR4_principal_branchPoint]; simp
+  · exact (im_lambertW_zero_ofReal_and_neg_one_lt_re h).1
+  · rw [← h, lambertW_zero_neg_exp_neg_one]; simp
 
 /-- The principal real inverse is valid through the branch point. -/
 @[dlmf 4.13.E3_1]
 theorem lambertW_exp_inverse {x : ℝ} (hx : -1 ≤ x) : lambertW 0 (x * Real.exp x) = x := by
   rcases hx.lt_or_eq with h | h
-  · have := lwR4_exp_inverse_gt h; rwa [Complex.ofReal_mul] at this
+  · have := lambertW_zero_mul_exp h; rwa [Complex.ofReal_mul] at this
   · subst h
     have : (((-1 : ℝ) : ℂ) * ((Real.exp (-1) : ℝ) : ℂ)) = ((-Real.exp (-1) : ℝ) : ℂ) := by
       push_cast; ring
-    rw [this, lwR4_principal_branchPoint]; simp
+    rw [this, lambertW_zero_neg_exp_neg_one]; simp
 
 /-- Both indicated lower-branch cut values invert `x exp x` below minus one. -/
 @[dlmf 4.13.E3_2]
@@ -772,18 +812,18 @@ theorem lambertW_hasDerivAt (k : ℤ) {z : ℂ}
     (hz : if k = 0 then z ∈ lambertPrincipalDomain else z ∈ Complex.slitPlane) :
     HasDerivAt (lambertW k)
       (Complex.exp (-lambertW k z) / (1 + lambertW k z)) z := by
-  exact lwR4_hasDerivAt ((lwR4_mem_dom_iff k z).mp hz)
+  exact hasDerivAt_lambertW ((ite_mem_iff_mem_lambertBranchDomain k z).mp hz)
 
 /-- The equivalent derivative quotient requires a nonzero argument. -/
 @[dlmf 4.13.E4]
 theorem lambertW_deriv_quotient (k : ℤ) {z : ℂ} (hne : z ≠ 0)
     (hz : if k = 0 then z ∈ lambertPrincipalDomain else z ∈ Complex.slitPlane) :
     deriv (lambertW k) z = lambertW k z / (z * (1 + lambertW k z)) := by
-  rw [lwR4_mem_dom_iff] at hz
-  rw [(lwR4_hasDerivAt hz).deriv]
-  have h1 := lwR4_one_add_ne_zero hz
-  have hW := lwR4_ne_zero_of_ne hz hne
-  have heq := lwR4_equation_dom hz
+  rw [ite_mem_iff_mem_lambertBranchDomain] at hz
+  rw [(hasDerivAt_lambertW hz).deriv]
+  have h1 := one_add_lambertW_ne_zero hz
+  have hW := lambertW_ne_zero hz hne
+  have heq := lambertW_mul_exp_lambertW hz
   generalize lambertW k z = w at *
   subst heq
   rw [Complex.exp_neg]
@@ -792,7 +832,7 @@ theorem lambertW_deriv_quotient (k : ℤ) {z : ℂ} (hne : z ≠ 0)
 
 open Polynomial in
 /-- Vanishing above degree `n` and the leading coefficient `(-1)^n n!`. -/
-lemma lwR4_derivPoly_coeff (n : ℕ) :
+private lemma lambertDerivPolynomial_coeff (n : ℕ) :
     (∀ m, n < m → (lambertDerivPolynomial n).coeff m = 0) ∧
     (lambertDerivPolynomial n).coeff n = (-1) ^ n * n.factorial := by
   induction n with
@@ -821,18 +861,18 @@ lemma lwR4_derivPoly_coeff (n : ℕ) :
 /-- The nth derivative polynomial has exactly degree n. -/
 @[dlmf 4.13.E4_2]
 theorem lambertDerivPolynomial_natDegree (n : ℕ) : (lambertDerivPolynomial n).natDegree = n := by
-  obtain ⟨hz, hl⟩ := lwR4_derivPoly_coeff n
+  obtain ⟨hz, hl⟩ := lambertDerivPolynomial_coeff n
   apply Polynomial.natDegree_eq_of_le_of_coeff_ne_zero
   · exact Polynomial.natDegree_le_iff_coeff_eq_zero.mpr fun m hm => hz m (by exact_mod_cast hm)
   · rw [hl]; exact mul_ne_zero (pow_ne_zero _ (by norm_num)) (by exact_mod_cast n.factorial_ne_zero)
 
 /-- The closed form of the `(m+1)`st derivative as a function of `w = W(z)`. -/
-def lwR4_F (m : ℕ) (w : ℂ) : ℂ :=
+def lambertIteratedDerivForm (m : ℕ) (w : ℂ) : ℂ :=
   Complex.exp (-(m + 1 : ℂ) * w) * (lambertDerivPolynomial m).eval w / (1 + w) ^ (2 * m + 1)
 
-/-- The derivative of the closed form `lwR4_F m`. -/
-lemma lwR4_F_hasDerivAt (m : ℕ) {w : ℂ} (hw : 1 + w ≠ 0) :
-    HasDerivAt (lwR4_F m)
+/-- The derivative of the closed form `lambertIteratedDerivForm m`. -/
+private lemma hasDerivAt_lambertIteratedDerivForm (m : ℕ) {w : ℂ} (hw : 1 + w ≠ 0) :
+    HasDerivAt (lambertIteratedDerivForm m)
       (((Complex.exp (-(m + 1 : ℂ) * w) * (-(m + 1 : ℂ)) * (lambertDerivPolynomial m).eval w +
         Complex.exp (-(m + 1 : ℂ) * w) * (lambertDerivPolynomial m).derivative.eval w) *
           (1 + w) ^ (2 * m + 1) -
@@ -849,27 +889,27 @@ lemma lwR4_F_hasDerivAt (m : ℕ) {w : ℂ} (hw : 1 + w ≠ 0) :
   exact (he.mul hp).div hq (pow_ne_zero _ hw)
 
 /-- The `(m+1)`st derivative of a branch on its domain, by induction. -/
-lemma lwR4_iteratedDeriv_succ (k : ℤ) (m : ℕ) :
-    ∀ z ∈ lwR4_dom k, iteratedDeriv (m + 1) (lambertW k) z = lwR4_F m (lambertW k z) := by
+private lemma iteratedDeriv_succ_lambertW (k : ℤ) (m : ℕ) :
+    ∀ z ∈ lambertBranchDomain k, iteratedDeriv (m + 1) (lambertW k) z = lambertIteratedDerivForm m (lambertW k z) := by
   induction m with
   | zero =>
     intro z hz
-    rw [iteratedDeriv_one, (lwR4_hasDerivAt hz).deriv, lwR4_F]
+    rw [iteratedDeriv_one, (hasDerivAt_lambertW hz).deriv, lambertIteratedDerivForm]
     simp [lambertDerivPolynomial]
   | succ m ih =>
     intro z hz
     rw [iteratedDeriv_succ]
-    have hev : iteratedDeriv (m + 1) (lambertW k) =ᶠ[𝓝 z] fun u => lwR4_F m (lambertW k u) := by
-      filter_upwards [(lwR4_isOpen_dom k).mem_nhds hz] with u hu
+    have hev : iteratedDeriv (m + 1) (lambertW k) =ᶠ[𝓝 z] fun u => lambertIteratedDerivForm m (lambertW k u) := by
+      filter_upwards [(isOpen_lambertBranchDomain k).mem_nhds hz] with u hu
       exact ih u hu
     rw [hev.deriv_eq]
-    have h1 := lwR4_one_add_ne_zero hz
-    have hc : HasDerivAt (fun u => lwR4_F m (lambertW k u)) _ z :=
-      (lwR4_F_hasDerivAt m h1).comp z (lwR4_hasDerivAt hz)
+    have h1 := one_add_lambertW_ne_zero hz
+    have hc : HasDerivAt (fun u => lambertIteratedDerivForm m (lambertW k u)) _ z :=
+      (hasDerivAt_lambertIteratedDerivForm m h1).comp z (hasDerivAt_lambertW hz)
     rw [hc.deriv]
     clear hc hev ih
     generalize lambertW k z = w at *
-    rw [lwR4_F, lambertDerivPolynomial]
+    rw [lambertIteratedDerivForm, lambertDerivPolynomial]
     simp only [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_sub, Polynomial.eval_one,
       Polynomial.eval_X, Polynomial.eval_C, Polynomial.eval_ofNat]
     have e1 : Complex.exp (-(↑(m + 1) + 1 : ℂ) * w) =
@@ -893,10 +933,10 @@ theorem lambertW_iteratedDeriv (k n : ℤ) (hn : 1 ≤ n) {z : ℂ}
       Complex.exp (-n * lambertW k z) *
         (lambertDerivPolynomial (n.toNat - 1)).eval (lambertW k z) /
       (1 + lambertW k z) ^ (2 * n.toNat - 1) := by
-  rw [lwR4_mem_dom_iff] at hz
+  rw [ite_mem_iff_mem_lambertBranchDomain] at hz
   obtain ⟨m, rfl⟩ : ∃ m : ℕ, n = (m : ℤ) + 1 := ⟨(n - 1).toNat, by omega⟩
   have hm : ((m : ℤ) + 1).toNat = m + 1 := by omega
-  rw [hm, lwR4_iteratedDeriv_succ k m z hz, lwR4_F]
+  rw [hm, iteratedDeriv_succ_lambertW k m z hz, lambertIteratedDerivForm]
   simp only [Nat.add_sub_cancel, show 2 * (m + 1) - 1 = 2 * m + 1 by omega]
   push_cast; ring_nf
 

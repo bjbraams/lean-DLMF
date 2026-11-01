@@ -13,6 +13,11 @@ public import Mathlib.Analysis.PSeries
 
 Mathlib's Gaussian decay estimates imply summability on the integer lattice,
 including arbitrary complex linear and constant terms.
+
+## Main results
+
+* `Complex.summable_exp_quadratic`: a complex quadratic exponential whose leading coefficient
+  has negative real part is absolutely summable over the integers.
 -/
 
 @[expose] public noncomputable section

@@ -6,14 +6,37 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.IntegralRepresentations
+public import ToMathlib.Analysis.SpecialFunctions.Pow
 
 /-!
 # Toroidal functions, coordinates and representations
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+Toroidal coordinates and the toroidal (ring) functions `P^μ_{n-1/2}(cosh ξ)` and
+`𝑸^μ_{n-1/2}(cosh ξ)` (DLMF §14.19): hypergeometric representations, integral representations,
+the Fourier series in `φ`, and Whipple's formulas.
+
+## Main definitions
+
+* `toroidalCoordinates`: the toroidal coordinate map `(η, θ, φ) ↦ (x, y, z)` (DLMF 14.19.1).
+* `toroidalP`, `toroidalQ`: the toroidal functions `P^μ_{n-1/2}` and `𝑸^μ_{n-1/2}` of the first
+  kind and the regularized second kind.
+
+## Main results
+
+* `toroidalP_hypergeometric`, `toroidalQ_hypergeometric`: Gauss hypergeometric representations
+  in `e^{-2ξ}` (DLMF 14.19.2, 14.19.3).
+* `toroidalP_integral`, `toroidalQ_integral`: integral representations (DLMF 14.19.4, 14.19.5).
+* `toroidalQ_fourier`: the Fourier series of `sinh^μ ξ/(cosh ξ - cos φ)^{μ+1/2}` in `φ`
+  (DLMF 14.19.6).
+* `toroidal_whipple_P`, `toroidal_whipple_Q`: Whipple's formulas for toroidal functions
+  (DLMF 14.19.7, 14.19.8).
+
+## Implementation notes
+
+The hypergeometric forms rest on a composite quadratic transformation (DLMF 15.8.21 followed by
+15.8.13, `legTor_quad`). DLMF 14.19.4 follows from the Euler half-line integral of `₂F₁` with the
+substitution `u = tan²(θ/2)`, and DLMF 14.19.5 from Whipple's formula (DLMF 14.9.16) and
+DLMF 14.12.4. Helper names carry the prefixes `legTor_`, `legInt_` and `legFS_`.
 -/
 
 @[expose] public noncomputable section
@@ -81,10 +104,6 @@ theorem legTor_Gamma_half_ne (k : ℤ) : Gamma ((k:ℂ) + 1/2) ≠ 0 := by
 
 /-! ### Quadratic transformations for DLMF 14.19.2–3 -/
 
-/-- Complex powers of a positive real as exponentials. -/
-theorem legTor_cpow_real {x : ℝ} (hx : 0 < x) (s : ℂ) : (x:ℂ)^s = exp ((Real.log x:ℂ) * s) := by
-  rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hx.ne'), ofReal_log hx.le]
-
 /-- Composite quadratic transformation (DLMF 15.8.21 then 15.8.13) behind DLMF 14.19.3:
 for `0 < q < 1` and `x = (1+q²)/(2q)`,
 `F(μ+½, ν+μ+½; ν+1; q²) = (1+q²)^{-(ν+μ+½)} F(a/2, (a+1)/2; ν+1; x^{-2})`, `a = ν+μ+½`. -/
@@ -97,7 +116,7 @@ theorem legTor_quad (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)) (ht : 
     rw [norm_real, Real.norm_eq_abs, abs_of_pos (by positivity)]; nlinarith
   have hs : ((q^2:ℝ):ℂ) ∈ slitPlane := Or.inl (by simp only [ofReal_re]; positivity)
   have hsq : ((q^2:ℝ):ℂ)^(1/2:ℂ) = (q:ℂ) := by
-    rw [legTor_cpow_real (by positivity), Real.log_pow]; push_cast
+    rw [Complex.ofReal_cpow_eq_exp (by positivity), Real.log_pow]; push_cast
     rw [show (2*(Real.log q:ℂ))*(1/2) = Real.log q by ring, ← ofReal_exp, Real.exp_log hq0]
   set w : ℝ := 4*q/(1+q)^2 with hwdef
   have hw0 : 0 < w := by positivity
@@ -125,7 +144,7 @@ theorem legTor_quad (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)) (ht : 
   rw [harg]
   have hw2 : (1:ℂ) - (w:ℂ)/2 = ((1-w/2:ℝ):ℂ) := by push_cast; ring
   have h1q : (1:ℂ) + q = ((1+q:ℝ):ℂ) := by push_cast; ring
-  rw [hw2, h1q, legTor_cpow_real (by positivity), legTor_cpow_real (by linarith), ← mul_assoc,
+  rw [hw2, h1q, Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp (by linarith), ← mul_assoc,
     ← exp_add]
   congr 2
   have hl : Real.log (1+q^2) = 2*Real.log (1+q) + Real.log (1-w/2) := by
@@ -190,9 +209,9 @@ theorem legTor_Q_hyp_generic (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ
   have e1 : (1:ℂ) - ((q^2:ℝ):ℂ) = ((1-q^2:ℝ):ℂ) := by push_cast; ring
   have q21 : q^2 < 1 := by nlinarith
   unfold legendreBranchPower
-  rw [hl, e1, legTor_cpow_real (by linarith) μ, show (2:ℂ)^(ν-1/2+1) = ((2:ℝ):ℂ)^(ν-1/2+1) by norm_num,
-    legTor_cpow_real (by norm_num : (0:ℝ) < 2),
-    legTor_cpow_real hx0]
+  rw [hl, e1, Complex.ofReal_cpow_eq_exp (by linarith) μ, show (2:ℂ)^(ν-1/2+1) = ((2:ℝ):ℂ)^(ν-1/2+1) by norm_num,
+    Complex.ofReal_cpow_eq_exp (by norm_num : (0:ℝ) < 2),
+    Complex.ofReal_cpow_eq_exp hx0]
   have L : ∀ A B C : ℂ, (Real.sqrt π:ℂ) * exp A / (exp B * exp C) * G =
       (Real.sqrt π:ℂ) * G * exp (A + -B + -C) := by
     intro A B C; rw [exp_add, exp_add, exp_neg, exp_neg]; ring
@@ -287,9 +306,9 @@ theorem legTor_P_hyp_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:
   have e2 : (1:ℂ) - ((1-q^2:ℝ):ℂ)/2 = ((1-(1-q^2)/2:ℝ):ℂ) := by push_cast; ring
   unfold legendreBranchPower
   have h2 : ∀ s : ℂ, (2:ℂ)^s = exp ((Real.log 2:ℂ)*s) := fun s => by
-    rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num]; exact legTor_cpow_real (by norm_num) s
-  rw [hl, e2, h2, h2, legTor_cpow_real hx0, legTor_cpow_real (by linarith) μ,
-    legTor_cpow_real (by nlinarith)]
+    rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num]; exact Complex.ofReal_cpow_eq_exp (by norm_num) s
+  rw [hl, e2, h2, h2, Complex.ofReal_cpow_eq_exp hx0, Complex.ofReal_cpow_eq_exp (by linarith) μ,
+    Complex.ofReal_cpow_eq_exp (by nlinarith)]
   have hpi : (Real.sqrt π:ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have L : ∀ A B C : ℂ, exp A * exp B * exp C * (F / Gamma (-μ+1)) = F / Gamma (-μ+1) * exp (A+B+C) := by
     intro A B C; rw [exp_add, exp_add]; ring
@@ -464,9 +483,9 @@ theorem legInt_toroidal_point (a : ℂ) (m : ℕ) {q x s θ : ℝ} (hq : 0 < q) 
     show (((q^2)⁻¹:ℝ):ℂ) + ((legInt_ht θ:ℝ):ℂ) = (((q^2)⁻¹ + legInt_ht θ : ℝ):ℂ) by push_cast; ring,
     show (2:ℂ)^(-(2*m:ℂ)) = ((2:ℝ):ℂ)^(-(2*m:ℂ)) by norm_num,
     show (S:ℂ)^(2*m) = (S:ℂ)^(((2*m:ℕ):ℂ)) by rw [cpow_natCast],
-    legInt_cpow_ofReal hu, legInt_cpow_ofReal (by positivity : (0:ℝ) < 1 + legInt_ht θ),
-    legInt_cpow_ofReal (by positivity : (0:ℝ) < (q^2)⁻¹ + legInt_ht θ), legInt_cpow_ofReal hq,
-    legInt_cpow_ofReal two_pos, legInt_cpow_ofReal hS, legInt_cpow_ofReal hW, real_smul,
+    Complex.ofReal_cpow_eq_exp hu, Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < 1 + legInt_ht θ),
+    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (q^2)⁻¹ + legInt_ht θ), Complex.ofReal_cpow_eq_exp hq,
+    Complex.ofReal_cpow_eq_exp two_pos, Complex.ofReal_cpow_eq_exp hS, Complex.ofReal_cpow_eq_exp hW, real_smul,
     show ((|legInt_ht' θ|:ℝ):ℂ) = exp (Real.log |legInt_ht' θ| : ℂ) by
       rw [← ofReal_exp, Real.exp_log hd]]
   rw [← Complex.exp_sub]
@@ -498,10 +517,10 @@ theorem legInt_toroidal_value (n m : ℕ) (F : ℂ) {q c s : ℝ} (hq0 : 0 < q) 
     rw [eq_div_iff hGa, div_mul_eq_mul_div, div_eq_iff hG2, mul_comm (Gamma ((m:ℂ)+1)), hdup]; ring
   rw [hG1]
   have h2 : ∀ w : ℂ, (2:ℂ)^w = exp (Real.log 2 * w) := fun w => by
-    rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, legInt_cpow_ofReal two_pos]
+    rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, Complex.ofReal_cpow_eq_exp two_pos]
   have h2n : (2:ℂ)^m = exp (Real.log 2 * (m:ℂ)) := by rw [← h2, cpow_natCast]
-  have hsn : (s:ℂ)^m = exp (Real.log s * (m:ℂ)) := by rw [← cpow_natCast, legInt_cpow_ofReal hs0]
-  rw [h2n, hsn, h2, h2, h2, legInt_cpow_ofReal hq0, legInt_cpow_ofReal hc0]
+  have hsn : (s:ℂ)^m = exp (Real.log s * (m:ℂ)) := by rw [← cpow_natCast, Complex.ofReal_cpow_eq_exp hs0]
+  rw [h2n, hsn, h2, h2, h2, Complex.ofReal_cpow_eq_exp hq0, Complex.ofReal_cpow_eq_exp hc0]
   have e : exp (Real.log s * (m:ℂ)) * exp (Real.log 2 * (2*m:ℂ)) *
       exp (Real.log q * (-((n:ℂ)+m+1/2))) * exp (Real.log q * (2*((m:ℂ)-(-n-1/2)))) *
       exp ((Real.log q + Real.log c) * ((-n-1/2:ℂ)-m)) * exp (Real.log 2 * (1-(2*(m:ℂ)+1))) =
@@ -594,7 +613,7 @@ theorem toroidalP_integral (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
     legInt_legendreBranchPower_real _ hc1,
     show ((c:ℂ))^2 - 1 = ((s^2:ℝ):ℂ) by
       rw [hcdef, hsdef]; push_cast; linear_combination (Complex.cosh_sq_sub_sinh_sq (ξ:ℂ)),
-    legInt_cpow_ofReal (r := s^2) (by positivity), Real.log_pow,
+    Complex.ofReal_cpow_eq_exp (q := s^2) (by positivity), Real.log_pow,
     show (Real.sinh ξ:ℂ) = (s:ℂ) from rfl, show (Real.cosh ξ:ℂ) = (c:ℂ) from rfl,
     show (n:ℂ)-1/2+m+1 = n+m+1/2 by ring, show (n:ℂ)-1/2-m+1 = n-m+1/2 by ring,
     legInt_toroidal_value n m _ hq0 (by linarith) hs0,
@@ -638,8 +657,8 @@ theorem toroidalQ_integral (n m : ℕ) (hmn : m ≤ n) {ξ : ℝ} (hξ : 0 < ξ)
     show (c:ℂ) + ((Real.cosh t:ℝ):ℂ)*(s:ℂ) = ((c + Real.cosh t * s:ℝ):ℂ) by push_cast; ring,
     show ((Real.cosh (m*t):ℝ):ℂ) = cosh ((m:ℂ)*t) by push_cast; ring_nf,
     show (π/2:ℂ) = ((π/2:ℝ):ℂ) by push_cast; ring,
-    legInt_cpow_ofReal (by positivity), legInt_cpow_ofReal (by positivity),
-    legInt_cpow_ofReal (by positivity), legInt_cpow_ofReal hY,
+    Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp (by positivity),
+    Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp hY,
     Real.log_div hY.ne' hs.ne', Real.log_div Real.pi_pos.ne' two_ne_zero,
     show Real.log (1/s^2) = -(2*Real.log s) by
       rw [one_div, Real.log_inv, Real.log_pow]; push_cast; ring]
@@ -813,11 +832,6 @@ theorem legFS_cpow_mul_conj {w : ℂ} (hw : w ∈ slitPlane) (s : ℂ) :
   rw [cpow_def_of_ne_zero hw0, cpow_def_of_ne_zero hc0, ← exp_add, log_conj w harg, ← add_mul,
     add_conj, log_re]
 
-/-- Positive real powers through the real logarithm. -/
-theorem legFS_ofReal_cpow {x : ℝ} (hx : 0 < x) (s : ℂ) :
-    (x:ℂ)^s = exp (((Real.log x : ℝ) : ℂ) * s) := by
-  rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hx.ne'), ← ofReal_log hx.le]
-
 /-- The closed form behind DLMF 14.19.6: with `t = e^{-ξ}`, `E = e^{iphi}`,
 `√π (1-t²)^μ e^{-ξ/2} (1-tE)^{-μ-1/2} (1-t/E)^{-μ-1/2} = (π/2)^{1/2} sinh^μ ξ (cosh ξ - cos phi)^{-μ-1/2}`. -/
 theorem legFS_toroidal_rhs (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
@@ -868,10 +882,10 @@ theorem legFS_toroidal_rhs (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
   have hcc0 : 0 < Real.cosh ξ - Real.cos phi := by
     have := Real.one_lt_cosh.mpr hξ.ne'; linarith [Real.cos_le_one phi]
   rw [show (1 - (Real.exp (-2*ξ):ℂ)) = ((1 - t^2 : ℝ) : ℂ) by rw [h2t]; push_cast; ring,
-    legFS_ofReal_cpow ht2, hsq, show (π/2:ℂ) = ((π/2 : ℝ) : ℂ) by push_cast; ring,
-    legFS_ofReal_cpow (by positivity), legFS_ofReal_cpow hsinh0,
+    Complex.ofReal_cpow_eq_exp ht2, hsq, show (π/2:ℂ) = ((π/2 : ℝ) : ℂ) by push_cast; ring,
+    Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp hsinh0,
     show (Real.cosh ξ - Real.cos phi : ℂ) = ((Real.cosh ξ - Real.cos phi : ℝ) : ℂ) by push_cast; ring,
-    legFS_ofReal_cpow hcc0, hL1, hL2, hL3]
+    Complex.ofReal_cpow_eq_exp hcc0, hL1, hL2, hL3]
   simp only [← exp_add, ← exp_sub]
   congr 1
   push_cast

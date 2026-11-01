@@ -9,12 +9,20 @@ public import DLMF.QSeries.Basic.Calculus
 public import DLMF.QSeries.Pochhammer
 
 /-!
-# `q`-derivative and the `q`-fundamental theorem (Duverney §10.1.2)
+# The `q`-derivative and the `q`-fundamental theorem (Duverney §10.1.2)
 
-`qDeriv q f x = (f(x) - f(qx))/((1-q)x)` is Jackson's `q`-derivative. This file proves
-`δ_q xⁿ = [n]_q x^{n-1}`, linearity, the `q`-product rule, and `δ_q f(x) → f'(x)` as `q → 1`.
-It also proves both halves of the `q`-fundamental theorem of calculus for the existing Jackson
-integral `jacksonIntegral`: `δ_q ∫₀ˣ f d_q t = f(x)` and `∫₀ˣ δ_q f d_q t = f(x) - f(0)`.
+This file develops Jackson's `q`-derivative `qDeriv q f x = (f(x) - f(qx))/((1-q)x)` and
+proves both halves of the `q`-fundamental theorem of calculus for the Jackson integral
+`jacksonIntegral`.
+
+## Main results
+
+* `qDeriv_pow`: `δ_q xⁿ = [n]_q x^{n-1}` (Duverney (10.11)).
+* `qDeriv_add`, `qDeriv_const_mul`, `qDeriv_mul`: linearity and the `q`-product rule
+  (Duverney (10.14)).
+* `tendsto_qDeriv`: `δ_q f(x) → f'(x)` as `q → 1` (DLMF §17.2(iv)).
+* `qDeriv_jacksonIntegral`: `δ_q ∫₀ˣ f d_q t = f(x)` (Duverney, Theorem 10.4).
+* `jacksonIntegral_qDeriv`: `∫₀ˣ δ_q f d_q t = f(x) - f(0)`.
 -/
 
 @[expose] public section

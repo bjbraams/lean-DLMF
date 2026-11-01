@@ -8,11 +8,41 @@ module
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 /-!
-# Wigner `3j`, `6j` and `9j` symbols: definitions (DLMF Chapter 34)
+# Wigner `3j`, `6j` and `9j` symbols: definitions
 
-This file holds the definitions of DLMF Chapter 34 (namespace `DLMF.WignerSymbols`).
+The definitions of DLMF Chapter 34 (namespace `DLMF.WignerSymbols`) and their basic
+properties.
 
-## Representation
+## Main definitions
+
+* `IsNatQ`, `IsAngularMomentum`, `IsProjection`, `IsTriad`: the standing conditions on angular
+  momenta and projections (DLMF §34.1, 34.2.1–34.2.2).
+* `IsAdmissible3j`, `IsAdmissible6j`: the admissibility conditions of the `3j` and `6j`
+  symbols.
+* `factQ`, `invFactQ`, `signPow`: factorials, reciprocal factorials and signs of rational
+  arguments.
+* `triangleDelta`: the triangle coefficient of DLMF 34.2.5.
+* `wigner3j`: the `3j` symbol by Racah's formula (DLMF 34.2.4). It is `0` unless
+  `IsAdmissible3j` holds: the triangle conditions (34.2.1), the projection conditions (34.2.2)
+  and `m₁ + m₂ + m₃ = 0` (34.2.3).
+* `clebschGordan`: the Clebsch–Gordan coefficient (DLMF 34.1.1).
+* `wigner6j`: the `6j` symbol by the single-sum formula (DLMF 34.4.2), zero unless the four
+  triads of 34.4.1 satisfy the triangle conditions (DLMF §34.10).
+* `wigner9j`: the `9j` symbol as a sum of products of three `6j` symbols (DLMF 34.6.2).
+* `projections`, `halfIntegersUpTo`: the finite ranges of summation used in the orthogonality
+  relations and sum rules.
+* `largeParameterAngle`: the angle of DLMF 34.8.2.
+* `sixJRecursionE`: the coefficient of DLMF 34.5.13 in the three-term `6j` recursion.
+* `symmetricRacahSum`: the Racah sum of 34.2.4 written symmetrically as a `finsum` over `ℤ`,
+  used to prove the symmetries of the `3j` symbol.
+
+## Main results
+
+* `wigner3j_of_not`, `wigner6j_of_not`: the symbols vanish outside the admissible range.
+* `IsTriad.symm12`, `IsTriad.cycle`, `IsTriad.symm23`: symmetries of triads.
+* `invFactQ_eq_zero_iff_neg`: `invFactQ x = 0` exactly when `x < 0`.
+
+## Implementation notes
 
 Angular momenta `j` and projective quantum numbers `m` are rational numbers. DLMF's
 standing conditions are predicates:
@@ -25,28 +55,12 @@ standing conditions are predicates:
   conditions hold, and `j₁ + j₂ + j₃` is an integer (`isTriad_iff` in
   `DLMF.WignerSymbols.ThreeJ`).
 
-Factorials, reciprocal factorials and signs of rational arguments are `factQ`, `invFactQ`
-and `signPow`; they are only used at integer arguments, where they are `n!`, `1/n!`
-(`0` for negative `n`) and `(-1)ⁿ`.
+Factorials, reciprocal factorials and signs of rational arguments are only used at integer
+arguments, where they are `n!`, `1/n!` (`0` for negative `n`) and `(-1)ⁿ`.
 
-## Definitions
-
-* `wigner3j j₁ j₂ j₃ m₁ m₂ m₃` (34.2.4, Racah's formula with `triangleDelta` of 34.2.5). It is
-  `0` unless `IsAdmissible3j` holds: the triangle conditions (34.2.1), the projection
-  conditions (34.2.2) and `m₁ + m₂ + m₃ = 0` (34.2.3). DLMF: "If either of the conditions
-  (34.2.1) or (34.2.3) is not satisfied, then the 3j symbol is zero"; outside the
-  projection ranges 34.2.2 DLMF defines nothing and the value `0` is the convention used by
-  all summation formulas of the chapter.
-* `clebschGordan` (34.1.1).
-* `wigner6j` (34.4.2, the single-sum formula), zero unless the four triads of 34.4.1 satisfy
-  the triangle conditions (DLMF §34.10).
-* `wigner9j` (34.6.2, the sum of products of three `6j` symbols).
-* `projections j`, `halfIntegersUpTo x`: the finite ranges of summation used in the
-  orthogonality relations and sum rules.
-* `largeParameterAngle` (34.8.2).
-* `sixJRecursionE` (34.5.13), the coefficient of the three-term `6j` recursion 34.5.12.
-* `w34_S`: an internal helper, the Racah sum of 34.2.4 written symmetrically as a `finsum`
-  over `ℤ`; it is used to prove the symmetries of the `3j` symbol.
+DLMF: "If either of the conditions (34.2.1) or (34.2.3) is not satisfied, then the 3j symbol
+is zero"; outside the projection ranges 34.2.2 DLMF defines nothing, and the value `0` is the
+convention used by all summation formulas of the chapter.
 -/
 
 @[expose] public noncomputable section
@@ -139,7 +153,7 @@ def clebschGordan (j₁ m₁ j₂ m₂ j₃ m₃ : ℚ) : ℝ :=
 /-- Racah's sum 34.2.4 in symmetric form: `∑_s (-1)^s / ∏ᵢ (xᵢ - s)! ∏ₖ (s - yₖ)!` over all
 integers `s` (finitely many nonzero terms; `invFactQ` vanishes at negative arguments). A helper
 for the symmetry relations of the `3j` symbol. -/
-def w34_S (x₁ x₂ x₃ y₁ y₂ y₃ : ℚ) : ℝ :=
+def symmetricRacahSum (x₁ x₂ x₃ y₁ y₂ y₃ : ℚ) : ℝ :=
   ∑ᶠ s : ℤ, (-1 : ℝ) ^ s * (invFactQ (x₁ - s) * invFactQ (x₂ - s) * invFactQ (x₃ - s) *
     (invFactQ (s - y₁) * invFactQ (s - y₂) * invFactQ (s - y₃)))
 
@@ -337,20 +351,20 @@ theorem wigner6j_of_not {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : ¬ IsAdmissib
   simp [wigner6j, h]
 
 /-- `√A · B = √(A B²)` for nonnegative `A`, `B`. -/
-theorem w34_sqrt_mul_eq {A B C : ℝ} (hA : 0 ≤ A) (hB : 0 ≤ B) (h : A * B ^ 2 = C) :
+theorem sqrt_mul_eq_sqrt_of_eq {A B C : ℝ} (hA : 0 ≤ A) (hB : 0 ≤ B) (h : A * B ^ 2 = C) :
     Real.sqrt A * B = Real.sqrt C := by
   rw [← h, Real.sqrt_mul hA, Real.sqrt_sq hB]
 
 /-- Normalize `1 + n` to a natural-number cast. -/
-theorem w34_one_add_natCast (n : ℕ) : (1 : ℚ) + n = ((1 + n : ℕ) : ℚ) := by push_cast; ring
+theorem one_add_natCast_eq (n : ℕ) : (1 : ℚ) + n = ((1 + n : ℕ) : ℚ) := by push_cast; ring
 
 /-- `0! = 1`. -/
-@[simp] theorem w34_factQ_zero : factQ 0 = 1 := by simp [factQ]
+@[simp] theorem factQ_zero : factQ 0 = 1 := by simp [factQ]
 /-- `1/0! = 1`. -/
-@[simp] theorem w34_invFactQ_zero : invFactQ 0 = 1 := by simp [invFactQ, factQ]
+@[simp] theorem invFactQ_zero : invFactQ 0 = 1 := by simp [invFactQ, factQ]
 
 /-- Reciprocal factorials are nonnegative. -/
-theorem w34_invFactQ_nonneg (x : ℚ) : 0 ≤ invFactQ x := by
+theorem invFactQ_nonneg (x : ℚ) : 0 ≤ invFactQ x := by
   unfold invFactQ factQ; split_ifs <;> positivity
 
 end DLMF.WignerSymbols

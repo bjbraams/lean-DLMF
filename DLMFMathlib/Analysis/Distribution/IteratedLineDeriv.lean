@@ -15,6 +15,13 @@ Directional derivatives commute on smooth test functions. Iterating this fact le
 of distributional derivatives act on a test function with one minus sign per derivative.
 Both identities allow arbitrary real normed source and target spaces. The commutation
 step reuses Tau Ceti's `TestFunction.lineDerivOp_comm`.
+
+## Main results
+
+* `TestFunction.iteratedLineDerivOp_comm`: a directional derivative commutes with any finite
+  list of directional derivatives of a test function.
+* `Distribution.iteratedLineDerivOp_apply`: moving a list of directional derivatives from a
+  distribution to a test function gives one minus sign per derivative.
 -/
 
 @[expose] public noncomputable section

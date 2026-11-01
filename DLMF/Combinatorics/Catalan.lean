@@ -8,22 +8,37 @@ module
 public import DLMF.Combinatorics.Binomial
 public import Mathlib.Combinatorics.Enumerative.Catalan.Basic
 public import Mathlib.Analysis.Analytic.Binomial
-public import DLMFMathlib.Combinatorics.S26aQuadraticSeries
+public import DLMFMathlib.Combinatorics.QuadraticSeries
 
 /-!
-# Catalan numbers (DLMF §26.5)
+# Catalan numbers
 
-DLMF's Catalan number `C(n)` is Mathlib's `catalan n` (defined by the recurrence 26.5.3,
-`catalan_succ`); no new definition is made. Mathlib proves `C(n) = C(2n, n)/(n+1)`
-(`succ_mul_catalan_eq_centralBinom`), the formal generating-function identity
-`PowerSeries.catalanSeries_sq_mul_X_add_one`, and counts Dyck words
+The Catalan numbers of DLMF §26.5. DLMF's Catalan number `C(n)` is Mathlib's `catalan n`
+(defined by the recurrence 26.5.3, `catalan_succ`); no new definition is made.
+
+## Main results
+
+* `card_latticePaths_above_eq_catalan`: `C(n)` counts lattice paths from `(0, 0)` to `(n, n)`
+  staying on or above `y = x` (DLMF §26.5(i)).
+* `catalan_eq_choose_div`, `catalan_eq_choose_sub`: the binomial forms of DLMF 26.5.1.
+* `hasSum_catalan_mul_pow`: the generating function `(1 - √(1-4x))/(2x)` (DLMF 26.5.2).
+* `catalan_succ_eq_sum`, `catalan_succ_eq_mul`, `catalan_succ_eq_sum_touchard`: the recurrences
+  DLMF 26.5.3–26.5.5.
+* `catalan_isEquivalent`, `tendsto_catalan_succ_div`: `C(n) ~ 4ⁿ/√(πn³)` and
+  `C(n+1)/C(n) → 4` (DLMF 26.5.6, 26.5.7).
+
+## Implementation notes
+
+Mathlib proves `C(n) = C(2n, n)/(n+1)` (`succ_mul_catalan_eq_centralBinom`), the formal
+generating-function identity `PowerSeries.catalanSeries_sq_mul_X_add_one`, and counts Dyck words
 (`DyckWord.card_dyckWord_semilength_eq_catalan`); a Dyck word of semilength `n` is a lattice
 path from `(0, 0)` to `(n, n)` staying on or above `y = x` (up-step `(0, 1)`, down-step
-`(1, 0)`), and the lattice-path count in DLMF's form is acquired here.
+`(1, 0)`), and the lattice-path count is stated here in DLMF's form.
 
 The forms `C(2n, n) - C(2n, n-1)` and `C(2n-1, n) - C(2n-1, n+1)` in 26.5.1 are stated for
 `n ≥ 1` (for `n = 0` they need `C(0, -1) = 0`, resp. `C(-1, 0) - C(-1, 1)` with nonnegative
-upper index, which DLMF's conventions do not cover).
+upper index, which DLMF's conventions do not cover). In 26.5.2 the value at `x = 0` is the
+removable value `1`, so the statement is for `0 < |x| < 1/4`.
 -/
 
 @[expose] public section
@@ -39,8 +54,8 @@ or above the line `y = x`. -/
 @[dlmf 26.5.i]
 theorem card_latticePaths_above_eq_catalan (n : ℕ) :
     #{l ∈ latticePaths unitSteps n n | StaysWeaklyAboveDiagonal l} = catalan n := by
-  have h := q26a_ballot_eq (n + n) 0 n n rfl (by omega)
-  simp only [q26a_ballot, Nat.cast_zero, q26a_staysAbove_zero_iff] at h
+  have h := ballotCount_eq_choose_sub (n + n) 0 n n rfl (by omega)
+  simp only [ballotCount, Nat.cast_zero, staysAbove_zero_iff] at h
   rcases n with _ | n
   · simpa using h
   have hc := succ_mul_catalan_eq_centralBinom (n + 1)
@@ -116,25 +131,25 @@ theorem catalan_eq_choose_sub {n : ℕ} (hn : 1 ≤ n) :
   ring
 
 /-- The generalized binomial coefficient over `ℝ` as a falling factorial over `n!`. -/
-lemma q26a_ringChoose_eq (a : ℝ) (n : ℕ) :
+private lemma ringChoose_eq_descPochhammer_div (a : ℝ) (n : ℕ) :
     Ring.choose a n = (descPochhammer ℝ n).eval a / n.factorial := by
   rw [Ring.choose_eq_smul, ← Polynomial.aeval_eq_smeval, Polynomial.aeval_def,
     ← Polynomial.eval_map, descPochhammer_map,
     smul_eq_mul, div_eq_inv_mul]
 
 /-- `C(n) = -(1/2) (-4)^{n+1} binom(1/2, n+1)`. -/
-lemma q26a_catalan_eq_choose_half (n : ℕ) :
+private lemma catalan_eq_ringChoose_half (n : ℕ) :
     (catalan n : ℝ) = -(1 / 2) * (-4) ^ (n + 1) * Ring.choose (1 / 2 : ℝ) (n + 1) := by
   induction n with
   | zero =>
-    rw [q26a_ringChoose_eq]; simp; norm_num
+    rw [ringChoose_eq_descPochhammer_div]; simp; norm_num
   | succ n ih =>
     have hc := succ_mul_catalan_eq_centralBinom n
     have hc' := succ_mul_catalan_eq_centralBinom (n + 1)
     have hb := Nat.succ_mul_centralBinom_succ n
     have hrec : Ring.choose (1 / 2 : ℝ) (n + 1 + 1) =
         Ring.choose (1 / 2 : ℝ) (n + 1) * (1 / 2 - (n + 1)) / (n + 2) := by
-      rw [q26a_ringChoose_eq, q26a_ringChoose_eq, descPochhammer_succ_eval, Nat.factorial_succ]
+      rw [ringChoose_eq_descPochhammer_div, ringChoose_eq_descPochhammer_div, descPochhammer_succ_eval, Nat.factorial_succ]
       push_cast
       have : ((n + 1).factorial : ℝ) ≠ 0 := by exact_mod_cast (n + 1).factorial_ne_zero
       field_simp
@@ -178,7 +193,7 @@ theorem hasSum_catalan_mul_pow {x : ℝ} (hx0 : x ≠ 0) (hx : |x| < 1 / 4) :
     rw [← Real.sqrt_eq_rpow, show 1 + -4 * x = 1 - 4 * x by ring]; field_simp; ring]
   convert h2 using 1
   ext n
-  rw [q26a_catalan_eq_choose_half, mul_pow]
+  rw [catalan_eq_ringChoose_half, mul_pow]
   field_simp
   ring
 
@@ -216,7 +231,7 @@ theorem catalan_succ_eq_sum_touchard (n : ℕ) :
     catalan (n + 1) = ∑ k ∈ range (n / 2 + 1), n.choose (2 * k) * 2 ^ (n - 2 * k) * catalan k := by
   have h : (catalan (n + 1) : ℚ) =
       ∑ k ∈ range (n / 2 + 1), (n.choose (2 * k) : ℚ) * 2 ^ (n - 2 * k) * catalan k := by
-    rw [s26a_catalan_succ_eq_sum,
+    rw [catalan_succ_eq_sum_catalan_mul_choose_mul_two_pow,
       ← sum_subset (range_subset_range.mpr (by omega : n / 2 + 1 ≤ n + 1))]
     · exact sum_congr rfl fun k _ => by ring
     · intro k _ hk

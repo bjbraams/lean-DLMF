@@ -10,12 +10,35 @@ public import DLMF.Confluent.ZeroTools
 public import DLMF.ErrorFunctions.ZeroTools
 
 /-!
-# Counts of real Kummer zeros
+# Counts of real zeros of Kummer's function
 
-Positive real zero counts of Kummer functions obtained from differential-equation comparison.
+This file counts the positive and negative real zeros of Kummer's `M(a,b,·)` for real
+parameters (DLMF §13.9(i)), by differential-equation comparison and sign patterns of the
+zeros.
 
-Source references and common attribution are retained in
-`DLMF.Confluent.Zeros`.
+## Main definitions
+
+* `kummerMPosZeros`, `kummerUPosZeros`: the positive real zeros of `M(a,b,·)` and `U(a,b,·)`.
+* `KumZQ`: sign-pattern data for counting positive zeros.
+
+## Main results
+
+* `kummerM_posZeros_neg_a`: `⌈-a⌉` positive zeros for `a < 0 < b` (DLMF 13.9.1).
+* `kummerM_posZeros_nonneg`: no positive zeros for `a, b ≥ 0` (DLMF 13.9.2).
+* `kummerM_posZeros_one`: one positive zero for `a > 0`, `-1 < b < 0` (DLMF 13.9.3).
+* `kummerM_posZeros_b_le_neg_one`: DLMF 13.9.4, for `a > 0`.
+* `kummerM_posZeros_ceil`: DLMF 13.9.5.
+* `kummerM_posZeros_ceil_swap`: DLMF 13.9.6, corrected to `a ∉ -ℕ`.
+* `kummerM_posZeros_ceil_swap_ne`: DLMF 13.9.6 as printed fails for integer `a`.
+* `kummerM_negZeros_eq`: negative zeros of `M(a,b,·)` correspond to positive zeros of
+  `M(b-a,b,·)` (DLMF 13.9.7).
+
+## Implementation notes
+
+DLMF 13.9.6 as printed fails for integer `a`: at `a = -1`, `b = -3/2` one has
+`M(-1,-3/2,x) = 1 + 2x/3 > 0`, while the formula gives one zero; this is a DLMF erratum. In
+DLMF 13.9.5 the hypothesis `a < 0` follows from the others and is omitted. At `a = 0` there are
+no zeros (`kummerM_posZeros_zero`).
 -/
 
 @[expose] public section
@@ -576,7 +599,7 @@ theorem kumZ_F_hasDerivAt {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (x : 
 
 /-- At a positive zero `x` of `M(a+1,b+1,·)`, Kummer's equation gives
 `M(a,b,x) = (x/b) M'(a+1,b+1,x)`. -/
-theorem kumZ_F_ode {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (ha : a ≠ 0) {x : ℝ} (hx : 0 < x)
+theorem kumZ_F_ode {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (ha : a ≠ 0) {x : ℝ}
     (hg : kumZ_F (a + 1) (b + 1) x = 0) :
     kumZ_F a b x = x / b * ((a + 1) / (b + 1) * kumZ_F (a + 1 + 1) (b + 1 + 1) x) := by
   have hb' := hb
@@ -584,7 +607,7 @@ theorem kumZ_F_ode {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (ha : a ≠ 
   have hb2' := kumZ_succ_not_neg_nat hb1'
   have hb1 : ∀ k : ℕ, ((b : ℂ) + 1) ≠ -k := by push_cast at hb1'; exact hb1'
   have hb0 : (b : ℂ) ≠ 0 := by simpa using hb' 0
-  have hode := kummerM_ode (a := (a : ℂ)) hb' (z := (x : ℂ)) (by exact_mod_cast hx.ne')
+  have hode := kummerM_ode (a := (a : ℂ)) hb' (z := (x : ℂ))
   have hd1 : deriv (kummerM (a : ℂ) b) = fun z => a / b * kummerM (a + 1) (b + 1) z :=
     funext fun z => deriv_kummerM hb' hb0
   have hd2 : iteratedDeriv 2 (kummerM (a : ℂ) b) x =
@@ -637,7 +660,7 @@ theorem kumZ_F_Q (n : ℕ) : ∀ a b : ℝ, 0 < b → -(n : ℝ) ≤ a → a < -
     have ha : a < 0 := by linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
     exact kumZ_step (div_neg_of_neg_of_pos ha hb) (Or.inr hb) (kumZ_F_zero a b)
       (kumZ_F_hasDerivAt (kumZ_not_neg_nat hb))
-      (fun x hx hg => kumZ_F_ode (kumZ_not_neg_nat hb) ha.ne hx hg)
+      (fun x hx hg => kumZ_F_ode (kumZ_not_neg_nat hb) ha.ne hg)
       (ih (a + 1) (b + 1) (by linarith) (by linarith) (by linarith))
 
 /-- A real number strictly between consecutive nonpositive integers is not in `-ℕ`. -/
@@ -666,7 +689,7 @@ theorem kumZ_F_Q_negb (n : ℕ) : ∀ a b : ℝ, 0 < a → -((n : ℝ) + 1) < b 
         (fun x => (a + 1) / (b + 1) * kumZ_F (a + 1 + 1) (b + 1 + 1) x) 0 :=
       kumZ_Q_zero fun x hx => kumZ_F_one_le (by linarith) (by linarith) hx
     exact kumZ_step (div_neg_of_pos_of_neg ha hb2) (Or.inl rfl) (kumZ_F_zero a b)
-      (kumZ_F_hasDerivAt hbn) (fun x hx hg0 => kumZ_F_ode hbn ha.ne' hx hg0) hg
+      (kumZ_F_hasDerivAt hbn) (fun x hx hg0 => kumZ_F_ode hbn ha.ne' hg0) hg
   | succ n ih =>
     intro a b ha hb1 hb2
     push_cast at hb1 hb2
@@ -677,11 +700,11 @@ theorem kumZ_F_Q_negb (n : ℕ) : ∀ a b : ℝ, 0 < a → -((n : ℝ) + 1) < b 
     rcases Nat.mod_two_eq_zero_or_one (n + 1) with h | h
     · rw [h] at hg
       have := kumZ_step hab (Or.inl rfl) (kumZ_F_zero a b) (kumZ_F_hasDerivAt hbn)
-        (fun x hx hg0 => kumZ_F_ode hbn ha.ne' hx hg0) hg
+        (fun x hx hg0 => kumZ_F_ode hbn ha.ne' hg0) hg
       rwa [show (n + 1 + 1) % 2 = 0 + 1 by omega]
     · rw [h] at hg
       have := kumZ_step_down hab (by linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)])
-        (kumZ_F_hasDerivAt hbn) (fun x hx hg0 => kumZ_F_ode hbn ha.ne' hx hg0) hg
+        (kumZ_F_hasDerivAt hbn) (fun x hx hg0 => kumZ_F_ode hbn ha.ne' hg0) hg
       rwa [show (n + 1 + 1) % 2 = 0 by omega]
 
 /-- For noninteger `b < 0`, `b` lies strictly between `-⌈-b⌉` and `-⌈-b⌉ + 1`. -/
@@ -727,7 +750,7 @@ theorem kumZ_F_Q_both (m : ℕ) : ∀ a b : ℝ, -((m : ℝ) + 1) < b → b < -(
     have hg := kumZ_F_Q (⌈-a⌉.toNat - 1) (a + 1) (b + 1) (by linarith)
       (by rw [hn]; linarith [Int.le_ceil (-a)]) (by rw [hn]; linarith [Int.ceil_lt_add_one (-a)])
     exact kumZ_step_same (div_pos_of_neg_of_neg ha hb2) hb2 (kumZ_F_zero a b)
-      (kumZ_F_hasDerivAt hbn) (fun x hx hg0 => kumZ_F_ode hbn ha.ne hx hg0) hg
+      (kumZ_F_hasDerivAt hbn) (fun x hx hg0 => kumZ_F_ode hbn ha.ne hg0) hg
   | succ m ih =>
     intro a b hb1 hb2 ha
     push_cast at hb1 hb2 ha
@@ -742,7 +765,7 @@ theorem kumZ_F_Q_both (m : ℕ) : ∀ a b : ℝ, -((m : ℝ) + 1) < b → b < -(
     rw [hceil, show (⌈-a⌉ - 1).toNat - (m + 1) = ⌈-a⌉.toNat - (m + 1 + 1) by omega] at hg
     exact kumZ_step_same (div_pos_of_neg_of_neg ha0 hb0) hb0
       (kumZ_F_zero a b) (kumZ_F_hasDerivAt hbn)
-      (fun x hx hg0 => kumZ_F_ode hbn ha0.ne hx hg0) hg
+      (fun x hx hg0 => kumZ_F_ode hbn ha0.ne hg0) hg
 
 /-- Sign-pattern data for noninteger `a ∈ (-(p+1), -p)` and noninteger `b` with
 `⌈-b⌉ > p + 1`: `(⌈-b⌉ - (p+1)) mod 2` zeros. -/
@@ -767,7 +790,7 @@ theorem kumZ_F_Q_swap (p : ℕ) : ∀ a b : ℝ, -((p : ℝ) + 1) < a → a < -(
     rw [hcount] at hg
     exact kumZ_step_same (div_pos_of_neg_of_neg ha2 (by linarith)) (by linarith)
       (kumZ_F_zero a b) (kumZ_F_hasDerivAt hbn)
-      (fun x hx hg0 => kumZ_F_ode hbn ha2.ne hx hg0) hg
+      (fun x hx hg0 => kumZ_F_ode hbn ha2.ne hg0) hg
   | succ p ih =>
     intro a b ha1 ha2 hbi hcb
     push_cast at ha1 ha2 hcb
@@ -785,7 +808,7 @@ theorem kumZ_F_Q_swap (p : ℕ) : ∀ a b : ℝ, -((p : ℝ) + 1) < a → a < -(
     have ha0 : a < 0 := by linarith
     exact kumZ_step_same (div_pos_of_neg_of_neg ha0 hb) hb
       (kumZ_F_zero a b) (kumZ_F_hasDerivAt hbn)
-      (fun x hx hg0 => kumZ_F_ode hbn ha0.ne hx hg0) hg
+      (fun x hx hg0 => kumZ_F_ode hbn ha0.ne hg0) hg
 
 /- The old 13.9.3–4 statements were false at `a = 0`; 13.9.5 omitted `a,b < 0`. -/
 /-- DLMF 13.9.1: `⌈-a⌉` positive zeros for `a < 0 < b`. -/
@@ -915,12 +938,11 @@ theorem kummerM_posZeros_b_le_neg_one {a b : ℝ} (ha : 0 < a) (hb : b ≤ -1)
     have : (2 * q + 1 + 1) % 2 = 0 := by omega
     rw [this]; simp
 
-/-- DLMF 13.9.5. The hypothesis `a < 0` is implied by the others. -/
+/-- DLMF 13.9.5. DLMF's hypothesis `a < 0` follows from the others and is omitted. -/
 @[dlmf 13.9.E5]
-theorem kummerM_posZeros_ceil {a b : ℝ} (ha : a < 0) (hb : b < 0) (h : ⌈-a⌉ ≥ ⌈-b⌉) (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) :
+theorem kummerM_posZeros_ceil {a b : ℝ} (hb : b < 0) (h : ⌈-a⌉ ≥ ⌈-b⌉) (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) :
     (kummerMPosZeros a b).encard = Int.toNat (⌈-a⌉ - ⌈-b⌉) := by
   obtain ⟨hc1, hl, hr⟩ := kumZ_ceil_bounds hb hbi
-  clear ha
   obtain ⟨m, hm⟩ : ∃ m, ⌈-b⌉.toNat = m + 1 := ⟨⌈-b⌉.toNat - 1, by omega⟩
   rw [hm] at hl hr
   push_cast at hl hr
@@ -975,7 +997,7 @@ theorem kummerM_posZeros_ceil_swap_ne :
       norm_num [kumZ_F, kummerM_of_zero_param]
   have hQ := kumZ_step_same (a := -1) (b := -3 / 2) (by norm_num) (by norm_num)
     (kumZ_F_zero _ _) (kumZ_F_hasDerivAt hbn)
-    (fun x hx hg0 => kumZ_F_ode hbn (by norm_num) hx hg0) hg
+    (fun x hx hg0 => kumZ_F_ode hbn (by norm_num) hg0) hg
   rw [kumZ_posZeros_eq hbn, kumZ_Q_encard hQ]
   have h1 : ⌈-(-3 / 2 : ℝ)⌉ = 2 := by rw [Int.ceil_eq_iff]; norm_num
   have h2 : ⌈-(-1 : ℝ)⌉ = 1 := by rw [Int.ceil_eq_iff]; norm_num

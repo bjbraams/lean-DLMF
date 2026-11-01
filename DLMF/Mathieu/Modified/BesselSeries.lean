@@ -6,33 +6,53 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Modified.Basic
-public import DLMF.Mathieu.Modified.P3mImaginary
+public import DLMF.Mathieu.Modified.ImaginaryArgument
 public import DLMF.Bessel.SecondKind
 
 /-!
 # Modified Mathieu functions: expansions in Bessel functions (DLMF §§28.23–28.24)
 
-* 28.23.1: the cylinder functions `𝒞^{(j)}_μ` (`mathieuCyl`, `mathieuCylExp`) and their
-  relation to the project's Hankel functions and to the principal branch.
-* 28.23.2–28.23.5: the expansions of `M^{(j)}_ν` in `𝒞^{(j)}_{ν+2n}(2h cosh z)` and
-  `𝒞^{(j)}_{ν+2n}(2h sinh z)` (noninteger `ν`; **corrected convergence region**, see below).
-* 28.23.6–28.23.13: the integer-order expansions of `Mc^{(j)}_n`, `Ms^{(j)}_n`.
-* 28.24.1: the cross-product series, which is the definition of `M^{(j)}_ν`; the theorem says
-  that it converges for every index `n` with the same sum.
-* 28.24.2–28.24.13: the integer-order cross-product series, including those for `Ie_n`,
-  `Io_n`, `Ke_n`, `Ko_n` in modified Bessel functions.
+Expansions of the modified Mathieu functions in cylinder functions: the expansions of
+`M^{(j)}_ν` in `𝒞^{(j)}_{ν+2n}(2h cosh z)` and `𝒞^{(j)}_{ν+2n}(2h sinh z)` (noninteger `ν`,
+with a corrected convergence region), the integer-order expansions of `Mc^{(j)}_n`,
+`Ms^{(j)}_n`, and the cross-product series of §28.24. The series 28.24.1 is the definition of
+`M^{(j)}_ν`; the theorem here says that it converges for every index `n` with the same sum.
 
-## Correction to DLMF 28.23
+## Main results
 
-DLMF states that 28.23.2–28.23.5 are valid "for all `z` when `j = 1`". For noninteger `ν` this
-is false: the terms with `n → -∞` behave like `c^ν_{2n} J_{ν+2n}(2h cosh z)`, and since
-`c^ν_{2n}/c^ν_{2n+2} ~ -q/(4n²)` (28.14.6) while `J_{μ-2}(w)/J_μ(w) ~ 4μ²/w²` as
-`μ → -∞` through nonintegers, the ratio of consecutive terms tends to `1/cosh² z`
-(resp. `1/sinh² z`). The series therefore converge only for `|cosh z| > 1`
-(resp. `|sinh z| > 1`), for every `j`. Numerically, with `ν = 0.3`, `h = 1.2`, the series 28.23.2
-with `j = 1` at `z = 0.2 + 1.2i` (`|cosh z| = 0.41`) has partial sums of size `10⁵` at
-`|n| ≤ 10` and `10¹²` at `|n| ≤ 20`, and 28.23.4 diverges at `z = 0.3`. For integer `ν`
-(28.23.6–28.23.13) the `j = 1` series do converge for all `z`. The statements below for
+* `mathieuCyl_three_four`, `mathieuCylExp_eq_mathieuCyl`, `besselJExp_eq_besselJ`: the
+  cylinder functions `𝒞^{(j)}_μ` of DLMF 28.23.1, their relation to the project's Hankel
+  functions and to the principal branch.
+* `hasSum_modMathieuM_cosh`, `hasSum_modMathieuM_cosh_deriv`, `hasSum_modMathieuM_sinh`,
+  `hasSum_modMathieuM_sinh_deriv`: the expansions DLMF 28.23.2–28.23.5 (corrected region).
+* `hasSum_radialMathieuMc_even_cosh`, `hasSum_radialMathieuMc_even_sinh`,
+  `hasSum_radialMathieuMc_odd_cosh`, `hasSum_radialMathieuMc_odd_sinh`: DLMF 28.23.6–28.23.9.
+* `hasSum_radialMathieuMs_odd_cosh`, `hasSum_radialMathieuMs_odd_sinh`,
+  `hasSum_radialMathieuMs_even_cosh`, `hasSum_radialMathieuMs_even_sinh`:
+  DLMF 28.23.10–28.23.13.
+* `hasSum_modMathieuTerm`, `modMathieuTerm_locally_uniform`, `summable_modMathieuTerm`: the
+  cross-product series DLMF 28.24.1, independent of the index, and its absolute and locally
+  uniform convergence.
+* `hasSum_radialMathieuMc_even_cross`, `hasSum_radialMathieuMc_odd_cross`,
+  `hasSum_radialMathieuMs_odd_cross`, `hasSum_radialMathieuMs_even_cross`:
+  DLMF 28.24.2–28.24.5.
+* `hasSum_modMathieuIe_even`, `hasSum_modMathieuIo_even`, `hasSum_modMathieuIe_odd`,
+  `hasSum_modMathieuIo_odd`: DLMF 28.24.6–28.24.9.
+* `hasSum_modMathieuKe_even`, `hasSum_modMathieuKo_even`, `hasSum_modMathieuKe_odd`,
+  `hasSum_modMathieuKo_odd`: DLMF 28.24.10–28.24.13 (for `|Im z| < π`, with the
+  principal-branch `K`).
+
+## Implementation notes
+
+**Correction to DLMF 28.23.** DLMF states that 28.23.2–28.23.5 are valid "for all `z` when
+`j = 1`". For noninteger `ν` this is false: the terms with `n → -∞` behave like
+`c^ν_{2n} J_{ν+2n}(2h cosh z)`, and since `c^ν_{2n}/c^ν_{2n+2} ~ -q/(4n²)` (28.14.6) while
+`J_{μ-2}(w)/J_μ(w) ~ 4μ²/w²` as `μ → -∞` through nonintegers, the ratio of consecutive terms
+tends to `1/cosh² z` (resp. `1/sinh² z`). The series therefore converge only for
+`|cosh z| > 1` (resp. `|sinh z| > 1`), for every `j`. Numerically, with `ν = 0.3`, `h = 1.2`,
+the series 28.23.2 with `j = 1` at `z = 0.2 + 1.2i` (`|cosh z| = 0.41`) has partial sums of
+size `10⁵` at `|n| ≤ 10` and `10¹²` at `|n| ≤ 20`, and 28.23.4 diverges at `z = 0.3`. For
+integer `ν` (28.23.6–28.23.13) the `j = 1` series do converge for all `z`. The statements for
 noninteger `ν` carry the hypothesis `|cosh z| > 1` (resp. `|sinh z| > 1`) for all `j`.
 -/
 
@@ -53,20 +73,20 @@ theorem mathieuCyl_three_four (μ w : ℂ) :
   ⟨rfl, rfl⟩
 
 /-- For `h > 0` and `-π < Im z ≤ π`, `besselJExp μ h z` is the principal-branch `J_μ(h e^z)`. -/
-theorem p1c_besselJExp_eq (μ : ℂ) {h : ℝ} (hh : 0 < h) {z : ℂ} (hz₁ : -π < z.im)
+theorem besselJExp_eq_besselJ (μ : ℂ) {h : ℝ} (hh : 0 < h) {z : ℂ} (hz₁ : -π < z.im)
     (hz₂ : z.im ≤ π) : besselJExp μ h z = besselJ μ (h * Complex.exp z) := by
   rw [besselJExp, DLMF.Bessel.besselJ_eq_regularized]
-  have := p1c_cpow_ofReal_mul_exp μ (r := h / 2) (by positivity) hz₁ hz₂
+  have := cpow_ofReal_mul_exp μ (r := h / 2) (by positivity) hz₁ hz₂
   push_cast at this
   rw [show (h : ℂ) * Complex.exp z / 2 = (h / 2) * Complex.exp z by ring, this]
 
 /-- `besselJExp k (-h) w = (-1)^k besselJExp k h w` for integer `k`. -/
-theorem p1c_besselJExp_neg_h_intCast (k : ℤ) (h w : ℂ) :
+theorem besselJExp_intCast_neg_parameter (k : ℤ) (h w : ℂ) :
     besselJExp k (-h) w = (-1 : ℂ) ^ k * besselJExp k h w := by
-  rw [p1c_besselJExp_intCast, p1c_besselJExp_intCast, neg_mul, besselJ_int_neg]
+  rw [besselJExp_intCast, besselJExp_intCast, neg_mul, besselJ_int_neg]
 
 /-- `e^{±πi/2} = ±i`. -/
-lemma p1c_exp_sigma {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) : Complex.exp (σ * π * I / 2) = σ * I := by
+private lemma exp_sign_mul_pi_I_div_two {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) : Complex.exp (σ * π * I / 2) = σ * I := by
   rcases hσ with rfl | rfl
   · rw [show (1 : ℂ) * π * I / 2 = (π / 2 : ℂ) * I by ring, Complex.exp_mul_I]
     simp [← Complex.ofReal_ofNat, ← Complex.ofReal_div, ← Complex.ofReal_cos, ← Complex.ofReal_sin]
@@ -74,36 +94,36 @@ lemma p1c_exp_sigma {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) : Complex.exp (σ * π
     simp [← Complex.ofReal_ofNat, ← Complex.ofReal_div, ← Complex.ofReal_cos, ← Complex.ofReal_sin]
 
 /-- Shifting `z` by `±πi/2` in `J_μ(h e^z)` (continued) is the same as replacing `h` by `±ih`. -/
-theorem p1c_besselJExp_add_pi_div_two (μ : ℂ) {h : ℝ} (hh : 0 < h) {σ : ℂ}
+theorem besselJExp_add_pi_I_div_two (μ : ℂ) {h : ℝ} (hh : 0 < h) {σ : ℂ}
     (hσ : σ = 1 ∨ σ = -1) (z : ℂ) :
     besselJExp μ h (z + σ * π * I / 2) = besselJExp μ (σ * I * h) z := by
   have him : -π < (σ * π * I / 2).im ∧ (σ * π * I / 2).im ≤ π := by
     rcases hσ with rfl | rfl <;> simp <;> constructor <;> linarith [Real.pi_pos]
-  have hc := p1c_cpow_ofReal_mul_exp μ (r := h / 2) (by positivity) him.1 him.2
-  rw [p1c_exp_sigma hσ] at hc
+  have hc := cpow_ofReal_mul_exp μ (r := h / 2) (by positivity) him.1 him.2
+  rw [exp_sign_mul_pi_I_div_two hσ] at hc
   push_cast at hc
   rw [besselJExp, besselJExp, show σ * I * (h : ℂ) / 2 = h / 2 * (σ * I) by ring, hc,
-    Complex.exp_add, p1c_exp_sigma hσ]
+    Complex.exp_add, exp_sign_mul_pi_I_div_two hσ]
   have e : Complex.exp (μ * (z + σ * π * I / 2)) = Complex.exp (μ * z) *
       Complex.exp (μ * (σ * π * I / 2)) := by rw [← Complex.exp_add]; ring_nf
   rw [e, show (h : ℂ) * (Complex.exp z * (σ * I)) = σ * I * h * Complex.exp z by ring]
   ring
 
 /-- Shifting `z` by `±πi/2` in `𝒞^{(j)}_μ(h e^z)` amounts to replacing `h` by `±ih`. -/
-theorem p1c_mathieuCylExp_add_pi_div_two (j : ℕ) (μ : ℂ) {h : ℝ} (hh : 0 < h) {σ : ℂ}
+theorem mathieuCylExp_add_pi_I_div_two (j : ℕ) (μ : ℂ) {h : ℝ} (hh : 0 < h) {σ : ℂ}
     (hσ : σ = 1 ∨ σ = -1) (z : ℂ) :
     mathieuCylExp j μ h (z + σ * π * I / 2) = mathieuCylExp j μ (σ * I * h) z := by
-  have hJ := fun μ' => p1c_besselJExp_add_pi_div_two μ' hh hσ z
+  have hJ := fun μ' => besselJExp_add_pi_I_div_two μ' hh hσ z
   have hY : besselYExp μ h (z + σ * π * I / 2) = besselYExp μ (σ * I * h) z := by
     simp only [besselYExp, hJ]
   rcases j with _ | _ | _ | _ | _ | j <;> simp [mathieuCylExp, hJ, hY]
 
 /-- A real noninteger is a complex noninteger. -/
-theorem p1c_not_int_cast {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) : ∀ m : ℤ, (m : ℂ) ≠ ν := by
+theorem intCast_ne_ofReal_of_not_int {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) : ∀ m : ℤ, (m : ℂ) ≠ ν := by
   intro m hm; exact hν m (by exact_mod_cast hm)
 
 /-- `ν + k` is not an integer when `ν` is not. -/
-theorem p1c_not_int_add {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) (k : ℤ) :
+theorem not_exists_ofReal_add_intCast_eq_intCast {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) (k : ℤ) :
     ¬ ∃ j : ℤ, (ν : ℂ) + k = j := by
   rintro ⟨j, hj⟩
   apply hν (j - k)
@@ -111,7 +131,7 @@ theorem p1c_not_int_add {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) (k : �
   exact_mod_cast this.symm
 
 /-- `sin((ν + k)π) ≠ 0` for real `ν ∉ ℤ`, `k ∈ ℤ`. -/
-theorem p1c_sin_ne_zero {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) (k : ℤ) :
+theorem sin_add_intCast_mul_pi_ne_zero {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) (k : ℤ) :
     Complex.sin ((ν + k) * π) ≠ 0 := by
   rw [Ne, Complex.sin_eq_zero_iff]
   rintro ⟨m, hm⟩
@@ -122,17 +142,17 @@ theorem p1c_sin_ne_zero {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) (k : �
   exact_mod_cast this.symm
 
 /-- `cos((ν + k)π) = (-1)^k cos(νπ)`. -/
-theorem p1c_cos_add_int (ν : ℂ) (k : ℤ) :
+theorem cos_add_intCast_mul_pi (ν : ℂ) (k : ℤ) :
     Complex.cos ((ν + k) * π) = (-1 : ℂ) ^ k * Complex.cos (ν * π) := by
   rw [add_mul, Complex.cos_antiperiodic.add_int_mul_eq, Int.cast_negOnePow]
 
 /-- `sin((ν + k)π) = (-1)^k sin(νπ)`. -/
-theorem p1c_sin_add_int (ν : ℂ) (k : ℤ) :
+theorem sin_add_intCast_mul_pi (ν : ℂ) (k : ℤ) :
     Complex.sin ((ν + k) * π) = (-1 : ℂ) ^ k * Complex.sin (ν * π) := by
   rw [add_mul, Complex.sin_antiperiodic.add_int_mul_eq, Int.cast_negOnePow]
 
 /-- `e^{ix} = cos x + i sin x`. -/
-theorem p1c_exp_I_mul (x : ℂ) : Complex.exp (I * x) = Complex.cos x + I * Complex.sin x := by
+theorem exp_I_mul_eq_cos_add_I_mul_sin (x : ℂ) : Complex.exp (I * x) = Complex.cos x + I * Complex.sin x := by
   rw [mul_comm, Complex.exp_mul_I]; ring
 
 /-- The continued cylinder functions agree with the principal-branch ones at `h e^z` for
@@ -142,7 +162,7 @@ theorem mathieuCylExp_eq_mathieuCyl (j : ℕ) (μ : ℂ) {h : ℝ} (hh : 0 < h) 
     (hz₁ : -π < z.im) (hz₂ : z.im ≤ π) :
     mathieuCylExp j μ h z = mathieuCyl j μ (h * Complex.exp z) := by
   have hJ : ∀ μ', besselJExp μ' h z = besselJ μ' (h * Complex.exp z) :=
-    fun μ' => p1c_besselJExp_eq μ' hh hz₁ hz₂
+    fun μ' => besselJExp_eq_besselJ μ' hh hz₁ hz₂
   have hY : besselYExp μ h z = DLMF.Bessel.besselY μ (h * Complex.exp z) := by
     simp only [besselYExp, DLMF.Bessel.besselY, hJ]
   rcases j with _ | _ | _ | _ | _ | j <;> simp [mathieuCylExp, mathieuCyl, hJ, hY]
@@ -308,7 +328,7 @@ theorem hasSum_modMathieuTerm (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {ν 
     (hν : ModMathieuAdmissible ν h) (hh : h ≠ 0) (n : ℤ) (z : ℂ) :
     HasSum (modMathieuTerm j ν z h n)
       (mathieuMeCoeff ν (h ^ 2) n * modMathieuM j ν z h) :=
-  p2m_hasSum_modMathieuTerm j hj₁ hj₄ hν hh n z
+  hasSum_modMathieuTerm' j hj₁ hj₄ hν hh n z
 
 /-- **Absolute and locally uniform convergence** of the cross-product series (DLMF §28.24,
 "the expansions (28.24.1)–(28.24.13) converge absolutely and uniformly on compact sets of the
@@ -317,7 +337,7 @@ theorem hasSum_modMathieuTerm (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {ν 
 theorem modMathieuTerm_locally_uniform (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {ν h : ℂ}
     (hν : ModMathieuAdmissible ν h) (hh : h ≠ 0) (n : ℤ) {K : Set ℂ} (hK : IsCompact K) :
     ∃ u : ℤ → ℝ, Summable u ∧ ∀ ℓ, ∀ z ∈ K, ‖modMathieuTerm j ν z h n ℓ‖ ≤ u ℓ :=
-  p2m_modMathieuTerm_locally_uniform j hj₁ hj₄ hν hh n hK
+  modMathieuTerm_locally_uniform' j hj₁ hj₄ hν hh n hK
 
 /-- The summability of the defining series, a consequence of 28.24.1. -/
 theorem summable_modMathieuTerm (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {ν h : ℂ}
@@ -337,7 +357,7 @@ theorem hasSum_radialMathieuMc_even_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j
         (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s : ℕ) : ℂ) h z +
           besselJExp ((ℓ + s : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
       (mathieuEpsilon s * radialMathieuMc j (2 * m) z h) :=
-  p2m_hasSum_radialMathieuMc_even_cross j hj₁ hj₄ m s hh hA z
+  hasSum_radialMathieuMc_even_cross' j hj₁ hj₄ m s hh hA z
 
 /-- **Cross-product expansion** (DLMF 28.24.3), as 28.24.2, `A^{2m+1}_{2s+1}(h²) ≠ 0`:
 `Mc^{(j)}_{2m+1} = (-1)^m ∑_ℓ (-1)^ℓ (A^{2m+1}_{2ℓ+1}/A^{2m+1}_{2s+1})
@@ -351,7 +371,7 @@ theorem hasSum_radialMathieuMc_odd_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j 
         (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s + 1 : ℕ) : ℂ) h z +
           besselJExp ((ℓ + s + 1 : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
       (radialMathieuMc j (2 * m + 1) z h) :=
-  p2m_hasSum_radialMathieuMc_odd_cross j hj₁ hj₄ m s hh hA z
+  hasSum_radialMathieuMc_odd_cross' j hj₁ hj₄ m s hh hA z
 
 /-- **Cross-product expansion** (DLMF 28.24.4), `B^{2m+1}_{2s+1}(h²) ≠ 0`:
 `Ms^{(j)}_{2m+1} = (-1)^m ∑_ℓ (-1)^ℓ (B^{2m+1}_{2ℓ+1}/B^{2m+1}_{2s+1})
@@ -365,7 +385,7 @@ theorem hasSum_radialMathieuMs_odd_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j 
         (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s + 1 : ℕ) : ℂ) h z -
           besselJExp ((ℓ + s + 1 : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
       (radialMathieuMs j (2 * m + 1) z h) :=
-  p2m_hasSum_radialMathieuMs_odd_cross j hj₁ hj₄ m s hh hB z
+  hasSum_radialMathieuMs_odd_cross' j hj₁ hj₄ m s hh hB z
 
 /-- **Cross-product expansion** (DLMF 28.24.5), `B^{2m+2}_{2s+2}(h²) ≠ 0`:
 `Ms^{(j)}_{2m+2} = (-1)^m ∑_ℓ (-1)^ℓ (B^{2m+2}_{2ℓ+2}/B^{2m+2}_{2s+2})
@@ -379,7 +399,7 @@ theorem hasSum_radialMathieuMs_even_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j
         (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s + 2 : ℕ) : ℂ) h z -
           besselJExp ((ℓ + s + 2 : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
       (radialMathieuMs j (2 * m + 2) z h) :=
-  p2m_hasSum_radialMathieuMs_even_cross j hj₁ hj₄ m s hh hB z
+  hasSum_radialMathieuMs_even_cross' j hj₁ hj₄ m s hh hB z
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.6), `h > 0`, `s = 0, 1, …`,
@@ -396,7 +416,7 @@ theorem hasSum_modMathieuIe_even (m s : ℕ) {h : ℝ} (hh : 0 < h)
           besselI ((ℓ + s : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselI ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z))))
       (mathieuEpsilon s * modMathieuIe (2 * m) z h) :=
-  p3m_hasSum_modMathieuIe_even m s hh hA z
+  hasSum_modMathieuIe_even' m s hh hA z
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.7), `B^{2m+2}_{2s+2}(h²) ≠ 0`:
@@ -413,7 +433,7 @@ theorem hasSum_modMathieuIo_even (m s : ℕ) {h : ℝ} (hh : 0 < h)
           besselI ((ℓ + s + 2 : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselI ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z))))
       (modMathieuIo (2 * m + 2) z h) :=
-  p3m_hasSum_modMathieuIo_even m s hh hB z
+  hasSum_modMathieuIo_even' m s hh hB z
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.8), `B^{2m+1}_{2s+1}(h²) ≠ 0` (the
@@ -431,7 +451,7 @@ theorem hasSum_modMathieuIe_odd (m s : ℕ) {h : ℝ} (hh : 0 < h)
           besselI ((ℓ + s + 1 : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselI ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z))))
       (modMathieuIe (2 * m + 1) z h) :=
-  p3m_hasSum_modMathieuIe_odd m s hh hB z
+  hasSum_modMathieuIe_odd' m s hh hB z
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.9), `A^{2m+1}_{2s+1}(h²) ≠ 0`:
@@ -448,7 +468,7 @@ theorem hasSum_modMathieuIo_odd (m s : ℕ) {h : ℝ} (hh : 0 < h)
           besselI ((ℓ + s + 1 : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselI ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z))))
       (modMathieuIo (2 * m + 1) z h) :=
-  p3m_hasSum_modMathieuIo_odd m s hh hA z
+  hasSum_modMathieuIo_odd' m s hh hA z
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.10), `h > 0`, `|Im z| < π`
@@ -465,7 +485,7 @@ theorem hasSum_modMathieuKe_even (m s : ℕ) {h : ℝ} (hh : 0 < h)
           besselI ((ℓ + s : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselK ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z)))
       (mathieuEpsilon s * modMathieuKe (2 * m) z h) :=
-  p3m_hasSum_modMathieuKe_even m s hh hA hz
+  hasSum_modMathieuKe_even' m s hh hA hz
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.11), as 28.24.10,
@@ -483,7 +503,7 @@ theorem hasSum_modMathieuKo_even (m s : ℕ) {h : ℝ} (hh : 0 < h)
           besselI ((ℓ + s + 2 : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselK ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z)))
       (modMathieuKo (2 * m + 2) z h) :=
-  p3m_hasSum_modMathieuKo_even m s hh hB hz
+  hasSum_modMathieuKo_even' m s hh hB hz
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.12), as 28.24.10,
@@ -501,7 +521,7 @@ theorem hasSum_modMathieuKe_odd (m s : ℕ) {h : ℝ} (hh : 0 < h)
           besselI ((ℓ + s + 1 : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselK ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z)))
       (modMathieuKe (2 * m + 1) z h) :=
-  p3m_hasSum_modMathieuKe_odd m s hh hB hz
+  hasSum_modMathieuKe_odd' m s hh hB hz
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.13), as 28.24.10,
@@ -519,6 +539,6 @@ theorem hasSum_modMathieuKo_odd (m s : ℕ) {h : ℝ} (hh : 0 < h)
           besselI ((ℓ + s + 1 : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselK ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z)))
       (modMathieuKo (2 * m + 1) z h) :=
-  p3m_hasSum_modMathieuKo_odd m s hh hA hz
+  hasSum_modMathieuKo_odd' m s hh hA hz
 
 end DLMF.Mathieu

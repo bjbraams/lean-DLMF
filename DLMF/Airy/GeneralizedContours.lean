@@ -8,10 +8,42 @@ module
 public import DLMF.Airy.Scorer
 
 /-!
-# Reid generalized Airy contours, DLMF §9.13(ii)
+# Reid's generalized Airy contour integrals (DLMF §9.13(ii))
 
-Statements acquired from the NIST DLMF, checked 2026-10-19.
-New statements are initially admitted; existing proved Airy results are retained.
+Reid's functions `A_k(z, p)` and `B_k(z, p)`, defined by contour and ray integrals of
+`t^{-p} e^{zt - t³/3}` on the logarithmic `t`-plane, their third-order differential equation,
+difference equation, rotation relations and connection formulas.
+
+## Main definitions
+
+* `reidKernel`, `reidRay`, `reidArc`, `reidContour`: the integrand and its ray, arc and contour
+  integrals.
+* `reidAiryA`: Reid's `A_k` on the contours of DLMF Figure 9.13.1 (DLMF 9.13.25).
+* `reidAiryB0`: the closed-contour function for integral `p` (DLMF 9.13.26).
+* `reidAiryB`: the ray functions `B_k`, with a Hadamard finite part for `p > 0`.
+* `reidTaylorCoeff`, `reidTaylorTail`, `reidFinitePartH`: data for the finite part.
+
+## Main results
+
+* `reidAiryB_ordinary_ray`: convergence range of the ray integrals (DLMF 9.13.27).
+* `reidAiryA_zero_parameter`, `reidAiryA_zero_rotations`, `reidAiryB_zero_parameter`:
+  the case `p = 0` (DLMF 9.13.28–9.13.30).
+* `reidAiryA_ode`, `reidAiryB_ode`, `reidAiryB0_ode`: `w''' - z w' + (p - 1) w = 0`
+  (DLMF 9.13.31).
+* `reidAiryA_difference`, `reidAiryB_difference`, `reidAiryB0_difference`: DLMF 9.13.32.
+* `reidAiryA_rotations`: DLMF 9.13.33.
+* `reidAiry_connection_sum`: `A₀ + A₁ + A₂ + B₀ = 0` (DLMF 9.13.34).
+* `reidAiry_connection_35`, `reidAiry_connection_36`, `reidAiry_connection_37`: the
+  connection formulas DLMF 9.13.35–9.13.37, the second in corrected form.
+
+## Implementation notes
+
+Indices run over `0, 1, 2`: DLMF's `B₁, B₂, B₃, A₁, A₂, A₃` are `reidAiryB 0, 1, 2` and
+`reidAiryA 0, 1, 2` here. DLMF 9.13.36 as printed is false for `p ≥ 1` whenever
+`B₀(z, p) ≠ 0`, whatever regularization of the divergent ray integrals is used
+(`reidAiry_connection_36_ne_one`); with the finite-part `B_k` the correct relation carries the
+residue term `2πi B₀(z, p)`, and it reduces to the printed form for `p ≤ 0`
+(`reidAiry_connection_36_of_nonpos`).
 -/
 
 @[expose] public noncomputable section

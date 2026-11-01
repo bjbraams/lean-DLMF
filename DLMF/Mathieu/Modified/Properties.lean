@@ -5,20 +5,48 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Modified.P3mWronskian
+public import DLMF.Mathieu.Modified.Wronskians
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 
 /-!
 # Modified Mathieu functions: basic properties (DLMF §28.20)
 
-* 28.20.1–28.20.2: the modified Mathieu equation, obtained from 28.2.1 by `z ↦ iz` (proved),
-  and its algebraic form.
-* 28.20.3–28.20.7: `Ce_ν`, `Se_ν`, `Me_ν`, `Fe_n`, `Ge_n` solve the modified equation (proved
-  for integer order from DLMF.Mathieu.Basic; for `Me_ν` from ACQ28B's Floquet theorem).
-* §28.20(iii): `M^{(j)}_ν` solve 28.20.1 and have the asymptotics 28.20.9–28.20.12, which
-  characterize them; 28.20.13–28.20.14 (proved from the convergence theorem 28.24.1).
-* 28.20.21 Wronskians, 28.20.22–28.20.25 shifts of the variable; the shift `z ↦ z + sπi` of
-  `M^{(1)}_ν` is proved directly from the cross-product series.
+The modified Mathieu equation 28.20.1, obtained from Mathieu's equation 28.2.1 by `z ↦ iz`,
+and its algebraic form; the solutions `Ce_ν`, `Se_ν`, `Me_ν`, `Fe_n`, `Ge_n` (28.20.3–28.20.7)
+and `M^{(j)}_ν` (§28.20(iii)), with the asymptotics 28.20.9–28.20.12 that characterize the
+latter, the relations 28.20.13–28.20.14, the Wronskians 28.20.21 and the shifts of the
+variable 28.20.22–28.20.25.
+
+## Main results
+
+* `IsMathieuSolution.isModMathieuSolution_comp`, `isModMathieuSolution_comp_cosh`: the
+  modified Mathieu equation (DLMF 28.20.1) and its algebraic form (DLMF 28.20.2).
+* `modMathieuCe_natCast`, `modMathieuSe_natCast`: `Ce_n` and `Se_n` at integer order
+  (DLMF 28.20.3–28.20.4).
+* `isModMathieuSolution_modMathieuCe`, `isModMathieuSolution_modMathieuSe`,
+  `isModMathieuSolution_modMathieuMe`, `isModMathieuSolution_modMathieuFe`,
+  `isModMathieuSolution_modMathieuGe`: these functions solve the modified equation
+  (DLMF 28.20.3–28.20.7).
+* `isModMathieuSolution_modMathieuM`: `M^{(j)}_ν` solves 28.20.1 (§28.20(iii)).
+* `modMathieuM_three_isBigO`, `modMathieuM_four_isBigO`, `modMathieuM_one_isBigO`,
+  `modMathieuM_two_isBigO`: the asymptotics DLMF 28.20.9–28.20.12.
+* `eq_modMathieuM_three_of_isBigO`, `eq_modMathieuM_four_of_isBigO`: `M^{(3)}_ν`, `M^{(4)}_ν`
+  are characterized by their asymptotics (§28.20(iii)).
+* `modMathieuM_one_two_real`: `M^{(1)}_ν`, `M^{(2)}_ν` are real on the real axis.
+* `modMathieuM_three`, `modMathieuM_four`: `M^{(3,4)}_ν = M^{(1)}_ν ± i M^{(2)}_ν`
+  (DLMF 28.20.13–28.20.14), from the convergence theorem 28.24.1.
+* `modMathieuM_wronskian_two`, `modMathieuM_wronskian_three`: Wronskians (DLMF 28.20.21).
+* `modMathieuM_add_pi_div_two`, `radialMathieu_add_pi_div_two_even`,
+  `radialMathieu_add_pi_div_two_odd`: shifts by `±πi/2` (DLMF 28.20.22–28.20.24).
+* `modMathieuM_one_add_int_mul_pi_I`, `modMathieuM_two_add_int_mul_pi_I`,
+  `modMathieuM_three_add_int_mul_pi_I`, `modMathieuM_four_add_int_mul_pi_I`: shifts by `sπi`
+  (DLMF 28.20.25).
+
+## Implementation notes
+
+For integer order the solution property follows from `DLMF.Mathieu.Basic`; for `Me_ν` it
+follows from the Floquet theory of the noninteger-order functions. The shift `z ↦ z + sπi` of
+`M^{(1)}_ν` is proved directly from the cross-product series.
 -/
 
 @[expose] public noncomputable section
@@ -165,7 +193,7 @@ theorem isModMathieuSolution_modMathieuGe (n : ℕ) (q : ℝ) :
 theorem isModMathieuSolution_modMathieuM (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {ν h : ℂ}
     (hν : ModMathieuAdmissible ν h) (hh : h ≠ 0) :
     IsModMathieuSolution (mathieuLambda ν (h ^ 2)) (h ^ 2) (fun z => modMathieuM j ν z h) :=
-  p2m_isModMathieuSolution_modMathieuM j hj₁ hj₄ hν hh
+  isModMathieuSolution_modMathieuM' j hj₁ hj₄ hν hh
 
 /-- **Asymptotics of `M^{(3)}_ν`** (DLMF 28.20.9): for real `ν`, `h > 0` and `δ > 0`,
 `M^{(3)}_ν(z, h) = H^{(1)}_ν(2h cosh z)(1 + O(sech z))` as `Re z → +∞` with
@@ -173,7 +201,7 @@ theorem isModMathieuSolution_modMathieuM (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j 
 The parameter is `h = √q > 0` (DLMF 28.20.8). -/
 @[dlmf 28.20.E9, dlmf 28.20.E8]
 theorem modMathieuM_three_isBigO {ν h δ : ℝ} (hh : 0 < h) (hδ : 0 < δ) :
-    (fun z => modMathieuM 3 ν z h - mathieuCylCosh 3 ν h z) =O[m28c_strip (-π + δ) (2 * π - δ)]
+    (fun z => modMathieuM 3 ν z h - mathieuCylCosh 3 ν h z) =O[reAtTopStrip (-π + δ) (2 * π - δ)]
       (fun z => mathieuCylCosh 3 ν h z * (Complex.cosh z)⁻¹) := by
   sorry
 
@@ -181,7 +209,7 @@ theorem modMathieuM_three_isBigO {ν h δ : ℝ} (hh : 0 < h) (hδ : 0 < δ) :
 H^{(2)}_ν(2h cosh z)(1 + O(sech z))` as `Re z → +∞` with `-2π + δ ≤ Im z ≤ π - δ`. -/
 @[dlmf 28.20.E10]
 theorem modMathieuM_four_isBigO {ν h δ : ℝ} (hh : 0 < h) (hδ : 0 < δ) :
-    (fun z => modMathieuM 4 ν z h - mathieuCylCosh 4 ν h z) =O[m28c_strip (-2 * π + δ) (π - δ)]
+    (fun z => modMathieuM 4 ν z h - mathieuCylCosh 4 ν h z) =O[reAtTopStrip (-2 * π + δ) (π - δ)]
       (fun z => mathieuCylCosh 4 ν h z * (Complex.cosh z)⁻¹) := by
   sorry
 
@@ -189,7 +217,7 @@ theorem modMathieuM_four_isBigO {ν h δ : ℝ} (hh : 0 < h) (hδ : 0 < δ) :
 e^{|Im(2h cosh z)|} O((sech z)^{3/2})` as `Re z → +∞` with `|Im z| ≤ π - δ`. -/
 @[dlmf 28.20.E11]
 theorem modMathieuM_one_isBigO {ν h δ : ℝ} (hh : 0 < h) (hδ : 0 < δ) :
-    (fun z => modMathieuM 1 ν z h - mathieuCylCosh 1 ν h z) =O[m28c_strip (-π + δ) (π - δ)]
+    (fun z => modMathieuM 1 ν z h - mathieuCylCosh 1 ν h z) =O[reAtTopStrip (-π + δ) (π - δ)]
       (fun z => Real.exp |(2 * h * Complex.cosh z).im| *
         ‖(Complex.cosh z)⁻¹‖ ^ (3 / 2 : ℝ)) := by
   sorry
@@ -198,7 +226,7 @@ theorem modMathieuM_one_isBigO {ν h δ : ℝ} (hh : 0 < h) (hδ : 0 < δ) :
 e^{|Im(2h cosh z)|} O((sech z)^{3/2})` as `Re z → +∞` with `|Im z| ≤ π - δ`. -/
 @[dlmf 28.20.E12]
 theorem modMathieuM_two_isBigO {ν h δ : ℝ} (hh : 0 < h) (hδ : 0 < δ) :
-    (fun z => modMathieuM 2 ν z h - mathieuCylCosh 2 ν h z) =O[m28c_strip (-π + δ) (π - δ)]
+    (fun z => modMathieuM 2 ν z h - mathieuCylCosh 2 ν h z) =O[reAtTopStrip (-π + δ) (π - δ)]
       (fun z => Real.exp |(2 * h * Complex.cosh z).im| *
         ‖(Complex.cosh z)⁻¹‖ ^ (3 / 2 : ℝ)) := by
   sorry
@@ -209,7 +237,7 @@ solutions"); similarly for `M^{(4)}_ν` with 28.20.10. -/
 @[dlmf 28.20.iii]
 theorem eq_modMathieuM_three_of_isBigO {ν h δ : ℝ} (hh : 0 < h) (hδ : 0 < δ) {w : ℂ → ℂ}
     (hw : IsModMathieuSolution (mathieuLambda ν ((h : ℂ) ^ 2)) ((h : ℂ) ^ 2) w)
-    (has : (fun z => w z - mathieuCylCosh 3 ν h z) =O[m28c_strip (-π + δ) (2 * π - δ)]
+    (has : (fun z => w z - mathieuCylCosh 3 ν h z) =O[reAtTopStrip (-π + δ) (2 * π - δ)]
       (fun z => mathieuCylCosh 3 ν h z * (Complex.cosh z)⁻¹)) :
     w = fun z => modMathieuM 3 ν z h := by
   sorry
@@ -218,36 +246,35 @@ theorem eq_modMathieuM_three_of_isBigO {ν h δ : ℝ} (hh : 0 < h) (hδ : 0 < �
 @[dlmf 28.20.iii]
 theorem eq_modMathieuM_four_of_isBigO {ν h δ : ℝ} (hh : 0 < h) (hδ : 0 < δ) {w : ℂ → ℂ}
     (hw : IsModMathieuSolution (mathieuLambda ν ((h : ℂ) ^ 2)) ((h : ℂ) ^ 2) w)
-    (has : (fun z => w z - mathieuCylCosh 4 ν h z) =O[m28c_strip (-2 * π + δ) (π - δ)]
+    (has : (fun z => w z - mathieuCylCosh 4 ν h z) =O[reAtTopStrip (-2 * π + δ) (π - δ)]
       (fun z => mathieuCylCosh 4 ν h z * (Complex.cosh z)⁻¹)) :
     w = fun z => modMathieuM 4 ν z h := by
   sorry
 
-section p2mReality
-
+section Reality
 open scoped ComplexConjugate
 
 /-- The continued `J_μ(h e^x)` is real for real `μ`, `x` and `h > 0`. -/
-lemma p2m_conj_besselJExp (μ x : ℝ) {h : ℝ} (hh : 0 < h) :
+private lemma conj_besselJExp_ofReal (μ x : ℝ) {h : ℝ} (hh : 0 < h) :
     conj (besselJExp μ h x) = besselJExp μ h x := by
-  rw [p1c_besselJExp_eq μ hh (by simp [Real.pi_pos]) (by simp [Real.pi_pos.le]),
+  rw [besselJExp_eq_besselJ μ hh (by simp [Real.pi_pos]) (by simp [Real.pi_pos.le]),
     show (h : ℂ) * Complex.exp x = ((h * Real.exp x : ℝ) : ℂ) by push_cast; rfl,
     DLMF.Bessel.besselJ_ofReal_eq_re μ _ (by positivity), Complex.conj_ofReal]
 
 /-- The continued `Y_μ(h e^x)` is real for real `μ ∉ ℤ`. -/
-lemma p2m_conj_besselYExp_of_not_int {μ : ℝ} (hμ : ∀ k : ℤ, (μ : ℂ) ≠ k) (x : ℝ) {h : ℝ}
+private lemma conj_besselYExp_ofReal_of_not_int {μ : ℝ} (hμ : ∀ k : ℤ, (μ : ℂ) ≠ k) (x : ℝ) {h : ℝ}
     (hh : 0 < h) : conj (besselYExp μ h x) = besselYExp μ h x := by
-  rw [p2m_besselYExp_of_not_int hμ, p2m_besselDExp,
+  rw [besselYExp_eq_besselYExpNumerator_div hμ, besselYExpNumerator,
     show -(μ : ℂ) = ((-μ : ℝ) : ℂ) by push_cast; rfl,
     show (μ : ℂ) * π = ((μ * π : ℝ) : ℂ) by push_cast; rfl, ← Complex.ofReal_cos,
     ← Complex.ofReal_sin]
-  simp only [map_div₀, map_sub, map_mul, Complex.conj_ofReal, p2m_conj_besselJExp _ _ hh]
+  simp only [map_div₀, map_sub, map_mul, Complex.conj_ofReal, conj_besselJExp_ofReal _ _ hh]
 
 /-- The continued `Y_μ(h e^x)` is real for every real `μ` (integer orders by continuity). -/
-lemma p2m_conj_besselYExp (μ x : ℝ) {h : ℝ} (hh : 0 < h) :
+private lemma conj_besselYExp_ofReal (μ x : ℝ) {h : ℝ} (hh : 0 < h) :
     conj (besselYExp μ h x) = besselYExp μ h x := by
   by_cases hμ : ∀ k : ℤ, (μ : ℂ) ≠ k
-  · exact p2m_conj_besselYExp_of_not_int hμ x hh
+  · exact conj_besselYExp_ofReal_of_not_int hμ x hh
   push Not at hμ
   obtain ⟨k, hk⟩ := hμ
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
@@ -259,7 +286,7 @@ lemma p2m_conj_besselYExp (μ x : ℝ) {h : ℝ} (hh : 0 < h) :
     simpa [s] using this.const_add μ
   have hF : Continuous fun t : ℝ => besselYExp (t : ℂ) h x :=
     continuous_iff_continuousAt.mpr fun t =>
-      (p2m_continuousAt_besselYExp_order hh' x t).comp Complex.continuous_ofReal.continuousAt
+      (continuousAt_besselYExp_order hh' x t).comp Complex.continuous_ofReal.continuousAt
   have hns : ∀ n, ∀ m : ℤ, ((s n : ℝ) : ℂ) ≠ m := by
     intro n m hm
     have hm' : s n = m := by exact_mod_cast hm
@@ -277,14 +304,14 @@ lemma p2m_conj_besselYExp (μ x : ℝ) {h : ℝ} (hh : 0 < h) :
   have t2 := (Complex.continuous_conj.tendsto _).comp t1
   refine tendsto_nhds_unique t2 (t1.congr fun n => ?_)
   simp only [Function.comp_apply]
-  exact (p2m_conj_besselYExp_of_not_int (hns n) x hh).symm
+  exact (conj_besselYExp_ofReal_of_not_int (hns n) x hh).symm
 
 /-- `me_k(π - x) = (-1)^k conj(me_k(x))` for integer `k`, real `q` and real `x`. -/
-lemma p2m_mathieuMeInt_reflect (k : ℤ) (q x : ℝ) :
+private lemma mathieuMeInt_pi_sub (k : ℤ) (q x : ℝ) :
     mathieuMeInt k (π - x) q = (-1 : ℂ) ^ k * conj (mathieuMeInt k x q) := by
-  have hper := (p2m_mathieuMeInt_floquet k q).2 ((x : ℂ) - π)
+  have hper := (isMathieuSolution_mathieuMeInt_and_add_pi k q).2 ((x : ℂ) - π)
   rw [sub_add_cancel] at hper
-  have hsq : (-1 : ℂ) ^ k * (-1 : ℂ) ^ k = 1 := m28b_negOnePow_mul_self k
+  have hsq : (-1 : ℂ) ^ k * (-1 : ℂ) ^ k = 1 := neg_one_zpow_mul_self_eq_one k
   have hshift : mathieuMeInt k ((x : ℂ) - π) q = (-1 : ℂ) ^ k * mathieuMeInt k x q := by
     rw [hper, ← mul_assoc, hsq, one_mul]
   by_cases hk : 0 ≤ k
@@ -292,23 +319,23 @@ lemma p2m_mathieuMeInt_reflect (k : ℤ) (q x : ℝ) :
       intro z; simp [mathieuMeInt, hk]
     have hreal : conj (mathieuMeInt k x q) = mathieuMeInt k x q := by
       rw [hc]
-      simp only [mathieuCe, map_mul, Complex.conj_ofReal, p1a1_mathieuWI_real]
+      simp only [mathieuCe, map_mul, Complex.conj_ofReal, conj_mathieuWI_ofReal]
     rw [hreal, ← hshift, show (π : ℂ) - x = -((x : ℂ) - π) by ring, hc, hc, mathieuCe_neg]
   · have hc : ∀ z, mathieuMeInt k z q = -((Real.sqrt 2 : ℂ) * I) * mathieuSe k.natAbs z q := by
       intro z; simp [mathieuMeInt, hk]
     have hreal : conj (mathieuMeInt k x q) = -mathieuMeInt k x q := by
-      rw [hc, map_mul, mathieuSe, map_mul, Complex.conj_ofReal, p1a1_mathieuWII_real]
+      rw [hc, map_mul, mathieuSe, map_mul, Complex.conj_ofReal, conj_mathieuWII_ofReal]
       simp
     rw [hreal, mul_neg, ← hshift, show (π : ℂ) - x = -((x : ℂ) - π) by ring, hc, hc,
       mathieuSe_neg]
     ring
 
 /-- The coefficients `c^ν_{2m}(h²)` are real for real `ν` and real `h`. -/
-lemma p2m_conj_mathieuMeCoeff (ν h : ℝ) (m : ℤ) :
+private lemma conj_mathieuMeCoeff_ofReal (ν h : ℝ) (m : ℤ) :
     conj (mathieuMeCoeff ν ((h : ℂ) ^ 2) m) = mathieuMeCoeff ν ((h : ℂ) ^ 2) m := by
   by_cases hν : ∀ k : ℤ, (k : ℂ) ≠ ν
   · rw [mathieuMeCoeff_of_not_int hν]
-    have := congrArg (fun p => p.2 m) (m28b_data_conj (ν : ℂ) ((h : ℂ) ^ 2))
+    have := congrArg (fun p => p.2 m) (mathieuLambdaData_conj (ν : ℂ) ((h : ℂ) ^ 2))
     simp only [Complex.conj_ofReal, map_pow] at this
     exact this.symm
   push Not at hν
@@ -325,7 +352,7 @@ lemma p2m_conj_mathieuMeCoeff (ν h : ℝ) (m : ℤ) :
     intro x
     simp only [g]
     push_cast
-    rw [p2m_mathieuMeInt_reflect, map_mul, ← Complex.exp_conj]
+    rw [mathieuMeInt_pi_sub, map_mul, ← Complex.exp_conj]
     simp only [map_neg, map_mul, Complex.conj_I, Complex.conj_ofReal, map_intCast]
     rw [show -(I * (K : ℂ) * (π - x)) = -(I * K * π) + -(-I * K * x) by ring, Complex.exp_add,
       show -(I * (K : ℂ) * π) = ((-K : ℤ) : ℂ) * (π * I) by push_cast; ring,
@@ -348,33 +375,32 @@ lemma p2m_conj_mathieuMeCoeff (ν h : ℝ) (m : ℤ) :
   simp
 
 /-- **Reality** (DLMF §28.20(iii)): proof of `modMathieuM_one_two_real`. -/
-lemma p2m_modMathieuM_real {j : ℕ} (hj : j = 1 ∨ j = 2) {ν h : ℝ} (hh : 0 < h) (x : ℝ) :
+private lemma im_modMathieuM_eq_zero {j : ℕ} (hj : j = 1 ∨ j = 2) {ν h : ℝ} (hh : 0 < h) (x : ℝ) :
     (modMathieuM j ν x h).im = 0 := by
   rw [← Complex.conj_eq_iff_im]
   have hterm : ∀ n ℓ : ℤ, conj (modMathieuTerm j ν x h n ℓ) = modMathieuTerm j ν x h n ℓ := by
     intro n ℓ
     have hJ : conj (besselJExp ((ℓ - n : ℤ) : ℂ) h (-x)) = besselJExp ((ℓ - n : ℤ) : ℂ) h (-x) := by
-      have := p2m_conj_besselJExp ((ℓ - n : ℤ) : ℝ) (-x) hh
+      have := conj_besselJExp_ofReal ((ℓ - n : ℤ) : ℝ) (-x) hh
       push_cast at this ⊢
       exact this
     have hC : conj (mathieuCylExp j (ν + n + ℓ) h x) = mathieuCylExp j (ν + n + ℓ) h x := by
       have e : (ν : ℂ) + n + ℓ = ((ν + n + ℓ : ℝ) : ℂ) := by push_cast; ring
       rw [e]
       rcases hj with rfl | rfl
-      · exact p2m_conj_besselJExp _ _ hh
-      · exact p2m_conj_besselYExp _ _ hh
+      · exact conj_besselJExp_ofReal _ _ hh
+      · exact conj_besselYExp_ofReal _ _ hh
     simp only [modMathieuTerm, map_mul, map_zpow₀, map_neg, map_one, hJ, hC,
-      p2m_conj_mathieuMeCoeff]
-  simp only [modMathieuM, map_mul, map_inv₀, Complex.conj_tsum, hterm, p2m_conj_mathieuMeCoeff]
+      conj_mathieuMeCoeff_ofReal]
+  simp only [modMathieuM, map_mul, map_inv₀, Complex.conj_tsum, hterm, conj_mathieuMeCoeff_ofReal]
 
-end p2mReality
-
+end Reality
 /-- `M^{(1)}_ν` and `M^{(2)}_ν` are **real on the real axis** for real `ν` and `h > 0`
 (DLMF §28.20(iii)). -/
 @[dlmf 28.20.iii]
 theorem modMathieuM_one_two_real {ν h : ℝ} (hh : 0 < h) (x : ℝ) :
     (modMathieuM 1 ν x h).im = 0 ∧ (modMathieuM 2 ν x h).im = 0 :=
-  ⟨p2m_modMathieuM_real (Or.inl rfl) hh x, p2m_modMathieuM_real (Or.inr rfl) hh x⟩
+  ⟨im_modMathieuM_eq_zero (Or.inl rfl) hh x, im_modMathieuM_eq_zero (Or.inr rfl) hh x⟩
 
 /-- Pointwise, the third cross-product term is the first plus `i` times the second. -/
 theorem modMathieuTerm_three (ν z h : ℂ) (n ℓ : ℤ) :
@@ -414,14 +440,14 @@ theorem modMathieuM_four {ν h : ℂ} (hν : ModMathieuAdmissible ν h) (hh : h 
 `𝒲{M^{(1)}_ν, M^{(2)}_ν} = -𝒲{M^{(2)}_ν, M^{(3)}_ν} = -𝒲{M^{(2)}_ν, M^{(4)}_ν} = 2/π`. -/
 @[dlmf 28.20.E21]
 theorem modMathieuM_wronskian_two {ν h : ℝ} (hh : 0 < h) (z : ℂ) :
-    m28c_wronskian (fun z => modMathieuM 1 ν z h) (fun z => modMathieuM 2 ν z h) z = 2 / π ∧
-      m28c_wronskian (fun z => modMathieuM 2 ν z h) (fun z => modMathieuM 3 ν z h) z =
+    complexWronskian (fun z => modMathieuM 1 ν z h) (fun z => modMathieuM 2 ν z h) z = 2 / π ∧
+      complexWronskian (fun z => modMathieuM 2 ν z h) (fun z => modMathieuM 3 ν z h) z =
         -(2 / π) ∧
-      m28c_wronskian (fun z => modMathieuM 2 ν z h) (fun z => modMathieuM 4 ν z h) z =
+      complexWronskian (fun z => modMathieuM 2 ν z h) (fun z => modMathieuM 4 ν z h) z =
         -(2 / π) := by
-  have hadm := p1c_admissible_real' ν h
+  have hadm := modMathieuAdmissible_ofReal ν h
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
-  have hW := p3m_wronskian_one_two (ν := ν) hh z
+  have hW := complexWronskian_modMathieuM_one_two (ν := ν) hh z
   have d1 := (isModMathieuSolution_modMathieuM 1 le_rfl (by norm_num) hadm hh').differentiable z
   have d2 :=
     (isModMathieuSolution_modMathieuM 2 (by norm_num) (by norm_num) hadm hh').differentiable z
@@ -438,10 +464,10 @@ theorem modMathieuM_wronskian_two {ν h : ℝ} (hh : 0 < h) (z : ℂ) :
       deriv (fun z => modMathieuM 1 ν z h) z - I * deriv (fun z => modMathieuM 2 ν z h) z :=
     (d1.hasDerivAt.sub (d2.hasDerivAt.const_mul I)).deriv
   refine ⟨hW, ?_, ?_⟩
-  · simp only [m28c_wronskian] at hW ⊢
+  · simp only [complexWronskian] at hW ⊢
     rw [e3, D3, modMathieuM_three hadm hh' z]
     linear_combination -hW
-  · simp only [m28c_wronskian] at hW ⊢
+  · simp only [complexWronskian] at hW ⊢
     rw [e4, D4, modMathieuM_four hadm hh' z]
     linear_combination -hW
 
@@ -449,13 +475,13 @@ theorem modMathieuM_wronskian_two {ν h : ℝ} (hh : 0 < h) (z : ℂ) :
 `𝒲{M^{(1)}_ν, M^{(3)}_ν} = -𝒲{M^{(1)}_ν, M^{(4)}_ν} = -½ 𝒲{M^{(3)}_ν, M^{(4)}_ν} = 2i/π`. -/
 @[dlmf 28.20.E21]
 theorem modMathieuM_wronskian_three {ν h : ℝ} (hh : 0 < h) (z : ℂ) :
-    m28c_wronskian (fun z => modMathieuM 1 ν z h) (fun z => modMathieuM 3 ν z h) z =
+    complexWronskian (fun z => modMathieuM 1 ν z h) (fun z => modMathieuM 3 ν z h) z =
         2 * I / π ∧
-      m28c_wronskian (fun z => modMathieuM 1 ν z h) (fun z => modMathieuM 4 ν z h) z =
+      complexWronskian (fun z => modMathieuM 1 ν z h) (fun z => modMathieuM 4 ν z h) z =
         -(2 * I / π) ∧
-      m28c_wronskian (fun z => modMathieuM 3 ν z h) (fun z => modMathieuM 4 ν z h) z =
+      complexWronskian (fun z => modMathieuM 3 ν z h) (fun z => modMathieuM 4 ν z h) z =
         -2 * (2 * I / π) := by
-  have hadm := p1c_admissible_real' ν h
+  have hadm := modMathieuAdmissible_ofReal ν h
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
   have hW := (modMathieuM_wronskian_two (ν := ν) hh z).1
   have d1 := (isModMathieuSolution_modMathieuM 1 le_rfl (by norm_num) hadm hh').differentiable z
@@ -473,7 +499,7 @@ theorem modMathieuM_wronskian_three {ν h : ℝ} (hh : 0 < h) (z : ℂ) :
   have D4 : deriv (fun z => modMathieuM 1 ν z h - I * modMathieuM 2 ν z h) z =
       deriv (fun z => modMathieuM 1 ν z h) z - I * deriv (fun z => modMathieuM 2 ν z h) z :=
     (d1.hasDerivAt.sub (d2.hasDerivAt.const_mul I)).deriv
-  simp only [m28c_wronskian] at hW ⊢
+  simp only [complexWronskian] at hW ⊢
   rw [e3, e4, D3, D4, modMathieuM_three hadm hh' z, modMathieuM_four hadm hh' z]
   refine ⟨?_, ?_, ?_⟩
   · linear_combination I * hW
@@ -483,19 +509,19 @@ theorem modMathieuM_wronskian_three {ν h : ℝ} (hh : 0 < h) (z : ℂ) :
 /-! ### §28.20(vii) Shift of variable -/
 
 /-- Term-wise form of 28.20.22: the shift `z ↦ z ± πi/2` against `h ↦ ±ih`. -/
-lemma p1c_modMathieuTerm_add_pi_div_two (j : ℕ) {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν)
+private lemma modMathieuTerm_add_pi_div_two_mul_I_of_not_int (j : ℕ) {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν)
     {h : ℝ} (hh : 0 < h) {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) (z : ℂ) (n ℓ : ℤ) :
     modMathieuTerm j ν (z + σ * π * I / 2) h n ℓ =
       (-1 : ℂ) ^ n * modMathieuTerm j ν z (σ * I * h) n ℓ := by
   have hσ' : -σ = 1 ∨ -σ = -1 := by rcases hσ with rfl | rfl <;> simp
-  have hJ := p1c_besselJExp_add_pi_div_two ((ℓ - n : ℤ) : ℂ) hh hσ' (-z)
+  have hJ := besselJExp_add_pi_I_div_two ((ℓ - n : ℤ) : ℂ) hh hσ' (-z)
   rw [show -z + -σ * π * I / 2 = -(z + σ * π * I / 2) by ring,
-    show -σ * I * (h : ℂ) = -(σ * I * h) by ring, p1c_besselJExp_neg_h_intCast] at hJ
+    show -σ * I * (h : ℂ) = -(σ * I * h) by ring, besselJExp_intCast_neg_parameter] at hJ
   have hq : (σ * I * (h : ℂ)) ^ 2 = -((h : ℂ) ^ 2) := by
     rcases hσ with rfl | rfl <;> ring_nf <;> rw [I_sq] <;> ring
   simp only [modMathieuTerm]
-  rw [hJ, p1c_mathieuCylExp_add_pi_div_two j _ hh hσ z, hq,
-    mathieuMeCoeff_neg_q (p1c_not_int_cast hν)]
+  rw [hJ, mathieuCylExp_add_pi_I_div_two j _ hh hσ z, hq,
+    mathieuMeCoeff_neg_q (intCast_ne_ofReal_of_not_int hν)]
   have e : (-1 : ℂ) ^ (ℓ - n) = (-1 : ℂ) ^ n * (-1 : ℂ) ^ ℓ := by
     rw [zpow_sub₀ (by norm_num)]
     have h2 : (-1 : ℂ) ^ n * (-1 : ℂ) ^ n = 1 := by
@@ -516,21 +542,21 @@ theorem modMathieuM_add_pi_div_two (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4)
     push_cast
     rcases hσ with rfl | rfl <;> ring_nf <;> rw [I_sq] <;> ring
   have hadm : ModMathieuAdmissible ν (σ * I * h) := by
-    refine Or.inl ⟨p1c_not_int_cast hν, ?_⟩
+    refine Or.inl ⟨intCast_ne_ofReal_of_not_int hν, ?_⟩
     rw [hq]
-    exact (mathieuNormalSegment_real (ν := ν) (q := -(h ^ 2)) (p1c_not_int_cast hν)).1
+    exact (mathieuNormalSegment_real (ν := ν) (q := -(h ^ 2)) (intCast_ne_ofReal_of_not_int hν)).1
   have hne : σ * I * (h : ℂ) ≠ 0 := by
     have : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
     rcases hσ with rfl | rfl <;> simp [this]
-  have hc := p1c_coeff_index_ne_zero hν h
+  have hc := mathieuMeCoeff_modMathieuIndex_ne_zero hν h
   set n := modMathieuIndex ν h
   have hR := hasSum_modMathieuTerm j hj₁ hj₄ hadm hne n z
   have hq' : (σ * I * (h : ℂ)) ^ 2 = -((h : ℂ) ^ 2) := by rw [hq]; push_cast; ring
-  rw [hq', mathieuMeCoeff_neg_q (p1c_not_int_cast hν)] at hR
+  rw [hq', mathieuMeCoeff_neg_q (intCast_ne_ofReal_of_not_int hν)] at hR
   have hL := hR.mul_left ((-1 : ℂ) ^ n)
   have e : (fun ℓ => (-1 : ℂ) ^ n * modMathieuTerm j ν z (σ * I * h) n ℓ) =
       modMathieuTerm j ν (z + σ * π * I / 2) h n := by
-    funext ℓ; rw [p1c_modMathieuTerm_add_pi_div_two j hν hh hσ]
+    funext ℓ; rw [modMathieuTerm_add_pi_div_two_mul_I_of_not_int j hν hh hσ]
   rw [e] at hL
   have eL : modMathieuM j ν (z + σ * π * I / 2) h = (mathieuMeCoeff ν ((h : ℂ) ^ 2) n)⁻¹ *
       ∑' ℓ, modMathieuTerm j ν (z + σ * π * I / 2) h n ℓ := rfl
@@ -542,20 +568,20 @@ theorem modMathieuM_add_pi_div_two (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4)
   ring
 
 /-- The integer-order coefficients as Fourier integrals. -/
-lemma p1c_mathieuMeCoeff_intCast (k ℓ : ℤ) (q : ℂ) :
+private lemma mathieuMeCoeff_intCast_eq_integral (k ℓ : ℤ) (q : ℂ) :
     mathieuMeCoeff k q ℓ = (1 / π : ℂ) * ∫ x in (0 : ℝ)..π,
       mathieuMe k x q * Complex.exp (-(I * (k + 2 * ℓ) * x)) := by
   simp only [mathieuMeCoeff, show (∃ j : ℤ, (j : ℂ) = k) from ⟨k, rfl⟩, ↓reduceIte]
 
 /-- `e^{-iNπ} = (-1)^N`. -/
-theorem p1c_exp_neg_I_int_mul_pi (N : ℤ) : Complex.exp (-(I * N * π)) = (-1 : ℂ) ^ N := by
+theorem exp_neg_I_mul_intCast_mul_pi (N : ℤ) : Complex.exp (-(I * N * π)) = (-1 : ℂ) ^ N := by
   rw [show -(I * N * π) = N * (-(π * I)) by ring, Complex.exp_int_mul, Complex.exp_neg,
     Complex.exp_pi_mul_I]; simp
 
 /-- Coefficients after a quarter-period shift: if `me_k(x, q') = ε me_{k'}(x - π/2, q)` and
 `me_{k'}(·, q)` has multiplier `(-1)^{k'}` under `x ↦ x + π`, then
 `c^k_{2ℓ}(q') = ε e^{-i(k+2ℓ)π/2} c^{k'}_{2ℓ'}(q)` whenever `k' + 2ℓ' = k + 2ℓ`. -/
-lemma p1c_mathieuMeCoeff_shift {k k' ℓ ℓ' : ℤ} (hkl : k' + 2 * ℓ' = k + 2 * ℓ) {q q' ε : ℂ}
+private lemma mathieuMeCoeff_eq_of_quarter_shift {k k' ℓ ℓ' : ℤ} (hkl : k' + 2 * ℓ' = k + 2 * ℓ) {q q' ε : ℂ}
     (hme : ∀ x : ℝ, mathieuMe k x q' = ε * mathieuMe k' ((x : ℂ) - π / 2) q)
     (hper : ∀ y : ℝ, mathieuMe k' ((y : ℂ) + π) q = (-1 : ℂ) ^ k' * mathieuMe k' y q) :
     mathieuMeCoeff k q' ℓ =
@@ -568,11 +594,11 @@ lemma p1c_mathieuMeCoeff_shift {k k' ℓ ℓ' : ℤ} (hkl : k' + 2 * ℓ' = k + 
     push_cast
     rw [hper y, show -(I * (k + 2 * ℓ) * ((y : ℂ) + π)) =
       -(I * (k + 2 * ℓ) * y) + -(I * ((k' + 2 * ℓ' : ℤ) : ℂ) * π) by push_cast; rw [hN]; ring,
-      Complex.exp_add, p1c_exp_neg_I_int_mul_pi]
+      Complex.exp_add, exp_neg_I_mul_intCast_mul_pi]
     have : (-1 : ℂ) ^ k' * (-1 : ℂ) ^ (k' + 2 * ℓ') = 1 := by
-      rw [zpow_add₀ (by norm_num), zpow_mul]; simp [m28b_negOnePow_mul_self]
+      rw [zpow_add₀ (by norm_num), zpow_mul]; simp [neg_one_zpow_mul_self_eq_one]
     linear_combination mathieuMe k' y q * Complex.exp (-(I * (k + 2 * ℓ) * y)) * this
-  rw [p1c_mathieuMeCoeff_intCast, p1c_mathieuMeCoeff_intCast]
+  rw [mathieuMeCoeff_intCast_eq_integral, mathieuMeCoeff_intCast_eq_integral]
   have e1 : (fun x : ℝ => mathieuMe k x q' * Complex.exp (-(I * (k + 2 * ℓ) * x))) =
       fun x : ℝ => ε * Complex.exp (-(I * (k + 2 * ℓ) * (π / 2))) * g (x - π / 2) := by
     funext x
@@ -591,148 +617,148 @@ lemma p1c_mathieuMeCoeff_shift {k k' ℓ ℓ' : ℤ} (hkl : k' + 2 * ℓ' = k + 
 
 
 /-- `me_N = √2 ce_N` for `N ≥ 0` (DLMF 28.12.11). -/
-lemma p1c_mathieuMe_natCast (N : ℕ) (z : ℂ) (Q : ℝ) :
+private lemma mathieuMe_intCast_natCast (N : ℕ) (z : ℂ) (Q : ℝ) :
     mathieuMe ((N : ℤ) : ℂ) z Q = (Real.sqrt 2 : ℂ) * mathieuCe N z Q := by
   rw [mathieuMe_intCast, mathieuMeInt, ite_eq_left (by positivity)]; simp
 
 /-- `me_{-N} = -√2 i se_N` for `N ≥ 1` (DLMF 28.12.11). -/
-lemma p1c_mathieuMe_negNatCast {N : ℕ} (hN : N ≠ 0) (z : ℂ) (Q : ℝ) :
+private lemma mathieuMe_intCast_neg_natCast {N : ℕ} (hN : N ≠ 0) (z : ℂ) (Q : ℝ) :
     mathieuMe ((-(N : ℤ) : ℤ) : ℂ) z Q = -((Real.sqrt 2 : ℂ) * I) * mathieuSe N z Q := by
   rw [mathieuMe_intCast, mathieuMeInt, ite_eq_right (by omega)]; simp
 
 /-- `e^{-i(2M)π/2} = (-1)^M`. -/
-lemma p1c_exp_half_even (M : ℤ) : Complex.exp (-(I * (2 * M) * (π / 2))) = (-1 : ℂ) ^ M := by
-  rw [show -(I * (2 * (M : ℂ)) * (π / 2)) = -(I * M * π) by ring, p1c_exp_neg_I_int_mul_pi]
+private lemma exp_neg_I_mul_two_mul_mul_pi_div_two (M : ℤ) : Complex.exp (-(I * (2 * M) * (π / 2))) = (-1 : ℂ) ^ M := by
+  rw [show -(I * (2 * (M : ℂ)) * (π / 2)) = -(I * M * π) by ring, exp_neg_I_mul_intCast_mul_pi]
 
 /-- `e^{-i(2M+1)π/2} = -i (-1)^M`. -/
-lemma p1c_exp_half_odd (M : ℤ) :
+private lemma exp_neg_I_mul_two_mul_add_one_mul_pi_div_two (M : ℤ) :
     Complex.exp (-(I * (2 * M + 1) * (π / 2))) = (-1 : ℂ) ^ M * (-I) := by
   rw [show -(I * (2 * (M : ℂ) + 1) * (π / 2)) = -(I * M * π) + -(π / 2 * I) by ring,
-    Complex.exp_add, p1c_exp_neg_I_int_mul_pi, Complex.exp_neg, Complex.exp_mul_I]
+    Complex.exp_add, exp_neg_I_mul_intCast_mul_pi, Complex.exp_neg, Complex.exp_mul_I]
   simp [← Complex.ofReal_ofNat, ← Complex.ofReal_div, ← Complex.ofReal_cos, ← Complex.ofReal_sin]
 
 
 /-- `(-1)^{2n} = 1`. -/
-lemma p1c_neg_one_zpow_two_mul (n : ℤ) : (-1 : ℂ) ^ (2 * n) = 1 := by
+private lemma neg_one_zpow_two_mul_eq_one (n : ℤ) : (-1 : ℂ) ^ (2 * n) = 1 := by
   rw [zpow_mul]; simp
 
 /-- `c^{2n}_{2ℓ}(-Q) = (-1)^ℓ c^{2n}_{2ℓ}(Q)` (from 28.2.34). -/
-lemma p1c_coeff_even_neg (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
+private lemma mathieuMeCoeff_even_neg_q (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
     mathieuMeCoeff (((2 * n : ℕ) : ℤ) : ℂ) ((-Q : ℝ) : ℂ) ℓ =
       (-1 : ℂ) ^ ℓ * mathieuMeCoeff (((2 * n : ℕ) : ℤ) : ℂ) (Q : ℂ) ℓ := by
-  rw [p1c_mathieuMeCoeff_shift (k := ((2 * n : ℕ) : ℤ)) (k' := ((2 * n : ℕ) : ℤ)) (ℓ' := ℓ) rfl
+  rw [mathieuMeCoeff_eq_of_quarter_shift (k := ((2 * n : ℕ) : ℤ)) (k' := ((2 * n : ℕ) : ℤ)) (ℓ' := ℓ) rfl
     (ε := (-1 : ℂ) ^ n)]
   · rw [show ((((2 * n : ℕ) : ℤ) : ℂ) + 2 * ℓ) = 2 * ((n + ℓ : ℤ) : ℂ) by push_cast; ring,
-      p1c_exp_half_even, zpow_add₀ (by norm_num), zpow_natCast]
-    have := m28b_negOnePow_mul_self n
+      exp_neg_I_mul_two_mul_mul_pi_div_two, zpow_add₀ (by norm_num), zpow_natCast]
+    have := neg_one_zpow_mul_self_eq_one n
     simp only [zpow_natCast] at this
     linear_combination (-1 : ℂ) ^ ℓ * mathieuMeCoeff (((2 * n : ℕ) : ℤ) : ℂ) (Q : ℂ) ℓ * this
   · intro x
-    rw [p1c_mathieuMe_natCast, p1c_mathieuMe_natCast, mathieuCe_even_neg_q,
+    rw [mathieuMe_intCast_natCast, mathieuMe_intCast_natCast, mathieuCe_even_neg_q,
       show (π / 2 : ℂ) - x = -((x : ℂ) - π / 2) by ring, mathieuCe_neg]
     ring
   · intro y
-    rw [p1c_mathieuMe_natCast, p1c_mathieuMe_natCast, mathieuCe_even_add_pi]
-    push_cast; rw [p1c_neg_one_zpow_two_mul]; ring
+    rw [mathieuMe_intCast_natCast, mathieuMe_intCast_natCast, mathieuCe_even_add_pi]
+    push_cast; rw [neg_one_zpow_two_mul_eq_one]; ring
 
 
 /-- `(-1)^n (-1)^n = 1` for `n ∈ ℕ`. -/
-lemma p1c_neg_one_pow_mul_self (n : ℕ) : (-1 : ℂ) ^ n * (-1 : ℂ) ^ n = 1 := by
+private lemma neg_one_pow_mul_self_eq_one (n : ℕ) : (-1 : ℂ) ^ n * (-1 : ℂ) ^ n = 1 := by
   rw [← pow_add, ← two_mul, pow_mul]; simp
 
 /-- `c^{-(2n+2)}_{2ℓ}(-Q) = (-1)^ℓ c^{-(2n+2)}_{2ℓ}(Q)` (from 28.2.37). -/
-lemma p1c_coeff_negEven_neg (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
+private lemma mathieuMeCoeff_negEven_neg_q (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
     mathieuMeCoeff ((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ) ((-Q : ℝ) : ℂ) ℓ =
       (-1 : ℂ) ^ ℓ * mathieuMeCoeff ((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ) (Q : ℂ) ℓ := by
   have hN : (2 * n + 2 : ℕ) ≠ 0 := by omega
-  rw [p1c_mathieuMeCoeff_shift (k := -((2 * n + 2 : ℕ) : ℤ)) (k' := -((2 * n + 2 : ℕ) : ℤ))
+  rw [mathieuMeCoeff_eq_of_quarter_shift (k := -((2 * n + 2 : ℕ) : ℤ)) (k' := -((2 * n + 2 : ℕ) : ℤ))
     (ℓ' := ℓ) rfl (ε := -(-1 : ℂ) ^ n)]
   · rw [show (((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ) + 2 * ℓ) = 2 * ((ℓ - n - 1 : ℤ) : ℂ) by
-      push_cast; ring, p1c_exp_half_even, p2m_negOnePow_sub, p2m_negOnePow_sub]
-    have := p1c_neg_one_pow_mul_self n
+      push_cast; ring, exp_neg_I_mul_two_mul_mul_pi_div_two, neg_one_zpow_sub, neg_one_zpow_sub]
+    have := neg_one_pow_mul_self_eq_one n
     simp only [zpow_natCast, zpow_one]
     linear_combination (-1 : ℂ) ^ ℓ * mathieuMeCoeff ((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ) (Q : ℂ) ℓ *
       this
   · intro x
-    rw [p1c_mathieuMe_negNatCast hN, p1c_mathieuMe_negNatCast hN,
+    rw [mathieuMe_intCast_neg_natCast hN, mathieuMe_intCast_neg_natCast hN,
       mathieuSe_even_neg_q,
       show (π / 2 : ℂ) - x = -((x : ℂ) - π / 2) by ring, mathieuSe_neg]
     ring
   · intro y
-    rw [p1c_mathieuMe_negNatCast hN, p1c_mathieuMe_negNatCast hN, mathieuSe_even_add_pi,
+    rw [mathieuMe_intCast_neg_natCast hN, mathieuMe_intCast_neg_natCast hN, mathieuSe_even_add_pi,
       show (-((2 * n + 2 : ℕ) : ℤ)) = 2 * (-(n + 1 : ℤ)) by push_cast; ring,
-      p1c_neg_one_zpow_two_mul]
+      neg_one_zpow_two_mul_eq_one]
     ring
 
 /-- `c^{2n+1}_{2ℓ}(-Q) = -(-1)^ℓ c^{-(2n+1)}_{2(ℓ+2n+1)}(Q)` (from 28.2.35). -/
-lemma p1c_coeff_odd_neg (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
+private lemma mathieuMeCoeff_odd_neg_q (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
     mathieuMeCoeff (((2 * n + 1 : ℕ) : ℤ) : ℂ) ((-Q : ℝ) : ℂ) ℓ =
       -1 * (-1 : ℂ) ^ ℓ *
         mathieuMeCoeff ((-((2 * n + 1 : ℕ) : ℤ) : ℤ) : ℂ) (Q : ℂ) (ℓ + ((2 * n + 1 : ℕ) : ℤ)) := by
   have hN : (2 * n + 1 : ℕ) ≠ 0 := by omega
-  rw [p1c_mathieuMeCoeff_shift (k := ((2 * n + 1 : ℕ) : ℤ)) (k' := -((2 * n + 1 : ℕ) : ℤ))
+  rw [mathieuMeCoeff_eq_of_quarter_shift (k := ((2 * n + 1 : ℕ) : ℤ)) (k' := -((2 * n + 1 : ℕ) : ℤ))
     (ℓ' := ℓ + ((2 * n + 1 : ℕ) : ℤ)) (by ring) (ε := (-1 : ℂ) ^ (n + 1) * I)]
   · rw [show ((((2 * n + 1 : ℕ) : ℤ) : ℂ) + 2 * ℓ) = 2 * ((n + ℓ : ℤ) : ℂ) + 1 by
-      push_cast; ring, p1c_exp_half_odd, zpow_add₀ (by norm_num)]
-    have := p1c_neg_one_pow_mul_self n
+      push_cast; ring, exp_neg_I_mul_two_mul_add_one_mul_pi_div_two, zpow_add₀ (by norm_num)]
+    have := neg_one_pow_mul_self_eq_one n
     simp only [zpow_natCast]
     linear_combination (-1 : ℂ) ^ ℓ *
       mathieuMeCoeff ((-((2 * n + 1 : ℕ) : ℤ) : ℤ) : ℂ) (Q : ℂ) (ℓ + ((2 * n + 1 : ℕ) : ℤ)) *
       (-this + (-1 : ℂ) ^ n * (-1 : ℂ) ^ n * I_sq)
   · intro x
-    rw [p1c_mathieuMe_natCast, p1c_mathieuMe_negNatCast hN, mathieuCe_odd_neg_q,
+    rw [mathieuMe_intCast_natCast, mathieuMe_intCast_neg_natCast hN, mathieuCe_odd_neg_q,
       show (π / 2 : ℂ) - x = -((x : ℂ) - π / 2) by ring, mathieuSe_neg]
     linear_combination -(-1 : ℂ) ^ n * (Real.sqrt 2 : ℂ) *
       mathieuSe (2 * n + 1) ((x : ℂ) - π / 2) Q * I_sq
   · intro y
-    rw [p1c_mathieuMe_negNatCast hN, p1c_mathieuMe_negNatCast hN, mathieuSe_odd_add_pi,
+    rw [mathieuMe_intCast_neg_natCast hN, mathieuMe_intCast_neg_natCast hN, mathieuSe_odd_add_pi,
       show (-((2 * n + 1 : ℕ) : ℤ)) = 2 * (-(n + 1 : ℤ)) + 1 by push_cast; ring,
-      zpow_add₀ (by norm_num), p1c_neg_one_zpow_two_mul]
+      zpow_add₀ (by norm_num), neg_one_zpow_two_mul_eq_one]
     ring
 
 /-- `c^{-(2n+1)}_{2ℓ}(-Q) = (-1)^ℓ c^{2n+1}_{2(ℓ-2n-1)}(Q)` (from 28.2.36). -/
-lemma p1c_coeff_negOdd_neg (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
+private lemma mathieuMeCoeff_negOdd_neg_q (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
     mathieuMeCoeff ((-((2 * n + 1 : ℕ) : ℤ) : ℤ) : ℂ) ((-Q : ℝ) : ℂ) ℓ =
       1 * (-1 : ℂ) ^ ℓ *
         mathieuMeCoeff (((2 * n + 1 : ℕ) : ℤ) : ℂ) (Q : ℂ) (ℓ + -((2 * n + 1 : ℕ) : ℤ)) := by
   have hN : (2 * n + 1 : ℕ) ≠ 0 := by omega
-  rw [p1c_mathieuMeCoeff_shift (k := -((2 * n + 1 : ℕ) : ℤ)) (k' := ((2 * n + 1 : ℕ) : ℤ))
+  rw [mathieuMeCoeff_eq_of_quarter_shift (k := -((2 * n + 1 : ℕ) : ℤ)) (k' := ((2 * n + 1 : ℕ) : ℤ))
     (ℓ' := ℓ + -((2 * n + 1 : ℕ) : ℤ)) (by ring) (ε := -I * (-1 : ℂ) ^ n)]
   · rw [show (((-((2 * n + 1 : ℕ) : ℤ) : ℤ) : ℂ) + 2 * ℓ) = 2 * ((ℓ - n - 1 : ℤ) : ℂ) + 1 by
-      push_cast; ring, p1c_exp_half_odd, p2m_negOnePow_sub, p2m_negOnePow_sub]
-    have := p1c_neg_one_pow_mul_self n
+      push_cast; ring, exp_neg_I_mul_two_mul_add_one_mul_pi_div_two, neg_one_zpow_sub, neg_one_zpow_sub]
+    have := neg_one_pow_mul_self_eq_one n
     simp only [zpow_natCast, zpow_one]
     linear_combination (-1 : ℂ) ^ ℓ *
       mathieuMeCoeff (((2 * n + 1 : ℕ) : ℤ) : ℂ) (Q : ℂ) (ℓ + -((2 * n + 1 : ℕ) : ℤ)) *
       (this - (-1 : ℂ) ^ n * (-1 : ℂ) ^ n * I_sq)
   · intro x
-    rw [p1c_mathieuMe_natCast, p1c_mathieuMe_negNatCast hN, mathieuSe_odd_neg_q,
+    rw [mathieuMe_intCast_natCast, mathieuMe_intCast_neg_natCast hN, mathieuSe_odd_neg_q,
       show (π / 2 : ℂ) - x = -((x : ℂ) - π / 2) by ring, mathieuCe_neg]
     ring
   · intro y
-    rw [p1c_mathieuMe_natCast, p1c_mathieuMe_natCast, mathieuCe_odd_add_pi,
+    rw [mathieuMe_intCast_natCast, mathieuMe_intCast_natCast, mathieuCe_odd_add_pi,
       show (((2 * n + 1 : ℕ) : ℤ)) = 2 * (n : ℤ) + 1 by push_cast; ring,
-      zpow_add₀ (by norm_num), p1c_neg_one_zpow_two_mul]
+      zpow_add₀ (by norm_num), neg_one_zpow_two_mul_eq_one]
     ring
 
 /-- The shift `z ↦ z ± πi/2` of a cross-product term, any order. -/
-lemma p1c_modMathieuTerm_add_pi_div_two_gen (j : ℕ) (ν : ℂ) {h : ℝ} (hh : 0 < h) {σ : ℂ}
+private lemma modMathieuTerm_add_pi_div_two_mul_I (j : ℕ) (ν : ℂ) {h : ℝ} (hh : 0 < h) {σ : ℂ}
     (hσ : σ = 1 ∨ σ = -1) (z : ℂ) (n ℓ : ℤ) :
     modMathieuTerm j ν (z + σ * π * I / 2) h n ℓ =
       (-1 : ℂ) ^ (ℓ - n) * ((-1 : ℂ) ^ ℓ * mathieuMeCoeff ν ((h : ℂ) ^ 2) ℓ *
         besselJExp ((ℓ - n : ℤ) : ℂ) (σ * I * h) (-z) *
           mathieuCylExp j (ν + n + ℓ) (σ * I * h) z) := by
   have hσ' : -σ = 1 ∨ -σ = -1 := by rcases hσ with rfl | rfl <;> simp
-  have hJ := p1c_besselJExp_add_pi_div_two ((ℓ - n : ℤ) : ℂ) hh hσ' (-z)
+  have hJ := besselJExp_add_pi_I_div_two ((ℓ - n : ℤ) : ℂ) hh hσ' (-z)
   rw [show -z + -σ * π * I / 2 = -(z + σ * π * I / 2) by ring,
-    show -σ * I * (h : ℂ) = -(σ * I * h) by ring, p1c_besselJExp_neg_h_intCast] at hJ
+    show -σ * I * (h : ℂ) = -(σ * I * h) by ring, besselJExp_intCast_neg_parameter] at hJ
   simp only [modMathieuTerm]
-  rw [hJ, p1c_mathieuCylExp_add_pi_div_two j _ hh hσ z]
+  rw [hJ, mathieuCylExp_add_pi_I_div_two j _ hh hσ z]
   ring
 
 /-- **General shift by `±πi/2`**: if the coefficients of order `ν₁ = ν₀ + 2d` at `(±ih)²` are
 `κ (-1)^ℓ c^{ν₀}_{2(ℓ+d)}(h²)`, then `M^{(j)}_{ν₀}(z ± πi/2, h) = (-1)^d M^{(j)}_{ν₁}(z, ±ih)`. -/
-lemma p1c_modMathieuM_add_pi_div_two_gen (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {ν₀ ν₁ : ℂ}
+private lemma modMathieuM_add_pi_div_two_mul_I_of_coeff (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {ν₀ ν₁ : ℂ}
     (d : ℤ) (hν : ν₁ = ν₀ + 2 * d) {h : ℝ} (hh : 0 < h) {σ : ℂ} (hσ : σ = 1 ∨ σ = -1)
     {κ : ℂ} (hκ : κ ≠ 0) (hadm : ModMathieuAdmissible ν₁ (σ * I * h))
     (hc : ∀ ℓ : ℤ, mathieuMeCoeff ν₁ ((σ * I * h) ^ 2) ℓ =
@@ -764,16 +790,16 @@ lemma p1c_modMathieuM_add_pi_div_two_gen (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j 
         (modMathieuTerm j ν₁ z (σ * I * h) k ∘ (Equiv.addRight (-d))) ℓ) =
         modMathieuTerm j ν₀ (z + σ * π * I / 2) h n0 := by
       funext ℓ
-      rw [p1c_modMathieuTerm_add_pi_div_two_gen j ν₀ hh hσ]
+      rw [modMathieuTerm_add_pi_div_two_mul_I j ν₀ hh hσ]
       simp only [Function.comp_apply, Equiv.coe_addRight, modMathieuTerm, hc]
       rw [show ℓ + -d + d = ℓ by ring, show ℓ + -d - k = ℓ - n0 by ring,
         show ν₁ + ((k : ℤ) : ℂ) + ((ℓ + -d : ℤ) : ℂ) = ν₀ + n0 + ℓ by
           rw [hν]; simp only [k]; push_cast; ring]
       have h1 : (-1 : ℂ) ^ (ℓ - n0) = (-1 : ℂ) ^ ℓ * (-1 : ℂ) ^ n0 := by
         rw [zpow_sub₀ (by norm_num), div_eq_mul_inv,
-          inv_eq_of_mul_eq_one_right (m28b_negOnePow_mul_self n0)]
-      have h2 := m28b_negOnePow_mul_self (ℓ + -d)
-      have h3 := m28b_negOnePow_mul_self ℓ
+          inv_eq_of_mul_eq_one_right (neg_one_zpow_mul_self_eq_one n0)]
+      have h2 := neg_one_zpow_mul_self_eq_one (ℓ + -d)
+      have h3 := neg_one_zpow_mul_self_eq_one ℓ
       have hκ' : κ⁻¹ * κ = 1 := inv_mul_cancel₀ hκ
       rw [h1]
       linear_combination (-1 : ℂ) ^ n0 * mathieuMeCoeff ν₀ ((h : ℂ) ^ 2) ℓ *
@@ -787,7 +813,7 @@ lemma p1c_modMathieuM_add_pi_div_two_gen (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j 
     have hk : (-1 : ℂ) ^ k = (-1 : ℂ) ^ n0 * (-1 : ℂ) ^ d := by
       simp only [k]
       rw [zpow_sub₀ (by norm_num), div_eq_mul_inv,
-        inv_eq_of_mul_eq_one_right (m28b_negOnePow_mul_self d)]
+        inv_eq_of_mul_eq_one_right (neg_one_zpow_mul_self_eq_one d)]
     have hκ' : κ⁻¹ * κ = 1 := inv_mul_cancel₀ hκ
     have h0' : (mathieuMeCoeff ν₀ ((h : ℂ) ^ 2) n0)⁻¹ * mathieuMeCoeff ν₀ ((h : ℂ) ^ 2) n0 = 1 :=
       inv_mul_cancel₀ h0
@@ -795,22 +821,22 @@ lemma p1c_modMathieuM_add_pi_div_two_gen (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j 
     linear_combination (-1 : ℂ) ^ d * modMathieuM j ν₁ z (σ * I * h) *
       ((-1 : ℂ) ^ n0 * (-1 : ℂ) ^ n0 * (mathieuMeCoeff ν₀ ((h : ℂ) ^ 2) n0)⁻¹ *
         mathieuMeCoeff ν₀ ((h : ℂ) ^ 2) n0 * hκ' +
-        (-1 : ℂ) ^ n0 * (-1 : ℂ) ^ n0 * h0' + m28b_negOnePow_mul_self n0)
+        (-1 : ℂ) ^ n0 * (-1 : ℂ) ^ n0 * h0' + neg_one_zpow_mul_self_eq_one n0)
 
 
 /-- `(±ih)² = -h²`. -/
-lemma p1c_sq_sigma {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) (h : ℝ) :
+private lemma sq_sign_mul_I_mul_ofReal {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) (h : ℝ) :
     (σ * I * (h : ℂ)) ^ 2 = ((-(h ^ 2) : ℝ) : ℂ) := by
   push_cast
   rcases hσ with rfl | rfl <;> ring_nf <;> rw [I_sq] <;> ring
 
 /-- Integer orders are admissible at `±ih` for real `h`. -/
-lemma p1c_admissible_int (k : ℤ) {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) (h : ℝ) :
+private lemma modMathieuAdmissible_intCast_sign_mul_I (k : ℤ) {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) (h : ℝ) :
     ModMathieuAdmissible (k : ℂ) (σ * I * h) :=
-  Or.inr ⟨⟨k, rfl⟩, by rw [p1c_sq_sigma hσ]; exact ofReal_im _⟩
+  Or.inr ⟨⟨k, rfl⟩, by rw [sq_sign_mul_I_mul_ofReal hσ]; exact ofReal_im _⟩
 
 /-- `(h : ℂ)² = ((h² : ℝ) : ℂ)`. -/
-lemma p1c_hsq (h : ℝ) : (h : ℂ) ^ 2 = ((h ^ 2 : ℝ) : ℂ) := by push_cast; ring
+lemma ofReal_sq_eq_ofReal_sq (h : ℝ) : (h : ℂ) ^ 2 = ((h ^ 2 : ℝ) : ℂ) := by push_cast; ring
 
 /-- **Shift by `±πi/2`** for integer order (DLMF 28.20.23), `n = 0, 1, …`, `h > 0`, `σ = ±1`:
 `Mc^{(j)}_{2n}(z ± πi/2, h) = Mc^{(j)}_{2n}(z, ±ih)` and
@@ -822,20 +848,20 @@ theorem radialMathieu_add_pi_div_two_even (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j
       radialMathieuMs j (2 * n + 1) (z + σ * π * I / 2) h =
         radialMathieuMc j (2 * n + 1) z (σ * I * h) := by
   constructor
-  · have key := p1c_modMathieuM_add_pi_div_two_gen j hj₁ hj₄ (ν₀ := (((2 * n : ℕ) : ℤ) : ℂ))
+  · have key := modMathieuM_add_pi_div_two_mul_I_of_coeff j hj₁ hj₄ (ν₀ := (((2 * n : ℕ) : ℤ) : ℂ))
       (ν₁ := (((2 * n : ℕ) : ℤ) : ℂ)) 0 (by simp) hh hσ (κ := 1) one_ne_zero
-      (p1c_admissible_int _ hσ h) (fun ℓ => by
-        rw [p1c_sq_sigma hσ, p1c_hsq, p1c_coeff_even_neg, add_zero, one_mul]) z
+      (modMathieuAdmissible_intCast_sign_mul_I _ hσ h) (fun ℓ => by
+        rw [sq_sign_mul_I_mul_ofReal hσ, ofReal_sq_eq_ofReal_sq, mathieuMeCoeff_even_neg_q, add_zero, one_mul]) z
     rw [Int.cast_natCast, zpow_zero, one_mul] at key
     exact key
-  · have key := p1c_modMathieuM_add_pi_div_two_gen j hj₁ hj₄
+  · have key := modMathieuM_add_pi_div_two_mul_I_of_coeff j hj₁ hj₄
       (ν₀ := ((-((2 * n + 1 : ℕ) : ℤ) : ℤ) : ℂ)) (ν₁ := (((2 * n + 1 : ℕ) : ℤ) : ℂ))
       ((2 * n + 1 : ℕ) : ℤ) (by push_cast; ring) hh hσ (κ := -1) (by norm_num)
-      (p1c_admissible_int _ hσ h) (fun ℓ => by
-        rw [p1c_sq_sigma hσ, p1c_hsq, p1c_coeff_odd_neg]) z
+      (modMathieuAdmissible_intCast_sign_mul_I _ hσ h) (fun ℓ => by
+        rw [sq_sign_mul_I_mul_ofReal hσ, ofReal_sq_eq_ofReal_sq, mathieuMeCoeff_odd_neg_q]) z
     simp only [Int.cast_neg, Int.cast_natCast] at key
     rw [radialMathieuMs, radialMathieuMc, key, zpow_natCast, ← mul_assoc,
-      p1c_neg_one_pow_mul_self, one_mul]
+      neg_one_pow_mul_self_eq_one, one_mul]
 
 /-- **Shift by `±πi/2`** for integer order (DLMF 28.20.24), `n = 0, 1, …`, `h > 0`, `σ = ±1`:
 `Mc^{(j)}_{2n+1}(z ± πi/2, h) = Ms^{(j)}_{2n+1}(z, ±ih)` and
@@ -848,24 +874,24 @@ theorem radialMathieu_add_pi_div_two_odd (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j 
       radialMathieuMs j (2 * n + 2) (z + σ * π * I / 2) h =
         radialMathieuMs j (2 * n + 2) z (σ * I * h) := by
   constructor
-  · have key := p1c_modMathieuM_add_pi_div_two_gen j hj₁ hj₄
+  · have key := modMathieuM_add_pi_div_two_mul_I_of_coeff j hj₁ hj₄
       (ν₀ := (((2 * n + 1 : ℕ) : ℤ) : ℂ)) (ν₁ := ((-((2 * n + 1 : ℕ) : ℤ) : ℤ) : ℂ))
       (-((2 * n + 1 : ℕ) : ℤ)) (by push_cast; ring) hh hσ (κ := 1) one_ne_zero
-      (p1c_admissible_int _ hσ h) (fun ℓ => by
-        rw [p1c_sq_sigma hσ, p1c_hsq, p1c_coeff_negOdd_neg]) z
+      (modMathieuAdmissible_intCast_sign_mul_I _ hσ h) (fun ℓ => by
+        rw [sq_sign_mul_I_mul_ofReal hσ, ofReal_sq_eq_ofReal_sq, mathieuMeCoeff_negOdd_neg_q]) z
     simp only [Int.cast_neg, Int.cast_natCast] at key
     rw [radialMathieuMs, radialMathieuMc, key, zpow_neg, zpow_natCast,
-      inv_eq_of_mul_eq_one_right (p1c_neg_one_pow_mul_self _)]
-  · have key := p1c_modMathieuM_add_pi_div_two_gen j hj₁ hj₄
+      inv_eq_of_mul_eq_one_right (neg_one_pow_mul_self_eq_one _)]
+  · have key := modMathieuM_add_pi_div_two_mul_I_of_coeff j hj₁ hj₄
       (ν₀ := ((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ)) (ν₁ := ((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ))
       0 (by simp) hh hσ (κ := 1) one_ne_zero
-      (p1c_admissible_int _ hσ h) (fun ℓ => by
-        rw [p1c_sq_sigma hσ, p1c_hsq, p1c_coeff_negEven_neg, add_zero, one_mul]) z
+      (modMathieuAdmissible_intCast_sign_mul_I _ hσ h) (fun ℓ => by
+        rw [sq_sign_mul_I_mul_ofReal hσ, ofReal_sq_eq_ofReal_sq, mathieuMeCoeff_negEven_neg_q, add_zero, one_mul]) z
     simp only [Int.cast_neg, Int.cast_natCast, zpow_zero, one_mul] at key
     rw [radialMathieuMs, radialMathieuMs, key]
 
 /-- Shifting `z` by `c` with `e^{2c} = 1` multiplies `J_μ(h e^z)` (continued) by `e^{μc}`. -/
-theorem m28c_besselJExp_add (μ h z c : ℂ) (hc : Complex.exp (2 * c) = 1) :
+theorem besselJExp_add_of_exp_two_mul_eq_one (μ h z c : ℂ) (hc : Complex.exp (2 * c) = 1) :
     besselJExp μ h (z + c) = Complex.exp (μ * c) * besselJExp μ h z := by
   have e : (h * Complex.exp (z + c)) ^ 2 = (h * Complex.exp z) ^ 2 := by
     rw [Complex.exp_add, mul_pow, mul_pow, mul_pow, ← Complex.exp_nat_mul c 2]
@@ -873,7 +899,7 @@ theorem m28c_besselJExp_add (μ h z c : ℂ) (hc : Complex.exp (2 * c) = 1) :
   rw [besselJExp, besselJExp, e, mul_add, Complex.exp_add]; ring
 
 /-- `e^{2sπi} = 1` for `s ∈ ℤ`. -/
-lemma m28c_exp_two_int_pi_I (s : ℤ) : Complex.exp (2 * (s * π * I)) = 1 := by
+private lemma exp_two_mul_intCast_mul_pi_mul_I (s : ℤ) : Complex.exp (2 * (s * π * I)) = 1 := by
   rw [Complex.exp_eq_one_iff]; exact ⟨s, by ring⟩
 
 /-- **Shift by `sπi`** of `M^{(1)}_ν` (DLMF 28.20.25, first line), every `ν`, `h`, `z` and
@@ -885,10 +911,10 @@ theorem modMathieuM_one_add_int_mul_pi_I (ν z h : ℂ) (s : ℤ) :
   have key : ∀ ℓ : ℤ, modMathieuTerm 1 ν (z + s * π * I) h n ℓ =
       Complex.exp (I * s * π * ν) * modMathieuTerm 1 ν z h n ℓ := by
     intro ℓ
-    have h1 := m28c_besselJExp_add ((ℓ - n : ℤ) : ℂ) h (-z) (-(s * π * I))
+    have h1 := besselJExp_add_of_exp_two_mul_eq_one ((ℓ - n : ℤ) : ℂ) h (-z) (-(s * π * I))
       (by rw [show 2 * -((s : ℂ) * π * I) = 2 * (((-s : ℤ) : ℂ) * π * I) by push_cast; ring]
-          exact m28c_exp_two_int_pi_I _)
-    have h2 := m28c_besselJExp_add (ν + n + ℓ) h z (s * π * I) (m28c_exp_two_int_pi_I s)
+          exact exp_two_mul_intCast_mul_pi_mul_I _)
+    have h2 := besselJExp_add_of_exp_two_mul_eq_one (ν + n + ℓ) h z (s * π * I) (exp_two_mul_intCast_mul_pi_mul_I s)
     simp only [modMathieuTerm, mathieuCylExp]
     rw [show -(z + s * π * I) = -z + -(s * π * I) by ring, h1, h2]
     have e : Complex.exp (((ℓ - n : ℤ) : ℂ) * -(s * π * I)) *
@@ -901,24 +927,24 @@ theorem modMathieuM_one_add_int_mul_pi_I (ν z h : ℂ) (s : ℤ) :
   rw [modMathieuM, modMathieuM, tsum_congr key, tsum_mul_left]; ring
 
 /-- Term-wise form of 28.20.25 for `M^{(2)}_ν`. -/
-lemma p1c_modMathieuTerm_two_add_int_mul_pi_I {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν)
+private lemma modMathieuTerm_two_add_intCast_mul_pi_mul_I {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν)
     (z h : ℂ) (s n ℓ : ℤ) :
     modMathieuTerm 2 ν (z + s * π * I) h n ℓ =
       Complex.exp (-(I * s * π * ν)) * modMathieuTerm 2 ν z h n ℓ +
         2 * I * Complex.cot (π * ν) * Complex.sin (s * π * ν) * modMathieuTerm 1 ν z h n ℓ := by
-  have hk := p1c_not_int_add hν (n + ℓ)
+  have hk := not_exists_ofReal_add_intCast_eq_intCast hν (n + ℓ)
   have hk' : ¬ ∃ j : ℤ, (ν : ℂ) + n + ℓ = j := by
     rw [show (ν : ℂ) + n + ℓ = ν + ((n + ℓ : ℤ) : ℂ) by push_cast; ring]; exact hk
-  have hs := p1c_sin_ne_zero hν (n + ℓ)
-  have hs0 := p1c_sin_ne_zero hν 0
+  have hs := sin_add_intCast_mul_pi_ne_zero hν (n + ℓ)
+  have hs0 := sin_add_intCast_mul_pi_ne_zero hν 0
   simp only [Int.cast_zero, add_zero] at hs0
-  have h1 := m28c_besselJExp_add ((ℓ - n : ℤ) : ℂ) h (-z) (-(s * π * I))
+  have h1 := besselJExp_add_of_exp_two_mul_eq_one ((ℓ - n : ℤ) : ℂ) h (-z) (-(s * π * I))
     (by rw [show 2 * -((s : ℂ) * π * I) = 2 * (((-s : ℤ) : ℂ) * π * I) by push_cast; ring]
-        exact m28c_exp_two_int_pi_I _)
-  have h2 := m28c_besselJExp_add (ν + n + ℓ) h z (s * π * I) (m28c_exp_two_int_pi_I s)
-  have h3 := m28c_besselJExp_add (-(ν + n + ℓ)) h z (s * π * I) (m28c_exp_two_int_pi_I s)
+        exact exp_two_mul_intCast_mul_pi_mul_I _)
+  have h2 := besselJExp_add_of_exp_two_mul_eq_one (ν + n + ℓ) h z (s * π * I) (exp_two_mul_intCast_mul_pi_mul_I s)
+  have h3 := besselJExp_add_of_exp_two_mul_eq_one (-(ν + n + ℓ)) h z (s * π * I) (exp_two_mul_intCast_mul_pi_mul_I s)
   simp only [modMathieuTerm, mathieuCylExp]
-  rw [p1c_besselYExp_of_not_int hk', p1c_besselYExp_of_not_int hk',
+  rw [besselYExp_of_not_exists_int hk', besselYExp_of_not_exists_int hk',
     show -(z + s * π * I) = -z + -(s * π * I) by ring, h1, h2, h3]
   have e1 : Complex.exp (((ℓ - n : ℤ) : ℂ) * -(s * π * I)) *
       Complex.exp ((ν + n + ℓ) * (s * π * I)) = Complex.exp (I * s * π * ν) := by
@@ -968,13 +994,13 @@ theorem modMathieuM_two_add_int_mul_pi_I {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ
     (hh : 0 < h) (z : ℂ) (s : ℤ) :
     modMathieuM 2 ν (z + s * π * I) h = Complex.exp (-(I * s * π * ν)) * modMathieuM 2 ν z h +
       2 * I * Complex.cot (π * ν) * Complex.sin (s * π * ν) * modMathieuM 1 ν z h := by
-  have hadm := p1c_admissible_real hν h
+  have hadm := modMathieuAdmissible_ofReal_of_not_int hν h
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
   set n := modMathieuIndex ν h
   have h1 := summable_modMathieuTerm 1 le_rfl (by norm_num) hadm hh' n z
   have h2 := summable_modMathieuTerm 2 (by norm_num) (by norm_num) hadm hh' n z
   simp only [modMathieuM]
-  rw [tsum_congr (p1c_modMathieuTerm_two_add_int_mul_pi_I hν z h s n),
+  rw [tsum_congr (modMathieuTerm_two_add_intCast_mul_pi_mul_I hν z h s n),
     (h2.mul_left _).tsum_add (h1.mul_left _), tsum_mul_left, tsum_mul_left]
   ring
 
@@ -988,9 +1014,9 @@ theorem modMathieuM_three_add_int_mul_pi_I {ν : ℝ} (hν : ∀ m : ℤ, (m : �
       -(Complex.sin ((s - 1) * π * ν) / Complex.sin (π * ν)) * modMathieuM 3 ν z h -
         Complex.exp (-(I * π * ν)) * (Complex.sin (s * π * ν) / Complex.sin (π * ν)) *
           modMathieuM 4 ν z h := by
-  have hadm := p1c_admissible_real hν h
+  have hadm := modMathieuAdmissible_ofReal_of_not_int hν h
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
-  have hs0 := p1c_sin_ne_zero hν 0
+  have hs0 := sin_add_intCast_mul_pi_ne_zero hν 0
   simp only [Int.cast_zero, add_zero] at hs0
   have hs1 : Complex.sin (π * ν) ≠ 0 := by rwa [mul_comm]
   rw [modMathieuM_three hadm hh', modMathieuM_three hadm hh', modMathieuM_four hadm hh',
@@ -998,7 +1024,7 @@ theorem modMathieuM_three_add_int_mul_pi_I {ν : ℝ} (hν : ∀ m : ℤ, (m : �
     Complex.cot_eq_cos_div_sin, show ((s : ℂ) - 1) * π * ν = s * π * ν - π * ν by ring,
     Complex.sin_sub, show -(I * s * π * ν) = I * (-(s * π * ν)) by ring,
     show I * s * π * ν = I * (s * π * ν) by ring, show -(I * π * ν) = I * (-(π * ν)) by ring,
-    p1c_exp_I_mul, p1c_exp_I_mul, p1c_exp_I_mul]
+    exp_I_mul_eq_cos_add_I_mul_sin, exp_I_mul_eq_cos_add_I_mul_sin, exp_I_mul_eq_cos_add_I_mul_sin]
   simp only [Complex.cos_neg, Complex.sin_neg]
   field_simp
   ring_nf
@@ -1015,9 +1041,9 @@ theorem modMathieuM_four_add_int_mul_pi_I {ν : ℝ} (hν : ∀ m : ℤ, (m : �
       Complex.exp (I * π * ν) * (Complex.sin (s * π * ν) / Complex.sin (π * ν)) *
           modMathieuM 3 ν z h +
         Complex.sin ((s + 1) * π * ν) / Complex.sin (π * ν) * modMathieuM 4 ν z h := by
-  have hadm := p1c_admissible_real hν h
+  have hadm := modMathieuAdmissible_ofReal_of_not_int hν h
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
-  have hs0 := p1c_sin_ne_zero hν 0
+  have hs0 := sin_add_intCast_mul_pi_ne_zero hν 0
   simp only [Int.cast_zero, add_zero] at hs0
   have hs1 : Complex.sin (π * ν) ≠ 0 := by rwa [mul_comm]
   rw [modMathieuM_four hadm hh', modMathieuM_three hadm hh', modMathieuM_four hadm hh',
@@ -1025,7 +1051,7 @@ theorem modMathieuM_four_add_int_mul_pi_I {ν : ℝ} (hν : ∀ m : ℤ, (m : �
     Complex.cot_eq_cos_div_sin, show ((s : ℂ) + 1) * π * ν = s * π * ν + π * ν by ring,
     Complex.sin_add, show -(I * s * π * ν) = I * (-(s * π * ν)) by ring,
     show I * s * π * ν = I * (s * π * ν) by ring, show I * π * ν = I * (π * ν) by ring,
-    p1c_exp_I_mul, p1c_exp_I_mul, p1c_exp_I_mul]
+    exp_I_mul_eq_cos_add_I_mul_sin, exp_I_mul_eq_cos_add_I_mul_sin, exp_I_mul_eq_cos_add_I_mul_sin]
   simp only [Complex.cos_neg, Complex.sin_neg]
   field_simp
   ring_nf

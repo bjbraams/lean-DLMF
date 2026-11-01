@@ -14,11 +14,21 @@ public import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
 The Poisson kernel `P(r, θ)` (1.15.12), the Fejér kernel `K_n(θ)` (1.15.15), the Abel means
 `A(r, θ)` (1.15.18) and the Cesàro means `σ_n(θ)` (1.15.21) of the Fourier series of a function
 on `[0, 2π]` with coefficients `F(n) = fourierCoeffOn Real.two_pi_pos f n` (1.15.19).
+Throughout, `0 < δ < π` as in DLMF.
 
-Proved: the uniform decay of the kernels away from `θ ∈ 2πℤ` (1.15.14, 1.15.17). Admitted: the
-series and integral identities of the kernels, the integral representations 1.15.20 and 1.15.23,
-the convergence theorem 1.15.24 and the analytic extension 1.15.25–1.15.28. Throughout,
-`0 < δ < π` as in DLMF.
+## Main results
+
+* `hasSum_abelPoissonKernel`, `integral_abelPoissonKernel`,
+  `tendstoUniformlyOn_abelPoissonKernel`: the Poisson kernel (DLMF 1.15.12–1.15.14).
+* `integral_fejerKernel`, `tendstoUniformlyOn_fejerKernel`: the Fejér kernel
+  (DLMF 1.15.16–1.15.17).
+* `abelMean_eq_integral`, `harmonicOnNhd_abelMean`, `fourierCesaroMean_eq_integral`: integral
+  representations of the means (DLMF 1.15.20, 1.15.23).
+* `tendsto_abelMean`, `tendsto_fourierCesaroMean`, `tendstoUniformly_abelMean`,
+  `tendstoUniformly_fourierCesaroMean`: convergence of the means, including Fejér's theorem
+  (DLMF 1.15.24).
+* `differentiableOn_fourierAnalyticExtension`, `re_fourierAnalyticExtension`,
+  `im_fourierAnalyticExtension`: the analytic extension (DLMF 1.15.25–1.15.28).
 -/
 
 @[expose] public noncomputable section
@@ -41,8 +51,8 @@ theorem integral_abelPoissonKernel {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) :
   sorry
 
 /-- The denominator of the Poisson kernel is bounded below away from `θ ∈ 2πℤ`. -/
-private lemma g1e_poisson_denom_ge {r θ δ : ℝ} (hr : 0 ≤ r) (hθ : θ ∈ Icc δ (2 * Real.pi - δ))
-    (hδ0 : 0 < δ) (_hδ : δ < Real.pi) :
+private lemma poissonKernel_denom_ge {r θ δ : ℝ} (hr : 0 ≤ r) (hθ : θ ∈ Icc δ (2 * Real.pi - δ))
+    (hδ0 : 0 < δ) :
     2 * r * (1 - Real.cos δ) ≤ 1 - 2 * r * Real.cos θ + r ^ 2 := by
   have hcos : Real.cos θ ≤ Real.cos δ := by
     rcases le_total θ Real.pi with h | h
@@ -76,7 +86,7 @@ theorem tendstoUniformlyOn_abelPoissonKernel {δ : ℝ} (hδ0 : 0 < δ) (hδ : �
     exact ⟨hr1.le, hr2⟩
   filter_upwards [hev, self_mem_nhdsWithin] with r ⟨hr, hrε⟩ hr1 θ hθ
   have hr1 : r < 1 := hr1
-  have hden := g1e_poisson_denom_ge (by linarith : (0 : ℝ) ≤ r) hθ hδ0 hδ
+  have hden := poissonKernel_denom_ge (by linarith : (0 : ℝ) ≤ r) hθ hδ0
   have hpos : 0 < 2 * r * (1 - Real.cos δ) := by positivity
   have hnum : 0 ≤ 1 - r ^ 2 := by nlinarith
   rw [dist_zero_left, Real.norm_eq_abs, abelPoissonKernel,

@@ -17,10 +17,10 @@ public import DLMF.CoalescingSaddles.Series
 public import DLMF.CoalescingSaddles.IntegralIdentities
 public import DLMF.CoalescingSaddles.Asymptotics
 
-/-! # Integrals with coalescing saddles: DLMF Chapter 36
+/-! # Integrals with coalescing saddles (DLMF Chapter 36)
 
-Potentials of the cuspoid and umbilic catastrophes, the canonical integrals `Ψ_K`, `Ψ^(E)`,
-`Ψ^(H)` as absolutely convergent integrals along rotated contours, bifurcation and Stokes sets,
-scaling relations, zeros, series, integral identities, differential equations and leading-order
-asymptotics. Ledger: `DLMF36Acquisition.md`.
+This umbrella imports the coalescing-saddles area: potentials of the cuspoid and umbilic
+catastrophes, the canonical integrals `Ψ_K`, `Ψ^(E)`, `Ψ^(H)` as absolutely convergent integrals
+along rotated contours, bifurcation and Stokes sets, scaling relations, zeros, series, integral
+identities, differential equations and leading-order asymptotics.
 -/

@@ -24,18 +24,24 @@ for integrals (1.7.4–1.7.6), the inequalities between means (1.7.7) and Jensen
 file states the remaining parts: the equality cases, the converse statements, the reversed
 Minkowski inequality for `0 < p < 1`, the power-mean inequalities 1.7.8–1.7.9 and DLMF's form
 of Jensen's inequality on an open interval, together with 1.7.11.
-The finite Hölder converse uses the normalized dual vector and Mathlib’s conjugate-exponent
-and real-power identities, including the zero-vector case. The finite Hölder equality case
-uses Mathlib’s equality characterization in Young’s inequality after normalizing each vector.
-The integral analogue uses the same normalization and Mathlib’s almost-everywhere equality
-criterion for ordered integrable functions.
-The finite Minkowski equality case uses strict convexity or strict concavity of real powers
-according to the exponent, with zero vectors handled separately. The integral equality proof
-applies the corresponding almost-everywhere Jensen criterion; measurability follows from
-integrability of the positive powers.
-Power-mean order and equality
-use strict Jensen and lean-codes' negative-power convexity theorem from
-`ToMathlib.Analysis.Convex.NegativePower`.
+
+## Main results
+
+* `sq_sum_mul_eq_iff`, `inner_eq_Lp_mul_Lq_iff`, `Lp_add_eq_iff`: equality cases of the
+  Cauchy–Schwarz, Hölder and Minkowski inequalities for sums (DLMF 1.7.1–1.7.3).
+* `sum_sq_le_of_forall_sq_sum_mul_le`, `sum_rpow_le_of_forall_inner_le`: the converse
+  statements of §1.7(i).
+* `Lp_add_ge_of_lt_one`, `integral_add_rpow_ge_of_lt_one`: reversed Minkowski inequalities for
+  `0 < p < 1` (DLMF 1.7.3, 1.7.6).
+* `sq_integral_mul_le`, `sq_integral_mul_eq_iff`, `integral_mul_eq_Lp_mul_Lq_iff`,
+  `integral_add_rpow_le`, `integral_add_rpow_eq_iff`: the integral inequalities and their
+  equality cases (DLMF 1.7.4–1.7.6).
+* `harmMean_le_geomMean_le_arithMean`, `geomMean_eq_arithMean_iff`: `H ≤ G ≤ A` (DLMF 1.7.7).
+* `min_le_powerMean_le_max`, `powerMean_le_powerMean`: DLMF 1.7.8, 1.7.9.
+* `convexOn_Ioo_map_integral_le`: Jensen's inequality (DLMF 1.7.10).
+* `exp_integral_log_le_integral`, `exp_integral_log_lt_integral`: DLMF 1.7.11, corrected.
+
+## Implementation notes
 
 **Equality cases.** For sums DLMF writes "equality iff `aⱼ = c bⱼ`" (1.7.1, 1.7.3) and
 "`aⱼᵖ = c bⱼ^q`" (1.7.2); this misses `b = 0`, `a ≠ 0`, where equality holds. We use the
@@ -47,6 +53,11 @@ almost everywhere constant.
 
 The means of §1.2(iv) are written out explicitly: `A = (∑ aⱼ)/n`, `G = (∏ aⱼ)^{1/n}`,
 `1/H = (∑ 1/aⱼ)/n`, and `M(r) = (∑ pⱼ aⱼ^r)^{1/r}` (weights `pⱼ > 0`, `∑ pⱼ = 1`).
+
+The Hölder equality cases use Mathlib's equality characterization in Young's inequality after
+normalizing each vector; the Minkowski equality cases use strict convexity or concavity of real
+powers. The power-mean order uses strict Jensen and the negative-power convexity theorem of
+lean-codes (`ToMathlib.Analysis.Convex.NegativePower`).
 -/
 
 @[expose] public noncomputable section
@@ -954,7 +965,7 @@ theorem harmMean_le_geomMean_le_arithMean {n : ℕ} (hn : 0 < n) (a : Fin n → 
   exact ⟨by simpa [one_div] using h2, by simpa [one_div] using h1⟩
 
 /-- Helper: `G = A` iff all entries agree. -/
-lemma g1b_GA {n : ℕ} (hn : 0 < n) (a : Fin n → ℝ) (ha : ∀ j, 0 < a j) :
+private lemma geom_mean_eq_arith_mean_iff {n : ℕ} (hn : 0 < n) (a : Fin n → ℝ) (ha : ∀ j, 0 < a j) :
     (∏ j, a j) ^ (1 / (n : ℝ)) = (∑ j, a j) / n ↔ ∀ i j, a i = a j := by
   have hn' : (0 : ℝ) < n := by exact_mod_cast hn
   have h := Real.geom_mean_eq_arith_mean_weighted_iff_of_pos (s := Finset.univ)
@@ -964,10 +975,10 @@ lemma g1b_GA {n : ℕ} (hn : 0 < n) (a : Fin n → ℝ) (ha : ∀ j, 0 < a j) :
   simp
 
 /-- Helper: `H = G` iff all entries agree. -/
-lemma g1b_HG {n : ℕ} (hn : 0 < n) (a : Fin n → ℝ) (ha : ∀ j, 0 < a j) :
+private lemma harm_mean_eq_geom_mean_iff {n : ℕ} (hn : 0 < n) (a : Fin n → ℝ) (ha : ∀ j, 0 < a j) :
     (n : ℝ) / ∑ j, 1 / a j = (∏ j, a j) ^ (1 / (n : ℝ)) ↔ ∀ i j, a i = a j := by
   have hn' : (0 : ℝ) < n := by exact_mod_cast hn
-  have h := g1b_GA hn (fun j => 1 / a j) (fun j => by have := ha j; positivity)
+  have h := geom_mean_eq_arith_mean_iff hn (fun j => 1 / a j) (fun j => by have := ha j; positivity)
   have hP : 0 < ∏ j, a j := Finset.prod_pos fun j _ => ha j
   have hS : 0 < ∑ j, 1 / a j :=
     Finset.sum_pos (fun j _ => by have := ha j; positivity) ⟨⟨0, hn⟩, Finset.mem_univ _⟩
@@ -990,7 +1001,7 @@ lemma g1b_HG {n : ℕ} (hn : 0 < n) (a : Fin n → ℝ) (ha : ∀ j, 0 < a j) :
 theorem geomMean_eq_arithMean_iff {n : ℕ} (hn : 0 < n) (a : Fin n → ℝ) (ha : ∀ j, 0 < a j) :
     ((∏ j, a j) ^ (1 / (n : ℝ)) = (∑ j, a j) / n ↔ ∀ i j, a i = a j) ∧
       ((n : ℝ) / ∑ j, 1 / a j = (∏ j, a j) ^ (1 / (n : ℝ)) ↔ ∀ i j, a i = a j) :=
-  ⟨g1b_GA hn a ha, g1b_HG hn a ha⟩
+  ⟨geom_mean_eq_arith_mean_iff hn a ha, harm_mean_eq_geom_mean_iff hn a ha⟩
 
 /-- A positive weighted sum attains a common bound only when every term equals that bound. -/
 private lemma weighted_sum_bounds_and_eq_of_pos {n : ℕ} (w b : Fin n → ℝ) (hw : ∀ j, 0 < w j)

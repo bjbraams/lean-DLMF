@@ -11,10 +11,21 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 
 /-!
-# Coefficients of the Whittaker–Buchholz expansion (DLMF §13.24)
+# Coefficients of the Whittaker–Buchholz expansion
 
-The normalized hyperbolic generating function defines the Taylor coefficients in Whittaker's
-Bessel-function expansion. Their analytic properties and the expansion itself are developed in
+This file defines the polynomial coefficients `p_s^{(μ)}(z)` of the expansion of Whittaker's
+function `M_{κ,μ}` in Bessel functions (DLMF §13.24), through a normalized hyperbolic
+generating function.
+
+## Main definitions
+
+* `whittakerBesselGenerating`: the generating function of DLMF 13.24.3.
+* `whittakerBesselCoeff`: the coefficient `p_s^{(μ)}(z) (-z)^s`, the `s`-th Taylor coefficient
+  of the generating function at `0`.
+
+## Implementation notes
+
+The analytic properties of the coefficients and the expansion itself are in
 `DLMF.Confluent.WhittakerBuchholz`.
 -/
 

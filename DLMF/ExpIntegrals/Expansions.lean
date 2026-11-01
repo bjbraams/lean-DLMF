@@ -9,12 +9,28 @@ public import DLMF.Bessel.SphericalProductTools
 public import DLMF.IncompleteGamma.ExponentialIntegral
 
 /-!
-# Power, reciprocal factorial and spherical Bessel series, DLMF §§6.6 and 6.10–6.11
+# Power, reciprocal-factorial and spherical Bessel series (DLMF §§6.6, 6.10–6.11)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs.
+Power series of `Ei`, `E₁` and `Ci` (DLMF §6.6), the reciprocal-factorial series of `E₁` and the
+expansions in spherical Bessel functions (DLMF §6.10), and the relations to incomplete Gamma and
+confluent hypergeometric functions (DLMF §6.11).
+
+## Main definitions
+
+* `expIntReciprocalFactorialCoeff`: the coefficients of the reciprocal-factorial series, with
+  the recurrence of DLMF 6.10.3.
+* `expIntSphericalCoeff`: the coefficients of the spherical Bessel expansions (DLMF 6.10.7).
+
+## Main results
+
+* `Real.hasSum_expIntEi`, `expIntE1_hasSum`, `expIntE1_digamma_series`, `hasSum_Ci_complex`:
+  power series (DLMF 6.6.1–6.6.3, 6.6.6).
+* `expIntE1_reciprocal_factorial_series`, `expIntReciprocalFactorialCoeff_initial`: the
+  reciprocal-factorial series of `E₁` and its first coefficients (DLMF 6.10.1, 6.10.2).
+* `sinInt_spherical_series`, `cosIntCin_spherical_series`, `expIntEi_spherical_series`,
+  `Ein_spherical_series`: series of spherical Bessel functions (DLMF 6.10.4–6.10.6, 6.10.8).
+* `expIntE1_eq_upperIncGamma`, `expIntE1_eq_kummerU`, `expIntAux_eq_kummerU`: relations to
+  `Γ(0, z)` and Kummer's `U` (DLMF 6.11.1–6.11.3).
 -/
 
 @[expose] public noncomputable section

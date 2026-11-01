@@ -11,6 +11,34 @@ public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
 
 /-!
 # Half-periods, period pairs, lattice orientation and scaling
+
+DLMF describes a lattice `𝕃` by half-periods `ω₁, ω₃` with `ℑ(ω₃/ω₁) > 0`; the lattice
+generators are `2ω₁, 2ω₃` and `ω₂ = -ω₁ - ω₃` (DLMF 23.2.1). Mathlib's `PeriodPair` instead
+stores the full periods (with no orientation condition).
+
+## Main definitions
+
+* `HalfPeriods`: DLMF's lattice data, nonzero half-periods `ω₁, ω₃` with `ℑ(ω₃/ω₁) > 0`.
+* `HalfPeriods.ω₂`: the third half-period `ω₂ = -ω₁ - ω₃` (DLMF 23.2.1).
+* `HalfPeriods.tau`, `HalfPeriods.nome`: `τ = ω₃/ω₁` and `q = e^{iπτ}` (DLMF 23.6.1).
+* `HalfPeriods.ofTau`: the half-periods `ω₁ = ω`, `ω₃ = ωτ`.
+* `HalfPeriods.periodPair`: the bridge to Mathlib, the `PeriodPair` with full periods
+  `2ω₁, 2ω₃`.
+* `halfPeriodsOf`: DLMF half-periods for an arbitrary Mathlib period pair.
+* `scalePeriodPair`, `scalePeriodPairLatticeEquiv`: the scaled lattice `c𝕃` and the
+  bijection `𝕃 ≃ c𝕃`.
+
+## Main results
+
+* `HalfPeriods.ω₁_add_ω₂_add_ω₃`: `ω₁ + ω₂ + ω₃ = 0` (DLMF 23.2.1).
+* `HalfPeriods.tau_im_pos`: `ℑτ > 0`.
+* `HalfPeriods.linearIndependent_two_mul`: `2ω₁` and `2ω₃` are `ℝ`-linearly independent.
+
+## Implementation notes
+
+Mathlib's names for full periods are not DLMF's names; in this area `H.ω₁, H.ω₂, H.ω₃`
+always denote DLMF's half-periods, and the Mathlib periods of `H.periodPair` are `2ω₁` and
+`2ω₃`.
 -/
 
 @[expose] public noncomputable section
@@ -106,13 +134,13 @@ abbrev lattice : Submodule ℤ ℂ := H.periodPair.lattice
 end HalfPeriods
 
 /-- Nonvanishing under the stated hypotheses: `L.ω₁ ≠ 0`. -/
-lemma wp23_ω₁_ne_zero (L : PeriodPair) : L.ω₁ ≠ 0 := by
+private lemma periodPair_ω₁_ne_zero (L : PeriodPair) : L.ω₁ ≠ 0 := by
   simpa using L.indep.ne_zero 0
 
 /-- Nonvanishing under the stated hypotheses: `(L.ω₂ / L.ω₁).im ≠ 0`. -/
-lemma wp23_im_div_ne_zero (L : PeriodPair) : (L.ω₂ / L.ω₁).im ≠ 0 := by
+private lemma periodPair_im_ω₂_div_ω₁_ne_zero (L : PeriodPair) : (L.ω₂ / L.ω₁).im ≠ 0 := by
   intro him
-  have h1 := wp23_ω₁_ne_zero L
+  have h1 := periodPair_ω₁_ne_zero L
   have hq : L.ω₂ / L.ω₁ = ((L.ω₂ / L.ω₁).re : ℂ) := Complex.ext (by simp) (by simp [him])
   have h2 : L.ω₂ = ((L.ω₂ / L.ω₁).re : ℂ) * L.ω₁ := by
     rw [← hq]; field_simp
@@ -124,12 +152,12 @@ lemma wp23_im_div_ne_zero (L : PeriodPair) : (L.ω₂ / L.ω₁).im ≠ 0 := by
 `ω₃ = ±L.ω₂/2`, the sign chosen so that `ℑ(ω₃/ω₁) > 0`. -/
 def halfPeriodsOf (L : PeriodPair) : HalfPeriods :=
   if h : 0 < (L.ω₂ / L.ω₁).im then
-    ⟨L.ω₁ / 2, L.ω₂ / 2, by simpa using wp23_ω₁_ne_zero L, by
+    ⟨L.ω₁ / 2, L.ω₂ / 2, by simpa using periodPair_ω₁_ne_zero L, by
       rwa [div_div_div_cancel_right₀ two_ne_zero]⟩
   else
-    ⟨L.ω₁ / 2, -L.ω₂ / 2, by simpa using wp23_ω₁_ne_zero L, by
+    ⟨L.ω₁ / 2, -L.ω₂ / 2, by simpa using periodPair_ω₁_ne_zero L, by
       rw [div_div_div_cancel_right₀ two_ne_zero, neg_div, neg_im]
-      have := wp23_im_div_ne_zero L
+      have := periodPair_im_ω₂_div_ω₁_ne_zero L
       exact neg_pos.mpr (lt_of_le_of_ne (not_lt.mp h) this)⟩
 
 /-- The period pair `c𝕃` with periods `cω₁, cω₂` (`c ≠ 0`). -/
@@ -143,7 +171,7 @@ def scalePeriodPair (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) : PeriodPair :=
 
 /-- Formula under the stated hypotheses: `z ∈ (scalePeriodPair c hc L).lattice ↔ z / c ∈
 L.lattice`. -/
-theorem wp23_mem_scale_iff (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) {z : ℂ} :
+theorem mem_scalePeriodPair_lattice_iff (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) {z : ℂ} :
     z ∈ (scalePeriodPair c hc L).lattice ↔ z / c ∈ L.lattice := by
   simp only [PeriodPair.mem_lattice, scalePeriodPair]
   constructor
@@ -151,17 +179,17 @@ theorem wp23_mem_scale_iff (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) {z : ℂ} :
   · rintro ⟨m, n, h⟩; exact ⟨m, n, by rw [← mul_div_cancel₀ z hc, ← h]; ring⟩
 
 /-- Multiplication by `c` as a bijection `𝕃 ≃ c𝕃`. -/
-def wp23_scaleEquiv (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) :
+def scalePeriodPairLatticeEquiv (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) :
     L.lattice ≃ (scalePeriodPair c hc L).lattice where
-  toFun l := ⟨c * l, (wp23_mem_scale_iff c hc L).mpr (by simp [hc])⟩
-  invFun l := ⟨l / c, (wp23_mem_scale_iff c hc L).mp l.2⟩
+  toFun l := ⟨c * l, (mem_scalePeriodPair_lattice_iff c hc L).mpr (by simp [hc])⟩
+  invFun l := ⟨l / c, (mem_scalePeriodPair_lattice_iff c hc L).mp l.2⟩
   left_inv l := by ext; simp [hc]
   right_inv l := by ext; simp [mul_div_cancel₀ _ hc]
 
 /-- The square lattice with half-periods `1, i`, used to see that `PeriodPair` is nonempty. -/
-def wp23_squareHalfPeriods : HalfPeriods := ⟨1, I, one_ne_zero, by simp⟩
+def squareHalfPeriods : HalfPeriods := ⟨1, I, one_ne_zero, by simp⟩
 
 /-- The square lattice supplies a complex period pair. -/
-instance : Nonempty PeriodPair := ⟨wp23_squareHalfPeriods.periodPair⟩
+instance : Nonempty PeriodPair := ⟨squareHalfPeriods.periodPair⟩
 
 end DLMF.Weierstrass

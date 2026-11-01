@@ -8,20 +8,38 @@ module
 public import DLMF.BernoulliEuler.Explicit
 
 /-!
-# Bernoulli and Euler numbers: arithmetic properties (DLMF §24.10)
+# Bernoulli and Euler numbers: arithmetic properties
 
-DLMF §24.10(i): "two rational numbers are congruent if the modulus divides the numerator of
-their difference"; this is `RatModEq M a b`. The von Staudt–Clausen theorem 24.10.1 is Mathlib's
-`Bernoulli.vonStaudt_clausen` (pointer in `DLMF.BernoulliEuler.MathlibCoverage`); the second
-assertion of 24.10.1 (the denominator of `B₂ₙ` is the product of the primes `p` with
-`p - 1 ∣ 2n`) is `bernoulli_two_mul_den_eq_prod`.
+This file covers DLMF §24.10: congruences for the Bernoulli and Euler numbers. DLMF §24.10(i)
+calls two rational numbers congruent if the modulus divides the numerator of their difference;
+this is `RatModEq M a b`.
 
-## Corrections
+## Main definitions
+
+* `RatModEq`: congruence of rational numbers (DLMF §24.10(i)).
+
+## Main results
+
+* `bernoulli_two_mul_den_eq_prod`: the denominator of `B₂ₙ` is the product of the primes `p`
+  with `p - 1 ∣ 2n` (second assertion of DLMF 24.10.1).
+* `prime_mul_bernoulli_two_mul_modEq`: DLMF 24.10.2.
+* `kummer_congruence`, `kummer_congruence_pow`: Kummer's congruences (DLMF 24.10.3, 24.10.4).
+* `eulerNumber_modEq_add_prime_sub_one`, `eulerNumber_two_mul_modEq_two_pow`:
+  DLMF 24.10.5, 24.10.6.
+* `voronoi_congruence`: Voronoi's congruence (DLMF 24.10.7).
+* `prime_pow_dvd_bernoulli_num`, `eulerNumber_two_mul_modEq_prime_pow`: DLMF 24.10.8, 24.10.9.
+
+## Implementation notes
+
+The von Staudt–Clausen theorem (first assertion of 24.10.1) is Mathlib's
+`Bernoulli.vonStaudt_clausen` (pointer in `DLMF.BernoulliEuler.MathlibCoverage`).
+
+Corrections to DLMF:
 
 * Kummer's congruence 24.10.3 fails if `m = 1` or `n = 1` (e.g. `p = 3`, `m = 1`, `n = 3`:
-  `B₁/1 = -1/2 ≢ 0 = B₃/3 (mod 3)`); acquired for `m, n ≥ 2`. 24.10.4 needs no such condition
-  (its factor `1 - p⁰` vanishes for `m = 1`).
-* 24.10.5 also holds for `n = 1` (`E₁ = Eₚ = 0`), but not for `n = 0`; acquired as printed
+  `B₁/1 = -1/2 ≢ 0 = B₃/3 (mod 3)`); it is stated for `m, n ≥ 2`. 24.10.4 needs no such
+  condition (its factor `1 - p⁰` vanishes for `m = 1`).
+* 24.10.5 also holds for `n = 1` (`E₁ = Eₚ = 0`), but not for `n = 0`; it is stated as printed
   (`n ≥ 2`).
 
 All congruences were checked in exact arithmetic for primes `p ≤ 13` and the index ranges
@@ -46,7 +64,7 @@ def RatModEq (M : ℤ) (a b : ℚ) : Prop := M ∣ (a - b).num
 /-! ### §24.10(i) Von Staudt–Clausen theorem -/
 
 /-- The denominator of `∑_{p ∈ s} 1/p` divides `∏_{p ∈ s} p`. -/
-lemma q24a_den_sum_inv_dvd (s : Finset ℕ) :
+private lemma den_sum_one_div_dvd_prod (s : Finset ℕ) :
     (∑ p ∈ s, (1 : ℚ) / p).den ∣ ∏ p ∈ s, p := by
   induction s using Finset.induction_on with
   | empty => simp
@@ -67,7 +85,7 @@ theorem bernoulli_two_mul_den_eq_prod {n : ℕ} (hn : 1 ≤ n) :
   have hB : bernoulli (2 * n) = (z : ℚ) + -∑ p ∈ T, (1 : ℚ) / p := by linarith
   refine Nat.dvd_antisymm ?_ ?_
   · rw [hB, Rat.intCast_add_den, Rat.den_neg_eq_den]
-    exact q24a_den_sum_inv_dvd T
+    exact den_sum_one_div_dvd_prod T
   · refine Finset.prod_primes_dvd _ (fun p hp => (mem_filter.mp hp).2.1.prime) fun p hp => ?_
     have hp' := (mem_filter.mp hp).2
     have : Fact p.Prime := ⟨hp'.1⟩
@@ -101,14 +119,14 @@ theorem kummer_congruence_pow {p : ℕ} (hp : p.Prime) {m n ℓ : ℕ}
 
 /-- Euler numbers as a Newton series with any number `K ≥ m` of terms:
 `Eₘ = ∑_{k=0}^{K} 2⁻ᵏ ∑_{j=0}^{k} (-1)ʲ (k choose j) (2j+1)ᵐ`. -/
-lemma r24a_eulerNumber_newton {m K : ℕ} (hmK : m ≤ K) :
+private lemma eulerNumber_eq_newton_series {m K : ℕ} (hmK : m ≤ K) :
     (eulerNumber m : ℚ) = ∑ k ∈ range (K + 1), 1 / (2 : ℚ) ^ k *
       ∑ j ∈ range (k + 1), (-1 : ℚ) ^ j * (k.choose j : ℚ) * (2 * (j : ℚ) + 1) ^ m := by
-  have h := q24a_eulerPolyE_newton m (1 / 2)
+  have h := eulerPolyE_eq_newton_series m (1 / 2)
   rw [eulerPolyE_half] at h
   rw [sum_subset (range_subset_range.mpr (show m + 1 ≤ K + 1 by omega)) (fun k hk hk' => by
     have : m < k := by simp only [mem_range] at hk hk'; omega
-    rw [q24a_alt_sum_pow_eq_zero _ this, mul_zero])] at h
+    rw [sum_alt_choose_mul_add_pow_eq_zero _ this, mul_zero])] at h
   have h2 : (2 : ℂ) ^ m ≠ 0 := pow_ne_zero _ (by norm_num)
   have : ((eulerNumber m : ℚ) : ℂ) = ((∑ k ∈ range (K + 1), 1 / (2 : ℚ) ^ k *
       ∑ j ∈ range (k + 1), (-1 : ℚ) ^ j * (k.choose j : ℚ) * (2 * (j : ℚ) + 1) ^ m : ℚ) : ℂ) := by
@@ -124,7 +142,7 @@ lemma r24a_eulerNumber_newton {m K : ℕ} (hmK : m ≤ K) :
   exact_mod_cast this
 
 /-- A rational `p a / 2ᴷ` with `a ∈ ℤ` and `p` an odd prime has numerator divisible by `p`. -/
-lemma r24a_dvd_num_of_eq {p : ℕ} (hp : p.Prime) (hp2 : p ≠ 2) {q : ℚ} {a : ℤ} (K : ℕ)
+private lemma prime_dvd_num_of_eq_mul_div_two_pow {p : ℕ} (hp : p.Prime) (hp2 : p ≠ 2) {q : ℚ} {a : ℤ} (K : ℕ)
     (hq : q = p * a / 2 ^ K) : (p : ℤ) ∣ q.num := by
   have h1 : (q.num : ℚ) * 2 ^ K = p * a * q.den := by
     rw [← Rat.mul_den_eq_num, hq]; field_simp
@@ -154,10 +172,10 @@ theorem eulerNumber_modEq_add_prime_sub_one {p : ℕ} (hp : p.Prime) (hp2 : 2 < 
     rw [show K = (n - 1) + p by omega, pow_add, ZMod.pow_card, ← pow_succ,
       Nat.sub_add_cancel (by omega), sub_self]
   choose e he using hF
-  have hE := r24a_eulerNumber_newton (m := n) (K := K) (by omega)
-  have hE' := r24a_eulerNumber_newton (m := K) (K := K) le_rfl
+  have hE := eulerNumber_eq_newton_series (m := n) (K := K) (by omega)
+  have hE' := eulerNumber_eq_newton_series (m := K) (K := K) le_rfl
   unfold RatModEq
-  refine r24a_dvd_num_of_eq hp (by omega) K (a := -∑ k ∈ range (K + 1), 2 ^ (K - k) *
+  refine prime_dvd_num_of_eq_mul_div_two_pow hp (by omega) K (a := -∑ k ∈ range (K + 1), 2 ^ (K - k) *
     ∑ j ∈ range (k + 1), (-1) ^ j * (k.choose j : ℤ) * e (2 * j + 1)) ?_
   rw [hE, hE', ← sum_sub_distrib]
   push_cast

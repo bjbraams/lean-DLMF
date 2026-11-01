@@ -14,5 +14,9 @@ public import DLMF.Confluent.Basic.ExpansionData
 public import DLMF.Confluent.Basic.Buchholz
 
 /-!
-# Canonical definitions and normalizations of confluent functions
+# Confluent hypergeometric functions: foundational definitions
+
+Canonical definitions and normalizations for the confluent area: Kummer's `M`, Tricomi's `U`,
+the incomplete gamma functions, exponential integrals, error, Fresnel and Dawson functions,
+expansion coefficients, and the coefficients of the Whittaker–Buchholz expansion.
 -/

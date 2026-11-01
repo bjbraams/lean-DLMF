@@ -6,27 +6,44 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Coulomb.Energy.Basic
-public import DLMF.Coulomb.Energy.Q2eRegular
+public import DLMF.Coulomb.Energy.RegularSolution
 public import DLMF.Bessel.Modified
 
 /-!
-# Coulomb functions `f`, `h`: power series in `r` and expansions in `ε` (DLMF §§33.19–33.20)
+# Coulomb functions `f`, `h`: power series in `r` and expansions in `ε`
 
-The power series of `f(ε,ℓ;r)` and `h(ε,ℓ;r)` in `r` (33.19.1–33.19.7), the Bessel forms at
-`ε = 0` (33.20.1–33.20.2), the convergent expansion of `f` in powers of `ε` (33.20.3–33.20.6) and
-the asymptotic expansion of `h` as `ε → 0` (33.20.7–33.20.9).
+This file proves the power series of `f(ε,ℓ;r)` and `h(ε,ℓ;r)` in `r` (DLMF 33.19.1–33.19.7), the
+Bessel forms at `ε = 0` (33.20.1–33.20.2), the convergent expansion of `f` in powers of `ε`
+(33.20.3–33.20.6) and the asymptotic expansion of `h` as `ε → 0` (33.20.7–33.20.9).
 
-## Source correction: DLMF 33.19.3
+## Main results
 
-Checked numerically (mpmath, 40 digits; `ε ∈ {0.3, 2.5, -0.13, -0.6}`, `ℓ ≤ 3`, both signs of
-`r`, after fitting the series coefficients), 33.19.3 as printed fails in two ways:
+* `coulombAlpha_zero_one`, `coulombAlpha_recurrence`: the coefficients `α_k` (DLMF 33.19.2).
+* `coulombGammaCoeff_recurrence`, `coulombBetaCoeff_recurrence`, `coulombDeltaCoeff_zero_one`,
+  `coulombDeltaCoeff_recurrence`: the coefficients `γ_k`, `β_k`, `δ_k` (DLMF 33.19.4–33.19.7).
+* `coulombCkp_eq_zero`, `coulombCkp_recurrence`: the coefficients `C_{k,p}` (DLMF 33.20.6).
+* `coulombf_hasSum`: `f(ε,ℓ;r) = r^{ℓ+1} ∑_{k≥0} α_k r^k` for all real `r` and `ε`
+  (DLMF 33.19.1).
+* `coulombh_hasSum`: the series for `h` (DLMF 33.19.3, corrected).
+* `coulombf_zero_eq_besselJ`, `coulombf_zero_eq_besselI`, `coulombh_zero_eq_besselY`,
+  `coulombh_zero_eq_besselK`: the Bessel forms at `ε = 0` (DLMF 33.20.1–33.20.2).
+* `coulombf_hasSum_eps_pos`, `coulombf_hasSum_eps_neg`: the expansion of `f` in powers of `ε`
+  (DLMF 33.20.3–33.20.5).
+* `coulombh_asymptotic_eps_pos`, `coulombh_asymptotic_eps_neg`: the asymptotic expansion of `h`
+  as `ε → 0` (DLMF 33.20.7–33.20.9).
+
+## Implementation notes
+
+DLMF 33.19.3 as printed fails in two ways, checked numerically (mpmath, 40 digits;
+`ε ∈ {0.3, 2.5, -0.13, -0.6}`, `ℓ ≤ 3`, both signs of `r`, after fitting the series
+coefficients):
 
 * the finite sum `∑_{k=0}^{2ℓ} (2ℓ-k)! γ_k (2r)^{k-ℓ}/k!` must be doubled (as printed, the leading
   behaviour would be `h ~ (2ℓ)!/(2π(2r)^ℓ)`, contradicting 33.18.1 and §33.14(i));
 * for `ε < 0` and `r < 0` the digamma terms must be evaluated at `κ = +(-ε)^{-1/2}` (the
   `r > 0` value of 33.14.6), not at `κ = -(-ε)^{-1/2}`.
 
-The acquired statement `coulombh_hasSum` is
+The corrected statement `coulombh_hasSum` is
 `2πh = 2∑_{k=0}^{2ℓ} (2ℓ-k)! γ_k (2r)^{k-ℓ}/k! - ∑ δ_k r^{k+ℓ+1}
   - A(ε,ℓ)(2 ln|2r/κ| + Re ψ(ℓ+1+κ) + Re ψ(-ℓ+κ)) f(ε,ℓ;r)` with `κ = coulombKappa ε 1`.
 -/
@@ -142,8 +159,8 @@ theorem coulombCkp_recurrence (ℓ k p : ℕ) (hk : 0 < k) (hp : 2 * k ≤ p ∧
 @[dlmf 33.19.E1]
 theorem coulombf_hasSum (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
     HasSum (fun k => coulombAlpha ε ℓ k * r ^ (k + ℓ + 1)) (coulombf ε ℓ r) := by
-  have h := Complex.hasSum_re (q2e_Phi_hasSum ε ℓ r)
-  rw [← q2e_coulombf_eq_re] at h
+  have h := Complex.hasSum_re (hasSum_coulombfComplex ε ℓ r)
+  rw [← coulombf_eq_re_coulombfComplex] at h
   convert h using 1
   funext k
   rw [← Complex.ofReal_pow, ← Complex.ofReal_mul, Complex.ofReal_re]
@@ -168,13 +185,13 @@ theorem coulombh_hasSum {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) {r : ℝ} (hr : 
 /-! ### `ε = 0`: Bessel functions -/
 
 /-- `√(8r)/2 = √(2r)`. -/
-lemma c33b_sqrt_eight (r : ℝ) : Real.sqrt (8 * r) / 2 = Real.sqrt (2 * r) := by
+private lemma sqrt_eight_mul_div_two (r : ℝ) : Real.sqrt (8 * r) / 2 = Real.sqrt (2 * r) := by
   rw [show 8 * r = 2 ^ 2 * (2 * r) by ring, Real.sqrt_mul (by positivity),
     Real.sqrt_sq (by norm_num)]
   ring
 
 /-- For `x ≥ 0`, `√x (√x)^{2ℓ+1} = x^{ℓ+1}`. -/
-lemma c33b_pow_sqrt {x : ℝ} (hx : 0 ≤ x) (ℓ : ℕ) :
+private lemma ofReal_sqrt_mul_pow_odd {x : ℝ} (hx : 0 ≤ x) (ℓ : ℕ) :
     (Real.sqrt x : ℂ) * (Real.sqrt x : ℂ) ^ (2 * ℓ + 1) = (x : ℂ) ^ (ℓ + 1) := by
   rw [← pow_succ', show 2 * ℓ + 1 + 1 = 2 * (ℓ + 1) by ring, pow_mul, ← Complex.ofReal_pow,
     Real.sq_sqrt hx]
@@ -188,7 +205,7 @@ theorem coulombf_zero_eq_besselJ (ℓ : ℕ) {r : ℝ} (hr : 0 < r) :
   congr 1
   rw [Complex.besselJ, show (2 * (ℓ : ℂ) + 1) = ((2 * ℓ + 1 : ℕ) : ℂ) by push_cast; ring,
     cpow_natCast, show ((Real.sqrt (8 * r) : ℝ) : ℂ) / 2 = ((Real.sqrt (8 * r) / 2 : ℝ) : ℂ) by
-      push_cast; ring, c33b_sqrt_eight r, ← mul_assoc, c33b_pow_sqrt (by positivity)]
+      push_cast; ring, sqrt_eight_mul_div_two r, ← mul_assoc, ofReal_sqrt_mul_pow_odd (by positivity)]
   have hsq : ((Real.sqrt (2 * r) : ℝ) : ℂ) ^ 2 = 2 * r := by
     rw [← Complex.ofReal_pow, Real.sq_sqrt (by positivity)]; push_cast; ring
   rw [hsq, show (((2 * ℓ + 1 : ℕ) : ℂ)) + 1 = 2 * ℓ + 2 by push_cast; ring]
@@ -206,7 +223,7 @@ theorem coulombf_zero_eq_besselI (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
   congr 1
   rw [besselI, show (2 * (ℓ : ℂ) + 1) = ((2 * ℓ + 1 : ℕ) : ℂ) by push_cast; ring,
     cpow_natCast, show ((Real.sqrt (8 * |r|) : ℝ) : ℂ) / 2 = ((Real.sqrt (8 * |r|) / 2 : ℝ) : ℂ) by
-      push_cast; ring, c33b_sqrt_eight |r|]
+      push_cast; ring, sqrt_eight_mul_div_two |r|]
   have h2 : ((Real.sqrt (8 * |r|) : ℝ) : ℂ) ^ 2 / 4 = -(2 * (r : ℂ)) := by
     rw [← Complex.ofReal_pow, Real.sq_sqrt (by positivity), abs_of_neg hr]
     push_cast; ring
@@ -217,7 +234,7 @@ theorem coulombf_zero_eq_besselI (ℓ : ℕ) {r : ℝ} (hr : r < 0) :
         (-(2 * (r : ℂ)))) =
       (-1) ^ (ℓ + 1) * ((Real.sqrt (2 * |r|) : ℂ) * (Real.sqrt (2 * |r|) : ℂ) ^ (2 * ℓ + 1)) *
         regularizedHGFun ∅ {(2 * (ℓ : ℂ) + 1) + 1} (-(2 * (r : ℂ))) by ring]
-  have hp := c33b_pow_sqrt (abs_nonneg (2 * r)) ℓ
+  have hp := ofReal_sqrt_mul_pow_odd (abs_nonneg (2 * r)) ℓ
   rw [abs_mul, abs_two] at hp
   rw [hp, abs_of_neg hr, Multiset.empty_eq_zero,
     show (2 * (ℓ : ℂ) + 1) + 1 = 2 * ℓ + 2 by ring]

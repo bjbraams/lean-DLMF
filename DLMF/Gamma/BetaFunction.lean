@@ -12,10 +12,9 @@ public import DLMF.Gamma.BetaFunction.Vertical
 /-!
 # Beta function (DLMF §5.12)
 
-The Euler integral and the identity `B(a,b) = Γ(a)Γ(b)/Γ(a+b)` are Mathlib
-`betaIntegral` and `Gamma_mul_Gamma_eq_betaIntegral`, and are also
-`selberg_integral_one` in `DLMF.Selberg.Basic`. The trigonometric integrals 5.12.5–5.12.6 use
-Mathlib's binomial series (`Complex.one_add_cpow_hasFPowerSeriesOnBall_zero`). Contour
-formulae 5.12.9–5.12.12 are deferred. The real Euler integral uses the Tau Ceti contributors’
-`TauCeti.integral_rpow_mul_one_sub_rpow`, built on Mathlib’s beta theory.
+This umbrella collects the trigonometric, half-line, shifted, cosine, hyperbolic and vertical
+Beta integrals of DLMF 5.12.2–5.12.8. The Euler integral and the identity
+`B(a,b) = Γ(a)Γ(b)/Γ(a+b)` (5.12.1) are Mathlib's `betaIntegral` and
+`Gamma_mul_Gamma_eq_betaIntegral`, and also `selberg_integral_one` in
+`DLMF.Selberg.ContinuationAndAomoto`. The contour integrals 5.12.9–5.12.12 are not formalized.
 -/

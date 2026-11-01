@@ -8,19 +8,40 @@ module
 public import DLMF.ErrorFunctions.ZeroClassification
 
 /-!
-# Zero distributions and asymptotics, DLMF §7.13
+# Zeros of the error functions and Fresnel integrals (DLMF §7.13)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results, numerical
-tables (Tables 7.13.1–7.13.4) and application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+Enumerations of the complex zeros of `erf`, `erfc`, `w` and the Fresnel integrals, their
+classification, and the asymptotic expansions of the zeros. Numerical tables (Tables
+7.13.1–7.13.4) are excluded.
 
-The orderings and zero classifications (`errorFunctionZero_ordered`, `erf_zero_classification`,
-`erfc_zero_classification`, `faddeevaW_zero_classification`, `fresnelFunctionZero_ordered`,
-`fresnel_zero_classification`) are derived from the enumeration statements
+## Main definitions
+
+* `errorFunctionZero`: the zeros of `erf` (resp. `erfc`) in the upper half-plane, indexed from
+  one by increasing modulus.
+* `fresnelFunctionZero`: the zeros of `C` (resp. `S`) in the first octant; the other octants
+  follow by symmetry.
+* `errorZeroLambda`, `errorZeroMu`: the variables `λ`, `μ` of DLMF 7.13.2, 7.13.4.
+* `fresnelZeroLambda`, `fresnelZeroAlpha`: the variables of DLMF 7.13.6, 7.13.7.
+
+## Main results
+
+* `erf_zero_simple`, `fresnel_zero_orders`: the zeros at the origin.
+* `errorFunctionZero_spec`, `errorFunctionZero_spec_iff`, `fresnelFunctionZero_spec`: the
+  enumerations are well defined; `errorFunctionZero_spec_iff` reduces this to distinct moduli
+  and infinitely many zeros in the sector.
+* `errorFunctionZero_ordered`, `fresnelFunctionZero_ordered`: the moduli increase strictly.
+* `erf_zero_classification`, `erfc_zero_classification`, `faddeevaW_zero_classification`,
+  `fresnel_zero_classification`, `fresnelTail_zero_classification`: the complete zero sets
+  (DLMF §7.13(ii)–(iv)).
+* `errorFunctionZero_asymptotic`: all-order expansions of the zeros of `erf` and `erfc`
+  (DLMF 7.13.1, 7.13.3).
+* `fresnelFunctionZero_asymptotic`: all-order expansions of the Fresnel zeros (DLMF 7.13.5).
+
+## Implementation notes
+
+The orderings and classifications are derived from the enumeration statements
 `errorFunctionZero_spec` and `fresnelFunctionZero_spec` together with the zero localizations of
-`DLMF/ErrorFunctions/ZeroClassification.lean`, so they depend on those two admissions only.
-`errorFunctionZero_spec_iff` reduces `errorFunctionZero_spec` to distinct moduli and infinitely
-many zeros in the sector.
+`DLMF.ErrorFunctions.ZeroClassification`.
 -/
 
 @[expose] public noncomputable section

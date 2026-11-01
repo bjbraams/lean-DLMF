@@ -8,12 +8,41 @@ module
 public import DLMF.Gamma.IntegralRepresentations.PrymAndOscillatory
 
 /-!
-# Digamma integrals and Binet formulas
+# Digamma integrals and Binet's formulas (DLMF §5.9)
 
-Integral representations of the digamma function and the Binet formulas for log Gamma.
+Integral representations of the digamma function, obtained from the digamma series by termwise
+integration (the terms do not change sign), and Binet's formulas for `ln Γ` in exponential,
+arctangent and logarithmic form (DLMF 5.9.10).
 
-Source references and common attribution are retained in
-`DLMF.Gamma.IntegralRepresentations`.
+## Main definitions
+
+* `binetKernel`: the kernel `1/(1 - e^{-t}) - 1/t`.
+* `binetBeta`: Binet's function `β(t) = 1/(eᵗ - 1) - 1/t + 1/2` (Temme (3.12)).
+* `binetIntegral`: Binet's integral `Φ(x) = ∫₀^∞ e^{-xt} β(t)/t dt` (Temme (3.27)).
+
+## Main results
+
+* `digamma_add_euler_Ioo`, `digamma_add_euler_Ioi`: `ψ(x) + γ` as integrals over `(0, 1)` and
+  `(0, ∞)`.
+* `digamma_eq_log_sub`, `digamma_eq_log_sub_binetBeta`: Binet's formula for `ψ`.
+* `digamma_le_log_and`: `log x - 1/x ≤ ψ(x) ≤ log x`.
+* `integral_exp_neg_sub_exp_neg_div`: Frullani's integral `∫₀^∞ (e^{-t} - e^{-xt})/t dt = log x`.
+* `log_Gamma_binet_exp`, `log_Gamma_eq_add_binetIntegral`: Binet's first formula
+  (DLMF 5.9.10, exponential form).
+* `log_Gamma_binet_arctan`: Binet's second formula (DLMF 5.9.10).
+* `log_Gamma_binet_log`: the logarithmic form of DLMF 5.9.10.
+* `binetBeta_pos`, `binetBeta_lt`, `binetIntegral_pos_lt`: `0 < β(t) < t/12` and
+  `0 < Φ(x) < 1/(12x)` (Temme §3.6.1).
+* `hasSum_binetBeta`: the partial fraction expansion `β(s) = ∑ₘ 2s/(s² + (2π(m+1))²)`.
+
+## Implementation notes
+
+The constant in Binet's formula is fixed by letting `x → ∞`, using
+`log x - 1/x ≤ ψ(x) ≤ log x`.
+
+## References
+
+* N. M. Temme, *Special Functions*, Wiley, 1996, §3.
 -/
 
 @[expose] public section

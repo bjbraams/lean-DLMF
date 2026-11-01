@@ -11,10 +11,17 @@ public import Mathlib.Analysis.SpecialFunctions.Sqrt
 /-!
 # Special values and identities of the complex trigonometric functions
 
-Complex-argument companions of real facts in Mathlib: `cos (n π) = (-1)ⁿ`,
-`sin ((ν + 1) π) = -sin (ν π)`, the nonvanishing of `sin (ν π)` off the integers,
-De Moivre's formula for integer exponents, `e^{πi/3} = (1 + √3 i)/2`, and the constants
-`π ≠ 0`, `√π √π = π` and `2 i ≠ 0` in `ℂ`.
+Complex-argument companions of real facts in Mathlib.
+
+## Main results
+
+* `Complex.cos_nat_mul_pi`: `cos (n π) = (-1)ⁿ`.
+* `Complex.sin_add_one_mul_pi`: `sin ((ν + 1) π) = -sin (ν π)`.
+* `Complex.sin_mul_pi_ne_zero`: `sin (ν π) ≠ 0` when `ν` is not an integer.
+* `Complex.cos_add_I_mul_sin_zpow`: De Moivre's formula for integer exponents.
+* `Complex.exp_pi_mul_I_div_three`: `e^{πi/3} = (1 + √3 i)/2`.
+* `Complex.ofReal_pi_ne_zero`, `Complex.ofReal_sqrt_pi_mul_self`, `Complex.two_mul_I_ne_zero`:
+  the constants `π ≠ 0`, `√π √π = π` and `2 i ≠ 0` in `ℂ`.
 -/
 
 @[expose] public section

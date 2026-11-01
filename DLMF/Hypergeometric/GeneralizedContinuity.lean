@@ -10,10 +10,16 @@ public import DLMF.Confluent.Regularized
 public import ToMathlib.Analysis.SpecialFunctions.GammaShiftBounds
 
 /-!
-# Joint continuity of the regularized generalized hypergeometric series
+# Joint continuity of the regularized `₁F₂(1;b,c;z)`
 
-Uniform reciprocal-Gamma bounds from lean-codes control the regularized `₁F₂(1;b,c;z)` series
-jointly in both lower parameters and the argument, including exceptional lower parameters.
+## Main results
+
+* `continuous_regularized1F2_one`: the regularized `₁F₂(1;b,c;z)` is jointly continuous in both
+  lower parameters and the argument, including exceptional lower parameters.
+
+## Implementation notes
+
+The proof uses uniform reciprocal-Gamma bounds from lean-codes.
 -/
 
 @[expose] public noncomputable section

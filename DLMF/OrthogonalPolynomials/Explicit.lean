@@ -11,12 +11,39 @@ public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.Basic
 /-!
 # Explicit formulas, symmetry, and transformations (DLMF §§18.5–18.7)
 
-Statements from NIST DLMF Chapter 18, each tagged with its equation number by `@[dlmf]`.
+Explicit finite sums (DLMF §18.5), values and symmetry (DLMF §18.6) and interrelations
+(DLMF §18.7) of the classical orthogonal polynomials, together with the Chebyshev polynomials
+of the third and fourth kinds.
+
+## Main definitions
+
+* `laguerreExtended`: the Laguerre polynomial as a polynomial in its parameter, including
+  negative integer parameters (DLMF 18.5.12).
+* `chebyshevV`, `chebyshevW`: the Chebyshev polynomials of the third and fourth kinds
+  (DLMF 18.7.5–18.7.6).
+
+## Main results
+
+* `jacobi_finite_sum`, `jacobi_binomial_sum`: the explicit sums DLMF 18.5.7 and 18.5.8.
+* `hermitePolyH_finite_sum`: DLMF 18.5.13.
+* `chebyshevT_finite_sum`, `chebyshevU_finite_sum`: explicit sums for `T_n` and `U_n`
+  (DLMF §18.5).
+* `laguerrePolyL_at_zero`, `jacobiPolyP_one`, `ultrasphPoly_at_one`, `chebyshevV_at_one`,
+  `chebyshevW_at_one`: values at the endpoints (DLMF 18.6.1 and Table 18.6.1).
+* `hermitePolyH_reflection`, `hermitePolyH_even_at_zero`: symmetry and values at `0`.
+* `legendre_eq_ultrasphPoly`: `P_n = C_n^{(1/2)}` (DLMF 18.7.9).
+* `hermitePolyH_even_eq_laguerrePolyL`, `hermitePolyH_odd_eq_laguerrePolyL`: Hermite in terms
+  of Laguerre polynomials (DLMF 18.7.19–18.7.20).
+* `chebyshevT_discrete_orthogonality`: discrete orthogonality of `T_n` at the Chebyshev–Gauss
+  nodes (DLMF 18.3.1).
+
+## Implementation notes
+
 Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
 hypergeometric definitions do not implement continuation in singular parameters.
 The Gegenbauer sums 18.5.10–18.5.11 and the quadratic transformations 18.7.13–18.7.16
 need the three-term recurrences of `Differential.lean`, which imports this file; they
-are stated and proved in `GegenbauerSeries.lean`.
+are in `GegenbauerSeries.lean`.
 -/
 
 @[expose] public section
@@ -285,7 +312,7 @@ theorem jacobiPolyP_one_ne_zero {α β : ℂ} (hα : -1 < α.re) (n : ℕ) : jac
 /-- Identity under the stated parameter and domain assumptions: `ultrasphPoly lam n 1 = poch (2 *
 lam) n / n.factorial`. -/
 @[dlmf 18.6.T1]
-theorem ultrasphPoly_at_one {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) :
+theorem ultrasphPoly_at_one {lam : ℂ} (n : ℕ) :
     ultrasphPoly lam n 1 = poch (2 * lam) n / n.factorial := by
   simp [ultrasphPoly]
 

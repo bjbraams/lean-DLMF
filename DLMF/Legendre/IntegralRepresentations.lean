@@ -11,8 +11,7 @@ public import DLMF.Legendre.IntegralRepresentations.Ferrers
 /-!
 # Integral representations and fractional integration
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This umbrella imports the integral representations of Legendre functions (DLMF §14.12,
+§14.25 and §14.6(ii)): real-angle and fractional integrals of Ferrers functions, and hyperbolic
+and complex integrals of associated Legendre functions outside the cut.
 -/

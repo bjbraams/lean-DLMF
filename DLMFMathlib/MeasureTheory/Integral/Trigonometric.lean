@@ -12,9 +12,16 @@ public import Mathlib.MeasureTheory.Function.JacobianOneDim
 /-!
 # Trigonometric changes of variables on a quarter period
 
-`MeasureTheory.integral_Ioo_eq_integral_cos_sq` substitutes `u = cos² θ` between `(0, 1)`
-and `(0, π/2)`, with the absolute Jacobian `2 sin θ cos θ`. It applies to arbitrary real
-normed target spaces and retains Mathlib's totalized Bochner-integral convention.
+## Main results
+
+* `MeasureTheory.integral_Ioo_eq_integral_cos_sq`: the substitution `u = cos² θ` between
+  `(0, 1)` and `(0, π/2)`, with the absolute Jacobian `2 sin θ cos θ`.
+
+## Implementation notes
+
+The substitution applies to arbitrary real normed target spaces and retains Mathlib's
+totalized Bochner-integral convention. The open intervals omit both endpoints, so no
+endpoint regularity is needed.
 -/
 
 @[expose] public noncomputable section

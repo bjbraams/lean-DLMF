@@ -10,14 +10,23 @@ public import DLMF.AlgebraicAnalytic.ContinuedFractions.Convergents
 /-!
 # Convergence of continued fractions (DLMF §1.12(v))
 
-* **Pringsheim's theorem** (1.12.25): if `b₀ = 0` and `|b_n| ≥ |a_n| + 1` for `n ≥ 1`, then
-  `|C_n| < 1` and `C_n → C` with `|C| ≤ 1`. The proof is the classical one: the canonical
-  denominators satisfy `|B_n| - |B_{n-1}| ≥ |a₁ ⋯ a_n|`, so the series 1.12.9 of the convergents
-  is dominated by the telescoping series `∑ (1/|B_{n-1}| - 1/|B_n|) ≤ 1`. The hypothesis
-  `a_n ≠ 0` of DLMF is not needed (stronger than DLMF). It is proved in any complete normed
-  field.
-* **Van Vleck's theorem** (1.12.26–1.12.28), for `1/(b₁ + 1/(b₂ + ⋯))` with all `b_n` in the
-  sector `|ph b_n| < π/2 - δ` (admitted).
+The convergence theorems of Pringsheim and Van Vleck.
+
+## Main results
+
+* `pringsheim_norm_convs_lt_one`, `pringsheim`, `contFracConverges_of_pringsheim`: Pringsheim's
+  theorem (DLMF 1.12.25): if `b₀ = 0` and `|b_n| ≥ |a_n| + 1` for `n ≥ 1`, then `|C_n| < 1` and
+  `C_n → C` with `|C| ≤ 1`.
+* `vanVleck_arg_convs`, `vanVleck_even_odd`, `vanVleck_converges_iff`, `vanVleck_arg_limit`:
+  Van Vleck's theorem (DLMF 1.12.26–1.12.28) for `1/(b₁ + 1/(b₂ + ⋯))` with all `b_n` in the
+  sector `|ph b_n| < π/2 - δ`.
+
+## Implementation notes
+
+The proof of Pringsheim's theorem is the classical one: the canonical denominators satisfy
+`|B_n| - |B_{n-1}| ≥ |a₁ ⋯ a_n|`, so the series 1.12.9 of the convergents is dominated by the
+telescoping series `∑ (1/|B_{n-1}| - 1/|B_n|) ≤ 1`. The hypothesis `a_n ≠ 0` of DLMF is not
+needed (stronger than DLMF). It is proved in any complete normed field.
 -/
 
 @[expose] public noncomputable section
@@ -33,7 +42,7 @@ variable {K : Type*} [NormedField K] {a b : ℕ → K}
 
 /-- Under the Pringsheim condition the canonical denominators satisfy
 `|B_{m+1}| - |B_m| ≥ |a₁ ⋯ a_{m+1}|`. -/
-lemma g1d_pringsheim_dens_diff (h : ∀ n, 1 ≤ n → ‖a n‖ + 1 ≤ ‖b n‖) (m : ℕ) :
+private lemma prod_norm_le_norm_dens_succ_sub_of_pringsheim (h : ∀ n, 1 ≤ n → ‖a n‖ + 1 ≤ ‖b n‖) (m : ℕ) :
     ∏ k ∈ range (m + 1), ‖a (k + 1)‖ ≤
       ‖(contFrac a b).dens (m + 1)‖ - ‖(contFrac a b).dens m‖ := by
   induction m with
@@ -63,30 +72,30 @@ lemma g1d_pringsheim_dens_diff (h : ∀ n, 1 ≤ n → ‖a n‖ + 1 ≤ ‖b n�
       _ ≤ _ := by linarith
 
 /-- Under the Pringsheim condition `|B_n| ≥ 1`. -/
-lemma g1d_pringsheim_dens_ge_one (h : ∀ n, 1 ≤ n → ‖a n‖ + 1 ≤ ‖b n‖) (n : ℕ) :
+private lemma one_le_norm_dens_of_pringsheim (h : ∀ n, 1 ≤ n → ‖a n‖ + 1 ≤ ‖b n‖) (n : ℕ) :
     1 ≤ ‖(contFrac a b).dens n‖ := by
   induction n with
   | zero => simp
   | succ m ih =>
-    have := g1d_pringsheim_dens_diff h m
+    have := prod_norm_le_norm_dens_succ_sub_of_pringsheim h m
     have : 0 ≤ ∏ k ∈ range (m + 1), ‖a (k + 1)‖ := prod_nonneg fun _ _ => norm_nonneg _
     linarith
 
 /-- The telescoping bound `|C_{m+1} - C_m| ≤ 1/|B_m| - 1/|B_{m+1}|`. -/
-lemma g1d_pringsheim_step (h : ∀ n, 1 ≤ n → ‖a n‖ + 1 ≤ ‖b n‖) (m : ℕ) :
+private lemma norm_convs_succ_sub_le_of_pringsheim (h : ∀ n, 1 ≤ n → ‖a n‖ + 1 ≤ ‖b n‖) (m : ℕ) :
     ‖(contFrac a b).convs (m + 1) - (contFrac a b).convs m‖ ≤
       1 / ‖(contFrac a b).dens m‖ - 1 / ‖(contFrac a b).dens (m + 1)‖ := by
-  have h0 := g1d_pringsheim_dens_ge_one h m
-  have h1 := g1d_pringsheim_dens_ge_one h (m + 1)
+  have h0 := one_le_norm_dens_of_pringsheim h m
+  have h1 := one_le_norm_dens_of_pringsheim h (m + 1)
   have hne0 : (contFrac a b).dens m ≠ 0 := norm_pos_iff.mp (by linarith)
   have hne1 : (contFrac a b).dens (m + 1) ≠ 0 := norm_pos_iff.mp (by linarith)
   rw [contFrac_convs_sub a b m hne0 hne1, norm_div, norm_mul, norm_mul, norm_pow, norm_neg,
     norm_one, one_pow, one_mul, norm_prod, div_sub_div _ _ (by positivity) (by positivity),
     one_mul, mul_one]
-  exact div_le_div_of_nonneg_right (g1d_pringsheim_dens_diff h m) (by positivity)
+  exact div_le_div_of_nonneg_right (prod_norm_le_norm_dens_succ_sub_of_pringsheim h m) (by positivity)
 
 /-- The partial sums of the telescoping bound. -/
-lemma g1d_pringsheim_sum (n : ℕ) :
+private lemma sum_inv_norm_dens_sub_eq (n : ℕ) :
     ∑ m ∈ range n, (1 / ‖(contFrac a b).dens m‖ - 1 / ‖(contFrac a b).dens (m + 1)‖) =
       1 - 1 / ‖(contFrac a b).dens n‖ := by
   rw [sum_range_sub' (fun m => 1 / ‖(contFrac a b).dens m‖), contFrac_dens_zero, norm_one,
@@ -99,13 +108,13 @@ DLMF: `a_n ≠ 0` is not assumed. -/
 theorem pringsheim_norm_convs_lt_one (hb0 : b 0 = 0) (h : ∀ n, 1 ≤ n → ‖a n‖ + 1 ≤ ‖b n‖)
     (n : ℕ) : ‖(contFrac a b).convs n‖ < 1 := by
   have hsum : ‖(contFrac a b).convs n‖ ≤ 1 - 1 / ‖(contFrac a b).dens n‖ := by
-    rw [← g1d_pringsheim_sum (a := a) (b := b) n]
+    rw [← sum_inv_norm_dens_sub_eq (a := a) (b := b) n]
     have htel : (contFrac a b).convs n =
         ∑ m ∈ range n, ((contFrac a b).convs (m + 1) - (contFrac a b).convs m) := by
       rw [sum_range_sub (fun m => (contFrac a b).convs m), contFrac_convs_zero, hb0, sub_zero]
     rw [htel]
-    exact (norm_sum_le _ _).trans (sum_le_sum fun m _ => g1d_pringsheim_step h m)
-  have := g1d_pringsheim_dens_ge_one h n
+    exact (norm_sum_le _ _).trans (sum_le_sum fun m _ => norm_convs_succ_sub_le_of_pringsheim h m)
+  have := one_le_norm_dens_of_pringsheim h n
   have : 0 < 1 / ‖(contFrac a b).dens n‖ := by positivity
   linarith
 
@@ -117,17 +126,17 @@ theorem pringsheim [CompleteSpace K] (hb0 : b 0 = 0) (h : ∀ n, 1 ≤ n → ‖
     ∃ C, ‖C‖ ≤ 1 ∧ Tendsto (contFrac a b).convs atTop (𝓝 C) := by
   set d : ℕ → ℝ := fun m => 1 / ‖(contFrac a b).dens m‖ - 1 / ‖(contFrac a b).dens (m + 1)‖
   have hd0 : ∀ m, 0 ≤ d m := fun m =>
-    (norm_nonneg _).trans (g1d_pringsheim_step h m)
+    (norm_nonneg _).trans (norm_convs_succ_sub_le_of_pringsheim h m)
   have hds : Summable d := by
     refine summable_of_sum_range_le hd0 (c := 1) fun n => ?_
-    rw [g1d_pringsheim_sum (a := a) (b := b) n]
-    have := g1d_pringsheim_dens_ge_one h n
+    rw [sum_inv_norm_dens_sub_eq (a := a) (b := b) n]
+    have := one_le_norm_dens_of_pringsheim h n
     have : 0 < 1 / ‖(contFrac a b).dens n‖ := by positivity
     linarith
   have hc : CauchySeq (contFrac a b).convs := by
     refine cauchySeq_of_dist_le_of_summable d (fun m => ?_) hds
     rw [dist_comm, dist_eq_norm]
-    exact g1d_pringsheim_step h m
+    exact norm_convs_succ_sub_le_of_pringsheim h m
   obtain ⟨C, hC⟩ := cauchySeq_tendsto_of_complete hc
   exact ⟨C, le_of_tendsto' hC.norm fun n => (pringsheim_norm_convs_lt_one hb0 h n).le, hC⟩
 

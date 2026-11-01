@@ -9,16 +9,31 @@ public import DLMF.BernoulliEuler.Properties
 public import Mathlib.Analysis.Complex.AbelLimit
 
 /-!
-# Bernoulli and Euler polynomials: series expansions (DLMF §24.8)
+# Bernoulli and Euler polynomials: series expansions
+
+This file covers DLMF §24.8: the conditionally convergent boundary cases of the Fourier series
+of the Bernoulli polynomials, the Fourier series of the Euler polynomials, and series
+representations of the Bernoulli and Euler numbers.
+
+## Main results
+
+* `tendsto_sum_sin_div_eq_bernoulliFun_one`, `tendsto_sum_exp_div_eq_bernoulliFun_one`: DLMF
+  24.8.2 with `n = 0` and 24.8.3 with `n = 1`, for `0 < x < 1`, as limits of natural
+  (respectively symmetric) partial sums.
+* `hasSum_sin_odd_eulerFun`, `hasSum_cos_odd_eulerFun`: the Fourier series of the Euler
+  polynomials (DLMF 24.8.4, 24.8.5).
+* `hasSum_bernoulli_four_mul_add_two`, `hasSum_bernoulli_two_mul_alt`,
+  `bernoulli_two_mul_alpha_beta`: series for `B₂ₙ` (DLMF 24.8.6–24.8.8).
+* `eulerNumber_two_mul_eq_series`: a series for `E₂ₙ` (DLMF 24.8.9).
+
+## Implementation notes
 
 The Fourier series 24.8.1, 24.8.2 (`n ≥ 1`) and 24.8.3 (`n ≥ 2`) are Mathlib's
 `hasSum_one_div_nat_pow_mul_cos`, `hasSum_one_div_nat_pow_mul_sin` and
 `hasSum_one_div_pow_mul_fourier_mul_bernoulliFun` (pointers in `DLMF.Core.UpstreamElementary`).
-This file adds the conditionally convergent boundary cases (24.8.2 with `n = 0` and 24.8.3 with
-`n = 1`, for `0 < x < 1`) as limits of natural (resp. symmetric) partial sums, the Euler
-Fourier series 24.8.4–24.8.5, and the series 24.8.6–24.8.9. Series over `k ≥ 1` are written
-over `k + 1`, `k : ℕ`. In 24.8.8 and 24.8.9 two convergent series are combined; their
-summability is part of the statement, so the `tsum`s are genuine sums.
+Series over `k ≥ 1` are written over `k + 1`, `k : ℕ`. In 24.8.8 and 24.8.9 two convergent
+series are combined; their summability is part of the statement, so the `tsum`s are genuine
+sums.
 -/
 
 @[expose] public section
@@ -33,7 +48,7 @@ namespace DLMF.BernoulliEuler
 /-! ### Helpers -/
 
 /-- Real form of DLMF 24.4.23: `Eₙ(x) = 2ⁿ⁺¹/(n+1) (Bₙ₊₁(x/2 + 1/2) - Bₙ₊₁(x/2))`. -/
-lemma q24a_eulerFun_eq_bernoulliFun_sub (n : ℕ) (x : ℝ) :
+private lemma eulerFun_eq_bernoulliFun_sub (n : ℕ) (x : ℝ) :
     eulerFun n x = 2 ^ (n + 1) / (n + 1) *
       (bernoulliFun (n + 1) (x / 2 + 1 / 2) - bernoulliFun (n + 1) (x / 2)) := by
   have h := eulerPolyE_eq_bernoulliPolyB_sub n x
@@ -46,7 +61,7 @@ lemma q24a_eulerFun_eq_bernoulliFun_sub (n : ℕ) (x : ℝ) :
   exact_mod_cast h'
 
 /-- Restricting a series vanishing at even indices to the odd indices. -/
-lemma q24a_hasSum_odd {f : ℕ → ℝ} {a : ℝ} (h : HasSum f a) (h0 : ∀ j, f (2 * j) = 0) :
+private lemma hasSum_odd_of_even_eq_zero {f : ℕ → ℝ} {a : ℝ} (h : HasSum f a) (h0 : ∀ j, f (2 * j) = 0) :
     HasSum (fun k => f (2 * k + 1)) a := by
   have hinj : Function.Injective (fun m : ℕ => 2 * m + 1) := fun a b h => by simp at h; omega
   refine (hinj.hasSum_iff fun n hn => ?_).mpr h
@@ -58,7 +73,7 @@ lemma q24a_hasSum_odd {f : ℕ → ℝ} {a : ℝ} (h : HasSum f a) (h0 : ∀ j, 
 
 /-- The complex logarithmic series on the unit circle: for `w = e^{iθ}`, `0 < θ < 2π`, the partial
 sums of `∑_{n≥1} wⁿ/n` converge to `-log(1 - w)` (Dirichlet's test and Abel's limit theorem). -/
-lemma r24a_tendsto_log_series {θ : ℝ} (h0 : 0 < θ) (h1 : θ < 2 * π) :
+private lemma tendsto_sum_exp_pow_div_neg_log {θ : ℝ} (h0 : 0 < θ) (h1 : θ < 2 * π) :
     Tendsto (fun N : ℕ => ∑ n ∈ range N, Complex.exp (θ * Complex.I) ^ n / n) atTop
       (𝓝 (-Complex.log (1 - Complex.exp (θ * Complex.I)))) := by
   set w := Complex.exp (θ * Complex.I) with hw
@@ -128,7 +143,7 @@ lemma r24a_tendsto_log_series {θ : ℝ} (h0 : 0 < θ) (h1 : θ < 2 * π) :
 
 
 /-- `arg(1 - e^{iθ}) = (θ - π)/2` for `0 < θ < 2π`. -/
-lemma r24a_arg_one_sub_exp {θ : ℝ} (h0 : 0 < θ) (h1 : θ < 2 * π) :
+private lemma arg_one_sub_exp_mul_I {θ : ℝ} (h0 : 0 < θ) (h1 : θ < 2 * π) :
     Complex.arg (1 - Complex.exp (θ * Complex.I)) = (θ - π) / 2 := by
   have hs : 0 < Real.sin (θ / 2) := sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
   have he : 1 - Complex.exp (θ * Complex.I) = ((2 * Real.sin (θ / 2) : ℝ) : ℂ) *
@@ -152,7 +167,7 @@ lemma r24a_arg_one_sub_exp {θ : ℝ} (h0 : 0 < θ) (h1 : θ < 2 * π) :
 
 
 /-- Symmetric sums over `0 < |k| ≤ N` as sums over `k = 1, …, N`. -/
-lemma r24a_sum_symm_Icc {M : Type*} [AddCommMonoid M] (f : ℤ → M) (N : ℕ) :
+private lemma sum_Icc_neg_ne_zero_eq_sum_range {M : Type*} [AddCommMonoid M] (f : ℤ → M) (N : ℕ) :
     ∑ k ∈ Icc (-(N : ℤ)) N with k ≠ 0, f k = ∑ k ∈ range N, (f (k + 1) + f (-(k + 1))) := by
   induction N with
   | zero => simp [Finset.filter_singleton]
@@ -170,10 +185,10 @@ limit of the partial sums (the series converges only conditionally). -/
 theorem tendsto_sum_sin_div_eq_bernoulliFun_one {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1) :
     Tendsto (fun N : ℕ => -(2 / (2 * π)) * ∑ k ∈ range N, sin (2 * π * (k + 1) * x) / (k + 1))
       atTop (𝓝 (bernoulliFun 1 x)) := by
-  have h := r24a_tendsto_log_series (θ := 2 * π * x) (by positivity) (by nlinarith [pi_pos])
+  have h := tendsto_sum_exp_pow_div_neg_log (θ := 2 * π * x) (by positivity) (by nlinarith [pi_pos])
   have him := (Complex.continuous_im.tendsto _).comp h
   rw [← tendsto_add_atTop_iff_nat 1] at him
-  rw [Complex.neg_im, Complex.log_im, r24a_arg_one_sub_exp (by positivity) (by nlinarith [pi_pos])]
+  rw [Complex.neg_im, Complex.log_im, arg_one_sub_exp_mul_I (by positivity) (by nlinarith [pi_pos])]
     at him
   rw [bernoulliFun_one]
   have hval : -(2 / (2 * π)) * -((2 * π * x - π) / 2) = x - 1 / 2 := by
@@ -202,7 +217,7 @@ theorem tendsto_sum_exp_div_eq_bernoulliFun_one {x : ℝ} (hx0 : 0 < x) (hx1 : x
     (tendsto_sum_sin_div_eq_bernoulliFun_one hx0 hx1)
   refine h.congr fun N => ?_
   simp only [Function.comp]
-  rw [r24a_sum_symm_Icc]
+  rw [sum_Icc_neg_ne_zero_eq_sum_range]
   push_cast
   rw [mul_sum, mul_sum]
   refine sum_congr rfl fun k _ => ?_
@@ -246,9 +261,9 @@ theorem hasSum_sin_odd_eulerFun {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 ≤ 
         (Polynomial.map (algebraMap ℚ ℝ) (Polynomial.bernoulli (2 * n + 1))))
       = eulerFun (2 * n) x := by
     change _ * (c * bernoulliFun _ _ - c * bernoulliFun _ _) = _
-    rw [q24a_eulerFun_eq_bernoulliFun_sub]; push_cast; field_simp
+    rw [eulerFun_eq_bernoulliFun_sub]; push_cast; field_simp
   rw [hE] at hD
-  refine (q24a_hasSum_odd hD fun j => ?_).congr_fun fun k => ?_
+  refine (hasSum_odd_of_even_eq_zero hD fun j => ?_).congr_fun fun k => ?_
   · rw [show 2 * π * ((2 * j : ℕ) : ℝ) * (x / 2 + 1 / 2) = 2 * π * ((2 * j : ℕ) : ℝ) * (x / 2) +
       ((2 * j : ℕ) : ℝ) * π by ring, Real.sin_add_nat_mul_pi]
     simp [pow_mul]
@@ -288,13 +303,13 @@ theorem hasSum_cos_odd_eulerFun {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 ≤ 
       c * Polynomial.eval (x / 2) (Polynomial.map (algebraMap ℚ ℝ) (Polynomial.bernoulli (2 * n))))
       = eulerFun (2 * n - 1) x := by
     change _ * (c * bernoulliFun _ _ - c * bernoulliFun _ _) = _
-    rw [q24a_eulerFun_eq_bernoulliFun_sub, show 2 * n - 1 + 1 = 2 * n by omega]
+    rw [eulerFun_eq_bernoulliFun_sub, show 2 * n - 1 + 1 = 2 * n by omega]
     have : (2 * (n : ℝ)) ≠ 0 := by positivity
     rw [show ((2 * n - 1 : ℕ) : ℝ) + 1 = 2 * n by
       rw [Nat.cast_sub (by omega)]; push_cast; ring]
     field_simp
   rw [hE] at hD
-  refine (q24a_hasSum_odd hD fun j => ?_).congr_fun fun k => ?_
+  refine (hasSum_odd_of_even_eq_zero hD fun j => ?_).congr_fun fun k => ?_
   · rw [show 2 * π * ((2 * j : ℕ) : ℝ) * (x / 2 + 1 / 2) = 2 * π * ((2 * j : ℕ) : ℝ) * (x / 2) +
       ((2 * j : ℕ) : ℝ) * π by ring, Real.cos_add_nat_mul_pi]
     simp [pow_mul]

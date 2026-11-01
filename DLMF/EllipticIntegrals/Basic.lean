@@ -10,7 +10,7 @@ public import DLMF.EllipticIntegrals.Basic.Symmetric
 /-!
 # Foundational definitions for symmetric elliptic integrals
 
-This entry point exposes principal branches, admissible domains, Cauchy principal values
-and the symmetric integral definitions. Their Carlson bridges and subsequent theorems are
-in the complete area umbrella `DLMF.EllipticIntegrals`.
+This entry point exposes the principal branches, admissible domains, Cauchy principal values
+and definitions of the symmetric elliptic integrals. The comparison with Carlson's functions
+and the theorems about these integrals are collected in the umbrella `DLMF.EllipticIntegrals`.
 -/

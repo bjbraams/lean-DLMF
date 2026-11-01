@@ -9,13 +9,33 @@ public import DLMF.IncompleteGamma.Beta
 public import DLMF.IncompleteGamma.UniformAsymptotics
 
 /-!
-# Incomplete Beta asymptotic expansions and inverse, DLMF §8.18
+# Incomplete Beta asymptotic expansions and inverse (DLMF §8.18)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-The fixed-argument expansion uses finite diagonal shifts and a binomial-series
-majorant independent of the large positive parameter. Other remaining admissions
-are not completed proofs.
+## Main definitions
+
+* `betaAuxF`, `Real.betaXi`, `Real.betaGeneratingCoeff`: the endpoint auxiliary functions, the
+  endpoint variable and the generating coefficients, DLMF 8.18.2–8.18.7.
+* `Real.betaCenter`, `Real.betaEta`, `betaSymmetricC`: the transition variable and coefficients
+  of the symmetric case, DLMF 8.18.8–8.18.12.
+* `Real.betaZeta`, `betaGeneralH`: the transition variable and coefficients of the general case,
+  DLMF 8.18.15–8.18.17.
+* `Real.incBetaInverse`: the inverse of the normalized incomplete Beta function, DLMF 8.18.18.
+
+## Main results
+
+* `incBeta_large_a_fixed_x`, `incBeta_large_a_integer_b_exact`: the fixed-argument expansion,
+  DLMF 8.18.1.
+* `betaAuxF_recurrence`, `betaAuxF_initial`, `Real.betaGenerating_hasSum`: DLMF 8.18.4–8.18.6.
+* `incBeta_large_a_uniform`: the uniform endpoint expansion, DLMF 8.18.3.
+* `incBeta_symmetric_uniform_expansion`: the symmetric uniform expansion, DLMF 8.18.9.
+* `incBeta_general_uniform_expansion`: the general uniform expansion, DLMF 8.18.14.
+* `Real.incBetaInverse_spec`: DLMF 8.18.18.
+
+## Implementation notes
+
+Results already in Mathlib are referenced, not reproved. The fixed-argument expansion uses
+finite diagonal shifts and a binomial-series majorant independent of the large positive
+parameter.
 -/
 
 @[expose] public noncomputable section
@@ -189,7 +209,7 @@ theorem incBeta_large_a_integer_b_exact {a : ℝ} (ha : 0 < a) {b N : ℕ} (hb :
     have ih := ih (by omega)
     have hab : (a:ℂ)+b ≠ 0 := by
       intro h; have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg b : (0:ℝ) ≤ b)]
-    have hsh := normIncBetaI_shift_right (a:ℂ) b ha1 hab hxn hx0
+    have hsh := normIncBetaI_shift_right (a:ℂ) b ha1 hab hxn
     obtain ⟨M, rfl⟩ : ∃ M, N = M + 1 := ⟨N-1, by omega⟩
     have hbM : b ≤ M := by omega
     have hA : (∑ k ∈ Finset.range (M+1), R^k*(G (a+k)*G (((b+1:ℕ):ℂ)-k))) =

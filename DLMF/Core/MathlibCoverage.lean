@@ -17,21 +17,23 @@ public import TauCeti.Analysis.SpecialFunctions.IncompleteBeta
 # DLMF Chapters 6–8 results already in Mathlib or TauCeti
 
 The `dlmf_upstream` commands below are checked source pointers, deliberately not duplicate
-local theorems. The pinned Mathlib has neither named exponential/error/Fresnel functions nor
-complex incomplete Gamma/Beta continuations. Its `Complex.partialGamma` does cover the
-positive-real-argument lower incomplete Gamma integral. The real error/inverse
-functions imported by the project belong to TauCeti, including the declaration
-`Real.erfInv` in TauCeti's source; the namespace alone does not identify ownership.
+local theorems. The pinned Mathlib has neither named exponential, error or Fresnel functions
+nor complex incomplete Gamma or Beta continuations. Its `Complex.partialGamma` does cover the
+lower incomplete Gamma integral at positive real argument. The real error function and its
+inverse imported by the project belong to TauCeti, including the declaration `Real.erfInv` in
+TauCeti's source; the namespace alone does not identify ownership.
 
-The alternative notations of §8.1 are aliases for existing functions: Prym's
-P_z(a), Q_z(a) mean `DLMF.Confluent.lowerIncGamma a z`, `upperIncGamma a z`;
-(a,z)! and [a,z]! shift that parameter to a+1. B(a,b,x), I(a,b,x) name the
-incomplete Beta functions, and Luke's generalized trigonometric parameter is
-1-a. These notational aliases do not introduce new mathematical functions.
+## Implementation notes
 
-The former equation 8.18.13 was retired in DLMF 1.1.8; its slot now points to
-5.11.3. The scaled Gamma definition is recorded in `gammaScaled`, and the
-project's proved logarithmic Stirling expansion is in DLMF/Gamma/Asymptotics.lean.
+The alternative notations of §8.1 are aliases for existing functions: Prym's `P_z(a)`, `Q_z(a)`
+mean `DLMF.Confluent.lowerIncGamma a z` and `upperIncGamma a z`; `(a,z)!` and `[a,z]!` shift
+that parameter to `a+1`. `B(a,b,x)` and `I(a,b,x)` name the incomplete Beta functions, and
+Luke's generalized trigonometric parameter is `1-a`. These aliases do not introduce new
+mathematical functions.
+
+Equation 8.18.13 was retired in DLMF 1.1.8; its slot now points to 5.11.3. The scaled Gamma
+function is `gammaScaled` in `DLMF.IncompleteGamma.UniformAsymptotics`, and the logarithmic
+Stirling expansion is in `DLMF/Gamma/Asymptotics.lean`.
 -/
 
 /- DLMF 7.2.1–7.2.2 for real arguments: TauCeti's real error functions. The project's

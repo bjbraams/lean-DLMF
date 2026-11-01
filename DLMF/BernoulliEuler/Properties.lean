@@ -9,32 +9,61 @@ public import DLMF.BernoulliEuler.GeneratingFunctions
 public import Mathlib.Algebra.Group.ForwardDiff
 
 /-!
-# Bernoulli and Euler polynomials: basic properties (DLMF §24.4)
+# Bernoulli and Euler polynomials: basic properties
 
-Difference equations, symmetry, sums of powers, finite expansions, multiplication formulas,
-special values and symbolic (umbral) operations, for complex `x` (DLMF §24.1: "`x` real or
-complex"). Polynomial identities in `ℚ[X]` from Mathlib (`Polynomial.bernoulli_comp_one_add_X`,
-…) and from `DLMFMathlib.NumberTheory.EulerPolynomials` are evaluated at complex points with
+This file covers DLMF §24.4: difference equations, symmetry, sums of powers, finite expansions,
+multiplication formulas, special values and symbolic (umbral) operations, for complex `x`
+(DLMF §24.1: "`x` real or complex").
+
+## Main definitions
+
+* `umbralBernoulli`, `umbralEuler`: the umbral substitutions `(B(x))ⁿ = Bₙ(x)` and
+  `(E(x))ⁿ = Eₙ(x)` of DLMF §24.4(viii).
+
+## Main results
+
+* `bernoulliPolyB_add_one_sub`, `eulerPolyE_add_one_add`, `bernoulliPolyB_one_sub`,
+  `eulerPolyE_one_sub`, `bernoulliPolyB_neg`, `eulerPolyE_neg`: difference equations and
+  symmetry (DLMF 24.4.1–24.4.6).
+* `sum_Icc_pow_eq_bernoulli`, `sum_Icc_neg_one_pow_mul_pow_eq_euler`, `sum_range_add_mul_pow`,
+  `sum_range_neg_one_pow_mul_add_mul_pow`, `sum_coprime_pow`: sums of powers
+  (DLMF 24.4.7–24.4.11).
+* `eulerPolyE_eq_sum_bernoulli`, `bernoulli_two_mul_eq_sum_euler`,
+  `eulerNumber_two_mul_eq_sum_bernoulli`, `eulerNumber_two_mul_eq_one_sub_sum_bernoulli`:
+  finite expansions (DLMF 24.4.14–24.4.17).
+* `bernoulliPolyB_mul`, `eulerPolyE_mul_of_even`, `eulerPolyE_mul_of_odd`,
+  `eulerPolyE_eq_bernoulliPolyB_sub'`, `bernoulliPolyB_eq_half`,
+  `eulerPolyE_eq_bernoulliPolyB_sub`: multiplication formulas (DLMF 24.4.18–24.4.23).
+* `bernoulliPolyB_mul_eq_roots_of_unity`: DLMF 24.4.24, corrected.
+* `bernoulliPolyB_zero_one`, `eulerPolyE_zero_one`, `bernoulliPolyB_half`, `eulerPolyE_half'`,
+  `bernoulliPolyB_third`, `eulerPolyE_third`, `bernoulliPolyB_quarter`, `bernoulliPolyB_sixth`,
+  `eulerPolyE_sixth`: special values (DLMF 24.4.25–24.4.33).
+* `umbralBernoulli_comp_add_one_sub`, `umbralBernoulli_X_add_C_pow`,
+  `umbralEuler_comp_add_one_add`, `umbralEuler_X_add_C_pow`: DLMF 24.4.36–24.4.39.
+
+## Implementation notes
+
+Polynomial identities in `ℚ[X]` from Mathlib (`Polynomial.bernoulli_comp_one_add_X`, …) and
+from `DLMFMathlib.NumberTheory.EulerPolynomials` are evaluated at complex points with
 `Polynomial.aeval_comp`. Identities that Mathlib proves only for real `x` (Raabe's theorem
 `bernoulliFun_mul`) are extended to complex `x` by the identity theorem for polynomials
-(`b24a_eq_zero_of_real`).
+(`eq_zero_of_polynomial_of_real_eq_zero`). The finite expansions 24.4.12–24.4.13 and the
+derivatives 24.4.34–24.4.35 are `bernoulliPolyB_add`, `eulerPolyE_add`,
+`hasDerivAt_bernoulliPolyB` and `hasDerivAt_eulerPolyE` in `DLMF.BernoulliEuler.Basic`.
 
-The derivatives 24.4.34–24.4.35 are `hasDerivAt_bernoulliPolyB`, `hasDerivAt_eulerPolyE`
-(`DLMF.BernoulliEuler.Basic`); the finite expansions 24.4.12–24.4.13 are `bernoulliPolyB_add`,
-`eulerPolyE_add` (ibid.).
-
-## Corrections
+Corrections to DLMF:
 
 * 24.4.7 and 24.4.8 fail for `n = 0` (the printed sums start at `k = 1`; for `n = 0`,
   `∑_{k=1}^m k⁰ = m` while the right side of 24.4.7 is `m + 1`, and 24.4.8 gives
-  `(1 + (-1)^m)/2` against `∑_{k=1}^m (-1)^{m-k}`). They are acquired for `n ≥ 1`.
-* 24.4.11 fails for `m = 1` (left side `1`, right side `(Bₙ₊₁(1) - Bₙ₊₁)/(n+1) = 0` for `n ≥ 1`);
-  acquired for `m ≥ 2`.
+  `(1 + (-1)^m)/2` against `∑_{k=1}^m (-1)^{m-k}`). They are stated for `n ≥ 1`.
+* 24.4.11 fails for `m = 1` (left side `1`, right side `(Bₙ₊₁(1) - Bₙ₊₁)/(n+1) = 0` for
+  `n ≥ 1`); it is stated for `m ≥ 2`.
 * 24.4.24 is false as printed: for `n = 1` its right side is `mx - m + 1/2` instead of
-  `mx - 1/2` (the inner sum is `∑_{r=1}^{m-1} e^{2πir/m}/(1 - e^{2πir/m}) = -(m-1)/2`); numerical
-  checks also fail for `n = 2, …, 5`, `m = 2, 3, 4` and for every sign or exponent variant tried.
-  The corrected form, derived from the generating function by the partial fractions
-  `m/(w^m - 1) = ∑_r ζ^r/(w - ζ^r)` and expanding `1/(ζ^{-r}e^t - 1)` in powers of `eᵗ - 1`, is
+  `mx - 1/2` (the inner sum is `∑_{r=1}^{m-1} e^{2πir/m}/(1 - e^{2πir/m}) = -(m-1)/2`);
+  numerical checks also fail for `n = 2, …, 5`, `m = 2, 3, 4` and for every sign or exponent
+  variant tried. The corrected form, derived from the generating function by the partial
+  fractions `m/(w^m - 1) = ∑_r ζ^r/(w - ζ^r)` and expanding `1/(ζ^{-r}e^t - 1)` in powers of
+  `eᵗ - 1`, is
   `Bₙ(mx) = mⁿ Bₙ(x) - n ∑_{k=1}^{n} ∑_{j=0}^{k-1} (-1)^j (k-1 choose j)
     (∑_{r=1}^{m-1} ζ^r/(1 - ζ^r)^k) (j + mx)^{n-1}` with `ζ = e^{2πi/m}`
   (verified numerically to working precision for `n ≤ 7`, `2 ≤ m ≤ 5`, complex `x`).
@@ -53,13 +82,13 @@ namespace DLMF.BernoulliEuler
 /-! ### Helpers -/
 
 /-- Complex evaluation of a rational polynomial as evaluation of the mapped polynomial. -/
-theorem b24a_aeval_eq_eval_map (p : ℚ[X]) (z : ℂ) :
+theorem aeval_complex_eq_eval_map (p : ℚ[X]) (z : ℂ) :
     aeval z p = (p.map (algebraMap ℚ ℂ)).eval z := by
   rw [Polynomial.aeval_def, Polynomial.eval₂_eq_eval_map]
 
 /-- The identity theorem for polynomial functions: a function of `z ∈ ℂ` given by a complex
 polynomial that vanishes at every real point vanishes everywhere. -/
-lemma b24a_eq_zero_of_real {f : ℂ → ℂ} (F : ℂ[X]) (hF : ∀ z, F.eval z = f z)
+private lemma eq_zero_of_polynomial_of_real_eq_zero {f : ℂ → ℂ} (F : ℂ[X]) (hF : ∀ z, F.eval z = f z)
     (hreal : ∀ x : ℝ, f x = 0) (z : ℂ) : f z = 0 := by
   have hF0 : F = 0 := by
     refine Polynomial.eq_zero_of_infinite_isRoot F ?_
@@ -70,18 +99,18 @@ lemma b24a_eq_zero_of_real {f : ℂ → ℂ} (F : ℂ[X]) (hF : ∀ z, F.eval z 
 
 /-- Identity under the stated parameter and domain assumptions: `aeval z ((Polynomial.bernoulli
 n).comp p) = bernoulliPolyB n (aeval z p)`. -/
-lemma b24a_bernoulliPolyB_comp (n : ℕ) (p : ℚ[X]) (z : ℂ) :
+private lemma aeval_bernoulli_comp (n : ℕ) (p : ℚ[X]) (z : ℂ) :
     aeval z ((Polynomial.bernoulli n).comp p) = bernoulliPolyB n (aeval z p) := by
   rw [Polynomial.aeval_comp]; rfl
 
 /-- Identity under the stated parameter and domain assumptions: `aeval z ((Polynomial.euler
 n).comp p) = eulerPolyE n (aeval z p)`. -/
-lemma b24a_eulerPolyE_comp (n : ℕ) (p : ℚ[X]) (z : ℂ) :
+private lemma aeval_euler_comp (n : ℕ) (p : ℚ[X]) (z : ℂ) :
     aeval z ((Polynomial.euler n).comp p) = eulerPolyE n (aeval z p) := by
   rw [Polynomial.aeval_comp]; rfl
 
 /-- A complex polynomial with `F(z + h) + F(z) = 0` for all `z`, `h ≠ 0`, vanishes. -/
-theorem b24a_eq_zero_of_add_add_self {F : ℂ[X]} {h : ℂ} (hh : h ≠ 0)
+theorem polynomial_eq_zero_of_eval_add_add_eval {F : ℂ[X]} {h : ℂ} (hh : h ≠ 0)
     (hF : ∀ z, F.eval (z + h) + F.eval z = 0) : F = 0 := by
   have hper : ∀ z, F.eval (z + 2 * h) = F.eval z := by
     intro z
@@ -109,7 +138,7 @@ theorem b24a_eq_zero_of_add_add_self {F : ℂ[X]} {h : ℂ} (hh : h ≠ 0)
   rw [this, map_zero]
 
 /-- Alternating telescoping sum. -/
-lemma b24a_sum_alt_telescope (g : ℕ → ℂ) (m : ℕ) :
+private lemma sum_range_alt_add_telescope (g : ℕ → ℂ) (m : ℕ) :
     ∑ k ∈ range m, (-1 : ℂ) ^ k * (g (k + 1) + g k) = g 0 - (-1) ^ m * g m := by
   induction m with
   | zero => simp
@@ -122,7 +151,7 @@ lemma b24a_sum_alt_telescope (g : ℕ → ℂ) (m : ℕ) :
 theorem bernoulliPolyB_add_one_sub (n : ℕ) (x : ℂ) :
     bernoulliPolyB n (x + 1) - bernoulliPolyB n x = n * x ^ (n - 1) := by
   have h := congrArg (aeval x) (Polynomial.bernoulli_comp_one_add_X n)
-  rw [b24a_bernoulliPolyB_comp] at h
+  rw [aeval_bernoulli_comp] at h
   simp only [map_add, map_one, Polynomial.aeval_X, nsmul_eq_mul] at h
   rw [add_comm x 1, h]; simp [bernoulliPolyB]
 
@@ -132,7 +161,7 @@ theorem eulerPolyE_add_one_add (n : ℕ) (x : ℂ) :
     eulerPolyE n (x + 1) + eulerPolyE n x = 2 * x ^ n := by
   have h := congrArg (aeval x) (Polynomial.euler_comp_X_add_one_add n)
   simp only [map_add, map_mul, map_pow, Polynomial.aeval_X, map_ofNat] at h
-  rw [b24a_eulerPolyE_comp] at h
+  rw [aeval_euler_comp] at h
   simpa [eulerPolyE] using h
 
 /-! ### §24.4(ii) Symmetry -/
@@ -142,7 +171,7 @@ theorem eulerPolyE_add_one_add (n : ℕ) (x : ℂ) :
 theorem bernoulliPolyB_one_sub (n : ℕ) (x : ℂ) :
     bernoulliPolyB n (1 - x) = (-1) ^ n * bernoulliPolyB n x := by
   have h := congrArg (aeval x) (Polynomial.bernoulli_comp_one_sub_X n)
-  rw [b24a_bernoulliPolyB_comp] at h
+  rw [aeval_bernoulli_comp] at h
   simpa [bernoulliPolyB] using h
 
 /-- **DLMF 24.4.4**: `Eₙ(1-x) = (-1)ⁿ Eₙ(x)`. -/
@@ -150,7 +179,7 @@ theorem bernoulliPolyB_one_sub (n : ℕ) (x : ℂ) :
 theorem eulerPolyE_one_sub (n : ℕ) (x : ℂ) :
     eulerPolyE n (1 - x) = (-1) ^ n * eulerPolyE n x := by
   have h := congrArg (aeval x) (Polynomial.euler_comp_one_sub_X n)
-  rw [b24a_eulerPolyE_comp] at h
+  rw [aeval_euler_comp] at h
   simpa [eulerPolyE] using h
 
 /-- **DLMF 24.4.5**: `(-1)ⁿ Bₙ(-x) = Bₙ(x) + n x^{n-1}`. -/
@@ -251,7 +280,7 @@ theorem sum_Icc_neg_one_pow_mul_pow_eq_euler {n : ℕ} (hn : 1 ≤ n) (m : ℕ) 
 
 /-- Inclusion–exclusion over the prime factors of `m`:
 `[gcd(k, m) = 1] = ∑_{T ⊆ P(m)} (-1)^{|T|} [∏T ∣ k]`. -/
-lemma r24a_coprime_indicator (k : ℕ) {m : ℕ} (hm0 : m ≠ 0) :
+private lemma coprime_indicator_eq_sum_powerset_primeFactors (k : ℕ) {m : ℕ} (hm0 : m ≠ 0) :
     (if Nat.Coprime k m then (1 : ℚ) else 0) = ∑ T ∈ m.primeFactors.powerset,
       (-1 : ℚ) ^ T.card * (if (∏ p ∈ T, p) ∣ k then 1 else 0) := by
   have h1 : (if Nat.Coprime k m then (1 : ℚ) else 0) =
@@ -282,7 +311,7 @@ lemma r24a_coprime_indicator (k : ℕ) {m : ℕ} (hm0 : m ≠ 0) :
     fun h p hp => (dvd_prod_of_mem _ hp).trans h⟩
 
 /-- Sum of `kⁿ` over the multiples of `d` in `[1, m]`: `dⁿ ∑_{j=1}^{m/d} jⁿ`. -/
-lemma r24a_sum_dvd_pow {d m : ℕ} (hd : 0 < d) (n : ℕ) :
+private lemma sum_Icc_dvd_indicator_mul_pow {d m : ℕ} (hd : 0 < d) (n : ℕ) :
     ∑ k ∈ Icc 1 m, (if d ∣ k then (1 : ℚ) else 0) * (k : ℚ) ^ n =
       (d : ℚ) ^ n * ∑ j ∈ Icc 1 (m / d), (j : ℚ) ^ n := by
   have hfilt : (Icc 1 m).filter (fun k => d ∣ k) =
@@ -306,7 +335,7 @@ lemma r24a_sum_dvd_pow {d m : ℕ} (hd : 0 < d) (n : ℕ) :
   push_cast; ring
 
 /-- Faulhaber with `B'`: `∑_{j=1}^{q} jⁿ = 1/(n+1) ∑_{j=1}^{n+1} (n+1 choose j) B'_{n+1-j} qʲ`. -/
-lemma r24a_sum_Icc_pow (q n : ℕ) :
+private lemma sum_Icc_pow_eq_sum_choose_bernoulli' (q n : ℕ) :
     ∑ j ∈ Icc 1 q, (j : ℚ) ^ n = 1 / (n + 1) * ∑ j ∈ Icc 1 (n + 1),
       ((n + 1).choose j : ℚ) * bernoulli' (n + 1 - j) * (q : ℚ) ^ j := by
   rw [show Icc 1 q = Ico 1 (q + 1) from rfl, sum_Ico_pow, show Icc 1 (n + 1) = Ico 1 (n + 1 + 1)
@@ -346,18 +375,18 @@ theorem sum_coprime_pow (n : ℕ) {m : ℕ} (hm : 2 ≤ m) :
           ((if (∏ p ∈ T, p) ∣ k then 1 else 0) * (k : ℚ) ^ n) := fun k _ => by
       rw [show (if Nat.Coprime k m then (k : ℚ) ^ n else 0) =
         (if Nat.Coprime k m then (1 : ℚ) else 0) * (k : ℚ) ^ n by split_ifs <;> simp,
-        r24a_coprime_indicator k hm0, sum_mul]
+        coprime_indicator_eq_sum_powerset_primeFactors k hm0, sum_mul]
       exact sum_congr rfl fun _ _ => by ring
     rw [sum_congr rfl this, sum_comm]
     refine sum_congr rfl fun T hT => ?_
-    rw [← mul_sum, r24a_sum_dvd_pow (hpos T hT)]
+    rw [← mul_sum, sum_Icc_dvd_indicator_mul_pow (hpos T hT)]
   -- step 2: Faulhaber and `dⁿ (m/d)ʲ = mʲ d^{n-j}`
   have s2 : ∀ T ∈ P.powerset, (((∏ p ∈ T, p : ℕ) : ℚ) ^ n *
       ∑ j ∈ Icc 1 (m / ∏ p ∈ T, p), (j : ℚ) ^ n) = 1 / (n + 1) * ∑ j ∈ Icc 1 (n + 1),
         ((n + 1).choose j : ℚ) * bernoulli' (n + 1 - j) * (m : ℚ) ^ j *
           ∏ p ∈ T, (p : ℚ) ^ ((n : ℤ) - j) := by
     intro T hT
-    rw [r24a_sum_Icc_pow, mul_sum, mul_sum, mul_sum]
+    rw [sum_Icc_pow_eq_sum_choose_bernoulli', mul_sum, mul_sum, mul_sum]
     refine sum_congr rfl fun j _ => ?_
     have hd0 : ((∏ p ∈ T, p : ℕ) : ℚ) ≠ 0 := by exact_mod_cast (hpos T hT).ne'
     rw [Nat.cast_div (hdvd T hT) hd0, prod_zpow, ← Nat.cast_prod, zpow_sub₀ hd0, zpow_natCast,
@@ -399,8 +428,8 @@ theorem bernoulliPolyB_mul (n : ℕ) {m : ℕ} (hm : m ≠ 0) (x : ℂ) :
     bernoulliPolyB n (m * x) =
       (m : ℂ) ^ n / m * ∑ k ∈ range m, bernoulliPolyB n (x + k / m) := by
   set P := (Polynomial.bernoulli n).map (algebraMap ℚ ℂ)
-  have hB : ∀ w, bernoulliPolyB n w = P.eval w := fun w => b24a_aeval_eq_eval_map _ w
-  have := b24a_eq_zero_of_real
+  have hB : ∀ w, bernoulliPolyB n w = P.eval w := fun w => aeval_complex_eq_eval_map _ w
+  have := eq_zero_of_polynomial_of_real_eq_zero
     (f := fun z => bernoulliPolyB n (m * z) -
       (m : ℂ) ^ n / m * ∑ k ∈ range m, bernoulliPolyB n (z + k / m))
     (P.comp (Polynomial.C (m : ℂ) * X) - Polynomial.C ((m : ℂ) ^ n / m) *
@@ -423,19 +452,19 @@ theorem eulerPolyE_mul_of_even (n : ℕ) {m : ℕ} (hm : Even m) (hm0 : m ≠ 0)
   have hn1 : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
   set P := (Polynomial.euler n).map (algebraMap ℚ ℂ)
   set Q := (Polynomial.bernoulli (n + 1)).map (algebraMap ℚ ℂ)
-  have hE : ∀ w, eulerPolyE n w = P.eval w := fun w => b24a_aeval_eq_eval_map _ w
-  have hB : ∀ w, bernoulliPolyB (n + 1) w = Q.eval w := fun w => b24a_aeval_eq_eval_map _ w
+  have hE : ∀ w, eulerPolyE n w = P.eval w := fun w => aeval_complex_eq_eval_map _ w
+  have hB : ∀ w, bernoulliPolyB (n + 1) w = Q.eval w := fun w => aeval_complex_eq_eval_map _ w
   set F : ℂ[X] := P.comp (Polynomial.C (m : ℂ) * X) + Polynomial.C (2 * (m : ℂ) ^ n / (n + 1)) *
       ∑ k ∈ range m, Polynomial.C ((-1 : ℂ) ^ k) * Q.comp (X + Polynomial.C ((k : ℂ) / m))
   have hFe : ∀ z, F.eval z = eulerPolyE n (m * z) +
       2 * (m : ℂ) ^ n / (n + 1) * ∑ k ∈ range m, (-1) ^ k * bernoulliPolyB (n + 1) (z + k / m) := by
     intro z; simp [F, hE, hB, Polynomial.eval_finsetSum]
   have hF : F = 0 := by
-    refine b24a_eq_zero_of_add_add_self (h := 1 / m) (by simpa using hm0') fun z => ?_
+    refine polynomial_eq_zero_of_eval_add_add_eval (h := 1 / m) (by simpa using hm0') fun z => ?_
     rw [hFe, hFe]
     have h1 := eulerPolyE_add_one_add n (m * z)
     rw [show (m : ℂ) * (z + 1 / m) = m * z + 1 by field_simp]
-    have h2 := b24a_sum_alt_telescope (fun k => bernoulliPolyB (n + 1) (z + k / m)) m
+    have h2 := sum_range_alt_add_telescope (fun k => bernoulliPolyB (n + 1) (z + k / m)) m
     simp only [Nat.cast_succ, Nat.cast_zero, zero_div, add_zero, hm.neg_one_pow, one_mul] at h2
     rw [show z + (m : ℂ) / m = z + 1 by field_simp] at h2
     have h4 := bernoulliPolyB_add_one_sub (n + 1) z
@@ -463,18 +492,18 @@ theorem eulerPolyE_mul_of_odd (n : ℕ) {m : ℕ} (hm : Odd m) (x : ℂ) :
     eulerPolyE n (m * x) = (m : ℂ) ^ n * ∑ k ∈ range m, (-1) ^ k * eulerPolyE n (x + k / m) := by
   have hm0 : (m : ℂ) ≠ 0 := by exact_mod_cast hm.pos.ne'
   set P := (Polynomial.euler n).map (algebraMap ℚ ℂ)
-  have hE : ∀ w, eulerPolyE n w = P.eval w := fun w => b24a_aeval_eq_eval_map _ w
+  have hE : ∀ w, eulerPolyE n w = P.eval w := fun w => aeval_complex_eq_eval_map _ w
   set F : ℂ[X] := P.comp (Polynomial.C (m : ℂ) * X) - Polynomial.C ((m : ℂ) ^ n) *
       ∑ k ∈ range m, Polynomial.C ((-1 : ℂ) ^ k) * P.comp (X + Polynomial.C ((k : ℂ) / m))
   have hFe : ∀ z, F.eval z = eulerPolyE n (m * z) -
       (m : ℂ) ^ n * ∑ k ∈ range m, (-1) ^ k * eulerPolyE n (z + k / m) := by
     intro z; simp [F, hE, Polynomial.eval_finsetSum]
   have hF : F = 0 := by
-    refine b24a_eq_zero_of_add_add_self (h := 1 / m) (by simpa using hm0) fun z => ?_
+    refine polynomial_eq_zero_of_eval_add_add_eval (h := 1 / m) (by simpa using hm0) fun z => ?_
     rw [hFe, hFe]
     have h1 := eulerPolyE_add_one_add n (m * z)
     rw [show (m : ℂ) * (z + 1 / m) = m * z + 1 by field_simp]
-    have h2 := b24a_sum_alt_telescope (fun k => eulerPolyE n (z + k / m)) m
+    have h2 := sum_range_alt_add_telescope (fun k => eulerPolyE n (z + k / m)) m
     simp only [Nat.cast_succ, Nat.cast_zero, zero_div, add_zero, hm.neg_one_pow] at h2
     rw [show z + (m : ℂ) / m = z + 1 by field_simp] at h2
     have h3 : ∀ k : ℕ, z + 1 / m + k / m = z + ((k : ℂ) + 1) / m := fun k => by ring
@@ -511,7 +540,7 @@ theorem eulerPolyE_eq_bernoulliPolyB_sub (n : ℕ) (x : ℂ) :
       (bernoulliPolyB (n + 1) (x / 2 + 1 / 2) - bernoulliPolyB (n + 1) (x / 2)) := by
   have h := congrArg (aeval x) (Polynomial.euler_eq_bernoulli n)
   simp only [map_mul, map_add, map_natCast, map_one, map_sub, Polynomial.aeval_C,
-    b24a_bernoulliPolyB_comp, Polynomial.aeval_X, eq_ratCast] at h
+    aeval_bernoulli_comp, Polynomial.aeval_X, eq_ratCast] at h
   have hn : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
   push_cast at h
   rw [show (1 : ℂ) / 2 * x + 1 / 2 = x / 2 + 1 / 2 by ring,
@@ -548,13 +577,13 @@ theorem eulerPolyE_eq_sum_bernoulli (n : ℕ) (x : ℂ) :
 /-! ### Helpers for 24.4.24 -/
 
 /-- Alternating binomial sums `∑_{j≤k} (-1)^j (k choose j) (j + y)^{n-1}`. -/
-def s24a_D (n k : ℕ) (y : ℂ) : ℂ :=
+def altBinomialShiftPowSum (n k : ℕ) (y : ℂ) : ℂ :=
   ∑ j ∈ range (k + 1), (-1) ^ j * (k.choose j : ℂ) * ((j : ℂ) + y) ^ (n - 1)
 
-/-- `s24a_D` as an iterated forward difference. -/
-lemma s24a_D_eq_fwdDiff (n k : ℕ) (y : ℂ) :
-    s24a_D n k y = (-1) ^ k * (fwdDiff 1)^[k] (fun r : ℂ => r ^ (n - 1)) y := by
-  rw [fwdDiff_iter_eq_sum_shift, s24a_D, mul_sum]
+/-- `altBinomialShiftPowSum` as an iterated forward difference. -/
+private lemma altBinomialShiftPowSum_eq_fwdDiff_iter (n k : ℕ) (y : ℂ) :
+    altBinomialShiftPowSum n k y = (-1) ^ k * (fwdDiff 1)^[k] (fun r : ℂ => r ^ (n - 1)) y := by
+  rw [fwdDiff_iter_eq_sum_shift, altBinomialShiftPowSum, mul_sum]
   refine sum_congr rfl fun j hj => ?_
   have hj' : j ≤ k := Nat.lt_succ_iff.mp (mem_range.mp hj)
   simp only [zsmul_eq_mul, nsmul_eq_mul, mul_one]
@@ -563,41 +592,41 @@ lemma s24a_D_eq_fwdDiff (n k : ℕ) (y : ℂ) :
     show k + (k - j) = j + 2 * (k - j) by omega, pow_add, pow_mul]
   simp
 
-/-- Pascal recursion for `s24a_D`. -/
-lemma s24a_D_shift (n k : ℕ) (y : ℂ) :
-    s24a_D n k (y + 1) = s24a_D n k y - s24a_D n (k + 1) y := by
-  rw [s24a_D_eq_fwdDiff, s24a_D_eq_fwdDiff, s24a_D_eq_fwdDiff, Function.iterate_succ_apply',
+/-- Pascal recursion for `altBinomialShiftPowSum`. -/
+private lemma altBinomialShiftPowSum_add_one (n k : ℕ) (y : ℂ) :
+    altBinomialShiftPowSum n k (y + 1) = altBinomialShiftPowSum n k y - altBinomialShiftPowSum n (k + 1) y := by
+  rw [altBinomialShiftPowSum_eq_fwdDiff_iter, altBinomialShiftPowSum_eq_fwdDiff_iter, altBinomialShiftPowSum_eq_fwdDiff_iter, Function.iterate_succ_apply',
     fwdDiff, pow_succ]
   ring
 
-/-- `s24a_D n n = 0`: the `n`-th difference of `y^{n-1}` vanishes. -/
-lemma s24a_D_self {n : ℕ} (hn : 1 ≤ n) (y : ℂ) : s24a_D n n y = 0 := by
-  rw [s24a_D_eq_fwdDiff, fwdDiff_iter_pow_eq_zero_of_lt (by omega)]
+/-- `altBinomialShiftPowSum n n = 0`: the `n`-th difference of `y^{n-1}` vanishes. -/
+private lemma altBinomialShiftPowSum_self {n : ℕ} (hn : 1 ≤ n) (y : ℂ) : altBinomialShiftPowSum n n y = 0 := by
+  rw [altBinomialShiftPowSum_eq_fwdDiff_iter, fwdDiff_iter_pow_eq_zero_of_lt (by omega)]
   simp
 
 /-- The polynomial solution of `h(y+1) - ζ h(y) = y^{n-1}`, `ζ ≠ 1`. -/
-def s24a_h (n : ℕ) (ζ y : ℂ) : ℂ :=
-  ∑ k ∈ range n, ((1 - ζ)⁻¹) ^ (k + 1) * s24a_D n k y
+def twistedDiffSolution (n : ℕ) (ζ y : ℂ) : ℂ :=
+  ∑ k ∈ range n, ((1 - ζ)⁻¹) ^ (k + 1) * altBinomialShiftPowSum n k y
 
 /-- The difference equation `h(y+1) = ζ h(y) + y^{n-1}`. -/
-lemma s24a_h_shift {n : ℕ} (hn : 1 ≤ n) {ζ : ℂ} (hζ : ζ ≠ 1) (y : ℂ) :
-    s24a_h n ζ (y + 1) = ζ * s24a_h n ζ y + y ^ (n - 1) := by
+private lemma twistedDiffSolution_add_one {n : ℕ} (hn : 1 ≤ n) {ζ : ℂ} (hζ : ζ ≠ 1) (y : ℂ) :
+    twistedDiffSolution n ζ (y + 1) = ζ * twistedDiffSolution n ζ y + y ^ (n - 1) := by
   have h1 : (1 : ℂ) - ζ ≠ 0 := sub_ne_zero.mpr (Ne.symm hζ)
   set a := (1 - ζ)⁻¹
   have ha : a ≠ 0 := inv_ne_zero h1
   have hζa : ζ = 1 - a⁻¹ := by simp [a]
   have key : y ^ (n - 1) =
-      ∑ k ∈ range n, (a ^ k * s24a_D n k y - a ^ (k + 1) * s24a_D n (k + 1) y) := by
-    rw [sum_range_sub' (fun k : ℕ => a ^ k * s24a_D n k y) n, s24a_D_self hn]
-    simp [s24a_D]
-  rw [s24a_h, s24a_h, key, mul_sum, ← sum_add_distrib]
+      ∑ k ∈ range n, (a ^ k * altBinomialShiftPowSum n k y - a ^ (k + 1) * altBinomialShiftPowSum n (k + 1) y) := by
+    rw [sum_range_sub' (fun k : ℕ => a ^ k * altBinomialShiftPowSum n k y) n, altBinomialShiftPowSum_self hn]
+    simp [altBinomialShiftPowSum]
+  rw [twistedDiffSolution, twistedDiffSolution, key, mul_sum, ← sum_add_distrib]
   refine sum_congr rfl fun k _ => ?_
-  rw [s24a_D_shift, hζa]
+  rw [altBinomialShiftPowSum_add_one, hζa]
   field_simp
   ring
 
 /-- Iterating `f(z+1) = ζ f(z) + q(z)`. -/
-lemma s24a_iter {f q : ℂ → ℂ} {ζ : ℂ} (hf : ∀ z, f (z + 1) = ζ * f z + q z) (y : ℂ) (s : ℕ) :
+private lemma apply_add_natCast_of_apply_add_one {f q : ℂ → ℂ} {ζ : ℂ} (hf : ∀ z, f (z + 1) = ζ * f z + q z) (y : ℂ) (s : ℕ) :
     f (y + s) = ζ ^ s * f y + ∑ t ∈ range s, ζ ^ (s - 1 - t) * q (y + (t : ℂ)) := by
   induction s with
   | zero => simp
@@ -615,7 +644,7 @@ lemma s24a_iter {f q : ℂ → ℂ} {ζ : ℂ} (hf : ∀ z, f (z + 1) = ζ * f z
     ring
 
 /-- `ζ_r^j = ω^{rj}` with `ω = e^{2πi/m}`. -/
-lemma s24a_zeta_pow (m r j : ℕ) :
+private lemma exp_two_pi_I_mul_div_pow (m r j : ℕ) :
     Complex.exp (2 * π * Complex.I * r / m) ^ j =
       Complex.exp (2 * π * Complex.I / m) ^ (r * j) := by
   rw [← Complex.exp_nat_mul, ← Complex.exp_nat_mul]
@@ -625,7 +654,7 @@ lemma s24a_zeta_pow (m r j : ℕ) :
 
 /-- Sums over the nontrivial `m`-th roots of unity: `∑_{r=1}^{m-1} ζ_r^j` is `m - 1` for
 `j = m` and `-1` for `0 < j < m`. -/
-lemma s24a_sum_zeta_pow {m j : ℕ} (hm : 2 ≤ m) (hj0 : 0 < j) (hjm : j ≤ m) :
+private lemma sum_Icc_exp_two_pi_I_mul_div_pow {m j : ℕ} (hm : 2 ≤ m) (hj0 : 0 < j) (hjm : j ≤ m) :
     ∑ r ∈ Icc 1 (m - 1), Complex.exp (2 * π * Complex.I * r / m) ^ j =
       if j = m then (m : ℂ) - 1 else -1 := by
   have hω := Complex.isPrimitiveRoot_exp m (by omega)
@@ -639,7 +668,7 @@ lemma s24a_sum_zeta_pow {m j : ℕ} (hm : 2 ≤ m) (hj0 : 0 < j) (hjm : j ≤ m)
         zero_div]
   have hsplit : ∑ r ∈ range m, (ω ^ j) ^ r = 1 + ∑ r ∈ Icc 1 (m - 1), (ω ^ j) ^ r := by
     rw [hI, range_eq_Ico, sum_eq_sum_Ico_succ_bot (by omega), pow_zero]
-  simp only [s24a_zeta_pow, mul_comm _ j, pow_mul]
+  simp only [exp_two_pi_I_mul_div_pow, mul_comm _ j, pow_mul]
   by_cases h : j = m
   · have e1 : (if j = m then (m : ℂ) - 1 else -1) = (m : ℂ) - 1 := by simp [h]
     have e2 : (if j = m then (m : ℂ) else 0) = m := by simp [h]
@@ -649,27 +678,27 @@ lemma s24a_sum_zeta_pow {m j : ℕ} (hm : 2 ≤ m) (hj0 : 0 < j) (hjm : j ≤ m)
     rw [e2] at hfull; rw [e1]; linear_combination hfull - hsplit
 
 /-- `ζ_r ≠ 1` for `1 ≤ r ≤ m - 1`. -/
-lemma s24a_zeta_ne_one {m r : ℕ} (hr : r ∈ Icc 1 (m - 1)) :
+private lemma exp_two_pi_I_mul_div_ne_one {m r : ℕ} (hr : r ∈ Icc 1 (m - 1)) :
     Complex.exp (2 * π * Complex.I * r / m) ≠ 1 := by
   simp only [mem_Icc] at hr
   have hω := Complex.isPrimitiveRoot_exp m (by omega)
-  rw [← pow_one (Complex.exp _), s24a_zeta_pow, mul_one]
+  rw [← pow_one (Complex.exp _), exp_two_pi_I_mul_div_pow, mul_one]
   exact hω.pow_ne_one_of_pos_of_lt (by omega) (by omega)
 
 /-- `ζ_r^m = 1`. -/
-lemma s24a_zeta_pow_m (m r : ℕ) (hm : m ≠ 0) :
+private lemma exp_two_pi_I_mul_div_pow_self (m r : ℕ) (hm : m ≠ 0) :
     Complex.exp (2 * π * Complex.I * r / m) ^ m = 1 := by
-  rw [s24a_zeta_pow, show r * m = m * r from mul_comm r m, pow_mul,
+  rw [exp_two_pi_I_mul_div_pow, show r * m = m * r from mul_comm r m, pow_mul,
     (Complex.isPrimitiveRoot_exp m hm).pow_eq_one, one_pow]
 
 /-- `∑_{s<m} ζ_r^s = 0` for `1 ≤ r ≤ m - 1`. -/
-lemma s24a_geom_zeta {m r : ℕ} (hr : r ∈ Icc 1 (m - 1)) :
+private lemma sum_range_exp_two_pi_I_mul_div_pow {m r : ℕ} (hr : r ∈ Icc 1 (m - 1)) :
     ∑ s ∈ range m, Complex.exp (2 * π * Complex.I * r / m) ^ s = 0 := by
   have hm : m ≠ 0 := by simp only [mem_Icc] at hr; omega
-  rw [geom_sum_eq (s24a_zeta_ne_one hr), s24a_zeta_pow_m m r hm, sub_self, zero_div]
+  rw [geom_sum_eq (exp_two_pi_I_mul_div_ne_one hr), exp_two_pi_I_mul_div_pow_self m r hm, sub_self, zero_div]
 
 /-- A polynomial function with a nonzero period is constant. -/
-lemma s24a_periodic_const (P : ℂ[X]) {c : ℂ} (hc : c ≠ 0) (hP : ∀ y, P.eval (y + c) = P.eval y)
+private lemma polynomial_eval_eq_of_periodic (P : ℂ[X]) {c : ℂ} (hc : c ≠ 0) (hP : ∀ y, P.eval (y + c) = P.eval y)
     (y z : ℂ) : P.eval y = P.eval z := by
   set Q := P - Polynomial.C (P.eval z)
   have hroot : ∀ k : ℕ, Q.eval (z + k * c) = 0 := by
@@ -700,14 +729,14 @@ theorem bernoulliPolyB_mul_eq_roots_of_unity {n m : ℕ} (hn : 1 ≤ n) (hm : 2 
           (1 - Complex.exp (2 * π * Complex.I * r / m)) ^ k) * (j + m * x) ^ (n - 1) := by
   set ζ : ℕ → ℂ := fun r => Complex.exp (2 * π * Complex.I * r / m) with hζdef
   set R := Icc 1 (m - 1)
-  set G : ℂ → ℂ := fun y => ∑ r ∈ R, ζ r * s24a_h n (ζ r) y with hG
+  set G : ℂ → ℂ := fun y => ∑ r ∈ R, ζ r * twistedDiffSolution n (ζ r) y with hG
   have hm0 : (m : ℂ) ≠ 0 := by exact_mod_cast (show m ≠ 0 by omega)
   -- the right side in terms of `G`
   have hRHS : ∀ y : ℂ, ∑ k ∈ Icc 1 n, ∑ j ∈ range k, (-1) ^ j * ((k - 1).choose j : ℂ) *
       (∑ r ∈ R, ζ r / (1 - ζ r) ^ k) * (j + y) ^ (n - 1) = G y := by
     intro y
     rw [← Finset.Ico_add_one_right_eq_Icc, sum_Ico_eq_sum_range, Nat.add_sub_cancel]
-    simp only [G, s24a_h, s24a_D, mul_sum]
+    simp only [G, twistedDiffSolution, altBinomialShiftPowSum, mul_sum]
     rw [sum_comm]
     refine sum_congr rfl fun k _ => ?_
     simp only [add_comm 1 k, Nat.add_sub_cancel]
@@ -717,16 +746,16 @@ theorem bernoulliPolyB_mul_eq_roots_of_unity {n m : ℕ} (hn : 1 ≤ n) (hm : 2 
     refine sum_congr rfl fun (r : ℕ) _ => ?_
     rw [div_eq_mul_inv, ← inv_pow]
     ring
-  have hζ1 : ∀ r ∈ R, ζ r ≠ 1 := fun r hr => s24a_zeta_ne_one hr
+  have hζ1 : ∀ r ∈ R, ζ r ≠ 1 := fun r hr => exp_two_pi_I_mul_div_ne_one hr
   -- shifts of `G`
-  have hGs : ∀ (y : ℂ) (s : ℕ), G (y + s) = ∑ r ∈ R, ζ r * (ζ r ^ s * s24a_h n (ζ r) y) +
+  have hGs : ∀ (y : ℂ) (s : ℕ), G (y + s) = ∑ r ∈ R, ζ r * (ζ r ^ s * twistedDiffSolution n (ζ r) y) +
       ∑ t ∈ range s, (y + t) ^ (n - 1) * ∑ r ∈ R, ζ r ^ (s - t) := by
     intro y s
-    have : ∀ r ∈ R, ζ r * s24a_h n (ζ r) (y + s) = ζ r * (ζ r ^ s * s24a_h n (ζ r) y) +
+    have : ∀ r ∈ R, ζ r * twistedDiffSolution n (ζ r) (y + s) = ζ r * (ζ r ^ s * twistedDiffSolution n (ζ r) y) +
         ∑ t ∈ range s, (y + t) ^ (n - 1) * ζ r ^ (s - t) := by
       intro r hr
-      rw [s24a_iter (f := s24a_h n (ζ r)) (q := fun z => z ^ (n - 1))
-        (s24a_h_shift hn (hζ1 r hr)) y s, mul_add, mul_sum]
+      rw [apply_add_natCast_of_apply_add_one (f := twistedDiffSolution n (ζ r)) (q := fun z => z ^ (n - 1))
+        (twistedDiffSolution_add_one hn (hζ1 r hr)) y s, mul_add, mul_sum]
       congr 1
       refine sum_congr rfl fun t ht => ?_
       have := mem_range.mp ht
@@ -738,19 +767,19 @@ theorem bernoulliPolyB_mul_eq_roots_of_unity {n m : ℕ} (hn : 1 ≤ n) (hm : 2 
   have hGm : ∀ y : ℂ, G (y + m) = G y + m * y ^ (n - 1) - ∑ t ∈ range m, (y + t) ^ (n - 1) := by
     intro y
     rw [hGs]
-    have h1 : ∑ r ∈ R, ζ r * (ζ r ^ m * s24a_h n (ζ r) y) = G y := by
+    have h1 : ∑ r ∈ R, ζ r * (ζ r ^ m * twistedDiffSolution n (ζ r) y) = G y := by
       refine sum_congr rfl fun r _ => ?_
-      rw [show ζ r ^ m = 1 from s24a_zeta_pow_m m r (by omega), one_mul]
+      rw [show ζ r ^ m = 1 from exp_two_pi_I_mul_div_pow_self m r (by omega), one_mul]
     rw [h1, range_eq_Ico,
       sum_eq_sum_Ico_succ_bot (f := fun t => (y + t) ^ (n - 1) * ∑ r ∈ R, ζ r ^ (m - t)) (by omega),
       sum_eq_sum_Ico_succ_bot (f := fun t => (y + (t : ℂ)) ^ (n - 1)) (by omega)]
     have h2 : ∑ r ∈ R, ζ r ^ (m - 0) = (m : ℂ) - 1 := by
-      rw [Nat.sub_zero, s24a_sum_zeta_pow hm (by omega) le_rfl]; simp
+      rw [Nat.sub_zero, sum_Icc_exp_two_pi_I_mul_div_pow hm (by omega) le_rfl]; simp
     have h3 : ∀ t ∈ Ico (0 + 1) m, (y + t) ^ (n - 1) * ∑ r ∈ R, ζ r ^ (m - t) =
         -(y + t) ^ (n - 1) := by
       intro t ht
       simp only [mem_Ico] at ht
-      rw [s24a_sum_zeta_pow hm (by omega) (by omega)]
+      rw [sum_Icc_exp_two_pi_I_mul_div_pow hm (by omega) (by omega)]
       simp [show m - t ≠ m by omega]
     rw [h2, sum_congr rfl h3, sum_neg_distrib]
     simp only [Nat.cast_zero, add_zero]
@@ -759,23 +788,23 @@ theorem bernoulliPolyB_mul_eq_roots_of_unity {n m : ℕ} (hn : 1 ≤ n) (hm : 2 
       -∑ s ∈ range m, ∑ t ∈ range s, (y + t) ^ (n - 1) := by
     intro y
     simp only [hGs, sum_add_distrib]
-    have h1 : ∑ s ∈ range m, ∑ r ∈ R, ζ r * (ζ r ^ s * s24a_h n (ζ r) y) = 0 := by
+    have h1 : ∑ s ∈ range m, ∑ r ∈ R, ζ r * (ζ r ^ s * twistedDiffSolution n (ζ r) y) = 0 := by
       rw [sum_comm]
       refine sum_eq_zero fun r hr => ?_
-      rw [← mul_sum, ← sum_mul, s24a_geom_zeta hr, zero_mul, mul_zero]
+      rw [← mul_sum, ← sum_mul, sum_range_exp_two_pi_I_mul_div_pow hr, zero_mul, mul_zero]
     rw [h1, zero_add, ← sum_neg_distrib]
     refine sum_congr rfl fun s hs => ?_
     rw [← sum_neg_distrib]
     refine sum_congr rfl fun t ht => ?_
     have := mem_range.mp hs
     have := mem_range.mp ht
-    rw [s24a_sum_zeta_pow hm (by omega) (by omega)]
+    rw [sum_Icc_exp_two_pi_I_mul_div_pow hm (by omega) (by omega)]
     simp [show s - t ≠ m by omega]
   -- shifts of `Bₙ`
   have hB : ∀ (y : ℂ) (s : ℕ), bernoulliPolyB n (y + s) =
       bernoulliPolyB n y + ∑ t ∈ range s, n * (y + t) ^ (n - 1) := by
     intro y s
-    have := s24a_iter (f := bernoulliPolyB n) (q := fun z => n * z ^ (n - 1)) (ζ := 1)
+    have := apply_add_natCast_of_apply_add_one (f := bernoulliPolyB n) (q := fun z => n * z ^ (n - 1)) (ζ := 1)
       (fun z => by rw [one_mul, ← bernoulliPolyB_add_one_sub]; ring) y s
     simpa using this
   set Φ : ℂ → ℂ := fun y => bernoulliPolyB n y + n * G y - (m : ℂ) ^ n * bernoulliPolyB n (y / m)
@@ -816,12 +845,12 @@ theorem bernoulliPolyB_mul_eq_roots_of_unity {n m : ℕ} (hn : 1 ≤ n) (hm : 2 
       Polynomial.C ((m : ℂ) ^ n) * Bp.comp (Polynomial.C (m : ℂ)⁻¹ * X)
   have hP : ∀ y, P.eval y = Φ y := by
     intro y
-    simp only [P, Φ, G, s24a_h, s24a_D, Polynomial.eval_add, Polynomial.eval_sub,
+    simp only [P, Φ, G, twistedDiffSolution, altBinomialShiftPowSum, Polynomial.eval_add, Polynomial.eval_sub,
       Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_finsetSum, Polynomial.eval_pow,
-      Polynomial.eval_X, Polynomial.eval_comp, bernoulliPolyB, b24a_aeval_eq_eval_map, Bp,
+      Polynomial.eval_X, Polynomial.eval_comp, bernoulliPolyB, aeval_complex_eq_eval_map, Bp,
       div_eq_inv_mul]
   have hconst : ∀ y, Φ y = Φ 0 := fun y => by
-    rw [← hP, ← hP]; exact s24a_periodic_const P hm0 (fun z => by rw [hP, hP, hper]) y 0
+    rw [← hP, ← hP]; exact polynomial_eval_eq_of_periodic P hm0 (fun z => by rw [hP, hP, hper]) y 0
   have h0 : Φ 0 = 0 := by
     have := hsum 0
     simp only [hconst _, sum_const, card_range, nsmul_eq_mul] at this
@@ -1019,7 +1048,7 @@ theorem eulerPolyE_third {n : ℕ} (hn : 1 ≤ n) :
 /-! ### Helpers for §24.4(iv) -/
 
 /-- Splitting a sum over `range (2m)` into even and odd indices. -/
-lemma q24a_sum_range_two_mul {M : Type*} [AddCommMonoid M] (f : ℕ → M) (m : ℕ) :
+private lemma sum_range_two_mul_eq_sum_even_add_odd {M : Type*} [AddCommMonoid M] (f : ℕ → M) (m : ℕ) :
     ∑ k ∈ range (2 * m), f k = ∑ j ∈ range m, (f (2 * j) + f (2 * j + 1)) := by
   induction m with
   | zero => simp
@@ -1028,14 +1057,14 @@ lemma q24a_sum_range_two_mul {M : Type*} [AddCommMonoid M] (f : ℕ → M) (m : 
       sum_range_succ, add_assoc]
 
 /-- Reindexing `Icc 1 n` to `range n`. -/
-theorem q24a_sum_Icc_one {M : Type*} [AddCommMonoid M] (f : ℕ → M) (n : ℕ) :
+theorem sum_Icc_one_eq_sum_range {M : Type*} [AddCommMonoid M] (f : ℕ → M) (n : ℕ) :
     ∑ k ∈ Icc 1 n, f k = ∑ k ∈ range n, f (k + 1) := by
   induction n with
   | zero => simp
   | succ n ih => rw [sum_Icc_succ_top (by omega), ih, sum_range_succ]
 
 /-- `∑_{k ≤ 2n+1} (2n+1 choose k)(1-2^k) Bₖ 2^k = (2n+1)E₂ₙ`, the core of 24.4.16–17. -/
-lemma q24a_eulerNumber_two_mul_sum (n : ℕ) :
+private lemma two_mul_add_one_mul_eulerNumber_two_mul (n : ℕ) :
     ((2 * n + 1 : ℕ) : ℂ) * eulerNumber (2 * n) = ∑ k ∈ range (2 * n + 2),
       ((2 * n + 1).choose k : ℂ) * (1 - 2 ^ k) * bernoulli k * 2 ^ k := by
   have h1 := eulerPolyE_eq_sum_bernoulli (2 * n) (1 / 2)
@@ -1059,15 +1088,15 @@ lemma q24a_eulerNumber_two_mul_sum (n : ℕ) :
   linear_combination h1 + S * h3
 
 /-- Splitting `range (2n+2)` when the odd terms beyond the first vanish. -/
-lemma q24a_sum_range_even_split (g : ℕ → ℂ) (n : ℕ) (hg : ∀ j, 1 ≤ j → g (2 * j + 1) = 0) :
+private lemma sum_range_two_mul_add_two_of_odd_eq_zero (g : ℕ → ℂ) (n : ℕ) (hg : ∀ j, 1 ≤ j → g (2 * j + 1) = 0) :
     ∑ k ∈ range (2 * n + 2), g k = g 0 + g 1 + ∑ j ∈ range n, g (2 * (j + 1)) := by
-  rw [show 2 * n + 2 = 2 * (n + 1) by ring, q24a_sum_range_two_mul, sum_range_succ',
+  rw [show 2 * n + 2 = 2 * (n + 1) by ring, sum_range_two_mul_eq_sum_even_add_odd, sum_range_succ',
     sum_add_distrib, sum_congr rfl fun j _ => hg (j + 1) (by omega)]
   simp only [sum_const_zero, add_zero, mul_zero, zero_add]
   ring
 
 /-- From `B₂ₙ₊₁(1/2) = 0`: `∑_{j=1}^{n} (2n+1 choose 2j) B₂ⱼ 2^{2j} = 2n`. -/
-theorem q24a_sum_choose_bernoulli_two_pow (n : ℕ) :
+theorem sum_choose_bernoulli_two_mul_mul_two_pow (n : ℕ) :
     ∑ j ∈ range n, ((2 * n + 1).choose (2 * (j + 1)) : ℂ) * bernoulli (2 * (j + 1)) *
       2 ^ (2 * (j + 1)) = 2 * n := by
   have h1 := bernoulliPolyB_eq_sum (2 * n + 1) (1 / 2)
@@ -1086,7 +1115,7 @@ theorem q24a_sum_choose_bernoulli_two_pow (n : ℕ) :
       rw [← pow_add, Nat.sub_add_cancel hk']]
     rw [show (2 : ℂ) ^ k = 1 / (1 / 2) ^ k by rw [one_div_pow, one_div_one_div]]
     field_simp
-  rw [h2, q24a_sum_range_even_split _ n (fun j hj => by
+  rw [h2, sum_range_two_mul_add_two_of_odd_eq_zero _ n (fun j hj => by
     rw [bernoulli_eq_zero_of_odd (odd_two_mul_add_one j) (by omega)]; simp)] at h1
   have h3 : (1 / 2 : ℂ) ^ (2 * n + 1) ≠ 0 := pow_ne_zero _ (by norm_num)
   have h4 := (mul_eq_zero.mp h1.symm).resolve_left h3
@@ -1105,7 +1134,7 @@ theorem bernoulli_two_mul_eq_sum_euler {n : ℕ} (hn : 1 ≤ n) :
   have h1 := eulerPolyE_eq_sum (2 * m + 1) 0
   rw [(eulerPolyE_zero_one (by omega : 0 < 2 * m + 1)).1,
     (eulerPolyE_zero_one (by omega : 0 < 2 * m + 1)).2,
-    show 2 * m + 1 + 1 = 2 * (m + 1) by ring, q24a_sum_range_two_mul] at h1
+    show 2 * m + 1 + 1 = 2 * (m + 1) by ring, sum_range_two_mul_eq_sum_even_add_odd] at h1
   have hodd : ∀ j ∈ range (m + 1), ((2 * m + 1).choose (2 * j) : ℂ) *
       ((eulerNumber (2 * j) : ℂ) / 2 ^ (2 * j)) * (0 - 1 / 2) ^ (2 * m + 1 - 2 * j) +
       ((2 * m + 1).choose (2 * j + 1) : ℂ) * ((eulerNumber (2 * j + 1) : ℂ) / 2 ^ (2 * j + 1)) *
@@ -1150,19 +1179,19 @@ theorem bernoulli_two_mul_eq_sum_euler {n : ℕ} (hn : 1 ≤ n) :
 theorem eulerNumber_two_mul_eq_sum_bernoulli (n : ℕ) :
     eulerNumber (2 * n) = 1 / (2 * n + 1) - ∑ k ∈ Icc 1 n, ((2 * n).choose (2 * k - 1) : ℚ) *
       (2 ^ (2 * k) * (2 ^ (2 * k - 1) - 1) * bernoulli (2 * k) / k) := by
-  have h := q24a_eulerNumber_two_mul_sum n
-  rw [q24a_sum_range_even_split _ n (fun j hj => by
+  have h := two_mul_add_one_mul_eulerNumber_two_mul n
+  rw [sum_range_two_mul_add_two_of_odd_eq_zero _ n (fun j hj => by
     rw [bernoulli_eq_zero_of_odd (odd_two_mul_add_one j) (by omega)]; simp)] at h
   simp only [Nat.choose_zero_right, bernoulli_zero, Nat.choose_one_right, bernoulli_one,
     pow_zero, sub_self, mul_zero, zero_mul, zero_add] at h
-  have h2 := q24a_sum_choose_bernoulli_two_pow n
+  have h2 := sum_choose_bernoulli_two_mul_mul_two_pow n
   have hn : ((2 * n + 1 : ℕ) : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
   have key : ((2 * n + 1 : ℕ) : ℂ) * ∑ k ∈ Icc 1 n, ((2 * n).choose (2 * k - 1) : ℂ) *
       (2 ^ (2 * k) * (2 ^ (2 * k - 1) - 1) * bernoulli (2 * k) / k) =
       ∑ j ∈ range n, (-(((2 * n + 1).choose (2 * (j + 1)) : ℂ) * (1 - 2 ^ (2 * (j + 1))) *
         bernoulli (2 * (j + 1)) * 2 ^ (2 * (j + 1))) - ((2 * n + 1).choose (2 * (j + 1)) : ℂ) *
           bernoulli (2 * (j + 1)) * 2 ^ (2 * (j + 1))) := by
-    rw [q24a_sum_Icc_one, mul_sum]
+    rw [sum_Icc_one_eq_sum_range, mul_sum]
     refine sum_congr rfl fun j _ => ?_
     have hc := Nat.add_one_mul_choose_eq (2 * n) (2 * j + 1)
     rw [show 2 * (j + 1) - 1 = 2 * j + 1 by omega, show 2 * j + 1 + 1 = 2 * (j + 1) by ring] at *
@@ -1195,8 +1224,8 @@ theorem eulerNumber_two_mul_eq_sum_bernoulli (n : ℕ) :
 theorem eulerNumber_two_mul_eq_one_sub_sum_bernoulli (n : ℕ) :
     eulerNumber (2 * n) = 1 - ∑ k ∈ Icc 1 n, ((2 * n).choose (2 * k - 1) : ℚ) *
       (2 ^ (2 * k) * (2 ^ (2 * k) - 1) * bernoulli (2 * k) / (2 * k)) := by
-  have h := q24a_eulerNumber_two_mul_sum n
-  rw [q24a_sum_range_even_split _ n (fun j hj => by
+  have h := two_mul_add_one_mul_eulerNumber_two_mul n
+  rw [sum_range_two_mul_add_two_of_odd_eq_zero _ n (fun j hj => by
     rw [bernoulli_eq_zero_of_odd (odd_two_mul_add_one j) (by omega)]; simp)] at h
   simp only [Nat.choose_zero_right, bernoulli_zero, Nat.choose_one_right, bernoulli_one,
     pow_zero, sub_self, mul_zero, zero_mul, zero_add] at h
@@ -1205,7 +1234,7 @@ theorem eulerNumber_two_mul_eq_one_sub_sum_bernoulli (n : ℕ) :
       (2 ^ (2 * k) * (2 ^ (2 * k) - 1) * bernoulli (2 * k) / (2 * k)) =
       -∑ j ∈ range n, ((2 * n + 1).choose (2 * (j + 1)) : ℂ) * (1 - 2 ^ (2 * (j + 1))) *
         bernoulli (2 * (j + 1)) * 2 ^ (2 * (j + 1)) := by
-    rw [q24a_sum_Icc_one, mul_sum, ← sum_neg_distrib]
+    rw [sum_Icc_one_eq_sum_range, mul_sum, ← sum_neg_distrib]
     refine sum_congr rfl fun j _ => ?_
     have hc := Nat.add_one_mul_choose_eq (2 * n) (2 * j + 1)
     rw [show 2 * (j + 1) - 1 = 2 * j + 1 by omega, show 2 * j + 1 + 1 = 2 * (j + 1) by ring] at *
@@ -1232,50 +1261,50 @@ theorem eulerNumber_two_mul_eq_one_sub_sum_bernoulli (n : ℕ) :
 /-! ### §24.4(viii) Symbolic operations -/
 
 /-- Generic umbral functional `yⁱ ↦ F i`. -/
-def b24a_umbral (F : ℕ → ℂ) (P : ℂ[X]) : ℂ := P.sum fun i a => a * F i
+def umbralFunctional (F : ℕ → ℂ) (P : ℂ[X]) : ℂ := P.sum fun i a => a * F i
 
-/-- Identity under the stated parameter and domain assumptions: `b24a_umbral F (p + q) =
-b24a_umbral F p + b24a_umbral F q`. -/
-lemma b24a_umbral_add (F : ℕ → ℂ) (p q : ℂ[X]) :
-    b24a_umbral F (p + q) = b24a_umbral F p + b24a_umbral F q :=
+/-- Identity under the stated parameter and domain assumptions: `umbralFunctional F (p + q) =
+umbralFunctional F p + umbralFunctional F q`. -/
+private lemma umbralFunctional_add (F : ℕ → ℂ) (p q : ℂ[X]) :
+    umbralFunctional F (p + q) = umbralFunctional F p + umbralFunctional F q :=
   Polynomial.sum_add_index p q _ (fun i => by simp) (fun i a b => by ring)
 
-/-- Identity under the stated parameter and domain assumptions: `b24a_umbral F
+/-- Identity under the stated parameter and domain assumptions: `umbralFunctional F
 (Polynomial.monomial n a) = a * F n`. -/
-lemma b24a_umbral_monomial (F : ℕ → ℂ) (n : ℕ) (a : ℂ) :
-    b24a_umbral F (Polynomial.monomial n a) = a * F n :=
+private lemma umbralFunctional_monomial (F : ℕ → ℂ) (n : ℕ) (a : ℂ) :
+    umbralFunctional F (Polynomial.monomial n a) = a * F n :=
   Polynomial.sum_monomial_index _ _ (by simp)
 
-/-- Formula under the stated hypotheses: `b24a_umbral F (∑ i ∈ s, p i) = ∑ i ∈ s, b24a_umbral F (p
+/-- Formula under the stated hypotheses: `umbralFunctional F (∑ i ∈ s, p i) = ∑ i ∈ s, umbralFunctional F (p
 i)`. -/
-lemma b24a_umbral_sum (F : ℕ → ℂ) (s : Finset ℕ) (p : ℕ → ℂ[X]) :
-    b24a_umbral F (∑ i ∈ s, p i) = ∑ i ∈ s, b24a_umbral F (p i) := by
+private lemma umbralFunctional_sum (F : ℕ → ℂ) (s : Finset ℕ) (p : ℕ → ℂ[X]) :
+    umbralFunctional F (∑ i ∈ s, p i) = ∑ i ∈ s, umbralFunctional F (p i) := by
   induction s using Finset.induction_on with
-  | empty => simp [b24a_umbral]
-  | insert a s ha ih => rw [sum_insert ha, sum_insert ha, b24a_umbral_add, ih]
+  | empty => simp [umbralFunctional]
+  | insert a s ha ih => rw [sum_insert ha, sum_insert ha, umbralFunctional_add, ih]
 
-/-- Formula under the stated hypotheses: `b24a_umbral F (C a * (X + C h) ^ n) = a * ∑ k ∈ range (n
+/-- Formula under the stated hypotheses: `umbralFunctional F (C a * (X + C h) ^ n) = a * ∑ k ∈ range (n
 + 1), (n.choose k : ℂ) * F k * h ^ (n - k)`. -/
-lemma b24a_umbral_C_mul_X_add_C_pow (F : ℕ → ℂ) (n : ℕ) (a h : ℂ) :
-    b24a_umbral F (C a * (X + C h) ^ n) =
+private lemma umbralFunctional_C_mul_X_add_C_pow (F : ℕ → ℂ) (n : ℕ) (a h : ℂ) :
+    umbralFunctional F (C a * (X + C h) ^ n) =
       a * ∑ k ∈ range (n + 1), (n.choose k : ℂ) * F k * h ^ (n - k) := by
-  rw [add_pow, mul_sum, b24a_umbral_sum, mul_sum]
+  rw [add_pow, mul_sum, umbralFunctional_sum, mul_sum]
   refine sum_congr rfl fun k _ => ?_
   rw [show C a * (X ^ k * C h ^ (n - k) * (n.choose k : ℂ[X])) =
       Polynomial.monomial k (a * h ^ (n - k) * n.choose k) by
     rw [← Polynomial.C_mul_X_pow_eq_monomial]; simp only [map_mul, map_pow, map_natCast]; ring,
-    b24a_umbral_monomial]
+    umbralFunctional_monomial]
   ring
 
 /-- The umbral substitution of DLMF §24.4(viii) for Bernoulli polynomials: expand the complex
 polynomial `P` in powers of its variable and replace each power `yⁿ` by `Bₙ(x)`; this is the
 meaning of `P(B(x))` with `(B(x))ⁿ = Bₙ(x)`. -/
 @[dlmf 24.4.viii]
-def umbralBernoulli (x : ℂ) (P : ℂ[X]) : ℂ := b24a_umbral (fun i => bernoulliPolyB i x) P
+def umbralBernoulli (x : ℂ) (P : ℂ[X]) : ℂ := umbralFunctional (fun i => bernoulliPolyB i x) P
 
 /-- The umbral substitution `(E(x))ⁿ = Eₙ(x)` of DLMF §24.4(viii). -/
 @[dlmf 24.4.viii]
-def umbralEuler (x : ℂ) (P : ℂ[X]) : ℂ := b24a_umbral (fun i => eulerPolyE i x) P
+def umbralEuler (x : ℂ) (P : ℂ[X]) : ℂ := umbralFunctional (fun i => eulerPolyE i x) P
 
 /-- **DLMF 24.4.36**: `P(B(x) + 1) - P(B(x)) = P'(x)` for every polynomial `P`. -/
 @[dlmf 24.4.E36]
@@ -1284,12 +1313,12 @@ theorem umbralBernoulli_comp_add_one_sub (x : ℂ) (P : ℂ[X]) :
       (Polynomial.derivative P).eval x := by
   induction P using Polynomial.induction_on' with
   | add p q hp hq =>
-    simp only [umbralBernoulli, Polynomial.add_comp, b24a_umbral_add, Polynomial.derivative_add,
+    simp only [umbralBernoulli, Polynomial.add_comp, umbralFunctional_add, Polynomial.derivative_add,
       Polynomial.eval_add] at *
     linear_combination hp + hq
   | monomial n a =>
     rw [umbralBernoulli, umbralBernoulli, Polynomial.monomial_comp,
-      show (X + 1 : ℂ[X]) = X + C 1 by simp, b24a_umbral_C_mul_X_add_C_pow, b24a_umbral_monomial,
+      show (X + 1 : ℂ[X]) = X + C 1 by simp, umbralFunctional_C_mul_X_add_C_pow, umbralFunctional_monomial,
       Polynomial.derivative_monomial, Polynomial.eval_monomial]
     have h := bernoulliPolyB_add n x 1
     rw [← h]
@@ -1300,7 +1329,7 @@ theorem umbralBernoulli_comp_add_one_sub (x : ℂ) (P : ℂ[X]) :
 theorem umbralBernoulli_X_add_C_pow (n : ℕ) (x h : ℂ) :
     bernoulliPolyB n (x + h) = umbralBernoulli x ((X + Polynomial.C h) ^ n) := by
   rw [umbralBernoulli, ← one_mul ((X + Polynomial.C h) ^ n), ← map_one Polynomial.C,
-    b24a_umbral_C_mul_X_add_C_pow, one_mul, bernoulliPolyB_add]
+    umbralFunctional_C_mul_X_add_C_pow, one_mul, bernoulliPolyB_add]
 
 /-- **DLMF 24.4.38**: `P(E(x) + 1) + P(E(x)) = 2P(x)` for every polynomial `P`. -/
 @[dlmf 24.4.E38]
@@ -1308,11 +1337,11 @@ theorem umbralEuler_comp_add_one_add (x : ℂ) (P : ℂ[X]) :
     umbralEuler x (P.comp (X + 1)) + umbralEuler x P = 2 * P.eval x := by
   induction P using Polynomial.induction_on' with
   | add p q hp hq =>
-    simp only [umbralEuler, Polynomial.add_comp, b24a_umbral_add, Polynomial.eval_add] at *
+    simp only [umbralEuler, Polynomial.add_comp, umbralFunctional_add, Polynomial.eval_add] at *
     linear_combination hp + hq
   | monomial n a =>
     rw [umbralEuler, umbralEuler, Polynomial.monomial_comp,
-      show (X + 1 : ℂ[X]) = X + C 1 by simp, b24a_umbral_C_mul_X_add_C_pow, b24a_umbral_monomial,
+      show (X + 1 : ℂ[X]) = X + C 1 by simp, umbralFunctional_C_mul_X_add_C_pow, umbralFunctional_monomial,
       Polynomial.eval_monomial]
     have h := eulerPolyE_add n x 1
     rw [← h]
@@ -1323,6 +1352,6 @@ theorem umbralEuler_comp_add_one_add (x : ℂ) (P : ℂ[X]) :
 theorem umbralEuler_X_add_C_pow (n : ℕ) (x h : ℂ) :
     eulerPolyE n (x + h) = umbralEuler x ((X + Polynomial.C h) ^ n) := by
   rw [umbralEuler, ← one_mul ((X + Polynomial.C h) ^ n), ← map_one Polynomial.C,
-    b24a_umbral_C_mul_X_add_C_pow, one_mul, eulerPolyE_add]
+    umbralFunctional_C_mul_X_add_C_pow, one_mul, eulerPolyE_add]
 
 end DLMF.BernoulliEuler

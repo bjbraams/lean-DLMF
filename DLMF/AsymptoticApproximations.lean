@@ -35,10 +35,10 @@ public import DLMF.AsymptoticApproximations.Sums.Basic
 public import DLMF.AsymptoticApproximations.Sums.EulerMaclaurin
 public import DLMF.AsymptoticApproximations.Sums.MathlibCoverage
 
-/-! # Asymptotic approximations: DLMF Chapter 2
+/-!
+# Asymptotic approximations (DLMF Chapter 2)
 
 Namespace `DLMF.AsymptoticApproximations`. One subdirectory per group of sections, each with its
 own `Basic` file: `Basics` (§§2.1–2.2), `Integrals` (§§2.3–2.4), `Mellin` (§2.5),
 `Distributional` (§2.6), `ODE` (§§2.7–2.9), `Sums` (§2.10) and `Remainders` (§2.11).
-Ledger: `DLMF2Acquisition.md`.
 -/

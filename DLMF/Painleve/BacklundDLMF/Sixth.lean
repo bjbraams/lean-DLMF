@@ -8,13 +8,27 @@ module
 public import DLMF.Painleve.BacklundDLMF.FourthAndFifth
 
 /-!
-# Backlund transformations for Painleve VI
+# Bäcklund transformations for Painlevé VI (DLMF §32.7(vi))
 
-Painleve VI parameter symmetries, Okamoto transformations and quadratic and quartic changes of
-variables.
+The parameter symmetries of Painlevé VI, the Okamoto transformation, and the quadratic and
+quartic transformations, in the DLMF normalization.
 
-Source references and common attribution are retained in
-`DLMF.Painleve.BacklundDLMF`.
+## Main results
+
+* `IsPainleveVIOn.s₁`, `IsPainleveVIOn.s₂`, `IsPainleveVIOn.s₃`: the transformations `S₁`–`S₃`
+  of `PVI` (DLMF 32.7.33–32.7.41).
+* `IsPainleveVIOn.okamoto`: the Okamoto transformation (DLMF 32.7.42–32.7.46), corrected.
+* `IsPainleveVIOn.quadratic`: the quadratic transformation (DLMF 32.7.47).
+* `IsPainleveVIOn.quartic`, `IsPainleveVIOn.quartic_root`: the quartic transformations
+  (DLMF 32.7.48–32.7.50).
+
+## Implementation notes
+
+**Correction of 32.7.42–32.7.43.** DLMF prints `α = (θ∞ - 1)²/2` and `A = (Θ∞ - 1)²/2`; with
+those values the transformation fails, while `α = θ∞²/2`, `A = Θ∞²/2` make 32.7.46 correct.
+
+All maps are stated on open sets where their denominators do not vanish. Roots such as `√z`,
+`z^{1/4}` and `√w` are replaced by arbitrary functions with the right power and derivative.
 -/
 
 @[expose] public noncomputable section
@@ -421,7 +435,7 @@ theorem IsPainleveVIOn.okamoto {Θ₀ Θ₁ Θ₂ Θinf : ℂ} {W : ℂ → ℂ}
 
 /-- Transfer of a derivative through a holomorphic change of variables `φ` with nonzero
 derivative: if `u (φ x) = g x` on the open set `U`, then `u' (φ z) = g'(z) / φ'(z)`. -/
-lemma p3a_hasDerivAt_of_comp {φ φ' g u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+private lemma hasDerivAt_of_comp {φ φ' g u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hφ : ∀ x ∈ U, HasDerivAt φ (φ' x) x) (hφ0 : ∀ x ∈ U, φ' x ≠ 0) {g' z : ℂ} (hz : z ∈ U)
     (hg : HasDerivAt g g' z) (hug : ∀ x ∈ U, u (φ x) = g x) :
     HasDerivAt u (g' / φ' z) (φ z) := by
@@ -446,7 +460,7 @@ lemma p3a_hasDerivAt_of_comp {φ φ' g u : ℂ → ℂ} {U : Set ℂ} (hU : IsOp
 /-- A second-order ODE transferred through a holomorphic change of variables `ζ = φ(x)` with
 nonzero derivative: if `u (φ x) = g x` on `U`, `g' = g₁`, `(g₁/φ')' = g₂` and
 `g₂/φ' = F(φ, g, g₁/φ')` on `U`, then `u` solves `u'' = F(ζ, u, u')` on any `V ⊆ φ(U)`. -/
-lemma p3a_isODE2SolutionOn_of_comp {F : ℂ → ℂ → ℂ → ℂ} {φ φ' g g₁ g₂ u : ℂ → ℂ}
+private lemma isODE2SolutionOn_of_comp {F : ℂ → ℂ → ℂ → ℂ} {φ φ' g g₁ g₂ u : ℂ → ℂ}
     {U V : Set ℂ} (hU : IsOpen U) (hφ : ∀ x ∈ U, HasDerivAt φ (φ' x) x)
     (hφ0 : ∀ x ∈ U, φ' x ≠ 0) (hg : ∀ x ∈ U, HasDerivAt g (g₁ x) x)
     (hg₁ : ∀ x ∈ U, HasDerivAt (fun y => g₁ y / φ' y) (g₂ x) x)
@@ -454,14 +468,14 @@ lemma p3a_isODE2SolutionOn_of_comp {F : ℂ → ℂ → ℂ → ℂ} {φ φ' g g
     (hF : ∀ x ∈ U, g₂ x / φ' x = F (φ x) (g x) (g₁ x / φ' x)) :
     IsODE2SolutionOn F u V := by
   have h1 : ∀ x ∈ U, HasDerivAt u (g₁ x / φ' x) (φ x) := fun x hx =>
-    p3a_hasDerivAt_of_comp hU hφ hφ0 hx (hg x hx) hug
+    hasDerivAt_of_comp hU hφ hφ0 hx (hg x hx) hug
   have h2 : ∀ x ∈ U, deriv u (φ x) = g₁ x / φ' x := fun x hx => (h1 x hx).deriv
   refine ⟨fun ζ hζ => ?_, fun ζ hζ => ?_⟩
   · obtain ⟨x, hx, rfl⟩ := hcover hζ
     exact (h1 x hx).differentiableAt
   · obtain ⟨x, hx, rfl⟩ := hcover hζ
     rw [hug x hx, h2 x hx, ← hF x hx]
-    exact p3a_hasDerivAt_of_comp hU hφ hφ0 hx (hg₁ x hx) h2
+    exact hasDerivAt_of_comp hU hφ hφ0 hx (hg₁ x hx) h2
 
 /-- DLMF 32.7.47, the quadratic transformation of `PVI`: for a solution `w` of `PVI` with
 `α = -β`, `γ = 1/2 - δ`, and with `s = √z` (any function on `U` with `s² = z`,
@@ -471,7 +485,7 @@ on an open `V` with these values, where every point of `V` is `ζ₁(z)` for som
 which `ζ₁` has nonzero derivative. -/
 @[dlmf 32.7.E47]
 theorem IsPainleveVIOn.quadratic {α γ : ℂ} {w s u : ℂ → ℂ} {U V : Set ℂ}
-    (h : IsPainleveVIOn α (-α) γ (1 / 2 - γ) w U) (hU : IsOpen U) (hV : IsOpen V)
+    (h : IsPainleveVIOn α (-α) γ (1 / 2 - γ) w U) (hU : IsOpen U)
     (hs : ∀ z ∈ U, s z ^ 2 = z) (hs' : ∀ z ∈ U, HasDerivAt s (1 / (2 * s z)) z)
     (hs1 : ∀ z ∈ U, s z ≠ -1) (hs1' : ∀ z ∈ U, s z ≠ 1)
     (hmaps : ∀ z ∈ U, ((1 - s z) / (1 + s z)) ^ 2 ∈ V)
@@ -516,7 +530,7 @@ theorem IsPainleveVIOn.quadratic {α γ : ℂ} {w s u : ℂ → ℂ} {U V : Set 
     subst hsq
     field_simp
     all_goals set_option maxRecDepth 100000 in ring
-  refine ⟨p3a_isODE2SolutionOn_of_comp hU (φ := fun z => ((1 - s z) / (1 + s z)) ^ 2)
+  refine ⟨isODE2SolutionOn_of_comp hU (φ := fun z => ((1 - s z) / (1 + s z)) ^ 2)
       (φ' := fun z => ((-(2 * (1 - s z))) / (s z * ((1 + s z) ^ 3))))
       (g := fun z => (1 - w z) * (w z - z) / ((1 + s z) ^ 2 * w z))
       (g₁ := fun z => ((((((s z * deriv w z) * (s z + 1)) * (((w z * (1 - w z)) - (w z * (w z -
@@ -840,7 +854,7 @@ theorem IsPainleveVIOn.quartic_root {γ : ℂ} {w q p u : ℂ → ℂ} {U V : Se
     subst hsq
     field_simp
     all_goals set_option maxRecDepth 100000 in ring
-  refine ⟨p3a_isODE2SolutionOn_of_comp hU (φ := fun z => ((1 - q z) / (1 + q z)) ^ 4)
+  refine ⟨isODE2SolutionOn_of_comp hU (φ := fun z => ((1 - q z) / (1 + q z)) ^ 4)
       (φ' := fun z => ((-((2 * ((1 - q z) ^ 3)) * q z)) / (((1 + q z) ^ 5) * z)))
       (g := fun z => ((1 - q z) / (1 + q z)) ^ 2 * ((p z + q z) / (p z - q z)) ^ 2)
       (g₁ := fun z => (((q z * (p z + q z)) * ((p z * ((((((-((1 - q z) ^ 2)) * (p z - q z)) * (p z

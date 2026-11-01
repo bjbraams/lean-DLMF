@@ -8,12 +8,17 @@ module
 public import DLMF.ParabolicCylinder.Relations
 
 /-!
-# Both Hermite normalizations of cylinder functions
+# Parabolic cylinder functions and Hermite polynomials (DLMF 12.7.2–12.7.3)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+At half-integral parameters `U(a,z)` and `V(a,z)` reduce to Hermite polynomials. This file
+gives the reductions in the physicists' normalization `H_n` and relates it to the
+probabilists' normalization `He_n`.
+
+## Main results
+
+* `aeval_hermitePolyH_eq_hermite_complex`: `H_n(x) = (√2)^n He_n(√2 x)` over `ℂ`.
+* `pcfU_physicists_hermite`: `U(-n - 1/2, z)` in terms of `H_n(z/√2)` (DLMF 12.7.2).
+* `pcfV_physicists_hermite`: `V(n + 1/2, z)` in terms of `H_n(iz/√2)` (DLMF 12.7.3).
 -/
 
 @[expose] public noncomputable section

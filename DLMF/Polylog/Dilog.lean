@@ -11,11 +11,33 @@ public import Mathlib.NumberTheory.Real.GoldenRatio
 /-!
 # The real dilogarithm (Duverney §8.1.2; DLMF §25.12(i))
 
-`Real.dilog x = ∫₀ˣ -log(1-t)/t dt` is defined for real `x ≤ 1`; the kernel is extended by its limit
-`1` at `t = 0` (`dslope`). On `[-1, 1]` it agrees with the series `Li₂` of `DLMF.Polylog.Basic`;
-the endpoints use integrability of the nonnegative kernel against the continuous series. Euler's
-reflection formula, Landen's identity, the inversion formula and the duplication formula follow by
-the derivative-equals-zero method, giving `Li₂(1/2)` and the golden-ratio values.
+This file defines the real dilogarithm `Real.dilog x = ∫₀ˣ -log(1-t)/t dt` for `x ≤ 1`,
+identifies it with the series `Li₂` on `[-1, 1]`, and proves its classical functional
+equations and special values.
+
+## Main definitions
+
+* `dilogKernel`: the kernel `-log(1-t)/t`, extended by its limit `1` at `t = 0`.
+* `Real.dilog`: the real dilogarithm (DLMF 25.12.2).
+
+## Main results
+
+* `Real.hasDerivAt_dilog`: `Li₂'(x) = -log(1-x)/x` on `(-∞, 1)`.
+* `polylogSeries_two_ofReal_eq_dilog`: the series `Li₂` agrees with `Real.dilog` on `[-1, 1]`
+  (DLMF 25.12.2).
+* `Real.dilog_one`, `Real.dilog_neg_one`: `Li₂(1) = π²/6`, `Li₂(-1) = -π²/12`.
+* `Real.dilog_add_dilog_one_sub`: Euler's reflection formula (DLMF 25.12.6).
+* `Real.dilog_one_half`: `Li₂(1/2) = π²/12 - (ln 2)²/2`.
+* `Real.dilog_add_dilog_div_sub_one`: Landen's identity (DLMF 25.12.3).
+* `Real.dilog_add_dilog_recip`: the inversion formula (DLMF 25.12.4).
+* `Real.dilog_add_dilog_neg`: the duplication formula `Li₂(x) + Li₂(-x) = ½ Li₂(x²)`.
+* `Real.dilog_goldenRatio`: the golden-ratio values.
+
+## Implementation notes
+
+At the endpoints `±1` the identification with the series uses integrability of the
+nonnegative kernel against the continuous series. The functional equations are proved by the
+derivative-equals-zero method.
 -/
 
 @[expose] public section

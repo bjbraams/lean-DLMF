@@ -13,15 +13,25 @@ public import DLMF.Gamma.Integrals
 /-!
 # Integral representations (DLMF §15.6)
 
-The source uses Olver's regularized function. Euler's E1 is already recorded,
-with the equivalent ordinary-function normalization, in `EulerIntegral`.
-The substitutions and vertical Barnes integrals below need no continued contour
-branches. Barnes's integral E6 is proved in `DLMF.Hypergeometric.BarnesAux` from the
-Mellin–Barnes integral for `(1+u)^{-a}` and analytic continuation in `c`. The loop integral E2 is
-in `DLMF.Hypergeometric.LoopIntegral`, over an explicit loop about `1`; E3–E5 (Pochhammer and
-other loop contours) are not recorded. E7 follows from Barnes's first lemma
-(`DLMF.Gamma.mellin_barnes_four`) after the binomial expansion of `(1-z)^s`; E9 follows by
-termwise integration and the Chu–Vandermonde and Pfaff–Saalschütz sums.
+DLMF uses Olver's regularized function. Euler's integral 15.6.1 is in
+`DLMF.Hypergeometric.EulerIntegral`, with the equivalent ordinary normalization. The loop
+integral 15.6.2 is in `DLMF.Hypergeometric.LoopIntegral`; the Pochhammer and other loop contours
+of 15.6.3–15.6.5 are not included.
+
+## Main results
+
+* `integral_Ioi`: the half-line form, DLMF 15.6.2_5.
+* `barnes_integral`: Barnes's integral, DLMF 15.6.6, proved in `DLMF.Hypergeometric.BarnesAux`
+  from the Mellin–Barnes integral for `(1+u)^{-a}` and analytic continuation in `c`.
+* `barnes_integral_one_sub`: DLMF 15.6.7, from Barnes's first lemma
+  (`DLMF.Gamma.mellin_barnes_four`) after the binomial expansion of `(1-z)^s`.
+* `fractional_integral`: DLMF 15.6.8.
+* `product_integral`: DLMF 15.6.9, by termwise integration and the Chu–Vandermonde and
+  Pfaff–Saalschütz sums.
+
+## Implementation notes
+
+The substitutions and vertical Barnes integrals need no continued contour branches.
 -/
 
 @[expose] public section
@@ -104,8 +114,8 @@ theorem integral_Ioi {a b c z : ℂ} (hb : 0 < b.re) (hcb : 0 < (c - b).re) (hz 
     have e3 : ((t : ℂ) - z * t + 1) = X := by rw [hX]; ring
     have e4 : (t + 1 : ℂ) = ((1 + t : ℝ) : ℂ) := by push_cast; ring
     rw [e1, e2, e3, e4, abs_of_pos (by simp only [hf']; positivity), Complex.real_smul,
-      ofReal_cpow_eq_exp_log hft, ofReal_cpow_eq_exp_log (by positivity),
-      ofReal_cpow_eq_exp_log ht0, ofReal_cpow_eq_exp_log ht1,
+      Complex.ofReal_cpow_eq_exp hft, Complex.ofReal_cpow_eq_exp (by positivity),
+      Complex.ofReal_cpow_eq_exp ht0, Complex.ofReal_cpow_eq_exp ht1,
       cpow_def_of_ne_zero (mul_ne_zero hX0 (ofReal_ne_zero.mpr (by positivity))),
       Complex.log_mul_ofReal _ (by positivity) _ hX0, cpow_def_of_ne_zero hX0,
       show ((f' t : ℝ) : ℂ) = Complex.exp (((-2 * Real.log (1 + t) : ℝ) : ℂ)) by

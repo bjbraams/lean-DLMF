@@ -12,27 +12,31 @@ public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
 
 /-!
-# Second-order differential operators and eigenfunction expansions: definitions
-(DLMF §1.18)
+# Second-order differential operators and eigenfunction expansions: definitions (DLMF §1.18)
 
 Hilbert spaces, `L²` spaces, orthonormal bases (`HilbertBasis`), bounded operators and their
 adjoints, unbounded operators (`LinearPMap`) with their adjoints and self-adjointness are
-Mathlib's. This file adds:
+Mathlib's. This file adds the operators, eigenfunctions and spectral notions of DLMF §1.18.
+
+## Main definitions
 
 * `schrodingerOp q` (1.18.28), `hermiteOp` (1.18.41), `besselOp ν` (1.18.55) and the radial
-  operator `radialSchrodingerOp ℓ V` (1.18.67), acting on functions `ℝ → ℂ`;
-* the eigenfunctions of the examples: `sinEigenfunction`, `cosEigenfunction`,
-  `expEigenfunction` (1.18.36–1.18.38) and the Hermite functions `hermiteFunction` (1.18.42),
-  via Mathlib's `Polynomial.hermite`;
-* for an unbounded operator `T : E →ₗ.[ℂ] E`: `IsSymmetricOp` (1.18.70),
-  `IsEssentiallySelfAdjoint`, the resolvent set and the point, continuous and residual spectra
-  (§1.18(ix)), the deficiency subspaces `deficiencySubspace T z` and indices;
-* for the Weyl theory of `-d²/dx² + q`: `IsSchrodingerSolOn`, `AllSolutionsL2Left/Right`,
-  `IsLimitCircleLeft/Right`, the `L²` solution space `l2SolutionSpace` and the boundary value
-  `boundaryValueLeft` (1.18.71);
-* `IsEigenfunctionTransform` (1.18.44–1.18.47, 1.18.60–1.18.63): a unitary map from `L²(X)`
-  onto `L²(ν)`, `ν` the spectral measure on `σ = σ_c ∪ σ_p`, given on compactly supported
-  continuous functions by `f̂(λ) = ⟨f, φ_λ⟩`; and `IsDiagonalizedBy` (`T ↔ λ`).
+  operator `radialSchrodingerOp ℓ V` (1.18.67), acting on functions `ℝ → ℂ`.
+* `sinEigenfunction`, `cosEigenfunction`, `expEigenfunction` (1.18.36–1.18.38) and the Hermite
+  functions `hermiteFunction` (1.18.42), via Mathlib's `Polynomial.hermite`.
+* For an unbounded operator `T : E →ₗ.[ℂ] E`: `IsSymmetricOp` (1.18.70),
+  `IsEssentiallySelfAdjoint`, `opResolventSet`, `opSpectrum`, `opPointSpectrum`,
+  `opContinuousSpectrum`, `opResidualSpectrum`, `deficiencySubspace` and `deficiencyIndices`
+  (§1.18(ix)).
+* For the Weyl theory of `-d²/dx² + q`: `IsSchrodingerSolOn`, `AllSolutionsL2Left`,
+  `AllSolutionsL2Right`, `IsLimitCircleLeft`, `IsLimitCircleRight`, the `L²` solution space
+  `l2SolutionSpace` and the boundary value `boundaryValueLeft` (1.18.71).
+* `eigenCoeff` (1.18.32, 1.18.47) and `IsEigenfunctionTransform` (1.18.44–1.18.47,
+  1.18.60–1.18.63): a unitary map from `L²(X)` onto `L²(ν)`, `ν` the spectral measure on
+  `σ = σ_c ∪ σ_p`, given on compactly supported continuous functions by `f̂(λ) = ⟨f, φ_λ⟩`;
+  and `IsDiagonalizedBy` (`T ↔ λ`, 1.18.49–1.18.50).
+
+## Implementation notes
 
 DLMF's inner product `⟨u, v⟩` is linear in `u`; Mathlib's `⟪u, v⟫` is linear in `v`, so
 DLMF's `⟨u, v⟩` is Mathlib's `⟪v, u⟫`.

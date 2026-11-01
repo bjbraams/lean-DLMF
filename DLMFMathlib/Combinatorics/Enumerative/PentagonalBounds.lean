@@ -11,7 +11,10 @@ public import Mathlib.Tactic.Linarith
 /-!
 # A bound for generalized pentagonal numbers
 
-The generalized pentagonal number `k (3k - 1)/2` dominates `|k|`.
+## Main results
+
+* `Int.natAbs_le_pentagonal`: the generalized pentagonal number `k (3k - 1)/2` is at least
+  `|k|`.
 -/
 
 @[expose] public section

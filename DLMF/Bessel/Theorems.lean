@@ -9,9 +9,18 @@ public import DLMF.Bessel.Generating
 public import Mathlib.Analysis.SpecialFunctions.Bernstein
 
 /-!
-# Recurrences, integrals, addition formulae, and zeros (AAR §§4.6–4.11, 4.14–4.15)
+# Recurrences, integrals, generating function and zeros (AAR §§4.6–4.11, 4.14–4.15)
 
-These are the remaining named identities of AAR Chapter 4 that are absent from Mathlib.
+Named identities of AAR Chapter 4 for `J_ν` that are absent from Mathlib.
+
+## Main results
+
+* `besselJ_add_sub`: `(2ν/z) J_ν(z) = J_{ν-1}(z) + J_{ν+1}(z)` (DLMF 10.6.1; AAR (4.6.5)).
+* `two_deriv_besselJ`: `2 J_ν'(z) = J_{ν-1}(z) - J_{ν+1}(z)` (DLMF 10.6.1; AAR (4.6.6)).
+* `besselJ_eq_poisson_integral`: Poisson's integral (DLMF 10.9.4; AAR §4.7).
+* `besselJ_generating_function`: the generating function for integer orders (DLMF 10.12.1;
+  AAR (4.9.10)).
+* `besselJ_zeros_simple`: the positive zeros of `J_ν` are simple.
 -/
 
 @[expose] public section
@@ -46,7 +55,7 @@ theorem two_deriv_besselJ {ν z : ℂ} (hz : z ∈ slitPlane) :
 /-- Poisson's integral (AAR §4.7). -/
 @[dlmf 10.9.E4]
 theorem besselJ_eq_poisson_integral {ν : ℂ} {x : ℝ}
-    (hν : -1 / 2 < ν.re) (hx : 0 < x) :
+    (hν : -1 / 2 < ν.re) :
     besselJ ν x =
       (x / 2) ^ ν / (Real.sqrt π * Gamma (ν + 1 / 2)) *
         ∫ t : ℝ in (-1 : ℝ)..1,
@@ -162,7 +171,7 @@ lemma regularized0F1_deriv_ne_zero {c w : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
     filter_upwards [hp.eventually_hasSum_sub, hq.eventually_hasSum_sub] with z hz₁ hz₂
     exact hz₁.unique hz₂
   have hz := congrFun hf 0
-  rw [DLMF.Confluent.regularizedHGFun_zero, regularizedHGFunCoeff_empty] at hz
+  rw [Complex.regularizedHGFun_zero, regularizedHGFunCoeff_empty] at hz
   simp [Gamma_ne_zero hc] at hz
 
 /-- The positive zeros of `J_ν` are simple. -/

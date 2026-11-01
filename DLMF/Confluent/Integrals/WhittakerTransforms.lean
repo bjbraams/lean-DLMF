@@ -8,12 +8,30 @@ module
 public import DLMF.Confluent.Integrals.BesselTransforms
 
 /-!
-# Laplace transforms of Whittaker functions
+# Integral transforms of Whittaker functions
 
-Closed Laplace-transform formulas for Whittaker functions and related Bessel-Kummer kernels.
+This file proves the Laplace, Mellin, cosine and Hankel-type transforms of Whittaker's
+functions (DLMF §13.23) and the Bessel transform DLMF 13.10.16.
 
-Source references and common attribution are retained in
-`DLMF.Confluent.Integrals`.
+## Main results
+
+* `bessel_kummerU_M`: DLMF 13.10.16, by termwise integration of the Bessel series against
+  Tricomi's Laplace transform.
+* `laplace_whittakerM`, `laplace_whittakerM_closed`: Laplace transforms of `M_{κ,μ}`
+  (DLMF 13.23.1, 13.23.2).
+* `mellin_whittakerM`: the Mellin transform of `M_{κ,μ}` (DLMF 13.23.3).
+* `laplace_whittakerW`, `mellin_whittakerW`: transforms of `W_{κ,μ}` (DLMF 13.23.4, 13.23.5).
+* `cosine_whittakerM`: a cosine transform of the regularized `M_{κ,μ}` (DLMF 13.23.8).
+* `bessel_whittakerM`, `bessel_whittakerM_W`, `bessel_whittakerW`, `bessel_whittakerW_M`:
+  Hankel-type transforms (DLMF 13.23.9–13.23.12).
+
+## Implementation notes
+
+Regularized Whittaker `M` is used where DLMF has it, and Gamma poles in its second parameter
+are retained. The closed Laplace transform 13.23.2 uses an explicit principal-logarithm
+calculation in the right half-plane. The Hankel-type transforms are stated for real `x > 0`:
+for non-real `x` the Bessel kernel grows like `exp (c √t)`. Conditionally convergent cases of
+the cosine transform are excluded because Lean's integral does not capture them.
 -/
 
 @[expose] public section

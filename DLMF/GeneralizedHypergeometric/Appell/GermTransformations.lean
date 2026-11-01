@@ -12,15 +12,24 @@ public import Carlson.Elliptic.ReductionRelations
 public import Carlson.TwoVariable.RPolynomial.Hypergeometric
 
 /-!
-# Germ transformations and reductions of Appell functions
+# Germ transformations and reductions of Appell functions (DLMF §16.16)
 
-The F1 transformation follows from the three-node Carlson representation, principal
-complex homogeneity and permutation of nodes. Its Gauss specialization also reduces F3.
-For F2, grouping F1 by total degree and using Carlson's polynomial representation of a
-terminating Gauss function identifies the two convergent series after Euler's transformation.
+## Main results
 
-The Carlson representations, homogeneity, permutation and polynomial identities are imported
-from lean-codes. The Gauss Euler transformation and Appell fiber sums are reused locally.
+* `appF1_pfaff_second`: the second Pfaff transformation of `F₁`, DLMF 16.16.8.
+* `appF1_reduction_gauss`: reduction of `F₁` to a Gauss function, DLMF 16.16.1.
+* `appF3_reduction_gauss`: reduction of `F₃` to a Gauss function of `x + y - xy`, DLMF 16.16.5.
+* `appF2_reduction_appF1`: reduction of `F₂` to `F₁`, DLMF 16.16.3.
+
+All identities are between analytic germs at the origin.
+
+## Implementation notes
+
+The `F₁` transformation follows from the three-node Carlson representation
+(`appF1_eq_gamma_mul_regCarlsonR`), principal complex homogeneity and permutation of nodes; its
+Gauss specialization also reduces `F₃`. For `F₂`, grouping `F₁` by total degree and using
+Carlson's polynomial representation of a terminating Gauss function identifies the two
+convergent series after Euler's transformation. The Carlson results come from lean-codes.
 -/
 
 @[expose] public noncomputable section

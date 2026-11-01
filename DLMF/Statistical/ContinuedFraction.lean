@@ -12,27 +12,43 @@ public import DLMF.Confluent.IncompleteGamma
 /-!
 # The continued fraction for `Γ(a,x)` (Temme §11.2.2; DLMF 8.9.2)
 
-For real `a < 1` and `x > 0` this file proves that the convergents of Legendre's continued fraction
-`Γ(a,x) = x^a e^{-x}/(x + (1-a)/(1 + 1/(x + (2-a)/(1 + 2/(x + ⋯)))))` converge to `Γ(a,x)`.
-All partial numerators and denominators are then positive.
+For real `a < 1` and `x > 0` this file proves that the convergents of Legendre's continued
+fraction `Γ(a,x) = x^a e^{-x}/(x + (1-a)/(1 + 1/(x + (2-a)/(1 + 2/(x + ⋯)))))` converge to
+`Γ(a,x)`. All partial numerators and denominators are then positive.
 
-* **Exact tails.** Let `J_m(σ) = ∫₀^∞ t^m (1+t)^σ e^{-xt} dt`. Then `Γ(a,x) = x^a e^{-x} J₀(a-1)`
-  (`upperIncGamma_eq_gammaTail`). Integration by parts gives
-  `x J_m(σ) = 0^m + m J_{m-1}(σ) + σ J_m(σ-1)`
-  (`gammaTail_ibp`), and `(1+t)^σ = (1+t)^{σ-1}(1+t)` gives `J_n(σ) = J_n(σ-1) + J_{n+1}(σ-1)`
-  (`gammaTail_split`). Together these provide a positive backward solution `w` of the three-term
-  recurrence of the fraction, with `Γ(a,x) = a₀ w₁ / w₀` (Temme's Exercise 11.5 route, without
-  Kummer's `U`).
-* **General convergence theorem** (`posContFract_tendsto`). For `a₀/(b₀ + a₁/(b₁ + ⋯))` with
-  positive elements and a positive backward solution `w`, Pincherle-type invariants and the
-  determinant formula bound the error by `∏ a_k / (B_{m+1} B_m)`. Scaling the denominators
-  reduces this to the Seidel–Stern growth lemma `tendsto_mul_of_seidelStern`, which needs the
-  divergence of `∑ b_k d_k / d_{k+1}`.
-* For the `Γ(a,x)` fraction, `d_{2j}/d_{2j+1} ≥ c/(j+1)`, so the divergence follows from the
-  harmonic series (`gammaInc_seidelStern_div`).
+## Main definitions
 
-DLMF states convergence for every complex `a` and `|ph z| < π`. The positive real case proved here
-is the one where all elements are positive.
+* `gammaTail`: the tail integrals `J_m(σ) = ∫₀^∞ t^m (1+t)^σ e^{-xt} dt`.
+* `posContFract`: the continued fraction `a₀/(b₀ + a₁/(b₁ + ⋯))` with zero integer part.
+* `cfScale`: the scaling that normalizes the continuants.
+* `gammaIncCFNum`, `gammaIncCFDen`, `gammaIncContFract`: the partial numerators, partial
+  denominators and the continued fraction of DLMF 8.9.2.
+* `gammaIncCFTail`: the positive backward solution.
+
+## Main results
+
+* `upperIncGamma_eq_gammaTail`: `Γ(a,x) = x^a e^{-x} J₀(a-1)`.
+* `gammaTail_ibp`, `gammaTail_split`: `x J_m(σ) = 0^m + m J_{m-1}(σ) + σ J_m(σ-1)` and
+  `J_n(σ) = J_n(σ-1) + J_{n+1}(σ-1)`.
+* `posContFract_det`, `posContFract_error`: the determinant formula and the error bound.
+* `tendsto_mul_of_seidelStern`: the Seidel–Stern growth lemma.
+* `posContFract_tendsto`: convergence of continued fractions with positive elements and a
+  positive backward solution.
+* `gammaInc_seidelStern_div`: the Seidel–Stern series of the `Γ(a,x)` fraction diverges.
+* `tendsto_gammaIncContFract`: the continued fraction for `Γ(a,x)` (DLMF 8.9.2).
+
+## Implementation notes
+
+Integration by parts and the splitting `(1+t)^σ = (1+t)^{σ-1}(1+t)` provide a positive backward
+solution `w` of the three-term recurrence of the fraction, with `Γ(a,x) = a₀ w₁ / w₀` (Temme's
+Exercise 11.5 route, without Kummer's `U`). For the general convergence theorem, Pincherle-type
+invariants and the determinant formula bound the error by `∏ a_k / (B_{m+1} B_m)`; scaling the
+denominators reduces this to the Seidel–Stern growth lemma, which needs the divergence of
+`∑ b_k d_k / d_{k+1}`. For the `Γ(a,x)` fraction, `d_{2j}/d_{2j+1} ≥ c/(j+1)`, so the divergence
+follows from the harmonic series.
+
+DLMF states convergence for every complex `a` and `|ph z| < π`. The real case `a < 1`, `x > 0`
+proved here is the one where all elements are positive.
 -/
 
 @[expose] public section

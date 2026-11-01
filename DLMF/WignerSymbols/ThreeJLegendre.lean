@@ -9,7 +9,20 @@ public import DLMF.WignerSymbols.Basic
 public import DLMF.Legendre.Harmonics
 
 /-!
-# `3j` symbols, Legendre polynomials and spherical harmonics: DLMF §34.3(vii)
+# `3j` symbols, Legendre polynomials and spherical harmonics
+
+Products and integrals of Legendre polynomials and spherical harmonics in terms of `3j`
+symbols (DLMF §34.3(vii)).
+
+## Main results
+
+* `legendrePolyP_mul_legendrePolyP`: DLMF 34.3.19, for every complex argument (stronger than
+  DLMF).
+* `sphericalHarmonic_mul_sphericalHarmonic`: DLMF 34.3.20.
+* `integral_legendrePolyP_mul_mul`: DLMF 34.3.21.
+* `integral_sphericalHarmonic_mul_mul`: Gaunt's integral, DLMF 34.3.22.
+
+## Implementation notes
 
 The Legendre polynomials `P_l` of §18.3 are `DLMF.OrthogonalPolynomials.legendrePolyP` and the
 spherical harmonics `Y_{l,m}` of §14.30 are `DLMF.Legendre.sphericalHarmonic` (with

@@ -9,6 +9,26 @@ public import DLMF.Mathieu.Modified.Basic.Functions
 
 /-!
 # Kernels, contours and cross-products for modified Mathieu integrals
+
+The kernels, integration paths, cross-products and coefficient integrals of the integral
+relations between modified Mathieu functions in DLMF §28.28.
+
+## Main definitions
+
+* `mathieuKernelW`: the kernel `w` of DLMF 28.28.1.
+* `mathieuPathIntegral`: the integral along the paths `𝓛_j` of DLMF 28.28.6, realized as
+  polygonal paths with vertical rays; `MathieuPathValley`: the valley conditions for these
+  paths.
+* `mathieuKernelR`, `mathieuKernelPhi`: `R(z, t)` and `φ(z, t)` of DLMF 28.28.18–28.28.19, with
+  `mathieuKernelLogR` and the continued cylinder functions `mathieuCylR` (28.28.17).
+* `modMathieuD0`, `modMathieuD1`: the cross-products `D_0`, `D_1` of DLMF 28.28.24.
+* `mathieuAlpha0`, `mathieuAlpha1`, `mathieuGammaInt`: the integrals `α^{(0)}`, `α^{(1)}`,
+  `γ` of DLMF 28.28.27, 28.28.28, 28.28.33.
+* `radialMathieuDs0`, `radialMathieuDs1`, `radialMathieuDs2`, `radialMathieuDc0`,
+  `radialMathieuDc1`, `radialMathieuDsc0`, `radialMathieuDsc1`: the cross-products of
+  DLMF 28.28.35, 28.28.39, 28.28.40.
+* `mathieuAlphaHatS`, `mathieuBetaHat`, `mathieuGammaHat`, `mathieuAlphaHatC`: the integrals
+  `α̂^{(s)}`, `β̂`, `γ̂`, `α̂^{(c)}` of DLMF 28.28.38, 28.28.43, 28.28.46, 28.28.49.
 -/
 
 @[expose] public noncomputable section
@@ -184,6 +204,6 @@ def MathieuPathValley (z α : ℂ) (η₁ η₂ : ℝ) : Prop :=
       η₂ < π - Complex.arg (Complex.cosh (z - I * α) + I))
 
 /-- The common denominator `sinh² z + sin² t` of §28.28(iii)–(iv). -/
-abbrev m28c_den (z : ℂ) (t : ℝ) : ℂ := Complex.sinh z ^ 2 + Complex.sin t ^ 2
+abbrev sinhSqAddSinSq (z : ℂ) (t : ℝ) : ℂ := Complex.sinh z ^ 2 + Complex.sin t ^ 2
 
 end DLMF.Mathieu

@@ -12,7 +12,8 @@ public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 /-!
 # Mathlib coverage of DLMF §2.10
 
-Pointers from DLMF §2.10 items to related Mathlib declarations; the DLMF statements themselves
+Pointers from DLMF §2.10 items to related Mathlib declarations: summation by parts (2.10.9)
+and the leading terms of the harmonic-number expansion (2.10.8). The DLMF statements themselves
 are formalized in `DLMF.AsymptoticApproximations.Sums.EulerMaclaurin`.
 -/
 

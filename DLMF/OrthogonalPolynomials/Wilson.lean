@@ -10,9 +10,34 @@ public import DLMF.OrthogonalPolynomials.Hahn
 /-!
 # Wilson, continuous dual Hahn, Racah, and dual Hahn polynomials
 
-Statements from NIST DLMF Chapter 18, each tagged with its equation number by `@[dlmf]`.
-Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
-hypergeometric definitions do not implement continuation in singular parameters.
+The Wilson class of DLMF §§18.25–18.26: definitions as terminating hypergeometric sums,
+orthogonality of the Wilson and continuous dual Hahn polynomials, duality, limit relations,
+central differences and generating functions.
+
+## Main definitions
+
+* `wilson`, `continuousDualHahn`: DLMF 18.26.1 and 18.26.2, in the polynomial argument
+  `x = y²`.
+* `racah`, `dualHahn`: DLMF 18.26.3 and 18.26.4, in the variable `x = λ(y)`.
+
+## Main results
+
+* `wilson_hypergeometric`, `continuousDualHahn_hypergeometric`, `racah_hypergeometric`,
+  `dualHahn_hypergeometric`: the hypergeometric forms DLMF 18.26.1–18.26.4.
+* `wilson_orthogonal`, `continuousDualHahn_orthogonality`: DLMF 18.25.2 and 18.25.8.
+* `dualHahn_hahn_duality`, `racah_duality`: DLMF 18.26.4_1 and 18.26.4_2.
+* `wilson_limit_continuousDualHahn`, `racah_limit_dualHahn`, `racah_limit_hahn`:
+  DLMF 18.26.5, 18.26.9 and 18.26.10.
+* `wilson_central_difference`, `continuousDualHahn_central_difference`: DLMF 18.26.14 and
+  18.26.15.
+* `wilson_generating_function`, `continuousDualHahn_generating_function`: DLMF 18.26.18 and
+  18.26.19.
+* `charlier_eq_laguerrePolyL`: Charlier polynomials as Laguerre polynomials with a
+  degree-dependent parameter.
+
+## Implementation notes
+
+The definitions use the polynomial arguments `y²` and `λ(y)`, so no square root is chosen.
 -/
 
 @[expose] public section

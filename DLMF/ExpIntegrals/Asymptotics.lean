@@ -9,11 +9,32 @@ public import DLMF.ExpIntegrals.Continuation
 public import DLMF.IncompleteGamma.ExpIntegralAsymptotics
 
 /-!
-# Sectorial asymptotic expansions and explicit remainders, DLMF §6.12
+# Asymptotic expansions and explicit remainders (DLMF §6.12)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+Asymptotic expansions of `E₁(z)` on the logarithmic plane, of `Ei(x)`, and of the auxiliary
+functions `f(z)`, `g(z)` in the sector `|ph z| ≤ π - δ`, with integral representations, bounds
+and signs of the remainders. The expansions are obtained from rotated Laplace representations
+by Watson's lemma.
+
+## Main definitions
+
+* `expIntAsymptoticTerm`: the `n`-th term of the asymptotic expansions of `f` and `g`.
+* `expIntAsymptoticRemainder`: the remainder after `N` terms (DLMF 6.12.5, 6.12.6).
+
+## Main results
+
+* `expIntE1_logSector_asymptotic`: the expansion of `E₁(z)` for `|ph z| ≤ 3π/2 - δ`
+  (DLMF 6.12.1).
+* `expIntEi_asymptotic`: the expansion of `Ei(x)` as `x → ∞` (DLMF 6.12.2).
+* `expIntAuxF_sector_asymptotic`, `expIntAuxG_sector_asymptotic`: the expansions of `f` and `g`
+  (DLMF 6.12.3, 6.12.4).
+* `expIntAuxF_remainder_integral`, `expIntAuxG_remainder_integral`: the remainders as Laplace
+  integrals (DLMF 6.12.7, 6.12.8).
+* `expIntE1_remainder_bound`, `expIntE1_remainder_sign`, `expIntEi_remainder_bound`: remainder
+  bounds and signs for `E₁` and `Ei` (DLMF §6.12(i)).
+* `expIntAux_remainder_bound`, `expIntAux_remainder_sign`: remainder bounds and signs for `f`
+  and `g` (DLMF §6.12(ii)).
+* `genExpIntE_one_eq_integral_rotate`: the rotated Laplace representation of `E₁`.
 -/
 
 @[expose] public noncomputable section

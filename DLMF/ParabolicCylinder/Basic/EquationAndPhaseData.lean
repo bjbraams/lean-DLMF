@@ -9,6 +9,25 @@ public import DLMF.ParabolicCylinder.Basic.Functions
 
 /-!
 # Quadratic cylinder equations, amplitudes and phases
+
+This file defines the cylinder differential equations of DLMF §12.2 and §12.15 as predicates,
+together with the second solution `UBar` and the modulus and phase functions of DLMF 12.2.22–
+12.2.23 on the real axis.
+
+## Main definitions
+
+* `IsQuadraticCylinderSolution`: the equation `f″(z) + (az² + bz + c)f(z) = 0` (DLMF 12.2.1).
+* `IsOscillatoryCylinderSolution`: the equation `f″(z) + (z²/4 - a)f(z) = 0` (DLMF 12.2.3).
+* `pcfUBar`, `pcfUBarDeriv`: the solution `Ū(a,z)` of DLMF 12.2.21 and its derivative.
+* `pcfF`, `pcfTheta`: the modulus and phase of `U(a,x) + iŪ(a,x)` (DLMF 12.2.22).
+* `pcfG`, `pcfPsi`: the modulus and phase of `U′(a,x) + iŪ′(a,x)` (DLMF 12.2.23).
+* `IsGeneralizedCylinderSolution`: the generalized cylinder equation (DLMF 12.15.1).
+
+## Implementation notes
+
+The equations are written with totalized iterated derivatives. `pcfUBar` is meaningful only
+away from positive half-integral parameters; the bar does not denote complex conjugation. The
+phases are principal representatives; a continuous lift differs by integral multiples of `2π`.
 -/
 
 @[expose] public noncomputable section

@@ -9,25 +9,45 @@ public import DLMF.QSeries.Identities
 public import DLMF.QSeries.Saalschutz
 
 /-!
-# Bailey chains (AAR Chapter 12)
+# Bailey chains
 
-Rogers–Ramanujan identities, Bailey's lemma, and Watson's transformation are absent from
-Mathlib. All three are proved here from the `q`-Pfaff–Saalschütz sum (`DLMF.QSeries.Saalschutz`).
+This file proves Bailey's lemma, Watson's transformation and the Rogers–Ramanujan identities
+(AAR Chapter 12; DLMF 17.12.5, 17.9.15, 17.2.49–17.2.50) from the `q`-Pfaff–Saalschütz sum
+(`DLMF.QSeries.Saalschutz`).
 
-* Bailey's lemma (`bailey_lemma`) reduces, after interchanging the double sum, to a shifted
-  `q`-Pfaff–Saalschütz sum (`bailey_inner`); `bailey_relation` is its form at a fixed index with
-  hypotheses only up to that index.
-* The unit Bailey pair (`unit_pair`) is proved by an explicit telescoping certificate.
-  Watson's transformation of a terminating very-well-poised `₈φ₇` into a balanced `₄φ₃`
-  (`watson_transformation`) follows from two applications of Bailey's lemma to it; the values of
-  `a` with `(aq;q)_{2n} = 0` that the hypotheses allow are reached by continuity in `a`.
-* The limiting form of Bailey's lemma (`ρ₁, ρ₂ → ∞`, `bailey_limit_relation`) rests on the
-  identity `∑_m [N m]_q q^{m(m-1)} A^m (Aq^m;q)_{N-m} = 1` (`sum_qBinom_limit`). Applied twice to
-  the unit pair and with `n → ∞` (Tannery's theorem), it gives
-  `∑ a^k q^{k²}/(q;q)_k = (aq;q)_∞⁻¹ ∑ a^{2k} q^{2k²} α_k` (`sum_unit_bailey`). At `a = 1` and
-  `a = q` the right side is the Jacobi triple product at base `q⁵`, and regrouping
-  `(q;q)_∞ = (q, q², q³, q⁴, q⁵; q⁵)_∞` (`qPochhammerInf_mod_five`) gives the Rogers–Ramanujan
-  identities.
+## Main definitions
+
+* `IsBaileyPair`: `(α, β)` is a Bailey pair relative to `a` (DLMF 17.12.3).
+* `unitAlpha`, `unitD`: the unit Bailey pair and its very-well-poised factor.
+
+## Main results
+
+* `bailey_lemma`: a Bailey pair produces a new Bailey pair (DLMF 17.12.5); `bailey_relation` is
+  its form at a fixed index with hypotheses only up to that index.
+* `unit_pair`: the unit Bailey pair.
+* `watson_transformation`: Watson's transformation of a terminating very-well-poised `₈φ₇`
+  into a balanced `₄φ₃` (DLMF 17.9.15).
+* `bailey_limit_relation`, `sum_qBinom_limit`: the limiting form of Bailey's lemma
+  (`ρ₁, ρ₂ → ∞`) and the identity `∑_m [N m]_q q^{m(m-1)} A^m (Aq^m;q)_{N-m} = 1`.
+* `sum_unit_bailey`: `∑ a^k q^{k²}/(q;q)_k = (aq;q)_∞⁻¹ ∑ a^{2k} q^{2k²} α_k`.
+* `rogers_ramanujan_first`, `rogers_ramanujan_second`: the Rogers–Ramanujan identities
+  (DLMF 17.2.49, 17.2.50).
+
+## Implementation notes
+
+Bailey's lemma reduces, after interchanging the double sum, to a shifted
+`q`-Pfaff–Saalschütz sum (`bailey_inner`). The unit Bailey pair is proved by an explicit
+telescoping certificate. Watson's transformation follows from two applications of Bailey's
+lemma to the unit pair; the values of `a` with `(aq;q)_{2n} = 0` that the hypotheses allow are
+reached by continuity in `a`. The limiting Bailey lemma, applied twice to the unit pair and
+with `n → ∞` (Tannery's theorem), gives `sum_unit_bailey`. At `a = 1` and `a = q` its right
+side is the Jacobi triple product at base `q⁵`, and regrouping
+`(q;q)_∞ = (q, q², q³, q⁴, q⁵; q⁵)_∞` (`qPochhammerInf_mod_five`) gives the Rogers–Ramanujan
+identities.
+
+## References
+
+* G. E. Andrews, R. Askey, R. Roy, *Special Functions*, Chapter 12.
 -/
 
 @[expose] public section
@@ -672,7 +692,7 @@ private lemma eventually_qPochhammer_ne_zero (a q : ℂ) (hq : q ≠ 0) (m : ℕ
 
 /-- Watson's transformation in rational form, for all `a` with the natural denominators
 nonzero; the degenerate values of `a` with `(aq;q)_{2n} = 0` follow by continuity in `a`. -/
-theorem watsonR {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
+theorem watson_transformation_rational {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
     (hd : d ≠ 0) (he : e ≠ 0) (hq : q ≠ 0) (hqq : ∀ m ≤ n, qPochhammer q q m ≠ 0)
     (hB : qPochhammer (a * q / b) q n ≠ 0) (hC : qPochhammer (a * q / c) q n ≠ 0)
     (hD : qPochhammer (a * q / d) q n ≠ 0) (hE : qPochhammer (a * q / e) q n ≠ 0)
@@ -811,7 +831,7 @@ theorem watson_transformation {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb :
   have HN := H (a * q * q ^ n) (by simp)
   have HY := H (d * e * q⁻¹ ^ n / a) (by simp)
   have HQ := H q (by simp)
-  have hW := watsonR n ha hb hc hd he hq (fun m hm => HQ m (by omega)) (HB n (by omega))
+  have hW := watson_transformation_rational n ha hb hc hd he hq (fun m hm => HQ m (by omega)) (HB n (by omega))
     (HC n (by omega)) (HD n (by omega)) (HE n (by omega)) (HY n (by omega)) (HN n (by omega))
   have hzero : ∀ k, n < k → qPochhammer (q⁻¹ ^ n) q k = 0 :=
     fun k hk => by rw [inv_pow]; exact qPochhammer_recip_pow_eq_zero hq hk
@@ -1066,7 +1086,7 @@ private lemma tri_neg_succ (m : ℕ) :
   omega
 
 /-- The Jacobi triple product summand at base `q⁵`, evaluated at `n ≥ 0` and `n < 0`. -/
-private lemma jtp5_nat (q z : ℂ) (j m : ℕ) (hz : z = q ^ j) :
+private lemma jacobiTripleProduct_term_q5_natCast (q z : ℂ) (j m : ℕ) (hz : z = q ^ j) :
     (-1 : ℂ) ^ (m : ℤ) * (q ^ 5) ^ (((m : ℤ) : ℂ) * (((m : ℤ) : ℂ) - 1) / 2) * z ^ (m : ℤ) =
       (-1) ^ m * q ^ (5 * m.choose 2 + j * m) := by
   rw [DLMF.QSeries.TripleProduct.cpow_tri, tri_natCast, zpow_natCast, zpow_natCast, zpow_natCast,
@@ -1074,7 +1094,7 @@ private lemma jtp5_nat (q z : ℂ) (j m : ℕ) (hz : z = q ^ j) :
   ring
 
 /-- The Jacobi triple product summand at base `q⁵` and `z = qʲ`, at the negative index `-(m+1)`. -/
-private lemma jtp5_neg (q z : ℂ) (hq : q ≠ 0) (j m E : ℕ) (hz : z = q ^ j)
+private lemma jacobiTripleProduct_term_q5_neg (q z : ℂ) (hq : q ≠ 0) (j m E : ℕ) (hz : z = q ^ j)
     (hE : 5 * (m + 1 + 1).choose 2 = E + j * (m + 1)) :
     (-1 : ℂ) ^ (-((m : ℤ) + 1)) *
         (q ^ 5) ^ (((-((m : ℤ) + 1) : ℤ) : ℂ) * (((-((m : ℤ) + 1) : ℤ) : ℂ) - 1) / 2) *
@@ -1095,7 +1115,7 @@ private lemma summable_sign_pow {q : ℂ} (hq : ‖q‖ < 1) (s : ℕ → ℕ) (
   exact pow_le_pow_of_le_one (norm_nonneg q) hq.le (hE n)
 
 /-- The Jacobi triple product at base `q⁵` and `z = q^j`, split into `n ≥ 0` and `n < 0`. -/
-private lemma jtp5_hasSum {q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (j : ℕ) (hj : 1 ≤ j)
+private lemma jacobiTripleProduct_q5_eq_tsum_add_tsum {q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (j : ℕ) (hj : 1 ≤ j)
     (E : ℕ → ℕ)
     (hE : ∀ m, 5 * (m + 1 + 1).choose 2 = E m + j * (m + 1)) (hEm : ∀ m, m ≤ E m) :
     qPochhammerInf (q ^ 5) (q ^ 5) * qPochhammerInf (q ^ j) (q ^ 5) *
@@ -1112,10 +1132,10 @@ private lemma jtp5_hasSum {q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (j : ℕ)
   refine (HasSum.of_nat_of_neg_add_one ?_ ?_).tsum_eq
   · convert hs1.hasSum using 1
     funext m
-    simpa using jtp5_nat q (q ^ j) j m rfl
+    simpa using jacobiTripleProduct_term_q5_natCast q (q ^ j) j m rfl
   · convert hs2.hasSum using 1
     funext m
-    simpa using jtp5_neg q (q ^ j) hq0 j m (E m) rfl (hE m)
+    simpa using jacobiTripleProduct_term_q5_neg q (q ^ j) hq0 j m (E m) rfl (hE m)
 
 /-- The first Rogers–Ramanujan identity (AAR §12.1):
 `∑ q^{n²} / (q;q)_n = 1 / (q, q⁴; q⁵)_∞`. -/
@@ -1134,7 +1154,7 @@ theorem rogers_ramanujan_first {q : ℂ} (hq : ‖q‖ < 1) :
   simp only [one_pow, one_mul, mul_one_div] at hB
   -- the triple product at base `q⁵`, `z = q²`
   set E : ℕ → ℕ := fun m => 2 * ((m + 1) * (m + 1)) + (m + 1).choose 2 + (m + 1) with hEdef
-  have hJ := jtp5_hasSum hq hq0 2 (by norm_num) E (fun m => by
+  have hJ := jacobiTripleProduct_q5_eq_tsum_add_tsum hq hq0 2 (by norm_num) E (fun m => by
       simp only [hEdef]; rw [choose_two_succ (m + 1)]; nlinarith [two_choose_add (m + 1)])
     (fun m => by simp only [hEdef]; nlinarith)
   rw [show q ^ 5 / q ^ 2 = q ^ 3 by field_simp] at hJ
@@ -1196,7 +1216,7 @@ theorem rogers_ramanujan_second {q : ℂ} (hq : ‖q‖ < 1) :
   simp only [mul_one_div] at hB
   -- the triple product at base `q⁵`, `z = q⁴`
   set E : ℕ → ℕ := fun m => 2 * (m * m) + 4 * m + 1 + m.choose 2 with hEdef
-  have hJ := jtp5_hasSum hq hq0 4 (by norm_num) E (fun m => by
+  have hJ := jacobiTripleProduct_q5_eq_tsum_add_tsum hq hq0 4 (by norm_num) E (fun m => by
       simp only [hEdef]; rw [choose_two_succ (m + 1), choose_two_succ m]
       nlinarith [two_choose_add m])
     (fun m => by simp only [hEdef]; nlinarith)

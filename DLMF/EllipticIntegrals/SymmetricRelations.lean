@@ -8,8 +8,8 @@ module
 public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.Legendre
 public import DLMF.EllipticIntegrals.SymmetricAddition
-public import DLMF.EllipticIntegrals.P19sR1Legendre
-public import DLMF.EllipticIntegrals.P19sR1Connection
+public import DLMF.EllipticIntegrals.LegendreSymmetricForms
+public import DLMF.EllipticIntegrals.SymmetricLegendreConnection
 public import DLMF.EllipticIntegrals.LegendreIdentities
 public import DLMF.EllipticIntegrals.Derivatives
 public import Carlson.TwoVariable.GaussHypergeometric
@@ -19,37 +19,73 @@ public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 /-!
 # Relations of the symmetric integrals to other functions (DLMF §19.25)
 
-* §19.25(i): Legendre's integrals as symmetric integrals, (19.25.1)–(19.25.18), with
-  `c = csc² φ`;
-* §19.25(ii): Bulirsch's integrals as symmetric integrals, (19.25.19)–(19.25.22), `r = 1/x²`;
-* §19.25(iii): symmetric integrals as Legendre's integrals, (19.25.23)–(19.25.27);
-* §19.25(iv): theta functions — a pointer to §20.9(i) (19.25.iv.p1), no formula;
-* §19.25(v): Jacobian elliptic functions, (19.25.28)–(19.25.34);
-* §19.25(vi): Weierstrass elliptic functions, (19.25.35)–(19.25.41);
-* §19.25(vii): the Gauss hypergeometric function, (19.25.42)–(19.25.43).
+Legendre's and Bulirsch's integrals as symmetric integrals and conversely (§19.25(i)–(iii)),
+and the symmetric integrals in terms of Jacobian elliptic functions (§19.25(v)), Weierstrass
+elliptic functions (§19.25(vi)) and the Gauss hypergeometric function (§19.25(vii)).
+§19.25(iv) is a pointer to §20.9(i) (19.25.iv.p1) with no formula.
+
+## Main definitions
+
+* `jacobiLetterNumerator`: the Glaisher numerator `p(u, k)` for `p ∈ {s, c, d, n}`.
+* `jacobiDeltam`: `Δ(p, q) = ps²(u, k) - qs²(u, k)` (DLMF 19.25.28).
+* `weierstrassSigmaIdx`: the functions `σ_j(z)` (DLMF 19.25.41).
+
+## Main results
+
+* `compEllIntKk_eq_symEllIntRF`, `compEllIntKk_ofReal_eq_symEllIntRF`,
+  `compEllIntEk_eq_symEllInt`: the complete integrals `K`, `E` (DLMF 19.25.1).
+* `compEllIntPik_sub_compEllIntKk`, `compEllIntPik_eq_symEllIntR`, `compEllIntPik_pv_eq`:
+  `Π(α², k)` (DLMF 19.25.2–19.25.4).
+* `incEllIntFk_eq_symEllIntRF`: `F(φ, k) = R_F(c - 1, c - k², c)`, `c = csc² φ`
+  (DLMF 19.25.5, 19.25.17, 19.25.18).
+* `incEllIntEk_eq_symEllIntRG`, `incEllIntEk_eq_symEllIntR`,
+  `incEllIntEk_eq_symEllIntRF_sub_symEllIntRD`, `incEllIntEk_eq_symEllIntRD_second`,
+  `incEllIntEk_eq_symEllIntRD_third`: `E(φ, k)` (DLMF 19.25.7–19.25.11).
+* `hasDerivAt_incEllIntFk_symEllIntRD`, `hasDerivAt_incEllIntEk_symEllIntRD`: DLMF 19.25.6,
+  19.25.12.
+* `incEllIntDk_eq_symEllIntRD`, `incEllIntPik_sub_incEllIntFk`, `incEllIntPik_eq_symEllIntR`,
+  `incEllIntPik_pv_eq`: DLMF 19.25.13–19.25.16.
+* `bulirschCel_eq_symEllInt`, `bulirschEl1_eq_symEllIntRF`, `bulirschEl2_eq_symEllInt`,
+  `bulirschEl3_eq_symEllInt`: Bulirsch's integrals (DLMF 19.25.19–19.25.22).
+* `sqrt_mul_symEllIntRF_eq_incEllIntFk`, `symEllIntRD_eq_incEllInt`, `symEllIntRJ_eq_incEllInt`,
+  `symEllIntRG_eq_incEllInt`: symmetric integrals as Legendre integrals
+  (DLMF 19.25.23–19.25.27).
+* `jacobiDeltam_swap`, `jacobiDeltam_values`, `jacobiAmm_eq_symEllIntRC`,
+  `eq_symEllIntRF_jacobi`, `jacobiArcps_eq_symEllIntRF`, `jacobiArcsp_eq_symEllIntRF`,
+  `jacobiArcpq_eq_symEllIntRF`: Jacobian elliptic functions (DLMF 19.25.28–19.25.34).
+* `weierstrassP_symEllIntRF`, `weierstrassZeta_symEllIntRG`, `halfPeriod_eq_symEllIntRF`,
+  `eq_weierstrassSigma_mul_symEllIntRF`: Weierstrass functions (DLMF 19.25.35–19.25.40).
+* `ordinaryHypergeometric_eq_symEllIntR`, `symEllIntR_two_eq_ordinaryHypergeometric`: the
+  Gauss hypergeometric function (DLMF 19.25.42, 19.25.43).
+* `symEllIntRF_zero_one_two`, `integral_sq_div_sqrt_one_sub_pow_four`,
+  `symEllIntRF_mul_symEllIntRD_lemniscate`: the lemniscate constants (DLMF 19.20.2, 19.20.22)
+  and their product (DLMF 19.21.1 at `z = 1`).
+
+## Implementation notes
 
 Legendre's integrals are the complex `DLMF.EllipticIntegrals.incEllIntFk` etc. of
 `DLMF.EllipticIntegrals.Legendre` (segment path from `0` to `φ`, principal powers, a Cauchy
-principal value for `Π`), `K(k)` is `DLMF.JacobiElliptic.compEllIntKk`. Jacobian functions are
-the project's real `DLMF.Elliptic.Real.jacobiSnm` etc. (parameter `m = k²`) and the inverse
+principal value for `Π`), and `K(k)` is `DLMF.JacobiElliptic.compEllIntKk`. Jacobian functions
+are the project's real `DLMF.Elliptic.Real.jacobiSnm` etc. (parameter `m = k²`) and the inverse
 functions of `DLMF.JacobiElliptic.Inverse`; Weierstrass functions are those of
 `DLMF.Weierstrass` on the lattice of `H : HalfPeriods`; `₂F₁` is Mathlib's
-`ordinaryHypergeometric` (the Gauss series, `|z| < 1`).
+`ordinaryHypergeometric` (the Gauss series, `|z| < 1`). In §19.25(i) `c = csc² φ`; in
+§19.25(ii) `r = 1/x²`.
 
-**Domains and corrections** (numerical evidence with mpmath recorded in the ledger):
+**Domains and corrections** (numerical evidence with mpmath):
 * §19.25(i) is stated for **real** `φ ∈ (0, π/2]` and complex `k` with `1 - k² sin² φ` off
   `(-∞, 0]`. DLMF allows `0 ≤ ℜ φ ≤ π/2`; with Legendre's integral along the segment `[0, φ]`
   and principal branches, (19.25.5) and (19.25.7) fail when both `φ` and `k` are nonreal
   (e.g. `φ = 0.771 + 0.492i`, `k = -1.32 + 0.604i`), although they hold for real `φ` and for
   real `k² < 1`.
 * (19.25.30)–(19.25.31): DLMF's condition `cs²(u, k) ≥ 0` holds for all real `u` but the
-  formulas fail for `K < u < 2K` (the right sides are symmetric under `u ↦ 2K - u`); acquired for
-  `0 < u ≤ K`.
+  formulas fail for `K < u < 2K` (the right sides are symmetric under `u ↦ 2K - u`); they are
+  stated for `0 < u ≤ K`.
 * (19.25.32)–(19.25.34): DLMF's conditions on `x²` allow negative `x`, where the formulas fail
-  for `arccs`, `arccd`, `arccn` (the right sides are even in `x`); acquired for `x ≥ 0`.
+  for `arccs`, `arccd`, `arccn` (the right sides are even in `x`); they are stated for `x ≥ 0`.
 * (19.25.25) divides by `k²`; we assume `y < z` (so `k ≠ 0`).
-* (19.25.38)–(19.25.40) assume the arguments of `R_F`, `R_G` lie in `ℂ \ (-∞, 0]` (DLMF uses its
-  conventions on the cut implicitly).
+* (19.25.38)–(19.25.40) assume the arguments of `R_F`, `R_G` lie in `ℂ \ (-∞, 0]` (DLMF uses
+  its conventions on the cut implicitly).
 
 ## References
 
@@ -76,8 +112,8 @@ theorem compEllIntKk_eq_symEllIntRF {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
     compEllIntKk k = symEllIntRF 0 (1 - k ^ 2) 1 := by
   have _ := hk
   rw [compEllIntKk_eq_incEllIntFk, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
-    incEllIntFk_ofReal_eq_integral, ← p19sR1_symEllIntRF_legendre (by positivity) le_rfl k,
-    p19sR1_csc_sq_pi_div_two, sub_self]
+    incEllIntFk_ofReal_eq_integral, ← symEllIntRF_csc_sq_eq_integral (by positivity) le_rfl k,
+    csc_sq_pi_div_two, sub_self]
 
 /-- DLMF 19.25.1 (first formula) for real `k² < 1`. From `lean-codes`'
 `Carlson.Real.compEllIntKk_eq` (Carlson (9.2-14)). -/
@@ -85,7 +121,7 @@ theorem compEllIntKk_eq_symEllIntRF {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
 theorem compEllIntKk_ofReal_eq_symEllIntRF {k : ℝ} (hk : k ^ 2 < 1) :
     compEllIntKk k = symEllIntRF 0 ((1 - k ^ 2 : ℝ) : ℂ) 1 := by
   rw [compEllIntKk_ofReal_carlson hk.le, Carlson.Real.compEllIntKk_eq hk,
-    ei19d_symEllIntRF_zero_eq_carlsonRK (ofReal_mem_slitPlane.mpr (by linarith)) one_mem_slitPlane]
+    symEllIntRF_zero_eq_pi_div_two_mul_carlsonRK (ofReal_mem_slitPlane.mpr (by linarith)) one_mem_slitPlane]
 
 /-- DLMF 19.25.1 (second to fifth formulas): with `k'² = 1 - k² ∈ ℂ \ (-∞, 0]`,
 `E(k) = 2 R_G(0, k'², 1) = (1/3) k'² (R_D(0, k'², 1) + R_D(0, 1, k'²))`,
@@ -104,18 +140,18 @@ theorem compEllIntEk_eq_symEllInt {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
   have hk' : 1 - k ^ 2 * (Real.sin (π / 2) : ℂ) ^ 2 ∈ slitPlane := by
     simpa [Real.sin_pi_div_two] using hk
   have hp : (0 : ℝ) < π / 2 := by positivity
-  have hE := p19sR1_incEllIntEk_eq hp le_rfl hk'
-  have hD := p19sR1_incEllIntDk_eq hp le_rfl k
-  have hsub := p19sR1_incEllIntEk_eq_sub hp.le le_rfl hk'
-  rw [p19sR1_csc_sq_pi_div_two, sub_self] at hE hD
+  have hE := incEllIntEk_eq_symEllIntRF_sub_one_third_symEllIntRD hp le_rfl hk'
+  have hD := incEllIntDk_eq_one_third_symEllIntRD hp le_rfl k
+  have hsub := incEllIntEk_eq_incEllIntFk_sub hp.le le_rfl hk'
+  rw [csc_sq_pi_div_two, sub_self] at hE hD
   have hK : compEllIntKk k = symEllIntRF 0 (1 - k ^ 2) 1 := compEllIntKk_eq_symEllIntRF hk
   have hKF : compEllIntKk k = incEllIntFk ((π / 2 : ℝ) : ℂ) k := by
     rw [compEllIntKk_eq_incEllIntFk, e]
   have hEE : compEllIntEk k = incEllIntEk ((π / 2 : ℝ) : ℂ) k := by rw [compEllIntEk, e]
   have hDD : compEllIntDk k = incEllIntDk ((π / 2 : ℝ) : ℂ) k := by rw [compEllIntDk, e]
-  have hG := p19sR1_two_mul_symEllIntRG (x := 0) (Or.inr rfl) hk one_mem_slitPlane
+  have hG := two_mul_symEllIntRG (x := 0) (Or.inr rfl) hk one_mem_slitPlane
   rw [zero_cpow (by norm_num)] at hG
-  have hcyc := p19sR1_symEllIntRD_cyclic_mul_sum (x := 0) (Or.inr rfl) hk one_mem_slitPlane
+  have hcyc := symEllIntRD_cyclic_mul_sum_of_symEllIntArg (x := 0) (Or.inr rfl) hk one_mem_slitPlane
   rw [symEllIntRD_comm 0 1] at hcyc
   refine ⟨?_, ?_, ?_, ?_, ?_⟩
   · rw [hEE, hE]; linear_combination -hG
@@ -136,10 +172,10 @@ theorem compEllIntPik_sub_compEllIntKk {k α2 : ℂ} (hk : 1 - k ^ 2 ∈ slitPla
     simpa [Real.sin_pi_div_two] using hk
   have hα' : 1 - α2 * (Real.sin (π / 2) : ℂ) ^ 2 ∈ slitPlane := by
     simpa [Real.sin_pi_div_two] using hα
-  have h := p19sR1_incEllIntPik_sub hp.le le_rfl hk' hα'
-  have hJ := p19sR1_symEllIntRJ_legendre hp le_rfl k α2
-    (ei19c_not_isNegReal_of_mem_slitPlane (p19sR1_csc_sq_sub_mem hp le_rfl hα'))
-  rw [p19sR1_csc_sq_pi_div_two, sub_self] at hJ
+  have h := incEllIntPik_sub_incEllIntFk_eq_integral hp.le le_rfl hk' hα'
+  have hJ := symEllIntRJ_csc_sq_eq_integral hp le_rfl k α2
+    (not_isNegReal_of_mem_slitPlane (csc_sq_sub_mem_slitPlane hp le_rfl hα'))
+  rw [csc_sq_pi_div_two, sub_self] at hJ
   rw [compEllIntPik, compEllIntKk_eq_incEllIntFk, e, h, hJ]
   ring
 
@@ -150,7 +186,7 @@ theorem compEllIntPik_eq_symEllIntR {k α2 : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane)
     (hα : 1 - α2 ∈ slitPlane) :
     compEllIntPik α2 k =
       (π / 2) * symEllIntR (1 / 2) ![1 / 2, -1 / 2, 1] ![1 - k ^ 2, 1, 1 - α2] := by
-  exact p19sR1_compEllIntPik_eq_symEllIntR hk hα
+  exact compEllIntPik_eq_pi_div_two_mul_symEllIntR hk hα
 
 /-- DLMF 19.25.4: the Cauchy principal value
 `Π(α², k) = -(1/3)(k²/α²) R_J(0, 1 - k², 1, 1 - k²/α²)` for `-∞ < k² < 1 < α²` (real `k²`,
@@ -172,20 +208,20 @@ theorem incEllIntFk_eq_symEllIntRF {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (hφ' : �
     incEllIntFk φ k = symEllIntRF (c - 1) (c - k ^ 2) c := by
   have _ := hk
   intro c
-  exact (incEllIntFk_ofReal_eq_integral φ k).trans (p19sR1_symEllIntRF_legendre hφ hφ' k).symm
+  exact (incEllIntFk_ofReal_eq_integral φ k).trans (symEllIntRF_csc_sq_eq_integral hφ hφ' k).symm
 
 /-- Under the cosecant-square substitution, moving `c-k²` to the third argument
 of `R_D` gives the sine integral with the inverse cube of the Legendre square root. -/
-private lemma p19sR2_symEllIntRD_legendre_cube {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (hφ' : φ ≤ π / 2)
+private lemma symEllIntRD_csc_sq_swap_eq_integral {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (hφ' : φ ≤ π / 2)
     (hk : 1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) :
     let c : ℂ := ((1 / Real.sin φ ^ 2 : ℝ) : ℂ)
     symEllIntRD (c - 1) c (c - k ^ 2) =
       3 * ∫ θ in (0 : ℝ)..φ, (Real.sin θ : ℂ) ^ 2 *
         (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(3 / 2 : ℂ)) := by
   dsimp only
-  have hc := p19sR1_csc_sq_sub_mem hφ hφ' hk
-  rw [symEllIntRD_eq_integral (ei19c_not_isNegReal_of_mem_slitPlane hc),
-    p19sR1_integral_Ioi_eq_Ioo hφ hφ', intervalIntegral.integral_of_le hφ.le,
+  have hc := csc_sq_sub_mem_slitPlane hφ hφ' hk
+  rw [symEllIntRD_eq_integral (not_isNegReal_of_mem_slitPlane hc),
+    integral_Ioi_eq_integral_Ioo_csc_sq_subst hφ hφ', intervalIntegral.integral_of_le hφ.le,
     integral_Ioc_eq_integral_Ioo, ← integral_const_mul, ← integral_const_mul]
   refine setIntegral_congr_fun measurableSet_Ioo fun θ hθ => ?_
   have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθ.1 (by linarith [hθ.2, Real.pi_pos])
@@ -193,7 +229,7 @@ private lemma p19sR2_symEllIntRD_legendre_cube {φ : ℝ} {k : ℂ} (hφ : 0 < �
     ⟨by linarith [hθ.1, Real.pi_pos], by linarith [hθ.2]⟩
   have hperm : ∀ x y z : ℂ, ∀ t : ℝ, symEllIntS x y z t = symEllIntS x z y t := by
     intros; simp only [symEllIntS]; ring
-  rw [hperm, p19sR1_symEllIntS_subst hs hcos k]
+  rw [hperm, symEllIntS_csc_sq_subst hs hcos k]
   have hsC : Complex.sin (θ : ℂ) ≠ 0 := by
     rw [← ofReal_sin]; exact ofReal_ne_zero.mpr hs.ne'
   have hcC : Complex.cos (θ : ℂ) ≠ 0 := by
@@ -208,8 +244,8 @@ private lemma p19sR2_symEllIntRD_legendre_cube {φ : ℝ} {k : ℂ} (hφ : 0 < �
       (div_le_one hφ).mpr hθ.2.le⟩
     simpa only [div_mul_cancel₀ _ hφ.ne', ← ofReal_mul, ← ofReal_sin] using h
   have hw0 := slitPlane_ne_zero hslit
-  rw [ei19c_cpow_neg_three_halves hw0, cpow_neg]
-  have hV := ei19c_cpow_half_sq (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2)
+  rw [cpow_neg_three_halves_eq hw0, cpow_neg]
+  have hV := cpow_half_mul_cpow_half (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2)
   have hs0 : (Real.sin θ : ℂ) ≠ 0 := ofReal_ne_zero.mpr hs.ne'
   have hcos0 : (Real.cos θ : ℂ) ≠ 0 := ofReal_ne_zero.mpr hcos.ne'
   have hV0 : (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) ≠ 0 := by
@@ -230,7 +266,7 @@ theorem hasDerivAt_incEllIntFk_symEllIntRD {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (
       ((1 / 3) * k * symEllIntRD (c - 1) c (c - k ^ 2)) k := by
   dsimp only
   have hpath := legendrePathOK_ofReal_of_endpoint hφ hφ' hk
-  have h := p19lR1_hasDerivAt_path (by fun_prop : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2)
+  have h := hasDerivAt_integral_unit_mul_cpow (by fun_prop : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2)
     continuousOn_const (-(1 / 2) : ℂ) (w := fun _ => (φ : ℂ)) hpath
   change HasDerivAt (fun κ : ℂ => incEllIntFk φ κ) _ k at h
   have hpt (t : ℝ) : (φ : ℂ) * ((-(1 / 2) : ℂ) *
@@ -238,13 +274,13 @@ theorem hasDerivAt_incEllIntFk_symEllIntRD {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (
       k * ((φ : ℂ) * (Complex.sin (t * φ) ^ 2 * (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(3 / 2 : ℂ)))) := by
     rw [show (-(1 / 2) : ℂ) - 1 = -(3 / 2) by norm_num]; ring
   simp only [hpt, intervalIntegral.integral_const_mul] at h
-  rw [p19sR2_symEllIntRD_legendre_cube hφ hφ' hk]
+  rw [symEllIntRD_csc_sq_swap_eq_integral hφ hφ' hk]
   have he : (φ : ℂ) * ∫ t in (0 : ℝ)..1, Complex.sin (t * φ) ^ 2 *
       (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(3 / 2 : ℂ)) =
       ∫ θ in (0 : ℝ)..φ, (Real.sin θ : ℂ) ^ 2 * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(3 / 2 : ℂ)) := by
     simp only [ofReal_sin]
-    rw [← ei19a_segmentIntegral_ofReal (fun z : ℂ => Complex.sin z ^ 2 *
-      (1 - k ^ 2 * Complex.sin z ^ 2) ^ (-(3 / 2 : ℂ))) φ, ei19a_segmentIntegral,
+    rw [← segmentIntegral_ofReal (fun z : ℂ => Complex.sin z ^ 2 *
+      (1 - k ^ 2 * Complex.sin z ^ 2) ^ (-(3 / 2 : ℂ))) φ, segmentIntegral,
       intervalIntegral.integral_const_mul]
   rw [he] at h
   convert h using 1
@@ -261,10 +297,10 @@ theorem incEllIntEk_eq_symEllIntRG {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (hφ' : �
       (c - 1) ^ (1 / 2 : ℂ) * (c - k ^ 2) ^ (1 / 2 : ℂ) / c ^ (1 / 2 : ℂ) := by
   intro c
   have hc : c = ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) := rfl
-  have hE := p19sR1_incEllIntEk_eq hφ hφ' hk
-  have hG := p19sR1_two_mul_symEllIntRG (p19sR1_csc_sq_sub_one_arg hφ hφ')
-    (p19sR1_csc_sq_sub_mem hφ hφ' hk) (p19sR1_csc_sq_mem hφ hφ')
-  rw [← ei19c_inv_cpow_half] at hG
+  have hE := incEllIntEk_eq_symEllIntRF_sub_one_third_symEllIntRD hφ hφ' hk
+  have hG := two_mul_symEllIntRG (symEllIntArg_csc_sq_sub_one hφ hφ')
+    (csc_sq_sub_mem_slitPlane hφ hφ' hk) (csc_sq_mem_slitPlane hφ hφ')
+  rw [← inv_cpow_half_eq_cpow_neg_half] at hG
   rw [hc]
   linear_combination hE - hG
 
@@ -276,7 +312,7 @@ theorem incEllIntEk_eq_symEllIntR {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (hφ' : φ
     (hk : 1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) :
     let c : ℂ := ((1 / Real.sin φ ^ 2 : ℝ) : ℂ)
     incEllIntEk φ k = symEllIntR (1 / 2) ![1 / 2, -1 / 2, 3 / 2] ![c - 1, c - k ^ 2, c] := by
-  exact p19sR1_incEllIntEk_eq_symEllIntR hφ hφ' hk
+  exact incEllIntEk_eq_symEllIntR_csc_sq hφ hφ' hk
 
 /-- DLMF 19.25.9: `E(φ, k) = R_F(c - 1, c - k², c) - (1/3) k² R_D(c - 1, c - k², c)`, for real
 `φ ∈ (0, π/2]` and `1 - k² sin² φ ∈ ℂ \ (-∞, 0]`; all terms are nonnegative when `k² ≤ 0`
@@ -290,7 +326,7 @@ theorem incEllIntEk_eq_symEllIntRF_sub_symEllIntRD {φ : ℝ} {k : ℂ} (hφ : 0
   intro c
   have hc : c = ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) := rfl
   rw [hc]
-  exact p19sR1_incEllIntEk_eq hφ hφ' hk
+  exact incEllIntEk_eq_symEllIntRF_sub_one_third_symEllIntRD hφ hφ' hk
 
 /-- DLMF 19.25.10: `E(φ, k) = k'² R_F(c - 1, c - k², c) + (1/3) k² k'² R_D(c - 1, c, c - k²)
 + k² √(c - 1)/(√c √(c - k²))`, for `c > k²` (real `k`, `k² sin² φ < 1`), real `φ ∈ (0, π/2]`;
@@ -311,20 +347,20 @@ theorem incEllIntEk_eq_symEllIntRD_second {φ k : ℝ} (hφ : 0 < φ) (hφ' : φ
   rw [hc]
   rcases eq_or_lt_of_le hφ' with h | h
   · subst h
-    have hE := p19sR1_incEllIntEk_eq hφ le_rfl hk'
-    have hy := p19sR1_csc_sq_sub_mem hφ le_rfl hk'
-    rw [p19sR1_csc_sq_pi_div_two] at hE hy ⊢
+    have hE := incEllIntEk_eq_symEllIntRF_sub_one_third_symEllIntRD hφ le_rfl hk'
+    have hy := csc_sq_sub_mem_slitPlane hφ le_rfl hk'
+    rw [csc_sq_pi_div_two] at hE hy ⊢
     rw [sub_self] at hE ⊢
-    have hcyc := p19sR1_symEllIntRD_cyclic_mul_sum (x := 0) (Or.inr rfl) hy one_mem_slitPlane
+    have hcyc := symEllIntRD_cyclic_mul_sum_of_symEllIntArg (x := 0) (Or.inr rfl) hy one_mem_slitPlane
     rw [symEllIntRD_comm 0 1] at hcyc
     rw [hE, zero_cpow (by norm_num)]
     linear_combination -((k : ℂ) ^ 2 / 3) * hcyc
-  · have hE := p19sR1_incEllIntEk_eq hφ hφ' hk'
-    have hM := p19sR1_symEllIntRD_move (p19sR1_csc_sq_sub_mem hφ hφ' hk')
-      (p19sR1_csc_sq_sub_one_mem hφ h) (p19sR1_csc_sq_mem hφ hφ')
+  · have hE := incEllIntEk_eq_symEllIntRF_sub_one_third_symEllIntRD hφ hφ' hk'
+    have hM := symEllIntRD_two_term_relation (csc_sq_sub_mem_slitPlane hφ hφ' hk')
+      (csc_sq_sub_one_mem_slitPlane hφ h) (csc_sq_mem_slitPlane hφ hφ')
     rw [symEllIntRD_comm (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1), symEllIntRF_comm_left,
-      ← ei19c_inv_cpow_half,
-      ← ei19c_inv_cpow_half] at hM
+      ← inv_cpow_half_eq_cpow_neg_half,
+      ← inv_cpow_half_eq_cpow_neg_half] at hM
     linear_combination hE - ((k : ℂ) ^ 2 / 3) * hM
 
 /-- DLMF 19.25.11: `E(φ, k) = -(1/3) k'² R_D(c - k², c, c - 1) + √(c - k²)/(√c √(c - 1))`, for
@@ -338,10 +374,10 @@ theorem incEllIntEk_eq_symEllIntRD_third {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (h�
       (c - k ^ 2) ^ (1 / 2 : ℂ) / (c ^ (1 / 2 : ℂ) * (c - 1) ^ (1 / 2 : ℂ)) := by
   intro c
   have hc : c = ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) := rfl
-  have hE := p19sR1_incEllIntEk_eq hφ hφ'.le hk
-  have hM := p19sR1_symEllIntRD_move (p19sR1_csc_sq_sub_one_mem hφ hφ')
-    (p19sR1_csc_sq_sub_mem hφ hφ'.le hk) (p19sR1_csc_sq_mem hφ hφ'.le)
-  rw [← ei19c_inv_cpow_half, ← ei19c_inv_cpow_half] at hM
+  have hE := incEllIntEk_eq_symEllIntRF_sub_one_third_symEllIntRD hφ hφ'.le hk
+  have hM := symEllIntRD_two_term_relation (csc_sq_sub_one_mem_slitPlane hφ hφ')
+    (csc_sq_sub_mem_slitPlane hφ hφ'.le hk) (csc_sq_mem_slitPlane hφ hφ'.le)
+  rw [← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half] at hM
   rw [hc]
   linear_combination hE - (1 / 3 : ℂ) * hM
 
@@ -354,7 +390,7 @@ theorem hasDerivAt_incEllIntEk_symEllIntRD {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (
     HasDerivAt (fun κ : ℂ => incEllIntEk φ κ)
       (-(1 / 3) * k * symEllIntRD (c - 1) (c - k ^ 2) c) k := by
   have hpath := legendrePathOK_ofReal_of_endpoint hφ hφ' hk
-  have h := p19lR1_hasDerivAt_path (by fun_prop : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2)
+  have h := hasDerivAt_integral_unit_mul_cpow (by fun_prop : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2)
     continuousOn_const (1 / 2 : ℂ) (w := fun _ => (φ : ℂ)) hpath
   change HasDerivAt (fun κ : ℂ => incEllIntEk φ κ) _ k at h
   have hpt (t : ℝ) : (φ : ℂ) * ((1 / 2 : ℂ) *
@@ -364,9 +400,9 @@ theorem hasDerivAt_incEllIntEk_symEllIntRD {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (
   simp only [hpt, intervalIntegral.integral_const_mul] at h
   have he : incEllIntDk φ k = (φ : ℂ) * ∫ t in (0 : ℝ)..1, Complex.sin (t * φ) ^ 2 *
       (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
-    rw [incEllIntDk, ei19a_segmentIntegral, intervalIntegral.integral_const_mul]
+    rw [incEllIntDk, segmentIntegral, intervalIntegral.integral_const_mul]
   rw [← he] at h
-  rw [p19sR1_incEllIntDk_eq hφ hφ' k] at h
+  rw [incEllIntDk_eq_one_third_symEllIntRD hφ hφ' k] at h
   convert h using 1
   ring
 
@@ -381,7 +417,7 @@ theorem incEllIntDk_eq_symEllIntRD {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (hφ' : �
   intro c
   have hc : c = ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) := rfl
   rw [hc]
-  exact p19sR1_incEllIntDk_eq hφ hφ' k
+  exact incEllIntDk_eq_one_third_symEllIntRD hφ hφ' k
 
 /-- DLMF 19.25.14: `Π(φ, α², k) - F(φ, k) = (1/3) α² R_J(c - 1, c - k², c, c - α²)`, for real
 `φ ∈ (0, π/2]`, `1 - k² sin² φ` and `1 - α² sin² φ` in `ℂ \ (-∞, 0]` (no principal value). -/
@@ -394,8 +430,8 @@ theorem incEllIntPik_sub_incEllIntFk {φ : ℝ} {k α2 : ℂ} (hφ : 0 < φ) (h�
         (c - α2) := by
   intro c
   have hc : c = ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) := rfl
-  rw [hc, p19sR1_incEllIntPik_sub hφ.le hφ' hk hα, p19sR1_symEllIntRJ_legendre hφ hφ' k α2
-    (ei19c_not_isNegReal_of_mem_slitPlane (p19sR1_csc_sq_sub_mem hφ hφ' hα))]
+  rw [hc, incEllIntPik_sub_incEllIntFk_eq_integral hφ.le hφ' hk hα, symEllIntRJ_csc_sq_eq_integral hφ hφ' k α2
+    (not_isNegReal_of_mem_slitPlane (csc_sq_sub_mem_slitPlane hφ hφ' hα))]
   ring
 
 /-- DLMF 19.25.15: `Π(φ, α², k) = R_{-1/2}(1/2, 1/2, -1/2, 1; c - 1, c - k², c, c - α²)`, for real
@@ -407,7 +443,7 @@ theorem incEllIntPik_eq_symEllIntR {φ : ℝ} {k α2 : ℂ} (hφ : 0 < φ) (hφ'
     let c : ℂ := ((1 / Real.sin φ ^ 2 : ℝ) : ℂ)
     incEllIntPik φ α2 k =
       symEllIntR (1 / 2) ![1 / 2, 1 / 2, -1 / 2, 1] ![c - 1, c - k ^ 2, c, c - α2] := by
-  exact p19sR1_incEllIntPik_eq_symEllIntR hφ hφ' hk hα
+  exact incEllIntPik_eq_symEllIntR_csc_sq hφ hφ' hk hα
 
 /-- DLMF 19.25.16: if `α² > c` the Cauchy principal value is
 `Π(φ, α², k) = -(1/3) ω² R_J(c - 1, c - k², c, c - ω²)
@@ -442,7 +478,7 @@ theorem bulirschEl1_eq_symEllIntRF {x : ℝ} {kc : ℂ} (hx : 0 < x) (hkc : kc ^
     let r : ℂ := ((1 / x ^ 2 : ℝ) : ℂ)
     bulirschEl1 x kc = symEllIntRF r (r + kc ^ 2) (r + 1) := by
   have _ := hkc
-  exact p19sR1_bulirschEl1_eq hx kc
+  exact bulirschEl1_eq_symEllIntRF_of_pos hx kc
 
 /-- DLMF 19.25.21: `el2(x, k_c, a, b) = a el1(x, k_c) + (1/3)(b - a) R_D(r, r + k_c², r + 1)`,
 `r = 1/x²`, for real `x > 0`, `a, b` and `k_c² ∈ ℂ \ (-∞, 0]`. -/
@@ -452,7 +488,7 @@ theorem bulirschEl2_eq_symEllInt {x : ℝ} {kc : ℂ} {a b : ℝ} (hx : 0 < x)
     let r : ℂ := ((1 / x ^ 2 : ℝ) : ℂ)
     bulirschEl2 x kc a b = a * bulirschEl1 x kc + (1 / 3) * ((b - a : ℝ) : ℂ) * symEllIntRD r
         (r + kc ^ 2) (r + 1) := by
-  exact p19sR1_bulirschEl2_eq hx hkc a b
+  exact bulirschEl2_eq_symEllIntRD hx hkc a b
 
 /-- DLMF 19.25.22: `el3(x, k_c, p) = el1(x, k_c) + (1/3)(1 - p) R_J(r, r + k_c², r + 1, r + p)`,
 `r = 1/x²`, for real `x > 0`, real `p ≠ 0` with `x² ≠ -1/p` (19.2.16), and
@@ -478,10 +514,10 @@ theorem sqrt_mul_symEllIntRF_eq_incEllIntFk {x y z : ℝ} (hx : 0 ≤ x) (hxy : 
   have _ := hxy
   have _ := h0
   intro φ k
-  obtain ⟨hφ0, hφ1, ex, ey, ez, -, -, -⟩ := p19sR1_iii_setup hx hyz hxz
+  obtain ⟨hφ0, hφ1, ex, ey, ez, -, -, -⟩ := real_symmetric_legendre_parametrization hx hyz hxz
   have hl : 0 < z - x := by linarith
-  rw [ex, ey, ez, p19sR1_symEllIntRF_scale hl, p19sR1_sqrt_cast_eq_cpow hl.le,
-    mul_inv_cancel_left₀ (p19sR1_half_pow_ne hl), p19sR1_symEllIntRF_legendre hφ0 hφ1,
+  rw [ex, ey, ez, symEllIntRF_scale hl, ofReal_sqrt_eq_cpow_half hl.le,
+    mul_inv_cancel_left₀ (ofReal_cpow_half_ne_zero hl), symEllIntRF_csc_sq_eq_integral hφ0 hφ1,
     ← incEllIntFk_ofReal_eq_integral]
 
 /-- DLMF 19.25.25 with 19.25.23: `(z - x)^{3/2} R_D(x, y, z) = (3/k²)(F(φ, k) - E(φ, k))`, under
@@ -495,7 +531,7 @@ theorem symEllIntRD_eq_incEllInt {x y z : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (h
       3 / (k : ℂ) ^ 2 * (incEllIntFk φ k - incEllIntEk φ k) := by
   intro φ k
   have hxz : x < z := lt_of_le_of_lt hxy hyz
-  obtain ⟨hφ0, hφ1, ex, ey, ez, -, hA, hk2⟩ := p19sR1_iii_setup hx hyz.le hxz
+  obtain ⟨hφ0, hφ1, ex, ey, ez, -, hA, hk2⟩ := real_symmetric_legendre_parametrization hx hyz.le hxz
   have hl : 0 < z - x := by linarith
   have hz : 0 < z := by linarith
   have hy : 0 < y := by
@@ -506,10 +542,10 @@ theorem symEllIntRD_eq_incEllInt {x y z : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (h
     rw [hA]; exact ofReal_mem_slitPlane.mpr (div_pos hy hz)
   have hk0 : (k : ℂ) ^ 2 ≠ 0 := by
     rw [hk2]; exact ofReal_ne_zero.mpr (div_pos (by linarith) hl).ne'
-  rw [ex, ey, ez, p19sR1_symEllIntRD_scale hl _ _ _
-      (ei19c_not_isNegReal_of_mem_slitPlane (p19sR1_csc_sq_mem hφ0 hφ1)),
-    p19sR1_rpow_three_halves hl, mul_inv_cancel_left₀ (pow_ne_zero _ (p19sR1_half_pow_ne hl)),
-    p19sR1_incEllIntEk_eq_sub hφ0.le hφ1 hk, p19sR1_incEllIntDk_eq hφ0 hφ1, sub_sub_cancel,
+  rw [ex, ey, ez, symEllIntRD_scale hl _ _ _
+      (not_isNegReal_of_mem_slitPlane (csc_sq_mem_slitPlane hφ0 hφ1)),
+    ofReal_rpow_three_halves hl, mul_inv_cancel_left₀ (pow_ne_zero _ (ofReal_cpow_half_ne_zero hl)),
+    incEllIntEk_eq_incEllIntFk_sub hφ0.le hφ1 hk, incEllIntDk_eq_one_third_symEllIntRD hφ0 hφ1, sub_sub_cancel,
     ← mul_assoc, div_mul_cancel₀ _ hk0]
   ring
 
@@ -526,7 +562,7 @@ theorem symEllIntRJ_eq_incEllInt {x y z p : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) 
       3 / (α2 : ℂ) * (incEllIntPik φ α2 k - incEllIntFk φ k) := by
   have _ := hxy
   intro φ k α2
-  obtain ⟨hφ0, hφ1, ex, ey, ez, hs2, hA, hk2⟩ := p19sR1_iii_setup hx hyz hxz
+  obtain ⟨hφ0, hφ1, ex, ey, ez, hs2, hA, hk2⟩ := real_symmetric_legendre_parametrization hx hyz hxz
   have hl : 0 < z - x := by linarith
   have hz : 0 < z := by linarith
   have hy : 0 < y := by
@@ -543,15 +579,15 @@ theorem symEllIntRJ_eq_incEllInt {x y z p : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) 
     exact ofReal_mem_slitPlane.mpr (div_pos hp hz)
   have ep : (p : ℂ) = ((z - x : ℝ) : ℂ) * (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - (α2 : ℂ)) := by
     have hc : 1 / Real.sin φ ^ 2 = z / (z - x) := by rw [hs2, one_div_div]
-    exact p19sR1_real_scale_eq (w := p) hxz _ hc
+    exact ofReal_eq_sub_mul_csc_sq_sub (w := p) hxz _ hc
   have hα0 : (α2 : ℂ) ≠ 0 := by
     simp only [α2]
     exact ofReal_ne_zero.mpr (div_ne_zero (sub_ne_zero.mpr (Ne.symm hpz)) hl.ne')
-  rw [ex, ey, ez, ep, p19sR1_symEllIntRJ_scale hl _ _ _ _
-      (ei19c_not_isNegReal_of_mem_slitPlane (p19sR1_csc_sq_sub_mem hφ0 hφ1 hα)),
-    p19sR1_rpow_three_halves hl, mul_inv_cancel_left₀ (pow_ne_zero _ (p19sR1_half_pow_ne hl)),
-    p19sR1_incEllIntPik_sub hφ0.le hφ1 hk hα, p19sR1_symEllIntRJ_legendre hφ0 hφ1 _ _
-      (ei19c_not_isNegReal_of_mem_slitPlane (p19sR1_csc_sq_sub_mem hφ0 hφ1 hα)),
+  rw [ex, ey, ez, ep, symEllIntRJ_scale hl _ _ _ _
+      (not_isNegReal_of_mem_slitPlane (csc_sq_sub_mem_slitPlane hφ0 hφ1 hα)),
+    ofReal_rpow_three_halves hl, mul_inv_cancel_left₀ (pow_ne_zero _ (ofReal_cpow_half_ne_zero hl)),
+    incEllIntPik_sub_incEllIntFk_eq_integral hφ0.le hφ1 hk hα, symEllIntRJ_csc_sq_eq_integral hφ0 hφ1 _ _
+      (not_isNegReal_of_mem_slitPlane (csc_sq_sub_mem_slitPlane hφ0 hφ1 hα)),
     ← mul_assoc, div_mul_cancel₀ _ hα0]
 
 /-- DLMF 19.25.27 with 19.25.23: `2(z - x)^{-1/2} R_G(x, y, z) = E(φ, k) + cot² φ F(φ, k)
@@ -565,7 +601,7 @@ theorem symEllIntRG_eq_incEllInt {x y z : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (h
       incEllIntEk φ k + ((Real.cot φ ^ 2 : ℝ) : ℂ) * incEllIntFk φ k +
         ((Real.cot φ * √(1 - k ^ 2 * Real.sin φ ^ 2) : ℝ) : ℂ) := by
   intro φ k
-  obtain ⟨hφ0, hφ1, ex, ey, ez, -, hA, -⟩ := p19sR1_iii_setup hx hyz hxz
+  obtain ⟨hφ0, hφ1, ex, ey, ez, -, hA, -⟩ := real_symmetric_legendre_parametrization hx hyz hxz
   have hl : 0 < z - x := by linarith
   have hz : 0 < z := by linarith
   have hy : 0 < y := by
@@ -575,12 +611,12 @@ theorem symEllIntRG_eq_incEllInt {x y z : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (h
   have hk : 1 - (k : ℂ) ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane := by
     rw [hA]; exact ofReal_mem_slitPlane.mpr (div_pos hy hz)
   have hAr : 1 - k ^ 2 * Real.sin φ ^ 2 = y / z := by exact_mod_cast hA
-  have hG := p19sR1_two_mul_symEllIntRG (p19sR1_csc_sq_sub_one_arg hφ0 hφ1)
-    (p19sR1_csc_sq_sub_mem hφ0 hφ1 hk) (p19sR1_csc_sq_mem hφ0 hφ1)
-  have hE := p19sR1_incEllIntEk_eq hφ0 hφ1 hk
+  have hG := two_mul_symEllIntRG (symEllIntArg_csc_sq_sub_one hφ0 hφ1)
+    (csc_sq_sub_mem_slitPlane hφ0 hφ1 hk) (csc_sq_mem_slitPlane hφ0 hφ1)
+  have hE := incEllIntEk_eq_symEllIntRF_sub_one_third_symEllIntRD hφ0 hφ1 hk
   have hF : incEllIntFk φ k = symEllIntRF (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1)
       (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - (k : ℂ) ^ 2) ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) :=
-    (incEllIntFk_ofReal_eq_integral _ _).trans (p19sR1_symEllIntRF_legendre hφ0 hφ1 _).symm
+    (incEllIntFk_ofReal_eq_integral _ _).trans (symEllIntRF_csc_sq_eq_integral hφ0 hφ1 _).symm
   have hs : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi hφ0 (by linarith [Real.pi_pos])
   have hcot2r : Real.cot φ ^ 2 = 1 / Real.sin φ ^ 2 - 1 := by
     rw [Real.cot_eq_cos_div_sin, div_pow]
@@ -598,13 +634,13 @@ theorem symEllIntRG_eq_incEllInt {x y z : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (h
       (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) ^ (1 / 2 : ℂ) *
         (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - (k : ℂ) ^ 2) ^ (1 / 2 : ℂ) *
           ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) ^ (-1 / 2 : ℂ) := by
-    rw [p19sR1_cot_sqrt_eq hφ0 hφ1 hA0, ofReal_div, ofReal_mul,
-      p19sR1_sqrt_cast_eq_cpow hc1, p19sR1_sqrt_cast_eq_cpow hck,
-      p19sR1_sqrt_cast_eq_cpow (by positivity), ← ei19c_inv_cpow_half]
+    rw [cot_mul_sqrt_eq_sqrt_csc_sq hφ0 hφ1 hA0, ofReal_div, ofReal_mul,
+      ofReal_sqrt_eq_cpow_half hc1, ofReal_sqrt_eq_cpow_half hck,
+      ofReal_sqrt_eq_cpow_half (by positivity), ← inv_cpow_half_eq_cpow_neg_half]
     push_cast
     ring
-  have hL0 := p19sR1_half_pow_ne hl
-  rw [ex, ey, ez, p19sR1_symEllIntRG_scale hl, p19sR1_rpow_neg_half hl, hcot2, hsq, hE, hF,
+  have hL0 := ofReal_cpow_half_ne_zero hl
+  rw [ex, ey, ez, symEllIntRG_scale hl, ofReal_rpow_neg_half hl, hcot2, hsq, hE, hF,
     mul_assoc, inv_mul_cancel_left₀ hL0]
   linear_combination hG
 
@@ -612,7 +648,7 @@ theorem symEllIntRG_eq_incEllInt {x y z : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (h
 
 /-- The real Glaisher numerator `p(u, k)` for `p ∈ {s, c, d, n}`: `sn, cn, dn, 1` (parameter
 `m = k²`), so that `pq = p/q` (DLMF 22.2.10). -/
-def ei19d_jacobiLetterm : JacobiLetter → ℝ → ℝ → ℝ
+def jacobiLetterNumerator : JacobiLetter → ℝ → ℝ → ℝ
   | .s, u, m => DLMF.Elliptic.Real.jacobiSnm u m
   | .c, u, m => DLMF.Elliptic.Real.jacobiCnm u m
   | .d, u, m => DLMF.Elliptic.Real.jacobiDnm u m
@@ -622,8 +658,8 @@ def ei19d_jacobiLetterm : JacobiLetter → ℝ → ℝ → ℝ
 parameter `m = k²`), with `Δ(p, q) = -Δ(q, p)`. -/
 @[dlmf 19.25.E28]
 def jacobiDeltam (p q : JacobiLetter) (u m : ℝ) : ℝ :=
-  (ei19d_jacobiLetterm p u m / DLMF.Elliptic.Real.jacobiSnm u m) ^ 2 -
-    (ei19d_jacobiLetterm q u m / DLMF.Elliptic.Real.jacobiSnm u m) ^ 2
+  (jacobiLetterNumerator p u m / DLMF.Elliptic.Real.jacobiSnm u m) ^ 2 -
+    (jacobiLetterNumerator q u m / DLMF.Elliptic.Real.jacobiSnm u m) ^ 2
 
 /-- DLMF 19.25.28 (antisymmetry): `Δ(p, q) = -Δ(q, p)`. -/
 @[dlmf 19.25.E28]
@@ -649,30 +685,30 @@ theorem jacobiDeltam_values {u m : ℝ} (hm : m < 1)
     rw [DLMF.Elliptic.Real.jacobiDnm, ← Real.sqrt_eq_rpow, Real.sq_sqrt h1]
   have hs2 : DLMF.Elliptic.Real.jacobiSnm u m ^ 2 ≠ 0 := pow_ne_zero 2 hs
   refine ⟨?_, ?_, ?_⟩
-  · simp only [jacobiDeltam, ei19d_jacobiLetterm, div_pow]
+  · simp only [jacobiDeltam, jacobiLetterNumerator, div_pow]
     field_simp
     linear_combination (-1 : ℝ) * hd
-  · simp only [jacobiDeltam, ei19d_jacobiLetterm, div_pow]
+  · simp only [jacobiDeltam, jacobiLetterNumerator, div_pow]
     field_simp
     linear_combination hd - hsc
-  · simp only [jacobiDeltam, ei19d_jacobiLetterm, div_pow]
+  · simp only [jacobiDeltam, jacobiLetterNumerator, div_pow]
     field_simp
     linear_combination (-1 : ℝ) * hsc
 
 
 /-- Round-1 helper: the real `F(φ|m)` as the complex Legendre integral with `k = √m`. -/
-lemma p19sR1_incEllIntFm_ofReal {m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1) (φ : ℝ) :
+private lemma ofReal_incEllIntFm_eq_integral {m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1) (φ : ℝ) :
     ((DLMF.Elliptic.Real.incEllIntFm φ m : ℝ) : ℂ) = ∫ θ in (0 : ℝ)..φ,
       (1 - ((√m : ℝ) : ℂ) ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
   rw [DLMF.Elliptic.Real.incEllIntFm, ← intervalIntegral.integral_ofReal]
   refine intervalIntegral.integral_congr fun θ _ => ?_
   have hb : 0 ≤ 1 - m * Real.sin θ ^ 2 := by nlinarith [Real.sin_sq_le_one θ]
-  rw [ofReal_cpow hb, p19sR1_sqrt_sq_cast hm0]
+  rw [ofReal_cpow hb, ofReal_sqrt_sq_of_nonneg hm0]
   push_cast
   ring_nf
 
 /-- Round-1 helper: for `0 < u ≤ K(m)`, `0 < am(u|m) ≤ π/2`. -/
-lemma p19sR1_jacobiAmm_mem {u m : ℝ} (hm : m < 1) (hu : 0 < u)
+private lemma jacobiAmm_mem_Ioc {u m : ℝ} (hm : m < 1) (hu : 0 < u)
     (huK : u ≤ DLMF.Elliptic.Real.compEllIntKm m) :
     0 < DLMF.Elliptic.Real.jacobiAmm u m ∧ DLMF.Elliptic.Real.jacobiAmm u m ≤ π / 2 := by
   have hmono := DLMF.Elliptic.Real.strictMono_incEllIntFm hm
@@ -699,7 +735,7 @@ theorem jacobiAmm_eq_symEllIntRC {u m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1) (hu : 
         (((DLMF.Elliptic.Real.jacobiCnm u m / DLMF.Elliptic.Real.jacobiSnm u m) ^ 2 : ℝ) : ℂ)
         (((1 / DLMF.Elliptic.Real.jacobiSnm u m) ^ 2 : ℝ) : ℂ) := by
   have _ := hm0
-  obtain ⟨h0, h1⟩ := p19sR1_jacobiAmm_mem hm hu huK
+  obtain ⟨h0, h1⟩ := jacobiAmm_mem_Ioc hm hu huK
   set φ := DLMF.Elliptic.Real.jacobiAmm u m with hφ
   have hs : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi h0 (by linarith [Real.pi_pos])
   have hc : 0 ≤ Real.cos φ := Real.cos_nonneg_of_mem_Icc ⟨by linarith [Real.pi_pos], h1⟩
@@ -728,7 +764,7 @@ theorem eq_symEllIntRF_jacobi {u m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1) (hu : 0 <
       (((DLMF.Elliptic.Real.jacobiCnm u m / DLMF.Elliptic.Real.jacobiSnm u m) ^ 2 : ℝ) : ℂ)
       (((DLMF.Elliptic.Real.jacobiDnm u m / DLMF.Elliptic.Real.jacobiSnm u m) ^ 2 : ℝ) : ℂ)
       (((1 / DLMF.Elliptic.Real.jacobiSnm u m) ^ 2 : ℝ) : ℂ) := by
-  obtain ⟨h0, h1⟩ := p19sR1_jacobiAmm_mem hm hu huK
+  obtain ⟨h0, h1⟩ := jacobiAmm_mem_Ioc hm hu huK
   have hs : 0 < Real.sin (DLMF.Elliptic.Real.jacobiAmm u m) :=
     Real.sin_pos_of_pos_of_lt_pi h0 (by linarith [Real.pi_pos])
   have hF := DLMF.Elliptic.Real.incEllIntFm_jacobiAmm hm u
@@ -749,11 +785,11 @@ theorem eq_symEllIntRF_jacobi {u m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1) (hu : 0 <
       rw [div_pow, DLMF.Elliptic.Real.jacobiDnm, ← Real.sqrt_eq_rpow, Real.sq_sqrt hb]
       unfold DLMF.Elliptic.Real.jacobiSnm
       field_simp
-    rw [this, p19sR1_sqrt_sq_cast hm0]; push_cast; ring
+    rw [this, ofReal_sqrt_sq_of_nonneg hm0]; push_cast; ring
   have e3 : (((1 / DLMF.Elliptic.Real.jacobiSnm u m) ^ 2 : ℝ) : ℂ) =
       ((1 / Real.sin (DLMF.Elliptic.Real.jacobiAmm u m) ^ 2 : ℝ) : ℂ) := by
     unfold DLMF.Elliptic.Real.jacobiSnm; push_cast; ring
-  rw [e1, e2, e3, p19sR1_symEllIntRF_legendre h0 h1, ← p19sR1_incEllIntFm_ofReal hm0 hm, hF]
+  rw [e1, e2, e3, symEllIntRF_csc_sq_eq_integral h0 h1, ← ofReal_incEllIntFm_eq_integral hm0 hm, hF]
 
 /-- DLMF 19.25.32 for `ps = cs, ds, ns` (with `Δ(d, c) = k'²`, `Δ(n, c) = 1`, `Δ(n, d) = k²`,
 19.25.29): `arcps(x, k) = R_F(x², x² + Δ(q, p), x² + Δ(r, p))`, i.e.
@@ -889,7 +925,7 @@ theorem ordinaryHypergeometric_eq_symEllIntR (a b c : ℂ) (hc : ∀ n : ℕ, c 
     simp only [sub_re, one_re]
     linarith [le_abs_self z.re]
   have hw : (1 - z) ∈ slitPlane := Or.inl hre
-  rw [symEllIntR_of_mem _ _ (ei19c_slit2 hw one_mem_slitPlane)]
+  rw [symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hw one_mem_slitPlane)]
   have h := Carlson.regCarlsonR_pair_one_sub_eq_regularizedGaussHGFun a b c hz
   unfold Carlson.carlsonR
   have e1 : (![b, c - b] : Fin 2 → ℂ) = Carlson.TwoVariable.pair b (c - b) := rfl
@@ -932,7 +968,7 @@ theorem symEllIntR_two_eq_ordinaryHypergeometric (a b₁ b₂ : ℂ) (hb : ∀ n
     fin_cases i
     · exact (mul_div_cancel₀ z₁ h₂).symm
     · simp
-  rw [hnodes, symEllIntR_mul a _ (ei19c_slit2 hdiv one_mem_slitPlane) hz₂]
+  rw [hnodes, symEllIntR_mul a _ (vec2_mem_carlsonRSlitDomain hdiv one_mem_slitPlane) hz₂]
   intro i
   fin_cases i
   · change arg z₂ + arg (z₁ / z₂) ∈ Ioo (-π) π
@@ -947,12 +983,12 @@ theorem symEllIntR_two_eq_ordinaryHypergeometric (a b₁ b₂ : ℂ) (hb : ∀ n
 /-! ### Round-1 helpers: the lemniscate constants -/
 
 /-- Round-1 helper (DLMF 19.21.1 at `z = 1`): `R_F(0, 1, 2) · (1/3) R_D(0, 2, 1) = π/4`. -/
-theorem p19sR1_lemniscate_product :
+theorem symEllIntRF_mul_symEllIntRD_lemniscate :
     symEllIntRF 0 1 2 * ((1 / 3) * symEllIntRD 0 2 1) = π / 4 := by
   have hL := DLMF.Elliptic.legendre_relation (m := 1 / 2) (by norm_num) (by norm_num)
   rw [show (1 : ℝ) - 1 / 2 = 1 / 2 by norm_num] at hL
   set k : ℂ := ((√(1 / 2 : ℝ) : ℝ) : ℂ) with hk
-  have hk2 : k ^ 2 = ((1 / 2 : ℝ) : ℂ) := p19sR1_sqrt_sq_cast (by norm_num)
+  have hk2 : k ^ 2 = ((1 / 2 : ℝ) : ℂ) := ofReal_sqrt_sq_of_nonneg (by norm_num)
   have hK := compEllIntKk_eq_ofReal (k := k) (m := 1 / 2) hk2 (by norm_num)
   have hE := compEllIntEk_eq_ofReal (k := k) (m := 1 / 2) hk2 (by norm_num)
   have hk2' : k ^ 2 = 1 / 2 := by rw [hk2]; push_cast; ring
@@ -965,13 +1001,13 @@ theorem p19sR1_lemniscate_product :
   have hKF := compEllIntKk_eq_symEllIntRF hmem
   rw [hk2', show (1 : ℂ) - 1 / 2 = 1 / 2 by norm_num] at h5 hKF
   have hl : (0 : ℝ) < 2 := by norm_num
-  have hA := p19sR1_symEllIntRF_scale hl 0 (1 / 2) 1
-  have hB := p19sR1_symEllIntRD_scale hl 0 1 (1 / 2) (ei19c_not_isNegReal_of_mem_slitPlane h12)
+  have hA := symEllIntRF_scale hl 0 (1 / 2) 1
+  have hB := symEllIntRD_scale hl 0 1 (1 / 2) (not_isNegReal_of_mem_slitPlane h12)
   simp only [mul_zero, mul_one, ofReal_ofNat] at hA hB
   rw [show (2 : ℂ) * (1 / 2) = 1 by norm_num] at hA hB
   rw [hA, hB, ← hKF]
-  have hL2 := p19sR1_half_pow_sq hl
-  have hL0 := p19sR1_half_pow_ne hl
+  have hL2 := ofReal_cpow_half_sq (l := 2)
+  have hL0 := ofReal_cpow_half_ne_zero hl
   simp only [ofReal_ofNat] at hL2 hL0
   have hLc : ((compEllIntEk k * JacobiElliptic.compEllIntKk k + compEllIntEk k * JacobiElliptic.compEllIntKk k -
       JacobiElliptic.compEllIntKk k * JacobiElliptic.compEllIntKk k : ℂ)) = π / 2 := by
@@ -983,10 +1019,10 @@ theorem p19sR1_lemniscate_product :
   linear_combination (-JacobiElliptic.compEllIntKk k) * h5 + (1 / 2 : ℂ) * hLc
 
 /-- Round-1 helper: `R_F(0, 1, 2) = Γ(1/4)²/(4 √(2π))` (DLMF 19.20.2). -/
-theorem p19sR1_symEllIntRF_zero_one_two :
+theorem symEllIntRF_zero_one_two :
     symEllIntRF 0 1 2 = ((Real.Gamma (1 / 4) ^ 2 / (4 * Real.sqrt (2 * π)) : ℝ) : ℂ) := by
   set k : ℂ := ((√(1 / 2 : ℝ) : ℝ) : ℂ) with hk
-  have hk2 : k ^ 2 = ((1 / 2 : ℝ) : ℂ) := p19sR1_sqrt_sq_cast (by norm_num)
+  have hk2 : k ^ 2 = ((1 / 2 : ℝ) : ℂ) := ofReal_sqrt_sq_of_nonneg (by norm_num)
   have hK := compEllIntKk_eq_ofReal (k := k) (m := 1 / 2) hk2 (by norm_num)
   have hk2' : k ^ 2 = 1 / 2 := by rw [hk2]; push_cast; ring
   have h12 : (1 / 2 : ℂ) ∈ slitPlane := by
@@ -997,11 +1033,11 @@ theorem p19sR1_symEllIntRF_zero_one_two :
   have hKF := compEllIntKk_eq_symEllIntRF hmem
   rw [hk2', show (1 : ℂ) - 1 / 2 = 1 / 2 by norm_num] at hKF
   have hl : (0 : ℝ) < 2 := by norm_num
-  have hA := p19sR1_symEllIntRF_scale hl 0 (1 / 2) 1
+  have hA := symEllIntRF_scale hl 0 (1 / 2) 1
   simp only [mul_zero, mul_one, ofReal_ofNat] at hA
   rw [show (2 : ℂ) * (1 / 2) = 1 by norm_num] at hA
   have h2 : (2 : ℂ) ^ (1 / 2 : ℂ) = ((√2 : ℝ) : ℂ) := by
-    rw [p19sR1_sqrt_cast_eq_cpow (by norm_num)]; push_cast; ring_nf
+    rw [ofReal_sqrt_eq_cpow_half (by norm_num)]; push_cast; ring_nf
   rw [hA, ← hKF, hK, DLMF.Elliptic.Real.compEllIntKm_one_half, h2, Real.sqrt_mul (by norm_num)]
   have hs2 : 0 < Real.sqrt 2 := by positivity
   have hsπ : 0 < Real.sqrt π := Real.sqrt_pos.mpr Real.pi_pos
@@ -1009,7 +1045,7 @@ theorem p19sR1_symEllIntRF_zero_one_two :
   field_simp
 
 /-- Round-1 helper: `∫₀¹ t² dt/√(1 - t⁴) = ∫₀^{π/2} sin² θ dθ/√(1 + sin² θ)` (`t = sin θ`). -/
-lemma p19sR1_integral_sq_div_sqrt :
+private lemma integral_sq_div_sqrt_eq_integral_sin :
     ∫ t in (0 : ℝ)..1, t ^ 2 / Real.sqrt (1 - t ^ 4) =
       ∫ θ in (0 : ℝ)..(π / 2), Real.sin θ ^ 2 / Real.sqrt (1 + Real.sin θ ^ 2) := by
   have hcv := MeasureTheory.integral_image_eq_integral_abs_deriv_smul (f := Real.sin)
@@ -1036,16 +1072,16 @@ lemma p19sR1_integral_sq_div_sqrt :
   field_simp
 
 /-- Round-1 helper: `∫₀¹ t² dt/√(1 - t⁴) = (1/3) R_D(0, 2, 1)` (DLMF 19.20.22). -/
-theorem p19sR1_integral_sq_div_sqrt_eq :
+theorem integral_sq_div_sqrt_one_sub_pow_four :
     ((∫ t in (0 : ℝ)..1, t ^ 2 / Real.sqrt (1 - t ^ 4) : ℝ) : ℂ) =
       (1 / 3) * symEllIntRD 0 2 1 := by
   have hp : (0 : ℝ) < π / 2 := by positivity
-  have hD := p19sR1_symEllIntRD_legendre hp le_rfl I
-  rw [p19sR1_csc_sq_pi_div_two, sub_self, I_sq, show (1 : ℂ) - -1 = 2 by norm_num] at hD
-  rw [hD, p19sR1_integral_sq_div_sqrt, ← intervalIntegral.integral_ofReal]
+  have hD := symEllIntRD_csc_sq_eq_integral hp le_rfl I
+  rw [csc_sq_pi_div_two, sub_self, I_sq, show (1 : ℂ) - -1 = 2 by norm_num] at hD
+  rw [hD, integral_sq_div_sqrt_eq_integral_sin, ← intervalIntegral.integral_ofReal]
   rw [← mul_assoc, show (1 / 3 : ℂ) * 3 = 1 by norm_num, one_mul]
   refine intervalIntegral.integral_congr fun θ _ => ?_
-  rw [ofReal_div, p19sR1_sqrt_cast_eq_cpow (by positivity), cpow_neg]
+  rw [ofReal_div, ofReal_sqrt_eq_cpow_half (by positivity), cpow_neg]
   push_cast
   ring_nf
 

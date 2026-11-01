@@ -21,6 +21,30 @@ are the complex DLMF integrals of `DLMF.EllipticIntegrals` (`incEllIntFk`, `incE
 `cCompEllIntKk`), evaluated at real arguments; there they are real
 (`incEllIntFk_eq_ofReal` etc.), and the inequalities are stated for their real parts.
 
+## Main definitions
+
+* `ellipsePerimeter`: the perimeter `L(a, b)` of an ellipse (DLMF §19.9(i)).
+
+## Main results
+
+* `log_four_le_compEllIntKk_add_log`, `one_le_compEllIntEk_le`, `one_le_compEllIntPik_le`:
+  the three lines of DLMF 19.9.1.
+* `compEllIntKk_div_log_bounds`, `eight_add_sq_mul_compEllIntKk_div_log_bounds`: bounds for
+  `K(k)/ln(4/k')` (DLMF 19.9.2, 19.9.3).
+* `compEllIntEk_bounds`, `pi_mul_cCompEllIntKk_div_bounds`: DLMF 19.9.4, 19.9.5.
+* `compEllIntKk_sub_compEllIntEk_bounds`, `compEllIntEk_sub_mul_compEllIntKk_bounds`,
+  `compEllIntEk_div_compEllIntKk_bounds`: DLMF 19.9.6–19.9.8.
+* `ellipsePerimeter_eq`: `L(a, b) = 4a E(k)` (DLMF 19.9.9).
+* `pi_mul_ramanujan_le_ellipsePerimeter`: Ramanujan's approximation to `L(a, b)` is from below
+  (DLMF §19.9(i)).
+* `incEllIntFk_bounds`, `incEllIntEk_bounds`, `incEllIntPik_bounds`: DLMF 19.9.11–19.9.13.
+* `incEllIntFk_div_sin_bounds`, `incEllIntFk_div_sin_mul_log_bounds`,
+  `incEllIntFk_eq_log_sub_bounds`: DLMF 19.9.14–19.9.16.
+* `incEllIntFk_arctanh_bounds`: Carlson's bounds by inverse hyperbolic tangents
+  (DLMF 19.9.17, 19.9.18).
+
+## Implementation notes
+
 The strict bounds (19.9.14) use the normalized first-kind integral from
 `Carlson.Elliptic.Standard`, the strict capacity lower bound from
 `Carlson.Elliptic.CapacityBound`, and the geometric upper bound from `Carlson.Mean.Bounds`
@@ -36,12 +60,11 @@ Domain qualifications (Lean totalization; DLMF's own statements are kept otherwi
 * (19.9.14)–(19.9.16) need `sin φ > 0`; (19.9.14) and (19.9.17) also need `cos φ > 0`
   (otherwise a side is infinite), so they are stated for `0 < φ < π/2`; (19.9.15), (19.9.16)
   for `0 < φ ≤ π/2`.
-* The perimeter `L(a, b)` of (19.9.9) is the arc length of `t ↦ (a cos t, b sin t)`,
-  `ellipsePerimeter`.
+* The perimeter `L(a, b)` of (19.9.9) is the arc length of `t ↦ (a cos t, b sin t)`.
 
-The approximations of §19.9(i) ((19.9.10) and the cited accuracy figures) are numerical and not
-acquired, except the analytical statement that Ramanujan's approximation is from below
-(Barnard et al. 2000), `pi_mul_ramanujan_le_ellipsePerimeter`.
+The approximations of §19.9(i) ((19.9.10) and the cited accuracy figures) are numerical and
+excluded, except the analytical statement that Ramanujan's approximation is from below
+(Barnard et al. 2000).
 
 ## References
 
@@ -60,14 +83,14 @@ open DLMF.JacobiElliptic
 /-! ### Real-variable helpers -/
 
 /-- `x^{-1/2} = (√x)⁻¹` for `x ≥ 0`. -/
-theorem ei19b_rpow_neg_half {x : ℝ} (hx : 0 ≤ x) : x ^ (-(1 / 2) : ℝ) = (Real.sqrt x)⁻¹ := by
+theorem rpow_neg_half_eq_inv_sqrt {x : ℝ} (hx : 0 ≤ x) : x ^ (-(1 / 2) : ℝ) = (Real.sqrt x)⁻¹ := by
   rw [Real.rpow_neg hx, ← Real.sqrt_eq_rpow]
 
 /-- `x^{1/2} = √x`. -/
-theorem ei19b_rpow_half (x : ℝ) : x ^ (1 / 2 : ℝ) = Real.sqrt x := (Real.sqrt_eq_rpow x).symm
+theorem rpow_half_eq_sqrt (x : ℝ) : x ^ (1 / 2 : ℝ) = Real.sqrt x := (Real.sqrt_eq_rpow x).symm
 
 /-- On `[0, π/2]` the sine is monotone: `sin² θ ≤ sin² φ` for `0 ≤ θ ≤ φ ≤ π/2`. -/
-lemma ei19b_sin_sq_le {θ φ : ℝ} (h0 : 0 ≤ θ) (hθ : θ ≤ φ) (hφ : φ ≤ π / 2) :
+private lemma sin_sq_le_sin_sq {θ φ : ℝ} (h0 : 0 ≤ θ) (hθ : θ ≤ φ) (hφ : φ ≤ π / 2) :
     Real.sin θ ^ 2 ≤ Real.sin φ ^ 2 := by
   have hs : Real.sin θ ≤ Real.sin φ :=
     Real.sin_le_sin_of_le_of_le_pi_div_two (by linarith [Real.pi_pos]) hφ hθ
@@ -75,47 +98,47 @@ lemma ei19b_sin_sq_le {θ φ : ℝ} (h0 : 0 ≤ θ) (hθ : θ ≤ φ) (hφ : φ 
   exact pow_le_pow_left₀ h1 hs 2
 
 /-- `1 - m sin²θ ≥ cos²θ` for `m ≤ 1`. -/
-lemma ei19b_cos_sq_le {m : ℝ} (hm : m ≤ 1) (θ : ℝ) :
+private lemma cos_sq_le_one_sub_mul_sin_sq {m : ℝ} (hm : m ≤ 1) (θ : ℝ) :
     Real.cos θ ^ 2 ≤ 1 - m * Real.sin θ ^ 2 := by
   have := Real.sin_sq_add_cos_sq θ
   nlinarith [sq_nonneg (Real.sin θ)]
 
 /-- `1 - m sin²θ ≥ 1 - m sin²φ` for `0 ≤ m` and `0 ≤ θ ≤ φ ≤ π/2`. -/
-lemma ei19b_delta_sq_le {m θ φ : ℝ} (hm : 0 ≤ m) (h0 : 0 ≤ θ) (hθ : θ ≤ φ) (hφ : φ ≤ π / 2) :
+private lemma one_sub_mul_sin_sq_le_of_le {m θ φ : ℝ} (hm : 0 ≤ m) (h0 : 0 ≤ θ) (hθ : θ ≤ φ) (hφ : φ ≤ π / 2) :
     1 - m * Real.sin φ ^ 2 ≤ 1 - m * Real.sin θ ^ 2 := by
-  nlinarith [ei19b_sin_sq_le h0 hθ hφ]
+  nlinarith [sin_sq_le_sin_sq h0 hθ hφ]
 
 /-- `1 - m sin²θ ≤ 1` for `m ≥ 0`. -/
-lemma ei19b_base_le_one {m : ℝ} (hm : 0 ≤ m) (θ : ℝ) : 1 - m * Real.sin θ ^ 2 ≤ 1 := by
+private lemma one_sub_mul_sin_sq_le_one {m : ℝ} (hm : 0 ≤ m) (θ : ℝ) : 1 - m * Real.sin θ ^ 2 ≤ 1 := by
   nlinarith [sq_nonneg (Real.sin θ)]
 
 /-- The third-kind factor `(1 - n sin²θ)⁻¹` is positive for `n < 1`. -/
-lemma ei19b_pi_factor_pos {n : ℝ} (hn : n < 1) (θ : ℝ) : 0 < (1 - n * Real.sin θ ^ 2)⁻¹ :=
+private lemma inv_one_sub_mul_sin_sq_pos {n : ℝ} (hn : n < 1) (θ : ℝ) : 0 < (1 - n * Real.sin θ ^ 2)⁻¹ :=
   inv_pos.mpr (DLMF.Elliptic.one_sub_mul_sin_sq_pos hn θ)
 
 /-! ### Real forms of the integrals -/
 
 /-- `Re F(φ, k) = F(φ | k²)` for real `φ` and `k² ≤ 1`. -/
-lemma ei19b_re_incEllIntFk {φ k : ℝ} (hk : k ^ 2 ≤ 1) :
+private lemma re_incEllIntFk_ofReal {φ k : ℝ} (hk : k ^ 2 ≤ 1) :
     (incEllIntFk φ k).re = DLMF.Elliptic.Real.incEllIntFm φ (k ^ 2) := by
   rw [incEllIntFk_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk φ, ofReal_re]
 
 /-- `Re E(φ, k) = E(φ | k²)` for real `φ` and `k² ≤ 1`. -/
-lemma ei19b_re_incEllIntEk {φ k : ℝ} (hk : k ^ 2 ≤ 1) :
+private lemma re_incEllIntEk_ofReal {φ k : ℝ} (hk : k ^ 2 ≤ 1) :
     (incEllIntEk φ k).re = DLMF.Elliptic.Real.incEllIntEm φ (k ^ 2) := by
   rw [incEllIntEk_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk φ, ofReal_re]
 
 /-- `Re Π(φ, α², k) = Π(φ, α² | k²)` for real `φ`, `α² < 1` and `k² ≤ 1`. -/
-lemma ei19b_re_incEllIntPik {φ α2 k : ℝ} (hα : α2 < 1) (hk : k ^ 2 ≤ 1) :
+private lemma re_incEllIntPik_ofReal {φ α2 k : ℝ} (hα : α2 < 1) (hk : k ^ 2 ≤ 1) :
     (incEllIntPik φ α2 k).re = DLMF.Elliptic.Real.incEllIntPim φ α2 (k ^ 2) := by
   rw [incEllIntPik_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk hα φ, ofReal_re]
 
 /-- `E(k) = E(π/2, k)` with a real amplitude cast. -/
-lemma ei19b_compEllIntEk_eq (k : ℂ) : compEllIntEk k = incEllIntEk ((π / 2 : ℝ) : ℂ) k := by
+private lemma compEllIntEk_eq_incEllIntEk (k : ℂ) : compEllIntEk k = incEllIntEk ((π / 2 : ℝ) : ℂ) k := by
   rw [compEllIntEk]; push_cast; rfl
 
 /-- `Π(α², k) = Π(π/2, α², k)` with a real amplitude cast. -/
-lemma ei19b_compEllIntPik_eq (α2 k : ℂ) :
+private lemma compEllIntPik_eq_incEllIntPik (α2 k : ℂ) :
     compEllIntPik α2 k = incEllIntPik ((π / 2 : ℝ) : ℂ) α2 k := by
   rw [compEllIntPik]; push_cast; rfl
 
@@ -250,7 +273,7 @@ theorem ellipsePerimeter_eq {a b : ℝ} (hb : 0 ≤ b) (hab : b < a) :
     rw [compEllIntEk_eq_ofReal hk hm1, DLMF.Elliptic.Real.compEllIntEm]
     congr 1
     refine intervalIntegral.integral_congr fun t _ => ?_
-    simp only [hf, ei19b_rpow_half]
+    simp only [hf, rpow_half_eq_sqrt]
   rw [h1, h2, h3, h4]
   push_cast
   ring
@@ -276,15 +299,15 @@ theorem incEllIntFk_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 �
       (φ < π / 2 → (incEllIntFk φ k).re ≤ DLMF.Elementary.inverseGudermannian φ) := by
   have hk2 : k ^ 2 < 1 := by nlinarith
   have hm0 : 0 ≤ k ^ 2 := sq_nonneg k
-  rw [ei19b_re_incEllIntFk hk2.le, DLMF.Elliptic.Real.incEllIntFm]
+  rw [re_incEllIntFk_ofReal hk2.le, DLMF.Elliptic.Real.incEllIntFm]
   have hc := DLMF.Elliptic.continuous_one_sub_mul_sin_sq_rpow hk2 (-(1 / 2))
   have hΔ : 0 < 1 - k ^ 2 * Real.sin φ ^ 2 := DLMF.Elliptic.one_sub_mul_sin_sq_pos hk2 φ
   refine ⟨?_, ?_, ?_⟩
   · have h := intervalIntegral.integral_mono_on (μ := MeasureTheory.volume) hφ0
       (continuous_const.intervalIntegrable 0 φ)
       (hc.intervalIntegrable 0 φ) (f := fun _ => (1 : ℝ)) (fun θ hθ => by
-        rw [ei19b_rpow_neg_half (DLMF.Elliptic.one_sub_mul_sin_sq_pos hk2 θ).le]
-        have h1 := ei19b_base_le_one hm0 θ
+        rw [rpow_neg_half_eq_inv_sqrt (DLMF.Elliptic.one_sub_mul_sin_sq_pos hk2 θ).le]
+        have h1 := one_sub_mul_sin_sq_le_one hm0 θ
         have h2 := DLMF.Elliptic.one_sub_mul_sin_sq_pos hk2 θ
         rw [one_le_inv₀ (Real.sqrt_pos.mpr h2)]
         exact Real.sqrt_le_one.mpr h1)
@@ -294,9 +317,9 @@ theorem incEllIntFk_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 �
       (continuous_const.intervalIntegrable 0 φ)
       (g := fun _ => (Real.sqrt (1 - k ^ 2 * Real.sin φ ^ 2))⁻¹)
       (fun θ hθ => by
-        rw [ei19b_rpow_neg_half (DLMF.Elliptic.one_sub_mul_sin_sq_pos hk2 θ).le]
+        rw [rpow_neg_half_eq_inv_sqrt (DLMF.Elliptic.one_sub_mul_sin_sq_pos hk2 θ).le]
         exact inv_anti₀ (Real.sqrt_pos.mpr hΔ)
-          (Real.sqrt_le_sqrt (ei19b_delta_sq_le hm0 hθ.1 hθ.2 hφ1)))
+          (Real.sqrt_le_sqrt (one_sub_mul_sin_sq_le_of_le hm0 hθ.1 hθ.2 hφ1)))
     simpa [div_eq_mul_inv] using h
   · intro hφ2
     unfold DLMF.Elementary.inverseGudermannian
@@ -307,10 +330,10 @@ theorem incEllIntFk_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 �
       rw [uIcc_of_le hφ0]
       exact (Real.continuous_cos.continuousOn).inv₀ fun θ hθ => (hcos θ hθ).ne'
     · intro θ hθ
-      rw [ei19b_rpow_neg_half (DLMF.Elliptic.one_sub_mul_sin_sq_pos hk2 θ).le]
+      rw [rpow_neg_half_eq_inv_sqrt (DLMF.Elliptic.one_sub_mul_sin_sq_pos hk2 θ).le]
       refine inv_anti₀ (hcos θ hθ) ?_
       rw [← Real.sqrt_sq (hcos θ hθ).le]
-      exact Real.sqrt_le_sqrt (ei19b_cos_sq_le hk2.le θ)
+      exact Real.sqrt_le_sqrt (cos_sq_le_one_sub_mul_sin_sq hk2.le θ)
 
 /-- DLMF 19.9.12: `max(sin φ, φΔ) ≤ E(φ, k) ≤ φ` for `0 < k < 1`, `0 ≤ φ ≤ π/2`. -/
 @[dlmf 19.9.E12]
@@ -320,40 +343,40 @@ theorem incEllIntEk_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 �
       (incEllIntEk φ k).re ≤ φ := by
   have hk2 : k ^ 2 < 1 := by nlinarith
   have hm0 : 0 ≤ k ^ 2 := sq_nonneg k
-  rw [ei19b_re_incEllIntEk hk2.le, DLMF.Elliptic.Real.incEllIntEm]
+  rw [re_incEllIntEk_ofReal hk2.le, DLMF.Elliptic.Real.incEllIntEm]
   have hc := DLMF.Elliptic.continuous_one_sub_mul_sin_sq_rpow hk2 (1 / 2)
   refine ⟨max_le ?_ ?_, ?_⟩
   · have h := intervalIntegral.integral_mono_on (μ := MeasureTheory.volume) hφ0
       (Real.continuous_cos.intervalIntegrable 0 φ)
       (hc.intervalIntegrable 0 φ) (fun θ hθ => by
-        rw [ei19b_rpow_half]
+        rw [rpow_half_eq_sqrt]
         have hcos : 0 ≤ Real.cos θ :=
           Real.cos_nonneg_of_mem_Icc ⟨by linarith [hθ.1, Real.pi_pos], by linarith [hθ.2]⟩
         rw [← Real.sqrt_sq hcos]
-        exact Real.sqrt_le_sqrt (ei19b_cos_sq_le hk2.le θ))
+        exact Real.sqrt_le_sqrt (cos_sq_le_one_sub_mul_sin_sq hk2.le θ))
     simpa using h
   · have h := intervalIntegral.integral_mono_on (μ := MeasureTheory.volume) hφ0
       (continuous_const.intervalIntegrable 0 φ)
       (hc.intervalIntegrable 0 φ) (f := fun _ => Real.sqrt (1 - k ^ 2 * Real.sin φ ^ 2))
       (fun θ hθ => by
-        rw [ei19b_rpow_half]
-        exact Real.sqrt_le_sqrt (ei19b_delta_sq_le hm0 hθ.1 hθ.2 hφ1))
+        rw [rpow_half_eq_sqrt]
+        exact Real.sqrt_le_sqrt (one_sub_mul_sin_sq_le_of_le hm0 hθ.1 hθ.2 hφ1))
     simpa using h
   · have h := intervalIntegral.integral_mono_on (μ := MeasureTheory.volume) hφ0
       (hc.intervalIntegrable 0 φ)
       (continuous_const.intervalIntegrable 0 φ) (g := fun _ => (1 : ℝ)) (fun θ _ => by
-        rw [ei19b_rpow_half]
-        exact Real.sqrt_le_one.mpr (ei19b_base_le_one hm0 θ))
+        rw [rpow_half_eq_sqrt]
+        exact Real.sqrt_le_one.mpr (one_sub_mul_sin_sq_le_one hm0 θ))
     simpa using h
 
 /-- Pointwise comparison of the third-kind integrands in the modulus. -/
-lemma ei19b_piIntegrand_mono {n m m' θ : ℝ} (hn : n < 1) (hm : m ≤ m')
+private lemma piIntegrand_le_piIntegrand_of_le {n m m' θ : ℝ} (hn : n < 1) (hm : m ≤ m')
     (hm' : m' * Real.sin θ ^ 2 < 1)
     (hm0 : m * Real.sin θ ^ 2 < 1) :
     DLMF.Elliptic.piIntegrand n m θ ≤ DLMF.Elliptic.piIntegrand n m' θ := by
   unfold DLMF.Elliptic.piIntegrand
-  refine mul_le_mul_of_nonneg_left ?_ (ei19b_pi_factor_pos hn θ).le
-  rw [ei19b_rpow_neg_half (by linarith), ei19b_rpow_neg_half (by linarith)]
+  refine mul_le_mul_of_nonneg_left ?_ (inv_one_sub_mul_sin_sq_pos hn θ).le
+  rw [rpow_neg_half_eq_inv_sqrt (by linarith), rpow_neg_half_eq_inv_sqrt (by linarith)]
   refine inv_anti₀ (Real.sqrt_pos.mpr (by linarith)) (Real.sqrt_le_sqrt ?_)
   nlinarith [sq_nonneg (Real.sin θ)]
 
@@ -371,8 +394,8 @@ theorem incEllIntPik_bounds {φ α2 k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 :
   have hm0 : 0 ≤ k ^ 2 := sq_nonneg k
   have e0 : incEllIntPik φ α2 0 = incEllIntPik φ α2 ((0 : ℝ) : ℂ) := by simp
   have e1 : incEllIntPik φ α2 1 = incEllIntPik φ α2 ((1 : ℝ) : ℂ) := by simp
-  rw [e0, e1, ei19b_re_incEllIntPik hα hk2.le, ei19b_re_incEllIntPik (k := 0) hα (by norm_num),
-    ei19b_re_incEllIntPik (k := 1) hα (by norm_num)]
+  rw [e0, e1, re_incEllIntPik_ofReal hα hk2.le, re_incEllIntPik_ofReal (k := 0) hα (by norm_num),
+    re_incEllIntPik_ofReal (k := 1) hα (by norm_num)]
   simp only [DLMF.Elliptic.Real.incEllIntPim]
   rw [show (0 : ℝ) ^ 2 = 0 by norm_num, one_pow]
   have hcont : ∀ m : ℝ, m < 1 → Continuous (DLMF.Elliptic.piIntegrand α2 m) :=
@@ -381,7 +404,7 @@ theorem incEllIntPik_bounds {φ α2 k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 :
   refine ⟨?_, ?_, ?_⟩
   · refine intervalIntegral.integral_mono_on hφ0 ((hcont 0 (by norm_num)).intervalIntegrable _ _)
       ((hcont _ hk2).intervalIntegrable _ _) fun θ _ => ?_
-    have h := ei19b_piIntegrand_mono (θ := θ) hα hm0 (by nlinarith [Real.sin_sq_le_one θ])
+    have h := piIntegrand_le_piIntegrand_of_le (θ := θ) hα hm0 (by nlinarith [Real.sin_sq_le_one θ])
       (by simp)
     simpa using h
   · rw [div_eq_mul_inv, ← intervalIntegral.integral_mul_const]
@@ -389,10 +412,10 @@ theorem incEllIntPik_bounds {φ α2 k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 :
       (((hcont 0 (by norm_num)).mul continuous_const).intervalIntegrable _ _) fun θ hθ => ?_
     unfold DLMF.Elliptic.piIntegrand
     simp only [zero_mul, sub_zero, Real.one_rpow, mul_one]
-    refine mul_le_mul_of_nonneg_left ?_ (ei19b_pi_factor_pos hα θ).le
-    rw [ei19b_rpow_neg_half (DLMF.Elliptic.one_sub_mul_sin_sq_pos hk2 θ).le]
+    refine mul_le_mul_of_nonneg_left ?_ (inv_one_sub_mul_sin_sq_pos hα θ).le
+    rw [rpow_neg_half_eq_inv_sqrt (DLMF.Elliptic.one_sub_mul_sin_sq_pos hk2 θ).le]
     exact inv_anti₀ (Real.sqrt_pos.mpr hΔ)
-      (Real.sqrt_le_sqrt (ei19b_delta_sq_le hm0 hθ.1 hθ.2 hφ1))
+      (Real.sqrt_le_sqrt (one_sub_mul_sin_sq_le_of_le hm0 hθ.1 hθ.2 hφ1))
   · intro hφ2
     have hcos : ∀ θ ∈ Icc (0 : ℝ) φ, 0 < Real.cos θ := fun θ hθ =>
       Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1, Real.pi_pos], by linarith [hθ.2]⟩
@@ -409,14 +432,14 @@ theorem incEllIntPik_bounds {φ α2 k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 :
         fun θ => (DLMF.Elliptic.one_sub_mul_sin_sq_pos hα θ).ne').continuousOn) ?_
       · exact ContinuousOn.rpow_const (by fun_prop) fun θ hθ => Or.inl (hbase θ hθ).ne'
     · have hb := hbase θ hθ
-      exact ei19b_piIntegrand_mono hα hk2.le (by linarith)
+      exact piIntegrand_le_piIntegrand_of_le hα hk2.le (by linarith)
         (by nlinarith [Real.sin_sq_le_one θ])
 
 /-- DLMF 19.9.1, second line: `1 ≤ E(k) ≤ π/2` for `0 < k < 1`. -/
 @[dlmf 19.9.E1]
 theorem one_le_compEllIntEk_le {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
     1 ≤ (compEllIntEk k).re ∧ (compEllIntEk k).re ≤ π / 2 := by
-  rw [ei19b_compEllIntEk_eq]
+  rw [compEllIntEk_eq_incEllIntEk]
   have h := incEllIntEk_bounds (φ := π / 2) hk0 hk1 (by positivity) le_rfl
   rw [Real.sin_pi_div_two] at h
   exact ⟨le_trans (le_max_left _ _) h.1, h.2⟩
@@ -427,12 +450,12 @@ theorem one_le_compEllIntEk_le {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
 theorem one_le_compEllIntPik_le {α2 k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hα : α2 < 1) :
     1 ≤ 2 / π * Real.sqrt (1 - α2) * (compEllIntPik α2 k).re ∧
       2 / π * Real.sqrt (1 - α2) * (compEllIntPik α2 k).re ≤ 1 / Real.sqrt (1 - k ^ 2) := by
-  rw [ei19b_compEllIntPik_eq]
+  rw [compEllIntPik_eq_incEllIntPik]
   have h := incEllIntPik_bounds (φ := π / 2) hk0 hk1 (by positivity) le_rfl hα
   rw [Real.sin_pi_div_two, one_pow, mul_one] at h
   have e0 : incEllIntPik ((π / 2 : ℝ) : ℂ) α2 0 = incEllIntPik ((π / 2 : ℝ) : ℂ) α2 ((0 : ℝ) : ℂ) :=
     by simp
-  rw [e0, ei19b_re_incEllIntPik (k := 0) hα (by norm_num)] at h
+  rw [e0, re_incEllIntPik_ofReal (k := 0) hα (by norm_num)] at h
   have hz : DLMF.Elliptic.Real.incEllIntPim (π / 2) α2 (0 ^ 2) = π / (2 * Real.sqrt (1 - α2)) := by
     rw [zero_pow two_ne_zero]
     exact DLMF.Elliptic.Real.compEllIntPim_param_zero hα
@@ -544,7 +567,7 @@ theorem incEllIntFk_eq_log_sub_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (
 /-! ### Helpers for 19.9.17–19.9.18 -/
 
 /-- At `x`, the function `Real.artanh` has derivative `(1 / (1 - x ^ 2))`. -/
-lemma p19lR1_hasDerivAt_artanh {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+private lemma hasDerivAt_artanh_of_mem_Ioo {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     HasDerivAt Real.artanh (1 / (1 - x ^ 2)) x := by
   have h1 : 0 < 1 + x := by linarith [hx.1]
   have h2 : 0 < 1 - x := by linarith [hx.2]
@@ -563,7 +586,7 @@ lemma p19lR1_hasDerivAt_artanh {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
 
 /-- Identity under the stated parameter and domain assumptions: `∫ θ in (0 : ℝ)..φ, Real.cos θ /
 (1 - q ^ 2 * Real.sin θ ^ 2) = q⁻¹ * Real.artanh (q * Real.sin φ)`. -/
-lemma p19lR1_integral_cos_div {q φ : ℝ} (hq : 0 < q) (hφ0 : 0 ≤ φ) (hφ1 : φ < π / 2)
+private lemma integral_cos_div_one_sub_sq_mul_sin_sq {q φ : ℝ} (hq : 0 < q) (hφ0 : 0 ≤ φ) (hφ1 : φ < π / 2)
     (hqs : q * Real.sin φ < 1) :
     ∫ θ in (0 : ℝ)..φ, Real.cos θ / (1 - q ^ 2 * Real.sin θ ^ 2) =
       q⁻¹ * Real.artanh (q * Real.sin φ) := by
@@ -582,7 +605,7 @@ lemma p19lR1_integral_cos_div {q φ : ℝ} (hq : 0 < q) (hφ0 : 0 ≤ φ) (hφ1 
     (f := fun θ => q⁻¹ * Real.artanh (q * Real.sin θ))
     (f' := fun θ => Real.cos θ / (1 - q ^ 2 * Real.sin θ ^ 2)) (a := 0) (b := φ)
     (fun θ hθ => by
-      have h := ((p19lR1_hasDerivAt_artanh (hmem θ hθ)).comp θ
+      have h := ((hasDerivAt_artanh_of_mem_Ioo (hmem θ hθ)).comp θ
         ((Real.hasDerivAt_sin θ).const_mul q)).const_mul q⁻¹
       refine h.congr_deriv ?_
       have := (hden θ hθ).ne'
@@ -594,7 +617,7 @@ lemma p19lR1_integral_cos_div {q φ : ℝ} (hq : 0 < q) (hφ0 : 0 ≤ φ) (hφ1 
   simp
 
 /-- Cauchy–Schwarz for interval integrals of continuous nonnegative functions. -/
-lemma p19lR1_cauchy_schwarz {f g : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b) (hf : Continuous f)
+private lemma sq_integral_sqrt_mul_sqrt_le {f g : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b) (hf : Continuous f)
     (hg : Continuous g) (hf0 : ∀ x ∈ Icc a b, 0 ≤ f x) (hg0 : ∀ x ∈ Icc a b, 0 ≤ g x) :
     (∫ x in a..b, Real.sqrt (f x) * Real.sqrt (g x)) ^ 2 ≤
       (∫ x in a..b, f x) * ∫ x in a..b, g x := by
@@ -629,7 +652,7 @@ lemma p19lR1_cauchy_schwarz {f g : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b) (hf 
 
 /-- Estimate under the stated parameter and domain assumptions: `c / ((a + b) / 2) ≤ c * (a⁻¹ +
 b⁻¹) / 2`. -/
-lemma p19lR1_hm_am {a b c : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 ≤ c) :
+private lemma div_avg_le_mul_avg_inv {a b c : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 ≤ c) :
     c / ((a + b) / 2) ≤ c * (a⁻¹ + b⁻¹) / 2 := by
   rw [div_le_iff₀ (by positivity)]
   have : c * (a⁻¹ + b⁻¹) / 2 * ((a + b) / 2) = c * ((a + b) ^ 2 / (4 * a * b)) := by
@@ -641,7 +664,7 @@ lemma p19lR1_hm_am {a b c : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 ≤ c) :
 
 /-- Estimate under the stated parameter and domain assumptions: `c / ((c ^ 2 + b) / 2) ≤
 (Real.sqrt b)⁻¹`. -/
-lemma p19lR1_gm_am {b c : ℝ} (hb : 0 < b) (hc : 0 < c) :
+private lemma div_avg_sq_add_le_inv_sqrt {b c : ℝ} (hb : 0 < b) (hc : 0 < c) :
     c / ((c ^ 2 + b) / 2) ≤ (Real.sqrt b)⁻¹ := by
   have hsb := Real.sq_sqrt hb.le
   have hsb0 := Real.sqrt_pos.2 hb
@@ -650,7 +673,7 @@ lemma p19lR1_gm_am {b c : ℝ} (hb : 0 < b) (hc : 0 < c) :
 
 /-- Identity under the stated parameter and domain assumptions: `Real.sqrt (c * ((c ^ 2)⁻¹ + b⁻¹)
 / 2) * Real.sqrt (c / ((c ^ 2 + b) / 2)) = (Real.sqrt b)⁻¹`. -/
-lemma p19lR1_sqrt_AG {b c : ℝ} (hc : 0 < c) (hb : 0 < b) :
+private lemma sqrt_mul_sqrt_avg_eq_inv_sqrt {b c : ℝ} (hc : 0 < c) (hb : 0 < b) :
     Real.sqrt (c * ((c ^ 2)⁻¹ + b⁻¹) / 2) * Real.sqrt (c / ((c ^ 2 + b) / 2)) =
       (Real.sqrt b)⁻¹ := by
   rw [← Real.sqrt_mul (by positivity), ← Real.sqrt_inv]
@@ -692,11 +715,11 @@ theorem incEllIntFk_arctanh_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ
   set G : ℝ → ℝ := fun θ => Real.cos θ / (1 - σ ^ 2 * Real.sin θ ^ 2) with hG
   set Φ : ℝ → ℝ := fun θ => (Real.sqrt (1 - k ^ 2 * Real.sin θ ^ 2))⁻¹ with hΦ
   have hF : (incEllIntFk φ k).re = ∫ θ in (0 : ℝ)..φ, Φ θ := by
-    rw [ei19b_re_incEllIntFk hk2.le, DLMF.Elliptic.Real.incEllIntFm]
-    exact intervalIntegral.integral_congr fun θ _ => ei19b_rpow_neg_half (hb θ).le
+    rw [re_incEllIntFk_ofReal hk2.le, DLMF.Elliptic.Real.incEllIntFm]
+    exact intervalIntegral.integral_congr fun θ _ => rpow_neg_half_eq_inv_sqrt (hb θ).le
   have hU : U = ∫ θ in (0 : ℝ)..φ, A θ := by
-    have h1 := p19lR1_integral_cos_div one_pos hφ0 hφ1 (by linarith)
-    have h2 := p19lR1_integral_cos_div hk0 hφ0 hφ1 (by nlinarith)
+    have h1 := integral_cos_div_one_sub_sq_mul_sin_sq one_pos hφ0 hφ1 (by linarith)
+    have h2 := integral_cos_div_one_sub_sq_mul_sin_sq hk0 hφ0 hφ1 (by nlinarith)
     simp only [one_pow, one_mul, inv_one] at h1
     have hi1 : IntervalIntegrable (fun θ => Real.cos θ / (1 - Real.sin θ ^ 2)) volume 0 φ := by
       refine ContinuousOn.intervalIntegrable (ContinuousOn.div (by fun_prop) (by fun_prop) ?_)
@@ -712,7 +735,7 @@ theorem incEllIntFk_arctanh_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ
     show Real.artanh (Real.sin φ) / 2 + k⁻¹ * Real.artanh (k * Real.sin φ) / 2 = _
     ring
   have hL : L = ∫ θ in (0 : ℝ)..φ, G θ :=
-    (p19lR1_integral_cos_div hσ0 hφ0 hφ1 (by nlinarith)).symm
+    (integral_cos_div_one_sub_sq_mul_sin_sq hσ0 hφ0 hφ1 (by nlinarith)).symm
   have hab : ∀ θ ∈ Icc (0 : ℝ) φ, 1 - σ ^ 2 * Real.sin θ ^ 2 =
       ((1 - Real.sin θ ^ 2) + (1 - k ^ 2 * Real.sin θ ^ 2)) / 2 := fun θ _ => by
     rw [hσ2]; ring
@@ -721,17 +744,17 @@ theorem incEllIntFk_arctanh_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ
     intro θ hθ
     simp only [hG, hΦ]
     rw [hab θ hθ, hsq]
-    exact p19lR1_gm_am (hb θ) (hc θ hθ)
+    exact div_avg_sq_add_le_inv_sqrt (hb θ) (hc θ hθ)
   have hGA : ∀ θ ∈ Icc (0 : ℝ) φ, G θ ≤ A θ := by
     intro θ hθ
     simp only [hG, hA]
     rw [hab θ hθ, hsq]
-    exact p19lR1_hm_am (pow_pos (hc θ hθ) 2) (hb θ) (hc θ hθ).le
+    exact div_avg_le_mul_avg_inv (pow_pos (hc θ hθ) 2) (hb θ) (hc θ hθ).le
   have hAG : ∀ θ ∈ Icc (0 : ℝ) φ, Real.sqrt (A θ) * Real.sqrt (G θ) = Φ θ := by
     intro θ hθ
     simp only [hG, hA, hΦ]
     rw [hab θ hθ, hsq]
-    exact p19lR1_sqrt_AG (hc θ hθ) (hb θ)
+    exact sqrt_mul_sqrt_avg_eq_inv_sqrt (hc θ hθ) (hb θ)
   have hG0 : ∀ θ ∈ Icc (0 : ℝ) φ, 0 ≤ G θ := fun θ hθ => by
     simp only [hG]; rw [hab θ hθ]
     exact div_nonneg (hc θ hθ).le (by linarith [hb θ, sq_nonneg (Real.sin θ), Real.sin_sq_le_one θ])
@@ -755,7 +778,7 @@ theorem incEllIntFk_arctanh_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ
   have hint_eq : ∀ {f g : ℝ → ℝ}, EqOn f g (Icc 0 φ) → ∫ θ in (0 : ℝ)..φ, f θ = ∫ θ in (0 : ℝ)..φ, g θ :=
     fun h => intervalIntegral.integral_congr (by rw [uIcc_of_le hφ0]; exact h)
   have hUA' : U = ∫ θ in (0 : ℝ)..φ, A' θ := by rw [hU]; exact (hint_eq hA'eq).symm
-  have hcs := p19lR1_cauchy_schwarz hφ0 hA'c hGc (fun θ hθ => (hA'eq hθ).symm ▸ hA0 θ hθ) hG0
+  have hcs := sq_integral_sqrt_mul_sqrt_le hφ0 hA'c hGc (fun θ hθ => (hA'eq hθ).symm ▸ hA0 θ hθ) hG0
   have hFeq : (∫ θ in (0 : ℝ)..φ, Real.sqrt (A' θ) * Real.sqrt (G θ)) = (incEllIntFk φ k).re := by
     rw [hF]; exact hint_eq fun θ hθ => by rw [hA'eq hθ]; exact hAG θ hθ
   rw [hFeq, ← hUA', ← hL] at hcs

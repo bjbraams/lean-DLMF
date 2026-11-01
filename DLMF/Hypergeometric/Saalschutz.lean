@@ -13,10 +13,15 @@ public import DLMF.Gamma.Pochhammer
 # The Pfaff–Saalschütz summation (Duverney Ex. 4.9; DLMF 16.4.3)
 
 Comparing coefficients in Euler's transformation `𝐅(c-a,c-b;c;z) = (1-z)^{a+b-c} 𝐅(a,b;c;z)`
-gives a convolution identity for the regularized coefficients, valid for all parameters
-(`regularized_saalschutz_convolution`). Rewriting `(c-a-b)ₙ₋ₖ` and `1/(n-k)!` through Pochhammer
-symbols in `k` turns it into the balanced terminating `₃F₂` summation
-`₃F₂(-n, a, b; c, 1+a+b-c-n; 1) = (c-a)ₙ (c-b)ₙ / ((c)ₙ (c-a-b)ₙ)`.
+gives a convolution identity for the regularized coefficients, valid for all parameters.
+Rewriting `(c-a-b)ₙ₋ₖ` and `1/(n-k)!` through Pochhammer symbols in `k` turns it into the
+balanced terminating `₃F₂` summation.
+
+## Main results
+
+* `regularized_saalschutz_convolution`: the regularized convolution identity.
+* `pfaff_saalschutz`:
+  `₃F₂(-n, a, b; c, 1+a+b-c-n; 1) = (c-a)ₙ (c-b)ₙ / ((c)ₙ (c-a-b)ₙ)`, DLMF 16.4.3.
 -/
 
 @[expose] public section

@@ -12,9 +12,16 @@ public import DLMF.Hypergeometric.AnalyticProperties
 # Ferrers functions (Temme §8.7; DLMF §§14.2, 14.3, 14.6)
 
 The Ferrers function `𝖯^μ_ν(x) = ((1+x)/(1-x))^{μ/2} 𝐅(ν+1, -ν; 1-μ; (1-x)/2)` on `(-1, 1)`
-(DLMF 14.3.1) satisfies the associated Legendre equation for all complex `ν, μ`. At integer order
-`m` it is `(-1)ᵐ (1-x²)^{m/2} P_ν⁽ᵐ⁾(x)` (DLMF 14.6.1), from DLMF 15.2.3_5 for `𝐅` at `c = 1-m`,
-lifted here to the cut plane.
+(DLMF 14.3.1): the associated Legendre equation for all complex `ν, μ`, and the integer-order
+formula.
+
+## Main results
+
+* `regularizedGaussHG_neg_nat`: DLMF 15.2.3_5 on the cut plane,
+  `𝐅(a,b;-n;z) = (a)ₙ₊₁ (b)ₙ₊₁ zⁿ⁺¹ 𝐅(a+n+1,b+n+1;n+2;z)`.
+* `ferrersP_zero`: at `μ = 0` the Ferrers function is `P_ν` on `(-1, 1)`.
+* `ferrersP_nat`: `𝖯^m_ν(x) = (-1)ᵐ (1-x²)^{m/2} P_ν⁽ᵐ⁾(x)` (DLMF 14.6.1).
+* `ferrersP_ode`: the associated Legendre equation DLMF 14.2.1.
 -/
 
 @[expose] public section

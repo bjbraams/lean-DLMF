@@ -11,16 +11,26 @@ public import DLMF.Gamma.IntegralRepresentations
 /-!
 # Bessel functions of large order
 
-All results come from the series `Γ(ν+1) ₀F̃₁(;ν+1;v) = ∑ v^n / (n! (ν+1)_n)` by dominated
-convergence (Tannery's theorem) as `ν → +∞` along the reals.
+Limits of Bessel functions as the order `ν → +∞` along the reals, including DLMF 10.19.1. All
+results come from the series `Γ(ν+1) ₀F̃₁(;ν+1;v) = ∑ v^n / (n! (ν+1)_n)` by dominated
+convergence (Tannery's theorem).
+
+## Main definitions
+
+* `gammaShiftRatio`: the ratio `Γ(ν+1)/Γ(ν+1+n) = 1/(ν+1)_n`.
+* `besselLargeOrderMain`, `besselLargeOrderCorr`: the comparison function
+  `(ez/(2ν))^ν / √(2πν)` of DLMF 10.19.1 and the correction factor.
+
+## Main results
 
 * `tendsto_Gamma_mul_regularized0F1_mul`: `Γ(ν+1) ₀F̃₁(;ν+1;ν w) → e^w`.
 * `tendsto_Gamma_mul_besselJ_sqrt_mul` (Beals–Wong (9.1.16)):
   `Γ(ν+1) J_ν(√ν x) / (√ν x/2)^ν → e^{-x²/4}`, and the companion
   `tendsto_Gamma_mul_besselI_sqrt_mul` for `I_ν` with limit `e^{x²/4}`.
 * `norm_besselJ_le`: `|J_ν(z)| ≤ |(z/2)^ν| e^{|z|²/4} / Γ(ν+1)` for real `ν ≥ 0`.
+* `Gamma_add_one_eq_stirling`: Stirling's formula with Binet's remainder.
 * `besselJ_isEquivalent_large_order` (DLMF 10.19.1): `J_ν(z) ∼ (ez/(2ν))^ν / √(2πν)` for fixed
-  `z ≠ 0`, using Binet's form of Stirling's formula.
+  `z ≠ 0`.
 -/
 
 @[expose] public section

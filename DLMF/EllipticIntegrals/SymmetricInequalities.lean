@@ -22,38 +22,47 @@ All variables are real and positive (or nonnegative where DLMF says so); on such
 symmetric integrals of `DLMF.EllipticIntegrals` are real, and the inequalities are stated for
 their real parts (`symEllIntRF_ofReal_im` etc. record that the imaginary parts vanish).
 
-* (19.24.1)–(19.24.4): bounds for `R_F(0, y, z)`, `R_G(0, y, z)`, `R_G(0, y², z²)` and
-  `R_J(0, y, z, p)`; the condition `y ≤ z` in (19.24.1)–(19.24.2) only identifies the smaller
-  variable (19.24.i.p1). `R_D(0, y, z)` is the case `p = z` of (19.24.4) (19.24.i.p2).
-* (19.24.5)–(19.24.6): the AGM bounds `1/aₙ ≤ (2/π) R_F(0, a₀², g₀²) ≤ 1/gₙ`.
-* (19.24.7): the perimeter of an ellipse `L(a, b) = 8 R_G(0, a², b²)` (`ellipsePerimeter` of
-  §19.9(i)); the approximations of §19.9(i) then apply (19.24.i.p4).
-* (19.24.8)–(19.24.9): strict product and sum bounds for `R_F(x, y, 0)`, `R_G(x, y, 0)` and
-  Neuman's bounds for `R_G/R_F` through the first AGM step.
-* (19.24.10)–(19.24.12): bounds for `R_F`, `R_J`, `R_G` by elementary means (special cases of
-  Carlson (1966), Theorems 2 and 3; "all variables are positive", 19.24.ii.p1); the cases
-  `R_C`, `R_D` are included (19.24.Px1.p1).
-* (19.24.13)–(19.24.15): Neuman's bounds `R_a R_{-a} > 1`, `R_a + R_{-a} > 2`, their special
-  case `R_F R_G > 1`, `R_F + R_G > 2`, and `R_C(x, (y+z)/2) ≤ R_F(x, y, z) ≤ R_C(x, √(yz))`.
+## Main results
 
-The lower bound in (19.24.10) is proved from `lean-codes`' capacity bound
-`Carlson.inv_dupMean_le_carlsonRF_sq` (Carlson 1966, Theorem 3). The AGM bounds in
-(19.24.5) use the RF–AGM identity from §19.22 and Mathlib's `NNReal.agmSequences` bounds.
-The upper bound in (19.24.10) uses monotonicity of Carlson's hypergeometric mean;
-(19.24.13)–(19.24.14) use strict exponential Jensen inequalities for the real R-averages.
-The `R_J` bounds use the five-node capacity inequality and order monotonicity; the `R_G`
-bounds are Jensen bounds before and after Euler transformation. The `R_F`–`R_C` bounds in
-(19.24.15) compare the real integral kernels using strict arithmetic–geometric mean
-inequalities and `lean-codes`' `integral_lt_integral_of_ae_lt`. The complete `R_G` bounds
-in (19.24.2) use `Carlson.carlsonRE_eq_compEllIntEk` and the bounds for `E(k)` from §19.9.
+* `symEllIntRF_zero_log_bounds`, `symEllIntRG_zero_bounds`, `symEllIntRG_zero_sq_bounds`,
+  `symEllIntRJ_zero_bounds`: bounds for `R_F(0, y, z)`, `R_G(0, y, z)`, `R_G(0, y², z²)` and
+  `R_J(0, y, z, p)` (DLMF 19.24.1–19.24.4).
+* `symEllIntRF_zero_agm_bounds`: the AGM bounds `1/aₙ ≤ (2/π) R_F(0, a₀², g₀²) ≤ 1/gₙ`
+  (DLMF 19.24.5, 19.24.6).
+* `ellipsePerimeter_eq_symEllIntRG`: `L(a, b) = 8 R_G(0, a², b²)` (DLMF 19.24.7).
+* `symEllIntRF_symEllIntRG_complete_bounds`, `symEllIntRG_div_symEllIntRF_agm_bounds`:
+  DLMF 19.24.8 and Neuman's bounds 19.24.9.
+* `symEllIntRF_ge`, `symEllIntRF_le`, `symEllIntRJ_bounds`, `symEllIntRG_bounds`: bounds by
+  elementary means (DLMF 19.24.10–19.24.12).
+* `symEllIntR_mul_neg_gt`, `symEllIntRF_symEllIntRG_gt`: Neuman's bounds (DLMF 19.24.13,
+  19.24.14).
+* `symEllIntRF_symEllIntRC_bounds`: `R_C(x, (y+z)/2) ≤ R_F(x, y, z) ≤ R_C(x, √(yz))`
+  (DLMF 19.24.15).
 
-The complete `R_J` bounds (19.24.4) use the three-node R-average: order monotonicity gives
-the upper bound, and Euler transformation followed by Jensen gives the lower bound.
+## Implementation notes
 
-The perimeter identity (19.24.7) uses the proved positive-semiaxis formula
-`Carlson.ellipse_perimeter` from `lean-codes` and checks the degenerate semiaxes directly.
-Reflection and periodicity reduce the full arc-length integral to a quadrant for every
-real pair of semiaxes.
+* The condition `y ≤ z` in (19.24.1)–(19.24.2) only identifies the smaller variable
+  (19.24.i.p1). `R_D(0, y, z)` is the case `p = z` of (19.24.4) (19.24.i.p2). The perimeter in
+  (19.24.7) is `ellipsePerimeter` of §19.9(i), so the approximations of §19.9(i) apply
+  (19.24.i.p4). The bounds (19.24.10)–(19.24.12) are special cases of Carlson (1966),
+  Theorems 2 and 3 ("all variables are positive", 19.24.ii.p1); the cases `R_C`, `R_D` are
+  included (19.24.Px1.p1).
+* The lower bound in (19.24.10) comes from `lean-codes`' capacity bound
+  `Carlson.inv_dupMean_le_carlsonRF_sq` (Carlson 1966, Theorem 3). The AGM bounds in
+  (19.24.5) use the RF–AGM identity from §19.22 and Mathlib's `NNReal.agmSequences` bounds.
+  The upper bound in (19.24.10) uses monotonicity of Carlson's hypergeometric mean;
+  (19.24.13)–(19.24.14) use strict exponential Jensen inequalities for the real R-averages.
+  The `R_J` bounds use the five-node capacity inequality and order monotonicity; the `R_G`
+  bounds are Jensen bounds before and after Euler transformation. The `R_F`–`R_C` bounds in
+  (19.24.15) compare the real integral kernels using strict arithmetic–geometric mean
+  inequalities and `lean-codes`' `integral_lt_integral_of_ae_lt`. The complete `R_G` bounds
+  in (19.24.2) use `Carlson.carlsonRE_eq_compEllIntEk` and the bounds for `E(k)` from §19.9.
+* The complete `R_J` bounds (19.24.4) use the three-node R-average: order monotonicity gives
+  the upper bound, and Euler transformation followed by Jensen gives the lower bound.
+* The perimeter identity (19.24.7) uses the positive-semiaxis formula
+  `Carlson.ellipse_perimeter` from `lean-codes` and checks the degenerate semiaxes directly.
+  Reflection and periodicity reduce the full arc-length integral to a quadrant for every real
+  pair of semiaxes.
 
 ## References
 
@@ -74,18 +83,18 @@ namespace DLMF.EllipticIntegrals
 
 /-- Identity under the stated parameter and domain assumptions: `((t : ℂ) + (r : ℂ)) ^ (1 / 2 : ℂ)
 = ((√(t + r) : ℝ) : ℂ)`. -/
-lemma ei19d_ofReal_add_cpow_half {t r : ℝ} (h : 0 ≤ t + r) :
+private lemma ofReal_add_ofReal_cpow_half {t r : ℝ} (h : 0 ≤ t + r) :
     ((t : ℂ) + (r : ℂ)) ^ (1 / 2 : ℂ) = ((√(t + r) : ℝ) : ℂ) := by
   rw [← ofReal_add, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← ofReal_cpow h, Real.sqrt_eq_rpow]
 
 /-- Identity under the stated parameter and domain assumptions: `symEllIntS (x : ℂ) (y : ℂ) (z :
 ℂ) t = ((√(t + x) * √(t + y) * √(t + z) : ℝ) : ℂ)`. -/
-lemma ei19d_symEllIntS_ofReal {x y z t : ℝ} (hx : 0 ≤ t + x) (hy : 0 ≤ t + y)
+private lemma symEllIntS_ofReal {x y z t : ℝ} (hx : 0 ≤ t + x) (hy : 0 ≤ t + y)
     (hz : 0 ≤ t + z) :
     symEllIntS (x : ℂ) (y : ℂ) (z : ℂ) t = ((√(t + x) * √(t + y) * √(t + z) : ℝ) : ℂ) := by
-  rw [symEllIntS, ei19d_ofReal_add_cpow_half hx, ei19d_ofReal_add_cpow_half hy,
-    ei19d_ofReal_add_cpow_half hz]
+  rw [symEllIntS, ofReal_add_ofReal_cpow_half hx, ofReal_add_ofReal_cpow_half hy,
+    ofReal_add_ofReal_cpow_half hz]
   push_cast; ring
 
 /-- `R_F(x, y, z)` is real for nonnegative real `x, y, z`. -/
@@ -94,7 +103,7 @@ theorem symEllIntRF_ofReal_im {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 
   have h : (∫ t in Ioi (0 : ℝ), (symEllIntS (x : ℂ) (y : ℂ) (z : ℂ) t)⁻¹) =
       ∫ t in Ioi (0 : ℝ), (((√(t + x) * √(t + y) * √(t + z))⁻¹ : ℝ) : ℂ) := by
     refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
-    rw [ei19d_symEllIntS_ofReal (by linarith) (by linarith) (by linarith), ofReal_inv]
+    rw [symEllIntS_ofReal (by linarith) (by linarith) (by linarith), ofReal_inv]
   rw [symEllIntRF, h, integral_complex_ofReal]
   simp
 
@@ -176,7 +185,7 @@ theorem symEllIntRG_zero_bounds {y z : ℝ} (hy : 0 ≤ y) (hyz : y ≤ z) (hz :
   have hRE := Carlson.carlsonRE_eq_compEllIntEk hy' hyz
   rw [← compEllIntEk_ofReal hk2.le] at hRE
   have hRG : symEllIntRG 0 y z = ((√z / 2 : ℝ) : ℂ) * compEllIntEk (√(1 - y / z)) := by
-    rw [p19sR1_symEllIntRG_zero_eq_carlsonRE (ofReal_mem_slitPlane.mpr hy')
+    rw [symEllIntRG_zero_eq_carlsonRE (ofReal_mem_slitPlane.mpr hy')
       (ofReal_mem_slitPlane.mpr hz), hRE]
     push_cast
     field_simp
@@ -213,7 +222,7 @@ theorem symEllIntRJ_zero_bounds {y z p : ℝ} (hy : 0 < y) (hz : 0 < z) (hp : 0 
   have he : 4 / (3 * π) * (symEllIntRJ 0 y z p).re = Carlson.carlsonRReal (-3 / 2) b v := by
     rw [symEllIntRJ_zero_left (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)
       (ofReal_mem_slitPlane.mpr hp), symEllIntR_of_mem _ _
-      (ei19c_slit3 (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz) (ofReal_mem_slitPlane.mpr hp))]
+      (vec3_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz) (ofReal_mem_slitPlane.mpr hp))]
     have H := Carlson.ofReal_carlsonRReal (-3 / 2) hb hv
     have hnodes : (fun i => ((![y,z,p] : Fin 3 → ℝ) i : ℂ)) = ![(y:ℂ),z,p] := by
       funext i; fin_cases i <;> rfl
@@ -292,7 +301,7 @@ theorem symEllIntRF_zero_agm_bounds {a g : ℕ → ℝ} (hg0 : 0 < g 0) (hag : g
     induction n with
     | zero => exact ⟨rfl, rfl⟩
     | succ n ih =>
-      rw [ha, hg, ih.1, ih.2, p19sR1_agmA_succ, p19sR1_agmG_succ]
+      rw [ha, hg, ih.1, ih.2, agmA_succ, agmG_succ]
       exact ⟨rfl, rfl⟩
   have hpos : ∀ n, 0 < a n ∧ 0 < g n := by
     intro n
@@ -392,7 +401,7 @@ theorem ellipsePerimeter_eq_symEllIntRG (a b : ℝ) :
     push_cast; ring
   have H := Carlson.ellipse_perimeter (abs_pos.mpr ha) (abs_pos.mpr hb)
   simp only [sq_abs, ← Real.sqrt_eq_rpow] at H
-  rw [p19sR1_symEllIntRG_zero_eq_carlsonRE (ofReal_mem_slitPlane.mpr (sq_pos_of_ne_zero ha))
+  rw [symEllIntRG_zero_eq_carlsonRE (ofReal_mem_slitPlane.mpr (sq_pos_of_ne_zero ha))
     (ofReal_mem_slitPlane.mpr (sq_pos_of_ne_zero hb))]
   rw [H]
   ring
@@ -495,7 +504,7 @@ theorem symEllIntRF_le {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) :
 /-- On positive real nodes, the real part of `R_J(x, y, z, p)` is the real Carlson
 R-average with five half-parameters and repeated last node `p`. This makes the general
 capacity bound applicable without a separate equal-node aggregation argument. -/
-private lemma p19sR2_symEllIntRJ_re_eq_carlsonRReal {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) (hp : 0 < p) :
+private lemma re_symEllIntRJ_eq_carlsonRReal {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) (hp : 0 < p) :
     (symEllIntRJ x y z p).re = Carlson.carlsonRReal (-3/2)
       (fun _ : Fin 5 => 1/2) ![x,y,z,p,p] := by
   have hv : ∀ i, 0 < (![x,y,z,p,p] : Fin 5 → ℝ) i := by
@@ -503,7 +512,7 @@ private lemma p19sR2_symEllIntRJ_re_eq_carlsonRReal {x y z p : ℝ} (hx : 0 < x)
   have hc := Carlson.capacity_integral_eq_carlsonRReal hv (by norm_num)
   norm_num only [Fintype.card_fin, Nat.cast_ofNat] at hc
   rw [neg_div, ← hc]
-  have hnp : ¬ IsNegReal (p:ℂ) := ei19c_not_isNegReal_of_mem_slitPlane
+  have hnp : ¬ IsNegReal (p:ℂ) := not_isNegReal_of_mem_slitPlane
     (ofReal_mem_slitPlane.mpr hp)
   rw [symEllIntRJ, ite_eq_right hnp]
   have he : (∫ t in Ioi (0:ℝ), (symEllIntS x y z t * ((t:ℂ)+p))⁻¹) =
@@ -511,7 +520,7 @@ private lemma p19sR2_symEllIntRJ_re_eq_carlsonRReal {x y z p : ℝ} (hx : 0 < x)
     rw [← integral_complex_ofReal]
     refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
     change 0 < t at ht
-    rw [ei19d_symEllIntS_ofReal (by linarith) (by linarith) (by linarith)]
+    rw [symEllIntS_ofReal (by linarith) (by linarith) (by linarith)]
     simp only [Carlson.capacityKernel, Fin.prod_univ_succ, Matrix.cons_val_zero,
       Matrix.cons_val_succ, Matrix.cons_val_fin_one]
     simp only [Fin.prod_univ_zero, mul_one]
@@ -533,7 +542,7 @@ theorem symEllIntRJ_bounds {x y z p : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z
   let v : Fin 5 → ℝ := ![x,y,z,p,p]
   have hb : b ∈ ProbabilityTheory.mvRealBetaDomain := by intro i; norm_num [b]
   have hv : ∀ i, 0 < v i := by intro i; fin_cases i <;> assumption
-  rw [p19sR2_symEllIntRJ_re_eq_carlsonRReal hx hy hz hp]
+  rw [re_symEllIntRJ_eq_carlsonRReal hx hy hz hp]
   constructor
   · by_cases hn : ∃ i j, v i ≠ v j
     · have h := (Carlson.carlsonRReal_capacity_lower_bound hv (by norm_num) hn).le
@@ -580,7 +589,7 @@ theorem symEllIntRG_bounds {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) 
   have he : (symEllIntRG x y z).re = Carlson.carlsonRReal (1 / 2) b v := by
     rw [symEllIntRG_eq_symEllIntR (ofReal_mem_slitPlane.mpr hx)
       (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz),
-      symEllIntR_of_mem _ _ (ei19c_slit3 (ofReal_mem_slitPlane.mpr hx)
+      symEllIntR_of_mem _ _ (vec3_mem_carlsonRSlitDomain (ofReal_mem_slitPlane.mpr hx)
         (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)), neg_div, neg_neg]
     have hc := Carlson.ofReal_carlsonRReal (1 / 2) hb hv
     norm_num only [b, v, ofReal_div, ofReal_one, ofReal_ofNat] at hc
@@ -645,12 +654,12 @@ private lemma symEllIntRF_re_integral_and_integrable {x y z : ℝ}
   have he : (fun t : ℝ => (symEllIntS x y z t)⁻¹) =ᵐ[volume.restrict (Ioi (0 : ℝ))]
       (fun t => (((√(t + x) * √(t + y) * √(t + z))⁻¹ : ℝ) : ℂ)) := by
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with t (ht : 0 < t)
-    rw [ei19d_symEllIntS_ofReal (by linarith) (by linarith) (by linarith), ofReal_inv]
+    rw [symEllIntS_ofReal (by linarith) (by linarith) (by linarith), ofReal_inv]
   have hxc : SymEllIntArg (x : ℂ) := by
     rcases hx.eq_or_lt with hh | hh
     · exact Or.inr (by exact_mod_cast hh.symm)
     · exact Or.inl (ofReal_mem_slitPlane.mpr hh)
-  have hi := (p19sR1_integrableOn_RF hxc (ofReal_mem_slitPlane.mpr hy)
+  have hi := (integrableOn_symEllIntRF_integrand hxc (ofReal_mem_slitPlane.mpr hy)
     (ofReal_mem_slitPlane.mpr hz)).congr he
   constructor
   · rw [symEllIntRF, integral_congr_ae he, integral_complex_ofReal]
@@ -700,7 +709,7 @@ theorem symEllIntRF_symEllIntRC_bounds {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y)
   have hG : 0 < √(y * z) := Real.sqrt_pos.mpr (mul_pos hy hz)
   have hrc (q : ℝ) (hq : 0 < q) : symEllIntRC x q = symEllIntRF x q q :=
     symEllIntRC_eq_symEllIntRF _
-      (ei19c_not_isNegReal_of_mem_slitPlane (ofReal_mem_slitPlane.mpr hq))
+      (not_isNegReal_of_mem_slitPlane (ofReal_mem_slitPlane.mpr hq))
   rw [hrc _ hA, hrc _ hG]
   by_cases hyz : y = z
   · subst z

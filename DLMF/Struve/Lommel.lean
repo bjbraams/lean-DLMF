@@ -17,19 +17,43 @@ public import Mathlib.Analysis.Complex.LocallyUniformLimit
 public import Mathlib.Analysis.Complex.RemovableSingularity
 
 /-!
-# Lommel functions and parameter continuation
+# Lommel functions and parameter continuation (DLMF §11.9)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This file defines the Lommel functions `s_{μ,ν}(z)` and `S_{μ,ν}(z)`, proves their
+differential equation, series and symmetry properties, and continues the capital Lommel
+function to exceptional parameters.
 
-The small-Lommel equation and general solution reuse the proved regularized
-`₁F₂` forcing and the all-order Bessel fundamental system in `DLMF.Struve.Basic`.
-The capital-Lommel parameter limit is proved by cancelling the Gamma poles against a jointly
-entire regularized numerator. At intersections of polar hyperplanes, its two vanishing partial
-derivatives supply the double cancellation. The finite-shift identity for reciprocal Gamma
-comes from lean-codes' `Pochhammer.Gamma` through the existing GammaPochhammer import.
+## Main definitions
+
+* `lommelA`: the product of the first `k` factors `(μ+2j+1)² - ν²` (DLMF 11.9.4).
+* `LommelRegular`: the nonexceptional parameters of the small Lommel function.
+* `lommelS`: the Lommel series `s_{μ,ν}(z)` (DLMF 11.9.3), on the principal power branch.
+* `lommelCapitalRegular`, `lommelCapital`: the capital Lommel function `S_{μ,ν}(z)`
+  (DLMF 11.9.5) at regular parameters and its removable continuation to all parameters.
+* `lommelNumerator`: the entire numerator of the regular capital Lommel function.
+
+## Main results
+
+* `lommelA_poch`, `hasSum_lommelS`: DLMF 11.9.3–11.9.4.
+* `lommelS_ode`, `lommelCapital_ode`: the inhomogeneous Bessel equation DLMF 11.9.1.
+* `lommel_general_solution`: the general solution DLMF 11.9.2.
+* `lommelCapital_regular`: the capital Lommel function at regular parameters (DLMF 11.9.5).
+* `lommelS_neg_order`, `lommelCapital_neg_order`: DLMF 11.9.6.
+* `lommelS_bessel_series_7`, `lommelS_bessel_series_8`: the Bessel series DLMF 11.9.7–11.9.8.
+* `lommelCapital_asymptotic`, `lommelCapital_terminates`: the asymptotic expansion DLMF 11.9.9
+  and its termination when `μ ± ν` is a positive odd integer.
+* `lommelCapital_parameter_limit`: the parameter limit defining `lommelCapital` at exceptional
+  parameters.
+* `lommelCapital_add_two`: the shift `μ ↦ μ + 2`.
+
+## Implementation notes
+
+The small-Lommel equation and general solution use the regularized `₁F₂` forcing and the
+all-order Bessel fundamental system of `DLMF.Struve.Basic`. The capital-Lommel parameter limit
+is proved by cancelling the Gamma poles against a jointly entire regularized numerator; at
+intersections of polar hyperplanes, its two vanishing partial derivatives supply the double
+cancellation. The finite-shift identity for reciprocal Gamma comes from lean-codes'
+`Pochhammer.Gamma`.
 -/
 
 @[expose] public noncomputable section
@@ -292,7 +316,7 @@ theorem lommelS_eq_regularized {μ ν : ℂ} (h : LommelRegular μ ν) (z : ℂ)
 /-- The series with terms `(fun k : ℕ => z^(μ+1)*(-1)^k*z^(2*k)/lommelA μ ν (k+1))` converges to
 `(lommelS μ ν z)`. -/
 @[dlmf 11.9.E3]
-theorem hasSum_lommelS {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasSum_lommelS {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} :
     HasSum (fun k : ℕ => z^(μ+1)*(-1)^k*z^(2*k)/lommelA μ ν (k+1)) (lommelS μ ν z) := by
   have hr : (regularizedHGFunSeries {1} {(μ-ν+3)/2,(μ+ν+3)/2}).radius=⊤ :=
     radius_regularizedHGFunSeries_eq_top (by simp)
@@ -374,7 +398,7 @@ theorem lommelS_ode {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} (hz : z �
 /-- Identity under the stated parameter and domain assumptions: `lommelS μ (-ν) z = lommelS μ ν
 z`. -/
 @[dlmf 11.9.E6]
-theorem lommelS_neg_order {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} :
+theorem lommelS_neg_order {μ ν : ℂ} {z : ℂ} :
     lommelS μ (-ν) z = lommelS μ ν z := by
   have h (k : ℕ) : lommelA μ (-ν) k=lommelA μ ν k := by simp [lommelA]
   simp only [lommelS, h]
@@ -585,7 +609,7 @@ theorem lommelS_add_two {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ}
   have hpow : z^(μ + 2 + 1) = z^(μ + 1) * z^2 := by
     rw [show μ + 2 + 1 = μ + 1 + (2 : ℕ) by norm_num; ring,
       cpow_add _ _ (slitPlane_ne_zero hz), cpow_natCast]
-  have hs := (hasSum_lommelS h.add_two hz).mul_left (-D⁻¹)
+  have hs := (hasSum_lommelS h.add_two (z := z)).mul_left (-D⁻¹)
   have htail : HasSum
       (fun k : ℕ => z^(μ + 1) * (-1)^(k + 1) * z^(2*(k + 1)) /
         lommelA μ ν (k + 1 + 1)) (-D⁻¹ * lommelS (μ + 2) ν z) := by
@@ -596,7 +620,7 @@ theorem lommelS_add_two {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ}
     rw [pow_succ, show 2 * (k + 1) = 2 * k + 2 by omega, pow_add]
     simp only [div_eq_mul_inv, mul_inv]
     ring
-  have heq := htail.unique ((hasSum_nat_add_iff' 1).mpr (hasSum_lommelS h hz))
+  have heq := htail.unique ((hasSum_nat_add_iff' 1).mpr (hasSum_lommelS h))
   simp only [Finset.sum_range_one] at heq
   simp [lommelA] at heq
   change -(D⁻¹ * lommelS (μ + 2) ν z) = lommelS μ ν z - z^(μ + 1) / D at heq
@@ -686,7 +710,7 @@ theorem differentiable_regularized1F2_params (q : ℂ) :
       (differentiable_one_div_Gamma.comp (differentiable_snd.add_const _)) |>.differentiableOn
   · set K : Set ℂ := Metric.closedBall p.1 1 ∪ Metric.closedBall p.2 1
     have hK : IsCompact K := (isCompact_closedBall _ _).union (isCompact_closedBall _ _)
-    obtain ⟨m,C,hC,hbound⟩ := DLMF.Gamma.Simplex.Complex.exists_uniform_norm_recip_Gamma_add_nat hK
+    obtain ⟨m,C,hC,hbound⟩ := Complex.exists_uniform_norm_inv_Gamma_add_nat hK
     set u : ℕ → ℝ := fun n => C^2 * ‖q‖^n / ((n-m)!)
     have hu : Summable u := by
       rw [← summable_nat_add_iff m]

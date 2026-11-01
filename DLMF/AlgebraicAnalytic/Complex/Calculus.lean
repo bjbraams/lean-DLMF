@@ -35,33 +35,51 @@ Statements of DLMF §1.9 that are not, in the stated generality, in Mathlib or T
 upstream items are recorded as `dlmf_upstream` pointers in
 `DLMF.AlgebraicAnalytic.Complex.MathlibCoverage`.
 
-Conventions.
+## Main results
+
+* `arg_eq_arctan_of_re_pos_of_im_nonneg` and the three other quadrant formulas: DLMF 1.9.5–1.9.6.
+* `isPhase_arg`, `isPhase_iff`: the phases of `z` (DLMF 1.9.7).
+* `IsPhase.conj`, `IsPhase.mul`, `IsPhase.div`: DLMF 1.9.13, 1.9.18, 1.9.20 for general phases.
+* `div_eq_mul_conj_div`, `pow_eq_sum_choose`: DLMF 1.9.16, 1.9.21.
+* `cos_add_sin_mul_I_zpow`: De Moivre's theorem for `n ∈ ℤ` and complex `θ` (DLMF 1.9.22).
+* `abs_norm_sub_norm_le_norm_add_le`: the triangle inequality (DLMF 1.9.23).
+* `hasDerivAt_re_im_of_hasDerivAt`, `differentiableAt_of_cauchyRiemann`: the Cauchy–Riemann
+  equations and their converse (DLMF 1.9.25, §1.9(ii)).
+* `harmonic_polar`: Laplace's equation in polar coordinates (DLMF 1.9.27).
+* `IsSimpleClosedContour.jordan`, `IsSimpleClosedContour.contourIntegral_eq_zero`,
+  `IsSimpleClosedContour.cauchy_integral_formula`,
+  `IsSimpleClosedContour.cauchyIntegralFormula_iteratedDeriv`: the Jordan curve theorem,
+  Cauchy's theorem and Cauchy's integral formulas (§1.9(iii), 1.9.29–1.9.31).
+* `windingNumber_eq_intCast`, `IsSimpleClosedContour.windingNumber_eq_one_or_neg_one`,
+  `windingNumber_eq_zero_of_mem_contourExterior`: winding numbers (DLMF 1.9.32, §1.9(iii)).
+* `hasBasis_nhds_infty`, `extAdd_infty`, `extMul_infty`, `extDiv_infty`, `extDiv_zero`: the
+  point at infinity (DLMF 1.9.35–1.9.39).
+* `mobiusExt_neg_div`, `hasDerivAt_mobius`, `derivAtInfty_mobius`, `mobius_mobius_inv`,
+  `mobiusExt_bijective`, `crossRatio_mobius`: bilinear transformations (DLMF 1.9.41–1.9.45).
+* `tendsto_cauchyProduct`: products of power series (DLMF 1.9.51–1.9.52, corrected).
+* `hasSum_recipCoeff`, `hasSum_logCoeff`, `hasSum_powCoeff` and the coefficient values
+  `recipCoeff_zero_one_two`, `logCoeff_one_two_three`, `powCoeff_zero_one_two`:
+  DLMF 1.9.53–1.9.61.
+* `hasSum_iteratedDeriv_powerSeries`: termwise differentiation (DLMF 1.9.63).
+* `tendsto_iterated_of_tendsto_prod`: double sequences (DLMF 1.9.64–1.9.65).
+* `tendsto_contourIntegral_tsum`: termwise integration (DLMF 1.9.68).
+
+## Implementation notes
+
 * **Phase.** Mathlib's `Complex.arg` takes values in `(-π, π]`, which is the single-valued
   principal phase of DLMF §1.9(i) ("if we require a principal value to be single-valued, then
   we can restrict `-π < ph z ≤ π`"). DLMF's principal value `-π ≤ ph z ≤ π` is two-valued on the
   negative real axis, where Lean takes `π`. The multivalued phase is `IsPhase z θ`; the identities
-  1.9.13, 1.9.18, 1.9.20 hold for general phases (proved here) but not for principal values
+  1.9.13, 1.9.18, 1.9.20 hold for general phases but not for principal values
   (Mathlib: `Complex.arg_conj`, `Complex.arg_mul_coe_angle`, `Complex.arg_div_coe_angle`).
 * **Contours.** Contours are Tau Ceti's piecewise `C¹` curves; `IsSimpleClosedContour`,
   `contourInterior`, `contourExterior`, `IsPositivelyOriented` and `contourIntegral` are in
   `DLMF.AlgebraicAnalytic.Complex.Basic`. Tau Ceti proves Cauchy's theorem and formula in the
-  homology form (holomorphy on an open set containing the curve, null-homologous curve); the DLMF
-  forms, with continuity up to a Jordan contour and holomorphy only inside, are admitted here.
+  homology form (holomorphy on an open set containing the curve, null-homologous curve); the
+  DLMF forms here assume continuity up to a Jordan contour and holomorphy only inside.
 * **Series.** DLMF's series converge as partial sums; Mathlib's `HasSum` is unconditional. They
   agree for absolutely convergent series; partial sums are used where DLMF's statement is about
   conditional convergence (1.9.51).
-
-Proved here: the quadrant formulas 1.9.5–1.9.6 for `arg`, the characterization of the phase
-1.9.7 and the general-phase identities 1.9.13, 1.9.18, 1.9.20, the division formula 1.9.16,
-De Moivre's theorem 1.9.22 for `n ∈ ℤ` (and complex `θ`), the triangle inequality 1.9.23, the
-Cauchy–Riemann equations 1.9.25, the arithmetic of `∞` (1.9.36–1.9.39), the bilinear
-transformation formulas 1.9.41–1.9.44 and the invariance of the cross ratio 1.9.45, the
-binomial decomposition 1.9.21, the Cauchy product identity 1.9.51–1.9.52 via Mathlib’s
-Abel limit theorem, the reciprocal-series convergence 1.9.53–1.9.54 via analytic inversion,
-the logarithm and principal-power series 1.9.57 and 1.9.60 via their differential identities,
-termwise differentiation 1.9.63 via Mathlib’s Cauchy–Taylor theorem, the
-recurrence values 1.9.55, 1.9.58, 1.9.61, the double-limit theorem of §1.9(vii), and the
-vanishing of the winding number on the exterior of a closed contour (from Tau Ceti).
 -/
 
 @[expose] public noncomputable section
@@ -75,7 +93,7 @@ namespace DLMF.AlgebraicAnalytic
 
 /-- Identity under the stated parameter and domain assumptions: `arg z = Real.arctan (z.im /
 z.re)`. -/
-private lemma g1c_arg_of_re_pos {z : ℂ} (hz : 0 < z.re) :
+private lemma arg_eq_arctan_div_of_re_pos {z : ℂ} (hz : 0 < z.re) :
     arg z = Real.arctan (z.im / z.re) := by
   have h := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz))
   rw [← tan_arg, Real.arctan_tan h.1 h.2]
@@ -84,13 +102,13 @@ private lemma g1c_arg_of_re_pos {z : ℂ} (hz : 0 < z.re) :
 @[dlmf 1.9.E5, dlmf 1.9.E6]
 theorem arg_eq_arctan_of_re_pos_of_im_nonneg {z : ℂ} (hx : 0 < z.re) (hy : 0 ≤ z.im) :
     arg z = Real.arctan |z.im / z.re| := by
-  rw [g1c_arg_of_re_pos hx, abs_of_nonneg (div_nonneg hy hx.le)]
+  rw [arg_eq_arctan_div_of_re_pos hx, abs_of_nonneg (div_nonneg hy hx.le)]
 
 /-- DLMF 1.9.5–1.9.6, fourth quadrant: for `x > 0`, `y < 0`, `ph z = -ω`. -/
 @[dlmf 1.9.E5, dlmf 1.9.E6]
 theorem arg_eq_neg_arctan_of_re_pos_of_im_neg {z : ℂ} (hx : 0 < z.re) (hy : z.im < 0) :
     arg z = -Real.arctan |z.im / z.re| := by
-  rw [g1c_arg_of_re_pos hx, abs_of_neg (div_neg_of_neg_of_pos hy hx), Real.arctan_neg, neg_neg]
+  rw [arg_eq_arctan_div_of_re_pos hx, abs_of_neg (div_neg_of_neg_of_pos hy hx), Real.arctan_neg, neg_neg]
 
 /-- DLMF 1.9.5–1.9.6, second quadrant: for `x < 0`, `y ≥ 0`, `ph z = π - ω` (on the negative
 real axis this is Lean's single-valued choice `π`). -/
@@ -98,7 +116,7 @@ real axis this is Lean's single-valued choice `π`). -/
 theorem arg_eq_pi_sub_arctan_of_re_neg_of_im_nonneg {z : ℂ} (hx : z.re < 0) (hy : 0 ≤ z.im) :
     arg z = Real.pi - Real.arctan |z.im / z.re| := by
   have hn : 0 < (-z).re := by simpa using hx
-  have h := g1c_arg_of_re_pos hn
+  have h := arg_eq_arctan_div_of_re_pos hn
   simp only [neg_re, neg_im, neg_div_neg_eq] at h
   rcases hy.lt_or_eq with hy | hy
   · rw [arg_neg_eq_arg_sub_pi_of_im_pos hy] at h
@@ -112,7 +130,7 @@ theorem arg_eq_pi_sub_arctan_of_re_neg_of_im_nonneg {z : ℂ} (hx : z.re < 0) (h
 theorem arg_eq_neg_pi_add_arctan_of_re_neg_of_im_neg {z : ℂ} (hx : z.re < 0) (hy : z.im < 0) :
     arg z = -Real.pi + Real.arctan |z.im / z.re| := by
   have hn : 0 < (-z).re := by simpa using hx
-  have h := g1c_arg_of_re_pos hn
+  have h := arg_eq_arctan_div_of_re_pos hn
   simp only [neg_re, neg_im, neg_div_neg_eq] at h
   rw [arg_neg_eq_arg_add_pi_of_im_neg hy] at h
   rw [abs_of_pos (div_pos_of_neg_of_neg hy hx)]
@@ -348,7 +366,7 @@ theorem IsSimpleClosedContour.contourIntegral_eq_zero {γ : ℝ → ℂ} {a b : 
 contour `C`, analytic within `C`, `C` is described in the positive sense and `z₀` lies within
 `C`, then `f(z₀) = (2πi)⁻¹ ∫_C f(z)/(z - z₀) dz`. -/
 @[dlmf 1.9.E30]
-theorem IsSimpleClosedContour.cauchyIntegralFormula {γ : ℝ → ℂ} {a b : ℝ} {f : ℂ → ℂ} {z₀ : ℂ}
+theorem IsSimpleClosedContour.cauchy_integral_formula {γ : ℝ → ℂ} {a b : ℝ} {f : ℂ → ℂ} {z₀ : ℂ}
     (hγ : IsSimpleClosedContour γ a b) (hpos : IsPositivelyOriented γ a b)
     (hc : ContinuousOn f (contourInterior γ a b ∪ γ '' Icc a b))
     (hd : DifferentiableOn ℂ f (contourInterior γ a b)) (hz₀ : z₀ ∈ contourInterior γ a b) :
@@ -480,7 +498,7 @@ theorem hasDerivAt_mobius (a b c d : ℂ) {z : ℂ} (hz : c * z + d ≠ 0) :
 
 /-- Identity under the stated parameter and domain assumptions: `Function.update (fun z => mobius
 a b c d z⁻¹) 0 (a / c) = fun z => (a + b * z) / (c + d * z)`. -/
-private lemma g1c_mobius_inv_eq (a b c d : ℂ) :
+private lemma update_mobius_inv_eq (a b c d : ℂ) :
     Function.update (fun z => mobius a b c d z⁻¹) 0 (a / c) =
       fun z => (a + b * z) / (c + d * z) := by
   funext z
@@ -511,12 +529,12 @@ theorem derivAtInfty_mobius (a b : ℂ) {c : ℂ} (d : ℂ) (hc : c ≠ 0) :
     simp
   refine ⟨?_, ?_⟩
   · unfold AnalyticAtInfty
-    rw [g1c_mobius_inv_eq]
+    rw [update_mobius_inv_eq]
     have : AnalyticAt ℂ (fun z : ℂ => a + b * z) 0 := by fun_prop
     have h2 : AnalyticAt ℂ (fun z : ℂ => c + d * z) 0 := by fun_prop
     exact this.div h2 (by simpa using hc)
   · unfold derivAtInfty
-    rw [g1c_mobius_inv_eq]
+    rw [update_mobius_inv_eq]
     exact hh.deriv
 
 /-- DLMF 1.9.44: the inverse of the bilinear transformation 1.9.40 is `z = (dw - b)/(-cw + a)`:
@@ -693,7 +711,7 @@ theorem hasSum_recipCoeff {a : ℕ → ℂ} {f : ℂ → ℂ} {r : ℝ} (hr : 0 
   obtain ⟨δ, hδ, hδsub⟩ := Metric.eventually_nhds_iff.mp hlocal
   have hcoef : (fun n => ∑ k ∈ Finset.range (n + 1), a k * b (n - k)) =
       fun n => if n = 0 then (1 : ℂ) else 0 := by
-    apply Complex.trigR4_coeff_unique_ball hδ (g := fun _ => 1)
+    apply Complex.powerSeries_coeff_eq_of_hasSum_ball hδ (g := fun _ => 1)
     · intro z hz
       obtain ⟨hza, hzb, hzn⟩ := hδsub (by simpa [dist_eq_norm] using hz)
       simpa [hzn] using Complex.hasSum_mul_powerSeries hza hzb
@@ -793,7 +811,7 @@ theorem hasSum_logCoeff {a : ℕ → ℂ} {f : ℂ → ℂ} {r : ℝ} (hr : 0 < 
   have hcoef : (fun n : ℕ => ∑ k ∈ Finset.range (n + 1),
       a k * (((n - k + 1 : ℕ) : ℂ) * b (n - k + 1))) =
       fun n : ℕ => (n + 1 : ℂ) * a (n + 1) := by
-    apply Complex.trigR4_coeff_unique_ball hδ (g := deriv f)
+    apply Complex.powerSeries_coeff_eq_of_hasSum_ball hδ (g := deriv f)
     · intro z hz
       obtain ⟨hza, hzg, hzf, hzeq⟩ := hδsub (by simpa [dist_eq_norm] using hz)
       simpa only [hzeq, Nat.cast_add, Nat.cast_one] using Complex.hasSum_mul_powerSeries hza hzg
@@ -909,7 +927,7 @@ theorem hasSum_powCoeff {a : ℕ → ℂ} {f : ℂ → ℂ} {r : ℝ} (hr : 0 < 
   have hcoef : (fun n : ℕ => ∑ k ∈ Finset.range (n + 1),
       a k * (((n - k + 1 : ℕ) : ℂ) * b (n - k + 1))) =
       fun n => ν * ∑ k ∈ Finset.range (n + 1), (k + 1 : ℂ) * a (k + 1) * b (n - k) := by
-    apply Complex.trigR4_coeff_unique_ball hδ (g := fun z => f z * deriv g z)
+    apply Complex.powerSeries_coeff_eq_of_hasSum_ball hδ (g := fun z => f z * deriv g z)
     · intro z hz
       obtain ⟨hza, hzg, hzf, hzb, hzeq⟩ := hδsub (by simpa [dist_eq_norm] using hz)
       simpa only [Nat.cast_add, Nat.cast_one] using Complex.hasSum_mul_powerSeries hza hzg
@@ -958,7 +976,7 @@ theorem hasSum_iteratedDeriv_powerSeries {a : ℕ → ℂ} {f : ℂ → ℂ} {z�
   have hd : DifferentiableOn ℂ g (ball 0 ρ) := by
     simpa only [heball] using hp.differentiableOn
   have hcoef : a = fun n => iteratedDeriv n g 0 / n.factorial := by
-    apply Complex.trigR4_coeff_unique_ball hρ
+    apply Complex.powerSeries_coeff_eq_of_hasSum_ball hρ
       (fun w hw => hg w (lt_trans hw hρR))
     intro w hw
     convert Complex.hasSum_taylorSeries_on_ball hd (z := w) (by simpa using hw) using 1

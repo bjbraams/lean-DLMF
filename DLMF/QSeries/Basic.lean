@@ -10,5 +10,11 @@ public import DLMF.QSeries.Basic.Series
 public import DLMF.QSeries.Basic.Calculus
 
 /-!
-# Foundations of q-series
+# Foundations of `q`-series
+
+This file collects the foundational definitions of the `q`-series area: `q`-Pochhammer
+symbols, the Jackson integral and `q`-gamma (`DLMF.QSeries.Basic.Pochhammer`), Gaussian
+coefficients, `q`-numbers and the `q`-derivative (`DLMF.QSeries.Basic.Calculus`), and
+integer-index shifted factorials and basic hypergeometric series
+(`DLMF.QSeries.Basic.Series`).
 -/

@@ -8,17 +8,38 @@ module
 public import DLMF.QHypergeometric.Convergence
 
 /-!
-# Constant terms of q-products (DLMF §17.14)
+# Constant terms of `q`-products (DLMF §17.14)
 
-The finite q-Dyson product is a genuine multivariate Laurent polynomial, represented
-by its finitely supported integer exponent vectors. Infinite-product constant terms
-are Laurent coefficients computed by the normalized integral on `|z|=ρ`, `ρ>1`.
-This annulus fixes the expansion of inverse powers and excludes all denominator poles.
+This file proves the `q`-Dyson constant-term identity and the four Rogers–Ramanujan-type
+constant-term identities of DLMF §17.14.
 
-The printed left side of 17.14.3 repeats 17.14.2. Its coefficient of q is −1,
-whereas the printed G(q)/(-q;q²)∞ has coefficient 0. The correct denominator is
-`(-q;q²)_n`, as also obtained from the constant-term expression. The corrected
-formula is recorded explicitly below; no false identity is admitted.
+## Main definitions
+
+* `qDysonLaurent`: the finite `q`-Dyson Laurent polynomial in `n` variables.
+* `circleConstantTerm`: the Laurent coefficient of order zero on a positively oriented circle.
+* `rogersThetaProduct`: the Jacobi triple-product numerator of the four constant-term
+  identities.
+
+## Main results
+
+* `qDyson_constantTerm_mul`, `qDyson_constantTerm`: the `q`-Dyson identity (DLMF 17.14.1) in
+  polynomial form, valid even at roots of unity, and in quotient form.
+* `rogers_constantTerm_H`: DLMF 17.14.2.
+* `rogers_constantTerm_G_corrected`: the corrected form of DLMF 17.14.3.
+* `rogers_constantTerm_G_four`, `rogers_constantTerm_H_four`: the constant-term forms of
+  `G(q⁴)` and `H(q⁴)` (DLMF 17.14.4–17.14.5).
+
+## Implementation notes
+
+The finite `q`-Dyson product is a multivariate Laurent polynomial, represented by its finitely
+supported integer exponent vectors. Infinite-product constant terms are Laurent coefficients
+computed by the normalized integral on `|z| = ρ`, `ρ > 1`. This annulus fixes the expansion of
+inverse powers and excludes all denominator poles.
+
+The printed left side of DLMF 17.14.3 repeats 17.14.2. Its coefficient of `q` is `-1`, whereas
+the printed `G(q)/(-q;q²)_∞` has coefficient `0`. The correct denominator is `(-q;q²)_n`, as
+also obtained from the constant-term expression; the corrected formula is stated as
+`rogers_constantTerm_G_corrected`.
 -/
 
 @[expose] public noncomputable section

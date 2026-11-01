@@ -6,16 +6,36 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.WignerSymbols.Basic
-public import DLMF.WignerSymbols.Q2wHelpers
+public import DLMF.WignerSymbols.FactorialHelpers
 public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 
 /-!
-# The `6j` symbol: DLMF §§34.4–34.5 and §34.10
+# The `6j` symbol
 
-Statements of DLMF §34.4 (the definition 34.4.1 as a sum of products of four `3j` symbols,
-the `₄F₃` form 34.4.3, the tetrahedron of §34.4) and §34.5 (special cases, symmetry,
+Statements of DLMF §34.4 (the representation 34.4.1 as a sum of products of four `3j`
+symbols, the `₄F₃` form 34.4.3, the tetrahedron of §34.4) and §34.5 (special cases, symmetry,
 recursion, orthogonality and sums) for `wigner6j`, which is defined by the single sum 34.4.2,
 and the trivial zeros of §34.10.
+
+## Main results
+
+* `wigner6j_eq_sum_threeJ`: DLMF 34.4.1.
+* `triangle_conditions_of_tetrahedron`: the triangle conditions are necessary for a
+  tetrahedron with the six edges (DLMF §34.4).
+* `wigner6j_eq_hyp4F3`: DLMF 34.4.3.
+* `wigner6j_zero`, `wigner6j_half_plus`, `wigner6j_half_minus`, `wigner6j_one_minus_minus`,
+  `wigner6j_one_minus_zero`, `wigner6j_one_minus_plus`, `wigner6j_one_zero_zero`: the special
+  cases DLMF 34.5.1–34.5.7.
+* `wigner6j_swap_columns`, `wigner6j_flip`: DLMF 34.5.8.
+* `wigner6j_regge₁`, `wigner6j_regge₂`: the Regge symmetries DLMF 34.5.9–34.5.10.
+* `wigner6j_recursion`: DLMF 34.5.11–34.5.13.
+* `wigner6j_orthogonality`, `wigner6j_sum_rule`: DLMF 34.5.14–34.5.15.
+* `wigner6j_biedenharn_elliott`: the Biedenharn–Elliott sum rule DLMF 34.5.16.
+* `wigner6j_sum_17`, …, `wigner6j_sum_22`: the sums DLMF 34.5.17–34.5.22.
+* `wigner3j_mul_wigner6j`: DLMF 34.5.23.
+* `wigner6j_eq_zero_of_not`: the trivial zeros of DLMF §34.10.
+
+## Implementation notes
 
 Summations over angular momenta run over `halfIntegersUpTo x` (the values `0, 1/2, …, x`)
 for a bound `x` beyond which every summand vanishes, and summations over projections run over
@@ -23,7 +43,7 @@ for a bound `x` beyond which every summand vanishes, and summations over project
 over all admissible values. Signs `(-1)^x` are `signPow x`; in every nonzero summand `x` is an
 integer.
 
-The tetrahedron statement of §34.4 is acquired in its correct direction: the four triangle
+The tetrahedron statement of §34.4 is formalized in its correct direction: the four triangle
 conditions are necessary for the existence of a tetrahedron with the six edge lengths. DLMF's
 converse ("except in degenerate cases … equivalent to the existence of a tetrahedron") fails:
 for `{3 2 2; 3 2 2}` the four triads satisfy the triangle conditions and the symbol is `1/14`,
@@ -39,12 +59,12 @@ namespace DLMF.WignerSymbols
 /-! ## Helpers -/
 
 /-- Product of four square roots. -/
-lemma w34_sqrt4 {x y z w : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z) (_hw : 0 ≤ w) :
+private lemma sqrt_mul_sqrt_mul_sqrt_mul_sqrt {x y z w : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z) :
     Real.sqrt x * Real.sqrt y * Real.sqrt z * Real.sqrt w = Real.sqrt (x * y * z * w) := by
   rw [Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity), Real.sqrt_mul hx]
 
 /-- The product of the four triangle coefficients of a `6j` symbol as one square root. -/
-lemma w34_delta_prod (a b c d e f g h i k l m : ℚ) :
+private lemma triangleDelta_mul_four (a b c d e f g h i k l m : ℚ) :
     triangleDelta a b c * triangleDelta d e f * triangleDelta g h i * triangleDelta k l m =
       Real.sqrt ((factQ (a + b - c) * factQ (a - b + c) * factQ (-a + b + c) /
           factQ (a + b + c + 1)) *
@@ -53,11 +73,11 @@ lemma w34_delta_prod (a b c d e f g h i k l m : ℚ) :
         (factQ (k + l - m) * factQ (k - l + m) * factQ (-k + l + m) /
           factQ (k + l + m + 1))) := by
   unfold triangleDelta
-  exact w34_sqrt4 (by unfold factQ; positivity) (by unfold factQ; positivity)
-    (by unfold factQ; positivity) (by unfold factQ; positivity)
+  exact sqrt_mul_sqrt_mul_sqrt_mul_sqrt (by unfold factQ; positivity) (by unfold factQ; positivity)
+    (by unfold factQ; positivity)
 
 /-- The four triads of a `6j` symbol, as twelve nonnegative integers. -/
-lemma w34_admissible6j_iff {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} :
+private lemma isAdmissible6j_iff {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} :
     IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃ ↔
       IsNatQ (j₁ + j₂ - j₃) ∧ IsNatQ (j₁ - j₂ + j₃) ∧ IsNatQ (-j₁ + j₂ + j₃) ∧
       IsNatQ (j₁ + l₂ - l₃) ∧ IsNatQ (j₁ - l₂ + l₃) ∧ IsNatQ (-j₁ + l₂ + l₃) ∧
@@ -68,7 +88,7 @@ lemma w34_admissible6j_iff {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} :
 
 set_option hygiene false in
 /-- Close `IsNatQ e` by one of the hypotheses `h1`, …, `h12` up to `ring`. -/
-macro "w34_pick" : tactic => `(tactic| first
+macro "wigner_pick" : tactic => `(tactic| first
   | (apply IsNatQ.of_eq h1; ring1)
   | (apply IsNatQ.of_eq h2; ring1)
   | (apply IsNatQ.of_eq h3; ring1)
@@ -84,7 +104,7 @@ macro "w34_pick" : tactic => `(tactic| first
 
 
 /-- The sum of 34.4.2 may be extended beyond `s = j₁ + j₂ + l₁ + l₂`. -/
-lemma w34_sum6j_extend {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃) (N : ℕ)
+private lemma sum_racahTerm6j_extend {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃) (N : ℕ)
     (hN : ⌊j₁ + j₂ + l₁ + l₂⌋.toNat ≤ N) :
     ∑ s ∈ range (⌊j₁ + j₂ + l₁ + l₂⌋.toNat + 1), racahTerm6j j₁ j₂ j₃ l₁ l₂ l₃ s =
       ∑ s ∈ range (N + 1), racahTerm6j j₁ j₂ j₃ l₁ l₂ l₃ s := by
@@ -169,21 +189,21 @@ theorem wigner6j_eq_hyp4F3 {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : IsAdmissib
 /-! ### Single-term evaluations -/
 
 /-- A Racah term of 34.4.2 vanishes below the summation range. -/
-lemma w34_term6j_zero_of_lt {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} {s : ℕ} (h : (s : ℚ) < j₁ + j₂ + j₃) :
+private lemma racahTerm6j_eq_zero_of_lt {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} {s : ℕ} (h : (s : ℚ) < j₁ + j₂ + j₃) :
     racahTerm6j j₁ j₂ j₃ l₁ l₂ l₃ s = 0 := by
   unfold racahTerm6j
   rw [invFactQ_of_neg (x := (s : ℚ) - j₁ - j₂ - j₃) (by linarith)]
   ring
 
 /-- A Racah term of 34.4.2 vanishes above the summation range. -/
-lemma w34_term6j_zero_of_gt {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} {s : ℕ} (h : j₁ + j₂ + l₁ + l₂ < s) :
+private lemma racahTerm6j_eq_zero_of_gt {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} {s : ℕ} (h : j₁ + j₂ + l₁ + l₂ < s) :
     racahTerm6j j₁ j₂ j₃ l₁ l₂ l₃ s = 0 := by
   unfold racahTerm6j
   rw [invFactQ_of_neg (x := j₁ + j₂ + l₁ + l₂ - s) (by linarith)]
   ring
 
 /-- Single-term evaluation of 34.4.2 when `j₁ + j₂ + j₃ = j₁ + j₂ + l₁ + l₂ = n`. -/
-lemma w34_wigner6j_single {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃) (n : ℕ)
+private lemma wigner6j_eq_single_term {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃) (n : ℕ)
     (h₁ : j₁ + j₂ + j₃ = n) (h₂ : j₁ + j₂ + l₁ + l₂ = n) :
     wigner6j j₁ j₂ j₃ l₁ l₂ l₃ = (-1 : ℝ) ^ n *
       (triangleDelta j₁ j₂ j₃ * triangleDelta j₁ l₂ l₃ * triangleDelta l₁ j₂ l₃ *
@@ -202,34 +222,34 @@ lemma w34_wigner6j_single {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : IsAdmissibl
     ring
   · intro s _ hs
     rcases lt_or_gt_of_ne hs with hlt | hgt
-    · exact w34_term6j_zero_of_lt (by rw [h₁]; exact_mod_cast hlt)
-    · exact w34_term6j_zero_of_gt (by rw [h₂]; exact_mod_cast hgt)
+    · exact racahTerm6j_eq_zero_of_lt (by rw [h₁]; exact_mod_cast hlt)
+    · exact racahTerm6j_eq_zero_of_gt (by rw [h₂]; exact_mod_cast hgt)
   · intro hn; simp at hn
 
 /-- `(1 + n)! = (1 + n) n!`. -/
-lemma w34_factorial_one_add (n : ℕ) :
+private lemma factorial_one_add_eq_mul (n : ℕ) :
     ((1 + n).factorial : ℝ) = ((1 + n : ℕ) : ℝ) * (n.factorial : ℝ) := by
   rw [Nat.add_comm, Nat.factorial_succ]; push_cast; ring
 
 /-- Close a cast equation. -/
-macro "w34_nq6" : tactic => `(tactic| first | ring1 | (push_cast; ring1))
+macro "wigner_ring_cast6" : tactic => `(tactic| first | ring1 | (push_cast; ring1))
 
 /-- Nonnegativity of products of factorials and reciprocal factorials. -/
-macro "w34_nonneg" : tactic => `(tactic|
-  repeat (first | apply mul_nonneg | exact w34_invFactQ_nonneg _ | positivity |
+macro "wigner_nonneg" : tactic => `(tactic|
+  repeat (first | apply mul_nonneg | exact invFactQ_nonneg _ | positivity |
     (unfold factQ; positivity)))
 
 /-- Rewrite the factorials of natural-number arguments. -/
-macro "w34_casts" : tactic => `(tactic| (push_cast; ring_nf; simp only [w34_one_add_natCast,
-  ← Nat.cast_add, factQ_natCast, invFactQ_natCast, w34_factQ_zero, w34_invFactQ_zero, mul_one,
+macro "wigner_casts" : tactic => `(tactic| (push_cast; ring_nf; simp only [one_add_natCast_eq,
+  ← Nat.cast_add, factQ_natCast, invFactQ_natCast, factQ_zero, invFactQ_zero, mul_one,
   one_mul]))
 
 /-- Replace the argument of a square root of a rational cast. -/
-lemma q2w_sqrt_cast_eq {y : ℚ} {Y : ℝ} (h : (y : ℝ) = Y) : Real.sqrt (y : ℝ) = Real.sqrt Y := by
+private lemma sqrt_ratCast_eq {y : ℚ} {Y : ℝ} (h : (y : ℝ) = Y) : Real.sqrt (y : ℝ) = Real.sqrt Y := by
   rw [h]
 
 /-- Two-term evaluation of 34.4.2 when `j₁ + j₂ + j₃ = n` and `j₁ + j₂ + l₁ + l₂ = n + 1`. -/
-lemma q2w_wigner6j_two {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃) (n : ℕ)
+private lemma wigner6j_eq_two_terms {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃) (n : ℕ)
     (h₁ : j₁ + j₂ + j₃ = n) (h₂ : j₁ + j₂ + l₁ + l₂ = n + 1) :
     wigner6j j₁ j₂ j₃ l₁ l₂ l₃ =
       triangleDelta j₁ j₂ j₃ * triangleDelta j₁ l₂ l₃ * triangleDelta l₁ j₂ l₃ *
@@ -242,7 +262,7 @@ lemma q2w_wigner6j_two {j₁ j₂ j₃ l₁ l₂ l₃ : ℚ} (h : IsAdmissible6j
     Finset.sum_eq_zero (s := range n), zero_add]
   intro s hs
   simp only [mem_range] at hs
-  exact w34_term6j_zero_of_lt (by rw [h₁]; exact_mod_cast hs)
+  exact racahTerm6j_eq_zero_of_lt (by rw [h₁]; exact_mod_cast hs)
 
 /-! ## §34.5(i) Special cases
 
@@ -259,20 +279,20 @@ theorem wigner6j_zero {j₁ j₂ j₃ : ℚ} (h : IsTriad j₁ j₂ j₃) :
   obtain rfl : j₃ = ((a₂ : ℚ) + a₃) / 2 := by linarith
   have hadm : IsAdmissible6j (((a₁ : ℚ) + a₂) / 2) (((a₁ : ℚ) + a₃) / 2) (((a₂ : ℚ) + a₃) / 2) 0
       (((a₂ : ℚ) + a₃) / 2) (((a₁ : ℚ) + a₃) / 2) :=
-    ⟨⟨⟨a₁, by w34_nq6⟩, ⟨a₂, by w34_nq6⟩, ⟨a₃, by w34_nq6⟩⟩,
-      ⟨⟨a₂, by w34_nq6⟩, ⟨a₁, by w34_nq6⟩, ⟨a₃, by w34_nq6⟩⟩,
-      ⟨⟨0, by w34_nq6⟩, ⟨0, by w34_nq6⟩, ⟨a₁ + a₃, by w34_nq6⟩⟩,
-      ⟨⟨0, by w34_nq6⟩, ⟨0, by w34_nq6⟩, ⟨a₂ + a₃, by w34_nq6⟩⟩⟩
-  rw [w34_wigner6j_single hadm (a₁ + a₂ + a₃) (by push_cast; ring) (by push_cast; ring),
+    ⟨⟨⟨a₁, by wigner_ring_cast6⟩, ⟨a₂, by wigner_ring_cast6⟩, ⟨a₃, by wigner_ring_cast6⟩⟩,
+      ⟨⟨a₂, by wigner_ring_cast6⟩, ⟨a₁, by wigner_ring_cast6⟩, ⟨a₃, by wigner_ring_cast6⟩⟩,
+      ⟨⟨0, by wigner_ring_cast6⟩, ⟨0, by wigner_ring_cast6⟩, ⟨a₁ + a₃, by wigner_ring_cast6⟩⟩,
+      ⟨⟨0, by wigner_ring_cast6⟩, ⟨0, by wigner_ring_cast6⟩, ⟨a₂ + a₃, by wigner_ring_cast6⟩⟩⟩
+  rw [wigner6j_eq_single_term hadm (a₁ + a₂ + a₃) (by push_cast; ring) (by push_cast; ring),
     signPow_of_eq (n := ((a₁ + a₂ + a₃ : ℕ) : ℤ)) (by push_cast; ring), zpow_natCast,
-    div_eq_mul_inv ((-1 : ℝ) ^ (a₁ + a₂ + a₃)), ← Real.sqrt_inv, w34_delta_prod]
+    div_eq_mul_inv ((-1 : ℝ) ^ (a₁ + a₂ + a₃)), ← Real.sqrt_inv, triangleDelta_mul_four]
   congr 1
   simp only [mul_assoc]
-  apply w34_sqrt_mul_eq
-  · w34_nonneg
-  · w34_nonneg
-  · w34_casts
-    simp only [Nat.add_assoc, w34_factorial_one_add]
+  apply sqrt_mul_eq_sqrt_of_eq
+  · wigner_nonneg
+  · wigner_nonneg
+  · wigner_casts
+    simp only [Nat.add_assoc, factorial_one_add_eq_mul]
     push_cast
     field_simp
     ring
@@ -292,16 +312,16 @@ theorem wigner6j_half_plus {j₁ j₂ j₃ : ℚ}
   obtain ⟨c₂, rfl⟩ : ∃ c, a₂ = c + 1 := ⟨b₁, by
     have : (a₂ : ℚ) = b₁ + 1 := by linarith
     exact_mod_cast this⟩
-  rw [w34_wigner6j_single h (a₁ + c₂ + a₃ + 1) (by push_cast; ring) (by push_cast; ring),
+  rw [wigner6j_eq_single_term h (a₁ + c₂ + a₃ + 1) (by push_cast; ring) (by push_cast; ring),
     signPow_of_eq (n := ((a₁ + c₂ + a₃ + 1 : ℕ) : ℤ)) (by push_cast; ring), zpow_natCast,
-    w34_delta_prod]
+    triangleDelta_mul_four]
   congr 1
   simp only [mul_assoc]
-  apply w34_sqrt_mul_eq
-  · w34_nonneg
-  · w34_nonneg
-  · q2w_casts
-    q2w_fin
+  apply sqrt_mul_eq_sqrt_of_eq
+  · wigner_nonneg
+  · wigner_nonneg
+  · wigner_cast_ring
+    wigner_fin_simp
 
 /-- DLMF 34.5.3. -/
 @[dlmf 34.5.E3]
@@ -318,16 +338,16 @@ theorem wigner6j_half_minus {j₁ j₂ j₃ : ℚ}
   obtain ⟨c₃, rfl⟩ : ∃ c, a₃ = c + 1 := ⟨b₃, by
     have : (a₃ : ℚ) = b₃ + 1 := by linarith
     exact_mod_cast this⟩
-  rw [w34_wigner6j_single h (a₁ + a₂ + c₃ + 1) (by push_cast; ring) (by push_cast; ring),
+  rw [wigner6j_eq_single_term h (a₁ + a₂ + c₃ + 1) (by push_cast; ring) (by push_cast; ring),
     signPow_of_eq (n := ((a₁ + a₂ + c₃ + 1 : ℕ) : ℤ)) (by push_cast; ring), zpow_natCast,
-    w34_delta_prod]
+    triangleDelta_mul_four]
   congr 1
   simp only [mul_assoc]
-  apply w34_sqrt_mul_eq
-  · w34_nonneg
-  · w34_nonneg
-  · q2w_casts
-    q2w_fin
+  apply sqrt_mul_eq_sqrt_of_eq
+  · wigner_nonneg
+  · wigner_nonneg
+  · wigner_cast_ring
+    wigner_fin_simp
 
 /-- DLMF 34.5.4. -/
 @[dlmf 34.5.E4]
@@ -346,16 +366,16 @@ theorem wigner6j_one_minus_minus {j₁ j₂ j₃ : ℚ}
   obtain ⟨c₃, rfl⟩ : ∃ c, a₃ = c + 2 := ⟨b₃, by
     have : (a₃ : ℚ) = b₃ + 2 := by linarith
     exact_mod_cast this⟩
-  rw [w34_wigner6j_single h (a₁ + a₂ + c₃ + 2) (by push_cast; ring) (by push_cast; ring),
+  rw [wigner6j_eq_single_term h (a₁ + a₂ + c₃ + 2) (by push_cast; ring) (by push_cast; ring),
     signPow_of_eq (n := ((a₁ + a₂ + c₃ + 2 : ℕ) : ℤ)) (by push_cast; ring), zpow_natCast,
-    w34_delta_prod]
+    triangleDelta_mul_four]
   congr 1
   simp only [mul_assoc]
-  apply w34_sqrt_mul_eq
-  · w34_nonneg
-  · w34_nonneg
-  · q2w_casts
-    q2w_fin
+  apply sqrt_mul_eq_sqrt_of_eq
+  · wigner_nonneg
+  · wigner_nonneg
+  · wigner_cast_ring
+    wigner_fin_simp
 
 /-- DLMF 34.5.5. -/
 @[dlmf 34.5.E5]
@@ -377,16 +397,16 @@ theorem wigner6j_one_minus_zero {j₁ j₂ j₃ : ℚ}
   obtain ⟨c₃, rfl⟩ : ∃ c, a₃ = c + 1 := ⟨b₃, by
     have : (a₃ : ℚ) = b₃ + 1 := by linarith
     exact_mod_cast this⟩
-  rw [w34_wigner6j_single h (a₁ + c₂ + c₃ + 2) (by push_cast; ring) (by push_cast; ring),
+  rw [wigner6j_eq_single_term h (a₁ + c₂ + c₃ + 2) (by push_cast; ring) (by push_cast; ring),
     signPow_of_eq (n := ((a₁ + c₂ + c₃ + 2 : ℕ) : ℤ)) (by push_cast; ring), zpow_natCast,
-    w34_delta_prod]
+    triangleDelta_mul_four]
   congr 1
   simp only [mul_assoc]
-  apply w34_sqrt_mul_eq
-  · w34_nonneg
-  · w34_nonneg
-  · q2w_casts
-    q2w_fin
+  apply sqrt_mul_eq_sqrt_of_eq
+  · wigner_nonneg
+  · wigner_nonneg
+  · wigner_cast_ring
+    wigner_fin_simp
 
 /-- DLMF 34.5.6. -/
 @[dlmf 34.5.E6]
@@ -405,16 +425,16 @@ theorem wigner6j_one_minus_plus {j₁ j₂ j₃ : ℚ}
   obtain ⟨c₂, rfl⟩ : ∃ c, a₂ = c + 2 := ⟨b₁, by
     have : (a₂ : ℚ) = b₁ + 2 := by linarith
     exact_mod_cast this⟩
-  rw [w34_wigner6j_single h (a₁ + c₂ + a₃ + 2) (by push_cast; ring) (by push_cast; ring),
+  rw [wigner6j_eq_single_term h (a₁ + c₂ + a₃ + 2) (by push_cast; ring) (by push_cast; ring),
     signPow_of_eq (n := ((a₁ + c₂ + a₃ + 2 : ℕ) : ℤ)) (by push_cast; ring), zpow_natCast,
-    w34_delta_prod]
+    triangleDelta_mul_four]
   congr 1
   simp only [mul_assoc]
-  apply w34_sqrt_mul_eq
-  · w34_nonneg
-  · w34_nonneg
-  · q2w_casts
-    q2w_fin
+  apply sqrt_mul_eq_sqrt_of_eq
+  · wigner_nonneg
+  · wigner_nonneg
+  · wigner_cast_ring
+    wigner_fin_simp
 
 /-- DLMF 34.5.7. -/
 @[dlmf 34.5.E7]
@@ -429,9 +449,9 @@ theorem wigner6j_one_zero_zero {j₁ j₂ j₃ : ℚ} (h : IsAdmissible6j j₁ j
   obtain rfl : j₁ = ((a₁ : ℚ) + a₂) / 2 := by linarith
   obtain rfl : j₂ = ((a₁ : ℚ) + a₃) / 2 := by linarith
   obtain rfl : j₃ = ((a₂ : ℚ) + a₃) / 2 := by linarith
-  rw [q2w_wigner6j_two h (a₁ + a₂ + a₃) (by push_cast; ring) (by push_cast; ring),
+  rw [wigner6j_eq_two_terms h (a₁ + a₂ + a₃) (by push_cast; ring) (by push_cast; ring),
     signPow_of_eq (n := ((a₁ + a₂ + a₃ + 1 : ℕ) : ℤ)) (by push_cast; ring), zpow_natCast,
-    w34_delta_prod]
+    triangleDelta_mul_four]
   rcases Nat.eq_zero_or_eq_succ_pred a₃ with h3 | h3
   · subst h3
     obtain ⟨d, rfl⟩ : ∃ d, a₁ = d + 1 := ⟨p, by
@@ -444,29 +464,29 @@ theorem wigner6j_one_zero_zero {j₁ j₂ j₃ : ℚ} (h : IsAdmissible6j j₁ j
       by positivity
     have hY : (0 : ℝ) ≤ ((d + 1 : ℝ)) * (d + 2) * (d + 3) * (e + 1) * (e + 2) * (e + 3) :=
       by positivity
-    rw [q2w_sqrt_eq_div hR hY, q2w_sqrt_cast_eq]
+    rw [sqrt_eq_div_sqrt_of_eq hR hY, sqrt_ratCast_eq]
     · rw [div_mul_eq_mul_div]
       congr 1
       unfold racahTerm6j
-      q2w_casts
-      q2w_fin
+      wigner_cast_ring
+      wigner_fin_simp
     · push_cast; ring
-    · q2w_casts
-      q2w_fin
+    · wigner_cast_ring
+      wigner_fin_simp
   · obtain ⟨c, rfl⟩ : ∃ c, a₃ = c + 1 := ⟨_, h3⟩
     have hR : (0 : ℝ) ≤ (a₁.factorial * a₂.factorial * (1 + c).factorial /
         (2 + a₁ + a₂ + c).factorial : ℝ) := by positivity
     have hY : (0 : ℝ) ≤ ((a₁ + c + 1 : ℝ)) * (a₁ + c + 2) * (a₁ + c + 3) *
         (a₂ + c + 1) * (a₂ + c + 2) * (a₂ + c + 3) := by positivity
-    rw [q2w_sqrt_eq_div hR hY, q2w_sqrt_cast_eq]
+    rw [sqrt_eq_div_sqrt_of_eq hR hY, sqrt_ratCast_eq]
     · rw [div_mul_eq_mul_div]
       congr 1
       unfold racahTerm6j
-      q2w_casts
-      q2w_fin
+      wigner_cast_ring
+      wigner_fin_simp
     · push_cast; ring
-    · q2w_casts
-      q2w_fin
+    · wigner_cast_ring
+      wigner_fin_simp
 
 /-! ## §34.5(ii) Symmetry -/
 
@@ -476,17 +496,17 @@ theorem wigner6j_swap_columns (j₁ j₂ j₃ l₁ l₂ l₃ : ℚ) :
     wigner6j j₁ j₂ j₃ l₁ l₂ l₃ = wigner6j j₂ j₁ j₃ l₂ l₁ l₃ := by
   have hiff : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃ ↔
       IsAdmissible6j j₂ j₁ j₃ l₂ l₁ l₃ := by
-    rw [w34_admissible6j_iff, w34_admissible6j_iff]
+    rw [isAdmissible6j_iff, isAdmissible6j_iff]
     constructor
     · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩
-      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> w34_pick
+      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> wigner_pick
     · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩
-      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> w34_pick
+      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> wigner_pick
   by_cases h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃
   · have h' := hiff.mp h
     unfold wigner6j
     simp only [h, h', ↓reduceIte]
-    rw [w34_delta_prod, w34_delta_prod]
+    rw [triangleDelta_mul_four, triangleDelta_mul_four]
     unfold racahTerm6j
     ring_nf
     congr 1
@@ -500,17 +520,17 @@ theorem wigner6j_flip (j₁ j₂ j₃ l₁ l₂ l₃ : ℚ) :
     wigner6j j₁ j₂ j₃ l₁ l₂ l₃ = wigner6j j₁ l₂ l₃ l₁ j₂ j₃ := by
   have hiff : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃ ↔
       IsAdmissible6j j₁ l₂ l₃ l₁ j₂ j₃ := by
-    rw [w34_admissible6j_iff, w34_admissible6j_iff]
+    rw [isAdmissible6j_iff, isAdmissible6j_iff]
     constructor
     · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩
-      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> w34_pick
+      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> wigner_pick
     · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩
-      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> w34_pick
+      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> wigner_pick
   by_cases h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃
   · have h' := hiff.mp h
     unfold wigner6j
     simp only [h, h', ↓reduceIte]
-    rw [w34_delta_prod, w34_delta_prod]
+    rw [triangleDelta_mul_four, triangleDelta_mul_four]
     unfold racahTerm6j
     ring_nf
     congr 1
@@ -526,17 +546,17 @@ theorem wigner6j_regge₁ (j₁ j₂ j₃ l₁ l₂ l₃ : ℚ) :
   have hiff : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃ ↔
       IsAdmissible6j j₁ ((j₂ + l₂ + j₃ - l₃) / 2) ((j₂ - l₂ + j₃ + l₃) / 2)
         l₁ ((j₂ + l₂ - j₃ + l₃) / 2) ((-j₂ + l₂ + j₃ + l₃) / 2) := by
-    rw [w34_admissible6j_iff, w34_admissible6j_iff]
+    rw [isAdmissible6j_iff, isAdmissible6j_iff]
     constructor
     · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩
-      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> w34_pick
+      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> wigner_pick
     · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩
-      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> w34_pick
+      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> wigner_pick
   by_cases h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃
   · have h' := hiff.mp h
     unfold wigner6j
     simp only [h, h', ↓reduceIte]
-    rw [w34_delta_prod, w34_delta_prod]
+    rw [triangleDelta_mul_four, triangleDelta_mul_four]
     unfold racahTerm6j
     ring_nf
     congr 1
@@ -552,19 +572,19 @@ theorem wigner6j_regge₂ (j₁ j₂ j₃ l₁ l₂ l₃ : ℚ) :
   have hiff : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃ ↔
       IsAdmissible6j ((j₂ + l₂ + j₃ - l₃) / 2) ((j₁ - l₁ + j₃ + l₃) / 2) ((j₁ + l₁ + j₂ - l₂) / 2)
         ((j₂ + l₂ - j₃ + l₃) / 2) ((-j₁ + l₁ + j₃ + l₃) / 2) ((j₁ + l₁ - j₂ + l₂) / 2) := by
-    rw [w34_admissible6j_iff, w34_admissible6j_iff]
+    rw [isAdmissible6j_iff, isAdmissible6j_iff]
     constructor
     · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩
-      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> w34_pick
+      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> wigner_pick
     · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩
-      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> w34_pick
+      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> wigner_pick
   by_cases h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃
   · have h' := hiff.mp h
     unfold wigner6j
     simp only [h, h', ↓reduceIte]
-    rw [w34_delta_prod, w34_delta_prod,
-      w34_sum6j_extend h (⌊j₁ + j₂ + l₁ + l₂⌋.toNat + ⌊j₂ + j₃ + l₂ + l₃⌋.toNat) (by omega),
-      w34_sum6j_extend h' (⌊j₁ + j₂ + l₁ + l₂⌋.toNat + ⌊j₂ + j₃ + l₂ + l₃⌋.toNat) ?_]
+    rw [triangleDelta_mul_four, triangleDelta_mul_four,
+      sum_racahTerm6j_extend h (⌊j₁ + j₂ + l₁ + l₂⌋.toNat + ⌊j₂ + j₃ + l₂ + l₃⌋.toNat) (by omega),
+      sum_racahTerm6j_extend h' (⌊j₁ + j₂ + l₁ + l₂⌋.toNat + ⌊j₂ + j₃ + l₂ + l₃⌋.toNat) ?_]
     · unfold racahTerm6j
       ring_nf
       congr 1
@@ -576,22 +596,22 @@ theorem wigner6j_regge₂ (j₁ j₂ j₃ l₁ l₂ l₃ : ℚ) :
 
 /-- DLMF 34.5.8: interchange of the second and third columns of a `6j` symbol (a helper; with
 `wigner6j_swap_columns` it gives all column permutations). -/
-theorem q2w_wigner6j_swap23 (j₁ j₂ j₃ l₁ l₂ l₃ : ℚ) :
+theorem wigner6j_swap_columns_two_three (j₁ j₂ j₃ l₁ l₂ l₃ : ℚ) :
     wigner6j j₁ j₂ j₃ l₁ l₂ l₃ = wigner6j j₁ j₃ j₂ l₁ l₃ l₂ := by
   have hiff : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃ ↔ IsAdmissible6j j₁ j₃ j₂ l₁ l₃ l₂ := by
-    rw [w34_admissible6j_iff, w34_admissible6j_iff]
+    rw [isAdmissible6j_iff, isAdmissible6j_iff]
     constructor
     · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩
-      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> w34_pick
+      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> wigner_pick
     · rintro ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩
-      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> w34_pick
+      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> wigner_pick
   by_cases h : IsAdmissible6j j₁ j₂ j₃ l₁ l₂ l₃
   · have h' := hiff.mp h
     unfold wigner6j
     simp only [h, h', ↓reduceIte]
-    rw [w34_delta_prod, w34_delta_prod,
-      w34_sum6j_extend h (⌊j₁ + j₂ + l₁ + l₂⌋.toNat + ⌊j₁ + j₃ + l₁ + l₃⌋.toNat) (by omega),
-      w34_sum6j_extend h' (⌊j₁ + j₂ + l₁ + l₂⌋.toNat + ⌊j₁ + j₃ + l₁ + l₃⌋.toNat) (by omega)]
+    rw [triangleDelta_mul_four, triangleDelta_mul_four,
+      sum_racahTerm6j_extend h (⌊j₁ + j₂ + l₁ + l₂⌋.toNat + ⌊j₁ + j₃ + l₁ + l₃⌋.toNat) (by omega),
+      sum_racahTerm6j_extend h' (⌊j₁ + j₂ + l₁ + l₂⌋.toNat + ⌊j₁ + j₃ + l₁ + l₃⌋.toNat) (by omega)]
     unfold racahTerm6j
     ring_nf
     congr 1
@@ -599,11 +619,11 @@ theorem q2w_wigner6j_swap23 (j₁ j₂ j₃ l₁ l₂ l₃ : ℚ) :
   · rw [wigner6j_of_not h, wigner6j_of_not (mt hiff.mpr h)]
 
 /-- DLMF 34.5.8: interchange of the upper and lower arguments in the first two columns. -/
-theorem q2w_wigner6j_flip12 (j₁ j₂ j₃ l₁ l₂ l₃ : ℚ) :
+theorem wigner6j_flip_first_two (j₁ j₂ j₃ l₁ l₂ l₃ : ℚ) :
     wigner6j j₁ j₂ j₃ l₁ l₂ l₃ = wigner6j l₁ l₂ j₃ j₁ j₂ l₃ := by
-  rw [q2w_wigner6j_swap23 j₁ j₂ j₃ l₁ l₂ l₃, wigner6j_swap_columns j₁ j₃ j₂ l₁ l₃ l₂,
+  rw [wigner6j_swap_columns_two_three j₁ j₂ j₃ l₁ l₂ l₃, wigner6j_swap_columns j₁ j₃ j₂ l₁ l₃ l₂,
     wigner6j_flip j₃ j₁ j₂ l₃ l₁ l₂, wigner6j_swap_columns j₃ l₁ l₂ l₃ j₁ j₂,
-    q2w_wigner6j_swap23 l₁ j₃ l₂ j₁ l₃ j₂]
+    wigner6j_swap_columns_two_three l₁ j₃ l₂ j₁ l₃ j₂]
 
 /-! ## §34.5(iii) Recursion relations -/
 

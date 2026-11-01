@@ -10,6 +10,17 @@ public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 /-!
 # Asymptotic approximations as `q → 0` (DLMF §23.12)
 
+Asymptotic forms of `℘`, `ζ`, `σ` and `η₁` as the nome tends to zero.
+
+## Main results
+
+* `weierstrassP_isBigO_nome`: DLMF 23.12.1.
+* `weierstrassZeta_isBigO_nome`: DLMF 23.12.2.
+* `weierstrassSigma_isBigO_nome`: DLMF 23.12.3.
+* `eta_one_isBigO_nome`: DLMF 23.12.4.
+
+## Implementation notes
+
 DLMF lets `q = e^{πiω₃/ω₁} → 0` with `ω₁` and `z` fixed. Here `ω₃ = ω₁τ` and `τ` tends to
 `i∞` in the upper half-plane (`UpperHalfPlane.atImInfty`), which is the same as `q → 0`.
 The condition `z ∉ 𝕃` of DLMF is, eventually as `ℑτ → ∞`, the condition `z ∉ 2ω₁ℤ`.

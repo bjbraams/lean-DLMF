@@ -12,13 +12,37 @@ public import DLMF.Confluent.Relations
 public import TauCeti.RingTheory.Polynomial.Hermite.Derivative
 
 /-!
-# Parabolic cylinder equations and Laplace representations
+# Parabolic cylinder functions: Weber's equation, recurrences and integrals
 
-Weber equations, uniqueness, recurrences, Hermite specializations and the Laplace representation
-of U.
+Weber's function `U(a,z)` (`pcfU`) is the solution of `w'' = (z²/4 + a) w` that is recessive as
+`z → +∞` (DLMF Chapter 12, Temme §7.3.3). It is defined, following DLMF 12.4.1, through the even
+and odd Kummer solutions `u₁(a,z) = e^{-z²/4} M(a/2 + 1/4, 1/2, z²/2)` and
+`u₂(a,z) = z e^{-z²/4} M(a/2 + 3/4, 3/2, z²/2)` with the initial values 12.2.6 and 12.2.7, so
+that `U(a, ·)` is entire for every `a`. This file proves Weber's equation, uniqueness of
+solutions, the recurrences, the Hermite specialization and the Laplace-type integral of `U`.
 
-Source references and common attribution are retained in
-`DLMF.Confluent.ParabolicCylinder`.
+## Main results
+
+* `hasDerivAt_pcfU`, `hasDerivAt_pcfUDeriv`, `deriv_deriv_pcfU`: Weber's equation
+  (DLMF 12.2.2).
+* `pcfU_zero`, `pcfUDeriv_zero`: the initial values (DLMF 12.2.6, 12.2.7).
+* `pcfU_neg_half`: `U(-1/2, z) = e^{-z²/4}` (DLMF 12.7.1).
+* `pcfU_eq_kummerU`: `U(a,z) = 2^{-1/4-a/2} e^{-z²/4} U(a/2 + 1/4, 1/2, z²/2)` for `re z > 0`
+  (DLMF 12.7.14).
+* `hasAsymptoticExpansion_pcfU`:
+  `U(a,x) ~ e^{-x²/4} x^{-a-1/2} ∑ (-1)^s (a + 1/2)_{2s}/(s! (2x²)^s)` (DLMF 12.9.1).
+* `IsWeberSol.eq_of_initial`: solutions of Weber's equation are determined by `w(0), w'(0)`,
+  via constancy of Wronskians against `u₁, u₂`.
+* `pcfU_three_term`, `pcfU_recurrence_add`, `pcfU_recurrence_sub`, `pcfU_deriv_recurrence`:
+  the recurrences DLMF 12.8.1–12.8.4.
+* `pcfD_nat`: `D_n(z) = e^{-z²/4} He_n(z)` (DLMF 12.7.2), with Mathlib's probabilists' Hermite
+  polynomials.
+* `pcfU_eq_integral`: `U(a,z) = e^{-z²/4}/Γ(1/2+a) ∫₀^∞ t^{a-1/2} e^{-t²/2-zt} dt` for
+  `re a > -1/2` (DLMF 12.5.1).
+
+## Implementation notes
+
+Whittaker's `D_ν(z) = U(-ν - 1/2, z)` is `pcfD`.
 -/
 
 @[expose] public section

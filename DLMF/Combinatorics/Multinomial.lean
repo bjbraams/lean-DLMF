@@ -10,18 +10,33 @@ public import Mathlib.Data.Nat.Choose.Multinomial
 public import Mathlib.GroupTheory.Perm.Cycle.Type
 public import Mathlib.GroupTheory.Perm.Centralizer
 public import Mathlib.Order.Partition.Finpartition
-public import DLMFMathlib.Combinatorics.R26aFinpartition
-public import DLMFMathlib.Combinatorics.Q26bSurjections
+public import DLMFMathlib.Combinatorics.Finpartition
+public import DLMFMathlib.Combinatorics.Surjections
 
 /-!
-# Lattice paths: multinomial coefficients and set partitions (DLMF §26.4)
+# Lattice paths: multinomial coefficients and set partitions
 
-DLMF's multinomial coefficient `(n₁ + ⋯ + n_k; n₁, …, n_k)` is Mathlib's
+The multinomial coefficients of DLMF §26.4. DLMF's `(n₁ + ⋯ + n_k; n₁, …, n_k)` is Mathlib's
 `Nat.multinomial univ n` for `n : Fin k → ℕ` (more generally `Nat.multinomial s f`), defined as
 `(∑ nᵢ)! / ∏ nᵢ!` (26.4.2, `Nat.multinomial_spec`); `Multiset.multinomial` is the same
 coefficient for a multiset of parts. Mathlib also has the binomial case 26.4.1
 (`Nat.binomial_eq_choose`) and the multinomial theorem 26.4.9
 (`Finset.sum_pow_eq_sum_piAntidiag`); pointers are in `DLMF/Combinatorics/MathlibCoverage.lean`.
+
+## Main results
+
+* `card_boxPlacements_eq_multinomial`, `card_latticePathsFin_eq_multinomial`: the multinomial
+  coefficient counts placements into labeled boxes and `k`-dimensional lattice paths
+  (DLMF §26.4(i)).
+* `multinomial_eq_prod_choose`: the product form of DLMF 26.4.2.
+* `sum_mul_count_parts`, `sum_count_parts`, `parts_eq_sum_replicate`: the partition data of
+  Table 26.4.1 (DLMF 26.4.3–26.4.5).
+* `multinomial_parts_eq`: `M₁` (DLMF 26.4.6).
+* `card_perm_partition_eq`: `M₂` counts permutations with cycle type `λ` (DLMF 26.4.7).
+* `card_finpartition_blocks_eq`: `M₃` counts set partitions with block sizes `λ` (DLMF 26.4.8).
+* `multinomial_eq_sum_update`: the recurrence DLMF 26.4.10, for `m ≥ 1`.
+
+## Implementation notes
 
 For the data of Table 26.4.1 the nonnegative integers `a₁, …, a_n` with `∑ j a_j = n`
 (26.4.3) are the multiplicities `a_j = λ.parts.count j` of a partition `λ : Nat.Partition n`
@@ -47,12 +62,12 @@ namespace DLMF.Combinatorics
 /-! ### Helpers (agent p26a) -/
 
 /-- Reindexing a multinomial coefficient along an embedding. -/
-lemma q26a_multinomial_map {α β : Type*} (s : Finset α) (g : α ↪ β) (f : β → ℕ) :
+private lemma multinomial_map {α β : Type*} (s : Finset α) (g : α ↪ β) (f : β → ℕ) :
     Nat.multinomial (s.map g) f = Nat.multinomial s (f ∘ g) := by
   simp [Nat.multinomial, sum_map, prod_map]
 
 /-- Counting the occurrences of `l` in `Fin.cons j g`. -/
-lemma q26a_sum_consEquiv_eq {k N : ℕ} (j : Fin k) (g : Fin N → Fin k) (l : Fin k) :
+private lemma sum_consEquiv_ite_eq {k N : ℕ} (j : Fin k) (g : Fin N → Fin k) (l : Fin k) :
     (∑ i : Fin (N + 1), if (Fin.consEquiv (fun _ => Fin k) (j, g)) i = l then 1 else 0) =
       #{i | g i = l} + if j = l then 1 else 0 := by
   rw [card_filter, Fin.sum_univ_succ]
@@ -61,7 +76,7 @@ lemma q26a_sum_consEquiv_eq {k N : ℕ} (j : Fin k) (g : Fin N → Fin k) (l : F
 
 /-- The Pascal-type recurrence of multinomial coefficients:
 `(n; n₁, …, n_k) = ∑_{j, n_j > 0} (n-1; n₁, …, n_j - 1, …, n_k)`. -/
-lemma q26a_multinomial_rec {k N : ℕ} (n : Fin k → ℕ) (hN : ∑ i, n i = N + 1) :
+private lemma multinomial_eq_sum_update_sub_one {k N : ℕ} (n : Fin k → ℕ) (hN : ∑ i, n i = N + 1) :
     Nat.multinomial univ n =
       ∑ j ∈ univ.filter (fun j => 0 < n j),
         Nat.multinomial univ (Function.update n j (n j - 1)) := by
@@ -119,7 +134,7 @@ lemma q26a_multinomial_rec {k N : ℕ} (n : Fin k → ℕ) (hN : ∑ i, n i = N 
   exact_mod_cast this
 
 /-- Placements of `N` labeled objects into `k` boxes with prescribed occupancies. -/
-lemma q26a_card_boxPlacements (N : ℕ) : ∀ {k : ℕ} (n : Fin k → ℕ), ∑ i, n i = N →
+private lemma card_boxPlacements_of_sum_eq (N : ℕ) : ∀ {k : ℕ} (n : Fin k → ℕ), ∑ i, n i = N →
     #{f : Fin N → Fin k | ∀ j, #{i | f i = j} = n j} = Nat.multinomial univ n := by
   induction N with
   | zero =>
@@ -137,7 +152,7 @@ lemma q26a_card_boxPlacements (N : ℕ) : ∀ {k : ℕ} (n : Fin k → ℕ), ∑
     · intro _ j; simp
   | succ N ih =>
     intro k n hn
-    rw [q26a_multinomial_rec n hn]
+    rw [multinomial_eq_sum_update_sub_one n hn]
     simp only [card_filter]
     rw [← (Fin.consEquiv fun _ => Fin k).sum_comp, Fintype.sum_prod_type]
     rw [← sum_filter_add_sum_filter_not univ (fun j => 0 < n j)]
@@ -154,7 +169,7 @@ lemma q26a_card_boxPlacements (N : ℕ) : ∀ {k : ℕ} (n : Fin k → ℕ), ∑
       congr 1
       apply propext
       refine forall_congr' fun l => ?_
-      rw [q26a_sum_consEquiv_eq]
+      rw [sum_consEquiv_ite_eq]
       by_cases hl : l = j
       · subst hl
         simp only [Function.update_self, ite_true]
@@ -165,11 +180,11 @@ lemma q26a_card_boxPlacements (N : ℕ) : ∀ {k : ℕ} (n : Fin k → ℕ), ∑
       rw [if_neg]
       intro h
       have := h j
-      rw [q26a_sum_consEquiv_eq] at this
+      rw [sum_consEquiv_ite_eq] at this
       simp at this; omega
 
 /-- The number of occurrences of `i` in `List.ofFn f`. -/
-lemma q26a_count_ofFn {k : ℕ} : ∀ {N : ℕ} (f : Fin N → Fin k) (i : Fin k),
+private lemma count_ofFn {k : ℕ} : ∀ {N : ℕ} (f : Fin N → Fin k) (i : Fin k),
     (List.ofFn f).count i = #{x | f x = i} := by
   intro N
   induction N with
@@ -187,7 +202,7 @@ distinct objects into `k` labeled boxes with `n_j` objects in box `j`. -/
 @[dlmf 26.4.i]
 theorem card_boxPlacements_eq_multinomial {k : ℕ} (n : Fin k → ℕ) :
     #{f : Fin (∑ i, n i) → Fin k | ∀ j, #{i | f i = j} = n j} = Nat.multinomial univ n :=
-  q26a_card_boxPlacements _ n rfl
+  card_boxPlacements_of_sum_eq _ n rfl
 
 /-- DLMF §26.4(i): `(n; n₁, …, n_k)` is the number of `k`-dimensional lattice paths from the
 origin to `(n₁, …, n_k)`. -/
@@ -195,8 +210,8 @@ origin to `(n₁, …, n_k)`. -/
 theorem card_latticePathsFin_eq_multinomial {k : ℕ} (n : Fin k → ℕ) :
     #(latticePathsFin n) = Nat.multinomial univ n := by
   rw [latticePathsFin, filter_image, card_image_of_injective _ List.ofFn_injective]
-  simp only [q26a_count_ofFn]
-  exact q26a_card_boxPlacements _ n rfl
+  simp only [count_ofFn]
+  exact card_boxPlacements_of_sum_eq _ n rfl
 
 /-- DLMF 26.4.2 (product form): `(n₁ + ⋯ + n_k; n₁, …, n_k) = ∏_{j=1}^{k-1}
 C(n_j + n_{j+1} + ⋯ + n_k, n_j)` (the factor `j = k` is `C(n_k, n_k) = 1`). -/
@@ -207,7 +222,7 @@ theorem multinomial_eq_prod_choose {k : ℕ} (n : Fin k → ℕ) :
   | zero => simp
   | succ k ih =>
     rw [Fin.prod_univ_succ]
-    conv_lhs => rw [Fin.univ_succ, Nat.multinomial_cons, q26a_multinomial_map, ih, sum_map]
+    conv_lhs => rw [Fin.univ_succ, Nat.multinomial_cons, multinomial_map, ih, sum_map]
     congr 1
     · congr 1
       rw [show Ici (0 : Fin (k + 1)) = univ by ext; simp, Fin.sum_univ_succ]
@@ -219,7 +234,7 @@ theorem multinomial_eq_prod_choose {k : ℕ} (n : Fin k → ℕ) :
 /-! ### Multiplicities of a partition (§26.4(i), Table 26.4.1) -/
 
 /-- The parts of a partition of `n` are among `0, …, n`. -/
-lemma c26a_toFinset_parts_subset {n : ℕ} (p : n.Partition) :
+private lemma toFinset_parts_subset_range {n : ℕ} (p : n.Partition) :
     p.parts.toFinset ⊆ range (n + 1) := by
   intro j hj
   rw [Multiset.mem_toFinset] at hj
@@ -232,7 +247,7 @@ theorem sum_mul_count_parts {n : ℕ} (p : n.Partition) :
   conv_rhs => rw [← p.parts_sum, Finset.sum_multiset_count]
   simp_rw [smul_eq_mul, mul_comm (Multiset.count _ _)]
   symm
-  apply sum_subset (c26a_toFinset_parts_subset p)
+  apply sum_subset (toFinset_parts_subset_range p)
   intro j _ hj; rw [Multiset.mem_toFinset] at hj; simp [Multiset.count_eq_zero_of_notMem hj]
 
 /-- DLMF 26.4.4: `m = a₁ + a₂ + ⋯ + a_n` is the number of parts of `λ`. -/
@@ -241,7 +256,7 @@ theorem sum_count_parts {n : ℕ} (p : n.Partition) :
     ∑ j ∈ range (n + 1), p.parts.count j = Multiset.card p.parts := by
   rw [← Multiset.toFinset_sum_count_eq]
   symm
-  apply sum_subset (c26a_toFinset_parts_subset p)
+  apply sum_subset (toFinset_parts_subset_range p)
   intro j _ hj; rw [Multiset.mem_toFinset] at hj; exact Multiset.count_eq_zero_of_notMem hj
 
 /-- DLMF 26.4.5: `λ = 1^{a₁} 2^{a₂} ⋯ n^{a_n}`, i.e. the multiset of parts is the sum of
@@ -251,11 +266,11 @@ theorem parts_eq_sum_replicate {n : ℕ} (p : n.Partition) :
     p.parts = ∑ j ∈ range (n + 1), Multiset.replicate (p.parts.count j) j := by
   conv_lhs => rw [← Multiset.toFinset_sum_count_nsmul_eq p.parts]
   simp_rw [Multiset.nsmul_singleton]
-  apply sum_subset (c26a_toFinset_parts_subset p)
+  apply sum_subset (toFinset_parts_subset_range p)
   intro j _ hj; rw [Multiset.mem_toFinset] at hj; simp [Multiset.count_eq_zero_of_notMem hj]
 
 /-- `m.multinomial · ∏_{x ∈ m} x! = (∑ m)!`. -/
-lemma c26a_multinomial_mul_prod_factorial (m : Multiset ℕ) :
+private lemma multinomial_mul_prod_factorial (m : Multiset ℕ) :
     m.multinomial * (m.map Nat.factorial).prod = m.sum.factorial := by
   induction m using Multiset.induction_on with
   | empty => simp
@@ -271,21 +286,21 @@ multinomial coefficient of the parts of `λ` (`Multiset.multinomial`). -/
 theorem multinomial_parts_eq {n : ℕ} (p : n.Partition) :
     (p.parts.multinomial : ℚ) =
       n.factorial / ∏ j ∈ range (n + 1), ((j.factorial : ℚ) ^ p.parts.count j) := by
-  have h := c26a_multinomial_mul_prod_factorial p.parts
+  have h := multinomial_mul_prod_factorial p.parts
   rw [p.parts_sum, Finset.prod_multiset_map_count] at h
   have e : ∏ j ∈ p.parts.toFinset, (j.factorial : ℚ) ^ p.parts.count j =
       ∏ j ∈ range (n + 1), (j.factorial : ℚ) ^ p.parts.count j := by
-    apply prod_subset (c26a_toFinset_parts_subset p)
+    apply prod_subset (toFinset_parts_subset_range p)
     intro j _ hj; rw [Multiset.mem_toFinset] at hj; simp [Multiset.count_eq_zero_of_notMem hj]
   rw [← e, eq_div_iff (by positivity)]
   exact_mod_cast h
 
 /-- Transporting a partition along `a = b` keeps its parts. -/
-lemma q26a_parts_cast {a b : ℕ} (h : a = b) (p : b.Partition) : (h ▸ p).parts = p.parts := by
+private lemma parts_cast {a b : ℕ} (h : a = b) (p : b.Partition) : (h ▸ p).parts = p.parts := by
   subst h; rfl
 
 /-- The parts of size `1` of a partition. -/
-lemma q26a_filter_lt_two_parts {n : ℕ} (p : n.Partition) :
+private lemma filter_not_two_le_parts {n : ℕ} (p : n.Partition) :
     p.parts.filter (fun j => ¬ 2 ≤ j) = Multiset.replicate (p.parts.count 1) 1 := by
   rw [← Multiset.filter_eq']
   refine Multiset.filter_congr fun j hj => ?_
@@ -293,11 +308,11 @@ lemma q26a_filter_lt_two_parts {n : ℕ} (p : n.Partition) :
   omega
 
 /-- The parts `≥ 2` and the parts `= 1` of a partition of `n` add up to `n`. -/
-lemma q26a_sum_filter_two_le {n : ℕ} (p : n.Partition) :
+private lemma sum_filter_two_le_add_count_one {n : ℕ} (p : n.Partition) :
     (p.parts.filter (2 ≤ ·)).sum + p.parts.count 1 = n := by
   have h := Multiset.filter_add_not (2 ≤ ·) p.parts
   have := congrArg Multiset.sum h
-  rw [Multiset.sum_add, q26a_filter_lt_two_parts, Multiset.sum_replicate, smul_eq_mul, mul_one,
+  rw [Multiset.sum_add, filter_not_two_le_parts, Multiset.sum_replicate, smul_eq_mul, mul_one,
     p.parts_sum] at this
   exact this
 
@@ -310,7 +325,7 @@ theorem card_perm_partition_eq {n : ℕ} (p : n.Partition) :
       n.factorial / ∏ j ∈ range (n + 1),
         ((j : ℚ) ^ p.parts.count j * (p.parts.count j).factorial) := by
   set m := p.parts.filter (2 ≤ ·) with hm
-  have hsum : m.sum + p.parts.count 1 = n := q26a_sum_filter_two_le p
+  have hsum : m.sum + p.parts.count 1 = n := sum_filter_two_le_add_count_one p
   have hset :
       (univ.filter fun σ : Equiv.Perm (Fin n) => σ.partition = (Fintype.card_fin n).symm ▸ p) =
       univ.filter fun σ : Equiv.Perm (Fin n) => σ.cycleType = m := by
@@ -318,13 +333,13 @@ theorem card_perm_partition_eq {n : ℕ} (p : n.Partition) :
     simp only [mem_filter, mem_univ, true_and]
     constructor
     · intro h
-      rw [← Equiv.Perm.filter_parts_partition_eq_cycleType, h, q26a_parts_cast]
+      rw [← Equiv.Perm.filter_parts_partition_eq_cycleType, h, parts_cast]
       exact Fintype.card_fin n
     · intro h
       apply Nat.Partition.ext
-      rw [q26a_parts_cast, Equiv.Perm.parts_partition, h, Fintype.card_fin,
+      rw [parts_cast, Equiv.Perm.parts_partition, h, Fintype.card_fin,
         ← Equiv.Perm.sum_cycleType, h, ← Multiset.filter_add_not (2 ≤ ·) p.parts,
-        q26a_filter_lt_two_parts]
+        filter_not_two_le_parts]
       · congr 2
         omega
       · exact Fintype.card_fin n
@@ -387,11 +402,11 @@ theorem card_perm_partition_eq {n : ℕ} (p : n.Partition) :
   exact_mod_cast hmul
 
 /-- Value multisets of maps `Fin k → Fin (n + 1)` against value counts. -/
-lemma r26a_map_val_eq_iff {n k : ℕ} (p : n.Partition) (s : Fin k → Fin (n + 1)) :
+private lemma map_val_eq_parts_iff {n k : ℕ} (p : n.Partition) (s : Fin k → Fin (n + 1)) :
     univ.val.map (fun j => (s j : ℕ)) = p.parts ↔
       ∀ i : Fin (n + 1), #{j | s j = i} = p.parts.count (i : ℕ) := by
   have hc : ∀ a : ℕ, Multiset.count a (univ.val.map fun j => (s j : ℕ)) = #{j | (s j : ℕ) = a} :=
-    fun a => q26b_count_map (fun j => (s j : ℕ)) a
+    fun a => Multiset.count_map_univ (fun j => (s j : ℕ)) a
   constructor
   · intro h i
     rw [← h, hc]
@@ -424,7 +439,7 @@ theorem card_finpartition_blocks_eq {n : ℕ} (p : n.Partition) :
     exact_mod_cast Multiset.prod_pos fun x hx => by
       obtain ⟨y, -, rfl⟩ := Multiset.mem_map.mp hx; exact Nat.factorial_pos y
   -- step 1: finpartitions against surjections
-  have h1 := r26a_card_surjective_filter (α := Fin n) k (· = p.parts)
+  have h1 := Finpartition.card_filter_surjective_eq_factorial_mul (α := Fin n) k (· = p.parts)
   have hfilt : (univ.filter fun P : Finpartition (univ : Finset (Fin n)) => #P.parts = k ∧
       P.parts.val.map card = p.parts) =
       univ.filter fun P : Finpartition (univ : Finset (Fin n)) =>
@@ -441,10 +456,10 @@ theorem card_finpartition_blocks_eq {n : ℕ} (p : n.Partition) :
     refine filter_congr fun f _ => ?_
     have e : univ.val.map (fun j => #{x | f x = j}) = univ.val.map (fun j => ((τ f j : ℕ))) := rfl
     simp only [T, mem_filter, mem_univ, true_and]
-    rw [e, r26a_map_val_eq_iff]
+    rw [e, map_val_eq_parts_iff]
     refine ⟨fun h => h.2, fun h => ⟨fun j => ?_, h⟩⟩
     have hm : #{x | f x = j} ∈ p.parts := by
-      rw [← (r26a_map_val_eq_iff p (τ f)).2 h]
+      rw [← (map_val_eq_parts_iff p (τ f)).2 h]
       exact Multiset.mem_map_of_mem _ (mem_univ_val j)
     obtain ⟨x, hx⟩ := card_pos.mp (p.parts_pos hm)
     exact ⟨x, by simpa using hx⟩
@@ -452,12 +467,12 @@ theorem card_finpartition_blocks_eq {n : ℕ} (p : n.Partition) :
       n.factorial / (Pl : ℚ) := by
     intro s hs
     have hsm : univ.val.map (fun j => (s j : ℕ)) = p.parts := by
-      rw [r26a_map_val_eq_iff]; simpa [T] using hs
+      rw [map_val_eq_parts_iff]; simpa [T] using hs
     have hsum : ∑ j, (s j : ℕ) = n := by
       rw [sum_eq_multiset_sum, hsm, p.parts_sum]
     have hprod : ∏ j, (s j : ℕ).factorial = Pl := by
       rw [prod_eq_multiset_prod, hPl, ← hsm, Multiset.map_map]; rfl
-    have hb := q26a_card_boxPlacements n (fun j => (s j : ℕ)) hsum
+    have hb := card_boxPlacements_of_sum_eq n (fun j => (s j : ℕ)) hsum
     have hspec := Nat.multinomial_spec univ (fun j => (s j : ℕ))
     rw [hprod, hsum] at hspec
     have he : (univ.filter fun f : Fin n → Fin k => τ f = s) =
@@ -478,7 +493,7 @@ theorem card_finpartition_blocks_eq {n : ℕ} (p : n.Partition) :
   -- step 3: count the fibre-size patterns
   have hcsum : ∑ i, c i = k := by
     rw [Fin.sum_univ_eq_sum_range (fun j => p.parts.count j), sum_count_parts]
-  have hT := q26a_card_boxPlacements k c hcsum
+  have hT := card_boxPlacements_of_sum_eq k c hcsum
   have hTspec := Nat.multinomial_spec univ c
   rw [hcsum, ← hT] at hTspec
   -- conclude
@@ -489,7 +504,7 @@ theorem card_finpartition_blocks_eq {n : ℕ} (p : n.Partition) :
     congr 1
     rw [hPl, Nat.cast_multiset_prod, Multiset.map_map, Finset.prod_multiset_map_count]
     symm
-    apply prod_subset (c26a_toFinset_parts_subset p)
+    apply prod_subset (toFinset_parts_subset_range p)
     intro j _ hj; rw [Multiset.mem_toFinset] at hj; simp [Multiset.count_eq_zero_of_notMem hj]
   have h1' : (k.factorial : ℚ) * #{P : Finpartition (univ : Finset (Fin n)) |
       P.parts.val.map Finset.card = p.parts} = #T * (n.factorial / (Pl : ℚ)) := by

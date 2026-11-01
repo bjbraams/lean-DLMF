@@ -8,12 +8,30 @@ module
 public import DLMF.Gamma.IntegralRepresentations.HankelAndGaussian
 
 /-!
-# Prym decomposition and oscillatory Gamma integrals
+# Prym's decomposition and oscillatory Gamma integrals (DLMF 5.9.4–5.9.9)
 
-Prym decomposition and the oscillatory sine and cosine representations of the Gamma function.
+Prym's decomposition of Euler's integral and the Cauchy–Saalschütz representation, and the
+cosine, sine and generalized Fresnel integrals for `Γ`. The oscillatory integrals converge only
+conditionally at infinity and are stated as limits of integrals over `(0, R)`.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.IntegralRepresentations`.
+## Main definitions
+
+* `prymSeries`: Prym's series `∑ₖ (-1)ᵏ/((z+k) k!)`.
+* `prymIntegral`: the upper incomplete Euler integral `∫₁^∞ t^{z-1} e^{-t} dt`.
+
+## Main results
+
+* `Gamma_incomplete_sum`, `Gamma_eq_prym`: Prym's decomposition for `z` not a nonpositive
+  integer (DLMF 5.9.4).
+* `Gamma_truncated_exp`: the Cauchy–Saalschütz representation (DLMF 5.9.5, Temme §3.2.2).
+* `Gamma_cos`, `Gamma_sin`: the cosine and sine integrals for `Γ` (DLMF 5.9.6, 5.9.7).
+* `Gamma_cos_pow`, `Gamma_sin_pow`: the generalized Fresnel integrals (DLMF 5.9.8, 5.9.9).
+* `integral_rpow_div_one_add`, `integral_rpow_div_one_add_sq`: the Beta-type integrals
+  `∫₀^∞ u^{b-1}/(1+u) du` and `∫₀^∞ s^{a-1}/(1+s²) ds`.
+
+## References
+
+* N. M. Temme, *Special Functions*, Wiley, 1996, §3.2.
 -/
 
 @[expose] public section

@@ -12,9 +12,38 @@ public import DLMF.IncompleteGamma.RealIntegrals
 /-!
 # Continued fractions and inequalities, DLMF §§8.9–8.10
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+Continued-fraction representations of `γ*(a,z)` and `Γ(a,z)` (DLMF §8.9) and the real
+inequalities for the incomplete Gamma functions in DLMF §8.10.
+
+## Main definitions
+
+* `Real.upperGammaTheta`: the first-order remainder ratio of DLMF 8.10.3.
+* `Real.upperGammaPade`: the finite Legendre convergents `A_n`, `B_n` of DLMF 8.10.5.
+* `Real.upperGammaCa`, `Real.upperGammaDa`: the constants `c_a`, `d_a` of DLMF 8.10.9.
+* `Real.gammaPAlpha`, `Real.gammaPBeta`: the bounding constants `α_a`, `β_a` of DLMF 8.10.12,
+  with the continuous value of `α_a` at `a = 1`.
+
+## Main results
+
+* `scIncGamma_continuedFraction`, `upperIncGamma_continuedFraction_complex`: the continued
+  fractions DLMF 8.9.1 and 8.9.2.
+* `upperIncGamma_bound_le_one`, `upperIncGamma_bound_ge_one`, `lowerIncGamma_bound_ge`,
+  `lowerIncGamma_bound_le`: the elementary bounds DLMF 8.10.1 and 8.10.2.
+* `Real.upperGammaTheta_identity`, `Real.upperGammaTheta_bounds`: DLMF 8.10.3 and 8.10.4.
+* `Real.upperGammaPade_bounds`, `Real.upperGammaPade_first`: DLMF 8.10.5 and 8.10.6.
+* `incompleteGamma_positive_exponential_integral`: DLMF 8.10.7.
+* `incompleteGamma_positive_exponential_bounds`, `incompleteGamma_positive_exponential_limit`:
+  DLMF 8.10.8 for `a > 0` and its limit at `a = 0`.
+* `upperIncGamma_power_bounds`, `upperIncGamma_power_bounds_zero_limit`: DLMF 8.10.10.
+* `normIncGammaP_exponential_bounds`, `normIncGammaP_exponential_bounds_strict`: Alzer's
+  bounds DLMF 8.10.11.
+* `normIncGammaQ_diagonal_bounds`: DLMF 8.10.13.
+
+## Implementation notes
+
+The integral in DLMF 8.10.8 needs `a > 0`; the boundary case `a = 0` is stated separately as
+a limit. At `x = 0` the scaled form of DLMF 8.10.10 uses its limiting value `0`. The strict
+form of 8.10.11 excludes the automatic equality at `x = 0`.
 -/
 
 @[expose] public noncomputable section

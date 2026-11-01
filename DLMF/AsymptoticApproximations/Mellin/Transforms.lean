@@ -18,22 +18,30 @@ public import Mathlib.Analysis.Fourier.RiemannLebesgueLemma
 
 The Mellin transform 2.5.1 is Mathlib's `mellin`, the inversion integral 2.5.2 along
 `ℜz = c` is `mellinInv c` (`(2πi)⁻¹ ∫_{c-i∞}^{c+i∞} x^{-z} F(z) dz = mellinInv c F x`), and the
-inversion theorem is `mellinInv_mellin_eq` (see `MathlibCoverage`). Residues are
+inversion theorem is `mellinInv_mellin_eq` (see `Basics.MathlibCoverage`). Residues are
 `DLMF.AlgebraicAnalytic.residueAt` (§1.10(iii)), the circle integral `(2πi)⁻¹ ∮ F` around a small
 circle.
 
-* 2.5.3–2.5.5: the Mellin convolution `I(x) = ∫₀^∞ f(t) h(xt) dt` and the Parseval formula;
-* 2.5.6–2.5.7, 2.5.34–2.5.36: shifting the line of integration past finitely many poles, and
-  `E(x) = o(x^{-q})` by the Riemann–Lebesgue lemma (proved);
-* §2.5(ii): the truncations `f₁, f₂, h₁, h₂` (2.5.21–2.5.24), the domains of convergence of
-  Tables 2.5.1–2.5.2 (proved), the continuations 2.5.25–2.5.28, and the splitting 2.5.29–2.5.31
-  (proved).
+## Main results
+
+* `mellin_convolution`, `mellin_convolution_eq_mellinInv`: the Mellin convolution
+  `I(x) = ∫₀^∞ f(t) h(xt) dt` and the Parseval formula (DLMF 2.5.3–2.5.5).
+* `mellinInv_shift`, `mellinInv_isLittleO`: shifting the line of integration past finitely
+  many poles, and `E(x) = o(x^{-q})` by the Riemann–Lebesgue lemma (DLMF 2.5.6–2.5.7,
+  2.5.34–2.5.36).
+* `mellinConvergent_truncLow`, `mellinConvergent_truncHigh`, `mellinConvergent_trunc_h`,
+  `mellinConvergent_pairs`: the domains of convergence of Tables 2.5.1–2.5.2.
+* `mellin_truncLow_continuation`, `mellin_eq_truncLow_add_truncHigh`,
+  `mellin_truncHigh_continuation`, `mellin_truncHigh_continuation_osc`: the continuations
+  2.5.25–2.5.28.
+* `convolution_eq_sum_trunc`, `integral_truncHigh_mul_truncLow`: the splitting 2.5.29–2.5.31.
+
+## Implementation notes
 
 Mellin convergence `MellinConvergent f z` is absolute convergence of `∫₀^∞ t^{z-1} f(t) dt`.
 In the convolution theorems the transforms are required to converge absolutely on the line of
-integration; then the double integral converges absolutely (Tonelli).
-The convolution theorem reuses the logarithmic-coordinate convolution API in
-`DLMFMathlib.Analysis.MellinConvolution`, together with Mathlib’s `mellin_comp_inv`.
+integration; then the double integral converges absolutely (Tonelli). The convolution theorem
+uses the logarithmic-coordinate convolution API in `DLMFMathlib.Analysis.MellinConvolution`.
 -/
 
 @[expose] public noncomputable section
@@ -149,7 +157,7 @@ theorem mellinInv_shift {G : ℂ → ℂ} {c d x : ℝ} (hdc : d < c) (hx : 0 < 
 
 /-- Helper for `mellinInv_isLittleO`: the integrand of `mellinInv q G x` as a Fourier
 integrand. -/
-private lemma g2a_mellinInv_integrand {q x : ℝ} (hx : 0 < x) (G : ℂ → ℂ) (y : ℝ) :
+private lemma mellinInv_integrand_eq_fourier {q x : ℝ} (hx : 0 < x) (G : ℂ → ℂ) (y : ℝ) :
     (x : ℂ) ^ (-((q : ℂ) + y * I)) • G (q + y * I) =
       ((x ^ (-q) : ℝ) : ℂ) * ((Real.fourierChar (-(y * (Real.log x / (2 * π)))) : ℂ) *
         G (q + y * I)) := by
@@ -180,7 +188,7 @@ theorem mellinInv_isLittleO (G : ℂ → ℂ) (q : ℝ) :
     simpa [u] using this
   have heq : (fun x => mellinInv q G x) =ᶠ[atTop] fun x => ((x ^ (-q) : ℝ) : ℂ) * u x := by
     filter_upwards [eventually_gt_atTop 0] with x hx
-    simp only [mellinInv, u, g2a_mellinInv_integrand hx, Circle.smul_def, smul_eq_mul]
+    simp only [mellinInv, u, mellinInv_integrand_eq_fourier hx, Circle.smul_def, smul_eq_mul]
     rw [integral_const_mul]
     simp only [Complex.real_smul]
     push_cast
@@ -192,7 +200,7 @@ theorem mellinInv_isLittleO (G : ℂ → ℂ) (q : ℝ) :
 /-! ## §2.5(ii) Truncated functions and domains of convergence -/
 
 /-- Helper: the restriction of a locally integrable function by an indicator. -/
-private lemma g2a_locallyIntegrableOn_indicator {f : ℝ → ℂ} {s t : Set ℝ}
+private lemma locallyIntegrableOn_indicator_of_measurableSet {f : ℝ → ℂ} {s t : Set ℝ}
     (hf : LocallyIntegrableOn f s) (ht : MeasurableSet t) :
     LocallyIntegrableOn (t.indicator f) s := by
   intro x hx
@@ -208,7 +216,7 @@ theorem mellinConvergent_truncLow {f : ℝ → ℂ} {α : ℝ} (hfc : LocallyInt
     MellinConvergent (mellinTruncLow f) z := by
   have hc : LocallyIntegrableOn (mellinTruncLow f) (Ioi 0) := by
     unfold mellinTruncLow
-    exact g2a_locallyIntegrableOn_indicator hfc measurableSet_Iic
+    exact locallyIntegrableOn_indicator_of_measurableSet hfc measurableSet_Iic
   refine mellinConvergent_of_isBigO_rpow hc (a := z.re + 1) ?_ (by linarith) ?_ hz
   · refine (isBigO_zero _ _).congr' ?_ EventuallyEq.rfl
     filter_upwards [eventually_gt_atTop 1] with t ht
@@ -232,7 +240,7 @@ theorem mellinConvergent_truncHigh {f : ℝ → ℂ} {b : ℝ} (hfc : LocallyInt
     · simp [mellinTruncHigh, mellinTruncLow, ht, not_le.1 ht]
   have hc : LocallyIntegrableOn (mellinTruncHigh f) (Ioi 0) := by
     rw [h2]
-    exact g2a_locallyIntegrableOn_indicator hfc measurableSet_Ioi
+    exact locallyIntegrableOn_indicator_of_measurableSet hfc measurableSet_Ioi
   refine mellinConvergent_of_isBigO_rpow hc ?_ hz (b := z.re - 1) ?_ (by linarith)
   · refine IsBigO.trans ?_ hf
     refine (isBigO_refl _ _).congr' ?_ EventuallyEq.rfl

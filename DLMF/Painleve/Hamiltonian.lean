@@ -18,11 +18,33 @@ public import Mathlib.Tactic.ReduceModChar
 /-!
 # Hamiltonian structure: DLMF §32.6
 
-For each Hamiltonian of §32.6 we prove that the Hamiltonian system 32.6.1 is the explicit
-first-order system printed by DLMF, that its first component solves the corresponding
-Painlevé equation, and that the function `σ` built from the Hamiltonian solves the
-second-order second-degree `σ`-equation. The converse statements (from `σ` back to `(q, p)`)
-need a nondegeneracy hypothesis that DLMF omits (`σ'' ≠ 0` for `PI`; see the docstrings).
+For each Hamiltonian of §32.6: the Hamiltonian system 32.6.1 is the explicit first-order
+system printed by DLMF, its first component solves the corresponding Painlevé equation, the
+function `σ` built from the Hamiltonian solves the second-order second-degree `σ`-equation,
+and conversely `(q, p)` can be recovered from `σ`.
+
+## Main results
+
+* `isHamiltonianSystemOn_painleveHamiltonianI_iff`, `IsHamiltonianSystemOn.isPainleveIOn`,
+  `IsHamiltonianSystemOn.sigma_painleveI`, `painleveI_of_sigma`: `PI` (DLMF 32.6.2–32.6.8).
+* `isHamiltonianSystemOn_painleveHamiltonianII_iff`, `IsHamiltonianSystemOn.isPainleveIIOn`,
+  `IsHamiltonianSystemOn.momentum_painleveII`, `IsHamiltonianSystemOn.sigma_painleveII`,
+  `painleveII_of_sigma`: `PII` (DLMF 32.6.9–32.6.15).
+* `isHamiltonianSystemOn_painleveHamiltonianIII_iff`, `IsHamiltonianSystemOn.isPainleveIIIOn`,
+  `IsHamiltonianSystemOn.sigma_painleveIII`, `painleveIII_of_sigma`: `PIII`
+  (DLMF 32.6.16–32.6.23).
+* `isHamiltonianSystemOn_painleveHamiltonianIIIPrime_iff`,
+  `IsHamiltonianSystemOn.isPainleveIIIPrimeOn`, `IsHamiltonianSystemOn.sigma_painleveIIIPrime`,
+  `painleveIIIPrime_of_sigma`: `P'III` (DLMF 32.6.24–32.6.31, corrected).
+* `isHamiltonianSystemOn_painleveHamiltonianIIIGammaZero_iff`,
+  `IsHamiltonianSystemOn.isPainleveIIIOn_gammaZero`,
+  `IsHamiltonianSystemOn.sigma_painleveIII_gammaZero`, `painleveIIIGammaZero_of_sigma`: `PIII`
+  with `γ = 0` (DLMF 32.6.32–32.6.39, corrected).
+
+## Implementation notes
+
+The converse statements (from `σ` back to `(q, p)`) need a nondegeneracy hypothesis that DLMF
+omits (`σ'' ≠ 0` for `PI`; see the declaration docstrings).
 
 Corrections of the printed text (verified symbolically along the Hamiltonian flows):
 * 32.6.26 prints `θ₁`; the Hamiltonian 32.6.24 gives `θ∞`.
@@ -44,7 +66,7 @@ namespace DLMF.Painleve
 /-! ## Helpers -/
 
 /-- A Hamiltonian system with explicitly known partial derivatives along the solution. -/
-lemma a32_hamiltonian_iff {H : ℂ → ℂ → ℂ → ℂ} {q p : ℂ → ℂ} {U : Set ℂ} {Hp Hq : ℂ → ℂ}
+private lemma isHamiltonianSystemOn_iff {H : ℂ → ℂ → ℂ → ℂ} {q p : ℂ → ℂ} {U : Set ℂ} {Hp Hq : ℂ → ℂ}
     (hHp : ∀ z ∈ U, HasDerivAt (fun p' => H (q z) p' z) (Hp z) (p z))
     (hHq : ∀ z ∈ U, HasDerivAt (fun q' => H q' (p z) z) (Hq z) (q z)) :
     IsHamiltonianSystemOn H q p U ↔
@@ -57,7 +79,7 @@ lemma a32_hamiltonian_iff {H : ℂ → ℂ → ℂ → ℂ} {q p : ℂ → ℂ} 
       fun z hz => (hHq z hz).deriv ▸ (h z hz).2⟩
 
 /-- The second derivative of `f` from an explicit first derivative on an open set. -/
-lemma a32_deriv_deriv {f g : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+private lemma deriv_deriv_eq_of_hasDerivAt {f g : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hf : ∀ z ∈ U, HasDerivAt f (g z) z) {z g' : ℂ} (hz : z ∈ U) (hg : HasDerivAt g g' z) :
     deriv (deriv f) z = g' := by
   have he : deriv f =ᶠ[𝓝 z] g := by
@@ -65,7 +87,7 @@ lemma a32_deriv_deriv {f g : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
   rw [he.deriv_eq, hg.deriv]
 
 /-- A function vanishing on an open set has zero derivative there. -/
-lemma a32_hasDerivAt_eq_zero {f : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+private lemma hasDerivAt_eq_zero_of_eq_zero_on {f : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hf : ∀ z ∈ U, f z = 0) {z f' : ℂ} (hz : z ∈ U) (hd : HasDerivAt f f' z) : f' = 0 := by
   have he : f =ᶠ[𝓝 z] fun _ => 0 := by
     filter_upwards [hU.mem_nhds hz] with y hy using hf y hy
@@ -78,7 +100,7 @@ lemma a32_hasDerivAt_eq_zero {f : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
 theorem isHamiltonianSystemOn_painleveHamiltonianI_iff {q p : ℂ → ℂ} {U : Set ℂ} :
     IsHamiltonianSystemOn painleveHamiltonianI q p U ↔
       ∀ z ∈ U, HasDerivAt q (p z) z ∧ HasDerivAt p (6 * q z ^ 2 + z) z := by
-  rw [a32_hamiltonian_iff (Hp := p) (Hq := fun z => -(6 * q z ^ 2 + z))]
+  rw [isHamiltonianSystemOn_iff (Hp := p) (Hq := fun z => -(6 * q z ^ 2 + z))]
   · simp only [neg_neg]
   · intro z _
     simpa [painleveHamiltonianI] using
@@ -115,7 +137,7 @@ theorem IsHamiltonianSystemOn.sigma_painleveI {q p : ℂ → ℂ} {U : Set ℂ}
     have hp := (h y hy).2
     exact (((hp.pow 2).div_const 2).sub ((hq.pow 3).const_mul 2) |>.sub
       ((hasDerivAt_id y).mul hq)).congr_deriv (by simp; ring)
-  rw [(hσ z hz).deriv, a32_deriv_deriv hU hσ hz (h z hz).1.neg]
+  rw [(hσ z hz).deriv, deriv_deriv_eq_of_hasDerivAt hU hσ hz (h z hz).1.neg]
   simp only [σ, painleveHamiltonianI]
   ring
 
@@ -136,7 +158,7 @@ theorem painleveI_of_sigma {σ σ₁ σ₂ : ℂ → ℂ} {U : Set ℂ} (hU : Is
   have h3 := (h₂ z hz).hasDerivAt
   have hE := (((h3.pow 2).add (((h₁ z hz).pow 3).const_mul 4)).add
     (((hasDerivAt_id z).const_mul 2).mul (h₁ z hz))).sub ((h₀ z hz).const_mul 2)
-  have h0 := a32_hasDerivAt_eq_zero hU (fun y hy => by simpa using hσ y hy) hz hE
+  have h0 := hasDerivAt_eq_zero_of_eq_zero_on hU (fun y hy => by simpa using hσ y hy) hz hE
   have hne := hσ₂ z hz
   have key : deriv σ₂ z = -6 * σ₁ z ^ 2 - z := by
     have : σ₂ z * (2 * deriv σ₂ z + 12 * σ₁ z ^ 2 + 2 * z) = 0 := by
@@ -154,7 +176,7 @@ theorem isHamiltonianSystemOn_painleveHamiltonianII_iff {α : ℂ} {q p : ℂ �
     IsHamiltonianSystemOn (painleveHamiltonianII α) q p U ↔
       ∀ z ∈ U, HasDerivAt q (p z - q z ^ 2 - z / 2) z ∧
         HasDerivAt p (2 * q z * p z + α + 1 / 2) z := by
-  rw [a32_hamiltonian_iff (Hp := fun z => p z - q z ^ 2 - z / 2)
+  rw [isHamiltonianSystemOn_iff (Hp := fun z => p z - q z ^ 2 - z / 2)
     (Hq := fun z => -(2 * q z * p z + α + 1 / 2))]
   · simp only [neg_neg]
   · intro z _
@@ -197,7 +219,7 @@ theorem IsHamiltonianSystemOn.momentum_painleveII {α : ℂ} {q p : ℂ → ℂ}
       (2 * (p z - q z ^ 2 - z / 2) * p z + 2 * q z * (2 * q z * p z + α + 1 / 2)) z :=
     ((((h z hz).1.const_mul 2).mul (h z hz).2).add_const α |>.add_const (1 / 2)).congr_deriv
       (by ring)
-  rw [a32_deriv_deriv hU (fun y hy => (h y hy).2) hz hp2, (h z hz).2.deriv]
+  rw [deriv_deriv_eq_of_hasDerivAt hU (fun y hy => (h y hy).2) hz hp2, (h z hz).2.deriv]
   ring
 
 /-- DLMF 32.6.13: `σ(z) = H_II(q, p, z)` along a solution of the Hamiltonian system satisfies
@@ -216,7 +238,7 @@ theorem IsHamiltonianSystemOn.sigma_painleveII {α : ℂ} {q p : ℂ → ℂ} {U
     have hp := (h y hy).2
     exact (((hp.pow 2).div_const 2).sub (((hq.pow 2).add ((hasDerivAt_id y).div_const 2)).mul
       hp) |>.sub (hq.const_mul (α + 1 / 2))).congr_deriv (by simp; ring)
-  rw [(hσ z hz).deriv, a32_deriv_deriv hU hσ hz ((h z hz).2.neg.div_const 2)]
+  rw [(hσ z hz).deriv, deriv_deriv_eq_of_hasDerivAt hU hσ hz ((h z hz).2.neg.div_const 2)]
   simp only [σ, painleveHamiltonianII]
   ring
 
@@ -243,7 +265,7 @@ theorem painleveII_of_sigma {α : ℂ} {σ σ₁ σ₂ : ℂ → ℂ} {U : Set �
   have hE := ((((h3.pow 2).add (((h₁ z hz).pow 3).const_mul 4)).add
     (((h₁ z hz).const_mul 2).mul (((hasDerivAt_id z).mul (h₁ z hz)).sub (h₀ z hz)))).sub_const
     ((α + 1 / 2) ^ 2 / 4))
-  have h0 := a32_hasDerivAt_eq_zero hU (fun y hy => by simpa using hσ y hy) hz hE
+  have h0 := hasDerivAt_eq_zero_of_eq_zero_on hU (fun y hy => by simpa using hσ y hy) hz hE
   have key : deriv σ₂ z = -6 * σ₁ z ^ 2 - 2 * z * σ₁ z + σ z := by
     have : σ₂ z * (2 * deriv σ₂ z + 12 * σ₁ z ^ 2 + 4 * z * σ₁ z - 2 * σ z) = 0 := by
       simp only [Pi.mul_apply, Pi.sub_apply, id] at h0; linear_combination h0
@@ -273,7 +295,7 @@ theorem isHamiltonianSystemOn_painleveHamiltonianIII_iff {κ₀ κinf θ₀ θin
           κ₀ * z) / z) z ∧
         HasDerivAt p ((-2 * q z * p z ^ 2 + 2 * κinf * z * q z * p z + (2 * θ₀ + 1) * p z -
           κinf * (θ₀ + θinf) * z) / z) z := by
-  rw [a32_hamiltonian_iff
+  rw [isHamiltonianSystemOn_iff
     (Hp := fun z => (2 * q z ^ 2 * p z - κinf * z * q z ^ 2 - (2 * θ₀ + 1) * q z + κ₀ * z) / z)
     (Hq := fun z => -((-2 * q z * p z ^ 2 + 2 * κinf * z * q z * p z + (2 * θ₀ + 1) * p z -
       κinf * (θ₀ + θinf) * z) / z))]
@@ -367,7 +389,7 @@ theorem IsHamiltonianSystemOn.sigma_painleveIII {κ₀ κinf θ₀ θinf : ℂ} 
         κinf * (θ₀ + θinf) * z) / z) - κ₀ * κinf) z := by
     exact (((h z hzU).2.const_mul (2 * κ₀)).sub ((hasDerivAt_id z).const_mul (κ₀ * κinf))
       ).congr_deriv (by ring)
-  rw [(hσ z hzU).deriv, a32_deriv_deriv hU hσ hzU hσ2]
+  rw [(hσ z hzU).deriv, deriv_deriv_eq_of_hasDerivAt hU hσ hzU hσ2]
   have hz0 := hz z hzU
   simp only [σ, painleveHamiltonianIII]
   field_simp
@@ -409,7 +431,7 @@ theorem painleveIII_of_sigma {κ₀ κinf θ₀ θinf : ℂ} {σ σ₁ σ₂ : �
       ((hid.mul (h₁ z hzU)).sub ((h₀ z hzU).const_mul 2)))).add
     ((hid.const_mul (8 * κ₀ * κinf * θ₀ * θinf)).mul (h₁ z hzU))).sub
     ((hid.pow 2).const_mul (4 * κ₀ ^ 2 * κinf ^ 2 * (θ₀ ^ 2 + θinf ^ 2)))
-  have h0 := a32_hasDerivAt_eq_zero hU (fun y hy => sub_eq_zero.mpr (hσ y hy)) hzU hE
+  have h0 := hasDerivAt_eq_zero_of_eq_zero_on hU (fun y hy => sub_eq_zero.mpr (hσ y hy)) hzU hE
   simp only [Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, id] at h0
   have key : deriv σ₂ z = (-4 * κ₀ ^ 2 * κinf ^ 2 * σ z * z + κ₀ ^ 2 * κinf ^ 2 * σ₁ z * z ^ 2 +
       κ₀ ^ 2 * κinf ^ 2 * σ₂ z * z ^ 3 + 4 * κ₀ ^ 2 * κinf ^ 2 * θ₀ ^ 2 * z +
@@ -458,7 +480,7 @@ theorem isHamiltonianSystemOn_painleveHamiltonianIIIPrime_iff {η₀ ηinf θ₀
       ∀ z ∈ U, HasDerivAt q ((2 * q z ^ 2 * p z - ηinf * q z ^ 2 - θ₀ * q z + η₀ * z) / z) z ∧
         HasDerivAt p ((-2 * q z * p z ^ 2 + 2 * ηinf * q z * p z + θ₀ * p z -
           ηinf * (θ₀ + θinf) / 2) / z) z := by
-  rw [a32_hamiltonian_iff
+  rw [isHamiltonianSystemOn_iff
     (Hp := fun z => (2 * q z ^ 2 * p z - ηinf * q z ^ 2 - θ₀ * q z + η₀ * z) / z)
     (Hq := fun z => -((-2 * q z * p z ^ 2 + 2 * ηinf * q z * p z + θ₀ * p z -
       ηinf * (θ₀ + θinf) / 2) / z))]
@@ -549,7 +571,7 @@ theorem IsHamiltonianSystemOn.sigma_painleveIIIPrime {η₀ ηinf θ₀ θinf : 
       (η₀ * ((-2 * q z * p z ^ 2 + 2 * ηinf * q z * p z + θ₀ * p z -
         ηinf * (θ₀ + θinf) / 2) / z)) z := by
     simpa using ((h z hzU).2.const_mul η₀).sub_const (η₀ * ηinf / 2)
-  rw [(hσ z hzU).deriv, a32_deriv_deriv hU hσ hzU hσ2]
+  rw [(hσ z hzU).deriv, deriv_deriv_eq_of_hasDerivAt hU hσ hzU hσ2]
   have hz0 := hz z hzU
   simp only [σ, painleveHamiltonianIIIPrime]
   field_simp
@@ -586,7 +608,7 @@ theorem painleveIIIPrime_of_sigma {η₀ ηinf θ₀ θinf : ℂ} {σ σ₁ σ�
       ((hid.mul (h₁ z hzU)).sub (h₀ z hzU)))).add
     ((h₁ z hzU).const_mul (η₀ * ηinf * θ₀ * θinf))).sub_const
     (η₀ ^ 2 * ηinf ^ 2 * (θ₀ ^ 2 + θinf ^ 2) / 4)
-  have h0 := a32_hasDerivAt_eq_zero hU (fun y hy => sub_eq_zero.mpr (hσ y hy)) hzU hE
+  have h0 := hasDerivAt_eq_zero_of_eq_zero_on hU (fun y hy => sub_eq_zero.mpr (hσ y hy)) hzU hE
   simp only [Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, id] at h0
   have key0 : σ₂ z * (deriv σ₂ z * (2 * z ^ 2) - (-η₀ * ηinf * θ₀ * θinf + 8 * σ z * σ₁ z +
       z * (η₀ ^ 2 * ηinf ^ 2 - 12 * σ₁ z ^ 2 - 2 * σ₂ z))) = 0 := by
@@ -630,7 +652,7 @@ theorem isHamiltonianSystemOn_painleveHamiltonianIIIGammaZero_iff {κ₀ κinf �
     IsHamiltonianSystemOn (painleveHamiltonianIIIGammaZero κ₀ κinf θ) q p U ↔
       ∀ z ∈ U, HasDerivAt q ((2 * q z ^ 2 * p z + θ * q z - κ₀ * z) / z) z ∧
         HasDerivAt p ((-2 * q z * p z ^ 2 - θ * p z + κinf * z) / z) z := by
-  rw [a32_hamiltonian_iff (Hp := fun z => (2 * q z ^ 2 * p z + θ * q z - κ₀ * z) / z)
+  rw [isHamiltonianSystemOn_iff (Hp := fun z => (2 * q z ^ 2 * p z + θ * q z - κ₀ * z) / z)
     (Hq := fun z => -((-2 * q z * p z ^ 2 - θ * p z + κinf * z) / z))]
   · simp only [neg_neg]
   · intro z _
@@ -715,7 +737,7 @@ theorem IsHamiltonianSystemOn.sigma_painleveIII_gammaZero {κ₀ κinf θ : ℂ}
   have hσ2 : HasDerivAt (fun y => -2 * κ₀ * p y)
       (-2 * κ₀ * ((-2 * q z * p z ^ 2 - θ * p z + κinf * z) / z)) z :=
     (h z hzU).2.const_mul (-2 * κ₀)
-  rw [(hσ z hzU).deriv, a32_deriv_deriv hU hσ hzU hσ2]
+  rw [(hσ z hzU).deriv, deriv_deriv_eq_of_hasDerivAt hU hσ hzU hσ2]
   have hz0 := hz z hzU
   simp only [σ, painleveHamiltonianIIIGammaZero]
   field_simp
@@ -748,7 +770,7 @@ theorem painleveIIIGammaZero_of_sigma {κ₀ κinf θ : ℂ} {σ σ₁ σ₂ : �
       ((h₀ z hzU).const_mul 2)))).sub ((hid.const_mul
       (4 * κ₀ * κinf * (θ + 1))).mul (h₁ z hzU))).sub
       ((hid.pow 2).const_mul (4 * κ₀ ^ 2 * κinf ^ 2))
-  have h0 := a32_hasDerivAt_eq_zero hU (fun y hy => sub_eq_zero.mpr (hσ y hy)) hzU hE
+  have h0 := hasDerivAt_eq_zero_of_eq_zero_on hU (fun y hy => sub_eq_zero.mpr (hσ y hy)) hzU hE
   simp only [Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, id] at h0
   have key : deriv σ₂ z = (4 * κ₀ ^ 2 * κinf ^ 2 * z + 2 * κ₀ * κinf * σ₁ z * θ +
       2 * κ₀ * κinf * σ₁ z + 2 * κ₀ * κinf * σ₂ z * θ * z + 2 * κ₀ * κinf * σ₂ z * z +

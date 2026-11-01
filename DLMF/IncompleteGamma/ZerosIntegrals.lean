@@ -6,14 +6,48 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.IncompleteGamma.SeriesRecurrences
-public import DLMF.Zeta.S25bHurwitzCore
+public import DLMF.Zeta.HurwitzEulerMaclaurin
 
 /-!
 # Zeros, transforms and sums, DLMF §§8.13–8.15
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+Real zeros of `γ*(a,x)` in `x` and in `a` (DLMF §8.13), Laplace and Mellin transforms of the
+incomplete Gamma functions (DLMF §8.14), the multiplication and Fourier sums of DLMF §8.15,
+and DiDonato's approximation from DLMF §8.27(i).
+
+## Main definitions
+
+* `Real.scIncGammaNegativeZero`, `Real.scIncGammaPositiveZero`: the negative and positive real
+  zeros of `γ*(a,·)` when they exist.
+* `scIncGammaDoubleZero`: the double parameter zero `(a_n*, x_n*)`.
+* `Real.gammaDiDonatoF`, `Real.gammaDiDonatoH`: the function `F(p,x)` of DLMF §8.27(i) and its
+  explicit approximation denominator.
+
+## Main results
+
+* `scIncGamma_nonnegative_parameter_no_real_zeros`: no real zeros for `a ≥ 0`.
+* `scIncGamma_one_negative_zero`, `scIncGamma_two_real_zeros`: one or two real zeros,
+  according to the range of `a` (DLMF §8.13(i)).
+* `Real.scIncGammaNegativeZero_strictAnti`, `Real.scIncGammaNegativeZero_bounds`: monotonicity
+  and the bounds DLMF 8.13.1.
+* `scIncGamma_two_parameter_zeros_negative_x`, `scIncGamma_two_parameter_zeros_positive_x`,
+  `scIncGamma_double_parameter_zero`, `scIncGamma_parameter_zeros_at_x_zero`,
+  `scIncGamma_conjugate_zero_trajectories`: the parameter zeros of DLMF §8.13(ii).
+* `normIncGammaP_laplace`, `upperIncGamma_laplace`: the Laplace transforms DLMF 8.14.1 and
+  8.14.2.
+* `lowerIncGamma_mellin`, `upperIncGamma_mellin`, `lowerIncGamma_mellin_laplace`,
+  `upperIncGamma_mellin_laplace`: the Mellin transforms DLMF 8.14.3–8.14.6.
+* `lowerIncGamma_multiplication_hasSum`: the multiplication formula DLMF 8.15.1.
+* `incompleteGamma_hurwitz_fourier_sum`: the Fourier sum DLMF 8.15.2.
+* `Real.gammaDiDonato_gamma`, `Real.gammaDiDonato_approximation`: the change of variable and
+  the `O(x^{-7})` approximation of DLMF §8.27(i).
+
+## Implementation notes
+
+At coalescence the two parameter zeros are counted with multiplicity. In DLMF 8.15.2 the
+inherited logarithms and a right-half-plane convergence domain are made explicit; Mathlib's
+Hurwitz zeta function is periodic in a real second argument, and
+`hurwitzZetaComplex_mathlib` bridges to it.
 -/
 
 @[expose] public noncomputable section
@@ -956,12 +990,12 @@ theorem lowerIncGamma_multiplication_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ -
         scIncGamma (a+k) (exp u) * (1-exp v)^k / k.factorial := by ring
     _ = _ := by rw [hg, he]; ring
 
--- `hurwitzZetaComplex` (Euler–Maclaurin continuation) is defined in `DLMF.Zeta.S25bHurwitzCore`.
+-- `hurwitzZetaComplex` (Euler–Maclaurin continuation) is defined in `DLMF.Zeta.HurwitzEulerMaclaurin`.
 
 /-- Bridge to Mathlib; its existing Hurwitz zeta is periodic in a real second argument. -/
 theorem hurwitzZetaComplex_mathlib {x : ℝ} (hx : 0 < x) (hx1 : x ≤ 1) {s : ℂ} (hs : s ≠ 1) :
     hurwitzZetaComplex s x=HurwitzZeta.hurwitzZeta (x : UnitAddCircle) s :=
-  DLMF.Zeta.s25b_hzc_mathlib hx hx1 hs
+  DLMF.Zeta.hurwitzZetaComplex_eq_hurwitzZeta hx hx1 hs
 
 /-- Inherited logarithms and a right-half-plane convergence domain are explicit. -/
 @[dlmf 8.15.E2]

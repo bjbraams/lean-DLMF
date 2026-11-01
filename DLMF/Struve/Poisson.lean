@@ -12,12 +12,19 @@ public import DLMF.Bessel.Elementary
 # Poisson integrals for the Struve functions
 
 Termwise Beta integration of the Struve series against the Poisson weight
-`(1-t²)^(ν-1/2)` on `[0,1]` (DLMF 11.5.1, 11.5.4, 11.5.6):
+`(1-t²)^(ν-1/2)` on `[0,1]`, giving Poisson's integrals for `H_ν`, `L_ν` and `M_ν`
+(DLMF 11.5.1, 11.5.4, 11.5.6).
 
-* `integral_poissonWeight_mul_pow`: the Beta moments `∫₀¹ (1-t²)^(ν-1/2) t^m dt`;
-* `hasSum_integral_poissonWeight`: termwise integration of a power series on `[0,1]`;
-* `integral_poissonWeight_eq_trig`: the substitution `t = cos θ`;
-* `struveH_eq_poisson`, `struveL_eq_poisson`, `struveM_eq_poisson`.
+## Main results
+
+* `integral_poissonWeight_mul_pow`, `integral_poissonWeight_mul_odd_pow`: the Beta moments
+  `∫₀¹ (1-t²)^(ν-1/2) t^m dt`.
+* `hasSum_integral_poissonWeight`: termwise integration of a power series on `[0,1]`.
+* `integral_poissonWeight_eq_trig`: the substitution `t = cos θ`.
+* `struveH_eq_poisson`, `struveL_eq_poisson`: Poisson's integrals for `H_ν` and `L_ν`.
+* `struveM_eq_poisson`: the Poisson-type integral for `M_ν`.
+
+## Implementation notes
 
 The `I_ν` case reuses `DLMF.Bessel.besselI_eq_poisson_integral`.
 -/

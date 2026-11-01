@@ -10,19 +10,32 @@ public import Mathlib.Basic.Real.Sign
 public import DLMF.CoalescingSaddles.BifurcationSets
 
 /-!
-# Stokes sets (DLMF §36.5)
+# Stokes sets
 
-Statements acquired from the NIST DLMF (version 1.2.8), checked 2026-10-26.
+The Stokes sets of DLMF §36.5 are defined in `DLMF.CoalescingSaddles.Basic`
+(`cuspoidStokesSet`, `umbilicStokesSet` and their complex–complex variants) by the exponential
+dominance condition 36.5.1 together with a connecting path of constant `Re Φ`. This file treats
+the fold case and the parametrizations 36.5.2–36.5.21 of the cusp, swallowtail, elliptic umbilic
+and hyperbolic umbilic Stokes sets.
 
-The Stokes sets are defined in `DLMF.CoalescingSaddles.Basic` (`cuspoidStokesSet`,
-`umbilicStokesSet` and their complex–complex variants) by the exponential dominance condition
-36.5.1 together with a connecting path of constant `Re Φ`. This file proves the fold case
-(§36.5(ii), `K = 1`, in the form of the dominance condition for complex `x`) and states the
-parametrizations 36.5.2–36.5.21 of the cusp, swallowtail, elliptic umbilic and hyperbolic umbilic
-Stokes sets. The cusp case 36.5.2 is proved (necessity by elimination from the critical-point
-equations; sufficiency by an explicit level curve of `Re Φ₂` joining the real saddle to a complex
-one); the others are admitted. All of them were checked numerically at sample points (the real
-parts of `Φ` at the real and the complex critical point agree to working precision).
+## Main results
+
+* `fold_dominance_iff`: the fold Stokes set, as the dominance condition for complex `x`
+  (DLMF §36.5(ii), `K = 1`).
+* `cuspoidStokesSet_two`: the cusp Stokes set `y³ = (27/4)(√27 - 5) x²` (DLMF 36.5.2).
+* `cuspoidStokesSet_three_z_zero`: the swallowtail Stokes set in the plane `z = 0`
+  (DLMF 36.5.3, 36.5.4).
+* `cuspoidStokesSet_three_param`, `cuspoidComplexStokesSet_three_param`: the swallowtail Stokes
+  set for `z ≠ 0` (DLMF 36.5.6–36.5.10).
+* `umbilicStokesSet_elliptic_param`: the elliptic umbilic Stokes set (DLMF 36.5.11–36.5.14).
+* `umbilicStokesSet_hyperbolic_param`: the hyperbolic umbilic Stokes set (DLMF 36.5.15–36.5.21).
+
+## Implementation notes
+
+The cusp case 36.5.2 is proved with necessity by elimination from the critical-point equations
+and sufficiency by an explicit level curve of `Re Φ₂` joining the real saddle to a complex one.
+All parametrizations were checked numerically at sample points (the real parts of `Φ` at the
+real and the complex critical point agree to working precision).
 
 Notation: the swallowtail coordinates `(x, y, z)` are `(x 0, x 1, x 2)`; `σ = Real.sign z`.
 The decimal values 36.5.5 (`B_±`) and `X₁, Y₁, X₂, Y₂` are excluded as numerical; where DLMF
@@ -39,7 +52,7 @@ namespace DLMF.CoalescingSaddles
 /-! ### Fold (`K = 1`) -/
 
 /-- `Re w = 0` iff `w²` is real and nonpositive. -/
-lemma s36a_re_eq_zero_iff_sq {w : ℂ} : w.re = 0 ↔ (w ^ 2).im = 0 ∧ (w ^ 2).re ≤ 0 := by
+private lemma re_eq_zero_iff_sq_real_nonpos {w : ℂ} : w.re = 0 ↔ (w ^ 2).im = 0 ∧ (w ^ 2).re ≤ 0 := by
   rw [sq, Complex.mul_im, Complex.mul_re]
   constructor
   · intro h; rw [h]; constructor
@@ -65,7 +78,7 @@ theorem fold_dominance_iff {x t : ℂ} (ht : 3 * t ^ 2 + x = 0) :
     rw [hx]; push_cast; ring
   have hsq : (x * t) ^ 2 = ((-1 / 3 : ℝ) : ℂ) * x ^ 3 := by
     rw [hx]; push_cast; ring
-  rw [hdiff, Complex.re_ofReal_mul, mul_eq_zero, s36a_re_eq_zero_iff_sq, hsq,
+  rw [hdiff, Complex.re_ofReal_mul, mul_eq_zero, re_eq_zero_iff_sq_real_nonpos, hsq,
     Complex.re_ofReal_mul, Complex.im_ofReal_mul]
   constructor
   · rintro (h | ⟨h1, h2⟩)
@@ -81,24 +94,24 @@ theorem fold_dominance_iff {x t : ℂ} (ht : 3 * t ^ 2 + x = 0) :
 /-! ### Cusp (`K = 2`) -/
 
 /-- The cusp potential `Φ₂(w; x) = w⁴ + x₂w² + x₁w`. -/
-lemma q2s_cusp_pot (x : Fin 2 → ℝ) (w : ℂ) :
+private lemma cuspoidPotential_two_eq (x : Fin 2 → ℝ) (w : ℂ) :
     cuspoidPotential 2 w x = w ^ 4 + x 1 * w ^ 2 + x 0 * w := by
   simp [cuspoidPotential, Fin.sum_univ_two]; ring
 
 /-- `√27 = 3√3`. -/
-lemma q2s_sqrt27 : Real.sqrt 27 = 3 * Real.sqrt 3 := by
+private lemma sqrt_twentySeven : Real.sqrt 27 = 3 * Real.sqrt 3 := by
   rw [show (27 : ℝ) = 3 ^ 2 * 3 by norm_num, Real.sqrt_mul (by norm_num),
     Real.sqrt_sq (by norm_num)]
 
 /-- The necessity half of 36.5.2: a saddle connection between a real and a nonreal critical point
 of the cusp potential forces `y³ = (27/4)(√27 - 5)x²`. -/
-lemma q2s_cusp_stokes_mp {x : Fin 2 → ℝ} (hx : x ∈ cuspoidStokesSet 2) :
+private lemma cuspoidStokesSet_two_curve_of_mem {x : Fin 2 → ℝ} (hx : x ∈ cuspoidStokesSet 2) :
     x 1 ^ 3 = 27 / 4 * (Real.sqrt 27 - 5) * x 0 ^ 2 := by
   obtain ⟨t, μ, hμ, hd1, hd2, -, γ, -, hγ0, hγ1, hγ⟩ := hx
   have hre := hγ 1 ⟨zero_le_one, le_rfl⟩
   rw [hγ1] at hre
-  rw [(s36a_cusp_derivs x _).1] at hd1 hd2
-  simp only [q2s_cusp_pot] at hre
+  rw [(deriv_cuspoidPotential_two x _).1] at hd1 hd2
+  simp only [cuspoidPotential_two_eq] at hre
   set a := μ.re
   set b := μ.im
   set y := x 1
@@ -145,7 +158,7 @@ lemma q2s_cusp_stokes_mp {x : Fin 2 → ℝ} (hx : x ∈ cuspoidStokesSet 2) :
   rcases mul_eq_zero.mp hQ with h | h
   · have hy : y = (3 + 3 * Real.sqrt 3) * t ^ 2 := by linarith
     have hx0 : x0 = -(10 + 6 * Real.sqrt 3) * t ^ 3 := by rw [hy] at E1; linarith
-    rw [q2s_sqrt27, hy, hx0]
+    rw [sqrt_twentySeven, hy, hx0]
     linear_combination (-54 * t ^ 6 * (13 * Real.sqrt 3 + 21)) * hs
   · exfalso
     have hy : y = (3 - 3 * Real.sqrt 3) * t ^ 2 := by linarith
@@ -158,7 +171,7 @@ lemma q2s_cusp_stokes_mp {x : Fin 2 → ℝ} (hx : x ∈ cuspoidStokesSet 2) :
 `m = 10 + 6s`, the function `W(u) = (6u² + k - √D(u))/2` is nonnegative, solves the quadratic
 `W² - (6u² + k) W + u⁴ + k u² - m u - (1 + k - m) = 0`, and has `W(1) = 0`,
 `W(-1/2) = (9 + 6s)/4`. -/
-private lemma q2s_cusp_path_W {s k m : ℝ} (hs : s ^ 2 = 3) (hs0 : 0 < s) (hk : k = 3 + 3 * s)
+private lemma cusp_path_quadratic_root_props {s k m : ℝ} (hs : s ^ 2 = 3) (hs0 : 0 < s) (hk : k = 3 + 3 * s)
     (hm : m = 10 + 6 * s) {W : ℝ → ℝ}
     (hW : ∀ u, W u = (6 * u ^ 2 + k - Real.sqrt (32 * u ^ 4 + 8 * k * u ^ 2 + 4 * m * u +
       k ^ 2 + 4 * (1 + k - m))) / 2) :
@@ -194,9 +207,9 @@ private lemma q2s_cusp_path_W {s k m : ℝ} (hs : s ^ 2 = 3) (hs0 : 0 < s) (hk :
 
 /-- The sufficiency half of 36.5.2: on the curve `y³ = (27/4)(√27 - 5)x²`, `x ≠ 0`, an explicit
 path of constant `Re Φ₂` joins the real critical point to a nonreal one. -/
-lemma q2s_cusp_stokes_mpr {x : Fin 2 → ℝ} (hx : x 0 ≠ 0)
+private lemma mem_cuspoidStokesSet_two_of_curve {x : Fin 2 → ℝ} (hx : x 0 ≠ 0)
     (h : x 1 ^ 3 = 27 / 4 * (Real.sqrt 27 - 5) * x 0 ^ 2) : x ∈ cuspoidStokesSet 2 := by
-  rw [q2s_sqrt27] at h
+  rw [sqrt_twentySeven] at h
   set y := x 1 with hydef
   set x0 := x 0 with hx0def
   set s := Real.sqrt 3 with hsdef
@@ -235,13 +248,13 @@ lemma q2s_cusp_stokes_mpr {x : Fin 2 → ℝ} (hx : x 0 ≠ 0)
   -- the path
   set W : ℝ → ℝ := fun u => (6 * u ^ 2 + k - Real.sqrt (32 * u ^ 4 + 8 * k * u ^ 2 + 4 * m * u +
     k ^ 2 + 4 * (1 + k - m))) / 2 with hW
-  obtain ⟨hW0, hq, hW1, hWm⟩ := q2s_cusp_path_W hs hs0 hk hm (W := W) fun _ => rfl
+  obtain ⟨hW0, hq, hW1, hWm⟩ := cusp_path_quadratic_root_props hs hs0 hk hm (W := W) fun _ => rfl
   set γ : ℝ → ℂ := fun r => (t : ℂ) * ((1 - 3 / 2 * r : ℝ) + I * (Real.sqrt (W (1 - 3 / 2 * r))))
     with hγ
   refine ⟨t, μ, by rw [hμim]; exact mul_ne_zero ht0 hβ0.ne', ?_, ?_, ?_, γ, ?_, ?_, ?_, ?_⟩
-  · rw [(s36a_cusp_derivs x _).1, ← hydef, ← hx0def, hyt, hxt]
+  · rw [(deriv_cuspoidPotential_two x _).1, ← hydef, ← hx0def, hyt, hxt]
     push_cast; simp only [hk, hm]; push_cast; ring
-  · rw [(s36a_cusp_derivs x _).1, ← hydef, ← hx0def, hyt, hxt, hμ]
+  · rw [(deriv_cuspoidPotential_two x _).1, ← hydef, ← hx0def, hyt, hxt, hμ]
     have hβc : (β : ℂ) ^ 2 = (9 + 6 * s) / 4 := by exact_mod_cast hβ2
     push_cast; simp only [hk, hm]; push_cast
     linear_combination (6 * (t : ℂ) ^ 3 - 4 * (t : ℂ) ^ 3 * I * β) * hβc +
@@ -266,7 +279,7 @@ lemma q2s_cusp_stokes_mpr {x : Fin 2 → ℝ} (hx : x 0 ≠ 0)
     set w : ℝ := Real.sqrt (W u) with hw
     have hw2 : w ^ 2 = W u := Real.sq_sqrt (hW0 u)
     have hq := hq u
-    simp only [hγ, q2s_cusp_pot]
+    simp only [hγ, cuspoidPotential_two_eq]
     rw [← hydef, ← hx0def, ← hu, ← hw]
     simp [pow_succ, mul_re, mul_im]
     rw [hyt, hxt]
@@ -279,7 +292,7 @@ coefficient is not acquired. -/
 @[dlmf 36.5.E2]
 theorem cuspoidStokesSet_two {x : Fin 2 → ℝ} (hx : x 0 ≠ 0) :
     x ∈ cuspoidStokesSet 2 ↔ x 1 ^ 3 = 27 / 4 * (Real.sqrt 27 - 5) * x 0 ^ 2 :=
-  ⟨q2s_cusp_stokes_mp, q2s_cusp_stokes_mpr hx⟩
+  ⟨cuspoidStokesSet_two_curve_of_mem, mem_cuspoidStokesSet_two_of_curve hx⟩
 
 /-! ### Swallowtail (`K = 3`) -/
 

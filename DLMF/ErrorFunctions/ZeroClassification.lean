@@ -9,26 +9,32 @@ public import DLMF.ErrorFunctions.Integrals
 public import DLMF.Core.ZeroCounting
 
 /-!
-# Where the zeros of `erf` and `erfc` can lie, DLMF §7.13(i)–(ii)
+# Where the zeros of `erf`, `erfc` and the Fresnel integrals can lie (DLMF §7.13(i)–(ii))
 
-Elementary localization of the complex zeros of the error functions, used to reduce the zero
-classifications of `DLMF/ErrorFunctions/Zeros.lean` to the modulus enumerations there.
+Elementary localization of the complex zeros of the error functions and the Fresnel integrals,
+used to reduce the zero classifications of `DLMF.ErrorFunctions.Zeros` to the modulus
+enumerations there.
+
+## Main results
 
 * `zcnt_erf_conj`, `zcnt_erfc_conj`: `erf (z̄) = conj (erf z)`, by the identity theorem for the
   derivative (`HasDerivAt.conj_conj`).
-* `zcnt_erfc_ne_zero_of_re_pos`: `erfc z ≠ 0` for `Re z > 0`, from the Cauchy integral
-  `∫ e^{-t²}/(t - u) dt = π i w(u)` (DLMF 7.7.2) of the Faddeeva function at `u = iz`, whose
-  imaginary part is a positive integral.
+* `zcnt_erfc_ne_zero_of_re_pos`, `zcnt_erfc_ne_zero_of_re_nonneg`: `erfc z ≠ 0` for
+  `Re z ≥ 0`, from the Cauchy integral `∫ e^{-t²}/(t - u) dt = π i w(u)` (DLMF 7.7.2) of the
+  Faddeeva function at `u = iz`, whose imaginary part is a positive integral.
 * `zcnt_norm_erfc_le_one`: `‖erfc z‖ ≤ 1` for `Re z ≥ 0`, `Re z² ≥ 0`, from the Laplace form
   `erfc z = π^{-1/2} e^{-z²} ∫₀^∞ e^{-zr - r²/4} dr`.
-* `zcnt_erfc_zero_arg`: every zero of `erfc` satisfies `π/2 < |ph z| < 3π/4`.
+* `zcnt_erfc_zero_arg`: every zero of `erfc` satisfies `π/2 < |ph z| < 3π/4` (DLMF §7.13(ii)).
 * `zcnt_erf_ofReal_ne_zero`, `zcnt_erf_I_mul_ofReal_ne_zero`: `erf` has no zero on the real or
   imaginary axis other than `0`.
-* Fresnel integrals: the symmetries `C(-z) = -C(z)`, `C(z̄) = conj C(z)`, `C(iz) = i C(z)` and
-  `S(iz) = -i S(z)` (`zcnt_fresnelCosInt_neg` …); no zeros on the diagonal `ℝ(1+i)`
-  (`C((1+i)x) = (1+i)x ∫₀¹ cosh(πt²x²) dt`); no real zeros (`zcnt_fresnelCosInt_ofReal_ne_zero`,
-  `zcnt_fresnelSinInt_ofReal_ne_zero`): for `0 < x ≤ 1` the integrand is positive, and for `x ≥ 1`
-  `C = 1/2 + f sin − g cos` with `‖f‖ + ‖g‖ < 1/2` from the Laplace integrals 7.7.10–11.
+* `zcnt_fresnelCosInt_neg`, `zcnt_fresnelCosInt_conj`, `zcnt_fresnelCosInt_I_mul`,
+  `zcnt_fresnelSinInt_I_mul` and their companions: the symmetries `C(-z) = -C(z)`,
+  `C(z̄) = conj C(z)`, `C(iz) = i C(z)`, `S(iz) = -i S(z)`.
+* `zcnt_fresnelCosInt_diag_ne_zero`, `zcnt_fresnelSinInt_diag_ne_zero`: no zeros on the diagonal
+  `ℝ(1+i)` other than `0`, since `C((1+i)x) = (1+i)x ∫₀¹ cosh(πt²x²) dt`.
+* `zcnt_fresnelCosInt_ofReal_ne_zero`, `zcnt_fresnelSinInt_ofReal_ne_zero`: no real zeros other
+  than `0`: for `0 < x ≤ 1` the integrand is positive, and for `x ≥ 1`
+  `C = 1/2 + f sin - g cos` with `‖f‖ + ‖g‖ < 1/2` from the Laplace integrals 7.7.10–7.7.11.
 * `zcnt_octant_classification`: the eight-fold symmetry reduces a zero classification to the
   modulus enumeration in the octant `0 < ph z < π/4`.
 -/

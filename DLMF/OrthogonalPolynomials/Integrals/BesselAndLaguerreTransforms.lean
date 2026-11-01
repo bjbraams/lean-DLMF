@@ -8,13 +8,43 @@ module
 public import DLMF.OrthogonalPolynomials.Integrals.ConvolutionsAndFourier
 
 /-!
-# Bessel-square and Laguerre product transforms
+# Bessel-square, Fourier and Laplace transforms of classical polynomials
 
-Legendre-Bessel square moments, Hermite Fourier transforms and Laguerre product Laplace
-transforms.
+The Legendre–Bessel integral (DLMF 18.17.21), Fourier, cosine and sine transforms of
+Hermite functions (DLMF 18.17.22–18.17.27), the Laplace transform of Jacobi polynomials
+(DLMF 18.17.33), the Laplace transform of products of Laguerre polynomials (DLMF 18.17.34–35)
+and the Mellin–Laplace transform of Hermite polynomials (DLMF 18.17.41, corrected).
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Integrals`.
+## Main definitions
+
+* `hermiteGauss`: the Hermite–Gaussian function `He_n(x) e^{-x²/2}`.
+* `laguerreScaleCoeff`: the change-of-scale coefficients of the Laguerre basis.
+
+## Main results
+
+* `legendre_bessel_square_integral`: DLMF 18.17.21.
+* `hermite_fourier_eigenfunction`: DLMF 18.17.22.
+* `hermite_even_cosine_transform`, `hermite_odd_sine_transform`: DLMF 18.17.23 and 18.17.27.
+* `hermite_product_cosine_transform`, `hermite_product_sine_transform`: DLMF 18.17.25 and
+  18.17.26.
+* `hermite_linearization`: the product formula for probabilists' Hermite polynomials.
+* `jacobi_laplace_transform`: DLMF 18.17.33.
+* `laguerrePolyL_product_laplace_transform`: DLMF 18.17.34–35.
+* `hermite_mellin_laplace_transform`: DLMF 18.17.41 in a corrected finite-sum form.
+
+## Implementation notes
+
+The Legendre–Bessel integral integrates the sine series termwise against `P_n(1 - 2x²)`,
+evaluates the moments by the substitution `s = 1 - 2x²`, and matches the result with the
+product series of `J_{n+1/2}²` (DLMF 10.8.3, `besselJ_mul_besselJ`). The Hermite Fourier
+identities adapt a normalized Hermite Fourier theorem to the positive phase and the scales
+of DLMF; the cosine and sine transforms integrate by parts against `He_n(x) e^{-x²/2}`, and
+the product transforms use Hermite linearization. The Laguerre product transform uses finite
+changes of scale and orthogonality, valid for complex Laplace rates.
+
+The displayed DLMF formula 18.17.41 is incorrect; see the docstring of
+`hermite_mellin_laplace_transform` for the corrected form.
+
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
 -/
 

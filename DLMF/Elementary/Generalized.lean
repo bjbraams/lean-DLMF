@@ -31,12 +31,40 @@ public import Mathlib.Tactic.NormNum.RealSqrt
 public import Mathlib.Tactic.ReduceModChar
 
 /-!
-# Generalized logarithms and exponentials: DLMF §4.12
+# Generalized logarithms and exponentials
 
-The explicit Clenshaw choice uses iterated exponentials and the first iterate of the
-logarithm landing in `[0,1)`. The domain of the generalized exponential is `(-1,∞)`;
-the generalized logarithm has domain all of `ℝ`. Values outside the former domain
-are totalized by the displayed formula, without mathematical assertions there.
+This file formalizes the generalized logarithms and exponentials of DLMF §4.12: the defining
+equations, Clenshaw's explicit choice by iterated exponentials and logarithms, and the
+non-uniqueness of such pairs.
+
+## Main definitions
+
+* `IsGeneralizedExpLog`: a mutually inverse generalized exponential and logarithm, with their
+  full domains (DLMF 4.12.1–4.12.2).
+* `logIterationCount`: the first logarithmic iterate landing in the fundamental interval.
+* `generalizedExp`, `generalizedLog`: the simplest generalized exponential and its inverse
+  (DLMF 4.12.5–4.12.10).
+* `floorFractSqReparam`, `floorFractSqrtReparam`: an increasing reparametrization commuting with
+  unit shifts, and its inverse.
+
+## Main results
+
+* `IsGeneralizedExpLog.log_shift`, `IsGeneralizedExpLog.log_zero`: DLMF 4.12.3–4.12.4.
+* `exists_iterate_log_mem_Ico`: every positive argument eventually reaches `[0,1)` under
+  iterated logarithms (DLMF 4.12.10).
+* `generalized_eq_self`, `generalizedExp_neg`, `generalizedExp_gt_one`, `generalizedLog_neg`,
+  `generalizedLog_gt_one`: the explicit formulas DLMF 4.12.5–4.12.9.
+* `generalizedExpLog_spec`: the explicit pair satisfies the defining equations
+  (DLMF 4.12.1–4.12.2).
+* `generalizedExp_contDiffOn`, `generalizedLog_contDiff`: both functions are continuously
+  differentiable on their domains.
+* `generalizedExpLog_not_unique`: generalized logarithms and exponentials are not unique.
+
+## Implementation notes
+
+The domain of the generalized exponential is `(-1,∞)`; the generalized logarithm has domain all
+of `ℝ`. Values outside the former domain are totalized by the displayed formula, without
+mathematical assertions there.
 -/
 
 @[expose] public section
@@ -76,7 +104,7 @@ theorem IsGeneralizedExpLog.log_zero {φ ψ : ℝ → ℝ} (h : IsGeneralizedExp
   simpa [h.exp_zero] using h.log_exp 0 (by norm_num)
 
 /-- A generalized exponential exceeds one beyond the fundamental interval. -/
-lemma logR4_one_lt_exp {φ ψ : ℝ → ℝ} (h : IsGeneralizedExpLog φ ψ) {t : ℝ} (ht : 1 < t) :
+private lemma one_lt_generalizedExp_of_one_lt {φ ψ : ℝ → ℝ} (h : IsGeneralizedExpLog φ ψ) {t : ℝ} (ht : 1 < t) :
     1 < φ t := by
   have base : ∀ s : ℝ, 1 < s → s ≤ 2 → 1 < φ s := by
     intro s hs1 hs2
@@ -104,7 +132,7 @@ lemma logR4_one_lt_exp {φ ψ : ℝ → ℝ} (h : IsGeneralizedExpLog φ ψ) {t 
   exact key n t ht (by linarith)
 
 /-- A normalized generalized exponential takes values in `[0,1]` only on `[0,1]`. -/
-lemma logR4_mem_Icc_of_exp {φ ψ : ℝ → ℝ} (h : IsGeneralizedExpLog φ ψ) {t : ℝ}
+private lemma mem_Icc_of_generalizedExp_mem_Icc {φ ψ : ℝ → ℝ} (h : IsGeneralizedExpLog φ ψ) {t : ℝ}
     (ht : -1 < t) (hφ : φ t ∈ Icc 0 1) : t ∈ Icc 0 1 := by
   have h1 : φ 1 = 1 := by
     have := h.exp_shift 0 (by norm_num); simpa [h.exp_zero] using this
@@ -118,14 +146,14 @@ lemma logR4_mem_Icc_of_exp {φ ψ : ℝ → ℝ} (h : IsGeneralizedExpLog φ ψ)
     have : φ t < 0 := Real.exp_lt_one_iff.mp hlt
     linarith [hφ.1]
   · push Not at h0
-    linarith [logR4_one_lt_exp h h0, hφ.2]
+    linarith [one_lt_generalizedExp_of_one_lt h h0, hφ.2]
 
 /-- Generalized logarithms are strictly increasing on the fundamental interval. -/
 theorem IsGeneralizedExpLog.log_strictMono {φ ψ : ℝ → ℝ}
     (h : IsGeneralizedExpLog φ ψ) : StrictMonoOn ψ (Icc 0 1) := by
   intro x hx y hy hxy
-  have hx' := logR4_mem_Icc_of_exp h (h.log_range x) (by rw [h.exp_log]; exact hx)
-  have hy' := logR4_mem_Icc_of_exp h (h.log_range y) (by rw [h.exp_log]; exact hy)
+  have hx' := mem_Icc_of_generalizedExp_mem_Icc h (h.log_range x) (by rw [h.exp_log]; exact hx)
+  have hy' := mem_Icc_of_generalizedExp_mem_Icc h (h.log_range y) (by rw [h.exp_log]; exact hy)
   by_contra hle
   push Not at hle
   have := h.exp_strictMono.monotoneOn hy' hx' hle
@@ -218,7 +246,7 @@ theorem generalizedLog_gt_one {x : ℝ} (hx : 1 < x) :
   · simp [generalizedLog, show ¬ x < 0 by linarith, show ¬ x ≤ 1 by linarith, hc]
 
 /-- Iterated exponentials dominate a shift. -/
-lemma logR4_add_le_exp_iterate (k : ℕ) (f : ℝ) : f + k ≤ (Real.exp^[k]) f := by
+private lemma add_le_exp_iterate (k : ℕ) (f : ℝ) : f + k ≤ (Real.exp^[k]) f := by
   induction k with
   | zero => simp
   | succ k ih =>
@@ -227,7 +255,7 @@ lemma logR4_add_le_exp_iterate (k : ℕ) (f : ℝ) : f + k ≤ (Real.exp^[k]) f 
     push_cast; linarith
 
 /-- Iterated logarithms invert iterated exponentials. -/
-lemma logR4_log_iterate_exp_iterate (m : ℕ) (u : ℝ) : (Real.log^[m]) ((Real.exp^[m]) u) = u := by
+private lemma log_iterate_exp_iterate (m : ℕ) (u : ℝ) : (Real.log^[m]) ((Real.exp^[m]) u) = u := by
   induction m generalizing u with
   | zero => simp
   | succ m ih =>
@@ -235,7 +263,7 @@ lemma logR4_log_iterate_exp_iterate (m : ℕ) (u : ℝ) : (Real.log^[m]) ((Real.
       Real.log_exp, ih]
 
 /-- Before the least landing index, iterated logarithms stay at least one. -/
-lemma logR4_one_le_log_iterate {x : ℝ} (hx : 1 < x) {j : ℕ} (hj : j < logIterationCount x) :
+private lemma one_le_log_iterate_of_lt_logIterationCount {x : ℝ} (hx : 1 < x) {j : ℕ} (hj : j < logIterationCount x) :
     1 ≤ (Real.log^[j]) x := by
   obtain ⟨-, -, -, hmin⟩ := generalizedLog_gt_one hx
   induction j with
@@ -251,7 +279,7 @@ lemma logR4_one_le_log_iterate {x : ℝ} (hx : 1 < x) {j : ℕ} (hj : j < logIte
     exact ⟨h0, hlt⟩
 
 /-- Iterated exponentials invert iterated logarithms along positive orbits. -/
-lemma logR4_exp_iterate_log_iterate (j : ℕ) {u : ℝ} (hu : ∀ i < j, 0 < (Real.log^[i]) u) :
+private lemma exp_iterate_log_iterate (j : ℕ) {u : ℝ} (hu : ∀ i < j, 0 < (Real.log^[i]) u) :
     (Real.exp^[j]) ((Real.log^[j]) u) = u := by
   induction j generalizing u with
   | zero => simp
@@ -260,7 +288,7 @@ lemma logR4_exp_iterate_log_iterate (j : ℕ) {u : ℝ} (hu : ∀ i < j, 0 < (Re
       Real.exp_log (hu j (by omega)), ih (fun i hi => hu i (by omega))]
 
 /-- The inverse equation above the fundamental interval. -/
-lemma logR4_exp_log_gt_one {x : ℝ} (hx : 1 < x) : generalizedExp (generalizedLog x) = x := by
+private lemma generalizedExp_generalizedLog_of_one_lt {x : ℝ} (hx : 1 < x) : generalizedExp (generalizedLog x) = x := by
   obtain ⟨hpos, he, hm, -⟩ := generalizedLog_gt_one hx
   set m := logIterationCount x
   rw [he]
@@ -269,11 +297,11 @@ lemma logR4_exp_log_gt_one {x : ℝ} (hx : 1 < x) : generalizedExp (generalizedL
     constructor <;> linarith [hm.1, hm.2]
   simp only [generalizedExp, show ¬ ((m:ℝ) + (Real.log^[m]) x < 0) by
     linarith [hm.1, (Nat.cast_nonneg m : (0:ℝ) ≤ m)], ite_false, hfl, add_sub_cancel_left]
-  exact logR4_exp_iterate_log_iterate m (fun i hi => by
-    linarith [logR4_one_le_log_iterate hx hi])
+  exact exp_iterate_log_iterate m (fun i hi => by
+    linarith [one_le_log_iterate_of_lt_logIterationCount hx hi])
 
 /-- The logarithmic inverse equation above the fundamental interval. -/
-lemma logR4_log_exp_gt_one {x : ℝ} (hx : 1 < x) : generalizedLog (generalizedExp x) = x := by
+private lemma generalizedLog_generalizedExp_of_one_lt {x : ℝ} (hx : 1 < x) : generalizedLog (generalizedExp x) = x := by
   set n := ⌊x⌋₊ with hn
   set f := x - n with hf
   have hn1 : 1 ≤ n := Nat.le_floor (by simpa using hx.le)
@@ -282,18 +310,18 @@ lemma logR4_log_exp_gt_one {x : ℝ} (hx : 1 < x) : generalizedLog (generalizedE
   have hgx : generalizedExp x = (Real.exp^[n]) f := by
     simp [generalizedExp, show ¬ x < 0 by linarith, hn, hf]
   set y := (Real.exp^[n]) f with hy
-  have hyx : x ≤ y := by have := logR4_add_le_exp_iterate n f; rw [hf] at this; linarith
+  have hyx : x ≤ y := by have := add_le_exp_iterate n f; rw [hf] at this; linarith
   have hy1 : 1 < y := by linarith
   have horbit : ∀ m ≤ n, (Real.log^[m]) y = (Real.exp^[n - m]) f := by
     intro m hm
     rw [hy, show n = m + (n - m) by omega, Function.iterate_add_apply,
-      logR4_log_iterate_exp_iterate, show m + (n - m) - m = n - m by omega]
+      log_iterate_exp_iterate, show m + (n - m) - m = n - m by omega]
   have hcount : logIterationCount y = n := by
     simp only [logIterationCount, hy1, ↓reduceDIte]
     rw [Nat.find_eq_iff]
     refine ⟨by rw [horbit n le_rfl, Nat.sub_self]; exact ⟨hf0, hf1⟩, fun m hm hmem => ?_⟩
     rw [horbit m hm.le] at hmem
-    have := logR4_add_le_exp_iterate (n - m) f
+    have := add_le_exp_iterate (n - m) f
     have h1 : (1:ℝ) ≤ ((n - m : ℕ) : ℝ) := by exact_mod_cast (show 1 ≤ n - m by omega)
     linarith [hmem.2]
   rw [hgx]
@@ -326,14 +354,14 @@ theorem generalizedExpLog_spec : IsGeneralizedExpLog generalizedExp generalizedL
       simp [generalizedExp, generalizedLog, h0, hl, Real.exp_log (show 0 < x + 1 by linarith)]
     rcases le_or_gt x 1 with h1 | h1
     · rw [(generalized_eq_self ⟨h0, h1⟩).1, (generalized_eq_self ⟨h0, h1⟩).2]
-    · exact logR4_log_exp_gt_one h1
+    · exact generalizedLog_generalizedExp_of_one_lt h1
   · intro x
     rcases lt_or_ge x 0 with h0 | h0
     · have hl : Real.exp x - 1 < 0 := by linarith [Real.exp_lt_one_iff.mpr h0]
       simp [generalizedExp, generalizedLog, h0, hl]
     rcases le_or_gt x 1 with h1 | h1
     · rw [(generalized_eq_self ⟨h0, h1⟩).2, (generalized_eq_self ⟨h0, h1⟩).1]
-    · exact logR4_exp_log_gt_one h1
+    · exact generalizedExp_generalizedLog_of_one_lt h1
   · intro x
     rcases lt_or_ge x 0 with h0 | h0
     · simp [generalizedLog, h0, Real.exp_pos]
@@ -345,7 +373,7 @@ theorem generalizedExpLog_spec : IsGeneralizedExpLog generalizedExp generalizedL
       linarith [hm.1]
 
 /-- A function glued at `0` from two `C¹` pieces with matching value and slope is `C¹`. -/
-lemma logR4_junction {f g h g' h' : ℝ → ℝ} {a b : ℝ} (ha : a < 0) (hb : 0 < b)
+private lemma contDiffOn_one_of_glue {f g h g' h' : ℝ → ℝ} {a b : ℝ} (ha : a < 0) (hb : 0 < b)
     (hg : ∀ x ∈ Ioo a b, HasDerivAt g (g' x) x) (hh : ∀ x ∈ Ioo a b, HasDerivAt h (h' x) x)
     (hgc : ContinuousOn g' (Ioo a b)) (hhc : ContinuousOn h' (Ioo a b))
     (hfg : ∀ x ∈ Ioc a 0, f x = g x) (hfh : ∀ x ∈ Ico 0 b, f x = h x) (h0 : g' 0 = h' 0) :
@@ -407,7 +435,7 @@ lemma logR4_junction {f g h g' h' : ℝ → ℝ} {a b : ℝ} (ha : a < 0) (hb : 
 theorem generalizedExp_contDiffOn : ContDiffOn ℝ 1 generalizedExp (Ioi (-1)) := by
   have hs := generalizedExpLog_spec
   have base : ContDiffOn ℝ 1 generalizedExp (Ioo (-1) 1) := by
-    apply logR4_junction (g := fun x => Real.log (x+1)) (h := id) (g' := fun x => (x+1)⁻¹)
+    apply contDiffOn_one_of_glue (g := fun x => Real.log (x+1)) (h := id) (g' := fun x => (x+1)⁻¹)
       (h' := fun _ => 1) (by norm_num) (by norm_num)
     · intro x hx
       have hx1 : x + 1 ≠ 0 := by linarith [hx.1]
@@ -454,7 +482,7 @@ theorem generalizedExp_contDiffOn : ContDiffOn ℝ 1 generalizedExp (Ioi (-1)) :
 theorem generalizedLog_contDiff : ContDiff ℝ 1 generalizedLog := by
   have hs := generalizedExpLog_spec
   have base : ContDiffOn ℝ 1 generalizedLog (Ioo (-1) 1) := by
-    apply logR4_junction (g := fun x => Real.exp x - 1) (h := id) (g' := Real.exp)
+    apply contDiffOn_one_of_glue (g := fun x => Real.exp x - 1) (h := id) (g' := Real.exp)
       (h' := fun _ => 1) (by norm_num) (by norm_num)
     · intro x _; exact (Real.hasDerivAt_exp x).sub_const 1
     · intro x _; exact hasDerivAt_id x
@@ -506,92 +534,92 @@ theorem generalizedLog_contDiff : ContDiff ℝ 1 generalizedLog := by
   exact Q n x (by linarith)
 
 /-- A nonlinear increasing reparametrization commuting with unit shifts. -/
-def logR4_g (x : ℝ) : ℝ := ⌊x⌋ + (Int.fract x)^2
+def floorFractSqReparam (x : ℝ) : ℝ := ⌊x⌋ + (Int.fract x)^2
 
-/-- The inverse of `logR4_g`. -/
-def logR4_ginv (x : ℝ) : ℝ := ⌊x⌋ + Real.sqrt (Int.fract x)
+/-- The inverse of `floorFractSqReparam`. -/
+def floorFractSqrtReparam (x : ℝ) : ℝ := ⌊x⌋ + Real.sqrt (Int.fract x)
 
 /-- The reparametrization commutes with unit shifts. -/
-lemma logR4_g_add_one (x : ℝ) : logR4_g (x + 1) = logR4_g x + 1 := by
-  simp [logR4_g, Int.floor_add_one, Int.fract_add_one]; ring
+private lemma floorFractSqReparam_add_one (x : ℝ) : floorFractSqReparam (x + 1) = floorFractSqReparam x + 1 := by
+  simp [floorFractSqReparam, Int.floor_add_one, Int.fract_add_one]; ring
 
 /-- Floor and fractional part of an integer plus a number in `[0,1)`. -/
-lemma logR4_floor_fract {n : ℤ} {u : ℝ} (h0 : 0 ≤ u) (h1 : u < 1) :
+private lemma floor_intCast_add_and_fract_intCast_add {n : ℤ} {u : ℝ} (h0 : 0 ≤ u) (h1 : u < 1) :
     ⌊(n:ℝ) + u⌋ = n ∧ Int.fract ((n:ℝ) + u) = u := by
   have hf : ⌊u⌋ = 0 := Int.floor_eq_zero_iff.mpr ⟨h0, h1⟩
   refine ⟨by rw [Int.floor_intCast_add, hf, add_zero], ?_⟩
   rw [Int.fract_intCast_add, Int.fract_eq_self.mpr ⟨h0, h1⟩]
 
-/-- `logR4_ginv` is a left inverse of `logR4_g`. -/
-lemma logR4_ginv_g (x : ℝ) : logR4_ginv (logR4_g x) = x := by
+/-- `floorFractSqrtReparam` is a left inverse of `floorFractSqReparam`. -/
+private lemma floorFractSqrtReparam_floorFractSqReparam (x : ℝ) : floorFractSqrtReparam (floorFractSqReparam x) = x := by
   have h0 := Int.fract_nonneg x
   have h1 := Int.fract_lt_one x
-  obtain ⟨ha, hb⟩ := logR4_floor_fract (n := ⌊x⌋) (u := (Int.fract x)^2) (by positivity)
+  obtain ⟨ha, hb⟩ := floor_intCast_add_and_fract_intCast_add (n := ⌊x⌋) (u := (Int.fract x)^2) (by positivity)
     (by nlinarith)
-  rw [logR4_ginv, logR4_g, ha, hb, Real.sqrt_sq h0, Int.floor_add_fract]
+  rw [floorFractSqrtReparam, floorFractSqReparam, ha, hb, Real.sqrt_sq h0, Int.floor_add_fract]
 
-/-- `logR4_ginv` is a right inverse of `logR4_g`. -/
-lemma logR4_g_ginv (x : ℝ) : logR4_g (logR4_ginv x) = x := by
+/-- `floorFractSqrtReparam` is a right inverse of `floorFractSqReparam`. -/
+private lemma floorFractSqReparam_floorFractSqrtReparam (x : ℝ) : floorFractSqReparam (floorFractSqrtReparam x) = x := by
   have h0 := Int.fract_nonneg x
   have h1 := Int.fract_lt_one x
-  obtain ⟨ha, hb⟩ := logR4_floor_fract (n := ⌊x⌋) (u := Real.sqrt (Int.fract x))
+  obtain ⟨ha, hb⟩ := floor_intCast_add_and_fract_intCast_add (n := ⌊x⌋) (u := Real.sqrt (Int.fract x))
     (Real.sqrt_nonneg _) (by rw [Real.sqrt_lt' one_pos]; simpa using h1)
-  rw [logR4_g, logR4_ginv, ha, hb, Real.sq_sqrt h0, Int.floor_add_fract]
+  rw [floorFractSqReparam, floorFractSqrtReparam, ha, hb, Real.sq_sqrt h0, Int.floor_add_fract]
 
 /-- The reparametrization preserves the exponential domain. -/
-lemma logR4_g_gt {x : ℝ} (hx : -1 < x) : -1 < logR4_g x := by
+private lemma neg_one_lt_floorFractSqReparam {x : ℝ} (hx : -1 < x) : -1 < floorFractSqReparam x := by
   have hfl : -1 ≤ ⌊x⌋ := Int.le_floor.mpr (by push_cast; linarith)
   rcases hfl.lt_or_eq with h | h
   · have : (0:ℝ) ≤ ⌊x⌋ := by exact_mod_cast (show (0:ℤ) ≤ ⌊x⌋ by omega)
-    rw [logR4_g]; nlinarith [sq_nonneg (Int.fract x)]
+    rw [floorFractSqReparam]; nlinarith [sq_nonneg (Int.fract x)]
   · have hfr : Int.fract x = x + 1 := by rw [Int.fract, ← h]; push_cast; ring
-    rw [logR4_g, ← h, hfr]; push_cast; nlinarith
+    rw [floorFractSqReparam, ← h, hfr]; push_cast; nlinarith
 
 /-- The inverse reparametrization preserves the exponential domain. -/
-lemma logR4_ginv_gt {x : ℝ} (hx : -1 < x) : -1 < logR4_ginv x := by
+private lemma neg_one_lt_floorFractSqrtReparam {x : ℝ} (hx : -1 < x) : -1 < floorFractSqrtReparam x := by
   have hfl : -1 ≤ ⌊x⌋ := Int.le_floor.mpr (by push_cast; linarith)
   rcases hfl.lt_or_eq with h | h
   · have : (0:ℝ) ≤ ⌊x⌋ := by exact_mod_cast (show (0:ℤ) ≤ ⌊x⌋ by omega)
-    rw [logR4_ginv]; linarith [Real.sqrt_nonneg (Int.fract x)]
+    rw [floorFractSqrtReparam]; linarith [Real.sqrt_nonneg (Int.fract x)]
   · have hfr : Int.fract x = x + 1 := by rw [Int.fract, ← h]; push_cast; ring
-    rw [logR4_ginv, ← h, hfr]; push_cast
+    rw [floorFractSqrtReparam, ← h, hfr]; push_cast
     linarith [Real.sqrt_pos.mpr (show 0 < x + 1 by linarith)]
 
 /-- On the fundamental interval the reparametrization is squaring. -/
-lemma logR4_g_Icc {x : ℝ} (hx : x ∈ Icc (0:ℝ) 1) : logR4_g x = x^2 := by
+private lemma floorFractSqReparam_of_mem_Icc {x : ℝ} (hx : x ∈ Icc (0:ℝ) 1) : floorFractSqReparam x = x^2 := by
   rcases hx.2.lt_or_eq with h | rfl
-  · obtain ⟨ha, hb⟩ := logR4_floor_fract (n := 0) (u := x) hx.1 h
+  · obtain ⟨ha, hb⟩ := floor_intCast_add_and_fract_intCast_add (n := 0) (u := x) hx.1 h
     simp only [Int.cast_zero, zero_add] at ha hb
-    rw [logR4_g, ha, hb]; simp
-  · simp [logR4_g]
+    rw [floorFractSqReparam, ha, hb]; simp
+  · simp [floorFractSqReparam]
 
 /-- Generalized logarithms and exponentials are not unique (4.12, prose). -/
 theorem generalizedExpLog_not_unique :
     ∃ φ ψ : ℝ → ℝ, IsGeneralizedExpLog φ ψ ∧ φ ≠ generalizedExp := by
   have hs := generalizedExpLog_spec
-  refine ⟨fun x => generalizedExp (logR4_g x), fun x => logR4_ginv (generalizedLog x), ?_, ?_⟩
+  refine ⟨fun x => generalizedExp (floorFractSqReparam x), fun x => floorFractSqrtReparam (generalizedLog x), ?_, ?_⟩
   · refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
     · intro x hx
-      simp only [logR4_g_add_one]
-      exact hs.exp_shift _ (logR4_g_gt hx)
-    · simp [logR4_g, hs.exp_zero]
+      simp only [floorFractSqReparam_add_one]
+      exact hs.exp_shift _ (neg_one_lt_floorFractSqReparam hx)
+    · simp [floorFractSqReparam, hs.exp_zero]
     · intro x hx y hy hxy
-      have hgx : logR4_g x ∈ Icc (0:ℝ) 1 := by
-        rw [logR4_g_Icc hx]; exact ⟨sq_nonneg _, by nlinarith [hx.1, hx.2]⟩
-      have hgy : logR4_g y ∈ Icc (0:ℝ) 1 := by
-        rw [logR4_g_Icc hy]; exact ⟨sq_nonneg _, by nlinarith [hy.1, hy.2]⟩
+      have hgx : floorFractSqReparam x ∈ Icc (0:ℝ) 1 := by
+        rw [floorFractSqReparam_of_mem_Icc hx]; exact ⟨sq_nonneg _, by nlinarith [hx.1, hx.2]⟩
+      have hgy : floorFractSqReparam y ∈ Icc (0:ℝ) 1 := by
+        rw [floorFractSqReparam_of_mem_Icc hy]; exact ⟨sq_nonneg _, by nlinarith [hy.1, hy.2]⟩
       apply hs.exp_strictMono hgx hgy
-      rw [logR4_g_Icc hx, logR4_g_Icc hy]
+      rw [floorFractSqReparam_of_mem_Icc hx, floorFractSqReparam_of_mem_Icc hy]
       nlinarith [hx.1, hy.1]
     · intro x hx
-      rw [hs.log_exp _ (logR4_g_gt hx), logR4_ginv_g]
+      rw [hs.log_exp _ (neg_one_lt_floorFractSqReparam hx), floorFractSqrtReparam_floorFractSqReparam]
     · intro x
-      rw [logR4_g_ginv, hs.exp_log]
+      rw [floorFractSqReparam_floorFractSqrtReparam, hs.exp_log]
     · intro x
-      exact logR4_ginv_gt (hs.log_range x)
+      exact neg_one_lt_floorFractSqrtReparam (hs.log_range x)
   · intro h
     have := congrFun h (1/2)
-    rw [logR4_g_Icc ⟨by norm_num, by norm_num⟩, (generalized_eq_self ⟨by norm_num, by norm_num⟩).1,
+    rw [floorFractSqReparam_of_mem_Icc ⟨by norm_num, by norm_num⟩, (generalized_eq_self ⟨by norm_num, by norm_num⟩).1,
       (generalized_eq_self ⟨by norm_num, by norm_num⟩).1] at this
     norm_num at this
 

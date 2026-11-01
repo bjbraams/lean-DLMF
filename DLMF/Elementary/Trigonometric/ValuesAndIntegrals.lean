@@ -8,12 +8,49 @@ module
 public import DLMF.Elementary.Trigonometric.InverseIdentities
 
 /-!
-# Exact trigonometric values and integral formulas
+# Exact trigonometric values and integrals
 
-Exact algebraic tables, antiderivatives and conditionally convergent improper integrals.
+This file proves the exact-value tables of the trigonometric and inverse trigonometric functions
+(DLMF §§4.16, 4.17, 4.23), branch-point obstructions, and the antiderivatives, orthogonality
+relations and improper integrals of DLMF §4.26.
 
-Source references and common attribution are retained in
-`DLMF.Elementary.Trigonometric`.
+## Main definitions
+
+* `trigRealVector`, `trigQuadrantSigns`, `trigInterrelationTable`, `trigTwelfthTable`,
+  `inverseTrigRealVector`: the data of the exact-value tables.
+* `TrigTwelfthPole`: the pole cells of Table 4.17.1.
+
+## Main results
+
+* `trig_quadrant_signs`, `trig_quarter_period_table`, `trig_interrelation_table`:
+  Tables 4.16.1–4.16.3.
+* `trig_twelfth_exact_values`, `trig_twelfth_poles`: Table 4.17.1.
+* `inverse_trig_exact_table`, `inverse_reciprocal_limits`, `arccot_zero_bank_limits`:
+  Table 4.23.1.
+* `arcsec_arccot_interrelation`: the interrelation of DLMF §4.23(vii).
+* `inverse_sin_cos_branch_points`, `inverse_tan_cot_branch_points`,
+  `inverse_reciprocal_branch_points`: no analytic inverse branch crosses a branch point
+  (DLMF §4.23(i)).
+* `trig_phase_amplitude`: the real phase-amplitude reduction (DLMF 4.21.1_5).
+* `hasDerivAt_neg_log_cos`, `hasDerivAt_log_tan_half`, `hasDerivAt_inverse_gudermannian`,
+  `hasDerivAt_log_sin`, `hasDerivAt_exp_sin_antiderivative`, `hasDerivAt_exp_cos_antiderivative`:
+  antiderivatives (DLMF 4.26.3–4.26.8).
+* `integral_sin_integer_orthogonal`, `integral_cos_integer_orthogonal`,
+  `integral_trig_integer_squares`: orthogonality (DLMF 4.26.9–4.26.11).
+* `dirichlet_integral_scaled`, `fresnel_integrals_elementary`: DLMF 4.26.12–4.26.13.
+* `hasDerivAt_arcsin_antiderivative`, `hasDerivAt_arccot_antiderivative`,
+  `hasDerivAt_mul_arcsin_antiderivative`, `hasDerivAt_mul_arccos_antiderivative`:
+  antiderivatives of the inverse functions (DLMF 4.26.14–4.26.21).
+* `complex_trig_log_primitives`, `complex_inverse_sin_cos_primitives`,
+  `complex_arctan_primitive`, `complex_reciprocal_inverse_primitives`,
+  `complex_arccot_primitive`: complex primitives (DLMF §4.26(i)).
+
+## Implementation notes
+
+The orthogonality relations are stated for all integers `m`, `n`, which requires excluding
+`m = -n` as well as `m = n`. The Dirichlet integral is an ordered improper limit, stated for
+every real frequency; stronger than DLMF. The sine orthogonality API comes from TauCeti.
+
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
 -/
 
@@ -36,11 +73,11 @@ def trigQuadrantSigns : Fin 4→Fin 6→ℝ :=
   ![![1,1,1,1,1,1],![1,-1,-1,1,-1,-1],![-1,-1,1,-1,-1,1],![-1,1,-1,-1,1,-1]]
 
 /-- Sign of a positive real. -/
-private lemma trigR4_sign_pos {x : ℝ} (h : 0 < x) : trigRealSign x = 1 := by
+private lemma trigRealSign_of_pos {x : ℝ} (h : 0 < x) : trigRealSign x = 1 := by
   simp [trigRealSign, h]
 
 /-- Sign of a negative real. -/
-private lemma trigR4_sign_neg {x : ℝ} (h : x < 0) : trigRealSign x = -1 := by
+private lemma trigRealSign_of_neg {x : ℝ} (h : x < 0) : trigRealSign x = -1 := by
   simp [trigRealSign, h, not_lt.mpr h.le]
 
 /-- DLMF 4.16.T1: trig quadrant signs. -/
@@ -55,12 +92,12 @@ theorem trig_quadrant_signs (q : Fin 4) {θ : ℝ}
     have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
     have hc : 0 < Real.cos θ := Real.cos_pos_of_mem_Ioo ⟨by linarith, by linarith⟩
     fin_cases j <;> simp [trigRealVector, trigQuadrantSigns, Real.tan_eq_sin_div_cos,
-      Real.cot_eq_cos_div_sin, trigR4_sign_pos, hs, hc]
+      Real.cot_eq_cos_div_sin, trigRealSign_of_pos, hs, hc]
   · simp at h1 h2
     have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
     have hc : Real.cos θ < 0 := Real.cos_neg_of_pi_div_two_lt_of_lt (by linarith) (by linarith)
     fin_cases j <;> simp [trigRealVector, trigQuadrantSigns, Real.tan_eq_sin_div_cos,
-      Real.cot_eq_cos_div_sin, trigR4_sign_pos, trigR4_sign_neg, hs, hc, div_neg_of_pos_of_neg,
+      Real.cot_eq_cos_div_sin, trigRealSign_of_pos, trigRealSign_of_neg, hs, hc, div_neg_of_pos_of_neg,
       div_neg_of_neg_of_pos]
   · simp at h1 h2
     norm_num at h1 h2
@@ -71,7 +108,7 @@ theorem trig_quadrant_signs (q : Fin 4) {θ : ℝ}
       have := Real.cos_pos_of_mem_Ioo (x := θ - π) ⟨by linarith, by linarith⟩
       rw [Real.cos_sub_pi] at this; linarith
     fin_cases j <;> simp [trigRealVector, trigQuadrantSigns, Real.tan_eq_sin_div_cos,
-      Real.cot_eq_cos_div_sin, trigR4_sign_pos, trigR4_sign_neg, hs, hc, div_pos_of_neg_of_neg]
+      Real.cot_eq_cos_div_sin, trigRealSign_of_pos, trigRealSign_of_neg, hs, hc, div_pos_of_neg_of_neg]
   · simp at h1 h2
     norm_num at h1 h2
     have hs : Real.sin θ < 0 := by
@@ -81,7 +118,7 @@ theorem trig_quadrant_signs (q : Fin 4) {θ : ℝ}
       have := Real.cos_pos_of_mem_Ioo (x := θ - 2*π) ⟨by linarith, by linarith⟩
       rwa [Real.cos_sub_two_pi] at this
     fin_cases j <;> simp [trigRealVector, trigQuadrantSigns, Real.tan_eq_sin_div_cos,
-      Real.cot_eq_cos_div_sin, trigR4_sign_pos, trigR4_sign_neg, hs, hc, div_neg_of_pos_of_neg,
+      Real.cot_eq_cos_div_sin, trigRealSign_of_pos, trigRealSign_of_neg, hs, hc, div_neg_of_pos_of_neg,
       div_neg_of_neg_of_pos]
 
 /-- All quarter-period identities; reflection and the full period supply both signs in Table 4.16.2. -/
@@ -162,7 +199,7 @@ def TrigTwelfthPole (q : Fin 13) (j : Fin 6) : Prop :=
   ((q=0 ∨ q=12) ∧ (j=3 ∨ j=5)) ∨ (q=6 ∧ (j=2 ∨ j=4))
 
 /-- Exact sine and cosine at `π/12`. -/
-lemma trigR4_sin_cos_pi_div_twelve :
+private lemma sin_cos_pi_div_twelve :
     Real.sin (π/12) = Real.sqrt 2 * (Real.sqrt 3 - 1) / 4 ∧
     Real.cos (π/12) = Real.sqrt 2 * (Real.sqrt 3 + 1) / 4 := by
   have h : π/12 = π/3 - π/4 := by ring
@@ -174,7 +211,7 @@ lemma trigR4_sin_cos_pi_div_twelve :
 @[dlmf 4.17.T1]
 theorem trig_twelfth_exact_values (q : Fin 13) (j : Fin 6) (h : ¬TrigTwelfthPole q j) :
     trigRealVector ((q:ℝ)*π/12) j=trigTwelfthTable q j := by
-  obtain ⟨s1, c1⟩ := trigR4_sin_cos_pi_div_twelve
+  obtain ⟨s1, c1⟩ := sin_cos_pi_div_twelve
   have hr : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (by norm_num)
   have ht : Real.sqrt 3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
   have hr0 : 0 < Real.sqrt 2 := by positivity
@@ -245,7 +282,7 @@ theorem trig_twelfth_exact_values (q : Fin 13) (j : Fin 6) (h : ¬TrigTwelfthPol
     fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢
 
 /-- Real reciprocal blow-up at a simple zero. -/
-lemma trigR4_real_pole {g h : ℝ → ℝ} {a : ℝ} {g' : ℝ} (hg : HasDerivAt g g' a) (hg' : g' ≠ 0)
+private lemma tendsto_abs_mul_inv_atTop_of_simple_zero {g h : ℝ → ℝ} {a : ℝ} {g' : ℝ} (hg : HasDerivAt g g' a) (hg' : g' ≠ 0)
     (hga : g a = 0) (hh : ContinuousAt h a) (hha : h a ≠ 0) :
     Tendsto (fun θ => |h θ * (g θ)⁻¹|) (𝓝[≠] a) atTop := by
   have hne : ∀ᶠ θ in 𝓝[≠] a, g θ ≠ 0 := by simpa [hga] using hg.eventually_ne hg'
@@ -268,13 +305,13 @@ theorem trig_twelfth_poles (q : Fin 13) (j : Fin 6) (h : TrigTwelfthPole q j) :
   have hsin : ∀ a : ℝ, Real.sin a = 0 → Real.cos a ≠ 0 →
       Tendsto (fun θ : ℝ => |1 * (Real.sin θ)⁻¹|) (𝓝[≠] a) atTop ∧
       Tendsto (fun θ : ℝ => |Real.cos θ * (Real.sin θ)⁻¹|) (𝓝[≠] a) atTop := fun a h0 hc =>
-    ⟨trigR4_real_pole (Real.hasDerivAt_sin a) hc h0 continuousAt_const one_ne_zero,
-     trigR4_real_pole (Real.hasDerivAt_sin a) hc h0 Real.continuous_cos.continuousAt hc⟩
+    ⟨tendsto_abs_mul_inv_atTop_of_simple_zero (Real.hasDerivAt_sin a) hc h0 continuousAt_const one_ne_zero,
+     tendsto_abs_mul_inv_atTop_of_simple_zero (Real.hasDerivAt_sin a) hc h0 Real.continuous_cos.continuousAt hc⟩
   have hcos : ∀ a : ℝ, Real.cos a = 0 → Real.sin a ≠ 0 →
       Tendsto (fun θ : ℝ => |1 * (Real.cos θ)⁻¹|) (𝓝[≠] a) atTop ∧
       Tendsto (fun θ : ℝ => |Real.sin θ * (Real.cos θ)⁻¹|) (𝓝[≠] a) atTop := fun a h0 hs =>
-    ⟨trigR4_real_pole (Real.hasDerivAt_cos a) (neg_ne_zero.mpr hs) h0 continuousAt_const one_ne_zero,
-     trigR4_real_pole (Real.hasDerivAt_cos a) (neg_ne_zero.mpr hs) h0 Real.continuous_sin.continuousAt hs⟩
+    ⟨tendsto_abs_mul_inv_atTop_of_simple_zero (Real.hasDerivAt_cos a) (neg_ne_zero.mpr hs) h0 continuousAt_const one_ne_zero,
+     tendsto_abs_mul_inv_atTop_of_simple_zero (Real.hasDerivAt_cos a) (neg_ne_zero.mpr hs) h0 Real.continuous_sin.continuousAt hs⟩
   simp only [TrigTwelfthPole] at h
   rcases h with ⟨hq | hq, hj | hj⟩ | ⟨hq, hj | hj⟩ <;> subst hq <;> subst hj
   · simpa [trigRealVector] using (hsin 0 (by simp) (by simp)).1
@@ -887,7 +924,7 @@ theorem complex_reciprocal_inverse_primitives {z : ℂ} (hz : z∈arccscCutPlane
       have : z.re*z.im ≠ 0 := mul_ne_zero hr.ne' hy
       intro h; apply this; linarith
   have hr0 : 0 ≤ (Complex.sqrt (z^2-1)).re := by
-    rw [(trigR4_sqrt_re_im _).1]; exact Real.sqrt_nonneg _
+    rw [(re_sqrt_and_im_sqrt _).1]; exact Real.sqrt_nonneg _
   have hp : z + Complex.sqrt (z^2-1) ∈ Complex.slitPlane := by
     rw [Complex.mem_slitPlane_iff]; left; simp only [Complex.add_re]; linarith
   have hb0 : Complex.sqrt (z^2-1) ≠ 0 := by

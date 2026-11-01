@@ -11,12 +11,32 @@ public import DLMF.Legendre.Hypergeometric
 public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 
 /-!
-# Associated Legendre behavior at singularities
+# Behavior of Legendre functions at the singularities
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+The leading behavior of the Ferrers functions `𝖯^μ_ν(x)`, `𝖰^μ_ν(x)` as `x → 1⁻` and of the
+associated Legendre functions `P^μ_ν(x)`, `𝑸^μ_ν(x)` as `x → 1⁺` and `x → ∞` (DLMF §14.8).
+Asymptotic equivalences are stated with `Asymptotics.IsEquivalent` and error terms with `=O[…]`.
+
+## Main results
+
+* `legendre_singular_1`, `legendre_singular_2`: `𝖯^μ_ν(x)` as `x → 1⁻` (DLMF 14.8.1, 14.8.2).
+* `ferrersQ_log_singular`: the logarithmic behavior of `𝖰_ν(x)` as `x → 1⁻` (DLMF 14.8.3).
+* `legendre_singular_4`, `legendre_singular_5`, `legendre_singular_6`: `𝖰^{±μ}_ν(x)` as
+  `x → 1⁻` (DLMF 14.8.4–14.8.6).
+* `legendre_singular_7`, `legendre_singular_8`: `P^μ_ν(x)` as `x → 1⁺` (DLMF 14.8.7, 14.8.8).
+* `olverQ_log_singular`, `olverQ_log_singular_recipGamma`: the logarithmic behavior of `𝑸_ν(x)`
+  as `x → 1⁺` (DLMF 14.8.9).
+* `olverQ_negative_degree_singular`: the limit of `𝑸_{-n}(x)` as `x → 1⁺` (DLMF 14.8.10).
+* `legendre_singular_11`: `𝑸^μ_ν(x)` as `x → 1⁺` (DLMF 14.8.11).
+* `legendre_singular_12`, `legendre_singular_13`, `legendre_singular_14`: `P^μ_ν(x)` as `x → ∞`
+  (DLMF 14.8.12–14.8.14).
+* `legendre_singular_15`, `legendre_singular_16`: `𝑸^μ_ν(x)` as `x → ∞` (DLMF 14.8.15, 14.8.16).
+
+## Implementation notes
+
+`legendre_singular_2` also covers `m = 0`, where DLMF requires `m ≥ 1`.
+`olverQ_log_singular_recipGamma` writes `ψ(ν+1)/Γ(ν+1)` as `-(1/Γ)'(ν+1)`; it is stronger than
+DLMF, since it holds for all `ν`, including `ν = -1, -2, …`.
 -/
 
 @[expose] public noncomputable section
@@ -105,10 +125,10 @@ theorem legendre_singular_1 (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1) :
   push_cast
   field_simp
 
-/-- DLMF 14.8.2: for `m ≥ 1` with `(ν−m+1)_{2m} ≠ 0`, `𝖯^m_ν(x) ~ (−1)^m (ν−m+1)_{2m}/m! ·
+/-- DLMF 14.8.2: for `m ∈ ℕ` (DLMF: `m ≥ 1`) with `(ν−m+1)_{2m} ≠ 0`, `𝖯^m_ν(x) ~ (−1)^m (ν−m+1)_{2m}/m! ·
 ((1−x)/2)^{m/2}` as `x → 1⁻`. -/
 @[dlmf 14.8.E2]
-theorem legendre_singular_2 (ν : ℂ) (m : ℕ) (hm : 0 < m) (hν : poch (ν-m+1) (2*m) ≠ 0) :
+theorem legendre_singular_2 (ν : ℂ) (m : ℕ) (hν : poch (ν-m+1) (2*m) ≠ 0) :
     (fun x : ℝ => ferrersP ν m x) ~[𝓝[<] (1:ℝ)] (fun x : ℝ => (-1)^m*poch (ν-m+1) (2*m)/(m.factorial:ℂ)*((1-x)/2:ℂ)^((m:ℂ)/2)) := by
   have hf : (m.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   have hc : ∀ n : ℕ, (m:ℂ)+1 ≠ -n := fun n hn => by

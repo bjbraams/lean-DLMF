@@ -12,14 +12,17 @@ public import Mathlib.Analysis.SpecialFunctions.Bernstein
 /-!
 # Tools for orthogonality of `q`-families
 
-Helpers for DLMF §§18.27–18.28:
+Auxiliary summation results for DLMF §§18.27–18.28.
 
-* the balanced `q`-Pfaff–Saalschütz sum in the standard form
-  `₃φ₂(q^{-n}, r, s; c, e; q, q)` with `c e = q^{1-n} r s` (`qOrth_saalschutz`), obtained
-  termwise from the polynomial form `DLMF.QSeries.sum_qBinom_saalschutz`;
-* moments of the little `q`-Jacobi weight by the `q`-binomial theorem
-  (`qOrth_littleQJacobi_moment`) and the vanishing of the resulting moment sums
-  (`qOrth_littleQJacobi_sum_zero`).
+## Main results
+
+* `qOrth_saalschutz`: the balanced `q`-Pfaff–Saalschütz sum in the standard form
+  `₃φ₂(q^{-n}, r, s; c, e; q, q)` with `c e = q^{1-n} r s`, obtained termwise from the
+  polynomial form `DLMF.QSeries.sum_qBinom_saalschutz`.
+* `qOrth_littleQJacobi_moment`: moments of the little `q`-Jacobi weight, by the `q`-binomial
+  theorem.
+* `qOrth_littleQJacobi_sum_zero`: vanishing of the moment sums behind little `q`-Jacobi
+  orthogonality.
 -/
 
 @[expose] public section

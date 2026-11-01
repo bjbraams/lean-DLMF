@@ -10,9 +10,27 @@ public import DLMF.NumberTheory.Inversion
 /-!
 # Divisor sums and Lambert series (DLMF §§27.6–27.7)
 
+Identities for divisor sums of the classical arithmetic functions (DLMF §27.6) and Lambert
+series (DLMF §27.7).
+
+## Main definitions
+
+* `lambertSeries`: the Lambert series `∑_{n≥1} f(n) xⁿ/(1 - xⁿ)` (DLMF 27.7.1).
+
+## Main results
+
+* `sum_divisors_liouville`, `sum_divisors_moebius_mul`, `sum_divisors_abs_moebius`,
+  `sum_sq_dvd_moebius`, `sum_divisors_abs_moebius_div_totient`: DLMF 27.6.1–27.6.5.
+* `sum_divisors_totientPowerSum`, `sum_divisors_moebius_pow`, `sum_divisors_jordanTotient`:
+  DLMF 27.6.6–27.6.8.
+* `lambertSeries_hasSum`: a Lambert series as a power series (DLMF 27.7.2).
+* `lambert_moebius`, `lambert_totient`, `lambert_cpow`, `lambert_liouville`: DLMF 27.7.3–27.7.6.
+
+## Implementation notes
+
 Divisor sums are written `∑ d ∈ n.divisors, …`; DLMF's `∑_{d²∣n}` is the sum over the divisors
 `d` of `n` with `d² ∣ n`. DLMF 27.6.2 is stated by DLMF for `n > 1`; it holds for `n = 1` as
-well and is proved for all `n ≥ 1`. Lambert series (27.7.1) are written with the index shifted
+well and is stated here for all `n ≥ 1`. Lambert series (27.7.1) are written with the index shifted
 to `n + 1 ≥ 1`; for `|x| < 1` every series of §27.7 converges absolutely, and the identities
 are stated with `HasSum`. Mathlib's `tsum_pow_div_one_sub_eq_tsum_sigma` is 27.7.5 for natural
 `α` (as an equality of `tsum`s over `ℕ+`).
@@ -68,7 +86,7 @@ theorem sum_divisors_liouville {n : ℕ} (hn : 0 < n) :
     exact h p (Nat.prime_of_mem_primeFactors hp)
 
 /-- The prime power case of 27.6.2: `∑_{d∣p^k} μ(d) g(d) = g(1) - g(p)` for `k ≥ 1`. -/
-lemma n27_sum_divisors_prime_pow_moebius_mul {R : Type*} [CommRing R] (g : ℕ → R)
+private lemma sum_divisors_prime_pow_moebius_mul {R : Type*} [CommRing R] (g : ℕ → R)
     {p k : ℕ} (hp : p.Prime) (hk : k ≠ 0) :
     ∑ d ∈ (p ^ k).divisors, (μ d : R) * g d = g 1 - g p := by
   rw [Nat.divisors_prime_pow hp, Finset.sum_map]
@@ -104,7 +122,7 @@ theorem sum_divisors_moebius_mul {R : Type*} [CommRing R] (f : ArithmeticFunctio
   rw [← hgn, hg.multiplicative_factorization g hn, Nat.prod_factorization_eq_prod_primeFactors]
   refine Finset.prod_congr rfl fun p hp ↦ ?_
   have hp' := Nat.prime_of_mem_primeFactors hp
-  rw [hgn, n27_sum_divisors_prime_pow_moebius_mul f hp'
+  rw [hgn, sum_divisors_prime_pow_moebius_mul f hp'
     (hp'.factorization_pos_of_dvd hn (Nat.dvd_of_mem_primeFactors hp)).ne', hf.1]
 
 /-- DLMF 27.6.3: `∑_{d∣n} |μ(d)| = 2^{ν(n)}`. -/
@@ -130,12 +148,12 @@ theorem sum_divisors_abs_moebius {n : ℕ} (hn : n ≠ 0) :
   simp
 
 /-- `λ(d)/φ(d)` as a rational arithmetic function. -/
-def q27_liouvilleDivTotient : ArithmeticFunction ℚ :=
+def liouvilleDivTotient : ArithmeticFunction ℚ :=
   ⟨fun d ↦ (liouville d : ℚ) / d.totient, by simp⟩
 
 /-- `λ/φ` is multiplicative. -/
-lemma q27_isMultiplicative_liouvilleDivTotient : q27_liouvilleDivTotient.IsMultiplicative := by
-  refine ⟨by simp [q27_liouvilleDivTotient, liouville_apply_one], fun {m n} hmn ↦ ?_⟩
+private lemma isMultiplicative_liouvilleDivTotient : liouvilleDivTotient.IsMultiplicative := by
+  refine ⟨by simp [liouvilleDivTotient, liouville_apply_one], fun {m n} hmn ↦ ?_⟩
   change (liouville (m * n) : ℚ) / (m * n).totient =
     (liouville m : ℚ) / m.totient * ((liouville n : ℚ) / n.totient)
   rw [liouville_apply_mul, Nat.totient_mul hmn]
@@ -143,12 +161,12 @@ lemma q27_isMultiplicative_liouvilleDivTotient : q27_liouvilleDivTotient.IsMulti
   rw [mul_div_mul_comm]
 
 /-- DLMF 27.6.5 (proof). -/
-lemma q27_sum_divisors_abs_moebius_div_totient {n : ℕ} (hn : n ≠ 0) :
+private lemma sum_divisors_abs_moebius_div_totient_eq_div {n : ℕ} (hn : n ≠ 0) :
     ∑ d ∈ n.divisors, (|μ d| : ℚ) / d.totient = n / n.totient := by
-  have h := sum_divisors_moebius_mul (R := ℚ) q27_liouvilleDivTotient
-    q27_isMultiplicative_liouvilleDivTotient hn
+  have h := sum_divisors_moebius_mul (R := ℚ) liouvilleDivTotient
+    isMultiplicative_liouvilleDivTotient hn
   have habs : ∀ d ∈ n.divisors, (|μ d| : ℚ) / d.totient =
-      (μ d : ℚ) * q27_liouvilleDivTotient d := by
+      (μ d : ℚ) * liouvilleDivTotient d := by
     intro d hd
     have hd0 : d ≠ 0 := Nat.ne_of_gt (Nat.pos_of_mem_divisors hd)
     change _ = (μ d : ℚ) * ((liouville d : ℚ) / d.totient)
@@ -182,7 +200,7 @@ lemma q27_sum_divisors_abs_moebius_div_totient {n : ℕ} (hn : n ≠ 0) :
   ring
 
 /-- DLMF 27.6.6 (proof): group `m ≤ n` by `n/(m,n)`. -/
-lemma q27_sum_divisors_totientPowerSum (k n : ℕ) :
+private lemma sum_divisors_totientPowerSum_mul_pow (k n : ℕ) :
     ∑ d ∈ n.divisors, totientPowerSum k d * (n / d) ^ k = ∑ m ∈ Finset.Icc 1 n, m ^ k := by
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp
@@ -247,25 +265,25 @@ lemma q27_sum_divisors_totientPowerSum (k n : ℕ) :
 @[dlmf 27.6.E4]
 theorem sum_sq_dvd_moebius {n : ℕ} (hn : n ≠ 0) :
     ∑ d ∈ n.divisors with d ^ 2 ∣ n, μ d = |μ n| :=
-  q27_sum_sq_dvd_moebius hn
+  sum_divisors_sq_dvd_moebius hn
 
 /-- DLMF 27.6.5: `∑_{d∣n} |μ(d)|/φ(d) = n/φ(n)`. -/
 @[dlmf 27.6.E5]
 theorem sum_divisors_abs_moebius_div_totient {n : ℕ} (hn : n ≠ 0) :
     ∑ d ∈ n.divisors, (|μ d| : ℚ) / d.totient = n / n.totient :=
-  q27_sum_divisors_abs_moebius_div_totient hn
+  sum_divisors_abs_moebius_div_totient_eq_div hn
 
 /-- DLMF 27.6.6: `∑_{d∣n} φ_k(d) (n/d)^k = 1^k + 2^k + ⋯ + n^k`. -/
 @[dlmf 27.6.E6]
 theorem sum_divisors_totientPowerSum (k n : ℕ) :
     ∑ d ∈ n.divisors, totientPowerSum k d * (n / d) ^ k = ∑ m ∈ Finset.Icc 1 n, m ^ k :=
-  q27_sum_divisors_totientPowerSum k n
+  sum_divisors_totientPowerSum_mul_pow k n
 
 /-- DLMF 27.6.8: `∑_{d∣n} J_k(d) = n^k`. -/
 @[dlmf 27.6.E8]
 theorem sum_divisors_jordanTotient (k : ℕ) {n : ℕ} (hn : 0 < n) :
     ∑ d ∈ n.divisors, jordanTotient k d = n ^ k :=
-  q27_sum_divisors_jordanTotient k hn
+  sum_divisors_jordanTotient_eq_pow k hn
 
 /-- DLMF 27.6.7: `∑_{d∣n} μ(d) (n/d)^k = J_k(n)`; the Möbius inverse of 27.6.8. -/
 @[dlmf 27.6.E7]
@@ -288,7 +306,7 @@ def lambertSeries (f : ℕ → ℂ) (x : ℂ) : ℂ :=
   ∑' n : ℕ, f (n + 1) * x ^ (n + 1) / (1 - x ^ (n + 1))
 
 /-- `∑_{b≥1} y^b = y/(1 - y)` for `‖y‖ < 1`, over `ℕ+`. -/
-lemma q27_hasSum_geometric_pnat {K : Type*} [NormedDivisionRing K]
+private lemma hasSum_geometric_pnat {K : Type*} [NormedDivisionRing K]
     {y : K} (hy : ‖y‖ < 1) : HasSum (fun b : ℕ+ ↦ y ^ (b : ℕ)) (y * (1 - y)⁻¹) := by
   rw [← (Equiv.pnatEquivNat.symm.hasSum_iff (f := fun b : ℕ+ ↦ y ^ (b : ℕ)))]
   have := (hasSum_geometric_of_norm_lt_one hy).mul_left y
@@ -298,7 +316,7 @@ lemma q27_hasSum_geometric_pnat {K : Type*} [NormedDivisionRing K]
 
 /-- Lambert series rearrangement: the double series `∑_{a,b≥1} f(a) x^{ab}` summed by rows and
 by diagonals. -/
-lemma q27_lambert_core (f : ℕ → ℂ) {x : ℂ} (hx : ‖x‖ < 1)
+private lemma hasSum_lambert_rows_and_diagonals (f : ℕ → ℂ) {x : ℂ} (hx : ‖x‖ < 1)
     (hf : Summable fun n : ℕ ↦ ‖f (n + 1)‖ * ‖x‖ ^ (n + 1)) :
     HasSum (fun n : ℕ ↦ f (n + 1) * x ^ (n + 1) / (1 - x ^ (n + 1)))
         (∑' c : ℕ+ × ℕ+, f c.1 * x ^ ((c.1 : ℕ) * c.2)) ∧
@@ -312,7 +330,7 @@ lemma q27_lambert_core (f : ℕ → ℂ) {x : ℂ} (hx : ‖x‖ < 1)
   have hrow : ∀ a : ℕ+, HasSum (fun b ↦ c (a, b))
       (f a * (x ^ (a : ℕ) * (1 - x ^ (a : ℕ))⁻¹)) := by
     intro a
-    have := (q27_hasSum_geometric_pnat (hpow a)).mul_left (f a)
+    have := (hasSum_geometric_pnat (hpow a)).mul_left (f a)
     convert this using 2 with b
     simp only [hc, pow_mul]
   have hsumm : Summable c := by
@@ -323,7 +341,7 @@ lemma q27_lambert_core (f : ℕ → ℂ) {x : ℂ} (hx : ‖x‖ < 1)
     · have hra : ∀ a : ℕ+, ∑' b, ‖c (a, b)‖ ≤ ‖f a‖ * r ^ (a : ℕ) * (1 - r)⁻¹ := by
         intro a
         have hr1 : r ^ (a : ℕ) < 1 := pow_lt_one₀ hr0 hx a.ne_zero
-        have hg := (q27_hasSum_geometric_pnat (K := ℝ) (y := r ^ (a : ℕ))
+        have hg := (hasSum_geometric_pnat (K := ℝ) (y := r ^ (a : ℕ))
           (by rw [Real.norm_of_nonneg (pow_nonneg hr0 _)]; exact hr1)).mul_left ‖f a‖
         have : HasSum (fun b ↦ ‖c (a, b)‖) (‖f a‖ * (r ^ (a : ℕ) * (1 - r ^ (a : ℕ))⁻¹)) := by
           convert hg using 2 with b
@@ -342,11 +360,11 @@ lemma q27_lambert_core (f : ℕ → ℂ) {x : ℂ} (hx : ‖x‖ < 1)
   have hT := hsumm.hasSum
   refine ⟨?_, ?_⟩
   · have h1 := hT.prod_fiberwise hrow
-    rw [q27_hasSum_pnat_iff] at h1
+    rw [hasSum_pnat_iff_succPNat] at h1
     convert h1 using 2 with n
     simp [div_eq_mul_inv, mul_assoc]
-  · have h2 := q27_hasSum_divisorsAntidiagonal hT
-    rw [q27_hasSum_pnat_iff] at h2
+  · have h2 := hasSum_sum_divisorsAntidiagonal_of_hasSum hT
+    rw [hasSum_pnat_iff_succPNat] at h2
     convert h2 using 2 with n
     rw [Nat.succPNat_coe, sum_mul, ← Nat.sum_divisorsAntidiagonal (fun a _ ↦ f a * x ^ (n + 1))]
     refine sum_congr rfl fun y hy ↦ ?_
@@ -358,24 +376,24 @@ lemma q27_lambert_core (f : ℕ → ℂ) {x : ℂ} (hx : ‖x‖ < 1)
     simp only [hc, PNat.mk_coe, hy'.1]
 
 /-- DLMF 27.7.2 (proof). -/
-lemma q27_lambertSeries_hasSum (f : ℕ → ℂ) {x : ℂ} (hx : ‖x‖ < 1)
+private lemma hasSum_lambertSeries_rows_and_diagonals (f : ℕ → ℂ) {x : ℂ} (hx : ‖x‖ < 1)
     (hf : Summable fun n : ℕ ↦ ‖f (n + 1)‖ * ‖x‖ ^ (n + 1)) :
     HasSum (fun n : ℕ ↦ f (n + 1) * x ^ (n + 1) / (1 - x ^ (n + 1))) (lambertSeries f x) ∧
       HasSum (fun n : ℕ ↦ (∑ d ∈ (n + 1).divisors, f d) * x ^ (n + 1)) (lambertSeries f x) := by
-  obtain ⟨h1, h2⟩ := q27_lambert_core f hx hf
+  obtain ⟨h1, h2⟩ := hasSum_lambert_rows_and_diagonals f hx hf
   have : lambertSeries f x = ∑' c : ℕ+ × ℕ+, f c.1 * x ^ ((c.1 : ℕ) * c.2) := h1.tsum_eq
   rw [this]
   exact ⟨h1, h2⟩
 
 /-- `∑ (n+1)^k r^{n+1}` converges for `0 ≤ r < 1`. -/
-lemma q27_summable_shift_pow_mul (k : ℕ) {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) :
+private lemma summable_natCast_succ_pow_mul_pow (k : ℕ) {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) :
     Summable fun n : ℕ ↦ ((n + 1 : ℕ) : ℝ) ^ k * r ^ (n + 1) := by
   have := summable_pow_mul_geometric_of_norm_lt_one (R := ℝ) k
     (by rw [Real.norm_of_nonneg hr0]; exact hr)
   exact (summable_nat_add_iff 1).mpr this
 
 /-- DLMF 27.7.3 (proof). -/
-lemma q27_lambert_moebius {x : ℂ} (hx : ‖x‖ < 1) :
+private lemma hasSum_lambert_moebius {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ (μ (n + 1) : ℂ) * x ^ (n + 1) / (1 - x ^ (n + 1))) x := by
   have hr0 : 0 ≤ ‖x‖ := norm_nonneg x
   have hf : Summable fun n : ℕ ↦ ‖((μ (n + 1) : ℤ) : ℂ)‖ * ‖x‖ ^ (n + 1) := by
@@ -386,12 +404,12 @@ lemma q27_lambert_moebius {x : ℂ} (hx : ‖x‖ < 1) :
     refine mul_le_of_le_one_left hr0 ?_
     rw [Complex.norm_intCast]
     exact_mod_cast abs_moebius_le_one
-  obtain ⟨h1, h2⟩ := q27_lambert_core (fun n ↦ ((μ n : ℤ) : ℂ)) hx hf
+  obtain ⟨h1, h2⟩ := hasSum_lambert_rows_and_diagonals (fun n ↦ ((μ n : ℤ) : ℂ)) hx hf
   have h3 : HasSum (fun n : ℕ ↦ (∑ d ∈ (n + 1).divisors, ((μ d : ℤ) : ℂ)) * x ^ (n + 1)) x := by
     have : (fun n : ℕ ↦ (∑ d ∈ (n + 1).divisors, ((μ d : ℤ) : ℂ)) * x ^ (n + 1)) =
         fun n ↦ if n = 0 then x else 0 := by
       funext n
-      rw [q27_sum_divisors_moebius_eq_ite]
+      rw [sum_divisors_moebius_eq_ite]
       split_ifs with h h' h' <;> simp_all
     rw [this]
     exact hasSum_ite_eq 0 x
@@ -399,17 +417,17 @@ lemma q27_lambert_moebius {x : ℂ} (hx : ‖x‖ < 1) :
   exact h1
 
 /-- DLMF 27.7.4 (proof). -/
-lemma q27_lambert_totient {x : ℂ} (hx : ‖x‖ < 1) :
+private lemma hasSum_lambert_totient {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ ((n + 1).totient : ℂ) * x ^ (n + 1) / (1 - x ^ (n + 1)))
       (x / (1 - x) ^ 2) := by
   have hr0 : 0 ≤ ‖x‖ := norm_nonneg x
   have hf : Summable fun n : ℕ ↦ ‖(((n + 1).totient : ℕ) : ℂ)‖ * ‖x‖ ^ (n + 1) := by
     refine Summable.of_nonneg_of_le (fun _ ↦ by positivity) (fun n ↦ ?_)
-      (q27_summable_shift_pow_mul 1 hr0 hx)
+      (summable_natCast_succ_pow_mul_pow 1 hr0 hx)
     rw [pow_one, Complex.norm_natCast]
     refine mul_le_mul_of_nonneg_right ?_ (by positivity)
     exact_mod_cast Nat.totient_le _
-  obtain ⟨h1, h2⟩ := q27_lambert_core (fun n ↦ ((n.totient : ℕ) : ℂ)) hx hf
+  obtain ⟨h1, h2⟩ := hasSum_lambert_rows_and_diagonals (fun n ↦ ((n.totient : ℕ) : ℂ)) hx hf
   have h3 : HasSum (fun n : ℕ ↦ (∑ d ∈ (n + 1).divisors, ((d.totient : ℕ) : ℂ)) * x ^ (n + 1))
       (x / (1 - x) ^ 2) := by
     have h0 := hasSum_coe_mul_geometric_of_norm_lt_one (𝕜 := ℂ) hx
@@ -421,7 +439,7 @@ lemma q27_lambert_totient {x : ℂ} (hx : ‖x‖ < 1) :
   exact h1
 
 /-- DLMF 27.7.5 (proof). -/
-lemma q27_lambert_cpow (α : ℂ) {x : ℂ} (hx : ‖x‖ < 1) :
+private lemma hasSum_lambert_cpow (α : ℂ) {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ ((n + 1 : ℕ) : ℂ) ^ α * x ^ (n + 1) / (1 - x ^ (n + 1)))
       (∑' n : ℕ, sigmaC α (n + 1) * x ^ (n + 1)) ∧
       Summable fun n : ℕ ↦ sigmaC α (n + 1) * x ^ (n + 1) := by
@@ -429,11 +447,11 @@ lemma q27_lambert_cpow (α : ℂ) {x : ℂ} (hx : ‖x‖ < 1) :
   obtain ⟨K, hK⟩ := exists_nat_ge α.re
   have hf : Summable fun n : ℕ ↦ ‖((n + 1 : ℕ) : ℂ) ^ α‖ * ‖x‖ ^ (n + 1) := by
     refine Summable.of_nonneg_of_le (fun _ ↦ by positivity) (fun n ↦ ?_)
-      (q27_summable_shift_pow_mul K hr0 hx)
+      (summable_natCast_succ_pow_mul_pow K hr0 hx)
     refine mul_le_mul_of_nonneg_right ?_ (by positivity)
     rw [Complex.norm_natCast_cpow_of_pos (Nat.succ_pos n), ← Real.rpow_natCast]
     exact Real.rpow_le_rpow_of_exponent_le (by exact_mod_cast Nat.succ_le_succ (Nat.zero_le n)) hK
-  obtain ⟨h1, h2⟩ := q27_lambert_core (fun n ↦ (n : ℂ) ^ α) hx hf
+  obtain ⟨h1, h2⟩ := hasSum_lambert_rows_and_diagonals (fun n ↦ (n : ℂ) ^ α) hx hf
   have h3 : HasSum (fun n : ℕ ↦ sigmaC α (n + 1) * x ^ (n + 1))
       (∑' c : ℕ+ × ℕ+, ((c.1 : ℕ) : ℂ) ^ α * x ^ ((c.1 : ℕ) * c.2)) := by
     refine h2.congr_fun fun n ↦ ?_
@@ -442,7 +460,7 @@ lemma q27_lambert_cpow (α : ℂ) {x : ℂ} (hx : ‖x‖ < 1) :
   exact ⟨h1, h3.summable⟩
 
 /-- DLMF 27.7.6 (proof). -/
-lemma q27_lambert_liouville {x : ℂ} (hx : ‖x‖ < 1) :
+private lemma hasSum_lambert_liouville {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ (liouville (n + 1) : ℂ) * x ^ (n + 1) / (1 - x ^ (n + 1)))
       (∑' n : ℕ, x ^ ((n + 1) ^ 2)) := by
   have hr0 : 0 ≤ ‖x‖ := norm_nonneg x
@@ -454,7 +472,7 @@ lemma q27_lambert_liouville {x : ℂ} (hx : ‖x‖ < 1) :
     refine mul_le_of_le_one_left hr0 ?_
     rw [Complex.norm_intCast, liouville_apply (Nat.succ_ne_zero n)]
     simp
-  obtain ⟨h1, h2⟩ := q27_lambert_core (fun n ↦ ((liouville n : ℤ) : ℂ)) hx hf
+  obtain ⟨h1, h2⟩ := hasSum_lambert_rows_and_diagonals (fun n ↦ ((liouville n : ℤ) : ℂ)) hx hf
   set T := ∑' c : ℕ+ × ℕ+, ((liouville c.1 : ℤ) : ℂ) * x ^ ((c.1 : ℕ) * c.2)
   have h3 : HasSum (fun n : ℕ ↦ if IsSquare (n + 1) then x ^ (n + 1) else 0) T := by
     refine h2.congr_fun fun n ↦ ?_
@@ -496,20 +514,20 @@ theorem lambertSeries_hasSum (f : ℕ → ℂ) {x : ℂ} (hx : ‖x‖ < 1)
     (hf : Summable fun n : ℕ ↦ ‖f (n + 1)‖ * ‖x‖ ^ (n + 1)) :
     HasSum (fun n : ℕ ↦ f (n + 1) * x ^ (n + 1) / (1 - x ^ (n + 1))) (lambertSeries f x) ∧
       HasSum (fun n : ℕ ↦ (∑ d ∈ (n + 1).divisors, f d) * x ^ (n + 1)) (lambertSeries f x) :=
-  q27_lambertSeries_hasSum f hx hf
+  hasSum_lambertSeries_rows_and_diagonals f hx hf
 
 /-- DLMF 27.7.3: `∑_{n≥1} μ(n) xⁿ/(1 - xⁿ) = x`, `|x| < 1`. -/
 @[dlmf 27.7.E3]
 theorem lambert_moebius {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ (μ (n + 1) : ℂ) * x ^ (n + 1) / (1 - x ^ (n + 1))) x :=
-  q27_lambert_moebius hx
+  hasSum_lambert_moebius hx
 
 /-- DLMF 27.7.4: `∑_{n≥1} φ(n) xⁿ/(1 - xⁿ) = x/(1 - x)²`, `|x| < 1`. -/
 @[dlmf 27.7.E4]
 theorem lambert_totient {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ ((n + 1).totient : ℂ) * x ^ (n + 1) / (1 - x ^ (n + 1)))
       (x / (1 - x) ^ 2) :=
-  q27_lambert_totient hx
+  hasSum_lambert_totient hx
 
 /-- DLMF 27.7.5: `∑_{n≥1} n^α xⁿ/(1 - xⁿ) = ∑_{n≥1} σ_α(n) xⁿ`, `|x| < 1`, `α ∈ ℂ`; both series
 converge. -/
@@ -518,13 +536,13 @@ theorem lambert_cpow (α : ℂ) {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ ((n + 1 : ℕ) : ℂ) ^ α * x ^ (n + 1) / (1 - x ^ (n + 1)))
       (∑' n : ℕ, sigmaC α (n + 1) * x ^ (n + 1)) ∧
       Summable fun n : ℕ ↦ sigmaC α (n + 1) * x ^ (n + 1) :=
-  q27_lambert_cpow α hx
+  hasSum_lambert_cpow α hx
 
 /-- DLMF 27.7.6: `∑_{n≥1} λ(n) xⁿ/(1 - xⁿ) = ∑_{n≥1} x^{n²}`, `|x| < 1`. -/
 @[dlmf 27.7.E6]
 theorem lambert_liouville {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ (liouville (n + 1) : ℂ) * x ^ (n + 1) / (1 - x ^ (n + 1)))
       (∑' n : ℕ, x ^ ((n + 1) ^ 2)) :=
-  q27_lambert_liouville hx
+  hasSum_lambert_liouville hx
 
 end DLMF.NumberTheory

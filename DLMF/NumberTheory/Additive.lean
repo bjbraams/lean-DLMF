@@ -16,16 +16,45 @@ public import Mathlib.NumberTheory.SumFourSquares
 /-!
 # Functions of additive number theory (DLMF §27.13)
 
-Waring's `g(k)` and `G(k)` (§27.13(iii)) are defined as infima of the admissible numbers of
-`k`th powers (`waringSmallG`, `waringBigG`); `sInf ∅ = 0` is only a junk value, Hilbert's
-theorem (`waring_hilbert`) shows that the sets are nonempty. `r_k(n)` (27.13.3) is
-`sumSquaresCount k n`, the number of `(x₁, …, x_k) ∈ ℤ^k` with `x₁² + ⋯ + x_k² = n`. DLMF's
-`ϑ(x) = 1 + 2∑ x^{m²}` (27.13.4) is `jacobiThetaSeries x`; it is Mathlib's `jacobiTheta τ` at
-`x = e^{πiτ}` (`jacobiTheta_eq_jacobiThetaSeries`) and the project's `θ₃(0, q)`.
+Goldbach-type theorems (DLMF §27.13(ii)), Waring's problem (§27.13(iii)) and representations
+of integers as sums of squares (§27.13(iv)).
+
+## Main definitions
+
+* `GoldbachConjecture`: Goldbach's conjecture, as a proposition.
+* `IsWaringNumber`: `m` is admissible for the `k`th-power Waring problem (DLMF 27.13.1).
+* `waringSmallG`, `waringBigG`: Waring's `g(k)` and `G(k)`.
+* `HardyLittlewoodWaringConjecture`: the Hardy–Littlewood conjectures on `G(k)`, as a
+  proposition.
+* `sumSquaresCount`: `r_k(n)`, the number of representations of `n` as a sum of `k` squares
+  (DLMF 27.13.3).
+* `jacobiThetaSeries`: `ϑ(x) = 1 + 2 ∑_{m≥1} x^{m²}` (DLMF 27.13.4).
+
+## Main results
+
+* `vinogradov_three_primes`, `chen_even`: the theorems of Vinogradov and Chen.
+* `isWaringNumber_two_four`, `waringSmallG_two`: Lagrange's four-square theorem and `g(2) = 4`.
+* `waring_hilbert`: Hilbert's theorem that `g(k)` exists.
+* `waringSmallG_ge`, `waringSmallG_eq_of_le`, `waringSmallG_eq_of_rem`,
+  `waring_rem_condition_eventually`: the lower bound DLMF 27.13.2 and the cases of equality.
+* `waringSmallG_values`, `waringBigG_values`, `waringBigG_bounds`, `waringBigG_le_waringSmallG`,
+  `waringBigG_lt`: known values and bounds for `g(k)` and `G(k)`.
+* `jacobiTheta_eq_jacobiThetaSeries`: `ϑ(e^{πiτ})` is Mathlib's `jacobiTheta τ`.
+* `jacobiThetaSeries_sq`, `jacobiThetaSeries_pow`, `jacobiThetaSeries_sq_divisors`: the
+  generating functions DLMF 27.13.5, Mordell's formula and DLMF 27.13.6.
+* `sumSquaresCount_two`, `sumSquaresCount_four`: Jacobi's formulas for `r₂(n)` (DLMF 27.13.7)
+  and `r₄(n)`.
+
+## Implementation notes
+
+Waring's `g(k)` and `G(k)` are defined as infima of the admissible numbers of `k`th powers;
+`sInf ∅ = 0` is only a junk value, and Hilbert's theorem shows that the sets are nonempty.
+`sumSquaresCount k n` counts the `(x₁, …, x_k) ∈ ℤ^k` with `x₁² + ⋯ + x_k² = n`. DLMF's `ϑ(x)` is
+also the project's `θ₃(0, q)`.
 
 Goldbach's conjecture and the Hardy–Littlewood conjectures on `G(k)` are open: they are named
-as propositions (`GoldbachConjecture`, `HardyLittlewoodWaringConjecture`) and not asserted.
-Lagrange's four-square theorem is Mathlib's `Nat.sum_four_squares`.
+as propositions and not asserted. Lagrange's four-square theorem is Mathlib's
+`Nat.sum_four_squares`.
 -/
 
 @[expose] public noncomputable section
@@ -206,12 +235,11 @@ theorem jacobiTheta_eq_jacobiThetaSeries {τ : ℂ} (hτ : 0 < τ.im) :
   push_cast
   ring_nf
 
-section R27Helpers
-
+section Helpers
 open PowerSeries
 
 /-- Sums over `I^{k+1}` split off the first coordinate. -/
-lemma r27_sum_piFinset_succ {k : ℕ} (I : Finset ℤ) (g : (Fin (k + 1) → ℤ) → ℤ) :
+private lemma sum_piFinset_succ_eq_sum_cons {k : ℕ} (I : Finset ℤ) (g : (Fin (k + 1) → ℤ) → ℤ) :
     ∑ v ∈ Fintype.piFinset (fun _ : Fin (k + 1) ↦ I), g v =
       ∑ a ∈ I, ∑ w ∈ Fintype.piFinset (fun _ : Fin k ↦ I), g (Fin.cons a w) := by
   rw [← sum_product' (f := fun a w ↦ g (Fin.cons a w))]
@@ -232,19 +260,19 @@ lemma r27_sum_piFinset_succ {k : ℕ} (I : Finset ℤ) (g : (Fin (k + 1) → ℤ
   · intro v _; simp
 
 /-- The number of `v ∈ [-B, B]^k` with `∑ vᵢ² = m`. -/
-def r27_cnt (k B : ℕ) (m : ℤ) : ℤ :=
+def boxSquaresCount (k B : ℕ) (m : ℤ) : ℤ :=
   ∑ v ∈ Fintype.piFinset (fun _ : Fin k ↦ Icc (-(B : ℤ)) B), if ∑ i, v i ^ 2 = m then 1 else 0
 
 /-- `cnt₀(m) = [m = 0]`. -/
-lemma r27_cnt_zero (B : ℕ) (m : ℤ) : r27_cnt 0 B m = if 0 = m then 1 else 0 := by
-  simp [r27_cnt]
+private lemma boxSquaresCount_zero (B : ℕ) (m : ℤ) : boxSquaresCount 0 B m = if 0 = m then 1 else 0 := by
+  simp [boxSquaresCount]
 
 /-- Recursion for the representation counts. -/
-lemma r27_cnt_succ (k B : ℕ) (m : ℤ) :
-    r27_cnt (k + 1) B m = ∑ a ∈ Icc (-(B : ℤ)) B, r27_cnt k B (m - a ^ 2) := by
-  rw [r27_cnt, r27_sum_piFinset_succ]
+private lemma boxSquaresCount_succ (k B : ℕ) (m : ℤ) :
+    boxSquaresCount (k + 1) B m = ∑ a ∈ Icc (-(B : ℤ)) B, boxSquaresCount k B (m - a ^ 2) := by
+  rw [boxSquaresCount, sum_piFinset_succ_eq_sum_cons]
   refine sum_congr rfl fun a _ ↦ ?_
-  rw [r27_cnt]
+  rw [boxSquaresCount]
   refine sum_congr rfl fun w _ ↦ ?_
   rw [Fin.sum_univ_succ]
   simp only [Fin.cons_zero, Fin.cons_succ]
@@ -252,9 +280,9 @@ lemma r27_cnt_succ (k B : ℕ) (m : ℤ) :
   apply propext; constructor <;> intro h <;> linarith
 
 /-- `r_k(n)` with any box `[-B, B]`, `B ≥ n`. -/
-lemma r27_sumSquaresCount_eq_cnt (k n B : ℕ) (hB : n ≤ B) :
-    (sumSquaresCount k n : ℤ) = r27_cnt k B n := by
-  rw [r27_cnt, sum_boole, sumSquaresCount]
+private lemma sumSquaresCount_eq_boxSquaresCount (k n B : ℕ) (hB : n ≤ B) :
+    (sumSquaresCount k n : ℤ) = boxSquaresCount k B n := by
+  rw [boxSquaresCount, sum_boole, sumSquaresCount]
   congr 1
   apply congrArg
   ext v
@@ -273,35 +301,35 @@ lemma r27_sumSquaresCount_eq_cnt (k n B : ℕ) (hB : n ≤ B) :
     constructor <;> [linarith [neg_abs_le (v i)]; linarith [le_abs_self (v i)]]
 
 /-- No representations of negative numbers. -/
-lemma r27_cnt_neg (k B : ℕ) {m : ℤ} (hm : m < 0) : r27_cnt k B m = 0 := by
-  rw [r27_cnt]
+private lemma boxSquaresCount_of_neg (k B : ℕ) {m : ℤ} (hm : m < 0) : boxSquaresCount k B m = 0 := by
+  rw [boxSquaresCount]
   refine sum_eq_zero fun v _ ↦ ?_
   have : 0 ≤ ∑ i, v i ^ 2 := sum_nonneg fun i _ ↦ sq_nonneg _
   have h : ∑ i, v i ^ 2 ≠ m := by intro h; linarith
   simp [h]
 
 /-- `∑_{x ∈ ℤ} X^{x²}` as an integer power series (coefficients `r₁(n)`). -/
-def r27_thetaSeries : PowerSeries ℤ := PowerSeries.mk fun n ↦ (sumSquaresCount 1 n : ℤ)
+def thetaPowerSeries : PowerSeries ℤ := PowerSeries.mk fun n ↦ (sumSquaresCount 1 n : ℤ)
 
 /-- The coefficients of `ϑ^k` are `r_k(n)` (formal identity). -/
-lemma r27_coeff_thetaSeries_pow (k n : ℕ) :
-    coeff n (r27_thetaSeries ^ k) = sumSquaresCount k n := by
+private lemma coeff_thetaPowerSeries_pow (k n : ℕ) :
+    coeff n (thetaPowerSeries ^ k) = sumSquaresCount k n := by
   induction k generalizing n with
   | zero =>
-    rw [pow_zero, coeff_one, r27_sumSquaresCount_eq_cnt 0 n n le_rfl, r27_cnt_zero]
+    rw [pow_zero, coeff_one, sumSquaresCount_eq_boxSquaresCount 0 n n le_rfl, boxSquaresCount_zero]
     by_cases h : n = 0 <;> simp [h, eq_comm]
   | succ k ih =>
-    rw [pow_succ, coeff_mul, r27_sumSquaresCount_eq_cnt (k + 1) n n le_rfl, r27_cnt_succ]
-    have h1 : ∀ p ∈ antidiagonal n, coeff p.1 (r27_thetaSeries ^ k) * coeff p.2 r27_thetaSeries =
-        ∑ a ∈ Icc (-(n : ℤ)) n, r27_cnt k n p.1 * (if (p.2 : ℤ) = a ^ 2 then 1 else 0) := by
+    rw [pow_succ, coeff_mul, sumSquaresCount_eq_boxSquaresCount (k + 1) n n le_rfl, boxSquaresCount_succ]
+    have h1 : ∀ p ∈ antidiagonal n, coeff p.1 (thetaPowerSeries ^ k) * coeff p.2 thetaPowerSeries =
+        ∑ a ∈ Icc (-(n : ℤ)) n, boxSquaresCount k n p.1 * (if (p.2 : ℤ) = a ^ 2 then 1 else 0) := by
       intro p hp
       have hp' := mem_antidiagonal.mp hp
       have hp1 : p.1 ≤ n := by omega
       have hp2 : p.2 ≤ n := by omega
-      rw [ih, r27_sumSquaresCount_eq_cnt k p.1 n hp1, r27_thetaSeries, coeff_mk,
-        r27_sumSquaresCount_eq_cnt 1 p.2 n hp2, r27_cnt_succ, mul_sum]
+      rw [ih, sumSquaresCount_eq_boxSquaresCount k p.1 n hp1, thetaPowerSeries, coeff_mk,
+        sumSquaresCount_eq_boxSquaresCount 1 p.2 n hp2, boxSquaresCount_succ, mul_sum]
       refine sum_congr rfl fun a _ ↦ ?_
-      rw [r27_cnt_zero]
+      rw [boxSquaresCount_zero]
       congr 1
       by_cases h : (p.2 : ℤ) = a ^ 2
       · simp [h]
@@ -326,7 +354,7 @@ lemma r27_coeff_thetaSeries_pow (k n : ℕ) :
           rw [← hta]; intro h; apply hit; omega
         simp [this]
       · intro h; exfalso; apply h; rw [mem_range]; omega
-    · rw [r27_cnt_neg k n (by omega)]
+    · rw [boxSquaresCount_of_neg k n (by omega)]
       refine sum_eq_zero fun i hi ↦ ?_
       rw [mem_range] at hi
       have : ((n - i : ℕ) : ℤ) ≠ a ^ 2 := by omega
@@ -334,10 +362,10 @@ lemma r27_coeff_thetaSeries_pow (k n : ℕ) :
 
 open Classical in
 /-- `r₁(n)`: `1` at `n = 0`, `2` at positive squares, `0` otherwise. -/
-lemma r27_sumSquaresCount_one (n : ℕ) :
+private lemma sumSquaresCount_one (n : ℕ) :
     (sumSquaresCount 1 n : ℤ) = if n = 0 then 1 else if ∃ m : ℕ, (m + 1) ^ 2 = n then 2 else 0 := by
-  rw [r27_sumSquaresCount_eq_cnt 1 n n le_rfl, r27_cnt_succ]
-  simp_rw [r27_cnt_zero]
+  rw [sumSquaresCount_eq_boxSquaresCount 1 n n le_rfl, boxSquaresCount_succ]
+  simp_rw [boxSquaresCount_zero]
   rw [sum_boole]
   have key : ∀ a : ℤ, (0 = (n : ℤ) - a ^ 2) ↔ a ^ 2 = n := fun a ↦ by
     constructor <;> intro h <;> linarith
@@ -374,22 +402,24 @@ lemma r27_sumSquaresCount_one (n : ℕ) :
 
 open Classical in
 /-- `ϑ(x) = ∑ r₁(n) xⁿ` converges absolutely in the unit disc. -/
-lemma r27_absEval_thetaSeries {x : ℂ} (hx : ‖x‖ < 1) :
-    PowerSeries.HasSumAt r27_thetaSeries x (jacobiThetaSeries x) := by
-  have hc : ∀ n, ((coeff n r27_thetaSeries : ℤ) : ℂ) * x ^ n =
+private lemma hasSumAt_thetaPowerSeries {x : ℂ} (hx : ‖x‖ < 1) :
+    PowerSeries.HasSumAt thetaPowerSeries x (jacobiThetaSeries x) := by
+  have hc : ∀ n, ((coeff n thetaPowerSeries : ℤ) : ℂ) * x ^ n =
       (if n = 0 then 1 else 0) +
         (if ∃ m : ℕ, (m + 1) ^ 2 = n then 2 * x ^ n else 0) := by
     intro n
-    rw [r27_thetaSeries, coeff_mk, r27_sumSquaresCount_one]
+    rw [thetaPowerSeries, coeff_mk, sumSquaresCount_one]
     by_cases h0 : n = 0
     · subst h0; simp
     · by_cases hm : ∃ m : ℕ, (m + 1) ^ 2 = n <;> simp [h0]
-  have hb := PowerSeries.hasSumAt_of_bounded (P := r27_thetaSeries) (C := 2) (fun n ↦ by
-    rw [r27_thetaSeries, coeff_mk, r27_sumSquaresCount_one]; split_ifs <;> norm_num) hx
+  have hb := PowerSeries.hasSumAt_of_bounded (P := thetaPowerSeries) (C := 2) (fun n ↦ by
+    rw [algebraMap_int_eq, eq_intCast, Complex.norm_intCast, thetaPowerSeries, coeff_mk,
+      sumSquaresCount_one]; split_ifs <;> norm_num) hx
   convert hb using 1
   rw [jacobiThetaSeries]
   symm
   refine HasSum.tsum_eq ?_
+  simp only [algebraMap_int_eq, eq_intCast]
   simp_rw [hc]
   refine (hasSum_ite_eq 0 (1 : ℂ)).add ?_
   have hinj : Function.Injective fun m : ℕ ↦ (m + 1) ^ 2 := by
@@ -408,16 +438,15 @@ lemma r27_absEval_thetaSeries {x : ℂ} (hx : ‖x‖ < 1) :
     have : ¬ ∃ m : ℕ, (m + 1) ^ 2 = n := by rintro ⟨m, rfl⟩; exact hn ⟨m, rfl⟩
     simp [this]
 
-end R27Helpers
-
+end Helpers
 /-- DLMF 27.13.5: `ϑ(x)² = 1 + ∑_{n≥1} r₂(n) xⁿ`, `|x| < 1`. -/
 @[dlmf 27.13.E5]
 theorem jacobiThetaSeries_sq {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ (sumSquaresCount 2 (n + 1) : ℂ) * x ^ (n + 1))
       (jacobiThetaSeries x ^ 2 - 1) := by
   open PowerSeries in
-  have h := (PowerSeries.HasSumAt.pow (r27_absEval_thetaSeries hx) 2)
-  simp only [PowerSeries.HasSumAt, r27_coeff_thetaSeries_pow, Int.cast_natCast] at h
+  have h := (PowerSeries.HasSumAt.pow (hasSumAt_thetaPowerSeries hx) 2)
+  simp only [PowerSeries.hasSumAt_int_iff, coeff_thetaPowerSeries_pow, Int.cast_natCast] at h
   have h0 : sumSquaresCount 2 0 = 1 := by rfl
   have h1 := (hasSum_nat_add_iff' 1).mpr h
   simpa [h0] using h1
@@ -427,8 +456,8 @@ theorem jacobiThetaSeries_sq {x : ℂ} (hx : ‖x‖ < 1) :
 theorem jacobiThetaSeries_pow (k : ℕ) {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ (sumSquaresCount k n : ℂ) * x ^ n) (jacobiThetaSeries x ^ k) := by
   open PowerSeries in
-  have h := (PowerSeries.HasSumAt.pow (r27_absEval_thetaSeries hx) k)
-  simpa only [PowerSeries.HasSumAt, r27_coeff_thetaSeries_pow, Int.cast_natCast] using h
+  have h := (PowerSeries.HasSumAt.pow (hasSumAt_thetaPowerSeries hx) k)
+  simpa only [PowerSeries.hasSumAt_int_iff, coeff_thetaPowerSeries_pow, Int.cast_natCast] using h
 
 /-- DLMF 27.13.6 (Jacobi): `ϑ(x)² = 1 + 4 ∑_{n≥1} (δ₁(n) - δ₃(n)) xⁿ`, with `δ_j(n)` the number of
 divisors of `n` congruent to `j` mod 4. -/

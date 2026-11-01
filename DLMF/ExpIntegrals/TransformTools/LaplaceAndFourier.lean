@@ -11,11 +11,24 @@ public import DLMF.ExpIntegrals.Representations
 /-!
 # Laplace and Fourier tools for exponential integrals
 
-Transform kernels, integrability and analytic continuation used in exponential-integral
-identities.
+Elementary complex Laplace transforms, parametric integral representations of `E₁`, `Si` and
+`Ein - Cin`, Fubini swaps for Laplace transforms of such integrals, closed forms of the resulting
+inner integrals, and bounds and integrability of `Ci` and `Si - π/2`.
 
-Source references and common attribution are retained in
-`DLMF.ExpIntegrals.TransformTools`.
+## Main results
+
+* `eiTr_E1_eq`, `eiTr_sinInt_eq`, `eiTr_ein_sub_cin_eq`: `E₁(t) = ∫₁^∞ e^{-tu}/u du`,
+  `Si(t) = ∫₀¹ sin(tu)/u du` and `Ein(t) - Cin(t) = ∫₀¹ (cos(tu) - e^{-tu})/u du`.
+* `eiTr_integral_recip_mul`: `∫₁^∞ du/((a+u)u) = log(1+a)/a` for `Re a > -1`.
+* `eiTr_integral_recip_sq_add_sq`: `∫₀¹ du/(a²+u²) = (π/2 - arctan a)/a` for `Re a > 0`,
+  through the principal-branch identity `log((1+ia)/(1-ia)) = log(1+ia) - log(1-ia)`
+  (`eiTr_log_div`).
+* `eiTr_laplace_E1`, `eiTr_laplace_sinInt`, `eiTr_laplace_sin`, `eiTr_laplace_cos`: Laplace
+  transforms of `E₁`, `Si`, `sin(tu)` and `cos(tu)`.
+* `eiTr_tendsto_integral_cos_mul_cosInt`, `eiTr_tendsto_integral_sin_mul_sinIntTail`: the
+  improper integrals `∫₀^∞ cos t Ci(t) dt = -π/4` and `∫₀^∞ sin t (Si(t) - π/2) dt = -π/4`.
+* `eiTr_abs_cosInt_le`, `eiTr_abs_sinIntTail_le`: `|Ci(x)|, |Si(x) - π/2| ≤ 2/x` for `x > 0`.
+* `eiTr_integrableOn_cosInt_sq`: `Ci²` is integrable on `(0, ∞)`.
 -/
 
 @[expose] public noncomputable section

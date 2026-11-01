@@ -11,14 +11,28 @@ public import Carlson.Elliptic.Standard
 /-!
 # Definitions of the symmetric elliptic integrals
 
-The domain predicates and literal principal-power integrals `symEllIntRF`, `symEllIntRJ`,
-`symEllIntRG`, `symEllIntRD` and `symEllIntRC` follow DLMF §§19.2(iv), 19.15–19.16.
-Real negative pole parameters use a Cauchy principal value. `symEllIntR` uses Carlson's
-multivariate continuation on the product slit plane and its limit at admissible boundary
-points. Divergent integrals and nonexistent limits remain totalized; the theorem layer
-states convergence and branch assumptions explicitly.
+Domain predicates and the literal principal-power integrals defining Carlson's symmetric
+elliptic integrals, following DLMF §§19.2(iv), 19.15–19.16.
 
-Comparison theorems with the Carlson functions are in `DLMF.EllipticIntegrals.Symmetric`.
+## Main definitions
+
+* `SymEllIntArg`, `SymEllIntRFDomain`: admissible arguments and the domain of `R_F`
+  (DLMF §19.16(i)).
+* `IsNegReal`, `cauchyPVIoi`: negative real parameters and the Cauchy principal value of an
+  integral over `(0, ∞)`.
+* `symEllIntS`: the product `s(t)` of square roots (DLMF 19.16.4).
+* `symEllIntRF`, `symEllIntRJ`, `symEllIntRG`, `symEllIntRD`: the integrals `R_F`, `R_J`,
+  `R_G`, `R_D` (DLMF 19.16.1, 19.16.2, 19.16.2_5, 19.16.5).
+* `symEllIntRC`: the integral `R_C(x, y)` (DLMF 19.2.17).
+* `symEllIntR`: the multivariate hypergeometric function `R_{-a}(𝐛; 𝐳)` (DLMF 19.16.8).
+
+## Implementation notes
+
+Negative real pole parameters use a Cauchy principal value. `symEllIntR` uses Carlson's
+multivariate continuation on the product slit plane and its limit at admissible boundary
+points. Divergent integrals and nonexistent limits remain totalized; the theorem layer states
+convergence and branch assumptions explicitly. The comparison theorems with the Carlson
+functions are in `DLMF.EllipticIntegrals.Symmetric`.
 -/
 
 @[expose] public noncomputable section

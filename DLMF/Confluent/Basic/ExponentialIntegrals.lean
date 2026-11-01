@@ -10,7 +10,22 @@ public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 /-!
-# Generalized exponential integral and legacy real primitive definitions
+# Generalized exponential integral and real sine and cosine integrals
+
+## Main definitions
+
+* `genExpIntE`: the generalized exponential integral `E_p(z) = z^{p-1} Γ(1-p, z)`
+  (DLMF 8.19.1).
+* `Real.expIntEin`: the entire function `Ein(x)` on the real line (DLMF 6.2.3).
+* `Real.sinInt`: the sine integral `Si(x)` (DLMF 6.2.9).
+* `Real.cosIntCin`: the entire function `Cin(x)` on the real line (DLMF 6.2.12).
+* `Real.cosInt`: the cosine integral `Ci(x) = -Cin(x) + log x + γ` for `x > 0` (DLMF 6.2.13).
+
+## Implementation notes
+
+The real functions `Real.expIntEin`, `Real.sinInt`, `Real.cosIntCin` and `Real.cosInt` are
+older real-variable definitions, kept beside the complex functions of the exponential-integral
+area.
 -/
 
 @[expose] public noncomputable section

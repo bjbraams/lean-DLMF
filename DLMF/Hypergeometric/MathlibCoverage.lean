@@ -11,18 +11,20 @@ public import Mathlib.Analysis.SpecialFunctions.OrdinaryHypergeometric
 public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
 
 /-!
-# DLMF Chapter 15 results already in Mathlib 4.35.0-rc2
+# DLMF Chapter 15 results already in Mathlib
 
-The `dlmf_upstream` commands below are checked pointers to Mathlib declarations,
-deliberately not duplicate local theorems (see also `DLMF.Hypergeometric.AnalyticProperties`).
+The `dlmf_upstream` commands below are checked pointers to Mathlib declarations (DLMF 15.2.1,
+15.2.2, §15.2(i) and 15.12.6), deliberately not duplicated as local theorems (see also
+`DLMF.Hypergeometric.AnalyticProperties`).
+
 Mathlib's `ordinaryHypergeometric` (`₂F₁`) and `Complex.regularizedGaussHGFun` are sums of
 formal power series: outside the disk of convergence they are not DLMF's analytic
-continuations, and `₂F₁` divides by `(c)_s`, so it is totalized (terms with `(c)_s = 0`
-vanish) when `c ∈ -ℕ`. For the same reason
-`ordinaryHypergeometric_radius_top_of_neg_nat₃` (the totalized negative-denominator series) is
-not recorded as a DLMF pointer. Mathlib's value at zero (`ordinaryHypergeometric_zero`) and
-numerator symmetry (`ordinaryHypergeometricSeries_symm`, `Complex.regularizedGaussHGFun_symm`)
-are immediate from 15.2.1–15.2.2 and have no DLMF equation number of their own.
+continuations, and `₂F₁` divides by `(c)_s`, so it is totalized (terms with `(c)_s = 0` vanish)
+when `c ∈ -ℕ`. For the same reason `ordinaryHypergeometric_radius_top_of_neg_nat₃` (the
+totalized negative-denominator series) is not recorded as a DLMF pointer. Mathlib's value at
+zero (`ordinaryHypergeometric_zero`) and numerator symmetry (`ordinaryHypergeometricSeries_symm`,
+`Complex.regularizedGaussHGFun_symm`) are immediate from 15.2.1–15.2.2 and have no DLMF equation
+number of their own.
 -/
 
 -- DLMF 15.2.1: the Gauss series.

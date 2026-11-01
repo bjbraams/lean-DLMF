@@ -10,15 +10,33 @@ public import DLMFMathlib.Analysis.Calculus.DifferentialOperators
 public import TauCeti.Analysis.SpecialFunctions.RegularizedHypergeometric
 
 /-!
-# Derivatives and contiguous functions: DLMF §16.3
+# Derivatives and contiguous functions (DLMF §16.3)
 
-The existing local first derivative theorem is reused; the statements below acquire
-all orders and global principal continuation. Every displayed lower parameter is
-subject to the chapter's exclusion of nonpositive integers. Weighted powers use
-the principal slit plane. Contiguous linear dependence is over rational functions,
-expressed after clearing denominators as polynomial coefficients.
-The general raising-operator identity uses Mathlib's `iteratedDeriv_fun_mul` and
-analytic germ congruence; it has no dependence on hypergeometric continuation.
+## Main definitions
+
+* `genAnalyticDomain`: the analytic domain of a principal value (the whole plane for a
+  polynomial).
+* `GenContiguous`: contiguity, integer shifts of corresponding parameters.
+
+## Main results
+
+* `genHG_iteratedDeriv`: all derivatives, DLMF 16.3.1.
+* `genHG_weighted_iteratedDeriv`, `genHG_lower_weighted_iteratedDeriv`: weighted derivatives,
+  DLMF 16.3.2 and 16.3.4.
+* `genHG_raising_iterate`, `genRaiseOp_iterate`: iterated raising operators, DLMF 16.3.3 and
+  16.3.5.
+* `genHG_0F1_contiguous`, `genHG_3F2_contiguous`: contiguous relations, DLMF 16.3.6–16.3.7.
+* `genContiguous_linear_relation`: any `q + 2` contiguous functions are linearly dependent over
+  the rational functions.
+
+## Implementation notes
+
+The statements cover all orders and the global principal continuation. Every displayed lower
+parameter is kept away from the nonpositive integers. Weighted powers use the principal slit
+plane. Contiguous linear dependence over rational functions is expressed, after clearing
+denominators, with polynomial coefficients. The general raising-operator identity uses
+Mathlib's `iteratedDeriv_fun_mul` and analytic germ congruence; it does not depend on
+hypergeometric continuation.
 -/
 
 @[expose] public section
@@ -60,7 +78,7 @@ theorem genHG_weighted_iteratedDeriv (a b : Multiset ℂ) (hb : GenDenRegular b)
 theorem genHG_raising_iterate (a b : Multiset ℂ) (hb : GenDenRegular b) (γ : ℂ) (n : ℕ)
     (h : a.card + 1 ≤ b.card + 1 ∨ GenTerminates (γ ::ₘ a))
     {z : ℂ} (hz : z ∈ Complex.slitPlane ∩ genAnalyticDomain (γ ::ₘ a) b) :
-    (Function.mulDerivMul^[n]) (fun z => z ^ (γ - 1) * genHG (γ ::ₘ a) b z) z =
+    (mulDerivMul^[n]) (fun z => z ^ (γ - 1) * genHG (γ ::ₘ a) b z) z =
       poch γ n * z ^ (γ + n - 1) * genHG ((γ + n) ::ₘ a) b z := by
   sorry
 
@@ -98,16 +116,16 @@ theorem genIteratedDeriv_id_mul (f : ℂ → ℂ) (n : ℕ) {z : ℂ} (hf : Anal
 /-- The general operator identity for every analytic germ and every natural order. -/
 @[dlmf 16.3.E5]
 theorem genRaiseOp_iterate (f : ℂ → ℂ) (n : ℕ) {z : ℂ} (hf : AnalyticAt ℂ f z) :
-    (Function.mulDerivMul^[n]) f z = z ^ n * iteratedDeriv n (fun z => z ^ n * f z) z := by
+    (mulDerivMul^[n]) f z = z ^ n * iteratedDeriv n (fun z => z ^ n * f z) z := by
   induction n generalizing z with
   | zero => simp
   | succ n ih =>
-    have heq : (fun w => w * (Function.mulDerivMul^[n]) f w) =ᶠ[𝓝 z]
+    have heq : (fun w => w * (mulDerivMul^[n]) f w) =ᶠ[𝓝 z]
         (fun w => w ^ (n + 1) * iteratedDeriv n (fun w => w ^ n * f w) w) := by
       filter_upwards [hf.eventually_analyticAt] with w hw
       rw [ih hw]
       ring
-    rw [Function.iterate_succ_apply', Function.mulDerivMul, heq.deriv_eq]
+    rw [Function.iterate_succ_apply', mulDerivMul_eq_mul, heq.deriv_eq]
     have hg : AnalyticAt ℂ (fun w => w ^ n * f w) z := by fun_prop
     have hD : HasDerivAt (iteratedDeriv n (fun w => w ^ n * f w))
         (iteratedDeriv (n + 1) (fun w => w ^ n * f w) z) z := by

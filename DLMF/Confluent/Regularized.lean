@@ -11,9 +11,22 @@ public import DLMF.Hypergeometric.Continuation
 /-!
 # The regularized Kummer function as an entire function of its parameters
 
-Series, majorants and analyticity of `𝐌(a,b,z) = regularizedHGFun {a} {b} z` in the
-parameters (DLMF §13.2(i)). These lemmas were split off from `DLMF.Confluent.Continuation`
-so that they are available to `DLMF.Confluent.BasicProperties` and later files.
+This file develops the series, majorants and analyticity of the regularized Kummer function
+`𝐌(a,b,z) = regularizedHGFun {a} {b} z` in its parameters and argument (DLMF §13.2(i)).
+
+## Main results
+
+* `regularizedConfluent_eq_tsum`, `summable_regularizedConfluent_term`: `𝐌(a,b,z)` as the sum
+  of `∑ (a)_n zⁿ / (n! Γ(b+n))`, convergent for all `a, b, z`.
+* `hasFPowerSeriesOnBall_regularizedConfluent`: the series converges on all of `ℂ`.
+* `analyticOnNhd_regularizedConfluent_comp`, `differentiable_regularizedConfluent_comp`: `𝐌` is
+  entire along any entire curve in the parameter plane.
+* `analyticOnNhd_regularizedConfluent_a`, `analyticOnNhd_regularizedConfluent_b`: `𝐌` is entire
+  in each parameter.
+* `deriv_regularizedConfluent`: `𝐌'(a,b,z) = a 𝐌(a+1,b+1,z)` (DLMF 13.3.15), with no hypothesis
+  on the parameters.
+* `continuous_regularizedConfluent`: joint continuity in the parameters and the argument.
+* `regularizedConfluent_eq_div_Gamma`: `𝐌(a,b,z) = M(a,b,z)/Γ(b)` off the poles of `Γ(b)`.
 -/
 
 @[expose] public section

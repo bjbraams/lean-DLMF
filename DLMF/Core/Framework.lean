@@ -17,15 +17,46 @@ public import Mathlib.Tactic.Basify
 public import Mathlib.Tactic.ENatToNat
 
 /-!
-# Shared convergence, primitive and branch conventions for the DLMF
+# Shared conventions for convergence, primitives and branches
 
-Improper integrals assert limits of finite integrals. Logarithmic coordinates
-retain continuation across cuts. Continued fractions assert convergence of
-finite truncations, rather than an equality to a totalized infinite expression.
+This file fixes the conventions shared by the special-function areas: improper integrals,
+principal values, straight-segment primitives, sector filters, finite continued fractions,
+spherical Bessel functions, ordered zeros and successively extracted asymptotic coefficients.
 
-The primitive API integrates entire functions on straight complex segments and integrates
-globally convergent monomial series term by term. Further support includes spherical Bessel
-functions and zero-selection conventions used across the special-function areas.
+## Main definitions
+
+* `HasIntegralAtTop`, `HasIntegralAtBot`, `HasIntegralWholeLine`: improper integrals on
+  half-lines and on the whole line, including convergence.
+* `improperAtTop`: the value of a convergent tail.
+* `HasPrincipalValueIoi`: a symmetric principal value at an interior point of a half-line.
+* `segmentIntegral`, `primitive`: integrals along straight complex segments and the primitive
+  based at zero of an entire integrand.
+* `sector`, `logSector`: uniform approach to infinity in a closed sector, on the principal sheet
+  and on the logarithmic plane.
+* `cfContinuants`, `cfTail`, `HasContinuedFraction`: finite continued fractions and their
+  convergence.
+* `oddProduct`: the odd product `1·3···(2n+1)`.
+* `sphericalJ`, `sphericalI`: spherical Bessel functions `j_n` and `i_n`, with their removable
+  values at zero.
+* `orderedZero`: a zero selected by the number of strictly closer zeros.
+* `asymptoticCoeff`: coefficients extracted successively by limits at positive infinity.
+
+## Main results
+
+* `primitive_eq_sub`, `segmentIntegral_eq_sub`: an entire antiderivative evaluates segment
+  integrals.
+* `hasDerivAt_primitive`, `differentiable_primitive`: primitives of entire functions are
+  entire, with the expected derivative.
+* `hasSum_primitive_monomials`: a globally convergent monomial series may be integrated term by
+  term along a straight segment.
+* `primitive_ofReal`: the segment convention agrees with interval integration on the real axis.
+
+## Implementation notes
+
+Improper integrals assert limits of finite integrals. Logarithmic coordinates retain
+continuation across cuts. Continued fractions assert convergence of finite truncations, rather
+than an equality to a totalized infinite expression. Existence of an ordered zero, and of the
+limits defining `asymptoticCoeff`, must be established by separate theorems.
 -/
 
 @[expose] public noncomputable section

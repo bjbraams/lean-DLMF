@@ -13,15 +13,21 @@ public import DLMF.Mathieu.SpectralExistence
 The eigenvalues `a_n(q)`, `b_n(q)` are defined for real `q` (`DLMF.Mathieu.Basic`). DLMF §28.7
 describes their continuation to complex `q`: the eigenvalue condition `F(a, q) = 0`, with `F`
 one of the four entire functions `w_I'(π/2; a, q)`, `w_I(π/2; a, q)`, `w_II'(π/2; a, q)`,
-`w_II(π/2; a, q)` of 28.2.21–28.2.22, defines the eigenvalues as branches of an analytic
+`w_II(π/2; a, q)` of DLMF 28.2.21–28.2.22, defines the eigenvalues as branches of an analytic
 function of `q` whose only singularities are algebraic branch points (the exceptional values,
 a countable set without finite limit points, containing no real point), at which the roots
-in `a` are multiple; at the other (normal) values all roots are simple. This is stated as
-`mathieu_exceptional_values`. The irreducibility of `F` and the sum rules 28.7.1–28.7.4
-(real `q`) follow.
+in `a` are multiple; at the other (normal) values all roots are simple.
 
-The numerical locations of the first branch points (`q₀ = ±1.4688i`, `q₁ = ±6.9289i`) and the
-associated eigenvalues are excluded (numerical), as is the graphical Figure 28.7.1.
+## Main results
+
+* `mathieu_exceptional_values`: the exceptional values of each eigenvalue equation form a
+  countable set without finite limit points and without real points; elsewhere all roots in
+  `a` are simple (DLMF §28.7).
+* `mathieuA_mathieuB_analytic`: `a_n(q)` and `b_n(q)` extend analytically from the real axis to
+  a neighbourhood of it in the complex `q`-plane (DLMF §28.7).
+* `mathieu_eigenEquation_irreducible`: irreducibility of the eigenvalue functions `F(a, q)`.
+* `hasSum_mathieuA_even_sub`, `hasSum_mathieuA_odd_sub`, `hasSum_mathieuB_odd_sub`,
+  `hasSum_mathieuB_even_sub`: the sum rules for real `q` (DLMF 28.7.1–28.7.4).
 -/
 
 @[expose] public noncomputable section

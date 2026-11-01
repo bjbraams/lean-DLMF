@@ -17,20 +17,26 @@ This file holds the definitions of DLMF §§1.4–1.6 that have no Mathlib count
 convexity, total variation `eVariationOn`, `Lᵖ` spaces, the cross and dot products) is
 Mathlib's; see `DLMF.AlgebraicAnalytic.Calculus.MathlibCoverage`.
 
+## Main definitions
+
 * `IsSimpleDiscontinuity`, `IsPiecewiseContinuousOn` (§1.4(ii)) and the two-variable
   `IsPiecewiseContinuousOnProd` (§1.5(i)).
 * `HasCauchyPrincipalValue`, `HasPrincipalValueAtInfinity` (1.4.24, 1.4.25).
-* Partial derivatives `partialDeriv i f x` on `Fin n → ℝ`, defined as DLMF does (1.5.3) by the
-  derivative of the section `t ↦ f (update x i t)`, so they exist without total
-  differentiability; Jacobian determinants `jacobianDet2`, `jacobianDet3` (1.5.38, 1.5.40).
-* Cylindrical and spherical coordinates `cylindricalCoord`, `sphericalCoord` (1.5.14, 1.5.16).
+* `partialDeriv`: partial derivatives on `Fin n → ℝ` (1.5.3–1.5.4); `jacobianDet2`,
+  `jacobianDet3`: Jacobian determinants (1.5.38, 1.5.40).
+* `cylindricalCoord`, `sphericalCoord`: cylindrical and spherical coordinates (1.5.14, 1.5.16).
 * Vector calculus in `ℝ³ = Fin 3 → ℝ`: the magnitude `vecNorm` (1.6.3), the Levi-Civita symbol
   `leviCivita` (1.6.14), `grad`, `divergence`, `curl`, `laplacian`, `vectorLaplacian`
   (1.6.19–1.6.22, 1.6.30, 1.6.34).
 * Paths: `pathLength`, `pathIntegral`, `lineIntegral` (1.6.35–1.6.38), `IsSimpleClosedPath`.
-* Parametrized surfaces `Φ : ℝ × ℝ → (Fin 3 → ℝ)`: `tangentU`, `tangentV` (1.6.46–1.6.47),
+* Parametrized surfaces `Φ : ℝ × ℝ → (Fin 3 → ℝ)`: `tangentU`, `tangentV` (1.6.45–1.6.47),
   `IsSmoothSurfaceAt`, `surfaceArea`, `surfaceIntegral`, `fluxIntegral` (1.6.48, 1.6.54,
   1.6.55), and `HasPiecewiseSmoothBoundary`, the hypotheses of Gauss's theorem 1.6.58.
+
+## Implementation notes
+
+Partial derivatives `partialDeriv i f x` are defined as DLMF does (1.5.3) by the derivative of
+the section `t ↦ f (update x i t)`, so they exist without total differentiability.
 
 The type `Fin 3 → ℝ` carries the sup norm in Mathlib, so every Euclidean length in §1.6 is
 written with `vecNorm a = √(a ⬝ᵥ a)` (DLMF 1.6.3), never with `‖·‖`.

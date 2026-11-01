@@ -12,13 +12,24 @@ public import Mathlib.Tactic.Basify
 public import Mathlib.Tactic.ENatToNat
 
 /-!
-# Quadratic and logarithmic connection formulas (DLMF §15.8)
+# Quadratic, logarithmic and cubic connection formulas (DLMF §15.8)
 
-The logarithmic formulas are stated on intersections of convergence regions.
-Nonintegrality assumptions avoid products involving the totalized value of
-digamma at its poles. The companion module
-`DLMF.Hypergeometric.LogConnectionsRecipGamma` supplies formulas without these
-restrictions, using derivatives of the entire reciprocal gamma function. Finite sums use `range m`, including the empty sum at `m = 0`.
+## Main results
+
+* `quadratic_connection_well_poised`, `quadratic_connection_half_sum`,
+  `quadratic_connection_complementary`: DLMF 15.8.24–15.8.26.
+* `quadratic_even_connection`, `quadratic_odd_connection`: DLMF 15.8.27–15.8.28.
+* `logarithmic_connection_one_div_one_sub`, `logarithmic_connection_one_sub`,
+  `logarithmic_connection_one_sub_recip`: the logarithmic cases DLMF 15.8.9–15.8.11.
+* `cubic_connection`: the cubic connection formula 15.8.32 on the ray `x < -1`.
+
+## Implementation notes
+
+The logarithmic formulas are stated on intersections of convergence regions. Nonintegrality
+assumptions avoid products involving the totalized value of digamma at its poles; the companion
+module `DLMF.Hypergeometric.LogConnectionsRecipGamma` gives the formulas without these
+restrictions, using derivatives of the entire reciprocal Gamma function. Finite sums use
+`range m`, including the empty sum at `m = 0`.
 
 The cubic connection formula 15.8.32 is proved in the variable `u = 1/ζ` with the tools of
 `DLMF.Hypergeometric.CubicTools`: Goursat's cubic transformation near `u = 0`, the connection

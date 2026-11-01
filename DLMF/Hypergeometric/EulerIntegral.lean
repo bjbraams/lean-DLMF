@@ -21,8 +21,16 @@ $$
 \int_0^1 t^{b-1}(1-t)^{c-b-1}(1-zt)^{-a}\,dt.
 $$
 
-Gauss's summation theorem (the case `z = 1`) is recorded as `gauss_summation`; its proof is
-`Carlson.ordinaryHypergeometric_one` from lean-codes.
+## Main results
+
+* `ordinaryHypergeometric_eq_integral`: Euler's integral, DLMF 15.6.1.
+* `gauss_summation`: Gauss's summation theorem, DLMF 15.4.20; its proof is
+  `Carlson.ordinaryHypergeometric_one` from lean-codes.
+* `chu_vandermonde`: the Chu–Vandermonde sum, DLMF 15.4.24.
+
+## References
+
+* G. E. Andrews, R. Askey, R. Roy, *Special Functions*, §2.2.
 -/
 
 @[expose] public section

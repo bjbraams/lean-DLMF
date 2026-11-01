@@ -11,15 +11,29 @@ public import TauCeti.Analysis.SpecialFunctions.Beta
 /-!
 # Fractional integrals and regularization (DLMF §2.6(iii)–(iv))
 
-* §2.6(iii): the Riemann–Liouville integral as a convolution (2.6.35), the convolution algebra
-  `K⁺` (2.6.37) and the convolution identities 2.6.38–2.6.40, the expansions with exact
-  remainder 2.6.45–2.6.47 of `I^μ f(x)` (the function forms of the distributional identities
-  2.6.43–2.6.44), and the example 2.6.48–2.6.53.
-* §2.6(iv): the convolution integral `∫₀^∞ f(t) h(xt) dt` (2.6.54), the product expansion
-  2.6.57, the regularization 2.6.59 of `∫₀^∞ t^λ dt`, 2.6.60 and the expansion 2.6.62.
+Riemann–Liouville integrals and convolutions in the algebra `K⁺`, expansions of fractional
+integrals with exact remainder, and the asymptotics of Mellin convolution integrals.
 
-The sharp endpoint integrability criterion reuses TauCeti
-`integrableOn_rpow_mul_one_sub_rpow_iff` after positive dilation.
+## Main results
+
+* `riemannLiouvilleIntegral_eq_convolution`: the Riemann–Liouville integral as a convolution
+  (DLMF 2.6.35).
+* `integrableOn_powKernel_mul_rpow_iff`: DLMF 2.6.36.
+* `halfLineConvolution_comm`, `kPlusPairing_convolution_congr`: the convolution algebra `K⁺`
+  (DLMF 2.6.37).
+* `kPlusPairing_powKernel_conv_delta`, `kPlusPairing_powKernel_conv_rpow`,
+  `kPlusPairing_powKernel_conv_log`: the convolution identities 2.6.38–2.6.40.
+* `riemannLiouvilleIntegral_eq_of_lt_one`, `riemannLiouvilleIntegral_eq_of_eq_one`: expansions
+  of `I^μ f(x)` with exact remainder (DLMF 2.6.43–2.6.47).
+* `stieltjesRemainder_rpowDivOneAddExample`, `isMellinContinuation_rpowDivOneAddExample`,
+  `riemannLiouvilleIntegral_exampleF`, `norm_fractionalRemainder_exampleF_le`: the example
+  2.6.48–2.6.53.
+* `mul_comp_mul_eq_expansion`: the product expansion 2.6.57.
+* `regularized_integral_rpow_eq_zero`: the regularization 2.6.59 of `∫₀^∞ t^λ dt`.
+* `mellin_continuation_eq_mellin_remainder`, `mellinConvolutionIntegral_eq`: DLMF 2.6.60,
+  2.6.62.
+
+## Implementation notes
 
 Elements `Dⁿ f` of `K⁺` are represented by pairs `(n, f)` and act on smooth compactly
 supported test functions through `kPlusPairing n f φ = (-1)ⁿ ∫₀^∞ f φ^{(n)}`; the distributions
@@ -37,7 +51,7 @@ namespace DLMF.AsymptoticApproximations
 @[dlmf 2.6.E35]
 theorem riemannLiouvilleIntegral_eq_convolution (μ : ℝ) (f : ℝ → ℂ) (x : ℝ) :
     riemannLiouvilleIntegral μ f x =
-      (Real.Gamma μ : ℂ)⁻¹ * halfLineConvolution (g2b_powKernel μ) f x := rfl
+      (Real.Gamma μ : ℂ)⁻¹ * halfLineConvolution (rpowKernel μ) f x := rfl
 
 /-- DLMF 2.6.36: for `x > 0`, `μ > 0`, `0 < α ≤ 1` and `s = 0, 1, 2, …`, the convolution
 integral `∫₀^x (x-t)^{μ-1} t^{-s-α} dt` exists in the usual (Lebesgue) sense exactly when
@@ -117,7 +131,7 @@ theorem kPlusPairing_convolution_congr {n n' m m' : ℕ} {f f' g g' : ℝ → �
 @[dlmf 2.6.E38]
 theorem kPlusPairing_powKernel_conv_delta {μ : ℝ} (hμ : 0 < μ) (hμn : ∀ k : ℕ, μ ≠ k + 1)
     {s : ℕ} (hs : 1 ≤ s) {φ : ℝ → ℂ} (hφ : IsCompactTest φ) :
-    kPlusPairing s (halfLineConvolution (g2b_powKernel μ) fun _ => 1) φ =
+    kPlusPairing s (halfLineConvolution (rpowKernel μ) fun _ => 1) φ =
       (Real.Gamma μ / Real.Gamma (μ + 1 - s) : ℝ) * tPowPairing (μ - s) φ := by
   sorry
 
@@ -129,7 +143,7 @@ theorem kPlusPairing_powKernel_conv_rpow {μ α : ℝ} (hμ : 0 < μ) (hμn : �
     (hα0 : 0 < α) (hα1 : α < 1) (hμα : ∀ k : ℕ, μ - α ≠ k) (s : ℕ) {φ : ℝ → ℂ}
     (hφ : IsCompactTest φ) :
     ((-1 : ℂ) ^ s * (((ascPochhammer ℝ s).eval α : ℝ) : ℂ)⁻¹) *
-        kPlusPairing s (halfLineConvolution (g2b_powKernel μ)
+        kPlusPairing s (halfLineConvolution (rpowKernel μ)
           fun t => ((t ^ (-α) : ℝ) : ℂ)) φ =
       (Real.Gamma μ * Real.Gamma (1 - s - α) / Real.Gamma (μ + 1 - s - α) : ℝ) *
         tPowPairing (μ - s - α) φ := by
@@ -139,8 +153,8 @@ theorem kPlusPairing_powKernel_conv_rpow {μ α : ℝ} (hμ : 0 < μ) (hμn : �
 `(t^{μ-1} ∗ ln t)(x) = μ⁻¹ x^μ (ln x - γ - ψ(μ+1))` for `x > 0`, `μ > 0`. -/
 @[dlmf 2.6.E40]
 theorem halfLineConvolution_powKernel_log {μ : ℝ} (hμ : 0 < μ) {x : ℝ} (hx : 0 < x) :
-    halfLineConvolution (g2b_powKernel μ) (fun t => (Real.log t : ℂ)) x =
-      (μ : ℂ)⁻¹ * g2b_logKernel μ x := by
+    halfLineConvolution (rpowKernel μ) (fun t => (Real.log t : ℂ)) x =
+      (μ : ℂ)⁻¹ * logRpowKernel μ x := by
   sorry
 
 /-- DLMF 2.6.40: for `μ > 0` and `s = 0, 1, 2, …`,
@@ -149,12 +163,12 @@ theorem halfLineConvolution_powKernel_log {μ : ℝ} (hμ : 0 < μ) {x : ℝ} (h
 @[dlmf 2.6.E40]
 theorem kPlusPairing_powKernel_conv_log {μ : ℝ} (hμ : 0 < μ) (s : ℕ) (φ : ℝ → ℂ) :
     (-1 : ℂ) ^ s / (s.factorial : ℂ) *
-        kPlusPairing (s + 1) (halfLineConvolution (g2b_powKernel μ)
+        kPlusPairing (s + 1) (halfLineConvolution (rpowKernel μ)
           fun t => (Real.log t : ℂ)) φ =
-      (-1 : ℂ) ^ s / ((μ : ℂ) * (s.factorial : ℂ)) * kPlusPairing (s + 1) (g2b_logKernel μ) φ := by
-  have h : ∫ t in Ioi (0 : ℝ), halfLineConvolution (g2b_powKernel μ)
+      (-1 : ℂ) ^ s / ((μ : ℂ) * (s.factorial : ℂ)) * kPlusPairing (s + 1) (logRpowKernel μ) φ := by
+  have h : ∫ t in Ioi (0 : ℝ), halfLineConvolution (rpowKernel μ)
         (fun t => (Real.log t : ℂ)) t * iteratedDeriv (s + 1) φ t =
-      ∫ t in Ioi (0 : ℝ), (μ : ℂ)⁻¹ * (g2b_logKernel μ t * iteratedDeriv (s + 1) φ t) :=
+      ∫ t in Ioi (0 : ℝ), (μ : ℂ)⁻¹ * (logRpowKernel μ t * iteratedDeriv (s + 1) φ t) :=
     setIntegral_congr_fun measurableSet_Ioi fun t ht => by
       rw [halfLineConvolution_powKernel_log hμ ht]; ring
   unfold kPlusPairing
@@ -188,7 +202,7 @@ theorem riemannLiouvilleIntegral_eq_of_eq_one {f : ℝ → ℂ} {a : ℕ → ℂ
     (hμ : 0 < μ) {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) :
     riemannLiouvilleIntegral μ f x =
       ∑ s ∈ range n, (-1 : ℂ) ^ s * a s / ((s.factorial : ℂ) * Real.Gamma (μ + 1)) *
-          iteratedDeriv (s + 1) (g2b_logKernel μ) x -
+          iteratedDeriv (s + 1) (logRpowKernel μ) x -
         ∑ s ∈ range n, stieltjesLogDeltaCoeff M a s *
           (x ^ (μ - (s + 1)) / Real.Gamma (μ - s) : ℝ) +
         ((x ^ n : ℝ) : ℂ)⁻¹ * fractionalRemainder μ (stieltjesRemainder f 1 a n) n x := by
@@ -200,14 +214,14 @@ theorem riemannLiouvilleIntegral_eq_of_eq_one {f : ℝ → ℂ} {a : ℕ → ℂ
 `f(t) = ∑_{s<n} (-1)^s t^{-s-α} + (-1)ⁿ t^{1-n-α}/(1+t)`; so `a_s = (-1)^s` and
 `f_n(t) = (-1)ⁿ t^{1-n-α}/(1+t)`. -/
 @[dlmf 2.6.E49, dlmf 2.6.E50]
-theorem g2b_exampleF_eq (α : ℝ) (n : ℕ) {t : ℝ} (ht : 0 < t) :
-    stieltjesRemainder (g2b_exampleF α) α (fun s => (-1 : ℂ) ^ s) n t =
+theorem stieltjesRemainder_rpowDivOneAddExample (α : ℝ) (n : ℕ) {t : ℝ} (ht : 0 < t) :
+    stieltjesRemainder (rpowDivOneAddExample α) α (fun s => (-1 : ℂ) ^ s) n t =
       (-1 : ℂ) ^ n * ((t ^ (1 - n - α) / (1 + t) : ℝ) : ℂ) := by
   induction n with
-  | zero => simp [stieltjesRemainder, g2b_exampleF]
+  | zero => simp [stieltjesRemainder, rpowDivOneAddExample]
   | succ n ih =>
-    have he : stieltjesRemainder (g2b_exampleF α) α (fun s => (-1 : ℂ) ^ s) (n + 1) t =
-        stieltjesRemainder (g2b_exampleF α) α (fun s => (-1 : ℂ) ^ s) n t -
+    have he : stieltjesRemainder (rpowDivOneAddExample α) α (fun s => (-1 : ℂ) ^ s) (n + 1) t =
+        stieltjesRemainder (rpowDivOneAddExample α) α (fun s => (-1 : ℂ) ^ s) n t -
           (-1 : ℂ) ^ n * ((t ^ (-((n : ℝ) + α)) : ℝ) : ℂ) := by
       simp only [stieltjesRemainder, Finset.sum_range_succ]
       ring
@@ -225,8 +239,8 @@ theorem g2b_exampleF_eq (α : ℝ) (n : ℕ) {t : ℝ} (ht : 0 < t) :
 /-- DLMF 2.6.51: the Mellin transform of `f(t) = t^{1-α}/(1+t)`, `0 < α < 1`, continues to
 `𝓜f(z) = π/sin(π(z+1-α))`, and at the integers `𝓜f(s) = (-1)^s π/sin(πα)`. -/
 @[dlmf 2.6.E51]
-theorem g2b_exampleF_mellin {α : ℝ} (hα0 : 0 < α) (hα1 : α < 1) :
-    IsMellinContinuation (g2b_exampleF α) α
+theorem isMellinContinuation_rpowDivOneAddExample {α : ℝ} (hα0 : 0 < α) (hα1 : α < 1) :
+    IsMellinContinuation (rpowDivOneAddExample α) α
         (fun z => π / Complex.sin (π * (z + 1 - α))) ∧
       ∀ s : ℕ, π / Complex.sin (π * ((s : ℂ) + 1 - α)) = (-1 : ℂ) ^ s * (π / Real.sin (π * α)) := by
   sorry
@@ -238,7 +252,7 @@ for `f(t) = t^{1-α}/(1+t)`. -/
 @[dlmf 2.6.E52, dlmf 2.6.E48]
 theorem riemannLiouvilleIntegral_exampleF {α : ℝ} (hα0 : 0 < α) (hα1 : α < 1) {μ : ℝ}
     (hμ : 0 < μ) {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) :
-    riemannLiouvilleIntegral μ (g2b_exampleF α) x =
+    riemannLiouvilleIntegral μ (rpowDivOneAddExample α) x =
       ((∑ s ∈ range n, (-1) ^ s * (Real.Gamma (1 - s - α) / Real.Gamma (μ + 1 - s - α)) *
             x ^ (μ - s - α) -
           π / Real.sin (π * α) *

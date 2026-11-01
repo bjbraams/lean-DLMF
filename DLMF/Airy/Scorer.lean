@@ -9,8 +9,8 @@ public import DLMF.Airy.Scorer.Representations
 public import DLMF.Airy.Scorer.ExpansionsAndZeros
 
 /-!
-# Scorer functions, DLMF §9.12
+# Scorer functions (DLMF §9.12)
 
-Statements acquired from the NIST DLMF, checked 2026-10-19.
-New statements are initially admitted; existing proved Airy results are retained.
+The inhomogeneous Airy functions `Gi` and `Hi`: definitions, differential equations, connection
+formulas, Maclaurin series, integral representations, asymptotic expansions and real zeros.
 -/

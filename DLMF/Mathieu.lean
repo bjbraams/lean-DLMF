@@ -30,26 +30,25 @@ public import DLMF.Mathieu.Hill.Basic
 public import DLMF.Mathieu.Hill.Floquet
 public import DLMF.Mathieu.Hill.Eigenfunctions
 public import DLMF.Mathieu.Hill.Ince
-public import DLMF.Mathieu.P2sBridge
-public import DLMF.Mathieu.Modified.P2mCrossSeries
-public import DLMF.Mathieu.Modified.P2mRadial
-public import DLMF.Mathieu.Modified.P2mConnection
-public import DLMF.Mathieu.Modified.P3mImaginary
-public import DLMF.Mathieu.Modified.P3mIntegrals
-public import DLMF.Mathieu.Modified.P3mWronskian
-public import DLMF.Mathieu.P3qJacobi
-public import DLMF.Mathieu.P3qSpectrum
-public import DLMF.Mathieu.P3qGeneral
-public import DLMF.Mathieu.P3qVector
-public import DLMF.Mathieu.P3qCeSe
-public import DLMF.Mathieu.P3qCeSeGen
+public import DLMF.Mathieu.SturmBridge
+public import DLMF.Mathieu.Modified.CrossSeries
+public import DLMF.Mathieu.Modified.RadialSeries
+public import DLMF.Mathieu.Modified.CrossConnection
+public import DLMF.Mathieu.Modified.ImaginaryArgument
+public import DLMF.Mathieu.Modified.KernelIntegrals
+public import DLMF.Mathieu.Modified.Wronskians
+public import DLMF.Mathieu.SmallQJacobi
+public import DLMF.Mathieu.SmallQSpectrum
+public import DLMF.Mathieu.SmallQGeneral
+public import DLMF.Mathieu.SmallQVector
+public import DLMF.Mathieu.SmallQCeSe
+public import DLMF.Mathieu.SmallQCeSeGeneral
 
 /-!
 # Mathieu functions and Hill's equation (DLMF Chapter 28)
 
-Part A (§§28.1–28.11, integer order): `Basic` through `Expansions`; part B (§§28.12–28.19,
-noninteger order): `Noninteger`; part C (§§28.20–28.28, modified Mathieu functions):
-`Modified`; part B also covers Hill's equation (§§28.29–28.31): `Hill`. The fundamental
-solutions and eigenvalues are defined by choice from flagged existence theorems. The ledger
-is DLMF28Acquisition.md.
+Mathieu functions of integer order (DLMF §§28.1–28.11) in `Basic` through `Expansions`, of
+noninteger order (DLMF §§28.12–28.19) in `Noninteger`, modified Mathieu functions
+(DLMF §§28.20–28.28) in `Modified`, and Hill's equation (DLMF §§28.29–28.31) in `Hill`. The
+fundamental solutions and eigenvalues are defined by choice, justified by existence theorems.
 -/

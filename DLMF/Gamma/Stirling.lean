@@ -16,6 +16,21 @@ Mathlib has Stirling's formula for `n!` (`Stirling.factorial_isEquivalent_stirli
 Theorem 1.4.1 is `Γ(x) ∼ √(2π) x^{x-1/2} e^{-x}` as `Re x → ∞`. Along the positive integers this
 is `Γ(n+1) = n! ∼ √(2π n) (n/e)^n`. The real-variable form along rays `n ↦ n + t` is deduced from
 the integer case by log-convexity of `Γ` on `(0,∞)`.
+
+## Main definitions
+
+* `stirlingGamma`: the leading Stirling approximation `√(2π/x) (x/e)^x` to `Γ(x)`.
+
+## Main results
+
+* `Gamma_nat_succ_isEquivalent_stirling`: `Γ(n+1) ∼ √(2π n) (n/e)^n`.
+* `Gamma_nat_succ_isEquivalent_stirlingGamma`: `Γ(n+1) ∼ √(2π/(n+1)) ((n+1)/e)^{n+1}`,
+  DLMF 5.11.3.
+* `tendsto_Gamma_add_nat_div_stirlingGamma`: Stirling's formula along the ray `n + t`.
+
+## References
+
+* G. E. Andrews, R. Askey, R. Roy, *Special Functions*, §1.4.
 -/
 
 @[expose] public section

@@ -10,11 +10,25 @@ public import DLMF.Airy.Scorer.Representations
 /-!
 # Scorer asymptotic expansions and real zeros
 
-Asymptotic expansions of Gi and Hi and their derivatives, followed by the real zero-counting
-results.
+Asymptotic expansions of `Gi`, `Hi` and their derivatives (DLMF 9.12.25–9.12.28), obtained by
+rotating a Laplace contour, and the real zeros of `Gi` and `Gi'` (DLMF §9.12).
 
-Source references and common attribution are retained in
-`DLMF.Airy.Scorer`.
+## Main definitions
+
+* `scorerAsym_laplace`, `scorerAsym_coeff`: the Laplace integral and the Taylor coefficients of
+  `e^{-t³/3}`.
+* `scorerZ_gi`, `scorerZ_gi'`, `scorerZ_hi`: `Gi`, `Gi'`, `Hi` on the real axis.
+
+## Main results
+
+* `scorerGi_asymptotic`, `scorerGiDeriv_asymptotic`: DLMF 9.12.25, 9.12.26.
+* `scorerHi_asymptotic`, `scorerHiDeriv_asymptotic`: DLMF 9.12.27, 9.12.28.
+* `scorerGi_nonneg_ne_zero`, `scorerGiDeriv_unique_nonneg_zero`: `Gi` has no zeros on
+  `[0, ∞)` and `Gi'` exactly one.
+* `scorerGi_infinite_negative_zeros`, `scorerGiDeriv_infinite_negative_zeros`,
+  `scorerGi_zeros_interlace`, `scorerGiDeriv_zeros_interlace`: infinitely many negative zeros
+  and interlacing.
+* `scorerGi_principalValue_converges`: convergence of the principal value in DLMF 9.12.23.
 -/
 
 @[expose] public noncomputable section

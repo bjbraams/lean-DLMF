@@ -9,4 +9,8 @@ public import DLMF.OrthogonalPolynomials.Basic.Definitions
 
 /-!
 # Definitions of classical orthogonal polynomial families
+
+The foundational entry point for orthogonal polynomials: the canonical definitions of the
+physicists' Hermite, Laguerre, Jacobi, Legendre and Gegenbauer polynomials, in
+`OrthogonalPolynomials.Basic.Definitions`.
 -/

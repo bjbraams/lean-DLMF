@@ -12,11 +12,37 @@ public import DLMF.OrthogonalPolynomials.SoninePolyaApplications
 /-!
 # Pointwise bounds and zeros of classical polynomials
 
-Sonine-Polya inequalities and Laguerre differential inequalities bound values and zeros of
-classical orthogonal polynomials.
+Inequalities, positive sums, a Darboux-type asymptotic formula and the location of zeros for
+the classical orthogonal polynomials (DLMF §§18.14–18.16). Sonine–Pólya inequalities and
+Laguerre's differential inequality bound the values and zeros.
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.BoundsZeros`.
+## Main definitions
+
+* `rootDiscriminant`: the discriminant of a polynomial in terms of a complete list of its
+  roots (DLMF 18.2.20).
+
+## Main results
+
+* `jacobi_bound_at_one`, `jacobi_bound_at_neg_one`, `jacobi_bernstein_bound`,
+  `jacobi_weighted_bound`: bounds for Jacobi polynomials (DLMF 18.14.1–18.14.3).
+* `ultrasphPoly_bound_at_one`, `ultrasphPoly_even_bound`, `ultrasphPoly_odd_bound`,
+  `ultrasphPoly_bernstein_bound`: bounds for Gegenbauer polynomials (DLMF 18.14.4–18.14.7).
+* `laguerrePolyL_bound`, `hermitePolyH_bound`: DLMF 18.14.8 and 18.14.9.
+* `jacobi_turan`, `laguerrePolyL_turan`, `hermitePolyH_turan`: Turán's inequalities
+  (DLMF 18.14.11–18.14.13).
+* `jacobi_positive_weighted_sum`, `jacobi_positive_sum`, `laguerrePolyL_positive_weighted_sum`:
+  positive sums (DLMF 18.14.25–18.14.27).
+* `jacobi_darboux_asymptotic`: the large-`n` asymptotic form of Jacobi polynomials (DLMF §18.15).
+* `jacobi_zeros`, `laguerrePolyL_zeros`, `hermitePolyH_zeros`: the zeros are real, simple and in
+  the interval of orthogonality (DLMF §18.16).
+* `laguerre_inequality`: Laguerre's inequality for real polynomials with only real zeros.
+* `laguerrePolyL_zero_lower_bound`, `laguerrePolyL_zero_upper_bound`: bounds for the zeros of
+  Laguerre polynomials (DLMF 18.16.12–18.16.13).
+
+## Implementation notes
+
+Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
+hypergeometric definitions do not implement continuation in singular parameters.
 -/
 
 @[expose] public section

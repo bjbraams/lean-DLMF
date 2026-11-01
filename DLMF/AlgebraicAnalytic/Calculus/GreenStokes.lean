@@ -13,14 +13,25 @@ public import Mathlib.MeasureTheory.Covering.Besicovitch
 /-!
 # Green's theorem in the plane and Stokes's theorem (DLMF 1.6.43–1.6.44, 1.6.57)
 
+The area formulas below DLMF 1.6.44, derived from Green's theorem, and Stokes's theorem 1.6.57
+for a parametrized surface over a plane region.
+
+## Main results
+
+* `volume_real_eq_green_area`: the area of the region bounded by a closed curve as a line
+  integral (DLMF §1.6(iv), after 1.6.44).
+* `fluxIntegral_curl_eq_lineIntegral`: Stokes's theorem for a parametrized surface
+  (DLMF 1.6.57).
+
+## Implementation notes
+
 Green's theorem 1.6.44 is TauCeti's `TauCeti.Green.green_ac_index_one` (credited in the
 pointer file `DLMF.AlgebraicAnalytic.Calculus.MathlibCoverage`): the plane is `ℂ`, the curve
 `γ` is closed and absolutely continuous on `[a, b]`, and the region `S` is the part of the
 filled hull of the trace off the trace, on which the winding number of `γ` is `1`. This
 covers DLMF's positively oriented simple closed piecewise differentiable curves (whose
 interior has winding number `1` by the Jordan curve theorem, not in Mathlib), and more: the
-curve may cross itself. This file proves the area formulas below 1.6.44 from it, and states
-Stokes's theorem 1.6.57 for a parametrized surface over such a region.
+curve may cross itself.
 -/
 
 @[expose] public noncomputable section
@@ -31,7 +42,7 @@ open scoped Topology Matrix
 namespace DLMF.AlgebraicAnalytic
 
 /-- Green's theorem for a field with constant curl `1` gives the area of the region. -/
-lemma g1b_green_area {γ : ℝ → ℂ} {a b : ℝ} (hab : a < b)
+private lemma volume_filledHull_eq_integral_of_curl_eq_one {γ : ℝ → ℂ} {a b : ℝ} (hab : a < b)
     (hγ : AbsolutelyContinuousOnInterval γ a b) (hclosed : γ a = γ b)
     (hindex : ∀ z ∈ TauCeti.filledHull (γ '' uIcc a b) \ (γ '' uIcc a b),
       TauCeti.Contour.windingNumber γ a b z = 1)
@@ -69,15 +80,15 @@ theorem volume_real_eq_green_area {γ : ℝ → ℂ} {a b : ℝ} (hab : a < b)
   have hr2 (z : ℂ) : HasFDerivAt (fun z : ℂ => z.re / 2) ((2 : ℝ)⁻¹ • Complex.reCLM) z := by
     simp only [div_eq_mul_inv]; exact (hre z).mul_const _
   refine ⟨?_, ?_, ?_⟩
-  · have h := g1b_green_area hab hγ hclosed hindex (P := fun z => -z.im) (Q := fun _ => 0)
+  · have h := volume_filledHull_eq_integral_of_curl_eq_one hab hγ hclosed hindex (P := fun z => -z.im) (Q := fun _ => 0)
       cim.neg contDiff_const (fun z => by
         rw [TauCeti.Green.curl, (hn z).fderiv, (h0 z).fderiv]; simp)
     simpa using h
-  · have h := g1b_green_area hab hγ hclosed hindex (P := fun _ => 0) (Q := fun z => z.re)
+  · have h := volume_filledHull_eq_integral_of_curl_eq_one hab hγ hclosed hindex (P := fun _ => 0) (Q := fun z => z.re)
       contDiff_const cre (fun z => by
         rw [TauCeti.Green.curl, (hre z).fderiv, (h0 z).fderiv]; simp)
     simpa using h
-  · have h := g1b_green_area hab hγ hclosed hindex (P := fun z => -z.im / 2)
+  · have h := volume_filledHull_eq_integral_of_curl_eq_one hab hγ hclosed hindex (P := fun z => -z.im / 2)
       (Q := fun z => z.re / 2) (cim.neg.div_const 2) (cre.div_const 2) (fun z => by
         rw [TauCeti.Green.curl, (hn2 z).fderiv, (hr2 z).fderiv]; simp; norm_num)
     exact h

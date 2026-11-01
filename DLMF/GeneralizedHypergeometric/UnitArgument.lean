@@ -12,22 +12,42 @@ public import DLMF.Hypergeometric.Saalschutz
 public import DLMF.QHypergeometric.HigherSummations
 
 /-!
-# Argument unity: DLMF §16.4
+# `ₚF_q` at unit argument (DLMF §16.4)
 
-Existing proofs of Pfaff–Saalschütz, Dixon, terminating Whipple, and Dougall's bilateral
-sum are reused and indexed by the coverage ledger. Finite parity and finite Dougall
-identities use Pochhammer quotients, which retain the removable cases hidden by
-quotients of poles in the printed Gamma formulas. Lower parameters retain the
-chapter's nonpositive-integer exclusions, except the explicitly canceled finite pair
-in 16.4.2_5. Convergence at unity is always stated before using a nonterminating sum.
-The odd terminating Dixon evaluation follows from finite inversion. The normalized
-bilateral evaluation reuses the proved local `dougall_bilateral` and Mathlib's
-`Complex.Gamma_mul_Gamma_one_sub`, preserving integral lower parameters. The finite Dougall
-`₅F₄` evaluation is the q→1 limit of the proved rational terminating `₆φ₅` identity
-`DLMF.QHypergeometric.qbR4_six_rational`, with Bailey’s polynomial unit factor handling the
-very-well-poised pair without square-root branch restrictions. Finite Dougall `₇F₆` follows
-from the proved Whipple transformation and Saalschütz sum, with continuity of finite
-rational sums retaining the removable canceled-parameter cases.
+## Main definitions
+
+* `GenWellPoised`, `GenVeryWellPoised`: well-poised parameter vectors, DLMF 16.4.1.
+* `GenKBalanced`: `k`-balanced terminating series, DLMF 16.4.2.
+* `gen3F2UnitThomae`: the Thomae expression continuing `₃F₂(1)` in its parameters.
+
+## Main results
+
+* `genHG_finite_ratio_sum`, `genHG_finite_ratio_sum_closed`: DLMF 16.4.2_5.
+* `genHG_dixon_terminating_even`, `genHG_dixon_terminating_odd`: Dixon's sum, DLMF 16.4.5.
+* `genHG_watson_sum`: Watson's sum, DLMF 16.4.6, with terminating forms.
+* `genHG_whipple_3F2_sum`, `genHG_whipple_3F2_terminating`: Whipple's sum, DLMF 16.4.7–16.4.8.
+* `genHG_dougall_5F4_sum`, `genHG_dougall_5F4_terminating`, `genHG_dougall_7F6`: Dougall's
+  sums, DLMF 16.4.9–16.4.10.
+* `genHG_3F2_unit_transformation`, `analyticOnNhd_gen3F2UnitThomae_params`: DLMF 16.4.11.
+* `genHG_3F2_unit_recurrence`, `genHG_3F2_unit_recurrence_two`: DLMF 16.4.12–16.4.13.
+* `genHG_balanced_4F3_transformation`: DLMF 16.4.14.
+* `genHG_whipple_general`, `genHG_whipple_nonterminating_left`: Whipple's transformation,
+  DLMF 16.4.15.
+* `genHG_dougall_bilateral`: Dougall's bilateral sum, DLMF 16.4.17.
+
+## Implementation notes
+
+Finite parity and finite Dougall identities use Pochhammer quotients, which retain the
+removable cases hidden by quotients of poles in the printed Gamma formulas. Lower parameters
+retain the chapter's nonpositive-integer exclusions, except the explicitly cancelled finite
+pair in 16.4.2_5. Convergence at unity is always stated before a nonterminating sum is used.
+The odd terminating Dixon evaluation follows from finite inversion. The bilateral evaluation
+uses `dougall_bilateral` and Mathlib's `Complex.Gamma_mul_Gamma_one_sub`, preserving integral
+lower parameters. The finite Dougall `₅F₄` evaluation is the `q → 1` limit of the rational
+terminating `₆φ₅` identity `DLMF.QHypergeometric.sum_sixTerm_eq`, with Bailey's polynomial unit
+factor handling the very-well-poised pair without square-root branch restrictions. The finite
+Dougall `₇F₆` follows from Whipple's transformation and Saalschütz's sum, with continuity of
+finite rational sums retaining the removable cancelled-parameter cases.
 -/
 
 @[expose] public section
@@ -346,7 +366,7 @@ private lemma dougall_qpow_params (a b c : ℂ) (n : ℕ) {q : ℂ} (hq : q ≠ 
 very-well-poised `₅F₄` coefficient. -/
 private lemma dougall_qterm_classical_limit (a b c : ℂ) (n k : ℕ)
     (hb : GenDenRegular {a / 2, a - b + 1, a - c + 1, a + n + 1}) :
-    Tendsto (fun q : ℝ => qbR4SixTerm ((q : ℂ) ^ a) ((q : ℂ) ^ b) ((q : ℂ) ^ c) q n k)
+    Tendsto (fun q : ℝ => sixTerm ((q : ℂ) ^ a) ((q : ℂ) ^ b) ((q : ℂ) ^ c) q n k)
       (𝓝[<] 1) (𝓝 (genCoeff {a, a / 2 + 1, b, c, (-n : ℂ)}
         {a / 2, a - b + 1, a - c + 1, a + n + 1} k)) := by
   have hA : ∀ j : ℕ, a / 2 ≠ -j := hb _ (by simp)
@@ -380,7 +400,7 @@ private lemma dougall_qterm_classical_limit (a b c : ℂ) (n k : ℕ)
   have hB := (dougall_qpow_params a b c n hq0).1
   have hC := (dougall_qpow_params a c b n hq0).1
   obtain ⟨hN, hZ⟩ := (dougall_qpow_params a b c n hq0).2
-  rw [qbR4SixTerm, hB, hC, hZ, hN,
+  rw [sixTerm, hB, hC, hZ, hN,
     show (q : ℂ) ^ (-(n : ℤ)) = (q : ℂ) ^ (-(n : ℂ)) by
       rw [Complex.cpow_neg, Complex.cpow_natCast, zpow_neg, zpow_natCast]]
   ring
@@ -406,7 +426,7 @@ theorem genHG_dougall_5F4_terminating (n : ℕ) (a b c : ℂ)
   have hN := dougall_qPochhammer_eventually_ne_zero (a + n + 1) n
     (poch_ne_zero_of_not_neg_nat (hb _ (by simp)) n)
   have heq : (fun q : ℝ => ∑ k ∈ range (n + 1),
-      qbR4SixTerm ((q : ℂ) ^ a) ((q : ℂ) ^ b) ((q : ℂ) ^ c) q n k) =ᶠ[𝓝[<] 1]
+      sixTerm ((q : ℂ) ^ a) ((q : ℂ) ^ b) ((q : ℂ) ^ c) q n k) =ᶠ[𝓝[<] 1]
       (fun q => qPochhammerList ([a + 1, a - b - c + 1].map fun x => (q : ℂ) ^ x) q n /
         qPochhammerList ([a - b + 1, a - c + 1].map fun x => (q : ℂ) ^ x) q n) := by
     filter_upwards [hB, hC, hN, Ioo_mem_nhdsLT (by norm_num : (0 : ℝ) < 1)] with q hB hC hN hq
@@ -417,7 +437,7 @@ theorem genHG_dougall_5F4_terminating (n : ℕ) (a b c : ℂ)
     have hBpow := (dougall_qpow_params a b c n hq0).1
     have hCpow := (dougall_qpow_params a c b n hq0).1
     have hNpow := (dougall_qpow_params a b c n hq0).2.1
-    have hS := qbR4_six_rational hq0 hqn n
+    have hS := sum_sixTerm_eq hq0 hqn n
       (Complex.cpow_ne_zero_iff.mpr (Or.inl hq0))
       (Complex.cpow_ne_zero_iff.mpr (Or.inl hq0))
       (by rwa [hBpow]) (by rwa [hCpow]) (by rwa [hNpow])
@@ -668,7 +688,7 @@ private lemma hasSum_gen3F2_one {a b c d e : ℂ} (hb : GenDenRegular {d, e})
   · exact genHG_one_hasSum_of_summable hb (genCoeff_summable_of_terminates ha)
 
 /-- Consecutive coefficients of the second unity recurrence form an exact telescope. -/
-private lemma gen3F2_contiguous_two_coeff_succ (a b c d e : ℂ)
+private lemma genCoeff_second_unit_recurrence_telescope (a b c d e : ℂ)
     (hb : GenDenRegular {d, d + 1, e, e + 1}) (n : ℕ) :
     genCoeff {a, b, c} {d, e} (n + 1) -
       c * (e - a) / (d * e) * genCoeff {a, b + 1, c + 1} {d + 1, e + 1} (n + 1) -
@@ -696,7 +716,7 @@ private lemma gen3F2_contiguous_two_coeff_succ (a b c d e : ℂ)
   ring
 
 /-- Raising one regular lower parameter gives a linear relation between coefficients. -/
-private lemma gen3F2_coeff_lower_add_one (a b c d e : ℂ) (hb : GenDenRegular {d, e}) (n : ℕ) :
+private lemma genCoeff_lower_add_one (a b c d e : ℂ) (hb : GenDenRegular {d, e}) (n : ℕ) :
     (d + n) * genCoeff {a, b, c} {d + 1, e} n = d * genCoeff {a, b, c} {d, e} n := by
   have hd : d ≠ 0 := by simpa using hb d (by simp) 0
   have hdn : d + n ≠ 0 := by
@@ -715,7 +735,7 @@ private lemma gen3F2_coeff_lower_add_one (a b c d e : ℂ) (hb : GenDenRegular {
   field_simp [hd, hdn, hdP, heP, hf]
 
 /-- The first unit recurrence is an exact difference of adjacent weighted coefficients. -/
-private lemma gen3F2_contiguous_coeff (a b c d e : ℂ)
+private lemma genCoeff_first_unit_recurrence_telescope (a b c d e : ℂ)
     (hb : GenDenRegular {d - 1, d, d + 1, e}) (n : ℕ) :
     (a - d) * (b - d) * (c - d) *
       (genCoeff {a, b, c} {d + 1, e} n - genCoeff {a, b, c} {d, e} n) +
@@ -730,10 +750,10 @@ private lemma gen3F2_contiguous_coeff (a b c d e : ℂ)
   have hbm : GenDenRegular {d - 1, e} := by
     intro z hz
     exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton] at hz ⊢; tauto)
-  have hRaise := gen3F2_coeff_lower_add_one a b c d e hb0 n
-  have hLower := gen3F2_coeff_lower_add_one a b c (d - 1) e hbm n
+  have hRaise := genCoeff_lower_add_one a b c d e hb0 n
+  have hLower := genCoeff_lower_add_one a b c (d - 1) e hbm n
   rw [show d - 1 + 1 = d by ring] at hLower
-  have hSucc := ghbR4_genCoeff_succ (a := {a, b, c}) hb0 n
+  have hSucc := genCoeff_succ_mul (a := {a, b, c}) hb0 n
   simp only [Multiset.insert_eq_cons, Multiset.map_cons, Multiset.map_singleton,
     Multiset.prod_cons, Multiset.prod_singleton] at hSucc
   have hdn : d + (n : ℂ) ≠ 0 := by
@@ -743,7 +763,7 @@ private lemma gen3F2_contiguous_coeff (a b c d e : ℂ)
   linear_combination (a - d) * (b - d) * (c - d) * hRaise +
     - (d + n) * d * (a + b + c - d - e + 1) * hLower - d * hSucc
 /-- The weighted boundary coefficient in the first unit recurrence tends to zero. -/
-private lemma gen3F2_boundary_tendsto_zero (a b c d e : ℂ) (hb : GenDenRegular {d, e})
+private lemma tendsto_genCoeff_boundary_zero (a b c d e : ℂ) (hb : GenDenRegular {d, e})
     (hconv : 1 < (d + e - a - b - c).re ∨ GenTerminates {a, b, c}) :
     Tendsto (fun n : ℕ => d * n * (e + n - 1) * genCoeff {a, b, c} {d, e} n)
       atTop (𝓝 0) := by
@@ -811,7 +831,7 @@ theorem genHG_3F2_unit_recurrence (a b c d e : ℂ) (hb : GenDenRegular {d - 1, 
     | zero => simp [U]
     | succ N ih =>
       rw [sum_range_succ, ih]
-      have h := gen3F2_contiguous_coeff a b c d e hb N
+      have h := genCoeff_first_unit_recurrence_telescope a b c d e hb N
       change C N = _ at h
       rw [h]
       dsimp [U]
@@ -819,7 +839,7 @@ theorem genHG_3F2_unit_recurrence (a b c d e : ℂ) (hb : GenDenRegular {d - 1, 
       ring
   have hlim := hC.tendsto_sum_nat
   simp_rw [hsum] at hlim
-  have heq := tendsto_nhds_unique hlim (gen3F2_boundary_tendsto_zero a b c d e hb0 hconv)
+  have heq := tendsto_nhds_unique hlim (tendsto_genCoeff_boundary_zero a b c d e hb0 hconv)
   exact sub_eq_zero.mp heq
 
 /-- The second unity recurrence, with the full common convergence half-space. -/
@@ -869,7 +889,7 @@ theorem genHG_3F2_unit_recurrence_two (a b c d e : ℂ) (hb : GenDenRegular {d, 
     | succ N ih =>
       rw [sum_range_succ, ih]
       dsimp only [C, V]
-      rw [gen3F2_contiguous_two_coeff_succ a b c d e hb N]
+      rw [genCoeff_second_unit_recurrence_telescope a b c d e hb N]
       ring
   have hv0 := genCoeff_tendsto_zero (a := {a + 1, b + 1, c + 1})
     (b := {d + 1, e + 1}) (by simp) hb1 (Or.inl (by
@@ -979,7 +999,7 @@ def gen3F2UnitThomae (a b c d e : ℂ) : ℂ :=
     genHG {a, d - b, d - c} {d, d + e - b - c} 1
 
 /-- Joint analyticity in the convergent unit-series parameter region (16.4, prose). -/
-lemma gen3F2_unit_parameter_analytic :
+private lemma analyticOnNhd_genHG_three_two_one_params :
     AnalyticOnNhd ℂ (fun P : Fin 5 → ℂ => genHG {P 0, P 1, P 2} {P 3, P 4} 1)
       {P | GenDenRegular {P 3, P 4} ∧ 0 < (P 3 + P 4 - P 0 - P 1 - P 2).re} := by
   sorry
@@ -987,7 +1007,7 @@ lemma gen3F2_unit_parameter_analytic :
 /-- The continued expression is jointly analytic at its regular parameter points in
 the full printed e−a half-space, including points outside original series convergence. -/
 @[dlmf 16.4.E11]
-theorem gen3F2_thomae_parameter_analytic :
+theorem analyticOnNhd_gen3F2UnitThomae_params :
     AnalyticOnNhd ℂ (fun P : Fin 5 → ℂ => gen3F2UnitThomae (P 0) (P 1) (P 2) (P 3) (P 4))
       {P | GenDenRegular {P 3, P 4, P 3 + P 4 - P 1 - P 2,
         P 3 + P 4 - P 0 - P 1 - P 2} ∧ 0 < (P 4 - P 0).re} := by

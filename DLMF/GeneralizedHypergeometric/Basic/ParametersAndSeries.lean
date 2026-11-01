@@ -11,6 +11,17 @@ public import Mathlib.RingTheory.PowerSeries.Basic
 
 /-!
 # Parameter multisets, coefficients and finite hypergeometric series
+
+## Main definitions
+
+* `genParams`: vector parameters represented as a multiset.
+* `genPoch`, `genGamma`: products of rising factorials and of Gamma values over a multiset.
+* `genCoeff`: the coefficient of the generalized hypergeometric series, DLMF 16.2.1.
+* `genExcess`: the unit-circle excess parameter, DLMF 16.2.2.
+* `GenDenRegular`, `GenTerminates`: regular lower parameters and terminating series.
+* `genFormalSeries`, `genFiniteHG`: the formal series and finite retained sums.
+* `GenSeriesConvergesTo`, `GenSeriesAbsolutelyConverges`: natural-order and absolute
+  convergence of the series.
 -/
 
 @[expose] public noncomputable section

@@ -18,7 +18,8 @@ public import DLMF.Heun.Fuchsian
 /-!
 # Heun functions (DLMF Chapter 31)
 
-Heun's equation, the local solution Hl as an explicit power series, Heun functions and
-polynomials, hypergeometric reductions and expansions, confluent forms, the general
-Fuchsian equation and Stieltjes polynomials. The ledger is DLMF31Acquisition.md.
+This umbrella imports Heun's equation and its transformations, the local solution `Hl` as an
+explicit power series, Heun functions and polynomials, hypergeometric reductions and expansions,
+integral equations and representations, the confluent forms, the general Fuchsian equation and
+Stieltjes polynomials.
 -/

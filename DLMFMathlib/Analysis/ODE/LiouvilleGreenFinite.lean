@@ -21,21 +21,31 @@ variation `V_{a₁,x}` of the error-control function over `[a₁, x]`. This comp
 recessive solutions of `DLMFMathlib.Analysis.ODE.LiouvilleGreen` and
 `DLMFMathlib.Analysis.ODE.LiouvilleGreenExpansion`, whose errors are controlled from `+∞`.
 
-* Volterra equations `h x = σ x + ∫_{(a₁,x]} K x t ψ t h t dt` with a rank-two kernel, solved by
-  Picard iteration with the bound `‖h - σ‖ ≤ B (exp (∫_{a₁}^x ρ) - 1)`
-  (Olver, Ch. 6, Thm. 10.1, in the form used for finite reference points).
-* `LiouvilleGreen.lg2_exists_solution_of_approx`: an arbitrary approximant `P`, with
-  `w = A E (P + ε)`, `‖ε‖ ≤ κ W exp (κ V)`, `W x = ∫_{a₁}^x ‖r‖`.
-* `LiouvilleGreen.lg2_exists_solution_expansion`: truncated Liouville–Green series.
-* `LiouvilleGreen.lg2_exists_solution_expansion_exp_dom`: the **dominant** exponential solution
-  `A exp (u ξ) (∑ A_s/u^s + ε)` (Olver, Ch. 6, Thm. 2.1 and Ch. 10, Thm. 3.1 with reference point
-  `a₁`).
-* `LiouvilleGreen.lg2_exists_solution_expansion_osc`: the **oscillatory** solutions
-  `A exp (-i u ξ) (∑ (-1)^s A_s/(iu)^s + ε)` controlled from a finite point (Olver, Ch. 6,
-  Thm. 2.2 and Ch. 10, §3).
-* `LiouvilleGreen.lg2_wronskian_eq`, `LiouvilleGreen.lg2_eq_lincomb`: constancy of Wronskians and
-  the two-dimensionality of the solution space on an open interval, used to identify special
-  functions with combinations of the constructed solutions.
+## Main definitions
+
+* `leftVolterraOp`: the Volterra operator `h ↦ ∫_{(a₁,x]} K x t ψ t h t dt` with a rank-two
+  kernel `K x t = p₁ x q₁ t + p₂ x q₂ t`.
+
+## Main results
+
+* `exists_solution_expansion_dominant_exp_finite_endpoint`: the **dominant** exponential
+  solution `A exp (u ξ) (∑ A_s/u^s + ε)` (Olver, Ch. 6, Thm. 2.1 and Ch. 10, Thm. 3.1 with
+  reference point `a₁`).
+
+## Implementation notes
+
+The private supporting results include: the Volterra equation
+`h x = σ x + ∫_{(a₁,x]} K x t ψ t h t dt`, solved by Picard iteration with the bound
+`‖h - σ‖ ≤ B (exp (∫_{a₁}^x ρ) - 1)` (Olver, Ch. 6, Thm. 10.1, in the form used for finite
+reference points); solutions `w = A E (P + ε)` with `‖ε‖ ≤ κ W exp (κ V)`, `W x = ∫_{a₁}^x ‖r‖`,
+built from an arbitrary approximant `P` and from truncated Liouville–Green series; the
+**oscillatory** solutions `A exp (-i u ξ) (∑ (-1)^s A_s/(iu)^s + ε)` controlled from a finite
+point (Olver, Ch. 6, Thm. 2.2 and Ch. 10, §3); and constancy of Wronskians and the
+two-dimensionality of the solution space on an open interval.
+
+## References
+
+* F. W. J. Olver, *Asymptotics and Special Functions*, Ch. 6 and Ch. 10.
 -/
 
 @[expose] public section
@@ -50,33 +60,33 @@ variable {E : Type*} [NormedAddCommGroup E]
 variable {S : Set ℝ} {a₁ : ℝ}
 
 /-- In an order-connected set containing `a₁`, the interval `[a₁, x]` lies in the set. -/
-lemma lg2_Icc_subset (hSc : S.OrdConnected) (ha : a₁ ∈ S) {x : ℝ} (hx : x ∈ S) :
+private lemma Icc_subset_of_ordConnected (hSc : S.OrdConnected) (ha : a₁ ∈ S) {x : ℝ} (hx : x ∈ S) :
     Icc a₁ x ⊆ S :=
   hSc.out ha hx
 
 /-- `uIcc a₁ x ⊆ S` in an order-connected set. -/
-lemma lg2_uIcc_subset (hSc : S.OrdConnected) (ha : a₁ ∈ S) {x : ℝ} (hx : x ∈ S) :
+private lemma uIcc_subset_of_ordConnected (hSc : S.OrdConnected) (ha : a₁ ∈ S) {x : ℝ} (hx : x ∈ S) :
     uIcc a₁ x ⊆ S :=
   hSc.uIcc_subset ha hx
 
 /-- A function continuous on an order-connected `S ∋ a₁` is integrable on `(a₁, x]`. -/
-lemma lg2_integrableOn_Ioc {f : ℝ → E} (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+private lemma integrableOn_Ioc_of_continuousOn {f : ℝ → E} (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hf : ContinuousOn f S) {x : ℝ} (hx : x ∈ S) : IntegrableOn f (Ioc a₁ x) :=
-  ((hf.mono (lg2_Icc_subset hSc ha hx)).integrableOn_compact isCompact_Icc).mono_set
+  ((hf.mono (Icc_subset_of_ordConnected hSc ha hx)).integrableOn_compact isCompact_Icc).mono_set
     Ioc_subset_Icc_self
 
 /-- The derivative of a primitive `y ↦ ∫_{a₁}^y f` at a point of an open order-connected set on
 which `f` is continuous. -/
-lemma lg2_hasDerivAt_primitive [NormedSpace ℝ E] [CompleteSpace E] {f : ℝ → E} (hS : IsOpen S)
+private lemma hasDerivAt_intervalIntegral_of_continuousOn [NormedSpace ℝ E] [CompleteSpace E] {f : ℝ → E} (hS : IsOpen S)
     (hSc : S.OrdConnected) (ha : a₁ ∈ S) (hf : ContinuousOn f S) {x : ℝ} (hx : x ∈ S) :
     HasDerivAt (fun y => ∫ t in a₁..y, f t) (f x) x :=
   intervalIntegral.integral_hasDerivAt_right
-    ((hf.mono (lg2_uIcc_subset hSc ha hx)).intervalIntegrable)
+    ((hf.mono (uIcc_subset_of_ordConnected hSc ha hx)).intervalIntegrable)
     (hf.stronglyMeasurableAtFilter hS x hx) (hf.continuousAt (hS.mem_nhds hx))
 
 /-- A primitive `y ↦ ∫_{(a₁, y]} f` of a function integrable on every `(a₁, x]`, `x ∈ S`, is
 continuous on `S ∩ [a₁, ∞)` when `S` is open and order-connected. -/
-lemma lg2_continuousOn_primitive [NormedSpace ℝ E] {f : ℝ → E} (hS : IsOpen S)
+private lemma continuousOn_setIntegral_Ioc [NormedSpace ℝ E] {f : ℝ → E} (hS : IsOpen S)
     (hf : ∀ x ∈ S, IntegrableOn f (Ioc a₁ x)) :
     ContinuousOn (fun y => ∫ t in Ioc a₁ y, f t) (S ∩ Ici a₁) := by
   intro y ⟨hyS, hy⟩
@@ -106,38 +116,38 @@ section Head
 variable {ρ : ℝ → ℝ} {S : Set ℝ} {a₁ : ℝ}
 
 /-- The head integral `∫_{a₁}^x ρ` of a nonnegative function is nonnegative. -/
-lemma lg2_head_nonneg (hρ0 : ∀ t ∈ S, a₁ < t → 0 ≤ ρ t) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+private lemma intervalIntegral_nonneg_of_nonneg_on (hρ0 : ∀ t ∈ S, a₁ < t → 0 ≤ ρ t) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     {x : ℝ} (hx : x ∈ S) (hax : a₁ ≤ x) : 0 ≤ ∫ t in a₁..x, ρ t :=
   by
   rw [intervalIntegral.integral_of_le hax]
   exact setIntegral_nonneg measurableSet_Ioc fun t ht =>
-    hρ0 t (lg2_Icc_subset hSc ha hx (Ioc_subset_Icc_self ht)) ht.1
+    hρ0 t (Icc_subset_of_ordConnected hSc ha hx (Ioc_subset_Icc_self ht)) ht.1
 
 /-- The head integral `∫_{a₁}^x ρ` of a nonnegative function is monotone in `x`. -/
-lemma lg2_head_mono (hρ0 : ∀ t ∈ S, a₁ < t → 0 ≤ ρ t) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+private lemma intervalIntegral_mono_upper_of_nonneg (hρ0 : ∀ t ∈ S, a₁ < t → 0 ≤ ρ t) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hρc : ContinuousOn ρ S) {x y : ℝ} (hy : y ∈ S) (hax : a₁ ≤ x) (hxy : x ≤ y) :
     ∫ t in a₁..x, ρ t ≤ ∫ t in a₁..y, ρ t := by
-  have hxS : x ∈ S := lg2_Icc_subset hSc ha hy ⟨hax, hxy⟩
+  have hxS : x ∈ S := Icc_subset_of_ordConnected hSc ha hy ⟨hax, hxy⟩
   rw [← intervalIntegral.integral_add_adjacent_intervals (b := x)
-    ((hρc.mono (lg2_uIcc_subset hSc ha hxS)).intervalIntegrable)
+    ((hρc.mono (uIcc_subset_of_ordConnected hSc ha hxS)).intervalIntegrable)
     ((hρc.mono (hSc.uIcc_subset hxS hy)).intervalIntegrable)]
   have : 0 ≤ ∫ t in x..y, ρ t := by
     rw [intervalIntegral.integral_of_le hxy]
     exact setIntegral_nonneg measurableSet_Ioc fun t ht =>
-      hρ0 t (lg2_Icc_subset hSc ha hy ⟨hax.trans ht.1.le, ht.2⟩) (lt_of_le_of_lt hax ht.1)
+      hρ0 t (Icc_subset_of_ordConnected hSc ha hy ⟨hax.trans ht.1.le, ht.2⟩) (lt_of_le_of_lt hax ht.1)
   linarith
 
 /-- Integration against the head: if `Φ' = φ` and `R x = ∫_{a₁}^x ρ`, then
 `∫_{(a₁,x]} ρ φ(R) = Φ(R x) - Φ 0`. -/
-lemma lg2_integral_mul_comp_head (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+private lemma setIntegral_Ioc_mul_comp_primitive (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hρc : ContinuousOn ρ S) {Φ φ : ℝ → ℝ} (hΦ : ∀ s, HasDerivAt Φ (φ s) s)
     (hφ : Continuous φ) {x : ℝ} (hx : x ∈ S) (hax : a₁ ≤ x) :
     IntegrableOn (fun t => ρ t * φ (∫ s in a₁..t, ρ s)) (Ioc a₁ x) ∧
       ∫ t in Ioc a₁ x, ρ t * φ (∫ s in a₁..t, ρ s) = Φ (∫ s in a₁..x, ρ s) - Φ 0 := by
   set R : ℝ → ℝ := fun t => ∫ s in a₁..t, ρ s with hR
   have hRd : ∀ t ∈ S, HasDerivAt R (ρ t) t := fun t ht =>
-    lg2_hasDerivAt_primitive hS hSc ha hρc ht
-  have hsub := lg2_uIcc_subset hSc ha hx
+    hasDerivAt_intervalIntegral_of_continuousOn hS hSc ha hρc ht
+  have hsub := uIcc_subset_of_ordConnected hSc ha hx
   have hcont : ContinuousOn (fun t => ρ t * φ (R t)) (uIcc a₁ x) :=
     (hρc.mono hsub).mul (hφ.comp_continuousOn fun t ht =>
       (hRd t (hsub ht)).continuousAt.continuousWithinAt)
@@ -149,12 +159,12 @@ lemma lg2_integral_mul_comp_head (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a�
   simp [hR]
 
 /-- `∫_{(a₁,x]} ρ R^n / n! = R(x)^{n+1} / (n+1)!` for the head `R` of `ρ`. -/
-lemma lg2_integral_mul_head_pow (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+private lemma setIntegral_Ioc_mul_primitive_pow_div_factorial (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hρc : ContinuousOn ρ S) (n : ℕ) {x : ℝ} (hx : x ∈ S) (hax : a₁ ≤ x) :
     IntegrableOn (fun t => ρ t * ((∫ s in a₁..t, ρ s) ^ n / n.factorial)) (Ioc a₁ x) ∧
       ∫ t in Ioc a₁ x, ρ t * ((∫ s in a₁..t, ρ s) ^ n / n.factorial) =
         (∫ s in a₁..x, ρ s) ^ (n + 1) / (n + 1).factorial := by
-  have h := lg2_integral_mul_comp_head hS hSc ha hρc
+  have h := setIntegral_Ioc_mul_comp_primitive hS hSc ha hρc
     (Φ := fun s => s ^ (n + 1) / (n + 1).factorial) (φ := fun s => s ^ n / n.factorial)
     (fun s => by
       convert (hasDerivAt_pow (n + 1) s).div_const ((n + 1).factorial : ℝ) using 1
@@ -165,12 +175,12 @@ lemma lg2_integral_mul_head_pow (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a�
   simpa using h
 
 /-- `∫_{(a₁,x]} ρ exp(R) = exp(R x) - 1` for the head `R` of `ρ`. -/
-lemma lg2_integral_mul_exp_head (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+private lemma setIntegral_Ioc_mul_exp_primitive (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hρc : ContinuousOn ρ S) {x : ℝ} (hx : x ∈ S) (hax : a₁ ≤ x) :
     IntegrableOn (fun t => ρ t * Real.exp (∫ s in a₁..t, ρ s)) (Ioc a₁ x) ∧
       ∫ t in Ioc a₁ x, ρ t * Real.exp (∫ s in a₁..t, ρ s) =
         Real.exp (∫ s in a₁..x, ρ s) - 1 := by
-  have h := lg2_integral_mul_comp_head hS hSc ha hρc (Φ := Real.exp) (φ := Real.exp)
+  have h := setIntegral_Ioc_mul_comp_primitive hS hSc ha hρc (Φ := Real.exp) (φ := Real.exp)
     (fun s => Real.hasDerivAt_exp s) Real.continuous_exp hx hax
   simpa using h
 
@@ -184,21 +194,21 @@ variable {𝕜 : Type*} [RCLike 𝕜]
 
 /-- The Volterra operator controlled from the left endpoint `a₁`, with the rank-two kernel
 `K x t = p₁ x q₁ t + p₂ x q₂ t` and weight `ψ`: `(L φ) x = ∫_{(a₁,x]} K x t ψ t φ t dt`. -/
-noncomputable def lg2_volterraOp (a₁ : ℝ) (p₁ p₂ q₁ q₂ ψ : ℝ → 𝕜) (φ : ℝ → 𝕜) (x : ℝ) : 𝕜 :=
+noncomputable def leftVolterraOp (a₁ : ℝ) (p₁ p₂ q₁ q₂ ψ : ℝ → 𝕜) (φ : ℝ → 𝕜) (x : ℝ) : 𝕜 :=
   p₁ x * (∫ t in Ioc a₁ x, q₁ t * ψ t * φ t) + p₂ x * ∫ t in Ioc a₁ x, q₂ t * ψ t * φ t
 
 variable {p₁ p₂ q₁ q₂ ψ : ℝ → 𝕜} {ρ : ℝ → ℝ} {S : Set ℝ} {a₁ : ℝ}
 
 /-- `(a₁, x] ⊆ S ∩ (a₁, ∞)` for `x ∈ S`. -/
-lemma lg2_Ioc_subset (hSc : S.OrdConnected) (ha : a₁ ∈ S) {x : ℝ} (hx : x ∈ S) :
+private lemma Ioc_subset_inter_Ioi_of_ordConnected (hSc : S.OrdConnected) (ha : a₁ ∈ S) {x : ℝ} (hx : x ∈ S) :
     Ioc a₁ x ⊆ S ∩ Ioi a₁ := by
   intro t ht
-  exact ⟨lg2_Icc_subset hSc ha hx ⟨ht.1.le, ht.2⟩, ht.1⟩
+  exact ⟨Icc_subset_of_ordConnected hSc ha hx ⟨ht.1.le, ht.2⟩, ht.1⟩
 
 /-- One Picard step for the Volterra operator controlled from `a₁`: if
 `‖φ t‖ ≤ B t R(t)ⁿ / n!` with `R t = ∫_{a₁}^t ρ` and `B ≥ 0` nondecreasing, then
 `‖(L φ) x‖ ≤ B x R(x)ⁿ⁺¹ / (n + 1)!`. -/
-lemma lg2_volterraOp_step (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+private lemma norm_leftVolterraOp_le_picard_step (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hp₁ : ContinuousOn p₁ S) (hp₂ : ContinuousOn p₂ S)
     (hq₁ : ContinuousOn (fun t => q₁ t * ψ t) S) (hq₂ : ContinuousOn (fun t => q₂ t * ψ t) S)
     (hρc : ContinuousOn ρ S)
@@ -209,49 +219,49 @@ lemma lg2_volterraOp_step (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ 
     (hφ : ∀ t ∈ S, a₁ < t → ‖φ t‖ ≤ B t * ((∫ s in a₁..t, ρ s) ^ n / n.factorial)) :
     (∀ x ∈ S, IntegrableOn (fun t => q₁ t * ψ t * φ t) (Ioc a₁ x)) ∧
     (∀ x ∈ S, IntegrableOn (fun t => q₂ t * ψ t * φ t) (Ioc a₁ x)) ∧
-    AEStronglyMeasurable (lg2_volterraOp a₁ p₁ p₂ q₁ q₂ ψ φ) (volume.restrict (S ∩ Ioi a₁)) ∧
-    ∀ x ∈ S, a₁ < x → ‖lg2_volterraOp a₁ p₁ p₂ q₁ q₂ ψ φ x‖ ≤
+    AEStronglyMeasurable (leftVolterraOp a₁ p₁ p₂ q₁ q₂ ψ φ) (volume.restrict (S ∩ Ioi a₁)) ∧
+    ∀ x ∈ S, a₁ < x → ‖leftVolterraOp a₁ p₁ p₂ q₁ q₂ ψ φ x‖ ≤
       B x * ((∫ s in a₁..x, ρ s) ^ (n + 1) / (n + 1).factorial) := by
   have hρ0 : ∀ t ∈ S, a₁ < t → 0 ≤ ρ t := fun t ht hat =>
     (norm_nonneg _).trans (hK t ht t hat le_rfl)
   have hφx : ∀ x ∈ S, ∀ t ∈ Ioc a₁ x,
       ‖φ t‖ ≤ B x * ((∫ s in a₁..x, ρ s) ^ n / n.factorial) := by
     intro x hx t ht
-    have htS : t ∈ S := (lg2_Ioc_subset hSc ha hx ht).1
-    have hR0 := lg2_head_nonneg hρ0 hSc ha htS ht.1.le
+    have htS : t ∈ S := (Ioc_subset_inter_Ioi_of_ordConnected hSc ha hx ht).1
+    have hR0 := intervalIntegral_nonneg_of_nonneg_on hρ0 hSc ha htS ht.1.le
     refine (hφ t htS ht.1).trans (mul_le_mul (hBm x hx t ht.1 ht.2) ?_ (by positivity)
       ((hB0 t htS ht.1).trans (hBm x hx t ht.1 ht.2)))
     exact div_le_div_of_nonneg_right (pow_le_pow_left₀ hR0
-      (lg2_head_mono hρ0 hSc ha hρc hx ht.1.le ht.2) n) (Nat.cast_nonneg _)
+      (intervalIntegral_mono_upper_of_nonneg hρ0 hSc ha hρc hx ht.1.le ht.2) n) (Nat.cast_nonneg _)
   have hint : ∀ {q : ℝ → 𝕜}, ContinuousOn (fun t => q t * ψ t) S →
       ∀ x ∈ S, IntegrableOn (fun t => q t * ψ t * φ t) (Ioc a₁ x) := by
     intro q hq x hx
-    exact (lg2_integrableOn_Ioc hSc ha hq hx).mul_bdd
-      (hφm.mono_measure (Measure.restrict_mono (lg2_Ioc_subset hSc ha hx) le_rfl))
+    exact (integrableOn_Ioc_of_continuousOn hSc ha hq hx).mul_bdd
+      (hφm.mono_measure (Measure.restrict_mono (Ioc_subset_inter_Ioi_of_ordConnected hSc ha hx) le_rfl))
       (ae_restrict_of_forall_mem measurableSet_Ioc (hφx x hx))
   have hi₁ := hint hq₁
   have hi₂ := hint hq₂
   refine ⟨hi₁, hi₂, ?_, ?_⟩
-  · have hc : ContinuousOn (lg2_volterraOp a₁ p₁ p₂ q₁ q₂ ψ φ) (S ∩ Ici a₁) :=
-      ((hp₁.mono inter_subset_left).mul (lg2_continuousOn_primitive hS hi₁)).add
-        ((hp₂.mono inter_subset_left).mul (lg2_continuousOn_primitive hS hi₂))
+  · have hc : ContinuousOn (leftVolterraOp a₁ p₁ p₂ q₁ q₂ ψ φ) (S ∩ Ici a₁) :=
+      ((hp₁.mono inter_subset_left).mul (continuousOn_setIntegral_Ioc hS hi₁)).add
+        ((hp₂.mono inter_subset_left).mul (continuousOn_setIntegral_Ioc hS hi₂))
     exact (hc.mono (inter_subset_inter_right _ Ioi_subset_Ici_self)).aestronglyMeasurable
       (hS.measurableSet.inter measurableSet_Ioi)
   · intro x hx hax
-    have heq : lg2_volterraOp a₁ p₁ p₂ q₁ q₂ ψ φ x =
+    have heq : leftVolterraOp a₁ p₁ p₂ q₁ q₂ ψ φ x =
         ∫ t in Ioc a₁ x, (p₁ x * q₁ t + p₂ x * q₂ t) * ψ t * φ t := by
-      rw [lg2_volterraOp, ← integral_const_mul, ← integral_const_mul, ← integral_add
+      rw [leftVolterraOp, ← integral_const_mul, ← integral_const_mul, ← integral_add
         ((hi₁ x hx).const_mul _) ((hi₂ x hx).const_mul _)]
       congr 1
       ext t
       ring
-    have hb := lg2_integral_mul_head_pow hS hSc ha hρc n hx hax.le
+    have hb := setIntegral_Ioc_mul_primitive_pow_div_factorial hS hSc ha hρc n hx hax.le
     rw [heq, ← hb.2, ← integral_const_mul]
     refine norm_integral_le_of_norm_le (hb.1.const_mul (B x))
       (ae_restrict_of_forall_mem measurableSet_Ioc fun t ht => ?_)
-    have htS : t ∈ S := (lg2_Ioc_subset hSc ha hx ht).1
+    have htS : t ∈ S := (Ioc_subset_inter_Ioi_of_ordConnected hSc ha hx ht).1
     rw [norm_mul]
-    have hR0 := lg2_head_nonneg hρ0 hSc ha htS ht.1.le
+    have hR0 := intervalIntegral_nonneg_of_nonneg_on hρ0 hSc ha htS ht.1.le
     calc ‖(p₁ x * q₁ t + p₂ x * q₂ t) * ψ t‖ * ‖φ t‖
         ≤ ρ t * (B t * ((∫ s in a₁..t, ρ s) ^ n / n.factorial)) :=
           mul_le_mul (hK x hx t ht.1 ht.2) (hφ t htS ht.1) (norm_nonneg _) (hρ0 t htS ht.1)
@@ -267,7 +277,7 @@ Ch. 6, §2 for solutions characterized at a finite point `a₁`). Let `S` be ope
 order-connected with `a₁ ∈ S`. If `‖K x t ψ t‖ ≤ ρ t` for `a₁ < t ≤ x`, `ρ` is continuous on
 `S` and `‖σ t‖ ≤ B t` with `B` nondecreasing, then `h x = σ x + ∫_{(a₁,x]} K x t ψ t h t dt` has a
 solution on `S ∩ (a₁, ∞)` with `‖h x - σ x‖ ≤ B x (exp (∫_{a₁}^x ρ) - 1)`. -/
-lemma lg2_exists_volterra_solution_add (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+private lemma exists_leftVolterra_solution_of_finite_endpoint (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hp₁ : ContinuousOn p₁ S) (hp₂ : ContinuousOn p₂ S)
     (hq₁ : ContinuousOn (fun t => q₁ t * ψ t) S) (hq₂ : ContinuousOn (fun t => q₂ t * ψ t) S)
     {σ : ℝ → 𝕜} {B : ℝ → ℝ} (hσm : AEStronglyMeasurable σ (volume.restrict (S ∩ Ioi a₁)))
@@ -276,9 +286,9 @@ lemma lg2_exists_volterra_solution_add (hS : IsOpen S) (hSc : S.OrdConnected) (h
     (hK : ∀ x ∈ S, ∀ t, a₁ < t → t ≤ x → ‖(p₁ x * q₁ t + p₂ x * q₂ t) * ψ t‖ ≤ ρ t) :
     ∃ h : ℝ → 𝕜, AEStronglyMeasurable h (volume.restrict (S ∩ Ioi a₁)) ∧
       (∀ x ∈ S, a₁ < x → ‖h x - σ x‖ ≤ B x * (Real.exp (∫ s in a₁..x, ρ s) - 1)) ∧
-      ∀ x ∈ S, a₁ < x → h x = σ x + lg2_volterraOp a₁ p₁ p₂ q₁ q₂ ψ h x := by
+      ∀ x ∈ S, a₁ < x → h x = σ x + leftVolterraOp a₁ p₁ p₂ q₁ q₂ ψ h x := by
   have hB0 : ∀ t ∈ S, a₁ < t → 0 ≤ B t := fun t ht hat => (norm_nonneg _).trans (hσ t ht hat)
-  set L := lg2_volterraOp a₁ p₁ p₂ q₁ q₂ ψ with hL
+  set L := leftVolterraOp a₁ p₁ p₂ q₁ q₂ ψ with hL
   set φ : ℕ → ℝ → 𝕜 := fun n => L^[n] σ with hφdef
   set R : ℝ → ℝ := fun t => ∫ s in a₁..t, ρ s with hR
   have hφ : ∀ n, AEStronglyMeasurable (φ n) (volume.restrict (S ∩ Ioi a₁)) ∧
@@ -287,11 +297,11 @@ lemma lg2_exists_volterra_solution_add (hS : IsOpen S) (hSc : S.OrdConnected) (h
     induction n with
     | zero => exact ⟨hσm, fun t ht hat => by simpa [φ] using hσ t ht hat⟩
     | succ n ih =>
-      have hs := lg2_volterraOp_step hS hSc ha hp₁ hp₂ hq₁ hq₂ hρc hK hB0 hBm ih.1 n ih.2
+      have hs := norm_leftVolterraOp_le_picard_step hS hSc ha hp₁ hp₂ hq₁ hq₂ hρc hK hB0 hBm ih.1 n ih.2
       have hφs : φ (n + 1) = L (φ n) := Function.iterate_succ_apply' L n σ
       rw [hφs]
       exact ⟨hs.2.2.1, hs.2.2.2⟩
-  have hstep : ∀ n, _ := fun n => lg2_volterraOp_step hS hSc ha hp₁ hp₂ hq₁ hq₂ hρc hK hB0 hBm
+  have hstep : ∀ n, _ := fun n => norm_leftVolterraOp_le_picard_step hS hSc ha hp₁ hp₂ hq₁ hq₂ hρc hK hB0 hBm
     (hφ n).1 n (hφ n).2
   have hρ0 : ∀ t ∈ S, a₁ < t → 0 ≤ ρ t := fun t ht hat =>
     (norm_nonneg _).trans (hK t ht t hat le_rfl)
@@ -324,27 +334,27 @@ lemma lg2_exists_volterra_solution_add (hS : IsOpen S) (hSc : S.OrdConnected) (h
     exact (norm_tsum_le_tsum_norm hns).trans (hns.tsum_le_tsum hnb hs1.summable |>.trans_eq
       hs1.tsum_eq)
   · intro x hx hax
-    have hR0x := lg2_head_nonneg hρ0 hSc ha hx hax.le
+    have hR0x := intervalIntegral_nonneg_of_nonneg_on hρ0 hSc ha hx hax.le
     -- interchange of sum and integral
     have hswap : ∀ {q : ℝ → 𝕜}, ContinuousOn (fun t => q t * ψ t) S →
         (∀ n, IntegrableOn (fun t => q t * ψ t * φ n t) (Ioc a₁ x)) →
         Summable (fun n => ∫ t in Ioc a₁ x, q t * ψ t * φ n t) ∧
         ∫ t in Ioc a₁ x, q t * ψ t * H t = ∑' n, ∫ t in Ioc a₁ x, q t * ψ t * φ n t := by
       intro q hq hF
-      have hqi := lg2_integrableOn_Ioc hSc ha hq hx
+      have hqi := integrableOn_Ioc_of_continuousOn hSc ha hq hx
       have hnorm : ∀ n, ∫ t in Ioc a₁ x, ‖q t * ψ t * φ n t‖ ≤
           (∫ t in Ioc a₁ x, ‖q t * ψ t‖) * (B x * (R x ^ n / n.factorial)) := by
         intro n
         rw [← integral_mul_const]
         refine setIntegral_mono_on (hF n).norm (hqi.norm.mul_const _) measurableSet_Ioc
           fun t ht => ?_
-        have htS : t ∈ S := (lg2_Ioc_subset hSc ha hx ht).1
+        have htS : t ∈ S := (Ioc_subset_inter_Ioi_of_ordConnected hSc ha hx ht).1
         rw [norm_mul]
         gcongr
-        have hR0 := lg2_head_nonneg hρ0 hSc ha htS ht.1.le
+        have hR0 := intervalIntegral_nonneg_of_nonneg_on hρ0 hSc ha htS ht.1.le
         refine ((hφ n).2 t htS ht.1).trans (mul_le_mul (hBm x hx t ht.1 ht.2)
           (div_le_div_of_nonneg_right (pow_le_pow_left₀ hR0
-            (lg2_head_mono hρ0 hSc ha hρc hx ht.1.le ht.2) n) (Nat.cast_nonneg _))
+            (intervalIntegral_mono_upper_of_nonneg hρ0 hSc ha hρc hx ht.1.le ht.2) n) (Nat.cast_nonneg _))
           (by positivity) (hB0 x hx hax))
       have hsI : Summable fun n => ∫ t in Ioc a₁ x, ‖q t * ψ t * φ n t‖ :=
         Summable.of_nonneg_of_le (fun n => integral_nonneg fun _ => norm_nonneg _) hnorm
@@ -352,12 +362,12 @@ lemma lg2_exists_volterra_solution_add (hS : IsOpen S) (hSc : S.OrdConnected) (h
       refine ⟨Summable.of_norm_bounded hsI fun n => norm_integral_le_integral_norm _, ?_⟩
       rw [integral_tsum_of_summable_integral_norm hF hsI]
       refine setIntegral_congr_fun measurableSet_Ioc fun t ht => ?_
-      have htS : t ∈ S := (lg2_Ioc_subset hSc ha hx ht).1
+      have htS : t ∈ S := (Ioc_subset_inter_Ioi_of_ordConnected hSc ha hx ht).1
       simp only [hH]
       rw [tsum_mul_left]
     have h₁ := hswap hq₁ fun n => (hstep n).1 x hx
     have h₂ := hswap hq₂ fun n => (hstep n).2.1 x hx
-    rw [← sub_eq_iff_eq_add', hHσ x hx hax, hL, lg2_volterraOp, h₁.2, h₂.2, ← tsum_mul_left,
+    rw [← sub_eq_iff_eq_add', hHσ x hx hax, hL, leftVolterraOp, h₁.2, h₂.2, ← tsum_mul_left,
       ← tsum_mul_left, ← (h₁.1.mul_left _).tsum_add (h₂.1.mul_left _)]
     congr 1
     ext n
@@ -384,7 +394,7 @@ solution `w = A E (P + ε)` on `S ∩ (a₁, ∞)` with
 where `W x = ∫_{a₁}^x ‖r‖` and `V x = ∫_{a₁}^x ‖A A'' - g A²‖`. For `k = -u < 0`
 (`E = exp (u ξ)`) this is the solution dominant at the right; for `k = ± i u` it is an
 oscillatory solution with prescribed behaviour at `a₁`. -/
-lemma lg2_exists_solution_of_approx {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜}
+private lemma exists_solution_of_approx_finite_endpoint {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜}
     {A A' A'' E g P P' P'' : ℝ → 𝕜}
     (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S) (hk : k ≠ 0) (hκ : 0 < κ)
     (hA : ∀ x ∈ S, A x ≠ 0)
@@ -427,7 +437,7 @@ lemma lg2_exists_solution_of_approx {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜}
     exact mul_le_mul_of_nonneg_right (hK x hx t hat htx) (norm_nonneg _)
   have hmeas : MeasurableSet (S ∩ Ioi a₁) := hS.measurableSet.inter measurableSet_Ioi
   -- the forcing term
-  have hσ := lg2_volterraOp_step (𝕜 := 𝕜) hS hSc ha
+  have hσ := norm_leftVolterraOp_le_picard_step (𝕜 := 𝕜) hS hSc ha
     (p₁ := fun _ => (2 * k)⁻¹) (q₁ := fun _ => 1)
     (p₂ := fun x => -(2 * k)⁻¹ * (E x ^ 2)⁻¹) (q₂ := fun t => E t ^ 2) (ψ := r)
     (ρ := fun t => κ * ‖r t‖) (B := fun _ => 1)
@@ -436,17 +446,17 @@ lemma lg2_exists_solution_of_approx {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜}
     (fun x hx t hat htx => hKψ x hx t hat htx) (fun _ _ _ => zero_le_one)
     (fun _ _ _ _ _ => le_rfl) (φ := fun _ => 1) aestronglyMeasurable_const 0 (fun _ _ _ => by simp)
   simp only [one_mul, zero_add, pow_one, Nat.factorial_one, Nat.cast_one, div_one] at hσ
-  set σ : ℝ → 𝕜 := lg2_volterraOp a₁ (fun _ => (2 * k)⁻¹) (fun x => -(2 * k)⁻¹ * (E x ^ 2)⁻¹)
+  set σ : ℝ → 𝕜 := leftVolterraOp a₁ (fun _ => (2 * k)⁻¹) (fun x => -(2 * k)⁻¹ * (E x ^ 2)⁻¹)
     (fun _ => 1) (fun t => E t ^ 2) r (fun _ => 1) with hσdef
   set ρ : ℝ → ℝ := fun t => κ * ‖F' t‖ with hρ
   have hρc : ContinuousOn ρ S := continuousOn_const.mul hF'c.norm
   have hρ0 : ∀ t, 0 ≤ ρ t := fun t => mul_nonneg hκ.le (norm_nonneg _)
   set B : ℝ → ℝ := fun x => ∫ t in a₁..x, κ * ‖r t‖ with hB
   have hBm : ∀ x ∈ S, ∀ t, a₁ < t → t ≤ x → B t ≤ B x := fun x hx t hat htx =>
-    lg2_head_mono (fun _ _ _ => mul_nonneg hκ.le (norm_nonneg _)) hSc ha
+    intervalIntegral_mono_upper_of_nonneg (fun _ _ _ => mul_nonneg hκ.le (norm_nonneg _)) hSc ha
       (continuousOn_const.mul hrc.norm) hx
       hat.le htx
-  obtain ⟨h, hhm, hhb, hheq⟩ := lg2_exists_volterra_solution_add (𝕜 := 𝕜) hS hSc ha
+  obtain ⟨h, hhm, hhb, hheq⟩ := exists_leftVolterra_solution_of_finite_endpoint (𝕜 := 𝕜) hS hSc ha
     (p₁ := fun _ => (2 * k)⁻¹) (q₁ := fun _ => 1)
     (p₂ := fun x => -(2 * k)⁻¹ * (E x ^ 2)⁻¹) (q₂ := fun t => E t ^ 2) (ψ := F')
     (ρ := ρ) (σ := σ) (B := B)
@@ -458,7 +468,7 @@ lemma lg2_exists_solution_of_approx {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜}
   have hBx : ∀ x, B x = κ * ∫ t in a₁..x, ‖r t‖ := fun x =>
     intervalIntegral.integral_const_mul _ _
   have hB0 : ∀ x ∈ S, a₁ ≤ x → 0 ≤ B x := fun x hx hax =>
-    lg2_head_nonneg (fun _ _ _ => mul_nonneg hκ.le (norm_nonneg _)) hSc ha hx hax
+    intervalIntegral_nonneg_of_nonneg_on (fun _ _ _ => mul_nonneg hκ.le (norm_nonneg _)) hSc ha hx hax
   have hhb' : ∀ t ∈ S, a₁ < t → ‖h t‖ ≤ B t * Real.exp (R t) := fun t ht hat => by
     have h1 := hhb t ht hat
     have h2 := hσ.2.2.2 t ht hat
@@ -466,21 +476,21 @@ lemma lg2_exists_solution_of_approx {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜}
       _ ≤ B t + B t * (Real.exp (R t) - 1) := add_le_add h2 h1
       _ = B t * Real.exp (R t) := by ring
   have hhbx : ∀ x ∈ S, ∀ t ∈ Ioc a₁ x, ‖h t‖ ≤ B x * Real.exp (R x) := fun x hx t ht => by
-    have htS : t ∈ S := (lg2_Ioc_subset hSc ha hx ht).1
+    have htS : t ∈ S := (Ioc_subset_inter_Ioi_of_ordConnected hSc ha hx ht).1
     exact (hhb' t htS ht.1).trans (mul_le_mul (hBm x hx t ht.1 ht.2)
-      (Real.exp_le_exp.2 (lg2_head_mono (fun _ _ _ => hρ0 _) hSc ha hρc hx ht.1.le ht.2))
+      (Real.exp_le_exp.2 (intervalIntegral_mono_upper_of_nonneg (fun _ _ _ => hρ0 _) hSc ha hρc hx ht.1.le ht.2))
       (Real.exp_pos _).le (hB0 x hx (ht.1.le.trans ht.2)))
   have hmulb : ∀ {q : ℝ → 𝕜}, ContinuousOn (fun t => q t * F' t) S →
       ∀ x ∈ S, IntegrableOn (fun t => q t * F' t * h t) (Ioc a₁ x) := by
     intro q hq x hx
-    exact (lg2_integrableOn_Ioc hSc ha hq hx).mul_bdd
-      (hhm.mono_measure (Measure.restrict_mono (lg2_Ioc_subset hSc ha hx) le_rfl))
+    exact (integrableOn_Ioc_of_continuousOn hSc ha hq hx).mul_bdd
+      (hhm.mono_measure (Measure.restrict_mono (Ioc_subset_inter_Ioi_of_ordConnected hSc ha hx) le_rfl))
       (ae_restrict_of_forall_mem measurableSet_Ioc (hhbx x hx))
   have hJ₁i := hmulb (q := fun _ => 1) (by simpa using hF'c)
   have hJ₂i := hmulb (q := fun t => E t ^ 2) ((hEc.pow 2).mul hF'c)
-  have hri' : ∀ x ∈ S, IntegrableOn r (Ioc a₁ x) := fun x hx => lg2_integrableOn_Ioc hSc ha hrc hx
+  have hri' : ∀ x ∈ S, IntegrableOn r (Ioc a₁ x) := fun x hx => integrableOn_Ioc_of_continuousOn hSc ha hrc hx
   have hEri : ∀ x ∈ S, IntegrableOn (fun t => E t ^ 2 * r t) (Ioc a₁ x) := fun x hx =>
-    lg2_integrableOn_Ioc hSc ha ((hEc.pow 2).mul hrc) hx
+    integrableOn_Ioc_of_continuousOn hSc ha ((hEc.pow 2).mul hrc) hx
   have hI₁i : ∀ x ∈ S, IntegrableOn (fun t => F' t * h t + r t) (Ioc a₁ x) := fun x hx =>
     ((hJ₁i x hx).add (hri' x hx)).congr_fun (fun t _ => by simp only [Pi.add_apply]; ring)
       measurableSet_Ioc
@@ -501,11 +511,11 @@ lemma lg2_exists_solution_of_approx {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜}
       rw [← integral_add (hJ₂i x hx)
         ((hEri x hx).congr_fun (fun t _ => by simp) measurableSet_Ioc)]
       exact setIntegral_congr_fun measurableSet_Ioc (fun t _ => by ring)
-    rw [hheq x hx hax, hσdef, lg2_volterraOp, lg2_volterraOp, e1, e2]
+    rw [hheq x hx hax, hσdef, leftVolterraOp, leftVolterraOp, e1, e2]
     ring
   have hhc : ContinuousOn h (S ∩ Ioi a₁) :=
-    (((continuousOn_const.mul (lg2_continuousOn_primitive hS hI₁i)).add
-      ((hp₂c.mono inter_subset_left).mul (lg2_continuousOn_primitive hS hI₂i))).mono
+    (((continuousOn_const.mul (continuousOn_setIntegral_Ioc hS hI₁i)).add
+      ((hp₂c.mono inter_subset_left).mul (continuousOn_setIntegral_Ioc hS hI₂i))).mono
       (inter_subset_inter_right _ Ioi_subset_Ici_self)).congr fun x hx => hheq' x hx.1 hx.2
   have hopen : IsOpen (S ∩ Ioi a₁) := hS.inter isOpen_Ioi
   -- derivatives of the primitives at interior points
@@ -580,7 +590,7 @@ lemma lg2_exists_solution_of_approx {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜}
       rw [integral_const_mul, hε'def]
       field_simp
       rfl
-    have hexpt := lg2_integral_mul_exp_head hS hSc ha hρc hx hax.le
+    have hexpt := setIntegral_Ioc_mul_exp_primitive hS hSc ha hρc hx hax.le
     have hEx : 0 < ‖E x‖ ^ 2 := by have := hE0 x hx; positivity
     have hWx' : ∫ t in a₁..x, ‖r t‖ = κ⁻¹ * B x := by rw [hBx]; field_simp
     have hWx : ∫ t in Ioc a₁ x, ‖r t‖ = κ⁻¹ * B x := by
@@ -593,7 +603,7 @@ lemma lg2_exists_solution_of_approx {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜}
       _ ≤ ∫ t in Ioc a₁ x, (κ⁻¹ * B x * (ρ t * Real.exp (R t)) + ‖r t‖) := by
           refine norm_integral_le_of_norm_le hbint
             (ae_restrict_of_forall_mem measurableSet_Ioc fun t ht => ?_)
-          have htS : t ∈ S := (lg2_Ioc_subset hSc ha hx ht).1
+          have htS : t ∈ S := (Ioc_subset_inter_Ioi_of_ordConnected hSc ha hx ht).1
           have hle : ‖E t‖ ^ 2 ≤ ‖E x‖ ^ 2 := by
             have := hEle x hx t ht.1 ht.2
             gcongr
@@ -618,12 +628,12 @@ lemma lg2_exists_solution_of_approx {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜}
 
 /-- **Liouville–Green expansions with errors controlled from a finite endpoint** (Olver,
 *Asymptotics and Special Functions*, Ch. 10, §3, with the error bounds referred to `a₁`). Under the
-hypotheses of `lg2_exists_solution_of_approx`, let `A_0, …, A_n` satisfy `A_0' = 0` and the
+hypotheses of `exists_solution_of_approx_finite_endpoint`, let `A_0, …, A_n` satisfy `A_0' = 0` and the
 recursion `A² A_s'' + 2 A A' A_s' + (A A'' - g A²) A_s = -2 A_{s+1}'` for `s < n`. Then
 `w'' = (k² A⁻⁴ + g) w` has a solution `w = A E (∑_{s<n} (-1)^s A_s / k^s + ε)` on `S ∩ (a₁, ∞)` with
 `‖ε x‖ ≤ 2 κ ‖k‖^{1-n} (∫_{a₁}^x ‖A_n'‖) exp (κ V x)`, `V x = ∫_{a₁}^x ‖A A'' - g A²‖`, and the
 same bound for `‖A² ε'‖` without the factor `κ`. -/
-lemma lg2_exists_solution_expansion {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜} {A A' A'' E g : ℝ → 𝕜}
+private lemma exists_solution_expansion_finite_endpoint {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜} {A A' A'' E g : ℝ → 𝕜}
     (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S) (hk : k ≠ 0) (hκ : 0 < κ)
     (hA : ∀ x ∈ S, A x ≠ 0)
     (hA' : ∀ x ∈ S, HasDerivAt A (A' x) x)
@@ -660,7 +670,7 @@ lemma lg2_exists_solution_expansion {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜} {A 
     simp only [norm_div, norm_mul, norm_pow, norm_neg, norm_one, one_pow, mul_one,
       RCLike.norm_ofNat]
     ring
-  obtain ⟨ε, ε', w', H⟩ := lg2_exists_solution_of_approx hS hSc ha hk hκ hA hA' hA'' hA''c hgc
+  obtain ⟨ε, ε', w', H⟩ := exists_solution_of_approx_finite_endpoint hS hSc ha hk hκ hA hA' hA'' hA''c hgc
     hE0 hE hEle hK (hser hAs) (hser hAd)
     (by
       unfold lgSeries
@@ -673,7 +683,7 @@ lemma lg2_exists_solution_expansion {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜} {A 
     rw [← intervalIntegral.integral_const_mul, intervalIntegral.integral_of_le hax.le,
       intervalIntegral.integral_of_le hax.le]
     exact setIntegral_congr_fun measurableSet_Ioc fun t ht =>
-      hres t (lg2_Icc_subset hSc ha hx (Ioc_subset_Icc_self ht))
+      hres t (Icc_subset_of_ordConnected hSc ha hx (Ioc_subset_Icc_self ht))
   rw [hW] at h4 h5
   exact ⟨h1, h2, h3, h4, h5⟩
 
@@ -684,7 +694,7 @@ end Approx
 section Real
 
 /-- A function with nonnegative derivative on an order-connected open set is monotone there. -/
-lemma lg2_monotoneOn_of_hasDerivAt_nonneg {S : Set ℝ} (hSc : S.OrdConnected)
+private lemma monotoneOn_of_hasDerivAt_nonneg_of_ordConnected {S : Set ℝ} (hSc : S.OrdConnected)
     {ξ d : ℝ → ℝ} (hξ : ∀ x ∈ S, HasDerivAt ξ (d x) x) (hd : ∀ x ∈ S, 0 ≤ d x) :
     MonotoneOn ξ S := by
   have hconv : Convex ℝ S := hSc.convex
@@ -698,7 +708,7 @@ lemma lg2_monotoneOn_of_hasDerivAt_nonneg {S : Set ℝ} (hSc : S.OrdConnected)
 /-- The dominant exponential Liouville–Green kernel: for `ξ' = A⁻²` and `u > 0`,
 `E = exp (u ξ)` solves `E' = u A⁻² E`, `|E|` is nondecreasing and
 `|(1 - E(t)²/E(x)²)/(-2u)| ≤ 1/(2u)` for `t ≤ x`. -/
-lemma lg2_exp_dom_kernel {S : Set ℝ} (hSc : S.OrdConnected) {u : ℝ}
+private lemma dominant_exp_kernel_properties {S : Set ℝ} (hSc : S.OrdConnected) {u : ℝ}
     (hu : 0 < u) {A ξ : ℝ → ℝ} (hξ : ∀ x ∈ S, HasDerivAt ξ ((A x ^ 2)⁻¹) x) :
     (∀ x ∈ S, Real.exp (u * ξ x) ≠ 0) ∧
     (∀ x ∈ S, HasDerivAt (fun y => Real.exp (u * ξ y))
@@ -706,7 +716,7 @@ lemma lg2_exp_dom_kernel {S : Set ℝ} (hSc : S.OrdConnected) {u : ℝ}
     (∀ x ∈ S, ∀ t ∈ S, t ≤ x → ‖Real.exp (u * ξ t)‖ ≤ ‖Real.exp (u * ξ x)‖) ∧
     (∀ x ∈ S, ∀ t ∈ S, t ≤ x →
       ‖(1 - Real.exp (u * ξ t) ^ 2 / Real.exp (u * ξ x) ^ 2) / (2 * -u)‖ ≤ 1 / (2 * u)) := by
-  have hmono := lg2_monotoneOn_of_hasDerivAt_nonneg hSc hξ (fun x _ => by positivity)
+  have hmono := monotoneOn_of_hasDerivAt_nonneg_of_ordConnected hSc hξ (fun x _ => by positivity)
   have hEle : ∀ x ∈ S, ∀ t ∈ S, t ≤ x → Real.exp (u * ξ t) ≤ Real.exp (u * ξ x) :=
     fun x hx t ht htx => Real.exp_le_exp.2 (mul_le_mul_of_nonneg_left (hmono ht hx htx) hu.le)
   refine ⟨fun x _ => (Real.exp_pos _).ne', fun x hx => ?_, fun x hx t ht htx => ?_,
@@ -740,7 +750,7 @@ differentiable on `S`, `ξ' = A⁻²`, and let `A_0, …, A_n` satisfy `A_0' = 0
 
 where `V_{a₁,x}(A_n) = ∫_{a₁}^x |A_n'|` and `V x = ∫_{a₁}^x |A A'' - g A²|`. Note that the series
 is `lgSeries (-u) A_s = ∑ A_s / u^s`; the recessive companion is `∑ (-1)^s A_s / u^s`. -/
-theorem lg2_exists_solution_expansion_exp_dom {S : Set ℝ} {a₁ u : ℝ} (hS : IsOpen S)
+theorem exists_solution_expansion_dominant_exp_finite_endpoint {S : Set ℝ} {a₁ u : ℝ} (hS : IsOpen S)
     (hSc : S.OrdConnected) (ha : a₁ ∈ S) (hu : 0 < u) {A A' A'' ξ g : ℝ → ℝ}
     (hA : ∀ x ∈ S, A x ≠ 0)
     (hA' : ∀ x ∈ S, HasDerivAt A (A' x) x)
@@ -763,13 +773,13 @@ theorem lg2_exists_solution_expansion_exp_dom {S : Set ℝ} {a₁ u : ℝ} (hS :
         Real.exp ((∫ t in a₁..x, |A t * A'' t - g t * A t ^ 2|) / (2 * u)) ∧
       |A x ^ 2 * ε' x| ≤ 2 * u * ((∫ t in a₁..x, |Ad n t|) / u ^ n) *
         Real.exp ((∫ t in a₁..x, |A t * A'' t - g t * A t ^ 2|) / (2 * u)) := by
-  obtain ⟨hE0, hE, hEle, hK⟩ := lg2_exp_dom_kernel hSc hu hξ
-  obtain ⟨ε, ε', w', H⟩ := lg2_exists_solution_expansion (𝕜 := ℝ) hS hSc ha
+  obtain ⟨hE0, hE, hEle, hK⟩ := dominant_exp_kernel_properties hSc hu hξ
+  obtain ⟨ε, ε', w', H⟩ := exists_solution_expansion_finite_endpoint (𝕜 := ℝ) hS hSc ha
     (κ := 1 / (2 * u)) (k := -u) (A := A) (A' := A') (A'' := A'')
     (E := fun y => Real.exp (u * ξ y)) (g := g)
     (neg_ne_zero.2 hu.ne') (by positivity) hA hA' hA'' hA''c hgc hE0 hE
-    (fun x hx t hat htx => hEle x hx t (lg2_Icc_subset hSc ha hx ⟨hat.le, htx⟩) htx)
-    (fun x hx t hat htx => hK x hx t (lg2_Icc_subset hSc ha hx ⟨hat.le, htx⟩) htx)
+    (fun x hx t hat htx => hEle x hx t (Icc_subset_of_ordConnected hSc ha hx ⟨hat.le, htx⟩) htx)
+    (fun x hx t hat htx => hK x hx t (Icc_subset_of_ordConnected hSc ha hx ⟨hat.le, htx⟩) htx)
     hAs hAd hAd2c h0 hrec
   refine ⟨ε, ε', w', fun x hx hax => ?_⟩
   obtain ⟨h1, h2, h3, h4, h5⟩ := H x hx hax
@@ -796,7 +806,7 @@ differentiable on `S`, `ξ' = A⁻²`, and let the complex coefficients `A_0, �
 `‖A² ε'‖ ≤ 2 |u|^{1-n} V_{a₁,x}(A_n) exp (V x / |u|)`,
 
 where `V_{a₁,x}(A_n) = ∫_{a₁}^x ‖A_n'‖` and `V x = ∫_{a₁}^x |A A'' - g A²|`. -/
-lemma lg2_exists_solution_expansion_osc {S : Set ℝ} {a₁ u : ℝ} (hS : IsOpen S)
+private lemma exists_solution_expansion_oscillatory_finite_endpoint {S : Set ℝ} {a₁ u : ℝ} (hS : IsOpen S)
     (hSc : S.OrdConnected) (ha : a₁ ∈ S) (hu : u ≠ 0) {A A' A'' ξ g : ℝ → ℝ}
     (hA : ∀ x ∈ S, A x ≠ 0)
     (hA' : ∀ x ∈ S, HasDerivAt A (A' x) x)
@@ -830,7 +840,7 @@ lemma lg2_exists_solution_expansion_osc {S : Set ℝ} {a₁ u : ℝ} (hS : IsOpe
     have : ((A t * A'' t - g t * A t ^ 2 : ℝ) : ℂ) =
         (A t : ℂ) * (A'' t : ℂ) - (g t : ℂ) * (A t : ℂ) ^ 2 := by push_cast; ring
     rw [← this, Complex.norm_real, Real.norm_eq_abs]
-  obtain ⟨ε, ε', w', H⟩ := lg2_exists_solution_expansion (𝕜 := ℂ) hS hSc ha
+  obtain ⟨ε, ε', w', H⟩ := exists_solution_expansion_finite_endpoint (𝕜 := ℂ) hS hSc ha
     (κ := 1 / |u|) (k := Complex.I * u) (A := fun y => (A y : ℂ)) (A' := fun y => (A' y : ℂ))
     (A'' := fun y => (A'' y : ℂ)) (E := E) (g := fun y => (g y : ℂ))
     (mul_ne_zero Complex.I_ne_zero (Complex.ofReal_ne_zero.2 hu)) (by positivity)
@@ -890,7 +900,7 @@ variable {𝕜 : Type*} [RCLike 𝕜]
 
 /-- The **Wronskian** `w₁ w₂' - w₁' w₂` of two solutions of `w'' = q w` is constant on an open
 preconnected set. -/
-lemma lg2_wronskian_eq {S : Set ℝ} (hS : IsOpen S) (hSc : IsPreconnected S)
+private lemma wronskian_eq_of_mem {S : Set ℝ} (hS : IsOpen S) (hSc : IsPreconnected S)
     {q w₁ w₁' w₂ w₂' : ℝ → 𝕜}
     (h₁ : ∀ x ∈ S, HasDerivAt w₁ (w₁' x) x) (h₁' : ∀ x ∈ S, HasDerivAt w₁' (q x * w₁ x) x)
     (h₂ : ∀ x ∈ S, HasDerivAt w₂ (w₂' x) x) (h₂' : ∀ x ∈ S, HasDerivAt w₂' (q x * w₂ x) x)
@@ -906,7 +916,7 @@ lemma lg2_wronskian_eq {S : Set ℝ} (hS : IsOpen S) (hSc : IsPreconnected S)
 preconnected set `S` and their Wronskian does not vanish at one point of `S`, then every solution
 `y` of the same equation is a linear combination `c₁ w₁ + c₂ w₂` on `S` (together with its
 derivative). -/
-lemma lg2_eq_lincomb {S : Set ℝ} (hS : IsOpen S) (hSc : IsPreconnected S)
+private lemma eq_linear_combination_of_wronskian_ne_zero {S : Set ℝ} (hS : IsOpen S) (hSc : IsPreconnected S)
     {q y y' w₁ w₁' w₂ w₂' : ℝ → 𝕜}
     (hy : ∀ x ∈ S, HasDerivAt y (y' x) x) (hy' : ∀ x ∈ S, HasDerivAt y' (q x * y x) x)
     (h₁ : ∀ x ∈ S, HasDerivAt w₁ (w₁' x) x) (h₁' : ∀ x ∈ S, HasDerivAt w₁' (q x * w₁ x) x)
@@ -932,9 +942,9 @@ lemma lg2_eq_lincomb {S : Set ℝ} (hS : IsOpen S) (hSc : IsPreconnected S)
     field_simp
     ring
   refine ⟨c₁, c₂, fun x hx => ?_⟩
-  have e1 := lg2_wronskian_eq hS hSc hYd hY'd h₁ h₁' hx hx₀
-  have e2 := lg2_wronskian_eq hS hSc hYd hY'd h₂ h₂' hx hx₀
-  have e3 := lg2_wronskian_eq hS hSc h₁ h₁' h₂ h₂' hx hx₀
+  have e1 := wronskian_eq_of_mem hS hSc hYd hY'd h₁ h₁' hx hx₀
+  have e2 := wronskian_eq_of_mem hS hSc hYd hY'd h₂ h₂' hx hx₀
+  have e3 := wronskian_eq_of_mem hS hSc h₁ h₁' h₂ h₂' hx hx₀
   rw [hY0, hY'0, zero_mul, zero_mul, sub_zero] at e1 e2
   rw [← hWdef] at e3
   have hYx : Y x = 0 := by

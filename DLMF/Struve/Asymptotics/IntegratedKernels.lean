@@ -6,15 +6,27 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Struve.Asymptotics.Watson
+public import DLMFMathlib.Analysis.SpecialFunctions.Complex.ArgLog
 
 /-!
-# Integral kernels for integrated Struve expansions
+# Integral kernels for the integrated Struve expansions
 
-Holomorphic primitives, Frullani integrals and Gamma constants prepare the integrated Struve
-asymptotics.
+This file prepares the asymptotics of `∫₀^z 𝐊₀(t) dt`: holomorphy of the primitive on the slit
+plane, Frullani-type integrals giving the constant `log 2x + γ`, and the integration of
+derivative bounds in a sector.
 
-Source references and common attribution are retained in
-`DLMF.Struve.Asymptotics`.
+## Main results
+
+* `struvePrim_norm_struveK_zero_le`: a bound for `𝐊₀` from the rotated Laplace integral.
+* `struvePrim_differentiableOn`, `struvePrim_hasDerivAt`: the primitive `∫₀^z 𝐊₀` is a
+  holomorphic antiderivative of `𝐊₀` on the slit plane.
+* `struvePrim_integral_log_two`, `struvePrim_integral_log`, `struvePrim_integral_euler`,
+  `struvePrim_integral_log_two_mul`: the Frullani-type integrals, with
+  `∫₀^∞ ((1+τ²)^{-1/2} - e^{-xτ})/τ dτ = log 2x + γ`.
+* `struvePrim_primitive_ofReal`, `struvePrim_remainder_ofReal`: the primitive and its remainder
+  on the positive axis.
+* `struvePrim_tendsto_ofReal`: `∫₀^x 𝐊₀ - (2/π)(log 2x + γ) → 0` as `x → +∞`.
+* `struvePrim_isBigO_of_deriv`: integration of a derivative bound in a sector.
 -/
 
 @[expose] public noncomputable section
@@ -72,15 +84,6 @@ theorem struvePrim_norm_struveK_zero_le {α : ℝ} (hα : |α| < π / 2) {w : �
     (Eventually.of_forall hbound))).trans (le_of_eq ?_)
   rw [integral_const_mul, Real.integral_rpow_mul_exp_neg_mul_Ioi (by norm_num) hw]
 
-/-- Positive real multiples stay in the slit plane. -/
-theorem struvePrim_ofReal_mul_mem {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : z ∈ slitPlane) :
-    (t : ℂ) * z ∈ slitPlane := by
-  rw [mem_slitPlane_iff] at hz ⊢
-  rw [re_ofReal_mul, im_ofReal_mul]
-  rcases hz with h | h
-  · left; positivity
-  · right; exact mul_ne_zero ht.ne' h
-
 /-- A local bound `‖𝐊₀(t y)‖ ≤ C t^{-1/2}`, uniform for `y` near a point of the slit plane. -/
 theorem struvePrim_local_bound {z₀ : ℂ} (hz₀ : z₀ ∈ slitPlane) :
     ∃ V ∈ 𝓝 z₀, ∃ C : ℝ, ∀ y ∈ V, ∀ t : ℝ, 0 < t → ‖struveK 0 ((t : ℂ) * y)‖ ≤ C * t ^ (-(1 / 2 : ℝ)) := by
@@ -136,7 +139,7 @@ theorem struvePrim_continuousOn : ContinuousOn (struveK 0) slitPlane :=
 /-- `t ↦ 𝐊₀(t z)` is continuous on `(0, ∞)` for `z` in the slit plane. -/
 theorem struvePrim_continuousOn_ray {z : ℂ} (hz : z ∈ slitPlane) :
     ContinuousOn (fun t : ℝ => struveK 0 ((t : ℂ) * z)) (Ioi 0) :=
-  struvePrim_continuousOn.comp (by fun_prop) fun t ht => struvePrim_ofReal_mul_mem ht hz
+  struvePrim_continuousOn.comp (by fun_prop) fun t ht => Complex.ofReal_mul_mem_slitPlane ht hz
 
 /-- `t ↦ 𝐊₀(t z)` is interval integrable on `[0, 1]`. -/
 theorem struvePrim_intervalIntegrable {z : ℂ} (hz : z ∈ slitPlane) :
@@ -166,7 +169,7 @@ theorem struvePrim_differentiableOn :
   · rw [hI]
     refine (ae_restrict_iff' measurableSet_Ioc).mpr (Eventually.of_forall fun t ht => ?_)
     exact (DLMF.Bessel.analyticOnNhd_struveK 0).differentiableOn.comp (by fun_prop)
-      fun w hw => struvePrim_ofReal_mul_mem ht.1 hw
+      fun w hw => Complex.ofReal_mul_mem_slitPlane ht.1 hw
   · intro x hx
     obtain ⟨V, hV, C, hC⟩ := struvePrim_local_bound hx
     refine ⟨V, hV, fun t => C * t ^ (-(1 / 2 : ℝ)), ?_, ?_⟩

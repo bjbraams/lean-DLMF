@@ -11,6 +11,19 @@ public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 
 /-!
 # Exponential, trigonometric and hyperbolic integral functions
+
+Definitions of the functions of DLMF §6.2. The generalized exponential integral `E_p`, and
+hence `E₁ = genExpIntE 1`, is defined in the confluent hypergeometric area.
+
+## Main definitions
+
+* `expIntEin`: the entire complementary exponential integral `Ein(z)` (DLMF 6.2.3).
+* `Real.expIntEi`: the real exponential integral `Ei(x)` (DLMF 6.2.5), totalized at `0`.
+* `Real.logIntLi`: the real logarithmic integral `li(x)` (DLMF 6.2.8).
+* `sinInt`, `sinIntTail`: the sine integrals `Si(z)` and `si(z)` (DLMF 6.2.9, 6.2.10).
+* `cosIntCin`, `cosInt`: the entire `Cin(z)` and the principal `Ci(z)` (DLMF 6.2.12, 6.2.13).
+* `sinhInt`, `coshInt`: the entire `Shi(z)` and the principal `Chi(z)` (DLMF 6.2.15, 6.2.16).
+* `expIntAuxF`, `expIntAuxG`: the auxiliary functions `f(z)`, `g(z)` (DLMF 6.2.17, 6.2.18).
 -/
 
 @[expose] public noncomputable section

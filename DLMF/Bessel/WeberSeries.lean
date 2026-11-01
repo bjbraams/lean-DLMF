@@ -9,13 +9,19 @@ public import DLMF.Bessel.BesselIntegral
 public import DLMF.Bessel.SecondKind
 
 /-!
-# Weber's function at integer order, products and Jacobi–Anger series (Duverney Ch. 7)
+# Weber's function at integer order, products and Jacobi–Anger series
+
+Reflection and integer-order formulas for `Y_ν`, its logarithmic series, the general solution of
+Bessel's equation, the product formula for `J_μ J_ν` and the Jacobi–Anger series, following
+Duverney Ch. 7 and DLMF §§10.2–10.12.
+
+## Main results
 
 * `besselY_neg`, `besselY_neg_int`: `Y_{-ν} = sin(νπ) J_ν + cos(νπ) Y_ν`, hence `Y_{-n} = (-1)ⁿ Y_n`
   (DLMF 10.4.1).
 * `besselY_int_eq_deriv`: `Y_n = π⁻¹(∂_ν J_ν|_{ν=n} + (-1)ⁿ ∂_ν J_ν|_{ν=-n})` (DLMF 10.2.4).
-* `hasSum_deriv_regularized0F1_param`: termwise differentiation of `₀F̃₁` in its parameter, by
-  locally uniform convergence of holomorphic functions.
+* `hasSum_deriv_regularized0F1_param`, `deriv_besselJ_order`: termwise differentiation of `₀F̃₁`
+  in its parameter, by locally uniform convergence of holomorphic functions, and `∂_ν J_ν`.
 * `besselY_zero_eq_series`, `besselY_nat_eq_series`: the logarithmic series of `Y₀` and `Y_n` with
   harmonic numbers and digamma values (DLMF 10.8.1–10.8.2, Duverney (7.49)).
 * `eq_besselJ_besselY_of_ode`: every solution of Bessel's equation on a connected open subset of the
@@ -36,10 +42,6 @@ open DLMF.Hypergeometric
 noncomputable section
 
 namespace DLMF.Bessel
-
-/-- `1/Γ(z) = z/Γ(z+1)` for every `z`. -/
-theorem recip_Gamma_succ' (z : ℂ) : (Gamma z)⁻¹ = z * (Gamma (z + 1))⁻¹ := by
-  simpa [one_div] using one_div_Gamma_eq_self_mul_one_div_Gamma_add_one z
 
 /-- `Y_{-ν} = sin(νπ) J_ν + cos(νπ) Y_ν` for every order (DLMF §10.4). -/
 theorem besselY_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
@@ -222,7 +224,7 @@ theorem besselY_nat_eq_series (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     ring
   have hres := hA.neg.sub (hB.mul_right (w ^ n)⁻¹)
   have hJn : besselJ (-(n : ℂ)) z = (-1) ^ n * besselJ n z := by
-    have := besselJ_neg_int (n : ℤ) z
+    have := Complex.besselJ_neg_int (n : ℤ) z
     push_cast at this; simpa using this
   rw [hJn] at hY
   have hpi : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
@@ -367,8 +369,8 @@ theorem sum_antidiagonal_choose_recip_Gamma (n : ℕ) : ∀ a b : ℂ,
       refine Finset.sum_congr rfl fun ij _ => ?_
       push_cast; ring_nf
     rw [h1, h2, ih a (b + 1), ih (a + 1) b]
-    rw [show (Gamma (a + n))⁻¹ = (a + n) * (Gamma (a + n + 1))⁻¹ from recip_Gamma_succ' _,
-      show (Gamma (b + n))⁻¹ = (b + n) * (Gamma (b + n + 1))⁻¹ from recip_Gamma_succ' _,
+    rw [show (Gamma (a + n))⁻¹ = (a + n) * (Gamma (a + n + 1))⁻¹ from Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one _,
+      show (Gamma (b + n))⁻¹ = (b + n) * (Gamma (b + n + 1))⁻¹ from Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one _,
       poch_succ]
     push_cast
     rw [show a + (b + 1) + n - 1 = a + b + (n + 1) - 1 by ring,
@@ -453,7 +455,7 @@ theorem hasSum_besselJ_cos (z : ℂ) (θ : ℝ) :
   have hterm (n : ℕ) : besselJ ((n : ℤ) : ℂ) z * cos (((n : ℤ) : ℂ) * θ) +
       besselJ ((-(n : ℤ) : ℤ) : ℂ) z * cos (((-(n : ℤ) : ℤ) : ℂ) * θ) =
       (1 + (-1) ^ n) * besselJ n z * cos (n * θ) := by
-    have hJ := besselJ_neg_int (n : ℤ) z
+    have hJ := Complex.besselJ_neg_int (n : ℤ) z
     rw [zpow_natCast] at hJ
     push_cast at hJ ⊢
     rw [hJ, neg_mul, Complex.cos_neg]
@@ -488,7 +490,7 @@ theorem hasSum_besselJ_sin (z : ℂ) (θ : ℝ) :
   have hterm (n : ℕ) : besselJ ((n : ℤ) : ℂ) z * sin (((n : ℤ) : ℂ) * θ) +
       besselJ ((-(n : ℤ) : ℤ) : ℂ) z * sin (((-(n : ℤ) : ℤ) : ℂ) * θ) =
       (1 - (-1) ^ n) * besselJ n z * sin (n * θ) := by
-    have hJ := besselJ_neg_int (n : ℤ) z
+    have hJ := Complex.besselJ_neg_int (n : ℤ) z
     rw [zpow_natCast] at hJ
     push_cast at hJ ⊢
     rw [hJ, neg_mul, Complex.sin_neg]

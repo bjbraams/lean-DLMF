@@ -16,13 +16,17 @@ public import Mathlib.NumberTheory.LSeries.ZetaZeros
 /-!
 # DLMF §§25.1–25.10: results already in Mathlib
 
-Checked `dlmf_upstream` pointers for the Riemann zeta function, in addition to those already in
-`DLMF.Core.UpstreamElementary` (25.2.1, 25.2(i), 25.2.4, 25.2.11, 25.4.1, 25.4.3, 25.6.1–25.6.3),
-which are not repeated. Mathlib's `riemannZeta` is totalized at the pole (`riemannZeta 1` is the
-junk value `(γ - log 4π)/2`), which the comments below take into account.
+`dlmf_upstream` pointers from DLMF §§25.1–25.10 (the Riemann zeta function) to Mathlib: the
+Euler product, values at integers, and the distribution of the zeros, including Hardy's
+`Z`-function. The pointers in `DLMF.Core.UpstreamElementary` (25.2.1, 25.2(i), 25.2.4, 25.2.11,
+25.4.1, 25.4.3, 25.6.1–25.6.3) are not repeated.
 
-The Riemann hypothesis (DLMF §25.10(i)) is an open conjecture; Mathlib's `RiemannHypothesis` is
-the statement as a `Prop`, recorded here as the statement only (no theorem is acquired).
+## Implementation notes
+
+Mathlib's `riemannZeta` is totalized at the pole (`riemannZeta 1` is the junk value
+`(γ - log 4π)/2`), which the comments take into account. The Riemann hypothesis
+(DLMF §25.10(i)) is an open conjecture; Mathlib's `RiemannHypothesis` is the statement as a
+`Prop`, and the pointer records the statement only, not a theorem.
 -/
 
 /- §25.2(iv): the Euler product as an unconditional `HasProd`. -/

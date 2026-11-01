@@ -10,13 +10,31 @@ public import DLMF.Theta.Relations
 /-!
 # Theta functions: generalizations and analogs (DLMF §20.11)
 
-The Gauss sum `G(m,n)` and its reciprocity law (20.11.1–20.11.2), Ramanujan's theta function
-`f(a,b)` (20.11.3–20.11.4), Ramanujan's change of base `₂F₁(1/2,1/2;1;k²) = θ₃²(0|τ)` (20.11.5,
-rectangular case `τ = it` with Mathlib's series `₂F₁`), and the twelve combined theta functions
-`φ_{m,n}` of Carlson with their permutation symmetry (20.11.6–20.11.9).
+The Gauss sum `G(m,n)` and its reciprocity law, Ramanujan's theta function `f(a,b)`,
+Ramanujan's change of base `₂F₁(1/2,1/2;1;k²) = θ₃²(0|τ)` (rectangular case `τ = it`, with
+Mathlib's series `₂F₁`), and the twelve combined theta functions `φ_{m,n}` of Carlson with
+their permutation symmetry.
 
-Theta functions with characteristics (§20.11(iv)) are the one-dimensional case of the Riemann theta
-functions of DLMF Chapter 21 and are acquired there.
+## Main definitions
+
+* `thetaGaussSum`: the Gauss sum `G(m,n)` (DLMF 20.11.1).
+* `ramanujanThetaF`: Ramanujan's theta function `f(a,b)` (DLMF 20.11.3).
+* `combinedThetaConst`, `combinedTheta`: Carlson's combined theta functions `φ_{m,n}`
+  (DLMF 20.11.6–20.11.8).
+
+## Main results
+
+* `thetaGaussSum_reciprocity`: DLMF 20.11.2.
+* `ramanujanThetaF_eq_jacobiThetaThreeTau`: DLMF 20.11.4.
+* `summable_ramanujanThetaF`: absolute convergence for `|ab| < 1` (DLMF §20.11(ii)).
+* `ordinaryHypergeometric_half_half_one_thetaModulusK`: DLMF 20.11.5.
+* `combinedTheta_m_one`, `combinedTheta_one_n`, `combinedTheta_m_n`: DLMF 20.11.6–20.11.8.
+* `combinedTheta_symmetry`: DLMF 20.11.9.
+
+## Implementation notes
+
+Theta functions with characteristics (§20.11(iv)) are the one-dimensional case of the
+Riemann theta functions of DLMF Chapter 21 and are treated there.
 -/
 
 @[expose] public section
@@ -74,12 +92,12 @@ theorem ramanujanThetaF_eq_jacobiThetaThreeTau (z τ : ℂ) :
     exact_mod_cast Int.ediv_mul_cancel (Int.even_mul_succ_self n).two_dvd
   have hB : ((n * (n - 1) / 2 : ℤ) : ℂ) * 2 = n * (n - 1) := by
     exact_mod_cast Int.ediv_mul_cancel (Int.even_mul_pred_self n).two_dvd
-  rw [← exp_add, ← exp_add, th20_exp_zpow, th20_exp_zpow, ← exp_add]
+  rw [← exp_add, ← exp_add, exp_zpow_eq_exp_intCast_mul, exp_zpow_eq_exp_intCast_mul, ← exp_add]
   congr 1
   linear_combination (π * I * τ + 2 * I * z) / 2 * hA + (π * I * τ - 2 * I * z) / 2 * hB
 
 /-- `∑ r^{m(m-1)/2} A^m` converges for `0 ≤ r < 1`, `A ≥ 0` (helper). -/
-lemma p20R1_summable_quad {r A : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) (hA : 0 ≤ A) :
+private lemma summable_pow_triangular_mul_pow {r A : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) (hA : 0 ≤ A) :
     Summable (fun m : ℕ => r ^ (m * (m - 1) / 2) * A ^ m) := by
   obtain ⟨M, hM⟩ : ∃ M : ℕ, r ^ M * A ≤ 1 / 2 := by
     have ht : Tendsto (fun M : ℕ => r ^ M * A) atTop (𝓝 (0 * A)) :=
@@ -104,7 +122,7 @@ lemma p20R1_summable_quad {r A : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) (hA : 0 ≤ A
 
 
 /-- `m(m+1)/2 = m(m-1)/2 + m` in `ℕ` (helper). -/
-lemma p20R1_tri_succ (m : ℕ) : m * (m + 1) / 2 = m * (m - 1) / 2 + m := by
+private lemma mul_succ_div_two_eq (m : ℕ) : m * (m + 1) / 2 = m * (m - 1) / 2 + m := by
   have h : m * (m + 1) = m * (m - 1) + 2 * m := by
     rcases m with _ | k
     · simp
@@ -117,17 +135,17 @@ theorem summable_ramanujanThetaF {a b : ℂ} (hab : ‖a * b‖ < 1) :
     Summable (fun n : ℤ => ‖a ^ (n * (n + 1) / 2) * b ^ (n * (n - 1) / 2)‖) := by
   have hr0 : 0 ≤ ‖a * b‖ := norm_nonneg _
   refine Summable.of_nat_of_neg_add_one ?_ ?_
-  · refine (p20R1_summable_quad hr0 hab (norm_nonneg a)).congr fun m => ?_
+  · refine (summable_pow_triangular_mul_pow hr0 hab (norm_nonneg a)).congr fun m => ?_
     have e1 : (m : ℤ) * ((m : ℤ) + 1) / 2 = ((m * (m + 1) / 2 : ℕ) : ℤ) := by push_cast; ring_nf
     have e2 : (m : ℤ) * ((m : ℤ) - 1) / 2 = ((m * (m - 1) / 2 : ℕ) : ℤ) := by
       rcases m with _ | k
       · simp
       · push_cast; ring_nf
     symm
-    rw [e1, e2, zpow_natCast, zpow_natCast, norm_mul, norm_pow, norm_pow, p20R1_tri_succ, pow_add,
+    rw [e1, e2, zpow_natCast, zpow_natCast, norm_mul, norm_pow, norm_pow, mul_succ_div_two_eq, pow_add,
       norm_mul, mul_pow]
     ring
-  · have hs := (summable_nat_add_iff 1).mpr (p20R1_summable_quad hr0 hab (norm_nonneg b))
+  · have hs := (summable_nat_add_iff 1).mpr (summable_pow_triangular_mul_pow hr0 hab (norm_nonneg b))
     refine hs.congr fun m => ?_
     have e1 : (-((m : ℤ) + 1)) * (-((m : ℤ) + 1) + 1) / 2 = ((m * (m + 1) / 2 : ℕ) : ℤ) := by
       push_cast; ring_nf
@@ -135,7 +153,7 @@ theorem summable_ramanujanThetaF {a b : ℂ} (hab : ‖a * b‖ < 1) :
         (((m + 1) * (m + 1 + 1) / 2 : ℕ) : ℤ) := by
       push_cast; ring_nf
     symm
-    rw [e1, e2, zpow_natCast, zpow_natCast, norm_mul, norm_pow, norm_pow, p20R1_tri_succ (m + 1),
+    rw [e1, e2, zpow_natCast, zpow_natCast, norm_mul, norm_pow, norm_pow, mul_succ_div_two_eq (m + 1),
       pow_add, norm_mul, mul_pow, Nat.add_sub_cancel, show (m + 1) * m = m * (m + 1) by ring]
     ring
 
@@ -147,11 +165,11 @@ theorem summable_ramanujanThetaF {a b : ℂ} (hab : ‖a * b‖ < 1) :
 theorem ordinaryHypergeometric_half_half_one_thetaModulusK {t : ℝ} (ht : 0 < t) :
     ₂F₁ (1 / 2 : ℂ) (1 / 2) 1 (thetaModulusK (I * t) ^ 2) =
       jacobiThetaThreeNullTau (I * t) ^ 2 := by
-  obtain ⟨h0, h1, -⟩ := DLMF.JacobiElliptic.p22R1_real_at ht
+  obtain ⟨h0, h1, -⟩ := DLMF.JacobiElliptic.jacobiModulusImag_spec ht
   obtain ⟨-, hK, -⟩ := compEllIntK_eq_jacobiThetaThreeNullTau ht
-  rw [p22R1_thetaModulusK_I_mul ht] at hK ⊢
+  rw [thetaModulusK_I_mul ht] at hK ⊢
   simp only [ofReal_re] at hK
-  have hm : |DLMF.JacobiElliptic.p22R1_rho t ^ 2| < 1 := by
+  have hm : |DLMF.JacobiElliptic.jacobiModulusImag t ^ 2| < 1 := by
     rw [abs_of_nonneg (by positivity)]; nlinarith
   rw [Real.compEllIntKm_eq_ordinaryHypergeometric hm] at hK
   have hpi : (π : ℂ) / 2 ≠ 0 := by
@@ -163,7 +181,7 @@ theorem ordinaryHypergeometric_half_half_one_thetaModulusK {t : ℝ} (ht : 0 < t
 
 /-- The normalizing constants of Carlson's combined theta functions: `θ₁'(0|τ)` for `j = 1` and
 `θⱼ(0|τ)` for `j = 2, 3, 4`. -/
-def th20_combinedConst (j : ℕ) (τ : ℂ) : ℂ :=
+def combinedThetaConst (j : ℕ) (τ : ℂ) : ℂ :=
   if j = 1 then jacobiThetaOneDerivNullTau τ else jacobiThetaTau j 0 τ
 
 /-- DLMF 20.11.6–20.11.8: the twelve combined theta functions
@@ -172,28 +190,28 @@ def th20_combinedConst (j : ℕ) (τ : ℂ) : ℂ :=
 20.11.8 (`m, n ≥ 2`). -/
 @[dlmf 20.11.E6]
 def combinedTheta (m n : ℕ) (z τ : ℂ) : ℂ :=
-  th20_combinedConst n τ * jacobiThetaTau m z τ / (th20_combinedConst m τ * jacobiThetaTau n z τ)
+  combinedThetaConst n τ * jacobiThetaTau m z τ / (combinedThetaConst m τ * jacobiThetaTau n z τ)
 
 /-- DLMF 20.11.6: `φ_{m,1} = θ₁'(0) θ_m(z)/(θ_m(0) θ₁(z))`, `m = 2,3,4`. -/
 @[dlmf 20.11.E6]
 theorem combinedTheta_m_one (m : ℕ) (hm : m ≠ 1) (z τ : ℂ) :
     combinedTheta m 1 z τ = jacobiThetaOneDerivNullTau τ * jacobiThetaTau m z τ /
       (jacobiThetaTau m 0 τ * jacobiThetaOneTau z τ) := by
-  simp [combinedTheta, th20_combinedConst, hm, jacobiThetaTau]
+  simp [combinedTheta, combinedThetaConst, hm, jacobiThetaTau]
 
 /-- DLMF 20.11.7: `φ_{1,n} = θ_n(0) θ₁(z)/(θ₁'(0) θ_n(z))`, `n = 2,3,4`. -/
 @[dlmf 20.11.E7]
 theorem combinedTheta_one_n (n : ℕ) (hn : n ≠ 1) (z τ : ℂ) :
     combinedTheta 1 n z τ = jacobiThetaTau n 0 τ * jacobiThetaOneTau z τ /
       (jacobiThetaOneDerivNullTau τ * jacobiThetaTau n z τ) := by
-  simp [combinedTheta, th20_combinedConst, hn, jacobiThetaTau]
+  simp [combinedTheta, combinedThetaConst, hn, jacobiThetaTau]
 
 /-- DLMF 20.11.8: `φ_{m,n} = θ_n(0) θ_m(z)/(θ_m(0) θ_n(z))`, `m, n = 2,3,4`. -/
 @[dlmf 20.11.E8]
 theorem combinedTheta_m_n (m n : ℕ) (hm : m ≠ 1) (hn : n ≠ 1) (z τ : ℂ) :
     combinedTheta m n z τ = jacobiThetaTau n 0 τ * jacobiThetaTau m z τ /
       (jacobiThetaTau m 0 τ * jacobiThetaTau n z τ) := by
-  simp [combinedTheta, th20_combinedConst, hm, hn]
+  simp [combinedTheta, combinedThetaConst, hm, hn]
 
 /-- DLMF 20.11.9: `φ_{m,n} = φ_{m,1} φ_{1,n} = 1/φ_{n,m} = φ_{m,1}/φ_{n,1} = φ_{1,n}/φ_{1,m}`, for
 `m, n ∈ {1,2,3,4}`, `m ≠ n`, at points `z` where `θ₁(z), θ_m(z), θ_n(z)` do not vanish, given that
@@ -202,8 +220,8 @@ Corrected from the printed DLMF formula: the nonvanishing hypotheses are added, 
 Lean's `x / 0 = 0` the quotient identities are false at the zeros of the theta functions. -/
 @[dlmf 20.11.E9]
 theorem combinedTheta_symmetry {m n : ℕ} {z τ : ℂ}
-    (hc1 : th20_combinedConst 1 τ ≠ 0) (hcm : th20_combinedConst m τ ≠ 0)
-    (hcn : th20_combinedConst n τ ≠ 0) (h1 : jacobiThetaTau 1 z τ ≠ 0)
+    (hc1 : combinedThetaConst 1 τ ≠ 0) (hcm : combinedThetaConst m τ ≠ 0)
+    (hcn : combinedThetaConst n τ ≠ 0) (h1 : jacobiThetaTau 1 z τ ≠ 0)
     (hm : jacobiThetaTau m z τ ≠ 0) (hn : jacobiThetaTau n z τ ≠ 0) :
     combinedTheta m n z τ = combinedTheta m 1 z τ * combinedTheta 1 n z τ ∧
       combinedTheta m n z τ = 1 / combinedTheta n m z τ ∧
@@ -213,16 +231,16 @@ theorem combinedTheta_symmetry {m n : ℕ} {z τ : ℂ}
   refine ⟨?_, ?_, ?_, ?_⟩ <;> field_simp
 
 /-- The normalizing constants of the combined theta functions do not vanish for `Im τ > 0`. -/
-lemma th20_combinedConst_ne_zero {τ : ℂ} (hτ : 0 < τ.im) {j : ℕ} (hj1 : 1 ≤ j) (hj4 : j ≤ 4) :
-    th20_combinedConst j τ ≠ 0 := by
+private lemma combinedThetaConst_ne_zero {τ : ℂ} (hτ : 0 < τ.im) {j : ℕ} (hj1 : 1 ≤ j) (hj4 : j ≤ 4) :
+    combinedThetaConst j τ ≠ 0 := by
   obtain ⟨h2, h3, h4⟩ := jacobiThetaNullTau_ne_zero hτ
   interval_cases j
-  · simp only [th20_combinedConst, ite_true]
+  · simp only [combinedThetaConst, ite_true]
     rw [jacobiThetaOneDerivNullTau_eq_mul hτ]
     exact mul_ne_zero (mul_ne_zero h2 h3) h4
-  · simpa [th20_combinedConst, jacobiThetaTau] using h2
-  · simpa [th20_combinedConst, jacobiThetaTau] using h3
-  · simpa [th20_combinedConst, jacobiThetaTau] using h4
+  · simpa [combinedThetaConst, jacobiThetaTau] using h2
+  · simpa [combinedThetaConst, jacobiThetaTau] using h3
+  · simpa [combinedThetaConst, jacobiThetaTau] using h4
 
 end DLMF.Theta
 

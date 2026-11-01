@@ -9,7 +9,16 @@ public import DLMF.Core.Framework
 public import DLMF.Hypergeometric.Basic.Pochhammer
 
 /-!
-# Coefficients for Kummer expansions and parabolic zero-free regions
+# Coefficients of Kummer's series
+
+This file defines coefficient sequences attached to Kummer's series `M(a,c,z)`, used for the
+finite Kummer–Bessel expansion and for zero-free regions of parabolic type.
+
+## Main definitions
+
+* `kummerBesselCoeff`: the entire coefficient of the normalized finite Kummer–Bessel expansion.
+* `parab_A`: the real coefficients `(a)_k / ((c)_k k!)` of Kummer's series.
+* `parab_b`: the ratio of consecutive coefficients `parab_A`.
 -/
 
 @[expose] public noncomputable section

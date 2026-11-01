@@ -8,13 +8,32 @@ module
 public import DLMF.IncompleteGamma.Representations.LowerBarnes
 
 /-!
-# Gamma strip bounds and upper incomplete Gamma representations
+# Gamma strip bounds and the continued upper incomplete Gamma Barnes integral
 
-Uniform vertical Gamma bounds support the upper incomplete-Gamma Barnes representation and its
-continuation.
+Uniform vertical bounds for `Γ` on strips, and the Mellin–Barnes representation of the upper
+incomplete Gamma function on the logarithmic plane, DLMF 8.6.12, with explicit residues for
+the poles crossed by the separating contour.
 
-Source references and common attribution are retained in
-`DLMF.IncompleteGamma.Representations`.
+## Main definitions
+
+* `incRep_f`: the DLMF 8.6.12 integrand `Γ(s+1-a) π/sin(πs) e^{-sw}`.
+* `incRep_res`: its residue at `s = a-1-n`.
+* `incRep_W`: the right-hand side of DLMF 8.6.12 without residues.
+* `incRep_J`, `incRep_G`: the residue-corrected line integral and its value on a canonical
+  admissible line `incRep_cg`.
+* `gammaBarnesResidueSum`: the finitely many residues recording the indentation past
+  right-hand Gamma poles.
+
+## Main results
+
+* `incRep_Gamma_bound`, `incRep_Gamma_bound_pt`: uniform vertical bounds for `Γ` on strips.
+* `incRep_shift_none`, `incRep_shift_one`: shifting the line of integration across no pole
+  or one pole.
+* `incRep_base_real`, `incRep_base`: DLMF 8.6.12 in the base regime `Re a < 1 + c`, from the
+  Barnes integral for `U` (DLMF 13.4.17).
+* `incRep_G_differentiableAt`: holomorphy of the residue-corrected integral in `a`.
+* `upperIncGamma_mellinBarnes_continued`: DLMF 8.6.12 on the logarithmic plane with explicit
+  separating-contour residues.
 -/
 
 @[expose] public noncomputable section

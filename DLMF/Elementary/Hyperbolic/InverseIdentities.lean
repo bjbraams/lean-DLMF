@@ -8,15 +8,39 @@ module
 public import DLMF.Elementary.Hyperbolic.InverseBranches
 
 /-!
-# Addition identities for inverse hyperbolic functions
+# Series, derivatives and addition identities for inverse hyperbolic functions
 
-Series convergence and compatible-branch sum and difference identities for inverse hyperbolic
-values.
+This file proves the series of `arctanh` on the full DLMF domains, the derivatives of the
+principal inverse hyperbolic functions, and the sum and difference identities for inverse
+hyperbolic values (DLMF §4.38).
 
-Source references and common attribution are retained in
-`DLMF.Elementary.Hyperbolic`.
-The transformed series follows from the proved Euler arctangent series by rotation
-through `-i`; its principal logarithm formula is preserved exactly.
+## Main results
+
+* `tendsto_arctanh_series`, `hasSum_arctanh`: the Maclaurin series of `arctanh` on
+  `|z| ≤ 1`, `z ≠ ±1` (DLMF 4.38.5).
+* `tendsto_arctanh_large_series`, `hasSum_arctanh_large`: the reciprocal series on `|z| ≥ 1`
+  (DLMF 4.38.6).
+* `hasSum_arctanh_transformed`, `arctanh_transformed_region`: the factorial-coefficient
+  expansion and its region (DLMF 4.38.7–4.38.8).
+* `hasDerivAt_arcsinh`, `hasDerivAt_arccosh`, `hasDerivAt_arctanh`, `hasDerivAt_arccsch`,
+  `hasDerivAt_arcsech`, `hasDerivAt_arccoth`: derivatives (DLMF 4.38.9–4.38.14).
+* `arcsinh_values_add`, `arcsinh_values_sub`: DLMF 4.38.15 with compatible branches.
+* `arccosh_values_add`, `arccosh_values_sub`, `arctanh_values_add`, `arctanh_values_sub`:
+  DLMF 4.38.16–4.38.17.
+* `arcsinh_arccosh_values_add`, `arcsinh_arccosh_values_sub`: DLMF 4.38.18 with shared branches.
+* `arctanh_arccoth_values_add`, `arctanh_arccoth_values_sub`: DLMF 4.38.19.
+* `arcsinh_values_add_unrestricted_counterexample`,
+  `arcsinh_arccosh_values_unrestricted_counterexample`,
+  `arcsinh_values_sub_unrestricted_counterexample`: the identities fail when the inverse values
+  are combined without compatible branches.
+
+## Implementation notes
+
+The inverse-sinh and mixed inverse-sinh/inverse-cosh sums and differences use paired sinh/cosh
+equations to retain branch parity. Read as identities of full sets of values, without
+compatible branches, they fail at critical parameters; the counterexamples above show this. The
+printed DLMF branch formulas are not claimed to be false. The transformed series follows from
+Euler's arctangent series by rotation through `-i`, preserving its principal logarithm formula.
 -/
 
 @[expose] public noncomputable section
@@ -226,14 +250,14 @@ theorem hasDerivAt_arcsinh {z : ℂ} (hz : z∈arcsinhDomain) : HasDerivAt arcsi
 /-- At `z`, the function `arccosh` has derivative `((Complex.sqrt (z-1)*Complex.sqrt (z+1))⁻¹)`. -/
 @[dlmf 4.38.E10]
 theorem hasDerivAt_arccosh {z : ℂ} (hz : z∈arccoshDomain) : HasDerivAt arccosh ((Complex.sqrt (z-1)*Complex.sqrt (z+1))⁻¹) z := by
-  exact hypR4_hasDerivAt_arccosh hz
+  exact hasDerivAt_arccosh_of_mem hz
 
 /-- At `z`, the function `arccosh` has derivative `((if 0<z.re then 1 else -1)*(Complex.sqrt
 (z^2-1))⁻¹)`. -/
 @[dlmf 4.38.E10]
 theorem hasDerivAt_arccosh_signed {z : ℂ} (hz : z∈arccoshDomain) (hre : z.re≠0) : HasDerivAt arccosh ((if 0<z.re then 1 else -1)*(Complex.sqrt (z^2-1))⁻¹) z := by
-  have h := hypR4_hasDerivAt_arccosh hz
-  rw [hypR4_acosh_root_signed hz hre] at h
+  have h := hasDerivAt_arccosh_of_mem hz
+  rw [sqrt_sub_one_mul_sqrt_add_one_eq_sign_mul_sqrt hz hre] at h
   convert h using 1
   split_ifs <;> simp
 
@@ -252,7 +276,7 @@ theorem hasDerivAt_arccsch {z : ℂ} (hz : z∈arccschDomain) : HasDerivAt arccs
     field_simp <;> ring
 
 /-- `1 + w²` lies in the principal slit plane on the open inverse-sinh domain. -/
-private lemma hypR4_one_add_sq_slit {w : ℂ} (hw : w.re ≠ 0 ∨ |w.im| < 1) :
+private lemma one_add_sq_mem_slitPlane {w : ℂ} (hw : w.re ≠ 0 ∨ |w.im| < 1) :
     1+w^2 ∈ Complex.slitPlane := by
   rw [Complex.mem_slitPlane_iff]
   rcases hw with hr | hi
@@ -265,7 +289,7 @@ private lemma hypR4_one_add_sq_slit {w : ℂ} (hw : w.re ≠ 0 ∨ |w.im| < 1) :
     nlinarith [abs_lt.mp hi, sq_nonneg w.re]
 
 /-- On the right half-plane `z √(1+z⁻²)` is the principal `√(1+z²)`. -/
-private lemma hypR4_acsch_root_pos {z : ℂ} (hre : 0 < z.re) :
+private lemma mul_sqrt_one_add_inv_sq_of_re_pos {z : ℂ} (hre : 0 < z.re) :
     z*Complex.sqrt (1+z⁻¹^2) = Complex.sqrt (1+z^2) := by
   set V := {z : ℂ | 0 < z.re}
   have hVo : IsOpen V := isOpen_lt continuous_const Complex.continuous_re
@@ -279,16 +303,16 @@ private lemma hypR4_acsch_root_pos {z : ℂ} (hre : 0 < z.re) :
     apply DifferentiableOn.analyticOnNhd _ hVo
     intro w hw
     have hw0 : w ≠ 0 := fun h => by subst h; exact absurd (show (0:ℝ) < (0:ℂ).re from hw) (by simp)
-    have hsl := hypR4_one_add_sq_slit (Or.inl (hinvre w hw).ne')
+    have hsl := one_add_sq_mem_slitPlane (Or.inl (hinvre w hw).ne')
     exact (differentiableAt_id.mul ((Complex.differentiableAt_sqrt hsl).comp w
       (by fun_prop (disch := exact hw0) : DifferentiableAt ℂ (fun w : ℂ => 1+w⁻¹^2) w))).differentiableWithinAt
   have hs : AnalyticOnNhd ℂ (fun w => Complex.sqrt (1+w^2)) V := by
     apply DifferentiableOn.analyticOnNhd _ hVo
     intro w hw
-    have hsl := hypR4_one_add_sq_slit (Or.inl (ne_of_gt hw))
+    have hsl := one_add_sq_mem_slitPlane (Or.inl (ne_of_gt hw))
     exact ((Complex.differentiableAt_sqrt hsl).comp w
       (by fun_prop : DifferentiableAt ℂ (fun w : ℂ => 1+w^2) w)).differentiableWithinAt
-  refine hypR4_sq_eq_continuation hVo hVc hr hs ?_ h1V ?_ ?_ z hre
+  refine eqOn_of_sq_eq_of_analyticOnNhd hVo hVc hr hs ?_ h1V ?_ ?_ z hre
   · intro w hw
     have hw0 : w ≠ 0 := fun h => by subst h; exact absurd (show (0:ℝ) < (0:ℂ).re from hw) (by simp)
     rw [mul_pow, trig_sqrt_sq, trig_sqrt_sq]; field_simp; ring
@@ -298,14 +322,14 @@ private lemma hypR4_acsch_root_pos {z : ℂ} (hre : 0 < z.re) :
     rw [h] at this; norm_num at this
 
 /-- `z √(1+z⁻²) = ±√(1+z²)` according to the sign of `Re z`. -/
-private lemma hypR4_acsch_root_signed {z : ℂ} (hre : z.re ≠ 0) :
+private lemma mul_sqrt_one_add_inv_sq_signed {z : ℂ} (hre : z.re ≠ 0) :
     z*Complex.sqrt (1+z⁻¹^2) = (if 0<z.re then 1 else -1)*Complex.sqrt (1+z^2) := by
   rcases lt_or_gt_of_ne hre with hneg | hpos
   · simp only [show ¬ (0 < z.re) from not_lt.mpr hneg.le, ↓reduceIte]
-    have h := hypR4_acsch_root_pos (z := -z) (by simpa using hneg)
+    have h := mul_sqrt_one_add_inv_sq_of_re_pos (z := -z) (by simpa using hneg)
     rw [inv_neg, neg_sq, neg_sq] at h
     linear_combination -h
-  · simp only [hpos, ↓reduceIte, one_mul]; exact hypR4_acsch_root_pos hpos
+  · simp only [hpos, ↓reduceIte, one_mul]; exact mul_sqrt_one_add_inv_sq_of_re_pos hpos
 
 /-- At `z`, the function `arccsch` has derivative `(-(if 0<z.re then 1 else -1)/(z*Complex.sqrt
 (1+z^2)))`. -/
@@ -313,7 +337,7 @@ private lemma hypR4_acsch_root_signed {z : ℂ} (hre : z.re ≠ 0) :
 theorem hasDerivAt_arccsch_signed {z : ℂ} (hz : z∈arccschDomain) (hre : z.re≠0) : HasDerivAt arccsch (-(if 0<z.re then 1 else -1)/(z*Complex.sqrt (1+z^2))) z := by
   have h := hasDerivAt_arccsch hz
   have hz0 : z ≠ 0 := hz.1
-  have e := hypR4_acsch_root_signed hre
+  have e := mul_sqrt_one_add_inv_sq_signed hre
   convert h using 1
   rw [show z^2*Complex.sqrt (1+z⁻¹^2) = z*(z*Complex.sqrt (1+z⁻¹^2)) by ring, e]
   split_ifs <;> field_simp
@@ -322,9 +346,9 @@ theorem hasDerivAt_arccsch_signed {z : ℂ} (hz : z∈arccschDomain) (hre : z.re
 @[dlmf 4.38.E13]
 theorem hasDerivAt_arcsech {z : ℂ} (hz : z∈arcsechDomain) : HasDerivAt arcsech (-1/(z*Complex.sqrt (1-z^2))) z := by
   have hz0 : z ≠ 0 := hz.1
-  have h := (hypR4_hasDerivAt_arccosh hz.2).comp z (hasDerivAt_inv hz0)
-  have e := hypR4_asech_root hz
-  have hS : Complex.sqrt (z⁻¹-1)*Complex.sqrt (z⁻¹+1) ≠ 0 := hypR4_acosh_root_ne hz.2
+  have h := (hasDerivAt_arccosh_of_mem hz.2).comp z (hasDerivAt_inv hz0)
+  have e := mul_sqrt_inv_sub_one_mul_sqrt_inv_add_one hz
+  have hS : Complex.sqrt (z⁻¹-1)*Complex.sqrt (z⁻¹+1) ≠ 0 := sqrt_sub_one_mul_sqrt_add_one_ne_zero hz.2
   have hf : arcsech = arccosh ∘ (fun w : ℂ => w⁻¹) := rfl
   rw [hf]
   convert h using 1
@@ -425,10 +449,11 @@ theorem arccosh_values_add (u v : ℂ) :
       rw [Complex.cosh_sub,hyper_cosh_arccosh]
       linear_combination -hs
 
-/-- Off `±1`, the finite inverse-tanh values are the solutions of `exp (2w) (1-z) = 1+z`. -/
-private lemma hypR4_mem_arctanhValues_iff {z w : ℂ} (h1 : z ≠ 1) (h2 : z ≠ -1) :
+/-- The finite inverse-tanh values are the solutions of `exp (2w) (1-z) = 1+z`; at `z = ±1`
+there are none. -/
+private lemma mem_arctanhValues_iff_exp {z w : ℂ} :
     w ∈ arctanhValues z ↔ Complex.exp (2*w)*(1-z) = 1+z := by
-  obtain ⟨hc, hs⟩ := hypR4_cosh_sinh_exp w
+  obtain ⟨hc, hs⟩ := two_mul_exp_mul_cosh_and_sinh w
   have hE : Complex.exp w ≠ 0 := Complex.exp_ne_zero w
   constructor
   · rintro ⟨hc0, ht⟩
@@ -445,10 +470,11 @@ private lemma hypR4_mem_arctanhValues_iff {z w : ℂ} (h1 : z ≠ 1) (h2 : z ≠
     apply mul_left_cancel₀ (mul_ne_zero two_ne_zero hE)
     linear_combination hs - z*hc + h'
 
-/-- Off `±1`, the finite inverse-coth values are the solutions of `exp (2w) (z-1) = z+1`. -/
-private lemma hypR4_mem_arccothValues_iff {z w : ℂ} (h1 : z ≠ 1) (h2 : z ≠ -1) :
+/-- The finite inverse-coth values are the solutions of `exp (2w) (z-1) = z+1`; at `z = ±1`
+there are none. -/
+private lemma mem_arccothValues_iff_exp {z w : ℂ} :
     w ∈ arccothValues z ↔ Complex.exp (2*w)*(z-1) = z+1 := by
-  obtain ⟨hc, hs⟩ := hypR4_cosh_sinh_exp w
+  obtain ⟨hc, hs⟩ := two_mul_exp_mul_cosh_and_sinh w
   have hE : Complex.exp w ≠ 0 := Complex.exp_ne_zero w
   constructor
   · rintro ⟨hs0, ht⟩
@@ -466,7 +492,7 @@ private lemma hypR4_mem_arccothValues_iff {z w : ℂ} (h1 : z ≠ 1) (h2 : z ≠
     linear_combination hc - z*hs - h'
 
 /-- Solution sets of `exp (2w) c = d` add (Minkowski sum) by multiplying the coefficients. -/
-private lemma hypR4_expSet_add {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0) (hd₁ : d₁ ≠ 0) :
+private lemma image2_add_expSolutionSet {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0) (hd₁ : d₁ ≠ 0) :
     Set.image2 (fun a b : ℂ => a+b) {w | Complex.exp (2*w)*c₁ = d₁} {w | Complex.exp (2*w)*c₂ = d₂} =
       {w | Complex.exp (2*w)*(c₁*c₂) = d₁*d₂} := by
   ext w
@@ -490,7 +516,7 @@ private lemma hypR4_expSet_add {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0) 
     linear_combination hw - d₂*ha
 
 /-- Solution sets of `exp (2w) c = d` subtract by cross-multiplying the coefficients. -/
-private lemma hypR4_expSet_sub {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0) (hd₁ : d₁ ≠ 0) :
+private lemma image2_sub_expSolutionSet {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0) (hd₁ : d₁ ≠ 0) :
     Set.image2 (fun a b : ℂ => a-b) {w | Complex.exp (2*w)*c₁ = d₁} {w | Complex.exp (2*w)*c₂ = d₂} =
       {w | Complex.exp (2*w)*(c₁*d₂) = d₁*c₂} := by
   have hneg : {w : ℂ | Complex.exp (2*w)*c₂ = d₂} = (fun w => -w) '' {w | Complex.exp (2*w)*d₂ = c₂} := by
@@ -503,11 +529,11 @@ private lemma hypR4_expSet_sub {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0) 
     · rintro ⟨b, hb, rfl⟩
       have hE : Complex.exp (2*b) ≠ 0 := Complex.exp_ne_zero _
       rw [show 2*(-b) = -(2*b) by ring, Complex.exp_neg, ← hb]; field_simp
-  rw [hneg, Set.image2_image_right, ← hypR4_expSet_add hc₁ hd₁]
+  rw [hneg, Set.image2_image_right, ← image2_add_expSolutionSet hc₁ hd₁]
   simp only [sub_neg_eq_add]
 
 /-- Two solution sets of `exp (2w) c = d` coincide when the ratios `d/c` agree. -/
-private lemma hypR4_expSet_congr {c d c' d' : ℂ} (hc : c ≠ 0) (hc' : c' ≠ 0)
+private lemma expSolutionSet_congr {c d c' d' : ℂ} (hc : c ≠ 0) (hc' : c' ≠ 0)
     (h : c*d' = c'*d) : {w : ℂ | Complex.exp (2*w)*c = d} = {w | Complex.exp (2*w)*c' = d'} := by
   ext w
   simp only [Set.mem_ofPred_eq]
@@ -532,13 +558,13 @@ theorem arctanh_values_add {u v : ℂ} (hu : u≠1 ∧ u≠ -1) (hv : v≠1 ∧ 
     exact mul_ne_zero hu2 hv2 (by first | linear_combination h | linear_combination -h)
   have ht3 : 1-(u+v)/(1+u*v) ≠ 0 := sub_ne_zero.mpr (Ne.symm ht1)
   have e0 : arctanhValues (u) = {w : ℂ | Complex.exp (2*w)*(1-(u)) = 1+(u)} :=
-    Set.ext fun w => hypR4_mem_arctanhValues_iff hu.1 hu.2
+    Set.ext fun w => mem_arctanhValues_iff_exp
   have e1 : arctanhValues (v) = {w : ℂ | Complex.exp (2*w)*(1-(v)) = 1+(v)} :=
-    Set.ext fun w => hypR4_mem_arctanhValues_iff hv.1 hv.2
+    Set.ext fun w => mem_arctanhValues_iff_exp
   have e2 : arctanhValues ((u+v)/(1+u*v)) = {w : ℂ | Complex.exp (2*w)*(1-((u+v)/(1+u*v))) = 1+((u+v)/(1+u*v))} :=
-    Set.ext fun w => hypR4_mem_arctanhValues_iff ht1 ht2
-  rw [e0, e1, e2, hypR4_expSet_add hu1 hu2]
-  apply hypR4_expSet_congr (mul_ne_zero hu1 hv1) ht3
+    Set.ext fun w => mem_arctanhValues_iff_exp
+  rw [e0, e1, e2, image2_add_expSolutionSet hu1 hu2]
+  apply expSolutionSet_congr (mul_ne_zero hu1 hv1) ht3
   field_simp
   ring
 
@@ -631,19 +657,19 @@ theorem arctanh_arccoth_values_add {u v : ℂ} (hu : u≠1 ∧ u≠ -1) (hv : v�
   have ht3 : 1-(u*v+1)/(v+u) ≠ 0 := sub_ne_zero.mpr (Ne.symm ht1)
   have hs3 : (v+u)/(u*v+1)-1 ≠ 0 := sub_ne_zero.mpr hs1
   have e0 : arctanhValues (u) = {w : ℂ | Complex.exp (2*w)*(1-(u)) = 1+(u)} :=
-    Set.ext fun w => hypR4_mem_arctanhValues_iff hu.1 hu.2
+    Set.ext fun w => mem_arctanhValues_iff_exp
   have e1 : arccothValues (v) = {w : ℂ | Complex.exp (2*w)*((v)-1) = (v)+1} :=
-    Set.ext fun w => hypR4_mem_arccothValues_iff hv.1 hv.2
+    Set.ext fun w => mem_arccothValues_iff_exp
   have e2 : arctanhValues ((u*v+1)/(v+u)) = {w : ℂ | Complex.exp (2*w)*(1-((u*v+1)/(v+u))) = 1+((u*v+1)/(v+u))} :=
-    Set.ext fun w => hypR4_mem_arctanhValues_iff ht1 ht2
+    Set.ext fun w => mem_arctanhValues_iff_exp
   have e3 : arccothValues ((v+u)/(u*v+1)) = {w : ℂ | Complex.exp (2*w)*(((v+u)/(u*v+1))-1) = ((v+u)/(u*v+1))+1} :=
-    Set.ext fun w => hypR4_mem_arccothValues_iff hs1 hs2
-  rw [e0, e1, e2, e3, hypR4_expSet_add hu1 hu2]
+    Set.ext fun w => mem_arccothValues_iff_exp
+  rw [e0, e1, e2, e3, image2_add_expSolutionSet hu1 hu2]
   constructor
-  · apply hypR4_expSet_congr (mul_ne_zero hu1 hv1) ht3
+  · apply expSolutionSet_congr (mul_ne_zero hu1 hv1) ht3
     field_simp
     ring
-  · apply hypR4_expSet_congr (mul_ne_zero hu1 hv1) hs3
+  · apply expSolutionSet_congr (mul_ne_zero hu1 hv1) hs3
     field_simp
     ring
 
@@ -740,13 +766,13 @@ theorem arctanh_values_sub {u v : ℂ} (hu : u≠1 ∧ u≠ -1) (hv : v≠1 ∧ 
     exact mul_ne_zero hu2 hv1 (by first | linear_combination h | linear_combination -h)
   have ht3 : 1-(u-v)/(1-u*v) ≠ 0 := sub_ne_zero.mpr (Ne.symm ht1)
   have e0 : arctanhValues (u) = {w : ℂ | Complex.exp (2*w)*(1-(u)) = 1+(u)} :=
-    Set.ext fun w => hypR4_mem_arctanhValues_iff hu.1 hu.2
+    Set.ext fun w => mem_arctanhValues_iff_exp
   have e1 : arctanhValues (v) = {w : ℂ | Complex.exp (2*w)*(1-(v)) = 1+(v)} :=
-    Set.ext fun w => hypR4_mem_arctanhValues_iff hv.1 hv.2
+    Set.ext fun w => mem_arctanhValues_iff_exp
   have e2 : arctanhValues ((u-v)/(1-u*v)) = {w : ℂ | Complex.exp (2*w)*(1-((u-v)/(1-u*v))) = 1+((u-v)/(1-u*v))} :=
-    Set.ext fun w => hypR4_mem_arctanhValues_iff ht1 ht2
-  rw [e0, e1, e2, hypR4_expSet_sub hu1 hu2]
-  apply hypR4_expSet_congr (mul_ne_zero hu1 hv2) ht3
+    Set.ext fun w => mem_arctanhValues_iff_exp
+  rw [e0, e1, e2, image2_sub_expSolutionSet hu1 hu2]
+  apply expSolutionSet_congr (mul_ne_zero hu1 hv2) ht3
   field_simp
   ring
 
@@ -802,19 +828,19 @@ theorem arctanh_arccoth_values_sub {u v : ℂ} (hu : u≠1 ∧ u≠ -1) (hv : v�
   have ht3 : 1-(u*v-1)/(v-u) ≠ 0 := sub_ne_zero.mpr (Ne.symm ht1)
   have hs3 : (v-u)/(u*v-1)-1 ≠ 0 := sub_ne_zero.mpr hs1
   have e0 : arctanhValues (u) = {w : ℂ | Complex.exp (2*w)*(1-(u)) = 1+(u)} :=
-    Set.ext fun w => hypR4_mem_arctanhValues_iff hu.1 hu.2
+    Set.ext fun w => mem_arctanhValues_iff_exp
   have e1 : arccothValues (v) = {w : ℂ | Complex.exp (2*w)*((v)-1) = (v)+1} :=
-    Set.ext fun w => hypR4_mem_arccothValues_iff hv.1 hv.2
+    Set.ext fun w => mem_arccothValues_iff_exp
   have e2 : arctanhValues ((u*v-1)/(v-u)) = {w : ℂ | Complex.exp (2*w)*(1-((u*v-1)/(v-u))) = 1+((u*v-1)/(v-u))} :=
-    Set.ext fun w => hypR4_mem_arctanhValues_iff ht1 ht2
+    Set.ext fun w => mem_arctanhValues_iff_exp
   have e3 : arccothValues ((v-u)/(u*v-1)) = {w : ℂ | Complex.exp (2*w)*(((v-u)/(u*v-1))-1) = ((v-u)/(u*v-1))+1} :=
-    Set.ext fun w => hypR4_mem_arccothValues_iff hs1 hs2
-  rw [e0, e1, e2, e3, hypR4_expSet_sub hu1 hu2]
+    Set.ext fun w => mem_arccothValues_iff_exp
+  rw [e0, e1, e2, e3, image2_sub_expSolutionSet hu1 hu2]
   constructor
-  · apply hypR4_expSet_congr (mul_ne_zero hu1 hv2) ht3
+  · apply expSolutionSet_congr (mul_ne_zero hu1 hv2) ht3
     field_simp
     ring
-  · apply hypR4_expSet_congr (mul_ne_zero hu1 hv2) hs3
+  · apply expSolutionSet_congr (mul_ne_zero hu1 hv2) hs3
     field_simp
     ring
 

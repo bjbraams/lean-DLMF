@@ -10,10 +10,35 @@ public import DLMF.Legendre.Toroidal
 /-!
 # Conical functions, Mehler–Fock transforms and special identities
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+The conical functions `𝖯^{-μ}_{-1/2+iτ}(x)` and Dunster's companion `𝖰̂^{-μ}_{-1/2+iτ}(x)`:
+their differential equation, connection formulas, Wronskians, behaviour at the singularities,
+Mehler's integral, power series, positivity and the generalized Mehler–Fock transform
+(DLMF 14.20.1–14.20.14).
+
+## Main definitions
+
+* `conicalP`: the conical Ferrers function `𝖯^{-μ}_{-1/2+iτ}(x)` for real `τ, μ, x`.
+* `conicalQHat`: Dunster's conical companion `𝖰̂^{-μ}_{-1/2+iτ}(x)` (DLMF 14.20.2).
+* `mehlerFockTransform`, `mehlerFockInverse`: the generalized Mehler–Fock transform and its
+  inverse (DLMF 14.20.11–14.20.12).
+
+## Main results
+
+* `conical_ode`: the conical differential equation DLMF 14.20.1.
+* `conicalQHat_connection`: DLMF 14.20.3.
+* `conical_wronskian`, `conicalQHat_wronskian`: the Wronskians DLMF 14.20.4–14.20.5.
+* `conical_associated_connection`: DLMF 14.20.6 for `x > 1`.
+* `conical_singular_7`, `conical_singular_8`: the behaviour at `x = 1`, DLMF 14.20.7–14.20.8.
+* `conical_mehler_integral`: Mehler's integral DLMF 14.20.9.
+* `conical_power_series`: the power series DLMF 14.20.10.
+* `conical_positive`: positivity (DLMF §14.20(v)).
+* `conical_stieltjes_integral`, `conical_product_transform`: DLMF 14.20.13–14.20.14.
+
+## Implementation notes
+
+Several statements hold on wider parameter ranges than DLMF's `τ, μ ≥ 0` (for example
+`conical_wronskian` for all real `τ, μ`). The singular endpoint `θ = π` is excluded from the
+convergence assertion of DLMF 14.20.10.
 -/
 
 @[expose] public noncomputable section
@@ -61,11 +86,11 @@ theorem conicalP_differentiableAt (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:�
     ).differentiableAt.congr_of_eventuallyEq
     ((ferrersP_eqOn_even_odd _ _).eventuallyEq_of_mem (isOpen_Ioo.mem_nhds hx))
 
-/-- DLMF 14.20.3: for `τ, μ ≥ 0` (excluding `τ = 0` with `μ` a positive half-odd integer) and `-1 <
+/-- DLMF 14.20.3: for real `τ` and `μ ≥ 0` (DLMF: `τ ≥ 0`; excluding `τ = 0` with `μ` a positive half-odd integer) and `-1 <
 x < 1`, `𝖰̂^{-μ}_{-1/2+iτ}(x) = (π e^{-τπ} sin(μπ) sinh(τπ) 𝖯^{-μ}_{-1/2+iτ}(x) + π (e^{-τπ}
 cos²(μπ) + sinh(τπ)) 𝖯^{-μ}_{-1/2+iτ}(-x))/(2(cosh²(τπ) - sin²(μπ)))`. -/
 @[dlmf 14.20.E3]
-theorem conicalQHat_connection {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem conicalQHat_connection {τ μ : ℝ} (hμ : 0 ≤ μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     conicalQHat τ μ x=π*Real.exp (-τ*π)*Real.sin (μ*π)*Real.sinh (τ*π)/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))*conicalP τ μ x+π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))*conicalP τ μ (-x) := by
   have hxm : -x ∈ Ioo (-1:ℝ) 1 := ⟨by linarith [hx.2], by linarith [hx.1]⟩
   set ν : ℂ := -1/2+I*τ with hν
@@ -157,10 +182,10 @@ theorem conicalQHat_connection {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) (
   push_cast at h3 ⊢
   linear_combination h3
 
-/-- DLMF 14.20.4: for `τ, μ ≥ 0` and `-1 < x < 1`, `𝒲{𝖯^{-μ}_{-1/2+iτ}(x), 𝖯^{-μ}_{-1/2+iτ}(-x)} =
+/-- DLMF 14.20.4: for real `τ, μ` (DLMF: `τ, μ ≥ 0`) and `-1 < x < 1`, `𝒲{𝖯^{-μ}_{-1/2+iτ}(x), 𝖯^{-μ}_{-1/2+iτ}(-x)} =
 2/(|Γ(μ+1/2+iτ)|² (1-x²))`. -/
 @[dlmf 14.20.E4]
-theorem conical_wronskian (τ μ : ℝ) (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem conical_wronskian (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ODE.wronskian (conicalP τ μ) (fun x => conicalP τ μ (-x)) x=2/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*(1-x^2)) := by
   show ODE.wronskian (fun x => ferrersP (-1/2+I*τ) (-(μ:ℂ)) x)
     (fun x => ferrersP (-1/2+I*τ) (-(μ:ℂ)) (-x)) x = _
@@ -171,22 +196,22 @@ theorem conical_wronskian (τ μ : ℝ) (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) {x : �
     normSq_eq_norm_sq]
   push_cast; ring
 
-/-- DLMF 14.20.5: for `τ, μ ≥ 0` (excluding `τ = 0` with `μ` a positive half-odd integer) and `-1 <
+/-- DLMF 14.20.5: for real `τ` and `μ ≥ 0` (DLMF: `τ ≥ 0`; excluding `τ = 0` with `μ` a positive half-odd integer) and `-1 <
 x < 1`, `𝒲{𝖯^{-μ}_{-1/2+iτ}, 𝖰̂^{-μ}_{-1/2+iτ}}(x) = π (e^{-τπ} cos²(μπ) + sinh(τπ))/(|Γ(μ+1/2+iτ)|²
 (cosh²(τπ) - sin²(μπ)) (1-x²))`. -/
 @[dlmf 14.20.E5]
-theorem conicalQHat_wronskian {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem conicalQHat_wronskian {τ μ : ℝ} (hμ : 0 ≤ μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ODE.wronskian (conicalP τ μ) (conicalQHat τ μ) x=π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2)*(1-x^2)) := by
   set A : ℂ := π*Real.exp (-τ*π)*Real.sin (μ*π)*Real.sinh (τ*π)/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))
   set B : ℂ := π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))
   have hev : conicalQHat τ μ =ᶠ[nhds x] fun y => A*conicalP τ μ y+B*conicalP τ μ (-y) := by
     filter_upwards [isOpen_Ioo.mem_nhds hx] with y hy
-    exact conicalQHat_connection hτ hμ hex hy
+    exact conicalQHat_connection hμ hex hy
   have hxm : -x ∈ Ioo (-1:ℝ) 1 := ⟨by linarith [hx.2], by linarith [hx.1]⟩
   have hd1 : DifferentiableAt ℝ (conicalP τ μ) x := conicalP_differentiableAt τ μ hx
   have hd2 : DifferentiableAt ℝ (fun y => conicalP τ μ (-y)) x :=
     (conicalP_differentiableAt τ μ hxm).comp x differentiableAt_id.neg
-  have hW := conical_wronskian τ μ hτ hμ hx
+  have hW := conical_wronskian τ μ hx
   unfold ODE.wronskian at hW ⊢
   have hder : deriv (fun y => A*conicalP τ μ y+B*conicalP τ μ (-y)) x =
       A*deriv (conicalP τ μ) x + B*deriv (fun y => conicalP τ μ (-y)) x :=
@@ -286,8 +311,8 @@ theorem legCon_tendsto_P (ν μ : ℂ) :
   rw [show (1-(x:ℂ)^2) = ((1-x^2:ℝ):ℂ) by push_cast; ring,
     ← mul_cpow_ofReal_nonneg (by nlinarith) (by positivity), ← ofReal_mul,
     show (1-x^2)*((1+x)/(1-x)) = (1+x)^2 by field_simp; ring,
-    legTor_cpow_real (by positivity), show (1:ℂ)+x = ((1+x:ℝ):ℂ) by push_cast; ring,
-    legTor_cpow_real h0, Real.log_pow]
+    Complex.ofReal_cpow_eq_exp (by positivity), show (1:ℂ)+x = ((1+x:ℝ):ℂ) by push_cast; ring,
+    Complex.ofReal_cpow_eq_exp h0, Real.log_pow]
   push_cast; ring_nf
 
 /-- `(1-x²)^{μ/2} 𝖯^{-μ}_ν(-x) → 2^μ Γ(μ)/(Γ(μ-ν)Γ(μ+ν+1))` as `x → 1⁻`, for `Re μ > 0`. -/
@@ -318,7 +343,7 @@ theorem legCon_tendsto_P_neg (ν : ℂ) {μ : ℝ} (hμ : 0 < μ) :
     show (1 + -x) / (1 - -x) = (1-x)/(1+x) by ring, ← mul_assoc]
   congr 1
   rw [show (1-(x:ℂ)^2) = ((1-x^2:ℝ):ℂ) by push_cast; ring, show (1:ℂ)+x = ((1+x:ℝ):ℂ) by push_cast; ring,
-    legTor_cpow_real h0, legTor_cpow_real (by nlinarith), legTor_cpow_real (by positivity), ← exp_add,
+    Complex.ofReal_cpow_eq_exp h0, Complex.ofReal_cpow_eq_exp (by nlinarith), Complex.ofReal_cpow_eq_exp (by positivity), ← exp_add,
     show 1-x^2 = (1-x)*(1+x) by ring, Real.log_mul h2.ne' h0.ne', Real.log_div h2.ne' h0.ne']
   congr 1; push_cast; ring
 
@@ -415,15 +440,15 @@ theorem conical_singular_8 {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 < μ) (hex : 
     have h0 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
     simp only [conicalP, ← hνdef]
     rw [← mul_assoc]; congr 1
-    rw [show (1-(x:ℂ)^2) = ((1-x^2:ℝ):ℂ) by push_cast; ring, legTor_cpow_real h0,
-      legTor_cpow_real h0, ofReal_cpow h0.le, legTor_cpow_real h0, ← exp_add]
+    rw [show (1-(x:ℂ)^2) = ((1-x^2:ℝ):ℂ) by push_cast; ring, Complex.ofReal_cpow_eq_exp h0,
+      Complex.ofReal_cpow_eq_exp h0, ofReal_cpow h0.le, Complex.ofReal_cpow_eq_exp h0, ← exp_add]
     congr 1; ring
   have h2 := legCon_tendsto_P_neg ν hμ
   have hsum : Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^((μ:ℂ)/2) * conicalQHat τ (1*μ) x) (𝓝[<] 1)
       (𝓝 (A*0 + B*((2:ℂ)^(μ:ℂ) * (Gamma (μ:ℂ) * ((Gamma ((μ:ℂ)-ν))⁻¹ * (Gamma ((μ:ℂ)+ν+1))⁻¹))))) := by
     refine ((h1.const_mul A).add (h2.const_mul B)).congr' ?_
     filter_upwards [Ioo_mem_nhdsLT (show (-1:ℝ) < 1 by norm_num)] with x hx
-    rw [one_mul, conicalQHat_connection hτ hμ.le hex hx]
+    rw [one_mul, conicalQHat_connection hμ.le hex hx]
     simp only [conicalP, ← hνdef, A, B]
     ring
   simp only [mul_zero, zero_add] at hsum

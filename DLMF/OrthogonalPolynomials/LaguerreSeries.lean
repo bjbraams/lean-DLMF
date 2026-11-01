@@ -10,13 +10,29 @@ public import DLMF.OrthogonalPolynomials.Differential
 /-!
 # The formal Laguerre generating series
 
-`laguerreSeries α x = ∑ L_n^{(α)}(x) tⁿ` (with `laguerreExtended`) is the unique formal
+`laguerreSeries α x = ∑ L_n^{(α)}(x) tⁿ` (built from `laguerreExtended`) is the unique formal
 solution with constant term one of the generating-function equation
 `(1 - t)² f' = ((α + 1)(1 - t) - x) f` (`LaguerreODE`). The equation is equivalent to the
 three-term recurrence. Products of solutions solve the equation with parameters
 `α + β + 1` and `x + y`, which gives the Laguerre addition theorem for `Re α, Re β > -1`.
 Both sides of that theorem are entire in `α` and `β`, so the identity theorem removes the
-restriction.
+restriction (`laguerrePolyL_addition` in `DLMF.OrthogonalPolynomials.Series.ClassicalGenerating`).
+
+## Main definitions
+
+* `laguerreSeries`: the formal Laguerre generating series.
+* `LaguerreODE`: the generating-function differential equation.
+
+## Main results
+
+* `coeff_add_two_of_laguerreODE`, `laguerreODE_of_coeff`: equivalence of the equation with the
+  three-term recurrence.
+* `eq_of_laguerreODE`: a solution is determined by its constant coefficient.
+* `laguerreODE_mul`: products of solutions are solutions with added parameters.
+* `laguerreODE_laguerreSeries`: the Laguerre series solves the equation for `Re α > -1`.
+* `laguerrePolyL_addition_of_re`: the Laguerre addition theorem for `Re α, Re β > -1`.
+* `differentiable_laguerreExtended`, `eq_of_differentiable_of_re_gt`: the ingredients of the
+  continuation in the parameters.
 -/
 
 @[expose] public section

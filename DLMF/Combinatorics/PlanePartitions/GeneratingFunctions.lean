@@ -8,13 +8,33 @@ module
 public import DLMF.Combinatorics.PlanePartitions.BoxFormula
 
 /-!
-# Plane partition recurrences and generating functions
+# Generating functions for plane partitions (DLMF §26.12(iii)–(iv))
 
-The plane partition recurrence and MacMahon infinite generating function, with convergence
-stated explicitly.
+MacMahon's generating functions, the recurrence and the asymptotic form of `pp(n)`.
 
-Source references and common attribution are retained in
-`DLMF.Combinatorics.PlanePartitions`.
+## Main results
+
+* `hasSum_planePartitionCount`: `∑ pp(n) qⁿ = ∏_{k ≥ 1} (1 - q^k)^{-k}` for `|q| < 1`
+  (DLMF 26.12.20).
+* `sum_planePartitionsIn_pow`: the `q`-analogue of the box formula (DLMF 26.12.21).
+* `sum_symmetric_planePartitionsIn_pow`, `sum_cyclicallySymmetric_planePartitionsIn_pow`:
+  DLMF 26.12.22, 26.12.23.
+* `sum_descendingPPIn_pow`: descending plane partitions (DLMF 26.12.24, corrected).
+* `planePartitionCount_recurrence`: `n pp(n) = ∑_{j=1}^n pp(n-j) σ₂(j)` (DLMF 26.12.25).
+* `planePartitionCount_isEquivalent`: the asymptotic form of `pp(n)` (DLMF 26.12.26).
+
+## Implementation notes
+
+* (26.12.24): the product must run over `1 ≤ h ≤ j ≤ r`, not `1 ≤ h < j ≤ r`. As printed, for
+  `r = 2` the right side is `(1 - q⁴)/(1 - q³)`, not a polynomial, whereas the descending plane
+  partitions with parts at most 2 are `∅` and `(2)`, with generating function `1 + q²`; at
+  `q = 1` the printed product does not reproduce (26.12.19). The corrected product matches for
+  `r ≤ 5`.
+* 26.12.27 (decimal values of `ζ(3)`, `ζ'(-1)`) is numerical and out of scope.
+
+## References
+
+* NIST DLMF §26.12.
 -/
 
 @[expose] public section
@@ -36,18 +56,18 @@ section Recurrence
 open Polynomial
 
 /-- Truncation ideal `(X^(N+1))` of `ℤ[X]`. -/
-abbrev s26b_I (N : ℕ) : Ideal ℤ[X] := Ideal.span {(X : ℤ[X]) ^ (N + 1)}
+abbrev truncIdeal (N : ℕ) : Ideal ℤ[X] := Ideal.span {(X : ℤ[X]) ^ (N + 1)}
 
 /-- The quotient map modulo `X^(N+1)`. -/
-abbrev s26b_mk (N : ℕ) : ℤ[X] →+* ℤ[X] ⧸ s26b_I N := Ideal.Quotient.mk (s26b_I N)
+abbrev truncMk (N : ℕ) : ℤ[X] →+* ℤ[X] ⧸ truncIdeal N := Ideal.Quotient.mk (truncIdeal N)
 
 /-- `X^e` vanishes modulo `X^(N+1)` for `e ≥ N + 1`. -/
-lemma s26b_mk_X_pow {N e : ℕ} (he : N + 1 ≤ e) : s26b_mk N ((X : ℤ[X]) ^ e) = 0 := by
+private lemma truncMk_X_pow {N e : ℕ} (he : N + 1 ≤ e) : truncMk N ((X : ℤ[X]) ^ e) = 0 := by
   rw [Ideal.Quotient.eq_zero_iff_mem, Ideal.mem_span_singleton]
   exact pow_dvd_pow _ he
 
 /-- Congruent polynomials modulo `X^(N+1)` share their coefficients up to `N`. -/
-lemma s26b_coeff_eq_of_mk_eq {N : ℕ} {A B : ℤ[X]} (h : s26b_mk N A = s26b_mk N B) {n : ℕ}
+private lemma coeff_eq_of_truncMk_eq {N : ℕ} {A B : ℤ[X]} (h : truncMk N A = truncMk N B) {n : ℕ}
     (hn : n ≤ N) : A.coeff n = B.coeff n := by
   rw [Ideal.Quotient.eq, Ideal.mem_span_singleton] at h
   obtain ⟨C, hC⟩ := h
@@ -58,37 +78,37 @@ lemma s26b_coeff_eq_of_mk_eq {N : ℕ} {A B : ℤ[X]} (h : s26b_mk N A = s26b_mk
   · omega
 
 /-- The Euler operator `θ = X d/dX`. -/
-def s26b_θ (A : ℤ[X]) : ℤ[X] := X * derivative A
+def eulerOperator (A : ℤ[X]) : ℤ[X] := X * derivative A
 
 /-- `θ` is a derivation. -/
-lemma s26b_θ_mul (A B : ℤ[X]) : s26b_θ (A * B) = s26b_θ A * B + A * s26b_θ B := by
-  simp only [s26b_θ, derivative_mul]; ring
+private lemma eulerOperator_mul (A B : ℤ[X]) : eulerOperator (A * B) = eulerOperator A * B + A * eulerOperator B := by
+  simp only [eulerOperator, derivative_mul]; ring
 
 /-- `θ` preserves congruence modulo `X^(N+1)`. -/
-lemma s26b_mk_θ {N : ℕ} {A B : ℤ[X]} (h : s26b_mk N A = s26b_mk N B) :
-    s26b_mk N (s26b_θ A) = s26b_mk N (s26b_θ B) := by
+private lemma truncMk_eulerOperator_eq {N : ℕ} {A B : ℤ[X]} (h : truncMk N A = truncMk N B) :
+    truncMk N (eulerOperator A) = truncMk N (eulerOperator B) := by
   rw [Ideal.Quotient.eq, Ideal.mem_span_singleton] at h ⊢
   obtain ⟨C, hC⟩ := h
   refine ⟨(N + 1 : ℤ[X]) * C + X * derivative C, ?_⟩
-  rw [s26b_θ, s26b_θ, ← mul_sub, ← derivative_sub, hC, derivative_mul, derivative_X_pow]
+  rw [eulerOperator, eulerOperator, ← mul_sub, ← derivative_sub, hC, derivative_mul, derivative_X_pow]
   simp only [Nat.cast_add, Nat.cast_one, Nat.add_sub_cancel, map_add, map_one, map_natCast]
   ring
 
 /-- Logarithmic derivative of a product modulo `X^(N+1)`. -/
-lemma s26b_mk_θ_prod {N : ℕ} {ι : Type*} (s : Finset ι) (g c : ι → ℤ[X])
-    (h : ∀ i ∈ s, s26b_mk N (s26b_θ (g i)) = s26b_mk N (g i * c i)) :
-    s26b_mk N (s26b_θ (∏ i ∈ s, g i)) = s26b_mk N ((∏ i ∈ s, g i) * ∑ i ∈ s, c i) := by
+private lemma truncMk_eulerOperator_prod {N : ℕ} {ι : Type*} (s : Finset ι) (g c : ι → ℤ[X])
+    (h : ∀ i ∈ s, truncMk N (eulerOperator (g i)) = truncMk N (g i * c i)) :
+    truncMk N (eulerOperator (∏ i ∈ s, g i)) = truncMk N ((∏ i ∈ s, g i) * ∑ i ∈ s, c i) := by
   classical
   induction s using Finset.induction_on with
-  | empty => simp [s26b_θ]
+  | empty => simp [eulerOperator]
   | insert a s ha ih =>
-    rw [prod_insert ha, sum_insert ha, s26b_θ_mul, map_add, map_mul, map_mul,
+    rw [prod_insert ha, sum_insert ha, eulerOperator_mul, map_add, map_mul, map_mul,
       h a (mem_insert_self a s), ih fun i hi => h i (mem_insert_of_mem hi)]
     simp only [map_mul, map_add]
     ring
 
 /-- A plane partition lies in the cube of side `|π|`. -/
-lemma s26b_subset_planeBox_card {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) :
+private lemma subset_planeBox_card_of_isPlanePartition {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) :
     π ⊆ planeBox #π #π #π := by
   rintro ⟨h, j, k⟩ hx
   obtain ⟨h1, j1, k1, -⟩ := hπ _ hx
@@ -96,17 +116,17 @@ lemma s26b_subset_planeBox_card {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlane
     intro y hy
     obtain ⟨i, hi, rfl⟩ := mem_image.mp hy
     rw [mem_Icc] at hi
-    exact s26b_down hπ hx hi.1 hi.2 le_rfl j1 le_rfl k1
+    exact mem_of_isPlanePartition_of_le hπ hx hi.1 hi.2 le_rfl j1 le_rfl k1
   have c2 : (Icc 1 j).image (fun i => (1, i, 1)) ⊆ π := by
     intro y hy
     obtain ⟨i, hi, rfl⟩ := mem_image.mp hy
     rw [mem_Icc] at hi
-    exact s26b_down hπ hx le_rfl h1 hi.1 hi.2 le_rfl k1
+    exact mem_of_isPlanePartition_of_le hπ hx le_rfl h1 hi.1 hi.2 le_rfl k1
   have c3 : (Icc 1 k).image (fun i => (1, 1, i)) ⊆ π := by
     intro y hy
     obtain ⟨i, hi, rfl⟩ := mem_image.mp hy
     rw [mem_Icc] at hi
-    exact s26b_down hπ hx le_rfl h1 le_rfl j1 hi.1 hi.2
+    exact mem_of_isPlanePartition_of_le hπ hx le_rfl h1 le_rfl j1 hi.1 hi.2
   have e1 := card_le_card c1
   have e2 := card_le_card c2
   have e3 := card_le_card c3
@@ -114,31 +134,31 @@ lemma s26b_subset_planeBox_card {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlane
   rw [card_image_of_injective _ (fun a b hab => (Prod.mk.inj (Prod.mk.inj hab).2).1)] at e2
   rw [card_image_of_injective _ (fun a b hab => (Prod.mk.inj (Prod.mk.inj hab).2).2)] at e3
   simp only [Nat.card_Icc, Nat.add_sub_cancel] at e1 e2 e3
-  exact s26b_mem_planeBox.mpr ⟨h1, e1, j1, e2, k1, e3⟩
+  exact mem_planeBox.mpr ⟨h1, e1, j1, e2, k1, e3⟩
 
 /-- The box generating polynomial has `pp(n)` as its coefficients up to the side length. -/
-lemma s26b_coeff_boxPoly {N n : ℕ} (hn : n ≤ N) :
+private lemma coeff_sum_planePartitionsIn_X_pow {N n : ℕ} (hn : n ≤ N) :
     (∑ π ∈ planePartitionsIn N N N, (X : ℤ[X]) ^ #π).coeff n = planePartitionCount n := by
   simp only [finsetSum_coeff, coeff_X_pow]
   rw [sum_boole, planePartitionCount]
   congr 2
   ext π
-  simp only [mem_filter, s26b_mem_planePartitionsIn, mem_powerset]
+  simp only [mem_filter, mem_planePartitionsIn, mem_powerset]
   constructor
   · rintro ⟨⟨_, hπ⟩, rfl⟩
-    exact ⟨s26b_subset_planeBox_card hπ, hπ, rfl⟩
+    exact ⟨subset_planeBox_card_of_isPlanePartition hπ, hπ, rfl⟩
   · rintro ⟨hsub, hπ, rfl⟩
     refine ⟨⟨hsub.trans fun x hx => ?_, hπ⟩, rfl⟩
     rw [planeBox, mem_product, mem_product, mem_Icc, mem_Icc, mem_Icc] at hx ⊢
     omega
 
 /-- Regrouping the box denominator modulo `X^(N+1)`. -/
-lemma s26b_mk_denom (N : ℕ) :
-    s26b_mk N (∏ h ∈ Icc 1 N, ∏ k ∈ Icc 1 N, (1 - (X : ℤ[X]) ^ (h + k - 1))) =
-      s26b_mk N (∏ m ∈ Icc 1 N, (1 - (X : ℤ[X]) ^ m) ^ m) := by
-  set f : ℕ → ℤ[X] ⧸ s26b_I N := fun m => s26b_mk N (1 - X ^ m) with hf
+private lemma truncMk_prod_box_denominator (N : ℕ) :
+    truncMk N (∏ h ∈ Icc 1 N, ∏ k ∈ Icc 1 N, (1 - (X : ℤ[X]) ^ (h + k - 1))) =
+      truncMk N (∏ m ∈ Icc 1 N, (1 - (X : ℤ[X]) ^ m) ^ m) := by
+  set f : ℕ → ℤ[X] ⧸ truncIdeal N := fun m => truncMk N (1 - X ^ m) with hf
   have hf1 : ∀ m, N + 1 ≤ m → f m = 1 := fun m hm => by
-    simp only [hf, map_sub, map_one, s26b_mk_X_pow hm, sub_zero]
+    simp only [hf, map_sub, map_one, truncMk_X_pow hm, sub_zero]
   simp only [map_prod, map_pow]
   change ∏ h ∈ Icc 1 N, ∏ k ∈ Icc 1 N, f (h + k - 1) = ∏ m ∈ Icc 1 N, f m ^ m
   have hin : ∀ h ∈ Icc 1 N, ∏ k ∈ Icc 1 N, f (h + k - 1) = ∏ m ∈ Icc h N, f m := by
@@ -163,39 +183,39 @@ lemma s26b_mk_denom (N : ℕ) :
     omega
 
 /-- The truncated divisor series `T_m = ∑_{l=1}^{N} X^{ml}`. -/
-def s26b_T (N m : ℕ) : ℤ[X] := ∑ l ∈ range N, X ^ (m * (l + 1))
+def truncDivisorSeries (N m : ℕ) : ℤ[X] := ∑ l ∈ range N, X ^ (m * (l + 1))
 
 /-- `θ (1 - X^m)^m ≡ -(1 - X^m)^m m² T_m` modulo `X^(N+1)`. -/
-lemma s26b_mk_θ_factor {N m : ℕ} (hm : 1 ≤ m) :
-    s26b_mk N (s26b_θ ((1 - (X : ℤ[X]) ^ m) ^ m)) =
-      s26b_mk N ((1 - (X : ℤ[X]) ^ m) ^ m * (-(C ((m : ℤ) ^ 2)) * s26b_T N m)) := by
-  have htel : (1 - (X : ℤ[X]) ^ m) * s26b_T N m = X ^ m - X ^ (m * (N + 1)) := by
-    rw [s26b_T, mul_sum]
+private lemma truncMk_eulerOperator_one_sub_X_pow_pow {N m : ℕ} (hm : 1 ≤ m) :
+    truncMk N (eulerOperator ((1 - (X : ℤ[X]) ^ m) ^ m)) =
+      truncMk N ((1 - (X : ℤ[X]) ^ m) ^ m * (-(C ((m : ℤ) ^ 2)) * truncDivisorSeries N m)) := by
+  have htel : (1 - (X : ℤ[X]) ^ m) * truncDivisorSeries N m = X ^ m - X ^ (m * (N + 1)) := by
+    rw [truncDivisorSeries, mul_sum]
     have := sum_range_sub (fun l => -(X : ℤ[X]) ^ (m * (l + 1))) N
     simp only [neg_sub_neg] at this
     rw [show ∑ l ∈ range N, (1 - (X : ℤ[X]) ^ m) * X ^ (m * (l + 1)) =
         ∑ l ∈ range N, ((X : ℤ[X]) ^ (m * (l + 1)) - X ^ (m * (l + 1 + 1))) from
       sum_congr rfl fun l _ => by ring, this]
     ring
-  have hz : s26b_mk N ((X : ℤ[X]) ^ (m * (N + 1))) = 0 :=
-    s26b_mk_X_pow (by nlinarith)
-  have hθ : s26b_θ ((1 - (X : ℤ[X]) ^ m) ^ m) =
+  have hz : truncMk N ((X : ℤ[X]) ^ (m * (N + 1))) = 0 :=
+    truncMk_X_pow (by nlinarith)
+  have hθ : eulerOperator ((1 - (X : ℤ[X]) ^ m) ^ m) =
       -(C ((m : ℤ) ^ 2)) * (1 - X ^ m) ^ (m - 1) * X ^ m := by
-    rw [s26b_θ, derivative_pow, derivative_sub, derivative_one, derivative_X_pow]
+    rw [eulerOperator, derivative_pow, derivative_sub, derivative_one, derivative_X_pow]
     obtain ⟨m', rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
     simp only [Nat.add_sub_cancel, map_pow, map_natCast]
     ring
   rw [hθ]
   obtain ⟨m', rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
   rw [show (1 - (X : ℤ[X]) ^ (m' + 1)) ^ (m' + 1) * (-(C (((m' + 1 : ℕ) : ℤ) ^ 2)) *
-      s26b_T N (m' + 1)) = -(C (((m' + 1 : ℕ) : ℤ) ^ 2)) * (1 - X ^ (m' + 1)) ^ m' *
-      ((1 - X ^ (m' + 1)) * s26b_T N (m' + 1)) by ring, htel]
+      truncDivisorSeries N (m' + 1)) = -(C (((m' + 1 : ℕ) : ℤ) ^ 2)) * (1 - X ^ (m' + 1)) ^ m' *
+      ((1 - X ^ (m' + 1)) * truncDivisorSeries N (m' + 1)) by ring, htel]
   simp only [Nat.add_sub_cancel, map_mul, map_sub, hz, sub_zero]
 
 /-- Coefficients of `∑_{m ≤ N} m² T_m` are `σ₂`. -/
-lemma s26b_coeff_S {N j : ℕ} (hj : 1 ≤ j) (hjN : j ≤ N) :
-    (∑ m ∈ Icc 1 N, C ((m : ℤ) ^ 2) * s26b_T N m).coeff j = ArithmeticFunction.sigma 2 j := by
-  simp only [finsetSum_coeff, coeff_C_mul, s26b_T, coeff_X_pow]
+private lemma coeff_sum_sq_mul_truncDivisorSeries {N j : ℕ} (hj : 1 ≤ j) (hjN : j ≤ N) :
+    (∑ m ∈ Icc 1 N, C ((m : ℤ) ^ 2) * truncDivisorSeries N m).coeff j = ArithmeticFunction.sigma 2 j := by
+  simp only [finsetSum_coeff, coeff_C_mul, truncDivisorSeries, coeff_X_pow]
   rw [ArithmeticFunction.sigma_apply, Nat.cast_sum]
   have : ∀ m ∈ Icc 1 N, ((m : ℤ) ^ 2 * ∑ l ∈ range N, if j = m * (l + 1) then (1 : ℤ) else 0) =
       if m ∣ j then (m : ℤ) ^ 2 else 0 := by
@@ -236,48 +256,48 @@ lemma s26b_coeff_S {N j : ℕ} (hj : 1 ≤ j) (hjN : j ≤ N) :
     omega
 
 /-- The recurrence (26.12.25) (helper used before its statement). -/
-lemma s26b_pp_recurrence (n : ℕ) :
+private lemma mul_planePartitionCount_eq_sum_sigma (n : ℕ) :
     n * planePartitionCount n =
       ∑ j ∈ Icc 1 n, planePartitionCount (n - j) * ArithmeticFunction.sigma 2 j := by
   set G : ℤ[X] := ∑ π ∈ planePartitionsIn n n n, (X : ℤ[X]) ^ #π with hG
   set E : ℤ[X] := ∏ m ∈ Icc 1 n, (1 - (X : ℤ[X]) ^ m) ^ m with hE
-  set S : ℤ[X] := ∑ m ∈ Icc 1 n, C ((m : ℤ) ^ 2) * s26b_T n m with hS
+  set S : ℤ[X] := ∑ m ∈ Icc 1 n, C ((m : ℤ) ^ 2) * truncDivisorSeries n m with hS
   -- `G E ≡ 1`
-  have hGE : s26b_mk n (G * E) = s26b_mk n 1 := by
-    have hb := congrArg (s26b_mk n) (s26b_box_poly n n n)
-    rw [map_mul, s26b_mk_denom, ← map_mul] at hb
+  have hGE : truncMk n (G * E) = truncMk n 1 := by
+    have hb := congrArg (truncMk n) (sum_planePartitionsIn_X_pow_mul_prod n n n)
+    rw [map_mul, truncMk_prod_box_denominator, ← map_mul] at hb
     rw [hb, map_prod, map_one]
     refine prod_eq_one fun h hh => ?_
     rw [map_prod]
     refine prod_eq_one fun k hk => ?_
     simp only [mem_Icc] at hh hk
-    rw [map_sub, map_one, s26b_mk_X_pow (by omega), sub_zero]
+    rw [map_sub, map_one, truncMk_X_pow (by omega), sub_zero]
   -- `θ E ≡ -E S`
-  have hθE : s26b_mk n (s26b_θ E) = s26b_mk n (E * -S) := by
-    rw [hE, s26b_mk_θ_prod _ _ (fun m : ℕ => -(C ((m : ℤ) ^ 2)) * s26b_T n m)
-      (fun m hm => s26b_mk_θ_factor (mem_Icc.mp hm).1), hS, ← sum_neg_distrib]
+  have hθE : truncMk n (eulerOperator E) = truncMk n (E * -S) := by
+    rw [hE, truncMk_eulerOperator_prod _ _ (fun m : ℕ => -(C ((m : ℤ) ^ 2)) * truncDivisorSeries n m)
+      (fun m hm => truncMk_eulerOperator_one_sub_X_pow_pow (mem_Icc.mp hm).1), hS, ← sum_neg_distrib]
     simp only [neg_mul]
-  have hθ1 : s26b_mk n (s26b_θ (G * E)) = 0 := by
-    rw [s26b_mk_θ hGE]; simp [s26b_θ]
-  rw [s26b_θ_mul, map_add, map_mul, map_mul, hθE, map_mul, map_neg] at hθ1
+  have hθ1 : truncMk n (eulerOperator (G * E)) = 0 := by
+    rw [truncMk_eulerOperator_eq hGE]; simp [eulerOperator]
+  rw [eulerOperator_mul, map_add, map_mul, map_mul, hθE, map_mul, map_neg] at hθ1
   rw [map_mul, map_one] at hGE
-  have key : s26b_mk n (s26b_θ G) = s26b_mk n (G * S) := by
+  have key : truncMk n (eulerOperator G) = truncMk n (G * S) := by
     rw [map_mul]
-    linear_combination (s26b_mk n G) * hθ1 +
-      (s26b_mk n G * s26b_mk n S - s26b_mk n (s26b_θ G)) * hGE
-  have hc := s26b_coeff_eq_of_mk_eq key (le_refl n)
+    linear_combination (truncMk n G) * hθ1 +
+      (truncMk n G * truncMk n S - truncMk n (eulerOperator G)) * hGE
+  have hc := coeff_eq_of_truncMk_eq key (le_refl n)
   -- read off coefficient `n`
-  have hl : (s26b_θ G).coeff n = n * planePartitionCount n := by
+  have hl : (eulerOperator G).coeff n = n * planePartitionCount n := by
     rcases n with _ | m
-    · simp [s26b_θ]
-    · rw [s26b_θ, coeff_X_mul, coeff_derivative, s26b_coeff_boxPoly le_rfl]
+    · simp [eulerOperator]
+    · rw [eulerOperator, coeff_X_mul, coeff_derivative, coeff_sum_planePartitionsIn_X_pow le_rfl]
       push_cast; ring
   have hr : (G * S).coeff n =
       ∑ j ∈ Icc 1 n, (planePartitionCount (n - j) * ArithmeticFunction.sigma 2 j : ℤ) := by
     have hS0 : S.coeff 0 = 0 := by
       rw [hS, finsetSum_coeff]
       refine sum_eq_zero fun m hm => ?_
-      rw [coeff_C_mul, s26b_T, finsetSum_coeff, sum_eq_zero, mul_zero]
+      rw [coeff_C_mul, truncDivisorSeries, finsetSum_coeff, sum_eq_zero, mul_zero]
       intro l _
       simp only [mem_Icc] at hm
       have := Nat.mul_pos (by omega : 0 < m) (by omega : 0 < l + 1)
@@ -291,7 +311,7 @@ lemma s26b_pp_recurrence (n : ℕ) :
       show Ico (0 + 1) (n + 1) = Icc 1 n by ext; simp]
     refine sum_congr rfl fun j hj => ?_
     rw [mem_Icc] at hj
-    rw [s26b_coeff_S hj.1 hj.2, s26b_coeff_boxPoly (by omega)]
+    rw [coeff_sum_sq_mul_truncDivisorSeries hj.1 hj.2, coeff_sum_planePartitionsIn_X_pow (by omega)]
     ring
   have := hl.symm.trans (hc.trans hr)
   exact_mod_cast this
@@ -309,7 +329,7 @@ section GenFun
 open Filter Topology
 
 /-- `σ₂(j) ≤ j³`. -/
-lemma s26b_sigma_two_le (j : ℕ) : ArithmeticFunction.sigma 2 j ≤ j ^ 3 := by
+private lemma sigma_two_le_pow_three (j : ℕ) : ArithmeticFunction.sigma 2 j ≤ j ^ 3 := by
   rw [ArithmeticFunction.sigma_apply]
   calc ∑ d ∈ j.divisors, d ^ 2 ≤ ∑ _d ∈ j.divisors, j ^ 2 :=
         sum_le_sum fun d hd => Nat.pow_le_pow_left (Nat.divisor_le hd) 2
@@ -318,7 +338,7 @@ lemma s26b_sigma_two_le (j : ℕ) : ArithmeticFunction.sigma 2 j ≤ j ^ 3 := by
     _ = j ^ 3 := by ring
 
 /-- `pp(n) ρⁿ` is bounded for `0 < ρ < 1` (from the recurrence (26.12.25)). -/
-lemma s26b_pp_bound {ρ : ℝ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
+private lemma exists_planePartitionCount_mul_pow_le {ρ : ℝ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
     ∃ B : ℝ, 0 ≤ B ∧ ∀ n, (planePartitionCount n : ℝ) * ρ ^ n ≤ B := by
   have hsum : Summable fun j : ℕ => ((j : ℝ) ^ 3 * ρ ^ j) :=
     summable_pow_mul_geometric_of_norm_lt_one 3
@@ -328,7 +348,7 @@ lemma s26b_pp_bound {ρ : ℝ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
     intro n
     calc ∑ j ∈ Icc 1 n, (ArithmeticFunction.sigma 2 j : ℝ) * ρ ^ j
         ≤ ∑ j ∈ Icc 1 n, ((j : ℝ) ^ 3 * ρ ^ j) := sum_le_sum fun j _ =>
-          mul_le_mul_of_nonneg_right (by exact_mod_cast s26b_sigma_two_le j) (by positivity)
+          mul_le_mul_of_nonneg_right (by exact_mod_cast sigma_two_le_pow_three j) (by positivity)
       _ ≤ K := hsum.sum_le_tsum _ fun j _ => by positivity
   set K0 := ⌈K⌉₊
   set B := ∑ n ∈ range (K0 + 1), (planePartitionCount n : ℝ) * ρ ^ n
@@ -340,7 +360,7 @@ lemma s26b_pp_bound {ρ : ℝ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
     · exact single_le_sum (f := fun n => (planePartitionCount n : ℝ) * ρ ^ n)
         (fun n _ => by positivity) (mem_range.mpr (by omega))
     · push Not at hn
-      have hrec := s26b_pp_recurrence n
+      have hrec := mul_planePartitionCount_eq_sum_sigma n
       have hrecR : (n : ℝ) * ((planePartitionCount n : ℝ) * ρ ^ n) =
           ∑ j ∈ Icc 1 n, ((planePartitionCount (n - j) : ℝ) * ρ ^ (n - j)) *
             ((ArithmeticFunction.sigma 2 j : ℝ) * ρ ^ j) := by
@@ -374,11 +394,11 @@ lemma s26b_pp_bound {ρ : ℝ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
       nlinarith
 
 /-- Summability of `pp(n) qⁿ` for `|q| < 1`. -/
-lemma s26b_summable_pp {q : ℂ} (hq : ‖q‖ < 1) :
+private lemma summable_norm_planePartitionCount_mul_pow {q : ℂ} (hq : ‖q‖ < 1) :
     Summable fun n => ‖(planePartitionCount n : ℂ) * q ^ n‖ := by
   obtain ⟨ρ, hqρ, hρ1⟩ := exists_between hq
   have hρ0 : 0 < ρ := lt_of_le_of_lt (norm_nonneg q) hqρ
-  obtain ⟨B, hB0, hB⟩ := s26b_pp_bound hρ0 hρ1
+  obtain ⟨B, hB0, hB⟩ := exists_planePartitionCount_mul_pow_le hρ0 hρ1
   refine Summable.of_nonneg_of_le (fun n => norm_nonneg _) (fun n => ?_)
     ((summable_geometric_of_lt_one (div_nonneg (norm_nonneg q) hρ0.le)
       ((div_lt_one hρ0).mpr hqρ)).mul_left B)
@@ -391,7 +411,7 @@ lemma s26b_summable_pp {q : ℂ} (hq : ‖q‖ < 1) :
     _ ≤ B * ‖q‖ ^ n := mul_le_mul_of_nonneg_right this (by positivity)
 
 /-- `1 - qᵐ ≠ 0` for `|q| < 1`, `m > 0`. -/
-lemma s26b_one_sub_pow_ne_zero {q : ℂ} (hq : ‖q‖ < 1) {m : ℕ} (hm : 0 < m) : 1 - q ^ m ≠ 0 := by
+private lemma one_sub_pow_ne_zero_of_norm_lt_one {q : ℂ} (hq : ‖q‖ < 1) {m : ℕ} (hm : 0 < m) : 1 - q ^ m ≠ 0 := by
   intro h
   have : ‖q ^ m‖ = 1 := by rw [← sub_eq_zero.mp h, norm_one]
   rw [norm_pow] at this
@@ -399,7 +419,7 @@ lemma s26b_one_sub_pow_ne_zero {q : ℂ} (hq : ‖q‖ < 1) {m : ℕ} (hm : 0 < 
   linarith
 
 /-- MacMahon's product `∏ (1 - q^{k+1})^{-(k+1)}` converges, as an exponential of a sum. -/
-lemma s26b_hasProd_macMahon {q : ℂ} (hq : ‖q‖ < 1) :
+private lemma exists_hasProd_macMahon {q : ℂ} (hq : ‖q‖ < 1) :
     ∃ A : ℂ, HasProd (fun k : ℕ => ((1 - q ^ (k + 1)) ^ (k + 1))⁻¹) (Complex.exp A) := by
   set a : ℕ → ℂ := fun k => -(((k + 1 : ℕ) : ℂ) * Complex.log (1 - q ^ (k + 1))) with ha
   have h0 : Summable fun n : ℕ => (n : ℝ) ^ 1 * ‖q‖ ^ n :=
@@ -425,10 +445,10 @@ lemma s26b_hasProd_macMahon {q : ℂ} (hq : ‖q‖ < 1) :
   convert this using 1
   funext k
   simp only [Function.comp, ha, Complex.exp_neg, Complex.exp_nat_mul,
-    Complex.exp_log (s26b_one_sub_pow_ne_zero hq (Nat.succ_pos k))]
+    Complex.exp_log (one_sub_pow_ne_zero_of_norm_lt_one hq (Nat.succ_pos k))]
 
 /-- Products `∏ (1 - wᵢ)` over finite families with `∑ ‖wᵢ‖ → 0` tend to `1`. -/
-lemma s26b_tendsto_prod_one_sub {ι : Type*} (s : ℕ → Finset ι) (w : ℕ → ι → ℂ)
+private lemma tendsto_prod_one_sub {ι : Type*} (s : ℕ → Finset ι) (w : ℕ → ι → ℂ)
     (hw : ∀ᶠ N in atTop, ∀ x ∈ s N, ‖w N x‖ ≤ 1 / 2)
     (hsum : Tendsto (fun N => ∑ x ∈ s N, ‖w N x‖) atTop (𝓝 0)) :
     Tendsto (fun N => ∏ x ∈ s N, (1 - w N x)) atTop (𝓝 1) := by
@@ -456,7 +476,7 @@ lemma s26b_tendsto_prod_one_sub {ι : Type*} (s : ℕ → Finset ι) (w : ℕ �
   linarith
 
 /-- Regrouping `∏_{h,k ≤ N} f(h+k-1) = ∏_{m ≤ N} f(m)^m` when `f = 1` beyond `N`. -/
-lemma s26b_prod_regroup {M : Type*} [CommMonoid M] (N : ℕ) (f : ℕ → M)
+private lemma prod_Icc_Icc_add_sub_one_eq_prod_pow {M : Type*} [CommMonoid M] (N : ℕ) (f : ℕ → M)
     (hf1 : ∀ m, N + 1 ≤ m → f m = 1) :
     ∏ h ∈ Icc 1 N, ∏ k ∈ Icc 1 N, f (h + k - 1) = ∏ m ∈ Icc 1 N, f m ^ m := by
   have hin : ∀ h ∈ Icc 1 N, ∏ k ∈ Icc 1 N, f (h + k - 1) = ∏ m ∈ Icc h N, f m := by
@@ -481,49 +501,49 @@ lemma s26b_prod_regroup {M : Type*} [CommMonoid M] (N : ℕ) (f : ℕ → M)
     omega
 
 /-- The number of plane partitions of `n` in `B(N, N, N)`. -/
-def s26b_c (N n : ℕ) : ℕ := #{π ∈ planePartitionsIn N N N | π.card = n}
+def boxPlanePartitionCount (N n : ℕ) : ℕ := #{π ∈ planePartitionsIn N N N | π.card = n}
 
 /-- `c_N(n) ≤ pp(n)`. -/
-lemma s26b_c_le (N n : ℕ) : s26b_c N n ≤ planePartitionCount n := by
+private lemma boxPlanePartitionCount_le (N n : ℕ) : boxPlanePartitionCount N n ≤ planePartitionCount n := by
   refine card_le_card fun π hπ => ?_
-  simp only [mem_filter, s26b_mem_planePartitionsIn, mem_powerset] at hπ ⊢
+  simp only [mem_filter, mem_planePartitionsIn, mem_powerset] at hπ ⊢
   obtain ⟨⟨_, hπ⟩, rfl⟩ := hπ
-  exact ⟨s26b_subset_planeBox_card hπ, hπ, rfl⟩
+  exact ⟨subset_planeBox_card_of_isPlanePartition hπ, hπ, rfl⟩
 
 /-- `c_N(n) = pp(n)` for `n ≤ N`. -/
-lemma s26b_c_eq {N n : ℕ} (hn : n ≤ N) : s26b_c N n = planePartitionCount n := by
-  have := s26b_coeff_boxPoly (N := N) hn
+private lemma boxPlanePartitionCount_eq_of_le {N n : ℕ} (hn : n ≤ N) : boxPlanePartitionCount N n = planePartitionCount n := by
+  have := coeff_sum_planePartitionsIn_X_pow (N := N) hn
   simp only [Polynomial.finsetSum_coeff, Polynomial.coeff_X_pow, sum_boole] at this
-  rw [s26b_c]
+  rw [boxPlanePartitionCount]
   exact_mod_cast (congrArg (fun F => #F) (filter_congr fun π _ => eq_comm)).trans
     (by exact_mod_cast this)
 
 /-- `∑_{π ⊆ B(N,N,N)} q^{|π|} = ∑ₙ c_N(n) qⁿ`. -/
-lemma s26b_hasSum_c {q : ℂ} (N : ℕ) :
-    HasSum (fun n => (s26b_c N n : ℂ) * q ^ n) (∑ π ∈ planePartitionsIn N N N, q ^ π.card) := by
+private lemma hasSum_boxPlanePartitionCount {q : ℂ} (N : ℕ) :
+    HasSum (fun n => (boxPlanePartitionCount N n : ℂ) * q ^ n) (∑ π ∈ planePartitionsIn N N N, q ^ π.card) := by
   have hmaps : ∀ π ∈ planePartitionsIn N N N, π.card ∈ range (N ^ 3 + 1) := by
     intro π hπ
-    have := card_le_card (s26b_mem_planePartitionsIn.mp hπ).1
+    have := card_le_card (mem_planePartitionsIn.mp hπ).1
     simp only [planeBox, card_product, Nat.card_Icc, Nat.add_sub_cancel] at this
     rw [mem_range]; nlinarith
   rw [← sum_fiberwise_of_maps_to hmaps]
   have : ∀ n ∈ range (N ^ 3 + 1), ∑ π ∈ planePartitionsIn N N N with π.card = n, q ^ π.card =
-      (s26b_c N n : ℂ) * q ^ n := by
+      (boxPlanePartitionCount N n : ℂ) * q ^ n := by
     intro n _
-    rw [sum_congr rfl fun π hπ => by rw [(mem_filter.mp hπ).2], sum_const, nsmul_eq_mul, s26b_c]
+    rw [sum_congr rfl fun π hπ => by rw [(mem_filter.mp hπ).2], sum_const, nsmul_eq_mul, boxPlanePartitionCount]
   rw [sum_congr rfl this]
   refine hasSum_sum_of_ne_finset_zero fun n hn => ?_
-  rw [s26b_c, card_eq_zero.mpr, Nat.cast_zero, zero_mul]
+  rw [boxPlanePartitionCount, card_eq_zero.mpr, Nat.cast_zero, zero_mul]
   refine filter_eq_empty_iff.mpr fun π hπ hc => hn ?_
   rw [← hc]; exact hmaps π hπ
 
 /-- Double products `∏_{h,j ≤ N} (1 - w)` with `‖w‖ ≤ ‖q‖^{N+1}` tend to `1`. -/
-lemma s26b_tendsto_box_prod {q : ℂ} (hq : ‖q‖ < 1) (w : ℕ → ℕ × ℕ → ℂ)
+private lemma tendsto_prod_Icc_Icc_one_sub {q : ℂ} (hq : ‖q‖ < 1) (w : ℕ → ℕ × ℕ → ℂ)
     (hw : ∀ N, ∀ x ∈ Icc 1 N ×ˢ Icc 1 N, ‖w N x‖ ≤ ‖q‖ ^ (N + 1)) :
     Tendsto (fun N => ∏ h ∈ Icc 1 N, ∏ j ∈ Icc 1 N, (1 - w N (h, j))) atTop (𝓝 1) := by
   simp only [← prod_product']
   have hq0 := norm_nonneg q
-  refine s26b_tendsto_prod_one_sub (fun N => Icc 1 N ×ˢ Icc 1 N) w ?_ ?_
+  refine tendsto_prod_one_sub (fun N => Icc 1 N ×ˢ Icc 1 N) w ?_ ?_
   · have := (tendsto_pow_atTop_nhds_zero_of_lt_one hq0 hq).comp (tendsto_add_atTop_nat 1)
     filter_upwards [this.eventually (ge_mem_nhds (by norm_num : (0 : ℝ) < 1 / 2))] with N hN x hx
     exact (hw N x hx).trans hN
@@ -547,14 +567,14 @@ theorem hasSum_planePartitionCount {q : ℂ} (hq : ‖q‖ < 1) :
         (∏' k : ℕ, ((1 - q ^ (k + 1)) ^ (k + 1))⁻¹) ∧
       HasProd (fun k : ℕ => ((1 - q ^ (k + 1)) ^ (k + 1))⁻¹)
         (∏' k : ℕ, ((1 - q ^ (k + 1)) ^ (k + 1))⁻¹) := by
-  obtain ⟨A, hA⟩ := s26b_hasProd_macMahon hq
+  obtain ⟨A, hA⟩ := exists_hasProd_macMahon hq
   rw [hA.tprod_eq]
   refine ⟨?_, hA⟩
   set F := Complex.exp A
   have hF0 : F ≠ 0 := Complex.exp_ne_zero A
   have hq0 := norm_nonneg q
   have hsP : Summable fun n => (planePartitionCount n : ℂ) * q ^ n :=
-    (s26b_summable_pp hq).of_norm
+    (summable_norm_planePartitionCount_mul_pow hq).of_norm
   set GN : ℕ → ℂ := fun N => ∑ π ∈ planePartitionsIn N N N, q ^ π.card with hGN
   -- `GN → P`
   set u : ℕ → ℝ := fun n => ‖(planePartitionCount n : ℂ) * q ^ n‖ with hu
@@ -563,32 +583,32 @@ theorem hasSum_planePartitionCount {q : ℂ} (hq : ‖q‖ < 1) :
     have hlim := (tendsto_sum_nat_add u).comp (tendsto_add_atTop_nat 1)
     refine squeeze_zero (fun N => norm_nonneg _) (fun N => ?_) hlim
     set d : ℕ → ℂ := fun n =>
-      ((planePartitionCount n : ℂ) - s26b_c N n) * q ^ n with hd
+      ((planePartitionCount n : ℂ) - boxPlanePartitionCount N n) * q ^ n with hd
     have hdsum : HasSum d (∑' n, (planePartitionCount n : ℂ) * q ^ n - GN N) := by
-      have := hsP.hasSum.sub (s26b_hasSum_c (q := q) N)
+      have := hsP.hasSum.sub (hasSum_boxPlanePartitionCount (q := q) N)
       convert this using 1
       funext n; simp only [hd]; ring
     have hd0 : ∀ n < N + 1, d n = 0 := fun n hn => by
-      simp only [hd, s26b_c_eq (Nat.lt_succ_iff.mp hn), sub_self, zero_mul]
+      simp only [hd, boxPlanePartitionCount_eq_of_le (Nat.lt_succ_iff.mp hn), sub_self, zero_mul]
     have hdle : ∀ n, ‖d n‖ ≤ u n := fun n => by
       simp only [hd, hu, norm_mul]
       refine mul_le_mul_of_nonneg_right ?_ (norm_nonneg _)
-      rw [show ((planePartitionCount n : ℂ) - s26b_c N n) =
-        ((planePartitionCount n - s26b_c N n : ℕ) : ℂ) by
-          rw [Nat.cast_sub (s26b_c_le N n)], Complex.norm_natCast, Complex.norm_natCast]
+      rw [show ((planePartitionCount n : ℂ) - boxPlanePartitionCount N n) =
+        ((planePartitionCount n - boxPlanePartitionCount N n : ℕ) : ℂ) by
+          rw [Nat.cast_sub (boxPlanePartitionCount_le N n)], Complex.norm_natCast, Complex.norm_natCast]
       exact_mod_cast Nat.sub_le _ _
     have hshift := (hasSum_nat_add_iff' (f := d) (N + 1)).mpr hdsum
     rw [sum_eq_zero fun n hn => hd0 n (mem_range.mp hn), sub_zero] at hshift
     rw [norm_sub_rev, ← hshift.tsum_eq]
     have hus : Summable fun k => u (k + (N + 1)) :=
-      (summable_nat_add_iff (N + 1)).mpr (s26b_summable_pp hq)
+      (summable_nat_add_iff (N + 1)).mpr (summable_norm_planePartitionCount_mul_pow hq)
     refine (norm_tsum_le_tsum_norm (hus.of_nonneg_of_le (fun _ => norm_nonneg _)
       fun k => hdle _)).trans ?_
     exact Summable.tsum_le_tsum (fun k => hdle _)
       (hus.of_nonneg_of_le (fun _ => norm_nonneg _) fun k => hdle _) hus
   -- `GN → F`
   have hq' : ∀ m : ℕ, 0 < m → q ^ m ≠ 1 := fun m hm h =>
-    s26b_one_sub_pow_ne_zero hq hm (by rw [h, sub_self])
+    one_sub_pow_ne_zero_of_norm_lt_one hq hm (by rw [h, sub_self])
   set Num : ℕ → ℂ := fun N => ∏ h ∈ Icc 1 N, ∏ j ∈ Icc 1 N, (1 - q ^ (h + j + N - 1))
   set Xt : ℕ → ℂ := fun N => ∏ h ∈ Icc 1 N, ∏ j ∈ Icc 1 N,
     (1 - (if N < h + j - 1 then q ^ (h + j - 1) else 0))
@@ -602,20 +622,20 @@ theorem hasSum_planePartitionCount {q : ℂ} (hq : ‖q‖ < 1) :
       rw [prod_congr rfl fun h _ => prod_congr rfl fun j _ => hsplit (h + j - 1)]
       simp only [prod_mul_distrib]
       congr 1
-      rw [s26b_prod_regroup N (fun m => if m ≤ N then 1 - q ^ m else 1)
+      rw [prod_Icc_Icc_add_sub_one_eq_prod_pow N (fun m => if m ≤ N then 1 - q ^ m else 1)
         (fun m hm => by simp only [show ¬m ≤ N by omega, ↓reduceIte])]
       exact prod_congr rfl fun m hm => by simp only [(mem_Icc.mp hm).2, ↓reduceIte]
     show ∑ π ∈ planePartitionsIn N N N, q ^ π.card = _
-    rw [s26b_sum_box_pow hq' N N N, ← hden]
+    rw [sum_planePartitionsIn_pow_eq_prod_div hq' N N N, ← hden]
     simp only [prod_div_distrib]
     rfl
   have hNum : Tendsto Num atTop (𝓝 1) := by
-    refine s26b_tendsto_box_prod hq (fun N x => q ^ (x.1 + x.2 + N - 1)) fun N x hx => ?_
+    refine tendsto_prod_Icc_Icc_one_sub hq (fun N x => q ^ (x.1 + x.2 + N - 1)) fun N x hx => ?_
     simp only [mem_product, mem_Icc] at hx
     rw [norm_pow]
     exact pow_le_pow_of_le_one hq0 hq.le (by omega)
   have hXt : Tendsto Xt atTop (𝓝 1) := by
-    refine s26b_tendsto_box_prod hq
+    refine tendsto_prod_Icc_Icc_one_sub hq
       (fun N x => if N < x.1 + x.2 - 1 then q ^ (x.1 + x.2 - 1) else 0) fun N x hx => ?_
     split_ifs with h
     · rw [norm_pow]; exact pow_le_pow_of_le_one hq0 hq.le (by omega)
@@ -649,14 +669,14 @@ theorem sum_planePartitionsIn_pow {q : ℂ} (hq : ∀ m : ℕ, 0 < m → q ^ m �
   have hne : ∀ m : ℕ, 0 < m → (1 - q ^ m) ≠ 0 := fun m hm h => hq m hm (sub_eq_zero.mp h).symm
   have h2 : ∑ π ∈ planePartitionsIn r s t, q ^ π.card =
       ∏ h ∈ Icc 1 r, ∏ j ∈ Icc 1 s, (1 - q ^ (h + j + t - 1)) / (1 - q ^ (h + j - 1)) :=
-    s26b_sum_box_pow hq r s t
+    sum_planePartitionsIn_pow_eq_prod_div hq r s t
   refine ⟨h2.trans ?_, h2⟩
   rw [planeBox, prod_product]
   refine prod_congr rfl fun h hh => ?_
   rw [prod_product]
   refine prod_congr rfl fun j hj => ?_
   simp only [mem_Icc] at hh hj
-  have := s26b_prod_Icc_div (fun k : ℕ => 1 - q ^ (h + j + k - 1)) t
+  have := prod_Icc_div_sub_one (fun k : ℕ => 1 - q ^ (h + j + k - 1)) t
     (fun k _ => hne _ (by omega))
   simp only [add_zero] at this
   rw [← this]
@@ -706,7 +726,7 @@ divisors of `j` (stated multiplied by `n`). -/
 theorem planePartitionCount_recurrence (n : ℕ) :
     n * planePartitionCount n =
       ∑ j ∈ Icc 1 n, planePartitionCount (n - j) * ArithmeticFunction.sigma 2 j := by
-  exact s26b_pp_recurrence n
+  exact mul_planePartitionCount_eq_sum_sigma n
 
 /-- (26.12.26): `pp(n) ∼ ζ(3)^{7/36}/(2^{11/36} (3π)^{1/2} n^{25/36})
 exp(3 ζ(3)^{1/3} (n/2)^{2/3} + ζ'(-1))` as `n → ∞`. -/

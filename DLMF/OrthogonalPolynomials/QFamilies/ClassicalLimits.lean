@@ -8,13 +8,38 @@ module
 public import DLMF.OrthogonalPolynomials.QFamilies.BasicIdentities
 
 /-!
-# Classical limits of q-orthogonal polynomials
+# Classical limits, difference equation and asymptotics of q-orthogonal polynomials
 
-Limits as q tends to one relate the basic hypergeometric families to their classical
-counterparts.
+Limits as `q → 1⁻` from the q-families to the Hahn, Jacobi, Laguerre, Wilson, Gegenbauer and
+Hermite polynomials (DLMF §§18.27–18.28), the Askey–Wilson q-difference equation
+(DLMF 18.28.6_1) and the large-degree asymptotics of the Askey–Wilson polynomials
+(DLMF 18.29.1).
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.QFamilies`.
+## Main definitions
+
+* `askeyWilsonDifferenceCoefficient`: the coefficient of the Askey–Wilson q-difference
+  operator (DLMF 18.28.6_2).
+* `askeyWilsonAsymptoticCoefficient`: the leading asymptotic coefficient (DLMF 18.29.2).
+
+## Main results
+
+* `qHahn_limit_hahn`: DLMF 18.27.4_2.
+* `littleQJacobi_limit_jacobi`, `littleQLaguerre_limit_laguerrePolyL`: DLMF 18.27.14_4 and
+  18.27.14_6.
+* `qLaguerre_limit_laguerrePolyL`: DLMF 18.27.17_3.
+* `discreteQHermiteI_limit_hermite`, `discreteQHermiteII_limit_hermite`: DLMF 18.27.25 and
+  18.27.26.
+* `askeyWilson_limit_wilson`, `qGegenbauer_limit_ultrasphPoly`: DLMF 18.28.29 and 18.28.31.
+* `askeyWilson_difference_equation`: DLMF 18.28.6_1.
+* `askeyWilson_asymptotic`: DLMF 18.29.1.
+* `tendsto_qPochhammer_rpow_div`: `(q^t;q)_k / (1-q)^k → (t)_k` as `q → 1⁻`.
+
+## Implementation notes
+
+The q-Gegenbauer limit follows termwise from the finite q-Pochhammer ratio limits and the
+coefficients of the Gegenbauer generating series. The Askey–Wilson difference equation follows
+from the triangular action of the operator on the paired q-Pochhammer basis and a finite
+telescoping sum, for all stated parameters.
 -/
 
 @[expose] public section

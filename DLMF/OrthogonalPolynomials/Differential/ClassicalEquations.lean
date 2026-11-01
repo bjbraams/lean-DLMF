@@ -12,11 +12,35 @@ public import Mathlib.Analysis.SpecialFunctions.Sqrt
 /-!
 # Differential equations and derivatives of classical polynomials
 
-Polynomial continuation of differential identities and the classical orthogonal-polynomial
-equations.
+The differential equations (DLMF §18.8), three-term recurrences and contiguous relations
+(DLMF §18.9) and symmetry properties (DLMF §18.6) of the classical orthogonal polynomials.
+Identities are first obtained on the disk `‖(1-x)/2‖ < 1` and then continued to all `x`,
+since the polynomials are entire.
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Differential`.
+## Main results
+
+* `jacobi_differential_equation`, `ultrasphPoly_differential_equation`,
+  `legendre_differential_equation`, `laguerrePolyL_differential_equation`,
+  `hermitePolyH_differential_equation`, `hermite_differential_equation`: the differential
+  equations of DLMF Table 18.8.1.
+* `analyticOnNhd_jacobiPolyP`, `analyticOnNhd_ultrasphPoly`, `eq_of_eqOn_half_shift_disk`:
+  Jacobi and Gegenbauer polynomials are entire, and identities continue from the disk.
+* `jacobi_recurrence`, `ultrasphPoly_recurrence`, `laguerrePolyL_recurrence`,
+  `hermitePolyH_recurrence`, `hermite_recurrence`: the three-term recurrences (DLMF 18.9.2 and
+  Table 18.9.1).
+* `jacobi_contiguous_sub`, `jacobi_contiguous_add`, `jacobi_raise_beta`,
+  `jacobi_raise_degree_beta`: DLMF 18.9.3–18.9.6.
+* `ultrasphPoly_raise_parameter`, `ultrasphPoly_raise_parameter_sq`: DLMF 18.9.7 and 18.9.8.
+* `hermite_derivative`: DLMF 18.9.27.
+* `jacobi_reflection`, `ultrasphPoly_reflection`, `ultrasphPoly_even_at_zero`,
+  `jacobi_symmetric_even_at_zero`: symmetry and values at `0` (DLMF Table 18.6.1).
+* `chebyshevT_hypergeometric`, `chebyshevT_eq_jacobi`: `T_n` as a `₂F₁` and as a Jacobi
+  polynomial (DLMF 18.7.3).
+
+## Implementation notes
+
+Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
+hypergeometric definitions do not implement continuation in singular parameters.
 -/
 
 @[expose] public section

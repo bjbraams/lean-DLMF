@@ -14,13 +14,30 @@ public import Mathlib.Analysis.Real.Pi.Bounds
 /-!
 # Series expansions (DLMF §5.7)
 
-The Weierstrass/digamma series 5.7.6 is `digamma_eq_tsum` in `Digamma.lean` (real) and
-`digamma_eq_cDigammaSeries` in `Polygamma.lean` (complex); the expansions below use the
-complex form.
-The Taylor coefficients of `1/Γ` and the ζ-expansions of `log Γ` and `ψ` are
-described here. The reciprocal Gamma Taylor series converges on all of `ℂ`;
-the logarithmic and digamma expansions retain their disk and pole restrictions.
-The alternating half-argument digamma series is grouped into absolutely summable pairs.
+The Taylor coefficients of `1/Γ` and the ζ-expansions of `log Γ` and `ψ`. The reciprocal Gamma
+Taylor series converges on all of `ℂ`; the logarithmic and digamma expansions retain their disk
+and pole restrictions. The Weierstrass digamma series 5.7.6 is `digamma_eq_tsum` in
+`DLMF.Gamma.Digamma` (real) and `digamma_eq_cDigammaSeries` in `DLMF.Gamma.Polygamma`
+(complex); the expansions below use the complex form.
+
+## Main definitions
+
+* `recipGammaCoeff`: the Taylor coefficients of `1/Γ` at zero, DLMF 5.7.1.
+* `logGammaZetaSeries`: the ζ-series of DLMF 5.7.3.
+
+## Main results
+
+* `hasSum_recipGammaCoeff`: the Taylor series of `1/Γ` converges everywhere, DLMF 5.7.1.
+* `recipGammaCoeff_recurrence`: the recurrence for the coefficients, DLMF 5.7.2.
+* `log_Gamma_one_add`: the ζ-expansion of `ln Γ(1 + z)`, DLMF 5.7.3.
+* `digamma_one_add_zeta`, `digamma_one_add_odd_zeta`: ζ-expansions of `ψ(1 + z)`,
+  DLMF 5.7.4–5.7.5.
+* `digamma_half_diff`: the half-argument digamma difference, DLMF 5.7.7.
+* `digamma_one_add_mul_I_im_series`: `Im ψ(1 + iy) = ∑_{k≥1} y/(k² + y²)`, DLMF 5.7.8.
+
+## Implementation notes
+
+The alternating half-argument digamma series 5.7.7 is grouped into absolutely summable pairs.
 -/
 
 @[expose] public section

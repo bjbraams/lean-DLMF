@@ -9,12 +9,39 @@ public import DLMF.Legendre.UniformCoordinates
 public import DLMF.Legendre.IntegralRepresentations
 
 /-!
-# Legendre uniform large-degree and large-order approximations
+# Uniform asymptotic approximations of Legendre functions
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+Uniform approximations of Ferrers and associated Legendre functions for large order `μ`, for
+large degree `ν`, and for both large together (DLMF §14.15), in terms of elementary functions,
+Bessel functions and parabolic cylinder functions.
+
+## Main definitions
+
+* `legendreOrderPrefactor`: the leading factor of DLMF 14.15.4.
+
+## Main results
+
+* `ferrersP_large_order_uniform`, `associatedP_large_order_uniform`,
+  `olverQ_large_order_uniform`: large `μ` with fixed `ν` (DLMF 14.15.1–14.15.3).
+* `ferrersP_two_large_parameters`, `associatedP_two_large_order_uniform`,
+  `olverQ_two_large_order_uniform`: large `μ` with `ν + 1/2 ≤ (1-δ)μ`
+  (DLMF 14.15.4, 14.15.8, 14.15.9).
+* `ferrersP_large_degree_uniform`, `ferrersQ_large_degree_uniform`,
+  `associatedP_large_degree_uniform`, `olverQ_large_degree_uniform`: large `ν` with fixed `μ`, in
+  terms of Bessel functions (DLMF 14.15.11–14.15.14).
+* `ferrersP_two_large_degree_uniform`, `ferrersQ_two_large_degree_uniform`,
+  `associatedP_two_large_degree_modified`, `olverQ_two_large_degree_modified`: large `ν` with
+  `μ ≤ (1-δ)(ν+1/2)` (DLMF 14.15.15–14.15.18).
+* `ferrersP_cylinder_uniform`, `ferrersQ_cylinder_uniform`,
+  `ferrersP_cylinder_exponential_uniform`: approximations by parabolic cylinder functions
+  (DLMF 14.15.24, 14.15.25, 14.15.30).
+
+## Implementation notes
+
+The `O`-terms are stated with `=O[…]` along filters that encode the uniformity regions; where
+DLMF writes `f = g (1 + O(ε))`, the statement bounds `f/g - 1`. Oscillatory error terms are
+measured against the Bessel envelope functions `env J_μ`, `env Y_μ`. The coordinates and
+envelopes of DLMF §14.15 are defined in `DLMF.Legendre.UniformCoordinates`.
 -/
 
 @[expose] public noncomputable section

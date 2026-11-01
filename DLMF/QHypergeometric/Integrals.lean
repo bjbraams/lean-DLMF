@@ -9,13 +9,31 @@ public import DLMF.Gamma.QGamma
 public import DLMF.QHypergeometric.Calculus
 
 /-!
-# q-beta integrals (DLMF §17.13)
+# `q`-beta integrals (DLMF §17.13)
 
-Finite and bilateral Jackson integrals reuse `QSeries.jacksonIntegral` through
-the adapters in `Calculus`. Every evaluated integral asserts convergence of its
-defining series. The ordinary Mellin integral asserts Bochner integrability.
-The Gamma quotient of 17.13.3 is filled by its complex-parameter limit at
-removable positive-integer alpha values; the literal totalized `0/0` would be false.
+This file evaluates the two-ended and bilateral Jackson `q`-beta integrals and the ordinary
+Mellin `q`-beta integral of DLMF §17.13.
+
+## Main definitions
+
+* `jacksonBetaKernel`: the two-ended Jackson `q`-beta kernel.
+* `mellinQBetaValue`: the Gamma quotient of DLMF 17.13.3, filled at its removable points.
+
+## Main results
+
+* `jacksonBeta_integral`, `jacksonBeta_integral_qGamma`: the two-ended `q`-beta integral and
+  its `q`-Gamma normalization (DLMF 17.13.1–17.13.2).
+* `mellinQBeta_integral`: the ordinary Mellin `q`-beta integral (DLMF 17.13.3), with
+  `mellinQBetaValue_eq` and `tendsto_mellinQBetaValue` for the filled Gamma quotient.
+* `bilateralJacksonBeta_integral`: the bilateral Jackson `q`-beta integral (DLMF 17.13.4).
+
+## Implementation notes
+
+Finite and bilateral Jackson integrals reuse `QSeries.jacksonIntegral` through the adapters
+in `DLMF.QHypergeometric.Calculus`. Every evaluated integral asserts convergence of its
+defining series, and the ordinary Mellin integral asserts Bochner integrability. The Gamma
+quotient of DLMF 17.13.3 is filled by its complex-parameter limit at removable
+positive-integer values of `α`; the literal totalized `0/0` would be false.
 -/
 
 @[expose] public noncomputable section
@@ -64,7 +82,7 @@ def mellinQBetaValue (q : ℝ) (α β : ℂ) : ℂ :=
       (DLMF.QSeries.qGamma q (1-a) * DLMF.QSeries.qGamma q (a+β)))
 
 /-- The q-Gamma function is continuous and nonzero on the right half-plane. -/
-lemma qaR4_qGamma_cont_ne (q : ℝ) (hq0 : 0<q) (hq1 : q<1) (x : ℂ) (hx : 0<x.re) :
+private lemma continuousAt_qGamma_and_ne_zero (q : ℝ) (hq0 : 0<q) (hq1 : q<1) (x : ℂ) (hx : 0<x.re) :
     ContinuousAt (DLMF.QSeries.qGamma (q:ℂ)) x ∧ DLMF.QSeries.qGamma (q:ℂ) x≠0 := by
   have hqn : ‖(q:ℂ)‖<1 := by rw [Complex.norm_real,Real.norm_eq_abs,abs_of_pos hq0]; exact hq1
   have hqc : (q:ℂ)≠0 := by exact_mod_cast hq0.ne'
@@ -97,8 +115,8 @@ theorem mellinQBetaValue_eq (q : ℝ) (hq0 : 0<q) (hq1 : q<1)
     mellinQBetaValue q α β =
       Complex.Gamma α * Complex.Gamma (1-α) * DLMF.QSeries.qGamma q β /
         (DLMF.QSeries.qGamma q (1-α) * DLMF.QSeries.qGamma q (α+β)) := by
-  have h1 := qaR4_qGamma_cont_ne q hq0 hq1 (1-α) (by simp; linarith)
-  have h2 := qaR4_qGamma_cont_ne q hq0 hq1 (α+β) (by simp; linarith)
+  have h1 := continuousAt_qGamma_and_ne_zero q hq0 hq1 (1-α) (by simp; linarith)
+  have h2 := continuousAt_qGamma_and_ne_zero q hq0 hq1 (α+β) (by simp; linarith)
   have hG1 : ∀ m : ℕ, α≠-m := fun m h => by
     have := congrArg Complex.re h; simp at this; linarith [(m.cast_nonneg : (0:ℝ)≤m)]
   have hG2 : ∀ m : ℕ, 1-α≠-m := fun m h => by

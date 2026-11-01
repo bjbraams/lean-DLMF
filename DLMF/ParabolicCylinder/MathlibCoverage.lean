@@ -9,10 +9,10 @@ public import DLMF.Core.Upstream
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 
 /-!
-# DLMF Chapter 12 results already in Mathlib 4.35.0-rc2
+# DLMF Chapter 12 results already in Mathlib
 
-The `dlmf_upstream` commands below are checked pointers to Mathlib declarations,
-deliberately not duplicate local theorems.
+The `dlmf_upstream` commands below are checked pointers to Mathlib declarations, deliberately
+not duplicated as local theorems.
 -/
 
 /- DLMF 12.14.22 defines `c_{2r} + i d_{2r} = Γ(2r + 1/2 + ia)/Γ(1/2 + ia)`. The project's

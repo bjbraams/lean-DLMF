@@ -6,25 +6,36 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.ODE.Basic
-public import DLMFMathlib.Analysis.ODE.P1oEntireLinear
+public import DLMFMathlib.Analysis.ODE.EntireLinear
 public import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
 
 /-!
 # Linear second-order differential equations (DLMF §§1.13(i)–1.13(iii))
 
-For `w'' + f(z) w' + g(z) w = r(z)` on an open set `D ⊆ ℂ` with analytic coefficients
-(`IsLinODE2SolOn f g r w D`):
+Existence, uniqueness, fundamental pairs, Wronskians, parameter dependence and the
+inhomogeneous equation for `w'' + f(z) w' + g(z) w = r(z)` on an open set `D ⊆ ℂ` with analytic
+coefficients (`IsLinODE2SolOn f g r w D`).
 
-* existence of solutions with prescribed `w(z₀)`, `w'(z₀)` on a simply connected domain
-  (admitted; proved for entire coefficients from `ODE.exists_entire_solution_linear_ode'`), and
-  uniqueness on a connected open set (from `ODE.eqOn_of_ode`);
-* linear combinations of solutions, fundamental pairs from initial data 1.13.3 or from a
-  nonvanishing Wronskian at one point;
-* the two-argument Wronskian as a determinant (1.13.4), Abel's identity 1.13.5 (given a
-  primitive `F` of `f`, so that `e^{-∫ f} = e^{-F}`), and the equivalences 1.13.6;
-* parameter dependence 1.13.7 (admitted);
-* the inhomogeneous equation: existence (admitted), the general solution 1.13.9 and variation
-  of parameters 1.13.10 (given primitives of `w₁ r/𝒲` and `w₂ r/𝒲`).
+## Main results
+
+* `exists_isLinODE2SolOn`, `exists_isLinODE2SolOn_univ`: solutions with prescribed `w(z₀)`,
+  `w'(z₀)` on a simply connected domain, and for entire coefficients (from
+  `ODE.exists_entire_solution_linear_ode'`).
+* `isLinODE2SolOn_unique`: uniqueness on a connected open set (from `ODE.eqOn_of_ode`).
+* `IsLinODE2SolOn.linear_combination`: linear combinations of solutions.
+* `isFundamentalPair_of_initial`, `exists_isFundamentalPair`,
+  `isFundamentalPair_of_wronskian_ne_zero`: fundamental pairs (DLMF 1.13.2–1.13.3).
+* `wronskianN_two`: the two-argument Wronskian as a determinant (DLMF 1.13.4).
+* `wronskian_eq_mul_exp`, `wronskian_const_of_f_eq_zero`: Abel's identity (DLMF 1.13.5).
+* `isFundamentalPair_tfae`: the equivalences 1.13.6.
+* `isLinODE2SolOn_param_analytic`: parameter dependence (DLMF 1.13.7, §1.13(ii)).
+* `exists_isLinODE2SolOn_inhom`, `isLinODE2SolOn_inhom_eq`, `isLinODE2SolOn_varParam`: the
+  inhomogeneous equation, its general solution 1.13.9 and variation of parameters 1.13.10.
+
+## Implementation notes
+
+Abel's identity is stated given a primitive `F` of `f`, so that `e^{-∫ f} = e^{-F}`; variation
+of parameters is stated given primitives of `w₁ r/𝒲` and `w₂ r/𝒲`.
 -/
 
 @[expose] public noncomputable section
@@ -53,7 +64,7 @@ theorem IsLinODE2SolOn.analyticOnNhd {w : ℂ → ℂ} (hD : IsOpen D) (hw : IsL
 
 /-- Linear combinations: if `w` solves the equation with right side `r₁` and `v` with `r₂`, then
 `A w + B v` solves it with right side `A r₁ + B r₂`. -/
-theorem IsLinODE2SolOn.linComb {r₁ r₂ w v : ℂ → ℂ} (hD : IsOpen D) (hw : IsLinODE2SolOn f g r₁ w D)
+theorem IsLinODE2SolOn.linear_combination {r₁ r₂ w v : ℂ → ℂ} (hD : IsOpen D) (hw : IsLinODE2SolOn f g r₁ w D)
     (hv : IsLinODE2SolOn f g r₂ v D) (A B : ℂ) (hr : ∀ z ∈ D, r z = A * r₁ z + B * r₂ z) :
     IsLinODE2SolOn f g r (fun z => A * w z + B * v z) D := by
   intro z hz
@@ -76,7 +87,7 @@ lemma isLinODE2SolOn_zero : IsLinODE2SolOn f g 0 (fun _ => 0) D := fun z _ => by
   exact hasDerivAt_const z 0
 
 /-- The derivative of a linear combination of solutions, at a point of the open set `D`. -/
-lemma g1d_deriv_linComb {w v : ℂ → ℂ} {r₁ r₂ : ℂ → ℂ} (hw : IsLinODE2SolOn f g r₁ w D)
+private lemma deriv_const_mul_add_const_mul_of_isLinODE2SolOn {w v : ℂ → ℂ} {r₁ r₂ : ℂ → ℂ} (hw : IsLinODE2SolOn f g r₁ w D)
     (hv : IsLinODE2SolOn f g r₂ v D) (A B : ℂ) {z : ℂ} (hz : z ∈ D) :
     deriv (fun y => A * w y + B * v y) z = A * deriv w z + B * deriv v z :=
   (((hw z hz).1.hasDerivAt.const_mul A).add ((hv z hz).1.hasDerivAt.const_mul B)).deriv
@@ -138,13 +149,13 @@ theorem isFundamentalPair_of_wronskian_ne_zero (hD : IsOpen D) (hD' : IsPreconne
   set W := ODE.wronskian w₁ w₂ z₀
   set A := (w z₀ * deriv w₂ z₀ - w₂ z₀ * deriv w z₀) / W
   set B := (w₁ z₀ * deriv w z₀ - w z₀ * deriv w₁ z₀) / W
-  have hsol := h₁.linComb hD h₂ A B (r := 0) (fun z _ => by simp)
+  have hsol := h₁.linear_combination hD h₂ A B (r := 0) (fun z _ => by simp)
   refine ⟨A, B, fun z hz => isLinODE2SolOn_unique hD hD' hf hg hw hsol hz₀ ?_ ?_ hz⟩
   · simp only [A, B]
     rw [div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, eq_div_iff hW]
     simp only [W, ODE.wronskian]
     ring
-  · rw [g1d_deriv_linComb h₁ h₂ A B hz₀]
+  · rw [deriv_const_mul_add_const_mul_of_isLinODE2SolOn h₁ h₂ A B hz₀]
     simp only [A, B]
     rw [div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, eq_div_iff hW]
     simp only [W, ODE.wronskian]
@@ -172,7 +183,7 @@ theorem exists_isFundamentalPair (hD : IsOpen D) (hsc : IsSimplyConnected D)
     hf hg h₁ h₂ hz₀ h10 h11 h20 h21⟩
 
 /-- The derivative of the Wronskian of two solutions of 1.13.1: `𝒲' = -f 𝒲`. -/
-lemma g1d_hasDerivAt_wronskian {w₁ w₂ : ℂ → ℂ} (h₁ : IsLinODE2SolOn f g 0 w₁ D)
+private lemma hasDerivAt_wronskian_of_isLinODE2SolOn {w₁ w₂ : ℂ → ℂ} (h₁ : IsLinODE2SolOn f g 0 w₁ D)
     (h₂ : IsLinODE2SolOn f g 0 w₂ D) {z : ℂ} (hz : z ∈ D) :
     HasDerivAt (ODE.wronskian w₁ w₂) (-f z * ODE.wronskian w₁ w₂ z) z := by
   have := (((h₁ z hz).1.hasDerivAt.mul (h₂ z hz).2)).sub
@@ -191,7 +202,7 @@ theorem wronskian_eq_mul_exp (hD : IsOpen D) (hD' : IsPreconnected D) {F : ℂ �
     ∃ c : ℂ, ∀ z ∈ D, ODE.wronskian w₁ w₂ z = c * Complex.exp (-F z) := by
   have hd : ∀ z ∈ D, HasDerivAt (fun z => ODE.wronskian w₁ w₂ z * Complex.exp (F z)) 0 z := by
     intro z hz
-    refine ((g1d_hasDerivAt_wronskian h₁ h₂ hz).mul ((hF z hz).cexp)).congr_deriv ?_
+    refine ((hasDerivAt_wronskian_of_isLinODE2SolOn h₁ h₂ hz).mul ((hF z hz).cexp)).congr_deriv ?_
     ring
   obtain ⟨c, hc⟩ := hD.exists_is_const_of_deriv_eq_zero hD'
     (fun z hz => (hd z hz).differentiableAt.differentiableWithinAt)
@@ -211,7 +222,7 @@ theorem wronskian_const_of_f_eq_zero (hD : IsOpen D) (hD' : IsPreconnected D)
 
 /-- The data of a linear combination of solutions at a point vanish only trivially if the
 Wronskian there does not vanish. -/
-lemma g1d_eq_zero_of_wronskian {w₁ w₂ : ℂ → ℂ} {A B z : ℂ} (hW : ODE.wronskian w₁ w₂ z ≠ 0)
+private lemma eq_zero_of_wronskian_ne_zero {w₁ w₂ : ℂ → ℂ} {A B z : ℂ} (hW : ODE.wronskian w₁ w₂ z ≠ 0)
     (h0 : A * w₁ z + B * w₂ z = 0) (h1 : A * deriv w₁ z + B * deriv w₂ z = 0) :
     A = 0 ∧ B = 0 := by
   unfold ODE.wronskian at hW
@@ -243,11 +254,11 @@ theorem isFundamentalPair_tfae (hD : IsOpen D) (hsc : IsSimplyConnected D)
     have e1 : w₁ z * A₁ + w₂ z * B₁ = 1 := by rw [← hu10, hAB₁ z hz]; ring
     have e2 : deriv w₁ z * A₁ + deriv w₂ z * B₁ = 0 := by
       rw [← hu11, (eventuallyEq_of_mem (hD.mem_nhds hz) hAB₁).deriv_eq,
-        g1d_deriv_linComb h₁ h₂ A₁ B₁ hz]; ring
+        deriv_const_mul_add_const_mul_of_isLinODE2SolOn h₁ h₂ A₁ B₁ hz]; ring
     have e3 : w₁ z * A₂ + w₂ z * B₂ = 0 := by rw [← hu20, hAB₂ z hz]; ring
     have e4 : deriv w₁ z * A₂ + deriv w₂ z * B₂ = 1 := by
       rw [← hu21, (eventuallyEq_of_mem (hD.mem_nhds hz) hAB₂).deriv_eq,
-        g1d_deriv_linComb h₁ h₂ A₂ B₂ hz]; ring
+        deriv_const_mul_add_const_mul_of_isLinODE2SolOn h₁ h₂ A₂ B₂ hz]; ring
     have : ODE.wronskian w₁ w₂ z * (A₁ * B₂ - A₂ * B₁) = 1 := by
       unfold ODE.wronskian
       linear_combination (deriv w₁ z * A₂ + deriv w₂ z * B₂) * e1 + e4 -
@@ -257,10 +268,10 @@ theorem isFundamentalPair_tfae (hD : IsOpen D) (hsc : IsSimplyConnected D)
     intro hW A B hAB
     have h0 := hAB z₀ hz₀
     have h1 : A * deriv w₁ z₀ + B * deriv w₂ z₀ = 0 := by
-      rw [← g1d_deriv_linComb h₁ h₂ A B hz₀,
+      rw [← deriv_const_mul_add_const_mul_of_isLinODE2SolOn h₁ h₂ A B hz₀,
         (eventuallyEq_of_mem (hD.mem_nhds hz₀) hAB).deriv_eq]
       simp
-    exact g1d_eq_zero_of_wronskian (hW z₀ hz₀) h0 h1
+    exact eq_zero_of_wronskian_ne_zero (hW z₀ hz₀) h0 h1
   tfae_have 3 → 1 := by
     intro hind
     by_cases hW : ODE.wronskian w₁ w₂ z₀ = 0
@@ -268,10 +279,10 @@ theorem isFundamentalPair_tfae (hD : IsOpen D) (hsc : IsSimplyConnected D)
       have key : ∀ A B : ℂ, A * w₁ z₀ + B * w₂ z₀ = 0 → A * deriv w₁ z₀ + B * deriv w₂ z₀ = 0 →
           A = 0 ∧ B = 0 := by
         intro A B h0 h1
-        have hsol := h₁.linComb hD h₂ A B (r := 0) (fun z _ => by simp)
+        have hsol := h₁.linear_combination hD h₂ A B (r := 0) (fun z _ => by simp)
         refine hind A B fun z hz => isLinODE2SolOn_unique hD hD' hf hg hsol isLinODE2SolOn_zero
           hz₀ h0 ?_ hz
-        rw [g1d_deriv_linComb h₁ h₂ A B hz₀, h1, deriv_const']
+        rw [deriv_const_mul_add_const_mul_of_isLinODE2SolOn h₁ h₂ A B hz₀, h1, deriv_const']
       unfold ODE.wronskian at hW
       by_cases ha : w₂ z₀ = 0 ∧ w₁ z₀ = 0
       · by_cases hb : deriv w₂ z₀ = 0 ∧ deriv w₁ z₀ = 0
@@ -327,13 +338,13 @@ theorem isLinODE2SolOn_inhom_eq (hD : IsOpen D) {w₀ w₁ w₂ w : ℂ → ℂ}
     (h₀ : IsLinODE2SolOn f g r w₀ D) (hfp : IsFundamentalPair f g w₁ w₂ D)
     (hw : IsLinODE2SolOn f g r w D) :
     ∃ A B : ℂ, ∀ z ∈ D, w z = w₀ z + A * w₁ z + B * w₂ z := by
-  have hd := hw.linComb hD h₀ 1 (-1) (r := 0) (fun z _ => by simp)
+  have hd := hw.linear_combination hD h₀ 1 (-1) (r := 0) (fun z _ => by simp)
   obtain ⟨A, B, hAB⟩ := hfp.2.2 _ hd
   exact ⟨A, B, fun z hz => by linear_combination hAB z hz⟩
 
 /-- The variation-of-parameters solution `w₂ P - w₁ Q` (with `P' = w₁ r/𝒲`, `Q' = w₂ r/𝒲`)
 has derivative `w₂' P - w₁' Q`. -/
-lemma g1d_hasDerivAt_varParam {w₁ w₂ P Q : ℂ → ℂ} {z : ℂ} (h₁ : DifferentiableAt ℂ w₁ z)
+private lemma hasDerivAt_variationOfParameters {w₁ w₂ P Q : ℂ → ℂ} {z : ℂ} (h₁ : DifferentiableAt ℂ w₁ z)
     (h₂ : DifferentiableAt ℂ w₂ z) (hP : HasDerivAt P (w₁ z * r z / ODE.wronskian w₁ w₂ z) z)
     (hQ : HasDerivAt Q (w₂ z * r z / ODE.wronskian w₁ w₂ z) z) :
     HasDerivAt (fun y => w₂ y * P y - w₁ y * Q y) (deriv w₂ z * P z - deriv w₁ z * Q z) z := by
@@ -351,11 +362,11 @@ theorem isLinODE2SolOn_varParam (hD : IsOpen D) {w₁ w₂ P Q : ℂ → ℂ}
     (hQ : ∀ z ∈ D, HasDerivAt Q (w₂ z * r z / ODE.wronskian w₁ w₂ z) z) :
     IsLinODE2SolOn f g r (fun z => w₂ z * P z - w₁ z * Q z) D := by
   intro z hz
-  have hd := g1d_hasDerivAt_varParam (h₁ z hz).1 (h₂ z hz).1 (hP z hz) (hQ z hz)
+  have hd := hasDerivAt_variationOfParameters (h₁ z hz).1 (h₂ z hz).1 (hP z hz) (hQ z hz)
   have hev : deriv (fun y => w₂ y * P y - w₁ y * Q y) =ᶠ[𝓝 z]
       fun y => deriv w₂ y * P y - deriv w₁ y * Q y := by
     filter_upwards [hD.mem_nhds hz] with y hy
-    exact (g1d_hasDerivAt_varParam (h₁ y hy).1 (h₂ y hy).1 (hP y hy) (hQ y hy)).deriv
+    exact (hasDerivAt_variationOfParameters (h₁ y hy).1 (h₂ y hy).1 (hP y hy) (hQ y hy)).deriv
   refine ⟨hd.differentiableAt, ((((h₂ z hz).2.mul (hP z hz))).sub
     (((h₁ z hz).2.mul (hQ z hz)))).congr_of_eventuallyEq hev |>.congr_deriv ?_⟩
   rw [hd.deriv]

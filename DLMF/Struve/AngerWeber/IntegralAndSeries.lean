@@ -12,13 +12,36 @@ public import Mathlib.Analysis.SpecialFunctions.Sqrt
 public import DLMF.Struve.Poisson
 
 /-!
-# Anger and Weber integral and series identities
+# Anger and Weber functions: integrals, equations and series (DLMF §11.10)
 
-Integral definitions, derivative formulas and regularized series identities for Anger and Weber
-functions.
+This file defines the Anger function `𝐉_ν(z)`, the Weber function `𝐄_ν(z)` and the associated
+Anger–Weber function `𝐀_ν(z)` by their integrals, and proves their differential equations,
+power series and relations to Bessel functions.
 
-Source references and common attribution are retained in
-`DLMF.Struve.AngerWeber`.
+## Main definitions
+
+* `angerJ`, `weberE`: the Anger and Weber functions (DLMF 11.10.1–11.10.2).
+* `angerA`: the associated Anger–Weber function (DLMF 11.10.4), with `angerARegular` at
+  nonintegral order.
+* `angerS1`, `angerS2`: the entire series `S₁(ν,z)`, `S₂(ν,z)` (DLMF 11.10.10–11.10.11).
+
+## Main results
+
+* `angerA_integral`: the integral representation DLMF 11.10.4.
+* `angerJ_double_integral`: DLMF 11.10.3.
+* `angerJ_ode`, `weberE_ode`: the inhomogeneous Bessel equations DLMF 11.10.5–11.10.7.
+* `integral_sinPow_mul_cos`, `integral_sinPow_mul_sin`: the sine-power moments
+  `∫₀^π sinⁿθ cos νθ dθ` and `∫₀^π sinⁿθ sin νθ dθ`.
+* `angerJ_series`, `weberE_series`: the series DLMF 11.10.8–11.10.9, with `hasSum_angerS1`,
+  `hasSum_angerS2`.
+* `angerJ_neg`, `weberE_neg`: DLMF 11.10.12.
+* `anger_weber`, `weber_anger`: DLMF 11.10.13–11.10.14.
+* `anger_bessel`, `weber_bessel`: DLMF 11.10.15–11.10.16.
+
+## Implementation notes
+
+`angerA` is continued in the order, which supplies its removable values at integral orders.
+The series `S₁`, `S₂` use reciprocal Gamma factors, so they are entire in `ν`.
 -/
 
 @[expose] public noncomputable section
@@ -272,7 +295,7 @@ theorem eventually_nhdsNE_not_int (ν : ℂ) : ∀ᶠ μ : ℂ in 𝓝[≠] ν, 
 
 /-- `sin(πν) ≠ 0` at nonintegral `ν`. -/
 theorem sin_pi_mul_ne_zero_of_not_int {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) : sin (π*ν) ≠ 0 :=
-  DLMF.Confluent.sin_pi_mul_ne_zero_of_mem (DLMF.Confluent.mem_integerComplement_of_forall hν)
+  _root_.sin_pi_mul_ne_zero (DLMF.Confluent.mem_integerComplement_of_forall hν)
 
 /-- Associated Anger–Weber function at nonintegral order. -/
 def angerARegular (ν z : ℂ) : ℂ :=

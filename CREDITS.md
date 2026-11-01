@@ -1191,7 +1191,7 @@ to two variables, with inline attribution.
 
 Within the project, the Lambert W Maclaurin series reuse the Lagrange–Bürmann theorem of
 `DLMFMathlib/Analysis/Complex/LagrangeBurmann.lean` (`lagB_hasSum_iteratedDeriv`,
-`lagB_hasSum_of_differentiableOn`). The new `DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean`
+`lagB_hasSum_of_differentiableOn`). The new `DLMFMathlib/Analysis/Complex/TrigSeriesExtension.lean`
 adapts the coefficient-uniqueness argument of the local `scalarSeries_unique_ball`.
 The 0F1 product formula uses Chu–Vandermonde; the logarithm integrals
 `integral_log_div_one_sub/add` reuse the local `DLMF.Polylog.Real.dilog_one` and
@@ -1279,7 +1279,7 @@ Rogers–Ramanujan partition identities 26.10.13–14 are derived from the proje
 ## Ramanujan's τ and the prime number theorem (2026-10-26)
 
 Ramanujan's τ (DLMF/NumberTheory/Partitions.lean, with the general Hecke recursion helpers in
-DLMF/NumberTheory/T27bHecke.lean): multiplicativity (§27.14(vi)), 27.14.19 and the congruence
+DLMF/NumberTheory/HeckeOperators.lean): multiplicativity (§27.14(vi)), 27.14.19 and the congruence
 τ(n) ≡ σ₁₁(n) (mod 691) (27.14.20) use TauCeti's
 `TauCeti.ModularForms.LevelOne.DiscriminantEigenform`
 (`TauCeti.ModularForm.discriminant_qExpansion_coeff_mul`,
@@ -1290,7 +1290,7 @@ DLMF/NumberTheory/T27bHecke.lean): multiplicativity (§27.14(vi)), 27.14.19 and 
 `EisensteinSeries.E_qExpansion_coeff`, `ModularForm.qExpansion_pow`, `qExpansion_smul` and
 `qExpansion_sub`.
 
-The prime number theorem (DLMFMathlib/NumberTheory/T27aPrimeNumberTheorem.lean; 27.2.3, 27.2.4,
+The prime number theorem (DLMFMathlib/NumberTheory/PrimeNumberTheorem.lean; 27.2.3, 27.2.4,
 27.12.1 and primes in arithmetic progressions, §27.11) specializes TauCeti's prime ideal theorem
 and natural-density Chebotarev theorem to ℚ:
 `TauCeti.NumberTheory.ArithmeticDirichletSeries.Prime.PrimeIdealTheorem`

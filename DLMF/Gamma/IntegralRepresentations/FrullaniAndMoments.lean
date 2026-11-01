@@ -8,12 +8,23 @@ module
 public import DLMF.Gamma.IntegralRepresentations.DigammaAndBinet
 
 /-!
-# Frullani integrals and Gamma logarithmic moments
+# Digamma integrals and logarithmic moments of the Gamma integral (DLMF 5.9.12–5.9.20)
 
-Frullani-type digamma integrals and derivatives of the Gamma integral with respect to its order.
+Frullani- and Gauss-type integral representations of `ψ` and of Euler's constant, the
+derivatives of Euler's integral with respect to its order, and the integral of `Γ`.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.IntegralRepresentations`.
+## Main definitions
+
+* `gammaLogMoment`: the log-moments `Iₙ(x) = ∫₀^∞ (log t)ⁿ e^{-t} t^{x-1} dt`.
+
+## Main results
+
+* `digamma_gauss`, `digamma_binet`, `digamma_frullani`, `digamma_coth`, `digamma_add_euler`:
+  integral representations of `ψ` (DLMF 5.9.12–5.9.16).
+* `eulerMascheroni_integrals`: `γ = -∫₀^∞ e^{-t} ln t dt = ∫₀^∞ (1/(1+t) - e^{-t}) dt/t`
+  (DLMF 5.9.18).
+* `iteratedDeriv_Gamma`: `Γ^{(n)}(x) = ∫₀^∞ (ln t)ⁿ e^{-t} t^{x-1} dt` (DLMF 5.9.19).
+* `integral_Gamma`: `∫_c^x Γ(t) dt = ∫₀^∞ (t^{x-1} - t^{c-1}) e^{-t}/ln t dt` (DLMF 5.9.20).
 -/
 
 @[expose] public section

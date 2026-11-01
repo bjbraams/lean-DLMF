@@ -11,16 +11,31 @@ public import DLMF.Bessel.Lommel
 /-!
 # Monotonicity of the first zero of `J_ν` (DLMF 10.21(iv); Watson §15.6)
 
-With `B_ν(z) = ν J_ν(z) - z J_{ν+1}(z) = z J_ν'(z)`, Bessel's equation reads
-`B_ν' = (ν²/z - z) J_ν`,
-so `W = J_ν B_μ - B_ν J_μ` satisfies `W' = (μ² - ν²)/z · J_ν J_μ`.
+The first positive zero `j_{ν,1} = sInf {x > 0 | J_ν(x) = 0}` of `J_ν` is strictly increasing in
+the real order `ν ≥ 0`.
+
+## Main definitions
+
+* `besselB`: `B_ν(z) = ν J_ν(z) - z J_{ν+1}(z) = z J_ν'(z)`.
+* `besselW`: the Wronskian-type function `J_ν B_μ - B_ν J_μ`.
+
+## Main results
+
+* `hasDerivAt_besselB`: `B_ν' = (ν²/z - z) J_ν`, Bessel's equation in Sturm–Liouville form.
+* `hasDerivAt_besselW`: `(J_ν B_μ - B_ν J_μ)' = (μ² - ν²)/z · J_ν J_μ`.
+* `sInf_besselJ_zeros_spec`: the first positive zero of `J_ν` (`ν > -1` real) is attained, and
+  `J_ν > 0` before it.
+* `besselJ_first_zero_lt`: Sturm comparison for the first zeros, `j_{ν,1} < j_{μ,1}` for
+  real `0 ≤ ν < μ`.
+* `besselJ_first_positive_zero_strictMono`: the first positive zero is strictly increasing.
+
+## Implementation notes
 
 For real `0 ≤ ν < μ`, suppose `j_{μ,1} ≤ j_{ν,1}`. Then `W` is strictly increasing on
 `(0, j_{μ,1}]` and tends to `0` at `0⁺`, so `W(j_{μ,1}) = J_ν(j_{μ,1}) J_μ'(j_{μ,1}) j_{μ,1} > 0`.
-This contradicts `J_μ > 0` on `(0, j_{μ,1})`. Hence the first positive zero
-`sInf {x > 0 | J_ν(x) = 0}`
-is strictly increasing in `ν ≥ 0`. The infimum is attained because `J_ν > 0` near `0⁺` and the
-zero set is closed, using `DLMF.Bessel.besselJ_infinite_zeros_of_real` for nonemptiness.
+This contradicts `J_μ > 0` on `(0, j_{μ,1})`. The infimum is attained because `J_ν > 0` near
+`0⁺` and the zero set is closed, using `DLMF.Bessel.besselJ_infinite_zeros_of_real` for
+nonemptiness.
 -/
 
 @[expose] public section
@@ -77,7 +92,7 @@ theorem eventually_re_besselJ_pos {ν : ℝ} (hν : -1 < ν) :
     (analyticAt_regularized0F1 _ _).continuousAt.comp (by fun_prop)
   have hG0 : G 0 = ((Real.Gamma (ν + 1))⁻¹ : ℝ) := by
     simp only [G]
-    rw [show -(((0 : ℝ) : ℂ) ^ 2 / 4) = 0 by simp, DLMF.Confluent.regularizedHGFun_zero,
+    rw [show -(((0 : ℝ) : ℂ) ^ 2 / 4) = 0 by simp, Complex.regularizedHGFun_zero,
       regularizedHGFunCoeff_empty]
     push_cast
     rw [← Gamma_ofReal]; push_cast; simp

@@ -8,12 +8,37 @@ module
 public import DLMF.OrthogonalPolynomials.Integrals.GegenbauerAndLegendre
 
 /-!
-# Laguerre fractional integrals and Hermite Gaussian moments
+# Laguerre fractional integrals, Hermite transforms and convolutions
 
-Fractional Laguerre integration and Gaussian moment identities for Hermite polynomials.
+Fractional integrals of Laguerre polynomials (DLMF 18.17.14–18.17.15), Fourier transforms of
+Hermite and Laguerre polynomials, Laplace and Mellin transforms (DLMF 18.17.34,
+18.17.36–18.17.39), the Legendre singular integral (DLMF 18.17.44), and the Laguerre and
+Hermite convolution and triple-product integrals (DLMF 18.17.47–18.17.49).
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Integrals`.
+## Main results
+
+* `laguerrePolyL_fractional_integral`, `laguerrePolyL_fractional_tail_integral`:
+  DLMF 18.17.14 and 18.17.15.
+* `hermitePolyH_fourier_transform`, `hermitePolyH_fourier_eigenfunction`: the Hermite Fourier
+  transforms of DLMF §18.17.
+* `laguerrePolyL_fourier_transform`: the Laguerre Fourier transform of DLMF §18.17.
+* `laguerrePolyL_laplace_transform`: DLMF 18.17.34.
+* `jacobi_mellin_transform`: DLMF 18.17.36.
+* `legendre_even_mellin_transform`, `legendre_odd_mellin_transform`: DLMF 18.17.38 and
+  18.17.39.
+* `legendre_singular_integral`: DLMF 18.17.44.
+* `laguerrePolyL_convolution`, `hermitePolyH_convolution`: DLMF 18.17.47 and 18.17.48.
+* `hermitePolyH_triple_integral`: DLMF 18.17.49.
+
+## Implementation notes
+
+The Laguerre fractional integrals pass to the regularized Kummer function through Gamma
+normalization. The Hermite Fourier identities adapt the Tau Ceti Hermite functions to the
+positive, unit-frequency Fourier convention. The weighted Laguerre convolution expands the
+normalized polynomials into finite Gamma-normalized sums and scales the Beta integral; the
+Hermite convolution transfers derivatives by integration by parts and evaluates its base case
+with Hermite addition.
+
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
 -/
 

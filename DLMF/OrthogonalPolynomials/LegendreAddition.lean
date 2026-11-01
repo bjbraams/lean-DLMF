@@ -10,12 +10,28 @@ public import DLMF.OrthogonalPolynomials.Differential
 /-!
 # The finite Legendre addition kernel
 
-Derivative ladders and the differentiated Legendre equation prove the three-term
-recurrence of the finite angular kernel. Identifying its first two values gives
-Legendre's addition theorem, including vanishing sines and all boundary indices.
-The proof uses the Mathlib contributors’ analytic differentiation, finite-sum,
-and trigonometric APIs. The angle-free kernel permits complex coordinates
-satisfying `s² = 1-x²` and `t² = 1-y²`.
+Legendre's addition theorem in the form of a finite angular kernel. Derivative ladders and
+the differentiated Legendre equation give the three-term recurrence of the kernel in the
+degree; identifying its first two values gives the addition theorem, including vanishing
+sines and all boundary indices. The angle-free kernel allows complex coordinates with
+`s² = 1-x²` and `t² = 1-y²`.
+
+## Main definitions
+
+* `jet`: the derivatives of the Legendre polynomial.
+* `coeff`: the factorial-weighted product of associated Legendre derivatives.
+* `kernel`: the finite Legendre angular kernel.
+
+## Main results
+
+* `jet_raise`, `jet_lower`, `jet_ode`: derivative ladders and the differentiated Legendre
+  equation.
+* `coeff_recurrence`: the recurrence of the angular coefficients.
+* `kernel_recurrence`, `kernel_initial`: the degree recurrence and initial values of the
+  kernel.
+* `legendre_eq_kernel`: the kernel is the Legendre polynomial of the inner product
+  (Legendre's addition theorem).
+* `coeff_eq_jacobi`: the angular coefficients in the Jacobi normalization.
 -/
 
 @[expose] public section

@@ -26,7 +26,9 @@ public import Mathlib.Tactic.NormNum.RealSqrt
 /-!
 # Definitions for the solutions, reductions and applications of Painlevé equations
 
-Definitions for DLMF §§32.8–32.15 (agent ACQ32B), building on `DLMF.Painleve.Basic.Equations`.
+Definitions for DLMF §§32.8–32.15, building on `DLMF.Painleve.Basic.Equations`.
+
+## Main definitions
 
 * `yablonskiiVorobievQ` (32.8.6, the Yablonskii–Vorob'ev polynomials `Q_n`), the generating
   polynomials `yablonskiiVorobievP` of 32.8.8 and the Wronskians `yablonskiiVorobievTau` of
@@ -41,6 +43,10 @@ Definitions for DLMF §§32.8–32.15 (agent ACQ32B), building on `DLMF.Painleve
   `t ↦ u(x, t)`.
 * The longest increasing subsequence length `longestIncreasingLength` and the Tracy–Widom type
   distribution `tracyWidomF` of §32.14.
+* The moments `freudMoment`, Hankel determinants `freudHankel` and recurrence coefficients
+  `freudRecurrenceSq` of the weight of DLMF 32.15.1.
+* Picard's elliptic function `picardLambda` (DLMF 32.10.32), with its invariants `picardG₂`,
+  `picardG₃`.
 -/
 
 @[expose] public noncomputable section

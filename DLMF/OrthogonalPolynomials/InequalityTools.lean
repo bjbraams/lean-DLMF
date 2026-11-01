@@ -10,14 +10,17 @@ public import DLMF.Gamma.Inequalities
 /-!
 # Tools for inequalities of classical orthogonal polynomials
 
-Helpers for DLMF §18.14:
+Auxiliary inequalities for DLMF §18.14: elementary logarithmic inequalities, Gamma-ratio
+bounds of Kershaw type, and a Sonine-type bound for the Gegenbauer equation.
 
-* elementary logarithmic inequalities proved by monotonicity from `0`
-  (`opIneq_logRatio_even`, `opIneq_logRatio_odd`);
-* sharp Gamma-ratio bounds of Kershaw type, obtained from a strictly increasing sequence
-  dominated by Gautschi's bounds (DLMF 5.6.4): `opIneq_Gamma_even`, `opIneq_Gamma_odd`;
-* a Sonine-type bound for solutions of the Gegenbauer equation with `0 < λ < 1`
-  (`opIneq_gegenbauer_sonine`), which is the core of Lorch's inequality DLMF 18.14.7.
+## Main results
+
+* `opIneq_logRatio_even`, `opIneq_logRatio_odd`: logarithmic inequalities, by monotonicity
+  from `0`.
+* `opIneq_Gamma_even`, `opIneq_Gamma_odd`: sharp Gamma-ratio bounds of Kershaw type, from a
+  strictly increasing sequence dominated by Gautschi's bounds (DLMF 5.6.4).
+* `opIneq_gegenbauer_sonine`: a Sonine-type bound for solutions of the Gegenbauer equation
+  with `0 < λ < 1`, the core of Lorch's inequality DLMF 18.14.7.
 -/
 
 @[expose] public section

@@ -11,9 +11,16 @@ public import DLMF.Confluent.ExpIntegral
 /-!
 # Special cases from Duverney, Chapters 3–4
 
-* `ordinaryHypergeometric_one_one_half`: `F(1,1;a+1;1/2) = a(ψ((a+1)/2) - ψ(a/2))` (Ex. 4.10), from
-  Euler's transformation and `half_argument_digamma`.
-* `Real.sinInt_eq_regularizedHGFun`: `Si(x) = x ₁F₂(1/2; 3/2, 3/2; -x²/4)` (Duverney (3.19)).
+## Main results
+
+* `ordinaryHypergeometric_one_one_half`: `F(1,1;a+1;1/2) = a(ψ((a+1)/2) - ψ(a/2))` (Ex. 4.10),
+  from Euler's transformation and `half_argument_digamma`.
+* `Real.sinInt_eq_regularizedHGFun`: `Si(x) = x ₁F₂(1/2; 3/2, 3/2; -x²/4)` (Duverney (3.19)), in
+  regularized form `Si(x) = (π/4) x 𝐅(1/2; 3/2, 3/2; -x²/4)`.
+
+## References
+
+* D. Duverney, *An Introduction to Hypergeometric Functions*, Chapters 3–4.
 -/
 
 @[expose] public section

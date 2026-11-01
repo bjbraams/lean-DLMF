@@ -11,18 +11,31 @@ public import DLMF.Hypergeometric.ConnectionFormulas
 /-!
 # Parameter dependence and boundary convergence (DLMF §§15.2, 15.4)
 
-Already in Mathlib, without duplicate declarations here:
-* DLMF 15.2.E1: `ordinaryHypergeometric_eq_tsum`.
-* DLMF 15.2.E2: `coeff_regularizedGaussHGFunSeries` and the definition
-  `regularizedGaussHGFun`; `ordinaryHypergeometric_div_Gamma_eq` compares them.
-* DLMF 15.2.i: `ordinaryHypergeometricSeries_radius_eq_one` and
-  `ordinaryHypergeometric_radius_top_of_neg_nat₁/₂/₃` cover the series radius.
-See https://dlmf.nist.gov/15.2 . These Mathlib functions are sums of series;
-their values outside convergence are not DLMF's analytic continuations.
-Conditional convergence is therefore stated with ordered finite partial sums.
-The terminating identity E4 and absolute convergence on the unit circle already
-appear in `Basic`. E5/E6 prescribe different singular-parameter limit conventions;
-the diagonal convention E6 must not be confused with totalized division.
+## Main results
+
+* `regularized_at_neg_nat`, `tendsto_regularized_at_neg_nat`: the regularized function at a
+  nonpositive integer denominator parameter, DLMF 15.2.3_5.
+* `entire_regularized_parameters`: `𝐅(a,b;c;z)` is jointly entire in `(a, b, c)` on the unit
+  disk (§15.2(ii)).
+* `conditional_convergence_on_circle`, `divergence_on_circle`: conditional convergence and
+  divergence on the unit circle (§15.2(i)).
+* `terminating_iterated_parameter_limit`, `diagonal_parameter_limit`: the singular-parameter
+  limit conventions DLMF 15.2.5 and 15.2.6.
+* `zero_balanced_limit`, `imaginary_excess_limit`: the boundary behaviour at `z = 1`,
+  DLMF 15.4.21–15.4.22.
+
+## Implementation notes
+
+Already in Mathlib, without duplicate declarations here: DLMF 15.2.1 is
+`ordinaryHypergeometric_eq_tsum`; DLMF 15.2.2 is `coeff_regularizedGaussHGFunSeries` and the
+definition `regularizedGaussHGFun`, compared by `ordinaryHypergeometric_div_Gamma_eq`; the
+series radius of §15.2(i) is `ordinaryHypergeometricSeries_radius_eq_one` and
+`ordinaryHypergeometric_radius_top_of_neg_nat₁/₂/₃`. These Mathlib functions are sums of series;
+their values outside convergence are not DLMF's analytic continuations, so conditional
+convergence is stated with ordered finite partial sums. The terminating identity 15.2.4 and
+absolute convergence on the unit circle are in `DLMF.Hypergeometric.SeriesProperties`. DLMF 15.2.5
+and 15.2.6 prescribe different singular-parameter limit conventions; the diagonal convention
+15.2.6 must not be confused with totalized division.
 -/
 
 @[expose] public section

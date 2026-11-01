@@ -8,12 +8,25 @@ module
 public import DLMF.Legendre.Associated.QuadraticFerrers
 
 /-!
-# Conjugation and special associated Legendre values
+# Conjugation, analyticity and differential equations of associated Legendre functions
 
-Conjugation symmetry and special-parameter relations for associated Legendre functions.
+Conjugation symmetry of the Ferrers functions, Olver's normalization, analyticity in the
+argument and the parameters, reality, and the associated Legendre equation for `P^μ_ν`, `𝑸^μ_ν`
+and `𝖰^μ_ν`.
 
-Source references and common attribution are retained in
-`DLMF.Legendre.Associated`.
+## Main results
+
+* `ferrersP_conj`, `ferrersQ_conj`, `ferrersEven_conj`, `ferrersOdd_conj`: conjugation symmetry
+  of the Ferrers functions.
+* `olverQ_normalization`: `𝑸^μ_ν(z) = e^{-μπi} Q^μ_ν(z)/Γ(ν+μ+1)` (DLMF 14.3.10).
+* `associatedP_zero_order`, `associatedQ_zero_order`: compatibility with the degree-only
+  Legendre functions.
+* `associatedP_analytic`, `associatedP_entire_degree`, `associatedP_entire_order`,
+  `olverQ_analytic`, `olverQ_entire_degree`, `olverQ_entire_order`: analyticity in `z` for
+  `z ∉ (-∞, 1]` and entire dependence on the parameters.
+* `associatedP_ode`, `olverQ_ode`: the associated Legendre equation DLMF 14.2.2 / 14.21.1.
+* `ferrersQ_ode`: the associated Legendre equation DLMF 14.2.2 for `𝖰^μ_ν` on `(-1, 1)`.
+* `associatedP_real`, `olverQ_real`: reality for real parameters and `x > 1`.
 -/
 
 @[expose] public noncomputable section
@@ -124,18 +137,18 @@ theorem associatedP_zero_order (ν : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     regularizedGaussHG_symm (ν+1) (-ν) 1 (mem_cutPlane_of_one_add hz')
 
 /-- Compatibility of the totalized degree-only APIs; classical Q additionally requires regular degree. -/
-theorem associatedQ_zero_order (ν : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem associatedQ_zero_order (ν : ℂ) {z : ℂ} :
     associatedQ ν 0 z=legendreQ ν z := by
   simp only [associatedQ, olverQ, legendreQ, legendreBranchPower, zero_mul, zero_div,
     Complex.exp_zero, mul_one, one_mul, add_zero, cpow_neg]
   ring
 
 /-- At order zero and natural degree, `𝑸_n = Q_n/n!`. -/
-theorem legInt_olverQ_nat_zero_order (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_olverQ_nat_zero_order (n : ℕ) {z : ℂ} :
     olverQ n 0 z = legendreQ n z / n.factorial := by
   have hreg : LegendreQRegular (n:ℂ) 0 := fun k hk => by
     have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
-  rw [olverQ_normalization hreg, associatedQ_zero_order _ hz, add_zero, Gamma_nat_eq_factorial]
+  rw [olverQ_normalization hreg, associatedQ_zero_order _, add_zero, Gamma_nat_eq_factorial]
   simp
 
 /-- `P^μ_ν(z)` is analytic in `z` for `z-1` in the slit plane (`z ∉ (-∞, 1]`), for all complex `ν,

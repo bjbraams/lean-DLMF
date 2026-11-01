@@ -580,7 +580,7 @@ theorem pcfLG_tendsto_U_div {μ : ℝ} (hμ : 0 < μ) :
     Tendsto (fun t : ℝ => pcfU (-μ^2/2) (μ*t*Real.sqrt 2) /
       ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) atTop (𝓝 (pcfH μ)) := by
   set a : ℂ := -(μ:ℂ)^2/2
-  have hO := pcfU_sector_asymptotic a (δ := π/4) (by positivity) (by linarith [Real.pi_pos]) 1
+  have hO := pcfU_sector_asymptotic a (δ := π/4) (by positivity) 1
   have hz2 : Tendsto (fun z : ℂ => z ^ (-(2*(1:ℕ):ℤ))) (sector (3*π/4-π/4)) (𝓝 0) := by
     have : Tendsto (fun z : ℂ => ‖z‖) (sector (3*π/4-π/4)) atTop :=
       tendsto_comap.mono_left inf_le_left

@@ -14,16 +14,33 @@ public import Mathlib.RingTheory.PowerSeries.Basic
 /-!
 # Clausen's formula (Duverney §4.4.2; DLMF 16.12.2)
 
-`F(a, b; a+b+1/2; z)² = ₃F₂(2a, 2b, a+b; a+b+1/2, 2a+2b; z)`. With the Euler operator
-`θ = X d/dX` on formal power series, the Gauss equation `θ(θ+c-1)F = X(θ+a)(θ+b)F` with
-`c = a+b+1/2` implies that `w = F²` satisfies the generalized equation
+`F(a, b; a+b+1/2; z)² = ₃F₂(2a, 2b, a+b; a+b+1/2, 2a+2b; z)`, with Euler's series for `arcsin²`
+and `π² = 18 ∑ 1/(n² C(2n,n))` as corollaries.
+
+## Main definitions
+
+* `thetaPS`: the Euler operator `θ = X d/dX` on formal power series.
+* `gaussPS`: the Gauss series as a formal power series.
+* `clausenCoeff`: the coefficients of the Clausen `₃F₂`.
+
+## Main results
+
+* `gaussPS_ode`: the Gauss equation `θ(θ+c-1)F = X(θ+a)(θ+b)F` for formal power series.
+* `clausen_recurrence`, `coeff_gaussPS_sq_eq_clausenCoeff`: the coefficient recurrence of `F²`.
+* `clausen_formula`: Clausen's formula, DLMF 16.12.2 (Duverney (4.40)).
+* `hasSum_arcsin_sq`: `2 arcsin² x = ∑ (2x)^{2n}/(n² C(2n,n))` (Duverney (4.45)–(4.46)).
+* `hasSum_recip_sq_mul_centralBinom`: `π² = 18 ∑ 1/(n² C(2n,n))` (Duverney Ex. 4.6).
+
+## Implementation notes
+
+With `c = a+b+1/2`, the Gauss equation implies that `w = F²` satisfies the generalized equation
 `θ(θ+c-1)(θ+2a+2b-1)w = X(θ+2a)(θ+2b)(θ+a+b)w`. In fact
 `T(w) = 2F·θE + (4aF + 4bF - 2F + 6θF)·E`, where `E` is the Gauss equation; the multipliers
-were found by computer algebra and the identity is checked by `linear_combination`. Comparing
-coefficients gives the `₃F₂` recurrence for the coefficients of `F²`, hence Clausen's formula.
+were found by computer algebra and the identity is checked by `linear_combination`.
 
-Corollaries: Euler's series `2 arcsin² x = ∑ (2x)^{2n}/(n² C(2n,n))` (Duverney (4.45)–(4.46)) and
-`π² = 18 ∑ 1/(n² C(2n,n))` (Duverney Ex. 4.6).
+## References
+
+* D. Duverney, *An Introduction to Hypergeometric Functions*, §4.4.2.
 -/
 
 @[expose] public section

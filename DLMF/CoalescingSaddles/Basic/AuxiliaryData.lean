@@ -10,24 +10,37 @@ public import DLMF.CoalescingSaddles.Basic.CanonicalIntegrals
 public import DLMF.Airy.Basic
 
 /-!
-# Integrals with coalescing saddles: definitions for DLMF §§36.7–36.11
+# Coalescing saddles: auxiliary definitions
 
-Definitions used by the part B files of DLMF Chapter 36 (namespace `DLMF.CoalescingSaddles`);
-the canonical integrals themselves are in
+Definitions used by the theorem files of DLMF Chapter 36 (namespace `DLMF.CoalescingSaddles`)
+for §§36.7–36.11; the canonical integrals themselves are in
 `DLMF.CoalescingSaddles.Basic.CanonicalIntegrals`.
 
-* **Moments** (helpers for §36.10). `cuspoidMoment K x p = ∫ d(r) t(r)^p exp(iΦ_K(t(r); x)) dr`
-  over the rotated contour `t(r) = r d(r)` of `cuspoidIntegral`, so that
-  `cuspoidMoment K x 0 = Ψ_K(x)`, and `hyperbolicUmbilicMoment x y z a b`, the analogous
-  moment `∫∫ s^a t^b exp(iΦ^{(H)})` over the contour of `hyperbolicUmbilicIntegral`.
-* **Convergent series** (§36.8). The coefficients `a_n(x)` of 36.8.2
-  (`cuspoidSeriesCoeff`), the polynomials `c_n, d_n` of 36.8.6 (`umbilicSeriesC`,
-  `umbilicSeriesD`) and the functions `f_n` of 36.8.5 (`ellipticUmbilicSeriesF`).
-* **Zeros** (§36.7). The approximate zero loci printed by DLMF: 36.7.1 (inside the cusp),
-  36.7.2–36.7.3 (outside the cusp), 36.7.4–36.7.7 (the ring lattice of the elliptic umbilic)
-  and 36.7.8 (the zero lines of `Ψ^{(E)}` in the plane `z = 0`). Signs `±` are units of `ℤ`.
-* **Stationary phase** (§36.11). `cuspoidStationaryPhaseSum K x`, the right-hand side of
-  36.11.2 without the factors `1 + o(1)`.
+## Main definitions
+
+* `cuspoidMoment`: the moment `∫ d(r) t(r)^p exp(iΦ_K(t(r); x)) dr` over the rotated contour
+  `t(r) = r d(r)` of `cuspoidIntegral`, so that `cuspoidMoment K x 0 = Ψ_K(x)` (helper for
+  §36.10).
+* `hyperbolicUmbilicMoment`: the analogous moment `∫∫ s^a t^b exp(iΦ^{(H)})` over the contour
+  of `hyperbolicUmbilicIntegral`.
+* `cuspoidSeriesCoeff`: the coefficients `a_n(x)` of the cuspoid series (DLMF 36.8.2).
+* `umbilicSeriesC`, `umbilicSeriesD`: the polynomials `c_n`, `d_n` (DLMF 36.8.6).
+* `ellipticUmbilicSeriesF`: the functions `f_n` (DLMF 36.8.5).
+* `cuspInnerZeroY`, `cuspInnerZeroX`: approximate zeros of the Pearcey integral inside the cusp
+  (DLMF 36.7.1).
+* `IsCuspOuterZeroParam`, `cuspOuterZeroY`, `cuspOuterZeroX`: approximate zeros outside the
+  cusp (DLMF 36.7.2–36.7.3).
+* `ellipticUmbilicRingPlane`, `ellipticUmbilicLatticeDz`, `ellipticUmbilicLatticeDx`,
+  `ellipticUmbilicRingEquation`, `ellipticUmbilicRingCount`: the ring lattice of zeros of the
+  elliptic umbilic integral (DLMF 36.7.4–36.7.7).
+* `ellipticUmbilicPlaneZeroRadius`: the zero lines of `Ψ^{(E)}` in the plane `z = 0`
+  (DLMF 36.7.8).
+* `cuspoidStationaryPhaseSum`: the right-hand side of DLMF 36.11.2 without the factors
+  `1 + o(1)`.
+
+## Implementation notes
+
+The zero loci are the approximate formulas printed by DLMF. Signs `±` are units of `ℤ`.
 -/
 
 @[expose] public noncomputable section

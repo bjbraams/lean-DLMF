@@ -11,16 +11,48 @@ public import Mathlib.Combinatorics.Enumerative.Partition.Glaisher
 public import DLMF.QSeries.QExponential
 public import Mathlib.Combinatorics.Enumerative.Pentagonal.PowerSeries
 public import Mathlib.RingTheory.PowerSeries.Expand
-public import DLMF.Combinatorics.S26aStaircase
+public import DLMF.Combinatorics.Staircase
 public import DLMF.Bailey
 
 /-!
-# Generating products for restricted partitions
+# Generating products for restricted partitions (DLMF §26.10(i)–(ii))
 
-Generating series and finite products for partitions with restrictions on their parts.
+Restricted partition counts of DLMF §26.10(i), on Mathlib's `Nat.Partition`, and the
+generating products (26.10.2), (26.10.3).
 
-Source references and common attribution are retained in
-`DLMF.Combinatorics.PartitionIdentities`.
+## Main definitions
+
+* `partitionCountDistinct`, `partitionCountOdd`: `p(𝒟, n) = #(Nat.Partition.distincts n)` and
+  `p(𝒪, n) = #(Nat.Partition.odds n)`.
+* `partitionCountAtMostDistinct`, `partitionCountAtMostDistinctBoxed`: `p_m(𝒟, n)`, at most `m`
+  distinct parts, and `p_m(≤ k, 𝒟, n)`, moreover every part at most `k`.
+* `partitionCountDiff`: `p(𝒟k, n)`, any two parts differ by at least `k` (`PartsDifferAtLeast`;
+  for `k = 0` all partitions, for `k = 1` distinct parts).
+* `partitionCountSchur`: `p(𝒟'3, n)`, parts differ by at least 3 and multiples of 3 by at least 6
+  (`SchurCondition`).
+* `partitionCountIn`: `p(∈ S, n)`, parts taken from `S`; `residueSetPM j k` is `A_{j,k}` and
+  `setGeTwo` is `T = {2, 3, …}`.
+* `partitionCountDiffTwoNoOne`: `p(𝒟2, ∈ T, n)`. Combined restrictions are conjunctions.
+
+## Main results
+
+* `partitionCount_zero`: `p(𝒟, 0) = p(𝒟k, 0) = p(∈ S, 0) = 1` (DLMF 26.10.1).
+* `hasSum_partitionCountDistinct`, `hasProd_one_sub_odd_pow_inv`,
+  `hasSum_pow_triangle_div_qPochhammer`, `hasSum_pow_mul_prod_one_add`: the four members of
+  DLMF 26.10.2 for `|q| < 1`.
+* `hasSum_distinct_largest`: the generating function of partitions into distinct parts with
+  largest part `m` (DLMF §26.10(ii)).
+* `hasSum_partitionCountAtMostDistinctBoxed`, `sum_qBinom_triangle_eq_prod`: DLMF 26.10.3.
+
+## Implementation notes
+
+Euler's identity (26.10.12) is Mathlib's `Nat.Partition.card_odds_eq_card_distincts` (pointer in
+`DLMF.Combinatorics.MathlibCoverageB`). The finite identity (26.10.3) holds for every `q`, which
+is stronger than DLMF.
+
+## References
+
+* NIST DLMF §26.10.
 -/
 
 @[expose] public section
@@ -105,18 +137,11 @@ instance : DecidablePred (· ∈ setGeTwo) := fun n => by
 def partitionCountDiffTwoNoOne (n : ℕ) : ℕ :=
   #{p : n.Partition | PartsDifferAtLeast 2 p ∧ ∀ i ∈ p.parts, i ∈ setGeTwo}
 
-/-- The partitions of `0`: there is exactly one. -/
-lemma c26b_partition_zero_eq (p : (0 : ℕ).Partition) : p.parts = 0 := by
-  refine Multiset.eq_zero_of_forall_notMem fun i hi => ?_
-  have := p.parts_pos hi
-  have := Nat.Partition.le_of_mem_parts hi
-  omega
-
 /-- Identity under the stated parameter and domain assumptions: `#{p : (0 : ℕ).Partition | P p} =
 1`. -/
-lemma c26b_card_filter_partition_zero (P : (0 : ℕ).Partition → Prop) [DecidablePred P]
+private lemma card_filter_partition_zero (P : (0 : ℕ).Partition → Prop) [DecidablePred P]
     (h : ∀ p, p.parts = 0 → P p) : #{p : (0 : ℕ).Partition | P p} = 1 := by
-  rw [Finset.filter_true_of_mem fun p _ => h p (c26b_partition_zero_eq p), card_univ]
+  rw [Finset.filter_true_of_mem fun p _ => h p (Nat.Partition.partition_zero_parts p), card_univ]
   exact partitionFunction_zero
 
 /-- (26.10.1): `p(𝒟, 0) = p(𝒟k, 0) = p(∈ S, 0) = 1`. -/
@@ -125,33 +150,33 @@ theorem partitionCount_zero (k : ℕ) (S : Set ℕ) [DecidablePred (· ∈ S)] :
     partitionCountDistinct 0 = 1 ∧ partitionCountDiff k 0 = 1 ∧ partitionCountIn S 0 = 1 := by
   refine ⟨?_, ?_, ?_⟩
   · unfold partitionCountDistinct Nat.Partition.distincts
-    exact c26b_card_filter_partition_zero _ fun p hp => by rw [hp]; simp
+    exact card_filter_partition_zero _ fun p hp => by rw [hp]; simp
   · unfold partitionCountDiff
-    exact c26b_card_filter_partition_zero _ fun p hp => by
+    exact card_filter_partition_zero _ fun p hp => by
       unfold PartsDifferAtLeast; rw [hp]; simp
   · unfold partitionCountIn Nat.Partition.restricted
-    exact c26b_card_filter_partition_zero _ fun p hp => by rw [hp]; simp
+    exact card_filter_partition_zero _ fun p hp => by rw [hp]; simp
 
 /-- `(w; q)_∞` as an unconditional product. -/
-lemma r26a_hasProd_one_sub {w q : ℂ} (hq : ‖q‖ < 1) :
+lemma hasProd_one_sub_mul_pow {w q : ℂ} (hq : ‖q‖ < 1) :
     HasProd (fun k : ℕ => 1 - w * q ^ k) (qPochhammerInf w q) :=
   (multipliable_one_sub_mul_pow hq).hasProd
 
 /-- `∏_{j ≥ 1} (1 + q^j) = (-q; q)_∞`. -/
-lemma r26a_tprod_one_add_eq {q : ℂ} :
+private lemma tprod_one_add_pow_succ {q : ℂ} :
     ∏' j : ℕ, (1 + q ^ (j + 1)) = qPochhammerInf (-q) q := by
   unfold qPochhammerInf
   congr 1; ext j; ring
 
 /-- `∏_{j ≥ 1} (1 + q^j)` converges unconditionally for `|q| < 1`. -/
-lemma r26a_hasProd_one_add {q : ℂ} (hq : ‖q‖ < 1) :
+private lemma hasProd_one_add_pow_succ {q : ℂ} (hq : ‖q‖ < 1) :
     HasProd (fun j : ℕ => 1 + q ^ (j + 1)) (∏' j : ℕ, (1 + q ^ (j + 1))) := by
-  rw [r26a_tprod_one_add_eq]
-  convert r26a_hasProd_one_sub (w := -q) hq using 2 with j
+  rw [tprod_one_add_pow_succ]
+  convert hasProd_one_sub_mul_pow (w := -q) hq using 2 with j
   ring
 
 /-- Removing `k` copies of an allowed part `a`, keeping track of the remaining multiplicity. -/
-lemma r26a_card_restricted_count_ge' (P : ℕ → Prop) [DecidablePred P] {a : ℕ} (ha1 : 1 ≤ a)
+private lemma card_restricted_count_ge_filter_count_sub (P : ℕ → Prop) [DecidablePred P] {a : ℕ} (ha1 : 1 ≤ a)
     (hP : P a) (Q : ℕ → Prop) [DecidablePred Q] : ∀ k n : ℕ, k * a ≤ n →
       #{p ∈ Nat.Partition.restricted n P | k ≤ p.parts.count a ∧ Q (p.parts.count a - k)} =
         #{q ∈ Nat.Partition.restricted (n - k * a) P | Q (q.parts.count a)} := by
@@ -195,7 +220,7 @@ lemma r26a_card_restricted_count_ge' (P : ℕ → Prop) [DecidablePred P] {a : �
         rwa [show Multiset.count a q.parts + 1 - (k + 1) = Multiset.count a q.parts - k by omega]
 
 /-- Adjoining an allowed part `a ∉ P`: `p(P ∪ {a}, n) = ∑_{m a ≤ n} p(P, n - m a)`. -/
-lemma r26a_card_restricted_insert (P : ℕ → Prop) [DecidablePred P] {a : ℕ} (ha1 : 1 ≤ a)
+private lemma card_restricted_insert (P : ℕ → Prop) [DecidablePred P] {a : ℕ} (ha1 : 1 ≤ a)
     (hPa : ¬ P a) (n : ℕ) :
     #(Nat.Partition.restricted n (fun i => i = a ∨ P i)) =
       ∑ m ∈ range (n + 1) with m * a ≤ n, #(Nat.Partition.restricted (n - m * a) P) := by
@@ -211,7 +236,7 @@ lemma r26a_card_restricted_insert (P : ℕ → Prop) [DecidablePred P] {a : ℕ}
     (fun m => m * a ≤ n), sum_eq_zero (s := (range (n + 1)).filter fun m => ¬ m * a ≤ n), add_zero]
   · refine sum_congr rfl fun m hm => ?_
     simp only [mem_filter] at hm
-    have h := r26a_card_restricted_count_ge' P' ha1 (Or.inl rfl) (· = 0) m n hm.2
+    have h := card_restricted_count_ge_filter_count_sub P' ha1 (Or.inl rfl) (· = 0) m n hm.2
     have e1 : ({p ∈ Nat.Partition.restricted n P' | p.parts.count a = m} : Finset _) =
         {p ∈ Nat.Partition.restricted n P' | m ≤ p.parts.count a ∧ p.parts.count a - m = 0} :=
       filter_congr fun p _ => by omega
@@ -241,7 +266,7 @@ lemma r26a_card_restricted_insert (P : ℕ → Prop) [DecidablePred P] {a : ℕ}
     omega
 
 /-- Partitions with all parts in `∅`: only the empty partition of `0`. -/
-lemma r26a_card_restricted_false (n : ℕ) :
+private lemma card_restricted_empty (n : ℕ) :
     #(Nat.Partition.restricted n (· ∈ (∅ : Finset ℕ))) = if n = 0 then 1 else 0 := by
   split_ifs with hn
   · subst hn
@@ -259,7 +284,7 @@ lemma r26a_card_restricted_false (n : ℕ) :
     simpa using hp x hx
 
 /-- The geometric series `∑_m q^{a m}` as a series in `n` supported on multiples of `a`. -/
-lemma r26a_hasSum_dvd {a : ℕ} (ha : 1 ≤ a) {q : ℂ} (hq : ‖q‖ < 1) :
+private lemma hasSum_ite_dvd_mul_pow {a : ℕ} (ha : 1 ≤ a) {q : ℂ} (hq : ‖q‖ < 1) :
     HasSum (fun n : ℕ => (if a ∣ n then (1 : ℂ) else 0) * q ^ n) (1 - q ^ a)⁻¹ := by
   have hqa : ‖q ^ a‖ < 1 := by
     rw [norm_pow]; exact pow_lt_one₀ (norm_nonneg _) hq (by omega)
@@ -273,13 +298,13 @@ lemma r26a_hasSum_dvd {a : ℕ} (ha : 1 ≤ a) {q : ℂ} (hq : ‖q‖ < 1) :
     simp [this]
 
 /-- (26.10.5) for a finite set of allowed parts. -/
-lemma r26a_hasSum_restricted_finset (T : Finset ℕ) (hT : 0 ∉ T) : ∀ q : ℂ, ‖q‖ < 1 →
+private lemma hasSum_card_restricted_finset (T : Finset ℕ) (hT : 0 ∉ T) : ∀ q : ℂ, ‖q‖ < 1 →
     HasSum (fun n => (#(Nat.Partition.restricted n (· ∈ T)) : ℂ) * q ^ n)
       (∏ j ∈ T, (1 - q ^ j)⁻¹) := by
   induction T using Finset.induction_on with
   | empty =>
     intro q _
-    simp_rw [r26a_card_restricted_false, prod_empty]
+    simp_rw [card_restricted_empty, prod_empty]
     convert hasSum_ite_eq 0 (1 : ℂ) using 1
     ext n
     split_ifs <;> simp_all
@@ -290,7 +315,7 @@ lemma r26a_hasSum_restricted_finset (T : Finset ℕ) (hT : 0 ∉ T) : ∀ q : �
     have hc : ∀ n, #(Nat.Partition.restricted n (· ∈ insert a T)) =
         ∑ m ∈ range (n + 1) with m * a ≤ n, #(Nat.Partition.restricted (n - m * a) (· ∈ T)) := by
       intro n
-      rw [← r26a_card_restricted_insert (· ∈ T) ha haT n]
+      rw [← card_restricted_insert (· ∈ T) ha haT n]
       congr 1
       exact filter_congr fun p _ => by simp [mem_insert]
     set c : ℕ → ℕ := fun n => #(Nat.Partition.restricted n (· ∈ T))
@@ -301,7 +326,7 @@ lemma r26a_hasSum_restricted_finset (T : Finset ℕ) (hT : 0 ∉ T) : ∀ q : �
         convert h using 2 with n; push_cast; rfl
       convert Complex.summable_ofReal.mp h2 using 2 with n
       rw [norm_mul, norm_pow, Complex.norm_natCast]
-    have hg := r26a_hasSum_dvd ha hq
+    have hg := hasSum_ite_dvd_mul_pow ha hq
     have hgn : Summable fun n : ℕ => ‖(if a ∣ n then (1 : ℂ) else 0) * q ^ n‖ := by
       refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun n => ?_)
         (summable_geometric_of_lt_one (norm_nonneg q) hq)
@@ -349,7 +374,7 @@ lemma r26a_hasSum_restricted_finset (T : Finset ℕ) (hT : 0 ∉ T) : ∀ q : �
       exact mul_comm _ _
 
 /-- `∏_{j ∈ T} (1 - r^j)⁻¹ ≤ exp(1/(1-r)²)` for `0 ≤ r < 1` and `0 ∉ T`. -/
-lemma r26a_prod_inv_le {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) (T : Finset ℕ) (hT : 0 ∉ T) :
+lemma prod_one_sub_pow_inv_le {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) (T : Finset ℕ) (hT : 0 ∉ T) :
     ∏ j ∈ T, (1 - r ^ j)⁻¹ ≤ Real.exp (1 / (1 - r) ^ 2) := by
   have h1r : 0 < 1 - r := by linarith
   have hfac : ∀ j ∈ T, (1 - r ^ j)⁻¹ ≤ Real.exp (r ^ j / (1 - r)) := by
@@ -376,7 +401,7 @@ lemma r26a_prod_inv_le {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) (T : Finset ℕ) (
 
 /-- (26.10.5) for an arbitrary set of allowed positive parts (`0 ∉ S` is irrelevant: parts are
 positive). -/
-lemma r26a_hasSum_partitionCountIn {q : ℂ} (hq : ‖q‖ < 1) (S : Set ℕ) [DecidablePred (· ∈ S)] :
+lemma hasSum_partitionCountIn_and_hasProd {q : ℂ} (hq : ‖q‖ < 1) (S : Set ℕ) [DecidablePred (· ∈ S)] :
     HasSum (fun n => (partitionCountIn S n : ℂ) * q ^ n)
         (∏' j : ℕ, if j + 1 ∈ S then (1 - q ^ (j + 1))⁻¹ else 1) ∧
       HasProd (fun j : ℕ => if j + 1 ∈ S then (1 - q ^ (j + 1))⁻¹ else 1)
@@ -444,7 +469,7 @@ lemma r26a_hasSum_partitionCountIn {q : ℂ} (hq : ‖q‖ < 1) (S : Set ℕ) [D
   have hr0 : 0 ≤ r := norm_nonneg q
   have hreal : ∀ N, HasSum (fun n => (cN N n : ℝ) * r ^ n) (∏ j ∈ T N, (1 - r ^ j)⁻¹) := by
     intro N
-    have h := r26a_hasSum_restricted_finset (T N) (hT0 N) (r : ℂ) (by simpa [r] using hq)
+    have h := hasSum_card_restricted_finset (T N) (hT0 N) (r : ℂ) (by simpa [r] using hq)
     rw [← Complex.hasSum_ofReal]
     push_cast
     exact h
@@ -455,7 +480,7 @@ lemma r26a_hasSum_partitionCountIn {q : ℂ} (hq : ‖q‖ < 1) (S : Set ℕ) [D
           sum_congr rfl fun n hn => by rw [hceq M n (by simp at hn; omega)]
       _ ≤ ∏ j ∈ T M, (1 - r ^ j)⁻¹ :=
           sum_le_hasSum _ (fun n _ => by positivity) (hreal M)
-      _ ≤ _ := r26a_prod_inv_le hr0 hq (T M) (hT0 M)
+      _ ≤ _ := prod_one_sub_pow_inv_le hr0 hq (T M) (hT0 M)
   have hsumq : Summable fun n => (c n : ℂ) * q ^ n :=
     Summable.of_norm_bounded hsumc fun n => by rw [norm_mul, norm_pow, Complex.norm_natCast]
   -- Tannery
@@ -470,7 +495,7 @@ lemma r26a_hasSum_partitionCountIn {q : ℂ} (hq : ‖q‖ < 1) (S : Set ℕ) [D
   have hT' : Tendsto (fun N => ∏ j ∈ range N, f q j) atTop
       (nhds (∑' n, (c n : ℂ) * q ^ n)) := by
     refine hT.congr fun N => ?_
-    rw [(r26a_hasSum_restricted_finset (T N) (hT0 N) q hq).tsum_eq, hprodT]
+    rw [(hasSum_card_restricted_finset (T N) (hT0 N) q hq).tsum_eq, hprodT]
   have := tendsto_nhds_unique hT' (hmult q hq).tendsto_prod_tprod_nat
   rw [← this]
   exact hsumq.hasSum
@@ -483,9 +508,9 @@ theorem hasProd_one_sub_odd_pow_inv {q : ℂ} (hq : ‖q‖ < 1) :
   set O := qPochhammerInf q (q ^ 2)
   set E := qPochhammerInf (q ^ 2) (q ^ 2)
   have hO : HasProd (fun j : ℕ => 1 - q ^ (2 * j + 1)) O := by
-    convert r26a_hasProd_one_sub (w := q) hq2 using 2 with j; ring
+    convert hasProd_one_sub_mul_pow (w := q) hq2 using 2 with j; ring
   have hE : HasProd (fun j : ℕ => 1 - q ^ (2 * j + 2)) E := by
-    convert r26a_hasProd_one_sub (w := q ^ 2) hq2 using 2 with j; ring
+    convert hasProd_one_sub_mul_pow (w := q ^ 2) hq2 using 2 with j; ring
   have hO0 : O ≠ 0 :=
     qPochhammerInf_ne_zero_of_norm_lt_one (by simpa using hq.trans_le' (le_refl _)) hq2
   have hE0 : E ≠ 0 := qPochhammerInf_ne_zero_of_norm_lt_one hq2 hq2
@@ -493,7 +518,7 @@ theorem hasProd_one_sub_odd_pow_inv {q : ℂ} (hq : ‖q‖ < 1) :
     refine HasProd.even_mul_odd ?_ ?_
     · convert hO using 2 with k
     · convert hE using 2 with k
-  have hA := r26a_hasProd_one_add hq
+  have hA := hasProd_one_add_pow_succ hq
   have hAB := hA.mul hB
   have hAB' : HasProd (fun j : ℕ => 1 - q ^ (2 * j + 2))
       ((∏' j : ℕ, (1 + q ^ (j + 1))) * (O * E)) := by
@@ -512,8 +537,8 @@ theorem hasSum_partitionCountDistinct {q : ℂ} (hq : ‖q‖ < 1) :
     HasSum (fun n => (partitionCountDistinct n : ℂ) * q ^ n) (∏' j : ℕ, (1 + q ^ (j + 1))) ∧
       HasProd (fun j : ℕ => 1 + q ^ (j + 1)) (∏' j : ℕ, (1 + q ^ (j + 1))) := by
   have hodd := hasProd_one_sub_odd_pow_inv hq
-  refine ⟨?_, r26a_hasProd_one_add hq⟩
-  have hS := r26a_hasSum_partitionCountIn hq {j | Odd j}
+  refine ⟨?_, hasProd_one_add_pow_succ hq⟩
+  have hS := hasSum_partitionCountIn_and_hasProd hq {j | Odd j}
   have hd : ∀ n, partitionCountDistinct n = partitionCountIn {j | Odd j} n := by
     intro n
     rw [partitionCountDistinct, ← Nat.Partition.card_odds_eq_card_distincts, partitionCountIn]
@@ -560,7 +585,7 @@ theorem hasSum_pow_triangle_div_qPochhammer {q : ℂ} (hq : ‖q‖ < 1) :
           gcongr
       _ = D * ‖q‖ ^ m := by ring
   convert hs.hasSum using 1
-  rw [r26a_tprod_one_add_eq, ← tsum_qExp hq q]
+  rw [tprod_one_add_pow_succ, ← tsum_qExp hq q]
   exact tsum_congr fun m => (he m).symm
 
 /-- (26.10.2), fourth equality: `∏_{j ≥ 1} (1 + q^j) = 1 + ∑_{m ≥ 1} q^m (1+q)⋯(1+q^{m-1})`
@@ -580,7 +605,7 @@ theorem hasSum_pow_mul_prod_one_add {q : ℂ} (hq : ‖q‖ < 1) :
       have : ∏ i ∈ Ico 1 (N + 1), (1 + q ^ i) = ∏ j ∈ range N, (1 + q ^ (j + 1)) := by
         rw [prod_Ico_eq_prod_range]; simp [add_comm]
       rw [this]; ring
-  have hA := (r26a_hasProd_one_add hq).tendsto_prod_nat
+  have hA := (hasProd_one_add_pow_succ hq).tendsto_prod_nat
   -- bound the terms
   set B := ∏' j : ℕ, (1 + ‖q‖ ^ (j + 1))
   have hbd : ∀ m, ‖∏ i ∈ Ico 1 m, (1 + q ^ i)‖ ≤ Real.exp (1 / (1 - ‖q‖)) := by
@@ -607,7 +632,7 @@ theorem hasSum_pow_mul_prod_one_add {q : ℂ} (hq : ‖q‖ < 1) :
 
 /-- Distinct partitions of `n` with largest part `m ≥ 1` against subsets `T ⊆ [1, m)` with
 `m + ∑ T = n`. -/
-lemma r26a_card_distinct_sup {m : ℕ} (hm : 1 ≤ m) (n : ℕ) :
+private lemma card_distincts_sup_eq {m : ℕ} (hm : 1 ≤ m) (n : ℕ) :
     #{p ∈ Nat.Partition.distincts n | p.parts.sup = m} =
       #{T ∈ (Ico 1 m).powerset | m + ∑ i ∈ T, i = n} := by
   symm
@@ -697,7 +722,7 @@ theorem hasSum_distinct_largest (q : ℂ) (m : ℕ) :
     simp_rw [h]
     simpa using hasSum_ite_eq 0 (1 : ℂ)
   -- `m ≥ 1`: expand the product over subsets of `[1, m)`
-  simp_rw [r26a_card_distinct_sup hm]
+  simp_rw [card_distincts_sup_eq hm]
   set g : Finset ℕ → ℕ := fun T => m + ∑ i ∈ T, i
   have hval : q ^ m * ∏ i ∈ Ico 1 m, (1 + q ^ i) = ∑ T ∈ (Ico 1 m).powerset, q ^ g T := by
     rw [prod_one_add, mul_sum]
@@ -722,7 +747,7 @@ theorem hasSum_distinct_largest (q : ℂ) (m : ℕ) :
   rw [sum_const, nsmul_eq_mul]
 
 /-- Distinct partitions with parts at most `k` against subsets of `[1, k]`. -/
-lemma r26a_card_boxed_eq (m k n : ℕ) :
+private lemma partitionCountAtMostDistinctBoxed_eq_card (m k n : ℕ) :
     partitionCountAtMostDistinctBoxed m k n =
       #{T ∈ (Icc 1 k).powerset | T.card ≤ m ∧ ∑ i ∈ T, i = n} := by
   unfold partitionCountAtMostDistinctBoxed
@@ -784,7 +809,7 @@ theorem hasSum_partitionCountAtMostDistinctBoxed (q : ℂ) {x : ℂ} (hx : ‖x�
   have hsum := hasSum_sum hT
   convert hsum using 1
   · ext ⟨m, n⟩
-    rw [r26a_card_boxed_eq, card_filter, Nat.cast_sum, sum_mul, sum_mul, mul_sum]
+    rw [partitionCountAtMostDistinctBoxed_eq_card, card_filter, Nat.cast_sum, sum_mul, sum_mul, mul_sum]
     refine sum_congr rfl fun T _ => ?_
     split_ifs <;> simp
   · rw [prod_one_add]

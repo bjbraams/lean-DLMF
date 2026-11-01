@@ -10,10 +10,18 @@ public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 /-!
 # Parameter derivatives and bounds of Taylor coefficients
 
-Cauchy's circle integral gives holomorphy in a complex parameter of Taylor
-coefficients, commutation with a specified parameter derivative, and locally
-uniform geometric coefficient bounds. The holomorphy proof is extracted from
-`DLMF/Hypergeometric/Asymptotics.lean`; all inputs here are Mathlib-only.
+For a function holomorphic in a variable and a complex parameter, Cauchy's circle integral
+gives holomorphy of the Taylor coefficients in the parameter, commutation of the parameter
+derivative with Taylor derivatives, and locally uniform geometric coefficient bounds. All
+inputs are from Mathlib.
+
+## Main results
+
+* `differentiable_iteratedDeriv_param`: Taylor coefficients are holomorphic in the parameter.
+* `hasDerivAt_iteratedDeriv_param`: parameter differentiation commutes with Taylor
+  derivatives.
+* `exists_uniform_norm_taylorCoeff_le`: uniform Cauchy bounds for Taylor coefficients on a
+  compact parameter ball.
 -/
 
 @[expose] public noncomputable section

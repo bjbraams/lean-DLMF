@@ -8,12 +8,16 @@ module
 public import DLMF.Struve.Asymptotics
 
 /-!
-# Debye polynomials in the unnumbered Anger–Weber coefficient formula
+# Debye polynomials in the Anger–Weber coefficient formula (DLMF §11.11(iii))
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+## Main definitions
+
+* `angerDebyePoly`: the Debye polynomials, with their primitive normalized to vanish at zero.
+
+## Main results
+
+* `angerScaledB_debye`: the unnumbered general coefficient formula of DLMF §11.11(iii), with
+  the Debye normalization of DLMF §10.41(ii).
 -/
 
 @[expose] public noncomputable section

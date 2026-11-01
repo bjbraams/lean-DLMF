@@ -1,0 +1,349 @@
+% MathlibReview20261101.tex -- status review of lean-DLMF from the perspective of a Mathlib
+% reviewer, measured against the full review of 2026-10-30 (MathlibReview20261030.md).
+% Compile with LuaLaTeX: latexmk -lualatex MathlibReview20261101.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage{leanreport}
+\hypersetup{pdftitle={lean-DLMF: Mathlib-style status review, 2026-11-01}}
+
+\newcommand{\dlmf}{\repofile{lean-DLMF}}
+
+\begin{document}
+
+\title{Mathlib-Style Status Review of \texttt{lean-DLMF}}
+\author{Bastiaan J. Braams}
+\date{2026-11-01}
+\maketitle
+
+\begin{abstract}
+  This review checks the library at commit \texttt{9963e03} against the Mathlib reviewer
+  questions: generality, redundant hypotheses, naming, docstrings, namespaces, module
+  structure, proof length and reuse, file length and organization. It is a status update on the
+  full review of 2026-10-30 (\dlmf{MathlibReview20261030.md}, at commit \texttt{3989f9e}). It
+  measures what the review cleanup and the later proof rounds changed, records new findings,
+  and lists the work to do before the next proof round. The earlier review's audit programs
+  were run again unchanged on the current sources and compiled environment. The measurements
+  and candidate lists are in \dlmf{MathlibReviewInventory20261101.json}. No library source was
+  changed in this review.
+\end{abstract}
+
+\section{Summary}
+
+The library builds (15{,}006 jobs). It has 1{,}210 library files with 545{,}049 lines and
+26{,}344 explicit named declarations: 17{,}858 \texttt{theorem}, 5{,}012 \texttt{lemma},
+3{,}352 \texttt{def}, 52 \texttt{abbrev}, 55 \texttt{structure}, 7 \texttt{inductive} and 8
+named instances. There are 1{,}482 direct admissions, down from 1{,}553. In the compiled
+environment, 1{,}581 theorems depend on \lean{sorryAx}, down from 1{,}655. No other
+nonstandard axiom occurs.
+
+These areas meet the Mathlib bar and need no further work:
+
+\begin{itemize}
+  \item Every library file is a \texttt{module} and has a module docstring before its first
+    declaration. Every explicit declaration and all 205 directly declared structure fields
+    have a formal docstring. (The utility \file{scripts/DumpDLMF.lean} is not a library module.)
+  \item No file exceeds the 1{,}500-line limit, but one file is now exactly at it
+    (\S\ref{sec:files}).
+  \item The import survey finds no forbidden foundation-to-theorem imports, no missing modules,
+    no file-import cycles and no new two-way area pairs; the 16 existing pairs are allowed.
+  \item All 76 lowercase predicate definitions identified on 2026-10-30 were renamed, and no
+    \texttt{Prop}-valued \texttt{def} now starts with a lowercase letter.
+  \item The nine false formulations reported on 2026-10-30 have been corrected, and the two
+    pending hypothesis questions (Leibniz rules, Haar's lemma) now carry explicit
+    hypotheses.
+\end{itemize}
+
+These areas still need substantial work: development-round names (4{,}936 public
+declarations), long proofs (913 over 60 lines), files near the length limit, stale module
+headers, and the remaining duplicate and upstream-equivalent declarations. These are all
+cosmetic or organizational. The review found no new false statements.
+
+\section{Generality and hypotheses}
+
+\paragraph{Closed hypotheses (new audit).}
+This review adds one compiled check: a hypothesis whose type mentions none of the theorem's
+variables is either provable, and therefore removable, or false, and therefore makes the
+theorem vacuous. Across all project theorems there is exactly one such binder:
+\begin{itemize}
+  \item \lean{DLMF.Zeta.integral_quadratic_mul_cot_pi}
+    (\dlmf{DLMF/Zeta/CotangentMoments.lean}, line~24) assumes
+    $\lvert\pi x\cot(\pi x)\rvert\le1$ on $[0,\tfrac12]$. Its only caller, in
+    \file{DLMF/Zeta/Sums.lean}, discharges the hypothesis with the existing lemma
+    \lean{r25a_pi_mul_cot_bound}. Move that lemma down (or into a common Zeta support file)
+    and prove the bound inside the theorem. The hypothesis is true, so the statement is not
+    wrong, but it is not a finished interface.
+\end{itemize}
+
+\paragraph{Removable binders.}
+The 2026-10-30 audit found 341 binders that occur in neither the type nor the elaborated
+proof; the cleanup removed 224. The same audit now finds 125 binders in 109 admission-free
+theorems (117 in public theorems). Of these, 117 are carried over from the earlier list and
+were deliberately left for caller or API review. The 8 new ones are:
+\begin{itemize}
+  \item Four unused \lean{CompleteSpace} instances, in
+    \lean{MeasureTheory.integral_comp_abs_eq_two_smul} (the neighbour of the binder removed
+    from \lean{integral_eq_integral_Ioi_add_neg}),
+    \lean{differentiableOn_integral_cexp_neg_mul_smul}, \lean{isBigO_integral_cexp_smul_sector}
+    and \lean{Asymptotics.IsEquivalent.intervalIntegral_of_integral_norm}.
+  \item An unused \lean{DecidableEq} instance in
+    \lean{DLMF.EllipticIntegrals.contDiffAt_of_eqOn_analytic_comp_affine}.
+  \item An unused \lean{NeZero} instance in
+    \lean{DLMF.NumberTheory.DirichletCharacter.eq_mul_principal}.
+  \item \lean{hloc : LocallyIntegrable φ} in
+    \lean{DLMF.AlgebraicAnalytic.tendsto_gaussian_integral_of_growth}.
+  \item An unused function argument \lean{ξ} in
+    \lean{DLMF.AsymptoticApproximations.liouville_caseI}. An unused argument usually means the
+    statement does not say what its docstring says, so check this one first.
+\end{itemize}
+Among the carried-over binders, those worth handling first are the ones that weaken
+mathematically meaningful interfaces:
+\begin{itemize}
+  \item the slit-plane hypotheses on \lean{x + y} in the five Kummer addition theorems
+    (\file{Confluent/ProductsAddition.lean});
+  \item the two argument bounds and the non-integer condition on \lean{b} in
+    \lean{wronskian_kummerU_kummer_pos} and \lean{wronskian_kummerU_kummer_neg};
+  \item \lean{z ≠ 0}, \lean{z ≠ 1} in \lean{ordinaryHypergeometric_ode};
+  \item \lean{cosh z ≠ 0} in four Jacobi modulus limits;
+  \item the \lean{0 ≤ N} binders for natural~\lean{N} in the Airy remainder theorems.
+\end{itemize}
+
+\paragraph{Generality of the new shared APIs.}
+The new \lean{ODE.wronskian} (normed-ring target over any nontrivially normed field) is
+appropriately general. \lean{Function.mulDerivMul} and \lean{Function.oneSubMulDerivMul} are
+restricted to $\mathbb{K}\to\mathbb{K}$. A normed-space target, as for the Wronskian, costs
+nothing. The namespace \lean{Function} is also the wrong home for differential operators;
+something like \lean{DiffOp} or the root namespace with a descriptive name would be better.
+\lean{PowerSeries.HasSumAt} is still specific to $\ZZ$-coefficient series evaluated in
+$\CC$. The 2026-10-30 suggestion to generalize it to a complete normed ring with a coefficient
+homomorphism still stands. Its docstring says ``converges absolutely'' although the predicate
+now stores only \lean{HasSum}. This is equivalent over $\CC$, but the docstring should say
+which property is stored. Its declarations use explicit \lean{PowerSeries.}\ prefixes instead
+of a \lean{namespace PowerSeries} block.
+
+\section{Upstream reuse and duplication}
+
+\paragraph{Exact upstream matches.}
+58 project theorems have a type identical to a public theorem of Mathlib, TauCeti or
+lean-codes, down from 62. These involve 33 distinct upstream declarations. The cleanup
+removed the named examples, but the main family remains. There are 26 local copies of four
+general facts:
+\begin{itemize}
+  \item 9 copies of \lean{Complex.ofReal_cpow_eq_exp}: in Bessel, Hypergeometric~(2), Legendre~(3),
+    MatrixArgument, ErrorFunctions and the Fresnel transforms;
+  \item 6 copies of \lean{Carlson.ofReal_cpow_half};
+  \item 6 copies of \lean{Carlson.re_cpow_half_pos};
+  \item 5 copies of \lean{Carlson.cpow_half_sq}.
+\end{itemize}
+There are also copies of \lean{Nat.stirlingSecond_succ_succ}, \lean{Nat.stirlingSecond_self},
+\lean{Nat.ModEq.pow_totient}, \lean{Nat.Prime.of_mersenne}, \lean{Nat.totient_eq_mul_prod_factors},
+\lean{Complex.besselJ_neg_int}, \lean{Complex.regularizedHGFun_zero},
+\lean{Polynomial.derivative_bernoulli_add_one} and \lean{Finset.mem_inf}. Where a copy exists
+only to carry a \texttt{@[dlmf]} tag, project policy calls for a \texttt{dlmf\_upstream}
+pointer instead. The full list is in the inventory.
+
+\paragraph{Identical definitions.}
+17 pairs of public definitions have identical types and bodies, after excluding the
+compiler-generated \lean{recOn}/\lean{casesOn} pairs. These are unambiguous duplicates to
+consolidate:
+\begin{itemize}
+  \item \lean{Elementary.expPartialSum} and \lean{Confluent.expPartialSum};
+  \item \lean{Combinatorics.partitionCountAtMostParts} and \lean{NumberTheory.partitionsAtMost};
+  \item \lean{Confluent.pcfSect_logWedge} and \lean{Confluent.pcfLogWedge};
+  \item \lean{Confluent.upperIncGammaOnLog} and \lean{Airy.airyUpperGammaOnLog};
+  \item \lean{EllipticIntegrals.ellRedQuadU} and \lean{ei19b_redU};
+  \item \lean{Zeta.q25b_slit} and \lean{z25b_slitOne};
+  \item \lean{Zeta.z25a_gbinom} and \lean{AsymptoticApproximations.cbinom};
+  \item \lean{AsymptoticApproximations.besselEnvCrit} and \lean{Legendre.besselEnvelopeCross};
+  \item \lean{OrthogonalPolynomials.LegendreAddition.jet} and \lean{Legendre.legInt_D};
+  \item \lean{Confluent.kzt_p} and \lean{OrthogonalPolynomials.laguerreWeight}.
+\end{itemize}
+The remaining pairs need a judgment call. They are coincident cut domains of different
+inverse functions, coefficient families that coincide in one normalization, and
+\lean{Selberg.vdmSq} versus \lean{siegelDiscriminant}. Those may keep separate descriptive
+names, preferably with one defined as the other.
+
+\section{Names and namespaces}
+
+\paragraph{Development-round names.}
+4{,}936 public declarations carry a round prefix (4{,}966 on 10-30), in 154 families. The
+largest families are \lean{p22R1_} (237), \lean{p2p_} (150), \lean{p3q_} (133), \lean{p2m_}
+(129), \lean{q2t_} (125), \lean{p19sR1_} (119) and \lean{p19lR1_} (117). By area: Mathieu
+746, Combinatorics 453, JacobiElliptic 379, EllipticIntegrals 355, BernoulliEuler 337, Zeta
+293, Lam\'e 291, CoalescingSaddles 280. Thirteen type or predicate names carry the same
+prefixes (for example \lean{P2lIsSol}, \lean{Q25bIsLerchCont}, \lean{P3jDich},
+\lean{Q2mCoeffCont}, \lean{S26aGood}, \lean{Z25bLerchParamOK}). 59 file paths contain round
+identifiers (60 before). This is the largest gap between the library and Mathlib style. Most
+of these declarations are helpers, so the cheapest fix is often to make them
+\texttt{private} rather than rename them. The library now has 25{,}744 public and only 967
+private declarations. Renaming should be done area by area, together with the visibility
+pass.
+
+\paragraph{Theorem names in camel case.}
+42 public theorems have a lowerCamelCase name with no underscore. About half are correct,
+because they name a predicate in a conclusion (for example \lean{IsPIIOn.hasDerivAt}). The
+others name a theorem after a person or concept rather than its conclusion. Mathlib would
+ask for snake case describing the statement:
+\lean{AlgebraicAnalytic.mittagLeffler}, \lean{poissonSummation}, \lean{weierstrassProduct},
+\lean{lagrangeInversion}, \lean{lagrangeBurmann},
+\lean{IsSimpleClosedContour.residueTheorem}, \lean{argumentPrinciple},
+\lean{cauchyIntegralFormula}, \lean{QHypergeometric.generalBaileyTransform},
+\lean{limitingBaileyTransform}, \lean{rogersBaileyPair}, \lean{Bailey.watsonR},
+\lean{Struve.trigBeta}, \lean{RamanujanAux.gammaShiftBound},
+\lean{HasAsymptoticPowerSeries.mcMahon}, \lean{IsPainleveVIOn.ellipticForm},
+\lean{IsPIIOn.shiftUp}/\lean{shiftDown}, \lean{IsPainleveIIOn.tPlus}/\lean{tMinus} and
+\lean{IsLinODE2SolOn.linComb}.
+
+\paragraph{Uppercase data definitions.}
+18 public data definitions have UpperCamelCase names. All are one-letter or abbreviated
+helper quantities inside auxiliary namespaces: \lean{DixonAux.H}, \lean{K}, \lean{P},
+\lean{Lh}, \lean{Rh}; \lean{QGammaLimit.D}, \lean{K}, \lean{L}; \lean{QGammaMono.G},
+\lean{T}; \lean{JacobiDisc.EE}, \lean{SS}, \lean{Fr}; \lean{LagDisc.SSL}, \lean{KL};
+\lean{HerDisc.SSH}; \lean{WaveEquation.F01}; \lean{SphericalHarmonics.SU2}. They should be
+\texttt{private} or receive lowerCamel descriptive names. The \lean{…Aux} namespaces
+themselves would not pass Mathlib review.
+
+\paragraph{Remaining namespace items from 10-30.}
+The root-level \lean{stRem_*}, \lean{r27_*} and \lean{q26b_*} APIs in \file{DLMFMathlib}
+(40 declarations) still need mathematical namespaces and names. The cleanup fixed the
+nested \lean{DLMF.NumberTheory.DirichletCharacter} namespace. The Airy remainder family
+still uses \lean{airy_ai_…}/\lean{airy_bi_…} (20 theorems) instead of the
+\lean{airyAi}/\lean{airyBi} vocabulary.
+
+\section{Documentation}
+
+Formal coverage is complete (see the Summary). Semantic quality has three outstanding
+issues:
+\begin{itemize}
+  \item \textbf{Stale acquisition headers.} 85 module docstrings still contain acquisition
+    boilerplate (``Statements acquired from the NIST DLMF, checked \ldots'', ``New statements
+    are initially admitted''). By area: Legendre 24, Airy 13, ParabolicCylinder 11,
+    IncompleteGamma 11, Struve 8, ErrorFunctions 8. Twenty-three of these files contain no
+    \texttt{sorry} at all. Example: \file{DLMF/Airy/Generalized.lean} (1{,}342 lines) has a
+    three-sentence header that names no result. Replace these headers with a statement of
+    scope, conventions and main results.
+  \item \textbf{Short headers on large files.} 243 files over 500 lines have module
+    docstrings under 50 words. Not every short header is inadequate, but Mathlib expects a
+    ``Main results'' or ``Main definitions'' list in a file of this size. Many good examples
+    already exist, such as \file{MatrixArgument/GammaBeta.lean} and \file{Zeta/Sums.lean}.
+  \item \textbf{Small errors.} \file{GeneralizedHypergeometric/MathlibCoverage.lean} has
+    ``Chapter16'' in its title. The \lean{PowerSeries.HasSumAt} docstring is noted above.
+\end{itemize}
+The 10-30 items on \file{Core/Framework.lean}, \file{DLMF.lean},
+\file{Painleve/Basic/Equations.lean} and \file{Hypergeometric/ConnectionFormulas.lean} have
+been fixed.
+
+\section{Proofs: length, repetition and reuse}
+
+There are 913 admission-free tactic proofs over 60 lines (901 on 10-30) and 214 over 100
+(208). The 14 new proofs over 60 lines come from the latest proof rounds. The largest are
+\lean{symEllIntRD_asymp_small_x} (137 lines), \lean{symEllIntRG_asymp_small_x} (131),
+\lean{integral_quadratic_mul_cot_pi} (127), \lean{integral_symEllIntRD_interp} (109),
+\lean{qLaguerre_monomial_orthogonality} (105) and
+\lean{hasSum_riemannZeta_two_mul_div_odd_even} (103). The fragment scan pairs the
+$R_G$/$R_D$ small-$x$ asymptotics (four shared eight-line windows), the two odd-zeta sums in
+\file{Zeta/Sums.lean}, and \lean{symEllIntRG_add_symEllIntRG} with
+\lean{symEllIntRG_duplication}. The $R_F$, $R_G$ and $R_D$ small-$x$ proofs should share one
+lemma on the logarithmic singularity of the defining integral.
+
+The refactoring targets of 10-30 are unchanged. Each remains the most valuable proof cleanup
+in its area:
+\begin{enumerate}
+  \item The logarithmic connection formulas: \lean{logarithmic_connection_one_sub_recip}
+    (268 lines), \lean{…_recip_recipGamma} (266), \lean{…_recipGamma} (239) and
+    \lean{logarithmic_connection_one_sub} (236).
+  \item The Jacobi cyclic certificates: \lean{jacobi_cyclic_scdd_three} (270),
+    \lean{jacobi_cyclic_sdcc_three} (257), \lean{jacobi_cyclic_d_pairs} (260) and
+    \lean{jacobi_cyclic_d2_triple} (200).
+  \item The Painlev\'e~VI B\"acklund transformations: \lean{IsPainleveVIOn.quartic_root} (260)
+    and \lean{quadratic} (197).
+  \item The two Liouville--Green Volterra constructions (211 and 208 lines).
+\end{enumerate}
+The Mathieu and Jacobi-quotient repetitions were reduced in the cleanup. The fragment scan
+still finds 489 repeated eight-line windows (495 before). The most affected files are
+\file{Mathieu/SmallQCeSe.lean} (20), \file{Legendre/SpecialValues.lean} (15),
+\file{Mathieu/SmallQGeneral.lean} (13), \file{JacobiElliptic/Addition/ThetaAndQuotients.lean}
+(11) and \file{Confluent/ParabolicCylinder/WronskiansAndConnections.lean} (10).
+
+The successful build emits 1{,}310 warnings unrelated to admissions (1{,}468 before). Of
+these, 618 are unused \texttt{simp} arguments, 303 are unused-tactic reports, 132 are
+never-executed tactics, 84 are unused variables, 72 are ``used \texttt{X} where \texttt{Y}
+would suffice'' and 60 are deprecations. The deprecations should be fixed before the next
+Mathlib bump.
+
+\section{Files and organization}\label{sec:files}
+
+138 library files exceed 1{,}000 lines (134 before). Several grew past the point where the
+next proof round will break the limit:
+\begin{center}
+\begin{tabular}{lrr}
+  \toprule
+  File & 10-30 & now \\
+  \midrule
+  \file{MatrixArgument/GammaBeta.lean} & 1{,}454 & \textbf{1{,}500} \\
+  \file{Zeta/Sums.lean} & 1{,}372 & 1{,}474 \\
+  \file{QHypergeometric/BasicSummations.lean} & 1{,}412 & 1{,}463 \\
+  \file{QHypergeometric/Calculus.lean} & 1{,}331 & 1{,}427 \\
+  \file{Struve/Lommel.lean} & 1{,}312 & 1{,}382 \\
+  \file{QHypergeometric/Convergence.lean} & 1{,}257 & 1{,}351 \\
+  \file{EllipticIntegrals/SymmetricAddition.lean} & --- & 1{,}351 \\
+  \bottomrule
+\end{tabular}
+\end{center}
+\file{Spheroidal/Angular.lean} (1{,}450), \file{Hypergeometric/ConnectionFormulas.lean}
+(1{,}446), \file{Confluent/LargeA.lean} (1{,}438), \file{Legendre/AdditionTools.lean}
+(1{,}419), \file{Elementary/Trigonometric/InverseIdentities.lean} (1{,}417) and
+\file{Legendre/Series.lean} (1{,}406) are also near the limit. The splits proposed on 10-30
+for \file{GammaBeta} (Laplace transform, gamma integrals, beta integrals) and for
+\file{Spheroidal/Angular} are now urgent. \file{Zeta/Sums.lean} separates naturally into the
+power series 25.8.5--25.8.8 and the even-zeta summations; the new
+\file{CotangentMoments.lean} belongs with the latter. The four Q-hypergeometric files would
+benefit from a shared lower-level file for the shift and derivative machinery, as proposed
+on 10-30.
+
+Import hygiene is unchanged: 430 files have an unsorted consecutive import block, 57 files
+import \lean{Mathlib.Tactic.*} modules directly (352 lines), and 4{,}470 source lines exceed
+100 characters. Runs of four or more blank lines are gone. The 10-30 experiment showed that
+the 18 tactic imports in \file{SegmentPrimitive.lean} were removable, and they have been
+removed. \file{Painleve/Basic/Equations.lean} still has 16.
+
+\paragraph{Follow-up.} Later on 2026-11-01 the four files of item~1 below were split along their
+mathematical sections, with the original modules kept as umbrellas; the largest piece has 707
+lines. See \dlmf{REVIEW.md}, ``Splitting the files at the length limit''.
+
+\section{Recommended order before the next proof round}
+
+\begin{enumerate}
+  \item \textbf{Split the files at or near the limit:} \file{MatrixArgument/GammaBeta.lean}
+    first, then \file{Zeta/Sums.lean}, \file{QHypergeometric/BasicSummations.lean} and
+    \file{QHypergeometric/Calculus.lean}. Otherwise proof work in those areas will
+    immediately break the 1{,}500-line rule.
+  \item \textbf{Fix the small verified interface defects:} the closed hypothesis in
+    \lean{integral_quadratic_mul_cot_pi}, the 8 new removable binders (check
+    \lean{liouville_caseI} first), and the carried-over binders on the Kummer addition and
+    Wronskian theorems.
+  \item \textbf{Replace the 26 copies of the four complex-power facts} and the other exact
+    upstream copies with the upstream declarations or \texttt{dlmf\_upstream} pointers.
+    Consolidate the ten clear duplicate definitions.
+  \item \textbf{Run a combined visibility and naming pass, area by area,} starting with
+    Mathieu, Combinatorics, JacobiElliptic and EllipticIntegrals. Make one-use helpers
+    private, rename the reusable ones, and fix the camel-case theorem names and the
+    uppercase helper definitions.
+  \item \textbf{Replace the 85 stale acquisition headers} with scope and main-results summaries.
+  \item The long-proof refactorings and the linter and import cleanup can run alongside proof
+    work. They do not block it.
+\end{enumerate}
+
+\section*{Method and validation}
+
+The ordinary build command \texttt{lake build} completed (15{,}006 jobs). The 2026-10-30 audit
+programs \file{scan\_source.py} and \file{CompiledReview.lean}, stored in the earlier
+inventory, were rerun unchanged except for output paths and the file listing. The compiled
+audit read 27{,}069 compiled constants. A docstring probe confirmed that the
+apparent ``missing'' structure docstrings in its raw output are constructor rows. The new
+closed-hypothesis audit (\file{ClosedHyps.lean}, stored in the new inventory) scans all
+project theorems in the compiled environment. \file{scripts/import\_survey.py} and
+\file{scripts/check\_file\_lengths.py} pass. The removable-binder findings rely on the binder
+being absent from the elaborated type and proof term. Unlike on 10-30, this review did not
+kernel-check each narrowed declaration individually. Counts of naming, fragment and
+documentation candidates come from heuristics and are not adjudicated violations.
+
+\end{document}

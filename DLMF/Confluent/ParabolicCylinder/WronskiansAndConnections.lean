@@ -10,12 +10,33 @@ public import DLMF.ParabolicCylinder.Basic.Functions
 public import DLMF.Confluent.ParabolicCylinder.EquationAndIntegrals
 
 /-!
-# Wronskians and connections of parabolic cylinder functions
+# Parabolic cylinder functions: Wronskians and connection formulas
 
-Wronskians of rotated Weber solutions, connection formulas and the second cylinder solution V.
+This file proves the Wronskians of Weber's function `U(a,z)` with its rotations, defines the
+properties of the second solution `V(a,z) = V(a,0) u₁ + V'(a,0) u₂` (DLMF 12.4.2), which is
+entire in `a` and `z`, and proves the connection formulas and recurrences for `V`
+(DLMF §§12.2, 12.8).
 
-Source references and common attribution are retained in
-`DLMF.Confluent.ParabolicCylinder`.
+## Main results
+
+* `pcfU_wronskian_neg`: `𝒲{U(a,z), U(a,-z)} = √(2π)/Γ(1/2 + a)` (DLMF 12.2.11).
+* `pcfU_wronskian_mul_I`, `pcfU_wronskian_mul_neg_I`: the Wronskians DLMF 12.2.12.
+* `pcfU_connection_mul_I`, `pcfU_connection_mul_neg_I`: the connection formula DLMF 12.2.17.
+* `hasDerivAt_pcfVDeriv`, `isWeberSol_pcfV`: Weber's equation for `V` (DLMF 12.2.2).
+* `pcfV_zero`, `pcfVDeriv_zero`: the initial values of `V` (DLMF 12.2.8, 12.2.9).
+* `pcfV_wronskian`: `𝒲{U, V} = √(2/π)` (DLMF 12.2.10).
+* `pcfU_neg_eq`, `pcfV_neg_eq`: the connection formulas DLMF 12.2.15–12.2.16 for every `a`.
+* `pcfU_neg_nat_sub_half_neg`, `pcfV_nat_add_half_neg`: the parity relations
+  DLMF 12.2.13–12.2.14.
+* `pcfV_eq`: the classical form of `V` in terms of `U(a, ±z)`, away from the poles of
+  `Γ(1/2 + a)`.
+* `pcfV_eq_mul_I`, `pcfV_eq_mul_neg_I`: the connection formula DLMF 12.2.20 for every `a`.
+* `pcfV_three_term`, `pcfV_recurrence_sub`, `pcfV_recurrence_add`, `pcfV_deriv_recurrence`:
+  the recurrences DLMF 12.8.5–12.8.8.
+
+## Implementation notes
+
+The upper-sign Wronskian in DLMF 12.2.12 is proved as printed in the DLMF.
 -/
 
 @[expose] public section

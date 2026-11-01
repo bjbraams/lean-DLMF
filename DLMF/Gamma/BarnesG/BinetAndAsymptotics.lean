@@ -8,12 +8,27 @@ module
 public import DLMF.Gamma.BarnesG.WeierstrassProduct
 
 /-!
-# Binet formulas and asymptotics of Barnes G
+# Asymptotics of the Barnes G-function (DLMF 5.17.5)
 
-Binet remainder formulas, integer values and asymptotic expansions of the Barnes G function.
+The asymptotic expansion of `ln G(t + 1)`, from the real integral formula 5.17.4, and Glaisher's
+limit for the hyperfactorials, with the constant identified through `ζ'(-1)` by an
+Euler–Maclaurin continuation of the Riemann zeta function to `Re s > -2`.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.BarnesG`.
+## Main definitions
+
+* `zetaTerm`, `zetaEM`: the local Euler–Maclaurin errors for `x ↦ x^{-s}` and the resulting
+  continuation of `ζ` to `Re s > -2`.
+* `hseq`: the normalized hyperfactorial sequence.
+* `barnesD`: the function of DLMF 5.17.5.
+
+## Main results
+
+* `eqOn_zeta_zetaEM`: `ζ = zetaEM` on the slit half-plane `Re s > -2`, by analytic
+  continuation.
+* `tendsto_hseq`: Glaisher's limit, with the constant identified through `ζ'(-1)`.
+* `log_barnesGSucc_re`: the real form of DLMF 5.17.4.
+* `isBigO_barnesD`, `log_barnesG_asymptotic`: `ln G(t + 1) = t²/4 + t ln Γ(t + 1) -
+  (t(t+1)/2 + 1/12) ln t - ln A + O(1/t)` as `t → ∞` (DLMF 5.17.5).
 -/
 
 @[expose] public section

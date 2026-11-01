@@ -11,8 +11,9 @@ public import DLMF.Airy.ModulusPhase.ReciprocalExpansions
 public import DLMF.Airy.ModulusPhase.PhaseExpansions
 
 /-!
-# Airy modulus and continuous phase, DLMF §9.8
+# Airy modulus and phase (DLMF §9.8)
 
-Statements acquired from the NIST DLMF, checked 2026-10-19.
-New statements are initially admitted; existing proved Airy results are retained.
+Modulus and phase of the Airy functions and their derivatives on the real line: definitions,
+Bessel forms, differential equations, Nicholson integrals, monotonicity, and the asymptotic
+expansions at `-∞` with signed error bounds.
 -/

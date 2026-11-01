@@ -10,13 +10,30 @@ public import DLMF.QSeries.QBinomial
 public import Mathlib.GroupTheory.Perm.DomMulAct
 
 /-!
-# Multiset permutations (DLMF §26.16)
+# Multiset permutations
 
-For `a : Fin m → ℕ`, the multiset `S = {1^{a_1}, …, m^{a_m}}` has the permutations
-`𝔖_S` = words `w : Fin (a_1 + ⋯ + a_m) → Fin m` taking the value `j` exactly `a_j` times
-(`multisetPermutations a`; values `0`-based). Inversion number and major index are the word
-statistics `wordInversions`, `wordMajorIndex` of §26.14. The `q`-multinomial coefficient
-(26.16.1) is `qMultinomial q a`, built from the project's Gaussian coefficients `qBinom`; the
+The permutations of a multiset (DLMF §26.16). For `a : Fin m → ℕ`, the multiset
+`S = {1^{a_1}, …, m^{a_m}}` has the permutations `𝔖_S` = words
+`w : Fin (a_1 + ⋯ + a_m) → Fin m` taking the value `j` exactly `a_j` times (values `0`-based).
+
+## Main definitions
+
+* `multisetPermutations`: the set `𝔖_S` of multiset permutations.
+* `qMultinomial`: the `q`-multinomial coefficient (DLMF 26.16.1).
+
+## Main results
+
+* `card_multisetPermutations`: `|𝔖_S|` is the multinomial coefficient (DLMF §26.16).
+* `multisetPermutation_example`: the example `351322453154` with `inv = 24` and `maj = 34`.
+* `sum_pow_wordInversions_multisetPermutations`: `∑ q^{inv(σ)}` is the `q`-multinomial
+  coefficient (DLMF 26.16.2).
+* `sum_pow_wordMajorIndex_multisetPermutations`: `∑ q^{maj(σ)}` is the `q`-multinomial
+  coefficient (DLMF 26.16.3, MacMahon).
+
+## Implementation notes
+
+Inversion number and major index are the word statistics `wordInversions`, `wordMajorIndex` of
+§26.14. `qMultinomial q a` is built from the project's Gaussian coefficients `qBinom`; the
 product is taken over all `k`, the factor `k = m` being `[a_m, a_m]_q = 1`.
 
 ## References
@@ -60,14 +77,14 @@ theorem card_multisetPermutations {m : ℕ} (a : Fin m → ℕ) :
       split_ifs <;> simp_all]
     rw [← Finset.sum_eq_multiset_sum, Finset.sum_ite_eq' univ j]
     simp
-  obtain ⟨w0, hw0⟩ := q26b_exists_map_eq (n := N) s hs
-  have hw0c : ∀ j, #{i | w0 i = j} = a j := fun j => by rw [← q26b_count_map, hw0, hcs]
+  obtain ⟨w0, hw0⟩ := Multiset.exists_map_univ_eq (n := N) s hs
+  have hw0c : ∀ j, #{i | w0 i = j} = a j := fun j => by rw [← Multiset.count_map_univ, hw0, hcs]
   have hmem : ∀ w : Fin N → Fin m, w ∈ multisetPermutations a ↔
       univ.val.map w0 = univ.val.map w := by
     intro w
     simp only [multisetPermutations, mem_filter, mem_univ, true_and]
     rw [Multiset.ext]
-    simp only [q26b_count_map, hw0c]
+    simp only [Multiset.count_map_univ, hw0c]
     exact ⟨fun h j => (h j).symm, fun h j => (h j).symm⟩
   have hstab : Fintype.card {g : Perm (Fin N) // w0 ∘ g = w0} = ∏ j, (a j).factorial := by
     rw [DomMulAct.stabilizer_card]
@@ -76,7 +93,7 @@ theorem card_multisetPermutations {m : ℕ} (a : Fin m → ℕ) :
   have hfib : ∀ w ∈ multisetPermutations a,
       #{σ : Perm (Fin N) | w0 ∘ σ = w} = ∏ j, (a j).factorial := by
     intro w hw
-    obtain ⟨τ, rfl⟩ := (q26b_map_eq_iff w0 w).1 ((hmem w).1 hw)
+    obtain ⟨τ, rfl⟩ := (Multiset.map_univ_eq_map_univ_iff w0 w).1 ((hmem w).1 hw)
     rw [← hstab, ← Fintype.card_subtype]
     refine Fintype.card_congr ((Equiv.mulRight τ⁻¹).subtypeEquiv fun σ => ?_)
     simp only [Equiv.coe_mulRight, Perm.coe_mul]
@@ -92,7 +109,7 @@ theorem card_multisetPermutations {m : ℕ} (a : Fin m → ℕ) :
     · rw [Finset.sum_congr rfl hfib, sum_const, smul_eq_mul]
     · intro σ _
       rw [Finset.mem_coe, hmem]
-      exact (q26b_map_eq_iff w0 (w0 ∘ σ)).2 ⟨σ, rfl⟩
+      exact (Multiset.map_univ_eq_map_univ_iff w0 (w0 ∘ σ)).2 ⟨σ, rfl⟩
   have hspec := Nat.multinomial_spec univ a
   have hpos : 0 < ∏ j, (a j).factorial := Finset.prod_pos fun j _ => Nat.factorial_pos _
   have : #(multisetPermutations a) * ∏ j, (a j).factorial =

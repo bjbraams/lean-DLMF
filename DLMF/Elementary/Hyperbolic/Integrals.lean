@@ -15,18 +15,39 @@ public import TauCeti.Analysis.SpecialFunctions.Hyperbolic
 /-!
 # Continued fractions and integrals of hyperbolic functions
 
-Convergent continued fractions, antiderivatives and definite integrals of hyperbolic and inverse
-hyperbolic functions.
+This file proves the continued fractions of DLMF §4.39 and the antiderivatives and definite
+integrals of hyperbolic and inverse hyperbolic functions of DLMF §4.40, with complex primitives
+on the principal cut domains and on continued branches.
 
-Source references and common attribution are retained in
-`DLMF.Elementary.Hyperbolic`.
-The hyperbolic tangent difference integral applies Mathlib’s Frullani theorem after
-an exponential mean-value bound; continuity uses TauCeti’s `Real.continuous_tanh`.
-The exponential over squared-cosh integral specializes the general cosh-power Beta
-integral in `DLMF.Gamma.BetaFunction.Cosine` and Mathlib’s Gamma reflection formula.
-The sine and hyperbolic-sine kernels use the proved digamma series, special values,
-and real digamma integral in the Gamma area; the Laplace sine integral is the imaginary
-part of Mathlib’s complex exponential integral.
+## Main results
+
+* `tanh_continued_fraction`, `arcsinh_continued_fraction`, `arctanh_continued_fraction`:
+  DLMF 4.39.1–4.39.3.
+* `antiderivative_tanh`, `antiderivative_csch`, `antiderivative_sech`, `antiderivative_coth`:
+  real antiderivatives (DLMF 4.40.3–4.40.6).
+* `integral_exp_sin_div_sinh`, `integral_sinh_div_sinh`, `integral_exp_div_cosh_sq`,
+  `integral_tanh_difference`: definite integrals (DLMF 4.40.7–4.40.10).
+* `antiderivative_arcsinh`, `antiderivative_arccosh`, `antiderivative_arctanh`,
+  `antiderivative_arccsch`, `antiderivative_arcsech`, `antiderivative_arccoth`: real
+  antiderivatives of the inverse functions (DLMF 4.40.11–4.40.16).
+* `complex_antiderivative_arcsinh`, `complex_antiderivative_arccosh`,
+  `complex_antiderivative_arctanh`: complex primitives on the open cut domains.
+* `continued_antiderivative_arcsinh`, `continued_antiderivative_arccoth`: primitives on
+  continued branches.
+* `arctanh_values_neg`, `arccoth_values_neg`: oddness of all inverse branches, including cut
+  values (DLMF 4.37.12, 4.37.15).
+* `hyperbolic_table_imaginary_pole_sides`: one-sided pole directions in Table 4.31.1.
+
+## Implementation notes
+
+The real inverse functions `Real.arsinh`, `Real.arcosh`, `Real.artanh` of Mathlib are used for
+real antiderivatives. The tangent difference integral applies Mathlib's Frullani theorem after an
+exponential mean-value bound; continuity uses TauCeti's `Real.continuous_tanh`. The exponential
+over squared-cosh integral specializes the cosh-power Beta integral in
+`DLMF.Gamma.BetaFunction.Cosine` and Mathlib's Gamma reflection formula. The sine and
+hyperbolic-sine kernels use the digamma series, special values and real digamma integral of the
+Gamma area; the Laplace sine integral is the imaginary part of Mathlib's complex exponential
+integral.
 -/
 
 @[expose] public noncomputable section
@@ -295,7 +316,7 @@ theorem integral_exp_div_cosh_sq {a : ℝ} (ha : -1<a ∧ a<1) : Integrable (fun
     ring
 
 /-- The real derivative of hyperbolic tangent is the real restriction of its complex derivative. -/
-private lemma hypR4_real_hasDerivAt_tanh (x : ℝ) :
+private lemma hasDerivAt_real_tanh (x : ℝ) :
     HasDerivAt Real.tanh ((Real.cosh x)⁻¹ ^ 2) x := by
   have hc : Complex.cosh (x : ℂ) ≠ 0 := by
     rw [← Complex.ofReal_cosh]
@@ -304,7 +325,7 @@ private lemma hypR4_real_hasDerivAt_tanh (x : ℝ) :
     ← Complex.ofReal_pow, ← Complex.ofReal_tanh, Complex.ofReal_re] using
     (hasDerivAt_tanh hc).real_of_complex
 /-- The derivative of hyperbolic tangent has an exponential upper bound on the real line. -/
-private lemma hypR4_real_tanh_deriv_bound (x : ℝ) :
+private lemma norm_real_tanh_deriv_le (x : ℝ) :
     ‖(Real.cosh x)⁻¹ ^ 2‖ ≤ 4 * Real.exp (-2 * x) := by
   have hc : 0 < Real.cosh x := Real.cosh_pos x
   have he : 0 < Real.exp x := Real.exp_pos x
@@ -322,14 +343,14 @@ private lemma hypR4_real_tanh_deriv_bound (x : ℝ) :
   rw [hx]
   nlinarith [inv_pos.mpr hc, inv_pos.mpr he]
 /-- A mean-value bound for two scaled hyperbolic tangents cancels the Frullani kernel’s apparent singularity. -/
-private lemma hypR4_real_tanh_difference_bound {a b t : ℝ} (ht : 0 ≤ t) :
+private lemma norm_real_tanh_sub_le {a b t : ℝ} (ht : 0 ≤ t) :
     ‖Real.tanh (a*t) - Real.tanh (b*t)‖ ≤
       4 * Real.exp (-2 * min a b * t) * (|a-b| * t) := by
   have hd (x : ℝ) (_hx : x ∈ uIcc (b*t) (a*t)) :=
-    (hypR4_real_hasDerivAt_tanh x).hasDerivWithinAt (s := uIcc (b*t) (a*t))
+    (hasDerivAt_real_tanh x).hasDerivWithinAt (s := uIcc (b*t) (a*t))
   have hb (x : ℝ) (hx : x ∈ uIcc (b*t) (a*t)) :
       ‖(Real.cosh x)⁻¹ ^ 2‖ ≤ 4 * Real.exp (-2 * min a b * t) := by
-    apply (hypR4_real_tanh_deriv_bound x).trans
+    apply (norm_real_tanh_deriv_le x).trans
     have hmin : min a b * t ≤ x := by
       rw [uIcc, mem_Icc] at hx
       rw [min_mul_of_nonneg _ _ ht]
@@ -339,7 +360,7 @@ private lemma hypR4_real_tanh_difference_bound {a b t : ℝ} (ht : 0 ≤ t) :
     (left_mem_uIcc) (right_mem_uIcc)
   simpa only [Real.norm_eq_abs, ← sub_mul, abs_mul, abs_of_nonneg ht] using h
 /-- Hyperbolic tangent tends to one at positive infinity. -/
-private lemma hypR4_real_tanh_tendsto : Tendsto Real.tanh atTop (𝓝 1) := by
+private lemma tendsto_real_tanh_atTop : Tendsto Real.tanh atTop (𝓝 1) := by
   have he : Tendsto (fun x : ℝ => Real.exp (-2*x)) atTop (𝓝 0) :=
     Real.tendsto_exp_atBot.comp
       ((tendsto_const_mul_atBot_of_neg (by norm_num : (-2 : ℝ) < 0)).mpr tendsto_id)
@@ -370,7 +391,7 @@ theorem integral_tanh_difference {a b : ℝ} (ha : 0<a) (hb : 0<b) : IntegrableO
       have hx0 : (0 : ℝ) < x := hx
       rw [norm_div, Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos hx0]
       apply (div_le_iff₀ hx0).mpr
-      have h := hypR4_real_tanh_difference_bound (a := a) (b := b) hx0.le
+      have h := norm_real_tanh_sub_le (a := a) (b := b) hx0.le
       convert h using 1
       ring
   refine ⟨hi, ?_⟩
@@ -379,7 +400,7 @@ theorem integral_tanh_difference {a b : ℝ} (ha : 0<a) (hb : 0<b) : IntegrableO
   have hi' : IntegrableOn (fun x : ℝ => x⁻¹ • (Real.tanh (a*x)-Real.tanh (b*x))) (Ioi 0) := by
     simpa [smul_eq_mul, div_eq_mul_inv, mul_comm] using hi
   have h := Frullani.integral_Ioi_eq (hc.locallyIntegrable.locallyIntegrableOn _) ha hb hl
-    hypR4_real_tanh_tendsto hi'
+    tendsto_real_tanh_atTop hi'
   rw [Real.log_div hb.ne' ha.ne'] at h
   rw [Real.log_div ha.ne' hb.ne']
   convert h using 1 <;> simp [smul_eq_mul, div_eq_mul_inv, mul_comm]
@@ -485,7 +506,7 @@ theorem antiderivative_arccoth {x : ℝ} (hx : 1<x) : HasDerivAt (fun t : ℝ =>
     ring
 
 /-- Two functions that agree on an open neighbourhood have the same derivative there. -/
-private lemma hypR4_deriv_eq {f g : ℂ → ℂ} {f' g' z : ℂ} {U : Set ℂ} (hU : IsOpen U)
+private lemma hasDerivAt_unique_of_eqOn {f g : ℂ → ℂ} {f' g' z : ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hz : z ∈ U) (hf : HasDerivAt f f' z) (hg : HasDerivAt g g' z) (h : ∀ w ∈ U, f w = g w) :
     f' = g' :=
   hf.unique (hg.congr_of_eventuallyEq (Filter.eventuallyEq_of_mem (hU.mem_nhds hz) h))
@@ -504,8 +525,8 @@ theorem complex_antiderivatives_hyperbolic {U : Set ℂ} (hU : IsOpen U)
   have dc := (hLc z hz).differentiableAt.hasDerivAt
   have ds := (hLs z hz).differentiableAt.hasDerivAt
   have dt := (hLt z hz).differentiableAt.hasDerivAt
-  have ec := hypR4_deriv_eq hU hz dc.cexp (Complex.hasDerivAt_cosh z) hEc
-  have es := hypR4_deriv_eq hU hz ds.cexp (Complex.hasDerivAt_sinh z) hEs
+  have ec := hasDerivAt_unique_of_eqOn hU hz dc.cexp (Complex.hasDerivAt_cosh z) hEc
+  have es := hasDerivAt_unique_of_eqOn hU hz ds.cexp (Complex.hasDerivAt_sinh z) hEs
   have h2 : Complex.sinh z = 2*Complex.sinh (z/2)*Complex.cosh (z/2) := by
     rw [← Complex.sinh_two_mul]; ring_nf
   have hc2 : Complex.cosh (z/2) ≠ 0 := fun h => hs (by rw [h2, h]; ring)
@@ -513,7 +534,7 @@ theorem complex_antiderivatives_hyperbolic {U : Set ℂ} (hU : IsOpen U)
   have dth : HasDerivAt (fun w => Complex.tanh (w/2)) (sech (z/2)^2*(1/2)) z := by
     have := (hasDerivAt_tanh hc2).comp z ((hasDerivAt_id z).div_const 2)
     simpa [Function.comp_def] using this
-  have et := hypR4_deriv_eq hU hz dt.cexp dth hEt
+  have et := hasDerivAt_unique_of_eqOn hU hz dt.cexp dth hEt
   rw [hEc z hz] at ec
   rw [hEs z hz] at es
   rw [hEt z hz] at et
@@ -564,8 +585,8 @@ theorem complex_antiderivative_arcsinh {z : ℂ} (hz : z∈arcsinhDomain) :
 /-- The principal complex arccosh primitive on its complete open cut domain. -/
 theorem complex_antiderivative_arccosh {z : ℂ} (hz : z∈arccoshDomain) :
     HasDerivAt (fun w => w*arccosh w-Complex.sqrt (w-1)*Complex.sqrt (w+1)) (arccosh z) z := by
-  obtain ⟨h1, h2⟩ := hypR4_acosh_slit hz
-  have hs := hypR4_acosh_root_ne hz
+  obtain ⟨h1, h2⟩ := sub_one_add_one_mem_slitPlane_of_mem_arccoshDomain hz
+  have hs := sqrt_sub_one_mul_sqrt_add_one_ne_zero hz
   have hA : Complex.sqrt (z-1) ≠ 0 := fun h => hs (by rw [h, zero_mul])
   have hB : Complex.sqrt (z+1) ≠ 0 := fun h => hs (by rw [h, mul_zero])
   have dA : HasDerivAt (fun w => Complex.sqrt (w-1)) ((Complex.sqrt (z-1))⁻¹/2) z := by
@@ -576,7 +597,7 @@ theorem complex_antiderivative_arccosh {z : ℂ} (hz : z∈arccoshDomain) :
     have := (Complex.hasDerivAt_sqrt h2).comp z ((hasDerivAt_id z).add_const 1)
     simpa only [Complex.sqrt, show (-1/2:ℂ) = -(2⁻¹:ℂ) by norm_num, Complex.cpow_neg, mul_one,
       Function.comp_def, id] using this
-  have hd := ((hasDerivAt_id z).mul (hypR4_hasDerivAt_arccosh hz)).sub (dA.mul dB)
+  have hd := ((hasDerivAt_id z).mul (hasDerivAt_arccosh_of_mem hz)).sub (dA.mul dB)
   convert hd using 1
   · rfl
   have eA := trig_sqrt_sq (z-1)
@@ -624,7 +645,7 @@ theorem reciprocal_inverses_ofReal {x : ℝ} :
 
 /-- A nonvanishing holomorphic function on a disc about the origin, equal to `1` at the origin,
 has a holomorphic logarithm vanishing at the origin. -/
-private lemma hypR4_exists_log_ball {r : ℝ} {g : ℂ → ℂ}
+private lemma exists_hyperbolicNormalizedLog_ball {r : ℝ} {g : ℂ → ℂ}
     (hg : DifferentiableOn ℂ g (Metric.ball 0 r)) (hne : ∀ z ∈ Metric.ball (0:ℂ) r, g z ≠ 0)
     (h0 : g 0 = 1) (hr : 0 < r) : ∃ L, HyperbolicNormalizedLog (Metric.ball 0 r) g L := by
   have hB : IsOpen (Metric.ball (0:ℂ) r) := Metric.isOpen_ball
@@ -655,7 +676,7 @@ private lemma hypR4_exists_log_ball {r : ℝ} {g : ℂ → ℂ}
   linear_combination -(Complex.exp (P z))*h + g z*he
 
 /-- `sinh` has no zeros other than the origin in the open disc of radius `π`. -/
-private lemma hypR4_sinh_ne_zero_ball {z : ℂ} (hz : ‖z‖ < π) (hz0 : z ≠ 0) :
+private lemma sinh_ne_zero_of_norm_lt_pi {z : ℂ} (hz : ‖z‖ < π) (hz0 : z ≠ 0) :
     Complex.sinh z ≠ 0 := by
   intro h
   have hs : Complex.sin (z*I) = 0 := by rw [Complex.sin_mul_I, h, zero_mul]
@@ -672,7 +693,7 @@ private lemma hypR4_sinh_ne_zero_ball {z : ℂ} (hz : ‖z‖ < π) (hz0 : z ≠
     nlinarith [Real.pi_pos]
 
 /-- `cosh` has no zeros in the open disc of radius `π/2`. -/
-private lemma hypR4_cosh_ne_zero_ball {z : ℂ} (hz : ‖z‖ < π/2) : Complex.cosh z ≠ 0 := by
+private lemma cosh_ne_zero_of_norm_lt_pi_div_two {z : ℂ} (hz : ‖z‖ < π/2) : Complex.cosh z ≠ 0 := by
   intro h
   have hs : Complex.cos (z*I) = 0 := by rw [Complex.cos_mul_I, h]
   obtain ⟨k, hk⟩ := Complex.cos_eq_zero_iff.mp hs
@@ -703,18 +724,18 @@ theorem exists_hyperbolic_logarithms :
       by_cases hz : z = 0
       · subst hz; simp [sinhc, dslope_same, Complex.deriv_sinh]
       · rw [dslope_of_ne _ hz, slope_def_field]; simp [sinhc, hz]
-    refine hypR4_exists_log_ball ?_ (fun z hz => ?_) (by simp [sinhc]) hπ
+    refine exists_hyperbolicNormalizedLog_ball ?_ (fun z hz => ?_) (by simp [sinhc]) hπ
     · rw [he, differentiableOn_dslope (Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self hπ))]
       exact Complex.differentiable_sinh.differentiableOn
     · have hz' : ‖z‖ < π := by simpa using hz
       by_cases hz0 : z = 0
       · simp [sinhc, hz0]
       · simp only [sinhc, hz0, ↓reduceIte]
-        exact div_ne_zero (hypR4_sinh_ne_zero_ball hz' hz0) hz0
-  · exact hypR4_exists_log_ball Complex.differentiable_cosh.differentiableOn
-      (fun z hz => hypR4_cosh_ne_zero_ball (by simpa using hz)) (by simp) (by positivity)
+        exact div_ne_zero (sinh_ne_zero_of_norm_lt_pi hz' hz0) hz0
+  · exact exists_hyperbolicNormalizedLog_ball Complex.differentiable_cosh.differentiableOn
+      (fun z hz => cosh_ne_zero_of_norm_lt_pi_div_two (by simpa using hz)) (by simp) (by positivity)
   · have hc : ∀ z ∈ Metric.ball (0:ℂ) (π/2), Complex.cosh z ≠ 0 :=
-      fun z hz => hypR4_cosh_ne_zero_ball (by simpa using hz)
+      fun z hz => cosh_ne_zero_of_norm_lt_pi_div_two (by simpa using hz)
     have hT : DifferentiableOn ℂ Complex.tanh (Metric.ball 0 (π/2)) := by
       intro z hz
       have : Complex.tanh = fun w => Complex.sinh w / Complex.cosh w := by
@@ -734,7 +755,7 @@ theorem exists_hyperbolic_logarithms :
       by_cases hz : z = 0
       · subst hz; simp [tanhc, dslope_same, hd0]
       · rw [dslope_of_ne _ hz, slope_def_field]; simp [tanhc, hz]
-    refine hypR4_exists_log_ball ?_ (fun z hz => ?_) (by simp [tanhc]) (by positivity)
+    refine exists_hyperbolicNormalizedLog_ball ?_ (fun z hz => ?_) (by simp [tanhc]) (by positivity)
     · rw [he, differentiableOn_dslope (Metric.isOpen_ball.mem_nhds
         (Metric.mem_ball_self (by positivity)))]
       exact hT
@@ -743,10 +764,10 @@ theorem exists_hyperbolic_logarithms :
       · simp [tanhc, hz0]
       · simp only [tanhc, hz0, ↓reduceIte]
         rw [Complex.tanh_eq_sinh_div_cosh]
-        exact div_ne_zero (div_ne_zero (hypR4_sinh_ne_zero_ball (by linarith) hz0) (hc z hz)) hz0
+        exact div_ne_zero (div_ne_zero (sinh_ne_zero_of_norm_lt_pi (by linarith) hz0) (hc z hz)) hz0
 
 /-- `√(1-z²)+iz` never lies on the closed negative real axis. -/
-private lemma hypR4_sqrt_add_I_mul_slit (z : ℂ) :
+private lemma sqrt_one_sub_sq_add_I_mul_mem_slitPlane (z : ℂ) :
     Complex.sqrt (1-z^2)+I*z ∈ Complex.slitPlane := by
   set q := Complex.sqrt (1-z^2) with hq
   have hq2 : q^2 = 1-z^2 := trig_sqrt_sq _
@@ -811,7 +832,7 @@ theorem complex_antiderivatives_reciprocal_inverse {z : ℂ}
     simp only [id_eq]
     field_simp
     ring
-  · have hsl := hypR4_asech_slit hc
+  · have hsl := one_sub_sq_mem_slitPlane_of_mem_arcsechDomain hc
     set q := Complex.sqrt (1-z^2) with hqdef
     have hq0 : q ≠ 0 := by
       intro h
@@ -824,7 +845,7 @@ theorem complex_antiderivatives_reciprocal_inverse {z : ℂ}
     have hv : (1-z^2)^(-1/2:ℂ) = q⁻¹ := by
       rw [hqdef, Complex.sqrt, show (-1/2:ℂ) = -(2⁻¹) by norm_num, Complex.cpow_neg]
     rw [hv] at dS
-    have hL := hypR4_sqrt_add_I_mul_slit z
+    have hL := sqrt_one_sub_sq_add_I_mul_mem_slitPlane z
     have hA : HasDerivAt (fun w : ℂ => Complex.sqrt (1-w^2)+I*w) (2⁻¹*q⁻¹*(-(2*z)) + I) z := by
       convert dS.add ((hasDerivAt_id z).const_mul I) using 1
       · funext w; simp [Function.comp_def]
@@ -1101,7 +1122,7 @@ theorem continued_antiderivative_arctanh {U : Set ℂ} (hU : IsOpen U) {z : ℂ}
     HasDerivAt (fun w => w*A w-L w) (A z) z := by
   have dA := (hA z hz).differentiableAt.hasDerivAt
   have dL := (hL z hz).differentiableAt.hasDerivAt
-  have e := hypR4_deriv_eq hU hz dL.cexp dA.ccosh hlog
+  have e := hasDerivAt_unique_of_eqOn hU hz dL.cexp dA.ccosh hlog
   rw [hlog z hz] at e
   have hc := hpole z hz
   have hlz : deriv L z = z*deriv A z := by
@@ -1125,8 +1146,8 @@ theorem continued_antiderivative_arccsch {U : Set ℂ} (hU : IsOpen U) {z : ℂ}
   have dA := (hA z hz).differentiableAt.hasDerivAt
   have dB := (hB z hz).differentiableAt.hasDerivAt
   have hs := hpole z hz
-  have e1 := hypR4_deriv_eq hU hz ((hasDerivAt_csch hs).comp z dA) (hasDerivAt_id z) hinv
-  have e2 := hypR4_deriv_eq hU hz dB.csinh (hasDerivAt_id z) hbinv
+  have e1 := hasDerivAt_unique_of_eqOn hU hz ((hasDerivAt_csch hs).comp z dA) (hasDerivAt_id z) hinv
+  have e2 := hasDerivAt_unique_of_eqOn hU hz dB.csinh (hasDerivAt_id z) hbinv
   rw [hbranch z hz] at e2
   have hcz := hinv z hz
   rw [csch] at hcz
@@ -1156,8 +1177,8 @@ theorem continued_antiderivative_arcsech {U : Set ℂ} (hU : IsOpen U) {z : ℂ}
   have dA := (hA z hz).differentiableAt.hasDerivAt
   have dB := (hB z hz).differentiableAt.hasDerivAt
   have hc := hpole z hz
-  have e1 := hypR4_deriv_eq hU hz ((hasDerivAt_sech hc).comp z dA) (hasDerivAt_id z) hinv
-  have e2 := hypR4_deriv_eq hU hz dB.csin (hasDerivAt_id z) hbinv
+  have e1 := hasDerivAt_unique_of_eqOn hU hz ((hasDerivAt_sech hc).comp z dA) (hasDerivAt_id z) hinv
+  have e2 := hasDerivAt_unique_of_eqOn hU hz dB.csin (hasDerivAt_id z) hbinv
   rw [hbranch z hz] at e2
   have hcz := hinv z hz
   rw [sech] at hcz
@@ -1185,8 +1206,8 @@ theorem continued_antiderivative_arccoth {U : Set ℂ} (hU : IsOpen U) {z : ℂ}
   have dA := (hA z hz).differentiableAt.hasDerivAt
   have dL := (hL z hz).differentiableAt.hasDerivAt
   have hs := hpole z hz
-  have e1 := hypR4_deriv_eq hU hz ((hasDerivAt_coth hs).comp z dA) (hasDerivAt_id z) hinv
-  have e2 := hypR4_deriv_eq hU hz (dL.const_mul 2).cexp ((hasDerivAt_id z).pow 2 |>.sub_const 1) hlog
+  have e1 := hasDerivAt_unique_of_eqOn hU hz ((hasDerivAt_coth hs).comp z dA) (hasDerivAt_id z) hinv
+  have e2 := hasDerivAt_unique_of_eqOn hU hz (dL.const_mul 2).cexp ((hasDerivAt_id z).pow 2 |>.sub_const 1) hlog
   rw [hlog z hz] at e2
   have hcz := hinv z hz
   have hq : z^2-1 ≠ 0 := by rw [← hlog z hz]; exact Complex.exp_ne_zero _

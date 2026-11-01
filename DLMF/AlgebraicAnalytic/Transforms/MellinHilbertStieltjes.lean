@@ -27,28 +27,49 @@ Mathlib's `mellinInv_mellin_eq` (pointer in `MathlibCoverage`). The Hilbert tran
 `hilbertTransform` (1.14.41) and the Stieltjes transform `stieltjesTransform` (1.14.47) are
 defined in `Transforms/Basic`.
 
-Proved: Mellin holomorphy in its strip of absolute convergence, the Riemann–Lebesgue
-property 1.14.33 on vertical lines, the integrability criterion of §1.14(iv), Mellin
-convolution 1.14.40, the bilinear Mellin pairings 1.14.36–1.14.37 and the real
-Mellin–Parseval identity 1.14.38. These pairings use Fourier inversion almost everywhere
-with weighted `L¹` hypotheses. The Stieltjes results
-include convergence from power decay, slit-plane holomorphy, differentiation of every
-order and the iterated-Laplace identity 1.14.50. The Hilbert-transform statements and
-Stieltjes inversion remain admitted. Slit-plane bounds reuse TauCeti's denominator estimate.
+## Main definitions
+
+* `pichoridesConstant`: the constant `A_p` of DLMF 1.14.45.
+
+## Main results
+
+* `differentiableOn_mellin`, `mellinConvergent_of_isBigO`: holomorphy in the strip of absolute
+  convergence and an integrability criterion (§1.14(iv)).
+* `tendsto_mellin_vertical`: the Riemann–Lebesgue property on vertical lines (DLMF 1.14.33).
+* `tendsto_mellin_inversion_pv`: Mellin inversion at a point of bounded variation
+  (DLMF 1.14.34).
+* `integral_mul_comp_mul_eq_mellin`, `integral_mul_eq_mellin`, `integral_sq_eq_mellin`: the
+  Parseval-type formulas 1.14.36–1.14.38.
+* `mellin_mellinConvolution`: the Mellin convolution theorem (DLMF 1.14.40).
+* `ae_tendsto_hilbertTruncated`, `ae_tendsto_conjugatePoisson_hilbertTransform`,
+  `hilbertTruncated_eq_integral_Ioi`: existence and representations of the Hilbert transform
+  (DLMF 1.14.41–1.14.43).
+* `hilbertTransform_hilbertTransform`: Hilbert inversion (DLMF 1.14.44).
+* `hilbertTransform_lp_bound`, `integral_norm_hilbertTransform_sq`: the M. Riesz inequality with
+  Pichorides' constant (DLMF 1.14.45, corrected).
+* `tendsto_fourier_hilbertTransform`: the Fourier multiplier of `ℋ` (DLMF 1.14.46).
+* `integrableOn_stieltjes_integrand`, `differentiableOn_stieltjesTransform`,
+  `iteratedDeriv_stieltjesTransform`: convergence, holomorphy and derivatives of the Stieltjes
+  transform (§1.14(vi), 1.14.48).
+* `tendsto_stieltjesTransform_jump`: Stieltjes inversion (DLMF 1.14.49).
+* `stieltjesTransform_eq_laplace_laplace`: the iterated-Laplace identity (DLMF 1.14.50).
+
+## Implementation notes
 
 **Correction (1.14.45).** DLMF prints `∫ |ℋf|^p ≤ A_p ∫ |f|^p` with the Pichorides constants
 `A_p = tan(π/(2p))` (`1 < p ≤ 2`) and `cot(π/(2p))` (`p ≥ 2`), "sharp". These constants are the
 sharp bounds of the `L^p` operator norm, `‖ℋf‖_p ≤ A_p ‖f‖_p`; for the integrals of `p`-th powers
 the sharp constant is `A_p^p`. The printed form fails: for `p = 4/3` (`A_p = 1 + √2 ≈ 2.414`) the
 boundary values `u + iv` of `G(z) = (-iz)^{-0.745} (1 - iz)^{-1/2}` (analytic in the upper
-half-plane, `v = -ℋu` in DLMF's sign) give `∫|v|^p / ∫|u|^p ≈ 3.19 > 2.414`. The corrected form
-with `A_p^p` is acquired.
+half-plane, `v = -ℋu` in DLMF's sign) give `∫|v|^p / ∫|u|^p ≈ 3.19 > 2.414`. The statement
+here uses `A_p^p`.
 
 **Sign remark.** DLMF's Hilbert transform has `t - x` in the denominator (1.14.41), so its
-Fourier multiplier in DLMF's Fourier normalization is `-i sign x` (1.14.46, checked numerically
-for `f(t) = 1/(1 + t²)`, `ℋf(x) = -x/(1 + x²)`).
-The Mellin convolution theorem uses `hasMellin_integral_mul_div` from the project’s
-logarithmic-coordinate adapter to Mathlib’s convolution API.
+Fourier multiplier in DLMF's Fourier normalization is `-i sign x` (1.14.46; for example
+`f(t) = 1/(1 + t²)` has `ℋf(x) = -x/(1 + x²)`).
+
+The Mellin convolution theorem uses `hasMellin_integral_mul_div` from the project's
+logarithmic-coordinate adapter to Mathlib's convolution API.
 -/
 
 @[expose] public noncomputable section

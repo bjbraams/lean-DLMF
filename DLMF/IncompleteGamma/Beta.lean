@@ -10,12 +10,37 @@ public import DLMF.Hypergeometric.ArgumentContinuation
 public import DLMF.Statistical.IncompleteBeta
 
 /-!
-# Incomplete Beta continuation, recurrences and fractions, DLMF §8.17
+# Incomplete Beta function: continuation, recurrences and continued fraction (DLMF §8.17)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs.
+## Main definitions
+
+* `incBeta`, `normIncBetaI`: the continued incomplete Beta function and its normalized form.
+* `incBetaComplement`, `incBetaContiguousParameter`: the data of the contiguous recurrences,
+  DLMF 8.17.11.
+* `incBetaFractionD`, `incBetaFractionConvergent`: the continued fraction, DLMF 8.17.22–8.17.23.
+
+## Main results
+
+* `incBeta_ofReal`, `normIncBetaI_ofReal`: agreement with the real definitions,
+  DLMF 8.17.1–8.17.2.
+* `normIncBetaI_quadratic`: DLMF 8.17.6.
+* `incBeta_hypergeometric_euler`, `incBeta_hypergeometric_pfaff`: hypergeometric
+  representations, DLMF 8.17.8–8.17.9.
+* `normIncBetaI_mellinBarnes`: the Mellin–Barnes integral, DLMF 8.17.10.
+* `normIncBetaI_contiguous_12`, …, `normIncBetaI_contiguous_19`: the recurrences
+  DLMF 8.17.12–8.17.19, with `normIncBetaI_contiguous_limit_12`,
+  `normIncBetaI_contiguous_limit_16`, `normIncBetaI_contiguous_limit_17` at the singular case
+  `a + b = 1`.
+* `incBeta_continuedFraction`, `incBeta_continuedFraction_endpoint_limit`: the continued
+  fraction, DLMF 8.17.22.
+* `normIncBetaI_negative_binomial_sum`: DLMF 8.17.24.
+* `incBeta_cf_upper_bound_counterexample`, `incBeta_cf_third_bound_counterexample`:
+  counterexamples to the unqualified claim after 8.17.23 that the convergents are upper bounds.
+
+## Implementation notes
+
+Results already in Mathlib are referenced, not reproved. At parameter poles `incBeta` keeps its
+totalized values; `normIncBetaI` preserves the removable specialization `a = 0`.
 -/
 
 @[expose] public noncomputable section
@@ -260,7 +285,7 @@ theorem normIncBetaI_shift_diagonal (a b : ℂ) (ha : ∀ k : ℕ, a+1≠-k)
 
 /-- Right incomplete-Beta shift on the disk, valid also when the starting b is zero. -/
 theorem normIncBetaI_shift_right (a b : ℂ) (ha : ∀ k : ℕ, a+1≠-k)
-    (hab : a+b≠0) {z : ℂ} (hz : ‖z‖<1) (hz0 : z≠0) :
+    (hab : a+b≠0) {z : ℂ} (hz : ‖z‖<1) :
     normIncBetaI a (b+1) z=normIncBetaI a b z+
       Gamma (a+b)/Gamma (b+1)*z^a*(1-z)^b/Gamma a := by
   have hz1 : z≠1 := by intro h; simp [h] at hz
@@ -293,7 +318,7 @@ theorem normIncBetaI_shift_left (a b : ℂ) (ha : ∀ k : ℕ, a+1≠-k)
       Gamma (a+b)/Gamma b*z^a*(1-z)^b/Gamma (a+1) := by
   have hd := normIncBetaI_shift_diagonal a (b+1) ha hz hz0
   rw [add_sub_cancel_right] at hd
-  rw [normIncBetaI_shift_right a b ha hab hz hz0,
+  rw [normIncBetaI_shift_right a b ha hab hz,
     show a+(b+1)=(a+b)+1 by ring, Gamma_add_one _ hab] at hd
   have hga := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one a
   have hgb := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one b
@@ -323,7 +348,7 @@ theorem normIncBetaI_neighbors {a b z : ℂ} (ha : 0<a.re) (hb : 0<b.re)
     rw [hB, Gamma_add_one b hb0]
     field_simp
   have hleft := normIncBetaI_shift_left a b ha1 hab hz hz0
-  have hright := normIncBetaI_shift_right a b ha1 hab hz hz0
+  have hright := normIncBetaI_shift_right a b ha1 hab hz
   have hdiag := normIncBetaI_shift_diagonal a b ha1 hz hz0
   have hdiag' := normIncBetaI_shift_diagonal (a-1) (b+1)
     (by simpa using not_neg_nat_of_re_pos ha) hz hz0
@@ -355,7 +380,7 @@ theorem normIncBetaI_neighbors_down {a b z : ℂ} (ha : 0<a.re) (hb : 0<b.re)
   have ha1 := not_neg_nat_of_re_pos (show 0<(a+1).re by simp; linarith)
   have hl := normIncBetaI_shift_left (a-1) b (by simpa using not_neg_nat_of_re_pos ha)
     (by convert hs0 using 1 <;> ring) hz hz0
-  have hr := normIncBetaI_shift_right a (b-1) ha1 (by convert hs0 using 1 <;> ring) hz hz0
+  have hr := normIncBetaI_shift_right a (b-1) ha1 (by convert hs0 using 1 <;> ring) hz
   rw [sub_add_cancel, show a-1+b=a+b-1 by ring] at hl
   rw [sub_add_cancel, show a+(b-1)=a+b-1 by ring] at hr
   have hg := Gamma_add_one (a+b-1) hs0

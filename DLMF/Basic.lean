@@ -70,9 +70,7 @@ public import DLMF.WignerSymbols.Basic
 # The foundational DLMF collection
 
 This entry point imports all `Basic.lean` entry points and their foundational `Basic/`
-submodules. It exposes the organized definitions and their minimal supporting APIs;
-substantive differential, integral, asymptotic and transformation developments remain in
-separate theorem modules. External libraries, `DLMFMathlib` and `DLMF.Core.*` provide the
-general mathematical framework. The definitions inventories document further DLMF
-correspondences, including auxiliary constructions in theorem developments.
+submodules: the definitions of the library with their minimal supporting APIs. Differential,
+integral, asymptotic and transformation results are in separate theorem modules. External
+libraries, `DLMFMathlib` and `DLMF.Core.*` provide the general mathematical framework.
 -/

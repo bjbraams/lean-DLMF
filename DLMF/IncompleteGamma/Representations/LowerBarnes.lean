@@ -12,11 +12,28 @@ public import DLMFMathlib.Analysis.Integral.PrincipalValue
 /-!
 # Integral representations of the lower incomplete Gamma function
 
-Real and complex integrals, vertical-contour estimates and the lower incomplete-Gamma Barnes
-representation.
+Real and complex integral representations of the incomplete Gamma functions (DLMF 8.6.1–8.6.9),
+vertical-contour estimates, and the Mellin–Barnes representations DLMF 8.6.10 and 8.6.11.
 
-Source references and common attribution are retained in
-`DLMF.IncompleteGamma.Representations`.
+## Main definitions
+
+* `upperGammaIndentPV`: the symmetric principal value underlying the indented contour of
+  DLMF 8.6.9.
+* `upperIncGammaMBIntegrand`: the Mellin–Barnes integrand `Γ(s+a) z^{-s}/s` of DLMF 8.6.11.
+* `incRep_L`: the Mellin–Barnes integrand `Γ(s) z^{a-s}/(a-s)` of DLMF 8.6.10.
+
+## Main results
+
+* `lowerIncGamma_trigonometric_integral`, `lowerIncGamma_besselJ_integral`,
+  `lowerIncGamma_logarithmic_integral`: DLMF 8.6.1–8.6.3.
+* `upperIncGamma_stieltjes_integral`, `upperIncGamma_laplace_integral_complex`,
+  `upperIncGamma_besselK_integral`, `upperIncGamma_logarithmic_integral`: DLMF 8.6.4–8.6.7.
+* `lowerIncGamma_circle_integral`: the loop integral DLMF 8.6.8.
+* `upperGammaIndentPV_converges`, `upperIncGamma_indented_integral`: the indented-contour
+  representation DLMF 8.6.9.
+* `lowerIncGamma_mellinBarnes`: DLMF 8.6.10, with the separating contour expressed by a
+  vertical line and the crossed-pole residue.
+* `upperIncGamma_mellinBarnes`: DLMF 8.6.11, from the Barnes integral for `U` (DLMF 13.4.18).
 -/
 
 @[expose] public noncomputable section
@@ -278,11 +295,6 @@ theorem lowerIncGamma_besselJ_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} (hz :
   rw [hT]
   field_simp
 
-/-- `(e^x)^w = e^{xw}` for real `x`. -/
-theorem ofReal_exp_cpow_eq_exp_mul (x : ℝ) (w : ℂ) : ((Real.exp x : ℝ) : ℂ)^w = exp (x*w) := by
-  rw [ofReal_exp, cpow_def_of_ne_zero (Complex.exp_ne_zero _), log_exp (by simp [Real.pi_pos])
-    (by simp [Real.pi_pos.le])]
-
 /-- Identity under the stated parameter and domain assumptions: `lowerIncGamma a z=z^a*(∫ t : ℝ in
 Ioi 0, exp (-a*t-z*Real.exp (-t)))`. -/
 @[dlmf 8.6.E3]
@@ -314,7 +326,7 @@ theorem lowerIncGamma_logarithmic_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} :
   rw [← hneg]
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
   simp only [g, Complex.real_smul]
-  rw [ofReal_exp_cpow_eq_exp_mul, ofReal_exp, ← Complex.exp_add]
+  rw [TauCeti.ofReal_exp_cpow, ofReal_exp, ← Complex.exp_add]
   push_cast
   rw [← Complex.exp_add]
   congr 1
@@ -386,7 +398,7 @@ theorem upperIncGamma_logarithmic_integral (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
   rw [h1, ← h2, ← integral_const_mul]
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
   simp only [Complex.real_smul]
-  rw [ofReal_exp_cpow_eq_exp_mul, ofReal_exp, ← Complex.exp_add, ← Complex.exp_add, ← Complex.exp_add]
+  rw [TauCeti.ofReal_exp_cpow, ofReal_exp, ← Complex.exp_add, ← Complex.exp_add, ← Complex.exp_add]
   congr 1
   ring
 

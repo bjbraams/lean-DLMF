@@ -9,15 +9,35 @@ public import DLMF.Elliptic.AGM
 public import DLMF.Elliptic.Theta
 
 /-!
-# Theta functions and the AGM: `K = (π/2) θ₃²` (Temme §12.3.2, DLMF 20.9.2)
+# Theta functions and the AGM: `K = (π/2) θ₃²`
 
 For a real nome `0 < q < 1` let `θ₃(q) = ∑ q^{n²}` and `θ₄(q) = ∑ (-1)ⁿ q^{n²}`, the values at
-`z = 0` of the DLMF theta functions with `q = e^{iπτ}` (`jacobiThetaThreeTau_zero_I_mul`). Splitting
-`ℤ²` into the sublattice `a + b` even, parametrized by `(u+v, u-v)`, and its complement, on which
-`(a,b) ↦ (b,a)` cancels the signed terms, gives the doubling identities
-`θ₃(q)² + θ₄(q)² = 2θ₃(q²)²` and `θ₃(q) θ₄(q) = θ₄(q²)²`. Hence `(θ₃(q^{2ⁿ})², θ₄(q^{2ⁿ})²)` is an
-AGM sequence. It tends to `(1, 1)`, so `M(θ₃², θ₄²) = 1`, and Gauss's theorem gives Jacobi's
-`K(m) = (π/2) θ₃(q)²` with complementary modulus `k' = θ₄(q)²/θ₃(q)²`.
+`z = 0` of the DLMF theta functions with `q = e^{iπτ}`. This file proves the doubling identities
+and Jacobi's formula `K(m) = (π/2) θ₃(q)²` with complementary modulus `k' = θ₄(q)²/θ₃(q)²`
+(Temme §12.3.2, DLMF 20.9.2).
+
+## Main definitions
+
+* `Real.jacobiThetaThreeNullQ`, `Real.jacobiThetaFourNullQ`: the real theta constants `θ₃(q)` and
+  `θ₄(q)`.
+
+## Main results
+
+* `Real.jacobiThetaThreeNullQ_sq_add_jacobiThetaFourNullQ_sq`: `θ₃(q)² + θ₄(q)² = 2 θ₃(q²)²`.
+* `Real.jacobiThetaThreeNullQ_mul_jacobiThetaFourNullQ`: `θ₃(q) θ₄(q) = θ₄(q²)²` (DLMF 20.7.11 at
+  `z = 0`).
+* `Real.jacobiThetaFourNullQ_pos`: `θ₄(q) > 0`.
+* `Real.agm_jacobiThetaThreeNullQ_sq_jacobiThetaFourNullQ_sq`: `M(θ₃(q)², θ₄(q)²) = 1`.
+* `Real.compEllIntKm_eq_jacobiThetaThreeNullQ`: Jacobi's formula `K = (π/2) θ₃²` (DLMF 20.9.2).
+* `jacobiThetaThreeTau_zero_I_mul`, `jacobiThetaFourTau_zero_I_mul`: on the imaginary axis
+  `τ = it` the DLMF theta constants are the real series in the nome `q = e^{-πt}`.
+
+## Implementation notes
+
+Splitting `ℤ²` into the sublattice `a + b` even, parametrized by `(u+v, u-v)`, and its
+complement, on which `(a,b) ↦ (b,a)` cancels the signed terms, gives the doubling identities.
+Hence `(θ₃(q^{2ⁿ})², θ₄(q^{2ⁿ})²)` is an AGM sequence; it tends to `(1, 1)`, so
+`M(θ₃², θ₄²) = 1`, and Gauss's theorem gives Jacobi's formula.
 -/
 
 @[expose] public section

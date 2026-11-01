@@ -13,11 +13,33 @@ public import Mathlib.NumberTheory.Real.Irrational
 /-!
 # Topics in orthogonal polynomials (AAR Chapter 7)
 
-Connection coefficients, Turán's inequality, positive summability of ultraspherical series,
-and Apéry's theorem on the irrationality of `ζ(3)`. None of these are in Mathlib.
-The Jacobi connection proof uses finite Pochhammer inversion and the Mathlib
-contributors’ finite-sum, binomial and polynomial APIs. Its regular head term
-retains the case `α + β = -1`.
+Connection coefficients of Jacobi polynomials, Turán's inequalities, Vietoris's inequality,
+positivity of Cesàro sums of ultraspherical polynomials, and Apéry's theorem on the
+irrationality of `ζ(3)`.
+
+## Main definitions
+
+* `jacobiInverseCoeff`: inverse triangular Jacobi coefficients for powers of `(1-x)/2`.
+
+## Main results
+
+* `jacobi_monomial_inverse`: powers of `(1-x)/2` in the Jacobi basis, including
+  `α + β = -1`.
+* `jacobiPolyP_connection`: connection coefficients of Jacobi polynomials (AAR Lemma 7.1.1,
+  DLMF §18.18(iv)).
+* `ultrasphPoly_normalized_recurrence`, `legendrePolyP_recurrence`: three-term recurrences,
+  DLMF Table 18.9.1.
+* `turan_ultrasphPoly`, `turan_legendre`: Turán's inequalities DLMF 18.14.11 and 18.14.10.
+* `legendrePolyP_eq_normalized_ultrasphPoly`: DLMF 18.7.9.
+* `vietoris_inequality`: Vietoris's inequality (AAR §7.3).
+* `ultrasphPoly_cesaro_nonneg`: positivity of Cesàro sums of ultraspherical polynomials
+  (AAR Corollary 7.6.4).
+* `irrational_riemannZeta_three`: Apéry's theorem (AAR §7.7).
+
+## Implementation notes
+
+The Jacobi connection formula uses finite Pochhammer inversion; its regular head term keeps
+the case `α + β = -1`.
 -/
 
 @[expose] public section

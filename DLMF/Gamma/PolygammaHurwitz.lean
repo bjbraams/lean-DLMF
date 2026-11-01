@@ -11,12 +11,26 @@ public import DLMF.Gamma.Polygamma
 # Polygamma and the Hurwitz zeta function (Duverney §§2.1.5, 2.5.2)
 
 This file connects the project's polygamma series with Mathlib's Hurwitz zeta function.
+
+## Main results
+
 * `polygamma_eq_hurwitzZeta`: `ψ⁽ⁿ⁾(a) = (-1)ⁿ⁺¹ n! ζ(n+1, a)` for `0 < a ≤ 1`, `n ≥ 1`
-  (DLMF 25.11.12). Mathlib's Dirichlet series for `hurwitzZeta` covers only `a ∈ [0, 1]`.
+  (DLMF 25.11.12).
 * `hurwitzZeta_one_half_nat`: `ζ(n+1, ½) = (2ⁿ⁺¹ - 1) ζ(n+1)` (DLMF 25.11.11).
-* `integral_cpow_mul_exp_div_one_sub_exp`: `∫₀^∞ t^{s-1} e^{-xt}/(1-e^{-t}) dt = Γ(s) ∑ₖ (k+x)^{-s}`
-  for `x > 0`, `Re s > 1`, by termwise integration of the geometric series. It gives the
-  Hurwitz integral 25.11.25 (Duverney (2.89)) and the polygamma integral (Duverney (2.29)).
+* `integral_cpow_mul_exp_div_one_sub_exp`:
+  `∫₀^∞ t^{s-1} e^{-xt}/(1-e^{-t}) dt = Γ(s) ∑ₖ (k+x)^{-s}` for `x > 0`, `Re s > 1`, by
+  termwise integration of the geometric series.
+* `Gamma_mul_hurwitzZeta_eq_integral`: the Hurwitz integral, DLMF 25.11.25 (Duverney (2.89)).
+* `polygamma_eq_integral`: the polygamma integral (Duverney (2.29)).
+
+## Implementation notes
+
+Mathlib's Dirichlet series for `hurwitzZeta` covers only `a ∈ [0, 1]`, hence the restriction
+`0 < a ≤ 1`.
+
+## References
+
+* D. Duverney, *An Introduction to Hypergeometric Functions*, §§2.1.5, 2.5.2.
 -/
 
 @[expose] public section

@@ -11,60 +11,65 @@ public import DLMF.Core.Framework
 /-!
 # Spheroidal wave functions: definitions (DLMF §§30.2–30.4, 30.6, 30.8, 30.11, 30.12)
 
-This is the definitions file of the spheroidal area (DLMF Chapter 30). It contains
+This file contains the definitions of the spheroidal area (DLMF Chapter 30) that do not
+involve Ferrers functions: the spheroidal differential equation and its variants, the spectrum
+and eigenvalues, the normalized entire factor and the angular functions of the first kind, and
+the coefficients of the continued fractions, recurrences and expansions. The definitions that
+need the Ferrers functions are in `DLMF.Spheroidal.Basic.Ferrers`.
 
-* the spheroidal differential equation 30.2.1 as predicates with genuine differentiability:
-  `IsSpheroidalSolutionOn lam γ2 μ U w` (complex variable, open set `U` avoiding `±1`) and
-  `IsSpheroidalSolutionReal lam γ2 μ f` (real variable on `(-1, 1)`), the Liouville normal
-  form 30.2.2 (`IsSpheroidalLiouvilleSolution`), the form 30.2.4 in `ζ = γz`
-  (`IsSpheroidalZetaSolution`) and the generalized equations 30.12.1, 30.12.2;
-* the equation for the entire factor `g` of a bounded solution `(1 - z²)^{m/2} g(z)`
-  (`IsSpheroidalFactor m γ2 lam g`, DLMF §30.3(i)), the spectrum `spheroidalSpectrum m γ2`, and
-  the eigenvalue `spheroidalEigenvalue n m γ2 = λ^m_n(γ²)`, the `(n - m)`-th smallest element of
-  the spectrum (DLMF 30.3.1);
-* the entire factor `spheroidalPsFactor n m γ2`, normalized by 30.4.1 and the sign convention of
-  §30.4(i), and the angular functions of the first kind `spheroidalPs n m x γ2 = 𝖯s^m_n(x, γ²)`
-  (§30.4) and `spheroidalPsC n m z γ2 = 𝑃s^m_n(z, γ²)` (§30.6);
-* the coefficients of the continued-fraction equations 30.3.6 and 30.3.7, the recurrence
-  coefficients `A_k, B_k, C_k` of 30.8.3, the forward solution of 30.8.4 used in §30.8(ii) and
-  the constant `C'` of 30.8.11;
-* the functions `ψ_k^{(j)}(z) = (π/(2z))^{1/2} 𝒞^{(j)}_{k+1/2}(z)` of 30.11.1–30.11.2
-  (`spheroidalPsi`; for `j = 1` the entire `j_k`, `DLMF.sphericalJ` from `DLMF.Core`);
-* the Taylor coefficients `ℓ_{2k}` of 30.3.8 and the coefficients of the large-`γ` expansions
-  30.9.1–30.9.6;
-* the expansion coefficients `c_n` of 30.4.8.
+## Main definitions
 
-The definitions that need the Ferrers functions (`a^m_{n,k}(γ²)`, `A^{±m}_n(γ²)`, `𝖰s`, `𝑄s`,
-the radial functions `S^{m(j)}_n` and Flammer's functions of 30.1.1) are in
-`DLMF.Spheroidal.Basic.Ferrers`.
+* `IsSpheroidalSolutionOn`, `IsSpheroidalSolutionReal`: the spheroidal equation 30.2.1 on an
+  open set avoiding `±1` and on `(-1, 1)`, with genuine differentiability.
+* `IsSpheroidalLiouvilleSolution`, `IsSpheroidalZetaSolution`: the Liouville normal form 30.2.2
+  and the form 30.2.4 in `ζ = γz`.
+* `IsGenSpheroidalSolutionOn`, `IsSpheroidalSolutionOn₂`: the generalized equations 30.12.1 and
+  30.12.2.
+* `IsSpheroidalFactor`: the equation for the entire factor `g` of a bounded solution
+  `(1 - z²)^{m/2} g(z)` (DLMF §30.3(i)).
+* `spheroidalSpectrum`, `spheroidalEigenvalue`: the spectrum and the eigenvalue `λ^m_n(γ²)`, the
+  `(n - m)`-th smallest element of the spectrum (DLMF 30.3.1).
+* `IsSpheroidalPsFactor`, `spheroidalPsFactor`: the entire factor normalized by 30.4.1 and the
+  sign convention of §30.4(i).
+* `spheroidalPs`, `spheroidalPsC`: the angular functions of the first kind `𝖯s^m_n(x, γ²)`
+  (§30.4) and `𝑃s^m_n(z, γ²)` (§30.6).
+* `spheroidalExpansionCoeff`: the expansion coefficients `c_n` of DLMF 30.4.8.
+* `spheroidalCFAlpha`, `spheroidalCFBeta`, `spheroidalCFGamma` and their `Alt` variants: the
+  continued-fraction coefficients of DLMF 30.3.6 and 30.3.7.
+* `spheroidalRecA`, `spheroidalRecB`, `spheroidalRecC`, `spheroidalFwd`, `spheroidalCPrime`: the
+  recurrence coefficients of 30.8.3, the forward solution of 30.8.4 and the constant `C'` of
+  30.8.11.
+* `spheroidalEll`: the Taylor coefficients `ℓ_{2k}` of 30.3.8, with `spheroidalEllA`–
+  `spheroidalEllD` of 30.3.12.
+* `spheroidalProlateBeta`, `spheroidalOblateQ`, `spheroidalOblateC`: the coefficients of the
+  large-`γ` expansions 30.9.1–30.9.6.
+* `spheroidalCylinder`, `spheroidalPsi`: the functions
+  `ψ_k^{(j)}(z) = (π/(2z))^{1/2} 𝒞^{(j)}_{k+1/2}(z)` of 30.11.1–30.11.2.
 
-## Design notes
+## Implementation notes
 
 * `γ²` is a real parameter (DLMF §30.1), written `γ2 : ℝ`. Prolate: `γ2 > 0`, oblate:
   `γ2 < 0`. The degree comes before the order (`n m`, as for the project's `ferrersP ν μ x`),
   followed by DLMF's arguments `(x, γ²)`.
-* **Eigenvalues (choice flagged).** DLMF §30.3(i) characterizes `Ps^m_n` as the solutions of
+* Eigenvalues are defined by choice. DLMF §30.3(i) characterizes `Ps^m_n` as the solutions of
   30.2.1 with `μ = m` of the form `(1-x²)^{m/2} g(x)`, `g` entire; such solutions exist only for
-  the eigenvalues `λ^m_n(γ²)`, `n = m, m+1, …`, ordered by 30.3.1. Here
-  `spheroidalSpectrum m γ2` is the set of real `λ` for which the transformed equation
+  the eigenvalues `λ^m_n(γ²)`, `n = m, m+1, …`, ordered by 30.3.1. Here `spheroidalSpectrum m γ2`
+  is the set of real `λ` for which the transformed equation
   `(1-z²)g'' - 2(m+1)zg' + (λ - m(m+1) + γ²(1-z²))g = 0` has a nonzero entire solution, and
   `spheroidalEigenvalue n m γ2` is the element of the spectrum with exactly `n - m` smaller
-  elements (junk `0` if there is none). The theorem `exists_spheroidalEigenvalue` (in
-  `DLMF.Spheroidal.Existence`, proved via `DLMF.Spheroidal.P3lSpectrum` by a Frobenius
-  solution at `z = 1` and Sturm oscillation)
-  asserts that it exists; the ordering 30.3.1 is then proved.
-* **Eigenfunctions (choice flagged).** `spheroidalPsFactor n m γ2` is the entire function `g`
-  with the eigenvalue `λ^m_n(γ²)`, real on `ℝ`, with `∫_{-1}^1 (1-x²)^m g(x)² dx` given by
-  30.4.1 and the sign of `g(0)` (`n - m` even) or `g'(0)` (`n - m` odd) of §30.4(i); it is
-  defined by choice, with existence and uniqueness proved in
-  `existsUnique_isSpheroidalPsFactor` (`DLMF.Spheroidal.Existence`; simplicity and parity of the
-  eigenvalues,
-  `DLMF.Spheroidal.P3lParity`). Since
-  `(1 - x²)^{m/2}` has derivative `0` at `x = 0`, the signs of `g(0)`, `g'(0)` are those of
-  `𝖯s(0)`, `𝖯s'(0)`.
+  elements (junk `0` if there is none). Its existence is `exists_spheroidalEigenvalue` in
+  `DLMF.Spheroidal.Existence`, proved via `DLMF.Spheroidal.Spectrum` by a Frobenius solution at
+  `z = 1` and Sturm oscillation.
+* Eigenfunctions are defined by choice. `spheroidalPsFactor n m γ2` is the entire function `g`
+  with the eigenvalue `λ^m_n(γ²)`, real on `ℝ`, with `∫_{-1}^1 (1-x²)^m g(x)² dx` given by 30.4.1
+  and the sign of `g(0)` (`n - m` even) or `g'(0)` (`n - m` odd) of §30.4(i); existence and
+  uniqueness are `existsUnique_isSpheroidalPsFactor` in `DLMF.Spheroidal.Existence`, using the
+  simplicity and parity of the eigenvalues from `DLMF.Spheroidal.Parity`. Since `(1 - x²)^{m/2}`
+  has derivative `0` at `x = 0`, the signs of `g(0)`, `g'(0)` are those of `𝖯s(0)`, `𝖯s'(0)`.
 * `𝑃s^m_n(z, γ²) = (-1)^m (z-1)^{m/2} (z+1)^{m/2} g(z)` with principal powers: this is real on
   `(1, ∞)`, analytic on `ℂ ∖ (-∞, 1]`, and has the boundary values 30.6.4; at `γ = 0` it is
   `P^m_n(z) = (z²-1)^{m/2} dᵐP_n/dzᵐ` (DLMF 14.6.5, 30.6.2).
+* For `j = 1` the function `ψ_k^{(1)}` is the entire `j_k`, `DLMF.sphericalJ` from `DLMF.Core`.
 * Series in the definitions are `tsum`s (totalized); their convergence is stated separately.
 -/
 

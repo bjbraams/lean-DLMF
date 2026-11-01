@@ -6,22 +6,32 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Zeta.Polylog
-public import DLMF.Zeta.S25bDirichletTest
+public import DLMF.Zeta.DirichletTest
 
 /-!
 # The periodic zeta function (DLMF §25.13)
 
 DLMF's periodic zeta function `F(x, s) = ∑_{n≥1} e^{2πinx}/n^s` (25.13.1, real `x`) is Mathlib's
 `HurwitzZeta.expZeta (x : UnitAddCircle) s`, the meromorphic continuation in `s` of the series
-(entire in `s` for `x ∉ ℤ`; for `x ∈ ℤ` it is `ζ(s)`, with Lean's junk value at `s = 1`). The
-convergence of the series for `Re s > 1` is `HurwitzZeta.hasSum_expZeta_of_one_lt_re`
-(pointer in `DLMF.Zeta.MathlibCoverageB`); its conditional convergence for `0 < Re s ≤ 1`,
-`x ∉ ℤ`, is acquired here as a limit of partial sums. The identification with the polylogarithm,
-`F(x, s) = Li_s(e^{2πix})`, is `DLMF.Polylog.polylogSeries_exp_eq_expZeta` for natural `s ≥ 2` and
-`polylog_exp_eq_expZeta` below for `Re s > 1`.
+(entire in `s` for `x ∉ ℤ`; for `x ∈ ℤ` it is `ζ(s)`, with Lean's junk value at `s = 1`). This
+file covers DLMF §25.13 for it.
 
-Since Mathlib's parameter lives in `ℝ/ℤ`, periodicity in `x` holds by construction.
-For `0 < x < 1`, DLMF's `ζ(1 - s, x)` is Mathlib's `hurwitzZeta x (1 - s)`.
+## Main results
+
+* `tendsto_expZeta_partialSum`: the defining series 25.13.1 in its conditional range
+  `0 < Re s ≤ 1`, `x ∉ ℤ`, as a limit of partial sums.
+* `polylog_exp_eq_expZeta`: `F(x, s) = Li_s(e^{2πix})` for real `x` and `Re s > 1`.
+* `expZeta_add_one`, `expZeta_intCast`: periodicity, and `F(m, s) = ζ(s)` for `m ∈ ℤ`.
+* `expZeta_eq_hurwitzZeta`: `F` in terms of the Hurwitz zeta function (DLMF 25.13.2).
+* `hurwitzZeta_one_sub_eq_expZeta`: the Hurwitz zeta function in terms of `F` (DLMF 25.13.3).
+
+## Implementation notes
+
+The convergence of the series for `Re s > 1` is `HurwitzZeta.hasSum_expZeta_of_one_lt_re`
+(pointer in `DLMF.Zeta.MathlibCoverageB`). For natural `s ≥ 2` the identification with the
+polylogarithm is also `DLMF.Polylog.polylogSeries_exp_eq_expZeta`. Since Mathlib's parameter
+lives in `ℝ/ℤ`, periodicity in `x` holds by construction. For `0 < x < 1`, DLMF's `ζ(1 - s, x)`
+is Mathlib's `hurwitzZeta x (1 - s)`.
 -/
 
 @[expose] public section
@@ -41,7 +51,7 @@ theorem tendsto_expZeta_partialSum {x : ℝ} (hx : ∀ m : ℤ, x ≠ m) {s : �
     Tendsto (fun N : ℕ => ∑ n ∈ Finset.range N,
         cexp (2 * π * I * (n + 1) * x) / ((n : ℂ) + 1) ^ s) atTop
       (𝓝 (expZeta (x : UnitAddCircle) s)) :=
-  s25b_tendsto_expZeta (Or.inl ⟨hx, hs⟩)
+  tendsto_sum_exp_div_cpow_expZeta (Or.inl ⟨hx, hs⟩)
 
 /-- **`F(x, s)` is the polylogarithm on the unit circle** (DLMF §25.13): `F(x, s) = Li_s(e^{2πix})`
 for real `x` and `Re s > 1`. -/

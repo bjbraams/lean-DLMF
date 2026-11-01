@@ -8,13 +8,22 @@ module
 public import DLMF.CoalescingSaddles.DifferentialEquations.Cuspoid
 
 /-!
-# Differential identities for the hyperbolic umbilic
+# Moments of the hyperbolic umbilic integral
 
-Moment integrals, parameter derivatives and polynomial-weight estimates for the hyperbolic
-umbilic.
+Moment integrals `M_{a,b} = ∫∫ s^a t^b exp(iΦ^{(H)}) ds dt` of the hyperbolic umbilic integral
+over the product of two cubic contours, their parameter derivatives (by differentiation under
+the integral sign and Fubini) and the moment relations obtained by integration by parts in each
+variable. These give the hyperbolic umbilic equations of DLMF §36.10, proved in
+`DLMF.CoalescingSaddles.DifferentialEquations.EllipticUmbilic`.
 
-Source references and common attribution are retained in
-`DLMF.CoalescingSaddles.DifferentialEquations`.
+## Main results
+
+* `hyperbolicUmbilicIntegral_eq_moment`: `Ψ^{(H)}` is the moment of order `(0, 0)`.
+* `hasDerivAt_hyperbolicUmbilicMoment_x`, `hasDerivAt_hyperbolicUmbilicMoment_y`,
+  `hasDerivAt_hyperbolicUmbilicMoment_z`: differentiation in `x`, `y`, `z` raises the powers
+  of `s`, `t`, `st`.
+* `hyperbolicUmbilicMoment_relation_s`, `hyperbolicUmbilicMoment_relation_t`: the moment
+  relations behind DLMF 36.10.15 and 36.10.16.
 -/
 
 @[expose] public noncomputable section
@@ -33,7 +42,7 @@ absolutely, uniformly for bounded parameters. -/
 
 /-- An elementary cubic absorption bound: `(C/2 + 1/2) a² + C a ≤ a³ + c³ + c` with `c = (3C +
 1)/2`, for `a, C ≥ 0`. -/
-theorem s36b_cubic_le {a C : ℝ} (ha : 0 ≤ a) (hC : 0 ≤ C) :
+theorem quadratic_add_linear_le_cube_add {a C : ℝ} (ha : 0 ≤ a) (hC : 0 ≤ C) :
     (C / 2 + 1 / 2) * a ^ 2 + C * a ≤ a ^ 3 + ((3 * C + 1) / 2) ^ 3 + (3 * C + 1) / 2 := by
   set B := (3 * C + 1) / 2 with hB
   have hB0 : 0 ≤ B := by positivity
@@ -47,7 +56,7 @@ theorem s36b_cubic_le {a C : ℝ} (ha : 0 ≤ a) (hC : 0 ≤ C) :
 
 /-- Lower bound for `Im Φ^{(H)}` on the product of V-contours: `|σ|³ + |τ|³ - |z||σ||τ| - |y||τ| -
 |x||σ|`. -/
-lemma s36b_im_hyperbolic_ge (σ τ x y z : ℝ) :
+private lemma le_im_hyperbolicUmbilicPotential_cuspoidContour (σ τ x y z : ℝ) :
     |σ| ^ 3 + |τ| ^ 3 - |z| * |σ| * |τ| - |y| * |τ| - |x| * |σ| ≤
       (hyperbolicUmbilicPotential (cuspoidContour 1 σ) (cuspoidContour 1 τ) x y z).im := by
   have hs : cuspoidContour 1 σ ^ 3 = I * ((|σ| ^ 3 : ℝ) : ℂ) := cuspoidContour_pow 1 σ
@@ -64,7 +73,7 @@ lemma s36b_im_hyperbolic_ge (σ τ x y z : ℝ) :
 
 /-- Gaussian bound for the hyperbolic umbilic moment integrands, uniform for
 `|x|, |y|, |z| ≤ C`. -/
-lemma s36b_norm_hyperbolic_integrand_le (σ τ x y z : ℝ) (a b : ℕ) {C : ℝ} (hC0 : 0 ≤ C)
+private lemma norm_hyperbolicUmbilicMomentIntegrand_le (σ τ x y z : ℝ) (a b : ℕ) {C : ℝ} (hC0 : 0 ≤ C)
     (hx : |x| ≤ C) (hy : |y| ≤ C) (hz : |z| ≤ C) :
     ‖cuspoidContourDir 1 σ * cuspoidContourDir 1 τ *
         (cuspoidContour 1 σ ^ a * cuspoidContour 1 τ ^ b) *
@@ -78,9 +87,9 @@ lemma s36b_norm_hyperbolic_integrand_le (σ τ x y z : ℝ) (a b : ℕ) {C : ℝ
       x y z).re = -(hyperbolicUmbilicPotential (cuspoidContour 1 σ) (cuspoidContour 1 τ)
       x y z).im := by simp [mul_re]
   rw [hre]
-  have him := s36b_im_hyperbolic_ge σ τ x y z
-  have hσ := s36b_cubic_le (abs_nonneg σ) hC0
-  have hτ := s36b_cubic_le (abs_nonneg τ) hC0
+  have him := le_im_hyperbolicUmbilicPotential_cuspoidContour σ τ x y z
+  have hσ := quadratic_add_linear_le_cube_add (abs_nonneg σ) hC0
+  have hτ := quadratic_add_linear_le_cube_add (abs_nonneg τ) hC0
   rw [← hB] at hσ hτ
   have hst : 2 * (|σ| * |τ|) ≤ |σ| ^ 2 + |τ| ^ 2 := by nlinarith [sq_nonneg (|σ| - |τ|)]
   have h1 : |z| * |σ| * |τ| ≤ C * (|σ| ^ 2 + |τ| ^ 2) / 2 := by
@@ -105,7 +114,7 @@ lemma s36b_norm_hyperbolic_integrand_le (σ τ x y z : ℝ) (a b : ℕ) {C : ℝ
     _ = _ := by ring
 
 /-- The weight `d(σ) d(τ) t(σ)^a t(τ)^b` of the hyperbolic umbilic moments is measurable. -/
-lemma s36b_measurable_hyperbolic_weight (a b : ℕ) :
+private lemma measurable_hyperbolicUmbilicMomentWeight (a b : ℕ) :
     Measurable fun p : ℝ × ℝ => cuspoidContourDir 1 p.1 * cuspoidContourDir 1 p.2 *
       (cuspoidContour 1 p.1 ^ a * cuspoidContour 1 p.2 ^ b) :=
   (((measurable_cuspoidContourDir 1).comp measurable_fst).mul
@@ -114,7 +123,7 @@ lemma s36b_measurable_hyperbolic_weight (a b : ℕ) :
       (((measurable_cuspoidContour 1).comp measurable_snd).pow_const b))
 
 /-- The hyperbolic umbilic phase on the product of V-contours is measurable. -/
-lemma s36b_measurable_hyperbolic_phase (x y z : ℝ) :
+private lemma measurable_hyperbolicUmbilicPotential_cuspoidContour (x y z : ℝ) :
     Measurable fun p : ℝ × ℝ =>
       hyperbolicUmbilicPotential (cuspoidContour 1 p.1) (cuspoidContour 1 p.2) x y z := by
   have hc1 : Measurable fun p : ℝ × ℝ => cuspoidContour 1 p.1 :=
@@ -125,27 +134,27 @@ lemma s36b_measurable_hyperbolic_phase (x y z : ℝ) :
   fun_prop
 
 /-- The hyperbolic umbilic moment integrand is measurable. -/
-lemma s36b_measurable_hyperbolic_integrand (x y z : ℝ) (a b : ℕ) :
+private lemma measurable_hyperbolicUmbilicMomentIntegrand (x y z : ℝ) (a b : ℕ) :
     Measurable fun p : ℝ × ℝ => cuspoidContourDir 1 p.1 * cuspoidContourDir 1 p.2 *
       (cuspoidContour 1 p.1 ^ a * cuspoidContour 1 p.2 ^ b) *
       exp (I * hyperbolicUmbilicPotential (cuspoidContour 1 p.1) (cuspoidContour 1 p.2) x y z) :=
-  (s36b_measurable_hyperbolic_weight a b).mul
-    (measurable_exp.comp ((s36b_measurable_hyperbolic_phase x y z).const_mul I))
+  (measurable_hyperbolicUmbilicMomentWeight a b).mul
+    (measurable_exp.comp ((measurable_hyperbolicUmbilicPotential_cuspoidContour x y z).const_mul I))
 
 /-- `|p₁|^a e^{-p₁²/2} |p₂|^b e^{-p₂²/2}` is integrable on `ℝ²`. -/
-theorem s36b_integrable_gauss_prod (a b : ℕ) :
+theorem integrable_abs_pow_mul_exp_neg_half_sq_prod (a b : ℕ) :
     Integrable fun p : ℝ × ℝ => (|p.1| ^ a * Real.exp (-(1 / 2) * p.1 ^ 2)) *
       (|p.2| ^ b * Real.exp (-(1 / 2) * p.2 ^ 2)) :=
-  (s36b_integrable_pow_mul_gauss a).mul_prod (s36b_integrable_pow_mul_gauss b)
+  (integrable_abs_pow_mul_exp_neg_half_sq a).mul_prod (integrable_abs_pow_mul_exp_neg_half_sq b)
 
 /-- The hyperbolic umbilic moment integrand is integrable on `ℝ²`. -/
-lemma s36b_integrable_hyperbolic_integrand (x y z : ℝ) (a b : ℕ) :
+private lemma integrable_hyperbolicUmbilicMomentIntegrand (x y z : ℝ) (a b : ℕ) :
     Integrable fun p : ℝ × ℝ => cuspoidContourDir 1 p.1 * cuspoidContourDir 1 p.2 *
       (cuspoidContour 1 p.1 ^ a * cuspoidContour 1 p.2 ^ b) *
       exp (I * hyperbolicUmbilicPotential (cuspoidContour 1 p.1) (cuspoidContour 1 p.2) x y z) :=
-  Integrable.mono' ((s36b_integrable_gauss_prod a b).const_mul _)
-    (s36b_measurable_hyperbolic_integrand x y z a b).aestronglyMeasurable
-    (ae_of_all _ fun p => s36b_norm_hyperbolic_integrand_le p.1 p.2 x y z a b
+  Integrable.mono' ((integrable_abs_pow_mul_exp_neg_half_sq_prod a b).const_mul _)
+    (measurable_hyperbolicUmbilicMomentIntegrand x y z a b).aestronglyMeasurable
+    (ae_of_all _ fun p => norm_hyperbolicUmbilicMomentIntegrand_le p.1 p.2 x y z a b
       (C := |x| + |y| + |z|) (by positivity)
       (by linarith [abs_nonneg y, abs_nonneg z]) (by linarith [abs_nonneg x, abs_nonneg z])
       (by linarith [abs_nonneg x, abs_nonneg y]))
@@ -156,7 +165,7 @@ theorem hyperbolicUmbilicIntegral_eq_moment (x y z : ℝ) :
   simp [hyperbolicUmbilicIntegral, hyperbolicUmbilicMoment]
 
 /-- Differentiation under the integral sign in a parameter entering the phase linearly. -/
-lemma s36b_hasDerivAt_param_integral {W A B : ℝ × ℝ → ℂ} {bound : ℝ × ℝ → ℝ} (w₀ : ℝ)
+private lemma hasDerivAt_integral_mul_exp_I_mul_linear_phase {W A B : ℝ × ℝ → ℂ} {bound : ℝ × ℝ → ℝ} (w₀ : ℝ)
     (hW : Measurable W) (hA : Measurable A) (hB : Measurable B)
     (hint : Integrable fun p => W p * exp (I * (A p + (w₀ : ℂ) * B p)))
     (hbound : Integrable bound)
@@ -176,17 +185,17 @@ lemma s36b_hasDerivAt_param_integral {W A B : ℝ × ℝ → ℂ} {bound : ℝ �
   ring
 
 /-- `Φ^{(H)}` is affine in `x` with coefficient `s`. -/
-lemma s36b_hyperbolic_potential_x (s t : ℂ) (x y z : ℝ) :
+private lemma hyperbolicUmbilicPotential_eq_x_zero_add (s t : ℂ) (x y z : ℝ) :
     hyperbolicUmbilicPotential s t x y z = hyperbolicUmbilicPotential s t 0 y z + (x : ℂ) * s := by
   unfold hyperbolicUmbilicPotential; push_cast; ring
 
 /-- `Φ^{(H)}` is affine in `y` with coefficient `t`. -/
-lemma s36b_hyperbolic_potential_y (s t : ℂ) (x y z : ℝ) :
+private lemma hyperbolicUmbilicPotential_eq_y_zero_add (s t : ℂ) (x y z : ℝ) :
     hyperbolicUmbilicPotential s t x y z = hyperbolicUmbilicPotential s t x 0 z + (y : ℂ) * t := by
   unfold hyperbolicUmbilicPotential; push_cast; ring
 
 /-- `Φ^{(H)}` is affine in `z` with coefficient `st`. -/
-lemma s36b_hyperbolic_potential_z (s t : ℂ) (x y z : ℝ) :
+private lemma hyperbolicUmbilicPotential_eq_z_zero_add (s t : ℂ) (x y z : ℝ) :
     hyperbolicUmbilicPotential s t x y z =
       hyperbolicUmbilicPotential s t x y 0 + (z : ℂ) * (s * t) := by
   unfold hyperbolicUmbilicPotential; push_cast; ring
@@ -202,7 +211,7 @@ theorem hasDerivAt_hyperbolicUmbilicMoment_x (x y z : ℝ) (a b : ℕ) :
       exp (I * (hyperbolicUmbilicPotential (cuspoidContour 1 p.1) (cuspoidContour 1 p.2) 0 y z +
         (w : ℂ) * cuspoidContour 1 p.1)) := by
     funext w; unfold hyperbolicUmbilicMoment
-    simp_rw [← s36b_hyperbolic_potential_x]
+    simp_rw [← hyperbolicUmbilicPotential_eq_x_zero_add]
   have hval : I * hyperbolicUmbilicMoment x y z (a + 1) b = ∫ p : ℝ × ℝ,
       (cuspoidContourDir 1 p.1 * cuspoidContourDir 1 p.2 *
         (cuspoidContour 1 p.1 ^ a * cuspoidContour 1 p.2 ^ b)) * (I * cuspoidContour 1 p.1) *
@@ -211,20 +220,20 @@ theorem hasDerivAt_hyperbolicUmbilicMoment_x (x y z : ℝ) (a b : ℕ) :
     unfold hyperbolicUmbilicMoment
     rw [← integral_const_mul]
     congr 1; funext p
-    rw [← s36b_hyperbolic_potential_x, pow_succ]; ring
+    rw [← hyperbolicUmbilicPotential_eq_x_zero_add, pow_succ]; ring
   rw [hfun, hval]
-  refine s36b_hasDerivAt_param_integral x (s36b_measurable_hyperbolic_weight a b)
-    (s36b_measurable_hyperbolic_phase 0 y z) ((measurable_cuspoidContour 1).comp measurable_fst)
-    ?_ ((s36b_integrable_gauss_prod (a + 1) b).const_mul
+  refine hasDerivAt_integral_mul_exp_I_mul_linear_phase x (measurable_hyperbolicUmbilicMomentWeight a b)
+    (measurable_hyperbolicUmbilicPotential_cuspoidContour 0 y z) ((measurable_cuspoidContour 1).comp measurable_fst)
+    ?_ ((integrable_abs_pow_mul_exp_neg_half_sq_prod (a + 1) b).const_mul
       (Real.exp (2 * (((3 * C + 1) / 2) ^ 3 + (3 * C + 1) / 2)))) fun p w hw => ?_
-  · simp_rw [← s36b_hyperbolic_potential_x]
-    exact s36b_integrable_hyperbolic_integrand x y z a b
-  · rw [← s36b_hyperbolic_potential_x]
+  · simp_rw [← hyperbolicUmbilicPotential_eq_x_zero_add]
+    exact integrable_hyperbolicUmbilicMomentIntegrand x y z a b
+  · rw [← hyperbolicUmbilicPotential_eq_x_zero_add]
     have hw' : |w| ≤ C := by
       have := abs_sub_abs_le_abs_sub w x
       have := (Metric.mem_ball.mp hw); rw [Real.dist_eq] at this
       linarith [abs_nonneg y, abs_nonneg z]
-    have h := s36b_norm_hyperbolic_integrand_le p.1 p.2 w y z (a + 1) b (C := C) (by positivity)
+    have h := norm_hyperbolicUmbilicMomentIntegrand_le p.1 p.2 w y z (a + 1) b (C := C) (by positivity)
       hw' (by linarith [abs_nonneg x, abs_nonneg z]) (by linarith [abs_nonneg x, abs_nonneg y])
     calc _ = ‖cuspoidContourDir 1 p.1 * cuspoidContourDir 1 p.2 *
           (cuspoidContour 1 p.1 ^ (a + 1) * cuspoidContour 1 p.2 ^ b) *
@@ -250,7 +259,7 @@ theorem hasDerivAt_hyperbolicUmbilicMoment_y (x y z : ℝ) (a b : ℕ) :
       exp (I * (hyperbolicUmbilicPotential (cuspoidContour 1 p.1) (cuspoidContour 1 p.2) x 0 z +
         (w : ℂ) * cuspoidContour 1 p.2)) := by
     funext w; unfold hyperbolicUmbilicMoment
-    simp_rw [← s36b_hyperbolic_potential_y]
+    simp_rw [← hyperbolicUmbilicPotential_eq_y_zero_add]
   have hval : I * hyperbolicUmbilicMoment x y z a (b + 1) = ∫ p : ℝ × ℝ,
       (cuspoidContourDir 1 p.1 * cuspoidContourDir 1 p.2 *
         (cuspoidContour 1 p.1 ^ a * cuspoidContour 1 p.2 ^ b)) * (I * cuspoidContour 1 p.2) *
@@ -259,20 +268,20 @@ theorem hasDerivAt_hyperbolicUmbilicMoment_y (x y z : ℝ) (a b : ℕ) :
     unfold hyperbolicUmbilicMoment
     rw [← integral_const_mul]
     congr 1; funext p
-    rw [← s36b_hyperbolic_potential_y, pow_succ]; ring
+    rw [← hyperbolicUmbilicPotential_eq_y_zero_add, pow_succ]; ring
   rw [hfun, hval]
-  refine s36b_hasDerivAt_param_integral y (s36b_measurable_hyperbolic_weight a b)
-    (s36b_measurable_hyperbolic_phase x 0 z) ((measurable_cuspoidContour 1).comp measurable_snd)
-    ?_ ((s36b_integrable_gauss_prod a (b + 1)).const_mul
+  refine hasDerivAt_integral_mul_exp_I_mul_linear_phase y (measurable_hyperbolicUmbilicMomentWeight a b)
+    (measurable_hyperbolicUmbilicPotential_cuspoidContour x 0 z) ((measurable_cuspoidContour 1).comp measurable_snd)
+    ?_ ((integrable_abs_pow_mul_exp_neg_half_sq_prod a (b + 1)).const_mul
       (Real.exp (2 * (((3 * C + 1) / 2) ^ 3 + (3 * C + 1) / 2)))) fun p w hw => ?_
-  · simp_rw [← s36b_hyperbolic_potential_y]
-    exact s36b_integrable_hyperbolic_integrand x y z a b
-  · rw [← s36b_hyperbolic_potential_y]
+  · simp_rw [← hyperbolicUmbilicPotential_eq_y_zero_add]
+    exact integrable_hyperbolicUmbilicMomentIntegrand x y z a b
+  · rw [← hyperbolicUmbilicPotential_eq_y_zero_add]
     have hw' : |w| ≤ C := by
       have := abs_sub_abs_le_abs_sub w y
       have := (Metric.mem_ball.mp hw); rw [Real.dist_eq] at this
       linarith [abs_nonneg x, abs_nonneg z]
-    have h := s36b_norm_hyperbolic_integrand_le p.1 p.2 x w z a (b + 1) (C := C) (by positivity)
+    have h := norm_hyperbolicUmbilicMomentIntegrand_le p.1 p.2 x w z a (b + 1) (C := C) (by positivity)
       (by linarith [abs_nonneg y, abs_nonneg z]) hw' (by linarith [abs_nonneg x, abs_nonneg y])
     calc _ = ‖cuspoidContourDir 1 p.1 * cuspoidContourDir 1 p.2 *
           (cuspoidContour 1 p.1 ^ a * cuspoidContour 1 p.2 ^ (b + 1)) *
@@ -298,7 +307,7 @@ theorem hasDerivAt_hyperbolicUmbilicMoment_z (x y z : ℝ) (a b : ℕ) :
       exp (I * (hyperbolicUmbilicPotential (cuspoidContour 1 p.1) (cuspoidContour 1 p.2) x y 0 +
         (w : ℂ) * (cuspoidContour 1 p.1 * cuspoidContour 1 p.2))) := by
     funext w; unfold hyperbolicUmbilicMoment
-    simp_rw [← s36b_hyperbolic_potential_z]
+    simp_rw [← hyperbolicUmbilicPotential_eq_z_zero_add]
   have hval : I * hyperbolicUmbilicMoment x y z (a + 1) (b + 1) = ∫ p : ℝ × ℝ,
       (cuspoidContourDir 1 p.1 * cuspoidContourDir 1 p.2 *
         (cuspoidContour 1 p.1 ^ a * cuspoidContour 1 p.2 ^ b)) *
@@ -308,22 +317,22 @@ theorem hasDerivAt_hyperbolicUmbilicMoment_z (x y z : ℝ) (a b : ℕ) :
     unfold hyperbolicUmbilicMoment
     rw [← integral_const_mul]
     congr 1; funext p
-    rw [← s36b_hyperbolic_potential_z, pow_succ, pow_succ]; ring
+    rw [← hyperbolicUmbilicPotential_eq_z_zero_add, pow_succ, pow_succ]; ring
   rw [hfun, hval]
-  refine s36b_hasDerivAt_param_integral z (s36b_measurable_hyperbolic_weight a b)
-    (s36b_measurable_hyperbolic_phase x y 0)
+  refine hasDerivAt_integral_mul_exp_I_mul_linear_phase z (measurable_hyperbolicUmbilicMomentWeight a b)
+    (measurable_hyperbolicUmbilicPotential_cuspoidContour x y 0)
     (((measurable_cuspoidContour 1).comp measurable_fst).mul
       ((measurable_cuspoidContour 1).comp measurable_snd))
-    ?_ ((s36b_integrable_gauss_prod (a + 1) (b + 1)).const_mul
+    ?_ ((integrable_abs_pow_mul_exp_neg_half_sq_prod (a + 1) (b + 1)).const_mul
       (Real.exp (2 * (((3 * C + 1) / 2) ^ 3 + (3 * C + 1) / 2)))) fun p w hw => ?_
-  · simp_rw [← s36b_hyperbolic_potential_z]
-    exact s36b_integrable_hyperbolic_integrand x y z a b
-  · rw [← s36b_hyperbolic_potential_z]
+  · simp_rw [← hyperbolicUmbilicPotential_eq_z_zero_add]
+    exact integrable_hyperbolicUmbilicMomentIntegrand x y z a b
+  · rw [← hyperbolicUmbilicPotential_eq_z_zero_add]
     have hw' : |w| ≤ C := by
       have := abs_sub_abs_le_abs_sub w z
       have := (Metric.mem_ball.mp hw); rw [Real.dist_eq] at this
       linarith [abs_nonneg x, abs_nonneg y]
-    have h := s36b_norm_hyperbolic_integrand_le p.1 p.2 x y w (a + 1) (b + 1) (C := C)
+    have h := norm_hyperbolicUmbilicMomentIntegrand_le p.1 p.2 x y w (a + 1) (b + 1) (C := C)
       (by positivity) (by linarith [abs_nonneg y, abs_nonneg z])
       (by linarith [abs_nonneg x, abs_nonneg z]) hw'
     calc _ = ‖cuspoidContourDir 1 p.1 * cuspoidContourDir 1 p.2 *
@@ -341,7 +350,7 @@ theorem hasDerivAt_hyperbolicUmbilicMoment_z (x y z : ℝ) (a b : ℕ) :
       _ ≤ _ := h
 
 /-- Integrability in `σ` of the hyperbolic umbilic moment integrand for fixed `τ`. -/
-lemma s36b_integrable_hyperbolic_s (x y z τ : ℝ) (a : ℕ) :
+private lemma integrable_hyperbolicUmbilicMomentIntegrand_fst (x y z τ : ℝ) (a : ℕ) :
     Integrable fun σ : ℝ => cuspoidContourDir 1 σ * cuspoidContour 1 σ ^ a *
       exp (I * hyperbolicUmbilicPotential (cuspoidContour 1 σ) (cuspoidContour 1 τ) x y z) := by
   set C := |x| + |y| + |z|
@@ -350,13 +359,13 @@ lemma s36b_integrable_hyperbolic_s (x y z τ : ℝ) (a : ℕ) :
     have hc : Measurable (cuspoidContour 1) := measurable_cuspoidContour 1
     unfold hyperbolicUmbilicPotential
     fun_prop
-  refine Integrable.mono' (((s36b_integrable_pow_mul_gauss a).mul_const
+  refine Integrable.mono' (((integrable_abs_pow_mul_exp_neg_half_sq a).mul_const
       (|τ| ^ 0 * Real.exp (-(1 / 2) * τ ^ 2))).const_mul
       (Real.exp (2 * (((3 * C + 1) / 2) ^ 3 + (3 * C + 1) / 2))))
     ((((measurable_cuspoidContourDir 1).mul ((measurable_cuspoidContour 1).pow_const a)).mul
       (measurable_exp.comp (hm.const_mul I))).aestronglyMeasurable)
     (ae_of_all _ fun σ => ?_)
-  have h := s36b_norm_hyperbolic_integrand_le σ τ x y z a 0 (C := C) (by positivity)
+  have h := norm_hyperbolicUmbilicMomentIntegrand_le σ τ x y z a 0 (C := C) (by positivity)
     (by linarith [abs_nonneg y, abs_nonneg z]) (by linarith [abs_nonneg x, abs_nonneg z])
     (by linarith [abs_nonneg x, abs_nonneg y])
   rw [norm_mul, norm_mul, norm_mul, norm_mul, norm_cuspoidContourDir, norm_cuspoidContourDir]
@@ -366,7 +375,7 @@ lemma s36b_integrable_hyperbolic_s (x y z τ : ℝ) (a : ℕ) :
   linarith
 
 /-- Integrability in `τ` of the hyperbolic umbilic moment integrand for fixed `σ`. -/
-lemma s36b_integrable_hyperbolic_t (x y z σ : ℝ) (b : ℕ) :
+private lemma integrable_hyperbolicUmbilicMomentIntegrand_snd (x y z σ : ℝ) (b : ℕ) :
     Integrable fun τ : ℝ => cuspoidContourDir 1 τ * cuspoidContour 1 τ ^ b *
       exp (I * hyperbolicUmbilicPotential (cuspoidContour 1 σ) (cuspoidContour 1 τ) x y z) := by
   set C := |x| + |y| + |z|
@@ -375,13 +384,13 @@ lemma s36b_integrable_hyperbolic_t (x y z σ : ℝ) (b : ℕ) :
     have hc : Measurable (cuspoidContour 1) := measurable_cuspoidContour 1
     unfold hyperbolicUmbilicPotential
     fun_prop
-  refine Integrable.mono' (((s36b_integrable_pow_mul_gauss b).const_mul
+  refine Integrable.mono' (((integrable_abs_pow_mul_exp_neg_half_sq b).const_mul
       (|σ| ^ 0 * Real.exp (-(1 / 2) * σ ^ 2))).const_mul
       (Real.exp (2 * (((3 * C + 1) / 2) ^ 3 + (3 * C + 1) / 2))))
     ((((measurable_cuspoidContourDir 1).mul ((measurable_cuspoidContour 1).pow_const b)).mul
       (measurable_exp.comp (hm.const_mul I))).aestronglyMeasurable)
     (ae_of_all _ fun τ => ?_)
-  have h := s36b_norm_hyperbolic_integrand_le σ τ x y z 0 b (C := C) (by positivity)
+  have h := norm_hyperbolicUmbilicMomentIntegrand_le σ τ x y z 0 b (C := C) (by positivity)
     (by linarith [abs_nonneg y, abs_nonneg z]) (by linarith [abs_nonneg x, abs_nonneg z])
     (by linarith [abs_nonneg x, abs_nonneg y])
   rw [norm_mul, norm_mul, norm_mul, norm_mul, norm_cuspoidContourDir, norm_cuspoidContourDir]
@@ -391,18 +400,18 @@ lemma s36b_integrable_hyperbolic_t (x y z σ : ℝ) (b : ℕ) :
   linarith
 
 /-- `‖exp(iΦ^{(H)})‖ ≤ A e^{-σ²/2} e^{-τ²/2}` on the contour. -/
-lemma s36b_norm_hyperbolic_exp_le (x y z σ τ : ℝ) :
+private lemma norm_exp_I_mul_hyperbolicUmbilicPotential_le (x y z σ τ : ℝ) :
     ‖exp (I * hyperbolicUmbilicPotential (cuspoidContour 1 σ) (cuspoidContour 1 τ) x y z)‖ ≤
       Real.exp (2 * (((3 * (|x| + |y| + |z|) + 1) / 2) ^ 3 + (3 * (|x| + |y| + |z|) + 1) / 2)) *
         (Real.exp (-(1 / 2) * σ ^ 2) * Real.exp (-(1 / 2) * τ ^ 2)) := by
-  have h := s36b_norm_hyperbolic_integrand_le σ τ x y z 0 0 (C := |x| + |y| + |z|)
+  have h := norm_hyperbolicUmbilicMomentIntegrand_le σ τ x y z 0 0 (C := |x| + |y| + |z|)
     (by positivity) (by linarith [abs_nonneg y, abs_nonneg z])
     (by linarith [abs_nonneg x, abs_nonneg z]) (by linarith [abs_nonneg x, abs_nonneg y])
   rw [norm_mul, norm_mul, norm_mul, norm_cuspoidContourDir, norm_cuspoidContourDir] at h
   simpa using h
 
 /-- Integration by parts in `s`: `∫ (3s² + zt + x) e^{iΦ^{(H)}} ds = 0` for fixed `t = t(τ)`. -/
-lemma s36b_hyperbolic_ibp_s (x y z τ : ℝ) :
+private lemma integral_hyperbolicUmbilic_derivS_mul_exp_eq_zero (x y z τ : ℝ) :
     ∫ σ : ℝ, cuspoidContourDir 1 σ *
       (3 * cuspoidContour 1 σ ^ 2 + (z : ℂ) * cuspoidContour 1 τ + x) *
       exp (I * hyperbolicUmbilicPotential (cuspoidContour 1 σ) (cuspoidContour 1 τ) x y z) =
@@ -422,20 +431,20 @@ lemma s36b_hyperbolic_ibp_s (x y z τ : ℝ) :
       Tendsto (fun σ : ℝ => exp (I * hyperbolicUmbilicPotential (cuspoidContour 1 σ) t x y z))
         l (𝓝 0) := by
     intro l hl
-    refine squeeze_zero_norm (fun σ => s36b_norm_hyperbolic_exp_le x y z σ τ) ?_
+    refine squeeze_zero_norm (fun σ => norm_exp_I_mul_hyperbolicUmbilicPotential_le x y z σ τ) ?_
     have := ((Real.tendsto_exp_atBot.comp hl).mul_const (Real.exp (-(1 / 2) * τ ^ 2))).const_mul
       (Real.exp (2 * (((3 * (|x| + |y| + |z|) + 1) / 2) ^ 3 + (3 * (|x| + |y| + |z|) + 1) / 2)))
     simpa using this
-  refine s36b_contour_ibp 1 (P := fun u => hyperbolicUmbilicPotential u t x y z) hP ?_
-    (hlim s36b_tendsto_neg_half_sq_atTop) (hlim s36b_tendsto_neg_half_sq_atBot)
-  refine (((s36b_integrable_hyperbolic_s x y z τ 2).const_mul 3).add
-    ((s36b_integrable_hyperbolic_s x y z τ 0).const_mul ((z : ℂ) * t + x))).congr
+  refine integral_cuspoidContour_deriv_mul_exp_eq_zero 1 (P := fun u => hyperbolicUmbilicPotential u t x y z) hP ?_
+    (hlim tendsto_neg_half_mul_sq_atTop) (hlim tendsto_neg_half_mul_sq_atBot)
+  refine (((integrable_hyperbolicUmbilicMomentIntegrand_fst x y z τ 2).const_mul 3).add
+    ((integrable_hyperbolicUmbilicMomentIntegrand_fst x y z τ 0).const_mul ((z : ℂ) * t + x))).congr
     (ae_of_all _ fun σ => ?_)
   simp only [← ht, Pi.add_apply, pow_zero, mul_one]
   ring
 
 /-- Integration by parts in `t`: `∫ (3t² + zs + y) e^{iΦ^{(H)}} dt = 0` for fixed `s = s(σ)`. -/
-lemma s36b_hyperbolic_ibp_t (x y z σ : ℝ) :
+private lemma integral_hyperbolicUmbilic_derivT_mul_exp_eq_zero (x y z σ : ℝ) :
     ∫ τ : ℝ, cuspoidContourDir 1 τ *
       (3 * cuspoidContour 1 τ ^ 2 + (z : ℂ) * cuspoidContour 1 σ + y) *
       exp (I * hyperbolicUmbilicPotential (cuspoidContour 1 σ) (cuspoidContour 1 τ) x y z) =
@@ -455,25 +464,25 @@ lemma s36b_hyperbolic_ibp_t (x y z σ : ℝ) :
       Tendsto (fun τ : ℝ => exp (I * hyperbolicUmbilicPotential s (cuspoidContour 1 τ) x y z))
         l (𝓝 0) := by
     intro l hl
-    refine squeeze_zero_norm (fun τ => s36b_norm_hyperbolic_exp_le x y z σ τ) ?_
+    refine squeeze_zero_norm (fun τ => norm_exp_I_mul_hyperbolicUmbilicPotential_le x y z σ τ) ?_
     have := ((Real.tendsto_exp_atBot.comp hl).const_mul (Real.exp (-(1 / 2) * σ ^ 2))).const_mul
       (Real.exp (2 * (((3 * (|x| + |y| + |z|) + 1) / 2) ^ 3 + (3 * (|x| + |y| + |z|) + 1) / 2)))
     simpa using this
-  refine s36b_contour_ibp 1 (P := fun u => hyperbolicUmbilicPotential s u x y z) hP ?_
-    (hlim s36b_tendsto_neg_half_sq_atTop) (hlim s36b_tendsto_neg_half_sq_atBot)
-  refine (((s36b_integrable_hyperbolic_t x y z σ 2).const_mul 3).add
-    ((s36b_integrable_hyperbolic_t x y z σ 0).const_mul ((z : ℂ) * s + y))).congr
+  refine integral_cuspoidContour_deriv_mul_exp_eq_zero 1 (P := fun u => hyperbolicUmbilicPotential s u x y z) hP ?_
+    (hlim tendsto_neg_half_mul_sq_atTop) (hlim tendsto_neg_half_mul_sq_atBot)
+  refine (((integrable_hyperbolicUmbilicMomentIntegrand_snd x y z σ 2).const_mul 3).add
+    ((integrable_hyperbolicUmbilicMomentIntegrand_snd x y z σ 0).const_mul ((z : ℂ) * s + y))).congr
     (ae_of_all _ fun τ => ?_)
   simp only [← hs, Pi.add_apply, pow_zero, mul_one]
   ring
 
 /-- The moment relation behind 36.10.15: `3M_{2,0} + zM_{0,1} + xM_{0,0} = 0`. -/
-lemma s36b_hyperbolic_moment_rel_s (x y z : ℝ) :
+lemma hyperbolicUmbilicMoment_relation_s (x y z : ℝ) :
     3 * hyperbolicUmbilicMoment x y z 2 0 + (z : ℂ) * hyperbolicUmbilicMoment x y z 0 1 +
       (x : ℂ) * hyperbolicUmbilicMoment x y z 0 0 = 0 := by
-  have h1 := s36b_integrable_hyperbolic_integrand x y z 2 0
-  have h2 := s36b_integrable_hyperbolic_integrand x y z 0 1
-  have h3 := s36b_integrable_hyperbolic_integrand x y z 0 0
+  have h1 := integrable_hyperbolicUmbilicMomentIntegrand x y z 2 0
+  have h2 := integrable_hyperbolicUmbilicMomentIntegrand x y z 0 1
+  have h3 := integrable_hyperbolicUmbilicMomentIntegrand x y z 0 0
   have hsum : 3 * hyperbolicUmbilicMoment x y z 2 0 +
       (z : ℂ) * hyperbolicUmbilicMoment x y z 0 1 +
       (x : ℂ) * hyperbolicUmbilicMoment x y z 0 0 = ∫ p : ℝ × ℝ,
@@ -501,17 +510,17 @@ lemma s36b_hyperbolic_moment_rel_s (x y z : ℝ) :
   · exact hF
   refine integral_eq_zero_of_ae (ae_of_all _ fun τ => ?_)
   simp only [Pi.zero_apply]
-  rw [← mul_zero (cuspoidContourDir 1 τ), ← s36b_hyperbolic_ibp_s x y z τ, ← integral_const_mul]
+  rw [← mul_zero (cuspoidContourDir 1 τ), ← integral_hyperbolicUmbilic_derivS_mul_exp_eq_zero x y z τ, ← integral_const_mul]
   congr 1; funext σ
   ring
 
 /-- The moment relation behind 36.10.16: `3M_{0,2} + zM_{1,0} + yM_{0,0} = 0`. -/
-lemma s36b_hyperbolic_moment_rel_t (x y z : ℝ) :
+lemma hyperbolicUmbilicMoment_relation_t (x y z : ℝ) :
     3 * hyperbolicUmbilicMoment x y z 0 2 + (z : ℂ) * hyperbolicUmbilicMoment x y z 1 0 +
       (y : ℂ) * hyperbolicUmbilicMoment x y z 0 0 = 0 := by
-  have h1 := s36b_integrable_hyperbolic_integrand x y z 0 2
-  have h2 := s36b_integrable_hyperbolic_integrand x y z 1 0
-  have h3 := s36b_integrable_hyperbolic_integrand x y z 0 0
+  have h1 := integrable_hyperbolicUmbilicMomentIntegrand x y z 0 2
+  have h2 := integrable_hyperbolicUmbilicMomentIntegrand x y z 1 0
+  have h3 := integrable_hyperbolicUmbilicMomentIntegrand x y z 0 0
   have hsum : 3 * hyperbolicUmbilicMoment x y z 0 2 +
       (z : ℂ) * hyperbolicUmbilicMoment x y z 1 0 +
       (y : ℂ) * hyperbolicUmbilicMoment x y z 0 0 = ∫ p : ℝ × ℝ,
@@ -539,20 +548,20 @@ lemma s36b_hyperbolic_moment_rel_t (x y z : ℝ) :
   · exact hF
   refine integral_eq_zero_of_ae (ae_of_all _ fun σ => ?_)
   simp only [Pi.zero_apply]
-  rw [← mul_zero (cuspoidContourDir 1 σ), ← s36b_hyperbolic_ibp_t x y z σ, ← integral_const_mul]
+  rw [← mul_zero (cuspoidContourDir 1 σ), ← integral_hyperbolicUmbilic_derivT_mul_exp_eq_zero x y z σ, ← integral_const_mul]
   congr 1; funext τ
   ring
 
 /-- Differentiation in `x` raises the `s`-power of the hyperbolic umbilic moment: `∂_x M_{a,b} = i
 M_{a+1,b}`. -/
-lemma s36b_deriv_hyperbolicUmbilicMoment_x (y z : ℝ) (a b : ℕ) :
+lemma deriv_hyperbolicUmbilicMoment_x (y z : ℝ) (a b : ℕ) :
     deriv (fun w => hyperbolicUmbilicMoment w y z a b) =
       fun w => I * hyperbolicUmbilicMoment w y z (a + 1) b :=
   funext fun w => (hasDerivAt_hyperbolicUmbilicMoment_x w y z a b).deriv
 
 /-- Differentiation in `y` raises the `t`-power of the hyperbolic umbilic moment: `∂_y M_{a,b} = i
 M_{a,b+1}`. -/
-lemma s36b_deriv_hyperbolicUmbilicMoment_y (x z : ℝ) (a b : ℕ) :
+lemma deriv_hyperbolicUmbilicMoment_y (x z : ℝ) (a b : ℕ) :
     deriv (fun w => hyperbolicUmbilicMoment x w z a b) =
       fun w => I * hyperbolicUmbilicMoment x w z a (b + 1) :=
   funext fun w => (hasDerivAt_hyperbolicUmbilicMoment_y x w z a b).deriv

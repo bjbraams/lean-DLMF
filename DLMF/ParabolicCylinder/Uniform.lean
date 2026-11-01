@@ -9,10 +9,9 @@ public import DLMF.ParabolicCylinder.Uniform.PhasesAndPolynomials
 public import DLMF.ParabolicCylinder.Uniform.ExpansionData
 
 /-!
-# Olver and Temme uniform cylinder expansions and coefficient systems
+# Uniform expansions of parabolic cylinder functions
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This umbrella collects the Olver and Temme uniform expansions of the parabolic cylinder
+functions for large parameter (DLMF §12.10): the phase functions, coefficient polynomials and
+expansion data.
 -/

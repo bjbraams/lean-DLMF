@@ -11,11 +11,29 @@ public import DLMFMathlib.Analysis.ODE.Wronskian
 /-!
 # Ferrers fundamental pairs and their Wronskians
 
-Abel identities and connection coefficients determine the Wronskians of Ferrers fundamental
-pairs.
+The associated Legendre equation on `(-1, 1)`, the Ferrers functions as solutions, reality, and
+the Ferrers Wronskians DLMF 14.2.3, 14.2.4, 14.2.6 and 14.2.7.
 
-Source references and common attribution are retained in
-`DLMF.Legendre.Associated`.
+## Main definitions
+
+* `IsFerrersSolution`: `f` solves the associated Legendre equation on `(-1, 1)`.
+
+## Main results
+
+* `IsFerrersSolution.wronskian_const`: Abel's identity, `(1-x²)` times the Wronskian of two
+  solutions is constant.
+* `ferrersEven_isFerrersSolution`, `ferrersOdd_isFerrersSolution`,
+  `ferrers_even_odd_wronskian`: the quadratic solutions and their Wronskian `2/(π(1-x²))`.
+* `ferrersP_isFerrersSolution`, `ferrersQ_isFerrersSolution`: `𝖯^μ_ν` and `𝖰^μ_ν` solve the
+  associated Legendre equation for all complex `ν, μ`.
+* `ferrersP_real`, `ferrersQ_real`, `ferrersP_conical_real`: reality for real parameters, and of
+  the conical function `𝖯^μ_{-1/2+iτ}` (DLMF §14.20).
+* `ferrers_wronskian_3`, `ferrers_wronskian_4`, `ferrers_wronskian_6`, `ferrers_wronskian_7`:
+  DLMF 14.2.3, 14.2.4, 14.2.6 and 14.2.7.
+
+## Implementation notes
+
+DLMF excludes `ν + μ ∈ {-1, -2, …}` for `𝖰^μ_ν`; there the totalized value is real as well.
 -/
 
 @[expose] public noncomputable section
@@ -196,8 +214,9 @@ theorem ferrersP_real (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (ferrersP ν μ x).im=0 := by
   rw [← conj_eq_iff_im, ferrersP_conj _ _ hx]; simp
 
-/-- For real `ν, μ` with `ν+μ ∉ {-1,-2,…}` and `-1 < x < 1`, `𝖰^μ_ν(x)` is real. -/
-theorem ferrersQ_real (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) (h : LegendreQRegular ν μ) :
+/-- For real `ν, μ` and `-1 < x < 1`, `𝖰^μ_ν(x)` is real. DLMF excludes `ν+μ ∈ {-1,-2,…}`;
+there the totalized value is real as well. -/
+theorem ferrersQ_real (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (ferrersQ ν μ x).im=0 := by
   rw [← conj_eq_iff_im, ferrersQ_conj _ _ hx]; simp
 

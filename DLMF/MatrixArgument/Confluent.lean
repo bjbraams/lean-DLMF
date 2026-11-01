@@ -6,18 +6,34 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.MatrixArgument.Generalized
-public import DLMF.MatrixArgument.Q2mMatrixIntegrals
+public import DLMF.MatrixArgument.MatrixIntegrals
 
 /-!
 # Confluent hypergeometric functions of matrix argument (DLMF §35.6)
 
-`hyp1F1 a b T` (35.6.1), `kummerPsi a b T` (35.6.2) and the Laguerre form `laguerreL γ ν T`
-(35.6.3) are defined in `DLMF.MatrixArgument.Basic`. This file proves the series form 35.6.1
-and the case `m = 1` (`hyp1F1_fin_one`), the convergence 35.6.2 of the integral defining `Ψ`
-(`integrableOn_kummerPsi`) and the Mellin transform 35.6.8 (`hasIntegralOn_kummerPsi_mellin`,
-by Fubini from 35.3.8), and states 35.6.4–35.6.7, 35.6.9 and 35.6.10 (admitted). Where DLMF
-evaluates `₁F₁` at a product `SX` with `X ∈ Ω`, the statements use `X^{1/2} S X^{1/2}`.
-§35.6(iv) cites references only.
+Properties of the confluent hypergeometric functions `₁F₁(a; b; T)` and `Ψ(a; b; T)` of a real
+symmetric matrix argument. The functions `hyp1F1 a b T` (DLMF 35.6.1), `kummerPsi a b T`
+(DLMF 35.6.2) and the Laguerre form `laguerreL γ ν T` (DLMF 35.6.3) are defined in
+`DLMF.MatrixArgument.Basic`.
+
+## Main results
+
+* `hyp1F1_eq_tsum`: the zonal polynomial series for `₁F₁` (DLMF 35.6.1).
+* `integrableOn_kummerPsi`: absolute convergence of the integral defining `Ψ` (DLMF 35.6.2).
+* `hasIntegralOn_hyp1F1`: the beta integral representation of `₁F₁` (DLMF 35.6.4).
+* `hasIntegralOn_hyp1F1_laplace`, `hasIntegralOn_hyp1F1_convolution`: the Laplace transform
+  and convolution formulas DLMF 35.6.5 and 35.6.6.
+* `hyp1F1_kummer`: Kummer's transformation `₁F₁(a; b; T) = etr(T) ₁F₁(b - a; b; -T)`
+  (DLMF 35.6.7).
+* `hasIntegralOn_kummerPsi_mellin`: the Mellin transform of `Ψ` (DLMF 35.6.8), by Fubini from
+  DLMF 35.3.8.
+* `tendsto_hyp1F1_besselA`, `tendsto_kummerPsi_besselB`: the confluence limits to the Bessel
+  functions `A_ν` and `B_ν` (DLMF 35.6.9 and 35.6.10).
+
+## Implementation notes
+
+Where DLMF evaluates `₁F₁` at a product `SX` with `X ∈ Ω`, the statements use
+`X^{1/2} S X^{1/2}`, which has the same eigenvalues. DLMF §35.6(iv) cites references only.
 -/
 
 @[expose] public noncomputable section
@@ -36,7 +52,7 @@ theorem hyp1F1_eq_tsum {m : ℕ} (a b : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) :
   simp [hyp1F1, hypergeometricPFQ]
 
 /-- For `m = 1`, `₁F₁(a; b; t) = ∑_k (a)_k / (b)_k t^k / k!`, Kummer's series (DLMF 13.2.2). -/
-lemma hyp1F1_fin_one (a b : ℂ) (T : Matrix (Fin 1) (Fin 1) ℝ) :
+private lemma hyp1F1_fin_one (a b : ℂ) (T : Matrix (Fin 1) (Fin 1) ℝ) :
     hyp1F1 a b T = ∑' k : ℕ, (1 / (k ! : ℂ)) *
       ((ascPochhammer ℂ k).eval a / (ascPochhammer ℂ k).eval b * ((T 0 0 : ℂ) ^ k)) := by
   rw [hyp1F1, hypergeometricPFQ_fin_one]
@@ -63,7 +79,7 @@ theorem integrableOn_kummerPsi {m : ℕ} {a : ℂ} (b : ℂ) (ha : ((m : ℝ) - 
           (continuous_const.add continuous_subtype_val).matrix_det.measurable).pow_const _)
     exact Real.measurable_exp.comp
       (continuous_const.matrix_mul continuous_subtype_val).neg.matrix_trace.measurable
-  obtain ⟨ε, hε, hTε⟩ := q2m_exists_posDef_sub_smul hT
+  obtain ⟨ε, hε, hTε⟩ := exists_posDef_sub_smul_one hT
   set c : ℝ := (b - a - ((m : ℂ) + 1) / 2).re with hc
   have hre : (a - ((m : ℂ) + 1) / 2).re = a.re - ((m : ℝ) + 1) / 2 := by simp
   -- pointwise facts on the cone
@@ -84,7 +100,7 @@ theorem integrableOn_kummerPsi {m : ℕ} {a : ℂ} (b : ℂ) (ha : ((m : ℝ) - 
   have hone : ∀ X : SymMatrix m, (X : Matrix (Fin m) (Fin m) ℝ).PosDef →
       1 ≤ (1 + (X : Matrix (Fin m) (Fin m) ℝ)).det := by
     intro X hX
-    rw [q2m_det_one_add hX.isHermitian]
+    rw [det_one_add_eq_prod_eigenvalues hX.isHermitian]
     exact Finset.one_le_prod₀ fun i _ => by
       have := (hX.eigenvalues_pos i).le; linarith
   by_cases hc0 : c ≤ 0
@@ -119,7 +135,7 @@ theorem integrableOn_kummerPsi {m : ℕ} {a : ℂ} (b : ℂ) (ha : ((m : ℝ) - 
       rw [hX.isHermitian.trace_eq_sum_eigenvalues]
       exact Finset.sum_nonneg fun i _ => by simpa using (hX.eigenvalues_pos i).le
     have hdet1 : (1 + A).det ≤ (δ⁻¹) ^ m * Real.exp (δ * A.trace) := by
-      rw [q2m_det_one_add hX.isHermitian, hX.isHermitian.trace_eq_sum_eigenvalues]
+      rw [det_one_add_eq_prod_eigenvalues hX.isHermitian, hX.isHermitian.trace_eq_sum_eigenvalues]
       simp only [RCLike.ofReal_real_eq_id, id, Finset.mul_sum, Real.exp_sum]
       have hc' : (δ⁻¹) ^ m = ∏ _i : Fin m, δ⁻¹ := by simp
       rw [hc', ← Finset.prod_mul_distrib]
@@ -201,7 +217,7 @@ theorem hyp1F1_kummer {m : ℕ} (a : ℂ) {b : ℂ} (hb : multivariateGamma m b 
 
 /-- Identity under the stated parameter and domain assumptions: `(((‖(x : ℂ) ^ q‖ : ℝ)) : ℂ) = (x
 : ℂ) ^ ((q.re : ℝ) : ℂ)`. -/
-lemma q2m_cpow_norm_ofReal {x : ℝ} (hx : 0 < x) (q : ℂ) :
+private lemma ofReal_norm_cpow_eq_cpow_re {x : ℝ} (hx : 0 < x) (q : ℂ) :
     (((‖(x : ℂ) ^ q‖ : ℝ)) : ℂ) = (x : ℂ) ^ ((q.re : ℝ) : ℂ) := by
   rw [Complex.norm_cpow_eq_rpow_re_of_pos hx, Complex.ofReal_cpow hx.le]
 
@@ -236,7 +252,7 @@ theorem hasIntegralOn_kummerPsi_mellin {m : ℕ} {a b c : ℂ}
       (((T : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (c - p))) with hfdef
   have hfm : Measurable (Function.uncurry f) := by
     have hwm : Measurable w :=
-      (q2m_measurable_detcpow _).mul ((Complex.measurable_ofReal.comp
+      (measurable_det_cpow _).mul ((Complex.measurable_ofReal.comp
         (continuous_const.add continuous_subtype_val).matrix_det.measurable).pow_const _)
     have hXT : Measurable fun q : SymMatrix m × SymMatrix m =>
         (etr (-((q.1 : Matrix (Fin m) (Fin m) ℝ) * (q.2 : Matrix (Fin m) (Fin m) ℝ))) : ℂ) := by
@@ -244,11 +260,11 @@ theorem hasIntegralOn_kummerPsi_mellin {m : ℕ} {a b c : ℂ}
       exact Complex.measurable_ofReal.comp (Real.measurable_exp.comp
         ((continuous_subtype_val.comp continuous_fst).matrix_mul
           (continuous_subtype_val.comp continuous_snd)).neg.matrix_trace.measurable)
-    exact (hwm.comp measurable_fst).mul (hXT.mul ((q2m_measurable_detcpow _).comp measurable_snd))
+    exact (hwm.comp measurable_fst).mul (hXT.mul ((measurable_det_cpow _).comp measurable_snd))
   have hinT : ∀ X ∈ posDefCone m, HasIntegralOn (posDefCone m)
       (fun T => (etr (-((X : Matrix (Fin m) (Fin m) ℝ) * T)) : ℂ) * ((T.det : ℂ) ^ (c - p)))
       (multivariateGamma m c * ((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (-c)) :=
-    fun X hX => q2m_hasIntegralOn_gamma_scaled hX hc'
+    fun X hX => hasIntegralOn_laplace_det_cpow hX hc'
   set c' : ℂ := (c.re : ℂ)
   have hc'' : ((m : ℝ) - 1) / 2 < c'.re := by simpa [c'] using hc'
   have hnormT : ∀ X T : SymMatrix m, T ∈ posDefCone m →
@@ -262,12 +278,12 @@ theorem hasIntegralOn_kummerPsi_mellin {m : ℕ} {a b c : ℂ}
     rw [hre]
     simp only [hfdef, norm_mul, Complex.norm_real, Real.norm_eq_abs,
       abs_of_nonneg (Real.exp_pos _).le, etr, Complex.ofReal_mul]
-    rw [q2m_cpow_norm_ofReal hT.det_pos]
+    rw [ofReal_norm_cpow_eq_cpow_re hT.det_pos]
   have hnormInt : ∀ X, X ∈ posDefCone m → ∫ T, ‖f X T‖ ∂ν =
       (((‖w X‖ : ℝ) : ℂ) *
         (multivariateGamma m c' * ((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (-c'))).re := by
     intro X hX
-    have h := (q2m_hasIntegralOn_const_mul (q2m_hasIntegralOn_gamma_scaled hX hc'')
+    have h := (hasIntegralOn_posDefCone_const_mul (hasIntegralOn_laplace_det_cpow hX hc'')
       ((‖w X‖ : ℝ) : ℂ)).2
     rw [← setIntegral_congr_fun hmc (fun T hT => hnormT X T hT),
       integral_complex_ofReal] at h
@@ -299,7 +315,7 @@ theorem hasIntegralOn_kummerPsi_mellin {m : ℕ} {a b c : ℂ}
           ((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ ((((a - p).re : ℝ)) : ℂ) *
           ((1 + (X : Matrix (Fin m) (Fin m) ℝ)).det : ℂ) ^ ((((b - a - p).re : ℝ)) : ℂ) := by
         simp only [hw, norm_mul, Complex.ofReal_mul]
-        rw [q2m_cpow_norm_ofReal hd, q2m_cpow_norm_ofReal he]
+        rw [ofReal_norm_cpow_eq_cpow_re hd, ofReal_norm_cpow_eq_cpow_re he]
       rw [hwn]
       have k1 : ((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ ((((a - p).re : ℝ)) : ℂ) *
           ((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (-c') =

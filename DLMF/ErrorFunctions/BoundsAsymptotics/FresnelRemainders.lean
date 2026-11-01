@@ -8,13 +8,29 @@ module
 public import DLMF.ErrorFunctions.BoundsAsymptotics.GaussianRemainders
 
 /-!
-# Asymptotic remainders for Fresnel functions
+# Asymptotic expansions and remainders for the Fresnel auxiliary functions (DLMF §7.12(ii))
 
-Asymptotic terms, Laplace representations and remainder bounds for the auxiliary Fresnel
-functions.
+Asymptotic expansions of the auxiliary functions `f(z)` and `g(z)` in the sector
+`|ph z| ≤ π/2 - δ`, their Laplace representations, and integral forms and bounds for the
+remainders.
 
-Source references and common attribution are retained in
-`DLMF.ErrorFunctions.BoundsAsymptotics`.
+## Main definitions
+
+* `fresnelAsymptoticTerm`: the `n`-th term of the asymptotic expansions of `f` and `g`.
+* `fresnelAsymptoticRemainder`: the remainder after `N` terms (DLMF 7.12.4, 7.12.5).
+
+## Main results
+
+* `fresnelAuxFComplex_sector_asymptotic`, `fresnelAuxGComplex_sector_asymptotic`: the
+  asymptotic expansions of `f(z)` and `g(z)` (DLMF 7.12.2, 7.12.3).
+* `fresnelAuxFComplex_remainder_integral`, `fresnelAuxGComplex_remainder_integral`: the
+  remainders as Laplace-type integrals (DLMF 7.12.6, 7.12.7).
+* `fresnelAux_laplace_open`: the Laplace forms of `f` and `g` on the open sector
+  `|ph z| < π/4` (DLMF 7.7.10–7.7.11).
+* `fresnelAux_remainder_bound`, `fresnelAux_remainder_sign`: sector-dependent bounds for the
+  remainders and their sign for real positive argument.
+* `exp_sq_mul_erfc_sector_asymptotic`: the asymptotic expansion of `e^{ζ²} erfc ζ` in the
+  sector `|ph ζ| ≤ 3π/4 - δ`, from which the Fresnel expansions are derived.
 -/
 
 @[expose] public noncomputable section
@@ -35,10 +51,10 @@ def fresnelAsymptoticRemainder (aux : Bool) (N : ℕ) (z : ℂ) : ℂ :=
   (if aux then fresnelAuxGComplex z else fresnelAuxFComplex z)-∑ n ∈ Finset.range N, fresnelAsymptoticTerm aux n z
 
 /-- `e^{ζ²} erfc ζ ~ π^{-1/2} ∑ (-1)^m (1/2)_m ζ^{-2m-1}` in the sector `|arg ζ| ≤ 3π/4 - δ`. -/
-theorem exp_sq_mul_erfc_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/4) :
+theorem exp_sq_mul_erfc_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
     HasAsymptoticExpansion (sector (3*π/4-δ)) (fun (n : ℕ) (z : ℂ) => z^(-(2*(n : ℂ)+1)))
       (fun n => (-1 : ℂ)^n*poch (1/2) n/Real.sqrt π) (fun z => exp (z^2) * erfc z) := by
-  have h := (erfc_sector_asymptotic hδ hδ1).1.mul_left (fun z => exp (z^2))
+  have h := (erfc_sector_asymptotic hδ).1.mul_left (fun z => exp (z^2))
   have hφ : (fun (n : ℕ) (z : ℂ) => exp (z^2) * (exp (-z^2) * z^(-(2*(n : ℂ)+1)))) =
       fun (n : ℕ) (z : ℂ) => z^(-(2*(n : ℂ)+1)) := by
     funext n z; rw [← mul_assoc, ← Complex.exp_add]; simp
@@ -153,7 +169,7 @@ lemma fresnelAux_signed_sector_asymptotic {ε : ℝ} (hε : ε = 1 ∨ ε = -1) 
     HasAsymptoticExpansion (sector (π/2-δ)) (fun n z => z^(-(2*(n : ℂ)+1)))
       (fun n => (-1 : ℂ)^n * poch (1/2) n * (ε*I)^(n+1) * (2/π)^n / π)
       (fun z => fresnelAuxGComplex z + ε*I*fresnelAuxFComplex z) := by
-  have h1 := (exp_sq_mul_erfc_sector_asymptotic (δ := δ) hδ (by linarith)).comp_tendsto
+  have h1 := (exp_sq_mul_erfc_sector_asymptotic (δ := δ) hδ).comp_tendsto
     (tendsto_fresnelZetaComplex_sector hε hδ hδ1)
   have h2 := h1.smul_scale (ψ := fun (n : ℕ) (z : ℂ) => z^(-(2*(n : ℂ)+1)))
     (κ := fun n => (((Real.sqrt π : ℂ) / 2 * (1 - ε * I)) ^ (2 * n + 1))⁻¹)

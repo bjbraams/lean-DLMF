@@ -8,13 +8,46 @@ module
 public import DLMF.Elementary.Trigonometric.DirectIdentities
 
 /-!
-# Principal and general inverse trigonometric branches
+# Principal and general inverse trigonometric functions
 
-Inverse domains, analytic branches, cut limits and the principal sine and cosine inverse
-formulas.
+This file defines the principal and multivalued inverse trigonometric functions of a complex
+variable and proves their path-integral characterization, analyticity, symmetry, logarithmic
+forms and cut values (DLMF §4.23(i)–(v)).
 
-Source references and common attribution are retained in
-`DLMF.Elementary.Trigonometric`.
+## Main definitions
+
+* `arcsinPrincipal`, `arccosPrincipal`, `arccscPrincipal`, `arcsecPrincipal`, `arccotPrincipal`:
+  principal inverse functions (DLMF 4.23.7–4.23.9, 4.23.16, 4.23.19).
+* `arcsinCutPlane`, `arctanCutPlane`, `arccscCutPlane`, `arccotCutPlane`: the open cut planes.
+* `arcsinGeneral`, `arccosGeneral`, `arctanGeneral`, `arccscGeneral`, `arcsecGeneral`,
+  `arccotGeneral`: the sets of all inverse values.
+* `arcsinRightBank`, `arcsinLeftBank`, `arctanCutBank`: values on the two banks of the cuts
+  (DLMF 4.23.20, 4.23.21, 4.23.27).
+
+## Main results
+
+* `arcsin_general_integral`, `arccos_general_integral`, `arctan_general_integral`: path-integral
+  characterizations (DLMF 4.23.1–4.23.3).
+* `arccsc_general_reciprocal`, `arcsec_general_reciprocal`, `arccot_general_reciprocal`:
+  DLMF 4.23.4–4.23.6.
+* `analytic_arcsin_principal`, `analytic_arctan_principal`, `inverse_principal_real`:
+  analyticity and reality of the principal branches (DLMF §4.23(ii)).
+* `arcsin_principal_neg`, `arccos_principal_neg`, `arctan_principal_neg`: symmetry relations
+  (DLMF 4.23.10–4.23.15).
+* `arcsec_principal_complement`, `arccot_principal_complement`: DLMF 4.23.17–4.23.18.
+* `arcsin_right_cut_limit`, `arcsin_left_cut_limit`, `arccos_right_cut_limit`,
+  `arccos_left_cut_limit`, `arctan_cut_limit`: cut values (DLMF 4.23.20–4.23.27).
+* `arccos_principal_log`, `arctan_principal_log`: logarithmic forms (DLMF 4.23.22, 4.23.26).
+* `sin_arcsin_principal`, `cos_arccos_principal`, `arcsin_general_values`: DLMF 4.23.28,
+  4.23.29, 4.23.31.
+
+## Implementation notes
+
+Complex inverse functions use principal logarithms and square roots off their cuts; their two
+boundary values are represented separately. General inverse values are sets, so identities
+between multivalued functions retain every branch. Mathlib's complex sine and cosine fibers and
+antiperiodicity give the inverse families; integer parity combines the two sine fibers without
+discarding any branch or endpoint.
 -/
 
 @[expose] public noncomputable section
@@ -399,7 +432,7 @@ theorem inverse_principal_real {x : ℝ} (hx : x∈Icc (-1) 1) :
 
 /-- DLMF 4.23.E10: arcsin principal neg. -/
 @[dlmf 4.23.E10]
-theorem arcsin_principal_neg {z : ℂ} (hz : z∈arcsinCutPlane) : arcsinPrincipal (-z)= -arcsinPrincipal z := by
+theorem arcsin_principal_neg {z : ℂ} : arcsinPrincipal (-z)= -arcsinPrincipal z := by
   have hn:Complex.sqrt (1-(-z)^2)+I*(-z)=(Complex.sqrt (1-z^2)+I*z)⁻¹ := by
     apply (mul_left_cancel₀ (trig_arcsin_log_arg_ne z))
     rw [mul_inv_cancel₀ (trig_arcsin_log_arg_ne z)]
@@ -410,9 +443,9 @@ theorem arcsin_principal_neg {z : ℂ} (hz : z∈arcsinCutPlane) : arcsinPrincip
 
 /-- DLMF 4.23.E11: arccos principal neg. -/
 @[dlmf 4.23.E11]
-theorem arccos_principal_neg {z : ℂ} (hz : z∈arcsinCutPlane) : arccosPrincipal (-z)=π-arccosPrincipal z := by
+theorem arccos_principal_neg {z : ℂ} : arccosPrincipal (-z)=π-arccosPrincipal z := by
   unfold arccosPrincipal
-  rw [arcsin_principal_neg hz]
+  rw [arcsin_principal_neg]
   ring
 
 /-- DLMF 4.23.E12: arctan principal neg. -/
@@ -426,17 +459,17 @@ theorem arctan_principal_neg {z : ℂ} (hz : z∈arctanCutPlane) : Complex.arcta
 
 /-- DLMF 4.23.E13: arccsc principal neg. -/
 @[dlmf 4.23.E13]
-theorem arccsc_principal_neg {z : ℂ} (hz : z∈arccscCutPlane) : arccscPrincipal (-z)= -arccscPrincipal z := by
+theorem arccsc_principal_neg {z : ℂ} : arccscPrincipal (-z)= -arccscPrincipal z := by
   unfold arccscPrincipal
   rw [inv_neg]
-  exact arcsin_principal_neg hz.2
+  exact arcsin_principal_neg
 
 /-- DLMF 4.23.E14: arcsec principal neg. -/
 @[dlmf 4.23.E14]
-theorem arcsec_principal_neg {z : ℂ} (hz : z∈arccscCutPlane) : arcsecPrincipal (-z)=π-arcsecPrincipal z := by
+theorem arcsec_principal_neg {z : ℂ} : arcsecPrincipal (-z)=π-arcsecPrincipal z := by
   unfold arcsecPrincipal
   rw [inv_neg]
-  exact arccos_principal_neg hz.2
+  exact arccos_principal_neg
 
 /-- DLMF 4.23.E15: arccot principal neg. -/
 @[dlmf 4.23.E15]
@@ -512,44 +545,44 @@ def arcsinLeftBank (upper : Bool) (x : ℝ) : ℂ :=
   -π/2+trigBankSign upper*I*(Real.log (Real.sqrt (x^2-1)-x):ℂ)
 
 /-- The principal square root formula valid on the lower half-plane, extended continuously. -/
-def trigR4_sqrtLow (w : ℂ) : ℂ := (Real.sqrt ((‖w‖ + w.re)/2) : ℂ) - I * Real.sqrt ((‖w‖ - w.re)/2)
+def sqrtLowerBank (w : ℂ) : ℂ := (Real.sqrt ((‖w‖ + w.re)/2) : ℂ) - I * Real.sqrt ((‖w‖ - w.re)/2)
 
 /-- The principal square root formula valid on the closed upper half-plane. -/
-def trigR4_sqrtUp (w : ℂ) : ℂ := (Real.sqrt ((‖w‖ + w.re)/2) : ℂ) + I * Real.sqrt ((‖w‖ - w.re)/2)
+def sqrtUpperBank (w : ℂ) : ℂ := (Real.sqrt ((‖w‖ + w.re)/2) : ℂ) + I * Real.sqrt ((‖w‖ - w.re)/2)
 
-/-- On the lower half-plane the principal root is `trigR4_sqrtLow`. -/
-lemma trigR4_sqrt_eq_low {w : ℂ} (h : w.im < 0) : Complex.sqrt w = trigR4_sqrtLow w := by
-  rw [Complex.sqrt_eq_real_add_ite, trigR4_sqrtLow, ite_eq_right_of_eq_false _ _ (eq_false (not_le.mpr h))]; ring
+/-- On the lower half-plane the principal root is `sqrtLowerBank`. -/
+private lemma sqrt_eq_sqrtLowerBank {w : ℂ} (h : w.im < 0) : Complex.sqrt w = sqrtLowerBank w := by
+  rw [Complex.sqrt_eq_real_add_ite, sqrtLowerBank, ite_eq_right_of_eq_false _ _ (eq_false (not_le.mpr h))]; ring
 
-/-- On the closed upper half-plane the principal root is `trigR4_sqrtUp`. -/
-lemma trigR4_sqrt_eq_up {w : ℂ} (h : 0 ≤ w.im) : Complex.sqrt w = trigR4_sqrtUp w := by
-  rw [Complex.sqrt_eq_real_add_ite, trigR4_sqrtUp, ite_eq_left_of_eq_true _ _ (eq_true h)]; ring
+/-- On the closed upper half-plane the principal root is `sqrtUpperBank`. -/
+lemma sqrt_eq_sqrtUpperBank {w : ℂ} (h : 0 ≤ w.im) : Complex.sqrt w = sqrtUpperBank w := by
+  rw [Complex.sqrt_eq_real_add_ite, sqrtUpperBank, ite_eq_left_of_eq_true _ _ (eq_true h)]; ring
 
 /-- The lower-bank root formula is continuous. -/
-lemma trigR4_continuous_sqrtLow : Continuous trigR4_sqrtLow := by
-  unfold trigR4_sqrtLow; fun_prop
+private lemma continuous_sqrtLowerBank : Continuous sqrtLowerBank := by
+  unfold sqrtLowerBank; fun_prop
 
 /-- The upper-bank root formula is continuous. -/
-lemma trigR4_continuous_sqrtUp : Continuous trigR4_sqrtUp := by
-  unfold trigR4_sqrtUp; fun_prop
+lemma continuous_sqrtUpperBank : Continuous sqrtUpperBank := by
+  unfold sqrtUpperBank; fun_prop
 
 /-- Lower-bank root of a nonpositive real. -/
-lemma trigR4_sqrtLow_neg {t : ℝ} (ht : 0 ≤ t) : trigR4_sqrtLow (-(t:ℂ)) = -I * Real.sqrt t := by
-  simp [trigR4_sqrtLow, abs_of_nonneg ht]
+private lemma sqrtLowerBank_neg_ofReal {t : ℝ} (ht : 0 ≤ t) : sqrtLowerBank (-(t:ℂ)) = -I * Real.sqrt t := by
+  simp [sqrtLowerBank, abs_of_nonneg ht]
 
 /-- Upper-bank root of a nonpositive real. -/
-lemma trigR4_sqrtUp_neg {t : ℝ} (ht : 0 ≤ t) : trigR4_sqrtUp (-(t:ℂ)) = I * Real.sqrt t := by
-  simp [trigR4_sqrtUp, abs_of_nonneg ht]
+lemma sqrtUpperBank_neg_ofReal {t : ℝ} (ht : 0 ≤ t) : sqrtUpperBank (-(t:ℂ)) = I * Real.sqrt t := by
+  simp [sqrtUpperBank, abs_of_nonneg ht]
 
 /-- Logarithm of a point on the positive imaginary axis. -/
-lemma trigR4_log_I_mul_pos {s : ℝ} (hs : 0 < s) :
+lemma log_I_mul_ofReal_of_pos {s : ℝ} (hs : 0 < s) :
     Complex.log (I * s) = Real.log s + π/2 * I := by
   apply Complex.ext
   · simp [Complex.log_re, abs_of_pos hs]
   · simp [Complex.log_im, mul_comm I, Complex.arg_real_mul _ hs]
 
 /-- Logarithm of a point on the negative imaginary axis. -/
-lemma trigR4_log_I_mul_neg {s : ℝ} (hs : s < 0) :
+private lemma log_I_mul_ofReal_of_neg {s : ℝ} (hs : s < 0) :
     Complex.log (I * s) = Real.log (-s) - π/2 * I := by
   have he : I * (s:ℂ) = ((-s:ℝ):ℂ) * (-I) := by push_cast; ring
   apply Complex.ext
@@ -557,7 +590,7 @@ lemma trigR4_log_I_mul_neg {s : ℝ} (hs : s < 0) :
   · rw [he, Complex.log_im, Complex.arg_real_mul _ (by linarith), Complex.arg_neg_I]; simp
 
 /-- Arcsine limits along a bank where the square root follows a continuous formula. -/
-lemma trigR4_arcsin_bank {x : ℝ} {T : Set ℂ} {G : ℂ → ℂ} (hG : Continuous G)
+private lemma tendsto_arcsinPrincipal_of_sqrt_eventuallyEq {x : ℝ} {T : Set ℂ} {G : ℂ → ℂ} (hG : Continuous G)
     (hev : ∀ᶠ z in 𝓝[T] (x:ℂ), Complex.sqrt (1 - z^2) = G (1 - z^2))
     (hP : G (1 - (x:ℂ)^2) + I*x ∈ Complex.slitPlane) :
     Tendsto arcsinPrincipal (𝓝[T] (x:ℂ)) (𝓝 (-I * Complex.log (G (1 - (x:ℂ)^2) + I*x))) := by
@@ -570,11 +603,11 @@ lemma trigR4_arcsin_bank {x : ℝ} {T : Set ℂ} {G : ℂ → ℂ} (hG : Continu
   simp only [arcsinPrincipal, hz]
 
 /-- Imaginary part of `1 - z^2`. -/
-lemma trigR4_im_one_sub_sq (z : ℂ) : (1 - z^2).im = -(2 * z.re * z.im) := by
+private lemma im_one_sub_sq (z : ℂ) : (1 - z^2).im = -(2 * z.re * z.im) := by
   simp [pow_two, Complex.mul_im]; ring
 
 /-- `1 - x^2` as the negative of a real number. -/
-lemma trigR4_one_sub_sq_real (x : ℝ) : (1:ℂ) - (x:ℂ)^2 = -((x^2 - 1 : ℝ) : ℂ) := by
+lemma one_sub_ofReal_sq_eq_neg (x : ℝ) : (1:ℂ) - (x:ℂ)^2 = -((x^2 - 1 : ℝ) : ℂ) := by
   push_cast; ring
 
 /-- DLMF 4.23.E20: arcsin right cut limit. -/
@@ -601,31 +634,31 @@ theorem arcsin_right_cut_limit {x : ℝ} (hx : 1≤x) (upper : Bool) :
   cases upper
   · -- lower bank: im z < 0, so im (1 - z^2) > 0
     have hev : ∀ᶠ z in 𝓝[{z : ℂ | if false = true then 0<z.im else z.im<0}] (x:ℂ),
-        Complex.sqrt (1 - z^2) = trigR4_sqrtUp (1 - z^2) := by
+        Complex.sqrt (1 - z^2) = sqrtUpperBank (1 - z^2) := by
       filter_upwards [nhdsWithin_le_nhds hre, self_mem_nhdsWithin] with z hz hzT
       simp only [Bool.false_eq_true, ite_false] at hzT
-      apply trigR4_sqrt_eq_up
-      rw [trigR4_im_one_sub_sq]; nlinarith
-    have hP : trigR4_sqrtUp (1 - (x:ℂ)^2) + I*x = I * ((x + r : ℝ):ℂ) := by
-      rw [trigR4_one_sub_sq_real, trigR4_sqrtUp_neg hr0]; push_cast; ring
-    have h := trigR4_arcsin_bank trigR4_continuous_sqrtUp hev
+      apply sqrt_eq_sqrtUpperBank
+      rw [im_one_sub_sq]; nlinarith
+    have hP : sqrtUpperBank (1 - (x:ℂ)^2) + I*x = I * ((x + r : ℝ):ℂ) := by
+      rw [one_sub_ofReal_sq_eq_neg, sqrtUpperBank_neg_ofReal hr0]; push_cast; ring
+    have h := tendsto_arcsinPrincipal_of_sqrt_eventuallyEq continuous_sqrtUpperBank hev
       (by rw [hP]; exact Or.inr (by simp; linarith))
-    rw [hP, trigR4_log_I_mul_pos hxr'] at h
+    rw [hP, log_I_mul_ofReal_of_pos hxr'] at h
     convert h using 2
     simp only [arcsinRightBank, trigBankSign, Bool.false_eq_true, ite_false]
     rw [add_comm r x]
     linear_combination ((π:ℂ)/2)*Complex.I_sq
   · have hev : ∀ᶠ z in 𝓝[{z : ℂ | if true = true then 0<z.im else z.im<0}] (x:ℂ),
-        Complex.sqrt (1 - z^2) = trigR4_sqrtLow (1 - z^2) := by
+        Complex.sqrt (1 - z^2) = sqrtLowerBank (1 - z^2) := by
       filter_upwards [nhdsWithin_le_nhds hre, self_mem_nhdsWithin] with z hz hzT
       simp only [ite_true] at hzT
-      apply trigR4_sqrt_eq_low
-      rw [trigR4_im_one_sub_sq]; nlinarith
-    have hP : trigR4_sqrtLow (1 - (x:ℂ)^2) + I*x = I * ((x - r : ℝ):ℂ) := by
-      rw [trigR4_one_sub_sq_real, trigR4_sqrtLow_neg hr0]; push_cast; ring
-    have h := trigR4_arcsin_bank trigR4_continuous_sqrtLow hev
+      apply sqrt_eq_sqrtLowerBank
+      rw [im_one_sub_sq]; nlinarith
+    have hP : sqrtLowerBank (1 - (x:ℂ)^2) + I*x = I * ((x - r : ℝ):ℂ) := by
+      rw [one_sub_ofReal_sq_eq_neg, sqrtLowerBank_neg_ofReal hr0]; push_cast; ring
+    have h := tendsto_arcsinPrincipal_of_sqrt_eventuallyEq continuous_sqrtLowerBank hev
       (by rw [hP]; exact Or.inr (by simp; linarith))
-    rw [hP, trigR4_log_I_mul_pos hxr, hlog] at h
+    rw [hP, log_I_mul_ofReal_of_pos hxr, hlog] at h
     convert h using 2
     simp only [arcsinRightBank, trigBankSign, ite_true]
     push_cast
@@ -652,30 +685,30 @@ theorem arcsin_left_cut_limit {x : ℝ} (hx : x≤ -1) (upper : Bool) :
     (Complex.continuous_re.tendsto (x:ℂ)).eventually (gt_mem_nhds (by simpa using hx0))
   cases upper
   · have hev : ∀ᶠ z in 𝓝[{z : ℂ | if false = true then 0<z.im else z.im<0}] (x:ℂ),
-        Complex.sqrt (1 - z^2) = trigR4_sqrtLow (1 - z^2) := by
+        Complex.sqrt (1 - z^2) = sqrtLowerBank (1 - z^2) := by
       filter_upwards [nhdsWithin_le_nhds hre, self_mem_nhdsWithin] with z hz hzT
       simp only [Bool.false_eq_true, ite_false] at hzT
-      apply trigR4_sqrt_eq_low
-      rw [trigR4_im_one_sub_sq]; nlinarith
-    have hP : trigR4_sqrtLow (1 - (x:ℂ)^2) + I*x = I * ((x - r : ℝ):ℂ) := by
-      rw [trigR4_one_sub_sq_real, trigR4_sqrtLow_neg hr0]; push_cast; ring
-    have h := trigR4_arcsin_bank trigR4_continuous_sqrtLow hev
+      apply sqrt_eq_sqrtLowerBank
+      rw [im_one_sub_sq]; nlinarith
+    have hP : sqrtLowerBank (1 - (x:ℂ)^2) + I*x = I * ((x - r : ℝ):ℂ) := by
+      rw [one_sub_ofReal_sq_eq_neg, sqrtLowerBank_neg_ofReal hr0]; push_cast; ring
+    have h := tendsto_arcsinPrincipal_of_sqrt_eventuallyEq continuous_sqrtLowerBank hev
       (by rw [hP]; exact Or.inr (by simp; linarith))
-    rw [hP, trigR4_log_I_mul_neg hxr', show -(x - r) = r - x by ring] at h
+    rw [hP, log_I_mul_ofReal_of_neg hxr', show -(x - r) = r - x by ring] at h
     convert h using 2
     simp only [arcsinLeftBank, trigBankSign, Bool.false_eq_true, ite_false]
     linear_combination (-(π:ℂ)/2)*Complex.I_sq
   · have hev : ∀ᶠ z in 𝓝[{z : ℂ | if true = true then 0<z.im else z.im<0}] (x:ℂ),
-        Complex.sqrt (1 - z^2) = trigR4_sqrtUp (1 - z^2) := by
+        Complex.sqrt (1 - z^2) = sqrtUpperBank (1 - z^2) := by
       filter_upwards [nhdsWithin_le_nhds hre, self_mem_nhdsWithin] with z hz hzT
       simp only [ite_true] at hzT
-      apply trigR4_sqrt_eq_up
-      rw [trigR4_im_one_sub_sq]; nlinarith
-    have hP : trigR4_sqrtUp (1 - (x:ℂ)^2) + I*x = I * ((x + r : ℝ):ℂ) := by
-      rw [trigR4_one_sub_sq_real, trigR4_sqrtUp_neg hr0]; push_cast; ring
-    have h := trigR4_arcsin_bank trigR4_continuous_sqrtUp hev
+      apply sqrt_eq_sqrtUpperBank
+      rw [im_one_sub_sq]; nlinarith
+    have hP : sqrtUpperBank (1 - (x:ℂ)^2) + I*x = I * ((x + r : ℝ):ℂ) := by
+      rw [one_sub_ofReal_sq_eq_neg, sqrtUpperBank_neg_ofReal hr0]; push_cast; ring
+    have h := tendsto_arcsinPrincipal_of_sqrt_eventuallyEq continuous_sqrtUpperBank hev
       (by rw [hP]; exact Or.inr (by simp; linarith))
-    rw [hP, trigR4_log_I_mul_neg hxr, hlog] at h
+    rw [hP, log_I_mul_ofReal_of_neg hxr, hlog] at h
     convert h using 2
     simp only [arcsinLeftBank, trigBankSign, ite_true]
     push_cast
@@ -719,7 +752,7 @@ def arctanCutBank (right : Bool) (y : ℝ) : ℂ :=
   trigBankSign right*π/2+I/2*(Real.log ((y+1)/(y-1)):ℂ)
 
 /-- Imaginary part of the arctangent logarithm argument. -/
-lemma trigR4_arctan_quot_im (z : ℂ) :
+private lemma im_one_add_mul_I_div_one_sub_mul_I (z : ℂ) :
     ((1+z*I)/(1-z*I)).im=(2*z.re)/((1+z.im)^2+z.re^2) := by
   simp [Complex.div_im,Complex.normSq]
   ring
@@ -763,7 +796,7 @@ theorem arctan_cut_limit {y : ℝ} (hy : 1< |y|) (right : Bool) :
       filter_upwards [self_mem_nhdsWithin] with z hz
       have hz' : z.re < 0 := by simpa using hz
       show ((1+z*I)/(1-z*I)).im < 0
-      rw [trigR4_arctan_quot_im]
+      rw [im_one_add_mul_I_div_one_sub_mul_I]
       exact div_neg_of_neg_of_pos (by linarith) (hD z hz'.ne)
     have h := ((Complex.tendsto_log_nhdsWithin_im_neg_of_re_neg_of_im_zero hw0re hw0im).comp
       hw).const_mul (-I/2)
@@ -779,7 +812,7 @@ theorem arctan_cut_limit {y : ℝ} (hy : 1< |y|) (right : Bool) :
       filter_upwards [self_mem_nhdsWithin] with z hz
       have hz' : 0 < z.re := by simpa using hz
       show 0 ≤ ((1+z*I)/(1-z*I)).im
-      rw [trigR4_arctan_quot_im]
+      rw [im_one_add_mul_I_div_one_sub_mul_I]
       exact (div_pos (by linarith) (hD z hz'.ne')).le
     have h := ((Complex.tendsto_log_nhdsWithin_im_nonneg_of_re_neg_of_im_zero hw0re hw0im).comp
       hw).const_mul (-I/2)

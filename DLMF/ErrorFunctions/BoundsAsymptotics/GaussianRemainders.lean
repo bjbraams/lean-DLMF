@@ -8,12 +8,26 @@ module
 public import DLMF.ErrorFunctions.BoundsAsymptotics.ContinuedFractions
 
 /-!
-# Gaussian error-function remainder estimates
+# Asymptotic expansion and remainders for the complementary error function
 
-Faddeeva continued fractions and signed remainder bounds for the complementary error function.
+The continued fraction for the Faddeeva function (DLMF 7.9.3), rotated Laplace representations
+of `erfc`, the asymptotic expansion of `erfc z` in the sector `|ph z| ≤ 3π/4 - δ` (obtained by
+Watson's lemma) and the bounds and sign of its remainder (DLMF §7.12(i)).
 
-Source references and common attribution are retained in
-`DLMF.ErrorFunctions.BoundsAsymptotics`.
+## Main definitions
+
+* `gaussQuarterCoeff`: the Taylor coefficients of `e^{-t²/4}`.
+* `erfcAsymptoticRemainder`: the remainder of the asymptotic expansion of `erfc`.
+
+## Main results
+
+* `faddeevaW_continuedFraction`: the continued fraction for `w(z)` (DLMF 7.9.3).
+* `erfc_eq_integral_rotate`, `erfc_eq_integral_rotate_laplace`: rotated Laplace representations
+  of `erfc` (DLMF 7.7.2 continued).
+* `erfc_sector_asymptotic`: `erfc z ~ π^{-1/2} e^{-z²} ∑ (-1)ⁿ (1/2)ₙ z^{-2n-1}` in the sector
+  `|ph z| ≤ 3π/4 - δ` (DLMF 7.12.1).
+* `erfc_remainder_bound`, `erfc_remainder_sign`: sector-dependent bounds for the remainder and
+  its sign for real positive argument (DLMF §7.12(i)).
 -/
 
 @[expose] public noncomputable section
@@ -349,7 +363,7 @@ n/Real.sqrt π) erfc ∧ HasAsymptoticExpansion (sector (3*π/4-δ)) (fun n z =>
 (-z^2)*z^(-(2*(n : ℂ)+1))) (fun n => -(-1 : ℂ)^n*poch (1/2) n/Real.sqrt π) (fun z => erfc
 (-z)-2)`. -/
 @[dlmf 7.12.E1]
-theorem erfc_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/4) :
+theorem erfc_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
     HasAsymptoticExpansion (sector (3*π/4-δ)) (fun n z => exp (-z^2)*z^(-(2*(n : ℂ)+1))) (fun n => (-1 : ℂ)^n*poch (1/2) n/Real.sqrt π) erfc ∧ HasAsymptoticExpansion (sector (3*π/4-δ)) (fun n z => exp (-z^2)*z^(-(2*(n : ℂ)+1))) (fun n => -(-1 : ℂ)^n*poch (1/2) n/Real.sqrt π) (fun z => erfc (-z)-2) := by
   set d := min δ (π / 4) with hd
   have hd0 : 0 < d := lt_min hδ (by positivity)

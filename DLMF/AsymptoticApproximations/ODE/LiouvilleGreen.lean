@@ -11,17 +11,26 @@ public import DLMFMathlib.Analysis.ODE.LiouvilleGreenReal
 /-!
 # The Liouville–Green (WKBJ) approximation (DLMF §2.7(iii))
 
-The Liouville–Green theorem 2.7.20–2.7.25 for `w'' = (f + g) w` on an interval `(a₁, a₂)`,
-with the error bounds controlled by the variation of the error-control function
-`F = ∫ (f^{-1/4} (f^{-1/4})'' - g f^{-1/2})`. The integrand of `F` is DLMFMathlib's
-`LiouvilleGreen.errorDensity f f' f'' g` (with `f'`, `f''` the derivatives of `f`), so
-`𝒱_{a₁,x}(F) = ∫_{(a₁,x]} |errorDensity|` (2.7.25).
+The Liouville–Green theorem for `w'' = (f + g) w` on an interval `(a₁, a₂)`, with error bounds
+controlled by the variation of the error-control function
+`F = ∫ (f^{-1/4} (f^{-1/4})'' - g f^{-1/2})`.
 
-* `liouvilleGreen_interval`: the theorem on a finite interval (admitted).
-* `liouvilleGreen_recessive_atTop`: the case `a₂ = +∞`, `j = 2`, a corollary of DLMFMathlib's
-  `LiouvilleGreen.exists_solution_exp_of_pos` (Olver, Ch. 6, Thm. 2.1) with `u = 1` (proved).
-* `liouvilleGreen_recessive_isEquivalent`: 2.7.27 for `a₂ = +∞` (proved).
-* 2.7.26–2.7.30 on a finite interval, and the example 2.7.31–2.7.34 (admitted).
+## Main results
+
+* `liouvilleGreen_interval`: the theorem on a finite interval (DLMF 2.7.20–2.7.25).
+* `liouvilleGreen_recessive_atTop`, `liouvilleGreen_recessive_isEquivalent`: the recessive
+  solution for `a₂ = +∞` (DLMF 2.7.22–2.7.23, 2.7.27).
+* `liouvilleGreen_interval_isEquivalent`, `liouvilleGreen_dominant`: the asymptotic forms at the
+  endpoints (DLMF 2.7.26–2.7.30).
+* `sqrt_add_log_expansion`, `liouvilleGreen_example`: the example `w'' = (x + ln x) w`
+  (DLMF 2.7.31–2.7.34).
+
+## Implementation notes
+
+The integrand of `F` is DLMFMathlib's `LiouvilleGreen.errorDensity f f' f'' g` (with `f'`,
+`f''` the derivatives of `f`), so `𝒱_{a₁,x}(F) = ∫_{(a₁,x]} |errorDensity|` (2.7.25). The case
+`a₂ = +∞` is a corollary of `LiouvilleGreen.exists_solution_exp_of_pos` (Olver, Ch. 6,
+Thm. 2.1) with `u = 1`.
 -/
 
 @[expose] public noncomputable section

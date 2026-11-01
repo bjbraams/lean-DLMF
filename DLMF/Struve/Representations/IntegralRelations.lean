@@ -6,14 +6,25 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Struve.Representations.Mellin
+public import Carlson.Elliptic.Addition
 
 /-!
-# Further Struve integral relations
+# Laplace transforms of Struve functions
 
-Branch-square-root estimates and further integral relations for the Struve functions.
+Laplace transforms of `H₀`, `H₁`, `L₀` and `L₁` (DLMF 11.7.13–11.7.16), together with the
+principal-branch square-root identities and elementary integrals they require.
 
-Source references and common attribution are retained in
-`DLMF.Struve.Representations`.
+## Main results
+
+* `integral_recip_one_add_sq_sub_sq`, `integral_poissonWeight_mul_div_sq_add`: elementary
+  integrals evaluated in logarithmic form.
+* `integral_recip_sq_sub_one_add_sq_log`, `integral_recip_sq_sub_one_add_sq_arctan`: the
+  logarithmic and arctangent forms of `∫₀¹ du/(c²+u²)`, `c = (a²-1)^{1/2}`.
+* `exists_bound_struveH_zero`, `exists_bound_struveL_zero`: growth bounds for `H₀` and `L₀`
+  on the positive axis.
+* `struveL_zero_eq_poisson`: the Poisson form of `L₀` on the positive axis.
+* `struve_laplace_13`, `struve_laplace_14`, `struve_laplace_15`, `struve_laplace_16`:
+  DLMF 11.7.13–11.7.16.
 -/
 
 @[expose] public noncomputable section
@@ -25,22 +36,6 @@ open scoped Real Topology Nat
 namespace DLMF.Struve
 
 open DLMF.Bessel
-
-/-- Principal square roots of slit-plane numbers lie in the open right half-plane. -/
-theorem re_cpow_half_pos {x : ℂ} (hx : x ∈ slitPlane) : 0 < (x^(1/2:ℂ)).re := by
-  rw [show (1/2:ℂ) = ((1/2:ℝ):ℂ) by push_cast; ring, cpow_ofReal_re]
-  have hx0 := slitPlane_ne_zero hx
-  have harg := (mem_slitPlane_iff_arg.1 hx).1
-  have h1 : -π < arg x := neg_pi_lt_arg x
-  have h2 : arg x < π := lt_of_le_of_ne (arg_le_pi x) harg
-  apply mul_pos (Real.rpow_pos_of_pos (norm_pos_iff.2 hx0) _)
-  apply Real.cos_pos_of_mem_Ioo
-  constructor <;> nlinarith [Real.pi_pos]
-
-/-- Identity under the stated parameter and domain assumptions: `(x^(1/2:ℂ))^2 = x`. -/
-theorem cpow_half_sq (x : ℂ) : (x^(1/2:ℂ))^2 = x := by
-  have := cpow_nat_inv_pow x (n := 2) two_ne_zero
-  rwa [show ((2:ℕ):ℂ)⁻¹ = 1/2 by norm_num] at this
 
 /-- Identity under the stated parameter and domain assumptions: `r = a`. -/
 theorem eq_of_sq_eq_of_re_pos {r a : ℂ} (hr : 0 < r.re) (ha : 0 < a.re) (h : r^2 = a^2) :
@@ -87,13 +82,13 @@ theorem integral_recip_one_add_sq_sub_sq {a : ℂ} (ha : 0 < a.re) :
     exact sq_add_mem_slitPlane ha (by nlinarith [hu.1, hu.2])
   have hb1 : a^2 + ((1-(0:ℝ)^2:ℝ):ℂ) = 1+a^2 := by push_cast; ring
   have hbre : 0 < b.re := by
-    have := re_cpow_half_pos (hslit 0 (by simp))
+    have := Carlson.re_cpow_half_pos (hslit 0 (by simp))
     rwa [hb1] at this
-  have hb2 : b^2 = 1+a^2 := cpow_half_sq _
+  have hb2 : b^2 = 1+a^2 := Carlson.cpow_half_sq _
   set r : ℝ → ℂ := fun u => (a^2 + ((1-u^2:ℝ):ℂ))^(1/2:ℂ) with hrdef
-  have hrre : ∀ u ∈ uIcc (0:ℝ) 1, 0 < (r u).re := fun u hu => re_cpow_half_pos (hslit u hu)
+  have hrre : ∀ u ∈ uIcc (0:ℝ) 1, 0 < (r u).re := fun u hu => Carlson.re_cpow_half_pos (hslit u hu)
   have hr2 : ∀ u : ℝ, (r u)^2 = b^2 - (u:ℂ)^2 := by
-    intro u; simp only [r]; rw [cpow_half_sq, hb2]; push_cast; ring
+    intro u; simp only [r]; rw [Carlson.cpow_half_sq, hb2]; push_cast; ring
   have hr0 : r 0 = b := by simp only [r]; rw [hb1]
   have hr1 : r 1 = a := by
     apply eq_of_sq_eq_of_re_pos (hrre 1 (by simp)) ha
@@ -115,7 +110,7 @@ theorem integral_recip_one_add_sq_sub_sq {a : ℂ} (ha : 0 < a.re) :
       set Q : ℂ := a^2 + ((1-u^2:ℝ):ℂ) with hQdef
       have hQne : Q ≠ 0 := slitPlane_ne_zero (hslit u hu)
       have hru : r u = Q^(1/2:ℂ) := rfl
-      have hQ : Q = (r u)^2 := (cpow_half_sq Q).symm
+      have hQ : Q = (r u)^2 := (Carlson.cpow_half_sq Q).symm
       have : Q^((1/2:ℂ)-1) = (r u)⁻¹ := by
         rw [cpow_sub _ _ hQne, cpow_one, ← hru]
         conv_lhs => rw [hQ]
@@ -258,20 +253,20 @@ theorem cpow_half_sq_sub_one {a : ℂ} (ha : 1 < a.re) :
       (one_sub_recip_sq_mem_slitPlane hz))).continuousWithinAt
   have hsq : EqOn ((fun z : ℂ => (z^2-1)^(1/2:ℂ))^2) ((fun z : ℂ => z * (1-1/z^2)^(1/2:ℂ))^2) S := by
     intro z hz
-    simp only [Pi.pow_apply, mul_pow, cpow_half_sq]
+    simp only [Pi.pow_apply, mul_pow, Carlson.cpow_half_sq]
     field_simp [hz0 z hz]
   have hne : ∀ {z : ℂ}, z ∈ S → z * (1-1/z^2)^(1/2:ℂ) ≠ 0 := by
     intro z hz
     refine mul_ne_zero (hz0 z hz) fun h => ?_
-    have := re_cpow_half_pos (one_sub_recip_sq_mem_slitPlane hz)
+    have := Carlson.re_cpow_half_pos (one_sub_recip_sq_mem_slitPlane hz)
     rw [h] at this; simp at this
   have h2 : (2:ℂ) ∈ S := by simp [S]
   rcases hS.eq_or_eq_neg_of_sq_eq hf hg hsq hne with h | h
   · exact h ha
   · exfalso
     have h1 := h h2
-    have hp1 := re_cpow_half_pos (hslit1 2 h2)
-    have hp2 := re_cpow_half_pos (one_sub_recip_sq_mem_slitPlane (a := 2) (by simp))
+    have hp1 := Carlson.re_cpow_half_pos (hslit1 2 h2)
+    have hp2 := Carlson.re_cpow_half_pos (one_sub_recip_sq_mem_slitPlane (a := 2) (by simp))
     simp only [Pi.neg_apply] at h1
     rw [h1] at hp1
     simp only [neg_re, mul_re, re_ofNat, im_ofNat, zero_mul, sub_zero] at hp1
@@ -305,15 +300,15 @@ theorem integral_recip_sq_sub_one_add_sq_log {a : ℂ} (ha : 1 < a.re) :
   have hslit : ∀ u : ℝ, a^2 - 1 + ((u^2:ℝ):ℂ) ∈ slitPlane :=
     fun u => sq_sub_one_add_mem_slitPlane ha (sq_nonneg u)
   have hcre : 0 < c.re := by
-    have := re_cpow_half_pos (hslit 0)
+    have := Carlson.re_cpow_half_pos (hslit 0)
     rwa [show a^2-1+(((0:ℝ)^2:ℝ):ℂ) = a^2-1 by push_cast; ring] at this
-  have hc2 : c^2 = a^2-1 := cpow_half_sq _
+  have hc2 : c^2 = a^2-1 := Carlson.cpow_half_sq _
   have hcne : c ≠ 0 := fun h => by rw [h] at hcre; simp at hcre
   set r : ℝ → ℂ := fun u => (a^2 - 1 + ((u^2:ℝ):ℂ))^(1/2:ℂ) with hrdef
-  have hrre : ∀ u, 0 < (r u).re := fun u => re_cpow_half_pos (hslit u)
+  have hrre : ∀ u, 0 < (r u).re := fun u => Carlson.re_cpow_half_pos (hslit u)
   have hrne : ∀ u, r u ≠ 0 := fun u h => by have := hrre u; rw [h] at this; simp at this
   have hr2 : ∀ u : ℝ, (r u)^2 = c^2 + (u:ℂ)^2 := by
-    intro u; simp only [r]; rw [cpow_half_sq, hc2]; push_cast; ring
+    intro u; simp only [r]; rw [Carlson.cpow_half_sq, hc2]; push_cast; ring
   have hr0 : r 0 = c := by simp [r, c]
   have hr1 : r 1 = a := by
     have ha' : 0 < a.re := by linarith
@@ -333,7 +328,7 @@ theorem integral_recip_sq_sub_one_add_sq_log {a : ℂ} (ha : 1 < a.re) :
       set Q : ℂ := a^2 - 1 + ((u^2:ℝ):ℂ) with hQdef
       have hQne : Q ≠ 0 := slitPlane_ne_zero (hslit u)
       have hru : r u = Q^(1/2:ℂ) := rfl
-      have hQ : Q = (r u)^2 := (cpow_half_sq Q).symm
+      have hQ : Q = (r u)^2 := (Carlson.cpow_half_sq Q).symm
       have : Q^((1/2:ℂ)-1) = (r u)⁻¹ := by
         rw [cpow_sub _ _ hQne, cpow_one, ← hru]
         conv_lhs => rw [hQ]
@@ -371,9 +366,9 @@ theorem integral_recip_sq_sub_one_add_sq_arctan {a : ℂ} (ha : 1 < a.re) :
       arctan (1/((a^2-1)^(1/2:ℂ))) / (a^2-1)^(1/2:ℂ) := by
   set c : ℂ := (a^2-1)^(1/2:ℂ) with hcdef
   have hcre : 0 < c.re := by
-    have := re_cpow_half_pos (sq_sub_one_add_mem_slitPlane ha (u := 0) le_rfl)
+    have := Carlson.re_cpow_half_pos (sq_sub_one_add_mem_slitPlane ha (u := 0) le_rfl)
     rwa [show a^2-1+((0:ℝ):ℂ) = a^2-1 by push_cast; ring] at this
-  have hc2 : c^2 = a^2-1 := cpow_half_sq _
+  have hc2 : c^2 = a^2-1 := Carlson.cpow_half_sq _
   have hcne : c ≠ 0 := fun h => by rw [h] at hcre; simp at hcre
   set Λ : ℝ → ℂ := fun u => -I/2 * log ((1+(u/c)*I)/(1-(u/c)*I)) / c
   have hderiv : ∀ u ∈ uIcc (0:ℝ) 1, HasDerivAt Λ (1/((a^2-1) + (u:ℂ)^2)) u := by

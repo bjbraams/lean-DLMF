@@ -19,19 +19,39 @@ public import Mathlib.MeasureTheory.Integral.Prod
 /-!
 # Calculus of two or more variables (DLMF §1.5)
 
+Partial derivatives, chain rules, coordinate systems and Laplacians, Taylor's theorem and the
+second derivative test, Leibniz's rule, multiple integrals over normal domains, Jacobians and
+change of variables. Riemann double integrals (1.5.25–1.5.27), the extension by zero
+1.5.28–1.5.29 and Fubini's theorem are Mathlib's
+(`DLMF.AlgebraicAnalytic.Calculus.MathlibCoverage`).
+
+## Main results
+
+* `partialDeriv_eq_fderiv`, `partialDeriv_partialDeriv`: partial derivatives and Fréchet
+  derivatives (DLMF 1.5.3).
+* `partialDeriv_comm`, `deriv_section_comm`: symmetry of mixed partials (DLMF 1.5.5–1.5.6).
+* `hasDerivAt_comp_prod`, `deriv_comp_prod_section`, `hasDerivAt_comp_pi`: chain rules
+  (DLMF 1.5.7–1.5.9).
+* `exists_implicitFunction`: the implicit function theorem (§1.5(i)).
+* `partialDeriv_polar`, `laplacian_polar`, `laplacian_cylindrical`, `laplacian_spherical`:
+  coordinates and Laplacians (DLMF 1.5.11–1.5.17).
+* `taylor_isLittleO_prod`: Taylor's theorem in two variables (DLMF 1.5.18).
+* `isLocalMin_of_hessian_posDef`, `isLocalMax_of_hessian_negDef`: the second derivative test
+  (DLMF 1.5.19–1.5.21).
+* `hasDerivAt_integral_variable_limits`, `hasDerivAt_improper_integral_of_tendstoUniformlyOn`:
+  Leibniz's rule (DLMF 1.5.22–1.5.24).
+* `setIntegral_normalDomain_fst`, `setIntegral_normalDomain_snd`, `integral_normalDomain_swap`,
+  `integral_integral_swap_of_abs`, `setIntegral_normalDomain_three`: multiple integrals
+  (DLMF 1.5.30–1.5.37).
+* `jacobianDet2_polar`, `jacobianDet3_spherical`: DLMF 1.5.39, 1.5.41.
+* `integral_image_eq_integral_abs_det_of_injOn_diff_null`: change of variables with an
+  exceptional null set (DLMF 1.5.42–1.5.43).
+
+## Implementation notes
+
 Partial derivatives are derivatives of sections, as in DLMF 1.5.3–1.5.4: for `f : ℝ × ℝ → ℝ`
 we write `deriv (fun t => f (t, y)) x` for `∂f/∂x` at `(x, y)`, and on `Fin n → ℝ` we use
-`partialDeriv` (`DLMF.AlgebraicAnalytic.Calculus.Basic`). The first part of the file connects
-them with Fréchet derivatives (`partialDeriv_eq_fderiv`, `partialDeriv_partialDeriv`), which
-gives the symmetry of mixed partials 1.5.6 and the chain rules 1.5.7–1.5.9.
-
-The other items: the implicit function theorem (§1.5(i)), polar, cylindrical and spherical
-coordinates and their Laplacians (1.5.10–1.5.17), Taylor's theorem and the second derivative
-test (1.5.18–1.5.21), Leibniz's rule (1.5.22–1.5.24), double integrals over normal domains
-and the change of order of integration (1.5.30–1.5.37), Jacobians (1.5.39, 1.5.41) and the
-change of variables 1.5.42–1.5.43 with an exceptional null set. Riemann double integrals
-(1.5.25–1.5.27), the extension by zero 1.5.28–1.5.29 and Fubini's theorem are Mathlib's
-(`DLMF.AlgebraicAnalytic.Calculus.MathlibCoverage`).
+`partialDeriv` (`DLMF.AlgebraicAnalytic.Calculus.Basic`).
 -/
 
 @[expose] public noncomputable section
@@ -64,7 +84,7 @@ theorem partialDeriv_eq_fderiv {n : ℕ} {E : Type*} [NormedAddCommGroup E] [Nor
 
 /-- If `f` is differentiable near `x`, then near `x` the function `partialDeriv j f` is
 `y ↦ Df(y) eⱼ`. -/
-theorem g1b_partialDeriv_eventuallyEq {n : ℕ} {E : Type*} [NormedAddCommGroup E]
+theorem partialDeriv_eventuallyEq_fderiv {n : ℕ} {E : Type*} [NormedAddCommGroup E]
     [NormedSpace ℝ E] {f : (Fin n → ℝ) → E} {x : Fin n → ℝ} (j : Fin n)
     (hf : ∀ᶠ y in 𝓝 x, DifferentiableAt ℝ f y) :
     (fun y => partialDeriv j f y) =ᶠ[𝓝 x] fun y => fderiv ℝ f y (Pi.single j 1) := by
@@ -87,7 +107,7 @@ theorem partialDeriv_partialDeriv {n : ℕ} {E : Type*} [NormedAddCommGroup E]
       fun t => fderiv ℝ f (Function.update x i t) (Pi.single j 1) := by
     have hc : ContinuousAt (Function.update x i) (x i) :=
       (hasDerivAt_update x i (x i)).continuousAt
-    have := (g1b_partialDeriv_eventuallyEq j hev)
+    have := (partialDeriv_eventuallyEq_fderiv j hev)
     rw [← Function.update_eq_self i x] at this
     exact hc.eventually this
   change deriv (fun t => partialDeriv j f (Function.update x i t)) (x i) = _

@@ -10,10 +10,25 @@ public import DLMF.Legendre.Zeros
 /-!
 # Singular exponents and independence of Legendre solutions
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This file treats the local theory of the associated Legendre equation (DLMF §14.2(iii)): the
+regular singularities at `z = ±1` with exponents `±μ/2`, the singularity at infinity with
+exponents `-ν` and `ν + 1`, and the linear independence of standard pairs of solutions.
+
+## Main definitions
+
+* `legendreEquationP`, `legendreEquationQ`: the coefficients of `w'` and `w` in the associated
+  Legendre equation, normalized so that the coefficient of `w''` is `1`.
+
+## Main results
+
+* `legendre_finite_singular_exponents_1`, `legendre_finite_singular_exponents_2`: `z = 1` and
+  `z = -1` are regular singularities with exponents `±μ/2`.
+* `legendre_infinite_singular_exponents`: in the reciprocal coordinate, the exponents at infinity
+  are `-ν` and `ν + 1`.
+* `ferrersP_reflected_dependence`: `𝖯^{-μ}_ν(x)` and `𝖯^{-μ}_ν(-x)` are linearly dependent
+  exactly when `μ - ν` is a nonpositive integer or `μ + ν` is a negative integer.
+* `associatedPQ_independent`: independence of `P^{-μ}_ν` and `𝑸^μ_ν` for `Re ν ≥ -1/2`,
+  `Re μ ≥ 0` (DLMF §14.2(iii), §14.21(ii)).
 -/
 
 @[expose] public noncomputable section

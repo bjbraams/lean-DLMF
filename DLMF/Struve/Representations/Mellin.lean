@@ -10,10 +10,32 @@ public import DLMF.Struve.Representations.BarnesAndSonine
 /-!
 # Mellin transforms of Struve functions
 
-Mellin integral representations of Struve functions, with convergence and endpoint estimates.
+Mellin transforms of `H_ν` as improper integrals (DLMF 11.7.9–11.7.12), with the
+convergence and endpoint estimates they require, and Laplace transforms used for
+Poisson-weighted integrals.
 
-Source references and common attribution are retained in
-`DLMF.Struve.Representations`.
+## Main definitions
+
+* `struveMel_value`: the value of the Struve Mellin transform, DLMF 11.7.10–11.7.11, with
+  the removable case `μ = 0`.
+
+## Main results
+
+* `struveMel_tendsto_sin`: the Mellin transform of the sine, including Dirichlet's integral.
+* `struveMel_besselY_isBigO`, `struveMel_struveK_isBigO`, `struveMel_struveH_isBigO`:
+  growth estimates at infinity.
+* `struveMel_integral_by_parts`: integration by parts in the Struve Mellin integral.
+* `struveMel_value_succ`: the recurrence for the Mellin value, for all parameters.
+* `struveMel_tendsto`: the Struve Mellin transform as an improper integral.
+* `struveH_integral_plain`: DLMF 11.7.9.
+* `struveH_integral_mellin_zero`, `struveH_integral_mellin`: DLMF 11.7.10–11.7.11.
+* `struveH_integral_product`: DLMF 11.7.12.
+* `laplace_poissonWeight`, `laplace_sin_mul`, `laplace_sinh_mul`: Laplace transforms.
+
+## Implementation notes
+
+DLMF 11.7.12 states only `Re(μ+ν) > 0`, under which the integral may diverge;
+`struveH_integral_product` adds the hypotheses `-3/2 < Re μ` and `-3/2 < Re ν`.
 -/
 
 @[expose] public noncomputable section
@@ -110,7 +132,7 @@ theorem struveMel_trigBeta {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
       (Ioc 0 (π / 2)) ∧
     ∫ θ in Ioc 0 (π / 2), (Real.sin θ : ℂ) ^ (2 * a - 1) * (Real.cos θ : ℂ) ^ (2 * b - 1) =
       Gamma a * Gamma b / (2 * Gamma (a + b)) := by
-  obtain ⟨h1, h2⟩ := trigBeta ha hb
+  obtain ⟨h1, h2⟩ := trig_beta_integral ha hb
   refine ⟨(intervalIntegrable_iff_integrableOn_Ioc_of_le (by positivity)).mp h1, ?_⟩
   rw [← intervalIntegral.integral_of_le (by positivity), h2]
 

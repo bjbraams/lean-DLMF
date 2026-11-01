@@ -9,7 +9,15 @@ public import DLMF.GeneralizedHypergeometric.Basic.ParametersAndSeries
 public import DLMF.Hypergeometric.Basic.PrincipalBranch
 
 /-!
-# Normalized principal continuation data for generalized hypergeometric functions
+# Normalized principal continuation of generalized hypergeometric functions
+
+## Main definitions
+
+* `GenPrincipalContinuation`: a normalized regularized continuation for `p = q + 1`.
+* `genRegularizedHG`: the regularized principal function, DLMF 16.2.5; for `p > q + 1` it is
+  only the totalized series, and Barnes values should be used instead.
+* `genHG`: the ordinary principal function, valid for regular lower parameters.
+* `genHGLower`: values on the lower side of the cut.
 -/
 
 @[expose] public noncomputable section

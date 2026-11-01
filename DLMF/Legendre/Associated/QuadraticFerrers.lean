@@ -11,10 +11,39 @@ public import DLMF.Legendre.Integer
 /-!
 # Quadratic bases for associated Legendre and Ferrers functions
 
-Even and odd quadratic hypergeometric bases give the initial associated Legendre identities.
+The definitions of the associated Legendre functions `P^μ_ν`, `Q^μ_ν`, Olver's `𝑸^μ_ν` and the
+Ferrers function `𝖰^μ_ν` (DLMF §14.3), and the even and odd quadratic hypergeometric bases on
+`(-1, 1)` in which the Ferrers functions are expanded.
 
-Source references and common attribution are retained in
-`DLMF.Legendre.Associated`.
+## Main definitions
+
+* `legendreBranchPower`: the power `(z² - 1)^{c/2}`, continued from `z > 1`.
+* `associatedP`: `P^μ_ν(z) = ((z+1)/(z-1))^{μ/2} 𝐅(ν+1, -ν; 1-μ; (1-z)/2)` (DLMF 14.3.6).
+* `olverQ`: Olver's `𝑸^μ_ν` (DLMF 14.3.10), regularized before multiplying by Gamma so that
+  exceptional parameters are retained.
+* `associatedQ`: the classical `Q^μ_ν` (DLMF 14.3.7).
+* `LegendreQRegular`: the condition `ν + μ ∉ {-1, -2, …}`.
+* `ferrersW1`, `ferrersW2`: the auxiliary functions `w₁`, `w₂` of DLMF 14.3.13–14.3.14.
+* `ferrersQ`: the Ferrers function `𝖰^μ_ν` (DLMF 14.3.12).
+* `ferrersEven`, `ferrersOdd`: the even and odd quadratic Ferrers solutions.
+
+## Main results
+
+* `ferrersP_w1_w2`: DLMF 14.3.11.
+* `ferrersEven_neg_order`, `ferrersOdd_neg_order`, `ferrersEven_neg_degree`,
+  `ferrersOdd_neg_degree`, `ferrersEven_neg`, `ferrersOdd_neg`: symmetries of the quadratic
+  solutions.
+* `legendre_duplication`, `legendre_recip_Gamma_reflection`: duplication and reflection for
+  Gamma values, valid for all arguments.
+* `ferrersP_even_odd`, `ferrersP_neg_even_odd`, `ferrersQ_even_odd`, `ferrersQ_neg_even_odd`,
+  `ferrersQ_neg_degree_even_odd`: the Ferrers functions in the even/odd basis.
+* `ferrersQ_hypergeometric`, `ferrersQ_order_limit`: DLMF 14.3.2 for non-integer order and as a
+  limit at integer order.
+
+## Implementation notes
+
+The representation of `𝖰^μ_ν` in the even/odd basis supplies integer-order values without
+division by `sin(μπ)`.
 -/
 
 @[expose] public noncomputable section

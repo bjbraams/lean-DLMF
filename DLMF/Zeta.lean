@@ -13,25 +13,26 @@ public import DLMF.Zeta.Sums
 public import DLMF.Zeta.Asymptotics
 public import DLMF.Zeta.Zeros
 public import DLMF.Zeta.MathlibCoverage
-public import DLMF.Zeta.S25bHurwitzCore
-public import DLMF.Zeta.S25bDirichletTest
-public import DLMF.Zeta.R25bHurwitzContinuation
+public import DLMF.Zeta.HurwitzEulerMaclaurin
+public import DLMF.Zeta.DirichletTest
+public import DLMF.Zeta.HurwitzContinuation
 public import DLMF.Zeta.Hurwitz
 public import DLMF.Zeta.HurwitzIntegrals
 public import DLMF.Zeta.Polylog
 public import DLMF.Zeta.Periodic
-public import DLMF.Zeta.Q25bLerchContinuation
+public import DLMF.Zeta.LerchContinuation
 public import DLMF.Zeta.Lerch
 public import DLMF.Zeta.DirichletL
 public import DLMF.Zeta.MathlibCoverageB
 public import DLMF.Zeta.CotangentMoments
 
 /-!
-# Zeta and related functions (DLMF Chapter 25)
+# Zeta and related functions
 
-ζ(s) is Mathlib's `riemannZeta`; ζ(s,a), F(x,s) and L(s,χ) reuse Mathlib's Hurwitz zeta,
+This area covers DLMF Chapter 25: the Riemann zeta function (§§25.1–25.10, files `Riemann`
+through `Zeros`), the Hurwitz zeta function, polylogarithms, periodic zeta functions, Lerch's
+transcendent and Dirichlet `L`-functions (§§25.11–25.15, files `Hurwitz` through `DirichletL`).
+`ζ(s)` is Mathlib's `riemannZeta`; `ζ(s,a)`, `F(x,s)` and `L(s,χ)` reuse Mathlib's Hurwitz zeta,
 `HurwitzZeta.expZeta` and `DirichletCharacter.LFunction` (and the project's
-`DLMF.Confluent.hurwitzZetaComplex` for complex `a`). Part A (§§25.1–25.10, Riemann zeta):
-`Riemann` through `Zeros`; part B (§§25.11–25.15): `Hurwitz` through `DirichletL`.
-The ledger is DLMF25Acquisition.md.
+`DLMF.Confluent.hurwitzZetaComplex` for complex `a`).
 -/

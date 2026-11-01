@@ -23,6 +23,7 @@ public import DLMF.GeneralizedHypergeometric.UnitArgument
 /-!
 # Generalized hypergeometric, Appell and Meijer G functions (DLMF Chapter 16)
 
-The acquisition reuses existing project and upstream APIs; open proof obligations
-remain explicit. Source scope and branch conventions are tracked in the chapter ledger.
+This umbrella imports the generalized hypergeometric functions `ₚF_q` (definitions, analytic
+properties, derivatives, unit-argument sums, integrals, transformations, differential
+equations and asymptotics), the Appell and Horn double series, and the Meijer G function.
 -/

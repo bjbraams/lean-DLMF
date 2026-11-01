@@ -8,12 +8,30 @@ module
 public import DLMF.Struve.Asymptotics.InnerExpansions
 
 /-!
-# Scaled Struve asymptotic expansions
+# Scaled and turning-point expansions of the Anger–Weber functions (DLMF 11.11.14–11.11.19)
 
-Normalization of the scaled Anger-Struve kernels yields the final uniform expansions.
+This file proves the leading-order behavior of `𝐀_{±ν}(λν)` in the outer and inner regions and
+at the turning point, the uniform turning-point approximation, and the removability of the
+singularity of the coefficient recurrence of DLMF §11.11(iii).
 
-Source references and common attribution are retained in
-`DLMF.Struve.Asymptotics`.
+## Main results
+
+* `struveSc_turnU_est`: the main estimate behind DLMF 11.11.17.
+* `angerA_scaled_outer_equiv`, `angerA_scaled_inner_equiv`: DLMF 11.11.14–11.11.15.
+* `angerA_turning_equiv`: the turning-point behavior DLMF 11.11.16.
+* `angerA_turning_uniform`: the approximation DLMF 11.11.17, uniform on bounded complex
+  transition parameter.
+* `angerJ_turning_equiv`, `weberE_turning_equiv`: DLMF 11.11.18–11.11.19 for `ν → +∞`.
+* `struveLO_angerScaledA_eq`, `angerScaledA_removable`: the Lagrange-inversion form
+  `A_k(λ) = (2πi)⁻¹ ∮ (t + λ sinh t)^{-2k-1} dt` and the removable singularity of the
+  recurrence at `λ = 1`.
+* `struveH_large_order_expansion`, `struveL_large_order_expansion`: the convergent series of
+  `𝐇_ν`, `𝐋_ν` as generalized large-order expansions (DLMF §11.6(ii)).
+
+## Implementation notes
+
+DLMF 11.11.18–11.11.19 are stated only for `ν → +∞`: in the complex sector required by the
+definition DLMF 1.1.2 they fail.
 -/
 
 @[expose] public noncomputable section

@@ -8,13 +8,32 @@ module
 public import DLMF.ParabolicCylinder.UniformLG
 
 /-!
-# Uniform cylinder estimates for negative parameters
+# Uniform estimates for parabolic cylinder functions with negative parameter
 
-Liouville-Green estimates and Temme normalization for negative-parameter parabolic cylinder
-functions.
+This file proves a general recessive Liouville–Green expansion with explicit error bounds and
+applies it to Temme's form DLMF 12.10.31 of the uniform expansion of `U(-μ²/2, μt√2)`.
 
-Source references and common attribution are retained in
-`DLMF.ParabolicCylinder.UniformLG2`.
+## Main definitions
+
+* `pcfLG2_ser`: a truncated series `∑_{s<N} a_s(t)/u^s`.
+* `pcfLG2_p`: `p(t) = (t² - 1)^{-1/2}`.
+* `pcfLG2_Ta`, `pcfLG2_Tad`, `pcfLG2_Tad2`: Temme's coefficients `φ_s(τ(t))` and their first
+  and second derivatives.
+
+## Main results
+
+* `pcfLG2_core`: the general recessive Liouville–Green core.
+* `pcfLG2_temme_rec`: Temme's coefficients satisfy the Liouville–Green recursion.
+* `pcfU_temme_uniform`: Temme's form of the uniform expansion (DLMF 12.10.31).
+
+## Implementation notes
+
+`pcfLG2_core` applies to any amplitude `A` with `ξ' = A⁻²` on `(b, ∞)`, any coefficient family
+satisfying the Liouville–Green recursion with uniform bounds and limits at `+∞`, and any
+solution `U` of `U'' = μ⁴A⁻⁴U` normalized at `+∞`; the expansions of `U` and of `U'` then hold
+with explicit constants. Temme's coefficients satisfy the recursion by the polynomial
+recursion DLMF 12.10.33 and tend to `0` at `t = ∞` for `s ≥ 1`, so that the normalizer is
+exactly `h(μ)`.
 -/
 
 @[expose] public noncomputable section

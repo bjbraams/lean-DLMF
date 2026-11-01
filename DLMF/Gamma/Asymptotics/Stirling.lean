@@ -12,13 +12,35 @@ public import DLMF.Hypergeometric.SeriesProperties
 public import Mathlib.NumberTheory.BernoulliPolynomials
 
 /-!
-# Stirling expansions from Binet integrals
+# Stirling expansions from Binet's integral (DLMF 5.11.1–5.11.12, 5.11.15)
 
-Real Stirling coefficients and Poincare expansions obtained from the Binet integral and Watson
-lemma.
+Stirling's series for `ln Γ` and `ψ`, the scaled Gamma function and the Stirling coefficients,
+and asymptotics of `|Γ(x + iy)|`, `Γ(at + b)` and `Γ(t + a)/Γ(t + b)`, obtained from Binet's
+integral, the Bernoulli expansion of its kernel and Watson's lemma.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.Asymptotics`.
+## Main definitions
+
+* `scaledGamma`: the scaled Gamma function `Γ*(z)` (DLMF 5.11.3).
+* `stirlingG`: the Stirling coefficients (DLMF 5.11.4).
+* `stirlingRatioG`: the Gamma-ratio coefficients (DLMF 5.11.15).
+* `binetPoly`, `binetCoeff`: the Bernoulli polynomial part of Binet's kernel `β(t)/t` and its
+  Taylor coefficients.
+
+## Main results
+
+* `log_Gamma_stirling`, `hasAsymptoticExpansion_log_Gamma`: Stirling's series for `ln Γ`
+  (DLMF 5.11.1).
+* `digamma_stirling`: the asymptotic expansion of `ψ` (DLMF 5.11.2).
+* `Gamma_linear_argument`: `Γ(at + b)` as `t → ∞` (DLMF 5.11.7).
+* `norm_Gamma_imag_large`: `|Γ(x + iy)| ~ √(2π) |y|^{x-1/2} e^{-π|y|/2}` (DLMF 5.11.9).
+* `Gamma_ratio_power`: `Γ(t + a)/Γ(t + b) ~ t^{a-b}` (DLMF 5.11.12).
+* `abs_binetBeta_div_sub_binetPoly_le`, `binetBeta_div_sub_binetPoly_sign`: bound and sign of
+  the Bernoulli remainder of Binet's kernel (Temme (3.26)).
+* `tendsto_Gamma_div_stirling`: real Stirling, `Γ(x)/(√(2π) e^{-x} x^{x-1/2}) → 1`.
+
+## References
+
+* N. M. Temme, *Special Functions*, Wiley, 1996, §3.
 -/
 
 @[expose] public section

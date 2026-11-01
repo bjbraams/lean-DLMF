@@ -16,17 +16,26 @@ public import TauCeti.Analysis.Complex.SlitPlane
 /-!
 # Elementary Laplace transforms (DLMF Table 1.14.4)
 
-The polynomial, exponential, trigonometric and hyperbolic transform entries are evaluated
-from complex exponential moments. The moments use the project’s complex Gamma integral
-`integral_cpow_mul_cexp_neg_mul_Ioi` and Mathlib’s factorial values of `Complex.Gamma`.
-The inverse-square-root entry uses `Complex.Gamma_one_half_eq_sqrt`.
+The polynomial, exponential, trigonometric, hyperbolic and logarithmic entries of DLMF
+Table 1.14.4, with complex parameters and principal branches.
 
-Complex parameters and principal branches are retained. In rows 15–17 the convergence
-conditions are corrected for complex parameters; see the module documentation of
-`DLMF.AlgebraicAnalytic.Transforms.Tables` for the details. The logarithmic entries and
+## Main results
+
+* `laplaceTransform_one`, `laplaceTransform_pow_div_factorial`, `laplaceTransform_inv_sqrt`,
+  `laplaceTransform_exp_neg`, `laplaceTransform_pow_mul_exp_neg_div_factorial`,
+  `laplaceTransform_exp_neg_sub_exp_neg`: rows 2–7.
+* `laplaceTransform_sin`, `laplaceTransform_cos`, `laplaceTransform_sinh`,
+  `laplaceTransform_cosh`, `laplaceTransform_mul_sin`, `laplaceTransform_mul_cos`: rows 8–13.
+* `laplaceTransform_exp_neg_sub_exp_neg_div`, `laplaceTransform_one_sub_cosh_div`,
+  `laplaceTransform_one_sub_cos_div`, `laplaceTransform_sin_div`: rows 14–17.
+
+## Implementation notes
+
+In rows 15–17 the convergence conditions are corrected for complex parameters; see the module
+documentation of `DLMF.AlgebraicAnalytic.Transforms.Tables` for the details. The moments use
+the complex Gamma integral `integral_cpow_mul_cexp_neg_mul_Ioi`; the logarithmic entries and
 `sin(at)/t` follow from the complex exponential Frullani integral in
-`DLMFMathlib.Analysis.Integral.Frullani`; branch-cut avoidance uses TauCeti
-`div_mem_slitPlane_of_re_pos`.
+`DLMFMathlib.Analysis.Integral.Frullani`.
 -/
 
 @[expose] public noncomputable section

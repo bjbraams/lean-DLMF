@@ -105,7 +105,7 @@ theorem coulomb_coeff_turningPoint (η : ℝ) (ℓ : ℕ) (h : turningPoint η �
 /-! ### §33.2(ii) The regular solution -/
 
 /-- `Γ(ℓ + 1 + iη) ≠ 0`. -/
-theorem c33a_Gamma_ne_zero (ℓ : ℕ) (η : ℝ) : Gamma ((ℓ : ℂ) + 1 + I * η) ≠ 0 := by
+theorem Gamma_nat_add_one_add_I_mul_ne_zero (ℓ : ℕ) (η : ℝ) : Gamma ((ℓ : ℂ) + 1 + I * η) ≠ 0 := by
   refine Complex.Gamma_ne_zero fun m hm => ?_
   have := congrArg Complex.re hm
   simp at this
@@ -115,7 +115,7 @@ theorem c33a_Gamma_ne_zero (ℓ : ℕ) (η : ℝ) : Gamma ((ℓ : ℂ) + 1 + I *
 @[dlmf 33.2.ii]
 theorem coulombC_pos (ℓ : ℕ) (η : ℝ) : 0 < coulombC ℓ η := by
   rw [coulombC]
-  have := norm_pos_iff.mpr (c33a_Gamma_ne_zero ℓ η)
+  have := norm_pos_iff.mpr (Gamma_nat_add_one_add_I_mul_ne_zero ℓ η)
   positivity
 
 /-- **`F_ℓ` via Whittaker's `M`, upper signs** (DLMF 33.2.3):
@@ -163,7 +163,7 @@ theorem ofReal_coulombF_eq_whittakerM_neg (ℓ : ℕ) (η ρ : ℝ) :
     kummerM (ℓ + 1 + I * η) (2 * ℓ + 2) (-(2 * I * ρ))) * hI.symm
 
 /-- For `η ≠ 0`, `|Γ(1 + iη)|² = πη / sinh(πη)`. -/
-theorem c33a_normSq_Gamma_one (η : ℝ) (hη : η ≠ 0) :
+theorem norm_Gamma_one_add_I_mul_sq (η : ℝ) (hη : η ≠ 0) :
     ‖Gamma (1 + I * η)‖ ^ 2 = π * η / Real.sinh (π * η) := by
   have hconj : Gamma (1 - I * η) = conj (Gamma (1 + I * η)) := by
     rw [← Complex.Gamma_conj]; congr 1; simp [Complex.conj_ofReal]; ring
@@ -181,7 +181,7 @@ theorem c33a_normSq_Gamma_one (η : ℝ) (hη : η ≠ 0) :
   exact_mod_cast hmul
 
 /-- `|Γ(ℓ + 1 + iη)|² = |Γ(1 + iη)|² ∏_{k=1}^{ℓ} (η² + k²)`. -/
-theorem c33a_normSq_Gamma_succ (ℓ : ℕ) (η : ℝ) :
+theorem norm_Gamma_nat_add_one_add_I_mul_sq (ℓ : ℕ) (η : ℝ) :
     ‖Gamma ((ℓ : ℂ) + 1 + I * η)‖ ^ 2 =
       ‖Gamma (1 + I * η)‖ ^ 2 * ∏ k ∈ Finset.Icc 1 ℓ, (η ^ 2 + (k : ℝ) ^ 2) := by
   induction ℓ with
@@ -217,8 +217,8 @@ theorem coulombC_sq_eq_prod (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) :
       rw [← Real.exp_add]; convert he using 2; ring_nf
     field_simp
     ring
-  rw [coulombC, div_pow, mul_pow, mul_pow, ← pow_mul, mul_comm ℓ 2, c33a_normSq_Gamma_succ,
-    c33a_normSq_Gamma_one η hη, ← Real.exp_nat_mul]
+  rw [coulombC, div_pow, mul_pow, mul_pow, ← pow_mul, mul_comm ℓ 2, norm_Gamma_nat_add_one_add_I_mul_sq,
+    norm_Gamma_one_add_I_mul_sq η hη, ← Real.exp_nat_mul]
   rw [show ((2 : ℕ) : ℝ) * (-π * η / 2) = -π * η by push_cast; ring, ← hkey]
   ring
 
@@ -309,7 +309,7 @@ theorem coulombHMinus_eq_whittakerW (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 <
     exp (-I * ρ) * kummerU ((ℓ : ℂ) + 1 - I * η) (2 * ℓ + 2) (2 * I * ρ)) * hpow
 
 /-- `0 ≤ x - arctan x ≤ x³` for `x ≥ 0`. -/
-lemma q2a_sub_arctan_le_of_nonneg {x : ℝ} (hx : 0 ≤ x) : x - Real.arctan x ≤ x ^ 3 := by
+private lemma sub_arctan_le_pow_three_of_nonneg {x : ℝ} (hx : 0 ≤ x) : x - Real.arctan x ≤ x ^ 3 := by
   let g : ℝ → ℝ := fun y => y ^ 3 - y + Real.arctan y
   have hd : ∀ y, HasDerivAt g (3 * y ^ 2 - 1 + 1 / (1 + y ^ 2)) y := by
     intro y
@@ -331,35 +331,35 @@ lemma q2a_sub_arctan_le_of_nonneg {x : ℝ} (hx : 0 ≤ x) : x - Real.arctan x �
   linarith
 
 /-- `|x - arctan x| ≤ |x|³`. -/
-lemma q2a_abs_sub_arctan_le (x : ℝ) : |x - Real.arctan x| ≤ |x| ^ 3 := by
+private lemma abs_sub_arctan_le_abs_pow_three (x : ℝ) : |x - Real.arctan x| ≤ |x| ^ 3 := by
   rcases le_total 0 x with hx | hx
   · rw [abs_of_nonneg (sub_nonneg.mpr (Real.arctan_le_self hx)), abs_of_nonneg hx]
-    exact q2a_sub_arctan_le_of_nonneg hx
-  · have h := q2a_sub_arctan_le_of_nonneg (neg_nonneg.mpr hx)
+    exact sub_arctan_le_pow_three_of_nonneg hx
+  · have h := sub_arctan_le_pow_three_of_nonneg (neg_nonneg.mpr hx)
     rw [Real.arctan_neg] at h
     rw [abs_of_nonpos (sub_nonpos.mpr (Real.self_le_arctan hx)), abs_of_nonpos hx]
     linarith
 
 /-- The summable majorant `M³/(n+1)³`. -/
-lemma q2a_summable_bound (M : ℝ) :
+private lemma summable_pow_three_div_succ_pow_three (M : ℝ) :
     Summable (fun n : ℕ => M ^ 3 / ((n : ℝ) + 1) ^ 3) := by
   have h := (summable_nat_add_iff 1).mpr (Real.summable_nat_pow_inv.mpr (by norm_num : 1 < 3))
   simpa [div_eq_mul_inv] using h.mul_left (M ^ 3)
 
 /-- `|t - arctan t| ≤ |η|³/(n+1)³` for `t = η/(n+1)`. -/
-lemma q2a_term_bound (η : ℝ) (n : ℕ) :
+private lemma norm_div_succ_sub_arctan_le (η : ℝ) (n : ℕ) :
     ‖η / ((n : ℝ) + 1) - Real.arctan (η / ((n : ℝ) + 1))‖ ≤ |η| ^ 3 / ((n : ℝ) + 1) ^ 3 := by
   rw [Real.norm_eq_abs]
-  refine (q2a_abs_sub_arctan_le _).trans (le_of_eq ?_)
+  refine (abs_sub_arctan_le_abs_pow_three _).trans (le_of_eq ?_)
   rw [abs_div, abs_of_pos (by positivity : (0 : ℝ) < (n : ℝ) + 1), div_pow]
 
 /-- The series in the Weierstrass form of `phaseShift` converges. -/
-lemma q2a_summable_phase (η : ℝ) :
+lemma summable_div_succ_sub_arctan (η : ℝ) :
     Summable (fun n : ℕ => η / ((n : ℝ) + 1) - Real.arctan (η / ((n : ℝ) + 1))) :=
-  Summable.of_norm_bounded (q2a_summable_bound |η|) (q2a_term_bound η)
+  Summable.of_norm_bounded (summable_pow_three_div_succ_pow_three |η|) (norm_div_succ_sub_arctan_le η)
 
 /-- The series in the Weierstrass form of `phaseShift` is continuous in `η`. -/
-lemma q2a_continuous_phase_tsum :
+private lemma continuous_tsum_div_succ_sub_arctan :
     Continuous (fun η : ℝ => ∑' n : ℕ, (η / ((n : ℝ) + 1) - Real.arctan (η / ((n : ℝ) + 1)))) := by
   rw [continuous_iff_continuousAt]
   intro x
@@ -367,9 +367,9 @@ lemma q2a_continuous_phase_tsum :
   have hc : ContinuousOn
       (fun η : ℝ => ∑' n : ℕ, (η / ((n : ℝ) + 1) - Real.arctan (η / ((n : ℝ) + 1))))
       (Icc (-M) M) := by
-    refine continuousOn_tsum (fun n => by fun_prop) (q2a_summable_bound M) ?_
+    refine continuousOn_tsum (fun n => by fun_prop) (summable_pow_three_div_succ_pow_three M) ?_
     intro n η hη
-    refine (q2a_term_bound η n).trans ?_
+    refine (norm_div_succ_sub_arctan_le η n).trans ?_
     have : |η| ≤ M := abs_le.mpr ⟨hη.1, hη.2⟩
     gcongr
   refine hc.continuousAt (Icc_mem_nhds ?_ ?_)
@@ -377,7 +377,7 @@ lemma q2a_continuous_phase_tsum :
   · have := le_abs_self x; simp only [M]; linarith
 
 /-- Polar form `c + iη = |c + iη| e^{i arctan(η/c)}` for `c > 0`. -/
-lemma q2a_mul_exp_arctan {c : ℝ} (hc : 0 < c) (η : ℝ) :
+private lemma ofReal_add_I_mul_eq_norm_mul_exp_arctan {c : ℝ} (hc : 0 < c) (η : ℝ) :
     (c : ℂ) + I * η = (‖(c : ℂ) + I * η‖ : ℂ) * exp (I * Real.arctan (η / c)) := by
   have hn : ‖(c : ℂ) + I * η‖ = c * Real.sqrt (1 + (η / c) ^ 2) := by
     rw [show (c : ℂ) + I * η = ⟨c, η⟩ by apply Complex.ext <;> simp,
@@ -392,7 +392,7 @@ lemma q2a_mul_exp_arctan {c : ℝ} (hc : 0 < c) (η : ℝ) :
 
 
 /-- Polar form of Euler's sequence `GammaSeq (1+iη) n`. -/
-lemma q2a_GammaSeq_eq (η : ℝ) {n : ℕ} (hn : n ≠ 0) :
+private lemma GammaSeq_one_add_I_mul_eq_polar (η : ℝ) {n : ℕ} (hn : n ≠ 0) :
     GammaSeq (1 + I * η) n =
       (((n : ℝ) * n ! / ∏ j ∈ Finset.range (n + 1), ‖(((j : ℝ) + 1 : ℝ) : ℂ) + I * η‖ : ℝ) : ℂ) *
         exp (I * (η * Real.log n -
@@ -402,7 +402,7 @@ lemma q2a_GammaSeq_eq (η : ℝ) {n : ℕ} (hn : n ≠ 0) :
       ∏ j ∈ Finset.range (n + 1), ((‖(((j : ℝ) + 1 : ℝ) : ℂ) + I * η‖ : ℂ) *
         exp (I * Real.arctan (η / ((j : ℝ) + 1)))) := by
     refine Finset.prod_congr rfl fun j _ => ?_
-    rw [← q2a_mul_exp_arctan (by positivity : (0 : ℝ) < (j : ℝ) + 1) η]
+    rw [← ofReal_add_I_mul_eq_norm_mul_exp_arctan (by positivity : (0 : ℝ) < (j : ℝ) + 1) η]
     push_cast; ring
   have hn0 : (n : ℂ) ≠ 0 := by exact_mod_cast hn
   have hlog : log (n : ℂ) = ((Real.log n : ℝ) : ℂ) := by
@@ -431,7 +431,7 @@ lemma q2a_GammaSeq_eq (η : ℝ) {n : ℕ} (hn : n ≠ 0) :
   field_simp
 
 /-- The phases of `GammaSeq (1+iη) n` converge to `phaseShift 0 η`. -/
-lemma q2a_tendsto_phase (η : ℝ) :
+private lemma tendsto_GammaSeq_phase_phaseShift_zero (η : ℝ) :
     Tendsto (fun n : ℕ => η * Real.log n -
       ∑ j ∈ Finset.range (n + 1), Real.arctan (η / ((j : ℝ) + 1))) atTop
       (𝓝 (phaseShift 0 η)) := by
@@ -440,7 +440,7 @@ lemma q2a_tendsto_phase (η : ℝ) :
     have := Real.tendsto_harmonic_sub_log.comp (tendsto_add_atTop_nat 1)
     refine this.congr fun n => ?_
     simp
-  have hS := (q2a_summable_phase η).hasSum.tendsto_sum_nat.comp (tendsto_add_atTop_nat 1)
+  have hS := (summable_div_succ_sub_arctan η).hasSum.tendsto_sum_nat.comp (tendsto_add_atTop_nat 1)
   have h := ((hH.add Real.tendsto_log_nat_add_one_sub_log).const_mul (-η)).add hS
   rw [phaseShift]
   simp only [Finset.range_zero, Finset.sum_empty, add_zero, add_zero]
@@ -456,7 +456,7 @@ lemma q2a_tendsto_phase (η : ℝ) :
   · congr 1; ring
 
 /-- **DLMF 33.2.10 at `ℓ = 0`**: `Γ(1+iη) = |Γ(1+iη)| e^{iσ_0(η)}` with the Weierstrass branch. -/
-lemma q2a_Gamma_phase_zero (η : ℝ) :
+private lemma Gamma_one_add_I_mul_eq_norm_mul_exp_phaseShift (η : ℝ) :
     Gamma (1 + I * η) = ‖Gamma (1 + I * η)‖ * exp (I * phaseShift 0 η) := by
   have hlim := GammaSeq_tendsto_Gamma (1 + I * η)
   have h2 : Tendsto (fun n : ℕ => (‖GammaSeq (1 + I * η) n‖ : ℂ) *
@@ -465,17 +465,17 @@ lemma q2a_Gamma_phase_zero (η : ℝ) :
       (𝓝 ((‖Gamma (1 + I * η)‖ : ℂ) * exp (I * phaseShift 0 η))) := by
     refine ((continuous_ofReal.tendsto _).comp hlim.norm).mul ?_
     exact ((continuous_exp.comp (continuous_const.mul continuous_ofReal)).tendsto _).comp
-      (q2a_tendsto_phase η)
+      (tendsto_GammaSeq_phase_phaseShift_zero η)
   refine tendsto_nhds_unique hlim (h2.congr' ?_)
   filter_upwards [eventually_ne_atTop 0] with n hn
   have hE : ∀ x : ℝ, ‖exp (I * (x : ℂ))‖ = 1 := fun x => by
     rw [mul_comm]; exact norm_exp_ofReal_mul_I x
-  rw [q2a_GammaSeq_eq η hn, norm_mul, hE, mul_one, Complex.norm_real,
+  rw [GammaSeq_one_add_I_mul_eq_polar η hn, norm_mul, hE, mul_one, Complex.norm_real,
     Real.norm_of_nonneg (by positivity)]
 
 
 /-- `σ_{ℓ+1}(η) = σ_ℓ(η) + arctan(η/(ℓ+1))`. -/
-lemma q2a_phaseShift_succ (ℓ : ℕ) (η : ℝ) :
+private lemma phaseShift_succ (ℓ : ℕ) (η : ℝ) :
     phaseShift (ℓ + 1) η = phaseShift ℓ η + Real.arctan (η / ((ℓ : ℝ) + 1)) := by
   simp only [phaseShift, Finset.sum_range_succ]
   ring
@@ -490,22 +490,22 @@ theorem phaseShift_spec (ℓ : ℕ) :
     phaseShift ℓ 0 = 0 ∧ Continuous (phaseShift ℓ) := by
   refine ⟨fun η => ?_, ?_, ?_⟩
   · induction ℓ with
-    | zero => simpa using q2a_Gamma_phase_zero η
+    | zero => simpa using Gamma_one_add_I_mul_eq_norm_mul_exp_phaseShift η
     | succ n ih =>
       have hne : (n : ℂ) + 1 + I * η ≠ 0 := by
         intro h; have := congrArg Complex.re h; simp at this
         linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)]
-      have ha := q2a_mul_exp_arctan (by positivity : (0 : ℝ) < (n : ℝ) + 1) η
+      have ha := ofReal_add_I_mul_eq_norm_mul_exp_arctan (by positivity : (0 : ℝ) < (n : ℝ) + 1) η
       rw [ofReal_add, ofReal_natCast, ofReal_one] at ha
       rw [show ((n + 1 : ℕ) : ℂ) + 1 + I * η = ((n : ℂ) + 1 + I * η) + 1 by push_cast; ring,
-        Complex.Gamma_add_one _ hne, norm_mul, q2a_phaseShift_succ, ofReal_add, mul_add, exp_add]
+        Complex.Gamma_add_one _ hne, norm_mul, phaseShift_succ, ofReal_add, mul_add, exp_add]
       generalize Gamma ((n : ℂ) + 1 + I * η) = g at ih ⊢
       conv_lhs => rw [ha, ih]
       push_cast
       ring
   · simp [phaseShift]
   · unfold phaseShift
-    exact ((continuous_const.mul continuous_id).add q2a_continuous_phase_tsum).add
+    exact ((continuous_const.mul continuous_id).add continuous_tsum_div_succ_sub_arctan).add
       (by fun_prop)
 
 /-- `e^{iσ_ℓ}` does not depend on the branch: `e^{i phaseShift} = e^{i coulombSigma}`
@@ -513,7 +513,7 @@ theorem phaseShift_spec (ℓ : ℕ) :
 theorem exp_I_phaseShift (ℓ : ℕ) (η : ℝ) :
     exp (I * phaseShift ℓ η) = exp (I * coulombSigma ℓ η) := by
   have h := (phaseShift_spec ℓ).1 η
-  have hg := c33a_Gamma_ne_zero ℓ η
+  have hg := Gamma_nat_add_one_add_I_mul_ne_zero ℓ η
   have hn : (‖Gamma ((ℓ : ℂ) + 1 + I * η)‖ : ℂ) ≠ 0 := by
     exact_mod_cast (norm_pos_iff.mpr hg).ne'
   have h2 := norm_mul_exp_arg_mul_I (Gamma ((ℓ : ℂ) + 1 + I * η))
@@ -542,7 +542,7 @@ theorem analytic_coulombH (ℓ : ℕ) :
 /-! ### §33.4 Recurrence relations and derivatives -/
 
 /-- `R_{ℓ+1}(η) = √((ℓ+1)² + η²)/(ℓ+1)`. -/
-theorem c33a_recurrenceR_succ (ℓ : ℕ) (η : ℝ) :
+theorem recurrenceR_succ (ℓ : ℕ) (η : ℝ) :
     recurrenceR (ℓ + 1) η = Real.sqrt (((ℓ : ℝ) + 1) ^ 2 + η ^ 2) / (ℓ + 1) := by
   have hl : (0 : ℝ) < (ℓ : ℝ) + 1 := by positivity
   rw [recurrenceR, show 1 + η ^ 2 / ((ℓ + 1 : ℕ) : ℝ) ^ 2 =
@@ -550,12 +550,12 @@ theorem c33a_recurrenceR_succ (ℓ : ℕ) (η : ℝ) :
     Real.sqrt_div' _ (by positivity), Real.sqrt_sq hl.le]
 
 /-- `R_{ℓ+1}(η) > 0`. -/
-theorem c33a_recurrenceR_pos (ℓ : ℕ) (η : ℝ) : 0 < recurrenceR (ℓ + 1) η := by
-  rw [c33a_recurrenceR_succ]
+theorem recurrenceR_succ_pos (ℓ : ℕ) (η : ℝ) : 0 < recurrenceR (ℓ + 1) η := by
+  rw [recurrenceR_succ]
   apply div_pos (Real.sqrt_pos.mpr (by positivity)) (by positivity)
 
 /-- `U(a,b,z) + b U(a+1,b+1,z) = z U(a+1,b+2,z)` (from 13.3.9 and 13.3.14). -/
-lemma q2a_kummerU_rel1 (a b z : ℂ) (hz : z ≠ 0) :
+private lemma kummerU_add_mul_kummerU_succ_succ (a b z : ℂ) (hz : z ≠ 0) :
     kummerU a b z + b * kummerU (a + 1) (b + 1) z - z * kummerU (a + 1) (b + 2) z = 0 := by
   have h1 := kummerU_contiguous_a_b (a + 1) (b + 2) z hz
   have h2 := kummerU_ode_contiguous a b z hz
@@ -563,35 +563,35 @@ lemma q2a_kummerU_rel1 (a b z : ℂ) (hz : z ≠ 0) :
   linear_combination -(h2 + z * h1)
 
 /-- A contiguous relation between `U(a,b)`, `U(a+1,b+2)`, `U(a+2,b+3)`. -/
-lemma q2a_kummerU_rel2 (a b z : ℂ) (hz : z ≠ 0) :
+private lemma kummerU_contiguous_add_two_add_three (a b z : ℂ) (hz : z ≠ 0) :
     b * (b + 1) * kummerU (a + 1) (b + 2) z - z * (b - a) * kummerU (a + 1) (b + 2) z -
       b * (a + 1) * z * kummerU (a + 2) (b + 3) z + (b - a) * kummerU a b z = 0 := by
   have h1 := kummerU_contiguous_a_b (a + 1) (b + 2) z hz
   have h3 := kummerU_contiguous_shift_a (a + 2) (b + 2) z hz
-  have r1 := q2a_kummerU_rel1 a b z hz
+  have r1 := kummerU_add_mul_kummerU_succ_succ a b z hz
   rw [show a + 1 + 1 = a + 2 by ring, show b + 2 - 1 = b + 1 by ring] at h1
   rw [show b + 2 - (a + 2) = b - a by ring, show a + 2 - 1 = a + 1 by ring,
     show b + 2 + 1 = b + 3 by ring] at h3
   linear_combination b * (a + 1) * h3 + b * (b - a) * h1 + (b - a) * r1
 
 /-- `|ℓ+1+iη| = ((ℓ+1)² + η²)^{1/2}`. -/
-lemma q2a_norm_a (ℓ : ℕ) (η : ℝ) :
+private lemma norm_nat_add_one_add_I_mul (ℓ : ℕ) (η : ℝ) :
     ‖(ℓ : ℂ) + 1 + I * η‖ = Real.sqrt (((ℓ : ℝ) + 1) ^ 2 + η ^ 2) := by
   rw [show (ℓ : ℂ) + 1 + I * η = ⟨(ℓ : ℝ) + 1, η⟩ by apply Complex.ext <;> simp,
     Complex.norm_eq_sqrt_sq_add_sq]
 
 /-- `R_{ℓ+1} = |ℓ+1+iη|/(ℓ+1)`. -/
-lemma q2a_recurrenceR_cast (ℓ : ℕ) (η : ℝ) :
+private lemma ofReal_recurrenceR_succ (ℓ : ℕ) (η : ℝ) :
     (recurrenceR (ℓ + 1) η : ℂ) = ‖(ℓ : ℂ) + 1 + I * η‖ / ((ℓ : ℂ) + 1) := by
-  rw [c33a_recurrenceR_succ, q2a_norm_a]; push_cast; ring
+  rw [recurrenceR_succ, norm_nat_add_one_add_I_mul]; push_cast; ring
 
 /-- `|a| e^{iσ_{ℓ+1}} = a e^{iσ_ℓ}`, `a = ℓ+1+iη`. -/
-lemma q2a_exp_sigma_succ (ℓ : ℕ) (η : ℝ) :
+private lemma norm_mul_exp_coulombSigma_succ (ℓ : ℕ) (η : ℝ) :
     (‖(ℓ : ℂ) + 1 + I * η‖ : ℂ) * exp (coulombSigma (ℓ + 1) η * I) =
       ((ℓ : ℂ) + 1 + I * η) * exp (coulombSigma ℓ η * I) := by
   set a : ℂ := (ℓ : ℂ) + 1 + I * η with ha
   set g := Gamma a with hg
-  have hg0 : g ≠ 0 := c33a_Gamma_ne_zero ℓ η
+  have hg0 : g ≠ 0 := Gamma_nat_add_one_add_I_mul_ne_zero ℓ η
   have hrec : Gamma (((ℓ + 1 : ℕ) : ℂ) + 1 + I * η) = a * g := by
     rw [show ((ℓ + 1 : ℕ) : ℂ) + 1 + I * η = a + 1 by rw [ha]; push_cast; ring,
       Complex.Gamma_add_one]
@@ -609,11 +609,11 @@ lemma q2a_exp_sigma_succ (ℓ : ℕ) (η : ℝ) :
   linear_combination h1 - a * h0
 
 /-- `R_{ℓ+1} A^+_{ℓ+1} = -2a/(ℓ+1) A^+_ℓ`, `a = ℓ+1+iη`. -/
-lemma q2a_R_mul_APlus_succ (ℓ : ℕ) (η : ℝ) :
+private lemma recurrenceR_mul_coulombAPlus_succ (ℓ : ℕ) (η : ℝ) :
     (recurrenceR (ℓ + 1) η : ℂ) * coulombAPlus (ℓ + 1) η =
       -2 * ((ℓ : ℂ) + 1 + I * η) / ((ℓ : ℂ) + 1) * coulombAPlus ℓ η := by
-  have h := q2a_exp_sigma_succ ℓ η
-  rw [q2a_recurrenceR_cast, coulombAPlus, coulombAPlus]
+  have h := norm_mul_exp_coulombSigma_succ ℓ η
+  rw [ofReal_recurrenceR_succ, coulombAPlus, coulombAPlus]
   have hl : (ℓ : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero ℓ
   generalize exp (coulombSigma (ℓ + 1) η * I) = E1 at *
   generalize exp (coulombSigma ℓ η * I) = E0 at *
@@ -623,22 +623,22 @@ lemma q2a_R_mul_APlus_succ (ℓ : ℕ) (η : ℝ) :
   linear_combination (-(2 : ℂ)) * X * 2 ^ (ℓ + 1) * (-1) ^ ℓ * (-I) * ((ℓ : ℂ) + 1) * h
 
 /-- `R_{ℓ+1} A^+_ℓ = -conj(a)/(2(ℓ+1)) A^+_{ℓ+1}`, `a = ℓ+1+iη`. -/
-lemma q2a_R_mul_APlus (ℓ : ℕ) (η : ℝ) :
+private lemma recurrenceR_succ_mul_coulombAPlus (ℓ : ℕ) (η : ℝ) :
     (recurrenceR (ℓ + 1) η : ℂ) * coulombAPlus ℓ η =
       -((ℓ : ℂ) + 1 - I * η) / (2 * ((ℓ : ℂ) + 1)) * coulombAPlus (ℓ + 1) η := by
-  have h := q2a_exp_sigma_succ ℓ η
+  have h := norm_mul_exp_coulombSigma_succ ℓ η
   have hsq : (‖(ℓ : ℂ) + 1 + I * η‖ : ℂ) ^ 2 = ((ℓ : ℂ) + 1 + I * η) * ((ℓ : ℂ) + 1 - I * η) := by
     rw [← Complex.ofReal_pow, ← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
     simp; ring_nf; rw [I_sq]; ring
   have h2 : (‖(ℓ : ℂ) + 1 + I * η‖ : ℂ) * exp (coulombSigma ℓ η * I) =
       ((ℓ : ℂ) + 1 - I * η) * exp (coulombSigma (ℓ + 1) η * I) := by
     have hn : (‖(ℓ : ℂ) + 1 + I * η‖ : ℂ) ≠ 0 := by
-      have := c33a_Gamma_ne_zero ℓ η
-      rw [q2a_norm_a]
+      have := Gamma_nat_add_one_add_I_mul_ne_zero ℓ η
+      rw [norm_nat_add_one_add_I_mul]
       exact_mod_cast (Real.sqrt_pos.mpr (by positivity)).ne'
     apply mul_left_cancel₀ hn
     linear_combination exp (coulombSigma ℓ η * I) * hsq - ((ℓ : ℂ) + 1 - I * η) * h
-  rw [q2a_recurrenceR_cast, coulombAPlus, coulombAPlus]
+  rw [ofReal_recurrenceR_succ, coulombAPlus, coulombAPlus]
   have hl : (ℓ : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero ℓ
   have hl2 : 2 * ((ℓ : ℂ) + 1) ≠ 0 := mul_ne_zero two_ne_zero hl
   clear h hsq
@@ -651,7 +651,7 @@ lemma q2a_R_mul_APlus (ℓ : ℕ) (η : ℝ) :
 
 
 /-- The derivative of `H^+_ℓ` in terms of Tricomi functions. -/
-lemma q2a_hasDerivAt_HPlus (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+private lemma hasDerivAt_coulombHPlus_kummerU (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     HasDerivAt (fun x : ℝ => coulombHPlus ℓ η x)
       (coulombAPlus ℓ η * exp (I * ρ) * ((ρ : ℂ) ^ ℓ * ((ℓ : ℂ) + 1 + I * ρ) *
           kummerU ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2) (-2 * I * ρ) +
@@ -681,9 +681,9 @@ theorem deriv_coulombHPlus_upper (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ
       recurrenceS (ℓ + 1) η ρ * coulombHPlus ℓ η ρ -
         recurrenceR (ℓ + 1) η * coulombHPlus (ℓ + 1) η ρ := by
   have hz : (-2 * I * ρ : ℂ) ≠ 0 := slitPlane_ne_zero (neg_two_I_mul_mem_slitPlane hρ)
-  have hr := q2a_kummerU_rel1 ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2) (-2 * I * ρ) hz
-  have hA := q2a_R_mul_APlus_succ ℓ η
-  rw [(q2a_hasDerivAt_HPlus ℓ η hρ).deriv, coulombHPlus_eq ℓ η hρ, coulombHPlus_eq (ℓ + 1) η hρ,
+  have hr := kummerU_add_mul_kummerU_succ_succ ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2) (-2 * I * ρ) hz
+  have hA := recurrenceR_mul_coulombAPlus_succ ℓ η
+  rw [(hasDerivAt_coulombHPlus_kummerU ℓ η hρ).deriv, coulombHPlus_eq ℓ η hρ, coulombHPlus_eq (ℓ + 1) η hρ,
     show ((ℓ + 1 : ℕ) : ℂ) + 1 + I * η = (ℓ : ℂ) + 1 + I * η + 1 by push_cast; ring,
     show 2 * ((ℓ + 1 : ℕ) : ℂ) + 2 = 2 * ℓ + 2 + 2 by push_cast; ring, recurrenceS]
   have hρ0 : (ρ : ℂ) ≠ 0 := by exact_mod_cast hρ.ne'
@@ -715,9 +715,9 @@ theorem deriv_coulombHPlus_lower (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ
       recurrenceR (ℓ + 1) η * coulombHPlus ℓ η ρ -
         recurrenceS (ℓ + 1) η ρ * coulombHPlus (ℓ + 1) η ρ := by
   have hz : (-2 * I * ρ : ℂ) ≠ 0 := slitPlane_ne_zero (neg_two_I_mul_mem_slitPlane hρ)
-  have hr := q2a_kummerU_rel2 ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2) (-2 * I * ρ) hz
-  have hA := q2a_R_mul_APlus ℓ η
-  rw [(q2a_hasDerivAt_HPlus (ℓ + 1) η hρ).deriv, coulombHPlus_eq ℓ η hρ,
+  have hr := kummerU_contiguous_add_two_add_three ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2) (-2 * I * ρ) hz
+  have hA := recurrenceR_succ_mul_coulombAPlus ℓ η
+  rw [(hasDerivAt_coulombHPlus_kummerU (ℓ + 1) η hρ).deriv, coulombHPlus_eq ℓ η hρ,
     coulombHPlus_eq (ℓ + 1) η hρ,
     show ((ℓ + 1 : ℕ) : ℂ) + 1 + I * η + 1 = (ℓ : ℂ) + 1 + I * η + 2 by push_cast; ring,
     show 2 * ((ℓ + 1 : ℕ) : ℂ) + 2 + 1 = 2 * ℓ + 2 + 3 by push_cast; ring,
@@ -748,7 +748,7 @@ theorem deriv_coulombHPlus_lower (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ
 
 
 /-- Real and imaginary parts of a complex linear relation. -/
-lemma q2a_re_im_of_eq {g f s r G1 F1 G2 F2 : ℝ}
+private lemma re_im_eq_of_ofReal_add_I_mul_eq {g f s r G1 F1 G2 F2 : ℝ}
     (h : (g : ℂ) + I * f = (s : ℂ) * (G1 + I * F1) - (r : ℂ) * (G2 + I * F2)) :
     g = s * G1 - r * G2 ∧ f = s * F1 - r * F2 := by
   have h1 := congrArg Complex.re h
@@ -757,7 +757,7 @@ lemma q2a_re_im_of_eq {g f s r G1 F1 G2 F2 : ℝ}
   exact ⟨by linarith, by linarith⟩
 
 /-- DLMF 33.4.4 for `G_ℓ` and `F_ℓ`. -/
-lemma q2a_upper_FG (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+private lemma deriv_coulombG_coulombF_upper (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     deriv (coulombG ℓ η) ρ =
       recurrenceS (ℓ + 1) η ρ * coulombG ℓ η ρ - recurrenceR (ℓ + 1) η * coulombG (ℓ + 1) η ρ ∧
     deriv (coulombF ℓ η) ρ =
@@ -767,10 +767,10 @@ lemma q2a_upper_FG (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   rw [hH.deriv, (coulombH_eq_G_add_I_mul_F ℓ η hρ).1,
     (coulombH_eq_G_add_I_mul_F (ℓ + 1) η hρ).1] at h
   rw [hG.deriv, hF.deriv]
-  exact q2a_re_im_of_eq h
+  exact re_im_eq_of_ofReal_add_I_mul_eq h
 
 /-- DLMF 33.4.3 for `G_{ℓ+1}` and `F_{ℓ+1}`. -/
-lemma q2a_lower_FG (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+private lemma deriv_coulombG_coulombF_lower (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     deriv (coulombG (ℓ + 1) η) ρ =
       recurrenceR (ℓ + 1) η * coulombG ℓ η ρ - recurrenceS (ℓ + 1) η ρ * coulombG (ℓ + 1) η ρ ∧
     deriv (coulombF (ℓ + 1) η) ρ =
@@ -780,7 +780,7 @@ lemma q2a_lower_FG (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   rw [hH.deriv, (coulombH_eq_G_add_I_mul_F ℓ η hρ).1,
     (coulombH_eq_G_add_I_mul_F (ℓ + 1) η hρ).1] at h
   rw [hG.deriv, hF.deriv]
-  exact q2a_re_im_of_eq h
+  exact re_im_eq_of_ofReal_add_I_mul_eq h
 
 /-- **Derivative of `F_ℓ` in terms of `F_{ℓ-1}`** (DLMF 33.4.3, `X = F`), stated for `ℓ + 1`:
 `F_{ℓ+1}' = R_{ℓ+1} F_ℓ - S_{ℓ+1} F_{ℓ+1}`, `ρ > 0`. -/
@@ -788,7 +788,7 @@ lemma q2a_lower_FG (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
 theorem deriv_coulombF_lower (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     deriv (coulombF (ℓ + 1) η) ρ =
       recurrenceR (ℓ + 1) η * coulombF ℓ η ρ - recurrenceS (ℓ + 1) η ρ * coulombF (ℓ + 1) η ρ :=
-  (q2a_lower_FG ℓ η hρ).2
+  (deriv_coulombG_coulombF_lower ℓ η hρ).2
 
 /-- **Derivative of `F_ℓ` in terms of `F_{ℓ+1}`** (DLMF 33.4.4, `X = F`):
 `F_ℓ' = S_{ℓ+1} F_ℓ - R_{ℓ+1} F_{ℓ+1}`, `ℓ ≥ 0`, `ρ > 0`. -/
@@ -796,21 +796,21 @@ theorem deriv_coulombF_lower (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
 theorem deriv_coulombF_upper (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     deriv (coulombF ℓ η) ρ =
       recurrenceS (ℓ + 1) η ρ * coulombF ℓ η ρ - recurrenceR (ℓ + 1) η * coulombF (ℓ + 1) η ρ :=
-  (q2a_upper_FG ℓ η hρ).2
+  (deriv_coulombG_coulombF_upper ℓ η hρ).2
 
 /-- **Derivative of `G_ℓ` in terms of `G_{ℓ-1}`** (DLMF 33.4.3, `X = G`), stated for `ℓ + 1`. -/
 @[dlmf 33.4.E3]
 theorem deriv_coulombG_lower (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     deriv (coulombG (ℓ + 1) η) ρ =
       recurrenceR (ℓ + 1) η * coulombG ℓ η ρ - recurrenceS (ℓ + 1) η ρ * coulombG (ℓ + 1) η ρ :=
-  (q2a_lower_FG ℓ η hρ).1
+  (deriv_coulombG_coulombF_lower ℓ η hρ).1
 
 /-- **Derivative of `G_ℓ` in terms of `G_{ℓ+1}`** (DLMF 33.4.4, `X = G`), `ℓ ≥ 0`. -/
 @[dlmf 33.4.E4]
 theorem deriv_coulombG_upper (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     deriv (coulombG ℓ η) ρ =
       recurrenceS (ℓ + 1) η ρ * coulombG ℓ η ρ - recurrenceR (ℓ + 1) η * coulombG (ℓ + 1) η ρ :=
-  (q2a_upper_FG ℓ η hρ).1
+  (deriv_coulombG_coulombF_upper ℓ η hρ).1
 
 /-- **The Coulomb wave equation for `G_ℓ`** (DLMF 33.2.1), for `ρ > 0`. -/
 @[dlmf 33.2.E1]
@@ -820,7 +820,7 @@ theorem coulombG_deriv_deriv (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   have hev : deriv (coulombG ℓ η) =ᶠ[𝓝 ρ] fun x =>
       recurrenceS (ℓ + 1) η x * coulombG ℓ η x - recurrenceR (ℓ + 1) η * coulombG (ℓ + 1) η x := by
     filter_upwards [eventually_gt_nhds hρ] with x hx
-    exact (q2a_upper_FG ℓ η hx).1
+    exact (deriv_coulombG_coulombF_upper ℓ η hx).1
   obtain ⟨g0, -, hG0, -, -, -⟩ := coulomb_wronskian_real_aux ℓ η hρ
   obtain ⟨g1, -, hG1, -, -, -⟩ := coulomb_wronskian_real_aux (ℓ + 1) η hρ
   have hS : HasDerivAt (fun x => recurrenceS (ℓ + 1) η x)
@@ -835,8 +835,8 @@ theorem coulombG_deriv_deriv (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   rw [hev.deriv_eq, show (fun x => recurrenceS (ℓ + 1) η x * coulombG ℓ η x -
       recurrenceR (ℓ + 1) η * coulombG (ℓ + 1) η x) = ((fun x => recurrenceS (ℓ + 1) η x) *
       coulombG ℓ η - fun y => recurrenceR (ℓ + 1) η * coulombG (ℓ + 1) η y) from rfl, hd.deriv]
-  have h0 := (q2a_upper_FG ℓ η hρ).1
-  have h1 := (q2a_lower_FG ℓ η hρ).1
+  have h0 := (deriv_coulombG_coulombF_upper ℓ η hρ).1
+  have h1 := (deriv_coulombG_coulombF_lower ℓ η hρ).1
   rw [hG0.deriv] at h0
   rw [hG1.deriv] at h1
   rw [h0, h1]
@@ -872,7 +872,7 @@ theorem coulombG_recurrence (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   linear_combination h2 - h1
 
 /-- For `ρ > 0`, `H⁺_ℓ = G_ℓ + i F_ℓ` has derivative `G_ℓ' + i F_ℓ'`. -/
-theorem c33a_hasDerivAt_coulombHPlus (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+theorem hasDerivAt_coulombHPlus (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     HasDerivAt (fun x : ℝ => coulombHPlus ℓ η x)
       (deriv (coulombG ℓ η) ρ + I * deriv (coulombF ℓ η) ρ) ρ := by
   obtain ⟨g', f', hG, hF, hH, -⟩ := coulomb_wronskian_real_aux ℓ η hρ
@@ -880,7 +880,7 @@ theorem c33a_hasDerivAt_coulombHPlus (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 
   exact hH
 
 /-- For `ρ > 0`, `H⁻_ℓ = G_ℓ - i F_ℓ` has derivative `G_ℓ' - i F_ℓ'`. -/
-lemma c33a_hasDerivAt_coulombHMinus (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+private lemma hasDerivAt_coulombHMinus (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     HasDerivAt (fun x : ℝ => coulombHMinus ℓ η x)
       (deriv (coulombG ℓ η) ρ - I * deriv (coulombF ℓ η) ρ) ρ := by
   obtain ⟨g', f', hG, hF, -, -⟩ := coulomb_wronskian_real_aux ℓ η hρ
@@ -896,7 +896,7 @@ theorem deriv_coulombHMinus_lower (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < �
     deriv (fun x : ℝ => coulombHMinus (ℓ + 1) η x) ρ =
       recurrenceR (ℓ + 1) η * coulombHMinus ℓ η ρ -
         recurrenceS (ℓ + 1) η ρ * coulombHMinus (ℓ + 1) η ρ := by
-  rw [(c33a_hasDerivAt_coulombHMinus (ℓ + 1) η hρ).deriv, deriv_coulombG_lower ℓ η hρ,
+  rw [(hasDerivAt_coulombHMinus (ℓ + 1) η hρ).deriv, deriv_coulombG_lower ℓ η hρ,
     deriv_coulombF_lower ℓ η hρ, (coulombH_eq_G_add_I_mul_F ℓ η hρ).2,
     (coulombH_eq_G_add_I_mul_F (ℓ + 1) η hρ).2]
   push_cast; ring
@@ -907,7 +907,7 @@ theorem deriv_coulombHMinus_upper (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < �
     deriv (fun x : ℝ => coulombHMinus ℓ η x) ρ =
       recurrenceS (ℓ + 1) η ρ * coulombHMinus ℓ η ρ -
         recurrenceR (ℓ + 1) η * coulombHMinus (ℓ + 1) η ρ := by
-  rw [(c33a_hasDerivAt_coulombHMinus ℓ η hρ).deriv, deriv_coulombG_upper ℓ η hρ,
+  rw [(hasDerivAt_coulombHMinus ℓ η hρ).deriv, deriv_coulombG_upper ℓ η hρ,
     deriv_coulombF_upper ℓ η hρ, (coulombH_eq_G_add_I_mul_F ℓ η hρ).2,
     (coulombH_eq_G_add_I_mul_F (ℓ + 1) η hρ).2]
   push_cast; ring
@@ -952,12 +952,12 @@ theorem coulombF_mul_coulombG_sub (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < �
       (ℓ + 1) / Real.sqrt (((ℓ : ℝ) + 1) ^ 2 + η ^ 2) := by
   have hW := coulomb_wronskian (ℓ + 1) η hρ
   rw [deriv_coulombF_lower ℓ η hρ, deriv_coulombG_lower ℓ η hρ] at hW
-  have hR := c33a_recurrenceR_pos ℓ η
+  have hR := recurrenceR_succ_pos ℓ η
   have hR' : recurrenceR (ℓ + 1) η *
       (coulombF ℓ η ρ * coulombG (ℓ + 1) η ρ - coulombF (ℓ + 1) η ρ * coulombG ℓ η ρ) = 1 := by
     linear_combination hW
   rw [eq_div_iff (Real.sqrt_pos.mpr (by positivity)).ne']
-  rw [c33a_recurrenceR_succ] at hR'
+  rw [recurrenceR_succ] at hR'
   have hl : (0 : ℝ) < (ℓ : ℝ) + 1 := by positivity
   field_simp at hR'
   linear_combination hR'
@@ -1001,7 +1001,7 @@ theorem coulombC_eq_exp_sigma_mul_Gamma (ℓ : ℕ) (η : ℝ) :
 theorem recurrenceR_eq_coulombC_div (ℓ : ℕ) (η : ℝ) :
     recurrenceR (ℓ + 1) η = (2 * ((ℓ + 1 : ℕ) : ℝ) + 1) * coulombC (ℓ + 1) η / coulombC ℓ η := by
   have hC := coulombC_pos ℓ η
-  have hg := c33a_Gamma_ne_zero ℓ η
+  have hg := Gamma_nat_add_one_add_I_mul_ne_zero ℓ η
   have hrec : Gamma (((ℓ + 1 : ℕ) : ℂ) + 1 + I * η) =
       ((ℓ : ℂ) + 1 + I * η) * Gamma ((ℓ : ℂ) + 1 + I * η) := by
     rw [show ((ℓ + 1 : ℕ) : ℂ) + 1 + I * η = ((ℓ : ℂ) + 1 + I * η) + 1 by push_cast; ring,
@@ -1013,7 +1013,7 @@ theorem recurrenceR_eq_coulombC_div (ℓ : ℕ) (η : ℝ) :
   have hn : ‖(ℓ : ℂ) + 1 + I * η‖ = Real.sqrt (((ℓ : ℝ) + 1) ^ 2 + η ^ 2) := by
     rw [show (ℓ : ℂ) + 1 + I * η = ⟨(ℓ : ℝ) + 1, η⟩ by apply Complex.ext <;> simp,
       Complex.norm_eq_sqrt_sq_add_sq]
-  rw [c33a_recurrenceR_succ, eq_div_iff hC.ne', coulombC, coulombC, hrec, norm_mul, hn]
+  rw [recurrenceR_succ, eq_div_iff hC.ne', coulombC, coulombC, hrec, norm_mul, hn]
   have hl : (0 : ℝ) < (ℓ : ℝ) + 1 := by positivity
   rw [show 2 * ((ℓ + 1 : ℕ) : ℝ) + 1 = ((2 * (ℓ + 1) + 1 : ℕ) : ℝ) by push_cast; ring,
     show 2 * (ℓ + 1) + 1 = (2 * ℓ + 2) + 1 by ring, Nat.factorial_succ (2 * ℓ + 2),
@@ -1031,7 +1031,7 @@ theorem coulombWaveComplex_natCast (ℓ : ℕ) (η ρ : ℂ) :
     show (ℓ : ℂ) + 1 = ((ℓ + 1 : ℕ) : ℂ) by push_cast; ring, cpow_natCast]
 
 /-- The first derivative of `coulombWaveComplex` on the slit plane. -/
-lemma q2a_hasDerivAt_wc (ℓ η : ℂ) (hb0 : ∀ k : ℕ, 2 * ℓ + 2 ≠ -k) {z : ℂ}
+private lemma hasDerivAt_coulombWaveComplex (ℓ η : ℂ) (hb0 : ∀ k : ℕ, 2 * ℓ + 2 ≠ -k) {z : ℂ}
     (hz : z ∈ slitPlane) :
     HasDerivAt (coulombWaveComplex ℓ η)
       ((ℓ + 1) * z ^ (ℓ + 1 - 1) * exp (-I * z) * kummerM (ℓ + 1 - I * η) (2 * ℓ + 2) (2 * I * z)
@@ -1067,7 +1067,7 @@ theorem coulombWaveComplex_ode (ℓ η : ℂ) (hℓ : ∀ k : ℕ, 2 * ℓ + 2 �
         - I * z ^ (ℓ + 1) * exp (-I * z) * kummerM a b (2 * I * z)
         + 2 * I * (a / b) * z ^ (ℓ + 1) * exp (-I * z) * kummerM (a + 1) (b + 1) (2 * I * z) := by
     filter_upwards [isOpen_slitPlane.mem_nhds hρ] with z hz
-    exact (q2a_hasDerivAt_wc ℓ η hℓ hz).deriv
+    exact (hasDerivAt_coulombWaveComplex ℓ η hℓ hz).deriv
   rw [hev.deriv_eq]
   have hz0 : ρ ≠ 0 := slitPlane_ne_zero hρ
   have hE : HasDerivAt (fun z : ℂ => exp (-I * z)) (-I * exp (-I * ρ)) ρ := by

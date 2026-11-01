@@ -15,6 +15,15 @@ public import Mathlib.Tactic.LinearCombination
 Bookkeeping for parameters that avoid the integers or the nonpositive integers, and the
 density argument extending an identity of continuous functions from the non-integers to
 all of `ℂ`.
+
+## Main results
+
+* `Complex.eq_of_continuous_of_eq_off_int`: two continuous functions on `ℂ` that agree off the
+  integers agree everywhere.
+* `Complex.ne_neg_natCast_of_ne_intCast`, `Complex.add_one_ne_intCast_of_ne_intCast`:
+  bookkeeping for non-integer parameters.
+* `Complex.add_natCast_ne_zero_of_ne_neg_natCast`, `Complex.add_natCast_ne_zero_of_re_pos`,
+  `Complex.one_div_two_ne_neg_natCast`: parameters off the poles of `Γ`.
 -/
 
 @[expose] public section

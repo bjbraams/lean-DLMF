@@ -15,16 +15,58 @@ public import Mathlib.Analysis.Analytic.Binomial
 public import Mathlib.Order.Partition.Finpartition
 public import Mathlib.Algebra.Polynomial.Derivative
 public import Mathlib.RingTheory.Binomial
-public import DLMFMathlib.Combinatorics.R26aFinpartition
-public import DLMFMathlib.Combinatorics.Q26bSurjections
+public import DLMFMathlib.Combinatorics.Finpartition
+public import DLMFMathlib.Combinatorics.Surjections
 
 /-!
-# Stirling numbers and their generating series
+# Stirling numbers: definitions, generating functions and special values (DLMF §26.8)
 
-Signed Stirling numbers, factorial expansions, basic values and generating functions.
+DLMF's Stirling numbers of the first kind `s(n, k)` are signed: `(-1)^{n-k}` times the number
+of permutations of `{1, …, n}` with exactly `k` cycles (DLMF §26.8(i)). Mathlib's
+`Nat.stirlingFirst n k` is the unsigned (cycle-counting) number, so the DLMF function is
+`signedStirlingFirst n k = (-1)^{n-k} * Nat.stirlingFirst n k : ℤ`. DLMF's `S(n, k)` (second
+kind) is Mathlib's `Nat.stirlingSecond n k` itself. Both are defined for all `n, k : ℕ` and
+vanish for `k > n`.
 
-Source references and common attribution are retained in
-`DLMF.Combinatorics.Stirling`.
+## Main definitions
+
+* `signedStirlingFirst`: DLMF's signed `s(n, k)`.
+
+## Main results
+
+* `signedStirlingFirst_self`, `signedStirlingFirst_one`: DLMF 26.8.1, 26.8.2.
+* `neg_one_pow_mul_signedStirlingFirst_eq_esymm`: `|s(n, k)|` as an elementary symmetric sum
+  (DLMF 26.8.3).
+* `stirlingSecond_eq_sum_antidiagonalTuple`, `stirlingSecond_eq_sum`: explicit forms of
+  `S(n, k)` (DLMF 26.8.5, 26.8.6).
+* `coeff_descPochhammer`, `sum_signedStirlingFirst_mul_pow`: the falling factorial has the
+  coefficients `s(n, k)` (DLMF 26.8.7).
+* `sum_range_stirlingSecond_mul_ascPochhammer`, `sum_Icc_stirlingSecond_mul_ascPochhammer`: the
+  inverse expansion (DLMF 26.8.10).
+* `hasSum_signedStirlingFirst_div_factorial`, `hasSum_signedStirlingFirst_bivariate`:
+  DLMF 26.8.8, 26.8.9.
+* `hasSum_stirlingSecond_mul_pow`, `hasSum_stirlingSecond_div_factorial`,
+  `hasSum_stirlingSecond_bivariate`: DLMF 26.8.11–26.8.13.
+* `signedStirlingFirst_zero_right`, `signedStirlingFirst_one_right`,
+  `signedStirlingFirst_two_right`, `neg_signedStirlingFirst_pred_self`,
+  `stirlingSecond_zero_one_right`, `stirlingSecond_two_right`: special values
+  (DLMF 26.8.14–26.8.17).
+* `signedStirlingFirst_succ_succ`: the recurrence (DLMF 26.8.18).
+
+## Implementation notes
+
+The falling factorial `x(x-1)⋯(x-n+1)` is Mathlib's `descPochhammer`; DLMF writes it as the
+rising factorial `(x-n+1)_n` (`ascPochhammer` evaluated at `x - n + 1`). The inverse expansion
+26.8.10 is derived from Mathlib's `Nat.pow_eq_sum_stirlingSecond_mul_descFactorial` by a
+polynomial identity (agreement at every natural number). The lean-codes module
+`Pochhammer.PochhammerTransform` has the same expansions in the rising-factorial basis.
+
+26.8.10 (`∑_{k=1}^n S(n,k)(x-k+1)_k = xⁿ`) fails for `n = 0` (empty sum `0 ≠ 1`); it is stated
+for `1 ≤ n`, with the `k = 0` form valid for all `n` alongside.
+
+## References
+
+* NIST DLMF §26.8.
 -/
 
 @[expose] public section
@@ -102,16 +144,16 @@ theorem signedStirlingFirst_one (k : ℕ) : signedStirlingFirst 1 k = if k = 1 t
   · simp [signedStirlingFirst_eq_zero_of_lt (by omega : 1 < k + 2)]
 
 /-- The elementary symmetric sum `e_j(1, 2, …, m) = ∑_{1 ≤ b₁ < ⋯ < b_j ≤ m} b₁⋯b_j`. -/
-def c26a_esymmRange (m j : ℕ) : ℤ := ∑ B ∈ (Icc 1 m).powersetCard j, ∏ b ∈ B, (b : ℤ)
+def esymmRange (m j : ℕ) : ℤ := ∑ B ∈ (Icc 1 m).powersetCard j, ∏ b ∈ B, (b : ℤ)
 
 /-- The recurrence `e_{j+1}(1,…,m+1) = e_{j+1}(1,…,m) + (m+1) e_j(1,…,m)`. -/
-lemma q26a_esymmRange_succ_succ (m j : ℕ) :
-    c26a_esymmRange (m + 1) (j + 1) =
-      c26a_esymmRange m (j + 1) + (m + 1) * c26a_esymmRange m j := by
+private lemma esymmRange_succ_succ (m j : ℕ) :
+    esymmRange (m + 1) (j + 1) =
+      esymmRange m (j + 1) + (m + 1) * esymmRange m j := by
   have hI : Icc 1 (m + 1) = insert (m + 1) (Icc 1 m) := by
     ext x; simp only [mem_Icc, mem_insert]; omega
   have hx : m + 1 ∉ Icc 1 m := by simp
-  unfold c26a_esymmRange
+  unfold esymmRange
   rw [hI, powersetCard_succ_insert hx, sum_union, sum_image, mul_sum]
   · congr 1
     refine sum_congr rfl fun B hB => ?_
@@ -127,56 +169,53 @@ lemma q26a_esymmRange_succ_succ (m j : ℕ) :
     exact hx ((mem_powersetCard.mp hB).1 (mem_insert_self _ _))
 
 /-- `e_0 = 1`. -/
-lemma q26a_esymmRange_zero (m : ℕ) : c26a_esymmRange m 0 = 1 := by
-  simp [c26a_esymmRange]
+private lemma esymmRange_zero (m : ℕ) : esymmRange m 0 = 1 := by
+  simp [esymmRange]
 
 /-- `e_j(1,…,m) = 0` for `j > m`. -/
-lemma q26a_esymmRange_eq_zero {m j : ℕ} (h : m < j) : c26a_esymmRange m j = 0 := by
-  rw [c26a_esymmRange, powersetCard_eq_empty.mpr (by simp; omega), sum_empty]
+private lemma esymmRange_eq_zero_of_lt {m j : ℕ} (h : m < j) : esymmRange m j = 0 := by
+  rw [esymmRange, powersetCard_eq_empty.mpr (by simp; omega), sum_empty]
 
 /-- `c(m+1, i) = e_{m+1-i}(1, …, m)`. -/
-lemma q26a_stirlingFirst_eq_esymm (m : ℕ) : ∀ i ≤ m + 1,
-    (Nat.stirlingFirst (m + 1) i : ℤ) = c26a_esymmRange m (m + 1 - i) := by
+private lemma stirlingFirst_succ_eq_esymmRange (m : ℕ) : ∀ i ≤ m + 1,
+    (Nat.stirlingFirst (m + 1) i : ℤ) = esymmRange m (m + 1 - i) := by
   induction m with
   | zero =>
     intro i hi
     rcases i with _ | _ | i
-    · simp [q26a_esymmRange_eq_zero]
-    · simp [q26a_esymmRange_zero, Nat.stirlingFirst_self]
+    · simp [esymmRange_eq_zero_of_lt]
+    · simp [esymmRange_zero, Nat.stirlingFirst_self]
     · omega
   | succ m ih =>
     intro i hi
     rcases i with _ | i
-    · simp [q26a_esymmRange_eq_zero]
+    · simp [esymmRange_eq_zero_of_lt]
     · rw [Nat.stirlingFirst_succ_succ]
       push_cast
       rcases Nat.lt_or_ge i (m + 1) with h | h
       · rw [ih (i + 1) (by omega), ih i (by omega),
-          show m + 1 - i = m + 1 - (i + 1) + 1 by omega, q26a_esymmRange_succ_succ]
+          show m + 1 - i = m + 1 - (i + 1) + 1 by omega, esymmRange_succ_succ]
         push_cast; ring
       · obtain rfl : i = m + 1 := by omega
-        simp [Nat.stirlingFirst_self, q26a_esymmRange_zero,
+        simp [Nat.stirlingFirst_self, esymmRange_zero,
           Nat.stirlingFirst_eq_zero_of_lt (show m + 1 < m + 1 + 1 by omega)]
 
 /-- DLMF 26.8.3: `(-1)^{n-k} s(n, k) = ∑_{1 ≤ b₁ < ⋯ < b_{n-k} ≤ n-1} b₁ b₂ ⋯ b_{n-k}`,
 `n > k ≥ 1`. -/
 @[dlmf 26.8.E3]
 theorem neg_one_pow_mul_signedStirlingFirst_eq_esymm {n k : ℕ} (hk : 1 ≤ k) (hkn : k < n) :
-    (-1) ^ (n - k) * signedStirlingFirst n k = c26a_esymmRange (n - 1) (n - k) := by
+    (-1) ^ (n - k) * signedStirlingFirst n k = esymmRange (n - 1) (n - k) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  rw [neg_one_pow_mul_signedStirlingFirst, q26a_stirlingFirst_eq_esymm m k (by omega)]
+  rw [neg_one_pow_mul_signedStirlingFirst, stirlingFirst_succ_eq_esymmRange m k (by omega)]
   rfl
 
-/-- DLMF 26.8.4: `S(n, n) = 1` (Mathlib `Nat.stirlingSecond_self`). -/
-@[dlmf 26.8.E4]
-theorem stirlingSecond_self' (n : ℕ) : Nat.stirlingSecond n n = 1 := Nat.stirlingSecond_self n
 
 /-- The complete homogeneous sum with weights `k, k-1, …, 1`. -/
-def q26a_hRev (k d : ℕ) : ℤ :=
+def hsymmRev (k d : ℕ) : ℤ :=
   ∑ c ∈ Finset.Nat.antidiagonalTuple k d, ∏ i : Fin k, ((k : ℤ) - i) ^ (c i)
 
 /-- Splitting a sum over `antidiagonalTuple (k+1) d` by the first coordinate. -/
-lemma q26a_sum_antidiagonalTuple_succ {M : Type*} [AddCommMonoid M] (k d : ℕ)
+private lemma sum_antidiagonalTuple_succ {M : Type*} [AddCommMonoid M] (k d : ℕ)
     (F : (Fin (k + 1) → ℕ) → M) :
     ∑ c ∈ Finset.Nat.antidiagonalTuple (k + 1) d, F c =
       ∑ p ∈ antidiagonal d, ∑ c ∈ Finset.Nat.antidiagonalTuple k p.2, F (Fin.cons p.1 c) := by
@@ -200,11 +239,11 @@ lemma q26a_sum_antidiagonalTuple_succ {M : Type*} [AddCommMonoid M] (k d : ℕ)
     omega
   · intro c _; simp
 
-/-- First-coordinate expansion of `q26a_hRev`. -/
-lemma q26a_hRev_succ (k d : ℕ) :
-    q26a_hRev (k + 1) d = ∑ p ∈ antidiagonal d, ((k : ℤ) + 1) ^ p.1 * q26a_hRev k p.2 := by
-  unfold q26a_hRev
-  rw [q26a_sum_antidiagonalTuple_succ]
+/-- First-coordinate expansion of `hsymmRev`. -/
+private lemma hsymmRev_succ (k d : ℕ) :
+    hsymmRev (k + 1) d = ∑ p ∈ antidiagonal d, ((k : ℤ) + 1) ^ p.1 * hsymmRev k p.2 := by
+  unfold hsymmRev
+  rw [sum_antidiagonalTuple_succ]
   refine sum_congr rfl fun p _ => ?_
   rw [mul_sum]
   refine sum_congr rfl fun c _ => ?_
@@ -216,28 +255,28 @@ lemma q26a_hRev_succ (k d : ℕ) :
   exact prod_congr rfl fun i _ => by ring_nf
 
 /-- The recurrence `h_{d+1}(k+1,…,1) = h_{d+1}(k,…,1) + (k+1) h_d(k+1,…,1)`. -/
-lemma q26a_hRev_succ_succ (k d : ℕ) :
-    q26a_hRev (k + 1) (d + 1) = q26a_hRev k (d + 1) + ((k : ℤ) + 1) * q26a_hRev (k + 1) d := by
-  rw [q26a_hRev_succ, q26a_hRev_succ, Finset.Nat.sum_antidiagonal_succ, mul_sum]
+private lemma hsymmRev_succ_succ (k d : ℕ) :
+    hsymmRev (k + 1) (d + 1) = hsymmRev k (d + 1) + ((k : ℤ) + 1) * hsymmRev (k + 1) d := by
+  rw [hsymmRev_succ, hsymmRev_succ, Finset.Nat.sum_antidiagonal_succ, mul_sum]
   simp only [pow_zero, one_mul, pow_succ]
   congr 1
   refine sum_congr rfl fun p _ => by ring
 
-/-- `q26a_hRev 0 d = δ_{d,0}`. -/
-lemma q26a_hRev_zero_left (d : ℕ) : q26a_hRev 0 d = if d = 0 then 1 else 0 := by
-  rcases d with _ | d <;> simp [q26a_hRev]
+/-- `hsymmRev 0 d = δ_{d,0}`. -/
+private lemma hsymmRev_zero_left (d : ℕ) : hsymmRev 0 d = if d = 0 then 1 else 0 := by
+  rcases d with _ | d <;> simp [hsymmRev]
 
 /-- `S(k+d, k) = h_d(k, k-1, …, 1)`. -/
-lemma q26a_stirlingSecond_eq_hRev (k d : ℕ) :
-    (Nat.stirlingSecond (k + d) k : ℤ) = q26a_hRev k d := by
+private lemma stirlingSecond_add_eq_hsymmRev (k d : ℕ) :
+    (Nat.stirlingSecond (k + d) k : ℤ) = hsymmRev k d := by
   induction k generalizing d with
-  | zero => rcases d with _ | d <;> simp [q26a_hRev_zero_left, Nat.stirlingSecond_succ_zero]
+  | zero => rcases d with _ | d <;> simp [hsymmRev_zero_left, Nat.stirlingSecond_succ_zero]
   | succ k ih =>
     induction d with
     | zero =>
-      rw [q26a_hRev, Finset.Nat.antidiagonalTuple_zero_right]; simp [Nat.stirlingSecond_self]
+      rw [hsymmRev, Finset.Nat.antidiagonalTuple_zero_right]; simp [Nat.stirlingSecond_self]
     | succ d ihd =>
-      rw [q26a_hRev_succ_succ, ← ih, ← ihd, show k + 1 + (d + 1) = (k + 1 + d) + 1 by ring,
+      rw [hsymmRev_succ_succ, ← ih, ← ihd, show k + 1 + (d + 1) = (k + 1 + d) + 1 by ring,
         Nat.stirlingSecond_succ_succ, show k + 1 + d = k + (d + 1) by ring]
       push_cast; ring
 
@@ -249,7 +288,7 @@ theorem stirlingSecond_eq_sum_antidiagonalTuple {n k : ℕ} (hkn : k ≤ n) :
     (Nat.stirlingSecond n k : ℤ) =
       ∑ c ∈ Finset.Nat.antidiagonalTuple k (n - k), ∏ i : Fin k, ((i : ℤ) + 1) ^ (c i) := by
   obtain ⟨d, rfl⟩ : ∃ d, n = k + d := ⟨n - k, by omega⟩
-  rw [q26a_stirlingSecond_eq_hRev, Nat.add_sub_cancel_left, q26a_hRev]
+  rw [stirlingSecond_add_eq_hsymmRev, Nat.add_sub_cancel_left, hsymmRev]
   refine sum_nbij' (fun c => c ∘ Fin.rev) (fun c => c ∘ Fin.rev) ?_ ?_ ?_ ?_ ?_
   · intro c hc
     simp only [Finset.Nat.mem_antidiagonalTuple] at hc ⊢
@@ -267,7 +306,7 @@ theorem stirlingSecond_eq_sum_antidiagonalTuple {n k : ℕ} (hkn : k ≤ n) :
     rw [Nat.cast_sub (by omega)]; push_cast; ring
 
 /-- The `k`-th forward difference of `x ↦ xⁿ` at `0` is `k! S(n, k)`. -/
-lemma q26a_fwdDiff_iter_pow (n k : ℕ) :
+private lemma fwdDiff_iterate_pow_zero (n k : ℕ) :
     (fwdDiff 1)^[k] (fun x : ℕ => ((x : ℚ) ^ n)) 0 = k.factorial * Nat.stirlingSecond n k := by
   have hf : (fun x : ℕ => ((x : ℚ) ^ n)) = ∑ i ∈ range (n + 1),
       ((Nat.stirlingSecond n i * i.factorial : ℕ) : ℚ) • (fun x : ℕ => (x.choose i : ℚ)) := by
@@ -286,10 +325,10 @@ lemma q26a_fwdDiff_iter_pow (n k : ℕ) :
   · rw [Nat.stirlingSecond_eq_zero_of_lt (by simp at h; omega)]; simp
 
 /-- `∑_j (-1)^{k-j} C(k, j) jⁿ = k! S(n, k)`. -/
-lemma q26a_sum_alt_choose_pow (n k : ℕ) :
+lemma sum_neg_one_pow_choose_mul_pow (n k : ℕ) :
     ∑ j ∈ range (k + 1), (-1 : ℚ) ^ (k - j) * (k.choose j : ℚ) * (j : ℚ) ^ n =
       k.factorial * Nat.stirlingSecond n k := by
-  have h := q26a_fwdDiff_iter_pow n k
+  have h := fwdDiff_iterate_pow_zero n k
   rw [fwdDiff_iter_eq_sum_shift] at h
   simp only [zero_add, nsmul_eq_mul, mul_one, zsmul_eq_mul] at h
   push_cast at h
@@ -301,7 +340,7 @@ lemma q26a_sum_alt_choose_pow (n k : ℕ) :
 theorem stirlingSecond_eq_sum (n k : ℕ) :
     (Nat.stirlingSecond n k : ℚ) =
       (1 / k.factorial) * ∑ j ∈ range (k + 1), (-1) ^ (k - j) * (k.choose j : ℚ) * (j : ℚ) ^ n := by
-  rw [q26a_sum_alt_choose_pow]
+  rw [sum_neg_one_pow_choose_mul_pow]
   have : (k.factorial : ℚ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   field_simp
 
@@ -340,7 +379,7 @@ theorem sum_signedStirlingFirst_mul_pow {R : Type*} [CommRing R] (n : ℕ) (x : 
   simp
 
 /-- The integer polynomial identity `Xⁿ = ∑_k S(n, k) · X(X-1)⋯(X-k+1)`. -/
-lemma c26a_X_pow_eq_sum_descPochhammer (n : ℕ) :
+lemma X_pow_eq_sum_stirlingSecond_mul_descPochhammer_int (n : ℕ) :
     (X : ℤ[X]) ^ n = ∑ k ∈ range (n + 1), C (Nat.stirlingSecond n k : ℤ) * descPochhammer ℤ k := by
   rw [← sub_eq_zero]
   apply Polynomial.eq_zero_of_infinite_isRoot
@@ -354,7 +393,7 @@ lemma c26a_X_pow_eq_sum_descPochhammer (n : ℕ) :
 theorem X_pow_eq_sum_stirlingSecond_mul_descPochhammer (R : Type*) [CommRing R] (n : ℕ) :
     (X : R[X]) ^ n =
       ∑ k ∈ range (n + 1), C (Nat.stirlingSecond n k : R) * descPochhammer R k := by
-  have := congrArg (Polynomial.map (Int.castRingHom R)) (c26a_X_pow_eq_sum_descPochhammer n)
+  have := congrArg (Polynomial.map (Int.castRingHom R)) (X_pow_eq_sum_stirlingSecond_mul_descPochhammer_int n)
   simpa [Polynomial.map_sum, descPochhammer_map] using this
 
 /-- DLMF 26.8.10, `k = 0` form: `∑_{k=0}^n S(n, k) (x-k+1)_k = xⁿ` for all `n ≥ 0`. -/
@@ -385,7 +424,7 @@ theorem sum_Icc_stirlingSecond_mul_ascPochhammer {R : Type*} [CommRing R] {n : �
 /-! #### Helpers for 26.8.8–9 (agent p26a) -/
 
 /-- Coefficients of an everywhere absolutely convergent real power series are unique. -/
-lemma s26a_coeff_unique {a b : ℕ → ℝ} (ha : ∀ r : NNReal, Summable fun k => |a k| * (r : ℝ) ^ k)
+private lemma eq_of_tsum_mul_pow_eq {a b : ℕ → ℝ} (ha : ∀ r : NNReal, Summable fun k => |a k| * (r : ℝ) ^ k)
     (hb : ∀ r : NNReal, Summable fun k => |b k| * (r : ℝ) ^ k)
     (h : ∀ y : ℝ, ∑' k, a k * y ^ k = ∑' k, b k * y ^ k) : a = b := by
   have hrad : ∀ c : ℕ → ℝ, (∀ r : NNReal, Summable fun k => |c k| * (r : ℝ) ^ k) →
@@ -411,7 +450,7 @@ lemma s26a_coeff_unique {a b : ℕ → ℝ} (ha : ∀ r : NNReal, Summable fun k
   exact FormalMultilinearSeries.ofScalars_series_injective ℝ ℝ (h1.eq_formalMultilinearSeries h2)
 
 /-- `∑_k c(n, k) aᵏ = a(a+1)⋯(a+n-1)` (unsigned Stirling numbers of the first kind). -/
-lemma s26a_sum_stirlingFirst_mul_pow (n : ℕ) (a : ℝ) :
+private lemma sum_stirlingFirst_mul_pow (n : ℕ) (a : ℝ) :
     ∑ k ∈ range (n + 1), (Nat.stirlingFirst n k : ℝ) * a ^ k = (ascPochhammer ℝ n).eval a := by
   have h := descPochhammer_eq_sum ℝ n
   have h2 := congrArg (Polynomial.eval (-a)) h
@@ -434,13 +473,13 @@ lemma s26a_sum_stirlingFirst_mul_pow (n : ℕ) (a : ℝ) :
     (Nat.stirlingFirst n k : ℝ) * a ^ k * ((-1 : ℝ) ^ n) ^ 2 * hQ
 
 /-- The generalized binomial coefficient over `ℝ` as a falling factorial over `n!`. -/
-lemma s26a_ringChoose_eq (r : ℝ) (n : ℕ) :
+private lemma ringChoose_eq_eval_descPochhammer_div (r : ℝ) (n : ℕ) :
     Ring.choose r n = (descPochhammer ℝ n).eval r / n.factorial := by
   rw [Ring.choose_eq_smul, ← Polynomial.aeval_eq_smeval, Polynomial.aeval_def,
     ← Polynomial.eval_map, descPochhammer_map, smul_eq_mul, div_eq_inv_mul]
 
 /-- The binomial series `∑ binom(y, n) xⁿ = (1+x)^y`, real `|x| < 1`. -/
-lemma s26a_hasSum_ringChoose_mul_pow {x : ℝ} (hx : |x| < 1) (y : ℝ) :
+private lemma hasSum_ringChoose_mul_pow {x : ℝ} (hx : |x| < 1) (y : ℝ) :
     HasSum (fun n : ℕ => Ring.choose y n * x ^ n) ((1 + x) ^ y) := by
   have hb := (Real.one_add_rpow_hasFPowerSeriesOnBall_zero (a := y)).hasSum (y := x) (by
     rw [Metric.mem_eball, edist_zero_right, ← ofReal_norm, Real.norm_eq_abs]
@@ -450,7 +489,7 @@ lemma s26a_hasSum_ringChoose_mul_pow {x : ℝ} (hx : |x| < 1) (y : ℝ) :
   exact hb
 
 /-- `∑ binom(a+n-1, n) tⁿ = (1-t)^{-a}`, real `|t| < 1`. -/
-lemma s26a_hasSum_ringChoose_add_mul_pow {t : ℝ} (ht : |t| < 1) (a : ℝ) :
+private lemma hasSum_ringChoose_add_sub_one_mul_pow {t : ℝ} (ht : |t| < 1) (a : ℝ) :
     HasSum (fun n : ℕ => Ring.choose (a + n - 1) n * t ^ n) (1 / (1 - t) ^ a) := by
   have hb := (Real.one_div_one_sub_rpow_hasFPowerSeriesOnBall_zero a).hasSum (y := t) (by
     rw [Metric.mem_eball, edist_zero_right, ← ofReal_norm, Real.norm_eq_abs]
@@ -459,7 +498,7 @@ lemma s26a_hasSum_ringChoose_add_mul_pow {t : ℝ} (ht : |t| < 1) (a : ℝ) :
   exact hb
 
 /-- The rows of the bivariate series 26.8.9. -/
-lemma s26a_hasSum_signedStirlingFirst_row (x y : ℝ) (n : ℕ) :
+private lemma hasSum_signedStirlingFirst_row (x y : ℝ) (n : ℕ) :
     HasSum (fun k : ℕ => (signedStirlingFirst n k : ℝ) * x ^ n / n.factorial * y ^ k)
       (Ring.choose y n * x ^ n) := by
   have h : HasSum (fun k : ℕ => (signedStirlingFirst n k : ℝ) * x ^ n / n.factorial * y ^ k)
@@ -469,13 +508,13 @@ lemma s26a_hasSum_signedStirlingFirst_row (x y : ℝ) (n : ℕ) :
   convert h using 1
   have h2 := congrArg (Polynomial.eval y) (descPochhammer_eq_sum ℝ n)
   rw [eval_finsetSum] at h2
-  rw [s26a_ringChoose_eq, h2, sum_div, sum_mul]
+  rw [ringChoose_eq_eval_descPochhammer_div, h2, sum_div, sum_mul]
   refine sum_congr rfl fun k _ => ?_
   simp only [eval_mul, eval_C, eval_pow, eval_X]
   ring
 
 /-- The absolute rows of the bivariate series 26.8.9. -/
-lemma s26a_hasSum_signedStirlingFirst_row_abs (x y : ℝ) (n : ℕ) :
+private lemma hasSum_abs_signedStirlingFirst_row (x y : ℝ) (n : ℕ) :
     HasSum (fun k : ℕ => |(signedStirlingFirst n k : ℝ) * x ^ n / n.factorial * y ^ k|)
       (Ring.choose (|y| + n - 1) n * |x| ^ n) := by
   have h : HasSum (fun k : ℕ => |(signedStirlingFirst n k : ℝ) * x ^ n / n.factorial * y ^ k|)
@@ -483,8 +522,8 @@ lemma s26a_hasSum_signedStirlingFirst_row_abs (x y : ℝ) (n : ℕ) :
     hasSum_sum_of_ne_finset_zero fun k hk => by
       rw [signedStirlingFirst_eq_zero_of_lt (by simp at hk; omega)]; simp
   convert h using 1
-  rw [s26a_ringChoose_eq, descPochhammer_eval_eq_ascPochhammer,
-    show |y| + n - 1 - n + 1 = |y| by ring, ← s26a_sum_stirlingFirst_mul_pow, sum_div, sum_mul]
+  rw [ringChoose_eq_eval_descPochhammer_div, descPochhammer_eval_eq_ascPochhammer,
+    show |y| + n - 1 - n + 1 = |y| by ring, ← sum_stirlingFirst_mul_pow, sum_div, sum_mul]
   refine sum_congr rfl fun k _ => ?_
   simp only [signedStirlingFirst, Int.cast_mul, Int.cast_pow, Int.cast_neg, Int.cast_one,
     Int.cast_natCast, abs_mul, abs_div, abs_pow, abs_neg, abs_one, one_pow, one_mul,
@@ -492,32 +531,32 @@ lemma s26a_hasSum_signedStirlingFirst_row_abs (x y : ℝ) (n : ℕ) :
   ring
 
 /-- The double series 26.8.9 converges absolutely. -/
-lemma s26a_summable_abs_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : ℝ) :
+private lemma summable_abs_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : ℝ) :
     Summable (fun p : ℕ × ℕ => |(signedStirlingFirst p.1 p.2 : ℝ) * x ^ p.1 / p.1.factorial *
       y ^ p.2|) := by
   refine (summable_prod_of_nonneg fun _ => abs_nonneg _).mpr
-    ⟨fun n => (s26a_hasSum_signedStirlingFirst_row_abs x y n).summable, ?_⟩
-  simp_rw [fun n => (s26a_hasSum_signedStirlingFirst_row_abs x y n).tsum_eq]
-  exact (s26a_hasSum_ringChoose_add_mul_pow (t := |x|) (by rwa [abs_abs]) |y|).summable
+    ⟨fun n => (hasSum_abs_signedStirlingFirst_row x y n).summable, ?_⟩
+  simp_rw [fun n => (hasSum_abs_signedStirlingFirst_row x y n).tsum_eq]
+  exact (hasSum_ringChoose_add_sub_one_mul_pow (t := |x|) (by rwa [abs_abs]) |y|).summable
 
 /-- The double series 26.8.9 is summable. -/
-lemma s26a_summable_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : ℝ) :
+private lemma summable_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : ℝ) :
     Summable (fun p : ℕ × ℕ => (signedStirlingFirst p.1 p.2 : ℝ) * x ^ p.1 / p.1.factorial *
       y ^ p.2) :=
   Summable.of_norm (by simpa only [Real.norm_eq_abs] using
-    s26a_summable_abs_signedStirlingFirst_bivariate hx y)
+    summable_abs_signedStirlingFirst_bivariate hx y)
 
 /-- DLMF 26.8.9 (helper). -/
-lemma s26a_hasSum_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : ℝ) :
+private lemma hasSum_signedStirlingFirst_double {x : ℝ} (hx : |x| < 1) (y : ℝ) :
     HasSum (fun p : ℕ × ℕ => (signedStirlingFirst p.1 p.2 : ℝ) * x ^ p.1 / p.1.factorial *
       y ^ p.2) ((1 + x) ^ y) := by
-  have hs := s26a_summable_signedStirlingFirst_bivariate hx y
-  have h1 := hs.hasSum.prod_fiberwise (s26a_hasSum_signedStirlingFirst_row x y)
-  rw [← h1.unique (s26a_hasSum_ringChoose_mul_pow hx y)]
+  have hs := summable_signedStirlingFirst_bivariate hx y
+  have h1 := hs.hasSum.prod_fiberwise (hasSum_signedStirlingFirst_row x y)
+  rw [← h1.unique (hasSum_ringChoose_mul_pow hx y)]
   exact hs.hasSum
 
 /-- DLMF 26.8.8 (helper). -/
-lemma s26a_hasSum_signedStirlingFirst_div_factorial (k : ℕ) {x : ℝ} (hx : |x| < 1) :
+private lemma hasSum_signedStirlingFirst_mul_pow_div_factorial (k : ℕ) {x : ℝ} (hx : |x| < 1) :
     HasSum (fun n : ℕ => (signedStirlingFirst n k : ℝ) * x ^ n / n.factorial)
       (Real.log (1 + x) ^ k / k.factorial) := by
   set A : ℕ → ℝ := fun k => ∑' n : ℕ, (signedStirlingFirst n k : ℝ) * x ^ n / n.factorial
@@ -526,12 +565,12 @@ lemma s26a_hasSum_signedStirlingFirst_div_factorial (k : ℕ) {x : ℝ} (hx : |x
       n.factorial) := by
     intro k
     have h2 := ((Equiv.prodComm ℕ ℕ).summable_iff.mpr
-      (s26a_summable_signedStirlingFirst_bivariate hx 1)).prod_factor k
+      (summable_signedStirlingFirst_bivariate hx 1)).prod_factor k
     simpa using h2
   have hA : ∀ y : ℝ, HasSum (fun k => A k * y ^ k) ((1 + x) ^ y) := by
     intro y
     have hG' := (Equiv.prodComm ℕ ℕ).hasSum_iff.mpr
-      (s26a_hasSum_signedStirlingFirst_bivariate hx y)
+      (hasSum_signedStirlingFirst_double hx y)
     refine hG'.prod_fiberwise fun k => ?_
     simpa [A] using (hcol k).hasSum.mul_right (y ^ k)
   set L := Real.log (1 + x)
@@ -545,7 +584,7 @@ lemma s26a_hasSum_signedStirlingFirst_div_factorial (k : ℕ) {x : ℝ} (hx : |x
   have ha : ∀ r : NNReal, Summable fun k => |A k| * (r : ℝ) ^ k := by
     intro r
     have hS := (Equiv.prodComm ℕ ℕ).summable_iff.mpr
-      (s26a_summable_abs_signedStirlingFirst_bivariate hx (r : ℝ))
+      (summable_abs_signedStirlingFirst_bivariate hx (r : ℝ))
     have hS2 := ((summable_prod_of_nonneg fun _ => abs_nonneg _).mp hS).2
     refine Summable.of_nonneg_of_le (fun _ => by positivity) (fun k => ?_) hS2
     show |A k| * (r : ℝ) ^ k ≤ ∑' n : ℕ, |(signedStirlingFirst n k : ℝ) * x ^ n /
@@ -567,7 +606,7 @@ lemma s26a_hasSum_signedStirlingFirst_div_factorial (k : ℕ) {x : ℝ} (hx : |x
     have := Real.summable_pow_div_factorial (|L| * r)
     convert this using 1; ext k
     rw [abs_div, abs_pow, Nat.abs_cast, mul_pow]; ring
-  have huniq := s26a_coeff_unique ha hb fun y => (hA y).tsum_eq.trans (hB y).tsum_eq.symm
+  have huniq := eq_of_tsum_mul_pow_eq ha hb fun y => (hA y).tsum_eq.trans (hB y).tsum_eq.symm
   rw [show L ^ k / k.factorial = A k from (congrFun huniq k).symm]
   exact (hcol k).hasSum
 
@@ -576,7 +615,7 @@ lemma s26a_hasSum_signedStirlingFirst_div_factorial (k : ℕ) {x : ℝ} (hx : |x
 theorem hasSum_signedStirlingFirst_div_factorial (k : ℕ) {x : ℝ} (hx : |x| < 1) :
     HasSum (fun n : ℕ => (signedStirlingFirst n k : ℝ) * x ^ n / n.factorial)
       (Real.log (1 + x) ^ k / k.factorial) :=
-  s26a_hasSum_signedStirlingFirst_div_factorial k hx
+  hasSum_signedStirlingFirst_mul_pow_div_factorial k hx
 
 /-- DLMF 26.8.9: `∑_{n,k=0}^∞ s(n, k) (xⁿ/n!) y^k = (1+x)^y`, real `|x| < 1`, real `y` (the
 double series converges absolutely). -/
@@ -584,10 +623,10 @@ double series converges absolutely). -/
 theorem hasSum_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : ℝ) :
     HasSum (fun p : ℕ × ℕ => (signedStirlingFirst p.1 p.2 : ℝ) * x ^ p.1 / p.1.factorial * y ^ p.2)
       ((1 + x) ^ y) :=
-  s26a_hasSum_signedStirlingFirst_bivariate hx y
+  hasSum_signedStirlingFirst_double hx y
 
 /-- The series `∑ S(n, k) xⁿ` converges for `k|x| < 1` (from 26.8.6). -/
-lemma q26a_summable_stirlingSecond_mul_pow (k : ℕ) {x : ℝ} (hx : k * |x| < 1) :
+private lemma summable_stirlingSecond_mul_pow (k : ℕ) {x : ℝ} (hx : k * |x| < 1) :
     Summable (fun n : ℕ => (Nat.stirlingSecond n k : ℝ) * x ^ n) := by
   have hc : ∀ n, (Nat.stirlingSecond n k : ℝ) * x ^ n = ∑ j ∈ range (k + 1),
       (1 / k.factorial : ℝ) * ((-1 : ℝ) ^ (k - j) * (k.choose j : ℝ)) * ((j : ℝ) * x) ^ n := by
@@ -621,7 +660,7 @@ theorem hasSum_stirlingSecond_mul_pow (k : ℕ) {x : ℝ} (hx : k * |x| < 1) :
       have : (k : ℝ) * |x| ≤ (k + 1 : ℕ) * |x| := by
         apply mul_le_mul_of_nonneg_right _ (abs_nonneg x); push_cast; linarith
       linarith
-    have hA := (q26a_summable_stirlingSecond_mul_pow (k + 1) hx).hasSum
+    have hA := (summable_stirlingSecond_mul_pow (k + 1) hx).hasSum
     set A := ∑' n : ℕ, (Nat.stirlingSecond n (k + 1) : ℝ) * x ^ n
     have h1 := (hasSum_nat_add_iff' 1).mpr hA
     simp only [range_one, sum_singleton, Nat.stirlingSecond_zero_succ, Nat.cast_zero, zero_mul,
@@ -731,7 +770,7 @@ theorem signedStirlingFirst_one_right {n : ℕ} (hn : 1 ≤ n) :
   simp [signedStirlingFirst, Nat.stirlingFirst_one_right]
 
 /-- The unsigned `c(n+1, 2) = n! H_n`. -/
-lemma c26a_stirlingFirst_two (n : ℕ) :
+private lemma stirlingFirst_succ_two (n : ℕ) :
     (Nat.stirlingFirst (n + 1) 2 : ℚ) = n.factorial * harmonic n := by
   induction n with
   | zero => simp [Nat.stirlingFirst_eq_zero_of_lt]
@@ -752,7 +791,7 @@ theorem signedStirlingFirst_two_right {n : ℕ} (hn : 1 ≤ n) :
   · simp [signedStirlingFirst, Nat.stirlingFirst_eq_zero_of_lt]
   · simp only [signedStirlingFirst, Nat.add_sub_cancel]
     push_cast
-    rw [c26a_stirlingFirst_two, pow_succ, pow_succ]
+    rw [stirlingFirst_succ_two, pow_succ, pow_succ]
     ring
 
 /-- DLMF 26.8.16: `-s(n, n-1) = S(n, n-1) = C(n, 2)` for `n ≥ 1`. -/

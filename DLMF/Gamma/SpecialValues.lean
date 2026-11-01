@@ -12,12 +12,29 @@ public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 public import Mathlib.NumberTheory.ZetaValues
 
 /-!
-# Special values and extrema (DLMF §5.4)
+# Special values (DLMF §5.4)
 
-`Γ(1) = 1` and `Γ(n+1) = n!` are Mathlib. `Γ(1/2) = √π` is Mathlib
-`Gamma_one_half_eq`. `ψ(1) = -γ` and `ψ(1/2) = -γ - 2 log 2` are already
-tagged in `Digamma` and `GaussDigamma`. Decimal expansions 5.4.7–5.4.10 are
-not transcribed. The large-`n` extrema expansion 5.4.20 is deferred.
+`Γ(1) = 1` and `Γ(n+1) = n!` are in Mathlib, and so is `Γ(1/2) = √π` (`Gamma_one_half_eq`).
+`ψ(1) = -γ` and `ψ(1/2) = -γ - 2 log 2` are in `DLMF.Gamma.Digamma` and
+`DLMF.Gamma.GaussDigamma`. The decimal values 5.4.7–5.4.10 are numerical and out of scope; the
+large-`n` expansion 5.4.20 of the extrema is not included.
+
+## Main definitions
+
+* `gaussRoot`: the primitive `q`-th root of unity `e^{2πi/q}`.
+
+## Main results
+
+* `doubleFactorial_even`, `doubleFactorial_odd`: double factorials via Gamma, DLMF 5.4.2.
+* `norm_Gamma_mul_I`: `|Γ(iy)|`, DLMF 5.4.3.
+* `Gamma_half_add_mul_I`, `Gamma_quarter_mul_I`: DLMF 5.4.4–5.4.5.
+* `deriv_Gamma_one`: `Γ'(1) = -γ`, DLMF 5.4.11.
+* `trigamma_one`, `trigamma_one_div_two`: `ψ'(1) = π²/6` and `ψ'(1/2) = π²/2`,
+  DLMF 5.4.12–5.4.13.
+* `digamma_nat_add_half`: `ψ(n + 1/2)`, DLMF 5.4.15.
+* `digamma_mul_I_im`, `digamma_half_add_mul_I_im`, `digamma_one_add_mul_I_im`: imaginary parts
+  of `ψ` on vertical lines, DLMF 5.4.16–5.4.18.
+* `digamma_rat_complex`, `digamma_rat`: Gauss's digamma theorem, DLMF 5.4.19.
 -/
 
 @[expose] public section

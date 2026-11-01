@@ -26,8 +26,14 @@ public import Mathlib.Tactic.NormNum.RealSqrt
 /-!
 # Entire sparse factorial series
 
-Mathlib's summable exponential series and locally uniform holomorphic convergence
-supply convergence and differentiability for bounded coefficients and injective exponents.
+Series `∑ cₙ z^{dₙ} / (dₙ! dₙ)` with bounded coefficients `cₙ` and injective positive exponents
+`dₙ`. Mathlib's summable exponential series and locally uniform holomorphic convergence supply
+convergence and differentiability.
+
+## Main results
+
+* `Complex.summable_factorial_div_nat`: the series converges absolutely.
+* `Complex.differentiable_tsum_factorial_div_nat`: the series defines an entire function.
 -/
 
 @[expose] public noncomputable section

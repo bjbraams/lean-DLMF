@@ -12,7 +12,16 @@ public import Mathlib.Analysis.Analytic.Binomial
 public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
 
 /-!
-# Coefficients of the ordinary Gauss series
+# Coefficients of the Gauss series
+
+## Main definitions
+
+* `gaussHGCoeff`: the coefficient of `z^n` in `₂F₁(a,b;c;z)`.
+
+## Main results
+
+* `ordinaryHypergeometricCoefficient_eq`: agreement with Mathlib's
+  `ordinaryHypergeometricCoefficient`.
 -/
 
 @[expose] public noncomputable section

@@ -14,21 +14,39 @@ public import Mathlib.Analysis.SpecialFunctions.Trigonometric.EulerSineProd
 public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 
 /-!
-# Coulomb functions: limiting forms (DLMF §§33.5, 33.10)
+# Coulomb functions: limiting forms
 
-Limiting forms of `F_ℓ(η,ρ)`, `G_ℓ(η,ρ)`, `H^±_ℓ(η,ρ)` and of `C_ℓ(η)`, `σ_ℓ(η)`:
+This file proves the limiting forms of `F_ℓ(η,ρ)`, `G_ℓ(η,ρ)`, `H^±_ℓ(η,ρ)` and of `C_ℓ(η)`,
+`σ_ℓ(η)` for small `ρ`, at `η = 0`, for small `|η|`, for large `ℓ` (DLMF §33.5) and as
+`η → ±∞` with `ηρ` fixed (DLMF §33.10).
 
-* §33.5(i)–(iv): small `ρ` (33.5.1–33.5.2), `η = 0` (33.5.3–33.5.6), small `|η|` (33.5.7),
-  large `ℓ` (33.5.8–33.5.9);
-* §33.10(ii)–(iii): `η → ±∞` with `ηρ` fixed (33.10.3–33.10.10). The large-`ρ` limits
-  33.10.1–33.10.2 are `tendsto_coulombF_sub_sin_and_coulombG_sub_cos` and
-  `tendsto_coulombHPlus_sub_exp` in `DLMF.Confluent.CoulombIrregular`; `H^-` is added here.
+## Main results
+
+* `coulombF_isEquivalent_zero`, `coulombG_isEquivalent_zero`: small `ρ` (DLMF 33.5.1–33.5.2).
+* `coulombF_zero_eq_sphericalJ`, `coulombG_zero_eq_sphericalY`, `coulombFG_zero_eq_bessel`,
+  `coulomb_zero_zero`: the case `η = 0` (DLMF 33.5.3–33.5.5).
+* `coulombC_zero`: `C_ℓ(0) = 1/(2ℓ+1)!!` (DLMF 33.5.6).
+* `phaseShift_zero_isEquivalent`: `σ_0(η) ∼ -γη` as `η → 0` (DLMF 33.5.7).
+* `coulomb_isEquivalent_large_ell`, `coulombC_isEquivalent_large_ell`: large `ℓ`
+  (DLMF 33.5.8–33.5.9).
+* `tendsto_coulombHMinus_sub_exp`: `H^-_ℓ(η,ρ) - e^{-iθ_ℓ(η,ρ)} → 0` as `ρ → ∞` (DLMF 33.10.2).
+* `coulomb_isEquivalent_eta_atTop`, `coulomb_zero_isEquivalent_eta_atTop`,
+  `coulomb_zero_deriv_isEquivalent_eta_atTop`, `phaseShift_coulombC_eta_atTop`: `η → +∞`
+  (DLMF 33.10.3–33.10.6).
+* `coulomb_eta_atBot`, `coulomb_zero_eta_atBot`, `coulomb_zero_deriv_eta_atBot`,
+  `phaseShift_coulombC_eta_atBot`: `η → -∞` (DLMF 33.10.7–33.10.10).
+
+## Implementation notes
+
+The large-`ρ` limits 33.10.1–33.10.2 for `F_ℓ`, `G_ℓ` and `H^+_ℓ` are
+`tendsto_coulombF_sub_sin_and_coulombG_sub_cos` and `tendsto_coulombHPlus_sub_exp` in
+`DLMF.Confluent.CoulombIrregular`.
 
 `∼` is `Asymptotics.IsEquivalent`. In §33.10 the limit `η → ±∞` with `ηρ = c` fixed is the limit
 of the function `η ↦ X(η, c/η)` along `atTop` (`atBot`); derivatives are in `ρ`, evaluated at
 `ρ = c/η`. The phase shift in 33.5.7, 33.10.6 and 33.10.10 is DLMF's continuous branch
 `phaseShift`; the principal-branch `coulombSigma` does not satisfy 33.10.6 or 33.10.10.
-Bessel functions: Mathlib's `Complex.besselJ`, the project's `DLMF.Bessel.besselY`,
+Bessel functions are Mathlib's `Complex.besselJ` and the project's `DLMF.Bessel.besselY`,
 `besselI`, `besselK`; the spherical `j_ℓ` is `DLMF.sphericalJ`, and the spherical `y_ℓ` is
 written out by DLMF 10.47.3, `y_ℓ(ρ) = (π/(2ρ))^{1/2} Y_{ℓ+1/2}(ρ)`.
 -/
@@ -47,11 +65,11 @@ open DLMF.Confluent DLMF.Bessel
 /-! ### §33.5(i) Small `ρ` -/
 
 /-- Kummer's `M(a,b,·)` is continuous. -/
-lemma q2b_continuous_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) : Continuous (kummerM a b) :=
+private lemma continuous_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) : Continuous (kummerM a b) :=
   continuous_iff_continuousAt.mpr fun z => (hasDerivAt_kummerM_shift (a := a) hb z).continuousAt
 
 /-- `F_ℓ'(η,x) = Re(C_ℓ(η) · coulombWaveDeriv)`. -/
-lemma q2b_deriv_coulombF (ℓ : ℕ) (η x : ℝ) :
+private lemma deriv_coulombF_eq_re (ℓ : ℕ) (η x : ℝ) :
     deriv (coulombF ℓ η) x = ((coulombC ℓ η : ℂ) * coulombWaveDeriv ℓ η x).re :=
   (hasDerivAt_re_comp
     (((hasDerivAt_coulombWave ℓ η (x : ℂ)).comp_ofReal).const_mul (coulombC ℓ η : ℂ))).deriv
@@ -66,8 +84,8 @@ theorem coulombF_isEquivalent_zero (ℓ : ℕ) (η : ℝ) :
   set b : ℂ := 2 * ℓ + 2
   have hb : ∀ k : ℕ, b ≠ -k := two_mul_nat_add_two_ne_neg_nat ℓ
   have hC := coulombC_pos ℓ η
-  have hM := q2b_continuous_kummerM (a := a) hb
-  have hM1 := q2b_continuous_kummerM (a := a + 1) (b := b + 1) (by
+  have hM := continuous_kummerM (a := a) hb
+  have hM1 := continuous_kummerM (a := a + 1) (b := b + 1) (by
     intro k hk; apply hb (k + 1); push_cast; linear_combination hk)
   constructor
   · set g : ℝ → ℂ := fun ρ => exp (-I * ρ) * kummerM a b (2 * I * ρ)
@@ -109,7 +127,7 @@ theorem coulombF_isEquivalent_zero (ℓ : ℕ) (η : ℝ) :
     filter_upwards [self_mem_nhdsWithin] with ρ hρ
     have hρ0 : (0 : ℝ) < ρ := hρ
     have hu : deriv (coulombF ℓ η) ρ = coulombC ℓ η * ρ ^ ℓ * (h ρ).re := by
-      rw [q2b_deriv_coulombF, show (coulombC ℓ η : ℂ) * coulombWaveDeriv ℓ η ρ =
+      rw [deriv_coulombF_eq_re, show (coulombC ℓ η : ℂ) * coulombWaveDeriv ℓ η ρ =
           ((coulombC ℓ η * ρ ^ ℓ : ℝ) : ℂ) * h ρ by
             simp only [coulombWaveDeriv, h, a, b]; push_cast; ring, re_ofReal_mul]
     rw [Pi.div_apply, hu]
@@ -118,13 +136,13 @@ theorem coulombF_isEquivalent_zero (ℓ : ℕ) (η : ℝ) :
 
 /-- The leading term of `H^+_ℓ` at `ρ → 0+`, from `U(a,b,z) ∼ Γ(b-1)/Γ(a) z^{1-b}`:
 it is `e^{iρ} ρ^{-ℓ}/((2ℓ+1) C_ℓ(η))`. -/
-lemma q2b_lead_eq (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+private lemma coulombHPlus_leading_term_eq (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     coulombAPlus ℓ η * (ρ : ℂ) ^ (ℓ + 1) * exp (I * ρ) *
       (Gamma ((2 * ℓ + 2 : ℂ) - 1) / Gamma ((ℓ : ℂ) + 1 + I * η) *
         (-2 * I * ρ : ℂ) ^ (1 - (2 * ℓ + 2 : ℂ))) =
       exp (I * ρ) * (((ρ ^ ℓ)⁻¹ / ((2 * ℓ + 1) * coulombC ℓ η) : ℝ) : ℂ) := by
   have hz : (-2 * I * ρ : ℂ) ≠ 0 := by simp [hρ.ne', I_ne_zero]
-  have hG := c33a_Gamma_ne_zero ℓ η
+  have hG := Gamma_nat_add_one_add_I_mul_ne_zero ℓ η
   have hGn : (‖Gamma ((ℓ : ℂ) + 1 + I * η)‖ : ℂ) ≠ 0 := by
     exact_mod_cast (norm_pos_iff.mpr hG).ne'
   have hpolar := norm_mul_exp_arg_mul_I (Gamma ((ℓ : ℂ) + 1 + I * η))
@@ -160,7 +178,7 @@ lemma q2b_lead_eq (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   ring
 
 /-- `ρ ↦ -2iρ` maps `0+` into the punctured neighbourhood of `0`. -/
-lemma q2b_tendsto_neg_two_I :
+private lemma tendsto_neg_two_I_mul_nhdsGT_zero :
     Tendsto (fun ρ : ℝ => (-2 * I * ρ : ℂ)) (𝓝[>] 0) (𝓝[≠] 0) := by
   refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ?_ ?_
   · have : Continuous (fun ρ : ℝ => (-2 * I * ρ : ℂ)) := by fun_prop
@@ -170,7 +188,7 @@ lemma q2b_tendsto_neg_two_I :
     simp [this.ne', I_ne_zero]
 
 /-- The remainder `U(a,b,z) - Γ(b-1)/Γ(a) z^{1-b}` at `z = -2iρ`, times the prefactor. -/
-lemma q2b_rem_isLittleO (ℓ : ℕ) (η : ℝ) :
+private lemma coulombHPlus_remainder_isLittleO (ℓ : ℕ) (η : ℝ) :
     (fun ρ : ℝ => coulombAPlus ℓ η * (ρ : ℂ) ^ (ℓ + 1) * exp (I * ρ) *
       (kummerU ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2) (-2 * I * ρ) -
         Gamma ((2 * ℓ + 2 : ℂ) - 1) / Gamma ((ℓ : ℂ) + 1 + I * η) *
@@ -185,7 +203,7 @@ lemma q2b_rem_isLittleO (ℓ : ℕ) (η : ℝ) :
     exact (continuous_id.tendsto 0).mono_left nhdsWithin_le_nhds
   rcases Nat.eq_zero_or_pos ℓ with rfl | hℓ
   · have h := (isBigO_kummerU_at_zero_b_two ((0 : ℕ) + 1 + I * η)).comp_tendsto
-      q2b_tendsto_neg_two_I
+      tendsto_neg_two_I_mul_nhdsGT_zero
     have hlog : (fun ρ : ℝ => (ρ : ℂ) * log (-2 * I * ρ : ℂ)) =o[𝓝[>] 0]
         (fun _ : ℝ => (1 : ℝ)) := by
       rw [isLittleO_one_iff]
@@ -215,7 +233,7 @@ lemma q2b_rem_isLittleO (ℓ : ℕ) (η : ℝ) :
     have hb2 : (2 * (ℓ : ℂ) + 2) ≠ 2 := by
       intro h; have := congrArg Complex.re h; simp at this; omega
     have h := (isBigO_kummerU_at_zero_re_ge_two ((ℓ : ℂ) + 1 + I * η) _ hb hb2).comp_tendsto
-      q2b_tendsto_neg_two_I
+      tendsto_neg_two_I_mul_nhdsGT_zero
     have hz : ((fun z : ℂ => z ^ (2 - (2 * (ℓ : ℂ) + 2).re : ℂ)) ∘ fun ρ : ℝ => (-2 * I * ρ : ℂ))
         =O[𝓝[>] 0] (fun ρ : ℝ => ((ρ : ℂ) ^ (2 * ℓ))⁻¹) := by
       refine IsBigO.of_bound 1 ?_
@@ -253,7 +271,7 @@ lemma q2b_rem_isLittleO (ℓ : ℕ) (η : ℝ) :
     ring
 
 /-- `ρ^{-m} = o(ρ^{-(m+j)})` as `ρ → 0+`, `j ≥ 1`. -/
-lemma q2b_inv_pow_isLittleO (m j : ℕ) (hj : 1 ≤ j) :
+private lemma inv_pow_isLittleO_inv_pow_add (m j : ℕ) (hj : 1 ≤ j) :
     (fun ρ : ℝ => (ρ ^ m)⁻¹) =o[𝓝[>] 0] (fun ρ : ℝ => (ρ ^ (m + j))⁻¹) := by
   have h1 : (fun ρ : ℝ => ρ ^ j) =o[𝓝[>] 0] (fun _ : ℝ => (1 : ℝ)) := by
     rw [isLittleO_one_iff]
@@ -267,7 +285,7 @@ lemma q2b_inv_pow_isLittleO (m j : ℕ) (hj : 1 ≤ j) :
   rw [pow_add]; field_simp
 
 /-- DLMF 33.5.2 for `G_ℓ` itself. -/
-lemma q2b_coulombG_isEquivalent_zero (ℓ : ℕ) (η : ℝ) :
+private lemma coulombG_isEquivalent_nhdsGT_zero (ℓ : ℕ) (η : ℝ) :
     coulombG ℓ η ~[𝓝[>] 0] (fun ρ => (ρ ^ ℓ)⁻¹ / ((2 * ℓ + 1) * coulombC ℓ η)) := by
   set v : ℝ → ℝ := fun ρ => (ρ ^ ℓ)⁻¹ / ((2 * ℓ + 1) * coulombC ℓ η) with hv
   have hC := coulombC_pos ℓ η
@@ -276,7 +294,7 @@ lemma q2b_coulombG_isEquivalent_zero (ℓ : ℕ) (η : ℝ) :
     refine IsBigO.of_bound ((2 * ℓ + 1) * coulombC ℓ η) (Eventually.of_forall fun ρ => ?_)
     simp only [hv, norm_div, Real.norm_eq_abs, abs_of_pos hk]
     rw [mul_div_cancel₀ _ hk.ne']
-  have hrem := ((q2b_rem_isLittleO ℓ η).trans_isBigO hvO)
+  have hrem := ((coulombHPlus_remainder_isLittleO ℓ η).trans_isBigO hvO)
   set r : ℝ → ℂ := fun ρ => coulombAPlus ℓ η * (ρ : ℂ) ^ (ℓ + 1) * exp (I * ρ) *
       (kummerU ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2) (-2 * I * ρ) -
         Gamma ((2 * ℓ + 2 : ℂ) - 1) / Gamma ((ℓ : ℂ) + 1 + I * η) *
@@ -296,7 +314,7 @@ lemma q2b_coulombG_isEquivalent_zero (ℓ : ℕ) (η : ℝ) :
   filter_upwards [self_mem_nhdsWithin] with ρ hρ
   have hρ' : (0 : ℝ) < ρ := hρ
   have hH := coulombHPlus_eq ℓ η hρ'
-  have hL := q2b_lead_eq ℓ η hρ'
+  have hL := coulombHPlus_leading_term_eq ℓ η hρ'
   have : coulombHPlus ℓ η ρ = r ρ + exp (I * ρ) * (v ρ : ℂ) := by
     rw [hH, hr, hv]; simp only; rw [← hL]; ring
   simp only [Pi.sub_apply]
@@ -310,17 +328,17 @@ theorem coulombG_isEquivalent_zero (ℓ : ℕ) (η : ℝ) :
     coulombG ℓ η ~[𝓝[>] 0] (fun ρ => (ρ ^ ℓ)⁻¹ / ((2 * ℓ + 1) * coulombC ℓ η)) ∧
       (1 ≤ ℓ → deriv (coulombG ℓ η) ~[𝓝[>] 0]
         (fun ρ => -(ℓ * (ρ ^ (ℓ + 1))⁻¹) / ((2 * ℓ + 1) * coulombC ℓ η))) := by
-  refine ⟨q2b_coulombG_isEquivalent_zero ℓ η, fun hℓ => ?_⟩
+  refine ⟨coulombG_isEquivalent_nhdsGT_zero ℓ η, fun hℓ => ?_⟩
   obtain ⟨m, rfl⟩ : ∃ m, ℓ = m + 1 := ⟨ℓ - 1, by omega⟩
-  have hGl := q2b_coulombG_isEquivalent_zero (m + 1) η
-  have hGm := q2b_coulombG_isEquivalent_zero m η
+  have hGl := coulombG_isEquivalent_nhdsGT_zero (m + 1) η
+  have hGm := coulombG_isEquivalent_nhdsGT_zero m η
   have hl : (0 : ℝ) < ((m + 1 : ℕ) : ℝ) := by positivity
   -- `S_ℓ ∼ ℓ/ρ`
   have hS : (fun ρ => recurrenceS (m + 1) η ρ) ~[𝓝[>] 0]
       (fun ρ : ℝ => ((m + 1 : ℕ) : ℝ) / ρ) := by
     have h0 : (fun _ : ℝ => η / ((m + 1 : ℕ) : ℝ)) =o[𝓝[>] 0]
         (fun ρ : ℝ => ((m + 1 : ℕ) : ℝ) / ρ) := by
-      have := (q2b_inv_pow_isLittleO 0 1 le_rfl).const_mul_left (η / ((m + 1 : ℕ) : ℝ))
+      have := (inv_pow_isLittleO_inv_pow_add 0 1 le_rfl).const_mul_left (η / ((m + 1 : ℕ) : ℝ))
       refine (this.const_mul_right' (c := ((m + 1 : ℕ) : ℝ)) (isUnit_iff_ne_zero.mpr hl.ne')
         ).congr' (Eventually.of_forall fun ρ => by simp) (Eventually.of_forall fun ρ => ?_)
       simp [div_eq_mul_inv]
@@ -337,7 +355,7 @@ theorem coulombG_isEquivalent_zero (ℓ : ℕ) (η : ℝ) :
     refine (hGm.isBigO.const_mul_left (recurrenceR (m + 1) η)).trans_isLittleO ?_
     have h1 : (fun ρ : ℝ => (ρ ^ m)⁻¹ / ((2 * m + 1) * coulombC m η)) =o[𝓝[>] 0]
         (fun ρ : ℝ => (ρ ^ (m + 2))⁻¹) :=
-      (q2b_inv_pow_isLittleO m 2 (by norm_num)).const_mul_left
+      (inv_pow_isLittleO_inv_pow_add m 2 (by norm_num)).const_mul_left
         ((2 * m + 1) * coulombC m η)⁻¹ |>.congr_left (fun ρ => by ring)
     refine (h1.const_mul_right' (c := -(((m + 1 : ℕ) : ℝ)) /
       ((2 * ((m + 1 : ℕ) : ℝ) + 1) * coulombC (m + 1) η)) (isUnit_iff_ne_zero.mpr hc)).congr'
@@ -411,7 +429,7 @@ theorem coulombF_zero_eq_sphericalJ (ℓ : ℕ) (ρ : ℝ) :
   linear_combination ((ρ : ℂ) ^ (ℓ + 1) * R) * he
 
 /-- `θ_ℓ(0,ρ) = ρ - ℓπ/2`. -/
-lemma q2b_coulombTheta_zero (ℓ : ℕ) (ρ : ℝ) : coulombTheta ℓ 0 ρ = ρ - ℓ * π / 2 := by
+private lemma coulombTheta_eta_zero (ℓ : ℕ) (ρ : ℝ) : coulombTheta ℓ 0 ρ = ρ - ℓ * π / 2 := by
   have : coulombSigma ℓ 0 = 0 := by
     rw [coulombSigma]
     simp only [ofReal_zero, mul_zero, add_zero]
@@ -420,7 +438,7 @@ lemma q2b_coulombTheta_zero (ℓ : ℕ) (ρ : ℝ) : coulombTheta ℓ 0 ρ = ρ 
   rw [coulombTheta, this]; ring
 
 /-- `√(2ρ) π/(2√π) = √(πρ/2)`. -/
-lemma q2b_sqrt_identity {ρ : ℝ} (hρ : 0 < ρ) :
+private lemma sqrt_two_mul_mul_pi_div_eq_sqrt {ρ : ℝ} (hρ : 0 < ρ) :
     Real.sqrt (2 * ρ) * π / (2 * Real.sqrt π) = Real.sqrt (π * ρ / 2) := by
   have hπ := Real.sqrt_pos.mpr Real.pi_pos
   have h2 : Real.sqrt (π * ρ / 2) * Real.sqrt 2 = Real.sqrt π * Real.sqrt ρ := by
@@ -436,7 +454,7 @@ lemma q2b_sqrt_identity {ρ : ℝ} (hρ : 0 < ρ) :
 
 /-- `H^+_ℓ(0,ρ) = (πρ/2)^{1/2} (i J_{ℓ+1/2}(ρ) - Y_{ℓ+1/2}(ρ))`, `ρ > 0`, via DLMF 13.6.10
 and 10.27.8. -/
-lemma q2b_coulombHPlus_zero (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) :
+private lemma coulombHPlus_eta_zero_eq_bessel (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) :
     coulombHPlus ℓ 0 ρ = Real.sqrt (π * ρ / 2) *
       (I * Complex.besselJ (ℓ + 1 / 2) ρ - besselY (ℓ + 1 / 2) ρ) := by
   set ν : ℂ := (ℓ : ℂ) + 1 / 2
@@ -446,7 +464,7 @@ lemma q2b_coulombHPlus_zero (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) :
   have hH := hankelH1_eq_besselK ν (z := (ρ : ℂ)) (by simp [hρ]) (by
     rw [arg_ofReal_of_nonneg hρ.le]; linarith [Real.pi_pos])
   have hw : (-2 * I * ρ : ℂ) ≠ 0 := by simp [hρ.ne', I_ne_zero]
-  rw [coulombHPlus, q2b_coulombTheta_zero]
+  rw [coulombHPlus, coulombTheta_eta_zero]
   simp only [ofReal_zero, mul_zero, add_zero]
   rw [show (ℓ : ℂ) + 1 = ν + 1 / 2 by simp [ν]; ring, show 2 * (ℓ : ℂ) + 2 = 2 * ν + 1 by
     simp [ν]; ring, show (-2 * I * ρ : ℂ) = 2 * (-I * ρ) by ring, hU]
@@ -478,7 +496,7 @@ lemma q2b_coulombHPlus_zero (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) :
     simp only [ν]; push_cast; ring_nf; exact Complex.exp_zero
   have hS : ((Real.sqrt (2 * ρ) : ℝ) : ℂ) * π / (2 * (Real.sqrt π : ℂ)) =
       (Real.sqrt (π * ρ / 2) : ℂ) := by
-    rw [← q2b_sqrt_identity hρ]; push_cast; ring
+    rw [← sqrt_two_mul_mul_pi_div_eq_sqrt hρ]; push_cast; ring
   have hsπ : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   calc exp (I * ((ρ - ℓ * π / 2 : ℝ) : ℂ)) * (2 * (-I * ρ) : ℂ) ^ (ν + 1 / 2) *
         (1 / (Real.sqrt π : ℂ) * exp (-I * ρ) * (2 * (-I * ρ) : ℂ) ^ (-ν) * besselK ν (-I * ρ))
@@ -494,7 +512,7 @@ lemma q2b_coulombHPlus_zero (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) :
         ring_nf; rw [I_sq]; ring
 
 /-- `F_ℓ(0,ρ) = (πρ/2)^{1/2} J_{ℓ+1/2}(ρ)`, `ρ > 0`. -/
-lemma q2b_coulombF_zero_bessel (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) :
+private lemma coulombF_eta_zero_eq_besselJ (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) :
     (coulombF ℓ 0 ρ : ℂ) = Real.sqrt (π * ρ / 2) * Complex.besselJ (ℓ + 1 / 2) ρ := by
   rw [coulombF_zero_eq_sphericalJ, DLMF.sphericalJ, DLMF.Bessel.besselJ_eq_regularized]
   have hρ2 : (0 : ℝ) < ρ / 2 := by positivity
@@ -522,7 +540,7 @@ lemma q2b_coulombF_zero_bessel (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) :
 theorem coulombG_zero_eq_sphericalY (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) :
     (coulombG ℓ 0 ρ : ℂ) = -(ρ * (Real.sqrt (π / (2 * ρ)) * besselY (ℓ + 1 / 2) ρ)) := by
   have h := (coulombH_eq_G_add_I_mul_F ℓ 0 hρ).1
-  rw [q2b_coulombHPlus_zero ℓ hρ, q2b_coulombF_zero_bessel ℓ hρ] at h
+  rw [coulombHPlus_eta_zero_eq_bessel ℓ hρ, coulombF_eta_zero_eq_besselJ ℓ hρ] at h
   have hs : ρ * Real.sqrt (π / (2 * ρ)) = Real.sqrt (π * ρ / 2) := by
     rw [show Real.sqrt (π * ρ / 2) = Real.sqrt (ρ ^ 2 * (π / (2 * ρ))) by
       congr 1; field_simp, Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq hρ.le]
@@ -536,9 +554,9 @@ theorem coulombG_zero_eq_sphericalY (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) :
 theorem coulombFG_zero_eq_bessel (ℓ : ℕ) {ρ : ℝ} (hρ : 0 < ρ) :
     (coulombF ℓ 0 ρ : ℂ) = Real.sqrt (π * ρ / 2) * Complex.besselJ (ℓ + 1 / 2) ρ ∧
       (coulombG ℓ 0 ρ : ℂ) = -(Real.sqrt (π * ρ / 2) * besselY (ℓ + 1 / 2) ρ) := by
-  refine ⟨q2b_coulombF_zero_bessel ℓ hρ, ?_⟩
+  refine ⟨coulombF_eta_zero_eq_besselJ ℓ hρ, ?_⟩
   have h := (coulombH_eq_G_add_I_mul_F ℓ 0 hρ).1
-  rw [q2b_coulombHPlus_zero ℓ hρ, q2b_coulombF_zero_bessel ℓ hρ] at h
+  rw [coulombHPlus_eta_zero_eq_bessel ℓ hρ, coulombF_eta_zero_eq_besselJ ℓ hρ] at h
   linear_combination -h
 
 /-- **DLMF 33.5.5**: `F_0(0,ρ) = sin ρ`, `G_0(0,ρ) = cos ρ`, `H^±_0(0,ρ) = e^{±iρ}`
@@ -590,7 +608,7 @@ theorem coulomb_zero_zero (ρ : ℝ) :
 /-! ### §33.5(iii) Small `|η|` -/
 
 /-- `0 ≤ x - arctan x ≤ x³/3` for `x ≥ 0`. -/
-lemma q2b_arctan_bounds {x : ℝ} (hx : 0 ≤ x) :
+private lemma sub_arctan_nonneg_and_le {x : ℝ} (hx : 0 ≤ x) :
     0 ≤ x - Real.arctan x ∧ x - Real.arctan x ≤ x ^ 3 / 3 := by
   have hg : Monotone (fun x : ℝ => x - Real.arctan x) := by
     refine monotone_of_deriv_nonneg ((differentiable_id).sub Real.differentiable_arctan) ?_
@@ -617,27 +635,27 @@ lemma q2b_arctan_bounds {x : ℝ} (hx : 0 ≤ x) :
   · have := hh hx; simp at this; linarith
 
 /-- `|x - arctan x| ≤ |x|³/3`. -/
-lemma q2b_abs_sub_arctan_le (x : ℝ) : |x - Real.arctan x| ≤ |x| ^ 3 / 3 := by
+private lemma abs_sub_arctan_le_abs_pow_three_div_three (x : ℝ) : |x - Real.arctan x| ≤ |x| ^ 3 / 3 := by
   rcases le_total 0 x with hx | hx
-  · obtain ⟨h1, h2⟩ := q2b_arctan_bounds hx
+  · obtain ⟨h1, h2⟩ := sub_arctan_nonneg_and_le hx
     rw [abs_of_nonneg h1, abs_of_nonneg hx]; exact h2
-  · obtain ⟨h1, h2⟩ := q2b_arctan_bounds (neg_nonneg.mpr hx)
+  · obtain ⟨h1, h2⟩ := sub_arctan_nonneg_and_le (neg_nonneg.mpr hx)
     rw [Real.arctan_neg] at h1 h2
     rw [abs_of_nonpos hx, ← abs_neg, abs_of_nonneg (by linarith)]
     linarith
 
 /-- The Weierstrass series in `phaseShift` is `O(|η|³)`. -/
-lemma q2b_abs_tsum_sub_arctan_le (η : ℝ) :
+private lemma abs_tsum_div_sub_arctan_le (η : ℝ) :
     |∑' n : ℕ, (η / (n + 1) - Real.arctan (η / (n + 1)))| ≤
       |η| ^ 3 / 3 * ∑' n : ℕ, (1 / ((n : ℝ) + 1) ^ 3) := by
   have hs : Summable (fun n : ℕ => 1 / ((n : ℝ) + 1) ^ 3) :=
     ((summable_nat_add_iff 1).mpr (Real.summable_one_div_nat_pow.mpr (by norm_num : 1 < 3))).congr
       fun n => by push_cast; rfl
   rw [← tsum_mul_left]
-  refine (norm_tsum_le_tsum_norm (q2a_summable_phase η).norm).trans ?_
-  refine (q2a_summable_phase η).norm.tsum_le_tsum (fun n => ?_) (hs.mul_left _)
+  refine (norm_tsum_le_tsum_norm (summable_div_succ_sub_arctan η).norm).trans ?_
+  refine (summable_div_succ_sub_arctan η).norm.tsum_le_tsum (fun n => ?_) (hs.mul_left _)
   rw [Real.norm_eq_abs]
-  refine (q2b_abs_sub_arctan_le _).trans_eq ?_
+  refine (abs_sub_arctan_le_abs_pow_three_div_three _).trans_eq ?_
   rw [abs_div, abs_of_pos (by positivity : (0 : ℝ) < n + 1)]
   field_simp
 
@@ -653,7 +671,7 @@ theorem phaseShift_zero_isEquivalent :
     refine IsBigO.of_bound (1 / 3 * C) (Eventually.of_forall fun η => ?_)
     simp only [phaseShift, Finset.range_zero, Finset.sum_empty, add_zero,
       add_sub_cancel_left, Real.norm_eq_abs, abs_pow]
-    refine (q2b_abs_tsum_sub_arctan_le η).trans_eq ?_
+    refine (abs_tsum_div_sub_arctan_le η).trans_eq ?_
     ring
   refine hO.trans_isLittleO ?_
   have h3 : (fun η : ℝ => η ^ 3) =o[𝓝 0] (fun η : ℝ => η ^ 1) := isLittleO_pow_pow (by norm_num)
@@ -662,37 +680,36 @@ theorem phaseShift_zero_isEquivalent :
 
 /-! ### §33.5(iv) Large `ℓ` -/
 
-section q2bPoch
-
+section Pochhammer
 open DLMF.Hypergeometric
 
 /-- `(a)_n = ∏_{j<n} (a + j)`. -/
-lemma q2b_poch_eq_prod (a : ℂ) (n : ℕ) : poch a n = ∏ j ∈ Finset.range n, (a + j) := by
+private lemma poch_eq_prod_range (a : ℂ) (n : ℕ) : poch a n = ∏ j ∈ Finset.range n, (a + j) := by
   induction n with
   | zero => simp [poch_zero]
   | succ n ih => rw [poch_succ, ih, Finset.prod_range_succ]
 
 /-- The terms of `M(ℓ+1-iη, 2ℓ+2, z)` as products of ratios. -/
-lemma q2b_term_eq (ℓ n : ℕ) (η : ℝ) (z : ℂ) :
+private lemma kummerM_term_eq_prod_ratio (ℓ n : ℕ) (η : ℝ) (z : ℂ) :
     poch ((ℓ : ℂ) + 1 - I * η) n / (poch (2 * ℓ + 2) n * n !) * z ^ n =
       (∏ j ∈ Finset.range n, (((ℓ : ℂ) + 1 - I * η + j) / (2 * ℓ + 2 + j))) * (z ^ n / n !) := by
   have hb : ∀ j ∈ Finset.range n, (2 * (ℓ : ℂ) + 2 + j) ≠ 0 := fun j _ => by
     have : (0 : ℝ) < 2 * ℓ + 2 + j := by positivity
     exact_mod_cast this.ne'
-  rw [Finset.prod_div_distrib, q2b_poch_eq_prod, q2b_poch_eq_prod]
+  rw [Finset.prod_div_distrib, poch_eq_prod_range, poch_eq_prod_range]
   have : ∏ j ∈ Finset.range n, (2 * (ℓ : ℂ) + 2 + j) ≠ 0 := Finset.prod_ne_zero_iff.mpr hb
   have hf : (n ! : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
   field_simp
 
 /-- `M(ℓ+1-iη, 2ℓ+2, 2iρ) → e^{iρ}` as `ℓ → ∞` (Tannery's theorem). -/
-lemma q2b_tendsto_kummerM_large (η ρ : ℝ) :
+private lemma tendsto_kummerM_coulomb_atTop_ell (η ρ : ℝ) :
     Tendsto (fun ℓ : ℕ => kummerM ((ℓ : ℂ) + 1 - I * η) (2 * ℓ + 2) (2 * I * ρ)) atTop
       (𝓝 (exp (I * ρ))) := by
   have hexp : exp (I * ρ) = ∑' n : ℕ, (I * ρ) ^ n / n ! := by
     simpa [exp_eq_exp_ℂ] using (congrFun (NormedSpace.exp_eq_tsum_div (𝔸 := ℂ)) (I * ρ))
   rw [hexp]
   unfold kummerM
-  simp_rw [q2b_term_eq]
+  simp_rw [kummerM_term_eq_prod_ratio]
   refine tendsto_tsum_of_dominated_convergence (bound := fun n => ‖(2 * I * ρ : ℂ)‖ ^ n / n !)
     (Real.summable_pow_div_factorial _) (fun n => ?_) ?_
   · have hj : ∀ j ∈ Finset.range n, Tendsto (fun ℓ : ℕ => ((ℓ : ℂ) + 1 - I * η + j) /
@@ -746,10 +763,10 @@ lemma q2b_tendsto_kummerM_large (η ρ : ℝ) :
       _ = _ := one_mul _
 
 /-- `F_ℓ(η,ρ)/(C_ℓ(η) ρ^{ℓ+1}) → 1` as `ℓ → ∞`. -/
-lemma q2b_tendsto_coulombF_ratio (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+private lemma tendsto_coulombF_div_coulombC_mul_pow (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     Tendsto (fun ℓ : ℕ => coulombF ℓ η ρ / (coulombC ℓ η * ρ ^ (ℓ + 1))) atTop (𝓝 1) := by
   have h := ((Complex.continuous_re.tendsto _).comp
-    ((q2b_tendsto_kummerM_large η ρ).const_mul (exp (-I * ρ))))
+    ((tendsto_kummerM_coulomb_atTop_ell η ρ).const_mul (exp (-I * ρ))))
   rw [Function.comp_def, ← Complex.exp_add, show -I * (ρ : ℂ) + I * ρ = 0 by ring,
     Complex.exp_zero, one_re] at h
   refine h.congr fun ℓ => ?_
@@ -767,7 +784,7 @@ lemma q2b_tendsto_coulombF_ratio (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   ring
 
 /-- If `ε_n → 0` and `g_{n+1} = 1 + ε_n g_n`, then `g_n → 1`. -/
-lemma q2b_tendsto_of_rec {g ε : ℕ → ℝ} (hε : Tendsto ε atTop (𝓝 0))
+private lemma tendsto_one_of_eq_one_add_mul {g ε : ℕ → ℝ} (hε : Tendsto ε atTop (𝓝 0))
     (hg : ∀ n, g (n + 1) = 1 + ε n * g n) : Tendsto g atTop (𝓝 1) := by
   obtain ⟨N, hN⟩ := eventually_atTop.mp (hε.eventually (Metric.ball_mem_nhds 0
     (by norm_num : (0 : ℝ) < 1 / 2)))
@@ -790,8 +807,7 @@ lemma q2b_tendsto_of_rec {g ε : ℕ → ℝ} (hε : Tendsto ε atTop (𝓝 0))
   rw [← tendsto_add_atTop_iff_nat 1]
   exact this.congr fun n => (hg n).symm
 
-end q2bPoch
-
+end Pochhammer
 /-- **DLMF 33.5.8**: as `ℓ → ∞` with `η` and `ρ > 0` fixed, `F_ℓ(η,ρ) ∼ C_ℓ(η) ρ^{ℓ+1}` and
 `G_ℓ(η,ρ) ∼ ρ^{-ℓ}/((2ℓ+1) C_ℓ(η))`. -/
 @[dlmf 33.5.E8]
@@ -799,15 +815,15 @@ theorem coulomb_isEquivalent_large_ell (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     (fun ℓ : ℕ => coulombF ℓ η ρ) ~[atTop] (fun ℓ => coulombC ℓ η * ρ ^ (ℓ + 1)) ∧
       (fun ℓ : ℕ => coulombG ℓ η ρ) ~[atTop]
         (fun ℓ => (ρ ^ ℓ)⁻¹ / ((2 * ℓ + 1) * coulombC ℓ η)) := by
-  have hq := q2b_tendsto_coulombF_ratio η hρ
+  have hq := tendsto_coulombF_div_coulombC_mul_pow η hρ
   refine ⟨isEquivalent_of_tendsto_one hq, ?_⟩
   set q : ℕ → ℝ := fun ℓ => coulombF ℓ η ρ / (coulombC ℓ η * ρ ^ (ℓ + 1)) with hqdef
   set R : ℕ → ℝ := fun ℓ => recurrenceR (ℓ + 1) η with hRdef
   set g : ℕ → ℝ := fun ℓ => R ℓ * coulombF ℓ η ρ * coulombG (ℓ + 1) η ρ with hgdef
-  have hRpos : ∀ ℓ, 0 < R ℓ := fun ℓ => c33a_recurrenceR_pos ℓ η
+  have hRpos : ∀ ℓ, 0 < R ℓ := fun ℓ => recurrenceR_succ_pos ℓ η
   have hR : ∀ ℓ, R ℓ * ((ℓ + 1) / Real.sqrt (((ℓ : ℝ) + 1) ^ 2 + η ^ 2)) = 1 := fun ℓ => by
     simp only [hRdef]
-    rw [c33a_recurrenceR_succ]
+    rw [recurrenceR_succ]
     have : 0 < Real.sqrt (((ℓ : ℝ) + 1) ^ 2 + η ^ 2) := Real.sqrt_pos.mpr (by positivity)
     field_simp
   have hRC : ∀ ℓ, R ℓ * coulombC ℓ η = (2 * ((ℓ + 1 : ℕ) : ℝ) + 1) * coulombC (ℓ + 1) η :=
@@ -865,7 +881,7 @@ theorem coulomb_isEquivalent_large_ell (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     ring
   have hgt : Tendsto g atTop (𝓝 1) := by
     rw [← tendsto_add_atTop_iff_nat N]
-    exact q2b_tendsto_of_rec ((tendsto_add_atTop_iff_nat N).mpr hεt) fun n => by
+    exact tendsto_one_of_eq_one_add_mul ((tendsto_add_atTop_iff_nat N).mpr hεt) fun n => by
       rw [show n + 1 + N = n + N + 1 by ring]; exact hrec n
   refine isEquivalent_of_tendsto_one ?_
   rw [← tendsto_add_atTop_iff_nat 1]
@@ -885,7 +901,7 @@ theorem coulomb_isEquivalent_large_ell (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   field_simp
 
 /-- Asymptotic equivalence of positive functions from their squares. -/
-lemma q2b_isEquivalent_of_sq {α : Type*} {l : Filter α} {u v : α → ℝ}
+private lemma isEquivalent_of_tendsto_sq_div_sq {α : Type*} {l : Filter α} {u v : α → ℝ}
     (hu : ∀ᶠ x in l, 0 < u x) (hv : ∀ᶠ x in l, 0 < v x)
     (h : Tendsto (fun x => u x ^ 2 / v x ^ 2) l (𝓝 1)) : u ~[l] v := by
   refine isEquivalent_of_tendsto_one ?_
@@ -897,7 +913,7 @@ lemma q2b_isEquivalent_of_sq {α : Type*} {l : Filter α} {u v : α → ℝ}
   exact Real.sqrt_sq (div_pos hux hvx).le
 
 /-- Euler's product for `sinh(πη)/(πη)`. -/
-lemma q2b_tendsto_prod_sinh {η : ℝ} (hη : η ≠ 0) :
+private lemma tendsto_prod_one_add_sq_div_sq_sinh {η : ℝ} (hη : η ≠ 0) :
     Tendsto (fun n : ℕ => ∏ j ∈ Finset.range n, (1 + η ^ 2 / ((j : ℝ) + 1) ^ 2)) atTop
       (𝓝 (Real.sinh (π * η) / (π * η))) := by
   have h := (Complex.tendsto_euler_sin_prod (I * η)).div_const (π * (I * η))
@@ -921,7 +937,7 @@ lemma q2b_tendsto_prod_sinh {η : ℝ} (hη : η ≠ 0) :
   exact this
 
 /-- `∏_{k=1}^ℓ (η²+k²) = (ℓ!)² ∏_{k=1}^ℓ (1 + η²/k²)`. -/
-lemma q2b_prod_Icc_eq (η : ℝ) (ℓ : ℕ) :
+private lemma prod_Icc_sq_add_sq_eq_factorial_sq_mul (η : ℝ) (ℓ : ℕ) :
     ∏ k ∈ Finset.Icc 1 ℓ, (η ^ 2 + (k : ℝ) ^ 2) =
       (ℓ ! : ℝ) ^ 2 * ∏ j ∈ Finset.range ℓ, (1 + η ^ 2 / ((j : ℝ) + 1) ^ 2) := by
   induction ℓ with
@@ -934,19 +950,19 @@ lemma q2b_prod_Icc_eq (η : ℝ) (ℓ : ℕ) :
     ring
 
 /-- `|Γ(ℓ+1+iη)|/ℓ! → 1` as `ℓ → ∞` (squared form). -/
-lemma q2b_tendsto_norm_Gamma_div_factorial (η : ℝ) :
+private lemma tendsto_norm_Gamma_div_factorial_sq (η : ℝ) :
     Tendsto (fun ℓ : ℕ => (‖Gamma ((ℓ : ℂ) + 1 + I * η)‖ / ℓ !) ^ 2) atTop (𝓝 1) := by
   have hrw : ∀ ℓ : ℕ, (‖Gamma ((ℓ : ℂ) + 1 + I * η)‖ / ℓ !) ^ 2 =
       ‖Gamma (1 + I * η)‖ ^ 2 * ∏ j ∈ Finset.range ℓ, (1 + η ^ 2 / ((j : ℝ) + 1) ^ 2) := by
     intro ℓ
     have hf : (ℓ ! : ℝ) ≠ 0 := by positivity
-    rw [div_pow, c33a_normSq_Gamma_succ, q2b_prod_Icc_eq]
+    rw [div_pow, norm_Gamma_nat_add_one_add_I_mul_sq, prod_Icc_sq_add_sq_eq_factorial_sq_mul]
     field_simp
   simp_rw [hrw]
   rcases eq_or_ne η 0 with rfl | hη
   · simp
-  have := (q2b_tendsto_prod_sinh hη).const_mul (‖Gamma (1 + I * η)‖ ^ 2)
-  rw [c33a_normSq_Gamma_one η hη] at this ⊢
+  have := (tendsto_prod_one_add_sq_div_sq_sinh hη).const_mul (‖Gamma (1 + I * η)‖ ^ 2)
+  rw [norm_Gamma_one_add_I_mul_sq η hη] at this ⊢
   convert this using 2
   have hs : Real.sinh (π * η) ≠ 0 := by
     rw [Ne, Real.sinh_eq_zero]; exact mul_ne_zero Real.pi_ne_zero hη
@@ -954,7 +970,7 @@ lemma q2b_tendsto_norm_Gamma_div_factorial (η : ℝ) :
   field_simp
 
 /-- `C_ℓ(η) = e^{-πη/2}/(2ℓ+1)!! · |Γ(ℓ+1+iη)|/ℓ!`. -/
-lemma q2b_coulombC_eq (ℓ : ℕ) (η : ℝ) :
+private lemma coulombC_eq_doubleFactorial_norm_Gamma (ℓ : ℕ) (η : ℝ) :
     coulombC ℓ η = Real.exp (-π * η / 2) / (2 * ℓ + 1)‼ *
       (‖Gamma ((ℓ : ℂ) + 1 + I * η)‖ / ℓ !) := by
   rw [coulombC, Nat.factorial_eq_mul_doubleFactorial, Nat.doubleFactorial_two_mul]
@@ -965,7 +981,7 @@ lemma q2b_coulombC_eq (ℓ : ℕ) (η : ℝ) :
 
 
 /-- The ratio in DLMF 33.5.9 in terms of Stirling's sequence. -/
-lemma q2b_doubleFactorial_ratio {ℓ : ℕ} (hℓ : 1 ≤ ℓ) :
+private lemma doubleFactorial_ratio_eq_stirlingSeq {ℓ : ℕ} (hℓ : 1 ≤ ℓ) :
     Real.sqrt 2 * (2 * (ℓ : ℝ)) ^ (ℓ + 1) / ((2 * ℓ + 1)‼ * Real.exp ℓ) =
       Stirling.stirlingSeq ℓ / Stirling.stirlingSeq (2 * ℓ) * (2 * ℓ / (2 * ℓ + 1)) := by
   have h1 : ((2 * ℓ + 1)‼ : ℝ) = (2 * ℓ + 1) * (2 * ℓ)! / (2 ^ ℓ * ℓ !) := by
@@ -999,10 +1015,10 @@ theorem coulombC_isEquivalent_large_ell (η : ℝ) :
         (fun ℓ => Real.exp (-π * η / 2) *
           (Real.exp ℓ / (Real.sqrt 2 * (2 * (ℓ : ℝ)) ^ (ℓ + 1)))) := by
   constructor
-  · refine q2b_isEquivalent_of_sq (Eventually.of_forall fun ℓ => coulombC_pos ℓ η)
+  · refine isEquivalent_of_tendsto_sq_div_sq (Eventually.of_forall fun ℓ => coulombC_pos ℓ η)
       (Eventually.of_forall fun ℓ => by positivity) ?_
-    refine (q2b_tendsto_norm_Gamma_div_factorial η).congr fun ℓ => ?_
-    rw [q2b_coulombC_eq, mul_pow]
+    refine (tendsto_norm_Gamma_div_factorial_sq η).congr fun ℓ => ?_
+    rw [coulombC_eq_doubleFactorial_norm_Gamma, mul_pow]
     have : (Real.exp (-π * η / 2) / ((2 * ℓ + 1)‼ : ℝ)) ^ 2 ≠ 0 := by positivity
     field_simp
   · refine isEquivalent_of_tendsto_one ?_
@@ -1019,7 +1035,7 @@ theorem coulombC_isEquivalent_large_ell (η : ℝ) :
     refine this.congr' ?_
     filter_upwards [eventually_ge_atTop 1] with ℓ hℓ
     simp only [Pi.div_apply, Function.comp_apply, id]
-    rw [← q2b_doubleFactorial_ratio hℓ]
+    rw [← doubleFactorial_ratio_eq_stirlingSeq hℓ]
     have he := Real.exp_pos (-π * η / 2)
     have : (1 : ℝ) ≤ ℓ := by exact_mod_cast hℓ
     have : (0 : ℝ) < (2 * ℓ : ℝ) := by linarith
@@ -1028,34 +1044,33 @@ theorem coulombC_isEquivalent_large_ell (η : ℝ) :
 
 /-! ### The phase shift and `C_0` for large `|η|` (via Binet's formula) -/
 
-section q2bBinet
-
+section Binet
 open DLMF.Gamma
 
 /-- `1 + iη` lies in the slit plane. -/
-lemma q2b_mem_slitPlane (η : ℝ) : (1 + I * η : ℂ) ∈ slitPlane :=
+private lemma one_add_I_mul_mem_slitPlane (η : ℝ) : (1 + I * η : ℂ) ∈ slitPlane :=
   mem_slitPlane_iff.mpr (Or.inl (by simp))
 
 /-- `η ↦ Im` of Binet's exponent at `1 + iη` is continuous. -/
-lemma q2b_continuous_im_binet :
+private lemma continuous_im_binetExponent_one_add_I_mul :
     Continuous (fun η : ℝ => (binetExponent (1 + I * η)).im) := by
   refine continuous_im.comp ?_
   rw [continuous_iff_continuousAt]
   intro η
   have h := (differentiableOn_binetExponent.differentiableAt
-    (isOpen_slitPlane.mem_nhds (q2b_mem_slitPlane η))).continuousAt
+    (isOpen_slitPlane.mem_nhds (one_add_I_mul_mem_slitPlane η))).continuousAt
   exact ContinuousAt.comp (g := binetExponent) h
     ((by fun_prop : Continuous fun η : ℝ => (1 + I * η : ℂ)).continuousAt)
 
 /-- Binet's exponent is real at `1`. -/
-lemma q2b_binetExponent_one_im : (binetExponent (1 + I * ((0 : ℝ) : ℂ))).im = 0 := by
+private lemma im_binetExponent_one : (binetExponent (1 + I * ((0 : ℝ) : ℂ))).im = 0 := by
   have := binetExponent_ofReal (x := 1) one_pos
   simp only [ofReal_zero, mul_zero, add_zero]
   rw [show (1 : ℂ) = ((1 : ℝ) : ℂ) by simp, this, ofReal_im]
 
 /-- The continuous-branch phase shift `σ_0(η)` is the imaginary part of Binet's Stirling
 exponent at `1 + iη`. -/
-lemma q2b_phaseShift_zero_eq_im (η : ℝ) :
+private lemma phaseShift_zero_eq_im_binetExponent (η : ℝ) :
     phaseShift 0 η = (binetExponent (1 + I * η)).im := by
   obtain ⟨hspec, h0, hc⟩ := phaseShift_spec 0
   set f : ℝ → ℝ := fun η => phaseShift 0 η - (binetExponent (1 + I * η)).im with hf
@@ -1063,7 +1078,7 @@ lemma q2b_phaseShift_zero_eq_im (η : ℝ) :
     intro t _
     have hs := hspec t
     simp only [Nat.cast_zero, zero_add] at hs
-    rw [Gamma_eq_exp_binetExponent (q2b_mem_slitPlane t)] at hs
+    rw [Gamma_eq_exp_binetExponent (one_add_I_mul_mem_slitPlane t)] at hs
     set B := binetExponent (1 + I * t)
     have hB : exp B = (Real.exp B.re : ℂ) * exp (I * B.im) := by
       rw [ofReal_exp, ← Complex.exp_add]; congr 1; apply Complex.ext <;> simp
@@ -1078,20 +1093,20 @@ lemma q2b_phaseShift_zero_eq_im (η : ℝ) :
     simp at this
     simp only [hf, zsmul_eq_mul]
     linarith
-  have hcont : Continuous f := hc.sub q2b_continuous_im_binet
+  have hcont : Continuous f := hc.sub continuous_im_binetExponent_one_add_I_mul
   have hdisc : IsDiscrete (AddSubgroup.zmultiples (2 * π) : Set ℝ) :=
     isDiscrete_iff_discreteTopology.mpr
       (inferInstanceAs (DiscreteTopology (AddSubgroup.zmultiples (2 * π))))
   have := (isPreconnected_univ (α := ℝ)).constant_of_mapsTo hdisc hcont.continuousOn hmaps
     (mem_univ η) (mem_univ 0)
-  have hf0 : f 0 = 0 := by simp only [hf, h0, q2b_binetExponent_one_im, sub_zero]
+  have hf0 : f 0 = 0 := by simp only [hf, h0, im_binetExponent_one, sub_zero]
   rw [hf0] at this
   simp only [hf] at this
   linarith
 
 
 /-- The imaginary part of Binet's exponent at `1 + iη`. -/
-lemma q2b_im_binet (η : ℝ) :
+private lemma im_binetExponent_one_add_I_mul (η : ℝ) :
     (binetExponent (1 + I * η)).im = arg (1 + I * η) / 2 + η * Real.log ‖1 + I * (η : ℂ)‖ - η +
       (binetMu (1 + I * η)).im := by
   have h2 : (log (2 * π : ℂ)).im = 0 := by
@@ -1102,7 +1117,7 @@ lemma q2b_im_binet (η : ℝ) :
   ring
 
 /-- `ph(1 + iη) = arctan η`. -/
-lemma q2b_arg_one_add_I_mul (η : ℝ) : arg (1 + I * η) = Real.arctan η := by
+private lemma arg_one_add_I_mul (η : ℝ) : arg (1 + I * η) = Real.arctan η := by
   have hre : 0 < (1 + I * (η : ℂ)).re := by simp
   have habs := abs_arg_lt_pi_div_two_iff.mpr (Or.inl hre)
   rw [abs_lt] at habs
@@ -1112,23 +1127,23 @@ lemma q2b_arg_one_add_I_mul (η : ℝ) : arg (1 + I * η) = Real.arctan η := by
     _ = Real.arctan η := by rw [ht]
 
 /-- `|1 + iη| = √(1 + η²)`. -/
-lemma q2b_norm_one_add_I_mul (η : ℝ) : ‖1 + I * (η : ℂ)‖ = Real.sqrt (1 + η ^ 2) := by
+private lemma norm_one_add_I_mul (η : ℝ) : ‖1 + I * (η : ℂ)‖ = Real.sqrt (1 + η ^ 2) := by
   rw [show (1 + I * η : ℂ) = ((1 : ℝ) : ℂ) + η * I by push_cast; ring, norm_add_mul_I]
   norm_num
 
 /-- Stieltjes' bound at `1 + iη`. -/
-lemma q2b_norm_binetMu_le {η : ℝ} (hη : η ≠ 0) : ‖binetMu (1 + I * η)‖ ≤ 1 / (6 * |η|) := by
-  refine (norm_binetMu_le (q2b_mem_slitPlane η)).trans ?_
+private lemma norm_binetMu_one_add_I_mul_le {η : ℝ} (hη : η ≠ 0) : ‖binetMu (1 + I * η)‖ ≤ 1 / (6 * |η|) := by
+  refine (norm_binetMu_le (one_add_I_mul_mem_slitPlane η)).trans ?_
   have hre : (1 + I * (η : ℂ)).re = 1 := by simp
   have : |η| ≤ ‖1 + I * (η : ℂ)‖ := by
-    rw [q2b_norm_one_add_I_mul]
+    rw [norm_one_add_I_mul]
     exact Real.abs_le_sqrt (by linarith)
   rw [hre]
   apply one_div_le_one_div_of_le (by positivity)
   linarith
 
 /-- The phase part of DLMF 33.10.6. -/
-lemma q2b_tendsto_phaseShift_zero_atTop :
+private lemma tendsto_phaseShift_zero_sub_atTop :
     Tendsto (fun η => phaseShift 0 η - (η * (Real.log η - 1) + π / 4)) atTop (𝓝 0) := by
   have hA : Tendsto (fun η : ℝ => Real.arctan η / 2 - π / 4) atTop (𝓝 0) := by
     have := (Real.tendsto_arctan_atTop.mono_right nhdsWithin_le_nhds).div_const 2 |>.sub_const
@@ -1164,17 +1179,17 @@ lemma q2b_tendsto_phaseShift_zero_atTop :
     refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds hup
       (Eventually.of_forall fun η => abs_nonneg _) ?_
     filter_upwards [eventually_gt_atTop 0] with η hη
-    exact (abs_im_le_norm _).trans (q2b_norm_binetMu_le hη.ne')
+    exact (abs_im_le_norm _).trans (norm_binetMu_one_add_I_mul_le hη.ne')
   have := (hA.add hL).add hM
   rw [add_zero, add_zero] at this
   refine this.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with η hη
-  rw [q2b_phaseShift_zero_eq_im, q2b_im_binet, q2b_arg_one_add_I_mul, q2b_norm_one_add_I_mul]
+  rw [phaseShift_zero_eq_im_binetExponent, im_binetExponent_one_add_I_mul, arg_one_add_I_mul, norm_one_add_I_mul]
   ring
 
 
 /-- `σ_0` is odd. -/
-lemma q2b_phaseShift_zero_neg (η : ℝ) : phaseShift 0 (-η) = -phaseShift 0 η := by
+private lemma phaseShift_zero_neg (η : ℝ) : phaseShift 0 (-η) = -phaseShift 0 η := by
   simp only [phaseShift, Finset.range_zero, Finset.sum_empty, add_zero, neg_div,
     Real.arctan_neg, sub_neg_eq_add]
   rw [show (fun n : ℕ => -(η / (n + 1)) + Real.arctan (η / (n + 1))) =
@@ -1182,25 +1197,25 @@ lemma q2b_phaseShift_zero_neg (η : ℝ) : phaseShift 0 (-η) = -phaseShift 0 η
   ring
 
 /-- The phase part of DLMF 33.10.10. -/
-lemma q2b_tendsto_phaseShift_zero_atBot :
+private lemma tendsto_phaseShift_zero_sub_atBot :
     Tendsto (fun η => phaseShift 0 η - (η * (Real.log (-η) - 1) - π / 4)) atBot (𝓝 0) := by
-  have := (q2b_tendsto_phaseShift_zero_atTop.comp tendsto_neg_atBot_atTop).neg
+  have := (tendsto_phaseShift_zero_sub_atTop.comp tendsto_neg_atBot_atTop).neg
   rw [neg_zero] at this
   refine this.congr fun η => ?_
-  simp only [Function.comp_apply, q2b_phaseShift_zero_neg]
+  simp only [Function.comp_apply, phaseShift_zero_neg]
   ring
 
 /-- `C_0(η)² = 2πη/(e^{2πη} - 1)`, `η ≠ 0`. -/
-lemma q2b_coulombC_zero_sq {η : ℝ} (hη : η ≠ 0) :
+private lemma coulombC_zero_sq {η : ℝ} (hη : η ≠ 0) :
     coulombC 0 η ^ 2 = 2 * π * η / (Real.exp (π * η) ^ 2 - 1) := by
   rw [coulombC_sq_eq_prod 0 hη, ← Real.exp_nat_mul]
   simp
   ring_nf
 
 /-- The `C_0` part of DLMF 33.10.6. -/
-lemma q2b_coulombC_zero_atTop :
+private lemma coulombC_zero_isEquivalent_atTop :
     (fun η => coulombC 0 η) ~[atTop] (fun η => Real.sqrt (2 * π * η) * Real.exp (-π * η)) := by
-  refine q2b_isEquivalent_of_sq (Eventually.of_forall fun η => coulombC_pos 0 η) ?_ ?_
+  refine isEquivalent_of_tendsto_sq_div_sq (Eventually.of_forall fun η => coulombC_pos 0 η) ?_ ?_
   · filter_upwards [eventually_gt_atTop 0] with η hη
     exact mul_pos (Real.sqrt_pos.mpr (by positivity)) (Real.exp_pos _)
   have he : Tendsto (fun η : ℝ => Real.exp (-π * η)) atTop (𝓝 0) :=
@@ -1210,7 +1225,7 @@ lemma q2b_coulombC_zero_atTop :
   rw [zero_pow two_ne_zero, sub_zero, inv_one] at this
   refine this.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with η hη
-  rw [q2b_coulombC_zero_sq hη.ne', mul_pow, Real.sq_sqrt (by positivity)]
+  rw [coulombC_zero_sq hη.ne', mul_pow, Real.sq_sqrt (by positivity)]
   rw [show -π * η = -(π * η) by ring, Real.exp_neg]
   have hE1 : Real.exp (π * η) ^ 2 - 1 ≠ 0 := by
     have : 1 < Real.exp (π * η) := Real.one_lt_exp_iff.mpr (by positivity)
@@ -1223,9 +1238,9 @@ lemma q2b_coulombC_zero_atTop :
   field_simp
 
 /-- The `C_0` part of DLMF 33.10.10. -/
-lemma q2b_coulombC_zero_atBot :
+private lemma coulombC_zero_isEquivalent_atBot :
     (fun η => coulombC 0 η) ~[atBot] (fun η => Real.sqrt (-2 * π * η)) := by
-  refine q2b_isEquivalent_of_sq (Eventually.of_forall fun η => coulombC_pos 0 η) ?_ ?_
+  refine isEquivalent_of_tendsto_sq_div_sq (Eventually.of_forall fun η => coulombC_pos 0 η) ?_ ?_
   · filter_upwards [eventually_lt_atBot 0] with η hη
     exact Real.sqrt_pos.mpr (by nlinarith [Real.pi_pos])
   have he : Tendsto (fun η : ℝ => Real.exp (π * η)) atBot (𝓝 0) :=
@@ -1234,7 +1249,7 @@ lemma q2b_coulombC_zero_atBot :
   rw [zero_pow two_ne_zero, sub_zero, inv_one] at this
   refine this.congr' ?_
   filter_upwards [eventually_lt_atBot 0] with η hη
-  rw [q2b_coulombC_zero_sq hη.ne, Real.sq_sqrt (by nlinarith [Real.pi_pos])]
+  rw [coulombC_zero_sq hη.ne, Real.sq_sqrt (by nlinarith [Real.pi_pos])]
   have hE1 : Real.exp (π * η) ^ 2 - 1 ≠ 0 := by
     have : Real.exp (π * η) < 1 := Real.exp_lt_one_iff.mpr (by nlinarith [Real.pi_pos])
     nlinarith [Real.exp_pos (π * η)]
@@ -1244,8 +1259,7 @@ lemma q2b_coulombC_zero_atBot :
   field_simp
   ring
 
-end q2bBinet
-
+end Binet
 /-! ### §33.10(i) Large `ρ` -/
 
 /-- **DLMF 33.10.2**, lower sign: `H^-_ℓ(η,ρ) ∼ e^{-iθ_ℓ(η,ρ)}` as `ρ → ∞`, in the form
@@ -1307,7 +1321,7 @@ as `η → ∞` (continuous branch of `σ_0`). -/
 theorem phaseShift_coulombC_eta_atTop :
     Tendsto (fun η => phaseShift 0 η - (η * (Real.log η - 1) + π / 4)) atTop (𝓝 0) ∧
       (fun η => coulombC 0 η) ~[atTop] (fun η => Real.sqrt (2 * π * η) * Real.exp (-π * η)) :=
-  ⟨q2b_tendsto_phaseShift_zero_atTop, q2b_coulombC_zero_atTop⟩
+  ⟨tendsto_phaseShift_zero_sub_atTop, coulombC_zero_isEquivalent_atTop⟩
 
 /-! ### §33.10(iii) Large negative `η` -/
 
@@ -1359,6 +1373,6 @@ theorem coulomb_zero_deriv_eta_atBot {c : ℝ} (hc : c < 0) :
 theorem phaseShift_coulombC_eta_atBot :
     Tendsto (fun η => phaseShift 0 η - (η * (Real.log (-η) - 1) - π / 4)) atBot (𝓝 0) ∧
       (fun η => coulombC 0 η) ~[atBot] (fun η => Real.sqrt (-2 * π * η)) :=
-  ⟨q2b_tendsto_phaseShift_zero_atBot, q2b_coulombC_zero_atBot⟩
+  ⟨tendsto_phaseShift_zero_sub_atBot, coulombC_zero_isEquivalent_atBot⟩
 
 end DLMF.Coulomb

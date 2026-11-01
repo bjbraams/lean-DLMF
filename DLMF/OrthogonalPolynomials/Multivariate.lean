@@ -11,13 +11,28 @@ public import Mathlib.Analysis.SpecialFunctions.PolarCoord
 /-!
 # Disk and triangle orthogonal polynomials
 
-Statements from NIST DLMF Chapter 18, each tagged with its equation number by `@[dlmf]`.
-Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
-hypergeometric definitions do not implement continuation in singular parameters.
+The disk polynomials and triangle polynomials of DLMF §18.37, with their polar form,
+normalization and orthogonality.
 
-The disk proof uses Mathlib’s polar-coordinate integration formula; the triangle proof
-uses Mathlib’s Jacobian change-of-variables theorem. Both separate into the proved
-one-variable Jacobi orthogonality integrals using `MeasureTheory.integral_prod_mul`.
+## Main definitions
+
+* `diskPolynomial`: the disk polynomials `R_{m,n}^{(α)}(z)` in `z` and `z̄` (DLMF 18.37.6).
+* `trianglePolynomial`: the triangle polynomials (DLMF 18.37.7), meaningful for `n ≤ m`.
+
+## Main results
+
+* `diskPolynomial_polar`: the polar form DLMF 18.37.1.
+* `diskPolynomial_at_one`: DLMF 18.37.5.
+* `diskPolynomial_orthogonal`: orthogonality on the disk, DLMF 18.37.2.
+* `trianglePolynomial_orthogonal`: orthogonality on the triangle, DLMF 18.37.8.
+* `diskPolynomial_swap`: exchange of the two degrees by conjugating the argument.
+
+## Implementation notes
+
+Jacobi statements keep regularity hypotheses because the hypergeometric definitions used here
+are not continued in singular parameters. The disk orthogonality uses polar coordinates and
+the triangle orthogonality a change of variables to the unit square; both separate into
+one-variable Jacobi orthogonality integrals.
 -/
 
 @[expose] public section
@@ -126,7 +141,7 @@ exp (I * θ)) = exp (I * ((m : ℂ) - n) * θ) * (r : ℂ) ^ (Int.natAbs ((m : �
 jacobiPolyP α (Int.natAbs ((m : ℤ) - n)) (min m n) (2 * (r : ℂ) ^ 2 - 1) / jacobiPolyP α
 (Int.natAbs ((m : ℤ) - n)) (min m n) 1`. -/
 @[dlmf 18.37.E1]
-theorem diskPolynomial_polar {α : ℝ} (hα : -1 < α) (m n : ℕ) (r θ : ℝ) (_hr : 0 ≤ r) :
+theorem diskPolynomial_polar {α : ℝ} (hα : -1 < α) (m n : ℕ) (r θ : ℝ) :
     diskPolynomial α m n ((r : ℂ) * exp (I * θ)) =
       exp (I * ((m : ℂ) - n) * θ) * (r : ℂ) ^ (Int.natAbs ((m : ℤ) - n)) *
       jacobiPolyP α (Int.natAbs ((m : ℤ) - n)) (min m n) (2 * (r : ℂ) ^ 2 - 1) /
@@ -423,8 +438,8 @@ theorem diskPolynomial_orthogonal {α : ℝ} (hα : -1 < α) (m n j k : ℕ) (hn
       ring
     have hsq : 1 - (r * Real.cos θ) ^ 2 - (r * Real.sin θ) ^ 2 = 1 - r ^ 2 := by
       nlinarith [Real.sin_sq_add_cos_sq θ]
-    rw [hz, hw, hsq, diskPolynomial_polar hα m n r θ hr.1.le,
-      diskPolynomial_polar hα j k r (-θ) hr.1.le]
+    rw [hz, hw, hsq, diskPolynomial_polar hα m n r θ,
+      diskPolynomial_polar hα j k r (-θ)]
     have hexp : exp (I * ((m : ℂ) - n) * θ) * exp (I * ((j : ℂ) - k) * (-θ : ℝ)) = G θ := by
       rw [← exp_add]
       dsimp [G, l]

@@ -8,12 +8,25 @@ module
 public import DLMF.Gamma.Asymptotics.ShiftedStirling
 
 /-!
-# Reciprocal-factorial expansions of Gamma ratios
+# Reciprocal-factorial expansion of Gamma ratios (DLMF 5.11.19)
 
-Reciprocal-factorial Gamma-ratio expansions and the supporting coefficient identities.
+The expansion of `Γ(t + a)Γ(t + b)/Γ(t + c)` in reciprocal factorials, with a Beta-integral
+representation of the remainder and a shift argument in the parameter `a`.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.Asymptotics`.
+## Main definitions
+
+* `recipFacBinom`, `recipFacRem`: binomial coefficients `C(β, k)` and the remainder of the
+  binomial series of `(1 + s)^β`.
+* `ratioThreeSum`: the partial sums of the expansion 5.11.19.
+
+## Main results
+
+* `Gamma_ratio_three`: the reciprocal-factorial Gamma-ratio expansion, with the
+  parameter-dependent leading power `a + b - c` retained in the remainder (DLMF 5.11.19).
+* `ratioThree_isBigO_of_re_pos`, `ratioThree_isBigO_shift`: the case `Re (c - a) > 0`, via the
+  Beta-integral remainder, and the shift that removes this condition.
+* `isBigO_Gamma_add_div_Gamma_add`: `Γ(t+u)/Γ(t+v) = O(t^{u-v})`.
+* `Gamma_add_nat_eq_poch_mul_Gamma`: `Γ(α + k) = (α)ₖ Γ(α)`.
 -/
 
 @[expose] public section

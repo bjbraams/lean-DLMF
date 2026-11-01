@@ -10,7 +10,21 @@ public import Mathlib.MeasureTheory.Integral.Pi
 public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
 
 /-!
-# Selberg integrands, cubes and Aomoto defining data
+# Selberg integrands, cubes and Aomoto's integrals (AAR §8.1)
+
+## Main definitions
+
+* `selbergIntegrand`, `selbergInt`: the Selberg integrand on `[0,1]^n` and the Selberg integral
+  as a function of its parameters.
+* `cube`: the closed unit cube `[0,1]ⁿ`.
+* `weight`, `weightR`: the complex weight `x^{a-1}(1-x)^{b-1}` and the real product weight.
+* `vdm`, `vdmSq`, `vprod`: the Vandermonde factor `∏_{i<j} |tᵢ - tⱼ|^{2c}`, the squared
+  Vandermonde product and `∏ⱼ |x - yⱼ|^{2c}`.
+* `ibpF`, `ibpD`, `ibpBound`: the function, derivative and majorant of the one-variable
+  integration by parts.
+* `mono`, `aomotoInt`, `aomotoFactor`: the monomials `∏_{i∈S} tᵢ`, Aomoto's integrals and the
+  ratio in Aomoto's formula.
+* `reflect`: the reflection `t ↦ 1 - t` of the cube.
 -/
 
 @[expose] public noncomputable section

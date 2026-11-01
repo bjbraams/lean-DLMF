@@ -8,10 +8,26 @@ module
 public import DLMF.Airy.SquareTools
 
 /-!
-# Products of Airy solutions, DLMF §9.11
+# Products of Airy functions (DLMF §9.11)
 
-Statements acquired from the NIST DLMF, checked 2026-10-19.
-New statements are initially admitted; existing proved Airy results are retained.
+The third-order equation satisfied by products of Airy solutions, its Wronskian, integral
+representations of `Ai²` and `Ai² + Bi²`, antiderivatives of products and quotients, and
+definite integrals of products.
+
+## Main results
+
+* `airy_product_ode`: `w''' - 4z w' - 2w = 0` for a product of two solutions (DLMF 9.11.1).
+* `airy_product_wronskian`: the Wronskian of `Ai², Ai Bi, Bi²` is `2/π³` (DLMF 9.11.2).
+* `airyAi_sq_bessel_integral`: DLMF 9.11.3.
+* `airy_modulus_sq_exp_integral`: `Ai² + Bi²` as a Nicholson-type integral (DLMF 9.11.4).
+* `airy_product_antiderivative_5`, …, `airy_product_antiderivative_10`: DLMF 9.11.5–9.11.10.
+* `airy_quotient_antiderivative`, `airyAi_recip_sq_antiderivative`,
+  `airyAiBi_recip_antiderivative`, `airy_modulus_rational_antiderivative`:
+  DLMF 9.11.11–9.11.14.
+* `airyAi_sq_mellin`: the Mellin transform of `Ai²` (DLMF 9.11.15).
+* `airyAi_cube_integral`, `airyAi_sq_airyBi_integral`, `airyAi_fourth_integral`:
+  DLMF 9.11.16–9.11.18.
+* `airy_modulus_reciprocal_integrals`: DLMF 9.11.19.
 -/
 
 @[expose] public noncomputable section

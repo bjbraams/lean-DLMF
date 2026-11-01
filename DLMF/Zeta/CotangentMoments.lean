@@ -7,10 +7,17 @@ module
 
 public import DLMF.Zeta.IntegerArguments
 
-/-! # A cotangent moment for the zeta summation formula 25.8.10
+/-!
+# A cotangent moment for the zeta summation formula 25.8.10
 
-Reflection and duplication reduce the quadratic half-interval moment to the already proved
-Bernoulli-cotangent integral for `ζ(3)`.
+A quadratic moment of `cot(πx)` over a half interval, needed for the summation formula
+DLMF 25.8.10. Reflection and duplication reduce it to the Bernoulli-cotangent integral
+for `ζ(3)`.
+
+## Main results
+
+* `integral_quadratic_mul_cot_pi`: the quadratic cotangent moment occurring after twice
+  integrating the even-zeta series.
 -/
 
 @[expose] public noncomputable section

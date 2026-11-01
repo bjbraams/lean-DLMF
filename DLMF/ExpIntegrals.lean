@@ -9,8 +9,10 @@ public import DLMF.ExpIntegrals.ZerosIntegrals
 public import DLMF.ExpIntegrals.TransformTools
 
 /-!
-# Exponential, logarithmic, sine and cosine integrals: DLMF Chapter 6
+# Exponential, logarithmic, sine and cosine integrals (DLMF Chapter 6)
 
-The acquired scope excludes graphs and application notes. Upstream pointers and
-an equation-by-equation inventory are recorded in `DLMF678Acquisition.md`.
+This umbrella collects the formalization of DLMF Chapter 6: the exponential integrals `E₁`,
+`Ei` and `Ein`, the logarithmic integral, and the sine, cosine and hyperbolic integrals, with
+their analytic continuation, integral representations, series, asymptotic expansions, zeros and
+integrals. Graphical results and application notes of DLMF are not formalized.
 -/

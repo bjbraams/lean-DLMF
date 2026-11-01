@@ -12,16 +12,34 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 public import Mathlib.Analysis.Calculus.Deriv.Star
 
 /-!
-# The digamma series (AAR Theorem 1.2.5)
+# The real digamma series (AAR Theorem 1.2.5)
 
-Andrews–Askey–Roy, Theorem 1.2.5:
+The real digamma and trigamma functions on `(0, ∞)` and their series, after Andrews–Askey–Roy,
+Theorem 1.2.5. Of the parts of that theorem, `Γ'(1) = -γ` is Mathlib's
+`Real.hasDerivAt_Gamma_one` and `Complex.digamma_one`, and log-convexity of `Γ` on `(0, ∞)` is
+`Real.convexOn_log_Gamma`; the series for `ψ` is proved here. It is obtained from Gauss's
+product `GammaSeq` by differentiating `log ∘ GammaSeq` and passing to the limit, using convexity
+on `(0, ∞)`.
 
-* `Γ'(1) = -γ` is `Real.hasDerivAt_Gamma_one` / `Complex.digamma_one`;
-* `ψ(x) = -γ + ∑_{k=0}^∞ (1/(k+1) - 1/(x+k))` for `x > 0`, proved below;
-* log-convexity of `Γ` on `(0,∞)` is `Real.convexOn_log_Gamma`.
+## Main definitions
 
-The series is obtained from Gauss's product `GammaSeq` by differentiating `log ∘ GammaSeq`
-and passing to the limit, using convexity on `(0,∞)`.
+* `digamma`, `trigamma`: the real digamma function `ψ(x) = Γ'(x)/Γ(x)` and its derivative.
+
+## Main results
+
+* `digamma_eq_tsum`: `ψ(x) = -γ + ∑_{k≥0} (1/(k+1) - 1/(x+k))` for `x > 0` (DLMF 5.7.6, AAR
+  Theorem 1.2.5).
+* `hasDerivAt_digamma`, `trigamma_eq_tsum`: `ψ'(x) = ∑_{n≥0} 1/(x+n)²` (DLMF 5.15.1).
+* `digamma_one`, `digamma_nat_add_one`: `ψ(1) = -γ` and `ψ(n+1) = -γ + H_n` (DLMF 5.4.12,
+  5.4.14).
+* `digamma_add_one`, `digamma_add_nat`: the recurrence `ψ(x+1) = ψ(x) + 1/x` (DLMF 5.5.2).
+* `digamma_eq_re_digamma`: agreement with the real part of Mathlib's complex digamma function.
+* `hasDerivAt_log_Gamma`: `log Γ` has derivative `ψ` on `(0, ∞)`.
+
+## References
+
+* G. E. Andrews, R. Askey and R. Roy, *Special Functions*, Cambridge University Press, 1999,
+  §1.2.
 -/
 
 @[expose] public section

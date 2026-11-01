@@ -9,6 +9,23 @@ public import DLMF.Lame.Basic.SpectralData
 
 /-!
 # Lamé recurrences, Fourier coefficients, stability and asymptotic data
+
+The coefficients of the three-term recurrences for the Fourier coefficients of Lamé functions
+(DLMF §§29.3(iii), 29.6), the continued fractions of DLMF 29.3.10, Fourier coefficients in the
+variable `φ`, stability (DLMF §29.9) and the asymptotic coefficients of DLMF §29.7.
+
+## Main definitions
+
+* `LameRecurrence`: the eight three-term recurrences of DLMF 29.3.11–29.3.17 and 29.6.11,
+  29.6.26, 29.6.41, 29.6.56, with coefficients `LameRecurrence.alpha`, `LameRecurrence.beta`,
+  `LameRecurrence.gamma` and the predicate `LameRecurrence.Satisfies`.
+* `lameCFLeft`, `lameCFRight`: the finite continued fractions of DLMF 29.3.10.
+* `Real.lameCosCoeff`, `Real.lameSinCoeff`: the Fourier coefficients of a real function in
+  `φ = π/2 - am(x, k)`, defined by the Fourier integrals.
+* `Real.IsLameStable`: all real solutions are bounded (DLMF §29.9).
+* `lameKappa`, `lameTau0`, `lameTau1`, `lameTau2`, `lameTau3`, `lameTau4`: `κ` and the
+  coefficients `τ₀, …, τ₄` of DLMF 29.7.2–29.7.8.
+* `lameODECoeff`: the coefficients of Lamé's equation in the form of `Complex.linearODEValue`.
 -/
 
 @[expose] public noncomputable section

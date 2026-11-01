@@ -14,12 +14,32 @@ public import Mathlib.Analysis.SpecialFunctions.Stirling
 public import DLMF.Gamma.IntegralRepresentations
 
 /-!
-# The Weierstrass product for Barnes G
+# The Weierstrass product for the Barnes G-function (DLMF §5.17)
 
-Convergence, the shift identity and the real logarithm of the Barnes G product.
+The Barnes G-function defined by the Weierstrass product for `G(z+1)` (DLMF 5.17.3): convergence
+of the product, the functional equation, integer values, the integral formula for
+`ln G(x + 1)` and the Glaisher–Kinkelin constant.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.BarnesG`.
+## Main definitions
+
+* `barnesGTerm`: the Weierstrass factors of DLMF 5.17.3.
+* `barnesGSucc`: `G(z+1)` defined by the Weierstrass product (DLMF 5.17.3).
+* `barnesG`: `G(z) = G((z-1)+1)`.
+* `glaisherKinkelin`: the Glaisher–Kinkelin constant `A` (DLMF 5.17.6).
+
+## Main results
+
+* `multipliable_barnesGTerm`: the Weierstrass product converges.
+* `barnesG_one`, `barnesG_add_one`, `barnesGSucc_eq_Gamma_mul`: `G(1) = 1` and the functional
+  equation `G(z + 1) = Γ(z) G(z)` (DLMF 5.17.1).
+* `barnesG_nat`: `G(n) = ∏_{k=1}^{n-2} k!` (DLMF 5.17.2).
+* `log_barnesGSucc`: `Ln G(x + 1)` as an integral of `ln Γ` for `x > 0` (DLMF 5.17.4).
+* `glaisherKinkelin_eq_zeta_neg_one`: `ln A = 1/12 - ζ'(-1)` (DLMF 5.17.7).
+
+## Implementation notes
+
+At `z = 0` the functional equation reads `G(1) = Γ(0) G(0)`, a limit `∞ · 0`; with the
+totalized `Γ(0) = 0` it fails there, so `barnesG_add_one` excludes `z = 0`.
 -/
 
 @[expose] public section
@@ -304,7 +324,7 @@ theorem prod_barnesGTerm_eq (z : ℂ) (hz : ∀ m : ℕ, z ≠ -m) {N : ℕ} (hN
   field_simp
   linear_combination (z + N) * hpart
 
-/-- DLMF 5.17.2 in the form `G(z + 1) = Γ(z) G(z)` for `z ≠ 0`. -/
+/-- DLMF 5.17.1 in the form `G(z + 1) = Γ(z) G(z)` for `z ≠ 0`. -/
 theorem barnesGSucc_eq_Gamma_mul {z : ℂ} (hz : z ≠ 0) :
     barnesGSucc z = Complex.Gamma z * barnesGSucc (z - 1) := by
   by_cases hneg : ∃ m : ℕ, z = -m

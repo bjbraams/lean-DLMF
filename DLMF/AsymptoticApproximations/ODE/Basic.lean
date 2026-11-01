@@ -13,21 +13,28 @@ public import Mathlib.RingTheory.Binomial
 /-!
 # Differential and difference equations: definitions (DLMF §§2.7–2.9)
 
-Definitions for DLMF §§2.7–2.9 (namespace `DLMF.AsymptoticApproximations`).
+## Main definitions
 
-* `IsLinearODE2SolOn f g w U`: `w'' + f w' + g w = 0` on `U ⊆ ℂ` (2.7.1), via the project's
+* `IsLinearODE2SolOn f g w U`: `w'' + f w' + g w = 0` on `U ⊆ ℂ` (DLMF 2.7.1), via
   `DLMF.Painleve.IsODE2SolutionOn`.
 * `IsLogPlaneSolOn f g W U`: the same equation on the logarithmic plane, `W(ζ) = w(e^ζ)`, used
   for solutions continued over sectors of opening larger than `2π` (2.7.14–2.7.17).
 * `indicialPoly`, `frobeniusCoeff`: the indicial equation 2.7.3 and the Frobenius recursion
   2.7.5 at a regular singularity.
 * `HasSingularityRank`: the rank of a singularity (§2.7(ii)).
-* `rankOneExponent`, `rankOneCoeff`: the exponent 2.7.10 and the recursion 2.7.11 of the
-  formal solutions 2.7.8 at an irregular singularity of rank 1 at infinity.
+* `rankOneExponent`, `rankOneCoeff`, `IsRankOneAtInfinity`, `rankOneScale`, `logSectorFilter`:
+  the exponent 2.7.10 and the recursion 2.7.11 of the formal solutions 2.7.8 at an irregular
+  singularity of rank 1 at infinity, with the data, scale and sector filter of 2.7.14–2.7.16.
+* `lgApproximant`, `IsLGSolOn`, `IsLGData`: the Liouville–Green setting of 2.7.20.
 * `airyEnvCrit`, `envAi`, `envBi` (2.8.19–2.8.21) and `besselEnvCrit`, `envJ`, `envY`
   (2.8.32–2.8.34): the envelope functions of §2.8.
-* `differenceExponent`, `differenceCoeff`: the exponent 2.9.6 and the recursion 2.9.7 of the
-  formal solutions 2.9.4 of three-term recurrences.
+* `IsAiryCoeffs`, `IsBesselCoeffs`: the coefficient relations 2.8.17–2.8.18 and 2.8.27–2.8.28,
+  2.8.31.
+* `differenceExponent`, `differenceCoeff`, `IsDifferenceCoeffRel`, `IsRecurrenceSol`: the
+  three-term recurrence 2.9.1 and the exponent 2.9.6 and recursion 2.9.7 of its formal solutions
+  2.9.4.
+
+## Implementation notes
 
 The singular-point classification itself is DLMFMathlib's `Complex.LinearODEOrdinaryAt`,
 `Complex.LinearODERegularSingularAt` and `Complex.LinearODEIrregularAt` applied to the
@@ -186,17 +193,17 @@ def IsDifferenceCoeffRel (fs gs : ℕ → ℂ) (ρ α : ℂ) (a : ℕ → ℂ) :
       gs (r + 1)) * a (s - r)
 
 /-- The forward difference `Δw(n) = w(n+1) - w(n)` (DLMF §3.6(i)), used in 2.9.2. -/
-def g2b_fwdDiff (w : ℕ → ℂ) (n : ℕ) : ℂ := w (n + 1) - w n
+def forwardDiff (w : ℕ → ℂ) (n : ℕ) : ℂ := w (n + 1) - w n
 
 /-- The scale `n ↦ n^{-s}` of the coefficient expansions 2.9.3. -/
-def g2b_invPowScale (s n : ℕ) : ℂ := ((n : ℂ) ^ s)⁻¹
+def invPowScale (s n : ℕ) : ℂ := ((n : ℂ) ^ s)⁻¹
 
 /-- The scale `n ↦ ρⁿ n^{α-s}` (principal power, `n > 0`) of the expansions 2.9.4, 2.9.8 and
 2.9.12. -/
-def g2b_diffScale (ρ α : ℂ) (s n : ℕ) : ℂ := ρ ^ n * (n : ℂ) ^ (α - s)
+def geomCpowScale (ρ α : ℂ) (s n : ℕ) : ℂ := ρ ^ n * (n : ℂ) ^ (α - s)
 
 /-- The scale `n ↦ ρⁿ exp(σκ√n) n^{α-s/2}` of DLMF 2.9.9 (`σ = ±1`). -/
-def g2b_sqrtScale (ρ κ α : ℂ) (σ : ℂ) (s n : ℕ) : ℂ :=
+def geomExpSqrtScale (ρ κ α : ℂ) (σ : ℂ) (s n : ℕ) : ℂ :=
   ρ ^ n * Complex.exp (σ * κ * Real.sqrt n) * (n : ℂ) ^ (α - s / 2)
 
 /-- `w` solves the three-term recurrence `w(n+2) + f(n) w(n+1) + g(n) w(n) = 0` (DLMF 2.9.1)
@@ -209,7 +216,7 @@ open Asymptotics
 
 /-- The punctured slit disc `{z : z - z₀ ∉ (-∞, 0], |z - z₀| < R}` on which the principal powers
 `(z - z₀)^{α}` are holomorphic. -/
-def g2b_slitDisc (z₀ : ℂ) (R : ℝ) : Set ℂ :=
+def slitDisc (z₀ : ℂ) (R : ℝ) : Set ℂ :=
   {z : ℂ | z - z₀ ∈ slitPlane ∧ ‖z - z₀‖ < R}
 
 /-- The filter `|z| → ∞` with `θ₁ ≤ ℑ(ζ + c) ≤ θ₂` on the logarithmic plane (`z = e^ζ`); with
@@ -241,7 +248,7 @@ structure IsRankOneAtInfinity (f g : ℂ → ℂ) (fs gs : ℕ → ℂ) (a : ℝ
   roots_ne : l₁ ≠ l₂
 
 /-- The region `|z| > a` on the logarithmic plane. -/
-def g2b_logExterior (a : ℝ) : Set ℂ := {ζ : ℂ | a < Real.exp ζ.re}
+def logExterior (a : ℝ) : Set ℂ := {ζ : ℂ | a < Real.exp ζ.re}
 
 end
 

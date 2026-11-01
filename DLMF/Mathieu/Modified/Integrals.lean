@@ -5,28 +5,59 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Modified.P3mIntegrals
+public import DLMF.Mathieu.Modified.KernelIntegrals
 
 /-!
 # Modified Mathieu functions: integrals and integral equations (DLMF §28.28)
 
-* §28.28(i): integral equations with the kernel `e^{2ihw}` (28.28.1–28.28.9, along the paths
-  `𝓛_j` of 28.28.6 realized as polygonal paths with vertical rays), Laplace-type integrals over
-  `(0, ∞)` (28.28.10–28.28.14) and the cosine and sine transforms 28.28.15–28.28.16.
-* §28.28(ii): integrals of products with Bessel functions (28.28.17–28.28.23), with the analytic
-  functions `R(z, t)`, `φ(z, t)` of 28.28.18–28.28.19 (their characterizing identities are
-  proved).
-* §28.28(iii)–(iv): integrals of products of Mathieu functions, in terms of cross-products of
-  `M^{(3)}`, `M^{(4)}` (28.28.24–28.28.49).
+Integral equations with the kernel `e^{2ihw}` along `[0, 2π]` and along the paths `𝓛_j` of
+28.28.6 (realized as polygonal paths with vertical rays), Laplace-type integrals over
+`(0, ∞)` and cosine and sine transforms (§28.28(i)); integrals of products with Bessel
+functions, with the analytic functions `R(z, t)`, `φ(z, t)` of 28.28.18–28.28.19
+(§28.28(ii)); and integrals of products of Mathieu functions in terms of cross-products of
+`M^{(3)}`, `M^{(4)}` (§28.28(iii)–(iv)).
 
-## Corrections to DLMF
+## Main results
+
+* `integral_exp_mathieuCe`, `integral_exp_mathieuSe`, `integral_dw_exp_mathieuCe`,
+  `integral_dw_exp_mathieuSe`: integral equations DLMF 28.28.2–28.28.5.
+* `pathIntegral_exp_mathieuMe`, `pathIntegral_dw_exp_mathieuMe`,
+  `pathIntegral_one_exp_mathieuMe`: representations along `𝓛_j` (DLMF 28.28.7–28.28.9).
+* `integral_exp_cosh_modMathieuCe`, `integral_exp_cosh_modMathieuSe`,
+  `integral_exp_cosh_modMathieuFe`, `integral_exp_cosh_modMathieuGe`,
+  `integrableOn_exp_cosh_modMathieu`: Laplace-type integrals DLMF 28.28.10–28.28.14 (the first
+  corrected) and their absolute convergence.
+* `integral_cos_cosh_modMathieuCe`, `integral_sin_cosh_modMathieuCe`: the cosine and sine
+  transforms DLMF 28.28.15–28.28.16 (the second corrected).
+* `mathieuKernelR_sq`, `mathieuKernelR_zero`, `exp_two_I_mathieuKernelPhi`,
+  `mathieuKernelPhi_zero`: the characterizing identities of `R` and `φ` (DLMF 28.28.18–28.28.19).
+* `integral_cyl_mathieuMe`: the integral of a product with a Bessel function (DLMF 28.28.17).
+* `integral_cyl_mathieuCe_even`, `integral_cyl_mathieuCe_odd`, `integral_cyl_mathieuSe_odd`,
+  `integral_cyl_mathieuSe_even`: integer order (DLMF 28.28.20–28.28.23).
+* `integral_cos_mathieuMe_mul`, `integral_sin_mathieuMe_mul`, `mathieuAlpha0_eq`,
+  `mathieuAlpha1_eq`, `integral_sin_deriv_mathieuMe_mul`, `integral_cos_deriv_mathieuMe_mul`:
+  DLMF 28.28.25–28.28.30.
+* `integral_cos_sin_mathieuMe_mul`, `integral_deriv_mathieuMe_mul`, `mathieuGammaInt_eq`,
+  `pv_integral_deriv_mathieuMe_div_sin`: DLMF 28.28.31–28.28.34.
+* `integral_cos_mathieuSe_mul`, `integral_sin_deriv_mathieuSe_mul`, `mathieuAlphaHatS_eq`:
+  DLMF 28.28.36–28.28.38.
+* `integral_sin_mathieuSe_mul_mathieuCe`, `integral_cos_deriv_mathieuSe_mul_mathieuCe`,
+  `mathieuBetaHat_eq`: DLMF 28.28.41–28.28.43.
+* `integral_sin_two_mathieuSe_mul_mathieuCe`, `integral_deriv_mathieuSe_mul_mathieuCe`,
+  `mathieuGammaHat_eq`: DLMF 28.28.44–28.28.46.
+* `integral_cos_mathieuCe_mul`, `integral_sin_deriv_mathieuCe_mul`, `mathieuAlphaHatC_eq`:
+  DLMF 28.28.47–28.28.49.
+
+## Implementation notes
+
+Corrections to DLMF:
 
 * **28.28.11**: the factor `e^{iνπ}` must be `e^{iνπ/2}`. Numerically (`h = 1.2`,
   `z = 1 + i`): the ratio of the integral to `½πi ce_ν(0, h²) M^{(3)}_ν(z, h)` is
   `0.8910065 + 0.4539905i = e^{0.15πi}` for `ν = 0.3`, `e^{πi/4}` for `ν = 0.5` and `i` for
   `ν = 1` (agreement to `10⁻¹²`), not `e^{iνπ}`. The neighbouring formulas 28.28.12–28.28.14
-  (`e^{iνπ/2}`, `i^m`, `i^{m+1}`) are confirmed numerically, and 28.28.15–28.28.16 follow from the
-  corrected 28.28.11 at `z = iy`.
+  (`e^{iνπ/2}`, `i^m`, `i^{m+1}`) are confirmed numerically, and 28.28.15–28.28.16 follow from
+  the corrected 28.28.11 at `z = iy`.
 * **28.28.16**: the overall sign is wrong; the correct right-hand side is
   `+π A^{2n}_0(h²) / (2 ce_{2n}(π/2, h²)) · (ce_{2n}(y, h²) ∓ 2 fe_{2n}(y, h²)/(π C_{2n}(h²)))`.
   Direct numerical integration (`h = 1.2`, `n = 0, 1`, `y = 0.6, 2.0`) gives `0.11236`,
@@ -40,7 +71,7 @@ public import DLMF.Mathieu.Modified.P3mIntegrals
 
 All other formulas of this section were checked numerically (`h = 1.2`, `ν = 0.3`, small `m`,
 `n`, `z = 0.7 + 0.3i` or `0.5 + 0.3i`); the path integrals 28.28.7–28.28.9 at three parameter
-points with the vertical rays in the valleys described below.
+points with the vertical rays in the valleys of `MathieuPathValley`.
 -/
 
 @[expose] public noncomputable section
@@ -60,7 +91,7 @@ theorem integral_exp_mathieuCe (n : ℕ) (h : ℝ) (z α : ℂ) :
     (2 * π : ℂ)⁻¹ * ∫ t in (0 : ℝ)..2 * π,
         Complex.exp (2 * I * h * mathieuKernelW z t α) * mathieuCe n t (h ^ 2) =
       I ^ n * mathieuCe n α (h ^ 2) * radialMathieuMc 1 n z h :=
-  p3m_integral_exp_mathieuCe n h z α
+  integral_exp_mathieuCe' n h z α
 
 /-- **Integral equation** (DLMF 28.28.3), `n = 1, 2, …`:
 `(2π)⁻¹ ∫₀^{2π} e^{2ihw} se_n(t, h²) dt = i^n se_n(α, h²) Ms^{(1)}_n(z, h)`. -/
@@ -69,16 +100,16 @@ theorem integral_exp_mathieuSe {n : ℕ} (hn : n ≠ 0) (h : ℝ) (z α : ℂ) :
     (2 * π : ℂ)⁻¹ * ∫ t in (0 : ℝ)..2 * π,
         Complex.exp (2 * I * h * mathieuKernelW z t α) * mathieuSe n t (h ^ 2) =
       I ^ n * mathieuSe n α (h ^ 2) * radialMathieuMs 1 n z h :=
-  p3m_integral_exp_mathieuSe hn h z α
+  integral_exp_mathieuSe' hn h z α
 
 /-- 28.28.4/28.28.5 from 28.28.2/28.28.3: differentiate in `α`. -/
-lemma p1c_integral_dw_of_integral (h : ℝ) (z : ℂ) {g : ℝ → ℂ} (hg : Continuous g)
+private lemma integral_deriv_mathieuKernelW_of_integral (h : ℝ) (z : ℂ) {g : ℝ → ℂ} (hg : Continuous g)
     {f : ℂ → ℂ} (hf : Differentiable ℂ f)
     (hint : ∀ β : ℂ, (2 * π : ℂ)⁻¹ * ∫ t in (0 : ℝ)..2 * π,
         Complex.exp (2 * I * h * mathieuKernelW z t β) * g t = f β) (α : ℂ) :
     I * h / π * ∫ t in (0 : ℝ)..2 * π, deriv (fun β => mathieuKernelW z t β) α *
         Complex.exp (2 * I * h * mathieuKernelW z t α) * g t = deriv f α := by
-  have hD := p1c_hasDerivAt_integral_kernel h z hg α
+  have hD := hasDerivAt_integral_exp_mathieuKernelW h z hg α
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   have hfun : (fun β => ∫ t in (0 : ℝ)..2 * π,
       Complex.exp (2 * I * h * mathieuKernelW z t β) * g t) = fun β => 2 * π * f β := by
@@ -103,7 +134,7 @@ theorem integral_dw_exp_mathieuCe (n : ℕ) (h : ℝ) (z α : ℂ) :
         Complex.exp (2 * I * h * mathieuKernelW z t α) * mathieuCe n t (h ^ 2) =
       I ^ n * deriv (fun x => mathieuCe n x (h ^ 2)) α * radialMathieuMc 1 n z h := by
   have hd := (isMathieuSolution_mathieuCe n (h ^ 2)).differentiable
-  rw [p1c_integral_dw_of_integral h z (g := fun t : ℝ => mathieuCe n t (h ^ 2))
+  rw [integral_deriv_mathieuKernelW_of_integral h z (g := fun t : ℝ => mathieuCe n t (h ^ 2))
     (hd.continuous.comp continuous_ofReal)
     (f := fun β => I ^ n * mathieuCe n β (h ^ 2) * radialMathieuMc 1 n z h)
     (by fun_prop) (fun β => integral_exp_mathieuCe n h z β) α]
@@ -117,7 +148,7 @@ theorem integral_dw_exp_mathieuSe {n : ℕ} (hn : n ≠ 0) (h : ℝ) (z α : ℂ
         Complex.exp (2 * I * h * mathieuKernelW z t α) * mathieuSe n t (h ^ 2) =
       I ^ n * deriv (fun x => mathieuSe n x (h ^ 2)) α * radialMathieuMs 1 n z h := by
   have hd := (isMathieuSolution_mathieuSe n (h ^ 2)).differentiable
-  rw [p1c_integral_dw_of_integral h z (g := fun t : ℝ => mathieuSe n t (h ^ 2))
+  rw [integral_deriv_mathieuKernelW_of_integral h z (g := fun t : ℝ => mathieuSe n t (h ^ 2))
     (hd.continuous.comp continuous_ofReal)
     (f := fun β => I ^ n * mathieuSe n β (h ^ 2) * radialMathieuMs 1 n z h)
     (by fun_prop) (fun β => integral_exp_mathieuSe hn h z β) α]
@@ -253,7 +284,7 @@ theorem integral_sin_cosh_modMathieuCe (n : ℕ) {h : ℝ} (hh : 0 < h) {y : ℝ
 /-! ### §28.28(ii) Integrals of products with Bessel functions -/
 
 /-- `1 + e^{-2w} ≠ 0` for `Re w > 0` (helper for 28.28.18–28.28.19). -/
-lemma m28c_one_add_exp_ne_zero {w : ℂ} (hw : 0 < w.re) : 1 + Complex.exp (-2 * w) ≠ 0 := by
+private lemma one_add_exp_neg_two_mul_ne_zero {w : ℂ} (hw : 0 < w.re) : 1 + Complex.exp (-2 * w) ≠ 0 := by
   intro h0
   have h1 : Complex.exp (-2 * w) = -1 := by linear_combination h0
   have h2 := congrArg norm h1
@@ -266,8 +297,8 @@ lemma m28c_one_add_exp_ne_zero {w : ℂ} (hw : 0 < w.re) : 1 + Complex.exp (-2 *
 @[dlmf 28.28.E18]
 theorem mathieuKernelR_sq {z : ℂ} (hz : 0 < z.re) (t : ℝ) :
     mathieuKernelR z t ^ 2 = (Complex.cosh (2 * z) + Complex.cos (2 * t)) / 2 := by
-  have hA := m28c_one_add_exp_ne_zero (w := z - I * t) (by simpa using hz)
-  have hB := m28c_one_add_exp_ne_zero (w := z + I * t) (by simpa using hz)
+  have hA := one_add_exp_neg_two_mul_ne_zero (w := z - I * t) (by simpa using hz)
+  have hB := one_add_exp_neg_two_mul_ne_zero (w := z + I * t) (by simpa using hz)
   rw [mathieuKernelR, mathieuKernelLogR, div_pow, ← Complex.exp_nat_mul]
   have : ((2 : ℕ) : ℂ) * (z + (Complex.log (1 + Complex.exp (-2 * (z - I * t))) +
       Complex.log (1 + Complex.exp (-2 * (z + I * t)))) / 2) =
@@ -298,7 +329,7 @@ theorem mathieuKernelR_sq {z : ℂ} (hz : 0 < z.re) (t : ℝ) :
 /-- `R(z, 0) = cosh z` (DLMF 28.28.18), `Re z > 0`. -/
 @[dlmf 28.28.E18]
 theorem mathieuKernelR_zero {z : ℂ} (hz : 0 < z.re) : mathieuKernelR z 0 = Complex.cosh z := by
-  have hB := m28c_one_add_exp_ne_zero hz
+  have hB := one_add_exp_neg_two_mul_ne_zero hz
   rw [mathieuKernelR, mathieuKernelLogR]
   simp only [mul_zero, sub_zero, add_zero]
   rw [show z + (Complex.log (1 + Complex.exp (-2 * z)) + Complex.log (1 + Complex.exp (-2 * z))) / 2
@@ -314,8 +345,8 @@ theorem mathieuKernelR_zero {z : ℂ} (hz : 0 < z.re) : mathieuKernelR z 0 = Com
 theorem exp_two_I_mathieuKernelPhi {z : ℂ} (hz : 0 < z.re) (t : ℝ) :
     Complex.exp (2 * I * mathieuKernelPhi z t) =
       Complex.cosh (z + I * t) / Complex.cosh (z - I * t) := by
-  have hA := m28c_one_add_exp_ne_zero (w := z - I * t) (by simpa using hz)
-  have hB := m28c_one_add_exp_ne_zero (w := z + I * t) (by simpa using hz)
+  have hA := one_add_exp_neg_two_mul_ne_zero (w := z - I * t) (by simpa using hz)
+  have hB := one_add_exp_neg_two_mul_ne_zero (w := z + I * t) (by simpa using hz)
   rw [mathieuKernelPhi]
   have : 2 * I * ((t : ℂ) + (Complex.log (1 + Complex.exp (-2 * (z + I * t))) -
       Complex.log (1 + Complex.exp (-2 * (z - I * t)))) / (2 * I)) =
@@ -421,7 +452,7 @@ Throughout: `h > 0`, real `ν ∉ ℤ`, `m ∈ ℤ`, `Re z > 0` (so that `sinh²
 theorem integral_cos_mathieuMe_mul {ν : ℝ} (hν : ∀ k : ℤ, (k : ℝ) ≠ ν) (m : ℤ) {h : ℝ}
     (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     Complex.sinh z / π ^ 2 * ∫ t in (0 : ℝ)..2 * π, Complex.cos t * mathieuMe ν t ((h : ℂ) ^ 2) *
-        mathieuMe (-ν - 2 * m - 1) t ((h : ℂ) ^ 2) / m28c_den z t =
+        mathieuMe (-ν - 2 * m - 1) t ((h : ℂ) ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ (m + 1) * I * h * mathieuAlpha0 ν m h * modMathieuD0 ν (ν + 2 * m + 1) z h := by
   sorry
 
@@ -432,7 +463,7 @@ theorem integral_cos_mathieuMe_mul {ν : ℝ} (hν : ∀ k : ℤ, (k : ℝ) ≠ 
 theorem integral_sin_mathieuMe_mul {ν : ℝ} (hν : ∀ k : ℤ, (k : ℝ) ≠ ν) (m : ℤ) {h : ℝ}
     (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     Complex.cosh z / π ^ 2 * ∫ t in (0 : ℝ)..2 * π, Complex.sin t * mathieuMe ν t ((h : ℂ) ^ 2) *
-        mathieuMe (-ν - 2 * m - 1) t ((h : ℂ) ^ 2) / m28c_den z t =
+        mathieuMe (-ν - 2 * m - 1) t ((h : ℂ) ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ (m + 1) * I * h * mathieuAlpha1 ν m h * modMathieuD0 ν (ν + 2 * m + 1) z h := by
   sorry
 
@@ -463,7 +494,7 @@ theorem integral_sin_deriv_mathieuMe_mul {ν : ℝ} (hν : ∀ k : ℤ, (k : ℝ
     (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     Complex.cosh z / π ^ 2 * ∫ t in (0 : ℝ)..2 * π, Complex.sin t *
         deriv (fun x => mathieuMe ν x ((h : ℂ) ^ 2)) t *
-        mathieuMe (-ν - 2 * m - 1) t ((h : ℂ) ^ 2) / m28c_den z t =
+        mathieuMe (-ν - 2 * m - 1) t ((h : ℂ) ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ (m + 1) * I * h * mathieuAlpha0 ν m h * modMathieuD1 ν (ν + 2 * m + 1) z h := by
   sorry
 
@@ -475,7 +506,7 @@ theorem integral_cos_deriv_mathieuMe_mul {ν : ℝ} (hν : ∀ k : ℤ, (k : ℝ
     (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     Complex.sinh z / π ^ 2 * ∫ t in (0 : ℝ)..2 * π, Complex.cos t *
         deriv (fun x => mathieuMe ν x ((h : ℂ) ^ 2)) t *
-        mathieuMe (-ν - 2 * m - 1) t ((h : ℂ) ^ 2) / m28c_den z t =
+        mathieuMe (-ν - 2 * m - 1) t ((h : ℂ) ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ m * I * h * mathieuAlpha1 ν m h * modMathieuD1 ν (ν + 2 * m + 1) z h := by
   sorry
 
@@ -486,7 +517,7 @@ theorem integral_cos_deriv_mathieuMe_mul {ν : ℝ} (hν : ∀ k : ℤ, (k : ℝ
 theorem integral_cos_sin_mathieuMe_mul {ν : ℝ} (hν : ∀ k : ℤ, (k : ℝ) ≠ ν) (m : ℤ) {h : ℝ}
     (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     2 / π ^ 2 * ∫ t in (0 : ℝ)..2 * π, Complex.cos t * Complex.sin t *
-        mathieuMe ν t ((h : ℂ) ^ 2) * mathieuMe (-ν - 2 * m) t ((h : ℂ) ^ 2) / m28c_den z t =
+        mathieuMe ν t ((h : ℂ) ^ 2) * mathieuMe (-ν - 2 * m) t ((h : ℂ) ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ m * I * mathieuGammaInt ν m h * modMathieuD0 ν (ν + 2 * m) z h := by
   sorry
 
@@ -498,7 +529,7 @@ theorem integral_deriv_mathieuMe_mul {ν : ℝ} (hν : ∀ k : ℤ, (k : ℝ) �
     (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     Complex.sinh (2 * z) / π ^ 2 * ∫ t in (0 : ℝ)..2 * π,
         deriv (fun x => mathieuMe ν x ((h : ℂ) ^ 2)) t *
-        mathieuMe (-ν - 2 * m) t ((h : ℂ) ^ 2) / m28c_den z t =
+        mathieuMe (-ν - 2 * m) t ((h : ℂ) ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ (m + 1) * I * mathieuGammaInt ν m h * modMathieuD1 ν (ν + 2 * m) z h := by
   sorry
 
@@ -537,7 +568,7 @@ Throughout: `h > 0`, `Re z > 0`, `ce_n = ce_n(·, h²)`, `se_n = se_n(·, h²)`.
 theorem integral_cos_mathieuSe_mul {n m : ℕ} (hn : n ≠ 0) (hm : m ≠ 0) {p : ℤ}
     (hp : (m : ℤ) - n = 2 * p + 1) {h : ℝ} (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     Complex.sinh z / π ^ 2 * ∫ t in (0 : ℝ)..2 * π, Complex.cos t * mathieuSe n t (h ^ 2) *
-        mathieuSe m t (h ^ 2) / m28c_den z t =
+        mathieuSe m t (h ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ (p + 1) * I * h * mathieuAlphaHatS n m h * radialMathieuDs0 n m z h := by
   sorry
 
@@ -548,7 +579,7 @@ theorem integral_cos_mathieuSe_mul {n m : ℕ} (hn : n ≠ 0) (hm : m ≠ 0) {p 
 theorem integral_sin_deriv_mathieuSe_mul {n m : ℕ} (hn : n ≠ 0) (hm : m ≠ 0) {p : ℤ}
     (hp : (m : ℤ) - n = 2 * p + 1) {h : ℝ} (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     Complex.cosh z / π ^ 2 * ∫ t in (0 : ℝ)..2 * π, Complex.sin t *
-        deriv (fun x => mathieuSe n x (h ^ 2)) t * mathieuSe m t (h ^ 2) / m28c_den z t =
+        deriv (fun x => mathieuSe n x (h ^ 2)) t * mathieuSe m t (h ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ (p + 1) * I * h * mathieuAlphaHatS n m h * radialMathieuDs1 n m z h := by
   sorry
 
@@ -569,7 +600,7 @@ theorem mathieuAlphaHatS_eq {n m : ℕ} (hn : n ≠ 0) (hm : m ≠ 0) {p : ℤ}
 theorem integral_sin_mathieuSe_mul_mathieuCe {n m : ℕ} (hn : n ≠ 0) {p : ℤ}
     (hp : (m : ℤ) - n = 2 * p + 1) {h : ℝ} (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     Complex.cosh z / π ^ 2 * ∫ t in (0 : ℝ)..2 * π, Complex.sin t * mathieuSe n t (h ^ 2) *
-        mathieuCe m t (h ^ 2) / m28c_den z t =
+        mathieuCe m t (h ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ (p + 1) * I * h * mathieuBetaHat n m h * radialMathieuDsc0 n m z h := by
   sorry
 
@@ -580,7 +611,7 @@ theorem integral_sin_mathieuSe_mul_mathieuCe {n m : ℕ} (hn : n ≠ 0) {p : ℤ
 theorem integral_cos_deriv_mathieuSe_mul_mathieuCe {n m : ℕ} (hn : n ≠ 0) {p : ℤ}
     (hp : (m : ℤ) - n = 2 * p + 1) {h : ℝ} (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     Complex.sinh z / π ^ 2 * ∫ t in (0 : ℝ)..2 * π, Complex.cos t *
-        deriv (fun x => mathieuSe n x (h ^ 2)) t * mathieuCe m t (h ^ 2) / m28c_den z t =
+        deriv (fun x => mathieuSe n x (h ^ 2)) t * mathieuCe m t (h ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ p * I * h * mathieuBetaHat n m h * radialMathieuDsc1 n m z h := by
   sorry
 
@@ -600,7 +631,7 @@ theorem mathieuBetaHat_eq {n m : ℕ} (hn : n ≠ 0) {p : ℤ} (hp : (m : ℤ) -
 theorem integral_sin_two_mathieuSe_mul_mathieuCe {n m : ℕ} (hn : n ≠ 0) {p : ℤ}
     (hp : (n : ℤ) - m = 2 * p) {h : ℝ} (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     (π : ℂ)⁻¹ ^ 2 * ∫ t in (0 : ℝ)..2 * π, Complex.sin (2 * t) * mathieuSe n t (h ^ 2) *
-        mathieuCe m t (h ^ 2) / m28c_den z t =
+        mathieuCe m t (h ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ p * I * mathieuGammaHat n m h * radialMathieuDsc0 n m z h := by
   sorry
 
@@ -611,7 +642,7 @@ theorem integral_sin_two_mathieuSe_mul_mathieuCe {n m : ℕ} (hn : n ≠ 0) {p :
 theorem integral_deriv_mathieuSe_mul_mathieuCe {n m : ℕ} (hn : n ≠ 0) {p : ℤ}
     (hp : (n : ℤ) - m = 2 * p) {h : ℝ} (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     Complex.sinh (2 * z) / π ^ 2 * ∫ t in (0 : ℝ)..2 * π,
-        deriv (fun x => mathieuSe n x (h ^ 2)) t * mathieuCe m t (h ^ 2) / m28c_den z t =
+        deriv (fun x => mathieuSe n x (h ^ 2)) t * mathieuCe m t (h ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ (p + 1) * I * mathieuGammaHat n m h * radialMathieuDsc1 n m z h := by
   sorry
 
@@ -632,7 +663,7 @@ theorem mathieuGammaHat_eq {n m : ℕ} (hn : n ≠ 0) {p : ℤ} (hp : (n : ℤ) 
 theorem integral_cos_mathieuCe_mul {n m : ℕ} {p : ℤ} (hp : (m : ℤ) - n = 2 * p + 1) {h : ℝ}
     (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     Complex.sinh z / π ^ 2 * ∫ t in (0 : ℝ)..2 * π, Complex.cos t * mathieuCe n t (h ^ 2) *
-        mathieuCe m t (h ^ 2) / m28c_den z t =
+        mathieuCe m t (h ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ (p + 1) * I * h * mathieuAlphaHatC n m h * radialMathieuDc0 n m z h := by
   sorry
 
@@ -643,7 +674,7 @@ theorem integral_cos_mathieuCe_mul {n m : ℕ} {p : ℤ} (hp : (m : ℤ) - n = 2
 theorem integral_sin_deriv_mathieuCe_mul {n m : ℕ} {p : ℤ} (hp : (m : ℤ) - n = 2 * p + 1)
     {h : ℝ} (hh : 0 < h) {z : ℂ} (hz : 0 < z.re) :
     Complex.cosh z / π ^ 2 * ∫ t in (0 : ℝ)..2 * π, Complex.sin t *
-        deriv (fun x => mathieuCe n x (h ^ 2)) t * mathieuCe m t (h ^ 2) / m28c_den z t =
+        deriv (fun x => mathieuCe n x (h ^ 2)) t * mathieuCe m t (h ^ 2) / sinhSqAddSinSq z t =
       (-1 : ℂ) ^ (p + 1) * I * h * mathieuAlphaHatC n m h * radialMathieuDc1 n m z h := by
   sorry
 

@@ -9,12 +9,26 @@ public import DLMF.Bessel.KMellin
 public import DLMF.ErrorFunctions.IntegralTools
 
 /-!
-# Gaussian and Cauchy representations of error functions
+# Gaussian and Cauchy representations of error functions (DLMF §7.7)
 
-Quadratic Gaussian integrals, Faddeeva Cauchy transforms and their analytic continuation.
+Integral representations of `erfc`, the Faddeeva function, the Goodwin–Staton integral and the
+Fresnel auxiliary functions: rational Gaussian integrals, Cauchy transforms of the Gaussian,
+quadratic Gaussian integrals and their tails, and Laplace-type representations.
 
-Source references and common attribution are retained in
-`DLMF.ErrorFunctions.Integrals`.
+## Main results
+
+* `erfc_rational_gaussian_integral`: `erfc z` as a rational Gaussian integral (DLMF 7.7.1).
+* `faddeevaW_cauchy_integral`: the Cauchy transform of the Gaussian is `πi w(z)` (DLMF 7.7.2).
+* `gaussian_fourier_halfLine`, `gaussian_sqrt_laplace`: DLMF 7.7.3, 7.7.4.
+* `erf_squared_integral`: DLMF 7.7.5.
+* `gaussian_quadratic_tail`, `gaussian_reciprocal_tail`, `gaussian_reciprocal_integral`:
+  Gaussian integrals with quadratic and reciprocal exponents (DLMF 7.7.6–7.7.8).
+* `erf_primitive`: the primitive of `erf` (DLMF 7.7.9).
+* `fresnelAuxFComplex_laplace_integral`, `fresnelAuxGComplex_laplace_integral`: Laplace forms of
+  the Fresnel auxiliary functions (DLMF 7.7.10, 7.7.11).
+* `fresnelAux_contour_tail`: the contour representation of `g + i f` (DLMF 7.7.12).
+* `goodwinStatonG_dawson`: the Goodwin–Staton integral in terms of Dawson's function and the
+  exponential integral (DLMF 7.5.13).
 -/
 
 @[expose] public noncomputable section
@@ -694,7 +708,7 @@ theorem gaussian_sqrt_laplace {a z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re) :
         have hs0 : 0 ≤ s := le_trans (le_max_left _ _) hs
         have hm := hmem s hs0
         refine re_mul_pos_of_re_sq_pos hqre (by rw [hq2]; exact ha)
-          (re_cpow_half_pos_of_mem_slitPlane hm) ?_
+          (Carlson.re_cpow_half_pos hm) ?_
         rw [cpow_half_sq (slitPlane_ne_zero hm)]
         simp; linarith [le_max_right 0 (-w.re)]
       · have h0 : Tendsto (fun s : ℝ => a.re*s + (a*w).re) atTop atTop :=

@@ -11,10 +11,24 @@ public import DLMF.Mathieu.SpectralExistence
 # Expansions in series of Mathieu functions (DLMF §28.11)
 
 A `2π`-periodic function analytic in a strip around the real axis expands in the Mathieu
-functions `ce_n`, `se_n` (28.11.1–28.11.2), for real `q` (all real `q` are normal values,
-§28.7); the expansions 28.11.3–28.11.7 of `1`, `cos 2mz`, `cos(2m+1)z`, `sin(2m+1)z`,
-`sin(2m+2)z` follow with the Fourier coefficients of §28.4 (`mathieuFourierA`,
-`mathieuFourierB`). Expansions at exceptional (complex) `q` are only referenced by DLMF.
+functions `ce_n`, `se_n` for real `q` (all real `q` are normal values, DLMF §28.7). The
+expansions of `1`, `cos 2mz`, `cos(2m+1)z`, `sin(2m+1)z`, `sin(2m+2)z` use the Fourier
+coefficients of DLMF §28.4 (`mathieuFourierA`, `mathieuFourierB`).
+
+## Main results
+
+* `hasSum_mathieu_expansion`: the expansion of a `2π`-periodic function analytic in a strip
+  `|ℑz| < c` in the functions `ce_n`, `se_n` (DLMF 28.11.1–28.11.2).
+* `hasSum_one_mathieuCe`: `1 = 2 ∑_{n ≥ 0} A^{2n}_0(q) ce_{2n}(z, q)` (DLMF 28.11.3).
+* `hasSum_cos_even_mathieuCe`, `hasSum_cos_odd_mathieuCe`: expansions of `cos 2mz` and
+  `cos(2m+1)z` (DLMF 28.11.4, 28.11.5).
+* `hasSum_sin_odd_mathieuSe`, `hasSum_sin_even_mathieuSe`: expansions of `sin(2m+1)z` and
+  `sin(2m+2)z` (DLMF 28.11.6, 28.11.7).
+
+## Implementation notes
+
+DLMF only refers to the literature for expansions at exceptional (complex) values of `q`; they
+are not formalized here.
 -/
 
 @[expose] public noncomputable section

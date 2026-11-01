@@ -10,11 +10,30 @@ public import DLMF.Legendre.Continuation.LogarithmicBranches
 /-!
 # Monodromy of associated Legendre solutions
 
-Explicit transport of the first- and second-kind associated Legendre functions around the
-singular points.
+Explicit transport of `𝑸^μ_ν` around the confocal ellipse (DLMF 14.24.2) and of `P^{-μ}_ν`
+around loops encircling the singular point `1` (DLMF 14.24.3).
 
-Source references and common attribution are retained in
-`DLMF.Legendre.Continuation`.
+## Main definitions
+
+* `legInt_ew`, `legInt_eu`: the moving point `w(t) = ζ e^{-sπit}` and the explicit transport of
+  `𝑸^μ_ν` along the ellipse path.
+* `legendreSmoothStep`, `legendreOneLoop`: a smooth joining parameter and the loop from `z` to
+  `3/2`, around `1` `s` times, and back.
+* `legendreOneContinued`: the value obtained by continuing a solution along that loop.
+* `legTr_K`, `legTr_u`, `legTr_v`, `legTr_ell`: the regular factor of `P^{-μ}_ν`, the
+  transported value and derivative, and a continuous logarithm of `γ - 1` along the loop.
+
+## Main results
+
+* `legInt_joukowski_mem`, `legInt_zeta_joukowski`, `legInt_path_eq`: the ellipse path is the
+  Joukowski image `J(w(t))`.
+* `legInt_eu_deriv`, `legInt_eu_zero`: the explicit transport solves the Legendre system with
+  the right initial data.
+* `olverQ_ellipse_continuation`: DLMF 14.24.2.
+* `legTr_isTransport_of_local`, `legTr_isTransport_branch`: transports from local solutions, and
+  the transport of `P^{-μ}_ν` with a continuous logarithm.
+* `legTr_contDiff_loop`: the loop is `C¹`.
+* `associatedP_one_continuation`: DLMF 14.24.3.
 -/
 
 @[expose] public noncomputable section

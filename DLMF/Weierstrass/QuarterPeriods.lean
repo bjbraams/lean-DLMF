@@ -8,7 +8,19 @@ module
 public import DLMF.Weierstrass.SpecialLattices
 
 /-!
-# Quarter periods (DLMF §23.7)
+# Quarter periods of the Weierstrass function
+
+The values `℘(ω_j/2)` (DLMF §23.7) in Jacobian form and in square-root form.
+
+## Main results
+
+* `weierstrassP_half_ω₁`, `weierstrassP_half_ω₂`, `weierstrassP_half_ω₃`: DLMF 23.7.1–23.7.3
+  in Jacobian form, for every pair of generators.
+* `weierstrassP_half_sq`: the squared square-root forms, for every lattice.
+* `IsRectangular.weierstrassP_half`: the square-root forms with positive roots for rectangular
+  lattices.
+
+## Implementation notes
 
 DLMF gives `℘(ω_j/2)` in two forms, a square-root form and a Jacobian form, with `k, k'` and
 the square roots real and positive for rectangular lattices and "determined by continuity"
@@ -33,10 +45,10 @@ namespace DLMF.Weierstrass
 
 /-- For a half-lattice point `a`, `(℘(a/2) - ℘(a))² = (℘(b + a) - ℘(a))(℘(b) - ℘(a))` for every
 `b` with `b, b + a ∉ 𝕃`. -/
-lemma p23R1_weierstrassP_half_sub_sq (L : PeriodPair) {a b : ℂ} (ha : a ∉ L.lattice)
+private lemma weierstrassP_half_sub_sq (L : PeriodPair) {a b : ℂ} (ha : a ∉ L.lattice)
     (h2a : 2 * a ∈ L.lattice) (hb : b ∉ L.lattice) (hab : b + a ∉ L.lattice) :
     (℘[L] (a / 2) - ℘[L] a) ^ 2 = (℘[L] (b + a) - ℘[L] a) * (℘[L] b - ℘[L] a) := by
-  obtain ⟨K, hK⟩ := p23R1_halfPeriod_product L ha h2a
+  obtain ⟨K, hK⟩ := exists_weierstrassP_sub_mul_eq_const_of_two_mul_mem L ha h2a
   have h1 : a / 2 ∉ L.lattice := fun h => ha (by
     have := add_mem h h; rwa [add_halves] at this)
   have h2 : a / 2 + a ∉ L.lattice := fun h => ha (by
@@ -59,14 +71,14 @@ theorem weierstrassP_half_ω₁ :
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have hz : H.ω₁ / 2 ∉ H.lattice := fun h =>
     H.halfPeriod_notMem (j := 1) (by simp) (by simpa using add_mem h h)
-  have hθ := H.p23R1_thetaOne_ne_zero hz
+  have hθ := H.jacobiThetaOneTau_pi_mul_div_ne_zero hz
   have hw : π * (H.ω₁ / 2) / (2 * H.ω₁) = π / 4 := by field_simp; ring
   rw [hw] at hθ
   have h2 : jacobiThetaTwoTau (π / 4) H.tau = jacobiThetaOneTau (π / 4) H.tau := by
     rw [(jacobiThetaTwoTau_half_periods _ _).1,
       show (π : ℂ) / 4 + π / 2 = -(π / 4) + π by ring, jacobiThetaOneTau_add_pi,
       jacobiThetaOneTau_neg, neg_neg]
-  have h := H.p23R1_wp_sub_e_one hz
+  have h := H.weierstrassP_sub_e_one_eq_jacobiTheta_sq hz
   rw [hw, h2] at h
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
   simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4
@@ -84,7 +96,7 @@ theorem weierstrassP_half_ω₂ :
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have hz : H.ω₂ / 2 ∉ H.lattice := fun h =>
     H.halfPeriod_notMem (j := 2) (by simp) (by simpa using add_mem h h)
-  have hθ := H.p23R1_thetaOne_ne_zero hz
+  have hθ := H.jacobiThetaOneTau_pi_mul_div_ne_zero hz
   set d : ℂ := π / 4 + π * H.tau / 4 with hd
   have hw : π * (H.ω₂ / 2) / (2 * H.ω₁) = -d := by
     rw [hd, HalfPeriods.tau, HalfPeriods.ω₂]; field_simp; ring
@@ -93,8 +105,8 @@ theorem weierstrassP_half_ω₂ :
   rw [show -d + π / 2 + π * H.tau / 2 = d by rw [hd]; ring, thetaMultiplierM] at a
   have hM : cexp (I * -d + π * I * H.tau / 4) ^ 2 = -I := by
     rw [← exp_nat_mul, show ((2 : ℕ) : ℂ) * (I * -d + π * I * H.tau / 4) = -(π / 2 * I) by
-      rw [hd]; push_cast; ring, exp_neg, th20_exp_pi_div_two_mul_I, inv_I]
-  have h := H.p23R1_wp_sub_e_two hz
+      rw [hd]; push_cast; ring, exp_neg, Complex.exp_pi_div_two_mul_I, inv_I]
+  have h := H.weierstrassP_sub_e_two_eq_jacobiTheta_sq hz
   rw [hw, jacobiThetaOneTau_neg, a] at h
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
   simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4
@@ -114,7 +126,7 @@ theorem weierstrassP_half_ω₃ :
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have hz : H.ω₃ / 2 ∉ H.lattice := fun h =>
     H.halfPeriod_notMem (j := 3) (by simp) (by simpa using add_mem h h)
-  have hθ := H.p23R1_thetaOne_ne_zero hz
+  have hθ := H.jacobiThetaOneTau_pi_mul_div_ne_zero hz
   have hw : π * (H.ω₃ / 2) / (2 * H.ω₁) = π * H.tau / 4 := by
     rw [HalfPeriods.tau]; field_simp; ring
   rw [hw] at hθ
@@ -122,7 +134,7 @@ theorem weierstrassP_half_ω₃ :
   rw [jacobiThetaOneTau_neg, show -(π * H.tau / 4) + π * H.tau / 2 = π * H.tau / 4 by ring,
     thetaMultiplierM, show I * -(π * H.tau / 4) + π * I * H.tau / 4 = 0 by ring, exp_zero,
     mul_one] at a
-  have h := H.p23R1_wp_sub_e_three hz
+  have h := H.weierstrassP_sub_e_three_eq_jacobiTheta_sq hz
   rw [hw] at h
   obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero H.tau_im_pos
   simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4
@@ -151,7 +163,7 @@ theorem weierstrassP_half_sq :
       l ∈ ({1, 2, 3} : Finset ℕ) → H.halfPeriod k + H.halfPeriod j = -H.halfPeriod l →
       (H.weierstrassP (H.halfPeriod j / 2) - H.e j) ^ 2 = (H.e l - H.e j) * (H.e k - H.e j) := by
     intro j k l hj hk hl hjkl
-    have := p23R1_weierstrassP_half_sub_sq H.periodPair (H.halfPeriod_notMem hj)
+    have := weierstrassP_half_sub_sq H.periodPair (H.halfPeriod_notMem hj)
       (H.two_mul_halfPeriod_mem hj) (H.halfPeriod_notMem hk) (hjkl ▸ hneg l hl)
     rw [hjkl, PeriodPair.weierstrassP_neg] at this
     exact this
@@ -178,7 +190,7 @@ theorem IsRectangular.weierstrassP_half {H : HalfPeriods} (h : H.IsRectangular) 
       H.weierstrassP (H.ω₃ / 2) =
         H.e 3 - (Real.sqrt (((H.e 1 - H.e 3) * (H.e 2 - H.e 3)).re) : ℂ) := by
   obtain ⟨a, c, A, B, C, ha, hω, hcdef, hc, hA, hB, hC, hJ, e1, e2, e3, hK, hk, hk'⟩ :=
-    p23R1_rect_data h
+    exists_real_data_of_isRectangular h
   have q1 := H.weierstrassP_half_ω₁
   have q2 := H.weierstrassP_half_ω₂
   have q3 := H.weierstrassP_half_ω₃

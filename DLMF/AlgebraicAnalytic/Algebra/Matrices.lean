@@ -17,18 +17,30 @@ DLMF's matrices are Mathlib's `Matrix m n ℂ` (transpose `Aᵀ`, Hermitian conj
 1.2.27–1.2.39, 1.2.53–1.2.56 and 1.2.62–1.2.69 are upstream; the pointers are in
 `DLMF/AlgebraicAnalytic/Algebra/MathlibCoverage.lean`.
 
-**Convention for the scalar product.** DLMF's `⟨u, v⟩ = ∑ u_i \overline{v_i} = v^H u` (1.2.40)
-is linear in the first argument, Mathlib's inner product `⟪x, y⟫_ℂ = ∑ \overline{x_i} y_i` in
-the second. Here `⟨u, v⟩` is written `u ⬝ᵥ star v` for plain vectors, and it equals Mathlib's
-`⟪v, u⟫_ℂ` on `EuclideanSpace ℂ n` (`dotProduct_star_eq_inner`).
+## Main results
 
-This file proves the DLMF forms of the scalar-product rules 1.2.40–1.2.42, the complex Hölder
-inequality 1.2.50, the equality case of the Cauchy–Schwarz inequality 1.2.51, the limit
-`‖v‖_p → ‖v‖_∞` of 1.2.48, the Leibniz formula 1.2.59 in DLMF's index order, the statements on
-inverses and linear systems in §1.2(vi) (1.2.60–1.2.61), the attained maximum in the matrix
-norm 1.2.67, the characterization 1.2.71–1.2.72 of
-eigenvalues, the characterization 1.2.73 of non-defective matrices, 1.2.74–1.2.75, and the
-convergence of the exponential series 1.2.76.
+* `dotProduct_star_eq_sum`, `dotProduct_star_eq_inner`, `dotProduct_star_conj_symm`,
+  `smul_dotProduct_star_smul`: the scalar-product rules (DLMF 1.2.40–1.2.42).
+* `tendsto_lpNorm_atTop`: `‖v‖_p → ‖v‖_∞` (DLMF 1.2.48).
+* `norm_dotProduct_star_le_Lp_mul_Lq`: the complex Hölder inequality (DLMF 1.2.50).
+* `norm_inner_eq_norm_mul_iff`: the equality case of the Cauchy–Schwarz inequality
+  (DLMF 1.2.51, corrected).
+* `det_eq_sum_sign_mul_prod`: the Leibniz formula in DLMF's index order (DLMF 1.2.59).
+* `mul_inv_eq_one_of_det_ne_zero`, `existsUnique_mulVec_eq`, `mulVec_eq_iff_of_mulVec_eq`,
+  `not_exists_or_infinite_of_det_eq_zero`: inverses and linear systems (DLMF 1.2.60–1.2.61).
+* `isGreatest_norm_toEuclideanCLM_sphere`: the maximum in the matrix norm is attained
+  (DLMF 1.2.67).
+* `exists_eigenvector_iff_det_sub_eq_zero`: eigenvalues (DLMF 1.2.70–1.2.72).
+* `nonDefective_iff_exists_diagonal`, `det_eq_prod_of_inv_mul_mul_eq_diagonal`,
+  `trace_eq_sum_of_inv_mul_mul_eq_diagonal`: non-defective matrices (DLMF 1.2.73–1.2.75).
+* `hasSum_exp_matrix`: convergence of the exponential series (DLMF 1.2.76).
+
+## Implementation notes
+
+DLMF's `⟨u, v⟩ = ∑ u_i \overline{v_i} = v^H u` (1.2.40) is linear in the first argument,
+Mathlib's inner product `⟪x, y⟫_ℂ = ∑ \overline{x_i} y_i` in the second. Here `⟨u, v⟩` is
+written `u ⬝ᵥ star v` for plain vectors, and it equals Mathlib's `⟪v, u⟫_ℂ` on
+`EuclideanSpace ℂ n` (`dotProduct_star_eq_inner`).
 
 The equality case of 1.2.51 as printed ("iff `v` is a scalar multiple of `u`") fails for
 `u = 0 ≠ v`; it is stated with the alternative `u = 0`.
@@ -118,7 +130,7 @@ theorem tendsto_lpNorm_atTop [Nonempty n] (v : n → ℂ) :
   have hsup : (⨆ i, ‖v i‖) = ‖v i₀‖ :=
     le_antisymm (ciSup_le hi₀) (le_ciSup (Set.finite_range fun i => ‖v i‖).bddAbove i₀)
   rw [hsup]
-  simpa using g1a_tendsto_sum_rpow_atTop (w := fun _ => (1 : ℝ)) (c := fun i => ‖v i‖)
+  simpa using tendsto_weighted_sum_rpow_rpow_inv_atTop (w := fun _ => (1 : ℝ)) (c := fun i => ‖v i‖)
     (fun _ => one_pos) (fun i => norm_nonneg _) hi₀
 
 /-! ### Square matrices (§1.2(vi)) -/
@@ -214,7 +226,7 @@ Mathlib's `l²` operator norm (the scoped instance `Matrix.Norms.L2Operator`), a
 over the unit sphere is attained (for a nonempty index type). `toEuclideanCLM A` is `x ↦ A x` on
 `EuclideanSpace ℂ n`. -/
 @[dlmf 1.2.E67]
-theorem l2_opNorm_isGreatest [Nonempty n] (A : Matrix n n ℂ) :
+theorem isGreatest_norm_toEuclideanCLM_sphere [Nonempty n] (A : Matrix n n ℂ) :
     IsGreatest ((fun x : EuclideanSpace ℂ n => ‖toEuclideanCLM (n := n) (𝕜 := ℂ) A x‖) ''
       Metric.sphere 0 1) ‖A‖ := by
   have hc : IsCompact ((fun x : EuclideanSpace ℂ n => ‖toEuclideanCLM (n := n) (𝕜 := ℂ) A x‖) ''

@@ -10,13 +10,42 @@ public import DLMF.Bessel.Theorems
 public import DLMF.Confluent.BasicProperties
 
 /-!
-# Bessel functions of the second kind and Hankel functions (Temme §§9.1–9.4, DLMF 10.2–10.6)
+# Bessel functions of the second kind and Hankel functions (DLMF §§10.2–10.6, 10.25–10.29)
 
-The series `J_ν(z) = (z/2)^ν ₀F₁(ν+1; -z²/4)` is jointly continuous in `(ν, z)` on `ℂ × slitPlane`
-and entire in `ν`. Hence `D_ν(z) = J_ν(z) cos νπ - J_{-ν}(z)`, which vanishes at integer `ν`,
-divided by `sin νπ` has a removable singularity at each integer. This shows that Weber's `Y_ν` at
-integer order, defined in `besselY` as a limit, is the continuous extension, jointly in `(ν, z)`.
-The recurrences, the derivative, the Bessel equation and the Wronskians then hold for every order.
+Weber's `Y_ν`, the Hankel functions and Macdonald's `K_ν`, with continuity in the order,
+recurrences, derivatives, differential equations and Wronskians for every order, including the
+integers (Temme §§9.1–9.4).
+
+## Main definitions
+
+* `besselD`, `besselE`: the numerators `J_ν cos νπ - J_{-ν}` of `Y_ν` and `I_{-ν} - I_ν` of `K_ν`.
+* `hankelH1`, `hankelH2`: the Hankel functions `H_ν^{(1,2)} = J_ν ± i Y_ν` (DLMF 10.4.3).
+* `besselWronskianSeries`: the entire function behind the Wronskian of `J_ν` and `J_{-ν}`.
+
+## Main results
+
+* `continuous_regularized0F1`, `continuousOn_besselJ`, `differentiable_besselJ_order`: joint
+  continuity of `₀F₁` and `J_ν(z)`, and holomorphy of `J_ν(z)` in `ν`.
+* `continuousAt_besselY`, `continuousAt_besselK`: `Y_ν(z)` and `K_ν(z)` are jointly continuous
+  in `(ν, z)` on `ℂ × slitPlane`, including integer orders.
+* `besselY_add_sub`, `hasDerivAt_besselY`, `besselY_ode_all`: recurrence, derivative and
+  Bessel's equation for `Y_ν` (DLMF 10.6.1, 10.6.2, 10.2.1).
+* `wronskian_besselJ_neg`, `wronskian_besselJ_besselY`, `wronskian_hankelH1_hankelH2`: the
+  Wronskians DLMF 10.5.1, 10.5.2 and 10.5.5.
+* `besselI_sub_add`, `hasDerivAt_besselI`, `besselI_neg_int`: recurrence, derivative and
+  integer-order symmetry of `I_ν` (DLMF 10.29.1, 10.29.2, 10.27.1).
+* `besselK_add_sub`, `hasDerivAt_besselK`, `besselK_ode_all`: recurrence, derivative and
+  modified Bessel equation for `K_ν` (DLMF 10.29.1, 10.29.2, 10.25.1).
+* `wronskian_besselI_neg`, `wronskian_besselK_besselI`: the Wronskians DLMF 10.28.1–10.28.2.
+* `besselK_neg`: `K_{-ν} = K_ν` (DLMF 10.27.3).
+
+## Implementation notes
+
+The series `J_ν(z) = (z/2)^ν ₀F₁(ν+1; -z²/4)` is jointly continuous in `(ν, z)` on
+`ℂ × slitPlane` and entire in `ν`. Hence `D_ν(z) = J_ν(z) cos νπ - J_{-ν}(z)`, which vanishes at
+integer `ν`, divided by `sin νπ` has a removable singularity at each integer. This shows that
+Weber's `Y_ν` at integer order, defined in `besselY` as a limit, is the continuous extension,
+jointly in `(ν, z)`; similarly for `K_ν`.
 -/
 
 @[expose] public section
@@ -140,7 +169,7 @@ theorem cos_int_mul_pi_complex (n : ℤ) : cos ((n : ℂ) * π) = (-1) ^ n := by
 
 /-- Identity under the stated parameter and domain assumptions: `besselD n z = 0`. -/
 theorem besselD_int (n : ℤ) (z : ℂ) : besselD n z = 0 := by
-  rw [besselD, besselJ_neg_int, cos_int_mul_pi_complex]; ring
+  rw [besselD, Complex.besselJ_neg_int, cos_int_mul_pi_complex]; ring
 
 /-- Nonvanishing under the stated hypotheses: `sin (ν * π) ≠ 0`. -/
 theorem sin_mul_pi_ne_zero {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) : sin (ν * π) ≠ 0 := by
@@ -434,7 +463,7 @@ theorem besselWronskianSeries_eq (ν w : ℂ) :
   have hconst := is_const_of_deriv_eq_zero (f := besselWronskianSeries ν)
     (fun w => (hΦ w).differentiableAt) (fun w => (hΦ w).deriv) w 0
   rw [hconst, besselWronskianSeries]
-  simp only [zero_mul, sub_zero, DLMF.Confluent.regularizedHGFun_zero, regularizedHGFunCoeff_empty,
+  simp only [zero_mul, sub_zero, Complex.regularizedHGFun_zero, regularizedHGFunCoeff_empty,
     Nat.factorial_zero, Nat.cast_one, one_mul, Nat.cast_zero, add_zero, one_div]
   have h := DLMF.Confluent.recip_Gamma_mul_Gamma_one_sub (-ν)
   rw [show 1 - -ν = ν + 1 by ring, mul_inv, mul_neg, sin_neg] at h

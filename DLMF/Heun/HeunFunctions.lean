@@ -12,26 +12,29 @@ public import DLMF.Heun.LocalSolutions
 /-!
 # Heun functions, Heun polynomials and orthogonality (DLMF §§31.4–31.6, 31.9)
 
-* §31.4: for discrete values `q_m` of the accessory parameter `Hl(a, q_m; …; z)` is analytic at
-  `z = 1`, hence in `|z| < |a|` (`IsHeunEigenvalue01`, `heunFunction01`); the eigenvalues form an
-  infinite discrete set and satisfy the continued-fraction equation 31.4.2.
-* §31.5: for `α = -n` and `q` an eigenvalue of the tridiagonal matrix 31.5.1 the series of `Hl`
-  terminates: the Heun polynomial `heunPoly` (31.5.2) of degree `n`.
-* §31.6: path-multiplicative solutions (definition `IsPathMultiplicative` in Basic).
-* §31.9: the single orthogonality of `(0,1)Hf_m` over the Pochhammer double loop
-  `(1+, 0+, 1-, 0-)` with the normalization 31.9.3–31.9.4, and the double orthogonality 31.9.5 of
-  Heun polynomials.
+## Main results
+
+* `IsHeunEigenvalue01.analyticOn_ball`, `heunFunction01_eq_heunLocal`: for an eigenvalue `q_m`
+  of the accessory parameter, `Hl(a, q_m; …; z)` is analytic at `z = 1`, hence in `|z| < |a|`
+  (§31.4, DLMF 31.4.1).
+* `heunEigenvalue01_infinite_discrete`: the eigenvalues form an infinite discrete set.
+* `tendsto_heunCFApprox`: the continued-fraction equation 31.4.2.
+* `heunLocal_eq_heunPoly`, `heunPoly_isHeunSolOn`, `heunPolyMatrix_charpoly_natDegree`: for
+  `α = -n` and `q` an eigenvalue of the matrix 31.5.1 the series of `Hl` terminates in the Heun
+  polynomial `heunPoly` (31.5.2) of degree `n`.
+* `heun_orthogonality_ne`, `heun_orthogonality_self`: orthogonality of `(0,1)Hf_m` over the
+  Pochhammer double loop `(1+, 0+, 1-, 0-)` with the normalization 31.9.2–31.9.4.
+* `heunPoly_double_orthogonality`: double orthogonality of Heun polynomials, DLMF 31.9.5–31.9.6.
+
+Path-multiplicative solutions (§31.6) are defined in `DLMF.Heun.Basic` (`IsPathMultiplicative`).
+
+## Implementation notes
 
 The index `m` of `q_m`, `(s₁,s₂)Hf_m`, `Hp_{n,m}` is not modelled (DLMF fixes no ordering of
 the eigenvalues); statements are about eigenvalues `q`. The predicate `IsHeunFunctionOn` covers
 finite pairs `s₁, s₂ ∈ {0, 1, a}` only. Contour integrals use `continuedPathIntegral` along the
 explicit loop `pochhammerLoop` (four circles through the base point), with branches continued
 along the path and principal values at the start (`localBranchCpow`).
-
-Numerical checks (mpmath): the continued fraction 31.4.2 at an eigenvalue `q₀ ≈ 0.25992` for
-`a = 3, α = 0.4, β = 1.2, γ = 0.7, δ = 0.6`; the Pochhammer integral 31.9.2 for the two
-eigenvalues `q ≈ -2.9348, 0.25992` (off-diagonal `< 10⁻¹⁹`, diagonal equal to `θ_m` of 31.9.3 to
-ten digits); Heun polynomials for `n ≤ 3` (terminating series, ODE residuals `< 10⁻²⁷`).
 -/
 
 @[expose] public section
@@ -103,7 +106,7 @@ theorem tendsto_heunCFApprox (ha : 1 < ‖a‖) (hα : ∀ n : ℕ, α ≠ -(n :
 /-! ### Heun polynomials (§31.5) -/
 
 /-- Row `i` of `heunPolyMatrix` applied to a vector extended by zero. -/
-lemma p2h_row (a β γ δ : ℂ) (n : ℕ) (w : ℕ → ℂ) (hw : w (n + 1) = 0) (i : Fin (n + 1)) :
+private lemma heunPolyMatrix_mulVec_apply (a β γ δ : ℂ) (n : ℕ) (w : ℕ → ℂ) (hw : w (n + 1) = 0) (i : Fin (n + 1)) :
     ∑ k : Fin (n + 1), heunPolyMatrix a β γ δ n i k * w k =
       if (i : ℕ) = 0 then a * γ * w 1 else
         heunRecP (-(n : ℂ)) β i * w (i - 1) - heunRecQ a (-(n : ℂ)) β γ δ i * w i +
@@ -150,7 +153,7 @@ lemma p2h_row (a β γ δ : ℂ) (n : ℕ) (w : ℕ → ℂ) (hw : w (n + 1) = 0
 /-- For an eigenvalue `q` of `heunPolyMatrix`, the last row of the eigen-equation holds for the
 coefficients of `Hl(a, q; -n, …)`: `q = 0` if `n = 0`, and
 `(Q_n + q)c_n - P_n c_{n-1} = 0` if `n ≥ 1`. -/
-lemma p2h_eigen {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
+private lemma heunPolyMatrix_last_row {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     (hγ : ∀ k : ℕ, k < n → γ ≠ -(k : ℂ))
     (hq : (heunPolyMatrix a β γ δ n).charpoly.IsRoot q) :
     (n = 0 → q = 0) ∧ ∀ m : ℕ, n = m + 1 →
@@ -187,7 +190,7 @@ lemma p2h_eigen {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     | zero =>
       refine ⟨fun _ => by simp [c], fun h1 => ?_⟩
       have h := hrow ⟨0, by omega⟩
-      rw [p2h_row a β γ δ n w hw] at h
+      rw [heunPolyMatrix_mulVec_apply a β γ δ n w hw] at h
       simp only [ite_true] at h
       have hγ0 : γ ≠ 0 := by simpa using hγ 0 (by omega)
       show w 1 = w 0 * (q / (a * γ))
@@ -196,7 +199,7 @@ lemma p2h_eigen {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     | succ j ih =>
       refine ⟨ih.2, fun h2 => ?_⟩
       have h := hrow ⟨j + 1, by omega⟩
-      rw [p2h_row a β γ δ n w hw] at h
+      rw [heunPolyMatrix_mulVec_apply a β γ δ n w hw] at h
       simp only [Nat.add_one_ne_zero, ite_false, Nat.add_sub_cancel] at h
       have hRj := hR (j + 1) (by omega)
       have e1 := ih.1 (by omega)
@@ -214,7 +217,7 @@ lemma p2h_eigen {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     rw [← hwv k, (hmain k).1 (by omega), h0, zero_mul, Pi.zero_apply]
   rcases n with _ | m
   · have h := hrow ⟨0, by omega⟩
-    rw [p2h_row a β γ δ 0 w hw] at h
+    rw [heunPolyMatrix_mulVec_apply a β γ δ 0 w hw] at h
     simp only [ite_true] at h
     rw [show w 1 = 0 from hw, mul_zero] at h
     refine ⟨fun _ => ?_, fun m hm => by omega⟩
@@ -222,7 +225,7 @@ lemma p2h_eigen {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     · exact h
     · exact absurd h hw0
   · have h := hrow ⟨m + 1, by omega⟩
-    rw [p2h_row a β γ δ (m + 1) w hw] at h
+    rw [heunPolyMatrix_mulVec_apply a β γ δ (m + 1) w hw] at h
     simp only [Nat.add_one_ne_zero, ite_false, Nat.add_sub_cancel, hw, mul_zero, add_zero] at h
     have e1 := (hmain m).1 (by omega)
     have e2 := (hmain (m + 1)).1 (by omega)
@@ -238,11 +241,11 @@ lemma p2h_eigen {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
 
 /-- For an eigenvalue `q` of `heunPolyMatrix`, the coefficient `c_{n+1}` of `Hl(a, q; -n, …)`
 vanishes. -/
-lemma p2h_coeff_succ_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
+private lemma heunLocalCoeff_succ_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     (hγ : ∀ k : ℕ, k < n → γ ≠ -(k : ℂ))
     (hq : (heunPolyMatrix a β γ δ n).charpoly.IsRoot q) :
     heunLocalCoeff a q (-(n : ℂ)) β γ δ (n + 1) = 0 := by
-  obtain ⟨h0, h1⟩ := p2h_eigen ha hγ hq
+  obtain ⟨h0, h1⟩ := heunPolyMatrix_last_row ha hγ hq
   rcases n with _ | m
   · simp [h0 rfl]
   · have h := h1 m rfl
@@ -251,12 +254,12 @@ lemma p2h_coeff_succ_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
 
 /-- For an eigenvalue `q` of `heunPolyMatrix`, the coefficients `c_j` of `Hl(a, q; -n, …)`
 vanish for `j > n`. -/
-lemma p2h_coeff_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
+private lemma heunLocalCoeff_eq_zero_of_lt {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     (hγ : ∀ k : ℕ, k < n → γ ≠ -(k : ℂ))
     (hq : (heunPolyMatrix a β γ δ n).charpoly.IsRoot q) {j : ℕ} (hj : n < j) :
     heunLocalCoeff a q (-(n : ℂ)) β γ δ j = 0 := by
   set c := heunLocalCoeff a q (-(n : ℂ)) β γ δ with hc
-  have h1 : c (n + 1) = 0 := p2h_coeff_succ_eq_zero ha hγ hq
+  have h1 : c (n + 1) = 0 := heunLocalCoeff_succ_eq_zero ha hγ hq
   have key : ∀ k, c (n + 1 + k) = 0 ∧ c (n + 1 + k + 1) = 0 := by
     intro k
     induction k with
@@ -278,7 +281,7 @@ lemma p2h_coeff_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
   rwa [add_right_comm] at this
 
 /-- The leading coefficient `c_n` of the Heun polynomial is nonzero. -/
-lemma p2h_coeff_n_ne_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
+private lemma heunLocalCoeff_top_ne_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     (hγ : ∀ k : ℕ, k < n → γ ≠ -(k : ℂ)) (hβ : ∀ k : ℕ, k < n → β ≠ -(k : ℂ))
     (hq : (heunPolyMatrix a β γ δ n).charpoly.IsRoot q) :
     heunLocalCoeff a q (-(n : ℂ)) β γ δ n ≠ 0 := by
@@ -301,8 +304,8 @@ lemma p2h_coeff_n_ne_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
       apply hβ (j - 1) (by omega)
       push_cast [Nat.cast_sub hj1]
       linear_combination h0
-  have h1 := p2h_coeff_succ_eq_zero ha hγ hq
-  obtain ⟨-, hres⟩ := p2h_eigen ha hγ hq
+  have h1 := heunLocalCoeff_succ_eq_zero ha hγ hq
+  obtain ⟨-, hres⟩ := heunPolyMatrix_last_row ha hγ hq
   -- downward induction
   have key : ∀ k, k ≤ n → c (n - k) = 0 ∧ c (n - k + 1) = 0 := by
     intro k
@@ -341,22 +344,22 @@ lemma p2h_coeff_n_ne_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
   simp [c] at this
 
 /-- The coefficients of the Heun polynomial satisfy every equation of the recurrence. -/
-lemma p2h_p1hE_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
+private lemma heunOperatorCoeff_heunLocalCoeff_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     (hγ : ∀ k : ℕ, k < n → γ ≠ -(k : ℂ))
     (hq : (heunPolyMatrix a β γ δ n).charpoly.IsRoot q) (k : ℕ) :
-    p1hE a q (-(n : ℂ)) β γ δ (heunLocalCoeff a q (-(n : ℂ)) β γ δ) k = 0 := by
+    heunOperatorCoeff a q (-(n : ℂ)) β γ δ (heunLocalCoeff a q (-(n : ℂ)) β γ δ) k = 0 := by
   set c := heunLocalCoeff a q (-(n : ℂ)) β γ δ with hc
-  obtain ⟨h0, hres⟩ := p2h_eigen ha hγ hq
-  have hz : ∀ j, n < j → c j = 0 := fun j hj => p2h_coeff_eq_zero ha hγ hq hj
+  obtain ⟨h0, hres⟩ := heunPolyMatrix_last_row ha hγ hq
+  have hz : ∀ j, n < j → c j = 0 := fun j hj => heunLocalCoeff_eq_zero_of_lt ha hγ hq hj
   rcases k with _ | _ | j
-  · exact p1hE_zero _ _ _ _ _ _ _
-  · rw [p1hE_one, hc, heunLocalCoeff_one, heunLocalCoeff_zero]
+  · exact heunOperatorCoeff_zero _ _ _ _ _ _ _
+  · rw [heunOperatorCoeff_one, hc, heunLocalCoeff_one, heunLocalCoeff_zero]
     rcases Nat.eq_zero_or_pos n with hn | hn
     · simp [h0 hn]
     · have hγ0 : γ ≠ 0 := by simpa using hγ 0 hn
       field_simp
       ring
-  · rw [p1hE_add_two]
+  · rw [heunOperatorCoeff_add_two]
     rcases lt_trichotomy (j + 1) n with hj | hj | hj
     · have hR : heunRecR a γ (j + 1) ≠ 0 := by
         unfold heunRecR
@@ -388,7 +391,7 @@ theorem heunLocal_eq_heunPoly (ha : a ≠ 0) {n : ℕ} (hγ : ∀ k : ℕ, k < n
     (∀ j, n < j → heunLocalCoeff a q (-(n : ℂ)) β γ δ j = 0) ∧
       heunLocal a q (-(n : ℂ)) β γ δ z = (heunPoly a q β γ δ n).eval z := by
   have hc : ∀ j, n < j → heunLocalCoeff a q (-(n : ℂ)) β γ δ j = 0 :=
-    fun j hj => p2h_coeff_eq_zero ha hγ hq hj
+    fun j hj => heunLocalCoeff_eq_zero_of_lt ha hγ hq hj
   refine ⟨hc, ?_⟩
   rw [heunLocal, tsum_eq_sum (s := Finset.range (n + 1)) fun j hj => by
     rw [hc j (by simpa using hj), zero_mul]]
@@ -407,13 +410,13 @@ theorem heunPoly_isHeunSolOn (ha : a ≠ 0) {n : ℕ} (hγ : ∀ k : ℕ, k < n 
   set c := heunLocalCoeff a q (-(n : ℂ)) β γ δ with hc
   have hcoeff : P.coeff n = c n := by
     simp [P, heunPoly, finsetSum_coeff, c]
-  refine ⟨natDegree_eq_of_le_of_coeff_ne_zero ?_ (hcoeff ▸ p2h_coeff_n_ne_zero ha hγ hβ hq), ?_⟩
+  refine ⟨natDegree_eq_of_le_of_coeff_ne_zero ?_ (hcoeff ▸ heunLocalCoeff_top_ne_zero ha hγ hβ hq), ?_⟩
   · refine natDegree_sum_le_of_forall_le _ _ fun j hj => ?_
     exact (natDegree_C_mul_X_pow_le _ _).trans (by simpa [Nat.lt_succ_iff] using hj)
   set f : ℂ → ℂ := fun z => P.eval z with hfdef
   have hf : heunLocal a q (-(n : ℂ)) β γ δ = f :=
     funext fun z => (heunLocal_eq_heunPoly ha hγ hq z).2
-  have hps := p1h_hasFPowerSeriesOnBall (q := q) (α := -(n : ℂ)) (β := β) (γ := γ) (δ := δ) ha
+  have hps := hasFPowerSeriesOnBall_heunLocal (q := q) (α := -(n : ℂ)) (β := β) (γ := γ) (δ := δ) ha
   rw [hf] at hps
   have hd1 : deriv f = fun z => P.derivative.eval z := funext fun z => Polynomial.deriv P
   have hd2 : deriv (deriv f) = fun z => P.derivative.derivative.eval z := by
@@ -424,12 +427,12 @@ theorem heunPoly_isHeunSolOn (ha : a ≠ 0) {n : ℕ} (hγ : ∀ k : ℕ, k < n 
     intro z hz
     have hz' : z ∈ Metric.eball (0 : ℂ) (ENNReal.ofReal (heunLocalRadius a)) := by
       rwa [Metric.eball_ofReal]
-    have hT := p1h_hasSum_heunOperator (a := a) (q := q) (α := -(n : ℂ)) (β := β) (γ := γ)
+    have hT := hasSum_heunOperator (a := a) (q := q) (α := -(n : ℂ)) (β := β) (γ := γ)
       (δ := δ) hps hz'
     refine hT.unique ?_
     convert (hasSum_zero : HasSum (fun _ : ℕ => (0 : ℂ)) 0) using 1
     funext k
-    rw [p2h_p1hE_eq_zero ha hγ hq k, zero_mul]
+    rw [heunOperatorCoeff_heunLocalCoeff_eq_zero ha hγ hq k, zero_mul]
   have hgd : Differentiable ℂ g := by
     have : g = fun z => z * (z * (z - 1) * (z - a) * P.derivative.derivative.eval z +
         (γ * (z - 1) * (z - a) + δ * z * (z - a) + heunEps (-(n : ℂ)) β γ δ * z * (z - 1)) *
@@ -442,7 +445,7 @@ theorem heunPoly_isHeunSolOn (ha : a ≠ 0) {n : ℕ} (hγ : ∀ k : ℕ, k < n 
   have hgA : AnalyticOnNhd ℂ g univ := fun z _ => hgd.analyticAt z
   have hg0 : EqOn g 0 univ := hgA.eqOn_zero_of_preconnected_of_eventuallyEq_zero
     isPreconnected_univ (mem_univ 0) (by
-      filter_upwards [Metric.ball_mem_nhds (0 : ℂ) (p1h_radius_pos ha)] with z hz
+      filter_upwards [Metric.ball_mem_nhds (0 : ℂ) (heunLocalRadius_pos ha)] with z hz
       exact hgball z hz)
   have hs : ∀ z ∈ {z : ℂ | z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a}, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a := fun z hz => hz
   rw [isHeunSolOn_iff_heunOperator hs]

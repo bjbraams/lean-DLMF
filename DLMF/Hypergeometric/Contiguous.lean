@@ -10,10 +10,22 @@ public import DLMF.Hypergeometric.Series
 /-!
 # Contiguous relations (AAR §2.5 and §3.7)
 
-Gauss listed fifteen relations among `₂F₁(a,b;c;z)` and the six functions obtained by
-shifting one parameter by `±1`. A representative identity is recorded below; the remaining
-fourteen are the same linear-algebraic consequence of the three-term recurrence for Pochhammer
-symbols.
+Gauss listed fifteen relations among `₂F₁(a,b;c;z)` and the six functions obtained by shifting
+one parameter by `±1`. This file proves the basic ones; the others are in
+`DLMF.Hypergeometric.Derivatives`.
+
+## Main results
+
+* `ordinaryHypergeometric_mul_deriv_eq_shift_a`: `z F' = a (F(a+) - F)` (AAR (2.5.5)).
+* `ordinaryHypergeometric_mul_one_sub_mul_deriv_eq`: `z(1-z) F' = (c-a) F(a-) + (a-c+bz) F`,
+  DLMF 15.5.20 (AAR (2.5.8)).
+* `contiguous_a`: the three-term relation in `a`, DLMF 15.5.11.
+* `contiguous_shift_b`: DLMF 15.5.16_5.
+* `contiguous_c`: a relation shifting the denominator parameter.
+
+## References
+
+* G. E. Andrews, R. Askey, R. Roy, *Special Functions*, §2.5 and §3.7.
 -/
 
 @[expose] public section

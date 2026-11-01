@@ -8,13 +8,29 @@ module
 public import DLMF.ParabolicCylinder.UniformLG2.NegativeParameterEstimates
 
 /-!
-# Uniform cylinder estimates for positive parameters
+# Uniform estimates for parabolic cylinder functions with positive parameter
 
-Whole-line comparison solutions, coefficient bounds and normalizing functions for positive
-cylinder parameters.
+For positive parameter `a = μ²/2` the equation `w'' = μ⁴(t² + 1)w` has no turning points. This
+file sets up the barred coefficients `Ā_s` of DLMF 12.10.27, proves their Liouville–Green
+recursion and bounds, and proves a whole-line comparison result with constants uniform on
+every half-line.
 
-Source references and common attribution are retained in
-`DLMF.ParabolicCylinder.UniformLG2`.
+## Main definitions
+
+* `pcfLG2_bar`, `pcfLG2_Q`, `pcfLG2_R`: the barred polynomials `Re(i^e P(-it))`, in particular
+  `Q_s(t) = Re(i^s u_s(-it))` (DLMF 12.10.27).
+* `pcfLG2_PA`, `pcfLG2_PA1`, `pcfLG2_PA2`: the amplitude `A = (t² + 1)^{-1/4}` and its
+  derivatives.
+* `pcfLG2_Pa`, `pcfLG2_Pad`, `pcfLG2_Pad2`: the coefficients
+  `Ā_s(t) = Q_s(t)/(t² + 1)^{3s/2}` and their derivatives.
+* `pcfLG2_cbar`: the limits `c̄_s` of the barred coefficients at `+∞`.
+
+## Main results
+
+* `pcfLG2_P_recursion`: the Liouville–Green recursion for the barred coefficients.
+* `pcfLG2_tendsto_PU_div`, `pcfLG2_tendsto_PU_div_atBot`: the behavior of `U(μ²/2, μt√2)` at
+  `±∞` (from DLMF 12.2.15 and 12.9.1–12.9.2).
+* `pcfLG2_pos_core`: the whole-line Liouville–Green core for positive parameter.
 -/
 
 @[expose] public noncomputable section
@@ -589,7 +605,7 @@ lemma pcfLG2_tendsto_PU_div {μ : ℝ} (hμ : 0 < μ) :
       ((pcfLG2_PA t * Real.exp (-(μ^2 * pcfXiBar t)) : ℝ) : ℂ)) atTop
       (𝓝 (((μ * Real.sqrt 2 * pcfLG_h μ)⁻¹ : ℝ) : ℂ)) := by
   set a : ℂ := (μ:ℂ)^2/2
-  have hO := pcfU_sector_asymptotic a (δ := π/4) (by positivity) (by linarith [Real.pi_pos]) 1
+  have hO := pcfU_sector_asymptotic a (δ := π/4) (by positivity) 1
   have hz2 : Tendsto (fun z : ℂ => z ^ (-(2*(1:ℕ):ℤ))) (sector (3*π/4-π/4)) (𝓝 0) := by
     have : Tendsto (fun z : ℂ => ‖z‖) (sector (3*π/4-π/4)) atTop :=
       tendsto_comap.mono_left inf_le_left

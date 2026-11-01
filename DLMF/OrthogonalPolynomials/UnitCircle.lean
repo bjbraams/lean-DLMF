@@ -12,9 +12,31 @@ public import Mathlib.Analysis.SpecialFunctions.Bernstein
 /-!
 # Orthogonal polynomials on the unit circle
 
-Statements from NIST DLMF Chapter 18, each tagged with its equation number by `@[dlmf]`.
-Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
-hypergeometric definitions do not implement continuation in singular parameters.
+Monic orthogonal polynomials for a probability measure on the unit circle (DLMF §18.33): the
+reversed polynomials, Verblunsky coefficients, Szegő's recurrences and their inverses,
+Verblunsky's theorem, and the Szegő–Askey polynomials and their `q`-analogue.
+
+## Main definitions
+
+* `IsUnitCircleOP`: monic orthogonal polynomials for a probability measure on the unit circle
+  (DLMF 18.33.17); positive norms in every degree exclude finite support.
+* `reflectedPolynomial`: reverse-conjugation at a given degree (DLMF 18.33.22).
+* `verblunskyCoefficient`: the Verblunsky coefficient `α_n = -conj(φ_{n+1}(0))`
+  (DLMF 18.33.25).
+* `szegoAskey`, `szegoAskeyQ`: the Szegő–Askey polynomials and their `q`-analogue
+  (DLMF 18.33.13, 18.33.15).
+* `ip`: the `L²(μ)` inner product of two polynomials.
+
+## Main results
+
+* `szego_recurrence`, `szego_reflected_recurrence`: DLMF 18.33.23 and 18.33.24.
+* `verblunskyCoefficient_norm_lt_one`: `|α_n| < 1` (DLMF 18.33.25).
+* `unitCircle_norm_ratio`: `‖φ_{n+1}‖² = (1 - |α_n|²) ‖φ_n‖²` (DLMF 18.33.26).
+* `inverse_szego_recurrence`, `inverse_reflected_szego_recurrence`: DLMF 18.33.27 and
+  18.33.28.
+* `unitCircle_three_term_recurrence`: DLMF 18.33.30.
+* `verblunsky_theorem`: Verblunsky's theorem (DLMF §18.33(vi)).
+* `szegoAskey_orthogonal`, `szegoAskeyQ_orthogonal`: DLMF 18.33.14 and 18.33.16.
 -/
 
 @[expose] public section
@@ -395,7 +417,7 @@ theorem ip_reflected_self (h : IsUnitCircleOP μ p) (n : ℕ) :
   linear_combination (star ((p n).eval z) * (p n).eval z) * this
 
 /-- `⟨f, f⟩` is the real number `∫ |f|² dμ`. -/
-theorem ip_self_eq_ofReal (h : IsUnitCircleOP μ p) (f : ℂ[X]) :
+theorem ip_self_eq_ofReal (f : ℂ[X]) :
     ip μ f f = ((∫ z, ‖f.eval z‖ ^ 2 ∂μ : ℝ) : ℂ) := by
   unfold ip
   rw [← integral_complex_ofReal]
@@ -416,7 +438,7 @@ theorem ip_succ_self (h : IsUnitCircleOP μ p) (n : ℕ) :
     rw [this, ip_sub_left h, hR, ip_C_mul_left, ip_reflected_self h]; ring
   have hRX : ip μ R (X * p n) = -star c0 * ip μ (p n) (p n) := by
     rw [ip_swap, hXR, star_mul', star_neg]
-    have hN := ip_self_eq_ofReal h (p n)
+    have hN := ip_self_eq_ofReal (μ := μ) (p n)
     rw [hN, Complex.star_def, Complex.conj_ofReal]
   have e1 : ip μ (p (n + 1)) (p (n + 1)) =
       ip μ (p (n + 1)) (X * p n) + star c0 * ip μ (p (n + 1)) R := by
@@ -460,7 +482,7 @@ theorem unitCircle_norm_ratio {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUni
     (∫ z, ‖(p (n + 1)).eval z‖ ^ 2 ∂μ) =
       (1 - ‖verblunskyCoefficient p n‖ ^ 2) * ∫ z, ‖(p n).eval z‖ ^ 2 ∂μ := by
   have h1 := ip_succ_self h n
-  rw [ip_self_eq_ofReal h, ip_self_eq_ofReal h] at h1
+  rw [ip_self_eq_ofReal, ip_self_eq_ofReal] at h1
   have hc : (p (n + 1)).eval 0 * star ((p (n + 1)).eval 0) =
       ((‖verblunskyCoefficient p n‖ ^ 2 : ℝ) : ℂ) := by
     rw [verblunskyCoefficient, norm_neg, norm_star, Complex.star_def, Complex.mul_conj,

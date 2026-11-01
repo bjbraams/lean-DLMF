@@ -16,23 +16,49 @@ public import Pochhammer.BinomialSeries
 public import ToMathlib.Algebra.Polynomial.PochhammerIdentities
 
 /-!
-# General inverse trigonometric identities
+# Inverse trigonometric functions: values, series, addition and continued fractions
 
-General inverse values, sum and difference formulas and continued fractions with their branch
-conditions.
+This file proves the general-value formulas, real and imaginary parts, Gudermannian functions,
+series, derivatives, addition formulas and continued fractions of the inverse trigonometric
+functions (DLMF §§4.23(vi)–4.25).
 
-Source references and common attribution are retained in
-`DLMF.Elementary.Trigonometric`.
-The boundary and exterior arctangent series reuse the natural-order odd logarithm
-series from `DLMF.Elementary.LogExpAnalysis`, retaining the principal branch correction.
-Euler’s transformed series integrates a dominated geometric kernel; its factorial moments
-come from Mathlib’s Beta integral, and the principal arctangent derivative evaluates the kernel.
-The closed-disk arcsine series uses the lean-codes binomial series and Pochhammer
-duplication, with Gauss summability from `DLMF.Hypergeometric.Basic` at the boundary.
-The binomial series in `Pochhammer.BinomialSeries` imports the Tau Ceti contributors’
-complex binomial theorem; see `CREDITS.md`.
-The arccosine expansion follows from the principal half-angle identity. Its positive
-real cut values use the lower-bank limit already proved in `InverseBranches`.
+## Main definitions
+
+* `inverseTrigAlpha`, `inverseTrigBeta`: half-sum and half-difference of distances to the branch
+  points (DLMF 4.23.37–4.23.38).
+* `gudermannian`, `inverseGudermannian`: the Gudermannian and its inverse
+  (DLMF 4.23.39, 4.23.41).
+* `inverseTrigSum`: Minkowski addition with an independently chosen sign.
+
+## Main results
+
+* `arccos_general_values`, `arctan_general_values`: DLMF 4.23.32–4.23.33.
+* `arcsin_real_imag`, `arccos_real_imag`, `arctan_real_imag`: DLMF 4.23.34–4.23.36.
+* `gudermannian_elementary`, `inverse_gudermannian_elementary`, `gudermannian_inverse`:
+  DLMF 4.23.40, 4.23.42 and §4.23(viii).
+* `hasSum_arcsin_principal`, `hasSum_arccos_principal`, `hasSum_arctan_closed_disc`,
+  `arctan_exterior_series`, `hasSum_arctan_euler`: series (DLMF 4.24.1–4.24.5).
+* `hasDerivAt_arcsin_principal`, `hasDerivAt_arctan_principal`, `hasDerivAt_arccot_principal`:
+  derivatives (DLMF 4.24.7–4.24.12).
+* `arcsin_general_add`, `arccos_general_add`, `arctan_general_add`, `arcsin_arccos_general_add`,
+  `arctan_arccot_general_add`: addition formulas with consistent branches
+  (DLMF 4.24.13–4.24.17).
+* `tan_continued_fraction`, `tan_scaled_continued_fraction`, `arcsin_continued_fraction`,
+  `arctan_continued_fraction`, `exp_arccot_continued_fraction`: DLMF 4.25.1–4.25.5.
+
+## Implementation notes
+
+The principal arccosine and secant forms of the Gudermannian, and the arccosh and arcsech forms
+of its inverse, require a nonnegative argument; these sign conditions correct the displayed
+formulas. The boundary and exterior arctangent series use the natural-order odd logarithm series
+of `DLMF.Elementary.LogExpAnalysis`, retaining the principal branch correction. Euler's
+transformed series integrates a dominated geometric kernel whose factorial moments come from
+Mathlib's Beta integral. The closed-disk arcsine series uses the binomial series of
+`Pochhammer.BinomialSeries` (lean-codes), which imports the Tau Ceti contributors' complex
+binomial theorem (see `CREDITS.md`), Pochhammer duplication, and Gauss summability from
+`DLMF.Hypergeometric.Basic` at the boundary. The arccosine expansion follows from the principal
+half-angle identity, with its positive real cut values from the lower-bank limit of
+`DLMF.Elementary.Trigonometric.InverseBranches`.
 -/
 
 @[expose] public noncomputable section
@@ -90,7 +116,7 @@ def inverseTrigAlpha (z : ℂ) : ℝ := (‖z+1‖+‖z-1‖)/2
 def inverseTrigBeta (z : ℂ) : ℝ := (‖z+1‖-‖z-1‖)/2
 
 /-- The principal square root is the square root with positive real part. -/
-lemma trigR4_sqrt_eq_of_sq {a w : ℂ} (hw : w^2 = a) (hre : 0 < w.re) :
+private lemma sqrt_eq_of_sq_eq_of_re_pos {a w : ℂ} (hw : w^2 = a) (hre : 0 < w.re) :
     Complex.sqrt a = w := by
   have h1 := trig_sqrt_sq a
   have h : (Complex.sqrt a - w)*(Complex.sqrt a + w) = 0 := by linear_combination h1 - hw
@@ -104,7 +130,7 @@ lemma trigR4_sqrt_eq_of_sq {a w : ℂ} (hw : w^2 = a) (hre : 0 < w.re) :
     linarith
 
 /-- Algebraic identities for the half-sum and half-difference of distances to `±1`. -/
-lemma trigR4_alpha_beta (z : ℂ) :
+private lemma inverseTrigAlpha_inverseTrigBeta_identities (z : ℂ) :
     inverseTrigAlpha z*inverseTrigBeta z=z.re ∧
     (1-(inverseTrigBeta z)^2)*((inverseTrigAlpha z)^2-1)=z.im^2 ∧
     1 ≤ inverseTrigAlpha z ∧ |inverseTrigBeta z| ≤ 1 := by
@@ -129,7 +155,7 @@ lemma trigR4_alpha_beta (z : ℂ) :
 theorem arcsin_real_imag {z : ℂ} (hz : z.im≠0 ∨ |z.re|≤1) :
     arcsinPrincipal z=(Real.arcsin (inverseTrigBeta z):ℂ)+
       I*(trigRealSign z.im:ℂ)*Real.log (inverseTrigAlpha z+Real.sqrt ((inverseTrigAlpha z)^2-1)) := by
-  obtain ⟨hab, hsq, ha1, hb1⟩ := trigR4_alpha_beta z
+  obtain ⟨hab, hsq, ha1, hb1⟩ := inverseTrigAlpha_inverseTrigBeta_identities z
   set a := inverseTrigAlpha z
   set b := inverseTrigBeta z
   by_cases hy : z.im = 0
@@ -208,7 +234,7 @@ theorem arcsin_real_imag {z : ℂ} (hz : z.im≠0 ∨ |z.re|≤1) :
         Complex.I_re, Complex.I_im]
       nlinarith
     have hsq' : Complex.sqrt (1-z^2) = Complex.cos w := by
-      apply trigR4_sqrt_eq_of_sq _ hcosre
+      apply sqrt_eq_of_sq_eq_of_re_pos _ hcosre
       rw [← hsinw]; linear_combination Complex.sin_sq_add_cos_sq w
     have he : Complex.sqrt (1-z^2)+I*z = Complex.exp (w*I) := by
       rw [hsq', Complex.exp_mul_I, hsinw]; ring
@@ -228,8 +254,8 @@ theorem arccos_real_imag {z : ℂ} (hz : z.im≠0 ∨ |z.re|≤1) :
   push_cast; ring
 
 /-- On the arcsine cut plane the half-difference of distances lies strictly inside `(-1,1)`. -/
-lemma trigR4_beta_lt {z : ℂ} (hz : z∈arcsinCutPlane) : |inverseTrigBeta z|<1 := by
-  obtain ⟨hab, hsq, ha1, hb1⟩ := trigR4_alpha_beta z
+private lemma abs_inverseTrigBeta_lt_one {z : ℂ} (hz : z∈arcsinCutPlane) : |inverseTrigBeta z|<1 := by
+  obtain ⟨hab, hsq, ha1, hb1⟩ := inverseTrigAlpha_inverseTrigBeta_identities z
   rcases lt_or_eq_of_le hb1 with h | h
   · exact h
   exfalso
@@ -243,7 +269,7 @@ lemma trigR4_beta_lt {z : ℂ} (hz : z∈arcsinCutPlane) : |inverseTrigBeta z|<1
     linarith
 
 /-- Real and imaginary parts of the complex cosine and sine. -/
-lemma trigR4_cos_sin_re (w : ℂ) :
+private lemma re_cos_and_re_sin (w : ℂ) :
     (Complex.cos w).re = Real.cos w.re*Real.cosh w.im ∧
     (Complex.sin w).re = Real.sin w.re*Real.cosh w.im := by
   have hw : w = (w.re:ℂ) + (w.im:ℂ)*I := (Complex.re_add_im w).symm
@@ -271,7 +297,7 @@ theorem arccos_principal_log_half {z : ℂ} (hz : z∈arcsinCutPlane) :
   have hre : θ.re = Real.arccos (inverseTrigBeta z) := by
     rw [show θ = _ from arccos_real_imag hz']
     simp
-  have hb := abs_lt.mp (trigR4_beta_lt hz)
+  have hb := abs_lt.mp (abs_inverseTrigBeta_lt_one hz)
   have h0 : 0 < θ.re := by rw [hre]; exact Real.arccos_pos.mpr hb.2
   have hπ : θ.re < π := by rw [hre]; exact Real.arccos_lt_pi.mpr hb.1
   have hc : Complex.cos θ = z := cos_arccos_principal z
@@ -280,13 +306,13 @@ theorem arccos_principal_log_half {z : ℂ} (hz : z∈arcsinCutPlane) :
   have hv0 : 0 < Real.sin (θ/2).re := by
     apply Real.sin_pos_of_pos_of_lt_pi <;> simp <;> linarith
   have h1 : Complex.sqrt ((1+z)/2) = Complex.cos (θ/2) := by
-    apply trigR4_sqrt_eq_of_sq
+    apply sqrt_eq_of_sq_eq_of_re_pos
     · rw [Complex.cos_sq, ← hc]; ring_nf
-    · rw [(trigR4_cos_sin_re _).1]; exact mul_pos hu0 (Real.cosh_pos _)
+    · rw [(re_cos_and_re_sin _).1]; exact mul_pos hu0 (Real.cosh_pos _)
   have h2 : Complex.sqrt ((1-z)/2) = Complex.sin (θ/2) := by
-    apply trigR4_sqrt_eq_of_sq
+    apply sqrt_eq_of_sq_eq_of_re_pos
     · rw [Complex.sin_sq, Complex.cos_sq, ← hc]; ring_nf
-    · rw [(trigR4_cos_sin_re _).2]; exact mul_pos hv0 (Real.cosh_pos _)
+    · rw [(re_cos_and_re_sin _).2]; exact mul_pos hv0 (Real.cosh_pos _)
   rw [h1, h2, show Complex.cos (θ/2) + I*Complex.sin (θ/2) = Complex.exp (θ/2*I) by
     rw [Complex.exp_mul_I]; ring, Complex.log_exp]
   · linear_combination θ*Complex.I_sq
@@ -294,7 +320,7 @@ theorem arccos_principal_log_half {z : ℂ} (hz : z∈arcsinCutPlane) :
   · simp; linarith
 
 /-- In the open right half-plane the argument is the arctangent of the slope. -/
-lemma trigR4_arg_of_re_pos {w : ℂ} (hw : 0<w.re) : Complex.arg w=Real.arctan (w.im/w.re) := by
+private lemma arg_eq_arctan_div_of_re_pos {w : ℂ} (hw : 0<w.re) : Complex.arg w=Real.arctan (w.im/w.re) := by
   have h := Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hw)
   rw [← Complex.tan_arg, Real.arctan_tan (abs_lt.mp h).1 (abs_lt.mp h).2]
 
@@ -327,7 +353,7 @@ theorem arctan_real_imag {z : ℂ} (hz : ‖z‖<1) :
   apply Complex.ext
   · simp only [Complex.mul_re, Complex.log_re, Complex.log_im, Complex.add_re, Complex.div_re,
       Complex.ofReal_re, Complex.ofReal_im]
-    rw [trigR4_arg_of_re_pos hre, hw]
+    rw [arg_eq_arctan_div_of_re_pos hre, hw]
     simp
     rw [div_div_div_cancel_right₀ hD.ne']
     ring
@@ -625,10 +651,10 @@ private lemma arccos_half_cut {z : ℂ} (hz : z ∈ arcsinCutPlane) :
 private lemma arcsin_real_cut {x : ℝ} (hx : 1≤x) :
     arcsinPrincipal x = arcsinRightBank false x := by
   have hp : 0 < Real.sqrt (x^2-1)+x := by positivity
-  rw [arcsinPrincipal, trigR4_sqrt_eq_up (by simp [pow_two]), trigR4_one_sub_sq_real,
-    trigR4_sqrtUp_neg (by nlinarith)]
+  rw [arcsinPrincipal, sqrt_eq_sqrtUpperBank (by simp [pow_two]), one_sub_ofReal_sq_eq_neg,
+    sqrtUpperBank_neg_ofReal (by nlinarith)]
   rw [show I*(Real.sqrt (x^2-1):ℂ)+I*x = I*((Real.sqrt (x^2-1)+x:ℝ):ℂ) by push_cast; ring,
-    trigR4_log_I_mul_pos hp]
+    log_I_mul_ofReal_of_pos hp]
   simp only [arcsinRightBank, trigBankSign, Bool.false_eq_true, ite_false]
   linear_combination (-(π:ℂ)/2)*Complex.I_sq
 /-- The principal half-angle square root maps the shifted closed disk into the closed unit disk. -/
@@ -664,10 +690,10 @@ private lemma arccos_half_positive_cut {x : ℝ} (hx : 1<x) (hx3 : x≤3) :
       abs_of_neg (by linarith)]
     linarith
   have hp := continuousAt_arcsin_principal_of_norm_le_one (half_root_norm_le hn)
-  have hroot := (trigR4_continuous_sqrtUp.comp
+  have hroot := (continuous_sqrtUpperBank.comp
     (by fun_prop : Continuous (fun w : ℂ => (1-w)/2))).continuousAt.tendsto.comp hseq
-  have he : trigR4_sqrtUp ((1-(x:ℂ))/2) = Complex.sqrt ((1-(x:ℂ))/2) :=
-    (trigR4_sqrt_eq_up (by simp)).symm
+  have he : sqrtUpperBank ((1-(x:ℂ))/2) = Complex.sqrt ((1-(x:ℂ))/2) :=
+    (sqrt_eq_sqrtUpperBank (by simp)).symm
   dsimp only [Function.comp_def] at hroot
   rw [he] at hroot
   have hR := (hp.tendsto.comp hroot).const_mul (2:ℂ)
@@ -675,7 +701,7 @@ private lemma arccos_half_positive_cut {x : ℝ} (hx : 1<x) (hx3 : x≤3) :
   refine hR.congr (fun n => ?_)
   dsimp only [Function.comp_def]
   rw [arccos_half_cut (Or.inl (ne_of_lt (hi n))),
-    trigR4_sqrt_eq_up (by simp; linarith [hi n])]
+    sqrt_eq_sqrtUpperBank (by simp; linarith [hi n])]
 /-- The principal half-angle identity holds on the whole shifted disk, including its cut values. -/
 private lemma arccos_half_shifted_disk {z : ℂ} (hz : ‖1-z‖≤2) :
     arccosPrincipal z = 2*arcsinPrincipal (Complex.sqrt ((1-z)/2)) := by
@@ -765,7 +791,7 @@ theorem hasSum_arctan_closed_disc {z : ℂ} (hz : ‖z‖≤1) (hp : z≠I) (hm 
 
 /-- The exterior logarithmic form of arctangent keeps the principal branch correction
 on the appropriate side of the imaginary axis. -/
-private lemma trigR4_arctan_exterior_log {z : ℂ} (hr : z.re ≠ 0) :
+private lemma arctan_eq_exterior_log {z : ℂ} (hr : z.re ≠ 0) :
     (if 0<z.re then (π:ℂ)/2 else -π/2) -
       I/2*Complex.log ((z*I+1)/(z*I-1)) = Complex.arctan z := by
   let v := (1 + z * I) / (1 - z * I)
@@ -842,7 +868,7 @@ theorem arctan_exterior_series {z : ℂ} (hz : 1≤‖z‖) (hr : z.re≠0) :
     ring_nf
     simp
   simp_rw [hc] at h
-  simpa only [trigR4_arctan_exterior_log hr] using
+  simpa only [arctan_eq_exterior_log hr] using
     ((tendsto_const_nhds (x := if 0<z.re then (π:ℂ)/2 else -π/2)).sub h)
 
 /-- Integer Beta integrals give the factorial moments of the weight `4t(1-t)`. -/
@@ -997,15 +1023,15 @@ theorem hasDerivAt_arctan_principal {z : ℂ} (hz : z∈arctanCutPlane) : HasDer
   exact trig_hasDerivAt_arctan hz
 
 /-- Real and imaginary parts of the principal square root. -/
-lemma trigR4_sqrt_re_im (a : ℂ) :
+lemma re_sqrt_and_im_sqrt (a : ℂ) :
     (Complex.sqrt a).re = √((‖a‖ + a.re) / 2) ∧
     (Complex.sqrt a).im = (if 0 ≤ a.im then 1 else -1) * √((‖a‖ - a.re) / 2) := by
   rw [Complex.sqrt_eq_real_add_ite]
   constructor <;> split_ifs <;> simp
 
 /-- The principal square root has positive real part off the closed negative axis. -/
-lemma trigR4_sqrt_re_pos {a : ℂ} (h : a.im ≠ 0 ∨ 0 < a.re) : 0 < (Complex.sqrt a).re := by
-  rw [(trigR4_sqrt_re_im a).1]
+private lemma re_sqrt_pos {a : ℂ} (h : a.im ≠ 0 ∨ 0 < a.re) : 0 < (Complex.sqrt a).re := by
+  rw [(re_sqrt_and_im_sqrt a).1]
   apply Real.sqrt_pos.mpr
   rcases h with h | h
   · have := (Complex.abs_re_lt_norm).mpr h
@@ -1014,16 +1040,16 @@ lemma trigR4_sqrt_re_pos {a : ℂ} (h : a.im ≠ 0 ∨ 0 < a.re) : 0 < (Complex.
   · linarith [Complex.re_le_norm a]
 
 /-- The principal square root preserves a positive imaginary part. -/
-lemma trigR4_sqrt_im_pos {a : ℂ} (h : 0 < a.im) : 0 < (Complex.sqrt a).im := by
-  rw [(trigR4_sqrt_re_im a).2, ite_eq_left_of_eq_true _ _ (eq_true h.le), one_mul]
+private lemma im_sqrt_pos {a : ℂ} (h : 0 < a.im) : 0 < (Complex.sqrt a).im := by
+  rw [(re_sqrt_and_im_sqrt a).2, ite_eq_left_of_eq_true _ _ (eq_true h.le), one_mul]
   apply Real.sqrt_pos.mpr
   have := (Complex.abs_re_lt_norm).mpr h.ne'
   have := le_abs_self a.re
   linarith
 
 /-- The principal square root preserves a negative imaginary part. -/
-lemma trigR4_sqrt_im_neg {a : ℂ} (h : a.im < 0) : (Complex.sqrt a).im < 0 := by
-  rw [(trigR4_sqrt_re_im a).2, ite_eq_right_of_eq_false _ _ (eq_false (not_le.mpr h)), neg_one_mul,
+private lemma im_sqrt_neg {a : ℂ} (h : a.im < 0) : (Complex.sqrt a).im < 0 := by
+  rw [(re_sqrt_and_im_sqrt a).2, ite_eq_right_of_eq_false _ _ (eq_false (not_le.mpr h)), neg_one_mul,
     neg_lt_zero]
   apply Real.sqrt_pos.mpr
   have := (Complex.abs_re_lt_norm).mpr h.ne
@@ -1031,7 +1057,7 @@ lemma trigR4_sqrt_im_neg {a : ℂ} (h : a.im < 0) : (Complex.sqrt a).im < 0 := b
   linarith
 
 /-- The reciprocal square-root branch identity off the reciprocal cuts. -/
-lemma trigR4_mul_sqrt_one_sub_inv_sq {z : ℂ} (hz : z∈arccscCutPlane) (hr : z.re≠0) :
+private lemma mul_sqrt_one_sub_inv_sq_eq_sign_mul_sqrt {z : ℂ} (hz : z∈arccscCutPlane) (hr : z.re≠0) :
     z*Complex.sqrt (1-(z⁻¹)^2) = (if 0<z.re then 1 else -1)*Complex.sqrt (z^2-1) := by
   obtain ⟨hz0, hc⟩ := hz
   have hN : 0 < Complex.normSq z := Complex.normSq_pos.mpr hz0
@@ -1072,8 +1098,8 @@ lemma trigR4_mul_sqrt_one_sub_inv_sq {z : ℂ} (hz : z∈arccscCutPlane) (hr : z
         rw [hw2re, hy]
         have h1 : ((z⁻¹).re * z.re)^2 = 1 := by rw [hux]; norm_num
         nlinarith [abs_mul_abs_self (z⁻¹).re, abs_nonneg (z⁻¹).re, sq_nonneg z.re]
-      have hapos := trigR4_sqrt_re_pos (Or.inr hre1)
-      have hbpos := trigR4_sqrt_re_pos (Or.inr hre2)
+      have hapos := re_sqrt_pos (Or.inr hre1)
+      have hbpos := re_sqrt_pos (Or.inr hre2)
       rw [hy] at hre
       by_cases hx : 0 < z.re
       · rw [hs, ite_eq_left_of_eq_true _ _ (eq_true hx), one_mul] at hre
@@ -1087,35 +1113,35 @@ lemma trigR4_mul_sqrt_one_sub_inv_sq {z : ℂ} (hz : z∈arccscCutPlane) (hr : z
         rw [hw1im, hu, hv]; field_simp
       have hN2 : 0 < (Complex.normSq z)^2 := by positivity
       have hapos : 0 < a.re := by
-        rw [ha]; apply trigR4_sqrt_re_pos; left; rw [hw1]
+        rw [ha]; apply re_sqrt_pos; left; rw [hw1]
         exact div_ne_zero (mul_ne_zero (mul_ne_zero (by norm_num) hr) hy) hN2.ne'
       rcases lt_or_gt_of_ne hr with hx | hx <;> rcases lt_or_gt_of_ne hy with hy' | hy'
       · -- x<0, y<0
         have hxy : 0 < z.re*z.im := mul_pos_of_neg_of_neg hx hy'
         have h1 : 0 < a.im := by
-          rw [ha]; apply trigR4_sqrt_im_pos; rw [hw1]; apply div_pos _ hN2; linarith
-        have h2 : 0 < b.im := by rw [hb]; apply trigR4_sqrt_im_pos; rw [hw2im]; linarith
+          rw [ha]; apply im_sqrt_pos; rw [hw1]; apply div_pos _ hN2; linarith
+        have h2 : 0 < b.im := by rw [hb]; apply im_sqrt_pos; rw [hw2im]; linarith
         rw [hs, ite_eq_right_of_eq_false _ _ (eq_false (not_lt.mpr hx.le))] at him
         simp at him; linarith [mul_pos_of_neg_of_neg hx (neg_neg_of_pos h1), mul_neg_of_neg_of_pos hy' hapos]
       · -- x<0, y>0
         have hxy : z.re*z.im < 0 := mul_neg_of_neg_of_pos hx hy'
         have h1 : a.im < 0 := by
-          rw [ha]; apply trigR4_sqrt_im_neg; rw [hw1]; apply div_neg_of_neg_of_pos _ hN2; linarith
-        have h2 : b.im < 0 := by rw [hb]; apply trigR4_sqrt_im_neg; rw [hw2im]; linarith
+          rw [ha]; apply im_sqrt_neg; rw [hw1]; apply div_neg_of_neg_of_pos _ hN2; linarith
+        have h2 : b.im < 0 := by rw [hb]; apply im_sqrt_neg; rw [hw2im]; linarith
         rw [hs, ite_eq_right_of_eq_false _ _ (eq_false (not_lt.mpr hx.le))] at him
         simp at him; linarith [mul_pos_of_neg_of_neg hx h1, mul_pos hy' hapos]
       · -- x>0, y<0
         have hxy : z.re*z.im < 0 := mul_neg_of_pos_of_neg hx hy'
         have h1 : a.im < 0 := by
-          rw [ha]; apply trigR4_sqrt_im_neg; rw [hw1]; apply div_neg_of_neg_of_pos _ hN2; linarith
-        have h2 : b.im < 0 := by rw [hb]; apply trigR4_sqrt_im_neg; rw [hw2im]; linarith
+          rw [ha]; apply im_sqrt_neg; rw [hw1]; apply div_neg_of_neg_of_pos _ hN2; linarith
+        have h2 : b.im < 0 := by rw [hb]; apply im_sqrt_neg; rw [hw2im]; linarith
         rw [hs, ite_eq_left_of_eq_true _ _ (eq_true hx), one_mul] at him
         simp at him; linarith [mul_neg_of_pos_of_neg hx h1, mul_neg_of_neg_of_pos hy' hapos]
       · -- x>0, y>0
         have hxy : 0 < z.re*z.im := mul_pos hx hy'
         have h1 : 0 < a.im := by
-          rw [ha]; apply trigR4_sqrt_im_pos; rw [hw1]; apply div_pos _ hN2; linarith
-        have h2 : 0 < b.im := by rw [hb]; apply trigR4_sqrt_im_pos; rw [hw2im]; linarith
+          rw [ha]; apply im_sqrt_pos; rw [hw1]; apply div_pos _ hN2; linarith
+        have h2 : 0 < b.im := by rw [hb]; apply im_sqrt_pos; rw [hw2im]; linarith
         rw [hs, ite_eq_left_of_eq_true _ _ (eq_true hx), one_mul] at him
         simp at him; linarith [mul_pos hx h1, mul_pos hy' hapos]
   have hprod : (z*a - s*b)*(z*a + s*b) = 0 := by linear_combination hsq
@@ -1124,7 +1150,7 @@ lemma trigR4_mul_sqrt_one_sub_inv_sq {z : ℂ} (hz : z∈arccscCutPlane) (hr : z
 /-- DLMF 4.24.E10: hasDerivAt arccsc principal. -/
 @[dlmf 4.24.E10]
 theorem hasDerivAt_arccsc_principal {z : ℂ} (hz : z∈arccscCutPlane) (hr : z.re≠0) : HasDerivAt arccscPrincipal (-(if 0<z.re then 1 else -1)/(z*Complex.sqrt (z^2-1))) z := by
-  have hb := trigR4_mul_sqrt_one_sub_inv_sq hz hr
+  have hb := mul_sqrt_one_sub_inv_sq_eq_sign_mul_sqrt hz hr
   have hz0 := hz.1
   have hd := (hasDerivAt_arcsin_principal hz.2).comp z (hasDerivAt_inv hz0)
   convert hd using 1
@@ -1205,7 +1231,7 @@ theorem arccos_general_add (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1) :
       · rcases hσ with rfl|rfl <;> ring
 
 /-- The principal arctangent is a general arctangent value off the branch points `±i`. -/
-lemma trigR4_arctan_mem {u : ℂ} (h1 : u≠I) (h2 : u≠ -I) : Complex.arctan u∈arctanGeneral u := by
+private lemma arctan_mem_arctanGeneral {u : ℂ} (h1 : u≠I) (h2 : u≠ -I) : Complex.arctan u∈arctanGeneral u := by
   refine ⟨fun h => ?_, Complex.tan_arctan h1 h2⟩
   have ht := Complex.tan_arctan h1 h2
   rw [Complex.tan_eq_sin_div_cos, h, div_zero] at ht
@@ -1214,7 +1240,7 @@ lemma trigR4_arctan_mem {u : ℂ} (h1 : u≠I) (h2 : u≠ -I) : Complex.arctan u
   exact one_ne_zero h
 
 /-- `1+u^2≠0` off the branch points `±i`. -/
-lemma trigR4_one_add_sq_ne {u : ℂ} (h1 : u≠I) (h2 : u≠ -I) : 1+u^2≠0 := by
+private lemma one_add_sq_ne_zero_of_ne_I_of_ne_neg_I {u : ℂ} (h1 : u≠I) (h2 : u≠ -I) : 1+u^2≠0 := by
   intro h
   have : (u-I)*(u+I)=0 := by linear_combination h - Complex.I_sq
   rcases mul_eq_zero.mp this with h | h
@@ -1222,7 +1248,7 @@ lemma trigR4_one_add_sq_ne {u : ℂ} (h1 : u≠I) (h2 : u≠ -I) : 1+u^2≠0 := 
   · exact h2 (by linear_combination h)
 
 /-- The tangent of a sum and its nonvanishing cosine, for general arctangent values. -/
-lemma trigR4_tan_add_mem {a b u v σ : ℂ} (hσ : σ=1 ∨ σ= -1) (ha : a∈arctanGeneral u)
+private lemma add_mem_arctanGeneral {a b u v σ : ℂ} (hσ : σ=1 ∨ σ= -1) (ha : a∈arctanGeneral u)
     (hb : b∈arctanGeneral v) (hd : 1-σ*u*v≠0) : a+σ*b∈arctanGeneral ((u+σ*v)/(1-σ*u*v)) := by
   obtain ⟨ca, ta⟩ := ha
   obtain ⟨cb, tb⟩ := hb
@@ -1249,12 +1275,12 @@ theorem arctan_general_add (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1)
   ext w
   constructor
   · rintro ⟨a, ha, b, hb, rfl⟩
-    exact trigR4_tan_add_mem hσ ha hb hd
+    exact add_mem_arctanGeneral hσ ha hb hd
   · rintro ⟨cw, tw⟩
-    have ha := trigR4_arctan_mem hu.1 hu.2
+    have ha := arctan_mem_arctanGeneral hu.1 hu.2
     set a := Complex.arctan u
     obtain ⟨ca, ta⟩ := ha
-    have hu2 := trigR4_one_add_sq_ne hu.1 hu.2
+    have hu2 := one_add_sq_ne_zero_of_ne_I_of_ne_neg_I hu.1 hu.2
     have hσ2 : σ*σ = 1 := by rcases hσ with rfl | rfl <;> norm_num
     rw [Complex.tan_eq_sin_div_cos, div_eq_iff ca] at ta
     rw [Complex.tan_eq_sin_div_cos, div_eq_iff cw] at tw
@@ -1298,7 +1324,7 @@ theorem arcsin_arccos_general_add (u v a b σ : ℂ) (hσ : σ=1 ∨ σ= -1)
       Complex.sin_neg,Complex.cos_neg,mul_comm,mul_left_comm,mul_assoc]
 
 /-- For a nonzero value, general arctangents and general arccotangents of the reciprocal agree. -/
-lemma trigR4_arctanGeneral_eq_arccotGeneral {x : ℂ} (hx : x≠0) :
+private lemma arctanGeneral_eq_arccotGeneral_inv {x : ℂ} (hx : x≠0) :
     arctanGeneral x=arccotGeneral x⁻¹ := by
   ext w
   simp only [arctanGeneral, arccotGeneral, Set.mem_setOf_eq, Complex.tan_eq_sin_div_cos,
@@ -1341,10 +1367,10 @@ theorem arctan_arccot_general_add (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1)
       rw [Complex.tan_eq_sin_div_cos, hs, hc]
       field_simp
     · rintro ⟨cw, tw⟩
-      have ha := trigR4_arctan_mem hu.1 hu.2
+      have ha := arctan_mem_arctanGeneral hu.1 hu.2
       set a := Complex.arctan u
       obtain ⟨ca, ta⟩ := ha
-      have hu2 := trigR4_one_add_sq_ne hu.1 hu.2
+      have hu2 := one_add_sq_ne_zero_of_ne_I_of_ne_neg_I hu.1 hu.2
       rw [Complex.tan_eq_sin_div_cos, div_eq_iff ca] at ta
       rw [Complex.tan_eq_sin_div_cos, div_eq_iff cw] at tw
       set t := (u*v+σ)/(v-σ*u) with ht
@@ -1374,7 +1400,7 @@ theorem arctan_arccot_general_add (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1)
         linear_combination Complex.cos w*Complex.cos a*this
       · rw [← mul_assoc, hσ2]; ring
   refine ⟨first, ?_⟩
-  rw [first, trigR4_arctanGeneral_eq_arccotGeneral (div_ne_zero h2 h1), inv_div]
+  rw [first, arctanGeneral_eq_arccotGeneral_inv (div_ne_zero h2 h1), inv_div]
 
 /-- DLMF 4.25.E1: tan continued fraction. -/
 @[dlmf 4.25.E1]

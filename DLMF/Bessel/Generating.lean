@@ -9,8 +9,14 @@ public import DLMF.Bessel.RegularizedSeries
 
 /-! # Absolute convergence of the Bessel generating function
 
-Regroup the product of two exponential series by the difference of their indices.
-Mathlib's regularized hypergeometric parameter shift supplies the negative integer orders.
+The bilateral generating series `∑ₙ Jₙ(z) tⁿ = exp((z/2)(t - t⁻¹))` (DLMF 10.12.1) converges
+absolutely for `t ≠ 0`. The proof regroups the product of two exponential series by the
+difference of their indices; Mathlib's regularized hypergeometric parameter shift supplies the
+negative integer orders.
+
+## Main results
+
+* `hasSum_besselJ_generating_function`: the generating series has its classical sum.
 -/
 
 @[expose] public noncomputable section
@@ -20,11 +26,6 @@ namespace DLMF.Bessel
 open Complex
 open scoped Nat
 
-/-- Reflection in an integer order, including the value at zero (Mathlib's
-`Complex.besselJ_neg_int`, restated to carry the DLMF tag). -/
-@[dlmf 10.4.E1]
-theorem besselJ_neg_int (n : ℤ) (z : ℂ) : besselJ (-n) z = (-1) ^ n * besselJ n z :=
-  Complex.besselJ_neg_int n z
 
 /-- Reindex the integer diagonal `p.1 - p.2 = n` of the Bessel Cauchy product by a single natural
 index. -/
@@ -80,7 +81,7 @@ theorem hasSum_besselJ_generating_function (z t : ℂ) (ht : t ≠ 0) :
     · simp only [Int.toNat_natCast, Int.toNat_neg_natCast, neg_neg, add_zero]
       simp_rw [mul_comm (x ^ _ / _) (y ^ _ / _)]
       rw [bessel_diagonal_sum, mul_comm y x, hxy]
-      rw [Int.cast_neg, besselJ_neg_int]
+      rw [Int.cast_neg, Complex.besselJ_neg_int]
       rw [show y ^ n = (-1 : ℂ) ^ n * (z / 2) ^ n * (t ^ n)⁻¹ by
         dsimp [y]
         rw [mul_pow, neg_pow, inv_pow]]

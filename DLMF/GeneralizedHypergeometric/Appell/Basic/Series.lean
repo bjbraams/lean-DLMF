@@ -10,6 +10,20 @@ public import DLMF.Hypergeometric.Basic.AppellF4
 
 /-!
 # Appell and Horn series, domains and differential operators
+
+The Appell functions are totalized double series `∑ₘₙ cₘₙ xᵐ yⁿ`; their continuations are
+represented by analytic germs.
+
+## Main definitions
+
+* `appF1Coeff`, `appF2Coeff`, `appF3Coeff`: the double-series coefficients.
+* `appF1`, `appF2`, `appF3`: Appell's `F₁`, `F₂`, `F₃`, DLMF 16.13.1–16.13.3.
+* `hornG2`, `hornG3`: Horn's `G₂`, `G₃` in the Gamma-ratio normalization, DLMF 16.14.5–16.14.6.
+* `AppellRegular`: the denominator parameters avoid the nonpositive integers.
+* `appellBidisc`, `appellDiamond`, `appellF4Domain`: the domains of absolute convergence.
+* `appellDx`, `appellDy`, `appellThetaX`, `appellThetaY`: partial derivatives and Euler operators.
+* `IsAppellContinuation`, `IsAppellBranchAt`: analytic continuation of two-variable germs along
+  paths.
 -/
 
 @[expose] public noncomputable section

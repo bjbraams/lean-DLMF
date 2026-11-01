@@ -17,6 +17,16 @@ positive multiple of the norm of their centers. Compactness of the arc of unit
 directions supplies the uniform radius. Mathlib's
 `Complex.norm_deriv_le_of_forall_mem_sphere_norm_le` then bounds derivatives in
 an interior sector.
+
+## Main results
+
+* `Complex.exists_pos_forall_closedBall_arg_lt`,
+  `Complex.exists_pos_forall_closedBall_rotated_arg_lt`: uniform relative discs around points of
+  a closed sector stay in a larger open sector, also for rotated sectors.
+* `Real.rpow_le_two_rpow_abs_mul`: real powers of comparable positive numbers differ by at most
+  a factor `2 ^ |p|`.
+* `Complex.exists_pos_norm_deriv_le_of_sector_bound`: a power bound in an open sector gives a
+  derivative bound with the next power in an interior closed sector.
 -/
 
 @[expose] public noncomputable section
@@ -28,7 +38,7 @@ namespace Complex
 
 /-- A uniform relative disc around a point of a closed sector stays in a larger open
 sector, and the norms in the disc remain comparable to the center norm. -/
-theorem exists_pos_forall_closedBall_arg_lt {ω ω' : ℝ} (hω : ω ≤ π) (_hω' : 0 ≤ ω')
+theorem exists_pos_forall_closedBall_arg_lt {ω ω' : ℝ} (hω : ω ≤ π)
     (hωω' : ω' < ω) : ∃ c > 0, c ≤ 1 / 2 ∧ ∀ z : ℂ, 0 < ‖z‖ → |z.arg| ≤ ω' →
       ∀ w ∈ closedBall z (c * ‖z‖), |w.arg| < ω ∧ ‖z‖ / 2 ≤ ‖w‖ ∧ ‖w‖ ≤ 2 * ‖z‖ := by
   let K : Set ℂ := (fun φ : ℝ => exp (φ * I)) '' Icc (-ω') ω'
@@ -93,12 +103,12 @@ theorem Real.rpow_le_two_rpow_abs_mul {x y p : ℝ} (hx : 0 < x)
 namespace Complex
 
 /-- The uniform relative-disc estimate is invariant under rotation of the sector. -/
-theorem exists_pos_forall_closedBall_rotated_arg_lt {ω ω' : ℝ} (hω : ω ≤ π) (hω' : 0 ≤ ω')
+theorem exists_pos_forall_closedBall_rotated_arg_lt {ω ω' : ℝ} (hω : ω ≤ π)
     (hωω' : ω' < ω) (θ : ℝ) : ∃ c > 0, c ≤ 1 / 2 ∧ ∀ z : ℂ,
       0 < ‖z‖ → |(z * exp (-(θ * I))).arg| ≤ ω' →
       ∀ w ∈ closedBall z (c * ‖z‖), |(w * exp (-(θ * I))).arg| < ω ∧
         ‖z‖ / 2 ≤ ‖w‖ ∧ ‖w‖ ≤ 2 * ‖z‖ := by
-  obtain ⟨c, hc, hc2, hb⟩ := exists_pos_forall_closedBall_arg_lt hω hω' hωω'
+  obtain ⟨c, hc, hc2, hb⟩ := exists_pos_forall_closedBall_arg_lt hω hωω'
   have hr : ‖exp (-(θ * I))‖ = 1 := by rw [norm_exp]; simp [mul_re]
   have hn (v : ℂ) : ‖v * exp (-(θ * I))‖ = ‖v‖ := by rw [norm_mul, hr, mul_one]
   refine ⟨c, hc, hc2, fun z hz harg w hw => ?_⟩
@@ -110,13 +120,13 @@ theorem exists_pos_forall_closedBall_rotated_arg_lt {ω ω' : ℝ} (hω : ω ≤
 /-- Cauchy's derivative estimate transfers a power bound in an open sector to the next
 power in an interior closed sector. The constant is independent of the function and the
 radial cutoff, which also permits little-o applications. -/
-theorem exists_pos_norm_deriv_le_of_sector_bound {ω ω' : ℝ} (hω : ω ≤ π) (hω' : 0 ≤ ω')
+theorem exists_pos_norm_deriv_le_of_sector_bound {ω ω' : ℝ} (hω : ω ≤ π)
     (hωω' : ω' < ω) (θ ν : ℝ) : ∃ K > 0, ∀ (f : ℂ → ℂ) (A B : ℝ), 0 ≤ B →
       DifferentiableOn ℂ f {w | A < ‖w‖ ∧ |(w * exp (-(θ * I))).arg| < ω} →
       (∀ w, A < ‖w‖ → |(w * exp (-(θ * I))).arg| < ω → ‖f w‖ ≤ B * ‖w‖ ^ ν) →
       ∀ z : ℂ, 2 * max A 0 < ‖z‖ → |(z * exp (-(θ * I))).arg| ≤ ω' →
         ‖deriv f z‖ ≤ K * B * ‖z‖ ^ (ν - 1) := by
-  obtain ⟨c, hc, _hc2, hb⟩ := exists_pos_forall_closedBall_rotated_arg_lt hω hω' hωω' θ
+  obtain ⟨c, hc, _hc2, hb⟩ := exists_pos_forall_closedBall_rotated_arg_lt hω hωω' θ
   refine ⟨2 ^ |ν| / c, by positivity, fun f A B hB hf hbound z hz harg => ?_⟩
   have hz0 : 0 < ‖z‖ := by linarith [le_max_right A 0]
   have hsub : closedBall z (c * ‖z‖) ⊆ {w | A < ‖w‖ ∧ |(w * exp (-(θ * I))).arg| < ω} := by

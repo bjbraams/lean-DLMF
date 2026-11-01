@@ -18,7 +18,9 @@ bound is holomorphic (`differentiableOn_tsum_of_summable_norm`), and that parame
 are differentiable under bounds on the derivative
 (`hasFDerivAt_integral_of_dominated_of_fderiv_le`).
 This file removes the derivative bounds in the complex setting, for a parameter in an arbitrary
-complex normed space (several complex parameters at once):
+complex normed space (several complex parameters at once).
+
+## Main results
 
 * `Complex.norm_fderiv_le_of_forall_mem_ball_norm_le`: the Cauchy estimate
   `‖Df(x)‖ ≤ M / r` for `f` holomorphic and bounded by `M` on `ball x r`, obtained from the

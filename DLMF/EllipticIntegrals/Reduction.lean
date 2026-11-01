@@ -10,15 +10,34 @@ public import DLMF.EllipticIntegrals.Legendre
 /-!
 # Reduction of general elliptic integrals (DLMF §19.14)
 
-§19.14(i) gives examples of the reduction of elliptic integrals to Legendre's `F(φ, k)`
-(`incEllIntFk`, at real arguments). In (19.14.1)–(19.14.3) DLMF assumes the integrand and
-`cos φ` nonnegative; with `φ = arccos(…) ∈ [0, π/2]` this is the range of `x` stated in each
-theorem (`1 ≤ x ≤ √3 + 1`, `1 - √3 ≤ x ≤ 1`, `|x| ≤ 1`). In (19.14.4)–(19.14.6) the amplitude
-`φ ∈ [0, π/2]` is given by `sin²φ` (19.14.5); `α ≤ β ≤ γ` is the ordered permutation of
-`0, a₁b₂, a₂b₁` (stated as a multiset equality), not all zero.
+The examples of §19.14(i) of the reduction of elliptic integrals to Legendre's `F(φ, k)`
+(`incEllIntFk`, at real arguments): integrals of `(t³ - 1)^{-1/2}`, `(1 - t³)^{-1/2}`,
+`(1 + t⁴)^{-1/2}` and of the reciprocal square root of a product of two quadratics.
 
-The special cases (19.14.7), (19.14.9), (19.14.10) are derived from (19.14.4)–(19.14.6) by
-computing `U`; (19.14.8) (`x = ∞`) is the improper integral over `(y, ∞)`.
+## Main definitions
+
+* `ellRedQuadU`: the quantity `U` of DLMF 19.14.6 and 19.29.22.
+* `QuadraticProductReductionHyp`: the hypotheses of DLMF 19.14.4.
+
+## Main results
+
+* `integral_inv_sqrt_cube_sub_one`, `integral_inv_sqrt_one_sub_cube`,
+  `integral_inv_sqrt_one_add_pow_four`: DLMF 19.14.1–19.14.3.
+* `integral_inv_sqrt_two_quadratics`: the reduction of
+  `∫_y^x dt/√((a₁ + b₁t²)(a₂ + b₂t²))` (DLMF 19.14.4–19.14.6).
+* `integral_inv_sqrt_two_quadratics_zero`, `integral_inv_sqrt_two_quadratics_infty`,
+  `integral_inv_sqrt_two_quadratics_left`, `integral_inv_sqrt_two_quadratics_right`: the
+  special cases DLMF 19.14.7–19.14.10.
+
+## Implementation notes
+
+In (19.14.1)–(19.14.3) DLMF assumes the integrand and `cos φ` nonnegative; with
+`φ = arccos(…) ∈ [0, π/2]` this is the range of `x` stated in each theorem
+(`1 ≤ x ≤ √3 + 1`, `1 - √3 ≤ x ≤ 1`, `|x| ≤ 1`). In (19.14.4)–(19.14.6) the amplitude
+`φ ∈ [0, π/2]` is given by `sin²φ` (19.14.5); `α ≤ β ≤ γ` is the ordered permutation of
+`0, a₁b₂, a₂b₁` (stated as a multiset equality), not all zero. The special cases (19.14.7),
+(19.14.9), (19.14.10) are derived from (19.14.4)–(19.14.6) by computing `U`; (19.14.8)
+(`x = ∞`) is the improper integral over `(y, ∞)`.
 
 §19.14(ii) (Legendre's reduction of every elliptic integral to `F`, `E`, `Π` and elementary
 functions, and the reduction algorithms of Labahn–Mutrie, Byrd–Friedman and Erdélyi et al.) is
@@ -60,7 +79,7 @@ theorem integral_inv_sqrt_one_sub_cube {x : ℝ} (h1 : 1 - Real.sqrt 3 ≤ x) (h
 
 /-- The substitution `φ = 2 arctan t` of (19.14.3):
 `(1 - ½ sin²(2 arctan t))^{-1/2} · 2/(1 + t²) = 2/√(1 + t⁴)`. -/
-lemma ei19b_quartic_integrand (t : ℝ) :
+private lemma quartic_subst_integrand (t : ℝ) :
     (1 - 1 / 2 * Real.sin (2 * Real.arctan t) ^ 2) ^ (-(1 / 2) : ℝ) * (2 * (1 / (1 + t ^ 2))) =
       2 * (Real.sqrt (1 + t ^ 4))⁻¹ := by
   have h1 : 0 < 1 + t ^ 2 := by positivity
@@ -79,7 +98,7 @@ lemma ei19b_quartic_integrand (t : ℝ) :
   field_simp
 
 /-- `∫₀^x dt/√(1 + t⁴) = ½ F(2 arctan x | ½)` (real form of 19.14.3, any real `x`). -/
-lemma ei19b_integral_quartic_nonneg (x : ℝ) :
+private lemma integral_inv_sqrt_one_add_pow_four_eq_incEllIntFm (x : ℝ) :
     ∫ t in (0 : ℝ)..x, (Real.sqrt (1 + t ^ 4))⁻¹ =
       DLMF.Elliptic.Real.incEllIntFm (2 * Real.arctan x) (1 / 2) / 2 := by
   have hG : Continuous fun φ : ℝ => (1 - 1 / 2 * Real.sin φ ^ 2) ^ (-(1 / 2) : ℝ) :=
@@ -90,7 +109,7 @@ lemma ei19b_integral_quartic_nonneg (x : ℝ) :
     (by
       refine Continuous.continuousOn ?_
       exact continuous_const.mul (continuous_const.div (by fun_prop) fun t => by positivity)) hG
-  simp only [Function.comp_def, ei19b_quartic_integrand, Real.arctan_zero, mul_zero] at hsub
+  simp only [Function.comp_def, quartic_subst_integrand, Real.arctan_zero, mul_zero] at hsub
   rw [intervalIntegral.integral_const_mul] at hsub
   unfold DLMF.Elliptic.Real.incEllIntFm
   linarith
@@ -121,26 +140,29 @@ theorem integral_inv_sqrt_one_add_pow_four (x : ℝ) :
         (fun t => (Real.sqrt (1 + t ^ 4))⁻¹)
       simp only [neg_neg, neg_zero, Even.neg_pow (by decide : Even 4)] at this
       rw [intervalIntegral.integral_symm, this]
-    rw [hneg, ei19b_integral_quartic_nonneg (-x),
+    rw [hneg, integral_inv_sqrt_one_add_pow_four_eq_incEllIntFm (-x),
       show (1 - x ^ 2) / (1 + x ^ 2) = (1 - (-x) ^ 2) / (1 + (-x) ^ 2) by ring,
       harc (-x) (by linarith), sign_neg h, SignType.coe_neg_one]
     push_cast
     ring
   · simp
-  · rw [ei19b_integral_quartic_nonneg x, harc x h.le, sign_pos h, SignType.coe_one]
+  · rw [integral_inv_sqrt_one_add_pow_four_eq_incEllIntFm x, harc x h.le, sign_pos h, SignType.coe_one]
     push_cast
     ring
 
 /-! ### Two quadratic factors (19.14.4)–(19.14.10) -/
 
-/-- DLMF 19.14.6: `U = (x √((a₁ + b₁y²)(a₂ + b₂y²)) + y √((a₁ + b₁x²)(a₂ + b₂x²)))/(x² - y²)`. -/
-def ei19b_redU (a₁ b₁ a₂ b₂ x y : ℝ) : ℝ :=
+/-- DLMF 19.14.6 and 19.29.22: `U = (x √((a₁ + b₁y²)(a₂ + b₂y²)) + y √((a₁ + b₁x²)(a₂ +
+b₂x²)))/(x² - y²)`, that is `(x² - y²) U = x √(Q₁(y) Q₂(y)) + y √(Q₁(x) Q₂(x))` with
+`Q_j(t) = a_j + b_j t²`. -/
+@[dlmf 19.29.E22]
+def ellRedQuadU (a₁ b₁ a₂ b₂ x y : ℝ) : ℝ :=
   (x * Real.sqrt ((a₁ + b₁ * y ^ 2) * (a₂ + b₂ * y ^ 2)) +
     y * Real.sqrt ((a₁ + b₁ * x ^ 2) * (a₂ + b₂ * x ^ 2))) / (x ^ 2 - y ^ 2)
 
 /-- The hypotheses of DLMF 19.14.4: `0 ≤ y < x`, both quadratics positive on `(y, x)`, and
 `α ≤ β ≤ γ` the ordered permutation of `0, a₁b₂, a₂b₁`, not all zero. -/
-structure ei19b_RedHyp (a₁ b₁ a₂ b₂ x y α β γ : ℝ) : Prop where
+structure QuadraticProductReductionHyp (a₁ b₁ a₂ b₂ x y α β γ : ℝ) : Prop where
   /-- The lower integration endpoint is nonnegative. -/
   y_nonneg : 0 ≤ y
   /-- The lower integration endpoint is strictly less than the upper endpoint. -/
@@ -161,47 +183,47 @@ structure ei19b_RedHyp (a₁ b₁ a₂ b₂ x y α β γ : ℝ) : Prop where
 `sin²φ = (γ - α)/(U² + γ)` with `U` of (19.14.6), `φ ∈ [0, π/2]`. -/
 @[dlmf 19.14.E4, dlmf 19.14.E5, dlmf 19.14.E6]
 theorem integral_inv_sqrt_two_quadratics {a₁ b₁ a₂ b₂ x y α β γ : ℝ}
-    (h : ei19b_RedHyp a₁ b₁ a₂ b₂ x y α β γ) :
+    (h : QuadraticProductReductionHyp a₁ b₁ a₂ b₂ x y α β γ) :
     ((∫ t in y..x, (Real.sqrt ((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)))⁻¹ : ℝ) : ℂ) =
       ((Real.sqrt (γ - α))⁻¹ : ℝ) *
-        incEllIntFk (Real.arcsin (Real.sqrt ((γ - α) / (ei19b_redU a₁ b₁ a₂ b₂ x y ^ 2 + γ))))
+        incEllIntFk (Real.arcsin (Real.sqrt ((γ - α) / (ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 + γ))))
           (Real.sqrt ((γ - β) / (γ - α))) := by
   sorry
 
 /-- A function continuous on `[y, x]` and positive on `(y, x)` is nonnegative at `x`. -/
-lemma ei19b_nonneg_right {f : ℝ → ℝ} (hf : Continuous f) {x y : ℝ} (hyx : y < x)
+private lemma nonneg_right_of_pos_on_Ioo {f : ℝ → ℝ} (hf : Continuous f) {x y : ℝ} (hyx : y < x)
     (hpos : ∀ t ∈ Ioo y x, 0 < f t) : 0 ≤ f x :=
   ge_of_tendsto (hf.continuousAt.tendsto.mono_left nhdsWithin_le_nhds)
     (Filter.eventually_of_mem (Ioo_mem_nhdsLT hyx) fun t ht => (hpos t ht).le)
 
 /-- A function continuous on `[y, x]` and positive on `(y, x)` is nonnegative at `y`. -/
-lemma ei19b_nonneg_left {f : ℝ → ℝ} (hf : Continuous f) {x y : ℝ} (hyx : y < x)
+private lemma nonneg_left_of_pos_on_Ioo {f : ℝ → ℝ} (hf : Continuous f) {x y : ℝ} (hyx : y < x)
     (hpos : ∀ t ∈ Ioo y x, 0 < f t) : 0 ≤ f y :=
   ge_of_tendsto (hf.continuousAt.tendsto.mono_left nhdsWithin_le_nhds)
     (Filter.eventually_of_mem (Ioo_mem_nhdsGT hyx) fun t ht => (hpos t ht).le)
 
 /-- The product of the quadratics is nonnegative at both endpoints. -/
-lemma ei19b_prod_nonneg {a₁ b₁ a₂ b₂ x y α β γ : ℝ} (h : ei19b_RedHyp a₁ b₁ a₂ b₂ x y α β γ) :
+private lemma quadratic_product_nonneg {a₁ b₁ a₂ b₂ x y α β γ : ℝ} (h : QuadraticProductReductionHyp a₁ b₁ a₂ b₂ x y α β γ) :
     0 ≤ (a₁ + b₁ * x ^ 2) * (a₂ + b₂ * x ^ 2) ∧ 0 ≤ (a₁ + b₁ * y ^ 2) * (a₂ + b₂ * y ^ 2) := by
   have hc : Continuous fun t : ℝ => (a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2) := by fun_prop
   have hp : ∀ t ∈ Ioo y x, 0 < (a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2) := fun t ht =>
     mul_pos (h.pos t ht).1 (h.pos t ht).2
-  exact ⟨ei19b_nonneg_right hc h.y_lt_x hp, ei19b_nonneg_left hc h.y_lt_x hp⟩
+  exact ⟨nonneg_right_of_pos_on_Ioo hc h.y_lt_x hp, nonneg_left_of_pos_on_Ioo hc h.y_lt_x hp⟩
 
 /-- DLMF 19.14.7 (the case `y = 0` of 19.14.4–19.14.6): `sin²φ = (γ - α)x²/(a₁a₂ + γx²)`. -/
 @[dlmf 19.14.E7]
 theorem integral_inv_sqrt_two_quadratics_zero {a₁ b₁ a₂ b₂ x α β γ : ℝ}
-    (h : ei19b_RedHyp a₁ b₁ a₂ b₂ x 0 α β γ) :
+    (h : QuadraticProductReductionHyp a₁ b₁ a₂ b₂ x 0 α β γ) :
     ((∫ t in (0 : ℝ)..x, (Real.sqrt ((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)))⁻¹ : ℝ) : ℂ) =
       ((Real.sqrt (γ - α))⁻¹ : ℝ) *
         incEllIntFk (Real.arcsin (Real.sqrt ((γ - α) * x ^ 2 / (a₁ * a₂ + γ * x ^ 2))))
           (Real.sqrt ((γ - β) / (γ - α))) := by
   rw [integral_inv_sqrt_two_quadratics h]
   have hx : 0 < x := h.y_lt_x
-  have h0 := (ei19b_prod_nonneg h).2
+  have h0 := (quadratic_product_nonneg h).2
   simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero, add_zero] at h0
-  have hU : ei19b_redU a₁ b₁ a₂ b₂ x 0 ^ 2 = a₁ * a₂ / x ^ 2 := by
-    unfold ei19b_redU
+  have hU : ellRedQuadU a₁ b₁ a₂ b₂ x 0 ^ 2 = a₁ * a₂ / x ^ 2 := by
+    unfold ellRedQuadU
     simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero, add_zero,
       zero_mul, sub_zero]
     rw [div_pow, mul_pow, Real.sq_sqrt h0]
@@ -228,7 +250,7 @@ theorem integral_inv_sqrt_two_quadratics_infty {a₁ b₁ a₂ b₂ y α β γ :
 `sin²φ = (γ - α)(x² - y²)/(γ(x² - y²) - a₁(a₂ + b₂x²))`. -/
 @[dlmf 19.14.E9]
 theorem integral_inv_sqrt_two_quadratics_left {a₁ b₁ a₂ b₂ x y α β γ : ℝ}
-    (h : ei19b_RedHyp a₁ b₁ a₂ b₂ x y α β γ) (hy : a₁ + b₁ * y ^ 2 = 0) :
+    (h : QuadraticProductReductionHyp a₁ b₁ a₂ b₂ x y α β γ) (hy : a₁ + b₁ * y ^ 2 = 0) :
     ((∫ t in y..x, (Real.sqrt ((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)))⁻¹ : ℝ) : ℂ) =
       ((Real.sqrt (γ - α))⁻¹ : ℝ) *
         incEllIntFk (Real.arcsin (Real.sqrt ((γ - α) * (x ^ 2 - y ^ 2) /
@@ -237,9 +259,9 @@ theorem integral_inv_sqrt_two_quadratics_left {a₁ b₁ a₂ b₂ x y α β γ 
   rw [integral_inv_sqrt_two_quadratics h]
   have hxy : 0 < x ^ 2 - y ^ 2 := by
     have := h.y_nonneg; have := h.y_lt_x; nlinarith
-  have h0 := (ei19b_prod_nonneg h).1
-  have hU : ei19b_redU a₁ b₁ a₂ b₂ x y ^ 2 = -a₁ * (a₂ + b₂ * x ^ 2) / (x ^ 2 - y ^ 2) := by
-    unfold ei19b_redU
+  have h0 := (quadratic_product_nonneg h).1
+  have hU : ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 = -a₁ * (a₂ + b₂ * x ^ 2) / (x ^ 2 - y ^ 2) := by
+    unfold ellRedQuadU
     rw [hy, zero_mul, Real.sqrt_zero, mul_zero, zero_add, div_pow, mul_pow, Real.sq_sqrt h0]
     have hb : b₁ * y ^ 2 = -a₁ := by linarith
     rw [show (a₁ + b₁ * x ^ 2) = b₁ * (x ^ 2 - y ^ 2) by linarith,
@@ -254,7 +276,7 @@ theorem integral_inv_sqrt_two_quadratics_left {a₁ b₁ a₂ b₂ x y α β γ 
 `sin²φ = (γ - α)(y² - x²)/(γ(y² - x²) - a₁(a₂ + b₂y²))`. -/
 @[dlmf 19.14.E10]
 theorem integral_inv_sqrt_two_quadratics_right {a₁ b₁ a₂ b₂ x y α β γ : ℝ}
-    (h : ei19b_RedHyp a₁ b₁ a₂ b₂ x y α β γ) (hx : a₁ + b₁ * x ^ 2 = 0) :
+    (h : QuadraticProductReductionHyp a₁ b₁ a₂ b₂ x y α β γ) (hx : a₁ + b₁ * x ^ 2 = 0) :
     ((∫ t in y..x, (Real.sqrt ((a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2)))⁻¹ : ℝ) : ℂ) =
       ((Real.sqrt (γ - α))⁻¹ : ℝ) *
         incEllIntFk (Real.arcsin (Real.sqrt ((γ - α) * (y ^ 2 - x ^ 2) /
@@ -264,9 +286,9 @@ theorem integral_inv_sqrt_two_quadratics_right {a₁ b₁ a₂ b₂ x y α β γ
   have hxy : 0 < x ^ 2 - y ^ 2 := by
     have := h.y_nonneg; have := h.y_lt_x; nlinarith
   have hx0 : 0 < x := lt_of_le_of_lt h.y_nonneg h.y_lt_x
-  have h0 := (ei19b_prod_nonneg h).2
-  have hU : ei19b_redU a₁ b₁ a₂ b₂ x y ^ 2 = a₁ * (a₂ + b₂ * y ^ 2) / (x ^ 2 - y ^ 2) := by
-    unfold ei19b_redU
+  have h0 := (quadratic_product_nonneg h).2
+  have hU : ellRedQuadU a₁ b₁ a₂ b₂ x y ^ 2 = a₁ * (a₂ + b₂ * y ^ 2) / (x ^ 2 - y ^ 2) := by
+    unfold ellRedQuadU
     rw [hx, zero_mul, Real.sqrt_zero, mul_zero, add_zero, div_pow, mul_pow, Real.sq_sqrt h0]
     have hb : b₁ * x ^ 2 = -a₁ := by linarith
     rw [show (a₁ + b₁ * y ^ 2) = -b₁ * (x ^ 2 - y ^ 2) by linarith,

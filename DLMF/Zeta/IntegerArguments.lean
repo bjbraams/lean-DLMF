@@ -17,13 +17,34 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 
 /-!
-# The Riemann zeta function at integer arguments (DLMF §25.6)
+# The Riemann zeta function at integer arguments
 
-Mathlib proves `ζ(0) = -1/2`, `ζ(2) = π²/6`, `ζ(4) = π⁴/90` (25.6.1), Euler's `ζ(2n)` formula (25.6.2), `ζ(-n)`
-(25.6.3, for all `n ≥ 0`), the trivial zeros (25.6.4) and `ζ'(0) = -½ ln(2π)` (25.6.11); the
-pointers are in `DLMF.Core.UpstreamElementary` and `DLMF.Zeta.MathlibCoverage`. This file proves
-`ζ(6)` and the derivative values 25.6.13–25.6.14 at the trivial zeros and at negative odd
-integers (from the derivative reflection formula 25.4.5) and acquires the remaining formulas.
+Values of the Riemann zeta function and its derivatives at integers, series and integrals for
+`ζ(2)`, `ζ(3)`, `ζ(4)` and `ζ(2k+1)`, and quadratic recursions for `ζ(2n)` (DLMF §25.6).
+
+## Main results
+
+* `riemannZeta_six`: DLMF 25.6.1, `ζ(6) = π⁶/945`.
+* `hasSum_multiple_sum_riemannZeta`: the multiple series DLMF 25.6.5.
+* `riemannZeta_two_mul_add_one_eq_integral`: DLMF 25.6.6.
+* `riemannZeta_two_eq_double_integral`: DLMF 25.6.7.
+* `hasSum_riemannZeta_two_central_binom`, `hasSum_riemannZeta_three_central_binom`,
+  `hasSum_riemannZeta_four_central_binom`: central binomial series DLMF 25.6.8–25.6.10.
+* `iteratedDeriv_two_riemannZeta_zero`: DLMF 25.6.12.
+* `iteratedDeriv_riemannZeta_neg_two_mul`, `iteratedDeriv_riemannZeta_one_sub_two_mul`:
+  derivatives at the trivial zeros and at negative odd integers, DLMF 25.6.13–25.6.14.
+* `deriv_riemannZeta_two_mul`: DLMF 25.6.15.
+* `riemannZeta_two_mul_recursion`, `riemannZeta_four_mul_add_two_recursion`,
+  `riemannZeta_four_mul_recursion`, `riemannZeta_two_mul_recursion_two`,
+  `riemannZeta_two_mul_recursion_pow_two`: DLMF 25.6.16–25.6.20.
+
+## Implementation notes
+
+Mathlib proves `ζ(0) = -1/2`, `ζ(2) = π²/6`, `ζ(4) = π⁴/90` (25.6.1), Euler's `ζ(2n)` formula
+(25.6.2), `ζ(-n)` (25.6.3, for all `n ≥ 0`), the trivial zeros (25.6.4) and
+`ζ'(0) = -½ ln(2π)` (25.6.11); the pointers are in `DLMF.Core.UpstreamElementary` and
+`DLMF.Zeta.MathlibCoverage`. The derivative values 25.6.13–25.6.14 come from the derivative
+reflection formula 25.4.5.
 
 `ζ^{(k)}` is `iteratedDeriv k riemannZeta`, `Γ^{(r)}` is `iteratedDeriv r Gamma`, `ψ` is
 `Complex.digamma`, `γ₁` is `stieltjesConstant 1` (25.2.5) and `c` is `reflectionConst` (25.4.6).
@@ -50,61 +71,61 @@ theorem riemannZeta_six : riemannZeta 6 = π ^ 6 / 945 := by
   rw [h]; ring
 
 /-- The decreasing logarithmic involution that exchanges the two zeta integral kernels. -/
-private def z25a_logInvolution (t : ℝ) : ℝ := -Real.log (1 - Real.exp (-t))
+private def logInvolution (t : ℝ) : ℝ := -Real.log (1 - Real.exp (-t))
 
 /-- Positivity, involutivity, and the Jacobian of the logarithmic involution. -/
-private lemma z25a_logInvolution_properties {t : ℝ} (ht : 0 < t) :
-    0 < z25a_logInvolution t ∧
-      z25a_logInvolution (z25a_logInvolution t) = t ∧
-      HasDerivAt z25a_logInvolution
-        (-(Real.exp (z25a_logInvolution t) - 1)) t := by
+private lemma logInvolution_pos_involutive_hasDerivAt {t : ℝ} (ht : 0 < t) :
+    0 < logInvolution t ∧
+      logInvolution (logInvolution t) = t ∧
+      HasDerivAt logInvolution
+        (-(Real.exp (logInvolution t) - 1)) t := by
   have he : 0 < Real.exp (-t) := Real.exp_pos _
   have he1 : Real.exp (-t) < 1 := Real.exp_lt_one_iff.mpr (by linarith)
   have h1 : 0 < 1 - Real.exp (-t) := by linarith
-  have hφ : 0 < z25a_logInvolution t := by
-    dsimp [z25a_logInvolution]
+  have hφ : 0 < logInvolution t := by
+    dsimp [logInvolution]
     exact neg_pos.mpr (Real.log_neg h1 (by linarith))
-  have hinv : z25a_logInvolution (z25a_logInvolution t) = t := by
-    dsimp [z25a_logInvolution]
+  have hinv : logInvolution (logInvolution t) = t := by
+    dsimp [logInvolution]
     rw [neg_neg, Real.exp_log h1, sub_sub_cancel, Real.log_exp, neg_neg]
   refine ⟨hφ, hinv, ?_⟩
   have hd := (((hasDerivAt_const t (1 : ℝ)).sub
     ((hasDerivAt_id t).neg.exp)).log h1.ne').neg
   convert hd using 1
   · funext x; rfl
-  · dsimp [z25a_logInvolution]
+  · dsimp [logInvolution]
     rw [Real.exp_neg, Real.exp_log h1]
     field_simp
     ring
 
 /-- Powers of the logarithmic involution integrate to the corresponding zeta value. -/
-private lemma z25a_integral_logInvolution {k : ℕ} (hk : 1 ≤ k) :
-    IntegrableOn (fun t : ℝ => z25a_logInvolution t ^ k) (Ioi 0) ∧
-      (∫ t in Ioi (0 : ℝ), (z25a_logInvolution t ^ k : ℂ)) =
+private lemma integral_logInvolution_pow {k : ℕ} (hk : 1 ≤ k) :
+    IntegrableOn (fun t : ℝ => logInvolution t ^ k) (Ioi 0) ∧
+      (∫ t in Ioi (0 : ℝ), (logInvolution t ^ k : ℂ)) =
         k ! * riemannZeta (k + 1) := by
   let g : ℝ → ℂ := fun t => (t : ℂ) ^ k / (cexp t - 1)
-  have hφ : z25a_logInvolution '' Set.Ioi 0 = Set.Ioi 0 := by
+  have hφ : logInvolution '' Set.Ioi 0 = Set.Ioi 0 := by
     ext t
     constructor
     · rintro ⟨u, hu, rfl⟩
-      exact (z25a_logInvolution_properties hu).1
+      exact (logInvolution_pos_involutive_hasDerivAt hu).1
     · intro ht
-      exact ⟨z25a_logInvolution t, (z25a_logInvolution_properties ht).1,
-        (z25a_logInvolution_properties ht).2.1⟩
-  have hinj : InjOn z25a_logInvolution (Ioi 0) := by
+      exact ⟨logInvolution t, (logInvolution_pos_involutive_hasDerivAt ht).1,
+        (logInvolution_pos_involutive_hasDerivAt ht).2.1⟩
+  have hinj : InjOn logInvolution (Ioi 0) := by
     intro a ha b hb hab
-    have h := congrArg z25a_logInvolution hab
-    simpa [(z25a_logInvolution_properties ha).2.1,
-      (z25a_logInvolution_properties hb).2.1] using h
-  have hd : ∀ t ∈ Ioi (0 : ℝ), HasDerivWithinAt z25a_logInvolution
-      (-(Real.exp (z25a_logInvolution t) - 1)) (Ioi 0) t :=
-    fun t ht => (z25a_logInvolution_properties ht).2.2.hasDerivWithinAt
+    have h := congrArg logInvolution hab
+    simpa [(logInvolution_pos_involutive_hasDerivAt ha).2.1,
+      (logInvolution_pos_involutive_hasDerivAt hb).2.1] using h
+  have hd : ∀ t ∈ Ioi (0 : ℝ), HasDerivWithinAt logInvolution
+      (-(Real.exp (logInvolution t) - 1)) (Ioi 0) t :=
+    fun t ht => (logInvolution_pos_involutive_hasDerivAt ht).2.2.hasDerivWithinAt
   have hcomp : ∀ t ∈ Ioi (0 : ℝ),
-      |-(Real.exp (z25a_logInvolution t) - 1)| • g (z25a_logInvolution t) =
-        (z25a_logInvolution t ^ k : ℂ) := by
+      |-(Real.exp (logInvolution t) - 1)| • g (logInvolution t) =
+        (logInvolution t ^ k : ℂ) := by
     intro t ht
-    have hp : 0 < Real.exp (z25a_logInvolution t) - 1 := by
-      exact sub_pos.mpr (Real.one_lt_exp_iff.mpr (z25a_logInvolution_properties ht).1)
+    have hp : 0 < Real.exp (logInvolution t) - 1 := by
+      exact sub_pos.mpr (Real.one_lt_exp_iff.mpr (logInvolution_pos_involutive_hasDerivAt ht).1)
     rw [abs_neg, abs_of_pos hp]
     dsimp [g]
     rw [ofReal_sub, ofReal_exp, ofReal_one]
@@ -123,7 +144,7 @@ private lemma z25a_integral_logInvolution {k : ℕ} (hk : 1 ≤ k) :
     field_simp [show (k ! : ℂ) ≠ 0 by exact_mod_cast k.factorial_ne_zero]
   have hI := (integrableOn_image_iff_integrableOn_abs_deriv_smul
     measurableSet_Ioi hd hinj g).mp (by rwa [hφ])
-  have hI' : IntegrableOn (fun t : ℝ => (z25a_logInvolution t ^ k : ℂ)) (Ioi 0) :=
+  have hI' : IntegrableOn (fun t : ℝ => (logInvolution t ^ k : ℂ)) (Ioi 0) :=
     hI.congr (ae_restrict_of_forall_mem measurableSet_Ioi hcomp)
   refine ⟨?_, ?_⟩
   · convert hI'.re using 1
@@ -134,7 +155,7 @@ private lemma z25a_integral_logInvolution {k : ℕ} (hk : 1 ≤ k) :
     exact h.symm
 
 /-- A finite power of a nonnegative convergent series is the sum over all finite tuples. -/
-private lemma z25a_hasSum_fin_power {a : ℕ → ℝ} {s : ℝ} (ha : HasSum a s)
+private lemma hasSum_prod_fin_pow {a : ℕ → ℝ} {s : ℝ} (ha : HasSum a s)
     (hpos : ∀ n, 0 ≤ a n) (k : ℕ) :
     HasSum (fun n : Fin k → ℕ => ∏ i, a (n i)) (s ^ k) := by
   induction k with
@@ -149,7 +170,7 @@ private lemma z25a_hasSum_fin_power {a : ℕ → ℝ} {s : ℝ} (ha : HasSum a s
     · rw [pow_succ]; ring
 
 /-- The product logarithmic series has an elementary exponential integral at each tuple. -/
-private lemma z25a_integral_tuple {k : ℕ} (hk : 1 ≤ k) (n : Fin k → ℕ) :
+private lemma integral_prod_exp_div {k : ℕ} (hk : 1 ≤ k) (n : Fin k → ℕ) :
     (∫ t in Ioi (0 : ℝ), ∏ i, Real.exp (-((n i : ℝ) + 1) * t) / ((n i : ℝ) + 1)) =
       1 / ((∏ i, ((n i : ℝ) + 1)) * ∑ i, ((n i : ℝ) + 1)) := by
   let p : ℝ := ∏ i, ((n i : ℝ) + 1)
@@ -180,21 +201,21 @@ theorem hasSum_multiple_sum_riemannZeta {k : ℕ} (hk : 1 ≤ k) :
   let F : (Fin k → ℕ) → ℝ → ℝ := fun n t =>
     ∏ i, Real.exp (-((n i : ℝ) + 1) * t) / ((n i : ℝ) + 1)
   have hFpos : ∀ n t, 0 ≤ F n t := fun n t => prod_nonneg fun i _ => by positivity
-  have hsum : ∀ t ∈ Ioi (0 : ℝ), HasSum (fun n => F n t) (z25a_logInvolution t ^ k) := by
+  have hsum : ∀ t ∈ Ioi (0 : ℝ), HasSum (fun n => F n t) (logInvolution t ^ k) := by
     intro t ht
     have hlog := Real.hasSum_pow_div_log_of_abs_lt_one
       (x := Real.exp (-t)) (by
         rw [abs_of_pos (Real.exp_pos _)]
         exact Real.exp_lt_one_iff.mpr (by linarith [show 0 < t from ht]))
     have hbase : HasSum (fun j : ℕ => Real.exp (-((j : ℝ) + 1) * t) / ((j : ℝ) + 1))
-        (z25a_logInvolution t) := by
+        (logInvolution t) := by
       convert hlog using 1
       funext j
       rw [show -((j : ℝ) + 1) * t = ((j + 1 : ℕ) : ℝ) * (-t) by push_cast; ring,
         Real.exp_nat_mul]
       rfl
-    exact z25a_hasSum_fin_power hbase (fun j => by positivity) k
-  have hI := z25a_integral_logInvolution hk
+    exact hasSum_prod_fin_pow hbase (fun j => by positivity) k
+  have hI := integral_logInvolution_pow hk
   have hB : IntegrableOn (fun t : ℝ => ∑' n : Fin k → ℕ, F n t) (Ioi 0) := by
     refine hI.1.congr ?_
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
@@ -209,7 +230,7 @@ theorem hasSum_multiple_sum_riemannZeta {k : ℕ} (hk : 1 ≤ k) :
       filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
       exact hsum t ht)
   have hsC := Complex.ofRealCLM.hasSum hs
-  have hval : Complex.ofRealCLM (∫ t in Ioi (0 : ℝ), z25a_logInvolution t ^ k) =
+  have hval : Complex.ofRealCLM (∫ t in Ioi (0 : ℝ), logInvolution t ^ k) =
       k ! * riemannZeta (k + 1) := by
     rw [Complex.ofRealCLM_apply, ← integral_complex_ofReal]
     simpa only [ofReal_pow] using hI.2
@@ -217,13 +238,13 @@ theorem hasSum_multiple_sum_riemannZeta {k : ℕ} (hk : 1 ≤ k) :
   refine hsC.congr_fun fun n => ?_
   rw [show (fun t => F n t) = fun t : ℝ =>
       ∏ i, Real.exp (-((n i : ℝ) + 1) * t) / ((n i : ℝ) + 1) from rfl,
-    z25a_integral_tuple hk n]
+    integral_prod_exp_div hk n]
   simp only [Complex.ofRealCLM_apply]
   push_cast
   rfl
 
 /-- `sin(2πnt) cot(πt) = ∑_{j<n} (cos(2π(j+1)t) + cos(2πjt))` where `sin(πt) ≠ 0`. -/
-lemma r25a_sin_mul_cot {t : ℝ} (ht : Real.sin (π * t) ≠ 0) (n : ℕ) :
+private lemma sin_mul_cot_eq_sum_cos {t : ℝ} (ht : Real.sin (π * t) ≠ 0) (n : ℕ) :
     Real.sin (2 * π * n * t) * Real.cot (π * t) =
       ∑ j ∈ range n, (Real.cos (2 * π * (j + 1) * t) + Real.cos (2 * π * j * t)) := by
   induction n with
@@ -239,11 +260,11 @@ lemma r25a_sin_mul_cot {t : ℝ} (ht : Real.sin (π * t) ≠ 0) (n : ℕ) :
     linear_combination (2 * Real.cos B * Real.sin A) * Real.sin_sq_add_cos_sq B
 
 /-- `|sin(2πnt) cot(πt)| ≤ 2n`. -/
-lemma r25a_abs_sin_mul_cot_le (t : ℝ) (n : ℕ) :
+private lemma abs_sin_mul_cot_le (t : ℝ) (n : ℕ) :
     |Real.sin (2 * π * n * t) * Real.cot (π * t)| ≤ 2 * n := by
   by_cases ht : Real.sin (π * t) = 0
   · rw [Real.cot_eq_cos_div_sin, ht, div_zero, mul_zero, abs_zero]; positivity
-  rw [r25a_sin_mul_cot ht]
+  rw [sin_mul_cot_eq_sum_cos ht]
   refine (abs_sum_le_sum_abs _ _).trans ?_
   calc ∑ j ∈ range n, |Real.cos (2 * π * (j + 1) * t) + Real.cos (2 * π * j * t)|
       ≤ ∑ _j ∈ range n, (2 : ℝ) := sum_le_sum fun j _ => (abs_add_le _ _).trans (by
@@ -251,7 +272,7 @@ lemma r25a_abs_sin_mul_cot_le (t : ℝ) (n : ℕ) :
     _ = 2 * n := by simp; ring
 
 /-- `∫₀¹ cos(2πjt) dt = 0` for `j ≥ 1`. -/
-lemma r25a_integral_cos {j : ℕ} (hj : j ≠ 0) :
+private lemma integral_cos_two_pi_mul_natCast {j : ℕ} (hj : j ≠ 0) :
     ∫ t in (0 : ℝ)..1, Real.cos (2 * π * j * t) = 0 := by
   have hc : (2 * π * j : ℝ) ≠ 0 := by positivity
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt
@@ -267,7 +288,7 @@ lemma r25a_integral_cos {j : ℕ} (hj : j ≠ 0) :
 
 open scoped Interval in
 /-- `∫₀¹ sin(2πnt) cot(πt) dt = 1` for `n ≥ 1`. -/
-lemma r25a_integral_sin_mul_cot {n : ℕ} (hn : n ≠ 0) :
+private lemma integral_sin_mul_cot {n : ℕ} (hn : n ≠ 0) :
     ∫ t in (0 : ℝ)..1, Real.sin (2 * π * n * t) * Real.cot (π * t) = 1 := by
   have hae : ∀ᵐ t : ℝ ∂volume, t ∈ Ι (0 : ℝ) 1 →
       Real.sin (2 * π * n * t) * Real.cot (π * t) =
@@ -275,7 +296,7 @@ lemma r25a_integral_sin_mul_cot {n : ℕ} (hn : n ≠ 0) :
     have hne1 : ∀ᵐ x : ℝ ∂volume, x ≠ 1 := by rw [ae_iff]; simp
     filter_upwards [hne1] with t ht1 ht
     rw [Set.uIoc_of_le zero_le_one] at ht
-    refine r25a_sin_mul_cot ?_ n
+    refine sin_mul_cot_eq_sum_cos ?_ n
     exact (Real.sin_pos_of_pos_of_lt_pi (by nlinarith [ht.1, Real.pi_pos])
       (by nlinarith [lt_of_le_of_ne ht.2 ht1, Real.pi_pos])).ne'
   rw [intervalIntegral.integral_congr_ae hae, intervalIntegral.integral_finsetSum]
@@ -283,10 +304,10 @@ lemma r25a_integral_sin_mul_cot {n : ℕ} (hn : n ≠ 0) :
         (Real.cos (2 * π * (j + 1) * t) + Real.cos (2 * π * j * t)) = if j = 0 then 1 else 0 := by
       intro j _
       rw [intervalIntegral.integral_add, show (j : ℝ) + 1 = ((j + 1 : ℕ) : ℝ) by push_cast; ring,
-        r25a_integral_cos (by omega)]
+        integral_cos_two_pi_mul_natCast (by omega)]
       · split_ifs with h
         · subst h; simp
-        · rw [r25a_integral_cos h]; simp
+        · rw [integral_cos_two_pi_mul_natCast h]; simp
       all_goals exact (by fun_prop : Continuous fun t : ℝ => Real.cos _).intervalIntegrable 0 1
     rw [sum_congr rfl this, sum_ite_eq' (range n) 0]
     simp [Nat.pos_of_ne_zero hn]
@@ -328,7 +349,7 @@ theorem riemannZeta_two_mul_add_one_eq_integral {k : ℕ} (hk : 1 ≤ k) :
     have hn' : (0 : ℝ) < n := by exact_mod_cast hn
     calc 1 / (n : ℝ) ^ (2 * k + 1) * |Real.sin (2 * π * n * t) * Real.cot (π * t)|
         ≤ 1 / (n : ℝ) ^ (2 * k + 1) * (2 * n) :=
-          mul_le_mul_of_nonneg_left (r25a_abs_sin_mul_cot_le t n) (by positivity)
+          mul_le_mul_of_nonneg_left (abs_sin_mul_cot_le t n) (by positivity)
       _ = 2 * (1 / (n : ℝ) ^ (2 * k)) := by rw [pow_succ]; field_simp
   have hbs : Summable (fun n : ℕ => 2 * (1 / (n : ℝ) ^ (2 * k))) :=
     (Real.summable_one_div_nat_pow.mpr (by omega)).mul_left 2
@@ -372,7 +393,7 @@ theorem riemannZeta_two_mul_add_one_eq_integral {k : ℕ} (hk : 1 ≤ k) :
     rw [e, intervalIntegral.integral_const_mul]
     rcases Nat.eq_zero_or_pos n with rfl | hn
     · simp
-    rw [r25a_integral_sin_mul_cot hn.ne', mul_one]
+    rw [integral_sin_mul_cot hn.ne', mul_one]
   simp only [hint_n, intervalIntegral.integral_const_mul] at hI
   have hz := zeta_nat_eq_tsum_of_gt_one (k := 2 * k + 1) (by omega)
   push_cast at hz
@@ -387,7 +408,7 @@ theorem riemannZeta_two_mul_add_one_eq_integral {k : ℕ} (hk : 1 ≤ k) :
 
 open DLMF.Polylog in
 /-- The dilogarithm kernel `-ln(1-x)/x` is integrable on `[0, 1]`. -/
-lemma r25a_intervalIntegrable_dilogKernel :
+private lemma intervalIntegrable_dilogKernel_zero_one :
     IntervalIntegrable dilogKernel volume 0 1 := by
   refine intervalIntegral.intervalIntegrable_deriv_of_nonneg
       (g := fun t : ℝ => (polylogSeries 2 t).re)
@@ -402,7 +423,7 @@ lemma r25a_intervalIntegrable_dilogKernel :
 
 open DLMF.Polylog in
 /-- `∫₀¹ dy/(1 - xy) = -ln(1-x)/x` for `0 ≤ x < 1` (the kernel `dilogKernel`). -/
-lemma r25a_inner_integral {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
+private lemma integral_one_div_one_sub_mul {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
     ∫ y in (0 : ℝ)..1, 1 / (1 - x * y) = dilogKernel x := by
   rcases eq_or_lt_of_le hx0 with rfl | hx
   · simp [dilogKernel_zero]
@@ -438,7 +459,7 @@ theorem riemannZeta_two_eq_double_integral :
     refine intervalIntegral.integral_congr_ae ?_
     filter_upwards [hne1] with x hx hmem
     rw [Set.uIoc_of_le zero_le_one] at hmem
-    exact r25a_inner_integral hmem.1.le (lt_of_le_of_ne hmem.2 hx)
+    exact integral_one_div_one_sub_mul hmem.1.le (lt_of_le_of_ne hmem.2 hx)
   refine ⟨?_, ?_⟩
   · have hmeas : Measurable (fun p : ℝ × ℝ => 1 / (1 - p.1 * p.2)) := by fun_prop
     rw [IntegrableOn, Measure.volume_eq_prod, ← Measure.prod_restrict,
@@ -450,13 +471,13 @@ theorem riemannZeta_two_eq_double_integral :
       refine ContinuousOn.integrableOn_compact isCompact_Icc ?_
       exact continuousOn_const.div (continuousOn_const.sub
         (continuousOn_const.mul continuousOn_id)) fun y hy => by nlinarith [hy.1, hy.2, hmem.1]
-    · have hk := r25a_intervalIntegrable_dilogKernel
+    · have hk := intervalIntegrable_dilogKernel_zero_one
       rw [intervalIntegrable_iff_integrableOn_Icc_of_le zero_le_one] at hk
       refine hk.congr_fun_ae ?_
       rw [EventuallyEq, ae_restrict_iff' measurableSet_Icc]
       filter_upwards [hne1] with x hx hmem
       have hx1 : x < 1 := lt_of_le_of_ne hmem.2 hx
-      rw [← r25a_inner_integral hmem.1 hx1, intervalIntegral.integral_of_le zero_le_one,
+      rw [← integral_one_div_one_sub_mul hmem.1 hx1, intervalIntegral.integral_of_le zero_le_one,
         ← integral_Icc_eq_integral_Ioc]
       refine setIntegral_congr_fun measurableSet_Icc fun y hy => ?_
       have : 0 < 1 - x * y := by nlinarith [hy.1, hy.2, hmem.1]
@@ -500,7 +521,7 @@ theorem hasSum_riemannZeta_four_central_binom :
 /-! ### §25.6(ii) Derivative values -/
 
 /-- The second derivative of Gamma at one, obtained from the digamma value and slope. -/
-private lemma z25a_Gamma_second_one :
+private lemma iteratedDeriv_two_Gamma_one :
     iteratedDeriv 2 Gamma 1 = (Real.eulerMascheroniConstant : ℂ) ^ 2 + π ^ 2 / 6 := by
   have hreg : ∀ m : ℕ, (1 : ℂ) ≠ -(m : ℂ) := by
     intro m h; have := congrArg re h; simp at this; linarith [Nat.cast_nonneg (α := ℝ) m]
@@ -518,7 +539,7 @@ private lemma z25a_Gamma_second_one :
   ring
 
 /-- The second-order Leibniz rule, in a form suited to the regular factors at zero. -/
-private lemma z25a_second_mul {f g : ℂ → ℂ}
+private lemma iteratedDeriv_two_mul_zero {f g : ℂ → ℂ}
     (hf : ContDiffAt ℂ 2 f 0) (hg : ContDiffAt ℂ 2 g 0) :
     iteratedDeriv 2 (fun z => f z * g z) 0 =
       f 0 * iteratedDeriv 2 g 0 + 2 * deriv f 0 * deriv g 0 + iteratedDeriv 2 f 0 * g 0 := by
@@ -527,15 +548,15 @@ private lemma z25a_second_mul {f g : ℂ → ℂ}
 
 /-- Multiplying the reflection equation by its vanishing variable removes the zeta pole;
 the resulting identity holds on a full neighborhood of zero. -/
-private lemma z25a_regularized_reflection :
+private lemma mul_riemannZeta_eventuallyEq_reflection :
     (fun z : ℂ => z * riemannZeta z) =ᶠ[𝓝 0] fun z =>
       (π : ℂ)⁻¹ * (sin ((π / 2 : ℂ) * z) *
         (exp ((Real.log (2 * π) : ℂ) * z) * Gamma (1 - z) *
-          (z * s25a_zetaReg (1 - z) - 1))) := by
+          (z * riemannZetaRegular (1 - z) - 1))) := by
   let L : ℂ := Real.log (2 * π)
   let A : ℂ → ℂ := fun z => exp (L * z)
   let B : ℂ → ℂ := fun z => Gamma (1 - z)
-  let G : ℂ → ℂ := fun z => s25a_zetaReg (1 - z)
+  let G : ℂ → ℂ := fun z => riemannZetaRegular (1 - z)
   let K : ℂ → ℂ := fun z => z * G z - 1
   let F : ℂ → ℂ := fun z => A z * B z * K z
   let S : ℂ → ℂ := fun z => sin ((π / 2 : ℂ) * z)
@@ -555,7 +576,7 @@ private lemma z25a_regularized_reflection :
   have hz1 : 1 - z ≠ (1 : ℂ) := by intro h; apply hz0; linear_combination -h
   have hZ := riemannZeta_eq_reflection hz0 hzN
   have hgreg : G z = riemannZeta (1 - z) + z⁻¹ := by
-    dsimp [G, s25a_zetaReg]
+    dsimp [G, riemannZetaRegular]
     rw [Function.update_of_ne hz1]
     rw [show 1 - z - 1 = -z by ring, one_div, inv_neg, sub_neg_eq_add]
   have hp : (2 * π : ℂ) ^ (z - 1) = A z / (2 * π) := by
@@ -584,7 +605,7 @@ theorem iteratedDeriv_two_riemannZeta_zero :
   let γ₁ : ℂ := stieltjesConstant 1
   let A : ℂ → ℂ := fun z => exp (L * z)
   let B : ℂ → ℂ := fun z => Gamma (1 - z)
-  let G : ℂ → ℂ := fun z => s25a_zetaReg (1 - z)
+  let G : ℂ → ℂ := fun z => riemannZetaRegular (1 - z)
   let K : ℂ → ℂ := fun z => z * G z - 1
   let F : ℂ → ℂ := fun z => A z * B z * K z
   let S : ℂ → ℂ := fun z => sin ((π / 2 : ℂ) * z)
@@ -595,16 +616,16 @@ theorem iteratedDeriv_two_riemannZeta_zero :
     exact (DLMF.Gamma.analyticAt_Gamma hreg).comp_of_eq
       (by fun_prop : AnalyticAt ℂ (fun z : ℂ => 1 - z) 0) (by simp)
   have hG : AnalyticAt ℂ G 0 := by
-    exact (s25a_differentiable_zetaReg.analyticAt 1).comp_of_eq
+    exact (differentiable_riemannZetaRegular.analyticAt 1).comp_of_eq
       (by fun_prop : AnalyticAt ℂ (fun z : ℂ => 1 - z) 0) (by simp)
   have hK : AnalyticAt ℂ K 0 := (analyticAt_id.mul hG).sub analyticAt_const
   have hF : AnalyticAt ℂ F 0 := (hA.mul hB).mul hK
   have hS : AnalyticAt ℂ S 0 := by dsimp [S]; fun_prop
-  have hG0 : G 0 = γ := by simp [G, γ, s25a_zetaReg]
+  have hG0 : G 0 = γ := by simp [G, γ, riemannZetaRegular]
   have hG1 : deriv G 0 = γ₁ := by
     have h := congrFun (iteratedDeriv_comp_const_sub (n := 1)
-      (f := s25a_zetaReg) (s := 1)) 0
-    rw [sub_zero, s25a_iteratedDeriv_zetaReg_one] at h
+      (f := riemannZetaRegular) (s := 1)) 0
+    rw [sub_zero, iteratedDeriv_riemannZetaRegular_one] at h
     simpa [G, γ₁, iteratedDeriv_one] using h
   have hA0 : A 0 = 1 := by simp [A]
   have hA1 : deriv A 0 = L := by
@@ -617,7 +638,7 @@ theorem iteratedDeriv_two_riemannZeta_zero :
     simpa [B, γ, iteratedDeriv_one, hasDerivAt_Gamma_one.deriv] using h
   have hB2 : iteratedDeriv 2 B 0 = γ ^ 2 + π ^ 2 / 6 := by
     have h := congrFun (iteratedDeriv_comp_const_sub (n := 2) (f := Gamma) (s := 1)) 0
-    simpa [B, γ, z25a_Gamma_second_one] using h
+    simpa [B, γ, iteratedDeriv_two_Gamma_one] using h
   have hK0 : K 0 = -1 := by simp [K]
   have hK1 : deriv K 0 = γ := by
     dsimp [K]
@@ -628,13 +649,13 @@ theorem iteratedDeriv_two_riemannZeta_zero :
     dsimp [K]
     rw [iteratedDeriv_fun_sub (f := fun z : ℂ => z * G z) (g := fun _ : ℂ => 1)
       (analyticAt_id.mul hG).contDiffAt (by fun_prop),
-      z25a_second_mul (by fun_prop) hG.contDiffAt]
+      iteratedDeriv_two_mul_zero (by fun_prop) hG.contDiffAt]
     simp [iteratedDeriv_fun_id, iteratedDeriv_const, hG1]
   have hF0 : F 0 = -1 := by simp [F, hA0, hB0, hK0]
   have hF2 : iteratedDeriv 2 F 0 = -L ^ 2 + γ ^ 2 - π ^ 2 / 6 + 2 * γ₁ := by
     dsimp [F]
-    rw [z25a_second_mul (f := fun z => A z * B z) (hA.mul hB).contDiffAt hK.contDiffAt,
-      z25a_second_mul hA.contDiffAt hB.contDiffAt,
+    rw [iteratedDeriv_two_mul_zero (f := fun z => A z * B z) (hA.mul hB).contDiffAt hK.contDiffAt,
+      iteratedDeriv_two_mul_zero hA.contDiffAt hB.contDiffAt,
       deriv_fun_mul hA.differentiableAt hB.differentiableAt]
     rw [hA0, hA1, hA2, hB0, hB1, hB2, hK0, hK1, hK2]
     ring
@@ -652,7 +673,7 @@ theorem iteratedDeriv_two_riemannZeta_zero :
   have hζ : AnalyticAt ℂ riemannZeta 0 :=
     analyticOn_riemannZeta 0 (by norm_num)
   have heq : (fun z : ℂ => z * riemannZeta z) =ᶠ[𝓝 0]
-      fun z => (π : ℂ)⁻¹ * (S z * F z) := z25a_regularized_reflection
+      fun z => (π : ℂ)⁻¹ * (S z * F z) := mul_riemannZeta_eventuallyEq_reflection
   have h3 := heq.iteratedDeriv_eq 3
   rw [iteratedDeriv_fun_mul (by fun_prop) hζ.contDiffAt,
     iteratedDeriv_const_mul_field,
@@ -667,7 +688,7 @@ theorem iteratedDeriv_two_riemannZeta_zero :
   linear_combination h3 / 3
 
 /-- Identity under the stated parameter and domain assumptions: `cos (n * π) = (-1) ^ n`. -/
-private lemma z25a_cos_nat_mul_pi (n : ℕ) : cos (n * π) = (-1) ^ n := by
+private lemma cos_natCast_mul_pi (n : ℕ) : cos (n * π) = (-1) ^ n := by
   rw [← ofReal_natCast, ← ofReal_mul, ← ofReal_cos, Real.cos_nat_mul_pi]
   push_cast; rfl
 
@@ -697,7 +718,7 @@ theorem iteratedDeriv_riemannZeta_neg_two_mul {n : ℕ} (hn : 1 ≤ n) (k : ℕ)
       sin_nat_mul_pi, neg_zero]
   have hsin : sin (π * (2 * n + 1) / 2) = (-1) ^ n := by
     rw [show (π : ℂ) * (2 * n + 1) / 2 = n * π + π / 2 by ring, sin_add_pi_div_two,
-      z25a_cos_nat_mul_pi]
+      cos_natCast_mul_pi]
   have hpow : (2 * (π : ℂ)) ^ (2 * (n : ℂ) + 1) = (2 * π) ^ (2 * n + 1) := by
     rw [show (2 * (n : ℂ) + 1) = ((2 * n + 1 : ℕ) : ℂ) by push_cast; ring, cpow_natCast]
   rw [h, hcos, hsin, hpow, mul_sum, mul_sum]
@@ -730,7 +751,7 @@ theorem iteratedDeriv_riemannZeta_one_sub_two_mul {n : ℕ} (hn : 1 ≤ n) (k : 
     linarith
   have h := iteratedDeriv_riemannZeta_one_sub hs hs1 k
   have hcos : cos (π * (2 * n) / 2) = (-1) ^ n := by
-    rw [show (π : ℂ) * (2 * n) / 2 = n * π by ring, z25a_cos_nat_mul_pi]
+    rw [show (π : ℂ) * (2 * n) / 2 = n * π by ring, cos_natCast_mul_pi]
   have hsin : sin (π * (2 * n) / 2) = 0 := by
     rw [show (π : ℂ) * (2 * n) / 2 = n * π by ring, sin_nat_mul_pi]
   have hpow : (2 * (π : ℂ)) ^ (2 * (n : ℂ)) = (2 * π) ^ (2 * n) := by
@@ -797,7 +818,7 @@ theorem deriv_riemannZeta_two_mul {n : ℕ} (hn : 1 ≤ n) :
 /-! ### §25.6(iii) Recursion formulas -/
 
 /-- Sum over `range (2n+1)` of a function vanishing at odd arguments. -/
-lemma q25a_sum_range_even {M : Type*} [AddCommMonoid M] (g : ℕ → M)
+private lemma sum_range_two_mul_add_one_of_odd_eq_zero {M : Type*} [AddCommMonoid M] (g : ℕ → M)
     (hg : ∀ j, Odd j → g j = 0) (n : ℕ) :
     ∑ j ∈ range (2 * n + 1), g j = ∑ k ∈ range (n + 1), g (2 * k) := by
   induction n with
@@ -809,13 +830,13 @@ lemma q25a_sum_range_even {M : Type*} [AddCommMonoid M] (g : ℕ → M)
 
 /-- Euler's convolution identity `∑_{k=1}^{n-1} C(2n,2k) B_{2k} B_{2n-2k} = -(2n+1) B_{2n}`,
 `n ≥ 2` (from DLMF 24.14.2). -/
-lemma q25a_bernoulli_convolution {n : ℕ} (hn : 2 ≤ n) :
+private lemma sum_choose_mul_bernoulli_mul_bernoulli {n : ℕ} (hn : 2 ≤ n) :
     ∑ k ∈ Finset.Ico 1 n, ((2 * n).choose (2 * k) : ℚ) * bernoulli (2 * k) *
       bernoulli (2 * n - 2 * k) = -(2 * n + 1) * bernoulli (2 * n) := by
   have h := DLMF.BernoulliEuler.sum_choose_bernoulli_mul_bernoulli_number (2 * n)
   have hodd : bernoulli (2 * n - 1) = 0 :=
     bernoulli_eq_zero_of_odd ⟨n - 1, by omega⟩ (by omega)
-  rw [hodd, mul_zero, sub_zero, q25a_sum_range_even _ ?_ n] at h
+  rw [hodd, mul_zero, sub_zero, sum_range_two_mul_add_one_of_odd_eq_zero _ ?_ n] at h
   · obtain ⟨m, rfl⟩ : ∃ m, n = m + 2 := ⟨n - 2, by omega⟩
     rw [sum_range_succ, sum_range_succ'] at h
     rw [Finset.sum_Ico_eq_sum_range, show m + 2 - 1 = m + 1 by omega]
@@ -838,7 +859,7 @@ lemma q25a_bernoulli_convolution {n : ℕ} (hn : 2 ≤ n) :
     · rw [bernoulli_eq_zero_of_odd hj (by omega)]; ring
 
 /-- `ζ(2k) ζ(2n-2k) = (-1)ⁿ 2^{2n-2} π^{2n}/(2n)! · C(2n,2k) B_{2k} B_{2n-2k}` for `1 ≤ k < n`. -/
-lemma q25a_zeta_mul_zeta {n k : ℕ} (hk : 1 ≤ k) (hkn : k < n) :
+private lemma riemannZeta_two_mul_mul_riemannZeta_two_mul_sub {n k : ℕ} (hk : 1 ≤ k) (hkn : k < n) :
     riemannZeta (2 * k) * riemannZeta (2 * n - 2 * k) =
       (-1) ^ n * 2 ^ (2 * n - 2) * (π : ℂ) ^ (2 * n) / (2 * n)! *
         (((2 * n).choose (2 * k) : ℚ) * bernoulli (2 * k) * bernoulli (2 * n - 2 * k) : ℚ) := by
@@ -870,9 +891,9 @@ lemma q25a_zeta_mul_zeta {n k : ℕ} (hk : 1 ≤ k) (hkn : k < n) :
 theorem riemannZeta_two_mul_recursion {n : ℕ} (hn : 2 ≤ n) :
     (n + 1 / 2 : ℂ) * riemannZeta (2 * n) =
       ∑ k ∈ Finset.Ico 1 n, riemannZeta (2 * k) * riemannZeta (2 * n - 2 * k) := by
-  rw [sum_congr rfl fun k hk => q25a_zeta_mul_zeta (mem_Ico.mp hk).1 (mem_Ico.mp hk).2,
+  rw [sum_congr rfl fun k hk => riemannZeta_two_mul_mul_riemannZeta_two_mul_sub (mem_Ico.mp hk).1 (mem_Ico.mp hk).2,
     ← mul_sum]
-  have h := q25a_bernoulli_convolution hn
+  have h := sum_choose_mul_bernoulli_mul_bernoulli hn
   have h' : (∑ k ∈ Finset.Ico 1 n, ((((2 * n).choose (2 * k) : ℚ) * bernoulli (2 * k) *
       bernoulli (2 * n - 2 * k) : ℚ) : ℂ)) = -(2 * n + 1) * (bernoulli (2 * n) : ℂ) := by
     rw [← Rat.cast_sum, h]; push_cast; ring
@@ -884,7 +905,7 @@ theorem riemannZeta_two_mul_recursion {n : ℕ} (hn : 2 ≤ n) :
   field_simp
 
 /-- DLMF 25.6.19, proved from 25.6.16 by the reflection `k ↦ m+n+1-k`. -/
-lemma q25a_recursion_two {m n : ℕ} (hmn : 1 ≤ m + n) :
+private lemma mul_riemannZeta_even_eq_sum_add_sum {m n : ℕ} (hmn : 1 ≤ m + n) :
     (m + n + 3 / 2 : ℂ) * riemannZeta (2 * m + 2 * n + 2) =
       ∑ k ∈ Finset.Icc 1 m, riemannZeta (2 * k) * riemannZeta (2 * m + 2 * n + 2 - 2 * k) +
         ∑ k ∈ Finset.Icc 1 n, riemannZeta (2 * k) * riemannZeta (2 * m + 2 * n + 2 - 2 * k) := by
@@ -919,7 +940,7 @@ lemma q25a_recursion_two {m n : ℕ} (hmn : 1 ≤ m + n) :
 theorem riemannZeta_four_mul_add_two_recursion {n : ℕ} (hn : 1 ≤ n) :
     (n + 3 / 4 : ℂ) * riemannZeta (4 * n + 2) =
       ∑ k ∈ Finset.Icc 1 n, riemannZeta (2 * k) * riemannZeta (4 * n + 2 - 2 * k) := by
-  have h := q25a_recursion_two (m := n) (n := n) (by omega)
+  have h := mul_riemannZeta_even_eq_sum_add_sum (m := n) (n := n) (by omega)
   rw [show (2 * n + 2 * n + 2 : ℂ) = 4 * n + 2 by ring] at h
   linear_combination h / 2
 
@@ -928,7 +949,7 @@ theorem riemannZeta_four_mul_add_two_recursion {n : ℕ} (hn : 1 ≤ n) :
 theorem riemannZeta_four_mul_recursion {n : ℕ} (hn : 1 ≤ n) :
     (n + 1 / 4 : ℂ) * riemannZeta (4 * n) + 1 / 2 * riemannZeta (2 * n) ^ 2 =
       ∑ k ∈ Finset.Icc 1 n, riemannZeta (2 * k) * riemannZeta (4 * n - 2 * k) := by
-  have h := q25a_recursion_two (m := n - 1) (n := n) (by omega)
+  have h := mul_riemannZeta_even_eq_sum_add_sum (m := n - 1) (n := n) (by omega)
   have e : (2 * ((n - 1 : ℕ) : ℂ) + 2 * n + 2) = 4 * n := by
     rw [Nat.cast_sub hn]; push_cast; ring
   have e' : ((n - 1 : ℕ) : ℂ) + n + 3 / 2 = 2 * n + 1 / 2 := by
@@ -951,25 +972,25 @@ theorem riemannZeta_two_mul_recursion_two {m n : ℕ} (hmn : 1 ≤ m + n) :
     (m + n + 3 / 2 : ℂ) * riemannZeta (2 * m + 2 * n + 2) =
       ∑ k ∈ Finset.Icc 1 m, riemannZeta (2 * k) * riemannZeta (2 * m + 2 * n + 2 - 2 * k) +
         ∑ k ∈ Finset.Icc 1 n, riemannZeta (2 * k) * riemannZeta (2 * m + 2 * n + 2 - 2 * k) := by
-  exact q25a_recursion_two hmn
+  exact mul_riemannZeta_even_eq_sum_add_sum hmn
 
 /-- `aeval x (bernoulli k)` over `ℝ` is `bernoulliFun k x`. -/
-lemma r25a_aeval_bernoulli (k : ℕ) (x : ℝ) :
+private lemma aeval_bernoulli_eq_bernoulliFun (k : ℕ) (x : ℝ) :
     Polynomial.aeval x (Polynomial.bernoulli k) = bernoulliFun k x := by
   simp [bernoulliFun, Polynomial.aeval_def, Polynomial.eval_map]
 
 /-- DLMF 24.14.1 at `x = ½`, `y = 0`, `m = 2n`, restricted to the even middle terms. -/
-lemma r25a_half_conv {n : ℕ} (hn : 2 ≤ n) :
+private lemma sum_bernoulli_convolution_half {n : ℕ} (hn : 2 ≤ n) :
     ∑ k ∈ Finset.Ico 1 n, ((2 : ℝ) / 2 ^ (2 * k) - 1) * ((2 * n).choose (2 * k) : ℝ) *
       (bernoulli (2 * k) : ℝ) * (bernoulli (2 * n - 2 * k) : ℝ) =
       -(2 * n : ℝ) * (2 / 2 ^ (2 * n) - 1) * bernoulli (2 * n) - bernoulli (2 * n) := by
   have h := DLMF.BernoulliEuler.sum_choose_bernoulli_mul_bernoulli (A := ℝ) (2 * n) 2⁻¹ 0
-  simp only [r25a_aeval_bernoulli, add_zero, bernoulliFun_eval_half, bernoulliFun_eval_zero,
+  simp only [aeval_bernoulli_eq_bernoulliFun, add_zero, bernoulliFun_eval_half, bernoulliFun_eval_zero,
     nsmul_eq_mul] at h
   have hodd : bernoulli (2 * n - 1) = 0 :=
     bernoulli_eq_zero_of_odd ⟨n - 1, by omega⟩ (by omega)
   simp only [hodd, Rat.cast_zero, mul_zero, zero_sub] at h
-  rw [q25a_sum_range_even _ ?_ n] at h
+  rw [sum_range_two_mul_add_one_of_odd_eq_zero _ ?_ n] at h
   · rw [sum_range_succ, Finset.range_eq_Ico, Finset.sum_eq_sum_Ico_succ_bot (by omega)] at h
     simp only [mul_zero, Nat.sub_zero, Nat.choose_zero_right, Nat.sub_self, Nat.choose_self,
       bernoulli_zero, pow_zero, Nat.cast_one, Rat.cast_one] at h
@@ -988,14 +1009,14 @@ lemma r25a_half_conv {n : ℕ} (hn : 2 ≤ n) :
     · rw [bernoulli_eq_zero_of_odd hj (by omega)]; simp
 
 /-- `∑_{k=1}^{n-1} (2^{2n-2k}-1) C(2n,2k) B_{2k} B_{2n-2k} = -(2^{2n}-1) B_{2n}`, `n ≥ 2`. -/
-lemma r25a_pow_conv {n : ℕ} (hn : 2 ≤ n) :
+private lemma sum_two_pow_sub_one_bernoulli_convolution {n : ℕ} (hn : 2 ≤ n) :
     ∑ k ∈ Finset.Ico 1 n, ((2 : ℝ) ^ (2 * n - 2 * k) - 1) *
       ((((2 * n).choose (2 * k) : ℚ) * bernoulli (2 * k) * bernoulli (2 * n - 2 * k) : ℚ) : ℝ) =
       -((2 : ℝ) ^ (2 * n) - 1) * bernoulli (2 * n) := by
-  have h1 := r25a_half_conv hn
+  have h1 := sum_bernoulli_convolution_half hn
   have h0 : ∑ k ∈ Finset.Ico 1 n, ((((2 * n).choose (2 * k) : ℚ) * bernoulli (2 * k) *
       bernoulli (2 * n - 2 * k) : ℚ) : ℝ) = -(2 * n + 1) * (bernoulli (2 * n) : ℝ) := by
-    rw [← Rat.cast_sum, q25a_bernoulli_convolution hn]; push_cast; ring
+    rw [← Rat.cast_sum, sum_choose_mul_bernoulli_mul_bernoulli hn]; push_cast; ring
   have hP : (2 : ℝ) ^ (2 * n) = 2 * 2 ^ (2 * n - 1) := by
     rw [← pow_succ']; congr 1; omega
   have e : ∀ k ∈ Finset.Ico 1 n, ((2 : ℝ) ^ (2 * n - 2 * k) - 1) *
@@ -1032,10 +1053,10 @@ theorem riemannZeta_two_mul_recursion_pow_two {n : ℕ} (hn : 2 ≤ n) :
         ((((2 * n).choose (2 * k) : ℚ) * bernoulli (2 * k) * bernoulli (2 * n - 2 * k) : ℚ) : ℝ)
           : ℝ) : ℂ) := by
     intro k hk
-    rw [mul_assoc, mul_comm (riemannZeta _), q25a_zeta_mul_zeta (mem_Ico.mp hk).1
+    rw [mul_assoc, mul_comm (riemannZeta _), riemannZeta_two_mul_mul_riemannZeta_two_mul_sub (mem_Ico.mp hk).1
       (mem_Ico.mp hk).2]
     push_cast; ring
-  rw [sum_congr rfl e, ← mul_sum, ← ofReal_sum, r25a_pow_conv hn,
+  rw [sum_congr rfl e, ← mul_sum, ← ofReal_sum, sum_two_pow_sub_one_bernoulli_convolution hn,
     riemannZeta_two_mul_nat (by omega)]
   have p2 : (2 : ℂ) ^ (2 * n - 1) = 2 * 2 ^ (2 * n - 2) := by
     rw [← pow_succ']; congr 1; omega

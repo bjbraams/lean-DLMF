@@ -12,18 +12,28 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 /-!
 # Laplace's method and saddle points (DLMF §§2.3(iii), 2.4(iii)–(iv))
 
-* 2.3.13–2.3.18: Laplace's method for `∫ₐᵇ e^{-xp(t)} q(t) dt` with the minimum of `p` at the
-  left endpoint, `p(t) - p(a) ∼ ∑ pₛ (t-a)^{s+μ}`, `q(t) ∼ ∑ qₛ (t-a)^{s+λ-1}`. The coefficients
-  `bₛ` are `laplaceCoeff` (the residue formula 2.3.18); 2.3.16 identifies them with the
-  expansion of `q/p'` in powers of `v = p(t) - p(a)`, and 2.3.17 (proved) gives `b₀, b₁, b₂`.
-  The formula 2.3.15 was checked numerically (`p = t² + t³`, `q = 1 + 2t`).
-* 2.4.10–2.4.13: Laplace's method for contour integrals. The path `𝒫` from `a` is
-  parametrized as `t = γ(u)`, `u ∈ (0, ∞)` (finite and infinite `b` alike), and the powers
-  `(t - a)^ν` are `|t - a|^ν e^{iνθ(u)}` for a continuous branch `θ(u)` of `ph(γ(u) - a)` with
-  `θ(u) → ω`. The variable `z = r e^{iθ}` ranges over the annular sector `θ₁ ≤ θ ≤ θ₂`, `r → ∞`,
-  written as the filter `atTop ×ˢ 𝓟 [θ₁, θ₂]` on `(r, θ)` with `z^ν = r^ν e^{iνθ}`, so no
-  branch cut of `ph z` enters.
-* 2.4.14–2.4.16: saddle points.
+Laplace's method for real and contour integrals, with the minimum of `p` at the left endpoint,
+`p(t) - p(a) ∼ ∑ pₛ (t-a)^{s+μ}`, `q(t) ∼ ∑ qₛ (t-a)^{s+λ-1}`, and the saddle-point method.
+
+## Main results
+
+* `laplace_method`, `laplace_method_Ioi`: Laplace's method for `∫ₐᵇ e^{-xp(t)} q(t) dt`
+  (DLMF 2.3.13–2.3.15).
+* `laplaceCoeff_hasAsymptoticExpansion`: the coefficients `laplaceCoeff` are those of the
+  expansion of `q/p'` in powers of `v = p(t) - p(a)` (DLMF 2.3.16, 2.3.18).
+* `laplaceCoeff_zero`, `laplaceCoeff_one`, `laplaceCoeff_two`: `b₀, b₁, b₂` (DLMF 2.3.17).
+* `laplace_method_contour`: Laplace's method for contour integrals (DLMF 2.4.10–2.4.13).
+* `integral_path_split`: subdivision of the path (DLMF 2.4.14).
+* `saddle_point`, `saddle_coeff_zero`, `saddle_coeff_two`: the saddle-point method
+  (DLMF 2.4.15–2.4.16).
+
+## Implementation notes
+
+For contour integrals the path `𝒫` from `a` is parametrized as `t = γ(u)`, `u ∈ (0, ∞)` (finite
+and infinite `b` alike), and the powers `(t - a)^ν` are `|t - a|^ν e^{iνθ(u)}` for a continuous
+branch `θ(u)` of `ph(γ(u) - a)` with `θ(u) → ω`. The variable `z = r e^{iθ}` ranges over the
+annular sector `θ₁ ≤ θ ≤ θ₂`, `r → ∞`, written as the filter `atTop ×ˢ 𝓟 [θ₁, θ₂]` on `(r, θ)`
+with `z^ν = r^ν e^{iνθ}`, so no branch cut of `ph z` enters.
 -/
 
 @[expose] public noncomputable section

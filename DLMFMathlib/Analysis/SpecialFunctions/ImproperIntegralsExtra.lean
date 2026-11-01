@@ -12,9 +12,17 @@ public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 /-!
 # Elementary improper integrals on `(0, ∞)`
 
-* integrability of `t^r e^{-s t}` (`r > -1`, `s > 0`) and of its complex analogue
-  `v^{b-1} e^{-z v}` (`Re b > 0`, `Re z > 0`);
-* the Frullani-type integral `∫₀^∞ ((1+τ)⁻¹ - (1+xτ)⁻¹)/τ dτ = log x` for `x > 0`.
+Integrability of power-exponential integrands on the positive half-line and a Frullani-type
+integral.
+
+## Main results
+
+* `integrableOn_rpow_mul_exp_neg_mul`: `t ↦ t^r e^{-s t}` is integrable on `(0, ∞)` for
+  `r > -1` and `s > 0`.
+* `Complex.integrableOn_cpow_mul_exp_neg_mul`: `v ↦ v^{b-1} e^{-z v}` is integrable on
+  `(0, ∞)` for `Re b > 0` and `Re z > 0`.
+* `integrableOn_and_integral_inv_one_add_sub_inv_one_add_mul_div`: the Frullani-type
+  integral `∫₀^∞ ((1+τ)⁻¹ - (1+xτ)⁻¹)/τ dτ = log x` for `x > 0`, with integrability.
 -/
 
 @[expose] public section

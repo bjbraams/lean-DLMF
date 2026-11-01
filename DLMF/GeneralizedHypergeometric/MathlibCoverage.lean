@@ -9,11 +9,13 @@ public import DLMF.Core.Upstream
 public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
 public import TauCeti.Analysis.SpecialFunctions.RegularizedHypergeometric
 
-/-! # Checked upstream pointers for DLMF Chapter16
+/-!
+# DLMF Chapter 16 results already in Mathlib and TauCeti
 
-The power-series APIs are distinguished from principal analytic continuation.
-Existing project theorems are recorded separately in the chapter acquisition ledger; root
-attaches missing native tags rather than registering local declarations as upstream.
+The `dlmf_upstream` commands below are checked pointers to upstream declarations on the
+regularized generalized hypergeometric series (DLMF 16.2.1, 16.2.5, 16.3.6). These upstream
+functions are sums of power series and are distinguished from the principal analytic
+continuation used in this project.
 -/
 
 dlmf_upstream 16.2.E1 Complex.regularizedHGFunCoeff "partial: defining coefficients after division by bottom Gamma product"

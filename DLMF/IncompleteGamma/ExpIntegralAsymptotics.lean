@@ -11,9 +11,26 @@ public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 /-!
 # Generalized exponential integral asymptotics, DLMF §8.20
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+Asymptotic expansions of the generalized exponential integral `E_p(z)` for large `z`, on
+sectors of the logarithmic plane, and for large order `p` (DLMF §8.20).
+
+## Main definitions
+
+* `logStripAtTop`: the strip filter `re w → ∞` with `|im w + θ| ≤ π/2 - δ`.
+* `expIntLargeOrderPolynomial`: the polynomials `A_k(λ)` of DLMF 8.20.4, with `A₀ = 1`.
+
+## Main results
+
+* `genExpIntE_exact_remainder`: the expansion with exact remainder, DLMF 8.20.1.
+* `genExpIntE_eq_exp_mul_integral`, `genExpIntEOnLog_eq_integral_rotate`: Laplace
+  representations of `E_p`, the latter rotated on the logarithmic plane.
+* `genExpIntEOnLog_strip_asymptotic`: Watson's expansion of `E_p` on a strip.
+* `genExpIntE_log_sector_asymptotic`: the expansion on `|ph z| ≤ 3π/2 - δ`, DLMF 8.20.2.
+* `genExpIntE_extended_sector_asymptotic`: the extended-sector expansion with connection
+  terms, DLMF 8.20.3.
+* `expIntLargeOrderPolynomial_initial`, `expIntLargeOrderPolynomial_degree`: DLMF 8.20.5 and
+  the degree statement of DLMF §8.20(ii).
+* `genExpIntE_large_order_uniform`: the uniform large-order expansion, DLMF 8.20.6.
 -/
 
 @[expose] public noncomputable section

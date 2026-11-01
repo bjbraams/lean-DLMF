@@ -8,26 +8,30 @@ module
 public import DLMF.Confluent.Basic.Tricomi
 
 /-!
-# Coulomb functions: definitions (DLMF §33.2)
+# Coulomb functions: definitions
 
-This is the definitions file of the Coulomb area (DLMF Chapter 33). The functions of
-DLMF §33.2 were first defined in the Confluent area (`DLMF.Confluent.Coulomb`,
-`DLMF.Confluent.CoulombAsymptotics`, `DLMF.Confluent.CoulombIrregular`); on 2026-10-26 their
-definitions were moved down here unchanged, keeping the namespace `DLMF.Confluent`:
+This file defines the Coulomb wave functions of DLMF §33.2 (Temme §7.3.2) through Kummer's and
+Tricomi's functions.
+
+## Main definitions
 
 * `coulombWave`, `coulombWaveDeriv`: the unnormalized regular solution
-  `ρ^{ℓ+1} e^{-iρ} M(ℓ+1-iη, 2ℓ+2, 2iρ)` and its derivative;
-* `coulombC`: the normalizing constant `C_ℓ(η)` (DLMF 33.2.5);
-* `coulombF`: the regular Coulomb function `F_ℓ(η,ρ)` (DLMF 33.2.4);
-* `coulombSigma`, `coulombTheta`: the phase shift `σ_ℓ(η)` (principal branch of the phase) and
-  the phase `θ_ℓ(η,ρ)` (DLMF 33.2.9–33.2.10);
-* `coulombHPlus`, `coulombHMinus`: the irregular functions `H^±_ℓ(η,ρ)` (DLMF 33.2.8);
-* `coulombAPlus`: the constant in `H^+_ℓ = A^+ ρ^{ℓ+1} e^{iρ} U(ℓ+1+iη, 2ℓ+2, -2iρ)`;
+  `ρ^{ℓ+1} e^{-iρ} M(ℓ+1-iη, 2ℓ+2, 2iρ)`, entire in `ρ`, and its derivative.
+* `coulombC`: the normalizing constant `C_ℓ(η)` (DLMF 33.2.5).
+* `coulombF`: the regular Coulomb function `F_ℓ(η,ρ)` (DLMF 33.2.4).
+* `coulombSigma`, `coulombTheta`: the phase shift `σ_ℓ(η)`, on the principal branch of the
+  phase, and the phase `θ_ℓ(η,ρ)` (DLMF 33.2.9–33.2.10).
+* `coulombHPlus`, `coulombHMinus`: the irregular functions `H^±_ℓ(η,ρ)` (DLMF 33.2.8).
+* `coulombAPlus`: the constant in `H^+_ℓ = A^+ ρ^{ℓ+1} e^{iρ} U(ℓ+1+iη, 2ℓ+2, -2iρ)`.
 * `coulombG`: the irregular function `G_ℓ(η,ρ) = Re H^+_ℓ(η,ρ)` (DLMF 33.2.11).
-
-New Chapter 33 definitions live in the namespace `DLMF.Coulomb`:
-
 * `DLMF.Coulomb.turningPoint`: the outer turning point `ρ_tp(η,ℓ)` (DLMF 33.2.2).
+
+## Implementation notes
+
+The functions of DLMF §33.2 keep the namespace `DLMF.Confluent`, where their properties are
+developed (`DLMF.Confluent.Coulomb`, `DLMF.Confluent.CoulombAsymptotics`,
+`DLMF.Confluent.CoulombIrregular`); other Chapter 33 definitions are in the namespace
+`DLMF.Coulomb`.
 -/
 
 @[expose] public section

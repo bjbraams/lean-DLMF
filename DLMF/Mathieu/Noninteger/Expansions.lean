@@ -9,20 +9,35 @@ public import DLMF.Mathieu.Noninteger.Fourier
 public import DLMF.Mathieu.SecondSolutions
 
 /-!
-# Mathieu functions of noninteger order: expansions, asymptotics, stability (DLMF §§28.15–28.19)
+# Mathieu functions of noninteger order: expansions, asymptotics, stability
 
-* §28.15: the small-`q` expansions of `λ_ν(q)` (28.15.1), the continued-fraction equation
-  28.15.2 and the small-`q` expansion of `me_ν(z, q)` (28.15.3);
-* §28.16: the large-`q` asymptotic expansion 28.16.1 of `λ_ν(h²)`;
-* §28.17: stability of the pairs `(a, q)` (`DLMF.Mathieu.IsMathieuStable`);
-* §28.18 only refers to §28.28 (part C of the Chapter 28 acquisition): no statements;
-* §28.19: expansions of `π`-pseudoperiodic functions in series of `me_{ν+2n}`.
+This file states the results of DLMF §§28.15–28.19 for the noninteger-order eigenvalues
+`λ_ν(q)` and functions `me_ν(z, q)`: small-`q` expansions (§28.15), the large-`q` expansion of
+`λ_ν(h²)` (§28.16), stability of the pairs `(a, q)` (§28.17), and expansions of
+`π`-pseudoperiodic functions in series of `me_{ν+2n}` (§28.19). §28.18 only refers to §28.28 and
+has no statements here.
 
-The expansions with printed finitely many terms followed by `⋯` are stated as `O`-estimates of
-the remainder after the printed terms (`q → 0` in `ℂ`, resp. `h → +∞`). All formulas were
-checked numerically (truncated tridiagonal eigenproblems for the recurrence 28.14.4, scripts in
-the acquisition scratch directory); 28.16.1 was checked for `ν = 0.3, 0.5, 1.5, 2.4` and
-`h = 10, 20` (remainder ratios consistent with `O(h⁻⁶)`).
+## Main results
+
+* `mathieuLambda_isBigO_zero`: the power series of `λ_ν(q)` (DLMF 28.15.1).
+* `mathieuLambda_contFrac`: the continued-fraction equation for `λ_ν(q)` (DLMF 28.15.2).
+* `mathieuMe_isBigO_zero`: the power series of `me_ν(z, q)` (DLMF 28.15.3).
+* `mathieuLambda_isBigO_atTop`: the large-`q` expansion of `λ_ν(h²)` (DLMF 28.16.1).
+* `isMathieuStable_q_zero`, `isMathieuStable_mathieuLambda`: stable pairs (DLMF §28.17).
+* `mathieuMe_tendsto_or`, `not_isMathieuStable_of_im_ne_zero`: unstable pairs for a
+  characteristic exponent with `ℑν ≠ 0` (DLMF §28.17).
+* `isOpen_mathieuStable_and_frontier`: the stability chart (DLMF §28.17, Figure 28.17.1).
+* `hasSum_mathieuMe_expansion`: expansion in `me_{ν+2n}` (DLMF 28.19.1–28.19.3).
+* `hasSum_exp_mathieuMe`: the example `e^{iνz} = ∑_n c^{ν+2n}_{-2n}(q) me_{ν+2n}(z, q)`
+  (DLMF 28.19.4).
+
+## Implementation notes
+
+The expansions printed with finitely many terms followed by `⋯` are stated as `O`-estimates of
+the remainder after the printed terms (`q → 0` in `ℂ`, resp. `h → +∞`). The formulas were
+checked numerically with truncated tridiagonal eigenproblems for the recurrence 28.14.4;
+28.16.1 was checked for `ν = 0.3, 0.5, 1.5, 2.4` and `h = 10, 20` (remainder ratios consistent
+with `O(h⁻⁶)`).
 -/
 
 @[expose] public noncomputable section
@@ -147,7 +162,7 @@ theorem isMathieuStable_q_zero {a : ℝ} (ha : 0 < a) : IsMathieuStable a 0 := b
     _ = ‖w₀‖ + ‖w₁ / k‖ := by ring
 
 /-- `‖me_ν(±x, q)‖ ≤ (∑ |c_m|) e^{∓ℑν x}` for real `x`. -/
-lemma p1b_norm_mathieuMe_le {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ}
+private lemma norm_mathieuMe_ofReal_le {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ}
     (hq : MathieuNormalSegment ν q) (x : ℝ) :
     ‖mathieuMe ν x q‖ ≤ (∑' m : ℤ, ‖mathieuMeCoeff ν q m‖) * Real.exp (-(ν.im * x)) := by
   have h := hasSum_mathieuMe_ofReal hν hq x
@@ -155,10 +170,10 @@ lemma p1b_norm_mathieuMe_le {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q 
   refine (norm_tsum_le_tsum_norm h.1).trans (le_of_eq ?_)
   rw [← tsum_mul_right]
   congr 1; funext m
-  rw [norm_mul, p1b_norm_exp_real]
+  rw [norm_mul, norm_exp_I_mul_add_two_mul_ofReal]
 
 /-- `me_ν(x, q)` does not vanish identically on the real axis. -/
-lemma p1b_exists_mathieuMe_ne_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ}
+private lemma exists_mathieuMe_ofReal_ne_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ}
     (hq : MathieuNormalSegment ν q) : ∃ x : ℝ, mathieuMe ν x q ≠ 0 := by
   by_contra h
   push Not at h
@@ -167,13 +182,13 @@ lemma p1b_exists_mathieuMe_ne_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ 
   exact Real.pi_ne_zero (by exact_mod_cast this.symm)
 
 /-- A pseudoperiodic `w` with `|μ| < 1` and `w(x₀) ≠ 0` is unbounded on the negative axis. -/
-lemma p1b_unbounded_neg {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ * w z) (hμ : ‖μ‖ < 1)
+private lemma unbounded_neg_of_pseudoperiodic_norm_lt_one {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ * w z) (hμ : ‖μ‖ < 1)
     {x₀ : ℝ} (hx₀ : w x₀ ≠ 0) : ¬ ∃ C : ℝ, ∀ x : ℝ, 0 ≤ x → ‖w (-x)‖ ≤ C := by
   rintro ⟨C, hC⟩
   obtain ⟨N, hN⟩ := exists_nat_ge (x₀ / π)
   have hb : ∀ n : ℕ, N ≤ n → ‖w x₀‖ ≤ C * ‖μ‖ ^ n := by
     intro n hn
-    have e := p1b_add_nat_mul_pi h ((x₀ : ℂ) - n * π) n
+    have e := pseudoperiodic_add_nat_mul_pi h ((x₀ : ℂ) - n * π) n
     rw [sub_add_cancel] at e
     rw [e, norm_mul, norm_pow, mul_comm]
     gcongr
@@ -189,7 +204,7 @@ lemma p1b_unbounded_neg {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ
   exact hx₀ (norm_le_zero_iff.mp this)
 
 /-- A pseudoperiodic `w` with `|μ| > 1` and `w(x₀) ≠ 0` is unbounded on the positive axis. -/
-lemma p1b_unbounded_pos {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ * w z) (hμ : 1 < ‖μ‖)
+private lemma unbounded_pos_of_pseudoperiodic_one_lt_norm {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ * w z) (hμ : 1 < ‖μ‖)
     {x₀ : ℝ} (hx₀ : w x₀ ≠ 0) : ¬ ∃ C : ℝ, ∀ x : ℝ, 0 ≤ x → ‖w x‖ ≤ C := by
   have hμ0 : μ ≠ 0 := by rintro rfl; norm_num at hμ
   have hv : ∀ z, w (-(z + π)) = μ⁻¹ * w (-z) := by
@@ -198,7 +213,7 @@ lemma p1b_unbounded_pos {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ
     rw [show -(z + π) + π = -z by ring] at this
     rw [this, ← mul_assoc, inv_mul_cancel₀ hμ0, one_mul]
   have hμ' : ‖μ⁻¹‖ < 1 := by rw [norm_inv]; exact inv_lt_one_of_one_lt₀ hμ
-  have := p1b_unbounded_neg (w := fun z => w (-z)) hv hμ' (x₀ := -x₀) (by simpa using hx₀)
+  have := unbounded_neg_of_pseudoperiodic_norm_lt_one (w := fun z => w (-z)) hv hμ' (x₀ := -x₀) (by simpa using hx₀)
   simpa using this
 
 /-- **Stable pairs from real noninteger exponents** (DLMF §28.17): for real `ν ∉ ℤ` and real
@@ -209,7 +224,7 @@ theorem isMathieuStable_mathieuLambda {ν q : ℝ} (hν : ∀ m : ℤ, (m : ℂ)
     IsMathieuStable (mathieuLambda ν q) q := by
   have hq := (mathieuNormalSegment_real (q := q) hν).1
   obtain ⟨⟨h1, h1ne, hp1⟩, ⟨h2, -, hp2⟩⟩ := isFloquetSolution_mathieuMe hν hq
-  have hm0 := (p1b_charExp_of_floquet_pair hν (isFloquetSolution_mathieuMe hν hq).1
+  have hm0 := (isMathieuCharExp_of_isFloquetSolution_pair hν (isFloquetSolution_mathieuMe hν hq).1
     (isFloquetSolution_mathieuMe hν hq).2).1
   set f : ℂ → ℂ := fun z => mathieuMe ν z q
   set m0 := f 0
@@ -219,7 +234,7 @@ theorem isMathieuStable_mathieuLambda {ν q : ℝ} (hν : ∀ m : ℤ, (m : ℂ)
     intro hd
     have heq := h1.eq_of_initial h2 (z₀ := 0) (by simp [f])
       (by change d = deriv (fun z => f (-z)) 0; rw [hd2, hd, neg_zero])
-    apply p1b_exp_ne_inv hν
+    apply exp_pi_mul_I_mul_ne_inv hν
     obtain ⟨z, hz⟩ : ∃ z, f z ≠ 0 := by
       by_contra hcon; push Not at hcon; exact h1ne (funext hcon)
     have e1 := hp1 z
@@ -232,9 +247,9 @@ theorem isMathieuStable_mathieuLambda {ν q : ℝ} (hν : ∀ m : ℤ, (m : ℂ)
     linear_combination -e1 + e3 + e2 - (Complex.exp (π * I * ν))⁻¹ * e4
   set B : ℝ := ∑' m : ℤ, ‖mathieuMeCoeff ν q m‖
   have hb : ∀ x : ℝ, ‖f x‖ ≤ B := fun x => by
-    simpa using p1b_norm_mathieuMe_le hν hq x
+    simpa using norm_mathieuMe_ofReal_le hν hq x
   have hb' : ∀ x : ℝ, ‖f (-x)‖ ≤ B := fun x => by
-    simpa using p1b_norm_mathieuMe_le hν hq (-x)
+    simpa using norm_mathieuMe_ofReal_le hν hq (-x)
   have hm0' : m0 ≠ 0 := hm0
   intro w hw
   set α : ℂ := (w 0 / m0 + deriv w 0 / d) / 2
@@ -266,7 +281,7 @@ theorem mathieuMe_tendsto_or {q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (h�
         ¬ ∃ C : ℝ, ∀ x : ℝ, 0 ≤ x → ‖mathieuMe ν (-x) q‖ ≤ C) ∨
       (Tendsto (fun x : ℝ => mathieuMe ν (-x) q) atTop (𝓝 0) ∧
         ¬ ∃ C : ℝ, ∀ x : ℝ, 0 ≤ x → ‖mathieuMe ν x q‖ ≤ C) := by
-  obtain ⟨x₀, hx₀⟩ := p1b_exists_mathieuMe_ne_zero hν hq
+  obtain ⟨x₀, hx₀⟩ := exists_mathieuMe_ofReal_ne_zero hν hq
   set B : ℝ := ∑' m : ℤ, ‖mathieuMeCoeff ν q m‖
   have hper : ∀ z, mathieuMe ν (z + π) q = Complex.exp (π * I * ν) * mathieuMe ν z q :=
     fun z => mathieuMe_add_pi hν z q
@@ -276,10 +291,10 @@ theorem mathieuMe_tendsto_or {q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (h�
   · right
     have h1 : 1 < ‖Complex.exp (π * I * ν)‖ := by
       rw [hμ]; exact Real.one_lt_exp_iff.mpr (by nlinarith [Real.pi_pos])
-    refine ⟨?_, p1b_unbounded_pos (w := fun z => mathieuMe ν z q) hper h1 hx₀⟩
+    refine ⟨?_, unbounded_pos_of_pseudoperiodic_one_lt_norm (w := fun z => mathieuMe ν z q) hper h1 hx₀⟩
     have hb : ∀ x : ℝ, ‖mathieuMe ν (-(x : ℂ)) q‖ ≤ B * Real.exp (ν.im * x) := by
       intro x
-      have := p1b_norm_mathieuMe_le hν hq (-x)
+      have := norm_mathieuMe_ofReal_le hν hq (-x)
       simpa using this
     refine squeeze_zero_norm hb ?_
     have : Tendsto (fun x : ℝ => ν.im * x) atTop atBot :=
@@ -288,14 +303,14 @@ theorem mathieuMe_tendsto_or {q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (h�
   · left
     have h1 : ‖Complex.exp (π * I * ν)‖ < 1 := by
       rw [hμ]; exact Real.exp_lt_one_iff.mpr (by nlinarith [Real.pi_pos])
-    refine ⟨?_, p1b_unbounded_neg (w := fun z => mathieuMe ν z q) hper h1 hx₀⟩
-    refine squeeze_zero_norm (p1b_norm_mathieuMe_le hν hq) ?_
+    refine ⟨?_, unbounded_neg_of_pseudoperiodic_norm_lt_one (w := fun z => mathieuMe ν z q) hper h1 hx₀⟩
+    refine squeeze_zero_norm (norm_mathieuMe_ofReal_le hν hq) ?_
     have : Tendsto (fun x : ℝ => -(ν.im * x)) atTop atBot :=
       tendsto_neg_atTop_atBot.comp (tendsto_id.const_mul_atTop hpos)
     simpa using (Real.tendsto_exp_atBot.comp this).const_mul B
 
 /-- A nontrivial solution of Mathieu's equation does not vanish identically on `ℝ`. -/
-lemma p1b_exists_real_ne_zero {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w)
+private lemma exists_ofReal_ne_zero_of_isMathieuSolution {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w)
     (hw0 : w ≠ 0) : ∃ x : ℝ, w x ≠ 0 := by
   by_contra h
   push Not at h
@@ -312,20 +327,20 @@ lemma p1b_exists_real_ne_zero {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolut
   exact hw0 (by rw [this]; funext z; simp)
 
 /-- A Floquet solution with respect to `ν` with `ℑν ≠ 0` is unbounded on `ℝ`. -/
-lemma p1b_floquet_unbounded {a q ν : ℂ} {w : ℂ → ℂ} (hw : IsFloquetSolution a q ν w)
+private lemma unbounded_of_isFloquetSolution_im_ne_zero {a q ν : ℂ} {w : ℂ → ℂ} (hw : IsFloquetSolution a q ν w)
     (hν : ν.im ≠ 0) : ¬ ∃ C : ℝ, ∀ x : ℝ, ‖w x‖ ≤ C := by
   rintro ⟨C, hC⟩
   obtain ⟨hs, hw0, hper⟩ := hw
-  obtain ⟨x₀, hx₀⟩ := p1b_exists_real_ne_zero hs hw0
+  obtain ⟨x₀, hx₀⟩ := exists_ofReal_ne_zero_of_isMathieuSolution hs hw0
   have hμ : ‖Complex.exp (π * I * ν)‖ = Real.exp (-(π * ν.im)) := by
     rw [Complex.norm_exp]; congr 1; simp [Complex.mul_re]
   rcases lt_or_gt_of_ne hν with hneg | hpos
   · have h1 : 1 < ‖Complex.exp (π * I * ν)‖ := by
       rw [hμ]; exact Real.one_lt_exp_iff.mpr (by nlinarith [Real.pi_pos])
-    exact p1b_unbounded_pos hper h1 hx₀ ⟨C, fun x _ => hC x⟩
+    exact unbounded_pos_of_pseudoperiodic_one_lt_norm hper h1 hx₀ ⟨C, fun x _ => hC x⟩
   · have h1 : ‖Complex.exp (π * I * ν)‖ < 1 := by
       rw [hμ]; exact Real.exp_lt_one_iff.mpr (by nlinarith [Real.pi_pos])
-    exact p1b_unbounded_neg hper h1 hx₀ ⟨C, fun x _ => by simpa using hC (-x)⟩
+    exact unbounded_neg_of_pseudoperiodic_norm_lt_one hper h1 hx₀ ⟨C, fun x _ => by simpa using hC (-x)⟩
 
 /-- **Unstable pairs** (DLMF §28.17): if `a` has a characteristic exponent `ν` with
 `ℑν ≠ 0`, then `(a, q)` is unstable; indeed every nontrivial solution of 28.2.1 is unbounded
@@ -339,9 +354,9 @@ theorem not_isMathieuStable_of_im_ne_zero {a q ν : ℂ} (hc : IsMathieuCharExp 
       ¬ ∃ C : ℝ, ∀ x : ℝ, ‖w x‖ ≤ C := by
     intro w hw hw0
     rcases hw.isFloquet_or hw0 hc with h | h
-    · exact p1b_floquet_unbounded h hν
+    · exact unbounded_of_isFloquetSolution_im_ne_zero h hν
     · rintro ⟨C, hC⟩
-      refine p1b_floquet_unbounded h (by simpa using hν)
+      refine unbounded_of_isFloquetSolution_im_ne_zero h (by simpa using hν)
         ⟨C + ‖Complex.exp (I * ν * π)‖ * C, fun x => ?_⟩
       have h1 := hC (x + π)
       push_cast at h1
@@ -357,7 +372,7 @@ theorem not_isMathieuStable_of_im_ne_zero {a q ν : ℂ} (hc : IsMathieuCharExp 
   simp at this
 
 /-- A continuous `π`-pseudoperiodic function with multiplier of modulus `1` is bounded on `ℝ`. -/
-lemma p2x_bounded_of_pseudo {w : ℂ → ℂ} (hw : Continuous w) {μ : ℂ} (hμ : ‖μ‖ = 1)
+private lemma bounded_of_pseudoperiodic_norm_eq_one {w : ℂ → ℂ} (hw : Continuous w) {μ : ℂ} (hμ : ‖μ‖ = 1)
     (h : ∀ z, w (z + π) = μ * w z) : ∃ C : ℝ, ∀ x : ℝ, ‖w x‖ ≤ C := by
   set g : ℝ → ℝ := fun x => ‖w x‖
   have hg : Continuous g := continuous_norm.comp (hw.comp Complex.continuous_ofReal)
@@ -374,7 +389,7 @@ lemma p2x_bounded_of_pseudo {w : ℂ → ℂ} (hw : Continuous w) {μ : ℂ} (h�
 
 /-- Linear growth: if `p(z + π) = s p(z)`, `u(z + π) = s u(z) + B p(z)` with `s² = 1`, `B ≠ 0`
 and `p(x₀) ≠ 0`, then `u` is unbounded on `ℝ`. -/
-lemma p2x_unbounded_jordan {u p : ℂ → ℂ} {s B : ℂ} (hs : s ^ 2 = 1)
+private lemma unbounded_of_pseudoperiodic_jordan {u p : ℂ → ℂ} {s B : ℂ} (hs : s ^ 2 = 1)
     (hp : ∀ z, p (z + π) = s * p z) (hu : ∀ z, u (z + π) = s * u z + B * p z) (hB : B ≠ 0)
     {x₀ : ℝ} (hx₀ : p x₀ ≠ 0) : ¬ ∃ C : ℝ, ∀ x : ℝ, ‖u x‖ ≤ C := by
   have hpn : ∀ n : ℕ, ∀ z, p (z + n * π) = s ^ n * p z := by
@@ -416,11 +431,11 @@ lemma p2x_unbounded_jordan {u p : ℂ → ℂ} {s B : ℂ} (hs : s ^ 2 = 1)
 
 /-- For real `q ≠ 0` and real `a`, the pair `(a, q)` is stable iff `|w_I(π; a, q)| < 1`
 (DLMF §28.17; the boundary cases `w_I(π) = ±1` are unstable by Ince's theorem). -/
-lemma p2x_stable_iff {a q : ℝ} (hq : q ≠ 0) :
+private lemma isMathieuStable_iff_norm_mathieuWI_pi_lt_one {a q : ℝ} (hq : q ≠ 0) :
     IsMathieuStable a q ↔ ‖mathieuWI a q π‖ < 1 := by
   have hq' : (q : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hq
   set c := mathieuWI (a : ℂ) (q : ℂ) π with hc
-  have hcr : c = (c.re : ℂ) := (Complex.conj_eq_iff_re.mp (p1a1_mathieuWI_real a q π)).symm
+  have hcr : c = (c.re : ℂ) := (Complex.conj_eq_iff_re.mp (conj_mathieuWI_ofReal a q π)).symm
   obtain ⟨h1, h10, h11⟩ := mathieuWI_spec (a : ℂ) (q : ℂ)
   obtain ⟨h2, h20, h21⟩ := mathieuWII_spec (a : ℂ) (q : ℂ)
   constructor
@@ -463,17 +478,17 @@ lemma p2x_stable_iff {a q : ℝ} (hq : q ≠ 0) :
         intro z; rw [mathieuWII_add_pi, hD]; ring
       by_cases hB : B = 0
       · by_cases hC : C = 0
-        · refine p2x_not_coexist (a := (a : ℂ)) hq' (fun z => ?_) (fun z => ?_)
+        · refine not_mathieuWI_mathieuWII_two_pi_periodic (a := (a : ℂ)) hq' (fun z => ?_) (fun z => ?_)
           · rw [show z + 2 * π = z + π + π by ring, eI, eI, hB]
             linear_combination (mathieuWI (a : ℂ) (q : ℂ) z) * hs
           · rw [show z + 2 * π = z + π + π by ring, eII, eII, hC]
             linear_combination (mathieuWII (a : ℂ) (q : ℂ) z) * hs
-        · exact p2x_unbounded_jordan hs (fun z => by rw [eI, hB]; ring) eII hC
+        · exact unbounded_of_pseudoperiodic_jordan hs (fun z => by rw [eI, hB]; ring) eII hC
             (x₀ := 0) (by simp [h10]) (hst _ h2)
       · have hC : C = 0 := (mul_eq_zero.mp hBC).resolve_left hB
-        obtain ⟨x₀, hx₀⟩ := p1b_exists_real_ne_zero h2 (fun h => by
+        obtain ⟨x₀, hx₀⟩ := exists_ofReal_ne_zero_of_isMathieuSolution h2 (fun h => by
           have := congrArg (fun f => deriv f 0) h; simp [h21] at this)
-        exact p2x_unbounded_jordan hs (fun z => by rw [eII, hC]; ring) eI hB hx₀ (hst _ h1)
+        exact unbounded_of_pseudoperiodic_jordan hs (fun z => by rw [eII, hC]; ring) eI hB hx₀ (hst _ h1)
   · intro hlt
     set r := c.re
     have hr : |r| < 1 := by rw [hcr, Complex.norm_real, Real.norm_eq_abs] at hlt; exact hlt
@@ -507,14 +522,14 @@ lemma p2x_stable_iff {a q : ℝ} (hq : q ≠ 0) :
       rw [e, ← Complex.ofReal_sin]
       exact mul_ne_zero (mul_ne_zero two_ne_zero Complex.I_ne_zero)
         (Complex.ofReal_ne_zero.mpr hsin)
-    obtain ⟨Cu, hCu⟩ := p2x_bounded_of_pseudo hu.differentiable.continuous
+    obtain ⟨Cu, hCu⟩ := bounded_of_pseudoperiodic_norm_eq_one hu.differentiable.continuous
       (Complex.norm_exp_ofReal_mul_I θ) hup
-    obtain ⟨Cv, hCv⟩ := p2x_bounded_of_pseudo hv.differentiable.continuous
+    obtain ⟨Cv, hCv⟩ := bounded_of_pseudoperiodic_norm_eq_one hv.differentiable.continuous
       (by rw [show -(θ : ℂ) * I = ((-θ : ℝ) : ℂ) * I by push_cast; ring]
           exact Complex.norm_exp_ofReal_mul_I _) hvp
     have hW : u 0 * deriv v 0 - deriv u 0 * v 0 ≠ 0 := by
       intro hW
-      obtain ⟨k, hk⟩ := p2x_eq_const_mul_of_wronskian hu hu0 hv hW
+      obtain ⟨k, hk⟩ := exists_eq_const_mul_of_wronskian_eq_zero hu hu0 hv hW
       apply hv0; funext z
       have e1 := hvp z
       rw [hk] at e1
@@ -526,7 +541,7 @@ lemma p2x_stable_iff {a q : ℝ} (hq : q ≠ 0) :
       rw [hk]; simpa using this
     intro w hw
     obtain ⟨α, β, hwe⟩ : ∃ α β : ℂ, w = fun z => α * u z + β * v z :=
-      ⟨_, _, p2x_eq_comb_of_wronskian hu hv hW hw⟩
+      ⟨_, _, eq_lincomb_of_wronskian_ne_zero hu hv hW hw⟩
     refine ⟨‖α‖ * Cu + ‖β‖ * Cv, fun x => ?_⟩
     rw [hwe]
     refine (norm_add_le _ _).trans ?_
@@ -537,7 +552,7 @@ lemma p2x_stable_iff {a q : ℝ} (hq : q ≠ 0) :
 
 /-- **The stability chart** (DLMF §28.17, Figure 28.17.1): for real `a` and real `q ≠ 0` the
 stable pairs form an open set whose boundary consists of points on the characteristic curves
-`a = a_n(q)` and `a = b_n(q)`. Proved from `p2x_stable_iff` (stability iff `|w_I(π)| < 1`, by
+`a = a_n(q)` and `a = b_n(q)`. Proved from `isMathieuStable_iff_norm_mathieuWI_pi_lt_one` (stability iff `|w_I(π)| < 1`, by
 Ince's theorem), the continuity of `(a, q) ↦ w_I(π; a, q)` (`differentiable_mathieuWI_mathieuWII`)
 and Table 28.2.1 (`exists_solution_neumann_iff` and its analogues). -/
 @[dlmf 28.17]
@@ -554,8 +569,8 @@ theorem isOpen_mathieuStable_and_frontier :
       {p : ℝ × ℝ | p.2 ≠ 0 ∧ ‖F p‖ < 1} := by
     ext p
     simp only [mem_ofPred_eq]
-    exact ⟨fun h => ⟨h.1, (p2x_stable_iff h.1).mp h.2⟩,
-      fun h => ⟨h.1, (p2x_stable_iff h.1).mpr h.2⟩⟩
+    exact ⟨fun h => ⟨h.1, (isMathieuStable_iff_norm_mathieuWI_pi_lt_one h.1).mp h.2⟩,
+      fun h => ⟨h.1, (isMathieuStable_iff_norm_mathieuWI_pi_lt_one h.1).mpr h.2⟩⟩
   have hopen : IsOpen {p : ℝ × ℝ | p.2 ≠ 0 ∧ ‖F p‖ < 1} :=
     (isOpen_ne_fun continuous_snd continuous_const).inter
       (isOpen_lt (continuous_norm.comp hF) continuous_const)
@@ -574,7 +589,7 @@ theorem isOpen_mathieuStable_and_frontier :
   obtain ⟨a, q⟩ := p
   simp only [mem_ofPred_eq] at hp2 ⊢
   have hcr : F (a, q) = ((F (a, q)).re : ℂ) :=
-    (Complex.conj_eq_iff_re.mp (p1a1_mathieuWI_real a q π)).symm
+    (Complex.conj_eq_iff_re.mp (conj_mathieuWI_ofReal a q π)).symm
   obtain ⟨g1, g10, g11⟩ := mathieuWI_spec (a : ℂ) (q : ℂ)
   obtain ⟨g2, g20, g21⟩ := mathieuWII_spec (a : ℂ) (q : ℂ)
   have ne1 : mathieuWI (a : ℂ) (q : ℂ) ≠ 0 := fun h => by simpa [g10] using congrFun h 0

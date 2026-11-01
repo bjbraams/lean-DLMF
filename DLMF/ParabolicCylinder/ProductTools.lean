@@ -9,10 +9,14 @@ public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 
 /-!
-# Initial integral for the parabolic-cylinder product formula
+# Initial value for the parabolic cylinder product integral (DLMF 12.12.4)
 
-The substitution `x = exp (-4t)` evaluates the hyperbolic kernel at argument zero
-as a beta integral. This supplies initial data for DLMF 12.12.4.
+The substitution `x = exp (-4t)` evaluates the hyperbolic kernel of DLMF 12.12.4 at argument
+zero as a beta integral. This supplies initial data for the proof of DLMF 12.12.4.
+
+## Main results
+
+* `pcfIntegral4_base_beta`: the hyperbolic weight of DLMF 12.12.4 as a beta integral.
 -/
 
 @[expose] public noncomputable section

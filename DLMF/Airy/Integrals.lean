@@ -9,8 +9,8 @@ public import DLMF.Airy.Integrals.PrimitivesAndLaplace
 public import DLMF.Airy.Integrals.HalfLineLaplace
 
 /-!
-# Airy indefinite integrals and transforms, DLMF §9.10
+# Integrals of Airy functions (DLMF §9.10)
 
-Statements acquired from the NIST DLMF, checked 2026-10-19.
-New statements are initially admitted; existing proved Airy results are retained.
+Indefinite integrals and primitives of the Airy functions, their improper integrals and
+Laplace transforms over the half-line.
 -/

@@ -10,13 +10,36 @@ public import DLMF.Core.Framework
 public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
 
 /-!
-# Continued fractions and integrals: DLMF §§4.9–4.11
+# Continued fractions and integrals of logarithms and exponentials
 
-Continued fractions use continuants from `DLMF.Core.Framework`, so an intermediate
-zero denominator is not prematurely interpreted as a terminating nested quotient.
-Convergence means convergence of the finite convergents. Indefinite integrals are
-stated as derivative identities on their full branch domains. Section 4.11 only
-contains bibliographic references and has no mathematical statement to acquire.
+This file proves the continued fractions of DLMF §4.9 and the antiderivatives and definite
+integrals of DLMF §4.10. DLMF §4.11 contains only bibliographic references.
+
+## Main definitions
+
+* `expPartialSum`: the exponential polynomial `eₙ(z) = ∑_{k ≤ n} zᵏ/k!` (DLMF 4.9.5, 8.4.11).
+
+## Main results
+
+* `log_one_add_continuedFraction`, `log_ratio_continuedFraction`: continued fractions for the
+  logarithm (DLMF 4.9.1–4.9.2).
+* `exp_continuedFraction_one`, `exp_continuedFraction_two`, `exp_continuedFraction_three`:
+  continued fractions for the exponential, for every complex argument (DLMF 4.9.3).
+* `exp_remainder_continuedFraction`: the remainder fraction (DLMF 4.9.4).
+* `log_primitive`, `log_mul_primitive`, `cpow_log_primitive`, `log_log_primitive`:
+  antiderivatives involving logarithms (DLMF 4.10.1–4.10.4).
+* `integral_log_div_one_sub`, `integral_log_div_one_add`: improper logarithmic integrals
+  (DLMF 4.10.5–4.10.6).
+* `exp_primitive`, `inv_exp_add_primitive`, `exp_ratio_primitive`: exponential antiderivatives
+  (DLMF 4.10.8–4.10.10).
+* `integral_x_exp_div_exp_sub_one`, `integral_inv_exp_add_one`: DLMF 4.10.12–4.10.13.
+
+## Implementation notes
+
+Continued fractions use continuants from `DLMF.Core.Framework`, so an intermediate zero
+denominator is not interpreted as a terminating nested quotient; convergence means convergence of
+the finite convergents. Indefinite integrals are stated as derivative identities on their full
+branch domains.
 -/
 
 @[expose] public section
@@ -67,8 +90,9 @@ theorem exp_continuedFraction_three (z : ℂ) :
       (fun k => if k = 0 then 1 - z / 2 else 1) 0 N) atTop (𝓝 (Complex.exp z)) := by
   sorry
 
-/-- The exponential polynomial of degree n. -/
-@[dlmf 4.9.E5]
+/-- The exponential polynomial of degree `n`, `eₙ(z) = ∑_{k ≤ n} zᵏ/k!` (DLMF 4.9.5; the finite
+exponential sum of DLMF 8.4.11). -/
+@[dlmf 4.9.E5, dlmf 8.4.E11]
 def expPartialSum (n : ℕ) (z : ℂ) : ℂ := ∑ k ∈ range (n + 1), z ^ k / k.factorial
 
 /-- The full n-parameter remainder fraction for every complex argument. -/
@@ -121,7 +145,7 @@ theorem log_log_primitive {z : ℂ} (hz : z ∈ Complex.slitPlane) (hl : Complex
     (Complex.hasDerivAt_log hl).comp z (Complex.hasDerivAt_log hz)
 
 /-- The dilogarithm kernel is interval integrable on `[0,1]`, up to its logarithmic endpoint. -/
-lemma logR4_dilogKernel_intervalIntegrable :
+private lemma intervalIntegrable_dilogKernel_zero_one :
     IntervalIntegrable DLMF.Polylog.dilogKernel volume 0 1 := by
   have hcont := DLMF.Polylog.continuousOn_re_polylogSeries_two.mono
     (Icc_subset_Icc (by norm_num : (-1:ℝ) ≤ 0) le_rfl)
@@ -136,7 +160,7 @@ lemma logR4_dilogKernel_intervalIntegrable :
     exact DLMF.Polylog.dilogKernel_nonneg (abs_lt.mpr ⟨by linarith [ht.1], ht.2⟩)
 
 /-- Reflection of the logarithmic integrand into the dilogarithm kernel. -/
-lemma logR4_log_div_one_sub_eq (x : ℝ) (hx : x ≠ 0) :
+private lemma log_one_sub_div_eq_neg_dilogKernel (x : ℝ) (hx : x ≠ 0) :
     Real.log (1-x)/(1-(1-x)) = -DLMF.Polylog.dilogKernel x := by
   rw [DLMF.Polylog.dilogKernel_of_ne hx]; ring
 
@@ -148,11 +172,11 @@ theorem integral_log_div_one_sub  :
   have hae : ∀ᵐ x ∂volume, x ∈ Set.uIoc (0:ℝ) 1 →
       (fun x => Real.log (1-x)/(1-(1-x))) x = (fun x => -DLMF.Polylog.dilogKernel x) x := by
     filter_upwards [compl_mem_ae_iff.2 (measure_singleton (0 : ℝ))] with x hx _
-    exact logR4_log_div_one_sub_eq x (by simpa using hx)
+    exact log_one_sub_div_eq_neg_dilogKernel x (by simpa using hx)
   have hint : IntervalIntegrable (fun x => Real.log (1-x)/(1-(1-x))) volume 0 1 :=
-    (logR4_dilogKernel_intervalIntegrable.neg).congr_ae (by
+    (intervalIntegrable_dilogKernel_zero_one.neg).congr_ae (by
       filter_upwards [compl_mem_ae_iff.2 (measure_singleton (0 : ℝ))] with x hx
-      exact (logR4_log_div_one_sub_eq x (by simpa using hx)).symm)
+      exact (log_one_sub_div_eq_neg_dilogKernel x (by simpa using hx)).symm)
   have e := intervalIntegral.integral_comp_sub_left (fun t : ℝ => Real.log t / (1 - t)) (1:ℝ)
     (a := 0) (b := 1)
   simp only [sub_zero, sub_self] at e

@@ -10,11 +10,33 @@ public import DLMF.Elementary.Hyperbolic.IdentitiesAndSeries
 /-!
 # Hyperbolic addition formulas and products
 
-Addition and multiplication identities, Cartesian forms, infinite products and partial
-fractions.
+This file proves the addition and multiplication identities, Cartesian forms, infinite products
+and partial fractions of the hyperbolic functions (DLMF §§4.35–4.36).
 
-Source references and common attribution are retained in
-`DLMF.Elementary.Hyperbolic`.
+## Main results
+
+* `tanh_add`, `tanh_sub`, `coth_add`, `coth_sub`: addition formulas (DLMF 4.35.3–4.35.4).
+* `sinh_add_sinh`, `sinh_sub_sinh`, `cosh_add_cosh`, `cosh_sub_cosh`, `tanh_add_tanh`,
+  `coth_add_coth`: sums and differences (DLMF 4.35.5–4.35.10).
+* `sech_sq`, `csch_sq`: DLMF 4.35.12–4.35.13.
+* `two_sinh_mul_sinh`, `two_cosh_mul_cosh`, `two_sinh_mul_cosh`: products
+  (DLMF 4.35.14–4.35.16).
+* `sinh_half_sq`, `cosh_half_sq`, `tanh_half_sq`, `sinh_half_continued_root`,
+  `cosh_half_continued_root`, `tanh_half_continued_root`: half-argument formulas
+  (DLMF 4.35.20–4.35.22).
+* `sinh_two_mul_tanh`, `cosh_two_mul_forms`, `tanh_two_mul`, `sinh_four_mul`, `cosh_four_mul`:
+  multiple arguments (DLMF 4.35.26–4.35.32).
+* `cosh_add_sinh_int_mul`: De Moivre's formula (DLMF 4.35.33).
+* `sinh_cartesian`, `cosh_cartesian`, `tanh_cartesian`, `coth_cartesian`, `norm_sinh_cartesian`,
+  `norm_cosh_cartesian`, `norm_tanh_cartesian`: Cartesian forms (DLMF 4.35.34–4.35.40).
+* `hasProd_sinh`, `hasProd_cosh`: infinite products (DLMF 4.36.1–4.36.2).
+* `hasSum_coth_partialFractions`, `hasSum_csch_sq`, `hasSum_csch_partialFractions`: partial
+  fractions (DLMF 4.36.3–4.36.5).
+
+## Implementation notes
+
+In the continued half-argument formulas the square root is selected on the positive real axis
+and continued analytically.
 -/
 
 @[expose] public noncomputable section
@@ -418,7 +440,7 @@ theorem norm_tanh_cartesian (z : ℂ) : ‖Complex.tanh z‖=Real.sqrt ((Real.co
 
 /-- Two analytic functions on a preconnected open set with equal squares agree everywhere once
 they agree at one point where they do not vanish. -/
-lemma hypR4_sq_eq_continuation {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
+lemma eqOn_of_sq_eq_of_analyticOnNhd {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
     {r s : ℂ → ℂ} (hr : AnalyticOnNhd ℂ r U) (hs : AnalyticOnNhd ℂ s U)
     (hsq : ∀ z ∈ U, r z^2 = s z^2) {x : ℂ} (hx : x ∈ U) (hrx : r x = s x) (hsx : s x ≠ 0) :
     ∀ z ∈ U, r z = s z := by
@@ -439,7 +461,7 @@ theorem sinh_half_continued_root {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected
     ∀ z ∈ U, r z=Complex.sinh (z/2) := by
   have hs : AnalyticOnNhd ℂ (fun z => Complex.sinh (z/2)) U := fun z _ =>
     (Complex.differentiable_sinh.comp (differentiable_id.div_const 2)).analyticAt z
-  refine hypR4_sq_eq_continuation hU hc.isPreconnected hr hs
+  refine eqOn_of_sq_eq_of_analyticOnNhd hU hc.isPreconnected hr hs
     (fun z hz => by rw [hsq z hz, sinh_half_sq]) hxU hanchor ?_
   rw [show (x:ℂ)/2 = ((x/2:ℝ):ℂ) by push_cast; ring, ← Complex.ofReal_sinh]
   exact_mod_cast (Real.sinh_pos_iff.mpr (by linarith)).ne'
@@ -452,7 +474,7 @@ theorem cosh_half_continued_root {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected
     ∀ z ∈ U, r z=Complex.cosh (z/2) := by
   have hs : AnalyticOnNhd ℂ (fun z => Complex.cosh (z/2)) U := fun z _ =>
     (Complex.differentiable_cosh.comp (differentiable_id.div_const 2)).analyticAt z
-  refine hypR4_sq_eq_continuation hU hc.isPreconnected hr hs
+  refine eqOn_of_sq_eq_of_analyticOnNhd hU hc.isPreconnected hr hs
     (fun z hz => by rw [hsq z hz, cosh_half_sq]) hxU hanchor ?_
   rw [show (x:ℂ)/2 = ((x/2:ℝ):ℂ) by push_cast; ring, ← Complex.ofReal_cosh]
   exact_mod_cast (Real.cosh_pos _).ne'
@@ -473,7 +495,7 @@ theorem tanh_half_continued_root {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected
       funext w; simp [Complex.tanh_eq_sinh_div_cosh]
     rw [hf]
     exact h1.div h2 (hpole z hz)
-  refine hypR4_sq_eq_continuation hU hc.isPreconnected hr hs
+  refine eqOn_of_sq_eq_of_analyticOnNhd hU hc.isPreconnected hr hs
     (fun z hz => by rw [hsq z hz, tanh_half_sq (hpole z hz)]) hxU hanchor ?_
   rw [show (x:ℂ)/2 = ((x/2:ℝ):ℂ) by push_cast; ring, ← Complex.ofReal_tanh]
   have : 0 < Real.tanh (x/2) := by
@@ -494,7 +516,7 @@ theorem hasProd_cosh (z : ℂ) : HasProd (fun n : ℕ => 1+4*z^2/(((2*n+1:ℂ)^2
   exact Complex.hasProd_cosh_product z
 
 /-- Off the imaginary lattice `πiℤ`, the rotated point `iz/π` avoids the integers. -/
-private lemma hypR4_rot_mem {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) :
+private lemma I_mul_div_pi_mem_integerComplement {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) :
     I*z/π ∈ Complex.integerComplement := by
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   rintro ⟨n, hn⟩
@@ -504,7 +526,7 @@ private lemma hypR4_rot_mem {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) :
   linear_combination (-I)*h + z*Complex.I_sq
 
 /-- The Mittag-Leffler cotangent term at the rotated point `iz/π`. -/
-private lemma hypR4_cotTerm_rot {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) (n : ℕ) :
+private lemma cotTerm_I_mul_div_pi {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) (n : ℕ) :
     cotTerm (I*z/π) n = (-2*I*z*π)*(1/(z^2+(n+1:ℂ)^2*π^2)) := by
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   have h1 : I*z - (n+1)*π ≠ 0 := by
@@ -530,10 +552,10 @@ theorem hasSum_coth_partialFractions {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π
   have hz0 : z ≠ 0 := by simpa using hz 0
   have hs : Complex.sinh z ≠ 0 := fun h => by
     obtain ⟨k, hk⟩ := (sinh_zeros z).mp h; exact hz k hk
-  have hc := (Complex.hasSum_cotTerm (hypR4_rot_mem hz)).div_const (-2*I*z*π)
+  have hc := (Complex.hasSum_cotTerm (I_mul_div_pi_mem_integerComplement hz)).div_const (-2*I*z*π)
   have hk : (-2*I*z*π) ≠ 0 := by simp [hz0, hπ, Complex.I_ne_zero]
   convert hc using 1
-  · funext n; rw [hypR4_cotTerm_rot hz n]; field_simp
+  · funext n; rw [cotTerm_I_mul_div_pi hz n]; field_simp
   · rw [show (π:ℂ)*(I*z/π) = z*I by field_simp, Complex.cot, Complex.cos_mul_I,
       Complex.sin_mul_I, coth]
     field_simp
@@ -569,10 +591,10 @@ theorem hasSum_csch_partialFractions {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π
   have hz0 : z ≠ 0 := by simpa using hz 0
   have hs : Complex.sinh z ≠ 0 := fun h => by
     obtain ⟨k, hk⟩ := (sinh_zeros z).mp h; exact hz k hk
-  have hc := (Complex.hasSum_csc_partial_fraction (hypR4_rot_mem hz)).div_const (-2*I*z*π)
+  have hc := (Complex.hasSum_csc_partial_fraction (I_mul_div_pi_mem_integerComplement hz)).div_const (-2*I*z*π)
   have hk : (-2*I*z*π) ≠ 0 := by simp [hz0, hπ, Complex.I_ne_zero]
   convert hc using 1
-  · funext n; rw [hypR4_cotTerm_rot hz n]; field_simp
+  · funext n; rw [cotTerm_I_mul_div_pi hz n]; field_simp
   · rw [show (π:ℂ)*(I*z/π) = z*I by field_simp, Complex.sin_mul_I, csch]
     field_simp
     linear_combination (z - Complex.sinh z) * Complex.I_sq

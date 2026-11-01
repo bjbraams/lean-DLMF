@@ -7,16 +7,38 @@ module
 
 public import DLMF.Airy.Properties
 public import DLMF.Core.Framework
+public import DLMF.IncompleteGamma.Basic
 
 /-!
-# Conventions for the DLMF Airy acquisition
+# Conventions for the Airy functions
+
+Real restrictions of the Airy functions, oriented ray, arc and contour integrals, principal
+values, the Airy variable `ζ` with its logarithm, the sector filter, Bessel functions on the
+logarithmic plane and numerically satisfactory pairs, as used throughout DLMF §9.2 and
+§§9.4–9.14.
+
+## Main definitions
+
+* `airyAiReal`, `airyBiReal`, `airyAiDerivReal`, `airyBiDerivReal`: restrictions to `ℝ`.
+* `improperAtBot`, `rayIntegral`, `arcIntegral`, `contourIntegral`: improper and contour
+  integrals.
+* `principalValueIoi`, `HasPrincipalValueIoi`: Cauchy principal values on the half-line.
+* `airyZetaComplex`: the principal Airy change of variable `ζ = (2/3) z^{3/2}`
+  (DLMF 9.6.1, 9.7.1).
+* `airyLogZeta`: the logarithm of `ζ` inherited from the logarithm of `z`.
+* `airySector`: uniform approach to infinity in a closed sector.
+* `airyBesselIOnLog`, `airyBesselJOnLog`, `airyBesselKOnLog`, `airyBesselYOnLog`,
+  `airyHankel1OnLog`, `airyHankel2OnLog`: Bessel functions on the logarithmic plane.
+* `IsWellConditionedPairOn`: a quantitative notion of a numerically satisfactory pair.
+
+## Implementation notes
 
 Oscillatory integrals are stated as limits of finite integrals, not as totalized Bochner
 integrals. Complex powers of the Bessel argument use an explicit logarithmic coordinate,
 so that the substitution `ζ = 2 z^(3/2)/3` retains its analytically continued branch.
 The sector filter contains the whole closed sector, hence Big-O statements are uniform
-there. These conventions support DLMF §§9.2 and 9.4–9.14. Improper convergence and
-straight-segment primitives use the canonical definitions in `DLMF.Core.Framework`.
+there. Improper convergence and straight-segment primitives use the canonical definitions
+in `DLMF.Core.Framework`.
 -/
 
 @[expose] public noncomputable section
@@ -82,12 +104,6 @@ def airyBesselYOnLog (ν w : ℂ) : ℂ :=
 def airyHankel1OnLog (ν w : ℂ) : ℂ := airyBesselJOnLog ν w + I * airyBesselYOnLog ν w
 /-- Hankel H2 on the logarithmic plane, at nonintegral order. -/
 def airyHankel2OnLog (ν w : ℂ) : ℂ := airyBesselJOnLog ν w - I * airyBesselYOnLog ν w
-
-/-- Upper incomplete Gamma continued on the logarithmic plane, including integral parameters.
-The added segment integrates its entire logarithmic derivative, without subtracting Gamma poles. -/
-def airyUpperGammaOnLog (s w : ℂ) : ℂ :=
-  DLMF.Confluent.upperIncGamma s (exp w) -
-    segmentIntegral (fun u => exp (s * u - exp u)) (log (exp w)) w
 
 /-- A basis is uniformly separated in its value/derivative matrix after column normalization.
 This quantitative version of numerical independence also accommodates oscillatory pairs. -/

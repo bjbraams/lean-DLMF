@@ -16,10 +16,15 @@ public import Mathlib.NumberTheory.GaussSum
 /-!
 # DLMF §§25.11–25.15: results already in Mathlib
 
-Upstream pointers for the Hurwitz zeta function (Mathlib's parameter is in `ℝ/ℤ`, so it is DLMF's
-`ζ(s, a)` only for `0 < a ≤ 1`), the periodic zeta function (`HurwitzZeta.expZeta`, DLMF's
-`F(x, s)`) and Dirichlet `L`-functions (`DirichletCharacter.LFunction`). The pointers for 25.11.1
-and 25.11.2 are in `DLMF.Core.UpstreamElementary`.
+`dlmf_upstream` pointers from DLMF §§25.11–25.15 to Mathlib: the Hurwitz zeta function, the
+periodic zeta function (`HurwitzZeta.expZeta`, DLMF's `F(x, s)`) and Dirichlet `L`-functions
+(`DirichletCharacter.LFunction`). The pointers for 25.11.1 and 25.11.2 are in
+`DLMF.Core.UpstreamElementary`.
+
+## Implementation notes
+
+Mathlib's Hurwitz parameter lies in `ℝ/ℤ`, so Mathlib's Hurwitz zeta function is DLMF's
+`ζ(s, a)` only for `0 < a ≤ 1`.
 -/
 
 /-! ### §25.11 Hurwitz zeta function -/

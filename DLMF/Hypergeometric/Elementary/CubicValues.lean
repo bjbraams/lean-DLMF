@@ -8,13 +8,17 @@ module
 public import DLMF.Hypergeometric.Elementary.AlgebraicValues
 
 /-!
-# Gauss values at cubic and sixth-root arguments
+# Values of `₂F₁` at sixth-root arguments and digamma values (DLMF §15.4)
 
-Exact evaluations at cubic and sixth-root arguments, obtained through contiguous identities and
-branch calculations.
+Exact evaluations obtained through contiguous identities and branch calculations.
 
-Source references and common attribution are retained in
-`DLMF.Hypergeometric.Elementary`.
+## Main results
+
+* `alternating_digamma`, `half_argument_digamma`: digamma values, DLMF 15.4.27; the alternating
+  series is only conditionally convergent and is stated through ordered partial sums.
+* `value_sixth_root`, `value_sixth_root_contiguous`: values at `e^{iπ/3}`, DLMF 15.4.33–15.4.34.
+
+See `DLMF.Hypergeometric.Elementary` for the conventions.
 -/
 
 @[expose] public section
@@ -140,12 +144,12 @@ theorem value_sixth_root
       exp (Real.log 2) / ((Real.sqrt 3 : ℝ) * (2 : ℂ) ^ (1 - 2 * (A + 1 / 3))) := by
     rw [eq_div_iff (mul_ne_zero h3ne h2ne)]
     have e1 : (16 / 27 : ℂ) ^ ((3 * a + 1) / 6) = exp (Real.log (16 / 27) * ((3 * a + 1) / 6)) := by
-      have := ofReal_cpow_eq_exp_log (u := 16 / 27) (by norm_num) ((3 * a + 1) / 6)
+      have := Complex.ofReal_cpow_eq_exp (q := 16 / 27) (by norm_num) ((3 * a + 1) / 6)
       push_cast at this; exact this
     have e2 : (4 : ℂ) ^ (-2 * A) = exp (Real.log 4 * (-2 * A)) := by
-      have := ofReal_cpow_eq_exp_log (u := 4) (by norm_num) (-2 * A); push_cast at this; exact this
+      have := Complex.ofReal_cpow_eq_exp (q := 4) (by norm_num) (-2 * A); push_cast at this; exact this
     have e3 : (2 : ℂ) ^ (1 - 2 * (A + 1 / 3)) = exp (Real.log 2 * (1 - 2 * (A + 1 / 3))) := by
-      have := ofReal_cpow_eq_exp_log (u := 2) (by norm_num) (1 - 2 * (A + 1 / 3))
+      have := Complex.ofReal_cpow_eq_exp (q := 2) (by norm_num) (1 - 2 * (A + 1 / 3))
       push_cast at this; exact this
     have e4 : ((Real.sqrt 3 : ℝ) : ℂ) = exp (Real.log 3 / 2) := by
       rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos (by norm_num), ofReal_exp]; push_cast; ring_nf
@@ -211,14 +215,14 @@ private lemma value_sixth_root_contiguous_pow₁ (a A : ℂ) (hA : A = 1 / 3 + a
       exp ((Lr : ℂ) * (-(3 * a))) * (4 : ℂ) ^ (-2 * A) * exp ((Real.log 2 : ℝ) : ℂ) *
         (3 : ℂ) ^ ((3 * a + 1) / 2) := by
   have e1 : (2 : ℂ) ^ (2 * a) = exp (Real.log 2 * (2 * a)) := by
-    have := ofReal_cpow_eq_exp_log (u := 2) (by norm_num) (2 * a); push_cast at this; exact this
+    have := Complex.ofReal_cpow_eq_exp (q := 2) (by norm_num) (2 * a); push_cast at this; exact this
   have e2 : (2 : ℂ) ^ (1 - 2 * (A + 1 / 3)) = exp (Real.log 2 * (1 - 2 * (A + 1 / 3))) := by
-    have := ofReal_cpow_eq_exp_log (u := 2) (by norm_num) (1 - 2 * (A + 1 / 3))
+    have := Complex.ofReal_cpow_eq_exp (q := 2) (by norm_num) (1 - 2 * (A + 1 / 3))
     push_cast at this; exact this
   have e3 : (4 : ℂ) ^ (-2 * A) = exp (Real.log 4 * (-2 * A)) := by
-    have := ofReal_cpow_eq_exp_log (u := 4) (by norm_num) (-2 * A); push_cast at this; exact this
+    have := Complex.ofReal_cpow_eq_exp (q := 4) (by norm_num) (-2 * A); push_cast at this; exact this
   have e4 : (3 : ℂ) ^ ((3 * a + 1) / 2) = exp (Real.log 3 * ((3 * a + 1) / 2)) := by
-    have := ofReal_cpow_eq_exp_log (u := 3) (by norm_num) ((3 * a + 1) / 2)
+    have := Complex.ofReal_cpow_eq_exp (q := 3) (by norm_num) ((3 * a + 1) / 2)
     push_cast at this; exact this
   have e5 : ((Real.sqrt 3 : ℝ) : ℂ) = exp (Real.log 3 / 2) := by
     rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos (by norm_num), ofReal_exp]; push_cast; ring_nf
@@ -237,13 +241,13 @@ private lemma value_sixth_root_contiguous_pow₁ (a A : ℂ) (hA : A = 1 / 3 + a
 private lemma value_sixth_root_contiguous_pow₂ (A : ℂ) :
     4 * (4 : ℂ) ^ (-(2 / 3) : ℂ) * (2 : ℂ) ^ (1 - 2 * (A + 1 / 3)) = (2 : ℂ) ^ (1 - 2 * A) := by
   have e2 : (2 : ℂ) ^ (1 - 2 * (A + 1 / 3)) = exp (Real.log 2 * (1 - 2 * (A + 1 / 3))) := by
-    have := ofReal_cpow_eq_exp_log (u := 2) (by norm_num) (1 - 2 * (A + 1 / 3))
+    have := Complex.ofReal_cpow_eq_exp (q := 2) (by norm_num) (1 - 2 * (A + 1 / 3))
     push_cast at this; exact this
   have e2' : (2 : ℂ) ^ (1 - 2 * A) = exp (Real.log 2 * (1 - 2 * A)) := by
-    have := ofReal_cpow_eq_exp_log (u := 2) (by norm_num) (1 - 2 * A)
+    have := Complex.ofReal_cpow_eq_exp (q := 2) (by norm_num) (1 - 2 * A)
     push_cast at this; exact this
   have e3 : (4 : ℂ) ^ (-(2 / 3) : ℂ) = exp (Real.log 4 * (-(2 / 3))) := by
-    have := ofReal_cpow_eq_exp_log (u := 4) (by norm_num) (-(2 / 3)); push_cast at this; exact this
+    have := Complex.ofReal_cpow_eq_exp (q := 4) (by norm_num) (-(2 / 3)); push_cast at this; exact this
   have e4 : (4 : ℂ) = exp (Real.log 4) := by
     rw [← ofReal_exp, Real.exp_log (by norm_num)]; push_cast; ring
   rw [e2, e2', e3]

@@ -13,9 +13,18 @@ public import Mathlib.Topology.Order.Basic
 
 The derivative-quotient limit implies the function-quotient limit when the absolute value
 of the denominator tends to infinity at a punctured finite point. No limit of the numerator
-is required. Cauchy's mean value theorem bounds increments relative to the denominator;
-fixed anchors on the two sides of the puncture then contribute vanishing constant terms.
-The proof uses Mathlib's `exists_ratio_deriv_eq_ratio_slope` and metric/filter APIs.
+is required.
+
+## Main results
+
+* `deriv.lhopital_infty_nhdsNE`: L'Hôpital's rule at a punctured finite point when the
+  denominator is unbounded in absolute value.
+
+## Implementation notes
+
+Cauchy's mean value theorem (Mathlib's `exists_ratio_deriv_eq_ratio_slope`) bounds increments
+relative to the denominator; fixed anchors on the two sides of the puncture then contribute
+vanishing constant terms.
 -/
 
 @[expose] public noncomputable section

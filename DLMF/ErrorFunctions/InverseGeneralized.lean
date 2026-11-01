@@ -10,11 +10,42 @@ public import DLMF.Confluent.IncompleteGamma
 public import DLMF.ErrorFunctions.AnalyticProperties
 
 /-!
-# Generalized and inverse error functions, DLMF §§7.16–7.17
+# Generalized and inverse error functions (DLMF §§7.16–7.17)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+The generalized error and Dawson integrals of DLMF §7.16 and the inverse error functions of
+DLMF §7.17, with the power series of the inverse error function and the small-argument
+asymptotic expansion of the inverse complementary error function.
+
+## Main definitions
+
+* `Real.generalizedErrorIntegral`, `Real.generalizedDawsonIntegral`: the generalized error and
+  Dawson integrals (DLMF §7.16).
+* `Real.invErf`, `Real.invErfc`: the inverse error functions on `(-1, 1)` and `(0, 2)`
+  (DLMF 7.17.1), totalized by `0` outside these intervals.
+* `invErfSeriesCoeff`: the coefficients of the inverse-erf series, from the recurrence after
+  DLMF 7.17.2.
+* `invErfcAsymptoticU`, `invErfcAsymptoticV`: the variables `u`, `v` of DLMF 7.17.5, 7.17.6.
+
+## Main results
+
+* `Real.generalizedErrorIntegral_gamma`, `Real.generalizedDawsonIntegral_gamma`: the
+  generalized integrals in terms of incomplete Gamma functions (DLMF §7.16).
+* `Real.invErf_spec`, `Real.invErfc_spec`: the inverse identities.
+* `invErfSeriesCoeff_initial`, `invErfSeriesCoeff_recurrence`: the first coefficients and the
+  recurrence (DLMF 7.17.2).
+* `hasSum_invErf`: the power series of the inverse error function, convergent on the whole
+  interval `(-1, 1)` (DLMF 7.17.2).
+* `invErf_analyticAt`, `iteratedDeriv_invErf`, `iteratedDeriv_invErf_nonneg`: analyticity and the
+  derivatives of the inverse error function.
+* `invErfc_asymptotic`: the all-order small-argument expansion of `inverfc` (DLMF 7.17.3,
+  7.17.4).
+
+## Implementation notes
+
+`Real.invErf` reuses TauCeti's real inverse error function (`Real.erf_erfInv`). The power series
+is obtained from the nonnegativity of all derivatives on `[0, 1)` (explicit derivative
+polynomials with nonnegative coefficients), which gives convergence of the Taylor series on the
+full interval.
 -/
 
 @[expose] public noncomputable section

@@ -8,20 +8,29 @@ module
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 
 /-!
-# BBP-type formulas and Gauss's Machin formula (Duverney §8.4)
+# BBP-type formulas and Gauss's Machin formula
+
+This file proves the Bailey–Borwein–Plouffe formula for `π`, BBP-type series for `ln 2`, `ln 3`
+and `ln 5`, and Gauss's Machin-like formula for `π` (Duverney §8.4).
+
+## Main results
+
+* `hasSum_pow_div_mul_add`: `∑ aᵏ/(mk+j) = ∫₀¹ y^{j-1}/(1 - a yᵐ) dy` for `0 ≤ a < 1`
+  (Duverney (8.92)–(8.93)).
+* `hasSum_bbp_pi`: `π = ∑ 16^{-k} (4/(8k+1) - 2/(8k+4) - 1/(8k+5) - 1/(8k+6))` (Duverney (8.90)).
+* `hasSum_log_three`, `hasSum_log_two`: `ln 3 = ∑ 4^{-k}/(2k+1)` and
+  `ln 2 = (2/3) ∑ 9^{-k}/(2k+1)` (Duverney (8.81)–(8.82)).
+* `hasSum_bbp_log_five`: `4 ln 5 = ∑ 16^{-k}(4/(4k+1) + 4/(4k+2) + 1/(4k+3))` (Duverney (8.83)).
+* `hasSum_bbp_log_three`: `(8/3) ln 3 = ∑ 64^{-k}(4/(6k+2) + 2/(6k+3) + 1/(6k+4))`
+  (Duverney, Exercise 8.15).
+* `gauss_machin`: `12 arctan(1/18) + 8 arctan(1/57) - 5 arctan(1/239) = π/4` (Duverney (8.88)).
+
+## Implementation notes
 
 Writing `1/(mk+j) = ∫₀¹ y^{mk+j-1} dy` and summing the geometric series under the integral sign
-gives `∑ aᵏ/(mk+j) = ∫₀¹ y^{j-1}/(1 - a yᵐ) dy` for `0 ≤ a < 1` (`hasSum_pow_div_mul_add`,
-Duverney (8.92)–(8.93)). A linear combination of such sums is then the integral of a rational
-function, which is evaluated by an explicit primitive. This gives:
-* the Bailey–Borwein–Plouffe formula
-  `π = ∑ 16^{-k} (4/(8k+1) - 2/(8k+4) - 1/(8k+5) - 1/(8k+6))` (8.90);
-* `ln 3 = ∑ 4^{-k}/(2k+1)` and `(3/2) ln 2 = ∑ 9^{-k}/(2k+1)` (8.81)–(8.82);
-* `4 ln 5 = ∑ 16^{-k}(4/(4k+1) + 4/(4k+2) + 1/(4k+3))` (8.83);
-* `(8/3) ln 3 = ∑ 64^{-k}(4/(6k+2) + 2/(6k+3) + 1/(6k+4))` (Exercise 8.15).
-
-Gauss's Machin-like formula `12 arctan(1/18) + 8 arctan(1/57) - 5 arctan(1/239) = π/4` (8.88)
-follows from Mathlib's arctangent addition formula, beside Mathlib's other Machin formulas.
+turns a linear combination of such sums into the integral of a rational function, which is
+evaluated by an explicit primitive. Gauss's formula follows from Mathlib's arctangent addition
+formula, beside Mathlib's other Machin formulas.
 -/
 
 @[expose] public section

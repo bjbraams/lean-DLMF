@@ -10,17 +10,29 @@ public import Mathlib.NumberTheory.BernoulliPolynomials
 public import Mathlib.NumberTheory.ZetaValues
 
 /-!
-# Euler numbers: Bernoulli relation, generating functions, `β(2k+1)` (Duverney §2.3.2)
+# Euler numbers: Bernoulli relation, generating functions and `β(2k+1)`
 
-* `euler_eq_bernoulli`: `(n+1) Eₙ(x) = 2ⁿ⁺¹ (Bₙ₊₁((x+1)/2) - Bₙ₊₁(x/2))`. Both sides satisfy
-  `P(x+1) + P(x) = 2(n+1)xⁿ`, so they agree by `eq_of_comp_X_add_one_add_self_eq`.
-* `eulerNumber_two_mul`: `E₂ₖ = -2^{4k+2} B₂ₖ₊₁(1/4)/(2k+1)`.
-* `hasSum_sin_pi_div_two_div_pow_eulerNumber`: Dirichlet's
-  `β(2k+1) = (-1)ᵏ E₂ₖ π^{2k+1}/(4^{k+1}(2k)!)` for `k ≥ 1`, from Mathlib's Fourier series of
-  Bernoulli polynomials at `x = 1/4`.
-* `abs_eulerNumber_le`: `|Eₙ| ≤ n! 2ⁿ`, by induction from the recurrence.
-* `hasSum_eulerNumber_mul_pow_div`: `sech z = ∑ Eₙ zⁿ/n!` for `‖z‖ < 1/2`, by a Cauchy product with
-  the series of `cosh`; `hasSum_eulerNumber_sec`: `sec z = ∑ (-1)ᵏ E₂ₖ z^{2k}/(2k)!`.
+Relations between Euler and Bernoulli polynomials, the generating functions of the Euler
+numbers, and Dirichlet's beta function at odd integers (Duverney §2.3.2).
+
+## Main results
+
+* `Polynomial.euler_eq_bernoulli`: `(n+1) Eₙ(x) = 2ⁿ⁺¹ (Bₙ₊₁((x+1)/2) - Bₙ₊₁(x/2))`
+  (DLMF 24.4.23).
+* `Polynomial.eulerNumber_two_mul`: `E₂ₖ = -2^{4k+2} B₂ₖ₊₁(1/4)/(2k+1)` (DLMF 24.4.31).
+* `Polynomial.abs_eulerNumber_le`: `|Eₙ| ≤ n! 2ⁿ`.
+* `Polynomial.hasSum_sin_pi_div_two_div_pow_eulerNumber`: Dirichlet's
+  `β(2k+1) = (-1)ᵏ E₂ₖ π^{2k+1}/(4^{k+1}(2k)!)` for `k ≥ 1`.
+* `Polynomial.hasSum_eulerNumber_mul_pow_div`: `sech z = ∑ Eₙ zⁿ/n!` for `‖z‖ < 1/2`
+  (DLMF 24.2.6).
+* `Polynomial.hasSum_eulerNumber_sec`: `sec z = ∑ (-1)ᵏ E₂ₖ z^{2k}/(2k)!` for `‖z‖ < 1/2`.
+
+## Implementation notes
+
+Both sides of `euler_eq_bernoulli` satisfy `P(x+1) + P(x) = 2(n+1)xⁿ`, so they agree by
+`eq_of_comp_X_add_one_add_self_eq`. The value of `β(2k+1)` comes from Mathlib's Fourier
+series of Bernoulli polynomials at `x = 1/4`. The bound on `|Eₙ|` follows by induction from
+the recurrence, and the `sech` series from a Cauchy product with the series of `cosh`.
 -/
 
 @[expose] public section

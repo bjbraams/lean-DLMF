@@ -10,13 +10,28 @@ public import Mathlib.Analysis.SpecialFunctions.Stirling
 public import Mathlib.Analysis.SpecialFunctions.Log.Base
 
 /-!
-# Bernoulli and Euler numbers and polynomials: inequalities (DLMF §24.9)
+# Bernoulli and Euler numbers and polynomials: inequalities
 
-Real `x`. DLMF §24.9.p1: the inequalities hold for `n = 1, 2, …` except where noted
-(24.9.3–24.9.5 for `0 < x < 1/2`; 24.9.4, 24.9.6, 24.9.7 for `n ≥ 2`). The constant
-`β = 2 + ln(1 - 6/π²)/ln 2` of 24.9.9 is `bernoulliIneqBeta`; its decimal value `0.6491…` is
-numerical and not acquired. All inequalities were checked numerically (mpmath, 30 digits, on
-grids of `x` and for `n < 60`).
+This file proves the inequalities of DLMF §24.9 for real `x`. They hold for `n = 1, 2, …`
+except where noted: 24.9.3–24.9.5 are for `0 < x < 1/2`, and 24.9.4, 24.9.6, 24.9.7 for `n ≥ 2`.
+
+## Main definitions
+
+* `bernoulliIneqBeta`: the constant `β = 2 + ln(1 - 6/π²)/ln 2` (DLMF 24.9.9).
+
+## Main results
+
+* `abs_bernoulliFun_two_mul_lt`, `abs_bernoulliFun_two_mul_sub_le`: DLMF 24.9.1, 24.9.2.
+* `eulerFun_two_mul_bounds`, `bernoulliFun_two_mul_add_one_bounds`,
+  `eulerFun_two_mul_sub_one_bounds`: DLMF 24.9.3–24.9.5.
+* `bernoulli_two_mul_stirling_bounds`, `eulerNumber_two_mul_stirling_bounds`: DLMF 24.9.6,
+  24.9.7.
+* `bernoulli_two_mul_zeta_bounds`, `eulerNumber_two_mul_beta_bounds`: DLMF 24.9.8, 24.9.10.
+
+## Implementation notes
+
+The decimal value `0.6491…` of `β` is numerical and out of scope. All inequalities were checked
+numerically (mpmath, 30 digits, on grids of `x` and for `n < 60`).
 -/
 
 @[expose] public section
@@ -86,7 +101,7 @@ theorem abs_bernoulliFun_two_mul_lt {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 
 /-! ### Signs and monotonicity on `[0, 1/2]` (helpers for 24.9.2–24.9.5) -/
 
 /-- `(-1)ⁿ⁺¹ B₂ₙ = 2 (2n)!/(2π)^{2n} · ζ(2n)` with `ζ(2n)` the value of `∑ 1/m^{2n}`. -/
-lemma r24a_bernoulli_eq_zeta {n : ℕ} (hn : n ≠ 0) :
+private lemma exists_hasSum_bernoulli_two_mul_eq_zeta {n : ℕ} (hn : n ≠ 0) :
     ∃ Z : ℝ, HasSum (fun m : ℕ => 1 / (m : ℝ) ^ (2 * n)) Z ∧
       (-1) ^ (n + 1) * (bernoulli (2 * n) : ℝ) = 2 * (2 * n)! / (2 * π) ^ (2 * n) * Z := by
   refine ⟨_, hasSum_zeta_nat hn, ?_⟩
@@ -97,7 +112,7 @@ lemma r24a_bernoulli_eq_zeta {n : ℕ} (hn : n ≠ 0) :
   field_simp
 
 /-- `|sin(mθ)| ≤ m |sin θ|`. -/
-lemma r24a_abs_sin_nat_mul_le (m : ℕ) (θ : ℝ) : |sin (m * θ)| ≤ m * |sin θ| := by
+private lemma abs_sin_nat_mul_le (m : ℕ) (θ : ℝ) : |sin (m * θ)| ≤ m * |sin θ| := by
   induction m with
   | zero => simp
   | succ m ih =>
@@ -113,7 +128,7 @@ lemma r24a_abs_sin_nat_mul_le (m : ℕ) (θ : ℝ) : |sin (m * θ)| ≤ m * |sin
       _ ≤ (m + 1) * |sin θ| := by linarith
 
 /-- `∑ 1/m^{2n} ≤ π²/6` for `n ≥ 1`. -/
-lemma r24a_zeta_le {n : ℕ} (hn : 1 ≤ n) {Z : ℝ}
+private lemma zeta_two_mul_le_pi_sq_div_six {n : ℕ} (hn : 1 ≤ n) {Z : ℝ}
     (hz : HasSum (fun m : ℕ => 1 / (m : ℝ) ^ (2 * n)) Z) : Z ≤ π ^ 2 / 6 := by
   refine hasSum_le (fun m => ?_) hz hasSum_zeta_two
   rcases Nat.eq_zero_or_pos m with rfl | hm
@@ -124,7 +139,7 @@ lemma r24a_zeta_le {n : ℕ} (hn : 1 ≤ n) {Z : ℝ}
 
 /-- Sign of the odd Bernoulli polynomials: `(-1)ⁿ⁺¹ B₂ₙ₊₁(x) > 0` for `0 < x < 1/2`, `n ≥ 1`
 (from the Fourier series and `|sin mθ| ≤ m sin θ`). -/
-lemma r24a_bernoulliFun_odd_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
+private lemma bernoulliFun_two_mul_add_one_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
     0 < (-1) ^ (n + 1) * bernoulliFun (2 * n + 1) x := by
   have hn0 : n ≠ 0 := by omega
   have hs := hasSum_one_div_nat_pow_mul_sin hn0 (x := x) ⟨hx0.le, by linarith⟩
@@ -133,7 +148,7 @@ lemma r24a_bernoulliFun_odd_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x)
   have hu : 0 < u := sin_pos_of_pos_of_lt_pi (by positivity) (by nlinarith [pi_pos])
   have hz := hasSum_zeta_nat hn0
   set Z := (-1 : ℝ) ^ (n + 1) * (2 : ℝ) ^ (2 * n - 1) * π ^ (2 * n) * bernoulli (2 * n) / (2 * n)!
-  have hZ := r24a_zeta_le hn hz
+  have hZ := zeta_two_mul_le_pi_sq_div_six hn hz
   have hpi := pi_lt_d2
   have hZ2 : Z < 2 := by nlinarith [pi_pos]
   have hg : HasSum (fun m : ℕ => u * (2 * (if m = 1 then 1 else 0) - 1 / (m : ℝ) ^ (2 * n)))
@@ -154,7 +169,7 @@ lemma r24a_bernoulliFun_odd_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x)
     · simp [hn0]
     simp only [hm1, ite_false, mul_zero, zero_sub]
     have hm : (0 : ℝ) < m := by exact_mod_cast hm0
-    have hb := r24a_abs_sin_nat_mul_le m (2 * π * x)
+    have hb := abs_sin_nat_mul_le m (2 * π * x)
     rw [abs_of_pos hu, show (m : ℝ) * (2 * π * x) = 2 * π * m * x by ring] at hb
     have hb' := neg_abs_le (sin (2 * π * m * x))
     have e : u * -(1 / (m : ℝ) ^ (2 * n)) = 1 / (m : ℝ) ^ (2 * n + 1) * (-(m * u)) := by
@@ -165,7 +180,7 @@ lemma r24a_bernoulliFun_odd_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x)
 
 
 /-- Odd part of `ζ(2n)`: `∑ 1/(2k+1)^{2n} = ζ(2n)(1 - 4⁻ⁿ)`, and `η(2n) = ζ(2n)(1 - 2·4⁻ⁿ) ≤ 1`. -/
-lemma r24a_zeta_odd {n : ℕ} (hn : 1 ≤ n) {Z : ℝ}
+private lemma hasSum_inv_odd_pow_two_mul_and_eta_le_one {n : ℕ} (hn : 1 ≤ n) {Z : ℝ}
     (hz : HasSum (fun m : ℕ => 1 / (m : ℝ) ^ (2 * n)) Z) :
     HasSum (fun k : ℕ => 1 / (2 * (k : ℝ) + 1) ^ (2 * n)) (Z - Z / 4 ^ n) ∧
       Z - 2 * (Z / 4 ^ n) ≤ 1 := by
@@ -193,7 +208,7 @@ lemma r24a_zeta_odd {n : ℕ} (hn : 1 ≤ n) {Z : ℝ}
     linarith
 
 /-- Sign of the odd Euler polynomials: `(-1)ⁿ E₂ₙ₋₁(x) > 0` for `0 < x < 1/2`, `n ≥ 1`. -/
-lemma r24a_eulerFun_odd_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
+private lemma eulerFun_two_mul_sub_one_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
     0 < (-1) ^ n * eulerFun (2 * n - 1) x := by
   rcases Nat.lt_or_ge n 2 with h1 | h2
   · obtain rfl : n = 1 := by omega
@@ -236,7 +251,7 @@ lemma r24a_eulerFun_odd_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx
   · norm_num [v]
   simp only [hk, ite_false, mul_zero, zero_sub]
   -- `|cos((2k+1)θ)| ≤ (2k+1) cos θ` via `φ = π/2 - θ`
-  have hb := r24a_abs_sin_nat_mul_le (2 * k + 1) (π / 2 - π * x)
+  have hb := abs_sin_nat_mul_le (2 * k + 1) (π / 2 - π * x)
   have hcos : cos ((2 * k + 1) * π * x) = (-1) ^ k * sin ((2 * k + 1 : ℕ) * (π / 2 - π * x)) := by
     rw [show ((2 * k + 1 : ℕ) : ℝ) * (π / 2 - π * x) = -((2 * k + 1) * π * x) + k * π + π / 2 by
       push_cast; ring, sin_add_pi_div_two, cos_add_nat_mul_pi, cos_neg]
@@ -256,7 +271,7 @@ lemma r24a_eulerFun_odd_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx
 
 
 /-- Strict monotonicity on `[0, 1/2]` from a positive derivative on `(0, 1/2)`. -/
-lemma r24a_strictMonoOn_half {f f' : ℝ → ℝ} (hd : ∀ x, HasDerivAt f (f' x) x)
+private lemma strictMonoOn_Icc_zero_half_of_deriv_pos {f f' : ℝ → ℝ} (hd : ∀ x, HasDerivAt f (f' x) x)
     (hpos : ∀ x ∈ Set.Ioo (0 : ℝ) (1 / 2), 0 < f' x) : StrictMonoOn f (Set.Icc 0 (1 / 2)) := by
   refine strictMonoOn_of_deriv_pos (convex_Icc _ _)
     (fun x _ => (hd x).continuousAt.continuousWithinAt) fun x hx => ?_
@@ -264,7 +279,7 @@ lemma r24a_strictMonoOn_half {f f' : ℝ → ℝ} (hd : ∀ x, HasDerivAt f (f' 
   rw [(hd x).deriv]; exact hpos x hx
 
 /-- `E₂ₙ(0) = 0` for `n ≥ 1`. -/
-lemma r24a_eulerFun_two_mul_zero {n : ℕ} (hn : 1 ≤ n) : eulerFun (2 * n) 0 = 0 := by
+private lemma eulerFun_two_mul_zero {n : ℕ} (hn : 1 ≤ n) : eulerFun (2 * n) 0 = 0 := by
   have h1 := Polynomial.euler_eval_one_add_eval_zero (2 * n)
   have h2 := eulerFun_one_sub (2 * n) 0
   rw [zero_pow (by omega), mul_zero] at h1
@@ -276,17 +291,17 @@ lemma r24a_eulerFun_two_mul_zero {n : ℕ} (hn : 1 ≤ n) : eulerFun (2 * n) 0 =
 
 
 /-- `(-1)ⁿ B₂ₙ₋₁(x) > 0` for `0 < x < 1/2`, `n ≥ 1`. -/
-lemma r24a_bernoulliFun_odd_pos' {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
+private lemma bernoulliFun_two_mul_sub_one_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
     0 < (-1) ^ n * bernoulliFun (2 * n - 1) x := by
   rcases Nat.lt_or_ge n 2 with h1 | h2
   · obtain rfl : n = 1 := by omega
     simp [bernoulliFun_one]; linarith
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
   rw [show 2 * (m + 1) - 1 = 2 * m + 1 by omega]
-  exact r24a_bernoulliFun_odd_pos (by omega) hx0 hx1
+  exact bernoulliFun_two_mul_add_one_pos (by omega) hx0 hx1
 
 /-- `eulerFun n (1/2) = Eₙ / 2ⁿ`. -/
-lemma r24a_eulerFun_half (n : ℕ) : eulerFun n (1 / 2) = eulerNumber n / 2 ^ n := by
+private lemma eulerFun_half (n : ℕ) : eulerFun n (1 / 2) = eulerNumber n / 2 ^ n := by
   have h := eulerPolyE_half n
   rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, eulerPolyE_ofReal] at h
   exact_mod_cast h
@@ -303,10 +318,10 @@ theorem abs_bernoulliFun_two_mul_sub_le {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 
     rwa [bernoulliFun_eval_one_sub, pow_mul, neg_one_sq, one_pow, one_mul] at this
   set f : ℝ → ℝ := fun y => (-1) ^ n * bernoulliFun (2 * n) y
   have hmono : StrictMonoOn f (Set.Icc 0 (1 / 2)) := by
-    refine r24a_strictMonoOn_half
+    refine strictMonoOn_Icc_zero_half_of_deriv_pos
       (f' := fun y => (-1) ^ n * ((2 * n : ℕ) * bernoulliFun (2 * n - 1) y))
       (fun y => (hasDerivAt_bernoulliFun _ y).const_mul _) fun y hy => ?_
-    have := r24a_bernoulliFun_odd_pos' hn hy.1 hy.2
+    have := bernoulliFun_two_mul_sub_one_pos hn hy.1 hy.2
     have h2n : (0 : ℝ) < (2 * n : ℕ) := by exact_mod_cast (show 0 < 2 * n by omega)
     nlinarith
   have hx' : x ∈ Set.Icc (0 : ℝ) (1 / 2) := ⟨hx0, hx⟩
@@ -314,7 +329,7 @@ theorem abs_bernoulliFun_two_mul_sub_le {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 
   have h12 : f x ≤ f (1 / 2) := hmono.monotoneOn hx' ⟨by norm_num, le_rfl⟩ hx
   simp only [f, bernoulliFun_eval_zero, one_div, bernoulliFun_eval_half] at h0 h12
   -- sign of `B₂ₙ`
-  obtain ⟨Z, hz, hA⟩ := r24a_bernoulli_eq_zeta (n := n) (by omega)
+  obtain ⟨Z, hz, hA⟩ := exists_hasSum_bernoulli_two_mul_eq_zeta (n := n) (by omega)
   have hZ : 0 < Z := by
     have := le_hasSum hz 1 (fun _ _ => by positivity)
     norm_num at this; linarith
@@ -345,15 +360,15 @@ theorem eulerFun_two_mul_bounds {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x)
       (-1) ^ n * eulerFun (2 * n) x < (4 : ℝ)⁻¹ ^ n * |(eulerNumber (2 * n) : ℝ)| := by
   set f : ℝ → ℝ := fun y => (-1) ^ n * eulerFun (2 * n) y
   have hmono : StrictMonoOn f (Set.Icc 0 (1 / 2)) := by
-    refine r24a_strictMonoOn_half (f' := fun y => (-1) ^ n * ((2 * n : ℕ) * eulerFun (2 * n - 1) y))
+    refine strictMonoOn_Icc_zero_half_of_deriv_pos (f' := fun y => (-1) ^ n * ((2 * n : ℕ) * eulerFun (2 * n - 1) y))
       (fun y => (hasDerivAt_eulerFun _ y).const_mul _) fun y hy => ?_
-    have := r24a_eulerFun_odd_pos hn hy.1 hy.2
+    have := eulerFun_two_mul_sub_one_pos hn hy.1 hy.2
     have h2n : (0 : ℝ) < (2 * n : ℕ) := by exact_mod_cast (show 0 < 2 * n by omega)
     nlinarith
   have hx' : x ∈ Set.Icc (0 : ℝ) (1 / 2) := ⟨hx0.le, hx1.le⟩
   have h0 : f 0 < f x := hmono ⟨le_rfl, by norm_num⟩ hx' hx0
   have h12 : f x < f (1 / 2) := hmono hx' ⟨by norm_num, le_rfl⟩ hx1
-  simp only [f, r24a_eulerFun_two_mul_zero hn, mul_zero, r24a_eulerFun_half] at h0 h12
+  simp only [f, eulerFun_two_mul_zero hn, mul_zero, eulerFun_half] at h0 h12
   refine ⟨h0, h12.trans_le (le_of_eq ?_)⟩
   have hpos := (eulerNumber_two_mul_add_one_eq_zero_and_sign n).2
   have hpos' : (0 : ℝ) < (-1) ^ n * (eulerNumber (2 * n) : ℝ) := by exact_mod_cast hpos
@@ -377,7 +392,7 @@ theorem eulerFun_two_mul_sub_one_bounds {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 
     0 < (-1) ^ n * eulerFun (2 * n - 1) x ∧
       (-1) ^ n * eulerFun (2 * n - 1) x <
         4 * (2 * n - 1)! / π ^ (2 * n) * ((2 ^ (2 * n) - 1) / (2 ^ (2 * n) - 2)) := by
-  refine ⟨r24a_eulerFun_odd_pos hn hx0 hx1, ?_⟩
+  refine ⟨eulerFun_two_mul_sub_one_pos hn hx0 hx1, ?_⟩
   have hE := (hasSum_cos_odd_eulerFun hn (x := x) hx0.le (by linarith)).mul_left ((-1) ^ n)
   set K : ℝ := 4 * (2 * n - 1)! / π ^ (2 * n)
   have hK : 0 < K := by positivity
@@ -388,7 +403,7 @@ theorem eulerFun_two_mul_sub_one_bounds {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 
     rw [← mul_assoc, ← mul_assoc, h1, one_mul]
   have hz := hasSum_zeta_nat (k := n) (by omega)
   set Z := (-1 : ℝ) ^ (n + 1) * (2 : ℝ) ^ (2 * n - 1) * π ^ (2 * n) * bernoulli (2 * n) / (2 * n)!
-  obtain ⟨hodd, heta⟩ := r24a_zeta_odd hn hz
+  obtain ⟨hodd, heta⟩ := hasSum_inv_odd_pow_two_mul_and_eta_le_one hn hz
   have hlt := hasSum_lt (f := fun k : ℕ => K * (cos ((2 * k + 1) * π * x) / (2 * k + 1) ^ (2 * n)))
     (g := fun k : ℕ => K * (1 / (2 * (k : ℝ) + 1) ^ (2 * n))) (i := 0) (fun k => ?_) ?_ hE'
     (hodd.mul_left K)
@@ -420,7 +435,7 @@ theorem eulerFun_two_mul_sub_one_bounds {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 
 /-! ### Stirling bounds (helpers for 24.9.6–24.9.7) -/
 
 /-- Upper bound from Robbins' stepwise bound: `log s(N) - log √π ≤ 1/(12N)`, `N ≥ 1`. -/
-lemma r24a_log_stirlingSeq_le {N : ℕ} (hN : 1 ≤ N) :
+private lemma log_stirlingSeq_sub_log_sqrt_pi_le {N : ℕ} (hN : 1 ≤ N) :
     log (Stirling.stirlingSeq N) - log √π ≤ 1 / (12 * N) := by
   have hstep : ∀ M : ℕ, log (Stirling.stirlingSeq N) - log (Stirling.stirlingSeq (N + M)) ≤
       1 / (12 * N) - 1 / (12 * ((N + M : ℕ) : ℝ)) := by
@@ -447,7 +462,7 @@ lemma r24a_log_stirlingSeq_le {N : ℕ} (hN : 1 ≤ N) :
   linarith [hstep M]
 
 /-- Lower bound from the first term of the Stirling difference series. -/
-lemma r24a_log_stirlingSeq_ge {N : ℕ} (hN : 1 ≤ N) :
+private lemma le_log_stirlingSeq_sub_log_sqrt_pi {N : ℕ} (hN : 1 ≤ N) :
     1 / (3 * (2 * (N : ℝ) + 1) ^ 2) ≤ log (Stirling.stirlingSeq N) - log √π := by
   obtain ⟨m, rfl⟩ : ∃ m, N = m + 1 := ⟨N - 1, by omega⟩
   have h := Stirling.log_stirlingSeq_sdiff_hasSum m
@@ -461,15 +476,15 @@ lemma r24a_log_stirlingSeq_ge {N : ℕ} (hN : 1 ≤ N) :
   linarith
 
 /-- Two-sided Stirling bounds: `√π e^{1/(3(2N+1)²)} ≤ s(N) ≤ √π e^{1/(12N)}`, `N ≥ 1`. -/
-lemma r24a_stirlingSeq_bounds {N : ℕ} (hN : 1 ≤ N) :
+private lemma stirlingSeq_bounds {N : ℕ} (hN : 1 ≤ N) :
     √π * exp (1 / (3 * (2 * (N : ℝ) + 1) ^ 2)) ≤ Stirling.stirlingSeq N ∧
       Stirling.stirlingSeq N ≤ √π * exp (1 / (12 * N)) := by
   have hpos : 0 < Stirling.stirlingSeq N := by
     obtain ⟨m, rfl⟩ : ∃ m, N = m + 1 := ⟨N - 1, by omega⟩
     exact Stirling.stirlingSeq'_pos m
   have hpi : 0 < √π := by positivity
-  have h1 := r24a_log_stirlingSeq_ge hN
-  have h2 := r24a_log_stirlingSeq_le hN
+  have h1 := le_log_stirlingSeq_sub_log_sqrt_pi hN
+  have h2 := log_stirlingSeq_sub_log_sqrt_pi_le hN
   constructor
   · rw [← le_div_iff₀' hpi, ← Real.le_log_iff_exp_le (by positivity), log_div hpos.ne' hpi.ne']
     exact h1
@@ -477,7 +492,7 @@ lemma r24a_stirlingSeq_bounds {N : ℕ} (hN : 1 ≤ N) :
     linarith
 
 /-- `N! = s(N) √(2N) (N/e)^N`. -/
-lemma r24a_factorial_eq (N : ℕ) (hN : 1 ≤ N) :
+private lemma factorial_eq_stirlingSeq_mul (N : ℕ) (hN : 1 ≤ N) :
     (N ! : ℝ) = Stirling.stirlingSeq N * (√(2 * N) * (N / exp 1) ^ N) := by
   unfold Stirling.stirlingSeq
   have : 0 < √(2 * (N : ℝ)) * (N / exp 1) ^ N := by
@@ -487,7 +502,7 @@ lemma r24a_factorial_eq (N : ℕ) (hN : 1 ≤ N) :
 
 
 /-- `exp x ≤ 1 + 2x` for `0 < x ≤ 1/2`. -/
-lemma r24a_exp_le_one_add_two_mul {x : ℝ} (h0 : 0 < x) (h1 : x ≤ 1 / 2) :
+private lemma exp_le_one_add_two_mul {x : ℝ} (h0 : 0 < x) (h1 : x ≤ 1 / 2) :
     exp x ≤ 1 + 2 * x := by
   have := Real.exp_bound_div_one_sub_of_interval' h0 (by linarith)
   have h2 : 1 / (1 - x) ≤ 1 + 2 * x := by
@@ -495,7 +510,7 @@ lemma r24a_exp_le_one_add_two_mul {x : ℝ} (h0 : 0 < x) (h1 : x ≤ 1 / 2) :
   linarith
 
 /-- `(4n+1)² ≤ 9ⁿ` for `n ≥ 2`. -/
-lemma r24a_sq_le_nine_pow {n : ℕ} (hn : 2 ≤ n) : (4 * n + 1) ^ 2 ≤ 9 ^ n := by
+private lemma four_mul_add_one_sq_le_nine_pow {n : ℕ} (hn : 2 ≤ n) : (4 * n + 1) ^ 2 ≤ 9 ^ n := by
   induction n, hn using Nat.le_induction with
   | base => norm_num
   | succ k hk ih =>
@@ -533,8 +548,8 @@ theorem bernoulli_two_mul_stirling_bounds {n : ℕ} (hn : 2 ≤ n) :
     norm_num at this; linarith
   -- Stirling
   have h2n : 1 ≤ 2 * n := by omega
-  obtain ⟨hs1, hs2⟩ := r24a_stirlingSeq_bounds h2n
-  have hf := r24a_factorial_eq (2 * n) h2n
+  obtain ⟨hs1, hs2⟩ := stirlingSeq_bounds h2n
+  have hf := factorial_eq_stirlingSeq_mul (2 * n) h2n
   set s := Stirling.stirlingSeq (2 * n)
   have hsq : √(π * n) = √π * √n := Real.sqrt_mul hpi0.le _
   have hsq2 : √(2 * ((2 * n : ℕ) : ℝ)) = 2 * √n := by
@@ -558,7 +573,7 @@ theorem bernoulli_two_mul_stirling_bounds {n : ℕ} (hn : 2 ≤ n) :
   have hsn : 0 < √(n : ℝ) := Real.sqrt_pos.mpr (by exact_mod_cast (show 0 < n by omega))
   have hspi : 0 < √π := by positivity
   have hx : exp (1 / (12 * ((2 * n : ℕ) : ℝ))) ≤ 1 + 2 * (1 / (12 * ((2 * n : ℕ) : ℝ))) :=
-    r24a_exp_le_one_add_two_mul (by positivity) (by
+    exp_le_one_add_two_mul (by positivity) (by
       rw [div_le_div_iff₀ (by positivity) (by norm_num)]; push_cast
       have : (2 : ℝ) ≤ n := by exact_mod_cast hn
       nlinarith)
@@ -595,7 +610,7 @@ theorem bernoulli_two_mul_zeta_bounds {n : ℕ} (hn : 1 ≤ n) :
       (-1) ^ (n + 1) * (bernoulli (2 * n) : ℝ) ≤
         2 * (2 * n)! / (2 * π) ^ (2 * n) * (1 / (1 - (2 : ℝ) ^ (bernoulliIneqBeta - 2 * n))) := by
   have hn0 : n ≠ 0 := by omega
-  obtain ⟨Z, hz, hA⟩ := r24a_bernoulli_eq_zeta hn0
+  obtain ⟨Z, hz, hA⟩ := exists_hasSum_bernoulli_two_mul_eq_zeta hn0
   rw [hA]
   have hK : 0 < 2 * ((2 * n)! : ℝ) / (2 * π) ^ (2 * n) := by positivity
   have h4 : (0 : ℝ) < 4 ^ n := by positivity
@@ -689,7 +704,7 @@ theorem eulerNumber_two_mul_beta_bounds {n : ℕ} (hn : 1 ≤ n) :
     4 ^ (n + 1) * (2 * n)! / π ^ (2 * n + 1) * (1 / (1 + (3 : ℝ)⁻¹ ^ (2 * n + 1))) <
         (-1) ^ n * (eulerNumber (2 * n) : ℝ) ∧
       (-1) ^ n * (eulerNumber (2 * n) : ℝ) < 4 ^ (n + 1) * (2 * n)! / π ^ (2 * n + 1) := by
-  obtain ⟨hl, hu⟩ := q24a_dirichletBeta_bounds (k := n) (by omega)
+  obtain ⟨hl, hu⟩ := dirichletBeta_odd_alternating_bounds (k := n) (by omega)
   set V := (-1) ^ n * (eulerNumber (2 * n) : ℝ) * π ^ (2 * n + 1) / (4 ^ (n + 1) * (2 * n)!)
   set K := 4 ^ (n + 1) * (2 * n)! / π ^ (2 * n + 1) with hKdef
   have hK : 0 < K := by positivity
@@ -734,8 +749,8 @@ theorem eulerNumber_two_mul_stirling_bounds {n : ℕ} (hn : 2 ≤ n) :
   obtain ⟨hl, hu⟩ := eulerNumber_two_mul_beta_bounds (n := n) (by omega)
   have hpi0 := Real.pi_pos
   have h2n : 1 ≤ 2 * n := by omega
-  obtain ⟨hs1, hs2⟩ := r24a_stirlingSeq_bounds h2n
-  have hf := r24a_factorial_eq (2 * n) h2n
+  obtain ⟨hs1, hs2⟩ := stirlingSeq_bounds h2n
+  have hf := factorial_eq_stirlingSeq_mul (2 * n) h2n
   set s := Stirling.stirlingSeq (2 * n)
   have hspi : 0 < √π := by positivity
   have hsn : 0 < √(n : ℝ) := Real.sqrt_pos.mpr (by exact_mod_cast (show 0 < n by omega))
@@ -761,7 +776,7 @@ theorem eulerNumber_two_mul_stirling_bounds {n : ℕ} (hn : 2 ≤ n) :
   constructor
   · -- `s/√π > 1 + 3^{-(2n+1)}`
     have hu3 : (3 : ℝ)⁻¹ ^ (2 * n + 1) ≤ 1 / (3 * (2 * ((2 * n : ℕ) : ℝ) + 1) ^ 2) := by
-      have h9 := r24a_sq_le_nine_pow hn
+      have h9 := four_mul_add_one_sq_le_nine_pow hn
       have h9' : ((4 * n + 1 : ℕ) : ℝ) ^ 2 ≤ ((9 ^ n : ℕ) : ℝ) := by exact_mod_cast h9
       rw [inv_pow, pow_succ, show (3 : ℝ) ^ (2 * n) = 9 ^ n by rw [pow_mul]; norm_num]
       rw [one_div, inv_le_inv₀ (by positivity) (by positivity)]
@@ -776,7 +791,7 @@ theorem eulerNumber_two_mul_stirling_bounds {n : ℕ} (hn : 2 ≤ n) :
           gcongr
       _ < _ := hl
   · have hx : exp (1 / (12 * ((2 * n : ℕ) : ℝ))) ≤ 1 + 2 * (1 / (12 * ((2 * n : ℕ) : ℝ))) :=
-      r24a_exp_le_one_add_two_mul (by positivity) (by
+      exp_le_one_add_two_mul (by positivity) (by
         rw [div_le_div_iff₀ (by positivity) (by norm_num)]; push_cast
         have : (2 : ℝ) ≤ n := by exact_mod_cast hn
         nlinarith)

@@ -19,7 +19,31 @@ Statements of DLMF §1.8 for `f : ℝ → ℂ`, with the coefficients `fourierCo
 `fourierSinCoeff`, `fourierExpCoeff` and the Lebesgue constants `lebesgueConstant` of
 `DLMF.AlgebraicAnalytic.Fourier.Basic`.
 
-Conventions.
+## Main results
+
+* `fourierExpCoeff_eq_fourierCoeffOn`: `c_n` is Mathlib's `fourierCoeffOn` on `[-π, π]`
+  (DLMF 1.8.4).
+* `fourierExpCoeff_natCast`, `fourierExpCoeff_neg_natCast`, `fourierExpCoeff_zero`:
+  `c_n = (a_n - i b_n)/2`, `c_{-n} = (a_n + i b_n)/2`, `c_0 = a_0/2`.
+* `fourierSinCoeff_eq_zero_of_even`, `fourierCosCoeff_eq_zero_of_odd`: even and odd functions.
+* `hasSum_fourierSeries`, `hasSum_fourierExpSeries`: the Fourier series (DLMF 1.8.1, 1.8.3).
+* `hasSum_norm_sq_fourierCosSinCoeff`, `hasSum_norm_sq_fourierExpCoeff`,
+  `hasSum_fourierCosSinCoeff_mul_conj`, `hasSum_fourierExpCoeff_mul_conj`: Parseval's formulas
+  (DLMF 1.8.5–1.8.6_2).
+* `fourierCoeff_isLittleO`: decay of the coefficients of smooth functions (DLMF 1.8.7).
+* `eq_of_fourierCoeff_eq`: uniqueness of Fourier series.
+* `lebesgueConstant_isEquivalent`: `L_n ∼ (4/π²) ln n` (DLMF 1.8.9).
+* `tendsto_intervalIntegral_mul_exp_atTop`, `tendsto_integral_mul_exp_atTop`: the
+  Riemann–Lebesgue lemma (DLMF 1.8.10) and its extension to integrable functions on `ℝ`.
+* `tendsto_fourierPartialSum_of_oneSidedDeriv`: pointwise convergence (DLMF 1.8.11).
+* `tendsto_integral_fourierSeries`, `tendsto_deriv_fourierSeries`: termwise integration and
+  differentiation (DLMF 1.8.12, §1.8(iii)).
+* `poisson_summation`, `poissonSummation_cos`: Poisson's summation formula (DLMF 1.8.14,
+  1.8.15).
+* `hasSum_exp_neg_sq_mul`: DLMF 1.8.16.
+
+## Implementation notes
+
 * DLMF series over `n = 1, 2, …` that may converge only conditionally (the Fourier series in
   1.8.1, 1.8.11, 1.8.12, the differentiated series of §1.8(iii) and 1.8.15) are stated as limits
   of partial sums (`Filter.Tendsto` of `∑ n ∈ Finset.range N`), not with `HasSum`, which over
@@ -29,17 +53,8 @@ Conventions.
 * Periodicity is `Function.Periodic f (2 * π)`.
 * Several DLMF hypotheses are formalized in a stronger-than-DLMF (more general) or special-case
   form; each docstring says which.
-
-Proved here: the bridge `fourierExpCoeff = fourierCoeffOn` on `[-π, π]`, the relations
-`c_n = (a_n - i b_n)/2`, `c_{-n} = (a_n + i b_n)/2`, `c_0 = a_0/2`, the vanishing of `b_n`
-(`a_n`) for even (odd) `f`, Parseval's formula 1.8.6 (from Mathlib's
-`hasSum_sq_fourierCoeffOn`) and 1.8.5, and the Riemann–Lebesgue lemma 1.8.10 together with
-its extension to integrable functions on `ℝ` (from Mathlib's
-`Real.tendsto_integral_exp_smul_cocompact`). The two-function Parseval pairings use
-`HilbertBasis.hasSum_inner_mul_inner`; coefficient uniqueness uses the Fourier Hilbert basis,
-and smooth coefficient decay uses repeated integration by parts and TauCeti
-`Function.Periodic.deriv`. The Gaussian Poisson identity uses Mathlib
-`Complex.tsum_exp_neg_quadratic`, retaining complex shifts and principal powers.
+* The Gaussian Poisson identity 1.8.16 uses Mathlib's `Complex.tsum_exp_neg_quadratic`,
+  retaining complex shifts and principal powers.
 -/
 
 @[expose] public noncomputable section
@@ -69,7 +84,7 @@ theorem fourierExpCoeff_eq_fourierCoeffOn (f : ℝ → ℂ) (n : ℤ) :
 
 /-- Identity under the stated parameter and domain assumptions: `Complex.exp (-(Complex.I * n *
 x)) = (Real.cos (n * x) : ℂ) - Complex.I * (Real.sin (n * x) : ℂ)`. -/
-private lemma g1c_exp_neg_eq (n : ℤ) (x : ℝ) :
+private lemma cexp_neg_I_mul_eq_cos_sub_sin (n : ℤ) (x : ℝ) :
     Complex.exp (-(Complex.I * n * x)) =
       (Real.cos (n * x) : ℂ) - Complex.I * (Real.sin (n * x) : ℂ) := by
   rw [show -(Complex.I * n * x) = ((-(n * x) : ℝ) : ℂ) * Complex.I by push_cast; ring,
@@ -81,7 +96,7 @@ private lemma g1c_exp_neg_eq (n : ℤ) (x : ℝ) :
 /-- Identity under the stated parameter and domain assumptions: `∫ x in (-π)..π, f x * Complex.exp
 (-(Complex.I * n * x)) = (∫ x in (-π)..π, f x * (Real.cos (n * x) : ℂ)) - Complex.I * ∫ x in
 (-π)..π, f x * (Real.sin (n * x) : ℂ)`. -/
-private lemma g1c_integral_split {f : ℝ → ℂ} (hf : IntervalIntegrable f volume (-π) π)
+private lemma integral_mul_cexp_neg_eq_cos_sub_sin {f : ℝ → ℂ} (hf : IntervalIntegrable f volume (-π) π)
     (n : ℤ) :
     ∫ x in (-π)..π, f x * Complex.exp (-(Complex.I * n * x)) =
       (∫ x in (-π)..π, f x * (Real.cos (n * x) : ℂ)) -
@@ -93,7 +108,7 @@ private lemma g1c_integral_split {f : ℝ → ℂ} (hf : IntervalIntegrable f vo
   rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_sub hc
     (hs.const_mul _)]
   refine intervalIntegral.integral_congr fun x _ => ?_
-  rw [g1c_exp_neg_eq]
+  rw [cexp_neg_I_mul_eq_cos_sub_sin]
   ring
 
 /-- DLMF §1.8(i) (after 1.8.4): `c_n = ½(a_n - i b_n)` for `n > 0` (in fact for all `n ≥ 0`),
@@ -102,7 +117,7 @@ for `f` integrable on `[-π, π]`. -/
 theorem fourierExpCoeff_natCast {f : ℝ → ℂ} (hf : IntervalIntegrable f volume (-π) π)
     (n : ℕ) :
     fourierExpCoeff f n = (fourierCosCoeff f n - Complex.I * fourierSinCoeff f n) / 2 := by
-  rw [fourierExpCoeff, g1c_integral_split hf, fourierCosCoeff, fourierSinCoeff]
+  rw [fourierExpCoeff, integral_mul_cexp_neg_eq_cos_sub_sin hf, fourierCosCoeff, fourierSinCoeff]
   push_cast
   field_simp
 
@@ -112,7 +127,7 @@ theorem fourierExpCoeff_neg_natCast {f : ℝ → ℂ} (hf : IntervalIntegrable f
     (n : ℕ) :
     fourierExpCoeff f (-(n : ℤ)) =
       (fourierCosCoeff f n + Complex.I * fourierSinCoeff f n) / 2 := by
-  rw [fourierExpCoeff, g1c_integral_split hf, fourierCosCoeff, fourierSinCoeff]
+  rw [fourierExpCoeff, integral_mul_cexp_neg_eq_cos_sub_sin hf, fourierCosCoeff, fourierSinCoeff]
   have hc : ∀ x : ℝ, Real.cos (((-(n : ℤ) : ℤ) : ℝ) * x) = Real.cos (n * x) := fun x => by
     push_cast; rw [neg_mul, Real.cos_neg]
   have hs : ∀ x : ℝ, Real.sin (((-(n : ℤ) : ℤ) : ℝ) * x) = -Real.sin (n * x) := fun x => by
@@ -131,7 +146,7 @@ theorem fourierExpCoeff_zero {f : ℝ → ℂ} (hf : IntervalIntegrable f volume
   simp
 
 /-- Identity under the stated parameter and domain assumptions: `∫ x in (-π)..π, g x = 0`. -/
-private lemma g1c_integral_odd {g : ℝ → ℂ} (hg : ∀ x, g (-x) = -g x) :
+private lemma integral_neg_pi_pi_eq_zero_of_odd {g : ℝ → ℂ} (hg : ∀ x, g (-x) = -g x) :
     ∫ x in (-π)..π, g x = 0 := by
   have h := intervalIntegral.integral_comp_neg (a := -π) (b := π) g
   rw [neg_neg] at h
@@ -144,7 +159,7 @@ private lemma g1c_integral_odd {g : ℝ → ℂ} (hg : ∀ x, g (-x) = -g x) :
 @[dlmf 1.8.i]
 theorem fourierSinCoeff_eq_zero_of_even {f : ℝ → ℂ} (hf : ∀ x, f (-x) = f x) (n : ℕ) :
     fourierSinCoeff f n = 0 := by
-  rw [fourierSinCoeff, g1c_integral_odd, mul_zero]
+  rw [fourierSinCoeff, integral_neg_pi_pi_eq_zero_of_odd, mul_zero]
   intro x
   rw [hf, mul_neg, Real.sin_neg]
   push_cast
@@ -154,7 +169,7 @@ theorem fourierSinCoeff_eq_zero_of_even {f : ℝ → ℂ} (hf : ∀ x, f (-x) = 
 @[dlmf 1.8.i]
 theorem fourierCosCoeff_eq_zero_of_odd {f : ℝ → ℂ} (hf : ∀ x, f (-x) = -f x) (n : ℕ) :
     fourierCosCoeff f n = 0 := by
-  rw [fourierCosCoeff, g1c_integral_odd, mul_zero]
+  rw [fourierCosCoeff, integral_neg_pi_pi_eq_zero_of_odd, mul_zero]
   intro x
   rw [hf, mul_neg, Real.cos_neg]
   ring
@@ -251,7 +266,7 @@ theorem hasSum_norm_sq_fourierExpCoeff {f : ℝ → ℂ}
   ring
 
 /-- Integrability between the indicated endpoints: `IntervalIntegrable f volume (-π) π`. -/
-private lemma g1c_intervalIntegrable_of_memLp {f : ℝ → ℂ}
+private lemma intervalIntegrable_neg_pi_pi_of_memLp {f : ℝ → ℂ}
     (hf : MemLp f 2 (volume.restrict (Ioc (-π) π))) : IntervalIntegrable f volume (-π) π := by
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by linarith [pi_pos])]
   have : IsFiniteMeasure (volume.restrict (Ioc (-π) π)) := by
@@ -268,7 +283,7 @@ theorem hasSum_norm_sq_fourierCosSinCoeff {f : ℝ → ℂ}
     (hf : MemLp f 2 (volume.restrict (Ioc (-π) π))) :
     HasSum (fun n : ℕ => ‖fourierCosCoeff f (n + 1)‖ ^ 2 + ‖fourierSinCoeff f (n + 1)‖ ^ 2)
       (π⁻¹ * (∫ x in (-π)..π, ‖f x‖ ^ 2) - ‖fourierCosCoeff f 0‖ ^ 2 / 2) := by
-  have hi := g1c_intervalIntegrable_of_memLp hf
+  have hi := intervalIntegrable_neg_pi_pi_of_memLp hf
   have h := (hasSum_norm_sq_fourierExpCoeff hf).nat_add_neg
   have h1 := (hasSum_nat_add_iff' 1).mpr h
   simp only [Finset.range_one, Finset.sum_singleton, Nat.cast_zero, neg_zero] at h1
@@ -317,8 +332,8 @@ theorem hasSum_fourierCosSinCoeff_mul_conj {f g : ℝ → ℂ}
         fourierSinCoeff f (n + 1) * starRingEnd ℂ (fourierSinCoeff g (n + 1)))
       ((1 / π : ℂ) * (∫ x in (-π)..π, f x * starRingEnd ℂ (g x)) -
         fourierCosCoeff f 0 * starRingEnd ℂ (fourierCosCoeff g 0) / 2) := by
-  have hfi := g1c_intervalIntegrable_of_memLp hf
-  have hgi := g1c_intervalIntegrable_of_memLp hg
+  have hfi := intervalIntegrable_neg_pi_pi_of_memLp hf
+  have hgi := intervalIntegrable_neg_pi_pi_of_memLp hg
   have h := (hasSum_fourierExpCoeff_mul_conj hf hg).nat_add_neg
   have h1 := (hasSum_nat_add_iff' 1).mpr h
   simp only [Finset.range_one, Finset.sum_singleton, Nat.cast_zero, neg_zero] at h1
@@ -578,7 +593,7 @@ theorem tendsto_deriv_fourierSeries {f : ℝ → ℂ} (hf : ContDiff ℝ 2 f)
 (absolutely) to a common value. Mathlib's `Real.tsum_eq_tsum_fourier_of_rpow_decay` proves the
 formula under decay hypotheses on `f` and its Fourier transform instead. -/
 @[dlmf 1.8.E14]
-theorem poissonSummation {f : ℝ → ℂ} (hf : ContDiff ℝ 2 f) (hi : Integrable f)
+theorem poisson_summation {f : ℝ → ℂ} (hf : ContDiff ℝ 2 f) (hi : Integrable f)
     (hi2 : Integrable (iteratedDeriv 2 f)) (x : ℝ) :
     ∃ s : ℂ, HasSum (fun n : ℤ => f (x + n)) s ∧
       HasSum (fun n : ℤ => Complex.exp (2 * π * Complex.I * n * x) *

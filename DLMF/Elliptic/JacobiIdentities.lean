@@ -8,18 +8,36 @@ module
 public import DLMF.Elliptic.Jacobi
 
 /-!
-# Identities for Jacobi's elliptic functions (Duverney Ch. 5; DLMF §§22.6, 22.8, 22.13)
+# Identities for Jacobi's elliptic functions
 
-For `m < 1`:
-* `dn² - m cn² = 1 - m` and the first- and second-order equations of `sn`, `cn`, `dn`
-  (DLMF 22.13.13–22.13.18, Duverney Ex. 5.12).
-* The addition formulas for `sn`, `cn`, `dn` (DLMF 22.8.1–22.8.3, Duverney Ex. 5.14). Following
-  Duverney, `Ψ(u) = N(u, w-u)/(1 - m sn²u sn²(w-u))` has zero derivative, so it equals `Ψ(0)`.
-  The identity `N'D - ND' = 0` is a polynomial identity modulo `sn² + cn² = 1` and
-  `m sn² + dn² = 1` at both points.
-* The quarter-period shift `u ↦ u + K` and the values at `K/2` (Duverney Ex. 5.15).
-* The simple pendulum: `y = 2 arcsin(√m sn(ωt + φ))` solves `y'' + ω² sin y = 0` and has period
-  `4K/ω` (Duverney Thm 5.6, Temme §12.1.1).
+For a real parameter `m < 1`, this file proves the differential equations and addition formulas
+of `sn`, `cn`, `dn`, the quarter-period shift and the values at `K/2` (DLMF §§22.4–22.13), and
+the solution of the simple pendulum (Duverney Ch. 5, Temme §12.1.1).
+
+## Main definitions
+
+* `pendulumAngle`: the pendulum solution `y(t) = 2 arcsin(k sn(ωt + φ))`, `k = √m`.
+
+## Main results
+
+* `Real.jacobiDnm_sq_sub_mul_jacobiCnm_sq`: `dn² - m cn² = 1 - m` (from DLMF 22.6.1).
+* `Real.jacobiSnm_deriv_sq`, `Real.jacobiCnm_deriv_sq`, `Real.jacobiDnm_deriv_sq`: the
+  first-order equations DLMF 22.13.1–22.13.3.
+* `Real.iteratedDeriv_two_jacobiSnm`, `Real.iteratedDeriv_two_jacobiCnm`,
+  `Real.iteratedDeriv_two_jacobiDnm`: the second-order equations DLMF 22.13.13–22.13.15.
+* `Real.jacobiSnm_add`, `Real.jacobiCnm_add`, `Real.jacobiDnm_add`: the addition formulas
+  DLMF 22.8.1–22.8.3 (Duverney (5.69)–(5.71)).
+* `Real.jacobi_add_compEllIntKm`: the shift by a quarter period (DLMF Table 22.4.3).
+* `Real.jacobi_half_compEllIntKm`: the values at `K/2` (DLMF Table 22.5.2).
+* `pendulumAngle_ode`, `pendulumAngle_periodic`: the pendulum angle solves
+  `y'' + ω² sin y = 0` and has period `4K/ω` (Duverney Thm 5.6, Rem. 5.7).
+
+## Implementation notes
+
+Following Duverney, the addition formulas are proved by showing that
+`Ψ(u) = N(u, w-u)/(1 - m sn²u sn²(w-u))` has zero derivative, so that it equals `Ψ(0)`. The
+identity `N'D - ND' = 0` is a polynomial identity modulo `sn² + cn² = 1` and `m sn² + dn² = 1`
+at both points.
 -/
 
 @[expose] public section

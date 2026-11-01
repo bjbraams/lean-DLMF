@@ -15,11 +15,19 @@ DLMF item already formalized upstream (in Mathlib or TauCeti) without such a tag
 
   dlmf_upstream 8.17.E3 Complex.betaIntegral_eq_Gamma_mul_div "special case: 0 < re a, re b"
 
-records a pointer instead of a duplicate local theorem. The DLMF reference is parsed by the
-same parser as `@[dlmf]`, and the declaration must exist, so a renamed upstream declaration
-breaks the build rather than leaving a dead pointer. The optional string states how the
-upstream statement relates to the DLMF one (see `DLMFIndex.md`: exact, stronger, special case,
-different convention, partial), followed by free text.
+records a pointer instead of a duplicate local theorem.
+
+## Main definitions
+
+* `UpstreamPointer`: a pointer from a DLMF item to a declaration made elsewhere.
+* `upstreamPointers`: all pointers in the environment, imported and local.
+
+## Implementation notes
+
+The DLMF reference is parsed by the same parser as `@[dlmf]`, and the declaration must exist,
+so a renamed upstream declaration breaks the build rather than leaving a dead pointer. The
+optional string states how the upstream statement relates to the DLMF one (see `DLMFIndex.md`:
+exact, stronger, special case, different convention, partial), followed by free text.
 
 The pointers are kept in the environment extension `upstreamExt` and harvested, together with
 the `@[dlmf]` tags, by `scripts/DumpDLMF.lean`.

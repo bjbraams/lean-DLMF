@@ -8,12 +8,25 @@ module
 public import DLMF.QHypergeometric.Transformations
 
 /-!
-# Bilateral q-hypergeometric transformations (DLMF §17.10)
+# Bilateral basic hypergeometric transformations (DLMF §17.10)
 
-The bilateral series are the actual unconditionally summable series, with their
-annuli stated. The terminating transformation has both finite tails. Denominator
-conditions include the infinite-product prefactors and every transformed series.
-The `idem` notation is expanded into its two or three explicit summands.
+This file proves the transformation and connection formulas of DLMF §17.10 for bilateral
+basic hypergeometric series.
+
+## Main results
+
+* `qPsi2_transformation_one`, `qPsi2_transformation_two`: the `₂ψ₂` transformations
+  DLMF 17.10.1–17.10.2.
+* `qPsi8_terminating_to_qPsi4`: a terminating `₈ψ₈` reduced to a `₄ψ₄` (DLMF 17.10.3).
+* `qPsi2_gaussian_bilateral`: DLMF 17.10.4.
+* `qPsi8_connection`, `qPsi10_connection`: the connection formulas DLMF 17.10.5–17.10.6.
+
+## Implementation notes
+
+The bilateral series are the actual unconditionally summable series, with their annuli
+stated. The terminating transformation has both finite tails. Denominator conditions include
+the infinite-product prefactors and every transformed series. The `idem` notation is expanded
+into its two or three explicit summands.
 -/
 
 @[expose] public noncomputable section

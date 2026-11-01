@@ -11,10 +11,9 @@ public import DLMF.Gamma.Integrals.FourierAndTrigamma
 /-!
 # Mellin–Barnes and related integrals; sums (DLMF §§5.13, 5.16)
 
-Vertical-line integrals are acquired with a real parameter `t` in place of the
-source's `c±i∞` contour, on the indicated real-part strips. The inversion
-contour 5.13.1 is restricted to positive real `z`. Parametrizing `s = σ + it`
-converts the factor `1/(2πi) ds` into `1/(2π) dt`.
-The alternating trigamma sum 5.16.1 has closed-form partial sums, and its limit
-uses the odd part of `ζ(2)`.
+This umbrella collects Barnes's beta integral, the vertical integral of `|Γ(a + it)|²`,
+Barnes's first lemma, Ramanujan's integrals (DLMF §5.13) and the sums of DLMF §5.16. Vertical
+integrals are stated with a real parameter `t` along `s = σ + it` in place of DLMF's
+`c ± i∞` contour, on the indicated real-part strips, so DLMF's factor `1/(2πi) ds` becomes
+`1/(2π) dt`; the inversion contour 5.13.1 is restricted to positive real `z`.
 -/

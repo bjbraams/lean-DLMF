@@ -10,11 +10,27 @@ public import DLMF.Bailey
 /-!
 # Bailey transforms and pairs (DLMF §17.12)
 
-The finite Bailey-pair definition, Bailey lemma and Watson transformation are
-already proved in `DLMF.Bailey`. This module adds the general double-series
-transform and the remaining infinite identity and explicit pair.
-The general transform uses absolute summability, the hypothesis permitting
-the interchange of its two infinite sums.
+The finite Bailey-pair definition, Bailey's lemma and Watson's transformation are in
+`DLMF.Bailey`. This file adds the general double-series Bailey transform, Bailey chains, the
+limiting form of Bailey's lemma and the Rogers–Ramanujan Bailey pair.
+
+## Main definitions
+
+* `generalBaileyBeta`, `generalBaileyGamma`: the finite row and infinite column of a general
+  Bailey transform (DLMF 17.12.2).
+* `IsBaileyChain`: an infinite chain obtained by successive applications of DLMF 17.12.5.
+* `rogersBaileyAlpha`, `rogersBaileyBeta`: the Rogers–Ramanujan Bailey pair (DLMF 17.12.6).
+
+## Main results
+
+* `general_bailey_transform`: the general Bailey transform (DLMF 17.12.1).
+* `limiting_bailey_transform`: the infinite limiting form of Bailey's lemma (DLMF 17.12.4).
+* `isBaileyPair_rogersBailey`: the displayed sequences form a Bailey pair (DLMF 17.12.6).
+
+## Implementation notes
+
+The general transform assumes absolute summability of the double sum, which permits the
+interchange of its two infinite sums.
 -/
 
 @[expose] public noncomputable section
@@ -34,7 +50,7 @@ def generalBaileyGamma (u v δ : ℕ → ℂ) (j : ℕ) : ℂ :=
 
 /-- General Bailey transform, with the double-sum convergence needed by Fubini. -/
 @[dlmf 17.12.E1]
-theorem generalBaileyTransform (u v α δ : ℕ → ℂ)
+theorem general_bailey_transform (u v α δ : ℕ → ℂ)
     (hF : Summable (fun p : ℕ × ℕ =>
       if p.2 ≤ p.1 then α p.2 * δ p.1 * u (p.1 - p.2) * v (p.1 + p.2) else 0)) :
     (∑' j : ℕ, α j * generalBaileyGamma u v δ j) =
@@ -93,13 +109,13 @@ def IsBaileyChain (a q : ℂ) (α β : ℕ → ℕ → ℂ) : Prop :=
             DLMF.QSeries.qPochhammer q q (n-j))
 
 /-- A convergent sequence of complex numbers is bounded in norm. -/
-private lemma qbR4_exists_norm_le_of_tendsto {u : ℕ → ℂ} {L : ℂ} (hu : Tendsto u atTop (𝓝 L)) :
+private lemma exists_norm_le_of_tendsto {u : ℕ → ℂ} {L : ℂ} (hu : Tendsto u atTop (𝓝 L)) :
     ∃ C, ∀ n, ‖u n‖ ≤ C := by
   obtain ⟨C, hC⟩ := isBounded_iff_forall_norm_le.mp (Metric.isBounded_range_of_tendsto u hu)
   exact ⟨C, fun n => hC _ ⟨n, rfl⟩⟩
 
 /-- Tannery's theorem for the finite sums of the Bailey relation (as in `DLMF.Bailey`). -/
-private lemma qbR4_tendsto_sum_range_mul {u : ℕ → ℂ} {v : ℕ → ℕ → ℂ} {L : ℂ} {C : ℝ}
+private lemma tendsto_sum_range_mul_of_dominated {u : ℕ → ℂ} {v : ℕ → ℕ → ℂ} {L : ℂ} {C : ℝ}
     (hu : Summable fun k => ‖u k‖) (hv : ∀ k, Tendsto (fun N => v N k) atTop (𝓝 L))
     (hC : ∀ N k, ‖v N k‖ ≤ C) :
     Tendsto (fun N => ∑ k ∈ range (N + 1), u k * v N k) atTop (𝓝 ((∑' k, u k) * L)) := by
@@ -124,7 +140,7 @@ private lemma qbR4_tendsto_sum_range_mul {u : ℕ → ℂ} {v : ℕ → ℕ → 
 
 /-- The infinite limiting form of Bailey's lemma. -/
 @[dlmf 17.12.E4]
-theorem limitingBaileyTransform {a q : ℂ} {α β : ℕ → ℂ}
+theorem limiting_bailey_transform {a q : ℂ} {α β : ℕ → ℂ}
     (hq : ‖q‖ < 1) (hpair : DLMF.Bailey.IsBaileyPair a q α β)
     (hden : ∀ n : ℕ, DLMF.QSeries.qPochhammer (a * q) q n ≠ 0)
     (hα : Summable (fun n : ℕ => q ^ (n * n) * a ^ n * α n))
@@ -148,14 +164,14 @@ theorem limitingBaileyTransform {a q : ℂ} {α β : ℕ → ℂ}
     convert h using 2 <;> ring
   have tq := tendsto_qPochhammer (w := q) hq
   have taq := tendsto_qPochhammer (w := a * q) hq
-  obtain ⟨Cq, hCq⟩ := qbR4_exists_norm_le_of_tendsto (tq.inv₀ hQ)
-  obtain ⟨Ca, hCa⟩ := qbR4_exists_norm_le_of_tendsto (taq.inv₀ hA)
+  obtain ⟨Cq, hCq⟩ := exists_norm_le_of_tendsto (tq.inv₀ hQ)
+  obtain ⟨Ca, hCa⟩ := exists_norm_le_of_tendsto (taq.inv₀ hA)
   have hCq0 : 0 ≤ Cq := (norm_nonneg _).trans (hCq 0)
-  have limL := qbR4_tendsto_sum_range_mul (u := fun k => q ^ (k * k) * a ^ k * β k)
+  have limL := tendsto_sum_range_mul_of_dominated (u := fun k => q ^ (k * k) * a ^ k * β k)
     (v := fun N k => (qPochhammer q q (N - k))⁻¹) (L := (qPochhammerInf q q)⁻¹)
     (summable_norm_iff.mpr hβ)
     (fun k => ((tq.comp (tendsto_sub_atTop_nat k)).inv₀ hQ)) (fun N k => hCq _)
-  have limR := qbR4_tendsto_sum_range_mul (u := fun k => q ^ (k * k) * a ^ k * α k)
+  have limR := tendsto_sum_range_mul_of_dominated (u := fun k => q ^ (k * k) * a ^ k * α k)
     (v := fun N k => (qPochhammer q q (N - k) * qPochhammer (a * q) q (N + k))⁻¹)
     (L := (qPochhammerInf q q * qPochhammerInf (a * q) q)⁻¹) (summable_norm_iff.mpr hα)
     (fun k => ((tq.comp (tendsto_sub_atTop_nat k)).mul
@@ -184,7 +200,7 @@ def rogersBaileyBeta (q : ℂ) (n : ℕ) : ℂ :=
 /-- The displayed sequences form a Bailey pair wherever their quotients are finite.
 The removable specialization `a=1` is deliberately not identified with `0/0`. -/
 @[dlmf 17.12.E6]
-theorem rogersBaileyPair {a q : ℂ} (ha : a ≠ 1)
+theorem isBaileyPair_rogersBailey {a q : ℂ} (ha : a ≠ 1)
     (hqq : ∀ n : ℕ, DLMF.QSeries.qPochhammer q q n ≠ 0)
     (haq : ∀ n : ℕ, DLMF.QSeries.qPochhammer (a * q) q n ≠ 0) :
     DLMF.Bailey.IsBaileyPair a q (rogersBaileyAlpha a q) (rogersBaileyBeta q) := by

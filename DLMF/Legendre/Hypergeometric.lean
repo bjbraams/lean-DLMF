@@ -12,10 +12,39 @@ public import DLMF.Legendre.AssociatedRecurrences
 /-!
 # Hypergeometric representations and parameter derivatives
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This file gives the hypergeometric representations of the Ferrers and associated Legendre
+functions (DLMF §14.3) and the derivatives with respect to degree and order (DLMF §14.11). The
+degree derivatives come from termwise differentiation in `ν` of `𝐅(ν+1, -ν; c; w)` on the unit
+disk.
+
+## Main definitions
+
+* `legendreGaussF`: the Gauss function `Γ(c) 𝐅(a, b; c; z)` on its principal cut plane
+  (DLMF 14.3.3).
+* `legHypT`: the `n`-th term of `𝐅(ν+1, -ν; c; w)` as a function of the degree.
+* `legendreDegreeA`: the series `𝖠^μ_ν(x)` of DLMF 14.11.3.
+
+## Main results
+
+* `ferrersP_integer_hypergeometric_4`, `ferrersP_integer_hypergeometric_5`,
+  `associatedP_integer_hypergeometric_8`: integer-order forms (DLMF 14.3.4, 14.3.5, 14.3.8).
+* `associated_hypergeometric_9`, `associated_hypergeometric_15`, `associated_hypergeometric_16`,
+  `associated_hypergeometric_18`, `associated_hypergeometric_20`: DLMF 14.3.9, 14.3.15, 14.3.16,
+  14.3.18, 14.3.20.
+* `associatedP_square_hypergeometric`, `olverQ_linear_hypergeometric`: limit forms of
+  DLMF 14.3.17 and 14.3.19.
+* `legendreDegreeA_hasSum`: convergence of the series of DLMF 14.11.3.
+* `ferrersP_degree_deriv`, `ferrersQ_degree_deriv`: degree derivatives (DLMF 14.11.1, 14.11.2).
+* `ferrersP_order_deriv_zero`, `ferrersQ_order_deriv_zero`, `associatedP_order_deriv_zero`:
+  order derivatives at `μ = 0` (DLMF 14.11.4, 14.11.5).
+
+## Implementation notes
+
+`legendreGaussF` is the analytic continuation on the cut plane, not the totalized power series
+outside its disk of convergence. With Lean's principal branches, `associated_hypergeometric_9`
+holds for all `z`, extending DLMF 14.3.9 beyond `z ∉ (-∞, 1]`. DLMF 14.3.17 is stated as a
+boundary-value limit onto the cut of the hypergeometric function, and DLMF 14.3.19 as a limit
+in the degree that covers the removable singularities of the gamma prefactor.
 -/
 
 @[expose] public noncomputable section
@@ -83,10 +112,11 @@ theorem associatedP_integer_hypergeometric_8 (ν : ℂ) (m : ℕ) {z : ℂ} (hz 
   linear_combination (poch (ν-((k+1:ℕ):ℂ)+1) (2*(k+1)) *
     regularizedGaussHG (ν+((k+1:ℕ):ℂ)+1) (((k+1:ℕ):ℂ)-ν) (((k+1:ℕ):ℂ)+1) ((1-z)/2)) * hg
 
-/-- DLMF 14.3.9: for `z ∉ (-∞, 1]`, `P^{-μ}_ν(z) = ((z-1)/(z+1))^{μ/2} 𝐅(ν+1, -ν; μ+1; (1-z)/2)`,
-with principal branches. -/
+/-- DLMF 14.3.9: `P^{-μ}_ν(z) = ((z-1)/(z+1))^{μ/2} 𝐅(ν+1, -ν; μ+1; (1-z)/2)`, with principal
+branches. DLMF assumes `z ∉ (-∞, 1]`; with Lean's principal branches the identity holds for all
+`z`, which extends DLMF via Lean's conventions. -/
 @[dlmf 14.3.E9]
-theorem associated_hypergeometric_9 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem associated_hypergeometric_9 (ν μ : ℂ) {z : ℂ} :
     associatedP ν (-μ) z=exp (μ/2*(log (z-1)-log (z+1)))*regularizedGaussHG (ν+1) (-ν) (μ+1) ((1-z)/2) := by
   unfold associatedP
   rw [show 1-(-μ) = μ+1 by ring,

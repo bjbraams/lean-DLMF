@@ -14,6 +14,17 @@ public import DLMFMathlib.Analysis.Fourier.L1Inversion
 Logarithmic coordinates transport the bilinear Fourier pairing to the Mellin transform.
 Only one Mellin transform needs to be integrable on its vertical line; no square-integrability
 assumption on the original functions is required.
+
+## Main results
+
+* `mellin_vertical_eq_fourier`: on a vertical line the Mellin transform is the Fourier
+  transform of the weighted function in logarithmic coordinates.
+* `mellin_conj`: complex conjugation commutes with the Mellin transform after conjugating the
+  exponent.
+* `Complex.VerticalIntegrable.mellin_comp_mul_left`: positive dilation preserves integrability
+  of a Mellin transform on a vertical line.
+* `integral_mul_eq_mellin_parseval`: Mellin Parseval's bilinear identity on complementary
+  vertical lines.
 -/
 
 @[expose] public noncomputable section

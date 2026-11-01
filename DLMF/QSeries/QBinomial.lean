@@ -11,11 +11,17 @@ public import DLMF.QSeries.Pochhammer
 /-!
 # Gaussian `q`-binomial coefficients (Duverney §10.1.1)
 
-`qBinom q n k = [n k]_q` is defined by the `q`-Pascal rule (Duverney (10.6)–(10.7)). This file
-proves `[n k]_1 = C(n,k)`, the product form `[k+m, k]_q (q;q)_k (q;q)_m = (q;q)_{k+m}`
-(Duverney (10.4)), and Cauchy's finite `q`-binomial theorem
-`(x;q)_n = ∑_k [n k]_q (-1)^k q^{k(k-1)/2} x^k` (Duverney (10.8)), and the limit
-`[n k]_q → C(n,k)` as `q → 1` (10.5). Mathlib has no Gaussian binomial coefficients.
+The Gaussian coefficient `qBinom q n k = [n k]_q` is defined by the `q`-Pascal rule
+(Duverney (10.6)–(10.7)). Mathlib has no Gaussian binomial coefficients.
+
+## Main results
+
+* `qBinom_succ_succ`: the `q`-Pascal rule (DLMF 17.2.31).
+* `qBinom_one`: `[n k]_1 = C(n, k)`.
+* `qBinom_mul_qPochhammer`: `[k+m, k]_q (q;q)_k (q;q)_m = (q;q)_{k+m}` (Duverney (10.4)).
+* `qPochhammer_eq_sum_qBinom`: Cauchy's finite `q`-binomial theorem
+  `(x;q)_n = ∑_k [n k]_q (-1)^k q^{k(k-1)/2} x^k` (Duverney (10.8), DLMF 17.2.35).
+* `tendsto_qBinom`: `[n k]_q → C(n, k)` as `q → 1` (Duverney (10.5), DLMF 17.2.28).
 -/
 
 @[expose] public section

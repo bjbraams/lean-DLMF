@@ -10,12 +10,27 @@ public import DLMF.Gamma.Polygamma
 public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 
 /-!
-# Catalan's constant (Duverney Remark 2.9, Exercise 2.12)
+# Catalan's constant
 
-Catalan's constant `G = ∑ (-1)^k/(2k+1)² = β(2)` is not in Mathlib. With `λ(2) = (3/4) ζ(2) = π²/8`
-from `DLMF.Constants.Dirichlet`, splitting the odd squares by residue mod 4 gives
-`∑ 1/(4k+1)² = (π²/8 + G)/2` and `∑ 1/(4k+3)² = (π²/8 - G)/2`, hence, by the trigamma series,
-`ψ'(1/4) = π² + 8G` and `ψ'(3/4) = π² - 8G`.
+This file defines Catalan's constant `G = ∑ (-1)^k/(2k+1)² = β(2)` (DLMF 25.11.40, Duverney
+Remark 2.9), which is not in Mathlib, and evaluates the trigamma function at `1/4` and `3/4`.
+
+## Main definitions
+
+* `catalanConstant`: Catalan's constant `G`.
+
+## Main results
+
+* `hasSum_catalanConstant`: the series of `G` converges absolutely.
+* `hasSum_one_div_odd_sq_complex`: `∑ 1/(2k+1)² = π²/8`.
+* `hasSum_quarter_sq`: `∑ 1/(4k+1)² = (π²/8 + G)/2` and `∑ 1/(4k+3)² = (π²/8 - G)/2`.
+* `trigamma_one_quarter`, `trigamma_three_quarters`: `ψ'(1/4) = π² + 8G` and
+  `ψ'(3/4) = π² - 8G` (Duverney Remark 2.9, Exercise 2.12).
+
+## Implementation notes
+
+The value `λ(2) = (3/4) ζ(2) = π²/8` comes from `DLMF.Constants.Dirichlet`; splitting the odd
+squares by residue mod 4 and using the trigamma series gives the values of `ψ'`.
 -/
 
 @[expose] public section

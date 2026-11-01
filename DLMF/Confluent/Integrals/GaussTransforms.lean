@@ -8,13 +8,24 @@ module
 public import DLMF.Confluent.Integrals.Stieltjes
 
 /-!
-# Gauss transforms of confluent hypergeometric functions
+# A Gaussian transform of Kummer's function
 
-Gaussian integral transforms of Kummer functions, including their branch powers and
-normalization.
+This file proves the Gaussian-weighted Laplace transform of the regularized Kummer function
+`𝐌(a,b,t²)` (DLMF 13.10.6).
 
-Source references and common attribution are retained in
-`DLMF.Confluent.Integrals`.
+## Main results
+
+* `gauss_regularizedHGFun`: the Gaussian transform of `𝐌`, for `0 < Re z` (DLMF 13.10.6).
+* `confLP_subordination`: `∫₀^∞ e^{-t²u - ζ²/(4u)} u^{-3/2} du = (2√π/ζ) e^{-ζt}` for
+  `ζ, t > 0`.
+* `confLP_gauss_real`: DLMF 13.10.6 for real positive `z`.
+* `confLP_gauss_differentiableOn`: holomorphy of the transform in `z`.
+
+## Implementation notes
+
+For real `z` the transform follows by subordination and Fubini: the inner integral is a Kummer
+Laplace transform after `s = t²`, and the outer integral becomes Tricomi's Gauss-type integral
+DLMF 13.4.8 after `u = 1/v`. Holomorphy in `z` extends it to the half-plane.
 -/
 
 @[expose] public section

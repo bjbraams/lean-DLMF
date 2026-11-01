@@ -10,13 +10,50 @@ public import DLMF.OrthogonalPolynomials.Differential
 /-!
 # Associated, Bessel, Pollaczek, Freud, and exceptional polynomials
 
-Finite Bessel orthogonality expands into reciprocal Gamma moments and a finite
-Pochhammer Vandermonde convolution. Mathlib’s reciprocal-power and exponential changes
-of variables justify the integrals and transfer the Bessel norm to the Morse functions.
+Associated orthogonal polynomials (DLMF §18.30), Freud weights (§18.32), Bessel polynomials
+(§18.34), Pollaczek polynomials (§18.35) and exceptional Laguerre and Hermite polynomials
+(§18.36).
 
-Statements from NIST DLMF Chapter 18, each tagged with its equation number by `@[dlmf]`.
-Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
-hypergeometric definitions do not implement continuation in singular parameters.
+## Main definitions
+
+* `associated`: the general associated family of a three-term recurrence (DLMF 18.30.3).
+* `associatedLaguerre`, `associatedHermite`, `associatedMeixnerPollaczek`: the associated
+  Laguerre, Hermite and Meixner–Pollaczek polynomials (DLMF 18.30.9, 18.30.13, 18.30.16).
+* `freudWeight`: the Freud weight `|x|^α e^{-Q(x)}` (DLMF 18.32.2).
+* `besselPolynomial`, `reverseBesselPolynomial`: the Bessel polynomials `y_n(x; a)` and their
+  reversal (DLMF 18.34.1–18.34.2).
+* `morsePolynomialFunction`: the finite family of the Morse differential equation.
+* `pollaczek`: the Pollaczek polynomials `P_n^{(λ)}(x; a, b, c)` (DLMF 18.35.2).
+* `exceptionalLaguerre`, `exceptionalLaguerreWeight`, `exceptionalHermite`: exceptional
+  Laguerre and Hermite polynomials and the exceptional Laguerre weight (DLMF §18.36).
+
+## Main results
+
+* `associatedPollaczek_limit_laguerrePolyL`, `associatedPollaczek_limit_hermite`: limits of
+  associated Meixner–Pollaczek polynomials (DLMF 18.30.19–18.30.20).
+* `besselPolynomial_eq_laguerrePolyL`, `besselPolynomial_recurrence`,
+  `besselPolynomial_differential_equation`: Bessel polynomials as Laguerre polynomials, their
+  recurrence and differential equation (DLMF 18.34.1, 18.34.4, 18.34.7).
+* `besselPolynomial_finite_orthogonality`, `jacobi_limit_besselPolynomial`: finite orthogonality
+  and the limit from Jacobi polynomials (DLMF 18.34.8).
+* `morsePolynomialFunction_ode`, `morsePolynomialFunction_orthogonality`: the Morse functions.
+* `pollaczek_finite_sum`, `pollaczek_orthogonality`, `pollaczek_generating_function`: explicit
+  sum, orthogonality and generating function of the Pollaczek polynomials (DLMF 18.35.4,
+  18.35.5, 18.35.7).
+* `pollaczek_eq_ultrasphPoly`, `pollaczek_eq_meixnerPollaczek`,
+  `pollaczek_eq_associatedMeixnerPollaczek`: special cases DLMF 18.35.8–18.35.10.
+* `laguerrePolyL_negative_integer_parameter`: Laguerre polynomials with negative integer
+  parameter (DLMF 18.36.2).
+* `exceptionalLaguerre_orthogonality`, `exceptionalLaguerre_differential_equation`,
+  `exceptionalHermite_orthonormal`: DLMF 18.36.6, 18.36.7 and 18.36.10.
+
+## Implementation notes
+
+Finite Bessel orthogonality expands into reciprocal Gamma moments and a finite Pochhammer
+Vandermonde convolution. Mathlib's reciprocal-power and exponential changes of variables
+justify the integrals and transfer the Bessel norm to the Morse functions. Jacobi and
+Gegenbauer statements retain regularity hypotheses because the project's hypergeometric
+definitions do not implement continuation in singular parameters.
 -/
 
 @[expose] public section

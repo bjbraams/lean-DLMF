@@ -11,12 +11,25 @@ public import DLMF.Gamma.Polygamma
 # Series of rational functions summed by the digamma function (Duverney §2.2)
 
 If `∑ₖ Aₖ = 0`, the series `∑ₙ ∑ₖ Aₖ/(n - aₖ)` converges and equals `-∑ₖ Aₖ ψ(-aₖ)`
-(Duverney (2.34)). This follows from the complex digamma series 5.7.6. Example 2.8 gives
-`∑ 1/(2n²+3n+1) = 2 ln 2`.
+(Duverney (2.34)). This follows from the complex digamma series 5.7.6.
+
+## Main results
+
+* `hasSum_cDigammaTerm`: the digamma series as a `HasSum`.
+* `hasSum_sum_div_sub`: sums of rational functions by the digamma function (Duverney (2.34)).
+* `hasSum_one_div_two_mul_sq_add`: `∑ 1/(2n²+3n+1) = 2 ln 2` (Duverney, Example 2.8).
+* `tendsto_sum_neg_one_pow_div_add`: the partial sums of `∑ (-1)ⁿ/(z+n)` tend to
+  `½(ψ((z+1)/2) - ψ(z/2))` (Duverney (2.36)).
+* `tendsto_sum_neg_one_pow_sum_div_sub`: the alternating rational version (Duverney (2.37)).
+
+## Implementation notes
 
 The alternating series `∑ (-1)ⁿ/(z+n)` converges only conditionally, so it is stated through
-partial sums: they tend to `½(ψ((z+1)/2) - ψ(z/2))` (Duverney (2.36)). The rational version
-(Duverney (2.37)) follows by linearity.
+partial sums.
+
+## References
+
+* D. Duverney, *An Introduction to Hypergeometric Functions*, §2.2.
 -/
 
 @[expose] public section

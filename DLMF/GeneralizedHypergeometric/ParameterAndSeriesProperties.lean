@@ -14,23 +14,36 @@ public import DLMF.Hypergeometric.Solutions
 public import Mathlib.RingTheory.PowerSeries.Basic
 
 /-!
-# Generalized hypergeometric definitions and continuation: DLMF §§16.1–16.2
+# Generalized hypergeometric series and principal continuation (DLMF §§16.1–16.2)
 
-Canonical definitions are in `DLMF.GeneralizedHypergeometric.Basic`; this module develops their properties.
+Properties of the definitions in `DLMF.GeneralizedHypergeometric.Basic`.
 
-Mathlib's `regularizedHGFun` is a totalized power-series sum. It is not an analytic
-continuation outside its convergence disk. Here `genRegularizedHG` uses a uniquely
-normalized principal continuation for `p=q+1`; `genHG` restores the Gamma factors
-when lower parameters are regular. Nonprincipal boundary values are kept separately.
-For `p>q+1` nonterminating series no analytic value is assigned by this API; contour
-values are acquired separately in `Integrals`. `genFiniteHG` handles terminating
-expressions whose lower parameters may be exceptional after the final retained term.
+## Main results
 
-Mathlib supplies convergent-series radii and holomorphy. Existing local generalized
-calculus supplies differentiation and contiguity; no duplicate proof is introduced.
-Finite inversion multiplies the existing local scalar Pochhammer reflection identity
-and uses Mathlib's descending-factorial/binomial normalization. The integer-index
-Gamma bridge uses Mathlib's Gamma recurrence and its explicit pole totalization.
+* `genPrincipalContinuation_exists`, `genPrincipalContinuation_unique`: existence and
+  uniqueness of the normalized principal continuation for `p = q + 1`.
+* `genRegularizedHG_eq_series`, `genRegularizedHG_eq_series_of_terminates`: agreement with the
+  power series.
+* `genCoeff_eq_gamma_mul_regularized`: ordinary and regularized coefficients, DLMF 16.2.5.
+* `genHG_hasSum_disk`: the defining series converges to the principal value, DLMF 16.2.1.
+* `genHG_eq_finite`: terminating series are polynomials.
+* `genFiniteHG_inversion`, `genFiniteHG_partial_sum_inversion`: the terminating inversion
+  formulas, DLMF 16.2.3–16.2.4.
+
+## Implementation notes
+
+Mathlib's `regularizedHGFun` is a totalized power-series sum, not an analytic continuation
+outside its convergence disk. Here `genRegularizedHG` uses a uniquely normalized principal
+continuation for `p = q + 1`, and `genHG` restores the Gamma factors when the lower parameters
+are regular. Nonprincipal boundary values are kept separately. For nonterminating series with
+`p > q + 1` no analytic value is assigned by this API; contour values are in
+`DLMF.GeneralizedHypergeometric.Integrals`. `genFiniteHG` handles terminating expressions whose
+lower parameters may be exceptional after the final retained term.
+
+Mathlib supplies convergent-series radii and holomorphy. Finite inversion multiplies the
+scalar Pochhammer reflection identity `poch_one_sub_sub_mul` over the parameter multiset and
+uses Mathlib's descending-factorial and binomial normalization. The integer-index Gamma bridge
+uses Mathlib's Gamma recurrence and its pole totalization.
 -/
 
 @[expose] public section
@@ -125,7 +138,7 @@ theorem genGamma_shift_nat {b : Multiset ℂ} (hb : GenDenRegular b) (n : ℕ) :
     (Complex.Gamma_add_nat_div_Gamma_eq x (hb x hx))
 
 /-- The regularized principal germ agrees with the native power-series germ. -/
-theorem genRegularizedHG_eq_series {a b : Multiset ℂ} (h : a.card ≤ b.card + 1)
+theorem genRegularizedHG_eq_series {a b : Multiset ℂ}
     {z : ℂ} (hz : ‖z‖ < 1) :
     genRegularizedHG a b z = Complex.regularizedHGFun a b z := by
   classical
@@ -163,7 +176,7 @@ theorem genHG_hasSum_disk {a b : Multiset ℂ} (h : a.card ≤ b.card + 1)
     simpa [Complex.regularizedHGFun, Complex.regularizedHGFunSeries,
       FormalMultilinearSeries.ofScalars_apply_eq, mul_comm] using
       (Complex.regularizedHGFunSeries a b).hasSum (x := z) hzr
-  rw [genHG, genRegularizedHG_eq_series h hz]
+  rw [genHG, genRegularizedHG_eq_series hz]
   refine (hs.mul_left (genGamma b)).congr_fun fun n => ?_
   rw [genCoeff_eq_gamma_mul_regularized hb]
   ring

@@ -13,9 +13,32 @@ public import Mathlib.Analysis.Complex.CauchyIntegral
 /-!
 # Complex Chebyshev series of entire functions
 
-Complex-valued coefficient decay and pointwise reconstruction, generalized from
-`DLMF/OrthogonalPolynomials/ChebyshevExpansion.lean`. The proofs use Mathlib's
-Fourier series on `AddCircle` and the rectangular Cauchy theorem.
+Chebyshev coefficients `c_n = (2/π) ∫₀^π f(cos θ) cos (nθ) dθ` of complex-valued continuous
+functions on `[-1, 1]`, their geometric decay for analytic functions, and pointwise
+reconstruction. The proofs use Mathlib's Fourier series on `AddCircle` and the rectangular
+Cauchy theorem.
+
+## Main definitions
+
+* `complexCoeff`: complex Chebyshev coefficients, with the customary doubled zeroth
+  coefficient.
+* `complexCircleFun`: `θ ↦ f(cos θ)` as a continuous function on `ℝ/2πℤ`.
+
+## Main results
+
+* `fourierCoeff_complexCircleFun`: the Fourier coefficients of `θ ↦ f(cos θ)` are half the
+  Chebyshev coefficients.
+* `hasSum_complexCoeff_mul_T`: convergence of the Chebyshev series under absolute
+  summability of the coefficients (Temme (6.65)–(6.66)).
+* `norm_complexCoeff_le`: geometric decay of the coefficients for functions analytic on a
+  Bernstein ellipse (Temme §6.9.2).
+* `exists_summable_series_of_entire`: every entire function has an absolutely summable
+  Chebyshev series on `[-1, 1]`, including both endpoints.
+
+## References
+
+* N. M. Temme, *Special Functions*, §6.9.
+* T. J. Rivlin, *Chebyshev Polynomials*.
 -/
 
 @[expose] public noncomputable section

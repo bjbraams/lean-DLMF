@@ -13,24 +13,44 @@ public import DLMF.OrthogonalPolynomials.JacobiDiscriminant
 # The classical families as instances of the general theory
 
 `IsOrthogonalPolynomials μ p` (`General.lean`) is instantiated for the Jacobi, Laguerre and
-Hermite polynomials, with `μ` the weight measure `(volume.restrict I).withDensity w`.
+Hermite polynomials, and also for the Gegenbauer, Legendre and Chebyshev `T` polynomials, with
+`μ` the weight measure `(volume.restrict I).withDensity w`.
+
+## Main definitions
+
+* `weightMeasure`: the measure `w(x) dx` on a set `I`.
+* `hermiteMeasure`, `laguerreMeasure`, `laguerreWeight`, `jacobiWeight`: the classical weights.
+* `laguerrePolyLR`, `jacobiPolyPR`, `ultrasphPolyR`: the Laguerre, Jacobi and Gegenbauer
+  polynomials as real polynomials.
+
+## Main results
 
 * `isOrthogonalPolynomials_weightMeasure`: a weight positive on a set of positive measure that
   integrates every polynomial yields an instance as soon as orthogonality is known.
-* `IsOrthogonalPolynomials.lt_of_mem_roots`, `mem_roots_lt`: the zeros lie strictly inside any
-  almost-everywhere bounds of the measure; `exists_strictMono_roots` lists them increasingly
-  and identifies them with all complex zeros.
+* `IsOrthogonalPolynomials.lt_of_mem_roots`, `IsOrthogonalPolynomials.mem_roots_lt`: the zeros
+  lie strictly inside any almost-everywhere bounds of the measure;
+  `IsOrthogonalPolynomials.exists_strictMono_roots` lists them increasingly and identifies them
+  with all complex zeros.
 * `jacobi_isOrthogonalPolynomials`, `laguerre_isOrthogonalPolynomials`,
-  `hermite_isOrthogonalPolynomials`, with the real polynomials `jacobiPolyPR`, `laguerrePolyLR`
-  and `hermitePolyHR`.
-* Zeros: `jacobiPolyP_zeros_Ioo`, `laguerrePolyL_zeros_pos`, `hermitePolyH_zeros_bound`
-  (the last with the bound `|x| < √(2n+1)` from a Gershgorin-type argument on the recurrence).
-* Gauss quadrature and Christoffel–Darboux for each family.
-* Completeness (`IsOrthogonalPolynomials.ae_eq_zero_of_forall_integral_mul_eq_zero`, from
-  TauCeti's moment determinacy under a finite exponential moment): `jacobiPolyP_complete`,
-  `laguerrePolyL_complete`, `hermitePolyH_complete`, `ultrasphPoly_complete`.
-* Gegenbauer (`ultrasphPolyR`, `λ > -1/2`, `λ ≠ 0`), Legendre and Chebyshev `T` instances, with
-  their zeros in `(-1,1)`.
+  `hermite_isOrthogonalPolynomials`, `ultrasph_isOrthogonalPolynomials`,
+  `legendre_isOrthogonalPolynomials`, `chebyshevT_isOrthogonalPolynomials`: the instances.
+* `jacobiPolyP_zeros_Ioo`, `laguerrePolyL_zeros_pos`, `hermitePolyH_zeros_bound`,
+  `ultrasphPoly_zeros_Ioo`, `legendrePolyP_zeros_Ioo`, `chebyshevT_zeros_Ioo`: the zeros are
+  real, simple and in the interval of orthogonality (DLMF §18.16); for Hermite with the bound
+  `|x| < √(2n+1)` of DLMF 18.16.16.
+* `jacobi_gauss_quadrature`, `laguerre_gauss_quadrature`, `hermite_gauss_quadrature`: Gauss
+  quadrature for each family.
+* `jacobi_christoffel_darboux`, `laguerre_christoffel_darboux`, `hermite_christoffel_darboux`:
+  the Christoffel–Darboux formula for each family.
+* `IsOrthogonalPolynomials.ae_eq_zero_of_forall_integral_mul_eq_zero`: completeness under a
+  finite exponential moment, from Tau Ceti's moment determinacy.
+* `jacobiPolyP_complete`, `laguerrePolyL_complete`, `hermitePolyH_complete`,
+  `ultrasphPoly_complete`: completeness of the classical families in `L²` (DLMF §18.18(i)).
+
+## Implementation notes
+
+The Hermite zero bound `|x| < √(2n+1)` comes from a Gershgorin-type argument on the
+recurrence. The Gegenbauer instance requires `λ > -1/2`, `λ ≠ 0`.
 -/
 
 @[expose] public section

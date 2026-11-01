@@ -10,6 +10,13 @@ public import DLMF.Hypergeometric.Basic.PrincipalBranch
 
 /-!
 # Legendre and Ferrers functions in the hypergeometric normalization
+
+## Main definitions
+
+* `legendreP`: the Legendre function of the first kind `P_ν(z) = F(-ν, ν+1; 1; (1-z)/2)`,
+  analytic off `(-∞, -1]` (DLMF 14.3.6 with `μ = 0`).
+* `ferrersP`: the Ferrers function of the first kind on `(-1, 1)`,
+  `𝖯^μ_ν(x) = ((1+x)/(1-x))^{μ/2} 𝐅(ν+1, -ν; 1-μ; (1-x)/2)` (DLMF 14.3.1).
 -/
 
 @[expose] public noncomputable section

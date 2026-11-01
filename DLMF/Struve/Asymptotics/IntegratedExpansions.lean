@@ -8,12 +8,19 @@ module
 public import DLMF.Struve.Asymptotics.IntegratedKernels
 
 /-!
-# Asymptotic expansions of integrated Struve functions
+# Asymptotic expansions of integrated Struve functions (DLMF 11.6.3–11.6.4)
 
-Evaluation of the integrated kernels gives the Struve primitive expansions and their constants.
+This file proves the large-argument expansions of `∫₀^z 𝐊₀(t) dt` and `∫₀^z 𝐌₀(t) dt`,
+including the constants `(2/π)(log 2z + γ)`.
 
-Source references and common attribution are retained in
-`DLMF.Struve.Asymptotics`.
+## Main results
+
+* `struvePrim_term_hasDerivAt`, `struvePrim_term_zero`: the terms of the expansion of
+  `∫₀^z 𝐊₀` differentiate to those of `𝐊₀`.
+* `struveK_primitive_asymptotic`: the expansion DLMF 11.6.3.
+* `struvePrim_primitive_M_ofReal`: Fubini for the primitive of `𝐌₀` on the positive axis.
+* `struvePrim_tendsto_M_ofReal`: `∫₀^x 𝐌₀ + (2/π)(log 2x + γ) → 0` as `x → +∞`.
+* `struveM_primitive_asymptotic`: the expansion DLMF 11.6.4.
 -/
 
 @[expose] public noncomputable section

@@ -12,29 +12,46 @@ public import Mathlib.NumberTheory.LSeries.ZetaZeros
 /-!
 # Zeros of the Riemann zeta function (DLMF §25.10)
 
-§25.10(i). Mathlib proves `ζ(s) ≠ 0` for `Re s ≥ 1` (`riemannZeta_ne_zero_of_one_le_re`) and the
-trivial zeros `ζ(-2n) = 0` (`riemannZeta_neg_two_mul_nat_add_one`); pointers are in
-`DLMF.Zeta.MathlibCoverage`. This file proves that `ζ(s) ≠ 0` for `Re s ≤ 0` except at the trivial
-zeros, the two symmetries of the zeros in the critical strip, and acquires the existence of
-infinitely many zeros there. The Riemann hypothesis is a conjecture and is not acquired; Mathlib's
-`RiemannHypothesis` is the statement (pointer only).
+The distribution of the zeros of `ζ` (DLMF §25.10(i)), the Riemann–Siegel functions `θ` and
+`Z`, and the counting functions and Riemann–Siegel formula of §25.10(ii). Mathlib proves
+`ζ(s) ≠ 0` for `Re s ≥ 1` (`riemannZeta_ne_zero_of_one_le_re`) and the trivial zeros
+`ζ(-2n) = 0` (`riemannZeta_neg_two_mul_nat_add_one`); pointers are in
+`DLMF.Zeta.MathlibCoverage`. The Riemann hypothesis is a conjecture and is not stated here;
+Mathlib's `RiemannHypothesis` is the statement (pointer only).
 
-The Riemann–Siegel functions: `riemannSiegelTheta t = ph Γ(¼ + ½it) - ½ t ln π` with the
-principal phase, as DLMF prescribes (25.10.2), and `riemannSiegelZ t = e^{iθ(t)} ζ(½ + it)`
-(25.10.1). With the principal phase `θ` is discontinuous (it differs from the usual continuous
-Riemann–Siegel theta function by integer multiples of `2π`), but `e^{iθ}`, and hence `Z`, do not
-depend on the choice. `riemannSiegelZ` equals Mathlib's `hardyZ` (`riemannSiegelZ_eq_hardyZ`), so
-`Z` is real, `|Z(t)| = |ζ(½+it)|` and `Z` vanishes exactly at the zeros on the critical line. That
-`Z` changes sign infinitely often (Hardy's theorem) is admitted; the infinitude of zeros on the
-critical line and in the critical strip is proved from it.
+## Main definitions
 
-§25.10(ii). `riemannZeroCount T` is `N(T)`, the number of zeros in the critical strip with
-`0 < Im s < T`, counted with multiplicity; `criticalLineZeroCount T` counts those on the critical
-line. The Riemann–Siegel formula 25.10.3 is stated for the remainder `riemannSiegelRemainder`, and
-the first term of its asymptotic series (25.10.4) along `t` with `cos √(2πt) ≠ 0` (at the other `t`
-the printed quotient is a removable `0/0` form). The proportion result of Bui, Conrey and Young
-(more than 41% of the zeros lie on the critical line) is acquired as an eventual inequality; the
-statement about the first ten billion zeros is numerical and excluded.
+* `criticalStripZeros`: the zeros of `ζ` in the critical strip `0 < Re s < 1`.
+* `riemannSiegelTheta`: `θ(t) = ph Γ(¼ + ½it) - ½ t ln π` (DLMF 25.10.2).
+* `riemannSiegelZ`: `Z(t) = e^{iθ(t)} ζ(½ + it)` (DLMF 25.10.1).
+* `riemannZeroCount`, `criticalLineZeroCount`: `N(T)`, the number of zeros in the critical strip
+  with `0 < Im s < T` counted with multiplicity, and the number of those on the critical line.
+* `riemannSiegelRemainder`: the remainder `R(t)` of the Riemann–Siegel formula (DLMF 25.10.3).
+
+## Main results
+
+* `riemannZeta_ne_zero_of_re_nonpos`: `ζ(s) ≠ 0` for `Re s ≤ 0` except at the trivial zeros.
+* `riemannZeta_conj_eq_zero_iff`, `riemannZeta_one_sub_eq_zero_iff`: the symmetries of the zeros
+  about the real axis and about the critical line.
+* `riemannSiegelZ_eq_hardyZ`, `riemannSiegelZ_im`, `norm_riemannSiegelZ`,
+  `riemannSiegelZ_eq_zero_iff`: `Z` is Mathlib's `hardyZ`, real, `|Z(t)| = |ζ(½+it)|`, and it
+  vanishes exactly at the zeros on the critical line.
+* `riemannSiegelZ_sign_changes`: Hardy's theorem, `Z` changes sign infinitely often.
+* `exists_riemannZeta_critical_line_zero_gt`, `criticalStripZeros_infinite`: infinitely many
+  zeros on the critical line and in the critical strip, derived from Hardy's theorem.
+* `finite_criticalStripZerosBelow`: finitely many zeros in the strip with `0 < Im s < T`.
+* `riemannSiegelRemainder_isBigO`, `riemannSiegelRemainder_sub_leading_isBigO`: the
+  Riemann–Siegel formula (DLMF 25.10.3) and the first term of its asymptotic series (25.10.4).
+* `eventually_criticalLineZeroCount_gt`: more than 41% of the zeros lie on the critical line
+  (Bui, Conrey and Young), as an eventual inequality.
+
+## Implementation notes
+
+`riemannSiegelTheta` uses the principal phase, as DLMF prescribes. It is then discontinuous (it
+differs from the usual continuous Riemann–Siegel theta function by integer multiples of `2π`),
+but `e^{iθ}`, and hence `Z`, do not depend on the choice. The asymptotic term 25.10.4 is stated
+along the `t` with `cos √(2πt) ≠ 0`; at the other `t` the printed quotient is a removable `0/0`
+form. The statement about the first ten billion zeros is numerical and excluded.
 -/
 
 @[expose] public noncomputable section
@@ -153,13 +170,13 @@ def riemannSiegelZ (t : ℝ) : ℂ :=
   cexp (I * riemannSiegelTheta t) * riemannZeta (1 / 2 + t * I)
 
 /-- `e^z = e^{Re z} e^{i Im z}`. -/
-private lemma z25a_exp_eq (z : ℂ) : cexp z = (Real.exp z.re : ℂ) * cexp (z.im * I) := by
+private lemma cexp_eq_exp_re_mul_cexp_im (z : ℂ) : cexp z = (Real.exp z.re : ℂ) * cexp (z.im * I) := by
   rw [ofReal_exp, ← Complex.exp_add]
   congr 1
   exact (re_add_im z).symm
 
 /-- `e^{iθ(t)} = Γ_ℝ(½+it)/|Γ_ℝ(½+it)|`: the phase of the archimedean factor. -/
-private lemma z25a_exp_theta (t : ℝ) :
+private lemma norm_Gammaℝ_mul_cexp_riemannSiegelTheta (t : ℝ) :
     ((‖Gammaℝ (1 / 2 + t * I)‖ : ℝ) : ℂ) * cexp (I * riemannSiegelTheta t) =
       Gammaℝ (1 / 2 + t * I) := by
   have hw : (1 / 2 + t * I) / 2 = 1 / 4 + t / 2 * I := by ring
@@ -185,7 +202,7 @@ private lemma z25a_exp_theta (t : ℝ) :
     push_cast
     ring
   rw [Gammaℝ_def, hw, ← hGdef, hcp, norm_mul, Complex.norm_exp, he]
-  conv_rhs => rw [z25a_exp_eq z, hG']
+  conv_rhs => rw [cexp_eq_exp_re_mul_cexp_im z, hG']
   push_cast
   ring
 
@@ -198,7 +215,7 @@ theorem riemannSiegelZ_eq_hardyZ (t : ℝ) : riemannSiegelZ t = hardyZ t := by
   have hn : ((‖Gammaℝ (1 / 2 + t * I)‖ : ℝ) : ℂ) ≠ 0 := by
     exact_mod_cast norm_ne_zero_iff.mpr hg
   rw [ofReal_hardyZ, riemannSiegelZ, riemannZeta_def_of_ne_zero hs0]
-  conv_lhs => rw [← z25a_exp_theta t]
+  conv_lhs => rw [← norm_Gammaℝ_mul_cexp_riemannSiegelTheta t]
   field_simp
 
 /-- DLMF 25.10.1–25.10.2: `Z(t)` is real. -/

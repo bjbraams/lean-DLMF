@@ -11,19 +11,43 @@ public import DLMF.EllipticIntegrals.SpecialCases
 /-!
 # Derivatives and differential equations of Legendre's integrals (DLMF §19.4)
 
-Complex-modulus forms of DLMF 19.4.1–19.4.9. Here `k'² = 1 - k²`. The complete integrals are
+Complex-modulus forms of DLMF 19.4.1–19.4.9, with `k'² = 1 - k²`. The complete integrals are
 differentiated on the principal domain `{k ≠ 0, 1 - k² ∈ ℂ \ (-∞, 0]}`; the incomplete ones at
 a complex amplitude `φ` whose path `[0, φ]` keeps `1 - k² sin²θ` in `ℂ \ (-∞, 0]`
-(`LegendrePathOK`), with `Δ = (1 - k² sin²φ)^{1/2}`. The real-parameter forms (in `m = k²`) are
-the existing `DLMF.Elliptic.Real.hasDerivAt_compEllIntKm`, `Real.hasDerivAt_compEllIntEm`,
+(`LegendrePathOK`), with `Δ = (1 - k² sin²φ)^{1/2}`.
+
+## Main definitions
+
+* `LegendrePathOK`: the path condition on the amplitude.
+* `compEllIntDomain`: the principal domain of `K` and `E` as differentiable functions.
+* `ellDeltaComplex`: `Δ(z) = (1 - k² sin²z)^{1/2}` for complex `z`.
+
+## Main results
+
+* `hasDerivAt_compEllIntKk`, `hasDerivAt_compEllIntEk_sub`: the two relations of DLMF 19.4.1.
+* `hasDerivAt_compEllIntEk`, `hasDerivAt_compEllIntEk_sub_compEllIntKk`: the two relations of
+  DLMF 19.4.2.
+* `deriv_deriv_compEllIntEk`: the second derivative of `E` (DLMF 19.4.3).
+* `hasDerivAt_compEllIntPik`: the `k`-derivative of `Π(α², k)` (DLMF 19.4.4).
+* `hasDerivAt_incEllIntFk`, `hasDerivAt_incEllIntEk`, `hasDerivAt_incEllIntPik`: the
+  `k`-derivatives of the incomplete integrals (DLMF 19.4.5–19.4.7).
+* `incEllIntFk_ode`, `incEllIntEk_ode`: the differential equations in `k` (DLMF 19.4.8, 19.4.9).
+* `compEllIntKk_compEllIntEk_ode`: the hypergeometric equations of `K` and `E`
+  (DLMF §19.4(ii), prose).
+
+## Implementation notes
+
+The first relations of 19.4.1, 19.4.2 and 19.4.4–19.4.7 are obtained by differentiation under
+the integral sign (`hasDerivAt_integral_mul_cpow` for real paths,
+`hasDerivAt_integral_unit_mul_cpow` along the segment `[0, φ]`) together with the closed form of
+`∫ Δ⁻³` (`integral_inv_ellDelta_cube`, `pathIntegral_inv_ellDeltaComplex_cube`); the second
+relations, 19.4.3 and the differential equations follow. The real-parameter forms (in `m = k²`)
+are `DLMF.Elliptic.Real.hasDerivAt_compEllIntKm`, `Real.hasDerivAt_compEllIntEm`,
 `Real.hasDerivAt_compEllIntKm_sq` and `Real.hasDerivAt_compEllIntEm_sq` (tagged 19.4.E1–E2).
 
-All of 19.4.1–19.4.9 are proved: the first relations of 19.4.1, 19.4.2 and 19.4.4–19.4.7 by
-differentiation under the integral sign (`p19lR1_hasDerivAt_integral_cpow` for real paths,
-`p19lR1_hasDerivAt_path` along the segment `[0, φ]`) together with the closed form of
-`∫ Δ⁻³` (`p19lR1_integral_cube`, `p19lR1_path_integral_cube`); the second relations, 19.4.3 and the
-differential equations 19.4.8–19.4.9 follow. The hypergeometric equations of the prose (19.4.ii)
-follow from 19.4.8–19.4.9.
+## References
+
+* NIST DLMF §19.4.
 -/
 
 @[expose] public noncomputable section
@@ -43,7 +67,7 @@ def LegendrePathOK (φ k : ℂ) : Prop :=
 /-- For a real amplitude the path condition follows from `1 - k² ∈ ℂ \ (-∞, 0]`. -/
 theorem legendrePathOK_ofReal {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (φ : ℝ) :
     LegendrePathOK φ k := fun t _ => by
-  simpa using ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane hk (t * φ)
+  simpa using one_sub_sq_mul_sin_sq_mem_slitPlane hk (t * φ)
 
 /-- For a positive real amplitude at most `π/2`, the endpoint slit-plane condition
 `1 - k² sin² φ ∈ slitPlane` implies that condition along the entire integration path. -/
@@ -59,7 +83,7 @@ theorem legendrePathOK_ofReal_of_endpoint {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (h
   have hu1 : Real.sin (t * φ) ^ 2 / Real.sin φ ^ 2 ≤ 1 := by
     apply (div_le_one (sq_pos_of_pos hsφ)).mpr
     nlinarith
-  have h := ei19a_one_sub_mul_mem_slitPlane hk hu0 hu1
+  have h := one_sub_mul_ofReal_mem_slitPlane hk hu0 hu1
   convert h using 1
   rw [← ofReal_mul, ← ofReal_sin]
   push_cast
@@ -80,7 +104,7 @@ theorem isOpen_compEllIntDomain : IsOpen compEllIntDomain := by
 /-- Differentiation under the integral sign: for continuous `w`,
 `d/dk ∫₀^b w(θ) (1 - k² sin²θ)^s dθ = ∫₀^b w(θ) s (1 - k² sin²θ)^{s-1} (-2k sin²θ) dθ` on the
 principal domain `1 - k² ∈ ℂ \ (-∞, 0]`. -/
-lemma p19lR1_hasDerivAt_integral_cpow {w : ℝ → ℂ} (hw : Continuous w) (s : ℂ) (b : ℝ) {k0 : ℂ}
+private lemma hasDerivAt_integral_mul_cpow {w : ℝ → ℂ} (hw : Continuous w) (s : ℂ) (b : ℝ) {k0 : ℂ}
     (hk0 : 1 - k0 ^ 2 ∈ slitPlane) :
     HasDerivAt (fun k : ℂ => ∫ θ in (0 : ℝ)..b, w θ * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ s)
       (∫ θ in (0 : ℝ)..b, w θ * (s * (1 - k0 ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (s - 1) *
@@ -93,12 +117,12 @@ lemma p19lR1_hasDerivAt_integral_cpow {w : ℝ → ℂ} (hw : Continuous w) (s :
   have hcontk : ∀ k : ℂ, 1 - k ^ 2 ∈ slitPlane → Continuous fun θ : ℝ =>
       w θ * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ s := fun k hk =>
     hw.mul (Continuous.cpow (by fun_prop) continuous_const fun θ =>
-      ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane hk θ)
+      one_sub_sq_mul_sin_sq_mem_slitPlane hk θ)
   have hcontk' : ∀ k : ℂ, 1 - k ^ 2 ∈ slitPlane → Continuous fun θ : ℝ =>
       w θ * (s * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (s - 1) *
         (-(2 * k * (Real.sin θ : ℂ) ^ 2))) := fun k hk =>
     hw.mul (((continuous_const.mul (Continuous.cpow (by fun_prop) continuous_const fun θ =>
-      ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane hk θ))).mul (by fun_prop))
+      one_sub_sq_mul_sin_sq_mem_slitPlane hk θ))).mul (by fun_prop))
   -- a uniform bound on the derivative
   obtain ⟨W, hW⟩ := (isCompact_uIcc (a := (0 : ℝ)) (b := b)).exists_bound_of_continuousOn
     (hw.norm.continuousOn)
@@ -110,7 +134,7 @@ lemma p19lR1_hasDerivAt_integral_cpow {w : ℝ → ℂ} (hw : Continuous w) (s :
     refine ContinuousOn.norm ((continuousOn_const.mul
       (ContinuousOn.cpow (by fun_prop) continuousOn_const ?_)).mul (by fun_prop))
     rintro ⟨k, u⟩ ⟨hk, hu⟩
-    have := ei19a_one_sub_mul_mem_slitPlane (hball hk) hu.1 hu.2
+    have := one_sub_mul_ofReal_mem_slitPlane (hball hk) hu.1 hu.2
     simpa using this
   obtain ⟨M, hM⟩ := hcomp.exists_bound_of_continuousOn hcont
   have hd := intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_deriv_le
@@ -139,24 +163,24 @@ lemma p19lR1_hasDerivAt_integral_cpow {w : ℝ → ℂ} (hw : Continuous w) (s :
         (-(2 * k * (Real.sin θ : ℂ) ^ 2)) k := by
       have := ((hasDerivAt_pow 2 k).mul_const ((Real.sin θ : ℂ) ^ 2)).const_sub 1
       convert this using 1; ring
-    exact (hb.cpow_const (ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane (hball hk) θ)).const_mul (w θ)
+    exact (hb.cpow_const (one_sub_sq_mul_sin_sq_mem_slitPlane (hball hk) θ)).const_mul (w θ)
 
-/-- The case `w = 1` of `p19lR1_hasDerivAt_integral_cpow`. -/
-lemma p19lR1_hasDerivAt_integral_cpow_one (s : ℂ) (b : ℝ) {k0 : ℂ}
+/-- The case `w = 1` of `hasDerivAt_integral_mul_cpow`. -/
+private lemma hasDerivAt_integral_cpow (s : ℂ) (b : ℝ) {k0 : ℂ}
     (hk0 : 1 - k0 ^ 2 ∈ slitPlane) :
     HasDerivAt (fun k : ℂ => ∫ θ in (0 : ℝ)..b, (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ s)
       (∫ θ in (0 : ℝ)..b, s * (1 - k0 ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (s - 1) *
         (-(2 * k0 * (Real.sin θ : ℂ) ^ 2))) k0 := by
-  simpa using p19lR1_hasDerivAt_integral_cpow continuous_const s b hk0 (w := fun _ => 1)
+  simpa using hasDerivAt_integral_mul_cpow continuous_const s b hk0 (w := fun _ => 1)
 
 /-- If `1 - a ∈ ℂ \ (-∞, 0]`, then `1 - a sin²θ` is bounded away from `0` for real `θ`. -/
-theorem p19lR1_exists_norm_lower_gen {a : ℂ} (ha : 1 - a ∈ slitPlane) :
+theorem exists_le_norm_one_sub_mul_sin_sq {a : ℂ} (ha : 1 - a ∈ slitPlane) :
     ∃ δ > 0, ∀ θ : ℝ, δ ≤ ‖1 - a * (Real.sin θ : ℂ) ^ 2‖ := by
   obtain ⟨u0, hu0, hmin⟩ := (isCompact_Icc (a := (0 : ℝ)) (b := 1)).exists_isMinOn
     (nonempty_Icc.2 zero_le_one)
     (by fun_prop : Continuous fun u : ℝ => ‖1 - a * (u : ℂ)‖).continuousOn
   refine ⟨‖1 - a * (u0 : ℂ)‖, norm_pos_iff.2 (slitPlane_ne_zero
-    (ei19a_one_sub_mul_mem_slitPlane ha hu0.1 hu0.2)), fun θ => ?_⟩
+    (one_sub_mul_ofReal_mem_slitPlane ha hu0.1 hu0.2)), fun θ => ?_⟩
   have := hmin (show Real.sin θ ^ 2 ∈ Icc (0 : ℝ) 1 from ⟨sq_nonneg _, Real.sin_sq_le_one θ⟩)
   simpa using this
 
@@ -166,12 +190,12 @@ domain. -/
 theorem hasDerivAt_compEllIntKk {k : ℂ} (hk : k ∈ compEllIntDomain) :
     HasDerivAt compEllIntKk
       ((compEllIntEk k - (1 - k ^ 2) * compEllIntKk k) / (k * (1 - k ^ 2))) k := by
-  have h := p19lR1_hasDerivAt_integral_cpow_one (-(1 / 2) : ℂ) (π / 2) hk.2
+  have h := hasDerivAt_integral_cpow (-(1 / 2) : ℂ) (π / 2) hk.2
   refine (show compEllIntKk = _ from rfl) ▸ h.congr_deriv ?_
   have hk0 := hk.1
   have hk1 : 1 - k ^ 2 ≠ 0 := slitPlane_ne_zero hk.2
   have hb0 : ∀ θ : ℝ, 1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2 ≠ 0 := fun θ =>
-    slitPlane_ne_zero (ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane hk.2 θ)
+    slitPlane_ne_zero (one_sub_sq_mul_sin_sq_mem_slitPlane hk.2 θ)
   have hpt : ∀ θ : ℝ, (-(1 / 2) : ℂ) * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ ((-(1 / 2) : ℂ) - 1) *
       (-(2 * k * (Real.sin θ : ℂ) ^ 2)) = k⁻¹ * ((1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
         (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) -
@@ -184,13 +208,13 @@ theorem hasDerivAt_compEllIntKk {k : ℂ} (hk : k ∈ compEllIntDomain) :
     rw [mul_assoc, hks]
   have hc1 : Continuous fun θ : ℝ => (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) :=
     Continuous.cpow (by fun_prop) continuous_const fun θ =>
-      ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane hk.2 θ
+      one_sub_sq_mul_sin_sq_mem_slitPlane hk.2 θ
   have hc2 : Continuous fun θ : ℝ => (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) :=
     ((by fun_prop : Continuous fun θ : ℝ => 1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2).inv₀ hb0).mul hc1
   simp only [hpt, intervalIntegral.integral_const_mul]
   rw [intervalIntegral.integral_sub (hc2.intervalIntegrable _ _) (hc1.intervalIntegrable _ _),
-    p19lR1_integral_cube hk.2, ← compEllIntKk]
+    integral_inv_ellDelta_cube hk.2, ← compEllIntKk]
   simp only [Real.sin_pi_div_two, Real.cos_pi_div_two, ofReal_zero, mul_zero, zero_div,
     sub_zero, compEllIntEk]
   push_cast
@@ -202,7 +226,7 @@ theorem hasDerivAt_compEllIntEk {k : ℂ} (hk : k ∈ compEllIntDomain) :
     HasDerivAt compEllIntEk ((compEllIntEk k - compEllIntKk k) / k) k := by
   have hE : compEllIntEk = fun k : ℂ => ∫ θ in (0 : ℝ)..(π / 2),
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) := funext compEllIntEk_eq_integral
-  have h := p19lR1_hasDerivAt_integral_cpow_one (1 / 2 : ℂ) (π / 2) hk.2
+  have h := hasDerivAt_integral_cpow (1 / 2 : ℂ) (π / 2) hk.2
   rw [← hE] at h
   refine h.congr_deriv ?_
   have hpt : ∀ θ : ℝ, (1 / 2 : ℂ) * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ ((1 / 2 : ℂ) - 1) *
@@ -216,7 +240,7 @@ theorem hasDerivAt_compEllIntEk {k : ℂ} (hk : k ∈ compEllIntDomain) :
   ring
 
 /-- Nonvanishing under the stated hypotheses: `1 - k ^ 2 ≠ 0`. -/
-lemma ei19a_one_sub_sq_ne_zero {k : ℂ} (hk : k ∈ compEllIntDomain) : 1 - k ^ 2 ≠ 0 :=
+private lemma one_sub_sq_ne_zero_of_mem_compEllIntDomain {k : ℂ} (hk : k ∈ compEllIntDomain) : 1 - k ^ 2 ≠ 0 :=
   slitPlane_ne_zero hk.2
 
 /-- DLMF 19.4.1 (second relation): `d(E - k'²K)/dk = kK`. -/
@@ -227,7 +251,7 @@ theorem hasDerivAt_compEllIntEk_sub {k : ℂ} (hk : k ∈ compEllIntDomain) :
     (((hasDerivAt_pow 2 k).const_sub 1).mul (hasDerivAt_compEllIntKk hk))
   convert h using 1
   have h0 := hk.1
-  have h1 := ei19a_one_sub_sq_ne_zero hk
+  have h1 := one_sub_sq_ne_zero_of_mem_compEllIntDomain hk
   field_simp
   ring
 
@@ -239,7 +263,7 @@ theorem hasDerivAt_compEllIntEk_sub_compEllIntKk {k : ℂ} (hk : k ∈ compEllIn
   have h := (hasDerivAt_compEllIntEk hk).sub (hasDerivAt_compEllIntKk hk)
   convert h using 1
   have h0 := hk.1
-  have h1 := ei19a_one_sub_sq_ne_zero hk
+  have h1 := one_sub_sq_ne_zero_of_mem_compEllIntDomain hk
   field_simp
   ring
 
@@ -258,7 +282,7 @@ theorem deriv_deriv_compEllIntEk {k : ℂ} (hk : k ∈ compEllIntDomain) :
     (hasDerivAt_compEllIntEk_sub_compEllIntKk hk).div (hasDerivAt_id k) hk.1
   rw [hev.deriv_eq, hd.deriv, (hasDerivAt_compEllIntKk hk).deriv]
   have h0 := hk.1
-  have h1 := ei19a_one_sub_sq_ne_zero hk
+  have h1 := one_sub_sq_ne_zero_of_mem_compEllIntDomain hk
   constructor <;> (field_simp; ring)
 
 /-- DLMF 19.4.4:
@@ -269,7 +293,7 @@ theorem hasDerivAt_compEllIntPik {α2 k : ℂ} (hk : k ∈ compEllIntDomain)
     (hα : 1 - α2 ∈ slitPlane) (hαk : k ^ 2 ≠ α2) :
     HasDerivAt (fun k => compEllIntPik α2 k) (k / ((1 - k ^ 2) * (k ^ 2 - α2)) *
       (compEllIntEk k - (1 - k ^ 2) * compEllIntPik α2 k)) k := by
-  obtain ⟨δ, hδ, hlow⟩ := p19lR1_exists_norm_lower_gen hα
+  obtain ⟨δ, hδ, hlow⟩ := exists_le_norm_one_sub_mul_sin_sq hα
   have ha0 : ∀ θ : ℝ, 1 - α2 * (Real.sin θ : ℂ) ^ 2 ≠ 0 := fun θ =>
     norm_pos_iff.1 (hδ.trans_le (hlow θ))
   have hw : Continuous fun θ : ℝ => (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ :=
@@ -278,15 +302,15 @@ theorem hasDerivAt_compEllIntPik {α2 k : ℂ} (hk : k ∈ compEllIntDomain)
       (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
     intro k
     rw [compEllIntPik, show ((π : ℂ) / 2) = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
-      p19lR1_incEllIntPik_ofReal hδ (fun t _ => hlow _)]
-  have h := p19lR1_hasDerivAt_integral_cpow hw (-(1 / 2) : ℂ) (π / 2) hk.2
+      incEllIntPik_ofReal_eq_integral_of_norm_ge hδ (fun t _ => hlow _)]
+  have h := hasDerivAt_integral_mul_cpow hw (-(1 / 2) : ℂ) (π / 2) hk.2
   rw [← funext hPi] at h
   refine h.congr_deriv ?_
   have hk0 := hk.1
   have hk1 : 1 - k ^ 2 ≠ 0 := slitPlane_ne_zero hk.2
   have hka : k ^ 2 - α2 ≠ 0 := sub_ne_zero.2 hαk
   have hb0 : ∀ θ : ℝ, 1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2 ≠ 0 := fun θ =>
-    slitPlane_ne_zero (ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane hk.2 θ)
+    slitPlane_ne_zero (one_sub_sq_mul_sin_sq_mem_slitPlane hk.2 θ)
   have hpt : ∀ θ : ℝ, (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ * ((-(1 / 2) : ℂ) *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ ((-(1 / 2) : ℂ) - 1) *
       (-(2 * k * (Real.sin θ : ℂ) ^ 2))) = (k / (k ^ 2 - α2)) *
@@ -304,7 +328,7 @@ theorem hasDerivAt_compEllIntPik {α2 k : ℂ} (hk : k ∈ compEllIntDomain)
     ring
   have hc1 : Continuous fun θ : ℝ => (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) :=
     Continuous.cpow (by fun_prop) continuous_const fun θ =>
-      ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane hk.2 θ
+      one_sub_sq_mul_sin_sq_mem_slitPlane hk.2 θ
   have hc2 : Continuous fun θ : ℝ => (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) :=
     ((by fun_prop : Continuous fun θ : ℝ => 1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2).inv₀ hb0).mul hc1
@@ -312,14 +336,14 @@ theorem hasDerivAt_compEllIntPik {α2 k : ℂ} (hk : k ∈ compEllIntDomain)
   rw [intervalIntegral.integral_sub (hc2.intervalIntegrable _ _)
     ((show Continuous fun θ : ℝ => (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) from hw.mul hc1).intervalIntegrable _ _),
-    p19lR1_integral_cube hk.2, ← hPi]
+    integral_inv_ellDelta_cube hk.2, ← hPi]
   simp only [Real.sin_pi_div_two, Real.cos_pi_div_two, ofReal_zero, mul_zero, zero_div,
     sub_zero, compEllIntEk]
   push_cast
   field_simp
 
 /-- The condition `1 - k² g(t) ∈ ℂ \ (-∞, 0]` for all `t ∈ [0, 1]` is open in `k`. -/
-lemma p19lR1_eventually_path {g : ℝ → ℂ} (hg : Continuous g) {k0 : ℂ}
+private lemma eventually_forall_one_sub_sq_mul_mem_slitPlane {g : ℝ → ℂ} (hg : Continuous g) {k0 : ℂ}
     (hk0 : ∀ t ∈ Icc (0 : ℝ) 1, 1 - k0 ^ 2 * g t ∈ slitPlane) :
     ∀ᶠ k in 𝓝 k0, ∀ t ∈ Icc (0 : ℝ) 1, 1 - k ^ 2 * g t ∈ slitPlane := by
   refine isCompact_Icc.eventually_forall_of_forall_eventually fun t ht => ?_
@@ -328,12 +352,12 @@ lemma p19lR1_eventually_path {g : ℝ → ℂ} (hg : Continuous g) {k0 : ℂ}
 
 /-- Differentiation under the integral sign along `t ∈ [0, 1]`:
 `d/dk ∫₀¹ w(t) (1 - k² g(t))^s dt = ∫₀¹ w(t) s (1 - k² g(t))^{s-1} (-2k g(t)) dt`. -/
-lemma p19lR1_hasDerivAt_path {g w : ℝ → ℂ} (hg : Continuous g) (hw : ContinuousOn w (Icc 0 1))
+lemma hasDerivAt_integral_unit_mul_cpow {g w : ℝ → ℂ} (hg : Continuous g) (hw : ContinuousOn w (Icc 0 1))
     (s : ℂ)
     {k0 : ℂ} (hk0 : ∀ t ∈ Icc (0 : ℝ) 1, 1 - k0 ^ 2 * g t ∈ slitPlane) :
     HasDerivAt (fun k : ℂ => ∫ t in (0 : ℝ)..1, w t * (1 - k ^ 2 * g t) ^ s)
       (∫ t in (0 : ℝ)..1, w t * (s * (1 - k0 ^ 2 * g t) ^ (s - 1) * (-(2 * k0 * g t)))) k0 := by
-  obtain ⟨ε, hε, hεU⟩ := Metric.eventually_nhds_iff_ball.1 (p19lR1_eventually_path hg hk0)
+  obtain ⟨ε, hε, hεU⟩ := Metric.eventually_nhds_iff_ball.1 (eventually_forall_one_sub_sq_mul_mem_slitPlane hg hk0)
   have hball : ∀ k ∈ Metric.closedBall k0 (ε / 2), ∀ t ∈ Icc (0 : ℝ) 1,
       1 - k ^ 2 * g t ∈ slitPlane := fun k hk =>
     hεU k (Metric.closedBall_subset_ball (by linarith) hk)
@@ -387,12 +411,12 @@ lemma p19lR1_hasDerivAt_path {g w : ℝ → ℂ} (hg : Continuous g) (hw : Conti
     exact (hb.cpow_const (hball k hk t ht')).const_mul (w t)
 
 /-- `Δ(z) = (1 - k² sin²z)^{1/2}` for complex `z`. -/
-noncomputable abbrev p19lR1_Δc (k z : ℂ) : ℂ := (1 - k ^ 2 * Complex.sin z ^ 2) ^ (1 / 2 : ℂ)
+noncomputable abbrev ellDeltaComplex (k z : ℂ) : ℂ := (1 - k ^ 2 * Complex.sin z ^ 2) ^ (1 / 2 : ℂ)
 
 /-- `Δ′(z) = -k² sin z cos z/Δ(z)` where `1 - k² sin²z ∈ ℂ \ (-∞, 0]`. -/
-lemma p19lR1_hasDerivAt_Δc {k z : ℂ} (hz : 1 - k ^ 2 * Complex.sin z ^ 2 ∈ slitPlane) :
-    HasDerivAt (p19lR1_Δc k)
-      (-(k ^ 2 * Complex.sin z * Complex.cos z) * (p19lR1_Δc k z)⁻¹) z := by
+private lemma hasDerivAt_ellDeltaComplex {k z : ℂ} (hz : 1 - k ^ 2 * Complex.sin z ^ 2 ∈ slitPlane) :
+    HasDerivAt (ellDeltaComplex k)
+      (-(k ^ 2 * Complex.sin z * Complex.cos z) * (ellDeltaComplex k z)⁻¹) z := by
   have hb : HasDerivAt (fun z : ℂ => 1 - k ^ 2 * Complex.sin z ^ 2)
       (-(k ^ 2 * (2 * Complex.sin z * Complex.cos z))) z := by
     have := (((Complex.hasDerivAt_sin z).pow 2).const_mul (k ^ 2)).const_sub 1
@@ -402,25 +426,25 @@ lemma p19lR1_hasDerivAt_Δc {k z : ℂ} (hz : 1 - k ^ 2 * Complex.sin z ^ 2 ∈ 
   ring
 
 /-- `Δ(z) ≠ 0` where `1 - k² sin²z ∈ ℂ \ (-∞, 0]`. -/
-lemma p19lR1_Δc_ne_zero {k z : ℂ} (hz : 1 - k ^ 2 * Complex.sin z ^ 2 ∈ slitPlane) :
-    p19lR1_Δc k z ≠ 0 := by
-  rw [p19lR1_Δc, Ne, cpow_eq_zero_iff]; exact fun h' => slitPlane_ne_zero hz h'.1
+private lemma ellDeltaComplex_ne_zero {k z : ℂ} (hz : 1 - k ^ 2 * Complex.sin z ^ 2 ∈ slitPlane) :
+    ellDeltaComplex k z ≠ 0 := by
+  rw [ellDeltaComplex, Ne, cpow_eq_zero_iff]; exact fun h' => slitPlane_ne_zero hz h'.1
 
 /-- The complex-path form of `∫ Δ⁻³`: along the segment `[0, φ]`,
 `∫₀¹ φ Δ(tφ)⁻³ dt = (E(φ, k) - k² sin φ cos φ/Δ(φ))/k′²`. -/
-lemma p19lR1_path_integral_cube {φ k : ℂ} (hk1 : k ^ 2 ≠ 1) (hφ : LegendrePathOK φ k) :
+private lemma pathIntegral_inv_ellDeltaComplex_cube {φ k : ℂ} (hk1 : k ^ 2 ≠ 1) (hφ : LegendrePathOK φ k) :
     ∫ t in (0 : ℝ)..1, φ * ((1 - k ^ 2 * Complex.sin (t * φ) ^ 2)⁻¹ *
         (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ))) =
-      (incEllIntEk φ k - k ^ 2 * Complex.sin φ * Complex.cos φ / p19lR1_Δc k φ) / (1 - k ^ 2) := by
+      (incEllIntEk φ k - k ^ 2 * Complex.sin φ * Complex.cos φ / ellDeltaComplex k φ) / (1 - k ^ 2) := by
   have hk1' : 1 - k ^ 2 ≠ 0 := sub_ne_zero.2 (Ne.symm hk1)
-  set G : ℂ → ℂ := fun z => Complex.sin z * Complex.cos z / p19lR1_Δc k z with hG
+  set G : ℂ → ℂ := fun z => Complex.sin z * Complex.cos z / ellDeltaComplex k z with hG
   set G' : ℂ → ℂ := fun z => ((Complex.cos z * Complex.cos z + Complex.sin z * -Complex.sin z) *
-      p19lR1_Δc k z - Complex.sin z * Complex.cos z *
-        (-(k ^ 2 * Complex.sin z * Complex.cos z) * (p19lR1_Δc k z)⁻¹)) / p19lR1_Δc k z ^ 2
+      ellDeltaComplex k z - Complex.sin z * Complex.cos z *
+        (-(k ^ 2 * Complex.sin z * Complex.cos z) * (ellDeltaComplex k z)⁻¹)) / ellDeltaComplex k z ^ 2
     with hG'
   have hGd : ∀ z : ℂ, 1 - k ^ 2 * Complex.sin z ^ 2 ∈ slitPlane → HasDerivAt G (G' z) z :=
     fun z hz => ((Complex.hasDerivAt_sin z).mul (Complex.hasDerivAt_cos z)).div
-      (p19lR1_hasDerivAt_Δc hz) (p19lR1_Δc_ne_zero hz)
+      (hasDerivAt_ellDeltaComplex hz) (ellDeltaComplex_ne_zero hz)
   -- the path-composed version
   have hGt : ∀ t ∈ Icc (0 : ℝ) 1, HasDerivAt (fun t : ℝ => G (t * φ)) (G' (t * φ) * φ) t := by
     intro t ht
@@ -429,17 +453,17 @@ lemma p19lR1_path_integral_cube {φ k : ℂ} (hk1 : k ^ 2 ≠ 1) (hφ : Legendre
     exact ((hGd _ (hφ t ht)).comp (t : ℂ) h1).comp_ofReal
   have hpt : ∀ t ∈ Icc (0 : ℝ) 1, φ * ((1 - k ^ 2 * Complex.sin (t * φ) ^ 2)⁻¹ *
       (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ))) =
-        (φ * p19lR1_Δc k (t * φ) - k ^ 2 * (G' (t * φ) * φ)) / (1 - k ^ 2) := by
+        (φ * ellDeltaComplex k (t * φ) - k ^ 2 * (G' (t * φ) * φ)) / (1 - k ^ 2) := by
     intro t ht
     have hz := hφ t ht
     simp only [hG']
     generalize (t : ℂ) * φ = z at hz ⊢
-    have hD0 := p19lR1_Δc_ne_zero hz
-    have h2 : p19lR1_Δc k z ^ 2 = 1 - k ^ 2 * Complex.sin z ^ 2 := by
-      rw [p19lR1_Δc, sq, ei19c_cpow_half_sq]
+    have hD0 := ellDeltaComplex_ne_zero hz
+    have h2 : ellDeltaComplex k z ^ 2 = 1 - k ^ 2 * Complex.sin z ^ 2 := by
+      rw [ellDeltaComplex, sq, cpow_half_mul_cpow_half]
     have hsc := Complex.sin_sq_add_cos_sq z
-    rw [cpow_neg, ← p19lR1_Δc, ← h2]
-    generalize p19lR1_Δc k z = D at hD0 h2 ⊢
+    rw [cpow_neg, ← ellDeltaComplex, ← h2]
+    generalize ellDeltaComplex k z = D at hD0 h2 ⊢
     field_simp
     linear_combination (-φ * (D ^ 2 + (1 - k ^ 2 * Complex.sin z ^ 2) +
       k ^ 2 * (Complex.sin z ^ 2 - Complex.cos z ^ 2))) * h2 + φ * k ^ 2 * hsc
@@ -447,8 +471,8 @@ lemma p19lR1_path_integral_cube {φ k : ℂ} (hk1 : k ^ 2 ≠ 1) (hφ : Legendre
     rw [uIcc_of_le zero_le_one]
     intro t ht
     have hz := hφ t ht
-    have hDc : ContinuousAt (p19lR1_Δc k) ((t : ℂ) * φ) := (p19lR1_hasDerivAt_Δc hz).continuousAt
-    have hD0 := p19lR1_Δc_ne_zero hz
+    have hDc : ContinuousAt (ellDeltaComplex k) ((t : ℂ) * φ) := (hasDerivAt_ellDeltaComplex hz).continuousAt
+    have hD0 := ellDeltaComplex_ne_zero hz
     have hc : ContinuousAt G' ((t : ℂ) * φ) := by
       simp only [hG']
       exact (((by fun_prop : ContinuousAt (fun z : ℂ => Complex.cos z * Complex.cos z +
@@ -458,7 +482,7 @@ lemma p19lR1_path_integral_cube {φ k : ℂ} (hk1 : k ^ 2 ≠ 1) (hφ : Legendre
             (hDc.inv₀ hD0)))).div (hDc.pow 2) (pow_ne_zero 2 hD0)
     exact ((hc.comp (f := fun t : ℝ => (t : ℂ) * φ) (by fun_prop)).mul
       continuousAt_const).continuousWithinAt
-  have hΔc : ContinuousOn (fun t : ℝ => φ * p19lR1_Δc k (t * φ)) (uIcc 0 1) := by
+  have hΔc : ContinuousOn (fun t : ℝ => φ * ellDeltaComplex k (t * φ)) (uIcc 0 1) := by
     rw [uIcc_of_le zero_le_one]
     exact continuousOn_const.mul (ContinuousOn.cpow (by fun_prop) continuousOn_const hφ)
   rw [intervalIntegral.integral_congr (fun t ht => hpt t (by rwa [uIcc_of_le zero_le_one] at ht)),
@@ -467,7 +491,7 @@ lemma p19lR1_path_integral_cube {φ k : ℂ} (hk1 : k ^ 2 ≠ 1) (hφ : Legendre
     intervalIntegral.integral_const_mul (k ^ 2) (fun x : ℝ => G' (x * φ) * φ),
     intervalIntegral.integral_eq_sub_of_hasDerivAt
       (fun t ht => hGt t (by rwa [uIcc_of_le zero_le_one] at ht)) hG'c.intervalIntegrable]
-  simp only [hG, incEllIntEk, ei19a_segmentIntegral, ofReal_one, one_mul, ofReal_zero, zero_mul,
+  simp only [hG, incEllIntEk, segmentIntegral, ofReal_one, one_mul, ofReal_zero, zero_mul,
     Complex.sin_zero, zero_mul, zero_div, sub_zero]
   ring
 
@@ -483,7 +507,7 @@ theorem hasDerivAt_incEllIntFk {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
           ((1 - k ^ 2) * (1 - k ^ 2 * Complex.sin φ ^ 2) ^ (1 / 2 : ℂ))) k := by
   have hk1' : 1 - k ^ 2 ≠ 0 := sub_ne_zero.2 (Ne.symm hk1)
   have hg : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2 := by fun_prop
-  have h := p19lR1_hasDerivAt_path hg continuousOn_const (-(1 / 2) : ℂ) (w := fun _ => φ) hφ
+  have h := hasDerivAt_integral_unit_mul_cpow hg continuousOn_const (-(1 / 2) : ℂ) (w := fun _ => φ) hφ
   refine h.congr_deriv ?_
   have hpt : ∀ t ∈ uIcc (0 : ℝ) 1, φ * ((-(1 / 2) : ℂ) *
       (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ ((-(1 / 2) : ℂ) - 1) *
@@ -511,7 +535,7 @@ theorem hasDerivAt_incEllIntFk {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
         slitPlane_ne_zero (hφ t ht)).mul (ContinuousOn.cpow (by fun_prop) continuousOn_const hφ))
   rw [intervalIntegral.integral_congr hpt, intervalIntegral.integral_const_mul,
     intervalIntegral.integral_sub hc2.intervalIntegrable hc1.intervalIntegrable,
-    p19lR1_path_integral_cube hk1 hφ]
+    pathIntegral_inv_ellDeltaComplex_cube hk1 hφ]
   have hF : incEllIntFk φ k = ∫ t in (0 : ℝ)..1,
       φ * (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ)) := rfl
   rw [← hF]
@@ -524,7 +548,7 @@ satisfying `LegendrePathOK`. -/
 theorem hasDerivAt_incEllIntEk {φ k : ℂ} (hk0 : k ≠ 0) (hφ : LegendrePathOK φ k) :
     HasDerivAt (fun k => incEllIntEk φ k) ((incEllIntEk φ k - incEllIntFk φ k) / k) k := by
   have hg : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2 := by fun_prop
-  have h := p19lR1_hasDerivAt_path hg continuousOn_const (1 / 2 : ℂ) (w := fun _ => φ) hφ
+  have h := hasDerivAt_integral_unit_mul_cpow hg continuousOn_const (1 / 2 : ℂ) (w := fun _ => φ) hφ
   refine h.congr_deriv ?_
   have hF : IntervalIntegrable
       (fun t : ℝ => φ * (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ))) volume 0 1 := by
@@ -537,7 +561,7 @@ theorem hasDerivAt_incEllIntEk {φ k : ℂ} (hk0 : k ≠ 0) (hφ : LegendrePathO
     rw [show (1 / 2 : ℂ) - 1 = -(1 / 2) by norm_num]; ring
   simp only [hpt, intervalIntegral.integral_const_mul]
   have hD := incEllIntDk_eq hk0 hF
-  rw [incEllIntDk, ei19a_segmentIntegral, intervalIntegral.integral_const_mul] at hD
+  rw [incEllIntDk, segmentIntegral, intervalIntegral.integral_const_mul] at hD
   rw [hD]
   field_simp
   ring
@@ -561,12 +585,12 @@ theorem hasDerivAt_incEllIntPik {φ α2 k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 �
   have hPi : ∀ k : ℂ, incEllIntPik φ α2 k = ∫ t in (0 : ℝ)..1,
       φ * ((1 - α2 * Complex.sin (t * φ) ^ 2)⁻¹ *
         (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ))) := fun k => by
-    rw [incEllIntPik_eq_segmentIntegral hδ (fun t ht => hmin ht), ei19a_segmentIntegral]
+    rw [incEllIntPik_eq_segmentIntegral hδ (fun t ht => hmin ht), segmentIntegral]
   have hw : ContinuousOn (fun t : ℝ => φ * (1 - α2 * Complex.sin (t * φ) ^ 2)⁻¹) (Icc 0 1) :=
     continuousOn_const.mul ((by fun_prop : Continuous fun t : ℝ =>
       1 - α2 * Complex.sin (t * φ) ^ 2).continuousOn.inv₀ hα)
   have hg : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2 := by fun_prop
-  have h := p19lR1_hasDerivAt_path hg hw (-(1 / 2) : ℂ) hφ
+  have h := hasDerivAt_integral_unit_mul_cpow hg hw (-(1 / 2) : ℂ) hφ
   simp only [mul_assoc] at h
   rw [← funext hPi] at h
   refine h.congr_deriv ?_
@@ -602,20 +626,20 @@ theorem hasDerivAt_incEllIntPik {φ α2 k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 �
         slitPlane_ne_zero (hφ t ht)).mul (ContinuousOn.cpow (by fun_prop) continuousOn_const hφ))
   rw [intervalIntegral.integral_congr hpt, intervalIntegral.integral_const_mul,
     intervalIntegral.integral_sub hc2.intervalIntegrable hc1.intervalIntegrable,
-    p19lR1_path_integral_cube hk1 hφ, ← hPi]
+    pathIntegral_inv_ellDeltaComplex_cube hk1 hφ, ← hPi]
   field_simp
   ring
 
 /-! ### §19.4(ii) Differential equations -/
 
 /-- The hypotheses `k ≠ 0`, `k² ≠ 1` and `LegendrePathOK φ k` hold near `k`. -/
-lemma p19lR1_eventually_good {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
+private lemma eventually_legendrePathOK {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
     (hφ : LegendrePathOK φ k) :
     ∀ᶠ z in 𝓝 k, z ≠ 0 ∧ z ^ 2 ≠ 1 ∧ LegendrePathOK φ z := by
   have hg : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2 := by fun_prop
   filter_upwards [isOpen_ne.mem_nhds hk0,
     (isOpen_ne.preimage (continuous_pow 2)).mem_nhds (show k ∈ (fun z : ℂ => z ^ 2) ⁻¹' {x | x ≠ 1} from hk1),
-    p19lR1_eventually_path hg hφ] with z h1 h2 h3
+    eventually_forall_one_sub_sq_mul_mem_slitPlane hg hφ] with z h1 h2 h3
   exact ⟨h1, h2, h3⟩
 
 /-- DLMF 19.4.8: with `D_k = ∂/∂k`,
@@ -630,7 +654,7 @@ theorem incEllIntFk_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1) (hφ : 
       fun k => (incEllIntEk φ k - (1 - k ^ 2) * incEllIntFk φ k) / (k * (1 - k ^ 2)) -
         k * Complex.sin φ * Complex.cos φ /
           ((1 - k ^ 2) * (1 - k ^ 2 * Complex.sin φ ^ 2) ^ (1 / 2 : ℂ)) := by
-    filter_upwards [p19lR1_eventually_good hk0 hk1 hφ] with z hz
+    filter_upwards [eventually_legendrePathOK hk0 hk1 hφ] with z hz
     exact (hasDerivAt_incEllIntFk hz.1 hz.2.1 hz.2.2).deriv
   have hk1' : 1 - k ^ 2 ≠ 0 := sub_ne_zero.2 (Ne.symm hk1)
   have hb : 1 - k ^ 2 * Complex.sin φ ^ 2 ∈ slitPlane := by
@@ -658,7 +682,7 @@ theorem incEllIntFk_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1) (hφ : 
       ((((hasDerivAt_id k).mul_const S).mul_const C).div (hp.mul hΔ) (mul_ne_zero hk1' hD0))
   rw [hev.deriv_eq, hd.deriv, hF.deriv]
   have h2 : (1 - k ^ 2 * S ^ 2) ^ (1 / 2 : ℂ) * (1 - k ^ 2 * S ^ 2) ^ (1 / 2 : ℂ) =
-      1 - k ^ 2 * S ^ 2 := ei19c_cpow_half_sq _
+      1 - k ^ 2 * S ^ 2 := cpow_half_mul_cpow_half _
   rw [show (1 / 2 : ℂ) - 1 = -(1 / 2) by norm_num, cpow_neg,
     show (3 / 2 : ℂ) = 1 / 2 + 1 by norm_num, cpow_add _ _ hb0, cpow_one]
   generalize (1 - k ^ 2 * S ^ 2) ^ (1 / 2 : ℂ) = D at hD0 h2 ⊢
@@ -677,7 +701,7 @@ theorem incEllIntEk_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1) (hφ : 
       k * Complex.sin φ * Complex.cos φ / (1 - k ^ 2 * Complex.sin φ ^ 2) ^ (1 / 2 : ℂ) := by
   have hev : deriv (fun k => incEllIntEk φ k) =ᶠ[𝓝 k]
       fun k => (incEllIntEk φ k - incEllIntFk φ k) / k := by
-    filter_upwards [p19lR1_eventually_good hk0 hk1 hφ] with z hz
+    filter_upwards [eventually_legendrePathOK hk0 hk1 hφ] with z hz
     exact (hasDerivAt_incEllIntEk hz.1 hz.2.2).deriv
   have hd : HasDerivAt (fun k => (incEllIntEk φ k - incEllIntFk φ k) / k) _ k :=
     ((hasDerivAt_incEllIntEk hk0 hφ).sub (hasDerivAt_incEllIntFk hk0 hk1 hφ)).div
@@ -703,7 +727,7 @@ theorem compEllIntKk_compEllIntEk_ode {k : ℂ} (hk : k ∈ compEllIntDomain) :
         k * compEllIntKk k = 0 ∧
       k * (1 - k ^ 2) * deriv (deriv compEllIntEk) k + (1 - k ^ 2) * deriv compEllIntEk k +
         k * compEllIntEk k = 0 := by
-  have hk1 : k ^ 2 ≠ 1 := fun h => ei19a_one_sub_sq_ne_zero hk (by rw [h]; ring)
+  have hk1 : k ^ 2 ≠ 1 := fun h => one_sub_sq_ne_zero_of_mem_compEllIntDomain hk (by rw [h]; ring)
   have hp : LegendrePathOK (π / 2) k := by
     have := legendrePathOK_ofReal hk.2 (π / 2)
     simpa using this

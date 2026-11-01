@@ -14,12 +14,13 @@ public import DLMF.QSeries.QCalculus
 public import DLMF.QSeries.Saalschutz
 
 /-!
-# DLMF Chapter17: checked upstream coverage
+# DLMF Chapter 17 results already in Mathlib or in `DLMF.QSeries`
 
-Complex modular eta transformations come from Mathlib. Existing proved q-series identities
-are retained through precise pointers or small notation adapters. Native results with stronger
-intermediate hypotheses are marked partial and do not replace the full-domain acquisitions.
-The old admitted Ramanujan one-psi-one theorem is deliberately not recorded as proved coverage.
+The `dlmf_upstream` commands below are checked pointers to Mathlib declarations (for example
+the complex modular transformation of the Dedekind eta function) and to proved `q`-series
+identities of `DLMF.QSeries`, recorded through precise pointers or small notation adapters.
+Results whose hypotheses are stronger than DLMF's are marked partial and do not replace the
+full-domain statements.
 -/
 
 dlmf_upstream 17.2.E6_1 ModularForm.eta_comp_eq_csqrt_I_inv

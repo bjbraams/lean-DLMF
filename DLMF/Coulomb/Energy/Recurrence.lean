@@ -6,14 +6,26 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Coulomb.Energy.Basic
-public import DLMF.Coulomb.Energy.Q2eRegular
+public import DLMF.Coulomb.Energy.RegularSolution
 
 /-!
-# Coulomb functions `f`, `h`: recurrences, derivatives and large `ℓ` (DLMF §§33.17–33.18)
+# Coulomb functions `f`, `h`: recurrences, derivatives and large `ℓ`
 
-The three-term recurrences in `ℓ` (33.17.1–33.17.2, for `ℓ ≥ 1`), the derivative formulas
-(33.17.3–33.17.4) and the limiting forms as `ℓ → ∞` (33.18.1). All are verified numerically
-(mpmath, 30 digits) for `ε ∈ {0.3, -0.13, 0}` and both signs of `r`.
+This file proves the three-term recurrences in `ℓ`, the derivative formulas and the limiting
+forms as `ℓ → ∞` of the Coulomb functions `f(ε,ℓ;r)` and `h(ε,ℓ;r)` (DLMF §§33.17–33.18).
+
+## Main results
+
+* `coulombf_recurrence`, `coulombh_recurrence`: the recurrences DLMF 33.17.1–33.17.2, for
+  `ℓ ≥ 1`.
+* `coulombf_deriv`, `coulombh_deriv`: the derivative formulas DLMF 33.17.3–33.17.4.
+* `coulombf_coulombh_isEquivalent_atTop`: as `ℓ → ∞` with `ε` and `r ≠ 0` fixed,
+  `f(ε,ℓ;r) ~ (2r)^{ℓ+1}/(2ℓ+1)!` and the companion form for `h` (DLMF 33.18.1).
+
+## Implementation notes
+
+The statements were also checked numerically (mpmath, 30 digits) for `ε ∈ {0.3, -0.13, 0}` and
+both signs of `r`.
 -/
 
 @[expose] public section
@@ -32,12 +44,12 @@ theorem coulombf_recurrence (ε : ℝ) {ℓ : ℕ} (hℓ : 1 ≤ ℓ) (r : ℝ) 
     (ℓ + 1) * r * coulombf ε (ℓ - 1) r - (2 * ℓ + 1) * (ℓ * (ℓ + 1) - r) * coulombf ε ℓ r +
       ℓ * (1 + (ℓ + 1) ^ 2 * ε) * r * coulombf ε (ℓ + 1) r = 0 := by
   obtain ⟨m, rfl⟩ := Nat.exists_eq_add_of_le' hℓ
-  have h := congrArg Complex.re (q2e_Phi_three_term ε m r)
+  have h := congrArg Complex.re (coulombfComplex_three_term ε m r)
   simp only [Complex.add_re, Complex.sub_re, Complex.mul_re, Complex.ofReal_re,
     Complex.ofReal_im, Complex.natCast_re, Complex.natCast_im, Complex.add_im, Complex.sub_im,
     Complex.mul_im, Complex.one_re, Complex.one_im, Complex.re_ofNat, Complex.im_ofNat,
     Complex.zero_re, pow_two] at h
-  rw [Nat.add_sub_cancel, q2e_coulombf_eq_re, q2e_coulombf_eq_re, q2e_coulombf_eq_re]
+  rw [Nat.add_sub_cancel, coulombf_eq_re_coulombfComplex, coulombf_eq_re_coulombfComplex, coulombf_eq_re_coulombfComplex]
   push_cast
   linear_combination h
 
@@ -56,13 +68,13 @@ theorem coulombf_deriv (ε : ℝ) (ℓ : ℕ) (r : ℝ) :
     HasDerivAt (coulombf ε ℓ) (deriv (coulombf ε ℓ) r) r ∧
       (ℓ + 1) * r * deriv (coulombf ε ℓ) r =
         ((ℓ + 1) ^ 2 - r) * coulombf ε ℓ r - (1 + (ℓ + 1) ^ 2 * ε) * r * coulombf ε (ℓ + 1) r := by
-  have hd := q2e_hasDerivAt_coulombf ε ℓ r
+  have hd := hasDerivAt_coulombf ε ℓ r
   refine ⟨hd.deriv ▸ hd, ?_⟩
-  have h := congrArg Complex.re (q2e_Phi_raise ε ℓ r)
+  have h := congrArg Complex.re (coulombfComplex_raise ε ℓ r)
   simp only [Complex.add_re, Complex.sub_re, Complex.mul_re, Complex.ofReal_re,
     Complex.ofReal_im, Complex.natCast_re, Complex.natCast_im, Complex.add_im, Complex.sub_im,
     Complex.mul_im, Complex.one_re, Complex.one_im, pow_two] at h
-  rw [hd.deriv, q2e_coulombf_eq_re, q2e_coulombf_eq_re]
+  rw [hd.deriv, coulombf_eq_re_coulombfComplex, coulombf_eq_re_coulombfComplex]
   linear_combination h
 
 /-- **DLMF 33.17.4**: `(ℓ+1) r h'(ε,ℓ;r) = ((ℓ+1)² - r) h(ε,ℓ;r) - r h(ε,ℓ+1;r)` for `r ≠ 0`. -/

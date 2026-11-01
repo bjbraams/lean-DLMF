@@ -16,9 +16,23 @@ upper sector `δ ≤ ph z ≤ π - δ` follows from the connection formula 13.2.
 lie in the rotated sectors of `DLMF.Confluent.TricomiRotated` with rotation angles
 `∓(π/2 - δ/2)`, where Tricomi's expansion holds.
 
-These statements were moved unchanged from `BasicProperties`, `Asymptotics` and `Whittaker`,
-which precede the expansions in the import order. Hypotheses that the proofs do not need are
-kept with underscore names.
+## Main definitions
+
+* `upperSectorAtTop`: the filter of the closed upper sector `δ ≤ ph z ≤ π - δ` at infinity.
+
+## Main results
+
+* `tendsto_kummerU_mul_cpow_atTop`: `U(a, b, x) x^a → 1` as `x → +∞` (DLMF 13.2.6).
+* `tendsto_regularizedHGFun_mul_exp_neg_atTop`: the limit form of 13.7.1 for `𝐌`
+  (DLMF 13.2.23).
+* `tendsto_whittakerM_atTop`, `tendsto_whittakerW_atTop`: DLMF 13.14.20, 13.14.21.
+* `regularizedHGFun_poincare_sector`: the two-term Poincaré expansion of `𝐌` in closed
+  upper-half-plane sectors (DLMF 13.7.2).
+
+## Implementation notes
+
+These statements come after the expansions in the import order. Hypotheses that the proofs do
+not need are kept with underscore names.
 -/
 
 @[expose] public section
@@ -183,7 +197,7 @@ and algebraic remainder scales. It is not a local boundedness assertion. -/
 @[dlmf 13.7.E2]
 theorem regularizedHGFun_poincare_sector (a b : ℂ) (n : ℕ) {δ : ℝ}
     (hδ : 0 < δ) (hδπ : δ < π / 2)
-    (_ha : ∀ k : ℕ, a ≠ -k) (_hba : ∀ k : ℕ, b - a ≠ -k) :
+    :
     Asymptotics.IsBigO
       (Filter.comap (fun z : ℂ => ‖z‖) atTop ⊓
         Filter.principal {z : ℂ | δ ≤ z.arg ∧ z.arg ≤ π - δ})

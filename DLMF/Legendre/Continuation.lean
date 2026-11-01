@@ -12,8 +12,8 @@ public import DLMF.Legendre.Continuation.ContinuityAndConnections
 /-!
 # Legendre boundary values and continuation by ODE transport
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This umbrella module collects the boundary values of the Legendre functions on the cut
+`(-1, 1)` (DLMF §14.23) and their analytic continuation beyond the principal sheet by
+transport along paths (DLMF §14.24): continuation around ellipses and around the singular
+point `1`.
 -/

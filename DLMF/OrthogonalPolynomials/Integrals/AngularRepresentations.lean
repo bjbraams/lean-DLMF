@@ -15,12 +15,39 @@ public import TauCeti.Analysis.SpecialFunctions.Hermite.Function.Fourier.Basic
 public import Mathlib.RingTheory.Polynomial.Hermite.Gaussian
 
 /-!
-# Angular integral representations of classical polynomials
+# Norms, Rodrigues formulas and angular representations of classical polynomials
 
-Classical norms, Rodrigues integration and the Dirichlet-Mehler angular representations.
+Orthogonality and squared norms of the Jacobi, Laguerre, Hermite, Legendre and Gegenbauer
+polynomials (DLMF Table 18.3.1), the Rodrigues formulas (DLMF 18.5.5) and the
+Dirichlet–Mehler integrals (DLMF 18.10.1–18.10.2).
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Integrals`.
+## Main definitions
+
+* `hermitePolyHR`: the physicists' Hermite polynomials as real polynomials.
+
+## Main results
+
+* `jacobi_norm`, `jacobi_norm_all`: Jacobi squared norms, DLMF Table 18.3.1.
+* `laguerrePolyL_norm`, `hermitePolyH_orthogonality`, `hermite_orthogonality`: Laguerre norms
+  and Hermite orthogonality in both normalizations, DLMF Table 18.3.1.
+* `legendre_orthogonality`, `ultrasphPoly_orthogonality`, `ultrasphPoly_norm`: Legendre and
+  Gegenbauer orthogonality, DLMF Table 18.3.1.
+* `jacobi_rodrigues`, `laguerrePolyL_rodrigues`, `ultrasphPoly_rodrigues`,
+  `legendre_rodrigues`: Rodrigues formulas, DLMF 18.5.5.
+* `ultrasphPoly_dirichlet_integral`, `legendre_dirichlet_mehler`: DLMF 18.10.1 and 18.10.2.
+
+## Implementation notes
+
+Jacobi norms reduce by weighted integration by parts to shifted parameters and end at the
+Beta integral; the denominator in `jacobi_norm_all` is regular at degree zero. Gegenbauer
+orthogonality follows from symmetric Jacobi orthogonality, with the normalization fixed by
+the Gamma duplication formula, including degree zero; Legendre norms follow from the
+three-term recurrence. The Rodrigues formulas iterate weighted derivative identities on the
+open interval. The Dirichlet–Mehler integrals substitute `ψ = 2 arcsin(sin(θ/2) √t)`, write
+`cos(2(n+λ)x)/cos x` as a Gauss function (DLMF 15.4.14), and close with the fractional
+integral 15.6.8 and Euler's transformation 15.8.1. Integrable endpoint singularities of Beta
+kernels are retained.
+
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
 -/
 
@@ -262,7 +289,7 @@ theorem jacobi_norm_shift {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ
       simpa only [g, w, ofReal_add, ofReal_one, Function.comp_apply, Pi.mul_def] using
         ((hA.mul hB).mul hJ).differentiableAt
     have he := jacobi_weighted_derivative (α := α + 1) (β := β + 1)
-      (by linarith) (by linarith) n ht
+      (by linarith) n ht
     simp only [ofReal_add, ofReal_one, add_sub_cancel_right, add_sub_cancel_right] at he
     have he' : deriv g t = -2 * (n + 1 : ℂ) * w α β t * jacobiPolyP α β (n + 1) t := by
       simpa only [g, w, ofReal_add, ofReal_one, mul_assoc] using he
@@ -707,8 +734,7 @@ theorem iteratedDeriv_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β
         show (β : ℂ) + ((n : ℂ) + 1) = (β : ℂ) + 1 + n by ring]
       simpa only [mul_assoc] using h
     rw [iteratedDeriv_succ, heq.deriv_eq, deriv_const_mul_field]
-    have hD := jacobi_weighted_derivative (by linarith : 0 < α + 1)
-      (by linarith : 0 < β + 1) n hx
+    have hD := jacobi_weighted_derivative (β := β + 1) (by linarith : 0 < α + 1) n hx
     push_cast at hD
     rw [hD]
     simp only [Nat.factorial_succ, pow_succ, Nat.cast_add, Nat.cast_one, Nat.cast_mul,
@@ -1073,7 +1099,7 @@ theorem ultrasphPoly_dirichlet_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ)
   have hlre : -1 / 2 < (lam : ℂ).re := by simp; linarith
   have hP : poch (2 * (lam : ℂ)) n ≠ 0 := poch_ne_zero_of_re_pos (by simp; linarith) n
   have hf : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-  rw [ultrasphPoly_at_one hlre, ultrasphPoly,
+  rw [ultrasphPoly_at_one, ultrasphPoly,
     show (1 - ((Real.cos θ : ℝ) : ℂ)) / 2 = z by rw [hz, hcosθ]; push_cast; ring, ← hc]
   -- the constant
   have hR := dirM_const_real (lam := lam) hθ hθπ
@@ -1111,7 +1137,7 @@ theorem legendre_dirichlet_mehler (n : ℕ) {θ : ℝ} (hθ : 0 < θ) (hθπ : �
       ∫ phi : ℝ in (0 : ℝ)..θ, Real.cos ((n + 1 / 2) * phi) / Real.sqrt (Real.cos phi - Real.cos θ) : ℝ) := by
   have h := ultrasphPoly_dirichlet_integral (lam := 1 / 2) (by norm_num) n hθ hθπ
   have h1 : ultrasphPoly ((1 / 2 : ℝ) : ℂ) n 1 = 1 := by
-    rw [ultrasphPoly_at_one (by norm_num)]
+    rw [ultrasphPoly_at_one]
     rw [show 2 * ((1 / 2 : ℝ) : ℂ) = 1 by push_cast; ring, poch_nat_one]
     exact div_self (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
   rw [h1, div_one, show ((1 / 2 : ℝ) : ℂ) = 1 / 2 by push_cast; ring,

@@ -13,28 +13,35 @@ public import DLMF.Hypergeometric.Series
 # Basic solutions of Heun's equation (DLMF §31.3)
 
 `heunLocal a q α β γ δ z = ∑ c_j z^j` is DLMF's `Hl(a, q; α, β, γ, δ; z)` (31.3.1), with the
-coefficients `c_j` of the three-term recurrence 31.3.2–31.3.4 (`heunLocalCoeff`). This file
-states
+coefficients `c_j` of the three-term recurrence 31.3.2–31.3.4 (`heunLocalCoeff`).
 
-* the recurrence (31.3.2, 31.3.3, proved from the definition), `Hl(0) = 1` (proved), the
-  convergence of the series in `|z| < min(1, |a|)` and the characterization of `Hl` as the
-  solution with exponent `0` and value `1` at the origin (§31.3(i), admitted);
-* the second solution at `0` (31.3.5) and the Fuchs–Frobenius solutions at `1`, `a`, `∞`
-  (31.3.6–31.3.11), each as a solution of Heun's equation on the disk of convergence of the `Hl`
-  involved (admitted);
-* the equivalent expressions 31.3.12 (proved, for all `z`: the two series agree term by term)
-  and 31.3.13 (admitted).
+## Main results
 
-Domains: the principal powers `z^{1-γ}`, `(1-z)^{1-δ}`, `((a-z)/(a-1))^{1-ε}`, `z^{-α}` are used
-where their bases lie in `slitPlane`. Exceptional parameters: DLMF requires
-`γ ∉ {0, -1, -2, …}` for 31.3.1 and `γ ∉ {1, 2, 3, …}` for 31.3.5; at the other singularities
-the corresponding restrictions on `δ`, `ε` and `α - β` are imposed. For `γ ∈ ℤ` DLMF only remarks
-(§31.3(i), last paragraph) that a second solution can be constructed as in §2.7(i), in general
-with a logarithmic singularity; that remark is not acquired. The remarks of §31.3(iii) on the
-192 = 8 · 24 equivalent local solutions are informal (not acquired beyond 31.3.12–31.3.13).
+* `heunLocalCoeff_rec_zero`, `heunLocalCoeff_rec`: the recurrence, DLMF 31.3.2–31.3.3.
+* `heunLocal_zero`: `Hl(0) = 1`.
+* `hasSum_heunLocal`, `hasFPowerSeriesOnBall_heunLocal`: convergence of the series in
+  `|z| < min(1, |a|)`, DLMF 31.3.1.
+* `heunLocal_isHeunSolOn`, `eventuallyEq_heunLocal_of_analyticAt`: `Hl` solves Heun's equation
+  and is characterized as the solution with exponent `0` and value `1` at the origin (§31.3(i)).
+* `heunLocal_second_isHeunSolOn`: the second solution at `0`, DLMF 31.3.5.
+* `heunLocal_at_one_isHeunSolOn`, `heunLocal_second_at_one_isHeunSolOn`,
+  `heunLocal_at_a_isHeunSolOn`, `heunLocal_second_at_a_isHeunSolOn`,
+  `heunLocal_at_infinity_isHeunSolOn`, `heunLocal_second_at_infinity_isHeunSolOn`: the
+  Fuchs–Frobenius solutions at `1`, `a`, `∞` (31.3.6–31.3.11), each on the disk of convergence
+  of the `Hl` involved.
+* `heunLocal_eq_heunLocal_inv`, `heunLocal_eq_pfaff`: the equivalent expressions
+  31.3.12–31.3.13.
 
-Every formula was checked numerically (mpmath, coefficients from the recurrence, ODE residuals
-below `10⁻²⁹` at sample points for complex parameters).
+## Implementation notes
+
+The principal powers `z^{1-γ}`, `(1-z)^{1-δ}`, `((a-z)/(a-1))^{1-ε}`, `z^{-α}` are used where
+their bases lie in `slitPlane`. DLMF requires `γ ∉ {0, -1, -2, …}` for 31.3.1 and
+`γ ∉ {1, 2, 3, …}` for 31.3.5; at the other singularities the corresponding restrictions on
+`δ`, `ε` and `α - β` are imposed. 31.3.10–31.3.11 follow the corrections of DLMF 1.1.7.
+
+Not formalized: the remark (§31.3(i), last paragraph) that for `γ ∈ ℤ` a second solution can be
+constructed as in §2.7(i), in general with a logarithmic singularity, and the informal remarks
+of §31.3(iii) on the 192 = 8 · 24 equivalent local solutions beyond 31.3.12–31.3.13.
 -/
 
 @[expose] public section
@@ -89,7 +96,7 @@ theorem heunLocal_zero : heunLocal a q α β γ δ 0 = 1 := by
 /-! ### Convergence of the Maclaurin series of `Hl` -/
 
 /-- `(u m + v)/(a (m + 1)(m + γ)) → 0`. -/
-lemma p1h_tendsto_lin_div (u v a γ : ℂ) (ha : a ≠ 0) :
+private lemma tendsto_linear_div_quadratic (u v a γ : ℂ) (ha : a ≠ 0) :
     Tendsto (fun n : ℕ => (u * n + v) / (a * ((n : ℂ) + 1) * ((n : ℂ) + γ))) atTop (𝓝 0) := by
   have hw : Tendsto (fun n : ℕ => ((n : ℂ))⁻¹) atTop (𝓝 0) := tendsto_inv_atTop_nhds_zero_nat
   have h := ((tendsto_const_nhds (x := u)).add ((tendsto_const_nhds (x := v)).mul hw)).mul hw
@@ -104,7 +111,7 @@ lemma p1h_tendsto_lin_div (u v a γ : ℂ) (ha : a ≠ 0) :
   field_simp
 
 /-- One step of the majorant argument for a three-term recurrence. -/
-lemma p1h_step {a A B c₀ c c' : ℂ} {η δ r : ℝ} (hη : 0 < η) (hδ : 0 ≤ δ)
+private lemma majorant_step {a A B c₀ c c' : ℂ} {η δ r : ℝ} (hη : 0 < η) (hδ : 0 ≤ δ)
     (h : c' = A * c + B * c₀) (h1 : ‖A + B - 1‖ ≤ η * δ / 2) (h2 : ‖B + 1 / a‖ ≤ δ / 2)
     (hr1 : 1 / ‖a‖ + δ ≤ r) (hr2 : 1 + η * (1 / ‖a‖ + δ) ≤ r) :
     max (η * ‖c'‖) ‖c' - c‖ ≤ r * max (η * ‖c‖) ‖c - c₀‖ := by
@@ -144,7 +151,7 @@ lemma p1h_step {a A B c₀ c c' : ℂ} {η δ r : ℝ} (hη : 0 < η) (hδ : 0 �
   gcongr
 
 /-- The recurrence of `heunLocalCoeff` in the form `c_{n+2} = A_n c_{n+1} + B_n c_n`. -/
-lemma p1h_coeff_add_two (a q α β γ δ : ℂ) (n : ℕ) :
+private lemma heunLocalCoeff_add_two (a q α β γ δ : ℂ) (n : ℕ) :
     heunLocalCoeff a q α β γ δ (n + 2) =
       (heunRecQ a α β γ δ (n + 1) + q) / heunRecR a γ (n + 1) *
           heunLocalCoeff a q α β γ δ (n + 1) +
@@ -152,7 +159,7 @@ lemma p1h_coeff_add_two (a q α β γ δ : ℂ) (n : ℕ) :
   rw [heunLocalCoeff]; ring
 
 /-- Nonvanishing under the stated hypotheses: `∀ᶠ n : ℕ in atTop, heunRecR a γ (n + 1) ≠ 0`. -/
-lemma p1h_eventually_R_ne (a γ : ℂ) (ha : a ≠ 0) :
+private lemma eventually_heunRecR_ne_zero (a γ : ℂ) (ha : a ≠ 0) :
     ∀ᶠ n : ℕ in atTop, heunRecR a γ (n + 1) ≠ 0 := by
   obtain ⟨N, hN⟩ := exists_nat_gt ‖γ‖
   filter_upwards [eventually_ge_atTop N] with n hn
@@ -165,13 +172,13 @@ lemma p1h_eventually_R_ne (a γ : ℂ) (ha : a ≠ 0) :
 
 /-- The map `(fun n : ℕ => (heunRecQ a α β γ δ (n + 1) + q) / heunRecR a γ (n + 1) + -heunRecP α β
 (n + 1) / heunRecR a γ (n + 1) - 1)` tends to `(𝓝 0)` along `atTop`. -/
-lemma p1h_tendsto_A_add_B (a q α β γ δ : ℂ) (ha : a ≠ 0) :
+private lemma tendsto_heunRec_ratio_sum (a q α β γ δ : ℂ) (ha : a ≠ 0) :
     Tendsto (fun n : ℕ => (heunRecQ a α β γ δ (n + 1) + q) / heunRecR a γ (n + 1) +
       -heunRecP α β (n + 1) / heunRecR a γ (n + 1) - 1) atTop (𝓝 0) := by
-  have h := (p1h_tendsto_lin_div (a * δ - 2 * a - δ + 2)
+  have h := (tendsto_linear_div_quadratic (a * δ - 2 * a - δ + 2)
     (-a * γ - α * β + α + β + q - 1) a γ ha).comp (tendsto_add_atTop_nat 1)
   refine h.congr' ?_
-  filter_upwards [p1h_eventually_R_ne a γ ha] with n hn
+  filter_upwards [eventually_heunRecR_ne_zero a γ ha] with n hn
   simp only [Function.comp_apply]
   rw [eq_comm, ← add_div, div_sub_one hn]
   unfold heunRecR heunRecQ heunRecP heunEps
@@ -180,13 +187,13 @@ lemma p1h_tendsto_A_add_B (a q α β γ δ : ℂ) (ha : a ≠ 0) :
 
 /-- The map `(fun n : ℕ => -heunRecP α β (n + 1) / heunRecR a γ (n + 1) + 1 / a)` tends to `(𝓝 0)`
 along `atTop`. -/
-lemma p1h_tendsto_B (a α β γ : ℂ) (ha : a ≠ 0) :
+private lemma tendsto_neg_heunRecP_div_heunRecR_add_inv (a α β γ : ℂ) (ha : a ≠ 0) :
     Tendsto (fun n : ℕ => -heunRecP α β (n + 1) / heunRecR a γ (n + 1) + 1 / a) atTop
       (𝓝 0) := by
-  have h := (p1h_tendsto_lin_div ((-a * α - a * β + a * γ + 3 * a) / a)
+  have h := (tendsto_linear_div_quadratic ((-a * α - a * β + a * γ + 3 * a) / a)
     ((-a * α * β + a * α + a * β + a * γ - a) / a) a γ ha).comp (tendsto_add_atTop_nat 1)
   refine h.congr' ?_
-  filter_upwards [p1h_eventually_R_ne a γ ha] with n hn
+  filter_upwards [eventually_heunRecR_ne_zero a γ ha] with n hn
   simp only [Function.comp_apply]
   rw [eq_comm, div_add_div _ _ hn ha]
   unfold heunRecR heunRecP at *
@@ -195,16 +202,16 @@ lemma p1h_tendsto_B (a α β γ : ℂ) (ha : a ≠ 0) :
   ring
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < heunLocalRadius a`. -/
-theorem p1h_radius_pos {a : ℂ} (ha : a ≠ 0) : 0 < heunLocalRadius a :=
+theorem heunLocalRadius_pos {a : ℂ} (ha : a ≠ 0) : 0 < heunLocalRadius a :=
   lt_min one_pos (norm_pos_iff.2 ha)
 
 /-- Majorant bound: `∑ ‖c_n‖ tⁿ` converges for `0 ≤ t < min(1, |a|)`. -/
-lemma p1h_summable_norm {a q α β γ δ : ℂ} (ha : a ≠ 0) {t : ℝ} (ht0 : 0 ≤ t)
+private lemma summable_norm_heunLocalCoeff_mul_pow {a q α β γ δ : ℂ} (ha : a ≠ 0) {t : ℝ} (ht0 : 0 ≤ t)
     (ht : t < heunLocalRadius a) :
     Summable (fun n => ‖heunLocalCoeff a q α β γ δ n‖ * t ^ n) := by
   set c := heunLocalCoeff a q α β γ δ
   set ρ := heunLocalRadius a with hρdef
-  have hρ : 0 < ρ := p1h_radius_pos ha
+  have hρ : 0 < ρ := heunLocalRadius_pos ha
   have hρ1 : ρ ≤ 1 := min_le_left _ _
   have hρa : ρ ≤ ‖a‖ := min_le_right _ _
   have hapos : 0 < ‖a‖ := norm_pos_iff.2 ha
@@ -224,9 +231,9 @@ lemma p1h_summable_norm {a q α β γ δ : ℂ} (ha : a ≠ 0) {t : ℝ} (ht0 : 
   have hη0 : 0 < η := div_pos (by linarith) hD
   have hr2 : 1 + η * (1 / ‖a‖ + δ') ≤ r := by
     rw [hη, div_mul_cancel₀ _ hD.ne']; linarith
-  have e1 := (Metric.tendsto_nhds.1 (p1h_tendsto_A_add_B a q α β γ δ ha)) (η * δ' / 2)
+  have e1 := (Metric.tendsto_nhds.1 (tendsto_heunRec_ratio_sum a q α β γ δ ha)) (η * δ' / 2)
     (by positivity)
-  have e2 := (Metric.tendsto_nhds.1 (p1h_tendsto_B a α β γ ha)) (δ' / 2) (by positivity)
+  have e2 := (Metric.tendsto_nhds.1 (tendsto_neg_heunRecP_div_heunRecR_add_inv a α β γ ha)) (δ' / 2) (by positivity)
   set g : ℕ → ℝ := fun n => max (η * ‖c (n + 1)‖) ‖c (n + 1) - c n‖ * t ^ n with hg
   have hg0 : ∀ n, 0 ≤ g n := fun n =>
     mul_nonneg ((norm_nonneg _).trans (le_max_right _ _)) (pow_nonneg ht0 _)
@@ -236,7 +243,7 @@ lemma p1h_summable_norm {a q α β γ δ : ℂ} (ha : a ≠ 0) {t : ℝ} (ht0 : 
     rw [dist_zero_right] at h1 h2
     rw [Real.norm_of_nonneg (hg0 _), Real.norm_of_nonneg (hg0 _), hg]
     simp only
-    have hs := p1h_step (a := a) hη0 hδ0.le (p1h_coeff_add_two a q α β γ δ n) h1.le h2.le hr1 hr2
+    have hs := majorant_step (a := a) hη0 hδ0.le (heunLocalCoeff_add_two a q α β γ δ n) h1.le h2.le hr1 hr2
     rw [pow_succ]
     calc max (η * ‖c (n + 1 + 1)‖) ‖c (n + 1 + 1) - c (n + 1)‖ * (t ^ n * t)
         ≤ r * max (η * ‖c (n + 1)‖) ‖c (n + 1) - c n‖ * (t ^ n * t) := by
@@ -255,7 +262,7 @@ lemma p1h_summable_norm {a q α β γ δ : ℂ} (ha : a ≠ 0) {t : ℝ} (ht0 : 
   exact (summable_nat_add_iff 1).1 h1
 
 /-- The power series of `Hl` converges on the disk `|z| < min(1, |a|)`. -/
-theorem p1h_hasFPowerSeriesOnBall {a q α β γ δ : ℂ} (ha : a ≠ 0) :
+theorem hasFPowerSeriesOnBall_heunLocal {a q α β γ δ : ℂ} (ha : a ≠ 0) :
     HasFPowerSeriesOnBall (heunLocal a q α β γ δ) (ofScalars ℂ (heunLocalCoeff a q α β γ δ)) 0
       (ENNReal.ofReal (heunLocalRadius a)) := by
   set p := ofScalars ℂ (heunLocalCoeff a q α β γ δ)
@@ -263,12 +270,12 @@ theorem p1h_hasFPowerSeriesOnBall {a q α β γ δ : ℂ} (ha : a ≠ 0) :
     refine ENNReal.le_of_forall_nnreal_lt fun t ht => ?_
     refine p.le_radius_of_summable ?_
     have ht' : (t : ℝ) < heunLocalRadius a := by
-      rwa [← ENNReal.ofReal_coe_nnreal, ENNReal.ofReal_lt_ofReal_iff (p1h_radius_pos ha)] at ht
-    refine (p1h_summable_norm (q := q) (α := α) (β := β) (γ := γ) (δ := δ) ha t.2 ht').congr
+      rwa [← ENNReal.ofReal_coe_nnreal, ENNReal.ofReal_lt_ofReal_iff (heunLocalRadius_pos ha)] at ht
+    refine (summable_norm_heunLocalCoeff_mul_pow (q := q) (α := α) (β := β) (γ := γ) (δ := δ) ha t.2 ht').congr
       fun n => ?_
     simp [p]
   have hpos : 0 < ENNReal.ofReal (heunLocalRadius a) :=
-    ENNReal.ofReal_pos.2 (p1h_radius_pos ha)
+    ENNReal.ofReal_pos.2 (heunLocalRadius_pos ha)
   have h := (p.hasFPowerSeriesOnBall (hpos.trans_le hrad)).mono hpos hrad
   have hsum : p.sum = heunLocal a q α β γ δ := by
     funext z
@@ -276,50 +283,50 @@ theorem p1h_hasFPowerSeriesOnBall {a q α β γ δ : ℂ} (ha : a ≠ 0) :
   rwa [hsum] at h
 
 /-- Shift of a coefficient sequence (multiplication of the series by `z`). -/
-def p1hSh (u : ℕ → ℂ) : ℕ → ℂ
+def coeffShift (u : ℕ → ℂ) : ℕ → ℂ
   | 0 => 0
   | n + 1 => u n
 
-/-- The series with terms `(fun n => p1hSh u n * z ^ n)` converges to `(z * S)`. -/
-lemma p1h_hasSum_sh {u : ℕ → ℂ} {S z : ℂ} (h : HasSum (fun n => u n * z ^ n) S) :
-    HasSum (fun n => p1hSh u n * z ^ n) (z * S) :=
-  HasSum.mul_pow_shift (c := p1hSh u) h rfl
+/-- The series with terms `(fun n => coeffShift u n * z ^ n)` converges to `(z * S)`. -/
+private lemma hasSum_coeffShift {u : ℕ → ℂ} {S z : ℂ} (h : HasSum (fun n => u n * z ^ n) S) :
+    HasSum (fun n => coeffShift u n * z ^ n) (z * S) :=
+  HasSum.mul_pow_shift (c := coeffShift u) h rfl
 
 /-- The coefficient of `zⁿ` in `z (𝒟 f - q f)` for `f = ∑ bₙ zⁿ` (with `ε = heunEps α β γ δ`). -/
-def p1hE (a q α β γ δ : ℂ) (b : ℕ → ℂ) (n : ℕ) : ℂ :=
-  p1hSh (p1hSh fun n => (n : ℂ) * (n - 1) * b n) n -
-    (1 + a) * p1hSh (fun n => (n : ℂ) * (n - 1) * b n) n + a * ((n : ℂ) * (n - 1) * b n) +
-    (γ + δ + heunEps α β γ δ) * p1hSh (p1hSh fun n => (n : ℂ) * b n) n -
-    (γ * (1 + a) + δ * a + heunEps α β γ δ) * p1hSh (fun n => (n : ℂ) * b n) n +
-    γ * a * ((n : ℂ) * b n) + α * β * p1hSh (p1hSh b) n - q * p1hSh b n
+def heunOperatorCoeff (a q α β γ δ : ℂ) (b : ℕ → ℂ) (n : ℕ) : ℂ :=
+  coeffShift (coeffShift fun n => (n : ℂ) * (n - 1) * b n) n -
+    (1 + a) * coeffShift (fun n => (n : ℂ) * (n - 1) * b n) n + a * ((n : ℂ) * (n - 1) * b n) +
+    (γ + δ + heunEps α β γ δ) * coeffShift (coeffShift fun n => (n : ℂ) * b n) n -
+    (γ * (1 + a) + δ * a + heunEps α β γ δ) * coeffShift (fun n => (n : ℂ) * b n) n +
+    γ * a * ((n : ℂ) * b n) + α * β * coeffShift (coeffShift b) n - q * coeffShift b n
 
-/-- Identity under the stated parameter and domain assumptions: `p1hE a q α β γ δ b 0 = 0`. -/
-theorem p1hE_zero (a q α β γ δ : ℂ) (b : ℕ → ℂ) : p1hE a q α β γ δ b 0 = 0 := by
-  simp [p1hE, p1hSh]
+/-- Identity under the stated parameter and domain assumptions: `heunOperatorCoeff a q α β γ δ b 0 = 0`. -/
+theorem heunOperatorCoeff_zero (a q α β γ δ : ℂ) (b : ℕ → ℂ) : heunOperatorCoeff a q α β γ δ b 0 = 0 := by
+  simp [heunOperatorCoeff, coeffShift]
 
-/-- Identity under the stated parameter and domain assumptions: `p1hE a q α β γ δ b 1 = a * γ * b
+/-- Identity under the stated parameter and domain assumptions: `heunOperatorCoeff a q α β γ δ b 1 = a * γ * b
 1 - q * b 0`. -/
-theorem p1hE_one (a q α β γ δ : ℂ) (b : ℕ → ℂ) :
-    p1hE a q α β γ δ b 1 = a * γ * b 1 - q * b 0 := by
-  simp only [p1hE, p1hSh]
+theorem heunOperatorCoeff_one (a q α β γ δ : ℂ) (b : ℕ → ℂ) :
+    heunOperatorCoeff a q α β γ δ b 1 = a * γ * b 1 - q * b 0 := by
+  simp only [heunOperatorCoeff, coeffShift]
   push_cast
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `p1hE a q α β γ δ b (k + 2) =
+/-- Identity under the stated parameter and domain assumptions: `heunOperatorCoeff a q α β γ δ b (k + 2) =
 heunRecR a γ (k + 1) * b (k + 2) - (heunRecQ a α β γ δ (k + 1) + q) * b (k + 1) + heunRecP α β
 (k + 1) * b k`. -/
-theorem p1hE_add_two (a q α β γ δ : ℂ) (b : ℕ → ℂ) (k : ℕ) :
-    p1hE a q α β γ δ b (k + 2) = heunRecR a γ (k + 1) * b (k + 2) -
+theorem heunOperatorCoeff_add_two (a q α β γ δ : ℂ) (b : ℕ → ℂ) (k : ℕ) :
+    heunOperatorCoeff a q α β γ δ b (k + 2) = heunRecR a γ (k + 1) * b (k + 2) -
       (heunRecQ a α β γ δ (k + 1) + q) * b (k + 1) + heunRecP α β (k + 1) * b k := by
-  simp only [p1hE, p1hSh, heunRecR, heunRecQ, heunRecP, heunEps]
+  simp only [heunOperatorCoeff, coeffShift, heunRecR, heunRecQ, heunRecP, heunEps]
   push_cast
   ring
 
 /-- For a power series `f = ∑ bₙ zⁿ`, the function `z (𝒟 f - q f)` has the power series with
-coefficients `p1hE … b`. -/
-theorem p1h_hasSum_heunOperator {a q α β γ δ : ℂ} {b : ℕ → ℂ} {f : ℂ → ℂ} {r : ENNReal}
+coefficients `heunOperatorCoeff … b`. -/
+theorem hasSum_heunOperator {a q α β γ δ : ℂ} {b : ℕ → ℂ} {f : ℂ → ℂ} {r : ENNReal}
     (h : HasFPowerSeriesOnBall f (ofScalars ℂ b) 0 r) {z : ℂ} (hz' : z ∈ Metric.eball 0 r) :
-    HasSum (fun n => p1hE a q α β γ δ b n * z ^ n)
+    HasSum (fun n => heunOperatorCoeff a q α β γ δ b n * z ^ n)
       (z * (heunOperator a α β γ δ (heunEps α β γ δ) f z - q * f z)) := by
   set ε := heunEps α β γ δ with hε
   have hF := h.hasSum_mul_pow hz'
@@ -336,59 +343,61 @@ theorem p1h_hasSum_heunOperator {a q α β γ δ : ℂ} {b : ℕ → ℂ} {f : �
       (by simpa only [Nat.cast_add, Nat.cast_one] using hs) (by simp)
     convert ht using 1
     ring
-  have hX1 := p1h_hasSum_sh hX
-  have hX2 := p1h_hasSum_sh hX1
-  have hY1 := p1h_hasSum_sh hY
-  have hY2 := p1h_hasSum_sh hY1
-  have hF1 := p1h_hasSum_sh hF
-  have hF2 := p1h_hasSum_sh hF1
+  have hX1 := hasSum_coeffShift hX
+  have hX2 := hasSum_coeffShift hX1
+  have hY1 := hasSum_coeffShift hY
+  have hY2 := hasSum_coeffShift hY1
+  have hF1 := hasSum_coeffShift hF
+  have hF2 := hasSum_coeffShift hF1
   have hT := ((((((((hX2.sub (hX1.mul_left (1 + a))).add (hX.mul_left a)).add
     (hY2.mul_left (γ + δ + ε))).sub (hY1.mul_left (γ * (1 + a) + δ * a + ε))).add
     (hY.mul_left (γ * a))).add (hF2.mul_left (α * β))).sub (hF1.mul_left q)))
   convert hT using 1
   · funext n
-    simp only [p1hE, ← hε]
+    simp only [heunOperatorCoeff, ← hε]
     ring
   · rw [heunOperator]
     ring
 
 /-- `z (𝒟 Hl - q Hl) = 0` on the disk of convergence. -/
-lemma p1h_heunOperator_heunLocal {a q α β γ δ : ℂ} (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ))
+private lemma heunOperator_heunLocal {a q α β γ δ : ℂ} (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ))
     {z : ℂ} (hz : ‖z‖ < heunLocalRadius a) :
     z * (heunOperator a α β γ δ (heunEps α β γ δ) (heunLocal a q α β γ δ) z -
       q * heunLocal a q α β γ δ z) = 0 := by
   set c := heunLocalCoeff a q α β γ δ with hc
-  have h := p1h_hasFPowerSeriesOnBall (q := q) (α := α) (β := β) (δ := δ) (γ := γ) ha
+  have h := hasFPowerSeriesOnBall_heunLocal (q := q) (α := α) (β := β) (δ := δ) (γ := γ) ha
   have hz' : z ∈ Metric.eball (0 : ℂ) (ENNReal.ofReal (heunLocalRadius a)) := by
     rw [Metric.eball_ofReal, mem_ball_zero_iff]; exact hz
-  have hT := p1h_hasSum_heunOperator (a := a) (q := q) (α := α) (β := β) (γ := γ) (δ := δ) h hz'
-  have hcoef : ∀ n, p1hE a q α β γ δ c n = 0 := by
+  have hT := hasSum_heunOperator (a := a) (q := q) (α := α) (β := β) (γ := γ) (δ := δ) h hz'
+  have hcoef : ∀ n, heunOperatorCoeff a q α β γ δ c n = 0 := by
     intro n
     have hγ0 : γ ≠ 0 := by simpa using hγ 0
     rcases n with _ | _ | k
-    · exact p1hE_zero _ _ _ _ _ _ _
-    · rw [p1hE_one, hc, heunLocalCoeff, heunLocalCoeff]
+    · exact heunOperatorCoeff_zero _ _ _ _ _ _ _
+    · rw [heunOperatorCoeff_one, hc, heunLocalCoeff, heunLocalCoeff]
       field_simp
       ring
     · have hR : heunRecR a γ (k + 1) ≠ 0 := by
         unfold heunRecR
         refine mul_ne_zero (mul_ne_zero ha (by norm_cast)) fun h0 => hγ (k + 1) ?_
         push_cast at h0 ⊢; linear_combination h0
-      rw [p1hE_add_two, hc, heunLocalCoeff, mul_div_cancel₀ _ hR]
+      rw [heunOperatorCoeff_add_two, hc, heunLocalCoeff, mul_div_cancel₀ _ hR]
       ring
   refine hT.unique ?_
   convert (hasSum_zero : HasSum (fun _ : ℕ => (0 : ℂ)) 0) using 1
   funext n
   rw [hcoef n, zero_mul]
 
-/-- DLMF 31.3.1: for `a ≠ 0` and `γ ∉ {0, -1, -2, …}` the Maclaurin series `∑ c_j z^j`
+/-- DLMF 31.3.1: for `a ≠ 0` the Maclaurin series `∑ c_j z^j`
 converges to `Hl(a, q; α, β, γ, δ; z)` for `|z| < min(1, |a|)` (the radius given by the nearest
-singularity; the ratio `c_{j+1}/c_j` tends to `1` or `1/a`). -/
+singularity; the ratio `c_{j+1}/c_j` tends to `1` or `1/a`). DLMF assumes
+`γ ∉ {0, -1, -2, …}`; at those values the coefficients use Lean's division by zero, and the
+statement extends DLMF via Lean's conventions. -/
 @[dlmf 31.3.E1]
-theorem hasSum_heunLocal (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) {z : ℂ}
+theorem hasSum_heunLocal (ha : a ≠ 0) {z : ℂ}
     (hz : ‖z‖ < heunLocalRadius a) :
     HasSum (fun j => heunLocalCoeff a q α β γ δ j * z ^ j) (heunLocal a q α β γ δ z) :=
-  (p1h_hasFPowerSeriesOnBall ha).hasSum_mul_pow (by rwa [Metric.eball_ofReal, mem_ball_zero_iff])
+  (hasFPowerSeriesOnBall_heunLocal ha).hasSum_mul_pow (by rwa [Metric.eball_ofReal, mem_ball_zero_iff])
 
 /-- DLMF §31.3(i): `Hl` is analytic in the disk `|z| < min(1, |a|)` and solves Heun's equation
 (with `ε = α + β + 1 - γ - δ`) there, away from the regular singular point `z = 0`. -/
@@ -397,7 +406,7 @@ theorem heunLocal_isHeunSolOn (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : �
     AnalyticOnNhd ℂ (heunLocal a q α β γ δ) (Metric.ball 0 (heunLocalRadius a)) ∧
     IsHeunSolOn a q α β γ δ (heunEps α β γ δ) (heunLocal a q α β γ δ)
       (Metric.ball 0 (heunLocalRadius a) \ {0}) := by
-  have h := p1h_hasFPowerSeriesOnBall (q := q) (α := α) (β := β) (γ := γ) (δ := δ) ha
+  have h := hasFPowerSeriesOnBall_heunLocal (q := q) (α := α) (β := β) (γ := γ) (δ := δ) ha
   have hA : AnalyticOnNhd ℂ (heunLocal a q α β γ δ) (Metric.ball 0 (heunLocalRadius a)) :=
     fun z hz => h.analyticAt_of_mem (by rwa [Metric.eball_ofReal])
   refine ⟨hA, ?_⟩
@@ -413,7 +422,7 @@ theorem heunLocal_isHeunSolOn (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : �
   have hzA := hA z hz
   refine ⟨hzA.differentiableAt, hzA.deriv.differentiableAt, ?_⟩
   rw [mem_ball_zero_iff] at hz
-  have := p1h_heunOperator_heunLocal (q := q) (α := α) (β := β) (δ := δ) ha hγ hz
+  have := heunOperator_heunLocal (q := q) (α := α) (β := β) (δ := δ) ha hγ hz
   rcases mul_eq_zero.1 this with h0 | h0
   · exact absurd h0 hz0
   · exact sub_eq_zero.1 h0
@@ -421,12 +430,12 @@ theorem heunLocal_isHeunSolOn (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : �
 /-! ### Transformations used for the local solutions -/
 
 /-- Restriction of a solution to a subset. -/
-lemma p1h_isLinearODE2On_mono {p r w : ℂ → ℂ} {s t : Set ℂ} (h : IsLinearODE2On p r w t)
+private lemma isLinearODE2On_mono {p r w : ℂ → ℂ} {s t : Set ℂ} (h : IsLinearODE2On p r w t)
     (hst : s ⊆ t) : IsLinearODE2On p r w s :=
   ⟨fun z hz => h.1 z (hst hz), fun z hz => h.2 z (hst hz)⟩
 
 /-- Heun's equation is symmetric in `α` and `β`. -/
-lemma p1h_isHeunSolOn_swap {w : ℂ → ℂ} {s : Set ℂ} (h : IsHeunSolOn a q α β γ δ ε w s) :
+private lemma isHeunSolOn_swap {w : ℂ → ℂ} {s : Set ℂ} (h : IsHeunSolOn a q α β γ δ ε w s) :
     IsHeunSolOn a q β α γ δ ε w s := by
   have : heunCoeffR a q β α = heunCoeffR a q α β := by
     funext z; unfold heunCoeffR; ring
@@ -435,11 +444,11 @@ lemma p1h_isHeunSolOn_swap {w : ℂ → ℂ} {s : Set ℂ} (h : IsHeunSolOn a q 
 
 /-- The homography `z ↦ 1 - z` (§31.2(v)): a solution of Heun's equation with parameters
 `(1 - a, αβ - q; α, β, δ, γ; ε)` composed with `1 - z` solves the original equation. -/
-lemma p1h_isHeunSolOn_one_sub {U V : Set ℂ} (hU : IsOpen U)
+private lemma isHeunSolOn_comp_one_sub {U V : Set ℂ} (hU : IsOpen U)
     (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a ∧ 1 - z ∈ V) {w : ℂ → ℂ}
     (hw : IsHeunSolOn (1 - a) (α * β - q) α β δ γ ε w V) :
     IsHeunSolOn a q α β γ δ ε (fun z => w (1 - z)) U := by
-  refine p1h_isLinearODE2On_comp (φ₁ := fun _ => -1) (φ₂ := fun _ => 0) hU
+  refine isLinearODE2On_comp (φ₁ := fun _ => -1) (φ₂ := fun _ => 0) hU
     (fun z _ => by simpa using (hasDerivAt_id' z).const_sub (1 : ℂ))
     (fun z _ => hasDerivAt_const _ _) (fun z hz => (hUs z hz).2.2.2) (fun z hz => ?_)
     (fun z hz => ?_) hw
@@ -465,12 +474,12 @@ lemma p1h_isHeunSolOn_one_sub {U V : Set ℂ} (hU : IsOpen U)
     ring
 
 /-- The homography `z ↦ (a - z)/(a - 1)` (§31.2(v)). -/
-lemma p1h_isHeunSolOn_comp_a (ha1 : a ≠ 1) {U V : Set ℂ} (hU : IsOpen U)
+private lemma isHeunSolOn_comp_sub_div (ha1 : a ≠ 1) {U V : Set ℂ} (hU : IsOpen U)
     (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a ∧ (a - z) / (a - 1) ∈ V) {w : ℂ → ℂ}
     (hw : IsHeunSolOn (a / (a - 1)) ((α * β * a - q) / (a - 1)) α β ε δ γ w V) :
     IsHeunSolOn a q α β γ δ ε (fun z => w ((a - z) / (a - 1))) U := by
   have ha1' : a - 1 ≠ 0 := sub_ne_zero.2 ha1
-  refine p1h_isLinearODE2On_comp (φ₁ := fun _ => -1 / (a - 1)) (φ₂ := fun _ => 0) hU
+  refine isLinearODE2On_comp (φ₁ := fun _ => -1 / (a - 1)) (φ₂ := fun _ => 0) hU
     (fun z _ => ?_) (fun z _ => hasDerivAt_const _ _) (fun z hz => (hUs z hz).2.2.2)
     (fun z hz => ?_) (fun z hz => ?_) hw
   · convert ((hasDerivAt_id' z).const_sub a).div_const (a - 1) using 1
@@ -498,7 +507,7 @@ lemma p1h_isHeunSolOn_comp_a (ha1 : a ≠ 1) {U V : Set ℂ} (hU : IsOpen U)
 /-- The map `w ↦ z^{-α} w(1/z)` (§31.2(v), §31.3(ii)): a solution of Heun's equation with
 parameters `(1/a, q/a - α(β - ε) - (α/a)(β - δ); α, α - γ + 1, α - β + 1, δ; ε)` gives a
 solution of the original equation. -/
-lemma p1h_isHeunSolOn_infinity (ha0 : a ≠ 0) (hε : ε = heunEps α β γ δ) {U V : Set ℂ}
+private lemma isHeunSolOn_comp_inv (ha0 : a ≠ 0) (hε : ε = heunEps α β γ δ) {U V : Set ℂ}
     (hU : IsOpen U) (hUs : ∀ z ∈ U, z ∈ slitPlane ∧ z ≠ 1 ∧ z ≠ a ∧ 1 / z ∈ V) {w : ℂ → ℂ}
     (hw : IsHeunSolOn (1 / a) (q / a - α * (β - ε) - α / a * (β - δ)) α (α - γ + 1)
       (α - β + 1) δ ε w V) :
@@ -509,12 +518,12 @@ lemma p1h_isHeunSolOn_infinity (ha0 : a ≠ 0) (hε : ε = heunEps α β γ δ) 
   set L' : ℂ → ℂ := fun z => α / z ^ 2
   have hne : ∀ z ∈ U, z ≠ 0 ∧ z - 1 ≠ 0 ∧ z - a ≠ 0 := fun z hz =>
     ⟨slitPlane_ne_zero (hUs z hz).1, sub_ne_zero.2 (hUs z hz).2.1, sub_ne_zero.2 (hUs z hz).2.2.1⟩
-  refine p1h_isLinearODE2On_mul (L := L) (L' := L')
+  refine isLinearODE2On_gauge_mul (L := L) (L' := L')
     (p₁ := fun z => heunCoeffP a γ δ (α + β + 1 - γ - δ) z + 2 * L z)
     (r₁ := fun z => heunCoeffR a q α β z + heunCoeffP a γ δ (α + β + 1 - γ - δ) z * L z +
       L z ^ 2 + L' z)
     hU (fun z hz => ?_) (fun z hz => ?_) (fun z hz => rfl) (fun z hz => rfl) ?_
-  · have h := p1h_hasDerivAt_cpow (s := -α) (hasDerivAt_id' z) (hUs z hz).1
+  · have h := hasDerivAt_cpow_comp (s := -α) (hasDerivAt_id' z) (hUs z hz).1
     convert h using 1
     simp only [L]
     ring
@@ -522,7 +531,7 @@ lemma p1h_isHeunSolOn_infinity (ha0 : a ≠ 0) (hε : ε = heunEps α β γ δ) 
     convert ((hasDerivAt_id' z).inv h0).const_mul (-α) using 1
     · ext y; simp [L, div_eq_mul_inv]
     · simp [L']; field_simp
-  refine p1h_isLinearODE2On_comp (φ₁ := fun z => -1 / z ^ 2)
+  refine isLinearODE2On_comp (φ₁ := fun z => -1 / z ^ 2)
     (φ₂ := fun z => 2 / z ^ 3) hU (fun z hz => ?_) (fun z hz => ?_)
     (fun z hz => (hUs z hz).2.2.2) (fun z hz => ?_) (fun z hz => ?_) hw
   · have h0 := (hne z hz).1
@@ -547,18 +556,18 @@ lemma p1h_isHeunSolOn_infinity (ha0 : a ≠ 0) (hε : ε = heunEps α β γ δ) 
     ring
 
 /-- The domain `{|z| < min(1, |a|)} ∩ slitPlane` is open. -/
-lemma p1h_isOpen_ball_slit (a : ℂ) :
+private lemma isOpen_ball_inter_slitPlane (a : ℂ) :
     IsOpen {z : ℂ | ‖z‖ < heunLocalRadius a ∧ z ∈ slitPlane} :=
   (isOpen_lt continuous_norm continuous_const).inter isOpen_slitPlane
 
 /-- A point of the disk of convergence of `Hl(a, ⋯)` is neither `1` nor `a`. -/
-lemma p1h_ne_of_radius {a z : ℂ} (hz : ‖z‖ < heunLocalRadius a) : z ≠ 1 ∧ z ≠ a := by
+private lemma ne_one_and_ne_of_norm_lt_heunLocalRadius {a z : ℂ} (hz : ‖z‖ < heunLocalRadius a) : z ≠ 1 ∧ z ≠ a := by
   refine ⟨fun h => ?_, fun h => ?_⟩
   · subst h; simp only [norm_one] at hz; exact absurd (hz.trans_le (min_le_left _ _)) (lt_irrefl _)
   · subst h; exact absurd (hz.trans_le (min_le_right _ _)) (lt_irrefl _)
 
 /-- The domain `{|1/z| < min(1, |1/a|)} ∩ slitPlane` is open. -/
-lemma p1h_isOpen_inv_slit (a : ℂ) :
+private lemma isOpen_inv_ball_inter_slitPlane (a : ℂ) :
     IsOpen {z : ℂ | ‖1 / z‖ < heunLocalRadius (1 / a) ∧ z ∈ slitPlane} := by
   have hc : ContinuousOn (fun z : ℂ => ‖1 / z‖) slitPlane := by
     refine ContinuousOn.norm (continuousOn_const.div continuousOn_id fun z hz => ?_)
@@ -569,14 +578,14 @@ lemma p1h_isOpen_inv_slit (a : ℂ) :
   simp [and_comm]
 
 /-- A one-variable power series is `ofScalars` of its coefficients. -/
-lemma p1h_eq_ofScalars_coeff (p : FormalMultilinearSeries ℂ ℂ ℂ) :
+private lemma formalMultilinearSeries_eq_ofScalars_coeff (p : FormalMultilinearSeries ℂ ℂ ℂ) :
     p = ofScalars ℂ (fun n => p.coeff n) := by
   ext n
   rw [apply_eq_prod_smul_coeff]
   simp [ofScalars, mul_comm]
 
 /-- Coefficients of a power series vanishing on a ball vanish. -/
-lemma p1h_coeff_eq_zero_of_hasSum {e : ℕ → ℂ} {r : ℝ} (hr : 0 < r)
+private lemma coeff_eq_zero_of_hasSum_zero {e : ℕ → ℂ} {r : ℝ} (hr : 0 < r)
     (h : ∀ z : ℂ, ‖z‖ < r → HasSum (fun n => e n * z ^ n) 0) : e = 0 := by
   have hrad : ENNReal.ofReal r ≤ (ofScalars ℂ e).radius := by
     refine ENNReal.le_of_forall_nnreal_lt fun t ht => ?_
@@ -604,12 +613,12 @@ theorem eventuallyEq_heunLocal_of_analyticAt (ha : a ≠ 0) (hγ : ∀ n : ℕ, 
   obtain ⟨p, r, hp⟩ := hw
   set b : ℕ → ℂ := fun n => p.coeff n with hb
   have hp' : HasFPowerSeriesOnBall w (ofScalars ℂ b) 0 r := by
-    rw [hb, ← p1h_eq_ofScalars_coeff]; exact hp
+    rw [hb, ← formalMultilinearSeries_eq_ofScalars_coeff]; exact hp
   obtain ⟨ρ, hρ, hρU⟩ := Metric.mem_nhds_iff.1 hU
   obtain ⟨t, ht0, ht, htr⟩ := ENNReal.lt_iff_exists_real_btwn.1 hp.r_pos
   have ht0' : 0 < t := ENNReal.ofReal_pos.1 ht
   set r' := min t (min ρ (heunLocalRadius a)) with hr'
-  have hr'0 : 0 < r' := lt_min ht0' (lt_min hρ (p1h_radius_pos ha))
+  have hr'0 : 0 < r' := lt_min ht0' (lt_min hρ (heunLocalRadius_pos ha))
   have hr'r : ENNReal.ofReal r' ≤ r :=
     (ENNReal.ofReal_le_ofReal (min_le_left _ _)).trans htr.le
   have hr'ρ : r' ≤ ρ := (min_le_right _ _).trans (min_le_left _ _)
@@ -617,14 +626,14 @@ theorem eventuallyEq_heunLocal_of_analyticAt (ha : a ≠ 0) (hγ : ∀ n : ℕ, 
   have hsub : Metric.ball (0 : ℂ) r' \ {0} ⊆ U \ {0} := fun z hz =>
     ⟨hρU (Metric.ball_subset_ball hr'ρ hz.1), hz.2⟩
   have hs : ∀ z ∈ Metric.ball (0 : ℂ) r' \ {0}, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a := fun z hz =>
-    ⟨hz.2, p1h_ne_of_radius ((mem_ball_zero_iff.1 hz.1).trans_le hr'a)⟩
-  have hsol' := (isHeunSolOn_iff_heunOperator hs).1 (p1h_isLinearODE2On_mono hsol hsub)
+    ⟨hz.2, ne_one_and_ne_of_norm_lt_heunLocalRadius ((mem_ball_zero_iff.1 hz.1).trans_le hr'a)⟩
+  have hsol' := (isHeunSolOn_iff_heunOperator hs).1 (isLinearODE2On_mono hsol hsub)
   have hzr : ∀ z : ℂ, ‖z‖ < r' → z ∈ Metric.eball (0 : ℂ) r := fun z hz => by
     refine Metric.eball_subset_eball hr'r ?_
     rw [Metric.eball_ofReal, mem_ball_zero_iff]; exact hz
-  have hE : p1hE a q α β γ δ b = 0 := by
-    refine p1h_coeff_eq_zero_of_hasSum hr'0 fun z hz => ?_
-    convert p1h_hasSum_heunOperator (a := a) (q := q) (α := α) (β := β) (γ := γ) (δ := δ) hp'
+  have hE : heunOperatorCoeff a q α β γ δ b = 0 := by
+    refine coeff_eq_zero_of_hasSum_zero hr'0 fun z hz => ?_
+    convert hasSum_heunOperator (a := a) (q := q) (α := α) (β := β) (γ := γ) (δ := δ) hp'
       (hzr z hz) using 1
     rcases eq_or_ne z 0 with rfl | hz0
     · simp
@@ -638,7 +647,7 @@ theorem eventuallyEq_heunLocal_of_analyticAt (ha : a ≠ 0) (hγ : ∀ n : ℕ, 
       | 0, _ => simp
       | 1, _ =>
         have h1 := congrFun hE 1
-        rw [p1hE_one] at h1
+        rw [heunOperatorCoeff_one] at h1
         rw [heunLocalCoeff]
         simp only [Pi.zero_apply] at h1
         field_simp
@@ -649,7 +658,7 @@ theorem eventuallyEq_heunLocal_of_analyticAt (ha : a ≠ 0) (hγ : ∀ n : ℕ, 
           refine mul_ne_zero (mul_ne_zero ha (by norm_cast)) fun h0 => hγ (k + 1) ?_
           push_cast at h0 ⊢; linear_combination h0
         have h2 := congrFun hE (k + 2)
-        rw [p1hE_add_two, ih (k + 1) (by omega), ih k (by omega)] at h2
+        rw [heunOperatorCoeff_add_two, ih (k + 1) (by omega), ih k (by omega)] at h2
         simp only [Pi.zero_apply] at h2
         rw [heunLocalCoeff]
         field_simp
@@ -657,7 +666,7 @@ theorem eventuallyEq_heunLocal_of_analyticAt (ha : a ≠ 0) (hγ : ∀ n : ℕ, 
   filter_upwards [Metric.ball_mem_nhds (0 : ℂ) hr'0] with z hz
   rw [mem_ball_zero_iff] at hz
   have h1 := hp'.hasSum_mul_pow (hzr z hz)
-  have h2 := (hasSum_heunLocal (q := q) (α := α) (β := β) (δ := δ) ha hγ
+  have h2 := (hasSum_heunLocal (q := q) (α := α) (β := β) (γ := γ) (δ := δ) ha
     (hz.trans_le hr'a)).mul_left (b 0)
   have hb0 : b 0 = w 0 := by
     simp only [hb]
@@ -686,10 +695,10 @@ theorem heunLocal_second_isHeunSolOn (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ (
     (β := β + 1 - γ) (δ := δ) ha hγ').2
   have hε' : heunEps (α + 1 - γ) (β + 1 - γ) (2 - γ) δ = ε := by rw [hε]; unfold heunEps; ring
   rw [hε'] at h
-  refine heun_fHomotopic_zero hF (p1h_isOpen_ball_slit a) (fun z hz => ?_) ?_
-  · exact ⟨hz.2, p1h_ne_of_radius hz.1⟩
+  refine heun_fHomotopic_zero hF (isOpen_ball_inter_slitPlane a) (fun z hz => ?_) ?_
+  · exact ⟨hz.2, ne_one_and_ne_of_norm_lt_heunLocalRadius hz.1⟩
   · rw [show q + (a * δ + ε) * (1 - γ) = (a * δ + ε) * (1 - γ) + q from add_comm _ _]
-    refine p1h_isLinearODE2On_mono h fun z hz => ⟨mem_ball_zero_iff.2 hz.1, ?_⟩
+    refine isLinearODE2On_mono h fun z hz => ⟨mem_ball_zero_iff.2 hz.1, ?_⟩
     exact slitPlane_ne_zero hz.2
 
 /-- DLMF 31.3.6: for `δ ∉ {0, -1, -2, …}` the solution with exponent `0` at `z = 1` is
@@ -704,11 +713,11 @@ theorem heunLocal_at_one_isHeunSolOn (ha : a ≠ 1) (hδ : ∀ n : ℕ, δ ≠ -
     (δ := γ) ha' hδ).2
   have hε' : heunEps α β δ γ = ε := by rw [hε]; unfold heunEps; ring
   rw [hε'] at h
-  refine p1h_isHeunSolOn_one_sub (V := Metric.ball 0 (heunLocalRadius (1 - a)) \ {0})
+  refine isHeunSolOn_comp_one_sub (V := Metric.ball 0 (heunLocalRadius (1 - a)) \ {0})
     ((isOpen_lt (by fun_prop) continuous_const).sdiff isClosed_singleton) (fun z hz => ?_) h
   obtain ⟨hz, hz1⟩ := hz
   have hz1' : z ≠ 1 := hz1
-  obtain ⟨h1, h2⟩ := p1h_ne_of_radius hz
+  obtain ⟨h1, h2⟩ := ne_one_and_ne_of_norm_lt_heunLocalRadius hz
   refine ⟨fun h0 => h1 (by rw [h0, sub_zero]), hz1', fun h0 => h2 (by rw [h0]), ?_, ?_⟩
   · exact mem_ball_zero_iff.2 hz
   · exact sub_ne_zero.2 (Ne.symm hz1')
@@ -728,12 +737,12 @@ theorem heunLocal_second_at_one_isHeunSolOn (ha : a ≠ 1) (hδ : ∀ n : ℕ, �
     (γ := δ) (δ := γ) ha' hδ hε'
   rw [show ((1 - a) * γ + ε) * (1 - δ) + α * β - q = ((1 - a) * γ + ε) * (1 - δ) + (α * β - q)
     by ring]
-  refine p1h_isHeunSolOn_one_sub (V := {u | ‖u‖ < heunLocalRadius (1 - a) ∧ u ∈ slitPlane})
+  refine isHeunSolOn_comp_one_sub (V := {u | ‖u‖ < heunLocalRadius (1 - a) ∧ u ∈ slitPlane})
     ((isOpen_lt (by fun_prop : Continuous fun z : ℂ => ‖1 - z‖) continuous_const).inter
       (isOpen_slitPlane.preimage (by fun_prop : Continuous fun z : ℂ => 1 - z)))
     (fun z hz => ?_) h
   obtain ⟨hz, hzs⟩ := hz
-  obtain ⟨h1, h2⟩ := p1h_ne_of_radius hz
+  obtain ⟨h1, h2⟩ := ne_one_and_ne_of_norm_lt_heunLocalRadius hz
   refine ⟨fun h0 => h1 (by rw [h0, sub_zero]), fun h0 => slitPlane_ne_zero hzs
     (show 1 - z = 0 by rw [h0, sub_self]),
     fun h0 => h2 (by rw [h0]), hz, hzs⟩
@@ -752,11 +761,11 @@ theorem heunLocal_at_a_isHeunSolOn (ha0 : a ≠ 0) (ha1 : a ≠ 1) (hε' : ∀ n
     (β := β) (γ := ε) (δ := δ) ha' hε').2
   have hγ : heunEps α β ε δ = γ := by rw [hε]; unfold heunEps; ring
   rw [hγ] at h
-  refine p1h_isHeunSolOn_comp_a ha1 (V := Metric.ball 0 (heunLocalRadius (a / (a - 1))) \ {0})
+  refine isHeunSolOn_comp_sub_div ha1 (V := Metric.ball 0 (heunLocalRadius (a / (a - 1))) \ {0})
     ((isOpen_lt (by fun_prop) continuous_const).sdiff isClosed_singleton) (fun z hz => ?_) h
   obtain ⟨hz, hza⟩ := hz
   have hza' : z ≠ a := hza
-  obtain ⟨h1, h2⟩ := p1h_ne_of_radius hz
+  obtain ⟨h1, h2⟩ := ne_one_and_ne_of_norm_lt_heunLocalRadius hz
   refine ⟨fun h0 => h2 (by rw [h0, sub_zero]), fun h0 => h1 (by rw [h0]; exact div_self ha1'),
     hza', mem_ball_zero_iff.2 hz, ?_⟩
   exact div_ne_zero (sub_ne_zero.2 (Ne.symm hza')) ha1'
@@ -780,14 +789,14 @@ theorem heunLocal_second_at_a_isHeunSolOn (ha0 : a ≠ 0) (ha1 : a ≠ 1)
     (α := α) (β := β) (γ := ε) (δ := δ) (ε := γ) ha' hε' hγ
   rw [show (a * (δ + γ) - γ) * (1 - ε) / (a - 1) + (α * β * a - q) / (a - 1) =
     (a / (a - 1) * δ + γ) * (1 - ε) + (α * β * a - q) / (a - 1) by field_simp; ring]
-  refine p1h_isHeunSolOn_comp_a ha1
+  refine isHeunSolOn_comp_sub_div ha1
     (V := {u | ‖u‖ < heunLocalRadius (a / (a - 1)) ∧ u ∈ slitPlane})
     ((isOpen_lt (by fun_prop : Continuous fun z : ℂ => ‖(a - z) / (a - 1)‖)
       continuous_const).inter
       (isOpen_slitPlane.preimage (by fun_prop : Continuous fun z : ℂ => (a - z) / (a - 1))))
     (fun z hz => ?_) h
   obtain ⟨hz, hzs⟩ := hz
-  obtain ⟨h1, h2⟩ := p1h_ne_of_radius hz
+  obtain ⟨h1, h2⟩ := ne_one_and_ne_of_norm_lt_heunLocalRadius hz
   refine ⟨fun h0 => h2 (by rw [h0, sub_zero]), fun h0 => h1 (by rw [h0]; exact div_self ha1'),
     fun h0 => slitPlane_ne_zero hzs (show (a - z) / (a - 1) = 0 by rw [h0, sub_self, zero_div]),
     hz, hzs⟩
@@ -808,10 +817,10 @@ theorem heunLocal_at_infinity_isHeunSolOn (ha0 : a ≠ 0)
     (α := α) (β := α - γ + 1) (γ := α - β + 1) (δ := δ) ha' hαβ).2
   have hε' : heunEps α (α - γ + 1) (α - β + 1) δ = ε := by rw [hε]; unfold heunEps; ring
   rw [hε'] at h
-  refine p1h_isHeunSolOn_infinity ha0 hε (V := Metric.ball 0 (heunLocalRadius (1 / a)) \ {0})
-    (p1h_isOpen_inv_slit a) (fun z hz => ?_) h
+  refine isHeunSolOn_comp_inv ha0 hε (V := Metric.ball 0 (heunLocalRadius (1 / a)) \ {0})
+    (isOpen_inv_ball_inter_slitPlane a) (fun z hz => ?_) h
   obtain ⟨hz, hzs⟩ := hz
-  obtain ⟨h1, h2⟩ := p1h_ne_of_radius hz
+  obtain ⟨h1, h2⟩ := ne_one_and_ne_of_norm_lt_heunLocalRadius hz
   refine ⟨hzs, fun h0 => h1 (by rw [h0, div_one]), fun h0 => h2 (by rw [h0]),
     mem_ball_zero_iff.2 hz, one_div_ne_zero (slitPlane_ne_zero hzs)⟩
 
@@ -831,11 +840,11 @@ theorem heunLocal_second_at_infinity_isHeunSolOn (ha0 : a ≠ 0)
   have hε' : heunEps β (β - γ + 1) (β - α + 1) δ = ε := by rw [hε]; unfold heunEps; ring
   rw [hε'] at h
   have hεs : ε = heunEps β α γ δ := by rw [hε]; unfold heunEps; ring
-  refine p1h_isHeunSolOn_swap (p1h_isHeunSolOn_infinity ha0 hεs
-    (V := Metric.ball 0 (heunLocalRadius (1 / a)) \ {0}) (p1h_isOpen_inv_slit a)
+  refine isHeunSolOn_swap (isHeunSolOn_comp_inv ha0 hεs
+    (V := Metric.ball 0 (heunLocalRadius (1 / a)) \ {0}) (isOpen_inv_ball_inter_slitPlane a)
     (fun z hz => ?_) h)
   obtain ⟨hz, hzs⟩ := hz
-  obtain ⟨h1, h2⟩ := p1h_ne_of_radius hz
+  obtain ⟨h1, h2⟩ := ne_one_and_ne_of_norm_lt_heunLocalRadius hz
   refine ⟨hzs, fun h0 => h1 (by rw [h0, div_one]), fun h0 => h2 (by rw [h0]),
     mem_ball_zero_iff.2 hz, one_div_ne_zero (slitPlane_ne_zero hzs)⟩
 
@@ -843,7 +852,7 @@ theorem heunLocal_second_at_infinity_isHeunSolOn (ha0 : a ≠ 0)
 
 /-- The coefficients of `Hl(1/a, q/a; α, β, γ, ε; ·)` are `a^j` times those of
 `Hl(a, q; α, β, γ, δ; ·)`, where `ε = α + β + 1 - γ - δ`. -/
-lemma h31_heunLocalCoeff_inv (ha : a ≠ 0) (j : ℕ) :
+private lemma heunLocalCoeff_inv (ha : a ≠ 0) (j : ℕ) :
     heunLocalCoeff (1 / a) (q / a) α β γ (heunEps α β γ δ) j =
       a ^ j * heunLocalCoeff a q α β γ δ j := by
   induction j using Nat.strong_induction_on with
@@ -881,11 +890,11 @@ theorem heunLocal_eq_heunLocal_inv (ha : a ≠ 0) (z : ℂ) :
       heunLocal (1 / a) (q / a) α β γ (α + β + 1 - γ - δ) (z / a) := by
   rw [heunLocal, heunLocal]
   refine tsum_congr fun j => ?_
-  rw [show α + β + 1 - γ - δ = heunEps α β γ δ from rfl, h31_heunLocalCoeff_inv ha, div_pow]
+  rw [show α + β + 1 - γ - δ = heunEps α β γ δ from rfl, heunLocalCoeff_inv ha, div_pow]
   field_simp
 
 /-- The domain of 31.3.13 is star-shaped with respect to `0`. -/
-lemma p1h_pfaff_domain_star {a : ℂ} {z : ℂ} {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
+private lemma pfaff_domain_mul_mem {a : ℂ} {z : ℂ} {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
     (hz : ‖z‖ < heunLocalRadius a) (hz' : ‖z / (z - 1)‖ < heunLocalRadius (a / (a - 1))) :
     ‖(t : ℂ) * z‖ < heunLocalRadius a ∧
       ‖(t : ℂ) * z / ((t : ℂ) * z - 1)‖ < heunLocalRadius (a / (a - 1)) := by
@@ -967,12 +976,12 @@ theorem heunLocal_eq_pfaff (ha0 : a ≠ 0) (ha1 : a ≠ 1) (hγ : ∀ n : ℕ, �
     · rintro ⟨h1, -, h2⟩; exact ⟨h1, h2⟩
   have h0D : (0 : ℂ) ∈ D := by
     simp only [hD, Set.mem_ofPred_eq, norm_zero, zero_div]
-    exact ⟨p1h_radius_pos ha0, p1h_radius_pos ha'⟩
+    exact ⟨heunLocalRadius_pos ha0, heunLocalRadius_pos ha'⟩
   have hDconn : IsPreconnected D := by
     have hstar : StarConvex ℝ (0 : ℂ) D := fun y hy s t hs ht hst => by
       have e : s • (0 : ℂ) + t • y = (t : ℂ) * y := by simp [Complex.real_smul]
       rw [e]
-      exact p1h_pfaff_domain_star ht (by linarith) hy.1 hy.2
+      exact pfaff_domain_mul_mem ht (by linarith) hy.1 hy.2
     exact (hstar.isPathConnected h0D).isConnected.isPreconnected
   have hHl : AnalyticOnNhd ℂ (heunLocal a q α β γ δ) D := fun u hu =>
     (heunLocal_isHeunSolOn (q := q) (α := α) (β := β) (δ := δ) ha0 hγ).1 u
@@ -990,11 +999,10 @@ theorem heunLocal_eq_pfaff (ha0 : a ≠ 0) (ha1 : a ≠ 1) (hγ : ∀ n : ℕ, �
   have hw := hHH.2
   rw [hε] at hw
   have hsol : IsHeunSolOn a q α β γ δ (heunEps α β γ δ) G (D \ {0}) := by
-    refine heun_homography_mobius ha1 (by unfold heunEps; ring) (hDopen.sdiff isClosed_singleton)
-      (Metric.isOpen_ball.sdiff isClosed_singleton) (fun u hu => ?_) hw
+    refine heun_homography_mobius ha1 (by unfold heunEps; ring) (hDopen.sdiff isClosed_singleton) (fun u hu => ?_) hw
     obtain ⟨hu, hu0⟩ := hu
     have hu0' : u ≠ 0 := hu0
-    refine ⟨hDslit u hu, hu0', (p1h_ne_of_radius hu.1).2, mem_ball_zero_iff.2 hu.2, ?_⟩
+    refine ⟨hDslit u hu, hu0', (ne_one_and_ne_of_norm_lt_heunLocalRadius hu.1).2, mem_ball_zero_iff.2 hu.2, ?_⟩
     exact div_ne_zero hu0' (hDne u hu)
   have hev := eventuallyEq_heunLocal_of_analyticAt ha0 hγ (hDopen.mem_nhds h0D) (hGa 0 h0D) hsol
   have hG0 : G 0 = 1 := by simp [hG, H, heunLocal_zero]

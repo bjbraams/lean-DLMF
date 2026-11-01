@@ -44,18 +44,18 @@ public import DLMF.Hypergeometric.SpecialValueTools
 public import DLMF.Hypergeometric.CubicTools
 
 /-!
-# The hypergeometric function (AAR Chapters 2 and 3; DLMF Chapter 15)
+# The hypergeometric function (DLMF Chapter 15; AAR Chapters 2 and 3)
 
-Mathlib already supplies the Gaussian series `₂F₁` (`ordinaryHypergeometric`), its radius of
-convergence, the regularized generalized series, and the binomial series
-`(1+x)^a`. The imported modules record AAR Chapter 2–3 identities and suitable statements
-from DLMF §§15.2, 15.4–15.8, and 15.10–15.12 that are absent from Mathlib.
-Each statement taken from the DLMF records its equation number in a `@[dlmf]`
-attribute. Many newly acquired statements are admitted and remain proof obligations.
+Mathlib supplies the Gaussian series `₂F₁` (`ordinaryHypergeometric`), its radius of
+convergence, the regularized generalized series and the binomial series `(1+x)^a`. This
+umbrella imports the identities of AAR Chapters 2–3 and the results of DLMF Chapter 15 that are
+absent from Mathlib: continuation in the argument and the parameters, special values,
+derivatives and contiguous relations, integral representations, transformations, connection
+formulas, local solutions of the hypergeometric equation, continued fractions and asymptotics.
 
-From Duverney, *An Introduction to Hypergeometric Functions*, Chapters 3–4 (all proved):
-Pfaff–Saalschütz (`Saalschutz`); the derivative, contiguous relation, uniqueness of power-series
-solutions and Euler–Pochhammer integral of the general `ₚFq` (`GeneralizedCalculus`,
-`GeneralizedIntegral`); Clausen's formula with Euler's `arcsin²` series and
-`π² = 18 ∑ 1/(n² C(2n,n))` (`Clausen`); and `Si` as a `₁F₂` (`SpecialCases`).
+It also imports results from Duverney, *An Introduction to Hypergeometric Functions*,
+Chapters 3–4: Pfaff–Saalschütz (`Saalschutz`); the derivative, contiguous relation, uniqueness of
+power-series solutions and Euler–Pochhammer integral of the general `ₚF_q`
+(`GeneralizedCalculus`, `GeneralizedIntegral`); Clausen's formula with Euler's `arcsin²` series
+and `π² = 18 ∑ 1/(n² C(2n,n))` (`Clausen`); and `Si` as a `₁F₂` (`SpecialCases`).
 -/

@@ -13,6 +13,12 @@ public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 
 An exponential bound with positive rate for a derivative gives an exponential
 bound with the same rate for its primitive. One-sided derivatives at zero suffice.
+
+## Main results
+
+* `Asymptotics.norm_le_mul_exp_of_hasDerivWithinAt`: an exponential bound with positive rate
+  for a continuous derivative on `[0, ∞)` gives an explicit bound with the same rate for the
+  primitive.
 -/
 
 @[expose] public noncomputable section

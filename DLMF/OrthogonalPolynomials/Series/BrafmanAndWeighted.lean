@@ -10,11 +10,35 @@ public import DLMF.OrthogonalPolynomials.Series.JacobiParameterSeries
 /-!
 # Brafman and weighted Jacobi generating functions
 
-Brafman product formulas and weighted Jacobi generating series on their specified complex
-branches.
+Brafman's generating function for Jacobi polynomials (DLMF 18.12.2_5) and the weighted
+generating function DLMF 18.12.3, on the unit disc with principal branches.
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Series`.
+## Main definitions
+
+* `jacWTerm`: the double-series term behind DLMF 18.12.3.
+
+## Main results
+
+* `jacB_re_pos`, `jacB_norm_sq_le`, `jacB_norm_sq_le'`: `Re(R conj(1 - z)) > 0` and the bounds
+  `|U|², |V|² ≤ |z|` on the unit disc, where `R = (1 - 2xz + z²)^{1/2}`.
+* `jacobi_brafman_generating_function`: DLMF 18.12.2_5.
+* `jacW_hasSum_small`, `jacW_one_le_radius`: DLMF 18.12.3 for small `|z|`, and the radius of
+  convergence of its coefficient series.
+* `jacobi_weighted_generating_function`: DLMF 18.12.3.
+
+## Implementation notes
+
+Brafman's formula follows from Bailey's product formula for Appell's `F₄`
+(`DLMF.Hypergeometric.appF4_bailey`): with `U = (1 - R - z)/2`, `V = (1 - R + z)/2` one has
+`U(1 - V) = (x-1)z/2`, `V(1 - U) = (x+1)z/2`, and the antidiagonal sums of
+`F₄((x-1)z/2, (x+1)z/2)` are the Jacobi terms by DLMF 18.5.8. The bound `|U|², |V|² ≤ |z|`
+(from `Re(R conj(1 ∓ z)) > 0` by a connectedness argument) makes the right side holomorphic on
+the unit disc, so the hypotheses `|U|, |V| < 1` of the DLMF statement are redundant.
+
+The weighted form DLMF 18.12.3 is first proved for small `|z|` by summing an absolutely
+convergent double series in two ways, and then on the star-shaped domain
+`{|z| < 1, |2(x+1)z/(1+z)²| < 1}` by the identity theorem, the left side having radius of
+convergence at least `1` by DLMF 18.12.1.
 -/
 
 @[expose] public section

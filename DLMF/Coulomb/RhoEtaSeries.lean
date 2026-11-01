@@ -13,20 +13,39 @@ public import DLMF.Confluent.CoulombIrregular
 public import DLMF.Coulomb.Basic.AuxiliaryData
 
 /-!
-# Coulomb functions: series expansions (DLMF §§33.6, 33.9)
+# Coulomb functions: series expansions
 
-* §33.6: the power series of `F_ℓ` and `F_ℓ'` in `ρ` with the coefficients `A_k^ℓ(η)`
-  (`powerSeriesCoeff`, 33.6.1–33.6.4), and the logarithmic series of `H^±_ℓ` (33.6.5).
-* §33.9: the expansion of `F_ℓ` in spherical Bessel functions (33.9.1–33.9.2), in Bessel
-  functions `I_k` (`η > 0`) and `J_k` (`η < 0`) (33.9.3–33.9.5), and the asymptotic form of `G_ℓ`
-  in functions `K_k` as `η → +∞` (33.9.6–33.9.7).
+This file proves the power series of `F_ℓ` and `F_ℓ'` in `ρ` and the logarithmic series of
+`H^±_ℓ` (DLMF §33.6), and the expansions of `F_ℓ` in spherical Bessel functions and in Bessel
+functions `I_k`, `J_k`, with the asymptotic form of `G_ℓ` in functions `K_k` (DLMF §33.9).
+
+## Main results
+
+* `powerSeriesCoeff_initial`, `powerSeriesCoeff_recurrence`: the coefficients `A_k^ℓ(η)`
+  (DLMF 33.6.3).
+* `hasSum_coulombF`, `hasSum_deriv_coulombF`: the power series of `F_ℓ` and `F_ℓ'`
+  (DLMF 33.6.1–33.6.2).
+* `powerSeriesCoeff_eq_hyp2F1`: `A_k^ℓ` as a terminating `₂F₁` (DLMF 33.6.4).
+* `hasSum_coulombHPlus_log`, `hasSum_coulombHMinus_log`: the logarithmic series of `H^±_ℓ`
+  (DLMF 33.6.5).
+* `besselSeriesCoeffA_initial`, `besselSeriesCoeffA_recurrence`: the coefficients `a_k`
+  (DLMF 33.9.2).
+* `hasSum_coulombF_sphericalJ`: `F_ℓ(η,ρ) = ρ ∑_{k ≥ 0} a_k j_{ℓ+k}(ρ)` (DLMF 33.9.1).
+* `besselSeriesCoeffB_initial`, `besselSeriesCoeffB_recurrence`: the coefficients `b_k`
+  (DLMF 33.9.5).
+* `coulombF_eq_besselI_series`: the `I`-Bessel expansion for `η > 0` (DLMF 33.9.3).
+* `coulombF_eq_besselJ_series`: the `J`-Bessel expansion for `η < 0` (DLMF 33.9.4, corrected).
+* `coulombG_isEquivalent_besselK`: the `K`-Bessel asymptotic form of `G_ℓ` as `η → +∞`
+  (DLMF 33.9.6–33.9.7).
+
+## Implementation notes
 
 Series are stated with `HasSum` over all `k ∈ ℕ`; the coefficient functions vanish below the
-first index of DLMF's sums. All statements were checked numerically with mpmath.
+first index of DLMF's sums. The statements were also checked numerically with mpmath.
 
-**Source correction.** DLMF 33.9.4 (`η < 0`) as printed, with the same coefficients `b_k` as
-33.9.3, fails numerically (for example `ℓ = 0`, `η = -0.7`, `ρ = 1.2`: the printed right side
-minus `F_0` is `-0.11`). The correct expansion has the factor `(-1)^{k+1}`:
+DLMF 33.9.4 (`η < 0`) as printed, with the same coefficients `b_k` as 33.9.3, fails numerically
+(for example `ℓ = 0`, `η = -0.7`, `ρ = 1.2`: the printed right side minus `F_0` is `-0.11`). The
+correct expansion has the factor `(-1)^{k+1}`:
 `F_ℓ = C_ℓ (2ℓ+1)!/(2|η|)^{2ℓ+1} ρ^{-ℓ} ∑_k (-1)^{k+1} b_k t^{k/2} J_k(2√t)` (residual `1e-31`
 for `ℓ = 0, 1, 3`); it follows from 33.9.3 by `t ↦ -t`. Equivalently, `b_k` for `η < 0` obeys
 33.9.5 with `+b_{k-2}` replaced by `-b_{k-2}`.
@@ -71,7 +90,7 @@ theorem powerSeriesCoeff_recurrence (ℓ : ℕ) (η : ℝ) {k : ℕ} (hk : ℓ +
   ring
 
 /-- The `n`-times differentiated equation `w² f'' + (w² - 2ηw - L) f = 0`. -/
-lemma q2a_iter_ode {f : ℂ → ℂ} (hf : Differentiable ℂ f) {η L : ℂ}
+private lemma iteratedDeriv_coulomb_ode {f : ℂ → ℂ} (hf : Differentiable ℂ f) {η L : ℂ}
     (hode : ∀ w, w ^ 2 * deriv (deriv f) w + (w ^ 2 - 2 * η * w - L) * f w = 0) (n : ℕ) (w : ℂ) :
     w ^ 2 * iteratedDeriv (n + 2) f w + 2 * n * w * iteratedDeriv (n + 1) f w +
       n * (n - 1) * iteratedDeriv n f w + w ^ 2 * iteratedDeriv n f w +
@@ -143,11 +162,11 @@ lemma q2a_iter_ode {f : ℂ → ℂ} (hf : Differentiable ℂ f) {η L : ℂ}
 
 
 /-- `coulombWave` is entire. -/
-lemma q2a_differentiable_coulombWave (ℓ : ℕ) (η : ℂ) : Differentiable ℂ (coulombWave ℓ η) :=
+private lemma differentiable_coulombWave (ℓ : ℕ) (η : ℂ) : Differentiable ℂ (coulombWave ℓ η) :=
   fun z => (hasDerivAt_coulombWave ℓ η z).differentiableAt
 
 /-- The Coulomb equation for `coulombWave` multiplied by `w²`, for all `w`. -/
-lemma q2a_coulombWave_ode (ℓ : ℕ) (η : ℂ) (w : ℂ) :
+private lemma coulombWave_ode_mul_sq (ℓ : ℕ) (η : ℂ) (w : ℂ) :
     w ^ 2 * deriv (deriv (coulombWave ℓ η)) w +
       (w ^ 2 - 2 * η * w - ((ℓ : ℂ) * (ℓ + 1))) * coulombWave ℓ η w = 0 := by
   rcases eq_or_ne w 0 with rfl | hw
@@ -159,7 +178,7 @@ lemma q2a_coulombWave_ode (ℓ : ℕ) (η : ℂ) (w : ℂ) :
     field_simp
 
 /-- The regular part `e^{-iz} M(ℓ+1-iη, 2ℓ+2, 2iz)` of `coulombWave`. -/
-lemma q2a_differentiable_reg (ℓ : ℕ) (η : ℂ) :
+private lemma differentiable_exp_mul_kummerM_coulomb (ℓ : ℕ) (η : ℂ) :
     Differentiable ℂ (fun z : ℂ => exp (-I * z) *
       kummerM (ℓ + 1 - I * η) (2 * ℓ + 2) (2 * I * z)) := by
   intro z
@@ -170,13 +189,13 @@ lemma q2a_differentiable_reg (ℓ : ℕ) (η : ℂ) :
     (two_mul_nat_add_two_ne_neg_nat ℓ) z)).differentiableAt
 
 /-- The derivatives of `coulombWave` at `0` of order `≤ ℓ + 1`. -/
-lemma q2a_iteratedDeriv_coulombWave_low (ℓ : ℕ) (η : ℂ) {k : ℕ} (hk : k ≤ ℓ + 1) :
+private lemma iteratedDeriv_coulombWave_zero_of_le (ℓ : ℕ) (η : ℂ) {k : ℕ} (hk : k ≤ ℓ + 1) :
     iteratedDeriv k (coulombWave ℓ η) 0 = if k = ℓ + 1 then ((ℓ + 1)! : ℂ) else 0 := by
   obtain ⟨t, ht⟩ : ∃ t, ℓ + 1 = k + t := ⟨ℓ + 1 - k, by omega⟩
   obtain ⟨R₂, -, hR⟩ := iteratedDeriv_mul_pow_sub_of_analytic (k := k) (t := t) (z₀ := (0 : ℂ))
     (R := coulombWave ℓ η) (R₁ := fun z : ℂ => exp (-I * z) *
       kummerM (ℓ + 1 - I * η) (2 * ℓ + 2) (2 * I * z))
-    (fun z => (q2a_differentiable_reg ℓ η).analyticAt z)
+    (fun z => (differentiable_exp_mul_kummerM_coulomb ℓ η).analyticAt z)
     (fun z => by rw [coulombWave, sub_zero, ← ht]; ring)
   rw [hR 0]
   rcases t with _ | t
@@ -187,21 +206,21 @@ lemma q2a_iteratedDeriv_coulombWave_low (ℓ : ℕ) (η : ℂ) {k : ℕ} (hk : k
 
 
 /-- The Taylor coefficients of `coulombWave` at `0` are the `A_k^ℓ(η)`. -/
-lemma q2a_taylor_coulombWave (ℓ : ℕ) (η : ℝ) (k : ℕ) :
+private lemma iteratedDeriv_coulombWave_zero_div_factorial (ℓ : ℕ) (η : ℝ) (k : ℕ) :
     iteratedDeriv k (coulombWave ℓ (η : ℂ)) 0 / (k ! : ℂ) = (powerSeriesCoeff ℓ η k : ℂ) := by
   induction k using Nat.strong_induction_on with
   | _ k ih =>
-  have hf := q2a_differentiable_coulombWave ℓ (η : ℂ)
+  have hf := differentiable_coulombWave ℓ (η : ℂ)
   rcases le_or_gt k (ℓ + 1) with hk | hk
-  · rw [q2a_iteratedDeriv_coulombWave_low ℓ (η : ℂ) hk]
+  · rw [iteratedDeriv_coulombWave_zero_of_le ℓ (η : ℂ) hk]
     split_ifs with h
     · subst h
       rw [(powerSeriesCoeff_initial ℓ η).1, div_self (by exact_mod_cast Nat.factorial_ne_zero _)]
       simp
     · simp [powerSeriesCoeff, show ¬ (ℓ + 1 ≤ k) by omega]
   · obtain ⟨m, rfl⟩ : ∃ m, k = m + 2 := ⟨k - 2, by omega⟩
-    have h := q2a_iter_ode hf (η := (η : ℂ)) (L := (ℓ : ℂ) * (ℓ + 1))
-      (q2a_coulombWave_ode ℓ η) (m + 2) 0
+    have h := iteratedDeriv_coulomb_ode hf (η := (η : ℂ)) (L := (ℓ : ℂ) * (ℓ + 1))
+      (coulombWave_ode_mul_sq ℓ η) (m + 2) 0
     simp only [show m + 2 - 1 = m + 1 by omega, show m + 2 - 2 = m by omega] at h
     have h1 := ih (m + 1) (by omega)
     have h0 := ih m (by omega)
@@ -245,16 +264,16 @@ lemma q2a_taylor_coulombWave (ℓ : ℕ) (η : ℝ) (k : ℕ) :
 
 
 /-- The power series of `coulombWave` with the coefficients `A_k^ℓ(η)`. -/
-lemma q2a_hasSum_coulombWave (ℓ : ℕ) (η : ℝ) (z : ℂ) :
+private lemma hasSum_powerSeriesCoeff_coulombWave (ℓ : ℕ) (η : ℝ) (z : ℂ) :
     HasSum (fun k : ℕ => (powerSeriesCoeff ℓ η k : ℂ) * z ^ k) (coulombWave ℓ η z) := by
-  have ht := Complex.hasSum_taylorSeries_of_entire (q2a_differentiable_coulombWave ℓ (η : ℂ)) 0 z
+  have ht := Complex.hasSum_taylorSeries_of_entire (differentiable_coulombWave ℓ (η : ℂ)) 0 z
   convert ht using 1
   funext n
-  rw [← q2a_taylor_coulombWave ℓ η n, sub_zero, smul_eq_mul, smul_eq_mul]
+  rw [← iteratedDeriv_coulombWave_zero_div_factorial ℓ η n, sub_zero, smul_eq_mul, smul_eq_mul]
   ring
 
 /-- Leibniz's rule for the derivatives at `0` of `M(a, 2ℓ+2, 2iz) e^{-iz}`. -/
-lemma q2a_iteratedDeriv_reg (ℓ : ℕ) (η : ℂ) (n : ℕ) :
+private lemma iteratedDeriv_kummerM_mul_exp_zero (ℓ : ℕ) (η : ℂ) (n : ℕ) :
     iteratedDeriv n (fun z : ℂ => kummerM (ℓ + 1 - I * η) (2 * ℓ + 2) (2 * I * z) *
       exp (-I * z)) 0 = ∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) *
         ((2 * I) ^ j * (poch ((ℓ : ℂ) + 1 - I * η) j / poch (2 * (ℓ : ℂ) + 2) j)) *
@@ -279,7 +298,7 @@ convergent for all real `ρ` (DLMF §33.6). -/
 theorem hasSum_coulombF (ℓ : ℕ) (η ρ : ℝ) :
     HasSum (fun k : ℕ => coulombC ℓ η * powerSeriesCoeff ℓ η k * ρ ^ k) (coulombF ℓ η ρ) := by
   rw [← Complex.hasSum_ofReal, ofReal_coulombF]
-  convert (q2a_hasSum_coulombWave ℓ η ρ).mul_left (coulombC ℓ η : ℂ) using 1
+  convert (hasSum_powerSeriesCoeff_coulombWave ℓ η ρ).mul_left (coulombC ℓ η : ℂ) using 1
   funext k
   push_cast
   ring
@@ -302,7 +321,7 @@ theorem hasSum_deriv_coulombF (ℓ : ℕ) (η ρ : ℝ) :
       funext fun w => (hasDerivAt_coulombWave ℓ η w).deriv
     rw [← this]
     intro z
-    exact ((q2a_differentiable_coulombWave ℓ (η : ℂ)).analyticAt z).deriv.differentiableAt
+    exact ((differentiable_coulombWave ℓ (η : ℂ)).analyticAt z).deriv.differentiableAt
   have hD : deriv (coulombWave ℓ (η : ℂ)) = coulombWaveDeriv ℓ (η : ℂ) :=
     funext fun w => (hasDerivAt_coulombWave ℓ η w).deriv
   have ht := Complex.hasSum_taylorSeries_of_entire hdiff 0 (ρ : ℂ)
@@ -311,7 +330,7 @@ theorem hasSum_deriv_coulombF (ℓ : ℕ) (η ρ : ℝ) :
       ((coulombC ℓ η : ℂ) * coulombWaveDeriv ℓ η ρ) := by
     convert ht.mul_left (coulombC ℓ η : ℂ) using 1
     funext n
-    rw [← hD, ← iteratedDeriv_succ', ← q2a_taylor_coulombWave ℓ η (n + 1), sub_zero,
+    rw [← hD, ← iteratedDeriv_succ', ← iteratedDeriv_coulombWave_zero_div_factorial ℓ η (n + 1), sub_zero,
       smul_eq_mul, smul_eq_mul, Nat.factorial_succ]
     have : (n ! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
     push_cast
@@ -338,18 +357,18 @@ theorem powerSeriesCoeff_eq_hyp2F1 (ℓ : ℕ) (η : ℝ) {k : ℕ} (hk : ℓ + 
   obtain ⟨n, rfl⟩ : ∃ n, k = n + ℓ + 1 := ⟨k - ℓ - 1, by omega⟩
   rw [show n + ℓ + 1 - ℓ - 1 = n by omega, show n + ℓ + 1 - ℓ = n + 1 by omega,
     show (ℓ : ℂ) + 1 - ((n + ℓ + 1 : ℕ) : ℂ) = -(n : ℂ) by push_cast; ring,
-    ← q2a_taylor_coulombWave]
+    ← iteratedDeriv_coulombWave_zero_div_factorial]
   set Φ : ℂ → ℂ := fun z => kummerM (ℓ + 1 - I * (η : ℂ)) (2 * ℓ + 2) (2 * I * z) *
     exp (-I * z) with hΦ
   have hψ : coulombWave ℓ (η : ℂ) = (fun z : ℂ => z ^ (ℓ + 1)) * Φ := by
     funext z; simp only [coulombWave, Pi.mul_apply, hΦ]; ring
   have hΦd : ContDiff ℂ ⊤ Φ := by
-    have h1 := (q2a_differentiable_reg ℓ (η : ℂ)).contDiff (n := ⊤)
+    have h1 := (differentiable_exp_mul_kummerM_coulomb ℓ (η : ℂ)).contDiff (n := ⊤)
     convert h1 using 1; funext z; simp only [hΦ]; ring
   rw [hψ, iteratedDeriv_mul (by fun_prop) (hΦd.contDiffAt.of_le le_top),
     Finset.sum_eq_single (ℓ + 1)]
   · rw [iteratedDeriv_fun_pow_zero, ite_eq_left rfl, show n + ℓ + 1 - (ℓ + 1) = n by omega, hΦ,
-      q2a_iteratedDeriv_reg, Finset.mul_sum, Finset.mul_sum, Finset.sum_div]
+      iteratedDeriv_kummerM_mul_exp_zero, Finset.mul_sum, Finset.mul_sum, Finset.sum_div]
     refine Finset.sum_congr rfl fun j hj => ?_
     have hjn : j ≤ n := by simpa [Nat.lt_succ_iff] using hj
     rw [poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]

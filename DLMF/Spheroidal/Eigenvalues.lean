@@ -12,23 +12,36 @@ public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 /-!
 # Eigenvalues of the spheroidal equation (DLMF §30.3, §30.9)
 
-Statement acquisition from NIST DLMF (version 1.2.8), checked 2026-10-26. Admitted statements
-are not completed proofs; see `DLMF30Acquisition.md`.
+This file proves the properties of the spheroidal eigenvalues `λ^m_n(γ²)`: ordering,
+analyticity, large-degree behavior and derivative bounds (§30.3(ii)), the continued-fraction
+equation (§30.3(iii)), the power series in `γ²` (§30.3(iv)) and the asymptotic expansions for
+`γ² → ±∞` (§30.9).
 
-* §30.3(ii): analyticity in `γ²`, the ordering 30.3.1 (proved from the existence theorem),
-  the large-`n` behaviour 30.3.2, `λ^m_n(0) = n(n+1)` (30.3.3) and the derivative bounds 30.3.4;
-* §30.3(iii): the continued-fraction equation 30.3.5 with the coefficients 30.3.6 or 30.3.7;
-* §30.3(iv): the power series 30.3.8 and its coefficients 30.3.9–30.3.12;
-* §30.9: the asymptotic expansions 30.9.1–30.9.6 for `γ² → ±∞`.
+## Main results
+
+* `spheroidalEigenvalue_lt_succ`, `spheroidalEigenvalue_lt`: the ordering DLMF 30.3.1.
+* `analyticAt_spheroidalEigenvalue`: real-analyticity in `γ²` (§30.3(ii)).
+* `spheroidalEigenvalue_isBigO_atTop`: the large-degree behavior DLMF 30.3.2.
+* `spheroidalEigenvalue_zero`: `λ^m_n(0) = n(n+1)` (DLMF 30.3.3).
+* `spheroidalEigenvalue_deriv_bounds`: the derivative bounds DLMF 30.3.4.
+* `spheroidal_cf_of_eigenvalue`, `spheroidal_eigenvalue_of_cf`: the two directions of the
+  continued-fraction characterization DLMF 30.3.5 with the coefficients 30.3.6 or 30.3.7.
+* `hasSum_spheroidalEll`: the power series DLMF 30.3.8.
+* `spheroidalEll_zero`, `spheroidalEll_one`, `spheroidalEll_two`, `spheroidalEll_three`,
+  `spheroidalEll_four`: the coefficients DLMF 30.3.9–30.3.12.
+* `spheroidalEigenvalue_prolate_asymptotic`, `spheroidalEigenvalue_oblate_asymptotic`: the
+  asymptotic expansions DLMF 30.9.1–30.9.6.
+
+## Implementation notes
 
 The continued fraction 30.3.5 is written with the project's continuants (`DLMF.cfTail`,
 `DLMF.HasContinuedFraction`, which assert convergence of the finite truncations). The
 equivalence "`λ` solves 30.3.5 iff `λ` is an eigenvalue of the right parity" is split into two
-directions with explicit nondegeneracy hypotheses (nonvanishing finite continuant, nonvanishing
-expansion coefficient), which DLMF leaves implicit.
+directions with explicit nondegeneracy hypotheses (nonvanishing finite continuant,
+nonvanishing expansion coefficient), which DLMF leaves implicit.
 
-All printed formulas of §§30.3 and 30.9 were checked numerically (eigenvalues of the
-recurrences 30.8.4 and 30.3.5 in high precision, compared with SciPy's `pro_cv`/`obl_cv`).
+The printed formulas of §§30.3 and 30.9 agree numerically with the eigenvalues of the
+recurrences 30.8.4 and 30.3.5 computed in high precision and with SciPy's `pro_cv`/`obl_cv`.
 -/
 
 @[expose] public noncomputable section
@@ -39,7 +52,7 @@ open scoped Topology Real
 namespace DLMF.Spheroidal
 
 /-- If two elements of a set have `a < b` smaller elements in the set, they are ordered. -/
-private lemma s30_lt_of_encard_lt {S : Set ℝ} {x y : ℝ} {a b : ℕ∞}
+private lemma lt_of_encard_inter_Iio_lt {S : Set ℝ} {x y : ℝ} {a b : ℕ∞}
     (hx : (S ∩ Iio x).encard = a) (hy : (S ∩ Iio y).encard = b) (hab : a < b) : x < y := by
   by_contra h
   have hsub : S ∩ Iio y ⊆ S ∩ Iio x :=
@@ -57,7 +70,7 @@ theorem spheroidalEigenvalue_lt_succ {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     spheroidalEigenvalue n m γ2 < spheroidalEigenvalue (n + 1) m γ2 := by
   have h1 := (spheroidalEigenvalue_spec hmn γ2).2
   have h2 := (spheroidalEigenvalue_spec (hmn.trans (Nat.le_succ n)) γ2).2
-  refine s30_lt_of_encard_lt h1 h2 ?_
+  refine lt_of_encard_inter_Iio_lt h1 h2 ?_
   have : n - m < n + 1 - m := by omega
   exact_mod_cast this
 
@@ -68,7 +81,7 @@ theorem spheroidalEigenvalue_lt {n n' m : ℕ} (hmn : m ≤ n) (hn : n < n') (γ
     spheroidalEigenvalue n m γ2 < spheroidalEigenvalue n' m γ2 := by
   have h1 := (spheroidalEigenvalue_spec hmn γ2).2
   have h2 := (spheroidalEigenvalue_spec (hmn.trans hn.le) γ2).2
-  refine s30_lt_of_encard_lt h1 h2 ?_
+  refine lt_of_encard_inter_Iio_lt h1 h2 ?_
   have : n - m < n' - m := by omega
   exact_mod_cast this
 
@@ -90,7 +103,7 @@ theorem spheroidalEigenvalue_isBigO_atTop (m : ℕ) (γ2 : ℝ) :
 @[dlmf 30.3.E3]
 theorem spheroidalEigenvalue_zero {n m : ℕ} (hmn : m ≤ n) :
     spheroidalEigenvalue n m 0 = (n : ℝ) * (n + 1) :=
-  p1s_spheroidalEigenvalue_zero hmn
+  spheroidalEigenvalue_gamma_zero hmn
 
 /-- **Derivative bounds** (DLMF 30.3.4): `-1 < dλ^m_n(γ²)/d(γ²) < 0`. -/
 @[dlmf 30.3.E4]

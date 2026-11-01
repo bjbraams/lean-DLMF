@@ -9,10 +9,9 @@ public import DLMF.ParabolicCylinder.Weber.Solutions
 public import DLMF.ParabolicCylinder.Weber.Representations
 
 /-!
-# The oscillatory parabolic cylinder function W
+# The oscillatory parabolic cylinder function `W(a,x)`
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This umbrella collects the real Weber function `W(a,x)` of DLMF §12.14: its definition,
+connection formulas, Wronskian, power series, Bessel-function cases, modulus–phase
+representations and large-argument asymptotics.
 -/

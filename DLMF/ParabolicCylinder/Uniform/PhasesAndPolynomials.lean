@@ -12,13 +12,33 @@ public import DLMFMathlib.Analysis.Calculus.InverseSeries
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!
-# Cylinder phases and Olver coefficient polynomials
+# Phases and Olver coefficient polynomials for parabolic cylinder functions
 
-Real cylinder phase functions, Gamma coefficients and the recurrence for Olver U and V
-polynomials.
+This file contains the real phase functions, the normalizing factor, the Gamma coefficients
+and the Olver coefficient polynomials of the uniform large-parameter expansions of
+DLMF §12.10.
 
-Source references and common attribution are retained in
-`DLMF.ParabolicCylinder.Uniform`.
+## Main definitions
+
+* `pcfXi`, `pcfEta`, `pcfXiBar`: the phases of DLMF 12.10.7, 12.10.23 and 12.10.26.
+* `pcfH`: the normalizing factor `2^{-μ²/4-1/4} e^{-μ²/4} μ^{μ²/2-1/2}` (DLMF 12.10.15).
+* `pcfGammaCoeff`: the coefficients of the normalized half-shifted Gamma function
+  (DLMF 12.10.16).
+* `pcfOlverU`, `pcfOlverR`, `pcfOlverV`: the Olver polynomials (DLMF 12.10.11–12.10.13),
+  built from the pairs `pcfOlverPair`.
+
+## Main results
+
+* `pcfGammaCoeff_expansion`, `pcfGammaCoeff_initial`: DLMF 12.10.16–12.10.17.
+* `pcfLG_olver_exists`, `pcfLG_olver_step`: existence and uniqueness of the polynomial
+  solutions of the Olver recursion with the degree bound.
+* `pcfOlverU_spec`: the recurrence DLMF 12.10.11.
+* `pcfOlverUV_initial`: the initial values DLMF 12.10.9–12.10.10.
+
+## Implementation notes
+
+The Olver polynomials are defined by choice; the degree condition fixes the integration
+constant, and existence and uniqueness are proved separately.
 -/
 
 @[expose] public noncomputable section

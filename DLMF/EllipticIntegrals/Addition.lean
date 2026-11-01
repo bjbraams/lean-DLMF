@@ -10,28 +10,50 @@ public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.Inequalities
 
 /-!
-# Addition theorems for Legendre's integrals (DLMF §19.11)
+# Addition theorems for Legendre's integrals
 
-The addition theorems are stated for real modulus `k` with `k² < 1` and real amplitudes, the
-setting of DLMF's qualifications in §19.11(i). The Legendre integrals are the complex DLMF
-integrals `incEllIntFk`, `incEllIntEk`, `incEllIntPik` (and `compEllIntKk`, `compEllIntEk`,
-`compEllIntPik`) at real arguments; `R_C` is `symEllIntRC`.
+This file proves the addition and duplication theorems for Legendre's elliptic integrals of the
+first, second and third kinds (DLMF §19.11), for real modulus `k` with `k² < 1` and real
+amplitudes, the setting of DLMF's qualifications in §19.11(i). The Legendre integrals are the
+complex DLMF integrals `incEllIntFk`, `incEllIntEk`, `incEllIntPik` (and `compEllIntKk`,
+`compEllIntEk`, `compEllIntPik`) at real arguments; `R_C` is `symEllIntRC`.
 
-**The amplitude `ψ`.** DLMF defines `ψ` by `sin ψ` (19.11.3) and lists `cos ψ` (19.11.4) as a
-further property. For `θ, φ ∈ [0, π/2]` both formulas are needed to fix `ψ ∈ [0, π]` (the sine
-alone does not distinguish `ψ` from `π - ψ`); the theorems take `ψ ∈ [0, π]` with both
-`sin ψ` and `cos ψ` given, and `addition_sin_sq_add_cos_sq` shows that such a `ψ` exists.
-Likewise for the duplication formulas, with (19.11.14) and the first formula of (19.11.15).
+## Main definitions
 
-**Branches in (19.11.5), (19.11.10), (19.11.16).** DLMF warns that "care has to be taken with
-the multivalued functions in (19.11.5)". With DLMF's principal `R_C` (Cauchy principal value
-for a negative second argument) the formula (19.11.5) holds numerically (mpmath, 3000 random
-samples) exactly when `α² < 1` and `α² (1 - cos θ cos φ cos ψ) < 1`, the region of (19.11.6_5);
-it fails outside it. The theorems are stated on this region (with `θ, φ ∈ (0, π/2)`, so that
-the cosecants are finite). The duplication formula (19.11.16) is the case `φ = θ`, with the
-condition `α² (1 - cos²θ cos ψ) < 1`; (19.11.10) holds for all real `α² < 1`.
-In (19.11.6_5) DLMF allows `α² = k²`, where `δ = 0` and the right side is a limit; the theorem
-assumes `k² < α²`.
+* `ellDeltaReal`: `Δ(θ) = √(1 - k² sin²θ)`.
+* `additionSin`, `additionCos`: `sin ψ` and `cos ψ` for the addition of `θ` and `φ`
+  (DLMF 19.11.3–19.11.4).
+* `duplicationSin`, `duplicationCos`: `sin ψ` and `cos ψ` for the duplication of `θ`
+  (DLMF 19.11.14–19.11.15).
+
+## Main results
+
+* `addition_sin_sq_add_cos_sq`, `addition_tan_half`: consistency of DLMF 19.11.3–19.11.4.
+* `incEllIntFk_add`, `incEllIntEk_add`: DLMF 19.11.1 and 19.11.2.
+* `incEllIntPik_add`: DLMF 19.11.5–19.11.6.
+* `symEllIntRC_addition_eq_arctan`: DLMF 19.11.6_5.
+* `incEllIntFk_eq_compEllIntKk_sub`, `incEllIntEk_eq_compEllIntEk_sub`,
+  `incEllIntPik_eq_compEllIntPik_sub`: the complete-integral cases DLMF 19.11.7–19.11.11.
+* `incEllIntFk_duplication`, `incEllIntEk_duplication`, `incEllIntPik_duplication`: the
+  duplication formulas DLMF 19.11.12–19.11.13 and 19.11.16–19.11.17.
+* `duplication_half_angle`: the remaining formulas of DLMF 19.11.15.
+
+## Implementation notes
+
+DLMF defines `ψ` by `sin ψ` (19.11.3) and lists `cos ψ` (19.11.4) as a further property. For
+`θ, φ ∈ [0, π/2]` both formulas are needed to fix `ψ ∈ [0, π]`, since the sine alone does not
+distinguish `ψ` from `π - ψ`; the theorems take `ψ ∈ [0, π]` with both `sin ψ` and `cos ψ` given,
+and `addition_sin_sq_add_cos_sq` shows that such a `ψ` exists. Likewise for the duplication
+formulas, with (19.11.14) and the first formula of (19.11.15).
+
+DLMF warns that "care has to be taken with the multivalued functions in (19.11.5)". With DLMF's
+principal `R_C` (Cauchy principal value for a negative second argument) the formula (19.11.5)
+holds numerically (mpmath, 3000 random samples) exactly when `α² < 1` and
+`α² (1 - cos θ cos φ cos ψ) < 1`, the region of (19.11.6_5), and fails outside it. The theorems
+are stated on this region, with `θ, φ ∈ (0, π/2)` so that the cosecants are finite. The
+duplication formula (19.11.16) is the case `φ = θ`, with the condition
+`α² (1 - cos²θ cos ψ) < 1`; (19.11.10) holds for all real `α² < 1`. In (19.11.6_5) DLMF allows
+`α² = k²`, where `δ = 0` and the right side is a limit; the theorem assumes `k² < α²`.
 
 ## References
 
@@ -48,16 +70,16 @@ namespace DLMF.EllipticIntegrals
 open DLMF.JacobiElliptic
 
 /-- `Δ(θ) = √(1 - k² sin²θ)` (DLMF 19.11.3), real. -/
-def ei19b_delta (k θ : ℝ) : ℝ := Real.sqrt (1 - k ^ 2 * Real.sin θ ^ 2)
+def ellDeltaReal (k θ : ℝ) : ℝ := Real.sqrt (1 - k ^ 2 * Real.sin θ ^ 2)
 
 /-- The right side of (19.11.3): `sin ψ` for the addition of `θ` and `φ`. -/
-def ei19b_addSin (k θ φ : ℝ) : ℝ :=
-  (Real.sin θ * Real.cos φ * ei19b_delta k φ + Real.sin φ * Real.cos θ * ei19b_delta k θ) /
+def additionSin (k θ φ : ℝ) : ℝ :=
+  (Real.sin θ * Real.cos φ * ellDeltaReal k φ + Real.sin φ * Real.cos θ * ellDeltaReal k θ) /
     (1 - k ^ 2 * Real.sin θ ^ 2 * Real.sin φ ^ 2)
 
 /-- The right side of the first formula (19.11.4): `cos ψ` for the addition of `θ` and `φ`. -/
-def ei19b_addCos (k θ φ : ℝ) : ℝ :=
-  (Real.cos θ * Real.cos φ - Real.sin θ * Real.sin φ * ei19b_delta k θ * ei19b_delta k φ) /
+def additionCos (k θ φ : ℝ) : ℝ :=
+  (Real.cos θ * Real.cos φ - Real.sin θ * Real.sin φ * ellDeltaReal k θ * ellDeltaReal k φ) /
     (1 - k ^ 2 * Real.sin θ ^ 2 * Real.sin φ ^ 2)
 
 /-! ### §19.11(i) General formulas -/
@@ -67,13 +89,13 @@ def ei19b_addCos (k θ φ : ℝ) : ℝ :=
 exists. -/
 @[dlmf 19.11.E3, dlmf 19.11.E4]
 theorem addition_sin_sq_add_cos_sq {k : ℝ} (hk : k ^ 2 < 1) (θ φ : ℝ) :
-    ei19b_addSin k θ φ ^ 2 + ei19b_addCos k θ φ ^ 2 = 1 := by
+    additionSin k θ φ ^ 2 + additionCos k θ φ ^ 2 = 1 := by
   set a := Real.sin θ
   set b := Real.cos θ
   set c := Real.sin φ
   set d := Real.cos φ
-  set P := ei19b_delta k θ
-  set Q := ei19b_delta k φ
+  set P := ellDeltaReal k θ
+  set Q := ellDeltaReal k φ
   have hP : P ^ 2 = 1 - k ^ 2 * a ^ 2 := Real.sq_sqrt (by nlinarith [Real.sin_sq_le_one θ])
   have hQ : Q ^ 2 = 1 - k ^ 2 * c ^ 2 := Real.sq_sqrt (by nlinarith [Real.sin_sq_le_one φ])
   have hab : a ^ 2 + b ^ 2 = 1 := Real.sin_sq_add_cos_sq θ
@@ -88,7 +110,7 @@ theorem addition_sin_sq_add_cos_sq {k : ℝ} (hk : k ^ 2 < 1) (θ φ : ℝ) :
       calc k ^ 2 * (a ^ 2 * c ^ 2) ≤ k ^ 2 * 1 := mul_le_mul_of_nonneg_left hac (sq_nonneg k)
         _ = k ^ 2 := by ring
     intro h; nlinarith
-  unfold ei19b_addSin ei19b_addCos
+  unfold additionSin additionCos
   rw [div_pow, div_pow, ← add_div, div_eq_one_iff_eq (pow_ne_zero 2 hD)]
   linear_combination (Q ^ 2 * a ^ 2 * c ^ 2 + b ^ 2 * c ^ 2) * hP +
     (-a ^ 4 * c ^ 2 * k ^ 2 + a ^ 2 * c ^ 2 + a ^ 2 * d ^ 2) * hQ +
@@ -98,10 +120,10 @@ theorem addition_sin_sq_add_cos_sq {k : ℝ} (hk : k ^ 2 < 1) (θ φ : ℝ) :
 for an amplitude `ψ` with `sin ψ`, `cos ψ` given by (19.11.3), (19.11.4); real `k² < 1`,
 `cos θ + cos φ ≠ 0`. -/
 @[dlmf 19.11.E4]
-theorem addition_tan_half {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hs : Real.sin ψ = ei19b_addSin k θ φ)
-    (hc : Real.cos ψ = ei19b_addCos k θ φ) (hθφ : Real.cos θ + Real.cos φ ≠ 0) :
+theorem addition_tan_half {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hs : Real.sin ψ = additionSin k θ φ)
+    (hc : Real.cos ψ = additionCos k θ φ) (hθφ : Real.cos θ + Real.cos φ ≠ 0) :
     Real.tan (ψ / 2) =
-      (Real.sin θ * ei19b_delta k φ + Real.sin φ * ei19b_delta k θ) /
+      (Real.sin θ * ellDeltaReal k φ + Real.sin φ * ellDeltaReal k θ) /
         (Real.cos θ + Real.cos φ) := by
   have htan : Real.tan (ψ / 2) = Real.sin ψ / (1 + Real.cos ψ) := by
     obtain ⟨u, rfl⟩ : ∃ u, ψ = 2 * u := ⟨ψ / 2, by ring⟩
@@ -111,13 +133,13 @@ theorem addition_tan_half {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hs : Real.sin ψ 
     · field_simp
       ring
   rw [htan, hs, hc]
-  unfold ei19b_addSin ei19b_addCos
+  unfold additionSin additionCos
   set a := Real.sin θ
   set b := Real.cos θ
   set c := Real.sin φ
   set d := Real.cos φ
-  set P := ei19b_delta k θ
-  set Q := ei19b_delta k φ
+  set P := ellDeltaReal k θ
+  set Q := ellDeltaReal k φ
   have hP : P ^ 2 = 1 - k ^ 2 * a ^ 2 := Real.sq_sqrt (by nlinarith [Real.sin_sq_le_one θ])
   have hQ : Q ^ 2 = 1 - k ^ 2 * c ^ 2 := Real.sq_sqrt (by nlinarith [Real.sin_sq_le_one φ])
   have hab : a ^ 2 + b ^ 2 = 1 := Real.sin_sq_add_cos_sq θ
@@ -158,8 +180,8 @@ theorem addition_tan_half {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hs : Real.sin ψ 
 `ψ ∈ [0, π]` given by (19.11.3) and (19.11.4). -/
 @[dlmf 19.11.E1, dlmf 19.11.E3]
 theorem incEllIntFk_add {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
-    (hφ : φ ∈ Icc 0 (π / 2)) (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = ei19b_addSin k θ φ)
-    (hc : Real.cos ψ = ei19b_addCos k θ φ) :
+    (hφ : φ ∈ Icc 0 (π / 2)) (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = additionSin k θ φ)
+    (hc : Real.cos ψ = additionCos k θ φ) :
     incEllIntFk θ k + incEllIntFk φ k = incEllIntFk ψ k := by
   sorry
 
@@ -167,8 +189,8 @@ theorem incEllIntFk_add {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 
 (19.11.1). -/
 @[dlmf 19.11.E2, dlmf 19.11.E3]
 theorem incEllIntEk_add {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
-    (hφ : φ ∈ Icc 0 (π / 2)) (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = ei19b_addSin k θ φ)
-    (hc : Real.cos ψ = ei19b_addCos k θ φ) :
+    (hφ : φ ∈ Icc 0 (π / 2)) (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = additionSin k θ φ)
+    (hc : Real.cos ψ = additionCos k θ φ) :
     incEllIntEk θ k + incEllIntEk φ k =
       incEllIntEk ψ k + k ^ 2 * Real.sin θ * Real.sin φ * Real.sin ψ := by
   sorry
@@ -179,8 +201,8 @@ theorem incEllIntEk_add {k θ φ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 
 `α²(1 - cos θ cos φ cos ψ) < 1` (see the module docstring). -/
 @[dlmf 19.11.E5, dlmf 19.11.E6]
 theorem incEllIntPik_add {k θ φ ψ α2 : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ioo 0 (π / 2))
-    (hφ : φ ∈ Ioo 0 (π / 2)) (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = ei19b_addSin k θ φ)
-    (hc : Real.cos ψ = ei19b_addCos k θ φ) (hα : α2 < 1)
+    (hφ : φ ∈ Ioo 0 (π / 2)) (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = additionSin k θ φ)
+    (hc : Real.cos ψ = additionCos k θ φ) (hα : α2 < 1)
     (hαψ : α2 * (1 - Real.cos θ * Real.cos φ * Real.cos ψ) < 1) :
     let γ := (1 / Real.sin θ ^ 2 - α2) * (1 / Real.sin φ ^ 2 - α2) * (1 / Real.sin ψ ^ 2 - α2)
     let δ := α2 * (1 - α2) * (α2 - k ^ 2)
@@ -195,7 +217,7 @@ theorem incEllIntPik_add {k θ φ ψ α2 : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ I
 @[dlmf 19.11.E6_5]
 theorem symEllIntRC_addition_eq_arctan {k θ φ ψ α2 : ℝ} (hk : k ^ 2 < 1)
     (hθ : θ ∈ Ioo 0 (π / 2)) (hφ : φ ∈ Ioo 0 (π / 2)) (hψ : ψ ∈ Icc 0 π)
-    (hs : Real.sin ψ = ei19b_addSin k θ φ) (hc : Real.cos ψ = ei19b_addCos k θ φ)
+    (hs : Real.sin ψ = additionSin k θ φ) (hc : Real.cos ψ = additionCos k θ φ)
     (hkα : k ^ 2 < α2) (hα : α2 < 1)
     (hαψ : α2 * (1 - Real.cos θ * Real.cos φ * Real.cos ψ) < 1) :
     let γ := (1 / Real.sin θ ^ 2 - α2) * (1 / Real.sin φ ^ 2 - α2) * (1 / Real.sin ψ ^ 2 - α2)
@@ -210,7 +232,7 @@ theorem symEllIntRC_addition_eq_arctan {k θ φ ψ α2 : ℝ} (hk : k ^ 2 < 1)
 /-- The substitution `θ ↦ π/2 - arctan(k' tan θ)` of (19.11.9) maps `dθ/Δ(θ)` to `-dθ/Δ(θ)`:
 `(1 - m sin²(π/2 - arctan(c tan θ)))^{-1/2} · d/dθ(π/2 - arctan(c tan θ)) = -(1 - m sin²θ)^{-1/2}`,
 `c = √(1 - m)`, for `cos θ > 0`. -/
-lemma ei19b_complement_integrand {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.cos θ) :
+private lemma complement_subst_integrand_F {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.cos θ) :
     (1 - m * Real.sin (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan θ)) ^ 2) ^ (-(1 / 2) : ℝ) *
         (-(Real.sqrt (1 - m) * (1 / Real.cos θ ^ 2)) /
           (1 + (Real.sqrt (1 - m) * Real.tan θ) ^ 2)) =
@@ -233,7 +255,7 @@ lemma ei19b_complement_integrand {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.cos 
   have hbase : 1 - m * (Real.cos θ ^ 2 / D) = c ^ 2 / D := by
     rw [hc2, eq_div_iff hD0.ne', sub_mul, mul_assoc, div_mul_cancel₀ _ hD0.ne', hD]
     linear_combination (-m) * hsc
-  rw [hsin, hbase, ei19b_rpow_neg_half (by positivity), ei19b_rpow_neg_half hD0.le, hx2,
+  rw [hsin, hbase, rpow_neg_half_eq_inv_sqrt (by positivity), rpow_neg_half_eq_inv_sqrt hD0.le, hx2,
     Real.sqrt_div' _ hD0.le, Real.sqrt_sq hc.le]
   have hsD : 0 < Real.sqrt D := Real.sqrt_pos.mpr hD0
   have hsD2 : Real.sqrt D ^ 2 = D := Real.sq_sqrt hD0.le
@@ -243,7 +265,7 @@ lemma ei19b_complement_integrand {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.cos 
 
 /-- Real form of (19.11.7): `F(φ | m) = K(m) - F(π/2 - arctan(√(1-m) tan φ) | m)` for `m < 1`
 and `0 ≤ φ < π/2`. -/
-lemma ei19b_incEllIntFm_complement {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ) (hφ : φ < π / 2) :
+private lemma incEllIntFm_eq_compEllIntKm_sub {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ) (hφ : φ < π / 2) :
     DLMF.Elliptic.Real.incEllIntFm φ m = DLMF.Elliptic.Real.compEllIntKm m -
       DLMF.Elliptic.Real.incEllIntFm (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) m := by
   set c := Real.sqrt (1 - m) with hcdef
@@ -273,7 +295,7 @@ lemma ei19b_incEllIntFm_complement {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ) (
     · exact continuousAt_const.add ((continuousAt_const.mul htan).pow 2)
   have hsub := intervalIntegral.integral_comp_mul_deriv hderiv hcont' hGc
   have hpt : ∀ θ ∈ uIcc 0 φ, (G ∘ f) θ * f' θ = -G θ := fun θ hθ =>
-    ei19b_complement_integrand hm (hcos θ hθ)
+    complement_subst_integrand_F hm (hcos θ hθ)
   rw [intervalIntegral.integral_congr hpt, intervalIntegral.integral_neg] at hsub
   have hf0 : f 0 = π / 2 := by simp [hf]
   rw [hf0, ← intervalIntegral.integral_interval_sub_left (hGc.intervalIntegrable 0 (f φ))
@@ -285,7 +307,7 @@ lemma ei19b_incEllIntFm_complement {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ) (
 /-- The substitution of (19.11.9) in the second-kind integrand:
 `(1 - m sin²(π/2 - arctan(c tan θ)))^{1/2} · d/dθ(π/2 - arctan(c tan θ)) = -(1 - m) D^{-1/2}/D`,
 `D = 1 - m sin²θ`, `c = √(1 - m)`, for `cos θ > 0`. -/
-lemma ei19b_complement_integrand_E {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.cos θ) :
+private lemma complement_subst_integrand_E {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.cos θ) :
     (1 - m * Real.sin (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan θ)) ^ 2) ^ (1 / 2 : ℝ) *
         (-(Real.sqrt (1 - m) * (1 / Real.cos θ ^ 2)) /
           (1 + (Real.sqrt (1 - m) * Real.tan θ) ^ 2)) =
@@ -308,7 +330,7 @@ lemma ei19b_complement_integrand_E {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.co
   have hbase : 1 - m * (Real.cos θ ^ 2 / D) = c ^ 2 / D := by
     rw [hc2, eq_div_iff hD0.ne', sub_mul, mul_assoc, div_mul_cancel₀ _ hD0.ne', hD]
     linear_combination (-m) * hsc
-  rw [hsin, hbase, ei19b_rpow_half, hx2, Real.sqrt_div' _ hD0.le, Real.sqrt_sq hc.le, ← hc2]
+  rw [hsin, hbase, rpow_half_eq_sqrt, hx2, Real.sqrt_div' _ hD0.le, Real.sqrt_sq hc.le, ← hc2]
   have hsD : 0 < Real.sqrt D := Real.sqrt_pos.mpr hD0
   have hsD2 : Real.sqrt D ^ 2 = D := Real.sq_sqrt hD0.le
   set r := Real.sqrt D with hr
@@ -316,7 +338,7 @@ lemma ei19b_complement_integrand_E {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.co
   field_simp
 
 /-- `d/dθ [m sin θ cos θ / Δ(θ)] = Δ(θ) - (1 - m)/Δ(θ)³`, `Δ = √(1 - m sin²θ)`, `m < 1`. -/
-lemma ei19b_hasDerivAt_E_correction {m : ℝ} (hm : m < 1) (θ : ℝ) :
+private lemma hasDerivAt_mul_sin_mul_cos_div_sqrt {m : ℝ} (hm : m < 1) (θ : ℝ) :
     HasDerivAt (fun θ => m * Real.sin θ * Real.cos θ * (Real.sqrt (1 - m * Real.sin θ ^ 2))⁻¹)
       (Real.sqrt (1 - m * Real.sin θ ^ 2) -
         (1 - m) * (Real.sqrt (1 - m * Real.sin θ ^ 2))⁻¹ / (1 - m * Real.sin θ ^ 2)) θ := by
@@ -349,7 +371,7 @@ lemma ei19b_hasDerivAt_E_correction {m : ℝ} (hm : m < 1) (θ : ℝ) :
   ring
 
 /-- `∫₀^φ (1 - m)/Δ³ = E(φ | m) - m sin φ cos φ/Δ(φ)`, `m < 1`. -/
-lemma ei19b_integral_E_correction {m : ℝ} (hm : m < 1) (φ : ℝ) :
+private lemma integral_one_sub_div_sqrt_cube {m : ℝ} (hm : m < 1) (φ : ℝ) :
     ∫ θ in (0 : ℝ)..φ, (1 - m) * (Real.sqrt (1 - m * Real.sin θ ^ 2))⁻¹ / (1 - m * Real.sin θ ^ 2) =
       DLMF.Elliptic.Real.incEllIntEm φ m -
         m * Real.sin φ * Real.cos φ * (Real.sqrt (1 - m * Real.sin φ ^ 2))⁻¹ := by
@@ -360,19 +382,19 @@ lemma ei19b_integral_E_correction {m : ℝ} (hm : m < 1) (φ : ℝ) :
     refine Continuous.div (continuous_const.mul (hc1.inv₀ fun θ =>
       (Real.sqrt_pos.mpr (hpos θ)).ne')) (by fun_prop) fun θ => (hpos θ).ne'
   have hftc := intervalIntegral.integral_eq_sub_of_hasDerivAt
-    (fun θ _ => ei19b_hasDerivAt_E_correction hm θ) ((hc1.sub hc2).intervalIntegrable 0 φ)
+    (fun θ _ => hasDerivAt_mul_sin_mul_cos_div_sqrt hm θ) ((hc1.sub hc2).intervalIntegrable 0 φ)
   rw [intervalIntegral.integral_sub (hc1.intervalIntegrable 0 φ) (hc2.intervalIntegrable 0 φ)]
     at hftc
   have hE : ∫ θ in (0 : ℝ)..φ, Real.sqrt (1 - m * Real.sin θ ^ 2) =
       DLMF.Elliptic.Real.incEllIntEm φ m := by
     unfold DLMF.Elliptic.Real.incEllIntEm
-    exact intervalIntegral.integral_congr fun θ _ => (ei19b_rpow_half _).symm
+    exact intervalIntegral.integral_congr fun θ _ => (rpow_half_eq_sqrt _).symm
   simp only [Real.sin_zero, mul_zero, zero_mul, sub_zero] at hftc
   linarith
 
 /-- Real form of (19.11.8): `E(φ | m) = E(m) - E(θ | m) + m sin θ sin φ` with
 `θ = π/2 - arctan(√(1-m) tan φ)`, for `m < 1` and `0 ≤ φ < π/2`. -/
-lemma ei19b_incEllIntEm_complement {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ) (hφ : φ < π / 2) :
+private lemma incEllIntEm_eq_compEllIntEm_sub {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ) (hφ : φ < π / 2) :
     DLMF.Elliptic.Real.incEllIntEm φ m = DLMF.Elliptic.Real.compEllIntEm m -
       DLMF.Elliptic.Real.incEllIntEm (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) m +
       m * Real.sin (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) * Real.sin φ := by
@@ -404,9 +426,9 @@ lemma ei19b_incEllIntEm_complement {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ) (
   have hsub := intervalIntegral.integral_comp_mul_deriv hderiv hcont' hGc
   have hpt : ∀ θ ∈ uIcc 0 φ, (G ∘ f) θ * f' θ =
       -((1 - m) * (Real.sqrt (1 - m * Real.sin θ ^ 2))⁻¹ / (1 - m * Real.sin θ ^ 2)) :=
-    fun θ hθ => ei19b_complement_integrand_E hm (hcos θ hθ)
+    fun θ hθ => complement_subst_integrand_E hm (hcos θ hθ)
   rw [intervalIntegral.integral_congr hpt, intervalIntegral.integral_neg,
-    ei19b_integral_E_correction hm φ] at hsub
+    integral_one_sub_div_sqrt_cube hm φ] at hsub
   have hf0 : f 0 = π / 2 := by simp [hf]
   rw [hf0, ← intervalIntegral.integral_interval_sub_left (hGc.intervalIntegrable 0 (f φ))
     (hGc.intervalIntegrable 0 (π / 2))] at hsub
@@ -446,7 +468,7 @@ theorem incEllIntFk_eq_compEllIntKk_sub {k θ φ : ℝ} (hk : k ^ 2 < 1) (hθ : 
   have hk2 : ((k : ℂ)) ^ 2 = ((k ^ 2 : ℝ) : ℂ) := by push_cast; ring
   rw [incEllIntFk_eq_ofReal hk2 hk.le, incEllIntFk_eq_ofReal hk2 hk.le,
     compEllIntKk_eq_ofReal hk2 hk.le, hθeq,
-    ei19b_incEllIntFm_complement hk hφ.1.le hφ.2]
+    incEllIntFm_eq_compEllIntKm_sub hk hφ.1.le hφ.2]
   push_cast
   ring
 
@@ -464,7 +486,7 @@ theorem incEllIntEk_eq_compEllIntEk_sub {k θ φ : ℝ} (hk : k ^ 2 < 1) (hθ : 
   have hk2 : ((k : ℂ)) ^ 2 = ((k ^ 2 : ℝ) : ℂ) := by push_cast; ring
   rw [incEllIntEk_eq_ofReal hk2 hk.le, incEllIntEk_eq_ofReal hk2 hk.le,
     compEllIntEk_eq_ofReal hk2 hk.le, hθeq,
-    ei19b_incEllIntEm_complement hk hφ.1.le hφ.2]
+    incEllIntEm_eq_compEllIntEm_sub hk hφ.1.le hφ.2]
   push_cast
   ring
 
@@ -486,27 +508,27 @@ theorem incEllIntPik_eq_compEllIntPik_sub {k θ φ α2 : ℝ} (hk : k ^ 2 < 1)
 /-! ### §19.11(iii) Duplication formulas -/
 
 /-- The right side of (19.11.14): `sin ψ` for the duplication of `θ`. -/
-def ei19b_dupSin (k θ : ℝ) : ℝ :=
-  Real.sin (2 * θ) * ei19b_delta k θ / (1 - k ^ 2 * Real.sin θ ^ 4)
+def duplicationSin (k θ : ℝ) : ℝ :=
+  Real.sin (2 * θ) * ellDeltaReal k θ / (1 - k ^ 2 * Real.sin θ ^ 4)
 
 /-- The right side of the first formula (19.11.15): `cos ψ` for the duplication of `θ`. -/
-def ei19b_dupCos (k θ : ℝ) : ℝ :=
+def duplicationCos (k θ : ℝ) : ℝ :=
   (Real.cos (2 * θ) + k ^ 2 * Real.sin θ ^ 4) / (1 - k ^ 2 * Real.sin θ ^ 4)
 
 /-- (19.11.14), (19.11.15) are (19.11.3), (19.11.4) with `φ = θ`. -/
-lemma ei19b_dupSin_eq (k θ : ℝ) : ei19b_dupSin k θ = ei19b_addSin k θ θ := by
-  unfold ei19b_dupSin ei19b_addSin
+private lemma duplicationSin_eq_additionSin (k θ : ℝ) : duplicationSin k θ = additionSin k θ θ := by
+  unfold duplicationSin additionSin
   rw [Real.sin_two_mul]
   ring
 
 /-- (19.11.15), first formula, is the first formula of (19.11.4) with `φ = θ`. -/
-lemma ei19b_dupCos_eq {k : ℝ} (hk : k ^ 2 < 1) (θ : ℝ) :
-    ei19b_dupCos k θ = ei19b_addCos k θ θ := by
-  unfold ei19b_dupCos ei19b_addCos
-  have hP : ei19b_delta k θ ^ 2 = 1 - k ^ 2 * Real.sin θ ^ 2 :=
+private lemma duplicationCos_eq_additionCos {k : ℝ} (hk : k ^ 2 < 1) (θ : ℝ) :
+    duplicationCos k θ = additionCos k θ θ := by
+  unfold duplicationCos additionCos
+  have hP : ellDeltaReal k θ ^ 2 = 1 - k ^ 2 * Real.sin θ ^ 2 :=
     Real.sq_sqrt (by nlinarith [Real.sin_sq_le_one θ])
-  rw [Real.cos_two_mul, show Real.sin θ * Real.sin θ * ei19b_delta k θ * ei19b_delta k θ =
-    Real.sin θ ^ 2 * ei19b_delta k θ ^ 2 by ring, hP]
+  rw [Real.cos_two_mul, show Real.sin θ * Real.sin θ * ellDeltaReal k θ * ellDeltaReal k θ =
+    Real.sin θ ^ 2 * ellDeltaReal k θ ^ 2 by ring, hP]
   have := Real.sin_sq_add_cos_sq θ
   congr 1
   · nlinarith
@@ -516,25 +538,25 @@ lemma ei19b_dupCos_eq {k : ℝ} (hk : k ^ 2 < 1) (θ : ℝ) :
 given by (19.11.14) and the first formula of (19.11.15). -/
 @[dlmf 19.11.E12, dlmf 19.11.E14]
 theorem incEllIntFk_duplication {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
-    (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = ei19b_dupSin k θ) (hc : Real.cos ψ = ei19b_dupCos k θ) :
+    (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = duplicationSin k θ) (hc : Real.cos ψ = duplicationCos k θ) :
     incEllIntFk ψ k = 2 * incEllIntFk θ k := by
-  rw [ei19b_dupSin_eq] at hs
-  rw [ei19b_dupCos_eq hk] at hc
+  rw [duplicationSin_eq_additionSin] at hs
+  rw [duplicationCos_eq_additionCos hk] at hc
   rw [← incEllIntFk_add hk hθ hθ hψ hs hc]
   ring
 
 /-- DLMF 19.11.13: `E(ψ, k) = 2E(θ, k) - k² sin²θ sin ψ`, hypotheses as in (19.11.12). -/
 @[dlmf 19.11.E13, dlmf 19.11.E14]
 theorem incEllIntEk_duplication {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Icc 0 (π / 2))
-    (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = ei19b_dupSin k θ) (hc : Real.cos ψ = ei19b_dupCos k θ) :
+    (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = duplicationSin k θ) (hc : Real.cos ψ = duplicationCos k θ) :
     incEllIntEk ψ k = 2 * incEllIntEk θ k - k ^ 2 * Real.sin θ ^ 2 * Real.sin ψ := by
-  rw [ei19b_dupSin_eq] at hs
-  rw [ei19b_dupCos_eq hk] at hc
+  rw [duplicationSin_eq_additionSin] at hs
+  rw [duplicationCos_eq_additionCos hk] at hc
   have h := incEllIntEk_add hk hθ hθ hψ hs hc
   linear_combination -h
 
 /-- Half-angle tangent: `tan(ψ/2) = sin ψ/(1 + cos ψ)` when `1 + cos ψ ≠ 0`. -/
-lemma p19lR1_tan_half {ψ : ℝ} (h : 1 + Real.cos ψ ≠ 0) :
+private lemma tan_half_eq_sin_div_one_add_cos {ψ : ℝ} (h : 1 + Real.cos ψ ≠ 0) :
     Real.tan (ψ / 2) = Real.sin ψ / (1 + Real.cos ψ) := by
   have hc : Real.cos (ψ / 2) ≠ 0 := by
     intro h0
@@ -557,12 +579,12 @@ lemma p19lR1_tan_half {ψ : ℝ} (h : 1 + Real.cos ψ ≠ 0) :
 `cos θ = √((cos ψ + Δ(ψ))/(1 + Δ(ψ)))`, `tan θ = tan(ψ/2) √((1 + cos ψ)/(cos ψ + Δ(ψ)))`. -/
 @[dlmf 19.11.E15]
 theorem duplication_half_angle {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ico 0 (π / 2))
-    (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = ei19b_dupSin k θ) (hc : Real.cos ψ = ei19b_dupCos k θ) :
-    Real.tan (ψ / 2) = Real.tan θ * ei19b_delta k θ ∧
-      Real.sin θ = Real.sin ψ / Real.sqrt ((1 + Real.cos ψ) * (1 + ei19b_delta k ψ)) ∧
-      Real.cos θ = Real.sqrt ((Real.cos ψ + ei19b_delta k ψ) / (1 + ei19b_delta k ψ)) ∧
+    (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = duplicationSin k θ) (hc : Real.cos ψ = duplicationCos k θ) :
+    Real.tan (ψ / 2) = Real.tan θ * ellDeltaReal k θ ∧
+      Real.sin θ = Real.sin ψ / Real.sqrt ((1 + Real.cos ψ) * (1 + ellDeltaReal k ψ)) ∧
+      Real.cos θ = Real.sqrt ((Real.cos ψ + ellDeltaReal k ψ) / (1 + ellDeltaReal k ψ)) ∧
       Real.tan θ =
-        Real.tan (ψ / 2) * Real.sqrt ((1 + Real.cos ψ) / (Real.cos ψ + ei19b_delta k ψ)) := by
+        Real.tan (ψ / 2) * Real.sqrt ((1 + Real.cos ψ) / (Real.cos ψ + ellDeltaReal k ψ)) := by
   -- `ψ ∈ [0, π]` is not needed: `sin ψ`, `cos ψ` already determine all four identities.
   have _ := hψ
   set s := Real.sin θ with hs_def
@@ -573,9 +595,9 @@ theorem duplication_half_angle {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ic
   have hx1 : s ^ 2 < 1 := by nlinarith
   have hk0 : 0 ≤ k ^ 2 := sq_nonneg k
   have hkx : k ^ 2 * s ^ 2 < 1 := by nlinarith [sq_nonneg s]
-  set D := ei19b_delta k θ with hD_def
+  set D := ellDeltaReal k θ with hD_def
   have hD2 : D ^ 2 = 1 - k ^ 2 * s ^ 2 := by
-    rw [hD_def, ei19b_delta, Real.sq_sqrt (by linarith)]
+    rw [hD_def, ellDeltaReal, Real.sq_sqrt (by linarith)]
   have hDpos : 0 < D := Real.sqrt_pos.2 (by linarith)
   set Q := 1 - k ^ 2 * s ^ 4 with hQ_def
   have hQpos : 0 < Q := by nlinarith [sq_nonneg s, mul_nonneg hk0 (sq_nonneg s)]
@@ -584,28 +606,28 @@ theorem duplication_half_angle {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ic
     have : s ^ 2 * (2 - s ^ 2) ≤ 1 := by nlinarith [sq_nonneg (1 - s ^ 2)]
     nlinarith [mul_nonneg hk0 (sq_nonneg s), mul_le_mul_of_nonneg_left this hk0]
   have hsinψ : Real.sin ψ = 2 * s * c * D / Q := by
-    rw [hs, ei19b_dupSin, Real.sin_two_mul]
+    rw [hs, duplicationSin, Real.sin_two_mul]
   have hcosψ : Real.cos ψ = (c ^ 2 - s ^ 2 + k ^ 2 * s ^ 4) / Q := by
-    rw [hc, ei19b_dupCos, Real.cos_two_mul]
+    rw [hc, duplicationCos, Real.cos_two_mul]
     congr 1; nlinarith
   have h1c : 1 + Real.cos ψ = 2 * c ^ 2 / Q := by
     rw [hcosψ]; field_simp; nlinarith
-  have hΔψ : ei19b_delta k ψ = N / Q := by
-    rw [ei19b_delta, hsinψ]
+  have hΔψ : ellDeltaReal k ψ = N / Q := by
+    rw [ellDeltaReal, hsinψ]
     rw [show 1 - k ^ 2 * (2 * s * c * D / Q) ^ 2 = (N / Q) ^ 2 by
       field_simp
       have hc2 : c ^ 2 = 1 - s ^ 2 := by linarith
       rw [hc2, hD2, hQ_def, hN_def]
       ring]
     exact Real.sqrt_sq (div_pos hNpos hQpos).le
-  have h1Δ : 1 + ei19b_delta k ψ = 2 * D ^ 2 / Q := by
+  have h1Δ : 1 + ellDeltaReal k ψ = 2 * D ^ 2 / Q := by
     rw [hΔψ, hD2]; field_simp; ring
-  have hcΔ : Real.cos ψ + ei19b_delta k ψ = 2 * c ^ 2 * D ^ 2 / Q := by
+  have hcΔ : Real.cos ψ + ellDeltaReal k ψ = 2 * c ^ 2 * D ^ 2 / Q := by
     rw [hΔψ, hcosψ, hD2]; field_simp
     have hc2 : c ^ 2 = 1 - s ^ 2 := by linarith
     rw [hc2, hN_def]; ring
   have hthalf : Real.tan (ψ / 2) = s * D / c := by
-    rw [p19lR1_tan_half (by rw [h1c]; positivity), hsinψ, h1c]
+    rw [tan_half_eq_sin_div_one_add_cos (by rw [h1c]; positivity), hsinψ, h1c]
     field_simp
   have htanθ : Real.tan θ = s / c := Real.tan_eq_sin_div_cos θ
   refine ⟨?_, ?_, ?_, ?_⟩
@@ -628,7 +650,7 @@ theorem duplication_half_angle {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ic
 `α²(1 - cos²θ cos ψ) < 1` (see the module docstring). -/
 @[dlmf 19.11.E16, dlmf 19.11.E17]
 theorem incEllIntPik_duplication {k θ ψ α2 : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ioo 0 (π / 2))
-    (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = ei19b_dupSin k θ) (hc : Real.cos ψ = ei19b_dupCos k θ)
+    (hψ : ψ ∈ Icc 0 π) (hs : Real.sin ψ = duplicationSin k θ) (hc : Real.cos ψ = duplicationCos k θ)
     (hα : α2 < 1) (hαψ : α2 * (1 - Real.cos θ ^ 2 * Real.cos ψ) < 1) :
     let γ := (1 / Real.sin θ ^ 2 - α2) ^ 2 * (1 / Real.sin ψ ^ 2 - α2)
     let δ := α2 * (1 - α2) * (α2 - k ^ 2)

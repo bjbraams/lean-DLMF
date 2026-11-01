@@ -8,17 +8,30 @@ module
 public import DLMF.WignerSymbols.SixJ
 
 /-!
-# The `9j` symbol: DLMF §§34.6–34.7
+# The `9j` symbol
 
-Statements of DLMF §34.6 (the definition 34.6.1 as a sum of products of six `3j` symbols)
+Statements of DLMF §34.6 (the representation 34.6.1 as a sum of products of six `3j` symbols)
 and §34.7 (special case, symmetry, orthogonality and sums) for `wigner9j`, which is defined by
-the sum 34.6.2 of products of three `6j` symbols. The `9j` symbol vanishes unless every row
-and every column is a triad (each of them is a triad of one of the three `6j` factors).
+the sum 34.6.2 of products of three `6j` symbols.
 
-Summations over angular momenta run over `halfIntegersUpTo x` for a bound `x` beyond which
-the summands vanish, and summations over projections over `projections j`. The relations are
-stated for all rational arguments where both sides vanish outside the admissible range
-(checked numerically with exact arithmetic, see the ledger).
+## Main results
+
+* `wigner9j_eq_sum_threeJ`: DLMF 34.6.1.
+* `wigner9j_zero`: DLMF 34.7.1, the case of a zero entry.
+* `wigner9j_transpose`, `wigner9j_cycle_rows`, `wigner9j_cycle_columns`,
+  `wigner9j_swap_rows`, `wigner9j_swap_columns`: the symmetries of DLMF §34.7(ii).
+* `wigner9j_orthogonality`: DLMF 34.7.2.
+* `wigner9j_sum_rule`: DLMF 34.7.3.
+* `wigner3j_mul_wigner9j`: DLMF 34.7.4.
+* `wigner9j_sum_wigner6j`: DLMF 34.7.5.
+
+## Implementation notes
+
+The `9j` symbol vanishes unless every row and every column is a triad (each of them is a
+triad of one of the three `6j` factors). Summations over angular momenta run over
+`halfIntegersUpTo x` for a bound `x` beyond which the summands vanish, and summations over
+projections over `projections j`. The relations are stated for all rational arguments, both
+sides vanishing outside the admissible range.
 -/
 
 @[expose] public noncomputable section
@@ -43,11 +56,11 @@ theorem wigner9j_eq_sum_threeJ (j₁₁ j₁₂ j₁₃ j₂₁ j₂₂ j₂₃ 
 /-! ## §34.7(i) Special case -/
 
 /-- The sum `j₁ + j₂ + j₃` of a triad is a natural number. -/
-lemma q2w_triad_sum {a b c : ℚ} (h : IsTriad a b c) : IsNatQ (a + b + c) :=
+private lemma isNatQ_add_add_of_isTriad {a b c : ℚ} (h : IsTriad a b c) : IsNatQ (a + b + c) :=
   ((h.1.add h.2.1).add h.2.2).of_eq (by ring)
 
 /-- `2a` is a natural number for the first entry of a triad. -/
-lemma q2w_triad_two_mul {a b c : ℚ} (h : IsTriad a b c) : IsNatQ (2 * a) :=
+private lemma isNatQ_two_mul_of_isTriad {a b c : ℚ} (h : IsTriad a b c) : IsNatQ (2 * a) :=
   (h.1.add h.2.1).of_eq (by ring)
 
 /-- DLMF 34.7.1: `{j₁₁ j₁₂ j₁₃; j₂₁ j₂₂ j₁₃; j₃₁ j₃₁ 0}`
@@ -70,7 +83,7 @@ theorem wigner9j_zero (j₁₁ j₁₂ j₁₃ j₂₁ j₂₂ j₃₁ : ℚ) :
     linarith
   have hF3 : wigner6j j₁₃ j₁₃ 0 j₁₁ j₁₁ j₁₂ = wigner6j j₁₂ j₁₁ j₁₃ 0 j₁₃ j₁₁ := by
     rw [wigner6j_flip j₁₃ j₁₃ 0 j₁₁ j₁₁ j₁₂, wigner6j_swap_columns j₁₃ j₁₁ j₁₂ j₁₁ j₁₃ 0,
-      q2w_wigner6j_swap23 j₁₁ j₁₃ j₁₂ j₁₃ j₁₁ 0, wigner6j_swap_columns j₁₁ j₁₂ j₁₃ j₁₃ 0 j₁₁]
+      wigner6j_swap_columns_two_three j₁₁ j₁₃ j₁₂ j₁₃ j₁₁ 0, wigner6j_swap_columns j₁₁ j₁₂ j₁₃ j₁₃ 0 j₁₁]
   have hF1 : wigner6j j₁₁ j₂₁ j₃₁ j₃₁ 0 j₁₁ = wigner6j j₂₁ j₁₁ j₃₁ 0 j₃₁ j₁₁ :=
     wigner6j_swap_columns _ _ _ _ _ _
   unfold wigner9j
@@ -82,8 +95,8 @@ theorem wigner9j_zero (j₁₁ j₁₂ j₁₃ j₂₁ j₂₂ j₃₁ : ℚ) :
       by_cases t1 : IsTriad j₂₁ j₁₁ j₃₁
       · by_cases t3 : IsTriad j₁₂ j₁₁ j₁₃
         · rw [wigner6j_zero t1, wigner6j_zero t3]
-          obtain ⟨n₁, hn₁⟩ := q2w_triad_sum t1
-          obtain ⟨n₂, hn₂⟩ := q2w_triad_sum t3
+          obtain ⟨n₁, hn₁⟩ := isNatQ_add_add_of_isTriad t1
+          obtain ⟨n₂, hn₂⟩ := isNatQ_add_add_of_isTriad t3
           obtain ⟨e₁, he₁⟩ := (t1.symm23.cycle.cycle).2.1.add t1.symm23.cycle.cycle.2.2
           obtain ⟨e₃, he₃⟩ := (t3.symm23.cycle.cycle).2.1.add t3.symm23.cycle.cycle.2.2
           rw [signPow_of_eq (n := (n₁ : ℤ)) (by rw [hn₁]; push_cast; ring),
@@ -122,7 +135,7 @@ theorem wigner9j_zero (j₁₁ j₁₂ j₁₃ j₂₁ j₂₂ j₃₁ : ℚ) :
       exfalso; apply hk'
       rw [mem_range, add_zero, hk, Int.floor_natCast, Int.toNat_natCast]
       omega
-  · rw [Finset.sum_eq_zero, wigner6j_of_not (fun h => hk (q2w_triad_two_mul h.1))]
+  · rw [Finset.sum_eq_zero, wigner6j_of_not (fun h => hk (isNatQ_two_mul_of_isTriad h.1))]
     · ring
     · intro t _
       rw [h3 _ (fun h => hk ⟨t, by linarith⟩)]
@@ -143,11 +156,11 @@ theorem wigner9j_transpose (j₁₁ j₁₂ j₁₃ j₂₁ j₂₂ j₂₃ j₃
   refine Finset.sum_congr rfl fun t _ => ?_
   set x : ℚ := (t : ℚ) / 2
   have e1 : wigner6j j₁₁ j₂₁ j₃₁ j₃₂ j₃₃ x = wigner6j j₃₁ j₃₂ j₃₃ x j₁₁ j₂₁ := by
-    rw [q2w_wigner6j_flip12 j₁₁ j₂₁ j₃₁ j₃₂ j₃₃ x, q2w_wigner6j_swap23 j₃₂ j₃₃ j₃₁ j₁₁ j₂₁ x,
+    rw [wigner6j_flip_first_two j₁₁ j₂₁ j₃₁ j₃₂ j₃₃ x, wigner6j_swap_columns_two_three j₃₂ j₃₃ j₃₁ j₁₁ j₂₁ x,
       wigner6j_swap_columns j₃₂ j₃₁ j₃₃ j₁₁ x j₂₁]
   have e3 : wigner6j j₁₃ j₂₃ j₃₃ x j₁₁ j₁₂ = wigner6j j₁₁ j₁₂ j₁₃ j₂₃ j₃₃ x := by
     rw [wigner6j_flip j₁₃ j₂₃ j₃₃ x j₁₁ j₁₂, wigner6j_swap_columns j₁₃ j₁₁ j₁₂ x j₂₃ j₃₃,
-      q2w_wigner6j_swap23 j₁₁ j₁₃ j₁₂ j₂₃ x j₃₃]
+      wigner6j_swap_columns_two_three j₁₁ j₁₃ j₁₂ j₂₃ x j₃₃]
   have e2 : wigner6j j₁₂ j₂₂ j₃₂ j₂₁ x j₂₃ = wigner6j j₂₁ j₂₂ j₂₃ j₁₂ x j₃₂ := by
     rw [wigner6j_swap_columns j₁₂ j₂₂ j₃₂ j₂₁ x j₂₃, wigner6j_flip j₂₂ j₁₂ j₃₂ x j₂₁ j₂₃,
       wigner6j_swap_columns j₂₂ j₂₁ j₂₃ x j₁₂ j₃₂]

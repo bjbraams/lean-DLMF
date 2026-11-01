@@ -11,10 +11,26 @@ public import DLMF.Gamma.RecipGammaDeriv
 /-!
 # Removable parameter values in source formulas
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This file extends formulas of DLMF Chapter 14 to the parameter values where their coefficients
+have removable singularities. The products `sin(πν) ψ(ν+1)` and `sin²(πν) ψ'(ν+1)` are extended
+by continuity to the negative integers, which gives DLMF 14.17.10 and 14.17.11 for all degrees,
+and DLMF 14.9.3 and 14.9.13 are stated as limits in the degree, covering the degrees where the
+gamma quotient is singular.
+
+## Main definitions
+
+* `legendreSinDigamma`: `sin(πν) ψ(ν+1)`, extended continuously to the negative integers.
+* `legendreSinSqTrigamma`: `sin²(πν) ψ'(ν+1)`, extended continuously to the negative integers.
+
+## Main results
+
+* `legendreSinDigamma_eq`, `legendreSinSqTrigamma_eq`: closed forms of the extended functions.
+* `legendreSinDigamma_limit`, `legendreSinSqTrigamma_limit`: the extensions are the limits for
+  every complex `ν`.
+* `ferrersPP_integral_all_degrees`, `ferrersP_sq_integral_all_degrees`: DLMF 14.17.10 and
+  14.17.11 for all degrees.
+* `ferrersP_negative_order_parameter_limit`, `associatedP_negative_order_parameter_limit`:
+  limit forms of DLMF 14.9.3 and 14.9.13.
 -/
 
 @[expose] public noncomputable section

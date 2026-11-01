@@ -15,6 +15,20 @@ bounds mixed derivatives on smaller polydiscs. Together with locally dominated
 series differentiation, it proves convergence and termwise evaluation of every
 mixed derivative. Quadratic coefficient recurrences then give second order
 partial differential equations, including points on the coordinate axes.
+
+## Main definitions
+
+* `Complex.bivariateSeriesDerivTerm`: a term of a mixed partial derivative of a bivariate
+  monomial series.
+
+## Main results
+
+* `Complex.summable_bivariateSeriesDerivTerm`, `Complex.iteratedDeriv_bivariateSeries_eq_tsum`:
+  every mixed partial derivative of a normally convergent bivariate series is the sum of its
+  termwise mixed derivatives.
+* `Complex.bivariateSeries_pde_x_of_coeff_recurrence`,
+  `Complex.bivariateSeries_pde_y_of_coeff_recurrence`: quadratic coefficient recurrences give
+  second order partial differential equations on the convergence polydisc.
 -/
 
 @[expose] public noncomputable section

@@ -12,10 +12,27 @@ public import DLMF.Hypergeometric.Saalschutz
 /-!
 # Barnes moments for continuous Hahn orthogonality
 
-The proved four-Gamma Barnes integral evaluates mixed rising-factorial moments.
-Pfaff–Saalschutz annihilates every reversed rising factorial of smaller degree.
-All finite integral exchanges use absolute integrability, established from the
-Mathlib integral API and the project's proved vertical Gamma bounds.
+Bilinear orthogonality of the continuous Hahn sums (DLMF §18.19) for four parameters in the
+right half-plane. The four-Gamma Barnes integral evaluates the mixed rising-factorial
+moments of the weight, and the Pfaff–Saalschütz sum shows that every reversed rising
+factorial of smaller degree is annihilated.
+
+## Main definitions
+
+* `weight`: the four-Gamma Barnes weight, without conjugate-pair constraints.
+* `moment`: the mixed Pochhammer moment of the weight.
+* `hahnSum`: the unnormalized terminating continuous Hahn sum.
+
+## Main results
+
+* `integrable_weight`, `integral_weight`: integrability and evaluation of the weight.
+* `mixed_moment`, `moment_factor`: integrability and evaluation of the mixed moments.
+* `hahnSum_orthogonal_lt`, `hahnSum_orthogonal`: orthogonality of the continuous Hahn sums.
+
+## Implementation notes
+
+All exchanges of finite sums and integrals use absolute integrability, obtained from vertical
+bounds for the Gamma function.
 -/
 
 @[expose] public section

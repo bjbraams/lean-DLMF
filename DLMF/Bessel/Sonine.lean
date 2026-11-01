@@ -7,11 +7,22 @@ module
 
 public import DLMF.Bessel.RegularizedSeries
 
-/-! # Sonine’s integral and Gamma-weighted integrals of regularized `₀F₁`
+/-! # Sonine's integral and Gamma-weighted integrals of regularized `₀F₁`
 
-Termwise integration is justified by the absolute convergence of a regularized
-`₁F₁` series whose first parameter is the real part of the Gamma weight.
-Scaling and the substitution `u = t²` then give Sonine’s Bessel integral.
+Gamma-weighted integrals of the regularized `₀F₁` series and Sonine's integral
+`∫_0^∞ J_ν(at) e^{-p² t²} t^{ν+1} dt` (DLMF 10.22.51; AAR §4.11).
+
+## Main results
+
+* `integral_regularized0F1_gamma`, `integral_regularized0F1_gamma_scaled`: integrating
+  regularized `₀F₁` against its Gamma weight gives an exponential.
+* `sonine_integral`: Sonine's integral (DLMF 10.22.51).
+
+## Implementation notes
+
+Termwise integration is justified by the absolute convergence of a regularized `₁F₁` series
+whose first parameter is the real part of the Gamma weight. Scaling and the substitution
+`u = t²` then give Sonine's Bessel integral.
 -/
 
 @[expose] public noncomputable section

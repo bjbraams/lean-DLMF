@@ -14,17 +14,43 @@ public import DLMF.Confluent.Continuation
 public import DLMF.OrthogonalPolynomials.Hahn
 
 /-!
-# Relations to other functions (DLMF §§13.6, 13.18)
+# Relations of confluent hypergeometric functions to other functions
 
-Elementary, error-function, incomplete-gamma, Bessel, Hermite, Laguerre, and
-Charlier identities are recorded against existing project definitions.
-Parabolic-cylinder identities 13.6.12–13.6.15 and 13.18.11–13.18.13, Airy
-identities 13.6.11 and 13.18.10, and Coulomb-wave identities in 13.6(vii) are
-deferred here. Parabolic cylinder and Coulomb wave functions are now defined in
-`DLMF.Confluent.ParabolicCylinder` and `DLMF.Confluent.Coulomb`.
-The finite Kummer–Bessel proofs reuse the Mathlib contributors’ reciprocal-Gamma
-recurrence, binomial identities and complex identity principle, with the local
-regularized Kummer and Bessel APIs.
+This file expresses special cases of Kummer's, Tricomi's and Whittaker's functions through
+elementary functions, error functions, incomplete gamma functions, Bessel functions and
+Hermite, Laguerre and Charlier polynomials (DLMF §§13.6, 13.18).
+
+## Main results
+
+* `kummerM_one_two`, `kummerU_of_zero_param`, `kummerU_shift_one`: elementary cases
+  (DLMF 13.6.2–13.6.4).
+* `kummerM_lowerIncGamma`, `kummerU_upperIncGamma`: incomplete gamma functions
+  (DLMF 13.6.5, 13.6.6).
+* `kummerM_erf`, `kummerU_erfc`: error functions (DLMF 13.6.7, 13.6.8).
+* `kummerM_besselI`, `kummerU_besselK`: modified Bessel functions (DLMF 13.6.9, 13.6.10).
+* `kummerM_besselI_sum`, `kummerM_besselI_sum_neg`: the finite Kummer–Bessel expansions
+  DLMF 13.6.11_1 and 13.6.11_2.
+* `kummerM_hermite_even`, `kummerM_hermite_odd`, `kummerU_hermite`: Hermite polynomials
+  (DLMF 13.6.16–13.6.18).
+* `kummerU_laguerrePolyL`, `kummerU_charlier`, `kummerU_eq_twoFzero`: Laguerre and Charlier
+  polynomials and the terminating `₂F₀` (DLMF 13.6.19–13.6.21).
+* `whittakerM_sinh`, `whittakerM_exp`, `whittakerM_exp_neg`: elementary cases
+  (DLMF 13.18.1–13.18.3).
+* `whittakerM_lowerIncGamma`, `whittakerW_upperIncGamma`, `whittakerM_erf`, `whittakerW_erfc`:
+  incomplete gamma and error functions (DLMF 13.18.4–13.18.7).
+* `whittakerM_besselI`, `whittakerW_besselK`: modified Bessel functions (DLMF 13.18.8, 13.18.9).
+* `whittakerM_hermite_even`, `whittakerM_hermite_odd`, `whittakerW_hermite`,
+  `whittakerW_laguerrePolyL`: orthogonal polynomials (DLMF 13.18.14–13.18.17).
+
+## Implementation notes
+
+Identities whose left side depends only on `z²` are stated for `0 < Re z`. The parabolic
+cylinder identities 13.6.12–13.6.15 and 13.18.11–13.18.13, the Airy identities 13.6.11 and
+13.18.10, and the Coulomb wave identities of §13.6(vii) are not formalized here; parabolic
+cylinder and Coulomb wave functions are in `DLMF.Confluent.ParabolicCylinder` and
+`DLMF.Confluent.Coulomb`. The finite Kummer–Bessel expansions use the reciprocal-Gamma
+recurrence, binomial identities and the identity principle, and exclude the Gamma-prefactor
+poles, where totalized Gamma values would make the right side zero.
 -/
 
 @[expose] public section

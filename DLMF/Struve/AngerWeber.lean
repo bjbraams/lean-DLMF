@@ -9,10 +9,9 @@ public import DLMF.Struve.AngerWeber.IntegralAndSeries
 public import DLMF.Struve.AngerWeber.LommelConnections
 
 /-!
-# Anger and Weber functions: entire definitions and identities
+# Anger and Weber functions
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This umbrella collects the Anger and Weber functions of DLMF §§11.10–11.11: their integral
+definitions, derivative formulas and series (`DLMF.Struve.AngerWeber.IntegralAndSeries`), and
+their connections with the Lommel functions (`DLMF.Struve.AngerWeber.LommelConnections`).
 -/

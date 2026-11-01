@@ -8,11 +8,14 @@ module
 public import DLMF.Hypergeometric.GeneralizedCalculus
 
 /-!
-# The Euler–Pochhammer integral for `ₚFq` (Duverney Thm 3.18; DLMF 16.5.2)
+# The Euler–Pochhammer integral for `ₚF_q` (Duverney Thm 3.18; DLMF 16.5.2)
 
-For `0 < Re a₀ < Re b₀` and `z` inside the disc of convergence of `𝐅(a; b)`,
-`𝐅(a₀, a; b₀, b; z) = (Γ(a₀) Γ(b₀-a₀))⁻¹ ∫₀¹ t^{a₀-1} (1-t)^{b₀-a₀-1} 𝐅(a; b; zt) dt`,
-by termwise integration (dominated convergence) and the Beta integral.
+## Main results
+
+* `regularizedHGFun_cons_eq_integral`: for `0 < Re a₀ < Re b₀` and `z` inside the disc of
+  convergence of `𝐅(a; b)`,
+  `𝐅(a₀, a; b₀, b; z) = (Γ(a₀) Γ(b₀-a₀))⁻¹ ∫₀¹ t^{a₀-1} (1-t)^{b₀-a₀-1} 𝐅(a; b; zt) dt`,
+  by termwise integration (dominated convergence) and the Beta integral.
 -/
 
 @[expose] public section

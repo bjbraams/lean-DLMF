@@ -11,30 +11,41 @@ public import Mathlib.Topology.Separation.CompletelyRegular
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 
 /-!
-# Mathieu functions of noninteger order: basic properties and Fourier series
-(DLMF §§28.12, 28.14)
+# Mathieu functions of noninteger order: basic properties
 
-Statements of DLMF §28.12 (eigenvalues `λ_ν(q)`, Floquet solutions `me_ν(z, q)`, the functions
-`ce_ν`, `se_ν`) and §28.14 (Fourier series and their coefficients `c^ν_{2m}(q)`), for the
-definitions of `DLMF.Mathieu.Noninteger.Basic`.
+This file proves the statements of DLMF §28.12 (eigenvalues `λ_ν(q)`, Floquet solutions
+`me_ν(z, q)`, the functions `ce_ν`, `se_ν`) and the recurrence and normalization of §28.14 for
+the definitions of `DLMF.Mathieu.Noninteger.Basic`. The values at `q = 0` follow because along
+the segment `[0, 0]` the only continuation is the constant one (a continuous path in the
+countable set `{(ν + 2m)²}` is constant, and the sign of `c_0` is fixed by continuity). The
+symmetries are obtained by transporting continuation paths along the involutions
+`c_m ↦ c_{-m}` (`ν ↦ -ν`), `c_m ↦ (-1)^m c_m` (`q ↦ -q`) and complex conjugation. The key
+analytic step is that an absolutely summable solution of the recurrence 28.14.4 decays faster
+than every exponential, so `∑ c_m e^{i(ν+2m)z}` is entire and can be differentiated termwise.
 
-Proved here from the definitions (no admissions):
+## Main results
 
-* the values at `q = 0` (28.12.1, 28.12.4, 28.14.9): along the segment `[0, 0]` the only
-  continuation is the constant one (a continuous path in the countable set `{(ν + 2m)²}` is
-  constant, and the sign of `c_0` is fixed by continuity);
-* the symmetries 28.12.2, 28.12.8, 28.12.9, 28.12.10, 28.12.14, 28.12.15, 28.14.7, 28.14.8,
-  obtained by transporting continuation paths along the involutions
-  `c_m ↦ c_{-m}` (`ν ↦ -ν`), `c_m ↦ (-1)^m c_m` (`q ↦ -q`) and complex conjugation;
-* the pseudoperiodicity 28.12.6, the reality of `ce_ν`, `se_ν` for real `ν`, `q`, `z`, and
-  the recurrence and normalization 28.14.4–28.14.5 at normal values;
-* at normal values: the Floquet property of `me_ν(±z, q)` (§28.12(ii)), the normalization
-  28.12.5 and the characteristic equation `cos πν = w_I(π; λ_ν(q), q)` (§28.12(i)). The key
-  step (`p1b_summable_norm_mul_exp`) is that an absolutely summable solution of the
-  recurrence 28.14.4 decays faster than every exponential, so `∑ c_m e^{i(ν+2m)z}` is entire
-  and can be differentiated termwise (`p1b_isMathieuSolution_series`);
-* the periodicity of all solutions for rational noninteger `ν` (§28.12(iii)), from the
-  Floquet dichotomy of `DLMF.Mathieu.Properties`.
+* `isMeCoeffSeq_mathieuLambdaData`: at a normal value the continuation data solve 28.14.4 with
+  the normalization 28.14.5.
+* `mathieuLambda_zero`, `mathieuMe_zero`: the values at `q = 0` (DLMF 28.12.1, 28.12.4).
+* `isMathieuCharExp_iff_exists_mathieuLambda`, `mathieuNormalSegment_real`,
+  `not_continuousAt_mathieuLambda`: the roots of 28.2.16, normality of real parameters and the
+  discontinuity in `ν` at the integers (DLMF §28.12(i)).
+* `mathieuLambda_neg_q_and_neg_nu`, `mathieuLambda_intCast_eq`: DLMF 28.12.2, 28.12.3.
+* `integral_mathieuMe_mul_neg`, `integral_mathieuMe_orthogonal`: the normalization 28.12.5 and
+  the orthogonality 28.12.7.
+* `mathieuMe_add_pi`: the pseudoperiodicity 28.12.6.
+* `mathieuMe_neg_nu`, `mathieuMe_neg_q`, `conj_mathieuMe`: DLMF 28.12.8–28.12.10.
+* `mathieuMe_natCast`, `mathieuMe_neg_natCast`: the integer-order values 28.12.11.
+* `isFloquetSolution_mathieuMe`, `isMathieuCharExp_mathieuLambda`: the Floquet property of
+  `me_ν` and the characteristic equation `cos πν = w_I(π; λ_ν(q), q)` (DLMF §28.12(i), (ii)).
+* `mathieuCeNu_mathieuSeNu_real`: reality of `ce_ν`, `se_ν` for real `ν`, `q`, `x`
+  (DLMF §28.12(iii)).
+* `mathieu_periodic_of_rational`: periodicity of all solutions for rational noninteger `ν`
+  (DLMF §28.12(iii)), from the Floquet dichotomy of `DLMF.Mathieu.Properties`.
+* `mathieuCeNu_neg`, `mathieuSeNu_neg`: DLMF 28.12.14, 28.12.15.
+
+## Implementation notes
 
 All statements are for `ν ∉ ℤ`, as in DLMF §28.12 ("we now restrict `ν̂ ≠ 0, 1`"); several of
 them are false for integer `ν` with DLMF's completion 28.12.3, 28.12.11 (for example
@@ -58,7 +69,7 @@ namespace DLMF.Mathieu
 
 /-- If `p` is an endpoint of a continuation path and every endpoint equals `p`, then
 `mathieuLambdaData ν q = p`. -/
-lemma m28b_data_eq {ν q : ℂ} {p : ℂ × (ℤ → ℂ)}
+private lemma mathieuLambdaData_eq_of_unique {ν q : ℂ} {p : ℂ × (ℤ → ℂ)}
     (hp : ∃ Λ c, IsMathieuLambdaPath ν q Λ c ∧ Λ 1 = p.1 ∧ c 1 = p.2)
     (hu : ∀ p' : ℂ × (ℤ → ℂ), (∃ Λ c, IsMathieuLambdaPath ν q Λ c ∧ Λ 1 = p'.1 ∧ c 1 = p'.2) →
       p' = p) :
@@ -68,7 +79,7 @@ lemma m28b_data_eq {ν q : ℂ} {p : ℂ × (ℤ → ℂ)}
   exact hu _ h.choose_spec.1
 
 /-- At a normal value the endpoint is attained by a continuation path. -/
-lemma m28b_data_spec {ν q : ℂ} (h : MathieuNormalSegment ν q) :
+private lemma exists_isMathieuLambdaPath_mathieuLambdaData {ν q : ℂ} (h : MathieuNormalSegment ν q) :
     ∃ Λ c, IsMathieuLambdaPath ν q Λ c ∧ Λ 1 = (mathieuLambdaData ν q).1 ∧
       c 1 = (mathieuLambdaData ν q).2 := by
   simp only [mathieuLambdaData, h, dite_true]
@@ -76,9 +87,9 @@ lemma m28b_data_spec {ν q : ℂ} (h : MathieuNormalSegment ν q) :
 
 /-- At a normal value, `(λ_ν(q), c^ν(q))` solves the recurrence 28.14.4 with the normalization
 28.14.5. -/
-theorem m28b_isMeCoeffSeq_data {ν q : ℂ} (h : MathieuNormalSegment ν q) :
+theorem isMeCoeffSeq_mathieuLambdaData {ν q : ℂ} (h : MathieuNormalSegment ν q) :
     IsMeCoeffSeq ν q (mathieuLambdaData ν q).1 (mathieuLambdaData ν q).2 := by
-  obtain ⟨Λ, c, hp, h1, h2⟩ := m28b_data_spec h
+  obtain ⟨Λ, c, hp, h1, h2⟩ := exists_isMathieuLambdaPath_mathieuLambdaData h
   have := hp.isMeCoeffSeq 1 ⟨zero_le_one, le_rfl⟩
   rw [h1, h2] at this
   simpa using this
@@ -86,7 +97,7 @@ theorem m28b_isMeCoeffSeq_data {ν q : ℂ} (h : MathieuNormalSegment ν q) :
 /-- **Transport of continuation data** along an involution `F` of `ℂ × (ℤ → ℂ)` fixing the
 junk value `(0, 0)`, when `F` maps the continuation paths for `(ν, q)` to those for
 `(ν', q')` and back. -/
-lemma m28b_data_transport {ν q ν' q' : ℂ} (F : ℂ × (ℤ → ℂ) → ℂ × (ℤ → ℂ))
+private lemma mathieuLambdaData_transport {ν q ν' q' : ℂ} (F : ℂ × (ℤ → ℂ) → ℂ × (ℤ → ℂ))
     (hF : Function.Involutive F) (hF0 : F (0, 0) = (0, 0))
     (h₁ : ∀ Λ c, IsMathieuLambdaPath ν q Λ c →
       ∃ Λ' c', IsMathieuLambdaPath ν' q' Λ' c' ∧ (Λ' 1, c' 1) = F (Λ 1, c 1))
@@ -106,9 +117,9 @@ lemma m28b_data_transport {ν q ν' q' : ℂ} (F : ℂ × (ℤ → ℂ) → ℂ 
     exact ⟨Λ', c', hp', by rw [← he], by rw [← he]⟩
   by_cases h : MathieuNormalSegment ν q
   · obtain ⟨p, hp, hu⟩ := h
-    have hdata : mathieuLambdaData ν q = p := m28b_data_eq hp hu
+    have hdata : mathieuLambdaData ν q = p := mathieuLambdaData_eq_of_unique hp hu
     rw [hdata]
-    refine m28b_data_eq (e₁ p hp) fun p' hp' => ?_
+    refine mathieuLambdaData_eq_of_unique (e₁ p hp) fun p' hp' => ?_
     have := hu _ (e₂ p' hp')
     rw [← this, hF p']
   · have h' : ¬ MathieuNormalSegment ν' q' := by
@@ -121,7 +132,7 @@ lemma m28b_data_transport {ν q ν' q' : ℂ} (F : ℂ × (ℤ → ℂ) → ℂ 
 /-! ### The case `q = 0` -/
 
 /-- For `ν ∉ ℤ` and `m ≠ 0`, `ν² ≠ (ν + 2m)²`. -/
-lemma m28b_sq_sub_ne {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {m : ℤ} (hm : m ≠ 0) :
+private lemma sq_sub_add_two_mul_sq_ne_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {m : ℤ} (hm : m ≠ 0) :
     ν ^ 2 - (ν + 2 * m) ^ 2 ≠ 0 := by
   have e : ν ^ 2 - (ν + 2 * m) ^ 2 = -4 * m * (ν + m) := by ring
   rw [e]
@@ -129,7 +140,7 @@ lemma m28b_sq_sub_ne {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {m : ℤ} 
   exact hν (-m) (by push_cast; linear_combination -h)
 
 /-- At `q = 0`, the sequence `δ_{m,0}` is a coefficient sequence for `me_ν` with `λ = ν²`. -/
-lemma m28b_isMeCoeffSeq_single (ν : ℂ) (t : ℝ) :
+private lemma isMeCoeffSeq_single_zero (ν : ℂ) (t : ℝ) :
     IsMeCoeffSeq ν ((t : ℂ) * 0) (ν ^ 2) (Pi.single 0 1) := by
   refine ⟨fun m => ?_, ?_, ?_⟩
   · by_cases hm : m = 0
@@ -141,7 +152,7 @@ lemma m28b_isMeCoeffSeq_single (ν : ℂ) (t : ℝ) :
     simpa using this
 
 /-- A continuous function on `[0, 1]` with values in a countable set is constant there. -/
-lemma m28b_const_of_countable {f : ℝ → ℂ} {S : Set ℂ} (hS : S.Countable)
+private lemma eq_of_countable_continuousOn_Icc {f : ℝ → ℂ} {S : Set ℂ} (hS : S.Countable)
     (hf : ContinuousOn f (Icc 0 1)) (hfS : ∀ t ∈ Icc (0 : ℝ) 1, f t ∈ S) :
     ∀ t ∈ Icc (0 : ℝ) 1, f t = f 0 := by
   intro t ht
@@ -150,7 +161,7 @@ lemma m28b_const_of_countable {f : ℝ → ℂ} {S : Set ℂ} (hS : S.Countable)
   exact hsing ⟨t, ht, rfl⟩ ⟨0, ⟨le_rfl, zero_le_one⟩, rfl⟩
 
 /-- Every continuation path for `q = 0` is the constant path `(ν², δ_0)`. -/
-lemma m28b_path_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {Λ : ℝ → ℂ} {c : ℝ → ℤ → ℂ}
+private lemma isMathieuLambdaPath_zero_eq_const {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {Λ : ℝ → ℂ} {c : ℝ → ℤ → ℂ}
     (hp : IsMathieuLambdaPath ν 0 Λ c) :
     ∀ t ∈ Icc (0 : ℝ) 1, Λ t = ν ^ 2 ∧ c t = Pi.single 0 1 := by
   have hrec : ∀ t ∈ Icc (0 : ℝ) 1, ∀ m : ℤ, (Λ t - (ν + 2 * m) ^ 2) * c t m = 0 := by
@@ -171,13 +182,13 @@ lemma m28b_path_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {Λ : ℝ 
     exact one_ne_zero ((hasSum_zero.congr_fun (by simp)).unique this).symm
   have hΛ : ∀ t ∈ Icc (0 : ℝ) 1, Λ t = ν ^ 2 := by
     intro t ht
-    rw [m28b_const_of_countable (Set.countable_range _) hp.continuousOn_lambda hΛS t ht,
+    rw [eq_of_countable_continuousOn_Icc (Set.countable_range _) hp.continuousOn_lambda hΛS t ht,
       hp.lambda_zero]
   have hcm : ∀ t ∈ Icc (0 : ℝ) 1, ∀ m : ℤ, m ≠ 0 → c t m = 0 := by
     intro t ht m hm
     have := hrec t ht m
     rw [hΛ t ht] at this
-    exact (mul_eq_zero.mp this).resolve_left (m28b_sq_sub_ne hν hm)
+    exact (mul_eq_zero.mp this).resolve_left (sq_sub_add_two_mul_sq_ne_zero hν hm)
   have hc0 : ∀ t ∈ Icc (0 : ℝ) 1, c t 0 ∈ ({1, -1} : Set ℂ) := by
     intro t ht
     have h1 := (hp.isMeCoeffSeq t ht).2.2
@@ -188,7 +199,7 @@ lemma m28b_path_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {Λ : ℝ 
     rcases mul_self_eq_one_iff.mp this with h | h <;> simp [h]
   have hc0' : ∀ t ∈ Icc (0 : ℝ) 1, c t 0 = 1 := by
     intro t ht
-    rw [m28b_const_of_countable (Set.toFinite _).countable (hp.continuousOn_coeff 0) hc0 t ht,
+    rw [eq_of_countable_continuousOn_Icc (Set.toFinite _).countable (hp.continuousOn_coeff 0) hc0 t ht,
       hp.coeff_zero]
   intro t ht
   refine ⟨hΛ t ht, funext fun m => ?_⟩
@@ -197,13 +208,13 @@ lemma m28b_path_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {Λ : ℝ 
   · simp [hm, hcm t ht m hm]
 
 /-- The continuation data at `q = 0`: `(ν², δ_0)`. -/
-theorem m28b_data_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) :
+theorem mathieuLambdaData_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) :
     mathieuLambdaData ν 0 = (ν ^ 2, Pi.single 0 1) := by
-  refine m28b_data_eq ⟨fun _ => ν ^ 2, fun _ => Pi.single 0 1,
+  refine mathieuLambdaData_eq_of_unique ⟨fun _ => ν ^ 2, fun _ => Pi.single 0 1,
     ⟨continuousOn_const, fun m => continuousOn_const, rfl, by simp,
-      fun t _ => m28b_isMeCoeffSeq_single ν t⟩, rfl, rfl⟩ ?_
+      fun t _ => isMeCoeffSeq_single_zero ν t⟩, rfl, rfl⟩ ?_
   rintro ⟨a, b⟩ ⟨Λ, c, hp, rfl, rfl⟩
-  obtain ⟨h1, h2⟩ := m28b_path_zero hν hp 1 ⟨zero_le_one, le_rfl⟩
+  obtain ⟨h1, h2⟩ := isMathieuLambdaPath_zero_eq_const hν hp 1 ⟨zero_le_one, le_rfl⟩
   rw [h1, h2]
 
 /-- `0` is normal along the segment for `ν ∉ ℤ`. -/
@@ -211,24 +222,24 @@ theorem mathieuNormalSegment_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ �
     MathieuNormalSegment ν 0 := by
   refine ⟨(ν ^ 2, Pi.single 0 1), ⟨fun _ => ν ^ 2, fun _ => Pi.single 0 1,
     ⟨continuousOn_const, fun m => continuousOn_const, rfl, by simp,
-      fun t _ => m28b_isMeCoeffSeq_single ν t⟩, rfl, rfl⟩, ?_⟩
+      fun t _ => isMeCoeffSeq_single_zero ν t⟩, rfl, rfl⟩, ?_⟩
   rintro ⟨a, b⟩ ⟨Λ, c, hp, rfl, rfl⟩
-  obtain ⟨h1, h2⟩ := m28b_path_zero hν hp 1 ⟨zero_le_one, le_rfl⟩
+  obtain ⟨h1, h2⟩ := isMathieuLambdaPath_zero_eq_const hν hp 1 ⟨zero_le_one, le_rfl⟩
   rw [h1, h2]
 
 /-! ### §28.12(i) Eigenvalues -/
 
 /-- `ν ∉ ℤ` implies `ν + 2n ∉ ℤ`, `-ν ∉ ℤ`, `conj ν ∉ ℤ`. -/
-theorem m28b_not_int_neg {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) : ∀ m : ℤ, (m : ℂ) ≠ -ν :=
+theorem intCast_ne_neg_of_not_int {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) : ∀ m : ℤ, (m : ℂ) ≠ -ν :=
   fun m h => hν (-m) (by push_cast; rw [h, neg_neg])
 
 /-- If `ν ∉ ℤ` then `ν̄ ∉ ℤ`. -/
-lemma m28b_not_int_conj {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) :
+private lemma intCast_ne_conj_of_not_int {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) :
     ∀ m : ℤ, (m : ℂ) ≠ conj ν :=
   fun m h => hν m (by rw [← Complex.conj_conj ν, ← h]; simp)
 
 /-- If `ν ∉ ℤ` then `ν + 2n ∉ ℤ` for every integer `n`. -/
-lemma m28b_not_int_add {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (n : ℤ) :
+private lemma intCast_ne_add_two_mul_of_not_int {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (n : ℤ) :
     ∀ m : ℤ, (m : ℂ) ≠ ν + 2 * n :=
   fun m h => hν (m - 2 * n) (by push_cast; rw [h]; ring)
 
@@ -236,7 +247,7 @@ lemma m28b_not_int_add {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (n : ℤ
 `λ_{ν+2n}(0) = (ν + 2n)²`; with `ν` replaced by `ν + 2n` this is the same statement). -/
 @[dlmf 28.12.E1]
 theorem mathieuLambda_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) : mathieuLambda ν 0 = ν ^ 2 := by
-  rw [mathieuLambda_of_not_int hν, m28b_data_zero hν]
+  rw [mathieuLambda_of_not_int hν, mathieuLambdaData_zero hν]
 
 /-- **The roots of 28.2.16** (DLMF §28.12(i)): for `ν ∉ ℤ`, if `q` is normal along the segment
 with respect to every `ν + 2n`, the roots `a` of `cos(πν) = w_I(π; a, q)` are exactly the
@@ -262,7 +273,7 @@ theorem not_continuousAt_mathieuLambda {q : ℝ} (hq : q ≠ 0) {n : ℤ} (hn : 
   sorry
 
 /-- The continuation paths for `-ν` are those for `ν` with `c_m` replaced by `c_{-m}`. -/
-lemma m28b_path_neg_nu {ν q : ℂ} {Λ : ℝ → ℂ} {c : ℝ → ℤ → ℂ}
+private lemma isMathieuLambdaPath_neg_nu {ν q : ℂ} {Λ : ℝ → ℂ} {c : ℝ → ℤ → ℂ}
     (hp : IsMathieuLambdaPath ν q Λ c) :
     IsMathieuLambdaPath (-ν) q Λ (fun t m => c t (-m)) := by
   refine ⟨hp.continuousOn_lambda, fun m => hp.continuousOn_coeff (-m), by
@@ -275,23 +286,23 @@ lemma m28b_path_neg_nu {ν q : ℂ} {Λ : ℝ → ℂ} {c : ℝ → ℤ → ℂ}
   linear_combination this
 
 /-- The continuation data for `-ν` (proved by transport). -/
-theorem m28b_data_neg_nu (ν q : ℂ) :
+theorem mathieuLambdaData_neg_nu (ν q : ℂ) :
     mathieuLambdaData (-ν) q =
       ((mathieuLambdaData ν q).1, fun m => (mathieuLambdaData ν q).2 (-m)) := by
-  have := m28b_data_transport (ν := ν) (q := q) (ν' := -ν) (q' := q)
+  have := mathieuLambdaData_transport (ν := ν) (q := q) (ν' := -ν) (q' := q)
     (fun p => (p.1, fun m => p.2 (-m))) (fun p => by simp) (by ext m <;> simp)
-    (fun Λ c hp => ⟨_, _, m28b_path_neg_nu hp, rfl⟩)
-    (fun Λ c hp => ⟨_, _, by simpa using m28b_path_neg_nu hp, rfl⟩)
+    (fun Λ c hp => ⟨_, _, isMathieuLambdaPath_neg_nu hp, rfl⟩)
+    (fun Λ c hp => ⟨_, _, by simpa using isMathieuLambdaPath_neg_nu hp, rfl⟩)
   exact this
 
 /-- `(-1)^m (-1)^m = 1` for an integer `m`. -/
-theorem m28b_negOnePow_mul_self (m : ℤ) : (-1 : ℂ) ^ m * (-1 : ℂ) ^ m = 1 := by
+theorem neg_one_zpow_mul_self_eq_one (m : ℤ) : (-1 : ℂ) ^ m * (-1 : ℂ) ^ m = 1 := by
   rcases Int.even_or_odd m with h | h
   · rw [h.neg_one_zpow]; ring
   · rw [h.neg_one_zpow]; ring
 
 /-- The continuation paths for `-q` are those for `q` with `c_m` replaced by `(-1)^m c_m`. -/
-lemma m28b_path_neg_q {ν q : ℂ} {Λ : ℝ → ℂ} {c : ℝ → ℤ → ℂ}
+private lemma isMathieuLambdaPath_neg_q {ν q : ℂ} {Λ : ℝ → ℂ} {c : ℝ → ℤ → ℂ}
     (hp : IsMathieuLambdaPath ν q Λ c) :
     IsMathieuLambdaPath ν (-q) Λ (fun t m => (-1 : ℂ) ^ m * c t m) := by
   refine ⟨hp.continuousOn_lambda, fun m => continuousOn_const.mul (hp.continuousOn_coeff m),
@@ -306,21 +317,21 @@ lemma m28b_path_neg_q {ν q : ℂ} {Λ : ℝ → ℂ} {c : ℝ → ℤ → ℂ}
   · refine h2.congr fun m => ?_
     rw [norm_mul, norm_zpow, norm_neg, norm_one, one_zpow, one_mul]
   · refine h3.congr_fun fun m => ?_
-    rw [mul_pow, sq ((-1 : ℂ) ^ m), m28b_negOnePow_mul_self, one_mul]
+    rw [mul_pow, sq ((-1 : ℂ) ^ m), neg_one_zpow_mul_self_eq_one, one_mul]
 
 /-- The continuation data for `-q` (proved by transport). -/
-theorem m28b_data_neg_q (ν q : ℂ) :
+theorem mathieuLambdaData_neg_q (ν q : ℂ) :
     mathieuLambdaData ν (-q) =
       ((mathieuLambdaData ν q).1, fun m => (-1 : ℂ) ^ m * (mathieuLambdaData ν q).2 m) := by
-  have := m28b_data_transport (ν := ν) (q := q) (ν' := ν) (q' := -q)
+  have := mathieuLambdaData_transport (ν := ν) (q := q) (ν' := ν) (q' := -q)
     (fun p => (p.1, fun m => (-1 : ℂ) ^ m * p.2 m))
-    (fun p => by ext m <;> simp [← mul_assoc, m28b_negOnePow_mul_self]) (by ext m <;> simp)
-    (fun Λ c hp => ⟨_, _, m28b_path_neg_q hp, rfl⟩)
-    (fun Λ c hp => ⟨_, _, by simpa using m28b_path_neg_q hp, rfl⟩)
+    (fun p => by ext m <;> simp [← mul_assoc, neg_one_zpow_mul_self_eq_one]) (by ext m <;> simp)
+    (fun Λ c hp => ⟨_, _, isMathieuLambdaPath_neg_q hp, rfl⟩)
+    (fun Λ c hp => ⟨_, _, by simpa using isMathieuLambdaPath_neg_q hp, rfl⟩)
   exact this
 
 /-- The continuation paths for `(conj ν, conj q)` are the conjugates of those for `(ν, q)`. -/
-lemma m28b_path_conj {ν q : ℂ} {Λ : ℝ → ℂ} {c : ℝ → ℤ → ℂ}
+private lemma isMathieuLambdaPath_conj {ν q : ℂ} {Λ : ℝ → ℂ} {c : ℝ → ℤ → ℂ}
     (hp : IsMathieuLambdaPath ν q Λ c) :
     IsMathieuLambdaPath (conj ν) (conj q) (fun t => conj (Λ t)) (fun t m => conj (c t m)) := by
   refine ⟨Complex.continuous_conj.comp_continuousOn hp.continuousOn_lambda,
@@ -336,13 +347,13 @@ lemma m28b_path_conj {ν q : ℂ} {Λ : ℝ → ℂ} {c : ℝ → ℤ → ℂ}
     simpa [map_pow] using this
 
 /-- The continuation data for `(conj ν, conj q)` (proved by transport). -/
-theorem m28b_data_conj (ν q : ℂ) :
+theorem mathieuLambdaData_conj (ν q : ℂ) :
     mathieuLambdaData (conj ν) (conj q) =
       (conj (mathieuLambdaData ν q).1, fun m => conj ((mathieuLambdaData ν q).2 m)) := by
-  have := m28b_data_transport (ν := ν) (q := q) (ν' := conj ν) (q' := conj q)
+  have := mathieuLambdaData_transport (ν := ν) (q := q) (ν' := conj ν) (q' := conj q)
     (fun p => (conj p.1, fun m => conj (p.2 m))) (fun p => by simp) (by ext m <;> simp)
-    (fun Λ c hp => ⟨_, _, m28b_path_conj hp, rfl⟩)
-    (fun Λ c hp => ⟨_, _, by simpa using m28b_path_conj hp, rfl⟩)
+    (fun Λ c hp => ⟨_, _, isMathieuLambdaPath_conj hp, rfl⟩)
+    (fun Λ c hp => ⟨_, _, by simpa using isMathieuLambdaPath_conj hp, rfl⟩)
   exact this
 
 /-- **Symmetries of `λ_ν`** (DLMF 28.12.2): `λ_ν(-q) = λ_ν(q) = λ_{-ν}(q)` for `ν ∉ ℤ`. -/
@@ -350,7 +361,7 @@ theorem m28b_data_conj (ν q : ℂ) :
 theorem mathieuLambda_neg_q_and_neg_nu {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (q : ℂ) :
     mathieuLambda ν (-q) = mathieuLambda ν q ∧ mathieuLambda (-ν) q = mathieuLambda ν q := by
   rw [mathieuLambda_of_not_int hν, mathieuLambda_of_not_int hν,
-    mathieuLambda_of_not_int (m28b_not_int_neg hν), m28b_data_neg_q, m28b_data_neg_nu]
+    mathieuLambda_of_not_int (intCast_ne_neg_of_not_int hν), mathieuLambdaData_neg_q, mathieuLambdaData_neg_nu]
   exact ⟨rfl, rfl⟩
 
 /-- **Integer order** (DLMF 28.12.3): `λ_m(q) = a_m(q)` for `m = 0, 1, …` and
@@ -365,7 +376,7 @@ theorem mathieuLambda_intCast_eq (m : ℤ) (q : ℝ) :
 
 /-- An absolutely summable solution of the recurrence 28.14.4 decays faster than every
 exponential: `∑ |c_m| e^{K|m|} < ∞` for every real `K`. -/
-lemma p1b_summable_norm_mul_exp {ν q a : ℂ} {c : ℤ → ℂ}
+private lemma summable_norm_mul_exp_of_rec {ν q a : ℂ} {c : ℤ → ℂ}
     (hrec : ∀ m : ℤ, q * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + q * c (m - 1) = 0)
     (hs : Summable (fun m => ‖c m‖)) (K : ℝ) :
     Summable (fun m : ℤ => ‖c m‖ * Real.exp (K * |(m : ℝ)|)) := by
@@ -450,7 +461,7 @@ lemma p1b_summable_norm_mul_exp {ν q a : ℂ} {c : ℤ → ℂ}
   · exact eventually_atTop.2 ⟨(N : ℤ), fun k hk => key k (by omega)⟩
 
 /-- Bound on `(i(ν+2m))^j e^{i(ν+2m)z}` for `‖z‖ ≤ R`. -/
-theorem p1b_norm_pow_exp_le (ν z : ℂ) (m : ℤ) {R : ℝ} (hz : ‖z‖ ≤ R) (j : ℕ) :
+theorem norm_pow_mul_exp_le (ν z : ℂ) (m : ℤ) {R : ℝ} (hz : ‖z‖ ≤ R) (j : ℕ) :
     ‖(I * (ν + 2 * m)) ^ j * Complex.exp (I * (ν + 2 * m) * z)‖ ≤
       Real.exp (‖ν‖ * (R + j)) * Real.exp (2 * (R + j) * |(m : ℝ)|) := by
   have hR : 0 ≤ R := (norm_nonneg z).trans hz
@@ -473,7 +484,7 @@ theorem p1b_norm_pow_exp_le (ν z : ℂ) (m : ℤ) {R : ℝ} (hz : ‖z‖ ≤ R
 
 /-- The summable majorant (from faster-than-exponential decay) of the termwise
 differentiated series. -/
-lemma p1b_summable_bound_of {ν : ℂ} {c : ℤ → ℂ}
+private lemma summable_majorant_of_summable_exp {ν : ℂ} {c : ℤ → ℂ}
     (hb : ∀ K : ℝ, Summable (fun m : ℤ => ‖c m‖ * Real.exp (K * |(m : ℝ)|))) (R : ℝ) (j : ℕ) :
     Summable (fun m : ℤ => ‖c m‖ *
       (Real.exp (‖ν‖ * (R + j)) * Real.exp (2 * (R + j) * |(m : ℝ)|))) :=
@@ -481,7 +492,7 @@ lemma p1b_summable_bound_of {ν : ℂ} {c : ℤ → ℂ}
     fun m => by ring
 
 /-- Termwise differentiation of `∑ c_m (i(ν+2m))^j e^{i(ν+2m)z}`. -/
-theorem p1b_hasDerivAt_series_of {ν : ℂ} {c : ℤ → ℂ}
+theorem hasDerivAt_tsum_exp_series_of_summable_exp {ν : ℂ} {c : ℤ → ℂ}
     (hb : ∀ K : ℝ, Summable (fun m : ℤ => ‖c m‖ * Real.exp (K * |(m : ℝ)|))) (j : ℕ) (z : ℂ) :
     HasDerivAt (fun w => ∑' m : ℤ, c m * ((I * (ν + 2 * m)) ^ j *
         Complex.exp (I * (ν + 2 * m) * w)))
@@ -490,20 +501,20 @@ theorem p1b_hasDerivAt_series_of {ν : ℂ} {c : ℤ → ℂ}
   refine hasDerivAt_tsum_of_isPreconnected
     (g := fun m w => c m * ((I * (ν + 2 * m)) ^ j * Complex.exp (I * (ν + 2 * m) * w)))
     (g' := fun m w => c m * ((I * (ν + 2 * m)) ^ (j + 1) * Complex.exp (I * (ν + 2 * m) * w)))
-    (p1b_summable_bound_of (ν := ν) hb R (j + 1))
+    (summable_majorant_of_summable_exp (ν := ν) hb R (j + 1))
     Metric.isOpen_ball (convex_ball (0 : ℂ) R).isPreconnected (fun m w _ => ?_)
     (fun m w hw => ?_) (Metric.mem_ball_self (by positivity : (0 : ℝ) < R)) ?_
     (by rw [Metric.mem_ball, dist_zero_right]; simp [R])
   rotate_left
   · rw [norm_mul]
     gcongr
-    have := p1b_norm_pow_exp_le ν w m (R := R)
+    have := norm_pow_mul_exp_le ν w m (R := R)
       (by rw [Metric.mem_ball, dist_zero_right] at hw; exact hw.le) (j + 1)
     simpa using this
-  · refine .of_norm_bounded (p1b_summable_bound_of (ν := ν) hb R j) fun m => ?_
+  · refine .of_norm_bounded (summable_majorant_of_summable_exp (ν := ν) hb R j) fun m => ?_
     rw [norm_mul]
     gcongr
-    have := p1b_norm_pow_exp_le ν (0 : ℂ) m (R := R) (by simp [R]; positivity) j
+    have := norm_pow_mul_exp_le ν (0 : ℂ) m (R := R) (by simp [R]; positivity) j
     simpa using this
   · have h := ((hasDerivAt_id w).const_mul (I * (ν + 2 * m))).cexp
     have := (h.const_mul ((I * (ν + 2 * m)) ^ j)).const_mul (c m)
@@ -512,40 +523,40 @@ theorem p1b_hasDerivAt_series_of {ν : ℂ} {c : ℤ → ℂ}
     · simp only [id]; ring
 
 /-- Absolute convergence of `∑ c_m (i(ν+2m))^j e^{i(ν+2m)z}` for every complex `z`. -/
-theorem p1b_summable_series_of {ν : ℂ} {c : ℤ → ℂ}
+theorem summable_exp_series_of_summable_exp {ν : ℂ} {c : ℤ → ℂ}
     (hb : ∀ K : ℝ, Summable (fun m : ℤ => ‖c m‖ * Real.exp (K * |(m : ℝ)|))) (j : ℕ) (z : ℂ) :
     Summable (fun m : ℤ => ‖c m * ((I * (ν + 2 * m)) ^ j * Complex.exp (I * (ν + 2 * m) * z))‖) :=
   .of_nonneg_of_le (fun _ => norm_nonneg _) (fun m => by
-    rw [norm_mul]; gcongr; exact p1b_norm_pow_exp_le ν z m le_rfl j)
-    (p1b_summable_bound_of (ν := ν) hb ‖z‖ j)
+    rw [norm_mul]; gcongr; exact norm_pow_mul_exp_le ν z m le_rfl j)
+    (summable_majorant_of_summable_exp (ν := ν) hb ‖z‖ j)
 
 /-- The summable majorant of the termwise differentiated series. -/
-theorem p1b_summable_bound {ν q a : ℂ} {c : ℤ → ℂ}
+theorem summable_majorant_of_rec {ν q a : ℂ} {c : ℤ → ℂ}
     (hrec : ∀ m : ℤ, q * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + q * c (m - 1) = 0)
     (hs : Summable (fun m => ‖c m‖)) (R : ℝ) (j : ℕ) :
     Summable (fun m : ℤ => ‖c m‖ *
       (Real.exp (‖ν‖ * (R + j)) * Real.exp (2 * (R + j) * |(m : ℝ)|))) :=
-  p1b_summable_bound_of (p1b_summable_norm_mul_exp hrec hs) R j
+  summable_majorant_of_summable_exp (summable_norm_mul_exp_of_rec hrec hs) R j
 
 /-- Termwise differentiation of `∑ c_m (i(ν+2m))^j e^{i(ν+2m)z}`. -/
-lemma p1b_hasDerivAt_series {ν q a : ℂ} {c : ℤ → ℂ}
+private lemma hasDerivAt_tsum_exp_series_of_rec {ν q a : ℂ} {c : ℤ → ℂ}
     (hrec : ∀ m : ℤ, q * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + q * c (m - 1) = 0)
     (hs : Summable (fun m => ‖c m‖)) (j : ℕ) (z : ℂ) :
     HasDerivAt (fun w => ∑' m : ℤ, c m * ((I * (ν + 2 * m)) ^ j *
         Complex.exp (I * (ν + 2 * m) * w)))
       (∑' m : ℤ, c m * ((I * (ν + 2 * m)) ^ (j + 1) * Complex.exp (I * (ν + 2 * m) * z))) z :=
-  p1b_hasDerivAt_series_of (p1b_summable_norm_mul_exp hrec hs) j z
+  hasDerivAt_tsum_exp_series_of_summable_exp (summable_norm_mul_exp_of_rec hrec hs) j z
 
 /-- Absolute convergence of `∑ c_m (i(ν+2m))^j e^{i(ν+2m)z}` for every complex `z`. -/
-theorem p1b_summable_series {ν q a : ℂ} {c : ℤ → ℂ}
+theorem summable_exp_series_of_rec {ν q a : ℂ} {c : ℤ → ℂ}
     (hrec : ∀ m : ℤ, q * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + q * c (m - 1) = 0)
     (hs : Summable (fun m => ‖c m‖)) (j : ℕ) (z : ℂ) :
     Summable (fun m : ℤ => ‖c m * ((I * (ν + 2 * m)) ^ j * Complex.exp (I * (ν + 2 * m) * z))‖) :=
-  p1b_summable_series_of (p1b_summable_norm_mul_exp hrec hs) j z
+  summable_exp_series_of_summable_exp (summable_norm_mul_exp_of_rec hrec hs) j z
 
 /-- An absolutely summable solution of 28.14.4 gives an entire solution
 `∑ c_m e^{i(ν+2m)z}` of Mathieu's equation. -/
-lemma p1b_isMathieuSolution_series {ν q a : ℂ} {c : ℤ → ℂ}
+private lemma isMathieuSolution_tsum_exp_series {ν q a : ℂ} {c : ℤ → ℂ}
     (hrec : ∀ m : ℤ, q * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + q * c (m - 1) = 0)
     (hs : Summable (fun m => ‖c m‖)) :
     IsMathieuSolution a q (fun z => ∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * z)) := by
@@ -554,7 +565,7 @@ lemma p1b_isMathieuSolution_series {ν q a : ℂ} {c : ℤ → ℂ}
   have h0 : (fun z => ∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * z)) = S 0 := by
     funext z; simp [hS]
   have hd : ∀ j z, HasDerivAt (S j) (S (j + 1) z) z := fun j z =>
-    p1b_hasDerivAt_series hrec hs j z
+    hasDerivAt_tsum_exp_series_of_rec hrec hs j z
   have hderiv : deriv (S 0) = S 1 := funext fun z => (hd 0 z).deriv
   rw [h0]
   refine ⟨fun z => (hd 0 z).differentiableAt, fun z => ?_⟩
@@ -565,10 +576,10 @@ lemma p1b_isMathieuSolution_series {ν q a : ℂ} {c : ℤ → ℂ}
   set E : ℂ := Complex.exp (2 * I * z)
   set E' : ℂ := Complex.exp (-(2 * I * z))
   have hs0 : HasSum (fun m => c m * e m) (S 0 z) := by
-    have := (p1b_summable_series hrec hs 0 z).of_norm.hasSum
+    have := (summable_exp_series_of_rec hrec hs 0 z).of_norm.hasSum
     simpa [hS] using this
   have hs2 : HasSum (fun m => c m * ((I * (ν + 2 * m)) ^ 2 * e m)) (S 2 z) :=
-    (p1b_summable_series hrec hs 2 z).of_norm.hasSum
+    (summable_exp_series_of_rec hrec hs 2 z).of_norm.hasSum
   have hE : ∀ m : ℤ, e (m + 1) = E * e m := fun m => by
     simp only [he, E, ← Complex.exp_add]; congr 1; push_cast; ring
   have hE' : ∀ m : ℤ, e (m - 1) = E' * e m := fun m => by
@@ -591,12 +602,12 @@ lemma p1b_isMathieuSolution_series {ν q a : ℂ} {c : ℤ → ℂ}
     linear_combination (e m) * this
 
 /-- `|e^{i(ν+2m)x}| = e^{-ℑν x}` for real `x`. -/
-theorem p1b_norm_exp_real (ν : ℂ) (m : ℤ) (x : ℝ) :
+theorem norm_exp_I_mul_add_two_mul_ofReal (ν : ℂ) (m : ℤ) (x : ℝ) :
     ‖Complex.exp (I * (ν + 2 * m) * x)‖ = Real.exp (-(ν.im * x)) := by
   rw [Complex.norm_exp]; congr 1; simp [Complex.mul_re, Complex.mul_im]
 
 /-- `∫₀^π e^{2ikx} dx = π δ_{k0}`. -/
-lemma p1b_integral_exp_int (k : ℤ) :
+private lemma integral_exp_two_mul_I_intCast_mul (k : ℤ) :
     ∫ x in (0 : ℝ)..π, Complex.exp (2 * I * k * x) = if k = 0 then (π : ℂ) else 0 := by
   split_ifs with hk
   · subst hk; simp
@@ -608,7 +619,7 @@ lemma p1b_integral_exp_int (k : ℤ) :
     simp [this]
 
 /-- Fourier coefficients of an absolutely convergent series `∑ c_m e^{i(ν+2m)x}` on `[0, π]`. -/
-theorem p1b_integral_series_mul_exp {ν : ℂ} {c : ℤ → ℂ} (hs : Summable (fun m => ‖c m‖))
+theorem integral_tsum_exp_series_mul_exp {ν : ℂ} {c : ℤ → ℂ} (hs : Summable (fun m => ‖c m‖))
     (n : ℤ) :
     ∫ x in (0 : ℝ)..π, (∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * x)) *
       Complex.exp (-(I * (ν + 2 * n) * x)) = π * c n := by
@@ -631,7 +642,7 @@ theorem p1b_integral_series_mul_exp {ν : ℂ} {c : ℤ → ℂ} (hs : Summable 
   · have hval : ∀ m : ℤ, ∫ x in (0 : ℝ)..π, c m * Complex.exp (2 * I * (m - n : ℤ) * x) =
         if m = n then (π : ℂ) * c n else 0 := by
       intro m
-      rw [intervalIntegral.integral_const_mul, p1b_integral_exp_int]
+      rw [intervalIntegral.integral_const_mul, integral_exp_two_mul_I_intCast_mul]
       by_cases h : m = n
       · subst h; simp; ring
       · simp [sub_eq_zero, h]
@@ -639,13 +650,13 @@ theorem p1b_integral_series_mul_exp {ν : ℂ} {c : ℤ → ℂ} (hs : Summable 
     exact hsum.unique (hasSum_ite_eq n _)
   · have hs' : Summable (fun m : ℤ => c m * Complex.exp (I * (ν + 2 * m) * x)) := by
       refine Summable.of_norm ?_
-      simp only [norm_mul, p1b_norm_exp_real]
+      simp only [norm_mul, norm_exp_I_mul_add_two_mul_ofReal]
       exact hs.mul_right _
     exact (hs'.hasSum.mul_right _).congr_fun fun m => (hF m x).symm
 
 
 /-- `∫₀^π f(x) f(-x) dx = π ∑ c_m²` for `f(x) = ∑ c_m e^{i(ν+2m)x}` (absolutely convergent). -/
-lemma p1b_integral_series_mul_neg {ν : ℂ} {c : ℤ → ℂ} (hs : Summable (fun m => ‖c m‖))
+private lemma integral_tsum_exp_series_mul_neg {ν : ℂ} {c : ℤ → ℂ} (hs : Summable (fun m => ‖c m‖))
     (hf : Continuous (fun x : ℝ => ∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * x)))
     {s : ℂ} (hsq : HasSum (fun m => c m ^ 2) s) :
     ∫ x in (0 : ℝ)..π, (∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * x)) *
@@ -656,7 +667,7 @@ lemma p1b_integral_series_mul_neg {ν : ℂ} {c : ℤ → ℂ} (hs : Summable (f
   have hnorm : ∀ (m : ℤ) (x : ℝ),
       ‖Complex.exp (I * (ν + 2 * m) * -(x : ℂ))‖ = Real.exp (ν.im * x) := by
     intro m x
-    rw [show -(x : ℂ) = ((-x : ℝ) : ℂ) by push_cast; ring, p1b_norm_exp_real]
+    rw [show -(x : ℂ) = ((-x : ℝ) : ℂ) by push_cast; ring, norm_exp_I_mul_add_two_mul_ofReal]
     congr 1; ring
   have hsum := intervalIntegral.hasSum_integral_of_dominated_convergence
     (μ := volume) (a := 0) (b := π)
@@ -672,7 +683,7 @@ lemma p1b_integral_series_mul_neg {ν : ℂ} {c : ℤ → ℂ} (hs : Summable (f
       have : (fun x : ℝ => f x * (c m * Complex.exp (I * (ν + 2 * m) * -(x : ℂ)))) =
           fun x : ℝ => c m * (f x * Complex.exp (-(I * (ν + 2 * m) * x))) := by
         funext x; rw [hneg]; ring
-      rw [this, intervalIntegral.integral_const_mul, p1b_integral_series_mul_exp hs]; ring
+      rw [this, intervalIntegral.integral_const_mul, integral_tsum_exp_series_mul_exp hs]; ring
     simp only [hval] at hsum
     exact hsum.unique (hsq.mul_left _)
   · have : (fun t : ℝ => ∑' m : ℤ, ‖f t‖ * (‖c m‖ * Real.exp (ν.im * t))) =
@@ -693,7 +704,7 @@ lemma p1b_integral_series_mul_neg {ν : ℂ} {c : ℤ → ℂ} (hs : Summable (f
 theorem mathieuMe_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (z : ℂ) :
     mathieuMe ν z 0 = Complex.exp (I * ν * z) := by
   rw [mathieuMe_of_not_int hν]
-  simp only [mathieuMeCoeff_of_not_int hν, m28b_data_zero hν]
+  simp only [mathieuMeCoeff_of_not_int hν, mathieuLambdaData_zero hν]
   rw [tsum_eq_single 0 fun m hm => by simp [hm]]
   simp
 
@@ -703,13 +714,13 @@ normal along the segment. -/
 theorem integral_mathieuMe_mul_neg {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
     (hq : MathieuNormalSegment ν q) :
     ∫ x in (0 : ℝ)..π, mathieuMe ν x q * mathieuMe ν (-x) q = π := by
-  have hd := m28b_isMeCoeffSeq_data hq
+  have hd := isMeCoeffSeq_mathieuLambdaData hq
   set c := (mathieuLambdaData ν q).2
   have hme : ∀ z, mathieuMe ν z q = ∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * z) := by
     intro z; rw [mathieuMe_of_not_int hν]; simp only [mathieuMeCoeff_of_not_int hν, c]
-  have hsol := p1b_isMathieuSolution_series hd.1 hd.2.1
+  have hsol := isMathieuSolution_tsum_exp_series hd.1 hd.2.1
   simp only [hme]
-  rw [p1b_integral_series_mul_neg hd.2.1 (hsol.differentiable.continuous.comp
+  rw [integral_tsum_exp_series_mul_neg hd.2.1 (hsol.differentiable.continuous.comp
     Complex.continuous_ofReal) hd.2.2, mul_one]
 
 /-- **Pseudoperiodicity** (DLMF 28.12.6): `me_ν(z + π, q) = e^{πiν} me_ν(z, q)` for `ν ∉ ℤ`
@@ -739,9 +750,9 @@ theorem integral_mathieuMe_orthogonal {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ)
 @[dlmf 28.12.E8]
 theorem mathieuMe_neg_nu {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (z q : ℂ) :
     mathieuMe (-ν) z q = mathieuMe ν (-z) q := by
-  rw [mathieuMe_of_not_int (m28b_not_int_neg hν), mathieuMe_of_not_int hν]
-  simp only [mathieuMeCoeff_of_not_int (m28b_not_int_neg hν), mathieuMeCoeff_of_not_int hν,
-    m28b_data_neg_nu]
+  rw [mathieuMe_of_not_int (intCast_ne_neg_of_not_int hν), mathieuMe_of_not_int hν]
+  simp only [mathieuMeCoeff_of_not_int (intCast_ne_neg_of_not_int hν), mathieuMeCoeff_of_not_int hν,
+    mathieuLambdaData_neg_nu]
   rw [← (Equiv.neg ℤ).tsum_eq]
   congr 1; funext m
   simp only [Equiv.neg_apply, neg_neg, Int.cast_neg]
@@ -755,13 +766,13 @@ theorem isFloquetSolution_mathieuMe {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) �
     (hq : MathieuNormalSegment ν q) :
     IsFloquetSolution (mathieuLambda ν q) q ν (fun z => mathieuMe ν z q) ∧
       IsFloquetSolution (mathieuLambda ν q) q (-ν) (fun z => mathieuMe ν (-z) q) := by
-  have hd := m28b_isMeCoeffSeq_data hq
+  have hd := isMeCoeffSeq_mathieuLambdaData hq
   set c := (mathieuLambdaData ν q).2
   have hme : ∀ z, mathieuMe ν z q = ∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * z) := by
     intro z; rw [mathieuMe_of_not_int hν]; simp only [mathieuMeCoeff_of_not_int hν, c]
   have hsol : IsMathieuSolution (mathieuLambda ν q) q (fun z => mathieuMe ν z q) := by
     rw [mathieuLambda_of_not_int hν]; simp only [hme]
-    exact p1b_isMathieuSolution_series hd.1 hd.2.1
+    exact isMathieuSolution_tsum_exp_series hd.1 hd.2.1
   have hne : (fun z => mathieuMe ν z q) ≠ 0 := by
     intro h
     have h0 : ∀ z, mathieuMe ν z q = 0 := fun z => congrFun h z
@@ -778,11 +789,11 @@ theorem isFloquetSolution_mathieuMe {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) �
       push_cast at this ⊢
       linear_combination this
     have hs' : Summable (fun m : ℤ => ‖c (-m)‖) := (Equiv.neg ℤ).summable_iff.mpr hd.2.1
-    have := p1b_isMathieuSolution_series (c := fun m => c (-m)) hrec' hs'
+    have := isMathieuSolution_tsum_exp_series (c := fun m => c (-m)) hrec' hs'
     rw [mathieuLambda_of_not_int hν]
     convert this using 2 with z
-    rw [← mathieuMe_neg_nu hν, mathieuMe_of_not_int (m28b_not_int_neg hν)]
-    simp only [mathieuMeCoeff_of_not_int (m28b_not_int_neg hν), m28b_data_neg_nu, c]
+    rw [← mathieuMe_neg_nu hν, mathieuMe_of_not_int (intCast_ne_neg_of_not_int hν)]
+    simp only [mathieuMeCoeff_of_not_int (intCast_ne_neg_of_not_int hν), mathieuLambdaData_neg_nu, c]
   · funext z
     have := congrFun h (-z)
     simpa using this
@@ -795,7 +806,7 @@ theorem isFloquetSolution_mathieuMe {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) �
 /-- **Green's identity on a period**: solutions `f`, `g` of Mathieu's equation with eigenvalues
 `a ≠ b` and reciprocal multipliers `f(z + π) = μ f(z)`, `g(z + π) = μ⁻¹ g(z)` satisfy
 `∫₀^π f g = 0`. -/
-lemma p2x_integral_mul_eq_zero {a b q μ : ℂ} {f g : ℂ → ℂ} (hf : IsMathieuSolution a q f)
+private lemma integral_mul_eq_zero_of_pseudoperiodic {a b q μ : ℂ} {f g : ℂ → ℂ} (hf : IsMathieuSolution a q f)
     (hg : IsMathieuSolution b q g) (hμ : μ ≠ 0) (hfp : ∀ z, f (z + π) = μ * f z)
     (hgp : ∀ z, g (z + π) = μ⁻¹ * g z) (hab : a ≠ b) :
     ∫ x in (0 : ℝ)..π, f x * g x = 0 := by
@@ -833,14 +844,14 @@ lemma p2x_integral_mul_eq_zero {a b q μ : ℂ} {f g : ℂ → ℂ} (hf : IsMath
 /-- **Orthogonality with distinct eigenvalues** (DLMF 28.12.7 under the extra hypothesis
 `λ_{ν+2m}(q) ≠ λ_{ν+2n}(q)`; Green's identity on `[0, π]`). The statement
 `integral_mathieuMe_orthogonal` without this hypothesis remains admitted. -/
-lemma p2x_integral_mathieuMe_orthogonal_of_ne {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
+private lemma integral_mathieuMe_orthogonal_of_mathieuLambda_ne {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
     {m n : ℤ} (hm : MathieuNormalSegment (ν + 2 * m) q)
     (hn : MathieuNormalSegment (ν + 2 * n) q)
     (hne : mathieuLambda (ν + 2 * m) q ≠ mathieuLambda (ν + 2 * n) q) :
     ∫ x in (0 : ℝ)..π, mathieuMe (ν + 2 * m) x q * mathieuMe (ν + 2 * n) (-x) q = 0 := by
-  obtain ⟨⟨h1, -, hp1⟩, -⟩ := isFloquetSolution_mathieuMe (m28b_not_int_add hν m) hm
-  obtain ⟨-, ⟨h2, -, hp2⟩⟩ := isFloquetSolution_mathieuMe (m28b_not_int_add hν n) hn
-  refine p2x_integral_mul_eq_zero h1 h2 (Complex.exp_ne_zero _) hp1 (fun z => ?_) hne
+  obtain ⟨⟨h1, -, hp1⟩, -⟩ := isFloquetSolution_mathieuMe (intCast_ne_add_two_mul_of_not_int hν m) hm
+  obtain ⟨-, ⟨h2, -, hp2⟩⟩ := isFloquetSolution_mathieuMe (intCast_ne_add_two_mul_of_not_int hν n) hn
+  refine integral_mul_eq_zero_of_pseudoperiodic h1 h2 (Complex.exp_ne_zero _) hp1 (fun z => ?_) hne
   have h2z := hp2 z
   simp only at h2z
   rw [h2z, ← Complex.exp_neg]
@@ -852,7 +863,7 @@ lemma p2x_integral_mathieuMe_orthogonal_of_ne {ν q : ℂ} (hν : ∀ m : ℤ, (
 
 /-- A Floquet solution with respect to `ν ∉ ℤ` whose reflection `w(-z)` is a Floquet solution
 with respect to `-ν` does not vanish at `0`, and `cos πν = w_I(π)`. -/
-theorem p1b_charExp_of_floquet_pair {a q ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {w : ℂ → ℂ}
+theorem isMathieuCharExp_of_isFloquetSolution_pair {a q ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {w : ℂ → ℂ}
     (h1 : IsFloquetSolution a q ν w) (h2 : IsFloquetSolution a q (-ν) (fun z => w (-z))) :
     w 0 ≠ 0 ∧ IsMathieuCharExp a q ν := by
   obtain ⟨hw, hw0, hper⟩ := h1
@@ -925,7 +936,7 @@ segment, `a = λ_ν(q)` is a root of the characteristic equation 28.2.16,
 @[dlmf 28.12.i]
 theorem isMathieuCharExp_mathieuLambda {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν)
     (hq : MathieuNormalSegment ν q) : IsMathieuCharExp (mathieuLambda ν q) q ν :=
-  (p1b_charExp_of_floquet_pair hν (isFloquetSolution_mathieuMe hν hq).1
+  (isMathieuCharExp_of_isFloquetSolution_pair hν (isFloquetSolution_mathieuMe hν hq).1
     (isFloquetSolution_mathieuMe hν hq).2).2
 
 /-- **Change of sign of `q`** (DLMF 28.12.9): `me_ν(z, -q) = e^{iνπ/2} me_ν(z - π/2, q)` for
@@ -934,7 +945,7 @@ theorem isMathieuCharExp_mathieuLambda {ν q : ℂ} (hν : ∀ m : ℤ, (m : ℂ
 theorem mathieuMe_neg_q {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (z q : ℂ) :
     mathieuMe ν z (-q) = Complex.exp (I * ν * π / 2) * mathieuMe ν (z - π / 2) q := by
   rw [mathieuMe_of_not_int hν, mathieuMe_of_not_int hν, ← tsum_mul_left]
-  simp only [mathieuMeCoeff_of_not_int hν, m28b_data_neg_q]
+  simp only [mathieuMeCoeff_of_not_int hν, mathieuLambdaData_neg_q]
   congr 1; funext m
   have h : Complex.exp (I * ν * π / 2) * Complex.exp (I * (ν + 2 * m) * (z - π / 2)) =
       Complex.exp (m * (-(π * I))) * Complex.exp (I * (ν + 2 * m) * z) := by
@@ -949,9 +960,9 @@ for `ν ∉ ℤ`. Stronger than DLMF: with the straight-segment continuation it 
 @[dlmf 28.12.E10]
 theorem conj_mathieuMe {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (z q : ℂ) :
     conj (mathieuMe ν z q) = mathieuMe (conj ν) (-conj z) (conj q) := by
-  rw [mathieuMe_of_not_int hν, mathieuMe_of_not_int (m28b_not_int_conj hν), Complex.conj_tsum]
-  simp only [mathieuMeCoeff_of_not_int hν, mathieuMeCoeff_of_not_int (m28b_not_int_conj hν),
-    m28b_data_conj]
+  rw [mathieuMe_of_not_int hν, mathieuMe_of_not_int (intCast_ne_conj_of_not_int hν), Complex.conj_tsum]
+  simp only [mathieuMeCoeff_of_not_int hν, mathieuMeCoeff_of_not_int (intCast_ne_conj_of_not_int hν),
+    mathieuLambdaData_conj]
   congr 1; funext m
   rw [map_mul, ← Complex.exp_conj]
   congr 2
@@ -995,7 +1006,7 @@ theorem mathieuCeNu_mathieuSeNu_real {ν q x : ℝ} (hν : ∀ m : ℤ, (m : ℂ
   · simp only [mathieuSeNu, ← h, him]
 
 /-- Iterated pseudoperiodicity: `w(z + nπ) = μⁿ w(z)`. -/
-theorem p1b_add_nat_mul_pi {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ * w z) (z : ℂ)
+theorem pseudoperiodic_add_nat_mul_pi {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ * w z) (z : ℂ)
     (n : ℕ) : w (z + n * π) = μ ^ n * w z := by
   induction n with
   | zero => simp
@@ -1003,7 +1014,7 @@ theorem p1b_add_nat_mul_pi {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) =
     rw [show z + ((n + 1 : ℕ) : ℂ) * π = (z + n * π) + π by push_cast; ring, h, ih]; ring
 
 /-- For `ν ∉ ℤ` the Floquet multipliers `e^{±iπν}` are distinct. -/
-theorem p1b_exp_ne_inv {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) :
+theorem exp_pi_mul_I_mul_ne_inv {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) :
     Complex.exp (π * I * ν) ≠ (Complex.exp (π * I * ν))⁻¹ := by
   intro hμ2
   have hμ : Complex.exp (π * I * ν) ≠ 0 := Complex.exp_ne_zero _
@@ -1018,10 +1029,10 @@ theorem p1b_exp_ne_inv {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) :
   linear_combination -hn
 
 /-- A Floquet solution with respect to `ν` with `e^{2πimν} = 1` has period `2mπ`. -/
-lemma p1b_floquet_periodic {a q ν : ℂ} {w : ℂ → ℂ} (hw : IsFloquetSolution a q ν w) {m : ℕ}
+private lemma periodic_of_isFloquetSolution {a q ν : ℂ} {w : ℂ → ℂ} (hw : IsFloquetSolution a q ν w) {m : ℕ}
     (hm : Complex.exp (2 * m * π * I * ν) = 1) : Function.Periodic w (2 * m * π) := by
   intro z
-  have := p1b_add_nat_mul_pi hw.2.2 z (2 * m)
+  have := pseudoperiodic_add_nat_mul_pi hw.2.2 z (2 * m)
   push_cast at this
   rw [this, ← Complex.exp_nat_mul]
   push_cast
@@ -1047,13 +1058,13 @@ theorem mathieu_periodic_of_rational {a q : ℂ} {s : ℤ} {m : ℕ} (hm : m ≠
   by_cases hw0 : w = 0
   · intro z; simp [hw0]
   rcases hw.isFloquet_or hw0 hc with h | hu
-  · exact p1b_floquet_periodic h h1
+  · exact periodic_of_isFloquetSolution h h1
   rcases hw.isFloquet_or hw0 hc' with h | hu'
-  · exact p1b_floquet_periodic h h2
-  have pu := p1b_floquet_periodic hu h2
-  have pu' := p1b_floquet_periodic hu' (by rw [neg_neg]; exact h1)
+  · exact periodic_of_isFloquetSolution h h2
+  have pu := periodic_of_isFloquetSolution hu h2
+  have pu' := periodic_of_isFloquetSolution hu' (by rw [neg_neg]; exact h1)
   have hD : Complex.exp (I * ν * π) - Complex.exp (I * -ν * π) ≠ 0 := by
-    have := p1b_exp_ne_inv (ν := ν) hν
+    have := exp_pi_mul_I_mul_ne_inv (ν := ν) hν
     rw [sub_ne_zero, show I * -ν * π = -(π * I * ν) by ring, Complex.exp_neg,
       show I * ν * π = π * I * ν by ring]
     exact this

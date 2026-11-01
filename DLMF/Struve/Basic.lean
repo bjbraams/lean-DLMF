@@ -9,4 +9,7 @@ public import DLMF.Struve.Basic.Functions
 
 /-!
 # Definitions of Struve functions
+
+This file collects the foundational definitions of the Struve functions
+(`DLMF.Struve.Basic.Functions`).
 -/

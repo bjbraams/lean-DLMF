@@ -12,14 +12,22 @@ public import DLMF.Lame.Polynomials.Basic
 
 If Lamé's equation 29.2.1 has a Lamé polynomial solution `E` (eigenvalue
 `h = ½(H_m + ν(ν+1)k²)`, 29.15.7 and analogues), a second solution is
-`F(z) = E(z) ∫_{iK'}^z du/E(u)²` (29.17.1). The base point `iK'` is a pole of `sn`, hence of
-`E` (of order `ν`), where `1/E²` has a zero; the integral is taken along the segment from `iK'`
-to `z`, parametrized as `∫₀¹ (z - iK')/E(iK' + s(z - iK'))² ds` (the integrand at `s = 0`, a
-single point, does not affect the integral). The statement is local: on an open set `U` such
-that the segments from `iK'` to points of `U` meet no zero of `E` and no pole of `sn` other than
-their initial point. The Wronskian `E F' - E' F` equals `1`, so `F` is independent of `E`.
+`F(z) = E(z) ∫_{iK'}^z du/E(u)²` (29.17.1).
+
+## Main results
+
+* `lamePolyEk_second_solution`: DLMF 29.17.1, with Wronskian `E F' - E' F = 1`, so that `F` is
+  independent of `E`.
+
+## Implementation notes
+
+The base point `iK'` is a pole of `sn`, hence of `E` (of order `ν`), where `1/E²` has a zero;
+the integral is taken along the segment from `iK'` to `z`, parametrized as
+`∫₀¹ (z - iK')/E(iK' + s(z - iK'))² ds` (the integrand at `s = 0`, a single point, does not
+affect the integral). The statement is local: on an open set `U` such that the segments from
+`iK'` to points of `U` meet no zero of `E` and no pole of `sn` other than their initial point.
 §29.17(ii) (algebraic Lamé functions) and §29.17(iii) (Lamé–Wangerin functions) are
-descriptive with references only and are not acquired. Admitted.
+descriptive, with references only, and are not stated.
 -/
 
 @[expose] public section

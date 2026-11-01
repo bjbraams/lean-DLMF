@@ -5,23 +5,35 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.JacobiElliptic.P3jJacobiODE
+public import DLMF.JacobiElliptic.JacobiODE
 
 /-!
 # Maclaurin series of the Jacobian elliptic functions (DLMF §22.10)
 
-* §22.10(i): the initial Maclaurin coefficients of `sn, cn, dn` in `z` (22.10.1–22.10.3), as
-  `Asymptotics.IsBigO` statements at `z = 0`, for complex `k ∈ jacobiModulusDomain`; and the
-  convergence of the full expansions in the disc `|z| < min(K, K')` (prose 22.10.i), stated for
-  `0 < k < 1` as the existence of a power series on that ball.
-* §22.10(ii): the expansions in `k` (22.10.4–22.10.6, `k → 0`) and in `k'`
-  (22.10.7–22.10.9, `k → 1`), for fixed complex `z`, with `k` tending to its limit inside
-  `jacobiModulusDomain`. In 22.10.7–22.10.9 `cosh z ≠ 0` is assumed (`sech z` appears).
+The initial Maclaurin coefficients of `sn, cn, dn` in `z`, the convergence of the full
+expansions, and the expansions in `k` and in `k'` (DLMF §22.10).
 
-22.10.1–22.10.3 are proved by bootstrapping the system `sn' = cn dn`, `cn' = -sn dn`,
-`dn' = -k² sn cn` against the Maclaurin polynomials, and the prose radius statement from the
-absence of poles in `|z| < K'`. The §22.10(ii) statements are admitted. The coefficients were
-checked numerically (mpmath, 2026-10-25), also for complex `k`.
+## Main results
+
+* `jacobiSnk_isBigO_maclaurin`, `jacobiCnk_isBigO_maclaurin`, `jacobiDnk_isBigO_maclaurin`:
+  DLMF 22.10.1–22.10.3, as big-O statements at `z = 0`, for complex
+  `k ∈ jacobiModulusDomain`.
+* `jacobi_hasFPowerSeriesOnBall`: the full expansions converge in the disc `|z| < min(K, K')`
+  (prose of DLMF §22.10(i)), stated for `0 < k < 1` as the existence of a power series on that
+  ball.
+* `jacobiSnk_isBigO_small_modulus`, `jacobiCnk_isBigO_small_modulus`,
+  `jacobiDnk_isBigO_small_modulus`: the expansions DLMF 22.10.4–22.10.6 as `k → 0`.
+* `jacobiSnk_isBigO_small_comodulus`, `jacobiCnk_isBigO_small_comodulus`,
+  `jacobiDnk_isBigO_small_comodulus`: the expansions DLMF 22.10.7–22.10.9 as `k → 1`.
+
+## Implementation notes
+
+The expansions in `k` and `k'` are for fixed complex `z`, with `k` tending to its limit inside
+`jacobiModulusDomain`; in 22.10.7–22.10.9 `cosh z ≠ 0` is assumed (`sech z` appears).
+DLMF 22.10.1–22.10.3 are proved by bootstrapping the system `sn' = cn dn`, `cn' = -sn dn`,
+`dn' = -k² sn cn` against the Maclaurin polynomials, and the radius statement from the absence
+of poles in `|z| < K'`. The coefficients have been checked numerically (mpmath), also for
+complex `k`.
 -/
 
 @[expose] public section
@@ -39,7 +51,7 @@ variable {k : ℂ}
 
 /-- Bootstrapping the Maclaurin coefficients of a solution of the Jacobi system
 `s' = cd, c' = -sd, d' = -κsc` from polynomial approximations. -/
-lemma p3j_bootstrap {s c d S C D S' C' D' : ℂ → ℂ} {κ : ℂ}
+private lemma jacobiSystem_isBigO_of_approx {s c d S C D S' C' D' : ℂ → ℂ} {κ : ℂ}
     (hs : ∀ᶠ z in 𝓝 0, HasDerivAt s (c z * d z) z)
     (hc : ∀ᶠ z in 𝓝 0, HasDerivAt c (-(s z * d z)) z)
     (hd : ∀ᶠ z in 𝓝 0, HasDerivAt d (-(κ * s z * c z)) z)
@@ -70,12 +82,12 @@ lemma p3j_bootstrap {s c d S C D S' C' D' : ℂ → ℂ} {κ : ℂ}
   have z0s : es 0 = 0 := by simp [hes_def, h0s]
   have z0c : ec 0 = 0 := by simp [hec_def, h0c]
   have z0d : ed 0 = 0 := by simp [hed_def, h0d]
-  have bS := p3j_cont_isBigO_one (hS 0).continuousAt
-  have bC := p3j_cont_isBigO_one (hC 0).continuousAt
-  have bD := p3j_cont_isBigO_one (hD 0).continuousAt
-  have bes := p3j_cont_isBigO_one hes.self_of_nhds.continuousAt
-  have bec := p3j_cont_isBigO_one hec.self_of_nhds.continuousAt
-  have bed := p3j_cont_isBigO_one hed.self_of_nhds.continuousAt
+  have bS := isBigO_one_of_continuousAt (hS 0).continuousAt
+  have bC := isBigO_one_of_continuousAt (hC 0).continuousAt
+  have bD := isBigO_one_of_continuousAt (hD 0).continuousAt
+  have bes := isBigO_one_of_continuousAt hes.self_of_nhds.continuousAt
+  have bec := isBigO_one_of_continuousAt hec.self_of_nhds.continuousAt
+  have bed := isBigO_one_of_continuousAt hed.self_of_nhds.continuousAt
   have bk : (fun _ : ℂ => (-1 : ℂ)) =O[𝓝 0] fun _ => (1 : ℂ) := isBigO_const_const _ one_ne_zero _
   have bκ : (fun _ : ℂ => (-κ : ℂ)) =O[𝓝 0] fun _ => (1 : ℂ) := isBigO_const_const _ one_ne_zero _
   have P : ∀ j, j ≤ 8 → es =O[𝓝 0] (fun z => z ^ j) ∧ ec =O[𝓝 0] (fun z => z ^ j) ∧
@@ -86,29 +98,29 @@ lemma p3j_bootstrap {s c d S C D S' C' D' : ℂ → ℂ} {κ : ℂ}
     | succ j ih =>
       intro hj
       obtain ⟨h1, h2, h3⟩ := ih (by omega)
-      have r8 := hrs.trans (p3j_pow_isBigO_pow (a := 8) (b := j) (by omega))
-      have r7c := hrc.trans (p3j_pow_isBigO_pow (a := 7) (b := j) (by omega))
-      have r7d := hrd.trans (p3j_pow_isBigO_pow (a := 7) (b := j) (by omega))
-      refine ⟨p3j_isBigO_of_deriv hes z0s ?_, p3j_isBigO_of_deriv hec z0c ?_,
-        p3j_isBigO_of_deriv hed z0d ?_⟩
-      · exact ((r8.add (p3j_mul_one h3 bC)).add (p3j_mul_one h2 bD)).add (p3j_mul_one h3 bec)
-      · exact ((r7c.add (p3j_mul_one (p3j_mul_one h3 bS) bk)).add
-          (p3j_mul_one (p3j_mul_one h1 bD) bk)).add (p3j_mul_one (p3j_mul_one h3 bes) bk)
-      · exact ((r7d.add (p3j_mul_one (p3j_mul_one h2 bS) bκ)).add
-          (p3j_mul_one (p3j_mul_one h1 bC) bκ)).add (p3j_mul_one (p3j_mul_one h2 bes) bκ)
+      have r8 := hrs.trans (pow_isBigO_pow_of_le (a := 8) (b := j) (by omega))
+      have r7c := hrc.trans (pow_isBigO_pow_of_le (a := 7) (b := j) (by omega))
+      have r7d := hrd.trans (pow_isBigO_pow_of_le (a := 7) (b := j) (by omega))
+      refine ⟨isBigO_pow_succ_of_deriv_isBigO_pow hes z0s ?_, isBigO_pow_succ_of_deriv_isBigO_pow hec z0c ?_,
+        isBigO_pow_succ_of_deriv_isBigO_pow hed z0d ?_⟩
+      · exact ((r8.add (mul_isBigO_pow_of_isBigO_one h3 bC)).add (mul_isBigO_pow_of_isBigO_one h2 bD)).add (mul_isBigO_pow_of_isBigO_one h3 bec)
+      · exact ((r7c.add (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h3 bS) bk)).add
+          (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h1 bD) bk)).add (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h3 bes) bk)
+      · exact ((r7d.add (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h2 bS) bκ)).add
+          (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h1 bC) bκ)).add (mul_isBigO_pow_of_isBigO_one (mul_isBigO_pow_of_isBigO_one h2 bes) bκ)
   obtain ⟨h1, h2, h3⟩ := P 8 le_rfl
-  exact ⟨p3j_isBigO_of_deriv hes z0s
-    (((hrs.add (p3j_mul_one h3 bC)).add (p3j_mul_one h2 bD)).add (p3j_mul_one h3 bec)), h2, h3⟩
+  exact ⟨isBigO_pow_succ_of_deriv_isBigO_pow hes z0s
+    (((hrs.add (mul_isBigO_pow_of_isBigO_one h3 bC)).add (mul_isBigO_pow_of_isBigO_one h2 bD)).add (mul_isBigO_pow_of_isBigO_one h3 bec)), h2, h3⟩
 
 /-- Asymptotic bound with the indicated comparison function: `R =O[𝓝 0] fun z => z ^ n`. -/
-lemma p3j_isBigO_of_eq {R Q : ℂ → ℂ} {n : ℕ} (hQ : Continuous Q)
+private lemma isBigO_pow_of_eq_pow_mul {R Q : ℂ → ℂ} {n : ℕ} (hQ : Continuous Q)
     (h : ∀ z, R z = z ^ n * Q z) : R =O[𝓝 0] fun z => z ^ n := by
   rw [show R = fun z => Q z * z ^ n from funext fun z => by rw [h, mul_comm]]
-  exact p3j_mul_one (isBigO_refl _ _) (p3j_cont_isBigO_one hQ.continuousAt)
+  exact mul_isBigO_pow_of_isBigO_one (isBigO_refl _ _) (isBigO_one_of_continuousAt hQ.continuousAt)
 
 /-- The Maclaurin polynomials of `sn, cn, dn` (DLMF 22.10.1–22.10.3) approximate them to
 orders `z⁹, z⁸, z⁸`. -/
-lemma p3j_jacobi_maclaurin {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+private lemma jacobiSnCnDnk_sub_maclaurin_isBigO {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     (fun z => jacobiSnk z k - (z - (1 + k ^ 2) * z ^ 3 / 6 + (1 + 14 * k ^ 2 + k ^ 4) * z ^ 5 /
         120 - (1 + 135 * k ^ 2 + 135 * k ^ 4 + k ^ 6) * z ^ 7 / 5040)) =O[𝓝 0]
         (fun z => z ^ 9) ∧
@@ -116,11 +128,11 @@ lemma p3j_jacobi_maclaurin {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         (1 + 44 * k ^ 2 + 16 * k ^ 4) * z ^ 6 / 720)) =O[𝓝 0] (fun z => z ^ 8) ∧
       (fun z => jacobiDnk z k - (1 - k ^ 2 * z ^ 2 / 2 + k ^ 2 * (4 + k ^ 2) * z ^ 4 / 24 -
         k ^ 2 * (16 + 44 * k ^ 2 + k ^ 4) * z ^ 6 / 720)) =O[𝓝 0] (fun z => z ^ 8) := by
-  have hreg := p22R1_eventually_ne hk (p22R1_reg0 hk (q := .n) (by decide))
+  have hreg := eventually_jacobiLetterTheta_ne_zero hk (jacobiLetterTheta_jacobiZetak_zero_ne_zero hk (q := .n) (by decide))
   have hpow : ∀ (a : ℂ) (n : ℕ) (b : ℂ) (z : ℂ),
       HasDerivAt (fun z : ℂ => a * z ^ n / b) (a * (n * z ^ (n - 1)) / b) z :=
     fun a n b z => ((hasDerivAt_pow n z).const_mul a).div_const b
-  refine p3j_bootstrap (κ := k ^ 2)
+  refine jacobiSystem_isBigO_of_approx (κ := k ^ 2)
     (S' := fun z => 1 - (1 + k ^ 2) * (3 * z ^ 2) / 6 + (1 + 14 * k ^ 2 + k ^ 4) * (5 * z ^ 4) /
         120 - (1 + 135 * k ^ 2 + 135 * k ^ 4 + k ^ 6) * (7 * z ^ 6) / 5040)
     (C' := fun z => -(1 * (2 * z) / 2) + (1 + 4 * k ^ 2) * (4 * z ^ 3) / 24 -
@@ -149,16 +161,16 @@ lemma p3j_jacobi_maclaurin {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
       (hpow (k ^ 2 * (4 + k ^ 2)) 4 24 z)).sub (hpow (k ^ 2 * (16 + 44 * k ^ 2 + k ^ 4)) 6 720 z))
     convert this using 1
     simp
-  · refine p3j_isBigO_of_eq (Q := fun z => k^10*z^4/32400 + 187*k^8*z^4/129600 - k^8*z^2/864 +
+  · refine isBigO_pow_of_eq_pow_mul (Q := fun z => k^10*z^4/32400 + 187*k^8*z^4/129600 - k^8*z^2/864 +
       731*k^6*z^4/172800 - 19*k^6*z^2/1152 + 3*k^6/160 + 187*k^4*z^4/129600 - 19*k^4*z^2/1152 +
       29*k^4/320 + k^2*z^4/32400 - k^2*z^2/864 + 3*k^2/160) (by fun_prop) fun z => by ring
-  · refine p3j_isBigO_of_eq (Q := fun z => -k^12*z^6/3628800 - 179*k^10*z^6/3628800 +
+  · refine isBigO_pow_of_eq_pow_mul (Q := fun z => -k^12*z^6/3628800 - 179*k^10*z^6/3628800 +
       k^10*z^4/50400 - 6091*k^8*z^6/3628800 + 367*k^8*z^4/201600 - 41*k^8*z^2/60480 -
       8101*k^6*z^6/3628800 + 1301*k^6*z^4/100800 - 101*k^6*z^2/3360 + 4*k^6/315 -
       551*k^4*z^6/907200 + 509*k^4*z^4/67200 - 949*k^4*z^2/20160 + 19*k^4/105 -
       k^2*z^6/226800 + 11*k^2*z^4/50400 - 157*k^2*z^2/30240 + 17*k^2/210 + 1/5040)
       (by fun_prop) fun z => by ring
-  · refine p3j_isBigO_of_eq (Q := fun z => -k^12*z^6/226800 - 551*k^10*z^6/907200 +
+  · refine isBigO_pow_of_eq_pow_mul (Q := fun z => -k^12*z^6/226800 - 551*k^10*z^6/907200 +
       11*k^10*z^4/50400 - 8101*k^8*z^6/3628800 + 509*k^8*z^4/67200 - 157*k^8*z^2/30240 +
       k^8/5040 - 6091*k^6*z^6/3628800 + 1301*k^6*z^4/100800 - 949*k^6*z^2/20160 + 17*k^6/210 -
       179*k^4*z^6/3628800 + 367*k^4*z^4/201600 - 101*k^4*z^2/3360 + 19*k^4/105 -
@@ -166,7 +178,7 @@ lemma p3j_jacobi_maclaurin {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
       (by fun_prop) fun z => by ring
 
 /-- A function complex differentiable on an open disc has a power series on that disc. -/
-lemma p3j_exists_hasFPowerSeriesOnBall {f : ℂ → ℂ} {r : ℝ≥0∞} (hr : 0 < r)
+private lemma exists_hasFPowerSeriesOnBall_of_differentiableOn {f : ℂ → ℂ} {r : ℝ≥0∞} (hr : 0 < r)
     (hf : DifferentiableOn ℂ f (Metric.eball 0 r)) :
     ∃ p : FormalMultilinearSeries ℂ ℂ ℂ, HasFPowerSeriesOnBall f p 0 r := by
   have hsub : ∀ r' : ℝ≥0, (r' : ℝ≥0∞) < r → 0 < r' →
@@ -193,16 +205,16 @@ lemma p3j_exists_hasFPowerSeriesOnBall {f : ℂ → ℂ} {r : ℝ≥0∞} (hr : 
         rw [Metric.mem_eball, edist_zero_right]; exact hr1) }
 
 /-- For real `0 < k < 1`, `sn, cn, dn` have no pole in the disc `|z| < K'`. -/
-lemma p3j_reg_ball {κ : ℝ} (hk0 : 0 < κ) (hk1 : κ < 1) {z : ℂ}
+private lemma jacobiLetterTheta_n_ne_zero_of_norm_lt {κ : ℝ} (hk0 : 0 < κ) (hk1 : κ < 1) {z : ℂ}
     (hz : ‖z‖ < Real.compEllIntKm (1 - κ ^ 2)) :
     jacobiLetterTheta .n (jacobiZetak z κ) (jacobiTauk κ) ≠ 0 := by
-  have hk := p22R1_ofReal_mem hk0 hk1
+  have hk := ofReal_mem_jacobiModulusDomain hk0 hk1
   have hτ := jacobiTauk_im_pos hk
   have hK := compEllIntKk_ofReal (k := κ) (by nlinarith)
   have hKp := compEllIntKpk_ofReal (k := κ) (by positivity)
   have hKpos : 0 < Real.compEllIntKm (κ ^ 2) := Real.compEllIntKm_pos (by nlinarith)
   rw [jacobiLetterTheta]
-  refine div_ne_zero (fun h => ?_) (je22a_thetaFour_zero_ne_zero hτ)
+  refine div_ne_zero (fun h => ?_) (jacobiThetaFourTau_zero_ne_zero hτ)
   obtain ⟨m, n, hmn⟩ := ((DLMF.Theta.jacobiThetaTau_eq_zero_iff hτ _).2.2.2).mp h
   set Kr := Real.compEllIntKm (κ ^ 2)
   set Kp := Real.compEllIntKm (1 - κ ^ 2)
@@ -233,7 +245,7 @@ theorem jacobiSnk_isBigO_maclaurin (hk : k ∈ jacobiModulusDomain) :
     (fun z => jacobiSnk z k - (z - (1 + k ^ 2) * z ^ 3 / 6 + (1 + 14 * k ^ 2 + k ^ 4) * z ^ 5 /
         120 -
       (1 + 135 * k ^ 2 + 135 * k ^ 4 + k ^ 6) * z ^ 7 / 5040)) =O[𝓝 0] fun z => z ^ 9 := by
-  exact (p3j_jacobi_maclaurin hk).1
+  exact (jacobiSnCnDnk_sub_maclaurin_isBigO hk).1
 
 /-- DLMF 22.10.2: `cn(z,k) = 1 - z²/2! + (1 + 4k²) z⁴/4! - (1 + 44k² + 16k⁴) z⁶/6! + O(z⁸)`.
 -/
@@ -241,7 +253,7 @@ theorem jacobiSnk_isBigO_maclaurin (hk : k ∈ jacobiModulusDomain) :
 theorem jacobiCnk_isBigO_maclaurin (hk : k ∈ jacobiModulusDomain) :
     (fun z => jacobiCnk z k - (1 - z ^ 2 / 2 + (1 + 4 * k ^ 2) * z ^ 4 / 24 -
       (1 + 44 * k ^ 2 + 16 * k ^ 4) * z ^ 6 / 720)) =O[𝓝 0] fun z => z ^ 8 := by
-  exact (p3j_jacobi_maclaurin hk).2.1
+  exact (jacobiSnCnDnk_sub_maclaurin_isBigO hk).2.1
 
 /-- DLMF 22.10.3: `dn(z,k) = 1 - k² z²/2! + k²(4 + k²) z⁴/4! - k²(16 + 44k² + k⁴) z⁶/6! + O(z⁸)`.
 -/
@@ -249,7 +261,7 @@ theorem jacobiCnk_isBigO_maclaurin (hk : k ∈ jacobiModulusDomain) :
 theorem jacobiDnk_isBigO_maclaurin (hk : k ∈ jacobiModulusDomain) :
     (fun z => jacobiDnk z k - (1 - k ^ 2 * z ^ 2 / 2 + k ^ 2 * (4 + k ^ 2) * z ^ 4 / 24 -
       k ^ 2 * (16 + 44 * k ^ 2 + k ^ 4) * z ^ 6 / 720)) =O[𝓝 0] fun z => z ^ 8 := by
-  exact (p3j_jacobi_maclaurin hk).2.2
+  exact (jacobiSnCnDnk_sub_maclaurin_isBigO hk).2.2
 
 /-- DLMF §22.10(i), prose: the full Maclaurin expansions of `sn, cn, dn` converge for
 `|z| < min(K, K')`; stated for `0 < k < 1` as power series on the ball of that radius
@@ -264,23 +276,23 @@ theorem jacobi_hasFPowerSeriesOnBall {κ : ℝ} (hk0 : 0 < κ) (hk1 : κ < 1) :
       ∃ p : FormalMultilinearSeries ℂ ℂ ℂ, HasFPowerSeriesOnBall (fun z => jacobiDnk z κ) p 0 r :=
           by
   intro r
-  have hk := p22R1_ofReal_mem hk0 hk1
+  have hk := ofReal_mem_jacobiModulusDomain hk0 hk1
   have hr : 0 < r := ENNReal.ofReal_pos.mpr (lt_min (Real.compEllIntKm_pos (by nlinarith))
     (Real.compEllIntKm_pos (by nlinarith)))
   have hreg : ∀ z ∈ Metric.eball (0 : ℂ) r,
       jacobiLetterTheta .n (jacobiZetak z κ) (jacobiTauk κ) ≠ 0 := by
     intro z hz
-    refine p3j_reg_ball hk0 hk1 ?_
+    refine jacobiLetterTheta_n_ne_zero_of_norm_lt hk0 hk1 ?_
     rw [Metric.mem_eball, edist_zero_right, enorm_eq_nnnorm] at hz
     have h1 : (‖z‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖z‖ := by
       rw [ofReal_norm, enorm_eq_nnnorm]
     rw [h1, ENNReal.ofReal_lt_ofReal_iff_of_nonneg (norm_nonneg _)] at hz
     exact lt_of_lt_of_le hz (min_le_right _ _)
-  exact ⟨p3j_exists_hasFPowerSeriesOnBall hr fun z hz =>
+  exact ⟨exists_hasFPowerSeriesOnBall_of_differentiableOn hr fun z hz =>
       (hasDerivAt_jacobiSnk hk (hreg z hz)).differentiableAt.differentiableWithinAt,
-    p3j_exists_hasFPowerSeriesOnBall hr fun z hz =>
+    exists_hasFPowerSeriesOnBall_of_differentiableOn hr fun z hz =>
       (hasDerivAt_jacobiCnk hk (hreg z hz)).differentiableAt.differentiableWithinAt,
-    p3j_exists_hasFPowerSeriesOnBall hr fun z hz =>
+    exists_hasFPowerSeriesOnBall_of_differentiableOn hr fun z hz =>
       (hasDerivAt_jacobiDnk hk (hreg z hz)).differentiableAt.differentiableWithinAt⟩
 
 /-! ### §22.10(ii): Maclaurin series in `k` and `k'` -/

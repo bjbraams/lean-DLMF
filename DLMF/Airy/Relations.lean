@@ -9,8 +9,9 @@ public import DLMF.Airy.Relations.BesselRepresentations
 public import DLMF.Airy.Relations.InverseBesselRelations
 
 /-!
-# Complete branch-aware Bessel and confluent relations, DLMF §9.6
+# Airy functions and Bessel functions (DLMF §9.6)
 
-Statements acquired from the NIST DLMF, checked 2026-10-19.
-New statements are initially admitted; existing proved Airy results are retained.
+Representations of Airy functions by Bessel, Hankel, Kummer and Whittaker functions on the
+logarithmic plane, and the inverse relations expressing Bessel functions of order `±1/3`,
+`±2/3` through Airy functions.
 -/

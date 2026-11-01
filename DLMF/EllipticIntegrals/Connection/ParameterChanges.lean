@@ -8,12 +8,24 @@ module
 public import DLMF.EllipticIntegrals.Connection.ModulusChanges
 
 /-!
-# Hyperbolic substitutions and elliptic parameter changes
+# Imaginary argument and changes of parameter (DLMF §19.7(ii)–(iii))
 
-Hyperbolic amplitude substitutions and transformations of the third-kind parameter.
+The imaginary-argument (hyperbolic amplitude) transformation of Legendre's incomplete
+integrals and the three transformations of the third-kind parameter, stated for real data
+with Cauchy principal values. Here `c = csc²φ` and `R_C = symEllIntRC`.
 
-Source references and common attribution are retained in
-`DLMF.EllipticIntegrals.Connection`.
+## Main results
+
+* `incEllInt_imaginary_argument`: the imaginary-argument transformation with
+  `tan ψ = sinh φ`, for complex `k` (DLMF 19.7.7).
+* `incEllIntPik_add_first`, `incEllIntPik_add_second`, `incEllIntPik_add_third`: the
+  parameter changes of `Π(φ, α², k)` (DLMF 19.7.8, 19.7.9, 19.7.10).
+* `first_relation_omega_lt`: under `α²ω² = k²`, `α² > c` implies `ω² < c`
+  (DLMF §19.7(iii), prose).
+
+## References
+
+* NIST DLMF §19.7.
 -/
 
 @[expose] public noncomputable section
@@ -30,7 +42,7 @@ open DLMF.JacobiElliptic
 
 /-- Identity under the stated parameter and domain assumptions: `((r : ℂ) * z) ^ w = (r : ℂ) ^ w *
 z ^ w`. -/
-lemma p19lR1_mul_ofReal_cpow {r : ℝ} (hr : 0 < r) (z w : ℂ) :
+private lemma ofReal_mul_cpow_eq_of_pos {r : ℝ} (hr : 0 < r) (z w : ℂ) :
     ((r : ℂ) * z) ^ w = (r : ℂ) ^ w * z ^ w := by
   have hr' : (r : ℂ) ≠ 0 := by exact_mod_cast hr.ne'
   rcases eq_or_ne z 0 with rfl | hz
@@ -42,20 +54,20 @@ lemma p19lR1_mul_ofReal_cpow {r : ℝ} (hr : 0 < r) (z w : ℂ) :
     ring_nf
 
 /-- A segment integral along `[0, iφ]`. -/
-lemma p19lR1_segmentIntegral_I (f : ℂ → ℂ) (φ : ℝ) :
-    ei19a_segmentIntegral f (I * φ) = I * ∫ u in (0 : ℝ)..φ, f (I * u) := by
-  have h := ei19a_segmentIntegral_ofReal (fun z => I * f (I * z)) φ
+private lemma segmentIntegral_I_mul (f : ℂ → ℂ) (φ : ℝ) :
+    segmentIntegral f (I * φ) = I * ∫ u in (0 : ℝ)..φ, f (I * u) := by
+  have h := segmentIntegral_ofReal (fun z => I * f (I * z)) φ
   rw [intervalIntegral.integral_const_mul] at h
-  rw [← h, ei19a_segmentIntegral, ei19a_segmentIntegral]
+  rw [← h, segmentIntegral, segmentIntegral]
   congr 1; funext t; ring_nf
 
 /-- Identity under the stated parameter and domain assumptions: `Complex.sin (I * u) ^ 2 =
 -((Real.sinh u : ℝ) : ℂ) ^ 2`. -/
-lemma p19lR1_sin_I_sq (u : ℝ) : Complex.sin (I * u) ^ 2 = -((Real.sinh u : ℝ) : ℂ) ^ 2 := by
+private lemma sin_I_mul_sq (u : ℝ) : Complex.sin (I * u) ^ 2 = -((Real.sinh u : ℝ) : ℂ) ^ 2 := by
   rw [mul_comm, Complex.sin_mul_I, ofReal_sinh, mul_pow, I_sq]; ring
 
 /-- Substitution `θ = arctan (sinh u)`, `dθ = du / cosh u`. -/
-lemma p19lR1_subst_arctan_sinh {G : ℝ → ℂ} (hG : ContinuousOn G (Ioo (-(π / 2)) (π / 2)))
+private lemma integral_arctan_sinh_subst {G : ℝ → ℂ} (hG : ContinuousOn G (Ioo (-(π / 2)) (π / 2)))
     (φ : ℝ) :
     ∫ u in (0 : ℝ)..φ, ((Real.cosh u)⁻¹ : ℝ) • G (Real.arctan (Real.sinh u)) =
       ∫ θ in (0 : ℝ)..(Real.arctan (Real.sinh φ)), G θ := by
@@ -77,7 +89,7 @@ lemma p19lR1_subst_arctan_sinh {G : ℝ → ℂ} (hG : ContinuousOn G (Ioo (-(π
 
 /-- Identity under the stated parameter and domain assumptions: `Real.sin (Real.arctan (Real.sinh
 u)) = Real.sinh u / Real.cosh u ∧ Real.cos (Real.arctan (Real.sinh u)) = (Real.cosh u)⁻¹`. -/
-lemma p19lR1_sin_cos_arctan_sinh (u : ℝ) :
+private lemma sin_cos_arctan_sinh (u : ℝ) :
     Real.sin (Real.arctan (Real.sinh u)) = Real.sinh u / Real.cosh u ∧
       Real.cos (Real.arctan (Real.sinh u)) = (Real.cosh u)⁻¹ := by
   have hs : Real.sqrt (1 + Real.sinh u ^ 2) = Real.cosh u := by
@@ -86,10 +98,10 @@ lemma p19lR1_sin_cos_arctan_sinh (u : ℝ) :
   exact ⟨rfl, rfl⟩
 
 /-- Along the substitution, `1 - (1 - b) sin²θ = (1 + b sinh²u)/cosh²u`. -/
-lemma p19lR1_one_sub_arctan_sinh (b : ℂ) (u : ℝ) :
+private lemma one_sub_mul_sin_arctan_sinh_sq (b : ℂ) (u : ℝ) :
     1 - (1 - b) * (Real.sin (Real.arctan (Real.sinh u)) : ℂ) ^ 2 =
       ((((Real.cosh u) ^ 2)⁻¹ : ℝ) : ℂ) * (1 + b * ((Real.sinh u : ℝ) : ℂ) ^ 2) := by
-  rw [(p19lR1_sin_cos_arctan_sinh u).1]
+  rw [(sin_cos_arctan_sinh u).1]
   have hc : (Real.cosh u : ℂ) ≠ 0 := by exact_mod_cast (Real.cosh_pos u).ne'
   have h2 : (Real.cosh u : ℂ) ^ 2 = 1 + (Real.sinh u : ℂ) ^ 2 := by
     have := Real.cosh_sq' u; exact_mod_cast (by linarith : Real.cosh u ^ 2 = 1 + Real.sinh u ^ 2)
@@ -98,9 +110,9 @@ lemma p19lR1_one_sub_arctan_sinh (b : ℂ) (u : ℝ) :
   linear_combination h2
 
 /-- Formula under the stated hypotheses: `1 - (1 - b) * (Real.sin θ : ℂ) ^ 2 ∈ slitPlane`. -/
-lemma p19lR1_conv_mem {b : ℂ} (hb : b ∈ slitPlane) (θ : ℝ) :
+private lemma one_sub_one_sub_mul_sin_sq_mem_slitPlane {b : ℂ} (hb : b ∈ slitPlane) (θ : ℝ) :
     1 - (1 - b) * (Real.sin θ : ℂ) ^ 2 ∈ slitPlane := by
-  have := ei19a_one_sub_mul_mem_slitPlane (z := 1 - b) (by rw [sub_sub_cancel]; exact hb)
+  have := one_sub_mul_ofReal_mem_slitPlane (z := 1 - b) (by rw [sub_sub_cancel]; exact hb)
     (sq_nonneg (Real.sin θ)) (Real.sin_sq_le_one θ)
   convert this using 2; push_cast; ring
 
@@ -109,39 +121,39 @@ lemma p19lR1_conv_mem {b : ℂ} (hb : b ∈ slitPlane) (θ : ℝ) :
 ((Real.sinh u : ℝ) : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) ∧ (1 - (1 - b) * (Real.sin (Real.arctan
 (Real.sinh u)) : ℂ) ^ 2) ^ (1 / 2 : ℂ) = (Real.cosh u : ℂ)⁻¹ * (1 + b * ((Real.sinh u : ℝ) :
 ℂ) ^ 2) ^ (1 / 2 : ℂ)`. -/
-lemma p19lR1_cpow_arctan_sinh (b : ℂ) (u : ℝ) :
+private lemma cpow_one_sub_mul_sin_arctan_sinh_sq (b : ℂ) (u : ℝ) :
     (1 - (1 - b) * (Real.sin (Real.arctan (Real.sinh u)) : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) =
       (Real.cosh u : ℂ) * (1 + b * ((Real.sinh u : ℝ) : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) ∧
     (1 - (1 - b) * (Real.sin (Real.arctan (Real.sinh u)) : ℂ) ^ 2) ^ (1 / 2 : ℂ) =
       (Real.cosh u : ℂ)⁻¹ * (1 + b * ((Real.sinh u : ℝ) : ℂ) ^ 2) ^ (1 / 2 : ℂ) := by
   have hc := Real.cosh_pos u
-  rw [p19lR1_one_sub_arctan_sinh, p19lR1_mul_ofReal_cpow (by positivity),
-    p19lR1_mul_ofReal_cpow (by positivity), (p19lR1_inv_sq_cpow hc).1, (p19lR1_inv_sq_cpow hc).2]
+  rw [one_sub_mul_sin_arctan_sinh_sq, ofReal_mul_cpow_eq_of_pos (by positivity),
+    ofReal_mul_cpow_eq_of_pos (by positivity), (ofReal_inv_sq_cpow_half hc).1, (ofReal_inv_sq_cpow_half hc).2]
   exact ⟨rfl, rfl⟩
 
 /-- Identity under the stated parameter and domain assumptions: `incEllIntFk (I * φ) k = I *
 incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k)`. -/
-lemma p19lR1_imag_arg_F (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
+private lemma incEllIntFk_I_mul (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
     incEllIntFk (I * φ) k = I * incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) := by
-  rw [incEllIntFk, p19lR1_segmentIntegral_I, incEllIntFk_ofReal_eq_integral,
-    ei19a_jacobiComodulusk_sq]
+  rw [incEllIntFk, segmentIntegral_I_mul, incEllIntFk_ofReal_eq_integral,
+    jacobiComodulusk_sq_eq_one_sub_sq]
   congr 1
-  rw [← p19lR1_subst_arctan_sinh]
+  rw [← integral_arctan_sinh_subst]
   · refine intervalIntegral.integral_congr fun u _ => ?_
-    simp only [p19lR1_sin_I_sq, (p19lR1_cpow_arctan_sinh _ u).1, real_smul]
+    simp only [sin_I_mul_sq, (cpow_one_sub_mul_sin_arctan_sinh_sq _ u).1, real_smul]
     have hc : (Real.cosh u : ℂ) ≠ 0 := by exact_mod_cast (Real.cosh_pos u).ne'
     rw [ofReal_inv, ← mul_assoc, inv_mul_cancel₀ hc, one_mul]
     ring_nf
   · exact (continuous_iff_continuousAt.2 fun θ =>
-      (continuousAt_cpow_const (p19lR1_conv_mem hk θ)).comp
+      (continuousAt_cpow_const (one_sub_one_sub_mul_sin_sq_mem_slitPlane hk θ)).comp
         (f := fun θ : ℝ => 1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) (by fun_prop)).continuousOn
 
 /-- Nonvanishing under the stated hypotheses: `Real.cos θ ≠ 0`. -/
-lemma p19lR1_cos_ne_zero_of_mem {θ : ℝ} (h : θ ∈ Ioo (-(π / 2)) (π / 2)) : Real.cos θ ≠ 0 :=
+private lemma cos_ne_zero_of_mem_Ioo {θ : ℝ} (h : θ ∈ Ioo (-(π / 2)) (π / 2)) : Real.cos θ ≠ 0 :=
   (Real.cos_pos_of_mem_Ioo h).ne'
 
 /-- The stated relation follows from the given hypotheses: `uIcc 0 ψ ⊆ Ioo (-(π / 2)) (π / 2)`. -/
-lemma p19lR1_uIcc_sub_Ioo {ψ : ℝ} (h : ψ ∈ Ioo (-(π / 2)) (π / 2)) :
+private lemma uIcc_zero_subset_Ioo {ψ : ℝ} (h : ψ ∈ Ioo (-(π / 2)) (π / 2)) :
     uIcc 0 ψ ⊆ Ioo (-(π / 2)) (π / 2) := by
   intro x hx
   rcases le_total 0 ψ with h0 | h0
@@ -152,50 +164,50 @@ lemma p19lR1_uIcc_sub_Ioo {ψ : ℝ} (h : ψ ∈ Ioo (-(π / 2)) (π / 2)) :
 (incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) - incEllIntEk (Real.arctan
 (Real.sinh φ)) (jacobiComodulusk k) + Real.tan (Real.arctan (Real.sinh φ)) * (1 - (1 - k ^ 2)
 * (Real.sin (Real.arctan (Real.sinh φ)) : ℂ) ^ 2) ^ (1 / 2 : ℂ))`. -/
-lemma p19lR1_imag_arg_E (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
+private lemma incEllIntEk_I_mul (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
     incEllIntEk (I * φ) k = I * (incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) -
         incEllIntEk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) +
           Real.tan (Real.arctan (Real.sinh φ)) *
             (1 - (1 - k ^ 2) * (Real.sin (Real.arctan (Real.sinh φ)) : ℂ) ^ 2) ^ (1 / 2 : ℂ)) := by
   set ψ := Real.arctan (Real.sinh φ) with hψ
   set k' := jacobiComodulusk k with hk'
-  have hk'2 : k' ^ 2 = 1 - k ^ 2 := ei19a_jacobiComodulusk_sq k
+  have hk'2 : k' ^ 2 = 1 - k ^ 2 := jacobiComodulusk_sq_eq_one_sub_sq k
   have hk's : 1 - k' ^ 2 ∈ slitPlane := by rw [hk'2, sub_sub_cancel]; exact hk
   have hψI : ψ ∈ Ioo (-(π / 2)) (π / 2) :=
     ⟨Real.neg_pi_div_two_lt_arctan _, Real.arctan_lt_pi_div_two _⟩
-  have hsub := p19lR1_uIcc_sub_Ioo hψI
-  set G : ℝ → ℂ := fun θ => p19lR1_Δ k' θ / (Real.cos θ : ℂ) ^ 2 with hG
-  have hΔc := p19lR1_continuous_Δ hk's
+  have hsub := uIcc_zero_subset_Ioo hψI
+  set G : ℝ → ℂ := fun θ => ellDelta k' θ / (Real.cos θ : ℂ) ^ 2 with hG
+  have hΔc := continuous_ellDelta hk's
   have hGc : ContinuousOn G (Ioo (-(π / 2)) (π / 2)) := by
     refine hΔc.continuousOn.div (by fun_prop) fun θ hθ => ?_
-    exact pow_ne_zero _ (by exact_mod_cast p19lR1_cos_ne_zero_of_mem hθ)
+    exact pow_ne_zero _ (by exact_mod_cast cos_ne_zero_of_mem_Ioo hθ)
   -- the substitution
   have h1 : incEllIntEk (I * φ) k = I * ∫ θ in (0 : ℝ)..ψ, G θ := by
-    rw [incEllIntEk, p19lR1_segmentIntegral_I, ← p19lR1_subst_arctan_sinh hGc]
+    rw [incEllIntEk, segmentIntegral_I_mul, ← integral_arctan_sinh_subst hGc]
     congr 1
     refine intervalIntegral.integral_congr fun u _ => ?_
-    simp only [hG, p19lR1_Δ, hk'2, (p19lR1_cpow_arctan_sinh _ u).2, p19lR1_sin_I_sq, real_smul,
-      (p19lR1_sin_cos_arctan_sinh u).2]
+    simp only [hG, ellDelta, hk'2, (cpow_one_sub_mul_sin_arctan_sinh_sq _ u).2, sin_I_mul_sq, real_smul,
+      (sin_cos_arctan_sinh u).2]
     have hc0 : (Real.cosh u : ℂ) ≠ 0 := by exact_mod_cast (Real.cosh_pos u).ne'
     have e : (1 - k ^ 2 * -((Real.sinh u : ℝ) : ℂ) ^ 2) = 1 + k ^ 2 * ((Real.sinh u : ℝ) : ℂ) ^ 2 := by
       ring
     rw [e, ofReal_inv]
     field_simp
   -- the integration by parts identity
-  set D : ℝ → ℂ := fun θ => G θ - (p19lR1_Δ k' θ)⁻¹ + p19lR1_Δ k' θ with hD
+  set D : ℝ → ℂ := fun θ => G θ - (ellDelta k' θ)⁻¹ + ellDelta k' θ with hD
   have hDc : ContinuousOn D (uIcc 0 ψ) := by
     refine ((hGc.mono hsub).sub ?_).add hΔc.continuousOn
     exact (continuous_iff_continuousAt.2 fun θ =>
-      (hΔc.continuousAt).inv₀ (p19lR1_Δ_ne_zero hk's θ)).continuousOn
-  have hFTC : ∫ θ in (0 : ℝ)..ψ, D θ = Real.tan ψ * p19lR1_Δ k' ψ := by
+      (hΔc.continuousAt).inv₀ (ellDelta_ne_zero hk's θ)).continuousOn
+  have hFTC : ∫ θ in (0 : ℝ)..ψ, D θ = Real.tan ψ * ellDelta k' ψ := by
     have := intervalIntegral.integral_eq_sub_of_hasDerivAt
-      (f := fun θ : ℝ => (Real.tan θ : ℂ) * p19lR1_Δ k' θ) (f' := D) (a := 0) (b := ψ)
+      (f := fun θ : ℝ => (Real.tan θ : ℂ) * ellDelta k' θ) (f' := D) (a := 0) (b := ψ)
       (fun θ hθ => by
-        have hcos := p19lR1_cos_ne_zero_of_mem (hsub hθ)
-        have h := ((Real.hasDerivAt_tan hcos).ofReal_comp).mul (p19lR1_hasDerivAt_Δ hk's θ)
+        have hcos := cos_ne_zero_of_mem_Ioo (hsub hθ)
+        have h := ((Real.hasDerivAt_tan hcos).ofReal_comp).mul (hasDerivAt_ellDelta hk's θ)
         refine h.congr_deriv ?_
-        have hΔ := p19lR1_Δ_ne_zero hk's θ
-        have hΔ2 := p19lR1_Δ_sq k' θ
+        have hΔ := ellDelta_ne_zero hk's θ
+        have hΔ2 := ellDelta_sq k' θ
         have hc : (Real.cos θ : ℂ) ≠ 0 := by exact_mod_cast hcos
         simp only [hD, hG, Real.tan_eq_sin_div_cos, ofReal_div, ofReal_one, ofReal_pow]
         field_simp
@@ -203,22 +215,22 @@ lemma p19lR1_imag_arg_E (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
       (hDc.intervalIntegrable)
     rw [this]; simp [Real.tan_zero]
   have hGint : IntervalIntegrable G volume 0 ψ := (hGc.mono hsub).intervalIntegrable
-  have hΔint : IntervalIntegrable (p19lR1_Δ k') volume 0 ψ := hΔc.intervalIntegrable _ _
-  have hΔiint : IntervalIntegrable (fun θ => (p19lR1_Δ k' θ)⁻¹) volume 0 ψ :=
+  have hΔint : IntervalIntegrable (ellDelta k') volume 0 ψ := hΔc.intervalIntegrable _ _
+  have hΔiint : IntervalIntegrable (fun θ => (ellDelta k' θ)⁻¹) volume 0 ψ :=
     (continuous_iff_continuousAt.2 fun θ =>
-      (hΔc.continuousAt).inv₀ (p19lR1_Δ_ne_zero hk's θ)).intervalIntegrable _ _
+      (hΔc.continuousAt).inv₀ (ellDelta_ne_zero hk's θ)).intervalIntegrable _ _
   have hsplit : ∫ θ in (0 : ℝ)..ψ, G θ = (∫ θ in (0 : ℝ)..ψ, D θ) +
-      (∫ θ in (0 : ℝ)..ψ, (p19lR1_Δ k' θ)⁻¹) - ∫ θ in (0 : ℝ)..ψ, p19lR1_Δ k' θ := by
+      (∫ θ in (0 : ℝ)..ψ, (ellDelta k' θ)⁻¹) - ∫ θ in (0 : ℝ)..ψ, ellDelta k' θ := by
     rw [← intervalIntegral.integral_add ((hGint.sub hΔiint).add hΔint) hΔiint,
       ← intervalIntegral.integral_sub (((hGint.sub hΔiint).add hΔint).add hΔiint) hΔint]
     refine intervalIntegral.integral_congr fun θ _ => ?_
     ring
   rw [h1, hsplit, hFTC, incEllIntFk_ofReal_eq_integral, incEllIntEk_ofReal_eq_integral]
-  simp only [p19lR1_Δ, ← cpow_neg, hk'2]
+  simp only [ellDelta, ← cpow_neg, hk'2]
   ring
 
 /-- Formula under the stated hypotheses: `1 + b * x ∈ slitPlane`. -/
-lemma p19lR1_one_add_mem {b : ℂ} (hb : b ∈ slitPlane) {x : ℝ} (hx : 0 ≤ x) :
+private lemma one_add_mul_ofReal_mem_slitPlane {b : ℂ} (hb : b ∈ slitPlane) {x : ℝ} (hx : 0 ≤ x) :
     1 + b * x ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hb ⊢
   simp only [add_re, one_re, mul_re, ofReal_re, ofReal_im, mul_zero, sub_zero, add_im, one_im,
@@ -231,7 +243,7 @@ lemma p19lR1_one_add_mem {b : ℂ} (hb : b ∈ slitPlane) {x : ℝ} (hx : 0 ≤ 
 
 /-- Estimate under the stated parameter and domain assumptions: `∃ δ > 0, ∀ t ∈ Icc (0 : ℝ) 1, δ ≤
 ‖g (t * w)‖`. -/
-lemma p19lR1_path_bound {g : ℂ → ℂ} (hg : Continuous g) (w : ℂ)
+private lemma exists_norm_lower_on_segment {g : ℂ → ℂ} (hg : Continuous g) (w : ℂ)
     (hne : ∀ t ∈ Icc (0 : ℝ) 1, g (t * w) ≠ 0) :
     ∃ δ > 0, ∀ t ∈ Icc (0 : ℝ) 1, δ ≤ ‖g (t * w)‖ := by
   obtain ⟨t0, ht0, hmin⟩ := (isCompact_Icc (a := (0 : ℝ)) (b := 1)).exists_isMinOn
@@ -241,11 +253,11 @@ lemma p19lR1_path_bound {g : ℂ → ℂ} (hg : Continuous g) (w : ℂ)
 /-- Identity under the stated parameter and domain assumptions: `incEllIntPik ψ β k = ∫ θ in (0 :
 ℝ)..ψ, ((1 - β * (Real.sin θ : ℂ) ^ 2)⁻¹ * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 :
 ℂ)))`. -/
-lemma p19lR1_incEllIntPik_ofReal_slit (ψ : ℝ) {β : ℂ} (hβ : 1 - β ∈ slitPlane) (k : ℂ) :
+private lemma incEllIntPik_ofReal_eq_integral_of_slit (ψ : ℝ) {β : ℂ} (hβ : 1 - β ∈ slitPlane) (k : ℂ) :
     incEllIntPik ψ β k = ∫ θ in (0 : ℝ)..ψ, ((1 - β * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) := by
-  obtain ⟨δ, hδ, hb⟩ := p19lR1_exists_norm_lower_gen hβ
-  rw [incEllIntPik_eq_segmentIntegral (δ := δ) hδ, ei19a_segmentIntegral_ofReal]
+  obtain ⟨δ, hδ, hb⟩ := exists_le_norm_one_sub_mul_sin_sq hβ
+  rw [incEllIntPik_eq_segmentIntegral (δ := δ) hδ, segmentIntegral_ofReal]
   · simp only [← Complex.ofReal_sin]
   · intro t _
     have := hb (t * ψ)
@@ -254,33 +266,33 @@ lemma p19lR1_incEllIntPik_ofReal_slit (ψ : ℝ) {β : ℂ} (hβ : 1 - β ∈ sl
 /-- Identity under the stated parameter and domain assumptions: `incEllIntPik (I * φ) α2 k = I *
 (incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) - α2 * incEllIntPik (Real.arctan
 (Real.sinh φ)) (1 - α2) (jacobiComodulusk k)) / (1 - α2)`. -/
-lemma p19lR1_imag_arg_Pi (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ slitPlane) (hα : α2 ∈ slitPlane)
+private lemma incEllIntPik_I_mul (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ slitPlane) (hα : α2 ∈ slitPlane)
     (hα1 : α2 ≠ 1) :
     incEllIntPik (I * φ) α2 k = I * (incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) -
         α2 * incEllIntPik (Real.arctan (Real.sinh φ)) (1 - α2) (jacobiComodulusk k)) / (1 - α2) := by
   set ψ := Real.arctan (Real.sinh φ) with hψ
   set k' := jacobiComodulusk k with hk'
-  have hk'2 : k' ^ 2 = 1 - k ^ 2 := ei19a_jacobiComodulusk_sq k
+  have hk'2 : k' ^ 2 = 1 - k ^ 2 := jacobiComodulusk_sq_eq_one_sub_sq k
   have hα1' : (1 : ℂ) - α2 ≠ 0 := sub_ne_zero.2 (Ne.symm hα1)
   have hpath : ∀ u : ℝ, 1 - α2 * Complex.sin (I * u) ^ 2 =
       1 + α2 * (((Real.sinh u) ^ 2 : ℝ) : ℂ) := by
-    intro u; rw [p19lR1_sin_I_sq]; push_cast; ring
+    intro u; rw [sin_I_mul_sq]; push_cast; ring
   -- remove the principal value on the left
-  obtain ⟨δ, hδ, hb⟩ := p19lR1_path_bound (g := fun z => 1 - α2 * Complex.sin z ^ 2)
+  obtain ⟨δ, hδ, hb⟩ := exists_norm_lower_on_segment (g := fun z => 1 - α2 * Complex.sin z ^ 2)
     (by fun_prop) (I * φ) (fun t _ => by
       have : ((t : ℂ) * (I * φ)) = I * ((t * φ : ℝ) : ℂ) := by push_cast; ring
       simp only [this, hpath]
-      exact slitPlane_ne_zero (p19lR1_one_add_mem hα (sq_nonneg _)))
-  rw [incEllIntPik_eq_segmentIntegral hδ hb, p19lR1_segmentIntegral_I,
-    p19lR1_incEllIntPik_ofReal_slit ψ (by rw [sub_sub_cancel]; exact hα),
+      exact slitPlane_ne_zero (one_add_mul_ofReal_mem_slitPlane hα (sq_nonneg _)))
+  rw [incEllIntPik_eq_segmentIntegral hδ hb, segmentIntegral_I_mul,
+    incEllIntPik_ofReal_eq_integral_of_slit ψ (by rw [sub_sub_cancel]; exact hα),
     incEllIntFk_ofReal_eq_integral]
   set P : ℝ → ℂ := fun θ => 1 - (1 - α2) * (Real.sin θ : ℂ) ^ 2 with hP
-  have hPne : ∀ θ, P θ ≠ 0 := fun θ => slitPlane_ne_zero (p19lR1_conv_mem hα θ)
+  have hPne : ∀ θ, P θ ≠ 0 := fun θ => slitPlane_ne_zero (one_sub_one_sub_mul_sin_sq_mem_slitPlane hα θ)
   set H : ℝ → ℂ := fun θ => (Real.cos θ : ℂ) ^ 2 * (P θ)⁻¹ *
     (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) with hH
   have hQc : Continuous fun θ : ℝ => (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) :=
     continuous_iff_continuousAt.2 fun θ =>
-      (continuousAt_cpow_const (p19lR1_conv_mem hk θ)).comp
+      (continuousAt_cpow_const (one_sub_one_sub_mul_sin_sq_mem_slitPlane hk θ)).comp
         (f := fun θ : ℝ => 1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) (by fun_prop)
   have hPic : Continuous fun θ => (P θ)⁻¹ :=
     continuous_iff_continuousAt.2 fun θ => ((by fun_prop : Continuous P).continuousAt).inv₀ (hPne θ)
@@ -288,17 +300,17 @@ lemma p19lR1_imag_arg_Pi (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ slitPlane) (h�
     rw [hH]; exact ((by fun_prop : Continuous fun θ : ℝ => (Real.cos θ : ℂ) ^ 2).mul hPic).mul hQc
   have h1 : (∫ u in (0 : ℝ)..φ, (1 - α2 * Complex.sin (I * u) ^ 2)⁻¹ *
       (1 - k ^ 2 * Complex.sin (I * u) ^ 2) ^ (-(1 / 2 : ℂ))) = ∫ θ in (0 : ℝ)..ψ, H θ := by
-    rw [← p19lR1_subst_arctan_sinh hHc.continuousOn]
+    rw [← integral_arctan_sinh_subst hHc.continuousOn]
     refine intervalIntegral.integral_congr fun u _ => ?_
     have hPu : P (Real.arctan (Real.sinh u)) =
         ((((Real.cosh u) ^ 2)⁻¹ : ℝ) : ℂ) * (1 + α2 * ((Real.sinh u : ℝ) : ℂ) ^ 2) :=
-      p19lR1_one_sub_arctan_sinh α2 u
-    simp only [hH, hPu, (p19lR1_cpow_arctan_sinh _ u).1, (p19lR1_sin_cos_arctan_sinh u).2,
-      real_smul, p19lR1_sin_I_sq]
+      one_sub_mul_sin_arctan_sinh_sq α2 u
+    simp only [hH, hPu, (cpow_one_sub_mul_sin_arctan_sinh_sq _ u).1, (sin_cos_arctan_sinh u).2,
+      real_smul, sin_I_mul_sq]
     have hc0 : (Real.cosh u : ℂ) ≠ 0 := by exact_mod_cast (Real.cosh_pos u).ne'
     have hA : (1 + α2 * ((Real.sinh u : ℝ) : ℂ) ^ 2) ≠ 0 :=
       slitPlane_ne_zero (by
-        have := p19lR1_one_add_mem hα (sq_nonneg (Real.sinh u)); push_cast at this ⊢; exact this)
+        have := one_add_mul_ofReal_mem_slitPlane hα (sq_nonneg (Real.sinh u)); push_cast at this ⊢; exact this)
     have e : (1 - k ^ 2 * -((Real.sinh u : ℝ) : ℂ) ^ 2) = 1 + k ^ 2 * ((Real.sinh u : ℝ) : ℂ) ^ 2 := by
       ring
     have e2 : (1 - α2 * -((Real.sinh u : ℝ) : ℂ) ^ 2) =
@@ -343,7 +355,7 @@ theorem incEllInt_imaginary_argument (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ sl
           Real.tan ψ * (1 - (1 - k ^ 2) * (Real.sin ψ : ℂ) ^ 2) ^ (1 / 2 : ℂ)) ∧
       incEllIntPik (I * φ) α2 k = I * (incEllIntFk ψ (jacobiComodulusk k) -
         α2 * incEllIntPik ψ (1 - α2) (jacobiComodulusk k)) / (1 - α2) :=
-  ⟨p19lR1_imag_arg_F φ hk, p19lR1_imag_arg_E φ hk, p19lR1_imag_arg_Pi φ hk hα hα1⟩
+  ⟨incEllIntFk_I_mul φ hk, incEllIntEk_I_mul φ hk, incEllIntPik_I_mul φ hk hα hα1⟩
 
 /-! ### §19.7(iii) Change of parameter of `Π(φ, α², k)` -/
 

@@ -14,14 +14,54 @@ public import TauCeti.Topology.Covering.Proper
 /-!
 # Uniform incomplete-Gamma expansions and inversion, DLMF §8.12
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-The inverse continues to the full Maclaurin disk through Mathlib's covering-space
-lifting theorem and the Tau Ceti contributors' proper local-homeomorphism criterion
-(`TauCeti.Topology.Covering.Proper`). Compact sublevel estimates keep its preimages
-inside the zero-free strip. The local inverse uses Mathlib's analytic inverse-function
-theorem, and its series uses `Complex.hasSum_taylorSeries_on_ball`.
-Uniform remainder estimates and further coefficient statements remain admitted.
+Temme's uniform asymptotic expansions of the incomplete Gamma functions for large parameter,
+in terms of the complementary error function and the saddle-point coordinate `η`, together
+with the coefficient recursions, Paris's transition expansion and the inversion of `Q(a,x)`
+(DLMF §8.12).
+
+## Main definitions
+
+* `gammaScaled`: the scaled Gamma function `Γ*` of DLMF 5.11.3; `gammaStirlingCoeff`: the
+  Stirling coefficients `g_k`.
+* `gammaUniformEtaOnLog`: `η` on the logarithmic `λ`-plane, normalized by `η ∼ λ - 1` at
+  `λ = 1` (DLMF 8.12.1).
+* `gammaUniformS`, `gammaUniformT`: the exact remainders `S` and `T` (DLMF 8.12.4).
+* `gammaUniformC`: the uniform coefficients `c_k(η)` (DLMF 8.12.9–8.12.10), with removable
+  singularities filled by limits at `w = 0`.
+* `gammaUniformFilter`: the uniform large-`a` filter with bounded arguments of `a` and `λ`.
+* `gammaUniformInverseLog`, `gammaUniformAlpha`, `gammaUniformD`: the inverse of `η`, the
+  inverse series coefficients `α_n` and the Maclaurin coefficients `d_{k,n}`.
+* `gammaParisD`, `gammaParisA`, `gammaParisB`: Paris's transition function `d(χ)` and
+  coefficients `A_k(χ)`, `B_k(χ)` (DLMF 8.12.19).
+* `gammaQInverse`: the inverse of `Q(a,·)`, including `x = ∞` at `q = 0` (DLMF 8.12.21).
+
+## Main results
+
+* `gammaUniformEta_equation`, `gammaUniformEta_derivative`, `gammaUniformEta_normalization`:
+  DLMF 8.12.1 and 8.12.2.
+* `gammaUniformP_identity`, `gammaUniformQ_negative_identity`,
+  `gammaUniform_scIncGamma_identity`: the exact representations DLMF 8.12.3, 8.12.5 and 8.12.6.
+* `gammaUniformS_uniform_expansion`, `gammaUniformT_uniform_expansion`: the uniform expansions
+  DLMF 8.12.7 and 8.12.8.
+* `gammaUniformC_first`: DLMF 8.12.9.
+* `gammaUniformC_maclaurin`, `gammaUniformD_recurrence`, `gammaUniformInverseLog_spec`,
+  `gammaUniformAlpha_hasSum`: DLMF 8.12.11–8.12.13.
+* `gammaUniformAlpha_printed`, `gammaUniformC_at_zero_printed`: the printed coefficients of
+  DLMF 8.12.14 and 8.12.17.
+* `normIncGammaQ_diagonal_uniform_asymptotic`, `normIncGammaQ_negative_diagonal_asymptotic`:
+  DLMF 8.12.15 and 8.12.16.
+* `gammaParis_uniform_expansion`, `gammaParis_printed`: DLMF 8.12.18 and 8.12.20.
+* `gammaQInverse_spec`, `gammaQInverse_median_asymptotic`: DLMF 8.12.21 and 8.12.22.
+
+## Implementation notes
+
+The analytic inverse of `η` near zero comes from Mathlib's analytic inverse-function theorem,
+and its series from `Complex.hasSum_taylorSeries_on_ball`. It continues to the full Maclaurin
+disk through Mathlib's covering-space lifting theorem and TauCeti's proper
+local-homeomorphism criterion (`TauCeti.Topology.Covering.Proper`); compact sublevel estimates
+keep its preimages inside the zero-free strip `|Im w| < 2π`. In DLMF 8.12.5 the reflection
+formula cancels the quotient by `sin(πa)`, so integral `a` is included. Uniformity in
+DLMF 8.12.18 is for bounded transition variable `χ` and closed right-half-plane sectors.
 -/
 
 @[expose] public noncomputable section
@@ -707,7 +747,7 @@ theorem gammaInv_boundary_norm {w : ℂ} (hw : |w.im|=2*π) :
   simpa [Complex.exp_im, hsin, hw] using hi
 
 /-- A sublevel set below the first critical image stays compactly inside the strip. -/
-theorem gammaInv_compact_sublevel {M : ℝ} (_hM : 0 ≤ M) (hMπ : M < 2*π) :
+theorem gammaInv_compact_sublevel {M : ℝ} (hMπ : M < 2*π) :
     IsCompact {w : ℂ | |w.im| ≤ 2*π ∧ ‖exp w-1-w‖ ≤ M} ∧
       {w : ℂ | |w.im| ≤ 2*π ∧ ‖exp w-1-w‖ ≤ M} ⊆ incG_strip := by
   have hc : IsClosed {w : ℂ | |w.im| ≤ 2*π ∧ ‖exp w-1-w‖ ≤ M} :=
@@ -740,7 +780,7 @@ theorem gammaInv_compact_preimage {K : Set ℂ}
     have hn := norm_nonneg η₀
     dsimp [M]; nlinarith
   let C : Set ℂ := {w : ℂ | |w.im| ≤ 2*π ∧ ‖exp w-1-w‖ ≤ M}
-  obtain ⟨hCc, hCs⟩ := gammaInv_compact_sublevel hM hMπ
+  obtain ⟨hCc, hCs⟩ := gammaInv_compact_sublevel hMπ
   let S : Set ℂ := incG_strip ∩ gammaUniformEtaOnLog ⁻¹' K
   have hSC : S ⊆ C := by
     intro w hw

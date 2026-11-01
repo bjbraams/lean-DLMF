@@ -10,10 +10,28 @@ public import DLMF.Legendre.Zeros.FerrersAndReal
 /-!
 # Exterior zeros of associated Legendre functions
 
-Exterior zero counts and nonvanishing criteria obtained from the self-adjoint Legendre equation.
+Zeros of `P^μ_ν(x)` on `(1, ∞)` for real `ν ≥ -1/2` and `μ` (DLMF §14.16(iii)), obtained from the
+self-adjoint Legendre equation by comparison with the positive solutions `P^{-m}_ν` near `1` and
+`𝑸^μ_ν` at infinity.
 
-Source references and common attribution are retained in
-`DLMF.Legendre.Zeros`.
+## Main results
+
+* `associatedP_zero_count`: a nonzero `P^μ_ν` has exactly one zero in `(1, ∞)` when
+  `AssociatedPOneZero ν μ` holds and none otherwise (DLMF §14.16(iii)).
+* `lzero_oneZero_iff`: `AssociatedPOneZero ν μ` holds iff `μ > 0` is not an integer and
+  `sin(μπ)/Γ(ν-μ+1) < 0`.
+* `lzero_ext_count`: a function with a nonzero constant Wronskian against a positive solution
+  has one or no zeros on `(1, ∞)`, according to its signs near `1` and at infinity.
+* `lzero_olverQ_pos_bound`: positivity of `𝑸^μ_ν` on `(1, ∞)` and the bound
+  `(x²-1)(𝑸^μ_ν)² = O(x)` at infinity.
+* `lzero_assocP_near_one`: `P^{-m}_ν` (`m ≥ 0`) is positive near `1⁺`, with
+  `(x²-1)(P^{-m}_ν)² = O(x - 1)`.
+
+## Implementation notes
+
+`AssociatedPOneZero` is defined in `DLMF.Legendre.Zeros.FerrersAndReal`; it encodes the rule of
+DLMF §14.16(iii) as corrected there (case (b) requires `μ > 0`). Helper names carry the prefix
+`lzero_`.
 -/
 
 @[expose] public noncomputable section

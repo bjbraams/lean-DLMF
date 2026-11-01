@@ -14,6 +14,11 @@ public import Mathlib.MeasureTheory.Measure.Haar.Unique
 
 The forward and inverse Fourier pairings follow from Mathlib's vector-valued
 Fubini theorem `VectorFourier.integral_bilin_fourierIntegral_eq_flip`.
+
+## Main results
+
+* `integral_fourier_mul_eq_flip`: `∫ (𝓕 f) g = ∫ f (𝓕 g)` for integrable `f`, `g`.
+* `integral_fourierInv_mul_eq_flip`: the same for the inverse Fourier transform.
 -/
 
 @[expose] public noncomputable section

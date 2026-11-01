@@ -22,6 +22,18 @@ The alternating analogue of the Euler–Maclaurin formula (Temme, *Special Funct
 with `c₀ = 1`, `cⱼ = (-1)^{j+1} Eⱼ(0)/j!` for `j ≥ 1`, and the antiperiodic Euler function
 `Ẽₖ(x) = (-1)^{⌊x⌋} Eₖ(x - ⌊x⌋)`. Since `Eⱼ(0) = 0` for even `j ≥ 2`, `cⱼ = Eⱼ(0)/j!`.
 
+## Main definitions
+
+* `antiperiodicEuler`: the antiperiodic Euler function `Ẽₖ` (DLMF §24.2(iii)).
+
+## Main results
+
+* `integral_eulerFun_sub_smul_deriv`: integration by parts against a shifted Euler polynomial.
+* `two_smul_eq_sum_eulerFun_add`: the one-interval Boole identity.
+* `two_smul_sum_range_neg_one_pow_smul`: Boole's summation formula.
+
+## Implementation notes
+
 The proof integrates by parts on `[a, a+1]` against `Eⱼ(x - a)`, using `Eⱼ' = j Eⱼ₋₁` and
 `Eⱼ(1) = -Eⱼ(0)` for `j ≥ 1`, and sums with alternating signs, which telescopes.
 -/

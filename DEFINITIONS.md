@@ -913,17 +913,17 @@ Traversal: all §§17.1–17.19 checked; no heading contains “Definition” or
   recurrence definition `DLMF.QSeries.qBinom` in
   [QBinomial](DLMF/QSeries/Basic/Calculus.lean#L22) and integer-top extension
   `DLMF.QHypergeometric.qBinomialInt` in
-  [Calculus](DLMF/QHypergeometric/Calculus.lean#L71).
+  [QBinomial](DLMF/QHypergeometric/Calculus/QBinomial.lean#L43).
 - **q-derivative and iterated q-derivative**, [17.2.41–42](https://dlmf.nist.gov/17.2.E41):
   `DLMF.QSeries.qDeriv` in [QCalculus](DLMF/QSeries/Basic/Calculus.lean#L28)
   is the raw quotient; `DLMF.QHypergeometric.qDerivExtended` and
-  `qDerivIterate` in [Calculus](DLMF/QHypergeometric/Calculus.lean#L38)
+  `qDerivIterate` in [QDerivative](DLMF/QHypergeometric/Calculus/QDerivative.lean#L41)
   additionally supply the ordinary derivative at zero.
 - **Jackson q-integrals**, [17.2.45–48](https://dlmf.nist.gov/17.2.E45):
   `DLMF.QSeries.jacksonIntegral` in [Pochhammer](DLMF/QSeries/Basic/Pochhammer.lean#L35),
   and `DLMF.QHypergeometric.jacksonBetween`, `jacksonBilateral`,
   `HasNaturalJacksonIntegral`, `HasNaturalJacksonBilateral` in
-  [Calculus](DLMF/QHypergeometric/Calculus.lean#L45).
+  [JacksonIntegral](DLMF/QHypergeometric/Calculus/JacksonIntegral.lean#L40).
   The predicates retain convergence information separately from totalized sums.
 - **Basic unilateral and bilateral hypergeometric series**,
   [17.4.1](https://dlmf.nist.gov/17.4.E1), [17.4.3](https://dlmf.nist.gov/17.4.E3):
@@ -1343,7 +1343,7 @@ Traversal: all §§23.1–23.24 checked; matching sections are §23.2 and §23.1
   [ModularFunctions](DLMF/Weierstrass/ModularFunctions.lean#L112).
   J uses DLMF's normalization, so the classical j-invariant has an extra
   factor 1728. `DLMFMathlib`'s `p3wJ` in
-  [P3wJSurjective](DLMFMathlib/NumberTheory/ModularForms/P3wJSurjective.lean#L33)
+  [KleinJSurjective](DLMFMathlib/NumberTheory/ModularForms/KleinJSurjective.lean#L33)
   is an independent Eisenstein-series quotient with that same J normalization.
 - **Dedekind eta and θ₁ derivative**, [23.15.8–9](https://dlmf.nist.gov/23.15.E8):
   the derivative is `DLMF.Theta.jacobiThetaOneDerivNullTau`; Mathlib's
@@ -1415,7 +1415,7 @@ Traversal: all §§25.1–25.21 checked; matching headings are §25.2
 
 - **Hurwitz ζ(s,a)**, [25.11.1](https://dlmf.nist.gov/25.11.E1):
   `DLMF.Confluent.hurwitzZetaComplex` in
-  [S25bHurwitzCore](DLMF/Zeta/S25bHurwitzCore.lean#L431), a complex-a
+  [HurwitzEulerMaclaurin](DLMF/Zeta/HurwitzEulerMaclaurin.lean#L431), a complex-a
   Euler–Maclaurin limit using principal powers. Mathlib `hurwitzZeta` in
   [HurwitzZeta](.lake/packages/mathlib/Mathlib/NumberTheory/LSeries/HurwitzZeta.lean#L53)
   has a `UnitAddCircle` parameter; comparison with DLMF's positive real a
@@ -1432,7 +1432,7 @@ Traversal: all §§25.1–25.21 checked; matching headings are §25.2
   on the cut it retains the totalized series, which does not encode DLMF's
   two boundary values. A separate actual integral construction
   `q25b_lerchInt` and continuation predicate `Q25bIsLerchCont` occur in
-  [Q25bLerchContinuation](DLMF/Zeta/Q25bLerchContinuation.lean#L125).
+  [LerchContinuation](DLMF/Zeta/LerchContinuation.lean#L125).
   Lerch's historical K notation is an exponential-argument specialization,
   without a separate local function.
 - **Referenced polylogarithm**, [25.14.3](https://dlmf.nist.gov/25.14.E3),
@@ -2163,7 +2163,8 @@ and normalization are recorded in
   interval integrals of the definition subsection are bridge theorems
   `multivariateGamma_eq_integral`, `multivariateGammaVec_eq_integral`,
   `multivariateBeta_eq_integral` in
-  [GammaBeta](DLMF/MatrixArgument/GammaBeta.lean).
+  [GammaIntegrals](DLMF/MatrixArgument/GammaBeta/GammaIntegrals.lean) and
+  [BetaIntegrals](DLMF/MatrixArgument/GammaBeta/BetaIntegrals.lean).
   The independent real product `TauCeti.multivariateGamma` is in
   [TauCeti Basic](.lake/packages/TauCeti/TauCeti/Analysis/SpecialFunctions/MultivariateGamma/Basic.lean#L64),
   with a real integral theorem in

@@ -8,13 +8,34 @@ module
 public import DLMF.ParabolicCylinder.UniformLG2.PositiveParameterEstimates
 
 /-!
-# Algebra of reciprocal-power cylinder expansions
+# Algebra of reciprocal-power expansions for parabolic cylinder functions
 
-Cauchy products, reciprocal series and normalizer expansions for the uniform cylinder
-asymptotics.
+This file develops asymptotic expansions in reciprocal powers (Cauchy products, reciprocals,
+uniqueness and Borel's lemma) and uses them to identify the normalizer of the uniform
+expansion DLMF 12.10.3 of `U(a,z)` for negative parameter.
 
-Source references and common attribution are retained in
-`DLMF.ParabolicCylinder.UniformLG2`.
+## Main definitions
+
+* `PcfLG2HasExp`: the expansion `f(u) ∼ ∑ a_s u^{-s}` as `u → ∞`.
+* `pcfLG2_trunc`, `pcfLG2_cauchy`, `pcfLG2_tw`, `pcfLG2_delta`: truncation polynomials, the
+  Cauchy product, the sign twist `a_n ↦ (-1)^n a_n` and the unit sequence.
+* `pcfLG2_Rf`: the normalized Gamma ratio `Γ(1/2 + u/2)/(√(2π) e^{-u/2} (u/2)^{u/2})`.
+
+## Main results
+
+* `PcfLG2HasExp.unique`, `PcfLG2HasExp.mul`, `PcfLG2HasExp.recip`: uniqueness, products and
+  reciprocals of expansions.
+* `pcfLG2_exists_HasExp`: Borel's lemma for real coefficients.
+* `pcfLG2_gamma_identity`: the normalizer identity in formal form.
+* `pcf_negative_parameter_uniform_U_normalizer`: DLMF 12.10.3 with a normalizer satisfying
+  DLMF 12.10.14.
+
+## Implementation notes
+
+Comparing the limits of `U` at `+∞` (DLMF 12.9.1) and at `-∞` (DLMF 12.2.15 with
+DLMF 12.9.1–12.9.2) gives the formal identity `(∑ γ_j (u/2)^{-j})(∑ c_s u^{-s}) =
+∑ (-1)^s c_s u^{-s}`, where `c_s` is the coefficient of `t^{3s}` in `u_s`. Since the even
+`c_s`, `s ≥ 2`, vanish, this yields DLMF 12.10.14 for the normalizer of DLMF 12.10.3.
 -/
 
 @[expose] public noncomputable section
@@ -50,7 +71,7 @@ def pcfLG2_delta (n : ℕ) : ℂ := if n = 0 then 1 else 0
 
 /-- Formula under the stated hypotheses: `(pcfLG2_trunc N a).eval ((u:ℂ)⁻¹) = ∑ s ∈ Finset.range
 N, a s / (u:ℂ)^s`. -/
-lemma pcfLG2_trunc_eval (N : ℕ) (a : ℕ → ℂ) {u : ℝ} (_hu : u ≠ 0) :
+lemma pcfLG2_trunc_eval (N : ℕ) (a : ℕ → ℂ) {u : ℝ} :
     (pcfLG2_trunc N a).eval ((u:ℂ)⁻¹) = ∑ s ∈ Finset.range N, a s / (u:ℂ)^s := by
   rw [pcfLG2_trunc, eval_finsetSum]
   refine Finset.sum_congr rfl fun s _ => ?_
@@ -94,7 +115,7 @@ lemma pcfLG2_trunc_isBigO_one (N : ℕ) (a : ℕ → ℂ) :
   refine (((pcfLG2_trunc N a).continuous.tendsto 0).comp h1).isBigO_one ℂ |>.congr' ?_
     EventuallyEq.rfl
   filter_upwards [eventually_ne_atTop 0] with u hu
-  exact pcfLG2_trunc_eval N a hu
+  exact pcfLG2_trunc_eval N a
 
 /-- An expansion gives boundedness. -/
 theorem PcfLG2HasExp.isBigO_one {f : ℝ → ℂ} {a : ℕ → ℂ} (h : PcfLG2HasExp f a) :
@@ -130,7 +151,7 @@ theorem PcfLG2HasExp.mul {f g : ℝ → ℂ} {a b : ℕ → ℂ} (ha : PcfLG2Has
     simpa only [one_mul] using (pcfLG2_trunc_isBigO_one N a).mul (hb N)
   refine ((h1.add h2).add h3).congr' ?_ ?_
   · filter_upwards [eventually_ne_atTop 0] with u hu
-    simp only [eval_sub, eval_mul, pcfLG2_trunc_eval _ _ hu]
+    simp only [eval_sub, eval_mul, pcfLG2_trunc_eval _ _]
     ring
   · filter_upwards with u; ring
 
@@ -173,7 +194,7 @@ theorem PcfLG2HasExp.recip {f : ℝ → ℂ} {a d : ℕ → ℂ} (ha : PcfLG2Has
     simpa only [one_mul] using (hf.mul (h1.add h3)).neg_left
   refine (hk.congr' ?_ ?_)
   · filter_upwards [eventually_ne_atTop 0, hf0] with u hu hfu
-    simp only [eval_sub, eval_mul, eval_one, pcfLG2_trunc_eval _ _ hu]
+    simp only [eval_sub, eval_mul, eval_one, pcfLG2_trunc_eval _ _]
     field_simp
     ring
   · filter_upwards with u; ring
@@ -491,7 +512,7 @@ lemma pcfLG2_recip_sq {G : ℝ → ℂ} {a d : ℕ → ℂ} (had : pcfLG2_cauchy
   have hT : ∀ (b : ℕ → ℂ) (K : ℕ) (μ : ℝ), μ ≠ 0 →
       (pcfLG2_trunc K b).eval (((μ^2:ℝ):ℂ)⁻¹) = ∑ s ∈ Finset.range K, b s / (μ:ℂ)^(2*s) := by
     intro b K μ hμ
-    rw [pcfLG2_trunc_eval K b (by positivity)]
+    rw [pcfLG2_trunc_eval K b]
     refine Finset.sum_congr rfl fun s _ => ?_
     push_cast; rw [pow_mul]
   have hz : ∀ K : ℕ, ((fun u : ℝ => (u:ℂ)^(-(K:ℤ))) ∘ fun μ : ℝ => μ^2) =ᶠ[atTop]

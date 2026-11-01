@@ -9,12 +9,19 @@ public import DLMFMathlib.Analysis.SpecialFunctions.ChebyshevSeries
 public import DLMF.ParabolicCylinder.ElementaryProperties
 
 /-!
-# Cylinder Chebyshev-series existence claims
+# Chebyshev-series expansions of parabolic cylinder functions (DLMF §12.20)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+DLMF §12.20 asserts that `U(a,x)` and `V(a,x)` can be computed from Chebyshev expansions on
+compact intervals and, for the recessive solution, on a compactified half-line. This file
+proves the existence of such expansions; the coefficients and the degree are not supplied by
+the source.
+
+## Main results
+
+* `pcfU_chebyshev_compact`, `pcfV_chebyshev_compact`: summable Chebyshev expansions of
+  `U(a,x)` and `V(a,x)` on `[0, λ]`.
+* `pcfU_chebyshev_infinite`: a summable Chebyshev expansion of `U(a,x)` in `1 - 2λ/x` on
+  `[λ, ∞)`.
 -/
 
 @[expose] public noncomputable section

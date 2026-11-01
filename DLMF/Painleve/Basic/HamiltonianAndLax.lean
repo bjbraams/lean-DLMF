@@ -26,6 +26,25 @@ public import Mathlib.Tactic.NormNum.RealSqrt
 
 /-!
 # Painlevé Hamiltonian systems and Lax matrices
+
+The Hamiltonian systems of DLMF §32.6 and the Lax pairs of DLMF §32.4, in the DLMF
+normalization.
+
+## Main definitions
+
+* `IsHamiltonianSystemOn`: solutions of the non-autonomous Hamiltonian system DLMF 32.6.1.
+* `painleveHamiltonianI`, `painleveHamiltonianII`, `painleveHamiltonianIII`,
+  `painleveHamiltonianIIIPrime`, `painleveHamiltonianIIIGammaZero`: the Hamiltonians
+  DLMF 32.6.2, 32.6.9, 32.6.16, 32.6.24 and 32.6.32.
+* `laxSigma1`, `laxSigma2`, `laxSigma3`: the Pauli-type matrices of §32.4.
+* `painleveILaxA`, `painleveILaxB`, `painleveIILaxA`, `painleveIILaxB`, `painleveIIILaxA`,
+  `painleveIIILaxB`: the Lax matrices of PI, PII and PIII (DLMF 32.4.4–32.4.9).
+* `painleveIIISystemRhs`: the right-hand sides of the system DLMF 32.4.10–32.4.13.
+
+## Implementation notes
+
+DLMF gives the Hamiltonians of the PIII-type equations as `z H` (resp. `ζ H`); the
+definitions divide by `z` (resp. `ζ`), so `z = 0` gives a junk value.
 -/
 
 @[expose] public noncomputable section

@@ -11,10 +11,10 @@ public import Mathlib.RingTheory.Polynomial.Vieta
 /-!
 # DLMF §§19.15–19.22 results already in Mathlib or TauCeti
 
-Checked pointers for the symmetric-integral sections. Mathlib and the pinned TauCeti have no
-Carlson symmetric integrals and no `R`-function; the only upstream counterpart found is the
-Vieta expansion behind the elementary symmetric functions (19.19.4). The `lean-codes`
-Carlson library is not upstream: its results are used through the bridge theorems of
+Upstream pointers for the symmetric-integral sections. Mathlib and TauCeti have no Carlson
+symmetric integrals and no `R`-function; the only upstream counterpart is the Vieta expansion
+behind the elementary symmetric functions (19.19.4). The `lean-codes` Carlson library is not
+upstream: its results are used through the bridge theorems of
 `DLMF.EllipticIntegrals.Symmetric` and tagged at the local declarations.
 -/
 

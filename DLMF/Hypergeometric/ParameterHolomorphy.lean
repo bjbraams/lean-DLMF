@@ -12,21 +12,34 @@ public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 # Joint holomorphy of the Gauss function in its parameters (DLMF §15.2(ii))
 
 DLMF §15.2(ii): `𝐅(a,b;c;z)` is an entire function of `a`, `b`, `c` for each fixed `z` in the
-cut plane. This file proves the joint form, on the whole cut plane:
+cut plane. This file proves the joint form, on the whole cut plane.
+
+## Main definitions
+
+* `eulerRegion`: the region in `(a, b, c, z)` where Euler's integral converges.
+* `regularizedGaussHGShiftB`, `regularizedGaussHGShift`: the continuation recursion with fixed
+  numbers of contiguous shifts.
+
+## Main results
 
 * `differentiable_regularizedGaussHGFun_of_differentiable`: on the unit disk, Mathlib's series
   `regularizedGaussHGFun` composed with holomorphic maps `A B C : E → ℂ` on any complex normed
-  space is holomorphic. With projections this gives `entire_regularized_parameters`.
+  space is holomorphic.
+* `differentiableOn_regularizedGaussHGIntegral_joint`: Euler's integral is jointly holomorphic.
+* `regularizedGaussHG_eq_regularizedGaussHGShift`: the fixed-shift recursion is the
+  continuation where its shift counts suffice.
 * `differentiableOn_regularizedGaussHG_joint`: `(a, b, c, z) ↦ regularizedGaussHG a b c z` is
-  holomorphic on `ℂ³ × cutPlane`, with the corollaries `DifferentiableOn.regularizedGaussHG`,
-  `differentiable_regularizedGaussHG_params`, `differentiable_regularizedGaussHG_comp` and
-  `analyticOnNhd_regularizedGaussHG_comp`.
+  holomorphic on `ℂ³ × cutPlane`.
+* `DifferentiableOn.regularizedGaussHG`, `differentiable_regularizedGaussHG_params`,
+  `differentiable_regularizedGaussHG_comp`: corollaries for parameter maps.
 
-The definition `regularizedGaussHG` chooses its numbers of contiguous shifts from the parameters,
-so its recursion is not locally uniform in them. Here the counts `p`, `q` are fixed instead
-(`regularizedGaussHGShift`): on the open set `Re b + p > 0`, `Re (c - b) + q > p` the fixed-shift
-recursion reaches Euler integrals only inside the Euler region, agrees with the series on the disk,
-and is therefore the continuation. Euler's integral is jointly holomorphic in `(a, b, c, z)` by
+## Implementation notes
+
+The definition `regularizedGaussHG` chooses its numbers of contiguous shifts from the
+parameters, so its recursion is not locally uniform in them. Here the counts `p`, `q` are fixed
+instead: on the open set `Re b + p > 0`, `Re (c - b) + q > p` the fixed-shift recursion reaches
+Euler integrals only inside the Euler region, agrees with the series on the disk, and is
+therefore the continuation. Euler's integral is jointly holomorphic in `(a, b, c, z)` by
 `Complex.differentiableOn_intervalIntegral_of_locally_dominated`.
 -/
 

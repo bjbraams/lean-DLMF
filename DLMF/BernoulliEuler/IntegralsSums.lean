@@ -10,21 +10,42 @@ public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.NumberTheory.ZetaValues
 
 /-!
-# Integrals and sums of Bernoulli and Euler polynomials (DLMF §§24.13, 24.14)
+# Integrals and sums of Bernoulli and Euler polynomials
 
-DLMF's `Bₙ(t)`, `Eₙ(t)` on the real line are Mathlib's `bernoulliFun n` and the project's
-`eulerFun n`; `Bₙ = _root_.bernoulli n` (Mathlib, `B₁ = -1/2`), `Eₙ = eulerNumber n`.
+This file covers DLMF §§24.13–24.14. DLMF's `Bₙ(t)`, `Eₙ(t)` on the real line are Mathlib's
+`bernoulliFun n` and the project's `eulerFun n`; `Bₙ = _root_.bernoulli n` (Mathlib,
+`B₁ = -1/2`), `Eₙ = eulerNumber n`.
 
-## §24.13 Integrals
+## Main definitions
 
-* 24.13.1 is Mathlib's `antideriv_bernoulliFun` and 24.13.2 at `x = 0` is
-  `integral_bernoulliFun_eq_zero` (pointers in `DLMF.Core.UpstreamElementary`); 24.13.2 for every
-  real `x` is proved here (also for `n = 0`, stronger than DLMF).
-* 24.13.3–24.13.5, 24.13.7–24.13.10 are proved from the antiderivatives, the shift relations and
-  the Bernoulli–Euler relation `euler_eq_bernoulli`. 24.13.6 and 24.13.11 are proved by
-  repeated integration by parts.
+* `egf`: the exponential generating function `∑ aₙ tⁿ/n!` as a `PowerSeries`.
 
-## §24.14 Sums
+## Main results
+
+* `integral_bernoulliFun_add_one`: `∫_x^{x+1} Bₙ(t) dt = xⁿ` for every real `x` (DLMF 24.13.2;
+  also for `n = 0`, stronger than DLMF).
+* `integral_bernoulliFun_add_half`, `integral_bernoulliFun_zero_half`,
+  `integral_bernoulliFun_quarter`: DLMF 24.13.3–24.13.5.
+* `integral_bernoulliFun_mul_bernoulliFun`, `integral_eulerFun_mul_eulerFun`: integrals of
+  products (DLMF 24.13.6, 24.13.11).
+* `hasDerivAt_eulerFun_succ_div`, `integral_eulerFun_zero_one`,
+  `integral_eulerFun_even_zero_half`, `integral_eulerFun_odd_zero_half`: DLMF 24.13.7–24.13.10.
+* `sum_choose_bernoulli_mul_bernoulli`, `sum_choose_bernoulli_mul_bernoulli_number`,
+  `sum_choose_euler_mul_euler`, `sum_choose_eulerNumber_mul_eulerNumber`,
+  `sum_choose_euler_mul_bernoulli`, `sum_choose_two_pow_bernoulli_mul_eulerNumber`: binomial
+  convolutions (DLMF 24.14.1–24.14.6).
+* `sum_choose_mul_bernoulli_mul_bernoulli_div`: DLMF 24.14.7.
+* `sum_antidiagonal_bernoulli_triple`, `sum_antidiagonal_eulerNumber_triple`,
+  `sum_antidiagonal_bernoulli_quadruple`: triple and quadruple sums (DLMF 24.14.8–24.14.10).
+* `det_hankel_bernoulli`, `det_hankel_eulerNumber`: Hankel determinants (DLMF 24.14.11–24.14.12).
+
+## Implementation notes
+
+24.13.1 is Mathlib's `antideriv_bernoulliFun` and 24.13.2 at `x = 0` is
+`integral_bernoulliFun_eq_zero` (pointers in `DLMF.Core.UpstreamElementary`). 24.13.3–24.13.5
+and 24.13.7–24.13.10 follow from the antiderivatives, the shift relations and the
+Bernoulli–Euler relation `euler_eq_bernoulli`; 24.13.6 and 24.13.11 follow by repeated
+integration by parts.
 
 The polynomial identities 24.14.1, 24.14.3, 24.14.5 are stated for `x, y, h` in an arbitrary
 commutative `ℚ`-algebra (via `Polynomial.aeval`), which covers DLMF's complex variables. In
@@ -34,12 +55,11 @@ algebra. In 24.14.6 `2^{n-1}` is written `2ⁿ/2` (it is `1/2` at `n = 0`). The 
 `j + k + ℓ = n` (24.14.8, 24.14.9) and over positive `j + k + ℓ + m = n` (24.14.10) run over
 `Finset.Nat.antidiagonalTuple`. The Hankel determinants 24.14.11–24.14.12 are of size `n + 1`.
 
-The sums 24.14.1–24.14.10 are proved with exponential generating functions in `PowerSeries`
-(`q24b_egf`): products of generating functions are binomial convolutions. For 24.14.8–24.14.10
-the generating functions `t/2 · coth(t/2)` and `sech t` satisfy polynomial relations with their
-derivatives, obtained by `linear_combination` from the defining relation after clearing the
-non-unit factor `eᵗ - 1` (or the unit `e²ᵗ + 1`). 24.14.9 holds for every `n` (stronger than
-DLMF). The Hankel determinants 24.14.11–24.14.12 remain admitted.
+The sums 24.14.1–24.14.10 are proved with exponential generating functions (`egf`): products of
+generating functions are binomial convolutions. For 24.14.8–24.14.10 the generating functions
+`t/2 · coth(t/2)` and `sech t` satisfy polynomial relations with their derivatives, obtained by
+`linear_combination` from the defining relation after clearing the non-unit factor `eᵗ - 1`
+(or the unit `e²ᵗ + 1`).
 
 ## References
 
@@ -57,29 +77,29 @@ namespace DLMF.BernoulliEuler
 
 /-- Identity under the stated parameter and domain assumptions: `bernoulliFun n x = aeval x
 (Polynomial.bernoulli n)`. -/
-lemma b24b_bernoulliFun_eq_aeval (n : ℕ) (x : ℝ) :
+private lemma bernoulliFun_eq_aeval (n : ℕ) (x : ℝ) :
     bernoulliFun n x = aeval x (Polynomial.bernoulli n) := by
   simp [bernoulliFun, eval_map_algebraMap]
 
 /-- Identity under the stated parameter and domain assumptions: `eulerFun n x = aeval x
 (Polynomial.euler n)`. -/
-lemma b24b_eulerFun_eq_aeval (n : ℕ) (x : ℝ) :
+private lemma eulerFun_eq_aeval (n : ℕ) (x : ℝ) :
     eulerFun n x = aeval x (Polynomial.euler n) := by
   simp [eulerFun, eval_map_algebraMap]
 
 /-- Identity under the stated parameter and domain assumptions: `bernoulliFun (n + 1) (x + 1) =
 bernoulliFun (n + 1) x + (n + 1) * x ^ n`. -/
-lemma b24b_bernoulliFun_succ_add_one (n : ℕ) (x : ℝ) :
+private lemma bernoulliFun_succ_add_one (n : ℕ) (x : ℝ) :
     bernoulliFun (n + 1) (x + 1) = bernoulliFun (n + 1) x + (n + 1) * x ^ n := by
   have h := congrArg (aeval x) (bernoulli_comp_one_add_X (n + 1))
   simp only [aeval_comp, map_add, map_one, aeval_X, map_nsmul, map_pow,
     Nat.add_sub_cancel] at h
-  rw [b24b_bernoulliFun_eq_aeval, b24b_bernoulliFun_eq_aeval, add_comm x, h, nsmul_eq_mul]
+  rw [bernoulliFun_eq_aeval, bernoulliFun_eq_aeval, add_comm x, h, nsmul_eq_mul]
   push_cast; ring
 
 /-- Identity under the stated parameter and domain assumptions: `∫ t in a..b, bernoulliFun n t =
 (bernoulliFun (n + 1) b - bernoulliFun (n + 1) a) / (n + 1)`. -/
-lemma b24b_integral_bernoulliFun (n : ℕ) (a b : ℝ) :
+private lemma intervalIntegral_bernoulliFun (n : ℕ) (a b : ℝ) :
     ∫ t in a..b, bernoulliFun n t =
       (bernoulliFun (n + 1) b - bernoulliFun (n + 1) a) / (n + 1) := by
   rw [integral_eq_sub_of_hasDerivAt (fun x _ => antideriv_bernoulliFun n x)
@@ -87,7 +107,7 @@ lemma b24b_integral_bernoulliFun (n : ℕ) (a b : ℝ) :
 
 /-- At `x`, the function `(fun x => eulerFun (n + 1) x / (n + 1))` has derivative `(eulerFun n
 x)`. -/
-lemma b24b_antideriv_eulerFun (n : ℕ) (x : ℝ) :
+private lemma hasDerivAt_eulerFun_succ_div' (n : ℕ) (x : ℝ) :
     HasDerivAt (fun x => eulerFun (n + 1) x / (n + 1)) (eulerFun n x) x := by
   convert (hasDerivAt_eulerFun (n + 1) x).div_const ((n : ℝ) + 1) using 1
   have : (n : ℝ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero n
@@ -95,25 +115,25 @@ lemma b24b_antideriv_eulerFun (n : ℕ) (x : ℝ) :
 
 /-- Identity under the stated parameter and domain assumptions: `∫ t in a..b, eulerFun n t =
 (eulerFun (n + 1) b - eulerFun (n + 1) a) / (n + 1)`. -/
-lemma b24b_integral_eulerFun (n : ℕ) (a b : ℝ) :
+private lemma intervalIntegral_eulerFun (n : ℕ) (a b : ℝ) :
     ∫ t in a..b, eulerFun n t = (eulerFun (n + 1) b - eulerFun (n + 1) a) / (n + 1) := by
-  rw [integral_eq_sub_of_hasDerivAt (fun x _ => b24b_antideriv_eulerFun n x)
+  rw [integral_eq_sub_of_hasDerivAt (fun x _ => hasDerivAt_eulerFun_succ_div' n x)
     ((continuous_eulerFun n).intervalIntegrable _ _), sub_div]
 
 /-- `(n+1) Eₙ(2x) = 2ⁿ⁺¹ (Bₙ₊₁(x + 1/2) - Bₙ₊₁(x))`, from `euler_eq_bernoulli`. -/
-lemma b24b_eulerFun_two_mul (n : ℕ) (x : ℝ) :
+private lemma succ_mul_eulerFun_two_mul (n : ℕ) (x : ℝ) :
     ((n : ℝ) + 1) * eulerFun n (2 * x) =
       2 ^ (n + 1) * (bernoulliFun (n + 1) (x + 1 / 2) - bernoulliFun (n + 1) x) := by
   have h := congrArg (aeval (2 * x)) (euler_eq_bernoulli n)
   simp only [map_mul, map_add, map_natCast, map_one, aeval_C, aeval_comp, aeval_X, map_sub,
     eq_ratCast] at h
-  rw [b24b_eulerFun_eq_aeval, b24b_bernoulliFun_eq_aeval, b24b_bernoulliFun_eq_aeval]
+  rw [eulerFun_eq_aeval, bernoulliFun_eq_aeval, bernoulliFun_eq_aeval]
   convert h using 3 <;> push_cast <;> ring_nf
 
 /-- `Eₙ(0) = -2 (2ⁿ⁺¹ - 1) Bₙ₊₁/(n+1)` (DLMF 24.4.26), on `ℝ`. -/
-lemma b24b_eulerFun_zero (n : ℕ) :
+private lemma eulerFun_apply_zero (n : ℕ) :
     eulerFun n 0 = -2 * (2 ^ (n + 1) - 1) * (_root_.bernoulli (n + 1) : ℝ) / (n + 1) := by
-  have h := b24b_eulerFun_two_mul n 0
+  have h := succ_mul_eulerFun_two_mul n 0
   rw [mul_zero, zero_add, bernoulliFun_eval_zero, show (1 / 2 : ℝ) = 2⁻¹ by norm_num,
     bernoulliFun_eval_half] at h
   have hn : (n : ℝ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero n
@@ -123,14 +143,14 @@ lemma b24b_eulerFun_zero (n : ℕ) :
 
 /-- Identity under the stated parameter and domain assumptions: `eulerFun (n + 1) 1 = -eulerFun (n
 + 1) 0`. -/
-lemma b24b_eulerFun_one (n : ℕ) : eulerFun (n + 1) 1 = -eulerFun (n + 1) 0 := by
+private lemma eulerFun_succ_one' (n : ℕ) : eulerFun (n + 1) 1 = -eulerFun (n + 1) 0 := by
   have h := eulerFun_add_one_add (n + 1) 0
   rw [zero_add, zero_pow (Nat.succ_ne_zero n), mul_zero] at h
   linarith
 
 /-- Identity under the stated parameter and domain assumptions: `eulerFun n (1 / 2) = eulerNumber
 n / 2 ^ n`. -/
-lemma b24b_eulerFun_half (n : ℕ) : eulerFun n (1 / 2) = eulerNumber n / 2 ^ n := by
+private lemma eulerFun_half' (n : ℕ) : eulerFun n (1 / 2) = eulerNumber n / 2 ^ n := by
   have : (1 / 2 : ℝ) = algebraMap ℚ ℝ (1 / 2) := by simp
   rw [eulerFun, this, eval_map, eval₂_at_apply]
   simp only [eulerNumber, eq_ratCast]
@@ -138,7 +158,7 @@ lemma b24b_eulerFun_half (n : ℕ) : eulerFun n (1 / 2) = eulerNumber n / 2 ^ n 
   field_simp
 
 /-- Integration by parts for `∫₀¹ Bₙ Bₘ₊₁`. -/
-lemma q24b_integral_bernoulli_parts (n m : ℕ) :
+private lemma integral_bernoulliFun_mul_bernoulliFun_succ_parts (n m : ℕ) :
     ∫ t in (0 : ℝ)..1, bernoulliFun n t * bernoulliFun (m + 1) t =
       (bernoulliFun (m + 1) 1 * bernoulliFun (n + 1) 1 -
         bernoulliFun (m + 1) 0 * bernoulliFun (n + 1) 0) / (n + 1) -
@@ -161,13 +181,13 @@ lemma q24b_integral_bernoulli_parts (n m : ℕ) :
   rw [this]; field_simp
 
 /-- `∫₀¹ Bₙ Bₘ₊₁ = (-1)ᵐ (m+1)! n!/(m+1+n)! B_{m+1+n}` for `n ≥ 1`. -/
-lemma q24b_integral_bernoulli_mul_aux (m : ℕ) :
+private lemma integral_bernoulliFun_mul_bernoulliFun_succ (m : ℕ) :
     ∀ n : ℕ, 1 ≤ n → ∫ t in (0 : ℝ)..1, bernoulliFun n t * bernoulliFun (m + 1) t =
       (-1) ^ m * ((m + 1)! * n ! / (m + 1 + n)! : ℝ) * (_root_.bernoulli (m + 1 + n) : ℝ) := by
   induction m with
   | zero =>
     intro n hn
-    rw [q24b_integral_bernoulli_parts, intervalIntegral.integral_congr (g := fun t =>
+    rw [integral_bernoulliFun_mul_bernoulliFun_succ_parts, intervalIntegral.integral_congr (g := fun t =>
       bernoulliFun (n + 1) t) (fun t _ => by simp [bernoulliFun]),
       integral_bernoulliFun_eq_zero (Nat.succ_ne_zero n), bernoulliFun_eval_one,
       bernoulliFun_endpoints_eq_of_ne_one (show n + 1 ≠ 1 by omega), bernoulliFun_eval_zero]
@@ -177,7 +197,7 @@ lemma q24b_integral_bernoulli_mul_aux (m : ℕ) :
     push_cast; field_simp; ring
   | succ m ih =>
     intro n hn
-    rw [q24b_integral_bernoulli_parts, ih (n + 1) (by omega),
+    rw [integral_bernoulliFun_mul_bernoulliFun_succ_parts, ih (n + 1) (by omega),
       bernoulliFun_endpoints_eq_of_ne_one (show m + 1 + 1 ≠ 1 by omega),
       bernoulliFun_endpoints_eq_of_ne_one (show n + 1 ≠ 1 by omega), sub_self, zero_div, zero_sub,
       show m + 1 + (n + 1) = m + 1 + 1 + n by ring]
@@ -186,7 +206,7 @@ lemma q24b_integral_bernoulli_mul_aux (m : ℕ) :
     push_cast; field_simp; ring
 
 /-- Integration by parts for `∫₀¹ Eₙ Eₘ₊₁`. -/
-lemma q24b_integral_euler_parts (n m : ℕ) :
+private lemma integral_eulerFun_mul_eulerFun_succ_parts (n m : ℕ) :
     ∫ t in (0 : ℝ)..1, eulerFun n t * eulerFun (m + 1) t =
       -((m + 1) / (n + 1) * ∫ t in (0 : ℝ)..1, eulerFun (n + 1) t * eulerFun m t) := by
   have hn : (n : ℝ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero n
@@ -194,11 +214,11 @@ lemma q24b_integral_euler_parts (n m : ℕ) :
     (u := eulerFun (m + 1)) (u' := fun x => ((m + 1 : ℕ) : ℝ) * eulerFun m x)
     (v := fun x => eulerFun (n + 1) x / (n + 1)) (v' := eulerFun n)
     (fun x _ => by simpa using hasDerivAt_eulerFun (m + 1) x)
-    (fun x _ => b24b_antideriv_eulerFun n x)
+    (fun x _ => hasDerivAt_eulerFun_succ_div' n x)
     ((continuous_const.mul (continuous_eulerFun _)).intervalIntegrable _ _)
     ((continuous_eulerFun _).intervalIntegrable _ _)
   simp_rw [mul_comm (eulerFun n _)] at *
-  rw [h, b24b_eulerFun_one, b24b_eulerFun_one]
+  rw [h, eulerFun_succ_one', eulerFun_succ_one']
   have : ∫ x in (0 : ℝ)..1, ((m + 1 : ℕ) : ℝ) * eulerFun m x * (eulerFun (n + 1) x / (n + 1)) =
       (m + 1) / (n + 1) * ∫ t in (0 : ℝ)..1, eulerFun (n + 1) t * eulerFun m t := by
     rw [← intervalIntegral.integral_const_mul]
@@ -206,7 +226,7 @@ lemma q24b_integral_euler_parts (n m : ℕ) :
   rw [this]; ring
 
 /-- `∫₀¹ Eₙ Eₘ = (-1)ᵐ m! n!/(m+n)! ∫₀¹ E_{m+n}`. -/
-lemma q24b_integral_euler_mul_aux (m : ℕ) : ∀ n : ℕ,
+private lemma integral_eulerFun_mul_eulerFun_eq_integral (m : ℕ) : ∀ n : ℕ,
     ∫ t in (0 : ℝ)..1, eulerFun n t * eulerFun m t =
       (-1) ^ m * (m ! * n ! / (m + n)! : ℝ) * ∫ t in (0 : ℝ)..1, eulerFun (m + n) t := by
   induction m with
@@ -216,13 +236,13 @@ lemma q24b_integral_euler_mul_aux (m : ℕ) : ∀ n : ℕ,
     simp [eulerFun, div_self this]
   | succ m ih =>
     intro n
-    rw [q24b_integral_euler_parts, ih (n + 1), show m + (n + 1) = m + 1 + n by ring]
+    rw [integral_eulerFun_mul_eulerFun_succ_parts, ih (n + 1), show m + (n + 1) = m + 1 + n by ring]
     have hn' : (n : ℝ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero n
     rw [Nat.factorial_succ n, Nat.factorial_succ m]
     push_cast; field_simp; ring
 
 /-- `Bₙ(t) = ∑ₖ (n choose k) Bₖ t^{n-k}` on `ℝ`. -/
-lemma q24b_bernoulliFun_eq_sum (n : ℕ) (t : ℝ) :
+private lemma bernoulliFun_eq_sum (n : ℕ) (t : ℝ) :
     bernoulliFun n t =
       ∑ k ∈ range (n + 1), ((n.choose k : ℝ) * _root_.bernoulli k) * t ^ (n - k) := by
   simp only [bernoulliFun, Polynomial.bernoulli, Polynomial.map_sum, eval_finsetSum,
@@ -237,7 +257,7 @@ stronger than DLMF). -/
 @[dlmf 24.13.E2]
 theorem integral_bernoulliFun_add_one (n : ℕ) (x : ℝ) :
     ∫ t in x..x + 1, bernoulliFun n t = x ^ n := by
-  rw [b24b_integral_bernoulliFun, b24b_bernoulliFun_succ_add_one]
+  rw [intervalIntegral_bernoulliFun, bernoulliFun_succ_add_one]
   have : (n : ℝ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero n
   field_simp; ring
 
@@ -245,8 +265,8 @@ theorem integral_bernoulliFun_add_one (n : ℕ) (x : ℝ) :
 @[dlmf 24.13.E3]
 theorem integral_bernoulliFun_add_half (n : ℕ) (x : ℝ) :
     ∫ t in x..x + 1 / 2, bernoulliFun n t = eulerFun n (2 * x) / 2 ^ (n + 1) := by
-  rw [b24b_integral_bernoulliFun]
-  have h := b24b_eulerFun_two_mul n x
+  rw [intervalIntegral_bernoulliFun]
+  have h := succ_mul_eulerFun_two_mul n x
   have hn : (n : ℝ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero n
   rw [div_eq_div_iff hn (by positivity)]
   linear_combination -h
@@ -256,7 +276,7 @@ theorem integral_bernoulliFun_add_half (n : ℕ) (x : ℝ) :
 theorem integral_bernoulliFun_zero_half (n : ℕ) :
     ∫ t in (0 : ℝ)..1 / 2, bernoulliFun n t =
       (1 - 2 ^ (n + 1)) / 2 ^ n * ((_root_.bernoulli (n + 1) : ℝ) / (n + 1)) := by
-  rw [b24b_integral_bernoulliFun, show (1 / 2 : ℝ) = 2⁻¹ by norm_num, bernoulliFun_eval_half,
+  rw [intervalIntegral_bernoulliFun, show (1 / 2 : ℝ) = 2⁻¹ by norm_num, bernoulliFun_eval_half,
     bernoulliFun_eval_zero]
   have hn : (n : ℝ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero n
   field_simp
@@ -268,7 +288,7 @@ theorem integral_bernoulliFun_quarter (n : ℕ) :
     ∫ t in (1 / 4 : ℝ)..3 / 4, bernoulliFun n t = (eulerNumber n : ℝ) / 2 ^ (2 * n + 1) := by
   have h := integral_bernoulliFun_add_half n (1 / 4)
   rw [show (1 / 4 : ℝ) + 1 / 2 = 3 / 4 by norm_num, show (2 : ℝ) * (1 / 4) = 1 / 2 by norm_num,
-    b24b_eulerFun_half] at h
+    eulerFun_half'] at h
   rw [h]
   field_simp
   ring
@@ -279,7 +299,7 @@ theorem integral_bernoulliFun_mul_bernoulliFun {m n : ℕ} (hm : 1 ≤ m) (hn : 
     ∫ t in (0 : ℝ)..1, bernoulliFun n t * bernoulliFun m t =
       (-1) ^ (n - 1) * (m ! * n ! / (m + n)! : ℝ) * (_root_.bernoulli (m + n) : ℝ) := by
   obtain ⟨j, rfl⟩ : ∃ j, m = j + 1 := ⟨m - 1, by omega⟩
-  rw [q24b_integral_bernoulli_mul_aux j n hn]
+  rw [integral_bernoulliFun_mul_bernoulliFun_succ j n hn]
   rcases Nat.even_or_odd (j + 1 + n) with he | ho
   · congr 2
     obtain ⟨k, hk⟩ := he
@@ -293,7 +313,7 @@ theorem integral_bernoulliFun_mul_bernoulliFun {m n : ℕ} (hm : 1 ≤ m) (hn : 
 @[dlmf 24.13.E7]
 theorem hasDerivAt_eulerFun_succ_div (n : ℕ) (x : ℝ) :
     HasDerivAt (fun x => eulerFun (n + 1) x / (n + 1)) (eulerFun n x) x :=
-  b24b_antideriv_eulerFun n x
+  hasDerivAt_eulerFun_succ_div' n x
 
 /-- DLMF 24.13.8: `∫_0^1 Eₙ(t) dt = -2 Eₙ₊₁(0)/(n+1) = 4(2ⁿ⁺² - 1)/((n+1)(n+2)) · Bₙ₊₂`. -/
 @[dlmf 24.13.E8]
@@ -302,9 +322,9 @@ theorem integral_eulerFun_zero_one (n : ℕ) :
       (∫ t in (0 : ℝ)..1, eulerFun n t) =
         4 * (2 ^ (n + 2) - 1) / ((n + 1) * (n + 2)) * (_root_.bernoulli (n + 2) : ℝ) := by
   have h1 : (∫ t in (0 : ℝ)..1, eulerFun n t) = -2 * eulerFun (n + 1) 0 / (n + 1) := by
-    rw [b24b_integral_eulerFun, b24b_eulerFun_one]; ring
+    rw [intervalIntegral_eulerFun, eulerFun_succ_one']; ring
   refine ⟨h1, ?_⟩
-  rw [h1, b24b_eulerFun_zero]
+  rw [h1, eulerFun_apply_zero]
   have hn : (n : ℝ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero n
   have hn2 : (n : ℝ) + 2 ≠ 0 := by positivity
   push_cast
@@ -319,12 +339,12 @@ theorem integral_eulerFun_even_zero_half (n : ℕ) :
         2 * (2 ^ (2 * n + 2) - 1) * (_root_.bernoulli (2 * n + 2) : ℝ) /
           ((2 * n + 1) * (2 * n + 2)) := by
   have hodd : eulerFun (2 * n + 1) (1 / 2) = 0 := by
-    rw [b24b_eulerFun_half, eulerNumber_eq_zero_of_odd (odd_two_mul_add_one n)]; simp
+    rw [eulerFun_half', eulerNumber_eq_zero_of_odd (odd_two_mul_add_one n)]; simp
   have h1 : (∫ t in (0 : ℝ)..1 / 2, eulerFun (2 * n) t) =
       -eulerFun (2 * n + 1) 0 / (2 * n + 1) := by
-    rw [b24b_integral_eulerFun, hodd]; push_cast; ring
+    rw [intervalIntegral_eulerFun, hodd]; push_cast; ring
   refine ⟨h1, ?_⟩
-  rw [h1, b24b_eulerFun_zero]
+  rw [h1, eulerFun_apply_zero]
   have hn : (2 * n : ℝ) + 1 ≠ 0 := by positivity
   have hn2 : (2 * n : ℝ) + 2 ≠ 0 := by positivity
   push_cast
@@ -337,8 +357,8 @@ theorem integral_eulerFun_odd_zero_half {n : ℕ} (hn : 1 ≤ n) :
     ∫ t in (0 : ℝ)..1 / 2, eulerFun (2 * n - 1) t =
       (eulerNumber (2 * n) : ℝ) / (n * 2 ^ (2 * n + 1)) := by
   obtain ⟨k, rfl⟩ : ∃ k, n = k + 1 := ⟨n - 1, by omega⟩
-  rw [show 2 * (k + 1) - 1 = 2 * k + 1 by omega, b24b_integral_eulerFun,
-    show 2 * k + 1 + 1 = 2 * (k + 1) by ring, b24b_eulerFun_half, b24b_eulerFun_zero,
+  rw [show 2 * (k + 1) - 1 = 2 * k + 1 by omega, intervalIntegral_eulerFun,
+    show 2 * k + 1 + 1 = 2 * (k + 1) by ring, eulerFun_half', eulerFun_apply_zero,
     show 2 * (k + 1) + 1 = 2 * (k + 1) + 1 by rfl,
     bernoulli_eq_zero_of_odd (odd_two_mul_add_one (k + 1)) (by omega)]
   have hk : (k : ℝ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero k
@@ -353,7 +373,7 @@ theorem integral_eulerFun_mul_eulerFun {m n : ℕ} (hm : 1 ≤ m) (hn : 1 ≤ n)
     ∫ t in (0 : ℝ)..1, eulerFun n t * eulerFun m t =
       (-1) ^ n * 4 * ((2 ^ (m + n + 2) - 1) * m ! * n ! / (m + n + 2)! : ℝ) *
         (_root_.bernoulli (m + n + 2) : ℝ) := by
-  rw [q24b_integral_euler_mul_aux, (integral_eulerFun_zero_one (m + n)).2]
+  rw [integral_eulerFun_mul_eulerFun_eq_integral, (integral_eulerFun_zero_one (m + n)).2]
   rcases Nat.even_or_odd (m + n) with he | ho
   · rw [neg_one_pow_eq_pow_mod_two (R := ℝ), neg_one_pow_eq_pow_mod_two (R := ℝ) (n := n),
       show m % 2 = n % 2 by obtain ⟨k, hk⟩ := he; omega]
@@ -371,22 +391,22 @@ section EGF
 variable {A : Type*} [CommRing A] [Algebra ℚ A]
 
 /-- Exponential generating function of `aₙ`: `∑ aₙ tⁿ/n!`. -/
-def q24b_egf (a : ℕ → A) : PowerSeries A := PowerSeries.mk fun n => algebraMap ℚ A (n ! : ℚ)⁻¹ * a n
+def egf (a : ℕ → A) : PowerSeries A := PowerSeries.mk fun n => algebraMap ℚ A (n ! : ℚ)⁻¹ * a n
 
-/-- Coefficients of `q24b_egf`. -/
-lemma q24b_coeff_egf (a : ℕ → A) (n : ℕ) :
-    PowerSeries.coeff n (q24b_egf a) = algebraMap ℚ A (n ! : ℚ)⁻¹ * a n := by
-  simp [q24b_egf]
+/-- Coefficients of `egf`. -/
+private lemma coeff_egf (a : ℕ → A) (n : ℕ) :
+    PowerSeries.coeff n (egf a) = algebraMap ℚ A (n ! : ℚ)⁻¹ * a n := by
+  simp [egf]
 
 /-- The product of exponential generating functions is the binomial convolution. -/
-lemma q24b_egf_mul (a b : ℕ → A) :
-    q24b_egf a * q24b_egf b =
-      q24b_egf fun n => ∑ k ∈ range (n + 1), (n.choose k : A) * a k * b (n - k) := by
+private lemma egf_mul (a b : ℕ → A) :
+    egf a * egf b =
+      egf fun n => ∑ k ∈ range (n + 1), (n.choose k : A) * a k * b (n - k) := by
   ext n
-  rw [PowerSeries.coeff_mul, Nat.sum_antidiagonal_eq_sum_range_succ_mk, q24b_coeff_egf, mul_sum]
+  rw [PowerSeries.coeff_mul, Nat.sum_antidiagonal_eq_sum_range_succ_mk, coeff_egf, mul_sum]
   refine sum_congr rfl fun k hk => ?_
   have hkn : k ≤ n := Nat.lt_succ_iff.mp (mem_range.mp hk)
-  simp only [q24b_coeff_egf]
+  simp only [coeff_egf]
   have h : (n.choose k : A) = algebraMap ℚ A (n.choose k : ℚ) := by simp
   rw [h, Nat.cast_choose ℚ hkn]
   have : (algebraMap ℚ A (n ! : ℚ)⁻¹) * algebraMap ℚ A ((n ! : ℚ) / (k ! * (n - k)!)) =
@@ -399,34 +419,34 @@ lemma q24b_egf_mul (a b : ℕ → A) :
   linear_combination (-(a k * b (n - k))) * this
 
 /-- `exp` as an exponential generating function. -/
-lemma q24b_exp_eq_egf : PowerSeries.exp A = q24b_egf fun _ => (1 : A) := by
-  ext n; simp [q24b_egf, PowerSeries.coeff_exp]
+private lemma exp_eq_egf_one : PowerSeries.exp A = egf fun _ => (1 : A) := by
+  ext n; simp [egf, PowerSeries.coeff_exp]
 
 /-- `e^{xt}` as an exponential generating function. -/
-lemma q24b_rescale_exp_eq_egf (x : A) :
-    PowerSeries.rescale x (PowerSeries.exp A) = q24b_egf fun n => x ^ n := by
-  ext n; simp [q24b_egf, PowerSeries.coeff_exp, PowerSeries.coeff_rescale, mul_comm]
+private lemma rescale_exp_eq_egf_pow (x : A) :
+    PowerSeries.rescale x (PowerSeries.exp A) = egf fun n => x ^ n := by
+  ext n; simp [egf, PowerSeries.coeff_exp, PowerSeries.coeff_rescale, mul_comm]
 
-/-- Mathlib's Bernoulli generating function in `q24b_egf` form. -/
-lemma q24b_egfB_gen (x : A) :
-    q24b_egf (fun n => aeval x (Polynomial.bernoulli n)) * (PowerSeries.exp A - 1) =
+/-- Mathlib's Bernoulli generating function in `egf` form. -/
+private lemma egf_aeval_bernoulli_mul_exp_sub_one (x : A) :
+    egf (fun n => aeval x (Polynomial.bernoulli n)) * (PowerSeries.exp A - 1) =
       PowerSeries.X * PowerSeries.rescale x (PowerSeries.exp A) := by
   rw [← bernoulli_generating_function x]
   congr 1
   ext n
-  simp [q24b_egf, Algebra.smul_def]
+  simp [egf, Algebra.smul_def]
 
 /-- The Euler generating function: `(∑ Eₙ(x) tⁿ/n!) (eᵗ + 1) = 2 e^{xt}`. -/
-lemma q24b_egfE_gen (x : A) :
-    q24b_egf (fun n => aeval x (Polynomial.euler n)) * (PowerSeries.exp A + 1) =
+private lemma egf_aeval_euler_mul_exp_add_one (x : A) :
+    egf (fun n => aeval x (Polynomial.euler n)) * (PowerSeries.exp A + 1) =
       2 * PowerSeries.rescale x (PowerSeries.exp A) := by
-  have h1 : PowerSeries.exp A + 1 = q24b_egf fun n => if n = 0 then (2 : A) else 1 := by
-    ext n; rcases n with _ | n <;> simp [q24b_egf, PowerSeries.coeff_exp, PowerSeries.coeff_one]
+  have h1 : PowerSeries.exp A + 1 = egf fun n => if n = 0 then (2 : A) else 1 := by
+    ext n; rcases n with _ | n <;> simp [egf, PowerSeries.coeff_exp, PowerSeries.coeff_one]
     norm_num
-  have h2 : 2 * PowerSeries.rescale x (PowerSeries.exp A) = q24b_egf fun n => 2 * x ^ n := by
-    rw [q24b_rescale_exp_eq_egf]; ext n
-    rw [two_mul, map_add]; simp only [q24b_coeff_egf]; ring
-  rw [h1, h2, q24b_egf_mul]
+  have h2 : 2 * PowerSeries.rescale x (PowerSeries.exp A) = egf fun n => 2 * x ^ n := by
+    rw [rescale_exp_eq_egf_pow]; ext n
+    rw [two_mul, map_add]; simp only [coeff_egf]; ring
+  rw [h1, h2, egf_mul]
   congr 1; funext n
   have h := congrArg (aeval x) (sum_range_choose_smul_euler n)
   simp only [map_add, map_sum, map_mul, map_pow, aeval_X, map_smul, map_ofNat] at h
@@ -440,7 +460,7 @@ lemma q24b_egfE_gen (x : A) :
   · ring
 
 /-- `eᵗ - 1` can be cancelled (it is `t` times a unit). -/
-lemma q24b_cancel_exp_sub_one {f g : PowerSeries A}
+private lemma eq_of_mul_exp_sub_one_eq {f g : PowerSeries A}
     (h : f * (PowerSeries.exp A - 1) = g * (PowerSeries.exp A - 1)) : f = g := by
   set u : PowerSeries A := PowerSeries.mk fun n => algebraMap ℚ A (1 / (n + 1)!)
   have hu : PowerSeries.exp A - 1 = PowerSeries.X * u := by
@@ -453,14 +473,14 @@ lemma q24b_cancel_exp_sub_one {f g : PowerSeries A}
   exact hunit.mul_left_injective (PowerSeries.X_mul_cancel h)
 
 /-- `eᵗ + 1` is a unit. -/
-lemma q24b_isUnit_exp_add_one : IsUnit (PowerSeries.exp A + 1) := by
+private lemma isUnit_exp_add_one : IsUnit (PowerSeries.exp A + 1) := by
   rw [PowerSeries.isUnit_iff_constantCoeff]
   simp only [map_add, PowerSeries.constantCoeff_exp, map_one]
   have : (1 + 1 : A) = algebraMap ℚ A 2 := by rw [map_ofNat]; norm_num
   rw [this]; exact (IsUnit.mk0 (2 : ℚ) two_ne_zero).map _
 
 /-- `d/dt e^{at} = a e^{at}`. -/
-lemma q24b_derivative_rescale_exp (a : A) :
+private lemma derivative_rescale_exp (a : A) :
     PowerSeries.derivative (R := A) (PowerSeries.rescale a (PowerSeries.exp A)) =
       PowerSeries.C a * PowerSeries.rescale a (PowerSeries.exp A) := by
   ext n
@@ -476,15 +496,15 @@ lemma q24b_derivative_rescale_exp (a : A) :
   linear_combination (a ^ n * a) * this
 
 /-- Exponential generating functions determine their sequences. -/
-lemma q24b_egf_inj {a b : ℕ → A} (h : q24b_egf a = q24b_egf b) (n : ℕ) : a n = b n := by
+private lemma eq_of_egf_eq {a b : ℕ → A} (h : egf a = egf b) (n : ℕ) : a n = b n := by
   have h' := congrArg (PowerSeries.coeff n) h
-  simp only [q24b_coeff_egf] at h'
+  simp only [coeff_egf] at h'
   have hu : IsUnit (algebraMap ℚ A (n ! : ℚ)⁻¹) :=
     (IsUnit.mk0 _ (inv_ne_zero (by positivity))).map _
   exact hu.mul_left_cancel h'
 
 /-- `(n+1)/(n+1)! = 1/n!` in `A`. -/
-lemma q24b_fact_succ (n : ℕ) :
+private lemma algebraMap_inv_factorial_succ_mul (n : ℕ) :
     algebraMap ℚ A ((n + 1)! : ℚ)⁻¹ * ((n : A) + 1) = algebraMap ℚ A (n ! : ℚ)⁻¹ := by
   have key : ((n : A) + 1) = algebraMap ℚ A (n + 1) := by
     rw [map_add, map_natCast, map_one]
@@ -493,25 +513,25 @@ lemma q24b_fact_succ (n : ℕ) :
   field_simp
 
 /-- Multiplication by `t` of an exponential generating function. -/
-lemma q24b_X_mul_egf (a : ℕ → A) :
-    PowerSeries.X * q24b_egf a = q24b_egf fun n => (n : A) * a (n - 1) := by
+private lemma X_mul_egf (a : ℕ → A) :
+    PowerSeries.X * egf a = egf fun n => (n : A) * a (n - 1) := by
   ext n; rcases n with _ | n
-  · simp [q24b_egf]
-  · rw [PowerSeries.coeff_succ_X_mul, q24b_coeff_egf, q24b_coeff_egf, Nat.add_sub_cancel,
-      ← q24b_fact_succ n]
+  · simp [egf]
+  · rw [PowerSeries.coeff_succ_X_mul, coeff_egf, coeff_egf, Nat.add_sub_cancel,
+      ← algebraMap_inv_factorial_succ_mul n]
     push_cast; ring
 
 /-- The derivative of an exponential generating function shifts the sequence. -/
-lemma q24b_derivative_egf (a : ℕ → A) :
-    PowerSeries.derivative (R := A) (q24b_egf a) = q24b_egf fun n => a (n + 1) := by
+private lemma derivative_egf (a : ℕ → A) :
+    PowerSeries.derivative (R := A) (egf a) = egf fun n => a (n + 1) := by
   ext n
-  rw [PowerSeries.coeff_derivative, q24b_coeff_egf, q24b_coeff_egf, ← q24b_fact_succ n]
+  rw [PowerSeries.coeff_derivative, coeff_egf, coeff_egf, ← algebraMap_inv_factorial_succ_mul n]
   ring
 
 /-- Rescaling an exponential generating function. -/
-lemma q24b_rescale_egf (a : A) (b : ℕ → A) :
-    PowerSeries.rescale a (q24b_egf b) = q24b_egf fun n => a ^ n * b n := by
-  ext n; simp only [PowerSeries.coeff_rescale, q24b_coeff_egf]; ring
+private lemma rescale_egf (a : A) (b : ℕ → A) :
+    PowerSeries.rescale a (egf b) = egf fun n => a ^ n * b n := by
+  ext n; simp only [PowerSeries.coeff_rescale, coeff_egf]; ring
 
 end EGF
 
@@ -530,39 +550,39 @@ theorem sum_choose_bernoulli_mul_bernoulli (n : ℕ) (x y : A) :
         ((n : A) - 1) * aeval (x + y) (Polynomial.bernoulli n) := by
   set s := x + y
   set E := PowerSeries.exp A
-  set F := q24b_egf fun n => aeval s (Polynomial.bernoulli n)
+  set F := egf fun n => aeval s (Polynomial.bernoulli n)
   set es := PowerSeries.rescale s E
-  have h1 : F * (E - 1) = PowerSeries.X * es := q24b_egfB_gen s
+  have h1 : F * (E - 1) = PowerSeries.X * es := egf_aeval_bernoulli_mul_exp_sub_one s
   have h2 := congrArg (PowerSeries.derivative (R := A)) h1
   simp only [Derivation.leibniz, smul_eq_mul, map_sub, E, PowerSeries.derivative_exp,
-    PowerSeries.derivative_one, PowerSeries.derivative_X, es, q24b_derivative_rescale_exp,
+    PowerSeries.derivative_one, PowerSeries.derivative_X, es, derivative_rescale_exp,
     sub_zero] at h2
   set R := (PowerSeries.C s - 1) * PowerSeries.X * F -
     PowerSeries.X * PowerSeries.derivative (R := A) F + F
   have hR : R * (E - 1) * (E - 1) = PowerSeries.X ^ 2 * es := by
     linear_combination ((PowerSeries.C s - 1) * PowerSeries.X * (E - 1) + (E - 1) +
       PowerSeries.X * E) * h1 - PowerSeries.X * (E - 1) * h2
-  have hL : q24b_egf (fun n => aeval x (Polynomial.bernoulli n)) *
-      q24b_egf (fun n => aeval y (Polynomial.bernoulli n)) * (E - 1) * (E - 1) =
+  have hL : egf (fun n => aeval x (Polynomial.bernoulli n)) *
+      egf (fun n => aeval y (Polynomial.bernoulli n)) * (E - 1) * (E - 1) =
       PowerSeries.X ^ 2 * es := by
-    have hx := q24b_egfB_gen x
-    have hy := q24b_egfB_gen y
+    have hx := egf_aeval_bernoulli_mul_exp_sub_one x
+    have hy := egf_aeval_bernoulli_mul_exp_sub_one y
     have hxy := PowerSeries.exp_mul_exp_eq_exp_add x y
-    linear_combination (q24b_egf (fun n => aeval y (Polynomial.bernoulli n)) * (E - 1)) * hx +
+    linear_combination (egf (fun n => aeval y (Polynomial.bernoulli n)) * (E - 1)) * hx +
       (PowerSeries.X * PowerSeries.rescale x E) * hy + PowerSeries.X ^ 2 * hxy
-  have hLR := q24b_cancel_exp_sub_one (q24b_cancel_exp_sub_one (hL.trans hR.symm))
-  rw [q24b_egf_mul] at hLR
-  have hR' : R = q24b_egf fun n => n • ((s - 1) * aeval s (Polynomial.bernoulli (n - 1))) -
+  have hLR := eq_of_mul_exp_sub_one_eq (eq_of_mul_exp_sub_one_eq (hL.trans hR.symm))
+  rw [egf_mul] at hLR
+  have hR' : R = egf fun n => n • ((s - 1) * aeval s (Polynomial.bernoulli (n - 1))) -
       ((n : A) - 1) * aeval s (Polynomial.bernoulli n) := by
-    simp only [R, F, q24b_derivative_egf, mul_assoc, q24b_X_mul_egf]
+    simp only [R, F, derivative_egf, mul_assoc, X_mul_egf]
     ext n
-    simp only [map_sub, map_add, PowerSeries.coeff_C_mul, sub_mul, one_mul, q24b_coeff_egf,
+    simp only [map_sub, map_add, PowerSeries.coeff_C_mul, sub_mul, one_mul, coeff_egf,
       nsmul_eq_mul]
     rcases n with _ | n
     · simp
     · simp only [Nat.add_sub_cancel]; push_cast; ring
   rw [hR'] at hLR
-  exact q24b_egf_inj hLR n
+  exact eq_of_egf_eq hLR n
 
 /-- DLMF 24.14.2: `∑ₖ (n choose k) Bₖ Bₙ₋ₖ = (1 - n) Bₙ - n Bₙ₋₁`. -/
 @[dlmf 24.14.E2]
@@ -584,12 +604,12 @@ theorem sum_choose_euler_mul_euler (n : ℕ) (x h : A) :
         (x + h - 1) * aeval (x + h) (Polynomial.euler n)) := by
   set s := x + h
   set E := PowerSeries.exp A
-  set F := q24b_egf fun n => aeval s (Polynomial.euler n)
+  set F := egf fun n => aeval s (Polynomial.euler n)
   set es := PowerSeries.rescale s E
-  have h1 : F * (E + 1) = 2 * es := q24b_egfE_gen s
+  have h1 : F * (E + 1) = 2 * es := egf_aeval_euler_mul_exp_add_one s
   have h2 := congrArg (PowerSeries.derivative (R := A)) h1
   simp only [Derivation.leibniz, smul_eq_mul, map_add, E, PowerSeries.derivative_exp,
-    PowerSeries.derivative_one, es, q24b_derivative_rescale_exp, add_zero] at h2
+    PowerSeries.derivative_one, es, derivative_rescale_exp, add_zero] at h2
   have h2' : F * E + (E + 1) * PowerSeries.derivative (R := A) F =
       2 * (PowerSeries.C s * es) := by
     have : PowerSeries.derivative (R := A) (2 : PowerSeries A) = 0 := by
@@ -599,26 +619,26 @@ theorem sum_choose_euler_mul_euler (n : ℕ) (x h : A) :
   set R := 2 * (PowerSeries.derivative (R := A) F - (PowerSeries.C s - 1) * F)
   have hR : R * (E + 1) * (E + 1) = 4 * es := by
     linear_combination 2 * (E + 1) * h2' + (-2 * E - 2 * (PowerSeries.C s - 1) * (E + 1)) * h1
-  have hL : q24b_egf (fun n => aeval h (Polynomial.euler n)) *
-      q24b_egf (fun n => aeval x (Polynomial.euler n)) * (E + 1) * (E + 1) = 4 * es := by
-    have hh := q24b_egfE_gen h
-    have hx := q24b_egfE_gen x
+  have hL : egf (fun n => aeval h (Polynomial.euler n)) *
+      egf (fun n => aeval x (Polynomial.euler n)) * (E + 1) * (E + 1) = 4 * es := by
+    have hh := egf_aeval_euler_mul_exp_add_one h
+    have hx := egf_aeval_euler_mul_exp_add_one x
     have hxy := PowerSeries.exp_mul_exp_eq_exp_add h x
     rw [add_comm h x] at hxy
-    linear_combination (q24b_egf (fun n => aeval x (Polynomial.euler n)) * (E + 1)) * hh +
+    linear_combination (egf (fun n => aeval x (Polynomial.euler n)) * (E + 1)) * hh +
       (2 * PowerSeries.rescale h E) * hx + 4 * hxy
-  have hu := (q24b_isUnit_exp_add_one (A := A)).mul_left_injective
+  have hu := (isUnit_exp_add_one (A := A)).mul_left_injective
   have hLR := hu (hu (hL.trans hR.symm))
-  rw [q24b_egf_mul] at hLR
-  have hR' : R = q24b_egf fun n => 2 * (aeval s (Polynomial.euler (n + 1)) -
+  rw [egf_mul] at hLR
+  have hR' : R = egf fun n => 2 * (aeval s (Polynomial.euler (n + 1)) -
       (s - 1) * aeval s (Polynomial.euler n)) := by
-    simp only [R, F, q24b_derivative_egf]
+    simp only [R, F, derivative_egf]
     ext n
     simp only [two_mul, map_add, map_sub, PowerSeries.coeff_C_mul, sub_mul, one_mul,
-      q24b_coeff_egf]
+      coeff_egf]
     ring
   rw [hR'] at hLR
-  exact q24b_egf_inj hLR n
+  exact eq_of_egf_eq hLR n
 
 /-- DLMF 24.14.4: `∑ₖ (n choose k) Eₖ Eₙ₋ₖ = -2ⁿ⁺¹ Eₙ₊₁(0)`. -/
 @[dlmf 24.14.E4]
@@ -644,7 +664,7 @@ theorem sum_choose_eulerNumber_mul_eulerNumber (n : ℕ) :
 theorem neg_two_pow_mul_euler_eval_zero (n : ℕ) :
     -2 ^ (n + 1) * (Polynomial.euler (n + 1)).eval 0 =
       -2 ^ (n + 2) * (1 - 2 ^ (n + 2)) * _root_.bernoulli (n + 2) / (n + 2) := by
-  have h := b24b_eulerFun_zero (n + 1)
+  have h := eulerFun_apply_zero (n + 1)
   have h0 : eulerFun (n + 1) 0 = (((Polynomial.euler (n + 1)).eval 0 : ℚ) : ℝ) := by
     rw [eulerFun, show (0 : ℝ) = algebraMap ℚ ℝ 0 by simp, eval_map, eval₂_at_apply]; rfl
   rw [h0] at h
@@ -665,8 +685,8 @@ theorem sum_choose_euler_mul_bernoulli (n : ℕ) (x h : A) :
         aeval x (Polynomial.bernoulli (n - k)) =
       2 ^ n * aeval ((2⁻¹ : ℚ) • (x + h)) (Polynomial.bernoulli n) := by
   set s := x + h
-  set G := q24b_egf fun n => aeval ((2⁻¹ : ℚ) • s) (Polynomial.bernoulli n)
-  have hG := q24b_egfB_gen ((2⁻¹ : ℚ) • s)
+  set G := egf fun n => aeval ((2⁻¹ : ℚ) • s) (Polynomial.bernoulli n)
+  have hG := egf_aeval_bernoulli_mul_exp_sub_one ((2⁻¹ : ℚ) • s)
   have hG2 := congrArg (PowerSeries.rescale (2 : A)) hG
   have hs2 : (2⁻¹ : ℚ) • s * 2 = s := by
     rw [Algebra.smul_def, mul_comm, ← mul_assoc]
@@ -677,26 +697,26 @@ theorem sum_choose_euler_mul_bernoulli (n : ℕ) (x h : A) :
     rw [PowerSeries.exp_pow_eq_rescale_exp]; norm_num
   simp only [map_mul, map_sub, map_one, PowerSeries.rescale_X, PowerSeries.rescale_rescale,
     hs2, hE2] at hG2
-  have hL : q24b_egf (fun n => aeval h (Polynomial.euler n)) *
-      q24b_egf (fun n => aeval x (Polynomial.bernoulli n)) * (PowerSeries.exp A - 1) *
+  have hL : egf (fun n => aeval h (Polynomial.euler n)) *
+      egf (fun n => aeval x (Polynomial.bernoulli n)) * (PowerSeries.exp A - 1) *
         (PowerSeries.exp A + 1) =
       PowerSeries.C 2 * PowerSeries.X * PowerSeries.rescale s (PowerSeries.exp A) := by
-    have hh := q24b_egfE_gen h
-    have hx := q24b_egfB_gen x
+    have hh := egf_aeval_euler_mul_exp_add_one h
+    have hx := egf_aeval_bernoulli_mul_exp_sub_one x
     have hxy := PowerSeries.exp_mul_exp_eq_exp_add h x
     rw [add_comm h x] at hxy
     have h2 : (PowerSeries.C 2 : PowerSeries A) = 2 := map_ofNat _ 2
     rw [h2]
     linear_combination
-      (q24b_egf (fun n => aeval x (Polynomial.bernoulli n)) * (PowerSeries.exp A - 1)) * hh +
+      (egf (fun n => aeval x (Polynomial.bernoulli n)) * (PowerSeries.exp A - 1)) * hh +
       (2 * PowerSeries.rescale h (PowerSeries.exp A)) * hx + 2 * PowerSeries.X * hxy
   have hR : PowerSeries.rescale (2 : A) G * (PowerSeries.exp A - 1) * (PowerSeries.exp A + 1) =
       PowerSeries.C 2 * PowerSeries.X * PowerSeries.rescale s (PowerSeries.exp A) := by
     linear_combination hG2
-  have hu := (q24b_isUnit_exp_add_one (A := A)).mul_left_injective
-  have hLR := q24b_cancel_exp_sub_one (hu (hL.trans hR.symm))
-  rw [q24b_egf_mul, q24b_rescale_egf] at hLR
-  exact q24b_egf_inj hLR n
+  have hu := (isUnit_exp_add_one (A := A)).mul_left_injective
+  have hLR := eq_of_mul_exp_sub_one_eq (hu (hL.trans hR.symm))
+  rw [egf_mul, rescale_egf] at hLR
+  exact eq_of_egf_eq hLR n
 
 end Quadratic
 
@@ -705,10 +725,10 @@ end Quadratic
 theorem sum_choose_two_pow_bernoulli_mul_eulerNumber (n : ℕ) :
     ∑ k ∈ range (n + 1), (n.choose k : ℚ) * 2 ^ k * _root_.bernoulli k * eulerNumber (n - k) =
       2 * (1 - 2 ^ n / 2) * _root_.bernoulli n - n * eulerNumber (n - 1) := by
-  set P := q24b_egf fun n => aeval (0 : ℚ) (Polynomial.bernoulli n)
-  set Q := q24b_egf fun n => aeval (1 / 2 : ℚ) (Polynomial.euler n)
+  set P := egf fun n => aeval (0 : ℚ) (Polynomial.bernoulli n)
+  set Q := egf fun n => aeval (1 / 2 : ℚ) (Polynomial.euler n)
   have k1 : P * ((PowerSeries.exp ℚ) - 1) = PowerSeries.X := by
-    rw [q24b_egfB_gen, PowerSeries.rescale_zero_apply, PowerSeries.constantCoeff_exp, map_one,
+    rw [egf_aeval_bernoulli_mul_exp_sub_one, PowerSeries.rescale_zero_apply, PowerSeries.constantCoeff_exp, map_one,
       mul_one]
   have hE2 : PowerSeries.rescale (2 : ℚ) (PowerSeries.exp ℚ) = (PowerSeries.exp ℚ) ^ 2 := by
     rw [PowerSeries.exp_pow_eq_rescale_exp]; norm_num
@@ -718,7 +738,7 @@ theorem sum_choose_two_pow_bernoulli_mul_eulerNumber (n : ℕ) :
     simpa only [map_mul, map_sub, map_one, hE2, PowerSeries.rescale_X] using this
   have k3 : PowerSeries.rescale (2 : ℚ) Q * ((PowerSeries.exp ℚ) ^ 2 + 1) =
       2 * (PowerSeries.exp ℚ) := by
-    have := congrArg (PowerSeries.rescale (2 : ℚ)) (q24b_egfE_gen (1 / 2 : ℚ))
+    have := congrArg (PowerSeries.rescale (2 : ℚ)) (egf_aeval_euler_mul_exp_add_one (1 / 2 : ℚ))
     simp only [map_mul, map_add, map_one, hE2, PowerSeries.rescale_rescale, map_ofNat] at this
     rw [this]; norm_num
   have h2 : (PowerSeries.C 2 : PowerSeries ℚ) = 2 := map_ofNat _ 2
@@ -735,19 +755,19 @@ theorem sum_choose_two_pow_bernoulli_mul_eulerNumber (n : ℕ) :
       ((PowerSeries.exp ℚ) ^ 2 + 1) * k2 - PowerSeries.X * ((PowerSeries.exp ℚ) ^ 2 - 1) * k3
   have hu3 : IsUnit ((PowerSeries.exp ℚ) ^ 2 + 1) := by
     rw [PowerSeries.isUnit_iff_constantCoeff]; simp
-  have hLR := q24b_cancel_exp_sub_one (q24b_isUnit_exp_add_one.mul_left_injective
+  have hLR := eq_of_mul_exp_sub_one_eq (isUnit_exp_add_one.mul_left_injective
     (hu3.mul_left_injective (hL.trans hR.symm)))
-  simp only [L, R, P, Q, q24b_rescale_egf, q24b_egf_mul, q24b_X_mul_egf] at hLR
-  have hR' : (2 * q24b_egf fun n => aeval (0 : ℚ) (Polynomial.bernoulli n)) -
-      (q24b_egf fun n => 2 ^ n * aeval (0 : ℚ) (Polynomial.bernoulli n)) -
-      (q24b_egf fun n => (n : ℚ) * (2 ^ (n - 1) * aeval (1 / 2 : ℚ) (Polynomial.euler (n - 1)))) =
-      q24b_egf fun n => 2 * (1 - 2 ^ n / 2) * _root_.bernoulli n - n * eulerNumber (n - 1) := by
+  simp only [L, R, P, Q, rescale_egf, egf_mul, X_mul_egf] at hLR
+  have hR' : (2 * egf fun n => aeval (0 : ℚ) (Polynomial.bernoulli n)) -
+      (egf fun n => 2 ^ n * aeval (0 : ℚ) (Polynomial.bernoulli n)) -
+      (egf fun n => (n : ℚ) * (2 ^ (n - 1) * aeval (1 / 2 : ℚ) (Polynomial.euler (n - 1)))) =
+      egf fun n => 2 * (1 - 2 ^ n / 2) * _root_.bernoulli n - n * eulerNumber (n - 1) := by
     ext m
-    simp only [two_mul, map_add, map_sub, q24b_coeff_egf, coe_aeval_eq_eval,
+    simp only [two_mul, map_add, map_sub, coeff_egf, coe_aeval_eq_eval,
       Polynomial.bernoulli_eval_zero, eulerNumber]
     ring
   rw [hR'] at hLR
-  have := q24b_egf_inj hLR n
+  have := eq_of_egf_eq hLR n
   rw [← this]
   refine sum_congr rfl fun k hk => ?_
   simp only [coe_aeval_eq_eval, Polynomial.bernoulli_eval_zero, eulerNumber]
@@ -766,7 +786,7 @@ theorem sum_choose_mul_bernoulli_mul_bernoulli_div {m n : ℕ} (hm : 1 ≤ m) (h
       ∑ j ∈ range (m + 1), ∑ k ∈ range (n + 1),
         ((m.choose j : ℚ) * n.choose k * _root_.bernoulli j * _root_.bernoulli k /
           (m + n - j - k + 1) : ℚ) := by
-    simp_rw [mul_comm (bernoulliFun n _), q24b_bernoulliFun_eq_sum n, q24b_bernoulliFun_eq_sum m,
+    simp_rw [mul_comm (bernoulliFun n _), bernoulliFun_eq_sum n, bernoulliFun_eq_sum m,
       sum_mul_sum]
     rw [intervalIntegral.integral_finsetSum (fun j _ => by
       exact (continuous_finsetSum _ fun k _ => by fun_prop).intervalIntegrable _ _)]
@@ -797,7 +817,7 @@ theorem sum_choose_mul_bernoulli_mul_bernoulli_div {m n : ℕ} (hm : 1 ≤ m) (h
 /-! ### Helpers for §24.14(ii) -/
 
 /-- Sums over `j + k + ℓ = n` as iterated sums. -/
-lemma q24b_sum_antidiagonalTuple_three {M : Type*} [AddCommMonoid M] (n : ℕ)
+private lemma sum_antidiagonalTuple_three {M : Type*} [AddCommMonoid M] (n : ℕ)
     (F : ℕ → ℕ → ℕ → M) :
     ∑ v ∈ Finset.Nat.antidiagonalTuple 3 n, F (v 0) (v 1) (v 2) =
       ∑ a ∈ range (n + 1), ∑ c ∈ range (n - a + 1), F a c (n - a - c) := by
@@ -839,19 +859,19 @@ private lemma sum_range_even_aux {M : Type*} [AddCommMonoid M] (n : ℕ) (f : �
     · rw [hf _ ho, add_zero, show (n + 1) / 2 = n / 2 by obtain ⟨m, hm⟩ := ho; omega]
 
 /-- Differences of exponential generating functions. -/
-lemma q24b_egf_sub {A : Type*} [CommRing A] [Algebra ℚ A] (a b : ℕ → A) :
-    q24b_egf a - q24b_egf b = q24b_egf fun n => a n - b n := by
-  ext n; simp only [map_sub, q24b_coeff_egf]; ring
+private lemma egf_sub {A : Type*} [CommRing A] [Algebra ℚ A] (a b : ℕ → A) :
+    egf a - egf b = egf fun n => a n - b n := by
+  ext n; simp only [map_sub, coeff_egf]; ring
 
 /-- The triple binomial convolution of a sequence vanishing at odd indices, at an even index,
 as a sum over `j + k + ℓ = n`. -/
-lemma q24b_triple_conv_even (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) (n : ℕ) :
+private lemma sum_triple_binomialConv_two_mul_of_odd_eq_zero (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) (n : ℕ) :
     ∑ i ∈ range (2 * n + 1), ((2 * n).choose i : ℚ) * b i *
         ∑ j ∈ range (2 * n - i + 1), ((2 * n - i).choose j : ℚ) * b j * b (2 * n - i - j) =
       ∑ v ∈ Finset.Nat.antidiagonalTuple 3 n,
         ((2 * n)! / ((2 * v 0)! * (2 * v 1)! * (2 * v 2)!) : ℚ) *
           b (2 * v 0) * b (2 * v 1) * b (2 * v 2) := by
-  rw [q24b_sum_antidiagonalTuple_three n (fun a c d => ((2 * n)! / ((2 * a)! * (2 * c)! *
+  rw [sum_antidiagonalTuple_three n (fun a c d => ((2 * n)! / ((2 * a)! * (2 * c)! *
     (2 * d)!) : ℚ) * b (2 * a) * b (2 * c) * b (2 * d))]
   rw [← sum_range_even_aux (2 * n) _ (fun j hj => by simp [hb j hj])]
   rw [show 2 * n / 2 = n by omega]
@@ -873,13 +893,13 @@ lemma q24b_triple_conv_even (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) (n
   field_simp
 
 /-- The derivative of the constant power series `2`. -/
-lemma q24b_derivative_two {A : Type*} [CommRing A] :
+private lemma derivative_two_eq_zero {A : Type*} [CommRing A] :
     PowerSeries.derivative (R := A) (2 : PowerSeries A) = 0 := by
   rw [show (2 : PowerSeries A) = PowerSeries.C 2 from (map_ofNat PowerSeries.C 2).symm]
   exact PowerSeries.derivative_C
 
 /-- Sums over `j + k + ℓ + m = n` as a sum over the first index and a triple sum. -/
-lemma q24b_sum_antidiagonalTuple_four {M : Type*} [AddCommMonoid M] (n : ℕ)
+private lemma sum_antidiagonalTuple_four {M : Type*} [AddCommMonoid M] (n : ℕ)
     (F : ℕ → ℕ → ℕ → ℕ → M) :
     ∑ v ∈ Finset.Nat.antidiagonalTuple 4 n, F (v 0) (v 1) (v 2) (v 3) =
       ∑ a ∈ range (n + 1), ∑ w ∈ Finset.Nat.antidiagonalTuple 3 (n - a),
@@ -910,7 +930,7 @@ lemma q24b_sum_antidiagonalTuple_four {M : Type*} [AddCommMonoid M] (n : ℕ)
 
 /-- The fourfold binomial convolution of a sequence vanishing at odd indices, at an even
 index, as a sum over `j + k + ℓ + m = n`. -/
-lemma q24b_quad_conv_even (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) (n : ℕ) :
+private lemma sum_quadruple_binomialConv_two_mul_of_odd_eq_zero (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) (n : ℕ) :
     ∑ i ∈ range (2 * n + 1), ((2 * n).choose i : ℚ) * b i *
         ∑ j ∈ range (2 * n - i + 1), ((2 * n - i).choose j : ℚ) * b j *
           ∑ k ∈ range (2 * n - i - j + 1), ((2 * n - i - j).choose k : ℚ) * b k *
@@ -918,13 +938,13 @@ lemma q24b_quad_conv_even (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) (n :
       ∑ v ∈ Finset.Nat.antidiagonalTuple 4 n,
         ((2 * n)! / ((2 * v 0)! * (2 * v 1)! * (2 * v 2)! * (2 * v 3)!) : ℚ) *
           b (2 * v 0) * b (2 * v 1) * b (2 * v 2) * b (2 * v 3) := by
-  rw [q24b_sum_antidiagonalTuple_four n (fun a c d e => ((2 * n)! / ((2 * a)! * (2 * c)! *
+  rw [sum_antidiagonalTuple_four n (fun a c d e => ((2 * n)! / ((2 * a)! * (2 * c)! *
     (2 * d)! * (2 * e)!) : ℚ) * b (2 * a) * b (2 * c) * b (2 * d) * b (2 * e))]
   rw [← sum_range_even_aux (2 * n) _ (fun j hj => by simp [hb j hj])]
   rw [show 2 * n / 2 = n by omega]
   refine sum_congr rfl fun a ha => ?_
   have han : a ≤ n := Nat.lt_succ_iff.mp (mem_range.mp ha)
-  rw [show 2 * n - 2 * a = 2 * (n - a) by omega, q24b_triple_conv_even b hb (n - a), mul_sum]
+  rw [show 2 * n - 2 * a = 2 * (n - a) by omega, sum_triple_binomialConv_two_mul_of_odd_eq_zero b hb (n - a), mul_sum]
   refine sum_congr rfl fun w _ => ?_
   rw [Nat.cast_choose ℚ (show 2 * a ≤ 2 * n by omega),
     show 2 * n - 2 * a = 2 * (n - a) by omega]
@@ -947,19 +967,19 @@ theorem sum_antidiagonal_bernoulli_triple {n : ℕ} (hn : 2 ≤ n) :
       (n - 1) * (2 * n - 1) * _root_.bernoulli (2 * n) +
         n * (n - 1 / 2) * _root_.bernoulli (2 * n - 2) := by
   set b : ℕ → ℚ := fun m => if m = 1 then 0 else _root_.bernoulli m
-  set f := q24b_egf b
+  set f := egf b
   set E := PowerSeries.exp ℚ
   set X : PowerSeries ℚ := PowerSeries.X
-  have hB : q24b_egf (fun m => (_root_.bernoulli m : ℚ)) * (E - 1) = X := by
-    have := q24b_egfB_gen (0 : ℚ)
+  have hB : egf (fun m => (_root_.bernoulli m : ℚ)) * (E - 1) = X := by
+    have := egf_aeval_bernoulli_mul_exp_sub_one (0 : ℚ)
     simp only [Polynomial.aeval_def, Polynomial.eval₂_at_zero] at this
     simpa [Polynomial.coeff_zero_eq_eval_zero, Polynomial.bernoulli_eval_zero,
       PowerSeries.rescale_zero, E, X] using this
   have h2 : (2 : PowerSeries ℚ) = PowerSeries.C 2 := (map_ofNat PowerSeries.C 2).symm
-  have hf : 2 * f = 2 * q24b_egf (fun m => (_root_.bernoulli m : ℚ)) + X := by
+  have hf : 2 * f = 2 * egf (fun m => (_root_.bernoulli m : ℚ)) + X := by
     ext m
-    rw [map_add, h2, PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul, q24b_coeff_egf,
-      q24b_coeff_egf]
+    rw [map_add, h2, PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul, coeff_egf,
+      coeff_egf]
     rcases m with _ | _ | m <;> norm_num [b, X, PowerSeries.coeff_X]
   have r0 : 2 * f * (E - 1) = X * (E + 1) := by
     rw [hf, add_mul, mul_assoc, hB]
@@ -967,7 +987,7 @@ theorem sum_antidiagonal_bernoulli_triple {n : ℕ} (hn : 2 ≤ n) :
   set D := PowerSeries.derivative (R := ℚ)
   have hDE : D E = E := PowerSeries.derivative_exp ℚ
   have hDX : D X = 1 := PowerSeries.derivative_X
-  have hD2 : D 2 = 0 := q24b_derivative_two
+  have hD2 : D 2 = 0 := derivative_two_eq_zero
   have r1 := congrArg D r0
   simp only [Derivation.leibniz, smul_eq_mul, map_add, map_sub, hDE, hDX, D.map_one_eq_zero,
     hD2, add_zero, mul_zero, sub_zero, mul_one] at r1
@@ -980,12 +1000,12 @@ theorem sum_antidiagonal_bernoulli_triple {n : ℕ} (hn : 2 ≤ n) :
     linear_combination ((E - 1) * (-2 * E * X ^ 2 + E * X * (2 * f) - 4 * E * X + E * (2 * f) ^ 2
       - 4 * E + X * (2 * f) - (2 * f) ^ 2 + 4)) * r0 +
       (4 * X * (E - 1) * (E * X + E - 1)) * r1 - (2 * X ^ 2 * (E - 1) ^ 2) * r2
-  have key := q24b_cancel_exp_sub_one (q24b_cancel_exp_sub_one (q24b_cancel_exp_sub_one key3))
-  simp only [f, D, X, pow_three, q24b_egf_mul, q24b_derivative_egf, q24b_X_mul_egf] at key
+  have key := eq_of_mul_exp_sub_one_eq (eq_of_mul_exp_sub_one_eq (eq_of_mul_exp_sub_one_eq key3))
+  simp only [f, D, X, pow_three, egf_mul, derivative_egf, X_mul_egf] at key
   have hc := congrArg (PowerSeries.coeff (2 * n)) key
   simp only [show (8 : PowerSeries ℚ) = PowerSeries.C 8 from (map_ofNat PowerSeries.C 8).symm,
     show (4 : PowerSeries ℚ) = PowerSeries.C 4 from (map_ofNat PowerSeries.C 4).symm, h2,
-    map_add, map_sub, PowerSeries.coeff_C_mul, q24b_coeff_egf, Algebra.algebraMap_self,
+    map_add, map_sub, PowerSeries.coeff_C_mul, coeff_egf, Algebra.algebraMap_self,
     RingHom.id_apply] at hc
   have hf : ((2 * n)! : ℚ) ≠ 0 := by positivity
   have hc' := congrArg (fun t => ((2 * n)! : ℚ) * t / 8) hc
@@ -1001,7 +1021,7 @@ theorem sum_antidiagonal_bernoulli_triple {n : ℕ} (hn : 2 ≤ n) :
       exact bernoulli_eq_zero_of_odd hj (by obtain ⟨k, hk⟩ := hj; omega)
   have hbe : ∀ k, b (2 * k) = _root_.bernoulli (2 * k) := fun k => by
     simp only [b, show 2 * k ≠ 1 by omega, ite_false]
-  rw [q24b_triple_conv_even b hbodd n, show 2 * n - 2 = 2 * (n - 1) by omega] at hc'
+  rw [sum_triple_binomialConv_two_mul_of_odd_eq_zero b hbodd n, show 2 * n - 2 = 2 * (n - 1) by omega] at hc'
   simp only [hbe] at hc'
   rw [show 2 * n - 2 = 2 * (n - 1) by omega]
   push_cast [show 1 ≤ 2 * n by omega] at hc'
@@ -1016,13 +1036,13 @@ theorem sum_antidiagonal_eulerNumber_triple {n : ℕ} (hn : 2 ≤ n) :
           eulerNumber (2 * v 0) * eulerNumber (2 * v 1) * eulerNumber (2 * v 2) =
       (eulerNumber (2 * n) - eulerNumber (2 * n + 2)) / 2 := by
   have _ := hn
-  set F := q24b_egf fun N => eulerNumber N
+  set F := egf fun N => eulerNumber N
   have hE2 : PowerSeries.rescale (2 : ℚ) (PowerSeries.exp ℚ) = PowerSeries.exp ℚ ^ 2 := by
     rw [PowerSeries.exp_pow_eq_rescale_exp]; norm_num
   have r0 : F * (PowerSeries.exp ℚ ^ 2 + 1) = 2 * PowerSeries.exp ℚ := by
-    have := congrArg (PowerSeries.rescale (2 : ℚ)) (q24b_egfE_gen (1 / 2 : ℚ))
+    have := congrArg (PowerSeries.rescale (2 : ℚ)) (egf_aeval_euler_mul_exp_add_one (1 / 2 : ℚ))
     simp only [map_mul, map_add, map_one, hE2, PowerSeries.rescale_rescale, map_ofNat,
-      q24b_rescale_egf] at this
+      rescale_egf] at this
     rw [show (1 / 2 : ℚ) * 2 = 1 by norm_num, PowerSeries.rescale_one] at this
     convert this using 2
     simp only [F]; congr 1
@@ -1030,7 +1050,7 @@ theorem sum_antidiagonal_eulerNumber_triple {n : ℕ} (hn : 2 ≤ n) :
   have hDE : D (PowerSeries.exp ℚ) = PowerSeries.exp ℚ := PowerSeries.derivative_exp ℚ
   have hDE2 : D (PowerSeries.exp ℚ ^ 2) = 2 * PowerSeries.exp ℚ ^ 2 := by
     rw [pow_two, Derivation.leibniz, hDE, smul_eq_mul]; ring
-  have hD2 : D 2 = 0 := q24b_derivative_two
+  have hD2 : D 2 = 0 := derivative_two_eq_zero
   have r1 := congrArg D r0
   simp only [Derivation.leibniz, smul_eq_mul, map_add, hDE, hDE2, D.map_one_eq_zero,
     hD2, add_zero, mul_zero] at r1
@@ -1046,14 +1066,14 @@ theorem sum_antidiagonal_eulerNumber_triple {n : ℕ} (hn : 2 ≤ n) :
     simp only
     linear_combination (2 * ((F * w) ^ 2 + 2 * E * (F * w) + 4 * E ^ 2) - w ^ 2 +
       (8 * E ^ 4 - 4 * E ^ 2 * w)) * r0 + (-4 * E ^ 2 * w) * r1 + w ^ 2 * r2
-  rw [pow_three, q24b_egf_mul, q24b_egf_mul, q24b_derivative_egf, q24b_derivative_egf,
-    q24b_egf_sub] at key
+  rw [pow_three, egf_mul, egf_mul, derivative_egf, derivative_egf,
+    egf_sub] at key
   have hc := congrArg (PowerSeries.coeff (2 * n)) key
   rw [show (2 : PowerSeries ℚ) = PowerSeries.C 2 from (map_ofNat PowerSeries.C 2).symm,
-    PowerSeries.coeff_C_mul, q24b_coeff_egf, q24b_coeff_egf] at hc
+    PowerSeries.coeff_C_mul, coeff_egf, coeff_egf] at hc
   have hf : ((2 * n)! : ℚ) ≠ 0 := by positivity
   simp only [Algebra.algebraMap_self, RingHom.id_apply] at hc
-  rw [← q24b_triple_conv_even _ (fun j hj => eulerNumber_eq_zero_of_odd hj) n]
+  rw [← sum_triple_binomialConv_two_mul_of_odd_eq_zero _ (fun j hj => eulerNumber_eq_zero_of_odd hj) n]
   have hc' := congrArg (fun t => ((2 * n)! : ℚ) * t / 2) hc
   simp only [← mul_assoc, mul_comm _ (2 : ℚ)] at hc'
   rw [mul_assoc 2, mul_inv_cancel₀ hf, mul_one] at hc'
@@ -1071,24 +1091,24 @@ theorem sum_antidiagonal_bernoulli_quadruple {n : ℕ} (hn : 4 ≤ n) :
         4 / 3 * n ^ 2 * (2 * n - 1) * _root_.bernoulli (2 * n - 2) := by
   set b : ℕ → ℚ := fun m => if m = 1 then 0 else _root_.bernoulli m
   set c : ℕ → ℚ := fun m => if m ≤ 1 then 0 else _root_.bernoulli m
-  set f := q24b_egf b
-  set C := q24b_egf c
+  set f := egf b
+  set C := egf c
   set E := PowerSeries.exp ℚ
   set X : PowerSeries ℚ := PowerSeries.X
-  have hB : q24b_egf (fun m => (_root_.bernoulli m : ℚ)) * (E - 1) = X := by
-    have := q24b_egfB_gen (0 : ℚ)
+  have hB : egf (fun m => (_root_.bernoulli m : ℚ)) * (E - 1) = X := by
+    have := egf_aeval_bernoulli_mul_exp_sub_one (0 : ℚ)
     simpa [Polynomial.coeff_zero_eq_eval_zero, Polynomial.bernoulli_eval_zero,
       PowerSeries.rescale_zero, E, X] using this
   have h2 : (2 : PowerSeries ℚ) = PowerSeries.C 2 := (map_ofNat PowerSeries.C 2).symm
-  have hf : 2 * f = 2 * q24b_egf (fun m => (_root_.bernoulli m : ℚ)) + X := by
+  have hf : 2 * f = 2 * egf (fun m => (_root_.bernoulli m : ℚ)) + X := by
     ext m
-    rw [map_add, h2, PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul, q24b_coeff_egf,
-      q24b_coeff_egf]
+    rw [map_add, h2, PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul, coeff_egf,
+      coeff_egf]
     rcases m with _ | _ | m <;> norm_num [b, X, PowerSeries.coeff_X]
   have hcf : 2 * C = 2 * f - 2 := by
     ext m
-    rw [map_sub, h2, PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul, q24b_coeff_egf,
-      q24b_coeff_egf, PowerSeries.coeff_C]
+    rw [map_sub, h2, PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul, coeff_egf,
+      coeff_egf, PowerSeries.coeff_C]
     rcases m with _ | _ | m <;> norm_num [b, c]
   have r0 : 2 * f * (E - 1) = X * (E + 1) := by
     rw [hf, add_mul, mul_assoc, hB]
@@ -1096,7 +1116,7 @@ theorem sum_antidiagonal_bernoulli_quadruple {n : ℕ} (hn : 4 ≤ n) :
   set D := PowerSeries.derivative (R := ℚ)
   have hDE : D E = E := PowerSeries.derivative_exp ℚ
   have hDX : D X = 1 := PowerSeries.derivative_X
-  have hD2 : D 2 = 0 := q24b_derivative_two
+  have hD2 : D 2 = 0 := derivative_two_eq_zero
   have r1 := congrArg D r0
   simp only [Derivation.leibniz, smul_eq_mul, map_add, map_sub, hDE, hDX, D.map_one_eq_zero,
     hD2, add_zero, mul_zero, sub_zero, mul_one] at r1
@@ -1124,16 +1144,16 @@ theorem sum_antidiagonal_bernoulli_quadruple {n : ℕ} (hn : 4 ≤ n) :
       (4 * X ^ 3 * (E - 1) ^ 3) * r3 +
       (3 * ((2 * C) ^ 3 + (2 * C) ^ 2 * (2 * f - 2) + (2 * C) * (2 * f - 2) ^ 2 +
         (2 * f - 2) ^ 3) * (E - 1) ^ 4) * hcf
-  have key := q24b_cancel_exp_sub_one (q24b_cancel_exp_sub_one (q24b_cancel_exp_sub_one
-    (q24b_cancel_exp_sub_one key4)))
+  have key := eq_of_mul_exp_sub_one_eq (eq_of_mul_exp_sub_one_eq (eq_of_mul_exp_sub_one_eq
+    (eq_of_mul_exp_sub_one_eq key4)))
   rw [show C ^ 4 = C * (C * (C * C)) by ring] at key
-  simp only [C, f, D, X, q24b_egf_mul, q24b_derivative_egf, q24b_X_mul_egf] at key
+  simp only [C, f, D, X, egf_mul, derivative_egf, X_mul_egf] at key
   have hc := congrArg (PowerSeries.coeff (2 * n)) key
   have hC : ∀ k : ℕ, [k.AtLeastTwo] →
       (OfNat.ofNat k : PowerSeries ℚ) = PowerSeries.C (OfNat.ofNat k : ℚ) :=
     fun k _ => (map_ofNat PowerSeries.C k).symm
   simp only [hC, neg_mul, map_add, map_sub, map_neg, PowerSeries.coeff_C_mul,
-    PowerSeries.coeff_C, PowerSeries.coeff_X_pow, q24b_coeff_egf, Algebra.algebraMap_self,
+    PowerSeries.coeff_C, PowerSeries.coeff_X_pow, coeff_egf, Algebra.algebraMap_self,
     RingHom.id_apply, show 2 * n ≠ 0 by omega, show 2 * n ≠ 2 by omega,
     show 2 * n ≠ 4 by omega, ite_false, mul_zero, add_zero] at hc
   rw [show 2 * n - 1 - 1 - 1 + 1 + 1 + 1 = 2 * n by omega,
@@ -1146,7 +1166,7 @@ theorem sum_antidiagonal_bernoulli_quadruple {n : ℕ} (hn : 4 ≤ n) :
     · simp [c, h1]
     · simp only [c, h1, ite_false]
       exact bernoulli_eq_zero_of_odd hj (by omega)
-  rw [q24b_quad_conv_even c hcodd n] at hc
+  rw [sum_quadruple_binomialConv_two_mul_of_odd_eq_zero c hcodd n] at hc
   have hb2 : b (2 * n) = _root_.bernoulli (2 * n) := by
     simp only [b, show ¬ 2 * n = 1 by omega, ite_false]
   have hb2' : b (2 * n - 2) = _root_.bernoulli (2 * n - 2) := by

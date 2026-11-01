@@ -11,28 +11,35 @@ public import DLMF.Bessel.RegularizedSeries
 /-!
 # Radial spheroidal wave functions (DLMF §30.11)
 
-Statement acquisition from NIST DLMF (version 1.2.8), checked 2026-10-26. Admitted statements
-are not completed proofs; see `DLMF30Acquisition.md`.
+This file proves the properties of the radial spheroidal functions `S^{m(j)}_n(z, γ)`: the
+functions `ψ^{(j)}_k`, convergence of the series 30.11.3 and the equation they satisfy, the
+connection formulas, the asymptotic behavior, the Wronskian, the connection with `𝑃s`, `𝑄s` and
+the integral representation.
 
-* §30.11(i): `ψ^{(1)}_k = j_k` off the cut, convergence of the series 30.11.3, the radial
-  functions as solutions of 30.2.1, and the connection formulas 30.11.5 (proved from the
-  convergence and from `ψ^{(3), (4)} = ψ^{(1)} ± iψ^{(2)}`);
-* §30.11(iii): the asymptotic behaviour 30.11.6 (corrected, see below);
-* §30.11(iv): the Wronskian 30.11.7;
-* §30.11(v): the connection with `𝑃s`, `𝑄s` (30.11.8–30.11.11);
-* §30.11(vi): the integral representation 30.11.12.
+## Main results
+
+* `spheroidalPsi_one_eq`, `spheroidalPsi_three_four`: `ψ^{(1)}_k = j_k` off the cut and
+  `ψ^{(3),(4)}_k = ψ^{(1)}_k ± iψ^{(2)}_k` (DLMF 30.11.1–30.11.2).
+* `summable_spheroidalRadial_series`, `isSpheroidalSolutionOn_spheroidalRadial`: convergence of
+  the series 30.11.3 and the radial functions as solutions of 30.2.1.
+* `spheroidalRadial_three_four`: the connection formulas DLMF 30.11.5.
+* `spheroidalRadial_isBigO_one_two`, `spheroidalRadial_isBigO_three_four`: the asymptotic
+  behavior DLMF 30.11.6 (corrected for `j = 1, 2`).
+* `wronskian_spheroidalRadial`: the Wronskian DLMF 30.11.7.
+* `spheroidalRadial_one_eq`, `spheroidalRadial_two_eq`: the connection with `𝑃s`, `𝑄s`
+  (DLMF 30.11.8–30.11.11).
+* `spheroidalRadial_one_integral`: the integral representation DLMF 30.11.12.
+
+## Implementation notes
 
 The radial functions take complex `z`, `γ` with `γ²` real; statements assume `(γ^2).im = 0`.
 
-**Correction to 30.11.6.** For `j = 1, 2` DLMF prints the error term `O(z⁻² e^{|ℑz|})`. The
-correct term is `O(z⁻² e^{|ℑ(γz)|})` (the two agree for `γ = 1`; DLMF's form is too strong for
-`γ > 1`): numerically, for `n = m = 0`, `γ = 2`, `z = iy`, the quantity
+For `j = 1, 2` DLMF 30.11.6 prints the error term `O(z⁻² e^{|ℑz|})`. The correct term is
+`O(z⁻² e^{|ℑ(γz)|})` (the two agree for `γ = 1`; DLMF's form is too strong for `γ > 1`):
+numerically, for `n = m = 0`, `γ = 2`, `z = iy`, the quantity
 `|S^{0(1)}_0(iy, 2) - ψ^{(1)}_0(2iy)| y² e^{-y}` is `3.9·10³, 8.7·10⁷, 4.2·10¹⁶` at
-`y = 10, 20, 40`, while `|S - ψ| y² e^{-2y} → 0.179`. The corrected form is acquired, for real
+`y = 10, 20, 40`, while `|S - ψ| y² e^{-2y} → 0.179`. The corrected form is stated for real
 `γ > 0` (the sector condition `|ph z| ≤ π - δ` refers to real `γ`).
-
-Numerical checks (high precision): 30.11.3 against SciPy's `pro_rad1`, `pro_rad2`; 30.11.7;
-30.11.8 with `K^m_n` from 30.11.10–30.11.11 and `𝑃s` from 30.6.1; 30.11.12; 30.11.6 for `j = 3`.
 -/
 
 @[expose] public noncomputable section

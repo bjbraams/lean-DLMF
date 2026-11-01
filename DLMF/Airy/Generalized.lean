@@ -8,10 +8,46 @@ module
 public import DLMF.Airy.Framework
 
 /-!
-# Generalized Airy equations and normalizations, DLMF §9.13(i)
+# Generalized Airy functions (DLMF §9.13(i))
 
-Statements acquired from the NIST DLMF, checked 2026-10-19.
-New statements are initially admitted; existing proved Airy results are retained.
+Solutions of the generalized Airy equation `w'' = zⁿ w`: the entire functions `A_n`, `B_n` of
+Swanson and Headley, their Bessel representations, initial values, Wronskian and asymptotics,
+and the normalizations of Olver and Smirnov.
+
+## Main definitions
+
+* `generalizedAiryOrder`, `generalizedAiryZeta`: the order `p = 1/(n+2)` and the argument `ζ`
+  (DLMF 9.13.3).
+* `generalizedAiryF`, `generalizedAiryG`: the even and odd fundamental solutions.
+* `generalizedAiryA`, `generalizedAiryB`: Swanson–Headley's `A_n` and `B_n`.
+* `IsGenAirySol`: solution pairs of `w'' = s zⁿ w`.
+* `olverAiryVariable`, `olverAiryU`, `olverAiryVBar`, `olverAiryW`: Olver's normalization
+  (DLMF 9.13.14–9.13.17).
+* `smirnovAiryU1`, `smirnovAiryU2`, `smirnovAiryVariable`: Smirnov's solutions
+  (DLMF 9.13.20–9.13.22).
+
+## Main results
+
+* `generalizedAiryA_ode`, `generalizedAiryB_ode`: DLMF 9.13.1.
+* `generalizedAiry_bessel_basis`, `generalizedAiry_general_solution`: DLMF 9.13.2.
+* `generalizedAiryA_bessel`, `generalizedAiryB_bessel`: Bessel representations (DLMF 9.13.4).
+* `generalizedAiry_initial_values`: DLMF 9.13.5.
+* `generalizedAiryA_negative`, `generalizedAiryB_negative`: DLMF 9.13.6, 9.13.7.
+* `generalizedAiry_wronskian`: `𝒲{A_n, B_n} = (2/π) p^{1/2} sin(pπ)` (DLMF 9.13.8).
+* `generalizedAiryA_one`, `generalizedAiryB_one`: the case `n = 1`.
+* `generalizedAiryA_asymptotic`, `generalizedAiryB_asymptotic` and their negative-axis
+  versions: DLMF 9.13.9–9.13.12.
+* `olverAiryU_ode`, `olverAiryVBar_ode`, `olverAiryW_ode`, `olverAiry_rotated_solution`:
+  DLMF 9.13.13, 9.13.17, 9.13.18.
+* `olverAiry_normalization_first`, `olverAiry_even_second`: DLMF 9.13.15, 9.13.16.
+* `smirnovAiryU1_ode`, `smirnovAiryU2_ode`, `smirnovAiryU1_olver`, `smirnovAiryU2_olver`:
+  DLMF 9.13.19 and the Smirnov–Olver relations 9.13.23, 9.13.24.
+
+## Implementation notes
+
+DLMF defines `W_m(±t)` only for even `m` (9.13.17), and `smirnovAiryU1_olver` and
+`smirnovAiryU2_olver` carry an evenness hypothesis, since for odd `m` the term of order `t^m`
+in `W_m(-t)` does not cancel.
 -/
 
 @[expose] public noncomputable section
@@ -128,7 +164,7 @@ theorem isGenAirySol_F (n : ℕ) (s : ℂ) :
     (c' := 3 - (generalizedAiryOrder n : ℂ)) (by ring) z
   have h2 := ((hasDerivAt_pow (n + 1) z).const_mul s).div_const ((n : ℂ) + 2)
   refine (h2.mul h1).congr_deriv ?_
-  have hc := reg0F1_contiguous' (c := 1 - (generalizedAiryOrder n : ℂ))
+  have hc := reg0F1_contiguous_of_eq (c := 1 - (generalizedAiryOrder n : ℂ))
     (c₁ := 2 - (generalizedAiryOrder n : ℂ)) (c₂ := 3 - (generalizedAiryOrder n : ℂ)) (by ring)
     (by ring) (s * z ^ (n + 2) / ((n : ℂ) + 2) ^ 2)
   simp only [hc]
@@ -157,7 +193,7 @@ theorem isGenAirySol_G (n : ℕ) (s : ℂ) :
   refine ⟨((hasDerivAt_id z).mul h1).congr_deriv (by simp only [id]; ring), ?_⟩
   have h3 := ((hasDerivAt_pow (n + 2) z).const_mul s).div_const ((n : ℂ) + 2)
   refine (h1.add (h3.mul h2)).congr_deriv ?_
-  have hc := reg0F1_contiguous' (c := 1 + (generalizedAiryOrder n : ℂ))
+  have hc := reg0F1_contiguous_of_eq (c := 1 + (generalizedAiryOrder n : ℂ))
     (c₁ := 2 + (generalizedAiryOrder n : ℂ)) (c₂ := 3 + (generalizedAiryOrder n : ℂ)) (by ring)
     (by ring) (s * z ^ (n + 2) / ((n : ℂ) + 2) ^ 2)
   simp only [hc]
@@ -711,7 +747,7 @@ theorem generalizedAiryB_negative {n : ℕ} {x : ℝ} (hx : 0 < x) :
 
 /-- `𝒲{A_n, B_n} = (2/π) p^{1/2} sin(pπ)` (DLMF 9.13.8). -/
 @[dlmf 9.13.E8]
-theorem generalizedAiry_wronskian {n : ℕ} (hn : 1 ≤ n) (z : ℂ) :
+theorem generalizedAiry_wronskian {n : ℕ} (z : ℂ) :
     generalizedAiryA n z * deriv (generalizedAiryB n) z - deriv (generalizedAiryA n) z * generalizedAiryB n z =
       2 / π * (generalizedAiryOrder n : ℂ) ^ (1 / 2 : ℂ) * sin ((generalizedAiryOrder n : ℂ) * π) := by
   rw [deriv_generalizedAiryA, deriv_generalizedAiryB,
@@ -1030,7 +1066,7 @@ theorem smirnov_even_ode {m : ℝ} (hm : 0 < m) {t : ℝ} (ht : 0 < t) :
     ((Real.hasDerivAt_rpow_const (Or.inl ht.ne')).div_const _).neg
   have h2 := hasDerivAt_smirnovF m (2 - 1 / (m : ℂ)) ht
   refine (h1.ofReal_comp.mul h2).congr_deriv ?_
-  have hc := reg0F1_contiguous' (c := 1 - 1 / (m : ℂ)) (c₁ := 2 - 1 / (m : ℂ))
+  have hc := reg0F1_contiguous_of_eq (c := 1 - 1 / (m : ℂ)) (c₁ := 2 - 1 / (m : ℂ))
     (c₂ := 2 - 1 / (m : ℂ) + 1) (by ring) (by ring) (smirnovArg m t)
   rw [hc]
   have e1 : t ^ (m - 1) * t ^ (m - 1) = t ^ (m - 2) * t ^ m := by
@@ -1072,7 +1108,7 @@ theorem smirnov_odd_ode {m : ℝ} (hm : 0 < m) {t : ℝ} (ht : 0 < t) :
   · have h1 : HasDerivAt (fun t : ℝ => -(t ^ m / m)) (-(m * t ^ (m - 1) / m)) t :=
       ((Real.hasDerivAt_rpow_const (Or.inl ht.ne')).div_const _).neg
     refine (hF1.add (h1.ofReal_comp.mul hF2)).congr_deriv ?_
-    have hc := reg0F1_contiguous' (c := 1 + 1 / (m : ℂ)) (c₁ := 1 + 1 / (m : ℂ) + 1)
+    have hc := reg0F1_contiguous_of_eq (c := 1 + 1 / (m : ℂ)) (c₁ := 1 + 1 / (m : ℂ) + 1)
       (c₂ := 1 + 1 / (m : ℂ) + 1 + 1) (by ring) (by ring) (smirnovArg m t)
     rw [hc]
     have e1 : t ^ (m - 2) * t = t ^ (m - 1) := by
@@ -1316,10 +1352,10 @@ def smirnovAiryVariable (m : ℕ) (t : ℝ) : ℝ := ((m : ℝ) / 2) ^ (2 / (m :
 
 /-- The generalized equation's global initial-data solution space. -/
 @[dlmf 9.13.E2]
-theorem generalizedAiry_general_solution {n : ℕ} (hn : 1 ≤ n) {w w' : ℂ → ℂ}
+theorem generalizedAiry_general_solution {n : ℕ} {w w' : ℂ → ℂ}
     (hw : ∀ z, HasDerivAt w (w' z) z ∧ HasDerivAt w' (z ^ n * w z) z) :
     ∃ a b : ℂ, ∀ z, w z = a * generalizedAiryA n z + b * generalizedAiryB n z := by
-  have hW := generalizedAiry_wronskian hn 0
+  have hW := generalizedAiry_wronskian (n := n) 0
   rw [deriv_generalizedAiryA, deriv_generalizedAiryB] at hW
   refine (isGenAirySol_generalizedAiryA n).eq_combination (isGenAirySol_generalizedAiryB n)
     (w' := w') (fun z => ⟨(hw z).1, by simpa using (hw z).2⟩) ?_

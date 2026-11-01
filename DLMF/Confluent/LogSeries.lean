@@ -9,9 +9,32 @@ public import DLMF.Confluent.ParameterDerivatives
 /-!
 # The analytic part of the integer-parameter Tricomi expansion
 
-The logarithmic expansion separates into `log z` times a regularized Kummer function and
-an ordinary power series. Parameter differentiation proves convergence of that series;
-its analyticity at zero then supplies the small-argument remainder estimates.
+At a positive integer second parameter the logarithmic expansion of Tricomi's `U` separates
+into `log z` times a regularized Kummer function and an ordinary power series. This file defines
+that power series and proves its convergence and analyticity at zero, which supply the
+small-argument remainder estimates.
+
+## Main definitions
+
+* `tricomiLogSeriesCoeff`, `tricomiLogSeries`: the analytic part accompanying `log z`.
+* `tricomiLogSeriesRecipGammaCoeff`, `tricomiLogSeriesRecipGamma`: the same multiplied by
+  `1/Γ(a-n)`, with `ψ(a+k)/Γ(a-n)` written through the derivative of `1/Γ`.
+
+## Main results
+
+* `summable_tricomiLogSeries`, `analyticAt_tricomiLogSeries`: convergence and analyticity at
+  zero.
+* `tricomi_log_series_split`: separation of the logarithm from the convergent series.
+* `summable_tricomiLogSeriesRecipGamma`, `analyticAt_tricomiLogSeriesRecipGamma`: the same for
+  the reciprocal-Gamma form, for all `a`.
+* `tricomiLogSeriesRecipGamma_eq`: away from the poles of `Γ(a-n)` the two forms agree up to
+  the factor `1/Γ(a-n)`.
+* `tricomi_log_series_split_recipGamma`: the splitting in reciprocal-Gamma form, valid for
+  all `a`.
+
+## Implementation notes
+
+Convergence is proved by differentiating Kummer's series in its parameters.
 -/
 
 @[expose] public section

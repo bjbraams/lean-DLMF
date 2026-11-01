@@ -12,10 +12,24 @@ public import DLMF.OrthogonalPolynomials.ClassicalInstances
 /-!
 # Individual positive Hermite zeros
 
-Beals–Wong Theorem 5.3.2. The existing Hermite function satisfies
-`u'' + (2n+1-x²) u = 0`. Sturm comparison gives lower bounds for the gaps;
-comparison with a translated solution gives increasing positive gaps and upper bounds
-for each indexed zero. The existing Hermite–Laguerre identities enumerate the positive zeros.
+Bounds for the individual positive zeros of the Hermite polynomials (Beals–Wong
+Theorem 5.3.2). The Hermite function satisfies `u'' + (2n+1-x²) u = 0`. Sturm comparison
+gives lower bounds for the gaps between zeros; comparison with a translated solution gives
+increasing positive gaps and upper bounds for each indexed zero. The positive zeros are
+enumerated through the Hermite–Laguerre identities.
+
+## Main results
+
+* `positive_roots_even`, `positive_roots_odd`: the positive zeros of `H_{2m}` and `H_{2m+1}`
+  in increasing order.
+* `pi_div_freq_lt_gap`, `increasing_gap`: gaps between consecutive zeros exceed a free
+  half-period and increase.
+* `hermite_even_positive_zero_bounds`, `hermite_odd_positive_zero_bounds`: strict bounds for
+  each positive zero, Beals–Wong (5.3.18) and (5.3.19).
+
+## Implementation notes
+
+Zeros are indexed from zero.
 -/
 
 @[expose] public noncomputable section

@@ -19,15 +19,31 @@ The statements of DLMF §1.14(i)–(ii) for DLMF's Fourier transform
 `𝓕(f)(x) = (2π)^{-1/2} ∫ f(t) e^{ixt} dt` (`fourierTransform`, 1.14.1) and the cosine and sine
 transforms on `(0, ∞)`.
 
-Proved here from Mathlib through the bridge `fourierTransform_eq_fourier`
-(`𝓕(f)(x) = (2π)^{-1/2} 𝓕_Mathlib f(-x/(2π))`): continuity and the Riemann–Lebesgue lemma
-(§1.14(i)), the bound 1.14.2, the inversion formula 1.14.4 when `F = 𝓕(f)` is integrable, the
-convolution theorem (§1.14(i), after 1.14.5) and the uniqueness theorem. The integral
-Fourier transform agrees almost everywhere with Mathlib's unitary `L²` transform, yielding
-Parseval's formula 1.14.7_5, its bilinear form 1.14.7, convolution inversion 1.14.6 and the
-norm identity 1.14.8. Even and odd extensions give the cosine and sine pairings
-1.14.13–1.14.16. The bounded-variation inversion theorem 1.14.3, the principal-value form
-of 1.14.4 and the half-line inversion theorems 1.14.11–1.14.12 remain admitted.
+## Main results
+
+* `norm_fourierTransform_le`: `|F(x)| ≤ (2π)^{-1/2} ∫ |f(t)| dt` (DLMF 1.14.2).
+* `continuous_fourierTransform`, `tendsto_fourierTransform_cocompact`: continuity and the
+  Riemann–Lebesgue lemma (§1.14(i)).
+* `tendsto_fourierTransform_inversion_pv`: inversion at points of bounded variation
+  (DLMF 1.14.3).
+* `fourierTransform_inversion`, `tendsto_fourierTransform_inversion_of_contDiff`: Fourier
+  inversion (DLMF 1.14.4).
+* `integrable_fourierConvolution`, `fourierTransform_fourierConvolution`: the convolution
+  theorem (§1.14(i)).
+* `fourierConvolution_eq_integral`, `integral_fourierTransform_mul`,
+  `integral_fourierTransform_mul_conj`, `integral_norm_fourierTransform_sq`: DLMF 1.14.6–1.14.8.
+* `eq_of_fourierTransform_eq`: uniqueness.
+* `tendsto_fourierCosTransform_inversion`, `tendsto_fourierSinTransform_inversion`:
+  DLMF 1.14.11–1.14.12.
+* `integral_fourierCosTransform_mul`, `integral_fourierSinTransform_mul`,
+  `integral_fourierCosTransform_sq`, `integral_fourierSinTransform_sq`: DLMF 1.14.13–1.14.16.
+
+## Implementation notes
+
+Many results come from Mathlib through the bridge `fourierTransform_eq_fourier`
+(`𝓕(f)(x) = (2π)^{-1/2} 𝓕_Mathlib f(-x/(2π))`); the integral Fourier transform agrees almost
+everywhere with Mathlib's unitary `L²` transform, which gives the Parseval formulas. Even and
+odd extensions give the cosine and sine pairings.
 
 Hypotheses DLMF leaves implicit are explicit: integrability for each transform, and the one-sided
 limits `f(u±)` in 1.14.3 are given as hypotheses (they exist for functions of bounded variation).
@@ -41,18 +57,18 @@ open scoped FourierTransform ComplexConjugate ENNReal
 namespace DLMF.AlgebraicAnalytic
 
 /-- The normalizing constant: `(2π)^{-1/2} · (2π)^{-1/2} = (2π)⁻¹` in `ℂ`. -/
-private lemma g1e_inv_sqrt_mul_self :
+private lemma inv_sqrt_two_pi_mul_self :
     ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) * ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) =
       ((2 * Real.pi : ℝ) : ℂ)⁻¹ := by
   rw [← mul_inv, ← ofReal_mul, Real.mul_self_sqrt (by positivity)]
 
 /-- Nonvanishing under the stated hypotheses: `((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) ≠ 0`. -/
-private lemma g1e_inv_sqrt_ne_zero : ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) ≠ 0 := by
+private lemma inv_sqrt_two_pi_ne_zero : ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) ≠ 0 := by
   refine inv_ne_zero (ofReal_ne_zero.mpr ?_)
   exact (Real.sqrt_pos.mpr (by positivity)).ne'
 
 /-- The integrand of 1.14.1 is integrable when `f` is. -/
-lemma g1e_integrable_mul_cexp {f : ℝ → ℂ} (hf : Integrable f) (x : ℝ) :
+lemma integrable_mul_cexp_I_mul {f : ℝ → ℂ} (hf : Integrable f) (x : ℝ) :
     Integrable fun t : ℝ => f t * cexp (I * x * t) := by
   refine hf.norm.mono' (hf.aestronglyMeasurable.mul (by fun_prop : Continuous fun t : ℝ =>
     cexp (I * x * t)).aestronglyMeasurable) (Eventually.of_forall fun t => ?_)
@@ -115,7 +131,7 @@ theorem continuous_fourierTransform {f : ℝ → ℂ} (hf : Integrable f) :
     Continuous (fourierTransform f) := by
   unfold fourierTransform
   refine continuous_const.mul (continuous_of_dominated (bound := fun t => ‖f t‖) ?_ ?_ hf.norm ?_)
-  · exact fun x => (g1e_integrable_mul_cexp hf x).aestronglyMeasurable
+  · exact fun x => (integrable_mul_cexp_I_mul hf x).aestronglyMeasurable
   · refine fun x => Eventually.of_forall fun t => ?_
     rw [norm_mul, show I * (x : ℂ) * t = ((x * t : ℝ) : ℂ) * I by push_cast; ring,
       norm_exp_ofReal_mul_I, mul_one]
@@ -189,7 +205,7 @@ theorem fourierTransform_inversion {f : ℝ → ℂ} (hf : Continuous f) (hfi : 
       rw [hfun] at this
       refine this.congr (Eventually.of_forall fun x => ?_)
       simp only
-      rw [← mul_assoc, inv_mul_cancel₀ g1e_inv_sqrt_ne_zero, one_mul]
+      rw [← mul_assoc, inv_mul_cancel₀ inv_sqrt_two_pi_ne_zero, one_mul]
     exact (integrable_comp_mul_left_iff (𝓕 f) ha0).mp h1
   have hinv := congrFun (hf.fourierInv_fourier_eq hfi hFF) t
   rw [Real.fourierInv_eq'] at hinv
@@ -208,7 +224,7 @@ theorem fourierTransform_inversion {f : ℝ → ℂ} (hf : Continuous f) (hfi : 
   simp only [hg, smul_eq_mul, inner]
   have hai : |a⁻¹| = 2 * Real.pi := by
     rw [ha, abs_inv, abs_neg, abs_of_pos (by positivity), one_div, inv_inv]
-  rw [hai, Complex.real_smul, ← mul_assoc, hc, g1e_inv_sqrt_mul_self,
+  rw [hai, Complex.real_smul, ← mul_assoc, hc, inv_sqrt_two_pi_mul_self,
     inv_mul_cancel₀ (ofReal_ne_zero.mpr hpi), one_mul]
   congr 1
   funext v
@@ -262,7 +278,7 @@ theorem integral_fourierTransform_mul_conj {f g : ℝ → ℂ} (hf : Integrable 
     funext x
     rw [fourierTransform_eq_fourier, fourierTransform_eq_fourier, map_mul, map_inv₀, conj_ofReal]
     have hx : -x / (2 * Real.pi) = a * x := by dsimp [a]; ring
-    rw [hx, ← g1e_inv_sqrt_mul_self]
+    rw [hx, ← inv_sqrt_two_pi_mul_self]
     ring
   rw [he, integral_const_mul, Measure.integral_comp_mul_left (fun x => 𝓕 f x * conj (𝓕 g x)) a]
   have habs : |a⁻¹| = 2 * Real.pi := by
@@ -343,7 +359,7 @@ theorem eq_of_fourierTransform_eq {f g : ℝ → ℂ} (hf : Continuous f) (hg : 
     intro x
     have e1 : fourierTransform k x = fourierTransform f x - fourierTransform g x := by
       simp only [fourierTransform, hk, sub_mul]
-      rw [integral_sub (g1e_integrable_mul_cexp hfi x) (g1e_integrable_mul_cexp hgi x), mul_sub]
+      rw [integral_sub (integrable_mul_cexp_I_mul hfi x) (integrable_mul_cexp_I_mul hgi x), mul_sub]
     rw [e1, h x, sub_self]
   have hF0 : 𝓕 k = fun _ => 0 := by
     funext w
@@ -353,7 +369,7 @@ theorem eq_of_fourierTransform_eq {f g : ℝ → ℂ} (hf : Continuous f) (hg : 
       have : (2 * Real.pi : ℝ) ≠ 0 := by positivity
       field_simp
     rw [hw] at this
-    exact (mul_eq_zero.mp this).resolve_left g1e_inv_sqrt_ne_zero
+    exact (mul_eq_zero.mp this).resolve_left inv_sqrt_two_pi_ne_zero
   have hinv := hkc.fourierInv_fourier_eq hki (by rw [hF0]; exact integrable_zero _ _ _)
   rw [hF0] at hinv
   funext t
@@ -385,7 +401,7 @@ private theorem memLp_oddExtension {f : ℝ → ℂ} {p : ℝ≥0∞}
 private theorem fourierTransform_evenExtension {f : ℝ → ℂ} (hf : IntegrableOn f (Ioi 0))
     (x : ℝ) : fourierTransform (fun t : ℝ => f |t|) x = fourierCosTransform f x := by
   have hi := integral_eq_integral_Ioi_add_neg
-    (g1e_integrable_mul_cexp (integrable_evenExtension hf) x)
+    (integrable_mul_cexp_I_mul (integrable_evenExtension hf) x)
   have he (t : ℝ) (ht : 0 < t) :
       f |t| * cexp (I * x * t) + f |-t| * cexp (I * x * (-t)) =
       2 * (f t * (Real.cos (x * t) : ℂ)) := by
@@ -407,7 +423,7 @@ private theorem fourierTransform_oddExtension {f : ℝ → ℂ} (hf : Integrable
       I * fourierSinTransform f x := by
   have hfull : Integrable (fun t : ℝ => if 0 ≤ t then f |t| else -f |t|) :=
     memLp_one_iff_integrable.mp (memLp_oddExtension (memLp_one_iff_integrable.mpr hf))
-  have hi := integral_eq_integral_Ioi_add_neg (g1e_integrable_mul_cexp hfull x)
+  have hi := integral_eq_integral_Ioi_add_neg (integrable_mul_cexp_I_mul hfull x)
   have he (t : ℝ) (ht : 0 < t) :
       (if 0 ≤ t then f |t| else -f |t|) * cexp (I * x * t) +
         (if 0 ≤ -t then f |-t| else -f |-t|) * cexp (I * x * (-t)) =

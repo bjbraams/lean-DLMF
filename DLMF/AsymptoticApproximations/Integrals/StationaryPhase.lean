@@ -12,9 +12,15 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 /-!
 # The method of stationary phase (DLMF §2.3(iv))
 
-* 2.3.20: the analogue of Watson's lemma for `∫₀^∞ e^{ixt} q(t) dt`;
-* 2.3.19, 2.3.21–2.3.23: `∫ₐᵇ e^{ixp(t)} q(t) dt` with the stationary point (if any) at `a`,
-  with the functions `Pₛ = stationaryPhaseP p q s` of 2.3.21.
+## Main results
+
+* `stationaryPhase_watson`: the analogue of Watson's lemma for `∫₀^∞ e^{ixt} q(t) dt`
+  (DLMF 2.3.20).
+* `stationaryPhase_endpoint`, `stationaryPhase_endpoint_infinite`: `∫ₐᵇ e^{ixp(t)} q(t) dt`
+  with the stationary point (if any) at `a`, with the functions `Pₛ = stationaryPhaseP p q s`
+  of 2.3.21 (DLMF 2.3.19, 2.3.21–2.3.23).
+
+## Implementation notes
 
 "Infinitely differentiable expansions" (DLMF) are expansions whose termwise derivatives of every
 order are expansions of the derivatives; the derivative of `t^ν` of order `k` is

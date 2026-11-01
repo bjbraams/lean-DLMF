@@ -6,20 +6,44 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.JacobiElliptic.Addition
+public import Carlson.Elliptic.Addition
 
 /-!
 # Jacobian elliptic functions: elementary identities (DLMF §22.6)
 
-The sums of squares 22.6.1 are proved from the theta identities 20.7.2–20.7.3; the
-other sums of squares 22.6.2–22.6.4 follow from them by Glaisher's relations. The double-argument
-formulas 22.6.5–22.6.13 are the cases `u = v` of the addition theorems 22.8.1–22.8.9
-(the second forms of 22.6.6–22.6.7 also use 22.6.1). The double-argument formulas
-22.6.14–22.6.16 are proved from the theta duplication identities, 22.6.17–22.6.18 and the
-half-argument formulas 22.6.19–22.6.21 from 22.6.6–22.6.7 and 22.6.1. Jacobi's imaginary
-transformation (Table 22.6.1) is proved from `τ(k') = -1/τ(k)` and the theta transformations
-under `τ ↦ -1/τ`. The half-argument formula 22.6.22 follows from the doubled pair sums and Glaisher quotients. All
-identities are pointwise, at points where the functions involved are finite (`JacobiRegulark`)
-and the printed denominators are nonzero.
+Sums of squares, double- and half-argument formulas and Jacobi's imaginary transformation for
+the Jacobian elliptic functions in modulus form (DLMF §22.6). All identities are pointwise, at
+points where the functions involved are finite (`JacobiRegulark`) and the printed denominators
+are nonzero.
+
+## Main definitions
+
+* `jacobiLetterModularSwap`: the letter map `s ↦ s`, `c ↦ n`, `d ↦ d`, `n ↦ c` of the modular
+  transformation `τ ↦ -1/τ`.
+
+## Main results
+
+* `jacobi_sq_sum`: `sn² + cn² = 1` and `k² sn² + dn² = 1` (DLMF 22.6.1).
+* `jacobi_sq_sum_s`, `jacobi_sq_sum_c`, `jacobi_sq_sum_d`: DLMF 22.6.2–22.6.4.
+* `jacobiSnk_two_mul`, `jacobiCnk_two_mul`, `jacobiDnk_two_mul`, `jacobiCdk_two_mul`,
+  `jacobiSdk_two_mul`, `jacobiNdk_two_mul`, `jacobiDck_two_mul`, `jacobiNck_two_mul`,
+  `jacobiSck_two_mul`: the double-argument formulas DLMF 22.6.5–22.6.13.
+* `jacobi_two_mul_s`, `jacobi_two_mul_ratio`: DLMF 22.6.14–22.6.16 and 22.6.17–22.6.18.
+* `jacobiSnk_half_sq`, `jacobiCnk_half_sq`, `jacobiDnk_half_sq`, `jacobiPQk_half_sq`: the
+  half-argument formulas DLMF 22.6.19–22.6.22.
+* `jacobiPQk_I_mul`, `jacobi_imaginary_transformation`: Jacobi's imaginary transformation,
+  Table 22.6.1, with the complementary modulus `k' = √(1 - k²)`.
+
+## Implementation notes
+
+The sums of squares 22.6.1 are proved from the theta identities 20.7.2–20.7.3; the other sums
+of squares 22.6.2–22.6.4 follow by Glaisher's relations. The double-argument formulas
+22.6.5–22.6.13 are the cases `u = v` of the addition theorems 22.8.1–22.8.9 (the second forms
+of 22.6.6–22.6.7 also use 22.6.1). The formulas 22.6.14–22.6.16 are proved from the theta
+duplication identities; 22.6.17–22.6.18 and the half-argument formulas 22.6.19–22.6.21 follow
+from 22.6.6–22.6.7 and 22.6.1, and 22.6.22 from the doubled pair sums and Glaisher quotients.
+Jacobi's imaginary transformation is proved from `τ(k') = -1/τ(k)` and the theta
+transformations under `τ ↦ -1/τ`.
 -/
 
 @[expose] public section
@@ -60,9 +84,9 @@ theorem jacobi_sq_sum {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   generalize jacobiZetak z k = ζ at hn' ⊢
   generalize jacobiTauk k = τ at hτ hn' hmod ⊢
   subst hmod
-  have h2 := je22a_thetaTwo_zero_ne_zero hτ
-  have h3 := je22a_thetaThree_zero_ne_zero hτ
-  have h4 := je22a_thetaFour_zero_ne_zero hτ
+  have h2 := jacobiThetaTwoTau_zero_ne_zero hτ
+  have h3 := jacobiThetaThreeTau_zero_ne_zero hτ
+  have h4 := jacobiThetaFourTau_zero_ne_zero hτ
   have e3 := DLMF.Theta.jacobiTheta_sq_two_four ζ τ hτ
   have e2 := DLMF.Theta.jacobiTheta_sq_three_four ζ τ hτ
   simp only [DLMF.Theta.jacobiThetaTwoNullTau, DLMF.Theta.jacobiThetaThreeNullTau,
@@ -75,7 +99,7 @@ theorem jacobi_sq_sum {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- Glaisher's relations expressing the nine functions with a letter other than `n` through
 `sn, cn, dn` (DLMF 22.2.10, `r = n`). -/
-theorem je22a_glaisher_via_n {z k : ℂ} (hn : JacobiRegulark .n z k) :
+theorem jacobiPQk_eq_div_of_regular_n {z k : ℂ} (hn : JacobiRegulark .n z k) :
     jacobiCsk z k = jacobiCnk z k / jacobiSnk z k ∧ jacobiDsk z k = jacobiDnk z k / jacobiSnk z k ∧
     jacobiNsk z k = 1 / jacobiSnk z k ∧ jacobiSck z k = jacobiSnk z k / jacobiCnk z k ∧
     jacobiDck z k = jacobiDnk z k / jacobiCnk z k ∧ jacobiNck z k = 1 / jacobiCnk z k ∧
@@ -90,7 +114,7 @@ theorem je22a_glaisher_via_n {z k : ℂ} (hn : JacobiRegulark .n z k) :
 
 set_option hygiene false in
 /-- Close a polynomial consequence of `h1 : sn² + cn² = 1`, `h2 : k² sn² + dn² = 1`. -/
-macro "je22a_lc" : tactic => `(tactic| first
+macro "jacobi_lin_comb" : tactic => `(tactic| first
   | linear_combination h1 - h2 | linear_combination h2 - h1 | linear_combination h2
   | linear_combination -h2 | linear_combination h1 | linear_combination -h1
   | linear_combination h2 - k ^ 2 * h1 | linear_combination k ^ 2 * h1 - h2
@@ -104,10 +128,10 @@ theorem jacobi_sq_sum_s {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
     1 + jacobiCsk z k ^ 2 = k ^ 2 + jacobiDsk z k ^ 2 ∧
       k ^ 2 + jacobiDsk z k ^ 2 = jacobiNsk z k ^ 2 := by
   obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
-  obtain ⟨e1, e2, e3, -⟩ := je22a_glaisher_via_n hn
+  obtain ⟨e1, e2, e3, -⟩ := jacobiPQk_eq_div_of_regular_n hn
   have hsn : jacobiSnk z k ≠ 0 := jacobiPQk_ne_zero (by decide) hs hn
   rw [e1, e2, e3]
-  refine ⟨?_, ?_⟩ <;> field_simp <;> je22a_lc
+  refine ⟨?_, ?_⟩ <;> field_simp <;> jacobi_lin_comb
 
 /-- DLMF 22.6.3: `k'² sc² + 1 = dc² = k'² nc² + k²`, where `sn`, `cn`, `dn` are finite and
 `cn ≠ 0`. Proved from 22.6.1. -/
@@ -117,10 +141,10 @@ theorem jacobi_sq_sum_c {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
     jacobiComodulusk k ^ 2 * jacobiSck z k ^ 2 + 1 = jacobiDck z k ^ 2 ∧
       jacobiDck z k ^ 2 = jacobiComodulusk k ^ 2 * jacobiNck z k ^ 2 + k ^ 2 := by
   obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
-  obtain ⟨-, -, -, e4, e5, e6, -⟩ := je22a_glaisher_via_n hn
+  obtain ⟨-, -, -, e4, e5, e6, -⟩ := jacobiPQk_eq_div_of_regular_n hn
   have hcn : jacobiCnk z k ≠ 0 := jacobiPQk_ne_zero (by decide) hc hn
   rw [e4, e5, e6, jacobiComodulusk_sq]
-  refine ⟨?_, ?_⟩ <;> field_simp <;> je22a_lc
+  refine ⟨?_, ?_⟩ <;> field_simp <;> jacobi_lin_comb
 
 /-- DLMF 22.6.4: `-k²k'² sd² = k²(cd² - 1) = k'²(1 - nd²)`, where `sn`, `cn`, `dn` are finite
 and `dn ≠ 0`. Proved from 22.6.1. -/
@@ -130,10 +154,10 @@ theorem jacobi_sq_sum_d {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
     -k ^ 2 * jacobiComodulusk k ^ 2 * jacobiSdk z k ^ 2 = k ^ 2 * (jacobiCdk z k ^ 2 - 1) ∧
       k ^ 2 * (jacobiCdk z k ^ 2 - 1) = jacobiComodulusk k ^ 2 * (1 - jacobiNdk z k ^ 2) := by
   obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
-  obtain ⟨-, -, -, -, -, -, e7, e8, e9⟩ := je22a_glaisher_via_n hn
+  obtain ⟨-, -, -, -, -, -, e7, e8, e9⟩ := jacobiPQk_eq_div_of_regular_n hn
   have hdn : jacobiDnk z k ≠ 0 := jacobiPQk_ne_zero (by decide) hd hn
   rw [e7, e8, e9, jacobiComodulusk_sq]
-  refine ⟨?_, ?_⟩ <;> field_simp <;> je22a_lc
+  refine ⟨?_, ?_⟩ <;> field_simp <;> jacobi_lin_comb
 
 /-! ### Double argument (§22.6(ii)) -/
 
@@ -269,7 +293,7 @@ local notation "θ₃" => jacobiThetaThreeTau
 local notation "θ₄" => jacobiThetaFourTau
 
 /-- `1 - k² sn⁴ z ≠ 0` where `sn` is finite at `z` and `2z` (helper). -/
-lemma p22R1_den_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
+private lemma one_sub_sq_mul_jacobiSnk_pow_four_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
     (hn : JacobiRegulark .n z k) (hn2 : JacobiRegulark .n (2 * z) k) :
     1 - k ^ 2 * jacobiSnk z k ^ 4 ≠ 0 := by
   have hτ := jacobiTauk_im_pos hk
@@ -286,8 +310,8 @@ lemma p22R1_den_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   generalize jacobiZetak z k = x at hu' hu2 ⊢
   generalize jacobiTauk k = τ at hτ hu' hu2 hmod ⊢
   subst hmod
-  obtain ⟨h2, h3, h4, -⟩ := p22R1_nulls τ hτ
-  have N4 := p22R1_four_add_mul_sub x x τ hτ
+  obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
+  have N4 := jacobiThetaFourTau_add_mul_jacobiThetaFourTau_sub x x τ hτ
   rw [sub_self] at N4
   intro h0
   field_simp at h0
@@ -322,20 +346,20 @@ theorem jacobi_two_mul_s {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   generalize jacobiZetak z k = x at hu' hden ⊢
   generalize jacobiTauk k = τ at hτ hu' hden hmod ⊢
   subst hmod
-  obtain ⟨h2, h3, h4, -⟩ := p22R1_nulls τ hτ
+  obtain ⟨h2, h3, h4, -⟩ := jacobiThetaTau_zero_ne_zero_and_pow_four τ hτ
   have hx2 : θ₂ x τ ≠ 0 := by intro h0; apply hden; simp [h0]
   have hx3 : θ₃ x τ ≠ 0 := by intro h0; apply hden; simp [h0]
   have hx4 : θ₄ x τ ≠ 0 := by intro h0; apply hden; simp [h0]
-  have dup := p22R1_mixed14 x x τ hτ
+  have dup := jacobiThetaOneTau_add_mul_jacobiThetaFourTau_sub x x τ hτ
   rw [sub_self] at dup
   have hD : θ₁ (x + x) τ ≠ 0 := by
     intro h0
     rw [h0] at dup
     have : θ₁ x τ * θ₄ x τ * (θ₂ x τ * θ₃ x τ) = 0 := by linear_combination -dup / 2
     simp [hu', hx2, hx3, hx4] at this
-  have N4 := p22R1_four_add_mul_sub x x τ hτ
-  have N3 := p22R1_S3 x x τ hτ
-  have N2 := p22R1_S2 x x τ hτ
+  have N4 := jacobiThetaFourTau_add_mul_jacobiThetaFourTau_sub x x τ hτ
+  have N3 := jacobiThetaThreeTau_add_mul_jacobiThetaThreeTau_sub x x τ hτ
+  have N2 := jacobiThetaTwoTau_add_mul_jacobiThetaTwoTau_sub x x τ hτ
   rw [sub_self] at N4 N3 N2
   generalize x + x = X at hD dup N4 N3 N2 ⊢
   refine ⟨?_, ?_, ?_⟩
@@ -358,7 +382,7 @@ theorem jacobi_two_mul_ratio {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ
         jacobiSnk z k ^ 2 * jacobiDnk z k ^ 2 / jacobiCnk z k ^ 2 ∧
       (1 - jacobiDnk (2 * z) k) / (1 + jacobiDnk (2 * z) k) =
         k ^ 2 * jacobiSnk z k ^ 2 * jacobiCnk z k ^ 2 / jacobiDnk z k ^ 2 := by
-  have hD := p22R1_den_two hk hn hn2
+  have hD := one_sub_sq_mul_jacobiSnk_pow_four_ne_zero hk hn hn2
   obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
   rw [(jacobiCnk_two_mul hk hn hD).1] at hc2 ⊢
   rw [(jacobiDnk_two_mul hk hn hD).1] at hd2 ⊢
@@ -395,7 +419,7 @@ theorem jacobiSnk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   obtain ⟨w, rfl⟩ : ∃ w, z = 2 * w := ⟨z / 2, by ring⟩
   have hw : 2 * w / 2 = w := by ring
   rw [hw] at hn2 ⊢
-  have hD := p22R1_den_two hk hn2 hn
+  have hD := one_sub_sq_mul_jacobiSnk_pow_four_ne_zero hk hn2 hn
   have hD' : 1 - jacobiSnk w k ^ 4 * k ^ 2 ≠ 0 := by rwa [mul_comm] at hD
   obtain ⟨e1, e2⟩ := jacobi_sq_sum hk hn2
   have hK := jacobiComodulusk_sq k
@@ -431,7 +455,7 @@ theorem jacobiCnk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   obtain ⟨w, rfl⟩ : ∃ w, z = 2 * w := ⟨z / 2, by ring⟩
   have hw : 2 * w / 2 = w := by ring
   rw [hw] at hn2 ⊢
-  have hD := p22R1_den_two hk hn2 hn
+  have hD := one_sub_sq_mul_jacobiSnk_pow_four_ne_zero hk hn2 hn
   have hD' : 1 - jacobiSnk w k ^ 4 * k ^ 2 ≠ 0 := by rwa [mul_comm] at hD
   obtain ⟨e1, e2⟩ := jacobi_sq_sum hk hn2
   have hK := jacobiComodulusk_sq k
@@ -482,7 +506,7 @@ theorem jacobiDnk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   obtain ⟨w, rfl⟩ : ∃ w, z = 2 * w := ⟨z / 2, by ring⟩
   have hw : 2 * w / 2 = w := by ring
   rw [hw] at hn2 ⊢
-  have hD := p22R1_den_two hk hn2 hn
+  have hD := one_sub_sq_mul_jacobiSnk_pow_four_ne_zero hk hn2 hn
   have hD' : 1 - jacobiSnk w k ^ 4 * k ^ 2 ≠ 0 := by rwa [mul_comm] at hD
   obtain ⟨e1, e2⟩ := jacobi_sq_sum hk hn2
   have hK := jacobiComodulusk_sq k
@@ -514,14 +538,14 @@ theorem jacobiDnk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
           k ^ 2 * (jacobiSnk w k) ^ 2 - 1) * hK
 
 /-- Doubled Jacobi cosine and delta pair sums in terms of the half-argument values. -/
-private lemma p22R1_half_pair_sums {k w : ℂ} (hk : k ∈ jacobiModulusDomain)
+private lemma jacobiCnk_jacobiDnk_two_mul_pair_sums {k w : ℂ} (hk : k ∈ jacobiModulusDomain)
     (hn : JacobiRegulark .n w k) (hn2 : JacobiRegulark .n (2 * w) k) :
     let D := 1 - k ^ 2 * jacobiSnk w k ^ 4
     D * (jacobiCnk (2 * w) k + 1) = 2 * jacobiCnk w k ^ 2 ∧
       D * (jacobiDnk (2 * w) k + 1) = 2 * jacobiDnk w k ^ 2 ∧
       D * (jacobiCnk (2 * w) k + jacobiDnk (2 * w) k) =
         2 * jacobiCnk w k ^ 2 * jacobiDnk w k ^ 2 := by
-  have hD := p22R1_den_two hk hn hn2
+  have hD := one_sub_sq_mul_jacobiSnk_pow_four_ne_zero hk hn hn2
   have e1 := (jacobi_sq_sum hk hn).1
   have e2 := (jacobi_sq_sum hk hn).2
   have ec := (jacobiCnk_two_mul hk hn hD).1
@@ -555,9 +579,9 @@ theorem jacobiPQk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q r : Ja
   simp only [hw] at hz2 ⊢
   have hn : JacobiRegulark .n w k := hz2 .n
   have hn2 : JacobiRegulark .n (2 * w) k := hz .n
-  have hD := p22R1_den_two hk hn hn2
+  have hD := one_sub_sq_mul_jacobiSnk_pow_four_ne_zero hk hn hn2
   let D : ℂ := 1 - k ^ 2 * jacobiSnk w k ^ 4
-  have hsum := p22R1_half_pair_sums hk hn hn2
+  have hsum := jacobiCnk_jacobiDnk_two_mul_pair_sums hk hn hn2
   change D * (jacobiCnk (2 * w) k + 1) = 2 * jacobiCnk w k ^ 2 ∧
     D * (jacobiDnk (2 * w) k + 1) = 2 * jacobiDnk w k ^ 2 ∧
     D * (jacobiCnk (2 * w) k + jacobiDnk (2 * w) k) =
@@ -619,8 +643,8 @@ theorem jacobiPQk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q r : Ja
     rw [eq_div_iff hcd, div_pow]
     field_simp
     exact hcross3.symm
-  have eG := je22a_glaisher_via_n hn2
-  have eGw := je22a_glaisher_via_n hn
+  have eG := jacobiPQk_eq_div_of_regular_n hn2
+  have eGw := jacobiPQk_eq_div_of_regular_n hn
   cases p <;> cases q <;> cases r <;> try { exfalso; first | exact hp rfl | exact hq rfl | exact hr rfl | exact hpq rfl | exact hpr rfl | exact hqr rfl }
   all_goals have hCsk (t : ℂ) : jacobiPQk .c .s t k = jacobiCsk t k := rfl
   all_goals have hDsk (t : ℂ) : jacobiPQk .d .s t k = jacobiDsk t k := rfl
@@ -643,35 +667,17 @@ theorem jacobiPQk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q r : Ja
 
 /-! ### Jacobi's imaginary transformation (§22.6(iv), Table 22.6.1) -/
 
-/-- The principal square root of a slit-plane number has positive real part. -/
-theorem p22R1_re_sqrt_pos {w : ℂ} (hw : w ∈ slitPlane) : 0 < (w ^ (1 / 2 : ℂ)).re := by
-  rcases (p22R1_sqrt_parts w).1.eq_or_lt with h | h
-  · exfalso
-    have hsq := p22R1_sqrt_sq w
-    set r := w ^ (1 / 2 : ℂ)
-    have hr : r = (r.im : ℂ) * I := by
-      apply Complex.ext <;> simp [h.symm]
-    have : w = -((r.im : ℂ) ^ 2) := by
-      rw [← hsq]; nth_rewrite 1 [hr]; rw [mul_pow, I_sq]; ring
-    rw [this, mem_slitPlane_iff] at hw
-    rcases hw with hw | hw
-    · have : (-((r.im : ℂ) ^ 2)).re = -(r.im ^ 2) := by
-        rw [← ofReal_pow, ← ofReal_neg, ofReal_re]
-      rw [this] at hw; nlinarith [sq_nonneg r.im]
-    · apply hw; rw [← ofReal_pow, ← ofReal_neg, ofReal_im]
-  · exact h
-
 /-- The complementary modulus of a modulus in `jacobiModulusDomain` is again in the domain. -/
-theorem p22R1_comodulus_mem {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+theorem jacobiComodulusk_mem_jacobiModulusDomain {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     jacobiComodulusk k ∈ jacobiModulusDomain := by
   have hsl : 1 - k ^ 2 ∈ slitPlane := by
-    have := hk; rw [p22R1_domain_eq] at this; exact this.2
-  refine ⟨p22R1_re_sqrt_pos hsl, fun him => ?_⟩
+    have := hk; rw [jacobiModulusDomain_eq] at this; exact this.2
+  refine ⟨Carlson.re_cpow_half_pos hsl, fun him => ?_⟩
   have hsq := jacobiComodulusk_sq k
   set r := jacobiComodulusk k
   have hr : r = (r.re : ℂ) := by rw [← re_add_im r, him]; simp
-  have hpos : 0 < r.re := p22R1_re_sqrt_pos hsl
-  have hm := p22R1_sq_of_mem_domain hk
+  have hpos : 0 < r.re := Carlson.re_cpow_half_pos hsl
+  have hm := sq_im_ne_zero_or_mem_Ioo_of_mem_jacobiModulusDomain hk
   have hk2 : k ^ 2 = ((1 - r.re ^ 2 : ℝ) : ℂ) := by
     have : k ^ 2 = 1 - r ^ 2 := by rw [hsq]; ring
     rw [this, hr]; push_cast; simp
@@ -682,36 +688,36 @@ theorem p22R1_comodulus_mem {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
 
 /-- Identity under the stated parameter and domain assumptions: `compEllIntKk (jacobiComodulusk k)
 = compEllIntKpk k`. -/
-theorem p22R1_K_comodulus (k : ℂ) : compEllIntKk (jacobiComodulusk k) = compEllIntKpk k := by
+theorem compEllIntKk_jacobiComodulusk_eq_compEllIntKpk (k : ℂ) : compEllIntKk (jacobiComodulusk k) = compEllIntKpk k := by
   rw [compEllIntKk, compEllIntKpk, jacobiComodulusk_sq]
 
 /-- Identity under the stated parameter and domain assumptions: `compEllIntKpk (jacobiComodulusk
 k) = compEllIntKk k`. -/
-lemma p22R1_Kp_comodulus (k : ℂ) : compEllIntKpk (jacobiComodulusk k) = compEllIntKk k := by
+private lemma compEllIntKpk_jacobiComodulusk_eq_compEllIntKk (k : ℂ) : compEllIntKpk (jacobiComodulusk k) = compEllIntKk k := by
   rw [compEllIntKk, compEllIntKpk, jacobiComodulusk_sq]; ring_nf
 
 /-- Identity under the stated parameter and domain assumptions: `jacobiTauk (jacobiComodulusk k) =
 -1 / jacobiTauk k`. -/
-lemma p22R1_tau_comodulus {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+private lemma jacobiTauk_jacobiComodulusk {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     jacobiTauk (jacobiComodulusk k) = -1 / jacobiTauk k := by
   have h1 := compEllIntKk_ne_zero hk
   have h2 : compEllIntKpk k ≠ 0 := by
-    rw [← p22R1_K_comodulus]; exact compEllIntKk_ne_zero (p22R1_comodulus_mem hk)
-  rw [jacobiTauk, jacobiTauk, p22R1_K_comodulus, p22R1_Kp_comodulus]
+    rw [← compEllIntKk_jacobiComodulusk_eq_compEllIntKpk]; exact compEllIntKk_ne_zero (jacobiComodulusk_mem_jacobiModulusDomain hk)
+  rw [jacobiTauk, jacobiTauk, compEllIntKk_jacobiComodulusk_eq_compEllIntKpk, compEllIntKpk_jacobiComodulusk_eq_compEllIntKk]
   field_simp
   simp [I_sq]
 
 /-- Letter map of the modular transformation `τ ↦ -1/τ`: `s ↦ s`, `c ↦ n`, `d ↦ d`, `n ↦ c`. -/
-def p22R1_sig : JacobiLetter → JacobiLetter
+def jacobiLetterModularSwap : JacobiLetter → JacobiLetter
   | .s => .s
   | .c => .n
   | .d => .d
   | .n => .c
 
 /-- The normalized thetas under `τ ↦ -1/τ`. -/
-lemma p22R1_letter_neg_inv {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) (ζ : ℂ) :
+private lemma jacobiLetterTheta_neg_inv {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) (ζ : ℂ) :
     jacobiLetterTheta p ζ τ = cexp (I * (-1 / τ) * ζ ^ 2 / π) * (if p = .s then -I else 1) *
-      jacobiLetterTheta (p22R1_sig p) (ζ * (-1 / τ)) (-1 / τ) := by
+      jacobiLetterTheta (jacobiLetterModularSwap p) (ζ * (-1 / τ)) (-1 / τ) := by
   have hτ0 : τ ≠ 0 := fun h => by simp [h] at hτ
   have hA : (-I * τ) ^ (1 / 2 : ℂ) ≠ 0 := by
     rw [Ne, cpow_eq_zero_iff]; push Not; intro h; exact absurd (by simpa using h) hτ0
@@ -724,12 +730,12 @@ lemma p22R1_letter_neg_inv {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) (ζ :
   have t40 := DLMF.Theta.jacobiThetaFourTau_neg_inv hτ 0
   simp only [zero_mul, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero,
     zero_div, Complex.exp_zero, one_mul] at t20 t30 t40
-  have n2 := je22a_thetaTwo_zero_ne_zero hτ
-  have n3 := je22a_thetaThree_zero_ne_zero hτ
-  have n4 := je22a_thetaFour_zero_ne_zero hτ
+  have n2 := jacobiThetaTwoTau_zero_ne_zero hτ
+  have n3 := jacobiThetaThreeTau_zero_ne_zero hτ
+  have n4 := jacobiThetaFourTau_zero_ne_zero hτ
   set A := (-I * τ) ^ (1 / 2 : ℂ)
   set E := cexp (I * (-1 / τ) * ζ ^ 2 / π)
-  cases p <;> simp only [jacobiLetterTheta, p22R1_sig, reduceCtorEq, ↓reduceIte]
+  cases p <;> simp only [jacobiLetterTheta, jacobiLetterModularSwap, reduceCtorEq, ↓reduceIte]
   · rw [← t20, ← t30, ← t40]
     have : jacobiThetaOneTau ζ τ = -I * E * jacobiThetaOneTau (ζ * (-1 / τ)) (-1 / τ) / A := by
       rw [← t1]; field_simp
@@ -748,34 +754,34 @@ lemma p22R1_letter_neg_inv {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) (ζ :
     rw [this]; field_simp
 
 /-- General form of Jacobi's imaginary transformation. -/
-theorem p22R1_imag_PQ {k : ℂ} (hk : k ∈ jacobiModulusDomain) (p q : JacobiLetter) (hpq : p ≠ q)
+theorem jacobiPQk_I_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) (p q : JacobiLetter) (hpq : p ≠ q)
     (z : ℂ) : jacobiPQk p q (I * z) k =
       (if p = .s then -I else 1) / (if q = .s then -I else 1) *
         ((if p = .s then -1 else 1) * (if q = .s then -1 else 1)) *
-        jacobiPQk (p22R1_sig p) (p22R1_sig q) z (jacobiComodulusk k) := by
+        jacobiPQk (jacobiLetterModularSwap p) (jacobiLetterModularSwap q) z (jacobiComodulusk k) := by
   have hτ := jacobiTauk_im_pos hk
-  have hσ : p22R1_sig p ≠ p22R1_sig q := by
-    cases p <;> cases q <;> simp_all [p22R1_sig]
+  have hσ : jacobiLetterModularSwap p ≠ jacobiLetterModularSwap q := by
+    cases p <;> cases q <;> simp_all [jacobiLetterModularSwap]
   have hw : jacobiZetak (I * z) k * (-1 / jacobiTauk k) = -jacobiZetak z (jacobiComodulusk k) := by
     have h1 := compEllIntKk_ne_zero hk
     have h2 : compEllIntKpk k ≠ 0 := by
-      rw [← p22R1_K_comodulus]; exact compEllIntKk_ne_zero (p22R1_comodulus_mem hk)
-    rw [jacobiZetak, jacobiZetak, jacobiTauk, p22R1_K_comodulus]
+      rw [← compEllIntKk_jacobiComodulusk_eq_compEllIntKpk]; exact compEllIntKk_ne_zero (jacobiComodulusk_mem_jacobiModulusDomain hk)
+    rw [jacobiZetak, jacobiZetak, jacobiTauk, compEllIntKk_jacobiComodulusk_eq_compEllIntKpk]
     field_simp
   unfold jacobiPQk jacobiGlaisher
   simp only [hpq, hσ, ↓reduceIte]
-  rw [p22R1_letter_neg_inv hτ p, p22R1_letter_neg_inv hτ q, hw,
-    ← p22R1_tau_comodulus hk, jacobiLetterTheta_neg, jacobiLetterTheta_neg]
+  rw [jacobiLetterTheta_neg_inv hτ p, jacobiLetterTheta_neg_inv hτ q, hw,
+    ← jacobiTauk_jacobiComodulusk hk, jacobiLetterTheta_neg, jacobiLetterTheta_neg]
   have hE : cexp (I * jacobiTauk (jacobiComodulusk k) * jacobiZetak (I * z) k ^ 2 / π) ≠ 0 :=
     exp_ne_zero _
   generalize cexp (I * jacobiTauk (jacobiComodulusk k) * jacobiZetak (I * z) k ^ 2 / π) = E
     at hE ⊢
-  have hs : ∀ r : JacobiLetter, (p22R1_sig r = .s) = (r = .s) := by
-    intro r; cases r <;> simp [p22R1_sig]
+  have hs : ∀ r : JacobiLetter, (jacobiLetterModularSwap r = .s) = (r = .s) := by
+    intro r; cases r <;> simp [jacobiLetterModularSwap]
   simp only [hs]
-  generalize jacobiLetterTheta (p22R1_sig p) (jacobiZetak z (jacobiComodulusk k))
+  generalize jacobiLetterTheta (jacobiLetterModularSwap p) (jacobiZetak z (jacobiComodulusk k))
     (jacobiTauk (jacobiComodulusk k)) = X
-  generalize jacobiLetterTheta (p22R1_sig q) (jacobiZetak z (jacobiComodulusk k))
+  generalize jacobiLetterTheta (jacobiLetterModularSwap q) (jacobiZetak z (jacobiComodulusk k))
     (jacobiTauk (jacobiComodulusk k)) = Y
   by_cases hp : p = .s <;> by_cases hq : q = .s <;> simp only [hp, hq, ↓reduceIte]
   · exact absurd (hp.trans hq.symm) hpq
@@ -800,7 +806,7 @@ theorem jacobi_imaginary_transformation {k : ℂ} (hk : k ∈ jacobiModulusDomai
   simp only [jacobiSnk, jacobiCnk, jacobiDnk, jacobiCdk, jacobiSdk, jacobiNdk, jacobiDck,
     jacobiNck, jacobiSck, jacobiNsk, jacobiDsk, jacobiCsk]
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
-    (rw [p22R1_imag_PQ hk _ _ (by decide)]; simp only [p22R1_sig, reduceCtorEq, ↓reduceIte, k'];
+    (rw [jacobiPQk_I_mul hk _ _ (by decide)]; simp only [jacobiLetterModularSwap, reduceCtorEq, ↓reduceIte, k'];
       try field_simp) <;> (try ring_nf) <;> (try simp [I_sq])
 
 end DLMF.JacobiElliptic

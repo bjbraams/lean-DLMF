@@ -26,15 +26,18 @@ public import Mathlib.Algebra.Group.ForwardDiff
 public import Pochhammer.PochhammerTransform
 
 /-!
-# DLMF Chapter 26, §§26.1–26.8: results already upstream
+# Combinatorial analysis, §§26.1–26.8: results already upstream
 
-The `dlmf_upstream` commands below are checked pointers to Mathlib (and lean-codes)
+The `dlmf_upstream` commands in this file are checked pointers to Mathlib (and lean-codes)
 declarations for DLMF §§26.1–26.8, deliberately not duplicate local theorems. Mathlib's
-`@[dlmf]` attribute has no Chapter 26 tags. The DLMF objects themselves are Mathlib's:
-`Nat.choose`, `Nat.multinomial`/`Multiset.multinomial`, `catalan`, `Nat.bell`,
-`Nat.largeSchroder` (DLMF's `r(n)`), `Nat.stirlingSecond` (DLMF's `S(n, k)`) and the unsigned
-`Nat.stirlingFirst` (DLMF's `|s(n, k)|`; the signed `s(n, k)` is
-`DLMF.Combinatorics.signedStirlingFirst`). The pointers for §§26.9–26.22 are in
+`@[dlmf]` attribute has no Chapter 26 tags.
+
+## Implementation notes
+
+The DLMF objects themselves are Mathlib's: `Nat.choose`, `Nat.multinomial`/`Multiset.multinomial`,
+`catalan`, `Nat.bell`, `Nat.largeSchroder` (DLMF's `r(n)`), `Nat.stirlingSecond` (DLMF's
+`S(n, k)`) and the unsigned `Nat.stirlingFirst` (DLMF's `|s(n, k)|`; the signed `s(n, k)` is
+`DLMF.Combinatorics.signedStirlingFirst`). The pointers for §§26.9–26.18 are in
 `DLMF/Combinatorics/MathlibCoverageB.lean`.
 -/
 

@@ -15,16 +15,45 @@ public import Mathlib.RingTheory.RootsOfUnity.Complex
 public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 
 /-!
-# Basic hypergeometric series: common definitions (DLMF §§17.1,17.2,17.4)
+# Shifted factorials, convergence and analyticity of basic hypergeometric series
 
-The finite, infinite and integer-index shifted factorials, the q-derivative, and the Jackson
-integral reuse `DLMF.QSeries`. The integer triangular exponent reuses
-`DLMF.QSeries.TripleProduct.tri`. The general unilateral and bilateral series below include
-the phase factors specified by DLMF/Gasper–Rahman; both differences of parameter counts
-are integers. `tsum` is totalized outside convergence, and all identities below state their
-convergence and exceptional-parameter hypotheses separately.
-The scalar-series interface below directly applies Mathlib's `ofScalars`, convergence-radius
-bound, and change-of-origin analytic API; it does not impose nonzero upper parameters.
+This file proves the identities for `q`-shifted factorials of DLMF §17.2, the convergence,
+splitting, termination and classical limits of the general series `rφs` and `rψs` of
+DLMF §17.4, and their analyticity, including the power-series interface used for continuation
+statements.
+
+## Main results
+
+* `qPhi_eq_basicHG`: the general `qPhi` agrees with the phase-free `basicHG` when
+  `r = s + 1`.
+* `qPochhammer_order_hasProd`, `qPochhammer_negative`: the generalized and negative-index
+  shifted factorials (DLMF 17.2.2–17.2.3).
+* `qPochhammer_invert_base`, `qPochhammer_reverse`, `qPochhammer_shift_negative`,
+  `qPochhammer_sub_index`, `qPochhammer_shift_positive`: DLMF 17.2.7–17.2.18, with their ratio
+  forms.
+* `qPochhammer_even`, `qPochhammer_blocks`, `qPochhammer_squared`, `qPochhammer_vwp_ratio`,
+  `qPochhammer_root_ratio`: DLMF 17.2.19–17.2.23.
+* `qPochhammer_parameter_limit`, `qPochhammer_parameter_ratio_limit`,
+  `qPochhammer_double_parameter_limit`: DLMF 17.2.24–17.2.26.
+* `qPhi_hasSum`, `qPsi_hasSum`: convergence of `rφs` and of `rψs` on its annulus.
+* `qPsi_split`, `qPsi_split_indices`: the splitting of a bilateral series (DLMF 17.4.3).
+* `qPhi_terminates`: termination at an upper parameter `q^{-N}`.
+* `qIdem_expansion`: the expansion of the `idem` notation.
+* `qPhi_classical_limit`, `qPhi_finite_classical_limit`, `qPsi_coefficient_classical_limit`:
+  the classical limits DLMF 17.4.2 and 17.4.4.
+* `zero_phi_zero`: Euler's product `₀φ₀(-;-;q,z) = (z;q)_∞` (DLMF 17.5.1).
+* `qPhi_analytic_disc`, `qPhi_analytic_entire`, `qPsi_analytic_annulus`: analyticity on the
+  disk, in the entire case, and on the annulus.
+* `qPhi_continuesInside_of_eq`, `qPsi_continuesInside_of_eq`: holomorphic germs continuing the
+  actual series germs.
+
+## Implementation notes
+
+`tsum` is totalized outside convergence, and the identities state their convergence and
+exceptional-parameter hypotheses separately. The scalar-series interface applies Mathlib's
+`FormalMultilinearSeries.ofScalars`, convergence-radius bound and change-of-origin analytic API
+directly; it does not impose nonzero upper parameters. The bilateral classical limit is
+formal (coefficientwise).
 -/
 
 @[expose] public noncomputable section
@@ -178,7 +207,7 @@ theorem qPochhammer_shift_negative_ratio {a b q : ℂ} (ha : a≠0) (hb : b≠0)
   field_simp
 
 /-- The reversal of a shifted block, used for 17.2.E13. -/
-theorem qaR4_reverse_tail {a q : ℂ} (ha : a≠0) (hq : q≠0) (m k : ℕ) :
+theorem qPochhammer_mul_pow_reverse {a q : ℂ} (ha : a≠0) (hq : q≠0) (m k : ℕ) :
     qPochhammer (a*q^m) q k=qPochhammer (q^(1-((m+k:ℕ):ℤ))/a) q k*(-(a*q^m))^k*q^(k.choose 2) := by
   have h := qPochhammer_reverse (mul_ne_zero ha (pow_ne_zero m hq)) hq k
   have he : q^(1-(k:ℤ))/(a*q^m)=q^(1-((m+k:ℕ):ℤ))/a := by
@@ -188,7 +217,7 @@ theorem qaR4_reverse_tail {a q : ℂ} (ha : a≠0) (hq : q≠0) (m k : ℕ) :
   exact h
 
 /-- `2·C(k,2)+k=k²`. -/
-theorem qaR4_choose_two_mul (k : ℕ) : (k.choose 2)*2+k=k*k := by
+theorem choose_two_mul_two_add_self (k : ℕ) : (k.choose 2)*2+k=k*k := by
   induction k with
   | zero => simp
   | succ k ih =>
@@ -196,7 +225,7 @@ theorem qaR4_choose_two_mul (k : ℕ) : (k.choose 2)*2+k=k*k := by
     nlinarith
 
 /-- Cancelling a natural power against an integer exponent difference. -/
-lemma qaR4_zpow_choose_sub {q : ℂ} (hq : q≠0) (c n : ℕ) :
+private lemma zpow_natCast_sub_mul_pow {q : ℂ} (hq : q≠0) (c n : ℕ) :
     q^((c:ℤ)-(n:ℤ))*q^n=q^c := by
   rw [← zpow_natCast q n,← zpow_add₀ hq]
   simp
@@ -206,12 +235,12 @@ lemma qaR4_zpow_choose_sub {q : ℂ} (hq : q≠0) (c n : ℕ) :
 @[dlmf 17.2.E13]
 theorem qPochhammer_sub_index {a q : ℂ} (ha : a≠0) (hq : q≠0) {k n : ℕ} (hk : k≤n) (hd : qPochhammer (q^(1-(n:ℤ))/a) q k≠0) : qPochhammer a q (n-k)=qPochhammer a q n/qPochhammer (q^(1-(n:ℤ))/a) q k*(-q/a)^k*q^((k.choose 2:ℤ)-(n:ℤ)*k) := by
   obtain ⟨m,rfl⟩ := Nat.exists_eq_add_of_le' hk
-  rw [Nat.add_sub_cancel,qPochhammer_add,qaR4_reverse_tail ha hq m k]
+  rw [Nat.add_sub_cancel,qPochhammer_add,qPochhammer_mul_pow_reverse ha hq m k]
   generalize qPochhammer (q^(1-((m+k:ℕ):ℤ))/a) q k = X at hd ⊢
-  have hE := qaR4_zpow_choose_sub hq (k.choose 2) ((m+k)*k)
+  have hE := zpow_natCast_sub_mul_pow hq (k.choose 2) ((m+k)*k)
   rw [show (((m+k)*k:ℕ):ℤ)=((m+k:ℕ):ℤ)*(k:ℤ) by push_cast; ring] at hE
   generalize q^((k.choose 2:ℤ)-((m+k:ℕ):ℤ)*(k:ℤ)) = E at hE ⊢
-  have hk2 := qaR4_choose_two_mul k
+  have hk2 := choose_two_mul_two_add_self k
   have hQ : q^(k.choose 2)*q^(k.choose 2)*q^k=q^(k*k) := by rw [← pow_add,← pow_add]; congr 1; omega
   have hAB : (-(a*q^m))^k*(-(q/a))^k=q^((m+1)*k) := by
     rw [← mul_pow,show (-(a*q^m))*(-(q/a))=q^(m+1) by field_simp; ring,← pow_mul]
@@ -571,33 +600,33 @@ theorem qPhi_hasSum {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
   exact hs.hasSum
 
 /-- The integer-index factorial at a nonpositive index, uniformly in the index. -/
-lemma qaR4_qPochhammerInt_neg (x q : ℂ) (m : ℕ) :
+private lemma qPochhammerInt_neg (x q : ℂ) (m : ℕ) :
     qPochhammerInt x q (-(m:ℤ))=(qPochhammer (x*q^(-(m:ℤ))) q m)⁻¹ := by
   cases m with
   | zero => simp [qPochhammerInt]
   | succ n => rfl
 
 /-- One step down in the integer-index factorial. -/
-lemma qaR4_qPochhammerInt_neg_succ {x q : ℂ} (hq : q≠0) (m : ℕ) :
+private lemma qPochhammerInt_neg_succ {x q : ℂ} (hq : q≠0) (m : ℕ) :
     qPochhammerInt x q (-((m+1:ℕ):ℤ))=
       qPochhammerInt x q (-(m:ℤ))/(1-x*q^(-((m+1:ℕ):ℤ))) := by
-  rw [qaR4_qPochhammerInt_neg,qaR4_qPochhammerInt_neg,qPochhammer_succ']
+  rw [qPochhammerInt_neg,qPochhammerInt_neg,qPochhammer_succ']
   have e : x*q^(-((m+1:ℕ):ℤ))*q=x*q^(-(m:ℤ)) := by
     rw [mul_assoc,← zpow_add_one₀ hq]; congr 2; push_cast; ring
   rw [e,mul_inv,div_eq_mul_inv,mul_comm]
 
 /-- One step down in a product of integer-index factorials. -/
-lemma qaR4_qPochhammerListInt_neg_succ (l : List ℂ) {q : ℂ} (hq : q≠0) (m : ℕ) :
+private lemma qPochhammerListInt_neg_succ (l : List ℂ) {q : ℂ} (hq : q≠0) (m : ℕ) :
     qPochhammerListInt l q (-((m+1:ℕ):ℤ))=
       qPochhammerListInt l q (-(m:ℤ))/(l.map fun x => 1-x*q^(-((m+1:ℕ):ℤ))).prod := by
   induction l with
   | nil => simp [qPochhammerListInt]
   | cons c l ih =>
     simp only [qPochhammerListInt,List.map_cons,List.prod_cons] at ih ⊢
-    rw [ih,qaR4_qPochhammerInt_neg_succ hq,div_mul_div_comm]
+    rw [ih,qPochhammerInt_neg_succ hq,div_mul_div_comm]
 
 /-- The integer triangular number one step down. -/
-lemma qaR4_tri_neg_succ (m : ℕ) :
+private lemma tri_neg_succ (m : ℕ) :
     DLMF.QSeries.TripleProduct.tri (-((m+1:ℕ):ℤ))=
       DLMF.QSeries.TripleProduct.tri (-(m:ℤ))+((m+1:ℕ):ℤ) := by
   have h1 := DLMF.QSeries.TripleProduct.tri_mul_two (-((m+1:ℕ):ℤ))
@@ -607,7 +636,7 @@ lemma qaR4_tri_neg_succ (m : ℕ) :
   linarith
 
 /-- Factoring the reciprocal power out of a list product. -/
-lemma qaR4_list_prod_one_sub (l : List ℂ) {w Q : ℂ} (hw : w*Q=1) :
+private lemma list_prod_map_one_sub_mul (l : List ℂ) {w Q : ℂ} (hw : w*Q=1) :
     (l.map fun x => 1-x*w).prod=w^l.length*(l.map fun x => Q-x).prod := by
   induction l with
   | nil => simp
@@ -616,7 +645,7 @@ lemma qaR4_list_prod_one_sub (l : List ℂ) {w Q : ℂ} (hw : w*Q=1) :
     linear_combination (-(w^l.length*(l.map fun x => Q-x).prod))*hw
 
 /-- The ratio recursion for bilateral terms at negative indices. -/
-lemma qaR4_qPsiTerm_neg_succ {a b : List ℂ} {q z : ℂ} (hq : q≠0) (hz : z≠0)
+private lemma qPsiTerm_neg_succ {a b : List ℂ} {q z : ℂ} (hq : q≠0) (hz : z≠0)
     (hr : a.length≤b.length) (ha : ∀ ai∈a, ∀ n : ℕ, ai≠q^(n+1)) (m : ℕ) :
     qPsiTerm a b q z (-((m+1:ℕ):ℤ))=
       (b.map fun x => q^(m+1)-x).prod/(a.map fun x => q^(m+1)-x).prod*
@@ -633,9 +662,9 @@ lemma qaR4_qPsiTerm_neg_succ {a b : List ℂ} {q z : ℂ} (hq : q≠0) (hz : z�
     obtain ⟨x,hx,h0⟩ := List.mem_map.mp h
     exact ha x hx m (sub_eq_zero.mp h0).symm
   unfold qPsiTerm
-  rw [qaR4_qPochhammerListInt_neg_succ a hq,qaR4_qPochhammerListInt_neg_succ b hq,
-    qaR4_list_prod_one_sub a hw,qaR4_list_prod_one_sub b hw,hE,zpow_natCast,zpow_natCast,
-    qaR4_tri_neg_succ]
+  rw [qPochhammerListInt_neg_succ a hq,qPochhammerListInt_neg_succ b hq,
+    list_prod_map_one_sub_mul a hw,list_prod_map_one_sub_mul b hw,hE,zpow_natCast,zpow_natCast,
+    tri_neg_succ]
   have hz1 : z^(-((m+1:ℕ):ℤ))=z^(-(m:ℤ))/z := by
     rw [show -((m+1:ℕ):ℤ)=-(m:ℤ)-1 by push_cast; ring,zpow_sub_one₀ hz]; rfl
   have hm1 : (-1:ℂ)^(-((m+1:ℕ):ℤ))=(-1:ℂ)^(-(m:ℤ))*(-1) := by
@@ -663,7 +692,7 @@ lemma qaR4_qPsiTerm_neg_succ {a b : List ℂ} {q z : ℂ} (hq : q≠0) (hz : z�
   field_simp
   linear_combination (qPochhammerListInt a q (-(m:ℤ))*P)*hwe
 /-- The limit of a list product of `q^(m+1)-x` as `m→∞`. -/
-lemma qaR4_tendsto_list_prod_pow_sub (l : List ℂ) {q : ℂ} (hq : ‖q‖<1) :
+private lemma tendsto_list_prod_pow_sub (l : List ℂ) {q : ℂ} (hq : ‖q‖<1) :
     Tendsto (fun m : ℕ => (l.map fun x => q^(m+1)-x).prod) atTop
       (𝓝 ((-1:ℂ)^l.length*l.prod)) := by
   have hpow : Tendsto (fun m : ℕ => q^(m+1)) atTop (𝓝 0) := by
@@ -677,7 +706,7 @@ lemma qaR4_tendsto_list_prod_pow_sub (l : List ℂ) {q : ℂ} (hq : ‖q‖<1) :
     simpa only [List.map_cons,List.prod_cons,List.length_cons] using h
 
 /-- Nonnegative-index bilateral terms are unilateral terms with the extra numerator `q`. -/
-lemma qaR4_qPsiTerm_natCast {a b : List ℂ} {q z : ℂ} (hq : ‖q‖<1) (n : ℕ) :
+private lemma qPsiTerm_natCast {a b : List ℂ} {q z : ℂ} (hq : ‖q‖<1) (n : ℕ) :
     qPsiTerm a b q z n=qPhiTerm (q::a) b q z n := by
   have hE : qPhiExponent (q::a) b=qPsiExponent a b := by
     simp only [qPhiExponent,qPsiExponent,List.length_cons]; push_cast; ring
@@ -690,18 +719,18 @@ lemma qaR4_qPsiTerm_natCast {a b : List ℂ} {q z : ℂ} (hq : ‖q‖<1) (n : �
   field_simp
 
 /-- The negative-index bilateral terms are summable. -/
-lemma qaR4_qPsiTerm_neg_summable {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
+private lemma summable_qPsiTerm_neg {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hab : QBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hz : ‖b.prod/(a.prod*z)‖<1) :
     Summable (fun m : ℕ => qPsiTerm a b q z (-(m:ℤ))) := by
   set R : ℕ → ℂ := fun m => (b.map fun x => q^(m+1)-x).prod/(a.map fun x => q^(m+1)-x).prod*
         (-1:ℂ)^(b.length-a.length)/z
   have hrec (m : ℕ) : qPsiTerm a b q z (-((m+1:ℕ):ℤ))=R m*qPsiTerm a b q z (-(m:ℤ)) :=
-    qaR4_qPsiTerm_neg_succ hq0 hz0 hr hab.2 m
+    qPsiTerm_neg_succ hq0 hz0 hr hab.2 m
   have hR : Tendsto R atTop (𝓝 ((-1:ℂ)^b.length*b.prod/((-1:ℂ)^a.length*a.prod)*
       (-1:ℂ)^(b.length-a.length)/z)) := by
     have hA : (-1:ℂ)^a.length*a.prod≠0 := mul_ne_zero (pow_ne_zero _ (by norm_num)) ha
-    exact (((qaR4_tendsto_list_prod_pow_sub b hq).div (qaR4_tendsto_list_prod_pow_sub a hq) hA).mul_const
+    exact (((tendsto_list_prod_pow_sub b hq).div (tendsto_list_prod_pow_sub a hq) hA).mul_const
       _).div_const _
   have hlim : ‖(-1:ℂ)^b.length*b.prod/((-1:ℂ)^a.length*a.prod)*
       (-1:ℂ)^(b.length-a.length)/z‖<1 := by
@@ -717,7 +746,7 @@ lemma qaR4_qPsiTerm_neg_summable {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq 
   exact mul_le_mul_of_nonneg_right (le_of_lt hn) (norm_nonneg _)
 
 /-- Both halves of a bilateral series in its annulus are summable. -/
-lemma qaR4_qPsiTerm_summable_parts {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
+private lemma summable_qPsiTerm_natCast_and_neg_succ {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hab : QBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hz : ‖b.prod/(a.prod*z)‖<1)
     (hz' : a.length=b.length → ‖z‖<1) :
@@ -726,12 +755,12 @@ lemma qaR4_qPsiTerm_summable_parts {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (h
   constructor
   · have h := (qPhi_hasSum (a := q::a) (b := b) (z := z) hq0 hq hab.1 (by simp; omega)
       (fun h => hz' (by simpa using h))).summable
-    exact h.congr fun n => (qaR4_qPsiTerm_natCast hq n).symm
-  · have h := (summable_nat_add_iff 1).mpr (qaR4_qPsiTerm_neg_summable hq0 hq hab ha hz0 hr hz)
+    exact h.congr fun n => (qPsiTerm_natCast hq n).symm
+  · have h := (summable_nat_add_iff 1).mpr (summable_qPsiTerm_neg hq0 hq hab ha hz0 hr hz)
     simpa only [Nat.cast_add,Nat.cast_one] using h
 
 /-- The successor step of a finite factorial product. -/
-lemma qaR4_qPochhammerList_succ (l : List ℂ) (q : ℂ) (n : ℕ) :
+private lemma qPochhammerList_succ (l : List ℂ) (q : ℂ) (n : ℕ) :
     qPochhammerList l q (n+1)=qPochhammerList l q n*(l.map fun x => 1-x*q^n).prod := by
   induction l with
   | nil => simp [qPochhammerList]
@@ -741,7 +770,7 @@ lemma qaR4_qPochhammerList_succ (l : List ℂ) (q : ℂ) (n : ℕ) :
     ring
 
 /-- Rewriting `q^(m+1)-x` through the reciprocal parameter. -/
-lemma qaR4_list_prod_pow_sub_recip (l : List ℂ) (q : ℂ) (m : ℕ) (hl : ∀ x∈l, x≠0) :
+private lemma list_prod_map_pow_sub_eq (l : List ℂ) (q : ℂ) (m : ℕ) (hl : ∀ x∈l, x≠0) :
     (l.map fun x => q^(m+1)-x).prod=(-1:ℂ)^l.length*l.prod*
       ((l.map fun x => q/x).map fun y => 1-y*q^m).prod := by
   induction l with
@@ -756,7 +785,7 @@ lemma qaR4_list_prod_pow_sub_recip (l : List ℂ) (q : ℂ) (m : ℕ) (hl : ∀ 
     ring
 
 /-- Closed form of the negative-index bilateral terms. -/
-lemma qaR4_qPsiTerm_neg_closed {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hz0 : z≠0)
+private lemma qPsiTerm_neg_eq {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hab : QBilateralRegular a b q) (ha : a.prod≠0) (hb0 : b.prod≠0)
     (m : ℕ) :
     qPsiTerm a b q z (-(m:ℤ))=qPochhammerList (b.map fun bi => q/bi) q m/
@@ -767,9 +796,9 @@ lemma qaR4_qPsiTerm_neg_closed {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hz0 :
   | zero => simp [qPsiTerm,qPochhammerListInt,qPochhammerList,qPochhammerInt,
       DLMF.QSeries.TripleProduct.tri,Function.comp_def,List.map_const',List.prod_replicate]
   | succ m ih =>
-    rw [qaR4_qPsiTerm_neg_succ hq0 hz0 hr hab.2 m,ih,qaR4_qPochhammerList_succ,
-      qaR4_qPochhammerList_succ,qaR4_list_prod_pow_sub_recip b q m hbx,
-      qaR4_list_prod_pow_sub_recip a q m hax]
+    rw [qPsiTerm_neg_succ hq0 hz0 hr hab.2 m,ih,qPochhammerList_succ,
+      qPochhammerList_succ,list_prod_map_pow_sub_eq b q m hbx,
+      list_prod_map_pow_sub_eq a q m hax]
     have hFa : ((a.map fun x => q/x).map fun y => 1-y*q^m).prod≠0 := by
       apply List.prod_ne_zero
       intro h
@@ -796,7 +825,7 @@ theorem qPsi_hasSum {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hab : QBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hz : ‖b.prod/(a.prod*z)‖<1)
     (hz' : a.length=b.length → ‖z‖<1) : HasSum (qPsiTerm a b q z) (qPsi a b q z) := by
-  obtain ⟨h1,h2⟩ := qaR4_qPsiTerm_summable_parts hq0 hq hab ha hz0 hr hz hz'
+  obtain ⟨h1,h2⟩ := summable_qPsiTerm_natCast_and_neg_succ hq0 hq hab ha hz0 hr hz hz'
   exact (h1.of_nat_of_neg_add_one h2).hasSum
 
 /-- A convergent bilateral series `rψs` splits into its nonnegative-index part and the reversed
@@ -809,20 +838,20 @@ theorem qPsi_split {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     qPsi a b q z=(∑' n : ℕ, qPsiTerm a b q z n)+
       ∑' n : ℕ, qPochhammerList (b.map fun bi => q/bi) q (n+1)/
         qPochhammerList (a.map fun ai => q/ai) q (n+1)*(b.prod/(a.prod*z))^(n+1) := by
-  obtain ⟨h1,h2⟩ := qaR4_qPsiTerm_summable_parts hq0 hq hab ha hz0 hr hz hz'
+  obtain ⟨h1,h2⟩ := summable_qPsiTerm_natCast_and_neg_succ hq0 hq hab ha hz0 hr hz hz'
   unfold qPsi
   rw [tsum_of_nat_of_neg_add_one h1 h2]
   congr 1
   apply tsum_congr
   intro n
-  rw [← qaR4_qPsiTerm_neg_closed hq0 hz0 hr hab ha hb0 (n+1)]
+  rw [← qPsiTerm_neg_eq hq0 hz0 hr hab ha hb0 (n+1)]
   push_cast
   rfl
 
 /-- A basic hypergeometric series with upper parameter `q^(-N)` terminates: it equals its partial
 sum through index `N`. -/
-theorem qPhi_terminates {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (N : ℕ) (hb : QDenominatorRegularThrough b q N) :
+theorem qPhi_terminates {a b : List ℂ} {q z : ℂ} (hq0 : q≠0)
+    (N : ℕ) :
     qPhi (q^(-(N:ℤ))::a) b q z=qPhiPartial (q^(-(N:ℤ))::a) b q z N := by
   unfold qPhi qPhiPartial
   apply tsum_eq_sum
@@ -847,7 +876,7 @@ theorem qPsi_split_indices {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q
     (hz' : a.length=b.length → ‖z‖<1) :
     qPsi a b q z=(∑' n : ℕ, qPsiTerm a b q z n)+
       ∑' n : ℕ, qPsiTerm a b q z (-(n:ℤ)-1) := by
-  obtain ⟨h1,h2⟩ := qaR4_qPsiTerm_summable_parts hq0 hq hab ha hz0 hr hz hz'
+  obtain ⟨h1,h2⟩ := summable_qPsiTerm_natCast_and_neg_succ hq0 hq hab ha hz0 hr hz hz'
   unfold qPsi
   rw [tsum_of_nat_of_neg_add_one h1 h2]
   congr 1
@@ -1059,7 +1088,7 @@ lemma tendsto_qPochhammerList_ratio (a b : List ℂ) (n : ℕ) (hlen : a.length 
 private lemma qPochhammerListInt_neg (l : List ℂ) (q : ℂ) (m : ℕ) :
     qPochhammerListInt l q (-(m : ℤ)) =
       (qPochhammerList (l.map fun x => x * q ^ (-(m : ℤ))) q m)⁻¹ := by
-  simp only [qPochhammerListInt, qaR4_qPochhammerInt_neg, qPochhammerList,
+  simp only [qPochhammerListInt, qPochhammerInt_neg, qPochhammerList,
     List.map_map, Function.comp_def, List.prod_inv]
 
 /-- The bilateral limit is formal/coefficientwise; its analytic annulus collapses as q→1. -/
@@ -1271,7 +1300,7 @@ private lemma qPsi_negative_analyticAt {a b : List ℂ} {q : ℂ}
       exact ⟨r, (norm_nonneg w).trans_lt hrw, hrw,
         by rw [mul_comm, ← lt_div_iff₀ hBpos]; exact hrB⟩
   apply qPsi_analyticAt_of_summable_radius _ hr0 ?_ hwr
-  have hs := qaR4_qPsiTerm_neg_summable hq0 hq hab ha
+  have hs := summable_qPsiTerm_neg hq0 hq hab ha
     (inv_ne_zero (show (r : ℂ) ≠ 0 by exact_mod_cast hr0.ne')) hr
     (show ‖b.prod / (a.prod * (r : ℂ)⁻¹)‖ < 1 by
       rw [div_mul_eq_div_div, div_inv_eq_mul, norm_mul, Complex.norm_of_nonneg hr0.le]
@@ -1308,7 +1337,7 @@ theorem qPsi_analytic_annulus {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖
         with v hv using fun _ => hv
     · exact Filter.Eventually.of_forall fun _ h => (heq h).elim
   filter_upwards [hev0, hevi, hevo] with v hv0 hvi hvo
-  have hs := qaR4_qPsiTerm_neg_summable hq0 hq hab ha hv0 hr hvi
+  have hs := summable_qPsiTerm_neg hq0 hq hab ha hv0 hr hvi
   have hsplit := qPsi_split_indices hq0 hq hab ha hv0 hr hvi hvo
   have hshift := Summable.sum_add_tsum_nat_add 1 hs
   simp only [sum_range_one] at hshift
@@ -1322,7 +1351,7 @@ theorem qPsi_analytic_annulus {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖
   rw [hsplit]
   have hpositive : (∑' n : ℕ, qPsiTerm a b q v n) = qPhi (q :: a) b q v := by
     unfold qPhi
-    exact tsum_congr fun n => qaR4_qPsiTerm_natCast hq n
+    exact tsum_congr fun n => qPsiTerm_natCast hq n
   rw [hpositive]
   have hnegative : (∑' n : ℕ, qPsiTerm a b q v (-(n : ℤ) - 1)) =
       ∑' n : ℕ, qPsiTerm a b q v (-((n + 1 : ℕ) : ℤ)) := by
@@ -1337,7 +1366,7 @@ theorem qPsi_analytic_annulus {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖
 /-- A holomorphic RHS germ continues the actual unilateral-series germ inside its domain.
 This is a direct adapter of TauCeti's proved germ continuation API. -/
 theorem qPhi_continuesInside_of_eq {a b : List ℂ} {q z₀ : ℂ} {U : Set ℂ} {F : ℂ → ℂ}
-    (hU : IsOpen U) (hz₀ : z₀∈U) (hF : AnalyticOnNhd ℂ F U)
+    (hU : IsOpen U) (hF : AnalyticOnNhd ℂ F U)
     (heq : qPhi a b q=ᶠ[𝓝 z₀] F) : TauCeti.ContinuesInside (qPhi a b q) U z₀ := by
   exact (TauCeti.ContinuesInside.of_differentiableOn hU hF.differentiableOn).congr heq.symm
 

@@ -10,13 +10,29 @@ public import Dirichlet.Beta.Complex.Integral
 public import Mathlib.LinearAlgebra.Lagrange
 
 /-!
-# Laguerre and Hermite limits of Selberg integrals
+# Dirichlet integrals and Laguerre and Hermite limits of the Selberg integral
 
-Scaling, domination and limit arguments derive Laguerre-Selberg and Hermite-Mehta integral
-formulas.
+Dirichlet's simplex integrals (DLMF 5.14.1–5.14.2) and the Laguerre and Hermite forms of the
+Selberg integral (DLMF 5.14.5–5.14.6). The latter are obtained from Aomoto's and Selberg's
+integrals by scaling, replacing `e^{-x}` by `(1 - x/N)^N` (resp. `e^{-x²/2}` by
+`(1 - x²/(2N))^N`), and passing to the limit by dominated convergence.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.Multidimensional`.
+## Main definitions
+
+* `vandermonde`: the Vandermonde product `Δ`, DLMF 5.14.3.
+* `lagIntegrand`, `lagApprox`: the integrand of 5.14.5 and its polynomial approximants.
+* `hermIntegrand`, `hermApprox`: the integrand of 5.14.6 and its polynomial approximants.
+
+## Main results
+
+* `dirichlet_simplex`, `dirichlet_simplex_full`: Dirichlet's integrals, DLMF 5.14.1–5.14.2.
+* `tendsto_integral_lagApprox`: convergence of the integrals of the Laguerre approximants.
+* `selberg_laguerrePolyL`: the Laguerre form of the Selberg integral, DLMF 5.14.5.
+* `selberg_hermite`: the Hermite form (Mehta's integral), DLMF 5.14.6.
+
+## References
+
+See `DLMF.Gamma.Multidimensional` for the overview of DLMF §5.14.
 -/
 
 @[expose] public section

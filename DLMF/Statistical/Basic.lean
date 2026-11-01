@@ -8,8 +8,9 @@ module
 public import DLMF.Statistical.Basic.IncompleteGamma
 
 /-!
-# Basic normalized incomplete Gamma functions
+# Normalized incomplete Gamma functions
 
-This entry point imports the normalized incomplete Gamma definitions. Their analytic
-and statistical identities are developed separately in the theorem files of this area.
+This file collects the foundational definitions of the normalized incomplete Gamma functions
+(`DLMF.Statistical.Basic.IncompleteGamma`). Their analytic and statistical identities are in
+the theorem files of this area.
 -/

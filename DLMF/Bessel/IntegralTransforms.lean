@@ -10,15 +10,26 @@ public import DLMF.Confluent.Integrals
 /-!
 # Gaussian and Laplace integrals of Bessel functions
 
-Beals–Wong (9.8.3), with complex order, power, and Gaussian scale of positive real part.
-The complex Gamma integral and absolute summation of Kummer's series extend the
-Gamma-weighted regularized `₀F₁` argument of `DLMF.Confluent.IntegralRepresentations`.
-The substitution `u = t²` gives the Bessel formula. Keeping Kummer's function
-regularized also retains exceptional orders.
-The Laplace transform reuses the existing full-half-plane Kummer Laplace theorem and
-uses the continued Gauss function, even when the argument leaves the series disk.
-`DLMF.Bessel.LaplaceTransform` supplies the conventional quadratic Gauss form
-without the Kummer representation's order exclusions.
+The Gaussian–Bessel integral of Beals–Wong (9.8.3), with complex order, power and Gaussian scale
+of positive real part, and a Laplace–Bessel transform. The complex Gamma integral and absolute
+summation of Kummer's series extend the Gamma-weighted regularized `₀F₁` argument of
+`DLMF.Confluent.IntegralRepresentations`; the substitution `u = t²` gives the Bessel formula.
+
+## Main results
+
+* `besselJ_gaussian_integral`, `besselJ_gaussian_integral_complex`: the Gaussian–Bessel integral
+  in regularized Kummer form, for real and complex scale, under `Re(μ+ν) > 0`.
+* `besselJ_gaussian_integral_kummerM`, `besselJ_gaussian_integral_complex_kummerM`: the same in
+  ordinary Kummer notation, away from the denominator poles.
+* `besselJ_laplace_integral_kummer`: a Laplace–Bessel transform from Kummer's representation
+  of `J`.
+
+## Implementation notes
+
+Keeping Kummer's function regularized retains the exceptional orders. The Laplace transform
+reuses the full-half-plane Kummer Laplace theorem and uses the continued Gauss function, even
+when the argument leaves the series disk. `DLMF.Bessel.LaplaceTransform` supplies the
+conventional quadratic Gauss form without the Kummer representation's order exclusions.
 -/
 
 @[expose] public noncomputable section

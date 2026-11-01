@@ -8,13 +8,30 @@ module
 public import DLMF.ErrorFunctions.Integrals.FresnelTransforms
 
 /-!
-# Reciprocal-argument Laplace integrals of error functions
+# Laplace transforms of error and Fresnel functions (DLMF §7.14(ii))
 
-Local domination and analytic continuation for Laplace transforms involving reciprocal arguments
-and square-root error functions.
+Laplace transforms of `erfc` with reciprocal-argument terms, obtained from an explicit
+antiderivative, local domination and analytic continuation in the parameters, and Laplace
+transforms of the Fresnel integrals, obtained by integration by parts.
 
-Source references and common attribution are retained in
-`DLMF.ErrorFunctions.Integrals`.
+## Main definitions
+
+* `erfInt_G`: the antiderivative (in `x = √t`) used for DLMF 7.14.4.
+
+## Main results
+
+* `erfc_sqrt_reciprocal_laplace`: `∫₀^∞ e^{(a-b)t} erfc((at)^{1/2} + (c/t)^{1/2}) dt`
+  (DLMF 7.14.4).
+* `erfc_sqrt_reciprocal_laplace_negative`: the unnumbered companion transform following
+  DLMF 7.14.4.
+* `erfInt_laplace_plus`, `erfInt_laplace_minus`: the two transforms for `Re a > 0`, `Re b > 0`,
+  `Re c ≥ 0`, by continuity from `Re c > 0`.
+* `fresnelCosInt_laplace`, `fresnelSinInt_laplace`: Laplace transforms of `C(t)` and `S(t)`
+  (DLMF 7.14.5, 7.14.6).
+* `fresnelCosInt_sqrt_laplace`, `fresnelSinInt_sqrt_laplace`: Laplace transforms of
+  `C(√(2t/π))` and `S(√(2t/π))` (DLMF 7.14.7, 7.14.8).
+* `integral_exp_mul_eq_of_deriv`: integration by parts for Laplace transforms of bounded
+  functions.
 -/
 
 @[expose] public noncomputable section

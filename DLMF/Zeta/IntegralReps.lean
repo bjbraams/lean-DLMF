@@ -9,9 +9,14 @@ public import DLMF.Zeta.IntegralReps.ElementaryKernels
 public import DLMF.Zeta.IntegralReps.PolygammaAndContours
 
 /-!
-# Integral representations of the Riemann zeta function (DLMF §25.5)
+# Integral representations of the Riemann zeta function
 
-Conventions.
+This file collects the integral representations of the Riemann zeta function of DLMF §25.5:
+elementary kernels in `DLMF.Zeta.IntegralReps.ElementaryKernels`, and polygamma integrals and
+contour integrals in `DLMF.Zeta.IntegralReps.PolygammaAndContours`.
+
+## Implementation notes
+
 * Integrals over `(0, ∞)` are Bochner integrals `∫ x in Ioi 0`, stated together with the
   integrability of the integrand, so that Lean's convention `∫ = 0` for non-integrable functions
   plays no role. Powers `x^{s-1}`, `(1+x²)^{s/2}`, `2^s`, `π^{s/2}` are principal complex powers
@@ -25,8 +30,8 @@ Conventions.
   reciprocal Gamma function, so 25.5.6 and 25.5.7 hold also at `s = 0, -1, -2, …`.
 * 25.5.13 has a removable singularity at `s = 0`, which is excluded.
 * `ψ = Complex.digamma` and `ψ^{(m)} = DLMF.Gamma.polygamma m` (iterated derivatives of `ψ`).
-* The loop integrals 25.5.20–25.5.21 are taken over the keyhole contours `keyholeLoopIntegral`
-  (the two edges of the cut `(-∞, -δ]` and the circle `|z| = δ`), for every admissible radius
-  `δ`; DLMF allows any loop of the stated kind, and the independence of the loop (Cauchy's
-  theorem) is not formalized.
+* The loop integrals 25.5.20–25.5.21 are taken over the keyhole contours
+  `DLMF.Zeta.keyholeLoopIntegral` (the two edges of the cut `(-∞, -δ]` and the circle
+  `|z| = δ`), for every admissible radius `δ`; DLMF allows any loop of the stated kind, and the
+  independence of the loop (Cauchy's theorem) is not formalized.
 -/

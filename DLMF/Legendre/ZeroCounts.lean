@@ -8,25 +8,30 @@ module
 public import DLMF.Legendre.ZeroTools
 
 /-!
-# Zero counts of Ferrers functions of positive order
+# Zero counts of real solutions of the Ferrers equation
 
 Tools for the zero counts of DLMF §14.16(ii) beyond `𝖯^{-m}_ν`
 (`lzt_ferrersP_neg_order_zero_count`). A real solution `f` of the Ferrers equation on `(-1, 1)`
 is compared with `u = 𝖯^{-μ}_ν(x)`, recessive at `1`, and `v = 𝖯^{-μ}_ν(-x)`, recessive at `-1`
-(`μ ≥ 0`):
+(`μ ≥ 0`).
 
-* Sturm separation with a nonzero constant Wronskian gives between `N` and `N + 1` zeros,
-  `N = max(⌈ν - μ⌉, 0)` the number of zeros of `u` (`lzc_count_bounds`,
-  `lzc_ferrers_count_bounds`); the zero after the last zero of `u` comes from the divergence
-  of `f/u` at `1`;
-* the signs of the Wronskians `c₁ = W{u, f}` and `c₂ = W{v, f}` (times `1-x²`) fix the signs of
-  `f` near `±1` and hence the parity of the number of zeros: `-(c₁ c₂)(-1)^n > 0`
-  (`lzc_parity`, `lzc_parity_ends`, `lzc_ferrers_parity`);
-* the Wronskians `W{𝖯^{-μ}_ν(-x), 𝖯^μ_ν(x)} = 2 sin(νπ)/(π(1-x²))` and
-  `W{𝖯^{-μ}_ν(-x), 𝖰^μ_ν(x)} = cos(νπ)/(1-x²)` (`lzc_wronskian_reflect_P`,
-  `lzc_wronskian_reflect_Q`), companions of DLMF 14.2.6–14.2.7.
+## Main results
 
-All helper names carry the prefix `lzc_`.
+* `lzc_exists_zero_between`: Sturm separation between zeros of a solution.
+* `lzc_count_bounds`, `lzc_ferrers_count_bounds`: a solution with a nonzero constant Wronskian
+  against `u` has between `N` and `N + 1` zeros, where `N = max(⌈ν - μ⌉, 0)` is the number of
+  zeros of `u`.
+* `lzc_parity`, `lzc_parity_ends`, `lzc_ferrers_parity`: the signs of the Wronskians
+  `c₁ = W{u, f}` and `c₂ = W{v, f}` (times `1-x²`) fix the signs of `f` near `±1` and hence the
+  parity of the number `n` of zeros: `-(c₁ c₂)(-1)^n > 0`.
+* `lzc_wronskian_reflect_P`, `lzc_wronskian_reflect_Q`: the Wronskians
+  `W{𝖯^{-μ}_ν(-x), 𝖯^μ_ν(x)} = 2 sin(νπ)/(π(1-x²))` and
+  `W{𝖯^{-μ}_ν(-x), 𝖰^μ_ν(x)} = cos(νπ)/(1-x²)`, companions of DLMF 14.2.6–14.2.7.
+
+## Implementation notes
+
+In the count bounds, the zero after the last zero of `u` comes from the divergence of `f/u` at
+`1` (`lzc_zero_right`). All helper names carry the prefix `lzc_`.
 -/
 
 @[expose] public noncomputable section

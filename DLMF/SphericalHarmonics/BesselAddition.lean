@@ -18,21 +18,30 @@ $$
   \sum_{n=0}^∞ (ν+n) J_{ν+n}(r) J_{ν+n}(ρ) C^{(ν)}_n(\cos φ).
 $$
 
+## Main definitions
+
+* `shBes_equiv`: the reindexing `(k, l) ↦ (k - 2l, l)` from `{(k, l) : 2l ≤ k}` onto `ℕ × ℕ`.
+
+## Main results
+
+* `shBes_hasSum_shift`: the Taylor shift `F_c(s + z) = ∑ zᵏ/k! F_{c+k}(s)` of regularized `₀F₁`.
+* `shBes_hasSum_product`: the product formula
+  `F_c(x) F_c(y) = ∑ₗ (xy)ˡ/(l! Γ(c+l)) F_{c+2l}(x+y)`.
+* `besselJ_addition`: Gegenbauer's addition theorem (DLMF 10.23.8, AAR (4.10.5)).
+
+## Implementation notes
+
 The proof is by power series and works directly at complex `ν`. Write `F_c = ₀F̃₁(;c;·)`, so
 that `J_ν(w)/w^ν = 2^{-ν} F_{ν+1}(x + y + z)` with `x = -r²/4`, `y = -ρ²/4`, `z = rρ cos φ / 2`.
+Taylor's theorem for the entire function `F_{ν+1}` gives the shift formula. Each `(2t)ᵏ` is
+expanded in Gegenbauer polynomials (`monomial_ultrasphPoly_expansion`, DLMF 18.18.17), and the
+absolutely convergent double series is regrouped by the Gegenbauer degree (`shBes_equiv`,
+`shBes_norm_ultrasph_le`, `shBes_norm_F_le`). The inner sums are identified by the product
+formula, itself proved from the Taylor shift and a finite identity obtained from the
+contiguous relation of `₀F₁` (`shBes_sum_choose`, a Chu–Vandermonde sum in disguise).
 
-* Taylor's theorem for the entire function `F_{ν+1}` gives `F_{ν+1}(s + z) = ∑ zᵏ/k! F_{ν+1+k}(s)`
-  (`shBes_hasSum_shift`).
-* Each `(2t)ᵏ` is expanded in Gegenbauer polynomials (`monomial_ultrasphPoly_expansion`, DLMF
-  18.18.17), and the absolutely convergent double series is regrouped by the Gegenbauer degree
-  (`shBes_equiv`, `shBes_norm_ultrasph_le`, `shBes_norm_F_le`).
-* The inner sums are identified by the product formula
-  `F_c(x) F_c(y) = ∑ₗ (xy)ˡ/(l! Γ(c+l)) F_{c+2l}(x+y)` (`shBes_hasSum_product`), itself proved from
-  the Taylor shift and a finite identity obtained from the contiguous relation of `₀F₁`
-  (`shBes_sum_choose`, a Chu–Vandermonde sum in disguise).
-
-The theorem `besselJ_addition` was moved here verbatim from `DLMF/Bessel/Theorems.lean`, since the
-Gegenbauer polynomial API it needs lives in modules that import that file.
+`besselJ_addition` lives here rather than in `DLMF.Bessel.Theorems` because the Gegenbauer
+polynomial API it needs is in modules that import that file.
 -/
 
 @[expose] public section

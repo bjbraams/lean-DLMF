@@ -15,31 +15,52 @@ public import Mathlib.Topology.Homotopy.Lifting
 /-!
 # Modular transformations of Riemann theta functions (DLMF §21.5)
 
-Integer symplectic matrices `Γ = [[A, B], [C, D]]` with `Γ J Γᵀ = J`,
-`J = [[0, I], [-I, 0]]` (DLMF 21.5.1–21.5.2), are related to Mathlib's
-`Matrix.symplecticGroup` (whose `J` is the negative of DLMF's). Their determinant is `1`
-(DLMF 21.5.3, Mathlib's `SymplecticGroup.det_eq_one`).
+Integer symplectic matrices `Γ = [[A, B], [C, D]]` with `Γ J Γᵀ = J`, `J = [[0, I], [-I, 0]]`
+(DLMF 21.5.1–21.5.2), are related to Mathlib's `Matrix.symplecticGroup` (whose `J` is the
+negative of DLMF's). This file proves the modular transformations of `θ(z|Ω)` and of the theta
+functions with characteristics.
 
-The elementary transformations 21.5.5–21.5.7 are proved by reindexing and a parity
-argument; the `g = 1` case of the inversion 21.5.8 is proved from Mathlib's
+## Main definitions
+
+* `symplecticJ`: DLMF's `J_{2g} = [[0, I], [-I, 0]]`.
+* `IsSymplectic`, `IsSymplecticBlocks`: the symplectic condition (DLMF 21.5.1–21.5.2).
+
+## Main results
+
+* `isSymplectic_iff_mem_symplecticGroup`: the bridge to `Matrix.symplecticGroup`.
+* `det_eq_one_of_isSymplectic`: `det Γ = 1` (DLMF 21.5.3, Mathlib's
+  `SymplecticGroup.det_eq_one`).
+* `modular_mem_siegel`, `exists_continuous_sqrt_det`: the modular action preserves the Siegel
+  space, and `det(CΩ + D)` has a continuous square root.
+* `riemannTheta_modular`: the corrected DLMF 21.5.4 for the theta group.
+* `riemannTheta_unimodular`, `riemannTheta_add_symm_int_even`, `riemannTheta_add_symm_int`:
+  the elementary transformations DLMF 21.5.5–21.5.7.
+* `riemannTheta_inversion`, `riemannTheta_inversion_principal`,
+  `riemannTheta_inversion_fin_one`: the inversion DLMF 21.5.8 with the corrected branch, with
+  the principal branch for `g ≤ 2`, and for `g = 1`.
+* `riemannThetaChar_modular`: the modular transformation with characteristics (DLMF 21.5.9).
+
+## Implementation notes
+
+The elementary transformations 21.5.5–21.5.7 are proved by reindexing and a parity argument;
+the `g = 1` case of the inversion 21.5.8 is proved from Mathlib's
 `jacobiTheta₂_functional_equation`.
 
-## Corrections and branch conventions
+DLMF 21.5.4 as printed is false for general symplectic `Γ`. For `Γ = [[I, B], [0, I]]` with
+`B` of odd diagonal, 21.5.7 gives `θ(z|Ω+B) = θ(z + ½ diag B|Ω)`, which is not a constant
+multiple of `θ(z|Ω)` (numerically, for `g = 2`, `B = [[1,3],[3,-1]]`, the ratio
+`θ(z|Ω+B)/θ(z|Ω)` changes with `z`). The general formula is 21.5.9 with `α = β = 0`, which
+shifts the characteristics by `½ diag(CDᵀ)`, `½ diag(ABᵀ)`; 21.5.4 holds when both diagonals
+are even (the theta group), and that corrected form is stated.
 
-* **21.5.4 as printed is false for general symplectic `Γ`.** For `Γ = [[I, B], [0, I]]` with
-  `B` of odd diagonal, 21.5.7 gives `θ(z|Ω+B) = θ(z + ½ diag B|Ω)`, which is not a constant
-  multiple of `θ(z|Ω)` (numerically, for `g = 2`, `B = [[1,3],[3,-1]]`, the ratio
-  `θ(z|Ω+B)/θ(z|Ω)` changes with `z`). The general formula is 21.5.9 with `α = β = 0`, which
-  shifts the characteristics by `½ diag(CDᵀ)`, `½ diag(ABᵀ)`; 21.5.4 holds when both diagonals
-  are even (the theta group). That corrected form is acquired.
-* The square root `√det(CΩ+D)` in 21.5.4 and 21.5.9 is a continuous branch on the Siegel
-  space (any such branch, the constant `ξ` or `κ` absorbing its sign).
-* **21.5.8 with the principal square root fails for `g ≥ 3`.** For `Ω = τ I₃`,
-  `τ = -1.1√3 + i`, `det(-iΩ) = (1 + 1.1√3 i)³` has argument beyond `π`, and the principal value
-  of the root has the wrong sign (verified numerically). The correct factor is the continuous
-  branch with value `1` at `Ω = iI`, i.e. the product of the principal roots of the
-  eigenvalues of `-iΩ`. For `g ≤ 2` the principal value is that branch. Both the general
-  branch form and the principal-value form for `g ≤ 2` are acquired; `g = 1` is proved.
+The square root `√det(CΩ+D)` in 21.5.4 and 21.5.9 is a continuous branch on the Siegel space
+(any such branch, the constant `ξ` or `κ` absorbing its sign).
+
+DLMF 21.5.8 with the principal square root fails for `g ≥ 3`. For `Ω = τ I₃`,
+`τ = -1.1√3 + i`, `det(-iΩ) = (1 + 1.1√3 i)³` has argument beyond `π`, and the principal value
+of the root has the wrong sign. The correct factor is the continuous branch with value `1` at
+`Ω = iI`, i.e. the product of the principal roots of the eigenvalues of `-iΩ`. For `g ≤ 2` the
+principal value is that branch.
 -/
 
 @[expose] public noncomputable section
@@ -90,14 +111,14 @@ theorem det_eq_one_of_isSymplectic {R : Type*} [CommRing R] {Γ : Matrix (ι ⊕
   SymplecticGroup.det_eq_one ((isSymplectic_iff_mem_symplecticGroup Γ).mp hΓ)
 
 /-- The integer matrix `A` viewed as a complex matrix. -/
-abbrev rth21_cplx (A : Matrix ι ι ℤ) : Matrix ι ι ℂ := A.map (Int.cast)
+abbrev intMatrixToComplex (A : Matrix ι ι ℤ) : Matrix ι ι ℂ := A.map (Int.cast)
 
 /-- The real matrix of an integer matrix. -/
-abbrev rth21_real (A : Matrix ι ι ℤ) : Matrix ι ι ℝ := A.map (Int.cast)
+abbrev intMatrixToReal (A : Matrix ι ι ℤ) : Matrix ι ι ℝ := A.map (Int.cast)
 
 omit [DecidableEq ι] in
 /-- For a real symmetric `Y`, `u* Y u = x·Yx + y·Yy` with `u = x + iy`. -/
-lemma p3t_star_quad {Y : Matrix ι ι ℝ} (hY : Yᵀ = Y) (u : ι → ℂ) :
+private lemma star_dotProduct_ofReal_mulVec {Y : Matrix ι ι ℝ} (hY : Yᵀ = Y) (u : ι → ℂ) :
     star u ⬝ᵥ (Y.map ofReal *ᵥ u) =
       (((fun i => (u i).re) ⬝ᵥ (Y *ᵥ fun i => (u i).re) +
         (fun i => (u i).im) ⬝ᵥ (Y *ᵥ fun i => (u i).im) : ℝ) : ℂ) := by
@@ -127,7 +148,7 @@ lemma p3t_star_quad {Y : Matrix ι ι ℝ} (hY : Yᵀ = Y) (u : ι → ℂ) :
 
 omit [Fintype ι] [DecidableEq ι] in
 /-- `Ω - Ωᴴ = 2i Im Ω` for symmetric `Ω`. -/
-lemma p3t_sub_conjTranspose {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω) :
+private lemma sub_conjTranspose_eq_two_I_smul_im {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω) :
     Ω - Ωᴴ = (2 * I) • (Ω.map Complex.im).map ofReal := by
   ext i j
   have h := congrFun (congrFun hΩ i) j
@@ -139,17 +160,17 @@ lemma p3t_sub_conjTranspose {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω) :
 
 omit [Fintype ι] [DecidableEq ι] in
 /-- Integer matrices are fixed by `ᴴ` up to transposition. -/
-lemma p3t_cplx_conjTranspose (A : Matrix ι ι ℤ) : (rth21_cplx A)ᴴ = (rth21_cplx A)ᵀ := by
+private lemma conjTranspose_intMatrixToComplex (A : Matrix ι ι ℤ) : (intMatrixToComplex A)ᴴ = (intMatrixToComplex A)ᵀ := by
   ext i j; simp [conjTranspose_apply]
 
 /-- The block relations of an integer symplectic matrix, over `ℂ`. -/
-lemma p3t_blocks {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlocks A B C D) :
-    (rth21_cplx A)ᵀ * rth21_cplx C = (rth21_cplx C)ᵀ * rth21_cplx A ∧
-      (rth21_cplx B)ᵀ * rth21_cplx D = (rth21_cplx D)ᵀ * rth21_cplx B ∧
-      (rth21_cplx A)ᵀ * rth21_cplx D - (rth21_cplx C)ᵀ * rth21_cplx B = 1 := by
+private lemma isSymplecticBlocks_complex_relations {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlocks A B C D) :
+    (intMatrixToComplex A)ᵀ * intMatrixToComplex C = (intMatrixToComplex C)ᵀ * intMatrixToComplex A ∧
+      (intMatrixToComplex B)ᵀ * intMatrixToComplex D = (intMatrixToComplex D)ᵀ * intMatrixToComplex B ∧
+      (intMatrixToComplex A)ᵀ * intMatrixToComplex D - (intMatrixToComplex C)ᵀ * intMatrixToComplex B = 1 := by
   obtain ⟨h1, h2, h3⟩ := SymplecticGroup.fromBlocks_mem_iff.mp
     ((isSymplectic_iff_mem_symplecticGroup _).mp hΓ)
-  have e : ∀ X : Matrix ι ι ℤ, rth21_cplx X = X.map (Int.castRingHom ℂ) := fun X => by
+  have e : ∀ X : Matrix ι ι ℤ, intMatrixToComplex X = X.map (Int.castRingHom ℂ) := fun X => by
     ext; simp
   refine ⟨?_, ?_, ?_⟩
   · have := congrArg (fun X => X.map (Int.castRingHom ℂ)) h1
@@ -168,14 +189,14 @@ invertible there (DLMF §21.5(i), implicit in 21.5.4). -/
 @[dlmf 21.5.i "the modular action preserves the Siegel space and CΩ+D is invertible"]
 theorem modular_mem_siegel {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlocks A B C D)
     {Ω : Matrix ι ι ℂ} (hΩ : Ω ∈ siegelUpperHalfSpace ι) :
-    IsUnit (rth21_cplx C * Ω + rth21_cplx D).det ∧
-      (rth21_cplx A * Ω + rth21_cplx B) * (rth21_cplx C * Ω + rth21_cplx D)⁻¹ ∈
+    IsUnit (intMatrixToComplex C * Ω + intMatrixToComplex D).det ∧
+      (intMatrixToComplex A * Ω + intMatrixToComplex B) * (intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹ ∈
         siegelUpperHalfSpace ι := by
-  obtain ⟨m1, m2, m3⟩ := p3t_blocks hΓ
-  set a := rth21_cplx A
-  set b := rth21_cplx B
-  set c := rth21_cplx C
-  set d := rth21_cplx D
+  obtain ⟨m1, m2, m3⟩ := isSymplecticBlocks_complex_relations hΓ
+  set a := intMatrixToComplex A
+  set b := intMatrixToComplex B
+  set c := intMatrixToComplex C
+  set d := intMatrixToComplex D
   set M := c * Ω + d with hM
   set N := a * Ω + b with hN
   set Y := Ω.map Complex.im with hYdef
@@ -194,25 +215,25 @@ theorem modular_mem_siegel {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlock
   have hMt : Mᵀ = Ω * cᵀ + dᵀ := by rw [hM, transpose_add, transpose_mul, hΩ.1]
   have hNt : Nᵀ = Ω * aᵀ + bᵀ := by rw [hN, transpose_add, transpose_mul, hΩ.1]
   have hMh : Mᴴ = Ωᴴ * cᵀ + dᵀ := by
-    rw [hM, conjTranspose_add, conjTranspose_mul, p3t_cplx_conjTranspose, p3t_cplx_conjTranspose]
+    rw [hM, conjTranspose_add, conjTranspose_mul, conjTranspose_intMatrixToComplex, conjTranspose_intMatrixToComplex]
   have hNh : Nᴴ = Ωᴴ * aᵀ + bᵀ := by
-    rw [hN, conjTranspose_add, conjTranspose_mul, p3t_cplx_conjTranspose, p3t_cplx_conjTranspose]
+    rw [hN, conjTranspose_add, conjTranspose_mul, conjTranspose_intMatrixToComplex, conjTranspose_intMatrixToComplex]
   have hT : Mᵀ * N = Nᵀ * M := by
     have := key Ω; rw [sub_self, ← hMt, ← hNt] at this; exact sub_eq_zero.mp this
   have hH : Mᴴ * N - Nᴴ * M = (2 * I) • Y.map ofReal := by
-    rw [hMh, hNh, key, p3t_sub_conjTranspose hΩ.1]
+    rw [hMh, hNh, key, sub_conjTranspose_eq_two_I_smul_im hΩ.1]
   -- the quadratic form
   have hq : ∀ u : ι → ℂ, star (M *ᵥ u) ⬝ᵥ (N *ᵥ u) - star (N *ᵥ u) ⬝ᵥ (M *ᵥ u) =
       2 * I * (((fun i => (u i).re) ⬝ᵥ (Y *ᵥ fun i => (u i).re) +
         (fun i => (u i).im) ⬝ᵥ (Y *ᵥ fun i => (u i).im) : ℝ) : ℂ) := by
     intro u
-    rw [← p3t_star_quad hYs, ← smul_eq_mul, ← dotProduct_smul, ← smul_mulVec, ← hH,
+    rw [← star_dotProduct_ofReal_mulVec hYs, ← smul_eq_mul, ← dotProduct_smul, ← smul_mulVec, ← hH,
       sub_mulVec, dotProduct_sub, star_mulVec, star_mulVec, dotProduct_mulVec, dotProduct_mulVec,
       vecMul_vecMul, vecMul_vecMul, ← dotProduct_mulVec, ← dotProduct_mulVec]
   have hpos : ∀ u : ι → ℂ, u ≠ 0 → 0 < (fun i => (u i).re) ⬝ᵥ (Y *ᵥ fun i => (u i).re) +
       (fun i => (u i).im) ⬝ᵥ (Y *ᵥ fun i => (u i).im) := by
     intro u hu
-    have h0 := rth21_posIm_of_mem hΩ
+    have h0 := posIm_of_mem_siegelUpperHalfSpace hΩ
     have hnn : ∀ x : ι → ℝ, 0 ≤ x ⬝ᵥ (Y *ᵥ x) := fun x => by
       by_cases hx : x = 0
       · simp [hx]
@@ -245,7 +266,7 @@ theorem modular_mem_siegel {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlock
           rw [← hT, ← Matrix.mul_assoc, nonsing_inv_mul _ hMtu, Matrix.one_mul]
   refine ⟨hdet, hsymm, PosDef.of_dotProduct_mulVec_pos ?_ fun x hx => ?_⟩
   · rw [IsHermitian, conjTranspose_eq_transpose_of_trivial, ← Matrix.transpose_map, hsymm]
-  · rw [star_trivial, ← rth21_im_quad_ofReal]
+  · rw [star_trivial, ← im_ofReal_dotProduct_mulVec_ofReal]
     set xc : ι → ℂ := fun i => (x i : ℂ) with hxc
     set u := M⁻¹ *ᵥ xc with hu_def
     have hMu : M *ᵥ u = xc := by
@@ -274,7 +295,7 @@ theorem modular_mem_siegel {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlock
 
 omit [DecidableEq ι] in
 /-- The Siegel upper half-space is convex. -/
-lemma p3t_siegel_convex : Convex ℝ (siegelUpperHalfSpace ι) := by
+private lemma convex_siegelUpperHalfSpace : Convex ℝ (siegelUpperHalfSpace ι) := by
   refine convex_iff_forall_pos.mpr fun Ω₁ h₁ Ω₂ h₂ a b ha hb hab => ⟨?_, ?_⟩
   · rw [transpose_add, transpose_smul, transpose_smul, h₁.1, h₂.1]
   · have e : (a • Ω₁ + b • Ω₂).map Complex.im = a • Ω₁.map Complex.im + b • Ω₂.map Complex.im := by
@@ -283,7 +304,7 @@ lemma p3t_siegel_convex : Convex ℝ (siegelUpperHalfSpace ι) := by
     exact (h₁.2.smul ha).add (h₂.2.smul hb)
 
 /-- `iI` lies in the Siegel upper half-space. -/
-lemma p3t_siegel_nonempty : (I • (1 : Matrix ι ι ℂ)) ∈ siegelUpperHalfSpace ι := by
+private lemma I_smul_one_mem_siegelUpperHalfSpace : (I • (1 : Matrix ι ι ℂ)) ∈ siegelUpperHalfSpace ι := by
   refine ⟨by simp, ?_⟩
   have e : (I • (1 : Matrix ι ι ℂ)).map Complex.im = 1 := by
     ext i j; by_cases h : i = j <;> simp [h, Matrix.one_apply]
@@ -293,22 +314,22 @@ lemma p3t_siegel_nonempty : (I • (1 : Matrix ι ι ℂ)) ∈ siegelUpperHalfSp
 branch of `√det[CΩ+D]` in 21.5.4 and 21.5.9). -/
 @[dlmf 21.5.i "existence of a continuous branch of the square root of det(CΩ+D)"]
 theorem exists_continuous_sqrt_det {C D : Matrix ι ι ℤ}
-    (hdet : ∀ Ω ∈ siegelUpperHalfSpace ι, (rth21_cplx C * Ω + rth21_cplx D).det ≠ 0) :
+    (hdet : ∀ Ω ∈ siegelUpperHalfSpace ι, (intMatrixToComplex C * Ω + intMatrixToComplex D).det ≠ 0) :
     ∃ s : Matrix ι ι ℂ → ℂ, ContinuousOn s (siegelUpperHalfSpace ι) ∧
-      ∀ Ω ∈ siegelUpperHalfSpace ι, s Ω ^ 2 = (rth21_cplx C * Ω + rth21_cplx D).det := by
+      ∀ Ω ∈ siegelUpperHalfSpace ι, s Ω ^ 2 = (intMatrixToComplex C * Ω + intMatrixToComplex D).det := by
   classical
   set S := siegelUpperHalfSpace ι
   have : LocallyConvexSpace ℝ (Matrix ι ι ℂ) :=
     inferInstanceAs (LocallyConvexSpace ℝ (ι → ι → ℂ))
-  have hne : S.Nonempty := ⟨_, p3t_siegel_nonempty⟩
-  have : ContractibleSpace S := p3t_siegel_convex.contractibleSpace hne
-  have : LocallyPathConnectedSpace S := p3t_siegel_convex.locallyPathConnectedSpace
-  let f : C(S, {z : ℂ // z ≠ 0}) := ⟨fun Ω => ⟨(rth21_cplx C * Ω.1 + rth21_cplx D).det,
+  have hne : S.Nonempty := ⟨_, I_smul_one_mem_siegelUpperHalfSpace⟩
+  have : ContractibleSpace S := convex_siegelUpperHalfSpace.contractibleSpace hne
+  have : LocallyPathConnectedSpace S := convex_siegelUpperHalfSpace.locallyPathConnectedSpace
+  let f : C(S, {z : ℂ // z ≠ 0}) := ⟨fun Ω => ⟨(intMatrixToComplex C * Ω.1 + intMatrixToComplex D).det,
     hdet Ω.1 Ω.2⟩, by
       refine Continuous.subtype_mk ?_ _
       exact (Continuous.matrix_det ((continuous_const.matrix_mul continuous_subtype_val).add
         continuous_const))⟩
-  let a₀ : S := ⟨_, p3t_siegel_nonempty⟩
+  let a₀ : S := ⟨_, I_smul_one_mem_siegelUpperHalfSpace⟩
   set w := ((f a₀ : ℂ)) ^ ((2 : ℕ)⁻¹ : ℂ) with hw
   have hw0 : w ≠ 0 := by
     rw [hw, Ne, cpow_eq_zero_iff]; exact fun h => (f a₀).2 h.1
@@ -340,11 +361,11 @@ theta-group condition is added and the square root is a continuous branch; the g
 theorem riemannTheta_modular {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlocks A B C D)
     (hCD : ∀ i, Even ((C * Dᵀ) i i)) (hAB : ∀ i, Even ((A * Bᵀ) i i))
     {s : Matrix ι ι ℂ → ℂ} (hs : ContinuousOn s (siegelUpperHalfSpace ι))
-    (hs2 : ∀ Ω ∈ siegelUpperHalfSpace ι, s Ω ^ 2 = (rth21_cplx C * Ω + rth21_cplx D).det) :
+    (hs2 : ∀ Ω ∈ siegelUpperHalfSpace ι, s Ω ^ 2 = (intMatrixToComplex C * Ω + intMatrixToComplex D).det) :
     ∃ ξ : ℂ, ξ ^ 8 = 1 ∧ ∀ Ω ∈ siegelUpperHalfSpace ι, ∀ z : ι → ℂ,
-      riemannTheta ((rth21_cplx C * Ω + rth21_cplx D)⁻¹ᵀ *ᵥ z)
-          ((rth21_cplx A * Ω + rth21_cplx B) * (rth21_cplx C * Ω + rth21_cplx D)⁻¹) =
-        ξ * s Ω * cexp (π * I * (z ⬝ᵥ (((rth21_cplx C * Ω + rth21_cplx D)⁻¹ * rth21_cplx C) *ᵥ
+      riemannTheta ((intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹ᵀ *ᵥ z)
+          ((intMatrixToComplex A * Ω + intMatrixToComplex B) * (intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹) =
+        ξ * s Ω * cexp (π * I * (z ⬝ᵥ (((intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹ * intMatrixToComplex C) *ᵥ
           z))) * riemannTheta z Ω := by
   sorry
 
@@ -357,7 +378,7 @@ Corrected from the printed DLMF formula: `A` must be invertible over `ℤ` (`A �
 @[dlmf 21.5.E5]
 theorem riemannTheta_unimodular {A : Matrix ι ι ℤ} (hA : IsUnit A) (z : ι → ℂ)
     (Ω : Matrix ι ι ℂ) :
-    riemannTheta (rth21_cplx A *ᵥ z) (rth21_cplx A * Ω * (rth21_cplx A)ᵀ) = riemannTheta z Ω := by
+    riemannTheta (intMatrixToComplex A *ᵥ z) (intMatrixToComplex A * Ω * (intMatrixToComplex A)ᵀ) = riemannTheta z Ω := by
   obtain ⟨u, rfl⟩ := hA
   let e : (ι → ℤ) ≃ (ι → ℤ) :=
     { toFun := fun n => (u : Matrix ι ι ℤ)ᵀ *ᵥ n
@@ -372,7 +393,7 @@ theorem riemannTheta_unimodular {A : Matrix ι ι ℤ} (hA : IsUnit A) (z : ι �
   conv_rhs => rw [← e.tsum_eq]
   refine tsum_congr fun n => ?_
   have hcast : (fun i => ((e n i : ℤ) : ℂ)) =
-      (rth21_cplx (u : Matrix ι ι ℤ))ᵀ *ᵥ fun i => (n i : ℂ) := by
+      (intMatrixToComplex (u : Matrix ι ι ℤ))ᵀ *ᵥ fun i => (n i : ℂ) := by
     funext i
     simp [e, mulVec, dotProduct]
   rw [riemannThetaTerm, riemannThetaTerm, hcast]
@@ -382,7 +403,7 @@ theorem riemannTheta_unimodular {A : Matrix ι ι ℤ} (hA : IsUnit A) (z : ι �
 
 /-- Identity under the stated parameter and domain assumptions: `((n ⬝ᵥ (B *ᵥ n) : ℤ) : ZMod 2) =
 ((∑ i, B i i * n i : ℤ) : ZMod 2)`. -/
-lemma rth21_quad_mod_two (B : Matrix ι ι ℤ) (hB : Bᵀ = B) (n : ι → ℤ) :
+private lemma intCast_dotProduct_mulVec_self_zmod_two (B : Matrix ι ι ℤ) (hB : Bᵀ = B) (n : ι → ℤ) :
     ((n ⬝ᵥ (B *ᵥ n) : ℤ) : ZMod 2) = ((∑ i, B i i * n i : ℤ) : ZMod 2) := by
   simp only [dotProduct, mulVec, Finset.mul_sum]
   push_cast
@@ -426,12 +447,12 @@ lemma rth21_quad_mod_two (B : Matrix ι ι ℤ) (hB : Bᵀ = B) (n : ι → ℤ)
 @[dlmf 21.5.E7]
 theorem riemannTheta_add_symm_int {B : Matrix ι ι ℤ} (hB : Bᵀ = B) (z : ι → ℂ)
     (Ω : Matrix ι ι ℂ) :
-    riemannTheta z (Ω + rth21_cplx B) = riemannTheta (z + fun i => (B i i : ℂ) / 2) Ω := by
+    riemannTheta z (Ω + intMatrixToComplex B) = riemannTheta (z + fun i => (B i i : ℂ) / 2) Ω := by
   rw [riemannTheta, riemannTheta]
   refine tsum_congr fun n => ?_
   obtain ⟨k, hk⟩ : (2 : ℤ) ∣ n ⬝ᵥ (B *ᵥ n) - ∑ i, B i i * n i :=
-    (ZMod.intCast_eq_intCast_iff_dvd_sub _ _ 2).mp (rth21_quad_mod_two B hB n).symm
-  have hq : (fun i => (n i : ℂ)) ⬝ᵥ (rth21_cplx B *ᵥ fun i => (n i : ℂ)) =
+    (ZMod.intCast_eq_intCast_iff_dvd_sub _ _ 2).mp (intCast_dotProduct_mulVec_self_zmod_two B hB n).symm
+  have hq : (fun i => (n i : ℂ)) ⬝ᵥ (intMatrixToComplex B *ᵥ fun i => (n i : ℂ)) =
       ((n ⬝ᵥ (B *ᵥ n) : ℤ) : ℂ) := by
     simp [dotProduct, mulVec]
   have hd : (fun i => (n i : ℂ)) ⬝ᵥ (fun i => (B i i : ℂ) / 2) =
@@ -444,14 +465,14 @@ theorem riemannTheta_add_symm_int {B : Matrix ι ι ℤ} (hB : Bᵀ = B) (z : ι
     exact_mod_cast hk
   rw [hk', show ∀ a b c : ℂ, 2 * π * I * ((1 / 2 : ℂ) * (a + (b + 2 * k)) + c) =
       2 * π * I * ((1 / 2 : ℂ) * a + (c + b / 2)) + 2 * π * I * k by intros; ring,
-    Complex.exp_add, rth21_exp_int, mul_one]
+    Complex.exp_add, exp_two_pi_I_intCast, mul_one]
 
 /-- `θ(z|Ω + B) = θ(z|Ω)` for a symmetric integer matrix `B` with even diagonal
 (DLMF 21.5.6, `Γ = [[I, B], [0, I]]`). -/
 @[dlmf 21.5.E6]
 theorem riemannTheta_add_symm_int_even {B : Matrix ι ι ℤ} (hB : Bᵀ = B)
     (heven : ∀ i, Even (B i i)) (z : ι → ℂ) (Ω : Matrix ι ι ℂ) :
-    riemannTheta z (Ω + rth21_cplx B) = riemannTheta z Ω := by
+    riemannTheta z (Ω + intMatrixToComplex B) = riemannTheta z Ω := by
   choose m hm using heven
   rw [riemannTheta_add_symm_int hB]
   have : (fun i => (B i i : ℂ) / 2) = fun i => (m i : ℂ) := by
@@ -488,7 +509,7 @@ theorem riemannTheta_inversion_principal (hg : Fintype.card ι ≤ 2) {Ω : Matr
 
 /-- Identity under the stated parameter and domain assumptions: `(!![τ] : Matrix (Fin 1) (Fin 1)
 ℂ)⁻¹ = !![τ⁻¹]`. -/
-lemma rth21_inv_fin_one {τ : ℂ} (hτ : τ ≠ 0) : (!![τ] : Matrix (Fin 1) (Fin 1) ℂ)⁻¹ = !![τ⁻¹] := by
+private lemma inv_matrix_fin_one {τ : ℂ} (hτ : τ ≠ 0) : (!![τ] : Matrix (Fin 1) (Fin 1) ℂ)⁻¹ = !![τ⁻¹] := by
   refine Matrix.inv_eq_right_inv ?_
   ext i j
   fin_cases i; fin_cases j
@@ -496,7 +517,7 @@ lemma rth21_inv_fin_one {τ : ℂ} (hτ : τ ≠ 0) : (!![τ] : Matrix (Fin 1) (
 
 /-- Identity under the stated parameter and domain assumptions: `riemannTheta ![w] !![σ] =
 jacobiTheta₂ w σ`. -/
-lemma rth21_riemannTheta_fin_one' (w σ : ℂ) : riemannTheta ![w] !![σ] = jacobiTheta₂ w σ := by
+lemma riemannTheta_fin_one_eq_jacobiTheta₂ (w σ : ℂ) : riemannTheta ![w] !![σ] = jacobiTheta₂ w σ := by
   rw [riemannTheta_fin_one, DLMF.Elliptic.jacobiThetaThreeTau,
     mul_div_cancel_left₀ _ DLMF.Elliptic.pi_ne_zero']
 
@@ -517,8 +538,8 @@ theorem riemannTheta_inversion_fin_one {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
     simp
   have hdot : ![z] ⬝ᵥ ![z / τ] = z ^ 2 / τ := by
     simp [dotProduct, sq, mul_div_assoc]
-  rw [rth21_inv_fin_one hτ0, hv, hm, hdet, hdot, rth21_riemannTheta_fin_one',
-    rth21_riemannTheta_fin_one', jacobiTheta₂_functional_equation z τ]
+  rw [inv_matrix_fin_one hτ0, hv, hm, hdet, hdot, riemannTheta_fin_one_eq_jacobiTheta₂,
+    riemannTheta_fin_one_eq_jacobiTheta₂, jacobiTheta₂_functional_equation z τ]
   have hne : (-I * τ) ^ (1 / 2 : ℂ) ≠ 0 := by
     rw [Ne, Complex.cpow_eq_zero_iff]
     simp [hτ0, I_ne_zero]
@@ -539,14 +560,14 @@ constant `κ(α, β, Γ)`, independent of `z` and `Ω`, with
 @[dlmf 21.5.E9 "continuous square-root branch; κ independent of z and Ω"]
 theorem riemannThetaChar_modular {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlocks A B C D)
     (α β : ι → ℝ) {s : Matrix ι ι ℂ → ℂ} (hs : ContinuousOn s (siegelUpperHalfSpace ι))
-    (hs2 : ∀ Ω ∈ siegelUpperHalfSpace ι, s Ω ^ 2 = (rth21_cplx C * Ω + rth21_cplx D).det) :
+    (hs2 : ∀ Ω ∈ siegelUpperHalfSpace ι, s Ω ^ 2 = (intMatrixToComplex C * Ω + intMatrixToComplex D).det) :
     ∃ κ : ℂ, ∀ Ω ∈ siegelUpperHalfSpace ι, ∀ z : ι → ℂ,
       riemannThetaChar
-          (rth21_real D *ᵥ α - rth21_real C *ᵥ β + fun i => ((C * Dᵀ) i i : ℝ) / 2)
-          (-(rth21_real B *ᵥ α) + rth21_real A *ᵥ β + fun i => ((A * Bᵀ) i i : ℝ) / 2)
-          ((rth21_cplx C * Ω + rth21_cplx D)⁻¹ᵀ *ᵥ z)
-          ((rth21_cplx A * Ω + rth21_cplx B) * (rth21_cplx C * Ω + rth21_cplx D)⁻¹) =
-        κ * s Ω * cexp (π * I * (z ⬝ᵥ (((rth21_cplx C * Ω + rth21_cplx D)⁻¹ * rth21_cplx C) *ᵥ
+          (intMatrixToReal D *ᵥ α - intMatrixToReal C *ᵥ β + fun i => ((C * Dᵀ) i i : ℝ) / 2)
+          (-(intMatrixToReal B *ᵥ α) + intMatrixToReal A *ᵥ β + fun i => ((A * Bᵀ) i i : ℝ) / 2)
+          ((intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹ᵀ *ᵥ z)
+          ((intMatrixToComplex A * Ω + intMatrixToComplex B) * (intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹) =
+        κ * s Ω * cexp (π * I * (z ⬝ᵥ (((intMatrixToComplex C * Ω + intMatrixToComplex D)⁻¹ * intMatrixToComplex C) *ᵥ
           z))) * riemannThetaChar α β z Ω := by
   sorry
 

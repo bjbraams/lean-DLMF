@@ -10,10 +10,32 @@ public import DLMF.BernoulliEuler.Zeros.RealZeros
 /-!
 # Limits of Bernoulli zeros from uniform convergence
 
-Uniform polynomial convergence controls the limiting locations and reality of Bernoulli zeros.
+This file proves the limiting locations of the real zeros of the Bernoulli polynomials (DLMF
+§24.12(i)) and the count `R(n)` of real zeros.
 
-Source references and common attribution are retained in
-`DLMF.BernoulliEuler.Zeros`.
+## Main results
+
+* `tendsto_bernoulliRealZero_even`, `tendsto_bernoulliRealZero_odd`: for fixed `m`, the limits
+  of `x_{2m-1}^{(n)}` and `x_{2m}^{(n)}` as `n → ∞` through even and through odd values
+  (DLMF 24.12.4, 24.12.5).
+* `bernoulliRealZero_one_of_odd`, `bernoulliRealZero_two_of_odd`: `x_1^{(n)} = 1/2` and
+  `x_2^{(n)} = 1` for odd `n`.
+* `bernoulliRealZeroCount_eq_self`: `R(n) = n` for `1 ≤ n ≤ 5`.
+* `bernoulliRealZeroCount_isEquivalent`: `R(n) ∼ 2n/(πe)` (DLMF 24.12.6).
+* `tendsto_eulerRealZero_two_mul`, `tendsto_eulerRealZero_two_mul_add_one`: the limits of the
+  Euler zeros, used for DLMF 24.12.8 and the corrected 24.12.11.
+
+## Implementation notes
+
+The limits "as `n → ∞` with `m` fixed" for even (odd) `n` are taken along `n = 2k`
+(`n = 2k + 1`), `k → ∞`. The zero `x_{2m}^{(n)}` exists for large `n`, so the totalized value
+does not matter in these limits. The limits are proved from the uniform limits 24.11.5–24.11.6
+by a zero-counting (Hurwitz-type) argument (`realZeroCountBelow`); `R(n) = n` for `n ≤ 5` is
+proved from the explicit polynomials.
+
+## References
+
+* NIST DLMF §24.12; Delange (1987).
 -/
 
 @[expose] public noncomputable section
@@ -31,7 +53,7 @@ simple zeros `z_1 < z_2 < ⋯` in `[1/2, ∞)`, then the `j`-th zero of `P_k` in
 to `z_j` (Hurwitz-type argument by counting zeros, Rolle and the mean value theorem). The
 uniform limits are DLMF 24.11.5–24.11.6 (`DLMF.BernoulliEuler.Asymptotics`). -/
 /-- In a sorted list, an index below the number of entries `< c` gives an entry `< c`. -/
-lemma r24b_getD_lt_of_length_filter {l : List ℝ} (hs : l.Pairwise (· ≤ ·)) {c : ℝ} {i : ℕ}
+private lemma getD_lt_of_lt_length_filter {l : List ℝ} (hs : l.Pairwise (· ≤ ·)) {c : ℝ} {i : ℕ}
     (h : i < (l.filter (fun x => decide (x < c))).length) : l.getD i 0 < c := by
   induction l generalizing i with
   | nil => simp at h
@@ -53,7 +75,7 @@ lemma r24b_getD_lt_of_length_filter {l : List ℝ} (hs : l.Pairwise (· ≤ ·))
       simp at h
 
 /-- In a sorted list, an entry `< c` at index `i` lies among the entries `< c`. -/
-lemma r24b_length_filter_of_getD_lt {l : List ℝ} (hs : l.Pairwise (· ≤ ·)) {c : ℝ} {i : ℕ}
+private lemma lt_length_filter_of_getD_lt {l : List ℝ} (hs : l.Pairwise (· ≤ ·)) {c : ℝ} {i : ℕ}
     (hi : i < l.length) (h : l.getD i 0 < c) : i < (l.filter (fun x => decide (x < c))).length := by
   induction l generalizing i with
   | nil => simp at hi
@@ -72,39 +94,39 @@ lemma r24b_length_filter_of_getD_lt {l : List ℝ} (hs : l.Pairwise (· ≤ ·))
       omega
 
 /-- The number of roots (with multiplicity) of `p` in `[1/2, c)`. -/
-noncomputable def r24b_count (p : ℝ[X]) (c : ℝ) : ℕ :=
+noncomputable def realZeroCountBelow (p : ℝ[X]) (c : ℝ) : ℕ :=
   Multiset.card (p.roots.filter (fun x => 1 / 2 ≤ x ∧ x < c))
 
-/-- The number of listed zeros below `c` is `r24b_count p c`. -/
-lemma r24b_length_filter_zerosGE (p : ℝ[X]) (c : ℝ) :
-    ((b24b_zerosGE p).filter (fun x => decide (x < c))).length = r24b_count p c := by
-  rw [r24b_count, ← Multiset.coe_card, ← Multiset.filter_coe, b24b_zerosGE, Multiset.sort_eq,
+/-- The number of listed zeros below `c` is `realZeroCountBelow p c`. -/
+private lemma length_filter_realZerosGE (p : ℝ[X]) (c : ℝ) :
+    ((realZerosGE p).filter (fun x => decide (x < c))).length = realZeroCountBelow p c := by
+  rw [realZeroCountBelow, ← Multiset.coe_card, ← Multiset.filter_coe, realZerosGE, Multiset.sort_eq,
     Multiset.filter_filter]
   congr 2
   funext x; simp [and_comm]
 
-/-- If `r24b_count p (z - r) = j - 1` and `r24b_count p (z + r) = j`, then the `j`-th zero of
+/-- If `realZeroCountBelow p (z - r) = j - 1` and `realZeroCountBelow p (z + r) = j`, then the `j`-th zero of
 `p` in `[1/2, ∞)` lies in `[z - r, z + r)`. -/
-lemma r24b_getD_mem_of_count {p : ℝ[X]} {j : ℕ} (hj : 1 ≤ j) {a b : ℝ}
-    (ha : r24b_count p a = j - 1) (hb : r24b_count p b = j) :
-    a ≤ (b24b_zerosGE p).getD (j - 1) 0 ∧ (b24b_zerosGE p).getD (j - 1) 0 < b := by
-  have hs := b24b_zerosGE_sorted p
-  have hlb : j - 1 < ((b24b_zerosGE p).filter (fun x => decide (x < b))).length := by
-    rw [r24b_length_filter_zerosGE, hb]; omega
-  refine ⟨?_, r24b_getD_lt_of_length_filter hs hlb⟩
+private lemma getD_realZerosGE_mem_Ico_of_count {p : ℝ[X]} {j : ℕ} (hj : 1 ≤ j) {a b : ℝ}
+    (ha : realZeroCountBelow p a = j - 1) (hb : realZeroCountBelow p b = j) :
+    a ≤ (realZerosGE p).getD (j - 1) 0 ∧ (realZerosGE p).getD (j - 1) 0 < b := by
+  have hs := realZerosGE_sorted p
+  have hlb : j - 1 < ((realZerosGE p).filter (fun x => decide (x < b))).length := by
+    rw [length_filter_realZerosGE, hb]; omega
+  refine ⟨?_, getD_lt_of_lt_length_filter hs hlb⟩
   by_contra hlt
   push Not at hlt
-  have hlen : j - 1 < (b24b_zerosGE p).length :=
+  have hlen : j - 1 < (realZerosGE p).length :=
     lt_of_lt_of_le hlb (List.length_filter_le _ _)
-  have := r24b_length_filter_of_getD_lt hs hlen hlt
-  rw [r24b_length_filter_zerosGE, ha] at this
+  have := lt_length_filter_of_getD_lt hs hlen hlt
+  rw [length_filter_realZerosGE, ha] at this
   omega
 
 /-- Splitting the zero count at `a ≤ b`. -/
-lemma r24b_count_add {p : ℝ[X]} {a b : ℝ} (hab : a ≤ b) :
-    r24b_count p b = r24b_count p a +
+private lemma realZeroCountBelow_eq_add {p : ℝ[X]} {a b : ℝ} (hab : a ≤ b) :
+    realZeroCountBelow p b = realZeroCountBelow p a +
       Multiset.card (p.roots.filter (fun x => 1 / 2 ≤ x ∧ a ≤ x ∧ x < b)) := by
-  rw [r24b_count, r24b_count, ← Multiset.card_add,
+  rw [realZeroCountBelow, realZeroCountBelow, ← Multiset.card_add,
     ← Multiset.filter_add_not (fun x => x < a) (p.roots.filter fun x => 1 / 2 ≤ x ∧ x < b),
     Multiset.filter_filter, Multiset.filter_filter]
   congr 2
@@ -116,7 +138,7 @@ lemma r24b_count_add {p : ℝ[X]} {a b : ℝ} (hab : a ≤ b) :
     · rintro ⟨h1, h3, h2⟩; exact ⟨not_lt.mpr h3, h1, h2⟩
 
 /-- No roots satisfy `q` if `p` does not vanish where `q` holds. -/
-lemma r24b_card_filter_eq_zero {p : ℝ[X]} {q : ℝ → Prop} [DecidablePred q]
+private lemma card_filter_roots_eq_zero {p : ℝ[X]} {q : ℝ → Prop} [DecidablePred q]
     (h : ∀ x, q x → p.eval x ≠ 0) : Multiset.card (p.roots.filter q) = 0 := by
   rw [Multiset.card_eq_zero, Multiset.filter_eq_nil]
   intro x hx hq
@@ -124,7 +146,7 @@ lemma r24b_card_filter_eq_zero {p : ℝ[X]} {q : ℝ → Prop} [DecidablePred q]
 
 /-- Exactly one root (with multiplicity) satisfies `q` when `ζ` is the unique zero there and
 simple. -/
-lemma r24b_card_filter_eq_one {p : ℝ[X]} (hp : p ≠ 0) {q : ℝ → Prop} [DecidablePred q] {ζ : ℝ}
+private lemma card_filter_roots_eq_one {p : ℝ[X]} (hp : p ≠ 0) {q : ℝ → Prop} [DecidablePred q] {ζ : ℝ}
     (hζ : q ζ) (hζ0 : p.eval ζ = 0) (hd : p.derivative.eval ζ ≠ 0)
     (huniq : ∀ x, q x → p.eval x = 0 → x = ζ) : Multiset.card (p.roots.filter q) = 1 := by
   have hfilt : p.roots.filter q = p.roots.filter (fun x => x = ζ) := by
@@ -138,7 +160,7 @@ lemma r24b_card_filter_eq_one {p : ℝ[X]} (hp : p ≠ 0) {q : ℝ → Prop} [De
   omega
 
 /-- Rolle: a function with nonvanishing derivative on `[a, b]` has at most one zero there. -/
-lemma r24b_zero_unique {F F' : ℝ → ℝ} (hF : ∀ x, HasDerivAt F (F' x) x) {a b : ℝ}
+private lemma eq_of_zero_of_deriv_ne_zero {F F' : ℝ → ℝ} (hF : ∀ x, HasDerivAt F (F' x) x) {a b : ℝ}
     (hF' : ∀ x ∈ Set.Icc a b, F' x ≠ 0) {x y : ℝ} (hx : x ∈ Set.Icc a b) (hy : y ∈ Set.Icc a b)
     (hFx : F x = 0) (hFy : F y = 0) : x = y := by
   by_contra hne
@@ -153,7 +175,7 @@ lemma r24b_zero_unique {F F' : ℝ → ℝ} (hF : ∀ x, HasDerivAt F (F' x) x) 
 
 /-- Mean value estimate at a simple zero: if `g z = 0` and `|g' - s| < |s|/4` on `[z - r, z + r]`,
 then `s g(z ± r) ≷ ± (3/4) r s²`. -/
-lemma r24b_sign_at_zero {g g' : ℝ → ℝ} (hg : ∀ x, HasDerivAt g (g' x) x) {z r s : ℝ}
+private lemma mul_apply_bounds_near_simple_zero {g g' : ℝ → ℝ} (hg : ∀ x, HasDerivAt g (g' x) x) {z r s : ℝ}
     (hr : 0 < r) (hgz : g z = 0) (hd : ∀ x, |x - z| ≤ r → |g' x - s| < |s| / 4) :
     3 / 4 * r * s ^ 2 < s * g (z + r) ∧ s * g (z - r) < -(3 / 4 * r * s ^ 2) := by
   have hcont : Continuous g := continuous_iff_continuousAt.mpr fun t => (hg t).continuousAt
@@ -193,7 +215,7 @@ lemma r24b_sign_at_zero {g g' : ℝ → ℝ} (hg : ∀ x, HasDerivAt g (g' x) x)
 `c_k P_k' → g'` uniformly on bounded subsets of `[1/2, ∞)`, and the zeros of `g` in `[1/2, ∞)`
 are the simple zeros `z₁ < z₂ < ⋯`, then the `j`-th zero of `P_k` in `[1/2, ∞)` tends to `z_j`.
 (If `z₁ = 1/2` we require `P_k(1/2) = 0`.) -/
-lemma r24b_tendsto_zerosGE (P : ℕ → ℝ[X]) (c : ℕ → ℝ) (hc : ∀ k, c k ≠ 0)
+private lemma tendsto_realZerosGE_getD (P : ℕ → ℝ[X]) (c : ℕ → ℝ) (hc : ∀ k, c k ≠ 0)
     (g g' : ℝ → ℝ) (hg : ∀ x, HasDerivAt g (g' x) x) (hg' : Continuous g')
     (z : ℕ → ℝ) (hz : StrictMono z) (hz1 : 1 / 2 ≤ z 1)
     (hzero : ∀ x, 1 / 2 ≤ x → g x = 0 → ∃ i, 1 ≤ i ∧ x = z i)
@@ -202,7 +224,7 @@ lemma r24b_tendsto_zerosGE (P : ℕ → ℝ[X]) (c : ℕ → ℝ) (hc : ∀ k, c
     (hconv : ∀ M ε : ℝ, 0 < ε → ∀ᶠ k in atTop, ∀ x, 1 / 2 ≤ x → x ≤ M →
       |c k * (P k).eval x - g x| < ε ∧ |c k * (P k).derivative.eval x - g' x| < ε)
     {j : ℕ} (hj : 1 ≤ j) :
-    Tendsto (fun k => (b24b_zerosGE (P k)).getD (j - 1) 0) atTop (𝓝 (z j)) := by
+    Tendsto (fun k => (realZerosGE (P k)).getD (j - 1) 0) atTop (𝓝 (z j)) := by
   refine Metric.tendsto_nhds.mpr fun ε hε => ?_
   have hgcont : Continuous g := continuous_iff_continuousAt.mpr fun t => (hg t).continuousAt
   -- choice of the radius `r`
@@ -308,7 +330,7 @@ lemma r24b_tendsto_zerosGE (P : ℕ → ℝ[X]) (c : ℕ → ℝ) (hc : ∀ k, c
           · have h12 := hgap 1 (Finset.mem_Icc.mpr ⟨le_rfl, hj⟩)
             have : z 2 ≤ z i := hzle h
             linarith
-        obtain ⟨hp, hm⟩ := r24b_sign_at_zero hg hr0 (hgz i hi1) (hg'r i hi)
+        obtain ⟨hp, hm⟩ := mul_apply_bounds_near_simple_zero hg hr0 (hgz i hi1) (hg'r i hi)
         have hb1 := (hbd (z i + r) (by linarith) (by linarith [hzj i hi])).1
         have hb2 := (hbd (z i - r) hzr (by linarith [hzj i hi])).1
         have hmin := min_le_left (r * |s i| / 2) (|s i| / 4)
@@ -328,34 +350,34 @@ lemma r24b_tendsto_zerosGE (P : ℕ → ℝ[X]) (c : ℕ → ℝ) (hc : ∀ k, c
         have hprod : F (z i - r) * F (z i + r) < 0 := by
           have : (s i * F (z i - r)) * (s i * F (z i + r)) < 0 := mul_neg_of_neg_of_pos f2 f1
           nlinarith [sq_nonneg (s i), sq_pos_of_pos hsi, sq_abs (s i)]
-        obtain ⟨ζ, hζ, hζ0⟩ := q24b_exists_root hFc (by linarith) hprod
+        obtain ⟨ζ, hζ, hζ0⟩ := exists_Ioo_eq_zero_of_mul_neg hFc (by linarith) hprod
         exact ⟨ζ, by linarith [hζ.1], hζ.1.le, hζ.2, hζ0⟩
     have hP0 : P k ≠ 0 := fun h0 => hF'ne ζ hζ1 (by rw [abs_le]; constructor <;> linarith)
       (by simp only [F', h0, derivative_zero, eval_zero, mul_zero])
     have hIcc : ∀ x, 1 / 2 ≤ x → z i - r ≤ x → x < z i + r →
         x ∈ Set.Icc (max (1 / 2) (z i - r)) (z i + r) := fun x h1 h2 h3 =>
       ⟨max_le h1 h2, h3.le⟩
-    refine r24b_card_filter_eq_one hP0 ⟨hζ1, hζ2, hζ3⟩ ((hPF ζ).mpr hζ0) ?_ ?_
+    refine card_filter_roots_eq_one hP0 ⟨hζ1, hζ2, hζ3⟩ ((hPF ζ).mpr hζ0) ?_ ?_
     · intro hd
       exact hF'ne ζ hζ1 (by rw [abs_le]; constructor <;> linarith)
         (by simp only [F', hd, mul_zero])
     · rintro x ⟨hx1, hx2, hx3⟩ hx0
-      refine r24b_zero_unique hF (fun y hy => hF'ne y (le_of_max_le_left hy.1)
+      refine eq_of_zero_of_deriv_ne_zero hF (fun y hy => hF'ne y (le_of_max_le_left hy.1)
         (by rw [abs_le]; constructor <;> linarith [le_of_max_le_right hy.1, hy.2]))
         (hIcc x hx1 hx2 hx3) (hIcc ζ hζ1 hζ2 hζ3) ((hPF x).mp hx0) hζ0
   -- counting
-  have hC0 : r24b_count (P k) (z 1 - r) = 0 := by
-    refine r24b_card_filter_eq_zero fun x ⟨hx1, hx2⟩ => hnoK x ⟨⟨hx1, ?_⟩, ?_⟩
+  have hC0 : realZeroCountBelow (P k) (z 1 - r) = 0 := by
+    refine card_filter_roots_eq_zero fun x ⟨hx1, hx2⟩ => hnoK x ⟨⟨hx1, ?_⟩, ?_⟩
     · linarith [hzj 1 (Finset.mem_Icc.mpr ⟨le_rfl, hj⟩)]
     · refine Set.mem_iInter₂.mpr fun l hl => ?_
       have := hzle (Finset.mem_Icc.mp hl).1
       show r ≤ |x - z l|
       rw [abs_sub_comm, abs_of_pos (by linarith)]; linarith
   have hCgap : ∀ i, 1 ≤ i → i < j →
-      r24b_count (P k) (z (i + 1) - r) = r24b_count (P k) (z i + r) := by
+      realZeroCountBelow (P k) (z (i + 1) - r) = realZeroCountBelow (P k) (z i + r) := by
     intro i hi hij
     have hg1 := hgap i (Finset.mem_Icc.mpr ⟨hi, hij.le⟩)
-    rw [r24b_count_add (show z i + r ≤ z (i + 1) - r by linarith)]
+    rw [realZeroCountBelow_eq_add (show z i + r ≤ z (i + 1) - r by linarith)]
     have h0 : ∀ x, (1 / 2 ≤ x ∧ z i + r ≤ x ∧ x < z (i + 1) - r) → (P k).eval x ≠ 0 := by
       rintro x ⟨hx1, hx2, hx3⟩
       refine hnoK x ⟨⟨hx1, ?_⟩, ?_⟩
@@ -367,13 +389,13 @@ lemma r24b_tendsto_zerosGE (P : ℕ → ℝ[X]) (c : ℕ → ℝ) (hc : ∀ k, c
           rw [abs_sub_comm, abs_of_pos (by linarith)]; linarith
         · have := hzle h
           rw [abs_of_nonneg (by linarith)]; linarith
-    rw [r24b_card_filter_eq_zero h0, add_zero]
+    rw [card_filter_roots_eq_zero h0, add_zero]
   have hCstep : ∀ i ∈ Finset.Icc 1 j,
-      r24b_count (P k) (z i + r) = r24b_count (P k) (z i - r) + 1 := by
+      realZeroCountBelow (P k) (z i + r) = realZeroCountBelow (P k) (z i - r) + 1 := by
     intro i hi
-    rw [r24b_count_add (show z i - r ≤ z i + r by linarith), hone i hi]
-  have hind : ∀ i, 1 ≤ i → i ≤ j → r24b_count (P k) (z i - r) = i - 1 ∧
-      r24b_count (P k) (z i + r) = i := by
+    rw [realZeroCountBelow_eq_add (show z i - r ≤ z i + r by linarith), hone i hi]
+  have hind : ∀ i, 1 ≤ i → i ≤ j → realZeroCountBelow (P k) (z i - r) = i - 1 ∧
+      realZeroCountBelow (P k) (z i + r) = i := by
     intro i hi hij
     induction i, hi using Nat.le_induction with
     | base =>
@@ -384,12 +406,12 @@ lemma r24b_tendsto_zerosGE (P : ℕ → ℝ[X]) (c : ℕ → ℝ) (hc : ∀ k, c
       refine ⟨by rw [h3, h2]; omega, ?_⟩
       rw [hCstep (i + 1) (Finset.mem_Icc.mpr ⟨by omega, hij⟩), h3, h2]
   obtain ⟨hA, hB⟩ := hind j hj le_rfl
-  obtain ⟨h1, h2⟩ := r24b_getD_mem_of_count hj hA hB
+  obtain ⟨h1, h2⟩ := getD_realZerosGE_mem_Ico_of_count hj hA hB
   rw [Real.dist_eq, abs_lt]
   constructor <;> linarith
 
 /-- Transfer complex uniform convergence on compacts to real bounds on `[1/2, M]`. -/
-lemma r24b_real_of_unif {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ}
+private lemma eventually_abs_sub_lt_of_tendstoUniformlyOn {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ}
     (h : ∀ K : Set ℂ, IsCompact K → TendstoUniformlyOn F G atTop K) (a : ℂ)
     (f : ℕ → ℝ → ℝ) (gr : ℝ → ℝ) (hf : ∀ k x, (f k x : ℂ) = a * F k x)
     (hg : ∀ x, (gr x : ℂ) = a * G x) (M ε : ℝ) (hε : 0 < ε) :
@@ -410,21 +432,21 @@ lemma r24b_real_of_unif {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ}
       rw [mul_div_assoc', div_lt_iff₀ (by positivity)]; nlinarith [norm_nonneg a]
 
 /-- Shift an eventual statement by one index. -/
-lemma r24b_eventually_shift {Q : ℕ → Prop} (h : ∀ᶠ k in atTop, Q k) :
+private lemma eventually_one_le_and_sub_one {Q : ℕ → Prop} (h : ∀ᶠ k in atTop, Q k) :
     ∀ᶠ k in atTop, 1 ≤ k ∧ Q (k - 1) :=
   (eventually_ge_atTop 1).and ((tendsto_sub_atTop_nat 1).eventually h)
 
 /-- `(-1)^(m-1) = -(-1)^m`. -/
-lemma r24b_neg_one_zpow (m : ℕ) : (-1 : ℂ) ^ ((m : ℤ) - 1) = -(-1) ^ m := by
+private lemma neg_one_zpow_natCast_sub_one (m : ℕ) : (-1 : ℂ) ^ ((m : ℤ) - 1) = -(-1) ^ m := by
   rw [zpow_sub₀ (by norm_num), zpow_natCast, zpow_one]; ring
 
 /-- Real evaluation of a rational polynomial, cast to `ℂ`, is complex evaluation. -/
-lemma r24b_eval_map_cplx (p : ℚ[X]) (x : ℝ) :
+private lemma ofReal_eval_map_eq_aeval (p : ℚ[X]) (x : ℝ) :
     (((p.map (algebraMap ℚ ℝ)).eval x : ℝ) : ℂ) = aeval (x : ℂ) p :=
-  (b24a_aeval_ofReal p x).symm
+  (aeval_ofReal_eq_eval_map p x).symm
 
 /-- Zeros of `cos (2πx)` in `[1/2, ∞)`. -/
-lemma r24b_cos_zero {x : ℝ} (hx : 1 / 2 ≤ x) (h : Real.cos (2 * π * x) = 0) :
+private lemma exists_eq_of_cos_two_pi_mul_eq_zero {x : ℝ} (hx : 1 / 2 ≤ x) (h : Real.cos (2 * π * x) = 0) :
     ∃ i : ℕ, 1 ≤ i ∧ x = (i : ℝ) / 2 + 1 / 4 := by
   obtain ⟨l, hl⟩ := Real.cos_eq_zero_iff.mp h
   have hx' : x = (2 * l + 1) / 4 := by
@@ -437,21 +459,21 @@ lemma r24b_cos_zero {x : ℝ} (hx : 1 / 2 ≤ x) (h : Real.cos (2 * π * x) = 0)
   exact ⟨l, by exact_mod_cast hl1, by rw [hx']; push_cast; ring⟩
 
 /-- Zeros of `sin (a πx)` (`a > 0`) in `[1/2, ∞)`. -/
-lemma r24b_sin_zero {a x : ℝ} (ha : 0 < a) (h : Real.sin (a * π * x) = 0) :
+private lemma exists_eq_of_sin_mul_pi_mul_eq_zero {a x : ℝ} (ha : 0 < a) (h : Real.sin (a * π * x) = 0) :
     ∃ n : ℤ, x = n / a := by
   obtain ⟨n, hn⟩ := Real.sin_eq_zero_iff.mp h
   refine ⟨n, ?_⟩
   have := Real.pi_pos; field_simp; nlinarith
 
 /-- `x_j^{(2k)} → j/2 + 1/4` as `k → ∞` (the zeros of `cos 2πx`). -/
-lemma r24b_bernoulli_even_zero {j : ℕ} (hj : 1 ≤ j) :
+private lemma tendsto_bernoulliRealZero_two_mul {j : ℕ} (hj : 1 ≤ j) :
     Tendsto (fun k => bernoulliRealZero (2 * k) j) atTop (𝓝 ((j : ℝ) / 2 + 1 / 4)) := by
   have hcplx : ∀ (k : ℕ) (x : ℝ), (((-(-1) ^ k * (2 * π) ^ (2 * k) / (2 * (2 * k)!) *
       ((Polynomial.bernoulli (2 * k)).map (algebraMap ℚ ℝ)).eval x : ℝ)) : ℂ) =
       1 * ((-1 : ℂ) ^ ((k : ℤ) - 1) * (2 * π) ^ (2 * k) / (2 * (2 * k)!) *
         bernoulliPolyB (2 * k) x) := by
     intro k x
-    rw [r24b_neg_one_zpow, bernoulliPolyB, ← r24b_eval_map_cplx]; push_cast; ring
+    rw [neg_one_zpow_natCast_sub_one, bernoulliPolyB, ← ofReal_eval_map_eq_aeval]; push_cast; ring
   have hcplx' : ∀ (m : ℕ) (x : ℝ), (((-(-1) ^ (m + 1) * (2 * π) ^ (2 * (m + 1)) /
       (2 * (2 * (m + 1))!) *
       ((Polynomial.bernoulli (2 * (m + 1))).map (algebraMap ℚ ℝ)).derivative.eval x : ℝ)) : ℂ) =
@@ -459,7 +481,7 @@ lemma r24b_bernoulli_even_zero {j : ℕ} (hj : 1 ≤ j) :
         bernoulliPolyB (2 * m + 1) x) := by
     intro m x
     rw [derivative_map, show 2 * (m + 1) = (2 * m + 1) + 1 by ring, derivative_bernoulli_add_one,
-      r24b_neg_one_zpow, bernoulliPolyB, ← r24b_eval_map_cplx, Nat.factorial_succ]
+      neg_one_zpow_natCast_sub_one, bernoulliPolyB, ← ofReal_eval_map_eq_aeval, Nat.factorial_succ]
     simp only [Polynomial.map_mul, eval_mul, Polynomial.map_add, Polynomial.map_natCast,
       Polynomial.map_one, eval_add, eval_natCast, eval_one]
     have hf : ((2 * m + 1)! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
@@ -467,11 +489,11 @@ lemma r24b_bernoulli_even_zero {j : ℕ} (hj : 1 ≤ j) :
     push_cast
     field_simp
     ring
-  refine r24b_tendsto_zerosGE (fun k => (Polynomial.bernoulli (2 * k)).map (algebraMap ℚ ℝ))
+  refine tendsto_realZerosGE_getD (fun k => (Polynomial.bernoulli (2 * k)).map (algebraMap ℚ ℝ))
     (fun k => -(-1) ^ k * (2 * π) ^ (2 * k) / (2 * (2 * k)!)) (fun k => ?_)
     (fun x => Real.cos (2 * π * x)) (fun x => -(2 * π) * Real.sin (2 * π * x)) (fun x => ?_)
     (by fun_prop) (fun i => (i : ℝ) / 2 + 1 / 4) (fun a b hab => ?_) (by norm_num)
-    (fun x hx h => r24b_cos_zero hx h) (fun i _ => ?_) (fun i _ => ?_) (fun h => ?_) ?_ hj
+    (fun x hx h => exists_eq_of_cos_two_pi_mul_eq_zero hx h) (fun i _ => ?_) (fun i _ => ?_) (fun h => ?_) ?_ hj
   · have := Nat.factorial_pos (2 * k)
     have := Real.pi_pos
     exact div_ne_zero (mul_ne_zero (neg_ne_zero.mpr (pow_ne_zero _ (by norm_num)))
@@ -495,9 +517,9 @@ lemma r24b_bernoulli_even_zero {j : ℕ} (hj : 1 ≤ j) :
     rw [this] at hs; norm_num at hs
   · norm_num at h
   · intro M ε hε
-    filter_upwards [r24b_real_of_unif (fun K hK => tendstoUniformlyOn_bernoulli_even hK) 1 _
+    filter_upwards [eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_bernoulli_even hK) 1 _
         (fun x => Real.cos (2 * π * x)) hcplx (fun x => by push_cast; ring) M ε hε,
-      r24b_eventually_shift (r24b_real_of_unif (fun K hK => tendstoUniformlyOn_bernoulli_odd hK)
+      eventually_one_le_and_sub_one (eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_bernoulli_odd hK)
         (-(2 * π)) _ (fun x => -(2 * π) * Real.sin (2 * π * x)) hcplx'
         (fun x => by push_cast; ring) M ε hε)] with k h1 h2 x hx1 hxM
     obtain ⟨hk1, h2⟩ := h2
@@ -506,25 +528,25 @@ lemma r24b_bernoulli_even_zero {j : ℕ} (hj : 1 ≤ j) :
     exact h2 x hx1 hxM
 
 /-- Zeros of `sin (2πx)`, `sin (πx)` are simple: the derivative `cos` is nonzero there. -/
-lemma r24b_cos_ne_of_sin {θ : ℝ} (h : Real.sin θ = 0) : Real.cos θ ≠ 0 := by
+private lemma cos_ne_zero_of_sin_eq_zero {θ : ℝ} (h : Real.sin θ = 0) : Real.cos θ ≠ 0 := by
   intro h0; have hs := Real.sin_sq_add_cos_sq θ; rw [h, h0] at hs; norm_num at hs
 
 /-- `x_j^{(2k+1)} → j/2` as `k → ∞` (the zeros of `sin 2πx`). -/
-lemma r24b_bernoulli_odd_zero {j : ℕ} (hj : 1 ≤ j) :
+private lemma tendsto_bernoulliRealZero_two_mul_add_one {j : ℕ} (hj : 1 ≤ j) :
     Tendsto (fun k => bernoulliRealZero (2 * k + 1) j) atTop (𝓝 ((j : ℝ) / 2)) := by
   have hcplx : ∀ (k : ℕ) (x : ℝ), (((-(-1) ^ k * (2 * π) ^ (2 * k + 1) / (2 * (2 * k + 1)!) *
       ((Polynomial.bernoulli (2 * k + 1)).map (algebraMap ℚ ℝ)).eval x : ℝ)) : ℂ) =
       1 * ((-1 : ℂ) ^ ((k : ℤ) - 1) * (2 * π) ^ (2 * k + 1) / (2 * (2 * k + 1)!) *
         bernoulliPolyB (2 * k + 1) x) := by
     intro k x
-    rw [r24b_neg_one_zpow, bernoulliPolyB, ← r24b_eval_map_cplx]; push_cast; ring
+    rw [neg_one_zpow_natCast_sub_one, bernoulliPolyB, ← ofReal_eval_map_eq_aeval]; push_cast; ring
   have hcplx' : ∀ (k : ℕ) (x : ℝ), (((-(-1) ^ k * (2 * π) ^ (2 * k + 1) / (2 * (2 * k + 1)!) *
       ((Polynomial.bernoulli (2 * k + 1)).map (algebraMap ℚ ℝ)).derivative.eval x : ℝ)) : ℂ) =
       ((2 * π : ℝ) : ℂ) * ((-1 : ℂ) ^ ((k : ℤ) - 1) * (2 * π) ^ (2 * k) / (2 * (2 * k)!) *
         bernoulliPolyB (2 * k) x) := by
     intro k x
     rw [derivative_map, derivative_bernoulli_add_one,
-      r24b_neg_one_zpow, bernoulliPolyB, ← r24b_eval_map_cplx, Nat.factorial_succ]
+      neg_one_zpow_natCast_sub_one, bernoulliPolyB, ← ofReal_eval_map_eq_aeval, Nat.factorial_succ]
     simp only [Polynomial.map_mul, eval_mul, Polynomial.map_add, Polynomial.map_natCast,
       Polynomial.map_one, eval_add, eval_natCast, eval_one]
     have hf : ((2 * k)! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
@@ -532,7 +554,7 @@ lemma r24b_bernoulli_odd_zero {j : ℕ} (hj : 1 ≤ j) :
     push_cast
     field_simp
     ring
-  refine r24b_tendsto_zerosGE (fun k => (Polynomial.bernoulli (2 * k + 1)).map (algebraMap ℚ ℝ))
+  refine tendsto_realZerosGE_getD (fun k => (Polynomial.bernoulli (2 * k + 1)).map (algebraMap ℚ ℝ))
     (fun k => -(-1) ^ k * (2 * π) ^ (2 * k + 1) / (2 * (2 * k + 1)!)) (fun k => ?_)
     (fun x => Real.sin (2 * π * x)) (fun x => (2 * π) * Real.cos (2 * π * x)) (fun x => ?_)
     (by fun_prop) (fun i => (i : ℝ) / 2) (fun a b hab => ?_) (by norm_num)
@@ -556,25 +578,25 @@ lemma r24b_bernoulli_odd_zero {j : ℕ} (hj : 1 ≤ j) :
   · have hs : Real.sin (2 * π * ((i : ℝ) / 2)) = 0 := by
       rw [Real.sin_eq_zero_iff]; exact ⟨i, by push_cast; ring⟩
     have := Real.pi_pos
-    exact mul_ne_zero (by positivity) (r24b_cos_ne_of_sin hs)
+    exact mul_ne_zero (by positivity) (cos_ne_zero_of_sin_eq_zero hs)
   · have := bernoulliFun_eval_half_eq_zero k
     rwa [bernoulliFun, ← one_div] at this
   · intro M ε hε
-    filter_upwards [r24b_real_of_unif (fun K hK => tendstoUniformlyOn_bernoulli_odd hK) 1 _
+    filter_upwards [eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_bernoulli_odd hK) 1 _
         (fun x => Real.sin (2 * π * x)) hcplx (fun x => by push_cast; ring) M ε hε,
-      r24b_real_of_unif (fun K hK => tendstoUniformlyOn_bernoulli_even hK)
+      eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_bernoulli_even hK)
         _ _ (fun x => (2 * π) * Real.cos (2 * π * x)) hcplx'
         (fun x => by push_cast; ring) M ε hε] with k h1 h2 x hx1 hxM
     exact ⟨h1 x hx1 hxM, h2 x hx1 hxM⟩
 
 /-- `y_j^{(2k)} → j` as `k → ∞` (the zeros of `sin πx`). -/
-lemma r24b_euler_even_zero {j : ℕ} (hj : 1 ≤ j) :
+lemma tendsto_eulerRealZero_two_mul {j : ℕ} (hj : 1 ≤ j) :
     Tendsto (fun k => eulerRealZero (2 * k) j) atTop (𝓝 (j : ℝ)) := by
   have hcplx : ∀ (k : ℕ) (x : ℝ), ((((-1) ^ k * π ^ (2 * k + 1) / (4 * (2 * k)!) *
       ((Polynomial.euler (2 * k)).map (algebraMap ℚ ℝ)).eval x : ℝ)) : ℂ) =
       1 * ((-1 : ℂ) ^ k * (π : ℂ) ^ (2 * k + 1) / (4 * (2 * k)!) * eulerPolyE (2 * k) x) := by
     intro k x
-    rw [eulerPolyE, ← r24b_eval_map_cplx]; push_cast; ring
+    rw [eulerPolyE, ← ofReal_eval_map_eq_aeval]; push_cast; ring
   have hcplx' : ∀ (m : ℕ) (x : ℝ), ((((-1) ^ (m + 1) * π ^ (2 * (m + 1) + 1) /
       (4 * (2 * (m + 1))!) *
       ((Polynomial.euler (2 * (m + 1))).map (algebraMap ℚ ℝ)).derivative.eval x : ℝ)) : ℂ) =
@@ -582,7 +604,7 @@ lemma r24b_euler_even_zero {j : ℕ} (hj : 1 ≤ j) :
         eulerPolyE (2 * m + 1) x) := by
     intro m x
     rw [derivative_map, show 2 * (m + 1) = (2 * m + 1) + 1 by ring, derivative_euler_succ,
-      eulerPolyE, ← r24b_eval_map_cplx, Nat.factorial_succ]
+      eulerPolyE, ← ofReal_eval_map_eq_aeval, Nat.factorial_succ]
     simp only [Polynomial.map_mul, eval_mul, Polynomial.map_add, Polynomial.map_natCast,
       Polynomial.map_one, eval_add, eval_natCast, eval_one]
     have hf : ((2 * m + 1)! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
@@ -590,7 +612,7 @@ lemma r24b_euler_even_zero {j : ℕ} (hj : 1 ≤ j) :
     push_cast
     field_simp
     ring
-  refine r24b_tendsto_zerosGE (fun k => (Polynomial.euler (2 * k)).map (algebraMap ℚ ℝ))
+  refine tendsto_realZerosGE_getD (fun k => (Polynomial.euler (2 * k)).map (algebraMap ℚ ℝ))
     (fun k => (-1) ^ k * π ^ (2 * k + 1) / (4 * (2 * k)!)) (fun k => ?_)
     (fun x => Real.sin (π * x)) (fun x => π * Real.cos (π * x)) (fun x => ?_)
     (by fun_prop) (fun i => (i : ℝ)) (fun a b hab => ?_) (by norm_num)
@@ -613,12 +635,12 @@ lemma r24b_euler_even_zero {j : ℕ} (hj : 1 ≤ j) :
   · have hs : Real.sin (π * (i : ℝ)) = 0 := by
       rw [Real.sin_eq_zero_iff]; exact ⟨i, by push_cast; ring⟩
     have := Real.pi_pos
-    exact mul_ne_zero (by positivity) (r24b_cos_ne_of_sin hs)
+    exact mul_ne_zero (by positivity) (cos_ne_zero_of_sin_eq_zero hs)
   · norm_num at h
   · intro M ε hε
-    filter_upwards [r24b_real_of_unif (fun K hK => tendstoUniformlyOn_euler_even hK) 1 _
+    filter_upwards [eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_euler_even hK) 1 _
         (fun x => Real.sin (π * x)) hcplx (fun x => by push_cast; ring) M ε hε,
-      r24b_eventually_shift (r24b_real_of_unif (fun K hK => tendstoUniformlyOn_euler_odd hK)
+      eventually_one_le_and_sub_one (eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_euler_odd hK)
         _ _ (fun x => π * Real.cos (π * x)) hcplx'
         (fun x => by push_cast; ring) M ε hε)] with k h1 h2 x hx1 hxM
     obtain ⟨hk1, h2⟩ := h2
@@ -628,20 +650,20 @@ lemma r24b_euler_even_zero {j : ℕ} (hj : 1 ≤ j) :
 
 /-- Corrected form of DLMF 24.12.11: `y_j^{(2k+1)} → j - 1/2` as `k → ∞` (the zeros of
 `cos πx`); in particular `y_{2m}^{(n)} → 2m - 1/2` for odd `n`, not `m - 1/2` as printed. -/
-lemma r24b_euler_odd_zero {j : ℕ} (hj : 1 ≤ j) :
+lemma tendsto_eulerRealZero_two_mul_add_one {j : ℕ} (hj : 1 ≤ j) :
     Tendsto (fun k => eulerRealZero (2 * k + 1) j) atTop (𝓝 ((j : ℝ) - 1 / 2)) := by
   have hcplx : ∀ (k : ℕ) (x : ℝ), ((((-1) ^ (k + 1) * π ^ (2 * k + 2) / (4 * (2 * k + 1)!) *
       ((Polynomial.euler (2 * k + 1)).map (algebraMap ℚ ℝ)).eval x : ℝ)) : ℂ) =
       1 * ((-1 : ℂ) ^ (k + 1) * (π : ℂ) ^ (2 * k + 2) / (4 * (2 * k + 1)!) *
         eulerPolyE (2 * k + 1) x) := by
     intro k x
-    rw [eulerPolyE, ← r24b_eval_map_cplx]; push_cast; ring
+    rw [eulerPolyE, ← ofReal_eval_map_eq_aeval]; push_cast; ring
   have hcplx' : ∀ (k : ℕ) (x : ℝ), ((((-1) ^ (k + 1) * π ^ (2 * k + 2) / (4 * (2 * k + 1)!) *
       ((Polynomial.euler (2 * k + 1)).map (algebraMap ℚ ℝ)).derivative.eval x : ℝ)) : ℂ) =
       ((-π : ℝ) : ℂ) * ((-1 : ℂ) ^ k * (π : ℂ) ^ (2 * k + 1) / (4 * (2 * k)!) *
         eulerPolyE (2 * k) x) := by
     intro k x
-    rw [derivative_map, derivative_euler_succ, eulerPolyE, ← r24b_eval_map_cplx,
+    rw [derivative_map, derivative_euler_succ, eulerPolyE, ← ofReal_eval_map_eq_aeval,
       Nat.factorial_succ]
     simp only [Polynomial.map_mul, eval_mul, Polynomial.map_add, Polynomial.map_natCast,
       Polynomial.map_one, eval_add, eval_natCast, eval_one]
@@ -650,7 +672,7 @@ lemma r24b_euler_odd_zero {j : ℕ} (hj : 1 ≤ j) :
     push_cast
     field_simp
     ring
-  refine r24b_tendsto_zerosGE (fun k => (Polynomial.euler (2 * k + 1)).map (algebraMap ℚ ℝ))
+  refine tendsto_realZerosGE_getD (fun k => (Polynomial.euler (2 * k + 1)).map (algebraMap ℚ ℝ))
     (fun k => (-1) ^ (k + 1) * π ^ (2 * k + 2) / (4 * (2 * k + 1)!)) (fun k => ?_)
     (fun x => Real.cos (π * x)) (fun x => -π * Real.sin (π * x)) (fun x => ?_)
     (by fun_prop) (fun i => (i : ℝ) - 1 / 2) (fun a b hab => ?_) (by norm_num)
@@ -688,11 +710,11 @@ lemma r24b_euler_odd_zero {j : ℕ} (hj : 1 ≤ j) :
     rcases mul_eq_zero.mp h0 with h | h
     · linarith
     · rw [h] at hs; norm_num at hs
-  · exact q24b_eulerFun_odd_half k
+  · exact eulerFun_two_mul_add_one_half k
   · intro M ε hε
-    filter_upwards [r24b_real_of_unif (fun K hK => tendstoUniformlyOn_euler_odd hK) 1 _
+    filter_upwards [eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_euler_odd hK) 1 _
         (fun x => Real.cos (π * x)) hcplx (fun x => by push_cast; ring) M ε hε,
-      r24b_real_of_unif (fun K hK => tendstoUniformlyOn_euler_even hK)
+      eventually_abs_sub_lt_of_tendstoUniformlyOn (fun K hK => tendstoUniformlyOn_euler_even hK)
         _ _ (fun x => -π * Real.sin (π * x)) hcplx'
         (fun x => by push_cast; ring) M ε hε] with k h1 h2 x hx1 hxM
     exact ⟨h1 x hx1 hxM, h2 x hx1 hxM⟩
@@ -704,16 +726,16 @@ theorem tendsto_bernoulliRealZero_even {m : ℕ} (hm : 1 ≤ m) :
     Tendsto (fun k : ℕ => bernoulliRealZero (2 * k) (2 * m - 1)) atTop (𝓝 (m - 1 / 4)) ∧
       Tendsto (fun k : ℕ => bernoulliRealZero (2 * k) (2 * m)) atTop (𝓝 (m + 1 / 4)) := by
   refine ⟨?_, ?_⟩
-  · convert r24b_bernoulli_even_zero (j := 2 * m - 1) (by omega) using 2
+  · convert tendsto_bernoulliRealZero_two_mul (j := 2 * m - 1) (by omega) using 2
     rw [Nat.cast_sub (by omega)]; push_cast; ring
-  · convert r24b_bernoulli_even_zero (j := 2 * m) (by omega) using 2
+  · convert tendsto_bernoulliRealZero_two_mul (j := 2 * m) (by omega) using 2
     push_cast; ring
 
 /-- DLMF §24.12(i): for odd `n`, `x_1^{(n)} = 1/2`. -/
 @[dlmf 24.12.i]
 theorem bernoulliRealZero_one_of_odd {n : ℕ} (hn : Odd n) : bernoulliRealZero n 1 = 1 / 2 := by
   obtain ⟨k, rfl⟩ := hn
-  refine b24b_getD_zero_eq (bernoulliRealZerosGE_sorted _) ?_ fun y hy => ?_
+  refine getD_zero_eq_of_sorted (bernoulliRealZerosGE_sorted _) ?_ fun y hy => ?_
   · rw [mem_bernoulliRealZerosGE, one_div, bernoulliFun_eval_half_eq_zero]; norm_num
   · exact (mem_bernoulliRealZerosGE.mp hy).1
 
@@ -725,14 +747,14 @@ theorem bernoulliRealZero_two_of_odd {n : ℕ} (hn : Odd n) (h3 : 3 ≤ n) :
   have hk : 1 ≤ k := by omega
   set P := (Polynomial.bernoulli (2 * k + 1)).map (algebraMap ℚ ℝ) with hP
   have hP0 : P ≠ 0 :=
-    (Polynomial.map_ne_zero_iff (algebraMap ℚ ℝ).injective).mpr (b24b_bernoulli_ne_zero _)
+    (Polynomial.map_ne_zero_iff (algebraMap ℚ ℝ).injective).mpr (bernoulli_polynomial_ne_zero _)
   have hroot : P.IsRoot (1 / 2) := by
     show bernoulliFun _ _ = 0; rw [one_div]; exact bernoulliFun_eval_half_eq_zero _
   have hd : (derivative P).eval (1 / 2) ≠ 0 := by
     have : (derivative P).eval (1 / 2) = ((2 * k + 1 : ℕ) : ℝ) * bernoulliFun (2 * k) (1 / 2) := by
       simp [P, Polynomial.derivative_map, Polynomial.derivative_bernoulli, bernoulliFun]
     rw [this, one_div, bernoulliFun_eval_half]
-    have hB := q24b_bernoulli_two_mul_ne_zero hk
+    have hB := bernoulli_two_mul_ne_zero hk
     have h2 : (2 : ℝ) / 2 ^ (2 * k) - 1 ≠ 0 := by
       have : (4 : ℝ) ≤ 2 ^ (2 * k) := by
         calc (4 : ℝ) = 2 ^ 2 := by norm_num
@@ -744,7 +766,7 @@ theorem bernoulliRealZero_two_of_odd {n : ℕ} (hn : Odd n) (h3 : 3 ≤ n) :
     by_contra h; push Not at h
     exact hd ((one_lt_rootMultiplicity_iff_isRoot hP0).mp h).2
   have hcount : (bernoulliRealZerosGE (2 * k + 1)).count (1 / 2) ≤ 1 := by
-    rw [bernoulliRealZerosGE, b24b_zerosGE, ← Multiset.coe_count, Multiset.sort_eq,
+    rw [bernoulliRealZerosGE, realZerosGE, ← Multiset.coe_count, Multiset.sort_eq,
       Multiset.count_filter_of_pos (by norm_num), count_roots]
     exact hmult
   have hz1 : bernoulliFun (2 * k + 1) 1 = 0 := by
@@ -752,9 +774,9 @@ theorem bernoulliRealZero_two_of_odd {n : ℕ} (hn : Odd n) (h3 : 3 ≤ n) :
       bernoulli_eq_zero_of_odd (odd_two_mul_add_one _) (by omega)]; simp
   have hzeros : ∀ x ∈ Set.Ioo (1 / 2 : ℝ) 1, bernoulliFun (2 * k + 1) x ≠ 0 := by
     intro x hx h
-    apply q24b_bernoulli_odd_ne_zero k (x := 1 - x) ⟨by linarith [hx.2], by linarith [hx.1]⟩
+    apply bernoulliFun_two_mul_add_one_ne_zero k (x := 1 - x) ⟨by linarith [hx.2], by linarith [hx.1]⟩
     rw [bernoulliFun_eval_one_sub, h, mul_zero]
-  refine q24b_getD_one_eq (bernoulliRealZerosGE_sorted _) ?_ ?_ (by norm_num) hcount ?_ ?_
+  refine getD_one_eq_of_sorted (bernoulliRealZerosGE_sorted _) ?_ ?_ (by norm_num) hcount ?_ ?_
   · exact mem_bernoulliRealZerosGE.mpr
       ⟨le_rfl, by rw [one_div]; exact bernoulliFun_eval_half_eq_zero _⟩
   · exact mem_bernoulliRealZerosGE.mpr ⟨by norm_num, hz1⟩
@@ -771,9 +793,9 @@ theorem tendsto_bernoulliRealZero_odd {m : ℕ} (hm : 1 ≤ m) :
     Tendsto (fun k : ℕ => bernoulliRealZero (2 * k + 1) (2 * m - 1)) atTop (𝓝 (m - 1 / 2)) ∧
       Tendsto (fun k : ℕ => bernoulliRealZero (2 * k + 1) (2 * m)) atTop (𝓝 m) := by
   refine ⟨?_, ?_⟩
-  · convert r24b_bernoulli_odd_zero (j := 2 * m - 1) (by omega) using 2
+  · convert tendsto_bernoulliRealZero_two_mul_add_one (j := 2 * m - 1) (by omega) using 2
     rw [Nat.cast_sub (by omega)]; push_cast; ring
-  · convert r24b_bernoulli_odd_zero (j := 2 * m) (by omega) using 2
+  · convert tendsto_bernoulliRealZero_two_mul_add_one (j := 2 * m) (by omega) using 2
     push_cast; ring
 
 /-- DLMF §24.12(i): `R(n) = n` for `1 ≤ n ≤ 5`. -/
@@ -786,49 +808,49 @@ theorem bernoulliRealZeroCount_eq_self {n : ℕ} (h1 : 1 ≤ n) (h5 : n ≤ 5) :
     have : ¬ N ≤ n := by exact_mod_cast not_le.mpr hN
     simp [this]
   have hp : (Polynomial.bernoulli n).map (algebraMap ℚ ℝ) ≠ 0 :=
-    (Polynomial.map_ne_zero_iff (algebraMap ℚ ℝ).injective).mpr (b24b_bernoulli_ne_zero _)
+    (Polynomial.map_ne_zero_iff (algebraMap ℚ ℝ).injective).mpr (bernoulli_polynomial_ne_zero _)
   have hc : Continuous (bernoulliFun n) := continuous_bernoulliFun n
   have key : ∀ l : List ℝ, l.Pairwise (· < ·) → l.length = n → (∀ x ∈ l, bernoulliFun n x = 0) →
       bernoulliRealZeroCount n = n := fun l hl hlen hr =>
-    q24b_roots_card_eq hdeg l hl hlen hr hp
+    card_roots_eq_of_strictly_sorted_zeros hdeg l hl hlen hr hp
   interval_cases n
   · refine key [1 / 2] (by simp) rfl ?_
     intro x hx; simp only [List.mem_singleton] at hx; subst hx
     simp [bernoulliFun, Polynomial.bernoulli_one]
-  · obtain ⟨a, ha, ha0⟩ := q24b_exists_root hc (show (0 : ℝ) < 1 / 2 by norm_num)
-      (by rw [q24b_B2, q24b_B2]; norm_num)
-    obtain ⟨b, hb, hb0⟩ := q24b_exists_root hc (show (1 / 2 : ℝ) < 1 by norm_num)
-      (by rw [q24b_B2, q24b_B2]; norm_num)
+  · obtain ⟨a, ha, ha0⟩ := exists_Ioo_eq_zero_of_mul_neg hc (show (0 : ℝ) < 1 / 2 by norm_num)
+      (by rw [bernoulliFun_two_apply, bernoulliFun_two_apply]; norm_num)
+    obtain ⟨b, hb, hb0⟩ := exists_Ioo_eq_zero_of_mul_neg hc (show (1 / 2 : ℝ) < 1 by norm_num)
+      (by rw [bernoulliFun_two_apply, bernoulliFun_two_apply]; norm_num)
     refine key [a, b] (by simp; linarith [ha.2, hb.1]) rfl ?_
     intro x hx; simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
     rcases hx with rfl | rfl <;> assumption
   · refine key [0, 1 / 2, 1] (by simp; norm_num) rfl ?_
     intro x hx; simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
-    rcases hx with rfl | rfl | rfl <;> rw [q24b_B3] <;> norm_num
-  · obtain ⟨a, ha, ha0⟩ := q24b_exists_root hc (show (-1 : ℝ) < 0 by norm_num)
-      (by rw [q24b_B4, q24b_B4]; norm_num)
-    obtain ⟨b, hb, hb0⟩ := q24b_exists_root hc (show (0 : ℝ) < 1 / 2 by norm_num)
-      (by rw [q24b_B4, q24b_B4]; norm_num)
-    obtain ⟨c, hc', hc0⟩ := q24b_exists_root hc (show (1 / 2 : ℝ) < 1 by norm_num)
-      (by rw [q24b_B4, q24b_B4]; norm_num)
-    obtain ⟨d, hd, hd0⟩ := q24b_exists_root hc (show (1 : ℝ) < 2 by norm_num)
-      (by rw [q24b_B4, q24b_B4]; norm_num)
+    rcases hx with rfl | rfl | rfl <;> rw [bernoulliFun_three_apply] <;> norm_num
+  · obtain ⟨a, ha, ha0⟩ := exists_Ioo_eq_zero_of_mul_neg hc (show (-1 : ℝ) < 0 by norm_num)
+      (by rw [bernoulliFun_four_apply, bernoulliFun_four_apply]; norm_num)
+    obtain ⟨b, hb, hb0⟩ := exists_Ioo_eq_zero_of_mul_neg hc (show (0 : ℝ) < 1 / 2 by norm_num)
+      (by rw [bernoulliFun_four_apply, bernoulliFun_four_apply]; norm_num)
+    obtain ⟨c, hc', hc0⟩ := exists_Ioo_eq_zero_of_mul_neg hc (show (1 / 2 : ℝ) < 1 by norm_num)
+      (by rw [bernoulliFun_four_apply, bernoulliFun_four_apply]; norm_num)
+    obtain ⟨d, hd, hd0⟩ := exists_Ioo_eq_zero_of_mul_neg hc (show (1 : ℝ) < 2 by norm_num)
+      (by rw [bernoulliFun_four_apply, bernoulliFun_four_apply]; norm_num)
     refine key [a, b, c, d] ?_ rfl ?_
     · simp only [List.pairwise_cons, List.mem_cons, List.mem_nil_iff, or_false,
         forall_eq_or_imp, forall_eq, IsEmpty.forall_iff, forall_const, List.Pairwise.nil, and_true]
       constructorm* _ ∧ _ <;> linarith [ha.1, ha.2, hb.1, hb.2, hc'.1, hc'.2, hd.1, hd.2]
     · intro x hx; simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
       rcases hx with rfl | rfl | rfl | rfl <;> assumption
-  · obtain ⟨a, ha, ha0⟩ := q24b_exists_root hc (show (-1 : ℝ) < -1 / 10 by norm_num)
-      (by rw [q24b_B5, q24b_B5]; norm_num)
-    obtain ⟨d, hd, hd0⟩ := q24b_exists_root hc (show (11 / 10 : ℝ) < 2 by norm_num)
-      (by rw [q24b_B5, q24b_B5]; norm_num)
+  · obtain ⟨a, ha, ha0⟩ := exists_Ioo_eq_zero_of_mul_neg hc (show (-1 : ℝ) < -1 / 10 by norm_num)
+      (by rw [bernoulliFun_five_apply, bernoulliFun_five_apply]; norm_num)
+    obtain ⟨d, hd, hd0⟩ := exists_Ioo_eq_zero_of_mul_neg hc (show (11 / 10 : ℝ) < 2 by norm_num)
+      (by rw [bernoulliFun_five_apply, bernoulliFun_five_apply]; norm_num)
     refine key [a, 0, 1 / 2, 1, d] ?_ rfl ?_
     · simp only [List.pairwise_cons, List.mem_cons, List.mem_nil_iff, or_false,
         forall_eq_or_imp, forall_eq, IsEmpty.forall_iff, forall_const, List.Pairwise.nil, and_true]
       constructorm* _ ∧ _ <;> linarith [ha.1, ha.2, hd.1, hd.2]
     · intro x hx; simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
-      rcases hx with rfl | rfl | rfl | rfl | rfl <;> first | assumption | (rw [q24b_B5]; norm_num)
+      rcases hx with rfl | rfl | rfl | rfl | rfl <;> first | assumption | (rw [bernoulliFun_five_apply]; norm_num)
 
 /-- DLMF 24.12.6: `R(n) ∼ 2n/(πe)` as `n → ∞`. -/
 @[dlmf 24.12.E6]

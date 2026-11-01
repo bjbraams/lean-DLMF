@@ -12,9 +12,30 @@ public import Mathlib.LinearAlgebra.Lagrange
 /-!
 # The discriminant of a Jacobi polynomial (AAR Theorem 8.5.3, DLMF 18.16.19)
 
-The product of squared differences of the zeros of `P_n^{(α,β)}`, by Schur's resultant route.
-`jacobiPolyP_prod_sq_sub` gives it for the monic normalization (this is AAR 8.5.3); DLMF
-18.16.19 (`jacobi_discriminant` in `BoundsZeros.lean`) is a restatement.
+The product of squared differences of the zeros of `P_n^{(α,β)}`, computed by Schur's
+resultant method: the product of `P_n` over the zeros of `P_{n+1}` satisfies a recursion from
+the three-term recurrence, and so does the closed form.
+
+## Main definitions
+
+* `jacPoly`: the Jacobi polynomial as an element of `ℂ[X]`.
+* `kk`: the leading coefficient of `P_n^{(α,β)}`.
+* `rootProd`: the product of `P_n` over the zeros of `P_{n+1}`.
+* `discClosedForm`: the closed form of the discriminant, indexed as in AAR Theorem 8.5.3.
+
+## Main results
+
+* `natDegree_jacPoly`, `leadingCoeff_jacPoly`: degree and leading coefficient for
+  `α, β > -1`.
+* `jacPoly_eq_nodal`: `P_n^{(α,β)} = kk ∏ (X - xᵢ)` over its `n` distinct real zeros.
+* `discRootProdForm_eq_discClosedForm`, `disc_eq_discRootProdForm`: the two steps of the
+  evaluation.
+* `jacobiPolyP_prod_sq_sub`: the product of squared differences of the zeros (AAR 8.5.3).
+
+## Implementation notes
+
+`jacobiPolyP_prod_sq_sub` is stated for the monic normalization; DLMF 18.16.19 is its
+restatement `jacobi_discriminant` in `DLMF.OrthogonalPolynomials.BoundsZeros.Discriminants`.
 -/
 
 @[expose] public section
@@ -334,19 +355,19 @@ theorem eval_jacPoly_two_of_root (hα : -1 < α) (hβ : -1 < β) (n : ℕ) {y : 
   ring
 
 /-- The product of `P_n` over the zeros of `P_{n+1}`. -/
-def SS (a b : ℂ) (n : ℕ) : ℂ :=
+def rootProd (a b : ℂ) (n : ℕ) : ℂ :=
   ((jacPoly a b (n + 1)).roots.map fun x => (jacPoly a b n).eval x).prod
 
 /-- `SS a b 0 = 1`. -/
-theorem SS_zero (a b : ℂ) : SS a b 0 = 1 := by
+theorem rootProd_zero (a b : ℂ) : rootProd a b 0 = 1 := by
   have : ∀ x, (jacPoly a b 0).eval x = 1 := by
     intro x; simp [jacPoly, coef, poch_zero]
-  simp [SS, this]
+  simp [rootProd, this]
 
 /-- The recursion for the product of `P_n` over the zeros of `P_{n+1}`. -/
-theorem SS_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
-    kk α β (n + 2) ^ (n + 1) * SS α β (n + 1) =
-      kk α β (n + 1) ^ (n + 2) * ((-1) ^ (n + 1) * recA α β n ^ (n + 1)) * SS α β n := by
+theorem rootProd_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+    kk α β (n + 2) ^ (n + 1) * rootProd α β (n + 1) =
+      kk α β (n + 1) ^ (n + 2) * ((-1) ^ (n + 1) * recA α β n ^ (n + 1)) * rootProd α β n := by
   have h := lc_pow_mul_prod_roots_eval (jacPoly α β (n + 2)) (jacPoly α β (n + 1))
   rw [natDegree_jacPoly hα hβ, natDegree_jacPoly hα hβ, leadingCoeff_jacPoly hα hβ,
     leadingCoeff_jacPoly hα hβ] at h
@@ -360,7 +381,7 @@ theorem SS_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
   have hev : Even ((n + 2) * (n + 1)) := by
     have := Nat.even_mul_succ_self (n + 1); rwa [mul_comm] at this
   rw [hev.neg_one_pow, one_mul] at h
-  unfold SS
+  unfold rootProd
   rw [h, neg_pow]
   ring
 
@@ -370,7 +391,7 @@ section ClosedForm
 variable {α β : ℝ}
 
 /-- The closed form of the Jacobi discriminant, indexed as in AAR Theorem 8.5.3. -/
-def Fr (a b : ℂ) (N : ℕ) : ℂ :=
+def discClosedForm (a b : ℂ) (N : ℕ) : ℂ :=
   (2 : ℂ) ^ (N * (N - 1)) * ∏ j ∈ range N,
     ((j : ℂ) + 1) ^ (j + 1) * ((j : ℂ) + 1 + a) ^ j * ((j : ℂ) + 1 + b) ^ j /
       ((N : ℂ) + j + 1 + a + b) ^ (N + j - 1)
@@ -382,8 +403,8 @@ def ratioR (a b : ℂ) (n : ℕ) : ℂ :=
     ((2 * (n : ℂ) + a + b + 3) ^ (2 * n + 1) * (2 * ((n + 1 : ℕ) : ℂ) + a + b + 2) ^ (2 * n + 2))
 
 /-- The closed form `Fr` satisfies `Fr (n+2) = Fr (n+1) · ratioR n`. -/
-theorem Fr_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
-    Fr α β (n + 2) = Fr α β (n + 1) * ratioR α β n := by
+theorem discClosedForm_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+    discClosedForm α β (n + 2) = discClosedForm α β (n + 1) * ratioR α β n := by
   have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   set g : ℕ → ℂ := fun i => ((n : ℂ) + i + 2 + α + β) ^ (n + i) with hg
   have hgne : ∀ i, g i ≠ 0 := fun i =>
@@ -408,7 +429,7 @@ theorem Fr_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     simp only [hg]; push_cast; ring_nf
   have hg2 : g (n + 2) = (2 * ((n + 1 : ℕ) : ℂ) + α + β + 2) ^ (2 * n + 2) := by
     simp only [hg]; push_cast; ring_nf
-  unfold Fr ratioR
+  unfold discClosedForm ratioR
   rw [prod_div_distrib, prod_div_distrib, hden1, hden2, prod_range_succ (fun j : ℕ =>
     ((j : ℂ) + 1) ^ (j + 1) * ((j : ℂ) + 1 + α) ^ j * ((j : ℂ) + 1 + β) ^ j) (n + 1)]
   have hD2 : ∏ j ∈ range (n + 2), g (j + 1) =
@@ -432,18 +453,18 @@ section Assembly
 variable {α β : ℝ}
 
 /-- The discriminant expressed through the resultant-type product `SS`. -/
-def EE (a b : ℂ) (n : ℕ) : ℂ :=
-  (-1) ^ ((n + 1).choose 2) * (2 * ((n : ℂ) + a + 1) * ((n : ℂ) + b + 1)) ^ (n + 1) * SS a b n *
+def discRootProdForm (a b : ℂ) (n : ℕ) : ℂ :=
+  (-1) ^ ((n + 1).choose 2) * (2 * ((n : ℂ) + a + 1) * ((n : ℂ) + b + 1)) ^ (n + 1) * rootProd a b n *
       (((n + 1)! : ℕ) : ℂ) ^ 2 * kk a b (n + 1) ^ 2 /
     ((2 * (n : ℂ) + a + b + 2) ^ (n + 1) * poch (a + 1) (n + 1) * poch (b + 1) (n + 1) *
       kk a b (n + 1) ^ (n + 1))
 
 /-- `EE` satisfies the same recursion as `Fr`. -/
-theorem EE_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
-    EE α β (n + 1) = EE α β n * ratioR α β n := by
+theorem discRootProdForm_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+    discRootProdForm α β (n + 1) = discRootProdForm α β n * ratioR α β n := by
   have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   have h := disc_step_algebra n (K := kk α β (n + 1)) (K2 := kk α β (n + 2))
-    (S0 := SS α β n) (S1 := SS α β (n + 1)) (u1 := (n : ℂ) + α + 1) (v1 := (n : ℂ) + β + 1)
+    (S0 := rootProd α β n) (S1 := rootProd α β (n + 1)) (u1 := (n : ℂ) + α + 1) (v1 := (n : ℂ) + β + 1)
     (c1 := 2 * (n : ℂ) + α + β + 2) (u2 := ((n + 1 : ℕ) : ℂ) + α + 1)
     (v2 := ((n + 1 : ℕ) : ℂ) + β + 1) (c2 := 2 * ((n + 1 : ℕ) : ℂ) + α + β + 2)
     (d := 2 * (n : ℂ) + α + β + 3) (e := (n : ℂ) + α + β + 2) (n2 := ((n + 1 + 1 : ℕ) : ℂ))
@@ -457,7 +478,7 @@ theorem EE_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     (poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _)
     (poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _)
     (by exact_mod_cast Nat.factorial_ne_zero (n + 1))
-    (kk_succ hα hβ n) (SS_succ hα hβ n)
+    (kk_succ hα hβ n) (rootProd_succ hα hβ n)
   have hσ : (-1 : ℂ) ^ ((n + 1 + 1).choose 2) = (-1) ^ ((n + 1).choose 2) * (-1) ^ (n + 1) := by
     rw [← pow_add, Nat.choose_succ_succ', Nat.choose_one_right, add_comm]
   have hpa : poch ((α : ℂ) + 1) (n + 1 + 1) =
@@ -468,26 +489,26 @@ theorem EE_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     rw [poch_succ]; ring
   have hf : (((n + 1 + 1)! : ℕ) : ℂ) = (((n + 1)! : ℕ) : ℂ) * ((n + 1 + 1 : ℕ) : ℂ) := by
     rw [Nat.factorial_succ]; push_cast; ring
-  unfold EE ratioR
+  unfold discRootProdForm ratioR
   rw [hσ, hpa, hpb, hf]
   exact h
 
 /-- `EE α β 0 = 1`. -/
-theorem EE_zero (hα : -1 < α) (hβ : -1 < β) : EE α β 0 = 1 := by
+theorem discRootProdForm_zero (hα : -1 < α) (hβ : -1 < β) : discRootProdForm α β 0 = 1 := by
   have hk : kk α β 1 = ((α : ℂ) + β + 2) / 2 := by
     simp [kk, coef_diag, poch_one]; ring
   have h1 : (α : ℂ) + 1 ≠ 0 := ne_zero_of_re_pos (by simp; linarith)
   have h2 : (β : ℂ) + 1 ≠ 0 := ne_zero_of_re_pos (by simp; linarith)
   have h3 : (α : ℂ) + β + 2 ≠ 0 := ne_zero_of_re_pos (by simp; linarith)
-  simp only [EE, SS_zero, hk]
+  simp only [discRootProdForm, rootProd_zero, hk]
   norm_num [poch_one]
   field_simp
 
 /-- `EE α β n = Fr α β (n + 1)`, by induction. -/
-theorem EE_eq_Fr (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : EE α β n = Fr α β (n + 1) := by
+theorem discRootProdForm_eq_discClosedForm (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : discRootProdForm α β n = discClosedForm α β (n + 1) := by
   induction n with
-  | zero => rw [EE_zero hα hβ]; simp [Fr]
-  | succ n ih => rw [EE_succ hα hβ, ih, Fr_succ hα hβ]
+  | zero => rw [discRootProdForm_zero hα hβ]; simp [discClosedForm]
+  | succ n ih => rw [discRootProdForm_succ hα hβ, ih, discClosedForm_succ hα hβ]
 
 end Assembly
 section Main
@@ -522,10 +543,10 @@ theorem jacPoly_eq_nodal (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n �
   rfl
 
 /-- The Jacobi discriminant equals `EE`. -/
-theorem disc_eq_EE (hα : -1 < α) (hβ : -1 < β) (m : ℕ) (x : Fin (m + 1) → ℝ)
+theorem disc_eq_discRootProdForm (hα : -1 < α) (hβ : -1 < β) (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, jacobiPolyP α β (m + 1) (x i) = 0) (hinj : Function.Injective x) :
     (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
-      if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) = EE α β m := by
+      if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) = discRootProdForm α β m := by
   have hα' : -1 < (α : ℂ).re := by simpa using hα
   have hβ' : -1 < (β : ℂ).re := by simpa using hβ
   have hm : (0 : ℝ) ≤ m := Nat.cast_nonneg m
@@ -552,8 +573,8 @@ theorem disc_eq_EE (hα : -1 < α) (hβ : -1 < β) (m : ℕ) (x : Fin (m + 1) �
   have hprod := congrArg (fun f : Fin (m + 1) → ℂ => ∏ i, f i) (funext hlow)
   simp only [prod_mul_distrib, prod_const, card_univ, Fintype.card_fin] at hprod
   -- the product of `P_m` over the nodes
-  have hSS : ∏ i, jacobiPolyP α β m (xc i) = SS α β m := by
-    unfold SS
+  have hSS : ∏ i, jacobiPolyP α β m (xc i) = rootProd α β m := by
+    unfold rootProd
     rw [roots_jacPoly_eq hα hβ x hroot hinj, Multiset.map_map]
     simp only [Function.comp_def, eval_jacPoly hα']
     rfl
@@ -600,7 +621,7 @@ theorem disc_eq_EE (hα : -1 < α) (hβ : -1 < β) (m : ℕ) (x : Fin (m + 1) �
   have hB : ∏ i, (1 + xc i) = poch (β + 1) (m + 1) / (m + 1)! / K := by
     rw [← h2]; field_simp
   rw [hA, hB] at hprod
-  unfold EE
+  unfold discRootProdForm
   rw [hpair] at hprod
   rw [← hK]
   have hden : (2 * (m : ℂ) + α + β + 2) ^ (m + 1) * poch (α + 1) (m + 1) * poch (β + 1) (m + 1) *
@@ -630,7 +651,7 @@ theorem jacobiPolyP_prod_sq_sub {α β : ℝ} {n : ℕ} (hn : n ≠ 0)
             ((j : ℂ) + 1 + β) ^ j.val /
             ((n : ℂ) + j + 1 + α + β) ^ (n + j.val - 1) := by
   obtain ⟨m, rfl⟩ := Nat.exists_eq_add_one_of_ne_zero hn
-  rw [JacobiDisc.disc_eq_EE hα hβ m x hroot hinj, JacobiDisc.EE_eq_Fr hα hβ m, JacobiDisc.Fr]
+  rw [JacobiDisc.disc_eq_discRootProdForm hα hβ m x hroot hinj, JacobiDisc.discRootProdForm_eq_discClosedForm hα hβ m, JacobiDisc.discClosedForm]
   congr 1
   exact (Fin.prod_univ_eq_prod_range (fun j : ℕ => ((j : ℂ) + 1) ^ (j + 1) *
     ((j : ℂ) + 1 + α) ^ j * ((j : ℂ) + 1 + β) ^ j /

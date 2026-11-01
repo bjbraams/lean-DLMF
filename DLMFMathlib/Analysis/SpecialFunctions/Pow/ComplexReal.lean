@@ -13,11 +13,17 @@ public import ToMathlib.Analysis.SpecialFunctions.Pow
 /-!
 # Complex powers of positive reals
 
-Small identities and bounds for complex powers `x ^ w` with a positive real base:
-the exponential forms `x ^ w = exp (log x · w)`, `(x²) ^ w = x ^ (2 w)`, products with a
-positive real factor, conjugation of `2 ^ w`, the bound
-`‖w ^ s‖ ≤ ‖w‖ ^ Re s e^{π |Im s|}`, and the elementary bound `|log t| ≤ 4 t^{-1/4}` on
-`(0, 1]`.
+Small identities and bounds for complex powers `x ^ w` with a positive real base.
+
+## Main results
+
+* `Complex.ofReal_cpow_eq_exp_mul_log`: `t ^ w = exp (w · log t)` for `t > 0`.
+* `Complex.ofReal_sq_cpow`, `Complex.ofReal_sq_cpow_neg_one_div_two`: `(x²) ^ w = x ^ (2 w)`
+  and `(x²) ^ (-1/2) = x⁻¹` for `x > 0`.
+* `Complex.mul_ofReal_cpow_of_ne_zero`: `(w a) ^ s = w ^ s a ^ s` for a positive real `a`.
+* `Complex.conj_two_cpow`: `conj (2 ^ w) = 2 ^ conj w`.
+* `Complex.norm_cpow_le_rpow_mul_exp`: `‖w ^ s‖ ≤ ‖w‖ ^ Re s e^{π |Im s|}` for `w ≠ 0`.
+* `Real.abs_log_le_four_mul_rpow_neg_one_fourth`: `|log t| ≤ 4 t^{-1/4}` for `0 < t ≤ 1`.
 -/
 
 @[expose] public section

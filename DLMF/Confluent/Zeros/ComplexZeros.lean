@@ -8,13 +8,38 @@ module
 public import DLMF.Confluent.Zeros.RealZeros
 
 /-!
-# Large complex zeros of Kummer functions
+# Large complex zeros and sector zero counts
 
-Localization and enumeration of the large complex Kummer zeros, with their asymptotic
-corrections.
+This file proves the asymptotic location of the large complex zeros of Kummer's and Tricomi's
+functions, in the argument and in the first parameter, and counts the zeros of `U(a,b,·)` in
+the sector `|ph z| < π` and on the positive real axis (DLMF §13.9).
 
-Source references and common attribution are retained in
-`DLMF.Confluent.Zeros`.
+## Main definitions
+
+* `kummerUSectorZeros`: the zeros of `U(a,b,·)` in the open sector `|ph z| < π`, whose number
+  DLMF calls `T(a,b)`.
+
+## Main results
+
+* `kummerM_large_zeros`: the large zeros of `M(a,b,·)` near the imaginary axis (DLMF 13.9.9).
+* `kummerM_zeros_in_a`: large zeros of `M(·,b,z)` in the first parameter (DLMF 13.9.10).
+* `kummerU_sectorZeros_gamma_pos`, `kummerU_sectorZeros_gamma_neg`: the sector counts
+  DLMF 13.9.11 and 13.9.12.
+* `kummerU_posZeros_none`: no positive zeros for `a ≥ 0` (DLMF 13.9.13).
+* `kummerU_posZeros_ceil`: the number `P(a,b)` of positive zeros when `a + 1 < b ≤ 1`
+  (DLMF 13.9.14).
+* `kummerU_posZeros_none_of_le`: no positive zeros when `a + 1 ≥ b` (DLMF 13.9.15); stronger
+  than DLMF, with no restriction on `b` and no nonintegrality hypotheses.
+* `kummerU_negZeros_none`: no zeros of the principal-branch `U(a,b,·)` on the negative axis when
+  `a + 1 ≥ b` and `a ∉ -ℕ`.
+* `kummerU_zeros_in_a`: large zeros of `U(·,b,z)` in the first parameter (DLMF 13.9.16).
+
+## Implementation notes
+
+DLMF's `T(a,b)` in 13.9.11–13.9.12 counts zeros in the sector, not positive zeros; the counts
+are stated with DLMF's hypotheses `b ≤ 1`, `a < 0` and nonintegral `a`, `b`, `a-b+1`. The
+positive-zero count 13.9.14 uses Kummer's transformation and the Sturm-comparison count
+`kzt_U_posZeros_count`.
 -/
 
 @[expose] public section
@@ -75,13 +100,13 @@ theorem kumZ_cpow_eq {u z : ℂ} (hu : u ≠ 0) (hz : z ≠ 0) (s : ℂ) :
   ring_nf
 
 /-- Explicit form of the sector Poincaré bound for `𝐌` (DLMF 13.7.2, one term). -/
-theorem kumZ_sector_bound (a b : ℂ) (ha : ∀ k : ℕ, a ≠ -k) (hba : ∀ k : ℕ, b - a ≠ -k) :
+theorem kumZ_sector_bound (a b : ℂ) :
     ∃ K₁ > 0, ∃ R : ℝ, ∀ z : ℂ, R ≤ ‖z‖ → π / 4 ≤ z.arg → z.arg ≤ π - π / 4 →
       ‖regularizedHGFun {a} {b} z -
         (exp z * z ^ (a - b) / Gamma a + exp (π * I * a) * z ^ (-a) / Gamma (b - a))‖ ≤
         K₁ * (‖exp z * z ^ (a - b - 1)‖ + ‖z ^ (-a - 1)‖) := by
   have h := regularizedHGFun_poincare_sector a b 1 (δ := π / 4) (by positivity)
-    (by linarith [Real.pi_pos]) ha hba
+    (by linarith [Real.pi_pos])
   obtain ⟨K₁, hK₁, hb⟩ := h.exists_pos
   rw [IsBigOWith, eventually_inf_principal, eventually_comap, eventually_atTop] at hb
   obtain ⟨R, hR⟩ := hb
@@ -107,7 +132,7 @@ theorem kumZ_core (a b : ℂ) (hb : ∀ k : ℕ, b ≠ -k) (ha : ∀ k : ℕ, a 
       exp w = -(exp (π * I * a) * Gamma a / Gamma (b - a)) * ((t : ℂ) * I) ^ (b - 2 * a) →
       ‖w - t * I‖ ≤ K * Real.log t →
       ∃ z, ‖z - w‖ ≤ C * Real.log t / t ∧ kummerM a b z = 0 := by
-  obtain ⟨K₁, hK₁, R, hR⟩ := kumZ_sector_bound a b ha hba
+  obtain ⟨K₁, hK₁, R, hR⟩ := kumZ_sector_bound a b
   have hGa : Gamma a ≠ 0 := Gamma_ne_zero ha
   have hGba : Gamma (b - a) ≠ 0 := Gamma_ne_zero hba
   have hGb : Gamma b ≠ 0 := Gamma_ne_zero hb

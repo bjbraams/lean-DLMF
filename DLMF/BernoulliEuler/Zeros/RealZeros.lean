@@ -13,10 +13,43 @@ public import Mathlib.NumberTheory.ZetaValues
 /-!
 # Real zeros of Bernoulli polynomials
 
-Zero enumerations, Rolle arguments and bounds for the first real Bernoulli zeros.
+This file enumerates the real zeros of the Bernoulli and Euler polynomials in `[1/2, ∞)` (DLMF
+§24.12(i)–(ii)), locates the zeros in `[0, 1]`, and bounds the first zero of `B₂ₖ`. DLMF's
+`Bₙ(x)` and `Eₙ(x)` on the real line are Mathlib's `bernoulliFun n` and the project's
+`eulerFun n` (`DLMFMathlib.NumberTheory.EulerPolynomials`).
 
-Source references and common attribution are retained in
-`DLMF.BernoulliEuler.Zeros`.
+## Main definitions
+
+* `bernoulliRealZerosGE n`: the real zeros of `Bₙ` in `[1/2, ∞)`, in increasing order and
+  counted with multiplicity (DLMF 24.12.1).
+* `bernoulliRealZero n j`: DLMF's `x_j^{(n)}` (1-based, `j = 1, 2, …`).
+* `bernoulliRealZeroCount n`: DLMF's `R(n)`, the number of real zeros (with multiplicity).
+* `eulerRealZerosGE n`, `eulerRealZero n j`: the same for `Eₙ` (DLMF 24.12.7, `y_j^{(n)}`).
+
+## Main results
+
+* `bernoulliRealZerosGE_sorted`, `mem_bernoulliRealZerosGE`, `eulerRealZerosGE_sorted`,
+  `mem_eulerRealZerosGE`: the lists are increasing and consist exactly of the zeros in
+  `[1/2, ∞)` (DLMF 24.12.1, 24.12.7).
+* `bernoulliFun_eq_zero_iff_of_le_half`, `eulerFun_eq_zero_iff_of_le_half`: the zeros in
+  `(-∞, 1/2]` are the reflections `1 - x_j^{(n)}`, `1 - y_j^{(n)}`.
+* `bernoulliFun_odd_zeros_Icc`, `bernoulliFun_even_sub_zeros_Icc`: the zeros of `B₂ₙ₊₁` and of
+  `B₂ₙ - B₂ₙ` in `[0, 1]` (DLMF §24.12(i)).
+* `bernoulliRealZero_one_bounds`, `bernoulliRealZero_one_sub_isEquivalent`: bounds and
+  asymptotics for `x_1^{(n)}`, `n` even (DLMF 24.12.2, 24.12.3).
+
+## Implementation notes
+
+The zeros are simple by §24.12(iv); beyond the last zero the totalized value of
+`bernoulliRealZero` and `eulerRealZero` is `0`. The zero counts in `[0, 1]` are proved by
+Rolle's theorem from the derivative and shift relations together with the Fourier series of
+`B₂ₘ` (Mathlib). The bounds 24.12.2 and the equivalence 24.12.3 are proved from the Fourier
+series of `B₂ₖ` with explicit tail bounds (sign changes locate the zero; `n = 2, 4` from the
+explicit polynomials).
+
+## References
+
+* NIST DLMF §24.12; Brillhart (1969), Dilcher (1988), Delange (1987).
 -/
 
 @[expose] public noncomputable section
@@ -28,14 +61,14 @@ open scoped Nat Real
 namespace DLMF.BernoulliEuler
 
 /-- The real zeros in `[1/2, ∞)` of a real polynomial, increasing, with multiplicity. -/
-def b24b_zerosGE (p : ℝ[X]) : List ℝ :=
+def realZerosGE (p : ℝ[X]) : List ℝ :=
   (p.roots.filter (fun x => 1 / 2 ≤ x)).sort (· ≤ ·)
 
 /-- DLMF 24.12.1: the real zeros `x_1^{(n)} ≤ x_2^{(n)} ≤ ⋯` of `Bₙ(x)` in `[1/2, ∞)`,
 increasing and counted with multiplicity. -/
 @[dlmf 24.12.E1]
 def bernoulliRealZerosGE (n : ℕ) : List ℝ :=
-  b24b_zerosGE ((Polynomial.bernoulli n).map (algebraMap ℚ ℝ))
+  realZerosGE ((Polynomial.bernoulli n).map (algebraMap ℚ ℝ))
 
 /-- DLMF §24.12(i): `x_j^{(n)}`, the `j`-th real zero of `Bₙ` in `[1/2, ∞)` (`j ≥ 1`); the
 totalized value `0` is returned when there is no such zero. -/
@@ -51,7 +84,7 @@ def bernoulliRealZeroCount (n : ℕ) : ℕ :=
 increasing and counted with multiplicity. -/
 @[dlmf 24.12.E7]
 def eulerRealZerosGE (n : ℕ) : List ℝ :=
-  b24b_zerosGE ((Polynomial.euler n).map (algebraMap ℚ ℝ))
+  realZerosGE ((Polynomial.euler n).map (algebraMap ℚ ℝ))
 
 /-- DLMF §24.12(ii): `y_j^{(n)}`, the `j`-th real zero of `Eₙ` in `[1/2, ∞)` (`j ≥ 1`); the
 totalized value `0` is returned when there is no such zero. -/
@@ -60,25 +93,25 @@ def eulerRealZero (n j : ℕ) : ℝ := (eulerRealZerosGE n).getD (j - 1) 0
 
 /-! ### Basic properties of the zero lists -/
 
-/-- Estimate under the stated parameter and domain assumptions: `(b24b_zerosGE p).Pairwise (· ≤
+/-- Estimate under the stated parameter and domain assumptions: `(realZerosGE p).Pairwise (· ≤
 ·)`. -/
-lemma b24b_zerosGE_sorted (p : ℝ[X]) : (b24b_zerosGE p).Pairwise (· ≤ ·) :=
+lemma realZerosGE_sorted (p : ℝ[X]) : (realZerosGE p).Pairwise (· ≤ ·) :=
   Multiset.pairwise_sort _ _
 
-/-- Estimate under the stated parameter and domain assumptions: `x ∈ b24b_zerosGE p ↔ 1 / 2 ≤ x ∧
+/-- Estimate under the stated parameter and domain assumptions: `x ∈ realZerosGE p ↔ 1 / 2 ≤ x ∧
 p.eval x = 0`. -/
-lemma b24b_mem_zerosGE {p : ℝ[X]} (hp : p ≠ 0) {x : ℝ} :
-    x ∈ b24b_zerosGE p ↔ 1 / 2 ≤ x ∧ p.eval x = 0 := by
-  rw [b24b_zerosGE, Multiset.mem_sort, Multiset.mem_filter, mem_roots hp, IsRoot.def, and_comm]
+private lemma mem_realZerosGE {p : ℝ[X]} (hp : p ≠ 0) {x : ℝ} :
+    x ∈ realZerosGE p ↔ 1 / 2 ≤ x ∧ p.eval x = 0 := by
+  rw [realZerosGE, Multiset.mem_sort, Multiset.mem_filter, mem_roots hp, IsRoot.def, and_comm]
 
 /-- Nonvanishing under the stated hypotheses: `Polynomial.bernoulli n ≠ 0`. -/
-lemma b24b_bernoulli_ne_zero (n : ℕ) : Polynomial.bernoulli n ≠ 0 := by
+lemma bernoulli_polynomial_ne_zero (n : ℕ) : Polynomial.bernoulli n ≠ 0 := by
   intro h
   have := congrArg (fun p => p.coeff n) h
   simp [coeff_bernoulli] at this
 
 /-- Nonvanishing under the stated hypotheses: `Polynomial.euler n ≠ 0`. -/
-lemma b24b_euler_ne_zero (n : ℕ) : Polynomial.euler n ≠ 0 := by
+lemma euler_polynomial_ne_zero (n : ℕ) : Polynomial.euler n ≠ 0 := by
   intro h
   have h1 := euler_comp_X_add_one_add n
   rw [h, zero_comp, add_zero] at h1
@@ -88,14 +121,14 @@ lemma b24b_euler_ne_zero (n : ℕ) : Polynomial.euler n ≠ 0 := by
 /-- DLMF 24.12.1: the list `x_1^{(n)} ≤ x_2^{(n)} ≤ ⋯` is increasing. -/
 @[dlmf 24.12.E1]
 theorem bernoulliRealZerosGE_sorted (n : ℕ) : (bernoulliRealZerosGE n).Pairwise (· ≤ ·) :=
-  b24b_zerosGE_sorted _
+  realZerosGE_sorted _
 
 /-- DLMF 24.12.1: the list consists exactly of the zeros of `Bₙ` in `[1/2, ∞)`. -/
 @[dlmf 24.12.E1]
 theorem mem_bernoulliRealZerosGE {n : ℕ} {x : ℝ} :
     x ∈ bernoulliRealZerosGE n ↔ 1 / 2 ≤ x ∧ bernoulliFun n x = 0 := by
-  rw [bernoulliRealZerosGE, b24b_mem_zerosGE, bernoulliFun]
-  exact (Polynomial.map_ne_zero_iff (algebraMap ℚ ℝ).injective).mpr (b24b_bernoulli_ne_zero n)
+  rw [bernoulliRealZerosGE, mem_realZerosGE, bernoulliFun]
+  exact (Polynomial.map_ne_zero_iff (algebraMap ℚ ℝ).injective).mpr (bernoulli_polynomial_ne_zero n)
 
 /-- DLMF §24.12(i) (after 24.12.1): the zeros in `(-∞, 1/2]` are the `1 - x_j^{(n)}`. -/
 @[dlmf 24.12.i]
@@ -112,14 +145,14 @@ theorem bernoulliFun_eq_zero_iff_of_le_half {n : ℕ} {x : ℝ} (hx : x ≤ 1 / 
 /-- DLMF 24.12.7: the list `y_1^{(n)} ≤ y_2^{(n)} ≤ ⋯` is increasing. -/
 @[dlmf 24.12.E7]
 theorem eulerRealZerosGE_sorted (n : ℕ) : (eulerRealZerosGE n).Pairwise (· ≤ ·) :=
-  b24b_zerosGE_sorted _
+  realZerosGE_sorted _
 
 /-- DLMF 24.12.7: the list consists exactly of the zeros of `Eₙ` in `[1/2, ∞)`. -/
 @[dlmf 24.12.E7]
 theorem mem_eulerRealZerosGE {n : ℕ} {x : ℝ} :
     x ∈ eulerRealZerosGE n ↔ 1 / 2 ≤ x ∧ eulerFun n x = 0 := by
-  rw [eulerRealZerosGE, b24b_mem_zerosGE, eulerFun]
-  exact (Polynomial.map_ne_zero_iff (algebraMap ℚ ℝ).injective).mpr (b24b_euler_ne_zero n)
+  rw [eulerRealZerosGE, mem_realZerosGE, eulerFun]
+  exact (Polynomial.map_ne_zero_iff (algebraMap ℚ ℝ).injective).mpr (euler_polynomial_ne_zero n)
 
 /-- DLMF §24.12(ii) (after 24.12.7): the zeros in `(-∞, 1/2]` are the `1 - y_j^{(n)}`. -/
 @[dlmf 24.12.ii]
@@ -134,7 +167,7 @@ theorem eulerFun_eq_zero_iff_of_le_half {n : ℕ} {x : ℝ} (hx : x ≤ 1 / 2) :
     · exact h
 
 /-- The first entry of a sorted list of reals that are all `≥ a` and contain `a` is `a`. -/
-lemma b24b_getD_zero_eq {l : List ℝ} {a : ℝ} (hs : l.Pairwise (· ≤ ·)) (ha : a ∈ l)
+lemma getD_zero_eq_of_sorted {l : List ℝ} {a : ℝ} (hs : l.Pairwise (· ≤ ·)) (ha : a ∈ l)
     (hge : ∀ y ∈ l, a ≤ y) : l.getD (1 - 1) 0 = a := by
   cases l with
   | nil => simp at ha
@@ -151,7 +184,7 @@ section ZeroHelpers
 open Finset
 
 /-- Rolle for `Bₖ₊₁`: two zeros give a zero of `Bₖ` between them. -/
-lemma q24b_rolle_bernoulli {k : ℕ} {a b : ℝ} (hab : a < b) (ha : bernoulliFun (k + 1) a = 0)
+private lemma exists_bernoulliFun_eq_zero_of_succ {k : ℕ} {a b : ℝ} (hab : a < b) (ha : bernoulliFun (k + 1) a = 0)
     (hb : bernoulliFun (k + 1) b = 0) : ∃ c ∈ Set.Ioo a b, bernoulliFun k c = 0 := by
   obtain ⟨c, hc, h⟩ := exists_hasDerivAt_eq_zero hab
     (continuous_bernoulliFun (k + 1)).continuousOn (ha.trans hb.symm)
@@ -163,7 +196,7 @@ lemma q24b_rolle_bernoulli {k : ℕ} {a b : ℝ} (hab : a < b) (ha : bernoulliFu
   · exact h
 
 /-- Rolle for `Eₖ₊₁`. -/
-lemma q24b_rolle_euler {k : ℕ} {a b : ℝ} (hab : a < b) (ha : eulerFun (k + 1) a = 0)
+private lemma exists_eulerFun_eq_zero_of_succ {k : ℕ} {a b : ℝ} (hab : a < b) (ha : eulerFun (k + 1) a = 0)
     (hb : eulerFun (k + 1) b = 0) : ∃ c ∈ Set.Ioo a b, eulerFun k c = 0 := by
   obtain ⟨c, hc, h⟩ := exists_hasDerivAt_eq_zero hab
     (continuous_eulerFun (k + 1)).continuousOn (ha.trans hb.symm)
@@ -175,7 +208,7 @@ lemma q24b_rolle_euler {k : ℕ} {a b : ℝ} (hab : a < b) (ha : eulerFun (k + 1
   · exact h
 
 /-- `B₂ₙ₊₁` has no zero in `(0, 1/2)`. -/
-lemma q24b_bernoulli_odd_ne_zero (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (0 : ℝ) (1 / 2)) :
+lemma bernoulliFun_two_mul_add_one_ne_zero (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (0 : ℝ) (1 / 2)) :
     bernoulliFun (2 * n + 1) x ≠ 0 := by
   induction n generalizing x with
   | zero =>
@@ -190,20 +223,20 @@ lemma q24b_bernoulli_odd_ne_zero (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (0 : �
     have hh : bernoulliFun (2 * (n + 1) + 1) (1 / 2) = 0 := by
       rw [one_div]; exact bernoulliFun_eval_half_eq_zero _
     rw [show 2 * (n + 1) + 1 = (2 * n + 1 + 1) + 1 by ring] at h0 hh hc
-    obtain ⟨a, ha, ha0⟩ := q24b_rolle_bernoulli hx.1 h0 hc
-    obtain ⟨b, hb, hb0⟩ := q24b_rolle_bernoulli hx.2 hc hh
-    obtain ⟨d, hd, hd0⟩ := q24b_rolle_bernoulli (ha.2.trans hb.1) ha0 hb0
+    obtain ⟨a, ha, ha0⟩ := exists_bernoulliFun_eq_zero_of_succ hx.1 h0 hc
+    obtain ⟨b, hb, hb0⟩ := exists_bernoulliFun_eq_zero_of_succ hx.2 hc hh
+    obtain ⟨d, hd, hd0⟩ := exists_bernoulliFun_eq_zero_of_succ (ha.2.trans hb.1) ha0 hb0
     exact ih ⟨ha.1.trans hd.1, hd.2.trans hb.2⟩ hd0
 
 /-- `Eₖ₊₁(1) = -Eₖ₊₁(0)`. -/
-lemma q24b_eulerFun_one (k : ℕ) : eulerFun (k + 1) 1 = -eulerFun (k + 1) 0 := by
+lemma eulerFun_succ_one (k : ℕ) : eulerFun (k + 1) 1 = -eulerFun (k + 1) 0 := by
   have h := eulerFun_add_one_add (k + 1) 0
   rw [zero_add, zero_pow (Nat.succ_ne_zero k), mul_zero] at h
   linarith
 
 /-- `E₂ₘ₊₂(0) = 0`. -/
-lemma q24b_eulerFun_two_mul_add_two_zero (m : ℕ) : eulerFun (2 * m + 2) 0 = 0 := by
-  have h1 := q24b_eulerFun_one (2 * m + 1)
+lemma eulerFun_two_mul_add_two_zero (m : ℕ) : eulerFun (2 * m + 2) 0 = 0 := by
+  have h1 := eulerFun_succ_one (2 * m + 1)
   have h2 := eulerFun_one_sub (2 * m + 2) 0
   rw [sub_zero, show 2 * m + 2 = 2 * (m + 1) by ring, pow_mul] at h2
   rw [show 2 * m + 1 + 1 = 2 * (m + 1) by ring] at h1
@@ -212,7 +245,7 @@ lemma q24b_eulerFun_two_mul_add_two_zero (m : ℕ) : eulerFun (2 * m + 2) 0 = 0 
   linarith
 
 /-- `E₂ₘ₊₁(1/2) = 0`. -/
-lemma q24b_eulerFun_odd_half (m : ℕ) : eulerFun (2 * m + 1) (1 / 2) = 0 := by
+lemma eulerFun_two_mul_add_one_half (m : ℕ) : eulerFun (2 * m + 1) (1 / 2) = 0 := by
   have h := eulerNumber_eq_zero_of_odd (odd_two_mul_add_one m)
   rw [eulerNumber, mul_eq_zero] at h
   have h' : (euler (2 * m + 1)).eval (1 / 2 : ℚ) = 0 := h.resolve_left (pow_ne_zero _ two_ne_zero)
@@ -220,7 +253,7 @@ lemma q24b_eulerFun_odd_half (m : ℕ) : eulerFun (2 * m + 1) (1 / 2) = 0 := by
   rw [eulerFun, this, eval_map, eval₂_at_apply, h', map_zero]
 
 /-- `E₂ₘ₊₁` has no zero in `(0, 1/2)` and `E₂ₘ₊₂` has no zero in `(0, 1)`. -/
-lemma q24b_euler_ne_zero (m : ℕ) :
+lemma eulerFun_ne_zero_Ioo (m : ℕ) :
     (∀ x ∈ Set.Ioo (0 : ℝ) (1 / 2), eulerFun (2 * m + 1) x ≠ 0) ∧
       ∀ x ∈ Set.Ioo (0 : ℝ) 1, eulerFun (2 * m + 2) x ≠ 0 := by
   have step : ∀ m : ℕ, (∀ x ∈ Set.Ioo (0 : ℝ) (1 / 2), eulerFun (2 * m + 1) x ≠ 0) →
@@ -233,13 +266,13 @@ lemma q24b_euler_ne_zero (m : ℕ) :
       · exact h
       · refine absurd ?_ (hQ (1 - y) ⟨by linarith [hy.2], by linarith⟩)
         rw [eulerFun_one_sub, hy0, mul_zero]
-    have h0 := q24b_eulerFun_two_mul_add_two_zero m
+    have h0 := eulerFun_two_mul_add_two_zero m
     have h1 : eulerFun (2 * m + 2) 1 = 0 := by
-      rw [show 2 * m + 2 = (2 * m + 1) + 1 by ring, q24b_eulerFun_one,
+      rw [show 2 * m + 2 = (2 * m + 1) + 1 by ring, eulerFun_succ_one,
         show 2 * m + 1 + 1 = 2 * m + 2 by ring, h0, neg_zero]
     rw [show 2 * m + 2 = (2 * m + 1) + 1 by ring] at h0 h1 hc
-    obtain ⟨a, ha, ha0⟩ := q24b_rolle_euler hx.1 h0 hc
-    obtain ⟨b, hb, hb0⟩ := q24b_rolle_euler hx.2 hc h1
+    obtain ⟨a, ha, ha0⟩ := exists_eulerFun_eq_zero_of_succ hx.1 h0 hc
+    obtain ⟨b, hb, hb0⟩ := exists_eulerFun_eq_zero_of_succ hx.2 hc h1
     have := hQ' a ⟨ha.1, ha.2.trans hx.2⟩ ha0
     have := hQ' b ⟨hx.1.trans hb.1, hb.2⟩ hb0
     linarith [ha.2, hb.1]
@@ -253,15 +286,15 @@ lemma q24b_euler_ne_zero (m : ℕ) :
   | succ m ih =>
     have hQ : ∀ x ∈ Set.Ioo (0 : ℝ) (1 / 2), eulerFun (2 * (m + 1) + 1) x ≠ 0 := by
       intro x hx hc
-      have hh := q24b_eulerFun_odd_half (m + 1)
+      have hh := eulerFun_two_mul_add_one_half (m + 1)
       rw [show 2 * (m + 1) + 1 = (2 * m + 2) + 1 by ring] at hh hc
-      obtain ⟨c, hc', hc0⟩ := q24b_rolle_euler hx.2 hc hh
+      obtain ⟨c, hc', hc0⟩ := exists_eulerFun_eq_zero_of_succ hx.2 hc hh
       exact ih.2 c ⟨hx.1.trans hc'.1, hc'.2.trans (by norm_num)⟩ hc0
     exact ⟨hQ, step (m + 1) hQ⟩
 
 /-- The second entry of a sorted list whose least entry `a` is simple and whose next value is
 `b`. -/
-lemma q24b_getD_one_eq {l : List ℝ} {a b : ℝ} (hs : l.Pairwise (· ≤ ·)) (ha : a ∈ l)
+lemma getD_one_eq_of_sorted {l : List ℝ} {a b : ℝ} (hs : l.Pairwise (· ≤ ·)) (ha : a ∈ l)
     (hb : b ∈ l) (hab : a < b) (hc : l.count a ≤ 1) (hge : ∀ y ∈ l, a ≤ y)
     (hgeb : ∀ y ∈ l, y ≠ a → b ≤ y) : l.getD (2 - 1) 0 = b := by
   match l, hs, ha, hb, hc, hge, hgeb with
@@ -290,7 +323,7 @@ lemma q24b_getD_one_eq {l : List ℝ} {a b : ℝ} (hs : l.Pairwise (· ≤ ·)) 
     exact le_antisymm h2 h1
 
 /-- `B₂ₖ ≠ 0` for `k ≥ 1` (from `ζ(2k) > 0`). -/
-lemma q24b_bernoulli_two_mul_ne_zero {k : ℕ} (hk : 1 ≤ k) : _root_.bernoulli (2 * k) ≠ 0 := by
+lemma bernoulli_two_mul_ne_zero {k : ℕ} (hk : 1 ≤ k) : _root_.bernoulli (2 * k) ≠ 0 := by
   intro h0
   have h := hasSum_zeta_nat (k := k) (by omega)
   rw [h0] at h
@@ -298,7 +331,7 @@ lemma q24b_bernoulli_two_mul_ne_zero {k : ℕ} (hk : 1 ≤ k) : _root_.bernoulli
   norm_num at this
 
 /-- `B₂, …, B₅`. -/
-lemma q24b_bernoulli_small :
+private lemma bernoulli_values_two_to_five :
     _root_.bernoulli 2 = 1 / 6 ∧ _root_.bernoulli 3 = 0 ∧ _root_.bernoulli 4 = -1 / 30 ∧
       _root_.bernoulli 5 = 0 := by
   refine ⟨?_, ?_, ?_, ?_⟩ <;> rw [bernoulli_eq_bernoulli'_of_ne_one (by norm_num)]
@@ -308,7 +341,7 @@ lemma q24b_bernoulli_small :
   · exact bernoulli'_eq_zero_of_odd (by decide) (by norm_num)
 
 /-- `Bₙ(x) = ∑ₖ (n choose k) Bₖ x^{n-k}`. -/
-lemma q24b_bernoulliFun_expand (n : ℕ) (x : ℝ) :
+private lemma bernoulliFun_eq_sum' (n : ℕ) (x : ℝ) :
     bernoulliFun n x =
       ∑ k ∈ range (n + 1), ((n.choose k : ℝ) * _root_.bernoulli k) * x ^ (n - k) := by
   simp only [bernoulliFun, Polynomial.bernoulli, Polynomial.map_sum, eval_finsetSum,
@@ -317,36 +350,36 @@ lemma q24b_bernoulliFun_expand (n : ℕ) (x : ℝ) :
   simp only [map_mul, map_natCast, eq_ratCast]; ring
 
 /-- Explicit `B₄(x)`. -/
-lemma q24b_B4 (x : ℝ) : bernoulliFun 4 x = x ^ 4 - 2 * x ^ 3 + x ^ 2 - 1 / 30 := by
-  obtain ⟨b2, b3, b4, -⟩ := q24b_bernoulli_small
-  rw [q24b_bernoulliFun_expand]
+lemma bernoulliFun_four_apply (x : ℝ) : bernoulliFun 4 x = x ^ 4 - 2 * x ^ 3 + x ^ 2 - 1 / 30 := by
+  obtain ⟨b2, b3, b4, -⟩ := bernoulli_values_two_to_five
+  rw [bernoulliFun_eq_sum']
   simp [sum_range_succ, b2, b3, b4, Nat.choose]
   norm_num; ring
 
 /-- Explicit `B₅(x)`. -/
-lemma q24b_B5 (x : ℝ) :
+lemma bernoulliFun_five_apply (x : ℝ) :
     bernoulliFun 5 x = x ^ 5 - 5 / 2 * x ^ 4 + 5 / 3 * x ^ 3 - 1 / 6 * x := by
-  obtain ⟨b2, b3, b4, b5⟩ := q24b_bernoulli_small
-  rw [q24b_bernoulliFun_expand]
+  obtain ⟨b2, b3, b4, b5⟩ := bernoulli_values_two_to_five
+  rw [bernoulliFun_eq_sum']
   simp [sum_range_succ, b2, b3, b4, b5, Nat.choose]
   norm_num; ring
 
 /-- Explicit `B₂(x)`. -/
-lemma q24b_B2 (x : ℝ) : bernoulliFun 2 x = x ^ 2 - x + 1 / 6 := by
-  obtain ⟨b2, -⟩ := q24b_bernoulli_small
-  rw [q24b_bernoulliFun_expand]
+lemma bernoulliFun_two_apply (x : ℝ) : bernoulliFun 2 x = x ^ 2 - x + 1 / 6 := by
+  obtain ⟨b2, -⟩ := bernoulli_values_two_to_five
+  rw [bernoulliFun_eq_sum']
   simp [sum_range_succ, b2, Nat.choose]
   norm_num; ring
 
 /-- Explicit `B₃(x)`. -/
-lemma q24b_B3 (x : ℝ) : bernoulliFun 3 x = x ^ 3 - 3 / 2 * x ^ 2 + 1 / 2 * x := by
-  obtain ⟨b2, b3, -⟩ := q24b_bernoulli_small
-  rw [q24b_bernoulliFun_expand]
+lemma bernoulliFun_three_apply (x : ℝ) : bernoulliFun 3 x = x ^ 3 - 3 / 2 * x ^ 2 + 1 / 2 * x := by
+  obtain ⟨b2, b3, -⟩ := bernoulli_values_two_to_five
+  rw [bernoulliFun_eq_sum']
   simp [sum_range_succ, b2, b3, Nat.choose]
   norm_num; ring
 
 /-- Intermediate value theorem for a sign change. -/
-lemma q24b_exists_root {f : ℝ → ℝ} (hf : Continuous f) {a b : ℝ} (hab : a < b)
+lemma exists_Ioo_eq_zero_of_mul_neg {f : ℝ → ℝ} (hf : Continuous f) {a b : ℝ} (hab : a < b)
     (h : f a * f b < 0) : ∃ c ∈ Set.Ioo a b, f c = 0 := by
   rcases lt_or_gt_of_ne (show f a ≠ 0 by intro h0; rw [h0, zero_mul] at h; exact lt_irrefl _ h)
     with ha | ha
@@ -358,7 +391,7 @@ lemma q24b_exists_root {f : ℝ → ℝ} (hf : Continuous f) {a b : ℝ} (hab : 
     exact ⟨c, hc, hfc⟩
 
 /-- A real polynomial of degree `≤ n` with `n` distinct real zeros has exactly `n` roots. -/
-lemma q24b_roots_card_eq {p : ℝ[X]} {n : ℕ} (hdeg : p.natDegree ≤ n) (l : List ℝ)
+lemma card_roots_eq_of_strictly_sorted_zeros {p : ℝ[X]} {n : ℕ} (hdeg : p.natDegree ≤ n) (l : List ℝ)
     (hl : l.Pairwise (· < ·)) (hlen : l.length = n) (hr : ∀ x ∈ l, p.eval x = 0)
     (hp : p ≠ 0) : p.roots.card = n := by
   refine le_antisymm ((card_roots' p).trans hdeg) ?_
@@ -385,10 +418,10 @@ theorem bernoulliFun_odd_zeros_Icc {n : ℕ} (hn : 1 ≤ n) :
     by_contra hne
     push Not at hne
     rcases lt_or_gt_of_ne hne.2.1 with hlt | hgt
-    · exact q24b_bernoulli_odd_ne_zero n ⟨lt_of_le_of_ne hx0 (Ne.symm hne.1), hlt⟩ hx
+    · exact bernoulliFun_two_mul_add_one_ne_zero n ⟨lt_of_le_of_ne hx0 (Ne.symm hne.1), hlt⟩ hx
     · have h1 : (1 - x) ∈ Set.Ioo (0 : ℝ) (1 / 2) :=
         ⟨by linarith [lt_of_le_of_ne hx1 hne.2.2], by linarith⟩
-      apply q24b_bernoulli_odd_ne_zero n h1
+      apply bernoulliFun_two_mul_add_one_ne_zero n h1
       rw [bernoulliFun_eval_one_sub, hx, mul_zero]
   · rintro (rfl | rfl | rfl)
     · exact ⟨⟨le_rfl, zero_le_one⟩, h0⟩
@@ -453,11 +486,11 @@ the tail being bounded by `ζ(4)`. For `k ≥ 3` this gives `g < 0` on `[-π/2, 
 and `g(A) > 0`; `k = 1, 2` follow from the explicit polynomials. -/
 
 /-- If `Bₙ ≠ 0` on `[1/2, lo]` and `Bₙ` changes sign on `[lo, hi]`, then `lo < x₁ < hi`. -/
-lemma s24b_first_zero_bracket {n : ℕ} {lo hi : ℝ} (hlh : lo < hi)
+private lemma bernoulliRealZero_one_mem_Ioo {n : ℕ} {lo hi : ℝ} (hlh : lo < hi)
     (hne : ∀ x ∈ Set.Icc (1 / 2 : ℝ) lo, bernoulliFun n x ≠ 0)
     (hlo : 1 / 2 ≤ lo) (hsign : bernoulliFun n lo * bernoulliFun n hi < 0) :
     lo < bernoulliRealZero n 1 ∧ bernoulliRealZero n 1 < hi := by
-  obtain ⟨z, hz, hz0⟩ := q24b_exists_root (continuous_bernoulliFun n) hlh hsign
+  obtain ⟨z, hz, hz0⟩ := exists_Ioo_eq_zero_of_mul_neg (continuous_bernoulliFun n) hlh hsign
   have hzl : z ∈ bernoulliRealZerosGE n :=
     mem_bernoulliRealZerosGE.mpr ⟨hlo.trans hz.1.le, hz0⟩
   have hs := bernoulliRealZerosGE_sorted n
@@ -479,7 +512,7 @@ lemma s24b_first_zero_bracket {n : ℕ} {lo hi : ℝ} (hlh : lo < hi)
   exact hne _ ⟨h1, hle⟩ h2
 
 /-- Tail bound for the Fourier series of `B₂ₖ`, `k ≥ 2`, after the first five terms. -/
-lemma s24b_fourier_tail {k : ℕ} (hk : 2 ≤ k) {x : ℝ} (hx : x ∈ Set.Icc (0 : ℝ) 1) :
+private lemma abs_bernoulliFun_two_mul_sub_fourier_five_le {k : ℕ} (hk : 2 ≤ k) {x : ℝ} (hx : x ∈ Set.Icc (0 : ℝ) 1) :
     |(-1 : ℝ) ^ (k + 1) * (2 * π) ^ (2 * k) / 2 / (2 * k)! * bernoulliFun (2 * k) x -
       ∑ m ∈ Finset.range 5, 1 / (m : ℝ) ^ (2 * k) * Real.cos (2 * π * m * x)| ≤
       625 * (π ^ 4 / 90 - (1 + 1 / 16 + 1 / 81 + 1 / 256)) * (1 / 5) ^ (2 * k) := by
@@ -511,7 +544,7 @@ lemma s24b_fourier_tail {k : ℕ} (hk : 2 ≤ k) {x : ℝ} (hx : x ∈ Set.Icc (
     _ = _ := by ring
 
 /-- The first five Fourier terms of `B_N` at `x = 3/4 + θ/(2π)`. -/
-lemma s24b_main_terms {N : ℕ} (hN : N ≠ 0) (θ : ℝ) :
+private lemma sum_fourier_five_terms_eq {N : ℕ} (hN : N ≠ 0) (θ : ℝ) :
     ∑ m ∈ Finset.range 5, 1 / (m : ℝ) ^ N * Real.cos (2 * π * m * (3 / 4 + θ / (2 * π))) =
       Real.sin θ - (1 / 2) ^ N * Real.cos (2 * θ) - (1 / 3) ^ N * Real.sin (3 * θ) +
         (1 / 4) ^ N * Real.cos (4 * θ) := by
@@ -537,11 +570,11 @@ lemma s24b_main_terms {N : ℕ} (hN : N ≠ 0) (θ : ℝ) :
   ring
 
 /-- The normalized `B₂ₖ` at `x = 3/4 + θ/(2π)`: `g(θ) = (-1)^{k+1} (2π)^{2k}/(2 (2k)!) B₂ₖ(x)`. -/
-noncomputable def s24b_g (k : ℕ) (θ : ℝ) : ℝ :=
+noncomputable def normalizedBernoulliShift (k : ℕ) (θ : ℝ) : ℝ :=
   (-1 : ℝ) ^ (k + 1) * (2 * π) ^ (2 * k) / 2 / (2 * k)! * bernoulliFun (2 * k) (3 / 4 + θ / (2 * π))
 
 /-- Numerical constants for `k ≥ 3`. -/
-lemma s24b_consts {k : ℕ} (hk : 3 ≤ k) :
+private lemma half_pow_two_mul_bounds_of_three_le {k : ℕ} (hk : 3 ≤ k) :
     0 < (1 / 2 : ℝ) ^ (2 * k) ∧ (1 / 2 : ℝ) ^ (2 * k) ≤ 1 / 64 ∧
       (1 / 3 : ℝ) ^ (2 * k) ≤ 9 / 100 * (1 / 2) ^ (2 * k) ∧
       625 * (π ^ 4 / 90 - (1 + 1 / 16 + 1 / 81 + 1 / 256)) * (1 / 5 : ℝ) ^ (2 * k) ≤
@@ -577,8 +610,8 @@ lemma s24b_consts {k : ℕ} (hk : 3 ≤ k) :
       _ ≤ 6 / 10 := by norm_num
 
 /-- `|g(θ) - main(θ)| ≤ 0.6 A²` on `[-3π/2, π/2]`, `A = 2^{-2k}`, `k ≥ 3`. -/
-lemma s24b_g_approx {k : ℕ} (hk : 3 ≤ k) {θ : ℝ} (h1 : -(3 * π / 2) ≤ θ) (h2 : θ ≤ π / 2) :
-    |s24b_g k θ - (Real.sin θ - (1 / 2) ^ (2 * k) * Real.cos (2 * θ) -
+private lemma abs_normalizedBernoulliShift_sub_le {k : ℕ} (hk : 3 ≤ k) {θ : ℝ} (h1 : -(3 * π / 2) ≤ θ) (h2 : θ ≤ π / 2) :
+    |normalizedBernoulliShift k θ - (Real.sin θ - (1 / 2) ^ (2 * k) * Real.cos (2 * θ) -
       (1 / 3) ^ (2 * k) * Real.sin (3 * θ) + (1 / 4) ^ (2 * k) * Real.cos (4 * θ))| ≤
       6 / 10 * ((1 / 2) ^ (2 * k)) ^ 2 := by
   have hx : 3 / 4 + θ / (2 * π) ∈ Set.Icc (0 : ℝ) 1 := by
@@ -588,13 +621,13 @@ lemma s24b_g_approx {k : ℕ} (hk : 3 ≤ k) {θ : ℝ} (h1 : -(3 * π / 2) ≤ 
       linarith
     · have : θ / (2 * π) ≤ 1 / 4 := by rw [div_le_iff₀ (by positivity)]; linarith
       linarith
-  have ht := s24b_fourier_tail (by omega : 2 ≤ k) hx
-  rw [s24b_main_terms (by omega : 2 * k ≠ 0)] at ht
-  exact ht.trans (s24b_consts hk).2.2.2
+  have ht := abs_bernoulliFun_two_mul_sub_fourier_five_le (by omega : 2 ≤ k) hx
+  rw [sum_fourier_five_terms_eq (by omega : 2 * k ≠ 0)] at ht
+  exact ht.trans (half_pow_two_mul_bounds_of_three_le hk).2.2.2
 
 /-- `g(A) > 0` for `A = 2^{-2k}`, `k ≥ 3`. -/
-lemma s24b_g_pos {k : ℕ} (hk : 3 ≤ k) : 0 < s24b_g k ((1 / 2) ^ (2 * k)) := by
-  obtain ⟨hA0, hA1, hB, -⟩ := s24b_consts hk
+private lemma normalizedBernoulliShift_pos {k : ℕ} (hk : 3 ≤ k) : 0 < normalizedBernoulliShift k ((1 / 2) ^ (2 * k)) := by
+  obtain ⟨hA0, hA1, hB, -⟩ := half_pow_two_mul_bounds_of_three_le hk
   set A : ℝ := (1 / 2) ^ (2 * k) with hAd
   set B : ℝ := (1 / 3) ^ (2 * k) with hBd
   have hB0 : 0 ≤ B := by positivity
@@ -602,7 +635,7 @@ lemma s24b_g_pos {k : ℕ} (hk : 3 ≤ k) : 0 < s24b_g k ((1 / 2) ^ (2 * k)) := 
     rw [show (A : ℝ) ^ 2 = ((1 / 2) ^ 2) ^ (2 * k) by rw [← pow_mul, ← pow_mul, mul_comm]]
     norm_num
   have hπ := Real.pi_gt_three
-  have hap := s24b_g_approx hk (θ := A) (by linarith) (by linarith)
+  have hap := abs_normalizedBernoulliShift_sub_le hk (θ := A) (by linarith) (by linarith)
   rw [hQ, ← hAd, ← hBd] at hap
   have h1 := Real.sin_ge_sub_cube hA0.le
   have h2 := Real.cos_le_one (2 * A)
@@ -619,10 +652,10 @@ lemma s24b_g_pos {k : ℕ} (hk : 3 ≤ k) : 0 < s24b_g k ((1 / 2) ^ (2 * k)) := 
   nlinarith [hap.1]
 
 /-- `g(θ) < 0` for `-π/2 ≤ θ ≤ cA` when `0 ≤ c` and `c + 2A ≤ 1`, `A = 2^{-2k}`, `k ≥ 3`. -/
-lemma s24b_g_neg {k : ℕ} (hk : 3 ≤ k) {c θ : ℝ} (hc0 : 0 ≤ c)
+private lemma normalizedBernoulliShift_neg {k : ℕ} (hk : 3 ≤ k) {c θ : ℝ} (hc0 : 0 ≤ c)
     (hc : c + 2 * (1 / 2) ^ (2 * k) ≤ 1) (h1 : -(π / 2) ≤ θ)
-    (h2 : θ ≤ c * (1 / 2) ^ (2 * k)) : s24b_g k θ < 0 := by
-  obtain ⟨hA0, hA1, hB, -⟩ := s24b_consts hk
+    (h2 : θ ≤ c * (1 / 2) ^ (2 * k)) : normalizedBernoulliShift k θ < 0 := by
+  obtain ⟨hA0, hA1, hB, -⟩ := half_pow_two_mul_bounds_of_three_le hk
   set A : ℝ := (1 / 2) ^ (2 * k) with hAd
   set B : ℝ := (1 / 3) ^ (2 * k) with hBd
   have hB0 : 0 ≤ B := by positivity
@@ -632,7 +665,7 @@ lemma s24b_g_neg {k : ℕ} (hk : 3 ≤ k) {c θ : ℝ} (hc0 : 0 ≤ c)
   have hπ := Real.pi_gt_three
   have hc1 : c ≤ 1 := by linarith
   have hθ2 : θ ≤ π / 2 := by nlinarith
-  have hap := s24b_g_approx hk (θ := θ) (by linarith) hθ2
+  have hap := abs_normalizedBernoulliShift_sub_le hk (θ := θ) (by linarith) hθ2
   rw [hQ, ← hAd, ← hBd, abs_le] at hap
   have h4 : A ^ 2 * Real.cos (4 * θ) ≤ A ^ 2 :=
     mul_le_of_le_one_right (by positivity) (Real.cos_le_one _)
@@ -663,11 +696,11 @@ lemma s24b_g_neg {k : ℕ} (hk : 3 ≤ k) {c θ : ℝ} (hc0 : 0 ≤ c)
 
 /-- For `k ≥ 3`, `0 ≤ c < 1` and `c + 2A ≤ 1` (`A = 2^{-2k}`):
 `3/4 + cA/(2π) < x_1^{(2k)} < 3/4 + A/(2π)`. -/
-lemma s24b_bracket {k : ℕ} (hk : 3 ≤ k) {c : ℝ} (hc0 : 0 ≤ c) (hc1 : c < 1)
+private lemma bernoulliRealZero_two_mul_one_bounds {k : ℕ} (hk : 3 ≤ k) {c : ℝ} (hc0 : 0 ≤ c) (hc1 : c < 1)
     (hc : c + 2 * (1 / 2) ^ (2 * k) ≤ 1) :
     3 / 4 + c * (1 / 2) ^ (2 * k) / (2 * π) < bernoulliRealZero (2 * k) 1 ∧
       bernoulliRealZero (2 * k) 1 < 3 / 4 + (1 / 2) ^ (2 * k) / (2 * π) := by
-  obtain ⟨hA0, hA1, -, -⟩ := s24b_consts hk
+  obtain ⟨hA0, hA1, -, -⟩ := half_pow_two_mul_bounds_of_three_le hk
   set A : ℝ := (1 / 2) ^ (2 * k) with hAd
   have hπ := Real.pi_pos
   have h2π : 0 < 2 * π := by positivity
@@ -675,10 +708,10 @@ lemma s24b_bracket {k : ℕ} (hk : 3 ≤ k) {c : ℝ} (hc0 : 0 ≤ c) (hc1 : c <
   have hK : K ≠ 0 := by
     have : (2 * k)! ≠ 0 := Nat.factorial_ne_zero _
     simp only [K]; positivity
-  have hg : ∀ θ, s24b_g k θ = K * bernoulliFun (2 * k) (3 / 4 + θ / (2 * π)) := fun _ => rfl
+  have hg : ∀ θ, normalizedBernoulliShift k θ = K * bernoulliFun (2 * k) (3 / 4 + θ / (2 * π)) := fun _ => rfl
   have hx : ∀ x : ℝ, 3 / 4 + 2 * π * (x - 3 / 4) / (2 * π) = x := by
     intro x; field_simp; ring
-  refine s24b_first_zero_bracket ?_ (fun x hx' => ?_) ?_ ?_
+  refine bernoulliRealZero_one_mem_Ioo ?_ (fun x hx' => ?_) ?_ ?_
   · have : c * A < A := by nlinarith
     linarith [div_lt_div_of_pos_right this h2π]
   · intro h0
@@ -687,13 +720,13 @@ lemma s24b_bracket {k : ℕ} (hk : 3 ≤ k) {c : ℝ} (hc0 : 0 ≤ c) (hc1 : c <
       have := hx'.2
       have : x - 3 / 4 ≤ c * A / (2 * π) := by linarith
       rwa [le_div_iff₀ h2π, mul_comm] at this
-    have hneg := s24b_g_neg hk hc0 hc hθ1 hθ2
+    have hneg := normalizedBernoulliShift_neg hk hc0 hc hθ1 hθ2
     rw [hg, hx, h0, mul_zero] at hneg
     exact lt_irrefl _ hneg
   · have : 0 ≤ c * A / (2 * π) := by positivity
     linarith
-  · have h1 := s24b_g_neg hk hc0 hc (θ := c * A) (by nlinarith) le_rfl
-    have h2 := s24b_g_pos hk
+  · have h1 := normalizedBernoulliShift_neg hk hc0 hc (θ := c * A) (by nlinarith) le_rfl
+    have h2 := normalizedBernoulliShift_pos hk
     rw [hg] at h1 h2
     rw [← hAd] at h2
     have hKK : 0 < K * K := mul_self_pos.mpr hK
@@ -710,7 +743,7 @@ lemma s24b_bracket {k : ℕ} (hk : 3 ≤ k) {c : ℝ} (hc0 : 0 ≤ c) (hc1 : c <
 
 /-- Estimate under the stated parameter and domain assumptions: `3 / 4 + 1 / (2 ^ (2 + 2) * π) <
 bernoulliRealZero 2 1 ∧ bernoulliRealZero 2 1 < 3 / 4 + 1 / (2 ^ (2 + 1) * π)`. -/
-lemma s24b_bounds_two :
+private lemma bernoulliRealZero_two_one_bounds :
     3 / 4 + 1 / (2 ^ (2 + 2) * π) < bernoulliRealZero 2 1 ∧
       bernoulliRealZero 2 1 < 3 / 4 + 1 / (2 ^ (2 + 1) * π) := by
   have hπ1 := Real.pi_gt_three
@@ -722,17 +755,17 @@ lemma s24b_bounds_two :
   have e2 : 1 / (2 ^ (2 + 1) * π) = u / 8 := by rw [hu]; field_simp; norm_num
   rw [e1, e2]
   have hu0 : 0 < u := by linarith [show (0 : ℝ) < 1 / 3.15 by norm_num]
-  refine s24b_first_zero_bracket (by linarith) (fun x hx => ?_) (by linarith) ?_
-  · rw [q24b_B2]
+  refine bernoulliRealZero_one_mem_Ioo (by linarith) (fun x hx => ?_) (by linarith) ?_
+  · rw [bernoulliFun_two_apply]
     have h1 := hx.1; have h2 := hx.2
     nlinarith
-  · rw [q24b_B2, q24b_B2]
+  · rw [bernoulliFun_two_apply, bernoulliFun_two_apply]
     norm_num at hu2
     refine mul_neg_of_neg_of_pos (by nlinarith) (by nlinarith)
 
 /-- Estimate under the stated parameter and domain assumptions: `3 / 4 + 1 / (2 ^ (4 + 2) * π) <
 bernoulliRealZero 4 1 ∧ bernoulliRealZero 4 1 < 3 / 4 + 1 / (2 ^ (4 + 1) * π)`. -/
-lemma s24b_bounds_four :
+private lemma bernoulliRealZero_four_one_bounds :
     3 / 4 + 1 / (2 ^ (4 + 2) * π) < bernoulliRealZero 4 1 ∧
       bernoulliRealZero 4 1 < 3 / 4 + 1 / (2 ^ (4 + 1) * π) := by
   have hπ1 := Real.pi_gt_d2
@@ -745,8 +778,8 @@ lemma s24b_bounds_four :
   have e2 : 1 / (2 ^ (4 + 1) * π) = u / 32 := by rw [hu]; field_simp; norm_num
   rw [e1, e2]
   have hB4 : ∀ x, bernoulliFun 4 x = (x * (1 - x)) ^ 2 - 1 / 30 := by
-    intro x; rw [q24b_B4]; ring
-  refine s24b_first_zero_bracket (by linarith) (fun x hx => ?_) (by linarith) ?_
+    intro x; rw [bernoulliFun_four_apply]; ring
+  refine bernoulliRealZero_one_mem_Ioo (by linarith) (fun x hx => ?_) (by linarith) ?_
   · rw [hB4]
     have h1 := hx.1; have h2 := hx.2
     have hw : 0.184975 ≤ x * (1 - x) := by nlinarith
@@ -772,10 +805,10 @@ theorem bernoulliRealZero_one_bounds {n : ℕ} (hn : 2 ≤ n) (he : Even n) :
       bernoulliRealZero n 1 < 3 / 4 + 1 / (2 ^ (n + 1) * π) := by
   obtain ⟨k, rfl⟩ : ∃ k, n = 2 * k := ⟨n / 2, by obtain ⟨j, hj⟩ := he; omega⟩
   rcases (show k = 1 ∨ k = 2 ∨ 3 ≤ k by omega) with rfl | rfl | hk
-  · exact s24b_bounds_two
-  · exact s24b_bounds_four
-  have h := s24b_bracket hk (c := 1 / 2) (by norm_num) (by norm_num)
-    (by linarith [(s24b_consts hk).2.1])
+  · exact bernoulliRealZero_two_one_bounds
+  · exact bernoulliRealZero_four_one_bounds
+  have h := bernoulliRealZero_two_mul_one_bounds hk (c := 1 / 2) (by norm_num) (by norm_num)
+    (by linarith [(half_pow_two_mul_bounds_of_three_le hk).2.1])
   have hπ := Real.pi_pos
   have e1 : 1 / 2 * (1 / 2 : ℝ) ^ (2 * k) / (2 * π) = 1 / (2 ^ (2 * k + 2) * π) := by
     rw [one_div_pow, pow_add]; field_simp
@@ -804,7 +837,7 @@ theorem bernoulliRealZero_one_sub_isEquivalent :
     have hc1 : c < 1 := max_lt ha (by norm_num)
     have hev := hA.eventually (gt_mem_nhds (show (0 : ℝ) < (1 - c) / 2 by linarith))
     filter_upwards [hev, eventually_ge_atTop 3] with k hk hk3
-    have h := (s24b_bracket hk3 hc0 hc1 (by linarith)).1
+    have h := (bernoulliRealZero_two_mul_one_bounds hk3 hc0 hc1 (by linarith)).1
     simp only [Pi.div_apply]
     rw [lt_div_iff₀ (hv0 k), hv]
     calc a * ((1 / 2 : ℝ) ^ (2 * k) / (2 * π)) ≤ c * (1 / 2) ^ (2 * k) / (2 * π) := by
@@ -812,8 +845,8 @@ theorem bernoulliRealZero_one_sub_isEquivalent :
           exact mul_le_mul_of_nonneg_right (le_max_left _ _) (by positivity)
       _ < _ := by linarith
   · filter_upwards [eventually_ge_atTop 3] with k hk3
-    have h := (s24b_bracket hk3 (c := 0) le_rfl (by norm_num)
-      (by linarith [(s24b_consts hk3).2.1])).2
+    have h := (bernoulliRealZero_two_mul_one_bounds hk3 (c := 0) le_rfl (by norm_num)
+      (by linarith [(half_pow_two_mul_bounds_of_three_le hk3).2.1])).2
     simp only [Pi.div_apply]
     rw [div_lt_iff₀ (hv0 k), hv]
     have : 0 < (1 / 2 : ℝ) ^ (2 * k) / (2 * π) := by positivity

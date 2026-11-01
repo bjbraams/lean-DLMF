@@ -8,13 +8,35 @@ module
 public import DLMF.OrthogonalPolynomials.Integrals.BesselAndLaguerreTransforms
 
 /-!
-# Double Laplace integrals and Gaussian polynomial identities
+# Double Laplace integrals, Fourier and Mellin transforms
 
-Angular Jacobi sums evaluate double Laplace integrals, followed by the associated Gaussian
-polynomial convolution formulas.
+The double Laplace integrals for Jacobi and Laguerre polynomials (DLMF 18.10.3 and 18.10.6),
+the Bessel integral for Laguerre polynomials (DLMF 18.10.9), the cosine, sine and Fourier
+transforms of Gegenbauer and Legendre polynomials (DLMF 18.17.17–18.17.19), and the Mellin
+transforms DLMF 18.17.37 and 18.17.40.
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Integrals`.
+## Main definitions
+
+* `angularJacobiSum`: homogenized symmetric Jacobi coefficients from the binomial formula.
+
+## Main results
+
+* `jacobi_double_laplace_integral`, `laguerrePolyL_double_laplace_integral`: DLMF 18.10.3
+  and 18.10.6.
+* `laguerrePolyL_bessel_integral`: DLMF 18.10.9.
+* `ultrasphPoly_even_cosine_transform`, `ultrasphPoly_odd_sine_transform`: DLMF 18.17.17 and
+  18.17.18.
+* `legendre_fourier_transform`: DLMF 18.17.19.
+* `ultrasphPoly_mellin_transform`, `ultrasphPoly_mellin_transform_even`,
+  `ultrasphPoly_mellin_transform_odd`: DLMF 18.17.37.
+* `laguerrePolyL_mellin_laplace_transform`: DLMF 18.17.40 in finite-sum form.
+
+## Implementation notes
+
+The double Laplace integrals use the Gegenbauer angular representation, finite Jacobi
+binomial coefficients and the square substitution, and retain integrable endpoint
+singularities. The finite-sum form of DLMF 18.17.40 covers parameters at which the displayed
+hypergeometric quotient has removable singularities.
 -/
 
 @[expose] public section

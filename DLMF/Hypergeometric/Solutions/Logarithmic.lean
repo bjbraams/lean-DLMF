@@ -10,13 +10,21 @@ public import DLMF.Hypergeometric.Basic.Pochhammer
 public import DLMF.Hypergeometric.Solutions.Equation
 
 /-!
-# Logarithmic solutions of the Gauss equation
+# Logarithmic solutions of the Gauss equation (DLMF 15.10.8–15.10.10)
 
-Logarithmic fundamental solutions at integral parameters and their Wronskians, including
-terminating cases.
+Logarithmic fundamental solutions at a positive integral denominator parameter, with generic,
+one or two terminating numerator parameters.
 
-Source references and common attribution are retained in
-`DLMF.Hypergeometric.Solutions`.
+## Main definitions
+
+* `logSing`: the pole part of the logarithmic solutions.
+
+## Main results
+
+* `gaussOperator_logSolution`: a logarithmic solution from the recurrence for its coefficients.
+* `logarithmic_second_fundamental`: DLMF 15.10.8.
+* `logarithmic_second_terminating_fundamental`: DLMF 15.10.9.
+* `logarithmic_second_both_terminating_fundamental`: DLMF 15.10.10.
 -/
 
 @[expose] public section
@@ -253,7 +261,7 @@ theorem gaussOperator_logSolution {a b : ℂ} {n : ℕ} (hn : 0 < n)
     simp at this
     linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k), (Nat.cast_pos.mpr hn : (0 : ℝ) < n)]
   have hLF : gaussOperator a b n F z = 0 := by
-    have := ordinaryHypergeometric_ode (a := a) (b := b) hnc hz hz0 hz1
+    have := ordinaryHypergeometric_ode (a := a) (b := b) hnc hz
     simpa [gaussOperator, iteratedDeriv_succ, iteratedDeriv_zero] using this
   rw [hLF]
   -- the series parts
@@ -393,7 +401,6 @@ theorem wronskian_logSolution_ne_zero {a b : ℂ} {n : ℕ} (hn : 0 < n)
     intro v hv
     have hv1 : v ≠ 1 := by rintro rfl; simpa using hball _ hv.1
     have := ordinaryHypergeometric_ode (a := a) (b := b) hnc (hball v hv.1)
-      (slitPlane_ne_zero hv.2) hv1
     simpa [gaussOperator, iteratedDeriv_succ, iteratedDeriv_zero] using this
   have hodew : ∀ v ∈ U, gaussOperator a b n w v = 0 := fun v hv =>
     gaussOperator_logSolution hn ha hb hH hrec (hball v hv.1) hv.2

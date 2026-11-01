@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMFMathlib.NumberTheory.T27aPrimeNumberTheorem
+public import DLMFMathlib.NumberTheory.PrimeNumberTheorem
 public import Mathlib.Algebra.Order.Antidiag.Nat
 public import Mathlib.Data.Finset.NatDivisors
 public import Mathlib.NumberTheory.ArithmeticFunction.Liouville
@@ -24,17 +24,43 @@ multiplicative properties. Most of them are Mathlib's:
 * `π(n)` is `Nat.primeCounting`, the `n`th prime `p_n` is `Nat.nth Nat.Prime (n - 1)` (DLMF
   starts at `p₁ = 2`, Mathlib's `Nat.nth` at index `0`).
 
-New here: the real-argument prime counting function `primePi x = π(⌊x⌋)` (DLMF 27.2.2, `x`
-real), `nthPrime`, the power sums `φ_k(n)` of the reduced residues (`totientPowerSum`, 27.2.6),
-the multiplicative divisor function `d_k(n)` (`divisorCountK`, the number of ordered
-factorizations into `k` factors), the divisor function `σ_α(n)` for complex `α` (`sigmaC`,
-27.2.10) and Jordan's function `J_k(n)` (`jordanTotient`, 27.2.11), together with the
-definitions of multiplicative and completely multiplicative functions on the positive
-integers (27.3.1, 27.3.9).
+## Main definitions
+
+* `primePi`: the prime counting function `π(x) = π(⌊x⌋)` of a real argument (DLMF 27.2.2).
+* `nthPrime`: the `n`th prime `p_n`, with `p₁ = 2`.
+* `totientPowerSum`: the power sums `φ_k(n)` of the reduced residues (DLMF 27.2.6).
+* `IsPrimitiveRootMod`: primitive roots mod `n` (DLMF §27.2(i)).
+* `divisorCountK`: `d_k(n)`, the number of ordered factorizations of `n` into `k` factors.
+* `sigmaC`: the divisor function `σ_α(n)` for complex `α` (DLMF 27.2.10).
+* `jordanTotient`: Jordan's function `J_k(n)` (DLMF 27.2.11).
+* `IsMultiplicativeFn`, `IsCompletelyMultiplicativeFn`: multiplicative and completely
+  multiplicative functions on the positive integers (DLMF 27.3.1, 27.3.9).
+
+## Main results
+
+* `prod_primeFactors_pow_factorization`, `eq_factorization_of_prod`: the fundamental theorem
+  of arithmetic (DLMF 27.2.1).
+* `primePi_isEquivalent`, `nthPrime_isEquivalent`: the prime number theorem in the forms
+  DLMF 27.2.3 and 27.2.4.
+* `totientPowerSum_zero`, `sigma_zero_eq_card_divisors`, `sigmaC_apply`, `jordanTotient_one`:
+  the defining formulas DLMF 27.2.7, 27.2.9–27.2.11.
+* `moebius_eq_cases`, `liouville_eq_cases`, `vonMangoldt_eq_cases`: DLMF 27.2.12–27.2.14 for
+  Mathlib's `μ`, `λ` and `Λ`.
+* `isMultiplicative_iff_isMultiplicativeFn`: Mathlib's multiplicativity is DLMF's.
+* `isMultiplicativeFn_basic`, `isMultiplicativeFn_divisorCountK`,
+  `isMultiplicativeFn_jordanTotient`, `totientPowerSum_one_not_multiplicative`: which functions
+  of §27.2 are multiplicative (corrected, see below).
+* `IsMultiplicativeFn.eq_prod_primeFactors`, `IsCompletelyMultiplicativeFn.eq_prod_primeFactors`:
+  DLMF 27.3.2 and 27.3.10.
+* `jordanTotient_eq_mul_prod`, `sigma_zero_eq_prod`, `sigmaC_eq_prod`: the product formulas
+  DLMF 27.3.4–27.3.6.
+* `sigmaC_mul_sigmaC`, `totient_mul_totient`: DLMF 27.3.7 and 27.3.8.
+
+## Implementation notes
 
 DLMF's functions live on the positive integers `n = 1, 2, …`; the Lean definitions are total
 on `ℕ` and all statements carry `0 < n` (or `n ≠ 0`) where DLMF has `n ≥ 1`. Tables 27.2.1
-and 27.2.2 (§27.2(ii)) are tabulated values and are not acquired (excluded: numerical).
+and 27.2.2 (§27.2(ii)) are tabulated values and are out of scope.
 
 **Correction (27.3, first sentence).** DLMF says that, except for `ν`, `Λ`, `p_n` and `π(x)`,
 the functions of §27.2 are multiplicative. The power sums `φ_k` with `k ≥ 1` are not:
@@ -82,9 +108,6 @@ theorem eq_factorization_of_prod {n : ℕ} (hn : n ≠ 0) (f : ℕ →₀ ℕ)
     (hf : ∀ p ∈ f.support, p.Prime) (h : f.prod (· ^ ·) = n) : f = n.factorization :=
   (Nat.eq_factorization_iff hn hf).mpr h
 
-/-- §27.2(i): Euclid's theorem, there are infinitely many primes. -/
-@[dlmf 27.2.i]
-theorem infinite_setOf_prime' : {p : ℕ | p.Prime}.Infinite := Nat.infinite_setOfPred_prime
 
 /-- DLMF 27.2.2: `π(x) = ∑_{p ≤ x} 1`. -/
 @[dlmf 27.2.E2]
@@ -100,18 +123,18 @@ and Legendre, proved by Hadamard and de la Vallée Poussin). -/
 @[dlmf 27.2.E3]
 theorem primePi_isEquivalent :
     (fun x : ℝ ↦ (primePi x : ℝ)) ~[atTop] fun x ↦ x / Real.log x :=
-  -- TauCeti's prime ideal theorem for `ℚ`, via `DLMFMathlib.NumberTheory.T27aPrimeNumberTheorem`
-  Nat.t27a_primeCounting_isEquivalent
+  -- TauCeti's prime ideal theorem for `ℚ`, via `DLMFMathlib.NumberTheory.PrimeNumberTheorem`
+  Nat.primeCounting_floor_isEquivalent
 
 /-- DLMF 27.2.4: the equivalent form `p_n ∼ n ln n` of the prime number theorem. -/
 @[dlmf 27.2.E4]
 theorem nthPrime_isEquivalent :
     (fun n : ℕ ↦ (nthPrime n : ℝ)) ~[atTop] fun n ↦ n * Real.log n := by
   have hsub : Tendsto (fun n : ℕ ↦ n - 1) atTop atTop := tendsto_sub_atTop_nat 1
-  have h := Nat.t27a_nth_prime_isEquivalent.comp_tendsto hsub
+  have h := Nat.nth_prime_isEquivalent.comp_tendsto hsub
   -- `(n - 1 : ℕ) ~ n`
   have hn : (fun n : ℕ ↦ ((n - 1 : ℕ) : ℝ)) ~[atTop] fun n ↦ (n : ℝ) := by
-    refine (Nat.t27a_natCast_add_one_isEquivalent.comp_tendsto hsub).symm.congr_right ?_
+    refine (Nat.natCast_add_one_isEquivalent.comp_tendsto hsub).symm.congr_right ?_
     filter_upwards [eventually_ge_atTop 1] with n hn
     simp only [Function.comp_apply]
     rw [Nat.cast_sub hn, Nat.cast_one, sub_add_cancel]
@@ -151,10 +174,6 @@ theorem totientPowerSum_zero (n : ℕ) : totientPowerSum 0 n = n.totient := by
   · rintro ⟨⟨h1, h2⟩, h3⟩; exact ⟨⟨h1, by omega⟩, h3.symm⟩
   · rintro ⟨⟨h1, h2⟩, h3⟩; exact ⟨⟨h1, by omega⟩, h3.symm⟩
 
-/-- DLMF 27.2.8, the Euler–Fermat theorem: `a^{φ(n)} ≡ 1 (mod n)` when `(a, n) = 1`. -/
-@[dlmf 27.2.E8]
-theorem pow_totient_modEq_one {a n : ℕ} (h : a.Coprime n) : a ^ n.totient ≡ 1 [MOD n] :=
-  Nat.ModEq.pow_totient h
 
 /-- §27.2(i) after 27.2.8: `a` is a primitive root mod `n` if `(a, n) = 1` and `φ(n)` is the
 smallest positive exponent `f` with `a^f ≡ 1 (mod n)`, i.e. the order of `a` in `ℤ/nℤ` is
@@ -388,11 +407,11 @@ theorem isMultiplicativeFn_basic (α : ℂ) :
     (isMultiplicative_iff_isMultiplicativeFn _).mp isMultiplicative_moebius,
     (isMultiplicative_iff_isMultiplicativeFn _).mp isMultiplicative_liouville⟩
 
-section q27
+section ArithmeticFunctions
 open scoped ArithmeticFunction.zeta
 
 /-- Recursion for the ordered factorizations: split off the first factor. -/
-lemma q27_card_finMulAntidiag_succ (k n : ℕ) :
+private lemma card_finMulAntidiag_succ (k n : ℕ) :
     (Nat.finMulAntidiag (k + 1) n).card =
       ∑ ab ∈ n.divisorsAntidiagonal, (Nat.finMulAntidiag k ab.2).card := by
   rw [card_eq_sum_card_fiberwise (f := fun g : Fin (k + 1) → ℕ ↦ (g 0, ∏ i, Fin.tail g i))
@@ -423,7 +442,7 @@ lemma q27_card_finMulAntidiag_succ (k n : ℕ) :
     rfl
 
 /-- `d_k = ζ^k` as arithmetic functions (Dirichlet power of `ζ`). -/
-theorem q27_divisorCountK_eq_zeta_pow (k n : ℕ) :
+theorem divisorCountK_eq_zeta_pow (k n : ℕ) :
     divisorCountK k n = ((ζ : ArithmeticFunction ℕ) ^ k) n := by
   induction k generalizing n with
   | zero =>
@@ -432,13 +451,13 @@ theorem q27_divisorCountK_eq_zeta_pow (k n : ℕ) :
     · subst h; rw [Nat.finMulAntidiag_one, card_singleton]
     · rw [Nat.finMulAntidiag_zero_left h, card_empty]
   | succ k ih =>
-    rw [divisorCountK, q27_card_finMulAntidiag_succ, pow_succ', mul_apply]
+    rw [divisorCountK, card_finMulAntidiag_succ, pow_succ', mul_apply]
     refine sum_congr rfl fun ab hab ↦ ?_
     rw [← divisorCountK, ih, zeta_apply, ite_eq_right (Nat.ne_of_gt (Nat.pos_of_mem_divisors
       (Nat.fst_mem_divisors_of_mem_antidiagonal hab))), one_mul]
 
 /-- `∑_{d∣n} J_k(d) = n^k` (DLMF 27.6.3), proved here for use in §27.3. -/
-theorem q27_sum_divisors_jordanTotient (k : ℕ) {n : ℕ} (hn : 0 < n) :
+theorem sum_divisors_jordanTotient_eq_pow (k : ℕ) {n : ℕ} (hn : 0 < n) :
     ∑ d ∈ n.divisors, jordanTotient k d = n ^ k := by
   have hcard : (Fintype.piFinset fun _ : Fin k ↦ Finset.Icc 1 n).card = n ^ k := by
     simp
@@ -526,36 +545,36 @@ theorem q27_sum_divisors_jordanTotient (k : ℕ) {n : ℕ} (hn : 0 < n) :
     exact ⟨Nat.div_dvd_of_dvd (Nat.gcd_dvd_right _ _), hn.ne'⟩
 
 /-- `J_k(0) = 0`. -/
-lemma q27_jordanTotient_zero_right (k : ℕ) : jordanTotient k 0 = 0 := by
+private lemma jordanTotient_zero_right (k : ℕ) : jordanTotient k 0 = 0 := by
   rcases k with _ | k
   · decide
   · simp [jordanTotient]
 
 /-- Jordan's totient as an integer-valued arithmetic function. -/
-def q27_jordanAF (k : ℕ) : ArithmeticFunction ℤ :=
-  ⟨fun n ↦ jordanTotient k n, by simp [q27_jordanTotient_zero_right]⟩
+def jordanArithmeticFunction (k : ℕ) : ArithmeticFunction ℤ :=
+  ⟨fun n ↦ jordanTotient k n, by simp [jordanTotient_zero_right]⟩
 
 /-- Möbius inversion of `∑_{d∣n} J_k(d) = n^k`: `J_k = μ * n^k`. -/
-lemma q27_jordanAF_eq (k : ℕ) :
-    q27_jordanAF k = (μ : ArithmeticFunction ℤ) * (pow k : ArithmeticFunction ℤ) := by
-  have h : (ζ : ArithmeticFunction ℤ) * q27_jordanAF k = (pow k : ArithmeticFunction ℤ) := by
+private lemma jordanArithmeticFunction_eq_moebius_mul_pow (k : ℕ) :
+    jordanArithmeticFunction k = (μ : ArithmeticFunction ℤ) * (pow k : ArithmeticFunction ℤ) := by
+  have h : (ζ : ArithmeticFunction ℤ) * jordanArithmeticFunction k = (pow k : ArithmeticFunction ℤ) := by
     ext n
     rcases Nat.eq_zero_or_pos n with rfl | hn
     · simp
     rw [coe_zeta_mul_apply, natCoe_apply, pow_apply, ite_eq_right (by omega)]
     change ∑ i ∈ n.divisors, ((jordanTotient k i : ℕ) : ℤ) = _
-    exact_mod_cast q27_sum_divisors_jordanTotient k hn
+    exact_mod_cast sum_divisors_jordanTotient_eq_pow k hn
   rw [← h, ← mul_assoc, moebius_mul_coe_zeta, one_mul]
 
 /-- `J_k` is multiplicative. -/
-lemma q27_isMultiplicative_jordanAF (k : ℕ) : (q27_jordanAF k).IsMultiplicative := by
-  rw [q27_jordanAF_eq]
+private lemma isMultiplicative_jordanArithmeticFunction (k : ℕ) : (jordanArithmeticFunction k).IsMultiplicative := by
+  rw [jordanArithmeticFunction_eq_moebius_mul_pow]
   exact isMultiplicative_moebius.mul isMultiplicative_pow.natCast
 
 /-- `J_k` is multiplicative (all `k`). -/
-lemma q27_isMultiplicativeFn_jordanTotient (k : ℕ) :
+private lemma isMultiplicativeFn_jordanTotient' (k : ℕ) :
     IsMultiplicativeFn (jordanTotient k) := by
-  have h := (isMultiplicative_iff_isMultiplicativeFn _).mp (q27_isMultiplicative_jordanAF k)
+  have h := (isMultiplicative_iff_isMultiplicativeFn _).mp (isMultiplicative_jordanArithmeticFunction k)
   refine ⟨?_, fun m n hm hn hmn ↦ ?_⟩
   · have h1 : ((jordanTotient k 1 : ℕ) : ℤ) = 1 := h.1
     exact_mod_cast h1
@@ -564,10 +583,10 @@ lemma q27_isMultiplicativeFn_jordanTotient (k : ℕ) :
     exact_mod_cast h2
 
 /-- `J_k(p^{e+1}) = p^{(e+1)k} - p^{ek}`. -/
-lemma q27_jordanTotient_prime_pow (k : ℕ) {p : ℕ} (hp : p.Prime) (e : ℕ) :
+private lemma jordanTotient_prime_pow_succ (k : ℕ) {p : ℕ} (hp : p.Prime) (e : ℕ) :
     (jordanTotient k (p ^ (e + 1)) : ℤ) = (p : ℤ) ^ ((e + 1) * k) - (p : ℤ) ^ (e * k) := by
-  have h1 := q27_sum_divisors_jordanTotient k (pow_pos hp.pos (e + 1))
-  have h2 := q27_sum_divisors_jordanTotient k (pow_pos hp.pos e)
+  have h1 := sum_divisors_jordanTotient_eq_pow k (pow_pos hp.pos (e + 1))
+  have h2 := sum_divisors_jordanTotient_eq_pow k (pow_pos hp.pos e)
   rw [Nat.sum_divisors_prime_pow hp, Finset.sum_range_succ] at h1
   rw [Nat.sum_divisors_prime_pow hp] at h2
   rw [h2] at h1
@@ -576,24 +595,23 @@ lemma q27_jordanTotient_prime_pow (k : ℕ) {p : ℕ} (hp : p.Prime) (e : ℕ) :
   rw [eq_sub_iff_add_eq]
   exact_mod_cast h3
 
-end q27
-
-/-- §27.3, first sentence: `d_k` is multiplicative (`k ≥ 1`). -/
+end ArithmeticFunctions
+/-- §27.3, first sentence: `d_k` is multiplicative, for every `k` (DLMF: `k ≥ 1`). -/
 @[dlmf 27.3]
-theorem isMultiplicativeFn_divisorCountK (k : ℕ) (hk : 0 < k) :
+theorem isMultiplicativeFn_divisorCountK (k : ℕ) :
     IsMultiplicativeFn (divisorCountK k) := by
   have h := (isMultiplicative_iff_isMultiplicativeFn _).mp
     (isMultiplicative_zeta.pow (k := k) : ((zeta : ArithmeticFunction ℕ) ^ k).IsMultiplicative)
   have he : divisorCountK k = ⇑((zeta : ArithmeticFunction ℕ) ^ k) :=
-    funext (q27_divisorCountK_eq_zeta_pow k)
+    funext (divisorCountK_eq_zeta_pow k)
   rw [he]
   exact h
 
-/-- §27.3, first sentence: Jordan's `J_k` is multiplicative (`k ≥ 1`). -/
+/-- §27.3, first sentence: Jordan's `J_k` is multiplicative, for every `k` (DLMF: `k ≥ 1`). -/
 @[dlmf 27.3]
-theorem isMultiplicativeFn_jordanTotient (k : ℕ) (hk : 0 < k) :
+theorem isMultiplicativeFn_jordanTotient (k : ℕ) :
     IsMultiplicativeFn (jordanTotient k) := by
-  exact q27_isMultiplicativeFn_jordanTotient k
+  exact isMultiplicativeFn_jordanTotient' k
 
 /-- Correction to §27.3, first sentence: `φ_k` is not multiplicative for `k ≥ 1`; for `k = 1`,
 `φ₁(2) φ₁(3) = 3 ≠ 6 = φ₁(6)`. -/
@@ -619,17 +637,12 @@ theorem IsMultiplicativeFn.eq_prod_primeFactors {R : Type*} [CommMonoidWithZero 
     · simp [(Nat.coprime_zero_right _).mp hab, hf.1]
     exact hf.2 a b ha hb hab
 
-/-- DLMF 27.3.3: `φ(n) = n ∏_{p∣n} (1 - p⁻¹)`. -/
-@[dlmf 27.3.E3]
-theorem totient_eq_mul_prod (n : ℕ) :
-    (n.totient : ℚ) = n * ∏ p ∈ n.primeFactors, (1 - (p : ℚ)⁻¹) :=
-  Nat.totient_eq_mul_prod_factors n
 
 /-- DLMF 27.3.4: `J_k(n) = n^k ∏_{p∣n} (1 - p^{-k})`. -/
 @[dlmf 27.3.E4]
 theorem jordanTotient_eq_mul_prod (k n : ℕ) (hn : 0 < n) :
     (jordanTotient k n : ℚ) = (n : ℚ) ^ k * ∏ p ∈ n.primeFactors, (1 - ((p : ℚ) ^ k)⁻¹) := by
-  rw [(q27_isMultiplicativeFn_jordanTotient k).eq_prod_primeFactors hn.ne']
+  rw [(isMultiplicativeFn_jordanTotient' k).eq_prod_primeFactors hn.ne']
   have hnq : (n : ℚ) = ∏ p ∈ n.primeFactors, (p : ℚ) ^ (n.factorization p) := by
     exact_mod_cast Nat.prod_primeFactors_pow_factorization hn.ne'
   rw [hnq, Nat.cast_prod, ← Finset.prod_pow,
@@ -640,7 +653,7 @@ theorem jordanTotient_eq_mul_prod (k n : ℕ) (hn : 0 < n) :
     (hp'.factorization_pos_of_dvd hn.ne' (Nat.dvd_of_mem_primeFactors hp)).ne'
   obtain ⟨e, he'⟩ := Nat.exists_eq_succ_of_ne_zero he
   rw [he']
-  have := q27_jordanTotient_prime_pow k hp' e
+  have := jordanTotient_prime_pow_succ k hp' e
   have hq : ((jordanTotient k (p ^ (e + 1)) : ℤ) : ℚ) =
       (((p : ℤ) ^ ((e + 1) * k) - (p : ℤ) ^ (e * k) : ℤ) : ℚ) := by rw [this]
   push_cast at hq
@@ -685,7 +698,7 @@ theorem sigmaC_eq_prod {α : ℂ} {n : ℕ} (hn : n ≠ 0)
   ring
 
 /-- `G(m + n + 1) = G(m) + x^{m+1} G(n)` for `G(j) = ∑_{i ≤ j} x^i`. -/
-lemma s27_geom_split {R : Type*} [CommRing R] (x : R) (m n : ℕ) :
+private lemma geom_sum_range_add_add_two {R : Type*} [CommRing R] (x : R) (m n : ℕ) :
     ∑ i ∈ range (m + n + 2), x ^ i =
       ∑ i ∈ range (m + 1), x ^ i + x ^ (m + 1) * ∑ i ∈ range (n + 1), x ^ i := by
   rw [show m + n + 2 = (m + 1) + (n + 1) by ring, sum_range_add, mul_sum]
@@ -693,7 +706,7 @@ lemma s27_geom_split {R : Type*} [CommRing R] (x : R) (m n : ℕ) :
   exact sum_congr rfl fun i _ ↦ by rw [pow_add]
 
 /-- Prime-power case of 27.3.7: `∑_{k ≤ a} x^k G(2a + t - 2k) = G(a) G(a + t)`. -/
-lemma s27_geom_hecke {R : Type*} [CommRing R] (x : R) (a t : ℕ) :
+private lemma sum_pow_mul_geom_sum_eq_mul_geom_sum {R : Type*} [CommRing R] (x : R) (a t : ℕ) :
     ∑ k ∈ range (a + 1), x ^ k * ∑ i ∈ range (2 * a + t - 2 * k + 1), x ^ i =
       (∑ i ∈ range (a + 1), x ^ i) * ∑ i ∈ range (a + t + 1), x ^ i := by
   induction a with
@@ -716,40 +729,40 @@ lemma s27_geom_hecke {R : Type*} [CommRing R] (x : R) (a t : ℕ) :
     have h2 : ∑ i ∈ range (a + 1 + t + 1), x ^ i =
         ∑ i ∈ range (a + t + 1), x ^ i + x ^ (a + t + 1) := by
       rw [show a + 1 + t + 1 = a + t + 1 + 1 by ring, sum_range_succ]
-    have h3 := s27_geom_split x (a + t + 1) a
+    have h3 := geom_sum_range_add_add_two x (a + t + 1) a
     rw [show a + t + 1 + a + 2 = 2 * (a + 1) + t + 1 by ring] at h3
     rw [h3, h1, h2, show a + t + 1 + 1 = a + 1 + t + 1 by ring, h2]
     ring
 
 /-- `(p^i)^α = (p^α)^i`. -/
-lemma s27_natPow_cpow (p i : ℕ) (α : ℂ) : (((p ^ i : ℕ) : ℂ)) ^ α = ((p : ℂ) ^ α) ^ i := by
+private lemma natCast_pow_cpow (p i : ℕ) (α : ℂ) : (((p ^ i : ℕ) : ℂ)) ^ α = ((p : ℂ) ^ α) ^ i := by
   induction i with
   | zero => simp
   | succ i ih => rw [pow_succ, Nat.cast_mul, Complex.natCast_mul_natCast_cpow, ih, pow_succ]
 
 /-- `σ_α(p^j) = ∑_{i ≤ j} (p^α)^i`. -/
-lemma s27_sigmaC_prime_pow (α : ℂ) {p : ℕ} (hp : p.Prime) (j : ℕ) :
+private lemma sigmaC_prime_pow (α : ℂ) {p : ℕ} (hp : p.Prime) (j : ℕ) :
     sigmaC α (p ^ j) = ∑ i ∈ range (j + 1), ((p : ℂ) ^ α) ^ i := by
   rw [sigmaC_apply, Nat.sum_divisors_prime_pow hp]
-  exact sum_congr rfl fun i _ ↦ s27_natPow_cpow p i α
+  exact sum_congr rfl fun i _ ↦ natCast_pow_cpow p i α
 
 /-- 27.3.7 for prime powers. -/
-lemma s27_sigmaC_hecke_prime_pow (α : ℂ) {p : ℕ} (hp : p.Prime) (a b : ℕ) :
+private lemma sum_divisors_cpow_mul_sigmaC_prime_pow (α : ℂ) {p : ℕ} (hp : p.Prime) (a b : ℕ) :
     ∑ d ∈ (p ^ min a b).divisors, (d : ℂ) ^ α * sigmaC α (p ^ (a + b) / d ^ 2) =
       sigmaC α (p ^ a) * sigmaC α (p ^ b) := by
   wlog hab : a ≤ b generalizing a b
   · rw [min_comm, add_comm, mul_comm]; exact this b a (by omega)
   obtain ⟨t, rfl⟩ : ∃ t, b = a + t := ⟨b - a, by omega⟩
-  rw [min_eq_left hab, Nat.sum_divisors_prime_pow hp, s27_sigmaC_prime_pow α hp,
-    s27_sigmaC_prime_pow α hp, ← s27_geom_hecke]
+  rw [min_eq_left hab, Nat.sum_divisors_prime_pow hp, sigmaC_prime_pow α hp,
+    sigmaC_prime_pow α hp, ← sum_pow_mul_geom_sum_eq_mul_geom_sum]
   refine sum_congr rfl fun k hk ↦ ?_
   have hk' : k ≤ a := Nat.lt_succ_iff.mp (mem_range.mp hk)
-  rw [s27_natPow_cpow, ← pow_mul, Nat.pow_div (by omega) hp.pos, s27_sigmaC_prime_pow α hp]
+  rw [natCast_pow_cpow, ← pow_mul, Nat.pow_div (by omega) hp.pos, sigmaC_prime_pow α hp]
   congr 3
   omega
 
 /-- `gcd(p^a m', p^b n') = p^{min(a,b)} gcd(m', n')` for `m', n'` coprime to `p`. -/
-theorem s27_gcd_split {p a b m' n' : ℕ} (hm : p.Coprime m') (hn : p.Coprime n') :
+theorem gcd_prime_pow_mul_prime_pow_mul {p a b m' n' : ℕ} (hm : p.Coprime m') (hn : p.Coprime n') :
     (p ^ a * m').gcd (p ^ b * n') = p ^ min a b * m'.gcd n' := by
   have h1 : (p ^ b).Coprime n' := Nat.Coprime.pow_left b hn
   have h2 : m'.Coprime (p ^ b) := (Nat.Coprime.pow_left b hm).symm
@@ -762,7 +775,7 @@ theorem s27_gcd_split {p a b m' n' : ℕ} (hm : p.Coprime m') (hn : p.Coprime n'
   · rw [min_eq_right h]; exact Nat.gcd_eq_right (Nat.pow_dvd_pow p h)
 
 /-- Splitting off the `p`-part of the right side of 27.3.7. -/
-lemma s27_hecke_split (α : ℂ) {p a b m' n' : ℕ} (hm : p.Coprime m')
+private lemma sum_divisors_gcd_cpow_mul_sigmaC_split (α : ℂ) {p a b m' n' : ℕ} (hm : p.Coprime m')
     (hn : p.Coprime n') :
     ∑ d ∈ ((p ^ a * m').gcd (p ^ b * n')).divisors,
         (d : ℂ) ^ α * sigmaC α (p ^ a * m' * (p ^ b * n') / d ^ 2) =
@@ -770,7 +783,7 @@ lemma s27_hecke_split (α : ℂ) {p a b m' n' : ℕ} (hm : p.Coprime m')
         ∑ j ∈ (m'.gcd n').divisors, (j : ℂ) ^ α * sigmaC α (m' * n' / j ^ 2) := by
   have hcop : (p ^ min a b).Coprime (m'.gcd n') :=
     Nat.Coprime.pow_left _ (Nat.Coprime.coprime_dvd_right (Nat.gcd_dvd_left m' n') hm)
-  rw [s27_gcd_split hm hn, Nat.divisors_mul, Finset.mul_def,
+  rw [gcd_prime_pow_mul_prime_pow_mul hm hn, Nat.divisors_mul, Finset.mul_def,
     sum_image (Nat.Coprime.mul_injOn_divisors hcop), sum_product, sum_mul_sum]
   refine sum_congr rfl fun i hi ↦ sum_congr rfl fun j hj ↦ ?_
   have hi' : i ∣ p ^ min a b := Nat.dvd_of_mem_divisors hi
@@ -794,7 +807,7 @@ lemma s27_hecke_split (α : ℂ) {p a b m' n' : ℕ} (hm : p.Coprime m')
   ring
 
 /-- DLMF 27.3.7 (proof). -/
-lemma s27_sigmaC_mul_sigmaC (α : ℂ) {m n : ℕ} (hm : 0 < m) (hn : 0 < n) :
+lemma sigmaC_mul_sigmaC_eq_sum_divisors_gcd (α : ℂ) {m n : ℕ} (hm : 0 < m) (hn : 0 < n) :
     sigmaC α m * sigmaC α n =
       ∑ d ∈ (m.gcd n).divisors, (d : ℂ) ^ α * sigmaC α (m * n / d ^ 2) := by
   induction h : m * n using Nat.strong_induction_on generalizing m n with
@@ -832,8 +845,8 @@ lemma s27_sigmaC_mul_sigmaC (α : ℂ) {m n : ℕ} (hm : 0 < m) (hn : 0 < n) :
     have : 0 < m' * n' := Nat.mul_pos hm' hn'
     nlinarith
   have ih' := ih (m' * n') hlt hm' hn' rfl
-  rw [← hmm, ← hnn, s27_hecke_split α hcm hcn, ← ih',
-    s27_sigmaC_hecke_prime_pow α hp,
+  rw [← hmm, ← hnn, sum_divisors_gcd_cpow_mul_sigmaC_split α hcm hcn, ← ih',
+    sum_divisors_cpow_mul_sigmaC_prime_pow α hp,
     (isMultiplicative_sigmaC α).map_mul_of_coprime (Nat.Coprime.pow_left a hcm),
     (isMultiplicative_sigmaC α).map_mul_of_coprime (Nat.Coprime.pow_left b hcn)]
   ring
@@ -843,7 +856,7 @@ lemma s27_sigmaC_mul_sigmaC (α : ℂ) {m n : ℕ} (hm : 0 < m) (hn : 0 < n) :
 theorem sigmaC_mul_sigmaC (α : ℂ) {m n : ℕ} (hm : 0 < m) (hn : 0 < n) :
     sigmaC α m * sigmaC α n =
       ∑ d ∈ (m.gcd n).divisors, (d : ℂ) ^ α * sigmaC α (m * n / d ^ 2) :=
-  s27_sigmaC_mul_sigmaC α hm hn
+  sigmaC_mul_sigmaC_eq_sum_divisors_gcd α hm hn
 
 /-- DLMF 27.3.8: `φ(m) φ(n) = φ(mn) φ((m,n))/(m,n)`. -/
 @[dlmf 27.3.E8]

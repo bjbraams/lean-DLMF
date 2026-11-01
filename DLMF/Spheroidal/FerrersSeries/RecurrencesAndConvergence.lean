@@ -11,12 +11,20 @@ public import DLMF.Spheroidal.Angular
 public import Mathlib.Tactic.Monotonicity.Lemmas
 
 /-!
-# Spheroidal Ferrers recurrences and convergence
+# Recurrences, decay and normalization of spheroidal Ferrers coefficients (DLMF §30.8)
 
-Ferrers coefficient recurrences, decay bounds and normalization of first-kind spheroidal series.
+This file proves the recurrence, decay bounds and normalization of the coefficients
+`a^m_{n,k}(γ²)` and the expansion of `𝖯s^m_n` in Ferrers functions.
 
-Source references and common attribution are retained in
-`DLMF.Spheroidal.FerrersSeries`.
+## Main results
+
+* `spheroidalCoeff_of_le`, `spheroidalCoeff_of_lt`: the integral formula 30.8.2 for `k ≥ -R` and
+  the extended coefficients of §30.8(ii) for `-N ≤ k < -R`.
+* `spheroidalRecA_neg_R`: `A_{-R} = 0` (note after DLMF 30.8.4).
+* `spheroidalCoeff_recurrence`, `spheroidalCoeff_recurrence_of_le`: the recurrence DLMF 30.8.4.
+* `spheroidalCoeffNeg_of_le`: the coefficients `a^{-m}_{n,k}` (DLMF 30.8.6).
+* `hasSum_spheroidalPs_ferrers`: the Ferrers expansion DLMF 30.8.1.
+* `hasSum_spheroidalCoeff_normalization`: the normalization DLMF 30.8.5.
 -/
 
 @[expose] public noncomputable section
@@ -68,19 +76,19 @@ the recurrence 14.10.3 expresses `(1-x²)𝖯^m_ν` through `𝖯^m_{ν-2}, 𝖯
 /-- Self-adjointness of `L_m u = (1-x²)u'' - 2(m+1)xu'` with weight `(1-x²)^m` on `[-1, 1]`,
 applied to an entire solution `g` of the factor equation and `P_N^{(m)}`: the boundary terms
 vanish because of the factor `(1-x²)^{m+1}`. -/
-lemma p2y_selfAdjoint {g : ℂ → ℂ} (hg : Differentiable ℂ g) (m N : ℕ) (lam γ2 : ℂ)
+private lemma integral_factor_mul_jet_selfAdjoint {g : ℂ → ℂ} (hg : Differentiable ℂ g) (m N : ℕ) (lam γ2 : ℂ)
     (hode : ∀ z : ℂ, (1 - z ^ 2) * deriv (deriv g) z - 2 * ((m : ℂ) + 1) * z * deriv g z +
       (lam - m * ((m : ℂ) + 1) + γ2 * (1 - z ^ 2)) * g z = 0) :
     ((N : ℂ) * (N + 1) - lam) *
-        ∫ x : ℝ in (-1 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ m * g x * legInt_D N m x =
-      γ2 * ∫ x : ℝ in (-1 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ (m + 1) * g x * legInt_D N m x := by
+        ∫ x : ℝ in (-1 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ m * g x * OrthogonalPolynomials.LegendreAddition.jet N m x =
+      γ2 * ∫ x : ℝ in (-1 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ (m + 1) * g x * OrthogonalPolynomials.LegendreAddition.jet N m x := by
   have hg1 : ∀ x : ℝ, HasDerivAt (fun x : ℝ => g x) (deriv g x) x := fun x =>
     (hg x).hasDerivAt.comp_ofReal
   have hg2 : ∀ x : ℝ, HasDerivAt (fun x : ℝ => deriv g x) (deriv (deriv g) x) x := fun x =>
     (hg.deriv x).hasDerivAt.comp_ofReal
   have hcg : Continuous fun x : ℝ => g x := hg.continuous.comp continuous_ofReal
   have hD := legInt_cont_D N m
-  have hc0 : ∀ j : ℕ, Continuous fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ j * g x * legInt_D N m x :=
+  have hc0 : ∀ j : ℕ, Continuous fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ j * g x * OrthogonalPolynomials.LegendreAddition.jet N m x :=
     fun j => ((by fun_prop : Continuous fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ j).mul hcg).mul hD
   have hw : ∀ x : ℝ, HasDerivAt (fun x : ℝ => (1 - (x : ℂ) ^ 2)) (-(2 * (x : ℂ))) x := by
     intro x
@@ -88,8 +96,8 @@ lemma p2y_selfAdjoint {g : ℂ → ℂ} (hg : Differentiable ℂ g) (m N : ℕ) 
     simpa using this
   have hΦ : ∀ x ∈ uIcc (-1 : ℝ) 1, HasDerivAt
       (fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ (m + 1) *
-        (deriv g x * legInt_D N m x - g x * legInt_D N (m + 1) x))
-      ((1 - (x : ℂ) ^ 2) ^ m * g x * legInt_D N m x *
+        (deriv g x * OrthogonalPolynomials.LegendreAddition.jet N m x - g x * OrthogonalPolynomials.LegendreAddition.jet N (m + 1) x))
+      ((1 - (x : ℂ) ^ 2) ^ m * g x * OrthogonalPolynomials.LegendreAddition.jet N m x *
         (((N : ℂ) * (N + 1) - lam) - γ2 * (1 - (x : ℂ) ^ 2))) x := by
     intro x _
     have h := ((hw x).pow (m + 1)).mul (((hg2 x).mul (legInt_hasDerivAt_D_real N m x)).sub
@@ -100,15 +108,15 @@ lemma p2y_selfAdjoint {g : ℂ → ℂ} (hg : Differentiable ℂ g) (m N : ℕ) 
     simp only [Nat.add_sub_cancel, Pi.mul_apply, Pi.sub_apply, Pi.pow_apply,
       show m + 1 + 1 = m + 2 from rfl]
     push_cast
-    linear_combination (1 - (x : ℂ) ^ 2) ^ m * (legInt_D N m x * h1 - g x * h2)
+    linear_combination (1 - (x : ℂ) ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet N m x * h1 - g x * h2)
   have hint := intervalIntegral.integral_eq_sub_of_hasDerivAt hΦ
     (((hc0 m).mul (by fun_prop)).intervalIntegrable _ _)
   simp only [ofReal_one, ofReal_neg, one_pow, sub_self, even_two, Even.neg_pow,
     zero_pow (Nat.succ_ne_zero m), zero_mul] at hint
-  have e : (fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ m * g x * legInt_D N m x *
+  have e : (fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ m * g x * OrthogonalPolynomials.LegendreAddition.jet N m x *
       (((N : ℂ) * (N + 1) - lam) - γ2 * (1 - (x : ℂ) ^ 2))) = fun x : ℝ =>
-      ((N : ℂ) * (N + 1) - lam) * ((1 - (x : ℂ) ^ 2) ^ m * g x * legInt_D N m x) -
-        γ2 * ((1 - (x : ℂ) ^ 2) ^ (m + 1) * g x * legInt_D N m x) := by
+      ((N : ℂ) * (N + 1) - lam) * ((1 - (x : ℂ) ^ 2) ^ m * g x * OrthogonalPolynomials.LegendreAddition.jet N m x) -
+        γ2 * ((1 - (x : ℂ) ^ 2) ^ (m + 1) * g x * OrthogonalPolynomials.LegendreAddition.jet N m x) := by
     funext x; ring
   rw [e, intervalIntegral.integral_sub, intervalIntegral.integral_const_mul,
     intervalIntegral.integral_const_mul] at hint
@@ -117,34 +125,34 @@ lemma p2y_selfAdjoint {g : ℂ → ℂ} (hg : Differentiable ℂ g) (m N : ℕ) 
   · exact (continuous_const.mul (hc0 (m + 1))).intervalIntegrable _ _
 
 /-- The integral of `(1-x²)^{m/2} G(x) 𝖯^m_N(x)` through the polynomial factor. -/
-lemma p2y_integral_ferrers {g : ℂ → ℂ} (hreal : ∀ x : ℝ, (g x).im = 0) (m N : ℕ) :
+private lemma integral_factor_mul_ferrersP_eq_jet {g : ℂ → ℂ} (hreal : ∀ x : ℝ, (g x).im = 0) (m N : ℕ) :
     ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re * (ferrersP N m x).re =
-      (-1) ^ m * (∫ x : ℝ in (-1 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ m * g x * legInt_D N m x).re := by
+      (-1) ^ m * (∫ x : ℝ in (-1 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ m * g x * OrthogonalPolynomials.LegendreAddition.jet N m x).re := by
   have hg : ∀ x : ℝ, g x = ((g x).re : ℂ) := fun x => (Complex.ext rfl (by simp [hreal x]))
-  have e1 : (fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ m * g x * legInt_D N m x) = fun x : ℝ =>
-      (((1 - x ^ 2) ^ m * (g x).re * (legInt_D N m x).re : ℝ) : ℂ) := by
-    funext x; rw [hg x, p2y_legInt_D_real]; push_cast; simp
+  have e1 : (fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ m * g x * OrthogonalPolynomials.LegendreAddition.jet N m x) = fun x : ℝ =>
+      (((1 - x ^ 2) ^ m * (g x).re * (OrthogonalPolynomials.LegendreAddition.jet N m x).re : ℝ) : ℂ) := by
+    funext x; rw [hg x, jet_ofReal_eq_re]; push_cast; simp
   rw [e1, intervalIntegral.integral_ofReal, ofReal_re, ← intervalIntegral.integral_const_mul]
-  apply p2y_integral_congr_Ioo
+  apply intervalIntegral_neg_one_one_congr_Ioo
   intro x hx
-  rw [legInt_ferrersP_nat_nat N m hx, p2y_legInt_D_real N m x]
+  rw [legInt_ferrersP_nat_nat N m hx, jet_ofReal_eq_re N m x]
   have h0 : (0:ℝ) ≤ 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hr : ((1-x^2)^((m:ℝ)/2)) * ((1-x^2)^((m:ℝ)/2)) = (1-x^2)^m := by
     rw [← sq, ← Real.rpow_natCast ((1-x^2)^((m:ℝ)/2)) 2, ← Real.rpow_mul h0,
       ← Real.rpow_natCast (1-x^2) m]
     congr 1; push_cast; ring
   have hre : ((-1 : ℂ) ^ m * (((1 - x ^ 2) ^ ((m : ℝ) / 2) : ℝ) : ℂ) *
-      (((legInt_D N m x).re : ℝ) : ℂ)).re =
-      (-1) ^ m * (1 - x ^ 2) ^ ((m : ℝ) / 2) * (legInt_D N m x).re := by
+      (((OrthogonalPolynomials.LegendreAddition.jet N m x).re : ℝ) : ℂ)).re =
+      (-1) ^ m * (1 - x ^ 2) ^ ((m : ℝ) / 2) * (OrthogonalPolynomials.LegendreAddition.jet N m x).re := by
     rw [show ((-1 : ℂ) ^ m * (((1 - x ^ 2) ^ ((m : ℝ) / 2) : ℝ) : ℂ) *
-      (((legInt_D N m x).re : ℝ) : ℂ)) = (((-1) ^ m * (1 - x ^ 2) ^ ((m : ℝ) / 2) *
-        (legInt_D N m x).re : ℝ) : ℂ) by push_cast; ring, ofReal_re]
+      (((OrthogonalPolynomials.LegendreAddition.jet N m x).re : ℝ) : ℂ)) = (((-1) ^ m * (1 - x ^ 2) ^ ((m : ℝ) / 2) *
+        (OrthogonalPolynomials.LegendreAddition.jet N m x).re : ℝ) : ℂ) by push_cast; ring, ofReal_re]
   rw [hre]
-  linear_combination (-1) ^ m * (g x).re * (legInt_D N m x).re * hr
+  linear_combination (-1) ^ m * (g x).re * (OrthogonalPolynomials.LegendreAddition.jet N m x).re * hr
 
 /-- `(1-x²)𝖯^m_ν(x)` in terms of `𝖯^m_{ν-2}`, `𝖯^m_ν`, `𝖯^m_{ν+2}` (from DLMF 14.10.3), multiplied
 by `(2ν-1)(2ν+1)(2ν+3)`. -/
-lemma p2y_ferrers_one_sub_sq (ν : ℝ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+private lemma one_sub_sq_mul_re_ferrersP (ν : ℝ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     (2 * ν - 1) * (2 * ν + 1) * (2 * ν + 3) * (1 - x ^ 2) * (ferrersP ν m x).re =
       ((2 * ν - 1) * (2 * ν + 1) * (2 * ν + 3) - ((2 * ν - 1) * (ν - m + 1) * (ν + m + 1) +
         (2 * ν + 3) * (ν + m) * (ν - m))) * (ferrersP ν m x).re -
@@ -168,31 +176,31 @@ lemma p2y_ferrers_one_sub_sq (ν : ℝ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 
   linear_combination h
 
 /-- Pointwise form of the product `(1-x²)^{m/2} G 𝖯^m_N` on `(-1, 1)`. -/
-lemma p2y_ferrers_prod {g : ℂ → ℂ} (m N : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+private lemma rpow_mul_re_mul_re_ferrersP_eq_jet {g : ℂ → ℂ} (m N : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re * (ferrersP N m x).re =
-      (-1) ^ m * (1 - x ^ 2) ^ m * (g x).re * (legInt_D N m x).re := by
-  rw [legInt_ferrersP_nat_nat N m hx, p2y_legInt_D_real N m x]
+      (-1) ^ m * (1 - x ^ 2) ^ m * (g x).re * (OrthogonalPolynomials.LegendreAddition.jet N m x).re := by
+  rw [legInt_ferrersP_nat_nat N m hx, jet_ofReal_eq_re N m x]
   have h0 : (0:ℝ) ≤ 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hr : ((1-x^2)^((m:ℝ)/2)) * ((1-x^2)^((m:ℝ)/2)) = (1-x^2)^m := by
     rw [← sq, ← Real.rpow_natCast ((1-x^2)^((m:ℝ)/2)) 2, ← Real.rpow_mul h0,
       ← Real.rpow_natCast (1-x^2) m]
     congr 1; push_cast; ring
   have hre : ((-1 : ℂ) ^ m * (((1 - x ^ 2) ^ ((m : ℝ) / 2) : ℝ) : ℂ) *
-      (((legInt_D N m x).re : ℝ) : ℂ)).re =
-      (-1) ^ m * (1 - x ^ 2) ^ ((m : ℝ) / 2) * (legInt_D N m x).re := by
+      (((OrthogonalPolynomials.LegendreAddition.jet N m x).re : ℝ) : ℂ)).re =
+      (-1) ^ m * (1 - x ^ 2) ^ ((m : ℝ) / 2) * (OrthogonalPolynomials.LegendreAddition.jet N m x).re := by
     rw [show ((-1 : ℂ) ^ m * (((1 - x ^ 2) ^ ((m : ℝ) / 2) : ℝ) : ℂ) *
-      (((legInt_D N m x).re : ℝ) : ℂ)) = (((-1) ^ m * (1 - x ^ 2) ^ ((m : ℝ) / 2) *
-        (legInt_D N m x).re : ℝ) : ℂ) by push_cast; ring, ofReal_re]
+      (((OrthogonalPolynomials.LegendreAddition.jet N m x).re : ℝ) : ℂ)) = (((-1) ^ m * (1 - x ^ 2) ^ ((m : ℝ) / 2) *
+        (OrthogonalPolynomials.LegendreAddition.jet N m x).re : ℝ) : ℂ) by push_cast; ring, ofReal_re]
   rw [hre]
-  linear_combination (-1) ^ m * (g x).re * (legInt_D N m x).re * hr
+  linear_combination (-1) ^ m * (g x).re * (OrthogonalPolynomials.LegendreAddition.jet N m x).re * hr
 
 /-- Integrability of `(1-x²)^{m/2} G 𝖯^m_μ` when `𝖯^m_μ` agrees with an integer-degree one. -/
-lemma p2y_ferrers_intInt {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) {μ : ℂ} (N : ℕ)
+private lemma intervalIntegrable_rpow_mul_re_mul_re_ferrersP {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) {μ : ℂ} (N : ℕ)
     (hμ : ∀ x ∈ Ioo (-1 : ℝ) 1, ferrersP μ m x = ferrersP N m x) :
     IntervalIntegrable (fun x : ℝ => (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re *
       (ferrersP μ m x).re) MeasureTheory.volume (-1) 1 := by
   have hc : Continuous fun x : ℝ => (-1 : ℝ) ^ m * (1 - x ^ 2) ^ m * (g x).re *
-      (legInt_D N m x).re :=
+      (OrthogonalPolynomials.LegendreAddition.jet N m x).re :=
     ((by fun_prop : Continuous fun x : ℝ => (-1 : ℝ) ^ m * (1 - x ^ 2) ^ m).mul
       (Complex.continuous_re.comp (hg.comp continuous_ofReal))).mul
       (Complex.continuous_re.comp (legInt_cont_D N m))
@@ -200,10 +208,10 @@ lemma p2y_ferrers_intInt {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) {μ : �
   rw [uIoo_of_le (by norm_num)]
   intro x hx
   simp only
-  rw [hμ x hx, p2y_ferrers_prod m N hx]
+  rw [hμ x hx, rpow_mul_re_mul_re_ferrersP_eq_jet m N hx]
 
 /-- `𝖯^μ_{-N-1} = 𝖯^μ_N` (degree reflection, from the symmetry of `₂F₁`). -/
-lemma p2y_ferrersP_neg_sub_one (N : ℕ) (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+private lemma ferrersP_neg_natCast_sub_one (N : ℕ) (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     ferrersP (-(N : ℂ) - 1) μ x = ferrersP N μ x := by
   have hs : 1 + (x : ℂ) ∈ slitPlane := Or.inl (by simp; linarith [hx.1])
   unfold ferrersP
@@ -211,7 +219,7 @@ lemma p2y_ferrersP_neg_sub_one (N : ℕ) (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-
     DLMF.Hypergeometric.regularizedGaussHG_symm _ _ _ (mem_cutPlane_of_one_add hs)]
 
 /-- The core identity behind 30.8.4: self-adjointness and the recurrence of `(1-x²)𝖯^m_ν`. -/
-lemma p2y_core {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (N : ℕ) :
+private lemma spheroidalPs_ferrersP_integral_recurrence {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (N : ℕ) :
     ((N : ℝ) * (N + 1) - spheroidalEigenvalue n m γ2) *
         ((2 * (N : ℝ) - 1) * (2 * N + 1) * (2 * N + 3)) *
         ∫ x in (-1 : ℝ)..1, spheroidalPs n m x γ2 * (ferrersP ((N : ℝ) : ℂ) m x).re =
@@ -240,14 +248,14 @@ lemma p2y_core {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (N : ℕ) :
   -- the integrals through the polynomial factor
   have hT : ∀ M : ℕ, ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re *
       (ferrersP ((M : ℝ) : ℂ) m x).re = (-1) ^ m *
-        (∫ x : ℝ in (-1 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ m * g x * legInt_D M m x).re := by
-    intro M; rw [ofReal_natCast]; exact p2y_integral_ferrers hreal m M
+        (∫ x : ℝ in (-1 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ m * g x * OrthogonalPolynomials.LegendreAddition.jet M m x).re := by
+    intro M; rw [ofReal_natCast]; exact integral_factor_mul_ferrersP_eq_jet hreal m M
   have hT2 : ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re *
       ((1 - x ^ 2) * (ferrersP ((N : ℝ) : ℂ) m x).re) = (-1) ^ m *
-        (∫ x : ℝ in (-1 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ (m + 1) * g x * legInt_D N m x).re := by
-    have h := p2y_integral_ferrers hreal' m N
-    have e1 : (fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ m * g' x * legInt_D N m x) =
-        fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ (m + 1) * g x * legInt_D N m x := by
+        (∫ x : ℝ in (-1 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ (m + 1) * g x * OrthogonalPolynomials.LegendreAddition.jet N m x).re := by
+    have h := integral_factor_mul_ferrersP_eq_jet hreal' m N
+    have e1 : (fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ m * g' x * OrthogonalPolynomials.LegendreAddition.jet N m x) =
+        fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ (m + 1) * g x * OrthogonalPolynomials.LegendreAddition.jet N m x := by
       funext x; simp only [hg']; ring
     have e2 : (fun x : ℝ => (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g' x).re * (ferrersP N m x).re) =
         fun x : ℝ => (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re *
@@ -258,7 +266,7 @@ lemma p2y_core {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (N : ℕ) :
       ring
     rw [e1, e2] at h; exact h
   -- self-adjointness
-  have hSA := p2y_selfAdjoint hgd m N (lam : ℂ) (γ2 : ℂ) spec.factor.ode
+  have hSA := integral_factor_mul_jet_selfAdjoint hgd m N (lam : ℂ) (γ2 : ℂ) spec.factor.ode
   have hSA' := congrArg Complex.re hSA
   rw [show ((N : ℂ) * (N + 1) - (lam : ℂ)) = (((N : ℝ) * (N + 1) - lam : ℝ) : ℂ) by push_cast; ring,
     re_ofReal_mul, re_ofReal_mul] at hSA'
@@ -268,16 +276,16 @@ lemma p2y_core {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (N : ℕ) :
       ferrersP (((N : ℝ) : ℂ) - 2) m x = ferrersP M m x := by
     rcases Nat.lt_or_ge N 2 with hN | hN
     · refine ⟨1 - N, fun x hx => ?_⟩
-      rw [← p2y_ferrersP_neg_sub_one _ _ hx]
+      rw [← ferrersP_neg_natCast_sub_one _ _ hx]
       congr 1
       interval_cases N <;> simp <;> norm_num
     · refine ⟨N - 2, fun x hx => ?_⟩
       congr 1; push_cast [Nat.cast_sub hN]; ring
   obtain ⟨M, hM⟩ := hlow
-  have i0 := p2y_ferrers_intInt hcg m (μ := ((N : ℝ) : ℂ)) N (fun x _ => by rw [ofReal_natCast])
-  have i2 := p2y_ferrers_intInt hcg m (μ := ((N : ℝ) : ℂ) + 2) (N + 2)
+  have i0 := intervalIntegrable_rpow_mul_re_mul_re_ferrersP hcg m (μ := ((N : ℝ) : ℂ)) N (fun x _ => by rw [ofReal_natCast])
+  have i2 := intervalIntegrable_rpow_mul_re_mul_re_ferrersP hcg m (μ := ((N : ℝ) : ℂ) + 2) (N + 2)
     (fun x _ => by push_cast; ring_nf)
-  have im := p2y_ferrers_intInt hcg m M hM
+  have im := intervalIntegrable_rpow_mul_re_mul_re_ferrersP hcg m M hM
   set e : ℝ := (2 * (N : ℝ) - 1) * (2 * N + 1) * (2 * N + 3)
   have hrec : e * ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re *
       ((1 - x ^ 2) * (ferrersP ((N : ℝ) : ℂ) m x).re) =
@@ -295,9 +303,9 @@ lemma p2y_core {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (N : ℕ) :
       ← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul,
       ← intervalIntegral.integral_sub (i0.const_mul _) (i2.const_mul _),
       ← intervalIntegral.integral_sub ((i0.const_mul _).sub (i2.const_mul _)) (im.const_mul _)]
-    apply p2y_integral_congr_Ioo
+    apply intervalIntegral_neg_one_one_congr_Ioo
     intro x hx
-    have h := p2y_ferrers_one_sub_sq (N : ℝ) m hx
+    have h := one_sub_sq_mul_re_ferrersP (N : ℝ) m hx
     linear_combination (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re * h
   rw [hT N] at hrec ⊢
   rw [hT2] at hrec
@@ -305,13 +313,13 @@ lemma p2y_core {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (N : ℕ) :
   linear_combination (-1) ^ m * e * hSA' + γ2 * hrec
 
 /-- `(n+2)! = (n+2)(n+1) n!` in `ℝ`. -/
-lemma p2y_factorial_two (a : ℕ) :
+private lemma factorial_add_two_cast (a : ℕ) :
     (((a + 2).factorial : ℕ) : ℝ) = ((a : ℝ) + 2) * ((a : ℝ) + 1) * (a.factorial : ℝ) := by
   rw [show a + 2 = (a + 1) + 1 from rfl, Nat.factorial_succ, Nat.factorial_succ]; push_cast; ring
 
 /-- The lowest admissible degree: `(N+m)(N+m-1) 𝖯^m_{N-2} = 0` on `(-1, 1)` when
 `m ≤ N < m + 2`. -/
-lemma p2y_low_vanish {m N : ℕ} (hmN : m ≤ N) (h : N < m + 2) {x : ℝ}
+private lemma mul_re_ferrersP_sub_two_eq_zero {m N : ℕ} (hmN : m ≤ N) (h : N < m + 2) {x : ℝ}
     (hx : x ∈ Ioo (-1 : ℝ) 1) :
     ((N : ℝ) + m) * ((N : ℝ) + m - 1) * (ferrersP (((N : ℝ) : ℂ) - 2) m x).re = 0 := by
   rcases Nat.lt_or_ge N 2 with hN | hN
@@ -320,7 +328,7 @@ lemma p2y_low_vanish {m N : ℕ} (hmN : m ≤ N) (h : N < m + 2) {x : ℝ}
       subst this; norm_num
     · rcases (by omega : m = 0 ∨ m = 1) with rfl | rfl
       · norm_num
-      · have h0 := p2y_ferrersP_neg_sub_one 0 (1 : ℕ) hx
+      · have h0 := ferrersP_neg_natCast_sub_one 0 (1 : ℕ) hx
         rw [ferrersP_order_gt_degree 0 1 (by norm_num) hx] at h0
         rw [show (((1 : ℕ) : ℝ) : ℂ) - 2 = -((0 : ℕ) : ℂ) - 1 by push_cast; ring, h0]
         simp
@@ -329,7 +337,7 @@ lemma p2y_low_vanish {m N : ℕ} (hmN : m ≤ N) (h : N < m + 2) {x : ℝ}
     simp
 
 /-- The algebra of 30.8.4 at the lowest index `k = -R`. -/
-lemma p2y_alg_low (n k m γ2 lam s Fa Fb T0 Tp Tm : ℝ) (hbf : Fb ≠ 0)
+private lemma spheroidalCoeff_recurrence_algebra_low (n k m γ2 lam s Fa Fb T0 Tp Tm : ℝ) (hbf : Fb ≠ 0)
     (hd1 : 2 * n + 4 * k - 1 ≠ 0) (hdm3 : 2 * n + 4 * k - 3 ≠ 0) (hd3 : 2 * n + 4 * k + 3 ≠ 0)
     (hd5 : 2 * n + 4 * k + 5 ≠ 0) (hd1' : 2 * n + 4 * k + 1 ≠ 0)
     (hb1 : n + m + 2 * k + 1 ≠ 0) (hb2 : n + m + 2 * k + 2 ≠ 0)
@@ -370,7 +378,7 @@ lemma p2y_alg_low (n k m γ2 lam s Fa Fb T0 Tp Tm : ℝ) (hbf : Fb ≠ 0)
   ring
 
 /-- The algebra of 30.8.4 for `k > -R`. -/
-lemma p2y_alg_high (n k m γ2 lam s Fa Fb T0 Tp Tm : ℝ) (hbf : Fb ≠ 0)
+private lemma spheroidalCoeff_recurrence_algebra_high (n k m γ2 lam s Fa Fb T0 Tp Tm : ℝ) (hbf : Fb ≠ 0)
     (hd1 : 2 * n + 4 * k - 1 ≠ 0) (hdm3 : 2 * n + 4 * k - 3 ≠ 0) (hd3 : 2 * n + 4 * k + 3 ≠ 0)
     (hd5 : 2 * n + 4 * k + 5 ≠ 0) (hd1' : 2 * n + 4 * k + 1 ≠ 0) (hB : 0 ≤ n + m + 2 * k - 2)
     (core : ((n + 2 * k) * (n + 2 * k + 1) - lam) *
@@ -431,7 +439,7 @@ theorem spheroidalCoeff_recurrence_of_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
   have har : (a : ℝ) = n - m + 2 * k := by exact_mod_cast ha
   have hbr : (b : ℝ) = n + m + 2 * k := by exact_mod_cast hb
   have hNc : ((N : ℝ) : ℂ) = n + 2 * k := by rw [ofReal_natCast]; exact_mod_cast hN
-  have core := p2y_core hmn γ2 N
+  have core := spheroidalPs_ferrersP_integral_recurrence hmn γ2 N
   rw [spheroidalCoeff_of_le γ2 hk, spheroidalCoeff_of_le γ2 (by omega : _ ≤ k + 1)]
   rw [show ((n : ℤ) - m + 2 * (k + 1)).toNat = a + 2 by omega,
     show ((n : ℤ) + m + 2 * (k + 1)).toNat = b + 2 by omega,
@@ -443,10 +451,10 @@ theorem spheroidalCoeff_recurrence_of_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
       (∫ x in (-1 : ℝ)..1, spheroidalPs n m x γ2 * (ferrersP (((N : ℝ) : ℂ) - 2) m x).re) = 0 := by
     intro hk'
     rw [← intervalIntegral.integral_const_mul]
-    rw [p2y_integral_congr_Ioo (f₂ := fun _ => (0 : ℝ)) ?_]
+    rw [intervalIntegral_neg_one_one_congr_Ioo (f₂ := fun _ => (0 : ℝ)) ?_]
     · simp
     intro x hx
-    have h := p2y_low_vanish (m := m) (N := N) (by exact_mod_cast hmN) (by omega) hx
+    have h := mul_re_ferrersP_sub_two_eq_zero (m := m) (N := N) (by exact_mod_cast hmN) (by omega) hx
     linear_combination spheroidalPs n m x γ2 * h
   have hd1 : (2 * (n : ℝ) + 4 * k - 1) ≠ 0 := by
     have : (2 * (N : ℤ) - 1) ≠ 0 := by omega
@@ -476,13 +484,13 @@ theorem spheroidalCoeff_recurrence_of_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
     set Tm := ∫ x in (-1 : ℝ)..1, spheroidalPs n m x γ2 * (ferrersP (((N : ℝ) : ℂ) - 2) m x).re
     set lam := spheroidalEigenvalue n m γ2
     clear_value T0 Tp Tm lam
-    rw [p2y_factorial_two a, p2y_factorial_two b, zpow_add_one₀ (by norm_num : (-1 : ℝ) ≠ 0)]
+    rw [factorial_add_two_cast a, factorial_add_two_cast b, zpow_add_one₀ (by norm_num : (-1 : ℝ) ≠ 0)]
     have hbf : (b.factorial : ℝ) ≠ 0 := by positivity
     rw [hNr] at core hTm'
     unfold spheroidalRecA spheroidalRecB spheroidalRecC
     push_cast
     rw [har, hbr]
-    exact p2y_alg_low _ _ _ _ _ _ _ _ _ _ _ hbf hd1 hdm3 hd3 hd5 hd1' hb1 hb2 core hTm'
+    exact spheroidalCoeff_recurrence_algebra_low _ _ _ _ _ _ _ _ _ _ _ hbf hd1 hdm3 hd3 hd5 hd1' hb1 hb2 core hTm'
   · -- `k > -R`
     simp only [show -(((n - m) / 2 : ℕ) : ℤ) ≤ k - 1 by omega, ↓reduceIte]
     rw [spheroidalCoeff_of_le γ2 (by omega : _ ≤ k - 1)]
@@ -499,14 +507,14 @@ theorem spheroidalCoeff_recurrence_of_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
     have har0 : (a₀ : ℝ) = n - m + 2 * k - 2 := by push_cast at har; linarith
     have hbr0 : (b₀ : ℝ) = n + m + 2 * k - 2 := by push_cast at hbr; linarith
     have hbf : (b₀.factorial : ℝ) ≠ 0 := by positivity
-    rw [p2y_factorial_two (a₀ + 2), p2y_factorial_two (b₀ + 2), p2y_factorial_two a₀,
-      p2y_factorial_two b₀, zpow_add_one₀ (by norm_num : (-1 : ℝ) ≠ 0),
+    rw [factorial_add_two_cast (a₀ + 2), factorial_add_two_cast (b₀ + 2), factorial_add_two_cast a₀,
+      factorial_add_two_cast b₀, zpow_add_one₀ (by norm_num : (-1 : ℝ) ≠ 0),
       zpow_sub_one₀ (by norm_num : (-1 : ℝ) ≠ 0)]
     rw [hNr] at core
     unfold spheroidalRecA spheroidalRecB spheroidalRecC
     push_cast
     rw [har0, hbr0]
-    exact p2y_alg_high _ _ _ _ _ _ _ _ _ _ _ hbf hd1 hdm3 hd3 hd5 hd1'
+    exact spheroidalCoeff_recurrence_algebra_high _ _ _ _ _ _ _ _ _ _ _ hbf hd1 hdm3 hd3 hd5 hd1'
       (by rw [← hbr0]; positivity) core
 
 /-- **The coefficients `a^{-m}_{n,k}`** (DLMF 30.8.6): for `k ≥ -R`,
@@ -526,25 +534,25 @@ theorem spheroidalCoeffNeg_of_le {n m : ℕ} (γ2 : ℝ) {k : ℤ}
 With `ν = n - 2R + 2j`, `a^m_{n,j-R} = ±(2ν+1)(ν-m)!/(2(ν+m)!) b_ν`, `b_ν = ∫ (1-x²)^m g P_ν^{(m)}`.
 A crude bound gives `|a| = O(j)`; the recurrence 30.8.4 with `B_k - λ → ∞` improves it to
 geometric decay of any rate, which dominates the exponential growth of `P_ν^{(m)}` on `[-1, 1]`.
-Completeness of the `P_ν^{(m)}` (`p2y_hasSum_expansion`) then gives 30.8.1 and Parseval 30.8.5. -/
+Completeness of the `P_ν^{(m)}` (`hasSum_jet_expansion`) then gives 30.8.1 and Parseval 30.8.5. -/
 
 /-- The real Ferrers function of integer degree through `P_N^{(m)}`. -/
-lemma p2y_ferrers_re (N m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
-    (ferrersP N m x).re = (-1) ^ m * (1 - x ^ 2) ^ ((m : ℝ) / 2) * (legInt_D N m x).re := by
-  rw [legInt_ferrersP_nat_nat N m hx, p2y_legInt_D_real N m x,
+private lemma re_ferrersP_eq_jet (N m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+    (ferrersP N m x).re = (-1) ^ m * (1 - x ^ 2) ^ ((m : ℝ) / 2) * (OrthogonalPolynomials.LegendreAddition.jet N m x).re := by
+  rw [legInt_ferrersP_nat_nat N m hx, jet_ofReal_eq_re N m x,
     show ((-1 : ℂ) ^ m) = (((-1 : ℝ) ^ m : ℝ) : ℂ) by push_cast; rfl, ← ofReal_mul, ← ofReal_mul,
     ofReal_re, ofReal_re]
 
 /-- The coefficients 30.8.2 through the entire factor: for `k = j - R`, `ν = n - 2R + 2j`,
 `a^m_{n,k} = (-1)^{k+m} (2ν+1)(ν-m)!/(2(ν+m)!) ∫ (1-x²)^m g P_ν^{(m)}`. -/
-lemma p2y_coeff_eq {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (j : ℕ) :
+lemma spheroidalCoeff_eq_integral_factor_mul_jet {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (j : ℕ) :
     spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) =
       (-1 : ℝ) ^ ((j : ℤ) - ((n - m) / 2 : ℕ)) * (-1) ^ m *
         ((2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
           ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
             (2 * ((n - 2 * ((n - m) / 2) + 2 * j + m).factorial : ℝ)) *
         ∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
-          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m y).re) := by
+          (OrthogonalPolynomials.LegendreAddition.jet (n - 2 * ((n - m) / 2) + 2 * j) m y).re) := by
   rw [spheroidalCoeff_of_le γ2 (by omega)]
   obtain ⟨ν, hν⟩ : ∃ ν, ν = n - 2 * ((n - m) / 2) + 2 * j := ⟨_, rfl⟩
   rw [← hν]
@@ -558,33 +566,33 @@ lemma p2y_coeff_eq {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (j : ℕ) :
   rw [hc, h1, h2, hr]
   have hI : ∫ x in (-1 : ℝ)..1, spheroidalPs n m x γ2 * (ferrersP ((ν : ℕ) : ℂ) m x).re =
       (-1) ^ m * ∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
-        (legInt_D ν m y).re := by
+        (OrthogonalPolynomials.LegendreAddition.jet ν m y).re := by
     rw [← intervalIntegral.integral_const_mul]
-    apply p2y_integral_congr_Ioo
+    apply intervalIntegral_neg_one_one_congr_Ioo
     intro x hx
     simp only [spheroidalPs]
-    rw [p2y_ferrers_prod m ν hx]
+    rw [rpow_mul_re_mul_re_ferrersP_eq_jet m ν hx]
     ring
   rw [hI]
   ring
 
 /-- The parity of the entire factor: `g(-x) = (-1)^{n-m} g(x)`. -/
-lemma p2y_factor_neg {n m : ℕ} (hmn : m ≤ n) (γ2 x : ℝ) :
+private lemma re_spheroidalPsFactor_neg {n m : ℕ} (hmn : m ≤ n) (γ2 x : ℝ) :
     (spheroidalPsFactor n m γ2 ((-x : ℝ) : ℂ)).re =
       (-1) ^ (n - m) * (spheroidalPsFactor n m γ2 x).re := by
   have hg := spheroidalPsFactor_spec hmn γ2
   have hu := (existsUnique_isSpheroidalPsFactor hmn γ2).unique
-    (p1s_isSpheroidalPsFactor_reflect hg) hg
+    (isSpheroidalPsFactor_reflect hg) hg
   have hx := congrFun hu (-(x : ℂ))
   simp only [neg_neg] at hx
   rw [ofReal_neg, ← hx, show ((-1 : ℂ) ^ (n - m)) = (((-1 : ℝ) ^ (n - m) : ℝ) : ℂ) by
     push_cast; rfl, re_ofReal_mul]
 
 /-- The coefficients of the wrong parity vanish. -/
-lemma p2y_coeff_parity {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (μ : ℕ) (hμ : m ≤ μ)
+private lemma integral_factor_mul_jet_eq_zero_of_parity {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (μ : ℕ) (hμ : m ≤ μ)
     (hex : ∀ j : ℕ, μ ≠ n - 2 * ((n - m) / 2) + 2 * j) :
     ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * (spheroidalPsFactor n m γ2 x).re *
-      (legInt_D μ m x).re = 0 := by
+      (OrthogonalPolynomials.LegendreAddition.jet μ m x).re = 0 := by
   have hodd : (n + μ) % 2 = 1 := by
     by_contra h
     exact hex ((μ - (n - 2 * ((n - m) / 2))) / 2) (by omega)
@@ -592,31 +600,31 @@ lemma p2y_coeff_parity {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (μ : ℕ) (hμ :
     rw [← pow_add, show n - m + (μ + m) = n + μ by omega]
     exact Odd.neg_one_pow (Nat.odd_iff.mpr hodd)
   set f : ℝ → ℝ := fun x => (1 - x ^ 2) ^ m * (spheroidalPsFactor n m γ2 x).re *
-    (legInt_D μ m x).re with hf
+    (OrthogonalPolynomials.LegendreAddition.jet μ m x).re with hf
   have hneg : ∀ x, f (-x) = -f x := by
     intro x
     simp only [hf]
-    rw [p2y_factor_neg hmn, p2y_D_neg, neg_sq]
+    rw [re_spheroidalPsFactor_neg hmn, re_jet_neg, neg_sq]
     linear_combination ((1 - x ^ 2) ^ m * (spheroidalPsFactor n m γ2 x).re *
-      (legInt_D μ m x).re) * hs
+      (OrthogonalPolynomials.LegendreAddition.jet μ m x).re) * hs
   have h := intervalIntegral.integral_comp_neg (a := (-1 : ℝ)) (b := 1) f
   simp only [neg_neg, hneg, intervalIntegral.integral_neg] at h
   change ∫ x in (-1 : ℝ)..1, f x = 0
   linarith
 
 /-- A crude bound for the coefficient `∫ (1-x²)^m G P_ν^{(m)}` of a bounded continuous `G`. -/
-lemma p2y_b_bound {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)) {MG : ℝ}
+private lemma abs_integral_mul_jet_le {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)) {MG : ℝ}
     (hM : ∀ x ∈ Icc (-1 : ℝ) 1, |G x| ≤ MG) {m ν : ℕ} (hν : m ≤ ν) :
-    |∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * G x * (legInt_D ν m x).re| ≤
+    |∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * G x * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re| ≤
       MG * (2 + 2 * ((ν + m).factorial : ℝ) / ((2 * ν + 1) * (ν - m).factorial)) := by
-  have hD : Continuous fun x : ℝ => (legInt_D ν m x).re :=
+  have hD : Continuous fun x : ℝ => (OrthogonalPolynomials.LegendreAddition.jet ν m x).re :=
     Complex.continuous_re.comp (legInt_cont_D ν m)
   have hw : Continuous fun x : ℝ => (1 - x ^ 2) ^ m := by fun_prop
   have hMG : 0 ≤ MG := (abs_nonneg _).trans (hM 0 (by norm_num))
-  calc _ ≤ ∫ x in (-1 : ℝ)..1, |(1 - x ^ 2) ^ m * G x * (legInt_D ν m x).re| :=
+  calc _ ≤ ∫ x in (-1 : ℝ)..1, |(1 - x ^ 2) ^ m * G x * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re| :=
         intervalIntegral.abs_integral_le_integral_abs (by norm_num)
-    _ ≤ ∫ x in (-1 : ℝ)..1, MG * (1 + (1 - x ^ 2) ^ m * (legInt_D ν m x).re *
-          (legInt_D ν m x).re) := by
+    _ ≤ ∫ x in (-1 : ℝ)..1, MG * (1 + (1 - x ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re *
+          (OrthogonalPolynomials.LegendreAddition.jet ν m x).re) := by
         refine intervalIntegral.integral_mono_on (by norm_num) ?_ ?_ fun x hx => ?_
         · exact ((hw.continuousOn.mul hG).mul hD.continuousOn).abs.intervalIntegrable_of_Icc
             (by norm_num)
@@ -625,7 +633,7 @@ lemma p2y_b_bound {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)) {MG : ℝ
         · have h1 : 0 ≤ 1 - x ^ 2 := by nlinarith [hx.1, hx.2]
           have hw0 : 0 ≤ (1 - x ^ 2) ^ m := pow_nonneg h1 m
           have hw1 : (1 - x ^ 2) ^ m ≤ 1 := pow_le_one₀ h1 (by nlinarith)
-          set d := (legInt_D ν m x).re
+          set d := (OrthogonalPolynomials.LegendreAddition.jet ν m x).re
           have hd : |d| ≤ 1 + d * d := by
             rcases abs_cases d with ⟨h, _⟩ | ⟨h, _⟩ <;> rw [h] <;> nlinarith [sq_nonneg (d - 1),
               sq_nonneg (d + 1)]
@@ -637,15 +645,15 @@ lemma p2y_b_bound {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)) {MG : ℝ
             _ ≤ MG * (1 + (1 - x ^ 2) ^ m * d * d) :=
               mul_le_mul hG' this (by positivity) hMG
     _ = MG * (2 + 2 * ((ν + m).factorial : ℝ) / ((2 * ν + 1) * (ν - m).factorial)) := by
-        have hi : IntervalIntegrable (fun x : ℝ => (1 - x ^ 2) ^ m * (legInt_D ν m x).re *
-            (legInt_D ν m x).re) volume (-1) 1 := ((hw.mul hD).mul hD).intervalIntegrable _ _
+        have hi : IntervalIntegrable (fun x : ℝ => (1 - x ^ 2) ^ m * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re *
+            (OrthogonalPolynomials.LegendreAddition.jet ν m x).re) volume (-1) 1 := ((hw.mul hD).mul hD).intervalIntegrable _ _
         rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_add
-          intervalIntegrable_const hi, p2y_D_orth hν ν]
+          intervalIntegrable_const hi, integral_weight_mul_jet_mul_jet hν ν]
         simp only [↓reduceIte, intervalIntegral.integral_const, smul_eq_mul]
         ring
 
 /-- **A linear a-priori bound** for the coefficients: `|a^m_{n,j-R}| ≤ M (j+1)`. -/
-lemma p2y_coeff_linear {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+lemma exists_abs_spheroidalCoeff_le_linear {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ j : ℕ,
       |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| ≤ M * (j + 1) := by
   have hg := (spheroidalPsFactor_spec hmn γ2).factor.differentiable
@@ -657,14 +665,14 @@ lemma p2y_coeff_linear {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     fun x hx => hMG _ ⟨x, hx, rfl⟩
   have hMG0 : 0 ≤ MG := (abs_nonneg _).trans (hM 0 (by norm_num))
   refine ⟨MG * (2 * n + 4), by positivity, fun j => ?_⟩
-  rw [p2y_coeff_eq hmn γ2 j]
+  rw [spheroidalCoeff_eq_integral_factor_mul_jet hmn γ2 j]
   obtain ⟨ν, hν⟩ : ∃ ν, ν = n - 2 * ((n - m) / 2) + 2 * j := ⟨_, rfl⟩
   rw [← hν]
   have hνm : m ≤ ν := by omega
   have hνn : (ν : ℝ) ≤ n + 2 * j := by
     have : ν ≤ n + 2 * j := by omega
     exact_mod_cast this
-  have hb := p2y_b_bound hGc.continuousOn hM hνm
+  have hb := abs_integral_mul_jet_le hGc.continuousOn hM hνm
   have hs : |(-1 : ℝ) ^ ((j : ℤ) - ((n - m) / 2 : ℕ)) * (-1) ^ m| = 1 := by
     rw [abs_mul, abs_zpow, abs_pow, abs_neg, abs_one, one_zpow, one_pow, mul_one]
   have hf1 : (0 : ℝ) < ((ν - m).factorial : ℝ) := by positivity
@@ -674,7 +682,7 @@ lemma p2y_coeff_linear {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
   have h2 : (0 : ℝ) < 2 * ν + 1 := by positivity
   rw [abs_mul, hs, one_mul, abs_mul, abs_of_pos (by positivity)]
   set B := |∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
-    (legInt_D ν m y).re|
+    (OrthogonalPolynomials.LegendreAddition.jet ν m y).re|
   have hB0 : 0 ≤ B := abs_nonneg _
   calc (2 * (ν : ℝ) + 1) * ((ν - m).factorial : ℝ) / (2 * ((ν + m).factorial : ℝ)) * B
       ≤ (2 * (ν : ℝ) + 1) * ((ν - m).factorial : ℝ) / (2 * ((ν + m).factorial : ℝ)) *
@@ -700,7 +708,7 @@ lemma p2y_coeff_linear {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
 
 /-- Bounds for the coefficients of 30.8.4 for `k ≥ 1`: `|A_k|, |C_k| ≤ |γ²|` and
 `B_k ≥ (n+2k)(n+2k+1) - 2|γ²|(1+m²)`. -/
-lemma p2y_rec_bounds {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
+lemma spheroidalRec_bounds {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
     |spheroidalRecA n m γ2 k| ≤ |γ2| ∧ |spheroidalRecC n m γ2 k| ≤ |γ2| ∧
       ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - 2 * |γ2| * (1 + m ^ 2) ≤
         spheroidalRecB n m γ2 k := by
@@ -735,7 +743,7 @@ lemma p2y_rec_bounds {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 1 �
     linarith
 
 /-- Eventually `|a_{j+1}| ≤ ε (|a_j| + |a_{j+2}|)` (from 30.8.4, since `B_k - λ → ∞`). -/
-lemma p2y_coeff_eps {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {ε : ℝ} (hε : 0 < ε) :
+lemma eventually_abs_spheroidalCoeff_succ_le_eps {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {ε : ℝ} (hε : 0 < ε) :
     ∃ J : ℕ, ∀ j : ℕ, J ≤ j →
       |spheroidalCoeff n m γ2 (((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))| ≤
         ε * (|spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| +
@@ -754,7 +762,7 @@ lemma p2y_coeff_eps {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {ε : ℝ} (hε : 0 
   simp only [show -(((n - m) / 2 : ℕ) : ℤ) ≤ k - 1 by omega, ↓reduceIte] at hrec
   rw [show k - 1 = (j : ℤ) - ((n - m) / 2 : ℕ) by rw [hk]; push_cast; ring,
     show k + 1 = ((j + 2 : ℕ) : ℤ) - ((n - m) / 2 : ℕ) by rw [hk]; push_cast; ring] at hrec
-  obtain ⟨hA, hC, hB⟩ := p2y_rec_bounds hmn γ2 hk1
+  obtain ⟨hA, hC, hB⟩ := spheroidalRec_bounds hmn γ2 hk1
   set a0 := spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))
   set a1 := spheroidalCoeff n m γ2 k
   set a2 := spheroidalCoeff n m γ2 (((j + 2 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))
@@ -793,11 +801,11 @@ lemma p2y_coeff_eps {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {ε : ℝ} (hε : 0 
 
 /-- **Geometric decay** of the coefficients: for every `q > 0`, eventually
 `|a_j| ≤ M (j+1) q^{j-J}`. -/
-lemma p2y_coeff_decay {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {q : ℝ} (hq : 0 < q) :
+private lemma exists_abs_spheroidalCoeff_le_geometric {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {q : ℝ} (hq : 0 < q) :
     ∃ J : ℕ, ∃ M : ℝ, 0 ≤ M ∧ ∀ j : ℕ, J ≤ j →
       |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| ≤ M * (j + 1) * q ^ (j - J) := by
-  obtain ⟨M, hM0, hM⟩ := p2y_coeff_linear hmn γ2
-  obtain ⟨J, hJ⟩ := p2y_coeff_eps hmn γ2 (by positivity : (0 : ℝ) < q / 2)
+  obtain ⟨M, hM0, hM⟩ := exists_abs_spheroidalCoeff_le_linear hmn γ2
+  obtain ⟨J, hJ⟩ := eventually_abs_spheroidalCoeff_succ_le_eps hmn γ2 (by positivity : (0 : ℝ) < q / 2)
   refine ⟨J, M, hM0, ?_⟩
   have key : ∀ i : ℕ, ∀ j : ℕ, J + i ≤ j →
       |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| ≤ M * (j + 1) * q ^ i := by
@@ -821,24 +829,24 @@ lemma p2y_coeff_decay {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {q : ℝ} (hq : 0 
 
 /-- A summable dominating sequence for the expansion of the entire factor on `[-1, 1]`, from the
 geometric decay of the coefficients and the exponential bound of `P_ν^{(m)}`. -/
-lemma p2y_factor_bound {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+private lemma exists_summable_spheroidalPsFactor_expansion_bound {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     ∃ u : ℕ → ℝ, Summable u ∧ ∀ j : ℕ, ∀ x ∈ Icc (-1 : ℝ) 1,
       |(2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
           ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
           (2 * ((n - 2 * ((n - m) / 2) + 2 * j + m).factorial : ℝ)) *
         (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
-          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m y).re) *
-          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m x).re| ≤ u j := by
+          (OrthogonalPolynomials.LegendreAddition.jet (n - 2 * ((n - m) / 2) + 2 * j) m y).re) *
+          (OrthogonalPolynomials.LegendreAddition.jet (n - 2 * ((n - m) / 2) + 2 * j) m x).re| ≤ u j := by
   have hg := (spheroidalPsFactor_spec hmn γ2).factor.differentiable
   have hGc : Continuous fun x : ℝ => (spheroidalPsFactor n m γ2 x).re :=
     Complex.continuous_re.comp (hg.continuous.comp continuous_ofReal)
-  obtain ⟨C, hC0, hCb⟩ := p2y_D_bound m
+  obtain ⟨C, hC0, hCb⟩ := exists_abs_jet_le m
   set L : ℝ := 2 * (m : ℝ) + 3 with hL
   have hL1 : 1 ≤ L := by rw [hL]; have := (Nat.cast_nonneg m : (0 : ℝ) ≤ m); linarith
   have hL0 : 0 < L := by linarith
   set q : ℝ := 1 / (2 * L ^ 2) with hq
   have hq0 : 0 < q := by positivity
-  obtain ⟨J, M, hM0, hdec⟩ := p2y_coeff_decay hmn γ2 hq0
+  obtain ⟨J, M, hM0, hdec⟩ := exists_abs_spheroidalCoeff_le_geometric hmn γ2 hq0
   set ν₀ := n - 2 * ((n - m) / 2) with hν₀
   have hν₀m : m ≤ ν₀ := by omega
   set a : ℕ → ℝ := fun j => spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) with ha
@@ -868,36 +876,36 @@ lemma p2y_factor_bound {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
             C * M * (j + 1) * (L ^ (2 * j + 1) * q ^ j) / q ^ J by ring, hLq]
           ring
   refine ⟨u, husum, fun j x hx => ?_⟩
-  have hcoef := p2y_coeff_eq hmn γ2 j
+  have hcoef := spheroidalCoeff_eq_integral_factor_mul_jet hmn γ2 j
   have hs : |(-1 : ℝ) ^ ((j : ℤ) - ((n - m) / 2 : ℕ)) * (-1) ^ m| = 1 := by
     rw [abs_mul, abs_zpow, abs_pow, abs_neg, abs_one, one_zpow, one_pow, mul_one]
   have haj : |a j| = |(2 * ((ν₀ + 2 * j : ℕ) : ℝ) + 1) * ((ν₀ + 2 * j - m).factorial : ℝ) /
       (2 * ((ν₀ + 2 * j + m).factorial : ℝ)) * (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m *
-        (spheroidalPsFactor n m γ2 y).re * (legInt_D (ν₀ + 2 * j) m y).re)| := by
+        (spheroidalPsFactor n m γ2 y).re * (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m y).re)| := by
     simp only [ha]
     rw [hcoef, abs_mul, hs, one_mul]
   rw [abs_mul, ← haj]
-  calc |a j| * |(legInt_D (ν₀ + 2 * j) m x).re| ≤ |a j| * (C * L ^ (ν₀ + 2 * j - m)) :=
+  calc |a j| * |(OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m x).re| ≤ |a j| * (C * L ^ (ν₀ + 2 * j - m)) :=
         mul_le_mul_of_nonneg_left (hCb _ (by omega) x hx) (abs_nonneg _)
     _ = u j := by simp only [hu]; ring
 
 /-- **The expansion of the entire factor** in the functions `P_ν^{(m)}`, `ν = n - 2R + 2j`, on
 `(-1, 1)` (the content of DLMF 30.8.1). -/
-lemma p2y_factor_expansion {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+lemma hasSum_spheroidalPsFactor_expansion {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     ∀ x ∈ Ioo (-1 : ℝ) 1, HasSum (fun j : ℕ =>
       (2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
           ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
           (2 * ((n - 2 * ((n - m) / 2) + 2 * j + m).factorial : ℝ)) *
         (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
-          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m y).re) *
-          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m x).re)
+          (OrthogonalPolynomials.LegendreAddition.jet (n - 2 * ((n - m) / 2) + 2 * j) m y).re) *
+          (OrthogonalPolynomials.LegendreAddition.jet (n - 2 * ((n - m) / 2) + 2 * j) m x).re)
       ((spheroidalPsFactor n m γ2 x).re) := by
   have hg := (spheroidalPsFactor_spec hmn γ2).factor.differentiable
   have hGc : Continuous fun x : ℝ => (spheroidalPsFactor n m γ2 x).re :=
     Complex.continuous_re.comp (hg.continuous.comp continuous_ofReal)
-  obtain ⟨u, hu, hb⟩ := p2y_factor_bound hmn γ2
-  exact p2y_hasSum_expansion hGc.continuousOn (by omega)
-    (fun μ hμ hex => p2y_coeff_parity hmn γ2 μ hμ hex) hu hb
+  obtain ⟨u, hu, hb⟩ := exists_summable_spheroidalPsFactor_expansion_bound hmn γ2
+  exact hasSum_jet_expansion hGc.continuousOn (by omega)
+    (fun μ hμ hex => integral_factor_mul_jet_eq_zero_of_parity hmn γ2 μ hμ hex) hu hb
 
 /-- **The Ferrers expansion** (DLMF 30.8.1):
 `𝖯s^m_n(x, γ²) = ∑_{k ≥ -R} (-1)^k a^m_{n,k}(γ²) 𝖯^m_{n+2k}(x)` on `(-1, 1)`. Proved from the
@@ -910,7 +918,7 @@ theorem hasSum_spheroidalPs_ferrers {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {x :
         let k : ℤ := (j : ℤ) - ((n - m) / 2 : ℕ)
         (-1 : ℝ) ^ k * spheroidalCoeff n m γ2 k * (ferrersP ((n : ℂ) + 2 * k) m x).re)
       (spheroidalPs n m x γ2) := by
-  have h := (p2y_factor_expansion hmn γ2 x hx).mul_left ((1 - x ^ 2) ^ ((m : ℝ) / 2))
+  have h := (hasSum_spheroidalPsFactor_expansion hmn γ2 x hx).mul_left ((1 - x ^ 2) ^ ((m : ℝ) / 2))
   convert h using 1
   swap
   · rfl
@@ -920,26 +928,26 @@ theorem hasSum_spheroidalPs_ferrers {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {x :
   have hc : ((n : ℂ) + 2 * ((((j : ℤ) - ((n - m) / 2 : ℕ)) : ℤ) : ℂ)) = ((ν : ℕ) : ℂ) := by
     exact_mod_cast hνi.symm
   simp only []
-  rw [p2y_coeff_eq hmn γ2 j, hc, ← hν, p2y_ferrers_re ν m hx]
+  rw [spheroidalCoeff_eq_integral_factor_mul_jet hmn γ2 j, hc, ← hν, re_ferrersP_eq_jet ν m hx]
   have h1 : ((-1 : ℝ) ^ ((j : ℤ) - ((n - m) / 2 : ℕ))) * (-1) ^ ((j : ℤ) - ((n - m) / 2 : ℕ)) =
       1 := by rw [← mul_zpow]; norm_num
   have h2 : ((-1 : ℝ) ^ m) * (-1) ^ m = 1 := by rw [← mul_pow]; norm_num
   linear_combination ((2 * (ν : ℝ) + 1) * ((ν - m).factorial : ℝ) / (2 * ((ν + m).factorial : ℝ))
     * (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
-      (legInt_D ν m y).re) * (1 - x ^ 2) ^ ((m : ℝ) / 2) * (legInt_D ν m x).re) *
+      (OrthogonalPolynomials.LegendreAddition.jet ν m y).re) * (1 - x ^ 2) ^ ((m : ℝ) / 2) * (OrthogonalPolynomials.LegendreAddition.jet ν m x).re) *
     ((-1) ^ m * (-1) ^ m * h1 + h2)
 
 /-- **Parseval's identity** for the expansion of the entire factor:
 `∑_j c_ν b_ν² = ∫ (1-x²)^m g² = 2(n+m)!/((2n+1)(n-m)!)`. -/
-lemma p2y_parseval {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+private lemma hasSum_spheroidalPsFactor_parseval {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     HasSum (fun j : ℕ =>
       (2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
           ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
           (2 * ((n - 2 * ((n - m) / 2) + 2 * j + m).factorial : ℝ)) *
         (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
-          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m y).re) *
+          (OrthogonalPolynomials.LegendreAddition.jet (n - 2 * ((n - m) / 2) + 2 * j) m y).re) *
         (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
-          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m y).re))
+          (OrthogonalPolynomials.LegendreAddition.jet (n - 2 * ((n - m) / 2) + 2 * j) m y).re))
       (2 / (2 * n + 1) * (((n + m).factorial : ℝ) / (n - m).factorial)) := by
   have spec := spheroidalPsFactor_spec hmn γ2
   have hg := spec.factor.differentiable
@@ -949,27 +957,27 @@ lemma p2y_parseval {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     (hGc.continuousOn (s := Icc (-1 : ℝ) 1))).isBounded.exists_norm_le
   have hM : ∀ x ∈ Icc (-1 : ℝ) 1, |(spheroidalPsFactor n m γ2 x).re| ≤ MG :=
     fun x hx => hMG _ ⟨x, hx, rfl⟩
-  obtain ⟨u, hu, hb⟩ := p2y_factor_bound hmn γ2
-  have hexp := p2y_factor_expansion hmn γ2
+  obtain ⟨u, hu, hb⟩ := exists_summable_spheroidalPsFactor_expansion_bound hmn γ2
+  have hexp := hasSum_spheroidalPsFactor_expansion hmn γ2
   rw [← spec.normalized]
   set ν₀ := n - 2 * ((n - m) / 2)
   set G : ℝ → ℝ := fun x => (spheroidalPsFactor n m γ2 x).re with hG
   set α : ℕ → ℝ := fun j => (2 * ((ν₀ + 2 * j : ℕ) : ℝ) + 1) * ((ν₀ + 2 * j - m).factorial : ℝ) /
       (2 * ((ν₀ + 2 * j + m).factorial : ℝ)) *
-        (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * G y * (legInt_D (ν₀ + 2 * j) m y).re) with hα
-  have hD : ∀ μ : ℕ, Continuous fun x : ℝ => (legInt_D μ m x).re := fun μ =>
+        (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * G y * (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m y).re) with hα
+  have hD : ∀ μ : ℕ, Continuous fun x : ℝ => (OrthogonalPolynomials.LegendreAddition.jet μ m x).re := fun μ =>
     Complex.continuous_re.comp (legInt_cont_D μ m)
   have hw : Continuous fun x : ℝ => (1 - x ^ 2) ^ m := by fun_prop
   have h := intervalIntegral.hasSum_integral_of_dominated_convergence (μ := volume)
     (a := (-1 : ℝ)) (b := 1) (F := fun j x => (1 - x ^ 2) ^ m * G x * (α j *
-      (legInt_D (ν₀ + 2 * j) m x).re)) (f := fun x => (1 - x ^ 2) ^ m * G x * G x)
+      (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m x).re)) (f := fun x => (1 - x ^ 2) ^ m * G x * G x)
     (fun j _ => MG * u j)
     (fun j => ((hw.mul hGc).mul (continuous_const.mul (hD _))).aestronglyMeasurable)
     (fun j => ?_) ?_ intervalIntegrable_const ?_
   · convert h using 1
     · funext j
-      rw [show (fun x : ℝ => (1 - x ^ 2) ^ m * G x * (α j * (legInt_D (ν₀ + 2 * j) m x).re)) =
-        fun x => α j * ((1 - x ^ 2) ^ m * G x * (legInt_D (ν₀ + 2 * j) m x).re) by
+      rw [show (fun x : ℝ => (1 - x ^ 2) ^ m * G x * (α j * (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m x).re)) =
+        fun x => α j * ((1 - x ^ 2) ^ m * G x * (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m x).re) by
           funext x; ring, intervalIntegral.integral_const_mul]
     · refine intervalIntegral.integral_congr fun x _ => ?_
       simp only [hG]; ring
@@ -981,7 +989,7 @@ lemma p2y_parseval {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     have hw1 : (1 - x ^ 2) ^ m ≤ 1 := pow_le_one₀ h1 (by nlinarith)
     have hbj := hb j x hx'
     rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_of_nonneg hw0]
-    calc (1 - x ^ 2) ^ m * |G x| * |α j * (legInt_D (ν₀ + 2 * j) m x).re|
+    calc (1 - x ^ 2) ^ m * |G x| * |α j * (OrthogonalPolynomials.LegendreAddition.jet (ν₀ + 2 * j) m x).re|
         ≤ 1 * MG * u j := by
           refine mul_le_mul (mul_le_mul hw1 (hM x hx') (abs_nonneg _) zero_le_one) ?_
             (abs_nonneg _) (mul_nonneg zero_le_one ((abs_nonneg _).trans (hM 0 (by norm_num))))
@@ -1006,7 +1014,7 @@ theorem hasSum_spheroidalCoeff_normalization {n m : ℕ} (hmn : m ≤ n) (γ2 : 
   have hf1 : (0 : ℝ) < ((n - m).factorial : ℝ) := by positivity
   have hf2 : (0 : ℝ) < ((n + m).factorial : ℝ) := by positivity
   have hn : (0 : ℝ) < 2 * n + 1 := by positivity
-  have h := (p2y_parseval hmn γ2).mul_left (((n - m).factorial : ℝ) / (2 * (n + m).factorial))
+  have h := (hasSum_spheroidalPsFactor_parseval hmn γ2).mul_left (((n - m).factorial : ℝ) / (2 * (n + m).factorial))
   convert h using 1
   · funext j
     obtain ⟨ν, hν⟩ : ∃ ν, ν = n - 2 * ((n - m) / 2) + 2 * j := ⟨_, rfl⟩
@@ -1018,10 +1026,10 @@ theorem hasSum_spheroidalCoeff_normalization {n m : ℕ} (hmn : m ≤ n) (γ2 : 
     have h1 : ((n : ℤ) - m + 2 * ((j : ℤ) - ((n - m) / 2 : ℕ))).toNat = ν - m := by omega
     have h2 : ((n : ℤ) + m + 2 * ((j : ℤ) - ((n - m) / 2 : ℕ))).toNat = ν + m := by omega
     simp only []
-    rw [spheroidalCoeffNeg_of_le γ2 (by omega), h1, h2, p2y_coeff_eq hmn γ2 j, ← hν]
+    rw [spheroidalCoeffNeg_of_le γ2 (by omega), h1, h2, spheroidalCoeff_eq_integral_factor_mul_jet hmn γ2 j, ← hν]
     rw [hr]
     set B := ∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
-      (legInt_D ν m y).re
+      (OrthogonalPolynomials.LegendreAddition.jet ν m y).re
     have hs : ((-1 : ℝ) ^ ((j : ℤ) - ((n - m) / 2 : ℕ)) * (-1) ^ m) ^ 2 = 1 := by
       rw [mul_pow, ← zpow_natCast, ← zpow_mul, ← pow_mul]
       rw [show (((j : ℤ) - ((n - m) / 2 : ℕ)) * ((2 : ℕ) : ℤ)) =

@@ -190,6 +190,7 @@ theorem integrableOn_cexp_neg_mul_smul_of_le {G : ℝ → V} {c : ℝ} {z : ℂ}
   simp only [neg_re, mul_re, ofReal_re, ofReal_im, mul_zero, sub_zero]
   nlinarith
 
+omit [CompleteSpace V] in
 /-- **Watson remainder bound in a sector.** If `G(t) = O(t^{s-1})` as `t → 0⁺` with `s > 0` and
 `e^{-ct} G` is integrable on `(0, ∞)`, then `∫₀^∞ e^{-zt} G(t) dt = O(|z|^{-s})` as `z → ∞` in the
 sector `δ |z| ≤ re z`. -/

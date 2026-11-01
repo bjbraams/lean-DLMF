@@ -11,10 +11,24 @@ public import Mathlib.Analysis.ODE.ExistUnique
 /-!
 # Local real solutions of Painlevé II
 
-Mathlib's Picard–Lindelöf and local Lipschitz theorems apply to the autonomous
-system `(x,u,v)' = (1,v,2u³+xu-c)`. This gives actual local real solutions and
-uniqueness of germs at every initial value, as used in Beals–Wong §15.3.
-This file does not assert complex analytic or global meromorphic continuation.
+Local existence and uniqueness of real solutions of Painlevé II, `u'' = 2u³ + xu - c`, as
+used in Beals–Wong §15.3. Mathlib's Picard–Lindelöf and local Lipschitz theorems apply to the
+autonomous system `(x,u,v)' = (1,v,2u³+xu-c)`.
+
+## Main definitions
+
+* `piiVectorField`: the autonomous three-dimensional vector field of real Painlevé II.
+
+## Main results
+
+* `contDiff_piiVectorField`: the vector field is continuously differentiable.
+* `exists_local_real_solution`: every real initial pair determines a local real solution.
+* `IsPIIOn.eventuallyEq_real`: solutions with the same initial value and derivative agree near
+  the initial point.
+
+## Implementation notes
+
+Complex analytic or global meromorphic continuation is not part of this file.
 -/
 
 @[expose] public noncomputable section

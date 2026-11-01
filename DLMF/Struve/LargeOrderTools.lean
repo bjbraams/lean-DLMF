@@ -11,37 +11,45 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 
 /-!
-# Large-order tools for the Anger–Weber coefficients
+# Large-order tools for the Anger–Weber coefficients and the Struve integrals
 
 The coefficients `A_k(λ)` of the scaled Anger–Weber expansion DLMF 11.11.8 are the Taylor
 coefficients `[u^{2k}] dt/du` of the inverse of `u = t + λ sinh t`; by Lagrange inversion
-`A_k(λ) = Res_{t=0} (t + λ sinh t)^{-(2k+1)}`. This file works with the circle integrals
+`A_k(λ) = Res_{t=0} (t + λ sinh t)^{-(2k+1)}`. The first part of this file studies the circle
+integrals `I_m(λ) = ∮_{|t|=r} g(t) (t + λ sinh t)^{-m} dt` and their recurrence. The second
+part gives uniform binomial remainder bounds for the large-order expansions DLMF 11.6.6–11.6.7
+of `𝐊_ν(λν)` and `𝐌_ν(λν)`.
 
-`I_m(λ) = ∮_{|t|=r} g(t) (t + λ sinh t)^{-m} dt`  (`struveLO_I`)
+## Main definitions
 
-on a small circle on which `t + λ sinh t = t (1 + λ σ(t))`, `σ = dslope sinh 0`, has no zero
-other than `t = 0` for all `λ` in a closed disc around `λ₀ ≠ -1` (`StruveLOGood`,
-`struveLO_good_exists`). The integrals are holomorphic in `λ`
-(`struveLO_hasDerivAt_I`, by differentiation under the integral sign,
-`struveLO_hasDerivAt_circleIntegral`), `I_1 = 2πi/(1+λ)` (`struveLO_I_one`, Cauchy's
-formula), and since
+* `struveLO_I`: the circle integral `I_m(λ)`.
+* `StruveLOGood`: on a small circle, `t + λ sinh t = t(1 + λσ(t))`, `σ = dslope sinh 0`, has no
+  zero other than `t = 0` for all `λ` in a closed disc around `λ₀ ≠ -1`.
+* `struveLO_b`: the binomial coefficient `a(a-1)⋯(a-j+1)/j!` for complex `a`.
+* `struveLO_R`: the binomial remainder `R_N(a, u) = (1+u)^a - ∑_{j<N} (a choose j) u^j`.
 
-`λ² n(n+1) sinh² t u^{-n-2} - λ n sinh t u^{-n-1} - (1-λ²) n(n+1) u^{-n-2}
-  = d/dt [-n (λ cosh t - 1) u^{-n-1}]`
+## Main results
 
-(`struveLO_hasDerivAt_exact`), the identity
-`θ² I_n = (1-λ²) n(n+1) I_{n+2}`, `θ = λ d/dλ`, holds (`struveLO_recurrence`). This is the
-recurrence DLMF 11.11(iii) for `A_k = (2πi)⁻¹ I_{2k+1}`, and it shows that the singularity of
-the recurrence at `λ = 1` is removable (`angerScaledA_removable` in `DLMF.Struve.Asymptotics`).
+* `struveLO_good_exists`: such circles exist.
+* `struveLO_hasDerivAt_I`: the integrals are holomorphic in `λ`, by differentiation under the
+  integral sign (`struveLO_hasDerivAt_circleIntegral`).
+* `struveLO_I_one`: `I_1 = 2πi/(1+λ)`, by Cauchy's formula.
+* `struveLO_hasDerivAt_exact`, `struveLO_recurrence`: the exact derivative
+  `λ² n(n+1) sinh² t u^{-n-2} - λ n sinh t u^{-n-1} - (1-λ²) n(n+1) u^{-n-2}
+  = d/dt [-n (λ cosh t - 1) u^{-n-1}]`, and hence `θ² I_n = (1-λ²) n(n+1) I_{n+2}`,
+  `θ = λ d/dλ`.
+* `struveLO_norm_R_le`: `|R_N(a,u)| ≤ ∏_{i<N} |a-i| |u|^N (1 + max u 0)^{re a - N}` for
+  `N ≤ re a` and real `u > -1`.
+* `struveLO_K_integral_bound`, `struveLO_M_integral_bound`: explicit error bounds for
+  `∫₀^∞ e^{-zt} (1+t²)^a dt` (`re a < re z`) and `∫₀¹ e^{-zt} (1-t²)^a dt` (`re z > 0`), uniform
+  in complex `a`, `z`.
 
-The second part treats the large-order expansions DLMF 11.6.6–11.6.7 of `𝐊_ν(λν)` and
-`𝐌_ν(λν)` by expanding `(1 ± t²)^{ν-1/2}` binomially inside the integrals 11.5.2 and 11.5.4.
-For complex `a` and real `u > -1` the remainder `R_N(a, u) = (1+u)^a - ∑_{j<N} (a choose j) u^j`
-(`struveLO_R`) satisfies `|R_N(a,u)| ≤ ∏_{i<N} |a-i| |u|^N (1 + max u 0)^{re a - N}` for
-`N ≤ re a` (`struveLO_norm_R_le`, by induction with the mean value inequality). Integrating
-against `e^{-zt}` gives explicit error bounds for
-`∫₀^∞ e^{-zt} (1+t²)^a dt` (`struveLO_K_integral_bound`, `re a < re z`) and for
-`∫₀¹ e^{-zt} (1-t²)^a dt` (`struveLO_M_integral_bound`, `re z > 0`), uniform in complex `a`, `z`.
+## Implementation notes
+
+The recurrence for `A_k = (2πi)⁻¹ I_{2k+1}` is the recurrence of DLMF §11.11(iii); it shows
+that the singularity of the recurrence at `λ = 1` is removable (`angerScaledA_removable` in
+`DLMF.Struve.Asymptotics.ScaledExpansions`). The remainder bound `struveLO_norm_R_le` is proved
+by induction with the mean value inequality.
 -/
 
 @[expose] public noncomputable section
@@ -485,17 +493,10 @@ theorem struveLO_K_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re
 
 /-! ### The integral of `𝐌_ν` with a binomial expansion -/
 
-/-- `x^m/m! ≤ e^x` for `x ≥ 0`. -/
-theorem struveLO_pow_div_factorial_le_exp {x : ℝ} (hx : 0 ≤ x) (m : ℕ) :
-    x ^ m / m.factorial ≤ Real.exp x := by
-  refine le_trans ?_ (Real.sum_le_exp_of_nonneg hx (m + 1))
-  exact Finset.single_le_sum (f := fun i => x ^ i / i.factorial)
-    (fun i _ => by positivity) (Finset.self_mem_range_succ m)
-
 /-- `e^{-y} ≤ m!/y^m` for `y > 0`. -/
 theorem struveLO_exp_neg_le {y : ℝ} (hy : 0 < y) (m : ℕ) :
     Real.exp (-y) ≤ m.factorial / y ^ m := by
-  have h := struveLO_pow_div_factorial_le_exp hy.le m
+  have h := Real.pow_div_factorial_le_exp _ hy.le m
   rw [Real.exp_neg, inv_le_comm₀ (Real.exp_pos _) (by positivity), inv_div]
   exact h
 

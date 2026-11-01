@@ -12,10 +12,31 @@ public import DLMFMathlib.Analysis.Asymptotics.AsymptoticInversion
 /-!
 # Airy modulus and phase representations
 
-Real-axis calculus, complex modulus-phase representations and their Bessel-function forms.
+The modulus and phase of the Airy functions and their derivatives on the real line
+(DLMF 9.8.1–9.8.19): definitions, real-axis calculus, Bessel-function forms, identities and
+differential equations.
 
-Source references and common attribution are retained in
-`DLMF.Airy.ModulusPhase`.
+## Main definitions
+
+* `airyModulus`, `airyDerivModulus`: the moduli `M` and `N` (DLMF 9.8.3, 9.8.7).
+* `airyPhase`, `airyDerivPhase`: the unwrapped phases `θ`, `φ` with `θ(0) = π/6`,
+  `φ(0) = -π/6`.
+* `airyModulusCoeff`, `airyDerivModulusCoeff`, `airyPhaseCoeff`, `airyDerivPhaseCoeff`,
+  `airyReciprocalCoeff`: coefficients of the expansions at `-∞`.
+* `airyModulusSum`, `airyPhaseSum`: truncated expansions.
+
+## Main results
+
+* `wronskian_airyReal`: `Ai Bi' - Ai' Bi = 1/π` on the real axis.
+* `airyAiReal_modulus_phase`, `airyBiReal_modulus_phase`, `airyAiDerivReal_modulus_phase`,
+  `airyBiDerivReal_modulus_phase`: DLMF 9.8.1, 9.8.2, 9.8.5, 9.8.6.
+* `airyPhase_atan_branch`, `airyDerivPhase_atan_branch`: DLMF 9.8.4, 9.8.8.
+* `airyModulus_bessel`, `airyDerivModulus_bessel`, `airyPhase_bessel_atan`,
+  `airyDerivPhase_bessel_atan`: DLMF 9.8.9–9.8.12.
+* `airy_modulus_phase_wronskian`, `airy_modulus_phase_derivatives`,
+  `airy_derivModulus_identity`, `airy_modulus_identity`, `airy_phase_difference_tan`:
+  DLMF 9.8.13–9.8.17.
+* `airy_modulus_ode`, `airy_phase_ode`: DLMF 9.8.18, 9.8.19.
 -/
 
 @[expose] public noncomputable section
@@ -946,7 +967,7 @@ theorem airyDerivPhase_bessel_atan {x : ℝ} (hx : x < 0)
 
 /-- Wronskian in modulus–phase form: `M N sin(θ - φ) = 1/π` (DLMF 9.8.13). -/
 @[dlmf 9.8.E13]
-theorem airy_modulus_phase_wronskian {x : ℝ} (hx : x ≤ 0) :
+theorem airy_modulus_phase_wronskian {x : ℝ} :
     airyModulus x * airyDerivModulus x * Real.sin (airyPhase x - airyDerivPhase x) = 1 / π :=
   airy_modulus_phase_wronskian' x
 

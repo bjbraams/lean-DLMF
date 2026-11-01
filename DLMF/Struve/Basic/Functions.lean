@@ -9,7 +9,26 @@ public import DLMF.Bessel.Basic
 public import DLMF.Core.Framework
 
 /-!
-# Struve functions, power series and inhomogeneous equations
+# Struve functions, power series and inhomogeneous equations (DLMF §11.2)
+
+## Main definitions
+
+* `struveCoeff`: the reciprocal Gamma coefficients of the Struve series.
+* `struveHCore`, `struveH`, `struveHOnLog`: the entire normalized series, the principal Struve
+  function `𝐇_ν(z)` (DLMF 11.2.1) and its continuation on the logarithmic plane.
+* `struveLCore`, `struveL`, `struveLOnLog`: the same for the modified Struve function `𝐋_ν(z)`
+  (DLMF 11.2.2).
+* `struveQuadratic`: a common signed regularized-series representation of `𝐇_ν` and `𝐋_ν`.
+* `struveK`, `struveM`: the auxiliary functions `𝐊_ν = 𝐇_ν - Y_ν` and `𝐌_ν = 𝐋_ν - I_ν`
+  (DLMF 11.2.5–11.2.6).
+* `besselResidual`: the ordinary or modified Bessel operator with its singularity cleared.
+* `StruveEquation`, `IsStruveSolutionOn`: the inhomogeneous Bessel equations DLMF 11.2.7 and
+  11.2.9.
+
+## Implementation notes
+
+The coefficients use reciprocal Gamma functions, so the series retain the exceptional orders
+at the zeros of `1/Γ`.
 -/
 
 @[expose] public noncomputable section

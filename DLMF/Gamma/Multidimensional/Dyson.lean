@@ -8,13 +8,32 @@ module
 public import DLMF.Gamma.Multidimensional.SelbergLimits
 
 /-!
-# Dyson circular integrals
+# Dyson's circular integral (DLMF 5.14.7)
 
-Dimension reduction, integer exponents and Carlson continuation establish the circular Dyson
-integral.
+We prove Dyson's constant-term identity by Good's recursion and deduce Dyson's circular
+integral (Morris), DLMF 5.14.7: the average over the torus `[-π, π]ⁿ` of
+`∏_{j<k} |e^{iθⱼ} - e^{iθₖ}|^(2b)` is `Γ(1 + bn) / Γ(1 + b)ⁿ`. The identity is first obtained
+for natural `b` and then extended to complex `b` by Carlson's theorem.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.Multidimensional`.
+## Main definitions
+
+* `dysonTerm`, `dysonInt`: Dyson's product `∏_{j ≠ l} (1 - z_j / z_l)^{a_j}` on the torus and
+  its integral.
+* `mnom`: the multinomial coefficient `(∑ aⱼ)! / ∏ aⱼ!`.
+* `circIntegrand`, `circInt`, `circRHS`: the integrand and the two sides of 5.14.7.
+
+## Main results
+
+* `sum_recip_dysonRow_one`: Good's identity `∑_j ∏_{l ≠ j} (1 - z_j/z_l)⁻¹ = 1`.
+* `dysonInt_rec`, `mnom_rec`: Good's recursion and the Pascal recursion for multinomials.
+* `dysonInt_eq`: Dyson's conjecture, the constant term of Dyson's product is the multinomial
+  coefficient.
+* `circInt_natCast`: 5.14.7 for natural exponents.
+* `circInt_eq_circRHS`, `selberg_circular`: Dyson's circular integral, DLMF 5.14.7.
+
+## References
+
+See `DLMF.Gamma.Multidimensional` for the overview of DLMF §5.14.
 -/
 
 @[expose] public section

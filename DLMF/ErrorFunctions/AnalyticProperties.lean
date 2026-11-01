@@ -11,14 +11,32 @@ public import DLMF.Confluent.FresnelAsymptotics
 public import DLMF.Core.Framework
 
 /-!
-# Entire error, Dawson, Fresnel and Goodwin–Staton functions, DLMF §7.2
+# Entire error, Dawson, Fresnel and Goodwin–Staton functions (DLMF §7.2)
 
-Canonical definitions are in `DLMF.ErrorFunctions.Basic`; this module develops their properties.
+Analytic properties of the functions defined in `DLMF.ErrorFunctions.Basic`: differentiability,
+the integral representations of DLMF §7.2, agreement with the real-variable definitions, and
+elementary bounds and limits of `erf` and `erfc`. Results already in Mathlib are referenced,
+not reproved.
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs.
+## Main results
+
+* `faddeevaW_entire`, `dawsonF_entire`, `fresnelCosInt_entire`, `fresnelSinInt_entire`,
+  `fresnelTail_entire`, `fresnelAuxFComplex_entire`, `fresnelAuxGComplex_entire`: these
+  functions are entire (DLMF §7.2).
+* `hasDerivAt_erf_complex`, `hasDerivAt_dawsonF_complex`, `hasDerivAt_fresnelCosInt_complex`,
+  `hasDerivAt_fresnelSinInt_complex`: their derivatives.
+* `erf_complex_segment_integral`, `erfc_horizontal_integral`, `faddeevaW_integral`: the
+  integral representations DLMF 7.2.1–7.2.3.
+* `erf_sector_limit`: `erf z → 1` and `erfc z → 0` in the sector `|ph z| < π/4 - δ`
+  (DLMF 7.2.4).
+* `fresnelTail_horizontal_integral`: the tail Fresnel integral (DLMF 7.2.6).
+* `goodwinStatonG_integrable`: integrability of the Goodwin–Staton kernel (DLMF 7.2.12).
+* `fresnelCosInt_hasSum`, `fresnelSinInt_hasSum`: the power series of `C(z)` and `S(z)`
+  (DLMF 7.6.4, 7.6.6).
+* `dawsonF_ofReal`, `fresnelCosInt_ofReal`, `fresnelSinInt_ofReal`, `fresnelAuxFComplex_ofReal`,
+  `fresnelAuxGComplex_ofReal`: agreement with the real-variable definitions.
+* `erfc_eq_laplace`, `norm_erf_le`, `norm_erfc_le`, `norm_erfc_le_one`,
+  `tendsto_erfc_zero_of_re`: Laplace form, bounds and limits of `erf` and `erfc`.
 -/
 
 @[expose] public noncomputable section

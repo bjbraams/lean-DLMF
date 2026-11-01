@@ -10,10 +10,23 @@ public import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
 /-!
 # Dirichlet integrals and simplex volumes (AAR §1.8)
 
-AAR Theorem 1.8.1 is the simplex integral of `∏ x_i^{a_i-1}`. The inner integral in two
-variables is recorded below. AAR Corollary 1.8.3 (volume of an `ℓ^p` ball) is
-`MeasureTheory.volume_sum_rpow_le` in Mathlib; the volume of the unit `ℓ^1` ball
-`{∑ |x_i| ≤ 1}` is `2^n / n!`.
+AAR Theorem 1.8.1 is the simplex integral of `∏ x_i^{a_i-1}`; its inner integral in two
+variables is recorded here. AAR Corollary 1.8.3 (the volume of an `ℓ^p` ball) is Mathlib's
+`MeasureTheory.volume_sum_rpow_le`.
+
+## Main results
+
+* `integral_rpow_zero_of_pos`: `∫₀^t y^{b-1} dy = t^b / b`, the inner integral of Dirichlet's
+  formula in two variables.
+* `volume_lp_ball_eq_gamma`: AAR Corollary 1.8.3 for equal exponents, the volume of the `ℓ^p`
+  ball of radius `r`.
+* `volume_l1_unitBall`: the unit `ℓ^1` ball `{∑ |x_i| ≤ 1}` in `ι → ℝ` has volume
+  `2^{#ι} / (#ι)!`.
+
+## References
+
+* G. E. Andrews, R. Askey and R. Roy, *Special Functions*, Cambridge University Press, 1999,
+  §1.8.
 -/
 
 @[expose] public section

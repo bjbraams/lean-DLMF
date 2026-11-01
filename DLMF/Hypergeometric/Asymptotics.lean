@@ -17,15 +17,28 @@ public import DLMF.Hypergeometric.Continuation
 /-!
 # Large-parameter asymptotics (DLMF §15.12)
 
-The large-denominator expansions are stated along the positive real axis, with
-the variable in the series disk. Remainders use Mathlib's `Asymptotics.IsBigO`.
-The Bessel approximation E5–E6 uses existing `besselI` and `Real.arcosh`, with
-`1 < x < 3` ensuring the hypergeometric series argument is in the disk.
-E1 defines the larger complex-sector boundary; those sector domains are deferred.
-E6 uses Mathlib's `Real.arcosh` (https://dlmf.nist.gov/15.12.E6); no
-duplicate inverse-hyperbolic-function definition is introduced.
-E7–E13 require parabolic-cylinder/Airy functions and continuous choices of
-turning-point branches not yet available in this project's hypergeometric API.
+## Main definitions
+
+* `largeDenominatorGenerating`, `largeDenominatorCoeff`: the generating function of DLMF 15.12.4
+  and its Taylor coefficients.
+
+## Main results
+
+* `large_denominator_expansion`: the large-`c` expansion, DLMF 15.12.2.
+* `large_denominator_shift_expansion`: DLMF 15.12.3.
+* `large_denominator_generating_hasSum`: convergence of the generating function, DLMF 15.12.4.
+* `hcub_large_denominator_shift`: the expansion 15.12.2 along a shifted ray `c + λ` with
+  complex `c`.
+* `large_opposite_parameters_bessel`: the Bessel approximation, DLMF 15.12.5–15.12.6.
+
+## Implementation notes
+
+The large-denominator expansions are stated along the positive real axis, with the variable in
+the series disk. Remainders use Mathlib's `Asymptotics.IsBigO`. The Bessel approximation uses
+`besselI` and Mathlib's `Real.arcosh` (DLMF 15.12.6), with `1 < x < 3` ensuring that the
+hypergeometric argument is in the disk. The complex-sector domains of 15.12.1 are not included.
+15.12.7–15.12.13 require parabolic-cylinder and Airy functions with continuous choices of
+turning-point branches and are not included.
 -/
 
 @[expose] public section
@@ -206,11 +219,6 @@ section ShiftExpansion
 
 open MeasureTheory Set Asymptotics
 open scoped Nat
-
-/-- `(eᵗ)^w = e^{t w}` for real `t`. -/
-theorem hcub_ofReal_cpow_exp (t : ℝ) (w : ℂ) :
-    ((Real.exp t : ℝ) : ℂ) ^ w = exp (t * w) :=
-  TauCeti.ofReal_exp_cpow t w
 
 /-- The map `t ↦ 1 - e^{-t}` sends `(0, ∞)` onto `(0, 1)`. -/
 theorem hcub_image : (fun t : ℝ => 1 - Real.exp (-t)) '' Ioi 0 = Ioo 0 1 := by
@@ -442,12 +450,12 @@ theorem hcub_subst₂ (a b c z : ℂ) (l : ℝ) {t : ℝ} (ht : 0 < t) :
   have hc : ((1 - Real.exp (-t) : ℝ) : ℂ) ^ (b - 1) =
       exp (-(t : ℂ) * (b - 1)) * ((t : ℂ) ^ (b - 1) * (E : ℂ) ^ (b - 1)) := by
     rw [hs, Complex.ofReal_mul, mul_cpow_ofReal_nonneg (Real.exp_pos _).le
-      (by positivity), Complex.ofReal_mul, mul_cpow_ofReal_nonneg ht.le hE0.le, hcub_ofReal_cpow_exp]
+      (by positivity), Complex.ofReal_mul, mul_cpow_ofReal_nonneg ht.le hE0.le, TauCeti.ofReal_exp_cpow]
     push_cast; ring_nf
   have hw : (1 - z * ((1 - Real.exp (-t) : ℝ) : ℂ)) = 1 - z + z * exp (-(t : ℂ)) := by
     push_cast; ring
   rw [hc, show (1 : ℂ) - ((1 - Real.exp (-t) : ℝ) : ℂ) = ((Real.exp (-t) : ℝ) : ℂ) by push_cast; ring,
-    hcub_ofReal_cpow_exp, abs_of_pos (Real.exp_pos _), Complex.real_smul,
+    TauCeti.ofReal_exp_cpow, abs_of_pos (Real.exp_pos _), Complex.real_smul,
     Complex.real_smul, largeDenominatorGenerating, hEc, hw]
   set W := (1 - z + z * exp (-(t : ℂ))) ^ (-a)
   push_cast

@@ -10,7 +10,37 @@ public import Mathlib.Analysis.Analytic.OfScalars
 public import Mathlib.Analysis.RCLike.Sqrt
 
 /-!
-# General basic hypergeometric series and parameter conditions
+# General basic hypergeometric series and parameter conditions (DLMF §17.2, §17.4)
+
+This file defines products of `q`-shifted factorials, the general unilateral series `rφs` and
+bilateral series `rψs` with the DLMF phase factors, and the parameter conditions (regularity,
+termination, balance and poise) used throughout DLMF Chapter 17.
+
+## Main definitions
+
+* `qPochhammerList`, `qPochhammerListInt`, `qPochhammerListInf`: products of finite,
+  integer-index and infinite `q`-shifted factorials (DLMF 17.2.5–17.2.6).
+* `qPhiTerm`, `qPhi`: the general unilateral series `rφs` (DLMF 17.4.1).
+* `qPsiTerm`, `qPsi`: the general bilateral series `rψs` (DLMF 17.4.3).
+* `qPhiExponent`, `qPsiExponent`: the integer phase exponents.
+* `QDenominatorRegular`, `QBilateralRegular`, `QTerminating`, `QDenominatorRegularThrough`:
+  regularity and termination conditions.
+* `QBalanced`, `QKBalanced`, `QWellPoised`, `QVeryWellPoised`, `QNearlyPoised`: balanced and
+  poised parameters (DLMF 17.4.9–17.4.13).
+* `rogersG`, `rogersH`: the Rogers–Ramanujan functions.
+* `qPochhammerOrder`: the complex-order shifted factorial on the principal branch of `q^ν`.
+* `qIdem`: the `idem` notation, expanded into explicit summands.
+* `qPhiCoeff`, `qPhiPowerSeries`: the scalar coefficients and Mathlib's formal power series of
+  the general series.
+
+## Implementation notes
+
+The integer triangular exponent reuses `DLMF.QSeries.TripleProduct.tri`. The general series
+include the phase factors specified by DLMF and Gasper–Rahman; both differences of parameter
+counts are integers. `tsum` is totalized outside convergence, and the identities state their
+convergence and exceptional-parameter hypotheses separately. The scalar-series interface
+applies Mathlib's `FormalMultilinearSeries.ofScalars`, convergence-radius bound and
+change-of-origin analytic API directly; it does not impose nonzero upper parameters.
 -/
 
 @[expose] public noncomputable section

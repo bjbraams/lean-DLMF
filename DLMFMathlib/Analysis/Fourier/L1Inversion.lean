@@ -16,6 +16,13 @@ When a function and its Fourier transform are integrable, inversion holds almost
 everywhere, without continuity of the original representative. Testing against smooth
 compactly supported functions reduces this to Mathlib's inversion for Schwartz functions.
 The resulting pairing requires integrability of only one of the Fourier transforms.
+
+## Main results
+
+* `ae_fourierInv_fourier_eq`: almost-everywhere Fourier inversion for integrable functions
+  with integrable Fourier transform.
+* `integral_mul_eq_integral_fourier_neg_mul`, `integral_mul_eq_integral_fourier_neg_mul_of_or`:
+  the bilinear Parseval identity, assuming integrability of one of the Fourier transforms.
 -/
 
 @[expose] public noncomputable section

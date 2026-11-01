@@ -12,7 +12,24 @@ public import DLMF.Gamma.RecipGammaDeriv
 /-!
 # Parameter derivatives of the regularized Kummer series
 
-Termwise parameter differentiation and the logarithmic series at integer second parameters.
+This file differentiates the regularized Kummer series termwise in its parameters and derives
+the logarithmic series of the Tricomi connection numerator at positive integer second
+parameters.
+
+## Main results
+
+* `hasSum_deriv_regularizedConfluent_comp`: termwise differentiation of the regularized Kummer
+  series along entire parameter curves.
+* `deriv_poch_mul_recip_Gamma_add_nat`: the derivative of `(x)_m / Γ(x+m)` through the entire
+  function `(1/Γ)'`, valid for every argument.
+* `deriv_tricomi_numerator_nat`, `tricomi_numerator_nat_series`: the derivative of the
+  regularized connection numerator at a positive integer parameter, split into a finite
+  singular part and a convergent series.
+* `deriv_tricomi_numerator_nat_recipGamma`, `tricomi_numerator_nat_series_recipGamma`: the same
+  with `ψ(a+k)/Γ(a-n)` written through `(1/Γ)'`; stronger than DLMF, valid for all `a`.
+
+## Implementation notes
+
 The domination argument adapts `hasSum_deriv_regularizedGaussHGFun_comp` from
 `DLMF.Hypergeometric.ConnectionFormulas`, using the entire confluent majorant.
 -/

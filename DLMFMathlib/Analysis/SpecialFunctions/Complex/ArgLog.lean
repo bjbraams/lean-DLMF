@@ -14,10 +14,19 @@ public import Mathlib.Analysis.RCLike.Sqrt
 /-!
 # Arguments, logarithms and the slit plane
 
-Elementary facts on the principal argument and logarithm: arguments of rays
-`ρ e^{is}` and of rotations `z e^{iα}`, `arg w = arctan (Im w / Re w)` in the right
-half-plane, `log (a²) = 2 log a` there, invariance of the slit plane under positive real
-scaling and inversion, and `Re (√z) ≥ 0`.
+Elementary facts on the principal argument and logarithm.
+
+## Main results
+
+* `arg_ofReal_mul_exp_ofReal_mul_I`: the argument of the ray point `ρ e^{is}` is `s` for
+  `ρ > 0` and `s ∈ (-π, π]`.
+* `arg_mul_exp_ofReal_mul_I`: rotating `z` by `α` adds `α` to the argument while the sum stays
+  in `(-π, π]`.
+* `arg_eq_arctan_of_re_pos`: `arg w = arctan (Im w / Re w)` in the right half-plane.
+* `log_sq_of_re_pos`: `log (a²) = 2 log a` in the right half-plane.
+* `ofReal_mul_mem_slitPlane`, `inv_mem_slitPlane`: the slit plane is invariant under positive
+  real scaling and inversion.
+* `re_sqrt_nonneg`: `Re (√z) ≥ 0`.
 -/
 
 @[expose] public section

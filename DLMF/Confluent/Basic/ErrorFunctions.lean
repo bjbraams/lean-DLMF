@@ -12,7 +12,26 @@ public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
 public import Mathlib.Analysis.Complex.AbsMax
 
 /-!
-# Error functions and real Fresnel and Dawson normalizations
+# Error functions, Fresnel integrals and Dawson's integral
+
+This file defines the error function through Kummer's function (DLMF 13.6.7), its complement,
+and the real Fresnel integrals, Dawson's integral and the auxiliary Fresnel functions of
+DLMF §7.2.
+
+## Main definitions
+
+* `erf`: the entire error function `erf z = (2z/√π) M(1/2, 3/2, -z²)` (DLMF 13.6.7).
+* `erfc`: the complementary error function `1 - erf z`.
+* `Real.fresnelCosInt`, `Real.fresnelSinInt`: the Fresnel integrals `C(x)` and `S(x)`
+  (DLMF 7.2.7, 7.2.8).
+* `Real.dawsonF`: Dawson's integral `F(x)` (DLMF 7.2.5).
+* `fresnelAuxF`, `fresnelAuxG`: the auxiliary Fresnel functions `f(x)` and `g(x)`
+  (DLMF 7.2.10, 7.2.11).
+* `fresnelZeta`: the Fresnel variable `ζ = √π (1 - i) x / 2` of DLMF 7.5.7.
+
+## Implementation notes
+
+On the real line `erf` agrees with TauCeti's `TauCeti.Real.erf`.
 -/
 
 @[expose] public noncomputable section

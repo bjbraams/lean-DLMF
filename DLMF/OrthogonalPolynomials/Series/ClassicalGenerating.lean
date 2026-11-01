@@ -19,11 +19,37 @@ public import DLMF.Hypergeometric.AppellF4
 /-!
 # Classical polynomial generating functions
 
-Scalar-series convolution, Jacobi Lagrange inversion and classical generating and multiplication
-identities.
+Generating functions of the Jacobi, Gegenbauer, Chebyshev, Legendre and Hermite polynomials
+(DLMF §18.12), and the addition and multiplication theorems for Laguerre and Hermite
+polynomials (DLMF 18.18.10–18.18.13).
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Series`.
+## Main definitions
+
+* `jacGenRhs`: the right side of the Jacobi generating function DLMF 18.12.1.
+
+## Main results
+
+* `jacobi_generating_function`: DLMF 18.12.1.
+* `ultrasphPoly_generating_function`, `ultrasphPoly_weighted_generating_function`:
+  DLMF 18.12.4 and 18.12.5.
+* `chebyshevT_generating_function`, `chebyshevT_log_generating_function`,
+  `chebyshevU_generating_function`: DLMF 18.12.8–18.12.10.
+* `legendre_generating_function`: DLMF 18.12.11.
+* `hermite_generating_function`: DLMF 18.12.16.
+* `laguerrePolyL_addition`, `hermitePolyH_addition`: DLMF 18.18.10 and 18.18.11 (also 18.18.38
+  and 18.18.39).
+* `laguerrePolyL_multiplication`, `hermitePolyH_multiplication`: DLMF 18.18.12 and 18.18.13.
+* `hasSum_of_three_term`: the generating function of a sequence with a constant-coefficient
+  three-term recurrence.
+
+## Implementation notes
+
+The Jacobi generating function follows from the coefficient form of the Lagrange–Bürmann
+formula (`Complex.lagB_hasSum_iteratedDeriv`): `P_n^{(α,β)}(x) = [tⁿ] F(t) φ(t)ⁿ` with
+`φ(t) = (1 + (x+1)t/2)(1 + (x-1)t/2)` and `F(t) = (1 + (x+1)t/2)^α (1 + (x-1)t/2)^β`
+(by DLMF 18.5.8), the root of `t = z φ(t)` being `w = 2z/(1 - xz + R)`,
+`R = (1 - 2xz + z²)^{1/2}`. This gives the identity for small `|z|`; it extends to `|z| < 1`
+because the right side is holomorphic there (`Complex.lagB_hasSum_of_differentiableOn`).
 -/
 
 @[expose] public section
@@ -297,7 +323,7 @@ theorem jacGen_hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x|
   set u : ℂ := 1 - 2 * x * z + z ^ 2 with hu
   have huS : u ∈ slitPlane := jacGen_mem_slitPlane hx (by linarith)
   set R : ℂ := u ^ (1 / 2 : ℂ) with hR
-  have hRre : 0 < R.re := DLMF.Hypergeometric.re_cpow_half_pos_of_mem_slitPlane huS
+  have hRre : 0 < R.re := Carlson.re_cpow_half_pos huS
   have hR2 : R ^ 2 = u := DLMF.Hypergeometric.cpow_half_sq (slitPlane_ne_zero huS)
   have hzre : |z.re| ≤ ‖z‖ := Complex.abs_re_le_norm z
   have hxz : |(x * z.re)| ≤ 1 / 10 := by
@@ -390,7 +416,7 @@ theorem jacGen_differentiableOn (α β : ℂ) {x : ℝ} (hx : |x| ≤ 1) :
   intro z hz
   have hz1 : ‖z‖ < 1 := by simpa using hz
   have huS := jacGen_mem_slitPlane hx hz1
-  have hRre := DLMF.Hypergeometric.re_cpow_half_pos_of_mem_slitPlane huS
+  have hRre := Carlson.re_cpow_half_pos huS
   have hzre := Complex.abs_re_le_norm z
   have hRd : DifferentiableAt ℂ (fun z : ℂ => (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ)) z :=
     DifferentiableAt.cpow (f := fun z : ℂ => 1 - 2 * x * z + z ^ 2) (by fun_prop)

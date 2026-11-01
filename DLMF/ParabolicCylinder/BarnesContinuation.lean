@@ -8,18 +8,36 @@ module
 public import DLMF.ParabolicCylinder.Integrals
 
 /-!
-# Cylinder Barnes integrals with crossed-pole corrections
+# Barnes integrals of parabolic cylinder functions with crossed-pole corrections
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+DLMF 12.5.8–12.5.9 represent `U(a,z)` and `V(a,z)` by Barnes integrals over a contour
+separating the poles of `Γ(t)` from those of `Γ(a + 1/2 - 2t)`. This file states them for all
+regular parameters on a straight vertical line `Re t = c`, adding the residues of the poles
+`t = (A + n)/2` that lie to the left of the line.
 
-Both theorems are proved. For `Re A > 0` (`A = 1/2 ± a`) one starts from the straight-line
-integrals 12.5.8/12.5.9 on a line `0 < 2c < Re A` and shifts the line to the right across the
-poles `t = (A+n)/2` of `Γ(A - 2t)` with `Complex.barnesRes_vertical_shift` (removable form
-`Γ(A-2t+n+1)/∏_{j<n}(A-2t+j)`); the general case follows by analytic continuation in `a`, since
-the line integral minus the crossed residues is independent of the line and holomorphic in `a`
-off the poles of `Γ(A)`. The 12.5.9 case follows from 12.5.8 at `(-a, ±iz)`.
+## Main definitions
+
+* `pcfBarnesResidue`, `pcfBarnesResidueSum`: the residues of the right pole family and their
+  finite sum over the poles crossed by the line `Re t = c`.
+* `pcfBC_F`: the Barnes integrand `Γ(t) Γ(A - 2t) 2^t z^{2t}` with `A = a + 1/2`.
+* `pcfBC_J`: the line integral minus the crossed residues, which is independent of the line.
+
+## Main results
+
+* `pcfBC_shift`: moving the line from `c₁` to `c₂` picks up the residues of the crossed poles.
+* `pcfBC_U_integral`: DLMF 12.5.8 for all regular parameters, in terms of `pcfBC_F`.
+* `pcfU_barnes_continued`, `pcfV_barnes_continued`: DLMF 12.5.8–12.5.9 with crossed-residue
+  corrections.
+
+## Implementation notes
+
+For `Re A > 0` (`A = 1/2 ± a`) one starts from the straight-line integrals 12.5.8–12.5.9 on a
+line `0 < 2c < Re A` and shifts the line to the right across the poles `t = (A + n)/2` of
+`Γ(A - 2t)` with `Complex.barnesRes_vertical_shift` (removable form
+`Γ(A - 2t + n + 1)/∏_{j<n}(A - 2t + j)`). The general case follows by analytic continuation in
+`a`, since the line integral minus the crossed residues is independent of the line and
+holomorphic in `a` off the poles of `Γ(A)`. The 12.5.9 case follows from 12.5.8 at
+`(-a, ±iz)`. The crossed residues encode the deformation of the separating contour.
 -/
 
 @[expose] public noncomputable section

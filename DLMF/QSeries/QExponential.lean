@@ -11,10 +11,20 @@ public import DLMF.QSeries.Heine
 /-!
 # Euler's second `q`-exponential (Duverney §10.1.3)
 
-`E_q(x) = ∑ q^{n(n-1)/2} xⁿ/(q;q)_n = (-x;q)_∞` for `|q| < 1` and every complex `x`. The proof lets
-`N → ∞` in Cauchy's finite `q`-binomial theorem `(-x;q)_N = ∑_k [N k]_q q^{k(k-1)/2} x^k`, by
-Tannery's theorem: `[N k]_q = (q^{N-k+1};q)_k/(q;q)_k → 1/(q;q)_k`, with a uniform bound. Together
-with Euler's first identity this gives `e_q(x) E_q(-x) = 1`.
+This file proves `E_q(x) = ∑ q^{n(n-1)/2} xⁿ/(q;q)_n = (-x;q)_∞` for `|q| < 1` and every
+complex `x`, and deduces `e_q(x) E_q(-x) = 1`.
+
+## Main results
+
+* `qBinom_eq`: `[k+m, k]_q = (q^{m+1};q)_k/(q;q)_k` (DLMF 17.2.29).
+* `tsum_qExp`: Euler's second identity (DLMF 17.5.1).
+* `qExp_mul_qExp`: `e_q(x) E_q(-x) = 1` for `|x| < 1` (Duverney (10.35)).
+
+## Implementation notes
+
+The proof lets `N → ∞` in Cauchy's finite `q`-binomial theorem
+`(-x;q)_N = ∑_k [N k]_q q^{k(k-1)/2} x^k`, by Tannery's theorem:
+`[N k]_q = (q^{N-k+1};q)_k/(q;q)_k → 1/(q;q)_k`, with a uniform bound.
 -/
 
 @[expose] public section

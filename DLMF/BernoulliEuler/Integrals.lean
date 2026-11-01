@@ -12,7 +12,24 @@ public import ToMathlib.Analysis.SpecialFunctions.RamanujanMaster
 public import Mathlib.Analysis.SpecialFunctions.PolynomialExp
 
 /-!
-# Bernoulli and Euler numbers and polynomials: integral representations (DLMF §24.7)
+# Bernoulli and Euler numbers and polynomials: integral representations
+
+This file proves the integral representations of DLMF §24.7: integrals over `(0, ∞)` for the
+Bernoulli and Euler numbers and polynomials, and the Mellin–Barnes integral for `Bₙ(x)`.
+
+## Main results
+
+* `bernoulli_two_mul_eq_integral_exp_add_one`, `bernoulli_two_mul_eq_integral_exp_sub_one`,
+  `bernoulli_two_mul_eq_integral_sech_sq`, `bernoulli_two_mul_eq_integral_csch_sq`,
+  `bernoulli_two_mul_eq_integral_log`: `B₂ₙ` as integrals (DLMF 24.7.1–24.7.5).
+* `eulerNumber_two_mul_eq_integral_sech`: `E₂ₙ` as an integral (DLMF 24.7.6).
+* `bernoulliPolyB_two_mul_eq_integral`, `bernoulliPolyB_two_mul_add_one_eq_integral`,
+  `eulerPolyE_two_mul_eq_integral`, `eulerPolyE_two_mul_add_one_eq_integral`: the polynomials for
+  `0 < Re x < 1` (DLMF 24.7.7–24.7.10).
+* `bernoulliPolyB_eq_mellinBarnes`: the Mellin–Barnes integral (DLMF 24.7.11), for every
+  complex `x`.
+
+## Implementation notes
 
 The integrals over `(0, ∞)` are Lebesgue (Bochner) integrals `∫ t in Set.Ioi 0, …`; all
 integrands are integrable on the stated ranges, so Lean's totalization of non-integrable
@@ -20,11 +37,10 @@ integrals to `0` plays no role. The polynomial representations 24.7.7–24.7.10 
 complex `x` with `0 < Re x < 1` (DLMF §24.7(ii)); 24.7.7 for `n ≥ 1`, 24.7.8–24.7.10 for `n ≥ 0`.
 
 The Mellin–Barnes representation 24.7.11 is proved by shifting the integration line to
-`Re t = -1/2` and expanding against the moments of `sech²(πs)`. It holds for every complex `x`.
-With `t = -c + is`, the contour normalization becomes
-`(1/(2πi)) ∫ … dt = (1/(2π)) ∫_ℝ … ds`. The proof uses the vertical-line shift theorem from
-lean-codes’ `ToMathlib.Analysis.MellinBarnes` and the sine lower bound from its
-`ToMathlib.Analysis.SpecialFunctions.RamanujanMaster`.
+`Re t = -1/2` and expanding against the moments of `sech²(πs)`. With `t = -c + is`, the contour
+normalization becomes `(1/(2πi)) ∫ … dt = (1/(2π)) ∫_ℝ … ds`. The proof uses the vertical-line
+shift theorem from lean-codes' `ToMathlib.Analysis.MellinBarnes` and the sine lower bound from
+its `ToMathlib.Analysis.SpecialFunctions.RamanujanMaster`.
 -/
 
 @[expose] public section
@@ -40,7 +56,7 @@ namespace DLMF.BernoulliEuler
 
 /-- Mellin transforms of `∑ aᵢ e^{-pᵢ t}` at a positive integer `m + 1`, real form:
 `∫₀^∞ tᵐ F(t) dt = ∑ m! aᵢ/pᵢ^{m+1}`. -/
-lemma q24a_hasSum_integral_pow_mul {a p : ℕ → ℝ} {F : ℝ → ℝ} (m : ℕ)
+private lemma hasSum_integral_pow_mul_of_hasSum_exp {a p : ℕ → ℝ} {F : ℝ → ℝ} (m : ℕ)
     (hp : ∀ i, 0 < p i)
     (hF : ∀ t ∈ Ioi (0 : ℝ), HasSum (fun i => a i * rexp (-p i * t)) (F t))
     (h_sum : Summable fun i => |a i| / p i ^ (m + 1)) :
@@ -69,7 +85,7 @@ lemma q24a_hasSum_integral_pow_mul {a p : ℕ → ℝ} {F : ℝ → ℝ} (m : �
   push_cast; ring
 
 /-- `ζ(2n) = ∑_{k ≥ 0} 1/(k+1)^{2n}` in Bernoulli form. -/
-lemma q24a_hasSum_zeta_succ {n : ℕ} (hn : n ≠ 0) :
+private lemma hasSum_inv_succ_pow_two_mul_bernoulli {n : ℕ} (hn : n ≠ 0) :
     HasSum (fun k : ℕ => 1 / ((k : ℝ) + 1) ^ (2 * n))
       ((-1 : ℝ) ^ (n + 1) * 2 ^ (2 * n - 1) * π ^ (2 * n) * bernoulli (2 * n) / (2 * n)!) := by
   have h := (hasSum_nat_add_iff' 1).mpr (hasSum_zeta_nat hn)
@@ -78,7 +94,7 @@ lemma q24a_hasSum_zeta_succ {n : ℕ} (hn : n ≠ 0) :
   exact h
 
 /-- The Dirichlet eta function from zeta: `∑ (-1)ᵏ/(k+1)ˢ = (1 - 2^{1-s}) ∑ 1/(k+1)ˢ`. -/
-lemma q24a_hasSum_eta {s : ℕ} {Z : ℝ} (hZ : HasSum (fun k : ℕ => 1 / ((k : ℝ) + 1) ^ s) Z) :
+private lemma hasSum_alt_inv_succ_pow {s : ℕ} {Z : ℝ} (hZ : HasSum (fun k : ℕ => 1 / ((k : ℝ) + 1) ^ s) Z) :
     HasSum (fun k : ℕ => (-1) ^ k * (1 / ((k : ℝ) + 1) ^ s)) ((1 - 2 / 2 ^ s) * Z) := by
   set f : ℕ → ℝ := fun k => 1 / ((k : ℝ) + 1) ^ s
   have ho : HasSum (fun k => f (2 * k + 1)) (Z / 2 ^ s) := by
@@ -102,17 +118,17 @@ lemma q24a_hasSum_eta {s : ℕ} {Z : ℝ} (hZ : HasSum (fun k : ℕ => 1 / ((k :
 
 /-- Summability of the indicated series: `Summable fun i : ℕ => (1 : ℝ) / (c * ((i : ℝ) + 1)) ^ (m
 + 2)`. -/
-lemma q24a_summable_pow_succ (m : ℕ) {c : ℝ} (hc : 0 < c) :
+private lemma summable_one_div_mul_succ_pow (m : ℕ) {c : ℝ} (hc : 0 < c) :
     Summable fun i : ℕ => (1 : ℝ) / (c * ((i : ℝ) + 1)) ^ (m + 2) := by
   have h := (summable_nat_add_iff 1).mpr (Real.summable_one_div_nat_pow.mpr (by omega : 1 < m + 2))
   refine (h.mul_left (1 / c ^ (m + 2))).congr fun i => ?_
   push_cast; rw [mul_pow]; field_simp
 
 /-- `∫₀^∞ tᵐ/(e^{ct} - 1) dt = ∑_{i ≥ 0} m!/(c(i+1))^{m+1}`, `m ≥ 1`, `c > 0`. -/
-lemma q24a_hasSum_integral_exp_sub_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
+private lemma hasSum_integral_pow_div_exp_sub_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
     HasSum (fun i : ℕ => ((m + 1) ! : ℝ) * 1 / (c * ((i : ℝ) + 1)) ^ (m + 2))
       (∫ t in Ioi (0 : ℝ), t ^ (m + 1) * (1 / (rexp (c * t) - 1))) := by
-  refine q24a_hasSum_integral_pow_mul (a := fun _ => 1) (p := fun i => c * ((i : ℝ) + 1)) (m + 1)
+  refine hasSum_integral_pow_mul_of_hasSum_exp (a := fun _ => 1) (p := fun i => c * ((i : ℝ) + 1)) (m + 1)
     (fun i => by positivity) (fun t ht => ?_) ?_
   · have ht' : 0 < t := ht
     set r := rexp (-(c * t))
@@ -131,14 +147,14 @@ lemma q24a_hasSum_integral_exp_sub_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
     refine h.congr_fun fun i => ?_
     simp only [one_mul]
     rw [← pow_succ', ← Real.exp_nat_mul]; congr 1; push_cast; ring
-  · refine (q24a_summable_pow_succ m hc).congr fun i => ?_
+  · refine (summable_one_div_mul_succ_pow m hc).congr fun i => ?_
     simp
 
 /-- `∫₀^∞ tᵐ/(e^{ct} + 1) dt = ∑_{i ≥ 0} (-1)ⁱ m!/(c(i+1))^{m+1}`, `m ≥ 1`, `c > 0`. -/
-lemma q24a_hasSum_integral_exp_add_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
+private lemma hasSum_integral_pow_div_exp_add_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
     HasSum (fun i : ℕ => ((m + 1) ! : ℝ) * (-1) ^ i / (c * ((i : ℝ) + 1)) ^ (m + 2))
       (∫ t in Ioi (0 : ℝ), t ^ (m + 1) * (1 / (rexp (c * t) + 1))) := by
-  refine q24a_hasSum_integral_pow_mul (a := fun i => (-1) ^ i) (p := fun i => c * ((i : ℝ) + 1))
+  refine hasSum_integral_pow_mul_of_hasSum_exp (a := fun i => (-1) ^ i) (p := fun i => c * ((i : ℝ) + 1))
     (m + 1) (fun i => by positivity) (fun t ht => ?_) ?_
   · have ht' : 0 < t := ht
     set r := rexp (-(c * t))
@@ -157,16 +173,16 @@ lemma q24a_hasSum_integral_exp_add_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
     refine h.congr_fun fun i => ?_
     rw [show r * (-r) ^ i = (-1) ^ i * r ^ (i + 1) by rw [neg_pow]; ring, ← Real.exp_nat_mul]
     congr 2; push_cast; ring
-  · refine (q24a_summable_pow_succ m hc).congr fun i => ?_
+  · refine (summable_one_div_mul_succ_pow m hc).congr fun i => ?_
     simp
 
 /-- The Bose integral `∫₀^∞ t^{2m+1}/(e^{2πt} - 1) dt = (-1)^m B_{2m+2}/(4(m+1))`. -/
-lemma q24a_integral_exp_sub_one_bernoulli (m : ℕ) :
+private lemma integral_pow_div_exp_sub_one_eq_bernoulli (m : ℕ) :
     ∫ t in Ioi (0 : ℝ), t ^ (2 * m + 1) / (rexp (2 * π * t) - 1) =
       (-1) ^ m * (bernoulli (2 * (m + 1)) : ℝ) / (4 * (m + 1)) := by
-  have h := q24a_hasSum_integral_exp_sub_one (2 * m) (c := 2 * π) (by positivity)
+  have h := hasSum_integral_pow_div_exp_sub_one (2 * m) (c := 2 * π) (by positivity)
   simp only [mul_one_div] at h
-  have hz := (q24a_hasSum_zeta_succ (n := m + 1) (by omega)).mul_left
+  have hz := (hasSum_inv_succ_pow_two_mul_bernoulli (n := m + 1) (by omega)).mul_left
     (((2 * m + 1) ! : ℝ) / (2 * π) ^ (2 * m + 2))
   have heq := h.unique (hz.congr_fun fun i => by
     rw [show 2 * (m + 1) = 2 * m + 2 by ring, mul_pow]; field_simp)
@@ -182,17 +198,17 @@ lemma q24a_integral_exp_sub_one_bernoulli (m : ℕ) :
   ring
 
 /-- `∫₀^∞ t^{2m+1}/(e^{2πt} + 1) dt = (1 - 2^{-(2m+1)}) (-1)^m B_{2m+2}/(4(m+1))`. -/
-lemma q24a_integral_exp_add_one_bernoulli (m : ℕ) :
+private lemma integral_pow_div_exp_add_one_eq_bernoulli (m : ℕ) :
     ∫ t in Ioi (0 : ℝ), t ^ (2 * m + 1) / (rexp (2 * π * t) + 1) =
       (1 - 2 / 2 ^ (2 * m + 2)) * ((-1) ^ m * (bernoulli (2 * (m + 1)) : ℝ) / (4 * (m + 1))) := by
-  have h := q24a_hasSum_integral_exp_add_one (2 * m) (c := 2 * π) (by positivity)
+  have h := hasSum_integral_pow_div_exp_add_one (2 * m) (c := 2 * π) (by positivity)
   simp only [mul_one_div] at h
-  have hz0 := q24a_hasSum_zeta_succ (n := m + 1) (by omega)
+  have hz0 := hasSum_inv_succ_pow_two_mul_bernoulli (n := m + 1) (by omega)
   rw [show 2 * (m + 1) = 2 * m + 2 by ring] at hz0
-  have hz := (q24a_hasSum_eta hz0).mul_left (((2 * m + 1) ! : ℝ) / (2 * π) ^ (2 * m + 2))
+  have hz := (hasSum_alt_inv_succ_pow hz0).mul_left (((2 * m + 1) ! : ℝ) / (2 * π) ^ (2 * m + 2))
   have heq := h.unique (hz.congr_fun fun i => by rw [mul_pow]; field_simp)
-  have hb := q24a_integral_exp_sub_one_bernoulli m
-  have h' := q24a_hasSum_integral_exp_sub_one (2 * m) (c := 2 * π) (by positivity)
+  have hb := integral_pow_div_exp_sub_one_eq_bernoulli m
+  have h' := hasSum_integral_pow_div_exp_sub_one (2 * m) (c := 2 * π) (by positivity)
   simp only [mul_one_div] at h'
   have heq' := h'.unique ((hz0.mul_left (((2 * m + 1) ! : ℝ) / (2 * π) ^ (2 * m + 2))).congr_fun
     fun i => by rw [mul_pow]; field_simp)
@@ -201,7 +217,7 @@ lemma q24a_integral_exp_add_one_bernoulli (m : ℕ) :
 
 /-- At `t`, the function `(fun t => 2 / π * arctan (rexp (π * t)))` has derivative `(1 / cosh (π *
 t))`. -/
-lemma q24a_hasDerivAt_arctan_exp (t : ℝ) :
+private lemma hasDerivAt_arctan_exp_pi_mul (t : ℝ) :
     HasDerivAt (fun t => 2 / π * arctan (rexp (π * t))) (1 / cosh (π * t)) t := by
   have h1 : HasDerivAt (fun t => rexp (π * t)) (rexp (π * t) * π) t := by
     have := ((hasDerivAt_id t).const_mul π).exp
@@ -217,15 +233,15 @@ lemma q24a_hasDerivAt_arctan_exp (t : ℝ) :
 
 /-- Identity under the stated parameter and domain assumptions: `∫ t in Ioi (0 : ℝ), 1 / cosh (π *
 t) = 1 / 2`. -/
-lemma q24a_integral_sech : ∫ t in Ioi (0 : ℝ), 1 / cosh (π * t) = 1 / 2 := by
+private lemma integral_one_div_cosh_pi_mul : ∫ t in Ioi (0 : ℝ), 1 / cosh (π * t) = 1 / 2 := by
   have hlim : Tendsto (fun t => 2 / π * arctan (rexp (π * t))) atTop (𝓝 (2 / π * (π / 2))) := by
     refine Tendsto.const_mul _ ?_
     exact (tendsto_nhds_of_tendsto_nhdsWithin Real.tendsto_arctan_atTop).comp
       (Real.tendsto_exp_atTop.comp (tendsto_id.const_mul_atTop pi_pos))
   have hint : IntegrableOn (fun t => 1 / cosh (π * t)) (Ioi 0) :=
-    integrableOn_Ioi_deriv_of_nonneg' (fun t _ => q24a_hasDerivAt_arctan_exp t)
+    integrableOn_Ioi_deriv_of_nonneg' (fun t _ => hasDerivAt_arctan_exp_pi_mul t)
       (fun t _ => by positivity) hlim
-  rw [integral_Ioi_of_hasDerivAt_of_tendsto' (fun t _ => q24a_hasDerivAt_arctan_exp t) hint hlim]
+  rw [integral_Ioi_of_hasDerivAt_of_tendsto' (fun t _ => hasDerivAt_arctan_exp_pi_mul t) hint hlim]
   simp only [mul_zero, Real.exp_zero, Real.arctan_one]
   field_simp; ring
 
@@ -240,7 +256,7 @@ theorem bernoulli_two_mul_eq_integral_exp_add_one {n : ℕ} (hn : 1 ≤ n) :
       (bernoulli (2 * n) : ℝ) = (-1) ^ (n + 1) * (2 * n) / (1 - (2 : ℝ) ^ (1 - 2 * (n : ℤ))) *
         ∫ t in Set.Ioi (0 : ℝ), t ^ (2 * n - 1) * exp (-(π * t)) / cosh (π * t) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  have hI := q24a_integral_exp_add_one_bernoulli m
+  have hI := integral_pow_div_exp_add_one_eq_bernoulli m
   have hI2 : ∫ t in Ioi (0 : ℝ), t ^ (2 * (m + 1) - 1) * exp (-(π * t)) / cosh (π * t) =
       2 * ∫ t in Ioi (0 : ℝ), t ^ (2 * (m + 1) - 1) / (exp (2 * π * t) + 1) := by
     rw [← integral_const_mul]
@@ -285,7 +301,7 @@ theorem bernoulli_two_mul_eq_integral_exp_sub_one {n : ℕ} (hn : 1 ≤ n) :
       (bernoulli (2 * n) : ℝ) = (-1) ^ (n + 1) * (2 * n) *
         ∫ t in Set.Ioi (0 : ℝ), t ^ (2 * n - 1) * exp (-(π * t)) / sinh (π * t) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  have hI := q24a_integral_exp_sub_one_bernoulli m
+  have hI := integral_pow_div_exp_sub_one_eq_bernoulli m
   have hI2 : ∫ t in Ioi (0 : ℝ), t ^ (2 * (m + 1) - 1) * exp (-(π * t)) / sinh (π * t) =
       2 * ∫ t in Ioi (0 : ℝ), t ^ (2 * (m + 1) - 1) / (exp (2 * π * t) - 1) := by
     rw [← integral_const_mul]
@@ -315,7 +331,7 @@ theorem bernoulli_two_mul_eq_integral_exp_sub_one {n : ℕ} (hn : 1 ≤ n) :
     ring_nf; rw [hs]; ring
 
 /-- `csch²(πt) = ∑_{i≥0} 4(i+1) e^{-2π(i+1)t}` for `t > 0`. -/
-lemma r24a_hasSum_csch_sq {t : ℝ} (ht : 0 < t) :
+private lemma hasSum_one_div_sinh_sq {t : ℝ} (ht : 0 < t) :
     HasSum (fun i : ℕ => (4 * ((i : ℝ) + 1)) * rexp (-(2 * π * ((i : ℝ) + 1)) * t))
       (1 / sinh (π * t) ^ 2) := by
   set r := rexp (-(2 * π * t))
@@ -350,7 +366,7 @@ lemma r24a_hasSum_csch_sq {t : ℝ} (ht : 0 < t) :
     exp_nat_mul, mul_assoc]
 
 /-- `sech²(πt) = ∑_{i≥0} 4(-1)ⁱ(i+1) e^{-2π(i+1)t}` for `t > 0`. -/
-lemma r24a_hasSum_sech_sq {t : ℝ} (ht : 0 < t) :
+private lemma hasSum_one_div_cosh_sq {t : ℝ} (ht : 0 < t) :
     HasSum (fun i : ℕ => (4 * (-1) ^ i * ((i : ℝ) + 1)) * rexp (-(2 * π * ((i : ℝ) + 1)) * t))
       (1 / cosh (π * t) ^ 2) := by
   set r := rexp (-(2 * π * t))
@@ -383,7 +399,7 @@ lemma r24a_hasSum_sech_sq {t : ℝ} (ht : 0 < t) :
   ring
 
 /-- `log(1 - e^{-2πt}) = ∑_{i≥0} (-1/(i+1)) e^{-2π(i+1)t}` for `t > 0`. -/
-lemma r24a_hasSum_log_one_sub_exp {t : ℝ} (ht : 0 < t) :
+private lemma hasSum_log_one_sub_exp {t : ℝ} (ht : 0 < t) :
     HasSum (fun i : ℕ => (-(1 / ((i : ℝ) + 1))) * rexp (-(2 * π * ((i : ℝ) + 1)) * t))
       (log (1 - rexp (-(2 * π * t)))) := by
   set r := rexp (-(2 * π * t))
@@ -401,11 +417,11 @@ lemma r24a_hasSum_log_one_sub_exp {t : ℝ} (ht : 0 < t) :
 theorem bernoulli_two_mul_eq_integral_sech_sq {n : ℕ} (hn : 1 ≤ n) :
     (bernoulli (2 * n) : ℝ) = (-1) ^ (n + 1) * π / (1 - (2 : ℝ) ^ (1 - 2 * (n : ℤ))) *
       ∫ t in Set.Ioi (0 : ℝ), t ^ (2 * n) / cosh (π * t) ^ 2 := by
-  have h := q24a_hasSum_integral_pow_mul (a := fun i : ℕ => 4 * (-1) ^ i * ((i : ℝ) + 1))
+  have h := hasSum_integral_pow_mul_of_hasSum_exp (a := fun i : ℕ => 4 * (-1) ^ i * ((i : ℝ) + 1))
     (p := fun i : ℕ => 2 * π * ((i : ℝ) + 1)) (F := fun t => 1 / cosh (π * t) ^ 2) (2 * n)
-    (fun i => by positivity) (fun t ht => r24a_hasSum_sech_sq ht) ?_
-  · have hz0 := q24a_hasSum_zeta_succ (n := n) (by omega)
-    have hz := (q24a_hasSum_eta hz0).mul_left (4 * ((2 * n) ! : ℝ) / (2 * π) ^ (2 * n + 1))
+    (fun i => by positivity) (fun t ht => hasSum_one_div_cosh_sq ht) ?_
+  · have hz0 := hasSum_inv_succ_pow_two_mul_bernoulli (n := n) (by omega)
+    have hz := (hasSum_alt_inv_succ_pow hz0).mul_left (4 * ((2 * n) ! : ℝ) / (2 * π) ^ (2 * n + 1))
     have heq := h.unique (hz.congr_fun fun i => by
       rw [mul_pow, pow_succ ((i : ℝ) + 1)]
       have : (i : ℝ) + 1 ≠ 0 := by positivity
@@ -432,7 +448,7 @@ theorem bernoulli_two_mul_eq_integral_sech_sq {n : ℕ} (hn : 1 ≤ n) :
     rw [h1']
     field_simp
     ring
-  · refine ((q24a_hasSum_zeta_succ (n := n) (by omega)).summable.mul_left
+  · refine ((hasSum_inv_succ_pow_two_mul_bernoulli (n := n) (by omega)).summable.mul_left
       (4 / (2 * π) ^ (2 * n + 1))).congr fun i => ?_
     rw [abs_mul, abs_mul, abs_pow, abs_neg, abs_one, one_pow, mul_one, abs_of_pos (by positivity),
       abs_of_pos (by positivity), mul_pow (2 * π), pow_succ ((i : ℝ) + 1)]
@@ -444,10 +460,10 @@ theorem bernoulli_two_mul_eq_integral_sech_sq {n : ℕ} (hn : 1 ≤ n) :
 theorem bernoulli_two_mul_eq_integral_csch_sq {n : ℕ} (hn : 1 ≤ n) :
     (bernoulli (2 * n) : ℝ) = (-1) ^ (n + 1) * π *
       ∫ t in Set.Ioi (0 : ℝ), t ^ (2 * n) / sinh (π * t) ^ 2 := by
-  have h := q24a_hasSum_integral_pow_mul (a := fun i : ℕ => 4 * ((i : ℝ) + 1))
+  have h := hasSum_integral_pow_mul_of_hasSum_exp (a := fun i : ℕ => 4 * ((i : ℝ) + 1))
     (p := fun i : ℕ => 2 * π * ((i : ℝ) + 1)) (F := fun t => 1 / sinh (π * t) ^ 2) (2 * n)
-    (fun i => by positivity) (fun t ht => r24a_hasSum_csch_sq ht) ?_
-  · have hz := (q24a_hasSum_zeta_succ (n := n) (by omega)).mul_left
+    (fun i => by positivity) (fun t ht => hasSum_one_div_sinh_sq ht) ?_
+  · have hz := (hasSum_inv_succ_pow_two_mul_bernoulli (n := n) (by omega)).mul_left
       (4 * ((2 * n) ! : ℝ) / (2 * π) ^ (2 * n + 1))
     have heq := h.unique (hz.congr_fun fun i => by
       rw [mul_pow, pow_succ ((i : ℝ) + 1)]
@@ -461,7 +477,7 @@ theorem bernoulli_two_mul_eq_integral_csch_sq {n : ℕ} (hn : 1 ≤ n) :
     rw [mul_pow, pow_succ, pow_succ, e2]
     field_simp
     linear_combination (-(4 * (bernoulli (2 * n) : ℝ) * π * π ^ (n * 2))) * h1
-  · refine ((q24a_hasSum_zeta_succ (n := n) (by omega)).summable.mul_left
+  · refine ((hasSum_inv_succ_pow_two_mul_bernoulli (n := n) (by omega)).summable.mul_left
       (4 / (2 * π) ^ (2 * n + 1))).congr fun i => ?_
     rw [abs_of_pos (by positivity), mul_pow (2 * π), pow_succ ((i : ℝ) + 1)]
     have : (i : ℝ) + 1 ≠ 0 := by positivity
@@ -472,10 +488,10 @@ theorem bernoulli_two_mul_eq_integral_csch_sq {n : ℕ} (hn : 1 ≤ n) :
 theorem bernoulli_two_mul_eq_integral_log {n : ℕ} (hn : 1 ≤ n) :
     (bernoulli (2 * n) : ℝ) = (-1) ^ n * (2 * n * (2 * n - 1)) / π *
       ∫ t in Set.Ioi (0 : ℝ), t ^ (2 * n - 2) * log (1 - exp (-(2 * π * t))) := by
-  have h := q24a_hasSum_integral_pow_mul (a := fun i : ℕ => -(1 / ((i : ℝ) + 1)))
+  have h := hasSum_integral_pow_mul_of_hasSum_exp (a := fun i : ℕ => -(1 / ((i : ℝ) + 1)))
     (p := fun i : ℕ => 2 * π * ((i : ℝ) + 1)) (F := fun t => log (1 - exp (-(2 * π * t))))
-    (2 * n - 2) (fun i => by positivity) (fun t ht => r24a_hasSum_log_one_sub_exp ht) ?_
-  · have hz0 := q24a_hasSum_zeta_succ (n := n) (by omega)
+    (2 * n - 2) (fun i => by positivity) (fun t ht => hasSum_log_one_sub_exp ht) ?_
+  · have hz0 := hasSum_inv_succ_pow_two_mul_bernoulli (n := n) (by omega)
     have hz := (hz0.mul_left (-(((2 * n - 2) ! : ℝ)) / (2 * π) ^ (2 * n - 1)))
     have heq := h.unique (hz.congr_fun fun i => by
       have e : ((i : ℝ) + 1) ^ (2 * n) = ((i : ℝ) + 1) ^ (2 * n - 1) * ((i : ℝ) + 1) := by
@@ -493,7 +509,7 @@ theorem bernoulli_two_mul_eq_integral_log {n : ℕ} (hn : 1 ≤ n) :
     have hk : (2 * (k : ℝ) + 1) ≠ 0 := by positivity
     have hk' : (2 * (k : ℝ) + 1 + 1) ≠ 0 := by positivity
     rcases neg_one_pow_eq_or ℝ (k + 1) with h | h <;> rw [h] <;> field_simp <;> ring
-  · refine ((q24a_hasSum_zeta_succ (n := n) (by omega)).summable.mul_left
+  · refine ((hasSum_inv_succ_pow_two_mul_bernoulli (n := n) (by omega)).summable.mul_left
       (1 / (2 * π) ^ (2 * n - 1))).congr fun i => ?_
     have e : ((i : ℝ) + 1) ^ (2 * n) = ((i : ℝ) + 1) ^ (2 * n - 1) * ((i : ℝ) + 1) := by
       rw [← pow_succ]; congr 1; omega
@@ -509,9 +525,9 @@ theorem eulerNumber_two_mul_eq_integral_sech (n : ℕ) :
       ∫ t in Set.Ioi (0 : ℝ), t ^ (2 * n) / cosh (π * t) := by
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp only [mul_zero, pow_zero, one_mul, zero_add, pow_one]
-    rw [q24a_integral_sech]; simp
-  have hβ := q24a_hasSum_alt_odd_eulerNumber (k := n) hn.ne'
-  have h := q24a_hasSum_integral_pow_mul (a := fun i => 2 * (-1) ^ i)
+    rw [integral_one_div_cosh_pi_mul]; simp
+  have hβ := hasSum_alt_inv_odd_pow_eulerNumber (k := n) hn.ne'
+  have h := hasSum_integral_pow_mul_of_hasSum_exp (a := fun i => 2 * (-1) ^ i)
     (p := fun i => (2 * (i : ℝ) + 1) * π) (F := fun t => 1 / cosh (π * t)) (2 * n)
     (fun i => by positivity) (fun t ht => ?_) ?_
   · have h2 := (hβ.mul_left (((2 * n) ! : ℝ) * 2 / π ^ (2 * n + 1)))

@@ -6,15 +6,36 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Struve.AngerWeber.IntegralAndSeries
+public import Carlson.Elliptic.Addition
+public import DLMFMathlib.Analysis.SpecialFunctions.Complex.ArgLog
 
 /-!
-# Lommel connections of Anger and Weber functions
+# Anger and Weber functions: Lommel connections and special values (DLMF §11.10)
 
-Regularized Lommel solutions, noninteger-order connections and integral consequences for Anger
-and Weber functions.
+This file relates the Anger and Weber functions to the Lommel functions and proves the
+half-integer and integer cases, the order derivatives at zero, the Bessel-product series, and
+the recurrence and derivative formulas.
 
-Source references and common attribution are retained in
-`DLMF.Struve.AngerWeber`.
+## Main definitions
+
+* `angerFresnelPlus`, `angerFresnelMinus`: the sum and difference of the complex Fresnel
+  integrals of DLMF 11.10.21.
+* `weberM1`, `weberM2`: the numbers of terms in DLMF 11.10.24.
+
+## Main results
+
+* `angerJ_lommel`, `weberE_lommel`: DLMF 11.10.17–11.10.18.
+* `angerJ_half_19`, `angerJ_half_20`, `anger_weber_half`: the half-integer cases
+  DLMF 11.10.19–11.10.20.
+* `weberE_nat`, `weberE_neg_nat`: `𝐄_{±n}` in terms of `𝐇_{±n}` (DLMF 11.10.22–11.10.24).
+* `angerJ_zero`, `weberE_zero`, `weberE_zero_order`, `weberE_one_order`: DLMF 11.10.25–11.10.26.
+* `angerJ_order_deriv_zero`, `weberE_order_deriv_zero`: DLMF 11.10.27–11.10.28.
+* `angerJ_int`: `𝐉_n(z) = J_n(z)` (DLMF 11.10.29).
+* `angerJ_bessel_products`, `weberE_bessel_products`: DLMF 11.10.30–11.10.31.
+* `angerJ_recurrence`, `weberE_recurrence`: DLMF 11.10.32–11.10.33.
+* `angerJ_deriv`, `weberE_deriv`: DLMF 11.10.34–11.10.35.
+* `angerJ_weighted_deriv_add`, `angerJ_weighted_deriv_sub`, `weberE_weighted_deriv_add`,
+  `weberE_weighted_deriv_sub`: DLMF 11.10.36–11.10.37.
 -/
 
 @[expose] public noncomputable section
@@ -346,23 +367,10 @@ theorem angerHalfDefect_eq_zero {x : ℝ} (hx : 0 < x) :
   · linear_combination -sin (x : ℂ) * hu0 + cos (x : ℂ) * hv0 +
       -angerHalfDefectG x * htrig
 
-/-- `r^{1/2} = √r` for `r ≥ 0`. -/
-theorem ofReal_cpow_half {r : ℝ} (hr : 0 ≤ r) : (r : ℂ) ^ (1/2 : ℂ) = (Real.sqrt r : ℂ) := by
-  rw [Real.sqrt_eq_rpow, ofReal_cpow hr]; push_cast; ring_nf
-
 /-- `r^{-1/2} = (√r)⁻¹` for `r ≥ 0`. -/
 theorem ofReal_cpow_neg_half {r : ℝ} (hr : 0 ≤ r) :
     (r : ℂ) ^ (-1/2 : ℂ) = ((Real.sqrt r : ℂ))⁻¹ := by
-  rw [show (-1/2 : ℂ) = -(1/2) by ring, cpow_neg, ofReal_cpow_half hr]
-
-/-- The slit plane is invariant under positive real scaling. -/
-theorem mul_mem_slitPlane_of_pos {r : ℝ} (hr : 0 < r) {z : ℂ} (hz : z ∈ slitPlane) :
-    (r : ℂ) * z ∈ slitPlane := by
-  rw [mem_slitPlane_iff] at hz ⊢
-  simp only [mul_re, ofReal_re, ofReal_im, zero_mul, sub_zero, mul_im, add_zero]
-  rcases hz with h | h
-  · exact Or.inl (mul_pos hr h)
-  · exact Or.inr (mul_ne_zero hr.ne' h)
+  rw [show (-1/2 : ℂ) = -(1/2) by ring, cpow_neg, Carlson.ofReal_cpow_half hr]
 
 /-- Positive reals accumulate at `1` in the punctured complex neighbourhood. -/
 theorem frequently_ofReal_pos {P : ℂ → Prop} (hP : ∀ x : ℝ, 0 < x → P x) :
@@ -388,10 +396,10 @@ theorem differentiableOn_angerHalf_rhs (A B : ℂ → ℂ) (hA : Differentiable 
       slitPlane := by
   intro z hz
   have h1 : π * z / 2 ∈ slitPlane := by
-    have := mul_mem_slitPlane_of_pos (by positivity : (0:ℝ) < π / 2) hz
+    have := Complex.ofReal_mul_mem_slitPlane (by positivity : (0:ℝ) < π / 2) hz
     convert this using 1; push_cast; ring
   have h2 : 2 * z / π ∈ slitPlane := by
-    have := mul_mem_slitPlane_of_pos (by positivity : (0:ℝ) < 2 / π) hz
+    have := Complex.ofReal_mul_mem_slitPlane (by positivity : (0:ℝ) < 2 / π) hz
     convert this using 1; push_cast; ring
   have hc1 : DifferentiableAt ℂ (fun z : ℂ => (π*z/2)^(-1/2:ℂ)) z :=
     DifferentiableAt.cpow (by fun_prop) (differentiableAt_const _) h1
@@ -427,7 +435,7 @@ theorem angerJ_half_19 {z : ℂ} (hz : z ∈ slitPlane) :
     ofReal_ne_zero.2 (Real.sqrt_pos.2 (by positivity)).ne'
   rw [show π * (x : ℂ) / 2 = ((π * x / 2 : ℝ) : ℂ) by push_cast; ring,
     show 2 * (x : ℂ) / π = ((2 * x / π : ℝ) : ℂ) by push_cast; ring,
-    ofReal_cpow_neg_half (by positivity), ofReal_cpow_half (by positivity),
+    ofReal_cpow_neg_half (by positivity), Carlson.ofReal_cpow_half (by positivity),
     eq_inv_mul_iff_mul_eq₀ hs0]
   linear_combination h
 
@@ -450,7 +458,7 @@ theorem angerJ_half_20 {z : ℂ} (hz : z ∈ slitPlane) :
     ofReal_ne_zero.2 (Real.sqrt_pos.2 (by positivity)).ne'
   rw [show π * (x : ℂ) / 2 = ((π * x / 2 : ℝ) : ℂ) by push_cast; ring,
     show 2 * (x : ℂ) / π = ((2 * x / π : ℝ) : ℂ) by push_cast; ring,
-    ofReal_cpow_neg_half (by positivity), ofReal_cpow_half (by positivity),
+    ofReal_cpow_neg_half (by positivity), Carlson.ofReal_cpow_half (by positivity),
     eq_inv_mul_iff_mul_eq₀ hs0]
   linear_combination h
 

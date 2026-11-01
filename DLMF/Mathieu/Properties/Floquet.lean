@@ -10,10 +10,33 @@ public import DLMF.Mathieu.Properties.BasicSolutions
 /-!
 # Floquet properties of Mathieu functions
 
-Characteristic exponents, Floquet alternatives and Ince-type arguments for Mathieu solutions.
+This file develops Floquet theory for Mathieu's equation (DLMF §§28.2(iii)–(iv)): Floquet's
+theorem and the characteristic equation, characteristic exponents, the connection formula, the
+Floquet dichotomy, Ince's uniqueness theorem and the Fourier series of Floquet solutions.
 
-Source references and common attribution are retained in
-`DLMF.Mathieu.Properties`.
+## Main results
+
+* `exists_isFloquetSolution_iff`: Floquet's theorem (DLMF 28.2.14–28.2.15).
+* `exists_isFloquetSolution_iff_charExp`, `mathieuWI_pi_neg_q`: the characteristic equation
+  `cos πν = w_I(π; a, q) = w_I(π; a, -q)` (DLMF 28.2.16).
+* `exists_entire_mathieuWI_pi`: `cos πν` is an entire function of `a` and `q²`
+  (DLMF §28.2(iii)).
+* `isMathieuCharExp_iff`, `re_arccosPrincipal_mathieuWI_div_pi_mem`: the principal
+  characteristic exponent `ν̂ = π⁻¹ arccos w_I(π; a, q)`, with `0 ≤ ℜν̂ ≤ 1`.
+* `isMathieuCharExp_double_iff`: double roots of the characteristic equation.
+* `IsMathieuSolution.add_pi_add_sub_pi`: the connection formula 28.2.17.
+* `IsMathieuSolution.isFloquet_or`: the Floquet dichotomy (DLMF §28.2(iv)).
+* `IsFloquetSolution.unique`: Ince's theorem, uniqueness of the Floquet solution for `q ≠ 0`
+  (DLMF §28.2(iv)).
+* `IsFloquetSolution.exists_fourier`, `isFloquetSolution_of_recurrence`: the Fourier series of
+  a Floquet solution and its converse (DLMF 28.2.18–28.2.20).
+
+## Implementation notes
+
+The principal characteristic exponent uses the principal arccosine
+`DLMF.Elementary.arccosPrincipal` (DLMF 4.23.16); no new definition is made. Ince's theorem is
+proved with the Casoratian of the recurrences for the Fourier coefficients (no coexistence of
+two periodic solutions for `q ≠ 0`).
 -/
 
 @[expose] public noncomputable section
@@ -52,7 +75,7 @@ theorem exists_isFloquetSolution_iff (a q ν : ℂ) :
         exact this
       have v0 : w π = μ * w 0 := by simpa using hper 0
       have c0 := congrFun hw.eq_combination π
-      have c1 := hw.p1a1_deriv_eq π
+      have c1 := hw.deriv_eq_mathieuWI_mathieuWII π
       ext i; fin_cases i
       · simp [mathieuMonodromy, Matrix.mulVec, dotProduct, Fin.sum_univ_two]
         rw [← v0, c0]; ring
@@ -66,7 +89,7 @@ theorem exists_isFloquetSolution_iff (a q ν : ℂ) :
     have hw : IsMathieuSolution a q w := (h1.const_mul _).add (h2.const_mul _)
     have hw0 : w 0 = v 0 := by simp [w, h10, h20]
     have hw1 : deriv w 0 = v 1 := by
-      rw [hwdef, m28a_deriv_lincomb (h1.differentiable 0) (h2.differentiable 0), h11, h21]
+      rw [hwdef, deriv_const_mul_add_const_mul (h1.differentiable 0) (h2.differentiable 0), h11, h21]
       ring
     refine ⟨w, hw, ?_, fun z => ?_⟩
     · intro hz
@@ -78,7 +101,7 @@ theorem exists_isFloquetSolution_iff (a q ν : ℂ) :
         (by simp only [zero_add, w, h10, h20]; linear_combination m0)
         (by
           rw [deriv_comp_add_const, zero_add, deriv_const_mul _ (hw.differentiable 0), hw1,
-            hwdef, m28a_deriv_lincomb (h1.differentiable _) (h2.differentiable _)]
+            hwdef, deriv_const_mul_add_const_mul (h1.differentiable _) (h2.differentiable _)]
           linear_combination m1)
       exact congrFun key z
 
@@ -117,13 +140,13 @@ theorem exists_isFloquetSolution_iff_charExp (a q ν : ℂ) :
 /-- **DLMF 28.2.16** (second equality): `w_I(π; a, q) = w_I(π; a, -q)`. -/
 @[dlmf 28.2.E16]
 theorem mathieuWI_pi_neg_q (a q : ℂ) : mathieuWI a q π = mathieuWI a (-q) π := by
-  rw [m28a_mathieuWI_pi, m28a_mathieuWI_pi a (-q), p1a1_mathieuWI_half_pi_neg_q,
-    p1a1_mathieuWII_half_pi_neg_q, p1a1_deriv_mathieuWI_half_pi_neg_q,
-    p1a1_deriv_mathieuWII_half_pi_neg_q]
+  rw [mathieuWI_pi, mathieuWI_pi a (-q), mathieuWI_half_pi_neg_q,
+    mathieuWII_half_pi_neg_q, deriv_mathieuWI_half_pi_neg_q,
+    deriv_mathieuWII_half_pi_neg_q]
   ring
 
 /-- If `g` is entire and even, `s ↦ g(√s)` is entire. -/
-lemma p2f_differentiable_comp_sqrt {g : ℂ → ℂ} (hg : Differentiable ℂ g)
+private lemma differentiable_comp_cpow_inv_two_of_even {g : ℂ → ℂ} (hg : Differentiable ℂ g)
     (hev : ∀ w, g (-w) = g w) : Differentiable ℂ (fun s => g (s ^ (2⁻¹ : ℂ))) := by
   have key : ∀ s w : ℂ, w ^ 2 = s → g (s ^ (2⁻¹ : ℂ)) = g w := by
     intro s w hw
@@ -160,7 +183,7 @@ lemma p2f_differentiable_comp_sqrt {g : ℂ → ℂ} (hg : Differentiable ℂ g)
   · exact hne s₀ hs₀
 
 /-- Hartogs for two variables on `ℂ × ℂ`. -/
-lemma p2f_differentiable_of_separately₂ {f : ℂ × ℂ → ℂ}
+private lemma differentiable_of_separately₂ {f : ℂ × ℂ → ℂ}
     (h1 : ∀ b, Differentiable ℂ (fun x => f (x, b)))
     (h2 : ∀ x, Differentiable ℂ (fun b => f (x, b))) : Differentiable ℂ f := by
   let g : (Fin 2 → ℂ) → ℂ := fun v => f (v 0, v 1)
@@ -182,15 +205,15 @@ function `F` on `ℂ²` with `w_I(π; a, q) = F(a, q²)`. -/
 @[dlmf 28.2.iii]
 theorem exists_entire_mathieuWI_pi :
     ∃ F : ℂ × ℂ → ℂ, Differentiable ℂ F ∧ ∀ a q, mathieuWI a q π = F (a, q ^ 2) := by
-  have hI := p2f_differentiable_param (W := mathieuWI) isMathieuSolution_mathieuWI
+  have hI := differentiable_family_in_a (W := mathieuWI) isMathieuSolution_mathieuWI
     (fun a q => (mathieuWI_spec a q).2.1) (fun a q => (mathieuWI_spec a q).2.2)
-  have hI' := p2f_differentiable_param_q (W := mathieuWI) isMathieuSolution_mathieuWI
+  have hI' := differentiable_family_in_q (W := mathieuWI) isMathieuSolution_mathieuWI
     (fun a q => (mathieuWI_spec a q).2.1) (fun a q => (mathieuWI_spec a q).2.2)
   have hev : ∀ a q : ℂ, mathieuWI a (-q) π = mathieuWI a q π := fun a q =>
     (mathieuWI_pi_neg_q a q).symm
   refine ⟨fun p => mathieuWI p.1 (p.2 ^ (2⁻¹ : ℂ)) π, ?_, fun a q => ?_⟩
-  · exact p2f_differentiable_of_separately₂ (fun s => (hI (s ^ (2⁻¹ : ℂ)) π).1)
-      (fun a => p2f_differentiable_comp_sqrt (g := fun q => mathieuWI a q π) (hI' a _).1
+  · exact differentiable_of_separately₂ (fun s => (hI (s ^ (2⁻¹ : ℂ)) π).1)
+      (fun a => differentiable_comp_cpow_inv_two_of_even (g := fun q => mathieuWI a q π) (hI' a _).1
         (hev a))
   · have : q ^ 2 = ((q ^ 2) ^ (2⁻¹ : ℂ)) ^ 2 := by rw [Complex.cpow_ofNat_inv_pow]
     rcases sq_eq_sq_iff_eq_or_eq_neg.1 this with h | h
@@ -226,7 +249,7 @@ theorem isMathieuCharExp_iff (a q ν : ℂ) :
       rw [hk]; field_simp; ring
 
 /-- `ℜ √z ≥ 0` for the principal square root. -/
-lemma p1a1_re_sqrt_nonneg (z : ℂ) : 0 ≤ (Complex.sqrt z).re := by
+private lemma zero_le_re_sqrt (z : ℂ) : 0 ≤ (Complex.sqrt z).re := by
   rcases eq_or_ne z 0 with rfl | hz
   · simp [Complex.sqrt, Complex.zero_cpow (by norm_num : (2⁻¹ : ℂ) ≠ 0)]
   · rw [Complex.sqrt, Complex.cpow_def_of_ne_zero hz, Complex.exp_re]
@@ -241,7 +264,7 @@ lemma p1a1_re_sqrt_nonneg (z : ℂ) : 0 ≤ (Complex.sqrt z).re := by
       rw [e]; linarith
 
 /-- `0 ≤ ℜ(arccos c / π) ≤ 1` for the principal arccosine. -/
-lemma p1a1_re_arccosPrincipal_div_pi_mem (c : ℂ) :
+private lemma re_arccosPrincipal_div_pi_mem_Icc (c : ℂ) :
     0 ≤ (DLMF.Elementary.arccosPrincipal c / π).re ∧
       (DLMF.Elementary.arccosPrincipal c / π).re ≤ 1 := by
   set s := Complex.sqrt (1 - c ^ 2)
@@ -256,7 +279,7 @@ lemma p1a1_re_arccosPrincipal_div_pi_mem (c : ℂ) :
       rw [← hinv]; simp only [w, Complex.add_re, Complex.sub_re]; ring
     rw [Complex.inv_re] at h2
     have hn : 0 < Complex.normSq w := Complex.normSq_pos.mpr hw0
-    have hsr := p1a1_re_sqrt_nonneg (1 - c ^ 2)
+    have hsr := zero_le_re_sqrt (1 - c ^ 2)
     by_contra hneg
     rw [not_le] at hneg
     have : w.re / Complex.normSq w < 0 := div_neg_of_neg_of_pos hneg hn
@@ -278,7 +301,7 @@ lemma p1a1_re_arccosPrincipal_div_pi_mem (c : ℂ) :
 theorem re_arccosPrincipal_mathieuWI_div_pi_mem (a q : ℂ) :
     0 ≤ (DLMF.Elementary.arccosPrincipal (mathieuWI a q π) / π).re ∧
       (DLMF.Elementary.arccosPrincipal (mathieuWI a q π) / π).re ≤ 1 :=
-  p1a1_re_arccosPrincipal_div_pi_mem _
+  re_arccosPrincipal_div_pi_mem_Icc _
 
 /-- **Double roots** (DLMF §28.2(iii)): `ν` is a double root of the characteristic equation
 (the derivative `-π sin πν` of `cos πν - w_I(π)` also vanishes) iff `ν` is an integer. -/
@@ -338,7 +361,7 @@ theorem IsMathieuSolution.isFloquet_or {a q ν : ℂ} {w : ℂ → ℂ}
       linear_combination h2 + w z * he
 
 /-- Derivative periodicity from periodicity. -/
-lemma p1a2_deriv_periodic {f : ℂ → ℂ} {T : ℂ} (hf : ∀ z, f (z + T) = f z) (z : ℂ) :
+private lemma deriv_add_of_periodic {f : ℂ → ℂ} {T : ℂ} (hf : ∀ z, f (z + T) = f z) (z : ℂ) :
     deriv f (z + T) = deriv f z := by
   have : (fun z => f (z + T)) = f := funext hf
   have h := deriv_comp_add_const (f := f) (a := T) (x := z)
@@ -346,7 +369,7 @@ lemma p1a2_deriv_periodic {f : ℂ → ℂ} {T : ℂ} (hf : ∀ z, f (z + T) = f
   exact h.symm
 
 /-- Integration-by-parts identity behind the recurrences 28.4.5–28.4.8 (cosine form). -/
-theorem p1a2_cos_rec {a q : ℂ} {f : ℂ → ℂ} (hf : IsMathieuSolution a q f)
+theorem integral_mul_cos_rec {a q : ℂ} {f : ℂ → ℂ} (hf : IsMathieuSolution a q f)
     (hper : ∀ z, f (z + 2 * π) = f z) (k : ℤ) :
     (a - (k : ℂ) ^ 2) * ∫ x in (0 : ℝ)..2 * π, f x * Complex.cos (k * x) =
       q * ((∫ x in (0 : ℝ)..2 * π, f x * Complex.cos (((k - 2 : ℤ) : ℂ) * x)) +
@@ -380,7 +403,7 @@ theorem p1a2_cos_rec {a q : ℂ} {f : ℂ → ℂ} (hf : IsMathieuSolution a q f
   have hK2 : Complex.sin (K * ((2 * π : ℝ) : ℂ)) = 0 := by
     rw [show K * ((2 * π : ℝ) : ℂ) = (k : ℂ) * (2 * π) by push_cast; ring]
     exact Complex.sin_int_mul_pi (2 * k) |>.symm ▸ by push_cast; ring_nf
-  have hper' := p1a2_deriv_periodic hper 0
+  have hper' := deriv_add_of_periodic hper 0
   rw [zero_add] at hper'
   have h0 : ∫ x in (0 : ℝ)..2 * π,
       (2 * q * Complex.cos (2 * x) - a + K ^ 2) * (f x * Complex.cos (K * x)) = 0 := by
@@ -412,7 +435,7 @@ theorem p1a2_cos_rec {a q : ℂ} {f : ℂ → ℂ} (hf : IsMathieuSolution a q f
   linear_combination -h0
 
 /-- Integration-by-parts identity behind the recurrences 28.4.5–28.4.8 (sine form). -/
-theorem p1a2_sin_rec {a q : ℂ} {f : ℂ → ℂ} (hf : IsMathieuSolution a q f)
+theorem integral_mul_sin_rec {a q : ℂ} {f : ℂ → ℂ} (hf : IsMathieuSolution a q f)
     (hper : ∀ z, f (z + 2 * π) = f z) (k : ℤ) :
     (a - (k : ℂ) ^ 2) * ∫ x in (0 : ℝ)..2 * π, f x * Complex.sin (k * x) =
       q * ((∫ x in (0 : ℝ)..2 * π, f x * Complex.sin (((k - 2 : ℤ) : ℂ) * x)) +
@@ -476,44 +499,44 @@ theorem p1a2_sin_rec {a q : ℂ} {f : ℂ → ℂ} (hf : IsMathieuSolution a q f
   linear_combination -h0
 
 /-- Exponential decay of the cosine integrals of an even entire `2π`-periodic function. -/
-theorem p2f_cos_coeff_decay {F : ℂ → ℂ} (hF : Differentiable ℂ F)
+theorem norm_integral_mul_cos_le_exp {F : ℂ → ℂ} (hF : Differentiable ℂ F)
     (hper : ∀ z, F (z + 2 * π) = F z) (hev : ∀ z, F (-z) = F z) (R : ℝ) :
     ∃ C, 0 ≤ C ∧ ∀ m : ℕ,
       ‖∫ x in (0 : ℝ)..2 * π, F x * Complex.cos (m * x)‖ ≤ C * Real.exp (-(R * m)) := by
   have hc := hF.continuous
-  obtain ⟨C, hC0, hC⟩ := p1a2_fourierInt_decay hF hper R
+  obtain ⟨C, hC0, hC⟩ := fourierIntegral_periodic_decay hF hper R
   refine ⟨C, hC0, fun m => ?_⟩
   have hs0 : ∫ x in (0 : ℝ)..2 * π, F x * Complex.sin (((m : ℤ) : ℂ) * x) = 0 := by
-    apply p1a2_integral_odd_periodic (p1a2_periodic_mul_sin hper m)
+    apply intervalIntegral_eq_zero_of_periodic_odd (periodic_mul_sin_int_mul hper m)
     intro x
     push_cast
     rw [hev, show (m : ℂ) * -x = -(m * x) by ring, Complex.sin_neg]; ring
   have h := hC m
-  rw [p1a2_fourierInt_eq hc, hs0, mul_zero, sub_zero] at h
+  rw [fourierIntegral_eq_cos_sub_I_mul_sin hc, hs0, mul_zero, sub_zero] at h
   push_cast at h
   simpa using h
 
 /-- Exponential decay of the sine integrals of an odd entire `2π`-periodic function. -/
-theorem p2f_sin_coeff_decay {F : ℂ → ℂ} (hF : Differentiable ℂ F)
+theorem norm_integral_mul_sin_le_exp {F : ℂ → ℂ} (hF : Differentiable ℂ F)
     (hper : ∀ z, F (z + 2 * π) = F z) (hodd : ∀ z, F (-z) = -F z) (R : ℝ) :
     ∃ C, 0 ≤ C ∧ ∀ m : ℕ,
       ‖∫ x in (0 : ℝ)..2 * π, F x * Complex.sin (m * x)‖ ≤ C * Real.exp (-(R * m)) := by
   have hc := hF.continuous
-  obtain ⟨C, hC0, hC⟩ := p1a2_fourierInt_decay hF hper R
+  obtain ⟨C, hC0, hC⟩ := fourierIntegral_periodic_decay hF hper R
   refine ⟨C, hC0, fun m => ?_⟩
   have hc0 : ∫ x in (0 : ℝ)..2 * π, F x * Complex.cos (((m : ℤ) : ℂ) * x) = 0 := by
-    apply p1a2_integral_odd_periodic (p1a2_periodic_mul_cos hper m)
+    apply intervalIntegral_eq_zero_of_periodic_odd (periodic_mul_cos_int_mul hper m)
     intro x
     push_cast
     rw [hodd, show (m : ℂ) * -x = -(m * x) by ring, Complex.cos_neg]; ring
   have h := hC m
-  rw [p1a2_fourierInt_eq hc, hc0, zero_sub, norm_neg, norm_mul, Complex.norm_I, one_mul] at h
+  rw [fourierIntegral_eq_cos_sub_I_mul_sin hc, hc0, zero_sub, norm_neg, norm_mul, Complex.norm_I, one_mul] at h
   push_cast at h
   simpa using h
 
 /-- A sequence satisfying a three-term recurrence with `q ≠ 0` and two vanishing initial
 values vanishes. -/
-lemma p2f_chain_zero {q : ℂ} (hq : q ≠ 0) {b x : ℕ → ℂ}
+private lemma eq_zero_of_three_term_rec {q : ℂ} (hq : q ≠ 0) {b x : ℕ → ℂ}
     (hrec : ∀ j, b j * x (j + 1) = q * (x j + x (j + 2))) (h0 : x 0 = 0) (h1 : x 1 = 0) :
     ∀ j, x j = 0 := by
   have : ∀ j, x j = 0 ∧ x (j + 1) = 0 := by
@@ -528,7 +551,7 @@ lemma p2f_chain_zero {q : ℂ} (hq : q ≠ 0) {b x : ℕ → ℂ}
   exact fun j => (this j).1
 
 /-- The Casoratian of two solutions of the same three-term recurrence is constant. -/
-lemma p2f_chain_const {q : ℂ} (hq : q ≠ 0) {b x y : ℕ → ℂ}
+private lemma casoratian_eq_of_three_term_rec {q : ℂ} (hq : q ≠ 0) {b x y : ℕ → ℂ}
     (hx : ∀ j, b j * x (j + 1) = q * (x j + x (j + 2)))
     (hy : ∀ j, b j * y (j + 1) = q * (y j + y (j + 2))) (j : ℕ) :
     x j * y (j + 1) - x (j + 1) * y j = x 0 * y 1 - x 1 * y 0 := by
@@ -543,7 +566,7 @@ lemma p2f_chain_const {q : ℂ} (hq : q ≠ 0) {b x y : ℕ → ℂ}
 
 /-- **Coexistence is impossible** (Ince): for `q ≠ 0` an even and an odd solution of Mathieu's
 equation cannot both be `π`-periodic, or both `π`-antiperiodic. -/
-lemma p2f_ince_core {a q μ : ℂ} (hq : q ≠ 0) (hμ : μ = 1 ∨ μ = -1) {F G : ℂ → ℂ}
+private lemma eq_zero_or_eq_zero_of_coexist {a q μ : ℂ} (hq : q ≠ 0) (hμ : μ = 1 ∨ μ = -1) {F G : ℂ → ℂ}
     (hF : IsMathieuSolution a q F) (hG : IsMathieuSolution a q G) (hFe : ∀ z, F (-z) = F z)
     (hGo : ∀ z, G (-z) = -G z) (hFp : ∀ z, F (z + π) = μ * F z)
     (hGp : ∀ z, G (z + π) = μ * G z) : F = 0 ∨ G = 0 := by
@@ -555,9 +578,9 @@ lemma p2f_ince_core {a q μ : ℂ} (hq : q ≠ 0) (hμ : μ = 1 ∨ μ = -1) {F 
   set α : ℤ → ℂ := fun k => ∫ x in (0 : ℝ)..2 * π, F x * Complex.cos (k * x) with hα
   set β : ℤ → ℂ := fun k => ∫ x in (0 : ℝ)..2 * π, G x * Complex.sin (k * x) with hβ
   have recα : ∀ k : ℤ, (a - (k : ℂ) ^ 2) * α k = q * (α (k - 2) + α (k + 2)) :=
-    p1a2_cos_rec hF hF2
+    integral_mul_cos_rec hF hF2
   have recβ : ∀ k : ℤ, (a - (k : ℂ) ^ 2) * β k = q * (β (k - 2) + β (k + 2)) :=
-    p1a2_sin_rec hG hG2
+    integral_mul_sin_rec hG hG2
   have αneg : ∀ k : ℤ, α (-k) = α k := fun k => by
     simp only [α]; congr 1; funext x; push_cast; rw [neg_mul, Complex.cos_neg]
   have βneg : ∀ k : ℤ, β (-k) = -β k := fun k => by
@@ -582,18 +605,18 @@ lemma p2f_ince_core {a q μ : ℂ} (hq : q ≠ 0) (hμ : μ = 1 ∨ μ = -1) {F 
     have hGc := hG.differentiable.continuous
     constructor
     · simp only [α]
-      apply p1a2_integral_antiperiodic (by push_cast; fun_prop)
+      apply intervalIntegral_eq_zero_of_antiperiodic (by push_cast; fun_prop)
       intro x; push_cast
       rw [hFp, (hcs m x).1]
       linear_combination (F x * Complex.cos (m * x)) * hm
     · simp only [β]
-      apply p1a2_integral_antiperiodic (by push_cast; fun_prop)
+      apply intervalIntegral_eq_zero_of_antiperiodic (by push_cast; fun_prop)
       intro x; push_cast
       rw [hGp, (hcs m x).2]
       linear_combination (G x * Complex.sin (m * x)) * hm
   -- decay of the coefficients
-  obtain ⟨Cα, hCα0, hCα⟩ := p2f_cos_coeff_decay hF.differentiable hF2 hFe 1
-  obtain ⟨Cβ, hCβ0, hCβ⟩ := p2f_sin_coeff_decay hG.differentiable hG2 hGo 1
+  obtain ⟨Cα, hCα0, hCα⟩ := norm_integral_mul_cos_le_exp hF.differentiable hF2 hFe 1
+  obtain ⟨Cβ, hCβ0, hCβ⟩ := norm_integral_mul_sin_le_exp hG.differentiable hG2 hGo 1
   have tα : ∀ k₀ : ℕ, Tendsto (fun j : ℕ => α ((k₀ + 2 * j : ℕ) : ℤ)) atTop (𝓝 0) := by
     intro k₀
     have hlim := (Real.tendsto_exp_neg_atTop_nhds_zero.comp
@@ -630,7 +653,7 @@ lemma p2f_ince_core {a q μ : ℂ} (hq : q ≠ 0) (hμ : μ = 1 ∨ μ = -1) {F 
   have hD : ∀ k₀ : ℕ, α ((k₀ : ℕ) : ℤ) * β ((k₀ + 2 : ℕ) : ℤ) -
       α ((k₀ + 2 : ℕ) : ℤ) * β ((k₀ : ℕ) : ℤ) = 0 := by
     intro k₀
-    have hc := p2f_chain_const hq (x := fun j => α ((k₀ + 2 * j : ℕ) : ℤ))
+    have hc := casoratian_eq_of_three_term_rec hq (x := fun j => α ((k₀ + 2 * j : ℕ) : ℤ))
       (y := fun j => β ((k₀ + 2 * j : ℕ) : ℤ))
       (b := fun j => a - (((k₀ + 2 * (j + 1) : ℕ) : ℤ) : ℂ) ^ 2) (hx k₀) (hy k₀)
     have ht : Tendsto (fun j : ℕ => α ((k₀ + 2 * j : ℕ) : ℤ) * β ((k₀ + 2 * (j + 1) : ℕ) : ℤ) -
@@ -650,7 +673,7 @@ lemma p2f_ince_core {a q μ : ℂ} (hq : q ≠ 0) (hμ : μ = 1 ∨ μ = -1) {F 
       rcases neg_one_pow_eq_or ℂ m with h | h <;> rcases hμ with rfl | rfl <;> simp [h]
     constructor
     · rintro ⟨h0, h1⟩
-      have hall := p2f_chain_zero hq (x := fun j => α ((k₀ + 2 * j : ℕ) : ℤ))
+      have hall := eq_zero_of_three_term_rec hq (x := fun j => α ((k₀ + 2 * j : ℕ) : ℤ))
         (b := fun j => a - (((k₀ + 2 * (j + 1) : ℕ) : ℤ) : ℂ) ^ 2) (hx k₀)
         (by simpa using h0) (by simpa using h1)
       have hm : ∀ m : ℕ, α m = 0 := by
@@ -660,13 +683,13 @@ lemma p2f_ince_core {a q μ : ℂ} (hq : q ≠ 0) (hμ : μ = 1 ∨ μ = -1) {F 
           exact_mod_cast hall j
         · exact (hwrong m h).1
       funext z
-      have := p1a2_hasSum_cos hF.differentiable hF2 hFe z
+      have := hasSum_cos_of_differentiable_periodic_even hF.differentiable hF2 hFe z
       have e : ∀ m : ℕ, (∫ x in (0 : ℝ)..2 * π, F x * Complex.cos (m * x)) = 0 := fun m => by
         simpa [α] using hm m
       simp only [e, mul_zero, zero_mul] at this
       exact this.unique hasSum_zero
     · rintro ⟨h0, h1⟩
-      have hall := p2f_chain_zero hq (x := fun j => β ((k₀ + 2 * j : ℕ) : ℤ))
+      have hall := eq_zero_of_three_term_rec hq (x := fun j => β ((k₀ + 2 * j : ℕ) : ℤ))
         (b := fun j => a - (((k₀ + 2 * (j + 1) : ℕ) : ℤ) : ℂ) ^ 2) (hy k₀)
         (by simpa using h0) (by simpa using h1)
       have hm : ∀ m : ℕ, β m = 0 := by
@@ -676,7 +699,7 @@ lemma p2f_ince_core {a q μ : ℂ} (hq : q ≠ 0) (hμ : μ = 1 ∨ μ = -1) {F 
           exact_mod_cast hall j
         · exact (hwrong m h).2
       funext z
-      have := p1a2_hasSum_sin hG.differentiable hG2 hGo z
+      have := hasSum_sin_of_differentiable_periodic_odd hG.differentiable hG2 hGo z
       have e : ∀ m : ℕ, (∫ x in (0 : ℝ)..2 * π, G x * Complex.sin (m * x)) = 0 := fun m => by
         simpa [β] using hm m
       simp only [e, mul_zero, zero_mul] at this
@@ -777,7 +800,7 @@ theorem IsFloquetSolution.unique {a q ν : ℂ} (hq : q ≠ 0) {w v : ℂ → �
       rw [h2] at h1
       exact h1.symm
     have hμ' : μ = 1 ∨ μ = -1 := mul_self_eq_one_iff.1 hμ
-    rcases p2f_ince_core hq hμ' (isMathieuSolution_mathieuWI a q)
+    rcases eq_zero_or_eq_zero_of_coexist hq hμ' (isMathieuSolution_mathieuWI a q)
       (isMathieuSolution_mathieuWII a q) (mathieuWI_neg a q) (mathieuWII_neg a q) hIp hIIp
       with h | h
     · have := (mathieuWI_spec a q).2.1
@@ -788,7 +811,7 @@ theorem IsFloquetSolution.unique {a q ν : ℂ} (hq : q ≠ 0) {w v : ℂ → �
       simp at this
 
 /-- Integration by parts behind the Floquet recurrence 28.2.19. -/
-lemma p2f_floquet_int_rec {a q ν : ℂ} {w : ℂ → ℂ} (hf : IsMathieuSolution a q w)
+private lemma integral_floquet_rec {a q ν : ℂ} {w : ℂ → ℂ} (hf : IsMathieuSolution a q w)
     (hfl : ∀ z, w (z + π) = Complex.exp (π * I * ν) * w z) (n : ℤ) :
     q * (∫ x in (0 : ℝ)..π, w x * Complex.exp (-(I * (ν + 2 * ((n + 1 : ℤ) : ℂ)) * x))) -
       (a - (ν + 2 * n) ^ 2) * (∫ x in (0 : ℝ)..π, w x * Complex.exp (-(I * (ν + 2 * n) * x))) +
@@ -904,9 +927,9 @@ theorem IsFloquetSolution.exists_fourier {a q ν : ℂ} {w : ℂ → ℂ}
       rw [mul_comm (Complex.exp _) (w _), mul_assoc, ← Complex.exp_add]
       congr 2; ring
   refine ⟨c, fun z => ?_, fun z => ?_, fun n => ?_⟩
-  · obtain ⟨C, hC0, hC⟩ := p1a2_fourierInt_decay hU hUper (2 * |z.im| + 1)
+  · obtain ⟨C, hC0, hC⟩ := fourierIntegral_periodic_decay hU hUper (2 * |z.im| + 1)
     refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun k => ?_)
-      (p1a2_summable_exp_neg_abs.mul_left
+      (summable_exp_neg_abs_int.mul_left
         (‖(1 / (2 * π) : ℂ)‖ * C * Real.exp (-(ν * z).im)))
     rw [norm_mul, norm_mul, Complex.norm_exp]
     have h1 := hC k
@@ -932,7 +955,7 @@ theorem IsFloquetSolution.exists_fourier {a q ν : ℂ} {w : ℂ → ℂ}
             rw [← Real.exp_add]; simp
           linear_combination (‖(1 / (2 * π) : ℂ)‖ * C * Real.exp (-(ν * z).im) *
             Real.exp (-|(k : ℝ)|)) * e
-  · have h := (p1a2_hasSum_fourier hU hUper (2 * z)).mul_left (Complex.exp (I * ν * z))
+  · have h := (hasSum_fourier_of_differentiable_periodic hU hUper (2 * z)).mul_left (Complex.exp (I * ν * z))
     have e : Complex.exp (I * ν * z) * U (2 * z) = w z := by
       simp only [U]
       rw [show 2 * z / 2 = z by ring, ← mul_assoc, ← Complex.exp_add]
@@ -943,12 +966,12 @@ theorem IsFloquetSolution.exists_fourier {a q ν : ℂ} {w : ℂ → ℂ}
     rw [show I * (ν + 2 * k) * z = k * (2 * z) * I + I * ν * z by ring, Complex.exp_add]
     ring
   · rw [hcJ, hcJ, hcJ]
-    have := p2f_floquet_int_rec hf hfl n
+    have := integral_floquet_rec hf hfl n
     push_cast at this ⊢
     linear_combination (1 / π : ℂ) * this
 
 /-- A function on `ℤ` that is eventually (cofinitely) at most `1` is bounded above. -/
-lemma p2f_bound_cofinite {f : ℤ → ℝ} (h : ∀ᶠ n in cofinite, f n ≤ 1) :
+private lemma exists_bound_of_eventually_le_one_cofinite {f : ℤ → ℝ} (h : ∀ᶠ n in cofinite, f n ≤ 1) :
     ∃ C, 0 ≤ C ∧ ∀ n, f n ≤ C := by
   have hfin : {n | ¬ f n ≤ 1}.Finite := Filter.eventually_cofinite.1 h
   obtain ⟨M, hM⟩ := (hfin.image f).bddAbove
@@ -958,13 +981,13 @@ lemma p2f_bound_cofinite {f : ℤ → ℝ} (h : ∀ᶠ n in cofinite, f n ≤ 1)
   · exact (hM ⟨n, hn, rfl⟩).trans (le_max_right _ _)
 
 /-- Exponential decay of a sequence with `|c_n|^{1/|n|} → 0`. -/
-lemma p2f_coeff_decay {c : ℤ → ℂ}
+private lemma norm_le_exp_of_tendsto_rpow_cofinite {c : ℤ → ℂ}
     (hlim : Tendsto (fun n : ℤ => ‖c n‖ ^ (1 / (|n| : ℝ))) cofinite (𝓝 0)) (R : ℝ) :
     ∃ C, 0 ≤ C ∧ ∀ n, ‖c n‖ ≤ C * Real.exp (-(R * |(n : ℝ)|)) := by
   have h1 : ∀ᶠ n : ℤ in cofinite, ‖c n‖ ^ (1 / (|n| : ℝ)) < Real.exp (-R) :=
     hlim.eventually (gt_mem_nhds (Real.exp_pos _))
   have h2 : ∀ᶠ n : ℤ in cofinite, n ≠ 0 := Filter.eventually_cofinite_ne 0
-  obtain ⟨C, hC0, hC⟩ := p2f_bound_cofinite (f := fun n => ‖c n‖ * Real.exp (R * |(n : ℝ)|))
+  obtain ⟨C, hC0, hC⟩ := exists_bound_of_eventually_le_one_cofinite (f := fun n => ‖c n‖ * Real.exp (R * |(n : ℝ)|))
     (by
       filter_upwards [h1, h2] with n hn hn0
       have hpos : (0 : ℝ) < |(n : ℝ)| := abs_pos.2 (by exact_mod_cast hn0)
@@ -986,7 +1009,7 @@ lemma p2f_coeff_decay {c : ℤ → ℂ}
     _ ≤ C * Real.exp (-(R * |(n : ℝ)|)) := by gcongr
 
 /-- `‖x‖^k ≤ e^{2‖x‖}` for `k ≤ 2`. -/
-lemma p2f_norm_pow_le {x : ℂ} {k : ℕ} (hk : k ≤ 2) : ‖x ^ k‖ ≤ Real.exp (2 * ‖x‖) := by
+private lemma norm_pow_le_exp_two_mul_norm {x : ℂ} {k : ℕ} (hk : k ≤ 2) : ‖x ^ k‖ ≤ Real.exp (2 * ‖x‖) := by
   rw [norm_pow]
   have h1 : max 1 ‖x‖ ≤ Real.exp ‖x‖ := max_le (Real.one_le_exp (norm_nonneg _))
     ((le_add_of_nonneg_right zero_le_one).trans (Real.add_one_le_exp _) |>.trans_eq' rfl)
@@ -996,13 +1019,13 @@ lemma p2f_norm_pow_le {x : ℂ} {k : ℕ} (hk : k ≤ 2) : ‖x ^ k‖ ≤ Real.
     _ = Real.exp (2 * ‖x‖) := by rw [← Real.exp_nat_mul]; norm_num
 
 /-- Uniform bound for the terms `c_n (i(ν+2n))^k e^{i(ν+2n)z}`, `k ≤ 2`, `‖z‖ ≤ ρ`. -/
-lemma p2f_floquet_term_bound {c : ℤ → ℂ}
+private lemma exists_summable_floquet_term_bound {c : ℤ → ℂ}
     (hlim : Tendsto (fun n : ℤ => ‖c n‖ ^ (1 / (|n| : ℝ))) cofinite (𝓝 0)) (ν : ℂ) (ρ : ℝ) :
     ∃ u : ℤ → ℝ, Summable u ∧ ∀ (k : ℕ), k ≤ 2 → ∀ n (z : ℂ), ‖z‖ ≤ ρ →
       ‖c n * (I * (ν + 2 * n)) ^ k * Complex.exp (I * (ν + 2 * n) * z)‖ ≤ u n := by
-  obtain ⟨C, hC0, hC⟩ := p2f_coeff_decay hlim (2 * (2 + ρ) + 1)
+  obtain ⟨C, hC0, hC⟩ := norm_le_exp_of_tendsto_rpow_cofinite hlim (2 * (2 + ρ) + 1)
   refine ⟨fun n => C * Real.exp ((2 + ρ) * ‖ν‖) * Real.exp (-|(n : ℝ)|),
-    p1a2_summable_exp_neg_abs.mul_left _, fun k hk n z hz => ?_⟩
+    summable_exp_neg_abs_int.mul_left _, fun k hk n z hz => ?_⟩
   set X : ℝ := ‖ν‖ + 2 * |(n : ℝ)|
   have hX : ‖I * (ν + 2 * n)‖ ≤ X := by
     rw [norm_mul, Complex.norm_I, one_mul]
@@ -1010,7 +1033,7 @@ lemma p2f_floquet_term_bound {c : ℤ → ℂ}
     simp [X]
   have hX0 : 0 ≤ X := by positivity
   rw [norm_mul, norm_mul, Complex.norm_exp]
-  have e1 := p2f_norm_pow_le (x := I * (ν + 2 * n)) hk
+  have e1 := norm_pow_le_exp_two_mul_norm (x := I * (ν + 2 * n)) hk
   have e2 : (I * (ν + 2 * n) * z).re ≤ X * ρ := by
     refine (Complex.re_le_norm _).trans ?_
     rw [norm_mul]
@@ -1039,12 +1062,12 @@ theorem isFloquetSolution_of_recurrence {a q ν : ℂ} {c : ℤ → ℂ} (hc : c
     c n * (I * (ν + 2 * n)) ^ k * Complex.exp (I * (ν + 2 * n) * z) with hgdef
   have hsum : ∀ k, k ≤ 2 → ∀ z, Summable (fun n => g k n z) := by
     intro k hk z
-    obtain ⟨u, hu, hb⟩ := p2f_floquet_term_bound hlim ν ‖z‖
+    obtain ⟨u, hu, hb⟩ := exists_summable_floquet_term_bound hlim ν ‖z‖
     exact Summable.of_norm_bounded hu fun n => hb k hk n z le_rfl
   have hder : ∀ k, k ≤ 1 → ∀ y,
       HasDerivAt (fun z => ∑' n, g k n z) (∑' n, g (k + 1) n y) y := by
     intro k hk y
-    obtain ⟨u, hu, hb⟩ := p2f_floquet_term_bound hlim ν (‖y‖ + 1)
+    obtain ⟨u, hu, hb⟩ := exists_summable_floquet_term_bound hlim ν (‖y‖ + 1)
     refine hasDerivAt_tsum_of_isPreconnected (t := Metric.ball 0 (‖y‖ + 1)) (y₀ := 0) hu
       Metric.isOpen_ball (convex_ball _ _).isPreconnected (fun n z _ => ?_)
       (fun n z hz => hb (k + 1) (by omega) n z (by simpa using (mem_ball_zero_iff.1 hz).le))
@@ -1102,10 +1125,10 @@ theorem isFloquetSolution_of_recurrence {a q ν : ℂ} {c : ℤ → ℂ} (hc : c
   · -- nontriviality: the coefficients are recovered by integration over `[0, π]`
     intro hw0
     obtain ⟨m, hm⟩ := Function.ne_iff.1 hc
-    obtain ⟨C, hC0, hC⟩ := p2f_coeff_decay hlim 1
+    obtain ⟨C, hC0, hC⟩ := norm_le_exp_of_tendsto_rpow_cofinite hlim 1
     have hcs : Summable fun n => ‖c n‖ :=
       Summable.of_nonneg_of_le (fun _ => norm_nonneg _) hC
-        (p1a2_summable_exp_neg_abs.mul_left C |>.congr fun n => by simp)
+        (summable_exp_neg_abs_int.mul_left C |>.congr fun n => by simp)
     have hlimt : ∀ t : ℝ, HasSum (fun n => c n * Complex.exp (2 * I * (n - m) * t)) 0 := by
       intro t
       have h0 : HasSum (fun n => g 0 n t) 0 := by

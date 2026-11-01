@@ -8,53 +8,65 @@ module
 public import Carlson.Elliptic.ReductionTables
 public import Carlson.Elliptic.Standard
 public import DLMF.EllipticIntegrals.Basic.Symmetric
-public import DLMF.EllipticIntegrals.P19sR1Bounds
+public import DLMF.EllipticIntegrals.SymmetricBounds
 
 /-!
 # Symmetric elliptic integrals: Carlson bridges and elementary identities
 
-The canonical definitions are in `DLMF.EllipticIntegrals.Basic.Symmetric`.
+DLMF's symmetric standard integrals `R_F`, `R_J`, `R_G`, `R_D`, `R_C` and the multivariate
+hypergeometric `R`-function `R_{-a}(𝐛; 𝐳)` of §19.16(ii), defined in
+`DLMF.EllipticIntegrals.Basic.Symmetric` by DLMF's own integrals (19.16.1), (19.16.2),
+(19.16.2_5), (19.16.5), (19.2.17) and (19.16.8). This file relates them to Carlson's functions
+in `lean-codes` and proves the elementary identities of §§19.15–19.16.
 
-DLMF's symmetric standard integrals, defined by DLMF's own integrals (19.16.1), (19.16.2),
-(19.16.2_5), (19.16.5) and (19.2.17), and DLMF's multivariate hypergeometric `R`-function
-`R_{-a}(𝐛; 𝐳)` of §19.16(ii):
+## Main results
 
-* `symEllIntRF x y z = (1/2) ∫₀^∞ dt / s(t)` (19.16.1), `s(t) = √(t+x) √(t+y) √(t+z)` (19.16.4)
-  with principal square roots (`symEllIntS`);
-* `symEllIntRJ x y z p = (3/2) ∫₀^∞ dt / (s(t) (t + p))` (19.16.2), the **Cauchy principal value**
-  (`cauchyPVIoi`) being taken when `p` is real and negative;
-* `symEllIntRG x y z = (1/4) ∫₀^∞ s(t)⁻¹ (x/(t+x) + y/(t+y) + z/(t+z)) t dt` (19.16.2_5);
-* `symEllIntRD x y z = R_J(x, y, z, z)` (19.16.5);
-* `symEllIntRC x y = (1/2) ∫₀^∞ dt / (√(t+x) (t+y))` (19.2.17), with the Cauchy principal value
-  when `y < 0`;
-* `symEllIntR a b z = R_{-a}(𝐛; 𝐳)` (19.16.8): on the product slit plane it is Carlson's
-  `R`-function `Carlson.carlsonR (-a) b z` of the companion library `lean-codes` (note DLMF's
-  sign convention for the subscript: DLMF's `R_{-a}` is `carlsonR (-a)`); at the boundary
-  (some `z_j = 0`, "without destroying convergence", §19.16(iii)) it is the limit from the
-  slit domain.
+* `symEllIntRF_eq_symEllIntR`, `symEllIntRD_eq_symEllIntR`, `symEllIntRJ_eq_symEllIntR`,
+  `symEllIntRG_eq_symEllIntR`, `symEllIntRC_eq_symEllIntR`: the integrals as `R`-functions on
+  the slit plane (DLMF 19.16.14–19.16.18).
+* `symEllIntRF_eq_carlsonRF`, `symEllIntRJ_eq_carlsonR`, `symEllIntRG_eq_carlsonRG`,
+  `symEllIntRC_eq_carlsonRC`, `symEllIntR_of_mem`: bridges to `lean-codes`.
+* `symEllIntR_eq_integral`: the integral representation of `R_{-a}(𝐛; 𝐳)` (DLMF 19.16.9,
+  stronger than DLMF).
+* `symEllIntRF_zero_left`, `symEllIntRD_zero_left`, `symEllIntRJ_zero_left`,
+  `symEllIntRG_zero_left`: the complete cases (DLMF 19.16.20–19.16.23).
+* `symEllIntRD_eq_integral`, `symEllIntRC_eq_symEllIntRF`, `symEllIntRJ_eq_hyperelliptic`:
+  DLMF 19.16.5–19.16.7.
+* `symEllIntRF_comm_left`, `symEllIntRJ_comm_left`, `symEllIntRG_comm_left`,
+  `symEllIntR_comp_perm` and their variants: permutation symmetry (§19.15, DLMF 19.16.8).
+* `symEllIntR_mul`, `symEllIntR_const`: homogeneity and the value at equal arguments
+  (DLMF 19.16.11).
+* `symEllIntRF_one_one_one`, `symEllIntRJ_one_one_one_one`: the normalizations of §19.16(i).
+* `two_mul_symEllIntRG`: DLMF 19.21.10 at the level of the defining integrals.
+* `symEllIntR_four_eq_integral_sin`, `symEllIntR_cons_zero`,
+  `symEllIntR_eq_integral_complete`: DLMF 19.16.12–19.16.13, 19.16.19, 19.16.24.
 
-**Domains.** DLMF 19.16(i): `x, y, z ∈ ℂ \ (-∞, 0]` except that one or more of them may be `0`
-when the integral converges; for `R_F` and `R_J` at most one may vanish, for `R_G` any number,
-for `R_D` the third argument is nonzero; `p ≠ 0`. These are the predicates `SymEllIntArg` and
-`SymEllIntRFDomain`. Because the definitions are Lean integrals, values outside these domains
-are totalized (a divergent integral is `0`). Square roots are principal, so the defining
-integrands are those of DLMF on the whole complex domain.
+## Implementation notes
 
-**Bridges** to `lean-codes` (`Carlson.carlsonRF`, `Carlson.carlsonRG`,
-`Carlson.TwoVariable.carlsonRC`, `Carlson.carlsonR`) on the slit plane are DLMF's
-(19.16.14)–(19.16.18); the normalizations were checked numerically (mpmath `elliprf`, `elliprj`,
-`elliprg`, `elliprc`; for `p < 0` mpmath's `elliprj` returns a complex number whose real part is
-the principal value used here).
-
-## §19.15 Advantages of symmetry (prose)
-
-The `R`-function reveals the permutation symmetry hidden in Lauricella's `F_D` (19.15.p1).
-Symmetry of `R_F`, `R_G`, `R_J` in `x, y, z` (`Carlson.carlsonRF_perm`, …, and
-`symEllIntR_comp_perm`) replaces the five Legendre transformations (19.7.2), (19.7.4)–(19.7.7),
-unifies Landen and Gauss transformations (§19.22) and the parameter changes of `Π` (19.21.12)
-(19.15.p2); it permits the elementary-symmetric expansion (19.19.7) (19.15.p3) and the
-reduction theorems of §19.29 (19.15.p4); symmetry in the semiaxes of ellipsoids is preserved
-(19.15.p5). These are commentary; the mathematical content is in the cited formulas.
+* **Domains.** DLMF §19.16(i): `x, y, z ∈ ℂ \ (-∞, 0]` except that one or more of them may be
+  `0` when the integral converges; for `R_F` and `R_J` at most one may vanish, for `R_G` any
+  number, for `R_D` the third argument is nonzero; `p ≠ 0`. These are the predicates
+  `SymEllIntArg` and `SymEllIntRFDomain`. Because the definitions are Lean integrals, values
+  outside these domains are totalized (a divergent integral is `0`). Square roots are
+  principal, so the defining integrands are those of DLMF on the whole complex domain. For
+  real negative `p` the Cauchy principal value (`cauchyPVIoi`) is taken.
+* **The `R`-function.** On the product slit plane `symEllIntR a b z` is Carlson's
+  `Carlson.carlsonR (-a) b z`; note DLMF's sign convention for the subscript. At the boundary
+  (some `z_j = 0`, "without destroying convergence", §19.16(iii)) it is the limit from the slit
+  domain.
+* **Bridges** to `lean-codes` (`Carlson.carlsonRF`, `Carlson.carlsonRG`,
+  `Carlson.TwoVariable.carlsonRC`, `Carlson.carlsonR`) on the slit plane are DLMF's
+  (19.16.14)–(19.16.18); the normalizations were checked numerically (mpmath `elliprf`,
+  `elliprj`, `elliprg`, `elliprc`; for `p < 0` mpmath's `elliprj` returns a complex number whose
+  real part is the principal value used here).
+* **§19.15 (prose).** The `R`-function reveals the permutation symmetry hidden in Lauricella's
+  `F_D` (19.15.p1). Symmetry of `R_F`, `R_G`, `R_J` in `x, y, z` (`Carlson.carlsonRF_perm`, …,
+  and `symEllIntR_comp_perm`) replaces the five Legendre transformations (19.7.2),
+  (19.7.4)–(19.7.7), unifies Landen and Gauss transformations (§19.22) and the parameter
+  changes of `Π` (19.21.12) (19.15.p2); it permits the elementary-symmetric expansion (19.19.7)
+  (19.15.p3) and the reduction theorems of §19.29 (19.15.p4); symmetry in the semiaxes of
+  ellipsoids is preserved (19.15.p5). These are commentary; the mathematical content is in the
+  cited formulas.
 
 ## References
 
@@ -74,23 +86,23 @@ namespace DLMF.EllipticIntegrals
 
 /-- Identity under the stated parameter and domain assumptions: `(w ^ (1 / 2 : ℂ))⁻¹ = w ^ (-1 / 2
 : ℂ)`. -/
-theorem ei19c_inv_cpow_half (w : ℂ) : (w ^ (1 / 2 : ℂ))⁻¹ = w ^ (-1 / 2 : ℂ) := by
+theorem inv_cpow_half_eq_cpow_neg_half (w : ℂ) : (w ^ (1 / 2 : ℂ))⁻¹ = w ^ (-1 / 2 : ℂ) := by
   rw [show (-1 / 2 : ℂ) = -(1 / 2) by ring, cpow_neg]
 
 /-- Identity under the stated parameter and domain assumptions: `w ^ (1 / 2 : ℂ) * w ^ (1 / 2 : ℂ)
 = w`. -/
-theorem ei19c_cpow_half_sq (w : ℂ) : w ^ (1 / 2 : ℂ) * w ^ (1 / 2 : ℂ) = w := by
+theorem cpow_half_mul_cpow_half (w : ℂ) : w ^ (1 / 2 : ℂ) * w ^ (1 / 2 : ℂ) = w := by
   rw [← sq, show (1 / 2 : ℂ) = ((2 : ℕ) : ℂ)⁻¹ by norm_num, cpow_nat_inv_pow _ two_ne_zero]
 
 /-- The stated relation follows from the given hypotheses: `¬ IsNegReal p`. -/
-theorem ei19c_not_isNegReal_of_mem_slitPlane {p : ℂ} (hp : p ∈ slitPlane) : ¬ IsNegReal p := by
+theorem not_isNegReal_of_mem_slitPlane {p : ℂ} (hp : p ∈ slitPlane) : ¬ IsNegReal p := by
   rintro ⟨h1, h2⟩
   rcases mem_slitPlane_iff.mp hp with h | h
   · linarith
   · exact h h1
 
 /-- Formula under the stated hypotheses: `(t : ℂ) + z ∈ slitPlane`. -/
-lemma ei19c_add_mem_slitPlane {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : SymEllIntArg z) :
+private lemma ofReal_add_mem_slitPlane_of_symEllIntArg {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : SymEllIntArg z) :
     (t : ℂ) + z ∈ slitPlane := by
   rcases hz with hz | rfl
   · rcases mem_slitPlane_iff.mp hz with h | h
@@ -106,30 +118,25 @@ theorem symEllIntR_of_mem {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {
 
 /-- Identity under the stated parameter and domain assumptions: `(betaIntegral a a')⁻¹ = Gamma (a
 + a') / (Gamma a * Gamma a')`. -/
-theorem ei19c_betaIntegral_inv {a a' : ℂ} (ha : 0 < a.re) (ha' : 0 < a'.re) :
+theorem inv_betaIntegral {a a' : ℂ} (ha : 0 < a.re) (ha' : 0 < a'.re) :
     (betaIntegral a a')⁻¹ = Gamma (a + a') / (Gamma a * Gamma a') := by
   have h := Complex.Gamma_mul_Gamma_eq_betaIntegral ha ha'
   have h1 : Gamma (a + a') ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by simp; linarith)
   rw [h]; field_simp
 
-/-- Identity under the stated parameter and domain assumptions: `Gamma (3 / 2 : ℂ) = (1 / 2) *
-Gamma (1 / 2)`. -/
-theorem ei19c_Gamma_three_halves : Gamma (3 / 2 : ℂ) = (1 / 2) * Gamma (1 / 2) := by
-  rw [show (3 / 2 : ℂ) = 1 / 2 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
-
 /-- Identity under the stated parameter and domain assumptions: `Gamma (5 / 2 : ℂ) = (3 / 2) *
 Gamma (3 / 2)`. -/
-lemma ei19c_Gamma_five_halves : Gamma (5 / 2 : ℂ) = (3 / 2) * Gamma (3 / 2) := by
+lemma Gamma_five_halves_eq_mul : Gamma (5 / 2 : ℂ) = (3 / 2) * Gamma (3 / 2) := by
   rw [show (5 / 2 : ℂ) = 3 / 2 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
 
 /-- Nonvanishing under the stated hypotheses: `Gamma (1 / 2 : ℂ) ≠ 0`. -/
-theorem ei19c_Gamma_half_ne : Gamma (1 / 2 : ℂ) ≠ 0 :=
+theorem Gamma_one_half_ne_zero : Gamma (1 / 2 : ℂ) ≠ 0 :=
   Complex.Gamma_ne_zero_of_re_pos (by norm_num)
 
 /-- Identity under the stated parameter and domain assumptions: `Gamma (1 / 2 : ℂ) * Gamma (1 / 2)
 = π`. -/
-lemma ei19c_Gamma_half_sq : Gamma (1 / 2 : ℂ) * Gamma (1 / 2) = π := by
-  rw [Complex.Gamma_one_half_eq, ei19c_cpow_half_sq]
+lemma Gamma_one_half_mul_self : Gamma (1 / 2 : ℂ) * Gamma (1 / 2) = π := by
+  rw [Complex.Gamma_one_half_eq, cpow_half_mul_cpow_half]
 
 /-- DLMF 19.16.9 (first form), **stronger than DLMF**: for complex `a, 𝐛` with `Re a > 0`,
 `Re a' > 0`, `a' = -a + ∑ bⱼ` (19.16.10), and nodes in the slit plane,
@@ -148,7 +155,7 @@ theorem symEllIntR_eq_integral {ι : Type*} [Fintype ι] {a a' : ℂ} {b z : ι 
   have hint : (∫ t in Ioi (0 : ℝ), (t : ℂ) ^ (a' - 1) * ∏ i, ((t : ℂ) + z i) ^ (-b i)) =
       ∫ s in Ioi (0 : ℝ), (s : ℂ) ^ (a' - 1) * ∏ i, (z i + (s : ℂ)) ^ (-b i) := by
     congr 1; funext t; simp only [add_comm]
-  rw [hint, h, ei19c_betaIntegral_inv ha ha']
+  rw [hint, h, inv_betaIntegral ha ha']
   unfold Carlson.carlsonR
   have hS : ∑ i, b i = a + a' := by rw [hsum]; ring
   have h1 : Gamma a ≠ 0 := Complex.Gamma_ne_zero_of_re_pos ha
@@ -162,18 +169,18 @@ def symEllIntRConj {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) : ℂ :=
 /-! ### The named integrals as `R`-functions (19.16.14–19.16.18) -/
 
 /-- Formula under the stated hypotheses: `(![x, y, z] : Fin 3 → ℂ) ∈ Carlson.carlsonRSlitDomain`. -/
-theorem ei19c_slit3 {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
+theorem vec3_mem_carlsonRSlitDomain {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     (![x, y, z] : Fin 3 → ℂ) ∈ Carlson.carlsonRSlitDomain := by
   intro i; fin_cases i <;> assumption
 
 /-- Formula under the stated hypotheses: `(![x, y] : Fin 2 → ℂ) ∈ Carlson.carlsonRSlitDomain`. -/
-theorem ei19c_slit2 {x y : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane) :
+theorem vec2_mem_carlsonRSlitDomain {x y : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane) :
     (![x, y] : Fin 2 → ℂ) ∈ Carlson.carlsonRSlitDomain := by
   intro i; fin_cases i <;> assumption
 
 /-- Formula under the stated hypotheses: `(![x, y, z, p] : Fin 4 → ℂ) ∈
 Carlson.carlsonRSlitDomain`. -/
-theorem ei19c_slit4 {x y z p : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
+theorem vec4_mem_carlsonRSlitDomain {x y z p : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) (hp : p ∈ slitPlane) :
     (![x, y, z, p] : Fin 4 → ℂ) ∈ Carlson.carlsonRSlitDomain := by
   intro i; fin_cases i <;> assumption
@@ -184,37 +191,32 @@ theorem symEllIntRF_eq_symEllIntR {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y �
     (hz : z ∈ slitPlane) :
     symEllIntRF x y z = symEllIntR (1 / 2) (fun _ : Fin 3 => 1 / 2) ![x, y, z] := by
   rw [symEllIntR_eq_integral (a' := 1) (by norm_num) (by norm_num)
-    (by simp; try norm_num) (ei19c_slit3 hx hy hz),
-    ei19c_betaIntegral_inv (by norm_num) (by norm_num), symEllIntRF]
+    (by simp; try norm_num) (vec3_mem_carlsonRSlitDomain hx hy hz),
+    inv_betaIntegral (by norm_num) (by norm_num), symEllIntRF]
   simp only [Fin.prod_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
     Matrix.head_cons, Matrix.tail_cons, sub_self, cpow_zero, one_mul, Gamma_one, mul_one]
-  rw [show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num, ei19c_Gamma_three_halves,
-    mul_div_assoc, div_self ei19c_Gamma_half_ne, mul_one]
+  rw [show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num, Carlson.Gamma_three_halves,
+    mul_div_assoc, div_self Gamma_one_half_ne_zero, mul_one]
   congr 1
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
-  simp only [symEllIntS, mul_inv, ei19c_inv_cpow_half, neg_div]
+  simp only [symEllIntS, mul_inv, inv_cpow_half_eq_cpow_neg_half, neg_div]
 
 /-- Bridge: on the slit plane DLMF's `R_F` is `Carlson.carlsonRF` of `lean-codes`. -/
 theorem symEllIntRF_eq_carlsonRF {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) : symEllIntRF x y z = Carlson.carlsonRF x y z := by
-  rw [symEllIntRF_eq_symEllIntR hx hy hz, symEllIntR_of_mem _ _ (ei19c_slit3 hx hy hz),
+  rw [symEllIntRF_eq_symEllIntR hx hy hz, symEllIntR_of_mem _ _ (vec3_mem_carlsonRSlitDomain hx hy hz),
     Carlson.carlsonRF]
   congr 1; ring
 
-/-- Identity under the stated parameter and domain assumptions: `Gamma (2 : ℂ) = 1`. -/
-lemma ei19c_Gamma_two : Gamma (2 : ℂ) = 1 := by
-  rw [show (2 : ℂ) = 1 + 1 by norm_num, Complex.Gamma_add_one _ one_ne_zero, Complex.Gamma_one]
-  ring
-
 /-- Identity under the stated parameter and domain assumptions: `w ^ (-(3 / 2) : ℂ) = w ^ (-(1 /
 2) : ℂ) * w⁻¹`. -/
-theorem ei19c_cpow_neg_three_halves {w : ℂ} (hw : w ≠ 0) :
+theorem cpow_neg_three_halves_eq {w : ℂ} (hw : w ≠ 0) :
     w ^ (-(3 / 2) : ℂ) = w ^ (-(1 / 2) : ℂ) * w⁻¹ := by
   rw [show -(3 / 2 : ℂ) = -(1 / 2) + -1 by norm_num, cpow_add _ _ hw, cpow_neg_one]
 
 /-- Nonvanishing under the stated hypotheses: `(t : ℂ) + z ≠ 0`. -/
-theorem ei19c_add_ne_zero {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : SymEllIntArg z) :
-    (t : ℂ) + z ≠ 0 := slitPlane_ne_zero (ei19c_add_mem_slitPlane ht hz)
+theorem ofReal_add_ne_zero_of_symEllIntArg {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : SymEllIntArg z) :
+    (t : ℂ) + z ≠ 0 := slitPlane_ne_zero (ofReal_add_mem_slitPlane_of_symEllIntArg ht hz)
 
 /-- DLMF 19.16.16: `R_J(x, y, z, p) = R_{-3/2}(1/2, 1/2, 1/2, 1; x, y, z, p)` on the slit plane
 (`p ∈ slitPlane`: no principal value). -/
@@ -223,23 +225,23 @@ theorem symEllIntRJ_eq_symEllIntR {x y z p : ℂ} (hx : x ∈ slitPlane) (hy : y
     (hz : z ∈ slitPlane) (hp : p ∈ slitPlane) :
     symEllIntRJ x y z p = symEllIntR (3 / 2) ![1 / 2, 1 / 2, 1 / 2, 1] ![x, y, z, p] := by
   rw [symEllIntR_eq_integral (a' := 1) (by norm_num) (by norm_num)
-    (by simp [Fin.sum_univ_four]; try norm_num) (ei19c_slit4 hx hy hz hp),
-    ei19c_betaIntegral_inv (by norm_num) (by norm_num), symEllIntRJ,
-    ite_eq_right (ei19c_not_isNegReal_of_mem_slitPlane hp)]
+    (by simp [Fin.sum_univ_four]; try norm_num) (vec4_mem_carlsonRSlitDomain hx hy hz hp),
+    inv_betaIntegral (by norm_num) (by norm_num), symEllIntRJ,
+    ite_eq_right (not_isNegReal_of_mem_slitPlane hp)]
   simp only [Fin.prod_univ_four, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
     Matrix.cons_val_three, Matrix.head_cons, Matrix.tail_cons, sub_self, cpow_zero, one_mul,
     Gamma_one, mul_one, cpow_neg_one]
-  rw [show (3 / 2 : ℂ) + 1 = 5 / 2 by norm_num, ei19c_Gamma_five_halves,
+  rw [show (3 / 2 : ℂ) + 1 = 5 / 2 by norm_num, Gamma_five_halves_eq_mul,
     mul_div_assoc, div_self (Complex.Gamma_ne_zero_of_re_pos (by norm_num)), mul_one]
   congr 1
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
-  simp only [symEllIntS, mul_inv, ei19c_inv_cpow_half, neg_div]
+  simp only [symEllIntS, mul_inv, inv_cpow_half_eq_cpow_neg_half, neg_div]
 
 /-- Bridge: on the slit plane DLMF's `R_J` is Carlson's `R_{-3/2}(1/2, 1/2, 1/2, 1; …)`. -/
 theorem symEllIntRJ_eq_carlsonR {x y z p : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) (hp : p ∈ slitPlane) :
     symEllIntRJ x y z p = Carlson.carlsonR (-3 / 2) ![1 / 2, 1 / 2, 1 / 2, 1] ![x, y, z, p] := by
-  rw [symEllIntRJ_eq_symEllIntR hx hy hz hp, symEllIntR_of_mem _ _ (ei19c_slit4 hx hy hz hp)]
+  rw [symEllIntRJ_eq_symEllIntR hx hy hz hp, symEllIntR_of_mem _ _ (vec4_mem_carlsonRSlitDomain hx hy hz hp)]
   congr 1; ring
 
 /-- DLMF 19.16.15: `R_D(x, y, z) = R_{-3/2}(1/2, 1/2, 3/2; x, y, z)` on the slit plane. -/
@@ -248,17 +250,17 @@ theorem symEllIntRD_eq_symEllIntR {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y �
     (hz : z ∈ slitPlane) :
     symEllIntRD x y z = symEllIntR (3 / 2) ![1 / 2, 1 / 2, 3 / 2] ![x, y, z] := by
   rw [symEllIntR_eq_integral (a' := 1) (by norm_num) (by norm_num)
-    (by simp [Fin.sum_univ_three]; try norm_num) (ei19c_slit3 hx hy hz),
-    ei19c_betaIntegral_inv (by norm_num) (by norm_num), symEllIntRD, symEllIntRJ,
-    ite_eq_right (ei19c_not_isNegReal_of_mem_slitPlane hz)]
+    (by simp [Fin.sum_univ_three]; try norm_num) (vec3_mem_carlsonRSlitDomain hx hy hz),
+    inv_betaIntegral (by norm_num) (by norm_num), symEllIntRD, symEllIntRJ,
+    ite_eq_right (not_isNegReal_of_mem_slitPlane hz)]
   simp only [Fin.prod_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
     Matrix.head_cons, Matrix.tail_cons, sub_self, cpow_zero, one_mul, Gamma_one, mul_one]
-  rw [show (3 / 2 : ℂ) + 1 = 5 / 2 by norm_num, ei19c_Gamma_five_halves,
+  rw [show (3 / 2 : ℂ) + 1 = 5 / 2 by norm_num, Gamma_five_halves_eq_mul,
     mul_div_assoc, div_self (Complex.Gamma_ne_zero_of_re_pos (by norm_num)), mul_one]
   congr 1
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
-  rw [ei19c_cpow_neg_three_halves (ei19c_add_ne_zero ht (Or.inl hz))]
-  simp only [symEllIntS, mul_inv, ei19c_inv_cpow_half, neg_div]
+  rw [cpow_neg_three_halves_eq (ofReal_add_ne_zero_of_symEllIntArg ht (Or.inl hz))]
+  simp only [symEllIntS, mul_inv, inv_cpow_half_eq_cpow_neg_half, neg_div]
   ring
 
 /-- DLMF 19.16.18: `R_C(x, y) = R_{-1/2}(1/2, 1; x, y)` on the slit plane. -/
@@ -266,21 +268,21 @@ theorem symEllIntRD_eq_symEllIntR {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y �
 theorem symEllIntRC_eq_symEllIntR {x y : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane) :
     symEllIntRC x y = symEllIntR (1 / 2) ![1 / 2, 1] ![x, y] := by
   rw [symEllIntR_eq_integral (a' := 1) (by norm_num) (by norm_num)
-    (by simp) (ei19c_slit2 hx hy),
-    ei19c_betaIntegral_inv (by norm_num) (by norm_num), symEllIntRC,
-    ite_eq_right (ei19c_not_isNegReal_of_mem_slitPlane hy)]
+    (by simp) (vec2_mem_carlsonRSlitDomain hx hy),
+    inv_betaIntegral (by norm_num) (by norm_num), symEllIntRC,
+    ite_eq_right (not_isNegReal_of_mem_slitPlane hy)]
   simp only [Fin.prod_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
     sub_self, cpow_zero, one_mul, Gamma_one, mul_one, cpow_neg_one]
-  rw [show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num, ei19c_Gamma_three_halves,
-    mul_div_assoc, div_self ei19c_Gamma_half_ne, mul_one]
+  rw [show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num, Carlson.Gamma_three_halves,
+    mul_div_assoc, div_self Gamma_one_half_ne_zero, mul_one]
   congr 1
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
-  simp only [mul_inv, ei19c_inv_cpow_half, neg_div]
+  simp only [mul_inv, inv_cpow_half_eq_cpow_neg_half, neg_div]
 
 /-- Bridge: on the slit plane DLMF's `R_C` is `Carlson.TwoVariable.carlsonRC` of `lean-codes`. -/
 theorem symEllIntRC_eq_carlsonRC {x y : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane) :
     symEllIntRC x y = Carlson.TwoVariable.carlsonRC x y := by
-  rw [symEllIntRC_eq_symEllIntR hx hy, symEllIntR_of_mem _ _ (ei19c_slit2 hx hy)]
+  rw [symEllIntRC_eq_symEllIntR hx hy, symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hx hy)]
   unfold Carlson.TwoVariable.carlsonRC Carlson.TwoVariable.pair
   congr 1; ring
 
@@ -291,16 +293,16 @@ theorem symEllIntRC_eq_carlsonRC {x y : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ 
 theorem symEllIntRF_zero_left {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     symEllIntRF 0 y z = (π / 2) * symEllIntR (1 / 2) ![1 / 2, 1 / 2] ![y, z] := by
   rw [symEllIntR_eq_integral (a' := 1 / 2) (by norm_num) (by norm_num)
-    (by simp) (ei19c_slit2 hy hz),
-    ei19c_betaIntegral_inv (by norm_num) (by norm_num), symEllIntRF]
+    (by simp) (vec2_mem_carlsonRSlitDomain hy hz),
+    inv_betaIntegral (by norm_num) (by norm_num), symEllIntRF]
   simp only [Fin.prod_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one]
-  rw [show (1 / 2 : ℂ) + 1 / 2 = 1 by norm_num, Gamma_one, ei19c_Gamma_half_sq,
+  rw [show (1 / 2 : ℂ) + 1 / 2 = 1 by norm_num, Gamma_one, Gamma_one_half_mul_self,
     show (1 / 2 : ℂ) - 1 = -(1 / 2) by norm_num]
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [← mul_assoc, show (π : ℂ) / 2 * (1 / π) = 1 / 2 by field_simp]
   congr 1
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
-  simp only [symEllIntS, add_zero, mul_inv, ei19c_inv_cpow_half, neg_div]
+  simp only [symEllIntS, add_zero, mul_inv, inv_cpow_half_eq_cpow_neg_half, neg_div]
   ring
 
 /-- DLMF 19.16.21: `R_D(0, y, z) = (3π/4) R_{-3/2}(1/2, 3/2; y, z)`, `y, z ∈ ℂ \ (-∞, 0]`. -/
@@ -308,18 +310,18 @@ theorem symEllIntRF_zero_left {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ sli
 theorem symEllIntRD_zero_left {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     symEllIntRD 0 y z = (3 * π / 4) * symEllIntR (3 / 2) ![1 / 2, 3 / 2] ![y, z] := by
   rw [symEllIntR_eq_integral (a' := 1 / 2) (by norm_num) (by norm_num)
-    (by simp) (ei19c_slit2 hy hz),
-    ei19c_betaIntegral_inv (by norm_num) (by norm_num), symEllIntRD, symEllIntRJ,
-    ite_eq_right (ei19c_not_isNegReal_of_mem_slitPlane hz)]
+    (by simp) (vec2_mem_carlsonRSlitDomain hy hz),
+    inv_betaIntegral (by norm_num) (by norm_num), symEllIntRD, symEllIntRJ,
+    ite_eq_right (not_isNegReal_of_mem_slitPlane hz)]
   simp only [Fin.prod_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one]
-  rw [show (3 / 2 : ℂ) + 1 / 2 = 2 by norm_num, ei19c_Gamma_two, ei19c_Gamma_three_halves,
-    show (1 / 2 : ℂ) - 1 = -(1 / 2) by norm_num, mul_assoc (1 / 2 : ℂ), ei19c_Gamma_half_sq]
+  rw [show (3 / 2 : ℂ) + 1 / 2 = 2 by norm_num, Carlson.Gamma_two', Carlson.Gamma_three_halves,
+    show (1 / 2 : ℂ) - 1 = -(1 / 2) by norm_num, mul_assoc (1 / 2 : ℂ), Gamma_one_half_mul_self]
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [← mul_assoc, show 3 * (π : ℂ) / 4 * (1 / (1 / 2 * π)) = 3 / 2 by field_simp; ring]
   congr 1
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
-  rw [ei19c_cpow_neg_three_halves (ei19c_add_ne_zero ht (Or.inl hz))]
-  simp only [symEllIntS, add_zero, mul_inv, ei19c_inv_cpow_half, neg_div]
+  rw [cpow_neg_three_halves_eq (ofReal_add_ne_zero_of_symEllIntArg ht (Or.inl hz))]
+  simp only [symEllIntS, add_zero, mul_inv, inv_cpow_half_eq_cpow_neg_half, neg_div]
   ring
 
 /-- DLMF 19.16.22: `R_J(0, y, z, p) = (3π/4) R_{-3/2}(1/2, 1/2, 1; y, z, p)`,
@@ -329,18 +331,18 @@ theorem symEllIntRJ_zero_left {y z p : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ s
     (hp : p ∈ slitPlane) :
     symEllIntRJ 0 y z p = (3 * π / 4) * symEllIntR (3 / 2) ![1 / 2, 1 / 2, 1] ![y, z, p] := by
   rw [symEllIntR_eq_integral (a' := 1 / 2) (by norm_num) (by norm_num)
-    (by simp [Fin.sum_univ_three]; try norm_num) (ei19c_slit3 hy hz hp),
-    ei19c_betaIntegral_inv (by norm_num) (by norm_num), symEllIntRJ,
-    ite_eq_right (ei19c_not_isNegReal_of_mem_slitPlane hp)]
+    (by simp [Fin.sum_univ_three]; try norm_num) (vec3_mem_carlsonRSlitDomain hy hz hp),
+    inv_betaIntegral (by norm_num) (by norm_num), symEllIntRJ,
+    ite_eq_right (not_isNegReal_of_mem_slitPlane hp)]
   simp only [Fin.prod_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
     Matrix.head_cons, Matrix.tail_cons, cpow_neg_one]
-  rw [show (3 / 2 : ℂ) + 1 / 2 = 2 by norm_num, ei19c_Gamma_two, ei19c_Gamma_three_halves,
-    show (1 / 2 : ℂ) - 1 = -(1 / 2) by norm_num, mul_assoc (1 / 2 : ℂ), ei19c_Gamma_half_sq]
+  rw [show (3 / 2 : ℂ) + 1 / 2 = 2 by norm_num, Carlson.Gamma_two', Carlson.Gamma_three_halves,
+    show (1 / 2 : ℂ) - 1 = -(1 / 2) by norm_num, mul_assoc (1 / 2 : ℂ), Gamma_one_half_mul_self]
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [← mul_assoc, show 3 * (π : ℂ) / 4 * (1 / (1 / 2 * π)) = 3 / 2 by field_simp; ring]
   congr 1
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
-  simp only [symEllIntS, add_zero, mul_inv, ei19c_inv_cpow_half, neg_div]
+  simp only [symEllIntS, add_zero, mul_inv, inv_cpow_half_eq_cpow_neg_half, neg_div]
   ring
 
 /-! ### Degenerate cases and the hyperelliptic integral (19.16.5–19.16.7) -/
@@ -358,7 +360,7 @@ is outside DLMF's domain). The integrands agree pointwise. -/
 @[dlmf 19.16.E6]
 theorem symEllIntRC_eq_symEllIntRF (x : ℂ) {y : ℂ} (hy : ¬ IsNegReal y) :
     symEllIntRC x y = symEllIntRF x y y := by
-  simp only [symEllIntRC, symEllIntRF, hy, ↓reduceIte, symEllIntS, mul_assoc, ei19c_cpow_half_sq]
+  simp only [symEllIntRC, symEllIntRF, hy, ↓reduceIte, symEllIntS, mul_assoc, cpow_half_mul_cpow_half]
 
 /-- DLMF 19.16.7: `R_J` is the degenerate case `x₄ = x₅ = p` of the hyperelliptic integral
 `(3/2) ∫₀^∞ dt / ∏_{j=1}^5 √(t + xⱼ)`; for `p` not a negative real (no principal value). -/
@@ -368,7 +370,7 @@ theorem symEllIntRJ_eq_hyperelliptic (x y z : ℂ) {p : ℂ} (hp : ¬ IsNegReal 
       (3 / 2) * ∫ t in Ioi (0 : ℝ), (∏ j : Fin 5, ((t : ℂ) + ![x, y, z, p, p] j) ^ (1 / 2 : ℂ))⁻¹ := by
   simp only [symEllIntRJ, hp, ↓reduceIte, Fin.prod_univ_five, Matrix.cons_val_zero, Matrix.cons_val_one,
     Matrix.cons_val_two, Matrix.cons_val_three, Matrix.cons_val_four, Matrix.head_cons,
-    Matrix.tail_cons, symEllIntS, mul_assoc, ei19c_cpow_half_sq]
+    Matrix.tail_cons, symEllIntS, mul_assoc, cpow_half_mul_cpow_half]
 
 /-! ### Symmetry, homogeneity and normalization -/
 
@@ -473,26 +475,26 @@ theorem symEllIntRJ_one_one_one_one : symEllIntRJ 1 1 1 1 = 1 := by
 /-- DLMF 19.21.10 at the level of the defining integrals, **stronger than DLMF** in allowing
 `x = 0`: `2R_G(x, y, z) = z R_F(x, y, z) - (1/3)(x - z)(y - z) R_D(x, y, z)
 + x^{1/2} y^{1/2} z^{-1/2}` for admissible `x` and `y, z ∈ ℂ \ (-∞, 0]`. Proved from the exact
-antiderivative of `p19sR1_RG_identity`. -/
+antiderivative of `symEllIntRG_integral_identity`. -/
 @[dlmf 19.21.E10]
-theorem p19sR1_two_mul_symEllIntRG {x y z : ℂ} (hx : SymEllIntArg x) (hy : y ∈ slitPlane)
+theorem two_mul_symEllIntRG {x y z : ℂ} (hx : SymEllIntArg x) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
     2 * symEllIntRG x y z = z * symEllIntRF x y z -
       (1 / 3) * (x - z) * (y - z) * symEllIntRD x y z +
         x ^ (1 / 2 : ℂ) * y ^ (1 / 2 : ℂ) * z ^ (-1 / 2 : ℂ) := by
-  have key := p19sR1_RG_identity hx hy hz
-  rw [symEllIntRD_eq_integral (ei19c_not_isNegReal_of_mem_slitPlane hz)]
+  have key := symEllIntRG_integral_identity hx hy hz
+  rw [symEllIntRD_eq_integral (not_isNegReal_of_mem_slitPlane hz)]
   simp only [symEllIntRG, symEllIntRF, symEllIntS]
   linear_combination (1 / 2 : ℂ) * key
 
 /-- Bridge (slit plane): DLMF's `R_G` integral (19.16.2_5) is `Carlson.carlsonRG`. From
-`p19sR1_two_mul_symEllIntRG` and Carlson's Table 9.3-1, row 3 (`lean-codes`). -/
-lemma p19sR1_symEllIntRG_eq_carlsonRG {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
+`two_mul_symEllIntRG` and Carlson's Table 9.3-1, row 3 (`lean-codes`). -/
+private lemma symEllIntRG_eq_carlsonRG' {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) : symEllIntRG x y z = Carlson.carlsonRG x y z := by
-  have h1 := p19sR1_two_mul_symEllIntRG (Or.inl hx) hy hz
+  have h1 := two_mul_symEllIntRG (Or.inl hx) hy hz
   have h2 := Carlson.carlsonR_table_9_3_1_row3 hx hy hz
   rw [symEllIntRF_eq_carlsonRF hx hy hz, symEllIntRD_eq_symEllIntR hx hy hz,
-    symEllIntR_of_mem _ _ (ei19c_slit3 hx hy hz), show -(3 / 2 : ℂ) = -3 / 2 by ring] at h1
+    symEllIntR_of_mem _ _ (vec3_mem_carlsonRSlitDomain hx hy hz), show -(3 / 2 : ℂ) = -3 / 2 by ring] at h1
   have ex : x * x ^ (-1 / 2 : ℂ) = x ^ (1 / 2 : ℂ) := by
     calc x * x ^ (-1 / 2 : ℂ) = x ^ (1 : ℂ) * x ^ (-1 / 2 : ℂ) := by rw [cpow_one]
       _ = _ := by rw [← cpow_add _ _ (slitPlane_ne_zero hx)]; norm_num
@@ -512,14 +514,14 @@ continuation, `lean-codes`' `Carlson.carlsonRG`). -/
 theorem symEllIntRG_eq_symEllIntR {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
     symEllIntRG x y z = symEllIntR (-1 / 2) (fun _ : Fin 3 => 1 / 2) ![x, y, z] := by
-  rw [p19sR1_symEllIntRG_eq_carlsonRG hx hy hz, symEllIntR_of_mem _ _ (ei19c_slit3 hx hy hz),
+  rw [symEllIntRG_eq_carlsonRG' hx hy hz, symEllIntR_of_mem _ _ (vec3_mem_carlsonRSlitDomain hx hy hz),
     Carlson.carlsonRG]
   congr 1; ring
 
 /-- Bridge: on the slit plane DLMF's `R_G` is `Carlson.carlsonRG` of `lean-codes`. -/
 theorem symEllIntRG_eq_carlsonRG {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) : symEllIntRG x y z = Carlson.carlsonRG x y z := by
-  rw [symEllIntRG_eq_symEllIntR hx hy hz, symEllIntR_of_mem _ _ (ei19c_slit3 hx hy hz),
+  rw [symEllIntRG_eq_symEllIntR hx hy hz, symEllIntR_of_mem _ _ (vec3_mem_carlsonRSlitDomain hx hy hz),
     Carlson.carlsonRG]
   congr 1; ring
 
@@ -562,7 +564,7 @@ theorem symEllIntR_cons_zero {n : ℕ} {a b₁ : ℝ} {b : Fin n → ℝ} {z : F
 
 /-- `R_E(y, z) = z R_K(y, z) + (1/2) z (y - z) R_{-3/2}(1/2, 3/2; y, z)` (Carlson's notation,
 `lean-codes`), from the contiguous relation `regR2_raise₁` and Table 9.3-2, row 3. -/
-lemma p19sR1_carlsonRE_eq {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
+private lemma carlsonRE_eq_carlsonRK_add {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     Carlson.carlsonRE y z = z * Carlson.TwoVariable.carlsonRK y z +
       (1 / 2) * z * (y - z) * Carlson.carlsonR (-3 / 2) ![1 / 2, 3 / 2] ![y, z] := by
   have h3 := Carlson.carlsonR_table_9_3_2_row3 hy hz
@@ -579,19 +581,19 @@ theorem symEllIntRG_zero_left {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ sli
     symEllIntRG 0 y z = (π / 4) * symEllIntR (-1 / 2) ![1 / 2, 1 / 2] ![y, z] ∧
       symEllIntRG 0 y z = (π / 4) * z * symEllIntR (1 / 2) ![-1 / 2, 3 / 2] ![y, z] := by
   have hRE : symEllIntRG 0 y z = (π / 4) * Carlson.carlsonRE y z := by
-    have h := p19sR1_two_mul_symEllIntRG (Or.inr rfl) hy hz
+    have h := two_mul_symEllIntRG (Or.inr rfl) hy hz
     rw [symEllIntRF_zero_left hy hz, symEllIntRD_zero_left hy hz,
-      symEllIntR_of_mem _ _ (ei19c_slit2 hy hz), symEllIntR_of_mem _ _ (ei19c_slit2 hy hz),
-      zero_cpow (by norm_num : (1 / 2 : ℂ) ≠ 0), p19sR1_carlsonRE_eq hy hz] at *
+      symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz), symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz),
+      zero_cpow (by norm_num : (1 / 2 : ℂ) ≠ 0), carlsonRE_eq_carlsonRK_add hy hz] at *
     unfold Carlson.TwoVariable.carlsonRK Carlson.TwoVariable.pair
     rw [show (-(1 / 2) : ℂ) = -1 / 2 by ring, show (-(3 / 2) : ℂ) = -3 / 2 by ring] at h
     linear_combination (1 / 2 : ℂ) * h
   refine ⟨?_, ?_⟩
-  · rw [hRE, symEllIntR_of_mem _ _ (ei19c_slit2 hy hz)]
+  · rw [hRE, symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz)]
     unfold Carlson.carlsonRE Carlson.TwoVariable.pair
     congr 2; ring
   · have h1 := Carlson.carlsonR_table_9_3_2_row1 hy hz
-    rw [hRE, symEllIntR_of_mem _ _ (ei19c_slit2 hy hz), show -(1 / 2 : ℂ) = -1 / 2 by ring]
+    rw [hRE, symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz), show -(1 / 2 : ℂ) = -1 / 2 by ring]
     linear_combination (-(π / 4 : ℂ)) * h1
 
 /-- DLMF 19.16.24: the incomplete integral recovered from the complete one,

@@ -8,16 +8,39 @@ module
 public import DLMF.Mathieu.Basic
 
 /-!
-# Mathieu functions of noninteger order: definitions (DLMF §§28.12, 28.14)
+# Mathieu functions of noninteger order: definitions
 
-DLMF §28.12 introduces, for `ν ∉ ℤ`, the eigenvalues `λ_ν(q)` (the values of `a` for which
-Mathieu's equation 28.2.1 has a Floquet solution with respect to `ν`, continued analytically
-from `λ_ν(0) = ν²`, 28.12.1), the Floquet solutions `me_ν(z, q)` normalized by 28.12.5, and
+This file defines the objects of DLMF §§28.12 and 28.14 for noninteger order `ν`: the
+eigenvalues `λ_ν(q)` (the values of `a` for which Mathieu's equation 28.2.1 has a Floquet
+solution with respect to `ν`, continued analytically from `λ_ν(0) = ν²`, 28.12.1), the Floquet
+solutions `me_ν(z, q)` normalized by 28.12.5, their Fourier coefficients `c^ν_{2m}(q)`, and
 `ce_ν`, `se_ν` (28.12.12, 28.12.13). For integer order DLMF completes the definitions by
 `λ_m = a_m` (`m ≥ 0`), `λ_m = b_{-m}` (`m < 0`) (28.12.3) and `me_n = √2 ce_n`,
-`me_{-n} = -√2 i se_n` (28.12.11).
+`me_{-n} = -√2 i se_n` (28.12.11). It also defines the finite continued fractions of §28.15 and
+the stability of a pair `(a, q)` (§28.17).
 
-## Design (definitions by choice)
+## Main definitions
+
+* `IsMeCoeffSeq`: `c : ℤ → ℂ` is an absolutely summable solution of 28.14.4 satisfying 28.14.5.
+* `IsMathieuLambdaPath`: a continuation path for `(λ_ν, c^ν)` along the segment `t ↦ t q`.
+* `MathieuNormalSegment`: `q` is normal along the segment `[0, q]` with respect to `ν`.
+* `mathieuLambdaData`: the endpoint of the continuation along `[0, q]` (junk `(0, 0)` otherwise).
+* `mathieuLambda`: the eigenvalue `λ_ν(q)` (DLMF §28.12(i)).
+* `mathieuMe`: the Mathieu function `me_ν(z, q)` (DLMF §28.12(ii)).
+* `mathieuMeCoeff`: the Fourier coefficients `c^ν_{2m}(q)` (DLMF 28.14.1).
+* `mathieuCeNu`, `mathieuSeNu`: `ce_ν`, `se_ν` (DLMF 28.12.12, 28.12.13).
+* `mathieuLambdaInt`, `mathieuMeInt`: the integer-order values 28.12.3 and 28.12.11.
+* `mathieuContFrac`: the finite continued fractions used in DLMF 28.15.2.
+* `IsMathieuStable`: stability of the pair `(a, q)` (DLMF §28.17).
+
+## Main results
+
+* `mathieuLambda_of_not_int`, `mathieuMeCoeff_of_not_int`, `mathieuMe_of_not_int`: the
+  unfolding of the definitions for `ν ∉ ℤ`.
+* `mathieuLambda_intCast`, `mathieuMe_intCast`: the integer-order values (DLMF 28.12.3,
+  28.12.11).
+
+## Implementation notes
 
 The Fourier series 28.14.1, `me_ν(z, q) = ∑_m c^ν_{2m}(q) e^{i(ν+2m)z}`, turns the Floquet
 problem into the three-term recurrence 28.14.4 with the normalization 28.14.5
@@ -44,7 +67,7 @@ coefficients `mathieuMeCoeff ν q m = c^ν_{2m}(q)` are the second, and
 `mathieuMe ν z q = me_ν(z, q)` is the Fourier series 28.14.1 (a `tsum`; its convergence for
 all complex `z` is the theorem 28.14.1).
 
-For integer order the project's eigenvalues and eigenfunctions are defined for real `q` only
+For integer order the eigenvalues and eigenfunctions are defined for real `q` only
 (`DLMF.Mathieu.mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe` in `DLMF.Mathieu.Basic`), so
 `mathieuLambda m q` and `mathieuMe m z q` for `m ∈ ℤ` follow 28.12.3 and 28.12.11 when `q` is
 real and are junk `0` for nonreal `q`. For integer `ν` the coefficients `mathieuMeCoeff` are

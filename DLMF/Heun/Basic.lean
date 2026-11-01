@@ -16,29 +16,43 @@ public import Mathlib.Tactic.Positivity.Finset
 
 This file holds the definitions of DLMF Chapter 31 (namespace `DLMF.Heun`).
 
+## Main definitions
+
 * `IsLinearODE2On p r w s`: `w'' + p w' + r w = 0` on `s`, with genuine differentiability, the
-  shape of every second-order equation of the chapter. Heun's equation (31.2.1) is
-  `IsHeunSolOn a q α β γ δ ε w s`; the exponent parameter `ε` is kept explicit and Fuchs's
-  relation `α + β + 1 = γ + δ + ε` is a hypothesis wherever DLMF needs it. `heunODECoeff` is the
-  same equation in the form of `Complex.linearODEValue` (DLMFMathlib, singularity
-  classification).
-* The coefficients `P_j, Q_j, R_j` of the three-term recurrence (31.3.4), the Maclaurin
-  coefficients `c_j` of the local solution (`heunLocalCoeff`, 31.3.2–31.3.3) and the local Heun
-  function `heunLocal a q α β γ δ z = ∑ c_j z^j` (31.3.1). In `heunLocal` the parameter
-  `ε = α + β + 1 - γ - δ` (`heunEps`). The series converges for `|z| < min(1, |a|)`
-  (`heunLocalRadius`); outside that disk, and when `aγ = 0` or `γ ∈ {-1, -2, …}` (where a
-  denominator `R_j` vanishes), the `tsum` and the totalized divisions are junk values.
-* Heun functions (§31.4): `IsHeunFunctionOn`, the eigenvalue predicate `IsHeunEigenvalue01`, the
-  continuation `heunFunction01` (by choice) and the continued fraction `heunCFApprox` (31.4.2).
-* Heun polynomials (§31.5): the tridiagonal matrix `heunPolyMatrix` (31.5.1) and the
-  truncated series `heunPoly` (31.5.2).
-* Contour integrals with continuously continued branches: `localBranchCpow`, the Pochhammer
-  double loop `pochhammerLoop`, and `continuedPathIntegral` (integral along a path of the analytic
-  continuation of a germ, via TauCeti's `IsAnalyticContinuationAlong`); path-multiplicative
-  solutions (§31.6).
-* Heun's operator `heunOperator` (31.10.4) and the weights of §31.10.
-* The confluent forms (§31.12), the rank of an irregular singularity, the general Fuchsian
-  equation (§31.14) and Stieltjes/Van Vleck polynomials (§31.15).
+  shape of every second-order equation of the chapter.
+* `IsHeunSolOn a q α β γ δ ε w s`: Heun's equation, DLMF 31.2.1. The exponent parameter `ε` is
+  explicit and Fuchs's relation `α + β + 1 = γ + δ + ε` is a hypothesis wherever DLMF needs it.
+  `heunODECoeff` is the same equation in the form of `Complex.linearODEValue`.
+* `heunNormalCoeff`: the normal form, DLMF 31.2.3–31.2.4.
+* `heunRecP`, `heunRecQ`, `heunRecR`, `heunLocalCoeff`: the coefficients of the three-term
+  recurrence (31.3.4) and the Maclaurin coefficients `c_j` of the local solution (31.3.2–31.3.3).
+* `heunLocal a q α β γ δ z = ∑ c_j z^j`: the local Heun function `Hl`, DLMF 31.3.1, with
+  `ε = α + β + 1 - γ - δ` (`heunEps`) and radius of convergence `min(1, |a|)` (`heunLocalRadius`).
+* `IsHeunFunctionOn`, `IsHeunEigenvalue01`, `heunFunction01`, `heunCFApprox`: Heun functions,
+  the eigenvalue predicate, the continued Heun function (by choice) and the continued fraction
+  31.4.2 (§31.4).
+* `heunPolyMatrix`, `heunPoly`: the tridiagonal matrix 31.5.1 and Heun polynomials 31.5.2.
+* `IsPathMultiplicative`: path-multiplicative solutions, DLMF 31.6.1.
+* `localBranchCpow`, `pochhammerLoop`, `continuedPathIntegral`: continuously continued branches,
+  the Pochhammer double loop, and integration along a path of the analytic continuation of a
+  germ (via TauCeti's `IsAnalyticContinuationAlong`).
+* `heunOperator`, `heunWeight`, `heunConcomitantP`: Heun's operator and the data of §31.10.
+* `heunHypK`, `heunHypL`, `heunHypM`, `heunHypP5`, `heunHypP6`: the coefficients and
+  Fuchs–Frobenius solutions of the hypergeometric expansions of §31.11.
+* `IsConfluentHeunSolOn`, `IsDoublyConfluentHeunSolOn`, `IsBiconfluentHeunSolOn`,
+  `IsTriconfluentHeunSolOn`: the confluent forms 31.12.1–31.12.4; `HasIrregularRankAt` and
+  `HasIrregularRankAtInfinity` give the rank of an irregular singularity.
+* `IsFuchsianSolOn`, `fuchsianNormalCoeff`: the general Fuchsian equation 31.14.1 and its normal
+  form.
+* `IsVanVleckStieltjes`, `stieltjesPoly`, `stieltjesG`, `stieltjesWeight`, `stieltjesInner`:
+  Stieltjes and Van Vleck polynomials (§31.15).
+
+## Implementation notes
+
+Outside the disk `|z| < min(1, |a|)`, and when `aγ = 0` or `γ ∈ {-1, -2, …}` (where a
+denominator `R_j` vanishes), the `tsum` and the totalized divisions in `heunLocal` are junk
+values. The biconfluent equation carries the sign as corrected in DLMF 1.0.7, and `heunHypK`,
+`heunHypM` follow the corrections of DLMF 1.1.7.
 -/
 
 @[expose] public section

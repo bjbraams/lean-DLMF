@@ -13,11 +13,32 @@ public import DLMF.Struve.BarnesTools
 /-!
 # Poisson integrals and Struve Barnes loops
 
-Poisson and sine-transform representations and the convergent Barnes loop for the modified
-Struve function.
+Poisson and Laplace integral representations of the Struve functions (DLMF 11.5.1–11.5.6),
+the sine-transform representation of `L_ν` (DLMF 11.5.7) and the convergent Barnes loop
+integral for `L_ν` (DLMF 11.5.9).
 
-Source references and common attribution are retained in
-`DLMF.Struve.Representations`.
+## Main definitions
+
+* `positiveBarnesLoop`: the separating loop from positive infinity above the poles to
+  positive infinity below them.
+* `struveLoop_rect`: the boundary integral over a rectangle `[a, b] × [-h, h]`.
+* `struveLoop_F`: the integrand of the Barnes loop for `L_ν`.
+
+## Main results
+
+* `struveH_trig_integral`, `struveH_integral`, `struveL_trig_integral`: DLMF 11.5.1 and
+  11.5.6.
+* `struveK_laplace`, `struveK_zero_laplace`: DLMF 11.5.2–11.5.3.
+* `struveM_integral`, `struveM_zero_integral`: DLMF 11.5.4–11.5.5.
+* `struveFour_H_I`, `struveFour_H_neg_I`: `H_ν(±ix)` in terms of `L_ν(x)`.
+* `struveL_fourier`: DLMF 11.5.7.
+* `struveLoop_rect_pole`, `struveLoop_rect_sum`: the residue theorem for rectangles with
+  simple poles on the real axis.
+* `struveL_barnes_loop`: DLMF 11.5.9.
+
+## Implementation notes
+
+`struveK_laplace` retains the reciprocal-Gamma prefactor at exceptional orders.
 -/
 
 @[expose] public noncomputable section

@@ -9,8 +9,8 @@ public import DLMF.Airy.Zeros.RealAndAi
 public import DLMF.Airy.Zeros.ComplexBi
 
 /-!
-# Airy zeros and their common asymptotic coefficients, DLMF §9.9
+# Zeros of Airy functions (DLMF §9.9)
 
-Statements acquired from the NIST DLMF, checked 2026-10-19.
-New statements are initially admitted; existing proved Airy results are retained.
+Real zeros of `Ai`, `Ai'`, `Bi`, `Bi'`, the absence of nonreal zeros of `Ai` and `Ai'`, the
+complex zeros of `Bi` and `Bi'`, and relations between zeros, moduli and phases.
 -/

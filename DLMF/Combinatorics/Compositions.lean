@@ -11,11 +11,27 @@ public import Mathlib.Analysis.Complex.Basic
 public import Mathlib.Data.Nat.Fib.Basic
 
 /-!
-# Integer partitions: compositions (DLMF §26.11)
+# Integer partitions: compositions
 
-Compositions are Mathlib's `Composition n` (ordered lists of positive integers summing to `n`;
-the empty composition of `0` included). `c(n)` is `compositionCount n`, `c_m(n)` is
-`compositionCountLength m n` and `c(∈ T, n)` (no part `1`) is `compositionCountNoOne n`.
+The compositions of DLMF §26.11. Compositions are Mathlib's `Composition n` (ordered lists of
+positive integers summing to `n`; the empty composition of `0` included).
+
+## Main definitions
+
+* `compositionCount`: `c(n)`, the number of compositions of `n`.
+* `compositionCountLength`: `c_m(n)`, the number of compositions of `n` into exactly `m` parts.
+* `compositionCountNoOne`: `c(∈ T, n)`, the number of compositions of `n` with no part `1`.
+
+## Main results
+
+* `compositionCount_zero`, `compositionCountLength_zero`: the initial values (DLMF 26.11.1,
+  26.11.2).
+* `compositionCountLength_eq_choose`: `c_m(n) = C(n-1, m-1)` for `n ≥ 1` (DLMF 26.11.3).
+* `hasSum_compositionCountLength`: the generating function `q^m/(1 - q)^m` (DLMF 26.11.4).
+* `compositionCountNoOne_eq_fib`: `c(∈ T, n) = F_{n-1}` for `n ≥ 1` (DLMF 26.11.6).
+
+## Implementation notes
+
 Mathlib already has `composition_card : Fintype.card (Composition n) = 2 ^ (n - 1)`.
 The Fibonacci numbers are Mathlib's `Nat.fib`; (26.11.5) and Binet's formula (26.11.7,
 `Real.coe_fib_eq`) are recorded as upstream pointers in `MathlibCoverageB`.
@@ -76,7 +92,7 @@ theorem compositionCountLength_zero (m : ℕ) :
 
 /-- For `n ≥ 1`, the boundary-set model of a composition has one element fewer than its
 number of blocks. -/
-lemma q26b_card_compositionAsSetEquiv {n : ℕ} (hn : 1 ≤ n) (d : CompositionAsSet n) :
+private lemma card_compositionAsSetEquiv_add_one {n : ℕ} (hn : 1 ≤ n) (d : CompositionAsSet n) :
     ((compositionAsSetEquiv n) d).card + 1 = d.length := by
   classical
   set T := (compositionAsSetEquiv n) d
@@ -133,7 +149,7 @@ theorem compositionCountLength_eq_choose {n : ℕ} (hn : 1 ≤ n) (m : ℕ) :
     (t := univ.filter fun s : Finset (Fin (n - 1)) => s.card + 1 = m) (by
       intro c
       simp only [mem_filter, mem_univ, true_and, Equiv.trans_apply]
-      rw [q26b_card_compositionAsSetEquiv hn]
+      rw [card_compositionAsSetEquiv_add_one hn]
       simp [compositionEquiv])
   rw [h]
   split_ifs with hm
@@ -180,7 +196,7 @@ theorem hasSum_compositionCountLength {q : ℂ} (hq : ‖q‖ < 1) (m : ℕ) :
     · field_simp
 
 /-- Prepend a block `2`. -/
-def q26b_compCons2 {n : ℕ} (c : Composition n) : Composition (n + 2) where
+def compositionConsTwo {n : ℕ} (c : Composition n) : Composition (n + 2) where
   blocks := 2 :: c.blocks
   blocks_pos := by
     intro i hi
@@ -190,7 +206,7 @@ def q26b_compCons2 {n : ℕ} (c : Composition n) : Composition (n + 2) where
   blocks_sum := by rw [List.sum_cons, c.blocks_sum]; omega
 
 /-- Add `1` to the first block. -/
-def q26b_compSuccHead {n : ℕ} (c : Composition (n + 1)) : Composition (n + 2) where
+def compositionSuccHead {n : ℕ} (c : Composition (n + 1)) : Composition (n + 2) where
   blocks := c.blocks.modifyHead (· + 1)
   blocks_pos := by
     intro i hi
@@ -210,20 +226,20 @@ def q26b_compSuccHead {n : ℕ} (c : Composition (n + 1)) : Composition (n + 2) 
       omega
 
 /-- The recurrence `c(∈ T, n+2) = c(∈ T, n) + c(∈ T, n+1)`. -/
-lemma q26b_compositionCountNoOne_add_two (n : ℕ) :
+private lemma compositionCountNoOne_add_two (n : ℕ) :
     compositionCountNoOne (n + 2) = compositionCountNoOne n + compositionCountNoOne (n + 1) := by
   classical
   unfold compositionCountNoOne
   set P : ∀ {m : ℕ}, Composition m → Prop := fun c => ∀ i ∈ c.blocks, 2 ≤ i
-  have hA : Function.Injective (q26b_compCons2 (n := n)) := by
+  have hA : Function.Injective (compositionConsTwo (n := n)) := by
     intro c d h
     have := congrArg Composition.blocks h
-    simp only [q26b_compCons2, List.cons.injEq, true_and] at this
+    simp only [compositionConsTwo, List.cons.injEq, true_and] at this
     exact Composition.ext this
-  have hB : Function.Injective (q26b_compSuccHead (n := n)) := by
+  have hB : Function.Injective (compositionSuccHead (n := n)) := by
     intro c d h
     have h1 := congrArg Composition.blocks h
-    simp only [q26b_compSuccHead] at h1
+    simp only [compositionSuccHead] at h1
     apply Composition.ext
     rcases hc : c.blocks with _ | ⟨a, l⟩ <;> rcases hd : d.blocks with _ | ⟨b, l'⟩
     · rfl
@@ -233,9 +249,9 @@ lemma q26b_compositionCountNoOne_add_two (n : ℕ) :
       simp only [List.modifyHead_cons, List.cons.injEq, Nat.add_right_cancel_iff] at h1
       rw [h1.1, h1.2]
   have hU : (univ.filter fun c : Composition (n + 2) => ∀ i ∈ c.blocks, 2 ≤ i) =
-      (univ.filter fun c : Composition n => ∀ i ∈ c.blocks, 2 ≤ i).image q26b_compCons2 ∪
+      (univ.filter fun c : Composition n => ∀ i ∈ c.blocks, 2 ≤ i).image compositionConsTwo ∪
       (univ.filter fun c : Composition (n + 1) => ∀ i ∈ c.blocks, 2 ≤ i).image
-        q26b_compSuccHead := by
+        compositionSuccHead := by
     ext c
     simp only [mem_filter, mem_univ, true_and, mem_union, mem_image]
     constructor
@@ -251,7 +267,7 @@ lemma q26b_compositionCountNoOne_add_two (n : ℕ) :
       rcases Nat.eq_or_lt_of_le ha with rfl | ha3
       · left
         refine ⟨⟨l, hlpos _, by omega⟩, hl, Composition.ext ?_⟩
-        simp [q26b_compCons2, h]
+        simp [compositionConsTwo, h]
       · right
         refine ⟨⟨(a - 1) :: l, ?_, ?_⟩, ?_, Composition.ext ?_⟩
         · intro i hi
@@ -263,16 +279,16 @@ lemma q26b_compositionCountNoOne_add_two (n : ℕ) :
           rcases List.mem_cons.mp hi with rfl | hi
           · omega
           · exact hl i hi
-        · simp only [q26b_compSuccHead, List.modifyHead_cons, h]
+        · simp only [compositionSuccHead, List.modifyHead_cons, h]
           congr 1; omega
     · rintro (⟨d, hd, rfl⟩ | ⟨d, hd, rfl⟩)
       · intro i hi
-        simp only [q26b_compCons2, List.mem_cons] at hi
+        simp only [compositionConsTwo, List.mem_cons] at hi
         rcases hi with rfl | hi
         · exact le_rfl
         · exact hd i hi
       · intro i hi
-        simp only [q26b_compSuccHead] at hi
+        simp only [compositionSuccHead] at hi
         rcases h : d.blocks with _ | ⟨a, l⟩
         · rw [h] at hi; simp at hi
         · rw [h] at hi hd
@@ -281,16 +297,16 @@ lemma q26b_compositionCountNoOne_add_two (n : ℕ) :
           · have := hd a List.mem_cons_self; omega
           · exact hd i (List.mem_cons_of_mem a hi)
   have hD : Disjoint
-      ((univ.filter fun c : Composition n => ∀ i ∈ c.blocks, 2 ≤ i).image q26b_compCons2)
+      ((univ.filter fun c : Composition n => ∀ i ∈ c.blocks, 2 ≤ i).image compositionConsTwo)
       ((univ.filter fun c : Composition (n + 1) => ∀ i ∈ c.blocks, 2 ≤ i).image
-        q26b_compSuccHead) := by
+        compositionSuccHead) := by
     rw [Finset.disjoint_left]
     rintro c hc hc'
     obtain ⟨d, -, rfl⟩ := mem_image.mp hc
     obtain ⟨d', hd', h⟩ := mem_image.mp hc'
     simp only [mem_filter, mem_univ, true_and] at hd'
     have h1 := congrArg Composition.blocks h
-    simp only [q26b_compSuccHead, q26b_compCons2] at h1
+    simp only [compositionSuccHead, compositionConsTwo] at h1
     rcases hb : d'.blocks with _ | ⟨a, l⟩
     · rw [hb] at h1; simp at h1
     · rw [hb] at h1 hd'
@@ -320,8 +336,8 @@ theorem compositionCountNoOne_eq_fib {n : ℕ} (hn : 1 ≤ n) :
     rcases n with _ | _ | _ | n
     · omega
     · simpa using h1
-    · rw [q26b_compositionCountNoOne_add_two, h0, h1]; rfl
-    · rw [q26b_compositionCountNoOne_add_two, ih (n + 1) (by omega) (by omega),
+    · rw [compositionCountNoOne_add_two, h0, h1]; rfl
+    · rw [compositionCountNoOne_add_two, ih (n + 1) (by omega) (by omega),
         ih (n + 2) (by omega) (by omega)]
       simp only [Nat.add_sub_cancel]
       rw [show n + 2 - 1 = n + 1 by omega, Nat.fib_add_two]

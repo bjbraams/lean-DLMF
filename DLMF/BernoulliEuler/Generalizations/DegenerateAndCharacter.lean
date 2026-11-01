@@ -6,15 +6,56 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.BernoulliEuler.Generalizations.HigherOrder
+public import Carlson.Elliptic.Addition
 
 /-!
-# Degenerate and character Bernoulli analogs
+# Complex-order, degenerate and character Bernoulli numbers
 
-Analytic generating functions for degenerate and complex-order Bernoulli polynomials, followed
-by character analogs.
+This file covers the rest of DLMF §24.16: the generating function of the Nörlund polynomials of
+complex order, the identity 24.16.8 for the degenerate Bernoulli numbers, and the Bernoulli
+numbers and polynomials belonging to a Dirichlet character (§24.16(iii)).
 
-Source references and common attribution are retained in
-`DLMF.BernoulliEuler.Generalizations`.
+## Main definitions
+
+* `bernoulliChar χ n`: `B_{n,χ}` for a Dirichlet character `χ` modulo `f` (DLMF 24.16.10),
+  by the closed form `B_{n,χ} = f^{n-1} ∑_{a=1}^{f} χ(a) Bₙ(a/f)`.
+* `bernoulliCharPoly`: `B_{n,χ}(x)` (DLMF 24.16.11).
+* `bernoulliGenFunLog`: a holomorphic logarithm of `t/(eᵗ - 1)` on `|t| < 2π`.
+
+## Main results
+
+* `degenerateBernoulli_eq`: DLMF 24.16.8.
+* `hasSum_norlundPolynomial`, `hasSum_norlundPolynomial_real`: the generating function
+  DLMF 24.16.9 for complex and for real order.
+* `natDegree_norlundPolynomial`, `norlundPolynomial_eval_natCast`: `B_n^{(x)}` has degree `n`
+  in `x` and agrees with `B_n^{(ℓ)}` at `x = ℓ` (DLMF §24.16(i)).
+* `hasSum_bernoulliChar`: the generating function DLMF 24.16.10.
+* `bernoulli_eq_bernoulliCharPoly_one`, `euler_eq_bernoulliCharPoly_chi4`: DLMF 24.16.12,
+  24.16.13.
+
+## Implementation notes
+
+For the Nörlund polynomials of complex order (24.16.9) DLMF's power `(t/(eᵗ-1))^x` is the
+branch analytic in `|t| < 2π` and equal to `1` at `0`; the principal power `cpow` agrees with
+it only while `t/(eᵗ-1)` has not crossed the negative axis. Numerically the principal argument
+stays below `π` for `|t| < 4.8`; 24.16.9 is stated for complex `x` and `0 < ‖t‖ < π`, and for
+real `x` and real `0 < |t| < 2π` (where `t/(eᵗ-1) > 0`). It is proved from the holomorphic
+logarithm `bernoulliGenFunLog` (a primitive of the logarithmic derivative): the Taylor
+coefficients of `e^{xL}` are polynomials in `x` that agree with `B_n^{(ℓ)}` at `x = ℓ ∈ ℕ`.
+
+The identity 24.16.8 is proved for real `0 < λ < 1/4` by writing `(1+λt)^{1/λ} = eᵘ`,
+`u = ln(1+λt)/λ`, expanding `t/(eᵘ-1)` with 24.2.1, 24.16.5 and the Stirling generating
+function 26.8.8 (`DLMF.Combinatorics.Stirling`), rearranging the absolutely convergent double
+series and comparing coefficients with 24.16.7; agreement for infinitely many `λ` gives the
+identity in `ℚ[λ]`.
+
+DLMF requires `χ` primitive (with `f` its conductor); the definition of `bernoulliChar` and the
+generating function 24.16.10 make sense, and are stated, for every `χ` modulo `f ≥ 1`. The
+generating function is proved by summing Cauchy products of absolutely convergent series.
+
+## References
+
+* NIST DLMF §24.16; Nörlund (1924), Milne-Thomson (1933), Carlitz (1979), Berndt (1975a).
 -/
 
 @[expose] public noncomputable section
@@ -32,13 +73,12 @@ For real `0 < λ < 1/4` and real `0 < |t| < 1`, `(1+λt)^{1/λ} = eᵘ` and
 (26.8.8) gives an absolutely convergent double series whose `tⁿ` coefficients are compared with
 24.16.7. Agreement for infinitely many `λ` gives the polynomial identity. -/
 
-section S24bDegenerate
-
+section Degenerate
 open DLMF.Combinatorics
 
 /-- Coefficients of two real power series with the same sum on a punctured neighbourhood of `0`
 are equal. -/
-lemma s24b_coeff_unique {a b : ℕ → ℝ} {f : ℝ → ℝ}
+private lemma coeff_eq_of_hasSum_pow_eventually {a b : ℕ → ℝ} {f : ℝ → ℝ}
     (ha : ∀ᶠ t in 𝓝[≠] (0 : ℝ), HasSum (fun n => a n * t ^ n) (f t))
     (hb : ∀ᶠ t in 𝓝[≠] (0 : ℝ), HasSum (fun n => b n * t ^ n) (f t)) : a = b := by
   have hser : ∀ c : ℕ → ℝ, (∀ᶠ t in 𝓝[≠] (0 : ℝ), HasSum (fun n => c n * t ^ n) (f t)) →
@@ -73,7 +113,7 @@ lemma s24b_coeff_unique {a b : ℕ → ℝ} {f : ℝ → ℝ}
     (h1.eq_formalMultilinearSeries_of_eventually h2 hev)
 
 /-- `u/(eᵘ - 1) = ∑ Bₙ uⁿ/n!` for real `0 < |u| < 2π`. -/
-lemma s24b_hasSum_bernoulli_real {u : ℝ} (hu : |u| < 2 * π) (hu0 : u ≠ 0) :
+private lemma hasSum_bernoulli_mul_pow_div_real {u : ℝ} (hu : |u| < 2 * π) (hu0 : u ≠ 0) :
     HasSum (fun n : ℕ => (bernoulli n : ℝ) * u ^ n / n !) (u / (Real.exp u - 1)) := by
   have h := Complex.hasSum_bernoulli_mul_pow_div (z := (u : ℂ))
     (by rwa [Complex.norm_real, Real.norm_eq_abs]) (by exact_mod_cast hu0)
@@ -83,7 +123,7 @@ lemma s24b_hasSum_bernoulli_real {u : ℝ} (hu : |u| < 2 * π) (hu0 : u ≠ 0) :
   · push_cast; rfl
 
 /-- `∑ |Bₙ| vⁿ/n!` converges for `0 ≤ v < 2π`. -/
-lemma s24b_summable_abs_bernoulli {v : ℝ} (hv0 : 0 ≤ v) (hv : v < 2 * π) :
+private lemma summable_abs_bernoulli_mul_pow_div {v : ℝ} (hv0 : 0 ≤ v) (hv : v < 2 * π) :
     Summable (fun n : ℕ => |(bernoulli n : ℝ)| * v ^ n / n !) := by
   have hsum : ∀ z : ℂ, ‖z‖ < 2 * π →
       Summable (fun n => ((bernoulli n : ℂ) / n !) * z ^ n) := by
@@ -93,7 +133,7 @@ lemma s24b_summable_abs_bernoulli {v : ℝ} (hv0 : 0 ≤ v) (hv : v < 2 * π) :
       exact (hasSum_single 0 (fun n hn => by simp [zero_pow hn])).summable
     · exact ((Complex.hasSum_bernoulli_mul_pow_div hz hz0).congr_fun
         fun n => by ring).summable
-  have h := b24a_summable_norm_of_summable hsum (z := (v : ℂ))
+  have h := summable_norm_mul_pow_of_summable hsum (z := (v : ℂ))
     (by rwa [Complex.norm_real, Real.norm_of_nonneg hv0])
   refine h.congr fun n => ?_
   rw [norm_mul, norm_div, norm_pow, Complex.norm_real, Real.norm_of_nonneg hv0,
@@ -101,7 +141,7 @@ lemma s24b_summable_abs_bernoulli {v : ℝ} (hv0 : 0 ≤ v) (hv : v < 2 * π) :
   ring
 
 /-- `∑ⱼ |s(j, m)| xʲ/j! = (-ln(1-x))^m/m!` for `|x| < 1`. -/
-lemma s24b_hasSum_stirlingFirst (m : ℕ) {x : ℝ} (hx : |x| < 1) :
+private lemma hasSum_stirlingFirst_mul_pow_div (m : ℕ) {x : ℝ} (hx : |x| < 1) :
     HasSum (fun j : ℕ => (Nat.stirlingFirst j m : ℝ) * x ^ j / j !)
       ((-Real.log (1 - x)) ^ m / m !) := by
   have h := hasSum_signedStirlingFirst_div_factorial m (x := -x) (by rwa [abs_neg])
@@ -122,7 +162,7 @@ lemma s24b_hasSum_stirlingFirst (m : ℕ) {x : ℝ} (hx : |x| < 1) :
   · rw [neg_pow]; ring
 
 /-- `|ln(1+y)| ≤ |y|/(1-|y|)` for `|y| < 1`. -/
-lemma s24b_abs_log_le {y : ℝ} (hy : |y| < 1) : |Real.log (1 + y)| ≤ |y| / (1 - |y|) := by
+private lemma abs_log_one_add_le {y : ℝ} (hy : |y| < 1) : |Real.log (1 + y)| ≤ |y| / (1 - |y|) := by
   have h1 : 0 < 1 + y := by linarith [neg_abs_le y]
   have h2 : 0 < 1 - |y| := by linarith
   have hup := Real.log_le_sub_one_of_pos h1
@@ -142,7 +182,7 @@ lemma s24b_abs_log_le {y : ℝ} (hy : |y| < 1) : |Real.log (1 + y)| ≤ |y| / (1
     nlinarith [le_abs_self y, abs_nonneg y]
 
 /-- `0 ≤ -ln(1-x) ≤ x/(1-x)` for `0 ≤ x < 1`. -/
-lemma s24b_neg_log_one_sub_le {x : ℝ} (hx0 : 0 ≤ x) (hx : x < 1) :
+private lemma neg_log_one_sub_nonneg_and_le {x : ℝ} (hx0 : 0 ≤ x) (hx : x < 1) :
     0 ≤ -Real.log (1 - x) ∧ -Real.log (1 - x) ≤ x / (1 - x) := by
   have h1 : 0 < 1 - x := by linarith
   refine ⟨neg_nonneg.mpr (Real.log_nonpos h1.le (by linarith)), ?_⟩
@@ -152,16 +192,16 @@ lemma s24b_neg_log_one_sub_le {x : ℝ} (hx0 : 0 ≤ x) (hx : x < 1) :
   linarith
 
 /-- The coefficients `e₀ = 0`, `e_{j+1} = (1/j!) ∑_{m ≤ j} (B_{m+1}/(m+1)) s(j, m) λ^{j-m}`. -/
-noncomputable def s24b_e (l : ℝ) : ℕ → ℝ
+noncomputable def degenerateBernoulliCorrection (l : ℝ) : ℕ → ℝ
   | 0 => 0
   | j + 1 => (∑ m ∈ range (j + 1), (bernoulli (m + 1) : ℝ) / (m + 1) *
       (signedStirlingFirst j m : ℝ) * l ^ (j - m)) / j !
 
 /-- For `0 < λ < 1/4` and `0 < |t| < 1`, with `u = ln(1+λt)/λ`,
 `t/(eᵘ - 1) = ∑ₙ (bₙ λⁿ + eₙ) tⁿ`. -/
-lemma s24b_hasSum_main {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) {t : ℝ} (ht : |t| < 1)
+private lemma hasSum_bernoulliSecondKind_add_correction {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) {t : ℝ} (ht : |t| < 1)
     (ht0 : t ≠ 0) :
-    HasSum (fun n : ℕ => ((bernoulliSecondKind n : ℝ) * l ^ n + s24b_e l n) * t ^ n)
+    HasSum (fun n : ℕ => ((bernoulliSecondKind n : ℝ) * l ^ n + degenerateBernoulliCorrection l n) * t ^ n)
       (t / (Real.exp (Real.log (1 + l * t) / l) - 1)) := by
   have hl' : l ≠ 0 := hl0.ne'
   set y := l * t with hy
@@ -183,12 +223,12 @@ lemma s24b_hasSum_main {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) {t : ℝ} (ht : 
     rw [div_lt_iff₀ (by linarith)]; nlinarith [abs_nonneg t]
   have hu2 : |u| < 2 * π := by
     rw [hu, abs_div, abs_of_pos hl0, div_lt_iff₀ hl0]
-    have := s24b_abs_log_le hy1
+    have := abs_log_one_add_le hy1
     have h3 : |y| / (1 - |y|) = l * (|t| / (1 - |y|)) := by rw [hyabs]; ring
     rw [h3] at this
     nlinarith
   set W := -Real.log (1 - |y|) with hW
-  obtain ⟨hW0, hW1⟩ := s24b_neg_log_one_sub_le (abs_nonneg y) hy1
+  obtain ⟨hW0, hW1⟩ := neg_log_one_sub_nonneg_and_le (abs_nonneg y) hy1
   have hWp : 0 < W := neg_pos.mpr (Real.log_neg (by linarith) (by linarith))
   set V := W / l with hV
   have hVp : 0 < V := div_pos hWp hl0
@@ -203,7 +243,7 @@ lemma s24b_hasSum_main {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) {t : ℝ} (ht : 
     ((signedStirlingFirst p.2 p.1 : ℝ) * y ^ p.2 / p.2 !) with hF
   have habsrow : ∀ m : ℕ, HasSum (fun j => |F (m, j)|) (|t| * |c m| / l ^ m * (W ^ m / m !)) := by
     intro m
-    have h := (s24b_hasSum_stirlingFirst m (x := |y|) (by rwa [abs_abs])).mul_left
+    have h := (hasSum_stirlingFirst_mul_pow_div m (x := |y|) (by rwa [abs_abs])).mul_left
       (|t| * |c m| / l ^ m)
     refine h.congr_fun fun j => ?_
     simp only [hF, abs_mul, abs_div, abs_pow, abs_of_pos hl0, Nat.abs_cast]
@@ -213,7 +253,7 @@ lemma s24b_hasSum_main {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) {t : ℝ} (ht : 
       rw [abs_mul, abs_pow, abs_neg, abs_one, one_pow, one_mul, Nat.abs_cast]
     rw [e]
   have hrowsum : Summable fun m : ℕ => |t| * |c m| / l ^ m * (W ^ m / m !) := by
-    have h0 := s24b_summable_abs_bernoulli hVp.le hV2
+    have h0 := summable_abs_bernoulli_mul_pow_div hVp.le hV2
     have h1 := ((summable_nat_add_iff 1).mpr h0).mul_left (|t| / V)
     refine h1.congr fun m => ?_
     simp only [hc, abs_div, Nat.factorial_succ]
@@ -236,7 +276,7 @@ lemma s24b_hasSum_main {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) {t : ℝ} (ht : 
       (t * c m / l ^ m)
     exact h
   have hR := hFs.hasSum.prod_fiberwise hrow
-  have hBer := (hasSum_nat_add_iff' 1).mpr (s24b_hasSum_bernoulli_real hu2 hu0)
+  have hBer := (hasSum_nat_add_iff' 1).mpr (hasSum_bernoulli_mul_pow_div_real hu2 hu0)
   have hBer2 := hBer.mul_left (t / u)
   have hS : ∑' p, F p = t / u * (u / (Real.exp u - 1) - 1) := by
     refine hR.unique (hBer2.congr_fun fun m => ?_) |>.trans ?_
@@ -253,9 +293,9 @@ lemma s24b_hasSum_main {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) {t : ℝ} (ht : 
       rw [hF]; dsimp only
       rw [signedStirlingFirst_eq_zero_of_lt (by simp at hm; omega)]; simp
   have hC2 := hC.prod_fiberwise fun j => hcol j
-  have hGj : ∀ j : ℕ, ∑ m ∈ range (j + 1), F (m, j) = s24b_e l (j + 1) * t ^ (j + 1) := by
+  have hGj : ∀ j : ℕ, ∑ m ∈ range (j + 1), F (m, j) = degenerateBernoulliCorrection l (j + 1) * t ^ (j + 1) := by
     intro j
-    simp only [s24b_e, sum_div, sum_mul]
+    simp only [degenerateBernoulliCorrection, sum_div, sum_mul]
     refine sum_congr rfl fun m hm => ?_
     have hmj : m ≤ j := by simp at hm; omega
     simp only [hF, hc, hy]
@@ -264,9 +304,9 @@ lemma s24b_hasSum_main {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) {t : ℝ} (ht : 
     field_simp
     ring
   simp_rw [hGj] at hC2
-  have hE : HasSum (fun n => s24b_e l n * t ^ n) (∑' p, F p) := by
+  have hE : HasSum (fun n => degenerateBernoulliCorrection l n * t ^ n) (∑' p, F p) := by
     refine (hasSum_nat_add_iff' 1).mp ?_
-    simpa [s24b_e] using hC2
+    simpa [degenerateBernoulliCorrection] using hC2
   -- second kind
   have hb2 := hasSum_bernoulliSecondKind (t := (y : ℂ))
     (by rwa [Complex.norm_real, Real.norm_eq_abs]) (by exact_mod_cast hy0)
@@ -288,7 +328,7 @@ lemma s24b_hasSum_main {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) {t : ℝ} (ht : 
     rw [mul_sub, e]; ring
 
 /-- 24.16.7 restricted to real `0 < λ` and real `t`. -/
-lemma s24b_hasSum_degenerate_real {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) :
+private lemma hasSum_degenerateBernoulli_real {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) :
     ∀ᶠ t in 𝓝[≠] (0 : ℝ), HasSum (fun n : ℕ => aeval l (degenerateBernoulli n) / n ! * t ^ n)
       (t / (Real.exp (Real.log (1 + l * t) / l) - 1)) := by
   have h := hasSum_degenerateBernoulli (lam := (l : ℂ)) (by exact_mod_cast hl0.ne')
@@ -320,7 +360,7 @@ lemma s24b_hasSum_degenerate_real {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) :
     ring_nf
 
 /-- The reindexing of the Bernoulli–Stirling sum in 24.16.8. -/
-lemma s24b_sum_reindex {j : ℕ} (hj : 1 ≤ j) (l : ℝ) :
+private lemma sum_bernoulli_stirlingFirst_reindex {j : ℕ} (hj : 1 ≤ j) (l : ℝ) :
     ∑ k ∈ Icc 1 ((j + 1) / 2), ((j : ℝ) + 1) / (2 * k) * (bernoulli (2 * k) : ℝ) *
         ((-1) ^ (j + 1 - 2 * k) * (Nat.stirlingFirst j (2 * k - 1) : ℝ)) * l ^ (j + 1 - 2 * k) =
       ((j : ℝ) + 1) * ∑ m ∈ range (j + 1), (bernoulli (m + 1) : ℝ) / (m + 1) *
@@ -359,21 +399,20 @@ lemma s24b_sum_reindex {j : ℕ} (hj : 1 ≤ j) (l : ℝ) :
       simp [bernoulli_eq_zero_of_odd hodd (by omega)]
 
 /-- The coefficient identity behind 24.16.8, for real `0 < λ < 1/4`. -/
-lemma s24b_aeval_degenerate {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) (n : ℕ) :
+private lemma aeval_degenerateBernoulli_div_factorial {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) (n : ℕ) :
     aeval l (degenerateBernoulli n) / n ! =
-      (bernoulliSecondKind n : ℝ) * l ^ n + s24b_e l n := by
+      (bernoulliSecondKind n : ℝ) * l ^ n + degenerateBernoulliCorrection l n := by
   have hm : ∀ᶠ t in 𝓝[≠] (0 : ℝ), HasSum
-      (fun n : ℕ => ((bernoulliSecondKind n : ℝ) * l ^ n + s24b_e l n) * t ^ n)
+      (fun n : ℕ => ((bernoulliSecondKind n : ℝ) * l ^ n + degenerateBernoulliCorrection l n) * t ^ n)
       (t / (Real.exp (Real.log (1 + l * t) / l) - 1)) := by
     have hball : Metric.ball (0 : ℝ) 1 ∈ 𝓝[≠] (0 : ℝ) :=
       mem_nhdsWithin_of_mem_nhds (Metric.ball_mem_nhds _ one_pos)
     filter_upwards [hball, self_mem_nhdsWithin] with t ht ht0
     rw [Metric.mem_ball, dist_zero_right, Real.norm_eq_abs] at ht
-    exact s24b_hasSum_main hl0 hl ht ht0
-  exact congrFun (s24b_coeff_unique (s24b_hasSum_degenerate_real hl0 hl) hm) n
+    exact hasSum_bernoulliSecondKind_add_correction hl0 hl ht ht0
+  exact congrFun (coeff_eq_of_hasSum_pow_eventually (hasSum_degenerateBernoulli_real hl0 hl) hm) n
 
-end S24bDegenerate
-
+end Degenerate
 /-- DLMF 24.16.8: for `n ≥ 2`,
 `βₙ(λ) = n! bₙ λⁿ + ∑_{k=1}^{⌊n/2⌋} (n/(2k)) B₂ₖ s(n-1, 2k-1) λ^{n-2k}`, with the signed
 Stirling number `s(n-1, 2k-1) = (-1)^{n-2k} |s(n-1, 2k-1)|` (Mathlib's unsigned
@@ -392,12 +431,12 @@ theorem degenerateBernoulli_eq {n : ℕ} (hn : 2 ≤ n) :
   refine Set.Infinite.mono ?_ (Set.Ioo_infinite (show (0 : ℝ) < 1 / 4 by norm_num))
   rintro l ⟨hl0, hl1⟩
   simp only [Set.mem_ofPred_eq, eval_map_algebraMap]
-  have h := s24b_aeval_degenerate hl0 hl1 (j + 1)
+  have h := aeval_degenerateBernoulli_div_factorial hl0 hl1 (j + 1)
   rw [div_eq_iff (by positivity)] at h
   rw [h, Nat.add_sub_cancel]
   simp only [map_add, map_sum, map_mul, aeval_C, map_pow, aeval_X, eq_ratCast]
   push_cast
-  rw [s24b_sum_reindex hj l, s24b_e, Nat.factorial_succ]
+  rw [sum_bernoulli_stirlingFirst_reindex hj l, degenerateBernoulliCorrection, Nat.factorial_succ]
   push_cast
   field_simp
 
@@ -411,15 +450,14 @@ On `|t| < π`, `H(t) = e^{-t/2} (t/2)/sinh(t/2)` is a product of two numbers wit
 part, so it lies in the slit plane and `L = log H` there; for real `t` the same holds as `H > 0`.
 -/
 
-section S24bNorlund
-
+section NorlundSums
 open Metric
 
 /-- `t/(eᵗ - 1)`, with its limit `1` at `t = 0`. -/
-noncomputable def s24b_H : ℂ → ℂ := Function.update (fun t => t / (Complex.exp t - 1)) 0 1
+noncomputable def bernoulliGenFun : ℂ → ℂ := Function.update (fun t => t / (Complex.exp t - 1)) 0 1
 
 /-- Nonvanishing under the stated hypotheses: `Complex.exp t - 1 ≠ 0`. -/
-lemma s24b_exp_sub_one_ne {t : ℂ} (ht : ‖t‖ < 2 * π) (ht0 : t ≠ 0) :
+private lemma exp_sub_one_ne_zero_of_norm_lt {t : ℂ} (ht : ‖t‖ < 2 * π) (ht0 : t ≠ 0) :
     Complex.exp t - 1 ≠ 0 := by
   intro h
   obtain ⟨n, hn⟩ := Complex.exp_eq_one_iff.mp (sub_eq_zero.mp h)
@@ -430,16 +468,16 @@ lemma s24b_exp_sub_one_ne {t : ℂ} (ht : ‖t‖ < 2 * π) (ht0 : t ≠ 0) :
     rw [← Int.cast_abs]; exact_mod_cast Int.one_le_abs hn0
   nlinarith [Real.pi_pos]
 
-/-- Identity under the stated parameter and domain assumptions: `s24b_H t = t / (Complex.exp t -
+/-- Identity under the stated parameter and domain assumptions: `bernoulliGenFun t = t / (Complex.exp t -
 1)`. -/
-lemma s24b_H_of_ne {t : ℂ} (ht0 : t ≠ 0) : s24b_H t = t / (Complex.exp t - 1) :=
+private lemma bernoulliGenFun_of_ne_zero {t : ℂ} (ht0 : t ≠ 0) : bernoulliGenFun t = t / (Complex.exp t - 1) :=
   Function.update_of_ne ht0 _ _
 
-/-- Identity under the stated parameter and domain assumptions: `s24b_H 0 = 1`. -/
-lemma s24b_H_zero : s24b_H 0 = 1 := Function.update_self _ _ _
+/-- Identity under the stated parameter and domain assumptions: `bernoulliGenFun 0 = 1`. -/
+private lemma bernoulliGenFun_zero : bernoulliGenFun 0 = 1 := Function.update_self _ _ _
 
 /-- The map `(fun t : ℂ => t / (Complex.exp t - 1))` tends to `(𝓝 1)` along `(𝓝[≠] 0)`. -/
-lemma s24b_tendsto_H : Tendsto (fun t : ℂ => t / (Complex.exp t - 1)) (𝓝[≠] 0) (𝓝 1) := by
+private lemma tendsto_div_exp_sub_one_nhdsNE_zero : Tendsto (fun t : ℂ => t / (Complex.exp t - 1)) (𝓝[≠] 0) (𝓝 1) := by
   have h := (Complex.hasDerivAt_exp 0).tendsto_slope_zero
   simp only [zero_add, Complex.exp_zero, smul_eq_mul] at h
   have h2 := h.inv₀ one_ne_zero
@@ -447,9 +485,9 @@ lemma s24b_tendsto_H : Tendsto (fun t : ℂ => t / (Complex.exp t - 1)) (𝓝[�
   refine h2.congr' (eventually_nhdsWithin_of_forall fun t ht => ?_)
   simp [div_eq_mul_inv, mul_comm]
 
-/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ s24b_H (ball 0 (2 *
+/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ bernoulliGenFun (ball 0 (2 *
 π))`. -/
-lemma s24b_differentiableOn_H : DifferentiableOn ℂ s24b_H (ball 0 (2 * π)) := by
+private lemma differentiableOn_bernoulliGenFun : DifferentiableOn ℂ bernoulliGenFun (ball 0 (2 * π)) := by
   rw [← Complex.differentiableOn_compl_singleton_and_continuousAt_iff
     (ball_mem_nhds _ (by positivity))]
   refine ⟨fun t ht => ?_, ?_⟩
@@ -457,31 +495,19 @@ lemma s24b_differentiableOn_H : DifferentiableOn ℂ s24b_H (ball 0 (2 * π)) :=
     have hb : ‖t‖ < 2 * π := by simpa using ht.1
     have hd : DifferentiableAt ℂ (fun t : ℂ => t / (Complex.exp t - 1)) t :=
       differentiableAt_id.div (Complex.differentiableAt_exp.sub_const 1)
-        (s24b_exp_sub_one_ne hb ht0)
+        (exp_sub_one_ne_zero_of_norm_lt hb ht0)
     refine (hd.congr_of_eventuallyEq ?_).differentiableWithinAt
-    filter_upwards [isOpen_ne.mem_nhds ht0] with z hz using s24b_H_of_ne hz
-  · rw [s24b_H, continuousAt_update_same]; exact s24b_tendsto_H
+    filter_upwards [isOpen_ne.mem_nhds ht0] with z hz using bernoulliGenFun_of_ne_zero hz
+  · rw [bernoulliGenFun, continuousAt_update_same]; exact tendsto_div_exp_sub_one_nhdsNE_zero
 
-/-- Nonvanishing under the stated hypotheses: `s24b_H t ≠ 0`. -/
-lemma s24b_H_ne_zero {t : ℂ} (ht : ‖t‖ < 2 * π) : s24b_H t ≠ 0 := by
+/-- Nonvanishing under the stated hypotheses: `bernoulliGenFun t ≠ 0`. -/
+private lemma bernoulliGenFun_ne_zero {t : ℂ} (ht : ‖t‖ < 2 * π) : bernoulliGenFun t ≠ 0 := by
   by_cases ht0 : t = 0
-  · rw [ht0, s24b_H_zero]; exact one_ne_zero
-  · rw [s24b_H_of_ne ht0]; exact div_ne_zero ht0 (s24b_exp_sub_one_ne ht ht0)
-
-/-- A product of two numbers in the open right half-plane lies in the slit plane. -/
-lemma s24b_mul_mem_slitPlane {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
-    a * b ∈ Complex.slitPlane := by
-  rw [Complex.mem_slitPlane_iff]
-  by_contra h
-  push Not at h
-  obtain ⟨h1, h2⟩ := h
-  simp only [Complex.mul_re, Complex.mul_im] at h1 h2
-  have h3 := mul_le_mul_of_nonneg_left h1 ha.le
-  have h4 : a.im * (a.re * b.im + a.im * b.re) = 0 := by rw [h2, mul_zero]
-  nlinarith [mul_pos (mul_pos ha ha) hb, mul_nonneg (sq_nonneg a.im) hb.le]
+  · rw [ht0, bernoulliGenFun_zero]; exact one_ne_zero
+  · rw [bernoulliGenFun_of_ne_zero ht0]; exact div_ne_zero ht0 (exp_sub_one_ne_zero_of_norm_lt ht ht0)
 
 /-- Estimate under the stated parameter and domain assumptions: `6 ^ (n + 1) ≤ (2 * n + 3)!`. -/
-lemma s24b_six_pow_le (n : ℕ) : 6 ^ (n + 1) ≤ (2 * n + 3)! := by
+private lemma six_pow_succ_le_factorial (n : ℕ) : 6 ^ (n + 1) ≤ (2 * n + 3)! := by
   induction n with
   | zero => decide
   | succ n ih =>
@@ -492,7 +518,7 @@ lemma s24b_six_pow_le (n : ℕ) : 6 ^ (n + 1) ≤ (2 * n + 3)! := by
       _ = _ := by ring
 
 /-- `‖sinh w - w‖ < ‖w‖` for `0 < ‖w‖ < π/2`. -/
-lemma s24b_norm_sinh_sub_lt {w : ℂ} (hw0 : w ≠ 0) (hw : ‖w‖ < π / 2) :
+private lemma norm_sinh_sub_self_lt {w : ℂ} (hw0 : w ≠ 0) (hw : ‖w‖ < π / 2) :
     ‖Complex.sinh w - w‖ < ‖w‖ := by
   set r := ‖w‖ with hr
   have hr0 : 0 < r := norm_pos_iff.mpr hw0
@@ -510,7 +536,7 @@ lemma s24b_norm_sinh_sub_lt {w : ℂ} (hw0 : w ≠ 0) (hw : ‖w‖ < π / 2) :
     rw [norm_div, norm_pow, Complex.norm_natCast, ← hr,
       show 2 * (n + 1) + 1 = 2 * n + 3 by ring]
     rw [div_le_iff₀ (by positivity)]
-    have h6 : ((6 : ℝ) ^ (n + 1)) ≤ ((2 * n + 3)! : ℝ) := by exact_mod_cast s24b_six_pow_le n
+    have h6 : ((6 : ℝ) ^ (n + 1)) ≤ ((2 * n + 3)! : ℝ) := by exact_mod_cast six_pow_succ_le_factorial n
     have : r * ρ * ρ ^ n = r ^ (2 * n + 3) / 6 ^ (n + 1) := by
       rw [hρ, div_pow, ← pow_mul]; field_simp; ring
     rw [this, div_mul_eq_mul_div, le_div_iff₀ (by positivity)]
@@ -522,11 +548,11 @@ lemma s24b_norm_sinh_sub_lt {w : ℂ} (hw0 : w ≠ 0) (hw : ‖w‖ < π / 2) :
       refine mul_lt_of_lt_one_right hr0 ?_
       rw [← div_eq_mul_inv, div_lt_one (by linarith)]; linarith
 
-/-- Formula under the stated hypotheses: `s24b_H t ∈ Complex.slitPlane`. -/
-lemma s24b_H_mem_slitPlane {t : ℂ} (ht : ‖t‖ < π) : s24b_H t ∈ Complex.slitPlane := by
+/-- Formula under the stated hypotheses: `bernoulliGenFun t ∈ Complex.slitPlane`. -/
+private lemma bernoulliGenFun_mem_slitPlane {t : ℂ} (ht : ‖t‖ < π) : bernoulliGenFun t ∈ Complex.slitPlane := by
   by_cases ht0 : t = 0
-  · rw [ht0, s24b_H_zero]; exact Complex.one_mem_slitPlane
-  rw [s24b_H_of_ne ht0]
+  · rw [ht0, bernoulliGenFun_zero]; exact Complex.one_mem_slitPlane
+  rw [bernoulliGenFun_of_ne_zero ht0]
   set w := t / 2 with hw
   have hw0 : w ≠ 0 := div_ne_zero ht0 two_ne_zero
   have hwn : ‖w‖ < π / 2 := by
@@ -537,7 +563,7 @@ lemma s24b_H_mem_slitPlane {t : ℂ} (ht : ‖t‖ < π) : s24b_H t ∈ Complex.
     have e2 : Complex.exp w * Complex.exp (-w) = 1 := by
       rw [← Complex.exp_add, add_neg_cancel, Complex.exp_zero]
     rw [Complex.sinh, e1]; linear_combination e2
-  have hne := s24b_exp_sub_one_ne (show ‖t‖ < 2 * π by linarith [Real.pi_pos]) ht0
+  have hne := exp_sub_one_ne_zero_of_norm_lt (show ‖t‖ < 2 * π by linarith [Real.pi_pos]) ht0
   have hsinh : Complex.sinh w ≠ 0 := by
     intro h; rw [hsh, h, mul_zero] at hne; exact hne rfl
   have heq : t / (Complex.exp t - 1) = Complex.exp (-w) * (Complex.sinh w / w)⁻¹ := by
@@ -545,7 +571,7 @@ lemma s24b_H_mem_slitPlane {t : ℂ} (ht : ‖t‖ < π) : s24b_H t ∈ Complex.
     have : Complex.exp w ≠ 0 := Complex.exp_ne_zero w
     rw [hw]; field_simp
   rw [heq]
-  refine s24b_mul_mem_slitPlane ?_ ?_
+  refine Carlson.mul_mem_slitPlane_of_re_pos ?_ ?_
   · rw [Complex.exp_re]
     refine mul_pos (Real.exp_pos _) (Real.cos_pos_of_mem_Ioo ⟨?_, ?_⟩) <;>
     · have := Complex.abs_im_le_norm (-w)
@@ -555,7 +581,7 @@ lemma s24b_H_mem_slitPlane {t : ℂ} (ht : ‖t‖ < π) : s24b_H t ∈ Complex.
     have hq : ‖q - 1‖ < 1 := by
       rw [show q - 1 = (Complex.sinh w - w) / w by rw [div_sub_one hw0], norm_div,
         div_lt_one (norm_pos_iff.mpr hw0)]
-      exact s24b_norm_sinh_sub_lt hw0 hwn
+      exact norm_sinh_sub_self_lt hw0 hwn
     have hqre : 0 < q.re := by
       have := Complex.abs_re_le_norm (q - 1)
       rw [Complex.sub_re, Complex.one_re, abs_le] at this; linarith [this.1]
@@ -563,94 +589,94 @@ lemma s24b_H_mem_slitPlane {t : ℂ} (ht : ‖t‖ < π) : s24b_H t ∈ Complex.
     exact div_pos hqre (Complex.normSq_pos.mpr fun h => by rw [h] at hqre; simp at hqre)
 
 /-- The logarithmic derivative `H'/H`. -/
-noncomputable def s24b_l (t : ℂ) : ℂ := deriv s24b_H t / s24b_H t
+noncomputable def bernoulliGenFunLogDeriv (t : ℂ) : ℂ := deriv bernoulliGenFun t / bernoulliGenFun t
 
-/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ s24b_l (ball 0 (2 *
+/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ bernoulliGenFunLogDeriv (ball 0 (2 *
 π))`. -/
-lemma s24b_differentiableOn_l : DifferentiableOn ℂ s24b_l (ball 0 (2 * π)) :=
-  (s24b_differentiableOn_H.deriv isOpen_ball).div s24b_differentiableOn_H
-    fun t ht => s24b_H_ne_zero (by simpa using ht)
+private lemma differentiableOn_bernoulliGenFunLogDeriv : DifferentiableOn ℂ bernoulliGenFunLogDeriv (ball 0 (2 * π)) :=
+  (differentiableOn_bernoulliGenFun.deriv isOpen_ball).div differentiableOn_bernoulliGenFun
+    fun t ht => bernoulliGenFun_ne_zero (by simpa using ht)
 
 /-- Formula under the stated hypotheses: `∃ L : ℂ → ℂ, L 0 = 0 ∧ ∀ t ∈ ball (0 : ℂ) (2 * π),
-HasDerivAt L (s24b_l t) t`. -/
-lemma s24b_exists_L : ∃ L : ℂ → ℂ, L 0 = 0 ∧
-    ∀ t ∈ ball (0 : ℂ) (2 * π), HasDerivAt L (s24b_l t) t :=
-  s24b_differentiableOn_l.isExactOn_ball.with_val_at 0 0
+HasDerivAt L (bernoulliGenFunLogDeriv t) t`. -/
+lemma exists_hasDerivAt_bernoulliGenFunLogDeriv : ∃ L : ℂ → ℂ, L 0 = 0 ∧
+    ∀ t ∈ ball (0 : ℂ) (2 * π), HasDerivAt L (bernoulliGenFunLogDeriv t) t :=
+  differentiableOn_bernoulliGenFunLogDeriv.isExactOn_ball.with_val_at 0 0
 
 /-- A holomorphic logarithm of `t/(eᵗ - 1)` on `|t| < 2π`, vanishing at `0`. -/
-noncomputable def s24b_L : ℂ → ℂ := s24b_exists_L.choose
+noncomputable def bernoulliGenFunLog : ℂ → ℂ := exists_hasDerivAt_bernoulliGenFunLogDeriv.choose
 
-/-- Identity under the stated parameter and domain assumptions: `s24b_L 0 = 0`. -/
-lemma s24b_L_zero : s24b_L 0 = 0 := s24b_exists_L.choose_spec.1
+/-- Identity under the stated parameter and domain assumptions: `bernoulliGenFunLog 0 = 0`. -/
+private lemma bernoulliGenFunLog_zero : bernoulliGenFunLog 0 = 0 := exists_hasDerivAt_bernoulliGenFunLogDeriv.choose_spec.1
 
-/-- At `t`, the function `s24b_L` has derivative `(s24b_l t)`. -/
-lemma s24b_hasDerivAt_L {t : ℂ} (ht : t ∈ ball (0 : ℂ) (2 * π)) :
-    HasDerivAt s24b_L (s24b_l t) t :=
-  s24b_exists_L.choose_spec.2 t ht
+/-- At `t`, the function `bernoulliGenFunLog` has derivative `(bernoulliGenFunLogDeriv t)`. -/
+private lemma hasDerivAt_bernoulliGenFunLog {t : ℂ} (ht : t ∈ ball (0 : ℂ) (2 * π)) :
+    HasDerivAt bernoulliGenFunLog (bernoulliGenFunLogDeriv t) t :=
+  exists_hasDerivAt_bernoulliGenFunLogDeriv.choose_spec.2 t ht
 
-/-- Identity under the stated parameter and domain assumptions: `Complex.exp (s24b_L t) = s24b_H
+/-- Identity under the stated parameter and domain assumptions: `Complex.exp (bernoulliGenFunLog t) = bernoulliGenFun
 t`. -/
-lemma s24b_exp_L {t : ℂ} (ht : t ∈ ball (0 : ℂ) (2 * π)) :
-    Complex.exp (s24b_L t) = s24b_H t := by
-  set g := fun z => s24b_H z * Complex.exp (-s24b_L z)
+private lemma exp_bernoulliGenFunLog {t : ℂ} (ht : t ∈ ball (0 : ℂ) (2 * π)) :
+    Complex.exp (bernoulliGenFunLog t) = bernoulliGenFun t := by
+  set g := fun z => bernoulliGenFun z * Complex.exp (-bernoulliGenFunLog z)
   have hd : ∀ z ∈ ball (0 : ℂ) (2 * π), HasDerivAt g 0 z := by
     intro z hz
-    have hH := (s24b_differentiableOn_H.differentiableAt (isOpen_ball.mem_nhds hz)).hasDerivAt
-    have hE := ((s24b_hasDerivAt_L hz).neg).cexp
+    have hH := (differentiableOn_bernoulliGenFun.differentiableAt (isOpen_ball.mem_nhds hz)).hasDerivAt
+    have hE := ((hasDerivAt_bernoulliGenFunLog hz).neg).cexp
     convert hH.mul hE using 1
-    have := s24b_H_ne_zero (by simpa using hz : ‖z‖ < 2 * π)
-    simp only [s24b_l]; field_simp; ring
+    have := bernoulliGenFun_ne_zero (by simpa using hz : ‖z‖ < 2 * π)
+    simp only [bernoulliGenFunLogDeriv]; field_simp; ring
   have hc := isOpen_ball.is_const_of_deriv_eq_zero (convex_ball _ _).isPreconnected
     (fun z hz => (hd z hz).differentiableAt.differentiableWithinAt)
     (fun z hz => (hd z hz).deriv) ht (mem_ball_self (by positivity))
-  simp only [g, s24b_L_zero, Complex.exp_zero, s24b_H_zero,
+  simp only [g, bernoulliGenFunLog_zero, Complex.exp_zero, bernoulliGenFun_zero,
     Complex.exp_neg, inv_one, mul_one] at hc
   exact ((mul_inv_eq_one₀ (Complex.exp_ne_zero _)).mp hc).symm
 
 /-- Differentiability throughout the specified domain: `DifferentiableOn ℂ (fun z => Complex.exp
-(x * s24b_L z)) (ball 0 (2 * π))`. -/
-lemma s24b_differentiableOn_F (x : ℂ) :
-    DifferentiableOn ℂ (fun z => Complex.exp (x * s24b_L z)) (ball 0 (2 * π)) :=
-  fun _ hz => (((s24b_hasDerivAt_L hz).differentiableAt.const_mul x).cexp).differentiableWithinAt
+(x * bernoulliGenFunLog z)) (ball 0 (2 * π))`. -/
+private lemma differentiableOn_exp_mul_bernoulliGenFunLog (x : ℂ) :
+    DifferentiableOn ℂ (fun z => Complex.exp (x * bernoulliGenFunLog z)) (ball 0 (2 * π)) :=
+  fun _ hz => (((hasDerivAt_bernoulliGenFunLog hz).differentiableAt.const_mul x).cexp).differentiableWithinAt
 
 /-- Formula under the stated hypotheses: `∃ c : ℕ → ℂ → ℂ, (∀ k, DifferentiableOn ℂ (c k) (ball 0
 (2 * π))) ∧ ∀ x : ℂ, ∀ t ∈ ball (0 : ℂ) (2 * π), iteratedDeriv n (fun z => Complex.exp (x *
-s24b_L z)) t = (∑ k ∈ range (n + 1), x ^ k * c k t) * Complex.exp (x * s24b_L t)`. -/
-lemma s24b_iteratedDeriv_F (n : ℕ) : ∃ c : ℕ → ℂ → ℂ,
+bernoulliGenFunLog z)) t = (∑ k ∈ range (n + 1), x ^ k * c k t) * Complex.exp (x * bernoulliGenFunLog t)`. -/
+private lemma iteratedDeriv_exp_mul_bernoulliGenFunLog_eq_sum (n : ℕ) : ∃ c : ℕ → ℂ → ℂ,
     (∀ k, DifferentiableOn ℂ (c k) (ball 0 (2 * π))) ∧
     ∀ x : ℂ, ∀ t ∈ ball (0 : ℂ) (2 * π),
-      iteratedDeriv n (fun z => Complex.exp (x * s24b_L z)) t =
-        (∑ k ∈ range (n + 1), x ^ k * c k t) * Complex.exp (x * s24b_L t) := by
+      iteratedDeriv n (fun z => Complex.exp (x * bernoulliGenFunLog z)) t =
+        (∑ k ∈ range (n + 1), x ^ k * c k t) * Complex.exp (x * bernoulliGenFunLog t) := by
   induction n with
   | zero => exact ⟨fun _ _ => 1, fun _ => differentiableOn_const _, fun x t _ => by simp⟩
   | succ n ih =>
     obtain ⟨c, hc, hF⟩ := ih
     refine ⟨fun k t => (if k = n + 1 then 0 else deriv (c k) t) +
-      (if k = 0 then 0 else s24b_l t * c (k - 1) t), fun k => ?_, fun x t ht => ?_⟩
+      (if k = 0 then 0 else bernoulliGenFunLogDeriv t * c (k - 1) t), fun k => ?_, fun x t ht => ?_⟩
     · refine DifferentiableOn.add ?_ ?_
       · split_ifs
         · exact differentiableOn_const _
         · exact (hc k).deriv isOpen_ball
       · split_ifs
         · exact differentiableOn_const _
-        · exact s24b_differentiableOn_l.mul (hc (k - 1))
+        · exact differentiableOn_bernoulliGenFunLogDeriv.mul (hc (k - 1))
     · rw [iteratedDeriv_succ]
-      have hev : iteratedDeriv n (fun z => Complex.exp (x * s24b_L z)) =ᶠ[𝓝 t]
-          fun z => (∑ k ∈ range (n + 1), x ^ k * c k z) * Complex.exp (x * s24b_L z) := by
+      have hev : iteratedDeriv n (fun z => Complex.exp (x * bernoulliGenFunLog z)) =ᶠ[𝓝 t]
+          fun z => (∑ k ∈ range (n + 1), x ^ k * c k z) * Complex.exp (x * bernoulliGenFunLog z) := by
         filter_upwards [isOpen_ball.mem_nhds ht] with z hz using hF x z hz
       rw [hev.deriv_eq]
       have hS : HasDerivAt (fun z => ∑ k ∈ range (n + 1), x ^ k * c k z)
           (∑ k ∈ range (n + 1), x ^ k * deriv (c k) t) t := by
         refine HasDerivAt.fun_sum fun k _ => ?_
         exact ((hc k).differentiableAt (isOpen_ball.mem_nhds ht)).hasDerivAt.const_mul _
-      have hE : HasDerivAt (fun z => Complex.exp (x * s24b_L z))
-          (Complex.exp (x * s24b_L t) * (x * s24b_l t)) t :=
-        ((s24b_hasDerivAt_L ht).const_mul x).cexp
+      have hE : HasDerivAt (fun z => Complex.exp (x * bernoulliGenFunLog z))
+          (Complex.exp (x * bernoulliGenFunLog t) * (x * bernoulliGenFunLogDeriv t)) t :=
+        ((hasDerivAt_bernoulliGenFunLog ht).const_mul x).cexp
       rw [(hS.fun_mul hE).deriv]
       have key : ∑ k ∈ range (n + 1 + 1), x ^ k * ((if k = n + 1 then 0 else deriv (c k) t) +
-          (if k = 0 then 0 else s24b_l t * c (k - 1) t)) =
+          (if k = 0 then 0 else bernoulliGenFunLogDeriv t * c (k - 1) t)) =
           ∑ k ∈ range (n + 1), x ^ k * deriv (c k) t +
-            x * s24b_l t * ∑ k ∈ range (n + 1), x ^ k * c k t := by
+            x * bernoulliGenFunLogDeriv t * ∑ k ∈ range (n + 1), x ^ k * c k t := by
         simp only [mul_add, sum_add_distrib]
         congr 1
         · rw [sum_range_succ, ite_eq_left (rfl : n + 1 = n + 1), mul_zero, add_zero]
@@ -662,14 +688,14 @@ lemma s24b_iteratedDeriv_F (n : ℕ) : ∃ c : ℕ → ℂ → ℂ,
       rw [key]; ring
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun z =>
-Complex.exp ((ℓ : ℂ) * s24b_L z)) 0 = (((norlundPolynomial n).eval (ℓ : ℚ) : ℚ) : ℂ)`. -/
-lemma s24b_iteratedDeriv_F_natCast (ℓ n : ℕ) :
-    iteratedDeriv n (fun z => Complex.exp ((ℓ : ℂ) * s24b_L z)) 0 =
+Complex.exp ((ℓ : ℂ) * bernoulliGenFunLog z)) 0 = (((norlundPolynomial n).eval (ℓ : ℚ) : ℚ) : ℂ)`. -/
+private lemma iteratedDeriv_exp_natCast_mul_bernoulliGenFunLog_zero (ℓ n : ℕ) :
+    iteratedDeriv n (fun z => Complex.exp ((ℓ : ℂ) * bernoulliGenFunLog z)) 0 =
       (((norlundPolynomial n).eval (ℓ : ℚ) : ℚ) : ℂ) := by
-  have hev : (fun z => Complex.exp ((ℓ : ℂ) * s24b_L z)) =ᶠ[𝓝 0] fun z => s24b_H z ^ ℓ := by
+  have hev : (fun z => Complex.exp ((ℓ : ℂ) * bernoulliGenFunLog z)) =ᶠ[𝓝 0] fun z => bernoulliGenFun z ^ ℓ := by
     filter_upwards [isOpen_ball.mem_nhds (mem_ball_self (show (0 : ℝ) < 2 * π by positivity))]
       with z hz
-    rw [Complex.exp_nat_mul, s24b_exp_L hz]
+    rw [Complex.exp_nat_mul, exp_bernoulliGenFunLog hz]
   rw [hev.iteratedDeriv_eq]
   set c : ℕ → ℂ := fun n => aeval (0 : ℂ) (bernoulliOrder ℓ n) / (n ! : ℂ)
   have h0 : ∀ m, aeval (0 : ℂ) (bernoulliOrder ℓ m) = ((bernoulliNumberOrder ℓ m : ℚ) : ℂ) := by
@@ -677,20 +703,20 @@ lemma s24b_iteratedDeriv_F_natCast (ℓ n : ℕ) :
     rw [show (0 : ℂ) = algebraMap ℚ ℂ 0 by simp, aeval_algebraMap_apply_eq_algebraMap_eval,
       bernoulliOrder_eval_zero]
     rfl
-  have hsum : ∀ y : ℂ, ‖y‖ < 2 * π → HasSum (fun n => c n * y ^ n) (s24b_H y ^ ℓ) := by
+  have hsum : ∀ y : ℂ, ‖y‖ < 2 * π → HasSum (fun n => c n * y ^ n) (bernoulliGenFun y ^ ℓ) := by
     intro y hy
     by_cases hy0 : y = 0
     · subst hy0
-      rw [s24b_H_zero, one_pow]
+      rw [bernoulliGenFun_zero, one_pow]
       convert hasSum_single (f := fun n => c n * (0 : ℂ) ^ n) 0
         (fun n (hn : n ≠ 0) => by simp only [zero_pow hn, mul_zero]) using 1
       show (1 : ℂ) = aeval 0 (bernoulliOrder ℓ 0) / ((0 ! : ℕ) : ℂ) * 0 ^ 0
       rw [h0, pow_zero, mul_one, Nat.factorial_zero, Nat.cast_one, div_one,
-        q24b_bernoulliNumberOrder_eq]
+        bernoulliNumberOrder_eq_factorial_mul_coeff]
       simp [bernoulliPowerSeries]
     · have := hasSum_bernoulliOrder ℓ 0 hy hy0
       simp only [zero_mul, Complex.exp_zero, mul_one] at this
-      rw [s24b_H_of_ne hy0]
+      rw [bernoulliGenFun_of_ne_zero hy0]
       exact this.congr_fun fun n => by simp only [c]; ring
   set p := FormalMultilinearSeries.ofScalars ℂ c
   have hrad : (1 : ENNReal) ≤ p.radius := by
@@ -699,7 +725,7 @@ lemma s24b_iteratedDeriv_F_natCast (ℓ n : ℕ) :
     · simpa using this
     simp only [NNReal.coe_one, one_pow, mul_one, p, FormalMultilinearSeries.ofScalars_norm]
     simpa using h1.norm
-  have hp : HasFPowerSeriesOnBall (fun z => s24b_H z ^ ℓ) p 0 1 :=
+  have hp : HasFPowerSeriesOnBall (fun z => bernoulliGenFun z ^ ℓ) p 0 1 :=
     { r_le := hrad
       r_pos := one_pos
       hasSum := fun {y} hy => by
@@ -718,14 +744,14 @@ lemma s24b_iteratedDeriv_F_natCast (ℓ n : ℕ) :
   rfl
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun z =>
-Complex.exp (x * s24b_L z)) 0 = aeval x (norlundPolynomial n)`. -/
-lemma s24b_iteratedDeriv_F_eq (x : ℂ) (n : ℕ) :
-    iteratedDeriv n (fun z => Complex.exp (x * s24b_L z)) 0 = aeval x (norlundPolynomial n) := by
-  obtain ⟨c, -, hF⟩ := s24b_iteratedDeriv_F n
-  have h0 : ∀ y : ℂ, iteratedDeriv n (fun z => Complex.exp (y * s24b_L z)) 0 =
+Complex.exp (x * bernoulliGenFunLog z)) 0 = aeval x (norlundPolynomial n)`. -/
+private lemma iteratedDeriv_exp_mul_bernoulliGenFunLog_zero (x : ℂ) (n : ℕ) :
+    iteratedDeriv n (fun z => Complex.exp (x * bernoulliGenFunLog z)) 0 = aeval x (norlundPolynomial n) := by
+  obtain ⟨c, -, hF⟩ := iteratedDeriv_exp_mul_bernoulliGenFunLog_eq_sum n
+  have h0 : ∀ y : ℂ, iteratedDeriv n (fun z => Complex.exp (y * bernoulliGenFunLog z)) 0 =
       ∑ k ∈ range (n + 1), y ^ k * c k 0 := by
     intro y
-    rw [hF y 0 (mem_ball_self (by positivity)), s24b_L_zero, mul_zero, Complex.exp_zero, mul_one]
+    rw [hF y 0 (mem_ball_self (by positivity)), bernoulliGenFunLog_zero, mul_zero, Complex.exp_zero, mul_one]
   set P : ℂ[X] := ∑ k ∈ range (n + 1), C (c k 0) * X ^ k
   have hP : ∀ y, P.eval y = ∑ k ∈ range (n + 1), y ^ k * c k 0 := by
     intro y
@@ -736,17 +762,17 @@ lemma s24b_iteratedDeriv_F_eq (x : ℂ) (n : ℕ) :
     refine Set.infinite_of_injective_forall_mem (f := fun ℓ : ℕ => (ℓ : ℂ)) Nat.cast_injective
       fun ℓ => ?_
     simp only [Set.mem_ofPred_eq]
-    rw [hP, ← h0, s24b_iteratedDeriv_F_natCast, eval_map_algebraMap,
+    rw [hP, ← h0, iteratedDeriv_exp_natCast_mul_bernoulliGenFunLog_zero, eval_map_algebraMap,
       show (ℓ : ℂ) = algebraMap ℚ ℂ ℓ by simp, aeval_algebraMap_apply_eq_algebraMap_eval]
     rfl
   rw [h0, ← hP, hQ, eval_map_algebraMap]
 
-/-- Identity under the stated parameter and domain assumptions: `s24b_L t = Complex.log (s24b_H
+/-- Identity under the stated parameter and domain assumptions: `bernoulliGenFunLog t = Complex.log (bernoulliGenFun
 t)`. -/
-lemma s24b_L_eq_log {t : ℂ} (ht : ‖t‖ < 2 * π)
-    (hs : ∀ s : ℝ, s ∈ Set.Icc (0 : ℝ) 1 → s24b_H (s * t) ∈ Complex.slitPlane) :
-    s24b_L t = Complex.log (s24b_H t) := by
-  set ψ : ℝ → ℂ := fun s => s24b_L (s * t) - Complex.log (s24b_H (s * t))
+private lemma bernoulliGenFunLog_eq_log {t : ℂ} (ht : ‖t‖ < 2 * π)
+    (hs : ∀ s : ℝ, s ∈ Set.Icc (0 : ℝ) 1 → bernoulliGenFun (s * t) ∈ Complex.slitPlane) :
+    bernoulliGenFunLog t = Complex.log (bernoulliGenFun t) := by
+  set ψ : ℝ → ℂ := fun s => bernoulliGenFunLog (s * t) - Complex.log (bernoulliGenFun (s * t))
   have hball : ∀ s : ℝ, s ∈ Set.Icc (0 : ℝ) 1 → (s : ℂ) * t ∈ ball (0 : ℂ) (2 * π) := by
     intro s hs
     rw [mem_ball_zero_iff, norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hs.1]
@@ -755,25 +781,24 @@ lemma s24b_L_eq_log {t : ℂ} (ht : ‖t‖ < 2 * π)
   have hd : ∀ s ∈ Set.Icc (0 : ℝ) 1, HasDerivAt ψ 0 s := by
     intro s hs'
     have hz := hball s hs'
-    have hH := (s24b_differentiableOn_H.differentiableAt (isOpen_ball.mem_nhds hz)).hasDerivAt
-    have e : HasDerivAt (fun z : ℂ => s24b_L (z * t) - Complex.log (s24b_H (z * t))) 0
+    have hH := (differentiableOn_bernoulliGenFun.differentiableAt (isOpen_ball.mem_nhds hz)).hasDerivAt
+    have e : HasDerivAt (fun z : ℂ => bernoulliGenFunLog (z * t) - Complex.log (bernoulliGenFun (z * t))) 0
         (s : ℂ) := by
       have hm : HasDerivAt (fun z : ℂ => z * t) t (s : ℂ) := by
         simpa using (hasDerivAt_id (s : ℂ)).mul_const t
-      have h1 := (s24b_hasDerivAt_L hz).comp (s : ℂ) hm
+      have h1 := (hasDerivAt_bernoulliGenFunLog hz).comp (s : ℂ) hm
       have h2 := (hH.clog (hs s hs')).comp (s : ℂ) hm
-      convert h1.sub h2 using 1 <;> first | rfl | simp only [s24b_l, sub_self]
+      convert h1.sub h2 using 1 <;> first | rfl | simp only [bernoulliGenFunLogDeriv, sub_self]
     exact e.comp_ofReal
   have hc := constant_of_has_deriv_right_zero (f := ψ) (a := 0) (b := 1)
     (fun s hs => (hd s hs).continuousAt.continuousWithinAt)
     (fun s hs => (hd s (Set.Ico_subset_Icc_self hs)).hasDerivWithinAt) 1
     (Set.right_mem_Icc.mpr zero_le_one)
-  simp only [ψ, Complex.ofReal_one, one_mul, Complex.ofReal_zero, zero_mul, s24b_L_zero,
-    s24b_H_zero, Complex.log_one, sub_zero] at hc
+  simp only [ψ, Complex.ofReal_one, one_mul, Complex.ofReal_zero, zero_mul, bernoulliGenFunLog_zero,
+    bernoulliGenFun_zero, Complex.log_one, sub_zero] at hc
   exact sub_eq_zero.mp hc
 
-end S24bNorlund
-
+end NorlundSums
 /-- DLMF 24.16.9 (complex order): `(t/(eᵗ - 1))^x = ∑ₙ B_n^{(x)} tⁿ/n!`, principal power, for
 complex `x` and `0 < |t| < π` (DLMF: `|t| < 2π` with the branch equal to `1` at `t = 0`; see
 the module docstring). -/
@@ -782,16 +807,16 @@ theorem hasSum_norlundPolynomial (x : ℂ) {t : ℂ} (ht : ‖t‖ < π) (ht0 : 
     HasSum (fun n : ℕ => aeval x (norlundPolynomial n) * t ^ n / n !)
       ((t / (Complex.exp t - 1)) ^ x) := by
   have hb : t ∈ Metric.ball (0 : ℂ) (2 * π) := by rw [mem_ball_zero_iff]; linarith [Real.pi_pos]
-  have hT := Complex.hasSum_taylorSeries_on_ball (s24b_differentiableOn_F x) hb
-  have hL := s24b_L_eq_log (t := t) (by linarith [Real.pi_pos]) fun s hs => by
-    refine s24b_H_mem_slitPlane ?_
+  have hT := Complex.hasSum_taylorSeries_on_ball (differentiableOn_exp_mul_bernoulliGenFunLog x) hb
+  have hL := bernoulliGenFunLog_eq_log (t := t) (by linarith [Real.pi_pos]) fun s hs => by
+    refine bernoulliGenFun_mem_slitPlane ?_
     rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hs.1]
     calc s * ‖t‖ ≤ 1 * ‖t‖ := by gcongr; exact hs.2
       _ < _ := by simpa
-  simp only [sub_zero, s24b_iteratedDeriv_F_eq, smul_eq_mul] at hT
+  simp only [sub_zero, iteratedDeriv_exp_mul_bernoulliGenFunLog_zero, smul_eq_mul] at hT
   rw [hL] at hT
-  rw [← s24b_H_of_ne ht0,
-    Complex.cpow_def_of_ne_zero (s24b_H_ne_zero (by linarith [Real.pi_pos])),
+  rw [← bernoulliGenFun_of_ne_zero ht0,
+    Complex.cpow_def_of_ne_zero (bernoulliGenFun_ne_zero (by linarith [Real.pi_pos])),
     mul_comm (Complex.log _)]
   exact hT.congr_fun fun n => by ring
 
@@ -810,21 +835,21 @@ theorem hasSum_norlundPolynomial_real (x : ℝ) {t : ℝ} (ht : |t| < 2 * π) (h
     · have := Real.exp_lt_exp.mpr h
       rw [Real.exp_zero] at this
       exact div_pos h (by linarith)
-  have hHr : ∀ r : ℝ, r ≠ 0 → s24b_H (r : ℂ) = ((r / (Real.exp r - 1) : ℝ) : ℂ) := by
+  have hHr : ∀ r : ℝ, r ≠ 0 → bernoulliGenFun (r : ℂ) = ((r / (Real.exp r - 1) : ℝ) : ℂ) := by
     intro r hr
-    rw [s24b_H_of_ne (Complex.ofReal_ne_zero.mpr hr)]; push_cast; rfl
+    rw [bernoulliGenFun_of_ne_zero (Complex.ofReal_ne_zero.mpr hr)]; push_cast; rfl
   have htn : ‖(t : ℂ)‖ < 2 * π := by rwa [Complex.norm_real, Real.norm_eq_abs]
   have hb : (t : ℂ) ∈ Metric.ball (0 : ℂ) (2 * π) := by rwa [mem_ball_zero_iff]
-  have hT := Complex.hasSum_taylorSeries_on_ball (s24b_differentiableOn_F (x : ℂ)) hb
-  have hL := s24b_L_eq_log htn fun s hs => by
+  have hT := Complex.hasSum_taylorSeries_on_ball (differentiableOn_exp_mul_bernoulliGenFunLog (x : ℂ)) hb
+  have hL := bernoulliGenFunLog_eq_log htn fun s hs => by
     rw [← Complex.ofReal_mul]
     by_cases h0 : s * t = 0
-    · rw [h0, Complex.ofReal_zero, s24b_H_zero]; exact Complex.one_mem_slitPlane
+    · rw [h0, Complex.ofReal_zero, bernoulliGenFun_zero]; exact Complex.one_mem_slitPlane
     · rw [hHr _ h0, Complex.ofReal_mem_slitPlane]; exact hpos _ h0
-  have hR : Complex.exp ((x : ℂ) * s24b_L t) = (((t / (Real.exp t - 1)) ^ x : ℝ) : ℂ) := by
+  have hR : Complex.exp ((x : ℂ) * bernoulliGenFunLog t) = (((t / (Real.exp t - 1)) ^ x : ℝ) : ℂ) := by
     rw [hL, hHr t ht0, ← Complex.ofReal_log (hpos t ht0).le, ← Complex.ofReal_mul,
       ← Complex.ofReal_exp, Real.rpow_def_of_pos (hpos t ht0), mul_comm]
-  simp only [sub_zero, s24b_iteratedDeriv_F_eq, smul_eq_mul, hR] at hT
+  simp only [sub_zero, iteratedDeriv_exp_mul_bernoulliGenFunLog_zero, smul_eq_mul, hR] at hT
   rw [← Complex.hasSum_ofReal]
   refine hT.congr_fun fun n => ?_
   rw [show (x : ℂ) = algebraMap ℝ ℂ x from rfl, aeval_algebraMap_apply]
@@ -842,8 +867,8 @@ theorem natDegree_norlundPolynomial (n : ℕ) : (norlundPolynomial n).natDegree 
     (natDegree_C_mul_le _ _).trans ((descPochhammer_natDegree ℚ j).le.trans
       (Nat.lt_succ_iff.mp (mem_range.mp hj)))
   have hcoeff : (norlundPolynomial n).coeff n = (-1 / 2) ^ n := by
-    rw [norlundPolynomial, b24b_powCoeff, coeff_smul, finsetSum_coeff, sum_range_succ,
-      Finset.sum_eq_zero, zero_add, coeff_C_mul, q24b_coeff_pow_self g hg, hg1]
+    rw [norlundPolynomial, binomialSeriesCoeff, coeff_smul, finsetSum_coeff, sum_range_succ,
+      Finset.sum_eq_zero, zero_add, coeff_C_mul, coeff_pow_self_of_constantCoeff_eq_zero g hg, hg1]
     · have hm := (monic_descPochhammer ℚ n).leadingCoeff
       rw [leadingCoeff, descPochhammer_natDegree ℚ n] at hm
       rw [hm, smul_eq_mul]
@@ -853,7 +878,7 @@ theorem natDegree_norlundPolynomial (n : ℕ) : (norlundPolynomial n).natDegree 
       rw [coeff_C_mul, coeff_eq_zero_of_natDegree_lt, mul_zero]
       rw [descPochhammer_natDegree ℚ]; exact mem_range.mp hj
   refine natDegree_eq_of_le_of_coeff_ne_zero ?_ (by rw [hcoeff]; positivity)
-  rw [norlundPolynomial, b24b_powCoeff]
+  rw [norlundPolynomial, binomialSeriesCoeff]
   exact (natDegree_smul_le _ _).trans (natDegree_sum_le_of_forall_le _ _ hterm)
 
 /-- DLMF §24.16(i): the notation is consistent with 24.16.3, `B_n^{(x)}` at `x = ℓ` being
@@ -908,7 +933,7 @@ theorem hasSum_bernoulliChar {f : ℕ} (hf : 1 ≤ f) (χ : DirichletCharacter �
 
 /-- The character `χ₄` modulo `4` (`χ₄(1) = 1`, `χ₄(3) = -1`, `χ₄(2) = χ₄(4) = 0`) as a
 complex Dirichlet character (Mathlib's `ZMod.χ₄` composed with `ℤ → ℂ`). -/
-def b24b_chi4 : DirichletCharacter ℂ 4 := ZMod.χ₄.ringHomComp (Int.castRingHom ℂ)
+def chi4 : DirichletCharacter ℂ 4 := ZMod.χ₄.ringHomComp (Int.castRingHom ℂ)
 
 /-- DLMF 24.16.12: `Bₙ(x) = B_{n,χ₀}(x - 1)`, `χ₀` the trivial character (`f = 1`). -/
 @[dlmf 24.16.E12]
@@ -925,15 +950,15 @@ theorem bernoulli_eq_bernoulliCharPoly_one (n : ℕ) (x : ℂ) :
 @[dlmf 24.16.E13]
 theorem euler_eq_bernoulliCharPoly_chi4 (n : ℕ) (x : ℂ) :
     eulerPolyE n x =
-      -((2 : ℂ) ^ (1 - (n : ℤ)) / (n + 1)) * bernoulliCharPoly b24b_chi4 (n + 1) (2 * x - 1) := by
-  have hchi : ∀ k, bernoulliChar b24b_chi4 k =
+      -((2 : ℂ) ^ (1 - (n : ℤ)) / (n + 1)) * bernoulliCharPoly chi4 (n + 1) (2 * x - 1) := by
+  have hchi : ∀ k, bernoulliChar chi4 k =
       (4 : ℂ) ^ ((k : ℤ) - 1) * (bernoulliPolyB k (1 / 4) - bernoulliPolyB k (3 / 4)) := by
     intro k
     rw [bernoulliChar]
-    simp [Finset.sum_Icc_succ_top, b24b_chi4, MulChar.ringHomComp_apply]
+    simp [Finset.sum_Icc_succ_top, chi4, MulChar.ringHomComp_apply]
     ring_nf
     simp
-  have hpoly : bernoulliCharPoly b24b_chi4 (n + 1) (2 * x - 1) =
+  have hpoly : bernoulliCharPoly chi4 (n + 1) (2 * x - 1) =
       4 ^ n * (bernoulliPolyB (n + 1) (x / 2) - bernoulliPolyB (n + 1) (x / 2 + 1 / 2)) := by
     have h1 := bernoulliPolyB_add (n + 1) (1 / 4) ((2 * x - 1) / 4)
     have h3 := bernoulliPolyB_add (n + 1) (3 / 4) ((2 * x - 1) / 4)

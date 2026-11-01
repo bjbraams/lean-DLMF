@@ -19,8 +19,11 @@ public import DLMF.IncompleteGamma.FractionTools
 public import DLMF.IncompleteGamma.BoundTools
 
 /-!
-# Incomplete Gamma and related functions: DLMF Chapter 8
+# Incomplete Gamma and related functions (DLMF Chapter 8)
 
-The acquisition excludes graphical results and application notes. See the root
-`DLMF678Acquisition.md` for source coverage and exceptional-value conventions.
+This umbrella imports the incomplete Gamma functions (continued definitions, special values,
+representations, series and recurrences, bounds and continued fractions, real integrals, zeros
+and asymptotic expansions), the incomplete Beta function and its asymptotics, the generalized
+exponential integral and the generalized sine and cosine integrals. Graphical results and
+application notes of DLMF Chapter 8 are excluded.
 -/

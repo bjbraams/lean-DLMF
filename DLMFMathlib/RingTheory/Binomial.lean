@@ -12,6 +12,15 @@ public import Mathlib.RingTheory.Binomial
 
 These adapters connect the polynomial evaluation API for Pochhammer symbols to
 `Ring.choose`, including the coefficient relation used in Euler–Maclaurin expansions.
+
+## Main results
+
+* `Ring.choose_eq_descPochhammer_div`: generalized binomial coefficients as falling-factorial
+  evaluations divided by the factorial.
+* `Ring.natCast_mul_choose_succ`: the falling-factorial recursion between consecutive
+  generalized binomial coefficients, with no restriction on the upper argument.
+* `Ring.choose_neg_add_even_sub_two`: the sign relation for the odd-order shifted binomial
+  coefficient in Euler–Maclaurin.
 -/
 
 @[expose] public noncomputable section

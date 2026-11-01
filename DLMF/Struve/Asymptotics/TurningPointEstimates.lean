@@ -8,13 +8,19 @@ module
 public import DLMF.Struve.Asymptotics.AngerWeberExpansions
 
 /-!
-# Turning-point bounds for scaled Struve kernels
+# Turning-point bounds for the scaled Anger–Weber function (DLMF 11.11.14)
 
-Phase geometry and local integral estimates control the scaled Struve kernels near turning
-points.
+This file studies the phase of the scaled integrand of `𝐀_{-ν}(λν)` and proves the main
+estimate behind DLMF 11.11.14.
 
-Source references and common attribution are retained in
-`DLMF.Struve.Asymptotics`.
+## Main definitions
+
+* `struveSc_phase`: the phase `Ψ(w) = λw - log(w + (1+w²)^{1/2})`.
+
+## Main results
+
+* `struveSc_re_phase_ge`: with `ν = ρ e^{2ia}`, `re (ν Ψ(r e^{-ia})) ≥ (λ-1) cos a · ρ r`.
+* `struveSc_integral_est`: the main estimate behind DLMF 11.11.14.
 -/
 
 @[expose] public noncomputable section
@@ -205,7 +211,7 @@ theorem struveSc_hasDerivAt_phase (lam : ℝ) {w : ℂ} (hu : 1 + w ^ 2 ∈ slit
 theorem struveSc_re_x_pos {a : ℝ} (ha : |a| < π / 2) {r : ℝ} (hr : 0 ≤ r) :
     0 < ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I) +
       (1 + ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (1 / 2 : ℂ)).re := by
-  have h1 := struveAs_re_cpow_half_pos (struveSc_mem_slitPlane (r := r) ha)
+  have h1 := Carlson.re_cpow_half_pos (struveSc_mem_slitPlane (r := r) ha)
   rw [add_re, re_ofReal_mul, exp_ofReal_mul_I_re, Real.cos_neg]
   have := struveSc_cos_pos ha
   nlinarith

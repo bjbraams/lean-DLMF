@@ -8,13 +8,25 @@ module
 public import DLMF.EllipticIntegrals.Connection.CompleteIntegrals
 
 /-!
-# Changes of modulus and amplitude in elliptic integrals
+# Changes of modulus in incomplete elliptic integrals (DLMF §19.7(ii))
 
-Reciprocal and imaginary modulus substitutions for incomplete elliptic integrals on the
-specified principal branches.
+The reciprocal- and imaginary-modulus transformations of Legendre's incomplete integrals,
+stated for the real amplitudes on which DLMF states them.
 
-Source references and common attribution are retained in
-`DLMF.EllipticIntegrals.Connection`.
+## Main definitions
+
+* `imagModulusAmplitude`: the amplitude map `T(u)` of DLMF 19.7.5.
+
+## Main results
+
+* `incEllInt_reciprocal_modulus`: the reciprocal-modulus transformation for real `0 < k < 1`
+  (DLMF 19.7.4).
+* `incEllInt_imaginary_modulus`: the imaginary-modulus transformation for real `k`
+  (DLMF 19.7.5, 19.7.6).
+
+## References
+
+* NIST DLMF §19.7.
 -/
 
 @[expose] public noncomputable section
@@ -33,7 +45,7 @@ open DLMF.JacobiElliptic
 
 /-- Identity under the stated parameter and domain assumptions: `(x : ℂ) ^ (-(1 / 2 : ℂ)) =
 ((Real.sqrt x)⁻¹ : ℝ) ∧ (x : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt x : ℝ)`. -/
-lemma p19lR1_ofReal_cpow_half {x : ℝ} (hx : 0 ≤ x) :
+private lemma ofReal_cpow_half_of_nonneg {x : ℝ} (hx : 0 ≤ x) :
     (x : ℂ) ^ (-(1 / 2 : ℂ)) = ((Real.sqrt x)⁻¹ : ℝ) ∧ (x : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt x : ℝ) := by
   constructor
   · rw [show -(1 / 2 : ℂ) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hx,
@@ -42,7 +54,7 @@ lemma p19lR1_ofReal_cpow_half {x : ℝ} (hx : 0 ≤ x) :
       ← Real.sqrt_eq_rpow]
 
 /-- Estimate under the stated parameter and domain assumptions: `Real.sin x ^ 2 ≤ Real.sin y ^ 2`. -/
-lemma p19lR1_sin_sq_le_of_le {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (hy : y ≤ π / 2) :
+private lemma sin_sq_le_sin_sq_of_le {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (hy : y ≤ π / 2) :
     Real.sin x ^ 2 ≤ Real.sin y ^ 2 := by
   have h1 : Real.sin x ≤ Real.sin y :=
     Real.sin_le_sin_of_le_of_le_pi_div_two (by linarith [Real.pi_pos]) hy hxy
@@ -50,15 +62,15 @@ lemma p19lR1_sin_sq_le_of_le {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (hy : y 
   nlinarith
 
 /-- `Π` for real data with `α² sin²φ < 1` on `0 ≤ φ ≤ π/2` needs no principal value. -/
-lemma p19lR1_Pi_ofReal_of_lt {φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ π / 2)
+private lemma incEllIntPik_ofReal_eq_integral_of_lt {φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ π / 2)
     (hα : α2 * Real.sin φ ^ 2 < 1) (k : ℂ) :
     incEllIntPik φ α2 k = ∫ θ in (0 : ℝ)..φ, ((1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) := by
   rw [incEllIntPik_eq_segmentIntegral (δ := min 1 (1 - α2 * Real.sin φ ^ 2))
-    (lt_min one_pos (by linarith)), ei19a_segmentIntegral_ofReal]
+    (lt_min one_pos (by linarith)), segmentIntegral_ofReal]
   · simp only [← Complex.ofReal_sin]
   · intro t ht
-    have hs := p19lR1_sin_sq_le_of_le (x := t * φ) (y := φ) (by nlinarith [ht.1])
+    have hs := sin_sq_le_sin_sq_of_le (x := t * φ) (y := φ) (by nlinarith [ht.1])
       (by nlinarith [ht.2]) hφ1
     have hs0 := sq_nonneg (Real.sin (t * φ))
     have hre : (1 - (α2 : ℂ) * Complex.sin (t * φ) ^ 2) =
@@ -72,7 +84,7 @@ lemma p19lR1_Pi_ofReal_of_lt {φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ π 
     exact hpos.trans (le_abs_self _)
 
 /-- The substitution `θ = arcsin (k sin ψ)` on `[0, β]`. -/
-lemma p19lR1_arcsin_subst {k β : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0 : 0 ≤ β) (hβ1 : β ≤ π / 2)
+private lemma integral_arcsin_mul_sin_subst {k β : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0 : 0 ≤ β) (hβ1 : β ≤ π / 2)
     (g : ℝ → ℂ) :
     ∫ θ in (0 : ℝ)..(Real.arcsin (k * Real.sin β)), g θ =
       ∫ ψ in (0 : ℝ)..β, ((k * Real.cos ψ / Real.sqrt (1 - k ^ 2 * Real.sin ψ ^ 2) : ℝ) : ℂ) *
@@ -101,7 +113,7 @@ lemma p19lR1_arcsin_subst {k β : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0 : 0 ≤
 /-- Identity under the stated parameter and domain assumptions: `incEllIntFk φ (1 / k : ℝ) = k *
 incEllIntFk β k ∧ incEllIntEk φ (1 / k : ℝ) = (incEllIntEk β k - (1 - k ^ 2 : ℝ) * incEllIntFk
 β k) / k ∧ incEllIntPik φ α2 (1 / k : ℝ) = k * incEllIntPik β (k ^ 2 * α2 : ℝ) k`. -/
-lemma p19lR1_recip_modulus {k β φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0 : 0 ≤ β)
+private lemma incEllInt_reciprocal_modulus_of_arcsin {k β φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0 : 0 ≤ β)
     (hβ1 : β ≤ π / 2) (hφ : Real.arcsin (k * Real.sin β) = φ) (hα : α2 * Real.sin φ ^ 2 < 1) :
     incEllIntFk φ (1 / k : ℝ) = k * incEllIntFk β k ∧
       incEllIntEk φ (1 / k : ℝ) = (incEllIntEk β k - (1 - k ^ 2 : ℝ) * incEllIntFk β k) / k ∧
@@ -125,7 +137,7 @@ lemma p19lR1_recip_modulus {k β φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0
     intro ψ
     have e : (1 - (k : ℂ) ^ 2 * (Real.sin ψ : ℂ) ^ 2) = ((1 - k ^ 2 * Real.sin ψ ^ 2 : ℝ) : ℂ) := by
       push_cast; ring
-    rw [e]; exact p19lR1_ofReal_cpow_half (hspos ψ).le
+    rw [e]; exact ofReal_cpow_half_of_nonneg (hspos ψ).le
   -- on `0 < ψ < π/2`, the reciprocal-modulus integrand
   have hcos : ∀ ψ : ℝ, 0 < Real.cos ψ →
       (1 - ((1 / k : ℝ) : ℂ) ^ 2 * (Real.sin (Real.arcsin (k * Real.sin ψ)) : ℂ) ^ 2) ^
@@ -138,7 +150,7 @@ lemma p19lR1_recip_modulus {k β φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0
       have er : 1 - (1 / k) ^ 2 * Real.sin (Real.arcsin (k * Real.sin ψ)) ^ 2 = Real.cos ψ ^ 2 := by
         rw [hsin]; field_simp; nlinarith [Real.sin_sq_add_cos_sq ψ]
       rw [← er]; simp only [ofReal_sub, ofReal_one, ofReal_mul, ofReal_pow]
-    rw [e, (p19lR1_ofReal_cpow_half (sq_nonneg _)).1, (p19lR1_ofReal_cpow_half (sq_nonneg _)).2,
+    rw [e, (ofReal_cpow_half_of_nonneg (sq_nonneg _)).1, (ofReal_cpow_half_of_nonneg (sq_nonneg _)).2,
       Real.sqrt_sq hc.le]
     exact ⟨rfl, rfl⟩
   have hae : ∀ᵐ ψ : ℝ, ψ ∈ uIoc 0 β → 0 < Real.cos ψ := by
@@ -155,7 +167,7 @@ lemma p19lR1_recip_modulus {k β φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0
   have hsiint : IntervalIntegrable (fun ψ => (((s ψ)⁻¹ : ℝ) : ℂ)) volume 0 β :=
     (continuous_ofReal.comp (hsc.inv₀ fun ψ => (hs0 ψ).ne')).intervalIntegrable _ _
   refine ⟨?_, ?_, ?_⟩
-  · rw [incEllIntFk_ofReal_eq_integral, p19lR1_arcsin_subst hk0 hk1 hβ0 hβ1,
+  · rw [incEllIntFk_ofReal_eq_integral, integral_arcsin_mul_sin_subst hk0 hk1 hβ0 hβ1,
       incEllIntFk_ofReal_eq_integral, ← intervalIntegral.integral_const_mul]
     refine intervalIntegral.integral_congr_ae ?_
     filter_upwards [hae] with ψ hψ hmem
@@ -180,7 +192,7 @@ lemma p19lR1_recip_modulus {k β φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0
       rw [Real.cos_sq']
       field_simp
       linear_combination h2
-    rw [hrhs, incEllIntEk_ofReal_eq_integral, p19lR1_arcsin_subst hk0 hk1 hβ0 hβ1,
+    rw [hrhs, incEllIntEk_ofReal_eq_integral, integral_arcsin_mul_sin_subst hk0 hk1 hβ0 hβ1,
       ← intervalIntegral.integral_div]
     refine intervalIntegral.integral_congr_ae ?_
     filter_upwards [hae] with ψ hψ hmem
@@ -192,8 +204,8 @@ lemma p19lR1_recip_modulus {k β φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0
     field_simp
   · have hαβ : (k ^ 2 * α2) * Real.sin β ^ 2 < 1 := by
       have := hα; rw [hsin] at this; nlinarith
-    rw [p19lR1_Pi_ofReal_of_lt hφ0 hφ1 hα, p19lR1_arcsin_subst hk0 hk1 hβ0 hβ1,
-      p19lR1_Pi_ofReal_of_lt hβ0 hβ1 hαβ, ← intervalIntegral.integral_const_mul]
+    rw [incEllIntPik_ofReal_eq_integral_of_lt hφ0 hφ1 hα, integral_arcsin_mul_sin_subst hk0 hk1 hβ0 hβ1,
+      incEllIntPik_ofReal_eq_integral_of_lt hβ0 hβ1 hαβ, ← intervalIntegral.integral_const_mul]
     refine intervalIntegral.integral_congr_ae ?_
     filter_upwards [hae] with ψ hψ hmem
     have hc := hψ hmem
@@ -228,42 +240,42 @@ theorem incEllInt_reciprocal_modulus {k φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1
   have hφ : Real.arcsin (k * Real.sin β) = φ := by
     rw [Real.sin_arcsin (by linarith) hu1, mul_div_cancel₀ _ hk0.ne',
       Real.arcsin_sin (by linarith [Real.pi_pos]) hφ1]
-  exact p19lR1_recip_modulus hk0 hk1 hβ0 hβ1 hφ hα
+  exact incEllInt_reciprocal_modulus_of_arcsin hk0 hk1 hβ0 hβ1 hφ hα
 
 /-! ### Helpers for 19.7.5–19.7.6 (substitution `tan θ = √(1+k²) tan u`) -/
 
 /-- The amplitude map of 19.7.5, `T(u) = arcsin (√(1+k²) sin u / √(1 + k² sin²u))`. -/
-noncomputable def p19lR1_T (k u : ℝ) : ℝ :=
+noncomputable def imagModulusAmplitude (k u : ℝ) : ℝ :=
   Real.arcsin (Real.sqrt (1 + k ^ 2) * Real.sin u / Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2))
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < 1 + k ^ 2 * Real.sin u ^ 2`. -/
-lemma p19lR1_w_pos (k u : ℝ) : 0 < 1 + k ^ 2 * Real.sin u ^ 2 := by positivity
+private lemma one_add_sq_mul_sin_sq_pos (k u : ℝ) : 0 < 1 + k ^ 2 * Real.sin u ^ 2 := by positivity
 
 /-- Estimate under the stated parameter and domain assumptions: `(Real.sqrt (1 + k ^ 2) * Real.sin
 u / Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2)) ^ 2 ≤ 1`. -/
-lemma p19lR1_T_arg_le (k u : ℝ) :
+private lemma imagModulusAmplitude_arg_sq_le_one (k u : ℝ) :
     (Real.sqrt (1 + k ^ 2) * Real.sin u / Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2)) ^ 2 ≤ 1 := by
   rw [div_pow, mul_pow, Real.sq_sqrt (by positivity), Real.sq_sqrt (by positivity),
     div_le_one (by positivity)]
   nlinarith [Real.sin_sq_le_one u, sq_nonneg k, sq_nonneg (Real.sin u)]
 
-/-- Identity under the stated parameter and domain assumptions: `Real.sin (p19lR1_T k u) =
+/-- Identity under the stated parameter and domain assumptions: `Real.sin (imagModulusAmplitude k u) =
 Real.sqrt (1 + k ^ 2) * Real.sin u / Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2)`. -/
-lemma p19lR1_sin_T (k u : ℝ) :
-    Real.sin (p19lR1_T k u) =
+private lemma sin_imagModulusAmplitude (k u : ℝ) :
+    Real.sin (imagModulusAmplitude k u) =
       Real.sqrt (1 + k ^ 2) * Real.sin u / Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2) := by
-  have h := p19lR1_T_arg_le k u
-  rw [p19lR1_T, Real.sin_arcsin (by nlinarith [sq_nonneg (Real.sqrt (1 + k ^ 2) * Real.sin u /
+  have h := imagModulusAmplitude_arg_sq_le_one k u
+  rw [imagModulusAmplitude, Real.sin_arcsin (by nlinarith [sq_nonneg (Real.sqrt (1 + k ^ 2) * Real.sin u /
     Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2) + 1)]) (by nlinarith [sq_nonneg (Real.sqrt (1 + k ^ 2) *
     Real.sin u / Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2) - 1)])]
 
-/-- Identity under the stated parameter and domain assumptions: `p19lR1_T k u = Real.arctan
+/-- Identity under the stated parameter and domain assumptions: `imagModulusAmplitude k u = Real.arctan
 (Real.sqrt (1 + k ^ 2) * Real.tan u)`. -/
-lemma p19lR1_T_eq_arctan (k : ℝ) {u : ℝ} (hu : u ∈ Ioo (-(π / 2)) (π / 2)) :
-    p19lR1_T k u = Real.arctan (Real.sqrt (1 + k ^ 2) * Real.tan u) := by
+private lemma imagModulusAmplitude_eq_arctan (k : ℝ) {u : ℝ} (hu : u ∈ Ioo (-(π / 2)) (π / 2)) :
+    imagModulusAmplitude k u = Real.arctan (Real.sqrt (1 + k ^ 2) * Real.tan u) := by
   have hc := Real.cos_pos_of_mem_Ioo hu
-  have hw := p19lR1_w_pos k u
-  rw [Real.arctan_eq_arcsin, p19lR1_T]
+  have hw := one_add_sq_mul_sin_sq_pos k u
+  rw [Real.arctan_eq_arcsin, imagModulusAmplitude]
   congr 1
   have h1 : 1 + (Real.sqrt (1 + k ^ 2) * Real.tan u) ^ 2 =
       (Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2) / Real.cos u) ^ 2 := by
@@ -274,81 +286,81 @@ lemma p19lR1_T_eq_arctan (k : ℝ) {u : ℝ} (hu : u ∈ Ioo (-(π / 2)) (π / 2
   have := (Real.sqrt_pos.2 hw).ne'
   field_simp
 
-/-- At `u`, the function `(p19lR1_T k)` has derivative `(Real.sqrt (1 + k ^ 2) / (1 + k ^ 2 *
+/-- At `u`, the function `(imagModulusAmplitude k)` has derivative `(Real.sqrt (1 + k ^ 2) / (1 + k ^ 2 *
 Real.sin u ^ 2))`. -/
-lemma p19lR1_hasDerivAt_T (k : ℝ) {u : ℝ} (hu : u ∈ Ioo (-(π / 2)) (π / 2)) :
-    HasDerivAt (p19lR1_T k) (Real.sqrt (1 + k ^ 2) / (1 + k ^ 2 * Real.sin u ^ 2)) u := by
+private lemma hasDerivAt_imagModulusAmplitude (k : ℝ) {u : ℝ} (hu : u ∈ Ioo (-(π / 2)) (π / 2)) :
+    HasDerivAt (imagModulusAmplitude k) (Real.sqrt (1 + k ^ 2) / (1 + k ^ 2 * Real.sin u ^ 2)) u := by
   have hc := Real.cos_pos_of_mem_Ioo hu
   have h := (Real.hasDerivAt_arctan (Real.sqrt (1 + k ^ 2) * Real.tan u)).comp u
     ((Real.hasDerivAt_tan hc.ne').const_mul (Real.sqrt (1 + k ^ 2)))
-  have heq : (fun v => Real.arctan (Real.sqrt (1 + k ^ 2) * Real.tan v)) =ᶠ[𝓝 u] p19lR1_T k := by
+  have heq : (fun v => Real.arctan (Real.sqrt (1 + k ^ 2) * Real.tan v)) =ᶠ[𝓝 u] imagModulusAmplitude k := by
     filter_upwards [isOpen_Ioo.mem_nhds hu] with v hv
-    exact (p19lR1_T_eq_arctan k hv).symm
+    exact (imagModulusAmplitude_eq_arctan k hv).symm
   refine (h.congr_of_eventuallyEq heq.symm).congr_deriv ?_
-  have hw := p19lR1_w_pos k u
+  have hw := one_add_sq_mul_sin_sq_pos k u
   rw [mul_pow, Real.sq_sqrt (by positivity), Real.tan_eq_sin_div_cos]
   field_simp
   nlinarith [Real.sin_sq_add_cos_sq u]
 
-/-- The function `(p19lR1_T k)` is continuous. -/
-lemma p19lR1_continuous_T (k : ℝ) : Continuous (p19lR1_T k) := by
-  unfold p19lR1_T
+/-- The function `(imagModulusAmplitude k)` is continuous. -/
+private lemma continuous_imagModulusAmplitude (k : ℝ) : Continuous (imagModulusAmplitude k) := by
+  unfold imagModulusAmplitude
   refine Real.continuous_arcsin.comp ?_
-  exact Continuous.div (by fun_prop) (by fun_prop) fun u => (Real.sqrt_pos.2 (p19lR1_w_pos k u)).ne'
+  exact Continuous.div (by fun_prop) (by fun_prop) fun u => (Real.sqrt_pos.2 (one_add_sq_mul_sin_sq_pos k u)).ne'
 
-/-- Identity under the stated parameter and domain assumptions: `∫ θ in (0 : ℝ)..(p19lR1_T k φ), g
+/-- Identity under the stated parameter and domain assumptions: `∫ θ in (0 : ℝ)..(imagModulusAmplitude k φ), g
 θ = ∫ u in (0 : ℝ)..φ, ((Real.sqrt (1 + k ^ 2) / (1 + k ^ 2 * Real.sin u ^ 2) : ℝ) : ℂ) * g
-(p19lR1_T k u)`. -/
-lemma p19lR1_T_subst (k : ℝ) {φ : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ π / 2) (g : ℝ → ℂ) :
-    ∫ θ in (0 : ℝ)..(p19lR1_T k φ), g θ =
+(imagModulusAmplitude k u)`. -/
+private lemma integral_imagModulusAmplitude_subst (k : ℝ) {φ : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ π / 2) (g : ℝ → ℂ) :
+    ∫ θ in (0 : ℝ)..(imagModulusAmplitude k φ), g θ =
       ∫ u in (0 : ℝ)..φ, ((Real.sqrt (1 + k ^ 2) / (1 + k ^ 2 * Real.sin u ^ 2) : ℝ) : ℂ) *
-        g (p19lR1_T k u) := by
+        g (imagModulusAmplitude k u) := by
   have h := intervalIntegral.integral_deriv_smul_comp_of_deriv_nonneg (a := 0) (b := φ) (g := g)
-    (f := p19lR1_T k) (f' := fun u => Real.sqrt (1 + k ^ 2) / (1 + k ^ 2 * Real.sin u ^ 2))
-    (p19lR1_continuous_T k).continuousOn
+    (f := imagModulusAmplitude k) (f' := fun u => Real.sqrt (1 + k ^ 2) / (1 + k ^ 2 * Real.sin u ^ 2))
+    (continuous_imagModulusAmplitude k).continuousOn
     (fun u hu => by
       rw [min_eq_left hφ0, max_eq_right hφ0] at hu
-      exact p19lR1_hasDerivAt_T k ⟨by linarith [hu.1, Real.pi_pos], by linarith [hu.2]⟩)
-    (fun u _ => div_nonneg (Real.sqrt_nonneg _) (p19lR1_w_pos k u).le)
-  have h0 : p19lR1_T k 0 = 0 := by simp [p19lR1_T]
+      exact hasDerivAt_imagModulusAmplitude k ⟨by linarith [hu.1, Real.pi_pos], by linarith [hu.2]⟩)
+    (fun u _ => div_nonneg (Real.sqrt_nonneg _) (one_add_sq_mul_sin_sq_pos k u).le)
+  have h0 : imagModulusAmplitude k 0 = 0 := by simp [imagModulusAmplitude]
   simp only [h0, real_smul, Function.comp] at h
   exact h.symm
 
 /-- The change to an imaginary elliptic modulus transforms both square-root factors on their
 principal branches; the positive real square roots fix the signs. -/
-lemma p19lR1_imod_pt (k u : ℝ) :
+private lemma imagModulus_cpow_pointwise (k u : ℝ) :
     (1 - (I * k) ^ 2 * (Real.sin u : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) =
         (((Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2))⁻¹ : ℝ) : ℂ) ∧
       (1 - (I * k) ^ 2 * (Real.sin u : ℂ) ^ 2) ^ (1 / 2 : ℂ) =
         ((Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2) : ℝ) : ℂ) ∧
-      (1 - ((k / Real.sqrt (1 + k ^ 2) : ℝ) : ℂ) ^ 2 * (Real.sin (p19lR1_T k u) : ℂ) ^ 2) ^
+      (1 - ((k / Real.sqrt (1 + k ^ 2) : ℝ) : ℂ) ^ 2 * (Real.sin (imagModulusAmplitude k u) : ℂ) ^ 2) ^
           (-(1 / 2 : ℂ)) = ((Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2) : ℝ) : ℂ) ∧
-      (1 - ((k / Real.sqrt (1 + k ^ 2) : ℝ) : ℂ) ^ 2 * (Real.sin (p19lR1_T k u) : ℂ) ^ 2) ^
+      (1 - ((k / Real.sqrt (1 + k ^ 2) : ℝ) : ℂ) ^ 2 * (Real.sin (imagModulusAmplitude k u) : ℂ) ^ 2) ^
           (1 / 2 : ℂ) = (((Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2))⁻¹ : ℝ) : ℂ) := by
-  have hw := p19lR1_w_pos k u
+  have hw := one_add_sq_mul_sin_sq_pos k u
   have hW := Real.sqrt_pos.2 hw
   have hW2 := Real.sq_sqrt hw.le
   have hc := Real.sqrt_pos.2 (by positivity : (0 : ℝ) < 1 + k ^ 2)
   have hc2 := Real.sq_sqrt (by positivity : (0 : ℝ) ≤ 1 + k ^ 2)
   have e1 : (1 - (I * k) ^ 2 * (Real.sin u : ℂ) ^ 2) = ((1 + k ^ 2 * Real.sin u ^ 2 : ℝ) : ℂ) := by
     rw [mul_pow, I_sq]; simp only [ofReal_add, ofReal_one, ofReal_mul, ofReal_pow]; ring
-  have er : 1 - (k / Real.sqrt (1 + k ^ 2)) ^ 2 * Real.sin (p19lR1_T k u) ^ 2 =
+  have er : 1 - (k / Real.sqrt (1 + k ^ 2)) ^ 2 * Real.sin (imagModulusAmplitude k u) ^ 2 =
       (Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2) ^ 2)⁻¹ := by
-    rw [p19lR1_sin_T, div_pow, div_pow, mul_pow, hc2, hW2]
+    rw [sin_imagModulusAmplitude, div_pow, div_pow, mul_pow, hc2, hW2]
     field_simp
     ring
-  have e2 : (1 - ((k / Real.sqrt (1 + k ^ 2) : ℝ) : ℂ) ^ 2 * (Real.sin (p19lR1_T k u) : ℂ) ^ 2) =
+  have e2 : (1 - ((k / Real.sqrt (1 + k ^ 2) : ℝ) : ℂ) ^ 2 * (Real.sin (imagModulusAmplitude k u) : ℂ) ^ 2) =
       (((Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2) ^ 2)⁻¹ : ℝ) : ℂ) := by
     rw [← er]; simp only [ofReal_sub, ofReal_one, ofReal_mul, ofReal_pow]
-  rw [e1, e2, (p19lR1_ofReal_cpow_half hw.le).1, (p19lR1_ofReal_cpow_half hw.le).2,
-    (p19lR1_inv_sq_cpow hW).1, (p19lR1_inv_sq_cpow hW).2]
+  rw [e1, e2, (ofReal_cpow_half_of_nonneg hw.le).1, (ofReal_cpow_half_of_nonneg hw.le).2,
+    (ofReal_inv_sq_cpow_half hW).1, (ofReal_inv_sq_cpow_half hW).2]
   push_cast
   exact ⟨rfl, rfl, rfl, rfl⟩
 
 /-- Identity under the stated parameter and domain assumptions: `(1 - α2 * s ^ 2)⁻¹ * W⁻¹ = (1 /
 c) / ((α2 + k ^ 2) / (1 + k ^ 2)) * ((k / c) ^ 2 * (c * W⁻¹) + ((1 / c) ^ 2 * α2) * (c * W /
 (1 - α2 * s ^ 2)))`. -/
-lemma p19lR1_alg_Pi {k α2 c W s : ℝ} (hc : 0 < c) (hW : 0 < W) (hc2 : c ^ 2 = 1 + k ^ 2)
+private lemma imagModulus_Pi_integrand_identity {k α2 c W s : ℝ} (hc : 0 < c) (hW : 0 < W) (hc2 : c ^ 2 = 1 + k ^ 2)
     (hW2 : W ^ 2 = 1 + k ^ 2 * s ^ 2) (hd : 1 - α2 * s ^ 2 ≠ 0) (hαk : α2 + k ^ 2 ≠ 0) :
     (1 - α2 * s ^ 2)⁻¹ * W⁻¹ = (1 / c) / ((α2 + k ^ 2) / (1 + k ^ 2)) *
       ((k / c) ^ 2 * (c * W⁻¹) + ((1 / c) ^ 2 * α2) * (c * W / (1 - α2 * s ^ 2))) := by
@@ -358,23 +370,23 @@ lemma p19lR1_alg_Pi {k α2 c W s : ℝ} (hc : 0 < c) (hW : 0 < W) (hc2 : c ^ 2 =
 
 /-- Identity under the stated parameter and domain assumptions: `(1 + k ^ 2) * J - k ^ 2 * sc / Wφ
 = (1 / (1 / c)) * (c * J - X)`. -/
-lemma p19lR1_alg_E {k c J X Wφ sc : ℝ} (hc2 : c ^ 2 = 1 + k ^ 2) (hc : 0 < c) (hW : 0 < Wφ)
+private lemma imagModulus_E_identity {k c J X Wφ sc : ℝ} (hc2 : c ^ 2 = 1 + k ^ 2) (hc : 0 < c) (hW : 0 < Wφ)
     (hX : X = k ^ 2 * sc / (c * Wφ)) :
     (1 + k ^ 2) * J - k ^ 2 * sc / Wφ = (1 / (1 / c)) * (c * J - X) := by
   rw [hX, ← hc2]; field_simp
 
 /-- Identity under the stated parameter and domain assumptions: `c / a * w = c * w⁻¹`. -/
-lemma p19lR1_alg1 {a w : ℝ} (hw : 0 < w) (h : w ^ 2 = a) (c : ℝ) : c / a * w = c * w⁻¹ := by
+private lemma div_mul_sqrt_eq_mul_inv {a w : ℝ} (hw : 0 < w) (h : w ^ 2 = a) (c : ℝ) : c / a * w = c * w⁻¹ := by
   rw [← h]; field_simp
 
 /-- Identity under the stated parameter and domain assumptions: `c / a * w⁻¹ = c * (w ^ 3)⁻¹`. -/
-lemma p19lR1_alg2 {a w : ℝ} (hw : 0 < w) (h : w ^ 2 = a) (c : ℝ) :
+private lemma div_mul_inv_sqrt_eq_mul_inv_cube {a w : ℝ} (hw : 0 < w) (h : w ^ 2 = a) (c : ℝ) :
     c / a * w⁻¹ = c * (w ^ 3)⁻¹ := by
   rw [← h]; field_simp
 
 /-- Identity under the stated parameter and domain assumptions: `c / (1 + k ^ 2 * s ^ 2) * ((1 -
 (α2 + k ^ 2) / (1 + k ^ 2) * (c * s / W) ^ 2)⁻¹ * W) = c * W / (1 - α2 * s ^ 2)`. -/
-lemma p19lR1_alg_P {k α2 c W s : ℝ} (hc2 : c ^ 2 = 1 + k ^ 2) (hW : 0 < W)
+private lemma imagModulus_Pi_jacobian_identity {k α2 c W s : ℝ} (hc2 : c ^ 2 = 1 + k ^ 2) (hW : 0 < W)
     (hW2 : W ^ 2 = 1 + k ^ 2 * s ^ 2) (hd : 1 - α2 * s ^ 2 ≠ 0) :
     c / (1 + k ^ 2 * s ^ 2) * ((1 - (α2 + k ^ 2) / (1 + k ^ 2) * (c * s / W) ^ 2)⁻¹ * W) =
       c * W / (1 - α2 * s ^ 2) := by
@@ -387,33 +399,33 @@ lemma p19lR1_alg_P {k α2 c W s : ℝ} (hc2 : c ^ 2 = 1 + k ^ 2) (hW : 0 < W)
   field_simp
 
 /-- Identity under the stated parameter and domain assumptions: `(k / Real.sqrt (1 + k ^ 2)) ^ 2 *
-Real.sin (p19lR1_T k φ) * Real.cos (p19lR1_T k φ) / Real.sqrt (1 - (k / Real.sqrt (1 + k ^ 2))
-^ 2 * Real.sin (p19lR1_T k φ) ^ 2) = k ^ 2 * (Real.sin φ * Real.cos φ) / (Real.sqrt (1 + k ^
+Real.sin (imagModulusAmplitude k φ) * Real.cos (imagModulusAmplitude k φ) / Real.sqrt (1 - (k / Real.sqrt (1 + k ^ 2))
+^ 2 * Real.sin (imagModulusAmplitude k φ) ^ 2) = k ^ 2 * (Real.sin φ * Real.cos φ) / (Real.sqrt (1 + k ^
 2) * Real.sqrt (1 + k ^ 2 * Real.sin φ ^ 2))`. -/
-lemma p19lR1_imod_X (k : ℝ) {φ : ℝ} (hφ1 : φ ≤ π / 2) (hφ0 : 0 ≤ φ) :
-    (k / Real.sqrt (1 + k ^ 2)) ^ 2 * Real.sin (p19lR1_T k φ) * Real.cos (p19lR1_T k φ) /
-        Real.sqrt (1 - (k / Real.sqrt (1 + k ^ 2)) ^ 2 * Real.sin (p19lR1_T k φ) ^ 2) =
+private lemma imagModulus_sin_cos_term_eq (k : ℝ) {φ : ℝ} (hφ1 : φ ≤ π / 2) (hφ0 : 0 ≤ φ) :
+    (k / Real.sqrt (1 + k ^ 2)) ^ 2 * Real.sin (imagModulusAmplitude k φ) * Real.cos (imagModulusAmplitude k φ) /
+        Real.sqrt (1 - (k / Real.sqrt (1 + k ^ 2)) ^ 2 * Real.sin (imagModulusAmplitude k φ) ^ 2) =
       k ^ 2 * (Real.sin φ * Real.cos φ) /
         (Real.sqrt (1 + k ^ 2) * Real.sqrt (1 + k ^ 2 * Real.sin φ ^ 2)) := by
   set c := Real.sqrt (1 + k ^ 2) with hc
   set w := Real.sqrt (1 + k ^ 2 * Real.sin φ ^ 2) with hw
   have hc0 : 0 < c := Real.sqrt_pos.2 (by positivity)
   have hc2 : c ^ 2 = 1 + k ^ 2 := Real.sq_sqrt (by positivity)
-  have hw0 : 0 < w := Real.sqrt_pos.2 (p19lR1_w_pos k φ)
-  have hw2 : w ^ 2 = 1 + k ^ 2 * Real.sin φ ^ 2 := Real.sq_sqrt (p19lR1_w_pos k φ).le
-  have hs : Real.sin (p19lR1_T k φ) = c * Real.sin φ / w := p19lR1_sin_T k φ
+  have hw0 : 0 < w := Real.sqrt_pos.2 (one_add_sq_mul_sin_sq_pos k φ)
+  have hw2 : w ^ 2 = 1 + k ^ 2 * Real.sin φ ^ 2 := Real.sq_sqrt (one_add_sq_mul_sin_sq_pos k φ).le
+  have hs : Real.sin (imagModulusAmplitude k φ) = c * Real.sin φ / w := sin_imagModulusAmplitude k φ
   have hcφ : 0 ≤ Real.cos φ := Real.cos_nonneg_of_mem_Icc ⟨by linarith [Real.pi_pos], hφ1⟩
-  have hcos : Real.cos (p19lR1_T k φ) = Real.cos φ / w := by
-    have h1 : Real.cos (p19lR1_T k φ) = Real.sqrt (1 - (c * Real.sin φ / w) ^ 2) := by
-      rw [p19lR1_T, Real.cos_arcsin]
+  have hcos : Real.cos (imagModulusAmplitude k φ) = Real.cos φ / w := by
+    have h1 : Real.cos (imagModulusAmplitude k φ) = Real.sqrt (1 - (c * Real.sin φ / w) ^ 2) := by
+      rw [imagModulusAmplitude, Real.cos_arcsin]
     have h2 : 1 - (c * Real.sin φ / w) ^ 2 = (Real.cos φ / w) ^ 2 := by
       rw [div_pow, div_pow, mul_pow, hc2]
       field_simp
       rw [hw2]
       nlinarith [Real.sin_sq_add_cos_sq φ]
     rw [h1, h2, Real.sqrt_sq (div_nonneg hcφ hw0.le)]
-  have hsq : Real.sqrt (1 - (k / c) ^ 2 * Real.sin (p19lR1_T k φ) ^ 2) = w⁻¹ := by
-    have h2 : 1 - (k / c) ^ 2 * Real.sin (p19lR1_T k φ) ^ 2 = (w⁻¹) ^ 2 := by
+  have hsq : Real.sqrt (1 - (k / c) ^ 2 * Real.sin (imagModulusAmplitude k φ) ^ 2) = w⁻¹ := by
+    have h2 : 1 - (k / c) ^ 2 * Real.sin (imagModulusAmplitude k φ) ^ 2 = (w⁻¹) ^ 2 := by
       rw [hs, div_pow, div_pow, mul_pow, hc2]
       field_simp
       rw [hw2]
@@ -444,25 +456,25 @@ theorem incEllInt_imaginary_modulus {k φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : �
   intro κ κ' θ α12
   set c := Real.sqrt (1 + k ^ 2) with hc
   set W : ℝ → ℝ := fun u => Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2) with hW
-  have hθ : θ = p19lR1_T k φ := rfl
+  have hθ : θ = imagModulusAmplitude k φ := rfl
   have hκ : κ = k / c := rfl
   have hκ' : κ' = 1 / c := rfl
   have hc0 : 0 < c := Real.sqrt_pos.2 (by positivity)
   have hc2 : c ^ 2 = 1 + k ^ 2 := Real.sq_sqrt (by positivity)
-  have hW0 : ∀ u, 0 < W u := fun u => Real.sqrt_pos.2 (p19lR1_w_pos k u)
-  have hW2 : ∀ u, W u ^ 2 = 1 + k ^ 2 * Real.sin u ^ 2 := fun u => Real.sq_sqrt (p19lR1_w_pos k u).le
+  have hW0 : ∀ u, 0 < W u := fun u => Real.sqrt_pos.2 (one_add_sq_mul_sin_sq_pos k u)
+  have hW2 : ∀ u, W u ^ 2 = 1 + k ^ 2 * Real.sin u ^ 2 := fun u => Real.sq_sqrt (one_add_sq_mul_sin_sq_pos k u).le
   have hpt : ∀ u : ℝ, (1 - (I * k) ^ 2 * (Real.sin u : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) =
         (((W u)⁻¹ : ℝ) : ℂ) ∧
       (1 - (I * k) ^ 2 * (Real.sin u : ℂ) ^ 2) ^ (1 / 2 : ℂ) = ((W u : ℝ) : ℂ) ∧
-      (1 - ((κ : ℝ) : ℂ) ^ 2 * (Real.sin (p19lR1_T k u) : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) =
+      (1 - ((κ : ℝ) : ℂ) ^ 2 * (Real.sin (imagModulusAmplitude k u) : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) =
         ((W u : ℝ) : ℂ) ∧
-      (1 - ((κ : ℝ) : ℂ) ^ 2 * (Real.sin (p19lR1_T k u) : ℂ) ^ 2) ^ (1 / 2 : ℂ) =
-        (((W u)⁻¹ : ℝ) : ℂ) := p19lR1_imod_pt k
+      (1 - ((κ : ℝ) : ℂ) ^ 2 * (Real.sin (imagModulusAmplitude k u) : ℂ) ^ 2) ^ (1 / 2 : ℂ) =
+        (((W u)⁻¹ : ℝ) : ℂ) := imagModulus_cpow_pointwise k
   have hsub : ∀ g : ℝ → ℂ, ∫ x in (0 : ℝ)..θ, g x = ∫ u in (0 : ℝ)..φ,
-      ((c / (1 + k ^ 2 * Real.sin u ^ 2) : ℝ) : ℂ) * g (p19lR1_T k u) :=
-    p19lR1_T_subst k hφ0 hφ1
+      ((c / (1 + k ^ 2 * Real.sin u ^ 2) : ℝ) : ℂ) * g (imagModulusAmplitude k u) :=
+    integral_imagModulusAmplitude_subst k hφ0 hφ1
   have hθ0 : 0 ≤ θ := by
-    rw [hθ, p19lR1_T]
+    rw [hθ, imagModulusAmplitude]
     exact Real.arcsin_nonneg.2 (div_nonneg (mul_nonneg hc0.le
       (Real.sin_nonneg_of_nonneg_of_le_pi hφ0 (by linarith [Real.pi_pos]))) (hW0 φ).le)
   have hθ1 : θ ≤ π / 2 := Real.arcsin_le_pi_div_two _
@@ -474,7 +486,7 @@ theorem incEllInt_imaginary_modulus {k φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : �
     rw [incEllIntFk_ofReal_eq_integral, hsub]
     refine intervalIntegral.integral_congr fun u _ => ?_
     rw [(hpt u).2.2.1, ← ofReal_mul]
-    exact congrArg ofReal (p19lR1_alg1 (hW0 u) (hW2 u) c)
+    exact congrArg ofReal (div_mul_sqrt_eq_mul_inv (hW0 u) (hW2 u) c)
   refine ⟨?_, ?_, ?_⟩
   · rw [hF1, hF2, intervalIntegral.integral_ofReal, intervalIntegral.integral_ofReal,
       intervalIntegral.integral_const_mul, ← ofReal_mul, hκ']
@@ -484,7 +496,7 @@ theorem incEllInt_imaginary_modulus {k φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : �
       have : (1 - (I * (k : ℂ)) ^ 2) = ((1 + k ^ 2 : ℝ) : ℂ) := by
         rw [mul_pow, I_sq]; push_cast; ring
       rw [this]; exact ofReal_mem_slitPlane.2 (by positivity)
-    have hcube := p19lR1_integral_cube hslit φ
+    have hcube := integral_inv_ellDelta_cube hslit φ
     set J := ∫ u in (0 : ℝ)..φ, ((W u ^ 3)⁻¹ : ℝ) with hJ
     have hJ' : (∫ θ in (0 : ℝ)..φ, (1 - (I * (k : ℂ)) ^ 2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
         (1 - (I * (k : ℂ)) ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) = (J : ℂ) := by
@@ -497,7 +509,7 @@ theorem incEllInt_imaginary_modulus {k φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : �
       congr 1
       have := (hW0 u).ne'
       field_simp
-    have hΔφ : p19lR1_Δ (I * k) φ = (W φ : ℂ) := (hpt φ).2.1
+    have hΔφ : ellDelta (I * k) φ = (W φ : ℂ) := (hpt φ).2.1
     have hEφ : incEllIntEk φ (I * k) =
         (((1 + k ^ 2) * J - k ^ 2 * (Real.sin φ * Real.cos φ) / W φ : ℝ) : ℂ) := by
       have h1k : (1 : ℂ) - (I * k) ^ 2 = ((1 + k ^ 2 : ℝ) : ℂ) := by
@@ -514,11 +526,11 @@ theorem incEllInt_imaginary_modulus {k φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : �
         ← intervalIntegral.integral_ofReal]
       refine intervalIntegral.integral_congr fun u _ => ?_
       rw [(hpt u).2.2.2, ← ofReal_mul]
-      exact congrArg ofReal (p19lR1_alg2 (hW0 u) (hW2 u) c)
+      exact congrArg ofReal (div_mul_inv_sqrt_eq_mul_inv_cube (hW0 u) (hW2 u) c)
     have hX : κ ^ 2 * Real.sin θ * Real.cos θ / Real.sqrt (1 - κ ^ 2 * Real.sin θ ^ 2) =
-        k ^ 2 * (Real.sin φ * Real.cos φ) / (c * W φ) := p19lR1_imod_X k hφ1 hφ0
+        k ^ 2 * (Real.sin φ * Real.cos φ) / (c * W φ) := imagModulus_sin_cos_term_eq k hφ1 hφ0
     rw [hEφ, hEθ, hX, hκ']
-    have := p19lR1_alg_E (J := J) (X := k ^ 2 * (Real.sin φ * Real.cos φ) / (c * W φ))
+    have := imagModulus_E_identity (J := J) (X := k ^ 2 * (Real.sin φ * Real.cos φ) / (c * W φ))
       (sc := Real.sin φ * Real.cos φ) hc2 hc0 (hW0 φ) rfl
     rw [this]
     push_cast; ring
@@ -536,19 +548,19 @@ theorem incEllInt_imaginary_modulus {k φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : �
       · nlinarith [Real.sin_sq_le_one θ]
     have hP1 : incEllIntPik φ α2 (I * k) =
         ∫ u in (0 : ℝ)..φ, (((1 - α2 * Real.sin u ^ 2)⁻¹ * (W u)⁻¹ : ℝ) : ℂ) := by
-      rw [p19lR1_Pi_ofReal_of_lt hφ0 hφ1 hα']
+      rw [incEllIntPik_ofReal_eq_integral_of_lt hφ0 hφ1 hα']
       refine intervalIntegral.integral_congr fun u _ => ?_
       rw [(hpt u).1, show (1 - (α2 : ℂ) * (Real.sin u : ℂ) ^ 2)⁻¹ =
         (((1 - α2 * Real.sin u ^ 2)⁻¹ : ℝ) : ℂ) by push_cast; ring, ← ofReal_mul]
     have hP2 : incEllIntPik θ α12 κ =
         ∫ u in (0 : ℝ)..φ, ((c * W u / (1 - α2 * Real.sin u ^ 2) : ℝ) : ℂ) := by
-      rw [p19lR1_Pi_ofReal_of_lt hθ0 hθ1 hα12, hsub]
+      rw [incEllIntPik_ofReal_eq_integral_of_lt hθ0 hθ1 hα12, hsub]
       refine intervalIntegral.integral_congr fun u _ => ?_
-      have hs : Real.sin (p19lR1_T k u) = c * Real.sin u / W u := p19lR1_sin_T k u
-      rw [(hpt u).2.2.1, show (1 - (α12 : ℂ) * (Real.sin (p19lR1_T k u) : ℂ) ^ 2)⁻¹ =
-        (((1 - α12 * Real.sin (p19lR1_T k u) ^ 2)⁻¹ : ℝ) : ℂ) by push_cast; ring,
+      have hs : Real.sin (imagModulusAmplitude k u) = c * Real.sin u / W u := sin_imagModulusAmplitude k u
+      rw [(hpt u).2.2.1, show (1 - (α12 : ℂ) * (Real.sin (imagModulusAmplitude k u) : ℂ) ^ 2)⁻¹ =
+        (((1 - α12 * Real.sin (imagModulusAmplitude k u) ^ 2)⁻¹ : ℝ) : ℂ) by push_cast; ring,
         ← ofReal_mul, ← ofReal_mul, hs]
-      exact congrArg ofReal (p19lR1_alg_P hc2 (hW0 u) (hW2 u) (hden u).ne')
+      exact congrArg ofReal (imagModulus_Pi_jacobian_identity hc2 (hW0 u) (hW2 u) (hden u).ne')
     have hBc : Continuous fun u => c * (W u)⁻¹ := by
       refine continuous_const.mul (Continuous.inv₀ ?_ fun u => (hW0 u).ne')
       rw [hW]; fun_prop
@@ -562,7 +574,7 @@ theorem incEllInt_imaginary_modulus {k φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : �
         ← intervalIntegral.integral_add ((hBc.intervalIntegrable _ _).const_mul _)
           ((hCc.intervalIntegrable _ _).const_mul _), ← intervalIntegral.integral_const_mul]
       refine intervalIntegral.integral_congr fun u _ => ?_
-      exact p19lR1_alg_Pi hc0 (hW0 u) hc2 (hW2 u) (hden u).ne' hαk
+      exact imagModulus_Pi_integrand_identity hc0 (hW0 u) hc2 (hW2 u) (hden u).ne' hαk
     rw [hP1, hF2, hP2, intervalIntegral.integral_ofReal, intervalIntegral.integral_ofReal,
       intervalIntegral.integral_ofReal, key]
     push_cast; ring

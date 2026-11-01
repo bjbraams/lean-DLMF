@@ -8,12 +8,30 @@ module
 public import DLMF.ExpIntegrals.AnalyticProperties
 
 /-!
-# Logarithmic continuation and boundary values, DLMF §§6.4–6.5
+# Analytic continuation and boundary values (DLMF §§6.4–6.5)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs.
+Continuation of `E₁`, `Ci`, `Chi` and the auxiliary functions `f`, `g` to the logarithmic plane
+(the Riemann surface of `ln z`, parametrized by `w = ln z`), the boundary values of `E₁` on the
+negative real axis, and the relations of `Ei` to `E₁`, `Shi` and `Chi`.
+
+## Main definitions
+
+* `expIntE1OnLog`: `E₁` on the logarithmic plane (DLMF 6.4.1).
+* `cosIntOnLog`, `coshIntOnLog`, `expIntAuxFOnLog`, `expIntAuxGOnLog`: `Ci`, `Chi`, `f`, `g` on
+  the logarithmic plane.
+
+## Main results
+
+* `expIntE1OnLog_principal`, `expIntE1OnLog_monodromy`, `expIntE1OnLog_halfTurn`: the principal
+  branch and the continuation formulas of `E₁` (DLMF 6.4.1–6.4.3).
+* `cosIntOnLog_halfTurn`, `coshIntOnLog_halfTurn`, `expIntAuxFOnLog_halfTurn`,
+  `expIntAuxGOnLog_halfTurn`: DLMF 6.4.4–6.4.7.
+* `expIntE1_negative_boundary`, `expIntEi_boundary_average`: the boundary values of `E₁` on the
+  negative real axis and `Ei` as their average (DLMF 6.5.1, 6.5.2).
+* `sinhInt_eq_Ei`, `coshInt_eq_Ei`: `Shi` and `Chi` in terms of `Ei` and `E₁` (DLMF 6.5.3,
+  6.5.4).
+* `expIntAux_laplace_hasIntegralAtTop`: Laplace representations of `f` and `g` on the closed
+  right half-plane minus the origin.
 -/
 
 @[expose] public noncomputable section

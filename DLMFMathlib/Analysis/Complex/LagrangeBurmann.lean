@@ -13,23 +13,23 @@ public import Mathlib.Analysis.Complex.CauchyIntegral
 Let `F` and `Φ` be holomorphic on a closed disc `|t| ≤ r`. For small `z` the equation
 `t = z Φ(t)` has a simple root `w` in the disc, and the Lagrange–Bürmann formula reads
 `F(w) / (1 - z Φ'(w)) = ∑ₙ zⁿ [tⁿ] (F Φⁿ)`.
-We prove it in the following form, which avoids the argument principle: assume a
-factorization `t - z Φ(t) = (t - w) g(t)` on the circle `|t| = r` with `|w| < r` and with `g`
-holomorphic and zero-free on the closed disc (then `g(w) = 1 - z Φ'(w)`).
-Writing `[tⁿ](F Φⁿ)` as a Cauchy integral, summing the geometric series
-`∑ (z Φ(t)/t)ⁿ = t / (t - z Φ(t))` under the integral (it converges uniformly when
-`|z Φ| ≤ ρ < r` on the circle) and applying Cauchy's integral formula to `F/g` gives
+It is stated in a form which avoids the argument principle: assume a factorization
+`t - z Φ(t) = (t - w) g(t)` on the circle `|t| = r` with `|w| < r` and with `g` holomorphic and
+zero-free on the closed disc (then `g(w) = 1 - z Φ'(w)`).
 
-* `Complex.lagB_hasSum_iteratedDeriv`:
+## Main results
+
+* `Complex.lagB_hasSum_iteratedDeriv`: the Lagrange–Bürmann formula in coefficient form,
   `∑ₙ zⁿ (F Φⁿ)⁽ⁿ⁾(0)/n! = F(w)/g(w)`.
-
-We also record the tool for extending a power-series identity from a small disc to the disc of
-holomorphy of its sum:
-
 * `Complex.lagB_hasSum_of_differentiableOn`: if `f` is holomorphic on `|z| < R` and
   `f(z) = ∑ cₙ zⁿ` for `|z| < δ`, then the identity holds for `|z| < R`.
 
-The proofs use Mathlib's Cauchy integral formula (`DiffContOnCl.circleIntegral_sub_inv_smul`,
+## Implementation notes
+
+Writing `[tⁿ](F Φⁿ)` as a Cauchy integral, the geometric series
+`∑ (z Φ(t)/t)ⁿ = t / (t - z Φ(t))` is summed under the integral (it converges uniformly when
+`|z Φ| ≤ ρ < r` on the circle), and Cauchy's integral formula is applied to `F/g`. The proofs
+use Mathlib's Cauchy integral formula (`DiffContOnCl.circleIntegral_sub_inv_smul`,
 `DiffContOnCl.circleIntegral_one_div_sub_center_pow_smul`), dominated convergence for interval
 integrals, and uniqueness of power series (`HasFPowerSeriesOnBall.exchange_radius`).
 -/

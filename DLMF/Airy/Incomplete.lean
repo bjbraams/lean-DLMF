@@ -9,10 +9,24 @@ public import DLMF.Airy.Framework
 public import DLMF.Airy.IntegralRepresentations
 
 /-!
-# Incomplete Airy functions, DLMF §9.14
+# Incomplete Airy functions (DLMF §9.14)
 
-Statements acquired from the NIST DLMF, checked 2026-10-19.
-New statements are initially admitted; existing proved Airy results are retained.
+Incomplete versions of the contour integral 9.5.4 for `Ai`, with one endpoint finite, their
+derivatives with respect to the finite endpoint and the recovery of the complete integral.
+
+## Main definitions
+
+* `incompleteAiryAi`: the contour integral with finite upper endpoint `a`.
+* `incompleteAiryAiLower`: the integral with finite lower endpoint and upper endpoint at
+  infinity.
+
+## Main results
+
+* `incompleteAiryAi_endpoint_derivative`, `incompleteAiryAiLower_endpoint_derivative`:
+  differentiation in the finite endpoint.
+* `incompleteAiryAi_complete_limit`, `incompleteAiryAiLower_complete_limit`: recovery of the
+  complete Airy contour integral.
+* `incompleteAiryAi_split`: splitting the complete contour at a finite point.
 -/
 
 @[expose] public noncomputable section

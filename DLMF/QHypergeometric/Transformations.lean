@@ -10,12 +10,36 @@ public import DLMF.QHypergeometric.Convergence
 /-!
 # Further basic hypergeometric transformations (DLMF §17.9)
 
-The functions are actual series, with their common convergence regions stated.
-Terminating transformations retain the full natural truncation parameter; no
-condition on its size is imposed. Lower parameters and denominator products are
-excluded from the q-lattice where the printed quotients have poles. The general
-phase factor is the integer exponent in `Basic`, including the 3-phi-1 case.
-Watson's terminating transformation is reused directly from `DLMF.Bailey`.
+This file proves the transformation formulas of DLMF §17.9 for `₂φ₁`, `₃φ₂` and `₄φ₃`
+series, including Sears' transformations, the nonterminating Watson transformation, quadratic
+transformations and mixed-base formulas.
+
+## Main definitions
+
+* `qProductRatio`, `qProductRatioInf`: quotients of finite and infinite `q`-products.
+
+## Main results
+
+* `qPhi2_to_qPhi2_2`, `qPhi2_terminating_to_qPhi3_1`, `qPhi2_two_qPhi3_2`,
+  `qPhi2_two_qPhi3_2_alternative`: DLMF 17.9.1–17.9.3.
+* `qPhi2_terminating_reverse`, `qPhi2_terminating_sears`: DLMF 17.9.4–17.9.5.
+* `qPhi3_sears_first`, `qPhi3_sears_second`: Sears' transformations (DLMF 17.9.6–17.9.7).
+* `qPhi3_terminating_first`, `qPhi3_terminating_second`, `qPhi3_terminating_third`,
+  `qPhi3_terminating_fourth`: DLMF 17.9.8–17.9.11.
+* `qPhi3_three_term`, `qPhi3_connection`: DLMF 17.9.12–17.9.13.
+* `qPhi4_balanced_transformations`: DLMF 17.9.14.
+* `nonterminating_watson`: DLMF 17.9.16.
+* `qPhi3_terminating_quadratic`, `qPhi4_square`: DLMF 17.9.17–17.9.18.
+* `mixed_base_even_odd`, `mixed_base_general`: DLMF 17.9.19–17.9.20.
+
+## Implementation notes
+
+The functions are actual series, with their common convergence regions stated. Terminating
+transformations retain the full natural truncation parameter; no condition on its size is
+imposed. Lower parameters and denominator products are excluded from the `q`-lattice where the
+printed quotients have poles. The general phase factor is the integer exponent of
+`DLMF.QHypergeometric.Basic`, including the `₃φ₁` case. Watson's terminating transformation is
+in `DLMF.Bailey`.
 -/
 
 @[expose] public noncomputable section

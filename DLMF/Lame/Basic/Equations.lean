@@ -12,6 +12,28 @@ public import DLMF.Elliptic.Basic.Amplitude
 
 /-!
 # Lamé equations and their alternative normalizations
+
+Predicates for Lamé's equation (DLMF 29.2.1) and its other forms in §29.2, and for the Lamé
+wave equation (DLMF 29.11.1).
+
+## Main definitions
+
+* `IsLameSolutionOn`: Lamé's equation 29.2.1 over `ℂ` on a set `U`.
+* `IsLameAlgebraicSolutionOn`: the algebraic form 29.2.2 in `ξ = sn²(z, k)`.
+* `IsLameWeierstrassSolutionOn`, `IsLameWeierstrassAlgebraicSolutionOn`: the Weierstrass forms
+  29.2.9 and 29.2.10.
+* `IsLameWaveSolutionOn`: the Lamé (ellipsoidal) wave equation 29.11.1.
+* `Real.IsLameSolution`: Lamé's equation 29.2.1 for real `x`.
+* `Real.IsLameTrigSolution`: the trigonometric form 29.2.4.
+* `Real.lamePhi`: the variable `φ = π/2 - am(x, k)` of DLMF 29.2.5.
+
+## Implementation notes
+
+`IsLameSolutionOn h ν k w U` uses the project's complex `sn(z, k) = jacobiSnk z k` (modulus
+`k`); like `DLMF.Painleve.IsPIIOn` it records genuine differentiability of `w` and `w'`, so
+totalized derivatives cannot make a nonsolution satisfy the equation. `Real.IsLameSolution`
+uses the real-variable `sn = DLMF.Elliptic.Real.jacobiSnm x (k²)` (parameter `m = k²`), which
+agrees with the complex `sn` for `0 < k < 1` (`jacobiSnk_ofReal`).
 -/
 
 @[expose] public noncomputable section

@@ -12,12 +12,21 @@ public import DLMF.Gamma.Asymptotics
 public import ToMathlib.Analysis.Complex.Carlson
 
 /-!
-# Carlson bounds for hypergeometric summations
+# Carlson's theorem and Gamma bounds for hypergeometric summations
 
-Terminating sums and analytic bounds prepare Carlson continuation for hypergeometric identities.
+Growth bounds for `Γ` and `1/Γ` on vertical strips and a periodic form of Carlson's theorem,
+which turn terminating summation identities into nonterminating ones.
 
-Source references and common attribution are retained in
-`DLMF.Hypergeometric.Identities`.
+## Main results
+
+* `CarlsonAux.eq_zero_of_periodic_of_bound`: Carlson's theorem for periodic functions.
+* `CarlsonAux.exists_norm_Gamma_le_strip`, `CarlsonAux.exists_norm_recip_Gamma_le_strip`:
+  uniform vertical bounds for `Γ` and `1/Γ` on strips.
+* `CarlsonAux.summable_norm_Gamma_ratio`, `CarlsonAux.isBigO_gaussHGCoeff`: growth of Gamma
+  ratios and of the Gauss coefficients.
+* `kummer_theorem`: Kummer's theorem `₂F₁(a,b;1+a-b;-1)`, DLMF 15.4.26.
+
+See `DLMF.Hypergeometric.Identities` for the overview.
 -/
 
 @[expose] public section

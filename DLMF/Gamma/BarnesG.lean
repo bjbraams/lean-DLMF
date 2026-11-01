@@ -11,5 +11,7 @@ public import DLMF.Gamma.BarnesG.BinetAndAsymptotics
 /-!
 # Barnes G-function (DLMF §5.17)
 
-The Weierstrass product 5.17.3 is taken as the definition of `G(z+1)`.
+This umbrella collects the Barnes G-function, defined by the Weierstrass product 5.17.3 for
+`G(z+1)`, with its functional equation, integer values, the integral formula for `ln G(x + 1)`,
+the Glaisher–Kinkelin constant and the asymptotic expansion of `ln G`.
 -/

@@ -11,20 +11,40 @@ public import DLMF.EllipticIntegrals.Symmetric
 /-!
 # Symmetric elliptic integrals: Taylor and related series (DLMF §19.19)
 
-The homogeneous hypergeometric polynomial `T_N(𝐛, 𝐳)` (19.19.1), the multivariate
-hypergeometric series (19.19.2), (19.19.3) of `R_{-a}(𝐛; 𝐳)`, the elementary symmetric functions
-`E_s(𝐳)` (19.19.4, Mathlib's `Multiset.esymm`), the form (19.19.5) of `T_N(½, 𝐳)`, `R_J` as an
-`R`-function with five equal parameters (19.19.6), and the expansion (19.19.7)–(19.19.8) about the
-mean `A`.
+The homogeneous hypergeometric polynomial `T_N(𝐛, 𝐳)`, the multivariate hypergeometric series
+of `R_{-a}(𝐛; 𝐳)`, the elementary symmetric functions `E_s(𝐳)`, `R_J` as an `R`-function with
+five equal parameters, and the expansion about the mean `A`.
+
+## Main definitions
+
+* `symEllIntT`: the homogeneous hypergeometric polynomial `T_N(𝐛, 𝐳)` (DLMF 19.19.1).
+* `symEllIntE`: the elementary symmetric function `E_s(𝐳)` (DLMF 19.19.4; Mathlib's
+  `Multiset.esymm`).
+
+## Main results
+
+* `symEllIntR_hasSum_T`, `symEllIntR_hasSum_T_last`: the series of `R_{-a}(𝐛; 𝐳)` in
+  `T_N(𝐛, 𝟏 - 𝐳)` (DLMF 19.19.2, 19.19.3).
+* `prod_one_add_mul_eq_sum_symEllIntE`: the generating function of `E_s` (DLMF 19.19.4).
+* `symEllIntT_half`: `T_N(½, 𝐳)` in terms of the `E_s` (DLMF 19.19.5).
+* `symEllIntRJ_eq_symEllIntR_five`: `R_J(x, y, z, p) = R_{-3/2}(½, ½, ½, ½, ½; x, y, z, p, p)`
+  (DLMF 19.19.6).
+* `symEllIntR_half_hasSum_mean`, `symEllIntE_one_mean`: the expansion about the mean
+  (DLMF 19.19.7, 19.19.8).
+* `carlsonRPolynomialNumerator_eq_factorial_mul_symEllIntT`: the normalization connecting
+  `T_N` with Carlson's Pochhammer numerator.
+
+## Implementation notes
 
 Series are stated with `HasSum` (absolute convergence holds in the stated discs). Pochhammer
 symbols are `(ascPochhammer ℂ N).eval a`; DLMF's `(c)_N` in a denominator is assumed nonzero
-through `0 < re c`.
+through `0 < re c`. For `n = 2`, (19.19.3) is a Gauss series (see (19.25.43), (15.2.1);
+19.19.p3). The remark 19.19.p5 on the number of terms of `T_N(½, 𝐙)` when `E₁(𝐙) = 0` (at most
+one term for `N ≤ 5` for `R_F`, …) is a computational remark and is not formalized.
 
-## Prose
-* 19.19.p3: for `n = 2`, (19.19.3) is a Gauss series (see (19.25.43), (15.2.1)); commentary.
-* 19.19.p5: the remark on the number of terms of `T_N(½, 𝐙)` when `E₁(𝐙) = 0` (at most one term
-  for `N ≤ 5` for `R_F`, …) is a computational remark, not formalized.
+## References
+
+* NIST DLMF §19.19.
 -/
 
 @[expose] public noncomputable section
@@ -116,7 +136,7 @@ theorem symEllIntR_hasSum_T {n : ℕ} (a : ℂ) (b z : Fin n → ℂ) (hc : 0 < 
 
 /-- Complex homogeneity on the right half-plane (helper): `R_{-a}(𝐛; μ𝐳) = μ^{-a} R_{-a}(𝐛; 𝐳)`
 for `ℜ μ > 0` and `ℜ zᵢ > 0`. -/
-lemma p19sR1_symEllIntR_mul_of_re_pos {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {μ : ℂ}
+private lemma symEllIntR_mul_of_re_pos {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {μ : ℂ}
     {z : ι → ℂ} (hz : ∀ i, 0 < (z i).re) (hμ : 0 < μ.re) :
     symEllIntR a b (fun i => μ * z i) = μ ^ (-a) * symEllIntR a b z := by
   refine symEllIntR_mul a b (fun i => mem_slitPlane_iff.mpr (Or.inl (hz i)))
@@ -126,7 +146,7 @@ lemma p19sR1_symEllIntR_mul_of_re_pos {ι : Type*} [Fintype ι] (a : ℂ) (b : �
   constructor <;> linarith [Real.pi_pos]
 
 /-- Helper for 19.19.3: `T_N` with vanishing last variable drops that variable. -/
-lemma p19sR1_symEllIntT_last_zero {n : ℕ} (N : ℕ) (b v : Fin (n + 1) → ℂ)
+private lemma symEllIntT_last_zero {n : ℕ} (N : ℕ) (b v : Fin (n + 1) → ℂ)
     (hv : v (Fin.last n) = 0) :
     symEllIntT N b v = symEllIntT N (fun j : Fin n => b j.castSucc) (fun j => v j.castSucc) := by
   unfold symEllIntT
@@ -210,7 +230,7 @@ theorem symEllIntR_hasSum_T_last {n : ℕ} (a : ℂ) (b : Fin (n + 1) → ℂ) (
   rw [hzw, symEllIntR_mul a b hws hzn harg']
   have H := (symEllIntR_hasSum_T a b w hc hw1).mul_left (μ ^ (-a))
   convert H using 2 with N
-  rw [p19sR1_symEllIntT_last_zero N b (fun j => 1 - w j) (by simp only [hwl]; ring)]
+  rw [symEllIntT_last_zero N b (fun j => 1 - w j) (by simp only [hwl]; ring)]
 
 /-- DLMF 19.19.5: `T_N(½, 𝐳) = ∑ (-1)^{M+N} (½)_M E₁^{m₁}⋯Eₙ^{mₙ} / (m₁!⋯mₙ!)`, over
 `m₁, …, mₙ ≥ 0` with `∑ j mⱼ = N`, `M = ∑ mⱼ` (here `mⱼ` is indexed by `j - 1 : Fin n`). -/
@@ -233,12 +253,12 @@ theorem symEllIntRJ_eq_symEllIntR_five {x y z p : ℂ} (hx : x ∈ slitPlane) (h
     intro i; fin_cases i <;> assumption
   rw [symEllIntRJ_eq_symEllIntR hx hy hz hp,
     symEllIntR_eq_integral (a' := 1) (by norm_num) (by norm_num)
-      (by simp [Fin.sum_univ_four]; norm_num) (ei19c_slit4 hx hy hz hp),
+      (by simp [Fin.sum_univ_four]; norm_num) (vec4_mem_carlsonRSlitDomain hx hy hz hp),
     symEllIntR_eq_integral (a' := 1) (by norm_num) (by norm_num)
       (by simp; norm_num) h5]
   congr 1
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
-  have hpt : (t : ℂ) + p ≠ 0 := ei19c_add_ne_zero ht (Or.inl hp)
+  have hpt : (t : ℂ) + p ≠ 0 := ofReal_add_ne_zero_of_symEllIntArg ht (Or.inl hp)
   simp only [Fin.prod_univ_four, Fin.prod_univ_five, Matrix.cons_val_zero, Matrix.cons_val_one,
     Matrix.cons_val_two, Matrix.cons_val_three, Matrix.cons_val_four, Matrix.head_cons,
     Matrix.tail_cons, cpow_neg_one]

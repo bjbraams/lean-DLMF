@@ -10,10 +10,26 @@ public import DLMF.Airy.ModulusPhase.Representations
 /-!
 # Nicholson representations for Airy moduli
 
-Nicholson integral formulas and remainder estimates for the Airy modulus and derivative modulus.
+Nicholson's integral formula for the Airy modulus `M`, analogous formulas for the derivative
+modulus `N` and for `Ai Ai' + Bi Bi'`, monotonicity consequences (DLMF §9.8(iii)) and signed
+remainder estimates for the expansions of `M²` and `N²` at `-∞` (DLMF §9.8(iv)).
 
-Source references and common attribution are retained in
-`DLMF.Airy.ModulusPhase`.
+## Main definitions
+
+* `airyMod_kernel`, `airyMod_kernel1`, `airyMod_kernel2`: the Nicholson kernels.
+* `airyMod_rem`: the remainder of the exponential series for `e^{-w}`.
+
+## Main results
+
+* `airyMod_sq_eq_integral`: Nicholson's formula `M(x)² = π^{-3/2} ∫₀^∞ e^{xt - t³/12} t^{-1/2} dt`
+  (DLMF 9.11.4).
+* `airyMod_derivSq_eq_integral`, `airyMod_cross_eq_integral`: Nicholson-type formulas for `N²`
+  and `Ai Ai' + Bi Bi'`.
+* `airyMod_sq_strictMono`: `M²` is strictly increasing on `ℝ`.
+* `airyMod_sq_error_bound`, `airyMod_derivSq_error`: error bounds for the expansions of `M²`
+  and `N²` at `-∞`.
+* `airy_modulus_monotone`, `airy_modulus_deriv_monotone`: `M` and `M'` are strictly increasing
+  on `(-∞, 0]` (DLMF §9.8(iii)).
 -/
 
 @[expose] public noncomputable section

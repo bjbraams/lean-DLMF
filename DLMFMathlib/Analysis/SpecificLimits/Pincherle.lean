@@ -10,14 +10,24 @@ public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 /-!
 # Divergent partial sums under a ratio limit, and a Pincherle criterion
 
-* `pinch_norm_sum_tendsto`: if `T n ≠ 0` and `T (n+1) / T n → ρ` with `‖ρ‖ > 1`, then the
-  partial sums `∑_{i<n} T i` tend to infinity in norm. (Unlike
-  `GenContFract.cfConv_norm_sum_tendsto`, no growth factor `q > 2` is needed: the partial sums
-  are compared with `ρ T_n/(ρ-1)`.)
-* `pinch_cfConv_tendsto`: **Pincherle's criterion with a ratio limit.** If `w` is a backward
-  solution `w_k = b_k w_{k+1} + a_{k+1} w_{k+2}` with `w₀ ≠ 0`, all `a_k ≠ 0`, `w_k`
-  eventually nonzero, and `-w_k/(a_{k+1} w_{k+2}) → ρ` with `‖ρ‖ > 1`, then the convergents of
-  `h + a₀/(b₀ + a₁/(b₁ + ⋯))` tend to `h + a₀ w₁/w₀`.
+Partial sums of a sequence with a ratio limit of modulus greater than one diverge, and this
+gives a form of Pincherle's theorem for continued fractions.
+
+## Main results
+
+* `GenContFract.pinch_sum_Ico_le`: tail sums of terms growing at least geometrically are
+  dominated by the last term.
+* `GenContFract.pinch_norm_sum_tendsto`: if `T n ≠ 0` and `T (n+1) / T n → ρ` with
+  `‖ρ‖ > 1`, then the partial sums `∑_{i<n} T i` tend to infinity in norm.
+* `GenContFract.pinch_cfConv_tendsto`: Pincherle's criterion with a ratio limit. If `w` is a
+  backward solution `w_k = b_k w_{k+1} + a_{k+1} w_{k+2}` with `w₀ ≠ 0`, all `a_k ≠ 0`, `w_k`
+  eventually nonzero, and `-w_k/(a_{k+1} w_{k+2}) → ρ` with `‖ρ‖ > 1`, then the convergents
+  of `h + a₀/(b₀ + a₁/(b₁ + ⋯))` tend to `h + a₀ w₁/w₀`.
+
+## Implementation notes
+
+Unlike `GenContFract.cfConv_norm_sum_tendsto`, `pinch_norm_sum_tendsto` needs no growth
+factor `q > 2`: the partial sums are compared with `ρ T_n/(ρ-1)`.
 -/
 
 @[expose] public noncomputable section

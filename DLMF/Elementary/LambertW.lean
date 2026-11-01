@@ -9,12 +9,9 @@ public import DLMF.Elementary.LambertW.BranchesAndCalculus
 public import DLMF.Elementary.LambertW.Series
 
 /-!
-# Lambert W and Wright omega: DLMF §4.13
+# Lambert W and Wright omega
 
-Neither Mathlib nor pinned TauCeti has Lambert W. A branch family is characterized
-by the inverse equation, analytic continuation, branch indexing at `1`, and upper
-boundary limits. Its existence is an explicit admitted acquisition theorem, not an
-axiom or an unspecified opaque function. Lower cut values are separate. Nonprincipal
-branches at zero are totalized to zero, outside all assertions for those branches.
-The Wright omega equation uses DLMF's closed logarithm at its cut values.
+The Lambert W function with all its integer branches, Wright's omega function and the tree
+T-function (DLMF §4.13): branches, calculus, series, asymptotic expansions and integral
+representations. Neither Mathlib nor TauCeti has Lambert W.
 -/

@@ -10,6 +10,27 @@ public import TauCeti.RingTheory.Polynomial.Hermite.Derivative
 
 /-!
 # Canonical parabolic cylinder functions and Weber solution data
+
+This file is the canonical home of Weber's parabolic cylinder functions `U(a,z)` and
+`V(a,z)`, Whittaker's `D_ν(z)`, and the even and odd solutions of Weber's equation
+`w'' = (z²/4 + a) w` (DLMF §12.2, §12.4, §12.7).
+
+## Main definitions
+
+* `pcfEven`, `pcfOdd`: the even and odd solutions `u₁`, `u₂` (DLMF 12.7.12–12.7.13), with
+  derivatives `pcfEvenDeriv`, `pcfOddDeriv`.
+* `pcfU`, `pcfUDeriv`: Weber's function `U(a,z)` (DLMF 12.4.1) and its derivative.
+* `pcfD`: Whittaker's notation `D_ν(z) = U(-ν - 1/2, z)` (DLMF 12.2.5).
+* `pcfVZero`, `pcfVDerivZero`: the initial values `V(a,0)`, `V'(a,0)` (DLMF 12.2.8–12.2.9).
+* `pcfV`, `pcfVDeriv`: Weber's second function `V(a,z)` (DLMF 12.4.2) and its derivative.
+* `IsWeberSol`: a function and a derivative candidate solve Weber's equation.
+* `pcfMoment`: the moments `∫₀^∞ t^c e^{-t²/2 - zt} dt` used in DLMF 12.5.1.
+
+## Implementation notes
+
+`U(a,z)` is the entire solution fixed by its initial values (DLMF 12.2.6–12.2.7). The initial
+values of `V` are written with reciprocal Gamma factors, so that `V(a,z)` is entire in `a`
+and `z`.
 -/
 
 @[expose] public noncomputable section

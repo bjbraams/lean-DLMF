@@ -14,6 +14,15 @@ public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 
 Integral comparison bounds the partial sums of `j^p`, with the logarithmic
 case stated separately. These estimates do not require an asymptotic expansion.
+
+## Main results
+
+* `Real.sum_Ico_rpow_le_one_add_integral`: partial sums of a decreasing power are bounded by one
+  plus its integral.
+* `Real.sum_Ico_rpow_isBigO_one`: partial sums of a summable power are bounded.
+* `Real.sum_Ico_rpow_neg_one_isBigO_log`: harmonic partial sums are `O(log n)`.
+* `Real.sum_Ico_rpow_isBigO`, `Real.sum_Ico_rpow_isBigO_add_one`: the bound `O(n^(p+1))` for
+  `p > -1`, and a bound valid on both sides of the summability threshold.
 -/
 
 @[expose] public noncomputable section

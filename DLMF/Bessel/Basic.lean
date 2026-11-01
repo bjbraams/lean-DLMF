@@ -12,10 +12,16 @@ public import Mathlib.Tactic.CrossRefAttribute
 /-!
 # Bessel functions: definitions
 
-Mathlib provides the first-kind Bessel function. The second-kind and modified functions
-are defined here with their original integer-order limit conventions. Series, derivative
-and differential-equation properties are developed in `DLMF.Bessel.RegularizedSeries`
-and `DLMF.Bessel.Modified`.
+Mathlib provides the first-kind Bessel function `Complex.besselJ`. This file defines the
+second-kind and modified Bessel functions (DLMF §§10.2, 10.25, 10.27), with integer orders
+given by limits in the order parameter. Series, derivative and differential-equation
+properties are in `DLMF.Bessel.RegularizedSeries` and `DLMF.Bessel.Modified`.
+
+## Main definitions
+
+* `besselY`: Weber's function `Y_ν` (DLMF 10.2.3).
+* `besselI`: the modified Bessel function `I_ν` (DLMF 10.25.2).
+* `besselK`: Macdonald's function `K_ν` (DLMF 10.27.4).
 -/
 
 @[expose] public noncomputable section

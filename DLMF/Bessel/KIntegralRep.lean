@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 public import DLMF.Bessel.SecondKind
+public import ToMathlib.Analysis.SpecialFunctions.RamanujanMaster
 
 /-!
 # Integral representations of `K_ν` (DLMF 10.32.9, 10.32.10)
@@ -19,12 +20,35 @@ and for `|ph z| < π/4`,
 
 `K_ν(z) = ½ (z/2)^ν ∫₀^∞ e^{-t - z²/(4t)} t^{-ν-1} dt` (DLMF 10.32.10).
 
+The file also gives uniform and exponential-decay bounds for `K_ν` in the right half-plane.
+
+## Main definitions
+
+* `besselKKernel`: the kernel `exp(-z cosh t + νt)`.
+* `besselKMoment`: the moments `Ψ_j(ν, z) = ∫_ℝ cosh^j t · e^{-z cosh t + νt} dt`.
+* `besselKMomentWronskian`: the combination `z (Φ g' - Φ' g)` with `Φ = Ψ₀`.
+* `kIntQuarterSector`: the open sector `|ph z| < π/4`, written as `|Im z| < Re z`.
+
+## Main results
+
+* `besselKMoment_ode`: the moment integral solves the modified Bessel equation.
+* `besselKMomentWronskian_besselI_eq_two`, `besselKMomentWronskian_besselK_eq_zero`: the
+  Wronskian constants `A(ν) = 2` and `B(ν) = 0`.
+* `besselK_eq_half_integral`: `K_ν(z) = ½ ∫_ℝ e^{-z cosh t + νt} dt`.
+* `besselK_eq_integral_cosh`: `K_ν(z) = ∫₀^∞ e^{-z cosh t} cosh(νt) dt` (DLMF 10.32.9).
+* `besselK_ofReal_eq_integral_schlafli`, `besselK_ofReal_eq_integral_schlafli'`: Schläfli's form
+  for real argument.
+* `besselK_eq_integral_schlafli`, `besselK_eq_integral_schlafli_of_abs_arg_lt`: Schläfli's
+  form for `|ph z| < π/4` (DLMF 10.32.10).
+* `norm_besselK_le`, `norm_besselK_le_exp`: uniform and exponential-decay bounds for `K_ν`.
+
+## Implementation notes
+
 The proof does not use any Laplace-type representation of `K_ν`; this module sits below the
 Tricomi integral representations (`DLMF.Confluent.IntegralRepresentations`), which may import it.
 
-* The moments `Ψ_j(ν, z) = ∫ cosh^j t e^{-z cosh t + νt} dt` are holomorphic in `z` and `ν`, with
-  `∂_z Ψ_j = -Ψ_{j+1}`; an integration by parts shows that `Φ = Ψ₀` solves the modified Bessel
-  equation.
+* The moments `Ψ_j` are holomorphic in `z` and `ν`, with `∂_z Ψ_j = -Ψ_{j+1}`; an integration by
+  parts shows that `Φ = Ψ₀` solves the modified Bessel equation.
 * For each solution `g`, the Wronskian combination `z (Φ g' - Φ' g)` is constant on the right
   half-plane; with `W{K_ν, I_ν} = 1/z` this gives `Φ = A(ν) K_ν - B(ν) I_ν`.
 * The shift `t ↦ t - log(x/2)` and `v = e^t` turn `Φ` into Schläfli's form, whose limit as
@@ -55,11 +79,6 @@ theorem norm_besselKKernel (ν z : ℂ) (t : ℝ) :
 theorem continuous_besselKKernel (ν z : ℂ) : Continuous (besselKKernel ν z) := by
   unfold besselKKernel; fun_prop
 
-/-- Estimate under the stated parameter and domain assumptions: `Real.exp |t| / 2 ≤ Real.cosh t`. -/
-theorem kInt_exp_abs_div_two_le_cosh (t : ℝ) : Real.exp |t| / 2 ≤ Real.cosh t := by
-  rw [← Real.cosh_abs, Real.cosh_eq]
-  linarith [Real.exp_pos (-|t|)]
-
 /-- Estimate under the stated parameter and domain assumptions: `Real.cosh t ≤ Real.exp |t|`. -/
 theorem kInt_cosh_le_exp_abs (t : ℝ) : Real.cosh t ≤ Real.exp |t| := by
   rw [← Real.cosh_abs, Real.cosh_eq]
@@ -69,7 +88,7 @@ theorem kInt_cosh_le_exp_abs (t : ℝ) : Real.cosh t ≤ Real.exp |t| := by
 /-- Estimate under the stated parameter and domain assumptions: `t ^ 2 / 4 ≤ Real.cosh t`. -/
 theorem kInt_sq_div_four_le_cosh (t : ℝ) : t ^ 2 / 4 ≤ Real.cosh t := by
   have h := Real.quadratic_le_exp_of_nonneg (abs_nonneg t)
-  have := kInt_exp_abs_div_two_le_cosh t
+  have := Real.exp_abs_div_two_le_cosh t
   have h2 : |t| ^ 2 = t ^ 2 := sq_abs t
   nlinarith [abs_nonneg t]
 
@@ -460,7 +479,7 @@ theorem kInt_tendsto_regularized0F1_sq_div_four (c : ℂ) :
   simp only [Function.comp_def] at hc
   have := (hc.tendsto 0).mono_left (nhdsWithin_le_nhds (s := Ioi 0))
   have h0 : regularizedHGFun (∅ : Multiset ℂ) {c} (((0 : ℝ) : ℂ) ^ 2 / 4) = 1 / Gamma c := by
-    rw [show (((0 : ℝ) : ℂ) ^ 2 / 4) = 0 by simp, DLMF.Confluent.regularizedHGFun_zero,
+    rw [show (((0 : ℝ) : ℂ) ^ 2 / 4) = 0 by simp, Complex.regularizedHGFun_zero,
       regularizedHGFunCoeff_empty]
     simp
   rwa [h0] at this

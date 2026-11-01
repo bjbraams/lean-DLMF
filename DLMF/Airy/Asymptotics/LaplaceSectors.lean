@@ -14,11 +14,37 @@ public import DLMF.Airy.Bessel
 /-!
 # Airy expansions on rotated Laplace sectors
 
-Rotated Laplace representations, Airy coefficients and normalized exponential expansions on
-closed sectors.
+The coefficients `u_k`, `v_k` and the data of the Airy asymptotic expansions of DLMF §9.7,
+Tricomi's Laplace representations of `Ai` and `Ai'` rotated onto closed sectors, and the
+resulting Poincaré expansions of the normalized `Ai` and `Ai'` in `|arg z| ≤ π - δ`.
 
-Source references and common attribution are retained in
-`DLMF.Airy.Asymptotics`.
+## Main definitions
+
+* `airyU`, `airyV`: the expansion coefficients `u_k`, `v_k` (DLMF 9.7.2).
+* `airyChi`: the Gamma-ratio error multiplier `χ` (DLMF 9.7.3).
+* `AiryKind`, `airyFunction`, `airyPrefactor`, `airyExponentialSum`, `airyRemainder`: the four
+  Airy functions, their exponential prefactors, truncated expansions and exact remainders.
+* `airyOscApprox`, `airyOscError`: truncated oscillatory expansions on the negative axis and
+  their error envelope.
+* `airyRotatedBiApprox`: the expansions of `Bi` on the rays `arg z = ±π/3`.
+* `airyErrorMultiplier`: the piecewise error multiplier of DLMF 9.7.17.
+* `airyTerminator`, `airyOptimalIndex`, `airyHyperRemainder`: terminants, the near-optimal
+  truncation index and the second-level remainder of DLMF 9.7.20–9.7.23.
+
+## Main results
+
+* `airyU_product`, `airyU_recurrence`: product form and recurrence of `u_k` (DLMF 9.7.2).
+* `airyChi_isEquivalent`: `χ(x) ∼ √(πx/2)` (DLMF 9.7.4).
+* `airyRot_hasAsymptoticExpansion`: Watson's lemma for the rotated Airy kernel.
+* `airyRot_expansion`: the generic Airy expansion on a closed rotated sector.
+* `airyRot_airyAi_expansion`, `airyRot_airyAiDeriv_expansion`: Poincaré expansions of the
+  normalized `Ai` and `Ai'` in `|arg z| ≤ π - δ` (DLMF 9.7.5, 9.7.6).
+
+## Implementation notes
+
+On the rays `|arg z| = 2π/3` the phase of `ζ` in `airyErrorMultiplier` is inherited from `z`.
+The terminant `airyTerminator` takes an explicit logarithmic argument to retain the Gamma
+branch.
 -/
 
 @[expose] public noncomputable section
@@ -117,7 +143,7 @@ def airyErrorMultiplier (n : ℕ) (σ : ℝ) (z : ℂ) : ℝ :=
     Real.sqrt (2 * π * (n + σ)) / |Real.cos (3 * arg z / 2)| ^ ((n : ℝ) + σ) + airyChi (n + σ) + 1
 /-- The terminant, with an explicit logarithmic argument to retain the Gamma branch. -/
 @[dlmf 9.7.E22]
-def airyTerminator (p w : ℂ) : ℂ := exp (exp w) / (2 * π) * Gamma p * airyUpperGammaOnLog (1 - p) w
+def airyTerminator (p w : ℂ) : ℂ := exp (exp w) / (2 * π) * Gamma p * upperIncGammaOnLog (1 - p) w
 /-- The near-optimal exponential truncation index. -/
 def airyOptimalIndex (z : ℂ) : ℕ := ⌊2 * ‖airyZetaComplex z‖⌋₊
 /-- Exact second-level remainder after re-expanding the normalized Ai remainder. -/

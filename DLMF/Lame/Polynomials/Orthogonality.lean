@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Lame.Polynomials.Basic
-public import DLMF.Lame.Polynomials.P2pODE
+public import DLMF.Lame.Polynomials.DifferentialEquation
 
 /-!
 # Lamé polynomials: orthogonality and completeness (DLMF §29.14)
@@ -16,19 +16,27 @@ Lamé polynomials by 29.12.1–29.12.8, see `DLMF.Lame.Eigenvalues`), the produc
 `E(s, k²) E(K + it, k²)` (`lameProduct`, 29.14.1, 29.14.4–29.14.10) of each of the eight types
 form an orthogonal and complete system on `[0, K] × [0, K']` for the inner product 29.14.2 with
 weight `w(s, t) = sn²(K + it, k) - sn²(s, k)` (29.14.3); together the eight systems are
-orthogonal and complete on `[0, 4K] × [0, 2K']` (29.14.11). The inner product has no complex
-conjugation (as in DLMF; the Lamé polynomials are real on both segments).
+orthogonal and complete on `[0, 4K] × [0, 2K']` (29.14.11).
 
-Completeness is stated as: a continuous function `g` on the closed rectangle orthogonal to
-every member of the system vanishes on the rectangle.
+## Main results
 
-The orthogonality 29.14.1–29.14.10 for a single type is proved: the Lamé polynomials solve
-Lamé's equation (`DLMF.Lame.p2p_lamePolyEk_isLameSolution`), Green's identity on the segments
-`[0, K]` and `K + i[0, K']` (the boundary Wronskians vanish by the parities of Table 29.12.1)
-gives two linear relations between the one-dimensional integrals, and the eigenvalue pairs
-`(h, ν(ν+1))` of distinct members differ (29.15.3). The orthogonality 29.14.11 of all eight
-systems on `[0, 4K] × [0, 2K']` is proved in the same way, with a symmetry argument for products
-of different parity. The completeness statements are admitted.
+* `lameProduct_orthogonal`, `lameProduct_complete`: orthogonality and completeness of the
+  system of one type, DLMF 29.14.1–29.14.10.
+* `lameProduct_orthogonal_all`, `lameProduct_complete_all`: orthogonality and completeness of
+  the eight systems together, DLMF 29.14.11.
+
+## Implementation notes
+
+The inner product has no complex conjugation (as in DLMF; the Lamé polynomials are real on both
+segments). Completeness is stated as: a continuous function `g` on the closed rectangle
+orthogonal to every member of the system vanishes on the rectangle.
+
+For orthogonality, the Lamé polynomials solve Lamé's equation
+(`DLMF.Lame.lamePolyEk_isLameSolutionOn`), Green's identity on the segments `[0, K]` and
+`K + i[0, K']` (the boundary Wronskians vanish by the parities of Table 29.12.1) gives two
+linear relations between the one-dimensional integrals, and the eigenvalue pairs `(h, ν(ν+1))`
+of distinct members differ (29.15.3). For 29.14.11 a symmetry argument handles products of
+different parity.
 -/
 
 @[expose] public section
@@ -51,17 +59,17 @@ theorem lameProduct_orthogonal (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
     {n m n' m' : ℕ} (hm : m ≤ n) (hm' : m' ≤ n') (hne : (n, m) ≠ (n', m')) :
     lameInner k (Real.compEllIntKm (k ^ 2)) (Real.compEllIntKm (1 - k ^ 2))
       (lameProduct t n m k) (lameProduct t n' m' k) = 0 := by
-  obtain ⟨s1, s2, s3, -, -, -⟩ := p2p_lamePolyEk_sym hk0 hk1 t n m
-  obtain ⟨s1', s2', s3', -, -, -⟩ := p2p_lamePolyEk_sym hk0 hk1 t n' m'
-  obtain ⟨cs, cc, cd⟩ := p2p_sgn_cases t
-  refine p2p_inner_zero_green hk0 hk1 hm hm' _ _ (fun z hz => ?_)
-    (p2p_eigen_ne hk0 hk1 hm hm' (by simpa using hne) rfl rfl)
+  obtain ⟨s1, s2, s3, -, -, -⟩ := lamePolyEk_reflection_period hk0 hk1 t n m
+  obtain ⟨s1', s2', s3', -, -, -⟩ := lamePolyEk_reflection_period hk0 hk1 t n' m'
+  obtain ⟨cs, cc, cd⟩ := lamePolySign_eq_one_or_neg_one t
+  refine lameInner_lameProduct_eq_zero_of_wronskian hk0 hk1 hm hm' _ _ (fun z hz => ?_)
+    (lamePoly_eigenvalue_ne hk0 hk1 hm hm' (by simpa using hne) rfl rfl)
   simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
   rcases hz with rfl | rfl | rfl | rfl
-  · exact p2p_W_zero hk0 hk1 hm hm' (by simpa using p2p_regular_real hk0 hk1 0) cs s1 s1'
-  · exact p2p_W_zero hk0 hk1 hm hm' (by simpa using p2p_regular_vert hk0 hk1 0) cc s2 s2'
-  · exact p2p_W_zero hk0 hk1 hm hm' (by simpa using p2p_regular_vert hk0 hk1 0) cc s2 s2'
-  · exact p2p_W_zero hk0 hk1 hm hm' (p2p_regular_vert hk0 hk1 _) cd s3 s3'
+  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' (by simpa using jacobiRegulark_ofReal hk0 hk1 0) cs s1 s1'
+  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' (by simpa using jacobiRegulark_K_add_I_mul hk0 hk1 0) cc s2 s2'
+  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' (by simpa using jacobiRegulark_K_add_I_mul hk0 hk1 0) cc s2 s2'
+  · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' (jacobiRegulark_K_add_I_mul hk0 hk1 _) cd s3 s3'
 
 /-- 29.14.1–29.14.10, completeness: for each type `t`, a function `g` continuous on
 `[0, K] × [0, K']` that is orthogonal (29.14.2) to every `lameProduct t n m`, `m ≤ n`,
@@ -89,44 +97,44 @@ theorem lameProduct_orthogonal_all (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyT
     {n m n' m' : ℕ} (hm : m ≤ n) (hm' : m' ≤ n') (hne : (t, n, m) ≠ (t', n', m')) :
     lameInner k (4 * Real.compEllIntKm (k ^ 2)) (2 * Real.compEllIntKm (1 - k ^ 2))
       (lameProduct t n m k) (lameProduct t' n' m' k) = 0 := by
-  obtain ⟨s1, s2, -, -, s5, s6⟩ := p2p_lamePolyEk_sym hk0 hk1 t n m
-  obtain ⟨s1', s2', -, -, s5', s6'⟩ := p2p_lamePolyEk_sym hk0 hk1 t' n' m'
-  obtain ⟨cs, cc, -⟩ := p2p_sgn_cases t
-  obtain ⟨cs', cc', -⟩ := p2p_sgn_cases t'
-  by_cases hs : p2p_sgnS t = p2p_sgnS t'
-  · by_cases hc : p2p_sgnC t = p2p_sgnC t'
+  obtain ⟨s1, s2, -, -, s5, s6⟩ := lamePolyEk_reflection_period hk0 hk1 t n m
+  obtain ⟨s1', s2', -, -, s5', s6'⟩ := lamePolyEk_reflection_period hk0 hk1 t' n' m'
+  obtain ⟨cs, cc, -⟩ := lamePolySign_eq_one_or_neg_one t
+  obtain ⟨cs', cc', -⟩ := lamePolySign_eq_one_or_neg_one t'
+  by_cases hs : lamePolySignSn t = lamePolySignSn t'
+  · by_cases hc : lamePolySignCn t = lamePolySignCn t'
     · rw [← hs] at s1' s5'
       rw [← hc] at s2' s6'
-      refine p2p_inner_zero_green hk0 hk1 hm hm' _ _ (fun z hz => ?_)
-        (p2p_eigen_ne hk0 hk1 hm hm' hne hs hc)
+      refine lameInner_lameProduct_eq_zero_of_wronskian hk0 hk1 hm hm' _ _ (fun z hz => ?_)
+        (lamePoly_eigenvalue_ne hk0 hk1 hm hm' hne hs hc)
       simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
       rcases hz with rfl | rfl | rfl | rfl
-      · exact p2p_W_zero hk0 hk1 hm hm' (by simpa using p2p_regular_real hk0 hk1 0) cs s1 s1'
-      · have hr := p2p_regular_real hk0 hk1 (4 * Real.compEllIntKm (k ^ 2))
+      · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' (by simpa using jacobiRegulark_ofReal hk0 hk1 0) cs s1 s1'
+      · have hr := jacobiRegulark_ofReal hk0 hk1 (4 * Real.compEllIntKm (k ^ 2))
         push_cast at hr ⊢
-        exact p2p_W_zero hk0 hk1 hm hm' hr cs s5 s5'
-      · exact p2p_W_zero hk0 hk1 hm hm' (by simpa using p2p_regular_vert hk0 hk1 0) cc s2 s2'
-      · have hr := p2p_regular_vert hk0 hk1 (2 * Real.compEllIntKm (1 - k ^ 2))
+        exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' hr cs s5 s5'
+      · exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' (by simpa using jacobiRegulark_K_add_I_mul hk0 hk1 0) cc s2 s2'
+      · have hr := jacobiRegulark_K_add_I_mul hk0 hk1 (2 * Real.compEllIntKm (1 - k ^ 2))
         push_cast at hr ⊢
-        exact p2p_W_zero hk0 hk1 hm hm' hr cc s6 s6'
-    · have hmul := p2p_sgn_mul cc cc' hc
-      obtain ⟨h0, h1⟩ := p2p_real_integrals_zero hk0 hk1 (t := t) (t' := t') (n := n) (m := m)
+        exact lamePolyEk_wronskian_eq_zero_of_reflection hk0 hk1 hm hm' hr cc s6 s6'
+    · have hmul := sign_mul_eq_neg_one_of_ne cc cc' hc
+      obtain ⟨h0, h1⟩ := integral_lamePolyEk_mul_eq_zero_of_odd hk0 hk1 (t := t) (t' := t') (n := n) (m := m)
         (n' := n') (m' := m') _ (Or.inr rfl) fun z => by
           have a := s2 z
           have b := s2' z
           simp only at a b
           rw [a, b]; linear_combination (lamePolyEk t n m (_ + z) k *
             lamePolyEk t' n' m' (_ + z) k) * hmul
-      rw [p2p_inner_split hk0 hk1 hm hm', h0, h1]; ring
-  · have hmul := p2p_sgn_mul cs cs' hs
-    obtain ⟨h0, h1⟩ := p2p_real_integrals_zero hk0 hk1 (t := t) (t' := t') (n := n) (m := m)
+      rw [lameInner_lameProduct_eq hk0 hk1 hm hm', h0, h1]; ring
+  · have hmul := sign_mul_eq_neg_one_of_ne cs cs' hs
+    obtain ⟨h0, h1⟩ := integral_lamePolyEk_mul_eq_zero_of_odd hk0 hk1 (t := t) (t' := t') (n := n) (m := m)
       (n' := n') (m' := m') 0 (Or.inl rfl) fun z => by
         have a := s1 z
         have b := s1' z
         simp only [Complex.ofReal_zero] at a b ⊢
         rw [a, b]; linear_combination (lamePolyEk t n m (0 + z) k *
           lamePolyEk t' n' m' (0 + z) k) * hmul
-    rw [p2p_inner_split hk0 hk1 hm hm', h0, h1]; ring
+    rw [lameInner_lameProduct_eq hk0 hk1 hm hm', h0, h1]; ring
 
 /-- 29.14.11, completeness: a function continuous on `[0, 4K] × [0, 2K']` orthogonal to all
 products of all eight types vanishes there. Admitted. -/

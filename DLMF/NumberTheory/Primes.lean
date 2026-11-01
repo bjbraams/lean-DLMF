@@ -13,6 +13,31 @@ public import Mathlib.NumberTheory.LucasLehmer
 /-!
 # Asymptotic formulas: primes (DLMF §27.12)
 
+Asymptotic formulas and bounds for the `n`th prime `p_n` and the prime counting function
+`π(x)`, Legendre's formula, the prime number theorem with error terms, and primality tests
+(DLMF §27.12).
+
+## Main definitions
+
+* `li`: the logarithmic integral `li(x)` (DLMF 6.2.8).
+
+## Main results
+
+* `tendsto_nthPrime_div`, `nthPrime_gt`: `p_n ∼ n ln n` (DLMF 27.12.1) and Rosser's bound
+  `p_n > n ln n` (DLMF 27.12.2).
+* `primePi_legendre`: Legendre's formula DLMF 27.12.3, corrected (see below).
+* `primePi_hasAsymptoticExpansion`: the asymptotic expansion of `π(x)` (DLMF 27.12.4).
+* `primePi_sub_li_isBigO`, `primePi_sub_li_isBigO_vinogradov`: the error terms of de la Vallée
+  Poussin and of Korobov and Vinogradov (DLMF 27.12.5 and 27.12.6).
+* `primePi_sub_li_sign_changes`: Littlewood's theorem that `π(x) - li(x)` changes sign
+  infinitely often.
+* `riemannHypothesis_iff_primePi`: the Riemann hypothesis in terms of `π(x)` (DLMF 27.12.7).
+* `primeCounting_ap_siegelWalfisz`: the Siegel–Walfisz theorem (DLMF 27.12.8).
+* `not_prime_of_two_pow_not_modEq`, `isCarmichael_iff_dlmf`, `infinite_setOf_isCarmichael`:
+  the pseudoprime test and Carmichael numbers.
+
+## Implementation notes
+
 `p_n` is `nthPrime n` (`p₁ = 2`), `π(x)` is `primePi x`, and the logarithmic integral `li(x)`
 (DLMF 6.2.8) is the project's `DLMF.Confluent.Real.logIntLi` (a principal value at `t = 1`).
 Statements equivalent to or conditional on the Riemann hypothesis use Mathlib's
@@ -23,8 +48,8 @@ Statements equivalent to or conditional on the Riemann hypothesis use Mathlib's
 gives `π(x) - π(√x)`, not `π(x)`: at `x = 10` the right-hand side is
 `10 - 1 - (5 + 3) + 1 = 2`, whereas `π(10) = 4`. The sum counts the integers in `(1, x]`
 free of the primes `≤ √x`, which are the primes in `(√x, x]`. The corrected form
-`π(x) = π(√x) - 1 + ∑_{d ∣ P} μ(d) ⌊x/d⌋`, `P = ∏_{p ≤ √x} p`, is acquired
-(`primePi_legendre`); checked numerically for `x = 1, 2, 3, 10, 30, 57.5, 100, 200`.
+`π(x) = π(√x) - 1 + ∑_{d ∣ P} μ(d) ⌊x/d⌋`, `P = ∏_{p ≤ √x} p`, is
+`primePi_legendre`; checked numerically for `x = 1, 2, 3, 10, 30, 57.5, 100, 200`.
 -/
 
 @[expose] public noncomputable section
@@ -58,7 +83,7 @@ theorem nthPrime_gt {n : ℕ} (hn : 0 < n) : (n : ℝ) * Real.log n < nthPrime n
 
 /-- Inclusion–exclusion (sieve of Eratosthenes): the number of `1 ≤ n ≤ N` divisible by no
 prime of a set `T` of primes is `∑_{S ⊆ T} (-1)^{|S|} ⌊N/∏S⌋`. -/
-lemma r27_sieve_card (N : ℕ) (T : Finset ℕ) (hT : ∀ p ∈ T, p.Prime) :
+private lemma card_filter_forall_not_dvd_eq_sum_powerset (N : ℕ) (T : Finset ℕ) (hT : ∀ p ∈ T, p.Prime) :
     ((Ioc 0 N).filter (fun n ↦ ∀ p ∈ T, ¬ p ∣ n)).card =
       ∑ S ∈ T.powerset, (-1 : ℤ) ^ S.card * ((N / ∏ p ∈ S, p : ℕ) : ℤ) := by
   have hdvd : ∀ S ∈ T.powerset, ∀ n, (∏ p ∈ S, p) ∣ n ↔ ∀ p ∈ S, p ∣ n := by
@@ -101,7 +126,7 @@ theorem primePi_legendre {x : ℝ} (hx : 1 ≤ x) :
   have hfl : ∀ S ∈ T.powerset, ⌊x / ∏ p ∈ S, (p : ℝ)⌋ = ((N / ∏ p ∈ S, p : ℕ) : ℤ) := by
     intro S _
     rw [← Nat.cast_prod, Int.floor_div_natCast, ← Int.natCast_floor_eq_floor hx0, Int.natCast_div]
-  rw [sum_congr rfl fun S hS ↦ by rw [hfl S hS], ← r27_sieve_card N T hT]
+  rw [sum_congr rfl fun S hS ↦ by rw [hfl S hS], ← card_filter_forall_not_dvd_eq_sum_powerset N T hT]
   -- the sieved set is `{1} ∪ {primes in (y, N]}`
   have hset : (Ioc 0 N).filter (fun n ↦ ∀ p ∈ T, ¬ p ∣ n) =
       insert 1 ((Ioc y N).filter Nat.Prime) := by
@@ -204,11 +229,6 @@ theorem primeCounting_ap_siegelWalfisz {α : ℝ} (hα : 0 < α) :
           li x / m.totient| ≤ C * x * Real.exp (-l * Real.log x ^ (1 / 2 : ℝ)) := by
   sorry
 
-/-- §27.12: a Mersenne prime is a prime of the form `2^p - 1` (Mathlib's `mersenne p`); then
-`p` is prime. The record value of the largest known prime is excluded (numerical). -/
-@[dlmf 27.12]
-theorem prime_of_mersenne_prime {p : ℕ} (h : (mersenne p).Prime) : p.Prime :=
-  Nat.Prime.of_mersenne h
 
 /-- §27.12, the pseudoprime test: if `2^n ≢ 2 (mod n)` then `n` is composite. -/
 @[dlmf 27.12]
@@ -221,7 +241,7 @@ theorem not_prime_of_two_pow_not_modEq {n : ℕ} (h : ¬ 2 ^ n ≡ 2 [MOD n]) : 
   exact ZMod.pow_card 2
 
 /-- DLMF §27.12, Carmichael numbers (proof via Korselt's criterion). -/
-lemma q27_isCarmichael_iff_dlmf {n : ℕ} :
+private lemma isCarmichael_iff_pow_modEq {n : ℕ} :
     n.IsCarmichael ↔ 1 < n ∧ ¬ n.Prime ∧ ∀ b : ℕ, b ^ n ≡ b [MOD n] := by
   constructor
   · intro h
@@ -266,7 +286,7 @@ Mathlib's `Nat.IsCarmichael` (Korselt's criterion). -/
 @[dlmf 27.12]
 theorem isCarmichael_iff_dlmf {n : ℕ} :
     n.IsCarmichael ↔ 1 < n ∧ ¬ n.Prime ∧ ∀ b : ℕ, b ^ n ≡ b [MOD n] :=
-  q27_isCarmichael_iff_dlmf
+  isCarmichael_iff_pow_modEq
 
 /-- §27.12 (Alford–Granville–Pomerance): there are infinitely many Carmichael numbers. -/
 @[dlmf 27.12]

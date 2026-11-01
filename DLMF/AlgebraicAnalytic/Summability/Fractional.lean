@@ -13,22 +13,33 @@ public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 /-!
 # Fractional integrals and derivatives (DLMF §1.15(vi)–(vii))
 
-The Riemann–Liouville fractional integral `fractionalIntegral` (1.15.47) and the fractional
-derivative `fractionalDerivative` (1.15.51, with `n = ⌊ℜα⌋ + 1`) are defined in
-`Summability/Basic.lean`. The statements are for `x ≥ 0` (DLMF erratum of version 1.0.1); we take
-`x > 0` where derivatives in `x` occur and `f` continuous on `[0, ∞)`.
+Properties of the Riemann–Liouville fractional integral `fractionalIntegral` (1.15.47) and the
+fractional derivative `fractionalDerivative` (1.15.51, with `n = ⌊ℜα⌋ + 1`), defined in
+`Summability/Basic.lean`.
 
-Proved: the power rule `I^α t^μ = Γ(μ+1)/Γ(μ+α+1) x^{μ+α}` (the termwise form of 1.15.50, by
-Mathlib's Beta integral `Complex.Gamma_mul_Gamma_eq_betaIntegral`) and the agreement of
-`fractionalIntegral` with the variant of §1.15(vi) with lower limit `0`. Admitted: the semigroup
-law 1.15.48, the power-series formula 1.15.49–1.15.50, the independence of `n` in 1.15.51, the
-rule 1.15.52, the law 1.15.53 and the remark `D^{1/2} D ≠ D^{3/2}`.
+## Main results
+
+* `fractionalIntegral_eq_riemannLiouvilleIntegralFrom`: agreement with the variant of §1.15(vi)
+  with lower limit `0`.
+* `fractionalIntegral_fractionalIntegral`: the semigroup law `I^α I^β = I^{α+β}` (DLMF 1.15.48).
+* `fractionalIntegral_cpow`: the power rule `I^α t^μ = Γ(μ+1)/Γ(μ+α+1) x^{μ+α}`, the termwise
+  form of 1.15.50, by Mathlib's Beta integral `Complex.Gamma_mul_Gamma_eq_betaIntegral`.
+* `hasSum_fractionalIntegral_of_hasSum`: the power-series formula (DLMF 1.15.49–1.15.50).
+* `fractionalDerivative_eq_iteratedDeriv`: independence of `n` (DLMF 1.15.51).
+* `iteratedDeriv_fractionalIntegral`: DLMF 1.15.52.
+* `fractionalDerivative_fractionalDerivative_cpow`: DLMF 1.15.53 for power functions.
+* `fractionalDerivative_half_deriv_ne`: `D^{1/2} D ≠ D^{3/2}`.
+
+## Implementation notes
+
+The statements are for `x ≥ 0` (DLMF erratum of version 1.0.1); we take `x > 0` where
+derivatives in `x` occur and `f` continuous on `[0, ∞)`.
 
 **Missing hypothesis (1.15.53).** DLMF states `D^α D^β = D^{α+β}` whenever none of `α`, `β`,
 `α + β` is an integer, without a condition on `f`. This fails in general: for `f(x) = x^{β-1}`
 (`ℜβ > 0`), `I^{n-β} f = (Γ(β)/Γ(n)) x^{n-1}` by the power rule, so `D^β f = 0` and
 `D^α D^β f = 0`, while `D^{α+β} f = (Γ(β)/Γ(-α)) x^{-α-1} ≠ 0`; e.g. `α = 1/2`, `β = 1/3`. We
-acquire 1.15.53 for power functions `x^μ` with `ℜμ > -1` and `ℜ(μ - β) > -1`
+state 1.15.53 for power functions `x^μ` with `ℜμ > -1` and `ℜ(μ - β) > -1`
 (`fractionalDerivative_fractionalDerivative_cpow`), where it holds by the power rule.
 -/
 

@@ -12,10 +12,32 @@ public import Mathlib.Analysis.Complex.Polynomial.Basic
 /-!
 # Airy solutions of Painlevé II at half-integral parameters
 
-Beals–Wong Proposition 15.4.6 starts from the Riccati reduction at `c = 1/2`.
-The Airy scale must satisfy `k³ = -1/2`. The printed scale `i 2^(-1/2)` on
-page 407 does not satisfy that identity; it is corrected here. Logarithmic
-quotients are asserted only where their Airy denominator is nonzero.
+Airy-function solutions of Painlevé II, `u'' = 2u³ + xu - c`, for every half-integer
+parameter `c` (Beals–Wong Proposition 15.4.6). The construction starts from the Riccati
+reduction at `c = 1/2` and applies the Bäcklund transformations.
+
+## Main definitions
+
+* `airySeed`: a linear combination of scaled Airy functions solving `φ'' = -(z/2)φ`.
+* `airyPII`: its logarithmic derivative, a solution of `PII(1/2)`.
+* `airyPIIJet`: the rational jet recurrence generating the half-integer hierarchy.
+* `airyPIIHierarchy`: the integer-indexed Airy hierarchy, negative indices by reflection.
+
+## Main results
+
+* `isPIIOn_of_riccati`: the Riccati reduction `u' = -u² - x/2` gives `PII(1/2)`.
+* `isPIIOn_airyPII`, `exists_airy_scale`: the Airy solution of `PII(1/2)` with a cube-root
+  scale `k³ = -1/2`.
+* `meromorphic_airyPII`, `meromorphic_airyPIIJet`, `meromorphic_airyPIIHierarchy`: these
+  solutions are meromorphic on the plane.
+* `exists_open_isPIIOn_airyPIIHierarchy`: every parameter `n + 1/2`, `n ∈ ℤ`, has an Airy-based
+  solution on a nonempty open set.
+
+## Implementation notes
+
+The Airy scale must satisfy `k³ = -1/2`. The printed scale `i 2^(-1/2)` on page 407 of
+Beals–Wong does not satisfy that identity; it is corrected here. Logarithmic quotients are
+asserted only where their Airy denominator is nonzero.
 -/
 
 @[expose] public noncomputable section
@@ -162,7 +184,7 @@ theorem exists_open_isPIIOn_airyPIIJet {k a b : ℂ} (hk : k ^ 3 = -1 / 2)
     obtain ⟨z, hz, hDz⟩ := hsol.neg.exists_backlundDenom_ne_zero hs hne hc
     have hnonempty : S.Nonempty := ⟨z, hz, hDz⟩
     have hD : ∀ z ∈ S, backlundDenom (fun z => -u z) z ≠ 0 := fun _ hz => hz.2
-    have hu := (hsol.mono (show S ⊆ s from inter_subset_left)).shiftUp hS hD
+    have hu := (hsol.mono (show S ⊆ s from inter_subset_left)).shift_up hS hD
     have he : EqOn (backlundUp ((n : ℂ) + 1 / 2) u)
         (fun z => (airyPIIJet k a b (n + 1) z).1) S := by
       intro z hz

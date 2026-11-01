@@ -12,11 +12,29 @@ public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 /-!
 # Singularities of normalized scalar complex linear differential equations
 
+Classification of finite points and of the point at infinity for a normalized scalar linear
+differential equation `w⁽ⁿ⁾ + ∑ cⱼ w⁽ʲ⁾ = 0` with complex coefficients. The file contains
+definitions only.
+
+## Main definitions
+
+* `linearODEValue`: the value of the normalized linear differential operator.
+* `LinearODEOrdinaryAt`, `LinearODEAtMostRegularAt`, `LinearODERegularSingularAt`,
+  `LinearODEIrregularAt`: ordinary, at most regular, regular singular and irregular singular
+  points at a finite point.
+* `linearODEReciprocalRaw`, `linearODEReciprocalCoeff`: the coefficients of the equation after
+  the change of variable `z = 1/u`.
+* `LinearODEOrdinaryAtInfinity`, `LinearODEAtMostRegularAtInfinity`,
+  `LinearODEIrregularAtInfinity`: the corresponding classification at infinity.
+
+## Implementation notes
+
 The coefficient germs define the classification: a removable totalization at a
 singular point is ignored, and an analytic extension is recorded explicitly.
+A regular singular point explicitly excludes ordinary points.
 The reciprocal-variable pullback is extracted by applying the original operator
 to normalized monomials in `1/z-u`; this avoids imposing a choice of values at zero
-on rational coefficient functions. This file contains definitions only.
+on rational coefficient functions.
 -/
 
 @[expose] public section

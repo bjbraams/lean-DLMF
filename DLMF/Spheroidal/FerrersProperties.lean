@@ -10,8 +10,17 @@ public import DLMF.Spheroidal.Basic.Ferrers
 /-!
 # Existence and defining properties of spheroidal Ferrers functions
 
-The canonical definitions are in `DLMF.Spheroidal.Basic.Ferrers`. Existence and
-specification statements retain their original domains and coefficient conventions.
+The definitions by choice in `DLMF.Spheroidal.Basic.Ferrers` rest on the existence statements
+of this file, which retain their original domains and coefficient conventions.
+
+## Main results
+
+* `exists_isSpheroidalCoeffPrime`, `spheroidalCoeffPrime_spec`: existence of the recessive
+  coefficients `a'^m_{n,k}(γ²)` and their defining property (DLMF §30.8(ii)).
+* `exists_isSpheroidalQs`, `spheroidalQs_spec`: existence of `𝖰s^m_n` and its defining property
+  (DLMF 30.5.1).
+* `existsUnique_isSpheroidalQsC`, `spheroidalQsC_spec`: existence and uniqueness of `𝑄s^m_n` and
+  its defining property (DLMF 30.6.1).
 -/
 
 @[expose] public noncomputable section
@@ -22,7 +31,7 @@ open scoped Topology Real Classical
 namespace DLMF.Spheroidal
 
 /-- `dif_pos` without the deprecation. -/
-private lemma s30_dif_pos' {c : Prop} [Decidable c] (h : c) {α : Sort*} {t : c → α}
+private lemma dite_eq_of_pos {c : Prop} [Decidable c] (h : c) {α : Sort*} {t : c → α}
     {e : ¬c → α} : dite c t e = t h := by simp [h]
 
 /-! ### Existence theorems (flagged) -/
@@ -58,7 +67,7 @@ theorem spheroidalQs_spec {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
     IsSpheroidalQs n m γ2 (fun x => spheroidalQs n m x γ2) := by
   have h := exists_isSpheroidalQs hmn γ2 hf
   have he : (fun x => spheroidalQs n m x γ2) = h.choose := by
-    funext x; simp only [spheroidalQs, s30_dif_pos' h]
+    funext x; simp only [spheroidalQs, dite_eq_of_pos h]
   rw [he]; exact h.choose_spec
 
 /-- The defining property of `𝑄s^m_n` (DLMF 30.6.1), from `existsUnique_isSpheroidalQsC`. -/
@@ -67,7 +76,7 @@ theorem spheroidalQsC_spec {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
     IsSpheroidalQsC n m γ2 (fun z => spheroidalQsC n m z γ2) := by
   have h := (existsUnique_isSpheroidalQsC hmn γ2 hf).exists
   have he : (fun z => spheroidalQsC n m z γ2) = h.choose := by
-    funext z; simp only [spheroidalQsC, s30_dif_pos' h]
+    funext z; simp only [spheroidalQsC, dite_eq_of_pos h]
   rw [he]; exact h.choose_spec
 
 /-- The defining property of `a'^m_{n,k}` (DLMF §30.8(ii)), from
@@ -75,7 +84,7 @@ theorem spheroidalQsC_spec {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
 theorem spheroidalCoeffPrime_spec {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     IsSpheroidalCoeffPrime n m γ2 (spheroidalCoeffPrime n m γ2) := by
   have h := exists_isSpheroidalCoeffPrime hmn γ2
-  simp only [spheroidalCoeffPrime, s30_dif_pos' h]
+  simp only [spheroidalCoeffPrime, dite_eq_of_pos h]
   exact h.choose_spec
 
 end DLMF.Spheroidal

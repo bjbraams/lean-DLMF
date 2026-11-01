@@ -10,8 +10,18 @@ public import DLMF.Struve.SeriesAndEquations
 
 The normalized power series for `struveH` is compared with an exponential series using
 lower bounds for its Pochhammer factors. The comparison is strict at the quadratic
-coefficient. The corrected DLMF 11.4.14–11.4.15 estimate applies to any positive lower bound
-for the distance to reciprocal-Gamma zeros; the lower bound need not be attained.
+coefficient.
+
+## Main results
+
+* `struveCoeff_normalized`: the Struve coefficients as Pochhammer quotients.
+* `struveH_relative_bound`: the relative-error bound of DLMF 11.4.14–11.4.15.
+
+## Implementation notes
+
+The exponential subtraction in DLMF 11.4.14–11.4.15 is corrected. The estimate applies to
+any positive lower bound for the distance to reciprocal-Gamma zeros; the lower bound need
+not be attained.
 -/
 
 @[expose] public noncomputable section

@@ -19,13 +19,22 @@ continuous `2π`-periodic `f` whose second derivative is square integrable on `[
 uniformly and absolutely convergent expansion `f = ∑ f_m w_m`,
 `f_m = (2π)⁻¹ ∫₀^{2π} f w_m` (28.30.3–28.30.4).
 
+## Main results
+
+* `exists_hill_eigenfunctions`: existence of an orthonormal family of eigenfunctions
+  (DLMF 28.30.1–28.30.2).
+* `hasSum_hill_eigenfunction_expansion`: the eigenfunction expansion (DLMF 28.30.3–28.30.4).
+
+## Implementation notes
+
 The eigenfunctions are a choice (DLMF: "let `w_m(x)` … be the eigenfunctions, that is, an
 orthonormal set of `2π`-periodic solutions"); the existence of such a family is stated
-separately (`exists_hill_eigenfunctions`), and the expansion theorem is stated for every such
-family. "Second derivative square integrable" is formalized as: `f` is differentiable with
-derivative `f'`, and `f'(x) = f'(0) + ∫₀^x g` on `[0, 2π]` for some `g ∈ L²(0, 2π)`.
+separately, and the expansion theorem is stated for every such family. "Second derivative
+square integrable" is formalized as: `f` is differentiable with derivative `f'`, and
+`f'(x) = f'(0) + ∫₀^x g` on `[0, 2π]` for some `g ∈ L²(0, 2π)`.
 
-§28.30(ii) only points to Schäfke and Meixner et al. for analogues of §28.19; no statements.
+§28.30(ii) only points to Schäfke and Meixner et al. for analogues of §28.19; it contains no
+statements.
 -/
 
 @[expose] public noncomputable section

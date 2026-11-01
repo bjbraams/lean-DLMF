@@ -9,11 +9,30 @@ public import DLMF.ExpIntegrals.Continuation
 public import DLMF.IncompleteGamma.FractionTools
 
 /-!
-# Exponential integral representations and inequalities, DLMF §§6.7–6.9
+# Integral representations, inequalities and continued fractions (DLMF §§6.7–6.9)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+Integral representations of `E₁`, `Ei`, `Ein`, `si` and the auxiliary functions `f`, `g`
+(DLMF §6.7), inequalities for `eˣ E₁(x)` (DLMF §6.8), and the continued fraction for `E₁`
+(DLMF §6.9).
+
+## Main results
+
+* `expIntE1_scaled_integrals`, `expIntEi_finite_integral`: DLMF 6.7.1, 6.7.2.
+* `expIntE1_rational_fourier_0`, `expIntE1_rational_fourier_1`, `expIntE1_rational_laplace_0`,
+  `expIntE1_rational_laplace_1`: integrals of rational functions against `e^{it}` and `e^{-t}`
+  (DLMF 6.7.3–6.7.6).
+* `expIntEin_real_integral_7`, `expIntEin_real_integral_8`, `expIntEin_real_integral_11`:
+  DLMF 6.7.7, 6.7.8, 6.7.11.
+* `sinIntTail_angular_integral`, `Ein_sub_Cin_angular_integral`: DLMF 6.7.9, 6.7.10.
+* `expIntAux_horizontal_integral`: DLMF 6.7.12.
+* `expIntAuxF_oscillatory_integral`, `expIntAuxF_laplace_integral`,
+  `expIntAuxG_oscillatory_integral`, `expIntAuxG_laplace_integral`: oscillatory and Laplace
+  representations of `f` and `g` (DLMF 6.7.13, 6.7.14).
+* `expIntAuxF_besselK_integral`, `expIntAuxG_besselK_integral`: representations through
+  `K₀(2√(zt))` (DLMF 6.7.15, 6.7.16), extended from the positive axis by the identity theorem.
+* `expIntE1_inequality_1`, `expIntE1_inequality_2`, `expIntE1_inequality_3`: bounds for
+  `eˣ E₁(x)` (DLMF 6.8.1–6.8.3), from a comparison principle for `f' = f - 1/x`.
+* `expIntE1_continuedFraction`: the continued fraction for `E₁` (DLMF 6.9.1).
 -/
 
 @[expose] public noncomputable section
@@ -867,12 +886,12 @@ theorem differentiableOn_integral_besselK_zero_mul {wt : ℝ → ℂ} (hwc : Con
       ((differentiableAt_id.mul_const (t : ℂ)).cpow_const hzt).const_mul 2
     exact ((hK.comp z hin).mul_const _).differentiableWithinAt
   · set c := (z₀ ^ (1 / 2 : ℂ)).re / 2
-    have hc0 : 0 < c := half_pos (re_cpow_half_pos_of_mem_slitPlane hz₀)
+    have hc0 : 0 < c := half_pos (Carlson.re_cpow_half_pos hz₀)
     have hcont : ContinuousAt (fun z : ℂ => (z ^ (1 / 2 : ℂ)).re) z₀ :=
       continuous_re.continuousAt.comp (continuousAt_id.cpow continuousAt_const hz₀)
     have hV : {z : ℂ | c < (z ^ (1 / 2 : ℂ)).re} ∩ slitPlane ∈ 𝓝 z₀ :=
       Filter.inter_mem (hcont.eventually (lt_mem_nhds (half_lt_self
-        (re_cpow_half_pos_of_mem_slitPlane hz₀)))) (isOpen_slitPlane.mem_nhds hz₀)
+        (Carlson.re_cpow_half_pos hz₀)))) (isOpen_slitPlane.mem_nhds hz₀)
     have hs : (0 : ℝ) < 1 / 2 := by norm_num
     have hνs : |(0 : ℂ).re| ≤ 1 / 2 := by norm_num
     refine ⟨_, hV, fun t => Real.Gamma (1 / 2) * (c / 2) ^ (-(1 / 2 : ℝ)) *

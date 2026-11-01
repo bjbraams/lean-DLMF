@@ -12,12 +12,26 @@ public import DLMF.Hypergeometric.Continuation
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 
 /-!
-# The Gauss equation and uniqueness of its solutions
+# The Gauss equation and its local solutions (DLMF §15.10(i))
 
-Local solutions of the Gauss differential equation and uniqueness on open domains.
+## Main definitions
 
-Source references and common attribution are retained in
-`DLMF.Hypergeometric.Solutions`.
+* `gaussOperator`: the Gauss differential operator, DLMF 15.10.1, without division at its
+  singular points.
+* `zeroSecond`, `oneFirst`, `oneSecond`, `infinityFirst`: the standard local solutions,
+  DLMF 15.10.2, 15.10.4, 15.10.6 (the first solution at zero is Mathlib's
+  `ordinaryHypergeometric`).
+* `solutionWronskian`: the Wronskian, in the order used by DLMF.
+* `logarithmicSecond`, `logarithmicSecondTerminating`, `logarithmicSecondBothTerminating`:
+  logarithmic second solutions at a positive integral denominator, DLMF 15.10.8–15.10.10.
+
+## Main results
+
+* `gaussOperator_ordinaryHypergeometric`, `zero_second_ode`, `one_first_ode`, `one_second_ode`,
+  `infinity_first_ode`: the local solutions solve the Gauss equation.
+* `zero_wronskian`, `one_wronskian`, `infinity_wronskian`: Wronskians, DLMF 15.10.3, 15.10.5,
+  15.10.7.
+* `gaussOperator_eq_zero_of_deriv_eq_zero`: uniqueness of solutions on connected open sets.
 -/
 
 @[expose] public section
@@ -113,7 +127,7 @@ theorem zero_second_ode
   obtain ⟨h1, h2⟩ := iteratedDeriv_two_cpow_mul (s := 1 - c) hU hzU hG Set.inter_subset_right
   have hz0 : z ≠ 0 := slitPlane_ne_zero hs
   have hz1 : z ≠ 1 := by rintro rfl; simp at hz
-  have hode := ordinaryHypergeometric_ode (a := a - c + 1) (b := b - c + 1) hc hz hz0 hz1
+  have hode := ordinaryHypergeometric_ode (a := a - c + 1) (b := b - c + 1) hc hz
   have he : zeroSecond a b c = fun w => w ^ (1 - c) * G w := by funext w; rfl
   have e1 : z ^ (1 - c - 1) = z ^ (1 - c) / z := by rw [cpow_sub _ _ hz0, cpow_one]
   have e2 : z ^ (1 - c - 2) = z ^ (1 - c) / z ^ 2 := by
@@ -250,7 +264,7 @@ theorem infinity_first_ode
   have hu := hinvlt z hz
   have hu0 : z⁻¹ ≠ 0 := inv_ne_zero hz0
   have hu1 : z⁻¹ ≠ 1 := by intro h; rw [h, norm_one] at hu; exact lt_irrefl _ hu
-  have hode := ordinaryHypergeometric_ode (a := a) (b := a - c + 1) hc hu hu0 hu1
+  have hode := ordinaryHypergeometric_ode (a := a) (b := a - c + 1) hc hu
   have he : infinityFirst a b c = fun w => w ^ (-a) * H w⁻¹ := by
     funext w; rw [infinityFirst, one_div]
   have e1 : z ^ (-a - 1) = z ^ (-a) / z := by rw [cpow_sub _ _ hz0, cpow_one]

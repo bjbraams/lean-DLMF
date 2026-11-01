@@ -12,4 +12,10 @@ public import DLMF.Hypergeometric.Basic.AppellF4
 
 /-!
 # Definitions and elementary coefficient algebra for hypergeometric functions
+
+This module collects the foundational definitions for DLMF Chapter 15: Pochhammer symbols
+(`DLMF.Hypergeometric.Basic.Pochhammer`), the Gauss coefficients
+(`DLMF.Hypergeometric.Basic.GaussCoefficients`), the cut plane and the continued Gauss function
+(`DLMF.Hypergeometric.Basic.PrincipalBranch`), and Appell's `F₄`
+(`DLMF.Hypergeometric.Basic.AppellF4`).
 -/

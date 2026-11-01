@@ -18,20 +18,32 @@ public import TauCeti.FieldTheory.GaloisGroups.Resolvent.Quartic.Discriminant
 Statements of DLMF §1.11 that are not already in Mathlib (the upstream ones are recorded in
 `DLMF.AlgebraicAnalytic.Polynomials.MathlibCoverage`).
 
-* §1.11(i): Horner's scheme (`hornerB`, 1.11.2–1.11.4) and the extended scheme (`hornerC`,
-  1.11.5–1.11.6) for a polynomial `f ∈ K[X]` over a field.
-* §1.11(ii): real zeros of monic real polynomials of odd and even degree, the parity part of
-  Descartes' rule of signs and its form for negative zeros, reciprocal zeros, the discriminant as
-  a product over the zeros (1.11.9).
-* §1.11(iii): quadratic, cubic (Cardano) and quartic (Ferrari, with DLMF's resolvent cubic)
-  formulas. Cube and square roots are replaced by arbitrary roots (`A ^ 3 = …`, `s ^ 2 = …`),
-  so the statements are branch-free and cover every choice; DLMF's choice 1.11.20 of the square
-  roots is a hypothesis.
-* §1.11(iv): roots of `z^n = -1` and of `z^n = a + ib` (1.11.22–1.11.23).
-* §1.11(v): the explicit Hurwitz determinants 1.11.25 and the Hurwitz criterion.
+## Main results
 
-The depressed quartic's discriminant 1.11.17 uses TauCeti's `TauCeti.discr_resolventCubic`
-(the quartic and TauCeti's resolvent cubic have the same discriminant).
+* `eval_eq_horner`, `hornerB_rec`, `hornerB_zero`, `hornerC_rec`, `hornerC_one`: Horner's
+  scheme and the extended scheme (DLMF 1.11.2–1.11.6) for `f ∈ K[X]` over a field.
+* `exists_root_sign_of_odd`, `exists_pos_neg_root_of_even`: real zeros of monic real
+  polynomials of odd and even degree.
+* `signVariations_sub_countP_pos_even`, `roots_countP_neg_le_signVariations`: the parity part
+  of Descartes' rule of signs and its form for negative zeros.
+* `isRoot_reverse_inv_iff`: reciprocal zeros.
+* `discr_eq_prod_roots`: the discriminant as a product over the zeros (DLMF 1.11.9).
+* `quadratic_roots_sum_prod`, `cubic_comp_X_sub_C`, `discr_reduced_cubic`, `cardano`,
+  `cardano_rho`: quadratic and cubic equations (DLMF 1.11.11–1.11.15).
+* `quartic_comp_X_sub_C`, `discr_reduced_quartic`, `ferrari`: quartic equations
+  (DLMF 1.11.16–1.11.20).
+* `pow_eq_neg_one_iff`, `pow_eq_iff`: roots of `z^n = -1` and `z^n = a + ib`
+  (DLMF 1.11.22–1.11.23).
+* `hurwitzDet_one`, `hurwitzDet_two`, `hurwitzDet_three`, `isStablePolynomial_iff_hurwitz`:
+  the Hurwitz determinants 1.11.25 and the Hurwitz criterion (§1.11(v)).
+
+## Implementation notes
+
+In the cubic and quartic formulas, cube and square roots are replaced by arbitrary roots
+(`A ^ 3 = …`, `s ^ 2 = …`), so the statements are branch-free and cover every choice; DLMF's
+choice 1.11.20 of the square roots is a hypothesis. The discriminant 1.11.17 of the depressed
+quartic uses TauCeti's `TauCeti.discr_resolventCubic` (the quartic and TauCeti's resolvent
+cubic have the same discriminant).
 -/
 
 @[expose] public noncomputable section
@@ -62,13 +74,13 @@ theorem eq_X_sub_C_mul_divByMonic_add_hornerB (f : K[X]) (α : K) :
   exact (modByMonic_add_div f _).symm
 
 /-- The quotient has degree less than `n = deg f` (it is zero when `f` is constant). -/
-lemma g1d_natDegree_divByMonic_lt (f : K[X]) (α : K) (hf : 0 < f.natDegree) :
+private lemma natDegree_divByMonic_X_sub_C_lt (f : K[X]) (α : K) (hf : 0 < f.natDegree) :
     (f /ₘ (X - C α)).natDegree < f.natDegree := by
   rw [natDegree_divByMonic f (monic_X_sub_C α), natDegree_X_sub_C]
   omega
 
 /-- The quotient of a constant polynomial by `X - α` vanishes. -/
-lemma g1d_divByMonic_eq_zero (f : K[X]) (α : K) (hf : f.natDegree = 0) :
+private lemma divByMonic_X_sub_C_eq_zero_of_natDegree_eq_zero (f : K[X]) (α : K) (hf : f.natDegree = 0) :
     f /ₘ (X - C α) = 0 := by
   rw [divByMonic_eq_zero_iff (monic_X_sub_C α), degree_X_sub_C]
   exact lt_of_le_of_lt (natDegree_eq_zero_iff_degree_le_zero.mp hf) (by norm_num)
@@ -81,9 +93,9 @@ theorem eval_eq_horner (f : K[X]) (α z : K) :
       hornerB f α 0 := by
   conv_lhs => rw [eq_X_sub_C_mul_divByMonic_add_hornerB f α]
   rcases Nat.eq_zero_or_pos f.natDegree with h0 | hpos
-  · simp [g1d_divByMonic_eq_zero f α h0, h0]
+  · simp [divByMonic_X_sub_C_eq_zero_of_natDegree_eq_zero f α h0, h0]
   · rw [eval_add, eval_mul, eval_sub, eval_X, eval_C, eval_C,
-      eval_eq_sum_range' (g1d_natDegree_divByMonic_lt f α hpos)]
+      eval_eq_sum_range' (natDegree_divByMonic_X_sub_C_lt f α hpos)]
     simp [coeff_divByMonic_X_sub_C]
 
 /-- DLMF 1.11.3: the recurrence `b_k = α b_{k+1} + a_k` of Horner's scheme. It holds for every
@@ -112,9 +124,9 @@ theorem hornerB_eq_zero_of_lt (f : K[X]) (α : K) {k : ℕ} (hk : f.natDegree < 
   obtain ⟨j, rfl⟩ : ∃ j, k = j + 1 := ⟨k - 1, by omega⟩
   rw [← coeff_divByMonic_X_sub_C]
   rcases Nat.eq_zero_or_pos f.natDegree with h0 | hpos
-  · simp [g1d_divByMonic_eq_zero f α h0]
+  · simp [divByMonic_X_sub_C_eq_zero_of_natDegree_eq_zero f α h0]
   · exact coeff_eq_zero_of_natDegree_lt
-      (lt_of_lt_of_le (g1d_natDegree_divByMonic_lt f α hpos) (by omega))
+      (lt_of_lt_of_le (natDegree_divByMonic_X_sub_C_lt f α hpos) (by omega))
 
 /-- DLMF 1.11.2–1.11.3: `b_n = a_n`. -/
 @[dlmf 1.11.E3]
@@ -149,7 +161,7 @@ theorem hornerC_one (f : K[X]) (α : K) : hornerC f α 1 = (derivative f).eval �
 
 /-- A real polynomial of positive degree with nonnegative leading coefficient and negative value
 at `0` has a positive zero (intermediate value theorem). -/
-lemma g1d_exists_pos_root {f : ℝ[X]} (hdeg : 0 < f.degree) (hlc : 0 ≤ f.leadingCoeff)
+private lemma exists_pos_isRoot_of_eval_zero_neg {f : ℝ[X]} (hdeg : 0 < f.degree) (hlc : 0 ≤ f.leadingCoeff)
     (h0 : f.eval 0 < 0) : ∃ x, 0 < x ∧ f.IsRoot x := by
   obtain ⟨M, hM, hM0⟩ := (((tendsto_atTop_of_leadingCoeff_nonneg f hdeg hlc).eventually
     (Filter.eventually_gt_atTop 0)).and (Filter.eventually_gt_atTop 0)).exists
@@ -161,7 +173,7 @@ lemma g1d_exists_pos_root {f : ℝ[X]} (hdeg : 0 < f.degree) (hlc : 0 ≤ f.lead
 
 /-- The polynomial `f(-z)` has the same degree as `f` and leading coefficient
 `(-1)^n a_n`. -/
-lemma g1d_comp_neg (f : ℝ[X]) :
+private lemma natDegree_leadingCoeff_comp_neg_X (f : ℝ[X]) :
     (f.comp (-X)).natDegree = f.natDegree ∧
       (f.comp (-X)).leadingCoeff = (-1) ^ f.natDegree * f.leadingCoeff := by
   have h1 : (-X : ℝ[X]).natDegree = 1 := by rw [natDegree_neg, natDegree_X]
@@ -178,13 +190,13 @@ theorem exists_root_sign_of_odd {f : ℝ[X]} (hm : f.Monic) (hodd : Odd f.natDeg
   have hpos : 0 < f.natDegree := hodd.pos
   have hdeg : 0 < f.degree := natDegree_pos_iff_degree_pos.mp hpos
   rcases lt_trichotomy (f.coeff 0) 0 with h | h | h
-  · obtain ⟨x, hx, hr⟩ := g1d_exists_pos_root hdeg (by rw [hm.leadingCoeff]; norm_num)
+  · obtain ⟨x, hx, hr⟩ := exists_pos_isRoot_of_eval_zero_neg hdeg (by rw [hm.leadingCoeff]; norm_num)
       (by rwa [← coeff_zero_eq_eval_zero])
     exact ⟨x, hr, fun _ => hx, fun h' => absurd h' (not_lt.mpr h.le)⟩
   · exact ⟨0, by rwa [IsRoot, ← coeff_zero_eq_eval_zero], fun h' => absurd h (ne_of_lt h'),
       fun h' => absurd h (ne_of_gt h')⟩
-  · obtain ⟨hn, hl⟩ := g1d_comp_neg f
-    obtain ⟨x, hx, hr⟩ := g1d_exists_pos_root (f := -(f.comp (-X)))
+  · obtain ⟨hn, hl⟩ := natDegree_leadingCoeff_comp_neg_X f
+    obtain ⟨x, hx, hr⟩ := exists_pos_isRoot_of_eval_zero_neg (f := -(f.comp (-X)))
       (by rw [degree_neg]; exact natDegree_pos_iff_degree_pos.mp (hn ▸ hpos))
       (by rw [leadingCoeff_neg, hl, hm.leadingCoeff, hodd.neg_one_pow]; norm_num)
       (by simp [← coeff_zero_eq_eval_zero, h])
@@ -203,10 +215,10 @@ theorem exists_pos_neg_root_of_even {f : ℝ[X]} (hm : f.Monic) (heven : Even f.
       rw [this, coeff_one_zero] at h0; norm_num at h0
     · exact h
   have hdeg : 0 < f.degree := natDegree_pos_iff_degree_pos.mp hpos
-  obtain ⟨x, hx, hr⟩ := g1d_exists_pos_root hdeg (by rw [hm.leadingCoeff]; norm_num)
+  obtain ⟨x, hx, hr⟩ := exists_pos_isRoot_of_eval_zero_neg hdeg (by rw [hm.leadingCoeff]; norm_num)
     (by rwa [← coeff_zero_eq_eval_zero])
-  obtain ⟨hn, hl⟩ := g1d_comp_neg f
-  obtain ⟨y, hy, hr'⟩ := g1d_exists_pos_root (f := f.comp (-X))
+  obtain ⟨hn, hl⟩ := natDegree_leadingCoeff_comp_neg_X f
+  obtain ⟨y, hy, hr'⟩ := exists_pos_isRoot_of_eval_zero_neg (f := f.comp (-X))
     (natDegree_pos_iff_degree_pos.mp (hn ▸ hpos))
     (by rw [hl, hm.leadingCoeff, heven.neg_one_pow]; norm_num)
     (by simpa [← coeff_zero_eq_eval_zero] using h0)

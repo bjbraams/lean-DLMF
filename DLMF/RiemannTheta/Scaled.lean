@@ -8,7 +8,14 @@ module
 public import DLMF.RiemannTheta.Convergence
 
 /-!
-# Boundedness and nonholomorphy of the scaled Riemann theta function
+# Boundedness and nonholomorphy of the scaled Riemann theta function (DLMF §21.2(i))
+
+## Main results
+
+* `riemannThetaScaled_bounded`: the scaled theta function `θ̂(z|Ω)` is bounded in `z`.
+* `not_differentiable_riemannThetaScaled`: `θ̂(z|Ω)` is not analytic in `z`.
+* `riemannThetaBig_eq_tsum`: the series form `Θ(φ|B) = ∑ₙ exp(½ n·B·n + n·φ)` of the
+  alternative notation of DLMF §21.1.
 -/
 
 @[expose] public noncomputable section
@@ -25,7 +32,7 @@ namespace DLMF.RiemannTheta
 
 /-- Summability of the indicated series: `Summable (fun n : ι → ℤ => ∏ i, f i (n i)) ∧ ∑' n : ι →
 ℤ, ∏ i, f i (n i) ≤ M ^ Fintype.card ι`. -/
-lemma rth21_prod_sum_le {f : ι → ℤ → ℝ} {M : ℝ} (hf0 : ∀ i k, 0 ≤ f i k)
+private lemma summable_prod_and_tsum_le_pow {f : ι → ℤ → ℝ} {M : ℝ} (hf0 : ∀ i k, 0 ≤ f i k)
     (hf : ∀ i, Summable (f i)) (hM : ∀ i, ∑' k, f i k ≤ M) :
     Summable (fun n : ι → ℤ => ∏ i, f i (n i)) ∧
       ∑' n : ι → ℤ, ∏ i, f i (n i) ≤ M ^ Fintype.card ι := by
@@ -48,7 +55,7 @@ lemma rth21_prod_sum_le {f : ι → ℤ → ℝ} {M : ℝ} (hf0 : ∀ i k, 0 ≤
 /-- Estimate under the stated parameter and domain assumptions: `∃ M : ℝ, ∀ t : ℝ, Summable (fun k
 : ℤ => Real.exp (-π * c * ((k : ℝ) + t) ^ 2)) ∧ ∑' k : ℤ, Real.exp (-π * c * ((k : ℝ) + t) ^
 2) ≤ M`. -/
-lemma rth21_gauss_shift_bound {c : ℝ} (hc : 0 < c) :
+private lemma exists_bound_tsum_exp_neg_sq_shift {c : ℝ} (hc : 0 < c) :
     ∃ M : ℝ, ∀ t : ℝ, Summable (fun k : ℤ => Real.exp (-π * c * ((k : ℝ) + t) ^ 2)) ∧
       ∑' k : ℤ, Real.exp (-π * c * ((k : ℝ) + t) ^ 2) ≤ M := by
   have hg : Summable fun k : ℤ => Real.exp (-π * c * (k : ℝ) ^ 2) := by
@@ -102,8 +109,8 @@ lemma rth21_gauss_shift_bound {c : ℝ} (hc : 0 < c) :
 theorem riemannThetaScaled_bounded [DecidableEq ι] {Ω : Matrix ι ι ℂ}
     (hΩ : Ω ∈ siegelUpperHalfSpace ι) : ∃ C : ℝ, ∀ z : ι → ℂ, ‖riemannThetaScaled z Ω‖ ≤ C := by
   set Y := Ω.map Complex.im with hYdef
-  obtain ⟨c, hc, hlow⟩ := rth21_exists_lower (rth21_posIm_of_mem hΩ)
-  obtain ⟨M, hM⟩ := rth21_gauss_shift_bound hc
+  obtain ⟨c, hc, hlow⟩ := exists_pos_mul_sum_sq_le_dotProduct_mulVec (posIm_of_mem_siegelUpperHalfSpace hΩ)
+  obtain ⟨M, hM⟩ := exists_bound_tsum_exp_neg_sq_shift hc
   refine ⟨M ^ Fintype.card ι, fun z => ?_⟩
   set y : ι → ℝ := fun i => (z i).im
   set a : ι → ℝ := Y⁻¹ *ᵥ y
@@ -133,7 +140,7 @@ theorem riemannThetaScaled_bounded [DecidableEq ι] {Ω : Matrix ι ι ℂ}
     have : N ⬝ᵥ (Y *ᵥ N) + 2 * (N ⬝ᵥ y) + y ⬝ᵥ (Y⁻¹ *ᵥ y) ≥ c * ∑ i, (N + a) i ^ 2 := by
       rw [← hexp]; exact hq
     nlinarith [Real.pi_pos]
-  obtain ⟨hprodS, hprodle⟩ := rth21_prod_sum_le
+  obtain ⟨hprodS, hprodle⟩ := summable_prod_and_tsum_le_pow
     (f := fun i k => Real.exp (-π * c * ((k : ℝ) + a i) ^ 2))
     (fun i k => (Real.exp_pos _).le) (fun i => (hM (a i)).1) (fun i => (hM (a i)).2)
   have hS := summable_norm_riemannThetaTerm z hΩ
@@ -148,12 +155,11 @@ theorem riemannThetaScaled_bounded [DecidableEq ι] {Ω : Matrix ι ι ℂ}
         (hS.mul_left _).tsum_le_tsum hterm hprodS
     _ ≤ M ^ Fintype.card ι := hprodle
 
-section p3t
-
+section ThetaIntegrals
 open MeasureTheory
 
 /-- `∫₀¹ e^{2πikt} dt = δ_{k0}`. -/
-lemma p3t_integral_exp_int (k : ℤ) :
+private lemma integral_Icc_exp_two_pi_I_int (k : ℤ) :
     ∫ t in Set.Icc (0 : ℝ) 1, cexp (2 * π * I * k * t) = if k = 0 then 1 else 0 := by
   rw [integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le zero_le_one]
   split_ifs with hk
@@ -168,11 +174,11 @@ lemma p3t_integral_exp_int (k : ℤ) :
     rw [this]; simp
 
 /-- The cube measure on `[0,1]^ι`. -/
-noncomputable abbrev p3t_cube (ι : Type*) [Fintype ι] : Measure (ι → ℝ) :=
+noncomputable abbrev unitCubeMeasure (ι : Type*) [Fintype ι] : Measure (ι → ℝ) :=
   Measure.pi fun _ : ι => volume.restrict (Set.Icc (0 : ℝ) 1)
 
 /-- A theta term at a real vector as a constant times a product. -/
-lemma p3t_term_real (Ω : Matrix ι ι ℂ) (n : ι → ℤ) (x : ι → ℝ) :
+private lemma riemannThetaTerm_ofReal (Ω : Matrix ι ι ℂ) (n : ι → ℤ) (x : ι → ℝ) :
     riemannThetaTerm (fun i => (x i : ℂ)) Ω n =
       cexp (2 * π * I * ((1 / 2 : ℂ) * ((fun i => (n i : ℂ)) ⬝ᵥ (Ω *ᵥ fun i => (n i : ℂ))))) *
         ∏ i, cexp (2 * π * I * (n i) * x i) := by
@@ -183,12 +189,12 @@ lemma p3t_term_real (Ω : Matrix ι ι ℂ) (n : ι → ℤ) (x : ι → ℝ) :
   ring
 
 /-- `∫_{[0,1]^g}` of a theta term is `δ_{n0}`. -/
-lemma p3t_integral_term (Ω : Matrix ι ι ℂ) (n : ι → ℤ) :
-    ∫ x, riemannThetaTerm (fun i => (x i : ℂ)) Ω n ∂(p3t_cube ι) = if n = 0 then 1 else 0 := by
-  simp_rw [p3t_term_real]
+private lemma integral_riemannThetaTerm_unitCube (Ω : Matrix ι ι ℂ) (n : ι → ℤ) :
+    ∫ x, riemannThetaTerm (fun i => (x i : ℂ)) Ω n ∂(unitCubeMeasure ι) = if n = 0 then 1 else 0 := by
+  simp_rw [riemannThetaTerm_ofReal]
   rw [integral_const_mul]
   rw [integral_fintype_prod_eq_prod (f := fun i (t : ℝ) => cexp (2 * π * I * (n i) * t))]
-  simp_rw [p3t_integral_exp_int]
+  simp_rw [integral_Icc_exp_two_pi_I_int]
   rw [Finset.prod_boole]
   by_cases hn : n = 0
   · subst hn; simp
@@ -197,38 +203,37 @@ lemma p3t_integral_term (Ω : Matrix ι ι ℂ) (n : ι → ℤ) :
     simp [hn, this]
 
 /-- The modulus of a theta term at a real vector. -/
-lemma p3t_norm_term_real (Ω : Matrix ι ι ℂ) (n : ι → ℤ) (x : ι → ℝ) :
+private lemma norm_riemannThetaTerm_ofReal (Ω : Matrix ι ι ℂ) (n : ι → ℤ) (x : ι → ℝ) :
     ‖riemannThetaTerm (fun i => (x i : ℂ)) Ω n‖ = ‖riemannThetaTerm 0 Ω n‖ := by
   rw [norm_riemannThetaTerm, norm_riemannThetaTerm]
   simp
 
 /-- The cube has measure one. -/
-lemma p3t_cube_univ : (p3t_cube ι) Set.univ = 1 := by
-  rw [p3t_cube, Measure.pi_univ]
+private lemma unitCubeMeasure_univ : (unitCubeMeasure ι) Set.univ = 1 := by
+  rw [unitCubeMeasure, Measure.pi_univ]
   simp
 
 /-- `∫_{[0,1]^g} θ(x|Ω) dx = 1`, so `θ(·|Ω)` is not identically zero. -/
-lemma p3t_integral_riemannTheta {Ω : Matrix ι ι ℂ} (hΩ : Ω ∈ siegelUpperHalfSpace ι) :
-    ∫ x, riemannTheta (fun i => (x i : ℂ)) Ω ∂(p3t_cube ι) = 1 := by
-  have hfin : IsFiniteMeasure (p3t_cube ι) := ⟨by rw [p3t_cube_univ]; simp⟩
+private lemma integral_riemannTheta_unitCube {Ω : Matrix ι ι ℂ} (hΩ : Ω ∈ siegelUpperHalfSpace ι) :
+    ∫ x, riemannTheta (fun i => (x i : ℂ)) Ω ∂(unitCubeMeasure ι) = 1 := by
+  have hfin : IsFiniteMeasure (unitCubeMeasure ι) := ⟨by rw [unitCubeMeasure_univ]; simp⟩
   have hint : ∀ n, Integrable (fun x : ι → ℝ => riemannThetaTerm (fun i => (x i : ℂ)) Ω n)
-      (p3t_cube ι) := by
+      (unitCubeMeasure ι) := by
     intro n
     refine Integrable.of_bound ?_ ‖riemannThetaTerm 0 Ω n‖
-      (Eventually.of_forall fun x => (p3t_norm_term_real Ω n x).le)
+      (Eventually.of_forall fun x => (norm_riemannThetaTerm_ofReal Ω n x).le)
     refine Continuous.aestronglyMeasurable ?_
     simp only [riemannThetaTerm, dotProduct]
     fun_prop
-  have hsum : Summable fun n => ∫ x, ‖riemannThetaTerm (fun i => (x i : ℂ)) Ω n‖ ∂(p3t_cube ι) := by
-    simp_rw [p3t_norm_term_real, integral_const, smul_eq_mul]
+  have hsum : Summable fun n => ∫ x, ‖riemannThetaTerm (fun i => (x i : ℂ)) Ω n‖ ∂(unitCubeMeasure ι) := by
+    simp_rw [norm_riemannThetaTerm_ofReal, integral_const, smul_eq_mul]
     exact (summable_norm_riemannThetaTerm 0 hΩ).mul_left _
   simp only [riemannTheta]
   rw [← integral_tsum_of_summable_integral_norm hint hsum]
-  simp_rw [p3t_integral_term]
+  simp_rw [integral_riemannThetaTerm_unitCube]
   exact tsum_ite_eq 0 1
 
-end p3t
-
+end ThetaIntegrals
 /-- `θ̂(z|Ω)` is not an analytic function of `z` (DLMF §21.2(i), after 21.2.2); genus
 `g ≥ 1`. -/
 @[dlmf 21.2.i "the scaled theta function is nonanalytic in z"]
@@ -248,11 +253,11 @@ theorem not_differentiable_riemannThetaScaled [DecidableEq ι] [Nonempty ι] {Ω
     have h0 : (fun i => ((x i : ℂ)).im) = 0 := by funext i; simp
     rw [riemannThetaScaled, h0]; simp
   have hc1 : riemannThetaScaled 0 Ω = 1 := by
-    have h := p3t_integral_riemannTheta hΩ
+    have h := integral_riemannTheta_unitCube hΩ
     have e : (fun x : ι → ℝ => riemannTheta (fun i => (x i : ℂ)) Ω) =
         fun _ => riemannThetaScaled 0 Ω := by
       funext x; rw [← hreal, hconst]
-    rw [e, MeasureTheory.integral_const, MeasureTheory.measureReal_def, p3t_cube_univ] at h
+    rw [e, MeasureTheory.integral_const, MeasureTheory.measureReal_def, unitCubeMeasure_univ] at h
     simpa using h
   set Y := Ω.map Complex.im with hY
   have hθ : ∀ z : ι → ℂ, riemannTheta z Ω =
@@ -273,8 +278,8 @@ theorem not_differentiable_riemannThetaScaled [DecidableEq ι] [Nonempty ι] {Ω
   set v : ι → ℂ := Pi.single j 1 with hv
   set g : ℂ → ℂ := fun w => riemannTheta (w • v) Ω with hgdef
   have hg : Differentiable ℂ g := fun w0 =>
-    rth21_differentiableAt_comp (L := fun w => (w • v, Ω)) (by fun_prop)
-      (rth21_posIm_of_mem hΩ) fun n => by
+    differentiableAt_riemannTheta_comp (L := fun w => (w • v, Ω)) (by fun_prop)
+      (posIm_of_mem_siegelUpperHalfSpace hΩ) fun n => by
         simp only [riemannThetaTerm, dotProduct_smul, smul_eq_mul]
         fun_prop
   have him : ∀ w : ℂ, (fun i => ((w • v) i).im) = w.im • (Pi.single j 1 : ι → ℝ) := by

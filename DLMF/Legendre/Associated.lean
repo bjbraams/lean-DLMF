@@ -13,8 +13,8 @@ public import DLMF.Legendre.Associated.BoundaryAndConnections
 /-!
 # Associated Legendre functions and Olver normalization
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This umbrella module collects the associated Legendre functions `P^μ_ν`, `Q^μ_ν`, Olver's
+normalized `𝑸^μ_ν` and the Ferrers functions in their quadratic hypergeometric forms, with
+their differential equations, analyticity, conjugation symmetry, Wronskians and connection
+formulas (DLMF §§14.2, 14.3, 14.9).
 -/

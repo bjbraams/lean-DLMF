@@ -12,10 +12,30 @@ public import DLMF.Statistical.IncompleteGamma
 /-!
 # Continued incomplete Gamma functions: analytic and differential properties
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs.
+Analytic continuation of the incomplete Gamma functions in the parameter and on the
+logarithmic covering of the punctured plane (DLMF §8.2), with series, recurrences and
+derivatives from DLMF §§8.7–8.8.
+
+## Main results
+
+* `normIncGammaPContinued_eq`, `normIncGammaQContinued_eq`: the continued regularized
+  functions agree with `P` and `Q` at regular parameters (DLMF 8.2.4);
+  `normIncGammaContinued_complement`: `P + Q = 1` (DLMF 8.2.5).
+* `lowerIncGamma_segment_integral`, `upperIncGamma_horizontal_integral`, `scIncGamma_integral`:
+  the integral representations DLMF 8.2.1, 8.2.2 and 8.2.7.
+* `scIncGamma_joint_entire`, `upperIncGamma_parameter_entire`, `lowerIncGamma_parameter_analytic`,
+  `lowerIncGamma_parameter_residue`: parameter dependence and residues (DLMF §8.2(ii)).
+* `lowerIncGammaOnLog_monodromy`, `upperIncGammaOnLog_monodromy`,
+  `upperIncGammaOnLog_monodromy_limit`, `upperIncGammaOnLog_jump`, `upperIncGammaOnLog_halfTurn`:
+  the continuation formulas DLMF 8.2.8–8.2.11.
+* `lower_upperIncGamma_ode`, `upperIncGamma_scaled_ode`, `scIncGamma_ode`: the differential
+  equations DLMF 8.2.12–8.2.14.
+* `scIncGamma_hasSum_exponential`: the series DLMF 8.7.1.
+* `scIncGamma_recurrence`, `normIncGammaPContinued_shift_up`, `normIncGammaQContinued_shift_up`:
+  the recurrences DLMF 8.8.4, 8.8.11 and 8.8.12.
+* `hasDerivAt_incompleteGamma`: the derivatives DLMF 8.8.13.
+* `regularizedConfluent_self_succ_neg`: `𝐌(a,a+1,-z)` is the scaled incomplete Gamma
+  function.
 -/
 
 @[expose] public noncomputable section

@@ -11,12 +11,17 @@ public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 /-!
 # Elementary exponential bounds for trigonometric and hyperbolic functions
 
+Growth bounds for the complex sine and cosine, and elementary real inequalities for the
+exponential, the hyperbolic cosine and the cosine.
+
+## Main results
+
 * `Complex.norm_sin_le_exp_abs_im`, `Complex.norm_cos_le_exp_abs_im`:
-  `‖sin z‖, ‖cos z‖ ≤ e^{|Im z|}`;
-* `Real.cosh_le_exp_abs`: `cosh t ≤ e^{|t|}`;
-* `Real.exp_sub_one_le_mul_exp`: `eʸ - 1 ≤ y eʸ`;
+  `‖sin z‖, ‖cos z‖ ≤ e^{|Im z|}`.
+* `Real.cosh_le_exp_abs`: `cosh t ≤ e^{|t|}`.
+* `Real.exp_sub_one_le_mul_exp`: `eʸ - 1 ≤ y eʸ` for every real `y`.
 * `Real.cos_pos_of_abs_lt_pi_div_two` and its partial converse
-  `Real.abs_lt_pi_div_two_of_cos_pos`.
+  `Real.abs_lt_pi_div_two_of_cos_pos` on `(-3π/2, 3π/2)`.
 -/
 
 @[expose] public section

@@ -14,19 +14,29 @@ public import DLMF.OrthogonalPolynomials.Legendre
 /-!
 # Zonal harmonics, Funk–Hecke and the spherical addition theorem
 
-Tools for AAR §§9.6–9.7 in three dimensions:
+This file contains the tools for AAR §§9.6–9.7 in three dimensions: harmonic polynomials as
+harmonic functions, the Poisson-kernel expansion in Legendre polynomials, the reproducing
+property of zonal kernels, the Funk–Hecke formula and the addition theorem.
 
-* polynomial evaluation on Euclidean space is smooth, with derivatives given by `pderiv`, so a
-  polynomial annihilated by `laplacianMv` is harmonic in Mathlib's sense;
-* the Poisson-kernel expansion `(1 - r²)/(1 - 2rt + r²)^{3/2} = ∑ (2j+1) P_j(t) r^j`
-  (from the Gegenbauer generating function and DLMF 18.9.7);
-* the reproducing property `(2j+1) ∫ P_j(ξ·y) S(y) dσ(y) = 4π δ_{jk} S(ξ)` for harmonic
-  homogeneous `S` of degree `k`, from the Poisson representation of the Tau Ceti contributors
-  and uniqueness of power-series coefficients;
-* the Funk–Hecke formula, by Legendre expansion of polynomials and Weierstrass approximation;
-* the addition theorem, by showing that the defect `y ↦ c P_k(ξ·y) - ∑ S_m(ξ) S_m(y)` has
-  squared norm `c - ∑ S_m(ξ)²`, whose integral over the sphere vanishes. This avoids a separate
-  dimension count for harmonic polynomials.
+## Main results
+
+* `zonal_harmonicOnNhd`: a polynomial annihilated by `laplacianMv` is harmonic in Mathlib's
+  sense.
+* `zonal_kernel_hasSum`: `(1 - r²)/(1 - 2rt + r²)^{3/2} = ∑ (2j+1) P_j(t) r^j`.
+* `zonal_reproduce`: `(2j+1) ∫ P_j(ξ·y) S(y) dσ(y) = 4π δ_{jk} S(ξ)` for harmonic homogeneous
+  `S` of degree `k`.
+* `zonal_funk_hecke`, `zonal_funk_hecke_real`: the Funk–Hecke formula (AAR Theorem 9.7.1).
+* `zonal_addition_sphere`, `zonal_spherical_addition`: the addition theorem (AAR
+  Theorem 9.6.3) for unit vectors and in coordinates.
+
+## Implementation notes
+
+The Poisson-kernel expansion comes from the Gegenbauer generating function and DLMF 18.9.7.
+The reproducing property uses the TauCeti Poisson representation and uniqueness of
+power-series coefficients. The Funk–Hecke formula follows by Legendre expansion of polynomials
+and Weierstrass approximation. For the addition theorem, the defect
+`y ↦ c P_k(ξ·y) - ∑ S_m(ξ) S_m(y)` has squared norm `c - ∑ S_m(ξ)²`, whose integral over the
+sphere vanishes; this avoids a separate dimension count for harmonic polynomials.
 -/
 
 @[expose] public noncomputable section

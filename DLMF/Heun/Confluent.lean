@@ -10,18 +10,26 @@ public import DLMF.Heun.Equation
 /-!
 # Confluent forms of Heun's equation (DLMF §31.12)
 
-The four standard confluent forms 31.12.1–31.12.4 are defined in DLMF/Heun/Basic.lean
+The four standard confluent forms 31.12.1–31.12.4 are defined in `DLMF.Heun.Basic`
 (`IsConfluentHeunSolOn`, `IsDoublyConfluentHeunSolOn`, `IsBiconfluentHeunSolOn` with the sign
-corrected in DLMF 1.0.7, `IsTriconfluentHeunSolOn`). This file records the classification of
+corrected in DLMF 1.0.7, `IsTriconfluentHeunSolOn`). This file proves the classification of
 their singular points stated after each equation: at most regular singular points through the
 API of `DLMFMathlib.Analysis.ODE.Singularities`, and the ranks of the irregular singularities
-through Poincaré's rank (`HasIrregularRankAtInfinity`, `HasIrregularRankAt`). The rank
-statements need the leading coefficient to be nonzero (`ε ≠ 0` for 31.12.1, `δ ≠ 0` at `0` for
-31.12.2); for other parameters the singularity is weaker.
+through Poincaré's rank (`HasIrregularRankAtInfinity`, `HasIrregularRankAt`).
 
-The remark that Mathieu, spheroidal and Coulomb spheroidal functions are special cases of
-solutions of the confluent Heun equation (31.12.1) is not acquired: it is not attached to
-explicit transformations in DLMF.
+## Main results
+
+* `confluentHeun_singularities`: DLMF 31.12.1.
+* `doublyConfluentHeun_singularities`: DLMF 31.12.2.
+* `biconfluentHeun_singularities`: DLMF 31.12.3.
+* `triconfluentHeun_ordinary`, `triconfluentHeun_rank_infinity`: DLMF 31.12.4.
+
+## Implementation notes
+
+The rank statements need the leading coefficient to be nonzero (`ε ≠ 0` for 31.12.1, `δ ≠ 0`
+at `0` for 31.12.2); for other parameters the singularity is weaker. The remark that Mathieu,
+spheroidal and Coulomb spheroidal functions are special cases of solutions of the confluent
+Heun equation is not formalized: DLMF does not attach it to explicit transformations.
 -/
 
 @[expose] public section
@@ -34,12 +42,12 @@ noncomputable section
 namespace DLMF.Heun
 
 /-- A function with a nonzero limit is not `O(g)` for `g → 0`. -/
-lemma p1h_not_isBigO_of_tendsto {l : Filter ℂ} [l.NeBot] {f g : ℂ → ℂ} {c : ℂ} (hc : c ≠ 0)
+private lemma not_isBigO_of_tendsto {l : Filter ℂ} [l.NeBot] {f g : ℂ → ℂ} {c : ℂ} (hc : c ≠ 0)
     (hf : Tendsto f l (𝓝 c)) (hg : Tendsto g l (𝓝 0)) : ¬ f =O[l] g := fun h =>
   hc (tendsto_nhds_unique hf (h.trans_tendsto hg))
 
 /-- `z ^ (-n) → 0` at infinity for `n > 0`. -/
-lemma p1h_tendsto_zpow_neg_cobounded {n : ℕ} (hn : 0 < n) :
+private lemma tendsto_zpow_neg_cobounded {n : ℕ} (hn : 0 < n) :
     Tendsto (fun z : ℂ => z ^ (-(n : ℤ))) (Bornology.cobounded ℂ) (𝓝 0) := by
   have h := (tendsto_inv₀_cobounded (α := ℂ)).pow n
   simp only [zero_pow hn.ne'] at h
@@ -47,14 +55,14 @@ lemma p1h_tendsto_zpow_neg_cobounded {n : ℕ} (hn : 0 < n) :
   simp [zpow_neg, inv_pow]
 
 /-- If `f / g → c ≠ 0` and `g' / g → 0` then `f` is not `O(g')`. -/
-lemma p1h_not_isBigO_of_div {l : Filter ℂ} [l.NeBot] {f g g' : ℂ → ℂ} {c : ℂ} (hc : c ≠ 0)
+private lemma not_isBigO_of_tendsto_div {l : Filter ℂ} [l.NeBot] {f g g' : ℂ → ℂ} {c : ℂ} (hc : c ≠ 0)
     (hf : Tendsto (fun z => f z / g z) l (𝓝 c)) (hg : Tendsto (fun z => g' z / g z) l (𝓝 0)) :
     ¬ f =O[l] g' := fun h =>
-  p1h_not_isBigO_of_tendsto hc hf hg
+  not_isBigO_of_tendsto hc hf hg
     (by simpa [div_eq_mul_inv] using h.mul (isBigO_refl (fun z => (g z)⁻¹) l))
 
 /-- `f = O(g)` from a limit of `f / g`, for `g` eventually nonzero. -/
-lemma p1h_isBigO_of_div {l : Filter ℂ} {f g : ℂ → ℂ} {c : ℂ}
+private lemma isBigO_of_tendsto_div {l : Filter ℂ} {f g : ℂ → ℂ} {c : ℂ}
     (hf : Tendsto (fun z => f z / g z) l (𝓝 c)) (hg : ∀ᶠ z in l, g z ≠ 0) : f =O[l] g :=
   isBigO_of_div_tendsto_nhds (hg.mono fun _ hz h => absurd h hz) c hf
 
@@ -73,12 +81,12 @@ theorem confluentHeun_singularities (q α γ δ ε : ℂ) (hε : ε ≠ 0) :
   have hm1 : (0 : ℂ) - 1 ≠ 0 := by norm_num
   have h1 : (1 : ℂ) ≠ 0 := one_ne_zero
   refine ⟨?_, ?_, fun z hz0 hz1 => ?_, ?_⟩
-  · refine p1h_atMostRegular_two (g₀ := fun z => z * (α * z - q) / (z - 1))
+  · refine linearODEAtMostRegularAt_two (g₀ := fun z => z * (α * z - q) / (z - 1))
       (g₁ := fun z => γ + z * δ / (z - 1) + z * ε) (by fun_prop (disch := simpa))
       (by fun_prop (disch := simpa)) (fun z hz => ?_) (fun z hz => ?_)
     · rw [sub_zero]; field_simp
     · rw [sub_zero]; field_simp
-  · refine p1h_atMostRegular_two (g₀ := fun z => (z - 1) * (α * z - q) / z)
+  · refine linearODEAtMostRegularAt_two (g₀ := fun z => (z - 1) * (α * z - q) / z)
       (g₁ := fun z => (z - 1) * γ / z + δ + (z - 1) * ε) (by fun_prop (disch := simpa))
       (by fun_prop (disch := simpa)) (fun z hz => ?_) (fun z hz => ?_)
     · have hz' : z - 1 ≠ 0 := sub_ne_zero.2 hz
@@ -90,7 +98,7 @@ theorem confluentHeun_singularities (q α γ δ ε : ℂ) (hε : ε ≠ 0) :
       · simp; ring
       · field_simp
   · have hz1' : z - 1 ≠ 0 := sub_ne_zero.2 hz1
-    exact p1h_ordinary_two (by fun_prop (disch := simp [hz0, hz1']))
+    exact linearODEOrdinaryAt_two (by fun_prop (disch := simp [hz0, hz1']))
       (by fun_prop (disch := simp [hz0, hz1']))
   · have hev : ∀ᶠ z in Bornology.cobounded ℂ, z ≠ 0 ∧ z ≠ 1 :=
       (Bornology.eventually_ne_cobounded 0).and (Bornology.eventually_ne_cobounded 1)
@@ -121,7 +129,7 @@ theorem confluentHeun_singularities (q α γ δ ε : ℂ) (hε : ε ≠ 0) :
     · simpa using hp.isBigO_one ℂ
     · simpa using hr.isBigO_one ℂ
     · rintro ⟨h, -⟩
-      exact p1h_not_isBigO_of_tendsto hε hp (p1h_tendsto_zpow_neg_cobounded (n := 1) one_pos)
+      exact not_isBigO_of_tendsto hε hp (tendsto_zpow_neg_cobounded (n := 1) one_pos)
         (by simpa using h)
 
 /-- DLMF 31.12.2: the doubly-confluent Heun equation has irregular singularities of rank `1` at
@@ -137,7 +145,7 @@ theorem doublyConfluentHeun_singularities (q α γ δ : ℂ) (hδ : δ ≠ 0) :
   have hev : ∀ᶠ z in 𝓝[≠] (0 : ℂ), z ≠ 0 := self_mem_nhdsWithin
   have hevi : ∀ᶠ z in Bornology.cobounded ℂ, z ≠ 0 := Bornology.eventually_ne_cobounded 0
   refine ⟨fun z hz0 => ?_, ?_, ?_⟩
-  · exact p1h_ordinary_two (by fun_prop (disch := simp [hz0]))
+  · exact linearODEOrdinaryAt_two (by fun_prop (disch := simp [hz0]))
       (by fun_prop (disch := simp [hz0]))
   · have hp : Tendsto (fun z => (δ / z ^ 2 + γ / z + 1) / (z - 0) ^ (-((1 : ℕ) : ℤ) - 1))
         (𝓝[≠] 0) (𝓝 δ) := by
@@ -168,11 +176,11 @@ theorem doublyConfluentHeun_singularities (q α γ δ : ℂ) (hδ : δ ≠ 0) :
       rw [sub_zero]
       norm_num [zpow_neg]
       field_simp
-    refine ⟨le_rfl, p1h_isBigO_of_div hp ?_, p1h_isBigO_of_div hr ?_, ?_⟩
+    refine ⟨le_rfl, isBigO_of_tendsto_div hp ?_, isBigO_of_tendsto_div hr ?_, ?_⟩
     · filter_upwards [hev] with z hz; simp [hz]
     · filter_upwards [hev] with z hz; simp [hz]
     · rintro ⟨h, -⟩
-      exact p1h_not_isBigO_of_div hδ hp hz h
+      exact not_isBigO_of_tendsto_div hδ hp hz h
   · have hp : Tendsto (fun z => δ / z ^ 2 + γ / z + 1) (Bornology.cobounded ℂ) (𝓝 1) := by
       have h : Tendsto (fun u : ℂ => δ * u ^ 2 + γ * u + 1) (𝓝 0)
           (𝓝 (δ * 0 ^ 2 + γ * 0 + 1)) :=
@@ -196,8 +204,8 @@ theorem doublyConfluentHeun_singularities (q α γ δ : ℂ) (hδ : δ ≠ 0) :
     · simpa using hp.isBigO_one ℂ
     · simpa using hr.isBigO_one ℂ
     · rintro ⟨h, -⟩
-      exact p1h_not_isBigO_of_tendsto one_ne_zero hp
-        (p1h_tendsto_zpow_neg_cobounded (n := 1) one_pos) (by simpa using h)
+      exact not_isBigO_of_tendsto one_ne_zero hp
+        (tendsto_zpow_neg_cobounded (n := 1) one_pos) (by simpa using h)
 
 /-- DLMF 31.12.3: the biconfluent Heun equation (sign as corrected in DLMF 1.0.7) has an at
 most regular singular point at `z = 0`, every other finite point is ordinary, and it has an
@@ -211,12 +219,12 @@ theorem biconfluentHeun_singularities (q α γ δ : ℂ) :
   intro c
   have hevi : ∀ᶠ z in Bornology.cobounded ℂ, z ≠ 0 := Bornology.eventually_ne_cobounded 0
   refine ⟨?_, fun z hz0 => ?_, ?_⟩
-  · refine p1h_atMostRegular_two (g₀ := fun z => z * (α * z - q))
+  · refine linearODEAtMostRegularAt_two (g₀ := fun z => z * (α * z - q))
       (g₁ := fun z => -(γ + δ * z + z ^ 2)) (by fun_prop) (by fun_prop)
       (fun z hz => ?_) (fun z hz => ?_)
     · rw [sub_zero]; field_simp
     · rw [sub_zero]; field_simp
-  · exact p1h_ordinary_two (by fun_prop (disch := simp [hz0]))
+  · exact linearODEOrdinaryAt_two (by fun_prop (disch := simp [hz0]))
       (by fun_prop (disch := simp [hz0]))
   · have hp : Tendsto (fun z => -(γ / z + δ + z) / z ^ ((2 : ℕ) - 1 : ℤ))
         (Bornology.cobounded ℂ) (𝓝 (-1)) := by
@@ -247,11 +255,11 @@ theorem biconfluentHeun_singularities (q α γ δ : ℂ) :
       refine (tendsto_inv₀_cobounded (α := ℂ)).congr' ?_
       filter_upwards [hevi] with z hz
       norm_num
-    refine ⟨by norm_num, p1h_isBigO_of_div hp ?_, p1h_isBigO_of_div hr ?_, ?_⟩
+    refine ⟨by norm_num, isBigO_of_tendsto_div hp ?_, isBigO_of_tendsto_div hr ?_, ?_⟩
     · filter_upwards [hevi] with z hz; simp [hz]
     · filter_upwards [hevi] with z hz; simp [hz]
     · rintro ⟨h, -⟩
-      exact p1h_not_isBigO_of_div (by norm_num) hp hz h
+      exact not_isBigO_of_tendsto_div (by norm_num) hp hz h
 
 /-- DLMF 31.12.4: the triconfluent Heun equation has no finite singular points (every finite
 point is ordinary). -/

@@ -18,8 +18,21 @@ For `0 < σ < re a` and `u > 0`,
 `Γ(a) (1+u)^{-a} = 1/(2π) ∫ Γ(σ+iy) Γ(a-σ-iy) u^{-σ-iy} dy`,
 
 the Mellin inversion (Mathlib's `mellinInv_mellin_eq`) of the Beta integral
-`∫₀^∞ t^{s-1} (1+t)^{-a} dt = Γ(s)Γ(a-s)/Γ(a)` (DLMF 5.12.3). The vertical integrability comes
-from the bounds of `DLMF.Gamma.VerticalBounds`.
+`∫₀^∞ t^{s-1} (1+t)^{-a} dt = Γ(s)Γ(a-s)/Γ(a)` (DLMF 5.12.3). The file also contains the
+Cahen–Mellin integral for `e^{-u}` and holomorphy of vertical integrals in a parameter. The
+vertical integrability comes from the bounds of `DLMF.Gamma.VerticalBounds`.
+
+## Main results
+
+* `mellin_one_add_cpow_neg`: the Beta integral as a Mellin transform (DLMF 5.12.3).
+* `Gamma_mul_one_add_cpow_neg`: the basic Mellin–Barnes integral above.
+* `exp_neg_eq_integral`: the Cahen–Mellin integral `e^{-u} = 1/(2π) ∫ Γ(σ+iy) u^{-σ-iy} dy`.
+* `integrable_Gamma_vertical`, `integrable_Gamma_mul_Gamma_vertical`: vertical integrability.
+* `exists_norm_Gamma_shift_le`, `exists_norm_recip_Gamma_shift_le`: exponential bounds for `Γ`
+  and `1/Γ` on shifted vertical lines.
+* `differentiable_integral_mul_recip_Gamma`: integrals against `1/Γ(c+σ+iy)` are entire in `c`.
+* `differentiableOn_integral_mul_cpow`: integrals against `w^{σ+iy}` are holomorphic in the right
+  half-plane.
 -/
 
 @[expose] public section
@@ -62,7 +75,7 @@ theorem exists_norm_Gamma_shift_le {x : ℝ} (hx : 0 < x) (β : ℝ) :
 theorem mellin_one_add_cpow_neg {a s : ℂ} (hs : 0 < s.re) (hsa : s.re < a.re) :
     mellin (fun t : ℝ => ((1 + t : ℝ) : ℂ) ^ (-a)) s = Gamma s * Gamma (a - s) / Gamma a := by
   have has : 0 < (a - s).re := by simp only [sub_re]; linarith
-  have hb := beta_on_Ioi hs has
+  have hb := beta_on_Ioi (a := s) (b := a - s)
   rw [show s + (a - s) = a by ring] at hb
   have hΓ := Complex.Gamma_mul_Gamma_eq_betaIntegral hs has
   rw [show s + (a - s) = a by ring] at hΓ

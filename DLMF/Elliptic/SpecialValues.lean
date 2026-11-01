@@ -10,19 +10,39 @@ public import DLMF.Hypergeometric.Elementary
 public import DLMF.Elliptic.Jacobi
 
 /-!
-# The algebraic form of `F`, `arcsn`, and special values (Duverney Ch. 5)
+# The algebraic form of `F`, `arcsn`, and special values
 
-* The substitution `t = sin θ` (by the one-dimensional change of variables for set integrals,
-  which handles the integrable singularity at `t = 1`) gives
-  `∫₀ˣ dt/√((1-t²)(1-mt²)) = F(arcsin x|m)` for `0 ≤ x ≤ 1`, hence `K = ∫₀¹`. It also gives
-  Jacobi's `arcsn = F ∘ arcsin` with `sn ∘ arcsn = id` and
-  `arcsn' = ((1-x²)(1-mx²))^{-1/2}` (Duverney Thm 5.9).
-* `K(1/2) = Γ(1/4)²/(4√π)`, by Gauss's second summation theorem and the reflection formula.
-  With `K = π/(2M)` this gives Gauss's constant `Γ(1/4)² M(1, 1/√2) = 2π^{3/2}`, and with
-  Legendre's relation the value of `E(1/2)` (Duverney (5.38), Ex. 5.9).
-* `K(-1) = K(1/2)/√2` by homogeneity of the AGM, so the lemniscate integral is
+This file proves the algebraic form of the incomplete elliptic integral of the first kind,
+defines Jacobi's inverse function `arcsn`, and evaluates `K` and `E` at special parameters, the
+lemniscate integral and the perimeter of an ellipse (Duverney Ch. 5).
+
+## Main definitions
+
+* `Real.jacobiArcsnm`: Jacobi's inverse function `arcsn(x|m) = F(arcsin x|m)` (DLMF 22.15.4).
+* `ellipsePerimeter`: the perimeter of the ellipse `(a sin θ, b cos θ)`.
+
+## Main results
+
+* `Real.integral_recip_sqrt_eq_incEllIntFm`: `∫₀ˣ dt/√((1-t²)(1-mt²)) = F(arcsin x|m)` for
+  `0 ≤ x ≤ 1` (Duverney Thm 5.9).
+* `Real.compEllIntKm_eq_integral_algebraic`: `K(m) = ∫₀¹ dt/√((1-t²)(1-mt²))` (DLMF 19.2.8).
+* `Real.jacobiSnm_jacobiArcsnm`, `Real.jacobiArcsnm_jacobiSnm`, `Real.hasDerivAt_jacobiArcsnm`:
+  `arcsn` inverts `sn` (DLMF 22.15.1), with `arcsn' = ((1-x²)(1-mx²))^{-1/2}`.
+* `Real.compEllIntKm_one_half`: `K(1/2) = Γ(1/4)²/(4√π)` (Duverney (5.38)).
+* `Gamma_one_fourth_sq_mul_agm`: Gauss's constant, `Γ(1/4)² M(1, 1/√2) = 2π^{3/2}`.
+* `Real.compEllIntEm_one_half`: `E(1/2) = π^{3/2}/Γ(1/4)² + Γ(1/4)²/(8√π)` (Duverney Ex. 5.9).
+* `Real.compEllIntKm_neg_one`: `K(-1) = K(1/2)/√2`.
+* `integral_recip_sqrt_one_sub_pow_four`: the lemniscate integral
   `∫₀¹ dt/√(1-t⁴) = Γ(1/4)²/(4√(2π))` (Duverney (5.10)–(5.13)).
-* The perimeter of an ellipse is `4a E(e²) = 2πa F(-1/2, 1/2; 1; e²)` (Duverney (5.4), (5.6)).
+* `ellipsePerimeter_eq`, `ellipsePerimeter_eq_ordinaryHypergeometric`: the perimeter is
+  `4a E(e²) = 2πa F(-1/2, 1/2; 1; e²)` (Duverney (5.4), (5.6)).
+
+## Implementation notes
+
+The substitution `t = sin θ` uses the one-dimensional change of variables for set integrals,
+which handles the integrable singularity at `t = 1`. `K(1/2)` follows from Gauss's second
+summation theorem and the reflection formula; Gauss's constant then follows from `K = π/(2M)`,
+the value of `E(1/2)` from Legendre's relation, and `K(-1)` from homogeneity of the AGM.
 -/
 
 @[expose] public section

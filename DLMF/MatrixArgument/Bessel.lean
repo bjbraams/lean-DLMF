@@ -6,18 +6,34 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.MatrixArgument.Generalized
-public import DLMF.MatrixArgument.Q2mMatrixIntegrals
+public import DLMF.MatrixArgument.MatrixIntegrals
 
 /-!
 # Bessel functions of matrix argument (DLMF §35.5)
 
-`besselA ν T` (35.5.1–35.5.2) and `besselB ν T` (35.5.3) are defined in
-`DLMF.MatrixArgument.Basic`. This file proves 35.5.1 (`besselA_zero`, from 35.8.4 and 35.8.8),
-the convergence 35.5.3 of the integral defining `B_ν` (`integrableOn_besselB`) and the
-reflection 35.5.6 (`besselB_neg`, by the inversion `X ↦ X⁻¹` and congruence by `T^{1/2}`), and
-states 35.5.4, 35.5.5, 35.5.7 and 35.5.8 (admitted). Where DLMF evaluates a function of matrix
-argument at a product such as `SX` with `X ∈ Ω`, the statements use `X^{1/2} S X^{1/2}`, which
-has the same eigenvalues. §35.5(iii) cites references only.
+Properties of the Bessel functions `A_ν` and `B_ν` of a real symmetric matrix argument. The
+functions `besselA ν T` (DLMF 35.5.1–35.5.2) and `besselB ν T` (DLMF 35.5.3) are defined in
+`DLMF.MatrixArgument.Basic`; here `Ω` is the cone of positive definite matrices and `𝓢` the
+space of real symmetric matrices.
+
+## Main results
+
+* `besselA_zero`: `A_ν(0) = 1 / Γ_m(ν + (m+1)/2)` (DLMF 35.5.1), from 35.8.4 and 35.8.8.
+* `integrableOn_besselB`: absolute convergence of the integral defining `B_ν(T)`
+  (DLMF 35.5.3).
+* `hasIntegralOn_besselA_laplace`: the Laplace transform of `|X|^ν A_ν(SX)` (DLMF 35.5.4).
+* `hasIntegralOn_besselA_convolution`: the convolution formula DLMF 35.5.5.
+* `besselB_neg`: the reflection `B_ν(T) = |T|^{-ν} B_{-ν}(T)` (DLMF 35.5.6), by the inversion
+  `X ↦ X⁻¹` and congruence by `T^{1/2}`.
+* `hasIntegralOn_besselA_mul_besselB`: the integral of `A_{ν₁} B_{-ν₂}` (DLMF 35.5.7).
+* `integral_etr_orthogonal`: the integral of `etr(SH)` over the orthogonal group `O(m)`
+  (DLMF 35.5.8).
+
+## Implementation notes
+
+Where DLMF evaluates a function of matrix argument at a product such as `SX` with `X ∈ Ω`, the
+statements use `X^{1/2} S X^{1/2}`, which has the same eigenvalues. DLMF §35.5(iii) cites
+references only.
 -/
 
 @[expose] public noncomputable section
@@ -34,11 +50,11 @@ theorem besselA_zero {m : ℕ} (ν : ℂ) :
   rw [besselA_eq_hyp0F1, neg_zero, hyp0F1, hypergeometricPFQ_zero, mul_one]
 
 /-- Measurability of the integrand of `B_ν(T)` (35.5.3). -/
-lemma q2m_measurable_besselB_integrand {m : ℕ} (ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) :
+private lemma measurable_besselB_integrand {m : ℕ} (ν : ℂ) (T : Matrix (Fin m) (Fin m) ℝ) :
     Measurable (fun X : SymMatrix m =>
       (etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ) + (X : Matrix (Fin m) (Fin m) ℝ)⁻¹)) : ℂ) *
         (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ (ν - ((m : ℂ) + 1) / 2))) := by
-  have hi := q2m_measurable_inv m
+  have hi := measurable_symMatrix_inv m
   have ht : (fun X : SymMatrix m => etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ) +
       (X : Matrix (Fin m) (Fin m) ℝ)⁻¹))) = fun X : SymMatrix m => Real.exp
         (-(T * (X : Matrix (Fin m) (Fin m) ℝ)).trace -
@@ -65,7 +81,7 @@ theorem integrableOn_besselB {m : ℕ} (ν : ℂ) {T : Matrix (Fin m) (Fin m) �
     have := Nat.le_ceil (((m : ℝ) - 1) / 2 - ν.re)
     rw [hK]; push_cast; linarith
   have hint := Matrix.PosDef.integrableOn_posDef_det_rpow_mul_exp_neg_trace_mul hT hK'
-  have hmeas := q2m_measurable_besselB_integrand ν T
+  have hmeas := measurable_besselB_integrand ν T
   refine (hint.const_mul ((m * K)! : ℝ)).mono' hmeas.aestronglyMeasurable ?_
   filter_upwards [ae_restrict_mem (TauCeti.measurableSet_posDefMatrix m)] with X hX
   have hX : (X : Matrix (Fin m) (Fin m) ℝ).PosDef := hX
@@ -87,7 +103,7 @@ theorem integrableOn_besselB {m : ℕ} (ν : ℂ) {T : Matrix (Fin m) (Fin m) �
       exact Finset.sum_nonneg fun i _ => by simpa using (hYi.eigenvalues_pos i).le
     have h1 : (A.det ^ K)⁻¹ ≤ A⁻¹.trace ^ (m * K) := by
       rw [← inv_pow, ← hdetinv, pow_mul]
-      exact pow_le_pow_left₀ hYi.det_pos.le (q2m_det_le_trace_pow hYi) K
+      exact pow_le_pow_left₀ hYi.det_pos.le (det_le_trace_pow_of_posDef hYi) K
     have h2 := Real.pow_div_factorial_le_exp _ htr (m * K)
     rw [div_le_iff₀ (by positivity)] at h2
     rw [div_eq_mul_inv]
@@ -149,7 +165,7 @@ theorem besselB_neg {m : ℕ} (ν : ℂ) {T : Matrix (Fin m) (Fin m) ℝ} (hT : 
   unfold besselB
   -- inversion
   rw [show posDefCone m = posDefCone m from rfl,
-    q2m_setIntegral_posDef_inv (q2m_measurable_besselB_integrand ν T)]
+    setIntegral_posDefCone_inv (measurable_besselB_integrand ν T)]
   have step2 : ∀ X ∈ posDefCone m,
       (((X : Matrix (Fin m) (Fin m) ℝ).det ^ (-((m : ℝ) + 1)) : ℝ) : ℂ) *
         ((etr (-(T * ((TauCeti.symmetricInv X : SymMatrix m) : Matrix (Fin m) (Fin m) ℝ) +

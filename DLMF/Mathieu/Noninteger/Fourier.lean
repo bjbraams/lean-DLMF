@@ -9,19 +9,26 @@ public import DLMF.Mathieu.Noninteger.Properties
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 
 /-!
-# Fourier series of the Mathieu functions of noninteger order (DLMF §28.14)
+# Fourier series of the Mathieu functions of noninteger order
 
-`me_ν(z, q) = ∑_m c^ν_{2m}(q) e^{i(ν+2m)z}` (28.14.1), with the cosine and sine series of
-`ce_ν`, `se_ν` (28.14.2–28.14.3), the recurrence 28.14.4, the normalization 28.14.5, the rate
-of convergence 28.14.6, the symmetries 28.14.7–28.14.8, the values at `q = 0` (28.14.9) and the
-leading small-`q` behaviour 28.14.10. The coefficient `c^ν_{2m}(q)` is
-`DLMF.Mathieu.mathieuMeCoeff ν q m` (index `m`).
+This file treats the Fourier series `me_ν(z, q) = ∑_m c^ν_{2m}(q) e^{i(ν+2m)z}` of DLMF §28.14
+and its coefficients `c^ν_{2m}(q) = DLMF.Mathieu.mathieuMeCoeff ν q m` (index `m`). All
+statements are for `ν ∉ ℤ`; those about the continued coefficients assume `q` normal along the
+segment `[0, q]` (`MathieuNormalSegment ν q`, automatic for real `ν`, `q`).
 
-All statements are for `ν ∉ ℤ`; those about the continued coefficients assume `q` normal along
-the segment `[0, q]` (`MathieuNormalSegment ν q`, automatic for real `ν`, `q`). Proved: the
-convergence 28.14.1 (absolute, locally uniform on `ℂ`) and 28.14.2–28.14.3, 28.14.4, 28.14.5,
-the rate 28.14.6 (via the monotone decay and nonvanishing of the tail of a minimal solution of
-28.14.4), 28.14.7, 28.14.8, 28.14.9.
+## Main results
+
+* `hasSum_mathieuMe`, `hasSum_mathieuMe_ofReal`: the Fourier series 28.14.1, converging
+  absolutely and locally uniformly on `ℂ`.
+* `hasSum_mathieuCeNu`, `hasSum_mathieuSeNu`: the cosine and sine series of `ce_ν`, `se_ν`
+  (DLMF 28.14.2, 28.14.3).
+* `mathieuMeCoeff_recurrence`: the recurrence 28.14.4.
+* `hasSum_mathieuMeCoeff_sq`: the normalization 28.14.5.
+* `mathieuMeCoeff_ratio`: the rate of convergence 28.14.6, via the monotone decay and
+  nonvanishing of the tail of a minimal solution of 28.14.4.
+* `mathieuMeCoeff_neg`, `mathieuMeCoeff_neg_q`: the symmetries 28.14.7, 28.14.8.
+* `mathieuMeCoeff_zero`: the values at `q = 0` (DLMF 28.14.9).
+* `mathieuMeCoeff_isBigO_zero`: the leading small-`q` behaviour (DLMF 28.14.10).
 -/
 
 @[expose] public noncomputable section
@@ -45,7 +52,7 @@ theorem hasSum_mathieuMe (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ} (hq : M
       (fun (s : Finset ℤ) (z : ℂ) =>
         ∑ m ∈ s, mathieuMeCoeff ν q m * Complex.exp (I * (ν + 2 * m) * z))
       (fun z => mathieuMe ν z q) atTop := by
-  have hd := m28b_isMeCoeffSeq_data hq
+  have hd := isMeCoeffSeq_mathieuLambdaData hq
   set c := (mathieuLambdaData ν q).2
   have hcoef : ∀ m, mathieuMeCoeff ν q m = c m := fun m => mathieuMeCoeff_of_not_int hν q m
   have hme : ∀ z, mathieuMe ν z q = ∑' m : ℤ, c m * Complex.exp (I * (ν + 2 * m) * z) := by
@@ -53,16 +60,16 @@ theorem hasSum_mathieuMe (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ} (hq : M
   simp only [hcoef, hme]
   have hsum : ∀ z : ℂ,
       Summable (fun m : ℤ => ‖c m * Complex.exp (I * (ν + 2 * m) * z)‖) := fun z => by
-    simpa using p1b_summable_series hd.1 hd.2.1 0 z
+    simpa using summable_exp_series_of_rec hd.1 hd.2.1 0 z
   refine ⟨fun z => ⟨hsum z, (hsum z).of_norm.hasSum⟩, ?_⟩
   rw [tendstoLocallyUniformly_iff_forall_isCompact]
   intro K hK
   obtain ⟨R, hR⟩ := hK.isBounded.subset_closedBall 0
-  refine tendstoUniformlyOn_tsum (p1b_summable_bound hd.1 hd.2.1 R 0) fun m z hz => ?_
+  refine tendstoUniformlyOn_tsum (summable_majorant_of_rec hd.1 hd.2.1 R 0) fun m z hz => ?_
   have hzR : ‖z‖ ≤ R := by simpa using hR hz
   rw [norm_mul]
   gcongr
-  simpa using p1b_norm_pow_exp_le ν z m hzR 0
+  simpa using norm_pow_mul_exp_le ν z m hzR 0
 
 /-- The Fourier series 28.14.1 on the **real axis** (proved): for `ν ∉ ℤ`, `q` normal along the
 segment and real `x`, the series converges absolutely to `me_ν(x, q)` (the coefficients are
@@ -73,7 +80,7 @@ theorem hasSum_mathieuMe_ofReal (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ}
     Summable (fun m : ℤ => ‖mathieuMeCoeff ν q m * Complex.exp (I * (ν + 2 * m) * x)‖) ∧
       HasSum (fun m : ℤ => mathieuMeCoeff ν q m * Complex.exp (I * (ν + 2 * m) * x))
         (mathieuMe ν x q) := by
-  have hc := (m28b_isMeCoeffSeq_data hq).2.1
+  have hc := (isMeCoeffSeq_mathieuLambdaData hq).2.1
   have hn : ∀ m : ℤ, ‖mathieuMeCoeff ν q m * Complex.exp (I * (ν + 2 * m) * x)‖ =
       ‖(mathieuLambdaData ν q).2 m‖ * Real.exp (-(ν.im * x)) := by
     intro m
@@ -87,14 +94,14 @@ theorem hasSum_mathieuMe_ofReal (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ}
   exact (hs.of_norm).hasSum
 
 /-- `e^{iθz} + e^{iθ(-z)} = 2 cos(θz)`. -/
-lemma m28b_exp_add_exp_neg (θ z : ℂ) :
+private lemma exp_I_mul_add_exp_I_mul_neg_eq_cos (θ z : ℂ) :
     Complex.exp (I * θ * z) + Complex.exp (I * θ * -z) = 2 * Complex.cos (θ * z) := by
   rw [show I * θ * z = (θ * z) * I by ring, show I * θ * -z = (-(θ * z)) * I by ring,
     Complex.exp_mul_I, Complex.exp_mul_I, Complex.cos_neg, Complex.sin_neg]
   ring
 
 /-- `-(i/2) (e^{iθz} - e^{iθ(-z)}) = sin(θz)`. -/
-lemma m28b_exp_sub_exp_neg (θ z : ℂ) :
+private lemma exp_I_mul_sub_exp_I_mul_neg_eq_sin (θ z : ℂ) :
     -(I / 2) * (Complex.exp (I * θ * z) - Complex.exp (I * θ * -z)) = Complex.sin (θ * z) := by
   rw [show I * θ * z = (θ * z) * I by ring, show I * θ * -z = (-(θ * z)) * I by ring,
     Complex.exp_mul_I, Complex.exp_mul_I, Complex.cos_neg, Complex.sin_neg]
@@ -112,7 +119,7 @@ theorem hasSum_mathieuCeNu (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ} (hq :
   have h2 := ((hasSum_mathieuMe hν hq).1 (-z)).2
   have := (h1.add h2).div_const 2
   refine this.congr_fun fun m => ?_
-  rw [← mul_add, m28b_exp_add_exp_neg]; ring
+  rw [← mul_add, exp_I_mul_add_exp_I_mul_neg_eq_cos]; ring
 
 /-- **Sine series of `se_ν`** (DLMF 28.14.3): `se_ν(z, q) = ∑_m c^ν_{2m}(q) sin((ν+2m)z)` for
 `ν ∉ ℤ` and `q` normal along the segment. Proved from 28.14.1. -/
@@ -125,7 +132,7 @@ theorem hasSum_mathieuSeNu (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ} (hq :
   have h2 := ((hasSum_mathieuMe hν hq).1 (-z)).2
   have := (h1.sub h2).mul_left (-(I / 2))
   refine this.congr_fun fun m => ?_
-  rw [← mul_sub, ← m28b_exp_sub_exp_neg]; ring
+  rw [← mul_sub, ← exp_I_mul_sub_exp_I_mul_neg_eq_sin]; ring
 
 /-- **Recurrence** (DLMF 28.14.4): with `a = λ_ν(q)` and `c_{2m} = c^ν_{2m}(q)`,
 `q c_{2m+2} - (a - (ν + 2m)²) c_{2m} + q c_{2m-2} = 0`, for `ν ∉ ℤ` and `q` normal along the
@@ -136,7 +143,7 @@ theorem mathieuMeCoeff_recurrence (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ
     q * mathieuMeCoeff ν q (m + 1) - (mathieuLambda ν q - (ν + 2 * m) ^ 2) * mathieuMeCoeff ν q m
       + q * mathieuMeCoeff ν q (m - 1) = 0 := by
   simp only [mathieuMeCoeff_of_not_int hν, mathieuLambda_of_not_int hν]
-  exact (m28b_isMeCoeffSeq_data hq).1 m
+  exact (isMeCoeffSeq_mathieuLambdaData hq).1 m
 
 /-- **Normalization** (DLMF 28.14.5): `∑_m (c^ν_{2m}(q))² = 1` for `ν ∉ ℤ` and `q` normal along
 the segment. -/
@@ -144,10 +151,10 @@ the segment. -/
 theorem hasSum_mathieuMeCoeff_sq (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ}
     (hq : MathieuNormalSegment ν q) : HasSum (fun m : ℤ => mathieuMeCoeff ν q m ^ 2) 1 := by
   simp only [mathieuMeCoeff_of_not_int hν]
-  exact (m28b_isMeCoeffSeq_data hq).2.2
+  exact (isMeCoeffSeq_mathieuLambdaData hq).2.2
 
 /-- For large `k`, `‖a - (ν + 2k)²‖ ≥ 2k² + B` (any fixed `B`). -/
-theorem p1b_norm_D_ge (ν a : ℂ) (B : ℝ) : ∃ M : ℕ, ∀ k : ℤ, (M : ℤ) ≤ k →
+theorem exists_le_norm_sub_add_two_mul_sq (ν a : ℂ) (B : ℝ) : ∃ M : ℕ, ∀ k : ℤ, (M : ℤ) ≤ k →
     2 * (k : ℝ) ^ 2 + B ≤ ‖a - (ν + 2 * k) ^ 2‖ := by
   obtain ⟨M, hM⟩ := exists_nat_ge (2 * ‖ν‖ + ‖a‖ + |B| + 1)
   refine ⟨M, fun k hk => ?_⟩
@@ -169,14 +176,14 @@ theorem p1b_norm_D_ge (ν a : ℂ) (B : ℝ) : ∃ M : ℕ, ∀ k : ℤ, (M : �
 
 /-- Ratio asymptotics on the right tail for a nontrivial absolutely summable solution of
 28.14.4 with `q ≠ 0`: `c_m / c_{m-1} + q/(4m²) = O(m⁻³)`. -/
-lemma p1b_ratio_tail {ν q a : ℂ} {c : ℤ → ℂ} (hq0 : q ≠ 0)
+private lemma coeff_ratio_add_isBigO_atTop {ν q a : ℂ} {c : ℤ → ℂ} (hq0 : q ≠ 0)
     (hrec : ∀ m : ℤ, q * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + q * c (m - 1) = 0)
     (hs : Summable (fun m => ‖c m‖)) (hne : c ≠ 0) :
     (fun m : ℕ => c m / c (m - 1) + q / (4 * (m : ℂ) ^ 2))
       =O[atTop] (fun m : ℕ => ((m : ℝ) ^ 3)⁻¹) := by
   set D : ℤ → ℂ := fun k => a - (ν + 2 * k) ^ 2
   have hqn : 0 < ‖q‖ := norm_pos_iff.mpr hq0
-  obtain ⟨M, hM⟩ := p1b_norm_D_ge ν a (3 * ‖q‖)
+  obtain ⟨M, hM⟩ := exists_le_norm_sub_add_two_mul_sq ν a (3 * ‖q‖)
   have hD3 : ∀ k : ℤ, (M : ℤ) ≤ k → 3 * ‖q‖ ≤ ‖D k‖ := fun k hk => by
     have := hM k hk; nlinarith [sq_nonneg (k : ℝ)]
   -- growth lemma
@@ -322,7 +329,7 @@ theorem mathieuMeCoeff_ratio (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ} (hq
         =O[atTop] (fun m : ℕ => ((m : ℝ) ^ 3)⁻¹) ∧
       (fun m : ℕ => mathieuMeCoeff ν q (-m) / mathieuMeCoeff ν q (-m + 1) + q / (4 * (m : ℂ) ^ 2))
         =O[atTop] (fun m : ℕ => ((m : ℝ) ^ 3)⁻¹) := by
-  have hd := m28b_isMeCoeffSeq_data hq
+  have hd := isMeCoeffSeq_mathieuLambdaData hq
   set c := (mathieuLambdaData ν q).2
   have hne : c ≠ 0 := by
     intro h
@@ -331,7 +338,7 @@ theorem mathieuMeCoeff_ratio (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ} (hq
     simp only [Pi.zero_apply, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow] at this
     exact one_ne_zero (hasSum_zero.unique this).symm
   simp only [mathieuMeCoeff_of_not_int hν]
-  refine ⟨p1b_ratio_tail hq0 hd.1 hd.2.1 hne, ?_⟩
+  refine ⟨coeff_ratio_add_isBigO_atTop hq0 hd.1 hd.2.1 hne, ?_⟩
   have hrec' : ∀ m : ℤ, q * c (-(m + 1)) - ((mathieuLambdaData ν q).1 - (-ν + 2 * m) ^ 2) *
       c (-m) + q * c (-(m - 1)) = 0 := by
     intro m
@@ -342,7 +349,7 @@ theorem mathieuMeCoeff_ratio (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ} (hq
   have hs' : Summable (fun m : ℤ => ‖c (-m)‖) := (Equiv.neg ℤ).summable_iff.mpr hd.2.1
   have hne' : (fun m => c (-m)) ≠ 0 := by
     intro h; apply hne; funext m; simpa using congrFun h (-m)
-  have := p1b_ratio_tail (c := fun m => c (-m)) hq0 hrec' hs' hne'
+  have := coeff_ratio_add_isBigO_atTop (c := fun m => c (-m)) hq0 hrec' hs' hne'
   refine this.congr_left fun m => ?_
   rw [show -((m : ℤ) - 1) = -(m : ℤ) + 1 by ring]
 
@@ -351,8 +358,8 @@ theorem mathieuMeCoeff_ratio (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ} (hq
 @[dlmf 28.14.E7]
 theorem mathieuMeCoeff_neg (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (q : ℂ) (m : ℤ) :
     mathieuMeCoeff (-ν) q (-m) = mathieuMeCoeff ν q m := by
-  rw [mathieuMeCoeff_of_not_int (m28b_not_int_neg hν), mathieuMeCoeff_of_not_int hν,
-    m28b_data_neg_nu]
+  rw [mathieuMeCoeff_of_not_int (intCast_ne_neg_of_not_int hν), mathieuMeCoeff_of_not_int hν,
+    mathieuLambdaData_neg_nu]
   simp
 
 /-- **Change of sign of `q`** (DLMF 28.14.8): `c^ν_{2m}(-q) = (-1)^m c^ν_{2m}(q)` for
@@ -360,14 +367,14 @@ theorem mathieuMeCoeff_neg (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (q : ℂ) (m : 
 @[dlmf 28.14.E8]
 theorem mathieuMeCoeff_neg_q (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (q : ℂ) (m : ℤ) :
     mathieuMeCoeff ν (-q) m = (-1 : ℂ) ^ m * mathieuMeCoeff ν q m := by
-  rw [mathieuMeCoeff_of_not_int hν, mathieuMeCoeff_of_not_int hν, m28b_data_neg_q]
+  rw [mathieuMeCoeff_of_not_int hν, mathieuMeCoeff_of_not_int hν, mathieuLambdaData_neg_q]
 
 /-- **Values at `q = 0`** (DLMF 28.14.9): `c^ν_0(0) = 1` and `c^ν_{2m}(0) = 0` for `m ≠ 0`
 (`ν ∉ ℤ`). -/
 @[dlmf 28.14.E9]
 theorem mathieuMeCoeff_zero (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) :
     mathieuMeCoeff ν 0 0 = 1 ∧ ∀ m : ℤ, m ≠ 0 → mathieuMeCoeff ν 0 m = 0 := by
-  simp only [mathieuMeCoeff_of_not_int hν, m28b_data_zero hν]
+  simp only [mathieuMeCoeff_of_not_int hν, mathieuLambdaData_zero hν]
   exact ⟨by simp, fun m hm => by simp [hm]⟩
 
 /-- **Small-`q` behaviour of the coefficients** (DLMF 28.14.10): for fixed `m ≥ 1` and `ν ∉ ℤ`,

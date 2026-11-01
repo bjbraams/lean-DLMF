@@ -10,11 +10,18 @@ public import DLMF.Airy.ModulusPhase.ReciprocalExpansions
 /-!
 # Asymptotic expansions of Airy phases
 
-Integration of the reciprocal-modulus expansions gives the Airy phase expansions with their
-additive constants fixed.
+Integration of the reciprocal-modulus expansions gives the expansions of the phases `θ` and `φ`
+at `-∞`, with the additive constants `π/4` and `-π/4` fixed by the leading oscillatory
+behaviour of the Airy functions (DLMF 9.8.22, 9.8.23).
 
-Source references and common attribution are retained in
-`DLMF.Airy.ModulusPhase`.
+## Main results
+
+* `airyMod_modulus_bounds`, `airyMod_derivModulus_bounds`: two-sided bounds for
+  `π s^{1/2} M(-s)²` and `π s^{-1/2} N(-s)²`.
+* `airyMod_phase_limit`, `airyMod_derivPhase_limit`: the constants in the phase expansions.
+* `airyPhase_asymptotic`: the expansion of `θ(x)` as `x → -∞` (DLMF 9.8.22).
+* `airyDerivPhase_asymptotic`: the expansion of `φ(x)` as `x → -∞` (DLMF 9.8.23).
+* `airy_phase_printed_coefficients`: every printed coefficient in 9.8.22 and 9.8.23.
 -/
 
 @[expose] public noncomputable section
@@ -122,7 +129,7 @@ theorem airyMod_modulus_bounds {s : ℝ} (hs : 0 < s) :
   have hqi : s ^ (-1 / 2 : ℝ) = (s ^ (1 / 2 : ℝ))⁻¹ := by
     rw [show (-1 / 2 : ℝ) = -(1 / 2) by ring, Real.rpow_neg hs.le]
   constructor
-  · have h := (airyModulus_error (x := -s) (by linarith) (N := 2) (by norm_num)).2
+  · have h := (airyModulus_error (x := -s) (by linarith) (N := 2)).2
     rw [neg_neg] at h
     simp only [airyModulusSum, Finset.sum_range_succ, Finset.sum_range_zero, ite_false,
       Bool.false_eq_true, airyMod_neg_zpow, c0, c1, hqi] at h

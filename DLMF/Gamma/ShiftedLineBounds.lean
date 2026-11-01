@@ -12,20 +12,23 @@ public import DLMFMathlib.Analysis.Complex.BarnesResidue
 # Bounds for `Γ` on vertical lines, uniform under shifts of the line
 
 Contour shifts in Mellin–Barnes integrals move a vertical line `Re s = c` to `Re s = c ± N`
-and need bounds for `Γ` that are uniform in `N`. Writing `s = x + iy`:
+and need bounds for `Γ` that are uniform in `N`. The factorial growth of `Γ(1 - x₀ + N)` and
+`Γ(x₀ + N)` then makes the shifted-line integrals of Mellin–Barnes integrands tend to `0`.
+
+## Main results
+
+Writing `s = x + iy`:
 
 * `shiftB_norm_Gamma_le`: `|Γ(x+iy)| ≤ Γ(x)` for `x > 0`;
 * `shiftB_norm_recip_Gamma_le`: `|1/Γ(x+iy)| ≤ e^{π|y|/2} / Γ(x)` for `x ≥ 1/2`, uniformly in
   `x` (from `|Γ(x)/Γ(x+iy)|² = ∏ (1 + y²/(x+k)²) ≤ cosh πy`, DLMF 5.8.3);
 * `shiftB_norm_Gamma_le_of_le_half`: `|Γ(x+iy)| ≤ 2π e^{-π|y|/2} / (|sin πx| Γ(1-x))` for
   `x ≤ 1/2`, uniformly in `x` (reflection formula);
-* `shiftB_norm_Gamma_sub_nat_le`: hence on the shifted lines `x = x₀ - N`,
+* `shiftB_norm_Gamma_sub_nat_le`: on the shifted lines `x = x₀ - N`,
   `|Γ(x₀ - N + iy)| ≤ 2π e^{-π|y|/2} / (|sin πx₀| Γ(1 - x₀ + N))`, uniformly in `N`;
 * `shiftB_norm_recip_Gamma_add_nat_le`: on `x = x₀ + N` with `x₀ ≥ 1/2`,
-  `|1/Γ(x₀ + N + iy)| ≤ e^{π|y|/2} / Γ(x₀ + N)`.
-
-The factorial growth of `Γ(1 - x₀ + N)` and `Γ(x₀ + N)` makes the shifted-line integrals of
-Mellin–Barnes integrands tend to `0`.
+  `|1/Γ(x₀ + N + iy)| ≤ e^{π|y|/2} / Γ(x₀ + N)`;
+* `shiftB_Gamma_ge`: `Γ(t) ≥ A^{t-1} e^{-(A+1)}` for `t ≥ 1` and `A > 0`.
 -/
 
 @[expose] public section

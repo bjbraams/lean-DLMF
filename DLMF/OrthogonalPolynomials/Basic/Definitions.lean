@@ -17,6 +17,24 @@ public import Mathlib.Analysis.SpecialFunctions.Bernstein
 
 /-!
 # Canonical classical orthogonal polynomial families
+
+The canonical definitions of the classical orthogonal polynomial families that are not in
+Mathlib, following AAR Chapter 6 and DLMF §18.5.
+
+## Main definitions
+
+* `hermitePolyH`: the physicists' Hermite polynomials, by `H_{n+1} = 2x H_n - H_n'` (AAR §6.1).
+* `laguerrePolyL`: the generalized Laguerre polynomials `L_n^{(α)}` as a `₁F₁` (DLMF 18.5.12).
+* `jacobiPolyP`: the Jacobi polynomials `P_n^{(α,β)}` as a `₂F₁` (DLMF 18.5.7).
+* `legendrePolyP`: the Legendre polynomials, the Jacobi case `α = β = 0` (DLMF 18.7.9).
+* `ultrasphPoly`: the Gegenbauer polynomials `C_n^{(λ)}` as a `₂F₁` (DLMF 18.5.9).
+* `jacobiMeasure`: the Jacobi weight measure on `(-1, 1)`.
+* `hermitePolyHEval`: the physicists' Hermite polynomial evaluated in `ℂ`.
+
+## Implementation notes
+
+The hypergeometric realizations of `laguerrePolyL`, `jacobiPolyP` and `ultrasphPoly` are
+intended for `α + 1` (resp. `λ + 1/2`) not a nonpositive integer.
 -/
 
 @[expose] public noncomputable section

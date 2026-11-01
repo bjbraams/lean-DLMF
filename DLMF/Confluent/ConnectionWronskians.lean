@@ -183,7 +183,7 @@ theorem wronskian_kummerU_reflected (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
 @[dlmf 13.2.E35]
 theorem wronskian_regularizedHGFun_kummerUReflected (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (sign : Bool) (hsign : if sign then z.arg < 0 else 0 < z.arg)
-    (_hba : ∀ k : ℕ, b - a ≠ -k) :
+    :
     ODE.wronskian (regularizedHGFun {a} {b})
       (fun w => exp w * kummerU (b - a) b (exp ((if sign then 1 else -1) * π * I) * w)) z =
       exp (-(if sign then 1 else -1) * b * π * I) * z ^ (-b) * exp z / Gamma (b - a) := by
@@ -218,12 +218,14 @@ theorem wronskian_kummerU_reflected_ne_zero (a b : ℂ) {z : ℂ} (hz : z ∈ sl
         fun h0 => him (arg_eq_zero_iff.mp h0.symm).2)]
     exact mul_ne_zero (mul_ne_zero (exp_ne_zero _) (hcp)) (exp_ne_zero _)
 
-/-- Numerically satisfactory pair on `-π/2 ≤ ph z ≤ 3π/2`. The second function is taken on
+/-- DLMF states this for the numerically satisfactory pair on `-π/2 ≤ ph z ≤ 3π/2` with
+`b ∉ ℤ`; the identity holds for all `a`, `b` and every `z` with `z`, `-z` off the cut (stronger
+than DLMF). The second function is taken on
 the principal branch, so `-z` must avoid the cut for it to be differentiable at `z`. -/
 @[dlmf 13.2.E24]
 theorem wronskian_kummerU_kummer_neg (a b : ℂ) {z : ℂ}
-    (hz : z ∈ slitPlane) (hz' : -z ∈ slitPlane) (_harg : -(π / 2) ≤ z.arg)
-    (_harg' : z.arg ≤ 3 * π / 2) (_hb : ∀ n : ℤ, b ≠ n) :
+    (hz : z ∈ slitPlane) (hz' : -z ∈ slitPlane)
+    :
     ODE.wronskian (kummerU a b)
       (fun w => exp w * kummerU (b - a) b (exp (-π * I) * w)) z ≠ 0 := by
   have h := kummerU_reflected_eq a b false
@@ -232,12 +234,14 @@ theorem wronskian_kummerU_kummer_neg (a b : ℂ) {z : ℂ}
   rw [h]
   exact wronskian_kummerU_reflected_ne_zero a b hz hz'
 
-/-- Numerically satisfactory pair on `-3π/2 ≤ ph z ≤ π/2`. The second function is taken on
+/-- DLMF states this for the numerically satisfactory pair on `-3π/2 ≤ ph z ≤ π/2` with
+`b ∉ ℤ`; the identity holds for all `a`, `b` and every `z` with `z`, `-z` off the cut (stronger
+than DLMF). The second function is taken on
 the principal branch, so `-z` must avoid the cut for it to be differentiable at `z`. -/
 @[dlmf 13.2.E25]
 theorem wronskian_kummerU_kummer_pos (a b : ℂ) {z : ℂ}
-    (hz : z ∈ slitPlane) (hz' : -z ∈ slitPlane) (_harg : -(3 * π / 2) ≤ z.arg)
-    (_harg' : z.arg ≤ π / 2) (_hb : ∀ n : ℤ, b ≠ n) :
+    (hz : z ∈ slitPlane) (hz' : -z ∈ slitPlane)
+    :
     ODE.wronskian (kummerU a b)
       (fun w => exp w * kummerU (b - a) b (exp (π * I) * w)) z ≠ 0 := by
   have h := kummerU_reflected_eq a b true
@@ -249,7 +253,7 @@ theorem wronskian_kummerU_kummer_pos (a b : ℂ) {z : ℂ}
 function is differentiable at `z`. -/
 @[dlmf 13.2.E37]
 theorem wronskian_shifted_regularized_kummerUReflected (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
-    (hz' : -z ∈ slitPlane) (sign : Bool) (_ha : ∀ k : ℕ, 1 - a ≠ -k) :
+    (hz' : -z ∈ slitPlane) (sign : Bool) :
     ODE.wronskian (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w)
       (fun w => exp w * kummerU (b - a) b (exp ((if sign then 1 else -1) * π * I) * w)) z =
       -(z ^ (-b) * exp z) / Gamma (1 - a) := by

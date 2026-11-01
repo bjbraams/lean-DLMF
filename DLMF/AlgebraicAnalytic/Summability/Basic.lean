@@ -16,16 +16,15 @@ DLMF §1.15 defines summation methods for series and integrals, the Poisson and 
 of Fourier series and Fourier integrals, the Abel and Cesàro means, and the Riemann–Liouville
 fractional integrals and derivatives.
 
+## Main definitions
+
 * Series (§1.15(i)): `seriesPartialSum` (1.15.1), the predicates `HasAbelSum` (1.15.2–1.15.3),
   `HasCesaroSum` (1.15.4–1.15.5), `HasCesaroSumOfOrder` (1.15.6–1.15.7) and `HasBorelSum`
-  (1.15.8–1.15.9). The Abel and Borel predicates include the convergence of the power series
-  for `0 < x < 1` (respectively of the exponential series for `t ≥ 0`), which DLMF leaves
-  implicit; without it Lean's `tsum` would assign the junk value `0`.
+  (1.15.8–1.15.9).
 * Fourier series (§1.15(iii)): the Poisson kernel `abelPoissonKernel` (1.15.12), the Fejér kernel
-  `fejerKernel` (1.15.15), the Fourier coefficients `F(n)` (1.15.19) are Mathlib's
-  `fourierCoeffOn Real.two_pi_pos f n` (bridge `fourierCoeffOn_two_pi_eq`), the Abel mean
-  `abelMean` (1.15.18), the partial sums `fourierPartialSum` (1.15.22), the Cesàro means
-  `fourierCesaroMean` (1.15.21) and the analytic extension `fourierAnalyticExtension` (1.15.27).
+  `fejerKernel` (1.15.15), the Abel mean `abelMean` (1.15.18), the partial sums
+  `fourierPartialSum` (1.15.22), the Cesàro means `fourierCesaroMean` (1.15.21) and the analytic
+  extension `fourierAnalyticExtension` (1.15.27).
 * Integrals (§1.15(iv)–(v)): `HasAbelIntegral` (1.15.29–1.15.30), `HasCesaroIntegral`
   (1.15.31–1.15.32), the half-plane Poisson kernel `halfPlanePoissonKernel` (1.15.33), the Abel
   mean of a Fourier integral `fourierAbelMean` (1.15.36), the Cauchy integral
@@ -35,6 +34,17 @@ fractional integrals and derivatives.
   other limits `riemannLiouvilleIntegralFrom`, `riemannLiouvilleIntegralUpper` and
   `weylFractionalIntegral` (§1.15(vi)), and `fractionalDerivative` (1.15.51) with
   `n = ⌊ℜα⌋ + 1`.
+
+## Main results
+
+* `fourierCoeffOn_two_pi_eq`: the Fourier coefficients `F(n)` of 1.15.19 are Mathlib's
+  `fourierCoeffOn Real.two_pi_pos f n`.
+
+## Implementation notes
+
+The Abel and Borel predicates include the convergence of the power series for `0 < x < 1`
+(respectively of the exponential series for `t ≥ 0`), which DLMF leaves implicit; without it
+Lean's `tsum` would assign the junk value `0`.
 
 The kernels are stated with DLMF's normalizations: the circle kernels have mean `1` over
 `[0, 2π]`, the half-plane kernel has `(1/2π) ∫ P = 1`, the Fejér kernel on the line has integral

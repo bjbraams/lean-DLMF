@@ -8,12 +8,25 @@ module
 public import DLMF.Hypergeometric.Identities.CarlsonTools
 
 /-!
-# Dougall bilateral summation tools
+# Dougall's bilateral sum
 
-Summability, analytic bounds and Carlson uniqueness for the bilateral Dougall summation.
+Summability, analytic bounds and Carlson uniqueness for Dougall's bilateral `₂H₂` sum. The
+final Gamma form `dougall_bilateral` is in `DLMF.Hypergeometric.Identities.Whipple`.
 
-Source references and common attribution are retained in
-`DLMF.Hypergeometric.Identities`.
+## Main definitions
+
+* `DougallAux.term`: the terms of Dougall's bilateral series.
+
+## Main results
+
+* `DougallAux.summable_term`, `DougallAux.differentiableOn_tsum`: absolute convergence and
+  holomorphy in `d` on the half-plane of convergence.
+* `DougallAux.tsum_recurrence`: the first-order recurrence in `d`.
+* `DougallAux.tsum_at_int`: the sum at integer `d`, from Gauss's summation.
+* `DougallAux.tsum_eq_of_not_int`: Dougall's sum for non-integral `c`, by Carlson's theorem in
+  `d`.
+
+See `DLMF.Hypergeometric.Identities` for the overview.
 -/
 
 @[expose] public section

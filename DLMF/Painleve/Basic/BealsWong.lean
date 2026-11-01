@@ -35,9 +35,24 @@ public import Mathlib.Tactic.ReduceModChar
 /-!
 # Painlevé II in the Beals–Wong normalization
 
-The equation `PII(c)` is `u'' = 2u³ + xu - c`, as in Beals–Wong (15.2.9).
-`IsPIIOn` records actual differentiability, so totalized derivatives cannot
-make a nonsolution satisfy the equation. Results apply over both `ℝ` and `ℂ`.
+The equation `PII(c)` is `u'' = 2u³ + xu - c`, as in Beals–Wong (15.2.9). Its parameter is
+the negative of DLMF's `α`. Results apply over both `ℝ` and `ℂ`.
+
+## Main definitions
+
+* `IsPIIOn`: a twice differentiable solution of `PII(c)` on a set.
+
+## Main results
+
+* `IsPIIOn.neg`: the reflection `u ↦ -u`, `c ↦ -c` (Beals–Wong Theorem 15.4.2).
+* `isPIIOn_of_hasDerivAt`: a solution from a first-order pair on an open set.
+* `isPIIOn_zero`, `isPIIOn_recip`: the solutions `0` of `PII(0)` and `1/x` of `PII(1)`.
+* `IsPIIOn.hasDerivAt_energy`: the nonautonomous Hamiltonian has derivative `-u²`.
+
+## Implementation notes
+
+`IsPIIOn` records actual differentiability, so totalized derivatives cannot make a
+nonsolution satisfy the equation.
 -/
 
 @[expose] public noncomputable section

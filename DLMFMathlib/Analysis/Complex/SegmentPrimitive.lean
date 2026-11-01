@@ -11,9 +11,20 @@ public import Mathlib.Analysis.Complex.RemovableSingularity
 /-!
 # Straight-segment primitives of entire functions
 
-The primitive existence theorem and the real fundamental theorem of calculus
-are supplied by Mathlib. These adapters identify the normalized straight-segment
-integral with an arbitrary primitive and give its complex derivative.
+The normalized straight-segment integral `z * ∫₀¹ f (t z) dt` of an entire function is a
+primitive of it. The primitive existence theorem and the real fundamental theorem of calculus
+come from Mathlib; the results here identify the segment integral with an arbitrary primitive
+and give its complex derivative.
+
+## Main results
+
+* `eq_of_differentiable_of_eqOn_pos_reals`: entire functions agreeing on the positive real axis
+  agree everywhere.
+* `differentiable_dslope_entire`: the divided difference of an entire function is entire.
+* `mul_integral_comp_mul_eq_sub`: integrating a complex derivative along a straight segment
+  recovers the endpoint difference.
+* `hasDerivAt_mul_integral_comp_mul`: the normalized segment integral differentiates to the
+  integrand.
 -/
 
 @[expose] public noncomputable section

@@ -10,9 +10,10 @@ public import DLMF.ErrorFunctions.BoundsAsymptotics.GaussianRemainders
 public import DLMF.ErrorFunctions.BoundsAsymptotics.FresnelRemainders
 
 /-!
-# Inequalities, continued fractions and asymptotic remainders, DLMF §§7.8–7.9 and 7.12
+# Inequalities, continued fractions and asymptotic remainders (DLMF §§7.8–7.9, 7.12)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+This umbrella collects the bounds for the Mills ratio, Dawson's integral and the error function
+(§7.8), the continued fractions for `erfc` and the Faddeeva function (§7.9), and the asymptotic
+expansions of `erfc` and of the Fresnel auxiliary functions with their remainder integrals and
+bounds (§7.12).
 -/

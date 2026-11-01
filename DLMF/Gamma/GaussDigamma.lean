@@ -11,17 +11,25 @@ public import DLMF.Gamma.Multiplication
 /-!
 # Gauss's multiplication formula for the digamma function (AAR Theorem 1.2.7)
 
-Logarithmic differentiation of Gauss multiplication (AAR 1.5.2) yields, for `m > 0` and
-`s > 0`,
+Logarithmic differentiation of Gauss's multiplication formula (AAR 1.5.2) gives, for `m > 0`
+and `s > 0`, `∑_{k=0}^{m-1} ψ(s + k/m) = m ψ(ms) - m log m`, the first identity of AAR
+Theorem 1.2.7. Combined with the reflection formula `ψ(1-x) - ψ(x) = π cot(πx)` it gives Gauss's
+evaluation of `ψ` at rational arguments; the cases with denominators `2`, `3` and `4` are
+recorded.
 
-$$
-\sum_{k=0}^{m-1}\psi\bigl(s+k/m\bigr)= m\,\psi(ms)-m\log m.
-$$
+## Main results
 
-This is the first identity of AAR Theorem 1.2.7 (in the form obtained from
-`Γ(x+n) = (x)_n Γ(x)` by taking logarithmic derivatives, together with the multiplication
-formula). Combined with reflection `ψ(1-x)-ψ(x)=π cot(πx)` one obtains Gauss's evaluation
-of `ψ` at rational arguments; the case `ψ(1/2)` is recorded below.
+* `digamma_sum_add_div`: `∑_{k<m} ψ(s + k/m) = m ψ(ms) - m log m` (DLMF 5.5.9, AAR
+  Theorem 1.2.7).
+* `digamma_add_digamma_add_half`: the case `m = 2` (DLMF 5.5.8).
+* `digamma_one_div_two`: `ψ(1/2) = -γ - 2 log 2` (DLMF 5.4.13).
+* `digamma_one_div_three`, `digamma_two_div_three`, `digamma_one_div_four`,
+  `digamma_three_div_four`: `ψ` at `1/3`, `2/3`, `1/4`, `3/4`.
+
+## References
+
+* G. E. Andrews, R. Askey and R. Roy, *Special Functions*, Cambridge University Press, 1999,
+  §1.2.
 -/
 
 @[expose] public section

@@ -13,14 +13,33 @@ public import DLMF.Core.Framework
 public import DLMFMathlib.Analysis.Complex.FactorialSeries
 
 /-!
-# Entire and principal exponential, trigonometric and hyperbolic integrals
+# Analytic properties of exponential, trigonometric and hyperbolic integrals (DLMF §§6.2, 6.5–6.6)
 
-Canonical definitions are in `DLMF.ExpIntegrals.Basic`; this module develops their properties.
+Properties of the functions defined in `DLMF.ExpIntegrals.Basic`: entire and principal
+branches, the integral definitions of DLMF §6.2, derivatives, symmetries, relations to `E₁`
+(DLMF §6.5) and power series (DLMF §6.6). Results already in Mathlib are referenced, not
+reproved.
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs.
+## Main results
+
+* `expIntE1_horizontal_integral`, `expIntE1_stieltjes`, `expIntEin_segment_integral`,
+  `expIntE1_eq_Ein_complex`: the integral definitions of `E₁` and `Ein` and the relation
+  `E₁ = Ein - ln z - γ` (DLMF 6.2.1–6.2.4).
+* `Real.expIntEi_principalValue`, `Real.expIntEi_negative`, `Real.expIntEi_Ein`: `Ei` as a
+  principal value and its relations to `E₁` and `Ein` (DLMF 6.2.5–6.2.7).
+* `Real.logIntLi_principalValue`: the logarithmic integral as a principal value (DLMF 6.2.8).
+* `sinInt_segment_integral`, `sinIntTail_horizontal_integral`, `cosInt_horizontal_integral`,
+  `cosIntCin_segment_integral`, `cosInt_tendsto_atTop`, `sinhInt_segment_integral`,
+  `coshInt_segment_integral`: the sine, cosine and hyperbolic integrals (DLMF 6.2.9–6.2.16).
+* `sinInt_eq_aux`, `cosInt_eq_aux`, `hasDerivAt_expIntAuxF`, `hasDerivAt_expIntAuxG`: the
+  auxiliary functions `f`, `g` (DLMF 6.2.19–6.2.21).
+* `sinInt_eq_E1`, `cosInt_eq_E1`, `expIntAux_eq_E1`: relations to `E₁` (DLMF 6.5.5–6.5.7).
+* `hasSum_Ein_complex`, `hasSum_Si_complex`, `hasSum_Cin_complex`: power series
+  (DLMF 6.6.4, 6.6.5).
+* `expIntEin_entire`, `sinInt_entire`, `cosIntCin_entire`, `sinhInt_entire`: these functions
+  are entire.
+* `expIntEin_ofReal`, `sinInt_ofReal`, `cosIntCin_ofReal`, `cosInt_ofReal`: agreement with the
+  real-variable definitions.
 -/
 
 @[expose] public noncomputable section

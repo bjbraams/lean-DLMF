@@ -9,11 +9,8 @@ public import DLMF.Confluent.Recurrence.Contiguous
 public import DLMF.Confluent.Recurrence.Derivatives
 
 /-!
-# Recurrence relations and derivatives (DLMF §§13.3, 13.15)
+# Recurrence relations and derivatives of confluent hypergeometric functions
 
-Denominator parameters of `kummerM` stay off the nonpositive integers.
-Tricomi and Whittaker identities use the principal branch on the slit plane.
-The operator `(z d/dz z)` is `Function.mulDerivMul`, matching DLMF 13.3.29.
-13.3.15 is already proved as `deriv_kummerM_regular` in
-`OrthogonalPolynomials.Differential`; the pointwise form is restated here.
+Contiguous relations and derivative identities for Kummer's, Tricomi's and Whittaker's
+functions (DLMF §§13.3, 13.15).
 -/

@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMFMathlib.Analysis.Complex.TrigR4SeriesExtension
+public import DLMFMathlib.Analysis.Complex.TrigSeriesExtension
 public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 
@@ -15,6 +15,13 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 Mathlib's Cauchy–Taylor coefficients give the differentiated coefficient series near the
 center. The principal complex power derivative is written as a first-order differential
 identity, convenient for determining coefficients of powers by convolution.
+
+## Main results
+
+* `Complex.eventually_hasSum_deriv_powerSeries`: a scalar power series is differentiated near its
+  center by shifting its coefficients.
+* `Complex.mul_deriv_cpow_const`: the first-order differential identity for principal complex
+  powers on the slit plane.
 -/
 
 @[expose] public noncomputable section

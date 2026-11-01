@@ -10,9 +10,15 @@ public import DLMF.Hypergeometric.SeriesProperties
 /-!
 # Gamma-ratio bounds for natural shifts
 
-The Gamma recurrence and the finite Pochhammer product prove the natural-shift
-case of DLMF 5.6.8. This does not assume the admitted fractional-shift inequality.
-The norm and real-power manipulations use the Mathlib contributors' APIs.
+The Gamma recurrence and the finite Pochhammer product prove the natural-shift case of
+DLMF 5.6.8. The proof is independent of the fractional-shift case.
+
+## Main results
+
+* `norm_le_norm_add_ofReal`: adding a nonnegative real number does not decrease the norm in
+  the right half-plane.
+* `Gamma_ratio_norm_le_nat`: the Gamma-ratio bound of DLMF 5.6.8 for natural differences of
+  the shifts.
 -/
 
 @[expose] public section

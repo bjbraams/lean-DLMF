@@ -11,32 +11,38 @@ public import DLMFMathlib.Analysis.SpecificLimits.Pincherle
 /-!
 # Tools for the Ferrers Fourier series (DLMF §14.13)
 
-The hypergeometric form behind DLMF 14.13.1–14.13.2:
-`s(πi/2) 𝖯^μ_ν(cos θ) + 𝖰^μ_ν(cos θ) = √π Γ(ν+μ+1) (2 sin θ)^μ e^{s(ν+μ+1)iθ}
-𝐅(ν+μ+1, μ+1/2; ν+3/2; e^{2isθ})`, `s = ±1`, `0 < θ < π` (`legFS_PQ_hyp`), for all `ν, μ`
-with `ν + μ ≠ -1, -2, …`. Route:
+The hypergeometric form behind the Fourier series DLMF 14.13.1–14.13.2, tools for the continued
+fractions of DLMF §14.14, and the complex integral representation DLMF 14.12.3 of `𝖰^μ_ν`.
 
-* the inverse Joukowski map `ζ(z) = z - √(z²-1)` on `ℂ ∖ (-∞, 1]` has `|ζ| < 1`, `ζ ∉ (-∞, 0]`
-  (`legInt_norm_zeta_lt_one`, `legInt_zeta_mem_slitPlane` in
-  `DLMF.Legendre.IntegralRepresentations`);
-* the toroidal form DLMF 14.19.3 (`toroidalQ_hypergeometric`, `z = cosh ξ`, `ζ = e^{-ξ}`) extends
-  by the identity theorem to `𝑸^μ_ν(z) = √π (1-ζ²)^μ ζ^{ν+1} 𝐅(μ+1/2, ν+μ+1; ν+3/2; ζ²)` on
-  `ℂ ∖ (-∞, 1]` (`legFS_olverQ_eq_G`);
-* at `z = cos θ ∓ i0`, `ζ → e^{±iθ}` (`legFS_zeta_lim`); the boundary values DLMF 14.23.2
-  (`olverQ_boundary_aux`) then give the identity.
+## Main definitions
 
-Also, for the continued fractions of DLMF §14.14:
+* `legFS_zeta`: the inverse Joukowski map `ζ = z - √(z²-1)`.
+* `legFS_q`: the ratio `(b+k)_n Γ(c+k)/Γ(c+k+n)` in `Γ(c+k) 𝐅(a, b+k; c+k; z)`.
+* `legTr_sideKernel`: the boundary integrand of DLMF 14.25.2 at `cos θ + σ i 0`.
 
-* `legFS_tannery`: `Γ(c+k) 𝐅(a, b+k; c+k; z) → (1-z)^{-a}` as `k → ∞` for `|z| < 1`
-  (dominated convergence termwise);
-* `legFS_hasCF_of_terminating`, `legFS_hasCF_of_exists_zero`, `legFS_hasCF_of_ratio`: the value `a₀w₁/w₀` of the project's
-  `HasContinuedFraction` from a backward solution `w`, in the terminating case and under a
-  ratio limit `-w_k/(a_{k+1}w_{k+2}) → ρ`, `|ρ| > 1` (`GenContFract.pinch_cfConv_tendsto`).
+## Main results
 
-Also DLMF 14.12.3 (`ferrersQ_complex_integral`), from the boundary values of DLMF 14.25.2 under
-dominated convergence (helpers `legTr_`).
+* `legFS_PQ_hyp`: `s(πi/2) 𝖯^μ_ν(cos θ) + 𝖰^μ_ν(cos θ) = √π Γ(ν+μ+1) (2 sin θ)^μ
+  e^{s(ν+μ+1)iθ} 𝐅(ν+μ+1, μ+1/2; ν+3/2; e^{2isθ})`, `s = ±1`, `0 < θ < π`, for all `ν, μ` with
+  `ν + μ ≠ -1, -2, …`.
+* `legFS_zeta_lim`: at `z = cos θ ∓ i0`, `ζ → e^{±iθ}`.
+* `legFS_tannery`: `Γ(c+k) 𝐅(a, b+k; c+k; z) → (1-z)^{-a}` as `k → ∞` for `|z| < 1` (dominated
+  convergence termwise).
+* `legFS_hasCF_of_terminating`, `legFS_hasCF_of_exists_zero`, `legFS_hasCF_of_ratio`: the value
+  `a₀w₁/w₀` of the project's `HasContinuedFraction` from a backward solution `w`, in the
+  terminating case and under a ratio limit `-w_k/(a_{k+1}w_{k+2}) → ρ`, `|ρ| > 1`
+  (`GenContFract.pinch_cfConv_tendsto`).
+* `legTr_side`: DLMF 14.25.2 at `cos θ + σ i 0`, as the one-sided limit of `𝑸^μ_ν`.
+* `ferrersQ_complex_integral`: DLMF 14.12.3, from the boundary values of DLMF 14.25.2 under
+  dominated convergence.
 
-All other helper names carry the prefix `legFS_`.
+## Implementation notes
+
+The proof of `legFS_PQ_hyp`: the inverse Joukowski map on `ℂ ∖ (-∞, 1]` has `|ζ| < 1`,
+`ζ ∉ (-∞, 0]` (`legInt_norm_zeta_lt_one`, `legInt_zeta_mem_slitPlane`); the toroidal form
+DLMF 14.19.3 (`toroidalQ_hypergeometric`, `z = cosh ξ`, `ζ = e^{-ξ}`) extends by the identity
+theorem to `𝑸^μ_ν(z) = √π (1-ζ²)^μ ζ^{ν+1} 𝐅(μ+1/2, ν+μ+1; ν+3/2; ζ²)` on `ℂ ∖ (-∞, 1]`
+(`legFS_olverQ_eq_G`); the boundary values DLMF 14.23.2 then give the identity.
 -/
 
 @[expose] public noncomputable section

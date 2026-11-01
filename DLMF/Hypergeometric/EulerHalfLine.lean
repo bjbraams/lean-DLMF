@@ -8,11 +8,20 @@ module
 public import DLMF.Hypergeometric.ArgumentContinuation
 
 /-!
-# Euler's Gauss integral on the positive half-line
+# Euler's integral for `₂F₁` on the positive half-line
 
-The substitution `v = 1 / (1 + u)` transfers the continued Euler integral
-and its absolute integrability to the positive half-line. Mathlib's Jacobian
-change-of-variables theorem handles the decreasing substitution and its endpoints.
+The substitution `v = 1 / (1 + u)` transfers the continued Euler integral and its absolute
+integrability to the positive half-line. Mathlib's Jacobian change-of-variables theorem handles
+the decreasing substitution and its endpoints.
+
+## Main definitions
+
+* `eulerHalfLineKernel`: the half-line form of Euler's kernel.
+
+## Main results
+
+* `eulerHalfLine_integrable_integral`: the half-line kernel is absolutely integrable and its
+  integral is the continued Gauss function.
 -/
 
 @[expose] public section

@@ -12,21 +12,37 @@ public import DLMF.Core.Framework
 public import DLMF.Hypergeometric.GeneralizedCalculus
 
 /-!
-# Struve functions: definitions, convergence and differential equations
+# Struve functions: convergence and differential equations
 
-Canonical definitions are in `DLMF.Struve.Basic`; this module develops their properties.
+The defining series of the Struve functions (DLMF §11.2), their regularized
+hypergeometric representations, entirety in argument and order, continuation across the
+cut (DLMF 11.4.16–11.4.17), and the inhomogeneous Bessel equations with their general
+solutions (DLMF 11.2.8–11.2.17). The canonical definitions are in `DLMF.Struve.Basic`.
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+## Main results
 
-The proved forcing equations use Mathlib's regularized hypergeometric series via
-`regularized1F2_one_inhomogeneous_ode`. The ordinary general-solution formulas
-reuse `DLMF.Bessel.eq_besselJ_besselY_of_ode`, including integer orders. The
-modified solution formulas use the proved I/K Wronskian through Abel's identity.
-The common quadratic gauge and reciprocal-Gamma contiguous relations supply the
-calculus without excluding exceptional orders.
+* `hasSum_struveHCore`, `hasSum_struveLCore`: DLMF 11.2.1–11.2.2, including exceptional
+  orders.
+* `struveHCore_eq_regularized`, `struveLCore_eq_regularized`: the regularized `₁F₂`
+  representations, for all parameters.
+* `entire_struveHCore`, `entire_order_struveHCore`, `entire_struveLCore`,
+  `entire_order_struveLCore`: entirety in the argument and in the order.
+* `struveHOnLog_shift`, `struveLOnLog_shift`: DLMF 11.4.16–11.4.17.
+* `struveH_zero_order_series`, `struveL_zero_order_series`: DLMF 11.2.3–11.2.4.
+* `struveH_ode`, `struveK_ode`, `struveL_ode`, `struveM_ode`: DLMF 11.2.8 and 11.2.10.
+* `struve_general_solution_11`, …, `struve_general_solution_17`: general analytic solutions
+  on the principal slit plane, DLMF 11.2.11–11.2.17.
+* `bessel_inhomogeneous_general_solution`, `modified_bessel_inhomogeneous_general_solution`:
+  the solution spaces of the inhomogeneous Bessel equations.
+
+## Implementation notes
+
+The forcing equations use Mathlib's regularized hypergeometric series via
+`regularized1F2_one_inhomogeneous_ode`. The ordinary general-solution formulas reuse
+`DLMF.Bessel.eq_besselJ_besselY_of_ode`, including integer orders. The modified solution
+formulas use the I/K Wronskian through Abel's identity. The common quadratic gauge and
+reciprocal-Gamma contiguous relations supply the calculus without excluding exceptional
+orders. Numerical stability of the general solutions is not asserted.
 -/
 
 @[expose] public noncomputable section

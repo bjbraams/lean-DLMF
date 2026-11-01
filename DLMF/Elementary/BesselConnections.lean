@@ -8,11 +8,21 @@ module
 public import DLMF.Bessel.Theorems
 
 /-!
-# The elementary zero equation for `J₃/₂` (DLMF §4.46)
+# The elementary zero equation for `J₃/₂`
 
-The numerical root tables mentioned in §4.46 are excluded, while the exact
-identification of their positive roots with zeros of `J₃/₂` is retained.
-The proof uses the project's half-order evaluations and three-term recurrence.
+This file identifies the positive solutions of `tan x = x` with the positive zeros of the
+Bessel function `J₃/₂` (DLMF §4.46).
+
+## Main results
+
+* `besselJ_three_halves`: the elementary evaluation of `J₃/₂`.
+* `tan_eq_self_iff_besselJ_zero`: the positive solutions of `tan x = x` are exactly the
+  positive zeros of `J₃/₂`.
+
+## Implementation notes
+
+The numerical root tables of §4.46 are out of scope. The proof uses the project's half-order
+evaluations and the three-term recurrence of Bessel functions.
 -/
 
 @[expose] public noncomputable section

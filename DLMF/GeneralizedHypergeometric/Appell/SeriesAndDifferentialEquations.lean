@@ -39,18 +39,29 @@ public import Mathlib.Tactic.ReduceModChar
 public import TauCeti.Topology.LocallyConstant.Preconnected
 
 /-!
-# Appell functions and their defining series
+# Appell series and their differential equations (DLMF §§16.13–16.14)
 
-Canonical definitions are in `DLMF.GeneralizedHypergeometric.Appell.Basic`; this module develops their properties.
+Convergence and analyticity of the Appell double series, coefficient recurrences, and the
+partial differential equations of the Appell functions. The definitions are in
+`DLMF.GeneralizedHypergeometric.Appell.Basic`.
 
-Appell series, coefficient identities and differential relations in two complex variables.
-The non-product witnesses use the mixed-coefficient obstruction from
-`Complex.not_exists_mul_analyticAt_of_coeff_ne`. The Appell PDEs use the generic
-Cauchy-estimate and coefficient-recurrence framework in
-`DLMFMathlib.Analysis.Complex.BivariateDerivatives`.
+## Main results
 
-Source references and common attribution are retained in
-`DLMF.GeneralizedHypergeometric.Appell`.
+* `hasSum_appF1`, `analytic_appF1`, `appF1_zero`: convergence, analyticity and value at the
+  origin of `F₁`, DLMF 16.13.1; likewise for `F₂`, `F₃`, `F₄` (16.13.2–16.13.4).
+* `appell_generic_nonseparable`: generic Appell functions are not products of one-variable
+  functions (DLMF §16.13).
+* `appF1_pde`, `appF2_pde`, `appF3_pde`, `appF4_pde`: the systems DLMF 16.14.1–16.14.4.
+* `hornG2_summable`, `hornG3_summable`, `hornG3_nonmaximal_region`: Horn's `G₂`, `G₃`,
+  DLMF 16.14.5–16.14.6 and §16.14(ii).
+* `appell_continuation_unique`: uniqueness of continued Appell branches (DLMF §16.16).
+
+## Implementation notes
+
+The non-product witnesses use the mixed-coefficient obstruction
+`Complex.not_exists_mul_analyticAt_of_coeff_ne`. The Appell PDEs use the Cauchy-estimate and
+coefficient-recurrence framework of `DLMFMathlib.Analysis.Complex.BivariateDerivatives`.
+
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
 -/
 
@@ -75,12 +86,12 @@ theorem appell_tsum_zero (c : ℕ × ℕ→ℂ) :
     · simp [hm]
 
 /-- Subexponential bound for the F1 coefficients. -/
-lemma ghaR4_appF1Coeff_bound (a b b' c : ℂ) (hc : AppellRegular c) {σ : ℝ} (hσ : 1 < σ) :
+private lemma exists_norm_appF1Coeff_le (a b b' c : ℂ) (hc : AppellRegular c) {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appF1Coeff a b b' c q.1 q.2‖ ≤ C * σ ^ (q.1 + q.2) := by
-  obtain ⟨τ, hτ, hτσ⟩ := ghaR4_exists_pow_le hσ 2
-  obtain ⟨C1, hC1, h1⟩ := ghaR4_norm_poch_le a c hc hτ
-  obtain ⟨C2, hC2, h2⟩ := ghaR4_norm_poch_le_factorial b hτ
-  obtain ⟨C3, hC3, h3⟩ := ghaR4_norm_poch_le_factorial b' hτ
+  obtain ⟨τ, hτ, hτσ⟩ := exists_one_lt_pow_le hσ 2
+  obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_norm_poch a c hc hτ
+  obtain ⟨C2, hC2, h2⟩ := norm_poch_le_mul_factorial b hτ
+  obtain ⟨C3, hC3, h3⟩ := norm_poch_le_mul_factorial b' hτ
   refine ⟨C1 * C2 * C3, fun ⟨m, n⟩ => ?_⟩
   have hcN : 0 < ‖poch c (m + n)‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hc _)
   have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
@@ -97,14 +108,14 @@ lemma ghaR4_appF1Coeff_bound (a b b' c : ℂ) (hc : AppellRegular c) {σ : ℝ} 
         gcongr
 
 /-- Binomially weighted subexponential bound for the F2 coefficients. -/
-lemma ghaR4_appF2Coeff_bound (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c')
+private lemma exists_norm_appF2Coeff_le (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c')
     {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appF2Coeff a b b' c c' q.1 q.2‖ ≤
       C * σ ^ (q.1 + q.2) * ((q.1 + q.2).choose q.1 : ℝ) := by
-  obtain ⟨τ, hτ, hτσ⟩ := ghaR4_exists_pow_le hσ 2
-  obtain ⟨C1, hC1, h1⟩ := ghaR4_norm_poch_le_factorial a hτ
-  obtain ⟨C2, hC2, h2⟩ := ghaR4_norm_poch_le b c hc hτ
-  obtain ⟨C3, hC3, h3⟩ := ghaR4_norm_poch_le b' c' hc' hτ
+  obtain ⟨τ, hτ, hτσ⟩ := exists_one_lt_pow_le hσ 2
+  obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_factorial a hτ
+  obtain ⟨C2, hC2, h2⟩ := norm_poch_le_mul_norm_poch b c hc hτ
+  obtain ⟨C3, hC3, h3⟩ := norm_poch_le_mul_norm_poch b' c' hc' hτ
   refine ⟨C1 * C2 * C3, fun ⟨m, n⟩ => ?_⟩
   have hcm : 0 < ‖poch c m‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hc _)
   have hcn : 0 < ‖poch c' n‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hc' _)
@@ -129,14 +140,14 @@ lemma ghaR4_appF2Coeff_bound (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : A
         gcongr
 
 /-- Subexponential bound for the F3 coefficients. -/
-lemma ghaR4_appF3Coeff_bound (a a' b b' c : ℂ) (hc : AppellRegular c) {σ : ℝ} (hσ : 1 < σ) :
+private lemma exists_norm_appF3Coeff_le (a a' b b' c : ℂ) (hc : AppellRegular c) {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appF3Coeff a a' b b' c q.1 q.2‖ ≤ C * σ ^ (q.1 + q.2) := by
-  obtain ⟨τ, hτ, hτσ⟩ := ghaR4_exists_pow_le hσ 3
-  obtain ⟨C1, hC1, h1⟩ := ghaR4_norm_poch_le_factorial a hτ
-  obtain ⟨C2, hC2, h2⟩ := ghaR4_norm_poch_le_factorial a' hτ
-  obtain ⟨C3, hC3, h3⟩ := ghaR4_norm_poch_le_factorial b hτ
-  obtain ⟨C4, hC4, h4⟩ := ghaR4_norm_poch_le_factorial b' hτ
-  obtain ⟨C5, hC5, h5⟩ := ghaR4_factorial_le_norm_poch c hc hτ
+  obtain ⟨τ, hτ, hτσ⟩ := exists_one_lt_pow_le hσ 3
+  obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_factorial a hτ
+  obtain ⟨C2, hC2, h2⟩ := norm_poch_le_mul_factorial a' hτ
+  obtain ⟨C3, hC3, h3⟩ := norm_poch_le_mul_factorial b hτ
+  obtain ⟨C4, hC4, h4⟩ := norm_poch_le_mul_factorial b' hτ
+  obtain ⟨C5, hC5, h5⟩ := factorial_le_mul_norm_poch c hc hτ
   refine ⟨C1 * C2 * C3 * C4 * C5, fun ⟨m, n⟩ => ?_⟩
   have hcN : 0 < ‖poch c (m + n)‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hc _)
   have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
@@ -159,15 +170,15 @@ lemma ghaR4_appF3Coeff_bound (a a' b b' c : ℂ) (hc : AppellRegular c) {σ : �
         gcongr
 
 /-- Squared-binomial subexponential bound for the F4 coefficients. -/
-lemma ghaR4_appF4Coeff_bound (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c')
+lemma exists_norm_appF4Coeff_le (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c')
     {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖appF4Coeff a b c c' q.1 q.2‖ ≤
       C * σ ^ (q.1 + q.2) * ((q.1 + q.2).choose q.1 : ℝ) ^ 2 := by
-  obtain ⟨τ, hτ, hτσ⟩ := ghaR4_exists_pow_le hσ 3
-  obtain ⟨C1, hC1, h1⟩ := ghaR4_norm_poch_le_factorial a hτ
-  obtain ⟨C2, hC2, h2⟩ := ghaR4_norm_poch_le_factorial b hτ
-  obtain ⟨C3, hC3, h3⟩ := ghaR4_factorial_le_norm_poch c hc hτ
-  obtain ⟨C4, hC4, h4⟩ := ghaR4_factorial_le_norm_poch c' hc' hτ
+  obtain ⟨τ, hτ, hτσ⟩ := exists_one_lt_pow_le hσ 3
+  obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_factorial a hτ
+  obtain ⟨C2, hC2, h2⟩ := norm_poch_le_mul_factorial b hτ
+  obtain ⟨C3, hC3, h3⟩ := factorial_le_mul_norm_poch c hc hτ
+  obtain ⟨C4, hC4, h4⟩ := factorial_le_mul_norm_poch c' hc' hτ
   refine ⟨C1 * C2 * C3 * C4, fun ⟨m, n⟩ => ?_⟩
   have hcm : 0 < ‖poch c m‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hc _)
   have hcn : 0 < ‖poch c' n‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hc' _)
@@ -200,65 +211,65 @@ lemma ghaR4_appF4Coeff_bound (a b c c' : ℂ) (hc : AppellRegular c) (hc' : Appe
 @[dlmf 16.13.E1]
 theorem hasSum_appF1 (a b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,y)∈appellBidisc) :
     HasSum (fun p : ℕ × ℕ => appF1Coeff a b b' c p.1 p.2*x^p.1*y^p.2) (appF1 a b b' c x y) := by
-  exact (ghaR4_double_series_hasSum_analytic (fun q => appF1Coeff a b b' c q.1 q.2) appellBidisc
-    (fun _ hp => ghaR4_dom_bidisc _ (fun _ hσ => ghaR4_appF1Coeff_bound a b b' c hc hσ)
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF1Coeff a b b' c q.1 q.2) appellBidisc
+    (fun _ hp => exists_summable_doubleSeries_of_bidisc _ (fun _ hσ => exists_norm_appF1Coeff_le a b b' c hc hσ)
       hp.1 hp.2)).1 (x, y) hxy
 
 /-- 16.13: analytic appF1. -/
 @[dlmf 16.13]
 theorem analytic_appF1 (a b b' c : ℂ) (hc : AppellRegular c) :
     AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF1 a b b' c p.1 p.2) appellBidisc := by
-  exact (ghaR4_double_series_hasSum_analytic (fun q => appF1Coeff a b b' c q.1 q.2) appellBidisc
-    (fun _ hp => ghaR4_dom_bidisc _ (fun _ hσ => ghaR4_appF1Coeff_bound a b b' c hc hσ)
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF1Coeff a b b' c q.1 q.2) appellBidisc
+    (fun _ hp => exists_summable_doubleSeries_of_bidisc _ (fun _ hσ => exists_norm_appF1Coeff_le a b b' c hc hσ)
       hp.1 hp.2)).2
 
 /-- 16.13.E2: hasSum appF2. -/
 @[dlmf 16.13.E2]
 theorem hasSum_appF2 (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ} (hxy : (x,y)∈appellDiamond) :
     HasSum (fun p : ℕ × ℕ => appF2Coeff a b b' c c' p.1 p.2*x^p.1*y^p.2) (appF2 a b b' c c' x y) := by
-  exact (ghaR4_double_series_hasSum_analytic (fun q => appF2Coeff a b b' c c' q.1 q.2)
-    appellDiamond (fun _ hp => ghaR4_dom_diamond _
-      (fun _ hσ => ghaR4_appF2Coeff_bound a b b' c c' hc hc' hσ) hp)).1 (x, y) hxy
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF2Coeff a b b' c c' q.1 q.2)
+    appellDiamond (fun _ hp => exists_summable_doubleSeries_of_diamond _
+      (fun _ hσ => exists_norm_appF2Coeff_le a b b' c c' hc hc' hσ) hp)).1 (x, y) hxy
 
 /-- 16.13: analytic appF2. -/
 @[dlmf 16.13]
 theorem analytic_appF2 (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') :
     AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF2 a b b' c c' p.1 p.2) appellDiamond := by
-  exact (ghaR4_double_series_hasSum_analytic (fun q => appF2Coeff a b b' c c' q.1 q.2)
-    appellDiamond (fun _ hp => ghaR4_dom_diamond _
-      (fun _ hσ => ghaR4_appF2Coeff_bound a b b' c c' hc hc' hσ) hp)).2
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF2Coeff a b b' c c' q.1 q.2)
+    appellDiamond (fun _ hp => exists_summable_doubleSeries_of_diamond _
+      (fun _ hσ => exists_norm_appF2Coeff_le a b b' c c' hc hc' hσ) hp)).2
 
 /-- 16.13.E3: hasSum appF3. -/
 @[dlmf 16.13.E3]
 theorem hasSum_appF3 (a a' b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,y)∈appellBidisc) :
     HasSum (fun p : ℕ × ℕ => appF3Coeff a a' b b' c p.1 p.2*x^p.1*y^p.2) (appF3 a a' b b' c x y) := by
-  exact (ghaR4_double_series_hasSum_analytic (fun q => appF3Coeff a a' b b' c q.1 q.2)
-    appellBidisc (fun _ hp => ghaR4_dom_bidisc _
-      (fun _ hσ => ghaR4_appF3Coeff_bound a a' b b' c hc hσ) hp.1 hp.2)).1 (x, y) hxy
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF3Coeff a a' b b' c q.1 q.2)
+    appellBidisc (fun _ hp => exists_summable_doubleSeries_of_bidisc _
+      (fun _ hσ => exists_norm_appF3Coeff_le a a' b b' c hc hσ) hp.1 hp.2)).1 (x, y) hxy
 
 /-- 16.13: analytic appF3. -/
 @[dlmf 16.13]
 theorem analytic_appF3 (a a' b b' c : ℂ) (hc : AppellRegular c) :
     AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF3 a a' b b' c p.1 p.2) appellBidisc := by
-  exact (ghaR4_double_series_hasSum_analytic (fun q => appF3Coeff a a' b b' c q.1 q.2)
-    appellBidisc (fun _ hp => ghaR4_dom_bidisc _
-      (fun _ hσ => ghaR4_appF3Coeff_bound a a' b b' c hc hσ) hp.1 hp.2)).2
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF3Coeff a a' b b' c q.1 q.2)
+    appellBidisc (fun _ hp => exists_summable_doubleSeries_of_bidisc _
+      (fun _ hσ => exists_norm_appF3Coeff_le a a' b b' c hc hσ) hp.1 hp.2)).2
 
 /-- 16.13.E4: hasSum appF4. -/
 @[dlmf 16.13.E4]
 theorem hasSum_appF4 (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') {x y : ℂ} (hxy : (x,y)∈appellF4Domain) :
     HasSum (fun p : ℕ × ℕ => appF4Coeff a b c c' p.1 p.2*x^p.1*y^p.2) (appF4 a b c c' x y) := by
-  exact (ghaR4_double_series_hasSum_analytic (fun q => appF4Coeff a b c c' q.1 q.2)
-    appellF4Domain (fun _ hp => ghaR4_dom_F4 _
-      (fun _ hσ => ghaR4_appF4Coeff_bound a b c c' hc hc' hσ) hp)).1 (x, y) hxy
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF4Coeff a b c c' q.1 q.2)
+    appellF4Domain (fun _ hp => exists_summable_doubleSeries_of_sqrt_add_sqrt _
+      (fun _ hσ => exists_norm_appF4Coeff_le a b c c' hc hc' hσ) hp)).1 (x, y) hxy
 
 /-- 16.13: analytic appF4. -/
 @[dlmf 16.13]
 theorem analytic_appF4 (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') :
     AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF4 a b c c' p.1 p.2) appellF4Domain := by
-  exact (ghaR4_double_series_hasSum_analytic (fun q => appF4Coeff a b c c' q.1 q.2)
-    appellF4Domain (fun _ hp => ghaR4_dom_F4 _
-      (fun _ hσ => ghaR4_appF4Coeff_bound a b c c' hc hc' hσ) hp)).2
+  exact (hasSum_and_analyticOnNhd_doubleSeries (fun q => appF4Coeff a b c c' q.1 q.2)
+    appellF4Domain (fun _ hp => exists_summable_doubleSeries_of_sqrt_add_sqrt _
+      (fun _ hσ => exists_norm_appF4Coeff_le a b c c' hc hc' hσ) hp)).2
 
 /-- 16.13.E1: appF1 zero. -/
 @[dlmf 16.13.E1]
@@ -303,20 +314,20 @@ theorem appell_generic_nonseparable :
     Complex.not_exists_mul_analyticAt_of_coeff_ne ?_ ?_,
     Complex.not_exists_mul_analyticAt_of_coeff_ne ?_ ?_,
     Complex.not_exists_mul_analyticAt_of_coeff_ne ?_ ?_⟩
-  · simpa only [norm_zero] using ghaR4_dom_bidisc _
-      (fun _ hσ => ghaR4_appF1Coeff_bound 1 1 1 2 h2 hσ)
+  · simpa only [norm_zero] using exists_summable_doubleSeries_of_bidisc _
+      (fun _ hσ => exists_norm_appF1Coeff_le 1 1 1 2 h2 hσ)
       (x := 0) (y := 0) (by norm_num) (by norm_num)
   · norm_num [appF1Coeff, poch_succ, poch_zero, Nat.factorial]
-  · simpa only [norm_zero] using ghaR4_dom_diamond _
-      (fun _ hσ => ghaR4_appF2Coeff_bound 1 1 1 1 1 h1
+  · simpa only [norm_zero] using exists_summable_doubleSeries_of_diamond _
+      (fun _ hσ => exists_norm_appF2Coeff_le 1 1 1 1 1 h1
         h1 hσ) (x := 0) (y := 0) (by norm_num)
   · norm_num [appF2Coeff, poch_succ, poch_zero, Nat.factorial]
-  · simpa only [norm_zero] using ghaR4_dom_bidisc _
-      (fun _ hσ => ghaR4_appF3Coeff_bound 1 1 1 1 2 h2 hσ)
+  · simpa only [norm_zero] using exists_summable_doubleSeries_of_bidisc _
+      (fun _ hσ => exists_norm_appF3Coeff_le 1 1 1 1 2 h2 hσ)
       (x := 0) (y := 0) (by norm_num) (by norm_num)
   · norm_num [appF3Coeff, poch_succ, poch_zero, Nat.factorial]
-  · simpa only [norm_zero] using ghaR4_dom_F4 _
-      (fun _ hσ => ghaR4_appF4Coeff_bound 1 1 1 1 h1
+  · simpa only [norm_zero] using exists_summable_doubleSeries_of_sqrt_add_sqrt _
+      (fun _ hσ => exists_norm_appF4Coeff_le 1 1 1 1 h1
         h1 hσ) (x := 0) (y := 0) (by norm_num)
   · norm_num [appF4Coeff, poch_succ, poch_zero, Nat.factorial]
 
@@ -446,8 +457,8 @@ theorem appF1_pde (a b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : (x,
     let f := appF1 a b b' c
     x*(1-x)*appellDx (appellDx f) x y+y*(1-x)*appellDx (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x y-b*y*appellDy f x y-a*b*f x y=0 ∧
     y*(1-y)*appellDy (appellDy f) x y+x*(1-y)*appellDx (appellDy f) x y+(c-(a+b'+1)*y)*appellDy f x y-b'*x*appellDx f x y-a*b'*f x y=0 := by
-  obtain ⟨A, B, hA, hB, hS⟩ := ghaR4_dom_bidisc _
-    (fun _ hσ => ghaR4_appF1Coeff_bound a b b' c hc hσ) hxy.1 hxy.2
+  obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_bidisc _
+    (fun _ hσ => exists_norm_appF1Coeff_le a b b' c hc hσ) hxy.1 hxy.2
   have hP := Complex.bivariateSeries_pde_x_of_coeff_recurrence hS hA hB 1 1 0 1 a b c
     (fun m n => by simpa using appF1Coeff_recurrence_left a b b' c hc m n)
   have hQ := Complex.bivariateSeries_pde_y_of_coeff_recurrence hS hA hB 1 1 0 1 a b' c
@@ -466,8 +477,8 @@ theorem appF2_pde (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegula
     let f := appF2 a b b' c c'
     x*(1-x)*appellDx (appellDx f) x y-x*y*appellDx (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x y-b*y*appellDy f x y-a*b*f x y=0 ∧
     y*(1-y)*appellDy (appellDy f) x y-x*y*appellDx (appellDy f) x y+(c'-(a+b'+1)*y)*appellDy f x y-b'*x*appellDx f x y-a*b'*f x y=0 := by
-  obtain ⟨A, B, hA, hB, hS⟩ := ghaR4_dom_diamond _
-    (fun _ hσ => ghaR4_appF2Coeff_bound a b b' c c' hc hc' hσ) hxy
+  obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_diamond _
+    (fun _ hσ => exists_norm_appF2Coeff_le a b b' c c' hc hc' hσ) hxy
   have hP := Complex.bivariateSeries_pde_x_of_coeff_recurrence hS hA hB 0 1 0 1 a b c
     (fun m n => by simpa using appF2Coeff_recurrence_left a b b' c c' hc m n)
   have hQ := Complex.bivariateSeries_pde_y_of_coeff_recurrence hS hA hB 0 1 0 1 a b' c'
@@ -486,8 +497,8 @@ theorem appF3_pde (a a' b b' c : ℂ) (hc : AppellRegular c) {x y : ℂ} (hxy : 
     let f := appF3 a a' b b' c
     x*(1-x)*appellDx (appellDx f) x y+y*appellDx (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x y-a*b*f x y=0 ∧
     y*(1-y)*appellDy (appellDy f) x y+x*appellDx (appellDy f) x y+(c-(a'+b'+1)*y)*appellDy f x y-a'*b'*f x y=0 := by
-  obtain ⟨A, B, hA, hB, hS⟩ := ghaR4_dom_bidisc _
-    (fun _ hσ => ghaR4_appF3Coeff_bound a a' b b' c hc hσ) hxy.1 hxy.2
+  obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_bidisc _
+    (fun _ hσ => exists_norm_appF3Coeff_le a a' b b' c hc hσ) hxy.1 hxy.2
   have hP := Complex.bivariateSeries_pde_x_of_coeff_recurrence hS hA hB 1 0 0 1 a b c
     (fun m n => by simpa using appF3Coeff_recurrence_left a a' b b' c hc m n)
   have hQ := Complex.bivariateSeries_pde_y_of_coeff_recurrence hS hA hB 1 0 0 1 a' b' c
@@ -506,8 +517,8 @@ theorem appF4_pde (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c
     let f := appF4 a b c c'
     x*(1-x)*appellDx (appellDx f) x y-2*x*y*appellDx (appellDy f) x y-y^2*appellDy (appellDy f) x y+(c-(a+b+1)*x)*appellDx f x y-(a+b+1)*y*appellDy f x y-a*b*f x y=0 ∧
     y*(1-y)*appellDy (appellDy f) x y-2*x*y*appellDx (appellDy f) x y-x^2*appellDx (appellDx f) x y+(c'-(a+b+1)*y)*appellDy f x y-(a+b+1)*x*appellDx f x y-a*b*f x y=0 := by
-  obtain ⟨A, B, hA, hB, hS⟩ := ghaR4_dom_F4 _
-    (fun _ hσ => ghaR4_appF4Coeff_bound a b c c' hc hc' hσ) hxy
+  obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_sqrt_add_sqrt _
+    (fun _ hσ => exists_norm_appF4Coeff_le a b c c' hc hc' hσ) hxy
   have hP := Complex.bivariateSeries_pde_x_of_coeff_recurrence hS hA hB 0 1 1 1 a b c
     (fun m n => by simpa using appF4Coeff_recurrence_left a b c c' hc m n)
   have hQ := Complex.bivariateSeries_pde_y_of_coeff_recurrence hS hA hB 0 1 1 1 a b c'
@@ -520,31 +531,31 @@ theorem appF4_pde (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c
     linear_combination hQ
 
 /-- A non-integral parameter is regular. -/
-lemma ghaR4_regular_of_nonint {b : ℂ} (hb : ∀ k : ℤ, b ≠ k) : ∀ k : ℕ, b ≠ -k :=
+lemma ne_neg_nat_of_ne_int {b : ℂ} (hb : ∀ k : ℤ, b ≠ k) : ∀ k : ℕ, b ≠ -k :=
   fun k h => hb (-(k : ℤ)) (by rw [h]; push_cast; ring)
 
 /-- `Γ(b+j) = (b)ⱼ Γ(b)` at regular `b`. -/
-lemma ghaR4_gamma_add_nat {b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (j : ℕ) :
+private lemma Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat {b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (j : ℕ) :
     Gamma (b + j) = poch b j * Gamma b := by
   have h := Complex.Gamma_add_nat_div_Gamma_eq (n := j) b hb
   rw [div_eq_iff (Complex.Gamma_ne_zero hb)] at h
   exact h
 
 /-- `Γ(b+j)Γ(b'-j) = (-1)^j (b)ⱼ/(1-b')ⱼ · Γ(b)Γ(b')` for non-integral `b, b'`. -/
-lemma ghaR4_gamma_pair {b b' : ℂ} (hb : ∀ k : ℤ, b ≠ k) (hb' : ∀ k : ℤ, b' ≠ k) (j : ℕ) :
+private lemma Gamma_add_nat_mul_Gamma_sub_nat {b b' : ℂ} (hb : ∀ k : ℤ, b ≠ k) (hb' : ∀ k : ℤ, b' ≠ k) (j : ℕ) :
     Gamma (b + j) * Gamma (b' - j) =
       (-1) ^ j * poch b j / poch (1 - b') j * (Gamma b * Gamma b') := by
-  have hbr := ghaR4_regular_of_nonint hb
+  have hbr := ne_neg_nat_of_ne_int hb
   have hb'r : ∀ k : ℕ, b' - j ≠ -k := fun k h => hb' (j - k) (by
     push_cast; linear_combination h)
-  have h1 := ghaR4_gamma_add_nat hb'r j
+  have h1 := Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat hb'r j
   rw [sub_add_cancel] at h1
   have hr := poch_reflect (1 - b') j
   rw [show 1 - (1 - b') - (j : ℂ) = b' - j by ring] at hr
   have h1b' : ∀ k : ℕ, 1 - b' ≠ -k := fun k h => hb' (k + 1) (by push_cast; linear_combination -h)
   have hp := poch_ne_zero_of_not_neg_nat h1b' j
   have hpj : poch (b' - j) j ≠ 0 := by rw [hr]; exact mul_ne_zero (pow_ne_zero _ (by norm_num)) hp
-  rw [ghaR4_gamma_add_nat hbr j]
+  rw [Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat hbr j]
   have hG : Gamma (b' - j) = Gamma b' / poch (b' - j) j := by
     rw [h1]; field_simp
   rw [hG, hr]
@@ -553,13 +564,13 @@ lemma ghaR4_gamma_pair {b b' : ℂ} (hb : ∀ k : ℤ, b ≠ k) (hb' : ∀ k : �
   linear_combination (-(poch b j * Gamma b * Gamma b')) * hs
 
 /-- Subexponential bound for the Horn G2 Gamma pair `Γ(b+n-m)Γ(b'+m-n)`. -/
-lemma ghaR4_gamma_shift_bound {b b' : ℂ} (hb : ∀ k : ℤ, b ≠ k) (hb' : ∀ k : ℤ, b' ≠ k)
+private lemma exists_norm_Gamma_add_sub_mul_Gamma_le {b b' : ℂ} (hb : ∀ k : ℤ, b ≠ k) (hb' : ∀ k : ℤ, b' ≠ k)
     {σ : ℝ} (hσ : 1 < σ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ m n : ℕ,
       ‖Gamma (b + n - m) * Gamma (b' + m - n)‖ ≤ C * σ ^ (m + n) * ‖Gamma b * Gamma b'‖ := by
   have h1b' : ∀ k : ℕ, 1 - b' ≠ -k := fun k h => hb' (k + 1) (by push_cast; linear_combination -h)
   have h1b : ∀ k : ℕ, 1 - b ≠ -k := fun k h => hb (k + 1) (by push_cast; linear_combination -h)
-  obtain ⟨C1, hC1, h1⟩ := ghaR4_norm_poch_le b (1 - b') h1b' hσ
-  obtain ⟨C2, hC2, h2⟩ := ghaR4_norm_poch_le b' (1 - b) h1b hσ
+  obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_norm_poch b (1 - b') h1b' hσ
+  obtain ⟨C2, hC2, h2⟩ := norm_poch_le_mul_norm_poch b' (1 - b) h1b hσ
   refine ⟨C1 + C2, by positivity, fun m n => ?_⟩
   have hσ0 : 0 ≤ σ := by linarith
   have hG0 := norm_nonneg (Gamma b * Gamma b')
@@ -567,7 +578,7 @@ lemma ghaR4_gamma_shift_bound {b b' : ℂ} (hb : ∀ k : ℤ, b ≠ k) (hb' : �
   · obtain ⟨j, rfl⟩ := Nat.exists_eq_add_of_le hmn
     have e1 : b + ((m + j : ℕ) : ℂ) - m = b + j := by push_cast; ring
     have e2 : b' + (m : ℂ) - ((m + j : ℕ) : ℂ) = b' - j := by push_cast; ring
-    rw [e1, e2, ghaR4_gamma_pair hb hb' j]
+    rw [e1, e2, Gamma_add_nat_mul_Gamma_sub_nat hb hb' j]
     have hp := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat h1b' j)
     rw [norm_mul, norm_div, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul]
     have hj : ‖poch b j‖ / ‖poch (1 - b') j‖ ≤ C1 * σ ^ j := by
@@ -581,7 +592,7 @@ lemma ghaR4_gamma_shift_bound {b b' : ℂ} (hb : ∀ k : ℤ, b ≠ k) (hb' : �
   · obtain ⟨j, rfl⟩ := Nat.exists_eq_add_of_le hnm
     have e1 : b + (n : ℂ) - ((n + j : ℕ) : ℂ) = b - j := by push_cast; ring
     have e2 : b' + ((n + j : ℕ) : ℂ) - n = b' + j := by push_cast; ring
-    rw [e1, e2, mul_comm, ghaR4_gamma_pair hb' hb j, mul_comm (Gamma b') (Gamma b)]
+    rw [e1, e2, mul_comm, Gamma_add_nat_mul_Gamma_sub_nat hb' hb j, mul_comm (Gamma b') (Gamma b)]
     have hp := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat h1b j)
     rw [norm_mul, norm_div, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul]
     have hj : ‖poch b' j‖ / ‖poch (1 - b) j‖ ≤ C2 * σ ^ j := by
@@ -601,22 +612,22 @@ theorem hornG2_summable (a a' b b' : ℂ) (ha : AppellRegular a) (ha' : AppellRe
       (Gamma a*Gamma a'*Gamma b*Gamma b'*(p.1 !*p.2 !))*x^p.1*y^p.2) := by
   have hGa := Complex.Gamma_ne_zero ha
   have hGa' := Complex.Gamma_ne_zero ha'
-  have hGb := Complex.Gamma_ne_zero (ghaR4_regular_of_nonint hb)
-  have hGb' := Complex.Gamma_ne_zero (ghaR4_regular_of_nonint hb')
+  have hGb := Complex.Gamma_ne_zero (ne_neg_nat_of_ne_int hb)
+  have hGb' := Complex.Gamma_ne_zero (ne_neg_nat_of_ne_int hb')
   have hbound : ∀ σ : ℝ, 1 < σ → ∃ C : ℝ, ∀ q : ℕ × ℕ,
       ‖Gamma (a+q.1)*Gamma (a'+q.2)*Gamma (b+q.2-q.1)*Gamma (b'+q.1-q.2)/
         (Gamma a*Gamma a'*Gamma b*Gamma b'*(q.1 !*q.2 !))‖ ≤ C * σ ^ (q.1 + q.2) := by
     intro σ hσ
-    obtain ⟨τ, hτ, hτσ⟩ := ghaR4_exists_pow_le hσ 2
-    obtain ⟨C1, hC1, h1⟩ := ghaR4_norm_poch_le_factorial a hτ
-    obtain ⟨C2, hC2, h2⟩ := ghaR4_norm_poch_le_factorial a' hτ
-    obtain ⟨C3, hC3, h3⟩ := ghaR4_gamma_shift_bound hb hb' hτ
+    obtain ⟨τ, hτ, hτσ⟩ := exists_one_lt_pow_le hσ 2
+    obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_factorial a hτ
+    obtain ⟨C2, hC2, h2⟩ := norm_poch_le_mul_factorial a' hτ
+    obtain ⟨C3, hC3, h3⟩ := exists_norm_Gamma_add_sub_mul_Gamma_le hb hb' hτ
     refine ⟨C1 * C2 * C3, fun ⟨m, n⟩ => ?_⟩
     simp only
     have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
     have hn : (0 : ℝ) < n ! := by exact_mod_cast n.factorial_pos
     have hτ0 : 0 ≤ τ := by linarith
-    rw [ghaR4_gamma_add_nat ha m, ghaR4_gamma_add_nat ha' n]
+    rw [Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat ha m, Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat ha' n]
     have e : poch a m * Gamma a * (poch a' n * Gamma a') * Gamma (b + n - m) * Gamma (b' + m - n) /
         (Gamma a * Gamma a' * Gamma b * Gamma b' * (m ! * n !)) =
         poch a m * poch a' n * (Gamma (b + n - m) * Gamma (b' + m - n)) /
@@ -638,7 +649,7 @@ theorem hornG2_summable (a a' b b' : ℂ) (ha : AppellRegular a) (ha' : AppellRe
           simp only [norm_mul, Complex.norm_natCast]
           ring
       _ ≤ C1 * C2 * C3 * σ ^ (m + n) * ‖Gamma b * Gamma b' * ((m ! : ℂ) * n !)‖ := by gcongr
-  obtain ⟨A, B, hA, hB, hS⟩ := ghaR4_dom_bidisc _ hbound hxy.1 hxy.2
+  obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_bidisc _ hbound hxy.1 hxy.2
   refine Summable.of_norm_bounded hS fun q => ?_
   rw [norm_mul, norm_mul, norm_pow, norm_pow]
   have hA0 : 0 ≤ A := (norm_nonneg _).trans hA.le
@@ -647,22 +658,22 @@ theorem hornG2_summable (a a' b b' : ℂ) (ha : AppellRegular a) (ha' : AppellRe
   gcongr
 
 /-- Gamma bounds at forward and backward integer shifts of a non-integral parameter. -/
-lemma ghaR4_gamma_int_bound {a : ℂ} (ha : ∀ k : ℤ, a ≠ k) {σ : ℝ} (hσ : 1 < σ) :
+private lemma exists_norm_Gamma_add_nat_le_and_sub_nat_le {a : ℂ} (ha : ∀ k : ℤ, a ≠ k) {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ j : ℕ, ‖Gamma (a + j)‖ ≤ C * σ ^ j * j ! ∧
       ‖Gamma (a - j)‖ * j ! ≤ C * σ ^ j := by
-  have har := ghaR4_regular_of_nonint ha
+  have har := ne_neg_nat_of_ne_int ha
   have h1a : ∀ k : ℕ, 1 - a ≠ -k := fun k h => ha (k + 1) (by push_cast; linear_combination -h)
-  obtain ⟨C1, hC1, h1⟩ := ghaR4_norm_poch_le_factorial a hσ
-  obtain ⟨C2, hC2, h2⟩ := ghaR4_factorial_le_norm_poch (1 - a) h1a hσ
+  obtain ⟨C1, hC1, h1⟩ := norm_poch_le_mul_factorial a hσ
+  obtain ⟨C2, hC2, h2⟩ := factorial_le_mul_norm_poch (1 - a) h1a hσ
   refine ⟨(C1 + C2) * ‖Gamma a‖, by positivity, fun j => ⟨?_, ?_⟩⟩
-  · rw [ghaR4_gamma_add_nat har j, norm_mul]
+  · rw [Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat har j, norm_mul]
     calc ‖poch a j‖ * ‖Gamma a‖ ≤ (C1 * σ ^ j * j !) * ‖Gamma a‖ := by gcongr; exact h1 j
       _ ≤ (C1 + C2) * ‖Gamma a‖ * σ ^ j * j ! := by
         have : 0 ≤ C2 * ‖Gamma a‖ * σ ^ j * j ! := by positivity
         nlinarith
   · -- Γ(a) = (a-j)ⱼ Γ(a-j) with (a-j)ⱼ = (-1)^j (1-a)ⱼ
     have hb'r : ∀ k : ℕ, a - j ≠ -k := fun k h => ha (j - k) (by push_cast; linear_combination h)
-    have hG := ghaR4_gamma_add_nat hb'r j
+    have hG := Gamma_add_nat_eq_poch_mul_Gamma_of_ne_neg_nat hb'r j
     rw [sub_add_cancel] at hG
     have hr := poch_reflect (1 - a) j
     rw [show 1 - (1 - a) - (j : ℂ) = a - j by ring] at hr
@@ -678,7 +689,7 @@ lemma ghaR4_gamma_int_bound {a : ℂ} (ha : ∀ k : ℤ, a ≠ k) {σ : ℝ} (h�
         nlinarith
 
 /-- `(A+B)! ≤ 2^(A+B) A! B!`. -/
-lemma ghaR4_choose_fact {A B : ℕ} : ((A + B) ! : ℝ) ≤ 2 ^ (A + B) * (A ! * B !) := by
+private lemma factorial_add_le_two_pow_mul {A B : ℕ} : ((A + B) ! : ℝ) ≤ 2 ^ (A + B) * (A ! * B !) := by
   have h := Nat.add_choose_mul_factorial_mul_factorial A B
   rw [← Nat.choose_symm_add] at h
   have h2 : (((A + B).choose A : ℕ) : ℝ) ≤ 2 ^ (A + B) := by exact_mod_cast Nat.choose_le_two_pow _ _
@@ -686,16 +697,16 @@ lemma ghaR4_choose_fact {A B : ℕ} : ((A + B) ! : ℝ) ≤ 2 ^ (A + B) * (A ! *
         rw [← h]; push_cast; ring
     _ ≤ _ := by gcongr
 
-/-- The mixed case of `ghaR4_gamma_G3_bound`: a forward Gamma factor at shift
+/-- The mixed case of `exists_norm_Gamma_hornG3_pair_le`: a forward Gamma factor at shift
 `k = (j+1) + N` and a backward one at shift `j+1 ≤ N` multiply to at most
 `C₁ C₂ σ^{4N} 4^N N!`. -/
-private lemma ghaR4_gamma_mixed_bound {σ C1 C2 : ℝ} (hσ : 1 < σ) (hC1 : 0 ≤ C1)
+private lemma gamma_mixed_bound {σ C1 C2 : ℝ} (hσ : 1 < σ) (hC1 : 0 ≤ C1)
     (hC2 : 0 ≤ C2) {x y : ℂ} {k j N : ℕ} (hkN : k = (j + 1) + N) (hjN : j + 1 ≤ N)
     (hx : ‖x‖ ≤ C1 * σ ^ k * k !) (hy : ‖y‖ * (j + 1) ! ≤ C2 * σ ^ (j + 1)) :
     ‖x‖ * ‖y‖ ≤ C1 * C2 * σ ^ (4 * N) * 4 ^ N * N ! := by
   have hσ0 : 0 ≤ σ := by linarith
   have hf : ((k ! : ℕ) : ℝ) ≤ 2 ^ k * ((j + 1) ! * N !) := by
-    rw [hkN]; exact ghaR4_choose_fact
+    rw [hkN]; exact factorial_add_le_two_pow_mul
   have hj0 : (0 : ℝ) < (j + 1) ! := by exact_mod_cast (j + 1).factorial_pos
   have hy' : ‖y‖ ≤ C2 * σ ^ (j + 1) / (j + 1) ! := by rw [le_div_iff₀ hj0]; exact hy
   calc ‖x‖ * ‖y‖ ≤ (C1 * σ ^ k * k !) * (C2 * σ ^ (j + 1) / (j + 1) !) :=
@@ -715,12 +726,12 @@ private lemma ghaR4_gamma_mixed_bound {σ C1 C2 : ℝ} (hσ : 1 < σ) (hC1 : 0 �
 
 /-- Gamma bound for the Horn G3 pair:
 `|Γ(a+2n-m) Γ(a'+2m-n)| ≤ C σ^{4(m+n)} 4^{m+n} (m+n)!` for non-integral `a, a'`. -/
-lemma ghaR4_gamma_G3_bound {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' : ∀ k : ℤ, a' ≠ k)
+private lemma exists_norm_Gamma_hornG3_pair_le {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' : ∀ k : ℤ, a' ≠ k)
     {σ : ℝ} (hσ : 1 < σ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ m n : ℕ,
       ‖Gamma (a + 2 * n - m) * Gamma (a' + 2 * m - n)‖ ≤
         C * σ ^ (4 * (m + n)) * 4 ^ (m + n) * (m + n) ! := by
-  obtain ⟨C1, hC1, h1⟩ := ghaR4_gamma_int_bound ha hσ
-  obtain ⟨C2, hC2, h2⟩ := ghaR4_gamma_int_bound ha' hσ
+  obtain ⟨C1, hC1, h1⟩ := exists_norm_Gamma_add_nat_le_and_sub_nat_le ha hσ
+  obtain ⟨C2, hC2, h2⟩ := exists_norm_Gamma_add_nat_le_and_sub_nat_le ha' hσ
   refine ⟨C1 * C2, by positivity, fun m n => ?_⟩
   have hσ0 : 0 ≤ σ := by linarith
   have h41 : (1 : ℝ) ≤ 4 ^ (m + n) := one_le_pow₀ (by norm_num)
@@ -758,7 +769,7 @@ lemma ghaR4_gamma_G3_bound {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' : ∀ k
       have e2 : a' + 2 * (m : ℂ) - n = a' - ((j + 1 : ℕ) : ℂ) := by
         rw [hj]; push_cast; ring
       rw [e2]
-      exact ghaR4_gamma_mixed_bound hσ hC1 hC2 (by omega) (by omega) (h1 k).1 (h2 (j + 1)).2
+      exact gamma_mixed_bound hσ hC1 hC2 (by omega) (by omega) (h1 k).1 (h2 (j + 1)).2
   · -- `2n < m`
     obtain ⟨j, hj⟩ := Nat.exists_eq_add_of_lt hm
     obtain ⟨l, hl⟩ := Nat.exists_eq_add_of_le (show n ≤ 2 * m by omega)
@@ -768,12 +779,12 @@ lemma ghaR4_gamma_G3_bound {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' : ∀ k
       have : (2 * m : ℕ) = n + l := hl
       rw [show (2 : ℂ) * m = ((2 * m : ℕ) : ℂ) by push_cast; ring, this]; push_cast; ring
     rw [e1, e2, mul_comm ‖Gamma (a - _)‖, mul_comm C1 C2]
-    exact ghaR4_gamma_mixed_bound hσ hC2 hC1 (by omega) (by omega) (h2 l).1 (h1 (j + 1)).2
+    exact gamma_mixed_bound hσ hC2 hC1 (by omega) (by omega) (h2 l).1 (h1 (j + 1)).2
 
 /-- A weighted binomial bound controls `(j+n)! 4^j` by `5^(j+n) j! n!`. -/
-private lemma ghaR4_weighted_choose_fact (j n : ℕ) :
+private lemma factorial_add_mul_four_pow_le (j n : ℕ) :
     ((j + n) ! : ℝ) * 4 ^ j ≤ 5 ^ (j + n) * (j ! * n !) := by
-  have h := ghaR4_choose_mul_pow_le (u := 4) (v := 1) (by norm_num) (by norm_num) j n
+  have h := choose_mul_pow_mul_pow_le (u := 4) (v := 1) (by norm_num) (by norm_num) j n
   norm_num at h
   have hf := Nat.add_choose_mul_factorial_mul_factorial j n
   rw [← Nat.choose_symm_add] at hf
@@ -787,12 +798,12 @@ private lemma ghaR4_weighted_choose_fact (j n : ℕ) :
 
 /-- The factorial quotient in a mixed Horn G3 Gamma pair is at most
 `5^(j+3n)`, after dividing by `j! (j+2n)! n!`. -/
-private lemma ghaR4_mixed_choose_fact_five (j n : ℕ) :
+private lemma factorial_two_mul_add_three_mul_le (j n : ℕ) :
     ((2 * j + 3 * n) ! : ℝ) ≤ 5 ^ (j + 3 * n) * (j ! * (j + 2 * n) ! * n !) := by
   have hfac : ((2 * j + 3 * n) ! : ℝ) ≤
       2 ^ (2 * j + 3 * n) * ((j + 2 * n) ! * (j + n) !) := by
     simpa only [show j + 2 * n + (j + n)=2 * j + 3 * n by omega] using
-      (ghaR4_choose_fact (A := j + 2 * n) (B := j + n))
+      (factorial_add_le_two_pow_mul (A := j + 2 * n) (B := j + n))
   have hp : (2 : ℝ) ^ (2 * j + 3 * n) * 5 ^ (j + n) ≤ 4 ^ j * 5 ^ (j + 3 * n) := by
     calc (2 : ℝ) ^ (2 * j + 3 * n) * 5 ^ (j + n) = 4 ^ j * 5 ^ j * 40 ^ n := by
           rw [pow_add, pow_add, pow_mul, pow_mul]
@@ -806,19 +817,19 @@ private lemma ghaR4_mixed_choose_fact_five (j n : ℕ) :
       2 ^ (2 * j + 3 * n) * ((j + 2 * n) ! * (j + n) !) * 4 ^ j := by gcongr
     _ = 2 ^ (2 * j + 3 * n) * (j + 2 * n) ! * (((j + n) ! : ℝ) * 4 ^ j) := by ring
     _ ≤ 2 ^ (2 * j + 3 * n) * (j + 2 * n) ! * (5 ^ (j + n) * (j ! * n !)) := by
-      exact mul_le_mul_of_nonneg_left (ghaR4_weighted_choose_fact j n) (by positivity)
+      exact mul_le_mul_of_nonneg_left (factorial_add_mul_four_pow_le j n) (by positivity)
     _ = (2 ^ (2 * j + 3 * n) * 5 ^ (j + n)) * (j ! * (j + 2 * n) ! * n !) := by ring
     _ ≤ (4 ^ j * 5 ^ (j + 3 * n)) * (j ! * (j + 2 * n) ! * n !) := by gcongr
     _ = _ := by ring
 
 /-- Forward and backward Gamma estimates combine with the mixed factorial bound
 to give the separate-factorial majorant needed for a Horn G3 bidisc. -/
-private lemma ghaR4_gamma_mixed_bound_five {σ C1 C2 : ℝ} (hσ : 1 < σ) (hC1 : 0 ≤ C1)
+private lemma gamma_mixed_bound_five {σ C1 C2 : ℝ} (hσ : 1 < σ) (hC1 : 0 ≤ C1)
     (hC2 : 0 ≤ C2) {x y : ℂ} {k r m n : ℕ} (hk : k = 2 * r + 3 * m) (hn : n=r + 2 * m)
     (hx : ‖x‖ ≤ C1 * σ ^ k * k !) (hy : ‖y‖ * r ! ≤ C2 * σ ^ r) :
     ‖x‖ * ‖y‖ ≤ C1 * C2 * σ ^ (4 * (m + n)) * 5 ^ (m + n) * (m ! * n !) := by
   have hf : ((k !:ℕ) : ℝ) ≤ 5 ^ (m + n) * (r ! * n ! * m !) := by
-    simpa only [hk, hn, show m + (r + 2 * m)=r + 3 * m by omega] using ghaR4_mixed_choose_fact_five r m
+    simpa only [hk, hn, show m + (r + 2 * m)=r + 3 * m by omega] using factorial_two_mul_add_three_mul_le r m
   have hr0 : (0 : ℝ)<r ! := by exact_mod_cast r.factorial_pos
   have hy' : ‖y‖ ≤ C2 * σ ^ r / r ! := by rw [le_div_iff₀ hr0]; exact hy
   calc ‖x‖ * ‖y‖ ≤ (C1 * σ ^ k * k !) * (C2 * σ ^ r / r !) :=
@@ -836,8 +847,8 @@ the diamond `|x|+|y|<1/4`. -/
 lemma hornG3_gammaPair_bound_five {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' : ∀ k : ℤ, a' ≠ k)
     {σ : ℝ} (hσ : 1 < σ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ m n : ℕ,
       ‖Gamma (a + 2 * n - m) * Gamma (a' + 2 * m - n)‖ ≤ C * σ ^ (4 * (m + n)) * 5 ^ (m + n) * (m ! * n !) := by
-  obtain ⟨C1, hC1, h1⟩ := ghaR4_gamma_int_bound ha hσ
-  obtain ⟨C2, hC2, h2⟩ := ghaR4_gamma_int_bound ha' hσ
+  obtain ⟨C1, hC1, h1⟩ := exists_norm_Gamma_add_nat_le_and_sub_nat_le ha hσ
+  obtain ⟨C2, hC2, h2⟩ := exists_norm_Gamma_add_nat_le_and_sub_nat_le ha' hσ
   refine ⟨C1 * C2, by positivity, fun m n => ?_⟩
   have hσ0 : 0 ≤ σ := by linarith
   rw [norm_mul]
@@ -858,7 +869,7 @@ lemma hornG3_gammaPair_bound_five {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' 
         rw [←hkl]; exact_mod_cast Nat.le_of_dvd (Nat.factorial_pos _)
           (Nat.factorial_mul_factorial_dvd_factorial_add k l)
       have hf' : ((m + n) ! : ℝ) ≤ 5 ^ (m + n) * (m ! * n !) :=
-        (ghaR4_choose_fact (A:=m) (B:=n)).trans (by gcongr; norm_num)
+        (factorial_add_le_two_pow_mul (A:=m) (B:=n)).trans (by gcongr; norm_num)
       calc ‖Gamma (a + k)‖ * ‖Gamma (a' + l)‖ ≤ (C1 * σ ^ k * k !) * (C2 * σ ^ l * l !) :=
             mul_le_mul (h1 k).1 (h2 l).1 (norm_nonneg _) (by positivity)
         _ = C1 * C2 * σ ^ (k + l) * (k ! * l !) := by rw [pow_add]; ring
@@ -870,7 +881,7 @@ lemma hornG3_gammaPair_bound_five {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' 
     · obtain ⟨j, hj⟩ := Nat.exists_eq_add_of_lt hn
       have e2 : a' + 2 * (m : ℂ) - n = a'-((j + 1:ℕ) : ℂ) := by rw [hj]; push_cast; ring
       rw [e2]
-      exact ghaR4_gamma_mixed_bound_five hσ hC1 hC2 (by omega) (by omega) (h1 k).1 (h2 (j + 1)).2
+      exact gamma_mixed_bound_five hσ hC1 hC2 (by omega) (by omega) (h1 k).1 (h2 (j + 1)).2
   · obtain ⟨j, hj⟩ := Nat.exists_eq_add_of_lt hm
     obtain ⟨l, hl⟩ := Nat.exists_eq_add_of_le (show n≤2 * m by omega)
     have e1 : a + 2 * (n : ℂ) - m = a - ((j + 1:ℕ) : ℂ) := by rw [hj]; push_cast; ring
@@ -878,7 +889,7 @@ lemma hornG3_gammaPair_bound_five {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' 
       have : (2 * m:ℕ)=n + l := hl
       rw [show (2 : ℂ) * m=((2 * m:ℕ) : ℂ) by push_cast; ring, this]; push_cast; ring
     rw [e1, e2]
-    have hh := ghaR4_gamma_mixed_bound_five hσ hC2 hC1 (m:=n) (n:=m) (by omega) (by omega)
+    have hh := gamma_mixed_bound_five hσ hC2 hC1 (m:=n) (n:=m) (by omega) (by omega)
       (h2 l).1 (h1 (j + 1)).2
     simpa only [Nat.add_comm, mul_comm, mul_left_comm, mul_assoc] using hh
 
@@ -888,15 +899,15 @@ theorem hornG3_summable (a a' : ℂ) (ha : ∀ k : ℤ,a≠k) (ha' : ∀ k : ℤ
     {x y : ℂ} (hxy : ‖x‖+‖y‖<(1/4:ℝ)) :
     Summable (fun p : ℕ × ℕ => Gamma (a+2*p.2-p.1)*Gamma (a'+2*p.1-p.2)/
       (Gamma a*Gamma a'*(p.1 !*p.2 !))*x^p.1*y^p.2) := by
-  have hGa := Complex.Gamma_ne_zero (ghaR4_regular_of_nonint ha)
-  have hGa' := Complex.Gamma_ne_zero (ghaR4_regular_of_nonint ha')
+  have hGa := Complex.Gamma_ne_zero (ne_neg_nat_of_ne_int ha)
+  have hGa' := Complex.Gamma_ne_zero (ne_neg_nat_of_ne_int ha')
   set c : ℕ × ℕ → ℂ := fun p => Gamma (a+2*p.2-p.1)*Gamma (a'+2*p.1-p.2)/
       (Gamma a*Gamma a'*(p.1 !*p.2 !)) / 4 ^ (p.1 + p.2) with hc
   have hbound : ∀ σ : ℝ, 1 < σ → ∃ C : ℝ, ∀ q : ℕ × ℕ,
       ‖c q‖ ≤ C * σ ^ (q.1 + q.2) * ((q.1 + q.2).choose q.1 : ℝ) := by
     intro σ hσ
-    obtain ⟨τ, hτ, hτσ⟩ := ghaR4_exists_pow_le hσ 4
-    obtain ⟨C, hC0, hC⟩ := ghaR4_gamma_G3_bound ha ha' hτ
+    obtain ⟨τ, hτ, hτσ⟩ := exists_one_lt_pow_le hσ 4
+    obtain ⟨C, hC0, hC⟩ := exists_norm_Gamma_hornG3_pair_le ha ha' hτ
     have hGn : 0 < ‖Gamma a * Gamma a'‖ := norm_pos_iff.mpr (mul_ne_zero hGa hGa')
     refine ⟨C / ‖Gamma a * Gamma a'‖, fun ⟨m, n⟩ => ?_⟩
     have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
@@ -925,7 +936,7 @@ theorem hornG3_summable (a a' : ℂ) (ha : ∀ k : ℤ,a≠k) (ha' : ∀ k : ℤ
           (‖Gamma a * Gamma a' * ((m ! : ℂ) * n !)‖ * ‖(4 : ℂ) ^ (m + n)‖) := by gcongr
   have hxy4 : ‖4 * x‖ + ‖4 * y‖ < 1 := by
     rw [norm_mul, norm_mul, Complex.norm_ofNat]; linarith
-  obtain ⟨A, B, hA, hB, hS⟩ := ghaR4_dom_diamond c hbound hxy4
+  obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_diamond c hbound hxy4
   refine Summable.of_norm_bounded hS fun q => ?_
   have e : Gamma (a+2*q.2-q.1)*Gamma (a'+2*q.1-q.2)/(Gamma a*Gamma a'*(q.1 !*q.2 !))*x^q.1*y^q.2 =
       c q * (4 * x) ^ q.1 * (4 * y) ^ q.2 := by
@@ -942,13 +953,13 @@ theorem hornG3_nonmaximal_region (a a' : ℂ) (ha : ∀ k : ℤ,a≠k) (ha' : �
     ∃ x y : ℂ,(1/4:ℝ)≤‖x‖+‖y‖ ∧
       Summable (fun p : ℕ × ℕ => Gamma (a+2*p.2-p.1)*Gamma (a'+2*p.1-p.2)/
         (Gamma a*Gamma a'*(p.1 !*p.2 !))*x^p.1*y^p.2) := by
-  have hGa := Complex.Gamma_ne_zero (ghaR4_regular_of_nonint ha)
-  have hGa' := Complex.Gamma_ne_zero (ghaR4_regular_of_nonint ha')
+  have hGa := Complex.Gamma_ne_zero (ne_neg_nat_of_ne_int ha)
+  have hGa' := Complex.Gamma_ne_zero (ne_neg_nat_of_ne_int ha')
   set c : ℕ × ℕ → ℂ := fun p => Gamma (a + 2 * p.2 - p.1) * Gamma (a' + 2 * p.1 - p.2) /
       (Gamma a * Gamma a' * (p.1 ! * p.2 !)) / 5 ^ (p.1 + p.2) with hc
   have hbound : ∀ σ : ℝ, 1 < σ → ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖c q‖ ≤ C * σ ^ (q.1 + q.2) := by
     intro σ hσ
-    obtain ⟨τ, hτ, hτσ⟩ := ghaR4_exists_pow_le hσ 4
+    obtain ⟨τ, hτ, hτσ⟩ := exists_one_lt_pow_le hσ 4
     obtain ⟨C, hC0, hC⟩ := hornG3_gammaPair_bound_five ha ha' hτ
     have hGn : 0<‖Gamma a * Gamma a'‖ := norm_pos_iff.mpr (mul_ne_zero hGa hGa')
     refine ⟨C / ‖Gamma a * Gamma a'‖, fun ⟨m, n⟩ => ?_⟩
@@ -972,7 +983,7 @@ theorem hornG3_nonmaximal_region (a a' : ℂ) (ha : ∀ k : ℤ,a≠k) (ha' : �
             gcongr
   let x : ℂ := 1 / 8
   have hx : ‖5 * x‖<1 := by norm_num [x, norm_div]
-  obtain ⟨A, B, hA, hB, hS⟩ := ghaR4_dom_bidisc c hbound hx hx
+  obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_bidisc c hbound hx hx
   refine ⟨x, x, by norm_num [x, norm_div], Summable.of_norm_bounded hS fun q => ?_⟩
   have e : Gamma (a + 2 * q.2 - q.1) * Gamma (a' + 2 * q.1 - q.2) / (Gamma a * Gamma a' * (q.1 ! * q.2 !)) * x ^ q.1 * x ^ q.2 =
       c q * (5 * x) ^ q.1 * (5 * x) ^ q.2 := by
@@ -984,7 +995,7 @@ theorem hornG3_nonmaximal_region (a a' : ℂ) (ha : ∀ k : ℤ,a≠k) (ha' : �
 
 /-- Germ agreement of two functions analytic at a point of `ℂ × ℂ` is locally constant.
 Adapted from TauCeti's one-variable `eventually_eventuallyEq_iff_of_analyticAt`. -/
-lemma ghaR4_eventually_eventuallyEq_iff {F G : ℂ × ℂ → ℂ} {z : ℂ × ℂ}
+private lemma eventually_eventuallyEq_iff_of_analyticAt_prod {F G : ℂ × ℂ → ℂ} {z : ℂ × ℂ}
     (hF : AnalyticAt ℂ F z) (hG : AnalyticAt ℂ G z) :
     ∀ᶠ w in 𝓝 z, ((F =ᶠ[𝓝 w] G) ↔ (F =ᶠ[𝓝 z] G)) := by
   obtain ⟨r₁, hr₁, hF'⟩ := hF.exists_ball_analyticOnNhd
@@ -1011,7 +1022,7 @@ theorem appell_continuation_unique {F G : ℝ→(ℂ × ℂ→ℂ)} {γ : ℝ→
   have hloc : ∀ t ∈ Icc (0:ℝ) 1, ∀ᶠ u in 𝓝[Icc 0 1] t,
       ((F u =ᶠ[𝓝 (γ u)] G u) ↔ (F t =ᶠ[𝓝 (γ t)] G t)) := by
     intro t ht
-    have hball := ghaR4_eventually_eventuallyEq_iff (hF.analyticAt t ht) (hG.analyticAt t ht)
+    have hball := eventually_eventuallyEq_iff_of_analyticAt_prod (hF.analyticAt t ht) (hG.analyticAt t ht)
     filter_upwards [(hF.continuousOn t ht).eventually hball, hF.locallyEq t ht,
       hG.locallyEq t ht] with u hiff hfu hgu
     exact ⟨fun h => hiff.mp (hfu.symm.trans (h.trans hgu)),

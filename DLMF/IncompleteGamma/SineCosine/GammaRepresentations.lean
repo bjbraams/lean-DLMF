@@ -10,11 +10,41 @@ public import DLMF.IncompleteGamma.ExpIntegralAsymptotics
 /-!
 # Generalized sine and cosine integrals through incomplete Gamma
 
-Rotated Gamma tails and segment integrals give generalized sine and cosine integral
-representations.
+The generalized sine and cosine integrals `si(a,z)`, `ci(a,z)`, `Si(a,z)`, `Ci(a,z)` of
+DLMF §8.21, defined on the logarithmic plane and on the principal branch, with their
+incomplete Gamma representations, integrals, complementary relations, special values and
+series (DLMF 8.21.1–8.21.15).
 
-Source references and common attribution are retained in
-`DLMF.IncompleteGamma.SineCosine`.
+## Main definitions
+
+* `genSinIntOnLog`, `genCosIntOnLog`: the lower generalized sine and cosine integrals on the
+  logarithmic plane, away from their parameter poles.
+* `genSinIntTailOnLog`, `genCosIntTailOnLog`: the upper generalized integrals, entire in `a`.
+* `genSinInt`, `genCosInt`, `genSinIntTail`, `genCosIntTail`: the principal branches for
+  nonzero `z`.
+* `gammaSinHalfPiContinued`, `gammaCosHalfPiContinued`: `Γ(a) sin(πa/2)` and `Γ(a) cos(πa/2)`
+  with their removable singularities filled by limits.
+
+## Main results
+
+* `genUpperTrig_gamma`, `genLowerTrig_gamma`: the incomplete Gamma representations
+  DLMF 8.21.1 and 8.21.2.
+* `gamma_rotated_oscillatory_integral`: DLMF 8.21.3.
+* `genSinIntTail_horizontal_integral`, `genCosIntTail_horizontal_integral`: DLMF 8.21.4 and
+  8.21.5.
+* `genSinInt_segment_integral`, `genCosInt_segment_integral`: DLMF 8.21.6 and 8.21.7.
+* `genSinInt_complement`, `genCosInt_complement`: DLMF 8.21.8 and 8.21.9.
+* `genTrig_order_zero`, `genSinInt_order_zero`: the order-zero cases DLMF 8.21.10 and 8.21.11.
+* `genSinInt_value_at_infinity`, `genCosInt_value_at_infinity`: DLMF 8.21.12 and 8.21.13.
+* `genSinInt_hasSum`, `genCosInt_hasSum`: the power series DLMF 8.21.14 and 8.21.15.
+* `genSinInt_parameter_analytic`, `genSinInt_parameter_residue`, `genCosInt_parameter_analytic`,
+  `genCosInt_parameter_residue`, `genSinIntTail_parameter_entire`,
+  `genCosIntTail_parameter_entire`: analytic dependence on the parameter.
+
+## Implementation notes
+
+Ordinary limits at infinity in DLMF 8.21.12 and 8.21.13 need `Re a < 1`; other values are
+interpreted by continuation in the parameter.
 -/
 
 @[expose] public noncomputable section
@@ -844,7 +874,7 @@ theorem genLowerTrig_gamma {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) {ε 
 /-- The series with terms `(fun k : ℕ => z^a*(-1 : ℂ)^k*z^(2*k+1)/((2*k+a+1)*(2*k+1).factorial))`
 converges to `(genSinInt a z)`. -/
 @[dlmf 8.21.E14]
-theorem genSinInt_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) {z : ℂ} (hz : z ≠ 0) :
+theorem genSinInt_hasSum {a : ℂ} {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ => z^a*(-1 : ℂ)^k*z^(2*k+1)/((2*k+a+1)*(2*k+1).factorial)) (genSinInt a z) := by
   have hs := (summable_genTrig_coeff a z 1).hasSum.mul_left (z^a)
   have he (k : ℕ) : exp ((2*k+1:ℂ)*log z)=z^(2*k+1) := by
@@ -866,7 +896,7 @@ theorem genSinInt_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) {z : ℂ} 
 /-- The series with terms `(fun k : ℕ => z^a*(-1 : ℂ)^k*z^(2*k)/((2*k+a)*(2*k).factorial))`
 converges to `(genCosInt a z)`. -/
 @[dlmf 8.21.E15]
-theorem genCosInt_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : ℂ)) {z : ℂ} (hz : z ≠ 0) :
+theorem genCosInt_hasSum {a : ℂ} {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ => z^a*(-1 : ℂ)^k*z^(2*k)/((2*k+a)*(2*k).factorial)) (genCosInt a z) := by
   have hs := (summable_genTrig_coeff a z 0).hasSum.mul_left (z^a)
   have he (k : ℕ) : exp ((2*k+0:ℂ)*log z)=z^(2*k+0) := by
@@ -947,8 +977,7 @@ theorem genSinInt_segment_integral {a : ℂ} (ha : -1 < a.re) {z : ℂ} (hz : z 
       cpow_natCast]
     ring
   rw [primitive, segmentIntegral, hint, ← hI.tsum_eq, sub_zero, ← tsum_mul_left,
-    ← (genSinInt_hasSum (fun n h => by
-      have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)]) hz0).tsum_eq]
+    ← (genSinInt_hasSum hz0).tsum_eq]
   congr 1; funext k
   have hza : z ^ a = z * z ^ (a-1) := by
     conv_lhs => rw [show a = 1 + (a - 1) by ring]
@@ -989,8 +1018,7 @@ theorem genCosInt_segment_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} (hz : z �
       cpow_natCast]
     ring
   rw [primitive, segmentIntegral, hint, ← hI.tsum_eq, sub_zero, ← tsum_mul_left,
-    ← (genCosInt_hasSum (fun n h => by
-      have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)]) hz0).tsum_eq]
+    ← (genCosInt_hasSum hz0).tsum_eq]
   congr 1; funext k
   have hza : z ^ a = z * z ^ (a-1) := by
     conv_lhs => rw [show a = 1 + (a - 1) by ring]

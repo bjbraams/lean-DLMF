@@ -12,9 +12,13 @@ public import Mathlib.Tactic.Ring
 /-!
 # Pairing consecutive terms of finite sums
 
-Small general facts used throughout the special-function library: a sum over
-`range (2 m)` is the sum of the consecutive pairs `f (2 j) + f (2 j + 1)`, and
-`(-1)ⁿ (-1)ⁿ = 1`.
+Small general facts about finite sums and signs used throughout the special-function library.
+
+## Main results
+
+* `Finset.sum_range_two_mul`: a sum over `range (2 m)` is the sum of the consecutive pairs
+  `f (2 j) + f (2 j + 1)`.
+* `neg_one_pow_mul_neg_one_pow_self`: `(-1)ⁿ (-1)ⁿ = 1`.
 -/
 
 @[expose] public section

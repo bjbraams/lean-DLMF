@@ -17,11 +17,19 @@ For `h` satisfying 2.5.18 and 2.5.20 with `c > -1`, the Laplace transform
 as `ζ → 0⁺` by writing `ζ𝓛h(ζ) = I₁(1/ζ) + I₂(1/ζ)` (2.5.38–2.5.39) and applying the Mellin
 method with `𝓜(e^{-t})(z) = Γ(z)`.
 
-* 2.5.38–2.5.40 (proved, 2.5.40 modulo the convolution theorem 2.5.4);
-* 2.5.41–2.5.44: contour shifts and the expansion 2.5.44;
-* the remainder estimate after 2.5.43, `O(ζ^{l-δ-1})` (proved);
-* the example `h(t) = 1/(1 + t)`: 2.5.45–2.5.49, with 2.5.49 for real `ζ > 0` and the convergent
-  form of 2.5.48 proved from DLMF 6.2.2 and 6.6.3.
+## Main results
+
+* `laplace_eq_trunc_add`, `laplace_trunc_eq_mellinInv`: DLMF 2.5.37–2.5.40.
+* `laplace_truncLow_shift`, `laplace_truncHigh_shift`: contour shifts (DLMF 2.5.41–2.5.42).
+* `laplace_remainder_isBigO`, `laplace_expansion_residues`: the remainder estimate
+  `O(ζ^{l-δ-1})` and the expansion 2.5.43.
+* `laplace_small_parameter`: the expansion 2.5.44.
+* `residueAt_laplace_inv_one_add`, `residueAt_laplace_inv_one_add_truncHigh`,
+  `laplace_inv_one_add_eq`, `laplace_inv_one_add_eq_complex`, `hasSum_laplace_inv_one_add`,
+  `laplace_inv_one_add_isBigO`: the example `h(t) = 1/(1 + t)` (DLMF 2.5.45–2.5.49), the
+  convergent form of 2.5.48 from DLMF 6.2.2 and 6.6.3.
+
+## Implementation notes
 
 Parameters: `ζ` is real and positive except in `laplace_inv_one_add_eq_complex` (`ℜζ > 0`).
 The extended transform `𝓜h(z)` for `ℜz > 1` in 2.5.43–2.5.44 is `𝓜h₁(z) + H(z)`, `H` the

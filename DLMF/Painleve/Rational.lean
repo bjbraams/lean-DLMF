@@ -12,11 +12,31 @@ public import Mathlib.Tactic.Polynomial.Basic
 /-!
 # Rational solutions of Painlevé II
 
-The existence part of Beals–Wong Theorem 15.3.1 is constructed by the upward
-Bäcklund shift, starting at zero. Polynomial numerator and denominator pairs
-keep the rationality assertion explicit, and denominator polynomials are
-proved nonzero. The equation is asserted on the full regular set of each
-constructed quotient. This does not yet prove the converse or uniqueness.
+Rational solutions of Painlevé II, `u'' = 2u³ + xu - c`, for every integer parameter: the
+existence part of Beals–Wong Theorem 15.3.1, constructed by the upward Bäcklund shift starting
+from the zero solution.
+
+## Main definitions
+
+* `rationalFn`, `polynomialDomain`: a polynomial quotient and its regular set.
+* `rationalStepDenom`: the polynomial denominator of one upward shift after clearing `q²`.
+* `rationalPIIPair`: the canonical polynomial pair of the rational solution at parameter `n`.
+
+## Main results
+
+* `backlundUp_rationalFn`: one upward Bäcklund shift as an explicit polynomial pair.
+* `rationalPIIPair_spec`: the canonical pair has a nonzero denominator and solves PII on its
+  full regular set.
+* `rationalPIIPair_one`, `rationalPIIPair_two`: the first two rational solutions, as on
+  page 407 of Beals–Wong.
+* `exists_rational_solution_nat`, `exists_rational_solution_int`: every integer parameter has a
+  rational solution.
+
+## Implementation notes
+
+Polynomial numerator and denominator pairs keep the rationality assertion explicit, and the
+denominator polynomials are nonzero. The equation is asserted on the full regular set of each
+constructed quotient. The converse and uniqueness parts of Theorem 15.3.1 are not included.
 -/
 
 @[expose] public noncomputable section
@@ -139,7 +159,7 @@ theorem rationalPIIPair_spec (n : ℕ) :
         mul_ne_zero_iff.mp (by simpa only [polynomialDomain, mem_ofPred_eq, eval_mul] using hx)
       rw [backlundDenom_neg_rationalFn p q hqr.1]
       exact div_ne_zero hqr.2 (pow_ne_zero _ hqr.1)
-    have hnew := (hsol.mono hsub).shiftUp (isOpen_polynomialDomain (q * r)) hD
+    have hnew := (hsol.mono hsub).shift_up (isOpen_polynomialDomain (q * r)) hD
     have heq : EqOn (backlundUp (n : ℂ) (rationalFn p q))
         (rationalFn (-p * r + C (1 + 2 * (n : ℂ)) * q ^ 3) (q * r)) (polynomialDomain (q * r)) := by
       intro x hx

@@ -10,20 +10,25 @@ public import DLMF.Airy.Properties
 /-!
 # Airy functions and Bessel functions of order `±1/3` (DLMF §§9.6, 9.7)
 
-For real `x > 0` and `ζ = (2/3) x^{3/2}` (`airyZeta`, DLMF 9.6.1) we prove
+For real `x > 0` and `ζ = (2/3) x^{3/2}`, the Airy functions are expressed through Bessel
+functions of order `±1/3`, and the leading terms of their large-`x` expansions are derived.
+
+## Main definitions
+
+* `airyZeta`: the variable `ζ = (2/3) x^{3/2}` (DLMF 9.6.1).
+
+## Main results
 
 * `airyAi_eq_besselI`, `airyAi_eq_besselK`: `Ai(x) = (√x/3)(I_{-1/3}(ζ) - I_{1/3}(ζ))
-  = π⁻¹ √(x/3) K_{1/3}(ζ)` (9.6.2);
-* `airyBi_eq_besselI`: `Bi(x) = √(x/3)(I_{1/3}(ζ) + I_{-1/3}(ζ))` (9.6.4);
-* `airyAi_neg_eq_besselJ`: `Ai(-x) = (√x/3)(J_{1/3}(ζ) + J_{-1/3}(ζ))` (9.6.6);
-* `airyBi_neg_eq_besselJ`: `Bi(-x) = √(x/3)(J_{-1/3}(ζ) - J_{1/3}(ζ))` (9.6.8);
+  = π⁻¹ √(x/3) K_{1/3}(ζ)` (DLMF 9.6.2).
+* `airyBi_eq_besselI`: `Bi(x) = √(x/3)(I_{1/3}(ζ) + I_{-1/3}(ζ))` (DLMF 9.6.4).
+* `airyAi_neg_eq_besselJ`: `Ai(-x) = (√x/3)(J_{1/3}(ζ) + J_{-1/3}(ζ))` (DLMF 9.6.6).
+* `airyBi_neg_eq_besselJ`: `Bi(-x) = √(x/3)(J_{-1/3}(ζ) - J_{1/3}(ζ))` (DLMF 9.6.8).
+* `airyAi_isEquivalent`: `Ai(x) ~ e^{-ζ}/(2√π x^{1/4})` (leading term of DLMF 9.7.5).
+* `airyBi_isEquivalent`: `Bi(x) ~ e^{ζ}/(√π x^{1/4})` (leading term of DLMF 9.7.7).
+* `airyAi_ofReal_pos`, `airyBi_ofReal_pos`: both functions are positive on `[0, ∞)`.
 
-and the leading terms of the large-`x` expansions (DLMF 9.7.5, 9.7.7):
-
-* `airyAi_isEquivalent`: `Ai(x) ~ e^{-ζ}/(2√π x^{1/4})`;
-* `airyBi_isEquivalent`: `Bi(x) ~ e^{ζ}/(√π x^{1/4})`;
-
-and `airyAi_ofReal_pos`, `airyBi_ofReal_pos`: both functions are positive on `[0, ∞)`.
+## Implementation notes
 
 The asymptotics come from Hankel's expansion of `K_ν` (`besselK_ray_isBigO`) and the
 large-argument behaviour of `I_ν` (`besselI_sub_exp_isBigO`).

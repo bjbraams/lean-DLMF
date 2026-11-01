@@ -20,21 +20,27 @@ public import Mathlib.MeasureTheory.Covering.Besicovitch
 /-!
 # Changes of variables and products of solutions (DLMF §§1.13(iv)–1.13(v))
 
-For `w'' + f(z) w' + g(z) w = 0` on an open set `D ⊆ ℂ` (`IsLinODE2SolOn f g 0 w D`):
+Transformations of `w'' + f(z) w' + g(z) w = 0` on an open set `D ⊆ ℂ`
+(`IsLinODE2SolOn f g 0 w D`), the Schwarzian derivative and products of solutions.
 
-* the inversion `ξ = 1/z` (1.13.11–1.13.12);
-* elimination of the first derivative by a change of the dependent variable (1.13.13–1.13.15)
-  and of the independent variable (1.13.16–1.13.17); the integrals `∫ f dz` of DLMF are
-  primitives `F` of `f` on `D` (hypotheses `HasDerivAt F (f z) z`), so the statements are
-  branch-free;
-* the Liouville transformation 1.13.18–1.13.19, stated in the variable `z` with a chosen square
-  root `σ` of `ζ'`, the Schwarzian derivative 1.13.20 (definition `schwarzian` and its
-  square-root form), Cayley's identity 1.13.21 and the inversion formula 1.13.22;
-* the third-order equation 1.13.23 for products of solutions, and the mixed-potential identity
-  1.13.25.
+## Main results
 
-The chain rules and Leibniz expansions use Mathlib’s derivative API,
-`iteratedDeriv_fun_mul` and the analyticity of complex differentiable functions.
+* `isLinODE2SolOn_inv`: the inversion `ξ = 1/z` (DLMF 1.13.11–1.13.12).
+* `isLinODE2SolOn_elim_first`: elimination of the first derivative by a change of the dependent
+  variable (DLMF 1.13.13–1.13.15).
+* `hasDerivAt_deriv_comp_eta`, `isLinODE2SolOn_comp_eta_iff`: change of the independent
+  variable (DLMF 1.13.16–1.13.17).
+* `liouville_transformation`: the Liouville transformation (DLMF 1.13.18–1.13.19).
+* `schwarzian_eq_sqrt`, `schwarzian_comp`, `schwarzian_inverse`: the square-root form of the
+  Schwarzian derivative, Cayley's identity and the inversion formula (DLMF 1.13.20–1.13.22).
+* `product_solution_ode3`, `product_solution_IJ`: the third-order equation for products of
+  solutions and the mixed-potential identity (DLMF 1.13.23–1.13.25).
+
+## Implementation notes
+
+The integrals `∫ f dz` of DLMF are primitives `F` of `f` on `D` (hypotheses
+`HasDerivAt F (f z) z`), so the statements are branch-free. The Liouville transformation is
+stated in the variable `z` with a chosen square root `σ` of `ζ'`.
 -/
 
 @[expose] public noncomputable section
@@ -109,7 +115,7 @@ theorem isLinODE2SolOn_elim_first (hD : IsOpen D) {F : ℂ → ℂ}
   ring
 
 /-- The first derivative of `v ∘ η` with `η' = e^{-F}`. -/
-lemma g1d_hasDerivAt_comp_eta {F η v : ℂ → ℂ} {z : ℂ}
+private lemma hasDerivAt_comp_of_hasDerivAt_exp_neg {F η v : ℂ → ℂ} {z : ℂ}
     (hη : HasDerivAt η (Complex.exp (-F z)) z) (hv : DifferentiableAt ℂ v (η z)) :
     HasDerivAt (v ∘ η) (deriv v (η z) * Complex.exp (-F z)) z :=
   hv.hasDerivAt.comp z hη
@@ -126,10 +132,10 @@ theorem hasDerivAt_deriv_comp_eta (hD : IsOpen D) {F η v : ℂ → ℂ}
       HasDerivAt (deriv (v ∘ η)) (-f z * deriv (v ∘ η) z - g z * (v ∘ η) z +
         Complex.exp (-2 * F z) * (deriv (deriv v) (η z) + g z * Complex.exp (2 * F z) *
           v (η z))) z := by
-  have h1 := g1d_hasDerivAt_comp_eta (hη z hz) (hv z hz).1
+  have h1 := hasDerivAt_comp_of_hasDerivAt_exp_neg (hη z hz) (hv z hz).1
   have hev : deriv (v ∘ η) =ᶠ[𝓝 z] fun y => deriv v (η y) * Complex.exp (-F y) := by
     filter_upwards [hD.mem_nhds hz] with y hy
-    exact (g1d_hasDerivAt_comp_eta (hη y hy) (hv y hy).1).deriv
+    exact (hasDerivAt_comp_of_hasDerivAt_exp_neg (hη y hy) (hv y hy).1).deriv
   refine ⟨h1.differentiableAt, ?_⟩
   refine ((((hv z hz).2.hasDerivAt.comp z (hη z hz)).mul (hF z hz).neg.cexp).congr_of_eventuallyEq
     hev).congr_deriv ?_
@@ -348,7 +354,7 @@ theorem schwarzian_comp {Z ξ : ℂ → ℂ} {ζ : ℂ} (hξ : ContDiffAt ℂ 3 
   ring
 
 /-- The Schwarzian derivative of a function equal to the identity near `ζ₀` vanishes. -/
-lemma g1d_schwarzian_of_eventuallyEq_id {u : ℂ → ℂ} {ζ₀ : ℂ} (hu : u =ᶠ[𝓝 ζ₀] id) :
+private lemma schwarzian_of_eventuallyEq_id {u : ℂ → ℂ} {ζ₀ : ℂ} (hu : u =ᶠ[𝓝 ζ₀] id) :
     schwarzian u ζ₀ = 0 := by
   have h3 := hu.iteratedDeriv_eq 3
   have h2 := hu.iteratedDeriv_eq 2
@@ -368,7 +374,7 @@ theorem schwarzian_inverse {z ζf : ℂ → ℂ} {ζ₀ : ℂ} (hz : ContDiffAt 
       (by norm_num)), hinv.deriv_eq, deriv_id]
   have hζf' : deriv ζf (z ζ₀) ≠ 0 := left_ne_zero_of_mul_eq_one hd
   have := schwarzian_comp hz hζf hz' hζf'
-  rw [g1d_schwarzian_of_eventuallyEq_id hinv] at this
+  rw [schwarzian_of_eventuallyEq_id hinv] at this
   linear_combination -this
 
 /-! ## Products of solutions (§1.13(v)) -/

@@ -17,21 +17,33 @@ public import DLMF.Legendre.Harmonics
 /-!
 # Integral and series representations of the Dirac delta (DLMF §1.17)
 
+Representations of the Dirac delta by delta sequences, Fourier integrals, Bessel, Coulomb and
+Airy kernels, Fourier series and orthogonal-polynomial expansions.
+
+## Main results
+
+* `delta_apply_eq_zero_of_notMem_tsupport`: `δ(x) = 0` for `x ≠ 0` (DLMF 1.17.1); see also
+  Mathlib's `Distribution.delta`.
+* `tendsto_gaussian_integral`, `isDeltaSequence_gaussian`, `tendsto_gaussian_integral_of_growth`,
+  `tendsto_gaussian_integral_jump`: the Gaussian delta sequence (DLMF 1.17.3–1.17.7).
+* `fourier_inversion_dlmf`, `gaussian_fourier_eq`, `isDeltaSequence_gaussian_fourier`,
+  `tendsto_fourier_kernel`: Fourier inversion and `δ(x-a) = (2π)⁻¹ ∫ e^{i(x-a)t} dt`
+  (DLMF 1.17.8–1.17.12).
+* `tendsto_cos_kernel`, `tendsto_sin_kernel`, `tendsto_bessel_kernel`,
+  `tendsto_sphericalBessel_kernel`, `tendsto_coulomb_kernel`, `tendsto_airy_kernel`:
+  DLMF 1.17.12_1–1.17.16.
+* `tendsto_fourier_series`, `dirichletKernel_eq`, `tendsto_dirichletKernel_integral`: Fourier
+  series and the Dirichlet kernel (DLMF 1.17.17–1.17.21).
+* `tendsto_legendre_kernel`, `tendsto_laguerre_kernel`, `tendsto_hermite_kernel`,
+  `tendsto_sphericalHarmonic_kernel`: DLMF 1.17.22–1.17.25.
+
+## Implementation notes
+
 DLMF writes the Dirac delta as a symbolic function `δ(x)` (1.17.1–1.17.2). Following the
 rigorous reading of DLMF §1.17(i) and §1.17(iv), every representation here is stated as a
 weak limit against test functions: a family `δ_R(x, a)` represents `δ(x - a)` when
 `lim ∫ δ_R(x, a) φ(x) dx = φ(a)` for every smooth compactly supported `φ` (on the stated
 interval), or for the class of functions DLMF names. Nothing is stated pointwise.
-
-* 1.17.1–1.17.2: `delta_apply_eq_zero_of_notMem_tsupport`; Mathlib's `Distribution.delta`.
-* 1.17.3–1.17.7: `IsDeltaSequence`, the Gaussian sequence (`tendsto_gaussian_integral`,
-  proved for integrable `φ` continuous at `a`; DLMF's growth condition and the one-sided
-  version 1.17.7 are admitted).
-* 1.17.8–1.17.12: Fourier inversion and `δ(x-a) = (2π)⁻¹ ∫ e^{i(x-a)t} dt`; the Gaussian
-  regularization 1.17.10 is proved (`gaussian_fourier_eq`), hence 1.17.11.
-* 1.17.12_1–1.17.16: cosine, sine, Bessel, spherical Bessel, Coulomb and Airy kernels.
-* 1.17.17–1.17.21: Fourier series and the Dirichlet kernel (closed form 1.17.20 proved).
-* 1.17.22–1.17.25: Legendre, Laguerre, Hermite and spherical-harmonic expansions.
 -/
 
 @[expose] public noncomputable section
@@ -53,7 +65,7 @@ theorem delta_apply_eq_zero_of_notMem_tsupport {Ω : TopologicalSpace.Opens ℝ}
   exact image_eq_zero_of_notMem_tsupport h
 
 /-- Identity under the stated parameter and domain assumptions: `∫ x, normalizedGaussian x = 1`. -/
-lemma g1f_integral_gauss : ∫ x, normalizedGaussian x = 1 := by
+private lemma integral_normalizedGaussian : ∫ x, normalizedGaussian x = 1 := by
   have h := integral_gaussian 1
   simp only [neg_mul, one_mul, div_one] at h
   simp only [normalizedGaussian, integral_div, h]
@@ -61,7 +73,7 @@ lemma g1f_integral_gauss : ∫ x, normalizedGaussian x = 1 := by
 
 /-- The map `(fun x : ℝ => ‖x‖ ^ Module.finrank ℝ ℝ * normalizedGaussian x)` tends to `(𝓝 0)`
 along `(Bornology.cobounded ℝ)`. -/
-lemma g1f_tendsto_gauss :
+private lemma tendsto_norm_pow_mul_normalizedGaussian :
     Tendsto (fun x : ℝ => ‖x‖ ^ Module.finrank ℝ ℝ * normalizedGaussian x) (Bornology.cobounded ℝ)
       (𝓝 0) := by
   rw [Metric.cobounded_eq_cocompact, cocompact_eq_atBot_atTop, ← comap_abs_atTop]
@@ -93,7 +105,7 @@ theorem tendsto_gaussian_integral {φ : ℝ → ℂ} {a : ℝ} (hφ : Integrable
     (ha : ContinuousAt φ a) :
     Tendsto (fun n : ℕ => ∫ x, gaussianDeltaSeq n (x - a) * φ x) atTop (𝓝 (φ a)) := by
   have hmain := tendsto_integral_comp_smul_smul_of_integrable' (μ := volume)
-    (fun x => by unfold normalizedGaussian; positivity) g1f_integral_gauss g1f_tendsto_gauss hφ ha
+    (fun x => by unfold normalizedGaussian; positivity) integral_normalizedGaussian tendsto_norm_pow_mul_normalizedGaussian hφ ha
   have hs : Tendsto (fun n : ℕ => Real.sqrt n) atTop atTop :=
     Real.tendsto_sqrt_atTop.comp tendsto_natCast_atTop_atTop
   refine (hmain.comp hs).congr fun n => ?_
@@ -111,13 +123,13 @@ theorem isDeltaSequence_gaussian : IsDeltaSequence gaussianDeltaSeq := fun _ hφ
   tendsto_gaussian_integral (hφ.continuous.integrable_of_hasCompactSupport hcs)
     hφ.continuous.continuousAt
 
-/-- DLMF 1.17.6 under DLMF's hypotheses: `φ` continuous at `a`, locally integrable, and
-`∫ e^{-n(x-a)²} φ(x) dx` absolutely convergent for some (hence all larger) `n`; this covers
-`φ(x) = O(e^{αx²})`. -/
+/-- DLMF 1.17.6: `φ` continuous at `a` and `∫ e^{-n(x-a)²} φ(x) dx` absolutely convergent for
+some (hence all larger) `n`; this covers `φ(x) = O(e^{αx²})`. DLMF also assumes `φ` locally
+integrable, which is not needed (stronger than DLMF). -/
 @[dlmf 1.17.E6]
 theorem tendsto_gaussian_integral_of_growth {φ : ℝ → ℂ} {a : ℝ} (n₀ : ℕ)
     (hφ : Integrable fun x => (Real.exp (-(n₀ * (x - a) ^ 2)) : ℂ) * φ x)
-    (hloc : LocallyIntegrable φ) (ha : ContinuousAt φ a) :
+    (ha : ContinuousAt φ a) :
     Tendsto (fun n : ℕ => ∫ x, gaussianDeltaSeq n (x - a) * φ x) atTop (𝓝 (φ a)) := by
   let ψ : ℝ → ℂ := fun x => (Real.exp (-(n₀ * (x - a) ^ 2)) : ℂ) * φ x
   have hψ : ContinuousAt ψ a := by

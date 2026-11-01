@@ -8,15 +8,26 @@ module
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent
 
 /-!
-# Partial fractions for tan, csc and sec (DLMF 4.22.3–4.22.5)
+# Partial fractions for tan, csc and sec
 
-Mathlib proves the Mittag-Leffler expansion of the cotangent (`cot_series_rep'`). From it, with
-`tan z = cot z - 2 cot 2z` and `csc z = cot(z/2) - cot z`, this file derives:
-* `hasSum_tan_partial_fraction`: `π tan(πx) = ∑ₖ 8x/((2k+1)² - 4x²)` for `2x ∉ ℤ`;
-* `hasSum_csc_partial_fraction`: `π/sin(πx) = 1/x + ∑ₙ (-1)ⁿ⁺¹ 2x/(x² - (n+1)²)` for `x ∉ ℤ`;
-* `tendsto_sec_partial_fraction`: `π/cos(πx) = ∑ₖ (-1)ᵏ(2k+1)/((k+½)² - x²)`, a conditionally
-  convergent series stated through partial sums, from the cosecant at `x + ½`.
-The even and odd parts of a summable series are separated with `HasSum.even_add_odd`.
+Mathlib proves the Mittag-Leffler expansion of the cotangent (`cot_series_rep'`). From it,
+with `tan z = cot z - 2 cot 2z` and `csc z = cot(z/2) - cot z`, this file derives the partial
+fraction expansions of the tangent, cosecant and secant (DLMF 4.22.5; Duverney (2.41),
+(2.43), (2.44)).
+
+## Main results
+
+* `Complex.hasSum_cotTerm`: the Mittag-Leffler series for the cotangent as a `HasSum`.
+* `Complex.hasSum_tan_partial_fraction`: `π tan(πx) = ∑ₖ 8x/((2k+1)² - 4x²)` for `2x ∉ ℤ`.
+* `Complex.hasSum_csc_partial_fraction`: `π/sin(πx) = 1/x + ∑ₙ (-1)ⁿ⁺¹ 2x/(x² - (n+1)²)`
+  for `x ∉ ℤ` (DLMF 4.22.5).
+* `Complex.tendsto_sec_partial_fraction`: `π/cos(πx) = ∑ₖ (-1)ᵏ(2k+1)/((k+½)² - x²)`, a
+  conditionally convergent series stated through partial sums.
+
+## Implementation notes
+
+The secant expansion is obtained from the cosecant at `x + ½`. The even and odd parts of a
+summable series are separated with `HasSum.even_add_odd`.
 -/
 
 @[expose] public section

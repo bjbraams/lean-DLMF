@@ -10,10 +10,26 @@ public import DLMF.Legendre.Integrals.FerrersGreen
 /-!
 # Diagonal Ferrers integrals and uniform parameter bounds
 
-Parameter-uniform endpoint estimates justify the diagonal limits of Ferrers product integrals.
+This file evaluates the integrals over `(-1, 1)` of products of Ferrers functions of order zero
+(DLMF 14.17.10–14.17.15), the integral of `𝖯^m_l 𝖰^m_n` for integer parameters
+(DLMF 14.17.16) and a triple integral (DLMF 14.17.17). The diagonal integrals 14.17.11, 13, 15
+follow from the off-diagonal ones by dominated convergence, using bounds
+`𝖯_λ, 𝖰_λ = O((1-x²)^{-1/4})` that are uniform for `λ` near `ν`; these come from the
+zero-balanced expansion DLMF 15.8.10 at `m = 0`, with Cauchy's estimate in the third parameter.
+Helper names carry the prefixes `legPIU_` and `legPI_`.
 
-Source references and common attribution are retained in
-`DLMF.Legendre.Integrals`.
+## Main results
+
+* `legPIU_bound_zb`, `legPIU_bound_P`, `legPIU_bound_Q`: parameter-uniform bounds.
+* `legPIU_tendsto_PP`, `legPIU_tendsto_sq`, `legPIU_tendsto_int`: dominated convergence on
+  `(-1, 1)`.
+* `ferrers_product_integral_10`, `ferrers_product_integral_11`: DLMF 14.17.10, 14.17.11.
+* `ferrers_product_integral_12`, `ferrers_product_integral_13`: DLMF 14.17.12, 14.17.13.
+* `ferrers_product_integral_14`, `ferrers_product_integral_15`: DLMF 14.17.14, 14.17.15.
+* `legPI_green_mu`, `legPI_integral_green_B`: Green's identity for two solutions of the same
+  order.
+* `ferrersPQ_nat_integral`: DLMF 14.17.16.
+* `ferrers_triple_integral`: DLMF 14.17.17.
 -/
 
 @[expose] public noncomputable section
@@ -771,7 +787,7 @@ theorem legPI_tendsto_PQ_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
     rw [show ((k-m:ℕ):ℂ) = (k:ℂ) - m by push_cast [hk]; ring] at this
     intro h; rw [h, zero_mul] at this
     exact (Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)) this.symm
-  have h1 := legendre_singular_2 (k:ℂ) m hm hp
+  have h1 := legendre_singular_2 (k:ℂ) m hp
   have hreg : LegendreQRegular (j:ℂ) (m:ℂ) := fun n hn => by
     have := congrArg Complex.re hn; simp at this
     linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n), (Nat.cast_nonneg j : (0:ℝ) ≤ j),

@@ -9,6 +9,32 @@ public import DLMF.Weierstrass.Basic.Periods
 
 /-!
 # Weierstrass zeta, sigma and half-period function definitions
+
+The Weierstrass `ζ` and `σ` functions of a lattice (DLMF 23.2.5–23.2.6) and the DLMF
+names for `℘`, `ζ`, `σ`, the invariants, the lattice roots and the constants `η_j` of
+half-period data.
+
+## Main definitions
+
+* `weierstrassZeta`, `weierstrassSigma`: the Weierstrass `ζ` and `σ` functions of a period
+  pair (DLMF 23.2.5–23.2.6), with abbreviations for half-period data.
+* `HalfPeriods.halfPeriod`: the half-periods `ω_j`, `j = 1, 2, 3`.
+* `HalfPeriods.weierstrassP`, `HalfPeriods.derivWeierstrassP`: `℘(z|𝕃)` and `℘'(z|𝕃)`.
+* `HalfPeriods.g₂`, `HalfPeriods.g₃`: the invariants (DLMF 23.3.1–23.3.2).
+* `HalfPeriods.e`: the lattice roots `e_j = ℘(ω_j)` (DLMF 23.3.9).
+* `HalfPeriods.eta`: the constants `η_j = ζ(ω_j)` (DLMF 23.2.12).
+* `HalfPeriods.latticeDiscriminant`: the discriminant `Δ = g₂³ - 27g₃²` (DLMF 23.3.4).
+
+## Implementation notes
+
+The Weierstrass `℘` and `℘'` are Mathlib's `PeriodPair.weierstrassP` and
+`PeriodPair.derivWeierstrassP`; the invariants `g₂ = 60 G₄`, `g₃ = 140 G₆` are Mathlib's
+`PeriodPair.g₂`, `PeriodPair.g₃`. Mathlib sums over all lattice points; the `w = 0` term is
+`1/z²` in `℘` and vanishes in `G n` (`n ≥ 1`) because `0⁻¹ = 0`, which reproduces DLMF's sums
+over `𝕃 ∖ {0}`. The same convention defines `weierstrassZeta` and `weierstrassSigma` here:
+the `w = 0` summand of `ζ` is `1/z`, and the `w = 0` factor of the product for `σ` is `1`.
+At lattice points the totalized values are junk where DLMF has poles; the theorems state
+their domains.
 -/
 
 @[expose] public noncomputable section

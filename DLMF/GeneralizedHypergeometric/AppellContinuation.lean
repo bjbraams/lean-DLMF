@@ -8,12 +8,25 @@ module
 public import DLMF.GeneralizedHypergeometric.Appell
 
 /-!
-# Coalescing Appell connection parameters
+# Coalescing Appell connection parameters (DLMF 16.16.10)
 
-The combined large-variable connection expression is continued before it is evaluated at
-integer exponent differences. This retains every upper parameter and avoids separately
-evaluating its singular Gamma factors. The original Appell double series is never evaluated
-outside its convergence region in order to stand in for a continued value.
+The combined large-variable connection expression for `F₄` is continued before it is evaluated
+at integer exponent differences. This retains every upper parameter and avoids evaluating its
+singular Gamma factors separately. The Appell double series is never evaluated outside its
+convergence region in place of a continued value.
+
+## Main definitions
+
+* `appF4InfinityExpression`: the two-term connection expression of DLMF 16.16.10.
+* `appF4InfinityBranch`: the connection branch at every upper parameter.
+* `appellInfinityDomain`: the domain of convergence of the two large-variable series.
+
+## Main results
+
+* `appF4_infinity_parameter_limit`: the connection terms have a locally uniform limit in the
+  upper parameters.
+* `appF4_infinity_all_parameters`: the limiting expression is a continued `F₄` branch for all
+  upper parameters.
 -/
 
 @[expose] public noncomputable section

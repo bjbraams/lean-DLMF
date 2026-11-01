@@ -11,7 +11,9 @@ public import DLMF.OrthogonalPolynomials.BoundsZeros.Discriminants
 /-!
 # Bounds, positive sums, zeros, and leading asymptotics
 
-Statements from NIST DLMF Chapter 18, each tagged with its equation number by `@[dlmf]`.
-Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
-hypergeometric definitions do not implement continuation in singular parameters.
+This umbrella collects the inequalities, positive sums, asymptotics and zeros of the classical
+orthogonal polynomials (DLMF §§18.14–18.16, `BoundsZeros.PointwiseAndZeroBounds`) and their
+discriminants (DLMF 18.16.19–18.16.21, `BoundsZeros.Discriminants`). Jacobi and Gegenbauer
+statements retain regularity hypotheses because the project's hypergeometric definitions do
+not implement continuation in singular parameters.
 -/

@@ -10,18 +10,20 @@ public import DLMF.Gamma.ShiftedLineBounds
 public import Mathlib.MeasureTheory.Integral.Asymptotics
 
 /-!
-# Estimates for the Mellin–Barnes integrand of the Struve function
+# Estimates for the Mellin–Barnes integrand of the Struve function (DLMF 11.5.8)
 
-Tools for the Barnes integral of `H_ν` (DLMF 11.5.8), whose integrand on `s = t + iy` is
-`π/sin(πs) · w^s / (Γ(3/2+s) Γ(3/2+ν+s))`:
+This file provides estimates for the Barnes integral of `𝐇_ν` (DLMF 11.5.8), whose integrand on
+`s = t + iy` is `π/sin(πs) · w^s/(Γ(3/2+s) Γ(3/2+ν+s))`.
+
+## Main results
 
 * `struveBar_recip_Gamma_isBigO`: on a shifted vertical line,
   `1/|Γ(a + i(y+m))| = O(y^{1/2-a} e^{πy/2})` as `y → +∞` (Stirling, DLMF 5.11.9, from
-  `DLMF.Gamma.tendsto_norm_Gamma_vertical_div`);
-* `struveBar_pi_div_sin_le`, `struveBar_pi_div_sin_isBigO`: `π/|sin(π(t+iy))| ≤ 4π e^{-πy}`
-  for `y ≥ 1`;
-* `struveBar_isBigO`: the product `π/|sin| · 1/|Γ(a+iy)| · 1/|Γ(b+i(y+m))|` is `O(y^{1-a-b})`;
-* `struveBar_integrableOn_rpow_div_Gamma`: `w^t/(Γ(α+t)Γ(β+t))` is integrable on `(c, ∞)`;
+  `DLMF.Gamma.tendsto_norm_Gamma_vertical_div`).
+* `struveBar_pi_div_sin_le`, `struveBar_pi_div_sin_isBigO`: `π/|sin(π(t+iy))| ≤ 4π e^{-πy}` for
+  `y ≥ 1`.
+* `struveBar_isBigO`: the product `π/|sin| · 1/|Γ(a+iy)| · 1/|Γ(b+i(y+m))|` is `O(y^{1-a-b})`.
+* `struveBar_integrableOn_rpow_div_Gamma`: `w^t/(Γ(α+t)Γ(β+t))` is integrable on `(c, ∞)`.
 * `struveBar_integrable_of_isBigO`: continuous functions with `O(|y|^p)` tails, `p < -1`, are
   integrable on `ℝ`.
 -/

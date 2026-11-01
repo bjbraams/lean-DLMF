@@ -8,12 +8,39 @@ module
 public import DLMF.Confluent.BasicProperties
 
 /-!
-# Whittaker functions (AAR §4.3)
+# Whittaker functions
 
-Whittaker's functions are the standard pair of solutions of the Whittaker equation,
-written in terms of Kummer's `M` and the continued Tricomi `U`.
-The `OnLog` definitions retain the logarithmic argument for monodromy;
-ordinary multiplication of the complex argument by `exp (2πi)` would lose that information.
+Whittaker's functions `M_{κ,μ}` and `W_{κ,μ}` are the standard pair of solutions of
+Whittaker's equation (DLMF §13.14, AAR §4.3), written in terms of Kummer's `M` and the
+continued Tricomi `U`.
+
+## Main definitions
+
+* `whittakerM`: Whittaker's `M_{κ,μ}(z)` (DLMF 13.14.2).
+* `regularizedWhittakerM`: `M_{κ,μ}` regularized in its second parameter, meaningful also at
+  `1 + 2μ = -n`.
+* `whittakerW`: Whittaker's principal-branch `W_{κ,μ}(z)` (DLMF 13.14.3).
+* `whittakerMOnLog`, `whittakerWOnLog`: Whittaker's functions on the logarithmic argument plane.
+
+## Main results
+
+* `whittakerM_ode`, `whittakerW_ode`: Whittaker's equation (DLMF 13.14.1).
+* `whittakerW_eq_kummerU`, `kummerM_eq_whittakerM`, `kummerU_eq_whittakerW`: the relations to
+  Kummer's and Tricomi's functions (DLMF 13.14.3–13.14.5).
+* `tendsto_whittakerM_div_Gamma`: the parameter limit at a denominator pole (DLMF 13.14.7).
+* `whittakerM_neg_argument`, `whittakerM_continuation`, `whittakerW_continuation`: analytic
+  continuation (DLMF 13.14.10–13.14.12).
+* `isBigO_whittakerM_at_zero`: behaviour at the origin (DLMF 13.14.14).
+* `wronskian_whittakerM`, `wronskian_whittakerM_W`, `wronskian_whittakerM_neg_W`: Wronskians
+  (DLMF 13.14.25, 13.14.26, 13.14.28).
+* `whittakerW_even_mu`: symmetry in the order (DLMF 13.14.31).
+* `whittakerW_eq_connection`: the connection formula for `W` (DLMF 13.14.33).
+* `whittakerM_jump`, `whittakerW_jump`: DLMF 13.14.34 and 13.14.35.
+
+## Implementation notes
+
+The `OnLog` definitions retain the logarithmic argument for monodromy; ordinary multiplication
+of the complex argument by `exp (2πi)` would lose that information.
 -/
 
 @[expose] public section
@@ -121,7 +148,7 @@ theorem whittakerM_ode {κ μ z : ℂ} (hz : z ∈ slitPlane)
   have hsecond := (hg z hz).mul (hy'.add (hq.mul (hy z)))
   rw [iteratedDeriv_succ, iteratedDeriv_succ, iteratedDeriv_zero,
     heq.deriv_eq, hsecond.deriv]
-  have hode := kummerM_ode (a := μ - κ + 1 / 2) hμ (slitPlane_ne_zero hz)
+  have hode := kummerM_ode (a := μ - κ + 1 / 2) (z := z) hμ
   change z * iteratedDeriv 2 y z + (1 + 2 * μ - z) * deriv y z -
     (μ - κ + 1 / 2) * y z = 0 at hode
   change _ + _ * (g z * y z) = 0
@@ -217,7 +244,7 @@ theorem whittakerW_ode {κ μ z : ℂ} (hz : z ∈ slitPlane)
 
 /-- The definition of W through the continued Tricomi function. -/
 @[dlmf 13.14.E3]
-theorem whittakerW_eq_kummerU {κ μ z : ℂ} (hz : z ∈ slitPlane) :
+theorem whittakerW_eq_kummerU {κ μ z : ℂ} :
     whittakerW κ μ z =
       exp (-z / 2) * z ^ (1 / 2 + μ) * kummerU (1 / 2 + μ - κ) (1 + 2 * μ) z := by
   rfl
@@ -226,7 +253,7 @@ theorem whittakerW_eq_kummerU {κ μ z : ℂ} (hz : z ∈ slitPlane) :
 (-b / 2) * whittakerM (b / 2 - a) (b / 2 - 1 / 2) z`. -/
 @[dlmf 13.14.E4]
 theorem kummerM_eq_whittakerM {a b z : ℂ} (hz : z ∈ slitPlane)
-    (hb : ∀ k : ℕ, b ≠ -k) :
+    :
     kummerM a b z =
       exp (z / 2) * z ^ (-b / 2) * whittakerM (b / 2 - a) (b / 2 - 1 / 2) z := by
   unfold whittakerM
@@ -257,7 +284,7 @@ theorem kummerU_eq_whittakerW {a b z : ℂ} (hz : z ∈ slitPlane) :
     kummerU a b z =
       exp (z / 2) * z ^ (-b / 2) * whittakerW (b / 2 - a) (b / 2 - 1 / 2) z := by
   have hz0 := slitPlane_ne_zero hz
-  have hW := whittakerW_eq_kummerU (κ := b / 2 - a) (μ := b / 2 - 1 / 2) hz
+  have hW := whittakerW_eq_kummerU (κ := b / 2 - a) (μ := b / 2 - 1 / 2) (z := z)
   have hμ : (1 / 2 + (b / 2 - 1 / 2) - (b / 2 - a) : ℂ) = a := by ring
   have hb' : (1 + 2 * (b / 2 - 1 / 2) : ℂ) = b := by ring
   have hr : (1 / 2 + (b / 2 - 1 / 2) : ℂ) = b / 2 := by ring
@@ -636,14 +663,14 @@ theorem whittakerM_jump {κ μ z : ℂ} (hz : z ∈ slitPlane) (hμi : ∀ n : �
   have hGne := Gamma_ne_zero hμ
   have hsin : sin (2 * π * μ) ≠ 0 := by
     rw [show (2 : ℂ) * π * μ = π * (2 * μ) by ring]
-    exact sin_pi_mul_ne_zero_of_mem (mem_integerComplement_of_forall hμi)
+    exact _root_.sin_pi_mul_ne_zero (mem_integerComplement_of_forall hμi)
   have hG : Gamma (-2 * μ) * sin (2 * π * μ) = -π / Gamma (1 + 2 * μ) := by
     have h := Gamma_mul_Gamma_one_sub (-2 * μ)
     rw [show 1 - -2 * μ = 1 + 2 * μ by ring,
       show (π : ℂ) * (-2 * μ) = -(2 * π * μ) by ring, sin_neg, div_neg, ← neg_div] at h
     apply (eq_div_iff hGne).mpr
     linear_combination (eq_div_iff hsin).mp h
-  have ht := exp_sub_exp_neg_mul_I (2 * π * μ)
+  have ht := Carlson.TwoVariable.exp_mul_I_sub_exp_neg_mul_I (2 * π * μ)
   have hpp : exp (μ * π * I) * exp (μ * π * I) = exp ((2 * π * μ) * I) := by
     rw [← exp_add]; congr 1; ring
   have hmm : exp (-μ * π * I) * exp (-μ * π * I) = exp (-(2 * π * μ) * I) := by

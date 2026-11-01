@@ -6,15 +6,37 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.Associated.Wronskians
+public import ToMathlib.Analysis.SpecialFunctions.Pow
 
 /-!
 # Boundary behavior and connections of associated Legendre functions
 
-Boundary estimates, hypergeometric values and degree-reflection connections for associated
-Legendre functions.
+Connection formulas, derivatives and Wronskians of the associated Legendre functions on the
+cut plane `z ∉ (-∞, 1]`, the generalized Legendre equation, and gauge identities at integer
+order.
 
-Source references and common attribution are retained in
-`DLMF.Legendre.Associated`.
+## Main definitions
+
+* `IsGeneralizedLegendreSolution`: the generalized Legendre equation DLMF 14.29.1.
+
+## Main results
+
+* `olverQ_connection`, `associated_connection_15_nonint`: the connection formula DLMF 14.9.15,
+  `2 sin(μπ)/π · 𝑸^μ_ν = P^μ_ν/Γ(ν+μ+1) - P^{-μ}_ν/Γ(ν-μ+1)`.
+* `associatedP_reflect_degree`: DLMF 14.9.11 on the principal sheet.
+* `deriv_associatedP`, `hasDerivAt_olverQ`: derivatives of `P^μ_ν` and `𝑸^μ_ν`.
+* `associated_wronskian_7`, `associated_wronskian_8`, `associated_wronskian_9`,
+  `associated_wronskian_10`: the Wronskians DLMF 14.2.7–14.2.10.
+* `olverQ_wronskian_pos`: `W{P^μ_ν, 𝑸^μ_ν}(z) = -1/(Γ(ν-μ+1) (z²-1))` for all complex `ν, μ`.
+* `generalizedLegendre_equal_orders`: with equal orders the generalized Legendre equation
+  reduces to the associated Legendre equation.
+* `regularizedGaussHG_at_zero`: the regularized Gauss function at the origin is `1/Γ(c)`, also
+  at poles of `Γ`.
+
+## Implementation notes
+
+The Wronskians are proved first for non-integer order and extended to all orders by continuity
+in `μ` (`legendre_eq_of_continuous_nonint`).
 -/
 
 @[expose] public noncomputable section
@@ -87,10 +109,6 @@ theorem regularizedGaussHG_olver_connection (ν μ : ℂ) {x : ℝ} (h1 : 1 < x)
     regularizedGaussHG_symm ((1+μ-ν-1)/2) ((1+μ-ν)/2) (1+μ) hyc] at h
   rw [h]; ring
 
-/-- Complex powers of positive reals as exponentials of real logarithms. -/
-theorem legendre_ofReal_cpow_exp {r : ℝ} (hr : 0 < r) (s : ℂ) : ((r:ℂ))^s = exp ((Real.log r:ℂ)*s) := by
-  rw [cpow_def_of_ne_zero (by exact_mod_cast hr.ne'), ofReal_log hr.le]
-
 /-- Powers of two as exponentials. -/
 theorem legendre_two_cpow_exp (s : ℂ) : (2:ℂ)^s = exp ((Real.log 2:ℂ)*s) := by
   rw [cpow_def_of_ne_zero two_ne_zero, show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, ← ofReal_log (by norm_num)]
@@ -111,8 +129,8 @@ theorem legendre_connection_scalar_minus (ν μ : ℂ) {x : ℝ} (h1 : 1 < x) :
   have e4 : (x:ℂ)+1 = ((x+1:ℝ):ℂ) := by push_cast; ring
   have e5 : (x:ℂ)-1 = ((x-1:ℝ):ℂ) := by push_cast; ring
   unfold legendreBranchPower
-  rw [e1, e2, e4, e5, legendre_ofReal_cpow_exp (by positivity : (0:ℝ) < 1/x^2),
-    legendre_ofReal_cpow_exp (by positivity : (0:ℝ) < (x+1)/2), legendre_ofReal_cpow_exp hx, legendre_ofReal_cpow_exp hx,
+  rw [e1, e2, e4, e5, Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < 1/x^2),
+    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (x+1)/2), Complex.ofReal_cpow_eq_exp hx, Complex.ofReal_cpow_eq_exp hx,
     legendre_two_cpow_exp, legendre_two_cpow_exp, ← ofReal_log hp.le, ← ofReal_log hm.le,
     Real.log_div (by positivity : x+1 ≠ 0) (by norm_num : (2:ℝ) ≠ 0),
     Real.log_div (by norm_num : (1:ℝ) ≠ 0) (by positivity : x^2 ≠ 0), Real.log_one, Real.log_pow]
@@ -137,9 +155,9 @@ theorem legendre_connection_scalar_plus (ν μ : ℂ) {x : ℝ} (h1 : 1 < x) :
   have e4 : (x:ℂ)+1 = ((x+1:ℝ):ℂ) := by push_cast; ring
   have e5 : (x:ℂ)-1 = ((x-1:ℝ):ℂ) := by push_cast; ring
   unfold legendreBranchPower
-  rw [e0, e1, e2, e4, e5, legendre_ofReal_cpow_exp (by positivity : (0:ℝ) < (x-1)*(x+1)/x^2),
-    legendre_ofReal_cpow_exp (by positivity : (0:ℝ) < 1/x^2),
-    legendre_ofReal_cpow_exp (by positivity : (0:ℝ) < (x+1)/2), legendre_ofReal_cpow_exp hx, legendre_ofReal_cpow_exp hx,
+  rw [e0, e1, e2, e4, e5, Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (x-1)*(x+1)/x^2),
+    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < 1/x^2),
+    Complex.ofReal_cpow_eq_exp (by positivity : (0:ℝ) < (x+1)/2), Complex.ofReal_cpow_eq_exp hx, Complex.ofReal_cpow_eq_exp hx,
     legendre_two_cpow_exp, legendre_two_cpow_exp, ← ofReal_log hp.le, ← ofReal_log hm.le,
     Real.log_div (by positivity : x+1 ≠ 0) (by norm_num : (2:ℝ) ≠ 0),
     Real.log_div (by norm_num : (1:ℝ) ≠ 0) (by positivity : x^2 ≠ 0), Real.log_one, Real.log_pow,

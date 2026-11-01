@@ -9,13 +9,31 @@ public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import DLMF.ParabolicCylinder.SectorAsymptotics
 
 /-!
-# Weber functions and their connection formulas
+# The Weber function `W(a,x)` and its connection data
 
-Solutions of Weber's equation, connection formulas and real-parameter identities for parabolic
-cylinder functions.
+This file defines the real Weber function `W(a,x)` of DLMF §12.14 from the even and odd
+solutions of the oscillatory Weber equation `w'' = (a - z²/4)w`, and proves its initial
+values, Kummer representations, reality and Wronskian, together with the connection factor
+and phase of DLMF 12.14.5–12.14.7.
 
-Source references and common attribution are retained in
-`DLMF.ParabolicCylinder.Weber`.
+## Main definitions
+
+* `pcfWZero`, `pcfWDerivZero`: the initial values `W(a,0)`, `W'(a,0)` (DLMF 12.14.1–12.14.2).
+* `pcfWEven`, `pcfWOdd`: the even and odd entire solutions (DLMF 12.14.15–12.14.16).
+* `pcfW`, `pcfWDeriv`: the Weber function (DLMF 12.14.8) and its derivative.
+* `pcfWK`: the connection factor `√(1 + e^{2πa}) - e^{πa}` (DLMF 12.14.5).
+* `pcfGammaPhase`: the continuous argument of `Γ(1/2 + ia)`, zero at `a = 0` (DLMF 12.14.7).
+* `pcfWRho`: the connection phase `π/8` plus half the Gamma phase (DLMF 12.14.6).
+
+## Main results
+
+* `pcfW_initial`: the initial values DLMF 12.14.1–12.14.2.
+* `pcfWEven_kummer`, `pcfWOdd_kummer`: DLMF 12.14.15–12.14.16.
+* `pcfW_ode`: `W(a,x)` satisfies the oscillatory equation DLMF 12.2.3.
+* `pcfW_real`, `conj_pcfW_conj`: reality on the real axis and conjugation symmetry.
+* `pcfW_wronskian`: the Wronskian DLMF 12.14.3.
+* `pcfWK_recip`: the reciprocal of the connection factor (DLMF 12.14.5).
+* `pcfGammaPhase_spec`: the polar form of `Γ(1/2 + ia)` (DLMF 12.14.7).
 -/
 
 @[expose] public noncomputable section

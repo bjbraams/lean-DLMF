@@ -11,6 +11,7 @@ public import Mathlib.Analysis.Normed.Module.Connected
 public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import ToMathlib.Analysis.Complex.Carlson
 
 /-!
 # Shifting a vertical line of integration across a simple pole
@@ -34,7 +35,7 @@ kernel in TauCeti, `TauCeti.NumberTheory.ArithmeticDirichletSeries.Perron.Basic`
 * `Complex.barnesRes_integral_recip`: `∫_{-T}^{T} (c + it)⁻¹ dt = 2 arctan (T / c)`.
 * `Complex.barnesRes_vertical_shift`: the residue formula for moving a vertical line past a pole.
 * `Complex.barnesRes_vertical_shift_of_differentiableOn`: the pole-free version.
-* `Complex.barnesRes_sq_norm_sin` and the lower bounds `|sinh y| ≤ ‖sin (x + iy)‖`,
+* `Complex.norm_sin_add_mul_I_sq` and the lower bounds `|sinh y| ≤ ‖sin (x + iy)‖`,
   `|sin x| cosh y ≤ ‖sin (x + iy)‖`, used to bound `Γ` through the reflection formula.
 * `Complex.barnesRes_norm_Gamma_mul_sin_le`: `‖Γ(w)‖ ‖sin πw‖ ≤ π ‖Γ(1-w)⁻¹‖`, with the lower
   bounds `barnesRes_sin_lower_line`, `barnesRes_sin_lower_far` for `‖sin(π(x+iy))‖`.
@@ -307,26 +308,15 @@ theorem barnesRes_vertical_shift_of_differentiableOn {f : ℂ → ℂ} {c₁ c�
   simp only [Φ, sub_self, zero_mul, mul_zero] at key
   exact sub_eq_zero.mp key
 
-/-- `‖sin (x + iy)‖² = sin² x + sinh² y`. -/
-theorem barnesRes_sq_norm_sin (x y : ℝ) :
-    ‖Complex.sin (x + y * I)‖ ^ 2 = Real.sin x ^ 2 + Real.sinh y ^ 2 := by
-  have h : Complex.sin (x + y * I) = ((Real.sin x * Real.cosh y : ℝ) : ℂ) +
-      ((Real.cos x * Real.sinh y : ℝ) : ℂ) * I := by
-    rw [Complex.sin_add_mul_I]; push_cast; rfl
-  rw [h, norm_add_mul_I, Real.sq_sqrt (by positivity)]
-  have := Real.cosh_sq y
-  have := Real.sin_sq_add_cos_sq x
-  nlinarith [this]
-
 /-- `|sinh y| ≤ ‖sin (x + iy)‖`. -/
 theorem barnesRes_abs_sinh_le_norm_sin (x y : ℝ) : |Real.sinh y| ≤ ‖Complex.sin (x + y * I)‖ := by
-  rw [← sq_le_sq₀ (abs_nonneg _) (norm_nonneg _), sq_abs, barnesRes_sq_norm_sin]
+  rw [← sq_le_sq₀ (abs_nonneg _) (norm_nonneg _), sq_abs, Complex.norm_sin_add_mul_I_sq]
   nlinarith [sq_nonneg (Real.sin x)]
 
 /-- `|sin x| cosh y ≤ ‖sin (x + iy)‖`. -/
 theorem barnesRes_abs_sin_mul_cosh_le_norm_sin (x y : ℝ) :
     |Real.sin x| * Real.cosh y ≤ ‖Complex.sin (x + y * I)‖ := by
-  rw [← sq_le_sq₀ (by positivity) (norm_nonneg _), mul_pow, sq_abs, barnesRes_sq_norm_sin,
+  rw [← sq_le_sq₀ (by positivity) (norm_nonneg _), mul_pow, sq_abs, Complex.norm_sin_add_mul_I_sq,
     Real.cosh_sq]
   have h1 : Real.sin x ^ 2 ≤ 1 := Real.sin_sq_le_one x
   nlinarith [sq_nonneg (Real.sinh y), sq_nonneg (Real.sin x)]

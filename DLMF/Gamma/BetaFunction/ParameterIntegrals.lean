@@ -12,13 +12,25 @@ public import Mathlib.Analysis.Fourier.Inversion
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 
 /-!
-# Beta integrals with shifted parameters
+# Euler's Beta integral and its variants (DLMF 5.12.2–5.12.4)
 
-Euler Beta integrals and the analytic dependence of their shifted-parameter variants.
+The real Euler Beta integral, the trigonometric and half-line forms, and the integral with a
+shifted parameter.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.BetaFunction`.
-This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
+## Main results
+
+* `real_betaIntegral`: `∫₀¹ u^{a-1} (1-u)^{b-1} du = Γ(a)Γ(b)/Γ(a+b)` for real parameters.
+* `beta_sin_cos`: `∫₀^{π/2} sin^{2a-1}θ cos^{2b-1}θ dθ = B(a, b)/2` (DLMF 5.12.2).
+* `beta_on_Ioi`: `∫₀^∞ t^{a-1}/(1 + t)^{a+b} dt = B(a, b)` (DLMF 5.12.3).
+* `beta_shifted`: `∫₀¹ t^{a-1}(1 - t)^{b-1}/(t + z)^{a+b} dt = B(a, b)(1 + z)^{-a} z^{-b}` for `z`
+  off the closed negative real axis (DLMF 5.12.4).
+
+## Implementation notes
+
+DLMF assumes `Re a, Re b > 0` in 5.12.3; with Lean's totalized integrals `beta_on_Ioi` holds
+for all complex `a`, `b`. The real Euler integral uses
+`TauCeti.integral_rpow_mul_one_sub_rpow` of the Tau Ceti contributors (see `CREDITS.md`),
+built on Mathlib's Beta theory.
 -/
 
 @[expose] public section
@@ -99,9 +111,11 @@ theorem beta_sin_cos {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
   rw [hpow hs, hpow hc]
   field_simp
 
-/-- DLMF 5.12.3: `∫₀^∞ t^(a-1)/(1 + t)^(a+b) dt = B(a, b)` for `Re a, Re b > 0`. -/
+/-- DLMF 5.12.3: `∫₀^∞ t^(a-1)/(1 + t)^(a+b) dt = B(a, b)`. DLMF assumes `Re a, Re b > 0`; with
+Lean's totalized integrals the identity holds for all complex `a`, `b`, which extends DLMF via
+Lean's conventions. -/
 @[dlmf 5.12.E3]
-theorem beta_on_Ioi {a b : ℂ} (_ha : 0 < a.re) (_hb : 0 < b.re) :
+theorem beta_on_Ioi {a b : ℂ} :
     ∫ t : ℝ in Set.Ioi 0, (t : ℂ) ^ (a - 1) / (1 + (t : ℂ)) ^ (a + b) =
       betaIntegral a b := by
   -- The substitution `u = t / (1 + t)` maps `(0, ∞)` onto `(0, 1)`.

@@ -8,13 +8,20 @@ module
 public import DLMF.Airy.Asymptotics.OscillatoryForms
 
 /-!
-# Rotated expansions of the Airy Bi function
+# Rotated expansions of the Airy function Bi
 
-The Bi connection formulas transfer the sector expansions to rotated arguments, with absolute
-error envelopes.
+The connection formulas for `Bi` transfer the sector expansions to the rotated arguments
+`z e^{±πi/3}`, with absolute error envelopes, and the normalized expansions are restated as
+the Poincaré expansions of DLMF 9.7.5–9.7.8.
 
-Source references and common attribution are retained in
-`DLMF.Airy.Asymptotics`.
+## Main results
+
+* `airyBi_rotated_expansion`, `airyBiDeriv_rotated_expansion`: expansions of `Bi(z e^{±πi/3})`
+  and `Bi'(z e^{±πi/3})` in `|arg z| ≤ 2π/3 - δ` (DLMF 9.7.13, 9.7.14).
+* `airy_ai_poincare`, `airy_aiDeriv_poincare`: the expansions of `Ai` and `Ai'` in
+  `|arg z| ≤ π - δ` (DLMF 9.7.5, 9.7.6).
+* `airy_bi_poincare`, `airy_biDeriv_poincare`: the expansions of `Bi` and `Bi'` in
+  `|arg z| ≤ π/3 - δ` (DLMF 9.7.7, 9.7.8).
 -/
 
 @[expose] public noncomputable section

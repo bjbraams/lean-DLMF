@@ -6,16 +6,19 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.WignerSymbols.Basic
-public import DLMF.WignerSymbols.Q2wHelpers
+public import DLMF.WignerSymbols.FactorialHelpers
 public import DLMF.WignerSymbols.ThreeJ
 public import DLMF.WignerSymbols.SixJ
 public import DLMF.WignerSymbols.NineJ
 public import DLMF.WignerSymbols.ThreeJLegendre
 public import DLMF.WignerSymbols.LargeParameters
 
-/-! # 3j, 6j, 9j symbols: DLMF Chapter 34
+/-!
+# Wigner `3j`, `6j` and `9j` symbols
 
-Angular momenta and projections are rationals with the standing conditions as predicates;
-`wigner3j` is Racah's formula 34.2.4, `wigner6j` the sum 34.4.2 and `wigner9j` the sum 34.6.2.
-Ledger: `DLMF34Acquisition.md`.
+This area covers DLMF Chapter 34: the `3j`, `6j` and `9j` symbols, their special values,
+symmetries, orthogonality relations, sum rules and recursions, the relation with Legendre
+polynomials, and the approximation for large parameters. Angular momenta and projections are
+rationals with the standing conditions as predicates; `wigner3j` is Racah's formula 34.2.4,
+`wigner6j` the sum 34.4.2 and `wigner9j` the sum 34.6.2.
 -/

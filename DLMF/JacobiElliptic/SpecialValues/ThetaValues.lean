@@ -13,10 +13,21 @@ public import DLMF.Elliptic.JacobiIdentities
 /-!
 # Theta-quotient values at elliptic special points
 
-Exact Jacobian elliptic values at the distinguished lattice and half-period points.
+The values of the twelve Jacobian elliptic functions at `z = 0` and at the lattice points
+`K, K + iK', iK', 2K, 2K + 2iK', 2iK'` (Table 22.5.1), for `k ∈ jacobiModulusDomain`.
 
-Source references and common attribution are retained in
-`DLMF.JacobiElliptic.SpecialValues`.
+## Main results
+
+* `jacobiLetterTheta_zero`: `θ_s(0) = 0` and `θ_c(0) = θ_d(0) = θ_n(0) = 1`.
+* `jacobiPQk_zero`: `pq(0, k) = 0` for `p = s` and `= 1` otherwise (`q ≠ s`), with the named
+  cases `jacobiSnk_zero`, `jacobiCnk_zero`, `jacobiDnk_zero` and companions.
+* `jacobiSnk_specialValues`, `jacobiCnk_specialValues`, `jacobiDnk_specialValues` and the nine
+  companions such as `jacobiCsk_specialValues`: the finite values in Table 22.5.1.
+
+## Implementation notes
+
+The values follow from the values at `z = 0` (`θ₁(0) = 0`, nonvanishing theta constants) and
+the shift Table 22.4.3, in the modulus form via the inversion 22.2.2.
 -/
 
 @[expose] public section
@@ -30,12 +41,12 @@ noncomputable section
 namespace DLMF.JacobiElliptic
 
 /-- The normalized theta functions at `ζ = 0`: `θ_s(0) = 0`, `θ_c(0) = θ_d(0) = θ_n(0) = 1`. -/
-theorem je22a_letterTheta_zero {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) :
+theorem jacobiLetterTheta_zero {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) :
     jacobiLetterTheta p 0 τ = if p = .s then 0 else 1 := by
-  have h2 := je22a_thetaTwo_zero_ne_zero hτ
-  have h3 := je22a_thetaThree_zero_ne_zero hτ
-  have h4 := je22a_thetaFour_zero_ne_zero hτ
-  cases p <;> simp [jacobiLetterTheta, je22a_thetaOne_zero, h2, h3, h4]
+  have h2 := jacobiThetaTwoTau_zero_ne_zero hτ
+  have h3 := jacobiThetaThreeTau_zero_ne_zero hτ
+  have h4 := jacobiThetaFourTau_zero_ne_zero hτ
+  cases p <;> simp [jacobiLetterTheta, jacobiThetaOneTau_zero, h2, h3, h4]
 
 /-- Values at `z = 0` of the functions without a pole there: `pq(0, k) = 0` for `p = s` and
 `= 1` otherwise (`q ≠ s`). -/
@@ -46,7 +57,7 @@ theorem jacobiPQk_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) (p q : JacobiL
   rw [jacobiPQk, hz, jacobiGlaisher]
   by_cases hpq : p = q
   · subst hpq; simp [hq]
-  · simp only [hpq, ↓reduceIte, je22a_letterTheta_zero hτ, hq, div_one]
+  · simp only [hpq, ↓reduceIte, jacobiLetterTheta_zero hτ, hq, div_one]
 
 /-- `sn(0, k) = 0` (Table 22.5.1). -/
 theorem jacobiSnk_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) : jacobiSnk 0 k = 0 := by
@@ -94,7 +105,7 @@ theorem jacobiSck_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) : jacobiSck 0 
   rfl
 
 /-- Evaluate a coefficient times a value at `0`. -/
-macro "je22a_value_tac " hk:term:max : tactic => `(tactic|
+macro "jacobi_value_tac " hk:term:max : tactic => `(tactic|
   (simp only [jacobiSnk_zero $hk, jacobiCnk_zero $hk, jacobiDnk_zero $hk, jacobiCdk_zero $hk,
     jacobiSdk_zero $hk, jacobiNdk_zero $hk, jacobiDck_zero $hk, jacobiNck_zero $hk,
     jacobiSck_zero $hk, mul_one, mul_zero, neg_zero] <;> try ring))
@@ -114,23 +125,23 @@ theorem jacobiSnk_specialValues {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have h := (jacobiSnk_shift hk 0).1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiSnk_shift hk 0).2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiSnk_shift hk 0).2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiSnk_shift hk 0).2.2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiSnk_shift hk 0).2.2.2.2.2
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
 
 /-- Table 22.5.1, row `cn`: the finite values of `cn(z, k)` at `z = 0, K, K + iK', iK', 2K,
 2K + 2iK', 2iK'` (proved from Table 22.4.3 and the values at `0`). -/
@@ -147,23 +158,23 @@ theorem jacobiCnk_specialValues {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have h := (jacobiCnk_shift hk 0).1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiCnk_shift hk 0).2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiCnk_shift hk 0).2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiCnk_shift hk 0).2.2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiCnk_shift hk 0).2.2.2.2.2
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
 
 /-- Table 22.5.1, row `dn`: the finite values of `dn(z, k)` at `z = 0, K, K + iK', iK', 2K,
 2K + 2iK', 2iK'` (proved from Table 22.4.3 and the values at `0`). -/
@@ -180,23 +191,23 @@ theorem jacobiDnk_specialValues {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have h := (jacobiDnk_shift hk 0).1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiDnk_shift hk 0).2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiDnk_shift hk 0).2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiDnk_shift hk 0).2.2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiDnk_shift hk 0).2.2.2.2.2
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
 
 /-- Table 22.5.1, row `cd`: the finite values of `cd(z, k)` at `z = 0, K, K + iK', iK', 2K,
 2K + 2iK', 2iK'` (proved from Table 22.4.3 and the values at `0`). -/
@@ -213,23 +224,23 @@ theorem jacobiCdk_specialValues {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have h := (jacobiCdk_shift hk 0).1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiCdk_shift hk 0).2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiCdk_shift hk 0).2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiCdk_shift hk 0).2.2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiCdk_shift hk 0).2.2.2.2.2
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
 
 /-- Table 22.5.1, row `sd`: the finite values of `sd(z, k)` at `z = 0, K, K + iK', iK', 2K,
 2K + 2iK', 2iK'` (proved from Table 22.4.3 and the values at `0`). -/
@@ -246,23 +257,23 @@ theorem jacobiSdk_specialValues {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have h := (jacobiSdk_shift hk 0).1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiSdk_shift hk 0).2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiSdk_shift hk 0).2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiSdk_shift hk 0).2.2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiSdk_shift hk 0).2.2.2.2.2
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
 
 /-- Table 22.5.1, row `nd`: the finite values of `nd(z, k)` at `z = 0, K, K + iK', iK', 2K,
 2K + 2iK', 2iK'` (proved from Table 22.4.3 and the values at `0`). -/
@@ -279,23 +290,23 @@ theorem jacobiNdk_specialValues {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have h := (jacobiNdk_shift hk 0).1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiNdk_shift hk 0).2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiNdk_shift hk 0).2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiNdk_shift hk 0).2.2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiNdk_shift hk 0).2.2.2.2.2
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
 
 /-- Table 22.5.1, row `dc`: the finite values of `dc(z, k)` at `z = 0, K, K + iK', iK', 2K,
 2K + 2iK', 2iK'` (proved from Table 22.4.3 and the values at `0`). -/
@@ -312,23 +323,23 @@ theorem jacobiDck_specialValues {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have h := (jacobiDck_shift hk 0).2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiDck_shift hk 0).2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiDck_shift hk 0).2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiDck_shift hk 0).2.2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiDck_shift hk 0).2.2.2.2.2
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
 
 /-- Table 22.5.1, row `nc`: the finite values of `nc(z, k)` at `z = 0, K, K + iK', iK', 2K,
 2K + 2iK', 2iK'` (proved from Table 22.4.3 and the values at `0`). -/
@@ -345,23 +356,23 @@ theorem jacobiNck_specialValues {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have h := (jacobiNck_shift hk 0).2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiNck_shift hk 0).2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiNck_shift hk 0).2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiNck_shift hk 0).2.2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiNck_shift hk 0).2.2.2.2.2
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
 
 /-- Table 22.5.1, row `sc`: the finite values of `sc(z, k)` at `z = 0, K, K + iK', iK', 2K,
 2K + 2iK', 2iK'` (proved from Table 22.4.3 and the values at `0`). -/
@@ -378,23 +389,23 @@ theorem jacobiSck_specialValues {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have h := (jacobiSck_shift hk 0).2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiSck_shift hk 0).2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiSck_shift hk 0).2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiSck_shift hk 0).2.2.2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiSck_shift hk 0).2.2.2.2.2
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
 
 /-- Table 22.5.1, row `ns`: the finite values of `ns(z, k)` at `z = 0, K, K + iK', iK', 2K,
 2K + 2iK', 2iK'` (proved from Table 22.4.3 and the values at `0`). -/
@@ -407,15 +418,15 @@ theorem jacobiNsk_specialValues {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have h := (jacobiNsk_shift hk 0).1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiNsk_shift hk 0).2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiNsk_shift hk 0).2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
 
 /-- Table 22.5.1, row `ds`: the finite values of `ds(z, k)` at `z = 0, K, K + iK', iK', 2K,
 2K + 2iK', 2iK'` (proved from Table 22.4.3 and the values at `0`). -/
@@ -428,15 +439,15 @@ theorem jacobiDsk_specialValues {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have h := (jacobiDsk_shift hk 0).1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiDsk_shift hk 0).2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiDsk_shift hk 0).2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
 
 /-- Table 22.5.1, row `cs`: the finite values of `cs(z, k)` at `z = 0, K, K + iK', iK', 2K,
 2K + 2iK', 2iK'` (proved from Table 22.4.3 and the values at `0`). -/
@@ -449,15 +460,15 @@ theorem jacobiCsk_specialValues {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · have h := (jacobiCsk_shift hk 0).1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiCsk_shift hk 0).2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
   · have h := (jacobiCsk_shift hk 0).2.2.1
     simp only [zero_add] at h
     rw [h]
-    je22a_value_tac hk
+    jacobi_value_tac hk
 
 end DLMF.JacobiElliptic
 end

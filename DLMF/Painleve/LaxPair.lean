@@ -13,10 +13,27 @@ public import Mathlib.Tactic.Polynomial.Basic
 /-!
 # The compatible linear system for Painlevé II
 
-The matrices are Beals–Wong (15.4.1)–(15.4.11), in exactly the book's
-normalization. The curvature identity identifies the compatibility condition
-with `PII(c)` and records the spectral reflection symmetry (15.4.12).
-This proves the compatibility identities, not existence of a fundamental
+The Lax pair of Painlevé II in the normalization of Beals–Wong (15.4.1)–(15.4.13). The
+curvature identity identifies the compatibility condition with `PII(c)`.
+
+## Main definitions
+
+* `laxJ`, `laxS`, `laxK`: the matrices `J`, `J₂`, `J₃` of Beals–Wong (15.4.13).
+* `laxB`, `laxA`: the coefficients of `Ψ_x = B Ψ` and `λ Ψ_λ = A Ψ`.
+* `laxAx`: the `x`-derivative of `A` in jet form.
+
+## Main results
+
+* `lax_curvature`, `lax_compatibility_iff`: the curvature of the linear system is the PII
+  residual, so zero curvature is equivalent to `PII(c)`.
+* `IsPIIOn.hasDerivAt_laxA`: every Painlevé II solution gives a compatible Lax pair
+  (Beals–Wong (15.4.3)).
+* `lax_trace_zero`: both coefficients have trace zero.
+* `laxB_reflection`, `laxA_reflection`: the spectral reflection symmetry (Beals–Wong (15.4.12)).
+
+## Implementation notes
+
+The file contains the compatibility identities only, not the existence of a fundamental
 matrix or the global isomonodromy and Stokes theorems.
 -/
 

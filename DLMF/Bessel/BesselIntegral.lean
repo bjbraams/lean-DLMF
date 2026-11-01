@@ -16,6 +16,13 @@ On the unit circle `t = e^{iθ}` the generating function becomes the Fourier ser
 value. Integrating term by term against `e^{-inθ}` over a period gives
 `Jₙ(z) = (2π)⁻¹ ∫₀^{2π} e^{i(z sin θ - nθ)} dθ`, and folding the period at `θ = π` gives
 Bessel's integral `Jₙ(z) = π⁻¹ ∫₀^π cos(z sin θ - nθ) dθ`.
+
+## Main results
+
+* `hasSum_besselJ_jacobiAnger`: the Jacobi–Anger expansion (DLMF 10.12.1).
+* `besselJ_int_eq_integral_exp`: the complex form of Bessel's integral.
+* `besselJ_int_eq_integral_cos`, `besselJ_zero_eq_integral_cos`: Bessel's integral
+  (DLMF 10.9.2) and its case `n = 0` (DLMF 10.9.1).
 -/
 
 @[expose] public section

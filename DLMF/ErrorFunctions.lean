@@ -14,8 +14,11 @@ public import DLMF.ErrorFunctions.BoundsAsymptotics
 public import DLMF.ErrorFunctions.ZeroClassification
 
 /-!
-# Error, Dawson and Fresnel functions: DLMF Chapter 7
+# Error, Dawson and Fresnel functions (DLMF Chapter 7)
 
-Acquisition excludes graphical results and application notes. See the root
-`DLMF678Acquisition.md` for source coverage, branches and upstream pointers.
+This umbrella collects the formalization of DLMF Chapter 7: the complex error functions, Dawson's
+integral, the Fresnel integrals and the Goodwin–Staton integral, with their analytic
+properties, series, integral representations, bounds and asymptotics, zeros, repeated integrals,
+inverse and generalized error functions, and Voigt functions. Graphical results and application
+notes of DLMF are not formalized.
 -/

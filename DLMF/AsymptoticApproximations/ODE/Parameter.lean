@@ -14,15 +14,26 @@ public import DLMFMathlib.Analysis.ODE.LiouvilleGreenFinite
 
 Uniform asymptotic solutions of `w'' = (u² f(z) + g(z)) w` (2.8.1) for large `u`.
 
-* §2.8(i): the Liouville transformation 2.8.2–2.8.4 and the normalizations 2.8.5–2.8.8 of the
-  three cases; the Bessel-type approximating equation 2.8.9.
-* §2.8(ii), Case I (no transition points): the expansions 2.8.10–2.8.13, proved for real `ξ`
-  as corollaries of DLMFMathlib's Liouville–Green expansions with error bounds
-  (`LiouvilleGreen.lg2_exists_solution_expansion_exp_dom` and
-  `LiouvilleGreen.exists_solution_expansion_exp`, Olver Ch. 10, Thm. 3.1) with amplitude `1`;
-  they are stronger than DLMF in that the error bounds are explicit.
-* §2.8(iii), Case II (simple turning point, Airy functions): 2.8.14–2.8.18, 2.8.22–2.8.23.
-* §2.8(iv), Case III (simple pole, Bessel functions): 2.8.24–2.8.31, 2.8.35–2.8.36.
+## Main results
+
+* `liouville_transformation`: the Liouville transformation (DLMF 2.8.2–2.8.4).
+* `liouville_caseI`, `liouville_caseII`, `liouville_caseIII`: the normalizations of the three
+  cases (DLMF 2.8.5–2.8.8).
+* `bessel_approximating_equation`: the Case III approximating equation (DLMF 2.8.9).
+* `caseI_dominant_expansion`, `caseI_recessive_expansion`: Case I, no transition points
+  (DLMF 2.8.10–2.8.13).
+* `caseII_airy_expansion`, `caseII_airy_envelope`: Case II, a simple turning point, with Airy
+  functions (DLMF 2.8.14–2.8.18, 2.8.22–2.8.23).
+* `caseIII_bessel_expansion_pos`, `caseIII_bessel_expansion_neg`, `caseIII_bessel_envelope`:
+  Case III, a simple pole, with Bessel functions (DLMF 2.8.24–2.8.31, 2.8.35–2.8.36).
+
+## Implementation notes
+
+The Case I expansions are stated for real `ξ` and follow from DLMFMathlib's Liouville–Green
+expansions with error bounds
+(`LiouvilleGreen.exists_solution_expansion_dominant_exp_finite_endpoint` and
+`LiouvilleGreen.exists_solution_expansion_exp`, Olver Ch. 10, Thm. 3.1) with amplitude `1`;
+they are stronger than DLMF in that the error bounds are explicit.
 
 The approximants are DLMF's `Ai`, `Bi` (`DLMF.Airy.airyAi`, …), `I_ν`, `K_ν`
 (`DLMF.Bessel.besselI`, `DLMF.Bessel.besselK`), `J_ν` (Mathlib's `Complex.besselJ`) and `Y_ν`
@@ -62,12 +73,14 @@ theorem liouville_transformation {u : ℝ} {f g w w' Z Z' Z'' A' A'' : ℝ → �
         (Z' ξ ^ (-(1 / 2) : ℝ) * w (Z ξ))) ξ := by
   sorry
 
-/-- DLMF 2.8.5 (Case I): with `ξ = ∫ f^{1/2} dz`, `ż² f(z) = 1`, where `ż = 1/ξ'(z)`; the
-transformed equation is 2.8.8 with `m = 0`. -/
+/-- DLMF 2.8.5 (Case I): if `ξ = ∫ f^{1/2} dz`, that is, `ξ` has derivative `f^{1/2}` in `z`,
+and `ξ'(z) = d`, then `ż² f(z) = 1` with `ż = 1/d`; the transformed equation is 2.8.8 with
+`m = 0`. -/
 @[dlmf 2.8.E5, dlmf 2.8.E8, dlmf 2.8.i]
-theorem liouville_caseI {f ξ : ℝ → ℝ} {z : ℝ} (hf : 0 < f z) :
-    (√(f z))⁻¹ ^ 2 * f z = 1 := by
-  rw [inv_pow, Real.sq_sqrt hf.le, inv_mul_cancel₀ hf.ne']
+theorem liouville_caseI {f ξ : ℝ → ℝ} {z d : ℝ} (hf : 0 < f z) (hξ : HasDerivAt ξ d z)
+    (hF : HasDerivAt ξ (√(f z)) z) :
+    d⁻¹ ^ 2 * f z = 1 := by
+  rw [hξ.unique hF, inv_pow, Real.sq_sqrt hf.le, inv_mul_cancel₀ hf.ne']
 
 /-- DLMF 2.8.6 (Case II): if `(2/3) ξ^{3/2} = ∫_{z₀}^z f^{1/2}`, that is, `(2/3) ξ^{3/2}` has
 derivative `f^{1/2}` in `z`, and `ξ > 0` with `ξ'(z) = d`, then `ż² f(z) = ξ` with
@@ -128,14 +141,14 @@ theorem bessel_approximating_equation {u ρ ν : ℝ} (hν : ν ^ 2 = 1 + 4 * ρ
 /-! ### §2.8(ii) Case I: no transition points -/
 
 /-- `lgSeries (-u)` is the series `∑_{s<n} A_s/u^s` of DLMF 2.8.11. -/
-lemma g2b_lgSeries_neg (u : ℝ) (As : ℕ → ℝ → ℝ) (n : ℕ) (y : ℝ) :
+private lemma lgSeries_neg_eq_sum (u : ℝ) (As : ℕ → ℝ → ℝ) (n : ℕ) (y : ℝ) :
     lgSeries (-u) As n y = ∑ s ∈ Finset.range n, As s y / u ^ s := by
   unfold lgSeries
   refine Finset.sum_congr rfl fun s _ => ?_
   rw [neg_pow u, mul_div_mul_left _ _ (pow_ne_zero s (by norm_num : (-1 : ℝ) ≠ 0))]
 
 /-- `lgSeries u` is the series `∑_{s<n} (-1)^s A_s/u^s` of DLMF 2.8.12. -/
-lemma g2b_lgSeries_pos (u : ℝ) (As : ℕ → ℝ → ℝ) (n : ℕ) (y : ℝ) :
+private lemma lgSeries_eq_sum_neg_one_pow (u : ℝ) (As : ℕ → ℝ → ℝ) (n : ℕ) (y : ℝ) :
     lgSeries u As n y = ∑ s ∈ Finset.range n, (-1) ^ s * As s y / u ^ s := rfl
 
 /-- DLMF 2.8.10–2.8.11 with 2.8.13 (Case I, `j = 1`, real `ξ`): let `S` be an open interval
@@ -160,7 +173,7 @@ theorem caseI_dominant_expansion {S : Set ℝ} {α₁ u : ℝ} (hS : IsOpen S) (
       HasDerivAt W' ((u ^ 2 + ψ x) *
         (Real.exp (u * x) * (∑ s ∈ Finset.range n, As s x / u ^ s + ε x))) x ∧
       |ε x| ≤ (∫ t in α₁..x, |Ad n t|) / u ^ n * Real.exp ((∫ t in α₁..x, |ψ t|) / (2 * u)) := by
-  obtain ⟨ε, ε', W', H⟩ := lg2_exists_solution_expansion_exp_dom hS hSc ha hu
+  obtain ⟨ε, ε', W', H⟩ := exists_solution_expansion_dominant_exp_finite_endpoint hS hSc ha hu
     (A := fun _ => 1) (A' := fun _ => 0) (A'' := fun _ => 0) (ξ := id) (g := ψ)
     (fun _ _ => one_ne_zero) (fun x _ => hasDerivAt_const x 1) (fun x _ => hasDerivAt_const x 0)
     continuousOn_const hψ (fun x _ => by simpa using hasDerivAt_id x) hAs hAd hAd2c h0
@@ -168,7 +181,7 @@ theorem caseI_dominant_expansion {S : Set ℝ} {α₁ u : ℝ} (hS : IsOpen S) (
   refine ⟨ε, ε', W', fun x hx hax => ?_⟩
   obtain ⟨h1, h2, h3, h4, -⟩ := H x hx hax
   have hsum : ∀ y, lgSeries (-u) As n y = ∑ s ∈ Finset.range n, As s y / u ^ s :=
-    g2b_lgSeries_neg u As n
+    lgSeries_neg_eq_sum u As n
   simp only [hsum, one_mul, id, one_pow, inv_one, mul_one] at h2 h3
   refine ⟨h1, h2, h3, ?_⟩
   have hV : (∫ t in α₁..x, |(1 : ℝ) * 0 - ψ t * 1 ^ 2|) = ∫ t in α₁..x, |ψ t| := by
@@ -205,7 +218,7 @@ theorem caseI_recessive_expansion {a u : ℝ} (hu : 0 < u) {ψ : ℝ → ℝ}
     (fun s hs x hx => by rw [hrec s hs x hx]; ring) hAni
   refine ⟨ε, ε', W', fun x hx => ?_⟩
   obtain ⟨h1, h2, h3, h4, -⟩ := H x hx
-  simp only [g2b_lgSeries_pos, one_mul, id, one_pow, inv_one, mul_one] at h2 h3
+  simp only [lgSeries_eq_sum_neg_one_pow, one_mul, id, one_pow, inv_one, mul_one] at h2 h3
   refine ⟨h1, h2, h3, ?_⟩
   have hV : (∫ t in Ioi x, |(1 : ℝ) * 0 - ψ t * 1 ^ 2|) = ∫ t in Ioi x, |ψ t| := by
     congr 1; funext t; simp

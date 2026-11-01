@@ -11,20 +11,34 @@ public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 /-!
 # Continued fractions (DLMF §15.7)
 
-All three coefficient sequences use Mathlib's `GenContFract` and `convs`;
-the general continued-fraction machinery is not duplicated.
-Convergence is acquired on the common real domain `0 < a,b < c`, `0 < x < 1/2`.
-This avoids poles and exceptional terminating fractions. The larger complex
-domains in DLMF need a meromorphic/projective formulation at denominator zeros.
+## Main definitions
 
-The three limits are proved by Pincherle's theorem in the real forms
+* `gaussContinuedFraction`: Gauss's continued fraction, DLMF 15.7.2.
+* `contiguousContinuedFraction`: the second expansion of the same quotient, DLMF 15.7.4.
+* `derivativeContinuedFraction`: the continued fraction for the derivative quotient,
+  DLMF 15.7.6.
+
+## Main results
+
+* `gauss_continued_fraction_limit`: DLMF 15.7.1.
+* `contiguous_continued_fraction_limit`: DLMF 15.7.3.
+* `derivative_continued_fraction_limit`: DLMF 15.7.5.
+
+## Implementation notes
+
+All three fractions use Mathlib's `GenContFract` and `convs`. Convergence is proved on the
+common real domain `0 < a, b < c`, `0 < x < 1/2`, which avoids poles and exceptional
+terminating fractions; the larger complex domains in DLMF need a meromorphic or projective
+formulation at denominator zeros.
+
+The limits are proved by Pincherle's theorem in the real forms
 `GenContFract.cfConv_tendsto_of_ratio_real` (15.7.1, 15.7.3: negative partial numerators) and
 `GenContFract.cfConv_tendsto_of_ratio_pos` (15.7.5: positive partial numerators). The backward
 solutions are regularized Gauss functions on the lines `(a+⌊j/2⌋, b+⌊(j+1)/2⌋, c+j)`,
 `(a, b+j, c+j)` and `(a+j, b+j, c+j)`; their three-term recurrences are combinations of the
-regularized contiguous relations of `Continuation.lean`. The ratio bounds come from termwise
-comparison of the positive real series (`gaussCF_R_shift_le`, `gaussCF_R_shift_c_le`) and, for
-15.7.5, from Euler's transformation.
+regularized contiguous relations of `DLMF.Hypergeometric.Continuation`. The ratio bounds come
+from termwise comparison of the positive real series (`gaussCF_R_shift_le`,
+`gaussCF_R_shift_c_le`) and, for 15.7.5, from Euler's transformation.
 -/
 
 @[expose] public section

@@ -15,16 +15,26 @@ public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 # Distributions (DLMF §1.16)
 
 Theorems of DLMF §1.16 that are not already in Mathlib (the upstream pointers are in
-`DLMF.AlgebraicAnalytic.Distributions.MathlibCoverage`):
+`DLMF.AlgebraicAnalytic.Distributions.MathlibCoverage`).
 
-* `distribIterDeriv_apply` (1.16.9) and `distribIterDeriv_delta_apply` (1.16.12);
-* `deriv_heaviside_shift` (1.16.16), `deriv_heaviside` (1.16.15), `stieltjes_eq_deriv`
-  (1.16.9_5), the jump formula `iterDeriv_piecewise` (1.16.17–1.16.18), `deriv_xPlusRpow`
-  (1.16.20) and the consistency of `xPlusDistrib` (1.16.21);
-* `sign_eq_two_mul_heaviside_sub_one` (1.16.44), `deriv_sign` (1.16.45);
-* the DLMF Fourier transform: `dlmfFourierSchwartz_apply` (1.16.29), the operator identities
-  1.16.33–1.16.34 and 1.16.36–1.16.37, and the transforms of `δ`, `1`, `sign` and `H`
-  (1.16.38–1.16.51).
+## Main results
+
+* `distribIterDeriv_apply` (1.16.9) and `distribIterDeriv_delta_apply` (1.16.12).
+* `smoothMul_apply` (1.16.6), `distrib_tendsto_iff` (1.16.7).
+* `deriv_heaviside` (1.16.15), `deriv_heaviside_shift` (1.16.16), `stieltjes_eq_deriv`
+  (1.16.9_5), `delta_not_regular` (§1.16(iii)).
+* `iterDeriv_piecewise`: the jump formula (1.16.17–1.16.18).
+* `deriv_xPlusRpow` (1.16.20), `xPlusDistrib_eq_iterDeriv` (1.16.21),
+  `factorial_smul_xPlusDistrib` (1.16.23).
+* `sign_eq_two_mul_heaviside_sub_one` (1.16.44), `deriv_sign` (1.16.45).
+* `dlmfFourierSchwartz_apply` (1.16.29), `dlmfFourierSchwartz_polyDiffOp`,
+  `dlmfFourierSchwartz_polyMul` (1.16.33–1.16.34), `dlmfFourierTempered_polyDiffOp`,
+  `dlmfFourierTempered_polyMul` (1.16.36–1.16.37).
+* `dlmfFourierTempered_delta`, `dlmfFourierTempered_one`, `dlmfFourierTempered_deriv_sign`,
+  `dlmfFourierTempered_sign`, `dlmfFourierTempered_heaviside`: the transforms of `δ`, `1`,
+  `sign'`, `sign` and `H` (1.16.38–1.16.51).
+
+## Implementation notes
 
 Distributions on the line are Mathlib's `𝓓'(Ω, ℝ)` (real test functions); `lineDistrib f`
 is the regular distribution of `f`. Tempered distributions are Mathlib's `𝓢'(E, ℂ)`.
@@ -45,23 +55,23 @@ variable {Ω : TopologicalSpace.Opens ℝ} {F : Type*} [AddCommGroup F] [Module 
   [TopologicalSpace F] [IsTopologicalAddGroup F] [ContinuousSMul ℝ F]
 
 /-- The derivative of a test function on the line as a function: `∂_{1} φ = φ'`. -/
-lemma g1f_coe_lineDeriv_one (φ : 𝓓(Ω, ℝ)) : ⇑(∂_{(1 : ℝ)} φ : 𝓓(Ω, ℝ)) = deriv ⇑φ := by
+private lemma coe_lineDerivOp_one (φ : 𝓓(Ω, ℝ)) : ⇑(∂_{(1 : ℝ)} φ : 𝓓(Ω, ℝ)) = deriv ⇑φ := by
   ext x
   rw [TestFunction.lineDerivOp_eq_lineDerivCLM ℝ, TestFunction.lineDerivCLM_apply_of_le le_top,
     (φ.contDiff.differentiable (by simp)).differentiableAt.lineDeriv_eq_fderiv]
   rfl
 
 /-- The `k`-fold derivative of a test function on the line: `(∂_{1})^[k] φ = φ^{(k)}`. -/
-lemma g1f_coe_iterate_lineDeriv_one (k : ℕ) (φ : 𝓓(Ω, ℝ)) :
+private lemma coe_iterate_lineDerivOp_one (k : ℕ) (φ : 𝓓(Ω, ℝ)) :
     ⇑((fun ψ : 𝓓(Ω, ℝ) => ∂_{(1 : ℝ)} ψ)^[k] φ) = iteratedDeriv k ⇑φ := by
   induction k with
   | zero => simp
   | succ k ih =>
-    rw [Function.iterate_succ_apply', g1f_coe_lineDeriv_one, ih, iteratedDeriv_succ]
+    rw [Function.iterate_succ_apply', coe_lineDerivOp_one, ih, iteratedDeriv_succ]
 
 /-- DLMF 1.16.9: `⟨Λ^{(k)}, φ⟩ = (-1)^k ⟨Λ, φ^{(k)}⟩`, with `φ^{(k)}` the `k`-fold
 derivative of the test function (as an element of `𝓓(Ω, ℝ)`; its values are
-`iteratedDeriv k φ`, `g1f_coe_iterate_lineDeriv_one`). The case `k = 1` is 1.16.8,
+`iteratedDeriv k φ`, `coe_iterate_lineDerivOp_one`). The case `k = 1` is 1.16.8,
 Mathlib's `Distribution.lineDerivOp_apply_apply`. -/
 @[dlmf 1.16.E9]
 theorem distribIterDeriv_apply (k : ℕ) (T : 𝓓'(Ω, F)) (φ : 𝓓(Ω, ℝ)) :
@@ -82,7 +92,7 @@ on an open set `Ω` of the line, 1.16.11). -/
 theorem distribIterDeriv_delta_apply (n : ℕ) (x₀ : ℝ) (φ : 𝓓(Ω, ℝ)) :
     distribIterDeriv n (Distribution.delta x₀ : 𝓓'(Ω, ℝ)) φ =
       (-1 : ℝ) ^ n * iteratedDeriv n ⇑φ x₀ := by
-  rw [distribIterDeriv_apply, Distribution.delta_apply, g1f_coe_iterate_lineDeriv_one,
+  rw [distribIterDeriv_apply, Distribution.delta_apply, coe_iterate_lineDerivOp_one,
     smul_eq_mul]
 
 end Deriv
@@ -91,20 +101,20 @@ end Deriv
 
 /-- Identity under the stated parameter and domain assumptions: `(fun x => heaviside (x - x₀)) =
 (Ioi x₀).indicator (fun _ => (1 : ℝ))`. -/
-lemma g1f_heaviside_shift_eq_indicator (x₀ : ℝ) :
+private lemma heaviside_sub_eq_indicator (x₀ : ℝ) :
     (fun x => heaviside (x - x₀)) = (Ioi x₀).indicator (fun _ => (1 : ℝ)) := by
   ext x
   simp [heaviside, Set.indicator, sub_pos]
 
 /-- Identity under the stated parameter and domain assumptions: `LocallyIntegrable (fun x =>
 heaviside (x - x₀)) volume`. -/
-lemma g1f_locallyIntegrable_heaviside_shift (x₀ : ℝ) :
+private lemma locallyIntegrable_heaviside_sub (x₀ : ℝ) :
     LocallyIntegrable (fun x => heaviside (x - x₀)) volume := by
-  rw [g1f_heaviside_shift_eq_indicator]
+  rw [heaviside_sub_eq_indicator]
   exact (locallyIntegrable_const 1).indicator measurableSet_Ioi
 
 /-- `∫ φ'(x) H(x - x₀) dx = -φ(x₀)` for a test function `φ` on the line. -/
-lemma g1f_integral_deriv_mul_heaviside (x₀ : ℝ) (φ : 𝓓((⊤ : TopologicalSpace.Opens ℝ), ℝ)) :
+private lemma integral_deriv_mul_heaviside_sub (x₀ : ℝ) (φ : 𝓓((⊤ : TopologicalSpace.Opens ℝ), ℝ)) :
     ∫ x, deriv ⇑φ x * heaviside (x - x₀) = -φ x₀ := by
   have hd : ContDiff ℝ 1 ⇑φ := φ.contDiff.of_le (by simp)
   have hφ' : Continuous (deriv ⇑φ) := hd.continuous_deriv le_rfl
@@ -126,10 +136,10 @@ theorem deriv_heaviside_shift (x₀ : ℝ) :
     ∂_{(1 : ℝ)} (lineDistrib fun x => heaviside (x - x₀)) = Distribution.delta x₀ := by
   ext φ
   rw [Distribution.lineDerivOp_apply_apply, lineDistrib,
-    Distribution.ofFun_apply ((g1f_locallyIntegrable_heaviside_shift x₀).locallyIntegrableOn _),
+    Distribution.ofFun_apply ((locallyIntegrable_heaviside_sub x₀).locallyIntegrableOn _),
     Distribution.delta_apply]
-  simp only [FunLike.coe_neg, Pi.neg_apply, g1f_coe_lineDeriv_one, smul_eq_mul, neg_mul,
-    integral_neg, g1f_integral_deriv_mul_heaviside, neg_neg]
+  simp only [FunLike.coe_neg, Pi.neg_apply, coe_lineDerivOp_one, smul_eq_mul, neg_mul,
+    integral_neg, integral_deriv_mul_heaviside_sub, neg_neg]
 
 /-- DLMF 1.16.15: `D H = δ` as distributions on the line. -/
 @[dlmf 1.16.E15]
@@ -148,12 +158,12 @@ theorem sign_eq_two_mul_heaviside_sub_one {x : ℝ} (hx : x ≠ 0) :
   · simp [Real.sign_of_pos h, heaviside, h]; norm_num
 
 /-- The distributional derivative of a constant vanishes. -/
-lemma g1f_deriv_const (c : ℝ) : ∂_{(1 : ℝ)} (lineDistrib fun _ => c) = 0 := by
+private lemma lineDerivOp_lineDistrib_const (c : ℝ) : ∂_{(1 : ℝ)} (lineDistrib fun _ => c) = 0 := by
   ext φ
   have hd : ContDiff ℝ 1 ⇑φ := φ.contDiff.of_le (by simp)
   rw [Distribution.lineDerivOp_apply_apply, lineDistrib,
     Distribution.ofFun_apply ((locallyIntegrable_const c).locallyIntegrableOn _)]
-  simp only [FunLike.coe_neg, Pi.neg_apply, g1f_coe_lineDeriv_one, smul_eq_mul, neg_mul,
+  simp only [FunLike.coe_neg, Pi.neg_apply, coe_lineDerivOp_one, smul_eq_mul, neg_mul,
     integral_neg, integral_mul_const, zero_apply, neg_eq_zero,
     mul_eq_zero]
   left
@@ -176,12 +186,12 @@ theorem deriv_sign : ∂_{(1 : ℝ)} (lineDistrib Real.sign) = (2 : ℝ) • Dis
       ext; simp [sub_eq_add_neg]
     rw [lineDistrib, Distribution.ofFun_congr_ae (ae_restrict_of_ae hae), e,
       Distribution.ofFun_add
-        (((g1f_locallyIntegrable_heaviside_shift 0).smul (2 : ℝ)).locallyIntegrableOn _)
+        (((locallyIntegrable_heaviside_sub 0).smul (2 : ℝ)).locallyIntegrableOn _)
         ((locallyIntegrable_const (1 : ℝ)).neg.locallyIntegrableOn _),
       Distribution.ofFun_smul, Distribution.ofFun_neg, sub_eq_add_neg]
     rfl
   rw [h2, sub_eq_add_neg, LineDeriv.lineDerivOp_add, LineDeriv.lineDerivOp_neg,
-    LineDeriv.lineDerivOp_smul, deriv_heaviside_shift, g1f_deriv_const, neg_zero, add_zero]
+    LineDeriv.lineDerivOp_smul, deriv_heaviside_shift, lineDerivOp_lineDistrib_const, neg_zero, add_zero]
 
 /-! ## §1.16(i): products, convergence, Stieltjes measures -/
 

@@ -12,9 +12,15 @@ public import Mathlib.Analysis.SpecialFunctions.Log.Summable
 /-!
 # Infinite products (DLMF §5.8)
 
-The Weierstrass product 5.8.2 is `one_div_Gamma_eq_tprod` in `Basic.lean`.
-Gauss's limit 5.8.1 is Mathlib `GammaSeq_tendsto_Gamma`. The remaining
-identities are the modulus product and the general balanced Gamma product.
+The Weierstrass product 5.8.2 is `one_div_Gamma_eq_tprod` in `DLMF.Gamma.Basic`, and Gauss's
+limit 5.8.1 is Mathlib's `GammaSeq_tendsto_Gamma`. This file proves the modulus product and the
+general balanced Gamma product.
+
+## Main results
+
+* `Gamma_div_Gamma_add_mul_I_sq`: `|Γ(x)/Γ(x+iy)|² = ∏ₖ (1 + y²/(x+k)²)`, DLMF 5.8.3.
+* `Gamma_balanced_product`: `∏_{n≥0} ∏ₖ (aₖ + n)/(bₖ + n) = ∏ₖ Γ(bₖ) / ∏ₖ Γ(aₖ)` when
+  `∑ aₖ = ∑ bₖ`, DLMF 5.8.5.
 -/
 
 @[expose] public section

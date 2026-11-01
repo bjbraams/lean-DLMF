@@ -9,22 +9,30 @@ public import DLMF.CoalescingSaddles.Basic.AuxiliaryData
 public import DLMF.CoalescingSaddles.CanonicalIntegrals
 
 /-!
-# Zeros of the canonical integrals: DLMF §36.7
+# Zeros of the canonical integrals
 
 DLMF §36.7 describes the zeros of the canonical integrals, mostly through approximate formulas
 read off from the stationary-phase approximation and from numerical computation (Berry, Nye and
 Wright 1979). The approximate loci 36.7.1, 36.7.2, 36.7.4–36.7.7 are definitions in
-`DLMF.CoalescingSaddles.Basic.AuxiliaryData`; the words "approximately", "close to", "deep inside" carry no
-error bound and are not formalized. This file proves the exact statements:
+`DLMF.CoalescingSaddles.Basic.AuxiliaryData`. This file contains the exact statements.
 
-* the zeros of `Ψ₁` are those of `Ai(x/3^{1/3})` (§36.7(i), from 36.2.13);
-* 36.7.3 has exactly one positive solution `ξ_n` for every `n` (DLMF: "the real solution");
-* the exact part of 36.7.4, `3(π(2n - 1/2)/4)^{1/3} = 3(π/2)^{1/3}(n - 1/4)^{1/3}` (the decimal
-  value `3.48734` is excluded as numerical);
+## Main results
 
-and states (admitted) the two analytic claims with a precise meaning: all zeros of the Pearcey
-integral have `y < 0` (§36.7(ii)), and the asymptotic form 36.7.8 of the zeros of `Ψ^{(E)}` in the
-plane `z = 0`. Table 36.7.1 is excluded as numerical.
+* `cuspoidIntegral_one_eq_zero_iff`: the zeros of `Ψ₁` are those of `Ai(x/3^{1/3})`
+  (DLMF §36.7(i), from 36.2.13).
+* `cuspoidIntegral_two_ne_zero_of_nonneg`: all zeros of the Pearcey integral have `y < 0`
+  (DLMF §36.7(ii)).
+* `existsUnique_cuspOuterZeroParam`: 36.7.3 has exactly one positive solution `ξ_n` for every
+  `n` (DLMF: "the real solution").
+* `ellipticUmbilicRingPlane_eq`: the exact part of 36.7.4,
+  `3(π(2n - 1/2)/4)^{1/3} = 3(π/2)^{1/3}(n - 1/4)^{1/3}`.
+* `ellipticUmbilicIntegral_plane_zeros`: the asymptotic form of the zeros of `Ψ^{(E)}` in the
+  plane `z = 0` (DLMF 36.7.8).
+
+## Implementation notes
+
+The words "approximately", "close to", "deep inside" in DLMF carry no error bound and are not
+formalized. The decimal value `3.48734` in 36.7.4 and Table 36.7.1 are excluded as numerical.
 -/
 
 @[expose] public noncomputable section
@@ -58,7 +66,7 @@ theorem cuspoidIntegral_two_ne_zero_of_nonneg {x y : ℝ} (hy : 0 ≤ y) :
   sorry
 
 /-- The left-hand side of 36.7.3 minus its right-hand side. -/
-lemma s36b_xi_strictMonoOn (n : ℕ) :
+private lemma strictMonoOn_cuspZeroEquation (n : ℕ) :
     StrictMonoOn (fun ξ : ℝ => 3 * π * (8 * n + 5) / (9 + 8 * ξ) * ξ ^ (3 / 2 : ℝ) -
       27 / 16 * Real.sqrt (3 / 2) * (Real.log (1 / ξ) + 3 * Real.log (3 / 2))) (Ioi 0) := by
   intro a ha b hb hab
@@ -94,7 +102,7 @@ theorem existsUnique_cuspOuterZeroParam (n : ℕ) :
   set c := 27 / 16 * Real.sqrt (3 / 2) with hcdef
   set f : ℝ → ℝ := fun ξ => A / (9 + 8 * ξ) * ξ ^ (3 / 2 : ℝ) -
     c * (Real.log (1 / ξ) + 3 * Real.log (3 / 2)) with hf
-  have hmono : StrictMonoOn f (Ioi 0) := s36b_xi_strictMonoOn n
+  have hmono : StrictMonoOn f (Ioi 0) := strictMonoOn_cuspZeroEquation n
   have hiff : ∀ ξ, IsCuspOuterZeroParam n ξ ↔ f ξ = 0 := fun ξ => by
     simp only [IsCuspOuterZeroParam, hf, hAdef, hcdef, sub_eq_zero]
   simp_rw [hiff]

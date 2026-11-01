@@ -11,17 +11,38 @@ public import DLMF.ParabolicCylinder.ProductTools
 public import DLMFMathlib.Analysis.ODE.SymmetricSquare
 
 /-!
-# Cylinder real and contour integrals
+# Real and contour integrals of parabolic cylinder functions
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-The integral statements in this module are proved. See
-`DLMF111214Acquisition.md` for coverage and validation.
+This file proves the integral representations of `U(a,z)` and `V(a,z)` of DLMF §12.5 and the
+integrals of DLMF §12.12.
 
-The kernel of 12.12.4 is absolutely integrable and its integral is entire in the
-argument. Integration by parts yields the shared symmetric-square Weber ODE;
-three initial values identify the integral with the normalized squared product.
-The ODE uniqueness machinery is shared with the Airy product proofs.
+## Main definitions
+
+* `pcfNegativeLoop`: the Hankel loop from `-∞` below the cut around zero to `-∞` above.
+
+## Main results
+
+* `pcfU_integral_2`, `pcfU_integral_3`, `pcfU_integral_4`: the horizontal-ray integrals
+  DLMF 12.5.2–12.5.4.
+* `pcfU_hankel_integral`: the Hankel-loop integral DLMF 12.5.5.
+* `pcfU_vertical_integral`: the vertical-line integral DLMF 12.5.6.
+* `pcfV_horizontal_integral`: the horizontal-line integral DLMF 12.5.7.
+* `pcfU_barnes_integral`, `pcfV_barnes_integral`: the Barnes integrals DLMF 12.5.8–12.5.9 on a
+  straight separating contour.
+* `pcf_integral_1`, `pcf_integral_2`, `pcf_integral_3`: the integrals DLMF 12.12.1–12.12.3.
+* `weber_product_ode`: products of Weber solutions satisfy the symmetric-square equation.
+* `pcf_integral_4_integrable`, `pcf_integral_4`: absolute convergence and value of the square
+  integral DLMF 12.12.4.
+
+## Implementation notes
+
+The Barnes integrals are stated on a straight separating contour; exceptional parameters
+need residue corrections, which are in `DLMF.ParabolicCylinder.BarnesContinuation`.
+
+The kernel of DLMF 12.12.4 is absolutely integrable and its integral is entire in the
+argument. Integration by parts yields the symmetric-square Weber equation, and three initial
+values identify the integral with the normalized squared product. The ODE uniqueness argument
+is shared with the Airy product proofs.
 -/
 
 @[expose] public noncomputable section
@@ -708,7 +729,7 @@ lemma pcfIntegral4_weight_integrable {b : ℝ} (hb : b < 1) :
   exact hnear.union hfar
 
 /-- Uniform-in-`z` majorant for the cylinder square-integral kernel. -/
-lemma pcfIntegral4_kernel_norm_le (a z : ℂ) {t : ℝ} (_ht : 0 < t) :
+lemma pcfIntegral4_kernel_norm_le (a z : ℂ) {t : ℝ} :
     ‖exp (2*a*t + z^2/2*Real.tanh t) / (Real.sqrt (Real.sinh (2*t)) : ℂ)‖ ≤
       Real.exp (‖z‖^2/2) * (Real.exp (2*a.re*t) / Real.sqrt (Real.sinh (2*t))) := by
   have harg : (z^2/2*(Real.tanh t : ℂ)).re ≤ ‖z‖^2/2 := by
@@ -750,7 +771,7 @@ lemma pcfIntegral4_kernel_integrable {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
     (Real.exp (‖z‖^2/2))).mono'
     ((pcfIntegral4_kernel_continuousOn a z).aestronglyMeasurable measurableSet_Ioi) ?_
   filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
-  exact pcfIntegral4_kernel_norm_le a z ht
+  exact pcfIntegral4_kernel_norm_le a z
 
 /-- Absolute convergence, including the original normalization, of DLMF 12.12.4. -/
 theorem pcf_integral_4_integrable {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
@@ -848,7 +869,7 @@ lemma pcfIntegral4_hasDerivAt_moment {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z : 
             (norm_nonneg _) (by positivity)
       _ ≤ _ := by
         apply mul_le_mul_of_nonneg_left _ (by positivity)
-        refine (pcfIntegral4_kernel_norm_le a w ht).trans ?_
+        refine (pcfIntegral4_kernel_norm_le a w).trans ?_
         gcongr
 
 /-- The hyperbolic derivative in the cylinder kernel. -/
@@ -915,7 +936,7 @@ lemma pcfIntegral4_moment_tendsto_zero {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z 
   refine squeeze_zero_norm' ?_ hl
   filter_upwards [eventually_ge_atTop (1:ℝ)] with t ht
   refine (pcfIntegral4_moment_norm_le a z n t).trans ?_
-  refine (pcfIntegral4_kernel_norm_le a z (by linarith : 0 < t)).trans ?_
+  refine (pcfIntegral4_kernel_norm_le a z).trans ?_
   calc Real.exp (‖z‖^2/2) * (Real.exp (2*a.re*t) / Real.sqrt (Real.sinh (2*t))) ≤
       Real.exp (‖z‖^2/2) * (Real.exp (2*a.re*t) / (Real.exp t/2)) := by
         gcongr

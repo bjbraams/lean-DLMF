@@ -11,14 +11,31 @@ public import DLMF.Confluent.Coulomb
 public import DLMF.Confluent.ParabolicCylinder
 
 /-!
-# Additional parabolic cylinder definitions and entire dependence
+# Elementary properties of parabolic cylinder functions
 
-Canonical definitions are in `DLMF.ParabolicCylinder.Basic`; this module develops their properties.
+This file develops the elementary properties of the parabolic cylinder functions defined in
+`DLMF.ParabolicCylinder.Basic`: entire dependence on the argument and on the parameter,
+behavior under complex conjugation and reality, the modulus–phase representations, the
+rotated connection formulas, power series, the special value `a = 1/2` and derivative
+formulas (DLMF §§12.2, 12.4, 12.7, 12.8).
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+## Main results
+
+* `quadraticCylinder_transform`, `pcfD_ode`: the cylinder equations DLMF 12.2.1 and 12.2.4.
+* `pcfU_entire`, `pcfU_entire_order`, `pcfV_entire`, `pcfV_entire_order`: entire dependence
+  on the argument and on the parameter.
+* `conj_pcfU`, `conj_pcfV`, `pcfU_real`, `pcfV_real`: complex conjugation and reality.
+* `pcfF_phase`, `pcfG_phase`: the modulus–phase representations DLMF 12.2.22–12.2.23.
+* `pcfU_rotated_connection_pos`, `pcfU_rotated_connection_neg`: DLMF 12.2.18.
+* `pcfU_rotated_connection_entire_pos`, `pcfU_rotated_connection_entire_neg`: DLMF 12.2.19.
+* `pcfEven_kummer_alternative`, `pcfOdd_kummer_alternative`: the Kummer-transformed forms of
+  DLMF 12.7.12–12.7.13.
+* `pcfEven_series_3`, `pcfOdd_series_4`, `pcfEven_series_5`, `pcfOdd_series_6`: the power
+  series DLMF 12.4.3–12.4.6.
+* `pcfU_half`: `U(1/2, z)` in terms of `erfc` (DLMF 12.7.5).
+* `pcfU_iterated_deriv_9`, `pcfU_iterated_deriv_10`, `pcfV_iterated_deriv_11`,
+  `pcfV_iterated_deriv_12`: the derivative formulas DLMF 12.8.9–12.8.12.
+* `pcfUBar_recurrences`: `Ū(a,z)` satisfies the recurrences of `U` on its parameter domain.
 -/
 
 @[expose] public noncomputable section

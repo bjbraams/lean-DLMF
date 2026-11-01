@@ -13,9 +13,19 @@ public import Mathlib.Analysis.SpecificLimits.Normed
 
 The polynomials `∏ j < n, (w - q^j)` admit a uniform geometric bound on compact discs
 when `‖q‖ < 1`. Consequently a series in this basis with geometrically bounded
-coefficients is analytic on its expected open disc. The estimate uses Mathlib's
-geometric series and `1 + x ≤ exp x`; normal convergence uses the existing locally
-dominated holomorphic-series theorem.
+coefficients is analytic on its expected open disc.
+
+## Main results
+
+* `Complex.norm_prod_sub_pow_le`: the geometric bound for `∏ j < n, (w - q^j)` on a closed disc.
+* `Complex.summable_geometricNewton`, `Complex.analyticOnNhd_tsum_geometricNewton`: a series with
+  geometrically bounded coefficients converges, and is analytic, on the open disc given by the
+  reciprocal growth rate.
+
+## Implementation notes
+
+The estimate uses Mathlib's geometric series and `1 + x ≤ exp x`; normal convergence uses the
+locally dominated holomorphic-series theorem `Complex.differentiableOn_tsum_of_locally_dominated`.
 -/
 
 @[expose] public noncomputable section

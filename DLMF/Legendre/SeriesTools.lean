@@ -7,22 +7,44 @@ module
 
 public import DLMF.Legendre.Integer
 public import DLMF.Legendre.Laplace
+public import Carlson.Elliptic.Addition
 
 /-!
-# Tools for Legendre generating functions and the polynomials `W_{n-1}`
+# Legendre generating functions and the polynomials `W_{n-1}`
+
+Tools for the Legendre polynomials `P_n(z)` of complex argument and the polynomials
+`W_{n-1}(z) = R_n(z)` with `Q_n = P_n Q_0 - R_n` (DLMF §14.7): polynomiality of the
+hypergeometric representation, formal power series identities in `ℂ⟦X⟧`, and the generating
+functions of DLMF 14.7.19.
+
+## Main definitions
+
+* `legSerP`, `legSerG`, `legSerF`: the sequence `n ↦ P_n(z)`, its generating series
+  `∑ P_n(z) Xⁿ` and the primitive `∑ P_{n-1}(z) Xⁿ / n`.
+* `legSerQ`, `legSerL`: the power series `1 - 2zX + X²` and `z - X`.
+* `legSerB`: the formal binomial series of `(1 - ζX)^{-1/2}`.
+* `legSerA`, `legSerE`, `legSerW`: the coefficients of `P_n` and `W_{n-1}` in powers of `z - 1`
+  and the explicit polynomial of DLMF 14.7.3.
+
+## Main results
 
 * `legSer_legendreP_nat`: the terminating hypergeometric function `P_n(z)` equals the Legendre
-  polynomial for every `z ∈ ℂ`, including the cut `(-∞,-1]` of the continuation. The proof shows
-  that the continuation recursion at `a = -n` produces a polynomial function of `z`
-  (`legSer_aux_poly`) and uses the identity principle for polynomials.
-* Formal power series in `ℂ⟦X⟧`: `G = ∑ P_n(z) Xⁿ` satisfies `(1-2zX+X²) G' = (z-X) G`, hence
-  `(1-2zX+X²) G² = 1` (`legSer_Q_G_sq`); with the primitive `F` of `G`, the coefficients of `FG`
-  obey the recurrence of `W_{n-1}` (`legSer_U_eq`, DLMF 14.7.4).
+  polynomial for every `z ∈ ℂ`, including the cut `(-∞,-1]` of the continuation.
+* `legSer_G_ode`, `legSer_Q_G_sq`: `(1-2zX+X²) G' = (z-X) G` and `(1-2zX+X²) G² = 1`.
+* `legSer_U_eq`: the coefficients of `F G` are the polynomials `R_n = W_{n-1}`
+  (DLMF 14.7.4).
 * `legSer_B_mul`: `G` is the product of the binomial series of `(1-ζ₁X)^{-1/2}` and
-  `(1-ζ₂X)^{-1/2}` when `ζ₁+ζ₂ = 2z`, `ζ₁ζ₂ = 1`; this gives the generating function
-  (DLMF 14.7.19) for complex `z` by a Cauchy product (`legSer_generating`).
+  `(1-ζ₂X)^{-1/2}` when `ζ₁+ζ₂ = 2z`, `ζ₁ζ₂ = 1`.
+* `legSer_generating`: the generating function of `P_n(z)` (DLMF 14.7.19) for complex `z`.
+* `legSerW_eq`: the explicit formula of DLMF 14.7.3 for `W_{n-1}`.
+* `legSer_hasSum_W`, `legSer_tsum_F_real`, `legSer_hasSum_Q_real`: generating functions of
+  `W_{n-1}` and of combinations `c P_n - W_{n-1}` for real arguments.
 
-All helper names carry the prefix `legSer_`.
+## Implementation notes
+
+The polynomiality of `P_n` on all of `ℂ` is proved by showing that the continuation recursion
+at `a = -n` produces a polynomial function of `z` (`legSer_aux_poly`) and applying the
+identity principle for polynomials. All helper names carry the prefix `legSer_`.
 -/
 
 @[expose] public noncomputable section
@@ -868,10 +890,6 @@ theorem legSer_tsum_F_real {x r : ℝ} (ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ₂ =
       norm_num [show x - 0 + √1 = 1 + x by simp; ring]
       rw [add_comm x 1, sub_self])
   exact heq htS
-
-/-- `a^{1/2} = √a` for `a ≥ 0`, as complex numbers. -/
-theorem legSer_cpow_half {a : ℝ} (ha : 0 ≤ a) : ((a:ℂ))^(1/2:ℂ) = ((√a : ℝ) : ℂ) := by
-  rw [Real.sqrt_eq_rpow, Complex.ofReal_cpow ha]; push_cast; ring_nf
 
 /-- Combination of the generating functions of `P_n` and `W_{n-1}` for real `x` and `h`. -/
 theorem legSer_hasSum_Q_real {x h r : ℝ} (ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ₂ = 2*x) (hp : ζ₁ * ζ₂ = 1)

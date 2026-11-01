@@ -8,13 +8,29 @@ module
 public import DLMF.OrthogonalPolynomials.Integrals.LaguerreAndHermite
 
 /-!
-# Polynomial convolutions and Fourier transforms
+# Weighted integrals, convolutions, fractional integrals and Fourier transforms
 
-Jacobi weighted integrals, Laguerre convolutions and Fourier transforms of classical
-polynomials.
+Integrals of classical orthogonal polynomials from DLMF §18.17: the weighted Jacobi
+antiderivative, the unweighted Laguerre convolution, Gegenbauer's product formula, the Jacobi
+fractional integral and the Fourier transforms of Jacobi and Gegenbauer polynomials.
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Integrals`.
+## Main results
+
+* `jacobi_weighted_integral`: DLMF 18.17.1, on intervals contained in `(-1, 1)`.
+* `laguerrePolyL_unweighted_convolution`: DLMF 18.17.2, for arbitrary real endpoints.
+* `ultrasphPoly_product_integral`: Gegenbauer's product formula DLMF 18.17.5.
+* `jacobi_fractional_integral`: DLMF 18.17.9.
+* `jacobi_moment`: the moments `∫ (1 + x)^m (1 - x)^α (1 + x)^β P_n^{(α,β)}(x) dx`.
+* `jacobi_fourier_transform`, `ultrasphPoly_fourier_transform`: DLMF 18.17.16 and its
+  Gegenbauer case.
+
+## Implementation notes
+
+Gegenbauer's product formula is proved by induction on the degree for all `λ > 0` at once:
+one integration by parts in the angle lowers `cos φ` times the integrand to the derivative at
+parameter `λ + 1`, and the three-term recurrence with DLMF 18.9.8 closes the induction. The
+Jacobi fractional integral reduces to the fractional integral of the regularized Gauss
+function.
 -/
 
 @[expose] public section
@@ -39,7 +55,7 @@ namespace DLMF.OrthogonalPolynomials
 
 /-- The weighted Jacobi antiderivative on an interval contained in `(-1,1)`. -/
 @[dlmf 18.17.E1]
-theorem jacobi_weighted_integral {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (-1) 1) :
+theorem jacobi_weighted_integral {α β : ℝ} (hα : -1 < α) (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (-1) 1) :
     2 * (n + 1 : ℂ) * (∫ y : ℝ in (0 : ℝ)..x, (1 - (y : ℂ)) ^ (α : ℂ) *
       (1 + (y : ℂ)) ^ (β : ℂ) * jacobiPolyP α β (n + 1) y) =
       jacobiPolyP (α + 1) (β + 1) n 0 - (1 - (x : ℂ)) ^ (α + 1 : ℂ) *
@@ -69,7 +85,7 @@ theorem jacobi_weighted_integral {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (
       simpa only [g, ofReal_add, ofReal_one] using hreg (α + 1) (β + 1) n t (hmem t ht)
     have hh := hg.hasDerivAt.neg
     have he := jacobi_weighted_derivative (α := α + 1) (β := β + 1)
-      (by linarith) (by linarith) n (hmem t ht)
+      (by linarith) n (hmem t ht)
     simp only [ofReal_add, ofReal_one, add_sub_cancel_right] at he
     change deriv g t = _ at he
     rw [he] at hh
@@ -450,12 +466,12 @@ private lemma gegProd_main (n : ℕ) : ∀ lam : ℝ, 0 < lam → ∀ θ ψ : �
     set F : ℂ := (k.factorial : ℂ) with hF
     have hP0 : P ≠ 0 := poch_ne_zero_of_re_pos (by simp; linarith) k
     have hF0 : F ≠ 0 := by simp [hF, Nat.factorial_ne_zero]
-    have hv0 : ultrasphPoly lam k 1 = P / F := ultrasphPoly_at_one hlre k
+    have hv0 : ultrasphPoly lam k 1 = P / F := ultrasphPoly_at_one k
     have hv1 : ultrasphPoly lam (k + 1) 1 = P * (2 * lam + k) / ((k + 1) * F) := by
-      rw [ultrasphPoly_at_one hlre, poch_succ, Nat.factorial_succ]; push_cast; ring
+      rw [ultrasphPoly_at_one, poch_succ, Nat.factorial_succ]; push_cast; ring
     have hv2 : ultrasphPoly lam (k + 2) 1 =
         P * (2 * lam + k) * (2 * lam + k + 1) / ((k + 2) * (k + 1) * F) := by
-      rw [ultrasphPoly_at_one hlre, poch_succ, poch_succ, Nat.factorial_succ,
+      rw [ultrasphPoly_at_one, poch_succ, poch_succ, Nat.factorial_succ,
         Nat.factorial_succ]; push_cast; ring
     have hvb : ultrasphPoly ((lam : ℂ) + 1) k 1 =
         P * (2 * lam + k) * (2 * lam + k + 1) / (2 * lam * (2 * lam + 1) * F) := by
@@ -463,7 +479,7 @@ private lemma gegProd_main (n : ℕ) : ∀ lam : ℝ, 0 < lam → ∀ θ ψ : �
       rw [show 2 + k = (k + 1) + 1 by omega, poch_succ, poch_succ,
         show (2 : ℕ) = 0 + 1 + 1 from rfl, poch_succ, poch_succ, poch_zero] at h1
       push_cast at h1
-      rw [ultrasphPoly_at_one hlre', show 2 * ((lam : ℂ) + 1) = 2 * lam + 2 by ring,
+      rw [ultrasphPoly_at_one, show 2 * ((lam : ℂ) + 1) = 2 * lam + 2 by ring,
         div_eq_div_iff hF0 (by simp [hl0, hl1, hF0])]
       linear_combination (-F) * h1
     have hmm : ((m'R : ℝ) : ℂ) = 2 * lam * mR / (2 * lam + 1) := by
@@ -536,7 +552,7 @@ theorem ultrasphPoly_product_integral {lam : ℝ} (hlam : 0 < lam) (n : ℕ) (θ
   have hmain := gegProd_main n lam hlam θ ψ
   have hlre : -1 / 2 < (lam : ℂ).re := by simp; linarith
   have h1 : ultrasphPoly lam n 1 ≠ 0 := by
-    rw [ultrasphPoly_at_one hlre]
+    rw [ultrasphPoly_at_one]
     exact div_ne_zero (poch_ne_zero_of_re_pos (by simp; linarith) n)
       (by exact_mod_cast n.factorial_ne_zero)
   have hG1 : 0 < Real.Gamma (lam + 1 / 2) := Real.Gamma_pos_of_pos (by linarith)

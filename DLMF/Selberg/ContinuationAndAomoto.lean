@@ -9,13 +9,42 @@ public import DLMF.Selberg.Basic.Integrands
 public import DLMF.Selberg.DimensionAndParameters
 
 /-!
-# Selberg continuation and the Aomoto integral
+# Continuation of Selberg's integral and Aomoto's integral (AAR §§8.1–8.3)
 
-Landau-type continuation, real integrand forms and the Aomoto integral extend the Selberg
-evaluation.
+This file extends Selberg's integral to its full domain of convergence by analytic
+continuation, proves the real form of the integrand, and derives Aomoto's extension.
 
-Source references and common attribution are retained in
-`DLMF.Selberg.Basic`.
+## Main results
+
+* `integrable_mul_rpow_of_analytic`: Landau's theorem for Mellin transforms of positive
+  measures, in the form needed here.
+* `integrableOn_weightR_mul_vdmSq_rpow`: integrability of the Selberg integrand on its full
+  domain of convergence.
+* `differentiableOn_selbergInt_cDomain`: holomorphy in `c` on the full domain.
+* `selbergInt_eq`: Selberg's integral on its full domain of convergence.
+* `aomotoInt_eq`: Aomoto's formula for `Re c > 0`.
+* `selberg_integral`: Selberg's integral (AAR Theorem 8.1.1, DLMF 5.14.4).
+* `selberg_integral_one`: the `n = 1` case is the Beta integral (DLMF 5.12.1).
+* `aomoto_integral`: Aomoto's extension (AAR §8.1, §8.3).
+
+## Implementation notes
+
+The evaluation follows Aomoto's proof (AAR §8.1), completed by Carlson's theorem and a
+recursion in the dimension, and extended to the full domain by analytic continuation.
+
+1. Integration by parts in one coordinate (`integral_cube_ibp`), with the Vandermonde factor
+   handled off the diagonal, gives Aomoto's recurrence (`aomoto_step`) for `Re c ≥ 1/2`, and
+   hence the shift `S(a+1) = ∏ⱼ (a+(n-1-j)c)/(a+b+(2n-2-j)c) · S(a)` (`selbergInt_add_one`).
+2. `S/R` is therefore `1`-periodic in `a`; it is holomorphic and of polynomial growth on
+   vertical strips, so it is constant by Carlson's theorem (`selbergRatio_eq_one_left`). By
+   the symmetry `a ↔ b` it depends on `c` only.
+3. A boundary integration by parts gives the dimension recursion
+   `(a + n c) S_{n+1}(a, 1, c) = S_n(a, 1 + 2c, c)` (`selbergInt_succ_one`), which the
+   right-hand side also satisfies, so the constant is `1` (`selbergInt_eq_of_half_le`).
+4. The identity extends to `Re c > 0` by analytic continuation in `c`. Integrability on the
+   full domain `Re c > -min(1/n, Re a/(n-1), Re b/(n-1))` follows from the Landau-type theorem
+   `integrable_mul_rpow_of_analytic`, after which the identity theorem gives
+   `selberg_integral`.
 -/
 
 @[expose] public section
@@ -627,7 +656,7 @@ theorem aomotoInt_eq {N m : ℕ} {a b c : ℂ} (hm : m ≤ N) (ha : 0 < a.re) (h
 /-- Selberg's integral, AAR Theorem 8.1.1. Indexed so that `j : Fin n` corresponds to
 the factor with shift `j · c`. -/
 @[dlmf 5.14.E4]
-theorem selberg_integral {n : ℕ} {a b c : ℂ} (hn : 0 < n)
+theorem selberg_integral {n : ℕ} {a b c : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < 1 + n * c.re)
     (hca : 0 < a.re + (n - 1 : ℕ) * c.re)
     (hcb : 0 < b.re + (n - 1 : ℕ) * c.re) :

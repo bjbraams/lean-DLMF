@@ -10,10 +10,22 @@ public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 /-!
 # Differential equations for `℘` (DLMF §23.3(ii))
 
+The factored form of the differential equation of `℘` and the higher-order equations, stated
+for `z ∉ 𝕃`.
+
+## Main results
+
+* `derivWeierstrassP_sq_eq_prod`: `℘'(z)² = 4(℘(z) - e₁)(℘(z) - e₂)(℘(z) - e₃)`
+  (DLMF 23.3.11).
+* `deriv_derivWeierstrassP`: `℘''(z) = 6℘(z)² - g₂/2` (DLMF 23.3.12).
+* `deriv_deriv_derivWeierstrassP`: `℘'''(z) = 12℘(z)℘'(z)` (DLMF 23.3.13).
+
+## Implementation notes
+
 The first-order equation 23.3.10 is Mathlib's `PeriodPair.derivWeierstrassP_sq` (pointer in
-`MathlibCoverage`). Here the factored form 23.3.11 and the higher-order equations 23.3.12–13
-are stated for `z ∉ 𝕃`. Derivatives are Lean's `deriv`; Mathlib's `deriv_weierstrassP`
-identifies `deriv ℘` with `℘'` everywhere (with junk values on the lattice).
+`DLMF.Weierstrass.MathlibCoverage`). Derivatives are Lean's `deriv`; Mathlib's
+`deriv_weierstrassP` identifies `deriv ℘` with `℘'` everywhere (with junk values on the
+lattice).
 -/
 
 @[expose] public section
@@ -39,7 +51,7 @@ theorem derivWeierstrassP_sq_eq_prod {z : ℂ} (hz : z ∉ H.lattice) :
 end HalfPeriods
 
 /-- `℘'` does not vanish identically off the lattice. -/
-lemma p23R1_exists_derivWeierstrassP_ne_zero (L : PeriodPair) :
+private lemma not_forall_derivWeierstrassP_eq_zero (L : PeriodPair) :
     ¬ ∀ w ∈ (L.latticeᶜ : Set ℂ), ℘'[L] w = 0 := by
   intro h
   have hU : IsOpen (L.latticeᶜ : Set ℂ) := L.isClosed_lattice.isOpen_compl
@@ -49,7 +61,7 @@ lemma p23R1_exists_derivWeierstrassP_ne_zero (L : PeriodPair) :
     simpa [h w hw] using this.hasDerivAt
   obtain ⟨z₀, hz₀⟩ : ∃ z₀, z₀ ∉ L.lattice := ⟨_, L.ω₁_div_two_notMem_lattice⟩
   have hc : ∀ w ∈ (L.latticeᶜ : Set ℂ), ℘[L] w = ℘[L] z₀ := fun w hw =>
-    hU.is_const_of_deriv_eq_zero (wp23_isPreconnected_compl_lattice L)
+    hU.is_const_of_deriv_eq_zero (isPreconnected_compl_lattice L)
       (fun z hz => (hD z hz).differentiableAt.differentiableWithinAt)
       (fun z hz => (hD z hz).deriv) hw hz₀
   have hev : ℘[L] =ᶠ[nhdsWithin 0 {0}ᶜ] fun _ ↦ ℘[L] z₀ := by
@@ -96,8 +108,8 @@ theorem deriv_derivWeierstrassP (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice
   have hzero : ℘'[L] =ᶠ[nhds z] 0 := by
     filter_upwards [hgne, hU.mem_nhds hz] with w hw hwU
     simpa [hw] using hkey w hwU
-  exact p23R1_exists_derivWeierstrassP_ne_zero L fun w hw =>
-    hP'.eqOn_zero_of_preconnected_of_eventuallyEq_zero (wp23_isPreconnected_compl_lattice L)
+  exact not_forall_derivWeierstrassP_eq_zero L fun w hw =>
+    hP'.eqOn_zero_of_preconnected_of_eventuallyEq_zero (isPreconnected_compl_lattice L)
       hz hzero hw
 
 /-- DLMF 23.3.13: `℘'''(z) = 12℘(z)℘'(z)` for `z ∉ 𝕃` (derived from 23.3.12). -/

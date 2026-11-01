@@ -20,8 +20,24 @@ J_ν(z)=\Bigl(\frac{z}{2}\Bigr)^ν\sum_{k=0}^∞\frac{(-1)^k}{k!\,Γ(ν+k+1)}\Bi
 $$
 
 is Mathlib's regularized `₀F₁(;ν+1;-z²/4)` multiplied by `(z/2)^ν`; it is Mathlib's
-`Complex.besselJ`, used here directly, with `besselJ_eq_regularized` giving the series form. The
-second-kind function `Y_ν` is the usual linear combination of `J_ν` and `J_{-ν}`.
+`Complex.besselJ`, used here directly. The second-kind function `Y_ν` is the usual linear
+combination of `J_ν` and `J_{-ν}`. This file develops the regularized `₀F₁` series, Bessel's
+equation, the derivative of `J_ν`, half-integer values and the connection with Kummer's function.
+
+## Main results
+
+* `besselJ_eq_regularized`: `J_ν(z) = (z/2)^ν ₀F̃₁(;ν+1;-z²/4)` (DLMF 10.2.2).
+* `hasFPowerSeriesOnBall_regularized0F1`, `analyticAt_regularized0F1`: regularized `₀F₁` is
+  entire, including nonpositive integer parameters.
+* `regularized0F1_ode`, `deriv_regularized0F1`, `regularized0F1_contiguous`: its differential
+  equation, derivative and a contiguous relation valid at all parameters.
+* `besselSeries_ode`: AAR (4.5.1)–(4.5.2), with a sign parameter covering modified functions.
+* `besselJ_ode`, `besselY_ode`: Bessel's equation (DLMF 10.2.1).
+* `hasDerivAt_besselJ`: the derivative of `J_ν` in terms of `J_{ν+1}` (AAR (4.6.2)).
+* `besselJ_apply_zero`, `besselJ_zero_zero`: values at the origin.
+* `besselJ_half`, `besselJ_neg_half`: `J_{±1/2}` in elementary form (DLMF 10.16.1).
+* `kummerM_eq_exp_mul_regularized0F1`: Kummer's second transformation (AAR (4.1.12)).
+* `besselJ_eq_kummerM`: `J_ν` through Kummer's function (DLMF 10.16.5).
 -/
 
 @[expose] public section
@@ -577,7 +593,7 @@ theorem kummerM_eq_exp_mul_regularized0F1 {ν : ℂ}
       (fun n => by rw [kummerMCoeff_recurrence h2ν]; ring) (z := w) (by simp)
     simpa using he
   have hzero : f 0 = kummerM (ν + 1 / 2) (2 * ν + 1) 0 := by
-    simp [f, g, F, u, DLMF.Confluent.regularizedHGFun_zero, regularizedHGFunCoeff, Gamma_ne_zero hν]
+    simp [f, g, F, u, Complex.regularizedHGFun_zero, regularizedHGFunCoeff, Gamma_ne_zero hν]
   exact (congrFun (confluent_ode_unique h2ν hfa hma hode hmode hzero) z).symm
 
 /-- Relation of `J_ν` to Kummer's function (AAR §4.5). -/

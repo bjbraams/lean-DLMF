@@ -7,7 +7,7 @@ module
 
 public import DLMF.Core.Framework
 public import DLMFMathlib.NumberTheory.BernoulliTaylor
-public import DLMFMathlib.Analysis.Complex.TrigR4SeriesExtension
+public import DLMFMathlib.Analysis.Complex.TrigSeriesExtension
 public import Mathlib.Analysis.Convex.SpecificFunctions.Deriv
 public import Mathlib.Analysis.Calculus.DSlope
 public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
@@ -19,13 +19,22 @@ public import TauCeti.Analysis.SpecialFunctions.Artanh
 /-!
 # Principal logarithmic Bernoulli series
 
-The logarithms of the removable sine and tangent quotients and of cosine have Bernoulli
-expansions on their full first zero-free disks. Slit-plane estimates retain the principal
-branches, including the removable value at the origin. The sine quotient uses strict
-concavity of sine and TauCeti’s `Real.tanh_le_self`; the series integrate the existing
-Bernoulli cotangent and tangent expansions through Cauchy–Taylor uniqueness.
+This file proves the Bernoulli expansions of the principal logarithms of the removable sine and
+tangent quotients and of cosine on their full first zero-free disks (DLMF 4.19.7–4.19.9).
 
-Source references and common attribution are retained in `DLMF.Elementary.Trigonometric`.
+## Main results
+
+* `hasSum_log_sinc_bernoulli`: the expansion of `log (sin z / z)` (DLMF 4.19.7).
+* `hasSum_log_cos_bernoulli`: the expansion of `log cos z` (DLMF 4.19.8).
+* `hasSum_log_tan_div_bernoulli`: the expansion of `log (tan z / z)` (DLMF 4.19.9).
+
+## Implementation notes
+
+Slit-plane estimates retain the principal branches, including the removable value at the
+origin. The sine quotient uses strict concavity of sine and TauCeti's `Real.tanh_le_self`; the
+series integrate the Bernoulli cotangent and tangent expansions through Cauchy–Taylor
+uniqueness.
+
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
 -/
 
@@ -212,7 +221,7 @@ theorem hasSum_log_sinc_bernoulli {z : ℂ} (hz : ‖z‖<π) :
   field_simp
   ring
 /-- The odd Bernoulli series of tangent, obtained from the existing scaled tangent series. -/
-private lemma trigR4_hasSum_tan_bernoulli {z : ℂ} (hz : ‖z‖ < π / 2) :
+private lemma hasSum_tan_bernoulli {z : ℂ} (hz : ‖z‖ < π / 2) :
     HasSum (fun n : ℕ => (-1 : ℂ)^n * 2^(2*(n+1)) * (2^(2*(n+1))-1) *
       (bernoulli (2*(n+1)) : ℂ) / ((2*(n+1)).factorial : ℂ) * z^(2*n+1))
       (Complex.tan z) := by
@@ -246,7 +255,7 @@ private lemma trigR4_hasSum_tan_bernoulli {z : ℂ} (hz : ‖z‖ < π / 2) :
 
 
 /-- Cosine has positive real part on its first zero-free centered disk. -/
-private lemma trigR4_cos_mem_slitPlane {z : ℂ} (hz : ‖z‖ < π/2) :
+private lemma cos_mem_slitPlane_of_norm_lt {z : ℂ} (hz : ‖z‖ < π/2) :
     Complex.cos z ∈ Complex.slitPlane := by
   have hx : |z.re| < π/2 := (Complex.abs_re_le_norm z).trans_lt hz
   have hc := Real.cos_pos_of_mem_Ioo (abs_lt.mp hx)
@@ -258,9 +267,9 @@ private lemma trigR4_cos_mem_slitPlane {z : ℂ} (hz : ‖z‖ < π/2) :
   exact mul_pos hc (Real.cosh_pos z.im)
 
 /-- The principal logarithm of cosine has derivative minus tangent on its first zero-free disk. -/
-private lemma trigR4_hasDerivAt_log_cos {z : ℂ} (hz : ‖z‖ < π/2) :
+private lemma hasDerivAt_log_cos {z : ℂ} (hz : ‖z‖ < π/2) :
     HasDerivAt (fun w => Complex.log (Complex.cos w)) (-Complex.tan z) z := by
-  have h := (Complex.hasDerivAt_cos z).clog (trigR4_cos_mem_slitPlane hz)
+  have h := (Complex.hasDerivAt_cos z).clog (cos_mem_slitPlane_of_norm_lt hz)
   convert h using 1
   simp [Complex.tan, div_eq_mul_inv]
 
@@ -273,11 +282,11 @@ theorem hasSum_log_cos_bernoulli {z : ℂ} (hz : ‖z‖<π/2) :
   let c : ℕ → ℂ := fun m => if Even m then 0 else -b (m/2)
   have hf : DifferentiableOn ℂ (fun w => Complex.log (Complex.cos w)) (Metric.ball 0 (π/2)) := by
     intro w hw
-    exact (trigR4_hasDerivAt_log_cos (by simpa using hw)).differentiableAt.differentiableWithinAt
+    exact (hasDerivAt_log_cos (by simpa using hw)).differentiableAt.differentiableWithinAt
   have hc : ∀ w : ℂ, ‖w‖ < π/2 → HasSum (fun m => c m * w^m)
       (deriv (fun w => Complex.log (Complex.cos w)) w) := by
     intro w hw
-    have ht := (trigR4_hasSum_tan_bernoulli hw).neg
+    have ht := (hasSum_tan_bernoulli hw).neg
     have he : (fun m => c m * w^m) =
         fun m => if Even m then 0 else -(b (m/2) * w^(2*(m/2)+1)) := by
       funext m
@@ -286,8 +295,8 @@ theorem hasSum_log_cos_bernoulli {z : ℂ} (hz : ‖z‖<π/2) :
       · have hmod : m % 2 ≠ 0 := by simpa only [Nat.even_iff] using hm
         have hme : 2*(m/2)+1=m := by omega
         simp [c, hm, hme]
-    rw [he, (trigR4_hasDerivAt_log_cos hw).deriv]
-    exact Complex.trigR4_hasSum_odd_iff.mpr ht
+    rw [he, (hasDerivAt_log_cos hw).deriv]
+    exact Complex.hasSum_ite_odd_iff.mpr ht
   have hs := Complex.hasSum_primitive_on_ball (by positivity : 0 < π/2) hf (by simp) hc hz
   let a : ℕ → ℂ := fun n =>
     ((-1:ℂ)^(n+1)*2^(2*(n+1)-1)*(2^(2*(n+1))-1)*(bernoulli (2*(n+1)):ℂ)/
@@ -312,7 +321,7 @@ theorem hasSum_log_cos_bernoulli {z : ℂ} (hz : ‖z‖<π/2) :
       have hfact : ((2*n+1+1)!:ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero (2*n+1+1)
       field_simp [hn0, hfact]
   rw [he] at hs
-  exact Complex.trigR4_hasSum_odd_iff.mp hs
+  exact Complex.hasSum_ite_odd_iff.mp hs
 
 /-- The tangent quotient has positive real part in its first zero-free vertical strip. -/
 private lemma tan_div_re_pos {z : ℂ} (hz0 : z ≠ 0) (hx : |z.re|<π/2) :

@@ -12,7 +12,28 @@ public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
 public import Mathlib.Analysis.Complex.AbsMax
 
 /-!
-# Tricomi connection formula and principal and logarithmic branches
+# Tricomi's function `U`
+
+This file defines Tricomi's confluent hypergeometric function `U(a,b,z)` on the principal
+branch through the connection formula DLMF 13.2.42.
+
+## Main definitions
+
+* `kummerUConnection`: the connection formula in terms of Kummer's `M`, valid at noninteger `b`.
+* `kummerU`: Tricomi's function; at integer `b` it is the limit of the connection formula along
+  noninteger parameters.
+* `kummerUOnLog`: the connection formula on the logarithmic argument plane, with `w` a
+  logarithm of the argument.
+
+## Main results
+
+* `kummerU_eq_connection`: `kummerU` agrees with the connection formula at noninteger `b`.
+
+## Implementation notes
+
+At integer `b` the totalized Gamma factors in the connection formula do not give the continued
+value, so `kummerU` uses `limUnder` there. The definition alone does not establish that the
+limit exists; that is `tendsto_kummerUConnection` in `DLMF.Confluent.BasicProperties.Continuity`.
 -/
 
 @[expose] public noncomputable section

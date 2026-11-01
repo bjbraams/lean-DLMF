@@ -4388,17 +4388,17 @@
       ]
     },
     {
-      "binder": "inst._@.DLMFMathlib.Combinatorics.Q26bSurjections.1997557923._hygCtx._hyg.7",
+      "binder": "inst._@.DLMFMathlib.Combinatorics.Surjections.1997557923._hygCtx._hyg.7",
       "index": 3,
       "isInstance": true,
       "isProp": false,
       "line": 210,
-      "module": "DLMFMathlib.Combinatorics.Q26bSurjections",
+      "module": "DLMFMathlib.Combinatorics.Surjections",
       "name": "q26b_exists_perm_comp_of_injective",
       "private": false,
       "type": "DecidableEq β",
       "userName": "q26b_exists_perm_comp_of_injective",
-      "file": "DLMFMathlib/Combinatorics/Q26bSurjections.lean",
+      "file": "DLMFMathlib/Combinatorics/Surjections.lean",
       "kernelChecked": true,
       "narrowedType": "∀ {α : Type u_1} {β : Type u_2} [Fintype β] {a b : α → β}, Function.Injective a → Function.Injective b → ∃ τ, b = ⇑τ ∘ a",
       "axioms": [
@@ -4408,17 +4408,17 @@
       ]
     },
     {
-      "binder": "inst._@.DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions.927048340._hygCtx._hyg.10",
+      "binder": "inst._@.DLMF.Spheroidal.Spectrum.EntireEigenfunctions.927048340._hygCtx._hyg.10",
       "index": 4,
       "isInstance": true,
       "isProp": true,
       "line": 39,
-      "module": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions",
+      "module": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions",
       "name": "DLMF.Spheroidal.p3lH_map",
       "private": false,
       "type": "CharZero L",
       "userName": "DLMF.Spheroidal.p3lH_map",
-      "file": "DLMF/Spheroidal/P3lSpectrum/EntireEigenfunctions.lean",
+      "file": "DLMF/Spheroidal/Spectrum/EntireEigenfunctions.lean",
       "kernelChecked": true,
       "narrowedType": "∀ {K : Type u_1} {L : Type u_2} [inst : Field K] [inst_1 : Field L] (f : K →+* L) (m : ℕ) (γ2 c : K) (k : ℕ),\n  f (DLMF.Spheroidal.p3lH m γ2 c k) = DLMF.Spheroidal.p3lH m (f γ2) (f c) k",
       "axioms": [
@@ -4921,7 +4921,7 @@
       "command": "python3 scripts/import_survey.py --baseline scripts/import_baseline.json",
       "exitCode": 0,
       "newTwoWayAreaPairs": 0,
-      "output": "46 areas, 1047 modules, 377 cross-area import lines (DLMF.Core excluded), 155 area edges\n\nTwo-way area pairs (16):\n  BernoulliEuler <-> Combinatorics: DLMF.BernoulliEuler.Generalizations.HigherOrder -> DLMF.Combinatorics.Stirling; DLMF.Combinatorics.Permutations.CyclesAndExcedances -> DLMF.BernoulliEuler.Explicit\n  Bessel <-> Confluent: DLMF.Bessel.Asymptotics -> DLMF.Confluent.Relations; DLMF.Confluent.IntegralRepresentations.EulerAndBessel -> DLMF.Bessel.Modified\n  Bessel <-> Struve: DLMF.Bessel.YIntegralRep -> DLMF.Struve.Properties; DLMF.Struve.AngerWeber.IntegralAndSeries -> DLMF.Bessel.Schlafli\n  Confluent <-> Coulomb: DLMF.Confluent.Coulomb -> DLMF.Coulomb.Basic; DLMF.Coulomb.Basic.Functions -> DLMF.Confluent.Basic.Tricomi\n  Confluent <-> ErrorFunctions: DLMF.Confluent.Zeros.RealZeros -> DLMF.ErrorFunctions.ZeroTools; DLMF.ErrorFunctions.AnalyticProperties -> DLMF.Confluent.FresnelAsymptotics\n  Confluent <-> Hypergeometric: DLMF.Confluent.Asymptotics.LargeArgument -> DLMF.Hypergeometric.Asymptotics; DLMF.Hypergeometric.GeneralizedContinuity -> DLMF.Confluent.Regularized\n  Confluent <-> OrthogonalPolynomials: DLMF.Confluent.LargeA -> DLMF.OrthogonalPolynomials.Classical; DLMF.OrthogonalPolynomials.Basic.Definitions -> DLMF.Confluent.Basic.KummerM\n  Confluent <-> ParabolicCylinder: DLMF.Confluent.ParabolicCylinder.EquationAndIntegrals -> DLMF.ParabolicCylinder.Basic.Functions; DLMF.ParabolicCylinder.Basic.Functions -> DLMF.Confluent.Basic.KummerM\n  ErrorFunctions <-> IncompleteGamma: DLMF.ErrorFunctions.BoundsAsymptotics.ContinuedFractions -> DLMF.IncompleteGamma.FractionTools; DLMF.IncompleteGamma.SpecialValues -> DLMF.ErrorFunctions.AnalyticProperties\n  ErrorFunctions <-> ParabolicCylinder: DLMF.ErrorFunctions.Repeated -> DLMF.ParabolicCylinder.ElementaryProperties; DLMF.ParabolicCylinder.Relations -> DLMF.ErrorFunctions.Repeated\n  ExpIntegrals <-> IncompleteGamma: DLMF.ExpIntegrals.Asymptotics -> DLMF.IncompleteGamma.ExpIntegralAsymptotics; DLMF.IncompleteGamma.ContinuedProperties -> DLMF.ExpIntegrals.AnalyticProperties\n  Gamma <-> Hypergeometric: DLMF.Gamma.Asymptotics.Stirling -> DLMF.Hypergeometric.SeriesProperties; DLMF.Hypergeometric.Asymptotics -> DLMF.Gamma.Asymptotics\n  GeneralizedHypergeometric <-> QHypergeometric: DLMF.GeneralizedHypergeometric.UnitArgument -> DLMF.QHypergeometric.HigherSummations; DLMF.QHypergeometric.Convergence -> DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties\n  JacobiElliptic <-> Theta: DLMF.JacobiElliptic.QuarterPeriods -> DLMF.Theta.Identities; DLMF.Theta.Relations -> DLMF.JacobiElliptic.AnalyticProperties\n  JacobiElliptic <-> Weierstrass: DLMF.JacobiElliptic.P3jEisenstein -> DLMF.Weierstrass.EllipticFunctionsAndInvariants; DLMF.Weierstrass.ModularFunctions -> DLMF.JacobiElliptic.AnalyticProperties\n  Legendre <-> SphericalHarmonics: DLMF.Legendre.Harmonics -> DLMF.SphericalHarmonics.AdditionTools; DLMF.SphericalHarmonics.AdditionTools -> DLMF.Legendre.Associated\n\nStrongly connected groups of areas (4):\n  19: Airy, BernoulliEuler, Bessel, Combinatorics, Confluent, Constants, Coulomb, Elementary, ErrorFunctions, ExpIntegrals, Gamma, Hypergeometric, IncompleteGamma, OrthogonalPolynomials, ParabolicCylinder, Selberg, Statistical, Struve, Zeta\n  4: EllipticIntegrals, JacobiElliptic, Theta, Weierstrass\n  2: GeneralizedHypergeometric, QHypergeometric\n  2: Legendre, SphericalHarmonics\n\nFoundational files importing non-foundational DLMF modules (0):\n\n0 new item(s) relative to scripts/import_baseline.json\n\nMissing project imports (0):\n\nFile-import cycles (0):\n"
+      "output": "46 areas, 1047 modules, 377 cross-area import lines (DLMF.Core excluded), 155 area edges\n\nTwo-way area pairs (16):\n  BernoulliEuler <-> Combinatorics: DLMF.BernoulliEuler.Generalizations.HigherOrder -> DLMF.Combinatorics.Stirling; DLMF.Combinatorics.Permutations.CyclesAndExcedances -> DLMF.BernoulliEuler.Explicit\n  Bessel <-> Confluent: DLMF.Bessel.Asymptotics -> DLMF.Confluent.Relations; DLMF.Confluent.IntegralRepresentations.EulerAndBessel -> DLMF.Bessel.Modified\n  Bessel <-> Struve: DLMF.Bessel.YIntegralRep -> DLMF.Struve.Properties; DLMF.Struve.AngerWeber.IntegralAndSeries -> DLMF.Bessel.Schlafli\n  Confluent <-> Coulomb: DLMF.Confluent.Coulomb -> DLMF.Coulomb.Basic; DLMF.Coulomb.Basic.Functions -> DLMF.Confluent.Basic.Tricomi\n  Confluent <-> ErrorFunctions: DLMF.Confluent.Zeros.RealZeros -> DLMF.ErrorFunctions.ZeroTools; DLMF.ErrorFunctions.AnalyticProperties -> DLMF.Confluent.FresnelAsymptotics\n  Confluent <-> Hypergeometric: DLMF.Confluent.Asymptotics.LargeArgument -> DLMF.Hypergeometric.Asymptotics; DLMF.Hypergeometric.GeneralizedContinuity -> DLMF.Confluent.Regularized\n  Confluent <-> OrthogonalPolynomials: DLMF.Confluent.LargeA -> DLMF.OrthogonalPolynomials.Classical; DLMF.OrthogonalPolynomials.Basic.Definitions -> DLMF.Confluent.Basic.KummerM\n  Confluent <-> ParabolicCylinder: DLMF.Confluent.ParabolicCylinder.EquationAndIntegrals -> DLMF.ParabolicCylinder.Basic.Functions; DLMF.ParabolicCylinder.Basic.Functions -> DLMF.Confluent.Basic.KummerM\n  ErrorFunctions <-> IncompleteGamma: DLMF.ErrorFunctions.BoundsAsymptotics.ContinuedFractions -> DLMF.IncompleteGamma.FractionTools; DLMF.IncompleteGamma.SpecialValues -> DLMF.ErrorFunctions.AnalyticProperties\n  ErrorFunctions <-> ParabolicCylinder: DLMF.ErrorFunctions.Repeated -> DLMF.ParabolicCylinder.ElementaryProperties; DLMF.ParabolicCylinder.Relations -> DLMF.ErrorFunctions.Repeated\n  ExpIntegrals <-> IncompleteGamma: DLMF.ExpIntegrals.Asymptotics -> DLMF.IncompleteGamma.ExpIntegralAsymptotics; DLMF.IncompleteGamma.ContinuedProperties -> DLMF.ExpIntegrals.AnalyticProperties\n  Gamma <-> Hypergeometric: DLMF.Gamma.Asymptotics.Stirling -> DLMF.Hypergeometric.SeriesProperties; DLMF.Hypergeometric.Asymptotics -> DLMF.Gamma.Asymptotics\n  GeneralizedHypergeometric <-> QHypergeometric: DLMF.GeneralizedHypergeometric.UnitArgument -> DLMF.QHypergeometric.HigherSummations; DLMF.QHypergeometric.Convergence -> DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties\n  JacobiElliptic <-> Theta: DLMF.JacobiElliptic.QuarterPeriods -> DLMF.Theta.Identities; DLMF.Theta.Relations -> DLMF.JacobiElliptic.AnalyticProperties\n  JacobiElliptic <-> Weierstrass: DLMF.JacobiElliptic.EisensteinSeries -> DLMF.Weierstrass.EllipticFunctionsAndInvariants; DLMF.Weierstrass.ModularFunctions -> DLMF.JacobiElliptic.AnalyticProperties\n  Legendre <-> SphericalHarmonics: DLMF.Legendre.Harmonics -> DLMF.SphericalHarmonics.AdditionTools; DLMF.SphericalHarmonics.AdditionTools -> DLMF.Legendre.Associated\n\nStrongly connected groups of areas (4):\n  19: Airy, BernoulliEuler, Bessel, Combinatorics, Confluent, Constants, Coulomb, Elementary, ErrorFunctions, ExpIntegrals, Gamma, Hypergeometric, IncompleteGamma, OrthogonalPolynomials, ParabolicCylinder, Selberg, Statistical, Struve, Zeta\n  4: EllipticIntegrals, JacobiElliptic, Theta, Weierstrass\n  2: GeneralizedHypergeometric, QHypergeometric\n  2: Legendre, SphericalHarmonics\n\nFoundational files importing non-foundational DLMF modules (0):\n\n0 new item(s) relative to scripts/import_baseline.json\n\nMissing project imports (0):\n\nFile-import cycles (0):\n"
     },
     "fileLengths": {
       "command": "python3 scripts/check_file_lengths.py",
@@ -5249,7 +5249,7 @@
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Combinatorics_PlanePartitions_BoxFormula.lean.log"
     },
     {
-      "file": "DLMF/Combinatorics/S26aStaircase.lean",
+      "file": "DLMF/Combinatorics/Staircase.lean",
       "exitCode": 0,
       "seconds": 3.78,
       "sha256": "36e23c0c87baa68b27fc2a152f6c528d900203a1b3edc6d05d2d76db0cb229d1",
@@ -5508,14 +5508,14 @@
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_Derivatives.lean.log"
     },
     {
-      "file": "DLMF/EllipticIntegrals/P19sR1Connection.lean",
+      "file": "DLMF/EllipticIntegrals/SymmetricLegendreConnection.lean",
       "exitCode": 0,
       "seconds": 6.68,
       "sha256": "ed7fcdb3d3e8b78abd26855f8b2fecd47c1d979a60498c585a79886226cdbec4",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_P19sR1Connection.lean.log"
     },
     {
-      "file": "DLMF/EllipticIntegrals/P19sR1Legendre.lean",
+      "file": "DLMF/EllipticIntegrals/LegendreSymmetricForms.lean",
       "exitCode": 0,
       "seconds": 8.12,
       "sha256": "2ef4d177c30c9268dbd6eb474bb17190ac7eb4ab808d0e44c07c9e12fb4e32c3",
@@ -5977,14 +5977,14 @@
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_Landen.lean.log"
     },
     {
-      "file": "DLMF/JacobiElliptic/P3jEisenstein.lean",
+      "file": "DLMF/JacobiElliptic/EisensteinSeries.lean",
       "exitCode": 0,
       "seconds": 11.24,
       "sha256": "66ed9ba88833386710994b170cf97a3fbbb9ad5533ba1f080c10908026214521",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_P3jEisenstein.lean.log"
     },
     {
-      "file": "DLMF/JacobiElliptic/P3jJacobiODE.lean",
+      "file": "DLMF/JacobiElliptic/JacobiODE.lean",
       "exitCode": 0,
       "seconds": 4.7,
       "sha256": "823c19a9a53fbb96cacc885cfb1388c06c074d251afa30bf4bfde60a8502f09f",
@@ -6019,28 +6019,28 @@
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Lame_Eigenvalues.lean.log"
     },
     {
-      "file": "DLMF/Lame/P3lWeierstrass.lean",
+      "file": "DLMF/Lame/WeierstrassForm.lean",
       "exitCode": 0,
       "seconds": 5.85,
       "sha256": "ba20867ad5c154b784e6f8da28a4afd6160c706ec112720bb9d4e7573de20e27",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Lame_P3lWeierstrass.lean.log"
     },
     {
-      "file": "DLMF/Lame/Polynomials/P2pEigen.lean",
+      "file": "DLMF/Lame/Polynomials/Eigenvalues.lean",
       "exitCode": 0,
       "seconds": 4.43,
       "sha256": "a1f082ac67fc94a41c1b73c6b717bac17ec6904dd01efb85e8a7bc9a23a2c5ff",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Lame_Polynomials_P2pEigen.lean.log"
     },
     {
-      "file": "DLMF/Lame/Polynomials/P2pODE.lean",
+      "file": "DLMF/Lame/Polynomials/DifferentialEquation.lean",
       "exitCode": 0,
       "seconds": 17.3,
       "sha256": "48db79f40b265276719cfd2b64e05c4ea1bb7c12bad23c28572e47cb27062065",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Lame_Polynomials_P2pODE.lean.log"
     },
     {
-      "file": "DLMF/Lame/Polynomials/P3lZeros.lean",
+      "file": "DLMF/Lame/Polynomials/Zeros.lean",
       "exitCode": 0,
       "seconds": 11.86,
       "sha256": "25af3df9c36884e025d4477140b17fd38c69f9b8a8ae965c2f472e9418324fa5",
@@ -6201,49 +6201,49 @@
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_Hill_Floquet.lean.log"
     },
     {
-      "file": "DLMF/Mathieu/Modified/P2mCrossSeries.lean",
+      "file": "DLMF/Mathieu/Modified/CrossSeries.lean",
       "exitCode": 0,
       "seconds": 11.31,
       "sha256": "19491ce57cea460254936333e361ed9333ae8b8a023ccfafc7f8cd7ee237c255",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_Modified_P2mCrossSeries.lean.log"
     },
     {
-      "file": "DLMF/Mathieu/Modified/P2mRadial/IntegerCrossProducts.lean",
+      "file": "DLMF/Mathieu/Modified/RadialSeries/IntegerCrossProducts.lean",
       "exitCode": 0,
       "seconds": 6.66,
       "sha256": "f64bb0a89a2b0874e7efacb4436cd7bbe531270696b9bf1e704f6e95a79ad8dc",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_Modified_P2mRadial_IntegerCrossProducts.lean.log"
     },
     {
-      "file": "DLMF/Mathieu/Modified/P2mRadial/SeriesEquation.lean",
+      "file": "DLMF/Mathieu/Modified/RadialSeries/SeriesEquation.lean",
       "exitCode": 0,
       "seconds": 8.26,
       "sha256": "fb2e8b80c148cd689e752410f57777c0048ae84d2533851073786ffd691f482a",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_Modified_P2mRadial_SeriesEquation.lean.log"
     },
     {
-      "file": "DLMF/Mathieu/P2sBridge.lean",
+      "file": "DLMF/Mathieu/SturmBridge.lean",
       "exitCode": 0,
       "seconds": 4.71,
       "sha256": "1b140bd70541d7adea860c74d74e947f856cf2c224b2ee922027827e1111d70c",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_P2sBridge.lean.log"
     },
     {
-      "file": "DLMF/Mathieu/P3qJacobi.lean",
+      "file": "DLMF/Mathieu/SmallQJacobi.lean",
       "exitCode": 0,
       "seconds": 5.79,
       "sha256": "d553d96b41d9c9a0af8d04ee972118d2ead9146c9859ef8d5349b1e4d78ce8c4",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_P3qJacobi.lean.log"
     },
     {
-      "file": "DLMF/Mathieu/P3qSpectrum.lean",
+      "file": "DLMF/Mathieu/SmallQSpectrum.lean",
       "exitCode": 0,
       "seconds": 8.88,
       "sha256": "55a81083d1e2cf93d334eb08efe8a3e8a66daef186c9c711585cdb0f5b522994",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_P3qSpectrum.lean.log"
     },
     {
-      "file": "DLMF/Mathieu/P3qVector.lean",
+      "file": "DLMF/Mathieu/SmallQVector.lean",
       "exitCode": 0,
       "seconds": 11.09,
       "sha256": "8cbe9825a2661cf4ab80fe708e931cd81b7422e8c90ebda11bca4d59ab813a7b",
@@ -6271,7 +6271,7 @@
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_SmallQ.lean.log"
     },
     {
-      "file": "DLMF/MatrixArgument/Q2mMatrixIntegrals.lean",
+      "file": "DLMF/MatrixArgument/MatrixIntegrals.lean",
       "exitCode": 0,
       "seconds": 3.15,
       "sha256": "9dd3274b1fe11582fce8c0d666b5d532e622028f61c3ed16d227adba03a05fb0",
@@ -6677,21 +6677,21 @@
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Spheroidal_Existence.lean.log"
     },
     {
-      "file": "DLMF/Spheroidal/P3lParity.lean",
+      "file": "DLMF/Spheroidal/Parity.lean",
       "exitCode": 0,
       "seconds": 5.3,
       "sha256": "a486e8d87a3fef3561c42675d18e1b8f464970ccb7a19503d0c367c8a05db38c",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Spheroidal_P3lParity.lean.log"
     },
     {
-      "file": "DLMF/Spheroidal/P3lSpectrum/EntireEigenfunctions.lean",
+      "file": "DLMF/Spheroidal/Spectrum/EntireEigenfunctions.lean",
       "exitCode": 0,
       "seconds": 15.35,
       "sha256": "c4e86c3103f264d1a1a5b57ebca13096080298ca4e3c1555a7334487b6fd7190",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Spheroidal_P3lSpectrum_EntireEigenfunctions.lean.log"
     },
     {
-      "file": "DLMF/Spheroidal/P3lSpectrum/ParameterDependence.lean",
+      "file": "DLMF/Spheroidal/Spectrum/ParameterDependence.lean",
       "exitCode": 0,
       "seconds": 13.73,
       "sha256": "e8f2f9ea6b67b0292c01e3bcb944e1ae5755e9e19a4e7dbb73df167991e84ce3",
@@ -6803,7 +6803,7 @@
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Zeta_Polylog.lean.log"
     },
     {
-      "file": "DLMF/Zeta/Q25bLerchContinuation.lean",
+      "file": "DLMF/Zeta/LerchContinuation.lean",
       "exitCode": 0,
       "seconds": 4.98,
       "sha256": "427363e5bfd76438c045c743a00e72813830972ca3f4df64030476e05f9de43c",
@@ -6880,14 +6880,14 @@
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_EulerMaclaurin.lean.log"
     },
     {
-      "file": "DLMFMathlib/Analysis/ODE/P2lSturmLiouville.lean",
+      "file": "DLMFMathlib/Analysis/ODE/SturmLiouville.lean",
       "exitCode": 0,
       "seconds": 6.12,
       "sha256": "c1c9e6ebce2a496fd4aab5e51217670ff14b8d4cf58d4208665f35d12989f6fb",
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_ODE_P2lSturmLiouville.lean.log"
     },
     {
-      "file": "DLMFMathlib/Analysis/ODE/P2sSturmOsc.lean",
+      "file": "DLMFMathlib/Analysis/ODE/SturmOscillation.lean",
       "exitCode": 0,
       "seconds": 6.26,
       "sha256": "29d7de726d301f4811da1f85733fe229f596bf3a49d9f823956d55eaee23d7e5",
@@ -6915,7 +6915,7 @@
       "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_SpecialFunctions_Pow_ComplexReal.lean.log"
     },
     {
-      "file": "DLMFMathlib/Combinatorics/Q26bSurjections.lean",
+      "file": "DLMFMathlib/Combinatorics/Surjections.lean",
       "exitCode": 0,
       "seconds": 2.27,
       "sha256": "6162dc9da72c9291dffa3e26c591f1803b7e6001ac3df4cff5bec1d61b038a4a",
@@ -7118,7 +7118,7 @@
         "lines": 1213
       },
       {
-        "file": "DLMF/Lame/Polynomials/P2pODE.lean",
+        "file": "DLMF/Lame/Polynomials/DifferentialEquation.lean",
         "lines": 1211
       },
       {
@@ -7306,7 +7306,7 @@
         "lines": 1066
       },
       {
-        "file": "DLMF/JacobiElliptic/P3jEisenstein.lean",
+        "file": "DLMF/JacobiElliptic/EisensteinSeries.lean",
         "lines": 1065
       },
       {
@@ -7474,7 +7474,7 @@
         "lines": 1006
       },
       {
-        "file": "DLMFMathlib/Analysis/ODE/P2sSturmOsc.lean",
+        "file": "DLMFMathlib/Analysis/ODE/SturmOscillation.lean",
         "lines": 1006
       },
       {
@@ -7498,65 +7498,65 @@
     "longProofsOver60": 899,
     "longProofsOver100": 208,
     "roundNamedFiles": [
-      "DLMF/Bessel/P3mGraf.lean",
-      "DLMF/Combinatorics/S26aStaircase.lean",
-      "DLMF/Coulomb/Energy/Q2eRegular.lean",
-      "DLMF/EllipticIntegrals/P19sR1Bounds.lean",
-      "DLMF/EllipticIntegrals/P19sR1Connection.lean",
-      "DLMF/EllipticIntegrals/P19sR1Legendre.lean",
-      "DLMF/JacobiElliptic/P3jEisenstein.lean",
-      "DLMF/JacobiElliptic/P3jJacobiODE.lean",
-      "DLMF/Lame/P2lFourier.lean",
-      "DLMF/Lame/P3lWeierstrass.lean",
-      "DLMF/Lame/Polynomials/P2pBase.lean",
-      "DLMF/Lame/Polynomials/P2pEigen.lean",
-      "DLMF/Lame/Polynomials/P2pIdent.lean",
-      "DLMF/Lame/Polynomials/P2pODE.lean",
-      "DLMF/Lame/Polynomials/P3lZeros.lean",
-      "DLMF/Mathieu/Modified/P2mConnection/AngularKernels.lean",
-      "DLMF/Mathieu/Modified/P2mConnection/RadialAndMonodromy.lean",
-      "DLMF/Mathieu/Modified/P2mConnection.lean",
-      "DLMF/Mathieu/Modified/P2mCrossSeries.lean",
-      "DLMF/Mathieu/Modified/P2mRadial/IntegerCrossProducts.lean",
-      "DLMF/Mathieu/Modified/P2mRadial/SeriesEquation.lean",
-      "DLMF/Mathieu/Modified/P2mRadial.lean",
-      "DLMF/Mathieu/Modified/P3mImaginary.lean",
-      "DLMF/Mathieu/Modified/P3mIntegrals.lean",
-      "DLMF/Mathieu/Modified/P3mWronskian.lean",
-      "DLMF/Mathieu/P2sBridge.lean",
-      "DLMF/Mathieu/P3qCeSe.lean",
-      "DLMF/Mathieu/P3qCeSeGen.lean",
-      "DLMF/Mathieu/P3qGeneral.lean",
-      "DLMF/Mathieu/P3qJacobi.lean",
-      "DLMF/Mathieu/P3qSpectrum.lean",
-      "DLMF/Mathieu/P3qVector.lean",
-      "DLMF/MatrixArgument/Q2mMatrixIntegrals.lean",
-      "DLMF/NumberTheory/T27bHecke.lean",
-      "DLMF/Spheroidal/P2yFerrersTools.lean",
-      "DLMF/Spheroidal/P3lParity.lean",
-      "DLMF/Spheroidal/P3lSpectrum/EntireEigenfunctions.lean",
-      "DLMF/Spheroidal/P3lSpectrum/ParameterDependence.lean",
-      "DLMF/Spheroidal/P3lSpectrum.lean",
-      "DLMF/WignerSymbols/Q2wHelpers.lean",
-      "DLMF/Zeta/Q25bLerchContinuation.lean",
-      "DLMF/Zeta/R25bHurwitzContinuation.lean",
-      "DLMF/Zeta/S25bDirichletTest.lean",
-      "DLMF/Zeta/S25bHurwitzCore.lean",
+      "DLMF/Bessel/GrafAddition.lean",
+      "DLMF/Combinatorics/Staircase.lean",
+      "DLMF/Coulomb/Energy/RegularSolution.lean",
+      "DLMF/EllipticIntegrals/SymmetricBounds.lean",
+      "DLMF/EllipticIntegrals/SymmetricLegendreConnection.lean",
+      "DLMF/EllipticIntegrals/LegendreSymmetricForms.lean",
+      "DLMF/JacobiElliptic/EisensteinSeries.lean",
+      "DLMF/JacobiElliptic/JacobiODE.lean",
+      "DLMF/Lame/FourierExistence.lean",
+      "DLMF/Lame/WeierstrassForm.lean",
+      "DLMF/Lame/Polynomials/Basis.lean",
+      "DLMF/Lame/Polynomials/Eigenvalues.lean",
+      "DLMF/Lame/Polynomials/Identities.lean",
+      "DLMF/Lame/Polynomials/DifferentialEquation.lean",
+      "DLMF/Lame/Polynomials/Zeros.lean",
+      "DLMF/Mathieu/Modified/CrossConnection/AngularKernels.lean",
+      "DLMF/Mathieu/Modified/CrossConnection/RadialAndMonodromy.lean",
+      "DLMF/Mathieu/Modified/CrossConnection.lean",
+      "DLMF/Mathieu/Modified/CrossSeries.lean",
+      "DLMF/Mathieu/Modified/RadialSeries/IntegerCrossProducts.lean",
+      "DLMF/Mathieu/Modified/RadialSeries/SeriesEquation.lean",
+      "DLMF/Mathieu/Modified/RadialSeries.lean",
+      "DLMF/Mathieu/Modified/ImaginaryArgument.lean",
+      "DLMF/Mathieu/Modified/KernelIntegrals.lean",
+      "DLMF/Mathieu/Modified/Wronskians.lean",
+      "DLMF/Mathieu/SturmBridge.lean",
+      "DLMF/Mathieu/SmallQCeSe.lean",
+      "DLMF/Mathieu/SmallQCeSeGeneral.lean",
+      "DLMF/Mathieu/SmallQGeneral.lean",
+      "DLMF/Mathieu/SmallQJacobi.lean",
+      "DLMF/Mathieu/SmallQSpectrum.lean",
+      "DLMF/Mathieu/SmallQVector.lean",
+      "DLMF/MatrixArgument/MatrixIntegrals.lean",
+      "DLMF/NumberTheory/HeckeOperators.lean",
+      "DLMF/Spheroidal/FerrersTools.lean",
+      "DLMF/Spheroidal/Parity.lean",
+      "DLMF/Spheroidal/Spectrum/EntireEigenfunctions.lean",
+      "DLMF/Spheroidal/Spectrum/ParameterDependence.lean",
+      "DLMF/Spheroidal/Spectrum.lean",
+      "DLMF/WignerSymbols/FactorialHelpers.lean",
+      "DLMF/Zeta/LerchContinuation.lean",
+      "DLMF/Zeta/HurwitzContinuation.lean",
+      "DLMF/Zeta/DirichletTest.lean",
+      "DLMF/Zeta/HurwitzEulerMaclaurin.lean",
       "DLMFMathlib/Analysis/Fourier/P1a2EntirePeriodic.lean",
-      "DLMFMathlib/Analysis/ODE/P1oEntireLinear.lean",
-      "DLMFMathlib/Analysis/ODE/P1oLinearGlobal.lean",
-      "DLMFMathlib/Analysis/ODE/P1oParamHolomorphic.lean",
-      "DLMFMathlib/Analysis/ODE/P2lSturmLiouville.lean",
-      "DLMFMathlib/Analysis/ODE/P2sGrowth.lean",
-      "DLMFMathlib/Analysis/ODE/P2sOscillation.lean",
-      "DLMFMathlib/Analysis/ODE/P2sSturmOsc.lean",
-      "DLMFMathlib/Analysis/ODE/P2sSturmSpectrum.lean",
-      "DLMFMathlib/Combinatorics/Q26bSurjections.lean",
-      "DLMFMathlib/Combinatorics/R26aFinpartition.lean",
-      "DLMFMathlib/Combinatorics/S26aQuadraticSeries.lean",
-      "DLMFMathlib/Combinatorics/S26aSeriesTransform.lean",
-      "DLMFMathlib/NumberTheory/ModularForms/P3wJSurjective.lean",
-      "DLMFMathlib/NumberTheory/T27aPrimeNumberTheorem.lean"
+      "DLMFMathlib/Analysis/ODE/EntireLinear.lean",
+      "DLMFMathlib/Analysis/ODE/LinearGlobal.lean",
+      "DLMFMathlib/Analysis/ODE/ParamHolomorphic.lean",
+      "DLMFMathlib/Analysis/ODE/SturmLiouville.lean",
+      "DLMFMathlib/Analysis/ODE/SturmGrowth.lean",
+      "DLMFMathlib/Analysis/ODE/Oscillation.lean",
+      "DLMFMathlib/Analysis/ODE/SturmOscillation.lean",
+      "DLMFMathlib/Analysis/ODE/SturmSpectrum.lean",
+      "DLMFMathlib/Combinatorics/Surjections.lean",
+      "DLMFMathlib/Combinatorics/Finpartition.lean",
+      "DLMFMathlib/Combinatorics/QuadraticSeries.lean",
+      "DLMFMathlib/Combinatorics/SeriesTransform.lean",
+      "DLMFMathlib/NumberTheory/ModularForms/KleinJSurjective.lean",
+      "DLMFMathlib/NumberTheory/PrimeNumberTheorem.lean"
     ],
     "publicRoundPrefixed": 4936,
     "linesOver100": 4407,
@@ -8253,7 +8253,7 @@
         "lines": 1000
       },
       {
-        "file": "DLMF/Lame/P2lFourier.lean",
+        "file": "DLMF/Lame/FourierExistence.lean",
         "words": 47,
         "lines": 547
       },
@@ -8393,22 +8393,22 @@
         "lines": 986
       },
       {
-        "file": "DLMF/Mathieu/Modified/P2mConnection/AngularKernels.lean",
+        "file": "DLMF/Mathieu/Modified/CrossConnection/AngularKernels.lean",
         "words": 30,
         "lines": 964
       },
       {
-        "file": "DLMF/Mathieu/Modified/P2mConnection/RadialAndMonodromy.lean",
+        "file": "DLMF/Mathieu/Modified/CrossConnection/RadialAndMonodromy.lean",
         "words": 27,
         "lines": 822
       },
       {
-        "file": "DLMF/Mathieu/Modified/P2mRadial/IntegerCrossProducts.lean",
+        "file": "DLMF/Mathieu/Modified/RadialSeries/IntegerCrossProducts.lean",
         "words": 25,
         "lines": 717
       },
       {
-        "file": "DLMF/Mathieu/Modified/P2mRadial/SeriesEquation.lean",
+        "file": "DLMF/Mathieu/Modified/RadialSeries/SeriesEquation.lean",
         "words": 31,
         "lines": 861
       },
@@ -8643,12 +8643,12 @@
         "lines": 1038
       },
       {
-        "file": "DLMF/Spheroidal/P3lSpectrum/EntireEigenfunctions.lean",
+        "file": "DLMF/Spheroidal/Spectrum/EntireEigenfunctions.lean",
         "words": 29,
         "lines": 901
       },
       {
-        "file": "DLMF/Spheroidal/P3lSpectrum/ParameterDependence.lean",
+        "file": "DLMF/Spheroidal/Spectrum/ParameterDependence.lean",
         "words": 25,
         "lines": 650
       },

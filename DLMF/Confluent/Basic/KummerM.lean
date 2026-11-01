@@ -13,7 +13,20 @@ public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
 public import Mathlib.Analysis.Complex.AbsMax
 
 /-!
-# Kummer M and its defining coefficients
+# Kummer's function `M`
+
+This file defines Kummer's confluent hypergeometric function `M(a,c,z) = ₁F₁(a;c;z)`
+(DLMF 13.2.2) as a totalized power series.
+
+## Main definitions
+
+* `kummerMCoeff`: the coefficient of `z^n` in Kummer's series.
+* `kummerM`: Kummer's function `M(a,c,z)` (DLMF 13.2.2).
+
+## Main results
+
+* `kummerM_zero`: `M(a,c,0) = 1`.
+* `kummerM_of_zero_param`: `M(0,c,z) = 1` (DLMF 13.6.3).
 -/
 
 @[expose] public noncomputable section

@@ -8,14 +8,31 @@ module
 public import DLMF.Confluent.Recurrence
 
 /-!
-# Analytic continuation of Kummer's function in its parameters (DLMF §13.2(i))
+# Analytic continuation of Kummer's function in its parameters
 
 Mathlib's regularized function `𝐌(a,b,z) = regularizedHGFun {a} {b} z = M(a,b,z)/Γ(b)` is
-entire in `a`, in `b` and in `z`. We prove that it is entire along any entire curve in the
-parameter plane, and use the identity principle to remove every parameter hypothesis from the
-contiguous relations of §13.3, from the derivative formula 13.3.15 and from Kummer's
-transformation 13.2.39. The classical statements with hypotheses remain in
-`DLMF.Confluent.Recurrence` and `DLMF.Confluent.Basic`.
+entire in `a`, in `b` and in `z` (DLMF §13.2(i)). This file shows that it is entire along any
+entire curve in the parameter plane, and uses the identity principle to remove every parameter
+hypothesis from the contiguous relations of DLMF §13.3, from the derivative formula 13.3.15 and
+from Kummer's transformation 13.2.39.
+
+## Main results
+
+* `tendsto_kummerM_div_Gamma_at_neg_nat`: at a denominator pole, `M(a,b,z)/Γ(b)` converges
+  along the punctured parameter plane (DLMF 13.2.5).
+* `iteratedDeriv_regularizedConfluent`: `𝐌⁽ⁿ⁾(a,b,z) = (a)ₙ 𝐌(a+n,b+n,z)` (DLMF 13.3.15).
+* `regularizedConfluent_contiguous_a`, `regularizedConfluent_contiguous_b`,
+  `regularizedConfluent_contiguous_a_b`, `regularizedConfluent_contiguous_shift_a`,
+  `regularizedConfluent_contiguous_mixed`, `regularizedConfluent_contiguous_down`: the
+  contiguous relations DLMF 13.3.1–13.3.6 for all parameters.
+* `regularizedConfluent_ode_contiguous`: DLMF 13.3.13 for all parameters.
+* `regularizedConfluent_kummer_transform`: `𝐌(a,b,z) = e^z 𝐌(b-a,b,-z)` for all parameters
+  (DLMF 13.2.39).
+
+## Implementation notes
+
+The classical statements with parameter hypotheses are in `DLMF.Confluent.Recurrence` and
+`DLMF.Confluent.Basic`.
 -/
 
 @[expose] public section

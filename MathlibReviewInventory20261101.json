@@ -1,0 +1,7772 @@
+{
+ "schemaVersion": 1,
+ "reviewDate": "2026-11-01",
+ "baseCommit": "9963e03",
+ "previousReview": "MathlibReview20261030.md",
+ "note": "Status measurements for reports/MathlibReview20261101.tex. Candidate lists, not adjudicated violations, except where the report says verified.",
+ "summary": {
+  "libraryFiles": 1210,
+  "allLeanFiles": 1212,
+  "libraryLines": 545049,
+  "declarationKinds": {
+   "theorem": 17858,
+   "def": 3352,
+   "lemma": 5012,
+   "inductive": 7,
+   "structure": 55,
+   "abbrev": 52,
+   "instance": 8
+  },
+  "directAdmissions": 1482,
+  "missingModuleKeyword": 1,
+  "missingModuleDoc": 0,
+  "missingModuleTitle": 11,
+  "moduleDocAfterDeclarations": 0,
+  "filesOver1000": 138,
+  "filesOver1500": 0,
+  "longProofsOver60": 913,
+  "longProofsOver100": 214,
+  "roundNamedFiles": 59,
+  "publicRoundPrefixed": 4936,
+  "linesOver100": 4470,
+  "repeatedEightLineFragmentGroups": 489,
+  "lowDetailLargeModuleDocs": 243
+ },
+ "compiled": {
+  "rows": 27069,
+  "publicExplicit": 25744,
+  "privateExplicit": 967,
+  "theoremsDependingOnSorryAx": 1581,
+  "directStructureFields": 205,
+  "fieldsWithoutDoc": 0
+ },
+ "closedHypotheses": [
+  "OK\tDLMF.Zeta.CotangentMoments\tDLMF.Zeta.integral_quadratic_mul_cot_pi\t∀ x ∈ Set.Icc 0 (1 / 2), |Real.pi * x * Real.cot (Real.pi * x)| ≤ 1"
+ ],
+ "removableBinders": [
+  {
+   "userName": "DLMF.Confluent.upperIncGamma_zero_E1",
+   "module": "DLMF.IncompleteGamma.SpecialValues",
+   "line": 65,
+   "binder": "hz",
+   "type": "z ≠ 0"
+  },
+  {
+   "userName": "DLMF.Mathieu.p3q_expand_AE",
+   "module": "DLMF.Mathieu.SmallQVector",
+   "line": 579,
+   "binder": "_hn",
+   "type": "n ≠ 0"
+  },
+  {
+   "userName": "DLMF.OrthogonalPolynomials.IsUnitCircleOP.ip_self_eq_ofReal",
+   "module": "DLMF.OrthogonalPolynomials.UnitCircle",
+   "line": 397,
+   "binder": "h",
+   "type": "DLMF.OrthogonalPolynomials.IsUnitCircleOP μ p"
+  },
+  {
+   "userName": "DLMF.Confluent.kummerM_addition_shift_b",
+   "module": "DLMF.Confluent.ProductsAddition",
+   "line": 316,
+   "binder": "hxy",
+   "type": "x + y ∈ Complex.slitPlane"
+  },
+  {
+   "userName": "DLMF.Legendre.ferrers_orthogonality_6",
+   "module": "DLMF.Legendre.Integrals.FerrersGreen",
+   "line": 38,
+   "binder": "hl",
+   "type": "m ≤ l"
+  },
+  {
+   "userName": "DLMF.Airy.airy_bi_real_error",
+   "module": "DLMF.Airy.Asymptotics.SectorRemainders",
+   "line": 424,
+   "binder": "hN",
+   "type": "0 ≤ N"
+  },
+  {
+   "userName": "DLMF.Heun.heun_hermiteDarboux_example₂",
+   "module": "DLMF.Heun.Integral",
+   "line": 226,
+   "binder": "ha0",
+   "type": "a ≠ 0"
+  },
+  {
+   "userName": "DLMF.Heun.heun_hermiteDarboux_example₂",
+   "module": "DLMF.Heun.Integral",
+   "line": 226,
+   "binder": "ha1",
+   "type": "a ≠ 1"
+  },
+  {
+   "userName": "DLMF.Legendre.associatedP_continued_fraction",
+   "module": "DLMF.Legendre.Series",
+   "line": 1273,
+   "binder": "hterm",
+   "type": "∀ (k : ℕ), DLMF.Legendre.legendrePCFNum ν μ x (k + 1) ≠ 0 ∨ DLMF.Legendre.legendrePCFDen μ x k ≠ 0"
+  },
+  {
+   "userName": "DLMF.AlgebraicAnalytic.tendsto_gaussian_integral_of_growth",
+   "module": "DLMF.AlgebraicAnalytic.Distributions.DiracDelta",
+   "line": 114,
+   "binder": "hloc",
+   "type": "MeasureTheory.LocallyIntegrable φ MeasureTheory.volume"
+  },
+  {
+   "userName": "DLMF.JacobiElliptic.p3j_core",
+   "module": "DLMF.JacobiElliptic.EisensteinSeries",
+   "line": 830,
+   "binder": "hc",
+   "type": "0 < c"
+  },
+  {
+   "userName": "MeasureTheory.integral_comp_abs_eq_two_smul",
+   "module": "DLMFMathlib.MeasureTheory.Integral.HalfLine",
+   "line": 49,
+   "binder": "inst._@.DLMFMathlib.MeasureTheory.Integral.HalfLine.504735006._hygCtx._hyg.12",
+   "type": "CompleteSpace E"
+  },
+  {
+   "userName": "DLMF.Legendre.legendre_singular_2",
+   "module": "DLMF.Legendre.Singularities",
+   "line": 108,
+   "binder": "hm",
+   "type": "0 < m"
+  },
+  {
+   "userName": "DLMF.Elementary.hypR4_mem_arccothValues_iff",
+   "module": "DLMF.Elementary.Hyperbolic.InverseIdentities",
+   "line": 448,
+   "binder": "h1",
+   "type": "z ≠ 1"
+  },
+  {
+   "userName": "DLMF.Elementary.hypR4_mem_arccothValues_iff",
+   "module": "DLMF.Elementary.Hyperbolic.InverseIdentities",
+   "line": 448,
+   "binder": "h2",
+   "type": "z ≠ -1"
+  },
+  {
+   "userName": "DLMF.Mathieu.p1a2_hd_one_t",
+   "module": "DLMF.Mathieu.IntegralEquations",
+   "line": 544,
+   "binder": "_z",
+   "type": "ℂ"
+  },
+  {
+   "userName": "DLMF.Airy.airy_modulus_phase_wronskian",
+   "module": "DLMF.Airy.ModulusPhase.Representations",
+   "line": 947,
+   "binder": "hx",
+   "type": "x ≤ 0"
+  },
+  {
+   "userName": "DLMF.QHypergeometric.qPhi_terminates",
+   "module": "DLMF.QHypergeometric.Convergence",
+   "line": 822,
+   "binder": "hq",
+   "type": "‖q‖ < 1"
+  },
+  {
+   "userName": "DLMF.QHypergeometric.qPhi_terminates",
+   "module": "DLMF.QHypergeometric.Convergence",
+   "line": 822,
+   "binder": "hb",
+   "type": "DLMF.QHypergeometric.QDenominatorRegularThrough b q N"
+  },
+  {
+   "userName": "DLMF.JacobiElliptic.tendsto_jacobiDck_one",
+   "module": "DLMF.JacobiElliptic.SpecialValues.ModulusLimits",
+   "line": 475,
+   "binder": "hz",
+   "type": "Complex.cosh z ≠ 0"
+  },
+  {
+   "userName": "DLMF.Confluent.whittakerW_eq_kummerU",
+   "module": "DLMF.Confluent.Whittaker",
+   "line": 218,
+   "binder": "hz",
+   "type": "z ∈ Complex.slitPlane"
+  },
+  {
+   "userName": "DLMF.Hypergeometric.kummer_five_connection_one",
+   "module": "DLMF.Hypergeometric.Kummer",
+   "line": 527,
+   "binder": "_hc",
+   "type": "∀ (k : ℤ), c ≠ ↑k"
+  },
+  {
+   "userName": "DLMF.Mathieu.p1a2_hd_one_z",
+   "module": "DLMF.Mathieu.IntegralEquations",
+   "line": 540,
+   "binder": "_t",
+   "type": "ℝ"
+  },
+  {
+   "userName": "DLMF.Mathieu.p1a2_hd_zero_z",
+   "module": "DLMF.Mathieu.IntegralEquations",
+   "line": 548,
+   "binder": "_t",
+   "type": "ℝ"
+  },
+  {
+   "userName": "DLMF.Confluent.kummerM_posZeros_ceil",
+   "module": "DLMF.Confluent.Zeros.RealZeros",
+   "line": 918,
+   "binder": "ha",
+   "type": "a < 0"
+  },
+  {
+   "userName": "DLMF.Airy.generalizedAiry_wronskian",
+   "module": "DLMF.Airy.Generalized",
+   "line": 712,
+   "binder": "hn",
+   "type": "1 ≤ n"
+  },
+  {
+   "userName": "DLMF.Legendre.associatedQ_zero_order",
+   "module": "DLMF.Legendre.Associated.ConjugationAndValues",
+   "line": 126,
+   "binder": "hz",
+   "type": "z - 1 ∈ Complex.slitPlane"
+  },
+  {
+   "userName": "DLMF.Confluent.wronskian_regularizedHGFun_kummerUReflected",
+   "module": "DLMF.Confluent.ConnectionWronskians",
+   "line": 181,
+   "binder": "_hba",
+   "type": "∀ (k : ℕ), b - a ≠ -↑k"
+  },
+  {
+   "userName": "differentiableOn_integral_cexp_neg_mul_smul",
+   "module": "DLMFMathlib.Analysis.Asymptotics.WatsonRotated",
+   "line": 66,
+   "binder": "inst._@.DLMFMathlib.Analysis.Asymptotics.WatsonRotated.4184034018._hygCtx._hyg.12",
+   "type": "CompleteSpace V"
+  },
+  {
+   "userName": "DLMF.Heun.hasSum_heunLocal",
+   "module": "DLMF.Heun.LocalSolutions",
+   "line": 384,
+   "binder": "hγ",
+   "type": "∀ (n : ℕ), γ ≠ -↑n"
+  },
+  {
+   "userName": "DLMF.Gamma.beta_on_Ioi",
+   "module": "DLMF.Gamma.BetaFunction.ParameterIntegrals",
+   "line": 102,
+   "binder": "_ha",
+   "type": "0 < a.re"
+  },
+  {
+   "userName": "DLMF.Gamma.beta_on_Ioi",
+   "module": "DLMF.Gamma.BetaFunction.ParameterIntegrals",
+   "line": 102,
+   "binder": "_hb",
+   "type": "0 < b.re"
+  },
+  {
+   "userName": "DLMF.Legendre.conical_wronskian",
+   "module": "DLMF.Legendre.Conical",
+   "line": 160,
+   "binder": "hτ",
+   "type": "0 ≤ τ"
+  },
+  {
+   "userName": "DLMF.Legendre.conical_wronskian",
+   "module": "DLMF.Legendre.Conical",
+   "line": 160,
+   "binder": "hμ",
+   "type": "0 ≤ μ"
+  },
+  {
+   "userName": "DLMF.Struve.hasSum_lommelS",
+   "module": "DLMF.Struve.Lommel",
+   "line": 292,
+   "binder": "hz",
+   "type": "z ∈ Complex.slitPlane"
+  },
+  {
+   "userName": "DLMF.Weierstrass.weierstrassP_laurent",
+   "module": "DLMF.Weierstrass.Series",
+   "line": 355,
+   "binder": "hz0",
+   "type": "z ≠ 0"
+  },
+  {
+   "userName": "DLMF.Legendre.conicalQHat_connection",
+   "module": "DLMF.Legendre.Conical",
+   "line": 64,
+   "binder": "hτ",
+   "type": "0 ≤ τ"
+  },
+  {
+   "userName": "DLMF.JacobiElliptic.tendsto_jacobiSdk_one",
+   "module": "DLMF.JacobiElliptic.SpecialValues.ModulusLimits",
+   "line": 522,
+   "binder": "hz",
+   "type": "Complex.cosh z ≠ 0"
+  },
+  {
+   "userName": "DLMF.Mathieu.integral_mathieuSe_sq",
+   "module": "DLMF.Mathieu.Properties.Eigenfunctions",
+   "line": 399,
+   "binder": "hn",
+   "type": "n ≠ 0"
+  },
+  {
+   "userName": "DLMF.Confluent.kummerU_addition",
+   "module": "DLMF.Confluent.ProductsAddition",
+   "line": 443,
+   "binder": "hxy",
+   "type": "x + y ∈ Complex.slitPlane"
+  },
+  {
+   "userName": "DLMF.Elementary.hypR4_sqrt_half",
+   "module": "DLMF.Elementary.Hyperbolic.InverseBranches",
+   "line": 452,
+   "binder": "_h",
+   "type": "w.im ≠ 0 ∨ 0 < w.re"
+  },
+  {
+   "userName": "DLMF.AlgebraicAnalytic.fourierCosTransform_gaussian",
+   "module": "DLMF.AlgebraicAnalytic.Transforms.Tables",
+   "line": 342,
+   "binder": "hx",
+   "type": "0 < x"
+  },
+  {
+   "userName": "DLMF.Airy.airyPV_ball_slitPlane",
+   "module": "DLMF.Airy.Integrals.HalfLineLaplace",
+   "line": 1065,
+   "binder": "_hx",
+   "type": "0 < x"
+  },
+  {
+   "userName": "DLMF.Confluent.gammaInv_compact_sublevel",
+   "module": "DLMF.IncompleteGamma.UniformAsymptotics",
+   "line": 709,
+   "binder": "_hM",
+   "type": "0 ≤ M"
+  },
+  {
+   "userName": "DLMF.Confluent.genSinInt_hasSum",
+   "module": "DLMF.IncompleteGamma.SineCosine.GammaRepresentations",
+   "line": 844,
+   "binder": "ha",
+   "type": "∀ (n : ℕ), a ≠ -(2 * ↑n + 1)"
+  },
+  {
+   "userName": "DLMF.OrthogonalPolynomials.jacobi_weighted_derivative",
+   "module": "DLMF.OrthogonalPolynomials.Differential.ChebyshevAndShifts",
+   "line": 817,
+   "binder": "hβ",
+   "type": "0 < β"
+  },
+  {
+   "userName": "DLMF.Hypergeometric.genRegularizedHG_eq_series",
+   "module": "DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties",
+   "line": 127,
+   "binder": "h",
+   "type": "a.card ≤ b.card + 1"
+  },
+  {
+   "userName": "DLMF.Heun.heun_jacobiForm",
+   "module": "DLMF.Heun.DoublyPeriodic",
+   "line": 66,
+   "binder": "hF",
+   "type": "α + β + 1 = γ + δ + ε"
+  },
+  {
+   "userName": "DLMF.Heun.heun_jacobiForm",
+   "module": "DLMF.Heun.DoublyPeriodic",
+   "line": 66,
+   "binder": "hU",
+   "type": "IsOpen U"
+  },
+  {
+   "userName": "DLMF.Confluent.kummerM_eq_whittakerM",
+   "module": "DLMF.Confluent.Whittaker",
+   "line": 225,
+   "binder": "hb",
+   "type": "∀ (k : ℕ), b ≠ -↑k"
+  },
+  {
+   "userName": "DLMF.Mathieu.p2s_coef_bound",
+   "module": "DLMF.Mathieu.SpectralExistence",
+   "line": 129,
+   "binder": "a._@._internal._hyg.0",
+   "type": "x ∈ Set.Icc 0 (Real.pi / 2)"
+  },
+  {
+   "userName": "DLMF.Confluent.pcfLG2_trunc_eval",
+   "module": "DLMF.ParabolicCylinder.UniformLG2.ExpansionAlgebra",
+   "line": 51,
+   "binder": "_hu",
+   "type": "u ≠ 0"
+  },
+  {
+   "userName": "DLMF.Statistical.normIncBetaI_shift_right",
+   "module": "DLMF.IncompleteGamma.Beta",
+   "line": 261,
+   "binder": "hz0",
+   "type": "z ≠ 0"
+  },
+  {
+   "userName": "DLMF.Bessel.besselJ_eq_poisson_integral",
+   "module": "DLMF.Bessel.Theorems",
+   "line": 46,
+   "binder": "hx",
+   "type": "0 < x"
+  },
+  {
+   "userName": "DLMF.Hypergeometric.genHG_entire",
+   "module": "DLMF.GeneralizedHypergeometric.AnalyticProperties",
+   "line": 34,
+   "binder": "hb",
+   "type": "DLMF.Hypergeometric.GenDenRegular b"
+  },
+  {
+   "userName": "DLMF.Confluent.kummerM_addition_exp_shift_both",
+   "module": "DLMF.Confluent.ProductsAddition",
+   "line": 410,
+   "binder": "hxy",
+   "type": "x + y ∈ Complex.slitPlane"
+  },
+  {
+   "userName": "DLMF.AsymptoticApproximations.liouville_caseI",
+   "module": "DLMF.AsymptoticApproximations.ODE.Parameter",
+   "line": 65,
+   "binder": "ξ",
+   "type": "ℝ → ℝ"
+  },
+  {
+   "userName": "DLMF.Confluent.kummerU_addition_exp",
+   "module": "DLMF.Confluent.ProductsAddition",
+   "line": 496,
+   "binder": "hxy",
+   "type": "x + y ∈ Complex.slitPlane"
+  },
+  {
+   "userName": "DLMF.EllipticIntegrals.p19sR1_half_pow_sq",
+   "module": "DLMF.EllipticIntegrals.LegendreSymmetricForms",
+   "line": 608,
+   "binder": "_hl",
+   "type": "0 < l"
+  },
+  {
+   "userName": "DLMF.Confluent.pcfIntegral4_kernel_norm_le",
+   "module": "DLMF.ParabolicCylinder.Integrals",
+   "line": 710,
+   "binder": "_ht",
+   "type": "0 < t"
+  },
+  {
+   "userName": "DLMF.MatrixArgument.laplaceTransform_matrixConvolution",
+   "module": "DLMF.MatrixArgument.GammaBeta",
+   "line": 219,
+   "binder": "hZ",
+   "type": "Z.transpose = Z"
+  },
+  {
+   "userName": "DLMF.EllipticIntegrals.contDiffAt_of_eqOn_analytic_comp_affine",
+   "module": "DLMF.EllipticIntegrals.SymmetricDerivatives",
+   "line": 468,
+   "binder": "inst._@.DLMF.EllipticIntegrals.SymmetricDerivatives.1104848481._hygCtx._hyg.6",
+   "type": "DecidableEq ι"
+  },
+  {
+   "userName": "DLMF.Elementary.trig_linear_ode_general",
+   "module": "DLMF.Elementary.Trigonometric.DirectIdentities",
+   "line": 493,
+   "binder": "hne",
+   "type": "U.Nonempty"
+  },
+  {
+   "userName": "DLMF.Airy.airy_ai_real_error",
+   "module": "DLMF.Airy.Asymptotics.RealRemainders",
+   "line": 488,
+   "binder": "hN",
+   "type": "0 ≤ N"
+  },
+  {
+   "userName": "DLMF.EllipticIntegrals.ei19d_sqrt_mul3",
+   "module": "DLMF.EllipticIntegrals.SymmetricAddition",
+   "line": 75,
+   "binder": "_hc",
+   "type": "0 ≤ c"
+  },
+  {
+   "userName": "DLMF.Gamma.mellin_barnes_beta",
+   "module": "DLMF.Gamma.Integrals.BarnesAndRamanujan",
+   "line": 32,
+   "binder": "hab",
+   "type": "0 < (a + b).re"
+  },
+  {
+   "userName": "DLMF.Confluent.pcfU_sector_asymptotic",
+   "module": "DLMF.ParabolicCylinder.AsymptoticsZeros",
+   "line": 35,
+   "binder": "hδπ",
+   "type": "δ < 3 * Real.pi / 4"
+  },
+  {
+   "userName": "DLMF.Elementary.arcsin_principal_neg",
+   "module": "DLMF.Elementary.Trigonometric.InverseBranches",
+   "line": 400,
+   "binder": "hz",
+   "type": "z ∈ DLMF.Elementary.arcsinCutPlane"
+  },
+  {
+   "userName": "DLMF.Hypergeometric.genAsymptoticCRaw_continuousAt",
+   "module": "DLMF.GeneralizedHypergeometric.Asymptotics",
+   "line": 167,
+   "binder": "_hpq",
+   "type": "p < q + 1"
+  },
+  {
+   "userName": "Asymptotics.IsEquivalent.intervalIntegral_of_integral_norm",
+   "module": "DLMFMathlib.Analysis.Asymptotics.IntegralComparison",
+   "line": 116,
+   "binder": "inst._@.DLMFMathlib.Analysis.Asymptotics.IntegralComparison.559518118._hygCtx._hyg.12",
+   "type": "CompleteSpace E"
+  },
+  {
+   "userName": "DLMF.Confluent.kummerM_ode",
+   "module": "DLMF.Confluent.KummerProperties",
+   "line": 196,
+   "binder": "hz",
+   "type": "z ≠ 0"
+  },
+  {
+   "userName": "DLMF.Selberg.selberg_integral",
+   "module": "DLMF.Selberg.ContinuationAndAomoto",
+   "line": 627,
+   "binder": "hn",
+   "type": "0 < n"
+  },
+  {
+   "userName": "DLMF.Confluent.genCosInt_hasSum",
+   "module": "DLMF.IncompleteGamma.SineCosine.GammaRepresentations",
+   "line": 866,
+   "binder": "ha",
+   "type": "∀ (n : ℕ), a ≠ -(2 * ↑n)"
+  },
+  {
+   "userName": "DLMF.WignerSymbols.q2w_factQ_ofNat",
+   "module": "DLMF.WignerSymbols.FactorialHelpers",
+   "line": 39,
+   "binder": "inst._@.DLMF.WignerSymbols.FactorialHelpers.386292010._hygCtx._hyg.5",
+   "type": "k.AtLeastTwo"
+  },
+  {
+   "userName": "DLMF.Struve.lommelS_neg_order",
+   "module": "DLMF.Struve.Lommel",
+   "line": 374,
+   "binder": "h",
+   "type": "DLMF.Struve.LommelRegular μ ν"
+  },
+  {
+   "userName": "DLMF.Lame.Real.lameEigenvalue_spec",
+   "module": "DLMF.Lame.Eigenvalues",
+   "line": 95,
+   "binder": "hν",
+   "type": "-1 / 2 ≤ ν"
+  },
+  {
+   "userName": "DLMF.WignerSymbols.q2w_invFactQ_ofNat",
+   "module": "DLMF.WignerSymbols.FactorialHelpers",
+   "line": 43,
+   "binder": "inst._@.DLMF.WignerSymbols.FactorialHelpers.2454020044._hygCtx._hyg.5",
+   "type": "k.AtLeastTwo"
+  },
+  {
+   "userName": "DLMF.JacobiElliptic.tendsto_jacobiCdk_one",
+   "module": "DLMF.JacobiElliptic.SpecialValues.ModulusLimits",
+   "line": 460,
+   "binder": "hz",
+   "type": "Complex.cosh z ≠ 0"
+  },
+  {
+   "userName": "DLMF.Hypergeometric.ordinaryHypergeometric_ode",
+   "module": "DLMF.Hypergeometric.DiffEq",
+   "line": 84,
+   "binder": "hz0",
+   "type": "z ≠ 0"
+  },
+  {
+   "userName": "DLMF.Hypergeometric.ordinaryHypergeometric_ode",
+   "module": "DLMF.Hypergeometric.DiffEq",
+   "line": 84,
+   "binder": "hz1",
+   "type": "z ≠ 1"
+  },
+  {
+   "userName": "DLMF.OrthogonalPolynomials.ultrasphPoly_at_one",
+   "module": "DLMF.OrthogonalPolynomials.Explicit",
+   "line": 285,
+   "binder": "hlam",
+   "type": "-1 / 2 < lam.re"
+  },
+  {
+   "userName": "DLMF.Painleve.IsPainleveVIOn.quadratic",
+   "module": "DLMF.Painleve.BacklundDLMF.Sixth",
+   "line": 466,
+   "binder": "hV",
+   "type": "IsOpen V"
+  },
+  {
+   "userName": "DLMF.Confluent.erfc_sector_asymptotic",
+   "module": "DLMF.ErrorFunctions.BoundsAsymptotics.GaussianRemainders",
+   "line": 346,
+   "binder": "hδ1",
+   "type": "δ < 3 * Real.pi / 4"
+  },
+  {
+   "userName": "DLMF.Heun.heun_homography_mobius",
+   "module": "DLMF.Heun.Equation",
+   "line": 705,
+   "binder": "hV",
+   "type": "IsOpen V"
+  },
+  {
+   "userName": "DLMF.Legendre.associatedP_complex_addition",
+   "module": "DLMF.Legendre.Sums",
+   "line": 857,
+   "binder": "harg",
+   "type": "z₁ * z₂ -\n      Complex.exp ((Complex.log (z₁ - 1) + Complex.log (z₁ + 1)) / 2) *\n          Complex.exp ((Complex.log (z₂ - 1) + Complex.log (z₂ + 1)) / 2) *\n        ↑(Real.cos phi) -\n    1 ∈\n  Complex.slitPlane"
+  },
+  {
+   "userName": "DLMF.Confluent.wronskian_kummerU_kummer_pos",
+   "module": "DLMF.Confluent.ConnectionWronskians",
+   "line": 235,
+   "binder": "_harg",
+   "type": "-(3 * Real.pi / 2) ≤ z.arg"
+  },
+  {
+   "userName": "DLMF.Confluent.wronskian_kummerU_kummer_pos",
+   "module": "DLMF.Confluent.ConnectionWronskians",
+   "line": 235,
+   "binder": "_harg'",
+   "type": "z.arg ≤ Real.pi / 2"
+  },
+  {
+   "userName": "DLMF.Confluent.wronskian_kummerU_kummer_pos",
+   "module": "DLMF.Confluent.ConnectionWronskians",
+   "line": 235,
+   "binder": "_hb",
+   "type": "∀ (n : ℤ), b ≠ ↑n"
+  },
+  {
+   "userName": "DLMF.OrthogonalPolynomials.hahn_forward_difference",
+   "module": "DLMF.OrthogonalPolynomials.Hahn.HahnAndMeixner",
+   "line": 614,
+   "binder": "hn",
+   "type": "n + 1 ≤ N + 1"
+  },
+  {
+   "userName": "DLMF.JacobiElliptic.tendsto_jacobiSck_one",
+   "module": "DLMF.JacobiElliptic.SpecialValues.ModulusLimits",
+   "line": 602,
+   "binder": "hz",
+   "type": "Complex.cosh z ≠ 0"
+  },
+  {
+   "userName": "Complex.exists_pos_forall_closedBall_arg_lt",
+   "module": "DLMFMathlib.Analysis.Complex.Sector",
+   "line": 29,
+   "binder": "_hω'",
+   "type": "0 ≤ ω'"
+  },
+  {
+   "userName": "DLMF.Airy.airyModulus_error",
+   "module": "DLMF.Airy.ModulusPhase.ReciprocalExpansions",
+   "line": 868,
+   "binder": "hN",
+   "type": "0 ≤ N"
+  },
+  {
+   "userName": "DLMF.Confluent.wronskian_kummerU_kummer_neg",
+   "module": "DLMF.Confluent.ConnectionWronskians",
+   "line": 221,
+   "binder": "_harg",
+   "type": "-(Real.pi / 2) ≤ z.arg"
+  },
+  {
+   "userName": "DLMF.Confluent.wronskian_kummerU_kummer_neg",
+   "module": "DLMF.Confluent.ConnectionWronskians",
+   "line": 221,
+   "binder": "_harg'",
+   "type": "z.arg ≤ 3 * Real.pi / 2"
+  },
+  {
+   "userName": "DLMF.Confluent.wronskian_kummerU_kummer_neg",
+   "module": "DLMF.Confluent.ConnectionWronskians",
+   "line": 221,
+   "binder": "_hb",
+   "type": "∀ (n : ℤ), b ≠ ↑n"
+  },
+  {
+   "userName": "DLMF.OrthogonalPolynomials.krawtchouk_duality",
+   "module": "DLMF.OrthogonalPolynomials.Hahn.HahnAndMeixner",
+   "line": 303,
+   "binder": "hn",
+   "type": "n ≤ N"
+  },
+  {
+   "userName": "DLMF.OrthogonalPolynomials.krawtchouk_duality",
+   "module": "DLMF.OrthogonalPolynomials.Hahn.HahnAndMeixner",
+   "line": 303,
+   "binder": "hx",
+   "type": "x ≤ N"
+  },
+  {
+   "userName": "DLMF.Confluent.regularizedHGFun_poincare_sector",
+   "module": "DLMF.Confluent.AsymptoticConsequences",
+   "line": 180,
+   "binder": "_ha",
+   "type": "∀ (k : ℕ), a ≠ -↑k"
+  },
+  {
+   "userName": "DLMF.Confluent.regularizedHGFun_poincare_sector",
+   "module": "DLMF.Confluent.AsymptoticConsequences",
+   "line": 180,
+   "binder": "_hba",
+   "type": "∀ (k : ℕ), b - a ≠ -↑k"
+  },
+  {
+   "userName": "DLMF.NumberTheory.DirichletCharacter.eq_mul_principal",
+   "module": "DLMF.NumberTheory.Characters",
+   "line": 278,
+   "binder": "inst._@.DLMF.NumberTheory.Characters.3665941191._hygCtx._hyg.5",
+   "type": "NeZero k"
+  },
+  {
+   "userName": "DLMF.QHypergeometric.qPhi_continuesInside_of_eq",
+   "module": "DLMF.QHypergeometric.Convergence",
+   "line": 1337,
+   "binder": "hz₀",
+   "type": "z₀ ∈ U"
+  },
+  {
+   "userName": "DLMF.NumberTheory.isMultiplicativeFn_divisorCountK",
+   "module": "DLMF.NumberTheory.Functions",
+   "line": 581,
+   "binder": "hk",
+   "type": "0 < k"
+  },
+  {
+   "userName": "DLMF.OrthogonalPolynomials.diskPolynomial_polar",
+   "module": "DLMF.OrthogonalPolynomials.Multivariate",
+   "line": 124,
+   "binder": "_hr",
+   "type": "0 ≤ r"
+  },
+  {
+   "userName": "DLMF.AsymptoticApproximations.laplace_error_bound",
+   "module": "DLMF.AsymptoticApproximations.Integrals.Parts",
+   "line": 120,
+   "binder": "hn",
+   "type": "iteratedDerivWithin n q (Set.Ici 0) 0 ≠ 0"
+  },
+  {
+   "userName": "DLMF.Confluent.wronskian_regularizedHGFun_kummerU",
+   "module": "DLMF.Confluent.BasicProperties.Wronskians",
+   "line": 413,
+   "binder": "ha",
+   "type": "∀ (k : ℕ), a ≠ -↑k"
+  },
+  {
+   "userName": "DLMF.OrthogonalPolynomials.jacobi_mehler_heine",
+   "module": "DLMF.OrthogonalPolynomials.Limits",
+   "line": 680,
+   "binder": "hβ",
+   "type": "-1 < β"
+  },
+  {
+   "userName": "DLMF.Weierstrass.weierstrassZeta_laurent",
+   "module": "DLMF.Weierstrass.Series",
+   "line": 394,
+   "binder": "hz0",
+   "type": "z ≠ 0"
+  },
+  {
+   "userName": "DLMF.Mathieu.p3q_tsum_isBigO",
+   "module": "DLMF.Mathieu.SmallQVector",
+   "line": 241,
+   "binder": "_hD",
+   "type": "0 ≤ D"
+  },
+  {
+   "userName": "DLMF.AlgebraicAnalytic.g1e_poisson_denom_ge",
+   "module": "DLMF.AlgebraicAnalytic.Summability.FourierSeries",
+   "line": 43,
+   "binder": "_hδ",
+   "type": "δ < Real.pi"
+  },
+  {
+   "userName": "DLMF.Legendre.associatedQ_continued_fraction",
+   "module": "DLMF.Legendre.Series",
+   "line": 1312,
+   "binder": "hr",
+   "type": "DLMF.Legendre.LegendreQRegular (ν - 1) μ"
+  },
+  {
+   "userName": "DLMF.Legendre.associatedQ_continued_fraction",
+   "module": "DLMF.Legendre.Series",
+   "line": 1312,
+   "binder": "hterm",
+   "type": "∀ (k : ℕ), DLMF.Legendre.legendreQCFNum ν μ (k + 1) ≠ 0 ∨ DLMF.Legendre.legendreQCFDen ν x k ≠ 0"
+  },
+  {
+   "userName": "DLMF.Hypergeometric.kummer_five_left_connection_zero",
+   "module": "DLMF.Hypergeometric.Kummer",
+   "line": 430,
+   "binder": "_he",
+   "type": "∀ (k : ℤ), c - a - b ≠ ↑k"
+  },
+  {
+   "userName": "DLMF.Legendre.ferrersQ_real",
+   "module": "DLMF.Legendre.Associated.Wronskians",
+   "line": 199,
+   "binder": "h",
+   "type": "DLMF.Legendre.LegendreQRegular ↑ν ↑μ"
+  },
+  {
+   "userName": "DLMF.Heun.heun_hermiteDarboux_example₁",
+   "module": "DLMF.Heun.Integral",
+   "line": 140,
+   "binder": "ha0",
+   "type": "a ≠ 0"
+  },
+  {
+   "userName": "DLMF.Heun.heun_hermiteDarboux_example₁",
+   "module": "DLMF.Heun.Integral",
+   "line": 140,
+   "binder": "ha1",
+   "type": "a ≠ 1"
+  },
+  {
+   "userName": "DLMF.Confluent.wronskian_shifted_regularized_kummerUReflected",
+   "module": "DLMF.Confluent.ConnectionWronskians",
+   "line": 248,
+   "binder": "_ha",
+   "type": "∀ (k : ℕ), 1 - a ≠ -↑k"
+  },
+  {
+   "userName": "DLMF.Legendre.associated_hypergeometric_9",
+   "module": "DLMF.Legendre.Hypergeometric",
+   "line": 86,
+   "binder": "hz",
+   "type": "z - 1 ∈ Complex.slitPlane"
+  },
+  {
+   "userName": "DLMF.NumberTheory.isMultiplicativeFn_jordanTotient",
+   "module": "DLMF.NumberTheory.Functions",
+   "line": 592,
+   "binder": "hk",
+   "type": "0 < k"
+  },
+  {
+   "userName": "isBigO_integral_cexp_smul_sector",
+   "module": "DLMFMathlib.Analysis.Asymptotics.WatsonSector",
+   "line": 193,
+   "binder": "inst._@.DLMFMathlib.Analysis.Asymptotics.WatsonSector.1751778559._hygCtx._hyg.12",
+   "type": "CompleteSpace V"
+  },
+  {
+   "userName": "DLMF.Confluent.regularizedHGFun_poincare_real",
+   "module": "DLMF.Confluent.Asymptotics.LargeArgument",
+   "line": 822,
+   "binder": "_ha",
+   "type": "∀ (k : ℕ), a ≠ -↑k"
+  },
+  {
+   "userName": "DLMF.Elementary.hypR4_mem_arctanhValues_iff",
+   "module": "DLMF.Elementary.Hyperbolic.InverseIdentities",
+   "line": 428,
+   "binder": "h1",
+   "type": "z ≠ 1"
+  },
+  {
+   "userName": "DLMF.Elementary.hypR4_mem_arctanhValues_iff",
+   "module": "DLMF.Elementary.Hyperbolic.InverseIdentities",
+   "line": 428,
+   "binder": "h2",
+   "type": "z ≠ -1"
+  },
+  {
+   "userName": "DLMF.Hypergeometric.contiguous_a_succ_c_pred",
+   "module": "DLMF.Hypergeometric.Derivatives",
+   "line": 356,
+   "binder": "hc",
+   "type": "∀ (k : ℕ), c ≠ -↑k"
+  },
+  {
+   "userName": "DLMF.Mathieu.p1a2_hd_zero_t",
+   "module": "DLMF.Mathieu.IntegralEquations",
+   "line": 552,
+   "binder": "_z",
+   "type": "ℂ"
+  },
+  {
+   "userName": "DLMF.WignerSymbols.w34_sqrt4",
+   "module": "DLMF.WignerSymbols.SixJ",
+   "line": 41,
+   "binder": "_hw",
+   "type": "0 ≤ w"
+  }
+ ],
+ "identicalDefinitionPairs": [
+  {
+   "name": "DLMF.Elementary.arctanCutPlane",
+   "other": "DLMF.Elementary.arcsinhDomain"
+  },
+  {
+   "name": "DLMF.Legendre.legExtU",
+   "other": "DLMF.Spheroidal.spheroidalCutPlane"
+  },
+  {
+   "name": "DLMF.AsymptoticApproximations.besselEnvCrit",
+   "other": "DLMF.Legendre.besselEnvelopeCross"
+  },
+  {
+   "name": "DLMF.Confluent.pcfSect_logWedge",
+   "other": "DLMF.Confluent.pcfLogWedge"
+  },
+  {
+   "name": "DLMF.Zeta.z25a_gbinom",
+   "other": "DLMF.AsymptoticApproximations.cbinom"
+  },
+  {
+   "name": "DLMF.OrthogonalPolynomials.LegendreAddition.jet",
+   "other": "DLMF.Legendre.legInt_D"
+  },
+  {
+   "name": "DLMF.EllipticIntegrals.ellRedQuadU",
+   "other": "DLMF.EllipticIntegrals.ei19b_redU"
+  },
+  {
+   "name": "DLMF.Elementary.expPartialSum",
+   "other": "DLMF.Confluent.expPartialSum"
+  },
+  {
+   "name": "DLMF.Zeta.q25b_slit",
+   "other": "DLMF.Zeta.z25b_slitOne"
+  },
+  {
+   "name": "DLMF.Elementary.arctanhDomain",
+   "other": "DLMF.Elementary.arcsinCutPlane"
+  },
+  {
+   "name": "DLMF.Confluent.upperIncGammaOnLog",
+   "other": "DLMF.Airy.airyUpperGammaOnLog"
+  },
+  {
+   "name": "DLMF.EllipticIntegrals.ellAsymH",
+   "other": "DLMF.EllipticIntegrals.ellAsymG"
+  },
+  {
+   "name": "DLMF.EllipticIntegrals.ellAsymB",
+   "other": "DLMF.EllipticIntegrals.ellAsymA"
+  },
+  {
+   "name": "DLMF.Heun.fuchsianCoeffR",
+   "other": "DLMF.Heun.fuchsianCoeffP"
+  },
+  {
+   "name": "DLMF.Combinatorics.partitionCountAtMostParts",
+   "other": "DLMF.NumberTheory.partitionsAtMost"
+  },
+  {
+   "name": "DLMF.Confluent.kzt_p",
+   "other": "DLMF.OrthogonalPolynomials.laguerreWeight"
+  },
+  {
+   "name": "DLMF.Selberg.vdmSq",
+   "other": "DLMF.Selberg.siegelDiscriminant"
+  }
+ ],
+ "camelCaseTheoremNames": [
+  {
+   "name": "DLMF.Bailey.watsonR",
+   "module": "DLMF.Bailey",
+   "line": 673
+  },
+  {
+   "name": "DLMF.Legendre.LztIsSol.continuousOn",
+   "module": "DLMF.Legendre.ZeroTools",
+   "line": 183
+  },
+  {
+   "name": "DLMF.Painleve.IsPIIOn.shiftDown",
+   "module": "DLMF.Painleve.Backlund",
+   "line": 137
+  },
+  {
+   "name": "DLMF.Painleve.IsPIIOn.hasDerivAt",
+   "module": "DLMF.Painleve.Basic.BealsWong",
+   "line": 64
+  },
+  {
+   "name": "DLMF.Gamma.RamanujanAux.gammaShiftBound",
+   "module": "DLMF.Gamma.Integrals.BarnesAndRamanujan",
+   "line": 614
+  },
+  {
+   "name": "DLMF.AlgebraicAnalytic.mittagLeffler",
+   "module": "DLMF.AlgebraicAnalytic.Complex.Functions",
+   "line": 733
+  },
+  {
+   "name": "DLMF.Painleve.IsPainleveVIOn.ellipticForm",
+   "module": "DLMF.Painleve.Equations",
+   "line": 504
+  },
+  {
+   "name": "DLMF.AlgebraicAnalytic.poissonSummation",
+   "module": "DLMF.AlgebraicAnalytic.Fourier.Series",
+   "line": 575
+  },
+  {
+   "name": "DLMF.AlgebraicAnalytic.IsSimpleClosedContour.residueTheorem",
+   "module": "DLMF.AlgebraicAnalytic.Complex.Functions",
+   "line": 135
+  },
+  {
+   "name": "DLMF.Confluent.KztIsSol.continuousOn",
+   "module": "DLMF.Confluent.ZeroTools",
+   "line": 66
+  },
+  {
+   "name": "DLMF.Painleve.IsHamiltonianSystemOn.isPainleveIIOn",
+   "module": "DLMF.Painleve.Hamiltonian",
+   "line": 173
+  },
+  {
+   "name": "DLMF.AlgebraicAnalytic.IsLinODE2SolOn.linComb",
+   "module": "DLMF.AlgebraicAnalytic.ODE.SecondOrder",
+   "line": 54
+  },
+  {
+   "name": "DLMF.AlgebraicAnalytic.IsLinODE2SolOn.differentiableOn",
+   "module": "DLMF.AlgebraicAnalytic.ODE.SecondOrder",
+   "line": 46
+  },
+  {
+   "name": "DLMF.Painleve.IsPIIOn.shiftUp",
+   "module": "DLMF.Painleve.Backlund",
+   "line": 144
+  },
+  {
+   "name": "DLMF.AlgebraicAnalytic.IsSimpleClosedContour.argumentPrinciple",
+   "module": "DLMF.AlgebraicAnalytic.Complex.Functions",
+   "line": 149
+  },
+  {
+   "name": "Asymptotics.HasAsymptoticPowerSeries.mcMahon",
+   "module": "DLMFMathlib.Analysis.Asymptotics.AsymptoticInversion",
+   "line": 373
+  },
+  {
+   "name": "DLMF.AlgebraicAnalytic.weierstrassProduct",
+   "module": "DLMF.AlgebraicAnalytic.Complex.Functions",
+   "line": 681
+  },
+  {
+   "name": "DLMF.AlgebraicAnalytic.lagrangeInversion",
+   "module": "DLMF.AlgebraicAnalytic.Complex.Functions",
+   "line": 368
+  },
+  {
+   "name": "DirichletCharacter.isDirichletCharacterFn",
+   "module": "DLMF.NumberTheory.Characters",
+   "line": 49
+  },
+  {
+   "name": "ODE.P2lIsSol.hasDerivAt",
+   "module": "DLMFMathlib.Analysis.ODE.SturmLiouville",
+   "line": 87
+  },
+  {
+   "name": "DLMF.Painleve.IsPainleveIIOn.tPlus",
+   "module": "DLMF.Painleve.BacklundDLMF.SecondAndThird",
+   "line": 36
+  },
+  {
+   "name": "DLMF.Painleve.IsHamiltonianSystemOn.isPainleveIOn",
+   "module": "DLMF.Painleve.Hamiltonian",
+   "line": 93
+  },
+  {
+   "name": "DLMF.QHypergeometric.generalBaileyTransform",
+   "module": "DLMF.QHypergeometric.BaileyPairs",
+   "line": 35
+  },
+  {
+   "name": "DLMF.Painleve.IsHamiltonianSystemOn.isPainleveIIIOn",
+   "module": "DLMF.Painleve.Hamiltonian",
+   "line": 298
+  },
+  {
+   "name": "DLMF.Painleve.IsHamiltonianSystemOn.isPainleveIIIPrimeOn",
+   "module": "DLMF.Painleve.Hamiltonian",
+   "line": 482
+  },
+  {
+   "name": "DLMF.Painleve.IsPainleveIIOn.tMinus",
+   "module": "DLMF.Painleve.BacklundDLMF.SecondAndThird",
+   "line": 56
+  },
+  {
+   "name": "DLMF.Painleve.IsPainleveIIIOn.toPainleveV",
+   "module": "DLMF.Painleve.BacklundDLMF.FourthAndFifth",
+   "line": 556
+  },
+  {
+   "name": "DLMF.Struve.trigBeta",
+   "module": "DLMF.Struve.Representations.BarnesAndSonine",
+   "line": 439
+  },
+  {
+   "name": "DLMF.NumberTheory.IsCompletelyMultiplicativeFn.isMultiplicativeFn",
+   "module": "DLMF.NumberTheory.Functions",
+   "line": 356
+  },
+  {
+   "name": "DLMF.Zeta.Q25bIsLerchCont.eqOn",
+   "module": "DLMF.Zeta.LerchContinuation",
+   "line": 370
+  },
+  {
+   "name": "DLMF.AlgebraicAnalytic.lagrangeBurmann",
+   "module": "DLMF.AlgebraicAnalytic.Complex.Functions",
+   "line": 381
+  },
+  {
+   "name": "DLMF.Painleve.IsODE2SolutionOn.hasDerivAt",
+   "module": "DLMF.Painleve.Basic.Equations",
+   "line": 59
+  },
+  {
+   "name": "DLMF.JacobiElliptic.P3jDich.meromorphicAt",
+   "module": "DLMF.JacobiElliptic.JacobiODE",
+   "line": 168
+  },
+  {
+   "name": "DifferentiableOn.regularizedGaussHG",
+   "module": "DLMF.Hypergeometric.ParameterHolomorphy",
+   "line": 371
+  },
+  {
+   "name": "DLMF.AlgebraicAnalytic.IsLinODE2SolOn.analyticOnNhd",
+   "module": "DLMF.AlgebraicAnalytic.ODE.SecondOrder",
+   "line": 50
+  },
+  {
+   "name": "DLMF.Mathieu.IsHillSolution.hasDerivAt",
+   "module": "DLMF.Mathieu.Hill.Floquet",
+   "line": 84
+  },
+  {
+   "name": "DLMF.MatrixArgument.Q2mCoeffCont.matMul",
+   "module": "DLMF.MatrixArgument.Zonal",
+   "line": 359
+  },
+  {
+   "name": "DLMF.QHypergeometric.limitingBaileyTransform",
+   "module": "DLMF.QHypergeometric.BaileyPairs",
+   "line": 125
+  },
+  {
+   "name": "DLMF.AlgebraicAnalytic.IsSimpleClosedContour.cauchyIntegralFormula",
+   "module": "DLMF.AlgebraicAnalytic.Complex.Calculus",
+   "line": 347
+  },
+  {
+   "name": "DLMF.Painleve.IsPainleveIIIPrimeOn.isPainleveIIIOn",
+   "module": "DLMF.Painleve.Equations",
+   "line": 213
+  },
+  {
+   "name": "DLMF.QHypergeometric.rogersBaileyPair",
+   "module": "DLMF.QHypergeometric.BaileyPairs",
+   "line": 184
+  },
+  {
+   "name": "Asymptotics.HasAsymptoticExpansion.isLittleO",
+   "module": "DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion",
+   "line": 135
+  }
+ ],
+ "exactPublicUpstreamMatches": [
+  {
+   "name": "DLMF.Combinatorics.stirlingSecond_succ_succ'",
+   "module": "DLMF.Combinatorics.Stirling.RecurrencesAndIdentities",
+   "line": 164,
+   "upstream": [
+    "Nat.stirlingSecond_succ_succ"
+   ]
+  },
+  {
+   "name": "DLMF.Zeta.r25a_sin_pi_ne_zero",
+   "module": "DLMF.Zeta.IntegralReps.PolygammaAndContours",
+   "line": 350,
+   "upstream": [
+    "Complex.sin_pi_mul_ne_zero_of_re_mem"
+   ]
+  },
+  {
+   "name": "DLMF.Struve.cpow_half_sq",
+   "module": "DLMF.Struve.Representations.IntegralRelations",
+   "line": 40,
+   "upstream": [
+    "Carlson.cpow_half_sq"
+   ]
+  },
+  {
+   "name": "DLMF.NumberTheory.pow_totient_modEq_one",
+   "module": "DLMF.NumberTheory.Functions",
+   "line": 154,
+   "upstream": [
+    "Nat.ModEq.pow_totient"
+   ]
+  },
+  {
+   "name": "DLMF.MatrixArgument.q2m_cpow_eq_exp",
+   "module": "DLMF.MatrixArgument.GammaBeta",
+   "line": 451,
+   "upstream": [
+    "Complex.ofReal_cpow_eq_exp"
+   ]
+  },
+  {
+   "name": "DLMF.Theta.th20_exp_pi_div_two_mul_I",
+   "module": "DLMF.Theta.SeriesAndZeros",
+   "line": 61,
+   "upstream": [
+    "Complex.exp_pi_div_two_mul_I"
+   ]
+  },
+  {
+   "name": "q26b_mem_inf",
+   "module": "DLMFMathlib.Combinatorics.Surjections",
+   "line": 34,
+   "upstream": [
+    "Finset.mem_inf"
+   ]
+  },
+  {
+   "name": "DLMF.Bessel.ofReal_cpow_eq_exp_log",
+   "module": "DLMF.Bessel.SturmZeros",
+   "line": 209,
+   "upstream": [
+    "Complex.ofReal_cpow_eq_exp"
+   ]
+  },
+  {
+   "name": "DLMF.Struve.struveAs_re_cpow_half_pos",
+   "module": "DLMF.Struve.AsymptoticTools",
+   "line": 49,
+   "upstream": [
+    "Carlson.re_cpow_half_pos"
+   ]
+  },
+  {
+   "name": "DLMF.NumberTheory.prime_of_mersenne_prime",
+   "module": "DLMF.NumberTheory.Primes",
+   "line": 207,
+   "upstream": [
+    "Nat.Prime.of_mersenne"
+   ]
+  },
+  {
+   "name": "Complex.barnesRes_sq_norm_sin",
+   "module": "DLMFMathlib.Analysis.Complex.BarnesResidue",
+   "line": 310,
+   "upstream": [
+    "Complex.norm_sin_add_mul_I_sq"
+   ]
+  },
+  {
+   "name": "DLMF.Bessel.kInt_exp_abs_div_two_le_cosh",
+   "module": "DLMF.Bessel.KIntegralRep",
+   "line": 58,
+   "upstream": [
+    "Real.exp_abs_div_two_le_cosh"
+   ]
+  },
+  {
+   "name": "DLMF.Confluent.regularizedHGFun_zero",
+   "module": "DLMF.Confluent.KummerProperties",
+   "line": 75,
+   "upstream": [
+    "Complex.regularizedHGFun_zero"
+   ]
+  },
+  {
+   "name": "DLMF.Combinatorics.c26b_partition_zero_eq",
+   "module": "DLMF.Combinatorics.PartitionIdentities.RestrictedProducts",
+   "line": 108,
+   "upstream": [
+    "Nat.Partition.partition_zero_parts"
+   ]
+  },
+  {
+   "name": "DLMF.Hypergeometric.ofReal_cpow_eq_exp",
+   "module": "DLMF.Hypergeometric.Elementary.AlgebraicValues",
+   "line": 415,
+   "upstream": [
+    "Complex.ofReal_cpow_eq_exp"
+   ]
+  },
+  {
+   "name": "DLMF.Hypergeometric.hcub_ofReal_cpow_exp",
+   "module": "DLMF.Hypergeometric.Asymptotics",
+   "line": 210,
+   "upstream": [
+    "TauCeti.ofReal_exp_cpow"
+   ]
+  },
+  {
+   "name": "DLMF.Confluent.re_one_sub_pos_of_norm_lt_one",
+   "module": "DLMF.Confluent.MobiusTaylor",
+   "line": 29,
+   "upstream": [
+    "Complex.re_one_sub_pos"
+   ]
+  },
+  {
+   "name": "DLMF.EllipticIntegrals.ei19c_Gamma_two",
+   "module": "DLMF.EllipticIntegrals.Symmetric",
+   "line": 204,
+   "upstream": [
+    "Carlson.Gamma_two'"
+   ]
+  },
+  {
+   "name": "DLMF.NumberTheory.totient_eq_mul_prod",
+   "module": "DLMF.NumberTheory.Functions",
+   "line": 622,
+   "upstream": [
+    "Nat.totient_eq_mul_prod_factors"
+   ]
+  },
+  {
+   "name": "DLMF.Combinatorics.descPochhammer_eval_eq_prod_range'",
+   "module": "DLMF.Combinatorics.Basic",
+   "line": 50,
+   "upstream": [
+    "descPochhammer_eval_eq_prod_range"
+   ]
+  },
+  {
+   "name": "DLMF.Hypergeometric.ofReal_cpow_eq_exp_log",
+   "module": "DLMF.Hypergeometric.FurtherTransformations.Cubic",
+   "line": 337,
+   "upstream": [
+    "Complex.ofReal_cpow_eq_exp"
+   ]
+  },
+  {
+   "name": "DLMF.EllipticIntegrals.ei19c_mul_mem_slitPlane",
+   "module": "DLMF.EllipticIntegrals.SymmetricQuadratic",
+   "line": 55,
+   "upstream": [
+    "Carlson.mul_mem_slitPlane_of_re_pos",
+    "Carlson.TwoVariable.mul_mem_slitPlane_of_re_pos"
+   ]
+  },
+  {
+   "name": "DLMF.EllipticIntegrals.ei19c_Gamma_three_halves",
+   "module": "DLMF.EllipticIntegrals.Symmetric",
+   "line": 115,
+   "upstream": [
+    "Carlson.Gamma_three_halves"
+   ]
+  },
+  {
+   "name": "DLMF.Confluent.sin_pi_mul_ne_zero_of_mem",
+   "module": "DLMF.Confluent.BasicProperties.Continuity",
+   "line": 202,
+   "upstream": [
+    "sin_pi_mul_ne_zero"
+   ]
+  },
+  {
+   "name": "DLMF.Struve.struveAs_cpow_half_sq",
+   "module": "DLMF.Struve.AsymptoticTools",
+   "line": 61,
+   "upstream": [
+    "Carlson.cpow_half_sq"
+   ]
+  },
+  {
+   "name": "DLMF.Legendre.legInt_cpow_ofReal",
+   "module": "DLMF.Legendre.IntegralTools.FractionalAndLaplace",
+   "line": 119,
+   "upstream": [
+    "Complex.ofReal_cpow_eq_exp"
+   ]
+  },
+  {
+   "name": "DLMF.Struve.ofReal_cpow_half",
+   "module": "DLMF.Struve.AngerWeber.LommelConnections",
+   "line": 349,
+   "upstream": [
+    "Carlson.ofReal_cpow_half"
+   ]
+  },
+  {
+   "name": "DLMF.NumberTheory.infinite_setOf_prime'",
+   "module": "DLMF.NumberTheory.Functions",
+   "line": 85,
+   "upstream": [
+    "Nat.infinite_setOfPred_prime",
+    "Nat.infinite_setOf_prime"
+   ]
+  },
+  {
+   "name": "DLMF.BernoulliEuler.b24a_derivative_bernoulli",
+   "module": "DLMF.BernoulliEuler.Basic",
+   "line": 184,
+   "upstream": [
+    "Polynomial.derivative_bernoulli_add_one"
+   ]
+  },
+  {
+   "name": "DLMF.Confluent.fresMB_cpow_eq_exp",
+   "module": "DLMF.ErrorFunctions.Integrals.FresnelTransforms",
+   "line": 270,
+   "upstream": [
+    "Complex.ofReal_cpow_eq_exp"
+   ]
+  },
+  {
+   "name": "DLMF.Airy.airyInt_re_sqrt_pos",
+   "module": "DLMF.Airy.IntegralRepresentations",
+   "line": 743,
+   "upstream": [
+    "Carlson.re_cpow_half_pos"
+   ]
+  },
+  {
+   "name": "DLMF.EllipticIntegrals.p19sR1_cpow_half_sq",
+   "module": "DLMF.EllipticIntegrals.SymmetricBounds",
+   "line": 146,
+   "upstream": [
+    "Carlson.cpow_half_sq"
+   ]
+  },
+  {
+   "name": "DLMF.Bessel.besselJ_neg_int",
+   "module": "DLMF.Bessel.Generating",
+   "line": 23,
+   "upstream": [
+    "Complex.besselJ_neg_int"
+   ]
+  },
+  {
+   "name": "DLMF.Hypergeometric.mul_cpow_of_re_pos",
+   "module": "DLMF.Hypergeometric.Transformations",
+   "line": 27,
+   "upstream": [
+    "Carlson.mul_cpow_of_re_pos"
+   ]
+  },
+  {
+   "name": "DLMF.Legendre.legTor_cpow_real",
+   "module": "DLMF.Legendre.Toroidal",
+   "line": 84,
+   "upstream": [
+    "Complex.ofReal_cpow_eq_exp"
+   ]
+  },
+  {
+   "name": "DLMF.Combinatorics.stirlingSecond_self'",
+   "module": "DLMF.Combinatorics.Stirling.DefinitionsAndSeries",
+   "line": 170,
+   "upstream": [
+    "Nat.stirlingSecond_self"
+   ]
+  },
+  {
+   "name": "DLMF.BernoulliEuler.s24b_mul_mem_slitPlane",
+   "module": "DLMF.BernoulliEuler.Generalizations.DegenerateAndCharacter",
+   "line": 471,
+   "upstream": [
+    "Carlson.mul_mem_slitPlane_of_re_pos",
+    "Carlson.TwoVariable.mul_mem_slitPlane_of_re_pos"
+   ]
+  },
+  {
+   "name": "DLMF.Hypergeometric.re_cpow_half_pos_of_mem_slitPlane",
+   "module": "DLMF.Hypergeometric.FurtherTransformations.Cubic",
+   "line": 230,
+   "upstream": [
+    "Carlson.re_cpow_half_pos"
+   ]
+  },
+  {
+   "name": "DLMF.JacobiElliptic.p22R1_sqrt_sq",
+   "module": "DLMF.JacobiElliptic.QuarterPeriods",
+   "line": 236,
+   "upstream": [
+    "Carlson.cpow_half_sq"
+   ]
+  },
+  {
+   "name": "DLMF.JacobiElliptic.p22R1_cpow_half",
+   "module": "DLMF.JacobiElliptic.ModulusInversion",
+   "line": 216,
+   "upstream": [
+    "Carlson.ofReal_cpow_half"
+   ]
+  },
+  {
+   "name": "DLMF.Legendre.legSer_cpow_half",
+   "module": "DLMF.Legendre.SeriesTools",
+   "line": 872,
+   "upstream": [
+    "Carlson.ofReal_cpow_half"
+   ]
+  },
+  {
+   "name": "DLMF.Confluent.cpow_half_sq",
+   "module": "DLMF.Confluent.IntegralRepresentations.EulerAndBessel",
+   "line": 232,
+   "upstream": [
+    "Carlson.cpow_half_sq"
+   ]
+  },
+  {
+   "name": "DLMF.Struve.re_cpow_half_pos",
+   "module": "DLMF.Struve.Representations.IntegralRelations",
+   "line": 29,
+   "upstream": [
+    "Carlson.re_cpow_half_pos"
+   ]
+  },
+  {
+   "name": "DLMF.Airy.airyInt_ofReal_cpow_half",
+   "module": "DLMF.Airy.IntegralRepresentations",
+   "line": 755,
+   "upstream": [
+    "Carlson.ofReal_cpow_half"
+   ]
+  },
+  {
+   "name": "DLMF.EllipticIntegrals.ei19e_cpow_half_ofReal",
+   "module": "DLMF.EllipticIntegrals.SymmetricReduction",
+   "line": 336,
+   "upstream": [
+    "Carlson.ofReal_cpow_half"
+   ]
+  },
+  {
+   "name": "DLMF.Bessel.recip_Gamma_succ'",
+   "module": "DLMF.Bessel.WeberSeries",
+   "line": 40,
+   "upstream": [
+    "Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one"
+   ]
+  },
+  {
+   "name": "DLMF.Legendre.legendre_ofReal_cpow_exp",
+   "module": "DLMF.Legendre.Associated.BoundaryAndConnections",
+   "line": 90,
+   "upstream": [
+    "Complex.ofReal_cpow_eq_exp"
+   ]
+  },
+  {
+   "name": "DLMF.CoalescingSaddles.s36a_isAddHaar_prod",
+   "module": "DLMF.CoalescingSaddles.Scaling",
+   "line": 169,
+   "upstream": [
+    "instIsAddHaarMeasureProdRealVolume"
+   ]
+  },
+  {
+   "name": "DLMF.Hypergeometric.ofReal_exp_cpow",
+   "module": "DLMF.Hypergeometric.LoopIntegral",
+   "line": 57,
+   "upstream": [
+    "Complex.ofReal_exp_cpow"
+   ]
+  },
+  {
+   "name": "DLMF.Confluent.ofReal_exp_cpow_eq_exp_mul",
+   "module": "DLMF.IncompleteGamma.Representations.LowerBarnes",
+   "line": 281,
+   "upstream": [
+    "TauCeti.ofReal_exp_cpow"
+   ]
+  },
+  {
+   "name": "DLMF.JacobiElliptic.p22R1_re_sqrt_pos",
+   "module": "DLMF.JacobiElliptic.ElementaryIdentities",
+   "line": 646,
+   "upstream": [
+    "Carlson.re_cpow_half_pos"
+   ]
+  },
+  {
+   "name": "DLMF.Confluent.exp_sub_exp_neg_mul_I",
+   "module": "DLMF.Confluent.BasicProperties.Wronskians",
+   "line": 642,
+   "upstream": [
+    "Carlson.TwoVariable.exp_mul_I_sub_exp_neg_mul_I"
+   ]
+  },
+  {
+   "name": "DLMF.Coulomb.c33b_cpow_half",
+   "module": "DLMF.Coulomb.Energy.Connection",
+   "line": 101,
+   "upstream": [
+    "Carlson.ofReal_cpow_half"
+   ]
+  },
+  {
+   "name": "DLMF.Gamma.Simplex.Complex.exists_uniform_norm_recip_Gamma_add_nat",
+   "module": "DLMF.Gamma.Simplex.GammaPochhammer",
+   "line": 23,
+   "upstream": [
+    "Complex.exists_uniform_norm_inv_Gamma_add_nat"
+   ]
+  },
+  {
+   "name": "DLMF.Hypergeometric.recip_Gamma_eq_mul_recip_Gamma_add_one",
+   "module": "DLMF.Hypergeometric.Generalized",
+   "line": 108,
+   "upstream": [
+    "Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one"
+   ]
+  },
+  {
+   "name": "DLMF.Legendre.legFS_ofReal_cpow",
+   "module": "DLMF.Legendre.Toroidal",
+   "line": 816,
+   "upstream": [
+    "Complex.ofReal_cpow_eq_exp"
+   ]
+  },
+  {
+   "name": "DLMF.Struve.struveLO_pow_div_factorial_le_exp",
+   "module": "DLMF.Struve.LargeOrderTools",
+   "line": 488,
+   "upstream": [
+    "Real.pow_div_factorial_le_exp"
+   ]
+  },
+  {
+   "name": "DLMF.EllipticIntegrals.p19lR1_cpow_half_re_pos",
+   "module": "DLMF.EllipticIntegrals.Quadratic",
+   "line": 397,
+   "upstream": [
+    "Carlson.re_cpow_half_pos"
+   ]
+  }
+ ],
+ "filesOver1000": [
+  {
+   "file": "DLMF/MatrixArgument/GammaBeta.lean",
+   "lines": 1500
+  },
+  {
+   "file": "DLMF/Zeta/Sums.lean",
+   "lines": 1474
+  },
+  {
+   "file": "DLMF/QHypergeometric/BasicSummations.lean",
+   "lines": 1463
+  },
+  {
+   "file": "DLMF/Spheroidal/Angular.lean",
+   "lines": 1450
+  },
+  {
+   "file": "DLMF/Hypergeometric/ConnectionFormulas.lean",
+   "lines": 1446
+  },
+  {
+   "file": "DLMF/Confluent/LargeA.lean",
+   "lines": 1438
+  },
+  {
+   "file": "DLMF/QHypergeometric/Calculus.lean",
+   "lines": 1427
+  },
+  {
+   "file": "DLMF/Legendre/AdditionTools.lean",
+   "lines": 1419
+  },
+  {
+   "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+   "lines": 1417
+  },
+  {
+   "file": "DLMF/Legendre/Series.lean",
+   "lines": 1406
+  },
+  {
+   "file": "DLMF/IncompleteGamma/ExponentialIntegral.lean",
+   "lines": 1392
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Associated.lean",
+   "lines": 1385
+  },
+  {
+   "file": "DLMF/Confluent/LargeASharp.lean",
+   "lines": 1384
+  },
+  {
+   "file": "DLMF/Confluent/ZeroTools.lean",
+   "lines": 1382
+  },
+  {
+   "file": "DLMF/Struve/Lommel.lean",
+   "lines": 1382
+  },
+  {
+   "file": "DLMF/Mathieu/SecondSolutions.lean",
+   "lines": 1380
+  },
+  {
+   "file": "DLMF/Coulomb/RhoEtaLimits.lean",
+   "lines": 1364
+  },
+  {
+   "file": "DLMF/Legendre/SpecialValues.lean",
+   "lines": 1362
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+   "lines": 1351
+  },
+  {
+   "file": "DLMF/QHypergeometric/Convergence.lean",
+   "lines": 1351
+  },
+  {
+   "file": "DLMF/Zeta/Riemann.lean",
+   "lines": 1350
+  },
+  {
+   "file": "DLMF/Airy/Asymptotics/OscillatoryRemainders.lean",
+   "lines": 1347
+  },
+  {
+   "file": "DLMF/Airy/Generalized.lean",
+   "lines": 1342
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ContinuedFraction/Convergence.lean",
+   "lines": 1342
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/Integrals.lean",
+   "lines": 1341
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Properties.lean",
+   "lines": 1328
+  },
+  {
+   "file": "DLMF/Theta/Identities.lean",
+   "lines": 1314
+  },
+  {
+   "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+   "lines": 1295
+  },
+  {
+   "file": "DLMF/Airy/Integrals/HalfLineLaplace.lean",
+   "lines": 1266
+  },
+  {
+   "file": "DLMF/ExpIntegrals/Representations.lean",
+   "lines": 1266
+  },
+  {
+   "file": "DLMF/Airy/GeneralizedContours.lean",
+   "lines": 1257
+  },
+  {
+   "file": "DLMF/Bailey.lean",
+   "lines": 1250
+  },
+  {
+   "file": "DLMF/Legendre/IntegralTools/FractionalAndLaplace.lean",
+   "lines": 1245
+  },
+  {
+   "file": "DLMF/Legendre/BoundaryAsymptotics.lean",
+   "lines": 1242
+  },
+  {
+   "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+   "lines": 1234
+  },
+  {
+   "file": "DLMF/Gamma/Integrals/BarnesAndRamanujan.lean",
+   "lines": 1231
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQ.lean",
+   "lines": 1222
+  },
+  {
+   "file": "DLMF/Struve/Properties.lean",
+   "lines": 1217
+  },
+  {
+   "file": "DLMF/Bessel/NeumannSeries.lean",
+   "lines": 1215
+  },
+  {
+   "file": "DLMF/Legendre/AssociatedRecurrences.lean",
+   "lines": 1215
+  },
+  {
+   "file": "DLMF/QHypergeometric/HigherSummations.lean",
+   "lines": 1215
+  },
+  {
+   "file": "DLMF/Elementary/Hyperbolic/Integrals.lean",
+   "lines": 1213
+  },
+  {
+   "file": "DLMF/Lame/Polynomials/DifferentialEquation.lean",
+   "lines": 1211
+  },
+  {
+   "file": "DLMF/BernoulliEuler/IntegralsSums.lean",
+   "lines": 1205
+  },
+  {
+   "file": "DLMF/Gamma/IntegralRepresentations/DigammaAndBinet.lean",
+   "lines": 1203
+  },
+  {
+   "file": "DLMF/Gamma/Multidimensional/SelbergLimits.lean",
+   "lines": 1191
+  },
+  {
+   "file": "DLMF/Struve/Representations/PoissonAndBarnesLoop.lean",
+   "lines": 1190
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean",
+   "lines": 1184
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/UniformLG.lean",
+   "lines": 1178
+  },
+  {
+   "file": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+   "lines": 1170
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean",
+   "lines": 1169
+  },
+  {
+   "file": "DLMF/Selberg/IntegrationByParts.lean",
+   "lines": 1169
+  },
+  {
+   "file": "DLMF/IncompleteGamma/SeriesRecurrences.lean",
+   "lines": 1165
+  },
+  {
+   "file": "DLMF/Mathieu/Properties/Floquet.lean",
+   "lines": 1161
+  },
+  {
+   "file": "DLMF/Confluent/Relations.lean",
+   "lines": 1159
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/AngularRepresentations.lean",
+   "lines": 1152
+  },
+  {
+   "file": "DLMF/Elementary/LogExpAnalysis.lean",
+   "lines": 1149
+  },
+  {
+   "file": "DLMF/IncompleteGamma/Asymptotics/PartialSums.lean",
+   "lines": 1147
+  },
+  {
+   "file": "DLMF/Combinatorics/PlanePartitions/BoxFormula.lean",
+   "lines": 1142
+  },
+  {
+   "file": "DLMF/Confluent/IntegralRepresentations/BarnesAndConnections.lean",
+   "lines": 1140
+  },
+  {
+   "file": "DLMF/Elementary/Hyperbolic/IdentitiesAndSeries.lean",
+   "lines": 1138
+  },
+  {
+   "file": "DLMF/Airy/IntegralRepresentations.lean",
+   "lines": 1137
+  },
+  {
+   "file": "DLMF/ExpIntegrals/AnalyticProperties.lean",
+   "lines": 1135
+  },
+  {
+   "file": "DLMF/Mathieu/Hill/Floquet.lean",
+   "lines": 1133
+  },
+  {
+   "file": "DLMF/Hypergeometric/FurtherTransformations/Quadratic.lean",
+   "lines": 1126
+  },
+  {
+   "file": "DLMF/NumberTheory/Characters.lean",
+   "lines": 1120
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+   "lines": 1113
+  },
+  {
+   "file": "DLMF/Confluent/Asymptotics/LargeArgument.lean",
+   "lines": 1111
+  },
+  {
+   "file": "DLMF/Coulomb/RhoEtaProperties.lean",
+   "lines": 1111
+  },
+  {
+   "file": "DLMF/Elementary/Hyperbolic/InverseBranches.lean",
+   "lines": 1108
+  },
+  {
+   "file": "DLMF/Airy/ModulusPhase/Representations.lean",
+   "lines": 1107
+  },
+  {
+   "file": "DLMF/JacobiElliptic/PeriodsPolesZeros.lean",
+   "lines": 1107
+  },
+  {
+   "file": "DLMF/Lame/Eigenvalues.lean",
+   "lines": 1104
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/HankelKernels.lean",
+   "lines": 1103
+  },
+  {
+   "file": "DLMF/Painleve/SpecialSolutions.lean",
+   "lines": 1095
+  },
+  {
+   "file": "DLMF/Confluent/IntegralRepresentations/EulerAndBessel.lean",
+   "lines": 1090
+  },
+  {
+   "file": "DLMF/Mathieu/Noninteger/Properties.lean",
+   "lines": 1087
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean",
+   "lines": 1086
+  },
+  {
+   "file": "DLMF/IncompleteGamma/UniformAsymptotics.lean",
+   "lines": 1086
+  },
+  {
+   "file": "DLMF/JacobiElliptic/Related.lean",
+   "lines": 1082
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/ContourTools.lean",
+   "lines": 1082
+  },
+  {
+   "file": "DLMF/Airy/Relations/BesselRepresentations.lean",
+   "lines": 1081
+  },
+  {
+   "file": "DLMF/Airy/Scorer/Representations.lean",
+   "lines": 1078
+  },
+  {
+   "file": "DLMF/Confluent/ContinuedFractions.lean",
+   "lines": 1076
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Hahn/Orthogonality.lean",
+   "lines": 1075
+  },
+  {
+   "file": "DLMF/Mathieu/IntegralEquations.lean",
+   "lines": 1073
+  },
+  {
+   "file": "DLMF/Struve/AngerWeber/LommelConnections.lean",
+   "lines": 1073
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/BesselTransforms.lean",
+   "lines": 1069
+  },
+  {
+   "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+   "lines": 1066
+  },
+  {
+   "file": "DLMF/Hypergeometric/Solutions/Logarithmic.lean",
+   "lines": 1066
+  },
+  {
+   "file": "DLMF/JacobiElliptic/EisensteinSeries.lean",
+   "lines": 1065
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/Sixth.lean",
+   "lines": 1064
+  },
+  {
+   "file": "DLMF/Struve/AngerWeber/IntegralAndSeries.lean",
+   "lines": 1063
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Explicit.lean",
+   "lines": 1060
+  },
+  {
+   "file": "DLMF/Painleve/RationalDLMF.lean",
+   "lines": 1060
+  },
+  {
+   "file": "DLMF/Confluent/Recurrence/Contiguous.lean",
+   "lines": 1059
+  },
+  {
+   "file": "DLMF/CoalescingSaddles/CanonicalIntegrals/OscillatoryRepresentations.lean",
+   "lines": 1056
+  },
+  {
+   "file": "DLMF/Combinatorics/LatticePaths.lean",
+   "lines": 1053
+  },
+  {
+   "file": "DLMF/Confluent/Recurrence/Derivatives.lean",
+   "lines": 1052
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+   "lines": 1052
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/BoundsZeros/PointwiseAndZeroBounds.lean",
+   "lines": 1051
+  },
+  {
+   "file": "DLMF/Weierstrass/ModularFunctions.lean",
+   "lines": 1051
+  },
+  {
+   "file": "DLMF/Mathieu/Hill/Ince.lean",
+   "lines": 1049
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/LaguerreAndHermite.lean",
+   "lines": 1049
+  },
+  {
+   "file": "DLMF/Zeta/IntegerArguments.lean",
+   "lines": 1047
+  },
+  {
+   "file": "DLMF/IncompleteGamma/ZerosIntegrals.lean",
+   "lines": 1044
+  },
+  {
+   "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+   "lines": 1043
+  },
+  {
+   "file": "DLMF/JacobiElliptic/SpecialValues/RealAndHalfPeriods.lean",
+   "lines": 1042
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/DoubleLaplaceAndGaussian.lean",
+   "lines": 1039
+  },
+  {
+   "file": "DLMF/Spheroidal/FerrersSeries/RecurrencesAndConvergence.lean",
+   "lines": 1038
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/Properties.lean",
+   "lines": 1035
+  },
+  {
+   "file": "DLMF/Legendre/ZeroTools.lean",
+   "lines": 1034
+  },
+  {
+   "file": "DLMF/Legendre/UniformCoordinates/TurningPointMaps.lean",
+   "lines": 1032
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Repeated.lean",
+   "lines": 1031
+  },
+  {
+   "file": "DLMF/Legendre/UniformCoordinates/InverseCoordinates.lean",
+   "lines": 1031
+  },
+  {
+   "file": "DLMF/ExpIntegrals/Expansions.lean",
+   "lines": 1028
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricReduction.lean",
+   "lines": 1026
+  },
+  {
+   "file": "DLMF/GeneralizedHypergeometric/Appell/SeriesAndDifferentialEquations.lean",
+   "lines": 1025
+  },
+  {
+   "file": "DLMF/Legendre/Integrals/FerrersGreen.lean",
+   "lines": 1025
+  },
+  {
+   "file": "DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean",
+   "lines": 1024
+  },
+  {
+   "file": "DLMF/WignerSymbols/ThreeJ.lean",
+   "lines": 1023
+  },
+  {
+   "file": "DLMF/Airy/ScorerAsymptotics.lean",
+   "lines": 1022
+  },
+  {
+   "file": "DLMF/Combinatorics/RestrictedPartitions.lean",
+   "lines": 1021
+  },
+  {
+   "file": "DLMF/Airy/Asymptotics/OscillatoryForms.lean",
+   "lines": 1020
+  },
+  {
+   "file": "DLMF/IncompleteGamma/BetaAsymptotics.lean",
+   "lines": 1016
+  },
+  {
+   "file": "DLMF/Legendre/Harmonics.lean",
+   "lines": 1009
+  },
+  {
+   "file": "DLMF/Airy/Scorer/ExpansionsAndZeros.lean",
+   "lines": 1008
+  },
+  {
+   "file": "DLMF/Hypergeometric/Elementary/AlgebraicValues.lean",
+   "lines": 1008
+  },
+  {
+   "file": "DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean",
+   "lines": 1008
+  },
+  {
+   "file": "DLMF/Heun/LocalSolutions.lean",
+   "lines": 1007
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Differential/ChebyshevAndShifts.lean",
+   "lines": 1007
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/BesselAndLaguerreTransforms.lean",
+   "lines": 1007
+  },
+  {
+   "file": "DLMF/Legendre/Toroidal.lean",
+   "lines": 1006
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/SturmOscillation.lean",
+   "lines": 1006
+  },
+  {
+   "file": "DLMF/Bessel/KIntegralRep.lean",
+   "lines": 1005
+  },
+  {
+   "file": "DLMF/Confluent/Zeros/RealZeros.lean",
+   "lines": 1004
+  },
+  {
+   "file": "DLMF/Weierstrass/Relations/ThetaIdentities.lean",
+   "lines": 1003
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/UniformLG2/UniformExpansions.lean",
+   "lines": 1002
+  }
+ ],
+ "roundNamedFiles": [
+  "DLMF/Bessel/GrafAddition.lean",
+  "DLMF/Combinatorics/Staircase.lean",
+  "DLMF/Coulomb/Energy/RegularSolution.lean",
+  "DLMF/EllipticIntegrals/SymmetricBounds.lean",
+  "DLMF/EllipticIntegrals/SymmetricLegendreConnection.lean",
+  "DLMF/EllipticIntegrals/LegendreSymmetricForms.lean",
+  "DLMF/JacobiElliptic/EisensteinSeries.lean",
+  "DLMF/JacobiElliptic/JacobiODE.lean",
+  "DLMF/Lame/FourierExistence.lean",
+  "DLMF/Lame/WeierstrassForm.lean",
+  "DLMF/Lame/Polynomials/Basis.lean",
+  "DLMF/Lame/Polynomials/Eigenvalues.lean",
+  "DLMF/Lame/Polynomials/Identities.lean",
+  "DLMF/Lame/Polynomials/DifferentialEquation.lean",
+  "DLMF/Lame/Polynomials/Zeros.lean",
+  "DLMF/Mathieu/Modified/CrossConnection/AngularKernels.lean",
+  "DLMF/Mathieu/Modified/CrossConnection/RadialAndMonodromy.lean",
+  "DLMF/Mathieu/Modified/CrossConnection.lean",
+  "DLMF/Mathieu/Modified/CrossSeries.lean",
+  "DLMF/Mathieu/Modified/RadialSeries/IntegerCrossProducts.lean",
+  "DLMF/Mathieu/Modified/RadialSeries/SeriesEquation.lean",
+  "DLMF/Mathieu/Modified/RadialSeries.lean",
+  "DLMF/Mathieu/Modified/ImaginaryArgument.lean",
+  "DLMF/Mathieu/Modified/KernelIntegrals.lean",
+  "DLMF/Mathieu/Modified/Wronskians.lean",
+  "DLMF/Mathieu/SturmBridge.lean",
+  "DLMF/Mathieu/SmallQCeSe.lean",
+  "DLMF/Mathieu/SmallQCeSeGeneral.lean",
+  "DLMF/Mathieu/SmallQGeneral.lean",
+  "DLMF/Mathieu/SmallQJacobi.lean",
+  "DLMF/Mathieu/SmallQSpectrum.lean",
+  "DLMF/Mathieu/SmallQVector.lean",
+  "DLMF/MatrixArgument/MatrixIntegrals.lean",
+  "DLMF/NumberTheory/HeckeOperators.lean",
+  "DLMF/Spheroidal/FerrersTools.lean",
+  "DLMF/Spheroidal/Parity.lean",
+  "DLMF/Spheroidal/Spectrum/EntireEigenfunctions.lean",
+  "DLMF/Spheroidal/Spectrum/ParameterDependence.lean",
+  "DLMF/Spheroidal/Spectrum.lean",
+  "DLMF/WignerSymbols/FactorialHelpers.lean",
+  "DLMF/Zeta/LerchContinuation.lean",
+  "DLMF/Zeta/HurwitzContinuation.lean",
+  "DLMF/Zeta/DirichletTest.lean",
+  "DLMF/Zeta/HurwitzEulerMaclaurin.lean",
+  "DLMFMathlib/Analysis/Fourier/P1a2EntirePeriodic.lean",
+  "DLMFMathlib/Analysis/ODE/EntireLinear.lean",
+  "DLMFMathlib/Analysis/ODE/LinearGlobal.lean",
+  "DLMFMathlib/Analysis/ODE/ParamHolomorphic.lean",
+  "DLMFMathlib/Analysis/ODE/SturmLiouville.lean",
+  "DLMFMathlib/Analysis/ODE/SturmGrowth.lean",
+  "DLMFMathlib/Analysis/ODE/Oscillation.lean",
+  "DLMFMathlib/Analysis/ODE/SturmOscillation.lean",
+  "DLMFMathlib/Analysis/ODE/SturmSpectrum.lean",
+  "DLMFMathlib/Combinatorics/Surjections.lean",
+  "DLMFMathlib/Combinatorics/Finpartition.lean",
+  "DLMFMathlib/Combinatorics/QuadraticSeries.lean",
+  "DLMFMathlib/Combinatorics/SeriesTransform.lean",
+  "DLMFMathlib/NumberTheory/ModularForms/KleinJSurjective.lean",
+  "DLMFMathlib/NumberTheory/PrimeNumberTheorem.lean"
+ ],
+ "longProofsOver60": [
+  {
+   "file": "DLMF/JacobiElliptic/Cyclic/MixedTripleProducts.lean",
+   "line": 33,
+   "name": "jacobi_cyclic_scdd_three",
+   "proofLines": 270
+  },
+  {
+   "file": "DLMF/Hypergeometric/ConnectionFormulas.lean",
+   "line": 1100,
+   "name": "logarithmic_connection_one_sub_recip",
+   "proofLines": 268
+  },
+  {
+   "file": "DLMF/Hypergeometric/LogConnectionsRecipGamma.lean",
+   "line": 412,
+   "name": "logarithmic_connection_one_sub_recip_recipGamma",
+   "proofLines": 266
+  },
+  {
+   "file": "DLMF/JacobiElliptic/Cyclic/QuarterPeriodAndThreePoint.lean",
+   "line": 400,
+   "name": "jacobi_cyclic_d_pairs",
+   "proofLines": 260
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/Sixth.lean",
+   "line": 789,
+   "name": "IsPainleveVIOn.quartic_root",
+   "proofLines": 260
+  },
+  {
+   "file": "DLMF/JacobiElliptic/Cyclic/MixedTripleProducts.lean",
+   "line": 319,
+   "name": "jacobi_cyclic_sdcc_three",
+   "proofLines": 257
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/UniformLG2/UniformExpansions.lean",
+   "line": 264,
+   "name": "pcf_positive_parameter_uniform",
+   "proofLines": 252
+  },
+  {
+   "file": "DLMF/Hypergeometric/LogConnectionsRecipGamma.lean",
+   "line": 92,
+   "name": "logarithmic_connection_one_sub_recipGamma",
+   "proofLines": 239
+  },
+  {
+   "file": "DLMF/Hypergeometric/ConnectionFormulas.lean",
+   "line": 675,
+   "name": "logarithmic_connection_one_sub",
+   "proofLines": 236
+  },
+  {
+   "file": "DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean",
+   "line": 540,
+   "name": "jacobiDnThreePointExpr_const",
+   "proofLines": 230
+  },
+  {
+   "file": "DLMF/IncompleteGamma/Asymptotics/Central.lean",
+   "line": 593,
+   "name": "igCen_core",
+   "proofLines": 227
+  },
+  {
+   "file": "DLMF/Hypergeometric/Identities/Dougall.lean",
+   "line": 358,
+   "name": "tsum_eq_of_not_int",
+   "proofLines": 216
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/LiouvilleGreenFinite.lean",
+   "line": 387,
+   "name": "lg2_exists_solution_of_approx",
+   "proofLines": 211
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/LiouvilleGreenExpansion.lean",
+   "line": 71,
+   "name": "exists_solution_of_approx",
+   "proofLines": 208
+  },
+  {
+   "file": "DLMF/JacobiElliptic/Cyclic/TripleProducts.lean",
+   "line": 163,
+   "name": "jacobi_cyclic_d2_triple",
+   "proofLines": 200
+  },
+  {
+   "file": "DLMF/JacobiElliptic/SpecialValues/RealAndHalfPeriods.lean",
+   "line": 684,
+   "name": "jacobi_specialValues_HalfKKp",
+   "proofLines": 200
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/Sixth.lean",
+   "line": 472,
+   "name": "IsPainleveVIOn.quadratic",
+   "proofLines": 197
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/InnerExpansions.lean",
+   "line": 706,
+   "name": "struveSc_inner_est",
+   "proofLines": 197
+  },
+  {
+   "file": "DLMF/ErrorFunctions/BoundsAsymptotics/GaussianRemainders.lean",
+   "line": 565,
+   "name": "erfc_remainder_bound",
+   "proofLines": 194
+  },
+  {
+   "file": "DLMF/Hypergeometric/Elementary/CubicValues.lean",
+   "line": 263,
+   "name": "value_sixth_root_contiguous",
+   "proofLines": 194
+  },
+  {
+   "file": "DLMF/Confluent/Zeros/ComplexZeros.lean",
+   "line": 104,
+   "name": "kumZ_core",
+   "proofLines": 193
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/UniformLG.lean",
+   "line": 795,
+   "name": "pcfLG_core",
+   "proofLines": 189
+  },
+  {
+   "file": "DLMF/Confluent/ParameterDerivatives.lean",
+   "line": 120,
+   "name": "tricomi_numerator_nat_series_recipGamma",
+   "proofLines": 187
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/UniformLG2/NegativeParameterEstimates.lean",
+   "line": 75,
+   "name": "pcfLG2_core",
+   "proofLines": 186
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Zeros/ZeroLimits.lean",
+   "line": 196,
+   "name": "r24b_tendsto_zerosGE",
+   "proofLines": 185
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/FourthAndFifth.lean",
+   "line": 357,
+   "name": "IsPainleveVOn.t_eps",
+   "proofLines": 184
+  },
+  {
+   "file": "DLMF/Mathieu/Properties/Floquet.lean",
+   "line": 546,
+   "name": "p2f_ince_core",
+   "proofLines": 176
+  },
+  {
+   "file": "DLMF/Painleve/Equations.lean",
+   "line": 320,
+   "name": "isPainleveVOn_coth_sq",
+   "proofLines": 175
+  },
+  {
+   "file": "DLMF/Hypergeometric/Solutions/Connections.lean",
+   "line": 232,
+   "name": "zero_first_connection_one_base",
+   "proofLines": 174
+  },
+  {
+   "file": "DLMF/Confluent/LargeASharp.lean",
+   "line": 875,
+   "name": "laguerrePolyL_fejer_isBigO",
+   "proofLines": 169
+  },
+  {
+   "file": "DLMF/Hypergeometric/FurtherTransformations/Cubic.lean",
+   "line": 756,
+   "name": "borwein_cubic",
+   "proofLines": 169
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQVector.lean",
+   "line": 274,
+   "name": "p3q_expand",
+   "proofLines": 169
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/FourthAndFifth.lean",
+   "line": 561,
+   "name": "IsPainleveIIIOn.toPainleveV",
+   "proofLines": 169
+  },
+  {
+   "file": "DLMF/ErrorFunctions/BoundsAsymptotics/FresnelRemainders.lean",
+   "line": 616,
+   "name": "fresnelAux_remainder_bound",
+   "proofLines": 166
+  },
+  {
+   "file": "DLMF/Hypergeometric/SpecialValueTools.lean",
+   "line": 112,
+   "name": "hypSV_cubic_psi",
+   "proofLines": 166
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/InnerExpansions.lean",
+   "line": 35,
+   "name": "struveSc_turning_est",
+   "proofLines": 165
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/LiouvilleGreenComparison.lean",
+   "line": 66,
+   "name": "exists_solution_of_comparison",
+   "proofLines": 160
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/ScaledExpansions.lean",
+   "line": 250,
+   "name": "struveSc_turnU_est",
+   "proofLines": 159
+  },
+  {
+   "file": "DLMF/Confluent/LargeASharp.lean",
+   "line": 1217,
+   "name": "kummerU_atBot_isBigO",
+   "proofLines": 157
+  },
+  {
+   "file": "DLMF/Hypergeometric/Solutions/Logarithmic.lean",
+   "line": 365,
+   "name": "wronskian_logSolution_ne_zero",
+   "proofLines": 156
+  },
+  {
+   "file": "DLMF/Hypergeometric/SpecialValueTools.lean",
+   "line": 323,
+   "name": "hypSV_cubic_two",
+   "proofLines": 156
+  },
+  {
+   "file": "DLMF/Struve/Properties.lean",
+   "line": 890,
+   "name": "struveH_one_products",
+   "proofLines": 156
+  },
+  {
+   "file": "DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean",
+   "line": 267,
+   "name": "genCosInt_spherical_series",
+   "proofLines": 155
+  },
+  {
+   "file": "DLMF/JacobiElliptic/Cyclic/TripleProducts.lean",
+   "line": 371,
+   "name": "jacobi_cyclic_scc_triple",
+   "proofLines": 155
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/ConvolutionsAndFourier.lean",
+   "line": 363,
+   "name": "gegProd_main",
+   "proofLines": 154
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/UniformLG2/UniformExpansions.lean",
+   "line": 776,
+   "name": "pcfLG2_neg_UDeriv_expansion",
+   "proofLines": 151
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/CrossConnection/AngularKernels.lean",
+   "line": 488,
+   "name": "p2m_key_se_odd",
+   "proofLines": 149
+  },
+  {
+   "file": "DLMF/Confluent/LargeASharp.lean",
+   "line": 347,
+   "name": "norm_largeAU_sub_largeAU0_le_sharp",
+   "proofLines": 147
+  },
+  {
+   "file": "DLMF/Hypergeometric/Solutions/Logarithmic.lean",
+   "line": 754,
+   "name": "logarithmic_second_terminating_fundamental",
+   "proofLines": 147
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/CrossConnection/AngularKernels.lean",
+   "line": 809,
+   "name": "p2m_key_se_even",
+   "proofLines": 147
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/Sixth.lean",
+   "line": 255,
+   "name": "IsPainleveVIOn.okamoto",
+   "proofLines": 147
+  },
+  {
+   "file": "DLMF/WignerSymbols/ThreeJ.lean",
+   "line": 803,
+   "name": "wigner3j_recursion_half",
+   "proofLines": 147
+  },
+  {
+   "file": "DLMF/Bessel/GrafAddition.lean",
+   "line": 85,
+   "name": "hasSum_besselJ_graf",
+   "proofLines": 144
+  },
+  {
+   "file": "DLMF/Hypergeometric/AppellF4.lean",
+   "line": 327,
+   "name": "appF4_bailey",
+   "proofLines": 144
+  },
+  {
+   "file": "DLMF/IncompleteGamma/ExponentialIntegral.lean",
+   "line": 1235,
+   "name": "genExpIntE_product_integral",
+   "proofLines": 144
+  },
+  {
+   "file": "DLMF/JacobiElliptic/Cyclic/QuarterPeriodAndThreePoint.lean",
+   "line": 249,
+   "name": "jacobi_cyclic_c4_pairs",
+   "proofLines": 143
+  },
+  {
+   "file": "DLMF/Legendre/FourierTools.lean",
+   "line": 530,
+   "name": "legTr_side",
+   "proofLines": 143
+  },
+  {
+   "file": "DLMF/Mathieu/SecondSolutions.lean",
+   "line": 116,
+   "name": "p2x_not_coexist",
+   "proofLines": 143
+  },
+  {
+   "file": "DLMF/MatrixArgument/GammaBeta.lean",
+   "line": 976,
+   "name": "q2m_beta_posDefCone",
+   "proofLines": 143
+  },
+  {
+   "file": "DLMF/ExpIntegrals/Asymptotics.lean",
+   "line": 561,
+   "name": "expIntE1_remainder_bound",
+   "proofLines": 142
+  },
+  {
+   "file": "DLMF/Legendre/Zeros/Exterior.lean",
+   "line": 552,
+   "name": "lzero_assocP_sign_near_one",
+   "proofLines": 142
+  },
+  {
+   "file": "DLMF/Theta/Products/InfiniteProducts.lean",
+   "line": 615,
+   "name": "p20R1_logDeriv_core",
+   "proofLines": 142
+  },
+  {
+   "file": "DLMF/Zeta/IntegralReps/ElementaryKernels.lean",
+   "line": 663,
+   "name": "riemannZeta_eq_half_add_integral",
+   "proofLines": 142
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/HankelKernels.lean",
+   "line": 711,
+   "name": "cfInt_bessel_M_euler",
+   "proofLines": 141
+  },
+  {
+   "file": "DLMF/Spheroidal/Spectrum/ParameterDependence.lean",
+   "line": 412,
+   "name": "p3lyR_many_zeros",
+   "proofLines": 141
+  },
+  {
+   "file": "DLMF/Weierstrass/Addition.lean",
+   "line": 118,
+   "name": "p23R1_sigma_product_eq",
+   "proofLines": 140
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Series.lean",
+   "line": 404,
+   "name": "erfCheb_hasSum",
+   "proofLines": 139
+  },
+  {
+   "file": "DLMF/Spheroidal/Spectrum/EntireEigenfunctions.lean",
+   "line": 623,
+   "name": "p3l_entire_of_ball",
+   "proofLines": 139
+  },
+  {
+   "file": "DLMF/Confluent/Zeros/RealZeros.lean",
+   "line": 200,
+   "name": "kumZ_step",
+   "proofLines": 138
+  },
+  {
+   "file": "DLMF/Hypergeometric/ConnectionFormulas.lean",
+   "line": 53,
+   "name": "quadratic_connection_well_poised",
+   "proofLines": 138
+  },
+  {
+   "file": "DLMF/Hypergeometric/FurtherTransformations/Cubic.lean",
+   "line": 565,
+   "name": "cubic_transformation",
+   "proofLines": 138
+  },
+  {
+   "file": "DLMF/Hypergeometric/Identities/Dixon.lean",
+   "line": 431,
+   "name": "exists_P_eq_K",
+   "proofLines": 138
+  },
+  {
+   "file": "DLMF/Mathieu/Noninteger/Fourier.lean",
+   "line": 172,
+   "name": "p1b_ratio_tail",
+   "proofLines": 138
+  },
+  {
+   "file": "DLMF/MatrixArgument/Confluent.lean",
+   "line": 211,
+   "name": "hasIntegralOn_kummerPsi_mellin",
+   "proofLines": 138
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+   "line": 582,
+   "name": "symEllIntRD_asymp_small_x",
+   "proofLines": 137
+  },
+  {
+   "file": "DLMF/IncompleteGamma/SeriesRecurrences.lean",
+   "line": 77,
+   "name": "incompleteGamma_increment_series",
+   "proofLines": 137
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/LiouvilleGreen.lean",
+   "line": 62,
+   "name": "exists_solution_of_kernel_bound",
+   "proofLines": 136
+  },
+  {
+   "file": "DLMF/Zeta/IntegralReps/PolygammaAndContours.lean",
+   "line": 422,
+   "name": "riemannZeta_one_add_eq_integral_digamma",
+   "proofLines": 135
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Properties.lean",
+   "line": 695,
+   "name": "bernoulliPolyB_mul_eq_roots_of_unity",
+   "proofLines": 134
+  },
+  {
+   "file": "DLMF/Hypergeometric/Elementary/CubicValues.lean",
+   "line": 33,
+   "name": "value_sixth_root",
+   "proofLines": 134
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Complex/BarnesResidue.lean",
+   "line": 137,
+   "name": "barnesRes_vertical_shift",
+   "proofLines": 134
+  },
+  {
+   "file": "DLMF/Confluent/ContinuedFractions.lean",
+   "line": 711,
+   "name": "kummerU_continued_fraction_tendsto_real",
+   "proofLines": 132
+  },
+  {
+   "file": "DLMF/Hypergeometric/IntegralRepresentations.lean",
+   "line": 150,
+   "name": "barnes_integral_one_sub",
+   "proofLines": 132
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/CrossConnection/AngularKernels.lean",
+   "line": 310,
+   "name": "p2m_key_odd",
+   "proofLines": 132
+  },
+  {
+   "file": "DLMF/Confluent/Zeros/RealZeros.lean",
+   "line": 408,
+   "name": "kumZ_step_same",
+   "proofLines": 131
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+   "line": 402,
+   "name": "symEllIntRG_asymp_small_x",
+   "proofLines": 131
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/BesselTransforms.lean",
+   "line": 932,
+   "name": "bessel_kummerU",
+   "proofLines": 129
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricReduction.lean",
+   "line": 553,
+   "name": "ellRedI_cubic_recurrence",
+   "proofLines": 129
+  },
+  {
+   "file": "DLMF/ExpIntegrals/ZerosIntegrals.lean",
+   "line": 764,
+   "name": "expIntActon_recurrence",
+   "proofLines": 129
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Asymptotics/StationaryPhase.lean",
+   "line": 353,
+   "name": "statPh_tendsto_cubic",
+   "proofLines": 129
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Integral/Improper.lean",
+   "line": 321,
+   "name": "integral_exp_neg_mul_cpow_sub_one_mul_sin",
+   "proofLines": 129
+  },
+  {
+   "file": "DLMF/Zeta/CotangentMoments.lean",
+   "line": 24,
+   "name": "integral_quadratic_mul_cot_pi",
+   "proofLines": 127
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/Connection/ModulusChanges.lean",
+   "line": 431,
+   "name": "incEllInt_imaginary_modulus",
+   "proofLines": 126
+  },
+  {
+   "file": "DLMF/Hypergeometric/CubicTools.lean",
+   "line": 270,
+   "name": "hcub_conn",
+   "proofLines": 126
+  },
+  {
+   "file": "DLMF/Hypergeometric/Riemann.lean",
+   "line": 76,
+   "name": "riemann_hypergeometric_solution",
+   "proofLines": 126
+  },
+  {
+   "file": "DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean",
+   "line": 136,
+   "name": "genSinInt_spherical_series",
+   "proofLines": 126
+  },
+  {
+   "file": "DLMF/Legendre/Zeros/FerrersAndReal.lean",
+   "line": 661,
+   "name": "ferrersQ_zero_count_range",
+   "proofLines": 126
+  },
+  {
+   "file": "DLMF/Hypergeometric/BarnesAux.lean",
+   "line": 63,
+   "name": "barnes_integral_of_re_sub_pos",
+   "proofLines": 125
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Generalizations/DegenerateAndCharacter.lean",
+   "line": 162,
+   "name": "s24b_hasSum_main",
+   "proofLines": 124
+  },
+  {
+   "file": "DLMF/Hypergeometric/AnalyticProperties.lean",
+   "line": 603,
+   "name": "diagonal_parameter_limit",
+   "proofLines": 124
+  },
+  {
+   "file": "DLMF/JacobiElliptic/Cyclic/TripleProducts.lean",
+   "line": 31,
+   "name": "jacobi_cyclic_c4_triple",
+   "proofLines": 124
+  },
+  {
+   "file": "DLMF/Selberg/ContinuationAndAomoto.lean",
+   "line": 172,
+   "name": "integrable_mul_rpow_of_analytic",
+   "proofLines": 124
+  },
+  {
+   "file": "DLMF/IncompleteGamma/SeriesRecurrences.lean",
+   "line": 409,
+   "name": "scSph_generic",
+   "proofLines": 123
+  },
+  {
+   "file": "DLMF/MatrixArgument/GammaBeta.lean",
+   "line": 1325,
+   "name": "q2m_beta_interval",
+   "proofLines": 123
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/ContourTools.lean",
+   "line": 881,
+   "name": "pcfCt_kernel_shift",
+   "proofLines": 123
+  },
+  {
+   "file": "DLMF/Combinatorics/Permutations/MenageAndFerrers.lean",
+   "line": 497,
+   "name": "s26b_NA_succ",
+   "proofLines": 122
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean",
+   "line": 826,
+   "name": "erfc_fourier_halfLine",
+   "proofLines": 122
+  },
+  {
+   "file": "DLMF/Mathieu/Properties/Floquet.lean",
+   "line": 1033,
+   "name": "isFloquetSolution_of_recurrence",
+   "proofLines": 122
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/BoundsZeros/PointwiseAndZeroBounds.lean",
+   "line": 425,
+   "name": "ultrasphPoly_bernstein_bound",
+   "proofLines": 122
+  },
+  {
+   "file": "DLMF/Confluent/IntegralRepresentations/BarnesAndConnections.lean",
+   "line": 501,
+   "name": "kummerU_barnes_exp_of_re_pos",
+   "proofLines": 121
+  },
+  {
+   "file": "DLMF/SphericalHarmonics/ZonalTools.lean",
+   "line": 602,
+   "name": "zonal_funk_hecke",
+   "proofLines": 121
+  },
+  {
+   "file": "DLMF/Confluent/ContinuedFractions.lean",
+   "line": 580,
+   "name": "kummerU_continued_fraction_limit",
+   "proofLines": 120
+  },
+  {
+   "file": "DLMF/ExpIntegrals/Asymptotics.lean",
+   "line": 771,
+   "name": "expIntAux_remainder_bound",
+   "proofLines": 120
+  },
+  {
+   "file": "DLMF/Heun/Equation.lean",
+   "line": 210,
+   "name": "heun_singularities",
+   "proofLines": 120
+  },
+  {
+   "file": "DLMF/Hypergeometric/FurtherTransformations/Quadratic.lean",
+   "line": 990,
+   "name": "quadratic_well_poised_minus",
+   "proofLines": 120
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/CrossSeries.lean",
+   "line": 562,
+   "name": "p2m_cross_series",
+   "proofLines": 120
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/DoubleLaplaceAndGaussian.lean",
+   "line": 330,
+   "name": "jacobi_double_laplace_integral",
+   "proofLines": 120
+  },
+  {
+   "file": "DLMF/Hypergeometric/Solutions/Logarithmic.lean",
+   "line": 933,
+   "name": "logarithmic_second_both_terminating_fundamental",
+   "proofLines": 119
+  },
+  {
+   "file": "DLMF/JacobiElliptic/EisensteinSeries.lean",
+   "line": 833,
+   "name": "p3j_core",
+   "proofLines": 119
+  },
+  {
+   "file": "DLMF/Zeta/Sums.lean",
+   "line": 435,
+   "name": "s25a_hasSum_822_re",
+   "proofLines": 119
+  },
+  {
+   "file": "DLMF/Confluent/Asymptotics/LargeArgument.lean",
+   "line": 854,
+   "name": "kummerU_poincare_finite",
+   "proofLines": 118
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean",
+   "line": 1047,
+   "name": "erf_sqrt_laplace",
+   "proofLines": 118
+  },
+  {
+   "file": "DLMF/Hypergeometric/AnalyticProperties.lean",
+   "line": 144,
+   "name": "conditional_convergence_on_circle",
+   "proofLines": 118
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/Connection.lean",
+   "line": 167,
+   "name": "mathieuFe_ge_zero_eq_joinG",
+   "proofLines": 118
+  },
+  {
+   "file": "DLMF/SphericalHarmonics/BesselAddition.lean",
+   "line": 407,
+   "name": "besselJ_addition",
+   "proofLines": 118
+  },
+  {
+   "file": "DLMF/Mathieu/Noninteger/Expansions.lean",
+   "line": 419,
+   "name": "p2x_stable_iff",
+   "proofLines": 117
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/UniformLG2/NegativeParameterEstimates.lean",
+   "line": 513,
+   "name": "pcfU_temme_uniform",
+   "proofLines": 117
+  },
+  {
+   "file": "DLMF/Struve/Lommel.lean",
+   "line": 1139,
+   "name": "lommelCapital_parameter_locallyUniform",
+   "proofLines": 117
+  },
+  {
+   "file": "DLMF/BernoulliEuler/IntegralsSums.lean",
+   "line": 1064,
+   "name": "sum_antidiagonal_bernoulli_quadruple",
+   "proofLines": 116
+  },
+  {
+   "file": "DLMF/SphericalHarmonics/ZonalTools.lean",
+   "line": 351,
+   "name": "zonal_reproduce",
+   "proofLines": 116
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/BinomialAndAnger.lean",
+   "line": 145,
+   "name": "struveK_remainder_sign",
+   "proofLines": 116
+  },
+  {
+   "file": "DLMF/Bessel/ProductIntegral.lean",
+   "line": 420,
+   "name": "hasSum_besselJ_products_integral",
+   "proofLines": 115
+  },
+  {
+   "file": "DLMF/Confluent/LargeA.lean",
+   "line": 1318,
+   "name": "laguerrePolyL_fejer",
+   "proofLines": 115
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricBounds.lean",
+   "line": 314,
+   "name": "p19sR1_RG_identity",
+   "proofLines": 115
+  },
+  {
+   "file": "DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean",
+   "line": 610,
+   "name": "Real.erf_exponential_bound",
+   "proofLines": 114
+  },
+  {
+   "file": "DLMF/Hypergeometric/IntegralRepresentations.lean",
+   "line": 743,
+   "name": "product_integral",
+   "proofLines": 114
+  },
+  {
+   "file": "DLMF/Hypergeometric/Solutions/Connections.lean",
+   "line": 86,
+   "name": "exists_connection_one",
+   "proofLines": 114
+  },
+  {
+   "file": "DLMF/IncompleteGamma/Representations/LowerBarnes.lean",
+   "line": 164,
+   "name": "lowerIncGamma_besselJ_integral",
+   "proofLines": 114
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/Wronskians.lean",
+   "line": 521,
+   "name": "p3m_tendsto_WF",
+   "proofLines": 114
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Hahn/Orthogonality.lean",
+   "line": 585,
+   "name": "krawtchouk_orthogonality",
+   "proofLines": 114
+  },
+  {
+   "file": "DLMF/Struve/Properties.lean",
+   "line": 685,
+   "name": "struveH_zero_products",
+   "proofLines": 114
+  },
+  {
+   "file": "DLMF/Hypergeometric/Elementary/CubicValues.lean",
+   "line": 532,
+   "name": "hasSum_altPair",
+   "proofLines": 113
+  },
+  {
+   "file": "DLMF/Hypergeometric/Identities/CarlsonTools.lean",
+   "line": 35,
+   "name": "kummer_theorem",
+   "proofLines": 113
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ContinuedFraction/Convergence.lean",
+   "line": 679,
+   "name": "cfConv_tendsto_of_pos_linear",
+   "proofLines": 113
+  },
+  {
+   "file": "DLMF/Hypergeometric/AnalyticProperties.lean",
+   "line": 354,
+   "name": "zero_balanced_limit",
+   "proofLines": 112
+  },
+  {
+   "file": "DLMF/Legendre/Hypergeometric.lean",
+   "line": 105,
+   "name": "associated_hypergeometric_16",
+   "proofLines": 112
+  },
+  {
+   "file": "DLMF/SphericalHarmonics/Theorems.lean",
+   "line": 272,
+   "name": "gegAdd_main",
+   "proofLines": 112
+  },
+  {
+   "file": "DLMF/Spheroidal/Angular.lean",
+   "line": 486,
+   "name": "p1s_isSpheroidalPsFactor_zero",
+   "proofLines": 112
+  },
+  {
+   "file": "DLMF/Zeta/IntegralReps/PolygammaAndContours.lean",
+   "line": 234,
+   "name": "r25a_integral_polygamma",
+   "proofLines": 112
+  },
+  {
+   "file": "DLMF/Gamma/Integrals/FourierAndTrigamma.lean",
+   "line": 114,
+   "name": "integral_ramanujanIntegrand_of_real",
+   "proofLines": 111
+  },
+  {
+   "file": "DLMF/IncompleteGamma/Asymptotics/Central.lean",
+   "line": 215,
+   "name": "igCen_U",
+   "proofLines": 111
+  },
+  {
+   "file": "DLMF/Legendre/UniformCoordinates/InverseCoordinates.lean",
+   "line": 41,
+   "name": "legY_strictAntiOn",
+   "proofLines": 111
+  },
+  {
+   "file": "DLMF/Mathieu/Hill/Ince.lean",
+   "line": 178,
+   "name": "p1b_isInceSolution_series_iff",
+   "proofLines": 111
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQVector.lean",
+   "line": 59,
+   "name": "p3q_vec_bound",
+   "proofLines": 111
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/LargeOrder.lean",
+   "line": 744,
+   "name": "struveM_scaled_asymptotic",
+   "proofLines": 111
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Asymptotics/WatsonSector.lean",
+   "line": 196,
+   "name": "isBigO_integral_cexp_smul_sector",
+   "proofLines": 111
+  },
+  {
+   "file": "DLMF/Hypergeometric/SpecialValueTools.lean",
+   "line": 577,
+   "name": "hypSV_cubic_psi_eventually",
+   "proofLines": 110
+  },
+  {
+   "file": "DLMF/Legendre/Continuation/ContinuityAndConnections.lean",
+   "line": 66,
+   "name": "legTr_transport_tendsto",
+   "proofLines": 110
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/DoubleLaplaceAndGaussian.lean",
+   "line": 880,
+   "name": "ultrasphPoly_mellin_transform_odd",
+   "proofLines": 110
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/TurningPointEstimates.lean",
+   "line": 427,
+   "name": "struveSc_integral_est",
+   "proofLines": 110
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+   "line": 171,
+   "name": "integral_symEllIntRD_interp",
+   "proofLines": 109
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/LaguerreAndHermite.lean",
+   "line": 877,
+   "name": "hermitePolyH_convolution",
+   "proofLines": 109
+  },
+  {
+   "file": "DLMF/Struve/Representations/BarnesAndSonine.lean",
+   "line": 479,
+   "name": "struveH_sonine",
+   "proofLines": 109
+  },
+  {
+   "file": "DLMF/Struve/Representations/Mellin.lean",
+   "line": 119,
+   "name": "struveMel_tendsto_direct",
+   "proofLines": 109
+  },
+  {
+   "file": "DLMF/IncompleteGamma/FractionTools.lean",
+   "line": 186,
+   "name": "incGF_gammaStar_tendsto",
+   "proofLines": 108
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Asymptotics/StieltjesRemainder.lean",
+   "line": 442,
+   "name": "stRem_chi_ray",
+   "proofLines": 108
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/Volterra.lean",
+   "line": 234,
+   "name": "exists_norm_sub_oscillation_le",
+   "proofLines": 108
+  },
+  {
+   "file": "DLMF/Confluent/IntegralRepresentations/BarnesAndConnections.lean",
+   "line": 58,
+   "name": "regularized_barnes_integral_of_re_sub_pos",
+   "proofLines": 107
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/WhittakerTransforms.lean",
+   "line": 43,
+   "name": "bessel_kummerU_M",
+   "proofLines": 107
+  },
+  {
+   "file": "DLMF/Gamma/BarnesG/BinetAndAsymptotics.lean",
+   "line": 72,
+   "name": "norm_zetaTerm_le",
+   "proofLines": 107
+  },
+  {
+   "file": "DLMF/Hypergeometric/Solutions/Logarithmic.lean",
+   "line": 109,
+   "name": "gaussOperator_logSing",
+   "proofLines": 107
+  },
+  {
+   "file": "DLMF/IncompleteGamma/ExpIntegralAsymptotics.lean",
+   "line": 132,
+   "name": "genExpIntEOnLog_eq_integral_rotate",
+   "proofLines": 107
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/IntegratedKernels.lean",
+   "line": 635,
+   "name": "struvePrim_isBigO_of_deriv",
+   "proofLines": 107
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/BesselTransforms.lean",
+   "line": 442,
+   "name": "confLP_base",
+   "proofLines": 106
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/HankelKernels.lean",
+   "line": 914,
+   "name": "cfInt_cosine_euler",
+   "proofLines": 106
+  },
+  {
+   "file": "DLMF/Hypergeometric/FurtherTransformations/Quadratic.lean",
+   "line": 873,
+   "name": "quadratic_well_poised_plus",
+   "proofLines": 106
+  },
+  {
+   "file": "DLMF/Hypergeometric/IntegralRepresentations.lean",
+   "line": 475,
+   "name": "hypSV_hasSum_shift_series",
+   "proofLines": 106
+  },
+  {
+   "file": "DLMF/Mathieu/Properties/BasicSolutions.lean",
+   "line": 149,
+   "name": "mathieu_algebraic_form_singularities",
+   "proofLines": 106
+  },
+  {
+   "file": "DLMF/Theta/ZeroValues.lean",
+   "line": 514,
+   "name": "jacobiTheta_deriv_ratio_sum",
+   "proofLines": 106
+  },
+  {
+   "file": "DLMF/Bailey.lean",
+   "line": 906,
+   "name": "sum_unit_bailey",
+   "proofLines": 105
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean",
+   "line": 646,
+   "name": "gaussian_sqrt_laplace",
+   "proofLines": 105
+  },
+  {
+   "file": "DLMF/IncompleteGamma/Asymptotics/PartialSums.lean",
+   "line": 957,
+   "name": "expPartialSumRemainderS_one_asymptotic",
+   "proofLines": 105
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/RadialSeries/IntegerCrossProducts.lean",
+   "line": 589,
+   "name": "p3m_hasSum_radialMathieuMs_even_cross_gen",
+   "proofLines": 105
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Legendre.lean",
+   "line": 205,
+   "name": "integral_norm_sub_sum_legendrePolyP_sq",
+   "proofLines": 105
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+   "line": 645,
+   "name": "qLaguerre_monomial_orthogonality",
+   "proofLines": 105
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/UniformLG.lean",
+   "line": 1065,
+   "name": "pcf_negative_parameter_uniform_U",
+   "proofLines": 105
+  },
+  {
+   "file": "DLMF/Spheroidal/FerrersSeries/RatiosAndSecondKind.lean",
+   "line": 244,
+   "name": "spheroidalCoeff_ratio_isBigO",
+   "proofLines": 105
+  },
+  {
+   "file": "DLMF/Spheroidal/Spectrum/EntireEigenfunctions.lean",
+   "line": 792,
+   "name": "p3l_exists_entire",
+   "proofLines": 105
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Complex/LagrangeBurmann.lean",
+   "line": 48,
+   "name": "lagB_hasSum_iteratedDeriv",
+   "proofLines": 105
+  },
+  {
+   "file": "DLMF/Confluent/IntegralRepresentations/BarnesAndConnections.lean",
+   "line": 341,
+   "name": "kummerU_barnes",
+   "proofLines": 104
+  },
+  {
+   "file": "DLMF/Elementary/Hyperbolic/Integrals.lean",
+   "line": 908,
+   "name": "complex_antiderivative_sech",
+   "proofLines": 104
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/Inequalities.lean",
+   "line": 666,
+   "name": "incEllIntFk_arctanh_bounds",
+   "proofLines": 104
+  },
+  {
+   "file": "DLMF/ErrorFunctions/BoundsAsymptotics/GaussianRemainders.lean",
+   "line": 455,
+   "name": "erfc_eq_integral_rotate_laplace",
+   "proofLines": 104
+  },
+  {
+   "file": "DLMF/Heun/Fuchsian.lean",
+   "line": 556,
+   "name": "stieltjes_zeros_critical",
+   "proofLines": 104
+  },
+  {
+   "file": "DLMF/SphericalHarmonics/ZonalTools.lean",
+   "line": 796,
+   "name": "zonal_addition_sphere",
+   "proofLines": 104
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/HankelKernels.lean",
+   "line": 394,
+   "name": "cfInt_laplace_kernel",
+   "proofLines": 103
+  },
+  {
+   "file": "DLMF/Confluent/TricomiRotated.lean",
+   "line": 450,
+   "name": "hasAsymptoticExpansion_kummerU_rotSector_of_re_pos",
+   "proofLines": 103
+  },
+  {
+   "file": "DLMF/Gamma/Asymptotics/ShiftedStirling.lean",
+   "line": 353,
+   "name": "hasAsymptoticExpansion_stirlingLogPart",
+   "proofLines": 103
+  },
+  {
+   "file": "DLMF/Hypergeometric/Identities/Dougall.lean",
+   "line": 52,
+   "name": "exists_bound",
+   "proofLines": 103
+  },
+  {
+   "file": "DLMF/Legendre/Sums.lean",
+   "line": 398,
+   "name": "heine_cheb",
+   "proofLines": 103
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/ConvolutionsAndFourier.lean",
+   "line": 858,
+   "name": "ultrasphPoly_fourier_transform",
+   "proofLines": 103
+  },
+  {
+   "file": "DLMF/RiemannTheta/Modular.lean",
+   "line": 168,
+   "name": "modular_mem_siegel",
+   "proofLines": 103
+  },
+  {
+   "file": "DLMF/SphericalHarmonics/Basic.lean",
+   "line": 223,
+   "name": "harmonicHomogeneous_orthogonal",
+   "proofLines": 103
+  },
+  {
+   "file": "DLMF/Zeta/Sums.lean",
+   "line": 1366,
+   "name": "hasSum_riemannZeta_two_mul_div_odd_even",
+   "proofLines": 103
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/BesselTransforms.lean",
+   "line": 48,
+   "name": "confLP_laplace_0F1",
+   "proofLines": 102
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/Connection/ModulusChanges.lean",
+   "line": 104,
+   "name": "p19lR1_recip_modulus",
+   "proofLines": 102
+  },
+  {
+   "file": "DLMF/Hypergeometric/CubicTools.lean",
+   "line": 533,
+   "name": "hcub_main",
+   "proofLines": 102
+  },
+  {
+   "file": "DLMF/Legendre/Zeros/Exterior.lean",
+   "line": 350,
+   "name": "lzero_olverQ_pos_bound",
+   "proofLines": 102
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/DoubleLaplaceAndGaussian.lean",
+   "line": 768,
+   "name": "ultrasphPoly_mellin_transform_even",
+   "proofLines": 102
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Series/ClassicalGenerating.lean",
+   "line": 282,
+   "name": "jacGen_hasSum_small",
+   "proofLines": 102
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Repeated.lean",
+   "line": 699,
+   "name": "iteratedErfc_continuedFraction",
+   "proofLines": 101
+  },
+  {
+   "file": "DLMF/Hypergeometric/ContinuedFractions.lean",
+   "line": 651,
+   "name": "derivative_continued_fraction_limit",
+   "proofLines": 101
+  },
+  {
+   "file": "DLMF/Legendre/Zeros/FerrersAndReal.lean",
+   "line": 491,
+   "name": "ferrersQ_nat_zero_count",
+   "proofLines": 101
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/General.lean",
+   "line": 277,
+   "name": "gauss_quadrature",
+   "proofLines": 101
+  },
+  {
+   "file": "DLMF/Confluent/LargeA.lean",
+   "line": 1188,
+   "name": "tendsto_kummerU_atBot",
+   "proofLines": 100
+  },
+  {
+   "file": "DLMF/Confluent/ProductsAddition.lean",
+   "line": 196,
+   "name": "kummerM_product",
+   "proofLines": 100
+  },
+  {
+   "file": "DLMF/Gamma/BetaFunction/ParameterIntegrals.lean",
+   "line": 287,
+   "name": "beta_shifted",
+   "proofLines": 100
+  },
+  {
+   "file": "DLMF/Hypergeometric/FurtherTransformations/Quadratic.lean",
+   "line": 608,
+   "name": "quadratic_double_denominator",
+   "proofLines": 100
+  },
+  {
+   "file": "DLMF/JacobiElliptic/EisensteinSeries.lean",
+   "line": 420,
+   "name": "p3j_eq_G",
+   "proofLines": 100
+  },
+  {
+   "file": "DLMF/MatrixArgument/Confluent.lean",
+   "line": 47,
+   "name": "integrableOn_kummerPsi",
+   "proofLines": 100
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Complex/TrigonometricProducts.lean",
+   "line": 49,
+   "name": "hasProd_cosh_product",
+   "proofLines": 100
+  },
+  {
+   "file": "DLMF/Gamma/IntegralRepresentations/PrymAndOscillatory.lean",
+   "line": 311,
+   "name": "Gamma_truncated_exp",
+   "proofLines": 99
+  },
+  {
+   "file": "DLMF/Hypergeometric/Identities/Dougall.lean",
+   "line": 250,
+   "name": "tsum_at_int",
+   "proofLines": 99
+  },
+  {
+   "file": "DLMF/Bessel/LaplaceTransform.lean",
+   "line": 50,
+   "name": "besselLaplace_quadratic",
+   "proofLines": 98
+  },
+  {
+   "file": "DLMF/Confluent/Series.lean",
+   "line": 586,
+   "name": "regularizedHGFun_eq_besselExpansion",
+   "proofLines": 98
+  },
+  {
+   "file": "DLMF/Gamma/MellinBarnes.lean",
+   "line": 405,
+   "name": "differentiableOn_integral_mul_cpow",
+   "proofLines": 98
+  },
+  {
+   "file": "DLMF/IncompleteGamma/ZerosIntegrals.lean",
+   "line": 568,
+   "name": "Real.scIncGammaNegativeZero_bounds",
+   "proofLines": 98
+  },
+  {
+   "file": "DLMF/Lame/Polynomials/Zeros.lean",
+   "line": 472,
+   "name": "p3l_algebraic_form",
+   "proofLines": 98
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/RadialSeries/IntegerCrossProducts.lean",
+   "line": 192,
+   "name": "p3m_hasSum_radialMathieuMc_even_cross_gen",
+   "proofLines": 98
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Hahn/Orthogonality.lean",
+   "line": 451,
+   "name": "meixner_orthogonality",
+   "proofLines": 98
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/IntegratedKernels.lean",
+   "line": 437,
+   "name": "struvePrim_primitive_ofReal",
+   "proofLines": 98
+  },
+  {
+   "file": "DLMF/Bessel/YIntegralRep.lean",
+   "line": 485,
+   "name": "contour_identity",
+   "proofLines": 97
+  },
+  {
+   "file": "DLMF/Confluent/ZeroTools.lean",
+   "line": 1190,
+   "name": "kzt_U_neg_im_nat",
+   "proofLines": 97
+  },
+  {
+   "file": "DLMF/Mathieu/IntegralEquations.lean",
+   "line": 437,
+   "name": "integral_cos_mathieuCe_even",
+   "proofLines": 97
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/Wronskians.lean",
+   "line": 88,
+   "name": "p3m_exists_coeff_ne_zero",
+   "proofLines": 97
+  },
+  {
+   "file": "DLMF/Theta/ZeroValues.lean",
+   "line": 124,
+   "name": "p20R1_F_second",
+   "proofLines": 97
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/WhittakerTransforms.lean",
+   "line": 161,
+   "name": "laplace_whittakerM",
+   "proofLines": 96
+  },
+  {
+   "file": "DLMF/Gamma/ComplexBinet.lean",
+   "line": 539,
+   "name": "tendsto_norm_Gamma_vertical_div",
+   "proofLines": 96
+  },
+  {
+   "file": "DLMF/Hypergeometric/Elementary/AlgebraicValues.lean",
+   "line": 905,
+   "name": "value_one_ninth",
+   "proofLines": 96
+  },
+  {
+   "file": "DLMF/IncompleteGamma/Asymptotics/PartialSums.lean",
+   "line": 825,
+   "name": "igAsy_one_decomp",
+   "proofLines": 96
+  },
+  {
+   "file": "DLMF/JacobiElliptic/EisensteinSeries.lean",
+   "line": 642,
+   "name": "p3j_ps_eq_G",
+   "proofLines": 96
+  },
+  {
+   "file": "DLMF/Lame/WeierstrassForm.lean",
+   "line": 163,
+   "name": "p3l_weierstrass",
+   "proofLines": 96
+  },
+  {
+   "file": "DLMF/Legendre/BoundaryAsymptotics.lean",
+   "line": 933,
+   "name": "legBd_olverQ_log_isBigO",
+   "proofLines": 96
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/CrossConnection/RadialAndMonodromy.lean",
+   "line": 719,
+   "name": "p2m_radialMathieuMs_two_eq",
+   "proofLines": 96
+  },
+  {
+   "file": "DLMF/Weierstrass/Relations/ThetaIdentities.lean",
+   "line": 143,
+   "name": "p23R1_sigma_eq_of",
+   "proofLines": 96
+  },
+  {
+   "file": "DLMF/Airy/Asymptotics/OscillatoryRemainders.lean",
+   "line": 118,
+   "name": "airyDer_ray_ratio",
+   "proofLines": 95
+  },
+  {
+   "file": "DLMF/Confluent/Zeros/ComplexZeros.lean",
+   "line": 407,
+   "name": "kummerM_large_zeros",
+   "proofLines": 95
+  },
+  {
+   "file": "DLMF/Heun/Hypergeometric.lean",
+   "line": 341,
+   "name": "heunLocal_four_eq_hypergeometric",
+   "proofLines": 95
+  },
+  {
+   "file": "DLMF/Hypergeometric/ConnectionFormulas.lean",
+   "line": 208,
+   "name": "quadratic_connection_half_sum",
+   "proofLines": 95
+  },
+  {
+   "file": "DLMF/Mathieu/Hill/Ince.lean",
+   "line": 366,
+   "name": "isInceSolution_cos_even_iff",
+   "proofLines": 95
+  },
+  {
+   "file": "DLMF/Combinatorics/PartitionIdentities/RestrictedProducts.lean",
+   "line": 379,
+   "name": "r26a_hasSum_partitionCountIn",
+   "proofLines": 94
+  },
+  {
+   "file": "DLMF/Confluent/KummerDecay.lean",
+   "line": 201,
+   "name": "kumDec_bound_base",
+   "proofLines": 94
+  },
+  {
+   "file": "DLMF/Gamma/BetaFunction/ParameterIntegrals.lean",
+   "line": 187,
+   "name": "beta_shifted_of_pos",
+   "proofLines": 94
+  },
+  {
+   "file": "DLMF/Legendre/Toroidal.lean",
+   "line": 208,
+   "name": "legTor_P_hyp_generic",
+   "proofLines": 94
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/RadialSeries/IntegerCrossProducts.lean",
+   "line": 473,
+   "name": "p3m_hasSum_radialMathieuMs_odd_cross_gen",
+   "proofLines": 94
+  },
+  {
+   "file": "DLMF/MatrixArgument/Bessel.lean",
+   "line": 132,
+   "name": "besselB_neg",
+   "proofLines": 94
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/IntegratedExpansions.lean",
+   "line": 429,
+   "name": "struvePrim_tendsto_Phi",
+   "proofLines": 94
+  },
+  {
+   "file": "DLMF/Zeta/Sums.lean",
+   "line": 242,
+   "name": "s25a_hasSum_838_re",
+   "proofLines": 94
+  },
+  {
+   "file": "DLMF/Confluent/Asymptotics/LargeArgument.lean",
+   "line": 418,
+   "name": "hasAsymptoticExpansion_regularizedConfluent_of_re_pos",
+   "proofLines": 93
+  },
+  {
+   "file": "DLMF/Coulomb/Energy/Connection.lean",
+   "line": 545,
+   "name": "coulombf_eq_whittaker_neg",
+   "proofLines": 93
+  },
+  {
+   "file": "DLMF/Heun/Integral.lean",
+   "line": 230,
+   "name": "heun_hermiteDarboux_example₂",
+   "proofLines": 93
+  },
+  {
+   "file": "DLMF/IncompleteGamma/BetaAsymptotics.lean",
+   "line": 144,
+   "name": "incBeta_large_a_integer_b_exact",
+   "proofLines": 93
+  },
+  {
+   "file": "DLMF/Mathieu/Hill/Floquet.lean",
+   "line": 660,
+   "name": "hill_all_periodic_of_minimal_period",
+   "proofLines": 93
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQCeSeGeneral.lean",
+   "line": 176,
+   "name": "p3q_ce_ge6",
+   "proofLines": 93
+  },
+  {
+   "file": "DLMF/Painleve/SpecialSolutions.lean",
+   "line": 657,
+   "name": "painleveV_whittaker_riccati",
+   "proofLines": 93
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/Weber/Solutions.lean",
+   "line": 556,
+   "name": "pcfW_aux_signs",
+   "proofLines": 93
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/ScaledExpansions.lean",
+   "line": 494,
+   "name": "angerA_scaled_inner_equiv",
+   "proofLines": 93
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/ScaledExpansions.lean",
+   "line": 592,
+   "name": "angerA_turning_equiv",
+   "proofLines": 93
+  },
+  {
+   "file": "DLMF/Struve/Lommel.lean",
+   "line": 1001,
+   "name": "lommelCapital_exists_parameter_limit",
+   "proofLines": 93
+  },
+  {
+   "file": "DLMF/Weierstrass/Series.lean",
+   "line": 395,
+   "name": "weierstrassZeta_laurent",
+   "proofLines": 93
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+   "line": 513,
+   "name": "differentiableOn_of_continuousOn_of_separately",
+   "proofLines": 93
+  },
+  {
+   "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+   "line": 675,
+   "name": "integral_add_rpow_ge_of_lt_one",
+   "proofLines": 92
+  },
+  {
+   "file": "DLMF/Combinatorics/Multinomial.lean",
+   "line": 413,
+   "name": "card_finpartition_blocks_eq",
+   "proofLines": 92
+  },
+  {
+   "file": "DLMF/Heun/DoublyPeriodic.lean",
+   "line": 448,
+   "name": "heunLocal_lame_even_odd",
+   "proofLines": 92
+  },
+  {
+   "file": "DLMF/Heun/Hypergeometric.lean",
+   "line": 242,
+   "name": "heunLocal_two_eq_hypergeometric",
+   "proofLines": 92
+  },
+  {
+   "file": "DLMF/Hypergeometric/EulerHalfLine.lean",
+   "line": 30,
+   "name": "eulerHalfLine_integrable_integral",
+   "proofLines": 92
+  },
+  {
+   "file": "DLMF/Legendre/SpecialValues.lean",
+   "line": 520,
+   "name": "ferrersQ_half_order_14",
+   "proofLines": 92
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/RadialSeries/SeriesEquation.lean",
+   "line": 732,
+   "name": "p2m_F_ode",
+   "proofLines": 92
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQCeSeGeneral.lean",
+   "line": 277,
+   "name": "p3q_se_ge6",
+   "proofLines": 92
+  },
+  {
+   "file": "DLMF/MatrixArgument/Zonal.lean",
+   "line": 731,
+   "name": "hasIntegralOn_zonalPolynomial_laplace",
+   "proofLines": 92
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/Sixth.lean",
+   "line": 683,
+   "name": "IsPainleveVIOn.quartic",
+   "proofLines": 92
+  },
+  {
+   "file": "DLMF/Confluent/Asymptotics/LargeArgument.lean",
+   "line": 996,
+   "name": "kummerM_large_b",
+   "proofLines": 91
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/BesselTransforms.lean",
+   "line": 555,
+   "name": "confLP_of_strip",
+   "proofLines": 91
+  },
+  {
+   "file": "DLMF/JacobiElliptic/ElementaryIdentities.lean",
+   "line": 542,
+   "name": "jacobiPQk_half_sq",
+   "proofLines": 91
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/InequalityTools.lean",
+   "line": 368,
+   "name": "opIneq_gegenbauer_sonine",
+   "proofLines": 91
+  },
+  {
+   "file": "DLMF/QHypergeometric/HigherSummations.lean",
+   "line": 556,
+   "name": "jackson_eight_phi_seven",
+   "proofLines": 91
+  },
+  {
+   "file": "DLMF/Bailey.lean",
+   "line": 675,
+   "name": "watsonR",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMF/Combinatorics/PlanePartitions/GeneratingFunctions.lean",
+   "line": 544,
+   "name": "hasSum_planePartitionCount",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMF/Confluent/BasicProperties/IntegerParametersAndLimits.lean",
+   "line": 508,
+   "name": "isBigO_kummerU_at_zero_re_ge_two",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMF/Confluent/IntegralRepresentations/BarnesAndConnections.lean",
+   "line": 240,
+   "name": "kummerM_eq_barnes_integral",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+   "line": 128,
+   "name": "arcsin_real_imag",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean",
+   "line": 417,
+   "name": "erfInt_laplace_plus",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMF/Hypergeometric/CubicTools.lean",
+   "line": 691,
+   "name": "hcub_cpow",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMF/Legendre/Associated/ConjugationAndValues.lean",
+   "line": 316,
+   "name": "olverQ_ode",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMF/Legendre/Conical.lean",
+   "line": 67,
+   "name": "conicalQHat_connection",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMF/Legendre/SpecialValues.lean",
+   "line": 694,
+   "name": "associatedP_half_order_16",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMF/MatrixArgument/GammaBeta.lean",
+   "line": 222,
+   "name": "laplaceTransform_matrixConvolution",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMF/Struve/LargeOrderTools.lean",
+   "line": 541,
+   "name": "struveLO_M_integral_bound",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMF/Weierstrass/Series.lean",
+   "line": 561,
+   "name": "laurentCoeff_recursion",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/SturmOscillation.lean",
+   "line": 120,
+   "name": "p2s_count_le",
+   "proofLines": 90
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/GaussTransforms.lean",
+   "line": 300,
+   "name": "confLP_gauss_real",
+   "proofLines": 89
+  },
+  {
+   "file": "DLMF/Legendre/Integer.lean",
+   "line": 300,
+   "name": "wronskian_legendreP_legendreQ_nat",
+   "proofLines": 89
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/CrossConnection/RadialAndMonodromy.lean",
+   "line": 81,
+   "name": "p2m_radialMs_one_even_deriv",
+   "proofLines": 89
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/QFamilies/ClassicalLimits.lean",
+   "line": 733,
+   "name": "askeyWilson_difference_equation",
+   "proofLines": 89
+  },
+  {
+   "file": "DLMF/Spheroidal/FerrersTools.lean",
+   "line": 463,
+   "name": "p2y_hasSum_expansion",
+   "proofLines": 89
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Asymptotics/Watson.lean",
+   "line": 87,
+   "name": "isBigO_integral_exp_smul",
+   "proofLines": 89
+  },
+  {
+   "file": "DLMF/Bailey.lean",
+   "line": 543,
+   "name": "watsonR_of_ne",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Inequalities.lean",
+   "line": 591,
+   "name": "bernoulli_two_mul_zeta_bounds",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+   "line": 602,
+   "name": "trig_riccati_ode_general",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+   "line": 1034,
+   "name": "trigR4_mul_sqrt_one_sub_inv_sq",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMF/ErrorFunctions/ZeroClassification.lean",
+   "line": 637,
+   "name": "zcnt_octant_classification",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMF/ExpIntegrals/Asymptotics.lean",
+   "line": 256,
+   "name": "expIntAux_eq_integral_rotate",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMF/ExpIntegrals/Expansions.lean",
+   "line": 911,
+   "name": "Ein_spherical_series",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMF/GeneralizedHypergeometric/AnalyticProperties.lean",
+   "line": 710,
+   "name": "genHG_one_converges_iff",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/ConvolutionsAndFourier.lean",
+   "line": 90,
+   "name": "laguerrePolyL_unweighted_convolution",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMF/QHypergeometric/Appell.lean",
+   "line": 414,
+   "name": "qLauricella_transformation",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMF/Spheroidal/FerrersSeries/RatiosAndSecondKind.lean",
+   "line": 563,
+   "name": "spheroidalCoeff_recurrence",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMF/Spheroidal/FerrersTools.lean",
+   "line": 369,
+   "name": "p2y_D_bound",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMF/Weierstrass/Relations/JacobiIdentities.lean",
+   "line": 61,
+   "name": "weierstrassSigma_add_halfPeriod_eq_theta",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Asymptotics/LaplaceSaddle.lean",
+   "line": 68,
+   "name": "lapSad_hasAsymptoticExpansion_gauss_odd",
+   "proofLines": 88
+  },
+  {
+   "file": "DLMF/CoalescingSaddles/CanonicalIntegrals/OscillatoryRepresentations.lean",
+   "line": 410,
+   "name": "q2s_fold_airy",
+   "proofLines": 87
+  },
+  {
+   "file": "DLMF/Combinatorics/Compositions.lean",
+   "line": 213,
+   "name": "q26b_compositionCountNoOne_add_two",
+   "proofLines": 87
+  },
+  {
+   "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+   "line": 69,
+   "name": "whittakerBessel_core_analytic",
+   "proofLines": 87
+  },
+  {
+   "file": "DLMF/Coulomb/RhoEtaRepresentations.lean",
+   "line": 701,
+   "name": "q2a_contFrac_real",
+   "proofLines": 87
+  },
+  {
+   "file": "DLMF/Hypergeometric/AnalyticProperties.lean",
+   "line": 473,
+   "name": "imaginary_excess_limit",
+   "proofLines": 87
+  },
+  {
+   "file": "DLMF/Mathieu/Hill/Ince.lean",
+   "line": 627,
+   "name": "isInceSolution_sin_even_iff",
+   "proofLines": 87
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/JacobiDiscriminant.lean",
+   "line": 525,
+   "name": "disc_eq_EE",
+   "proofLines": 87
+  },
+  {
+   "file": "DLMF/RiemannTheta/Products.lean",
+   "line": 649,
+   "name": "riemannThetaChar_four_product",
+   "proofLines": 87
+  },
+  {
+   "file": "DLMF/Zeta/IntegerArguments.lean",
+   "line": 578,
+   "name": "iteratedDeriv_two_riemannZeta_zero",
+   "proofLines": 87
+  },
+  {
+   "file": "DLMF/Confluent/ContinuedFractions.lean",
+   "line": 893,
+   "name": "kummerM_continued_fraction_tendsto_of_ne",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/Stieltjes.lean",
+   "line": 490,
+   "name": "cfInt_stieltjes_zero_of_re_pos",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMF/Hypergeometric/Solutions/Equation.lean",
+   "line": 270,
+   "name": "zero_wronskian",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMF/IncompleteGamma/SeriesRecurrences.lean",
+   "line": 317,
+   "name": "scSph_euler_F",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMF/Legendre/Conical.lean",
+   "line": 396,
+   "name": "conical_singular_8",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Limits.lean",
+   "line": 364,
+   "name": "ultrasphPoly_limit_chebyshev",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+   "line": 155,
+   "name": "qHahn_difference_equation_aux",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/Weber/Solutions.lean",
+   "line": 734,
+   "name": "pcfW_aux_scalar",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMF/QHypergeometric/HigherSummations.lean",
+   "line": 413,
+   "name": "qbR4_jackson_core",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMF/QSeries/Identities.lean",
+   "line": 363,
+   "name": "heine_transformation",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMF/Spheroidal/Angular.lean",
+   "line": 294,
+   "name": "p1s_spheroidalSpectrum_zero_subset",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/LargeOrder.lean",
+   "line": 651,
+   "name": "struveK_scaled_asymptotic",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/LiouvilleGreenFinite.lean",
+   "line": 270,
+   "name": "lg2_exists_volterra_solution_add",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/SturmOscillation.lean",
+   "line": 639,
+   "name": "p2s_gap",
+   "proofLines": 86
+  },
+  {
+   "file": "DLMF/Combinatorics/PartitionIdentities/StaircaseAndPentagonal.lean",
+   "line": 186,
+   "name": "r26a_card_restricted_recurrence",
+   "proofLines": 85
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/Stieltjes.lean",
+   "line": 74,
+   "name": "kummerU_gauss_of_re_pos",
+   "proofLines": 85
+  },
+  {
+   "file": "DLMF/Coulomb/RhoEtaAsymptotics.lean",
+   "line": 294,
+   "name": "largeRhoFGHat_isBigO",
+   "proofLines": 85
+  },
+  {
+   "file": "DLMF/Coulomb/RhoEtaLimits.lean",
+   "line": 797,
+   "name": "coulomb_isEquivalent_large_ell",
+   "proofLines": 85
+  },
+  {
+   "file": "DLMF/Hypergeometric/EulerIntegral.lean",
+   "line": 191,
+   "name": "chu_vandermonde_sum",
+   "proofLines": 85
+  },
+  {
+   "file": "DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean",
+   "line": 649,
+   "name": "lowerIncGamma_fixed_ratio_asymptotic",
+   "proofLines": 85
+  },
+  {
+   "file": "DLMF/Legendre/BoundaryAsymptotics.lean",
+   "line": 1153,
+   "name": "legBd_ferrersQ_log_isBigO",
+   "proofLines": 85
+  },
+  {
+   "file": "DLMF/NumberTheory/Functions.lean",
+   "line": 441,
+   "name": "q27_sum_divisors_jordanTotient",
+   "proofLines": 85
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Associated.lean",
+   "line": 1126,
+   "name": "morsePolynomialFunction_ode",
+   "proofLines": 85
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Classical.lean",
+   "line": 547,
+   "name": "jacobi_shifted_orthogonal",
+   "proofLines": 85
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/ConvolutionsAndFourier.lean",
+   "line": 184,
+   "name": "gegProd_ibp",
+   "proofLines": 85
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Legendre.lean",
+   "line": 433,
+   "name": "tendsto_sqrt_mul_integral_laplace_half",
+   "proofLines": 85
+  },
+  {
+   "file": "DLMF/Spheroidal/FerrersSeries/RecurrencesAndConvergence.lean",
+   "line": 420,
+   "name": "spheroidalCoeff_recurrence_of_le",
+   "proofLines": 85
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/Laplace.lean",
+   "line": 86,
+   "name": "laplace_regularizedHGFun_of_norm_lt",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/Confluent/Relations.lean",
+   "line": 211,
+   "name": "kummerU_besselK_of_not_int",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/Elementary/Hyperbolic/InverseBranches.lean",
+   "line": 600,
+   "name": "arccosh_outer_cut",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricLegendreConnection.lean",
+   "line": 31,
+   "name": "p19sR1_integral_eq_of_lin",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/ErrorFunctions/BoundsAsymptotics/GaussianRemainders.lean",
+   "line": 784,
+   "name": "erfc_remainder_sign",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/Gamma/Integrals/BarnesAndRamanujan.lean",
+   "line": 323,
+   "name": "mellin_barnes_four",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/Heun/DoublyPeriodic.lean",
+   "line": 291,
+   "name": "heun_weierstrassForm",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/Mathieu/SecondSolutions.lean",
+   "line": 1265,
+   "name": "mathieu_secular_unbounded",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/MatrixArgument/GammaBeta.lean",
+   "line": 1189,
+   "name": "q2m_beta_scale",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/BoundsZeros/PointwiseAndZeroBounds.lean",
+   "line": 259,
+   "name": "ultrasphPoly_odd_bound",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/InequalityTools.lean",
+   "line": 275,
+   "name": "opIneq_Gamma_odd",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/ProductTools.lean",
+   "line": 24,
+   "name": "pcfIntegral4_base_beta",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/AngerWeberExpansions.lean",
+   "line": 409,
+   "name": "weberE_even_bound",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/Zeta/IntegralReps/ElementaryKernels.lean",
+   "line": 550,
+   "name": "tendsto_integral_fract_sub_half",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/Zeta/Sums.lean",
+   "line": 1277,
+   "name": "hasSum_riemannZeta_two_mul_div_odd",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMFMathlib/Analysis/EulerMaclaurin.lean",
+   "line": 135,
+   "name": "sum_range_succ_eq_integral_add",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/SturmOscillation.lean",
+   "line": 416,
+   "name": "p2s_box",
+   "proofLines": 84
+  },
+  {
+   "file": "DLMF/Combinatorics/Permutations/RookPolynomials.lean",
+   "line": 333,
+   "name": "hitPolynomial_eq",
+   "proofLines": 83
+  },
+  {
+   "file": "DLMF/Confluent/AsymptoticConsequences.lean",
+   "line": 183,
+   "name": "regularizedHGFun_poincare_sector",
+   "proofLines": 83
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/Stieltjes.lean",
+   "line": 304,
+   "name": "kummerU_stieltjes_of_re_pos",
+   "proofLines": 83
+  },
+  {
+   "file": "DLMF/Coulomb/Energy/Connection.lean",
+   "line": 442,
+   "name": "coulombf_eq_whittaker_pos",
+   "proofLines": 83
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean",
+   "line": 1096,
+   "name": "fresnelSinInt_sqrt_laplace",
+   "proofLines": 83
+  },
+  {
+   "file": "DLMF/Legendre/Sums.lean",
+   "line": 506,
+   "name": "heine_norm_legendreQ_le",
+   "proofLines": 83
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean",
+   "line": 630,
+   "name": "ultrasphPoly_raise_parameter_sq",
+   "proofLines": 83
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/General.lean",
+   "line": 388,
+   "name": "eval_nonneg_or_nonpos",
+   "proofLines": 83
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/ConvolutionsAndFourier.lean",
+   "line": 578,
+   "name": "jacobi_fractional_integral",
+   "proofLines": 83
+  },
+  {
+   "file": "DLMF/Spheroidal/Equation.lean",
+   "line": 393,
+   "name": "isSpheroidalSolutionReal_iff_isSpheroidalFactor",
+   "proofLines": 83
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Asymptotics/WatsonSector.lean",
+   "line": 64,
+   "name": "integral_cpow_mul_cexp_neg_mul_Ioi",
+   "proofLines": 83
+  },
+  {
+   "file": "DLMF/BernoulliEuler/RelatedNumbers.lean",
+   "line": 575,
+   "name": "sum_choose_bernoulli_fib",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/Confluent/LargeA.lean",
+   "line": 1064,
+   "name": "kummerU_large_a_eq",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/Gamma/Asymptotics/ShiftedStirling.lean",
+   "line": 563,
+   "name": "cexp_poly_sub_isBigO",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/Gamma/IntegralRepresentations/FrullaniAndMoments.lean",
+   "line": 370,
+   "name": "digamma_coth",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/Hypergeometric/FurtherTransformations/Quadratic.lean",
+   "line": 438,
+   "name": "gauss_quadratic",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/Hypergeometric/LoopIntegral.lean",
+   "line": 491,
+   "name": "differentiable_hypergeometricLoop",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/JacobiElliptic/Cyclic/QuarterPeriodAndThreePoint.lean",
+   "line": 712,
+   "name": "jacobi_cyclic_s4_triple",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/JacobiElliptic/SpecialValues/RealAndHalfPeriods.lean",
+   "line": 272,
+   "name": "jacobi_specialValues_HalfK",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/Lame/Eigenvalues.lean",
+   "line": 162,
+   "name": "Real.lameEigenfunction_spec",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/Legendre/UniformCoordinates/TurningPointMaps.lean",
+   "line": 946,
+   "name": "legY_existsUnique",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/Legendre/ZeroTools.lean",
+   "line": 946,
+   "name": "lzt_ferrersP_neg_order_zero_count",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/Legendre/Zeros/Exterior.lean",
+   "line": 145,
+   "name": "lzero_ext_count",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/RadialSeries/IntegerCrossProducts.lean",
+   "line": 310,
+   "name": "p3m_hasSum_radialMathieuMc_odd_cross_gen",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/MatrixArgument/GammaBeta.lean",
+   "line": 474,
+   "name": "q2m_indicator_eq_prod",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/DoubleLaplaceAndGaussian.lean",
+   "line": 464,
+   "name": "laguerrePolyL_double_laplace_integral",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/Painleve/SpecialSolutions.lean",
+   "line": 799,
+   "name": "painleveVI_hypergeometric_riccati",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/Theta/Products/LogDerivativesAndDoubleProducts.lean",
+   "line": 241,
+   "name": "jacobiTheta_logDeriv_series_uniform",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/LiouvilleGreenVolterra.lean",
+   "line": 281,
+   "name": "exists_volterra_solution_add",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/SturmOscillation.lean",
+   "line": 856,
+   "name": "p2s_sign",
+   "proofLines": 82
+  },
+  {
+   "file": "DLMF/Confluent/LargeASharp.lean",
+   "line": 1057,
+   "name": "kummerU_large_a_eq_half",
+   "proofLines": 81
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+   "line": 238,
+   "name": "symEllIntRF_asymp_small_x",
+   "proofLines": 81
+  },
+  {
+   "file": "DLMF/Gamma/VerticalBounds.lean",
+   "line": 225,
+   "name": "exists_norm_recip_Gamma_le",
+   "proofLines": 81
+  },
+  {
+   "file": "DLMF/Hypergeometric/Identities/Dixon.lean",
+   "line": 598,
+   "name": "dixon_sum",
+   "proofLines": 81
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/CrossConnection/AngularKernels.lean",
+   "line": 189,
+   "name": "p2m_key_even",
+   "proofLines": 81
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/CrossSeries.lean",
+   "line": 308,
+   "name": "p2m_decay_nat",
+   "proofLines": 81
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/KernelIntegrals.lean",
+   "line": 90,
+   "name": "p3m_isMathieuSolution_kernelW",
+   "proofLines": 81
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/IntegratedExpansions.lean",
+   "line": 566,
+   "name": "struveM_primitive_asymptotic",
+   "proofLines": 81
+  },
+  {
+   "file": "DLMF/Struve/Representations/PoissonAndBarnesLoop.lean",
+   "line": 835,
+   "name": "struveLoop_tail_bound",
+   "proofLines": 81
+  },
+  {
+   "file": "DLMF/Zeta/IntegerArguments.lean",
+   "line": 300,
+   "name": "riemannZeta_two_mul_add_one_eq_integral",
+   "proofLines": 81
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Integral/Improper.lean",
+   "line": 59,
+   "name": "tendsto_abel_of_tendsto_intervalIntegral",
+   "proofLines": 81
+  },
+  {
+   "file": "DLMF/Airy/Asymptotics/SectorRemainders.lean",
+   "line": 202,
+   "name": "airySt_ai_third",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Airy/ScorerAsymptotics.lean",
+   "line": 131,
+   "name": "scorerTwo_half",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Generalizations/HigherOrder.lean",
+   "line": 828,
+   "name": "hasSum_degenerateBernoulli",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Bessel/Elementary.lean",
+   "line": 588,
+   "name": "besselI_eq_poisson_integral",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Bessel/SturmZeros.lean",
+   "line": 87,
+   "name": "conj_eq_of_regularized0F1_eq_zero",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Confluent/IntegralRepresentations/BarnesAndConnections.lean",
+   "line": 683,
+   "name": "whittakerM_euler",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/BesselTransforms.lean",
+   "line": 841,
+   "name": "bessel_regularizedHGFun_U",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Gamma/Integrals/BarnesAndRamanujan.lean",
+   "line": 955,
+   "name": "differentiableOn_integral_ramanujanIntegrand",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Hypergeometric/Identities/Dixon.lean",
+   "line": 294,
+   "name": "exists_bound",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Hypergeometric/IntegralRepresentations.lean",
+   "line": 39,
+   "name": "integral_Ioi",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Hypergeometric/IntegralRepresentations.lean",
+   "line": 305,
+   "name": "fractional_integral",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Legendre/Integrals/ExteriorGreen.lean",
+   "line": 746,
+   "name": "legendre_product_integral_20",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Legendre/Series.lean",
+   "line": 1178,
+   "name": "legFS_wP_ratio",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Legendre/SpecialValues.lean",
+   "line": 1224,
+   "name": "legendre_elliptic_26",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Legendre/Zeros/FerrersAndReal.lean",
+   "line": 244,
+   "name": "ferrersP_zero_count",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Mathieu/Noninteger/Properties.lean",
+   "line": 368,
+   "name": "p1b_summable_norm_mul_exp",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/LaguerreAndHermite.lean",
+   "line": 786,
+   "name": "laguerrePolyL_convolution",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Painleve/Equations.lean",
+   "line": 564,
+   "name": "isPainleveVOn_of_symmetric",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Spheroidal/FerrersSeries/RatiosAndSecondKind.lean",
+   "line": 354,
+   "name": "p2y_ratio_small",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Spheroidal/FerrersSeries/RecurrencesAndConvergence.lean",
+   "line": 214,
+   "name": "p2y_core",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Zeta/IntegralReps/ElementaryKernels.lean",
+   "line": 432,
+   "name": "riemannZeta_eq_integral_exp_add_one_sq",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Integral/PrincipalValue.lean",
+   "line": 66,
+   "name": "pv_tendsto_of_integrableOn_sub",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMFMathlib/Analysis/SpecificLimits/Pincherle.lean",
+   "line": 48,
+   "name": "pinch_norm_sum_tendsto",
+   "proofLines": 80
+  },
+  {
+   "file": "DLMF/Confluent/IntegralRepresentations/EulerAndBessel.lean",
+   "line": 952,
+   "name": "differentiableOn_integral_besselK",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMF/Confluent/LargeASharp.lean",
+   "line": 136,
+   "name": "isBigO_regularizedConfluent_sub_div",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean",
+   "line": 829,
+   "name": "erfc_continuedFraction_two",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+   "line": 525,
+   "name": "appF2_euler_germ",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMF/Hypergeometric/ContinuedFractions.lean",
+   "line": 565,
+   "name": "contiguous_continued_fraction_limit",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMF/Hypergeometric/CubicTools.lean",
+   "line": 162,
+   "name": "hcub_cubic",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMF/Hypergeometric/Solutions/Equation.lean",
+   "line": 433,
+   "name": "infinity_wronskian",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMF/IncompleteGamma/BetaAsymptotics.lean",
+   "line": 638,
+   "name": "incG_betaEta_exists",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMF/IncompleteGamma/SeriesRecurrences.lean",
+   "line": 614,
+   "name": "scSph_series",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMF/Legendre/QAdditionTools.lean",
+   "line": 345,
+   "name": "legQAdd_one_add_mem_slitPlane",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQCeSe.lean",
+   "line": 101,
+   "name": "p3q_ce1",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQCeSe.lean",
+   "line": 186,
+   "name": "p3q_se1",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Differential/ChebyshevAndShifts.lean",
+   "line": 734,
+   "name": "ultrasphPoly_weighted_identity",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Complex/StarPrimitive.lean",
+   "line": 41,
+   "name": "starPrim_hasDerivAt",
+   "proofLines": 79
+  },
+  {
+   "file": "DLMF/Airy/Asymptotics/DerivativeRemainders.lean",
+   "line": 138,
+   "name": "airyDer_stieltjes",
+   "proofLines": 78
+  },
+  {
+   "file": "DLMF/Airy/Asymptotics/RotatedBi.lean",
+   "line": 30,
+   "name": "airyRot_bi_rot_eq",
+   "proofLines": 78
+  },
+  {
+   "file": "DLMF/Airy/Asymptotics/RotatedBi.lean",
+   "line": 221,
+   "name": "airyRot_biDeriv_rot_eq",
+   "proofLines": 78
+  },
+  {
+   "file": "DLMF/Confluent/ParabolicCylinder/WronskiansAndConnections.lean",
+   "line": 234,
+   "name": "pcfU_connection_mul_I",
+   "proofLines": 78
+  },
+  {
+   "file": "DLMF/Elementary/Hyperbolic/IdentitiesAndSeries.lean",
+   "line": 507,
+   "name": "cosh_le_sinhc_cube",
+   "proofLines": 78
+  },
+  {
+   "file": "DLMF/Heun/HeunFunctions.lean",
+   "line": 153,
+   "name": "p2h_eigen",
+   "proofLines": 78
+  },
+  {
+   "file": "DLMF/Legendre/SpecialValues.lean",
+   "line": 437,
+   "name": "ferrersQ_half_order_13",
+   "proofLines": 78
+  },
+  {
+   "file": "DLMF/Legendre/Toroidal.lean",
+   "line": 524,
+   "name": "toroidalP_integral",
+   "proofLines": 78
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Multivariate.lean",
+   "line": 384,
+   "name": "diskPolynomial_orthogonal",
+   "proofLines": 78
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/QFamilies/ClassicalLimits.lean",
+   "line": 638,
+   "name": "askeyWilson_basis_step",
+   "proofLines": 78
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/AngerWeberExpansions.lean",
+   "line": 497,
+   "name": "weberE_large_integer_0",
+   "proofLines": 78
+  },
+  {
+   "file": "DLMF/Bessel/NeumannSeries.lean",
+   "line": 895,
+   "name": "kumTerm_succ_sub",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMF/CoalescingSaddles/StokesSets.lean",
+   "line": 197,
+   "name": "q2s_cusp_stokes_mpr",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMF/Combinatorics/Multinomial.lean",
+   "line": 307,
+   "name": "card_perm_partition_eq",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMF/Combinatorics/PlanePartitions/BoxFormula.lean",
+   "line": 801,
+   "name": "planePartitionCount_eq_card_arrays",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMF/Coulomb/Energy/RegularSolution.lean",
+   "line": 253,
+   "name": "q2e_iteratedDeriv_of_ode",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMF/Hypergeometric/GeneralizedIntegral.lean",
+   "line": 39,
+   "name": "regularizedHGFun_cons_eq_integral",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMF/Legendre/Harmonics.lean",
+   "line": 857,
+   "name": "herglotz_generating",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMF/Legendre/Integrals/FerrersDiagonal.lean",
+   "line": 132,
+   "name": "legPIU_bound_P",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMF/Legendre/ZeroTools.lean",
+   "line": 585,
+   "name": "lzt_upper_count",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMF/Mathieu/Hill/Floquet.lean",
+   "line": 965,
+   "name": "hillDiscriminant_order_half",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/Sixth.lean",
+   "line": 165,
+   "name": "IsPainleveVIOn.s₃",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMF/Spheroidal/Existence.lean",
+   "line": 84,
+   "name": "existsUnique_isSpheroidalPsFactor",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMF/Weierstrass/ModularFunctions.lean",
+   "line": 672,
+   "name": "isCuspForm_modularLambda",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/EntireLinear.lean",
+   "line": 53,
+   "name": "p1oTaylorSeq_bound",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMFMathlib/NumberTheory/BernoulliTaylor.lean",
+   "line": 46,
+   "name": "hasSum_pi_mul_cot_zeta",
+   "proofLines": 77
+  },
+  {
+   "file": "DLMF/Combinatorics/Staircase.lean",
+   "line": 274,
+   "name": "s26a_card_staircase",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/HankelKernels.lean",
+   "line": 268,
+   "name": "cfInt_exists_norm_besselJ_le",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Coulomb/RhoEtaLimits.lean",
+   "line": 173,
+   "name": "q2b_rem_isLittleO",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Elliptic/Complete.lean",
+   "line": 296,
+   "name": "legendre_relation",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean",
+   "line": 361,
+   "name": "fresMB_real",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Gamma/SeriesExpansions.lean",
+   "line": 246,
+   "name": "recipGammaCoeff_recurrence",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Hypergeometric/Solutions/Logarithmic.lean",
+   "line": 656,
+   "name": "logarithmic_second_fundamental",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/IncompleteGamma/FractionTools.lean",
+   "line": 434,
+   "name": "incGF_LF_tendsto_real",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/JacobiElliptic/Cyclic/QuarterPeriodAndThreePoint.lean",
+   "line": 165,
+   "name": "jacobi_cyclic_s4_pairs",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Legendre/SpecialValues.lean",
+   "line": 356,
+   "name": "ferrersP_half_order_12",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQGeneral.lean",
+   "line": 470,
+   "name": "p3q_mathieuA_seven",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQGeneral.lean",
+   "line": 550,
+   "name": "p3q_mathieuB_seven",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/NumberTheory/Characters.lean",
+   "line": 776,
+   "name": "divisorConvolutionSum_fourier",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/GeneralIdentities.lean",
+   "line": 755,
+   "name": "compact_support_L2_expansion",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Hahn/Orthogonality.lean",
+   "line": 367,
+   "name": "charlier_orthogonality",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/Sixth.lean",
+   "line": 33,
+   "name": "IsPainleveVIOn.s₁",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/SectorAsymptotics.lean",
+   "line": 755,
+   "name": "pcfSect_V_sector",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Selberg/ContinuationAndAomoto.lean",
+   "line": 428,
+   "name": "integrableOn_weightR_mul_vdmSq_rpow",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Spheroidal/FerrersTools.lean",
+   "line": 73,
+   "name": "p2y_eq_zero_of_moments",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Struve/Representations/BarnesAndSonine.lean",
+   "line": 313,
+   "name": "struveHPrimitive_recurrence",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Weierstrass/EllipticFunctionsAndInvariants.lean",
+   "line": 725,
+   "name": "p23R1_weierstrassP_eventuallyEq_of_invariants",
+   "proofLines": 76
+  },
+  {
+   "file": "DLMF/Airy/Integrals/PrimitivesAndLaplace.lean",
+   "line": 823,
+   "name": "airyLap_neg_eq_integral_A",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Bailey.lean",
+   "line": 778,
+   "name": "watson_transformation",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Combinatorics/Stirling/AsymptoticsAndCycles.lean",
+   "line": 80,
+   "name": "q26a_stirlingFirst_add_isEquivalent",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/HankelKernels.lean",
+   "line": 67,
+   "name": "cfInt_laplace_rpow_le_of_nonneg",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/Quadratic.lean",
+   "line": 203,
+   "name": "compEllIntEk_eq_agm",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean",
+   "line": 241,
+   "name": "Real.millsRatio_bound_2",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Gamma/BetaFunction/Vertical.lean",
+   "line": 250,
+   "name": "vb_fourier_inner",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Hypergeometric/ParameterHolomorphy.lean",
+   "line": 127,
+   "name": "differentiableOn_regularizedGaussHGIntegral_joint",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Lame/Polynomials/Basis.lean",
+   "line": 300,
+   "name": "p2p_lameRecVec_last_ne_zero",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Legendre/IntegralTools/FractionalAndLaplace.lean",
+   "line": 1166,
+   "name": "legInt_associatedP_Ks",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Legendre/Series.lean",
+   "line": 1006,
+   "name": "legFS_wQ_ratio",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Legendre/SeriesTools.lean",
+   "line": 791,
+   "name": "legSer_tsum_F_real",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Legendre/ZeroCounts.lean",
+   "line": 138,
+   "name": "lzc_parity",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/Connection.lean",
+   "line": 85,
+   "name": "radialMathieu_two_zero",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/Wronskians.lean",
+   "line": 262,
+   "name": "p3m_F_tail",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQCeSe.lean",
+   "line": 561,
+   "name": "p3q_ce4",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Hahn/CharlierAndConnections.lean",
+   "line": 554,
+   "name": "continuousHahn_difference_equation",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/LargeOrder.lean",
+   "line": 264,
+   "name": "tendsto_struve_stirling_exponent",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Zeta/Hurwitz/SeriesAndContinuation.lean",
+   "line": 470,
+   "name": "r25b_emD_zero_eq",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Zeta/Hurwitz/ValuesAndDerivatives.lean",
+   "line": 671,
+   "name": "deriv_hurwitzZetaComplex_zero",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Zeta/IntegralReps/ElementaryKernels.lean",
+   "line": 329,
+   "name": "riemannZeta_eq_integral_exp_add_one",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Zeta/Polylog.lean",
+   "line": 529,
+   "name": "polylog_two_pow",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ContinuedFraction/Convergence.lean",
+   "line": 520,
+   "name": "cfConv_abs_sum_tendsto_alt",
+   "proofLines": 75
+  },
+  {
+   "file": "DLMF/Airy/Integrals/HalfLineLaplace.lean",
+   "line": 869,
+   "name": "airyAi_mellin",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Airy/StieltjesForm.lean",
+   "line": 638,
+   "name": "laplaceChi_mixture",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/BesselTransforms.lean",
+   "line": 291,
+   "name": "confLP_integrable_Q",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Confluent/Relations.lean",
+   "line": 364,
+   "name": "regularizedConfluent_bessel_sum_pos",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Coulomb/Energy/Connection.lean",
+   "line": 722,
+   "name": "coulombs_coulombc_eq_whittaker_neg",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean",
+   "line": 807,
+   "name": "erf_squared_integral",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean",
+   "line": 894,
+   "name": "gaussian_reciprocal_tail",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Gamma/Integrals/BarnesAndRamanujan.lean",
+   "line": 780,
+   "name": "right_tail",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Gamma/Multidimensional/Dyson.lean",
+   "line": 774,
+   "name": "circInt_eq_circRHS_of_re_pos",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Gamma/Products.lean",
+   "line": 117,
+   "name": "summable_balanced_factor_sub_one",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Gamma/SeriesExpansions.lean",
+   "line": 426,
+   "name": "log_Gamma_one_add",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Hypergeometric/Identities/Whipple.lean",
+   "line": 265,
+   "name": "whipple_7F6",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/IncompleteGamma/UniformAsymptotics.lean",
+   "line": 885,
+   "name": "gammaUniformAlpha_printed",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Legendre/Integrals/FerrersDiagonal.lean",
+   "line": 376,
+   "name": "legPIU_bound_Q",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Legendre/Zeros/Exterior.lean",
+   "line": 699,
+   "name": "associatedP_zero_count",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQCeSe.lean",
+   "line": 721,
+   "name": "p3q_ce5",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQCeSe.lean",
+   "line": 803,
+   "name": "p3q_se5",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQJacobi.lean",
+   "line": 261,
+   "name": "p3q_eig_isBigO",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/Integrals.lean",
+   "line": 427,
+   "name": "pcfCt_integral_3_strip",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/QHypergeometric/Calculus.lean",
+   "line": 1266,
+   "name": "jackson_error_bound",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/BinomialAndAnger.lean",
+   "line": 652,
+   "name": "struveAs_angerJ_large_order_bound",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/Struve/Lommel.lean",
+   "line": 464,
+   "name": "lommelS_bessel_series_8",
+   "proofLines": 74
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Inequalities.lean",
+   "line": 507,
+   "name": "bernoulli_two_mul_stirling_bounds",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Bessel/ProductIntegral.lean",
+   "line": 276,
+   "name": "besselJ_mul_besselJ_eq_integral",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Bessel/WeberSeries.lean",
+   "line": 200,
+   "name": "besselY_nat_eq_series",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Combinatorics/PlanePartitions/BoxFormula.lean",
+   "line": 501,
+   "name": "s26b_box_poly",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Gamma/BetaFunction/ParameterIntegrals.lean",
+   "line": 103,
+   "name": "beta_on_Ioi",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Gamma/Integrals/FourierAndTrigamma.lean",
+   "line": 578,
+   "name": "sum_trigamma_div",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Gamma/SeriesExpansions.lean",
+   "line": 50,
+   "name": "hasSum_digamma_one_add_zeta",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Heun/Integral.lean",
+   "line": 143,
+   "name": "heun_hermiteDarboux_example₁",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Hypergeometric/LoopIntegral.lean",
+   "line": 366,
+   "name": "hypergeometricLoop_eq_euler",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Lame/FourierSeries/CoefficientRecurrences.lean",
+   "line": 543,
+   "name": "p1l_int_w",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Legendre/BoundaryAsymptotics.lean",
+   "line": 1054,
+   "name": "legBd_ferrersQ_consts",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Legendre/FourierTools.lean",
+   "line": 181,
+   "name": "legFS_PQ_hyp",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Legendre/LocalTheory.lean",
+   "line": 107,
+   "name": "ferrersP_reflected_dependence",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Legendre/SpecialValues.lean",
+   "line": 616,
+   "name": "associatedP_half_order_15",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/CrossConnection/AngularKernels.lean",
+   "line": 702,
+   "name": "p2m_key_se_even_prod",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQ.lean",
+   "line": 122,
+   "name": "mathieuA_one_small_q",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQ.lean",
+   "line": 202,
+   "name": "mathieuB_one_small_q",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/MatrixArgument/GammaBeta.lean",
+   "line": 865,
+   "name": "q2m_hasIntegralOn_phi",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/GeneralIdentities.lean",
+   "line": 485,
+   "name": "kernel_polynomials_orthogonal",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/DoubleLaplaceAndGaussian.lean",
+   "line": 106,
+   "name": "angular_homogeneous",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/GegenbauerAndLegendre.lean",
+   "line": 158,
+   "name": "ultrasphPoly_laplace_integral",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Limits.lean",
+   "line": 457,
+   "name": "laguerrePolyL_limit_hermite",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Series/BrafmanAndWeighted.lean",
+   "line": 629,
+   "name": "jacobi_weighted_generating_function",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Series/JacobiParameterSeries.lean",
+   "line": 527,
+   "name": "gegenbauerLinearizationSum_recurrence",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/IntegratedExpansions.lean",
+   "line": 130,
+   "name": "struveK_primitive_asymptotic",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Zeta/Hurwitz/SeriesAndContinuation.lean",
+   "line": 389,
+   "name": "hurwitzZetaComplex_eulerMaclaurin_one",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Zeta/IntegralReps/ElementaryKernels.lean",
+   "line": 74,
+   "name": "q25a_integral_exp_sub_one_sq",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Integral/Improper.lean",
+   "line": 225,
+   "name": "improper_exists_tendsto_cpow_sub_one_mul_sin",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/SturmOscillation.lean",
+   "line": 557,
+   "name": "p2s_dirichlet_count",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/SturmSpectrum.lean",
+   "line": 152,
+   "name": "p2s_energy_le",
+   "proofLines": 73
+  },
+  {
+   "file": "DLMF/Combinatorics/PartitionIdentities/RestrictedProducts.lean",
+   "line": 276,
+   "name": "r26a_hasSum_restricted_finset",
+   "proofLines": 72
+  },
+  {
+   "file": "DLMF/Elementary/LambertW/BranchesAndCalculus.lean",
+   "line": 480,
+   "name": "lwR4_principal_real_gt",
+   "proofLines": 72
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricQuadratic.lean",
+   "line": 449,
+   "name": "symEllIntRD_zero_agm",
+   "proofLines": 72
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Voigt.lean",
+   "line": 192,
+   "name": "voigt_laplace_deriv",
+   "proofLines": 72
+  },
+  {
+   "file": "DLMF/Gamma/Digamma.lean",
+   "line": 206,
+   "name": "tendsto_deriv_log_GammaSeq",
+   "proofLines": 72
+  },
+  {
+   "file": "DLMF/Gamma/SeriesExpansions.lean",
+   "line": 507,
+   "name": "digamma_one_add_odd_zeta",
+   "proofLines": 72
+  },
+  {
+   "file": "DLMF/Hypergeometric/Contiguous.lean",
+   "line": 176,
+   "name": "ordinaryHypergeometric_mul_one_sub_mul_deriv_eq",
+   "proofLines": 72
+  },
+  {
+   "file": "DLMF/JacobiElliptic/SpecialValues/DerivativesAndResidues.lean",
+   "line": 730,
+   "name": "jacobiNsk_specialDerivs",
+   "proofLines": 72
+  },
+  {
+   "file": "DLMF/Mathieu/Properties/Floquet.lean",
+   "line": 872,
+   "name": "IsFloquetSolution.exists_fourier",
+   "proofLines": 72
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQ.lean",
+   "line": 282,
+   "name": "mathieuA_two_small_q",
+   "proofLines": 72
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/BesselAndLaguerreTransforms.lean",
+   "line": 556,
+   "name": "hermite_product_cosine_transform",
+   "proofLines": 72
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/BesselAndLaguerreTransforms.lean",
+   "line": 638,
+   "name": "hermite_product_sine_transform",
+   "proofLines": 72
+  },
+  {
+   "file": "DLMF/Struve/Representations/Mellin.lean",
+   "line": 325,
+   "name": "struveMel_besselY_isBigO",
+   "proofLines": 72
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Asymptotics.lean",
+   "line": 341,
+   "name": "r24b_core",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Explicit.lean",
+   "line": 830,
+   "name": "s24a_eulerNumber_two_mul_eq_explicit₆",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Bessel/Lommel.lean",
+   "line": 97,
+   "name": "tendsto_lommel_zero",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/CoalescingSaddles/CanonicalIntegrals/ContoursAndSymmetries.lean",
+   "line": 599,
+   "name": "ellipticUmbilicIntegral_rotate",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Confluent/Series.lean",
+   "line": 136,
+   "name": "kummerM_four_mul_eq_tsum",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Confluent/Zeros/RealZeros.lean",
+   "line": 808,
+   "name": "kummerM_posZeros_one",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/Connection/ParameterChanges.lean",
+   "line": 257,
+   "name": "p19lR1_imag_arg_Pi",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Gamma/Multidimensional/SelbergLimits.lean",
+   "line": 1057,
+   "name": "integrable_hermBound",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Hypergeometric/Elementary/AlgebraicValues.lean",
+   "line": 548,
+   "name": "complementary_parameters_odd_sqrt",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/JacobiElliptic/SpecialValues/DerivativesAndResidues.lean",
+   "line": 819,
+   "name": "jacobiDsk_specialDerivs",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/JacobiElliptic/SpecialValues/DerivativesAndResidues.lean",
+   "line": 908,
+   "name": "jacobiCsk_specialDerivs",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Lame/SpecialCases.lean",
+   "line": 240,
+   "name": "p2p_lameSpectrum_zero",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Legendre/BoundaryAsymptotics.lean",
+   "line": 606,
+   "name": "legBd_zeroBalanced_eq",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQCeSe.lean",
+   "line": 403,
+   "name": "p3q_ce3",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQCeSe.lean",
+   "line": 482,
+   "name": "p3q_se3",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Mathieu/Properties/Floquet.lean",
+   "line": 791,
+   "name": "p2f_floquet_int_rec",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQ.lean",
+   "line": 857,
+   "name": "mathieuA_six_small_q",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/ClassicalInstances.lean",
+   "line": 262,
+   "name": "abs_lt_sqrt_of_hermitePolyHR_eval_eq_zero",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Series/JacobiParameterSeries.lean",
+   "line": 41,
+   "name": "monomial_ultrasphPoly_expansion",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/SecondAndThird.lean",
+   "line": 212,
+   "name": "IsPainleveIIIOn.t₁",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/SecondAndThird.lean",
+   "line": 294,
+   "name": "IsPainleveIIIOn.t₂",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/SecondAndThird.lean",
+   "line": 376,
+   "name": "IsPainleveIIIOn.t₃",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/SecondAndThird.lean",
+   "line": 458,
+   "name": "IsPainleveIIIOn.t₄",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/RiemannTheta/Scaled.lean",
+   "line": 234,
+   "name": "not_differentiable_riemannThetaScaled",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/Watson.lean",
+   "line": 206,
+   "name": "differentiableOn_struveKRotIntegral",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Struve/LargeOrderTools.lean",
+   "line": 411,
+   "name": "struveLO_K_integral_bound",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/WignerSymbols/NineJ.lean",
+   "line": 55,
+   "name": "wigner9j_zero",
+   "proofLines": 71
+  },
+  {
+   "file": "DLMF/Airy/Integrals/HalfLineLaplace.lean",
+   "line": 1189,
+   "name": "airyBi_stieltjes_principalValue_converges",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/Confluent/IntegralRepresentations/EulerAndBessel.lean",
+   "line": 68,
+   "name": "regularized_parameter_integral",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/Confluent/ZeroTools.lean",
+   "line": 913,
+   "name": "kzt_U_posZeros_count",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/Elementary/Hyperbolic/InverseBranches.lean",
+   "line": 868,
+   "name": "hypR4_asech_root",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/Elementary/Trigonometric/ValuesAndIntegrals.lean",
+   "line": 174,
+   "name": "trig_twelfth_exact_values",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+   "line": 203,
+   "name": "symEllIntRJ_zero_bounds",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean",
+   "line": 425,
+   "name": "Real.millsRatio_rational_bounds",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/ExpIntegrals/Representations.lean",
+   "line": 842,
+   "name": "differentiableOn_integral_besselK_zero_mul",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/Gamma/Integrals/BarnesAndRamanujan.lean",
+   "line": 859,
+   "name": "left_tail",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/Legendre/IntegralTools/FractionalAndLaplace.lean",
+   "line": 576,
+   "name": "legInt_heine",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/Legendre/Integrals/ExteriorGreen.lean",
+   "line": 543,
+   "name": "legPIU_bound_Qext",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/Legendre/Integrals/FerrersDiagonal.lean",
+   "line": 853,
+   "name": "legPI_PQ_nat_pos",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/Mathieu/Hill/Ince.lean",
+   "line": 547,
+   "name": "isInceSolution_sin_odd_iff",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/Mathieu/SecondSolutions.lean",
+   "line": 815,
+   "name": "mathieuFeC_ne_zero",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/GeneralIdentities.lean",
+   "line": 313,
+   "name": "zeros_interlace",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Hahn/Orthogonality.lean",
+   "line": 914,
+   "name": "hahn_recurrence",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/AngularRepresentations.lean",
+   "line": 223,
+   "name": "jacobi_norm_shift",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/AngularRepresentations.lean",
+   "line": 482,
+   "name": "legendre_orthogonality",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/AngularRepresentations.lean",
+   "line": 1027,
+   "name": "ultrasphPoly_dirichlet_integral",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/UniformLG.lean",
+   "line": 54,
+   "name": "pcfLG_eq_mul_of_tendsto",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/QHypergeometric/Convergence.lean",
+   "line": 499,
+   "name": "qPhi_hasSum",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/Theta/Identities.lean",
+   "line": 1023,
+   "name": "p20R1_two_null_half_eta",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Calculus/DoubleZeroSqrt.lean",
+   "line": 50,
+   "name": "AnalyticAt.dblZero_integral_smul_comp_mul",
+   "proofLines": 70
+  },
+  {
+   "file": "DLMF/Airy/Asymptotics/LaplaceSectors.lean",
+   "line": 455,
+   "name": "airyRot_eq_of_anchor",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Airy/Integrals/HalfLineLaplace.lean",
+   "line": 767,
+   "name": "airyLapNB_eq",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Airy/ModulusPhase/ReciprocalExpansions.lean",
+   "line": 648,
+   "name": "airyMod_expansion_of_deriv",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Airy/ScorerAsymptotics.lean",
+   "line": 791,
+   "name": "scorerHi_primitive_asymptotic",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/AlgebraicAnalytic/Algebra/Determinants.lean",
+   "line": 395,
+   "name": "det_krattenthaler",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Confluent/ProductsAddition.lean",
+   "line": 566,
+   "name": "whittakerM_product",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Coulomb/RhoEtaAsymptotics.lean",
+   "line": 214,
+   "name": "q2b_hat_eq",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+   "line": 486,
+   "name": "symEllIntRD_add_of_nonneg",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+   "line": 1042,
+   "name": "symEllIntRG_duplication_of_nonneg",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Gamma/Asymptotics/GammaRatios.lean",
+   "line": 198,
+   "name": "ratioThree_rem_eq",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/GeneralizedHypergeometric/Asymptotics.lean",
+   "line": 686,
+   "name": "genHG_all_large_parameter_asymptotic",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Hypergeometric/Elementary/AlgebraicValues.lean",
+   "line": 828,
+   "name": "value_neg_one_third",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/IncompleteGamma/Representations/LowerBarnes.lean",
+   "line": 817,
+   "name": "incRep_horizontal",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/IncompleteGamma/UniformAsymptotics.lean",
+   "line": 359,
+   "name": "gammaUniform_scIncGamma_identity",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/JacobiElliptic/SpecialValues/ModulusLimits.lean",
+   "line": 92,
+   "name": "p22R1_theta2_shift_tendsto",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Legendre/AdditionTools.lean",
+   "line": 899,
+   "name": "legAdd_norm_ferrersP_zero_le",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQCeSe.lean",
+   "line": 644,
+   "name": "p3q_se4",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Mathieu/SecondSolutions.lean",
+   "line": 888,
+   "name": "mathieuGeS_ne_zero",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQ.lean",
+   "line": 429,
+   "name": "mathieuA_three_small_q",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQ.lean",
+   "line": 505,
+   "name": "mathieuB_three_small_q",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/AngularRepresentations.lean",
+   "line": 865,
+   "name": "dirM_subst",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/GegenbauerAndLegendre.lean",
+   "line": 81,
+   "name": "gegenbauerLaplace_recurrence",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/SphericalHarmonics/BesselAddition.lean",
+   "line": 152,
+   "name": "shBes_sum_choose",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/SphericalHarmonics/BesselAddition.lean",
+   "line": 227,
+   "name": "shBes_hasSum_product",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Struve/Representations/IntegralRelations.lean",
+   "line": 559,
+   "name": "struve_laplace_14",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Struve/Representations/IntegralRelations.lean",
+   "line": 643,
+   "name": "struve_laplace_16",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Zeta/Hurwitz/ValuesAndDerivatives.lean",
+   "line": 379,
+   "name": "hurwitzZeta_one_sub_rat",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Zeta/Hurwitz/ValuesAndDerivatives.lean",
+   "line": 490,
+   "name": "s25b_hasDerivAt_integral_div_cpow",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/LinearGlobal.lean",
+   "line": 36,
+   "name": "exists_linear_system_Icc_of_mem",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/SturmDeformation.lean",
+   "line": 133,
+   "name": "sturmDef_eventually_ncard_eq",
+   "proofLines": 69
+  },
+  {
+   "file": "DLMF/Bessel/YIntegralRep.lean",
+   "line": 179,
+   "name": "mul_integral_mul_yLaplaceKernel",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/Confluent/TricomiRotated.lean",
+   "line": 285,
+   "name": "differentiableOn_tricomiRotated",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/Confluent/ZeroTools.lean",
+   "line": 599,
+   "name": "kzt_upper_count",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/Coulomb/Energy/RegularSolution.lean",
+   "line": 673,
+   "name": "q2e_Phi_three_term",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/Elementary/Hyperbolic/InverseBranches.lean",
+   "line": 505,
+   "name": "arccosh_inner_cut",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/LegendreSymmetricForms.lean",
+   "line": 45,
+   "name": "p19sR1_integral_Ioi_eq_Ioo",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Voigt.lean",
+   "line": 86,
+   "name": "voigt_laplace",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/Gamma/BetaFunction/Cosine.lean",
+   "line": 653,
+   "name": "beta_sin_exp",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/Heun/LocalSolutions.lean",
+   "line": 933,
+   "name": "heunLocal_eq_pfaff",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/Hypergeometric/Elementary/AlgebraicValues.lean",
+   "line": 323,
+   "name": "opposite_parameters_sqrt",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/Legendre/Zeros/FerrersAndReal.lean",
+   "line": 107,
+   "name": "ferrersP_nat_degree_zero_count",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/CrossSeries.lean",
+   "line": 235,
+   "name": "p2m_growth_int",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/RadialSeries/SeriesEquation.lean",
+   "line": 191,
+   "name": "p2m_hasSum_modMathieuTerm",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Hahn/HahnAndMeixner.lean",
+   "line": 324,
+   "name": "hahn_difference_equation",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/InequalityTools.lean",
+   "line": 106,
+   "name": "opIneq_logRatio_odd",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/AngularRepresentations.lean",
+   "line": 577,
+   "name": "ultrasphPoly_norm",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/Integrals.lean",
+   "line": 561,
+   "name": "pcfCt_integral_3_all",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/UniformLG2/ExpansionAlgebra.lean",
+   "line": 370,
+   "name": "pcfLG2_gamma_identity",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/ScaledExpansions.lean",
+   "line": 420,
+   "name": "angerA_scaled_outer_equiv",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/Weierstrass/Relations/ThetaIdentities.lean",
+   "line": 55,
+   "name": "p23R1_quasi_const",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Asymptotics/StieltjesRemainder.lean",
+   "line": 555,
+   "name": "stRem_mix_chi",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ContinuedFraction/Convergence.lean",
+   "line": 938,
+   "name": "cfConv_sfrac_bound",
+   "proofLines": 68
+  },
+  {
+   "file": "DLMF/Airy/ModulusPhase/Nicholson.lean",
+   "line": 504,
+   "name": "airyMod_derivSq_error",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/Airy/ModulusPhase/ReciprocalExpansions.lean",
+   "line": 415,
+   "name": "airy_derivPhase_deriv_monotone",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Zeros/ZeroLimits.lean",
+   "line": 631,
+   "name": "r24b_euler_odd_zero",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/Bessel/Sonine.lean",
+   "line": 27,
+   "name": "integral_regularized0F1_gamma",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/Confluent/LargeASharp.lean",
+   "line": 517,
+   "name": "largeAU_sub_largeAU0_isBigO",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+   "line": 948,
+   "name": "symEllIntRD_duplication_of_nonneg",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/Gamma/Inequalities.lean",
+   "line": 616,
+   "name": "Gamma_ratio_digamma_bounds",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/Heun/LocalSolutions.lean",
+   "line": 599,
+   "name": "eventuallyEq_heunLocal_of_analyticAt",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/JacobiElliptic/Inverse.lean",
+   "line": 791,
+   "name": "Real.jacobiCsm_jacobiArccsm",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/JacobiElliptic/Related.lean",
+   "line": 797,
+   "name": "jacobiNs_regularized_primitive",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/Legendre/IntegralTools/Orthogonality.lean",
+   "line": 552,
+   "name": "legInt_offdiag",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQ.lean",
+   "line": 711,
+   "name": "mathieuA_five_small_q",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQ.lean",
+   "line": 784,
+   "name": "mathieuB_five_small_q",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean",
+   "line": 556,
+   "name": "ultrasphPoly_raise_parameter",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/LaguerreAndHermite.lean",
+   "line": 460,
+   "name": "jacobi_mellin_transform",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Legendre.lean",
+   "line": 813,
+   "name": "ultrasphPoly_bessel_generating_function",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/FourthAndFifth.lean",
+   "line": 153,
+   "name": "IsPainleveIVOn.t₃",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/Painleve/BacklundDLMF/FourthAndFifth.lean",
+   "line": 231,
+   "name": "IsPainleveIVOn.t₄",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/Selberg/IntegrationByParts.lean",
+   "line": 834,
+   "name": "aomoto_cross_not_mem",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/AngerWeberExpansions.lean",
+   "line": 52,
+   "name": "struveAs_S_tail_bound",
+   "proofLines": 67
+  },
+  {
+   "file": "DLMF/Airy/Asymptotics/RealRemainders.lean",
+   "line": 176,
+   "name": "airyReal_integral_btw",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Airy/ModulusPhase/Representations.lean",
+   "line": 362,
+   "name": "airyBiDeriv_add_I_airyAiDeriv",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Bessel/IntegralTransforms.lean",
+   "line": 35,
+   "name": "integral_exp_cpow_regularized0F1_complex_scaled",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/CoalescingSaddles/Zeros.lean",
+   "line": 90,
+   "name": "existsUnique_cuspOuterZeroParam",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Combinatorics/Permutations/MenageAndFerrers.lean",
+   "line": 183,
+   "name": "s26b_Q_succ",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Confluent/Growth.lean",
+   "line": 170,
+   "name": "kummerRayBound_lower_both",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Confluent/IntegralRepresentations/BarnesAndConnections.lean",
+   "line": 776,
+   "name": "whittakerM_parameter_integral",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/HankelKernels.lean",
+   "line": 640,
+   "name": "cfInt_euler_subst_U",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Confluent/LargeA.lean",
+   "line": 782,
+   "name": "tendsto_largeAU_sub_largeAU0",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricQuadratic.lean",
+   "line": 288,
+   "name": "symEllIntRG_zero_agm",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricReduction.lean",
+   "line": 345,
+   "name": "ellRed_integral_inv_s_of_pos",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/ErrorFunctions/BoundsAsymptotics/FresnelRemainders.lean",
+   "line": 240,
+   "name": "fresnelAux_signed_laplace",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean",
+   "line": 612,
+   "name": "erfInt_laplace_minus_of_re_pos",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Gamma/BetaFunction/Cosine.lean",
+   "line": 465,
+   "name": "integral_cos_rpow_mul_cos_of_lt",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Gamma/Multiplication.lean",
+   "line": 212,
+   "name": "prod_Gamma_div",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Heun/Confluent.lean",
+   "line": 129,
+   "name": "doublyConfluentHeun_singularities",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Hypergeometric/ConnectionFormulas.lean",
+   "line": 554,
+   "name": "hasSum_deriv_regularizedGaussHGFun_comp",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Hypergeometric/FurtherTransformations/Cubic.lean",
+   "line": 108,
+   "name": "quadratic_half_sum",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Hypergeometric/Identities/Dixon.lean",
+   "line": 174,
+   "name": "summable_s_and_tendsto_H",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/IncompleteGamma/SeriesRecurrences.lean",
+   "line": 698,
+   "name": "lowerIncGamma_besselI_series",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Legendre/Connections.lean",
+   "line": 472,
+   "name": "associatedP_neg_eq_quadratic",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Legendre/Primitives.lean",
+   "line": 201,
+   "name": "ferrers_product_primitive_4",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Legendre/SpecialValues.lean",
+   "line": 789,
+   "name": "olverQ_half_order_1",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Legendre/SpecialValues.lean",
+   "line": 860,
+   "name": "olverQ_half_order_2",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Legendre/Sums.lean",
+   "line": 47,
+   "name": "ferrersP_nat_addition",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Legendre/Toroidal.lean",
+   "line": 138,
+   "name": "legTor_Q_hyp_generic",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Legendre/ZeroTools.lean",
+   "line": 509,
+   "name": "lzt_lower_count",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Mathieu/IntegralEquations.lean",
+   "line": 907,
+   "name": "integral_sin_sin_mathieuSe_even",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/RadialSeries/SeriesEquation.lean",
+   "line": 32,
+   "name": "p2m_floquet_coeff_rec",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/RadialSeries/SeriesEquation.lean",
+   "line": 451,
+   "name": "p2m_growth_int_unif",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQCeSe.lean",
+   "line": 29,
+   "name": "p3q_ce0",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/HermiteFixedX.lean",
+   "line": 333,
+   "name": "lambda_div_szegoConst",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/Uniform/PhasesAndPolynomials.lean",
+   "line": 393,
+   "name": "pcfLG_olver_exists_aux",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/QHypergeometric/BasicSummations.lean",
+   "line": 1301,
+   "name": "heine_qDifferentialEquation",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Spheroidal/Spectrum/ParameterDependence.lean",
+   "line": 309,
+   "name": "p3lyR_lower",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/TurningPointEstimates.lean",
+   "line": 662,
+   "name": "struveSc_phase_one_sub_cube",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Theta/Integrals.lean",
+   "line": 181,
+   "name": "mellin_jacobiThetaTwoNullTau",
+   "proofLines": 66
+  },
+  {
+   "file": "DLMF/Airy/ModulusPhase/Nicholson.lean",
+   "line": 707,
+   "name": "airyMod_derivErr_ibp",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Airy/ScorerAsymptotics.lean",
+   "line": 307,
+   "name": "scorerPrim_integral_rat",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Generalizations/HigherOrder.lean",
+   "line": 758,
+   "name": "r24b_norm_coeff_inv_le",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Series.lean",
+   "line": 61,
+   "name": "r24a_tendsto_log_series",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Combinatorics/Stirling/RecurrencesAndIdentities.lean",
+   "line": 45,
+   "name": "choose_mul_signedStirlingFirst",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/HankelKernels.lean",
+   "line": 1029,
+   "name": "cosine_regularizedHGFun",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Confluent/ParabolicCylinder/EquationAndIntegrals.lean",
+   "line": 651,
+   "name": "pcfU_eq_integral",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Coulomb/RhoEtaRepresentations.lean",
+   "line": 173,
+   "name": "q2a_kummerU_two_I",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/ErrorFunctions/IntegralTools.lean",
+   "line": 112,
+   "name": "erfInt_fresnelAux_laplace",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean",
+   "line": 114,
+   "name": "erfInt_laplace_core",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Series.lean",
+   "line": 254,
+   "name": "erf_spherical_series",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Gamma/BetaFunction/Vertical.lean",
+   "line": 329,
+   "name": "vb_base",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Gamma/IntegralRepresentations/HankelAndGaussian.lean",
+   "line": 257,
+   "name": "abs_binetPhi_sub_le",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+   "line": 658,
+   "name": "appF4_euler_analytic",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Heun/Integral.lean",
+   "line": 839,
+   "name": "heun_kernel_typeII_separable",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/IncompleteGamma/SineCosine/GammaRepresentations.lean",
+   "line": 126,
+   "name": "incG_trigTerm_analyticAt",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/JacobiElliptic/ModulusInversion.lean",
+   "line": 378,
+   "name": "p22R1_real_at",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Lame/DifferentialEquations.lean",
+   "line": 456,
+   "name": "p2l_lame_eq_zero_at_pole",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Legendre/Associated/BoundaryAndConnections.lean",
+   "line": 275,
+   "name": "associated_wronskian_7",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Legendre/Associated/ConjugationAndValues.lean",
+   "line": 472,
+   "name": "ferrersQ_ode",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Legendre/IntegralRepresentations/Exterior.lean",
+   "line": 881,
+   "name": "legInt_associatedP_cosh_integral",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Legendre/IntegralRepresentations/Ferrers.lean",
+   "line": 453,
+   "name": "olverQ_nat_interval_integral",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Legendre/Laplace.lean",
+   "line": 147,
+   "name": "integral_one_add_mul_cos_cpow",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Mathieu/Hill/Ince.lean",
+   "line": 472,
+   "name": "isInceSolution_cos_odd_iff",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Mathieu/IntegralEquations.lean",
+   "line": 982,
+   "name": "integral_cos_sinh_mathieuSe_even",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQCeSe.lean",
+   "line": 271,
+   "name": "p3q_ce2",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQ.lean",
+   "line": 934,
+   "name": "mathieuB_six_small_q",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/General.lean",
+   "line": 621,
+   "name": "christoffel_darboux",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/LaguerreAndHermite.lean",
+   "line": 58,
+   "name": "laguerrePolyL_fractional_integral",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+   "line": 911,
+   "name": "stieltjesWigert_orthogonal",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Series/JacobiParameterSeries.lean",
+   "line": 120,
+   "name": "ultrasphPoly_connection",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/AsymptoticsZeros.lean",
+   "line": 57,
+   "name": "pcfU_adjacent_asymptotic_pos",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/AsymptoticsZeros.lean",
+   "line": 126,
+   "name": "pcfU_adjacent_asymptotic_neg",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/ContourTools.lean",
+   "line": 165,
+   "name": "pcfCt_vertical_of_re",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/UniformLG2/ExpansionAlgebra.lean",
+   "line": 484,
+   "name": "pcfLG2_recip_sq",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/AngerWeberExpansions.lean",
+   "line": 130,
+   "name": "weberE_large_order",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/IntegratedExpansions.lean",
+   "line": 336,
+   "name": "struvePrim_primitive_M_ofReal",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/IntegratedKernels.lean",
+   "line": 227,
+   "name": "struvePrim_integral_log_two",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Struve/Representations/IntegralRelations.lean",
+   "line": 300,
+   "name": "integral_recip_sq_sub_one_add_sq_log",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Weierstrass/Relations/ThetaIdentities.lean",
+   "line": 469,
+   "name": "p23R1_logDeriv_tendsto",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Zeta/DirichletL.lean",
+   "line": 172,
+   "name": "eq_trivial_zero_of_LFunction_eq_zero",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Zeta/HurwitzEulerMaclaurin.lean",
+   "line": 141,
+   "name": "r25b_emF_diff",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Zeta/Sums.lean",
+   "line": 751,
+   "name": "s25a_hasSum_log_prod",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Asymptotics/StationaryPhase.lean",
+   "line": 232,
+   "name": "statPh_norm_integral_exp_cube_sub_le",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Fourier/P1a2EntirePeriodic.lean",
+   "line": 123,
+   "name": "p1a2_hasSum_fourier",
+   "proofLines": 65
+  },
+  {
+   "file": "DLMF/Airy/Integrals/HalfLineLaplace.lean",
+   "line": 1121,
+   "name": "airyPV_tail_integrableOn",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+   "line": 263,
+   "name": "Lp_add_ge_of_lt_one",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/Bessel/Elementary.lean",
+   "line": 207,
+   "name": "hasSum_besselJ_add",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/Confluent/BasicProperties/Wronskians.lean",
+   "line": 40,
+   "name": "kummer_pair_wronskian_core",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/Elementary/Hyperbolic/Integrals.lean",
+   "line": 775,
+   "name": "complex_antiderivatives_reciprocal_inverse",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricQuadratic.lean",
+   "line": 604,
+   "name": "p19sR1_tendsto_heron",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/ErrorFunctions/BoundsAsymptotics/GaussianRemainders.lean",
+   "line": 29,
+   "name": "faddeevaW_continuedFraction",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/ExpIntegrals/Representations.lean",
+   "line": 122,
+   "name": "expIntE1_scaled_integrals",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/Gamma/BarnesG/BinetAndAsymptotics.lean",
+   "line": 640,
+   "name": "abs_barnesB_le",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/Gamma/Multiplication.lean",
+   "line": 531,
+   "name": "Gamma_prod_add_div",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+   "line": 372,
+   "name": "appF1_euler_germ",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/Heun/DoublyPeriodic.lean",
+   "line": 118,
+   "name": "p3w_jacobiSnk_sq_eq",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/Lame/DifferentialEquations.lean",
+   "line": 318,
+   "name": "isLameWeierstrassSolutionOn_comp_wp",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/Legendre/IntegralRepresentations/Ferrers.lean",
+   "line": 613,
+   "name": "olverQ_nat_reduction_integral",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/Legendre/Series.lean",
+   "line": 131,
+   "name": "legFour_not_summable",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/Mathieu/Noninteger/Properties.lean",
+   "line": 855,
+   "name": "p1b_charExp_of_floquet_pair",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/BoundsZeros/Discriminants.lean",
+   "line": 392,
+   "name": "disc_closed",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Series/BrafmanAndWeighted.lean",
+   "line": 487,
+   "name": "jacW_hasSum_small",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/Painleve/Reductions.lean",
+   "line": 140,
+   "name": "kdV_scalingReduction",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Complex/TaylorParameter.lean",
+   "line": 88,
+   "name": "hasDerivAt_iteratedDeriv_param",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/PowerSeriesUniqueness.lean",
+   "line": 417,
+   "name": "exists_hasDerivWithinAt_Icc_of_lipschitz",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMFMathlib/NumberTheory/EulerNumbers.lean",
+   "line": 157,
+   "name": "hasSum_eulerNumber_mul_pow_div",
+   "proofLines": 64
+  },
+  {
+   "file": "DLMF/Airy/Integrals/PrimitivesAndLaplace.lean",
+   "line": 400,
+   "name": "airyLap_pos_bound",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Airy/Relations/InverseBesselRelations.lean",
+   "line": 637,
+   "name": "airyAiDeriv_eq_kummerU_onLog",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Bessel/Zeros.lean",
+   "line": 212,
+   "name": "besselJ_first_zero_lt",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Combinatorics/PartitionIdentities/StaircaseAndPentagonal.lean",
+   "line": 52,
+   "name": "s26a_hasSum_staircase",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Combinatorics/Permutations/RookPolynomials.lean",
+   "line": 171,
+   "name": "rookPolynomial_union",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Confluent/ConnectionWronskians.lean",
+   "line": 250,
+   "name": "wronskian_shifted_regularized_kummerUReflected",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Confluent/ExpIntegral.lean",
+   "line": 211,
+   "name": "genExpIntE_one_eq_Ein",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Confluent/IntegralRepresentations/BarnesAndConnections.lean",
+   "line": 931,
+   "name": "whittakerW_laplace",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Confluent/IntegralRepresentations/EulerAndBessel.lean",
+   "line": 148,
+   "name": "integral_exp_cpow_regularized0F1",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/BesselTransforms.lean",
+   "line": 372,
+   "name": "confLP_integrable_G",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Coulomb/RhoEtaSeries.lean",
+   "line": 74,
+   "name": "q2a_iter_ode",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Elementary/LogExpAnalysis.lean",
+   "line": 902,
+   "name": "second_order_ode_solution",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean",
+   "line": 719,
+   "name": "laplace_exp_I_sq",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/ReciprocalLaplace.lean",
+   "line": 1002,
+   "name": "fresnelCosInt_sqrt_laplace",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Gamma/Multidimensional/SelbergLimits.lean",
+   "line": 767,
+   "name": "herm_factor_eq",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Gamma/SpecialValues.lean",
+   "line": 458,
+   "name": "tendsto_sum_pow_div_of_norm_eq_one",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Hypergeometric/Asymptotics.lean",
+   "line": 351,
+   "name": "hcub_large_denominator_shift",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/IncompleteGamma/Beta.lean",
+   "line": 77,
+   "name": "integral_beta_quadratic_subst",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/IncompleteGamma/Representations/UpperBarnes.lean",
+   "line": 684,
+   "name": "incRep_integral_differentiableOn_a",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/IncompleteGamma/ZerosIntegrals.lean",
+   "line": 751,
+   "name": "upperIncGamma_laplace",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Legendre/Conical.lean",
+   "line": 327,
+   "name": "conical_singular_7",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Legendre/Sums.lean",
+   "line": 791,
+   "name": "legendre_heine_uniform",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Mathieu/IntegralEquations.lean",
+   "line": 836,
+   "name": "integral_sin_cos_mathieuSe_odd",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQ.lean",
+   "line": 580,
+   "name": "mathieuA_four_small_q",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/MatrixArgument/Zonal.lean",
+   "line": 654,
+   "name": "q2m_hasIntegralOn_phi_orth",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Associated.lean",
+   "line": 1315,
+   "name": "morsePolynomialFunction_orthogonality",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/BoundsZeros/PointwiseAndZeroBounds.lean",
+   "line": 935,
+   "name": "laguerrePolyL_zero_quadratic",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Hahn/CharlierAndConnections.lean",
+   "line": 640,
+   "name": "meixnerPollaczek_difference_equation",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Integrals/ConvolutionsAndFourier.lean",
+   "line": 741,
+   "name": "jacobi_laplace_aux",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Painleve/SpecialSolutions.lean",
+   "line": 172,
+   "name": "painleveII_five_halves",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/Uniform/ExpansionData.lean",
+   "line": 692,
+   "name": "pcfInverseZeta_taylor",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Selberg/DimensionAndParameters.lean",
+   "line": 175,
+   "name": "selbergRHS_succ_one",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/AngerWeberExpansions.lean",
+   "line": 324,
+   "name": "weberE_odd_bound",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/LargeOrder.lean",
+   "line": 109,
+   "name": "struve_series_tail_isBigO",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Zeta/Hurwitz/SeriesAndContinuation.lean",
+   "line": 684,
+   "name": "hurwitzZeta_half_eq_add_alternating",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMFMathlib/NumberTheory/ModularForms/KleinJSurjective.lean",
+   "line": 110,
+   "name": "p3w_exists_E₄_cube_div_eq",
+   "proofLines": 63
+  },
+  {
+   "file": "DLMF/Airy/Asymptotics/OscillatoryForms.lean",
+   "line": 713,
+   "name": "airy_aiDeriv_oscillatory_expansion",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Airy/Asymptotics/OscillatoryForms.lean",
+   "line": 782,
+   "name": "airy_bi_oscillatory_expansion",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Airy/Asymptotics/OscillatoryRemainders.lean",
+   "line": 828,
+   "name": "airyDer_binom_rem",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Airy/Integrals/PrimitivesAndLaplace.lean",
+   "line": 535,
+   "name": "airyLap_dom",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Bailey.lean",
+   "line": 224,
+   "name": "bailey_inner",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Bailey.lean",
+   "line": 1184,
+   "name": "rogers_ramanujan_second",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Zeros/EulerZeros.lean",
+   "line": 363,
+   "name": "eulerRealZero_two_bounds_one",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Bessel/NeumannSeries.lean",
+   "line": 209,
+   "name": "sum_antidiagonal_neg_one_pow_div_add",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Bessel/Theorems.lean",
+   "line": 47,
+   "name": "besselJ_eq_poisson_integral",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/CoalescingSaddles/CanonicalIntegrals/OscillatoryRepresentations.lean",
+   "line": 967,
+   "name": "ellipticUmbilicIntegral_z_zero",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Combinatorics/Permutations/CyclesAndExcedances.lean",
+   "line": 400,
+   "name": "inversionNumber_eq_min_adjacent",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Confluent/Asymptotics/LargeArgument.lean",
+   "line": 614,
+   "name": "hasAsymptoticExpansion_regularizedConfluent_b_sub_one",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Confluent/BasicProperties/Continuity.lean",
+   "line": 461,
+   "name": "continuousAt_kummerU",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Confluent/CoulombIrregular.lean",
+   "line": 149,
+   "name": "coulombF_eq_sub_div",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/GaussTransforms.lean",
+   "line": 40,
+   "name": "confLP_subordination",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Confluent/Integrals/GaussTransforms.lean",
+   "line": 402,
+   "name": "confLP_gauss_differentiableOn",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Confluent/ParabolicCylinder/EquationAndIntegrals.lean",
+   "line": 569,
+   "name": "pcfMoment_ibp",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Coulomb/Energy/Properties.lean",
+   "line": 397,
+   "name": "hydrogenRadial_eq_laguerre",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+   "line": 416,
+   "name": "hasDerivAt_carlsonRF_translate_right",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/ErrorFunctions/BoundsAsymptotics/FresnelRemainders.lean",
+   "line": 331,
+   "name": "fresnel_moment",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Gamma/Asymptotics/GammaRatios.lean",
+   "line": 368,
+   "name": "ratioThree_isBigO_of_re_pos",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Gamma/Asymptotics/Stirling.lean",
+   "line": 547,
+   "name": "tendsto_approx_Gamma_integral_rpow",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Gamma/IntegralRepresentations/PrymAndOscillatory.lean",
+   "line": 432,
+   "name": "integral_rpow_div_one_add",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+   "line": 935,
+   "name": "ghaR4_appF4_bailey",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Heun/Fuchsian.lean",
+   "line": 223,
+   "name": "p2h_fuchsian_normal_identity",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Hypergeometric/Asymptotics.lean",
+   "line": 69,
+   "name": "large_denominator_expansion",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Hypergeometric/LoopIntegral.lean",
+   "line": 594,
+   "name": "regularizedGaussHGFun_eq_loop",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Hypergeometric/Riemann.lean",
+   "line": 281,
+   "name": "riemann_mobius_covariance",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Lame/Polynomials/Eigenvalues.lean",
+   "line": 231,
+   "name": "p2p_lameEigenvalue_eq",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Legendre/Harmonics.lean",
+   "line": 332,
+   "name": "sphericalHarmonic_equator",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Legendre/Zeros/Exterior.lean",
+   "line": 467,
+   "name": "lzero_assocP_near_one",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Legendre/Zeros/FerrersAndReal.lean",
+   "line": 921,
+   "name": "olverQ_at_most_one_exterior_zero",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Mathieu/Modified/CrossConnection/RadialAndMonodromy.lean",
+   "line": 611,
+   "name": "p2m_radialMathieuMc_two_eq",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/NumberTheory/Primes.lean",
+   "line": 90,
+   "name": "primePi_legendre",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/ParabolicCylinder/UniformLG2/PositiveParameterEstimates.lean",
+   "line": 837,
+   "name": "pcfLG2_pos_core",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Struve/Asymptotics/ScaledExpansions.lean",
+   "line": 744,
+   "name": "angerA_turning_uniform",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Struve/Representations/IntegralRelations.lean",
+   "line": 80,
+   "name": "integral_recip_one_add_sq_sub_sq",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMFMathlib/Combinatorics/SeriesTransform.lean",
+   "line": 26,
+   "name": "s26a_hasSum_transform",
+   "proofLines": 62
+  },
+  {
+   "file": "DLMF/Airy/Integrals/PrimitivesAndLaplace.lean",
+   "line": 130,
+   "name": "airyAi_tail_integral_asymptotic",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/Airy/ModulusPhase/Nicholson.lean",
+   "line": 436,
+   "name": "airyMod_kernel2_error",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Generalizations/HigherOrder.lean",
+   "line": 445,
+   "name": "r24b_coeff_logSeries_pow",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/BernoulliEuler/IntegralsSums.lean",
+   "line": 942,
+   "name": "sum_antidiagonal_bernoulli_triple",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/BernoulliEuler/Properties.lean",
+   "line": 326,
+   "name": "sum_coprime_pow",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/Bessel/Asymptotics.lean",
+   "line": 369,
+   "name": "besselJ_sub_cos_isBigO",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/Confluent/KummerProperties.lean",
+   "line": 648,
+   "name": "parab_hurwitz",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/Confluent/TricomiRotated.lean",
+   "line": 198,
+   "name": "kummerU_eq_rotated_of_re_pos",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/Elementary/LambertW/Series.lean",
+   "line": 762,
+   "name": "lwR4_rational_bound",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean",
+   "line": 321,
+   "name": "Real.millsRatio_bound_3",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Integrals/FresnelTransforms.lean",
+   "line": 953,
+   "name": "erf_laplace",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/Gamma/Multidimensional/Dyson.lean",
+   "line": 852,
+   "name": "integrableOn_circV_rpow",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/Hypergeometric/Asymptotics.lean",
+   "line": 513,
+   "name": "hcub_largeDen_base",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/IncompleteGamma/BoundsFractions.lean",
+   "line": 370,
+   "name": "incG_positive_exponential_bounds",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/IncompleteGamma/ExpIntegralAsymptotics.lean",
+   "line": 273,
+   "name": "genExpIntEOnLog_strip_asymptotic",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/JacobiElliptic/SpecialValues/DerivativesAndResidues.lean",
+   "line": 584,
+   "name": "jacobiNck_specialDerivs",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/JacobiElliptic/SpecialValues/DerivativesAndResidues.lean",
+   "line": 657,
+   "name": "jacobiSck_specialDerivs",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/Lame/DifferentialEquations.lean",
+   "line": 112,
+   "name": "lame_regularSingularAt",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/Legendre/IntegralRepresentations/Exterior.lean",
+   "line": 713,
+   "name": "legInt_exp_split",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/Mathieu/IntegralEquations.lean",
+   "line": 702,
+   "name": "integral_cos_cosh_mathieuCe_odd",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/Mathieu/SmallQ.lean",
+   "line": 361,
+   "name": "mathieuB_two_small_q",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/PollaczekMoments.lean",
+   "line": 75,
+   "name": "pairHalf_transform_real",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/Painleve/SpecialSolutions.lean",
+   "line": 339,
+   "name": "painleveIII_bessel_riccati",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMF/QHypergeometric/Calculus.lean",
+   "line": 163,
+   "name": "qPochhammer_negative_modular",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMFMathlib/Analysis/Complex/RotateRay.lean",
+   "line": 162,
+   "name": "integral_Ioi_eq_exp_mul_integral_Ioi_rotate",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMFMathlib/Analysis/ODE/SturmLiouville.lean",
+   "line": 600,
+   "name": "p2l_spec_not_bddAbove",
+   "proofLines": 61
+  },
+  {
+   "file": "DLMFMathlib/NumberTheory/BernoulliTaylor.lean",
+   "line": 148,
+   "name": "hasSum_bernoulli_mul_pow_div",
+   "proofLines": 61
+  }
+ ],
+ "auditPrograms": {
+  "ClosedHyps.lean": "import DLMF\nimport DLMFMathlib\nopen Lean Meta\nset_option maxHeartbeats 0\nprivate partial def closedProps (e : Expr) (acc : Array Expr := #[]) : MetaM (Array Expr) := do\n  match e.consumeMData with\n  | .forallE _ d b _ =>\n    let acc ← if !d.hasLooseBVars && !d.hasFVar && !d.hasMVar then\n        (do if ← isProp d then pure (acc.push d) else pure acc) else pure acc\n    closedProps b acc\n  | _ => pure acc\n#eval show CoreM Unit from do\n  let env := (← getEnv).setExporting false\n  let mut out : Array String := #[]\n  for (n, ci) in env.constants.toList do\n    let some mi := env.getModuleIdxFor? n | continue\n    let mod := env.header.moduleNames[mi.toNat]!\n    unless mod.getRoot == `DLMF || mod.getRoot == `DLMFMathlib do continue\n    unless ci.isTheorem do continue\n    if n.isInternal then continue\n    let cs ← (closedProps ci.type).run'\n    if cs.isEmpty then continue\n    let axs ← collectAxioms n\n    let tag := if axs.contains `sorryAx then \"SORRY\" else \"OK\"\n    for c in cs do\n      let pp ← (ppExpr c).run'\n      out := out.push s!\"{tag}\\t{mod}\\t{n}\\t{(toString pp).replace \"\\n\" \" \"}\"\n  IO.FS.writeFile \"<out>/out/closed-hyps.tsv\" (String.intercalate \"\\n\" out.toList)\n  IO.println s!\"closed prop binders: {out.size}\"\n"
+ }
+}

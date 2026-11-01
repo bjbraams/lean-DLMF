@@ -18,8 +18,16 @@ real numbers. This file supplies a Pincherle-type convergence theory for the con
 
   `h + a₀/(b₀ + a₁/(b₁ + a₂/(b₂ + ⋯)))`
 
-with arbitrary partial numerators and denominators in a (normed) field, given by sequences
-(`GenContFract.cfConv_ofFun`).
+with arbitrary partial numerators and denominators in a (normed) field, given by sequences.
+
+## Main definitions
+
+* `GenContFract.cfConv_ofFun`: the continued fraction built from the sequences `a` and `b`.
+* `cfConv_G`: the forward solution `G_n = (-1)^n (∏_{k ≤ n} a_k) w_{n+1}` attached to a
+  backward solution `w`.
+* `cfConv_backW`: the finite backward solution of the `N`-th truncation.
+
+## Main results
 
 * `cfConv_det`: the determinant formula `A_{m+1}B_m - B_{m+1}A_m = (-1)^m ∏_{k ≤ m} a_k`.
 * `cfConv_invariant`: a *backward solution* `w_k = b_k w_{k+1} + a_{k+1} w_{k+2}` pairs with the
@@ -32,15 +40,19 @@ with arbitrary partial numerators and denominators in a (normed) field, given by
   with `q > 2` (that is, the true tails `τ_{k+1} = a_{k+1}w_{k+2}/w_{k+1}` satisfy
   `‖b_k + τ_{k+1}‖ ≥ q ‖τ_{k+1}‖`), then the convergents tend to `h + a₀w₁/w₀`.
 * `cfConv_tendsto_of_ratio_real`: the real analogue when `w_k` and `a_{k+1}w_{k+2}` have
-  opposite signs and `|a_{k+1} w_{k+2}| ≤ |w_k|` (negative elements, Worpitzky-type).
+  opposite signs and `|a_{k+1} w_{k+2}| ≤ |w_k|` (negative elements, Worpitzky type).
 * `cfConv_tendsto_of_ratio_pos`: the real analogue when `w_k` and `a_{k+1}w_{k+2}` have the
   same sign and `r |a_{k+1} w_{k+2}| ≤ |w_k|` with `r > 1` (positive elements).
+* `cfConv_tendsto_of_pos_linear`: convergence of a positive S-fraction with linearly bounded
+  elements.
 * `cfConv_continuants_of_back`, `cfConv_equiv_convs`, `cfConv_convs_smul_a0`: finite backward
   solutions, equivalence transformations, and linearity in `a₀`.
 * `cfConv_sfrac_bound`: the value region of an S-fraction `b_k = 1`, `a_k = c_k s²` (`c_k > 0`,
   `Re s > 0`): nonzero denominators and `‖A_n/B_n - h‖ ≤ ‖a₀‖‖s‖/Re s`; with
   `cfConv_convs_differentiableOn` this gives the local boundedness and holomorphy needed for the
   Stieltjes–Vitali convergence argument.
+* `cfConv_tail_tendsto`, `cfConv_head_tendsto`, `cfConv_tendsto_of_tail_invariant`: passing
+  convergence between a continued fraction and its tails.
 * `cfConv_convs_lt_of_pos`, `cfConv_lt_convs_of_pos`: for positive elements and a positive
   backward solution, even convergents lie below and odd convergents above `h + a₀w₁/w₀`.
 -/

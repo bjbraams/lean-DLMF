@@ -16,6 +16,14 @@ public import Mathlib.Analysis.Calculus.Deriv.Prod
 The coordinate partial derivatives of an analytic function on `ℂ × ℂ` are analytic and
 its two mixed partial derivatives agree. The proofs express coordinate derivatives as
 evaluations of Fréchet derivatives, then apply symmetry of the second Fréchet derivative.
+
+## Main results
+
+* `Complex.deriv_fst_eq_fderiv`, `Complex.deriv_snd_eq_fderiv`: coordinate derivatives as
+  evaluations of the Fréchet derivative.
+* `Complex.analyticAt_deriv_fst`, `Complex.analyticAt_deriv_snd`: coordinate partial
+  derivatives of jointly analytic functions are jointly analytic.
+* `Complex.deriv_snd_deriv_fst_comm`: the mixed partial derivatives commute.
 -/
 
 open Filter Set

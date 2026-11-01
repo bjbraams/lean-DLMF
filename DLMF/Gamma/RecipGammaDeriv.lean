@@ -16,12 +16,23 @@ public import Mathlib.Analysis.Calculus.Deriv.Polynomial
 `Complex.digamma` takes the value `0` at those poles, so a product such as
 `ψ(x) · (1/Γ(x))` evaluates to `0` there although its continuous extension is
 `(-1)^{n+1} n!` at `x = -n`. Statements in which digamma occurs only through such products
-are therefore best written with the entire functions `recipGammaDeriv n = (1/Γ)^{(n)}`:
+are therefore best written with the entire functions `recipGammaDeriv n = (1/Γ)^{(n)}`.
 
-* `(1/Γ)' = -ψ/Γ` (`recipGammaDeriv_one_eq`), with `(1/Γ)'(-n) = (-1)^n n!`;
-* `(1/Γ)'' = (ψ² - ψ')/Γ` (`recipGammaDeriv_two_eq`), so that the entire function
-  `((1/Γ)')² - (1/Γ)(1/Γ)''` extends `ψ'/Γ²` (`deriv_digamma_mul_recip_Gamma_sq`);
-* `ψ(x+n)/Γ(x) = -(x)_n (1/Γ)'(x+n)` (`recip_Gamma_mul_digamma_add_nat`).
+## Main definitions
+
+* `recipGammaDeriv`: the `n`-th derivative of `1/Γ`, an entire function.
+
+## Main results
+
+* `poch_mul_recip_Gamma_add_nat`: `(x)_n / Γ(x+n) = 1/Γ(x)` for every `x`.
+* `recipGammaDeriv_one_eq`, `recipGammaDeriv_one_neg_nat`: `(1/Γ)' = -ψ/Γ` away from the poles,
+  and `(1/Γ)'(-n) = (-1)^n n!`.
+* `recipGammaDeriv_two_eq`: `(1/Γ)'' = (ψ² - ψ')/Γ` away from the poles.
+* `deriv_digamma_mul_recip_Gamma_sq`: the entire function `((1/Γ)')² - (1/Γ)(1/Γ)''` extends
+  `ψ'/Γ²`.
+* `recip_Gamma_mul_digamma_add_nat`: `ψ(x+n)/Γ(x) = -(x)_n (1/Γ)'(x+n)`.
+
+## Implementation notes
 
 Results stated with `recipGammaDeriv` hold for all parameters; the digamma forms follow on the
 complement of the poles.

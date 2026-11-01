@@ -8,12 +8,28 @@ module
 public import DLMF.Struve.Asymptotics.TurningPointEstimates
 
 /-!
-# Inner and turning-point Struve expansions
+# Inner and turning-point estimates for the scaled Anger–Weber function (DLMF 11.11.15–11.11.16)
 
-Turning-point estimates and inner-region expansions with uniform error bounds.
+This file proves the main Laplace estimates behind the expansions DLMF 11.11.15 and 11.11.16 of
+`𝐀_{-ν}(λν)`: at the turning point `λ = 1` and in the inner region, uniformly in `ph ν`.
 
-Source references and common attribution are retained in
-`DLMF.Struve.Asymptotics`.
+## Main definitions
+
+* `struveSc_phiR`: the real phase `φ(s) = λs - arsinh s` of `𝐀_{-ν}(λν)` on the positive axis.
+* `struveSc_s0`: the saddle point `s₀ = √(1-λ²)/λ` of the real phase.
+* `struveSc_Q0`, `struveSc_Qf`: half the second derivative of the phase at the saddle and the
+  quadratic phase coefficient.
+
+## Main results
+
+* `struveSc_turning_est`: the main estimate behind DLMF 11.11.16.
+* `struveSc_const_turn`, `struveSc_turning_rhs`: the constant
+  `π⁻¹ Γ(4/3) 6^{1/3} = 2^{4/3}/(3^{7/6} Γ(2/3))` and the right-hand side of DLMF 11.11.16 as the
+  Gamma-integral leading term.
+* `struveSc_angerA_real`: DLMF 11.10.4 on the real contour, written with the real phase.
+* `struveSc_phiR_taylor`, `struveSc_phiR_gap`: the quadratic Taylor bound at the saddle and the
+  phase gap away from it.
+* `struveSc_inner_est`: the main Laplace estimate behind DLMF 11.11.15, uniform in `ph ν`.
 -/
 
 @[expose] public noncomputable section

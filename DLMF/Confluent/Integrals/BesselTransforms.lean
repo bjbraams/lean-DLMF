@@ -8,12 +8,32 @@ module
 public import DLMF.Confluent.Integrals.HankelKernels
 
 /-!
-# Bessel transforms with confluent hypergeometric parameters
+# Hankel-type transforms of Kummer and Tricomi functions
 
-Large-parameter Bessel kernels and their transforms into Kummer and Tricomi functions.
+This file proves the Hankel-type transforms of the regularized Kummer function and of
+Tricomi's function against the Bessel kernel `t^{ν/2} J_ν(2√(xt))` (DLMF §13.10(vi)).
 
-Source references and common attribution are retained in
-`DLMF.Confluent.Integrals`.
+## Main definitions
+
+* `confLP_Psi`, `confLP_R`: the two sides of DLMF 13.10.13 in `₀F₁` form.
+
+## Main results
+
+* `bessel_regularizedHGFun`: a Hankel-type transform of `𝐌` (DLMF 13.10.13).
+* `bessel_regularizedHGFun_U`: a Hankel-type transform of `𝐌` in terms of `U`
+  (DLMF 13.10.14).
+* `bessel_kummerU`: a Hankel-type transform of `U` (DLMF 13.10.15).
+* `confLP_Psi_eq_R`: DLMF 13.10.13 in `₀F₁` form for all admissible parameters.
+* `confLP_contiguous_b`, `confLP_contiguous_down`: contiguous relations of `𝐌` for all
+  parameters.
+
+## Implementation notes
+
+The transforms are stated for real `x > 0`. For non-real `x` the Bessel kernel grows like
+`exp (c √t)`, and the parameter bounds make the integrand absolutely integrable, as Lean's
+integral requires. DLMF 13.10.13 is proved first in the Euler region by Fubini, continued
+analytically in `a` to a strip, and extended by the order recurrence `confLP_Psi_rec`, which
+the right sides also satisfy (`confLP_R_rec`).
 -/
 
 @[expose] public section

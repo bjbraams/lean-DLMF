@@ -10,14 +10,27 @@ public import DLMF.GeneralizedHypergeometric.Appell.Basic.EulerBranches
 public import DLMF.GeneralizedHypergeometric.Appell.SeriesAndDifferentialEquations
 
 /-!
-# Euler integrals for Appell functions
+# Euler integrals for Appell functions (DLMF §§16.15–16.16)
 
-Branch domains and locally dominated Euler-integral representations of the Appell functions.
-The F3-to-F1 reduction and F1/F2 Pfaff transformations use Gauss-series fiber sums
-and the proved `pfaff_transformation_of_ne_neg_nat`, retaining all regular lower parameters.
+Integrability and analyticity of the Euler integrals of the Appell functions, their agreement
+with the double series as germs at the origin, and the reductions and transformations that
+follow.
 
-Source references and common attribution are retained in
-`DLMF.GeneralizedHypergeometric.Appell`.
+## Main results
+
+* `appF1_euler_integrable`, `appF1_euler_analytic`, `appF1_euler_germ`: the Euler integral of
+  `F₁`, DLMF 16.15.1; likewise for `F₂`, `F₃`, `F₄` (16.15.2–16.15.4).
+* `appF2_reduction_gauss`, `appF3_reduction_appF1`, `appF4_reduction_appF1`: reductions,
+  DLMF 16.16.2, 16.16.4, 16.16.5_5.
+* `appF4_product_germ`, `appF4_burchnall_chaundy`: DLMF 16.16.6–16.16.7.
+* `appF1_pfaff_first`, `appF2_pfaff`: Pfaff transformations, DLMF 16.16.8–16.16.9.
+* `appF4_infinity_connection`, `appF4_infinity_resonance_limits`: the connection formula at
+  infinity, DLMF 16.16.10, as a continued branch.
+
+## Implementation notes
+
+The `F₃`-to-`F₁` reduction and the `F₁`/`F₂` Pfaff transformations use Gauss-series fiber sums
+and `pfaff_transformation_of_ne_neg_nat`, retaining all regular lower parameters.
 -/
 
 @[expose] public noncomputable section
@@ -31,7 +44,7 @@ namespace DLMF.Hypergeometric
 /-! ## Euler integral branches with actual integrability -/
 
 /-- The segment from `1` to `1 - w` stays in the slit plane. -/
-lemma ghaR4_slit_segment {w : ℂ} (hw : 1 - w ∈ slitPlane) {u : ℝ} (hu : u ∈ Icc (0:ℝ) 1) :
+private lemma one_sub_mul_mem_slitPlane_of_one_sub_mem {w : ℂ} (hw : 1 - w ∈ slitPlane) {u : ℝ} (hu : u ∈ Icc (0:ℝ) 1) :
     1 - (u:ℂ) * w ∈ slitPlane := by
   have := starConvex_one_slitPlane.add_smul_mem (y := -w) (by simpa [sub_eq_add_neg] using hw)
     hu.1 hu.2
@@ -40,7 +53,7 @@ lemma ghaR4_slit_segment {w : ℂ} (hw : 1 - w ∈ slitPlane) {u : ℝ} (hu : u 
   ring
 
 /-- A reciprocal principal power of a slit-valued continuous function is bounded on a compact set. -/
-lemma ghaR4_inv_cpow_bound {α : Type*} [TopologicalSpace α] {f : α → ℂ} {s : Set α}
+private lemma exists_norm_inv_cpow_le_of_isCompact {α : Type*} [TopologicalSpace α] {f : α → ℂ} {s : Set α}
     (hs : IsCompact s) (hf : ContinuousOn f s)
     (hslit : ∀ u ∈ s, f u ∈ slitPlane) (b : ℂ) :
     ∃ M : ℝ, ∀ u ∈ s, ‖(f u ^ b)⁻¹‖ ≤ M := by
@@ -51,51 +64,51 @@ lemma ghaR4_inv_cpow_bound {α : Type*} [TopologicalSpace α] {f : α → ℂ} {
   exact hs.exists_bound_of_continuousOn hc
 
 /-- The Euler beta kernel is integrable on `[0,1]`. -/
-lemma ghaR4_beta_integrableOn {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) :
+private lemma integrableOn_betaKernel {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) :
     IntegrableOn (fun t : ℝ => (t:ℂ)^(u-1) * (1 - (t:ℂ))^(v-1)) (Icc 0 1) := by
   rw [integrableOn_Icc_iff_integrableOn_Ioc,
     ← intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one]
   exact Complex.betaIntegral_convergent hu hv
 
 /-- The product of two beta kernels is integrable on the unit square. -/
-lemma ghaR4_beta_prod_integrableOn {u v u' v' : ℂ} (hu : 0 < u.re) (hv : 0 < v.re)
+private lemma integrableOn_norm_betaKernel_mul_norm_betaKernel {u v u' v' : ℂ} (hu : 0 < u.re) (hv : 0 < v.re)
     (hu' : 0 < u'.re) (hv' : 0 < v'.re) :
     IntegrableOn (fun p : ℝ × ℝ => ‖(p.1:ℂ)^(u-1) * (1 - (p.1:ℂ))^(v-1)‖ *
       ‖(p.2:ℂ)^(u'-1) * (1 - (p.2:ℂ))^(v'-1)‖) (Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1) := by
   rw [IntegrableOn, Measure.volume_eq_prod, ← Measure.prod_restrict]
-  exact (ghaR4_beta_integrableOn hu hv).norm.mul_prod (ghaR4_beta_integrableOn hu' hv').norm
+  exact (integrableOn_betaKernel hu hv).norm.mul_prod (integrableOn_betaKernel hu' hv').norm
 
 /-- The set where `1 - x` lies in the slit plane is open. -/
-lemma ghaR4_isOpen_slitPre : IsOpen {x : ℂ | 1 - x ∈ slitPlane} :=
+private lemma isOpen_one_sub_mem_slitPlane : IsOpen {x : ℂ | 1 - x ∈ slitPlane} :=
   isOpen_slitPlane.preimage (by fun_prop)
 
 /-- A closed ball on which `1 - x` stays in the slit plane. -/
-lemma ghaR4_exists_closedBall_slit {x₀ : ℂ} (hx : 1 - x₀ ∈ slitPlane) :
+private lemma exists_closedBall_one_sub_mem_slitPlane {x₀ : ℂ} (hx : 1 - x₀ ∈ slitPlane) :
     ∃ r > 0, Metric.closedBall x₀ r ⊆ {x : ℂ | 1 - x ∈ slitPlane} := by
-  obtain ⟨r, hr, hsub⟩ := Metric.isOpen_iff.mp ghaR4_isOpen_slitPre x₀ hx
+  obtain ⟨r, hr, hsub⟩ := Metric.isOpen_iff.mp isOpen_one_sub_mem_slitPlane x₀ hx
   exact ⟨r / 2, by positivity, (Metric.closedBall_subset_ball (by linarith)).trans hsub⟩
 
 /-- Uniform bound for `(1 - u x)^(-b)` over `u ∈ [0,1]` and `x` in a slit-admissible closed ball. -/
-lemma ghaR4_inv_cpow_bound_param {x₀ : ℂ} {r : ℝ}
+private lemma exists_norm_inv_one_sub_mul_cpow_le {x₀ : ℂ} {r : ℝ}
     (hr : Metric.closedBall x₀ r ⊆ {x : ℂ | 1 - x ∈ slitPlane}) (b : ℂ) :
     ∃ M : ℝ, ∀ u ∈ Icc (0:ℝ) 1, ∀ x ∈ Metric.closedBall x₀ r, ‖((1 - (u:ℂ) * x) ^ b)⁻¹‖ ≤ M := by
-  obtain ⟨M, hM⟩ := ghaR4_inv_cpow_bound (f := fun q : ℝ × ℂ => 1 - (q.1:ℂ) * q.2)
+  obtain ⟨M, hM⟩ := exists_norm_inv_cpow_le_of_isCompact (f := fun q : ℝ × ℂ => 1 - (q.1:ℂ) * q.2)
     (isCompact_Icc.prod (isCompact_closedBall x₀ r)) (by fun_prop)
-    (fun q hq => ghaR4_slit_segment (hr hq.2) hq.1) b
+    (fun q hq => one_sub_mul_mem_slitPlane_of_one_sub_mem (hr hq.2) hq.1) b
   exact ⟨M, fun u hu x hx => hM (u, x) ⟨hu, hx⟩⟩
 
 /-- Differentiability of `x ↦ (1 - u x)^(-b)` on the Euler domain. -/
-lemma ghaR4_differentiableAt_inv_cpow {u : ℝ} (hu : u ∈ Icc (0:ℝ) 1) {x : ℂ}
+private lemma differentiableAt_inv_one_sub_mul_cpow {u : ℝ} (hu : u ∈ Icc (0:ℝ) 1) {x : ℂ}
     (hx : 1 - x ∈ slitPlane) (b : ℂ) :
     DifferentiableAt ℂ (fun x : ℂ => ((1 - (u:ℂ) * x) ^ b)⁻¹) x := by
-  have hs := ghaR4_slit_segment hx hu
+  have hs := one_sub_mul_mem_slitPlane_of_one_sub_mem hx hu
   refine (((differentiableAt_const _).sub ((differentiableAt_const _).mul differentiableAt_id)).cpow
     (differentiableAt_const b) hs).inv ?_
   rw [Ne, Complex.cpow_eq_zero_iff]
   exact fun h => slitPlane_ne_zero hs h.1
 
 /-- The square-slit condition is open. -/
-lemma ghaR4_square_eventually {p₀ : ℂ × ℂ} (h : AppellSquareSlit p₀) :
+private lemma eventually_appellSquareSlit {p₀ : ℂ × ℂ} (h : AppellSquareSlit p₀) :
     ∀ᶠ p in 𝓝 p₀, AppellSquareSlit p := by
   have hK : IsCompact (Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1) := isCompact_Icc.prod isCompact_Icc
   have := hK.eventually_forall_of_forall_eventually (x₀ := p₀)
@@ -107,29 +120,29 @@ lemma ghaR4_square_eventually {p₀ : ℂ × ℂ} (h : AppellSquareSlit p₀) :
   exact hp (u, v) ⟨hu, hv⟩
 
 /-- The F2/F4 Euler domain is open. -/
-lemma ghaR4_isOpen_square : IsOpen {p : ℂ × ℂ | AppellSquareSlit p} :=
-  isOpen_iff_mem_nhds.mpr fun _ hp => ghaR4_square_eventually hp
+private lemma isOpen_appellSquareSlit : IsOpen {p : ℂ × ℂ | AppellSquareSlit p} :=
+  isOpen_iff_mem_nhds.mpr fun _ hp => eventually_appellSquareSlit hp
 
 /-- A closed ball inside the F2/F4 Euler domain. -/
-lemma ghaR4_exists_closedBall_square {p₀ : ℂ × ℂ} (h : AppellSquareSlit p₀) :
+private lemma exists_closedBall_appellSquareSlit {p₀ : ℂ × ℂ} (h : AppellSquareSlit p₀) :
     ∃ r > 0, ∀ p ∈ Metric.closedBall p₀ r, AppellSquareSlit p := by
-  obtain ⟨r, hr, hsub⟩ := Metric.isOpen_iff.mp ghaR4_isOpen_square p₀ h
+  obtain ⟨r, hr, hsub⟩ := Metric.isOpen_iff.mp isOpen_appellSquareSlit p₀ h
   exact ⟨r / 2, by positivity, fun p hp => hsub (Metric.closedBall_subset_ball (by linarith) hp)⟩
 
 /-- A uniform bound for a reciprocal power along the square, for parameters near a point. -/
-lemma ghaR4_square_inv_cpow_bound {p₀ : ℂ × ℂ} {r : ℝ}
+private lemma exists_norm_inv_cpow_le_square {p₀ : ℂ × ℂ} {r : ℝ}
     {f : (ℂ × ℂ) × (ℝ × ℝ) → ℂ} (hf : Continuous f)
     (hs : ∀ p ∈ Metric.closedBall p₀ r, ∀ q ∈ Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1, f (p, q) ∈ slitPlane)
     (b : ℂ) :
     ∃ M : ℝ, ∀ p ∈ Metric.closedBall p₀ r, ∀ q ∈ Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1,
       ‖(f (p, q) ^ b)⁻¹‖ ≤ M := by
-  obtain ⟨M, hM⟩ := ghaR4_inv_cpow_bound (f := f)
+  obtain ⟨M, hM⟩ := exists_norm_inv_cpow_le_of_isCompact (f := f)
     ((isCompact_closedBall p₀ r).prod (isCompact_Icc.prod isCompact_Icc)) hf.continuousOn
     (fun z hz => hs z.1 hz.1 z.2 hz.2) b
   exact ⟨M, fun p hp q hq => hM (p, q) ⟨hp, hq⟩⟩
 
 /-- Differentiability of the square-integral denominator power. -/
-lemma ghaR4_differentiableAt_inv_cpow_square {p : ℂ × ℂ} {u v : ℝ}
+private lemma differentiableAt_inv_one_sub_mul_sub_mul_cpow {p : ℂ × ℂ} {u v : ℝ}
     (hs : 1 - (u:ℂ) * p.1 - (v:ℂ) * p.2 ∈ slitPlane) (b : ℂ) :
     DifferentiableAt ℂ (fun p : ℂ × ℂ => ((1 - (u:ℂ) * p.1 - (v:ℂ) * p.2) ^ b)⁻¹) p := by
   have hf : DifferentiableAt ℂ (fun p : ℂ × ℂ => 1 - (u:ℂ) * p.1 - (v:ℂ) * p.2) p := by fun_prop
@@ -138,7 +151,7 @@ lemma ghaR4_differentiableAt_inv_cpow_square {p : ℂ × ℂ} {u v : ℝ}
   exact fun h => slitPlane_ne_zero hs h.1
 
 /-- Termwise integration of a series with a bounded integrable weight. -/
-lemma ghaR4_hasSum_integral {α ι : Type*} [MeasurableSpace α] [Countable ι] {μ : Measure α}
+private lemma hasSum_integral_mul_of_norm_le_one {α ι : Type*} [MeasurableSpace α] [Countable ι] {μ : Measure α}
     {w : α → ℂ} (hw : Integrable w μ) {d : ι → ℂ} (hd : Summable fun i => ‖d i‖)
     {e : ι → α → ℂ} (he : ∀ i, AEStronglyMeasurable (e i) μ) (hbd : ∀ i, ∀ᵐ t ∂μ, ‖e i t‖ ≤ 1)
     {g : α → ℂ} (hg : ∀ᵐ t ∂μ, HasSum (fun i => d i * e i t) (g t)) :
@@ -160,14 +173,14 @@ lemma ghaR4_hasSum_integral {α ι : Type*} [MeasurableSpace α] [Countable ι] 
   congr 1; funext t; ring
 
 /-- Absolute convergence of the binomial series `∑ (b)ₘ xᵐ/m!` in the unit disk. -/
-lemma ghaR4_summable_norm_binom (b : ℂ) {x : ℂ} (hx : ‖x‖ < 1) :
+private lemma summable_norm_poch_div_factorial_mul_pow_of_norm_lt_one (b : ℂ) {x : ℂ} (hx : ‖x‖ < 1) :
     Summable fun m : ℕ => ‖poch b m / m ! * x ^ m‖ := by
   set σ := 2 / (1 + ‖x‖) with hσ
   have hx0 := norm_nonneg x
   have hσ1 : 1 < σ := by rw [hσ, lt_div_iff₀ (by linarith)]; linarith
   have hσx : σ * ‖x‖ < 1 := by
     rw [hσ, div_mul_eq_mul_div, div_lt_one (by linarith)]; linarith
-  obtain ⟨C, hC0, hC⟩ := ghaR4_norm_poch_le_factorial b hσ1
+  obtain ⟨C, hC0, hC⟩ := norm_poch_le_mul_factorial b hσ1
   refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun m => ?_)
     ((summable_geometric_of_lt_one (by positivity) hσx).mul_left C)
   have hf : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
@@ -177,10 +190,10 @@ lemma ghaR4_summable_norm_binom (b : ℂ) {x : ℂ} (hx : ‖x‖ < 1) :
     _ = _ := by ring
 
 /-- Binomially weighted bound for the two-variable binomial coefficients. -/
-lemma ghaR4_binom2_coeff_bound (a : ℂ) {σ : ℝ} (hσ : 1 < σ) :
+private lemma exists_norm_poch_add_div_factorial_mul_le (a : ℂ) {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖poch a (q.1 + q.2) / (q.1 ! * q.2 ! : ℂ)‖ ≤
       C * σ ^ (q.1 + q.2) * ((q.1 + q.2).choose q.1 : ℝ) := by
-  obtain ⟨C, hC0, hC⟩ := ghaR4_norm_poch_le_factorial a hσ
+  obtain ⟨C, hC0, hC⟩ := norm_poch_le_mul_factorial a hσ
   refine ⟨C, fun ⟨m, n⟩ => ?_⟩
   have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
   have hn : (0 : ℝ) < n ! := by exact_mod_cast n.factorial_pos
@@ -194,15 +207,15 @@ lemma ghaR4_binom2_coeff_bound (a : ℂ) {σ : ℝ} (hσ : 1 < σ) :
     _ = _ := by rw [hfac]; ring
 
 /-- The two-variable binomial series `(1-s-t)^(-a) = ∑ (a)ₘ₊ₙ sᵐ tⁿ/(m! n!)`. -/
-lemma ghaR4_hasSum_binom2 (a : ℂ) {s t : ℂ} (hst : ‖s‖ + ‖t‖ < 1) :
+private lemma hasSum_two_var_binomial (a : ℂ) {s t : ℂ} (hst : ‖s‖ + ‖t‖ < 1) :
     HasSum (fun q : ℕ × ℕ => poch a (q.1 + q.2) / (q.1 ! * q.2 ! : ℂ) * s ^ q.1 * t ^ q.2)
       ((1 - s - t) ^ (-a)) ∧
     Summable (fun q : ℕ × ℕ => ‖poch a (q.1 + q.2) / (q.1 ! * q.2 ! : ℂ) * s ^ q.1 * t ^ q.2‖) := by
   set f := fun q : ℕ × ℕ => poch a (q.1 + q.2) / (q.1 ! * q.2 ! : ℂ) * s ^ q.1 * t ^ q.2 with hf
   have hnorm : Summable fun q => ‖f q‖ := by
-    obtain ⟨A, B, hA, hB, hS⟩ := ghaR4_dom_diamond
+    obtain ⟨A, B, hA, hB, hS⟩ := exists_summable_doubleSeries_of_diamond
       (fun q : ℕ × ℕ => poch a (q.1 + q.2) / (q.1 ! * q.2 ! : ℂ))
-      (fun _ hσ => ghaR4_binom2_coeff_bound a hσ) hst
+      (fun _ hσ => exists_norm_poch_add_div_factorial_mul_le a hσ) hst
     refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun q => ?_) hS
     simp only [hf, norm_mul, norm_pow]
     have := norm_nonneg (poch a (q.1 + q.2) / (q.1 ! * q.2 ! : ℂ))
@@ -239,7 +252,7 @@ lemma ghaR4_hasSum_binom2 (a : ℂ) {s t : ℂ} (hst : ‖s‖ + ‖t‖ < 1) :
   exact hT
 
 /-- Beta-integral moments on `[0,1]`. -/
-lemma ghaR4_beta_moment {b γ : ℂ} (m : ℕ) :
+private lemma setIntegral_betaKernel_mul_pow {b γ : ℂ} (m : ℕ) :
     (∫ u in Icc (0:ℝ) 1, (u:ℂ) ^ (b - 1) * ((1 - u : ℝ) : ℂ) ^ (γ - 1) * (u:ℂ) ^ m) =
       betaIntegral (b + m) γ := by
   rw [integral_Icc_eq_integral_Ioc, betaIntegral, intervalIntegral.integral_of_le zero_le_one]
@@ -250,7 +263,7 @@ lemma ghaR4_beta_moment {b γ : ℂ} (m : ℕ) :
   ring
 
 /-- The normalized beta moment `Γ(c)B(b+m,c-b)/(Γ(b)Γ(c-b)) = (b)ₘ/(c)ₘ`. -/
-lemma ghaR4_gamma_beta {b c : ℂ} (hb : 0 < b.re) (hcb : 0 < (c - b).re) (m : ℕ) :
+private lemma Gamma_div_mul_betaIntegral_eq_poch_div_poch {b c : ℂ} (hb : 0 < b.re) (hcb : 0 < (c - b).re) (m : ℕ) :
     Gamma c / (Gamma b * Gamma (c - b)) * betaIntegral (b + m) (c - b) = poch b m / poch c m := by
   have hE := euler_term_eq_gaussHGCoeff (a := 1) (b := b) (c := c) m hb hcb
   have hf : (m ! : ℂ) ≠ 0 := by exact_mod_cast m.factorial_ne_zero
@@ -264,10 +277,10 @@ lemma ghaR4_gamma_beta {b c : ℂ} (hb : 0 < b.re) (hcb : 0 < (c - b).re) (m : �
 @[dlmf 16.15.E1]
 theorem appF1_euler_integrable (a b b' c : ℂ) (ha : 0<a.re) (hca : 0<(c-a).re) {x y : ℂ} (hxy : (x,y)∈appellEulerDomain) :
     IntegrableOn (appF1EulerKernel a b b' c x y) (Icc (0:ℝ) 1) := by
-  obtain ⟨M1, hM1⟩ := ghaR4_inv_cpow_bound (f := fun u : ℝ => 1 - (u:ℂ) * x) isCompact_Icc
-    (by fun_prop) (fun u hu => ghaR4_slit_segment hxy.1 hu) b
-  obtain ⟨M2, hM2⟩ := ghaR4_inv_cpow_bound (f := fun u : ℝ => 1 - (u:ℂ) * y) isCompact_Icc
-    (by fun_prop) (fun u hu => ghaR4_slit_segment hxy.2 hu) b'
+  obtain ⟨M1, hM1⟩ := exists_norm_inv_cpow_le_of_isCompact (f := fun u : ℝ => 1 - (u:ℂ) * x) isCompact_Icc
+    (by fun_prop) (fun u hu => one_sub_mul_mem_slitPlane_of_one_sub_mem hxy.1 hu) b
+  obtain ⟨M2, hM2⟩ := exists_norm_inv_cpow_le_of_isCompact (f := fun u : ℝ => 1 - (u:ℂ) * y) isCompact_Icc
+    (by fun_prop) (fun u hu => one_sub_mul_mem_slitPlane_of_one_sub_mem hxy.2 hu) b'
   have hβ : IntegrableOn (fun u : ℝ => (u:ℂ)^(a-1) * (1 - (u:ℂ))^(c-a-1)) (Icc 0 1) := by
     rw [integrableOn_Icc_iff_integrableOn_Ioc,
       ← intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one]
@@ -289,8 +302,8 @@ theorem appF1_euler_integrable (a b b' c : ℂ) (ha : 0<a.re) (hca : 0<(c-a).re)
 theorem appF1_euler_analytic (a b b' c : ℂ) (ha : 0<a.re) (hca : 0<(c-a).re) :
     AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF1Euler a b b' c p.1 p.2) appellEulerDomain := by
   have hU : IsOpen appellEulerDomain :=
-    (ghaR4_isOpen_slitPre.preimage continuous_fst).inter
-      (ghaR4_isOpen_slitPre.preimage continuous_snd)
+    (isOpen_one_sub_mem_slitPlane.preimage continuous_fst).inter
+      (isOpen_one_sub_mem_slitPlane.preimage continuous_snd)
   have hβ : IntegrableOn (fun u : ℝ => (u:ℂ)^(a-1) * (1 - (u:ℂ))^(c-a-1)) (Icc 0 1) := by
     rw [integrableOn_Icc_iff_integrableOn_Ioc,
       ← intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one]
@@ -305,8 +318,8 @@ theorem appF1_euler_analytic (a b b' c : ℂ) (ha : 0<a.re) (hca : 0<(c-a).re) :
       filter_upwards [ae_restrict_mem measurableSet_Ioc] with u hu
       have hu' : u ∈ Icc (0:ℝ) 1 := Ioc_subset_Icc_self hu
       intro p hp
-      have h1 := ghaR4_differentiableAt_inv_cpow hu' hp.1 b
-      have h2 := ghaR4_differentiableAt_inv_cpow hu' hp.2 b'
+      have h1 := differentiableAt_inv_one_sub_mul_cpow hu' hp.1 b
+      have h2 := differentiableAt_inv_one_sub_mul_cpow hu' hp.2 b'
       have e : (fun q : ℂ × ℂ => appF1EulerKernel a b b' c q.1 q.2 u) = fun q =>
           (u:ℂ) ^ (a - 1) * ((1 - u:ℝ):ℂ) ^ (c - a - 1) * ((1 - (u:ℂ) * q.1) ^ b)⁻¹ *
             ((1 - (u:ℂ) * q.2) ^ b')⁻¹ := by
@@ -315,10 +328,10 @@ theorem appF1_euler_analytic (a b b' c : ℂ) (ha : 0<a.re) (hca : 0<(c-a).re) :
       exact (((differentiableAt_const _).mul (h1.comp p differentiableAt_fst)).mul
         (h2.comp p differentiableAt_snd)).differentiableWithinAt
     · intro p hp
-      obtain ⟨r1, hr1, hs1⟩ := ghaR4_exists_closedBall_slit hp.1
-      obtain ⟨r2, hr2, hs2⟩ := ghaR4_exists_closedBall_slit hp.2
-      obtain ⟨M1, hM1⟩ := ghaR4_inv_cpow_bound_param hs1 b
-      obtain ⟨M2, hM2⟩ := ghaR4_inv_cpow_bound_param hs2 b'
+      obtain ⟨r1, hr1, hs1⟩ := exists_closedBall_one_sub_mem_slitPlane hp.1
+      obtain ⟨r2, hr2, hs2⟩ := exists_closedBall_one_sub_mem_slitPlane hp.2
+      obtain ⟨M1, hM1⟩ := exists_norm_inv_one_sub_mul_cpow_le hs1 b
+      obtain ⟨M2, hM2⟩ := exists_norm_inv_one_sub_mul_cpow_le hs2 b'
       refine ⟨Metric.ball p.1 r1 ×ˢ Metric.ball p.2 r2,
         prod_mem_nhds (Metric.ball_mem_nhds _ hr1) (Metric.ball_mem_nhds _ hr2),
         fun u => ‖(u:ℂ)^(a-1) * (1 - (u:ℂ))^(c-a-1)‖ * (M1 * M2), ?_, ?_⟩
@@ -359,7 +372,7 @@ private lemma appF1_hasSum_binom_prod (b b' : ℂ) {x y : ℂ} (hx : ‖x‖ < 1
     have huy : ‖y * u‖ < 1 := by
       rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hu.1]
       nlinarith [norm_nonneg y, hu.2]
-    have := (ghaR4_summable_norm_binom b hux).mul_of_nonneg (ghaR4_summable_norm_binom b' huy)
+    have := (summable_norm_poch_div_factorial_mul_pow_of_norm_lt_one b hux).mul_of_nonneg (summable_norm_poch_div_factorial_mul_pow_of_norm_lt_one b' huy)
       (fun _ => norm_nonneg _) (fun _ => norm_nonneg _)
     exact this.congr fun q => by simp only [norm_mul]
   have := h1.mul h2 hs
@@ -390,11 +403,11 @@ theorem appF1_euler_germ (a b b' c : ℂ) (ha : 0<a.re) (hca : 0<(c-a).re) :
     refine this.congr (Eventually.of_forall fun u => ?_)
     simp [hwdef]
   have hd : Summable fun q => ‖d q‖ := by
-    have := (ghaR4_summable_norm_binom b hx).mul_of_nonneg (ghaR4_summable_norm_binom b' hy)
+    have := (summable_norm_poch_div_factorial_mul_pow_of_norm_lt_one b hx).mul_of_nonneg (summable_norm_poch_div_factorial_mul_pow_of_norm_lt_one b' hy)
       (fun _ => norm_nonneg _) (fun _ => norm_nonneg _)
     refine this.congr fun q => ?_
     simp only [hddef, norm_mul]
-  have key := ghaR4_hasSum_integral (μ := volume.restrict (Ioc (0:ℝ) 1)) hw hd
+  have key := hasSum_integral_mul_of_norm_le_one (μ := volume.restrict (Ioc (0:ℝ) 1)) hw hd
     (e := fun q u => (u:ℂ) ^ (q.1 + q.2)) (fun q => by fun_prop)
     (fun q => by
       filter_upwards [ae_restrict_mem measurableSet_Ioc] with u hu
@@ -425,7 +438,7 @@ theorem appF1_euler_germ (a b b' c : ℂ) (ha : 0<a.re) (hca : 0<(c-a).re) :
     push_cast
     ring
   rw [hbeta]
-  have hB := ghaR4_gamma_beta ha hca (m + n)
+  have hB := Gamma_div_mul_betaIntegral_eq_poch_div_poch ha hca (m + n)
   calc appF1Coeff a b b' c m n * x ^ m * y ^ n
       = (Gamma c / (Gamma a * Gamma (c - a)) * betaIntegral (a + (m + n : ℕ)) (c - a)) *
           (poch b m / m ! * x ^ m * (poch b' n / n ! * y ^ n)) := by
@@ -440,11 +453,11 @@ theorem appF1_euler_germ (a b b' c : ℂ) (ha : 0<a.re) (hca : 0<(c-a).re) :
 @[dlmf 16.15.E2]
 theorem appF2_euler_integrable (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (hcb : b.re<c.re) (hcb' : b'.re<c'.re) {x y : ℂ} (hxy : (x,y)∈{p | AppellSquareSlit p}) :
     IntegrableOn (appF2EulerKernel a b b' c c' x y) (Icc (0:ℝ) 1×ˢIcc (0:ℝ) 1) := by
-  obtain ⟨M, hM⟩ := ghaR4_inv_cpow_bound (f := fun p : ℝ × ℝ => 1 - (p.1:ℂ) * x - (p.2:ℂ) * y)
+  obtain ⟨M, hM⟩ := exists_norm_inv_cpow_le_of_isCompact (f := fun p : ℝ × ℝ => 1 - (p.1:ℂ) * x - (p.2:ℂ) * y)
     (isCompact_Icc.prod isCompact_Icc) (by fun_prop) (fun p hp => hxy p.1 hp.1 p.2 hp.2) a
   have hcb1 : 0 < (c - b).re := by simp; linarith
   have hcb2 : 0 < (c' - b').re := by simp; linarith
-  refine ((ghaR4_beta_prod_integrableOn hb hcb1 hb' hcb2).mul_const M).mono' ?_ ?_
+  refine ((integrableOn_norm_betaKernel_mul_norm_betaKernel hb hcb1 hb' hcb2).mul_const M).mono' ?_ ?_
   · exact (by unfold appF2EulerKernel; fun_prop : Measurable _).aestronglyMeasurable
   · filter_upwards [ae_restrict_mem (measurableSet_Icc.prod measurableSet_Icc)] with p hp
     have h1 := hM p hp
@@ -460,7 +473,7 @@ theorem appF2_euler_integrable (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re)
 @[dlmf 16.15.E2]
 theorem appF2_euler_analytic (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (hcb : b.re<c.re) (hcb' : b'.re<c'.re) :
     AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF2Euler a b b' c c' p.1 p.2) {p | AppellSquareSlit p} := by
-  have hU := ghaR4_isOpen_square
+  have hU := isOpen_appellSquareSlit
   have hcb1 : 0 < (c - b).re := by simp; linarith
   have hcb2 : 0 < (c' - b').re := by simp; linarith
   have hsq : MeasurableSet (Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1) := measurableSet_Icc.prod measurableSet_Icc
@@ -472,7 +485,7 @@ theorem appF2_euler_analytic (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (
       ?_ ?_
     · filter_upwards [ae_restrict_mem hsq] with q hq
       intro p hp
-      have h1 := ghaR4_differentiableAt_inv_cpow_square (p := p) (hp q.1 hq.1 q.2 hq.2) a
+      have h1 := differentiableAt_inv_one_sub_mul_sub_mul_cpow (p := p) (hp q.1 hq.1 q.2 hq.2) a
       have e : (fun p : ℂ × ℂ => appF2EulerKernel a b b' c c' p.1 p.2 q) = fun p =>
           (q.1:ℂ) ^ (b - 1) * (q.2:ℂ) ^ (b' - 1) * ((1 - q.1:ℝ):ℂ) ^ (c - b - 1) *
             ((1 - q.2:ℝ):ℂ) ^ (c' - b' - 1) * ((1 - (q.1:ℂ) * p.1 - (q.2:ℂ) * p.2) ^ a)⁻¹ := by
@@ -480,14 +493,14 @@ theorem appF2_euler_analytic (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (
       rw [e]
       exact ((differentiableAt_const _).mul h1).differentiableWithinAt
     · intro p hp
-      obtain ⟨r, hr, hs⟩ := ghaR4_exists_closedBall_square hp
-      obtain ⟨M, hM⟩ := ghaR4_square_inv_cpow_bound
+      obtain ⟨r, hr, hs⟩ := exists_closedBall_appellSquareSlit hp
+      obtain ⟨M, hM⟩ := exists_norm_inv_cpow_le_square
         (f := fun z : (ℂ × ℂ) × (ℝ × ℝ) => 1 - (z.2.1:ℂ) * z.1.1 - (z.2.2:ℂ) * z.1.2)
         (by fun_prop) (fun p hp q hq => hs p hp q.1 hq.1 q.2 hq.2) a
       refine ⟨Metric.ball p r, Metric.ball_mem_nhds _ hr,
         fun q => ‖(q.1:ℂ)^(b-1) * (1 - (q.1:ℂ))^(c-b-1)‖ *
           ‖(q.2:ℂ)^(b'-1) * (1 - (q.2:ℂ))^(c'-b'-1)‖ * M, ?_, ?_⟩
-      · exact (ghaR4_beta_prod_integrableOn hb hcb1 hb' hcb2).mul_const M
+      · exact (integrableOn_norm_betaKernel_mul_norm_betaKernel hb hcb1 hb' hcb2).mul_const M
       · filter_upwards [ae_restrict_mem hsq] with q hq
         intro z hz
         have h1 := hM z (Metric.ball_subset_closedBall hz) q hq
@@ -515,7 +528,7 @@ private lemma appF2_hasSum_binom2_mul (a : ℂ) {x y : ℂ} (hp : ‖x‖ + ‖y
   have hz2 : ‖y * z.2‖ ≤ ‖y‖ := by
     rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hz.2.1]
     nlinarith [norm_nonneg y, hz.2.2]
-  have h := (ghaR4_hasSum_binom2 a (s := x * z.1) (t := y * z.2) (by linarith)).1
+  have h := (hasSum_two_var_binomial a (s := x * z.1) (t := y * z.2) (by linarith)).1
   rw [cpow_neg, mul_comm x, mul_comm y] at h
   refine h.congr_fun fun q => ?_
   rw [mul_pow, mul_pow]
@@ -546,14 +559,14 @@ theorem appF2_euler_germ (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (hcb 
   have hint0 : ∀ {β γ : ℂ}, 0 < β.re → 0 < γ.re →
       IntegrableOn (fun u : ℝ => (u:ℂ) ^ (β - 1) * ((1 - u : ℝ) : ℂ) ^ (γ - 1)) (Icc 0 1) := by
     intro β γ hβ hγ
-    refine (ghaR4_beta_integrableOn hβ hγ).congr_fun (fun u _ => ?_) measurableSet_Icc
+    refine (integrableOn_betaKernel hβ hγ).congr_fun (fun u _ => ?_) measurableSet_Icc
     push_cast; ring
   have hw : Integrable w (volume.restrict (Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1)) := by
     rw [Measure.volume_eq_prod, ← Measure.prod_restrict]
     refine ((hint0 hb hcb1).mul_prod (hint0 hb' hcb2)).congr (Eventually.of_forall fun q => ?_)
     simp [hwdef, hf1, hf2]
-  have hd : Summable fun q => ‖d q‖ := (ghaR4_hasSum_binom2 a hp).2
-  have key := ghaR4_hasSum_integral (μ := volume.restrict (Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1)) hw hd
+  have hd : Summable fun q => ‖d q‖ := (hasSum_two_var_binomial a hp).2
+  have key := hasSum_integral_mul_of_norm_le_one (μ := volume.restrict (Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1)) hw hd
     (e := fun q z => (z.1:ℂ) ^ q.1 * (z.2:ℂ) ^ q.2) (fun q => by fun_prop)
     (fun q => by
       filter_upwards [ae_restrict_mem hsq] with z hz
@@ -586,10 +599,10 @@ theorem appF2_euler_germ (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (hcb 
     rw [e2, Measure.volume_eq_prod, ← Measure.prod_restrict, integral_prod_mul]
     rw [show c - b - 1 = (c - b) - 1 by ring] at hf1
     simp only [hf1, hf2]
-    rw [ghaR4_beta_moment m, ghaR4_beta_moment n]
+    rw [setIntegral_betaKernel_mul_pow m, setIntegral_betaKernel_mul_pow n]
   rw [hI]
-  have hB1 := ghaR4_gamma_beta hb hcb1 m
-  have hB2 := ghaR4_gamma_beta hb' hcb2 n
+  have hB1 := Gamma_div_mul_betaIntegral_eq_poch_div_poch hb hcb1 m
+  have hB2 := Gamma_div_mul_betaIntegral_eq_poch_div_poch hb' hcb2 n
   have hG : Gamma c * Gamma c' / (Gamma b * Gamma b' * Gamma (c - b) * Gamma (c' - b')) *
       (betaIntegral (b + m) (c - b) * betaIntegral (b' + n) (c' - b')) =
       poch b m / poch c m * (poch b' n / poch c' n) := by
@@ -628,15 +641,15 @@ theorem appF4_euler_integrable (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca
     IntegrableOn (appF4EulerKernel a b c c' x y) (Icc (0:ℝ) 1×ˢIcc (0:ℝ) 1) := by
   have hK : IsCompact (Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1) := isCompact_Icc.prod isCompact_Icc
   have h0 : (0:ℝ) ∈ Icc (0:ℝ) 1 := left_mem_Icc.mpr zero_le_one
-  obtain ⟨M1, hM1⟩ := ghaR4_inv_cpow_bound (f := fun p : ℝ × ℝ => 1 - (p.1:ℂ) * x)
+  obtain ⟨M1, hM1⟩ := exists_norm_inv_cpow_le_of_isCompact (f := fun p : ℝ × ℝ => 1 - (p.1:ℂ) * x)
     hK (by fun_prop) (fun p hp => by simpa using hxy p.1 hp.1 0 h0) (c + c' - a - 1)
-  obtain ⟨M2, hM2⟩ := ghaR4_inv_cpow_bound (f := fun p : ℝ × ℝ => 1 - (p.2:ℂ) * y)
+  obtain ⟨M2, hM2⟩ := exists_norm_inv_cpow_le_of_isCompact (f := fun p : ℝ × ℝ => 1 - (p.2:ℂ) * y)
     hK (by fun_prop) (fun p hp => by simpa using hxy 0 h0 p.2 hp.2) (c + c' - b - 1)
-  obtain ⟨M3, hM3⟩ := ghaR4_inv_cpow_bound (f := fun p : ℝ × ℝ => 1 - (p.1:ℂ) * x - (p.2:ℂ) * y)
+  obtain ⟨M3, hM3⟩ := exists_norm_inv_cpow_le_of_isCompact (f := fun p : ℝ × ℝ => 1 - (p.1:ℂ) * x - (p.2:ℂ) * y)
     hK (by fun_prop) (fun p hp => hxy p.1 hp.1 p.2 hp.2) (a + b - c - c' + 1)
   have hca1 : 0 < (c - a).re := by simp; linarith
   have hcb1 : 0 < (c' - b).re := by simp; linarith
-  refine ((ghaR4_beta_prod_integrableOn ha hca1 hb hcb1).mul_const (M1 * M2 * M3)).mono' ?_ ?_
+  refine ((integrableOn_norm_betaKernel_mul_norm_betaKernel ha hca1 hb hcb1).mul_const (M1 * M2 * M3)).mono' ?_ ?_
   · exact (by unfold appF4EulerKernel; fun_prop : Measurable _).aestronglyMeasurable
   · filter_upwards [ae_restrict_mem (measurableSet_Icc.prod measurableSet_Icc)] with p hp
     have h1 := hM1 p hp
@@ -658,7 +671,7 @@ theorem appF4_euler_integrable (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca
 @[dlmf 16.15.E4]
 theorem appF4_euler_analytic (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca : a.re<c.re) (hcb : b.re<c'.re) :
     AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF4Euler a b c c' p.1 p.2) {p | AppellSquareSlit p} := by
-  have hU := ghaR4_isOpen_square
+  have hU := isOpen_appellSquareSlit
   have hca1 : 0 < (c - a).re := by simp; linarith
   have hcb1 : 0 < (c' - b).re := by simp; linarith
   have hsq : MeasurableSet (Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1) := measurableSet_Icc.prod measurableSet_Icc
@@ -671,11 +684,11 @@ theorem appF4_euler_analytic (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca :
       ?_ ?_
     · filter_upwards [ae_restrict_mem hsq] with q hq
       intro p hp
-      have h1 := ghaR4_differentiableAt_inv_cpow_square (p := p) (u := q.1) (v := 0)
+      have h1 := differentiableAt_inv_one_sub_mul_sub_mul_cpow (p := p) (u := q.1) (v := 0)
         (by simpa using hp q.1 hq.1 0 h0) (c + c' - a - 1)
-      have h2 := ghaR4_differentiableAt_inv_cpow_square (p := p) (u := 0) (v := q.2)
+      have h2 := differentiableAt_inv_one_sub_mul_sub_mul_cpow (p := p) (u := 0) (v := q.2)
         (by simpa using hp 0 h0 q.2 hq.2) (c + c' - b - 1)
-      have h3 := ghaR4_differentiableAt_inv_cpow_square (p := p) (hp q.1 hq.1 q.2 hq.2)
+      have h3 := differentiableAt_inv_one_sub_mul_sub_mul_cpow (p := p) (hp q.1 hq.1 q.2 hq.2)
         (a + b - c - c' + 1)
       have e : (fun p : ℂ × ℂ => appF4EulerKernel a b c c' p.1 p.2 q) = fun p =>
           (q.1:ℂ) ^ (a - 1) * (q.2:ℂ) ^ (b - 1) * ((1 - q.1:ℝ):ℂ) ^ (c - a - 1) *
@@ -687,20 +700,20 @@ theorem appF4_euler_analytic (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca :
       rw [e]
       exact ((((differentiableAt_const _).mul h1).mul h2).mul h3).differentiableWithinAt
     · intro p hp
-      obtain ⟨r, hr, hs⟩ := ghaR4_exists_closedBall_square hp
-      obtain ⟨M1, hM1⟩ := ghaR4_square_inv_cpow_bound
+      obtain ⟨r, hr, hs⟩ := exists_closedBall_appellSquareSlit hp
+      obtain ⟨M1, hM1⟩ := exists_norm_inv_cpow_le_square
         (f := fun z : (ℂ × ℂ) × (ℝ × ℝ) => 1 - (z.2.1:ℂ) * z.1.1)
         (by fun_prop) (fun p hp q hq => by simpa using hs p hp q.1 hq.1 0 h0) (c + c' - a - 1)
-      obtain ⟨M2, hM2⟩ := ghaR4_square_inv_cpow_bound
+      obtain ⟨M2, hM2⟩ := exists_norm_inv_cpow_le_square
         (f := fun z : (ℂ × ℂ) × (ℝ × ℝ) => 1 - (z.2.2:ℂ) * z.1.2)
         (by fun_prop) (fun p hp q hq => by simpa using hs p hp 0 h0 q.2 hq.2) (c + c' - b - 1)
-      obtain ⟨M3, hM3⟩ := ghaR4_square_inv_cpow_bound
+      obtain ⟨M3, hM3⟩ := exists_norm_inv_cpow_le_square
         (f := fun z : (ℂ × ℂ) × (ℝ × ℝ) => 1 - (z.2.1:ℂ) * z.1.1 - (z.2.2:ℂ) * z.1.2)
         (by fun_prop) (fun p hp q hq => hs p hp q.1 hq.1 q.2 hq.2) (a + b - c - c' + 1)
       refine ⟨Metric.ball p r, Metric.ball_mem_nhds _ hr,
         fun q => ‖(q.1:ℂ)^(a-1) * (1 - (q.1:ℂ))^(c-a-1)‖ *
           ‖(q.2:ℂ)^(b-1) * (1 - (q.2:ℂ))^(c'-b-1)‖ * (M1 * M2 * M3), ?_, ?_⟩
-      · exact (ghaR4_beta_prod_integrableOn ha hca1 hb hcb1).mul_const _
+      · exact (integrableOn_norm_betaKernel_mul_norm_betaKernel ha hca1 hb hcb1).mul_const _
       · filter_upwards [ae_restrict_mem hsq] with q hq
         intro z hz
         have hz' := Metric.ball_subset_closedBall hz
@@ -730,7 +743,7 @@ theorem appF4_euler_germ (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca : a.r
   sorry
 
 /-- The Gauss series in the unit disk, as a scalar `HasSum`. -/
-lemma ghaR4_gauss_hasSum {a b c z : ℂ} (hz : ‖z‖ < 1) :
+private lemma hasSum_gaussHGCoeff_mul_pow {a b c z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => gaussHGCoeff a b c n * z ^ n) (₂F₁ a b c z) := by
   have := (hasFPowerSeriesOnBall_ordinaryHypergeometric a b c).hasSum
     (y := z) (by simpa using mem_eball_one_of_norm_lt_one hz)
@@ -768,7 +781,7 @@ theorem appF2_reduction_gauss (a b b' c : ℂ) (hc : AppellRegular c) (hb' : App
     field_simp
   have hG := hsum.prod_fiberwise hfib
   refine hG.unique ?_
-  have h2 := (ghaR4_gauss_hasSum (a := a) (b := b) (c := c) hz).mul_left ((1 - y) ^ (-a))
+  have h2 := (hasSum_gaussHGCoeff_mul_pow (a := a) (b := b) (c := c) hz).mul_left ((1 - y) ^ (-a))
   refine h2.congr_fun fun m => ?_
   rw [show -(a + (m : ℂ)) = -a + -(m : ℂ) by ring, cpow_add _ _ h1y, cpow_neg (1 - y) (m : ℂ),
     cpow_natCast, div_pow]
@@ -782,7 +795,7 @@ lemma hasSum_appF3_gauss_fibers (a a' b b' c : ℂ) (hc : AppellRegular c)
   have hs := hasSum_appF3 a a' b b' c hc (x := x) (y := y) ⟨hx, hy⟩
   apply hs.prod_fiberwise
   intro m
-  have h := (ghaR4_gauss_hasSum (a := a') (b := b') (c := c + m) hy).mul_left
+  have h := (hasSum_gaussHGCoeff_mul_pow (a := a') (b := b') (c := c + m) hy).mul_left
     (poch a m * poch b m / (poch c m * m !) * x ^ m)
   refine h.congr_fun fun n => ?_
   rw [appF3Coeff, gaussHGCoeff, poch_add]
@@ -797,7 +810,7 @@ lemma hasSum_appF1_gauss_fibers (a b b' c : ℂ) (hc : AppellRegular c)
   have hs := hasSum_appF1 a b b' c hc (x := x) (y := y) ⟨hx, hy⟩
   apply hs.prod_fiberwise
   intro m
-  have h := (ghaR4_gauss_hasSum (a := a + m) (b := b') (c := c + m) hy).mul_left
+  have h := (hasSum_gaussHGCoeff_mul_pow (a := a + m) (b := b') (c := c + m) hy).mul_left
     (poch a m * poch b m / (poch c m * m !) * x ^ m)
   refine h.congr_fun fun n => ?_
   rw [appF1Coeff, gaussHGCoeff, poch_add a, poch_add c]
@@ -847,9 +860,9 @@ theorem appF4_reduction_appF1 (a b c : ℂ) (hc : AppellRegular c) (hb : AppellR
   sorry
 
 /-- A geometric bound for the F4 coefficients at regular lower parameters. -/
-lemma ghaR4_appF4Coeff_geom (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') :
+private lemma exists_norm_appF4Coeff_le_geom (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ m n : ℕ, ‖appF4Coeff a b c c' m n‖ ≤ C * (8 ^ m * 8 ^ n) := by
-  obtain ⟨C, hC⟩ := ghaR4_appF4Coeff_bound a b c c' hc hc' (σ := 2) (by norm_num)
+  obtain ⟨C, hC⟩ := exists_norm_appF4Coeff_le a b c c' hc hc' (σ := 2) (by norm_num)
   have hC0 : 0 ≤ C := by
     have := (norm_nonneg _).trans (hC (0, 0))
     simpa using this
@@ -864,7 +877,7 @@ lemma ghaR4_appF4Coeff_geom (a b c c' : ℂ) (hc : AppellRegular c) (hc' : Appel
 
 /-- Summing the four-index family `appF4Fam` over its last two indices gives the `(m, n)`
 term `c_{mn} (X(1-Y))ᵐ (Y(1-X))ⁿ` of the `F₄` double series. -/
-private lemma ghaR4_appF4Fam_hasSum_fst (a b c c' X Y : ℂ) (p : ℕ × ℕ) :
+private lemma hasSum_appF4Fam_fst (a b c c' X Y : ℂ) (p : ℕ × ℕ) :
     HasSum (fun q => appF4Fam a b c c' X Y (p, q))
       (appF4Coeff a b c c' p.1 p.2 * (X * (1 - Y)) ^ p.1 * (Y * (1 - X)) ^ p.2) := by
   obtain ⟨m, n⟩ := p
@@ -898,7 +911,7 @@ private lemma ghaR4_appF4Fam_hasSum_fst (a b c c' X Y : ℂ) (p : ℕ × ℕ) :
 
 /-- Under `c + c' = a + b + 1`, summing `appF4Fam` over its first two indices gives the
 product of the `(M, N)` terms of `₂F₁(a,b;c;X)` and `₂F₁(a,b;c';Y)`. -/
-private lemma ghaR4_appF4Fam_hasSum_snd {a b c c' : ℂ} (hcc : c + c' = a + b + 1)
+private lemma hasSum_appF4Fam_snd {a b c c' : ℂ} (hcc : c + c' = a + b + 1)
     (hpc : ∀ k, poch c k ≠ 0) (hpc' : ∀ k, poch c' k ≠ 0) (X Y : ℂ) (q : ℕ × ℕ) :
     HasSum (fun p => appF4Fam a b c c' X Y (p, q))
       (gaussHGCoeff a b c q.1 * X ^ q.1 * (gaussHGCoeff a b c' q.2 * Y ^ q.2)) := by
@@ -931,12 +944,12 @@ private lemma ghaR4_appF4Fam_hasSum_snd {a b c c' : ℂ} (hcc : c + c' = a + b +
 
 /-- Bailey's product formula at all regular lower parameters (stronger than `appF4_bailey`,
 which assumes positive real parts). The proof is that of `appF4_bailey` in
-`DLMF.Hypergeometric.AppellF4`, with its coefficient bound replaced by `ghaR4_appF4Coeff_geom`. -/
-lemma ghaR4_appF4_bailey {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : AppellRegular c)
+`DLMF.Hypergeometric.AppellF4`, with its coefficient bound replaced by `exists_norm_appF4Coeff_le_geom`. -/
+private lemma appF4_bailey_of_appellRegular {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : AppellRegular c)
     (hc' : AppellRegular c') : ∃ δ > 0, ∀ X Y : ℂ, ‖X‖ < δ → ‖Y‖ < δ →
       HasSum (fun p : ℕ × ℕ => appF4Coeff a b c c' p.1 p.2 * (X * (1 - Y)) ^ p.1 *
         (Y * (1 - X)) ^ p.2) (₂F₁ a b c X * ₂F₁ a b c' Y) := by
-  obtain ⟨C, hC0, hCb⟩ := ghaR4_appF4Coeff_geom a b c c' hc hc'
+  obtain ⟨C, hC0, hCb⟩ := exists_norm_appF4Coeff_le_geom a b c c' hc hc'
   refine ⟨1 / 1024, by norm_num, fun X Y hX hY => ?_⟩
   have hpc : ∀ k, poch c k ≠ 0 := poch_ne_zero_of_not_neg_nat hc
   have hpc' : ∀ k, poch c' k ≠ 0 := poch_ne_zero_of_not_neg_nat hc'
@@ -983,9 +996,9 @@ lemma ghaR4_appF4_bailey {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : Appel
           gcongr
       _ = _ := by rw [hrX, hrY]; simp only [mul_pow]; ring
   have hS := hsum.hasSum
-  have hfib1 := ghaR4_appF4Fam_hasSum_fst a b c c' X Y
+  have hfib1 := hasSum_appF4Fam_fst a b c c' X Y
   have hF4 := hS.prod_fiberwise hfib1
-  have hfib2 := ghaR4_appF4Fam_hasSum_snd hcc hpc hpc' X Y
+  have hfib2 := hasSum_appF4Fam_snd hcc hpc hpc' X Y
   have hS' : HasSum (fun x : (ℕ × ℕ) × (ℕ × ℕ) => appF4Fam a b c c' X Y (x.2, x.1))
       (∑' p, appF4Fam a b c c' X Y p) :=
     ((Equiv.prodComm (ℕ × ℕ) (ℕ × ℕ)).hasSum_iff (f := appF4Fam a b c c' X Y)).mpr hS
@@ -1003,7 +1016,7 @@ lemma ghaR4_appF4_bailey {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : Appel
 theorem appF4_product_germ (a b c : ℂ) (hc : AppellRegular c) (hc' : AppellRegular (a+b-c+1)) :
     (fun p : ℂ × ℂ => let x:=p.1; let y:=p.2; appF4 a b c (a+b-c+1) (x*(1-y)) (y*(1-x)))=ᶠ[𝓝 (0,0)]
       (fun p => let x:=p.1; let y:=p.2; ₂F₁ a b c x*₂F₁ a b (a+b-c+1) y) := by
-  obtain ⟨δ, hδ, h⟩ := ghaR4_appF4_bailey (a := a) (b := b) (c := c) (c' := a + b - c + 1)
+  obtain ⟨δ, hδ, h⟩ := appF4_bailey_of_appellRegular (a := a) (b := b) (c := c) (c' := a + b - c + 1)
     (by ring) hc hc'
   have hU : {p : ℂ × ℂ | ‖p.1‖ < δ ∧ ‖p.2‖ < δ} ∈ 𝓝 ((0:ℂ), (0:ℂ)) :=
     ((isOpen_lt (continuous_norm.comp continuous_fst) continuous_const).inter
@@ -1092,7 +1105,7 @@ lemma hasSum_appF2_gauss_fibers (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' 
   apply hs.prod_fiberwise
   intro n
   have hx : ‖x‖ < 1 := by linarith [norm_nonneg y]
-  have h := (ghaR4_gauss_hasSum (a := a + n) (b := b) (c := c) hx).mul_left
+  have h := (hasSum_gaussHGCoeff_mul_pow (a := a + n) (b := b) (c := c) hx).mul_left
     (poch a n * poch b' n / (poch c' n * n !) * y ^ n)
   refine h.congr_fun fun m => ?_
   change appF2Coeff a b b' c c' m n * x ^ m * y ^ n = _

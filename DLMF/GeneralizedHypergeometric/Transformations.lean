@@ -10,14 +10,32 @@ public import DLMF.GeneralizedHypergeometric.GHATools
 public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 
 /-!
-# Transformations, expansions, and products: DLMF §§16.6,16.10,16.12
+# Transformations, expansions and products of `ₚF_q` (DLMF §§16.6, 16.10, 16.12)
 
-Variable transformations use the component containing zero of the simultaneous
-principal domains. This retains analytic continuation without equating unrelated
-branches on disconnected preimages of cuts. The Fields–Wimp expansion has an
-unrestricted formal coefficient identity and a precise analytic statement under
-absolute convergence of its expanded double series; DLMF does not print a sharper
-convergence region. All terminating auxiliary functions are finite retained sums.
+## Main definitions
+
+* `genQuadraticDomain`, `genCubicDomain`: simultaneous principal domains of the variable
+  transformations.
+* `genFieldsWimpCoeff`, `genFieldsWimpTerm`, `genFieldsWimpDoubleTerm`: the terms of the
+  Fields–Wimp expansion.
+
+## Main results
+
+* `genHG_quadratic_transformation`, `genHG_cubic_transformation`: DLMF 16.6.1–16.6.2.
+* `genHG_fields_wimp_coeff`, `genHG_fields_wimp_hasSum`: the Fields–Wimp expansion,
+  DLMF 16.10.1.
+* `genHG_norlund_expansion`: Nørlund's expansion, DLMF 16.10.2.
+* `genHG_0F1_product`: the product of two `₀F₁` functions, DLMF 16.12.1.
+* `genHG_clausen_principal`: Clausen's formula on the principal slit plane, DLMF 16.12.2.
+* `genHG_general_square_hasSum`: the general square series, DLMF 16.12.3.
+
+## Implementation notes
+
+Variable transformations use the component containing zero of the simultaneous principal
+domains. This retains analytic continuation without equating unrelated branches on disconnected
+preimages of cuts. The Fields–Wimp expansion has an unrestricted formal coefficient identity
+and an analytic statement under absolute convergence of the expanded double series; DLMF does
+not print a sharper convergence region. All terminating auxiliary functions are finite sums.
 -/
 
 @[expose] public section
@@ -110,7 +128,7 @@ theorem genHG_norlund_expansion (a : ℂ) (A B : Multiset ℂ) (hcard : A.card =
   sorry
 
 /-- Duplication for Pochhammer symbols: `(x)₂ₙ = 4ⁿ (x/2)ₙ ((x+1)/2)ₙ`. -/
-lemma ghaR4_poch_dup (x : ℂ) (n : ℕ) :
+private lemma poch_two_mul_eq_four_pow_mul (x : ℂ) (n : ℕ) :
     poch x (2 * n) = 4 ^ n * poch (x / 2) n * poch ((x + 1) / 2) n := by
   induction n with
   | zero => simp [poch_zero]
@@ -120,7 +138,7 @@ lemma ghaR4_poch_dup (x : ℂ) (n : ℕ) :
     ring
 
 /-- A Chu–Vandermonde rearrangement: `∑ C(n,k) (a+k)ₙ₋ₖ (b+n-k)ₖ = (a+b+n-1)ₙ`. -/
-lemma ghaR4_vandermonde_two (a b : ℂ) (n : ℕ) :
+private lemma sum_choose_mul_poch_mul_poch (a b : ℂ) (n : ℕ) :
     ∑ k ∈ range (n + 1), (n.choose k : ℂ) * poch (a + k) (n - k) * poch (b + (n - k : ℕ)) k =
       poch (a + b + n - 1) n := by
   have h := chu_vandermonde_sum n (1 - b - n) a
@@ -135,7 +153,7 @@ lemma ghaR4_vandermonde_two (a b : ℂ) (n : ℕ) :
   linear_combination (n.choose k : ℂ) * poch (a + k) (n - k) * poch (b + (n - k : ℕ)) k * this.symm
 
 /-- Cauchy-product coefficients of two `0F1` series (DLMF 16.12.1). -/
-lemma ghaR4_0F1_coeff (a b : ℂ) (ha : ∀ k : ℕ, a ≠ -k) (hb : ∀ k : ℕ, b ≠ -k)
+private lemma sum_inv_poch_mul_factorial_mul_inv_poch_mul_factorial (a b : ℂ) (ha : ∀ k : ℕ, a ≠ -k) (hb : ∀ k : ℕ, b ≠ -k)
     (hab : ∀ k : ℕ, a + b - 1 ≠ -k) (n : ℕ) :
     ∑ k ∈ range (n + 1), 1 / (poch a k * k !) * (1 / (poch b (n - k) * (n - k)!)) =
       4 ^ n * poch ((a + b) / 2) n * poch ((a + b - 1) / 2) n /
@@ -164,8 +182,8 @@ lemma ghaR4_0F1_coeff (a b : ℂ) (ha : ∀ k : ℕ, a ≠ -k) (hb : ∀ k : ℕ
     have := hpa k
     have := hpb (n - k)
     field_simp
-  rw [Finset.sum_congr rfl hterm, ← Finset.sum_div, ghaR4_vandermonde_two]
-  have hdup := ghaR4_poch_dup (a + b - 1) n
+  rw [Finset.sum_congr rfl hterm, ← Finset.sum_div, sum_choose_mul_poch_mul_poch]
+  have hdup := poch_two_mul_eq_four_pow_mul (a + b - 1) n
   rw [show (a + b - 1 + 1) / 2 = (a + b) / 2 by ring] at hdup
   have hsplit := poch_add (a + b - 1) n n
   rw [← two_mul] at hsplit
@@ -174,19 +192,19 @@ lemma ghaR4_0F1_coeff (a b : ℂ) (ha : ∀ k : ℕ, a ≠ -k) (hb : ∀ k : ℕ
   linear_combination (poch a n * poch b n * n !) * (hsplit.symm.trans hdup)
 
 /-- The `0F1` coefficient. -/
-lemma ghaR4_genCoeff_0F1 (a : ℂ) (n : ℕ) : genCoeff ∅ {a} n = 1 / (poch a n * n !) := by
+private lemma genCoeff_empty_singleton (a : ℂ) (n : ℕ) : genCoeff ∅ {a} n = 1 / (poch a n * n !) := by
   simp [genCoeff, genPoch]
 
 /-- Absolute summability of the `0F1` series. -/
-lemma ghaR4_summable_norm_0F1 (a z : ℂ) (ha : ∀ k : ℕ, a ≠ -k) :
+private lemma summable_norm_genCoeff_empty_singleton_mul_pow (a z : ℂ) (ha : ∀ k : ℕ, a ≠ -k) :
     Summable fun n : ℕ => ‖genCoeff ∅ {a} n * z ^ n‖ := by
-  obtain ⟨C, hC0, hC⟩ := ghaR4_factorial_le_norm_poch a ha (σ := 2) (by norm_num)
+  obtain ⟨C, hC0, hC⟩ := factorial_le_mul_norm_poch a ha (σ := 2) (by norm_num)
   refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun n => ?_)
     ((Real.summable_pow_div_factorial (2 * ‖z‖)).mul_left C)
   have hp : 0 < ‖poch a n‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat ha n)
   have hf : (0 : ℝ) < n ! := by exact_mod_cast n.factorial_pos
   have hf1 : (1 : ℝ) ≤ n ! := by exact_mod_cast n.factorial_pos
-  rw [ghaR4_genCoeff_0F1, norm_mul, norm_div, norm_one, norm_mul, norm_pow, Complex.norm_natCast,
+  rw [genCoeff_empty_singleton, norm_mul, norm_div, norm_one, norm_mul, norm_pow, Complex.norm_natCast,
     mul_pow, div_mul_eq_mul_div, one_mul, div_le_iff₀ (by positivity)]
   have h := hC n
   calc ‖z‖ ^ n = ‖z‖ ^ n * 1 := by ring
@@ -212,17 +230,17 @@ theorem genHG_0F1_product (a b z : ℂ) (hb : GenDenRegular {a, b, a + b - 1}) :
   have hC := genHG_hasSum_entire (a := {(a + b) / 2, (a + b - 1) / 2}) (b := {a, b, a + b - 1})
     (by simp) hb (4 * z)
   rw [← hA.tsum_eq, ← hB.tsum_eq, ← hC.tsum_eq,
-    tsum_mul_tsum_eq_tsum_sum_range_of_summable_norm (ghaR4_summable_norm_0F1 a z ha')
-      (ghaR4_summable_norm_0F1 b z hb')]
+    tsum_mul_tsum_eq_tsum_sum_range_of_summable_norm (summable_norm_genCoeff_empty_singleton_mul_pow a z ha')
+      (summable_norm_genCoeff_empty_singleton_mul_pow b z hb')]
   congr 1
   funext n
-  have hcoef := ghaR4_0F1_coeff a b ha' hb' hab' n
+  have hcoef := sum_inv_poch_mul_factorial_mul_inv_poch_mul_factorial a b ha' hb' hab' n
   have hsum : ∑ k ∈ range (n + 1), genCoeff ∅ {a} k * z ^ k * (genCoeff ∅ {b} (n - k) * z ^ (n - k)) =
       (∑ k ∈ range (n + 1), 1 / (poch a k * k !) * (1 / (poch b (n - k) * (n - k)!))) * z ^ n := by
     rw [Finset.sum_mul]
     refine Finset.sum_congr rfl fun k hk => ?_
     have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
-    rw [ghaR4_genCoeff_0F1, ghaR4_genCoeff_0F1, ← Nat.add_sub_of_le hk', pow_add,
+    rw [genCoeff_empty_singleton, genCoeff_empty_singleton, ← Nat.add_sub_of_le hk', pow_add,
       Nat.add_sub_cancel_left]
     ring
   rw [hsum, hcoef]

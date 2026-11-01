@@ -8,12 +8,29 @@ module
 public import DLMF.BernoulliEuler.Properties
 
 /-!
-# Bernoulli and Euler numbers and polynomials: recurrence relations (DLMF §24.5)
+# Bernoulli and Euler numbers and polynomials: recurrence relations
 
-The basic relations 24.5.1–24.5.5, further identities 24.5.6–24.5.8 and the inversion formulas
-24.5.9–24.5.10, for complex `x` and rational numbers. The basic relations are proved; they hold
-for all `n ≥ 0` where DLMF states `n ≥ 2` or `n ≥ 1` except 24.5.3 (`n ≥ 2`) and 24.5.4
-(`n ≥ 1`), whose small cases fail.
+This file covers DLMF §24.5: the basic recurrence relations, further identities and the
+inversion formulas, for complex `x` and rational numbers.
+
+## Main definitions
+
+* `egfComplex`: the exponential generating function `∑ xₙ tⁿ/n!` as a formal power series.
+
+## Main results
+
+* `sum_choose_mul_bernoulliPolyB`, `sum_choose_mul_eulerPolyE_add`: DLMF 24.5.1, 24.5.2, for
+  all `n` (stronger than DLMF).
+* `sum_choose_mul_bernoulli_eq_zero`, `sum_choose_two_mul_mul_eulerNumber`,
+  `sum_choose_mul_two_pow_mul_eulerNumber`: DLMF 24.5.3–24.5.5.
+* `sum_choose_sub_two_mul_bernoulli_div`, `sum_choose_mul_bernoulli_div`,
+  `sum_two_pow_mul_bernoulli_div_factorial`: DLMF 24.5.6–24.5.8.
+* `bernoulli_inversion`, `euler_inversion`: the inversion formulas DLMF 24.5.9, 24.5.10.
+
+## Implementation notes
+
+24.5.1, 24.5.2 and 24.5.5 hold for all `n ≥ 0`, where DLMF states `n ≥ 2` or `n ≥ 1`;
+24.5.3 (`n ≥ 2`) and 24.5.4 (`n ≥ 1`) keep DLMF's ranges, since their small cases fail.
 -/
 
 @[expose] public section
@@ -113,14 +130,14 @@ theorem sum_choose_mul_two_pow_mul_eulerNumber (n : ℕ) :
 /-! ### Helpers for §§24.5(ii)–(iii) -/
 
 /-- Splitting off the first two terms of a sum over `range (n+1)`. -/
-lemma q24a_sum_Icc_two {M : Type*} [AddCommMonoid M] (f : ℕ → M) {n : ℕ} (hn : 1 ≤ n) :
+private lemma first_two_add_sum_Icc_two {M : Type*} [AddCommMonoid M] (f : ℕ → M) {n : ℕ} (hn : 1 ≤ n) :
     f 0 + f 1 + ∑ k ∈ Icc 2 n, f k = ∑ k ∈ range (n + 1), f k := by
   induction n, hn using Nat.le_induction with
   | base => simp [sum_range_succ]
   | succ n hn ih => rw [sum_Icc_succ_top (by omega), ← add_assoc, ih, sum_range_succ (n := n + 1)]
 
 /-- `∑_{k ≤ n} (n+2 choose k) Bₖ = -(n+2) Bₙ₊₁`. -/
-lemma q24a_sum_choose_bernoulli_succ_succ (n : ℕ) :
+private lemma sum_choose_add_two_mul_bernoulli (n : ℕ) :
     ∑ k ∈ range (n + 1), ((n + 2).choose k : ℚ) * bernoulli k = -(n + 2) * bernoulli (n + 1) := by
   have h := sum_bernoulli (n + 2)
   simp only [show n + 2 ≠ 1 by omega, ↓reduceIte] at h
@@ -129,17 +146,17 @@ lemma q24a_sum_choose_bernoulli_succ_succ (n : ℕ) :
   linear_combination h
 
 /-- The exponential generating function `∑ xₙ tⁿ/n!` as a formal power series. -/
-noncomputable def q24a_egf (x : ℕ → ℂ) : PowerSeries ℂ := PowerSeries.mk fun n => x n / n !
+noncomputable def egfComplex (x : ℕ → ℂ) : PowerSeries ℂ := PowerSeries.mk fun n => x n / n !
 
 /-- Coefficients of a product of exponential generating functions. -/
-lemma q24a_coeff_egf_mul (x y : ℕ → ℂ) (n : ℕ) :
-    PowerSeries.coeff n (q24a_egf x * q24a_egf y) =
+private lemma coeff_egfComplex_mul (x y : ℕ → ℂ) (n : ℕ) :
+    PowerSeries.coeff n (egfComplex x * egfComplex y) =
       (∑ k ∈ range (n + 1), (n.choose k : ℂ) * x k * y (n - k)) / n ! := by
   rw [PowerSeries.coeff_mul, Nat.sum_antidiagonal_eq_sum_range_succ
-    (fun i j => PowerSeries.coeff i (q24a_egf x) * PowerSeries.coeff j (q24a_egf y)), sum_div]
+    (fun i j => PowerSeries.coeff i (egfComplex x) * PowerSeries.coeff j (egfComplex y)), sum_div]
   refine sum_congr rfl fun k hk => ?_
   have hk' : k ≤ n := Nat.lt_succ_iff.mp (mem_range.mp hk)
-  simp only [q24a_egf, PowerSeries.coeff_mk]
+  simp only [egfComplex, PowerSeries.coeff_mk]
   have hc := Nat.choose_mul_factorial_mul_factorial hk'
   have hc' : (n.choose k : ℂ) * k ! * (n - k)! = n ! := by exact_mod_cast hc
   rw [← hc']
@@ -149,37 +166,37 @@ lemma q24a_coeff_egf_mul (x y : ℕ → ℂ) (n : ℕ) :
   field_simp
 
 /-- Binomial convolution identities as products of exponential generating functions. -/
-lemma q24a_egf_eq_mul_iff (x y z : ℕ → ℂ) :
+private lemma binomialConv_iff_egfComplex_eq_mul (x y z : ℕ → ℂ) :
     (∀ n, x n = ∑ k ∈ range (n + 1), (n.choose k : ℂ) * y k * z (n - k)) ↔
-      q24a_egf x = q24a_egf y * q24a_egf z := by
+      egfComplex x = egfComplex y * egfComplex z := by
   rw [PowerSeries.ext_iff]
   refine forall_congr' fun n => ?_
-  rw [q24a_coeff_egf_mul]
-  simp only [q24a_egf, PowerSeries.coeff_mk]
+  rw [coeff_egfComplex_mul]
+  simp only [egfComplex, PowerSeries.coeff_mk]
   have : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   constructor
   · intro h; rw [h]
   · intro h; exact (div_left_inj' this).mp h
 
 /-- `(t/(eᵗ - 1)) · ((eᵗ - 1)/t) = 1` as formal power series. -/
-lemma q24a_egf_bernoulli_mul :
-    q24a_egf (fun n => (bernoulli n : ℂ)) * q24a_egf (fun n => 1 / ((n : ℂ) + 1)) = 1 := by
+private lemma egfComplex_bernoulli_mul_inv_succ :
+    egfComplex (fun n => (bernoulli n : ℂ)) * egfComplex (fun n => 1 / ((n : ℂ) + 1)) = 1 := by
   have h := bernoulliPowerSeries_mul_exp_sub_one ℂ
-  have hB : bernoulliPowerSeries ℂ = q24a_egf (fun n => (bernoulli n : ℂ)) := by
-    ext n; simp [bernoulliPowerSeries, q24a_egf]
-  have hE : PowerSeries.exp ℂ - 1 = PowerSeries.X * q24a_egf (fun n => 1 / ((n : ℂ) + 1)) := by
+  have hB : bernoulliPowerSeries ℂ = egfComplex (fun n => (bernoulli n : ℂ)) := by
+    ext n; simp [bernoulliPowerSeries, egfComplex]
+  have hE : PowerSeries.exp ℂ - 1 = PowerSeries.X * egfComplex (fun n => 1 / ((n : ℂ) + 1)) := by
     ext n
     rcases n with _ | n
     · simp
     · rw [PowerSeries.coeff_succ_X_mul]
-      simp [q24a_egf, PowerSeries.coeff_exp, Nat.factorial_succ]
+      simp [egfComplex, PowerSeries.coeff_exp, Nat.factorial_succ]
       field_simp
   rw [hB, hE, mul_left_comm] at h
   have hX : (PowerSeries.X : PowerSeries ℂ) ≠ 0 := PowerSeries.X_ne_zero
   exact mul_left_cancel₀ hX (h.trans (mul_one _).symm)
 
 /-- Sums over even indices `2k ≤ n`. -/
-lemma q24a_sum_half_eq (g : ℕ → ℂ) (n : ℕ) :
+private lemma sum_range_half_eq_sum_even (g : ℕ → ℂ) (n : ℕ) :
     ∑ k ∈ range (n / 2 + 1), g (2 * k) = ∑ k ∈ range (n + 1), if Even k then g k else 0 := by
   rw [← sum_filter]
   have : (range (n + 1)).filter Even = (range (n / 2 + 1)).image (2 * ·) := by
@@ -191,10 +208,10 @@ lemma q24a_sum_half_eq (g : ℕ → ℂ) (n : ℕ) :
   rw [this, sum_image (fun a _ b _ h => by simpa using h)]
 
 /-- `sech t · cosh t = 1` as formal power series. -/
-lemma q24a_egf_euler_mul :
-    q24a_egf (fun n => (eulerNumber n : ℂ)) * q24a_egf (fun n => if Even n then 1 else 0) = 1 := by
+private lemma egfComplex_eulerNumber_mul_even :
+    egfComplex (fun n => (eulerNumber n : ℂ)) * egfComplex (fun n => if Even n then 1 else 0) = 1 := by
   ext n
-  rw [q24a_coeff_egf_mul, PowerSeries.coeff_one]
+  rw [coeff_egfComplex_mul, PowerSeries.coeff_one]
   have h := sum_choose_mul_eulerNumber n
   have h' : ∑ k ∈ range (n + 1), (n.choose k : ℂ) * eulerNumber k *
       (if Even (n - k) then 1 else 0) = if n = 0 then 1 else 0 := by
@@ -221,7 +238,7 @@ theorem sum_choose_sub_two_mul_bernoulli_div {n : ℕ} (hn : 2 ≤ n) :
       1 / ((n + 1) * (n + 2)) - bernoulli (n + 1) := by
   have h1 := sum_bernoulli (n + 1)
   simp only [show n + 1 ≠ 1 by omega, ↓reduceIte] at h1
-  have h2 := q24a_sum_choose_bernoulli_succ_succ n
+  have h2 := sum_choose_add_two_mul_bernoulli n
   have hn1 : (n : ℚ) + 1 ≠ 0 := by positivity
   have hn2 : (n : ℚ) + 2 ≠ 0 := by positivity
   -- termwise: `(n choose k-2)/k = (n+2 choose k)(k-1)/((n+1)(n+2))` for `k ≥ 2`
@@ -246,7 +263,7 @@ theorem sum_choose_sub_two_mul_bernoulli_div {n : ℕ} (hn : 2 ≤ n) :
       (bernoulli (j + 2) * (j + 1)) * hB'
   rw [sum_congr rfl hterm, ← sum_div]
   -- `T = ∑_{k=2}^{n} (k-1)(n+2 choose k)Bₖ = 1 - (n+1)(n+2)Bₙ₊₁`
-  have hsplit := q24a_sum_Icc_two (fun k => ((k : ℚ) - 1) * (((n + 2).choose k : ℚ) * bernoulli k))
+  have hsplit := first_two_add_sum_Icc_two (fun k => ((k : ℚ) - 1) * (((n + 2).choose k : ℚ) * bernoulli k))
     (by omega : 1 ≤ n)
   simp only [Nat.cast_zero, zero_sub, Nat.choose_zero_right, bernoulli_zero, Nat.cast_one,
     sub_self, zero_mul] at hsplit
@@ -271,7 +288,7 @@ theorem sum_choose_mul_bernoulli_div {n : ℕ} (hn : 1 ≤ n) :
       bernoulli (n + 1) / (n + 1) := by
   have h1 := sum_bernoulli (n + 1)
   simp only [show n + 1 ≠ 1 by omega, ↓reduceIte] at h1
-  have h2 := q24a_sum_choose_bernoulli_succ_succ n
+  have h2 := sum_choose_add_two_mul_bernoulli n
   have hterm : ∀ k ∈ range (n + 1), (n.choose k : ℚ) * bernoulli k / (n + 2 - k) =
       ((n + 2) * (((n + 1).choose k : ℚ) * bernoulli k) - ((n + 2).choose k : ℚ) * bernoulli k) /
         ((n + 1) * (n + 2)) := by
@@ -300,7 +317,7 @@ theorem sum_choose_mul_bernoulli_div {n : ℕ} (hn : 1 ≤ n) :
 theorem sum_two_pow_mul_bernoulli_div_factorial {n : ℕ} (hn : 1 ≤ n) :
     ∑ k ∈ range (n + 1), (2 : ℚ) ^ (2 * k) * bernoulli (2 * k) / ((2 * k)! * (2 * n + 1 - 2 * k)!) =
       1 / (2 * n)! := by
-  have h := q24a_sum_choose_bernoulli_two_pow n
+  have h := sum_choose_bernoulli_two_mul_mul_two_pow n
   have hq : ∑ j ∈ range n, ((2 * n + 1).choose (2 * (j + 1)) : ℚ) * bernoulli (2 * (j + 1)) *
       2 ^ (2 * (j + 1)) = 2 * n := by exact_mod_cast h
   have hterm : ∀ k ∈ range (n + 1), (2 : ℚ) ^ (2 * k) * bernoulli (2 * k) /
@@ -328,17 +345,17 @@ theorem bernoulli_inversion (a b : ℕ → ℂ) :
     (∀ n, a n = ∑ k ∈ range (n + 1), (n.choose k : ℂ) * b (n - k) / (k + 1)) ↔
       (∀ n, b n = ∑ k ∈ range (n + 1), (n.choose k : ℂ) * bernoulli k * a (n - k)) := by
   have e1 : (∀ n, a n = ∑ k ∈ range (n + 1), (n.choose k : ℂ) * b (n - k) / (k + 1)) ↔
-      q24a_egf a = q24a_egf (fun n => 1 / ((n : ℂ) + 1)) * q24a_egf b := by
+      egfComplex a = egfComplex (fun n => 1 / ((n : ℂ) + 1)) * egfComplex b := by
     have hsum : ∀ n, ∑ k ∈ range (n + 1), (n.choose k : ℂ) * b (n - k) / (k + 1) =
         ∑ k ∈ range (n + 1), (n.choose k : ℂ) * (1 / ((k : ℂ) + 1)) * b (n - k) :=
       fun n => sum_congr rfl fun k _ => by ring
     simp only [hsum]
-    exact q24a_egf_eq_mul_iff _ _ _
-  rw [e1, q24a_egf_eq_mul_iff]
-  have hBE := q24a_egf_bernoulli_mul
+    exact binomialConv_iff_egfComplex_eq_mul _ _ _
+  rw [e1, binomialConv_iff_egfComplex_eq_mul]
+  have hBE := egfComplex_bernoulli_mul_inv_succ
   constructor
   · intro h; rw [h, ← mul_assoc, hBE, one_mul]
-  · intro h; rw [h, ← mul_assoc, mul_comm (q24a_egf _) (q24a_egf (fun n => (bernoulli n : ℂ))),
+  · intro h; rw [h, ← mul_assoc, mul_comm (egfComplex _) (egfComplex (fun n => (bernoulli n : ℂ))),
       hBE, one_mul]
 
 /-- **DLMF 24.5.10**: `aₙ = ∑_{k ≤ n/2} (n choose 2k) bₙ₋₂ₖ` for all `n` if and only if
@@ -351,23 +368,23 @@ theorem euler_inversion (a b : ℕ → ℂ) :
   have e1 : ∀ n, ∑ k ∈ range (n / 2 + 1), (n.choose (2 * k) : ℂ) * b (n - 2 * k) =
       ∑ k ∈ range (n + 1), (n.choose k : ℂ) * (if Even k then 1 else 0) * b (n - k) := by
     intro n
-    rw [q24a_sum_half_eq (fun k => (n.choose k : ℂ) * b (n - k))]
+    rw [sum_range_half_eq_sum_even (fun k => (n.choose k : ℂ) * b (n - k))]
     refine sum_congr rfl fun k _ => ?_
     split_ifs <;> ring
   have e2 : ∀ n, ∑ k ∈ range (n / 2 + 1), (n.choose (2 * k) : ℂ) * eulerNumber (2 * k) *
       a (n - 2 * k) = ∑ k ∈ range (n + 1), (n.choose k : ℂ) * eulerNumber k * a (n - k) := by
     intro n
-    rw [q24a_sum_half_eq (fun k => (n.choose k : ℂ) * eulerNumber k * a (n - k))]
+    rw [sum_range_half_eq_sum_even (fun k => (n.choose k : ℂ) * eulerNumber k * a (n - k))]
     refine sum_congr rfl fun k _ => ?_
     split_ifs with h
     · rfl
     · rw [eulerNumber_eq_zero_of_odd (Nat.not_even_iff_odd.mp h)]; simp
   simp only [e1, e2]
-  rw [q24a_egf_eq_mul_iff, q24a_egf_eq_mul_iff]
-  have hSC := q24a_egf_euler_mul
+  rw [binomialConv_iff_egfComplex_eq_mul, binomialConv_iff_egfComplex_eq_mul]
+  have hSC := egfComplex_eulerNumber_mul_even
   constructor
   · intro h; rw [h, ← mul_assoc, hSC, one_mul]
-  · intro h; rw [h, ← mul_assoc, mul_comm (q24a_egf _) (q24a_egf (fun n => (eulerNumber n : ℂ))),
+  · intro h; rw [h, ← mul_assoc, mul_comm (egfComplex _) (egfComplex (fun n => (eulerNumber n : ℂ))),
       hSC, one_mul]
 
 end DLMF.BernoulliEuler

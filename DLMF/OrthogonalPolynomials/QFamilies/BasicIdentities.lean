@@ -13,13 +13,43 @@ public import DLMF.QHypergeometric.BasicSummations
 public import TauCeti.Probability.Distributions.LogNormal.Basic
 
 /-!
-# Basic identities of q-orthogonal polynomial families
+# Definitions and orthogonality of q-orthogonal polynomial families
 
-Finite basic hypergeometric formulas, recurrences and duality of the q-orthogonal polynomial
-families.
+The families of the q-Hahn class (DLMF §18.27) and the Askey–Wilson class (DLMF §18.28) as
+terminating basic hypergeometric sums, with their orthogonality relations, the Laurent form of
+the Askey–Wilson polynomials and q-Racah duality.
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.QFamilies`.
+## Main definitions
+
+* `terminatingBasicHG`: a terminating basic hypergeometric sum with exponent `1 + s - r`.
+* `qHahn`, `bigQJacobi`, `littleQJacobi`: DLMF 18.27.3, 18.27.5 and 18.27.13.
+* `littleQLaguerre`, `qLaguerre`, `stieltjesWigert`: DLMF 18.27.14_5, 18.27.15 and 18.27.18.
+* `discreteQHermiteI`, `discreteQHermiteII`: DLMF 18.27.21 and 18.27.23.
+* `askeyWilson`, `askeyWilsonLaurent`: DLMF 18.28.1 and 18.28.1_5.
+* `alSalamChihara`, `continuousQHermiteLaurent`, `qRacah`: DLMF 18.28.7, 18.28.16 and
+  18.28.19.
+
+## Main results
+
+* `qHahn_orthogonal`: DLMF 18.27.4.
+* `littleQJacobi_orthogonal`: DLMF 18.27.14.
+* `qLaguerre_orthogonal`, `stieltjesWigert_orthogonal`: DLMF 18.27.16 and 18.27.20.
+* `askeyWilson_laurent_representation`: DLMF 18.28.1_5.
+* `askeyWilson_orthogonal`: DLMF 18.28.2.
+* `qGegenbauer_orthogonal`, `continuousQHermite_orthogonality`: DLMF 18.28.15 and 18.28.17.
+* `qRacah_duality`: DLMF 18.28.23.
+
+## Implementation notes
+
+The finite form `askeyWilson` requires `a ≠ 0`; statements keep that hypothesis rather than
+assigning continuation values at `a = 0`. The q-Hahn orthogonality uses the finite
+summation-by-parts operator of `DLMF.OrthogonalPolynomials.Hahn.Orthogonality`
+(`DiscreteOrtho.sum_range_orthogonal`). Little q-Jacobi orthogonality uses the moment
+cancellations of `DLMF.OrthogonalPolynomials.QOrthogonalityTools`. Stieltjes–Wigert
+orthogonality uses the log-normal density and moments from
+`TauCeti.Probability.Distributions.LogNormal.Basic`, followed by Cauchy's finite q-binomial
+theorem.
+
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
 -/
 
@@ -667,7 +697,7 @@ private lemma qLaguerre_monomial_orthogonality {α q : ℝ} (hα : -1 < α)
     have h := norm_mul_pow_lt_one hvnorm hqc j
     simp [he] at h
   have hvk (k : ℕ) : qPochhammer v q k ≠ 0 :=
-    DLMF.QHypergeometric.qaR4_reg_poch_ne hqc hreg k
+    DLMF.QHypergeometric.qPochhammer_ne_zero_of_qDenominatorRegular hqc hreg k
   have hpow (i : ℕ) : ((q ^ (α + (i : ℝ) + 1) : ℝ) : ℂ) = v * (q : ℂ) ^ i := by
     rw [show α + (i : ℝ) + 1 = (α + 1) + i by ring, Real.rpow_add hq,
       Real.rpow_natCast, Complex.ofReal_mul, Complex.ofReal_pow]
@@ -734,11 +764,9 @@ private lemma qLaguerre_monomial_orthogonality {α q : ℝ} (hα : -1 < α)
     have hzero : qPochhammer (v / (v * (q : ℂ) ^ i)) q d = 0 := by
       rw [show v / (v * (q : ℂ) ^ i) = ((q : ℂ) ^ i)⁻¹ by field_simp]
       exact DLMF.QSeries.qPochhammer_recip_pow_eq_zero hq0 hid
-    rw [hzero, zero_div, harg, DLMF.QHypergeometric.qaR4_qPhi_swap21,
-      DLMF.QHypergeometric.qPhi_terminates (a := [v * (q : ℂ) ^ i]) (b := [v]) hq0 hqc d
-      (by simpa [DLMF.QHypergeometric.QDenominatorRegularThrough,
-        DLMF.QHypergeometric.qPochhammerList] using hvk d)] at hchu
-    simp only [DLMF.QHypergeometric.qPhiPartial, DLMF.QHypergeometric.qaR4_phi21_term,
+    rw [hzero, zero_div, harg, DLMF.QHypergeometric.qPhi_two_one_comm,
+      DLMF.QHypergeometric.qPhi_terminates (a := [v * (q : ℂ) ^ i]) (b := [v]) hq0 d] at hchu
+    simp only [DLMF.QHypergeometric.qPhiPartial, DLMF.QHypergeometric.qPhiTerm_two_one,
       zpow_neg, zpow_natCast] at hchu
     rw [hsum, integral_finsetSum _ (fun k _ => hterm i d k)]
     simp_rw [integral_const_mul, hI]

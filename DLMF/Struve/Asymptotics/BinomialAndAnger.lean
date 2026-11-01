@@ -8,13 +8,30 @@ module
 public import DLMF.Struve.Asymptotics.LargeOrder
 
 /-!
-# Binomial remainders in Anger asymptotics
+# Binomial remainders and the Anger–Weber expansions (DLMF 11.11.1–11.11.5)
 
-Binomial remainder estimates and paired Anger-function kernels give the fixed-argument
-expansions.
+This file proves sign and size bounds for binomial remainders, the large-argument expansions of
+the Anger–Weber functions, and the large-order expansion of the Anger function.
 
-Source references and common attribution are retained in
-`DLMF.Struve.Asymptotics`.
+## Main definitions
+
+* `struveBinomRem`: the binomial remainder `(1+u)^a - ∑_{k<m} (a choose k) u^k`.
+* `angerF`, `angerG`: the products of the factors `ν² - (2j+1)²` and `ν² - (2j+2)²` in the
+  coefficients of DLMF 11.11.1.
+* `nonintegerOrderSector`: large orders separated from all integers.
+* `struveAs_P1`, `struveAs_P2`: the products in the series of `π ν/sin(π ν) · 𝐉_ν(z)`.
+
+## Main results
+
+* `struveBinomRem_bound`: sign and size of the binomial remainder for `a ≤ m` and `u ≥ 0`.
+* `struveK_remainder_sign`: the first omitted term bounds the remainder of the expansion of
+  `𝐊_ν` for real positive argument.
+* `angerFG_poch`: `F_k`, `G_k` as Pochhammer symbols (DLMF 11.11.1).
+* `struveAs_angerA_sector`: DLMF 11.11.4 as an asymptotic expansion in `z^{-n-1}`.
+* `angerJ_large_argument`, `weberE_large_argument`, `angerA_large_argument`: the
+  large-argument expansions DLMF 11.11.2–11.11.4.
+* `struveAs_angerJ_large_order_bound`: the quantitative form of DLMF 11.11.5.
+* `angerJ_large_order`: the large-order expansion DLMF 11.11.5.
 -/
 
 @[expose] public noncomputable section

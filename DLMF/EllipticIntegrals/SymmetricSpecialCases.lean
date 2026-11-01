@@ -8,28 +8,59 @@ module
 public import Carlson.RPolynomial.Appell
 public import DLMF.EllipticIntegrals.SymmetricRelations
 public import DLMF.EllipticIntegrals.SymmetricSeries
+public import DLMFMathlib.Analysis.SpecialFunctions.Complex.ArgLog
 
 /-!
 # Symmetric elliptic integrals: special cases (DLMF §19.20)
 
 Special values, homogeneity, degenerate cases, limits and principal values of `R_F`, `R_G`,
-`R_J`, `R_D` and of `R_{-a}(𝐛; 𝐳)` (§19.20(i)–(v)). As DLMF says (19.20.i.p1), the variables
-satisfy the constraints of §19.16(i) unless stated otherwise; we state them explicitly
-(slit-plane membership, admissible zeros, real variables where DLMF uses real ones, e.g. for
-Cauchy principal values). Homogeneity is stated for real `λ > 0` (for complex `λ` see
-`symEllIntR_mul`). "`= ∞`" is formalized as non-integrability of the defining integrand,
-"`→ +∞`" as `Tendsto … atTop` of the (real) value.
+`R_J`, `R_D` and of `R_{-a}(𝐛; 𝐳)` (§19.20(i)–(v)).
 
-The lemniscatic formulas follow from a quadratic transformation of `R` at three arguments
-in arithmetic progression. Its real form uses the exact positive-ray substitution
-`u = t² + (x + y)t`; the complex form uses the proved separate identity theorem
+## Main results
+
+* `symEllIntRF_self`, `symEllIntRF_smul`, `symEllIntRF_self_right`, `symEllIntRF_zero_self`,
+  `not_integrableOn_symEllIntRF_zero_zero`: special cases of `R_F` (DLMF 19.20.1).
+* `lemniscate_first_symEllIntRF`, `lemniscate_second_symEllIntRD`: the lemniscate constants
+  (DLMF 19.20.2, 19.20.22).
+* `symEllIntRF_lemniscatic`, `symEllIntRF_lemniscatic_complex`, `symEllIntRD_lemniscatic`,
+  `symEllIntRD_lemniscatic_complex`: the lemniscatic cases (DLMF 19.20.3, 19.20.23).
+* `symEllIntRG_self`, `symEllIntRG_smul`, `symEllIntRG_zero_self`,
+  `two_mul_symEllIntRG_self_right`: special cases of `R_G` (DLMF 19.20.4, 19.20.5).
+* `symEllIntRJ_self`, `symEllIntRJ_smul`, `symEllIntRJ_self_self_self_eq`,
+  `symEllIntRJ_zero_self_self`, `symEllIntRJ_self_right_eq`, `symEllIntRJ_zero_sqrt`: special
+  cases of `R_J` (DLMF 19.20.6, 19.20.8, 19.20.9).
+* `tendsto_symEllIntRJ_zero`, `tendsto_symEllIntRJ_zero_left`, `symEllIntRJ_zero_asymptotic`,
+  `tendsto_mul_symEllIntRJ`: limits of `R_J` (DLMF 19.20.7, 19.20.10–19.20.12).
+* `symEllIntRJ_special_p`, `symEllIntRJ_principalValue`, `symEllIntRJ_principalValue_p`,
+  `symEllIntRJ_principalValue_complete`: DLMF 19.20.13–19.20.17.
+* `symEllIntRD_self`, `symEllIntRD_smul`, `symEllIntRD_zero_self`,
+  `symEllIntRD_isEquivalent_zero`, `symEllIntRD_self_right`, `symEllIntRD_self_left`: special
+  cases of `R_D` (DLMF 19.20.18–19.20.21).
+* `symEllIntR_zero`, `symEllIntR_neg_natCast`, `symEllIntR_sum`, `symEllIntR_euler`: special
+  cases of `R_{-a}` and Euler's transformation (DLMF 19.20.24–19.20.26).
+
+## Implementation notes
+
+As DLMF says (19.20.i.p1), the variables satisfy the constraints of §19.16(i) unless stated
+otherwise; we state them explicitly (slit-plane membership, admissible zeros, real variables
+where DLMF uses real ones, e.g. for Cauchy principal values). Homogeneity is stated for real
+`λ > 0` (for complex `λ` see `symEllIntR_mul`). "`= ∞`" is formalized as non-integrability of
+the defining integrand, "`→ +∞`" as `Tendsto … atTop` of the (real) value. Decimal values of
+the lemniscate constants (19.20.2), (19.20.22) are excluded as numerical.
+
+The lemniscatic formulas follow from a quadratic transformation of `R` at three arguments in
+arithmetic progression. Its real form uses the exact positive-ray substitution
+`u = t² + (x + y)t`; the complex form uses the identity theorem
 `Carlson.TwoVariable.eqOn_rightHalfPlane₂_of_real` from `lean-codes`.
 
-Decimal values of the lemniscate constants (19.20.2), (19.20.22) are excluded: numerical.
+**Domain corrections.** The lemniscatic cases (19.20.3), (19.20.23) are stated for real
+positive `x, y`, and in corrected complex forms for `ℜ x, ℜ y > 0`; with arbitrary complex
+arguments they fail without a branch condition (numerically, at `x = -1 + 0.3i`, `y = 2 + i`
+the two sides differ by a factor `-i`).
 
-**Domain corrections.** The lemniscatic cases (19.20.3), (19.20.23) are stated for real positive
-`x, y`; with complex arguments they fail without a branch condition (numerically, at
-`x = -1 + 0.3i`, `y = 2 + i` the two sides differ by a factor `-i`).
+## References
+
+* NIST DLMF §19.20.
 -/
 
 @[expose] public noncomputable section
@@ -39,25 +70,18 @@ open scoped Real Topology
 
 namespace DLMF.EllipticIntegrals
 
-/-- Formula under the stated hypotheses: `(l : ℂ) * x ∈ slitPlane`. -/
-lemma ei19c_smul_mem_slitPlane {l : ℝ} (hl : 0 < l) {x : ℂ} (hx : x ∈ slitPlane) :
-    (l : ℂ) * x ∈ slitPlane := by
-  rcases mem_slitPlane_iff.mp hx with h | h
-  · exact mem_slitPlane_iff.mpr (Or.inl (by simp; positivity))
-  · exact mem_slitPlane_iff.mpr (Or.inr (by simp [hl.ne', h]))
-
 /-- Formula under the stated hypotheses: `arg (l : ℂ) + arg x ∈ Ioo (-π) π`. -/
-lemma ei19c_arg_ofReal_add {l : ℝ} (hl : 0 < l) {x : ℂ} (hx : x ∈ slitPlane) :
+private lemma arg_ofReal_add_arg_mem_Ioo {l : ℝ} (hl : 0 < l) {x : ℂ} (hx : x ∈ slitPlane) :
     arg (l : ℂ) + arg x ∈ Ioo (-π) π := by
   rw [arg_ofReal_of_nonneg hl.le, zero_add]
   exact ⟨neg_pi_lt_arg _, lt_of_le_of_ne (arg_le_pi _) (mem_slitPlane_iff_arg.mp hx).1⟩
 
 /-- Identity under the stated parameter and domain assumptions: `symEllIntR a b (fun i => (l : ℂ)
 * z i) = (l : ℂ) ^ (-a) * symEllIntR a b z`. -/
-lemma ei19c_symEllIntR_smul {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {l : ℝ} (hl : 0 < l)
+private lemma symEllIntR_ofReal_mul {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {l : ℝ} (hl : 0 < l)
     {z : ι → ℂ} (hz : z ∈ Carlson.carlsonRSlitDomain) :
     symEllIntR a b (fun i => (l : ℂ) * z i) = (l : ℂ) ^ (-a) * symEllIntR a b z :=
-  symEllIntR_mul a b hz (ofReal_mem_slitPlane.mpr hl) fun i => ei19c_arg_ofReal_add hl (hz i)
+  symEllIntR_mul a b hz (ofReal_mem_slitPlane.mpr hl) fun i => arg_ofReal_add_arg_mem_Ioo hl (hz i)
 
 /-- Squaring the translated radial variable gives the quadratic integral substitution
 for three arguments in arithmetic progression. -/
@@ -134,12 +158,12 @@ lemma symEllIntR_arithmetic_progression_quadratic_ofReal {x y a : ℝ} (hx : 0 <
   have hleft := symEllIntR_eq_integral (a := (a : ℂ)) (a' := 1)
     (b := ![1 / 2, 1 / 2, (a : ℂ)])
     (show 0 < (a : ℂ).re from ha) (by norm_num)
-    (by simp [Fin.sum_univ_three]; ring) (ei19c_slit3
+    (by simp [Fin.sum_univ_three]; ring) (vec3_mem_carlsonRSlitDomain
       (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hm))
   have hright := symEllIntR_eq_integral (a := ((a / 2 : ℝ) : ℂ)) (a' := 1)
     (b := ![(((a + 1) / 2 : ℝ) : ℂ), 1 / 2])
     (by simp; positivity) (by norm_num)
-    (by simp [Fin.sum_univ_two]; ring) (ei19c_slit2
+    (by simp [Fin.sum_univ_two]; ring) (vec2_mem_carlsonRSlitDomain
       (ofReal_mem_slitPlane.mpr (sq_pos_of_pos hm)) (ofReal_mem_slitPlane.mpr (mul_pos hx hy)))
   rw [hleft, hright, Complex.betaIntegral_eval_one_right (show 0 < (a : ℂ).re from ha),
     Complex.betaIntegral_eval_one_right (by simp; positivity)]
@@ -186,25 +210,27 @@ lemma symEllIntR_arithmetic_progression_quadratic {a : ℝ} (ha : 0 < a) {x y : 
     apply analyticAt_symEllIntR_comp
     · apply analyticAt_pi_iff.mpr
       intro i; fin_cases i <;> dsimp <;> fun_prop
-    · exact ei19c_slit3 (Or.inl hX) (Or.inl hY) (Or.inl (hm X Y hX hY))
+    · exact vec3_mem_carlsonRSlitDomain (Or.inl hX) (Or.inl hY) (Or.inl (hm X Y hX hY))
   · intro Y hY X hX
     apply analyticAt_symEllIntR_comp
     · apply analyticAt_pi_iff.mpr
       intro i; fin_cases i <;> dsimp <;> fun_prop
-    · exact ei19c_slit2 (by simpa only [pow_two] using
-        Carlson.mul_mem_slitPlane_of_re_pos (hm X Y hX hY) (hm X Y hX hY))
+    · exact vec2_mem_carlsonRSlitDomain
+        (by simpa only [pow_two] using
+          Carlson.mul_mem_slitPlane_of_re_pos (hm X Y hX hY) (hm X Y hX hY))
         (Carlson.mul_mem_slitPlane_of_re_pos hX hY)
   · intro X hX Y hY
     apply analyticAt_symEllIntR_comp
     · apply analyticAt_pi_iff.mpr
       intro i; fin_cases i <;> dsimp <;> fun_prop
-    · exact ei19c_slit3 (Or.inl hX) (Or.inl hY) (Or.inl (hm X Y hX hY))
+    · exact vec3_mem_carlsonRSlitDomain (Or.inl hX) (Or.inl hY) (Or.inl (hm X Y hX hY))
   · intro X hX Y hY
     apply analyticAt_symEllIntR_comp
     · apply analyticAt_pi_iff.mpr
       intro i; fin_cases i <;> dsimp <;> fun_prop
-    · exact ei19c_slit2 (by simpa only [pow_two] using
-        Carlson.mul_mem_slitPlane_of_re_pos (hm X Y hX hY) (hm X Y hX hY))
+    · exact vec2_mem_carlsonRSlitDomain
+        (by simpa only [pow_two] using
+          Carlson.mul_mem_slitPlane_of_re_pos (hm X Y hX hY) (hm X Y hX hY))
         (Carlson.mul_mem_slitPlane_of_re_pos hX hY)
   · intro X Y hY hYX
     have H := symEllIntR_arithmetic_progression_quadratic_ofReal (hY.trans hYX) hY ha
@@ -222,11 +248,11 @@ theorem symEllIntRF_self {x : ℂ} (hx : x ∈ slitPlane) : symEllIntRF x x x = 
 theorem symEllIntRF_smul {l : ℝ} (hl : 0 < l) {x y z : ℂ} (hx : x ∈ slitPlane)
     (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     symEllIntRF (l * x) (l * y) (l * z) = (l : ℂ) ^ (-1 / 2 : ℂ) * symEllIntRF x y z := by
-  rw [symEllIntRF_eq_symEllIntR (ei19c_smul_mem_slitPlane hl hx) (ei19c_smul_mem_slitPlane hl hy)
-    (ei19c_smul_mem_slitPlane hl hz), symEllIntRF_eq_symEllIntR hx hy hz]
+  rw [symEllIntRF_eq_symEllIntR (Complex.ofReal_mul_mem_slitPlane hl hx) (Complex.ofReal_mul_mem_slitPlane hl hy)
+    (Complex.ofReal_mul_mem_slitPlane hl hz), symEllIntRF_eq_symEllIntR hx hy hz]
   have : (![(l : ℂ) * x, l * y, l * z] : Fin 3 → ℂ) = fun i => (l : ℂ) * ![x, y, z] i := by
     funext i; fin_cases i <;> rfl
-  rw [this, ei19c_symEllIntR_smul _ _ hl (ei19c_slit3 hx hy hz)]
+  rw [this, symEllIntR_ofReal_mul _ _ hl (vec3_mem_carlsonRSlitDomain hx hy hz)]
   congr 2; ring
 
 /-- DLMF 19.20.1 (third): `R_F(x, y, y) = R_C(x, y)` (for every `x` and `y` not a negative real;
@@ -249,7 +275,7 @@ theorem symEllIntRF_zero_self {y : ℂ} (hy : y ∈ slitPlane) :
 @[dlmf 19.20.E1]
 theorem not_integrableOn_symEllIntRF_zero_zero {z : ℂ} (hz : z ∈ slitPlane) :
     ¬ IntegrableOn (fun t => (symEllIntS 0 0 z t)⁻¹) (Ioi 0) :=
-  p19sR1_not_integrableOn_zero_zero' hz
+  not_integrableOn_symEllIntRF_integrand_zero_zero hz
 
 /-- DLMF 19.20.2: the first lemniscate constant
 `∫₀¹ dt/√(1 - t⁴) = R_F(0, 1, 2) = Γ(1/4)² / (4 (2π)^{1/2})` (decimal value excluded: numerical). -/
@@ -257,7 +283,7 @@ theorem not_integrableOn_symEllIntRF_zero_zero {z : ℂ} (hz : z ∈ slitPlane) 
 theorem lemniscate_first_symEllIntRF :
     ((∫ t in (0 : ℝ)..1, 1 / Real.sqrt (1 - t ^ 4) : ℝ) : ℂ) = symEllIntRF 0 1 2 ∧
       symEllIntRF 0 1 2 = ((Real.Gamma (1 / 4) ^ 2 / (4 * Real.sqrt (2 * π)) : ℝ) : ℂ) := by
-  rw [p19sR1_symEllIntRF_zero_one_two, DLMF.Elliptic.integral_recip_sqrt_one_sub_pow_four]
+  rw [symEllIntRF_zero_one_two, DLMF.Elliptic.integral_recip_sqrt_one_sub_pow_four]
   exact ⟨rfl, rfl⟩
 
 /-- DLMF 19.20.3 (general lemniscatic case), **domain-restricted** to real `x, y > 0`:
@@ -310,30 +336,30 @@ theorem symEllIntRG_self {x : ℂ} (hx : x ∈ slitPlane) : symEllIntRG x x x = 
 theorem symEllIntRG_smul {l : ℝ} (hl : 0 < l) {x y z : ℂ} (hx : x ∈ slitPlane)
     (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     symEllIntRG (l * x) (l * y) (l * z) = (l : ℂ) ^ (1 / 2 : ℂ) * symEllIntRG x y z := by
-  rw [symEllIntRG_eq_symEllIntR (ei19c_smul_mem_slitPlane hl hx) (ei19c_smul_mem_slitPlane hl hy)
-    (ei19c_smul_mem_slitPlane hl hz), symEllIntRG_eq_symEllIntR hx hy hz]
+  rw [symEllIntRG_eq_symEllIntR (Complex.ofReal_mul_mem_slitPlane hl hx) (Complex.ofReal_mul_mem_slitPlane hl hy)
+    (Complex.ofReal_mul_mem_slitPlane hl hz), symEllIntRG_eq_symEllIntR hx hy hz]
   have : (![(l : ℂ) * x, l * y, l * z] : Fin 3 → ℂ) = fun i => (l : ℂ) * ![x, y, z] i := by
     funext i; fin_cases i <;> rfl
-  rw [this, ei19c_symEllIntR_smul _ _ hl (ei19c_slit3 hx hy hz)]
+  rw [this, symEllIntR_ofReal_mul _ _ hl (vec3_mem_carlsonRSlitDomain hx hy hz)]
   congr 2; ring
 
 /-- `∫₀^∞ dt / ((t + z)^{1/2} (t + z)) = 2 z^{-1/2}` for `z ∈ ℂ \ (-∞, 0]`. -/
-lemma p19sR1_integral_inv_cpow_half_mul {z : ℂ} (hz : z ∈ slitPlane) :
+private lemma integral_Ioi_inv_cpow_half_mul {z : ℂ} (hz : z ∈ slitPlane) :
     ∫ t in Ioi (0 : ℝ), (((t : ℂ) + z) ^ (1 / 2 : ℂ) * ((t : ℂ) + z))⁻¹ =
       2 * (z ^ (1 / 2 : ℂ))⁻¹ := by
-  obtain ⟨c1, hc1, h1⟩ := p19sR1_norm_cpow_half_ge hz
-  obtain ⟨c2, hc2, h2⟩ := p19sR1_norm_add_ge hz
+  obtain ⟨c1, hc1, h1⟩ := exists_mul_sqrt_add_one_le_norm_cpow_half hz
+  obtain ⟨c2, hc2, h2⟩ := exists_mul_add_one_le_norm_ofReal_add hz
   have hz' : ∀ t : ℝ, 0 ≤ t → (t : ℂ) + z ∈ slitPlane := fun t ht => by
     rcases ht.eq_or_lt with rfl | ht
     · simpa using hz
-    · exact p19sR1_add_mem_slitPlane ht (Or.inl hz)
+    · exact ofReal_pos_add_mem_slitPlane ht (Or.inl hz)
   have hint : IntegrableOn (fun t : ℝ => (((t : ℂ) + z) ^ (1 / 2 : ℂ) * ((t : ℂ) + z))⁻¹)
       (Ioi 0) := by
-    refine p19sR1_integrableOn_of_le (C := (c1 * c2)⁻¹) ?_ fun t ht => ?_
-    · refine ((p19sR1_continuousOn_cpow_half (Or.inl hz)).mul
+    refine integrableOn_Ioi_of_norm_le_inv_sqrt_mul (C := (c1 * c2)⁻¹) ?_ fun t ht => ?_
+    · refine ((continuousOn_ofReal_add_cpow_half (Or.inl hz)).mul
         (continuous_ofReal.add continuous_const).continuousOn).inv₀ fun t ht => ?_
-      exact mul_ne_zero (p19sR1_cpow_half_ne_zero ht (Or.inl hz))
-        (slitPlane_ne_zero (p19sR1_add_mem_slitPlane ht (Or.inl hz)))
+      exact mul_ne_zero (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hz))
+        (slitPlane_ne_zero (ofReal_pos_add_mem_slitPlane ht (Or.inl hz)))
     · have a1 := h1 t ht.le
       have a2 := h2 t ht.le
       have hs : Real.sqrt t ≤ Real.sqrt (t + 1) := Real.sqrt_le_sqrt (by linarith)
@@ -348,15 +374,15 @@ lemma p19sR1_integral_inv_cpow_half_mul {z : ℂ} (hz : z ∈ slitPlane) :
   have hderiv : ∀ t ∈ Ioi (0 : ℝ), HasDerivAt (fun s : ℝ => -2 * (((s : ℂ) + z) ^ (1 / 2 : ℂ))⁻¹)
       ((((t : ℂ) + z) ^ (1 / 2 : ℂ) * ((t : ℂ) + z))⁻¹) t := by
     intro t ht
-    have h := ((p19sR1_hasDerivAt_cpow_half (hz' t (le_of_lt ht))).inv
-      (p19sR1_cpow_half_ne_zero ht (Or.inl hz))).const_mul (-2 : ℂ)
+    have h := ((hasDerivAt_ofReal_add_cpow_half (hz' t (le_of_lt ht))).inv
+      (ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hz))).const_mul (-2 : ℂ)
     convert h using 1
-    have hu0 := p19sR1_cpow_half_ne_zero ht (Or.inl hz)
-    have hw0 := slitPlane_ne_zero (p19sR1_add_mem_slitPlane ht (Or.inl hz))
+    have hu0 := ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hz)
+    have hw0 := slitPlane_ne_zero (ofReal_pos_add_mem_slitPlane ht (Or.inl hz))
     field_simp
   have hcont : ContinuousWithinAt (fun s : ℝ => -2 * (((s : ℂ) + z) ^ (1 / 2 : ℂ))⁻¹) (Ici 0) 0 :=
-    (continuousAt_const.mul ((p19sR1_continuousAt_cpow_half (hz' 0 le_rfl)).inv₀
-      (p19sR1_cpow_half_ne_zero_of_mem (hz' 0 le_rfl)))).continuousWithinAt
+    (continuousAt_const.mul ((continuousAt_ofReal_add_cpow_half (hz' 0 le_rfl)).inv₀
+      (cpow_half_ne_zero_of_mem_slitPlane (hz' 0 le_rfl)))).continuousWithinAt
   have hlim : Tendsto (fun s : ℝ => -2 * (((s : ℂ) + z) ^ (1 / 2 : ℂ))⁻¹) atTop (𝓝 0) := by
     refine squeeze_zero_norm' (a := fun t => 2 * (c1 * Real.sqrt (t + 1))⁻¹) ?_ ?_
     · filter_upwards [eventually_gt_atTop 0] with t ht
@@ -380,20 +406,20 @@ theorem symEllIntRG_zero_self {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ sli
     have : (![y, y] : Fin 2 → ℂ) = fun _ => y := by funext i; fin_cases i <;> rfl
     rw [this, symEllIntR_const _ _ hy (Complex.Gamma_ne_zero_of_re_pos (by simp))]
     congr 2; ring
-  · have hI := p19sR1_integral_inv_cpow_half_mul hz
+  · have hI := integral_Ioi_inv_cpow_half_mul hz
     have e : ∀ t ∈ Ioi (0 : ℝ), (symEllIntS 0 0 z t)⁻¹ *
         (0 / ((t : ℂ) + 0) + 0 / ((t : ℂ) + 0) + z / ((t : ℂ) + z)) * t =
         z * (((t : ℂ) + z) ^ (1 / 2 : ℂ) * ((t : ℂ) + z))⁻¹ := by
       intro t ht
       have ht0 : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr (ne_of_gt ht)
       simp only [symEllIntS, add_zero, zero_div, zero_add]
-      rw [ei19c_cpow_half_sq]
-      have hu0 := p19sR1_cpow_half_ne_zero ht (Or.inl hz)
-      have hw0 := slitPlane_ne_zero (p19sR1_add_mem_slitPlane ht (Or.inl hz))
+      rw [cpow_half_mul_cpow_half]
+      have hu0 := ofReal_pos_add_cpow_half_ne_zero ht (Or.inl hz)
+      have hw0 := slitPlane_ne_zero (ofReal_pos_add_mem_slitPlane ht (Or.inl hz))
       field_simp
     rw [symEllIntRG, setIntegral_congr_fun measurableSet_Ioi e, integral_const_mul, hI]
-    have hz0 := p19sR1_cpow_half_ne_zero_of_mem hz
-    have hsq := ei19c_cpow_half_sq z
+    have hz0 := cpow_half_ne_zero_of_mem_slitPlane hz
+    have hsq := cpow_half_mul_cpow_half z
     field_simp
     linear_combination (-4 : ℂ) * hsq
 
@@ -401,9 +427,9 @@ theorem symEllIntRG_zero_self {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ sli
 @[dlmf 19.20.E5]
 theorem two_mul_symEllIntRG_self_right {x y : ℂ} (hx : SymEllIntArg x) (hy : y ∈ slitPlane) :
     2 * symEllIntRG x y y = y * symEllIntRC x y + x ^ (1 / 2 : ℂ) := by
-  rw [p19sR1_two_mul_symEllIntRG hx hy hy, symEllIntRC_eq_symEllIntRF x
-    (ei19c_not_isNegReal_of_mem_slitPlane hy)]
-  have hy0 : y ^ (1 / 2 : ℂ) ≠ 0 := p19sR1_cpow_half_ne_zero_of_mem hy
+  rw [two_mul_symEllIntRG hx hy hy, symEllIntRC_eq_symEllIntRF x
+    (not_isNegReal_of_mem_slitPlane hy)]
+  have hy0 : y ^ (1 / 2 : ℂ) ≠ 0 := cpow_half_ne_zero_of_mem_slitPlane hy
   rw [show (-1 / 2 : ℂ) = -(1 / 2) by ring, cpow_neg]
   field_simp
   ring
@@ -427,13 +453,13 @@ theorem symEllIntRJ_self {x : ℂ} (hx : x ∈ slitPlane) :
 theorem symEllIntRJ_smul {l : ℝ} (hl : 0 < l) {x y z p : ℂ} (hx : x ∈ slitPlane)
     (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) (hp : p ∈ slitPlane) :
     symEllIntRJ (l * x) (l * y) (l * z) (l * p) = (l : ℂ) ^ (-3 / 2 : ℂ) * symEllIntRJ x y z p := by
-  rw [symEllIntRJ_eq_symEllIntR (ei19c_smul_mem_slitPlane hl hx) (ei19c_smul_mem_slitPlane hl hy)
-    (ei19c_smul_mem_slitPlane hl hz) (ei19c_smul_mem_slitPlane hl hp),
+  rw [symEllIntRJ_eq_symEllIntR (Complex.ofReal_mul_mem_slitPlane hl hx) (Complex.ofReal_mul_mem_slitPlane hl hy)
+    (Complex.ofReal_mul_mem_slitPlane hl hz) (Complex.ofReal_mul_mem_slitPlane hl hp),
     symEllIntRJ_eq_symEllIntR hx hy hz hp]
   have : (![(l : ℂ) * x, l * y, l * z, l * p] : Fin 4 → ℂ) =
       fun i => (l : ℂ) * ![x, y, z, p] i := by
     funext i; fin_cases i <;> rfl
-  rw [this, ei19c_symEllIntR_smul _ _ hl (ei19c_slit4 hx hy hz hp)]
+  rw [this, symEllIntR_ofReal_mul _ _ hl (vec4_mem_carlsonRSlitDomain hx hy hz hp)]
   congr 2; ring
 
 /-- DLMF 19.20.6 (third) and 19.20.8 (fourth): `R_J(x, y, z, z) = R_D(x, y, z)` (definitional). -/
@@ -445,7 +471,7 @@ theorem symEllIntRJ_self_right (x y z : ℂ) : symEllIntRJ x y z z = symEllIntRD
 theorem not_integrableOn_symEllIntRJ_zero_zero {z p : ℂ} (hz : z ∈ slitPlane)
     (hp : p ∈ slitPlane) :
     ¬ IntegrableOn (fun t => (symEllIntS 0 0 z t * ((t : ℂ) + p))⁻¹) (Ioi 0) :=
-  p19sR1_not_integrableOn_zero_zero hz hp
+  not_integrableOn_symEllIntRJ_integrand_zero_zero hz hp
 
 /-- DLMF 19.20.6 (fifth, first equality): `R_J(x, x, x, p) = R_D(p, p, x)`, for `x, p` not
 negative reals (stronger than DLMF: no further condition; the integrands agree). -/
@@ -454,8 +480,8 @@ theorem symEllIntRJ_self_self_self (p : ℂ) {x : ℂ} (hx : ¬ IsNegReal x) (hp
     symEllIntRJ x x x p = symEllIntRD p p x := by
   simp only [symEllIntRD, symEllIntRJ, hx, hp, ↓reduceIte, symEllIntS]
   congr 2; funext t
-  rw [mul_assoc (((t : ℂ) + x) ^ (1 / 2 : ℂ)), ei19c_cpow_half_sq,
-    ei19c_cpow_half_sq ((t : ℂ) + p)]
+  rw [mul_assoc (((t : ℂ) + x) ^ (1 / 2 : ℂ)), cpow_half_mul_cpow_half,
+    cpow_half_mul_cpow_half ((t : ℂ) + p)]
   ring
 
 /-- DLMF 19.20.6 (fifth, second equality): `R_J(x, x, x, p) = 3/(x - p) (R_C(x, p) - 1/√x)`,
@@ -464,9 +490,9 @@ theorem symEllIntRJ_self_self_self (p : ℂ) {x : ℂ} (hx : ¬ IsNegReal x) (hp
 theorem symEllIntRJ_self_self_self_eq {x p : ℂ} (hx : x ∈ slitPlane) (hp : p ∈ slitPlane)
     (hxp : x ≠ p) :
     symEllIntRJ x x x p = 3 / (x - p) * (symEllIntRC x p - 1 / x ^ (1 / 2 : ℂ)) := by
-  rw [symEllIntRJ_self_self_self p (ei19c_not_isNegReal_of_mem_slitPlane hx)
-    (ei19c_not_isNegReal_of_mem_slitPlane hp)]
-  exact p19sR1_symEllIntRD_self_left hp hx (Ne.symm hxp)
+  rw [symEllIntRJ_self_self_self p (not_isNegReal_of_mem_slitPlane hx)
+    (not_isNegReal_of_mem_slitPlane hp)]
+  exact symEllIntRD_self_left_eq_sub_symEllIntRC hp hx (Ne.symm hxp)
 
 /-- DLMF 19.20.7: `R_J(x, y, z, p) → +∞` as `p → 0±`, for `x, y, z > 0` (for `p < 0` the
 principal value). -/
@@ -484,12 +510,12 @@ theorem symEllIntRJ_zero_self_self {y : ℂ} (hy : y ∈ slitPlane) {p : ℝ} (h
     rw [show (-1 / 2 : ℂ) = -(1 / 2) by ring, cpow_neg]
   have hRC : ∀ w : ℂ, w ∈ slitPlane → symEllIntRC 0 w = (π / 2) * (w ^ (1 / 2 : ℂ))⁻¹ :=
     fun w hw => by
-      rw [← symEllIntRF_self_right 0 (ei19c_not_isNegReal_of_mem_slitPlane hw),
+      rw [← symEllIntRF_self_right 0 (not_isNegReal_of_mem_slitPlane hw),
         symEllIntRF_zero_self hw, e]
-  have hY0 := p19sR1_cpow_half_ne_zero_of_mem hy
-  have hP0 := p19sR1_cpow_half_ne_zero_of_mem hp'
-  have hY2 := p19sR1_cpow_half_sq y
-  have hP2 := p19sR1_cpow_half_sq (p : ℂ)
+  have hY0 := cpow_half_ne_zero_of_mem_slitPlane hy
+  have hP0 := cpow_half_ne_zero_of_mem_slitPlane hp'
+  have hY2 := Carlson.cpow_half_sq y
+  have hP2 := Carlson.cpow_half_sq (p : ℂ)
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   by_cases hpy : (p : ℂ) = y
   · have hD : symEllIntRD 0 (p : ℂ) p = (3 * π / 4) * (p : ℂ) ^ (-3 / 2 : ℂ) := by
@@ -503,7 +529,7 @@ theorem symEllIntRJ_zero_self_self {y : ℂ} (hy : y ∈ slitPlane) {p : ℝ} (h
     have hp0 : (p : ℂ) ≠ 0 := slitPlane_ne_zero hp'
     field_simp
     ring
-  · rw [p19sR1_symEllIntRJ_self_right_eq (Or.inr rfl) hy hp' hpy, hRC y hy, hRC _ hp']
+  · rw [symEllIntRJ_self_right_eq_sub_symEllIntRC (Or.inr rfl) hy hp' hpy, hRC y hy, hRC _ hp']
     generalize y ^ (1 / 2 : ℂ) = Y at *
     generalize (p : ℂ) ^ (1 / 2 : ℂ) = P at *
     generalize (p : ℂ) = q at *
@@ -534,7 +560,7 @@ for `x` admissible, `y, p ∈ ℂ \ (-∞, 0]`. -/
 theorem symEllIntRJ_self_right_eq {x y p : ℂ} (hx : SymEllIntArg x) (hy : y ∈ slitPlane)
     (hp : p ∈ slitPlane) (hpy : p ≠ y) :
     symEllIntRJ x y y p = 3 / (p - y) * (symEllIntRC x y - symEllIntRC x p) :=
-  p19sR1_symEllIntRJ_self_right_eq hx hy hp hpy
+  symEllIntRJ_self_right_eq_sub_symEllIntRC hx hy hp hpy
 
 /-- DLMF 19.20.8 (third), principal-value case: real `x ≥ 0`, `y > 0`, `p < 0`. -/
 @[dlmf 19.20.E8]
@@ -653,7 +679,7 @@ theorem symEllIntRD_zero_self {y : ℂ} (hy : y ∈ slitPlane) :
 @[dlmf 19.20.E18]
 theorem not_integrableOn_symEllIntRD_zero_zero {z : ℂ} (hz : z ∈ slitPlane) :
     ¬ IntegrableOn (fun t => (symEllIntS 0 0 z t * ((t : ℂ) + z))⁻¹) (Ioi 0) :=
-  p19sR1_not_integrableOn_zero_zero hz hz
+  not_integrableOn_symEllIntRJ_integrand_zero_zero hz hz
 
 /-- DLMF 19.20.19: `R_D(x, y, z) ∼ 3 x^{-1/2} y^{-1/2} z^{-1/2}` as `z/√(xy) → 0`; stated for
 fixed `x, y > 0` and `z → 0+`. -/
@@ -670,9 +696,9 @@ theorem symEllIntRD_self_right {x y : ℂ} (hx : SymEllIntArg x) (hy : y ∈ sli
     (hxy : x ≠ y) :
     symEllIntRD x y y = 3 / (2 * (y - x)) * (symEllIntRC x y - x ^ (1 / 2 : ℂ) / y) := by
   rcases hx with hx | rfl
-  · exact p19sR1_symEllIntRD_self_right hx hy hxy
+  · exact symEllIntRD_self_right_of_mem_slitPlane hx hy hxy
   · rw [symEllIntRD_zero_self hy, ← symEllIntRF_self_right 0
-      (ei19c_not_isNegReal_of_mem_slitPlane hy),
+      (not_isNegReal_of_mem_slitPlane hy),
       symEllIntRF_zero_self hy, zero_cpow (by norm_num : (1 / 2 : ℂ) ≠ 0)]
     have hy0 := slitPlane_ne_zero hy
     rw [show (-3 / 2 : ℂ) = -1 / 2 + (-1) by norm_num, cpow_add _ _ hy0, cpow_neg_one]
@@ -684,7 +710,7 @@ theorem symEllIntRD_self_right {x y : ℂ} (hx : SymEllIntArg x) (hy : y ∈ sli
 @[dlmf 19.20.E21]
 theorem symEllIntRD_self_left {x z : ℂ} (hx : x ∈ slitPlane) (hz : z ∈ slitPlane) (hxz : x ≠ z) :
     symEllIntRD x x z = 3 / (z - x) * (symEllIntRC z x - 1 / z ^ (1 / 2 : ℂ)) :=
-  p19sR1_symEllIntRD_self_left hx hz hxz
+  symEllIntRD_self_left_eq_sub_symEllIntRC hx hz hxz
 
 /-- DLMF 19.20.22: the second lemniscate constant
 `∫₀¹ t² dt/√(1 - t⁴) = (1/3) R_D(0, 2, 1) = Γ(3/4)²/(2π)^{1/2}` (decimal value excluded). -/
@@ -692,9 +718,9 @@ theorem symEllIntRD_self_left {x z : ℂ} (hx : x ∈ slitPlane) (hz : z ∈ sli
 theorem lemniscate_second_symEllIntRD :
     ((∫ t in (0 : ℝ)..1, t ^ 2 / Real.sqrt (1 - t ^ 4) : ℝ) : ℂ) = (1 / 3) * symEllIntRD 0 2 1 ∧
       (1 / 3) * symEllIntRD 0 2 1 = ((Real.Gamma (3 / 4) ^ 2 / Real.sqrt (2 * π) : ℝ) : ℂ) := by
-  refine ⟨p19sR1_integral_sq_div_sqrt_eq, ?_⟩
-  have hP := p19sR1_lemniscate_product
-  rw [p19sR1_symEllIntRF_zero_one_two] at hP
+  refine ⟨integral_sq_div_sqrt_one_sub_pow_four, ?_⟩
+  have hP := symEllIntRF_mul_symEllIntRD_lemniscate
+  rw [symEllIntRF_zero_one_two] at hP
   have h14 : 0 < Real.Gamma (1 / 4) := Real.Gamma_pos_of_pos (by norm_num)
   have hrefl := Real.Gamma_mul_Gamma_one_sub (1 / 4 : ℝ)
   rw [show (1 : ℝ) - 1 / 4 = 3 / 4 by norm_num, show π * (1 / 4 : ℝ) = π / 4 by ring,

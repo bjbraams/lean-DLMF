@@ -10,12 +10,26 @@ public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import TauCeti.Analysis.Complex.CauchyIntegralPolydisc
 
 /-!
-# Convergence tools for double power series (Appell functions, DLMF §16.13)
+# Convergence tools for double power series (DLMF §16.13)
 
-Subexponential Pochhammer ratio bounds, geometric domination of double series, and a
-generic theorem turning a locally dominated double power series into a sum that is
-jointly analytic in both variables. Joint analyticity uses the pinned TauCeti several-variable
-form `DifferentiableOn.analyticAt_of_finiteDimensional` together with the local
+Subexponential Pochhammer ratio bounds, geometric domination of double series, and a general
+theorem turning a locally dominated double power series into a sum that is jointly analytic in
+both variables. These are used for the Appell functions.
+
+## Main results
+
+* `norm_poch_le_mul_norm_poch`, `norm_poch_le_mul_factorial`, `factorial_le_mul_norm_poch`:
+  subexponential Pochhammer bounds.
+* `hasSum_and_analyticOnNhd_doubleSeries`: a locally dominated double power series converges
+  and its sum is jointly analytic.
+* `exists_summable_doubleSeries_of_bidisc`, `exists_summable_doubleSeries_of_diamond`,
+  `exists_summable_doubleSeries_of_sqrt_add_sqrt`: local domination on the convergence domains
+  of `F₁`/`F₃`, `F₂` and `F₄`.
+
+## Implementation notes
+
+Joint analyticity uses the TauCeti several-variable result
+`DifferentiableOn.analyticAt_of_finiteDimensional` together with
 `differentiableOn_tsum_of_locally_dominated`.
 -/
 
@@ -25,7 +39,7 @@ open scoped Topology Nat
 namespace DLMF.Hypergeometric
 
 /-- For every `σ > 1` and every `k` there is `τ > 1` with `τ ^ k ≤ σ`. -/
-theorem ghaR4_exists_pow_le {σ : ℝ} (hσ : 1 < σ) (k : ℕ) : ∃ τ : ℝ, 1 < τ ∧ τ ^ k ≤ σ := by
+theorem exists_one_lt_pow_le {σ : ℝ} (hσ : 1 < σ) (k : ℕ) : ∃ τ : ℝ, 1 < τ ∧ τ ^ k ≤ σ := by
   have h : Tendsto (fun t : ℝ => t ^ k) (𝓝[>] 1) (𝓝 1) := by
     have := (continuous_pow k).tendsto (1 : ℝ)
     rw [one_pow] at this
@@ -35,7 +49,7 @@ theorem ghaR4_exists_pow_le {σ : ℝ} (hσ : 1 < σ) (k : ℕ) : ∃ τ : ℝ, 
 
 /-- Pochhammer symbols grow at most subexponentially faster than one with a regular
 parameter: `‖(μ)ₘ‖ ≤ C σ^m ‖(ν)ₘ‖` for every `σ > 1`. -/
-theorem ghaR4_norm_poch_le (μ ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) {σ : ℝ} (hσ : 1 < σ) :
+theorem norm_poch_le_mul_norm_poch (μ ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ, ‖poch μ m‖ ≤ C * σ ^ m * ‖poch ν m‖ := by
   obtain ⟨K, hK⟩ := exists_nat_ge ((‖μ‖ + σ * ‖ν‖) / (σ - 1))
   have hpos : ∀ j, 0 < ‖poch ν j‖ := fun j => norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hν j)
@@ -75,22 +89,22 @@ theorem ghaR4_norm_poch_le (μ ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) {σ : �
         _ = C * σ ^ (m + 1) * (‖poch ν m‖ * ‖ν + m‖) := by ring
 
 /-- `‖(μ)ₘ‖ ≤ C σ^m m!` for every `σ > 1`. -/
-theorem ghaR4_norm_poch_le_factorial (μ : ℂ) {σ : ℝ} (hσ : 1 < σ) :
+theorem norm_poch_le_mul_factorial (μ : ℂ) {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ, ‖poch μ m‖ ≤ C * σ ^ m * (m ! : ℝ) := by
-  obtain ⟨C, hC0, hC⟩ := ghaR4_norm_poch_le μ 1 (fun k h => by
+  obtain ⟨C, hC0, hC⟩ := norm_poch_le_mul_norm_poch μ 1 (fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(k.cast_nonneg : (0 : ℝ) ≤ k)]) hσ
   refine ⟨C, hC0, fun m => ?_⟩
   simpa [poch_nat_one, Complex.norm_natCast] using hC m
 
 /-- `m! ≤ C σ^m ‖(ν)ₘ‖` for a regular `ν` and every `σ > 1`. -/
-theorem ghaR4_factorial_le_norm_poch (ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) {σ : ℝ} (hσ : 1 < σ) :
+theorem factorial_le_mul_norm_poch (ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ, (m ! : ℝ) ≤ C * σ ^ m * ‖poch ν m‖ := by
-  obtain ⟨C, hC0, hC⟩ := ghaR4_norm_poch_le 1 ν hν hσ
+  obtain ⟨C, hC0, hC⟩ := norm_poch_le_mul_norm_poch 1 ν hν hσ
   refine ⟨C, hC0, fun m => ?_⟩
   simpa [poch_nat_one, Complex.norm_natCast] using hC m
 
 /-- A single binomial term is bounded by the full binomial power. -/
-lemma ghaR4_choose_mul_pow_le {u v : ℝ} (hu : 0 ≤ u) (hv : 0 ≤ v) (m n : ℕ) :
+lemma choose_mul_pow_mul_pow_le {u v : ℝ} (hu : 0 ≤ u) (hv : 0 ≤ v) (m n : ℕ) :
     ((m + n).choose m : ℝ) * u ^ m * v ^ n ≤ (u + v) ^ (m + n) := by
   rw [add_pow]
   have h := Finset.single_le_sum (f := fun k => u ^ k * v ^ (m + n - k) * ((m + n).choose k : ℝ))
@@ -99,7 +113,7 @@ lemma ghaR4_choose_mul_pow_le {u v : ℝ} (hu : 0 ≤ u) (hv : 0 ≤ v) (m n : �
   linarith
 
 /-- Geometric domination of a nonnegative double sequence. -/
-lemma ghaR4_summable_of_geom_bound {f : ℕ × ℕ → ℝ} {C s : ℝ} (hs0 : 0 ≤ s) (hs : s < 1)
+private lemma summable_of_le_geom_add {f : ℕ × ℕ → ℝ} {C s : ℝ} (hs0 : 0 ≤ s) (hs : s < 1)
     (hf0 : ∀ q, 0 ≤ f q) (hf : ∀ q, f q ≤ C * s ^ (q.1 + q.2)) : Summable f := by
   have hg := summable_geometric_of_lt_one hs0 hs
   have hprod : Summable fun q : ℕ × ℕ => s ^ q.1 * s ^ q.2 :=
@@ -109,7 +123,7 @@ lemma ghaR4_summable_of_geom_bound {f : ℕ × ℕ → ℝ} {C s : ℝ} (hs0 : 0
 
 /-- A double power series dominated on a polydisc around each point of `U` converges there,
 and its sum is jointly analytic on `U`. -/
-theorem ghaR4_double_series_hasSum_analytic (c : ℕ × ℕ → ℂ) (U : Set (ℂ × ℂ))
+theorem hasSum_and_analyticOnNhd_doubleSeries (c : ℕ × ℕ → ℂ) (U : Set (ℂ × ℂ))
     (h : ∀ p ∈ U, ∃ A B : ℝ, ‖p.1‖ < A ∧ ‖p.2‖ < B ∧
       Summable (fun q : ℕ × ℕ => ‖c q‖ * A ^ q.1 * B ^ q.2)) :
     (∀ p ∈ U, HasSum (fun q : ℕ × ℕ => c q * p.1 ^ q.1 * p.2 ^ q.2)
@@ -139,7 +153,7 @@ theorem ghaR4_double_series_hasSum_analytic (c : ℕ × ℕ → ℂ) (U : Set (�
     exact hd.analyticAt_of_finiteDimensional (hV.mem_nhds hpV)
 
 /-- Local domination on the unit bidisc from a subexponential coefficient bound. -/
-theorem ghaR4_dom_bidisc (c : ℕ × ℕ → ℂ)
+theorem exists_summable_doubleSeries_of_bidisc (c : ℕ × ℕ → ℂ)
     (hc : ∀ σ : ℝ, 1 < σ → ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖c q‖ ≤ C * σ ^ (q.1 + q.2))
     {x y : ℂ} (hx : ‖x‖ < 1) (hy : ‖y‖ < 1) :
     ∃ A B : ℝ, ‖x‖ < A ∧ ‖y‖ < B ∧
@@ -152,7 +166,7 @@ theorem ghaR4_dom_bidisc (c : ℕ × ℕ → ℂ)
   obtain ⟨C, hC⟩ := hc ((1 + t) / (2 * t)) (by rw [lt_div_iff₀ (by linarith)]; linarith)
   refine ⟨t, t, by rw [ht]; linarith [le_max_left ‖x‖ ‖y‖],
     by rw [ht]; linarith [le_max_right ‖x‖ ‖y‖], ?_⟩
-  refine ghaR4_summable_of_geom_bound (C := C) (s := (1 + t) / 2) (by linarith) (by linarith)
+  refine summable_of_le_geom_add (C := C) (s := (1 + t) / 2) (by linarith) (by linarith)
     (fun q => by positivity) (fun q => ?_)
   have hst : (1 + t) / (2 * t) * t = (1 + t) / 2 := by field_simp
   calc ‖c q‖ * t ^ q.1 * t ^ q.2 = ‖c q‖ * t ^ (q.1 + q.2) := by rw [pow_add]; ring
@@ -161,7 +175,7 @@ theorem ghaR4_dom_bidisc (c : ℕ × ℕ → ℂ)
     _ = C * ((1 + t) / 2) ^ (q.1 + q.2) := by rw [mul_assoc, ← mul_pow, hst]
 
 /-- Local domination on the diamond `‖x‖+‖y‖<1` from a binomially weighted bound. -/
-theorem ghaR4_dom_diamond (c : ℕ × ℕ → ℂ)
+theorem exists_summable_doubleSeries_of_diamond (c : ℕ × ℕ → ℂ)
     (hc : ∀ σ : ℝ, 1 < σ → ∃ C : ℝ, ∀ q : ℕ × ℕ,
       ‖c q‖ ≤ C * σ ^ (q.1 + q.2) * ((q.1 + q.2).choose q.1 : ℝ))
     {x y : ℂ} (hxy : ‖x‖ + ‖y‖ < 1) :
@@ -176,10 +190,10 @@ theorem ghaR4_dom_diamond (c : ℕ × ℕ → ℂ)
   have ht0 : 1 / 2 ≤ t := by rw [ht, hδ]; linarith
   obtain ⟨C, hC⟩ := hc ((1 + t) / (2 * t)) (by rw [lt_div_iff₀ (by linarith)]; linarith)
   refine ⟨‖x‖ + δ, ‖y‖ + δ, by linarith, by linarith, ?_⟩
-  refine ghaR4_summable_of_geom_bound (C := C) (s := (1 + t) / 2) (by linarith) (by linarith)
+  refine summable_of_le_geom_add (C := C) (s := (1 + t) / 2) (by linarith) (by linarith)
     (fun q => by positivity) (fun q => ?_)
   have hst : (1 + t) / (2 * t) * t = (1 + t) / 2 := by field_simp
-  have hb := ghaR4_choose_mul_pow_le (u := ‖x‖ + δ) (v := ‖y‖ + δ) (by linarith) (by linarith)
+  have hb := choose_mul_pow_mul_pow_le (u := ‖x‖ + δ) (v := ‖y‖ + δ) (by linarith) (by linarith)
     q.1 q.2
   have hC0 : 0 ≤ C * ((1 + t) / (2 * t)) ^ (q.1 + q.2) := by
     have h1 := (norm_nonneg (c q)).trans (hC q)
@@ -196,7 +210,7 @@ theorem ghaR4_dom_diamond (c : ℕ × ℕ → ℂ)
     _ = C * ((1 + t) / 2) ^ (q.1 + q.2) := by rw [mul_assoc, ← mul_pow, hst]
 
 /-- Local domination on the F4 domain `√‖x‖+√‖y‖<1` from a squared-binomial bound. -/
-theorem ghaR4_dom_F4 (c : ℕ × ℕ → ℂ)
+theorem exists_summable_doubleSeries_of_sqrt_add_sqrt (c : ℕ × ℕ → ℂ)
     (hc : ∀ σ : ℝ, 1 < σ → ∃ C : ℝ, ∀ q : ℕ × ℕ,
       ‖c q‖ ≤ C * σ ^ (q.1 + q.2) * ((q.1 + q.2).choose q.1 : ℝ) ^ 2)
     {x y : ℂ} (hxy : Real.sqrt ‖x‖ + Real.sqrt ‖y‖ < 1) :
@@ -219,10 +233,10 @@ theorem ghaR4_dom_F4 (c : ℕ × ℕ → ℂ)
     rw [hβ]; nlinarith [Real.sq_sqrt (norm_nonneg y)]
   obtain ⟨C, hC⟩ := hc ((1 + t) / (2 * t)) (by rw [lt_div_iff₀ (by linarith)]; linarith)
   refine ⟨α ^ 2, β ^ 2, hxA, hyB, ?_⟩
-  refine ghaR4_summable_of_geom_bound (C := C) (s := (1 + t) / 2) (by linarith) (by linarith)
+  refine summable_of_le_geom_add (C := C) (s := (1 + t) / 2) (by linarith) (by linarith)
     (fun q => by positivity) (fun q => ?_)
   have hst : (1 + t) / (2 * t) * t = (1 + t) / 2 := by field_simp
-  have hb := ghaR4_choose_mul_pow_le (u := α) (v := β) (by linarith) (by linarith) q.1 q.2
+  have hb := choose_mul_pow_mul_pow_le (u := α) (v := β) (by linarith) (by linarith) q.1 q.2
   have hb2 : (((q.1 + q.2).choose q.1 : ℝ) * α ^ q.1 * β ^ q.2) ^ 2 ≤ t ^ (q.1 + q.2) := by
     rw [ht, ← pow_mul, mul_comm 2, pow_mul]
     exact pow_le_pow_left₀ (by positivity) hb 2

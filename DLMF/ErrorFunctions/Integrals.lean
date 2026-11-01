@@ -10,9 +10,9 @@ public import DLMF.ErrorFunctions.Integrals.FresnelTransforms
 public import DLMF.ErrorFunctions.Integrals.ReciprocalLaplace
 
 /-!
-# Integral representations and transforms, DLMF §§7.7 and 7.14
+# Integral representations and transforms of error functions (DLMF §§7.7, 7.14)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+This umbrella collects the integral representations of DLMF §7.7 and the integrals and
+transforms of DLMF §7.14: Gaussian and Cauchy-type integrals, Fresnel transforms, and Laplace
+transforms and reciprocal representations.
 -/

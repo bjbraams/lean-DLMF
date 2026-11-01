@@ -10,11 +10,38 @@ public import Mathlib.MeasureTheory.Covering.Besicovitch
 public import Mathlib.Tactic.Positivity.Finset
 
 /-!
-# Elementary argument reductions (DLMF §4.45)
+# Elementary argument reductions
 
-The exact argument transformations are retained; the worked decimal example
-4.45.12–14 is excluded as numerical. Upstream logarithm, exponential and
-periodicity identities are recorded in `Elementary.MathlibCoverage`.
+This file formalizes the exact argument reductions of DLMF §4.45 for computing logarithms,
+exponentials, trigonometric functions and the arctangent.
+
+## Main definitions
+
+* `logReductionArgument`: the small logarithm argument obtained after `m` square roots
+  (DLMF 4.45.1).
+* `expReductionIndex`, `expReductionArgument`: decimal scaling of a real exponential argument
+  (DLMF 4.45.4).
+* `trigReductionIndex`, `trigReductionAngle`: reduction of a real trigonometric argument by
+  half-turns (DLMF 4.45.6).
+* `arctanReductionStep`, `arctanReductionSequence`: the half-angle iteration for the arctangent
+  (DLMF 4.45.9).
+
+## Main results
+
+* `logReductionArgument_tendsto`: repeated square roots make the logarithm-series argument
+  arbitrarily small.
+* `expReductionArgument_bound`, `trigReductionAngle_bound`: the argument bounds stated in the
+  prose of DLMF §4.45(i).
+* `trigReductionAngle_eq`: the factored form of the reduced angle (DLMF 4.45.6).
+* `arctanReductionStep_identity`: the half-angle identity (DLMF 4.45.8).
+* `arctanReductionSequence_le`, `arctanReductionSequence_tendsto`: the iterated arguments
+  decrease geometrically to zero.
+* `arctanReductionSequence_identity`: reconstruction after finitely many steps (DLMF 4.45.10).
+
+## Implementation notes
+
+The worked decimal example 4.45.12–4.45.14 is out of scope as numerical. Upstream logarithm,
+exponential and periodicity identities are recorded in `DLMF.Elementary.MathlibCoverage`.
 -/
 
 @[expose] public noncomputable section

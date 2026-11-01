@@ -14,6 +14,13 @@ public import Mathlib.Topology.Separation.Hausdorff
 Joint continuity along a parameter slice gives locally uniform convergence to that slice.
 Consequently, an already known pointwise limit is locally uniform whenever the family agrees
 near the parameter with such a continuous extension.
+
+## Main results
+
+* `tendstoLocallyUniformlyOn_of_joint_continuousAt`: joint continuity along a parameter slice
+  gives locally uniform convergence to that slice.
+* `tendstoLocallyUniformlyOn_of_local_extension`: a local continuous extension upgrades an
+  identified pointwise limit to locally uniform convergence.
 -/
 
 @[expose] public section

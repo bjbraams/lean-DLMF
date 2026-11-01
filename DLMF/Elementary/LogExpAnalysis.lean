@@ -13,17 +13,50 @@ public import Mathlib.Analysis.Analytic.Binomial
 public import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!
-# Logarithms, exponentials and powers: DLMF §§4.4–4.8
+# Logarithms, exponentials and powers: values, inequalities, series and identities
 
-Exact special values, complex-parameter limits, inequalities, boundary-convergent
-series, differential equations, and multivalued identities. Binomial series use Mathlib's
-`Complex.one_add_cpow_hasFPowerSeriesOnBall_zero`; the coefficient adapter uses
-Mathlib's descending Pochhammer polynomial and generalized binomial APIs. Decimal approximations
-are omitted. The strict bounds in 4.5.3 and 4.5.14 require a strict endpoint; their
-exact positive cutoffs are defined below and equality is retained there.
-The additive constant printed in 4.7.13 is corrected to a multiplicative constant.
-The independent-set interpretation of 4.8.5 is corrected by retaining all integer
-logarithm shifts rather than only multiples of the exponent.
+This file proves exact special values and limits (DLMF §4.4), inequalities (§4.5), series with
+their boundary behaviour (§4.6), derivatives and differential equations (§4.7), and multivalued
+and principal identities (§4.8) for the complex logarithm, exponential and powers.
+
+## Main definitions
+
+* `logInequalityCutoff`, `expInequalityCutoff`: the exact positive cutoffs of the logarithmic and
+  exponential inequalities 4.5.3 and 4.5.14.
+* `fallingPower`: the complex falling factorial.
+
+## Main results
+
+* `closedLogValues_neg_one`, `exp_pi_div_three`, `exp_two_pi_div_three`, `exp_pi_div_four`,
+  `exp_three_pi_div_four`, `I_cpow_I`: exact values (DLMF 4.4.2, 4.4.8–4.4.12).
+* `tendsto_cpow_neg_mul_log`, `tendsto_cpow_mul_log_zero`, `tendsto_cpow_mul_log_complex_zero`,
+  `tendsto_cpow_mul_exp_neg`, `tendsto_cpow_mul_exp_neg_sector`: limits (DLMF 4.4.13–4.4.16).
+* `log_one_add_bounds`, `abs_log_one_sub_lt`, `norm_log_one_add_le`, `exp_one_sub_bounds`,
+  `rpow_one_add_bounds`, `exp_neg_lt_linear`, `norm_exp_sub_one_le`: inequalities
+  (DLMF 4.5.1–4.5.16).
+* `log_one_add_hasSum_closed`, `log_hasSum_halfplane`, `log_hasSum_center_one`, `log_hasSum_odd`,
+  `log_ratio_hasSum_odd`, `log_add_hasSum_odd`: logarithmic series including convergent boundary
+  points (DLMF 4.6.1–4.6.6).
+* `binomial_hasSum`, `binomial_nat_hasSum`: the binomial series (DLMF 4.6.7).
+* `logSheet_hasDerivAt`, `iteratedDeriv_logSheet`, `powerSheet_hasDerivAt`, `iteratedDeriv_cpow`:
+  derivatives (DLMF 4.7.2–4.7.11).
+* `logarithmic_ode_solution`, `linear_ode_solution`, `second_order_ode_solution`: differential
+  equations (DLMF 4.7.5–4.7.15).
+* `generalLogValues_mul`, `generalLogValues_div`, `generalLogValues_zpow`, `generalLogValues_exp`,
+  `generalLogValues_power`: multivalued identities (DLMF 4.8.1–4.8.11).
+* `closedLog_mul`, `closedLog_div`, `closedLog_zpow`, `closedLog_inv`, `closedLog_exp`,
+  `closedPower_mul`: closed principal identities (DLMF 4.8.2–4.8.15).
+* `log_zpow_strip`, `log_cpow_sheet`, `exp_cpow_strip`, `exp_cpow_int`: principal identities with
+  strip conditions (DLMF 4.8.6, 4.8.12, 4.8.17).
+
+## Implementation notes
+
+Binomial series use Mathlib's `Complex.one_add_cpow_hasFPowerSeriesOnBall_zero`, with Mathlib's
+descending Pochhammer polynomial and generalized binomial coefficients. Decimal approximations
+are omitted. The strict bounds in 4.5.3 and 4.5.14 require a strict endpoint; at the exact
+cutoffs equality holds. The additive constant printed in 4.7.13 is corrected to a
+multiplicative constant. In 4.8.5 all integer logarithm shifts are retained, not only multiples
+of the exponent.
 -/
 
 @[expose] public section
@@ -179,7 +212,7 @@ theorem tendsto_cpow_mul_exp_neg_sector (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ
 def logInequalityCutoff : ℝ := sSup {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2}
 
 /-- Members of the logarithm cutoff set lie below `9/10`. -/
-lemma logR4_mem_le {x : ℝ} (hx : x ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2}) :
+private lemma le_nine_tenths_of_mem_logCutoffSet {x : ℝ} (hx : x ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2}) :
     x ≤ 9/10 := by
   obtain ⟨h0, h1, h2⟩ := hx
   by_contra h
@@ -193,18 +226,18 @@ lemma logR4_mem_le {x : ℝ} (hx : x ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.lo
   linarith
 
 /-- The logarithm cutoff set is bounded above. -/
-lemma logR4_bdd : BddAbove {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} :=
-  ⟨9/10, fun _ hx => logR4_mem_le hx⟩
+private lemma bddAbove_logCutoffSet : BddAbove {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} :=
+  ⟨9/10, fun _ hx => le_nine_tenths_of_mem_logCutoffSet hx⟩
 
 /-- One half belongs to the logarithm cutoff set. -/
-lemma logR4_half_mem : (1/2:ℝ) ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} := by
+private lemma half_mem_logCutoffSet : (1/2:ℝ) ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} := by
   refine ⟨by norm_num, by norm_num, ?_⟩
   rw [show (1:ℝ) - 1/2 = (2:ℝ)⁻¹ by norm_num, Real.log_inv, neg_neg]
   have := Real.log_two_lt_d9
   linarith
 
 /-- Convexity bound: below a member of the cutoff set the strict inequality holds. -/
-lemma logR4_strict {x y : ℝ} (hx : 0 < x) (hxy : x < y)
+private lemma neg_log_one_sub_lt_of_lt_mem_logCutoffSet {x y : ℝ} (hx : 0 < x) (hxy : x < y)
     (hy : y ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2}) :
     -Real.log (1 - x) < 3 * x / 2 := by
   obtain ⟨hy0, hy1, hy2⟩ := hy
@@ -221,14 +254,14 @@ lemma logR4_strict {x y : ℝ} (hx : 0 < x) (hxy : x < y)
   nlinarith
 
 /-- The logarithm cutoff is at least one half. -/
-lemma logR4_cutoff_pos : 1/2 ≤ logInequalityCutoff := le_csSup logR4_bdd logR4_half_mem
+private lemma half_le_logInequalityCutoff : 1/2 ≤ logInequalityCutoff := le_csSup bddAbove_logCutoffSet half_mem_logCutoffSet
 
 /-- The cutoff is the nonzero root of the equality case. -/
 theorem logInequalityCutoff_spec  :
     0 < logInequalityCutoff ∧ logInequalityCutoff < 1 ∧
     -Real.log (1 - logInequalityCutoff) = 3 * logInequalityCutoff / 2 := by
-  have hc0 := logR4_cutoff_pos
-  have hc9 : logInequalityCutoff ≤ 9/10 := csSup_le ⟨_, logR4_half_mem⟩ (fun _ hx => logR4_mem_le hx)
+  have hc0 := half_le_logInequalityCutoff
+  have hc9 : logInequalityCutoff ≤ 9/10 := csSup_le ⟨_, half_mem_logCutoffSet⟩ (fun _ hx => le_nine_tenths_of_mem_logCutoffSet hx)
   set c := logInequalityCutoff with hcdef
   have hcont : ContinuousOn (fun x : ℝ => -Real.log (1 - x) - 3 * x / 2) (Icc 0 (9/10)) := by
     apply ContinuousOn.sub _ (by fun_prop)
@@ -243,9 +276,9 @@ theorem logInequalityCutoff_spec  :
     have hsub : {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} ⊆
         {x ∈ Icc (0:ℝ) (9/10) | -Real.log (1 - x) - 3 * x / 2 ≤ 0} := by
       intro x hx
-      exact ⟨⟨hx.1.le, logR4_mem_le hx⟩, by linarith [hx.2.2]⟩
+      exact ⟨⟨hx.1.le, le_nine_tenths_of_mem_logCutoffSet hx⟩, by linarith [hx.2.2]⟩
     have hcl : c ∈ closure {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} :=
-      csSup_mem_closure ⟨_, logR4_half_mem⟩ logR4_bdd
+      csSup_mem_closure ⟨_, half_mem_logCutoffSet⟩ bddAbove_logCutoffSet
     have hmem := hT.closure_subset_iff.mpr hsub hcl
     have := hmem.2
     linarith
@@ -263,7 +296,7 @@ theorem logInequalityCutoff_spec  :
       ((hev.filter_mono (nhdsWithin_le_nhds (s := Ioi c))).and self_mem_nhdsWithin).exists
     have hxS : x ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} :=
       ⟨by linarith [hcx], hx2, by linarith⟩
-    have : x ≤ c := le_csSup logR4_bdd hxS
+    have : x ≤ c := le_csSup bddAbove_logCutoffSet hxS
     linarith [hcx]
 
 /-- Both sharp first-order logarithmic inequalities. -/
@@ -294,8 +327,8 @@ theorem neg_log_one_sub_bounds {x : ℝ} (hx : x < 1) (hne : x ≠ 0) :
 @[dlmf 4.5.E3]
 theorem abs_log_one_sub_lt {x : ℝ} (hx : 0 < x) (hr : x < logInequalityCutoff) :
     |Real.log (1 - x)| < 3 * x / 2 := by
-  obtain ⟨y, hy, hxy⟩ := exists_lt_of_lt_csSup ⟨_, logR4_half_mem⟩ hr
-  have h := logR4_strict hx hxy hy
+  obtain ⟨y, hy, hxy⟩ := exists_lt_of_lt_csSup ⟨_, half_mem_logCutoffSet⟩ hr
+  have h := neg_log_one_sub_lt_of_lt_mem_logCutoffSet hx hxy hy
   have hx1 : x < 1 := lt_trans hxy hy.2.1
   have hl : Real.log (1 - x) < 0 := Real.log_neg (by linarith) (by linarith)
   rw [abs_of_neg hl]
@@ -306,8 +339,8 @@ theorem abs_log_one_sub_lt {x : ℝ} (hx : 0 < x) (hr : x < logInequalityCutoff)
 theorem abs_log_one_sub_le {x : ℝ} (hx : 0 < x) (hr : x ≤ logInequalityCutoff) :
     |Real.log (1 - x)| ≤ 3 * x / 2 := by
   rcases hr.lt_or_eq with hr | rfl
-  · obtain ⟨y, hy, hxy⟩ := exists_lt_of_lt_csSup ⟨_, logR4_half_mem⟩ hr
-    have h := logR4_strict hx hxy hy
+  · obtain ⟨y, hy, hxy⟩ := exists_lt_of_lt_csSup ⟨_, half_mem_logCutoffSet⟩ hr
+    have h := neg_log_one_sub_lt_of_lt_mem_logCutoffSet hx hxy hy
     have hx1 : x < 1 := lt_trans hxy hy.2.1
     have hl : Real.log (1 - x) < 0 := Real.log_neg (by linarith) (by linarith)
     rw [abs_of_neg hl]
@@ -412,17 +445,17 @@ theorem rpow_one_add_bounds {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
 def expInequalityCutoff : ℝ := sSup {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2}
 
 /-- Members of the exponential cutoff set lie below two. -/
-lemma logR4_exp_mem_lt {x : ℝ} (hx : x ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2}) :
+private lemma lt_two_of_mem_expCutoffSet {x : ℝ} (hx : x ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2}) :
     x < 2 := by
   have := Real.exp_pos (-x)
   linarith [hx.2]
 
 /-- The exponential cutoff set is bounded above. -/
-lemma logR4_exp_bdd : BddAbove {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} :=
-  ⟨2, fun _ hx => (logR4_exp_mem_lt hx).le⟩
+private lemma bddAbove_expCutoffSet : BddAbove {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} :=
+  ⟨2, fun _ hx => (lt_two_of_mem_expCutoffSet hx).le⟩
 
 /-- One belongs to the exponential cutoff set. -/
-lemma logR4_exp_one_mem : (1:ℝ) ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} := by
+private lemma one_mem_expCutoffSet : (1:ℝ) ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} := by
   refine ⟨by norm_num, ?_⟩
   rw [Real.exp_neg]
   have := Real.exp_one_gt_d9
@@ -430,7 +463,7 @@ lemma logR4_exp_one_mem : (1:ℝ) ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 -
   linarith
 
 /-- Convexity bound below a member of the exponential cutoff set. -/
-lemma logR4_exp_strict {x y : ℝ} (hx : 0 < x) (hxy : x < y)
+private lemma exp_neg_lt_of_lt_mem_expCutoffSet {x y : ℝ} (hx : 0 < x) (hxy : x < y)
     (hy : y ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2}) :
     Real.exp (-x) < 1 - x / 2 := by
   obtain ⟨hy0, hy2⟩ := hy
@@ -450,9 +483,9 @@ lemma logR4_exp_strict {x y : ℝ} (hx : 0 < x) (hxy : x < y)
 theorem expInequalityCutoff_spec  :
     0 < expInequalityCutoff ∧ expInequalityCutoff < 2 ∧
     Real.exp (-expInequalityCutoff) = 1 - expInequalityCutoff / 2 := by
-  have hc1 : 1 ≤ expInequalityCutoff := le_csSup logR4_exp_bdd logR4_exp_one_mem
+  have hc1 : 1 ≤ expInequalityCutoff := le_csSup bddAbove_expCutoffSet one_mem_expCutoffSet
   have hc2 : expInequalityCutoff ≤ 2 :=
-    csSup_le ⟨_, logR4_exp_one_mem⟩ (fun _ hx => (logR4_exp_mem_lt hx).le)
+    csSup_le ⟨_, one_mem_expCutoffSet⟩ (fun _ hx => (lt_two_of_mem_expCutoffSet hx).le)
   set c := expInequalityCutoff with hcdef
   have hle : Real.exp (-c) - 1 + c / 2 ≤ 0 := by
     have hT : IsClosed {x : ℝ | x ∈ Icc (0:ℝ) 2 ∧ Real.exp (-x) - 1 + x / 2 ≤ 0} :=
@@ -461,9 +494,9 @@ theorem expInequalityCutoff_spec  :
     have hsub : {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} ⊆
         {x : ℝ | x ∈ Icc (0:ℝ) 2 ∧ Real.exp (-x) - 1 + x / 2 ≤ 0} := by
       intro x hx
-      exact ⟨⟨hx.1.le, (logR4_exp_mem_lt hx).le⟩, by linarith [hx.2]⟩
+      exact ⟨⟨hx.1.le, (lt_two_of_mem_expCutoffSet hx).le⟩, by linarith [hx.2]⟩
     have hcl : c ∈ closure {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} :=
-      csSup_mem_closure ⟨_, logR4_exp_one_mem⟩ logR4_exp_bdd
+      csSup_mem_closure ⟨_, one_mem_expCutoffSet⟩ bddAbove_expCutoffSet
     exact (hT.closure_subset_iff.mpr hsub hcl).2
   have hlt2 : c < 2 := by
     rcases hc2.lt_or_eq with h | h
@@ -480,23 +513,23 @@ theorem expInequalityCutoff_spec  :
     ((hev.filter_mono (nhdsWithin_le_nhds (s := Ioi c))).and self_mem_nhdsWithin).exists
   have hxS : x ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} :=
     ⟨by linarith [show c < x from hcx], by linarith⟩
-  have : x ≤ c := le_csSup logR4_exp_bdd hxS
+  have : x ≤ c := le_csSup bddAbove_expCutoffSet hxS
   linarith [show c < x from hcx]
 
 /-- Strict form inside the exact cutoff. -/
 @[dlmf 4.5.E14]
 theorem exp_neg_lt_linear {x : ℝ} (hx : 0 < x) (hr : x < expInequalityCutoff) :
     Real.exp (-x) < 1 - x / 2 := by
-  obtain ⟨y, hy, hxy⟩ := exists_lt_of_lt_csSup ⟨_, logR4_exp_one_mem⟩ hr
-  exact logR4_exp_strict hx hxy hy
+  obtain ⟨y, hy, hxy⟩ := exists_lt_of_lt_csSup ⟨_, one_mem_expCutoffSet⟩ hr
+  exact exp_neg_lt_of_lt_mem_expCutoffSet hx hxy hy
 
 /-- Weak form through the exact cutoff. -/
 @[dlmf 4.5.E14]
 theorem exp_neg_le_linear {x : ℝ} (hx : 0 < x) (hr : x ≤ expInequalityCutoff) :
     Real.exp (-x) ≤ 1 - x / 2 := by
   rcases hr.lt_or_eq with hr | rfl
-  · obtain ⟨y, hy, hxy⟩ := exists_lt_of_lt_csSup ⟨_, logR4_exp_one_mem⟩ hr
-    exact (logR4_exp_strict hx hxy hy).le
+  · obtain ⟨y, hy, hxy⟩ := exists_lt_of_lt_csSup ⟨_, one_mem_expCutoffSet⟩ hr
+    exact (exp_neg_lt_of_lt_mem_expCutoffSet hx hxy hy).le
   · exact expInequalityCutoff_spec.2.2.le
 
 /-- Two-sided complex exponential estimate on the punctured unit disk. -/

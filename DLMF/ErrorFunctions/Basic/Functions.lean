@@ -10,6 +10,24 @@ public import DLMF.Confluent.Basic.ErrorFunctions
 
 /-!
 # Complex error, Fresnel, Dawson and Gaussian primitives
+
+Definitions of the entire functions of DLMF §7.2 and of the alternative notations of DLMF §7.1.
+The complex error functions `erf` and `erfc` themselves are defined in
+`DLMF.Confluent.Basic.ErrorFunctions`.
+
+## Main definitions
+
+* `faddeevaW`: the Faddeeva function `w(z)` (DLMF 7.2.3).
+* `dawsonF`: Dawson's integral `F(z)` (DLMF 7.2.5).
+* `fresnelCosInt`, `fresnelSinInt`, `fresnelTail`: the Fresnel integrals `C(z)`, `S(z)` and
+  `ℱ(z)` (DLMF 7.2.6–7.2.8).
+* `fresnelAuxFComplex`, `fresnelAuxGComplex`: the auxiliary functions `f(z)`, `g(z)`
+  (DLMF 7.2.10, 7.2.11).
+* `goodwinStatonG`: the Goodwin–Staton integral `G(z)` on the slit plane (DLMF 7.2.12).
+* `gaussianTail`, `gaussianCdf`, `scaledErf`, `dawsonPrimitive`: the alternative notations
+  `Q`, `P`, `Erf` and `Erfi` of DLMF §7.1.
+* `fresnelC1`, `fresnelS1`, `fresnelC2`, `fresnelS2`: the alternative Fresnel normalizations of
+  DLMF §7.1.
 -/
 
 @[expose] public noncomputable section

@@ -11,12 +11,29 @@ public import DLMF.Hypergeometric.FurtherTransformations
 /-!
 # Riemann's differential equation (DLMF §15.11)
 
-P-symbols are interpreted as solution spaces. The source's E5 is the Möbius map
-appearing explicitly in `riemann_mobius_covariance`; no separate general-purpose
-Möbius transformation definition is introduced. The covariance statement treats
-finite triples whose images remain finite. The normalized operator and reduction
-handle the usual triple containing infinity. A classification of all Fuchsian
-equations is deferred until regular singularities on the Riemann sphere are defined.
+## Main definitions
+
+* `riemannOperator`: Riemann's differential operator with three finite singular points,
+  DLMF 15.11.1.
+* `riemannNormalOperator`: the operator with singularities at `0, 1, ∞`.
+* `riemannSolutions`: the P-symbol as a set of solutions, DLMF 15.11.3.
+
+## Main results
+
+* `gauss_fuchs_relation`: Fuchs's relation for the exponents of the Gauss equation, DLMF 15.11.2.
+* `riemannNormalOperator_gauss`: the Gauss equation as a normalized Riemann equation,
+  DLMF 15.11.4.
+* `riemann_mobius_covariance`: covariance under Möbius maps, DLMF 15.11.5–15.11.6.
+* `riemann_hypergeometric_solution`: hypergeometric solutions, DLMF 15.11.7.
+* `riemann_gauge_shift`: shifting exponents by a gauge factor, DLMF 15.11.8.
+
+## Implementation notes
+
+P-symbols are interpreted as solution spaces. The Möbius map of 15.11.5 appears explicitly in
+`riemann_mobius_covariance`; no separate Möbius transformation is defined. The covariance
+statement treats finite triples whose images remain finite. The normalized operator and the
+reduction handle the usual triple containing infinity. A classification of all Fuchsian
+equations is not included; it needs regular singularities on the Riemann sphere.
 -/
 
 @[expose] public section
@@ -186,7 +203,7 @@ theorem riemann_hypergeometric_solution {α β γ a₁ a₂ b₁ b₂ c₁ c₂ 
     have h0 : 1 - T z = 0 := by rw [h]; ring
     rw [h1T] at h0
     exact div_ne_zero (mul_ne_zero (sub_ne_zero.mpr hαγ.symm) hzβ) (mul_ne_zero hzγ' h4') h0
-  have hode := ordinaryHypergeometric_ode (a := a₁ + b₁ + c₁) (b := a₁ + b₁ + c₂) hc hTz hT0 hT1
+  have hode := ordinaryHypergeometric_ode (a := a₁ + b₁ + c₁) (b := a₁ + b₁ + c₂) hc hTz
   have hf : (fun w => ((w - α) / (w - γ)) ^ a₁ * ((w - β) / (w - γ)) ^ b₁ *
       ₂F₁ (a₁ + b₁ + c₁) (a₁ + b₁ + c₂) (1 + a₁ - a₂) ((w - α) * (β - γ) / ((w - γ) * (β - α)))) =
       fun w => P w * Fh (T w) := rfl

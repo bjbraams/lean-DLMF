@@ -11,13 +11,23 @@ public import Mathlib.Analysis.SpecialFunctions.Trigonometric.InverseDeriv
 /-!
 # The hypergeometric equation (AAR §2.3)
 
-Termwise differentiation of the series gives
-`d/dz ₂F₁(a,b;c;z) = (ab/c) ₂F₁(a+1,b+1;c+1;z)`. The function then satisfies Euler's
-hypergeometric equation
+Termwise differentiation of the series gives `d/dz ₂F₁(a,b;c;z) = (ab/c) ₂F₁(a+1,b+1;c+1;z)`.
+The function then satisfies Euler's hypergeometric equation
 
 $$
 z(1-z)y'' + \bigl(c-(a+b+1)z\bigr)y' - ab\,y = 0.
 $$
+
+## Main results
+
+* `hasDerivAt_ordinaryHypergeometric`, `deriv_ordinaryHypergeometric`: DLMF 15.5.1.
+* `ordinaryHypergeometric_ode`: the hypergeometric equation, DLMF 15.10.1.
+* `arcsin_eq_ordinaryHypergeometric`: `arcsin x = x ₂F₁(1/2,1/2;3/2;x²)`, DLMF 15.4.4
+  (AAR (2.1.5)).
+
+## References
+
+* G. E. Andrews, R. Askey, R. Roy, *Special Functions*, §2.3.
 -/
 
 @[expose] public section
@@ -84,7 +94,7 @@ theorem deriv_ordinaryHypergeometric {a b c z : ℂ}
 /-- The Gaussian hypergeometric equation, AAR §2.3. -/
 @[dlmf 15.10.E1]
 theorem ordinaryHypergeometric_ode {a b c z : ℂ}
-    (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) (hz0 : z ≠ 0) (hz1 : z ≠ 1) :
+    (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :
     z * (1 - z) * iteratedDeriv 2 (₂F₁ a b c) z +
         (c - (a + b + 1) * z) * deriv (₂F₁ a b c) z -
         a * b * ₂F₁ a b c z = 0 := by

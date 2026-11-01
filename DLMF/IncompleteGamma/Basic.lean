@@ -11,9 +11,17 @@ public import DLMF.Core.Framework
 /-!
 # Continued incomplete Gamma functions: definitions
 
-The logarithmic-plane versions and the continued normalized functions `P` and `Q`
-are defined here. Their analytic and differential properties are in
+The incomplete Gamma functions on the logarithmic plane and the continued normalized functions
+`P` and `Q`. Their analytic and differential properties are in
 `DLMF.IncompleteGamma.ContinuedProperties`.
+
+## Main definitions
+
+* `upperIncGammaOnLog`, `lowerIncGammaOnLog`: the incomplete Gamma functions on the logarithmic
+  plane.
+* `normIncGammaPOnLog`, `normIncGammaQOnLog`: the continued `P` and `Q` on the logarithmic plane.
+* `normIncGammaPContinued`, `normIncGammaQContinued`: the analytically continued `P` and `Q`,
+  DLMF 8.2.4.
 -/
 
 @[expose] public noncomputable section

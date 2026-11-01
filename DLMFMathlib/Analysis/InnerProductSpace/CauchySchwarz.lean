@@ -14,6 +14,13 @@ public import Mathlib.MeasureTheory.Function.L2Space
 Mathlib's `norm_inner_eq_norm_tfae` gives the equality criterion in terms of one
 vector being zero or the other being a scalar multiple. The symmetric formulation
 below includes both degenerate cases without selecting a distinguished vector.
+
+## Main results
+
+* `real_inner_sq_eq_iff_smul_eq`: equality in the squared real Cauchy–Schwarz inequality
+  holds exactly when a nontrivial linear combination of the two vectors vanishes.
+* `MeasureTheory.MemLp.real_inner_toLp`: the real inner product of two `L²` representatives
+  is the integral of their pointwise product.
 -/
 
 @[expose] public noncomputable section

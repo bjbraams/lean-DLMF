@@ -21,9 +21,12 @@ interchanges the order of integration (Tonelli, with the real Gaussian moments o
 bounding the absolute integrand) and evaluates the inner Gaussian moment
 `∫₀^∞ x^{s-1} e^{-b x²} dx = ½ b^{-s/2} Γ(s/2)` and the outer Euler integral.
 
-The result is also given in the language of Mathlib's `mellin` (`besselK_mellinConvergent`,
-`mellin_besselK`), so that `mellin_comp_rpow` and `mellin_comp_mul_left` apply to
-functions such as `K_ν(c t^p)`.
+## Main results
+
+* `besselK_mellin`: the Mellin transform of `K_ν` (DLMF 10.43.19).
+* `besselK_mellinConvergent`, `mellin_besselK`: the same in the language of Mathlib's `mellin`,
+  so that `mellin_comp_rpow` and `mellin_comp_mul_left` apply to functions such as `K_ν(c t^p)`.
+* `kMel_integral_gauss`: the complex Gaussian moment `∫₀^∞ x^{s-1} e^{-b x²} dx`.
 -/
 
 @[expose] public section

@@ -12,10 +12,31 @@ public import DLMF.OrthogonalPolynomials.PollaczekMoments
 /-!
 # Hahn and Meixner polynomial identities
 
-Finite hypergeometric identities and generating functions for Hahn and Meixner families.
+Definitions of the polynomials of the Hahn class (DLMF §18.20) and their weights
+(DLMF §18.19), with the continuous orthogonality of the continuous Hahn and Meixner–Pollaczek
+polynomials, duality, difference equations, forward differences, recurrences and generating
+functions of the discrete families. Terminating hypergeometric sums carry an explicit
+cutoff, which implements DLMF's convention when a lower parameter is a negative integer.
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Hahn`.
+## Main definitions
+
+* `terminatingHG`: a terminating hypergeometric sum with an explicit cutoff.
+* `hahn`, `krawtchouk`, `meixner`, `charlier`: DLMF 18.20.5–18.20.8.
+* `continuousHahn`, `meixnerPollaczek`: DLMF 18.20.9 and 18.20.10.
+* `continuousHahnWeight`, `meixnerPollaczekWeight`: the weights DLMF 18.19.2 and 18.19.7.
+
+## Main results
+
+* `continuousHahn_orthogonal`, `meixnerPollaczek_orthogonality`: DLMF 18.19.4 and 18.19.9.
+* `krawtchouk_duality`, `meixner_duality`, `charlier_duality`: DLMF 18.21.2.
+* `hahn_difference_equation`: DLMF 18.22.10.
+* `krawtchouk_difference_equation`, `meixner_difference_equation`,
+  `charlier_difference_equation`: the difference equations of Table 18.22.2.
+* `hahn_forward_difference`, `krawtchouk_forward_difference`, `meixner_forward_difference`,
+  `charlier_forward_difference`: DLMF 18.22.19, 18.22.21, 18.22.23 and 18.22.25.
+* `meixnerPollaczek_recurrence`, `meixnerPollaczek_central_difference`: DLMF 18.22.8 and
+  18.22.29.
+* `krawtchouk_generating_function`, `meixner_generating_function`: DLMF 18.23.3 and 18.23.4.
 -/
 
 @[expose] public section
@@ -303,7 +324,7 @@ theorem terminatingHG_two_neg_nat_swap (n m : ℕ) (b : List ℂ) (z : ℂ) :
 /-- Identity under the stated parameter and domain assumptions: `krawtchouk p N n x = krawtchouk p
 N x n`. -/
 @[dlmf 18.21.E2]
-theorem krawtchouk_duality (p : ℂ) {N n x : ℕ} (hn : n ≤ N) (hx : x ≤ N) :
+theorem krawtchouk_duality (p : ℂ) {N n x : ℕ} :
     krawtchouk p N n x = krawtchouk p N x n := by
   exact terminatingHG_two_neg_nat_swap n x _ _
 
@@ -615,7 +636,7 @@ theorem charlier_first_difference (a : ℂ) (n : ℕ) (x : ℂ) :
 - hahn α β (N + 1) (n + 1) x = -((n + 1) * (n + α + β + 2)) / ((α + 1) * (N + 1)) * hahn (α +
 1) (β + 1) N n x`. -/
 @[dlmf 18.22.E19]
-theorem hahn_forward_difference {α β : ℂ} (hα : -1 < α.re) {N n : ℕ} (hn : n + 1 ≤ N + 1) (x : ℂ) :
+theorem hahn_forward_difference {α β : ℂ} (hα : -1 < α.re) {N n : ℕ} (x : ℂ) :
     hahn α β (N + 1) (n + 1) (x + 1) - hahn α β (N + 1) (n + 1) x =
       -((n + 1) * (n + α + β + 2)) / ((α + 1) * (N + 1)) * hahn (α + 1) (β + 1) N n x := by
   unfold hahn

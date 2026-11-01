@@ -6,14 +6,36 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.BasicProperties.IntegerParametersAndLimits
+public import Carlson.TwoVariable.R.ElementaryValues
 
 /-!
-# Fundamental pairs of confluent hypergeometric solutions
+# Wronskians and connection formulas for Kummer and Tricomi functions
 
-Analyticity and Wronskian calculations for Kummer and Tricomi fundamental systems.
+This file proves that `U(a,b,·)` is holomorphic on the slit plane for every `b`, computes the
+Wronskians of the standard pairs of solutions of Kummer's equation, and proves the connection
+formula 13.2.41 and the jump of `U` across the negative real axis (DLMF §13.2).
 
-Source references and common attribution are retained in
-`DLMF.Confluent.BasicProperties`.
+## Main results
+
+* `analyticOnNhd_kummerM`: `M(a,b,·)` is entire for `b` not a nonpositive integer.
+* `differentiableOn_kummerU`: `U(a,b,·)` is holomorphic on the slit plane, for every `b`.
+* `wronskian_kummer_pair`, `wronskian_kummerM_pair`: the Wronskian of `M(a,b,z)` and
+  `z^{1-b} M(a-b+1,2-b,z)` (DLMF 13.2.26).
+* `wronskian_regularizedHGFun`: the regularized form (DLMF 13.2.33).
+* `wronskian_regularizedHGFun_kummerU`, `wronskian_regularizedHGFun_kummerU_all`: the Wronskian
+  of `𝐌(a,b,z)` and `U(a,b,z)` (DLMF 13.2.34).
+* `wronskian_shifted_regularized_kummerU`, `wronskian_shifted_regularized_kummerU_all`:
+  DLMF 13.2.36.
+* `regularizedHGFun_eq_kummerU_connection`, `kummerM_eq_kummerU_connection`: the connection
+  formula DLMF 13.2.41, for every `b`.
+* `kummerM_eq_kummerU_jump`: DLMF 13.2.43.
+* `kummerU_jump`, `kummerU_jump_all`: the jump of `U` across the negative axis (DLMF 13.2.44).
+
+## Implementation notes
+
+DLMF's `U(b-a,b,z e^{±πi})` is represented by the principal value at `-z`, or by `kummerUOnLog`
+when both continuations are needed. The `_all` variants drop nonpole hypotheses on the
+parameters.
 -/
 
 @[expose] public section
@@ -81,8 +103,8 @@ theorem kummer_pair_wronskian_core {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k)
   have hEF : E = F := by
     refine Continuous.ext_on (dense_compl_singleton (0 : ℂ)) hEc hFc fun w hw => ?_
     have hw' : w ≠ 0 := hw
-    have hU := kummerM_ode (a := a) hb hw'
-    have hV := kummerM_ode (a := a - b + 1) hB hw'
+    have hU := kummerM_ode (a := a) (z := w) hb
+    have hV := kummerM_ode (a := a - b + 1) (z := w) hB
     rw [iteratedDeriv_succ, iteratedDeriv_one] at hU hV
     rw [← hu] at hU
     rw [← hv] at hV
@@ -347,7 +369,7 @@ theorem wronskian_regularizedHGFun (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
   have hBk : ∀ k : ℕ, 2 - b ≠ -k := fun k h => hb (2 + k) (by push_cast; linear_combination -h)
   have hb1 : (1 : ℂ) - b ≠ 0 := fun h => hb 1 (by push_cast; linear_combination -h)
   have hbc : b ∈ integerComplement := mem_integerComplement_of_forall hb
-  have hsin := sin_pi_mul_ne_zero_of_mem hbc
+  have hsin := _root_.sin_pi_mul_ne_zero hbc
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have hz0 := slitPlane_ne_zero hz
   have h1 : regularizedHGFun {a} {b} = fun w => (Gamma b)⁻¹ * kummerM a b w := by
@@ -414,7 +436,7 @@ theorem wronskian_regularizedHGFun_kummerU_all (a b : ℂ) {z : ℂ} (hz : z ∈
 {b}) (kummerU a b) z = -(z ^ (-b) * exp z) / Gamma a`. -/
 @[dlmf 13.2.E34]
 theorem wronskian_regularizedHGFun_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
-    (ha : ∀ k : ℕ, a ≠ -k) :
+    :
     ODE.wronskian (regularizedHGFun {a} {b}) (kummerU a b) z =
       -(z ^ (-b) * exp z) / Gamma a := by
   exact wronskian_regularizedHGFun_kummerU_all a b hz
@@ -639,12 +661,6 @@ theorem kummerM_eq_kummerU_connection (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlan
   rw [← regularizedConfluent_eq_div_Gamma hb]
   exact regularizedHGFun_eq_kummerU_connection a b hz sign hsign
 
-/-- Exponential form of a sine jump. -/
-theorem exp_sub_exp_neg_mul_I (t : ℂ) :
-    exp (t * I) - exp (-t * I) = 2 * I * sin t := by
-  rw [sin]
-  linear_combination (exp (t * I) - exp (-t * I)) * I_sq
-
 /-- Reciprocal form of Gamma reflection, valid also at integer arguments. -/
 theorem sin_pi_mul_eq_recip_Gamma (t : ℂ) :
     sin (π * t) = π / (Gamma t * Gamma (1 - t)) := by
@@ -662,7 +678,7 @@ theorem exp_weighted_jump (a b u v : ℂ) :
     rw [← exp_add]; congr 1; ring
   calc _ = (exp (a * I) - exp (-a * I)) * u -
       (exp ((a - b) * I) - exp (-(a - b) * I)) * v := by rw [hp, hm]; ring
-    _ = _ := by simp only [exp_sub_exp_neg_mul_I]
+    _ = _ := by simp only [Carlson.TwoVariable.exp_mul_I_sub_exp_neg_mul_I]
 
 /-- The half-turn of U, with its branch recorded in the logarithmic argument. -/
 theorem kummerUOnLog_half_turn (a b : ℂ) {z : ℂ} (hz : z ≠ 0) (sign : Bool) :
@@ -697,7 +713,7 @@ theorem kummerM_eq_kummerU_jump (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
   have hb : ∀ k : ℕ, b ≠ -(k : ℂ) := not_neg_nat_of_mem_integerComplement
     (mem_integerComplement_of_forall hbi)
   have hGb := Gamma_ne_zero hb
-  have hsin := sin_pi_mul_ne_zero_of_mem (mem_integerComplement_of_forall hbi)
+  have hsin := _root_.sin_pi_mul_ne_zero (mem_integerComplement_of_forall hbi)
   have hG : Gamma (1 - b) * sin (π * b) = π / Gamma b := by
     have h := Gamma_mul_Gamma_one_sub b
     apply (eq_div_iff hGb).mpr
@@ -707,7 +723,7 @@ theorem kummerM_eq_kummerU_jump (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
   simp only [Bool.false_eq_true, ↓reduceIte, one_mul, neg_one_mul, neg_neg, neg_mul,
     ← sub_eq_add_neg] at hp hm
   rw [hp, hm]
-  have ht := exp_sub_exp_neg_mul_I (π * b)
+  have ht := Carlson.TwoVariable.exp_mul_I_sub_exp_neg_mul_I (π * b)
   rw [show (π : ℂ) * b * I = b * π * I by ring,
     show -(π * b) * I = -b * π * I by ring] at ht
   have hM : kummerM a b (-z) = exp (-z) * kummerM (b - a) b z := by

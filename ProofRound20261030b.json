@@ -533,7 +533,7 @@
     },
     {
       "name": "Complex.hasSum_odd_primitive_on_ball",
-      "file": "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean",
+      "file": "DLMFMathlib/Analysis/Complex/TrigSeriesExtension.lean",
       "line": 134,
       "proofLines": 32,
       "axioms": [
@@ -611,7 +611,7 @@
         "log": "/tmp/DLMF-proof-round-20261030b/strict-DLMFMathlib.lean.log"
       },
       {
-        "file": "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean",
+        "file": "DLMFMathlib/Analysis/Complex/TrigSeriesExtension.lean",
         "exitCode": 0,
         "log": "/tmp/DLMF-proof-round-20261030b/strict-DLMFMathlib_Analysis_Complex_TrigR4SeriesExtension.lean.log"
       },
@@ -659,7 +659,7 @@
       "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
       "DLMF/GeneralizedHypergeometric/Asymptotics.lean",
       "DLMF/Zeta/Hurwitz/SeriesAndContinuation.lean",
-      "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean"
+      "DLMFMathlib/Analysis/Complex/TrigSeriesExtension.lean"
     ],
     "compiledDeclarationCount": 26836,
     "newSourceDeclarations": 22,

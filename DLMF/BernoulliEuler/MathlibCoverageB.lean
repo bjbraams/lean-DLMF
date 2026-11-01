@@ -15,9 +15,9 @@ public import Mathlib.NumberTheory.ZetaValues
 /-!
 # DLMF §§24.11–24.16: results and definitions already in Mathlib
 
-Checked `dlmf_upstream` pointers for the second half of Chapter 24 (the pointers for 24.13.1
-and 24.13.2 are in `DLMF.Core.UpstreamElementary` and are not repeated). Mathlib's
-`bernoulliFun k x` is DLMF's `B_k(x)` on `ℝ`; its Stirling numbers of the first kind are
+`dlmf_upstream` pointers for the second half of Chapter 24 (the pointers for 24.13.1 and
+24.13.2 are in `DLMF.Core.UpstreamElementary` and are not repeated). Mathlib's
+`bernoulliFun k x` is DLMF's `B_k(x)` on `ℝ`; Mathlib's Stirling numbers of the first kind are
 unsigned.
 -/
 

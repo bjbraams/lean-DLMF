@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.NumberTheory.Functions
-public import DLMF.NumberTheory.T27bHecke
+public import DLMF.NumberTheory.HeckeOperators
 public import DLMF.NumberTheory.DirichletSeries
 public import DLMF.NumberTheory.Inversion
 public import DLMF.NumberTheory.DivisorSums
@@ -23,6 +23,5 @@ public import DLMF.NumberTheory.MathlibCoverage
 Multiplicative number theory (§§27.2–27.12: arithmetic functions, Dirichlet series, inversion,
 divisor sums, Lambert series, characters, periodic functions, asymptotics, primes) and additive
 number theory (§§27.13–27.14: sums of squares, Waring's problem, unrestricted partitions),
-built on Mathlib's `ArithmeticFunction`, characters and L-series. The ledger is
-DLMF27Acquisition.md.
+built on Mathlib's `ArithmeticFunction`, characters and L-series.
 -/

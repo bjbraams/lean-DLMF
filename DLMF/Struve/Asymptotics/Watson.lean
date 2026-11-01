@@ -13,13 +13,38 @@ public import ToMathlib.Analysis.Integral.Laplace
 public import DLMF.Struve.Representations
 
 /-!
-# Watson expansions of Struve functions
+# Large-argument expansions of `𝐊_ν` and `𝐌_ν` by Watson's lemma (DLMF 11.6.1–11.6.2)
 
-Laplace representations and Watson lemma give fixed-order asymptotic expansions of the Struve
-functions.
+## Main definitions
 
-Source references and common attribution are retained in
-`DLMF.Struve.Asymptotics`.
+* `struveAsymptoticTerm`: the `k`th large-argument term
+  `Γ(k+1/2) (z/2)^{ν-2k-1}/(π Γ(ν+1/2-k))`.
+* `struveKKernel`, `struveKRotIntegral`, `struveKRotated`: the Laplace integrand of `𝐊_ν`, the
+  rotated Laplace integral and the rotated representation of `𝐊_ν`.
+* `struveKCoeffA`, `struveMCoeffB`: the Taylor coefficients of `(1 + (te^{iα})²)^a` and
+  `(1 - t²)^a`.
+* `struveMWeight`: the weight `(1 - t²)^a` on `t ≤ 1`, extended by zero.
+
+## Main results
+
+* `struveK_eq_struveKRotated`: the rotated Laplace representation of `𝐊_ν`.
+* `hasAsymptoticExpansion_struveKRotIntegral`: Watson's lemma for the rotated integral.
+* `struveK_asymptotic_rotSector`, `sector_le_sup_rotSectorAtTop`: DLMF 11.6.1 in a rotated
+  sector, and two rotated sectors cover `|arg z| ≤ π - δ`.
+* `struveM_asymptotic_sectorAtTop_of_re`, `struveM_asymptotic_step`,
+  `struveM_asymptotic_sectorAtTop`: DLMF 11.6.2 for `re ν > 1/2`, one recurrence step, and all
+  orders.
+* `struveK_asymptotic`: the expansion DLMF 11.6.1.
+* `struveM_asymptotic`: the expansion DLMF 11.6.2.
+
+## Implementation notes
+
+For `𝐊_ν` the Laplace integral 11.5.2 (`DLMF.Bessel.struveK_eq_integral`) is rotated to the ray
+`arg t = α`, `|α| < π/2`, by `Complex.integral_Ioi_eq_exp_mul_integral_Ioi_rotate` and analytic
+continuation, following `DLMF.Confluent.kummerU_eq_tricomiRotated`; Watson's lemma
+(`hasAsymptoticExpansion_integral_cexp_smul_sector`) applies on each ray. For `𝐌_ν` the
+integral 11.5.4 gives the case `re ν > 1/2`, and the recurrence 11.4.25 with 10.29.1 extends it
+to all orders.
 -/
 
 @[expose] public noncomputable section
@@ -347,7 +372,7 @@ theorem neg_one_pow_mul_poch_mul_recip_Gamma (a : ℂ) (k : ℕ) :
   | succ k ih =>
     rw [poch_succ, pow_succ, show (Gamma (a + 1))⁻¹ * ((-1) ^ k * (-1) * (poch (-a) k * (-a + k)))
       = (Gamma (a + 1))⁻¹ * ((-1) ^ k * poch (-a) k) * (a - k) by ring, ih,
-      DLMF.Hypergeometric.recip_Gamma_eq_mul_recip_Gamma_add_one (a + 1 - ((k + 1 : ℕ) : ℂ))]
+      Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a + 1 - ((k + 1 : ℕ) : ℂ))]
     push_cast
     rw [show a + 1 - (k + 1) + 1 = a + 1 - k by ring]
     ring
@@ -769,7 +794,7 @@ theorem struveAsymptoticTerm_sum_sub_one (ν : ℂ) {z : ℂ} (hz : z ≠ 0) (N 
     intro h; have := congrArg Complex.re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
   have hΓ : Gamma ((k : ℂ) + 1 + 1 / 2) = ((k : ℂ) + 1 / 2) * Gamma ((k : ℂ) + 1 / 2) := by
     rw [show (k : ℂ) + 1 + 1 / 2 = (k : ℂ) + 1 / 2 + 1 by ring, Complex.Gamma_add_one _ hk]
-  have hinv := DLMF.Hypergeometric.recip_Gamma_eq_mul_recip_Gamma_add_one (ν - 1 / 2 - k)
+  have hinv := Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν - 1 / 2 - k)
   rw [show ν - 1 / 2 - (k : ℂ) + 1 = ν + 1 / 2 - k by ring] at hinv
   have e1 : (z / 2) ^ (ν - 1 - 2 * (k : ℂ) - 1) = (z / 2) ^ (ν - 2 * k - 2) := by ring_nf
   have e2 : (z / 2) ^ (ν + 1 - 2 * ((k : ℂ) + 1) - 1) = (z / 2) ^ (ν - 2 * k - 2) := by ring_nf

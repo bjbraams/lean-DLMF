@@ -10,6 +10,29 @@ public import DLMF.Elliptic.Basic.Theta
 
 /-!
 # Jacobi theta functions, constants, nome forms and lattice data
+
+The project's theta functions are `DLMF.Elliptic.jacobiThetaOneTau … jacobiThetaFourTau`
+(`θⱼ(z|τ)` in DLMF normalization, defined from Mathlib's `jacobiTheta₂`; `q = e^{iπτ}`,
+period `π` in `z`). As in Mathlib, they are totalized: for `Im τ ≤ 0` they vanish. This file
+defines the nome forms, the theta constants and the lattice data of DLMF §§20.1–20.2.
+
+## Main definitions
+
+* `jacobiThetaOneQ`, `jacobiThetaTwoQ`, `jacobiThetaThreeQ`, `jacobiThetaFourQ`: the nome
+  forms `θⱼ(z,q)`, defined by their Fourier series in `q` (DLMF 20.2.1–20.2.4).
+* `jacobiThetaTwoNullTau`, `jacobiThetaThreeNullTau`, `jacobiThetaFourNullTau`,
+  `jacobiThetaOneDerivNullTau`: the theta constants `θⱼ(0|τ)` and `θ₁'(0|τ)`.
+* `jacobiThetaTwoNullQ`, `jacobiThetaThreeNullQ`, `jacobiThetaFourNullQ`,
+  `jacobiThetaOneDerivNullQ`: the theta constants in nome form.
+* `jacobiThetaTau`: the theta functions indexed by `j = 1, 2, 3, 4`.
+* `latticePoint`: the lattice points `(m + nτ)π` (DLMF 20.2.5).
+* `thetaMultiplierM`: the multiplier `M(z|τ) = e^{iz + iπτ/4}` (DLMF 20.2.10).
+
+## Implementation notes
+
+DLMF's convention `q^α = e^{iαπτ}` presupposes a known `τ`. For `θ₁, θ₂` the nome forms use
+the principal `q^{1/4}`, so `θⱼ(z, e^{iπτ}) = θⱼ(z|τ)` holds for `-1 < Re τ ≤ 1`, while for
+`θ₃, θ₄` it holds for every `τ` (see `DLMF.Theta.SeriesAndZeros`).
 -/
 
 @[expose] public noncomputable section

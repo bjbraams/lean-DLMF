@@ -7,14 +7,35 @@ module
 
 public import DLMF.ErrorFunctions.AnalyticProperties
 public import DLMF.IncompleteGamma.ContinuedProperties
+public import DLMF.Elementary.LogExpIntegrals
 
 /-!
 # Special values and confluent representations, DLMF §§8.4–8.5
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs.
+Special values of the incomplete Gamma functions at half-integral, integral and zero
+parameters (DLMF §8.4), their representations through Kummer and Whittaker functions
+(DLMF §8.5), and the error-function relations of DLMF §7.11 on the logarithmic plane.
+
+## Main results
+
+* `lowerIncGamma_half_square`, `upperIncGamma_half_square`, `scIncGamma_half_negative_square`:
+  the half-order values DLMF 8.4.1, 8.4.6 and 8.4.3.
+* `scIncGamma_zero`, `upperIncGamma_zero_E1`: DLMF 8.4.2 and 8.4.4.
+* `lowerIncGamma_nat_succ_expPartialSum`, `upperIncGamma_nat_succ_expPartialSum`,
+  `normIncGammaPContinued_nat_succ_expPartialSum`,
+  `normIncGammaQContinued_nat_succ_expPartialSum`: integral parameters, DLMF 8.4.7–8.4.10.
+* `upperIncGamma_one_minus_nat`, `normIncGammaQ_half_nat`: DLMF 8.4.13 and 8.4.14.
+* `upperIncGamma_neg_nat_finite`, `upperIncGamma_neg_nat_hasSum`: DLMF 8.4.15.
+* `lowerIncGamma_kummerM_pair`, `scIncGamma_regularized_pair`, `upperIncGamma_kummerU_pair`,
+  `lowerIncGamma_whittakerM`, `upperIncGamma_whittakerW`: the confluent representations
+  DLMF 8.5.1–8.5.5.
+* `erf_lowerIncGammaOnLog_square`, `erfc_upperIncGammaOnLog_square`, `erfc_kummerUOnLog_square`:
+  DLMF 7.11.1, 7.11.2 and 7.11.5.
+
+## Implementation notes
+
+In DLMF 7.11.1 the square argument keeps its inherited logarithm on the full punctured
+plane, so the relations are stated for the logarithmic-plane functions.
 -/
 
 @[expose] public noncomputable section
@@ -23,11 +44,6 @@ open scoped Real Topology Nat
 namespace DLMF.Confluent
 
 open DLMF.Statistical
-
-/-- The finite exponential sum e_n. -/
-@[dlmf 8.4.E11]
-def expPartialSum (n : ℕ) (z : ℂ) : ℂ :=
-  ∑ k ∈ Finset.range (n+1), z^k/(k.factorial : ℂ)
 
 /-- Identity under the stated parameter and domain assumptions: `lowerIncGamma (1/2)
 (z^2)=2*primitive (fun t => exp (-t^2)) z ∧ lowerIncGamma (1/2) (z^2)=Real.sqrt π*erf z`. -/
@@ -65,7 +81,7 @@ theorem scIncGamma_half_negative_square {z : ℂ} (hz : z ≠ 0) :
 /-- Identity under the stated parameter and domain assumptions: `upperIncGamma 0 z=genExpIntE 1
 z`. -/
 @[dlmf 8.4.E4]
-theorem upperIncGamma_zero_E1 {z : ℂ} (hz : z ≠ 0) :
+theorem upperIncGamma_zero_E1 {z : ℂ} :
     upperIncGamma 0 z=genExpIntE 1 z := by
   simp [genExpIntE]
 
@@ -80,40 +96,40 @@ theorem upperIncGamma_half_square {z : ℂ} (hz : 0 < z.re) :
   linear_combination (Real.sqrt π:ℂ)*erfc z*he
 
 /-- Identity under the stated parameter and domain assumptions: `lowerIncGamma (n+1)
-z=(n.factorial : ℂ)*(1-exp (-z)*expPartialSum n z)`. -/
+z=(n.factorial : ℂ)*(1-exp (-z)*Elementary.expPartialSum n z)`. -/
 @[dlmf 8.4.E7]
 theorem lowerIncGamma_nat_succ_expPartialSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
-    lowerIncGamma (n+1) z=(n.factorial : ℂ)*(1-exp (-z)*expPartialSum n z) := by
+    lowerIncGamma (n+1) z=(n.factorial : ℂ)*(1-exp (-z)*Elementary.expPartialSum n z) := by
   have h := normIncGammaP_nat_succ n hz
   rw [normIncGammaP, show (n:ℂ)+1=((n:ℂ)+1) by rfl, Gamma_nat_eq_factorial] at h
   have hn : (n.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
   apply (div_eq_iff hn).mp at h
-  simpa [expPartialSum, mul_comm] using h
+  simpa [Elementary.expPartialSum, mul_comm] using h
 
 /-- Identity under the stated parameter and domain assumptions: `upperIncGamma (n+1)
-z=(n.factorial : ℂ)*exp (-z)*expPartialSum n z`. -/
+z=(n.factorial : ℂ)*exp (-z)*Elementary.expPartialSum n z`. -/
 @[dlmf 8.4.E8]
 theorem upperIncGamma_nat_succ_expPartialSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
-    upperIncGamma (n+1) z=(n.factorial : ℂ)*exp (-z)*expPartialSum n z := by
+    upperIncGamma (n+1) z=(n.factorial : ℂ)*exp (-z)*Elementary.expPartialSum n z := by
   have h := normIncGammaQ_nat_succ n hz
   rw [normIncGammaQ, Gamma_nat_eq_factorial] at h
   have hn : (n.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
   apply (div_eq_iff hn).mp at h
-  simpa [expPartialSum, mul_assoc, mul_comm, mul_left_comm] using h
+  simpa [Elementary.expPartialSum, mul_assoc, mul_comm, mul_left_comm] using h
 
 /-- Identity under the stated parameter and domain assumptions: `normIncGammaPContinued (n+1)
-z=1-exp (-z)*expPartialSum n z`. -/
+z=1-exp (-z)*Elementary.expPartialSum n z`. -/
 @[dlmf 8.4.E9]
 theorem normIncGammaPContinued_nat_succ_expPartialSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
-    normIncGammaPContinued (n+1) z=1-exp (-z)*expPartialSum n z := by
+    normIncGammaPContinued (n+1) z=1-exp (-z)*Elementary.expPartialSum n z := by
   rw [normIncGammaPContinued_eq (natCast_add_one_ne_neg_nat n), normIncGammaP_nat_succ n hz]
   rfl
 
 /-- Identity under the stated parameter and domain assumptions: `normIncGammaQContinued (n+1)
-z=exp (-z)*expPartialSum n z`. -/
+z=exp (-z)*Elementary.expPartialSum n z`. -/
 @[dlmf 8.4.E10]
 theorem normIncGammaQContinued_nat_succ_expPartialSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
-    normIncGammaQContinued (n+1) z=exp (-z)*expPartialSum n z := by
+    normIncGammaQContinued (n+1) z=exp (-z)*Elementary.expPartialSum n z := by
   rw [normIncGammaQContinued_eq (natCast_add_one_ne_neg_nat n) hz, normIncGammaQ_nat_succ n hz]
   rfl
 
@@ -186,7 +202,7 @@ theorem upperIncGamma_neg_nat_hasSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     rw [← hasSum_nat_add_iff' 1]
     simp only [Finset.sum_range_one, ↓reduceIte, sub_zero, Nat.cast_zero, zpow_zero, one_mul,
       pow_zero, Nat.factorial_zero, Nat.cast_one, div_one, zero_add, neg_zero,
-      upperIncGamma_zero_E1 hz, expIntE1_eq_Ein_complex hz, digamma_one]
+      upperIncGamma_zero_E1, expIntE1_eq_Ein_complex hz, digamma_one]
     have h := (hasSum_Ein_complex z).neg
     convert h using 1
     · funext k

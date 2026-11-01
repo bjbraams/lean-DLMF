@@ -9,12 +9,28 @@ public import DLMF.BernoulliEuler.Properties
 public import Mathlib.Algebra.Group.ForwardDiff
 
 /-!
-# Bernoulli and Euler numbers and polynomials: explicit formulas (DLMF §24.6)
+# Bernoulli and Euler numbers and polynomials: explicit formulas
 
-DLMF §24.6.p1: the identities hold for `n = 1, 2, …`; 24.6.7, 24.6.8, 24.6.10 and 24.6.12 also
-for `n = 0`. Each statement below carries exactly that range (24.6.9 is stated for all `n`,
-which is stronger than DLMF: with Lean's `0⁰ = 1` it also holds for `n = 0`). All formulas were
-checked in exact rational arithmetic for `n ≤ 11`; the small cases excluded by DLMF fail.
+This file proves the explicit formulas of DLMF §24.6 for the Bernoulli and Euler numbers and
+polynomials as finite double sums of powers.
+
+## Main results
+
+* `bernoulli_two_mul_eq_explicit₁`, `bernoulli_eq_explicit₂`, `bernoulli_two_mul_eq_explicit₃`:
+  DLMF 24.6.1–24.6.3.
+* `eulerNumber_two_mul_eq_explicit₄`, `eulerNumber_two_mul_eq_explicit₅`,
+  `eulerNumber_two_mul_eq_explicit₆`: DLMF 24.6.4–24.6.6.
+* `bernoulliPolyB_eq_explicit`, `eulerPolyE_eq_explicit`: DLMF 24.6.7, 24.6.8 (complex `x`).
+* `bernoulli_eq_explicit₉`, `eulerNumber_eq_explicit₁₀`, `bernoulli_eq_explicit₁₁`,
+  `eulerNumber_two_mul_eq_explicit₁₂`: DLMF 24.6.9–24.6.12.
+* `eulerPolyE_eq_newton_series`: the Euler polynomials as a Newton series.
+
+## Implementation notes
+
+DLMF §24.6 states the identities for `n = 1, 2, …`, and 24.6.7, 24.6.8, 24.6.10 and 24.6.12
+also for `n = 0`. Each statement carries exactly that range, except that 24.6.9 is stated for all
+`n`, which is stronger than DLMF: with Lean's `0⁰ = 1` it also holds for `n = 0`. All formulas
+were checked in exact rational arithmetic for `n ≤ 11`; the small cases excluded by DLMF fail.
 Powers `jⁿ` with `j = 0` use `0⁰ = 1`, as the printed sums require.
 -/
 
@@ -33,7 +49,7 @@ namespace DLMF.BernoulliEuler
 /-- The `N`-th finite difference of a polynomial of degree `< N` vanishes:
 `∑_{k=0}^{N} (-1)ᵏ (N choose k) P(k) = 0`. -/
 
-lemma q24a_alt_sum_poly_eq_zero (c : ℕ → ℂ) (N : ℕ) :
+private lemma sum_alt_choose_mul_poly_eq_zero (c : ℕ → ℂ) (N : ℕ) :
     ∑ k ∈ range (N + 1), (-1 : ℂ) ^ k * (N.choose k : ℂ) *
       ∑ i ∈ range N, c i * (k : ℂ) ^ i = 0 := by
   have h := congrFun (fwdDiff_iter_sum_mul_pow_eq_zero (R := ℂ) (n := N) c) 0
@@ -51,15 +67,15 @@ lemma q24a_alt_sum_poly_eq_zero (c : ℕ → ℂ) (N : ℕ) :
   rw [this, h, mul_zero]
 /-- Variant for a function given by a polynomial of degree `< N` at the integers. -/
 
-lemma q24a_alt_sum_eq_zero_of_poly (f : ℕ → ℂ) (c : ℕ → ℂ) (N : ℕ)
+private lemma sum_alt_choose_mul_eq_zero_of_poly (f : ℕ → ℂ) (c : ℕ → ℂ) (N : ℕ)
     (hf : ∀ k, f k = ∑ i ∈ range N, c i * (k : ℂ) ^ i) :
     ∑ k ∈ range (N + 1), (-1 : ℂ) ^ k * (N.choose k : ℂ) * f k = 0 := by
-  simp only [hf]; exact q24a_alt_sum_poly_eq_zero c N
+  simp only [hf]; exact sum_alt_choose_mul_poly_eq_zero c N
 /-- `∑_{j=0}^{k} (-1)ʲ (k choose j) (x + j)ᵐ = 0` for `m < k`. -/
 
-theorem q24a_alt_sum_pow_eq_zero (x : ℂ) {m k : ℕ} (hmk : m < k) :
+theorem sum_alt_choose_mul_add_pow_eq_zero (x : ℂ) {m k : ℕ} (hmk : m < k) :
     ∑ j ∈ range (k + 1), (-1 : ℂ) ^ j * (k.choose j : ℂ) * (x + j) ^ m = 0 := by
-  refine q24a_alt_sum_eq_zero_of_poly _
+  refine sum_alt_choose_mul_eq_zero_of_poly _
     (fun i => if i ≤ m then (m.choose i : ℂ) * x ^ (m - i) else 0) k
     fun j => ?_
   rw [add_comm, add_pow]
@@ -71,7 +87,7 @@ theorem q24a_alt_sum_pow_eq_zero (x : ℂ) {m k : ℕ} (hmk : m < k) :
   simp only [hi', ↓reduceIte]; ring
 /-- Alternating binomial sums as iterated forward differences. -/
 
-lemma q24a_alt_sum_eq_fwdDiff (f : ℂ → ℂ) (k : ℕ) (x : ℂ) :
+private lemma sum_alt_choose_mul_eq_fwdDiff_iter (f : ℂ → ℂ) (k : ℕ) (x : ℂ) :
     ∑ j ∈ range (k + 1), (-1 : ℂ) ^ j * (k.choose j : ℂ) * f (x + j) =
       (-1) ^ k * (fwdDiff 1)^[k] f x := by
   rw [fwdDiff_iter_eq_sum_shift, mul_sum]
@@ -83,30 +99,30 @@ lemma q24a_alt_sum_eq_fwdDiff (f : ℂ → ℂ) (k : ℕ) (x : ℂ) :
   norm_num
 /-- `Δᵏf(x+1) = Δᵏ⁺¹f(x) + Δᵏf(x)`. -/
 
-lemma q24a_fwdDiff_iter_add_one (f : ℂ → ℂ) (k : ℕ) (x : ℂ) :
+private lemma fwdDiff_iter_apply_add_one (f : ℂ → ℂ) (k : ℕ) (x : ℂ) :
     (fwdDiff 1)^[k] f (x + 1) = (fwdDiff 1)^[k + 1] f x + (fwdDiff 1)^[k] f x := by
   rw [Function.iterate_succ_apply', fwdDiff]; ring
 
 /-- The alternating sums `c(k, m) = ∑_{j=0}^{k} (-1)ʲ (k choose j) jᵐ` (`= (-1)ᵏ k! S(m, k)`). -/
-noncomputable def q24a_c (k m : ℕ) : ℂ :=
+noncomputable def altBinomialPowSum (k m : ℕ) : ℂ :=
   ∑ j ∈ range (k + 1), (-1 : ℂ) ^ j * (k.choose j : ℂ) * (j : ℂ) ^ m
 
 /-- `c(k, m) = 0` for `m < k`. -/
 
-lemma q24a_c_eq_zero {k m : ℕ} (h : m < k) : q24a_c k m = 0 := by
-  have := q24a_alt_sum_pow_eq_zero 0 h
-  simpa [q24a_c] using this
+private lemma altBinomialPowSum_eq_zero_of_lt {k m : ℕ} (h : m < k) : altBinomialPowSum k m = 0 := by
+  have := sum_alt_choose_mul_add_pow_eq_zero 0 h
+  simpa [altBinomialPowSum] using this
 
 /-- Extending a binomial-weighted sum beyond `k`. -/
 
-lemma q24a_sum_choose_extend (a : ℕ → ℂ) {k M : ℕ} (h : k + 1 ≤ M) :
+private lemma sum_range_choose_mul_extend (a : ℕ → ℂ) {k M : ℕ} (h : k + 1 ≤ M) :
     ∑ j ∈ range (k + 1), (k.choose j : ℂ) * a j = ∑ j ∈ range M, (k.choose j : ℂ) * a j := by
   refine sum_subset (range_subset_range.mpr h) fun j _ hj => ?_
   rw [Nat.choose_eq_zero_of_lt (by simpa using hj)]; simp
 
 /-- Hockey stick: `∑_{k<N} (k choose j) = (N choose j+1)`. -/
 
-lemma q24a_sum_range_choose (N j : ℕ) :
+private lemma sum_range_choose_eq_choose_succ (N j : ℕ) :
     ∑ k ∈ range N, (k.choose j : ℂ) = (N.choose (j + 1) : ℂ) := by
   induction N with
   | zero => simp
@@ -114,15 +130,15 @@ lemma q24a_sum_range_choose (N j : ℕ) :
 
 /-- Pascal recursion for `c`: `∑_j (-1)ʲ (k choose j)(j+1)ᴺ = c(k, N) - c(k+1, N)`. -/
 
-lemma q24a_c_shift (k N : ℕ) :
+private lemma sum_alt_choose_mul_succ_pow_eq_sub (k N : ℕ) :
     ∑ j ∈ range (k + 1), (-1 : ℂ) ^ j * (k.choose j : ℂ) * ((j : ℂ) + 1) ^ N =
-      q24a_c k N - q24a_c (k + 1) N := by
-  have h1 := q24a_alt_sum_eq_fwdDiff (fun y => y ^ N) k (0 + 1)
-  have h2 := q24a_alt_sum_eq_fwdDiff (fun y => y ^ N) k 0
-  have h3 := q24a_alt_sum_eq_fwdDiff (fun y => y ^ N) (k + 1) 0
-  rw [q24a_fwdDiff_iter_add_one] at h1
+      altBinomialPowSum k N - altBinomialPowSum (k + 1) N := by
+  have h1 := sum_alt_choose_mul_eq_fwdDiff_iter (fun y => y ^ N) k (0 + 1)
+  have h2 := sum_alt_choose_mul_eq_fwdDiff_iter (fun y => y ^ N) k 0
+  have h3 := sum_alt_choose_mul_eq_fwdDiff_iter (fun y => y ^ N) (k + 1) 0
+  rw [fwdDiff_iter_apply_add_one] at h1
   simp only [zero_add] at h1 h2 h3
-  simp only [q24a_c]
+  simp only [altBinomialPowSum]
   rw [show ∑ j ∈ range (k + 1), (-1 : ℂ) ^ j * (k.choose j : ℂ) * ((j : ℂ) + 1) ^ N =
     ∑ j ∈ range (k + 1), (-1 : ℂ) ^ j * (k.choose j : ℂ) * (1 + (j : ℂ)) ^ N by
       simp only [add_comm (1 : ℂ)], h1, h2, h3, pow_succ]
@@ -130,14 +146,14 @@ lemma q24a_c_shift (k N : ℕ) :
 
 /-- Newton's `log(1 + Δ) = D` at `0`: `∑_{k=1}^{N} c(k, N)/k = -[N = 1]` for `N ≥ 1`. -/
 
-lemma q24a_sum_c_div (N : ℕ) (hN : 1 ≤ N) :
-    ∑ k ∈ range N, q24a_c (k + 1) N / (k + 1) = if N = 1 then -1 else 0 := by
-  have hext : ∀ k ∈ range N, q24a_c (k + 1) N / (k + 1) =
+private lemma sum_altBinomialPowSum_div (N : ℕ) (hN : 1 ≤ N) :
+    ∑ k ∈ range N, altBinomialPowSum (k + 1) N / (k + 1) = if N = 1 then -1 else 0 := by
+  have hext : ∀ k ∈ range N, altBinomialPowSum (k + 1) N / (k + 1) =
       ∑ j ∈ range (N + 1), (-1 : ℂ) ^ j * (j : ℂ) ^ N * ((k + 1).choose j / (k + 1)) := by
     intro k hk
     have hk' := mem_range.mp hk
-    rw [q24a_c, sum_div]
-    have := q24a_sum_choose_extend (k := k + 1) (M := N + 1)
+    rw [altBinomialPowSum, sum_div]
+    have := sum_range_choose_mul_extend (k := k + 1) (M := N + 1)
       (fun j => (-1 : ℂ) ^ j * (j : ℂ) ^ N / ((k : ℂ) + 1)) (by omega)
     rw [show ∑ j ∈ range (k + 1 + 1), (-1 : ℂ) ^ j * ((k + 1).choose j : ℂ) * (j : ℂ) ^ N /
         ((k : ℂ) + 1) = ∑ j ∈ range (k + 1 + 1), ((k + 1).choose j : ℂ) *
@@ -159,7 +175,7 @@ lemma q24a_sum_c_div (N : ℕ) (hN : 1 ≤ N) :
       have hi1 : (i : ℂ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero i
       field_simp
       linear_combination (-1 : ℂ) * this
-    rw [← mul_sum, sum_congr rfl hc, ← sum_div, q24a_sum_range_choose]
+    rw [← mul_sum, sum_congr rfl hc, ← sum_div, sum_range_choose_eq_choose_succ]
     have hi1 : ((i + 1 : ℕ) : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
     rw [show N = N - 1 + 1 by omega, pow_succ]
     rw [show N - 1 + 1 - 1 = N - 1 by omega]
@@ -168,8 +184,8 @@ lemma q24a_sum_c_div (N : ℕ) (hN : 1 ≤ N) :
     ring
   rw [sum_congr rfl hj]
   -- this is `c(N, N-1)` minus its `j = 0` term
-  have h0 := q24a_c_eq_zero (k := N) (m := N - 1) (by omega)
-  rw [q24a_c, sum_range_succ'] at h0
+  have h0 := altBinomialPowSum_eq_zero_of_lt (k := N) (m := N - 1) (by omega)
+  rw [altBinomialPowSum, sum_range_succ'] at h0
   simp only [Nat.cast_zero, pow_zero, Nat.choose_zero_right, Nat.cast_one, one_mul] at h0
   rcases Nat.lt_or_ge 1 N with h | h
   · simp only [show N ≠ 1 by omega, ↓reduceIte]
@@ -180,12 +196,12 @@ lemma q24a_sum_c_div (N : ℕ) (hN : 1 ≤ N) :
 
 /-- `∑_{m<N} (N choose m) c(k, m) = -c(k+1, N)`. -/
 
-lemma q24a_sum_choose_c (k N : ℕ) :
-    ∑ m ∈ range N, (N.choose m : ℂ) * q24a_c k m = -q24a_c (k + 1) N := by
-  rw [show -q24a_c (k + 1) N = (q24a_c k N - q24a_c (k + 1) N) - q24a_c k N by ring,
-    ← q24a_c_shift]
-  conv_lhs => simp only [q24a_c, mul_sum]
-  rw [sum_comm, q24a_c, ← sum_sub_distrib]
+private lemma sum_choose_mul_altBinomialPowSum (k N : ℕ) :
+    ∑ m ∈ range N, (N.choose m : ℂ) * altBinomialPowSum k m = -altBinomialPowSum (k + 1) N := by
+  rw [show -altBinomialPowSum (k + 1) N = (altBinomialPowSum k N - altBinomialPowSum (k + 1) N) - altBinomialPowSum k N by ring,
+    ← sum_alt_choose_mul_succ_pow_eq_sub]
+  conv_lhs => simp only [altBinomialPowSum, mul_sum]
+  rw [sum_comm, altBinomialPowSum, ← sum_sub_distrib]
   refine sum_congr rfl fun j _ => ?_
   have h := add_pow (j : ℂ) 1 N
   rw [sum_range_succ] at h
@@ -194,43 +210,43 @@ lemma q24a_sum_choose_c (k N : ℕ) :
   exact sum_congr rfl fun m _ => by ring
 
 /-- The Newton-series values `β_m = ∑_{k ≤ m} c(k, m)/(k+1)`. -/
-noncomputable def q24a_beta (m : ℕ) : ℂ := ∑ k ∈ range (m + 1), q24a_c k m / (k + 1)
+noncomputable def newtonBernoulli (m : ℕ) : ℂ := ∑ k ∈ range (m + 1), altBinomialPowSum k m / (k + 1)
 
 /-- The range of `β_m` may be extended. -/
 
-lemma q24a_beta_extend {m M : ℕ} (h : m + 1 ≤ M) :
-    q24a_beta m = ∑ k ∈ range M, q24a_c k m / (k + 1) := by
+private lemma newtonBernoulli_eq_sum_range {m M : ℕ} (h : m + 1 ≤ M) :
+    newtonBernoulli m = ∑ k ∈ range M, altBinomialPowSum k m / (k + 1) := by
   refine sum_subset (range_subset_range.mpr h) fun k _ hk => ?_
-  rw [q24a_c_eq_zero (by simpa using hk), zero_div]
+  rw [altBinomialPowSum_eq_zero_of_lt (by simpa using hk), zero_div]
 
 /-- `β` satisfies the Bernoulli recurrence `∑_{m<N} (N choose m) β_m = [N = 1]`. -/
 
-lemma q24a_sum_choose_beta (N : ℕ) (hN : 1 ≤ N) :
-    ∑ m ∈ range N, (N.choose m : ℂ) * q24a_beta m = if N = 1 then 1 else 0 := by
-  rw [sum_congr rfl fun m hm => by rw [q24a_beta_extend (M := N) (by simpa using hm)]]
+private lemma sum_choose_mul_newtonBernoulli (N : ℕ) (hN : 1 ≤ N) :
+    ∑ m ∈ range N, (N.choose m : ℂ) * newtonBernoulli m = if N = 1 then 1 else 0 := by
+  rw [sum_congr rfl fun m hm => by rw [newtonBernoulli_eq_sum_range (M := N) (by simpa using hm)]]
   simp only [mul_sum]
   rw [sum_comm]
-  have : ∀ k ∈ range N, ∑ m ∈ range N, (N.choose m : ℂ) * (q24a_c k m / (k + 1)) =
-      -(q24a_c (k + 1) N / (k + 1)) := by
+  have : ∀ k ∈ range N, ∑ m ∈ range N, (N.choose m : ℂ) * (altBinomialPowSum k m / (k + 1)) =
+      -(altBinomialPowSum (k + 1) N / (k + 1)) := by
     intro k _
-    rw [← neg_div, ← q24a_sum_choose_c, sum_div]
+    rw [← neg_div, ← sum_choose_mul_altBinomialPowSum, sum_div]
     exact sum_congr rfl fun m _ => by ring
-  rw [sum_congr rfl this, sum_neg_distrib, q24a_sum_c_div N hN]
+  rw [sum_congr rfl this, sum_neg_distrib, sum_altBinomialPowSum_div N hN]
   split_ifs <;> simp
 
 /-- `β_n = Bₙ`. -/
 
-lemma q24a_beta_eq (n : ℕ) : q24a_beta n = bernoulli n := by
+private lemma newtonBernoulli_eq_bernoulli (n : ℕ) : newtonBernoulli n = bernoulli n := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
-    have h1 := q24a_sum_choose_beta (n + 1) (by omega)
+    have h1 := sum_choose_mul_newtonBernoulli (n + 1) (by omega)
     have h2 := sum_bernoulli (n + 1)
     have h2' : ∑ k ∈ range (n + 1), ((n + 1).choose k : ℂ) * (bernoulli k : ℂ) =
         if n + 1 = 1 then 1 else 0 := by
       have := congrArg (Rat.cast : ℚ → ℂ) h2; push_cast at this; rw [this]
       by_cases h : n = 0 <;> simp [h]
     rw [sum_range_succ, Nat.choose_succ_self_right] at h1 h2'
-    have : ∑ x ∈ range n, ((n + 1).choose x : ℂ) * q24a_beta x =
+    have : ∑ x ∈ range n, ((n + 1).choose x : ℂ) * newtonBernoulli x =
         ∑ x ∈ range n, ((n + 1).choose x : ℂ) * (bernoulli x : ℂ) :=
       sum_congr rfl fun m hm => by rw [ih m (mem_range.mp hm)]
     rw [this] at h1
@@ -238,9 +254,9 @@ lemma q24a_beta_eq (n : ℕ) : q24a_beta n = bernoulli n := by
     exact mul_left_cancel₀ hn (by linear_combination h1 - h2')
 
 /-- `∑_{k=0}^{n+1} (-1)ᵏ (n+1 choose k) Eₙ(x + k) = 0`. -/
-lemma q24a_alt_sum_eulerPolyE (n : ℕ) (x : ℂ) :
+private lemma sum_alt_choose_mul_eulerPolyE_add (n : ℕ) (x : ℂ) :
     ∑ k ∈ range (n + 2), (-1 : ℂ) ^ k * ((n + 1).choose k : ℂ) * eulerPolyE n (x + k) = 0 := by
-  refine q24a_alt_sum_eq_zero_of_poly _ (fun i => (n.choose (n - i) : ℂ) * eulerPolyE (n - i) x)
+  refine sum_alt_choose_mul_eq_zero_of_poly _ (fun i => (n.choose (n - i) : ℂ) * eulerPolyE (n - i) x)
     (n + 1) fun j => ?_
   rw [eulerPolyE_add, ← sum_range_reflect]
   refine sum_congr rfl fun i hi => ?_
@@ -248,9 +264,9 @@ lemma q24a_alt_sum_eulerPolyE (n : ℕ) (x : ℂ) :
   rw [show n + 1 - 1 - i = n - i by omega, Nat.sub_sub_self hi']
 
 /-- `∑_{k=0}^{n+1} (-1)ᵏ (n+1 choose k) Bₙ(x + k) = 0`. -/
-lemma q24a_alt_sum_bernoulliPolyB (n : ℕ) (x : ℂ) :
+private lemma sum_alt_choose_mul_bernoulliPolyB_add (n : ℕ) (x : ℂ) :
     ∑ k ∈ range (n + 2), (-1 : ℂ) ^ k * ((n + 1).choose k : ℂ) * bernoulliPolyB n (x + k) = 0 := by
-  refine q24a_alt_sum_eq_zero_of_poly _
+  refine sum_alt_choose_mul_eq_zero_of_poly _
     (fun i => (n.choose (n - i) : ℂ) * bernoulliPolyB (n - i) x) (n + 1) fun j => ?_
   rw [bernoulliPolyB_add, ← sum_range_reflect]
   refine sum_congr rfl fun i hi => ?_
@@ -258,7 +274,7 @@ lemma q24a_alt_sum_bernoulliPolyB (n : ℕ) (x : ℂ) :
   rw [show n + 1 - 1 - i = n - i by omega, Nat.sub_sub_self hi']
 
 /-- Reindexing `Icc 1 n` to `range n`. -/
-lemma q24a_sum_Icc_one' {M : Type*} [AddCommMonoid M] (f : ℕ → M) (n : ℕ) :
+private lemma sum_Icc_one_eq_sum_range' {M : Type*} [AddCommMonoid M] (f : ℕ → M) (n : ℕ) :
     ∑ k ∈ Icc 1 n, f k = ∑ k ∈ range n, f (k + 1) := by
   induction n with
   | zero => simp
@@ -266,7 +282,7 @@ lemma q24a_sum_Icc_one' {M : Type*} [AddCommMonoid M] (f : ℕ → M) (n : ℕ) 
 
 /-- **Euler polynomials as a Newton series**: `Eₘ(x) = ∑_{k=0}^{m} 2⁻ᵏ ∑_{j=0}^{k} (-1)ʲ
 (k choose j) (x + j)ᵐ`. -/
-theorem q24a_eulerPolyE_newton (m : ℕ) (x : ℂ) :
+theorem eulerPolyE_eq_newton_series (m : ℕ) (x : ℂ) :
     eulerPolyE m x = ∑ k ∈ range (m + 1), 1 / (2 : ℂ) ^ k *
       ∑ j ∈ range (k + 1), (-1 : ℂ) ^ j * (k.choose j : ℂ) * (x + j) ^ m := by
   set g : ℂ → ℂ := fun y => y ^ m
@@ -274,7 +290,7 @@ theorem q24a_eulerPolyE_newton (m : ℕ) (x : ℂ) :
       ∑ j ∈ range (k + 1), (-1 : ℂ) ^ j * (k.choose j : ℂ) * (z + j) ^ m =
       ∑ k ∈ range (m + 1), (-1 / 2 : ℂ) ^ k * (fwdDiff 1)^[k] g z := by
     intro z; refine sum_congr rfl fun k _ => ?_
-    rw [q24a_alt_sum_eq_fwdDiff g k z, div_pow, one_div]; ring
+    rw [sum_alt_choose_mul_eq_fwdDiff_iter g k z, div_pow, one_div]; ring
   rw [hQ]
   set Qp : ℂ[X] := ∑ k ∈ range (m + 1), Polynomial.C ((-1 / 2 : ℂ) ^ k) *
     ∑ j ∈ range (k + 1), Polynomial.C ((((-1 : ℤ) ^ (k - j) * (k.choose j : ℤ) : ℤ) : ℂ)) *
@@ -289,9 +305,9 @@ theorem q24a_eulerPolyE_newton (m : ℕ) (x : ℂ) :
     refine sum_congr rfl fun j _ => ?_
     rw [zsmul_eq_mul, nsmul_eq_mul, mul_one]
   set Ep : ℂ[X] := (Polynomial.euler m).map (algebraMap ℚ ℂ)
-  have hEp : ∀ z, Ep.eval z = eulerPolyE m z := fun z => (b24a_aeval_eq_eval_map _ z).symm
+  have hEp : ∀ z, Ep.eval z = eulerPolyE m z := fun z => (aeval_complex_eq_eval_map _ z).symm
   have hzero : Qp - Ep = 0 := by
-    refine b24a_eq_zero_of_add_add_self (h := 1) one_ne_zero fun z => ?_
+    refine polynomial_eq_zero_of_eval_add_add_eval (h := 1) one_ne_zero fun z => ?_
     simp only [Polynomial.eval_sub, hQp, hEp]
     have h1 := eulerPolyE_add_one_add m z
     have h2 : ∑ k ∈ range (m + 1), (-1 / 2 : ℂ) ^ k * (fwdDiff 1)^[k] g (z + 1) +
@@ -301,7 +317,7 @@ theorem q24a_eulerPolyE_newton (m : ℕ) (x : ℂ) :
           (-1 / 2 : ℂ) ^ k * (fwdDiff 1)^[k] g z =
           2 * ((-1 / 2 : ℂ) ^ k * (fwdDiff 1)^[k] g z -
             (-1 / 2 : ℂ) ^ (k + 1) * (fwdDiff 1)^[k + 1] g z) := by
-        intro k _; rw [q24a_fwdDiff_iter_add_one, pow_succ]; ring
+        intro k _; rw [fwdDiff_iter_apply_add_one, pow_succ]; ring
       rw [sum_congr rfl this, ← mul_sum, sum_range_sub']
       have h0 : (fwdDiff 1)^[m + 1] g = 0 := fwdDiff_iter_pow_eq_zero_of_lt (Nat.lt_succ_self m)
       rw [h0]; simp [g]
@@ -312,13 +328,13 @@ theorem q24a_eulerPolyE_newton (m : ℕ) (x : ℂ) :
 
 /-- Faulhaber: `∑_{j=1}^{k-1} jᴺ = k ∑_{e=0}^{N} cₑ kᵉ`, `cₑ = B_{N-e} (N+1 choose N-e)/(N+1)`,
 `N ≥ 1`. -/
-lemma r24a_sum_pow_eq_mul_poly {N : ℕ} (hN : 1 ≤ N) (k : ℕ) :
+private lemma sum_Icc_pow_eq_mul_sum_bernoulli {N : ℕ} (hN : 1 ≤ N) (k : ℕ) :
     ∑ j ∈ Icc 1 (k - 1), (j : ℚ) ^ N = k * ∑ e ∈ range (N + 1),
       bernoulli (N - e) * ((N + 1).choose (N - e) : ℚ) / (N + 1) * (k : ℚ) ^ e := by
   have h1 : ∑ j ∈ Icc 1 (k - 1), (j : ℚ) ^ N = ∑ j ∈ range k, (j : ℚ) ^ N := by
     rcases k with _ | m
     · simp
-    · rw [sum_range_succ', q24a_sum_Icc_one]; simp [show N ≠ 0 by omega]
+    · rw [sum_range_succ', sum_Icc_one_eq_sum_range]; simp [show N ≠ 0 by omega]
   rw [h1, sum_range_pow, ← sum_range_reflect, mul_sum]
   refine sum_congr rfl fun e he => ?_
   have he' : e ≤ N := Nat.lt_succ_iff.mp (mem_range.mp he)
@@ -336,7 +352,7 @@ theorem bernoulli_two_mul_eq_explicit₁ {n : ℕ} (hn : 1 ≤ n) :
   set c : ℕ → ℚ := fun e => bernoulli (N - e) * ((N + 1).choose (N - e) : ℚ) / (N + 1)
   set F : ℕ → ℚ := fun k => ∑ e ∈ range (N + 1), c e * (k : ℚ) ^ e
   have hz : ∑ k ∈ range (N + 1 + 1), (-1 : ℚ) ^ k * ((N + 1).choose k : ℚ) * F k = 0 := by
-    have := q24a_alt_sum_eq_zero_of_poly (fun k => ((F k : ℚ) : ℂ)) (fun e => (c e : ℂ)) (N + 1)
+    have := sum_alt_choose_mul_eq_zero_of_poly (fun k => ((F k : ℚ) : ℂ)) (fun e => (c e : ℂ)) (N + 1)
       (fun k => by simp only [F]; push_cast; rfl)
     exact_mod_cast this
   have hF0 : F 0 = bernoulli N := by
@@ -353,12 +369,12 @@ theorem bernoulli_two_mul_eq_explicit₁ {n : ℕ} (hn : 1 ≤ n) :
       ∑ j ∈ Icc 1 (k - 1), (j : ℚ) ^ N = ∑ k ∈ Icc 1 (N + 1), ((-1 : ℚ) ^ (k - 1) / k) *
       ((N + 1).choose k : ℚ) * ∑ j ∈ Icc 1 (k - 1), (j : ℚ) ^ N := by
     rw [hIcc, sum_insert (by simp)]; simp
-  rw [h1, q24a_sum_Icc_one]
+  rw [h1, sum_Icc_one_eq_sum_range]
   have h2 : ∀ k ∈ range (N + 1), ((-1 : ℚ) ^ (k + 1 - 1) / ((k + 1 : ℕ) : ℚ)) *
       ((N + 1).choose (k + 1) : ℚ) * ∑ j ∈ Icc 1 (k + 1 - 1), (j : ℚ) ^ N =
       -((-1 : ℚ) ^ (k + 1) * ((N + 1).choose (k + 1) : ℚ) * F (k + 1)) := by
     intro k _
-    rw [r24a_sum_pow_eq_mul_poly hN]
+    rw [sum_Icc_pow_eq_mul_sum_bernoulli hN]
     have : ((k + 1 : ℕ) : ℚ) ≠ 0 := by positivity
     simp only [F, c, Nat.add_sub_cancel, pow_succ]
     field_simp
@@ -368,20 +384,20 @@ theorem bernoulli_two_mul_eq_explicit₁ {n : ℕ} (hn : 1 ≤ n) :
 /-! ### Helpers for 24.6.2: Eulerian sums -/
 
 /-- Hockey stick over a range: `∑_{i ≤ N} (i choose a) = (N+1 choose a+1)`. -/
-lemma s24a_sum_range_choose (N a : ℕ) :
+private lemma sum_range_add_one_choose_eq_choose (N a : ℕ) :
     ∑ i ∈ range (N + 1), i.choose a = (N + 1).choose (a + 1) := by
   induction N with
   | zero => cases a <;> simp [Nat.choose_eq_zero_of_lt]
   | succ N ih => rw [sum_range_succ, ih, Nat.choose_succ_succ (N + 1) a, add_comm]
 
 /-- Upper Chu–Vandermonde: `∑_{i ≤ n} (i choose a)(n-i choose b) = (n+1 choose a+b+1)`. -/
-lemma s24a_upper_vandermonde (n a b : ℕ) :
+private lemma sum_range_choose_mul_choose_sub (n a b : ℕ) :
     ∑ i ∈ range (n + 1), i.choose a * (n - i).choose b = (n + 1).choose (a + b + 1) := by
   induction n generalizing b with
   | zero => cases a <;> cases b <;> simp [Nat.choose_eq_zero_of_lt]
   | succ n ih =>
     cases b with
-    | zero => simpa using s24a_sum_range_choose (n + 1) a
+    | zero => simpa using sum_range_add_one_choose_eq_choose (n + 1) a
     | succ b =>
       rw [sum_range_succ, Nat.sub_self, Nat.choose_zero_succ, mul_zero, add_zero]
       have : ∀ i ∈ range (n + 1), i.choose a * (n + 1 - i).choose (b + 1) =
@@ -397,7 +413,7 @@ lemma s24a_upper_vandermonde (n a b : ℕ) :
 `∑_{j=1}^{k} (-1)^j jⁿ (n+1 choose k-j) =
 ∑_{i=0}^{k} (n-i choose k-i) ∑_{j=0}^{i} (-1)^j (i choose j) jⁿ`
 for `1 ≤ n`, `k ≤ n`. -/
-lemma s24a_eulerian_expand {n k : ℕ} (hn : 1 ≤ n) (hk : k ≤ n) :
+private lemma sum_Icc_alt_pow_mul_choose_eq_sum {n k : ℕ} (hn : 1 ≤ n) (hk : k ≤ n) :
     ∑ j ∈ Icc 1 k, (-1 : ℚ) ^ j * (j : ℚ) ^ n * ((n + 1).choose (k - j) : ℚ) =
       ∑ i ∈ range (k + 1), ((n - i).choose (k - i) : ℚ) *
         ∑ j ∈ range (i + 1), (-1 : ℚ) ^ j * (i.choose j : ℚ) * (j : ℚ) ^ n := by
@@ -431,7 +447,7 @@ lemma s24a_eulerian_expand {n k : ℕ} (hn : 1 ≤ n) (hk : k ≤ n) :
       · intro i hi hi'
         simp only [mem_range] at hi hi'
         rw [Nat.choose_eq_zero_of_lt (show n - i < n - k by omega), mul_zero]
-    have h2 := s24a_upper_vandermonde n j (n - k)
+    have h2 := sum_range_choose_mul_choose_sub n j (n - k)
     rw [show j + (n - k) + 1 = n + 1 - (k - j) by omega, Nat.choose_symm (by omega)] at h2
     exact_mod_cast h1.trans h2
   rw [← hV, mul_sum]
@@ -444,11 +460,11 @@ lemma s24a_eulerian_expand {n k : ℕ} (hn : 1 ≤ n) (hk : k ≤ n) :
 theorem bernoulli_eq_explicit₉ (n : ℕ) :
     bernoulli n = ∑ k ∈ range (n + 1), 1 / ((k : ℚ) + 1) *
       ∑ j ∈ range (k + 1), (-1 : ℚ) ^ j * (k.choose j : ℚ) * (j : ℚ) ^ n := by
-  have h := q24a_beta_eq n
+  have h := newtonBernoulli_eq_bernoulli n
   have : ((bernoulli n : ℚ) : ℂ) = ((∑ k ∈ range (n + 1), 1 / ((k : ℚ) + 1) *
       ∑ j ∈ range (k + 1), (-1 : ℚ) ^ j * (k.choose j : ℚ) * (j : ℚ) ^ n : ℚ) : ℂ) := by
-    rw [← h, q24a_beta]; push_cast
-    exact sum_congr rfl fun k _ => by rw [q24a_c]; ring
+    rw [← h, newtonBernoulli]; push_cast
+    exact sum_congr rfl fun k _ => by rw [altBinomialPowSum]; ring
   exact_mod_cast this
 
 /-- **DLMF 24.6.2**: `Bₙ = 1/(n+1) ∑_{k=1}^{n} ∑_{j=1}^{k} (-1)ʲ jⁿ (n+1 choose k-j)/(n choose k)`,
@@ -464,7 +480,7 @@ theorem bernoulli_eq_explicit₂ {n : ℕ} (hn : 1 ≤ n) :
       ∑ i ∈ range (n + 1), (k.choose i : ℚ) / (n.choose i : ℚ) * T i := by
     intro k hk
     have hkn : k ≤ n := (mem_Icc.mp hk).2
-    rw [s24a_eulerian_expand hn hkn, sum_div]
+    rw [sum_Icc_alt_pow_mul_choose_eq_sum hn hkn, sum_div]
     rw [← sum_subset (range_subset_range.mpr (show k + 1 ≤ n + 1 by omega))]
     · refine sum_congr rfl fun i hi => ?_
       have hik : i ≤ k := Nat.lt_succ_iff.mp (mem_range.mp hi)
@@ -486,9 +502,9 @@ theorem bernoulli_eq_explicit₂ {n : ℕ} (hn : 1 ≤ n) :
   rcases Nat.eq_zero_or_pos i with rfl | hi0
   · simp [hT0, show n ≠ 0 by omega]
   have hs : ∑ k ∈ Icc 1 n, (k.choose i : ℚ) = ((n + 1).choose (i + 1) : ℚ) := by
-    have := s24a_sum_range_choose n i
+    have := sum_range_add_one_choose_eq_choose n i
     rw [sum_range_succ', Nat.choose_eq_zero_of_lt hi0, add_zero] at this
-    rw [q24a_sum_Icc_one']
+    rw [sum_Icc_one_eq_sum_range']
     exact_mod_cast this
   have hsc := Nat.add_one_mul_choose_eq n i
   have hsc' : ((n : ℚ) + 1) * (n.choose i : ℚ) =
@@ -516,7 +532,7 @@ section
 open Polynomial
 
 /-- A rational polynomial with `H(x+1) + H(x-1) = 0` for all `x` vanishes. -/
-lemma r24a_poly_eq_zero_of_add_shift {H : ℚ[X]}
+private lemma eq_zero_of_eval_add_one_add_eval_sub_one {H : ℚ[X]}
     (h : ∀ x : ℚ, H.eval (x + 1) + H.eval (x - 1) = 0) : H = 0 := by
   have h2 : ∀ x : ℚ, H.eval (x + 2) = -H.eval x := fun x => by
     have := h (x + 1); rw [show x + 1 + 1 = x + 2 by ring, show x + 1 - 1 = x by ring] at this
@@ -541,7 +557,7 @@ lemma r24a_poly_eq_zero_of_add_shift {H : ℚ[X]}
 
 /-- Second difference of iterated forward differences:
 `Δ^{k+2} f(y) = Δᵏ f(y+2) - 2 Δᵏ f(y+1) + Δᵏ f(y)`. -/
-lemma r24a_fwdDiff_iter_add_two (f : ℚ → ℚ) (k : ℕ) (y : ℚ) :
+private lemma fwdDiff_iter_add_two_apply (f : ℚ → ℚ) (k : ℕ) (y : ℚ) :
     (fwdDiff 1)^[k + 2] f y =
       (fwdDiff 1)^[k] f (y + 2) - 2 * (fwdDiff 1)^[k] f (y + 1) + (fwdDiff 1)^[k] f y := by
   rw [add_comm, Function.iterate_add_apply]
@@ -552,7 +568,7 @@ lemma r24a_fwdDiff_iter_add_two (f : ℚ → ℚ) (k : ℕ) (y : ℚ) :
 
 /-- The central-difference series `Q(x) = ∑_{k=0}^{n} (-1/2)ᵏ Δ^{2k} f(x - k)` of `f = x^{2n}`
 solves `Q(x+1) + Q(x-1) = 2x^{2n}`. -/
-lemma r24a_central_series (n : ℕ) (x : ℚ) :
+private lemma centralDiffSeries_add_one_add_sub_one (n : ℕ) (x : ℚ) :
     let Q : ℚ → ℚ := fun y => ∑ k ∈ range (n + 1), (-1 / 2 : ℚ) ^ k *
       (fwdDiff 1)^[2 * k] (fun r : ℚ => r ^ (2 * n)) (y - k)
     Q (x + 1) + Q (x - 1) = 2 * x ^ (2 * n) := by
@@ -563,7 +579,7 @@ lemma r24a_central_series (n : ℕ) (x : ℚ) :
       2 * ((-1 / 2 : ℚ) ^ k * g k (x - k) -
         (-1 / 2 : ℚ) ^ (k + 1) * g (k + 1) (x - (k + 1 : ℕ))) := by
     intro k
-    have := r24a_fwdDiff_iter_add_two f (2 * k) (x - 1 - k)
+    have := fwdDiff_iter_add_two_apply f (2 * k) (x - 1 - k)
     simp only [g]
     rw [show 2 * (k + 1) = 2 * k + 2 by ring,
       show x - ((k + 1 : ℕ) : ℚ) = x - 1 - k by push_cast; ring, this]
@@ -581,7 +597,7 @@ lemma r24a_central_series (n : ℕ) (x : ℚ) :
   simp [h0, g, f]
 
 /-- `E₂ₙ` from the central-difference series: `E₂ₙ = ∑_{k=0}^{n} (-1/2)ᵏ Δ^{2k}[x^{2n}](-k)`. -/
-lemma r24a_eulerNumber_central (n : ℕ) :
+private lemma eulerNumber_two_mul_eq_centralDiffSeries (n : ℕ) :
     eulerNumber (2 * n) = ∑ k ∈ range (n + 1), (-1 / 2 : ℚ) ^ k *
       (fwdDiff 1)^[2 * k] (fun r : ℚ => r ^ (2 * n)) (0 - k) := by
   set QP : ℚ[X] := ∑ k ∈ range (n + 1), Polynomial.C ((-1 / 2 : ℚ) ^ k) *
@@ -608,9 +624,9 @@ lemma r24a_eulerNumber_central (n : ℕ) :
       ← mul_add, this, div_pow]
     field_simp
   have hH : QP - GP = 0 := by
-    refine r24a_poly_eq_zero_of_add_shift fun x => ?_
+    refine eq_zero_of_eval_add_one_add_eval_sub_one fun x => ?_
     simp only [eval_sub]
-    have h1 := r24a_central_series n x
+    have h1 := centralDiffSeries_add_one_add_sub_one n x
     simp only at h1
     rw [← hQP, ← hQP] at h1
     linarith [hGP x]
@@ -622,12 +638,12 @@ lemma r24a_eulerNumber_central (n : ℕ) :
 /-- Folding the central difference of the even function `x^{2n}`:
 `∑_{i=0}^{2k} (-1)^{2k-i} (2k choose i)(i-k)^{2n} =
 2(-1)ᵏ ∑_{j=1}^{k} (-1)ʲ (2k choose k-j) j^{2n}`. -/
-lemma r24a_central_fold (n k : ℕ) (hn : 1 ≤ n) :
+private lemma sum_choose_mul_sub_pow_two_mul_eq_fold (n k : ℕ) (hn : 1 ≤ n) :
     ∑ i ∈ range (2 * k + 1), (-1 : ℚ) ^ (2 * k - i) * ((2 * k).choose i : ℚ) *
       ((i : ℚ) - k) ^ (2 * n) = 2 * (-1) ^ k * ∑ j ∈ Icc 1 k, (-1 : ℚ) ^ j *
         ((2 * k).choose (k - j) : ℚ) * (j : ℚ) ^ (2 * n) := by
   rw [show 2 * k + 1 = k + (k + 1) by ring, sum_range_add, sum_range_succ', ← sum_range_reflect,
-    q24a_sum_Icc_one', mul_sum]
+    sum_Icc_one_eq_sum_range', mul_sum]
   simp only [Nat.cast_add, add_zero, sub_self, zero_pow (show 2 * n ≠ 0 by omega), mul_zero,
     add_zero]
   rw [← sum_add_distrib]
@@ -655,7 +671,7 @@ lemma r24a_central_fold (n k : ℕ) (hn : 1 ≤ n) :
 
 
 /-- Reflected summation over a final segment: `∑_{k=n-m}^{n} G k = ∑_{i=0}^{m} G (n - i)`. -/
-lemma r24a_sum_Icc_sub_reflect {M : Type*} [AddCommMonoid M] (G : ℕ → M) {m n : ℕ} (h : m ≤ n) :
+private lemma sum_Icc_sub_eq_sum_range_reflect {M : Type*} [AddCommMonoid M] (G : ℕ → M) {m n : ℕ} (h : m ≤ n) :
     ∑ k ∈ Icc (n - m) n, G k = ∑ i ∈ range (m + 1), G (n - i) := by
   induction m with
   | zero => simp
@@ -672,7 +688,7 @@ end
 theorem eulerNumber_two_mul_eq_explicit₄ {n : ℕ} (hn : 1 ≤ n) :
     eulerNumber (2 * n) = ∑ k ∈ Icc 1 n, 1 / (2 : ℚ) ^ (k - 1) *
       ∑ j ∈ Icc 1 k, (-1 : ℚ) ^ j * ((2 * k).choose (k - j) : ℚ) * (j : ℚ) ^ (2 * n) := by
-  rw [r24a_eulerNumber_central, sum_range_succ', q24a_sum_Icc_one']
+  rw [eulerNumber_two_mul_eq_centralDiffSeries, sum_range_succ', sum_Icc_one_eq_sum_range']
   simp only [pow_zero, mul_zero, Function.iterate_zero, id, Nat.cast_zero, sub_zero,
     zero_pow (show 2 * n ≠ 0 by omega), add_zero]
   refine sum_congr rfl fun k _ => ?_
@@ -684,7 +700,7 @@ theorem eulerNumber_two_mul_eq_explicit₄ {n : ℕ} (hn : 1 ≤ n) :
         ((i : ℚ) - ((k + 1 : ℕ) : ℚ)) ^ (2 * n) := by
     refine sum_congr rfl fun i _ => ?_
     rw [zsmul_eq_mul, nsmul_eq_mul, mul_one]; push_cast; ring
-  rw [this, r24a_central_fold n (k + 1) hn, Nat.add_sub_cancel]
+  rw [this, sum_choose_mul_sub_pow_two_mul_eq_fold n (k + 1) hn, Nat.add_sub_cancel]
   rw [show (-1 / 2 : ℚ) ^ (k + 1) = (-1) ^ (k + 1) / (2 * 2 ^ k) by
     rw [div_pow, pow_succ (2 : ℚ) k]; ring]
   have h1 : ((-1 : ℚ) ^ (k + 1)) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; norm_num
@@ -703,11 +719,11 @@ theorem eulerNumber_two_mul_eq_explicit₅ {n : ℕ} (hn : 1 ≤ n) :
   simp_rw [mul_sum]
   rw [sum_comm' (t' := Icc 1 n) (s' := fun j => Icc j n) (fun k j => by
     simp only [mem_Icc]; omega)]
-  rw [q24a_sum_Icc_one', ← sum_range_reflect]
+  rw [sum_Icc_one_eq_sum_range', ← sum_range_reflect]
   refine sum_congr rfl fun k hk => ?_
   have hk' : k < n := mem_range.mp hk
   rw [show n - 1 - k + 1 = n - k by omega,
-    r24a_sum_Icc_sub_reflect _ (by omega : k ≤ n)]
+    sum_Icc_sub_eq_sum_range_reflect _ (by omega : k ≤ n)]
   refine sum_congr rfl fun i hi => ?_
   have hi' : i ≤ k := Nat.lt_succ_iff.mp (mem_range.mp hi)
   rw [show n - i - (n - k) = k - i by omega, show 2 * (n - i) = 2 * n - 2 * i by omega]
@@ -722,14 +738,14 @@ open fwdDiff_aux
 open Polynomial
 
 /-- The symmetric shift `f ↦ f(· + 1) + f(· - 1)` as an endomorphism. -/
-def s24a_S : Module.End ℤ (ℚ → ℚ) := shiftₗ ℚ ℚ (1 : ℚ) + shiftₗ ℚ ℚ (-1 : ℚ)
+def symmShift : Module.End ℤ (ℚ → ℚ) := shiftₗ ℚ ℚ (1 : ℚ) + shiftₗ ℚ ℚ (-1 : ℚ)
 
 /-- Binomial expansion of powers of the symmetric shift. -/
-lemma s24a_S_pow_apply (f : ℚ → ℚ) (i : ℕ) (x : ℚ) :
-    (s24a_S ^ i) f x = ∑ j ∈ range (i + 1), (i.choose j : ℚ) * f (x + j - (i - j : ℕ)) := by
+private lemma symmShift_pow_apply (f : ℚ → ℚ) (i : ℕ) (x : ℚ) :
+    (symmShift ^ i) f x = ∑ j ∈ range (i + 1), (i.choose j : ℚ) * f (x + j - (i - j : ℕ)) := by
   have hc : Commute (shiftₗ ℚ ℚ (1 : ℚ)) (shiftₗ ℚ ℚ (-1 : ℚ)) := by
     ext f y; simp [Module.End.mul_apply, shiftₗ_apply, add_right_comm]
-  rw [s24a_S, hc.add_pow, LinearMap.sum_apply, Finset.sum_apply]
+  rw [symmShift, hc.add_pow, LinearMap.sum_apply, Finset.sum_apply]
   refine sum_congr rfl fun j _ => ?_
   rw [Module.End.mul_apply, Module.End.mul_apply, Module.End.natCast_apply, shiftₗ_pow_apply,
     shiftₗ_pow_apply]
@@ -738,16 +754,16 @@ lemma s24a_S_pow_apply (f : ℚ → ℚ) (i : ℕ) (x : ℚ) :
   ring
 
 /-- `2 - S = -(τ₋₁ Δ²)`. -/
-lemma s24a_two_sub_S :
-    (2 : Module.End ℤ (ℚ → ℚ)) - s24a_S =
+private lemma two_sub_symmShift :
+    (2 : Module.End ℤ (ℚ → ℚ)) - symmShift =
       -(shiftₗ ℚ ℚ (-1 : ℚ) * fwdDiffₗ ℚ ℚ (1 : ℚ) ^ 2) := by
   ext f y
-  simp [s24a_S, pow_two, Module.End.mul_apply, shiftₗ_apply, fwdDiff]
+  simp [symmShift, pow_two, Module.End.mul_apply, shiftₗ_apply, fwdDiff]
   ring_nf
 
 /-- `(2 - S)^N` kills `x^{2n}` for `N > n`. -/
-lemma s24a_two_sub_S_pow_apply {n N : ℕ} (hN : n < N) (x : ℚ) :
-    ((2 - s24a_S) ^ N) (fun r : ℚ => r ^ (2 * n)) x = 0 := by
+private lemma two_sub_symmShift_pow_apply_pow_eq_zero {n N : ℕ} (hN : n < N) (x : ℚ) :
+    ((2 - symmShift) ^ N) (fun r : ℚ => r ^ (2 * n)) x = 0 := by
   have hc : Commute (shiftₗ ℚ ℚ (-1 : ℚ)) (fwdDiffₗ ℚ ℚ (1 : ℚ) ^ 2) := by
     refine Commute.pow_right ?_ 2
     ext f y; simp [Module.End.mul_apply, shiftₗ_apply, fwdDiff, add_right_comm]
@@ -756,20 +772,20 @@ lemma s24a_two_sub_S_pow_apply {n N : ℕ} (hN : n < N) (x : ℚ) :
       (fun r : ℚ => r ^ (2 * n))
     rw [this]
     exact fwdDiff_iter_pow_eq_zero_of_lt (by omega)
-  rw [s24a_two_sub_S, neg_pow, hc.mul_pow, ← pow_mul, Module.End.mul_apply, Module.End.mul_apply,
+  rw [two_sub_symmShift, neg_pow, hc.mul_pow, ← pow_mul, Module.End.mul_apply, Module.End.mul_apply,
     h0, map_zero, map_zero]
   rfl
 
 /-- Binomial expansion of `(2 - S)^N x^{2n} = 0`. -/
-lemma s24a_binom_S {n N : ℕ} (hN : n < N) (x : ℚ) :
+private lemma sum_choose_mul_symmShift_pow_apply_eq_zero {n N : ℕ} (hN : n < N) (x : ℚ) :
     ∑ i ∈ range (N + 1), (-1 : ℚ) ^ i * 2 ^ (N - i) * (N.choose i : ℚ) *
-      (s24a_S ^ i) (fun r : ℚ => r ^ (2 * n)) x = 0 := by
-  have h := s24a_two_sub_S_pow_apply hN x
-  have hc : Commute (-s24a_S) (2 : Module.End ℤ (ℚ → ℚ)) := (Commute.ofNat_right _ 2)
+      (symmShift ^ i) (fun r : ℚ => r ^ (2 * n)) x = 0 := by
+  have h := two_sub_symmShift_pow_apply_pow_eq_zero hN x
+  have hc : Commute (-symmShift) (2 : Module.End ℤ (ℚ → ℚ)) := (Commute.ofNat_right _ 2)
   rw [sub_eq_neg_add, hc.add_pow, LinearMap.sum_apply, Finset.sum_apply] at h
   rw [← h]
   refine sum_congr rfl fun i _ => ?_
-  rw [neg_pow s24a_S i, Module.End.mul_apply, Module.End.mul_apply, Module.End.mul_apply]
+  rw [neg_pow symmShift i, Module.End.mul_apply, Module.End.mul_apply, Module.End.mul_apply]
   have hpow2 : (2 : Module.End ℤ (ℚ → ℚ)) ^ (N - i) = ((2 ^ (N - i) : ℕ) : Module.End ℤ _) := by
     push_cast; rfl
   have hneg : (-1 : Module.End ℤ (ℚ → ℚ)) ^ i = (((-1) ^ i : ℤ) : Module.End ℤ _) := by
@@ -782,7 +798,7 @@ lemma s24a_binom_S {n N : ℕ} (hN : n < N) (x : ℚ) :
 
 /-- Folding a symmetric sum: `∑_{j=0}^{k} (k choose j)(j - (k-j))^{2n} =
 2 ∑_{j=0}^{⌊(k-1)/2⌋} (k choose j)(k-2j)^{2n}` for `k ≥ 1`, `n ≥ 1`. -/
-lemma s24a_fold (n k : ℕ) (hn : 1 ≤ n) (hk : 1 ≤ k) :
+private lemma sum_choose_mul_sub_pow_two_mul_eq_fold_half (n k : ℕ) (hn : 1 ≤ n) (hk : 1 ≤ k) :
     ∑ j ∈ range (k + 1), (k.choose j : ℚ) * ((j : ℚ) - ((k - j : ℕ) : ℚ)) ^ (2 * n) =
       2 * ∑ j ∈ range ((k - 1) / 2 + 1), (k.choose j : ℚ) * ((k - 2 * j : ℕ) : ℚ) ^ (2 * n) := by
   set g : ℕ → ℚ := fun j => (k.choose j : ℚ) * ((j : ℚ) - ((k - j : ℕ) : ℚ)) ^ (2 * n)
@@ -827,22 +843,22 @@ lemma s24a_fold (n k : ℕ) (hn : 1 ≤ n) (hk : 1 ≤ k) :
 
 /-- Proof of DLMF 24.6.6 by the symmetric-shift operator and uniqueness of polynomial solutions
 of `Q(x+1) + Q(x-1) = 2x^{2n}`. -/
-lemma s24a_eulerNumber_two_mul_eq_explicit₆ {n : ℕ} (hn : 1 ≤ n) :
+private lemma eulerNumber_two_mul_eq_sum_Icc_choose_pow {n : ℕ} (hn : 1 ≤ n) :
     eulerNumber (2 * n) = ∑ k ∈ Icc 1 (2 * n), ((-1 : ℚ) ^ k / 2 ^ (k - 1)) *
       ((2 * n + 1).choose (k + 1) : ℚ) *
         ∑ j ∈ range ((k - 1) / 2 + 1), (k.choose j : ℚ) * ((k - 2 * j : ℕ) : ℚ) ^ (2 * n) := by
   set p : ℚ → ℚ := fun r : ℚ => r ^ (2 * n)
   set N := 2 * n + 1
   set Q : ℚ → ℚ := fun x => ∑ k ∈ range N, (-1 : ℚ) ^ k * (N.choose (k + 1) : ℚ) / 2 ^ k *
-    (s24a_S ^ k) p x
+    (symmShift ^ k) p x
   have hSshift : ∀ k x,
-      (s24a_S ^ k) p (x + 1) + (s24a_S ^ k) p (x - 1) = (s24a_S ^ (k + 1)) p x := by
+      (symmShift ^ k) p (x + 1) + (symmShift ^ k) p (x - 1) = (symmShift ^ (k + 1)) p x := by
     intro k x
-    rw [pow_succ', Module.End.mul_apply, s24a_S, LinearMap.add_apply, Pi.add_apply,
+    rw [pow_succ', Module.End.mul_apply, symmShift, LinearMap.add_apply, Pi.add_apply,
       shiftₗ_apply, shiftₗ_apply, sub_eq_add_neg]
   have hQ : ∀ x, Q (x + 1) + Q (x - 1) = 2 * x ^ (2 * n) := by
     intro x
-    have hb := s24a_binom_S (n := n) (N := N) (by omega) x
+    have hb := sum_choose_mul_symmShift_pow_apply_eq_zero (n := n) (N := N) (by omega) x
     rw [sum_range_succ'] at hb
     simp only [pow_zero, one_mul, Nat.sub_zero, Nat.choose_zero_right, Nat.cast_one,
       mul_one] at hb
@@ -850,9 +866,9 @@ lemma s24a_eulerNumber_two_mul_eq_explicit₆ {n : ℕ} (hn : 1 ≤ n) :
     rw [h0] at hb
     simp only [Q, ← sum_add_distrib]
     have hterm : ∀ k ∈ range N, (-1 : ℚ) ^ k * (N.choose (k + 1) : ℚ) / 2 ^ k *
-        (s24a_S ^ k) p (x + 1) + (-1 : ℚ) ^ k * (N.choose (k + 1) : ℚ) / 2 ^ k *
-        (s24a_S ^ k) p (x - 1) = -((-1 : ℚ) ^ (k + 1) * 2 ^ (N - (k + 1)) *
-          (N.choose (k + 1) : ℚ) * (s24a_S ^ (k + 1)) p x) / 2 ^ (2 * n) := by
+        (symmShift ^ k) p (x + 1) + (-1 : ℚ) ^ k * (N.choose (k + 1) : ℚ) / 2 ^ k *
+        (symmShift ^ k) p (x - 1) = -((-1 : ℚ) ^ (k + 1) * 2 ^ (N - (k + 1)) *
+          (N.choose (k + 1) : ℚ) * (symmShift ^ (k + 1)) p x) / 2 ^ (2 * n) := by
       intro k hk
       have hk' := mem_range.mp hk
       rw [← mul_add, hSshift, show (2 : ℚ) ^ (2 * n) = 2 ^ (N - (k + 1)) * 2 ^ k by
@@ -868,7 +884,7 @@ lemma s24a_eulerNumber_two_mul_eq_explicit₆ {n : ℕ} (hn : 1 ≤ n) :
   have hQP : ∀ y, QP.eval y = Q y := by
     intro y
     simp only [QP, Q, eval_finsetSum, eval_mul, eval_C, eval_pow, eval_add, eval_X,
-      s24a_S_pow_apply, p]
+      symmShift_pow_apply, p]
     refine sum_congr rfl fun k _ => ?_
     congr 1
     refine sum_congr rfl fun j _ => ?_
@@ -883,7 +899,7 @@ lemma s24a_eulerNumber_two_mul_eq_explicit₆ {n : ℕ} (hn : 1 ≤ n) :
       ← mul_add, this, div_pow]
     field_simp
   have hH : QP - GP = 0 := by
-    refine r24a_poly_eq_zero_of_add_shift fun x => ?_
+    refine eq_zero_of_eval_add_one_add_eval_sub_one fun x => ?_
     simp only [eval_sub, hQP]
     linarith [hGP x, hQ x]
   have h0 := congrArg (Polynomial.eval 0) (sub_eq_zero.mp hH)
@@ -892,13 +908,13 @@ lemma s24a_eulerNumber_two_mul_eq_explicit₆ {n : ℕ} (hn : 1 ≤ n) :
     rw [h0]
     simp only [GP, eval_mul, eval_C, eval_comp, eval_add, eval_X, mul_zero, zero_add, eulerNumber]
   rw [hE]
-  simp only [Q, s24a_S_pow_apply, p, zero_add]
-  rw [sum_range_succ', q24a_sum_Icc_one']
+  simp only [Q, symmShift_pow_apply, p, zero_add]
+  rw [sum_range_succ', sum_Icc_one_eq_sum_range']
   simp only [pow_zero, zero_add, Nat.choose_zero_right, Nat.sub_zero, Nat.cast_one, one_mul,
     sum_range_one, Nat.cast_zero, sub_zero, zero_pow (show 2 * n ≠ 0 by omega), mul_zero,
     add_zero]
   refine sum_congr rfl fun k _ => ?_
-  rw [s24a_fold n (k + 1) hn (by omega), Nat.add_sub_cancel, pow_succ]
+  rw [sum_choose_mul_sub_pow_two_mul_eq_fold_half n (k + 1) hn (by omega), Nat.add_sub_cancel, pow_succ]
   field_simp
   ring
 
@@ -911,7 +927,7 @@ theorem eulerNumber_two_mul_eq_explicit₆ {n : ℕ} (hn : 1 ≤ n) :
     eulerNumber (2 * n) = ∑ k ∈ Icc 1 (2 * n), ((-1 : ℚ) ^ k / 2 ^ (k - 1)) *
       ((2 * n + 1).choose (k + 1) : ℚ) *
         ∑ j ∈ range ((k - 1) / 2 + 1), (k.choose j : ℚ) * ((k - 2 * j : ℕ) : ℚ) ^ (2 * n) := by
-  exact s24a_eulerNumber_two_mul_eq_explicit₆ hn
+  exact eulerNumber_two_mul_eq_sum_Icc_choose_pow hn
 
 /-- **DLMF 24.6.7**: `Bₙ(x) = ∑_{k=0}^{n} 1/(k+1) ∑_{j=0}^{k} (-1)ʲ (k choose j)(x+j)ⁿ`,
 all `n ≥ 0`, complex `x`. -/
@@ -920,9 +936,9 @@ theorem bernoulliPolyB_eq_explicit (n : ℕ) (x : ℂ) :
     bernoulliPolyB n x = ∑ k ∈ range (n + 1), 1 / ((k : ℂ) + 1) *
       ∑ j ∈ range (k + 1), (-1 : ℂ) ^ j * (k.choose j : ℂ) * (x + j) ^ n := by
   have hD : ∀ k, ∑ j ∈ range (k + 1), (-1 : ℂ) ^ j * (k.choose j : ℂ) * (x + j) ^ n =
-      ∑ i ∈ range (n + 1), (n.choose i : ℂ) * x ^ (n - i) * q24a_c k i := by
+      ∑ i ∈ range (n + 1), (n.choose i : ℂ) * x ^ (n - i) * altBinomialPowSum k i := by
     intro k
-    simp only [q24a_c, mul_sum]
+    simp only [altBinomialPowSum, mul_sum]
     rw [sum_comm]
     refine sum_congr rfl fun j _ => ?_
     rw [add_comm x, add_pow, mul_sum]
@@ -931,7 +947,7 @@ theorem bernoulliPolyB_eq_explicit (n : ℕ) (x : ℂ) :
   rw [sum_comm, bernoulliPolyB_eq_sum]
   refine sum_congr rfl fun i hi => ?_
   have hi' : i + 1 ≤ n + 1 := by simpa using hi
-  rw [← q24a_beta_eq, q24a_beta_extend hi', mul_sum, sum_mul]
+  rw [← newtonBernoulli_eq_bernoulli, newtonBernoulli_eq_sum_range hi', mul_sum, sum_mul]
   exact sum_congr rfl fun k _ => by ring
 
 /-- **DLMF 24.6.8**: `Eₙ(x) = 2⁻ⁿ ∑_{k=1}^{n+1} ∑_{j=0}^{k-1} (-1)ʲ (n+1 choose k)(x+j)ⁿ`, all
@@ -952,8 +968,8 @@ theorem eulerPolyE_eq_explicit (n : ℕ) (x : ℂ) :
     rw [show (-1 : ℂ) ^ k = -(-1) ^ (k - 1) by
       rw [show k = k - 1 + 1 by omega, pow_succ]; simp]
     ring
-  rw [sum_congr rfl hin, q24a_sum_Icc_one']
-  have h0 := q24a_alt_sum_eulerPolyE n x
+  rw [sum_congr rfl hin, sum_Icc_one_eq_sum_range']
+  have h0 := sum_alt_choose_mul_eulerPolyE_add n x
   rw [sum_range_succ'] at h0
   simp only [pow_zero, Nat.choose_zero_right, Nat.cast_one, one_mul, Nat.cast_zero, add_zero] at h0
   have hc := Nat.sum_range_choose (n + 1)
@@ -1040,7 +1056,7 @@ theorem bernoulli_eq_explicit₁₁ {n : ℕ} (hn : 1 ≤ n) :
 theorem eulerNumber_two_mul_eq_explicit₁₂ (n : ℕ) :
     eulerNumber (2 * n) = ∑ k ∈ range (2 * n + 1), 1 / (2 : ℚ) ^ k *
       ∑ j ∈ range (k + 1), (-1 : ℚ) ^ j * (k.choose j : ℚ) * (1 + 2 * (j : ℚ)) ^ (2 * n) := by
-  have h := q24a_eulerPolyE_newton (2 * n) (1 / 2)
+  have h := eulerPolyE_eq_newton_series (2 * n) (1 / 2)
   rw [eulerPolyE_half] at h
   have h2 : (2 : ℂ) ^ (2 * n) ≠ 0 := pow_ne_zero _ (by norm_num)
   have : ((eulerNumber (2 * n) : ℚ) : ℂ) = ((∑ k ∈ range (2 * n + 1), 1 / (2 : ℚ) ^ k *

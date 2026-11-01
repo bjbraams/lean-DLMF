@@ -5,17 +5,32 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Modified.P2mConnection
+public import DLMF.Mathieu.Modified.CrossConnection
 
 /-!
 # Modified Mathieu functions: connection formulas (DLMF §28.22)
 
 The radial functions of the first and second kinds in terms of `Ce_m`, `Se_m`, `Fe_m`, `Ge_m`
 with the joining factors `g_{e,m}`, `g_{o,m}`, `f_{e,m}`, `f_{o,m}` (defined in
-`DLMF.Mathieu.Modified.Basic` by 28.22.5–28.22.10), and, for noninteger `ν`, `M^{(1)}_ν` in
-terms of `Me_ν` and `M^{(2)}_ν` in terms of `M^{(1)}_{±ν}`. All formulas were checked
-numerically (`h = 1.2`, `m ≤ 4`, `ν = 0.3`). Real `h > 0` throughout (DLMF's joining factors
-are defined for real `h`); `q = h²`.
+`DLMF.Mathieu.Modified.Basic.Functions` by 28.22.5–28.22.10), and, for noninteger `ν`,
+`M^{(1)}_ν` in terms of `Me_ν` and `M^{(2)}_ν` in terms of `M^{(1)}_{±ν}`. Real `h > 0`
+throughout (DLMF's joining factors are defined for real `h`); `q = h²`.
+
+## Main results
+
+* `radialMathieuMc_one_eq`, `radialMathieuMs_one_eq`: `Mc^{(1)}_m`, `Ms^{(1)}_m` in terms of
+  `Ce_m`, `Se_m` (DLMF 28.22.1–28.22.2).
+* `radialMathieuMc_two_eq`, `radialMathieuMs_two_eq`: `Mc^{(2)}_m`, `Ms^{(2)}_m` in terms of
+  `Ce_m`, `Fe_m` and `Se_m`, `Ge_m` (DLMF 28.22.3–28.22.4).
+* `radialMathieu_two_zero`: values at `z = 0` (DLMF 28.22.11).
+* `mathieuFe_ge_zero_eq_joinG`: initial values of the second solutions `fe_m`, `ge_m`
+  (DLMF 28.22.12).
+* `modMathieuM_one_eq_modMathieuMe`, `modMathieuM_two_eq`: noninteger order
+  (DLMF 28.22.13–28.22.14).
+
+## Implementation notes
+
+All formulas were checked numerically (`h = 1.2`, `m ≤ 4`, `ν = 0.3`).
 -/
 
 @[expose] public noncomputable section
@@ -31,7 +46,7 @@ namespace DLMF.Mathieu
 theorem radialMathieuMc_one_eq (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
     radialMathieuMc 1 m z h = Real.sqrt (2 / π) / (mathieuJoinGe m h * mathieuCe m 0 (h ^ 2)) *
       modMathieuCe m z ((h ^ 2 : ℝ) : ℂ) :=
-  p2m_radialMathieuMc_one_eq m hh z
+  radialMathieuMc_one_eq' m hh z
 
 /-- **Connection formula** (DLMF 28.22.2), `h > 0`, `m = 1, 2, …`:
 `Ms^{(1)}_m(z, h) = √(2/π) (g_{o,m}(h) se'_m(0, h²))⁻¹ Se_m(z, h²)`. -/
@@ -40,7 +55,7 @@ theorem radialMathieuMs_one_eq {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) (
     radialMathieuMs 1 m z h = Real.sqrt (2 / π) /
       (mathieuJoinGo m h * deriv (fun x => mathieuSe m x (h ^ 2)) 0) *
       modMathieuSe m z ((h ^ 2 : ℝ) : ℂ) :=
-  p2m_radialMathieuMs_one_eq hm hh z
+  radialMathieuMs_one_eq' hm hh z
 
 /-- **Connection formula** (DLMF 28.22.3), `h > 0`, `m = 0, 1, …`:
 `Mc^{(2)}_m(z, h) = √(2/π) (g_{e,m} ce_m(0, h²))⁻¹
@@ -50,7 +65,7 @@ theorem radialMathieuMc_two_eq (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
     radialMathieuMc 2 m z h = Real.sqrt (2 / π) / (mathieuJoinGe m h * mathieuCe m 0 (h ^ 2)) *
       (-mathieuJoinFe m h * modMathieuCe m z ((h ^ 2 : ℝ) : ℂ) +
         2 / (π * mathieuFeC m (h ^ 2)) * modMathieuFe m z (h ^ 2)) :=
-  p2m_radialMathieuMc_two_eq m hh z
+  radialMathieuMc_two_eq' m hh z
 
 /-- **Connection formula** (DLMF 28.22.4), `h > 0`, `m = 1, 2, …`:
 `Ms^{(2)}_m(z, h) = √(2/π) (g_{o,m} se'_m(0, h²))⁻¹
@@ -61,10 +76,10 @@ theorem radialMathieuMs_two_eq {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) (
       (mathieuJoinGo m h * deriv (fun x => mathieuSe m x (h ^ 2)) 0) *
       (-mathieuJoinFo m h * modMathieuSe m z ((h ^ 2 : ℝ) : ℂ) -
         2 / (π * mathieuGeS m (h ^ 2)) * modMathieuGe m z (h ^ 2)) :=
-  p2m_radialMathieuMs_two_eq hm hh z
+  radialMathieuMs_two_eq' hm hh z
 
 /-- An even function differentiable at `0` has derivative `0` there. -/
-lemma p1c_deriv_zero_of_even {f : ℂ → ℂ} (hf : DifferentiableAt ℂ f 0)
+private lemma deriv_zero_of_even {f : ℂ → ℂ} (hf : DifferentiableAt ℂ f 0)
     (he : ∀ z, f (-z) = f z) : deriv f 0 = 0 := by
   have h1 : HasDerivAt (fun z => f (-z)) (deriv f (-0) * -1) 0 :=
     (by simpa using hf.hasDerivAt : HasDerivAt f (deriv f (-0)) (-0)).comp (0 : ℂ)
@@ -76,7 +91,7 @@ lemma p1c_deriv_zero_of_even {f : ℂ → ℂ} (hf : DifferentiableAt ℂ f 0)
   linear_combination -this / 2
 
 /-- `(√(2/π))² = 2/π` in `ℂ`. -/
-lemma p1c_sqrt_two_div_pi_sq : ((Real.sqrt (2 / π) : ℝ) : ℂ) ^ 2 = 2 / π := by
+private lemma ofReal_sqrt_two_div_pi_sq : ((Real.sqrt (2 / π) : ℝ) : ℂ) ^ 2 = 2 / π := by
   rw [← ofReal_pow, Real.sq_sqrt (by positivity)]; push_cast; ring
 
 /-- **Values at `z = 0`** (DLMF 28.22.11), `h > 0`:
@@ -87,7 +102,7 @@ theorem radialMathieu_two_zero (m : ℕ) {h : ℝ} (hh : 0 < h) :
     deriv (fun z => radialMathieuMc 2 m z h) 0 = Real.sqrt (2 / π) * mathieuJoinGe m h ∧
       (m ≠ 0 → radialMathieuMs 2 m 0 h = -(Real.sqrt (2 / π) * mathieuJoinGo m h)) := by
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
-  have hs := p1c_sqrt_two_div_pi_sq
+  have hs := ofReal_sqrt_two_div_pi_sq
   have hs0 : (Real.sqrt (2 / π) : ℂ) ≠ 0 := by
     intro h0; rw [h0] at hs; simp at hs; exact div_ne_zero two_ne_zero hπ hs.symm
   constructor
@@ -100,7 +115,7 @@ theorem radialMathieu_two_zero (m : ℕ) {h : ℝ} (hh : 0 < h) :
       rw [← radialMathieuMc, radialMathieuMc_one_eq m hh z, modMathieuCe_natCast]
     have hce := (isMathieuSolution_mathieuCe m (h ^ 2)).differentiable
     have dce : deriv (fun z => mathieuCe m z (h ^ 2)) 0 = 0 :=
-      p1c_deriv_zero_of_even (hce 0) (fun z => mathieuCe_neg m z (h ^ 2))
+      deriv_zero_of_even (hce 0) (fun z => mathieuCe_neg m z (h ^ 2))
     have hCe : HasDerivAt (fun z => mathieuCe m (I * z) (h ^ 2)) 0 0 := by
       have := ((hce (I * 0)).hasDerivAt).comp (0 : ℂ) ((hasDerivAt_id (0 : ℂ)).const_mul I)
       simp only [mul_zero, dce, zero_mul, mul_one] at this
@@ -108,7 +123,7 @@ theorem radialMathieu_two_zero (m : ℕ) {h : ℝ} (hh : 0 < h) :
     have d1 := hCe.const_mul A
     have v1 := congrFun e1 0
     simp only [mul_zero] at v1
-    rw [m28c_wronskian, e1, d1.deriv, v1] at hW
+    rw [complexWronskian, e1, d1.deriv, v1] at hW
     simp only [mul_zero, zero_mul, sub_zero] at hW
     change deriv (fun z => modMathieuM 2 (m : ℂ) z h) 0 = _
     have hc : mathieuCe m 0 (h ^ 2) ≠ 0 := by
@@ -147,7 +162,7 @@ theorem radialMathieu_two_zero (m : ℕ) {h : ℝ} (hh : 0 < h) :
     simp only [mul_zero] at v1
     have hse0 : mathieuSe m 0 (h ^ 2) = 0 := by
       have := mathieuSe_neg m 0 (h ^ 2); rw [neg_zero] at this; linear_combination this / 2
-    rw [m28c_wronskian, e1, d1.deriv, v1, e2, hse0] at hW
+    rw [complexWronskian, e1, d1.deriv, v1, e2, hse0] at hW
     simp only [mul_zero, zero_mul, zero_sub] at hW
     have hc : deriv (fun x => mathieuSe m x (h ^ 2)) 0 ≠ 0 := by
       rintro hc; rw [hc] at hW; simp at hW; exact div_ne_zero two_ne_zero hπ hW.symm
@@ -172,7 +187,7 @@ theorem mathieuFe_ge_zero_eq_joinG (m : ℕ) {h : ℝ} (hh : 0 < h) :
         deriv (fun z => mathieuSe m z (h ^ 2)) 0) := by
   have hq : h ^ 2 ≠ 0 := by positivity
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
-  have hs := p1c_sqrt_two_div_pi_sq
+  have hs := ofReal_sqrt_two_div_pi_sq
   constructor
   · -- the Wronskian `𝒲{Mc^{(1)}_m, Mc^{(2)}_m}(0) = 2/π`
     have hW := (modMathieuM_wronskian_two (ν := (m : ℝ)) hh 0).1
@@ -191,7 +206,7 @@ theorem mathieuFe_ge_zero_eq_joinG (m : ℕ) {h : ℝ} (hh : 0 < h) :
     have hce := (isMathieuSolution_mathieuCe m (h ^ 2)).differentiable
     have hfe := (isMathieuSolution_mathieuFe (n := m) (q := h ^ 2) (by tauto)).differentiable
     have dce : deriv (fun z => mathieuCe m z (h ^ 2)) 0 = 0 :=
-      p1c_deriv_zero_of_even (hce 0) (fun z => mathieuCe_neg m z (h ^ 2))
+      deriv_zero_of_even (hce 0) (fun z => mathieuCe_neg m z (h ^ 2))
     have hCe : HasDerivAt (fun z => mathieuCe m (I * z) (h ^ 2)) 0 0 := by
       have := ((hce (I * 0)).hasDerivAt).comp (0 : ℂ) ((hasDerivAt_id (0 : ℂ)).const_mul I)
       simp only [mul_zero, dce, zero_mul, mul_one] at this
@@ -212,7 +227,7 @@ theorem mathieuFe_ge_zero_eq_joinG (m : ℕ) {h : ℝ} (hh : 0 < h) :
       ((hCe.const_mul (-mathieuJoinFe m h)).add (hFe.const_mul K)).const_mul A
     have v1 := congrFun e1 0
     simp only [mul_zero] at v1
-    rw [m28c_wronskian, e1, e2, d1.deriv, d2.deriv, v1] at hW
+    rw [complexWronskian, e1, e2, d1.deriv, d2.deriv, v1] at hW
     simp only [mul_zero, zero_mul, sub_zero, zero_add] at hW
     have hA : A ≠ 0 := by
       rintro hA; rw [hA] at hW; simp at hW; exact div_ne_zero two_ne_zero hπ hW.symm
@@ -269,7 +284,7 @@ theorem mathieuFe_ge_zero_eq_joinG (m : ℕ) {h : ℝ} (hh : 0 < h) :
     have v1 := congrFun e1 0
     have v2 := congrFun e2 0
     simp only [mul_zero] at v1 v2
-    rw [m28c_wronskian, e1, e2, d1.deriv, d2.deriv, v1, v2] at hW
+    rw [complexWronskian, e1, e2, d1.deriv, d2.deriv, v1, v2] at hW
     have hse0 : mathieuSe m 0 (h ^ 2) = 0 := by
       have := mathieuSe_neg m 0 (h ^ 2); rw [neg_zero] at this; linear_combination this / 2
     rw [hse0] at hW
@@ -289,7 +304,7 @@ theorem mathieuFe_ge_zero_eq_joinG (m : ℕ) {h : ℝ} (hh : 0 < h) :
     linear_combination hW / 2 - mathieuGe m 0 (h ^ 2) * hP
 
 /-- A Floquet solution with multiplier `ρ`, `ρ² ≠ 1`, vanishing at `0` is identically zero. -/
-lemma p1c_floquet_eq_zero {a q ρ : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w)
+private lemma isMathieuSolution_eq_zero_of_floquet {a q ρ : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w)
     (h0 : w 0 = 0) (hρ : ∀ t, w (t + π) = ρ * w t) (hρ0 : ρ ≠ 0) (hρ1 : ρ ^ 2 ≠ 1) :
     w = 0 := by
   have hneg := hw.comp_neg
@@ -325,13 +340,13 @@ theorem modMathieuM_one_eq_modMathieuMe {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ)
     modMathieuM 1 ν z h =
       modMathieuM 1 ν 0 h / mathieuMe ν 0 ((h : ℂ) ^ 2) * modMathieuMe ν z ((h : ℂ) ^ 2) := by
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
-  have hM := p1c_isMathieuSolution_comp
-    (isModMathieuSolution_modMathieuM 1 le_rfl (by norm_num) (p1c_admissible_real hν h) hh')
+  have hM := isMathieuSolution_comp_mul_of_isModMathieuSolution
+    (isModMathieuSolution_modMathieuM 1 le_rfl (by norm_num) (modMathieuAdmissible_ofReal_of_not_int hν h) hh')
     (c := I) I_sq
-  have hF := (isFloquetSolution_mathieuMe (p1c_not_int_cast hν) (p1c_normal_real hν h)).1
+  have hF := (isFloquetSolution_mathieuMe (intCast_ne_ofReal_of_not_int hν) (mathieuNormalSegment_ofReal hν h)).1
   set K := modMathieuM 1 ν 0 h / mathieuMe ν 0 ((h : ℂ) ^ 2)
   have hW := hM.add (hF.1.const_mul (-K))
-  have hW0 := p1c_floquet_eq_zero hW (ρ := Complex.exp (π * I * ν))
+  have hW0 := isMathieuSolution_eq_zero_of_floquet hW (ρ := Complex.exp (π * I * ν))
     (by simp only [mul_zero, K]; field_simp; ring)
     (fun t => by
       have h1 := modMathieuM_one_add_int_mul_pi_I (ν : ℂ) (I * t) h 1
@@ -357,22 +372,22 @@ theorem modMathieuM_one_eq_modMathieuMe {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ)
   linear_combination this
 
 /-- Term-wise form of 28.22.14 (with the `-ν` series reindexed by `ℓ ↦ -ℓ`). -/
-lemma p1c_modMathieuTerm_two_eq {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) (z h : ℂ) (n ℓ : ℤ) :
+private lemma modMathieuTerm_two_eq_cot_sub {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) (z h : ℂ) (n ℓ : ℤ) :
     modMathieuTerm 2 ν z h n ℓ = Complex.cot (ν * π) * modMathieuTerm 1 ν z h n ℓ -
       modMathieuTerm 1 (-(ν : ℂ)) z h (-n) (-ℓ) / Complex.sin (ν * π) := by
-  have hk := p1c_not_int_add hν (n + ℓ)
+  have hk := not_exists_ofReal_add_intCast_eq_intCast hν (n + ℓ)
   have hk' : ¬ ∃ j : ℤ, (ν : ℂ) + n + ℓ = j := by
     rw [show (ν : ℂ) + n + ℓ = ν + ((n + ℓ : ℤ) : ℂ) by push_cast; ring]; exact hk
-  have hs0 := p1c_sin_ne_zero hν 0
+  have hs0 := sin_add_intCast_mul_pi_ne_zero hν 0
   simp only [Int.cast_zero, add_zero] at hs0
-  have ecos := p1c_cos_add_int ν (n + ℓ)
-  have esin := p1c_sin_add_int ν (n + ℓ)
+  have ecos := cos_add_intCast_mul_pi ν (n + ℓ)
+  have esin := sin_add_intCast_mul_pi ν (n + ℓ)
   push_cast at ecos esin
   rw [← add_assoc] at ecos esin
   simp only [modMathieuTerm, mathieuCylExp]
-  rw [p1c_besselYExp_of_not_int hk', ecos, esin, Complex.cot_eq_cos_div_sin,
-    mathieuMeCoeff_neg (p1c_not_int_cast hν),
-    show (-ℓ - -n : ℤ) = -(ℓ - n) by ring, p1c_besselJExp_neg_intCast,
+  rw [besselYExp_of_not_exists_int hk', ecos, esin, Complex.cot_eq_cos_div_sin,
+    mathieuMeCoeff_neg (intCast_ne_ofReal_of_not_int hν),
+    show (-ℓ - -n : ℤ) = -(ℓ - n) by ring, besselJExp_neg_intCast,
     show -(ν : ℂ) + ((-n : ℤ) : ℂ) + ((-ℓ : ℤ) : ℂ) = -(ν + n + ℓ) by push_cast; ring]
   have hP : (-1 : ℂ) ^ (n + ℓ) * (-1 : ℂ) ^ (ℓ - n) = 1 := by
     rw [← zpow_add₀ (by norm_num), show n + ℓ + (ℓ - n) = 2 * ℓ by ring, zpow_mul]; simp
@@ -391,22 +406,22 @@ theorem modMathieuM_two_eq {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) {h :
     (z : ℂ) :
     modMathieuM 2 ν z h = Complex.cot (ν * π) * modMathieuM 1 ν z h -
       modMathieuM 1 (-(ν : ℂ)) z h / Complex.sin (ν * π) := by
-  have hadm := p1c_admissible_real hν h
+  have hadm := modMathieuAdmissible_ofReal_of_not_int hν h
   have hadm' : ModMathieuAdmissible (-(ν : ℂ)) h := by
-    have := p1c_admissible_real (p1c_neg_not_int hν) h; push_cast at this; exact this
+    have := modMathieuAdmissible_ofReal_of_not_int (intCast_ne_neg_real_of_not_int hν) h; push_cast at this; exact this
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
-  have hc := p1c_coeff_index_ne_zero hν h
+  have hc := mathieuMeCoeff_modMathieuIndex_ne_zero hν h
   set n := modMathieuIndex ν h
   have h1 := summable_modMathieuTerm 1 le_rfl (by norm_num) hadm hh' n z
   have hneg := hasSum_modMathieuTerm 1 le_rfl (by norm_num) hadm' hh' (-n) z
   rw [← (Equiv.neg ℤ).hasSum_iff] at hneg
-  rw [mathieuMeCoeff_neg (p1c_not_int_cast hν)] at hneg
+  rw [mathieuMeCoeff_neg (intCast_ne_ofReal_of_not_int hν)] at hneg
   have hsum := ((h1.hasSum.mul_left (Complex.cot (ν * π))).sub (hneg.div_const
     (Complex.sin (ν * π))))
   have e : (fun ℓ => Complex.cot (ν * π) * modMathieuTerm 1 ν z h n ℓ -
       ((modMathieuTerm 1 (-(ν : ℂ)) z h (-n)) ∘ (Equiv.neg ℤ)) ℓ / Complex.sin (ν * π)) =
       modMathieuTerm 2 ν z h n := by
-    funext ℓ; rw [p1c_modMathieuTerm_two_eq hν]; rfl
+    funext ℓ; rw [modMathieuTerm_two_eq_cot_sub hν]; rfl
   rw [e] at hsum
   have e2 : modMathieuM 2 ν z h = (mathieuMeCoeff ν ((h : ℂ) ^ 2) n)⁻¹ *
       ∑' ℓ, modMathieuTerm 2 ν z h n ℓ := rfl

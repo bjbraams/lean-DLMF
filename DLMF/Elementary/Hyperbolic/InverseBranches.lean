@@ -11,10 +11,33 @@ public import DLMFMathlib.Analysis.Complex.Sqrt
 /-!
 # Branches and cut values of inverse hyperbolic functions
 
-Square-root branches, cut-side limits and the full inverse families of the hyperbolic functions.
+This file proves the logarithmic forms and cut-side limits of the principal inverse hyperbolic
+functions, the full inverse families, and the power series of the inverse sine and cosine
+(DLMF §§4.37–4.38).
 
-Source references and common attribution are retained in
-`DLMF.Elementary.Hyperbolic`.
+## Main definitions
+
+* `hyperbolicCentral`: the central binomial coefficient divided by `4^n`.
+
+## Main results
+
+* `arccosh_neg`, `arcsech_neg`: the sign relations DLMF 4.37.11 and 4.37.14, corrected.
+* `arcsinh_log`, `arccosh_log`, `arccosh_log_half`, `arctanh_log`: logarithmic forms
+  (DLMF 4.37.16, 4.37.19, 4.37.21, 4.37.24).
+* `arcsinh_upper_cut`, `arcsinh_lower_cut`, `arccosh_inner_cut`, `arccosh_outer_cut`,
+  `arctanh_cut`: cut-side values (DLMF 4.37.17–4.37.25).
+* `arccosh_imaginary`: `arccosh` on the imaginary axis (DLMF 4.37.20).
+* `sinh_inverse_family`, `cosh_inverse_family`, `tanh_inverse_family`: all solutions of
+  `sinh w = z`, `cosh w = z`, `tanh w = z` (DLMF 4.37.26–4.37.31).
+* `arcsech_arccoth_interrelation`: the interrelation example of DLMF §4.37(vi).
+* `hasSum_arcsinh`, `hasSum_arcsinh_large`: series for `arcsinh` (DLMF 4.38.1–4.38.2).
+* `hasSum_arccosh_large`, `hasSum_arccosh_near_one`: series for `arccosh`
+  (DLMF 4.38.3–4.38.4).
+
+## Implementation notes
+
+DLMF 4.37.11 with the printed sign pairing contradicts 4.37.20 at `z = ±i`; the principal-branch
+sign relation is stated in corrected form.
 -/
 
 @[expose] public noncomputable section
@@ -26,7 +49,7 @@ open scoped Real Topology
 namespace DLMF.Elementary
 
 /-- Characterization of the principal square root by a root with positive real part. -/
-private lemma hypR4_sqrt_eq_of_sq {a w : ℂ} (hw : w^2 = a) (hre : 0 < w.re) :
+private lemma complexSqrt_eq_of_sq_of_re_pos {a w : ℂ} (hw : w^2 = a) (hre : 0 < w.re) :
     Complex.sqrt a = w := by
   have h1 := trig_sqrt_sq a
   have h : (Complex.sqrt a - w)*(Complex.sqrt a + w) = 0 := by linear_combination h1 - hw
@@ -40,9 +63,9 @@ private lemma hypR4_sqrt_eq_of_sq {a w : ℂ} (hw : w^2 = a) (hre : 0 < w.re) :
     linarith
 
 /-- The principal square root of `-w` for `w` in the upper half-plane. -/
-private lemma hypR4_sqrt_neg_of_im_pos {w : ℂ} (h : 0 < w.im) :
+private lemma complexSqrt_neg_of_im_pos {w : ℂ} (h : 0 < w.im) :
     Complex.sqrt (-w) = -I*Complex.sqrt w := by
-  apply hypR4_sqrt_eq_of_sq
+  apply complexSqrt_eq_of_sq_of_re_pos
   · rw [mul_pow, trig_sqrt_sq]; simp
   · have him : (Complex.sqrt w).im = Real.sqrt ((‖w‖ - w.re)/2) := by
       rw [Complex.sqrt]; exact Complex.cpow_inv_two_im_eq_sqrt h.le
@@ -52,9 +75,9 @@ private lemma hypR4_sqrt_neg_of_im_pos {w : ℂ} (h : 0 < w.im) :
     exact Real.sqrt_pos.mpr (by linarith)
 
 /-- The principal square root of `-w` for `w` in the lower half-plane. -/
-private lemma hypR4_sqrt_neg_of_im_neg {w : ℂ} (h : w.im < 0) :
+private lemma complexSqrt_neg_of_im_neg {w : ℂ} (h : w.im < 0) :
     Complex.sqrt (-w) = I*Complex.sqrt w := by
-  apply hypR4_sqrt_eq_of_sq
+  apply complexSqrt_eq_of_sq_of_re_pos
   · rw [mul_pow, trig_sqrt_sq]; simp
   · have him : (Complex.sqrt w).im = -Real.sqrt ((‖w‖ - w.re)/2) := by
       rw [Complex.sqrt]; exact Complex.cpow_inv_two_im_eq_neg_sqrt h
@@ -63,30 +86,30 @@ private lemma hypR4_sqrt_neg_of_im_neg {w : ℂ} (h : w.im < 0) :
     exact Real.sqrt_pos.mpr (by linarith)
 
 /-- The principal logarithm of `-u` for `u` in the upper half-plane. -/
-private lemma hypR4_log_neg_of_im_pos {u : ℂ} (h : 0 < u.im) :
+private lemma complexLog_neg_of_im_pos {u : ℂ} (h : 0 < u.im) :
     Complex.log (-u) = Complex.log u - π*I := by
   apply Complex.ext
   · simp [Complex.log_re]
   · simp [Complex.log_im, Complex.arg_neg_eq_arg_sub_pi_of_im_pos h]
 
 /-- The principal logarithm of `-u` for `u` in the lower half-plane. -/
-private lemma hypR4_log_neg_of_im_neg {u : ℂ} (h : u.im < 0) :
+private lemma complexLog_neg_of_im_neg {u : ℂ} (h : u.im < 0) :
     Complex.log (-u) = Complex.log u + π*I := by
   apply Complex.ext
   · simp [Complex.log_re]
   · simp [Complex.log_im, Complex.arg_neg_eq_arg_add_pi_of_im_neg h]
 
 /-- Imaginary part of a principal square root has the sign of the imaginary part. -/
-private lemma hypR4_sqrt_im_nonneg {w : ℂ} (h : 0 ≤ w.im) : 0 ≤ (Complex.sqrt w).im := by
+private lemma complexSqrt_im_nonneg {w : ℂ} (h : 0 ≤ w.im) : 0 ≤ (Complex.sqrt w).im := by
   rw [Complex.sqrt, Complex.cpow_inv_two_im_eq_sqrt h]; exact Real.sqrt_nonneg _
 
 /-- Imaginary part of a principal square root in the lower half-plane. -/
-private lemma hypR4_sqrt_im_nonpos {w : ℂ} (h : w.im < 0) : (Complex.sqrt w).im ≤ 0 := by
+private lemma complexSqrt_im_nonpos {w : ℂ} (h : w.im < 0) : (Complex.sqrt w).im ≤ 0 := by
   rw [Complex.sqrt, Complex.cpow_inv_two_im_eq_neg_sqrt h]
   exact neg_nonpos.mpr (Real.sqrt_nonneg _)
 
 /-- Real part of a principal square root is nonnegative. -/
-private lemma hypR4_sqrt_re_nonneg (w : ℂ) : 0 ≤ (Complex.sqrt w).re := by
+private lemma complexSqrt_re_nonneg (w : ℂ) : 0 ≤ (Complex.sqrt w).re := by
   rw [Complex.sqrt, Complex.cpow_inv_two_re]; exact Real.sqrt_nonneg _
 
 /-- Corrected principal-branch sign: E20 at z=±i contradicts the printed E11 sign pairing. -/
@@ -101,35 +124,35 @@ theorem arccosh_neg {z : ℂ} (hz : z.im≠0) :
   rcases lt_or_gt_of_ne hz with hn | hp
   · have h1 : (z+1).im < 0 := by simpa using hn
     have h2 : (z-1).im < 0 := by simpa using hn
-    rw [hypR4_sqrt_neg_of_im_neg h1, hypR4_sqrt_neg_of_im_neg h2]
+    rw [complexSqrt_neg_of_im_neg h1, complexSqrt_neg_of_im_neg h2]
     simp only [not_lt.mpr hn.le, ↓reduceIte]
     have hu : (z + Complex.sqrt (z-1)*Complex.sqrt (z+1)).im < 0 := by
-      have a1 := hypR4_sqrt_re_nonneg (z-1)
-      have a2 := hypR4_sqrt_re_nonneg (z+1)
-      have b1 := hypR4_sqrt_im_nonpos h2
-      have b2 := hypR4_sqrt_im_nonpos h1
+      have a1 := complexSqrt_re_nonneg (z-1)
+      have a2 := complexSqrt_re_nonneg (z+1)
+      have b1 := complexSqrt_im_nonpos h2
+      have b2 := complexSqrt_im_nonpos h1
       simp only [Complex.add_im, Complex.mul_im]
       nlinarith [mul_nonpos_of_nonneg_of_nonpos a1 b2, mul_nonpos_of_nonneg_of_nonpos a2 b1]
     have hx : -z + I*Complex.sqrt (z+1)*(I*Complex.sqrt (z-1)) =
         -(z + Complex.sqrt (z-1)*Complex.sqrt (z+1)) := by
       linear_combination Complex.sqrt (z+1)*Complex.sqrt (z-1)*hI
-    rw [hx, hypR4_log_neg_of_im_neg hu]
+    rw [hx, complexLog_neg_of_im_neg hu]
     ring
   · have h1 : 0 < (z+1).im := by simpa using hp
     have h2 : 0 < (z-1).im := by simpa using hp
-    rw [hypR4_sqrt_neg_of_im_pos h1, hypR4_sqrt_neg_of_im_pos h2]
+    rw [complexSqrt_neg_of_im_pos h1, complexSqrt_neg_of_im_pos h2]
     simp only [hp, ↓reduceIte]
     have hu : 0 < (z + Complex.sqrt (z-1)*Complex.sqrt (z+1)).im := by
-      have a1 := hypR4_sqrt_re_nonneg (z-1)
-      have a2 := hypR4_sqrt_re_nonneg (z+1)
-      have b1 := hypR4_sqrt_im_nonneg h2.le
-      have b2 := hypR4_sqrt_im_nonneg h1.le
+      have a1 := complexSqrt_re_nonneg (z-1)
+      have a2 := complexSqrt_re_nonneg (z+1)
+      have b1 := complexSqrt_im_nonneg h2.le
+      have b2 := complexSqrt_im_nonneg h1.le
       simp only [Complex.add_im, Complex.mul_im]
       nlinarith [mul_nonneg a1 b2, mul_nonneg a2 b1]
     have hx : -z + -I*Complex.sqrt (z+1)*(-I*Complex.sqrt (z-1)) =
         -(z + Complex.sqrt (z-1)*Complex.sqrt (z+1)) := by
       linear_combination Complex.sqrt (z+1)*Complex.sqrt (z-1)*hI
-    rw [hx, hypR4_log_neg_of_im_pos hu]
+    rw [hx, complexLog_neg_of_im_pos hu]
     ring
 
 /-- The reciprocal version of the corrected principal arccosh sign relation. -/
@@ -154,35 +177,35 @@ theorem arcsinh_log {z : ℂ} : arcsinh z=Complex.log (Complex.sqrt (z^2+1)+z) :
   rfl
 
 /-- The principal square root is continuous off the open negative real axis. -/
-private lemma hypR4_sqrt_continuousAt {w : ℂ} (h : 0 ≤ w.re ∨ w.im ≠ 0) :
+private lemma continuousAt_complexSqrt {w : ℂ} (h : 0 ≤ w.re ∨ w.im ≠ 0) :
     ContinuousAt Complex.sqrt w := by
   have := Complex.continuousAt_cpow_const_of_re_pos (w := (2⁻¹:ℂ)) h (by norm_num)
   exact this
 
 /-- One-sided limit of the principal square root at the cut, from the upper half-plane. -/
-private lemma hypR4_sqrt_tendsto_upper {f : ℝ → ℂ} {l : Filter ℝ} {w₀ : ℂ}
+private lemma tendsto_complexSqrt_cut_upper {f : ℝ → ℂ} {l : Filter ℝ} {w₀ : ℂ}
     (hf : Tendsto f l (𝓝 w₀)) (hre : w₀.re ≤ 0) (him : ∀ᶠ ε in l, 0 < (f ε).im) :
     Tendsto (fun ε => Complex.sqrt (f ε)) l (𝓝 (I*Complex.sqrt (-w₀))) := by
-  have hc := ((hypR4_sqrt_continuousAt (w := -w₀) (Or.inl (by simp; linarith))).tendsto.comp
+  have hc := ((continuousAt_complexSqrt (w := -w₀) (Or.inl (by simp; linarith))).tendsto.comp
     hf.neg).const_mul I
   refine hc.congr' (him.mono fun ε hε => ?_)
   simp only [Function.comp_apply]
-  rw [hypR4_sqrt_neg_of_im_pos hε]
+  rw [complexSqrt_neg_of_im_pos hε]
   linear_combination (-(Complex.sqrt (f ε))) * (by simp : (I:ℂ)^2 = -1)
 
 /-- One-sided limit of the principal square root at the cut, from the lower half-plane. -/
-private lemma hypR4_sqrt_tendsto_lower {f : ℝ → ℂ} {l : Filter ℝ} {w₀ : ℂ}
+private lemma tendsto_complexSqrt_cut_lower {f : ℝ → ℂ} {l : Filter ℝ} {w₀ : ℂ}
     (hf : Tendsto f l (𝓝 w₀)) (hre : w₀.re ≤ 0) (him : ∀ᶠ ε in l, (f ε).im < 0) :
     Tendsto (fun ε => Complex.sqrt (f ε)) l (𝓝 (-I*Complex.sqrt (-w₀))) := by
-  have hc := ((hypR4_sqrt_continuousAt (w := -w₀) (Or.inl (by simp; linarith))).tendsto.comp
+  have hc := ((continuousAt_complexSqrt (w := -w₀) (Or.inl (by simp; linarith))).tendsto.comp
     hf.neg).const_mul (-I)
   refine hc.congr' (him.mono fun ε hε => ?_)
   simp only [Function.comp_apply]
-  rw [hypR4_sqrt_neg_of_im_neg hε]
+  rw [complexSqrt_neg_of_im_neg hε]
   linear_combination (-(Complex.sqrt (f ε))) * (by simp : (I:ℂ)^2 = -1)
 
 /-- Limits of the principal logarithm at a point `i t` of the positive imaginary axis. -/
-private lemma hypR4_tendsto_log_I {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : 0 < t)
+private lemma tendsto_complexLog_I_mul {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : 0 < t)
     (hg : Tendsto g l (𝓝 (I*t))) :
     Tendsto (fun ε => Complex.log (g ε)) l (𝓝 (Real.log t + π/2*I)) := by
   have hs : I*(t:ℂ) ∈ Complex.slitPlane := by
@@ -192,7 +215,7 @@ private lemma hypR4_tendsto_log_I {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (
   exact h
 
 /-- Limits of the principal logarithm at a point `-i t` of the negative imaginary axis. -/
-private lemma hypR4_tendsto_log_negI {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : 0 < t)
+private lemma tendsto_complexLog_neg_I_mul {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : 0 < t)
     (hg : Tendsto g l (𝓝 (-I*t))) :
     Tendsto (fun ε => Complex.log (g ε)) l (𝓝 (Real.log t - π/2*I)) := by
   have hs : -I*(t:ℂ) ∈ Complex.slitPlane := by
@@ -203,7 +226,7 @@ private lemma hypR4_tendsto_log_negI {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ
   rw [e]; exact h
 
 /-- The quantity `ε + i y` tends to `i y` along any filter tending to zero. -/
-private lemma hypR4_tendsto_line {l : Filter ℝ} (hl : l ≤ 𝓝 0) (c : ℂ) :
+private lemma tendsto_ofReal_add_const {l : Filter ℝ} (hl : l ≤ 𝓝 0) (c : ℂ) :
     Tendsto (fun ε : ℝ => (ε:ℂ)+c) l (𝓝 c) := by
   have : Tendsto (fun ε : ℝ => (ε:ℂ)+c) (𝓝 0) (𝓝 (((0:ℝ):ℂ)+c)) :=
     ((Complex.continuous_ofReal.add continuous_const).tendsto 0)
@@ -228,26 +251,26 @@ theorem arcsinh_upper_cut {y : ℝ} (hy : 1≤y) :
   have hinv : y - r = (r+y)⁻¹ := eq_inv_of_mul_eq_one_left (by linear_combination -hr2)
   have hz : ∀ {l : Filter ℝ}, l ≤ 𝓝 0 →
       Tendsto (fun ε : ℝ => ((ε:ℂ)+I*y)^2+1) l (𝓝 ((I*(y:ℂ))^2+1)) := fun hl =>
-    ((hypR4_tendsto_line hl (I*y)).pow 2).add_const 1
+    ((tendsto_ofReal_add_const hl (I*y)).pow 2).add_const 1
   have hw0 : ((I*(y:ℂ))^2+1).re ≤ 0 := by simp [pow_two]; nlinarith
   constructor
   · have him : ∀ᶠ ε in 𝓝[>] (0:ℝ), 0 < (((ε:ℂ)+I*y)^2+1).im :=
       eventually_mem_nhdsWithin.mono fun ε (hε : 0 < ε) => by
         simp [pow_two]; nlinarith
-    have hs := hypR4_sqrt_tendsto_upper (hz nhdsWithin_le_nhds) hw0 him
+    have hs := tendsto_complexSqrt_cut_upper (hz nhdsWithin_le_nhds) hw0 him
     rw [hsq] at hs
-    have hg := hs.add (hypR4_tendsto_line nhdsWithin_le_nhds (I*y))
-    have := hypR4_tendsto_log_I (t := r+y) (by linarith) (by convert hg using 2; push_cast; ring)
+    have hg := hs.add (tendsto_ofReal_add_const nhdsWithin_le_nhds (I*y))
+    have := tendsto_complexLog_I_mul (t := r+y) (by linarith) (by convert hg using 2; push_cast; ring)
     have e : (π*I/2+((Real.log (Real.sqrt (y^2-1)+y)):ℂ)) = (Real.log (r+y) + π/2*I) := by
       rw [← hr]; ring
     rw [e]; exact this
   · have him : ∀ᶠ ε in 𝓝[<] (0:ℝ), (((ε:ℂ)+I*y)^2+1).im < 0 :=
       eventually_mem_nhdsWithin.mono fun ε (hε : ε < 0) => by
         simp [pow_two]; nlinarith
-    have hs := hypR4_sqrt_tendsto_lower (hz nhdsWithin_le_nhds) hw0 him
+    have hs := tendsto_complexSqrt_cut_lower (hz nhdsWithin_le_nhds) hw0 him
     rw [hsq] at hs
-    have hg := hs.add (hypR4_tendsto_line nhdsWithin_le_nhds (I*y))
-    have := hypR4_tendsto_log_I (t := y-r) (by linarith) (by convert hg using 2; push_cast; ring)
+    have hg := hs.add (tendsto_ofReal_add_const nhdsWithin_le_nhds (I*y))
+    have := tendsto_complexLog_I_mul (t := y-r) (by linarith) (by convert hg using 2; push_cast; ring)
     have e : (π*I/2-((Real.log (Real.sqrt (y^2-1)+y)):ℂ)) = (Real.log (y-r) + π/2*I) := by
       rw [← hr, hinv, Real.log_inv]; push_cast; ring
     rw [e]; exact this
@@ -271,32 +294,32 @@ theorem arcsinh_lower_cut {y : ℝ} (hy : y≤ -1) :
   have hinv : -y - r = (r-y)⁻¹ := eq_inv_of_mul_eq_one_left (by linear_combination -hr2)
   have hz : ∀ {l : Filter ℝ}, l ≤ 𝓝 0 →
       Tendsto (fun ε : ℝ => ((ε:ℂ)+I*y)^2+1) l (𝓝 ((I*(y:ℂ))^2+1)) := fun hl =>
-    ((hypR4_tendsto_line hl (I*y)).pow 2).add_const 1
+    ((tendsto_ofReal_add_const hl (I*y)).pow 2).add_const 1
   have hw0 : ((I*(y:ℂ))^2+1).re ≤ 0 := by simp [pow_two]; nlinarith
   constructor
   · have him : ∀ᶠ ε in 𝓝[>] (0:ℝ), (((ε:ℂ)+I*y)^2+1).im < 0 :=
       eventually_mem_nhdsWithin.mono fun ε (hε : 0 < ε) => by
         simp [pow_two]; nlinarith
-    have hs := hypR4_sqrt_tendsto_lower (hz nhdsWithin_le_nhds) hw0 him
+    have hs := tendsto_complexSqrt_cut_lower (hz nhdsWithin_le_nhds) hw0 him
     rw [hsq] at hs
-    have hg := hs.add (hypR4_tendsto_line nhdsWithin_le_nhds (I*y))
-    have := hypR4_tendsto_log_negI (t := r-y) (by linarith) (by convert hg using 2; push_cast; ring)
+    have hg := hs.add (tendsto_ofReal_add_const nhdsWithin_le_nhds (I*y))
+    have := tendsto_complexLog_neg_I_mul (t := r-y) (by linarith) (by convert hg using 2; push_cast; ring)
     have e : (-π*I/2+((Real.log (Real.sqrt (y^2-1)-y)):ℂ)) = (Real.log (r-y) - π/2*I) := by
       rw [← hr]; ring
     rw [e]; exact this
   · have him : ∀ᶠ ε in 𝓝[<] (0:ℝ), 0 < (((ε:ℂ)+I*y)^2+1).im :=
       eventually_mem_nhdsWithin.mono fun ε (hε : ε < 0) => by
         simp [pow_two]; nlinarith
-    have hs := hypR4_sqrt_tendsto_upper (hz nhdsWithin_le_nhds) hw0 him
+    have hs := tendsto_complexSqrt_cut_upper (hz nhdsWithin_le_nhds) hw0 him
     rw [hsq] at hs
-    have hg := hs.add (hypR4_tendsto_line nhdsWithin_le_nhds (I*y))
-    have := hypR4_tendsto_log_negI (t := -y-r) (by linarith) (by convert hg using 2; push_cast; ring)
+    have hg := hs.add (tendsto_ofReal_add_const nhdsWithin_le_nhds (I*y))
+    have := tendsto_complexLog_neg_I_mul (t := -y-r) (by linarith) (by convert hg using 2; push_cast; ring)
     have e : (-π*I/2-((Real.log (Real.sqrt (y^2-1)-y)):ℂ)) = (Real.log (-y-r) - π/2*I) := by
       rw [← hr, hinv, Real.log_inv]; push_cast; ring
     rw [e]; exact this
 
 /-- The right half of the inverse-cosh domain is star-convex about `2`. -/
-private lemma hypR4_acosh_right_starConvex :
+private lemma arccoshDomain_right_starConvex :
     StarConvex ℝ (2:ℂ) {z : ℂ | z ∈ arccoshDomain ∧ 0 < z.re} := by
   intro y hy a b ha hb hab
   obtain ⟨hyd, hyr⟩ := hy
@@ -317,7 +340,7 @@ private lemma hypR4_acosh_right_starConvex :
     · nlinarith [mul_pos hb0 (sub_pos.mpr hr)]
 
 /-- On the right half of its domain the factored inverse-cosh root is the principal `√(z²-1)`. -/
-private lemma hypR4_acosh_root_pos {z : ℂ} (hz : z ∈ arccoshDomain) (hre : 0 < z.re) :
+private lemma sqrt_sub_one_mul_sqrt_add_one_of_re_pos {z : ℂ} (hz : z ∈ arccoshDomain) (hre : 0 < z.re) :
     Complex.sqrt (z-1)*Complex.sqrt (z+1) = Complex.sqrt (z^2-1) := by
   set V := {z : ℂ | z ∈ arccoshDomain ∧ 0 < z.re}
   have hVo : IsOpen V := by
@@ -328,7 +351,7 @@ private lemma hypR4_acosh_root_pos {z : ℂ} (hz : z ∈ arccoshDomain) (hre : 0
     exact this.inter (isOpen_lt continuous_const Complex.continuous_re)
   have h2V : (2:ℂ) ∈ V := ⟨Or.inr (by norm_num), by norm_num⟩
   have hVc : IsPreconnected V :=
-    (hypR4_acosh_right_starConvex.isPathConnected h2V).isConnected.isPreconnected
+    (arccoshDomain_right_starConvex.isPathConnected h2V).isConnected.isPreconnected
   have hslit : ∀ w ∈ V, w^2-1 ∈ Complex.slitPlane := by
     rintro w ⟨hw, hwr⟩
     rw [Complex.mem_slitPlane_iff]
@@ -341,7 +364,7 @@ private lemma hypR4_acosh_root_pos {z : ℂ} (hz : z ∈ arccoshDomain) (hre : 0
   have hr : AnalyticOnNhd ℂ (fun w => Complex.sqrt (w-1)*Complex.sqrt (w+1)) V := by
     apply DifferentiableOn.analyticOnNhd _ hVo
     intro w hw
-    obtain ⟨h1, h2⟩ := hypR4_acosh_slit hw.1
+    obtain ⟨h1, h2⟩ := sub_one_add_one_mem_slitPlane_of_mem_arccoshDomain hw.1
     exact (((Complex.differentiableAt_sqrt h1).comp w (differentiableAt_id.sub_const 1)).mul
       ((Complex.differentiableAt_sqrt h2).comp w (differentiableAt_id.add_const 1))).differentiableWithinAt
   have hs : AnalyticOnNhd ℂ (fun w => Complex.sqrt (w^2-1)) V := by
@@ -350,7 +373,7 @@ private lemma hypR4_acosh_root_pos {z : ℂ} (hz : z ∈ arccoshDomain) (hre : 0
     exact ((Complex.differentiableAt_sqrt (hslit w hw)).comp w
       (by fun_prop : DifferentiableAt ℂ (fun w : ℂ => w^2-1) w)).differentiableWithinAt
   have h1 : Complex.sqrt 1 = 1 := by simp [Complex.sqrt]
-  refine hypR4_sq_eq_continuation hVo hVc hr hs ?_ h2V ?_ ?_ z ⟨hz, hre⟩
+  refine eqOn_of_sq_eq_of_analyticOnNhd hVo hVc hr hs ?_ h2V ?_ ?_ z ⟨hz, hre⟩
   · intro w _; rw [mul_pow, trig_sqrt_sq, trig_sqrt_sq, trig_sqrt_sq]; ring
   · norm_num [h1]
   · intro h
@@ -358,7 +381,7 @@ private lemma hypR4_acosh_root_pos {z : ℂ} (hz : z ∈ arccoshDomain) (hre : 0
     rw [h] at this; norm_num at this
 
 /-- The factored inverse-cosh root is `±√(z²-1)` according to the sign of `Re z`. -/
-lemma hypR4_acosh_root_signed {z : ℂ} (hz : z ∈ arccoshDomain) (hre : z.re ≠ 0) :
+lemma sqrt_sub_one_mul_sqrt_add_one_eq_sign_mul_sqrt {z : ℂ} (hz : z ∈ arccoshDomain) (hre : z.re ≠ 0) :
     Complex.sqrt (z-1)*Complex.sqrt (z+1) = (if 0<z.re then 1 else -1)*Complex.sqrt (z^2-1) := by
   rcases lt_or_gt_of_ne hre with hneg | hpos
   · simp only [show ¬ (0 < z.re) from not_lt.mpr hneg.le, ↓reduceIte]
@@ -367,22 +390,22 @@ lemma hypR4_acosh_root_signed {z : ℂ} (hz : z ∈ arccoshDomain) (hre : z.re �
       · exact h
       · linarith
     have hz' : -z ∈ arccoshDomain := Or.inl (by simpa using him)
-    have h := hypR4_acosh_root_pos hz' (by simpa using hneg)
+    have h := sqrt_sub_one_mul_sqrt_add_one_of_re_pos hz' (by simpa using hneg)
     rw [show (-z)^2-1 = z^2-1 by ring, show -z-1 = -(z+1) by ring,
       show -z+1 = -(z-1) by ring] at h
     rcases lt_or_gt_of_ne him with hi | hi
-    · rw [hypR4_sqrt_neg_of_im_neg (by simpa using hi), hypR4_sqrt_neg_of_im_neg (by simpa using hi)] at h
+    · rw [complexSqrt_neg_of_im_neg (by simpa using hi), complexSqrt_neg_of_im_neg (by simpa using hi)] at h
       rw [← h]; linear_combination (Complex.sqrt (z-1)*Complex.sqrt (z+1))*Complex.I_sq
-    · rw [hypR4_sqrt_neg_of_im_pos (by simpa using hi), hypR4_sqrt_neg_of_im_pos (by simpa using hi)] at h
+    · rw [complexSqrt_neg_of_im_pos (by simpa using hi), complexSqrt_neg_of_im_pos (by simpa using hi)] at h
       rw [← h]; linear_combination (Complex.sqrt (z-1)*Complex.sqrt (z+1))*Complex.I_sq
-  · simp only [hpos, ↓reduceIte, one_mul]; exact hypR4_acosh_root_pos hz hpos
+  · simp only [hpos, ↓reduceIte, one_mul]; exact sqrt_sub_one_mul_sqrt_add_one_of_re_pos hz hpos
 
 /-- Identity under the stated parameter and domain assumptions: `arccosh z=Complex.log ((if 0<z.re
 then 1 else -1)*Complex.sqrt (z^2-1)+z)`. -/
 @[dlmf 4.37.E19]
 theorem arccosh_log {z : ℂ} (hz : z ∈ arccoshDomain) (hre : z.re≠0) :
     arccosh z=Complex.log ((if 0<z.re then 1 else -1)*Complex.sqrt (z^2-1)+z) := by
-  rw [arccosh, hypR4_acosh_root_signed hz hre, add_comm]
+  rw [arccosh, sqrt_sub_one_mul_sqrt_add_one_eq_sign_mul_sqrt hz hre, add_comm]
 
 /-- Identity under the stated parameter and domain assumptions: `arccosh (I*y)=(if 0<y then 1 else
 -1)*π*I/2+ (Real.log (Real.sqrt (y^2+1)+(if 0<y then y else -y)):ℂ)`. -/
@@ -404,13 +427,13 @@ theorem arccosh_imaginary {y : ℝ} (hy : y≠0) :
   have hfac : (S - I*r)*(S + I*r) = 0 := by linear_combination hS2 - (r:ℂ)^2*hI
   unfold arccosh
   rw [← hSdef]
-  have a1 := hypR4_sqrt_re_nonneg (I*y-1)
-  have a2 := hypR4_sqrt_re_nonneg (I*y+1)
+  have a1 := complexSqrt_re_nonneg (I*y-1)
+  have a2 := complexSqrt_re_nonneg (I*y+1)
   rcases lt_or_gt_of_ne hy with hn | hp
   · have h1 : (I*y+1).im < 0 := by simpa using hn
     have h2 : (I*y-1).im < 0 := by simpa using hn
-    have b1 := hypR4_sqrt_im_nonpos h2
-    have b2 := hypR4_sqrt_im_nonpos h1
+    have b1 := complexSqrt_im_nonpos h2
+    have b2 := complexSqrt_im_nonpos h1
     have hSim : S.im ≤ 0 := by
       rw [hSdef, Complex.mul_im]
       nlinarith [mul_nonpos_of_nonneg_of_nonpos a1 b2, mul_nonpos_of_nonneg_of_nonpos a2 b1]
@@ -425,8 +448,8 @@ theorem arccosh_imaginary {y : ℝ} (hy : y≠0) :
     rw [Complex.log_neg_I]; ring
   · have h1 : 0 < (I*y+1).im := by simpa using hp
     have h2 : 0 < (I*y-1).im := by simpa using hp
-    have b1 := hypR4_sqrt_im_nonneg h2.le
-    have b2 := hypR4_sqrt_im_nonneg h1.le
+    have b1 := complexSqrt_im_nonneg h2.le
+    have b2 := complexSqrt_im_nonneg h1.le
     have hSim : 0 ≤ S.im := by
       rw [hSdef, Complex.mul_im]
       nlinarith [mul_nonneg a1 b2, mul_nonneg a2 b1]
@@ -441,7 +464,7 @@ theorem arccosh_imaginary {y : ℝ} (hy : y≠0) :
     rw [Complex.log_I]; ring
 
 /-- The principal square root has positive real part off the closed negative real axis. -/
-private lemma hypR4_sqrt_re_pos {w : ℂ} (h : w.im ≠ 0 ∨ 0 < w.re) : 0 < (Complex.sqrt w).re := by
+private lemma complexSqrt_re_pos {w : ℂ} (h : w.im ≠ 0 ∨ 0 < w.re) : 0 < (Complex.sqrt w).re := by
   rw [Complex.sqrt, Complex.cpow_inv_two_re]
   apply Real.sqrt_pos.mpr
   rcases h with h | h
@@ -450,7 +473,7 @@ private lemma hypR4_sqrt_re_pos {w : ℂ} (h : w.im ≠ 0 ∨ 0 < w.re) : 0 < (C
   · linarith [Complex.re_le_norm w]
 
 /-- Halving under the principal square root. -/
-private lemma hypR4_sqrt_half {w : ℂ} (_h : w.im ≠ 0 ∨ 0 < w.re) :
+private lemma complexSqrt_div_two {w : ℂ} :
     Complex.sqrt (w/2) = Complex.sqrt w*((Real.sqrt 2)⁻¹:ℝ) := by
   have hs := Complex.sqrt_ofReal_mul (by norm_num : (0:ℝ)≤1/2) w
   simpa only [Complex.ofReal_div, Complex.ofReal_one, Complex.ofReal_ofNat,
@@ -458,7 +481,7 @@ private lemma hypR4_sqrt_half {w : ℂ} (_h : w.im ≠ 0 ∨ 0 < w.re) :
     div_eq_mul_inv] using hs
 
 /-- `log (u²) = 2 log u` in the open right half-plane. -/
-private lemma hypR4_log_sq_of_re_pos {u : ℂ} (h : 0 < u.re) :
+private lemma complexLog_sq_of_re_pos {u : ℂ} (h : 0 < u.re) :
     Complex.log (u^2) = 2*Complex.log u := by
   have hu0 : u ≠ 0 := fun e => by rw [e] at h; simp at h
   have harg : |Complex.arg u| < π/2 := Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl h)
@@ -486,15 +509,15 @@ theorem arccosh_log_half {z : ℂ} (hz : z ∈ arccoshDomain) :
     rw [← Complex.ofReal_pow, inv_pow, Real.sq_sqrt (by norm_num)]; push_cast; ring
   have hsum : Complex.sqrt ((z+1)/2)+Complex.sqrt ((z-1)/2) =
       (Complex.sqrt (z+1)+Complex.sqrt (z-1))*((Real.sqrt 2)⁻¹:ℝ) := by
-    rw [hypR4_sqrt_half hp, hypR4_sqrt_half hm]; ring
+    rw [complexSqrt_div_two, complexSqrt_div_two]; ring
   have hre : 0 < (Complex.sqrt ((z+1)/2)+Complex.sqrt ((z-1)/2)).re := by
     rw [Complex.add_re]
-    have := hypR4_sqrt_re_pos (show ((z+1)/2).im ≠ 0 ∨ 0 < ((z+1)/2).re by
+    have := complexSqrt_re_pos (show ((z+1)/2).im ≠ 0 ∨ 0 < ((z+1)/2).re by
       rcases hp with h | h
       · left; simpa using h
       · right; simp; linarith [show 0 < (z+1).re from h, show (z+1).re = z.re+1 by simp])
-    linarith [hypR4_sqrt_re_nonneg ((z-1)/2)]
-  rw [← hypR4_log_sq_of_re_pos hre, hsum, mul_pow, h2, add_sq, trig_sqrt_sq, trig_sqrt_sq]
+    linarith [complexSqrt_re_nonneg ((z-1)/2)]
+  rw [← complexLog_sq_of_re_pos hre, hsum, mul_pow, h2, add_sq, trig_sqrt_sq, trig_sqrt_sq]
   unfold arccosh
   congr 1
   ring
@@ -518,7 +541,7 @@ theorem arccosh_inner_cut {x : ℝ} (hx : -1<x ∧ x≤1) :
     have hc : Tendsto (fun ε : ℝ => (x:ℂ)+I*ε+1) (𝓝 0) (𝓝 ((x+1:ℝ):ℂ)) := by
       have : Continuous (fun ε : ℝ => (x:ℂ)+I*ε+1) := by fun_prop
       simpa using this.tendsto 0
-    have := (hypR4_sqrt_continuousAt (w := ((x+1:ℝ):ℂ)) (Or.inl (by simp; linarith))).tendsto.comp hc
+    have := (continuousAt_complexSqrt (w := ((x+1:ℝ):ℂ)) (Or.inl (by simp; linarith))).tendsto.comp hc
     rwa [hyper_sqrt_ofReal _ (by linarith)] at this
   have hm : Tendsto (fun ε : ℝ => (x:ℂ)+I*ε-1) (𝓝 0) (𝓝 ((x:ℂ)-1)) := by
     have : Continuous (fun ε : ℝ => (x:ℂ)+I*ε-1) := by fun_prop
@@ -540,7 +563,7 @@ theorem arccosh_inner_cut {x : ℝ} (hx : -1<x ∧ x≤1) :
   constructor
   · have him : ∀ᶠ ε : ℝ in 𝓝[>] (0:ℝ), 0 < ((x:ℂ)+I*(ε:ℂ)-1).im :=
       eventually_mem_nhdsWithin.mono fun ε (hε : 0 < ε) => by simpa using hε
-    have h1 := hypR4_sqrt_tendsto_upper (hm.mono_left nhdsWithin_le_nhds) hmre him
+    have h1 := tendsto_complexSqrt_cut_upper (hm.mono_left nhdsWithin_le_nhds) hmre him
     rw [hneg] at h1
     have hg := (hlin.mono_left nhdsWithin_le_nhds).add (h1.mul (hp.mono_left nhdsWithin_le_nhds))
     have := (continuousAt_clog hslit).tendsto.comp
@@ -549,7 +572,7 @@ theorem arccosh_inner_cut {x : ℝ} (hx : -1<x ∧ x≤1) :
     exact this
   · have him : ∀ᶠ ε : ℝ in 𝓝[<] (0:ℝ), ((x:ℂ)+I*(ε:ℂ)-1).im < 0 :=
       eventually_mem_nhdsWithin.mono fun ε (hε : ε < 0) => by simpa using hε
-    have h1 := hypR4_sqrt_tendsto_lower (hm.mono_left nhdsWithin_le_nhds) hmre him
+    have h1 := tendsto_complexSqrt_cut_lower (hm.mono_left nhdsWithin_le_nhds) hmre him
     rw [hneg] at h1
     have hg := (hlin.mono_left nhdsWithin_le_nhds).add (h1.mul (hp.mono_left nhdsWithin_le_nhds))
     have hconj : -I*(s:ℂ)+x = (I*(s:ℂ)+x)⁻¹ := by
@@ -577,7 +600,7 @@ theorem arccosh_inner_cut {x : ℝ} (hx : -1<x ∧ x≤1) :
     exact this
 
 /-- One-sided limit of the principal logarithm at the negative real axis, from above. -/
-private lemma hypR4_tendsto_log_cut_upper {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : t < 0)
+private lemma tendsto_complexLog_cut_upper {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : t < 0)
     (hg : Tendsto g l (𝓝 (t:ℂ))) (him : ∀ᶠ ε in l, 0 ≤ (g ε).im) :
     Tendsto (fun ε => Complex.log (g ε)) l (𝓝 (Real.log (-t) + π*I)) := by
   have h := (Complex.tendsto_log_nhdsWithin_im_nonneg_of_re_neg_of_im_zero
@@ -586,7 +609,7 @@ private lemma hypR4_tendsto_log_cut_upper {g : ℝ → ℂ} {l : Filter ℝ} {t 
   exact h
 
 /-- One-sided limit of the principal logarithm at the negative real axis, from below. -/
-private lemma hypR4_tendsto_log_cut_lower {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : t < 0)
+private lemma tendsto_complexLog_cut_lower {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : t < 0)
     (hg : Tendsto g l (𝓝 (t:ℂ))) (him : ∀ᶠ ε in l, (g ε).im < 0) :
     Tendsto (fun ε => Complex.log (g ε)) l (𝓝 (Real.log (-t) - π*I)) := by
   have h := (Complex.tendsto_log_nhdsWithin_im_neg_of_re_neg_of_im_zero
@@ -630,17 +653,17 @@ theorem arccosh_outer_cut {x : ℝ} (hx : x≤ -1) :
       eventually_mem_nhdsWithin.mono fun ε (hε : 0 < ε) => by simpa using hε
     have him2 : ∀ᶠ ε : ℝ in 𝓝[>] (0:ℝ), 0 < ((x:ℂ)+I*(ε:ℂ)+1).im :=
       eventually_mem_nhdsWithin.mono fun ε (hε : 0 < ε) => by simpa using hε
-    have h1 := hypR4_sqrt_tendsto_upper (hm.mono_left nhdsWithin_le_nhds) hmre him1
-    have h2 := hypR4_sqrt_tendsto_upper (hp.mono_left nhdsWithin_le_nhds) hpre him2
+    have h1 := tendsto_complexSqrt_cut_upper (hm.mono_left nhdsWithin_le_nhds) hmre him1
+    have h2 := tendsto_complexSqrt_cut_upper (hp.mono_left nhdsWithin_le_nhds) hpre him2
     rw [hneg1] at h1; rw [hneg2] at h2
     have hg := (hlin.mono_left nhdsWithin_le_nhds).add (h1.mul h2)
     have hgim : ∀ᶠ ε : ℝ in 𝓝[>] (0:ℝ), 0 ≤ ((x:ℂ)+I*(ε:ℂ) +
         Complex.sqrt ((x:ℂ)+I*(ε:ℂ)-1)*Complex.sqrt ((x:ℂ)+I*(ε:ℂ)+1)).im :=
       (him1.and him2).mono fun ε ⟨e1, e2⟩ => by
-        have a1 := hypR4_sqrt_re_nonneg ((x:ℂ)+I*(ε:ℂ)-1)
-        have a2 := hypR4_sqrt_re_nonneg ((x:ℂ)+I*(ε:ℂ)+1)
-        have b1 := hypR4_sqrt_im_nonneg e1.le
-        have b2 := hypR4_sqrt_im_nonneg e2.le
+        have a1 := complexSqrt_re_nonneg ((x:ℂ)+I*(ε:ℂ)-1)
+        have a2 := complexSqrt_re_nonneg ((x:ℂ)+I*(ε:ℂ)+1)
+        have b1 := complexSqrt_im_nonneg e1.le
+        have b2 := complexSqrt_im_nonneg e2.le
         have hε : 0 < ε := by
           simpa using e1
         simp only [Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_re,
@@ -652,7 +675,7 @@ theorem arccosh_outer_cut {x : ℝ} (hx : x≤ -1) :
       convert hg using 2
       rw [← hprod]; push_cast
       linear_combination (-(Real.sqrt (1-x):ℂ)*(Real.sqrt (-1-x):ℂ))*hI
-    have := hypR4_tendsto_log_cut_upper hxr hg' hgim
+    have := tendsto_complexLog_cut_upper hxr hg' hgim
     have e : (π*I+(Real.log (Real.sqrt (x^2-1)-x):ℂ)) = Real.log (-(x-r)) + π*I := by
       rw [← hr]; ring_nf
     rw [e]; exact this
@@ -660,17 +683,17 @@ theorem arccosh_outer_cut {x : ℝ} (hx : x≤ -1) :
       eventually_mem_nhdsWithin.mono fun ε (hε : ε < 0) => by simpa using hε
     have him2 : ∀ᶠ ε : ℝ in 𝓝[<] (0:ℝ), ((x:ℂ)+I*(ε:ℂ)+1).im < 0 :=
       eventually_mem_nhdsWithin.mono fun ε (hε : ε < 0) => by simpa using hε
-    have h1 := hypR4_sqrt_tendsto_lower (hm.mono_left nhdsWithin_le_nhds) hmre him1
-    have h2 := hypR4_sqrt_tendsto_lower (hp.mono_left nhdsWithin_le_nhds) hpre him2
+    have h1 := tendsto_complexSqrt_cut_lower (hm.mono_left nhdsWithin_le_nhds) hmre him1
+    have h2 := tendsto_complexSqrt_cut_lower (hp.mono_left nhdsWithin_le_nhds) hpre him2
     rw [hneg1] at h1; rw [hneg2] at h2
     have hg := (hlin.mono_left nhdsWithin_le_nhds).add (h1.mul h2)
     have hgim : ∀ᶠ ε : ℝ in 𝓝[<] (0:ℝ), ((x:ℂ)+I*(ε:ℂ) +
         Complex.sqrt ((x:ℂ)+I*(ε:ℂ)-1)*Complex.sqrt ((x:ℂ)+I*(ε:ℂ)+1)).im < 0 :=
       (him1.and him2).mono fun ε ⟨e1, e2⟩ => by
-        have a1 := hypR4_sqrt_re_nonneg ((x:ℂ)+I*(ε:ℂ)-1)
-        have a2 := hypR4_sqrt_re_nonneg ((x:ℂ)+I*(ε:ℂ)+1)
-        have b1 := hypR4_sqrt_im_nonpos e1
-        have b2 := hypR4_sqrt_im_nonpos e2
+        have a1 := complexSqrt_re_nonneg ((x:ℂ)+I*(ε:ℂ)-1)
+        have a2 := complexSqrt_re_nonneg ((x:ℂ)+I*(ε:ℂ)+1)
+        have b1 := complexSqrt_im_nonpos e1
+        have b2 := complexSqrt_im_nonpos e2
         have hε : ε < 0 := by
           simpa using e1
         simp only [Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_re,
@@ -682,7 +705,7 @@ theorem arccosh_outer_cut {x : ℝ} (hx : x≤ -1) :
       convert hg using 2
       rw [← hprod]; push_cast
       linear_combination (-(Real.sqrt (1-x):ℂ)*(Real.sqrt (-1-x):ℂ))*hI
-    have := hypR4_tendsto_log_cut_lower hxr hg' hgim
+    have := tendsto_complexLog_cut_lower hxr hg' hgim
     have e : (-π*I+(Real.log (Real.sqrt (x^2-1)-x):ℂ)) = Real.log (-(x-r)) - π*I := by
       rw [← hr]; ring_nf
     rw [e]; exact this
@@ -741,7 +764,7 @@ theorem arctanh_cut {x : ℝ} (hx : 1< |x|) :
   · have hev : ∀ᶠ ε : ℝ in 𝓝[>] (0:ℝ), 0 ≤ ((1+((x:ℂ)+I*ε))/(1-((x:ℂ)+I*ε))).im :=
       eventually_mem_nhdsWithin.mono fun ε (hε : 0 < ε) => by
         rw [him]; exact (div_pos (by linarith) (hnsq ε)).le
-    have h := hypR4_tendsto_log_cut_upper ht (hcont.mono_left nhdsWithin_le_nhds) hev
+    have h := tendsto_complexLog_cut_upper ht (hcont.mono_left nhdsWithin_le_nhds) hev
     have := h.div_const 2
     rw [e] at this
     have e2 : (π*I/2+(Real.log ((x+1)/(x-1)):ℂ)/2) = ((Real.log ((x+1)/(x-1)):ℂ) + π*I)/2 := by
@@ -750,7 +773,7 @@ theorem arctanh_cut {x : ℝ} (hx : 1< |x|) :
   · have hev : ∀ᶠ ε : ℝ in 𝓝[<] (0:ℝ), ((1+((x:ℂ)+I*ε))/(1-((x:ℂ)+I*ε))).im < 0 :=
       eventually_mem_nhdsWithin.mono fun ε (hε : ε < 0) => by
         rw [him]; exact div_neg_of_neg_of_pos (by linarith) (hnsq ε)
-    have h := hypR4_tendsto_log_cut_lower ht (hcont.mono_left nhdsWithin_le_nhds) hev
+    have h := tendsto_complexLog_cut_lower ht (hcont.mono_left nhdsWithin_le_nhds) hev
     have := h.div_const 2
     rw [e] at this
     have e2 : (-π*I/2+(Real.log ((x+1)/(x-1)):ℂ)/2) = ((Real.log ((x+1)/(x-1)):ℂ) - π*I)/2 := by
@@ -790,7 +813,7 @@ theorem cosh_inverse_family (z w : ℂ) :
       linear_combination I*hk+(2*k*π)*Complex.I_sq
 
 /-- `cosh` and `sinh` in terms of `exp (2w)`, after multiplying by `2 exp w`. -/
-lemma hypR4_cosh_sinh_exp (w : ℂ) :
+lemma two_mul_exp_mul_cosh_and_sinh (w : ℂ) :
     2*Complex.exp w*Complex.cosh w = Complex.exp (2*w)+1 ∧
       2*Complex.exp w*Complex.sinh w = Complex.exp (2*w)-1 := by
   have h2 : Complex.exp (2*w) = Complex.exp w*Complex.exp w := by
@@ -806,9 +829,9 @@ lemma hypR4_cosh_sinh_exp (w : ℂ) :
 theorem tanh_inverse_family {z w : ℂ} (hz : z≠1 ∧ z≠ -1) :
     w ∈ arctanhValues z ↔ ∃ k : ℤ, w=arctanh z+(k:ℂ)*π*I := by
   have hm : 1-z ≠ 0 := sub_ne_zero.mpr (Ne.symm hz.1)
-  have hA := hypR4_arctanh_exp z hz.1 hz.2
+  have hA := exp_two_mul_arctanh_mul_one_sub z hz.1 hz.2
   have key : w ∈ arctanhValues z ↔ Complex.exp (2*w) = Complex.exp (2*arctanh z) := by
-    obtain ⟨hc, hs⟩ := hypR4_cosh_sinh_exp w
+    obtain ⟨hc, hs⟩ := two_mul_exp_mul_cosh_and_sinh w
     have hE : Complex.exp w ≠ 0 := Complex.exp_ne_zero w
     constructor
     · rintro ⟨hc0, ht⟩
@@ -835,7 +858,7 @@ theorem tanh_inverse_family {z w : ℂ} (hz : z≠1 ∧ z≠ -1) :
     exact ⟨n, by linear_combination 2*hn⟩
 
 /-- The open inverse-cosh domain is star-convex about `2`. -/
-private lemma hypR4_acosh_starConvex : StarConvex ℝ (2:ℂ) arccoshDomain := by
+private lemma arccoshDomain_starConvex : StarConvex ℝ (2:ℂ) arccoshDomain := by
   intro y hy a b ha hb hab
   have hre : (a • (2:ℂ) + b • y).re = 2*a + b*y.re := by simp; ring
   have him : (a • (2:ℂ) + b • y).im = b*y.im := by simp
@@ -849,7 +872,7 @@ private lemma hypR4_acosh_starConvex : StarConvex ℝ (2:ℂ) arccoshDomain := b
     · nlinarith [mul_pos hb0 (sub_pos.mpr hr)]
 
 /-- A real point of the inverse-sech domain lies in `(0,1)`. -/
-private lemma hypR4_asech_real {z : ℂ} (hz : z ∈ arcsechDomain) (hy : z.im = 0) :
+private lemma re_mem_Ioo_of_mem_arcsechDomain {z : ℂ} (hz : z ∈ arcsechDomain) (hy : z.im = 0) :
     0 < z.re ∧ z.re < 1 := by
   obtain ⟨hz0, hi⟩ := hz
   have he : z = (z.re:ℂ) := Complex.ext (by simp) (by simp [hy])
@@ -865,7 +888,7 @@ private lemma hypR4_asech_real {z : ℂ} (hz : z ∈ arcsechDomain) (hy : z.im =
     exact ⟨hxpos, by rwa [one_lt_inv₀ hxpos] at hi⟩
 
 /-- `z √(z⁻¹-1) √(z⁻¹+1)` is the principal `√(1-z²)` on the whole inverse-sech domain. -/
-lemma hypR4_asech_root {z : ℂ} (hz : z ∈ arcsechDomain) :
+lemma mul_sqrt_inv_sub_one_mul_sqrt_inv_add_one {z : ℂ} (hz : z ∈ arcsechDomain) :
     z*(Complex.sqrt (z⁻¹-1)*Complex.sqrt (z⁻¹+1)) = Complex.sqrt (1-z^2) := by
   have hVo : IsOpen arcsechDomain := by
     have hA : IsOpen arccoshDomain := by
@@ -881,7 +904,7 @@ lemma hypR4_asech_root {z : ℂ} (hz : z ∈ arcsechDomain) :
     · norm_num at h
   have hVc : IsPreconnected arcsechDomain := by
     have h2 : (2:ℂ) ∈ arccoshDomain := Or.inr (by norm_num)
-    have hc := (hypR4_acosh_starConvex.isPathConnected h2).isConnected.isPreconnected
+    have hc := (arccoshDomain_starConvex.isPathConnected h2).isConnected.isPreconnected
     have himg : arcsechDomain = (fun z : ℂ => z⁻¹) '' arccoshDomain := by
       ext z
       constructor
@@ -896,7 +919,7 @@ lemma hypR4_asech_root {z : ℂ} (hz : z ∈ arcsechDomain) :
     rw [Complex.mem_slitPlane_iff]
     by_cases hy : w.im = 0
     · left
-      obtain ⟨h1, h2⟩ := hypR4_asech_real hw hy
+      obtain ⟨h1, h2⟩ := re_mem_Ioo_of_mem_arcsechDomain hw hy
       simp [pow_two, Complex.mul_re, hy]; nlinarith
     · by_cases hx : w.re = 0
       · left; simp [pow_two, Complex.mul_re, hx]; nlinarith [sq_nonneg w.im]
@@ -905,7 +928,7 @@ lemma hypR4_asech_root {z : ℂ} (hz : z ∈ arcsechDomain) :
   have hr : AnalyticOnNhd ℂ (fun w => w*(Complex.sqrt (w⁻¹-1)*Complex.sqrt (w⁻¹+1))) arcsechDomain := by
     apply DifferentiableOn.analyticOnNhd _ hVo
     intro w hw
-    obtain ⟨h1, h2⟩ := hypR4_acosh_slit hw.2
+    obtain ⟨h1, h2⟩ := sub_one_add_one_mem_slitPlane_of_mem_arccoshDomain hw.2
     have hw0 := hw.1
     exact (differentiableAt_id.mul
       (((Complex.differentiableAt_sqrt h1).comp w
@@ -923,13 +946,13 @@ lemma hypR4_asech_root {z : ℂ} (hz : z ∈ arcsechDomain) :
       Complex.sqrt (1-(1/2:ℂ)^2) := by
     rw [show (1/2:ℂ)⁻¹-1 = 1 by norm_num, show (1/2:ℂ)⁻¹+1 = 3 by norm_num, h1, one_mul]
     symm
-    apply hypR4_sqrt_eq_of_sq
+    apply complexSqrt_eq_of_sq_of_re_pos
     · rw [mul_pow, trig_sqrt_sq]; norm_num
     · have : 0 < (Complex.sqrt 3).re := by
         rw [Complex.sqrt, Complex.cpow_inv_two_re]
         apply Real.sqrt_pos.mpr; norm_num
       simpa using this
-  refine hypR4_sq_eq_continuation hVo hVc hr hs ?_ hhalf hanchor ?_ z hz
+  refine eqOn_of_sq_eq_of_analyticOnNhd hVo hVc hr hs ?_ hhalf hanchor ?_ z hz
   · intro w hw
     have hw0 := hw.1
     rw [mul_pow, mul_pow, trig_sqrt_sq, trig_sqrt_sq, trig_sqrt_sq]; field_simp; ring
@@ -938,12 +961,12 @@ lemma hypR4_asech_root {z : ℂ} (hz : z ∈ arcsechDomain) :
     rw [h] at this; norm_num at this
 
 /-- On the inverse-sech domain, `1-z²` lies in the slit plane. -/
-lemma hypR4_asech_slit {w : ℂ} (hw : w ∈ arcsechDomain) :
+lemma one_sub_sq_mem_slitPlane_of_mem_arcsechDomain {w : ℂ} (hw : w ∈ arcsechDomain) :
     1-w^2 ∈ Complex.slitPlane := by
   rw [Complex.mem_slitPlane_iff]
   by_cases hy : w.im = 0
   · left
-    obtain ⟨h1, h2⟩ := hypR4_asech_real hw hy
+    obtain ⟨h1, h2⟩ := re_mem_Ioo_of_mem_arcsechDomain hw hy
     simp [pow_two, Complex.mul_re, hy]; nlinarith
   · by_cases hx : w.re = 0
     · left; simp [pow_two, Complex.mul_re, hx]; nlinarith [sq_nonneg w.im]
@@ -960,7 +983,7 @@ theorem arcsech_arccoth_interrelation {a : ℂ} (hre : 0<a.re) (ha : a∈arcsech
     rw [hqdef, Complex.sqrt, Complex.cpow_inv_two_re]; exact Real.sqrt_nonneg _
   have hq0 : q ≠ 0 := by
     intro h; rw [h] at hq2
-    exact Complex.slitPlane_ne_zero (hypR4_asech_slit ha) (by rw [← hq2]; ring)
+    exact Complex.slitPlane_ne_zero (one_sub_sq_mem_slitPlane_of_mem_arcsechDomain ha) (by rw [← hq2]; ring)
   have hq1 : 1+q ≠ 0 := by
     intro h; have : q = -1 := by linear_combination h
     rw [this] at hqre; norm_num at hqre
@@ -984,7 +1007,7 @@ theorem arcsech_arccoth_interrelation {a : ℂ} (hre : 0<a.re) (ha : a∈arcsech
     rw [← huinv, Complex.add_re] at h2
     linarith
   have hS : a⁻¹ + Complex.sqrt (a⁻¹-1)*Complex.sqrt (a⁻¹+1) = u := by
-    have e := hypR4_asech_root ha
+    have e := mul_sqrt_inv_sub_one_mul_sqrt_inv_add_one ha
     rw [← hqdef] at e
     rw [hu, eq_div_iff ha0]
     linear_combination e + mul_inv_cancel₀ ha0
@@ -1022,8 +1045,8 @@ private lemma arccosh_half_right {z : ℂ} (hz : 0<z.re) :
   have hp : 0<((z+1)/2).re := by simp; linarith
   have hre : 0<(Complex.sqrt ((z+1)/2)+Complex.sqrt ((z-1)/2)).re := by
     rw [Complex.add_re]
-    linarith [hypR4_sqrt_re_pos (Or.inr hp), hypR4_sqrt_re_nonneg ((z-1)/2)]
-  have hlog := hypR4_log_sq_of_re_pos hre
+    linarith [complexSqrt_re_pos (Or.inr hp), complexSqrt_re_nonneg ((z-1)/2)]
+  have hlog := complexLog_sq_of_re_pos hre
   rw [hs,hs,add_sq,mul_pow,mul_pow,hc2,trig_sqrt_sq,trig_sqrt_sq] at hlog
   unfold arccosh arcsinh
   rw [trig_sqrt_sq,show (z-1)/2+1=(z+1)/2 by ring]

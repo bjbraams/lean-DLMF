@@ -14,6 +14,11 @@ For a convergent bivariate power series, a local representation as `f(x) * g(y)`
 forces `c(1, 1) * c(0, 0) = c(1, 0) * c(0, 1)`. The proof restricts the series to
 its coordinate axes and diagonal, differentiates term by term, and uses Mathlib's
 Leibniz rule `iteratedDeriv_fun_mul`.
+
+## Main results
+
+* `Complex.not_exists_mul_analyticAt_of_coeff_ne`: if `c(1, 1) c(0, 0) ≠ c(1, 0) c(0, 1)`, the
+  sum is not locally a product of one-variable analytic functions.
 -/
 
 @[expose] public noncomputable section

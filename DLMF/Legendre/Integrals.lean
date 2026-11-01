@@ -12,8 +12,7 @@ public import DLMF.Legendre.Integrals.ExteriorGreen
 /-!
 # Definite integrals, orthogonality and primitive formulas
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This umbrella imports the definite integrals of Legendre functions (DLMF §14.17): orthogonality
+and Green-type integrals of Ferrers functions on `(-1, 1)`, diagonal integrals, and integrals of
+associated Legendre functions on `(1, ∞)`.
 -/

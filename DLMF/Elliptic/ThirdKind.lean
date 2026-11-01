@@ -9,15 +9,29 @@ public import DLMF.Elliptic.Basic.Integrals
 public import DLMF.Elliptic.Jacobi
 
 /-!
-# The elliptic integral of the third kind (Temme (12.17), DLMF §19.2)
+# The elliptic integral of the third kind
 
 For `n < 1` and `m < 1` the integrand `(1 - n sin²θ)⁻¹ (1 - m sin²θ)^{-1/2}` is continuous, so
-`Π(φ, n, m) = ∫₀^φ (1 - n sin²θ)⁻¹ (1 - m sin²θ)^{-1/2} dθ` needs no principal value; the argument
-order is DLMF's, with characteristic `n = α²` and parameter `m = k²`. It is odd and
-quasi-periodic, `Π(φ+π, n, m) = Π(φ, n, m) + 2Π(n, m)`, and `Π(φ, 0, m) = F(φ, m)`. At `m = 0` it
-is elementary: with `c = √(1-n)`,
-`Π(φ, n, 0) = (φ - arctan((1-c) sin φ cos φ/(cos²φ + c sin²φ)))/c`, which is `arctan(c tan φ)/c` on
-`(-π/2, π/2)` but is smooth on all of `ℝ`. In particular `Π(n, 0) = π/(2√(1-n))`.
+`Π(φ, n, m) = ∫₀^φ (1 - n sin²θ)⁻¹ (1 - m sin²θ)^{-1/2} dθ` needs no principal value
+(Temme (12.17), DLMF §19.2). The argument order is DLMF's, with characteristic `n = α²` and
+parameter `m = k²`.
+
+## Main results
+
+* `Real.incEllIntPim_char_zero`: `Π(φ, 0, m) = F(φ, m)`.
+* `Real.hasDerivAt_incEllIntPim`: `∂Π/∂φ = (1 - n sin²φ)⁻¹ (1 - m sin²φ)^{-1/2}`.
+* `Real.incEllIntPim_neg`, `Real.incEllIntPim_add_pi`: oddness and quasi-periodicity
+  `Π(φ + π, n, m) = Π(φ, n, m) + 2Π(n, m)` (DLMF §19.2(ii)).
+* `Real.incEllIntPim_param_zero`: the closed form at `m = 0`.
+* `Real.compEllIntPim_param_zero`: `Π(n, 0) = π/(2√(1-n))`.
+* `Real.compEllIntPim_param_zero_le`, `Real.compEllIntPim_ge_min_mul_compEllIntKm`: lower bounds
+  for the complete integral.
+
+## Implementation notes
+
+At `m = 0`, with `c = √(1-n)`,
+`Π(φ, n, 0) = (φ - arctan((1-c) sin φ cos φ/(cos²φ + c sin²φ)))/c`, which is `arctan(c tan φ)/c`
+on `(-π/2, π/2)` but is smooth on all of `ℝ`.
 -/
 
 @[expose] public section

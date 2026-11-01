@@ -14,15 +14,19 @@ public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 /-!
 # Linear second-order differential equations: definitions (DLMF §1.13)
 
+## Main definitions
+
 * `IsLinODE2SolOn f g r w D` (1.13.1, 1.13.8): `w'' + f w' + g w = r` on `D`, with genuine
   differentiability of `w` and of `w'` at every point of `D` (so the totalized `deriv` cannot
   make a nonsolution satisfy the equation); `r = 0` is the homogeneous equation 1.13.1.
 * `IsFundamentalPair f g w₁ w₂ D` (1.13.2).
-* `ODE.wronskian w₁ w₂` (1.13.4) and the `n`-argument Wronskian `wronskianN`.
+* `wronskianN`: the `n`-argument Wronskian; the two-argument Wronskian 1.13.4 is
+  `ODE.wronskian w₁ w₂`.
 * `schwarzian z ζ` (1.13.20): `{z, ζ} = z'''/z' - (3/2)(z''/z')²`, derivatives with respect
   to `ζ`.
-* The Sturm–Liouville equation 1.13.26 (`IsSturmLiouvilleSolOn`), the unmixed and periodic
-  boundary conditions 1.13.27–1.13.28 and the eigenvalues of a regular Sturm–Liouville system.
+* `IsSturmLiouvilleSolOn` (1.13.26), `SLUnmixedBC`, `SLPeriodicBC` (1.13.27–1.13.28),
+  `IsRegularSLEigenvalue`, `IsPeriodicSLEigenvalue`: the Sturm–Liouville equation, its boundary
+  conditions and the eigenvalues of a regular Sturm–Liouville system (§1.13(viii)).
 -/
 
 @[expose] public noncomputable section

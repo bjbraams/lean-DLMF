@@ -15,15 +15,37 @@ public import Mathlib.Tactic.Polynomial.Basic
 /-!
 # The Painlevé equations: DLMF §32.2
 
-* The bridge `isPainleveIIOn_iff_isPIIOn`: DLMF's `PII` with parameter `α` is Beals–Wong's
-  `PII(-α)` of `DLMF.Painleve.Basic`.
-* Renormalizations (§32.2(ii)): scaling lemmas for `PIII` and `PV`, with the normalized
-  parameter values of DLMF.
-* Alternative forms (§32.2(iii)): `P'III` (32.2.9) and the forms 32.2.10–32.2.12, in the
-  branch-free direction (from the new unknown to `w`).
-* The elliptic form of `PVI` (32.2.13–32.2.14), the symmetric forms (§32.2(v)) and the
-  coalescence cascade (§32.2(vi)): exact transformed equations and their limits.
-* The Painlevé property (prose of §32.2(i)) for `PI` and `PII`.
+Renormalizations, alternative forms, the elliptic and symmetric forms, the coalescence
+cascade and the Painlevé property of the six Painlevé equations, in the DLMF normalization.
+
+## Main results
+
+* `isPainleveIIOn_iff_isPIIOn`: DLMF's `PII` with parameter `α` is Beals–Wong's `PII(-α)` of
+  `DLMF.Painleve.Basic`.
+* `painleveIII_renormalize_gamma_delta`, `painleveIII_renormalize_alpha_delta`,
+  `painleveIII_renormalize_beta_gamma`, `painleveV_renormalize_delta`: the renormalized
+  parameter values of DLMF §32.2(ii), with `IsPainleveIIIOn.renormalize_gamma_delta` etc. for
+  solutions.
+* `IsPainleveIIIPrimeOn.isPainleveIIIOn`, `isPainleveIIIOn_exp_of_sineGordon`,
+  `isPainleveIVOn_of_quintic`, `isPainleveVOn_coth_sq`: the alternative forms
+  DLMF 32.2.9–32.2.12.
+* `IsPainleveVIOn.elliptic_form`: the elliptic form of `PVI` (DLMF 32.2.13–32.2.14).
+* `isPainleveIVOn_of_symmetric`, `isPainleveVOn_of_symmetric`: the symmetric forms
+  (DLMF 32.2.15–32.2.23).
+* `IsPainleveIIOn.coalescence_I`, `painleveII_coalescence_I_tendsto`,
+  `painleveIII_coalescence_II_tendsto`, `painleveIV_coalescence_II_tendsto`,
+  `painleveV_coalescence_III_tendsto`, `painleveV_coalescence_IV_tendsto`,
+  `painleveVI_coalescence_V_tendsto`: the coalescence cascade (DLMF 32.2.24–32.2.37).
+* `IsPainleveIOn.exists_meromorphic`, `IsPainleveIIOn.exists_meromorphic`,
+  `IsPainleveIVOn.exists_meromorphic`, `IsPainleveIIIOn.exists_meromorphic_exp`,
+  `IsPainleveVOn.exists_meromorphic_exp`: the Painlevé property (DLMF §32.2(i)).
+
+## Implementation notes
+
+The alternative forms 32.2.9–32.2.12 are stated in the branch-free direction, from the new
+unknown to `w`. For the coalescence cascade both the exact transformed equations and their
+limits are given. For `PIII` and `PV`, with their fixed singularity at `0`, the Painlevé
+property is stated for `t ↦ w(eᵗ)`.
 -/
 
 @[expose] public noncomputable section
@@ -511,7 +533,7 @@ ray `t = w(z)/s`, `0 < s ≤ 1`, and the square root is the principal one, which
 continuous along the ray (the polynomial stays in the slit plane); so
 `Φ(z) = -∫₀¹ (w/s²) (P(w/s))^{-1/2} ds` with `P(t) = t(t-1)(t-z)`. -/
 @[dlmf 32.2.E13, dlmf 32.2.E14]
-theorem IsPainleveVIOn.ellipticForm {α β γ δ : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
+theorem IsPainleveVIOn.elliptic_form {α β γ δ : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
     (h : IsPainleveVIOn α β γ δ w U) (hU : IsOpen U)
     (hcut : ∀ z ∈ U, ∀ s : ℝ, 0 < s → s ≤ 1 →
       (w z / s) * (w z / s - 1) * (w z / s - z) ∈ Complex.slitPlane)
@@ -688,19 +710,19 @@ theorem painleveII_coalescence_I_tendsto (ζ X Y : ℂ) :
 
 /-- A function that agrees near `0` (off `0`) with a function continuous at `0` tends to the
 value of the latter at `0`. -/
-lemma p3a_tendsto_of_eventuallyEq {F G : ℂ → ℂ} {L : ℂ}
+private lemma tendsto_punctured_of_eventuallyEq {F G : ℂ → ℂ} {L : ℂ}
     (hFG : ∀ᶠ ε in 𝓝[≠] (0 : ℂ), F ε = G ε) (hG : ContinuousAt G 0) (hL : G 0 = L) :
     Tendsto F (𝓝[≠] 0) (𝓝 L) := by
   rw [← hL]
   exact (hG.tendsto.mono_left nhdsWithin_le_nhds).congr' (hFG.mono fun _ h => h.symm)
 
 /-- A continuous function that does not vanish at `0` does not vanish near `0`. -/
-lemma p3a_eventually_ne {f : ℂ → ℂ} (hf : Continuous f) (h0 : f 0 ≠ 0) :
+private lemma eventually_ne_zero_of_continuous {f : ℂ → ℂ} (hf : Continuous f) (h0 : f 0 ≠ 0) :
     ∀ᶠ ε in 𝓝[≠] (0 : ℂ), f ε ≠ 0 :=
   nhdsWithin_le_nhds (hf.continuousAt.eventually_ne h0)
 
 /-- Points of the punctured neighbourhood of `0` are nonzero. -/
-lemma p3a_eventually_self_ne : ∀ᶠ ε in 𝓝[≠] (0 : ℂ), ε ≠ 0 := self_mem_nhdsWithin
+private lemma eventually_ne_zero_punctured : ∀ᶠ ε in 𝓝[≠] (0 : ℂ), ε ≠ 0 := self_mem_nhdsWithin
 
 /-- DLMF 32.2.28–32.2.29 (`PIII → PII`): with `w = 1 + 2εW(ζ)`, `z = 1 + ε²ζ`,
 `α = -ε⁻⁶/2`, `β = ε⁻⁶/2 + 2aε⁻³`, `γ = -δ = ε⁻⁶/4`, the equation satisfied by `W`
@@ -713,13 +735,13 @@ theorem painleveIII_coalescence_II_tendsto (a ζ X Y : ℂ) :
       painleveIIIRhs (-1 / (2 * ε ^ 6)) (1 / (2 * ε ^ 6) + 2 * a / ε ^ 3) (1 / (4 * ε ^ 6))
         (-1 / (4 * ε ^ 6)) (1 + ε ^ 2 * ζ) (1 + 2 * ε * X) (2 * ε * Y / ε ^ 2))
       (𝓝[≠] 0) (𝓝 (painleveIIRhs a ζ X Y)) := by
-  refine p3a_tendsto_of_eventuallyEq (G := fun ε => (2 * X ^ 4 * ε ^ 3 * ζ + 2 * X ^ 4 * ε +
+  refine tendsto_punctured_of_eventuallyEq (G := fun ε => (2 * X ^ 4 * ε ^ 3 * ζ + 2 * X ^ 4 * ε +
       4 * X ^ 3 * ε ^ 2 * ζ + 2 * X ^ 3 + 3 * X ^ 2 * ε * ζ - 2 * X * Y * ε ^ 3 + 2 * X * a * ε +
       X * ζ + 2 * Y ^ 2 * ε ^ 3 * ζ + 2 * Y ^ 2 * ε - Y * ε ^ 2 + a) /
       ((1 + 2 * ε * X) * (1 + ε ^ 2 * ζ))) ?_ ?_ ?_
-  · filter_upwards [p3a_eventually_self_ne,
-      p3a_eventually_ne (f := fun ε => 1 + 2 * ε * X) (by fun_prop) (by simp),
-      p3a_eventually_ne (f := fun ε => 1 + ε ^ 2 * ζ) (by fun_prop) (by simp)] with ε h0 h1 h2
+  · filter_upwards [eventually_ne_zero_punctured,
+      eventually_ne_zero_of_continuous (f := fun ε => 1 + 2 * ε * X) (by fun_prop) (by simp),
+      eventually_ne_zero_of_continuous (f := fun ε => 1 + ε ^ 2 * ζ) (by fun_prop) (by simp)] with ε h0 h1 h2
     simp only [painleveIIIRhs]
     generalize e1 : 1 + 2 * ε * X = A at h1 ⊢
     generalize e2 : 1 + ε ^ 2 * ζ = B at h2 ⊢
@@ -746,14 +768,14 @@ theorem painleveIV_coalescence_II_tendsto (a ζ X Y : ℂ) :
     rw [← Complex.ofReal_pow, ← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
     norm_num
   have ht0 : t ≠ 0 := by rintro h; rw [h] at ht; norm_num at ht
-  refine p3a_tendsto_of_eventuallyEq (G := fun ε => (3 * X ^ 4 * ε ^ 2 * t ^ 12 +
+  refine tendsto_punctured_of_eventuallyEq (G := fun ε => (3 * X ^ 4 * ε ^ 2 * t ^ 12 +
       8 * X ^ 3 * ε ^ 4 * t ^ 8 * ζ + 4 * X ^ 3 * t ^ 10 + 8 * X ^ 2 * a * ε ^ 4 * t ^ 8 +
       4 * X ^ 2 * ε ^ 6 * t ^ 4 * ζ ^ 2 + 16 * X ^ 2 * ε ^ 2 * t ^ 6 * ζ +
       16 * X * a * ε ^ 2 * t ^ 6 + 8 * X * ε ^ 4 * t ^ 2 * ζ ^ 2 + 8 * X * t ^ 4 * ζ +
       Y ^ 2 * ε ^ 2 * t ^ 12 + 8 * a * t ^ 4 + 4 * ε ^ 2 * ζ ^ 2) /
       (2 * t ^ 10 * (1 + t ^ 2 * ε ^ 2 * X))) ?_ ?_ ?_
-  · filter_upwards [p3a_eventually_self_ne,
-      p3a_eventually_ne (f := fun ε => 1 + t ^ 2 * ε ^ 2 * X) (by fun_prop) (by simp)]
+  · filter_upwards [eventually_ne_zero_punctured,
+      eventually_ne_zero_of_continuous (f := fun ε => 1 + t ^ 2 * ε ^ 2 * X) (by fun_prop) (by simp)]
       with ε h0 h1
     simp only [painleveIVRhs]
     have h1' : 1 / ε ^ 3 + t ^ 2 / ε * X ≠ 0 := by
@@ -786,14 +808,14 @@ theorem painleveV_coalescence_III_tendsto (a b c d ζ X Y : ℂ) (hζ : ζ ≠ 0
           (ε * b / 4) (ε ^ 2 * d / 8) (ζ ^ 2) (1 + ε * ζ * X) ((ε * X + ε * ζ * Y) / (2 * ζ)) +
         (ε * X + ε * ζ * Y) / ζ - 2 * ε * Y) / (ε * ζ))
       (𝓝[≠] 0) (𝓝 (painleveIIIRhs a b c d ζ X Y)) := by
-  refine p3a_tendsto_of_eventuallyEq (G := fun ε => (2 * X ^ 5 * a * ε ^ 2 * ζ ^ 2 +
+  refine tendsto_punctured_of_eventuallyEq (G := fun ε => (2 * X ^ 5 * a * ε ^ 2 * ζ ^ 2 +
       X ^ 5 * c * ε * ζ ^ 2 + 4 * X ^ 4 * a * ε * ζ + 2 * X ^ 4 * c * ζ + 2 * X ^ 3 * a +
       2 * X ^ 3 * b * ε ^ 2 * ζ ^ 2 + X ^ 3 * d * ε ^ 3 * ζ ^ 4 + X ^ 3 * ε +
       4 * X ^ 2 * b * ε * ζ + 4 * X ^ 2 * d * ε ^ 2 * ζ ^ 3 + 3 * X * Y ^ 2 * ε * ζ ^ 2 -
       2 * X * Y + 2 * X * b + 5 * X * d * ε * ζ ^ 2 + 2 * Y ^ 2 * ζ + 2 * d * ζ) /
       (2 * X * ζ * (1 + ε * ζ * X))) ?_ ?_ ?_
-  · filter_upwards [p3a_eventually_self_ne,
-      p3a_eventually_ne (f := fun ε => 1 + ε * ζ * X) (by fun_prop) (by simp)] with ε h0 h1
+  · filter_upwards [eventually_ne_zero_punctured,
+      eventually_ne_zero_of_continuous (f := fun ε => 1 + ε * ζ * X) (by fun_prop) (by simp)] with ε h0 h1
     have h2 : 1 + ε * ζ * X - 1 ≠ 0 := by simp [h0, hζ, hX]
     simp only [painleveVRhs]
     generalize e1 : 1 + ε * ζ * X = A at h1 h2 ⊢
@@ -819,7 +841,7 @@ theorem painleveV_coalescence_IV_tendsto (a b ζ X Y : ℂ) (hX : X ≠ 0) :
   have hr : r ^ 2 = 2 := by
     simp only [r]; rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num
   have hr0 : r ≠ 0 := by rintro h; rw [h] at hr; norm_num at hr
-  refine p3a_tendsto_of_eventuallyEq (G := fun ε => (r * X ^ 5 * ε - 6 * X ^ 4 +
+  refine tendsto_punctured_of_eventuallyEq (G := fun ε => (r * X ^ 5 * ε - 6 * X ^ 4 +
       8 * r * X ^ 3 * a * ε ^ 3 * ζ ^ 2 + 16 * X ^ 3 * a * ε ^ 2 * ζ + 4 * r * X ^ 3 * a * ε +
       r * X ^ 3 * b * ε ^ 3 - 4 * r * X ^ 3 * ε * ζ ^ 2 - 16 * X ^ 3 * ζ -
       4 * r * X ^ 2 * Y * ε ^ 3 * ζ - 4 * X ^ 2 * Y * ε ^ 2 + 16 * X ^ 2 * a * ε ^ 2 * ζ ^ 2 +
@@ -828,9 +850,9 @@ theorem painleveV_coalescence_IV_tendsto (a b ζ X Y : ℂ) (hX : X ≠ 0) :
       8 * X * Y * ε ^ 2 * ζ + 4 * r * X * Y * ε + 6 * r * X * b * ε - 4 * Y ^ 2 * ε ^ 2 * ζ ^ 2 -
       4 * r * Y ^ 2 * ε * ζ - 2 * Y ^ 2 - 4 * b) /
       (2 * X * (r / 2 * ε * X - 1) * 2 * (1 + r * ε * ζ) ^ 2)) ?_ ?_ ?_
-  · filter_upwards [p3a_eventually_self_ne,
-      p3a_eventually_ne (f := fun ε => 1 + r * ε * ζ) (by fun_prop) (by simp),
-      p3a_eventually_ne (f := fun ε => r / 2 * ε * X - 1) (by fun_prop) (by simp)]
+  · filter_upwards [eventually_ne_zero_punctured,
+      eventually_ne_zero_of_continuous (f := fun ε => 1 + r * ε * ζ) (by fun_prop) (by simp),
+      eventually_ne_zero_of_continuous (f := fun ε => r / 2 * ε * X - 1) (by fun_prop) (by simp)]
       with ε h0 h1 h2
     have h3 : r / 2 * ε * X ≠ 0 := by simp [h0, hr0, hX]
     simp only [painleveVRhs]
@@ -861,7 +883,7 @@ theorem painleveVI_coalescence_V_tendsto (a b c d ζ X Y : ℂ) (hζ : ζ ≠ 0)
     Tendsto (fun ε : ℂ => ε ^ 2 / 1 *
       painleveVIRhs a b (c / ε - d / ε ^ 2) (d / ε ^ 2) (1 + ε * ζ) (0 + 1 * X) (1 * Y / ε))
       (𝓝[≠] 0) (𝓝 (painleveVRhs a b c d ζ X Y)) := by
-  refine p3a_tendsto_of_eventuallyEq (G := fun ε => (-2 * X ^ 6 * a + 4 * X ^ 5 * a * ε * ζ +
+  refine tendsto_punctured_of_eventuallyEq (G := fun ε => (-2 * X ^ 6 * a + 4 * X ^ 5 * a * ε * ζ +
       8 * X ^ 5 * a - 2 * X ^ 4 * a * ε ^ 2 * ζ ^ 2 - 12 * X ^ 4 * a * ε * ζ - 12 * X ^ 4 * a -
       2 * X ^ 4 * b * ε * ζ - 2 * X ^ 4 * b - 2 * X ^ 4 * c * ζ - 2 * X ^ 4 * d * ζ ^ 2 +
       4 * X ^ 3 * Y * ε ^ 2 * ζ ^ 3 + 6 * X ^ 3 * Y * ε * ζ ^ 2 + 2 * X ^ 3 * Y * ζ +
@@ -881,11 +903,11 @@ theorem painleveVI_coalescence_V_tendsto (a b c d ζ X Y : ℂ) (hζ : ζ ≠ 0)
       3 * Y ^ 2 * ε ^ 2 * ζ ^ 4 - 3 * Y ^ 2 * ε * ζ ^ 3 - Y ^ 2 * ζ ^ 2 - 2 * b * ε ^ 3 * ζ ^ 3 -
       6 * b * ε ^ 2 * ζ ^ 2 - 6 * b * ε * ζ - 2 * b) /
       (2 * X * ζ ^ 2 * (X - 1) * (1 + ε * ζ) ^ 2 * (1 + ε * ζ - X))) ?_ ?_ ?_
-  · filter_upwards [p3a_eventually_self_ne,
-      p3a_eventually_ne (f := fun ε => 1 + ε * ζ) (by fun_prop) (by simp),
-      p3a_eventually_ne (f := fun ε => X - (1 + ε * ζ)) (by fun_prop)
+  · filter_upwards [eventually_ne_zero_punctured,
+      eventually_ne_zero_of_continuous (f := fun ε => 1 + ε * ζ) (by fun_prop) (by simp),
+      eventually_ne_zero_of_continuous (f := fun ε => X - (1 + ε * ζ)) (by fun_prop)
         (by simpa [sub_eq_zero] using hX1),
-      p3a_eventually_ne (f := fun ε => 1 + ε * ζ - X) (by fun_prop)
+      eventually_ne_zero_of_continuous (f := fun ε => 1 + ε * ζ - X) (by fun_prop)
         (by simpa [sub_eq_zero] using hX1.symm)] with ε h0 h1 h2 h5
     have h3 : 1 + ε * ζ - 1 ≠ 0 := by simp [h0, hζ]
     have h4 : X - 1 ≠ 0 := sub_ne_zero.mpr hX1

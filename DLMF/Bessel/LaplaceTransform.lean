@@ -10,10 +10,21 @@ public import DLMF.Confluent.Integrals
 /-!
 # The regularized Laplace–Bessel transform
 
-Beals–Wong §9.8 in the conventional quadratic Gauss form. The proof starts with
-Kummer's Laplace transform and the quadratic transformation, then lowers the
-regularized denominator parameter by contiguous relations. This retains the
-exceptional orders without cancellation of singular Gamma factors.
+The Laplace transform of `J_ν` (Beals–Wong §9.8) in the conventional quadratic Gauss form, on
+the full right half-plane. The proof starts with Kummer's Laplace transform and the quadratic
+transformation, then lowers the regularized denominator parameter by contiguous relations.
+
+## Main results
+
+* `laplace_regularized0F1`: the Laplace transform of regularized `₀F₁` on a negative quadratic
+  ray, for every complex denominator parameter.
+* `besselJ_laplace_integrable`: absolute convergence of the Laplace–Bessel integral.
+* `besselJ_laplace_integral`: the Laplace–Bessel integral in regularized Gauss form.
+
+## Implementation notes
+
+Working with regularized functions retains the exceptional orders without cancellation of
+singular Gamma factors.
 -/
 
 @[expose] public noncomputable section

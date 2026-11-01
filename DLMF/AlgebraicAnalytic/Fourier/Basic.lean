@@ -16,12 +16,16 @@ Definitions for DLMF §1.8 (namespace `DLMF.AlgebraicAnalytic`). The functions a
 valued functions of a real variable, `f : ℝ → ℂ`; a real-valued function is covered through
 the coercion `ℝ → ℂ`. Periodicity is a hypothesis of the theorems, not part of the definitions.
 
+## Main definitions
+
 * `fourierCosCoeff f n`, `fourierSinCoeff f n` (1.8.2): `a_n = π⁻¹ ∫_{-π}^{π} f(x) cos(nx) dx`,
   `b_n = π⁻¹ ∫_{-π}^{π} f(x) sin(nx) dx`.
 * `fourierExpCoeff f n` (1.8.4): `c_n = (2π)⁻¹ ∫_{-π}^{π} f(x) e^{-inx} dx`, `n ∈ ℤ`; it is
   Mathlib's `fourierCoeffOn` on `[-π, π]` (`fourierExpCoeff_eq_fourierCoeffOn` in
   `DLMF.AlgebraicAnalytic.Fourier.Series`).
 * `lebesgueConstant n` (1.8.8): `L_n = π⁻¹ ∫_0^π |sin((n + ½)t)| / sin(t/2) dt`.
+
+## Implementation notes
 
 All integrals are interval integrals, which are `0` for non-integrable integrands (Lean's
 totalization); the theorems carry integrability hypotheses where DLMF integrates.

@@ -8,12 +8,26 @@ module
 public import DLMF.Painleve.BacklundDLMF.SecondAndThird
 
 /-!
-# Backlund transformations for Painleve IV and V
+# Bäcklund transformations for Painlevé IV and V (DLMF §32.7(iv)–(v))
 
-Transformations of Painleve IV and V and the connection between Painleve III and V.
+The Bäcklund transformations of Painlevé IV and V in the DLMF normalization, and the
+connection between Painlevé III and V.
 
-Source references and common attribution are retained in
-`DLMF.Painleve.BacklundDLMF`.
+## Main results
+
+* `IsPainleveIVOn.t₁`, `IsPainleveIVOn.t₂`, `IsPainleveIVOn.t₃`, `IsPainleveIVOn.t₄`: the
+  transformations `T₁^±`–`T₄^±` of `PIV` (DLMF 32.7.19–32.7.23).
+* `IsPainleveVOn.comp_neg`, `IsPainleveVOn.inv`: the transformations `S₁` and `S₂` of `PV`
+  (DLMF 32.7.24–32.7.26).
+* `IsPainleveVOn.t_eps`: the transformations `T_{ε₁,ε₂,ε₃}` of `PV` with `δ = -1/2`
+  (DLMF 32.7.27–32.7.29).
+* `IsPainleveIIIOn.toPainleveV`: from `PIII(α, β, 1, -1)` to `PV` (DLMF 32.7.30–32.7.32).
+
+## Implementation notes
+
+All maps are stated on open sets where their denominators do not vanish. Square roots of
+parameters are replaced by arbitrary numbers with the right square, so both branches are
+covered at once.
 -/
 
 @[expose] public noncomputable section

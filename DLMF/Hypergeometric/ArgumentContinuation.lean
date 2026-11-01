@@ -12,25 +12,36 @@ public import DLMF.Hypergeometric.Continuation
 /-!
 # Continuation of `₂F₁` in the argument to the cut plane (DLMF §15.2(i))
 
-DLMF defines `F(a,b;c;z)` on the cut plane `ℂ ∖ [1, ∞)` as the analytic continuation of
-the Gauss series. We construct this continuation for the regularized function
-`𝐅(a,b;c;z) = F(a,b;c;z)/Γ(c)`, with no hypothesis on the parameters:
+DLMF defines `F(a,b;c;z)` on the cut plane `ℂ ∖ [1, ∞)` as the analytic continuation of the
+Gauss series. The continuation `regularizedGaussHG` of the regularized function
+`𝐅(a,b;c;z) = F(a,b;c;z)/Γ(c)`, defined in `DLMF.Hypergeometric.Basic.PrincipalBranch` with no
+hypothesis on the parameters, is shown here to be analytic on the cut plane and to agree with
+`𝐅` on the unit disk. The derivative formulas, the contiguous relations and the Euler and Pfaff
+transformations are then lifted to the cut plane.
 
-* `cutPlane := {z | 1 - z ∈ slitPlane}` is open and star-shaped about `0`, so the identity
-  principle `eqOn_cutPlane_of_eqOn_disk` lifts every identity from the unit disk.
-* `regularizedGaussHGIntegral a b c z = (Γ(b) Γ(c-b))⁻¹ ∫₀¹ t^(b-1) (1-t)^(c-b-1) (1 - z t)^(-a) dt`
-  is analytic on the cut plane for `Re b > 0`, `Re (c - b) > 0` (differentiation under the
-  integral sign), and equals `𝐅` on the disk (`ordinaryHypergeometric_eq_integral`).
-* `regularizedGaussHG a b c z` is defined for all parameters by shifting `b` and `c` into the Euler
-  region with the hypothesis-free contiguous relations `regularizedGaussHGFun_contiguous_c` and
-  `regularizedGaussHGFun_contiguous_shift_b`, through a recursion with fuel
-  `shiftMeasure b c`.
-* `regularizedGaussHG_eq_regularizedGaussHGFun` (agreement with `𝐅` on the disk),
-  `analyticOnNhd_regularizedGaussHG`
-  (analyticity on the cut plane) and `regularizedGaussHG_unique` characterize the continuation.
+## Main results
 
-The second half lifts the derivative formulas, the contiguous relations and the Euler and
-Pfaff transformations to the cut plane.
+* `regularizedGaussHGIntegral_eq_regularizedGaussHGFun`,
+  `analyticOnNhd_regularizedGaussHGIntegral`: Euler's integral agrees with `𝐅` on the disk and is
+  analytic on the cut plane for `Re b > 0`, `Re (c - b) > 0`.
+* `regularizedGaussHG_eq_regularizedGaussHGFun`, `analyticOnNhd_regularizedGaussHG`,
+  `regularizedGaussHG_unique`: agreement with `𝐅` on the disk, analyticity on the cut plane and
+  uniqueness characterize the continuation.
+* `regularizedGaussHG_eq_regularizedGaussHGIntegral`: the continuation is Euler's integral on
+  the whole cut plane.
+* `deriv_regularizedGaussHG`, `iteratedDeriv_regularizedGaussHG`: DLMF 15.5.1–15.5.2 on the cut
+  plane.
+* `regularizedGaussHG_contiguous_c`, `regularizedGaussHG_contiguous_a` and the other
+  `regularizedGaussHG_contiguous_*` lemmas: contiguous relations on the cut plane.
+* `regularizedGaussHG_euler`: Euler's transformation 15.8.1 on the cut plane.
+
+## Implementation notes
+
+`cutPlane = {z | 1 - z ∈ slitPlane}` is open and star-shaped about `0`, so the identity
+principle `eqOn_cutPlane_of_eqOn_disk` lifts every identity from the unit disk. The definition
+shifts `b` and `c` into the Euler region with the hypothesis-free contiguous relations
+`regularizedGaussHGFun_contiguous_c` and `regularizedGaussHGFun_contiguous_shift_b`, through a
+recursion with fuel `shiftMeasure b c`.
 -/
 
 @[expose] public section

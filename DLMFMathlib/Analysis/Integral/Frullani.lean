@@ -12,9 +12,20 @@ public import Mathlib.MeasureTheory.Integral.Prod
 /-!
 # Complex exponential Frullani integrals
 
-For parameters in the open right half-plane, integrate the exponential along the segment
-between the parameters and apply Fubini. This proves absolute convergence as well as the
-principal-logarithm evaluation, retaining complex parameters.
+For parameters `a`, `b` in the open right half-plane,
+`∫₀^∞ (exp (-b t) - exp (-a t)) / t dt = log (a / b)` with the principal logarithm.
+The proof integrates the exponential along the segment between the parameters and applies
+Fubini, which gives absolute convergence as well as the evaluation.
+
+## Main results
+
+* `integrableOn_exp_sub_exp_div`: absolute integrability of the Frullani integrand.
+* `integral_exp_sub_exp_div_eq_log_sub`: Frullani's formula as a difference of principal
+  logarithms.
+* `integral_exp_sub_exp_div`: Frullani's formula with the principal logarithm of the ratio.
+* `log_div_of_re_pos`: `log (b / a) = log b - log a` in the right half-plane.
+* `log_one_sub_sq`: `log (1 - z²) = log (1 - z) + log (1 + z)` when both linear factors avoid
+  the branch cut.
 -/
 
 @[expose] public noncomputable section

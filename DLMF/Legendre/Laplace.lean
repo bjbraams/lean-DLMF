@@ -17,6 +17,15 @@ it to `Re z > 0`. For real `x ≥ 1`, write `x + √(x²-1) cos φ = x (1 + r co
 `r² = 1 - 1/x² < 1`; integrating the binomial series termwise and using
 `∫₀^π cos^{2m} = π (2m)!/(4^m m!²)` and `(a)₂ₘ = 4^m (a/2)ₘ ((a+1)/2)ₘ` gives Laplace's first
 integral `P_ν(x) = π⁻¹ ∫₀^π (x + √(x²-1) cos φ)^ν dφ` for every complex `ν`.
+
+## Main results
+
+* `legendreP_eq_pfaff_real`, `legendreP_eq_cpow_mul`:
+  `P_ν(z) = z^ν 𝐅(-ν/2, (1-ν)/2; 1; 1 - 1/z²)` near `(1, √2)` and for `Re z > 0`.
+* `poch_two_mul`: duplication `(a)₂ₘ = 4^m (a/2)ₘ ((a+1)/2)ₘ` for Pochhammer symbols.
+* `hasSum_one_add_cpow`: the binomial series for `(1+t)^ν`, `|t| < 1`.
+* `integral_one_add_mul_cos_cpow`: `∫₀^π (1 + r cos φ)^ν dφ = π 𝐅(-ν/2, (1-ν)/2; 1; r²)`.
+* `legendreP_laplace`: Laplace's first integral for real `x ≥ 1` (Temme §8.6).
 -/
 
 @[expose] public section

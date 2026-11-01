@@ -10,19 +10,26 @@ public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 
 /-!
-# Remainder terms and the Stokes phenomenon: definitions (DLMF §2.11)
+# Remainder terms and the Stokes phenomenon: definitions
 
-Definitions for DLMF §2.11 (namespace `DLMF.AsymptoticApproximations`).
+This file defines the functions and coefficients used in DLMF §2.11 (remainder terms, Stokes
+phenomenon), in the namespace `DLMF.AsymptoticApproximations`.
 
-* `cosRationalIntegral` (2.11.1) and `cosRationalCoeff` (the `q_s` of 2.11.2–2.11.3).
-* `stokesC` (2.11.16): `c(θ) = (2(1 + e^{iθ} + i(θ - π)))^{1/2}`, the branch continuous on
-  `(-π, 3π)` with `c(θ) ∼ π - θ` as `θ → π`.
-* `stokesA2` (2.11.14) and `stokesH` (2.11.17): the coefficients of the re-expansions
-  2.11.13 and 2.11.15.
-* `whittakerTerm` (2.11.30) and `levinTransform` (2.11.32).
+## Main definitions
 
-The terminant `F_{n+p}(z) = Γ(n+p)/(2π) E_{n+p}(z)/z^{n+p-1}` of 2.11.11 is written out in
-the statements of `Remainders/Stokes`, since `E_p` (`DLMF.Confluent.genExpIntE`) lives in a
+* `cosRationalIntegral`: the integral `I(m) = ∫_0^π cos(mt)/(t² + 1) dt` (DLMF 2.11.1).
+* `cosRationalCoeff`: the coefficients `q_s` of the expansion DLMF 2.11.2–2.11.3.
+* `stokesC`: `c(θ) = (2(1 + e^{iθ} + i(θ - π)))^{1/2}` (DLMF 2.11.16), the branch continuous
+  on `(-π, 3π)` with `c(θ) ∼ π - θ` as `θ → π`.
+* `stokesA2`, `stokesH`: the coefficients of the re-expansions DLMF 2.11.13 and 2.11.15
+  (DLMF 2.11.14, 2.11.17).
+* `whittakerTerm`: the terms of the Whittaker expansion (DLMF 2.11.30).
+* `levinTransform`: a variant of Levin's transformation (DLMF 2.11.32).
+
+## Implementation notes
+
+The terminant `F_{n+p}(z) = Γ(n+p)/(2π) E_{n+p}(z)/z^{n+p-1}` of DLMF 2.11.11 is written out
+in the statements of `Remainders/Stokes`, since `E_p` (`DLMF.Confluent.genExpIntE`) lives in a
 theorem file of the confluent area.
 -/
 

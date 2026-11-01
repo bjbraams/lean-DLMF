@@ -55,7 +55,7 @@ the principal branches of DLMF §4.2. Mathlib's `HasSum` is unconditional (absol
 over `ℂ`); DLMF's series converge as partial sums. Tau Ceti's Cauchy, residue and argument
 theorems are in the homology form (holomorphy on an open set containing the curve and a
 null-homologous curve, winding numbers as weights); the DLMF forms for simple closed contours are
-admitted in `DLMF.AlgebraicAnalytic.Complex.Calculus` and `.Functions`.
+stated in `DLMF.AlgebraicAnalytic.Complex.Calculus` and `.Functions`.
 -/
 
 /- §1.9(i) Complex numbers. -/

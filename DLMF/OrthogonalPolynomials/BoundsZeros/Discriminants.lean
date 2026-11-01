@@ -10,10 +10,28 @@ public import DLMF.OrthogonalPolynomials.BoundsZeros.PointwiseAndZeroBounds
 /-!
 # Discriminants of classical orthogonal polynomials
 
-Resultant and product calculations give the Laguerre and Hermite discriminant formulas.
+The discriminants of the Jacobi, Laguerre and Hermite polynomials (DLMF 18.16.19–18.16.21),
+in terms of the root lists of the polynomials (`rootDiscriminant`, DLMF 18.2.20).
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.BoundsZeros`.
+## Main definitions
+
+* `lagPoly`, `hP`: the Laguerre and Hermite polynomials as elements of `ℂ[X]`.
+* `laguerreRootProd`, `hermiteRootProd`: the products of `L_m^{(α)}` (resp. `H_m`) over the
+  zeros of `L_{m+1}^{(α)}` (resp. `H_{m+1}`).
+
+## Main results
+
+* `jacobi_discriminant`: the Jacobi discriminant (DLMF 18.16.19), from the AAR form.
+* `laguerrePolyL_discriminant`: the Laguerre discriminant (DLMF 18.16.20).
+* `hermitePolyH_discriminant`: the Hermite discriminant (DLMF 18.16.21).
+* `lagPoly_eq_nodal`, `hP_eq_nodal`: `L_n^{(α)}` and `H_n` as leading coefficient times the
+  product over their real zeros.
+
+## Implementation notes
+
+The Laguerre and Hermite discriminants follow Stieltjes: the three-term recurrence evaluated
+at the zeros gives a recursion for the root products `laguerreRootProd` and
+`hermiteRootProd`, which have closed forms.
 -/
 
 @[expose] public section
@@ -129,9 +147,9 @@ theorem jacobi_discriminant {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {n : �
 
 /-! ### The discriminant of a Laguerre polynomial
 
-Schur's route as for Jacobi: `SSL m = ∏ L_m(y)` over the zeros of `L_{m+1}` satisfies a
+Schur's route as for Jacobi: `laguerreRootProd m = ∏ L_m(y)` over the zeros of `L_{m+1}` satisfies a
 first-order recursion from the three-term recurrence, and `x L_{m+1}'(x) = -(m+α+1) L_m(x)` at
-the zeros, with `L_{m+1}(0) = (α+1)_{m+1}/(m+1)!`, expresses the discriminant through `SSL`. -/
+the zeros, with `L_{m+1}(0) = (α+1)_{m+1}/(m+1)!`, expresses the discriminant through `laguerreRootProd`. -/
 
 namespace LagDisc
 
@@ -144,7 +162,7 @@ def lcoef (a : ℂ) (n j : ℕ) : ℂ := poch (a + 1) n / n ! * kummerMCoeff (-(
 def lagPoly (a : ℂ) (n : ℕ) : ℂ[X] := ∑ j ∈ range (n + 1), C (lcoef a n j) * X ^ j
 
 /-- The leading coefficient `(-1)^n / n!`. -/
-def KL (n : ℕ) : ℂ := (-1) ^ n / n !
+def laguerreLeadingCoeff (n : ℕ) : ℂ := (-1) ^ n / n !
 
 /-- `lagPoly a n` evaluates to `L_n^{(a)}`. -/
 theorem eval_lagPoly (a : ℂ) (n : ℕ) (x : ℂ) : (lagPoly a n).eval x = laguerrePolyL a n x := by
@@ -165,15 +183,15 @@ theorem poch_ne_zero' (hα : -1 < α) (n : ℕ) : poch ((α : ℂ) + 1) n ≠ 0 
   poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _
 
 /-- The leading coefficient of `L_n^{(α)}` is `(-1)ⁿ/n!`. -/
-theorem lcoef_self (hα : -1 < α) (n : ℕ) : lcoef α n n = KL n := by
+theorem lcoef_self (hα : -1 < α) (n : ℕ) : lcoef α n n = laguerreLeadingCoeff n := by
   have hp := poch_ne_zero' hα n
   have hf : (n ! : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
-  rw [lcoef, kummerMCoeff, poch_neg_coe_nat, Nat.descFactorial_self, KL]
+  rw [lcoef, kummerMCoeff, poch_neg_coe_nat, Nat.descFactorial_self, laguerreLeadingCoeff]
   field_simp
 
 /-- `(-1)ⁿ/n! ≠ 0`. -/
-theorem KL_ne_zero (n : ℕ) : KL n ≠ 0 := by
-  unfold KL
+theorem laguerreLeadingCoeff_ne_zero (n : ℕ) : laguerreLeadingCoeff n ≠ 0 := by
+  unfold laguerreLeadingCoeff
   exact div_ne_zero (pow_ne_zero _ (by norm_num)) (by exact_mod_cast n.factorial_ne_zero)
 
 /-- For `α > -1`, `lagPoly α n` has degree `n`. -/
@@ -187,11 +205,11 @@ theorem natDegree_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).natDegree =
     · rfl
   · rw [coeff_lagPoly]
     split_ifs with h
-    · rw [lcoef_self hα]; exact KL_ne_zero n
+    · rw [lcoef_self hα]; exact laguerreLeadingCoeff_ne_zero n
     · omega
 
 /-- For `α > -1`, the leading coefficient of `lagPoly α n` is `(-1)ⁿ/n!`. -/
-theorem leadingCoeff_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).leadingCoeff = KL n := by
+theorem leadingCoeff_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).leadingCoeff = laguerreLeadingCoeff n := by
   rw [leadingCoeff, natDegree_lagPoly hα, coeff_lagPoly]
   split_ifs with h
   · exact lcoef_self hα n
@@ -202,7 +220,7 @@ theorem lagPoly_ne_zero (hα : -1 < α) (n : ℕ) : lagPoly α n ≠ 0 := by
   intro h
   have := leadingCoeff_lagPoly hα n
   rw [h, leadingCoeff_zero] at this
-  exact KL_ne_zero n this.symm
+  exact laguerreLeadingCoeff_ne_zero n this.symm
 
 /-- If `x` lists `n` distinct real zeros of `L_n^{(α)}`, they are all its complex roots. -/
 theorem roots_lagPoly_eq (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
@@ -224,17 +242,17 @@ theorem roots_lagPoly_eq (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
 /-- `L_n^{(α)} = (-1)ⁿ/n! ∏ (X - xᵢ)` over its `n` distinct real zeros. -/
 theorem lagPoly_eq_nodal (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
     (hroot : ∀ i, laguerrePolyL α n (x i) = 0) (hinj : Function.Injective x) :
-    lagPoly α n = C (KL n) * Lagrange.nodal univ fun i => (x i : ℂ) := by
+    lagPoly α n = C (laguerreLeadingCoeff n) * Lagrange.nodal univ fun i => (x i : ℂ) := by
   conv_lhs => rw [← C_leadingCoeff_mul_prod_multiset_X_sub_C
     (IsAlgClosed.card_roots_eq_natDegree (k := ℂ) (p := lagPoly α n))]
   rw [leadingCoeff_lagPoly hα, roots_lagPoly_eq hα x hroot hinj, Multiset.map_map]
   rfl
 /-- `∏ L_m(y)` over the zeros `y` of `L_{m+1}`. -/
-def SSL (a : ℂ) (m : ℕ) : ℂ := ((lagPoly a (m + 1)).roots.map fun y => (lagPoly a m).eval y).prod
+def laguerreRootProd (a : ℂ) (m : ℕ) : ℂ := ((lagPoly a (m + 1)).roots.map fun y => (lagPoly a m).eval y).prod
 
-/-- `SSL a 0 = 1`. -/
-theorem SSL_zero (a : ℂ) : SSL a 0 = 1 := by
-  simp [SSL, lagPoly, lcoef, poch_zero, kummerMCoeff]
+/-- `laguerreRootProd a 0 = 1`. -/
+theorem laguerreRootProd_zero (a : ℂ) : laguerreRootProd a 0 = 1 := by
+  simp [laguerreRootProd, lagPoly, lcoef, poch_zero, kummerMCoeff]
 
 /-- At a zero of `L_{m+1}^{(α)}` the three-term recurrence gives
 `L_{m+2}^{(α)} = -(m+α+1)/(m+2) L_m^{(α)}`. -/
@@ -251,8 +269,8 @@ theorem eval_lagPoly_two_of_root (hα : -1 < α) (m : ℕ) {y : ℂ}
   linear_combination h
 
 /-- The recursion for the product of `L_m^{(α)}` over the zeros of `L_{m+1}^{(α)}`. -/
-theorem SSL_succ (hα : -1 < α) (m : ℕ) :
-    SSL α (m + 1) = (-1) ^ (m + 1) * ((m : ℂ) + 1 + α) ^ (m + 1) / ((m + 1) ! : ℂ) * SSL α m := by
+theorem laguerreRootProd_succ (hα : -1 < α) (m : ℕ) :
+    laguerreRootProd α (m + 1) = (-1) ^ (m + 1) * ((m : ℂ) + 1 + α) ^ (m + 1) / ((m + 1) ! : ℂ) * laguerreRootProd α m := by
   have key := lc_pow_mul_prod_roots_eval (lagPoly α (m + 2)) (lagPoly α (m + 1))
   rw [natDegree_lagPoly hα, natDegree_lagPoly hα, leadingCoeff_lagPoly hα,
     leadingCoeff_lagPoly hα] at key
@@ -263,12 +281,12 @@ theorem SSL_succ (hα : -1 < α) (m : ℕ) :
     refine Multiset.map_congr rfl fun y hy => ?_
     exact eval_lagPoly_two_of_root hα m ((mem_roots hne).mp hy)
   rw [hmap, prod_map_const_mul, IsAlgClosed.card_roots_eq_natDegree, natDegree_lagPoly hα] at key
-  change KL (m + 2) ^ (m + 1) * SSL α (m + 1) = _ * (_ * SSL α m) at key
+  change laguerreLeadingCoeff (m + 2) ^ (m + 1) * laguerreRootProd α (m + 1) = _ * (_ * laguerreRootProd α m) at key
   have he : Even ((m + 2) * (m + 1)) := by
     rw [mul_comm]; exact Nat.even_mul_succ_self (m + 1)
   rw [he.neg_one_pow, one_mul] at key
-  have hK := KL_ne_zero (m + 2)
-  simp only [KL] at key hK
+  have hK := laguerreLeadingCoeff_ne_zero (m + 2)
+  simp only [laguerreLeadingCoeff] at key hK
   have h2 : (m + 2 : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero (m + 1)
   have hf1 : ((m + 1) ! : ℂ) ≠ 0 := by exact_mod_cast (m + 1).factorial_ne_zero
   have hfac : ((m + 2) ! : ℂ) = (m + 2) * (m + 1) ! := by
@@ -287,22 +305,22 @@ theorem SSL_succ (hα : -1 < α) (m : ℕ) :
   linear_combination key
 
 /-- Closed form of the product of `L_m^{(α)}` over the zeros of `L_{m+1}^{(α)}`. -/
-theorem SSL_eq (hα : -1 < α) (m : ℕ) :
-    SSL α m = ∏ k ∈ range m, (-1) ^ (k + 1) * ((k : ℂ) + 1 + α) ^ (k + 1) / ((k + 1) ! : ℂ) := by
+theorem laguerreRootProd_eq (hα : -1 < α) (m : ℕ) :
+    laguerreRootProd α m = ∏ k ∈ range m, (-1) ^ (k + 1) * ((k : ℂ) + 1 + α) ^ (k + 1) / ((k + 1) ! : ℂ) := by
   induction m with
-  | zero => simp [SSL_zero]
-  | succ m ih => rw [SSL_succ hα, ih, prod_range_succ]; ring
+  | zero => simp [laguerreRootProd_zero]
+  | succ m ih => rw [laguerreRootProd_succ hα, ih, prod_range_succ]; ring
 
-/-- The Laguerre discriminant expressed through `SSL`. -/
+/-- The Laguerre discriminant expressed through `laguerreRootProd`. -/
 theorem disc_eq (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, laguerrePolyL α (m + 1) (x i) = 0) (hinj : Function.Injective x) :
     (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) *
-        (KL (m + 1) ^ (m + 1) * poch ((α : ℂ) + 1) (m + 1)) =
-      (-1) ^ (m + 1).choose 2 * (-((m : ℂ) + α + 1)) ^ (m + 1) * SSL α m := by
+        (laguerreLeadingCoeff (m + 1) ^ (m + 1) * poch ((α : ℂ) + 1) (m + 1)) =
+      (-1) ^ (m + 1).choose 2 * (-((m : ℂ) + α + 1)) ^ (m + 1) * laguerreRootProd α m := by
   have hα' : -1 < (α : ℂ).re := by simpa using hα
   set xc : Fin (m + 1) → ℂ := fun i => (x i : ℂ) with hxc
-  set K := KL (m + 1) with hK
+  set K := laguerreLeadingCoeff (m + 1) with hK
   have hnodal := lagPoly_eq_nodal hα x hroot hinj
   have hder : ∀ i, deriv (laguerrePolyL α (m + 1)) (xc i) =
       K * ∏ j ∈ univ.erase i, (xc i - xc j) := by
@@ -320,8 +338,8 @@ theorem disc_eq (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
     linear_combination -h
   have hprod := congrArg (fun f : Fin (m + 1) → ℂ => ∏ i, f i) (funext hrel)
   simp only [prod_mul_distrib, prod_const, card_univ, Fintype.card_fin] at hprod
-  have hSS : ∏ i, laguerrePolyL α m (xc i) = SSL α m := by
-    unfold SSL
+  have hSS : ∏ i, laguerrePolyL α m (xc i) = laguerreRootProd α m := by
+    unfold laguerreRootProd
     rw [roots_lagPoly_eq hα x hroot hinj, Multiset.map_map]
     simp only [Function.comp_def, eval_lagPoly]
     rfl
@@ -334,7 +352,7 @@ theorem disc_eq (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
     rw [← hc, ← prod_mul_distrib]
     exact prod_congr rfl fun i _ => by ring
   have hx : ∏ i, xc i = poch ((α : ℂ) + 1) (m + 1) := by
-    rw [hneg, hK, KL] at h0
+    rw [hneg, hK, laguerreLeadingCoeff] at h0
     have hf : ((m + 1)! : ℂ) ≠ 0 := by exact_mod_cast (m + 1).factorial_ne_zero
     have hs : ((-1 : ℂ) ^ (m + 1)) * (-1) ^ (m + 1) = 1 := by
       rw [← pow_add, ← two_mul, pow_mul]; norm_num
@@ -391,14 +409,14 @@ theorem poch_eq_prod (c : ℂ) (n : ℕ) : poch c n = ∏ k ∈ range n, (c + k)
 /-- Closed form of the discriminant of the Laguerre polynomial `L_{m+1}^{(α)}` (Stieltjes). -/
 theorem disc_closed (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, laguerrePolyL α (m + 1) (x i) = 0) (hinj : Function.Injective x) :
-    KL (m + 1) ^ (2 * m) * (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
+    laguerreLeadingCoeff (m + 1) ^ (2 * m) * (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) =
       ∏ k ∈ range (m + 1), ((k : ℂ) + 1) ^ (k + 1) / ((k : ℂ) + 1) ^ (2 * m) *
         ((k : ℂ) + 1 + α) ^ k := by
   have hD := disc_eq hα m x hroot hinj
   generalize (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) = D at hD ⊢
-  rw [SSL_eq hα, prod_div_distrib, prod_mul_distrib, prod_neg_one_pow_succ] at hD
+  rw [laguerreRootProd_eq hα, prod_div_distrib, prod_mul_distrib, prod_neg_one_pow_succ] at hD
   have hQ : poch ((α : ℂ) + 1) (m + 1) = ∏ k ∈ range (m + 1), ((k : ℂ) + 1 + α) := by
     rw [poch_eq_prod]; exact prod_congr rfl fun k _ => by ring
   rw [hQ] at hD
@@ -424,11 +442,11 @@ theorem disc_closed (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
   have hsN : ((-1 : ℂ) ^ (m + 1)) * ((-1 : ℂ) ^ (m + 1)) ^ (m + 1) = 1 := by
     rw [← pow_succ', ← pow_mul]
     exact (Nat.even_mul_succ_self (m + 1)).neg_one_pow
-  have hK2 : KL (m + 1) ^ (2 * m) = 1 / (((m + 1)! : ℕ) : ℂ) ^ (2 * m) := by
-    rw [KL, div_pow, pow_mul, hs2, one_pow]
-  have hKN : KL (m + 1) ^ (m + 1) = ((-1 : ℂ) ^ (m + 1)) ^ (m + 1) /
+  have hK2 : laguerreLeadingCoeff (m + 1) ^ (2 * m) = 1 / (((m + 1)! : ℕ) : ℂ) ^ (2 * m) := by
+    rw [laguerreLeadingCoeff, div_pow, pow_mul, hs2, one_pow]
+  have hKN : laguerreLeadingCoeff (m + 1) ^ (m + 1) = ((-1 : ℂ) ^ (m + 1)) ^ (m + 1) /
       (((m + 1)! : ℕ) : ℂ) ^ (m + 1) := by
-    rw [KL, div_pow]
+    rw [laguerreLeadingCoeff, div_pow]
   rw [hK2]
   rw [hKN] at hD
   rw [show (m : ℂ) + α + 1 = (m : ℂ) + 1 + α by ring, neg_pow ((m : ℂ) + 1 + α)] at hD
@@ -477,7 +495,7 @@ theorem laguerrePolyL_discriminant {α : ℝ} (hα : -1 < α) {n : ℕ} (hn : 0 
     push_cast
     refine Finset.prod_congr rfl fun i _ => Finset.prod_congr rfl fun j _ => ?_
     split_ifs <;> simp
-  rw [hL, LagDisc.KL] at hC
+  rw [hL, LagDisc.laguerreLeadingCoeff] at hC
   have hCR : ((-1 : ℝ) ^ (m + 1) / ((m + 1)! : ℝ)) ^ (2 * m) *
       (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
         if i.val < j.val then (x i - x j) ^ 2 else (1 : ℝ)) =
@@ -606,14 +624,14 @@ theorem hP_eq_nodal {n : ℕ} (x : Fin n → ℝ)
   rfl
 
 /-- `∏ H_m(y)` over the zeros `y` of `H_{m+1}`. -/
-def SSH (m : ℕ) : ℂ := ((hP (m + 1)).roots.map fun y => (hP m).eval y).prod
+def hermiteRootProd (m : ℕ) : ℂ := ((hP (m + 1)).roots.map fun y => (hP m).eval y).prod
 
-/-- `SSH 0 = 1`. -/
-theorem SSH_zero : SSH 0 = 1 := by
-  simp [SSH, hP, hermitePolyH_zero]
+/-- `hermiteRootProd 0 = 1`. -/
+theorem hermiteRootProd_zero : hermiteRootProd 0 = 1 := by
+  simp [hermiteRootProd, hP, hermitePolyH_zero]
 
 /-- The recursion for the product of `H_m` over the zeros of `H_{m+1}`. -/
-theorem SSH_succ (m : ℕ) : SSH (m + 1) = (-(2 * ((m : ℂ) + 1))) ^ (m + 1) * SSH m := by
+theorem hermiteRootProd_succ (m : ℕ) : hermiteRootProd (m + 1) = (-(2 * ((m : ℂ) + 1))) ^ (m + 1) * hermiteRootProd m := by
   have key := lc_pow_mul_prod_roots_eval (hP (m + 2)) (hP (m + 1))
   rw [natDegree_hP, natDegree_hP, leadingCoeff_hP, leadingCoeff_hP] at key
   have hne := hP_ne_zero (m + 1)
@@ -625,24 +643,24 @@ theorem SSH_succ (m : ℕ) : SSH (m + 1) = (-(2 * ((m : ℂ) + 1))) ^ (m + 1) * 
     rw [hP_recurrence, eval_sub, eval_mul, h0, mul_zero, zero_sub, eval_mul, eval_C]
     ring
   rw [hmap, prod_map_const_mul, IsAlgClosed.card_roots_eq_natDegree, natDegree_hP] at key
-  change ((2 : ℂ) ^ (m + 2)) ^ (m + 1) * SSH (m + 1) = _ * (_ * SSH m) at key
+  change ((2 : ℂ) ^ (m + 2)) ^ (m + 1) * hermiteRootProd (m + 1) = _ * (_ * hermiteRootProd m) at key
   have he : Even ((m + 2) * (m + 1)) := by
     rw [mul_comm]; exact Nat.even_mul_succ_self (m + 1)
   rw [he.neg_one_pow, one_mul, ← pow_mul, ← pow_mul, mul_comm (m + 1) (m + 2)] at key
   exact mul_left_cancel₀ (pow_ne_zero _ two_ne_zero) key
 
 /-- Closed form of the product of `H_m` over the zeros of `H_{m+1}`. -/
-theorem SSH_eq (m : ℕ) : SSH m = ∏ k ∈ range m, (-(2 * ((k : ℂ) + 1))) ^ (k + 1) := by
+theorem hermiteRootProd_eq (m : ℕ) : hermiteRootProd m = ∏ k ∈ range m, (-(2 * ((k : ℂ) + 1))) ^ (k + 1) := by
   induction m with
-  | zero => simp [SSH_zero]
-  | succ m ih => rw [SSH_succ, ih, prod_range_succ]; ring
+  | zero => simp [hermiteRootProd_zero]
+  | succ m ih => rw [hermiteRootProd_succ, ih, prod_range_succ]; ring
 
-/-- The Hermite discriminant expressed through `SSH`. -/
+/-- The Hermite discriminant expressed through `hermiteRootProd`. -/
 theorem disc_eq (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, (aeval (x i) (hermitePolyH (m + 1)) : ℝ) = 0) (hinj : Function.Injective x) :
     (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) * (2 ^ (m + 1)) ^ (m + 1) =
-      (-1) ^ (m + 1).choose 2 * (2 * ((m : ℂ) + 1)) ^ (m + 1) * SSH m := by
+      (-1) ^ (m + 1).choose 2 * (2 * ((m : ℂ) + 1)) ^ (m + 1) * hermiteRootProd m := by
   set xc : Fin (m + 1) → ℂ := fun i => (x i : ℂ) with hxc
   have hnodal := hP_eq_nodal x hroot hinj
   have hder : ∀ i, (2 : ℂ) ^ (m + 1) * ∏ j ∈ univ.erase i, (xc i - xc j) =
@@ -654,8 +672,8 @@ theorem disc_eq (m : ℕ) (x : Fin (m + 1) → ℝ)
     rw [h]
   have hprod := congrArg (fun f : Fin (m + 1) → ℂ => ∏ i, f i) (funext hder)
   simp only [prod_mul_distrib, prod_const, card_univ, Fintype.card_fin] at hprod
-  have hSS : ∏ i, (hP m).eval (xc i) = SSH m := by
-    unfold SSH
+  have hSS : ∏ i, (hP m).eval (xc i) = hermiteRootProd m := by
+    unfold hermiteRootProd
     rw [roots_hP_eq x hroot hinj, Multiset.map_map]
     rfl
   have hpair := prod_prod_erase_sub xc
@@ -686,9 +704,9 @@ theorem disc_closed (m : ℕ) (x : Fin (m + 1) → ℝ)
   have hD := disc_eq m x hroot hinj
   generalize (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) = D at hD ⊢
-  have hS : SSH m = (-1) ^ (m + 1).choose 2 * 2 ^ (m + 1).choose 2 *
+  have hS : hermiteRootProd m = (-1) ^ (m + 1).choose 2 * 2 ^ (m + 1).choose 2 *
       ∏ k ∈ range m, ((k : ℂ) + 1) ^ (k + 1) := by
-    rw [SSH_eq]
+    rw [hermiteRootProd_eq]
     have : ∀ k ∈ range m, (-(2 * ((k : ℂ) + 1))) ^ (k + 1) =
         (-1) ^ (k + 1) * 2 ^ (k + 1) * ((k : ℂ) + 1) ^ (k + 1) := fun k _ => by
       rw [neg_eq_neg_one_mul, mul_pow, mul_pow]; ring

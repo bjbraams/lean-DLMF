@@ -11,9 +11,8 @@ public import DLMF.Legendre.Zeros.Exterior
 /-!
 # Real Legendre zero counts and interlacing
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; since 2026-10-22 every statement in this
-file is proved (the 14.16 zero counts via the Sturm separation tools of
-`DLMF.Legendre.ZeroCounts`). See `DLMF111214Acquisition.md` for coverage and validation.
+The real zeros of Ferrers and associated Legendre functions (DLMF §14.16): zero counts and
+interlacing in `(-1, 1)` in `FerrersAndReal`, and exterior zeros on `(1, ∞)` in `Exterior`.
+The zero counts rest on the Sturm comparison and separation tools of `DLMF.Legendre.ZeroTools`
+and `DLMF.Legendre.ZeroCounts`.
 -/

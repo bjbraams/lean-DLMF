@@ -17,15 +17,20 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 /-!
 # Integration by parts (DLMF §2.3(i))
 
-* 2.3.2: the Laplace transform of a function smooth at the origin has the expansion
-  `∑ q^{(s)}(0)/x^{s+1}`; proved from the general Watson lemma of
-  `DLMF.AsymptoticApproximations.Integrals.Watson` and Taylor's theorem.
-* 2.3.3: the error bound `|q^{(n)}(0)/(xⁿ(x - σₙ))|`, from a common exponential
-  bound for the lower derivatives and the iterated Laplace derivative identity.
-* 2.3.4–2.3.6: Fourier integrals over finite and infinite intervals, with the error bound
-  `x⁻ⁿ 𝒱_{a,b}(q^{(n-1)})` in terms of the variational operator 2.3.6. Repeated
-  integration by parts gives exact remainders. In the improper case convergence at
-  two frequencies forces the boundary terms to vanish.
+Asymptotic expansions of Laplace and Fourier integrals by repeated integration by parts.
+
+## Main results
+
+* `laplace_hasAsymptoticExpansion_of_contDiffOn`: the Laplace transform of a function smooth at
+  the origin has the expansion `∑ q^{(s)}(0)/x^{s+1}` (DLMF 2.3.2), from the general Watson
+  lemma of `DLMF.AsymptoticApproximations.Integrals.Watson` and Taylor's theorem.
+* `laplace_error_bound`: the error bound `|q^{(n)}(0)/(xⁿ(x - σₙ))|` (DLMF 2.3.3).
+* `fourier_hasGeneralizedAsymptoticExpansion`, `fourier_error_bound`: finite Fourier integrals,
+  with the error bound `x⁻ⁿ 𝒱_{a,b}(q^{(n-1)})` in terms of the variational operator 2.3.6
+  (DLMF 2.3.4).
+* `fourier_Ioi_hasGeneralizedAsymptoticExpansion`: infinite Fourier integrals (DLMF 2.3.5).
+
+## Implementation notes
 
 Smoothness "in a neighbourhood of the origin" is smoothness on some `[0, r]`, `r > 0` (only
 `t ≥ 0` enters the Laplace transform), with one-sided derivatives `iteratedDerivWithin`.
@@ -117,20 +122,18 @@ private theorem laplace_derivatives_exp_bound {q : ℝ → ℂ} {n : ℕ} {σ α
   obtain ⟨M, _, hb⟩ := hdown (n - k) k (by omega)
   exact ⟨M, hb⟩
 
-/-- DLMF 2.3.3 and the bound after it: let `q` be infinitely differentiable on `[0, ∞)` with
-`q^{(n)}(0) ≠ 0`, and let `σ` bound `t⁻¹ ln|q^{(n)}(t)/q^{(n)}(0)|` on `(0, ∞)`, that is,
+/-- DLMF 2.3.3 and the bound after it: let `q` be infinitely differentiable on `[0, ∞)`, and let `σ` bound `t⁻¹ ln|q^{(n)}(t)/q^{(n)}(0)|` on `(0, ∞)`, that is,
 `|q^{(n)}(t)| ≤ |q^{(n)}(0)| e^{σt}` (DLMF's `σₙ` of 2.3.3 is the least such `σ`). Then for
-`x > max(0, σ)` the `n`th error term of 2.3.2 is bounded by `|q^{(n)}(0)/(xⁿ(x - σ))|`. -/
+`x > max(0, σ)` the `n`th error term of 2.3.2 is bounded by `|q^{(n)}(0)/(xⁿ(x - σ))|`. DLMF assumes `q^{(n)}(0) ≠ 0`; the bound holds
+without it (stronger than DLMF). -/
 @[dlmf 2.3.E3, dlmf 2.3.i]
 theorem laplace_error_bound {q : ℝ → ℂ} {n : ℕ} {σ x : ℝ} (hq : ContDiffOn ℝ ∞ q (Ici 0))
-    (hn : iteratedDerivWithin n q (Ici 0) 0 ≠ 0)
     (hσ : ∀ t, 0 < t →
       ‖iteratedDerivWithin n q (Ici 0) t‖ ≤ ‖iteratedDerivWithin n q (Ici 0) 0‖ * Real.exp (σ * t))
     (hx0 : 0 < x) (hxσ : σ < x) :
     ‖(∫ t in Ioi (0 : ℝ), Complex.exp (-(x * t)) * q t) -
         ∑ s ∈ range n, iteratedDerivWithin s q (Ici 0) 0 / (x : ℂ) ^ (s + 1)‖ ≤
       ‖iteratedDerivWithin n q (Ici 0) 0‖ / (x ^ n * (x - σ)) := by
-  clear hn
   have hx : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx0.ne'
   have hσ' : ∀ t ≥ 0, ‖iteratedDerivWithin n q (Ici 0) t‖ ≤
       ‖iteratedDerivWithin n q (Ici 0) 0‖ * Real.exp (σ * t) := by

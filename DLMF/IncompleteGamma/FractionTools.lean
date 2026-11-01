@@ -14,6 +14,20 @@ public import TauCeti.Analysis.Complex.Conformal.Vitali
 /-!
 # Tools for the continued fractions of Chapter 8
 
+Comparison of the project's finite continued fractions with Mathlib's convergents, and the
+convergence proofs for the continued fractions DLMF 8.9.1 and 8.9.2 and the Padé bounds
+used for DLMF 8.10.5.
+
+## Main definitions
+
+* `incGF_padeNum`: the partial numerators `x, 1-a, 1, 2-a, 2, …` of the fraction for
+  `x^{1-a} e^x Γ(a,x)`.
+* `incGF_w`: the backward solution of the fraction 8.9.1.
+* `incGF_LA`, `incGF_LF`: the partial numerators and convergents of the normalized Legendre
+  fraction; `incGF_LT`: its target `z^{1-a} e^z Γ(a,z)`.
+
+## Main results
+
 * `incGF_cfTail_eq`: when no partial numerator `a_k`, `k ≥ 1`, vanishes, the project's finite
   continued fraction `cfTail a b 0 N` (which freezes at a vanishing numerator) is the Mathlib
   convergent of `GenContFract.cfConv_ofFun 0 a b`.
@@ -27,10 +41,13 @@ public import TauCeti.Analysis.Complex.Conformal.Vitali
   functions on `ℂ ∖ (-∞, 0]` converging on `(0, ∞)` to a holomorphic function converges to it on
   the whole slit plane (TauCeti's `TauCeti.vitali_of_tendsto` and the identity theorem).
 * `incGF_LF_tendsto`, `incGF_formA_tendsto`, `incGF_formB_tendsto`: Legendre's fraction for
-  `Γ(a,z)` (DLMF 8.9.2) converges on the whole slit plane for real `a < 1`. Local boundedness and
-  nonvanishing denominators come from the S-fraction value region
-  `GenContFract.cfConv_sfrac_bound`; the real case is
-  `DLMF.Statistical.tendsto_gammaIncContFract`.
+  `Γ(a,z)` (DLMF 8.9.2) converges on the whole slit plane for real `a < 1`.
+
+## Implementation notes
+
+In the slit-plane convergence proof, local boundedness and nonvanishing denominators come from
+the S-fraction value region `GenContFract.cfConv_sfrac_bound`; the real case is
+`DLMF.Statistical.tendsto_gammaIncContFract`.
 -/
 
 @[expose] public noncomputable section

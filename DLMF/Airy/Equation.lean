@@ -10,10 +10,27 @@ public import DLMF.Airy.ErrorBoundTools
 public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Values
 
 /-!
-# Airy equations, connection formulas and explicit Maclaurin series
+# Airy's equation, connection formulas and Maclaurin series (DLMF §§9.2, 9.4)
 
-Statements acquired from the NIST DLMF, checked 2026-10-19.
-New statements are initially admitted; existing proved Airy results are retained.
+Solutions of Airy's equation, Wronskians of rotated solutions, connection formulas, the
+Riccati form of the equation, the numerically satisfactory pairs of DLMF Table 9.2.1 and the
+explicit Maclaurin series of `Ai`, `Bi` and their derivatives.
+
+## Main results
+
+* `isAirySol_rotated`: `z ↦ Ai(ωz)` solves Airy's equation for a cube root of unity `ω`
+  (DLMF 9.2.2).
+* `airy_general_solution`: every entire Airy solution is a combination of `Ai` and `Bi`.
+* `wronskian_airyAi_rotated`, `wronskian_airyAi_rotations`: DLMF 9.2.8, 9.2.9.
+* `airyAi_neg_connection`, `airyBi_neg_connection`: DLMF 9.2.14, 9.2.15.
+* `airy_log_derivative_riccati`: the Riccati equation for `w'/w` (DLMF 9.2.16).
+* `airy_pair_wellConditioned_real`, `airy_pair_wellConditioned_sector`,
+  `airy_rotated_pair_wellConditioned`, `airy_two_rotations_wellConditioned`: the numerically
+  satisfactory pairs of DLMF Table 9.2.1.
+* `factorial_three_mul`, `factorial_three_mul_add_one`, `factorial_three_mul_add_two`:
+  triplication formulas for factorials.
+* `hasSum_airyAi_maclaurin`, `hasSum_airyAiDeriv_maclaurin`, `hasSum_airyBi_maclaurin`,
+  `hasSum_airyBiDeriv_maclaurin`: DLMF 9.4.1–9.4.4.
 -/
 
 @[expose] public noncomputable section
@@ -239,7 +256,7 @@ theorem hasSum_airyFDeriv_maclaurin (z : ℂ) :
 /-- `G′(z) = 3 ₀F̃₁(;1/3;z³/9)`. -/
 theorem airyGDeriv_eq (z : ℂ) :
     airyGDeriv z = 3 * regularizedHGFun (∅ : Multiset ℂ) {1 / 3} (z ^ 3 / 9) := by
-  rw [airyGDeriv, reg0F1_contiguous' (c := 1 / 3) (c₁ := 4 / 3) (c₂ := 7 / 3) (by norm_num)
+  rw [airyGDeriv, reg0F1_contiguous_of_eq (c := 1 / 3) (c₁ := 4 / 3) (c₂ := 7 / 3) (by norm_num)
     (by norm_num)]
   ring
 

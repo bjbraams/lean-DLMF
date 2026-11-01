@@ -17,11 +17,29 @@ public import Mathlib.Analysis.Complex.AbelLimit
 
 Mathlib's regularized Gauss function `regularizedGaussHGFun a b c z` is, for `‖z‖ < 1`, an
 entire function of each of `a`, `b`, `c` separately. Together with the identity principle this
-extends identities proved under restrictive parameter hypotheses to all parameters. The joint
-statement `entire_regularized_parameters` in `AnalyticProperties.lean` is not derived here.
+extends identities proved under restrictive parameter hypotheses to all parameters.
+
+## Main results
+
+* `analyticOnNhd_regularizedGaussHGFun_a`, `analyticOnNhd_regularizedGaussHGFun_b`,
+  `analyticOnNhd_regularizedGaussHGFun_c`: separate analyticity in each parameter.
+* `eq_of_eqOn_not_neg_nat`, `eq_of_eqOn_re_pos`: identity principles in the parameters.
+* `deriv_regularizedGaussHGFun`, `iteratedDeriv_regularizedGaussHGFun`: derivatives of the
+  regularized function.
+* `regularizedGaussHGFun_contiguous_c`, `regularizedGaussHGFun_contiguous_a` and the other
+  `regularizedGaussHGFun_contiguous_*` lemmas: contiguous relations for all parameters.
+* `regularizedGaussHGFun_euler`, `regularizedGaussHGFun_pfaff`,
+  `euler_transformation_of_ne_neg_nat`, `pfaff_transformation_of_ne_neg_nat`: Euler's and
+  Pfaff's transformations.
+* `tendsto_ordinaryHypergeometric_nhdsWithin_one`: Gauss's asymptotic as `x → 1⁻`, DLMF 15.4.23
+  (AAR Theorem 2.1.3).
+
+## Implementation notes
 
 The proof dominates the tail of the series, on a neighbourhood of any point, by the series with
-parameters `(‖a‖, ‖b‖, 1 - N)`, using `‖1/Γ(c+n)‖ ≤ 1/((n-N)! ‖Γ(c+N)‖)` for `Re (c+N) ≥ 1`.
+parameters `(‖a‖, ‖b‖, 1 - N)`, using `‖1/Γ(c+n)‖ ≤ 1/((n-N)! ‖Γ(c+N)‖)` for `Re (c+N) ≥ 1`. The
+joint statement `entire_regularized_parameters` is in `DLMF.Hypergeometric.AnalyticProperties`
+and is not derived here.
 -/
 
 @[expose] public section

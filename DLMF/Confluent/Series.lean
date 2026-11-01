@@ -13,12 +13,33 @@ public import Mathlib.RingTheory.PowerSeries.Derivative
 public import Mathlib.RingTheory.PowerSeries.Exp
 
 /-!
-# Series expansions (DLMF §§13.11, 13.24)
+# Bessel-function expansions of confluent hypergeometric functions
 
-Bessel-function expansions of `M` and `M_{κ,μ}`. The generating function 13.11.4
-for the coefficients `A_s` and 13.24.3 for `p_s^{(μ)}` are included.
-The Whittaker–Buchholz expansion and its generating function are proved in
-`DLMF.Confluent.WhittakerBuchholz`, which is re-exported here.
+This file proves the expansions of Kummer's `M` and Whittaker's `M_{κ,μ}` in series of Bessel
+functions (DLMF §§13.11, 13.24), including the generating function 13.11.4 of the coefficients
+`A_s`.
+
+## Main definitions
+
+* `kummerBesselISeriesCoeff`: the coefficients of the expansion DLMF 13.11.1.
+* `besselExpansionCoeff`: the coefficients `A_s` of DLMF 13.11.3–13.11.4.
+* `besselExpansionB`: the coefficients of `(1-t)^{-a} (1+t)^{a-b}`.
+
+## Main results
+
+* `kummerM_four_mul_eq_tsum`: the entire form of DLMF 13.11.1.
+* `kummerM_besselI_series`, `kummerM_besselI_series_complement`: DLMF 13.11.1 and 13.11.2.
+* `besselExpansionCoeff_eq_mul`: `∑ A_s t^s = e^{(b-2a)t} ∑ B_N t^N`, the generating function
+  of DLMF 13.11.4.
+* `regularizedHGFun_eq_besselExpansion`: DLMF 13.11.3 in branch-free form, for all `a, b, z`.
+* `regularizedHGFun_besselJ_series`: DLMF 13.11.3 as printed, with principal branches.
+* `whittakerM_besselI_series`: DLMF 13.24.1.
+
+## Implementation notes
+
+The Whittaker–Buchholz expansion 13.24.2 and its generating function 13.24.3 are in
+`DLMF.Confluent.WhittakerBuchholz`, which this file imports. The printed form of 13.11.3 needs a
+hypothesis on `arg z + arg (b-2a)` so that the principal branches combine.
 -/
 
 @[expose] public section

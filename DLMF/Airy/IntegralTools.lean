@@ -10,15 +10,20 @@ public import DLMF.Airy.Scorer
 /-!
 # Tools for the Airy integrals of DLMF §9.10
 
+Estimates for Scorer and Airy functions on the real axis used for the improper integrals of
+DLMF §9.10.
+
+## Main results
+
 * `airyInt_primitive_ofReal`: the entire primitive on the real axis is an interval integral.
-* Elementary bounds for the Scorer function `Hi` and `Hi'` in the left half-plane, from the
-  Laplace integral 9.12.20, and for `Gi`, `Gi'` on the positive axis, from the rotation
-  formula 9.12.12.
-* The oscillatory expansions 9.7.9–9.7.12 restricted to the positive real axis, giving the
-  growth `Ai(-s), Bi(-s) = O(s^{-1/4})`, `Ai'(-s), Bi'(-s) = O(s^{1/4})` and the leading
-  terms of `Ai'(-s)`, `Bi'(-s)` with an `O(s^{-5/4})` error.
-* `airyInt_hasIntegralAtBot_of_cross` and `airyInt_cross_expansion`: the improper integrals
-  at `-∞` and their asymptotics, via the Scorer identities 9.10.2–9.10.3.
+* `airyInt_norm_scorerHi_le`, `airyInt_norm_scorerHiDeriv_le`: bounds for `Hi` and `Hi'` in
+  the left half-plane, from the Laplace integral 9.12.20.
+* `airyInt_norm_scorerGi_le`, `airyInt_norm_scorerGiDeriv_le`: bounds for `Gi`, `Gi'` on the
+  positive axis, from the rotation formula 9.12.12.
+* `airyInt_scorerGi_sub_isBigO`: `πGi(x) = 1/x + O(x^{-4})`.
+* `airyInt_poincare_real`, `airyInt_poincare0_real`: real-axis Poincaré bounds.
+* `airyInt_hasIntegralAtBot_of_cross`, `airyInt_cross_expansion`: improper integrals at `-∞`
+  and their asymptotics, via the Scorer identities 9.10.2–9.10.3.
 -/
 
 @[expose] public noncomputable section
@@ -338,7 +343,7 @@ theorem airyInt_norm_scorerGiDeriv_le {x : ℝ} (hx : 0 < x) : ‖scorerGiDeriv 
 /-- `|Ai(x)| ≤ 1` for `x ≥ 1`. -/
 theorem airyInt_norm_airyAi_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAi x‖ ≤ 1 := by
   have hx0 : 0 < x := by linarith
-  have h := (airy_ai_real_error hx0 (N := 0) le_rfl).1
+  have h := (airy_ai_real_error hx0 (N := 0)).1
   simp only [airyRemainder, airyExponentialSum, Finset.range_zero, Finset.sum_empty, sub_zero,
     airyExpansionCoeff, pow_zero, div_one, one_mul, airyReal_airyU_zero, ofReal_one, norm_one,
     airyFunction] at h

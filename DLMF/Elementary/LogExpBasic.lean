@@ -37,13 +37,50 @@ public import Mathlib.Tactic.Polynomial.Basic
 public import Mathlib.Tactic.ReduceModChar
 
 /-!
-# Logarithms, exponentials and powers: DLMF §§4.2–4.3
+# Logarithms, exponentials and powers: definitions and basic properties
 
-Mathlib supplies the principal logarithm with argument in `(-π,π]`. DLMF also uses a
-closed principal value with two values on the negative axis. `closedLogValues` retains
-both values; `generalLogValues` retains every logarithm. Thus a boundary value is never
-silently identified with Mathlib's upper-side convention. Upstream declarations are
-indexed in `MathlibCoverage`; only missing statements and adapters occur here.
+This file defines the multivalued and closed principal logarithms and powers of DLMF §4.2, and
+proves their path-integral characterization, base changes, magnitude and phase formulas and
+inversions, together with mapping properties of the exponential (DLMF §4.3).
+
+## Main definitions
+
+* `generalLogValues`: every value of the complex logarithm (DLMF 4.2.25).
+* `closedLogValues`: the closed principal logarithm, with both values on the cut.
+* `logSheet`: a specified sheet of the general logarithm (DLMF 4.2.6).
+* `logBranchCut`: the negative real axis (DLMF 4.2.4).
+* `complexLogb`: the complex logarithm to an arbitrary base (DLMF 4.2.8).
+* `generalPowerValues`, `closedPowerValues`: general and closed principal powers
+  (DLMF 4.2.26).
+
+## Main results
+
+* `mem_generalLogValues_iff`: the general logarithms are the integer translates of the principal
+  logarithm (DLMF 4.2.6).
+* `closedLogValues_neg`: the two closed logarithm values on the cut (DLMF 4.2.7).
+* `log_eq_path_integral`, `path_integral_mem_generalLogValues`,
+  `generalLogValues_eq_pathIntegrals`: logarithms as path integrals of `dt/t`
+  (DLMF 4.2.1–4.2.2).
+* `complexLogb_change_base`, `complexLogb_reciprocal`, `complexLogb_exp_one`, `complexLogb_ten`,
+  `log_eq_log_ten_mul_logb`: base changes (DLMF 4.2.9–4.2.16).
+* `norm_power_of_logValue`, `power_phase_of_logValue`, `real_power_of_logValue`, `power_phase`:
+  magnitude and phase of powers (DLMF 4.2.29–4.2.31).
+* `exp_one_cpow`, `generalPowerValues_exp_one`: powers of `e` (DLMF 4.2.32–4.2.33).
+* `mem_generalPowerValues_iff`, `mem_closedPowerValues_iff`: inversion of powers
+  (DLMF 4.2.35–4.2.36).
+* `sqrt_sq_closed_right`, `sqrt_sq_closed_left`: DLMF 4.2.37.
+* `generalPowerValues_int`, `generalPowerValues_subsingleton_iff`: the general power is
+  single-valued exactly for integer exponents (DLMF 4.2.27).
+* `exp_horizontal_image`, `exp_vertical_image`: the exponential maps horizontal lines to rays and
+  vertical lines to circles.
+
+## Implementation notes
+
+Mathlib supplies the principal logarithm with argument in `(-π,π]`. DLMF also uses a closed
+principal value with two values on the negative axis. `closedLogValues` retains both values and
+`generalLogValues` retains every logarithm, so a boundary value is never silently identified with
+Mathlib's upper-side convention. Upstream declarations are indexed in
+`DLMF.Elementary.MathlibCoverage`.
 -/
 
 @[expose] public section
@@ -115,17 +152,17 @@ theorem closedLogValues_neg {x : ℝ} (hx : x < 0) :
       · simp [Complex.mul_im,abs_of_pos Real.pi_pos]
 
 /-- Real part of an absolutely continuous complex path. -/
-lemma logR4_ac_re {f : ℝ → ℂ} {a b : ℝ} (hf : AbsolutelyContinuousOnInterval f a b) :
+private lemma absolutelyContinuousOnInterval_re {f : ℝ → ℂ} {a b : ℝ} (hf : AbsolutelyContinuousOnInterval f a b) :
     AbsolutelyContinuousOnInterval (fun t => (f t).re) a b :=
   (Complex.reCLM.lipschitzWith).comp_absolutelyContinuousOnInterval hf
 
 /-- Imaginary part of an absolutely continuous complex path. -/
-lemma logR4_ac_im {f : ℝ → ℂ} {a b : ℝ} (hf : AbsolutelyContinuousOnInterval f a b) :
+private lemma absolutelyContinuousOnInterval_im {f : ℝ → ℂ} {a b : ℝ} (hf : AbsolutelyContinuousOnInterval f a b) :
     AbsolutelyContinuousOnInterval (fun t => (f t).im) a b :=
   (Complex.imCLM.lipschitzWith).comp_absolutelyContinuousOnInterval hf
 
 /-- A complex path whose real and imaginary parts have derivatives has the assembled derivative. -/
-lemma logR4_hasDerivAt_of_re_im {f : ℝ → ℂ} {x r s : ℝ}
+private lemma hasDerivAt_of_hasDerivAt_re_im {f : ℝ → ℂ} {x r s : ℝ}
     (hr : HasDerivAt (fun t => (f t).re) r x) (hs : HasDerivAt (fun t => (f t).im) s x) :
     HasDerivAt f ((r:ℂ) + (s:ℂ)*I) x := by
   have h := hr.ofReal_comp.add (hs.ofReal_comp.mul_const I)
@@ -134,43 +171,43 @@ lemma logR4_hasDerivAt_of_re_im {f : ℝ → ℂ} {x r s : ℝ}
 
 /-- Absolutely continuous complex paths are differentiable almost everywhere, with
 derivative assembled from the real and imaginary parts. -/
-lemma logR4_ae_hasDerivAt {f : ℝ → ℂ} {a b : ℝ} (hf : AbsolutelyContinuousOnInterval f a b) :
+private lemma ae_hasDerivAt_of_absolutelyContinuousOnInterval {f : ℝ → ℂ} {a b : ℝ} (hf : AbsolutelyContinuousOnInterval f a b) :
     ∀ᵐ x, x ∈ uIcc a b → HasDerivAt f (deriv f x) x ∧
       deriv f x = ((deriv (fun t : ℝ => (f t).re) x : ℝ) : ℂ) +
         ((deriv (fun t : ℝ => (f t).im) x : ℝ) : ℂ)*I := by
-  filter_upwards [(logR4_ac_re hf).ae_differentiableAt, (logR4_ac_im hf).ae_differentiableAt]
+  filter_upwards [(absolutelyContinuousOnInterval_re hf).ae_differentiableAt, (absolutelyContinuousOnInterval_im hf).ae_differentiableAt]
     with x h1 h2 hx
-  have h := logR4_hasDerivAt_of_re_im (h1 hx).hasDerivAt (h2 hx).hasDerivAt
+  have h := hasDerivAt_of_hasDerivAt_re_im (h1 hx).hasDerivAt (h2 hx).hasDerivAt
   exact ⟨h.differentiableAt.hasDerivAt, h.deriv⟩
 
 /-- Complexification preserves interval integrability. -/
-lemma logR4_ii_ofReal {g : ℝ → ℝ} {a b : ℝ} (h : IntervalIntegrable g MeasureTheory.volume a b) :
+private lemma intervalIntegrable_ofReal_comp {g : ℝ → ℝ} {a b : ℝ} (h : IntervalIntegrable g MeasureTheory.volume a b) :
     IntervalIntegrable (fun x => (g x : ℂ)) MeasureTheory.volume a b := ⟨h.1.ofReal, h.2.ofReal⟩
 
 /-- The derivative of an absolutely continuous complex path is interval integrable. -/
-lemma logR4_intervalIntegrable_deriv {f : ℝ → ℂ} {a b : ℝ}
+private lemma intervalIntegrable_deriv_of_absolutelyContinuousOnInterval {f : ℝ → ℂ} {a b : ℝ}
     (hf : AbsolutelyContinuousOnInterval f a b) : IntervalIntegrable (deriv f) MeasureTheory.volume a b := by
-  have h1 := (logR4_ac_re hf).intervalIntegrable_deriv
-  have h2 := (logR4_ac_im hf).intervalIntegrable_deriv
-  refine ((logR4_ii_ofReal h1).add ((logR4_ii_ofReal h2).mul_const I)).congr_ae ?_
-  have := logR4_ae_hasDerivAt hf
+  have h1 := (absolutelyContinuousOnInterval_re hf).intervalIntegrable_deriv
+  have h2 := (absolutelyContinuousOnInterval_im hf).intervalIntegrable_deriv
+  refine ((intervalIntegrable_ofReal_comp h1).add ((intervalIntegrable_ofReal_comp h2).mul_const I)).congr_ae ?_
+  have := ae_hasDerivAt_of_absolutelyContinuousOnInterval hf
   rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' measurableSet_uIoc]
   filter_upwards [this] with x hx hx'
   exact (hx (Set.uIoc_subset_uIcc hx')).2.symm
 
 /-- Fundamental theorem of calculus for absolutely continuous complex paths. -/
-lemma logR4_integral_deriv_eq_sub {f : ℝ → ℂ} {a b : ℝ}
+private lemma integral_deriv_eq_sub_of_absolutelyContinuousOnInterval {f : ℝ → ℂ} {a b : ℝ}
     (hf : AbsolutelyContinuousOnInterval f a b) : ∫ x in a..b, deriv f x = f b - f a := by
-  have h1 := (logR4_ac_re hf).intervalIntegrable_deriv
-  have h2 := (logR4_ac_im hf).intervalIntegrable_deriv
+  have h1 := (absolutelyContinuousOnInterval_re hf).intervalIntegrable_deriv
+  have h2 := (absolutelyContinuousOnInterval_im hf).intervalIntegrable_deriv
   have hae : ∀ᵐ x, x ∈ Set.uIoc a b → deriv f x =
       ((deriv (fun t : ℝ => (f t).re) x : ℝ) : ℂ) + ((deriv (fun t : ℝ => (f t).im) x : ℝ) : ℂ)*I := by
-    filter_upwards [logR4_ae_hasDerivAt hf] with x hx hx'
+    filter_upwards [ae_hasDerivAt_of_absolutelyContinuousOnInterval hf] with x hx hx'
     exact (hx (Set.uIoc_subset_uIcc hx')).2
-  rw [intervalIntegral.integral_congr_ae hae, intervalIntegral.integral_add (logR4_ii_ofReal h1)
-    ((logR4_ii_ofReal h2).mul_const I), intervalIntegral.integral_mul_const, intervalIntegral.integral_ofReal,
-    intervalIntegral.integral_ofReal, (logR4_ac_re hf).integral_deriv_eq_sub,
-    (logR4_ac_im hf).integral_deriv_eq_sub]
+  rw [intervalIntegral.integral_congr_ae hae, intervalIntegral.integral_add (intervalIntegrable_ofReal_comp h1)
+    ((intervalIntegrable_ofReal_comp h2).mul_const I), intervalIntegral.integral_mul_const, intervalIntegral.integral_ofReal,
+    intervalIntegral.integral_ofReal, (absolutelyContinuousOnInterval_re hf).integral_deriv_eq_sub,
+    (absolutelyContinuousOnInterval_im hf).integral_deriv_eq_sub]
   push_cast
   rw [← Complex.re_add_im (f b), ← Complex.re_add_im (f a)]
   simp only [Complex.add_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, Complex.I_re,
@@ -178,7 +215,7 @@ lemma logR4_integral_deriv_eq_sub {f : ℝ → ℂ} {a b : ℝ}
   push_cast; ring
 
 /-- A function `C¹` near a compact set is Lipschitz on it. -/
-lemma logR4_lipschitzOnWith_of_compact {F : ℂ → ℂ} {K : Set ℂ} (hK : IsCompact K)
+private lemma exists_lipschitzOnWith_of_isCompact_of_contDiffAt {F : ℂ → ℂ} {K : Set ℂ} (hK : IsCompact K)
     (hF : ∀ w ∈ K, ContDiffAt ℝ 1 F w) : ∃ L, LipschitzOnWith L F K := by
   apply LocallyLipschitzOn.exists_lipschitzOnWith_of_compact hK
   intro w hw
@@ -186,11 +223,11 @@ lemma logR4_lipschitzOnWith_of_compact {F : ℂ → ℂ} {K : Set ℂ} (hK : IsC
   exact ⟨L, t, mem_nhdsWithin_of_mem_nhds ht, hL⟩
 
 /-- Composition of an absolutely continuous path with a function `C¹` along its image. -/
-lemma logR4_ac_comp {F : ℂ → ℂ} {γ : ℝ → ℂ} {a b : ℝ}
+private lemma absolutelyContinuousOnInterval_comp_contDiffAt {F : ℂ → ℂ} {γ : ℝ → ℂ} {a b : ℝ}
     (hγ : AbsolutelyContinuousOnInterval γ a b) (hF : ∀ t ∈ uIcc a b, ContDiffAt ℝ 1 F (γ t)) :
     AbsolutelyContinuousOnInterval (F ∘ γ) a b := by
   have hK : IsCompact (γ '' uIcc a b) := isCompact_uIcc.image_of_continuousOn hγ.continuousOn
-  obtain ⟨L, hL⟩ := logR4_lipschitzOnWith_of_compact hK (by
+  obtain ⟨L, hL⟩ := exists_lipschitzOnWith_of_isCompact_of_contDiffAt hK (by
     rintro _ ⟨t, ht, rfl⟩; exact hF t ht)
   exact hL.comp_absolutelyContinuousOnInterval (mapsTo_image _ _) hγ
 
@@ -204,19 +241,19 @@ theorem log_eq_path_integral {z : ℂ} (γ : ℝ → ℂ)
     Complex.log z = ∫ t in (0 : ℝ)..1, deriv γ t / γ t := by
   have hs' : ∀ t ∈ uIcc (0:ℝ) 1, γ t ∈ Complex.slitPlane := by
     rw [uIcc_of_le zero_le_one]; exact hs
-  have hac := logR4_ac_comp hγ (F := Complex.log) (fun t ht =>
+  have hac := absolutelyContinuousOnInterval_comp_contDiffAt hγ (F := Complex.log) (fun t ht =>
     (Complex.contDiffAt_log (hs' t ht)).restrict_scalars ℝ |>.of_le le_top)
-  have hft := logR4_integral_deriv_eq_sub hac
+  have hft := integral_deriv_eq_sub_of_absolutelyContinuousOnInterval hac
   simp only [Function.comp, h0, h1, Complex.log_one, sub_zero] at hft
   rw [← hft]
   apply intervalIntegral.integral_congr_ae
-  filter_upwards [logR4_ae_hasDerivAt hγ] with x hx hx'
+  filter_upwards [ae_hasDerivAt_of_absolutelyContinuousOnInterval hγ] with x hx hx'
   have hxi := Set.uIoc_subset_uIcc hx'
   show deriv (fun t => Complex.log (γ t)) x = _
   exact ((hx hxi).1.clog_real (hs' x hxi)).deriv
 
 /-- Indefinite integrals of interval integrable complex functions are absolutely continuous. -/
-lemma logR4_ac_integral {q : ℝ → ℂ} {a b c : ℝ} (hq : IntervalIntegrable q MeasureTheory.volume a b)
+private lemma absolutelyContinuousOnInterval_integral {q : ℝ → ℂ} {a b c : ℝ} (hq : IntervalIntegrable q MeasureTheory.volume a b)
     (hc : c ∈ uIcc a b) : AbsolutelyContinuousOnInterval (fun x => ∫ s in c..x, q s) a b := by
   have hre : IntervalIntegrable (fun s => (q s).re) MeasureTheory.volume a b :=
     ⟨hq.1.re, hq.2.re⟩
@@ -233,8 +270,8 @@ lemma logR4_ac_integral {q : ℝ → ℂ} {a b c : ℝ} (hq : IntervalIntegrable
   simp only [Function.comp, Pi.add_apply, Complex.ofRealCLM_apply, smul_eq_mul]
   rw [← intervalIntegral.integral_ofReal, ← intervalIntegral.integral_ofReal,
     ← intervalIntegral.integral_const_mul,
-    ← intervalIntegral.integral_add (logR4_ii_ofReal (hre.mono_set hsub))
-      ((logR4_ii_ofReal (him.mono_set hsub)).const_mul I)]
+    ← intervalIntegral.integral_add (intervalIntegrable_ofReal_comp (hre.mono_set hsub))
+      ((intervalIntegrable_ofReal_comp (him.mono_set hsub)).const_mul I)]
   refine intervalIntegral.integral_congr fun s _ => ?_
   rw [mul_comm]; exact Complex.re_add_im (q s)
 
@@ -249,21 +286,21 @@ theorem path_integral_mem_generalLogValues {z : ℂ} (γ : ℝ → ℂ)
   have hn' : ∀ t ∈ uIcc (0:ℝ) 1, γ t ≠ 0 := by rw [uIcc_of_le zero_le_one]; exact hn
   have hq : IntervalIntegrable (fun t => deriv γ t / γ t) MeasureTheory.volume 0 1 := by
     simp only [div_eq_mul_inv]
-    exact (logR4_intervalIntegrable_deriv hγ).mul_continuousOn
+    exact (intervalIntegrable_deriv_of_absolutelyContinuousOnInterval hγ).mul_continuousOn
       (hγ.continuousOn.inv₀ hn')
   have h0mem : (0:ℝ) ∈ uIcc (0:ℝ) 1 := by simp
   set H : ℝ → ℂ := fun x => ∫ s in (0:ℝ)..x, deriv γ s / γ s
-  have hH := logR4_ac_integral hq h0mem
+  have hH := absolutelyContinuousOnInterval_integral hq h0mem
   have hE : AbsolutelyContinuousOnInterval ((fun w => Complex.exp (-w)) ∘ H) 0 1 :=
     have hexp : ContDiff ℂ 1 (fun w : ℂ => Complex.exp (-w)) :=
       Complex.contDiff_exp.comp contDiff_id.neg
-    logR4_ac_comp hH (fun t _ => (hexp.restrict_scalars ℝ).contDiffAt)
+    absolutelyContinuousOnInterval_comp_contDiffAt hH (fun t _ => (hexp.restrict_scalars ℝ).contDiffAt)
   have heq : (γ • ((fun w => Complex.exp (-w)) ∘ H)) = fun t => γ t * Complex.exp (-H t) := by
     funext t; simp [Function.comp]
   have hG := hγ.smul hE
   rw [heq] at hG
   have hd : ∀ᵐ x, x ∈ uIcc (0:ℝ) 1 → HasDerivAt (fun t => γ t * Complex.exp (-H t)) 0 x := by
-    filter_upwards [logR4_ae_hasDerivAt hγ, hq.ae_hasDerivAt_integral] with x hx1 hx2 hx
+    filter_upwards [ae_hasDerivAt_of_absolutelyContinuousOnInterval hγ, hq.ae_hasDerivAt_integral] with x hx1 hx2 hx
     have dγ := (hx1 hx).1
     have dH : HasDerivAt H (deriv γ x / γ x) x := hx2 hx 0 h0mem
     have dE := dH.neg.cexp

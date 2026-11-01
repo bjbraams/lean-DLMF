@@ -8,12 +8,24 @@ module
 public import DLMF.Elliptic.Basic.Theta
 
 /-!
-# Jacobi's theta functions in DLMF normalization (Temme §12.3.2, DLMF §20.2)
+# Jacobi's theta functions: series, periodicity and parity
 
-Mathlib's `jacobiTheta₂ z τ = ∑ₙ exp(2πinz + πin²τ)` is `θ₃(πz|τ)`. We define `θ₁, …, θ₄` with
-the DLMF argument convention (`q = e^{iπτ}`, period `π` in `z`) and derive their series,
-periodicity, parity and the quasi-periodicity of `θ₃`, together with Jacobi's imaginary
-transformation of `θ₃(0|τ)`, from Mathlib's results for `jacobiTheta₂`.
+Mathlib's `jacobiTheta₂ z τ = ∑ₙ exp(2πinz + πin²τ)` is `θ₃(πz|τ)`. This file derives the series,
+periodicity and parity of `θ₁, …, θ₄` in the DLMF argument convention (`q = e^{iπτ}`, period `π`
+in `z`), the quasi-periodicity of `θ₃` and Jacobi's imaginary transformation of `θ₃(0|τ)` from
+Mathlib's results for `jacobiTheta₂` (Temme §12.3.2, DLMF §20.2).
+
+## Main results
+
+* `jacobiThetaFourTau_eq_tsum`: the series for `θ₄` (DLMF 20.2.4).
+* `jacobiThetaThreeTau_add_pi`, `jacobiThetaFourTau_add_pi`, `jacobiThetaTwoTau_add_pi`,
+  `jacobiThetaOneTau_add_pi`: behaviour under `z ↦ z + π` (DLMF 20.2.8).
+* `jacobiThetaThreeTau_add_pi_mul`, `jacobiThetaThreeTau_sub_pi_mul`: quasi-periodicity
+  `θ₃(z ± πτ|τ) = q⁻¹ e^{∓2iz} θ₃(z|τ)`.
+* `jacobiThetaOneTau_neg`, `jacobiThetaTwoTau_neg`, `jacobiThetaThreeTau_neg`,
+  `jacobiThetaFourTau_neg`: `θ₁` is odd and `θ₂, θ₃, θ₄` are even (DLMF §20.2(ii)).
+* `jacobiThetaThreeTau_zero_neg_recip`: `θ₃(0|-1/τ) = (-iτ)^{1/2} θ₃(0|τ)` (DLMF 20.7.32 at
+  `z = 0`).
 -/
 
 @[expose] public section

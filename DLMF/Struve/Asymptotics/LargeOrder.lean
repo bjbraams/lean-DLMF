@@ -8,12 +8,32 @@ module
 public import DLMF.Struve.Asymptotics.IntegratedExpansions
 
 /-!
-# Large-order and scaled Struve expansions
+# Large-order expansions of Struve functions (DLMF 11.6.5–11.6.9)
 
-Large-order expansions and their scaled forms, with coefficient and normalization identities.
+## Main definitions
 
-Source references and common attribution are retained in
-`DLMF.Struve.Asymptotics`.
+* `struveScaledCoeff`: the finite polynomial formula for the coefficients `c_k(λ)` of
+  DLMF 11.6.8.
+* `struveLO_P`, `struveLO_Q`: the polynomials `∏_{r<j} (X - (1/2 + r))` and the polynomial in
+  `w = 1/ν` collecting the binomial terms.
+
+## Main results
+
+* `struveH_large_order`, `struveL_large_order`: the leading behavior DLMF 11.6.5.
+* `struveLO_coeff_Q`, `struveLO_poly_bound`: the binomial terms reproduce the coefficients of
+  DLMF 11.6.6–11.6.7 up to `O(ν^{-N})`.
+* `struveK_scaled_asymptotic`, `struveM_scaled_asymptotic`: the large-order expansions
+  DLMF 11.6.6–11.6.7.
+* `struveScaledCoeff_initial`: the initial coefficients DLMF 11.6.8.
+* `struveL_scaled_equiv`: DLMF 11.6.9.
+
+## Implementation notes
+
+The expansions 11.6.6–11.6.7 follow from the integrals 11.5.2 and 11.5.4 by a binomial
+expansion of `(1 ± t²)^{ν-1/2}` with the uniform remainder bounds of
+`DLMF.Struve.LargeOrderTools`; the binomial terms are regrouped into powers of `1/ν` through
+the reflected polynomials `struveLO_Q`. The leading behavior 11.6.5 uses Binet's formula for the
+leading term of the Struve series.
 -/
 
 @[expose] public noncomputable section
@@ -98,7 +118,7 @@ theorem norm_recip_Gamma_add_nat_le_of_arg {ν : ℂ} {δ : ℝ} (hδ : 0 < δ) 
       nlinarith) hsn
     have hs0 : s ≠ 0 := by
       intro h; rw [h, norm_zero] at hs1; linarith
-    have hrec := DLMF.Hypergeometric.recip_Gamma_eq_mul_recip_Gamma_add_one s
+    have hrec := Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one s
     have h1 : (Gamma (s + 1))⁻¹ = (Gamma s)⁻¹ / s := by
       rw [hrec]; field_simp
     rw [show ν + N + 3 / 2 + ((k + 1 : ℕ) : ℂ) = s + 1 by rw [hs]; push_cast; ring, h1,
@@ -423,7 +443,7 @@ theorem isEquivalent_of_struve_order_expansion {f : ℂ → ℂ} {z : ℂ} (hz :
     have hw0 : ν + 3 / 2 ≠ 0 := slitPlane_ne_zero (by
       simpa using add_ofReal_mem_slitPlane_of_arg hν0 hδ harg (s := 3 / 2) (by norm_num))
     have hG32 : Gamma (3 / 2) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by norm_num)
-    have hrec := DLMF.Hypergeometric.recip_Gamma_eq_mul_recip_Gamma_add_one (ν + 3 / 2)
+    have hrec := Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν + 3 / 2)
     have h5 : (Gamma (ν + ((1 : ℕ) : ℂ) + 3 / 2))⁻¹ = (Gamma (ν + 3 / 2))⁻¹ / (ν + 3 / 2) := by
       rw [show ν + ((1 : ℕ) : ℂ) + 3 / 2 = ν + 3 / 2 + 1 by push_cast; ring, eq_div_iff hw0,
         mul_comm, ← hrec]

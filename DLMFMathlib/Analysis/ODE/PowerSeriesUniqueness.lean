@@ -16,29 +16,32 @@ We consider the second-order linear equation
 
 `f'' = p f' + q f`
 
-near a point `x₀`, with smooth (or analytic) coefficients `p` and `q`.
+near a point `x₀`, with smooth (or analytic) coefficients `p` and `q`, together with
+uniqueness and existence on real intervals.
 
-* `ODE.iteratedDeriv_add_two_of_eventuallyEq`: differentiating the equation `n` times with the
+## Main results
+
+* `iteratedDeriv_add_two_of_eventuallyEq`: differentiating the equation `n` times with the
   Leibniz rule expresses `f⁽ⁿ⁺²⁾(x₀)` through the lower derivatives of `f` and the derivatives
   of `p`, `q` at `x₀`. This is the recurrence for the Taylor coefficients obtained by
   substituting a power series.
-* `ODE.iteratedDeriv_eq_of_eventuallyEq`: two smooth solutions with the same value and first
+* `iteratedDeriv_eq_of_eventuallyEq`: two smooth solutions with the same value and first
   derivative at `x₀` have the same derivatives of all orders at `x₀`.
-* `ODE.eventuallyEq_of_eventuallyEq_ode`, `ODE.eqOn_of_ode`: for analytic solutions over any
+* `eventuallyEq_of_eventuallyEq_ode`, `eqOn_of_ode`: for analytic solutions over any
   complete field of characteristic zero (`ℝ`, `ℂ`, …), the value and derivative at `x₀`
   determine the solution near `x₀`, and on every preconnected open set on which it is
   analytic and solves the equation.
-* `ODE.eventually_ode_of_iteratedDeriv`: conversely, an analytic function whose derivatives at
+* `eventually_ode_of_iteratedDeriv`: conversely, an analytic function whose derivatives at
   `x₀` satisfy the recurrence solves the equation near `x₀`.
-* `ODE.iteratedDeriv_pow_mul_zero`: the `n`-th derivative of `x ^ m * g x` at `0`, the
+* `iteratedDeriv_pow_mul_zero`: the `n`-th derivative of `x ^ m * g x` at `0`, the
   ingredient for polynomial coefficients.
-* `ODE.eqOn_Icc_of_linear_ode`, `ODE.eqOn_of_linear_ode`, `ODE.eq_of_linear_ode`:
+* `eqOn_Icc_of_linear_ode`, `eqOn_of_linear_ode`, `eq_of_linear_ode`:
   real-variable uniqueness (Grönwall, via Mathlib's `ODE_solution_unique_of_mem_Icc`) for
   second-order equations on a compact interval, an open interval, or `ℝ`, with values in any
   normed space and coefficients in any normed field.
-* `ODE.eqOn_Icc_of_linear_system`: the same for linear `2 × 2` first-order systems on `[a, b]`
+* `eqOn_Icc_of_linear_system`: the same for linear `2 × 2` first-order systems on `[a, b]`
   with one-sided derivatives at the endpoints and data prescribed at any `t₀ ∈ [a, b]`.
-* `ODE.exists_hasDerivWithinAt_Icc_of_lipschitz`, `ODE.exists_linear_system_Icc`: global
+* `exists_hasDerivWithinAt_Icc_of_lipschitz`, `exists_linear_system_Icc`: global
   existence on `[a, b]` for globally Lipschitz fields with `v t 0 = 0` (via Mathlib's
   `IsPicardLindelof` on short subintervals and gluing), in particular for linear `2 × 2` systems.
 -/

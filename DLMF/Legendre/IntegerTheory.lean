@@ -11,10 +11,27 @@ public import DLMF.OrthogonalPolynomials.Integrals
 /-!
 # Integer degrees and orders and Rodrigues formulas
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This file treats Ferrers and associated Legendre functions of integer degree and order
+(DLMF §14.7): the reduction to Legendre polynomials, the Rodrigues formulas, the vanishing for
+order greater than degree, and the reflection formulas.
+
+## Main definitions
+
+* `legendrePolyR`: a real polynomial representing the Legendre polynomial `P_n`.
+
+## Main results
+
+* `ferrersP_nat_polynomial`: `𝖯^0_n(x) = P_n(x)` (DLMF 14.7.1).
+* `legendrePolyP_rodrigues_complex`: the complex Rodrigues formula for `P_n` (DLMF 18.5.5).
+* `ferrersP_nat_order_rodrigues`: the Rodrigues formula for `𝖯^m_n` (DLMF 14.7.8, 14.7.10).
+* `associatedP_nat_order_rodrigues`: the Rodrigues formula for `P^m_n` (DLMF 14.7.14).
+* `associatedP_equal_nat_order`: `P^m_m(z) = ((2m)!/(2^m m!)) (z²-1)^{m/2}` (DLMF 14.7.15).
+* `ferrersP_order_gt_degree`, `associatedP_order_gt_degree`: vanishing for `n < m`
+  (DLMF 14.7.16).
+* `ferrersP_neg_of_add_eq_nat`, `ferrersQ_neg_of_add_eq_nat`: reflection in `x` when `ν + μ` is
+  a nonnegative integer.
+* `ferrersP_nat_reflection`, `ferrersQ_nat_reflection_1`, `ferrersQ_nat_reflection_2`:
+  DLMF 14.7.17, 14.7.18.
 -/
 
 @[expose] public noncomputable section

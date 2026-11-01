@@ -13,13 +13,36 @@ public import DLMF.Bessel.KMellin
 public import DLMFMathlib.Analysis.Complex.NonInteger
 
 /-!
-# Airy primitives and bilateral Laplace transforms
+# Airy primitives and the bilateral Laplace transform
 
-Integral identities for the Airy functions and the bilateral Laplace transform, including
-convergence and normalization.
+Primitives of the Airy functions through Scorer functions, improper integrals over half-lines
+and their asymptotics, antiderivatives of moments of Airy solutions, and the bilateral Laplace
+transform of `Ai` (DLMF 9.10.1–9.10.13).
 
-Source references and common attribution are retained in
-`DLMF.Airy.Integrals`.
+## Main definitions
+
+* `airyLapF`: the bilateral Laplace transform `F(q) = ∫ e^{qt} Ai(t) dt`.
+* `airyLapA`: the running integral `∫₀^s Ai(-u) du`.
+
+## Main results
+
+* `airyAi_integral_scorerGi`, `airyAi_integral_scorerHi`, `airyBi_integral_scorer`:
+  DLMF 9.10.1–9.10.3.
+* `airyAi_lower_integral_scorerHi`, `airyBi_lower_integral_scorer`: the improper integrals
+  from `-∞`.
+* `airyAi_tail_integral_asymptotic`, `airyBi_integral_asymptotic`: DLMF 9.10.4, 9.10.5.
+* `airyAi_negative_integral_asymptotic`, `airyBi_negative_integral_asymptotic`:
+  DLMF 9.10.6, 9.10.7.
+* `airy_linear_antiderivative`, `airy_quadratic_antiderivative`,
+  `airy_moment_antiderivative_recurrence`: DLMF 9.10.8–9.10.10.
+* `airyAi_positive_integral`, `airyAi_negative_integral`, `airyBi_negative_integral`:
+  DLMF 9.10.11, 9.10.12.
+* `airyAi_bilateral_laplace`: `∫ e^{pt} Ai(t) dt = e^{p³/3}` for `Re p > 0` (DLMF 9.10.13).
+
+## Implementation notes
+
+DLMF 9.10.7 prints a plus sign in front of the leading term; the correct sign is minus, and
+`airyBi_negative_integral_asymptotic` is stated with it.
 -/
 
 @[expose] public noncomputable section
@@ -371,7 +394,7 @@ theorem airyLap_norm_le_exp {x : ℝ} (hx : 1 ≤ x) :
     exact Real.sqrt_le_sqrt (by linarith [Real.pi_gt_three])
   have hq1 : 1 ≤ x ^ (1 / 4 : ℝ) := Real.one_le_rpow hx (by norm_num)
   constructor
-  · have h := (airy_ai_real_error hx0 (N := 0) le_rfl).1
+  · have h := (airy_ai_real_error hx0 (N := 0)).1
     simp only [airyRemainder, airyExponentialSum, Finset.range_zero, Finset.sum_empty, sub_zero,
       airyExpansionCoeff, pow_zero, div_one, one_mul, airyReal_airyU_zero, ofReal_one, norm_one,
       airyFunction] at h

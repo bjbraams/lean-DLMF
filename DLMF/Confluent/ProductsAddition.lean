@@ -10,16 +10,40 @@ public import DLMF.Confluent.MobiusTaylor
 public import DLMF.Confluent.Whittaker
 
 /-!
-# Products and addition theorems (DLMF §§13.12, 13.13, 13.25, 13.26)
+# Products and addition theorems for confluent hypergeometric functions
 
-For U and Whittaker addition formulas, `Re x > 0` keeps the Taylor domain
-on the principal branch. Downward shifts of ordinary M exclude integer denominator
-parameters: the old formulas at `b = 1` discarded nonzero limiting terms as `0 * 0`.
-The product proofs use the Mathlib contributors’ zero-derivative constancy and
-complex-power calculus, together with the local Kummer contiguous relations.
-First-parameter additions use the unit-disk Taylor expansions in `MobiusTaylor`.
-Their four Whittaker adapters check the principal powers with positive-real-part
-ratios, retaining the original convergence and exceptional-parameter hypotheses.
+This file proves the product formulas and the addition theorems for Kummer's, Tricomi's and
+Whittaker's functions (DLMF §§13.12, 13.13, 13.25, 13.26). The addition series converge for
+`‖y‖ < ‖x‖`.
+
+## Main results
+
+* `kummerM_product`: the product formula DLMF 13.12.1.
+* `kummerM_addition`, `kummerM_addition_shift_b`, `kummerM_addition_shift_a`,
+  `kummerM_addition_exp`, `kummerM_addition_exp_shift_a`, `kummerM_addition_exp_shift_both`:
+  addition theorems for `M` (DLMF 13.13.1–13.13.6).
+* `kummerU_addition`, `kummerU_addition_shift_b`, `kummerU_addition_shift_a`,
+  `kummerU_addition_exp`, `kummerU_addition_exp_shift_a`, `kummerU_addition_exp_shift_both`:
+  addition theorems for `U` (DLMF 13.13.7–13.13.12).
+* `whittakerM_product`: the Whittaker product formula DLMF 13.25.1, for `2μ` not an integer.
+* `whittakerM_addition`, `whittakerM_addition_shift_mu`, `whittakerM_addition_shift_kappa`,
+  `whittakerM_addition_exp`, `whittakerM_addition_exp_shift_mu`,
+  `whittakerM_addition_exp_shift_kappa`: addition theorems for `M_{κ,μ}`
+  (DLMF 13.26.1–13.26.6).
+* `whittakerW_addition`, `whittakerW_addition_shift_mu`, `whittakerW_addition_shift_kappa`,
+  `whittakerW_addition_exp`, `whittakerW_addition_exp_shift_mu`,
+  `whittakerW_addition_exp_shift_kappa`: addition theorems for `W_{κ,μ}`
+  (DLMF 13.26.7–13.26.12).
+
+## Implementation notes
+
+For the `U` and Whittaker addition formulas, `Re x > 0` keeps the Taylor domain on the principal
+branch. Downward shifts of `M` exclude integer denominator parameters: at `b = 1` the limiting
+terms are nonzero and cannot be treated as `0 * 0`. The product formulas are proved by
+zero-derivative constancy, complex-power calculus and the Kummer contiguous relations.
+First-parameter additions use the unit-disk Taylor expansions of `DLMF.Confluent.MobiusTaylor`;
+their Whittaker versions check the principal powers with positive-real-part ratios, retaining
+the convergence and exceptional-parameter hypotheses.
 -/
 
 @[expose] public section
@@ -316,7 +340,7 @@ theorem kummerM_addition {a b x y : ℂ} (hb : ∀ k : ℕ, b ≠ -k) :
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/
 @[dlmf 13.13.E2]
 theorem kummerM_addition_shift_b {a b x y : ℂ} (hx : x ∈ slitPlane)
-    (hxy : x + y ∈ slitPlane) (hyx : ‖y‖ < ‖x‖) (hb : ∀ k : ℤ, b ≠ k) :
+    (hyx : ‖y‖ < ‖x‖) (hb : ∀ k : ℤ, b ≠ k) :
     kummerM a b (x + y) =
       ((x + y) / x) ^ (1 - b) *
         ∑' n : ℕ, poch (1 - b) n * (-y / x) ^ n / n.factorial * kummerM a (b - n) x := by
@@ -410,7 +434,7 @@ theorem kummerM_addition_exp_shift_a {a b x y : ℂ} (hx : x ∈ slitPlane)
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/
 @[dlmf 13.13.E6]
 theorem kummerM_addition_exp_shift_both {a b x y : ℂ} (hx : x ∈ slitPlane)
-    (hxy : x + y ∈ slitPlane) (hyx : ‖y‖ < ‖x‖) (hb : ∀ k : ℤ, b ≠ k) :
+    (hyx : ‖y‖ < ‖x‖) (hb : ∀ k : ℤ, b ≠ k) :
     kummerM a b (x + y) =
       exp y * ((x + y) / x) ^ (1 - b) *
         ∑' n : ℕ, poch (1 - b) n * (-y) ^ n / (n.factorial * x ^ n) *
@@ -442,7 +466,7 @@ theorem kummerM_addition_exp_shift_both {a b x y : ℂ} (hx : x ∈ slitPlane)
 
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/
 @[dlmf 13.13.E7]
-theorem kummerU_addition (a b : ℂ) {x y : ℂ} (hx : 0 < x.re) (hxy : x + y ∈ slitPlane)
+theorem kummerU_addition (a b : ℂ) {x y : ℂ} (hx : 0 < x.re)
     (hyx : ‖y‖ < ‖x‖) :
     kummerU a b (x + y) =
       ∑' n : ℕ, poch a n * (-y) ^ n / n.factorial * kummerU (a + n) (b + n) x := by
@@ -465,7 +489,7 @@ theorem kummerU_addition_shift_b {a b x y : ℂ} (hx : 0 < x.re)
         ∑' n : ℕ, poch (1 + a - b) n * (-y / x) ^ n / n.factorial * kummerU a (b - n) x := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
   rw [kummerU_kummer_transform_all a b (slitPlane_ne_zero hxy),
-    kummerU_addition (a - b + 1) (2 - b) hx hxy hyx,
+    kummerU_addition (a - b + 1) (2 - b) hx hyx,
     ← tsum_mul_left, ← tsum_mul_left]
   congr 1
   funext n
@@ -495,7 +519,7 @@ theorem kummerU_addition_shift_a {a b x y : ℂ} (hx : 0 < x.re)
 
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/
 @[dlmf 13.13.E10]
-theorem kummerU_addition_exp (a b : ℂ) {x y : ℂ} (hx : 0 < x.re) (hxy : x + y ∈ slitPlane)
+theorem kummerU_addition_exp (a b : ℂ) {x y : ℂ} (hx : 0 < x.re)
     (hyx : ‖y‖ < ‖x‖) :
     kummerU a b (x + y) =
       exp y * ∑' n : ℕ, (-y) ^ n / n.factorial * kummerU a (b + n) x := by
@@ -551,7 +575,7 @@ theorem kummerU_addition_exp_shift_both {a b x y : ℂ} (hx : 0 < x.re)
         ∑' n : ℕ, (-y) ^ n / (n.factorial * x ^ n) * kummerU (a - n) (b - n) x := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
   rw [kummerU_kummer_transform_all a b (slitPlane_ne_zero hxy),
-    kummerU_addition_exp (a - b + 1) (2 - b) hx hxy hyx,
+    kummerU_addition_exp (a - b + 1) (2 - b) hx hyx,
     ← tsum_mul_left, ← tsum_mul_left, ← tsum_mul_left]
   congr 1
   funext n
@@ -641,7 +665,7 @@ theorem whittakerM_product {κ μ z : ℂ} (hμ : ∀ k : ℕ, 2 * μ ≠ -k)
 
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/
 @[dlmf 13.26.E1]
-theorem whittakerM_addition {κ μ x y : ℂ} (hx : 0 < x.re) (hxy : x + y ∈ slitPlane)
+theorem whittakerM_addition {κ μ x y : ℂ} (hx : 0 < x.re)
     (hyx : ‖y‖ < ‖x‖)
     (hμ : ∀ k : ℤ, 1 + 2 * μ ≠ k) :
     whittakerM κ μ (x + y) =
@@ -653,7 +677,7 @@ theorem whittakerM_addition {κ μ x y : ℂ} (hx : 0 < x.re) (hxy : x + y ∈ s
   have hh := cpow_half_ne_zero hx0
   have hr := re_add_div_pos hyx
   simp only [whittakerM]
-  rw [kummerM_addition_shift_b hx' hxy hyx hμ, add_cpow_eq_div_cpow_mul hx hyx,
+  rw [kummerM_addition_shift_b hx' hyx hμ, add_cpow_eq_div_cpow_mul hx hyx,
     show x / (x + y) = ((x + y) / x)⁻¹ from (inv_div _ _).symm,
     ← cpow_shift_down_prefactor hr μ, ← tsum_mul_left, ← tsum_mul_left, ← tsum_mul_left]
   congr 1; funext n
@@ -717,7 +741,7 @@ theorem whittakerM_addition_shift_kappa {κ μ x y : ℂ} (hx : 0 < x.re)
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/
 @[dlmf 13.26.E4]
 theorem whittakerM_addition_exp {κ μ x y : ℂ} (hx : 0 < x.re)
-    (hxy : x + y ∈ slitPlane) (hyx : ‖y‖ < ‖x‖) (hμ : ∀ k : ℤ, 1 + 2 * μ ≠ k) :
+    (hyx : ‖y‖ < ‖x‖) (hμ : ∀ k : ℤ, 1 + 2 * μ ≠ k) :
     whittakerM κ μ (x + y) =
       exp (y / 2) * (x / (x + y)) ^ (μ - 1 / 2) *
         ∑' n : ℕ, poch (-2 * μ) n / n.factorial * (-y / x ^ (1 / 2 : ℂ)) ^ n *
@@ -728,7 +752,7 @@ theorem whittakerM_addition_exp {κ μ x y : ℂ} (hx : 0 < x.re)
   have hr := re_add_div_pos hyx
   have hey : cexp y = cexp (y / 2) * cexp (y / 2) := by rw [← exp_add]; ring_nf
   simp only [whittakerM]
-  rw [kummerM_addition_exp_shift_both hx' hxy hyx hμ, add_cpow_eq_div_cpow_mul hx hyx,
+  rw [kummerM_addition_exp_shift_both hx' hyx hμ, add_cpow_eq_div_cpow_mul hx hyx,
     show x / (x + y) = ((x + y) / x)⁻¹ from (inv_div _ _).symm,
     ← cpow_shift_down_prefactor hr μ, ← tsum_mul_left, ← tsum_mul_left, ← tsum_mul_left]
   congr 1; funext n
@@ -827,7 +851,7 @@ theorem whittakerW_addition {κ μ x y : ℂ} (hx : 0 < x.re) (hxy : x + y ∈ s
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/
 @[dlmf 13.26.E8]
 theorem whittakerW_addition_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
-    (hxy : x + y ∈ slitPlane) (hyx : ‖y‖ < ‖x‖) :
+    (hyx : ‖y‖ < ‖x‖) :
     whittakerW κ μ (x + y) =
       exp (-y / 2) * ((x + y) / x) ^ (μ + 1 / 2) *
         ∑' n : ℕ, poch (1 / 2 + μ - κ) n / n.factorial * (-y / x ^ (1 / 2 : ℂ)) ^ n *
@@ -835,7 +859,7 @@ theorem whittakerW_addition_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
   have hh := cpow_half_ne_zero hx0
   simp only [whittakerW]
-  rw [kummerU_addition _ _ hx hxy hyx, add_cpow_eq_div_cpow_mul hx hyx, ← tsum_mul_left,
+  rw [kummerU_addition _ _ hx hyx, add_cpow_eq_div_cpow_mul hx hyx, ← tsum_mul_left,
     ← tsum_mul_left]
   congr 1; funext n
   rw [show (1 : ℂ) / 2 + (μ + n / 2) - (κ - n / 2) = 1 / 2 + μ - κ + n by ring,
@@ -902,7 +926,7 @@ theorem whittakerW_addition_exp {κ μ x y : ℂ} (hx : 0 < x.re)
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/
 @[dlmf 13.26.E11]
 theorem whittakerW_addition_exp_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
-    (hxy : x + y ∈ slitPlane) (hyx : ‖y‖ < ‖x‖) :
+    (hyx : ‖y‖ < ‖x‖) :
     whittakerW κ μ (x + y) =
       exp (y / 2) * ((x + y) / x) ^ (μ + 1 / 2) *
         ∑' n : ℕ, (1 / n.factorial) * (-y / x ^ (1 / 2 : ℂ)) ^ n *
@@ -911,7 +935,7 @@ theorem whittakerW_addition_exp_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
   have hh := cpow_half_ne_zero hx0
   have hey : cexp y = cexp (y / 2) * cexp (y / 2) := by rw [← exp_add]; ring_nf
   simp only [whittakerW]
-  rw [kummerU_addition_exp _ _ hx hxy hyx, add_cpow_eq_div_cpow_mul hx hyx, ← tsum_mul_left,
+  rw [kummerU_addition_exp _ _ hx hyx, add_cpow_eq_div_cpow_mul hx hyx, ← tsum_mul_left,
     ← tsum_mul_left, ← tsum_mul_left]
   congr 1; funext n
   rw [show (1 : ℂ) / 2 + (μ + n / 2) - (κ + n / 2) = 1 / 2 + μ - κ by ring,

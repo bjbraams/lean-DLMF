@@ -14,12 +14,22 @@ As `ν → ∞` (fixed `m` and `0 < k < 1`),
 `a^m_ν(k²) ~ pκ - τ₀ - τ₁κ⁻¹ - τ₂κ⁻² - ⋯` with `κ = k(ν(ν+1))^{1/2}`, `p = 2m + 1`
 (29.7.1–29.7.2), where `τ₀, …, τ₄` are given by 29.7.3, 29.7.4, 29.7.6–29.7.8; the same
 expansion holds for `b^{m+1}_ν(k²)` because the difference is exponentially small (29.7.5).
+
+## Main results
+
+* `Real.lameAk_asymptotic`: the Poincaré expansion DLMF 29.7.1 of `a^m_ν(k²)`.
+* `Real.lameBk_sub_lameAk_isBigO`: `b^{m+1}_ν(k²) - a^m_ν(k²) = O(ν^{m + 3/2} ((1 - k)/(1 + k))^ν)`
+  (DLMF 29.7.5).
+* `Real.lameBk_asymptotic`: the same Poincaré expansion for `b^{m+1}_ν(k²)` (DLMF §29.7(i)).
+
+## Implementation notes
+
 The Poincaré expansion is stated as: there is a sequence `τ` with the given first five terms
 such that for every `N` the remainder after `N` terms is `O(κ^{-N})`. The coefficients
-(`lameKappa`, `lameTau0`–`lameTau4` in `DLMF.Lame.Basic`) were checked numerically
-(remainders of `τ₀`–`τ₃` against eigenvalues from the recurrence 29.3.10 for
-`ν = 100, 200, 400`). All statements are admitted. §29.7(ii) (Müller's formal
-expansions of the Lamé functions) is descriptive and not acquired.
+(`lameKappa`, `lameTau0`–`lameTau4` in `DLMF.Lame.Basic.RecurrenceData`) have been checked
+numerically (remainders of `τ₀`–`τ₃` against eigenvalues from the recurrence 29.3.10 for
+`ν = 100, 200, 400`). Müller's formal expansions of the Lamé functions (§29.7(ii)) are
+descriptive and not stated.
 -/
 
 @[expose] public section

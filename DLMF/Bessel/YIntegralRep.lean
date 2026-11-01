@@ -11,23 +11,34 @@ public import DLMF.Struve.Properties
 # Integral representations of `Y_ν` and of `K_ν = H_ν - Y_ν` (DLMF 10.9.5, 11.5.2)
 
 For `re z > 0` let
-`L_ν(z) = 2(z/2)^ν/(√π Γ(ν+½)) ∫₀^∞ e^{-zt} (1+t²)^{ν-½} dt` (`besselYLaplace`).
+`L_ν(z) = 2(z/2)^ν/(√π Γ(ν+½)) ∫₀^∞ e^{-zt} (1+t²)^{ν-½} dt` (`besselYLaplace`). Here `K_ν`
+denotes the Struve-type function `H_ν - Y_ν` of DLMF §11.2, not Macdonald's function.
 
-* `struveK_eq_integral` (DLMF 11.5.2): `K_ν(z) = H_ν(z) - Y_ν(z) = L_ν(z)` for **every** `ν`
-  and `re z > 0`.
+## Main definitions
+
+* `besselYLaplace`: the Laplace-type integral `L_ν(z)`.
+* `yLaplaceKernel`: its kernel `e^{-zt} (1+t²)^{ν-1/2}`.
+* `contourG`: the integrand of the quarter-plane contour argument.
+
+## Main results
+
+* `struveK_eq_besselYLaplace`, `struveK_eq_integral` (DLMF 11.5.2): `H_ν(z) - Y_ν(z) = L_ν(z)` for
+  **every** `ν` and `re z > 0`.
 * `besselY_eq_integral` (DLMF 10.9.5): for `re ν > -½` and `re z > 0`,
   `Y_ν(z) = 2(z/2)^ν/(√π Γ(ν+½)) (∫₀¹ (1-t²)^{ν-½} sin(zt) dt - ∫₀^∞ e^{-zt} (1+t²)^{ν-½} dt)`.
 * `besselJ_eq_poisson_cos`: Poisson's integral (DLMF 10.9.4) for complex `z` with `re z > 0`.
-* `hankelH1_eq_integral_Ioi_one`: `H^{(1)}_ν(z)` through `∫₁^∞ e^{izu} (u²-1)^{ν-½} du`
-  (DLMF 10.27.8 with 10.32.8) in the open first quadrant.
+* `contour_identity`: the quarter-plane contour rotation.
 
-Proof. For `re ν > ½` and `z` in the open first quadrant, `H_ν - i J_ν` (Poisson integrals) and
-`H^{(1)}_ν` (via `K_ν(-iz)` and DLMF 10.32.8) express `H_ν - Y_ν` through
-`∫₀¹ (1-t²)^{ν-½} e^{izt} dt` and `∫₁^∞ (t²-1)^{ν-½} e^{izt} dt`. Cauchy's theorem on the squares
-`[0,R]²` for `(-i(s-1))^{ν-½} (s+1)^{ν-½} e^{izs}` (`contour_identity`) rotates these onto the
-imaginary axis, giving `L_ν(z)`. The identity theorem extends to `re z > 0`, and the lowering
-relations `K_ν' = K_{ν-1} - (ν/z)K_ν`, `L_ν' = L_{ν-1} - (ν/z)L_ν` (the latter by differentiating
-under the integral and integrating by parts) extend to all `ν` by downward induction.
+## Implementation notes
+
+For `re ν > ½` and `z` in the open first quadrant, `H_ν - i J_ν` (Poisson integrals) and
+`H^{(1)}_ν` (via Macdonald's function at `-iz` and DLMF 10.32.8,
+`hankelH1_eq_integral_Ioi_one`) express `H_ν - Y_ν` through `∫₀¹ (1-t²)^{ν-½} e^{izt} dt` and
+`∫₁^∞ (t²-1)^{ν-½} e^{izt} dt`. Cauchy's theorem on the squares `[0,R]²` for
+`(-i(s-1))^{ν-½} (s+1)^{ν-½} e^{izs}` (`contour_identity`) rotates these onto the imaginary axis,
+giving `L_ν(z)`. The identity theorem extends to `re z > 0`, and the lowering relations
+`K_ν' = K_{ν-1} - (ν/z)K_ν`, `L_ν' = L_{ν-1} - (ν/z)L_ν` (the latter by differentiating under the
+integral and integrating by parts) extend to all `ν` by downward induction.
 -/
 
 @[expose] public noncomputable section

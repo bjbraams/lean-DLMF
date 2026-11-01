@@ -13,17 +13,40 @@ public import DLMF.Theta.Products.LogDerivativesAndDoubleProducts
 public import DLMF.Elementary.Trigonometric.DirectIdentities
 
 /-!
-# Fourier series, series of cosecants, products and Laurent series (DLMF §§23.8–23.9)
+# Fourier series, series of cosecants, products and Laurent series of Weierstrass functions
+
+Fourier series of `℘` and `ζ`, cosecant and cotangent series, product representations of `σ`
+(DLMF §23.8), and the Laurent and power series of `℘`, `ζ` and `σ` with their coefficient
+recursions (DLMF §23.9).
+
+## Main definitions
+
+* `laurentCoeff`: the Laurent coefficients `c_n` of DLMF 23.9.1.
+* `sigmaCoeff`: the coefficients `a_{m,n}` of DLMF 23.9.8.
+
+## Main results
+
+* `weierstrassP_fourier`, `weierstrassZeta_fourier`: DLMF 23.8.1–23.8.2 under the corrected
+  condition `|ℑ(z/ω₁)| < 2ℑτ`.
+* `weierstrassP_csc_series`, `weierstrassZeta_cot_series`, `eta_one_csc_series`: DLMF
+  23.8.3–23.8.5.
+* `weierstrassSigma_prod`, `weierstrassSigma_sin_prod`: DLMF 23.8.6–23.8.7.
+* `weierstrassP_laurent`, `weierstrassZeta_laurent`: DLMF 23.9.2–23.9.3.
+* `laurentCoeff_two`, `laurentCoeff_three`, `laurentCoeff_recursion`: DLMF 23.9.4–23.9.5.
+* `weierstrassP_halfPeriod_expansion`: DLMF 23.9.6.
+* `weierstrassSigma_series`: DLMF 23.9.7.
+
+## Implementation notes
 
 Series are stated with `HasSum` (all of them converge absolutely). Sums from `n = 1` are
 indexed by `n : ℕ` with the shift `n + 1`; the Eisenstein-bracketed cotangent series 23.8.4 is
 stated as the absolutely convergent series of the bracketed pairs `n`, `-n`.
 
-**Source correction.** The convergence condition of 23.8.1–23.8.2 is printed as
+Source correction: the convergence condition of 23.8.1–23.8.2 is printed as
 `ℑ(z/ω₁) < 2ℑ(ω₃/ω₁)`; the series diverge when `ℑ(z/ω₁) ≤ -2ℑ(ω₃/ω₁)` (the terms grow like
 `e^{nπ(|ℑ(z/ω₁)| - 2ℑτ)}`; e.g. `ω₁ = 1.1 + 0.2i`, `ω₃ = 0.3 + 0.9i`,
 `z/ω₁ = 0.3 - 2.5iℑτ` gives terms of size `10⁵, 10¹¹, 10²¹` at `n = 10, 20, 40`). The
-acquired condition is `|ℑ(z/ω₁)| < 2ℑ(ω₃/ω₁)`.
+condition used here is `|ℑ(z/ω₁)| < 2ℑ(ω₃/ω₁)`.
 
 The coefficients `a_{m,n}` of 23.9.7 are defined by the recursion 23.9.8 (`sigmaCoeff`), by
 well-founded recursion on the weight `2m + 3n`.
@@ -70,7 +93,7 @@ theorem weierstrassZeta_fourier {z : ℂ} (hz : z ∉ H.lattice)
     rw [show 2 * (n + 1 : ℂ) * (π * z / (2 * H.ω₁)) =
       (n + 1 : ℂ) * π * z / H.ω₁ by ring]
     ring
-  · rw [H.p23R1_zeta_theta hz]
+  · rw [H.weierstrassZeta_eq_jacobiThetaOneTau_logDeriv hz]
     ring
 
 
@@ -207,7 +230,7 @@ private lemma inv_sin_sq_eq_exp {v : ℂ} (hv : 1 - cexp (2 * I * v) ≠ 0) :
     1 / sin v ^ 2 = -4 * cexp (2 * I * v) / (1 - cexp (2 * I * v)) ^ 2 := by
   let x := cexp (2 * I * v)
   have hx0 : x ≠ 0 := exp_ne_zero _
-  have hc := DLMF.Theta.th20_exp_add_inv v
+  have hc := DLMF.Theta.exp_two_I_mul_add_inv v
   change x + x⁻¹ = 2 * cos (2 * v) at hc
   have hs := cos_sub_cos (2 * v) 0
   rw [show (2 * v + 0) / 2 = v by ring, show (2 * v - 0) / 2 = v by ring, cos_zero] at hs
@@ -240,7 +263,7 @@ theorem eta_one_csc_series :
     have hn : 1 - cexp (2 * I * ((n + 1 : ℂ) * π * H.ω₃ / H.ω₁)) ≠ 0 := by
       rw [he]
       exact DLMF.QSeries.one_sub_ne_zero_of_norm_lt_one
-        (DLMF.Theta.p20R1_norm_nome_pow_lt_one H.tau_im_pos (by omega))
+        (DLMF.Theta.norm_nome_pow_lt_one H.tau_im_pos (by omega))
     rw [inv_sin_sq_eq_exp hn, he]
     simp only [HalfPeriods.nome]
     ring
@@ -265,7 +288,7 @@ theorem weierstrassSigma_sin_prod (z : ℂ) :
   obtain ⟨hm, he⟩ := DLMF.Theta.jacobiThetaOneTau_hasProd_sin
     (π * z / (2 * H.ω₁)) H.tau_im_pos
   have hω := H.ω₁_ne_zero
-  have hD := H.p23R1_thetaOneDeriv_ne_zero
+  have hD := H.jacobiThetaOneDerivNullTau_tau_ne_zero
   have hterm (n : ℕ) :
       Complex.sin ((n + 1 : ℂ) * π * H.tau + π * z / (2 * H.ω₁)) *
         Complex.sin ((n + 1 : ℂ) * π * H.tau - π * z / (2 * H.ω₁)) /
@@ -316,8 +339,8 @@ theorem weierstrassSigma_prod (z : ℂ) :
     have hne : 1 - cexp (2 * I * a) ≠ 0 := by
       rw [hexp]
       exact DLMF.QSeries.one_sub_ne_zero_of_norm_lt_one
-        (DLMF.Theta.p20R1_norm_nome_pow_lt_one H.tau_im_pos (by omega))
-    have h := DLMF.Theta.p20R1_sin_ratio a w hne
+        (DLMF.Theta.norm_nome_pow_lt_one H.tau_im_pos (by omega))
+    have h := DLMF.Theta.sin_add_mul_sin_sub_div_sin_sq a w hne
     have hp : a + w = π * (2 * (n + 1) * H.ω₃ + z) / (2 * H.ω₁) := by
       dsimp [a, w]
       field_simp
@@ -352,13 +375,13 @@ theorem laurentCoeff_two (L : PeriodPair) : laurentCoeff L 2 = L.g₂ / 20 := by
 theorem laurentCoeff_three (L : PeriodPair) : laurentCoeff L 3 = L.g₃ / 28 := by
   simp only [laurentCoeff, PeriodPair.g₃]; push_cast; ring
 
-/-- DLMF 23.9.2: `℘(z) = 1/z² + ∑_{n≥2} c_n z^{2n-2}` for `0 < |z| < |z₀|`, `z₀` a nearest
-nonzero lattice point. -/
+/-- DLMF 23.9.2: `℘(z) = 1/z² + ∑_{n≥2} c_n z^{2n-2}` for `|z| < |z₀|`, `z₀` a nearest
+nonzero lattice point. DLMF assumes `0 < |z|`; at `z = 0` the statement holds by Lean's
+conventions, extending DLMF. -/
 @[dlmf 23.9.E2]
-theorem weierstrassP_laurent (L : PeriodPair) {z : ℂ} (hz0 : z ≠ 0)
+theorem weierstrassP_laurent (L : PeriodPair) {z : ℂ}
     (hz : ∀ w ∈ L.lattice, w ≠ 0 → ‖z‖ < ‖w‖) :
     HasSum (fun n : ℕ ↦ laurentCoeff L (n + 2) * z ^ (2 * (n + 2) - 2)) (℘[L] z - 1 / z ^ 2) := by
-  clear hz0
   have h := L.weierstrassPExceptSeries_hasSum 0 z 0 (fun l hl => by simpa using hz l l.2 hl)
   have hdef := L.weierstrassPExcept_def ⟨0, zero_mem _⟩ z
   simp only [sub_zero] at hdef h
@@ -391,13 +414,13 @@ theorem weierstrassP_laurent (L : PeriodPair) {z : ℂ} (hz0 : z ≠ 0)
       rw [L.G_eq_zero_of_odd _ (by rcases hodd with ⟨k, hk⟩; exact ⟨k + 1, by omega⟩)]
       simp
 
-/-- DLMF 23.9.3: `ζ(z) = 1/z - ∑_{n≥2} c_n z^{2n-1}/(2n - 1)` for `0 < |z| < |z₀|`. -/
+/-- DLMF 23.9.3: `ζ(z) = 1/z - ∑_{n≥2} c_n z^{2n-1}/(2n - 1)` for `|z| < |z₀|`. DLMF assumes
+`0 < |z|`; at `z = 0` the statement holds by Lean's conventions, extending DLMF. -/
 @[dlmf 23.9.E3]
-theorem weierstrassZeta_laurent (L : PeriodPair) {z : ℂ} (hz0 : z ≠ 0)
+theorem weierstrassZeta_laurent (L : PeriodPair) {z : ℂ}
     (hz : ∀ w ∈ L.lattice, w ≠ 0 → ‖z‖ < ‖w‖) :
     HasSum (fun n : ℕ ↦ -(laurentCoeff L (n + 2) / (2 * (n + 2) - 1) * z ^ (2 * (n + 2) - 1)))
       (weierstrassZeta L z - 1 / z) := by
-  clear hz0
   set T : ℕ → L.lattice → ℂ := fun k l => -z ^ (k + 2) * ((l : ℂ) ^ (k + 3))⁻¹ with hTdef
   -- summability of the double series, from Mathlib's bound for `℘`
   have hW := L.summable_weierstrassPExceptSummand 0 z 0 (fun l hl => by simpa using hz l l.2 hl)
@@ -434,7 +457,7 @@ theorem weierstrassZeta_laurent (L : PeriodPair) {z : ℂ} (hz0 : z ≠ 0)
         rw [norm_div, div_lt_one (norm_pos_iff.mpr hl)]; exact hzl
       have hg := (hasSum_geometric_of_norm_lt_one hq).mul_left (-z ^ 2 / (l : ℂ) ^ 3)
       simp only [hl, ite_false, sub_zero]
-      rw [wp23_zeta_summand z l hl hlz]
+      rw [weierstrassZeta_summand_eq z l hl hlz]
       convert hg using 1
       · funext k
         simp only [hTdef, div_pow]
@@ -491,13 +514,12 @@ theorem weierstrassZeta_laurent (L : PeriodPair) {z : ℂ} (hz0 : z ≠ 0)
     field_simp
 
 
-section p3wRecursion
-
+section Recursion
 open Topology Filter
 open scoped Nat
 
 /-- The ODE `z² g'' = 12 g + 6 z² g² - (g₂/2) z²` for `g = ℘ - 1/z²`, near `0`. -/
-lemma p3w_regular_ode (L : PeriodPair) :
+private lemma weierstrassPExcept_zero_ode (L : PeriodPair) :
     (fun z => z ^ 2 * deriv (deriv ℘[L - (0 : ℂ)]) z) =ᶠ[𝓝 0]
       fun z => 12 * ℘[L - (0 : ℂ)] z + 6 * z ^ 2 * ℘[L - (0 : ℂ)] z ^ 2 - L.g₂ / 2 * z ^ 2 := by
   set U : Set ℂ := (L.lattice \ {(0 : ℂ)})ᶜ
@@ -531,7 +553,7 @@ lemma p3w_regular_ode (L : PeriodPair) :
   ring
 
 /-- `(z² f)^{(N+2)}(0) = (N+2)(N+1) f^{(N)}(0)`. -/
-lemma p3w_iteratedDeriv_sq_mul {f : ℂ → ℂ} {N : ℕ} (hf : ContDiffAt ℂ (N + 2) f 0) :
+private lemma iteratedDeriv_sq_mul_add_two {f : ℂ → ℂ} {N : ℕ} (hf : ContDiffAt ℂ (N + 2) f 0) :
     iteratedDeriv (N + 2) (fun z => z ^ 2 * f z) 0 = (N + 2) * (N + 1) * iteratedDeriv N f 0 := by
   have hp : ContDiffAt ℂ (N + 2) (fun z : ℂ => z ^ 2) 0 := by fun_prop
   rw [show (fun z => z ^ 2 * f z) = (fun z : ℂ => z ^ 2) * f from rfl,
@@ -544,7 +566,7 @@ lemma p3w_iteratedDeriv_sq_mul {f : ℂ → ℂ} {N : ℕ} (hf : ContDiffAt ℂ 
   · intro h; simp at h
 
 /-- Splitting a sum over `range (2K+1)` into even and odd indices. -/
-lemma p3w_sum_range_even_odd (f : ℕ → ℂ) (K : ℕ) :
+private lemma sum_range_two_mul_add_one_even_odd (f : ℕ → ℂ) (K : ℕ) :
     ∑ i ∈ Finset.range (2 * K + 1), f i =
       ∑ j ∈ Finset.range (K + 1), f (2 * j) + ∑ j ∈ Finset.range K, f (2 * j + 1) := by
   induction K with
@@ -571,8 +593,8 @@ theorem laurentCoeff_recursion (L : PeriodPair) {n : ℕ} (hn : 4 ≤ n) :
   have ha : ∀ i, iteratedDeriv i g 0 =
       if i = 0 then 0 else ((i + 1)! : ℂ) * L.G (i + 2) := by
     intro i; rw [hg, L.iteratedDeriv_weierstrassPExcept_self, L.sumInvPow_zero]; simp
-  have key := (p3w_regular_ode L).iteratedDeriv_eq (2 * K + 2)
-  rw [p3w_iteratedDeriv_sq_mul (hg2.contDiffAt)] at key
+  have key := (weierstrassPExcept_zero_ode L).iteratedDeriv_eq (2 * K + 2)
+  rw [iteratedDeriv_sq_mul_add_two (hg2.contDiffAt)] at key
   rw [show iteratedDeriv (2 * K) (deriv (deriv g)) 0 = iteratedDeriv (2 * K + 2) g 0 by
     rw [iteratedDeriv_succ', iteratedDeriv_succ']] at key
   have e2 : iteratedDeriv (2 * K + 2) (fun z => 6 * z ^ 2 * g z ^ 2) 0 =
@@ -580,7 +602,7 @@ theorem laurentCoeff_recursion (L : PeriodPair) {n : ℕ} (hn : 4 ≤ n) :
         ((2 * K).choose i : ℂ) * iteratedDeriv i g 0 * iteratedDeriv (2 * K - i) g 0) := by
     rw [show (fun z => 6 * z ^ 2 * g z ^ 2) = fun z => 6 * (z ^ 2 * (g * g) z) by
       funext z; simp; ring]
-    rw [iteratedDeriv_const_mul _ (by fun_prop), p3w_iteratedDeriv_sq_mul (by fun_prop),
+    rw [iteratedDeriv_const_mul _ (by fun_prop), iteratedDeriv_sq_mul_add_two (by fun_prop),
       iteratedDeriv_mul (by fun_prop) (by fun_prop)]
     push_cast; ring
   have e1 : iteratedDeriv (2 * K + 2)
@@ -597,7 +619,7 @@ theorem laurentCoeff_recursion (L : PeriodPair) {n : ℕ} (hn : 4 ≤ n) :
       ((2 * K).choose i : ℂ) * iteratedDeriv i g 0 * iteratedDeriv (2 * K - i) g 0 =
       ((2 * K)! : ℂ) * ∑ m ∈ Finset.Icc 2 (K + 2 - 2),
         laurentCoeff L m * laurentCoeff L (K + 2 - m) := by
-    rw [p3w_sum_range_even_odd]
+    rw [sum_range_two_mul_add_one_even_odd]
     have hodd : ∑ j ∈ Finset.range K, ((2 * K).choose (2 * j + 1) : ℂ) *
         iteratedDeriv (2 * j + 1) g 0 * iteratedDeriv (2 * K - (2 * j + 1)) g 0 = 0 := by
       refine Finset.sum_eq_zero fun j _ => ?_
@@ -652,19 +674,17 @@ theorem laurentCoeff_recursion (L : PeriodPair) {n : ℕ} (hn : 4 ≤ n) :
   field_simp
   linear_combination hc
 
-end p3wRecursion
-
+end Recursion
 namespace HalfPeriods
 
 variable (H : HalfPeriods)
 
-section p3wHalfPeriod
-
+section HalfPeriodValues
 open Topology Filter
 
 attribute [local fun_prop] AnalyticAt.contDiffAt in
 /-- The ODE recursion for the derivatives of `℘` at a point off the lattice. -/
-lemma p3w_iteratedDeriv_wp_succ_succ {x : ℂ} (hx : x ∉ H.lattice) (k : ℕ) :
+private lemma iteratedDeriv_weierstrassP_add_two {x : ℂ} (hx : x ∉ H.lattice) (k : ℕ) :
     iteratedDeriv (k + 2) H.weierstrassP x =
       6 * ∑ i ∈ Finset.range (k + 1), (k.choose i : ℂ) * iteratedDeriv i H.weierstrassP x *
         iteratedDeriv (k - i) H.weierstrassP x - if k = 0 then H.g₂ / 2 else 0 := by
@@ -694,7 +714,7 @@ theorem weierstrassP_halfPeriod_expansion {j : ℕ} (hj : j ∈ ({1, 2, 3} : Fin
   have hω := H.halfPeriod_notMem hj
   have ha : AnalyticAt ℂ H.weierstrassP (H.halfPeriod j) :=
     H.periodPair.analyticOnNhd_weierstrassP _ hω
-  have hrec := H.p3w_iteratedDeriv_wp_succ_succ hω
+  have hrec := H.iteratedDeriv_weierstrassP_add_two hω
   have p0 : iteratedDeriv 0 H.weierstrassP (H.halfPeriod j) = H.e j := by
     simp [HalfPeriods.e]
   have p1 : iteratedDeriv 1 H.weierstrassP (H.halfPeriod j) = 0 := by
@@ -729,8 +749,7 @@ theorem weierstrassP_halfPeriod_expansion {j : ℕ} (hj : j ∈ ({1, 2, 3} : Fin
   norm_num [Nat.factorial]
   linear_combination (3 / 4 * t ^ 4 * (H.e j * t ^ 2 + 1)) * hcub
 
-end p3wHalfPeriod
-
+end HalfPeriodValues
 end HalfPeriods
 
 /-- The coefficients `a_{m,n}` of the power series of `σ` (DLMF 23.9.8): `a_{0,0} = 1`,

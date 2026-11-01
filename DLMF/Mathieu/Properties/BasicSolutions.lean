@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Elementary.Trigonometric
-public import DLMF.Mathieu.P2sBridge
+public import DLMF.Mathieu.SturmBridge
 public import DLMF.Mathieu.SpectralExistence
 public import DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic
 public import DLMFMathlib.Analysis.ODE.Singularities
@@ -16,10 +16,32 @@ public import SeveralComplexVariables.SeparateAnalytic
 /-!
 # Basic Mathieu solutions and symmetries
 
-Algebraic forms, normalized basic solutions and sign-change symmetries of Mathieu equation.
+This file treats Mathieu's equation `w'' + (a - 2q cos 2z) w = 0` and its basic solutions
+`w_I(z; a, q)`, `w_II(z; a, q)` (DLMF §§28.2(i)–(ii)): the algebraic forms and their
+singularities, the symmetries 28.2.4, parity, the Wronskian, the half-period relations
+28.2.7–28.2.13, the analytic dependence on `(z, a, q)`, and the behaviour under `q ↦ -q`.
 
-Source references and common attribution are retained in
-`DLMF.Mathieu.Properties`.
+## Main results
+
+* `algebraic_form_sin_sq`, `algebraic_form_cos`: the algebraic forms 28.2.2, 28.2.3.
+* `mathieu_algebraic_form_singularities`: the singularities of the algebraic form
+  (DLMF §28.2(i)).
+* `IsMathieuSolution.comp_neg`, `IsMathieuSolution.comp_add_pi`,
+  `IsMathieuSolution.comp_add_half_pi`: the symmetries 28.2.4.
+* `mathieuWI_neg`, `mathieuWII_neg`: `w_I` is even and `w_II` is odd (DLMF §28.2(ii)).
+* `mathieuWI_wronskian`: `𝒲{w_I, w_II} = 1` (DLMF 28.2.6).
+* `mathieuWI_add_pi`, `mathieuWII_add_pi`: the translation formulas 28.2.7, 28.2.8.
+* `mathieuWI_pi_eq_deriv_mathieuWII_pi`, `mathieuWI_pi_sub_one`, `mathieuWI_pi_add_one`,
+  `deriv_mathieuWI_pi`, `mathieuWII_pi`: DLMF 28.2.9–28.2.13.
+* `differentiable_mathieuWI_mathieuWII`: `w_I`, `w_II` are entire in `(z, a, q)`
+  (DLMF §28.2(ii)).
+* `mathieuWI_neg_q`, `mathieuWII_neg_q`: the basic solutions for `-q` in terms of those for
+  `q`, shifted by `π/2`.
+
+## Implementation notes
+
+The joint analyticity in `(z, a, q)` is obtained from holomorphic dependence on each parameter
+separately and Hartogs's theorem on separately holomorphic functions.
 -/
 
 @[expose] public noncomputable section
@@ -97,7 +119,7 @@ theorem algebraic_form_cos (a q : ℂ) {W W' W'' : ℂ → ℂ}
   linear_combination W'' (Complex.cos z) * hp
 
 /-- A function with `(z - z₀) f(z) → L ≠ 0` has no analytic extension at `z₀`. -/
-lemma p2f_not_eventuallyEq_analytic {f : ℂ → ℂ} {z₀ L : ℂ} (hL : L ≠ 0)
+private lemma not_exists_analyticAt_eventuallyEq_of_tendsto {f : ℂ → ℂ} {z₀ L : ℂ} (hL : L ≠ 0)
     (h : Tendsto (fun z => (z - z₀) * f z) (𝓝[≠] z₀) (𝓝 L)) :
     ¬ ∃ g : ℂ → ℂ, AnalyticAt ℂ g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g := by
   rintro ⟨g, hg, hfg⟩
@@ -110,13 +132,13 @@ lemma p2f_not_eventuallyEq_analytic {f : ℂ → ℂ} {z₀ L : ℂ} (hL : L ≠
   exact hL (tendsto_nhds_unique h h3)
 
 /-- Punctured limit from agreement with a continuous function. -/
-lemma p2f_tendsto_of_eq {f g : ℂ → ℂ} {z₀ : ℂ} (hg : ContinuousAt g z₀)
+private lemma tendsto_nhdsWithin_of_eq_continuousAt {f g : ℂ → ℂ} {z₀ : ℂ} (hg : ContinuousAt g z₀)
     (h : ∀ z, z ≠ z₀ → f z = g z) : Tendsto f (𝓝[≠] z₀) (𝓝 (g z₀)) :=
   (hg.tendsto.mono_left nhdsWithin_le_nhds).congr'
     (eventually_nhdsWithin_of_forall fun z hz => (h z hz).symm)
 
 /-- Two raw coefficients of a second-order equation after `z = 1/u`. -/
-lemma p2f_recipRaw_zero_two (c₀ c₁ : ℂ → ℂ) {u : ℂ} (hu : u ≠ 0) :
+private lemma linearODEReciprocalRaw_zero_two (c₀ c₁ : ℂ → ℂ) {u : ℂ} (hu : u ≠ 0) :
     Complex.linearODEReciprocalRaw ![c₀, c₁] 0 u = c₀ u⁻¹ ∧
     Complex.linearODEReciprocalRaw ![c₀, c₁] 2 u = u ^ 4 := by
   have hz : u⁻¹ ≠ 0 := inv_ne_zero hu
@@ -161,7 +183,7 @@ theorem mathieu_algebraic_form_singularities (a q : ℂ) :
   have hc1 : ∀ ζ, c 1 ζ = (1 - 2 * ζ) / (2 * ζ * (1 - ζ)) := fun _ => rfl
   -- limits at 0
   have L1 : Tendsto (fun ζ => ζ * c 1 ζ) (𝓝[≠] 0) (𝓝 (1 / 2)) := by
-    have := p2f_tendsto_of_eq (f := fun ζ => ζ * c 1 ζ)
+    have := tendsto_nhdsWithin_of_eq_continuousAt (f := fun ζ => ζ * c 1 ζ)
       (g := fun ζ => (1 - 2 * ζ) / (2 * (1 - ζ))) (z₀ := 0) (by fun_prop (disch := norm_num))
       (fun ζ hζ => by
         rcases eq_or_ne ζ 1 with rfl | h1
@@ -170,7 +192,7 @@ theorem mathieu_algebraic_form_singularities (a q : ℂ) :
         rw [hc1]; field_simp)
     simpa using this
   have L2 : Tendsto (fun ζ => ζ ^ 2 * c 0 ζ) (𝓝[≠] 0) (𝓝 0) := by
-    have := p2f_tendsto_of_eq (f := fun ζ => ζ ^ 2 * c 0 ζ)
+    have := tendsto_nhdsWithin_of_eq_continuousAt (f := fun ζ => ζ ^ 2 * c 0 ζ)
       (g := fun ζ => ζ * (a - 2 * q * (1 - 2 * ζ)) / (4 * (1 - ζ))) (z₀ := 0)
       (by fun_prop (disch := norm_num))
       (fun ζ hζ => by
@@ -180,7 +202,7 @@ theorem mathieu_algebraic_form_singularities (a q : ℂ) :
         rw [hc0]; field_simp)
     simpa using this
   have L3 : Tendsto (fun ζ => (ζ - 1) * c 1 ζ) (𝓝[≠] 1) (𝓝 (1 / 2)) := by
-    have := p2f_tendsto_of_eq (f := fun ζ => (ζ - 1) * c 1 ζ)
+    have := tendsto_nhdsWithin_of_eq_continuousAt (f := fun ζ => (ζ - 1) * c 1 ζ)
       (g := fun ζ => -(1 - 2 * ζ) / (2 * ζ)) (z₀ := 1) (by fun_prop (disch := norm_num))
       (fun ζ hζ => by
         rcases eq_or_ne ζ 0 with rfl | h0
@@ -189,7 +211,7 @@ theorem mathieu_algebraic_form_singularities (a q : ℂ) :
         rw [hc1]; field_simp; ring)
     convert this using 2; norm_num
   have L4 : Tendsto (fun ζ => (ζ - 1) ^ 2 * c 0 ζ) (𝓝[≠] 1) (𝓝 0) := by
-    have := p2f_tendsto_of_eq (f := fun ζ => (ζ - 1) ^ 2 * c 0 ζ)
+    have := tendsto_nhdsWithin_of_eq_continuousAt (f := fun ζ => (ζ - 1) ^ 2 * c 0 ζ)
       (g := fun ζ => -(ζ - 1) * (a - 2 * q * (1 - 2 * ζ)) / (4 * ζ)) (z₀ := 1)
       (by fun_prop (disch := norm_num))
       (fun ζ hζ => by
@@ -199,7 +221,7 @@ theorem mathieu_algebraic_form_singularities (a q : ℂ) :
         rw [hc0]; field_simp; ring)
     simpa using this
   refine ⟨⟨fun h => ?_, ?_⟩, ⟨fun h => ?_, ?_⟩, L1, L2, L3, L4, fun hq => ?_⟩
-  · exact p2f_not_eventuallyEq_analytic (L := 1 / 2) (by norm_num) (by simpa using L1) (h 1)
+  · exact not_exists_analyticAt_eventuallyEq_of_tendsto (L := 1 / 2) (by norm_num) (by simpa using L1) (h 1)
   · intro j
     fin_cases j
     · refine ⟨fun ζ => ζ * (a - 2 * q * (1 - 2 * ζ)) / (4 * (1 - ζ)),
@@ -218,7 +240,7 @@ theorem mathieu_algebraic_form_singularities (a q : ℂ) :
       have : 1 - ζ ≠ 0 := sub_ne_zero.2 (Ne.symm h1)
       have hζ : ζ ≠ 0 := hζ
       rw [hc1]; field_simp
-  · exact p2f_not_eventuallyEq_analytic (L := 1 / 2) (by norm_num) L3 (h 1)
+  · exact not_exists_analyticAt_eventuallyEq_of_tendsto (L := 1 / 2) (by norm_num) L3 (h 1)
   · intro j
     fin_cases j
     · refine ⟨fun ζ => -(ζ - 1) * (a - 2 * q * (1 - 2 * ζ)) / (4 * ζ),
@@ -239,13 +261,13 @@ theorem mathieu_algebraic_form_singularities (a q : ℂ) :
     have key : ¬ ∃ g : ℂ → ℂ, AnalyticAt ℂ g 0 ∧
         (fun u => (u - 0) ^ (2 - (0 : Fin 2).val) * Complex.linearODEReciprocalCoeff c 0 u)
           =ᶠ[𝓝[≠] 0] g := by
-      refine p2f_not_eventuallyEq_analytic (L := -q) (neg_ne_zero.2 hq) ?_
-      have := p2f_tendsto_of_eq (f := fun u => (u - 0) *
+      refine not_exists_analyticAt_eventuallyEq_of_tendsto (L := -q) (neg_ne_zero.2 hq) ?_
+      have := tendsto_nhdsWithin_of_eq_continuousAt (f := fun u => (u - 0) *
           ((u - 0) ^ (2 - (0 : Fin 2).val) * Complex.linearODEReciprocalCoeff c 0 u))
         (g := fun u => (a * u - 2 * q * u + 4 * q) / (4 * (u - 1))) (z₀ := 0)
         (by fun_prop (disch := norm_num)) (fun u hu => ?_)
       · convert this using 2; field_simp; ring
-      · obtain ⟨r0, r2⟩ := p2f_recipRaw_zero_two (c 0) (c 1) hu
+      · obtain ⟨r0, r2⟩ := linearODEReciprocalRaw_zero_two (c 0) (c 1) hu
         have hcc : c = ![c 0, c 1] := by ext i; fin_cases i <;> rfl
         simp only [Complex.linearODEReciprocalCoeff, Fin.val_zero]
         rw [hcc, r0, r2, hc0]
@@ -344,13 +366,13 @@ theorem comp_pi_sub (h : IsMathieuSolution a q w) :
 end IsMathieuSolution
 
 /-- Derivative of a linear combination `c f + d g`. -/
-lemma m28a_deriv_lincomb {f g : ℂ → ℂ} {z : ℂ} (hf : DifferentiableAt ℂ f z)
+lemma deriv_const_mul_add_const_mul {f g : ℂ → ℂ} {z : ℂ} (hf : DifferentiableAt ℂ f z)
     (hg : DifferentiableAt ℂ g z) (c d : ℂ) :
     deriv (fun x => c * f x + d * g x) z = c * deriv f z + d * deriv g z :=
   ((hf.hasDerivAt.const_mul c).add (hg.hasDerivAt.const_mul d)).deriv
 
 /-- Derivative of a linear combination `c f - d g`. -/
-lemma m28a_deriv_lincomb_sub {f g : ℂ → ℂ} {z : ℂ} (hf : DifferentiableAt ℂ f z)
+private lemma deriv_const_mul_sub_const_mul {f g : ℂ → ℂ} {z : ℂ} (hf : DifferentiableAt ℂ f z)
     (hg : DifferentiableAt ℂ g z) (c d : ℂ) :
     deriv (fun x => c * f x - d * g x) z = c * deriv f z - d * deriv g z :=
   ((hf.hasDerivAt.const_mul c).sub (hg.hasDerivAt.const_mul d)).deriv
@@ -413,7 +435,7 @@ theorem mathieuWI_wronskian (z : ℂ) : wI z * deriv wII z - deriv wI z * wII z 
 
 /-- Half-period reflection identity for `w_I` about `π/2`:
 `w_I(π - z) = (AB' + A'B) w_I(z) - 2AA' w_II(z)` with `A = w_I(π/2)`, `B = w_II(π/2)`. -/
-lemma m28a_mathieuWI_pi_sub (z : ℂ) :
+lemma mathieuWI_pi_sub (z : ℂ) :
     wI (π - z) = (wI (π / 2) * deriv wII (π / 2) + deriv wI (π / 2) * wII (π / 2)) * wI z -
       2 * wI (π / 2) * deriv wI (π / 2) * wII z := by
   obtain ⟨h1, -, -⟩ := mathieuWI_spec a q
@@ -431,7 +453,7 @@ lemma m28a_mathieuWI_pi_sub (z : ℂ) :
           wI z + -(2 * wI (π / 2) * deriv wI (π / 2)) * wII z) (π / 2) =
           (wI (π / 2) * deriv wII (π / 2) + deriv wI (π / 2) * wII (π / 2)) * deriv wI (π / 2) +
           -(2 * wI (π / 2) * deriv wI (π / 2)) * deriv wII (π / 2) from
-        m28a_deriv_lincomb (h1.differentiable _) (h2.differentiable _) _ _]
+        deriv_const_mul_add_const_mul (h1.differentiable _) (h2.differentiable _) _ _]
       rw [show (π : ℂ) - π / 2 = π / 2 by ring]
       linear_combination deriv wI (π / 2) * hW)
   have := congrFun key z
@@ -439,7 +461,7 @@ lemma m28a_mathieuWI_pi_sub (z : ℂ) :
 
 /-- Half-period reflection identity for `w_II` about `π/2`:
 `w_II(π - z) = 2BB' w_I(z) - (AB' + A'B) w_II(z)`. -/
-lemma m28a_mathieuWII_pi_sub (z : ℂ) :
+lemma mathieuWII_pi_sub (z : ℂ) :
     wII (π - z) = 2 * wII (π / 2) * deriv wII (π / 2) * wI z -
       (wI (π / 2) * deriv wII (π / 2) + deriv wI (π / 2) * wII (π / 2)) * wII z := by
   obtain ⟨h1, -, -⟩ := mathieuWI_spec a q
@@ -458,52 +480,52 @@ lemma m28a_mathieuWII_pi_sub (z : ℂ) :
           2 * wII (π / 2) * deriv wII (π / 2) * deriv wI (π / 2) +
           -(wI (π / 2) * deriv wII (π / 2) + deriv wI (π / 2) * wII (π / 2)) *
             deriv wII (π / 2) from
-        m28a_deriv_lincomb (h1.differentiable _) (h2.differentiable _) _ _]
+        deriv_const_mul_add_const_mul (h1.differentiable _) (h2.differentiable _) _ _]
       rw [show (π : ℂ) - π / 2 = π / 2 by ring]
       linear_combination deriv wII (π / 2) * hW)
   have := congrFun key z
   linear_combination this
 
 /-- Derivative of the reflection identity for `w_II` at `z = 0`. -/
-theorem m28a_deriv_mathieuWII_pi :
+theorem deriv_mathieuWII_pi :
     deriv wII π = wI (π / 2) * deriv wII (π / 2) + deriv wI (π / 2) * wII (π / 2) := by
   obtain ⟨h1, -, h11⟩ := mathieuWI_spec a q
   obtain ⟨h2, -, h21⟩ := mathieuWII_spec a q
-  have e := congrArg (fun f => deriv f 0) (funext (m28a_mathieuWII_pi_sub a q))
-  rw [deriv_comp_const_sub, m28a_deriv_lincomb_sub (h1.differentiable _) (h2.differentiable _),
+  have e := congrArg (fun f => deriv f 0) (funext (mathieuWII_pi_sub a q))
+  rw [deriv_comp_const_sub, deriv_const_mul_sub_const_mul (h1.differentiable _) (h2.differentiable _),
     h11, h21] at e
   simp only [sub_zero] at e
   linear_combination -e
 
 /-- `w_I(π) = AB' + A'B` (from the reflection identity at `z = 0`). -/
-theorem m28a_mathieuWI_pi :
+theorem mathieuWI_pi :
     wI π = wI (π / 2) * deriv wII (π / 2) + deriv wI (π / 2) * wII (π / 2) := by
-  have := m28a_mathieuWI_pi_sub a q 0
+  have := mathieuWI_pi_sub a q 0
   simp [(mathieuWI_spec a q).2.1, (mathieuWII_spec a q).2.1] at this
   exact this
 
 /-- **DLMF 28.2.9**: `w_I(π; a, q) = w_II'(π; a, q)`. -/
 @[dlmf 28.2.E9]
 theorem mathieuWI_pi_eq_deriv_mathieuWII_pi : wI π = deriv wII π := by
-  rw [m28a_mathieuWI_pi, m28a_deriv_mathieuWII_pi]
+  rw [mathieuWI_pi, deriv_mathieuWII_pi]
 
 /-- **DLMF 28.2.10**: `w_I(π) - 1 = 2 w_I'(π/2) w_II(π/2)`. -/
 @[dlmf 28.2.E10]
 theorem mathieuWI_pi_sub_one : wI π - 1 = 2 * deriv wI (π / 2) * wII (π / 2) := by
-  rw [m28a_mathieuWI_pi]; linear_combination (mathieuWI_wronskian a q (π / 2))
+  rw [mathieuWI_pi]; linear_combination (mathieuWI_wronskian a q (π / 2))
 
 /-- **DLMF 28.2.11**: `w_I(π) + 1 = 2 w_I(π/2) w_II'(π/2)`. -/
 @[dlmf 28.2.E11]
 theorem mathieuWI_pi_add_one : wI π + 1 = 2 * wI (π / 2) * deriv wII (π / 2) := by
-  rw [m28a_mathieuWI_pi]; linear_combination -(mathieuWI_wronskian a q (π / 2))
+  rw [mathieuWI_pi]; linear_combination -(mathieuWI_wronskian a q (π / 2))
 
 /-- **DLMF 28.2.12**: `w_I'(π) = 2 w_I(π/2) w_I'(π/2)`. -/
 @[dlmf 28.2.E12]
 theorem deriv_mathieuWI_pi : deriv wI π = 2 * wI (π / 2) * deriv wI (π / 2) := by
   obtain ⟨h1, -, h11⟩ := mathieuWI_spec a q
   obtain ⟨h2, -, h21⟩ := mathieuWII_spec a q
-  have e := congrArg (fun f => deriv f 0) (funext (m28a_mathieuWI_pi_sub a q))
-  rw [deriv_comp_const_sub, m28a_deriv_lincomb_sub (h1.differentiable _) (h2.differentiable _),
+  have e := congrArg (fun f => deriv f 0) (funext (mathieuWI_pi_sub a q))
+  rw [deriv_comp_const_sub, deriv_const_mul_sub_const_mul (h1.differentiable _) (h2.differentiable _),
     h11, h21] at e
   simp only [sub_zero] at e
   linear_combination -e
@@ -511,7 +533,7 @@ theorem deriv_mathieuWI_pi : deriv wI π = 2 * wI (π / 2) * deriv wI (π / 2) :
 /-- **DLMF 28.2.13**: `w_II(π) = 2 w_II(π/2) w_II'(π/2)`. -/
 @[dlmf 28.2.E13]
 theorem mathieuWII_pi : wII π = 2 * wII (π / 2) * deriv wII (π / 2) := by
-  have := m28a_mathieuWII_pi_sub a q 0
+  have := mathieuWII_pi_sub a q 0
   simpa [(mathieuWI_spec a q).2.1, (mathieuWII_spec a q).2.1] using this
 
 /-- **DLMF 28.2.7** (upper sign): `w_I(z + π) = w_I(π) w_I(z) + w_I'(π) w_II(z)`. -/
@@ -547,7 +569,7 @@ theorem mathieuWII_sub_pi (z : ℂ) : wII (z - π) = -wII π * wI z + deriv wII 
   rw [this, deriv_comp_sub_const, zero_sub, mathieuWII_neg, deriv_mathieuWII_neg]
 
 /-- Restriction of a Mathieu solution to the ray `t ↦ t z`: derivatives in `t`. -/
-lemma p2f_ray_hasDerivAt {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w) (z : ℂ)
+private lemma hasDerivAt_along_ray {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w) (z : ℂ)
     (t : ℝ) :
     HasDerivAt (fun t : ℝ => w (t * z)) (z * deriv w (t * z)) t ∧
       HasDerivAt (fun t : ℝ => z * deriv w (t * z))
@@ -561,7 +583,7 @@ lemma p2f_ray_hasDerivAt {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a
 
 /-- Separate holomorphy in `a` and in `q` of a family of Mathieu solutions with fixed initial
 data at `0`. -/
-theorem p2f_differentiable_param {W : ℂ → ℂ → ℂ → ℂ}
+theorem differentiable_family_in_a {W : ℂ → ℂ → ℂ → ℂ}
     (hW : ∀ a q, IsMathieuSolution a q (W a q)) {y₀ y₁ : ℂ} (h₀ : ∀ a q, W a q 0 = y₀)
     (h₁ : ∀ a q, deriv (W a q) 0 = y₁) (q z : ℂ) :
     Differentiable ℂ (fun a => W a q z) ∧ Differentiable ℂ (fun a => deriv (W a q) z) := by
@@ -570,7 +592,7 @@ theorem p2f_differentiable_param {W : ℂ → ℂ → ℂ → ℂ}
     continuous_const continuous_const (by fun_prop) continuous_const (t₀ := 0) (y₀ := y₀)
     (y₁ := z * y₁) (F := fun t a => W a q (t * z)) (F' := fun t a => z * deriv (W a q) (t * z))
     (fun a t => by
-      obtain ⟨k1, k2⟩ := p2f_ray_hasDerivAt (hW a q) z t
+      obtain ⟨k1, k2⟩ := hasDerivAt_along_ray (hW a q) z t
       exact ⟨k1, k2.congr_deriv (by ring)⟩)
     (fun a => by simp [h₀]) (fun a => by simp [h₁]) 1
   simp only [Complex.ofReal_one, one_mul] at this
@@ -580,8 +602,8 @@ theorem p2f_differentiable_param {W : ℂ → ℂ → ℂ → ℂ}
   · have := this.2.const_mul z⁻¹
     simpa [← mul_assoc, inv_mul_cancel₀ hz] using this
 
-/-- Separate holomorphy in `q` (companion of `p2f_differentiable_param`). -/
-theorem p2f_differentiable_param_q {W : ℂ → ℂ → ℂ → ℂ}
+/-- Separate holomorphy in `q` (companion of `differentiable_family_in_a`). -/
+theorem differentiable_family_in_q {W : ℂ → ℂ → ℂ → ℂ}
     (hW : ∀ a q, IsMathieuSolution a q (W a q)) {y₀ y₁ : ℂ} (h₀ : ∀ a q, W a q 0 = y₀)
     (h₁ : ∀ a q, deriv (W a q) 0 = y₁) (a z : ℂ) :
     Differentiable ℂ (fun q => W a q z) ∧ Differentiable ℂ (fun q => deriv (W a q) z) := by
@@ -590,7 +612,7 @@ theorem p2f_differentiable_param_q {W : ℂ → ℂ → ℂ → ℂ}
     continuous_const continuous_const continuous_const (by fun_prop) (t₀ := 0) (y₀ := y₀)
     (y₁ := z * y₁) (F := fun t q => W a q (t * z)) (F' := fun t q => z * deriv (W a q) (t * z))
     (fun q t => by
-      obtain ⟨k1, k2⟩ := p2f_ray_hasDerivAt (hW a q) z t
+      obtain ⟨k1, k2⟩ := hasDerivAt_along_ray (hW a q) z t
       exact ⟨k1, k2.congr_deriv (by ring)⟩)
     (fun q => by simp [h₀]) (fun q => by simp [h₁]) 1
   simp only [Complex.ofReal_one, one_mul] at this
@@ -601,7 +623,7 @@ theorem p2f_differentiable_param_q {W : ℂ → ℂ → ℂ → ℂ}
     simpa [← mul_assoc, inv_mul_cancel₀ hz] using this
 
 /-- Hartogs for three variables on `ℂ × ℂ × ℂ`. -/
-lemma p2f_differentiable_of_separately {f : ℂ × ℂ × ℂ → ℂ}
+private lemma differentiable_of_separately₃ {f : ℂ × ℂ × ℂ → ℂ}
     (h1 : ∀ b c, Differentiable ℂ (fun x => f (x, b, c)))
     (h2 : ∀ x c, Differentiable ℂ (fun b => f (x, b, c)))
     (h3 : ∀ x b, Differentiable ℂ (fun c => f (x, b, c))) : Differentiable ℂ f := by
@@ -628,18 +650,18 @@ and `(z, a, q) ↦ w_II(z; a, q)` are entire on `ℂ³`. -/
 theorem differentiable_mathieuWI_mathieuWII :
     Differentiable ℂ (fun p : ℂ × ℂ × ℂ => mathieuWI p.2.1 p.2.2 p.1) ∧
       Differentiable ℂ (fun p : ℂ × ℂ × ℂ => mathieuWII p.2.1 p.2.2 p.1) := by
-  have hI := p2f_differentiable_param (W := mathieuWI) isMathieuSolution_mathieuWI
+  have hI := differentiable_family_in_a (W := mathieuWI) isMathieuSolution_mathieuWI
     (fun a q => (mathieuWI_spec a q).2.1) (fun a q => (mathieuWI_spec a q).2.2)
-  have hI' := p2f_differentiable_param_q (W := mathieuWI) isMathieuSolution_mathieuWI
+  have hI' := differentiable_family_in_q (W := mathieuWI) isMathieuSolution_mathieuWI
     (fun a q => (mathieuWI_spec a q).2.1) (fun a q => (mathieuWI_spec a q).2.2)
-  have hII := p2f_differentiable_param (W := mathieuWII) isMathieuSolution_mathieuWII
+  have hII := differentiable_family_in_a (W := mathieuWII) isMathieuSolution_mathieuWII
     (fun a q => (mathieuWII_spec a q).2.1) (fun a q => (mathieuWII_spec a q).2.2)
-  have hII' := p2f_differentiable_param_q (W := mathieuWII) isMathieuSolution_mathieuWII
+  have hII' := differentiable_family_in_q (W := mathieuWII) isMathieuSolution_mathieuWII
     (fun a q => (mathieuWII_spec a q).2.1) (fun a q => (mathieuWII_spec a q).2.2)
-  exact ⟨p2f_differentiable_of_separately
+  exact ⟨differentiable_of_separately₃
       (fun a q => (isMathieuSolution_mathieuWI a q).differentiable)
       (fun z q => (hI q z).1) (fun z a => (hI' a z).1),
-    p2f_differentiable_of_separately (fun a q => (isMathieuSolution_mathieuWII a q).differentiable)
+    differentiable_of_separately₃ (fun a q => (isMathieuSolution_mathieuWII a q).differentiable)
       (fun z q => (hII q z).1) (fun z a => (hII' a z).1)⟩
 
 end Basic
@@ -647,7 +669,7 @@ end Basic
 /-! ### Change of sign of `q` for the basic solutions (from 28.2.4) -/
 
 /-- Derivative of `z ↦ c f(z + s) - d g(z + s)`. -/
-lemma p1a1_deriv_shift_lincomb {f g : ℂ → ℂ} (hf : Differentiable ℂ f)
+private lemma deriv_const_mul_comp_add_sub {f g : ℂ → ℂ} (hf : Differentiable ℂ f)
     (hg : Differentiable ℂ g) (c d s z : ℂ) :
     deriv (fun x => c * f (x + s) - d * g (x + s)) z =
       c * deriv f (z + s) - d * deriv g (z + s) := by
@@ -659,7 +681,7 @@ lemma p1a1_deriv_shift_lincomb {f g : ℂ → ℂ} (hf : Differentiable ℂ f)
 
 /-- `w_I(z; a, -q) = B' w_I(z + π/2; a, q) - A' w_II(z + π/2; a, q)` with `A = w_I(π/2)`,
 `B = w_II(π/2)` (from the half-period symmetry 28.2.4). -/
-theorem p1a1_mathieuWI_neg_q (a q z : ℂ) :
+theorem mathieuWI_neg_q (a q z : ℂ) :
     mathieuWI a (-q) z = deriv (mathieuWII a q) (π / 2) * mathieuWI a q (z + π / 2) -
       deriv (mathieuWI a q) (π / 2) * mathieuWII a q (z + π / 2) := by
   obtain ⟨h1, -, -⟩ := mathieuWI_spec a q
@@ -673,13 +695,13 @@ theorem p1a1_mathieuWI_neg_q (a q z : ℂ) :
     (by
       rw [g1]
       simp only [neg_mul, ← sub_eq_add_neg]
-      rw [p1a1_deriv_shift_lincomb h1.differentiable h2.differentiable]
+      rw [deriv_const_mul_comp_add_sub h1.differentiable h2.differentiable]
       simp only [zero_add]; ring)
   have := congrFun key z
   rw [this]; ring
 
 /-- `w_II(z; a, -q) = -B w_I(z + π/2; a, q) + A w_II(z + π/2; a, q)`. -/
-theorem p1a1_mathieuWII_neg_q (a q z : ℂ) :
+theorem mathieuWII_neg_q (a q z : ℂ) :
     mathieuWII a (-q) z = mathieuWI a q (π / 2) * mathieuWII a q (z + π / 2) -
       mathieuWII a q (π / 2) * mathieuWI a q (z + π / 2) := by
   obtain ⟨h1, -, -⟩ := mathieuWI_spec a q
@@ -692,52 +714,52 @@ theorem p1a1_mathieuWII_neg_q (a q z : ℂ) :
     (by
       rw [g1]
       simp only [neg_mul, ← sub_eq_add_neg]
-      rw [p1a1_deriv_shift_lincomb h2.differentiable h1.differentiable]
+      rw [deriv_const_mul_comp_add_sub h2.differentiable h1.differentiable]
       simp only [zero_add]; linear_combination -hW)
   have := congrFun key z
   rw [this]; ring
 
 /-- `w_I(π/2; a, -q) = w_II'(π/2; a, q)`: the value at `π/2` under `q ↦ -q`. -/
-theorem p1a1_mathieuWI_half_pi_neg_q (a q : ℂ) :
+theorem mathieuWI_half_pi_neg_q (a q : ℂ) :
     mathieuWI a (-q) (π / 2) = deriv (mathieuWII a q) (π / 2) := by
-  rw [p1a1_mathieuWI_neg_q, show (π : ℂ) / 2 + π / 2 = π by ring, mathieuWII_pi,
-    m28a_mathieuWI_pi]
+  rw [mathieuWI_neg_q, show (π : ℂ) / 2 + π / 2 = π by ring, mathieuWII_pi,
+    mathieuWI_pi]
   linear_combination deriv (mathieuWII a q) (π / 2) * mathieuWI_wronskian a q (π / 2)
 
 /-- `w_II(π/2; a, -q) = w_II(π/2; a, q)`: the value at `π/2` under `q ↦ -q`. -/
-theorem p1a1_mathieuWII_half_pi_neg_q (a q : ℂ) :
+theorem mathieuWII_half_pi_neg_q (a q : ℂ) :
     mathieuWII a (-q) (π / 2) = mathieuWII a q (π / 2) := by
-  rw [p1a1_mathieuWII_neg_q, show (π : ℂ) / 2 + π / 2 = π by ring, mathieuWII_pi,
-    m28a_mathieuWI_pi]
+  rw [mathieuWII_neg_q, show (π : ℂ) / 2 + π / 2 = π by ring, mathieuWII_pi,
+    mathieuWI_pi]
   linear_combination mathieuWII a q (π / 2) * mathieuWI_wronskian a q (π / 2)
 
 /-- `w_I'(π/2; a, -q) = w_I'(π/2; a, q)`: the derivative at `π/2` under `q ↦ -q`. -/
-theorem p1a1_deriv_mathieuWI_half_pi_neg_q (a q : ℂ) :
+theorem deriv_mathieuWI_half_pi_neg_q (a q : ℂ) :
     deriv (mathieuWI a (-q)) (π / 2) = deriv (mathieuWI a q) (π / 2) := by
   have e : mathieuWI a (-q) = fun z => deriv (mathieuWII a q) (π / 2) *
       mathieuWI a q (z + π / 2) - deriv (mathieuWI a q) (π / 2) * mathieuWII a q (z + π / 2) :=
-    funext (p1a1_mathieuWI_neg_q a q)
-  rw [e, p1a1_deriv_shift_lincomb (isMathieuSolution_mathieuWI a q).differentiable
+    funext (mathieuWI_neg_q a q)
+  rw [e, deriv_const_mul_comp_add_sub (isMathieuSolution_mathieuWI a q).differentiable
     (isMathieuSolution_mathieuWII a q).differentiable,
-    show (π : ℂ) / 2 + π / 2 = π by ring, deriv_mathieuWI_pi, m28a_deriv_mathieuWII_pi]
+    show (π : ℂ) / 2 + π / 2 = π by ring, deriv_mathieuWI_pi, deriv_mathieuWII_pi]
   linear_combination deriv (mathieuWI a q) (π / 2) * mathieuWI_wronskian a q (π / 2)
 
 /-- `w_II'(π/2; a, -q) = w_I(π/2; a, q)`: the derivative at `π/2` under `q ↦ -q`. -/
-theorem p1a1_deriv_mathieuWII_half_pi_neg_q (a q : ℂ) :
+theorem deriv_mathieuWII_half_pi_neg_q (a q : ℂ) :
     deriv (mathieuWII a (-q)) (π / 2) = mathieuWI a q (π / 2) := by
   have e : mathieuWII a (-q) = fun z => mathieuWI a q (π / 2) * mathieuWII a q (z + π / 2) -
       mathieuWII a q (π / 2) * mathieuWI a q (z + π / 2) :=
-    funext (p1a1_mathieuWII_neg_q a q)
-  rw [e, p1a1_deriv_shift_lincomb (isMathieuSolution_mathieuWII a q).differentiable
+    funext (mathieuWII_neg_q a q)
+  rw [e, deriv_const_mul_comp_add_sub (isMathieuSolution_mathieuWII a q).differentiable
     (isMathieuSolution_mathieuWI a q).differentiable,
-    show (π : ℂ) / 2 + π / 2 = π by ring, deriv_mathieuWI_pi, m28a_deriv_mathieuWII_pi]
+    show (π : ℂ) / 2 + π / 2 = π by ring, deriv_mathieuWI_pi, deriv_mathieuWII_pi]
   linear_combination mathieuWI a q (π / 2) * mathieuWI_wronskian a q (π / 2)
 
 /-- The derivative of a solution at `π`, in terms of the basic solutions. -/
-lemma IsMathieuSolution.p1a1_deriv_eq {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w)
+lemma IsMathieuSolution.deriv_eq_mathieuWI_mathieuWII {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w)
     (z : ℂ) : deriv w z = w 0 * deriv (mathieuWI a q) z + deriv w 0 * deriv (mathieuWII a q) z := by
   conv_lhs => rw [h.eq_combination]
-  exact m28a_deriv_lincomb ((isMathieuSolution_mathieuWI a q).differentiable z)
+  exact deriv_const_mul_add_const_mul ((isMathieuSolution_mathieuWI a q).differentiable z)
     ((isMathieuSolution_mathieuWII a q).differentiable z) _ _
 
 end DLMF.Mathieu

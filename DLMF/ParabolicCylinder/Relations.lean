@@ -8,12 +8,34 @@ module
 public import DLMF.ErrorFunctions.Repeated
 
 /-!
-# Parabolic cylinder special functions and addition formulas
+# Special cases, relations to other functions and addition theorems
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This file treats the special cases of the parabolic cylinder functions at half-integral
+parameters, their relations to Dawson's integral, Bessel, Kummer and Whittaker functions
+(DLMF §12.7), and the addition theorems of DLMF §12.13.
+
+## Main definitions
+
+* `hhFunction`: the repeated Gaussian tail integral `Hh_n(z) = ∫₀^∞ tⁿ/n! e^{-(z+t)²/2} dt`
+  (DLMF 12.7.7); the index `-1` denotes the Gaussian itself.
+
+## Main results
+
+* `pcfV_nat_add_half`, `pcfV_neg_half`, `pcfU_nat_add_half_deriv`: the special cases
+  DLMF 12.7.3, 12.7.4 and 12.7.6.
+* `pcfU_hh`: `U(n + 1/2, z)` in terms of `Hh_n` (DLMF 12.7.7).
+* `pcfU_bessel_8`, `pcfU_bessel_9`, `pcfU_bessel_10`, `pcfU_bessel_11`: the Bessel-function
+  cases DLMF 12.7.8–12.7.11.
+* `pcfU_kummerU_odd`, `pcfU_whittaker`: `U(a,z)` in terms of Kummer's `U` and Whittaker's `W`
+  (DLMF 12.7.14).
+* `pcfU_addition_1`, `pcfU_addition_2`, `pcfV_addition_3`, `pcfV_addition_4`: the addition
+  theorems DLMF 12.13.1–12.13.4.
+* `pcfU_rotational_addition`: the rotational addition theorem DLMF 12.13.5.
+
+## Implementation notes
+
+The Bessel-function cases use principal branches in the right half-plane; continuation
+elsewhere inherits the logarithm of `z²`.
 -/
 
 @[expose] public noncomputable section

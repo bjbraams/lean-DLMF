@@ -12,10 +12,46 @@ public import Mathlib.MeasureTheory.Integral.Gamma
 /-!
 # Generalized exponential integral, DLMF §8.19
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs.
+The generalized exponential integral `E_p(z)`: integral representations, series, the value
+at `z = 0`, derivatives, the continued fraction, analytic continuation on the logarithmic
+plane, real inequalities and integrals (DLMF §8.19), and the relation to the
+complementary error function (DLMF 7.11.3).
+
+## Main definitions
+
+* `genExpIntEOnLog`: `E_p` on the logarithmic plane.
+* `genExpIntEExtended`: the extension of `E_p` to `z = 0` for `Re p > 1`.
+* `genExpIntL`: the auxiliary integral `L(p)` of DLMF 8.19.27.
+
+## Main results
+
+* `genExpIntE_horizontal_integral`, `genExpIntE_laplace_complex`, `genExpIntE_stieltjes`:
+  the integral representations DLMF 8.19.2–8.19.4.
+* `genExpIntEExtended_zero`: the value at `z = 0`, DLMF 8.19.6.
+* `genExpIntE_nat_finite`, `genExpIntE_nat_hasSum`, `genExpIntE_nat_digamma_series`: the
+  integer-order formulas DLMF 8.19.7–8.19.9.
+* `genExpIntE_hasSum_noninteger`, `genExpIntE_hasSum_exponential`,
+  `genExpIntE_series_integer_limits`: the series DLMF 8.19.10 and 8.19.11 and their limits at
+  positive integral `p`.
+* `genExpIntE_scaled_derivative`, `genExpIntE_parameter_derivatives`: DLMF 8.19.14 and 8.19.15.
+* `genExpIntE_continuedFraction`: the continued fraction DLMF 8.19.17.
+* `genExpIntEOnLog_monodromy`, `genExpIntEOnLog_nat_monodromy`,
+  `genExpIntEOnLog_nonpos_nat_monodromy`: the continuation formula DLMF 8.19.18;
+  `genExpIntEOnLog_parameter_entire`, `genExpIntEOnLog_branch_point`: analytic properties.
+* `genExpIntE_nat_order_bounds`, `genExpIntE_nat_logconvex`, `genExpIntE_nat_rational_bounds`,
+  `genExpIntE_nat_ratio_derivative`: the inequalities DLMF 8.19.19–8.19.22.
+* `genExpIntE_tail_integral`, `genExpIntE_nat_laplace`, `genExpIntE_mellin_laplace`,
+  `genExpIntE_product_integral`, `genExpIntL_hypergeometric`: the integrals
+  DLMF 8.19.23–8.19.27.
+* `incG_expIntE1_digamma_series`: the series DLMF 6.6.3.
+* `erfc_genExpIntEOnLog_square`: the relation DLMF 7.11.3 with its square-argument
+  continuation.
+
+## Implementation notes
+
+The plain function keeps its totalized value at `z = 0`; `genExpIntEExtended` carries the
+continuous extension. The formula DLMF 8.19.25 also needs `Re b > 0` for convergence at
+zero, which is assumed.
 -/
 
 @[expose] public noncomputable section

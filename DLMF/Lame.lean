@@ -16,18 +16,20 @@ public import DLMF.Lame.IntegralEquations
 public import DLMF.Lame.Polynomials.Series
 public import DLMF.Lame.Polynomials.Orthogonality
 public import DLMF.Lame.OtherSolutions
-public import DLMF.Lame.P2lFourier
-public import DLMF.Lame.Polynomials.P2pBase
-public import DLMF.Lame.Polynomials.P2pODE
-public import DLMF.Lame.Polynomials.P2pEigen
-public import DLMF.Lame.Polynomials.P2pIdent
-public import DLMF.Lame.P3lWeierstrass
-public import DLMF.Lame.Polynomials.P3lZeros
+public import DLMF.Lame.FourierExistence
+public import DLMF.Lame.Polynomials.Basis
+public import DLMF.Lame.Polynomials.DifferentialEquation
+public import DLMF.Lame.Polynomials.Eigenvalues
+public import DLMF.Lame.Polynomials.Identities
+public import DLMF.Lame.WeierstrassForm
+public import DLMF.Lame.Polynomials.Zeros
 
 /-!
 # Lamé functions (DLMF Chapter 29)
 
-Lamé's equation in Jacobian and algebraic forms, the eigenvalues and Lamé functions
-Ec, Es (defined by choice from admitted Sturm–Liouville existence theorems) and the
-explicit Lamé polynomials of §29.12. The ledger is DLMF29Acquisition.md.
+This umbrella module collects Lamé's equation in its Jacobian, algebraic, trigonometric and
+Weierstrass forms, the eigenvalues `a^m_ν(k²)`, `b^m_ν(k²)` and Lamé functions `Ec`, `Es`
+(defined by choice from Sturm–Liouville existence theorems), their Fourier series, special cases,
+asymptotics and integral equations, and the explicit Lamé polynomials of §29.12 with their
+zeros and orthogonality.
 -/

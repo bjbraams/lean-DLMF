@@ -16,6 +16,8 @@ Tools for verifying explicit Taylor polynomials of functions defined implicitly,
 computing iterated derivatives. They reduce an expansion `F = P + O(φ)` to a residual estimate
 for a polynomial identity satisfied by `F`.
 
+## Main results
+
 * `invSer_isBigO_sub_of_pow_sub`: if `A → a ≠ 0`, `B → a` and `A^n - B^n = O(φ)`, then
   `A - B = O(φ)` (roots of algebraic relations, e.g. square and cube roots).
 * `invSer_isBigO_sub_of_leftInverse`: if `g` is a left inverse of `f` near `x₀` with a strict

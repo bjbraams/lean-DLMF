@@ -14,37 +14,53 @@ public import Carlson.Elliptic.Standard
 
 DLMF 19.2 defines Legendre's integrals for complex amplitude `φ`, modulus `k` and
 characteristic `α²` as integrals along the **line segment** from `0` to `φ`, with **principal**
-square roots (DLMF §19.1):
+square roots (DLMF §19.1). This file defines them, together with the complementary complete
+integrals and Bulirsch's integrals, and bridges them to the real integrals.
 
-* `incEllIntFk φ k = ∫₀^φ (1 - k² sin²θ)^{-1/2} dθ` (19.2.4),
-* `incEllIntEk φ k = ∫₀^φ (1 - k² sin²θ)^{1/2} dθ` (19.2.5),
-* `incEllIntDk φ k = ∫₀^φ sin²θ (1 - k² sin²θ)^{-1/2} dθ` (19.2.6),
-* `incEllIntPik φ α² k = ∫₀^φ (1 - α² sin²θ)⁻¹ (1 - k² sin²θ)^{-1/2} dθ` (19.2.7), with the
-  **Cauchy principal value** when `1 - α² sin²θ` vanishes at an interior point of the path;
-* the complete integrals `K(k) = F(π/2, k)` (the existing `DLMF.JacobiElliptic.compEllIntKk`),
-  `compEllIntEk`, `compEllIntDk`, `compEllIntPik` (19.2.8);
-* Legendre's complementary integrals `cCompEllIntKk`, `cCompEllIntEk` (`K'`, `E'`, 19.2.8_1,
-  19.2.8_2, 19.2.9), with the branch point at `k = 0` and principal branch `|ph k| ≤ π`;
-* Bulirsch's integrals `bulirschCel`, `bulirschEl1`, `bulirschEl2`, `bulirschEl3`
-  (19.2.11, 19.2.11_5, 19.2.12, 19.2.16).
+## Main definitions
 
-## Design
+* `segmentIntegral`, `pvSegmentIntegral`: the integral along the segment `[0, w]` and its
+  Cauchy principal value.
+* `incEllIntFk`, `incEllIntEk`, `incEllIntDk`, `incEllIntPik`: `F(φ, k)`, `E(φ, k)`, `D(φ, k)`
+  and `Π(φ, α², k)` (DLMF 19.2.4–19.2.7), with the Cauchy principal value in `Π` when
+  `1 - α² sin²θ` vanishes at an interior point of the path.
+* `compEllIntEk`, `compEllIntDk`, `compEllIntPik`: the complete integrals `E(k)`, `D(k)`,
+  `Π(α², k)` (DLMF 19.2.8); `K(k) = F(π/2, k)` is `DLMF.JacobiElliptic.compEllIntKk`.
+* `cCompEllIntKk`, `cCompEllIntEk`: Legendre's complementary integrals `K'`, `E'`
+  (DLMF 19.2.8_1, 19.2.8_2, 19.2.9), with branch point at `k = 0` and principal branch
+  `|ph k| ≤ π`.
+* `bulirschCel`, `bulirschEl1`, `bulirschEl2`, `bulirschEl3`: Bulirsch's integrals
+  (DLMF 19.2.11, 19.2.11_5, 19.2.12, 19.2.16).
 
-* **Path integrals.** `ei19a_segmentIntegral f w = ∫₀¹ w f(t w) dt` is the integral of `f` along
+## Main results
+
+* `compEllIntKk_eq_incEllIntFk`: `K(k) = F(π/2, k)` for all complex `k` (DLMF 19.2.8).
+* `cCompEllIntKk_of_re_pos`, `cCompEllIntKk_of_re_neg_of_im_pos`,
+  `cCompEllIntKk_of_re_neg_of_im_neg`: the three cases of DLMF 19.2.9.
+* `incEllIntFk_eq_ofReal`, `incEllIntEk_eq_ofReal`, `incEllIntPik_eq_ofReal`,
+  `compEllIntKk_eq_ofReal`, `compEllIntEk_eq_ofReal`: bridges to the real integrals of
+  `DLMF.Elliptic.Real`.
+* `incEllIntFk_ofReal`, `incEllIntEk_ofReal`, `incEllIntPik_ofReal`,
+  `compEllIntKk_ofReal_carlson`, `compEllIntEk_ofReal`: bridges to the real integrals of
+  `lean-codes`.
+
+## Implementation notes
+
+* **Path integrals.** `segmentIntegral f w = ∫₀¹ w f(t w) dt` is the integral of `f` along
   the segment `[0, w]`; for real `w` it is the interval integral `∫₀^w f`
-  (`ei19a_segmentIntegral_ofReal`).
-* **Principal values.** `ei19a_pvSegmentIntegral g f w` is the limit, as `ε → 0+`, of the segment
-  integral of `f` over the part of the path where `‖g‖ ≥ ε`. For a simple zero of `g` this excises
-  an asymptotically symmetric neighbourhood, so the limit is the Cauchy principal value
+  (`segmentIntegral_ofReal`).
+* **Principal values.** `pvSegmentIntegral g f w` is the limit, as `ε → 0+`, of the segment
+  integral of `f` over the part of the path where `‖g‖ ≥ ε`. For a simple zero of `g` this
+  excises an asymptotically symmetric neighbourhood, so the limit is the Cauchy principal value
   (DLMF §1.4(v)); when `g` is bounded away from `0` on the path it is the ordinary integral
-  (`ei19a_pvSegmentIntegral_eq`). `Π` and Bulirsch's `cel`, `el3` use it with
+  (`pvSegmentIntegral_eq_segmentIntegral`). `Π` and Bulirsch's `cel`, `el3` use it with
   `g = 1 - α² sin²θ`, resp. `g = cos²θ + p sin²θ`.
 * **Branches.** Powers are Mathlib's principal `cpow` (argument in `(-π, π]`), which is DLMF's
   principal square root off the cut. Outside DLMF's domains (19.2(ii): `1 - sin²φ` and
-  `1 - k² sin²φ` in `ℂ \ (-∞, 0]`, except that one of them may be `0`, and `1 - α² sin²φ ≠ 0`) the
-  definitions are totalized: a non-integrable integrand gives `0`, a non-existent principal
-  value gives `limUnder`'s junk value.
-* **K and K'.** `K(k)` and the literal `K(k') = compEllIntKpk k` are the existing definitions of
+  `1 - k² sin²φ` in `ℂ \ (-∞, 0]`, except that one of them may be `0`, and
+  `1 - α² sin²φ ≠ 0`) the definitions are totalized: a non-integrable integrand gives `0`, a
+  non-existent principal value gives `limUnder`'s junk value.
+* **K and K'.** `K(k)` and the literal `K(k') = compEllIntKpk k` are the definitions of
   `DLMF.JacobiElliptic` (Chapter 22). The literal integral (19.2.8_1) is a function of `k²` and
   is discontinuous across the imaginary axis; DLMF's `K'` is its continuation from `k > 0` to
   `ℂ \ (-∞, 0]`, given explicitly by (19.2.9). `cCompEllIntKk`, `cCompEllIntEk` are defined by
@@ -57,8 +73,8 @@ square roots (DLMF §19.1):
   `Carlson.Real.incEllIntFk/Ek/Pik` of `lean-codes`; the complete integrals are
   `Real.compEllIntKm/Em` and `Carlson.Real.compEllIntKk/Ek`.
 
-Mathlib and the pinned TauCeti have no Legendre elliptic integrals of complex argument
-(checked 2026-10-25); the companion library `lean-codes` (Carlson) has the real ones.
+Mathlib and TauCeti have no Legendre elliptic integrals of complex argument; the companion
+library `lean-codes` (Carlson) has the real ones.
 
 ## References
 
@@ -78,20 +94,20 @@ open DLMF.JacobiElliptic
 /-! ### Path integrals along a segment and principal values -/
 
 /-- The integral of `f` along the line segment from `0` to `w`, `∫₀¹ w f(t w) dt`. -/
-def ei19a_segmentIntegral (f : ℂ → ℂ) (w : ℂ) : ℂ :=
+def segmentIntegral (f : ℂ → ℂ) (w : ℂ) : ℂ :=
   ∫ t in (0 : ℝ)..1, w * f (t * w)
 
 /-- The Cauchy principal value of the integral of `f` along the segment `[0, w]`, with the
 singularities located at the zeros of `g`: the limit as `ε → 0+` of the integral over the part
 of the path where `‖g‖ ≥ ε`. -/
-def ei19a_pvSegmentIntegral (g f : ℂ → ℂ) (w : ℂ) : ℂ :=
+def pvSegmentIntegral (g f : ℂ → ℂ) (w : ℂ) : ℂ :=
   limUnder (𝓝[>] (0 : ℝ)) fun ε : ℝ =>
     ∫ t in (0 : ℝ)..1, if ε ≤ ‖g (t * w)‖ then w * f (t * w) else 0
 
 /-- For real `φ` the segment integral is the interval integral `∫₀^φ f`. -/
-theorem ei19a_segmentIntegral_ofReal (f : ℂ → ℂ) (φ : ℝ) :
-    ei19a_segmentIntegral f φ = ∫ θ in (0 : ℝ)..φ, f θ := by
-  rw [ei19a_segmentIntegral, intervalIntegral.integral_const_mul]
+theorem segmentIntegral_ofReal (f : ℂ → ℂ) (φ : ℝ) :
+    segmentIntegral f φ = ∫ θ in (0 : ℝ)..φ, f θ := by
+  rw [segmentIntegral, intervalIntegral.integral_const_mul]
   have h := intervalIntegral.smul_integral_comp_mul_right (a := 0) (b := 1)
     (fun θ : ℝ => f θ) φ
   simp only [zero_mul, one_mul, Complex.real_smul] at h
@@ -103,10 +119,10 @@ theorem ei19a_segmentIntegral_ofReal (f : ℂ → ℂ) (φ : ℝ) :
 
 /-- The principal value is the ordinary segment integral when `g` is bounded away from `0` on the
 path. -/
-theorem ei19a_pvSegmentIntegral_eq {g f : ℂ → ℂ} {w : ℂ} {δ : ℝ} (hδ : 0 < δ)
+theorem pvSegmentIntegral_eq_segmentIntegral {g f : ℂ → ℂ} {w : ℂ} {δ : ℝ} (hδ : 0 < δ)
     (hg : ∀ t ∈ Icc (0 : ℝ) 1, δ ≤ ‖g (t * w)‖) :
-    ei19a_pvSegmentIntegral g f w = ei19a_segmentIntegral f w := by
-  rw [ei19a_pvSegmentIntegral, ei19a_segmentIntegral]
+    pvSegmentIntegral g f w = segmentIntegral f w := by
+  rw [pvSegmentIntegral, segmentIntegral]
   refine Tendsto.limUnder_eq (tendsto_const_nhds.congr' ?_)
   filter_upwards [Ioo_mem_nhdsGT hδ] with ε hε
   refine intervalIntegral.integral_congr fun t ht => ?_
@@ -114,13 +130,13 @@ theorem ei19a_pvSegmentIntegral_eq {g f : ℂ → ℂ} {w : ℂ} {δ : ℝ} (hδ
   simp [hε.2.le.trans (hg t ht)]
 
 /-- The principal value over the degenerate segment `[0, 0]` is `0`. -/
-theorem ei19a_pvSegmentIntegral_zero (g f : ℂ → ℂ) : ei19a_pvSegmentIntegral g f 0 = 0 := by
-  rw [ei19a_pvSegmentIntegral]
+theorem pvSegmentIntegral_zero (g f : ℂ → ℂ) : pvSegmentIntegral g f 0 = 0 := by
+  rw [pvSegmentIntegral]
   refine Tendsto.limUnder_eq (tendsto_const_nhds.congr' (Eventually.of_forall fun ε => ?_))
   simp
 
 /-- If `1 - z` lies in the slit plane, so does `1 - s z` for `0 ≤ s ≤ 1`. -/
-theorem ei19a_one_sub_mul_mem_slitPlane {z : ℂ} (hz : 1 - z ∈ slitPlane) {s : ℝ} (hs0 : 0 ≤ s)
+theorem one_sub_mul_ofReal_mem_slitPlane {z : ℂ} (hz : 1 - z ∈ slitPlane) {s : ℝ} (hs0 : 0 ≤ s)
     (hs1 : s ≤ 1) : 1 - z * s ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hz ⊢
   simp only [sub_re, one_re, mul_re, ofReal_re, ofReal_im, mul_zero, sub_zero, sub_im, one_im,
@@ -137,9 +153,9 @@ theorem ei19a_one_sub_mul_mem_slitPlane {z : ℂ} (hz : 1 - z ∈ slitPlane) {s 
 
 /-- For real `θ`, `1 - k² sin²θ` lies in the slit plane when `1 - k²` does
 (`k² ∉ [1, ∞)`, the principal domain of `K` and `E`). -/
-theorem ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (θ : ℝ) :
+theorem one_sub_sq_mul_sin_sq_mem_slitPlane {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (θ : ℝ) :
     1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2 ∈ slitPlane := by
-  have := ei19a_one_sub_mul_mem_slitPlane hk (sq_nonneg (Real.sin θ)) (Real.sin_sq_le_one θ)
+  have := one_sub_mul_ofReal_mem_slitPlane hk (sq_nonneg (Real.sin θ)) (Real.sin_sq_le_one θ)
   simpa using this
 
 /-! ### Legendre's incomplete integrals (DLMF 19.2.4–19.2.7) -/
@@ -149,20 +165,20 @@ theorem ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane {k : ℂ} (hk : 1 - k ^ 2 ∈ 
 DLMF's domain: `1 - sin²φ, 1 - k² sin²φ ∈ ℂ \ (-∞, 0]`, one of them possibly `0`. -/
 @[dlmf 19.2.E4, dlmf 19.1.E2]
 def incEllIntFk (φ k : ℂ) : ℂ :=
-  ei19a_segmentIntegral (fun θ => (1 - k ^ 2 * Complex.sin θ ^ 2) ^ (-(1 / 2 : ℂ))) φ
+  segmentIntegral (fun θ => (1 - k ^ 2 * Complex.sin θ ^ 2) ^ (-(1 / 2 : ℂ))) φ
 
 /-- Legendre's incomplete elliptic integral of the second kind (DLMF 19.2.5),
 `E(φ, k) = ∫₀^φ (1 - k² sin²θ)^{1/2} dθ` along the segment `[0, φ]`, principal square root.
 It is well defined at `k² = sin²φ = 1`. -/
 @[dlmf 19.2.E5, dlmf 19.1.E2]
 def incEllIntEk (φ k : ℂ) : ℂ :=
-  ei19a_segmentIntegral (fun θ => (1 - k ^ 2 * Complex.sin θ ^ 2) ^ (1 / 2 : ℂ)) φ
+  segmentIntegral (fun θ => (1 - k ^ 2 * Complex.sin θ ^ 2) ^ (1 / 2 : ℂ)) φ
 
 /-- Jahnke's integral (DLMF 19.2.6), `D(φ, k) = ∫₀^φ sin²θ (1 - k² sin²θ)^{-1/2} dθ` along the
 segment `[0, φ]`; `D = (F - E)/k²` is `incEllIntDk_eq`. -/
 @[dlmf 19.2.E6]
 def incEllIntDk (φ k : ℂ) : ℂ :=
-  ei19a_segmentIntegral
+  segmentIntegral
     (fun θ => Complex.sin θ ^ 2 * (1 - k ^ 2 * Complex.sin θ ^ 2) ^ (-(1 / 2 : ℂ))) φ
 
 /-- Legendre's incomplete elliptic integral of the third kind (DLMF 19.2.7),
@@ -172,7 +188,7 @@ path (DLMF §19.2(ii)). DLMF requires `1 - α² sin²φ ≠ 0`. The second argum
 characteristic `α²` itself (DLMF's argument order). -/
 @[dlmf 19.2.E7, dlmf 19.1.E2]
 def incEllIntPik (φ α2 k : ℂ) : ℂ :=
-  ei19a_pvSegmentIntegral (fun θ => 1 - α2 * Complex.sin θ ^ 2)
+  pvSegmentIntegral (fun θ => 1 - α2 * Complex.sin θ ^ 2)
     (fun θ => (1 - α2 * Complex.sin θ ^ 2)⁻¹ * (1 - k ^ 2 * Complex.sin θ ^ 2) ^ (-(1 / 2 : ℂ))) φ
 
 /-! ### Complete integrals (DLMF 19.2.8) -/
@@ -224,7 +240,7 @@ def cCompEllIntEk (k : ℂ) : ℂ :=
 for real `a, b, p` (`p ≠ 0`) and complex `k_c ≠ 0`; a Cauchy principal value when `p < 0`. -/
 @[dlmf 19.2.E11]
 def bulirschCel (kc : ℂ) (p a b : ℝ) : ℂ :=
-  ei19a_pvSegmentIntegral (fun θ => Complex.cos θ ^ 2 + p * Complex.sin θ ^ 2)
+  pvSegmentIntegral (fun θ => Complex.cos θ ^ 2 + p * Complex.sin θ ^ 2)
     (fun θ => (a * Complex.cos θ ^ 2 + b * Complex.sin θ ^ 2) /
       (Complex.cos θ ^ 2 + p * Complex.sin θ ^ 2) *
         (Complex.cos θ ^ 2 + kc ^ 2 * Complex.sin θ ^ 2) ^ (-(1 / 2 : ℂ))) (π / 2)
@@ -234,7 +250,7 @@ def bulirschCel (kc : ℂ) (p a b : ℝ) : ℂ :=
 `arctan` and square root. -/
 @[dlmf 19.2.E11_5]
 def bulirschEl1 (x kc : ℂ) : ℂ :=
-  ei19a_segmentIntegral (fun θ => (Complex.cos θ ^ 2 + kc ^ 2 * Complex.sin θ ^ 2) ^ (-(1 / 2 : ℂ)))
+  segmentIntegral (fun θ => (Complex.cos θ ^ 2 + kc ^ 2 * Complex.sin θ ^ 2) ^ (-(1 / 2 : ℂ)))
     (Complex.arctan x)
 
 /-- Bulirsch's incomplete integral of the second kind (DLMF 19.2.12),
@@ -242,7 +258,7 @@ def bulirschEl1 (x kc : ℂ) : ℂ :=
 `a, b`. -/
 @[dlmf 19.2.E12]
 def bulirschEl2 (x kc : ℂ) (a b : ℝ) : ℂ :=
-  ei19a_segmentIntegral (fun θ => (a + b * Complex.tan θ ^ 2) *
+  segmentIntegral (fun θ => (a + b * Complex.tan θ ^ 2) *
     ((1 + Complex.tan θ ^ 2) * (1 + kc ^ 2 * Complex.tan θ ^ 2)) ^ (-(1 / 2 : ℂ)))
     (Complex.arctan x)
 
@@ -251,7 +267,7 @@ def bulirschEl2 (x kc : ℂ) (a b : ℝ) : ℂ :=
 `x² ≠ -1/p`; a principal value at an interior zero of `cos²θ + p sin²θ` (as for `Π`). -/
 @[dlmf 19.2.E16]
 def bulirschEl3 (x kc : ℂ) (p : ℝ) : ℂ :=
-  ei19a_pvSegmentIntegral (fun θ => Complex.cos θ ^ 2 + p * Complex.sin θ ^ 2)
+  pvSegmentIntegral (fun θ => Complex.cos θ ^ 2 + p * Complex.sin θ ^ 2)
     (fun θ => (Complex.cos θ ^ 2 + p * Complex.sin θ ^ 2)⁻¹ *
       (Complex.cos θ ^ 2 + kc ^ 2 * Complex.sin θ ^ 2) ^ (-(1 / 2 : ℂ))) (Complex.arctan x)
 
@@ -260,20 +276,20 @@ def bulirschEl3 (x kc : ℂ) (p : ℝ) : ℂ :=
 /-- `F(φ, k)` for real `φ` is the interval integral `∫₀^φ (1 - k² sin²θ)^{-1/2} dθ`. -/
 theorem incEllIntFk_ofReal_eq_integral (φ : ℝ) (k : ℂ) :
     incEllIntFk φ k = ∫ θ in (0 : ℝ)..φ, (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
-  rw [incEllIntFk, ei19a_segmentIntegral_ofReal]
+  rw [incEllIntFk, segmentIntegral_ofReal]
   simp only [← Complex.ofReal_sin]
 
 /-- `E(φ, k)` for real `φ` is the interval integral `∫₀^φ (1 - k² sin²θ)^{1/2} dθ`. -/
 theorem incEllIntEk_ofReal_eq_integral (φ : ℝ) (k : ℂ) :
     incEllIntEk φ k = ∫ θ in (0 : ℝ)..φ, (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) := by
-  rw [incEllIntEk, ei19a_segmentIntegral_ofReal]
+  rw [incEllIntEk, segmentIntegral_ofReal]
   simp only [← Complex.ofReal_sin]
 
 /-- `D(φ, k)` for real `φ` is the interval integral `∫₀^φ sin²θ (1 - k² sin²θ)^{-1/2} dθ`. -/
 theorem incEllIntDk_ofReal_eq_integral (φ : ℝ) (k : ℂ) :
     incEllIntDk φ k = ∫ θ in (0 : ℝ)..φ,
       (Real.sin θ : ℂ) ^ 2 * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
-  rw [incEllIntDk, ei19a_segmentIntegral_ofReal]
+  rw [incEllIntDk, segmentIntegral_ofReal]
   simp only [← Complex.ofReal_sin]
 
 /-- DLMF 19.2.8: `K(k) = F(π/2, k)`, bridging the Chapter 22 definition
@@ -297,11 +313,11 @@ theorem compEllIntDk_eq_integral (k : ℂ) :
     incEllIntDk_ofReal_eq_integral]
 
 /-- For a real exponent and a nonnegative real base the complex power is the real one. -/
-lemma ei19a_ofReal_cpow_ofReal {x : ℝ} (hx : 0 ≤ x) (y : ℝ) :
+private lemma ofReal_cpow_ofReal_of_nonneg {x : ℝ} (hx : 0 ≤ x) (y : ℝ) :
     ((x : ℂ) ^ (y : ℂ)) = ((x ^ y : ℝ) : ℂ) := (ofReal_cpow hx y).symm
 
 /-- If `k² = m` with `m` real and `1 - m sin²θ ≥ 0`, the complex base is the real one. -/
-lemma ei19a_base_ofReal {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (θ : ℝ) :
+private lemma one_sub_sq_mul_sin_sq_eq_ofReal {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (θ : ℝ) :
     1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2 = ((1 - m * Real.sin θ ^ 2 : ℝ) : ℂ) := by
   rw [hk]; push_cast; ring
 
@@ -314,8 +330,8 @@ theorem incEllIntFk_eq_ofReal {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m ≤ 1
   refine intervalIntegral.integral_congr fun θ _ => ?_
   have hpos : 0 ≤ 1 - m * Real.sin θ ^ 2 := by
     nlinarith [Real.sin_sq_le_one θ, sq_nonneg (Real.sin θ)]
-  rw [ei19a_base_ofReal hk, show (-(1 / 2 : ℂ)) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring,
-    ei19a_ofReal_cpow_ofReal hpos]
+  rw [one_sub_sq_mul_sin_sq_eq_ofReal hk, show (-(1 / 2 : ℂ)) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring,
+    ofReal_cpow_ofReal_of_nonneg hpos]
 
 /-- Bridge to the real integral of the second kind: if `k² = m` is real with `m ≤ 1` and `φ` is
 real, `E(φ, k) = Real.incEllIntEm φ m`. -/
@@ -326,8 +342,8 @@ theorem incEllIntEk_eq_ofReal {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m ≤ 1
   refine intervalIntegral.integral_congr fun θ _ => ?_
   have hpos : 0 ≤ 1 - m * Real.sin θ ^ 2 := by
     nlinarith [Real.sin_sq_le_one θ, sq_nonneg (Real.sin θ)]
-  rw [ei19a_base_ofReal hk, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
-    ei19a_ofReal_cpow_ofReal hpos]
+  rw [one_sub_sq_mul_sin_sq_eq_ofReal hk, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
+    ofReal_cpow_ofReal_of_nonneg hpos]
 
 /-- Bridge to `lean-codes`: for real `φ` and real `k` with `k² ≤ 1`,
 `F(φ, k) = Carlson.Real.incEllIntFk φ k`. -/
@@ -374,10 +390,10 @@ theorem compEllIntEk_ofReal {k : ℝ} (hk : k ^ 2 ≤ 1) :
 on the path. -/
 theorem incEllIntPik_eq_segmentIntegral {φ α2 k : ℂ} {δ : ℝ} (hδ : 0 < δ)
     (h : ∀ t ∈ Icc (0 : ℝ) 1, δ ≤ ‖1 - α2 * Complex.sin (t * φ) ^ 2‖) :
-    incEllIntPik φ α2 k = ei19a_segmentIntegral
+    incEllIntPik φ α2 k = segmentIntegral
       (fun θ => (1 - α2 * Complex.sin θ ^ 2)⁻¹ * (1 - k ^ 2 * Complex.sin θ ^ 2) ^ (-(1 / 2 : ℂ)))
         φ :=
-  ei19a_pvSegmentIntegral_eq hδ h
+  pvSegmentIntegral_eq_segmentIntegral hδ h
 
 /-- For real `φ` and real `α² < 1` the principal value in `Π` is not needed:
 `Π(φ, α², k) = ∫₀^φ (1 - α² sin²θ)⁻¹ (1 - k² sin²θ)^{-1/2} dθ`. -/
@@ -385,7 +401,7 @@ theorem incEllIntPik_ofReal_eq_integral (φ : ℝ) {α2 : ℝ} (hα : α2 < 1) (
     incEllIntPik φ α2 k = ∫ θ in (0 : ℝ)..φ, ((1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) := by
   rw [incEllIntPik_eq_segmentIntegral (δ := min 1 (1 - α2)) (lt_min one_pos (by linarith)),
-    ei19a_segmentIntegral_ofReal]
+    segmentIntegral_ofReal]
   · simp only [← Complex.ofReal_sin]
   · intro t _
     have hs := Real.sin_sq_le_one (t * φ)
@@ -410,8 +426,8 @@ theorem incEllIntPik_eq_ofReal {k : ℂ} {m α2 : ℝ} (hk : k ^ 2 = m) (hm : m 
   have hpos : 0 ≤ 1 - m * Real.sin θ ^ 2 := by
     nlinarith [Real.sin_sq_le_one θ, sq_nonneg (Real.sin θ)]
   simp only [DLMF.Elliptic.piIntegrand]
-  rw [ei19a_base_ofReal hk, show (-(1 / 2 : ℂ)) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring,
-    ei19a_ofReal_cpow_ofReal hpos]
+  rw [one_sub_sq_mul_sin_sq_eq_ofReal hk, show (-(1 / 2 : ℂ)) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring,
+    ofReal_cpow_ofReal_of_nonneg hpos]
   push_cast; ring
 
 /-- Bridge to `lean-codes`: for real `φ`, real `α² < 1` and real `k` with `k² ≤ 1`,

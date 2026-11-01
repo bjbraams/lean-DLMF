@@ -37,6 +37,24 @@ The parameters of `Q_{ν±1}` are integer shifts of those of `Q_ν`. A three-ter
 `(ν+1) Q_{ν+1} - (2ν+1) z Q_ν + ν Q_{ν-1} = 0` for `ν ≠ 0`, and `Q₁ = z Q₀ - 1`. By induction,
 `Q_n = P_n Q₀ - R_n` with polynomials `R_n` (Temme (8.25)). Since `(1-z²)𝒲{P_n, Q_n}` is constant by
 Legendre's equation and tends to `P_n(1)² = 1` as `z → 1`, `𝒲{P_n, Q_n} = 1/(1-z²)`.
+
+## Main definitions
+
+* `legendreQPoly`: the polynomials `R_n` with `Q_n = P_n Q₀ - R_n` (Temme's `W_{n-1}`).
+
+## Main results
+
+* `regularizedGaussHGFun_legendreQ`, `regularizedGaussHG_legendreQ`: the three-term identity for
+  `𝐅(a, b; a+b; u)` on the unit disk and on the cut plane.
+* `legendreQ_recurrence`: the recurrence of `Q_ν` for `ν ≠ 0` (DLMF 14.10.3 with `μ = 0`).
+* `legendreQ_one`: `Q₁(z) = z Q₀(z) - 1` (Temme (8.24)).
+* `legendreQ_nat`: `Q_n = P_n Q₀ - R_n` (Temme (8.25)).
+* `wronskian_legendreP_legendreQ_nat`: `𝒲{P_n, Q_n}(z) = 1/(1-z²)`.
+
+## References
+
+* N. M. Temme, *Special Functions: An Introduction to the Classical Functions of Mathematical
+  Physics*, §8.5.
 -/
 
 @[expose] public section

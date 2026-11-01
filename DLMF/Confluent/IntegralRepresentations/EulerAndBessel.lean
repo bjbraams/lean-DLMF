@@ -11,15 +11,41 @@ public import DLMF.Confluent.Recurrence
 public import DLMF.Bessel.Modified
 public import DLMF.Bessel.KIntegralRep
 public import DLMF.Hypergeometric.IntegralRepresentations
+public import Carlson.Elliptic.Addition
 
 /-!
-# Euler and Bessel integral representations of Tricomi functions
+# Euler, Laplace and Bessel integral representations
 
-Euler-type integrals and modified-Bessel kernels represent the confluent hypergeometric
-functions.
+This file proves the Euler-type and Bessel-kernel integrals for the regularized Kummer
+function and the Laplace and Bessel-`K` integrals for Tricomi's function (DLMF §13.4(i)–(ii)).
 
-Source references and common attribution are retained in
-`DLMF.Confluent.IntegralRepresentations`.
+## Main definitions
+
+* `besselKUKernel`: the double integrand behind DLMF 13.4.7.
+
+## Main results
+
+* `regularized_euler_integral`: Euler's integral for `𝐌(a,b,z)` (DLMF 13.4.1).
+* `regularized_parameter_integral`: raising the denominator parameter by a Beta integral
+  (DLMF 13.4.2).
+* `regularized_bessel_integral`: a Bessel-`J` integral for `𝐌(a,b,-z)` (DLMF 13.4.3).
+* `besselJ_two_sqrt`, `besselI_two_sqrt`: `J_ν(2√(zt))` and `I_ν(2√(zt))` through the
+  regularized `₀F₁`.
+* `kummerU_laplace`: Tricomi's Laplace integral (DLMF 13.4.4) in its full stated region.
+* `kummerU_eq_integral_besselK`, `kummerU_integral_besselK`: a Bessel-`K` integral for `U`
+  (DLMF 13.4.7) on the whole slit plane; stronger than DLMF, which states `|ph z| < π/2`.
+
+## Implementation notes
+
+The `M` form of 13.4.1 is `kummerM_eq_euler_integral` in `DLMF.Confluent.KummerProperties`.
+
+Tricomi's Laplace representation is first proved off the integer second parameters: the Gauss
+connection formula tends to the defining Tricomi connection, while its Euler integral tends to
+the Laplace integral. The Tau Ceti contributors' second Beta integrability theorem supplies the
+fixed majorant; Mathlib's real Bernoulli inequality and dominated convergence justify the limit.
+Holomorphic continuation in the argument and continuity in the second parameter cover every
+parameter. At `z = 0` the totalized values of the two sides of 13.4.7 differ.
+
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
 -/
 
@@ -229,19 +255,12 @@ private lemma sqrt_mul_cpow {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : 0 < t) (ν 
       (by rw [him]; linarith [arg_le_pi (z * t), Real.pi_pos]),
     show 1 / 2 * ν = ν / 2 by ring, mul_ofReal_cpow_of_pos hz ht]
 
-/-- `((w)^{1/2})^2 = w`. -/
-private lemma cpow_half_sq (w : ℂ) : (w ^ (1 / 2 : ℂ)) ^ 2 = w := by
-  rcases eq_or_ne w 0 with rfl | hw
-  · simp
-  · rw [sq, ← cpow_add _ _ hw]
-    norm_num
-
 /-- `J_ν(2√(zt)) = z^{ν/2} t^{ν/2} ₀F̃₁(ν+1; -zt)`. -/
 theorem besselJ_two_sqrt {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : 0 < t) (ν : ℂ) :
     besselJ ν (2 * (z * t) ^ (1 / 2 : ℂ)) =
       z ^ (ν / 2) * (t : ℂ) ^ (ν / 2) * regularizedHGFun ∅ {ν + 1} (-z * t) := by
   rw [besselJ_eq_regularized, show 2 * (z * t) ^ (1 / 2 : ℂ) / 2 = (z * t) ^ (1 / 2 : ℂ) by ring,
-    sqrt_mul_cpow hz ht, mul_pow, cpow_half_sq]
+    sqrt_mul_cpow hz ht, mul_pow, Carlson.cpow_half_sq]
   congr 2
   ring
 
@@ -250,7 +269,7 @@ theorem besselI_two_sqrt {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : 0 < t) (ν : �
     besselI ν (2 * (z * t) ^ (1 / 2 : ℂ)) =
       z ^ (ν / 2) * (t : ℂ) ^ (ν / 2) * regularizedHGFun ∅ {ν + 1} (z * t) := by
   rw [besselI, show 2 * (z * t) ^ (1 / 2 : ℂ) / 2 = (z * t) ^ (1 / 2 : ℂ) by ring,
-    sqrt_mul_cpow hz ht, mul_pow, cpow_half_sq]
+    sqrt_mul_cpow hz ht, mul_pow, Carlson.cpow_half_sq]
   congr 2
   ring
 
@@ -944,7 +963,7 @@ theorem two_mul_cpow_half_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) {t : �
     2 * (z * t) ^ (1 / 2 : ℂ) ∈ slitPlane := by
   refine Or.inl ?_
   rw [re_two_mul_cpow_half_mul_ofReal (slitPlane_ne_zero hz) ht]
-  have := re_cpow_half_pos_of_mem_slitPlane hz
+  have := Carlson.re_cpow_half_pos hz
   have := Real.sqrt_pos.mpr ht
   positivity
 
@@ -988,12 +1007,12 @@ theorem differentiableOn_integral_besselK {a b : ℂ} (ha : (b - 1).re < a.re) (
       ((differentiableAt_id.mul_const (t : ℂ)).cpow_const hzt).const_mul 2
     exact ((hK.comp z hin).const_mul _).differentiableWithinAt
   · set c := (z₀ ^ (1 / 2 : ℂ)).re / 2
-    have hc0 : 0 < c := half_pos (re_cpow_half_pos_of_mem_slitPlane hz₀)
+    have hc0 : 0 < c := half_pos (Carlson.re_cpow_half_pos hz₀)
     have hcont : ContinuousAt (fun z : ℂ => (z ^ (1 / 2 : ℂ)).re) z₀ :=
       continuous_re.continuousAt.comp (continuousAt_id.cpow continuousAt_const hz₀)
     have hV : {z : ℂ | c < (z ^ (1 / 2 : ℂ)).re} ∩ slitPlane ∈ 𝓝 z₀ :=
       Filter.inter_mem (hcont.eventually (lt_mem_nhds (half_lt_self
-        (re_cpow_half_pos_of_mem_slitPlane hz₀)))) (isOpen_slitPlane.mem_nhds hz₀)
+        (Carlson.re_cpow_half_pos hz₀)))) (isOpen_slitPlane.mem_nhds hz₀)
     refine ⟨_, hV, fun t => Real.Gamma s * c ^ (-s) * (Real.exp (-t) * t ^ (D / 2 - 1)),
       (Real.GammaIntegral_convergent (half_pos hD)).const_mul _, ?_⟩
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht z hz

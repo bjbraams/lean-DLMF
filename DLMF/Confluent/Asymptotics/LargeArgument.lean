@@ -11,12 +11,43 @@ public import DLMF.Confluent.IntegralRepresentations
 public import DLMF.Confluent.Continuation
 
 /-!
-# Large-argument confluent hypergeometric expansions
+# Large-argument expansions of confluent hypergeometric functions (DLMF §13.7, 13.8.1)
 
-Poincare expansions of Kummer and Tricomi functions, with binomial remainder estimates.
+Poincaré expansions of Tricomi's `U(a,b,z)` and of the regularized Kummer function `𝐌(a,b,z)`
+as `z → ∞`. Following Temme, *Special Functions*, §§7.1–7.2, the expansions are derived from
+Watson's lemma (`DLMFMathlib.Analysis.Asymptotics.Watson`) applied to the Laplace and Euler
+integrals, and extended to all complex parameters by the contiguous relations.
 
-Source references and common attribution are retained in
-`DLMF.Confluent.Asymptotics`.
+## Main definitions
+
+* `tricomiCoeff`, `kummerCoeff`: the coefficients of the expansions 13.7.3 and 13.7.1.
+* `largeBGenerating`, `largeBCoeff`: the generating function of DLMF 13.8.3, normalized to be
+  analytic at `t = 0`, and its Taylor coefficients.
+
+## Main results
+
+* `hasAsymptoticExpansion_kummerU`: `U(a,b,x) ~ ∑ (-1)^s (a)_s (a-b+1)_s / s! · x^{-a-s}` on the
+  positive axis for all complex `a, b`, from the Laplace integral for `re a > 0` and the
+  contiguous relation 13.3.10.
+* `hasAsymptoticExpansion_kummerU_sector`: the same expansion for complex `z → ∞` in every
+  sector `δ |z| ≤ re z`, from Watson's lemma in a sector.
+* `hasAsymptoticExpansion_regularizedConfluent`: `𝐌(a,b,x) ~ eˣ x^{a-b}/Γ(a) ·
+  ∑ (1-a)_s (b-a)_s / s! · x^{-s}` for all complex `a, b`, from the Euler integral and the
+  regularized contiguous relations.
+* `regularizedHGFun_poincare_real`, `kummerU_poincare`: DLMF 13.7.1 and 13.7.3 in `IsBigO` form.
+* `kummerU_poincare_finite`: for real `a > 0`, `b ≤ a + 1` the remainder is bounded by the first
+  omitted term (DLMF 13.7.4).
+* `kummerU_poincare_remainder`: a remainder with the stated order of decay (DLMF 13.7.4).
+* `kummerM_large_b`: the expansion of `M(a,b,z)` in powers of `1/b` (DLMF 13.8.1).
+* `abs_binomRem_le`: the binomial remainder is bounded by the first omitted term.
+
+## Implementation notes
+
+Poincaré expansions are stated along the positive real axis unless a sector is specified.
+Tricomi remainder statements include an error bound or an asymptotic order, rather than an
+arbitrary additive error. The exponentially improved expansion 13.7.10, the remainder-region
+results 13.7.5–13.7.9 and 13.7.11–13.7.13, and the uniform turning-point expansions of
+§§13.20–13.21 are not formalized here.
 -/
 
 @[expose] public section
@@ -823,7 +854,7 @@ theorem ofReal_ascPochhammer_eval (r : ℝ) (k : ℕ) :
 {a} {b} x - exp x * (x : ℂ) ^ (a - b) / Gamma a * ∑ s ∈ Finset.range n, poch (1 - a) s * poch
 (b - a) s / s.factorial * (x : ℂ) ^ (-(s : ℂ))) (fun x : ℝ => exp x * (x : ℂ) ^ (a - b - n))`. -/
 @[dlmf 13.7.E1]
-theorem regularizedHGFun_poincare_real (a b : ℂ) (n : ℕ) (_ha : ∀ k : ℕ, a ≠ -k) :
+theorem regularizedHGFun_poincare_real (a b : ℂ) (n : ℕ) :
     Asymptotics.IsBigO atTop
       (fun x : ℝ => regularizedHGFun {a} {b} x -
         exp x * (x : ℂ) ^ (a - b) / Gamma a *

@@ -14,19 +14,43 @@ public import TauCeti.LinearAlgebra.QuadraticForm.SpecialOrthogonal.WeightedSumS
 public import TauCeti.Analysis.PDE.PoissonIntegral.Ball
 
 /-!
-# Addition theorems, Funk–Hecke, Poisson, and `SU(2)` (AAR §§9.6–9.16)
+# Addition theorems, Funk–Hecke, Poisson and `SU(2)` (AAR §§9.6–9.16)
 
-Mathlib has the Poisson kernel of the *disk* (`poissonKernel`) and `Matrix.specialUnitaryGroup`,
-but not the spherical addition theorem, Funk–Hecke, or the identification of Jacobi polynomials
-with matrix coefficients of `SU(2)`.
-The ball Poisson representation uses the Tau Ceti contributors’ Poisson kernel,
-boundary convergence and Dirichlet uniqueness. The continuous extension argument
-is adapted from their unit-ball Dirichlet theorem. The `SU(2)` double cover transports
-their compact Spin cover through their Spin–unitary and coordinate equivalences.
+This file proves the spherical addition theorem and the Funk–Hecke formula in three
+dimensions, Gegenbauer's addition theorem for ultraspherical polynomials, the Poisson
+representation on the unit ball, and relates `SU(2)` to the compact Spin cover. Mathlib has
+the Poisson kernel of the disk and `Matrix.specialUnitaryGroup`, but not these results.
+
+## Main definitions
+
+* `poissonKernelBall`: the Poisson kernel of the unit ball in `ℝⁿ` (AAR §9.9), before
+  division by the sphere area.
+* `SU2`: the special unitary group `SU(2)`.
+* `compactSO3EquivMatrix`: the TauCeti Clifford-form special orthogonal group in matrix
+  coordinates.
+
+## Main results
+
+* `spherical_addition`: the addition theorem (AAR Theorem 9.6.3, (9.6.6)) in three
+  dimensions.
+* `funk_hecke`: the Funk–Hecke formula (AAR Theorem 9.7.1) in three dimensions.
+* `ultrasphPoly_addition`: Gegenbauer's addition theorem (AAR (9.8.5')) for `λ > 1/2`.
+* `poissonKernelBall_reproduces`, `ballPoissonIntegral_reproduces`: Poisson representation of
+  a harmonic function continuous on the closed unit ball.
+* `realSpinThreeEquivSpecialUnitary_negOne`: the distinguished negative Spin scalar has
+  special unitary matrix `-1`.
+
+## Implementation notes
+
+The ball Poisson representation uses the TauCeti Poisson kernel, boundary convergence and
+Dirichlet uniqueness; the continuous extension argument is adapted from TauCeti's unit-ball
+Dirichlet theorem. The `SU(2)` double cover transports TauCeti's compact Spin cover through
+its Spin–unitary and coordinate equivalences.
+
 Gegenbauer's addition theorem is proved by induction on the degree: both sides have the same
-derivative in `cos ψ` (by the derivative formula and the induction hypothesis at `λ + 1`), and the
-constant term is fixed by integrating against `sin^{2λ-1} ψ`, using the proved product formula
-(DLMF 18.17.5) and the vanishing of the integrals of `C_j^{λ-1/2}(cos ψ)`, `j ≥ 1`.
+derivative in `cos ψ` (by the derivative formula and the induction hypothesis at `λ + 1`), and
+the constant term is fixed by integrating against `sin^{2λ-1} ψ`, using the product formula
+DLMF 18.17.5 and the vanishing of the integrals of `C_j^{λ-1/2}(cos ψ)`, `j ≥ 1`.
 -/
 
 @[expose] public section
@@ -118,7 +142,7 @@ private lemma gegAdd_coef_zero {lam : ℝ} (hlam : 1 / 2 < lam) (n : ℕ) :
     gegAdd_coef lam n 0 * ultrasphPoly lam n 1 = 1 := by
   have hlre : -1 / 2 < (lam : ℂ).re := by simp; linarith
   simp only [gegAdd_coef, Nat.cast_zero, zero_add, pow_zero, mul_one, Nat.sub_zero, mul_zero]
-  rw [ultrasphPoly_at_one hlre, gegAdd_Gamma_poch (by linarith),
+  rw [ultrasphPoly_at_one, gegAdd_Gamma_poch (by linarith),
     show (2 * (lam : ℂ)) = (2 * lam - 1) + 1 by ring, Complex.Gamma_add_one _ (by
       intro h; have := congrArg Complex.re h; simp at this; linarith)]
   rw [show (2 * (lam : ℂ) - 1) + 1 = 2 * lam by ring]
@@ -249,7 +273,7 @@ private lemma gegAdd_integral_L {lam : ℝ} (hlam : 1 / 2 < lam) (m : ℕ) (θ �
     push_cast
     field_simp
   have h1 : ultrasphPoly lam m 1 ≠ 0 := by
-    rw [ultrasphPoly_at_one hlre]
+    rw [ultrasphPoly_at_one]
     exact div_ne_zero (poch_ne_zero_of_re_pos (by simp; linarith) _)
       (by exact_mod_cast m.factorial_ne_zero)
   have hPF := ultrasphPoly_product_integral hlam0 m θ φ
@@ -342,7 +366,7 @@ private lemma gegAdd_main (n : ℕ) : ∀ lam : ℝ, 1 / 2 < lam → ∀ θ φ t
   have hmρ : ∫ s : ℝ in (0 : ℝ)..π, ρ s = mC := by
     rw [intervalIntegral.integral_ofReal, (integral_sin_rpow_aux hlam0).2]
   have h1 : ultrasphPoly lam (n + 1) 1 ≠ 0 := by
-    rw [ultrasphPoly_at_one hlre]
+    rw [ultrasphPoly_at_one]
     exact div_ne_zero (poch_ne_zero_of_re_pos (by simp; linarith) _)
       (by exact_mod_cast (n + 1).factorial_ne_zero)
   have hm0 : mC ≠ 0 := gegAdd_weight_ne_zero hlam0
@@ -481,7 +505,7 @@ theorem realSpinThreeEquivSpecialUnitary_negOne :
 
 
 /-- The double cover `SU(2) → SO(3)` (AAR §9.16). -/
-lemma su2_covers_so3 :
+private lemma exists_doubleCover_SU2 :
     ∃ Φ : SU2 →* specialOrthogonalGroup (Fin 3) ℝ, Function.Surjective Φ ∧
       (∀ g, Φ g = 1 ↔ g = 1 ∨ g.1 = (-1 : Matrix (Fin 2) (Fin 2) ℂ)) := by
   let E := realSpinThreeEquivSpecialUnitary

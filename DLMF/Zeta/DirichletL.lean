@@ -11,25 +11,42 @@ public import Mathlib.NumberTheory.LSeries.Nonvanishing
 public import Mathlib.NumberTheory.MulChar.Lemmas
 
 /-!
-# Dirichlet `L`-functions (DLMF §25.15)
+# Dirichlet `L`-functions
+
+Dirichlet `L`-functions (DLMF §25.15): the pole of the principal `L`-function, the
+representation by Hurwitz zeta functions, the Gauss sum, the functional equation, zeros and
+the values at `s = 0`.
+
+## Main results
+
+* `LFunction_one_residue`: the simple pole of `L(s, χ₁)` at `s = 1` (DLMF §25.15(i)).
+* `LFunction_eq_sum_hurwitzZeta`: DLMF 25.15.3.
+* `gaussSum_stdAddChar_eq_sum`: the Gauss sum of DLMF 25.15.6.
+* `LFunction_one_sub_of_isPrimitive`: the functional equation DLMF 25.15.5.
+* `LFunction_neg_two_mul_nat_eq_zero`: the trivial zeros for even characters (DLMF 25.15.7).
+* `eq_trivial_zero_of_LFunction_eq_zero`, `infinite_LFunction_zeros_criticalStrip`,
+  `LFunction_one_sub_conj_eq_zero`: the zeros of primitive `L`-functions (DLMF §25.15(ii)).
+* `LFunction_zero_of_ne_one`, `LFunction_one_zero`: DLMF 25.15.10.
+
+## Implementation notes
 
 DLMF's `L(s, χ)` for a Dirichlet character `χ (mod k)` is Mathlib's
-`DirichletCharacter.LFunction χ s` (`χ : DirichletCharacter ℂ k`), the meromorphic continuation of
-`LSeries χ`; it is *defined* in Mathlib as `k^{-s} ∑_{j mod k} χ(j) ζ(s, j/k)` with Mathlib's
+`DirichletCharacter.LFunction χ s` (`χ : DirichletCharacter ℂ k`), the meromorphic continuation
+of `LSeries χ`; it is defined in Mathlib as `k^{-s} ∑_{j mod k} χ(j) ζ(s, j/k)` with Mathlib's
 Hurwitz zeta function, which is DLMF 25.15.3. The principal character `χ₁ (mod k)` is `1`, the
-complex conjugate character `χ̄` is `star χ` (`= χ⁻¹`, `MulChar.star_eq_inv`), and DLMF's Gauss sum
-`G(χ) = ∑_{r=1}^{k-1} χ(r) e^{2πir/k}` (25.15.6) is `gaussSum χ ZMod.stdAddChar` for `k ≥ 2`
-(`gaussSum_stdAddChar_eq_sum`).
+complex conjugate character `χ̄` is `star χ` (`= χ⁻¹`, `MulChar.star_eq_inv`), and DLMF's Gauss
+sum `G(χ) = ∑_{r=1}^{k-1} χ(r) e^{2πir/k}` (25.15.6) is `gaussSum χ ZMod.stdAddChar` for
+`k ≥ 2` (`gaussSum_stdAddChar_eq_sum`).
 
-**Implicit conditions.** For the modulus `k = 1` (the trivial character, which is primitive and
-principal) DLMF's finite sums `∑_{r=1}^{k-1}` are empty, so 25.15.3, 25.15.6 (hence 25.15.5) and
-the case `χ = χ₁` of 25.15.10 (`L(0, χ₁) = 0`; in fact `L(0, χ₁) = ζ(0) = -1/2` for `k = 1`) need
-`k ≥ 2`; 25.15.7 at `n = 0` likewise. The functional equation 25.15.5 is stated with Mathlib's Gauss
-sum, which makes it valid also for `k = 1`; it needs `s ≠ 0, -1, -2, …` (implicit: there `Γ(s)` has
-a pole and the right side is a limit).
+Implicit conditions: for the modulus `k = 1` (the trivial character, which is primitive and
+principal) DLMF's finite sums `∑_{r=1}^{k-1}` are empty, so 25.15.3, 25.15.6 (hence 25.15.5)
+and the case `χ = χ₁` of 25.15.10 (`L(0, χ₁) = 0`; in fact `L(0, χ₁) = ζ(0) = -1/2` for
+`k = 1`) need `k ≥ 2`; 25.15.7 at `n = 0` likewise. The functional equation 25.15.5 is stated
+with Mathlib's Gauss sum, which makes it valid also for `k = 1`; it needs `s ≠ 0, -1, -2, …`
+(implicit: there `Γ(s)` has a pole and the right side is a limit).
 
-Upstream pointers for 25.15.1, 25.15.2, 25.15.4, 25.15.8, 25.15.9 and the analyticity statements
-of §25.15(i) are in `DLMF.Zeta.MathlibCoverageB`.
+Upstream pointers for 25.15.1, 25.15.2, 25.15.4, 25.15.8, 25.15.9 and the analyticity
+statements of §25.15(i) are in `DLMF.Zeta.MathlibCoverageB`.
 -/
 
 @[expose] public section
@@ -46,12 +63,12 @@ variable {N : ℕ} [NeZero N]
 
 omit [NeZero N] in
 /-- Identity under the stated parameter and domain assumptions: `χ 0 = 0`. -/
-lemma z25b_map_zero {χ : DirichletCharacter ℂ N} (hN : N ≠ 1) : χ 0 = 0 := by
+private lemma dirichletCharacter_map_zero_of_ne_one {χ : DirichletCharacter ℂ N} (hN : N ≠ 1) : χ 0 = 0 := by
   have := ZMod.nontrivial_iff.mpr hN
   exact MulChar.map_zero χ
 
 /-- Reindexing a sum over `ZMod N` as a sum over `0 ≤ r < N`. -/
-lemma z25b_sum_zmod_eq_sum_range {M : Type*} [AddCommMonoid M] (f : ZMod N → M) :
+private lemma sum_zmod_eq_sum_range {M : Type*} [AddCommMonoid M] (f : ZMod N → M) :
     ∑ j : ZMod N, f j = ∑ r ∈ Finset.range N, f (r : ZMod N) := by
   refine Finset.sum_bij' (fun j _ => j.val) (fun r _ => (r : ZMod N)) ?_ ?_ ?_ ?_ ?_
   · intro j _; simpa using ZMod.val_lt j
@@ -85,18 +102,18 @@ theorem LFunction_eq_sum_hurwitzZeta (χ : DirichletCharacter ℂ N) (hN : N ≠
     LFunction χ s = (N : ℂ) ^ (-s) *
       ∑ r ∈ Finset.Ico 1 N, χ r * hurwitzZeta ((r / N : ℝ) : UnitAddCircle) s := by
   simp only [DirichletCharacter.LFunction, ZMod.LFunction]
-  rw [z25b_sum_zmod_eq_sum_range (fun j => χ j * hurwitzZeta (ZMod.toAddCircle j) s),
+  rw [sum_zmod_eq_sum_range (fun j => χ j * hurwitzZeta (ZMod.toAddCircle j) s),
     Finset.range_eq_Ico, Finset.sum_eq_sum_Ico_succ_bot (Nat.pos_of_ne_zero (NeZero.ne N))]
-  simp only [Nat.cast_zero, z25b_map_zero hN, zero_mul, zero_add, ZMod.toAddCircle_natCast]
+  simp only [Nat.cast_zero, dirichletCharacter_map_zero_of_ne_one hN, zero_mul, zero_add, ZMod.toAddCircle_natCast]
 
 /-- **The Gauss sum** (DLMF 25.15.6): for `k ≥ 2`, Mathlib's `gaussSum χ ZMod.stdAddChar` is
 `G(χ) = ∑_{r=1}^{k-1} χ(r) e^{2πir/k}`. -/
 @[dlmf 25.15.E6]
 theorem gaussSum_stdAddChar_eq_sum (χ : DirichletCharacter ℂ N) (hN : N ≠ 1) :
     gaussSum χ ZMod.stdAddChar = ∑ r ∈ Finset.Ico 1 N, χ r * cexp (2 * π * I * r / N) := by
-  rw [gaussSum, z25b_sum_zmod_eq_sum_range (fun j => χ j * ZMod.stdAddChar j), Finset.range_eq_Ico,
+  rw [gaussSum, sum_zmod_eq_sum_range (fun j => χ j * ZMod.stdAddChar j), Finset.range_eq_Ico,
     Finset.sum_eq_sum_Ico_succ_bot (Nat.pos_of_ne_zero (NeZero.ne N))]
-  simp only [Nat.cast_zero, z25b_map_zero hN, zero_mul, zero_add]
+  simp only [Nat.cast_zero, dirichletCharacter_map_zero_of_ne_one hN, zero_mul, zero_add]
   refine Finset.sum_congr rfl fun r _ => ?_
   have := ZMod.stdAddChar_coe (N := N) (r : ℤ)
   simp only [Int.cast_natCast] at this
@@ -112,7 +129,7 @@ theorem LFunction_one_sub_of_isPrimitive {χ : DirichletCharacter ℂ N} (hχ : 
     LFunction χ (1 - s) = (N : ℂ) ^ (s - 1) * Gamma s / (2 * π) ^ s *
       (cexp (-π * I * s / 2) + χ (-1) * cexp (π * I * s / 2)) * gaussSum χ ZMod.stdAddChar *
         LFunction (star χ) s := by
-  have hs' : (χ : ZMod N → ℂ) 0 = 0 ∨ s ≠ 1 := hN.imp_left z25b_map_zero
+  have hs' : (χ : ZMod N → ℂ) 0 = 0 ∨ s ≠ 1 := hN.imp_left dirichletCharacter_map_zero_of_ne_one
   have h := ZMod.LFunction_one_sub (χ : ZMod N → ℂ) hs hs'
   have hm1 : χ⁻¹ (-1) = χ (-1) := by
     rw [MulChar.inv_apply_eq_inv']
@@ -150,13 +167,13 @@ theorem LFunction_neg_two_mul_nat_eq_zero {χ : DirichletCharacter ℂ N} (hχ :
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp only [Nat.cast_zero, mul_zero, neg_zero]
     simp only [DirichletCharacter.LFunction]
-    rw [ZMod.LFunction_apply_zero_of_even hχ.to_fun, z25b_map_zero hN]
+    rw [ZMod.LFunction_apply_zero_of_even hχ.to_fun, dirichletCharacter_map_zero_of_ne_one hN]
     simp
   · have : NeZero n := ⟨hn.ne'⟩
     exact hχ.LFunction_neg_two_mul_nat n
 
 /-- The Gauss sum of a primitive character does not vanish (Fourier inversion on `ZMod N`). -/
-lemma q25b_gaussSum_ne_zero {χ : DirichletCharacter ℂ N} (hχ : χ.IsPrimitive) :
+private lemma gaussSum_stdAddChar_ne_zero_of_isPrimitive {χ : DirichletCharacter ℂ N} (hχ : χ.IsPrimitive) :
     gaussSum χ ZMod.stdAddChar ≠ 0 := by
   intro hG
   have hF : 𝓕 (χ : ZMod N → ℂ) = 0 := by
@@ -195,7 +212,7 @@ theorem eq_trivial_zero_of_LFunction_eq_zero {χ : DirichletCharacter ℂ N} (h�
             · exact Gamma_ne_zero_of_re_pos (by linarith) h
           · exact cpow_ne_zero_iff.mpr (Or.inl h2π) h
         · exact h
-      · exact absurd h (q25b_gaussSum_ne_zero hχ)
+      · exact absurd h (gaussSum_stdAddChar_ne_zero_of_isPrimitive hχ)
     · exact absurd h hL
   rcases χ.even_or_odd with he | ho
   · left
@@ -239,7 +256,7 @@ theorem eq_trivial_zero_of_LFunction_eq_zero {χ : DirichletCharacter ℂ N} (h�
     linear_combination -hwk + hw
 
 /-- `L(s̄, χ̄) = conj L(s, χ)` for a non-principal Dirichlet character. -/
-lemma r25b_LFunction_star_conj {χ : DirichletCharacter ℂ N} (hχ : χ ≠ 1) (s : ℂ) :
+private lemma LFunction_star_conj {χ : DirichletCharacter ℂ N} (hχ : χ ≠ 1) (s : ℂ) :
     LFunction (star χ) (conj s) = conj (LFunction χ s) := by
   have hχ' : star χ ≠ 1 := by
     rw [MulChar.star_eq_inv]; exact fun h => hχ (inv_eq_one.mp h)
@@ -278,7 +295,7 @@ theorem infinite_LFunction_zeros_criticalStrip {χ : DirichletCharacter ℂ N}
 `ρ ≠ 0` is a zero in the closed critical strip then so is `1 - ρ̄`. (Not necessarily symmetric
 about the real axis: `ρ̄` is a zero of `L(s, χ̄)`.) Correction: DLMF states the symmetry for all
 zeros in `0 ≤ ℜ s ≤ 1`, but for even `χ` the trivial zero `s = 0` lies in that strip while
-`L(1, χ) ≠ 0`; see `q25b_LFunction_one_sub_conj_counterexample`. -/
+`L(1, χ) ≠ 0`; see `LFunction_zero_eq_zero_and_LFunction_one_sub_conj_zero_ne_zero`. -/
 @[dlmf 25.15.ii]
 theorem LFunction_one_sub_conj_eq_zero {χ : DirichletCharacter ℂ N} (hχ : χ.IsPrimitive)
     (hN : N ≠ 1) {ρ : ℂ} (h0 : 0 ≤ ρ.re) (h1 : ρ.re ≤ 1) (hρ0 : ρ ≠ 0)
@@ -297,7 +314,7 @@ theorem LFunction_one_sub_conj_eq_zero {χ : DirichletCharacter ℂ N} (hχ : χ
     simp at hre him
     have hn : (n : ℝ) = 0 := by linarith [(n.cast_nonneg : (0 : ℝ) ≤ n)]
     exact hρ0 (Complex.ext (by simp; linarith) (by simpa using him))
-  rw [LFunction_one_sub_of_isPrimitive hχ hs (Or.inl hN), r25b_LFunction_star_conj hχ1, hρ,
+  rw [LFunction_one_sub_of_isPrimitive hχ hs (Or.inl hN), LFunction_star_conj hχ1, hρ,
     map_zero, mul_zero]
 
 /-- **Evidence that `LFunction_one_sub_conj_eq_zero` needs `ρ ≠ 0`** (DLMF's closed-strip
@@ -305,7 +322,7 @@ wording is too broad): for an even character
 `χ ≠ χ₁ (mod k)`, `k ≥ 2` (e.g. a primitive even character such as the quadratic character
 mod 5), `ρ = 0` is a zero with `0 ≤ Re ρ ≤ 1`, but `L(1 - ρ̄, χ) = L(1, χ) ≠ 0`. (The trivial zero
 at `s = 0` lies on the boundary of the closed critical strip; hence the hypothesis `ρ ≠ 0`.) -/
-lemma q25b_LFunction_one_sub_conj_counterexample {χ : DirichletCharacter ℂ N} (hχ : χ.Even)
+private lemma LFunction_zero_eq_zero_and_LFunction_one_sub_conj_zero_ne_zero {χ : DirichletCharacter ℂ N} (hχ : χ.Even)
     (hN : N ≠ 1) (h1 : χ ≠ 1) :
     LFunction χ 0 = 0 ∧ LFunction χ (1 - (starRingEnd ℂ) 0) ≠ 0 := by
   refine ⟨by simpa using LFunction_neg_two_mul_nat_eq_zero hχ hN 0, ?_⟩
@@ -321,9 +338,9 @@ theorem LFunction_zero_of_ne_one {χ : DirichletCharacter ℂ N} (hχ : χ ≠ 1
   have hN0 : (N : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (NeZero.ne N)
   have hsum : ∑ r ∈ Finset.Ico 1 N, χ r = 0 := by
     have h := MulChar.sum_eq_zero_of_ne_one hχ
-    rw [z25b_sum_zmod_eq_sum_range (fun j => χ j), Finset.range_eq_Ico,
+    rw [sum_zmod_eq_sum_range (fun j => χ j), Finset.range_eq_Ico,
       Finset.sum_eq_sum_Ico_succ_bot (Nat.pos_of_ne_zero (NeZero.ne N))] at h
-    simpa [z25b_map_zero hN] using h
+    simpa [dirichletCharacter_map_zero_of_ne_one hN] using h
   rw [LFunction_eq_sum_hurwitzZeta χ hN 0, neg_zero, cpow_zero, one_mul]
   have hterm : ∀ r ∈ Finset.Ico 1 N, χ r * hurwitzZeta ((r / N : ℝ) : UnitAddCircle) 0 =
       1 / 2 * χ r - 1 / N * ((r : ℂ) * χ r) := by
@@ -334,7 +351,7 @@ theorem LFunction_zero_of_ne_one {χ : DirichletCharacter ℂ N} (hχ : χ ≠ 1
       positivity
     have h2 : (r : ℝ) / N ≤ 1 := by
       rw [div_le_one (by positivity)]; exact_mod_cast hr.2.le
-    rw [r25b_hurwitzZeta_zero h1 h2]
+    rw [hurwitzZeta_zero_eq_one_half_sub h1 h2]
     push_cast
     ring
   rw [Finset.sum_congr rfl hterm, Finset.sum_sub_distrib, ← Finset.mul_sum, ← Finset.mul_sum,

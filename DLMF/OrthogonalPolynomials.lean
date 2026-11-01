@@ -45,17 +45,16 @@ public import DLMF.OrthogonalPolynomials.Multivariate
 public import DLMF.OrthogonalPolynomials.InequalityTools
 
 /-!
-# Orthogonal polynomials (AAR Chapters 5–7)
+# Orthogonal polynomials (DLMF Chapter 18, AAR Chapters 5–7)
 
 Mathlib already has Chebyshev polynomials `T,U,C,S` (including `T_n(cos θ) = cos(nθ)`,
 orthogonality of `T` on `[-1,1]` with weight `(1-x²)^{-1/2}`, Chebyshev–Gauss quadrature, and
 extrema), the probabilists' Hermite polynomials, and the shifted Legendre polynomials. The
-modules below record the remaining AAR Chapters 5–7 material: general orthogonal polynomial
-theory, the classical families (physicists' Hermite, Laguerre, Jacobi, Gegenbauer), and the
-Chapter 7 topics (connection coefficients, Turán, Apéry's theorem).
-
-The additional modules collect DLMF Chapter 18 statements, each recording its equation
-number in a `@[dlmf]` attribute.
+modules below contain general orthogonal polynomial theory, the classical families
+(physicists' Hermite, Laguerre, Jacobi, Gegenbauer), the topics of AAR Chapter 7 (connection
+coefficients, Turán, Apéry's theorem), and the DLMF Chapter 18 material: Hahn, Wilson and
+`q`-families, associated and other polynomials, orthogonal polynomials on the unit circle and
+in several variables, bounds, zeros, integrals and series.
 
 Two modules follow Temme, *Special Functions*, §§6.8–6.9: `Legendre` (bounds from Laplace's
 integral, mean-square optimality of Legendre expansions, Bessel's inequality and the

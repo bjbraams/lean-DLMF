@@ -13,21 +13,37 @@ public import Mathlib.Analysis.Calculus.MeanValue
 public import DLMFMathlib.Analysis.Asymptotics.PowerSums
 
 /-!
-# The Euler–Maclaurin formula and summation by parts (DLMF §2.10(i)–(ii))
+# The Euler–Maclaurin formula and summation by parts
 
-* `euler_maclaurin`: DLMF 2.10.1, proved from DLMFMathlib's `sum_range_succ_eq_integral_add`
-  (Euler–Maclaurin with periodic Bernoulli remainder) by a shift to the integer `a` and the
-  vanishing of the odd Bernoulli numbers.
-* `abel_plana`: the Abel–Plana formula 2.10.2.
-* The example `∑ j ln j` (2.10.3–2.10.6): the constant `C` is `ln A` with the project's
-  Glaisher–Kinkelin constant `DLMF.Gamma.glaisherKinkelin` (5.17.6); the two closed forms of
-  2.10.6 are proved from `DLMF.Gamma.glaisherKinkelin_eq_zeta_neg_one` (5.17.7), and the
-  leading behaviour `S(n) - (½n² ln n - ¼n² + ½n ln n + 1/12 ln n) → C` from
-  `DLMF.Gamma.BarnesAsymp.tendsto_hseq`.
-* The power sums 2.10.7 and the harmonic numbers 2.10.8, with the remainder bounds of
-  §2.10(i). The harmonic expansion and its signed first-neglected-term bound reuse
-  the digamma Binet remainder from `DLMF.Gamma.Asymptotics.Stirling`.
-* Summation by parts 2.10.9–2.10.10 and the oscillatory example 2.10.11–2.10.18.
+This file covers DLMF §2.10(i)–(ii): the Euler–Maclaurin and Abel–Plana formulas, the example
+`∑ j ln j`, the harmonic numbers, summation by parts and the oscillatory sums
+`S(α, β, n) = ∑_{j=1}^{n-1} e^{ijβ} j^α`.
+
+## Main results
+
+* `euler_maclaurin`: the Euler–Maclaurin formula (DLMF 2.10.1).
+* `abel_plana`: the Abel–Plana formula (DLMF 2.10.2).
+* `jLogJSum_eq`, `jLogJRemainder_bound`, `tendsto_jLogJSum_sub`: the expansion of
+  `∑_{j=1}^{n} j ln j` and its remainder (DLMF 2.10.3–2.10.5, §2.10(i)).
+* `log_glaisherKinkelin_eq`: the constant `C = ln A` of DLMF 2.10.4 (DLMF 2.10.6).
+* `harmonic_asymptotic`, `harmonic_remainder_bound`: the harmonic numbers (DLMF 2.10.8) with
+  the remainder bound of §2.10(i).
+* `sum_by_parts`: summation by parts (DLMF 2.10.9–2.10.10).
+* `norm_oscillatorySum_le`, `oscillatorySum_isBigO_trivial`, `partialSumFrom_exp`,
+  `oscillatorySum_eq`, `rpow_sub_rpow_succ`, `oscillatorySum_recursive`,
+  `oscillatorySum_isBigO`, `oscillatorySum_asymptotic`: the oscillatory example
+  (DLMF 2.10.12–2.10.18).
+
+## Implementation notes
+
+`euler_maclaurin` is derived from DLMFMathlib's `sum_range_succ_eq_integral_add`
+(Euler–Maclaurin with periodic Bernoulli remainder) by a shift to the integer `a` and the
+vanishing of the odd Bernoulli numbers. The constant `C` of 2.10.4 is `ln A` with the
+Glaisher–Kinkelin constant `DLMF.Gamma.glaisherKinkelin` (DLMF 5.17.6); the two closed forms of
+2.10.6 come from `DLMF.Gamma.glaisherKinkelin_eq_zeta_neg_one` (DLMF 5.17.7), and the leading
+behaviour of `S(n)` from `DLMF.Gamma.BarnesAsymp.tendsto_hseq`. The harmonic expansion and its
+signed first-neglected-term bound use the digamma Binet remainder from
+`DLMF.Gamma.Asymptotics.Stirling`. The power sums 2.10.7 are in `Sums/PowerSums`.
 
 Bernoulli numbers are Mathlib's `bernoulli` (`B₁ = -1/2`, as in DLMF §24.2); `B̃_n` is
 DLMFMathlib's `periodicBernoulli`; `ζ` is Mathlib's `riemannZeta` and `γ` is
@@ -45,7 +61,7 @@ namespace DLMF.AsymptoticApproximations
 
 /-- The odd-index Bernoulli terms of DLMFMathlib's Euler–Maclaurin sum vanish:
 `∑_{j=1}^{2m-1} (-1)^j B_{j+1}/(j+1)! c_j = -∑_{s=1}^{m} B_{2s}/(2s)! c_{2s-1}`. -/
-lemma g2b_bernoulli_sum_split (c : ℕ → ℝ) (m : ℕ) :
+private lemma sum_bernoulli_odd_eq_neg_sum_even (c : ℕ → ℝ) (m : ℕ) :
     ∑ j ∈ Ico 1 (2 * m), ((-1 : ℝ) ^ j * (bernoulli (j + 1) : ℝ) / (j + 1)!) * c j =
       -∑ s ∈ Ico 1 (m + 1), ((bernoulli (2 * s) : ℝ) / (2 * s)!) * c (2 * s - 1) := by
   induction m with
@@ -90,7 +106,7 @@ theorem euler_maclaurin {f : ℝ → ℝ} {m : ℕ} (hm : 1 ≤ m) (hf : ContDif
       (fun x => periodicBernoulli (2 * m) x * iteratedDeriv (2 * m) f x) (a : ℝ) (a := 0) (b := N)
     simp only [periodicBernoulli_add_intCast, zero_add] at this
     rw [this, add_comm]
-  rw [hper, g2b_bernoulli_sum_split (fun j => iteratedDeriv j f (N + a) - iteratedDeriv j f a),
+  rw [hper, sum_bernoulli_odd_eq_neg_sum_even (fun j => iteratedDeriv j f (N + a) - iteratedDeriv j f a),
     Finset.sum_Ico_succ_top (by omega : 1 ≤ m)] at h
   have hR : Continuous (iteratedDeriv (2 * m) f) := hf.continuous_iteratedDeriv _ le_rfl
   have hRint : IntervalIntegrable (fun x => periodicBernoulli (2 * m) x *
@@ -165,7 +181,7 @@ with `C = ln A`, `A` the Glaisher–Kinkelin constant. -/
 theorem jLogJSum_eq {m n : ℕ} (hm : 2 ≤ m) (hn : 1 ≤ n) :
     jLogJSum n = (n : ℝ) ^ 2 / 2 * Real.log n - (n : ℝ) ^ 2 / 4 + n / 2 * Real.log n +
       Real.log n / 12 + Real.log DLMF.Gamma.glaisherKinkelin +
-      ∑ s ∈ Ico 2 m, g2b_jLogJTerm s n + jLogJRemainder m n := by
+      ∑ s ∈ Ico 2 m, sumMulLogTerm s n + jLogJRemainder m n := by
   sorry
 
 /-- DLMF §2.10(i) (remainder of 2.10.4): since `B̃_{2m}(x) - B_{2m}` has constant sign
@@ -173,7 +189,7 @@ theorem jLogJSum_eq {m n : ℕ} (hm : 2 ≤ m) (hn : 1 ≤ n) :
 by it (`m ≥ 2`, `n ≥ 1`). -/
 @[dlmf 2.10.i]
 theorem jLogJRemainder_bound {m n : ℕ} (hm : 2 ≤ m) (hn : 1 ≤ n) :
-    0 ≤ jLogJRemainder m n * g2b_jLogJTerm m n ∧ |jLogJRemainder m n| ≤ |g2b_jLogJTerm m n| := by
+    0 ≤ jLogJRemainder m n * sumMulLogTerm m n ∧ |jLogJRemainder m n| ≤ |sumMulLogTerm m n| := by
   sorry
 
 /-- DLMF 2.10.4 to leading order (the case `m = 2`, with `R_2(n) → 0`):
@@ -227,23 +243,23 @@ private theorem harmonic_remainder_eq_integral (m n : ℕ) (hn : 1 ≤ n) :
 
 /-- Later inverse-power scales are bounded by earlier ones on the positive integers. -/
 private theorem invScale_isBigO_of_le {N M : ℕ} (hNM : N ≤ M) :
-    g2b_invScale M =O[atTop] g2b_invScale N := by
+    invPowScaleReal M =O[atTop] invPowScaleReal N := by
   refine IsBigO.of_bound 1 ?_
   filter_upwards [eventually_ge_atTop (1 : ℕ)] with n hn
   have hn' : (1 : ℝ) ≤ n := by exact_mod_cast hn
-  simp only [g2b_invScale, Real.norm_eq_abs, abs_inv, abs_pow,
+  simp only [invPowScaleReal, Real.norm_eq_abs, abs_inv, abs_pow,
     abs_of_nonneg (Nat.cast_nonneg n : (0 : ℝ) ≤ n), one_mul]
   exact inv_anti₀ (by positivity) (pow_le_pow_right₀ hn' hNM)
 
 /-- Pairing consecutive Bernoulli coefficients recovers the customary harmonic
 polynomial with only even powers after the first term. -/
 private theorem sum_harmonicCoeff_even (m n : ℕ) (hm : 1 ≤ m) :
-    ∑ s ∈ range (2 * m), g2b_invScale s n * g2b_harmonicCoeff s =
+    ∑ s ∈ range (2 * m), invPowScaleReal s n * harmonicAsymptoticCoeff s =
       -1 / (2 * n) - ∑ k ∈ Ico 1 m, (bernoulli (2 * k) : ℝ) / (2 * k) /
         (n : ℝ) ^ (2 * k) := by
   induction m, hm using Nat.le_induction with
   | base =>
-    simp [g2b_invScale, g2b_harmonicCoeff, sum_range_succ]
+    simp [invPowScaleReal, harmonicAsymptoticCoeff, sum_range_succ]
     ring
   | succ m hm ih =>
     have hodd : (bernoulli (2 * m + 1) : ℝ) = 0 := by
@@ -251,7 +267,7 @@ private theorem sum_harmonicCoeff_even (m n : ℕ) (hm : 1 ≤ m) :
       simp
     rw [show 2 * (m + 1) = (2 * m + 1) + 1 by omega, sum_range_succ,
       sum_range_succ, ih, sum_Ico_succ_top (by omega : 1 ≤ m)]
-    simp only [g2b_invScale, g2b_harmonicCoeff, show 2 * m ≠ 0 by omega,
+    simp only [invPowScaleReal, harmonicAsymptoticCoeff, show 2 * m ≠ 0 by omega,
       show 2 * m ≠ 1 by omega, show 2 * m + 1 ≠ 0 by omega,
       show 2 * m + 1 ≠ 1 by omega, ite_false, hodd, neg_zero, zero_div, mul_zero, add_zero]
     push_cast
@@ -318,12 +334,12 @@ theorem harmonic_remainder_bound {m n : ℕ} (hm : 1 ≤ m) (hn : 1 ≤ n) :
 `∑_{j=1}^{n-1} 1/j ∼ ln n + γ - 1/(2n) - ∑_{s ≥ 1} B_{2s}/(2s) n^{-2s}`. -/
 @[dlmf 2.10.E8]
 theorem harmonic_asymptotic :
-    HasAsymptoticExpansion atTop g2b_invScale g2b_harmonicCoeff
+    HasAsymptoticExpansion atTop invPowScaleReal harmonicAsymptoticCoeff
       (fun n : ℕ => (harmonic (n - 1) : ℝ) - Real.log n - Real.eulerMascheroniConstant) := by
   have hR (m : ℕ) (hm : 1 ≤ m) :
       (fun n : ℕ => (harmonic (n - 1) : ℝ) - Real.log n - Real.eulerMascheroniConstant -
-        ∑ s ∈ range (2 * m), g2b_invScale s n * g2b_harmonicCoeff s) =O[atTop]
-        g2b_invScale (2 * m) := by
+        ∑ s ∈ range (2 * m), invPowScaleReal s n * harmonicAsymptoticCoeff s) =O[atTop]
+        invPowScaleReal (2 * m) := by
     refine IsBigO.of_bound |(bernoulli (2 * m) : ℝ) / (2 * m)| ?_
     filter_upwards [eventually_ge_atTop (1 : ℕ)] with n hn
     have hb := (harmonic_remainder_bound hm hn).2
@@ -335,22 +351,22 @@ theorem harmonic_asymptotic :
           ring
       _ ≤ |-(bernoulli (2 * m) : ℝ) / (2 * m) / (n : ℝ) ^ (2 * m)| := hb
       _ = _ := by
-          simp only [g2b_invScale, Real.norm_eq_abs, abs_inv, abs_pow,
+          simp only [invPowScaleReal, Real.norm_eq_abs, abs_inv, abs_pow,
             abs_div, abs_neg, abs_of_nonneg (Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
           ring
   intro N
   let M := 2 * (N + 1)
   have hNM : N ≤ M := by dsimp [M]; omega
   have hr := (hR (N + 1) (by omega)).trans (invScale_isBigO_of_le hNM)
-  have htail : (fun n => ∑ s ∈ Ico N M, g2b_invScale s n * g2b_harmonicCoeff s) =O[atTop]
-      g2b_invScale N := by
-    have h := IsBigO.sum (s := Ico N M) (A := fun s n => g2b_invScale s n * g2b_harmonicCoeff s)
+  have htail : (fun n => ∑ s ∈ Ico N M, invPowScaleReal s n * harmonicAsymptoticCoeff s) =O[atTop]
+      invPowScaleReal N := by
+    have h := IsBigO.sum (s := Ico N M) (A := fun s n => invPowScaleReal s n * harmonicAsymptoticCoeff s)
       fun s hs => ((invScale_isBigO_of_le (mem_Ico.mp hs).1).const_mul_left
-        (g2b_harmonicCoeff s)).congr_left (fun n => mul_comm _ _)
+        (harmonicAsymptoticCoeff s)).congr_left (fun n => mul_comm _ _)
     exact h.congr_left fun n => by simp only [Finset.sum_apply]
   simp only [smul_eq_mul]
   refine (hr.add htail).congr_left fun n => ?_
-  have hsum := sum_range_add_sum_Ico (fun s => g2b_invScale s n * g2b_harmonicCoeff s) hNM
+  have hsum := sum_range_add_sum_Ico (fun s => invPowScaleReal s n * harmonicAsymptoticCoeff s) hNM
   dsimp only [M] at hsum ⊢
   rw [← hsum]
   ring

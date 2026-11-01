@@ -10,4 +10,9 @@ public import DLMF.GeneralizedHypergeometric.Appell.Basic.EulerBranches
 
 /-!
 # Definitions of Appell and Horn functions
+
+This module collects the definitions of the Appell and Horn double series, their convergence
+domains and differential operators (`DLMF.GeneralizedHypergeometric.Appell.Basic.Series`) and the
+Euler-integral branches of the Appell functions
+(`DLMF.GeneralizedHypergeometric.Appell.Basic.EulerBranches`).
 -/

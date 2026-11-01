@@ -9,11 +9,18 @@ public import DLMF.Confluent.Basic.IncompleteGamma
 public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
 
 /-!
-# Normalized incomplete Gamma functions: definitions
+# Normalized incomplete Gamma functions: definitions (DLMF §8.2)
 
-The totalized quotients `P`, `Q` and Tricomi's entire regularization `γ*` retain their
-original definitions. Recurrences, continuation and integral properties are proved in
-`DLMF.Statistical.IncompleteGamma`.
+## Main definitions
+
+* `normIncGammaP`, `normIncGammaQ`: the regularized incomplete Gamma functions
+  `P(a,z) = γ(a,z)/Γ(a)` and `Q(a,z) = Γ(a,z)/Γ(a)` (DLMF 8.2.4).
+* `scIncGamma`: Tricomi's entire incomplete Gamma function `γ*(a,z) = e^{-z} 𝐌(1, a+1, z)`.
+
+## Implementation notes
+
+`P` and `Q` are totalized quotients. Recurrences, continuation and integral properties are
+proved in `DLMF.Statistical.IncompleteGamma`.
 -/
 
 @[expose] public noncomputable section

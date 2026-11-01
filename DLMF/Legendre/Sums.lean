@@ -11,10 +11,34 @@ public import DLMF.Legendre.QAdditionTools
 /-!
 # Legendre addition theorems and zonal harmonic series
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+Addition theorems, Christoffel–Darboux formulas and series of zonal harmonics for Legendre and
+Ferrers functions (DLMF §14.18), Heine's formula and the complex addition theorem (DLMF §14.28).
+
+## Main definitions
+
+* `legendreEllipseRadius`: the confocal ellipse coordinate (foci `±1`), with value two on the
+  focal segment.
+
+## Main results
+
+* `ferrersP_addition`, `ferrersP_nat_addition`, `ferrersQ_addition`: addition theorems for
+  `𝖯_ν`, `P_n` and `𝖰_ν` (DLMF 14.18.1–14.18.3).
+* `associatedP_addition`, `associatedQ_addition`: addition theorems for `P_ν` and `Q_ν` on
+  `(1,∞)` (DLMF 14.18.4, 14.18.5).
+* `legendre_christoffel_6`, `legendre_christoffel_7`: Christoffel–Darboux formulas
+  (DLMF 14.18.6, 14.18.7).
+* `ferrersP_zonal_series`, `ferrersP_dougall_series`: expansions of `𝖯_ν(-x)` and of
+  `𝖯^{-μ}_ν` in Ferrers functions of integer degree (DLMF 14.18.8, 14.18.9).
+* `legendre_heine_series`, `legendre_heine_uniform`: Heine's formula
+  `∑ (2n+1) Q_n(z₁) P_n(z₂) = 1/(z₁ - z₂)` and its uniform convergence (DLMF 14.28.2).
+* `associatedP_complex_addition`: the addition theorem for complex arguments (DLMF 14.28.1).
+
+## Implementation notes
+
+The series are stated with `HasSum` (or as limits of partial sums). In
+`associatedP_addition`, at coincident arguments with `φ = 0` the value of the order-zero `P` at
+`1` is its regular extension. In `associatedP_complex_addition`, the DLMF condition that `Z` is
+off the cut is automatic under the hypotheses `Re z₁, Re z₂ > 0`.
 -/
 
 @[expose] public noncomputable section
@@ -165,7 +189,7 @@ Q_n(y) - P_n(x) Q_{n+1}(y)) - 1`. -/
 theorem legendre_christoffel_7 (n : ℕ) {x y : ℂ} (hx : x-1 ∈ slitPlane) (hy : y-1 ∈ slitPlane) :
     (x-y)*(∑ k ∈ Finset.range (n+1), (2*k+1:ℂ)*associatedP k 0 x*associatedQ k 0 y)=(n+1:ℂ)*(associatedP (n+1) 0 x*associatedQ n 0 y-associatedP n 0 x*associatedQ (n+1) 0 y)-1 := by
   have hx' := one_add_mem_slitPlane_of_sub_one hx
-  simp only [associatedP_zero_order _ hx, associatedQ_zero_order _ hy]
+  simp only [associatedP_zero_order _ hx, associatedQ_zero_order _]
   have hP0 : legendreP 0 x = 1 := by
     have := legendreP_nat 0 hx'; simpa [DLMF.OrthogonalPolynomials.legendrePolyP_zero] using this
   have hP1 : legendreP 1 x = x := by
@@ -657,7 +681,7 @@ private lemma heine_tail {z₁ z₂ w₁ w₂ : ℂ} (hz₁ : z₁ - 1 ∈ slitP
       DLMF.OrthogonalPolynomials.legendrePolyP k z₂) = ∑ k ∈ Finset.range (n + 1),
         (2 * k + 1 : ℂ) * DLMF.OrthogonalPolynomials.legendrePolyP k z₂ * legendreQ k z₁ := by
     refine Finset.sum_congr rfl fun k _ => ?_
-    rw [associatedQ_zero_order _ hz₁]; ring
+    rw [associatedQ_zero_order _]; ring
   rw [hsum]
   have hC := heine_christoffel n (z₂ := z₂) hz₁
   set D := DLMF.OrthogonalPolynomials.legendrePolyP (n + 1) z₂ * legendreQ n z₁ -
@@ -764,7 +788,7 @@ theorem legendre_heine_series {z₁ z₂ : ℂ} (hz₁ : z₁-1 ∈ slitPlane) (
         (by rwa [Real.norm_eq_abs, abs_of_nonneg hρ0])).mul_left (2 * K)).add
         ((summable_geometric_of_lt_one hρ0 hρ1).mul_left K)
     refine Summable.of_norm_bounded hg fun n => ?_
-    rw [associatedQ_zero_order _ hz₁, norm_mul, norm_mul]
+    rw [associatedQ_zero_order _, norm_mul, norm_mul]
     have hQ := heine_norm_legendreQ_le hz₁ hw₁ hm₁ n
     have hP := heine_norm_legendrePolyP_le hw₂ hm₂ n
     have h2n : ‖(2 * n + 1 : ℂ)‖ = 2 * n + 1 := by
@@ -855,10 +879,10 @@ theorem legendre_heine_uniform {R₁ R₂ : ℝ} (hR₂ : 2 < R₂) (hR : R₂ <
     _ = _ := by ring
 
 /-- DLMF 14.28.1: for `Re z₁, Re z₂ > 0` off the cut, real `φ`, and `Z = z₁z₂ -
-(z₁²-1)^{1/2}(z₂²-1)^{1/2} cos φ` off the cut, `P_ν(Z) = P_ν(z₁) P_ν(z₂) + 2 Σ_{m≥1} (-1)^m
+(z₁²-1)^{1/2}(z₂²-1)^{1/2} cos φ` (DLMF's condition that `Z` is off the cut is automatic), `P_ν(Z) = P_ν(z₁) P_ν(z₂) + 2 Σ_{m≥1} (-1)^m
 P^m_ν(z₁) P^m_ν(z₂) cos(mφ)/(ν-m+1)_{2m}`, as a convergent series. -/
 @[dlmf 14.28.E1]
-theorem associatedP_complex_addition (ν : ℂ) {z₁ z₂ : ℂ} (h1 : 0 < z₁.re) (h2 : 0 < z₂.re) (hz1 : z₁-1 ∈ slitPlane) (hz2 : z₂-1 ∈ slitPlane) (phi : ℝ) (harg : z₁*z₂-exp ((log (z₁-1)+log (z₁+1))/2)*exp ((log (z₂-1)+log (z₂+1))/2)*Real.cos phi-1 ∈ slitPlane) :
+theorem associatedP_complex_addition (ν : ℂ) {z₁ z₂ : ℂ} (h1 : 0 < z₁.re) (h2 : 0 < z₂.re) (hz1 : z₁-1 ∈ slitPlane) (hz2 : z₂-1 ∈ slitPlane) (phi : ℝ) :
     HasSum (fun j : ℕ => let m:=j+1; 2*(-1)^m*1/poch (ν-m+1) (2*m)*associatedP ν m z₁*associatedP ν m z₂*Real.cos (m*phi)) (associatedP ν 0 (z₁*z₂-exp ((log (z₁-1)+log (z₁+1))/2)*exp ((log (z₂-1)+log (z₂+1))/2)*Real.cos phi)-associatedP ν 0 z₁*associatedP ν 0 z₂) := by
   -- The combined argument avoids `(-∞, -1]` for every angle, so 14.18.4 continues analytically in
   -- `z₁` and `z₂`; the hypothesis `harg` is not needed.

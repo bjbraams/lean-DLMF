@@ -8,27 +8,36 @@ module
 public import DLMF.Confluent.Asymptotics
 
 /-!
-# Decay of Kummer's function on the negative real axis (DLMF 13.2.23, 13.7.2)
+# Decay of Kummer's function on the negative real axis
 
 On the negative real axis the regularized Kummer function decays algebraically:
 `𝐌(a,b,-t) ~ ∑ₛ (a)ₛ (a-b+1)ₛ / (s! Γ(b-a)) · t^{-a-s}` as `t → +∞`, for all complex `a, b`.
-This is the ray `ph z = π` of DLMF 13.7.2 (where the exponentially small companion series is
-dropped) and its leading term is DLMF 13.2.23 on that ray. The proof is Kummer's transformation
-13.2.39, `𝐌(a,b,-t) = e^{-t} 𝐌(b-a,b,t)`, combined with the positive-axis expansion 13.7.1
-(`hasAsymptoticExpansion_regularizedConfluent`).
+This is the ray `ph z = π` of DLMF 13.7.2, where the exponentially small companion series is
+dropped, and its leading term is DLMF 13.2.23 on that ray.
 
-Consequences proved here:
+## Main results
 
-* `isBigO_regularizedHGFun_neg`: `𝐌(a,b,-t) = O(t^{-Re a})`;
-* `exists_norm_regularizedHGFun_neg_le`: `‖𝐌(a,b,-t)‖ ≤ C (1+t)^{-Re a}` for all `t ≥ 0`;
+* `hasAsymptoticExpansion_regularizedHGFun_neg`: the expansion of `𝐌` on the negative real axis
+  (DLMF 13.7.2).
+* `tendsto_cpow_mul_regularizedHGFun_neg`: the leading behaviour `t^a 𝐌(a,b,-t) → 1/Γ(b-a)`
+  (DLMF 13.2.23).
+* `isBigO_regularizedHGFun_neg`: `𝐌(a,b,-t) = O(t^{-Re a})`.
+* `exists_norm_regularizedHGFun_neg_le`: `‖𝐌(a,b,-t)‖ ≤ C (1+t)^{-Re a}` for all `t ≥ 0`.
 * `exists_eventually_norm_regularizedHGFun_neg_le`: the same bound, with exponent loss `ε > 0`,
-  locally uniformly in both parameters. The base case is Euler's integral 13.4.1 in its
-  convergence region, compared with a fixed real-parameter Euler integral; the bound spreads
-  to all parameters through the contiguous relations 13.3.4 and 13.3.20 (`n = 1`), which keep
-  the decay exponent.
+  locally uniformly in both parameters.
+* `integrableOn_cpow_mul_regularizedHGFun_neg_mul`: integrability of `t^{c-1} 𝐌(a,b,-t) h(t)`
+  on `(0,∞)` for suitably decaying `h`.
 
-The locally uniform bound is what holomorphy of parametric integrals of `𝐌(a,b,-t)` in the
-parameters requires.
+## Implementation notes
+
+The expansion follows from Kummer's transformation 13.2.39, `𝐌(a,b,-t) = e^{-t} 𝐌(b-a,b,t)`,
+and the positive-axis expansion 13.7.1 (`hasAsymptoticExpansion_regularizedConfluent`).
+
+For the locally uniform bound the base case is Euler's integral 13.4.1 in its convergence
+region, compared with a fixed real-parameter Euler integral; the bound spreads to all
+parameters through the contiguous relations 13.3.4 and 13.3.20 (`n = 1`), which keep the decay
+exponent. The locally uniform bound is what holomorphy of parametric integrals of `𝐌(a,b,-t)`
+in the parameters requires.
 -/
 
 @[expose] public section

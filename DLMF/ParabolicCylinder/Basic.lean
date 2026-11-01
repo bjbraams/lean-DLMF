@@ -10,4 +10,8 @@ public import DLMF.ParabolicCylinder.Basic.EquationAndPhaseData
 
 /-!
 # Definitions of parabolic cylinder functions and their equations
+
+This file collects the foundational definitions of the parabolic cylinder functions
+(`DLMF.ParabolicCylinder.Basic.Functions`) and of the cylinder equations, amplitudes and phases
+(`DLMF.ParabolicCylinder.Basic.EquationAndPhaseData`).
 -/

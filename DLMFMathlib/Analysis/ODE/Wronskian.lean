@@ -10,10 +10,18 @@ public import Mathlib.Analysis.Calculus.Deriv.Basic
 /-!
 # Wronskians of two functions
 
-`ODE.wronskian f g` is `f g' - g f'`. The scalar field and the normed-ring target
+`ODE.wronskian f g` is `f g' - g f'` (DLMF 1.13.4). The scalar field and the normed-ring target
 are independent, so real and complex functions and complex-valued functions of a real
-variable share the same definition. The derivatives are totalized as in Mathlib;
-results about solutions of differential equations assert differentiability separately.
+variable share the same definition.
+
+## Main definitions
+
+* `wronskian`: the Wronskian `f g' - g f'`.
+
+## Implementation notes
+
+The derivatives are totalized as in Mathlib; results about solutions of differential
+equations assert differentiability separately.
 -/
 
 @[expose] public noncomputable section

@@ -8,12 +8,36 @@ module
 public import DLMF.Elementary.LambertW.BranchesAndCalculus
 
 /-!
-# Series and asymptotic expansions of Lambert W
+# Series, asymptotic expansions and integrals of Lambert W
 
-Local inverse-series formulas and expansions near the distinguished Lambert W branch points.
+This file proves the Maclaurin and power series of the Lambert W function, the expansions at the
+branch point `-1/e`, the large-argument and small-argument asymptotic expansions, antiderivatives
+and integral representations (DLMF §4.13).
 
-Source references and common attribution are retained in
-`DLMF.Elementary.LambertW`.
+## Main definitions
+
+* `powMulExpTaylorCoeff`: the truncated Taylor coefficients `K_j`.
+
+## Main results
+
+* `lambertW_hasSum`: the Maclaurin series with its exact disk of convergence (DLMF 4.13.5).
+* `lambertW_power_hasSum`, `lambertW_reciprocal_hasSum`, `lambertW_square_hasSum`: series for
+  powers of `W` (DLMF 4.13.5_1–4.13.5_3).
+* `lambertC_hasSum`, `lambertC_real_branches`: the branch-point expansion (DLMF 4.13.6).
+* `lambertC_initial`, `lambertC_recurrence`, `lambertC_stirling`: its coefficients
+  (DLMF 4.13.7–4.13.9).
+* `lambertW_puiseux_hasSum`, `lambertW_minus_one_puiseux_hasSum`,
+  `lambertW_one_lower_puiseux_hasSum`: Puiseux series (DLMF 4.13.9_1).
+* `lambertD_initial`, `lambertD_recurrence`: the Puiseux coefficients (DLMF 4.13.9_2).
+* `lambertW_asymptotic`, `lambertW_asymptotic_converges`, `lambertW_asymptotic_real_converges`:
+  the large-argument expansion (DLMF 4.13.10).
+* `lambertW_lower_asymptotic`: the real lower branches at zero (DLMF 4.13.11).
+* `lambertW_primitive`, `lambertW_div_primitive`, `sin_lambertW_primitive`: antiderivatives
+  (DLMF 4.13.12–4.13.14).
+* `lambertW_integral_rational`, `lambertW_integral_log`: integral representations on the
+  principal slit domain (DLMF 4.13.15–4.13.16).
+* `lambertW_other_norm_tendsto_zero`, `lambertW_other_logarithmic_growth`: the logarithmic
+  singularity of the nonprincipal branches at zero.
 -/
 
 @[expose] public section
@@ -26,12 +50,12 @@ noncomputable section
 
 namespace DLMF.Elementary
 
-section lwR4Series
+section LambertSeries
 open Metric
 open scoped Nat
 
 /-- Near the origin the principal branch is small. -/
-lemma lwR4_W0_small : ∃ δ > 0, ∀ z : ℂ, ‖z‖ < δ → ‖lambertW 0 z‖ < 1 / 2 := by
+private lemma exists_norm_lambertW_zero_lt_half : ∃ δ > 0, ∀ z : ℂ, ‖z‖ < δ → ‖lambertW 0 z‖ < 1 / 2 := by
   have h0 : (0 : ℂ) ∈ lambertPrincipalDomain := by
     left; simp [Real.exp_pos]
   have hc := (lambertW_principal_analytic 0 h0).continuousAt
@@ -43,7 +67,7 @@ lemma lwR4_W0_small : ∃ δ > 0, ∀ z : ℂ, ‖z‖ < δ → ‖lambertW 0 z�
 
 /-- The fixed-point equation `t = z e^{-t}` has at most one root in the unit disc
 when `‖z‖ e ≤ 1/2`. -/
-lemma lwR4_fixed_unique {z t w : ℂ} (hz : ‖z‖ * Real.exp 1 ≤ 1 / 2)
+private lemma eq_of_eq_mul_exp_neg_of_mem_closedBall {z t w : ℂ} (hz : ‖z‖ * Real.exp 1 ≤ 1 / 2)
     (ht : t ∈ closedBall (0 : ℂ) 1) (hw : w ∈ closedBall (0 : ℂ) 1)
     (h1 : t = z * Complex.exp (-t)) (h2 : w = z * Complex.exp (-w)) : t = w := by
   have hlip : ‖Complex.exp (-t) - Complex.exp (-w)‖ ≤ Real.exp 1 * ‖t - w‖ := by
@@ -66,12 +90,12 @@ lemma lwR4_fixed_unique {z t w : ℂ} (hz : ‖z‖ * Real.exp 1 ≤ 1 / 2)
 
 /-- Lagrange–Bürmann for the principal Lambert branch near the origin:
 `F(W(z)) / (1 + W(z)) = ∑ zⁿ [tⁿ] (F(t) e^{-nt})`. -/
-lemma lwR4_LB {F : ℂ → ℂ} (hF : Differentiable ℂ F) :
+private lemma hasSum_lagrangeBurmann_lambertW_zero {F : ℂ → ℂ} (hF : Differentiable ℂ F) :
     ∃ δ > 0, ∀ z : ℂ, ‖z‖ < δ →
       HasSum (fun n : ℕ => z ^ n *
         (iteratedDeriv n (fun t => F t * Complex.exp (-t) ^ n) 0 / n.factorial))
         (F (lambertW 0 z) / (1 + lambertW 0 z)) := by
-  obtain ⟨δ₁, hδ₁, hsmall⟩ := lwR4_W0_small
+  obtain ⟨δ₁, hδ₁, hsmall⟩ := exists_norm_lambertW_zero_lt_half
   refine ⟨min δ₁ (Real.exp (-1) / 2), lt_min hδ₁ (by positivity), fun z hz => ?_⟩
   set w := lambertW 0 z with hwdef
   have hw : ‖w‖ < 1 / 2 := hsmall z (lt_of_lt_of_le hz (min_le_left _ _))
@@ -108,7 +132,7 @@ lemma lwR4_LB {F : ℂ → ℂ} (hF : Differentiable ℂ F) :
       have hs := sub_smul_dslope h w t
       rw [show dslope h w t = g t from rfl, h0, smul_zero, hhw, sub_zero] at hs
       apply htw
-      refine lwR4_fixed_unique hze ht (ball_subset_closedBall hwball) ?_ hwfix
+      refine eq_of_eq_mul_exp_neg_of_mem_closedBall hze ht (ball_subset_closedBall hwball) ?_ hwfix
       simp only [hh] at hs; linear_combination -hs
   have hfac : ∀ t ∈ sphere (0 : ℂ) 1, t - z * Complex.exp (-t) = (t - w) * g t := by
     intro t _
@@ -132,7 +156,7 @@ lemma lwR4_LB {F : ℂ → ℂ} (hF : Differentiable ℂ F) :
   exact this
 
 /-- Taylor coefficients of `t^j e^{ct}` at the origin. -/
-lemma lwR4_iter_coeff (j n : ℕ) (c : ℂ) :
+private lemma iteratedDeriv_pow_mul_exp_zero (j n : ℕ) (c : ℂ) :
     iteratedDeriv n (fun t : ℂ => t ^ j * Complex.exp (c * t)) 0 =
       if j ≤ n then (n.choose j * j.factorial : ℂ) * c ^ (n - j) else 0 := by
   rw [iteratedDeriv_fun_mul (by fun_prop) (by fun_prop)]
@@ -150,12 +174,12 @@ lemma lwR4_iter_coeff (j n : ℕ) (c : ℂ) :
     simp [this]
 
 /-- The truncated Taylor coefficient `K_j`. -/
-def lwR4_K (n j : ℕ) (c : ℂ) : ℂ := if j ≤ n then (n.choose j * j.factorial : ℂ) * c ^ (n - j) else 0
+def powMulExpTaylorCoeff (n j : ℕ) (c : ℂ) : ℂ := if j ≤ n then (n.choose j * j.factorial : ℂ) * c ^ (n - j) else 0
 
 /-- Taylor coefficients of a cubic polynomial times `e^{ct}`. -/
-lemma lwR4_iter_cubic (α β γ δ c : ℂ) (n : ℕ) :
+private lemma iteratedDeriv_cubic_mul_exp_zero (α β γ δ c : ℂ) (n : ℕ) :
     iteratedDeriv n (fun t : ℂ => (α + β * t + γ * t ^ 2 + δ * t ^ 3) * Complex.exp (c * t)) 0 =
-      α * lwR4_K n 0 c + β * lwR4_K n 1 c + γ * lwR4_K n 2 c + δ * lwR4_K n 3 c := by
+      α * powMulExpTaylorCoeff n 0 c + β * powMulExpTaylorCoeff n 1 c + γ * powMulExpTaylorCoeff n 2 c + δ * powMulExpTaylorCoeff n 3 c := by
   have hfun : (fun t : ℂ => (α + β * t + γ * t ^ 2 + δ * t ^ 3) * Complex.exp (c * t)) =
       fun t => ((α * (t ^ 0 * Complex.exp (c * t)) + β * (t ^ 1 * Complex.exp (c * t))) +
         γ * (t ^ 2 * Complex.exp (c * t))) + δ * (t ^ 3 * Complex.exp (c * t)) := by
@@ -163,10 +187,10 @@ lemma lwR4_iter_cubic (α β γ δ c : ℂ) (n : ℕ) :
   rw [hfun, iteratedDeriv_fun_add (by fun_prop) (by fun_prop),
     iteratedDeriv_fun_add (by fun_prop) (by fun_prop),
     iteratedDeriv_fun_add (by fun_prop) (by fun_prop)]
-  simp only [iteratedDeriv_const_mul_field, lwR4_iter_coeff, lwR4_K]
+  simp only [iteratedDeriv_const_mul_field, iteratedDeriv_pow_mul_exp_zero, powMulExpTaylorCoeff]
 
 /-- Rewriting `F(t) e^{-nt}` with `F(t) = q(t) e^{-at}`. -/
-lemma lwR4_fun_eq (α β γ δ a : ℂ) (n : ℕ) :
+private lemma cubic_mul_exp_mul_exp_pow_eq (α β γ δ a : ℂ) (n : ℕ) :
     (fun t : ℂ => ((α + β * t + γ * t ^ 2 + δ * t ^ 3) * Complex.exp (-a * t)) *
       Complex.exp (-t) ^ n) =
     fun t => (α + β * t + γ * t ^ 2 + δ * t ^ 3) * Complex.exp (-(a + n) * t) := by
@@ -175,7 +199,7 @@ lemma lwR4_fun_eq (α β γ δ a : ℂ) (n : ℕ) :
   congr 2; ring
 
 /-- The open disc of radius `1/e` lies in the principal domain. -/
-lemma lwR4_ball_sub : ball (0 : ℂ) (Real.exp (-1)) ⊆ lambertPrincipalDomain := by
+private lemma ball_exp_neg_one_subset_lambertPrincipalDomain : ball (0 : ℂ) (Real.exp (-1)) ⊆ lambertPrincipalDomain := by
   intro z hz
   rw [Metric.mem_ball, dist_zero_right] at hz
   left
@@ -184,34 +208,34 @@ lemma lwR4_ball_sub : ball (0 : ℂ) (Real.exp (-1)) ⊆ lambertPrincipalDomain 
   linarith
 
 /-- The principal branch is differentiable on the disc of radius `1/e`. -/
-lemma lwR4_diffOn_ball : DifferentiableOn ℂ (lambertW 0) (Metric.ball 0 (Real.exp (-1))) :=
-  fun z hz => (lambertW_principal_analytic z (lwR4_ball_sub hz)).differentiableAt.differentiableWithinAt
+private lemma differentiableOn_lambertW_zero_ball : DifferentiableOn ℂ (lambertW 0) (Metric.ball 0 (Real.exp (-1))) :=
+  fun z hz => (lambertW_principal_analytic z (ball_exp_neg_one_subset_lambertPrincipalDomain hz)).differentiableAt.differentiableWithinAt
 
 /-- `1 + W₀(z) ≠ 0` on the disc of radius `1/e`. -/
-lemma lwR4_one_add_ne_zero_ball {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) : 1 + lambertW 0 z ≠ 0 :=
-  lwR4_one_add_ne_zero (k := 0) (z := z) (by
-    simp only [lwR4_dom, ↓reduceIte]; exact lwR4_ball_sub (mem_ball_zero_iff.mpr hz))
+private lemma one_add_lambertW_zero_ne_zero_of_norm_lt {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) : 1 + lambertW 0 z ≠ 0 :=
+  one_add_lambertW_ne_zero (k := 0) (z := z) (by
+    simp only [lambertBranchDomain, ↓reduceIte]; exact ball_exp_neg_one_subset_lambertPrincipalDomain (mem_ball_zero_iff.mpr hz))
 
 /-- The series part of 4.13.E5_1 with the coefficients of `zⁿ`. -/
-lemma lwR4_exp_hasSum (a : ℂ) {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) :
+private lemma hasSum_exp_neg_mul_lambertW_zero (a : ℂ) {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) :
     HasSum (fun n : ℕ => ((if n = 0 then 1 else a * (n + a) ^ (n - 1) / n.factorial) * (-1) ^ n) * z ^ n)
       (Complex.exp (-a * lambertW 0 z)) := by
-  obtain ⟨δ, hδ, hLB⟩ := lwR4_LB (F := fun t => (1 + 1 * t + 0 * t ^ 2 + 0 * t ^ 3) *
+  obtain ⟨δ, hδ, hLB⟩ := hasSum_lagrangeBurmann_lambertW_zero (F := fun t => (1 + 1 * t + 0 * t ^ 2 + 0 * t ^ 3) *
     Complex.exp (-a * t)) (by fun_prop)
   refine Complex.lagB_hasSum_of_differentiableOn (f := fun z => Complex.exp (-a * lambertW 0 z))
     (lt_min hδ (Real.exp_pos (-1))) ?_ (fun z hz => ?_) (by simpa using hz)
-  · exact (lwR4_diffOn_ball.const_mul _).cexp
+  · exact (differentiableOn_lambertW_zero_ball.const_mul _).cexp
   · rw [Metric.mem_ball, dist_zero_right] at hz
     have h := hLB z (lt_of_lt_of_le hz (min_le_left _ _))
-    have h1 := lwR4_one_add_ne_zero_ball (lt_of_lt_of_le hz (min_le_right _ _))
+    have h1 := one_add_lambertW_zero_ne_zero_of_norm_lt (lt_of_lt_of_le hz (min_le_right _ _))
     have hval : (1 + 1 * lambertW 0 z + 0 * lambertW 0 z ^ 2 + 0 * lambertW 0 z ^ 3) *
         Complex.exp (-a * lambertW 0 z) / (1 + lambertW 0 z) = Complex.exp (-a * lambertW 0 z) := by
       field_simp; ring
-    simp only [lwR4_fun_eq, lwR4_iter_cubic, hval] at h
+    simp only [cubic_mul_exp_mul_exp_pow_eq, iteratedDeriv_cubic_mul_exp_zero, hval] at h
     convert h using 2 with n
     rcases n with _ | m
-    · simp [lwR4_K]
-    · simp only [lwR4_K, Nat.zero_le, ↓reduceIte, Nat.choose_zero_right, Nat.factorial_zero,
+    · simp [powMulExpTaylorCoeff]
+    · simp only [powMulExpTaylorCoeff, Nat.zero_le, ↓reduceIte, Nat.choose_zero_right, Nat.factorial_zero,
         Nat.cast_one, one_mul, Nat.sub_zero, show 1 ≤ m + 1 by omega, Nat.choose_one_right,
         Nat.factorial_one, mul_one, zero_mul, add_zero,
         Nat.add_sub_cancel, Nat.add_eq_zero_iff, one_ne_zero, and_false]
@@ -221,14 +245,13 @@ lemma lwR4_exp_hasSum (a : ℂ) {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) :
       field_simp
       ring
 
-end lwR4Series
-
+end LambertSeries
 /-- Maclaurin series with its exact open convergence disk. -/
 @[dlmf 4.13.E5]
 theorem lambertW_hasSum {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) :
     HasSum (fun n : ℕ => (-(n + 1) : ℂ) ^ n / (n + 1).factorial * z ^ (n + 1))
       (lambertW 0 z) := by
-  have h := (lwR4_exp_hasSum 1 hz).mul_left z
+  have h := (hasSum_exp_neg_mul_lambertW_zero 1 hz).mul_left z
   have heq : lambertW 0 z * Complex.exp (lambertW 0 z) = z := lambertW_equation 0 z (Or.inr rfl)
   have hW : z * Complex.exp (-1 * lambertW 0 z) = lambertW 0 z := by
     have h' := heq
@@ -249,12 +272,12 @@ theorem lambertW_hasSum {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) :
     field_simp
     ring
 
-section lwR4Series
+section LambertSeries
 open Metric
 open scoped Nat
 
 /-- On the disc of radius `1/e` the principal branch has modulus less than one. -/
-lemma lwR4_norm_lt_one {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) : ‖lambertW 0 z‖ < 1 := by
+private lemma norm_lambertW_zero_lt_one {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) : ‖lambertW 0 z‖ < 1 := by
   have hr : ‖(-(‖z‖ : ℂ))‖ < Real.exp (-1) := by simpa using hz
   have hs := lambertW_hasSum hr
   have hterm : ∀ n : ℕ, (-(n + 1) : ℂ) ^ n / (n + 1).factorial * (-(‖z‖ : ℂ)) ^ (n + 1) =
@@ -270,7 +293,7 @@ lemma lwR4_norm_lt_one {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) : ‖lambertW 0 
     push_cast
     linear_combination ((n + 1 : ℂ) ^ n / ((n + 1).factorial : ℂ) * (‖z‖ : ℂ) ^ (n + 1)) * h1
   simp only [hterm] at hs
-  have hreal := lwR4_principal_real_gt (x := -‖z‖) (by linarith)
+  have hreal := im_lambertW_zero_ofReal_and_neg_one_lt_re (x := -‖z‖) (by linarith)
   push_cast at hreal
   have hs' : HasSum (fun n : ℕ => ‖(-(n + 1) : ℂ) ^ n / (n + 1).factorial * z ^ (n + 1)‖)
       (-(lambertW 0 (-(‖z‖ : ℂ))).re) := by
@@ -285,8 +308,7 @@ lemma lwR4_norm_lt_one {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) : ‖lambertW 0 
     exact norm_tsum_le_tsum_norm hs'.summable
   linarith [hreal.2]
 
-end lwR4Series
-
+end LambertSeries
 /-- General complex power series, with the n=0 coefficient continued to one for every a. -/
 @[dlmf 4.13.E5_1]
 theorem lambertW_power_hasSum (a : ℂ) {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) :
@@ -308,14 +330,14 @@ theorem lambertW_power_hasSum (a : ℂ) {z : ℂ} (hz : ‖z‖ < Real.exp (-1))
               rw [heq]
           _ = lambertW 0 z := by
               rw [mul_comm (lambertW 0 z), ← mul_assoc, ← Complex.exp_add]; simp
-      have hn := lwR4_norm_lt_one hz
+      have hn := norm_lambertW_zero_lt_one hz
       have him := Complex.abs_im_le_norm (-lambertW 0 z)
       rw [norm_neg, abs_le] at him
       have hpi := Real.pi_gt_three
       rw [hover, Complex.cpow_def_of_ne_zero (Complex.exp_ne_zero _),
         Complex.log_exp (by linarith) (by linarith)]
       ring_nf
-  · convert lwR4_exp_hasSum a hz using 2 with n
+  · convert hasSum_exp_neg_mul_lambertW_zero a hz using 2 with n
     rw [neg_pow z]; ring
 
 /-- Reciprocal series, including its constant term `0^0=1`. -/
@@ -323,71 +345,70 @@ theorem lambertW_power_hasSum (a : ℂ) {z : ℂ} (hz : ‖z‖ < Real.exp (-1))
 theorem lambertW_reciprocal_hasSum {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) :
     HasSum (fun n : ℕ => (n : ℂ) ^ n / n.factorial * z ^ n)
       (1 / (1 + lambertW 0 (-z))) := by
-  obtain ⟨δ, hδ, hLB⟩ := lwR4_LB (F := fun t => (1 + 0 * t + 0 * t ^ 2 + 0 * t ^ 3) *
+  obtain ⟨δ, hδ, hLB⟩ := hasSum_lagrangeBurmann_lambertW_zero (F := fun t => (1 + 0 * t + 0 * t ^ 2 + 0 * t ^ 3) *
     Complex.exp (-0 * t)) (by fun_prop)
   refine Complex.lagB_hasSum_of_differentiableOn (f := fun z => 1 / (1 + lambertW 0 (-z)))
     (lt_min hδ (Real.exp_pos (-1))) ?_ (fun z hz => ?_) (by simpa using hz)
   · have hd : DifferentiableOn ℂ (fun z => lambertW 0 (-z)) (Metric.ball 0 (Real.exp (-1))) :=
-      lwR4_diffOn_ball.comp (differentiableOn_neg _) (fun z hz => by simpa using hz)
+      differentiableOn_lambertW_zero_ball.comp (differentiableOn_neg _) (fun z hz => by simpa using hz)
     refine (differentiableOn_const 1).div (hd.const_add 1) (fun z hz => ?_)
-    exact lwR4_one_add_ne_zero_ball (by simpa using hz)
+    exact one_add_lambertW_zero_ne_zero_of_norm_lt (by simpa using hz)
   · rw [Metric.mem_ball, dist_zero_right] at hz
     have h := hLB (-z) (by rw [norm_neg]; exact lt_of_lt_of_le hz (min_le_left _ _))
-    have h1 := lwR4_one_add_ne_zero_ball (z := -z)
+    have h1 := one_add_lambertW_zero_ne_zero_of_norm_lt (z := -z)
       (by rw [norm_neg]; exact lt_of_lt_of_le hz (min_le_right _ _))
     have hval : (1 + 0 * lambertW 0 (-z) + 0 * lambertW 0 (-z) ^ 2 + 0 * lambertW 0 (-z) ^ 3) *
         Complex.exp (-0 * lambertW 0 (-z)) / (1 + lambertW 0 (-z)) =
           1 / (1 + lambertW 0 (-z)) := by simp
-    simp only [lwR4_fun_eq, lwR4_iter_cubic, hval] at h
+    simp only [cubic_mul_exp_mul_exp_pow_eq, iteratedDeriv_cubic_mul_exp_zero, hval] at h
     convert h using 2 with n
-    simp only [lwR4_K, Nat.zero_le, ↓reduceIte, Nat.choose_zero_right, Nat.factorial_zero,
+    simp only [powMulExpTaylorCoeff, Nat.zero_le, ↓reduceIte, Nat.choose_zero_right, Nat.factorial_zero,
       Nat.cast_one, one_mul, Nat.sub_zero, zero_mul, add_zero, zero_add]
     have hp : (-z) ^ n * (-(n : ℂ)) ^ n = (n : ℂ) ^ n * z ^ n := by
       rw [← mul_pow, ← mul_pow]; ring_nf
     rw [← mul_div_assoc, hp]; ring
 
-section lwR4Series
+section LambertSeries
 open Metric
 open scoped Nat
 
-/-- `lwR4_K` via descending factorials. -/
-lemma lwR4_K_eq (n j : ℕ) (c : ℂ) :
-    lwR4_K n j c = if j ≤ n then (n.descFactorial j : ℂ) * c ^ (n - j) else 0 := by
-  simp only [lwR4_K, Nat.descFactorial_eq_factorial_mul_choose]; push_cast; ring_nf
+/-- `powMulExpTaylorCoeff` via descending factorials. -/
+private lemma powMulExpTaylorCoeff_eq_descFactorial (n j : ℕ) (c : ℂ) :
+    powMulExpTaylorCoeff n j c = if j ≤ n then (n.descFactorial j : ℂ) * c ^ (n - j) else 0 := by
+  simp only [powMulExpTaylorCoeff, Nat.descFactorial_eq_factorial_mul_choose]; push_cast; ring_nf
 
-end lwR4Series
-
+end LambertSeries
 /-- Squared-branch series with the negative integer power at n=1 preserved. -/
 @[dlmf 4.13.E5_3]
 theorem lambertW_square_hasSum {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) :
     HasSum (fun n : ℕ => (n + 1 : ℂ) ^ ((n : ℤ) - 1) / (n + 1).factorial * (-z) ^ (n + 1))
       ((1 - (1 + lambertW 0 z) ^ 2) / 2) := by
-  obtain ⟨δ, hδ, hLB⟩ := lwR4_LB (F := fun t => (0 + (-1) * t + (-3 / 2) * t ^ 2 + (-1 / 2) * t ^ 3) *
+  obtain ⟨δ, hδ, hLB⟩ := hasSum_lagrangeBurmann_lambertW_zero (F := fun t => (0 + (-1) * t + (-3 / 2) * t ^ 2 + (-1 / 2) * t ^ 3) *
     Complex.exp (-0 * t)) (by fun_prop)
-  set c : ℕ → ℂ := fun n => (0 * lwR4_K n 0 (-(0 + n)) + (-1) * lwR4_K n 1 (-(0 + n)) +
-    (-3 / 2) * lwR4_K n 2 (-(0 + n)) + (-1 / 2) * lwR4_K n 3 (-(0 + n))) / n.factorial with hc
+  set c : ℕ → ℂ := fun n => (0 * powMulExpTaylorCoeff n 0 (-(0 + n)) + (-1) * powMulExpTaylorCoeff n 1 (-(0 + n)) +
+    (-3 / 2) * powMulExpTaylorCoeff n 2 (-(0 + n)) + (-1 / 2) * powMulExpTaylorCoeff n 3 (-(0 + n))) / n.factorial with hc
   have hfull : HasSum (fun n => c n * z ^ n) ((1 - (1 + lambertW 0 z) ^ 2) / 2) := by
     refine Complex.lagB_hasSum_of_differentiableOn
       (f := fun z => (1 - (1 + lambertW 0 z) ^ 2) / 2)
       (lt_min hδ (Real.exp_pos (-1))) ?_ (fun z hz => ?_) (by simpa using hz)
-    · exact (((lwR4_diffOn_ball.const_add 1).pow 2).const_sub 1).div_const 2
+    · exact (((differentiableOn_lambertW_zero_ball.const_add 1).pow 2).const_sub 1).div_const 2
     · rw [Metric.mem_ball, dist_zero_right] at hz
       have h := hLB z (lt_of_lt_of_le hz (min_le_left _ _))
-      have h1 := lwR4_one_add_ne_zero_ball (lt_of_lt_of_le hz (min_le_right _ _))
+      have h1 := one_add_lambertW_zero_ne_zero_of_norm_lt (lt_of_lt_of_le hz (min_le_right _ _))
       have hval : (0 + (-1) * lambertW 0 z + (-3 / 2) * lambertW 0 z ^ 2 +
           (-1 / 2) * lambertW 0 z ^ 3) * Complex.exp (-0 * lambertW 0 z) / (1 + lambertW 0 z) =
             (1 - (1 + lambertW 0 z) ^ 2) / 2 := by
         simp only [neg_zero, zero_mul, Complex.exp_zero, mul_one]
         field_simp; ring
-      simp only [lwR4_fun_eq, lwR4_iter_cubic, hval] at h
+      simp only [cubic_mul_exp_mul_exp_pow_eq, iteratedDeriv_cubic_mul_exp_zero, hval] at h
       convert h using 2 with n
       simp only [hc]; ring
-  have hc0 : c 0 = 0 := by simp [hc, lwR4_K]
+  have hc0 : c 0 = 0 := by simp [hc, powMulExpTaylorCoeff]
   have hshift := (hasSum_nat_add_iff' 1).mpr hfull
   simp only [Finset.range_one, Finset.sum_singleton, hc0, zero_mul, sub_zero] at hshift
   convert hshift using 1
   funext n
-  simp only [hc, lwR4_K_eq]
+  simp only [hc, powMulExpTaylorCoeff_eq_descFactorial]
   rcases n with _ | _ | k
   · simp
   · norm_num [Nat.factorial]
@@ -407,7 +428,7 @@ theorem lambertW_square_hasSum {z : ℂ} (hz : ‖z‖ < Real.exp (-1)) :
     ring
 
 /-- Unfolding the defining recurrence of `lambertC` at `n + 2`. -/
-lemma lwR4_C_succ_succ (n : ℕ) : lambertC (n + 2) = lambertC (n + 1) / (n + 3 : ℝ) - 1 / 2 *
+private lemma lambertC_add_two (n : ℕ) : lambertC (n + 2) = lambertC (n + 1) / (n + 3 : ℝ) - 1 / 2 *
       ∑ k ∈ range n, lambertC (k + 2) * lambertC (n + 1 - k) := by
   have ha : ¬ (n + 2 = 0) := by omega
   have hb : ¬ (n + 2 = 1) := by omega
@@ -424,10 +445,10 @@ theorem lambertC_initial  :
     lambertC 3 = 1 / 36 ∧ lambertC 4 = -1 / 270 := by
   have h0 : lambertC 0 = 1 := by rw [lambertC]; simp
   have h1 : lambertC 1 = 1 := by rw [lambertC]; simp
-  have h2 : lambertC 2 = 1/3 := by rw [lwR4_C_succ_succ]; simp [h1]
-  have h3 : lambertC 3 = 1/36 := by rw [lwR4_C_succ_succ]; simp [h2]; norm_num
+  have h2 : lambertC 2 = 1/3 := by rw [lambertC_add_two]; simp [h1]
+  have h3 : lambertC 3 = 1/36 := by rw [lambertC_add_two]; simp [h2]; norm_num
   have h4 : lambertC 4 = -1/270 := by
-    rw [lwR4_C_succ_succ]; simp [h2, h3, Finset.sum_range_succ]; norm_num
+    rw [lambertC_add_two]; simp [h2, h3, Finset.sum_range_succ]; norm_num
   exact ⟨h0, h1, h2, h3, h4⟩
 
 /-- The coefficient recurrence for every order n≥2. -/
@@ -436,7 +457,7 @@ theorem lambertC_recurrence {n : ℕ} (hn : 2 ≤ n) :
     lambertC n = lambertC (n - 1) / (n + 1) - 1 / 2 *
       ∑ k ∈ Finset.Icc 2 (n - 1), lambertC k * lambertC (n + 1 - k) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 2 := ⟨n - 2, by omega⟩
-  rw [lwR4_C_succ_succ]
+  rw [lambertC_add_two]
   have : ∑ k ∈ Finset.Icc 2 (m + 2 - 1), lambertC k * lambertC (m + 2 + 1 - k) =
       ∑ k ∈ range m, lambertC (k + 2) * lambertC (m + 1 - k) := by
     rw [show Finset.Icc 2 (m + 2 - 1) = Finset.Ico 2 (2 + m) by ext x; simp; omega,
@@ -468,7 +489,7 @@ theorem lambertC_real_branches {t : ℝ} (ht : |t| < 2 * Real.sqrt Real.pi) :
   sorry
 
 /-- Unfolding the defining recurrence of `lambertD` at `m + 2`. -/
-lemma lwR4_D_succ_succ (m : ℕ) : lambertD (m + 2) =
+private lemma lambertD_add_two (m : ℕ) : lambertD (m + 2) =
     (-2 * lambertD (m + 1) + (m + 1 : ℝ) / 2 *
       (∑ k ∈ range m, lambertD (k + 1) * lambertD (m - k)) -
       (m + 3 : ℝ) / 2 *
@@ -493,11 +514,11 @@ theorem lambertD_initial  :
   have h0 : lambertD 0 = -1 := by rw [lambertD]; simp
   have h1 : lambertD 1 = Real.sqrt 2 := by rw [lambertD]; simp
   have h2 : lambertD 2 = -2/3 := by
-    rw [lwR4_D_succ_succ]; simp [h1]; field_simp
+    rw [lambertD_add_two]; simp [h1]; field_simp
   have h3 : lambertD 3 = 11 / 36 * Real.sqrt 2 := by
-    rw [lwR4_D_succ_succ]; simp [h1, h2]; field_simp; linear_combination (-396 : ℝ) * hs
+    rw [lambertD_add_two]; simp [h1, h2]; field_simp; linear_combination (-396 : ℝ) * hs
   have h4 : lambertD 4 = -43/135 := by
-    rw [lwR4_D_succ_succ]; simp [h1, h2, h3, Finset.sum_range_succ]; field_simp
+    rw [lambertD_add_two]; simp [h1, h2, h3, Finset.sum_range_succ]; field_simp
     linear_combination (0:ℝ) * hs
   exact ⟨h0, h1, h2, h3, h4⟩
 
@@ -510,7 +531,7 @@ theorem lambertD_recurrence {n : ℕ} (hn : 1 ≤ n) :
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
   have h1 : lambertD 1 = Real.sqrt 2 := by rw [lambertD]; simp
   have hs0 : Real.sqrt 2 ≠ 0 := by positivity
-  rw [h1, lwR4_D_succ_succ]
+  rw [h1, lambertD_add_two]
   have e1 : ∑ k ∈ Finset.Icc 1 (m + 1 - 1), lambertD k * lambertD (m + 1 - k) =
       ∑ k ∈ range m, lambertD (k + 1) * lambertD (m - k) := by
     rw [show Finset.Icc 1 (m + 1 - 1) = Finset.Ico 1 (1 + m) by ext x; simp; omega,
@@ -580,16 +601,16 @@ theorem lambertW_lower_asymptotic (N : ℕ) :
 theorem lambertW_primitive (k : ℤ) {z : ℂ} (hne : z ≠ 0)
     (hz : if k = 0 then z ∈ lambertPrincipalDomain else z ∈ Complex.slitPlane) :
     HasDerivAt (fun z : ℂ => z / lambertW k z + z * lambertW k z - z) (lambertW k z) z := by
-  rw [lwR4_mem_dom_iff] at hz
-  have hd := lwR4_hasDerivAt hz
-  have h1 := lwR4_one_add_ne_zero hz
-  have hW := lwR4_ne_zero_of_ne hz hne
+  rw [ite_mem_iff_mem_lambertBranchDomain] at hz
+  have hd := hasDerivAt_lambertW hz
+  have h1 := one_add_lambertW_ne_zero hz
+  have hW := lambertW_ne_zero hz hne
   have := (((hasDerivAt_id z).div hd hW).add ((hasDerivAt_id z).mul hd)).sub (hasDerivAt_id z)
   convert this using 1
   · ext u; simp
   simp only [id_eq]
   clear this hd
-  have heq := lwR4_equation_dom hz
+  have heq := lambertW_mul_exp_lambertW hz
   generalize lambertW k z = w at *
   subst heq
   rw [Complex.exp_neg]
@@ -602,14 +623,14 @@ theorem lambertW_primitive (k : ℤ) {z : ℂ} (hne : z ≠ 0)
 theorem lambertW_div_primitive (k : ℤ) {z : ℂ} (hne : z ≠ 0)
     (hz : if k = 0 then z ∈ lambertPrincipalDomain else z ∈ Complex.slitPlane) :
     HasDerivAt (fun z : ℂ => (lambertW k z) ^ 2 / 2 + lambertW k z) (lambertW k z / z) z := by
-  rw [lwR4_mem_dom_iff] at hz
-  have hd := lwR4_hasDerivAt hz
-  have h1 := lwR4_one_add_ne_zero hz
-  have hW := lwR4_ne_zero_of_ne hz hne
+  rw [ite_mem_iff_mem_lambertBranchDomain] at hz
+  have hd := hasDerivAt_lambertW hz
+  have h1 := one_add_lambertW_ne_zero hz
+  have hW := lambertW_ne_zero hz hne
   have := ((hd.pow 2).div_const 2).add hd
   convert this using 1
   clear this hd
-  have heq := lwR4_equation_dom hz
+  have heq := lambertW_mul_exp_lambertW hz
   generalize lambertW k z = w at *
   subst heq
   rw [Complex.exp_neg]
@@ -623,10 +644,10 @@ theorem sin_lambertW_primitive (k : ℤ) {z : ℂ} (hne : z ≠ 0)
     (hz : if k = 0 then z ∈ lambertPrincipalDomain else z ∈ Complex.slitPlane) :
     HasDerivAt (fun z : ℂ => z * (1 + 1 / lambertW k z) * Complex.sin (lambertW k z) -
       z * Complex.cos (lambertW k z)) (2 * Complex.sin (lambertW k z)) z := by
-  rw [lwR4_mem_dom_iff] at hz
-  have hd := lwR4_hasDerivAt hz
-  have h1 := lwR4_one_add_ne_zero hz
-  have hW := lwR4_ne_zero_of_ne hz hne
+  rw [ite_mem_iff_mem_lambertBranchDomain] at hz
+  have hd := hasDerivAt_lambertW hz
+  have h1 := one_add_lambertW_ne_zero hz
+  have hW := lambertW_ne_zero hz hne
   have := (((hasDerivAt_id z).mul ((hasDerivAt_const z (1 : ℂ)).add
     ((hasDerivAt_const z (1 : ℂ)).div hd hW))).mul (hd.csin)).sub
     ((hasDerivAt_id z).mul hd.ccos)
@@ -634,7 +655,7 @@ theorem sin_lambertW_primitive (k : ℤ) {z : ℂ} (hne : z ≠ 0)
   · ext u; simp
   simp only [id_eq, Pi.add_apply, Pi.mul_apply, Pi.div_apply]
   clear this hd
-  have heq := lwR4_equation_dom hz
+  have heq := lambertW_mul_exp_lambertW hz
   generalize lambertW k z = w at *
   subst heq
   rw [Complex.exp_neg]
@@ -658,27 +679,27 @@ theorem lambertW_integral_log {z : ℂ} (hz : z ∈ lambertPrincipalDomain) :
   sorry
 
 /-- The slit plane lies in the principal domain. -/
-lemma lwR4_slit_sub : Complex.slitPlane ⊆ lambertPrincipalDomain := by
+private lemma slitPlane_subset_lambertPrincipalDomain : Complex.slitPlane ⊆ lambertPrincipalDomain := by
   intro z hz
   rcases Complex.mem_slitPlane_iff.mp hz with h | h
   · left; linarith [Real.exp_pos (-1)]
   · right; exact h
 
 /-- A nonprincipal branch differs from the principal one throughout the slit plane. -/
-lemma lwR4_other_ne_principal {k : ℤ} (hk : k ≠ 0) {z : ℂ} (hz : z ∈ Complex.slitPlane) :
+private lemma lambertW_ne_lambertW_zero {k : ℤ} (hk : k ≠ 0) {z : ℂ} (hz : z ∈ Complex.slitPlane) :
     lambertW k z ≠ lambertW 0 z := by
   have hU := Complex.isOpen_slitPlane
   have hUc : IsPreconnected Complex.slitPlane := (Complex.starConvex_one_slitPlane.isPathConnected
     (by simp [Complex.mem_slitPlane_iff])).isConnected.isPreconnected
-  have h0 := (lambertW_principal_analytic.mono lwR4_slit_sub).continuousOn
+  have h0 := (lambertW_principal_analytic.mono slitPlane_subset_lambertPrincipalDomain).continuousOn
   have hk' := (lambertW_other_analytic k hk).continuousOn
-  have hdom : ∀ z ∈ Complex.slitPlane, z ∈ lwR4_dom 0 := fun z hz => by
-    simp only [lwR4_dom, ↓reduceIte]; exact lwR4_slit_sub hz
-  have hdomk : ∀ z ∈ Complex.slitPlane, z ∈ lwR4_dom k := fun z hz => by
-    simp only [lwR4_dom, hk, ↓reduceIte]; exact hz
-  rcases lwR4_eq_or_ne hU hUc h0 hk' (fun z hz => lwR4_equation_dom (hdom z hz))
-      (fun z hz => lwR4_equation_dom (hdomk z hz))
-      (fun z hz => lwR4_one_add_ne_zero (hdom z hz)) with h | h
+  have hdom : ∀ z ∈ Complex.slitPlane, z ∈ lambertBranchDomain 0 := fun z hz => by
+    simp only [lambertBranchDomain, ↓reduceIte]; exact slitPlane_subset_lambertPrincipalDomain hz
+  have hdomk : ∀ z ∈ Complex.slitPlane, z ∈ lambertBranchDomain k := fun z hz => by
+    simp only [lambertBranchDomain, hk, ↓reduceIte]; exact hz
+  rcases eqOn_or_ne_of_mul_exp_eq hU hUc h0 hk' (fun z hz => lambertW_mul_exp_lambertW (hdom z hz))
+      (fun z hz => lambertW_mul_exp_lambertW (hdomk z hz))
+      (fun z hz => one_add_lambertW_ne_zero (hdom z hz)) with h | h
   · exfalso
     have h1 : (1 : ℂ) ∈ Complex.slitPlane := by simp [Complex.mem_slitPlane_iff]
     have e := h 1 h1
@@ -703,7 +724,7 @@ lemma lwR4_other_ne_principal {k : ℤ} (hk : k ≠ 0) {z : ℂ} (hz : z ∈ Com
 theorem lambertW_other_norm_tendsto_zero (k : ℤ) (hk : k ≠ 0) :
     Tendsto (fun z : ℂ => ‖lambertW k z‖)
       (𝓝[Complex.slitPlane] 0) atTop := by
-  obtain ⟨ε, hε, hinj⟩ := lwR4_locInj (w₀ := 0) (by norm_num)
+  obtain ⟨ε, hε, hinj⟩ := injOn_mul_exp_ball (w₀ := 0) (by norm_num)
   have h0 : (0 : ℂ) ∈ lambertPrincipalDomain := by left; simp [Real.exp_pos]
   have hc := (lambertW_principal_analytic 0 h0).continuousAt
   have hW0 : lambertW 0 0 = 0 := (Classical.choice exists_lambertBranchFamily).zero 0
@@ -719,14 +740,14 @@ theorem lambertW_other_norm_tendsto_zero (k : ℤ) (hk : k ≠ 0) :
   have hbig : ε ≤ ‖lambertW k z‖ := by
     by_contra hlt
     push Not at hlt
-    apply lwR4_other_ne_principal hk hz
-    have hk' : z ∈ lwR4_dom k := by simp only [lwR4_dom, hk, ↓reduceIte]; exact hz
-    have h0' : z ∈ lwR4_dom 0 := by simp only [lwR4_dom, ↓reduceIte]; exact lwR4_slit_sub hz
-    refine hinj (by simpa using hlt) ?_ ((lwR4_equation_dom hk').trans (lwR4_equation_dom h0').symm)
+    apply lambertW_ne_lambertW_zero hk hz
+    have hk' : z ∈ lambertBranchDomain k := by simp only [lambertBranchDomain, hk, ↓reduceIte]; exact hz
+    have h0' : z ∈ lambertBranchDomain 0 := by simp only [lambertBranchDomain, ↓reduceIte]; exact slitPlane_subset_lambertPrincipalDomain hz
+    refine hinj (by simpa using hlt) ?_ ((lambertW_mul_exp_lambertW hk').trans (lambertW_mul_exp_lambertW h0').symm)
     have := hδW (x := z) (by rw [dist_zero_right]; exact lt_of_lt_of_le hzb (min_le_left _ _))
     simpa using this
-  have hk' : z ∈ lwR4_dom k := by simp only [lwR4_dom, hk, ↓reduceIte]; exact hz
-  have heq := congrArg norm (lwR4_equation_dom hk')
+  have hk' : z ∈ lambertBranchDomain k := by simp only [lambertBranchDomain, hk, ↓reduceIte]; exact hz
+  have heq := congrArg norm (lambertW_mul_exp_lambertW hk')
   rw [norm_mul, Complex.norm_exp] at heq
   have hexp : Real.exp (lambertW k z).re < Real.exp (-M) := by
     have h1 : ε * Real.exp (lambertW k z).re ≤ ‖z‖ := by
@@ -740,7 +761,7 @@ theorem lambertW_other_norm_tendsto_zero (k : ℤ) (hk : k ≠ 0) :
   linarith
 
 /-- `t cot t < 1` on `(0, π)`. -/
-lemma lwR4_tcot_lt {t : ℝ} (h0 : 0 < t) (hπ : t < π) : t * Real.cos t / Real.sin t < 1 := by
+private lemma mul_cos_div_sin_lt_one {t : ℝ} (h0 : 0 < t) (hπ : t < π) : t * Real.cos t / Real.sin t < 1 := by
   have hs : 0 < Real.sin t := Real.sin_pos_of_pos_of_lt_pi h0 hπ
   rw [div_lt_one hs]
   rcases lt_or_ge t (π / 2) with h | h
@@ -752,14 +773,14 @@ lemma lwR4_tcot_lt {t : ℝ} (h0 : 0 < t) (hπ : t < π) : t * Real.cos t / Real
     nlinarith
 
 /-- The polynomial-times-exponential bound `(1-x)² + π² ≤ (2+π²) e^{1-x}` for `x ≤ 1`. -/
-lemma lwR4_quad_exp {x : ℝ} (hx : x ≤ 1) :
+private lemma one_sub_sq_add_pi_sq_le_mul_exp {x : ℝ} (hx : x ≤ 1) :
     (1 - x) ^ 2 + π ^ 2 ≤ (2 + π ^ 2) * Real.exp (1 - x) := by
   have h := Real.quadratic_le_exp_of_nonneg (x := 1 - x) (by linarith)
   have hpi : 0 ≤ π ^ 2 := by positivity
   nlinarith
 
 /-- The rational principal-branch integrand is bounded. -/
-lemma lwR4_rational_bound {z : ℂ} (hz : z ∈ lambertPrincipalDomain) :
+private lemma exists_bound_lambertW_rational_integrand {z : ℂ} (hz : z ∈ lambertPrincipalDomain) :
     ∃ M : ℝ, ∀ t ∈ Ioo 0 π, ‖(((1 - t * Real.cos t / Real.sin t) ^ 2 + t ^ 2 : ℝ) : ℂ) /
         (z + t * Real.exp (-t * Real.cos t / Real.sin t) / Real.sin t)‖ ≤ M := by
   -- the uniform lower bound of the denominator
@@ -781,7 +802,7 @@ lemma lwR4_rational_bound {z : ℂ} (hz : z ∈ lambertPrincipalDomain) :
   obtain ⟨h0, hπ⟩ := ht
   have hs : 0 < Real.sin t := Real.sin_pos_of_pos_of_lt_pi h0 hπ
   set x := t * Real.cos t / Real.sin t with hxdef
-  have hx : x < 1 := lwR4_tcot_lt h0 hπ
+  have hx : x < 1 := mul_cos_div_sin_lt_one h0 hπ
   set v := t * Real.exp (-t * Real.cos t / Real.sin t) / Real.sin t with hvdef
   have hneg : -t * Real.cos t / Real.sin t = -x := by rw [hxdef]; ring
   have hts : 1 ≤ t / Real.sin t := by rw [le_div_iff₀ hs]; linarith [Real.sin_le h0.le]
@@ -792,7 +813,7 @@ lemma lwR4_rational_bound {z : ℂ} (hz : z ∈ lambertPrincipalDomain) :
   set N := (1 - x) ^ 2 + t ^ 2
   have hN0 : 0 ≤ N := by positivity
   have hNB : N ≤ B * v := by
-    have h1 := lwR4_quad_exp hx.le
+    have h1 := one_sub_sq_add_pi_sq_le_mul_exp hx.le
     have h2 : Real.exp (1 - x) = Real.exp 1 * Real.exp (-x) := by
       rw [← Real.exp_add]; ring_nf
     have ht2 : t ^ 2 ≤ π ^ 2 := by nlinarith
@@ -824,7 +845,7 @@ lemma lwR4_rational_bound {z : ℂ} (hz : z ∈ lambertPrincipalDomain) :
     nlinarith [norm_nonneg (z + ↑v)]
 
 /-- A bound for the principal logarithm on an annulus. -/
-lemma lwR4_norm_log_le {w : ℂ} {c C : ℝ} (hc : 0 < c) (h1 : c ≤ ‖w‖) (h2 : ‖w‖ ≤ C) :
+private lemma norm_log_le_of_mem_annulus {w : ℂ} {c C : ℝ} (hc : 0 < c) (h1 : c ≤ ‖w‖) (h2 : ‖w‖ ≤ C) :
     ‖Complex.log w‖ ≤ |Real.log c| + |Real.log C| + π := by
   have hw : 0 < ‖w‖ := lt_of_lt_of_le hc h1
   have hlog : |Real.log ‖w‖| ≤ |Real.log c| + |Real.log C| := by
@@ -838,7 +859,7 @@ lemma lwR4_norm_log_le {w : ℂ} {c C : ℝ} (hc : 0 < c) (h1 : c ≤ ‖w‖) (
     _ ≤ |Real.log c| + |Real.log C| + π := by linarith [Complex.abs_arg_le_pi w]
 
 /-- The logarithmic principal-branch integrand is bounded. -/
-lemma lwR4_log_bound {z : ℂ} (hz : z ∈ lambertPrincipalDomain) :
+private lemma exists_bound_lambertW_log_integrand {z : ℂ} (hz : z ∈ lambertPrincipalDomain) :
     ∃ M : ℝ, ∀ t ∈ Ioo 0 π, ‖Complex.log (1 + z *
       (Real.sin t / t * Real.exp (t * Real.cos t / Real.sin t) : ℝ))‖ ≤ M := by
   -- a lower bound for `‖1 + z u‖` with `0 < u < e`
@@ -870,7 +891,7 @@ lemma lwR4_log_bound {z : ℂ} (hz : z ∈ lambertPrincipalDomain) :
   refine ⟨|Real.log c| + |Real.log (1 + ‖z‖ * Real.exp 1)| + π, fun t ht => ?_⟩
   obtain ⟨h0, hπ⟩ := ht
   have hs : 0 < Real.sin t := Real.sin_pos_of_pos_of_lt_pi h0 hπ
-  have hx := lwR4_tcot_lt h0 hπ
+  have hx := mul_cos_div_sin_lt_one h0 hπ
   set u := Real.sin t / t * Real.exp (t * Real.cos t / Real.sin t)
   have hu0 : 0 < u := by positivity
   have hst : Real.sin t / t ≤ 1 := by rw [div_le_one h0]; exact Real.sin_le h0.le
@@ -879,7 +900,7 @@ lemma lwR4_log_bound {z : ℂ} (hz : z ∈ lambertPrincipalDomain) :
     calc u ≤ 1 * Real.exp (t * Real.cos t / Real.sin t) :=
           mul_le_mul_of_nonneg_right hst (Real.exp_pos _).le
       _ < Real.exp 1 := by rw [one_mul]; exact this
-  apply lwR4_norm_log_le hc (hcw u hu0 hue)
+  apply norm_log_le_of_mem_annulus hc (hcw u hu0 hue)
   calc ‖1 + z * u‖ ≤ ‖(1 : ℂ)‖ + ‖z * u‖ := norm_add_le _ _
     _ = 1 + ‖z‖ * u := by rw [norm_one, norm_mul, Complex.norm_real, Real.norm_of_nonneg hu0.le]
     _ ≤ 1 + ‖z‖ * Real.exp 1 := by gcongr
@@ -892,7 +913,7 @@ theorem lambertW_integral_rational_integrable {z : ℂ} (hz : z ∈ lambertPrinc
         (z + t * Real.exp (-t * Real.cos t / Real.sin t) / Real.sin t))
       MeasureTheory.volume 0 Real.pi := by
   rw [intervalIntegrable_iff_integrableOn_Ioo_of_le Real.pi_pos.le]
-  obtain ⟨M, hM⟩ := lwR4_rational_bound hz
+  obtain ⟨M, hM⟩ := exists_bound_lambertW_rational_integrand hz
   refine MeasureTheory.IntegrableOn.of_bound measure_Ioo_lt_top ?_ M
     (MeasureTheory.ae_restrict_of_forall_mem measurableSet_Ioo hM)
   apply Measurable.aestronglyMeasurable
@@ -905,7 +926,7 @@ theorem lambertW_integral_log_integrable {z : ℂ} (hz : z ∈ lambertPrincipalD
       Complex.log (1 + z * (Real.sin t / t * Real.exp (t * Real.cos t / Real.sin t) : ℝ)))
       MeasureTheory.volume 0 Real.pi := by
   rw [intervalIntegrable_iff_integrableOn_Ioo_of_le Real.pi_pos.le]
-  obtain ⟨M, hM⟩ := lwR4_log_bound hz
+  obtain ⟨M, hM⟩ := exists_bound_lambertW_log_integrand hz
   refine MeasureTheory.IntegrableOn.of_bound measure_Ioo_lt_top ?_ M
     (MeasureTheory.ae_restrict_of_forall_mem measurableSet_Ioo hM)
   apply Measurable.aestronglyMeasurable

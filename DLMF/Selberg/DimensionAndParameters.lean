@@ -9,12 +9,23 @@ public import DLMF.Selberg.Basic.Parameters
 public import DLMF.Selberg.IntegrationByParts
 
 /-!
-# Selberg dimension recurrences and parameter continuation
+# The dimension recursion and holomorphy in the parameters of Selberg's integral
 
-Dimension reduction and holomorphic parameter arguments determine the Selberg normalization.
+This file proves the recursion of Selberg's integral in the dimension, holomorphy and growth
+bounds in the parameters, and Carlson's theorem in `a`; together these give Selberg's integral
+for `Re c > 0`.
 
-Source references and common attribution are retained in
-`DLMF.Selberg.Basic`.
+## Main results
+
+* `selbergInt_succ_one`: `(a + n c) S_{n+1}(a, 1, c) = S_n(a, 1 + 2c, c)`.
+* `selbergRHS_comm`, `selbergRHS_add_one`, `selbergRHS_succ_one`: symmetry, the `a`-shift and
+  the dimension recursion of the right-hand side.
+* `differentiableOn_selbergInt_a`, `differentiableOn_selbergInt_c`: holomorphy of the Selberg
+  integral in `a` and in `c`.
+* `selbergRatio_eq_one_left`: Carlson's theorem in `a`: `S/R` does not depend on `a`.
+* `selbergInt_eq_of_half_le`: Selberg's integral for `Re a, Re b > 0` and `Re c ≥ 1/2`.
+* `isOpen_cDomain`, `convex_cDomain`, `pos_mem_cDomain`: the domain of convergence in `c`.
+* `selbergInt_eq_of_re_pos`: Selberg's integral for `Re a, Re b, Re c > 0`.
 -/
 
 @[expose] public section

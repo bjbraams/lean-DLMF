@@ -12,38 +12,41 @@ public import DLMF.Spheroidal.Basic.EquationAndSpectralData
 # Spheroidal wave functions: definitions built on Ferrers functions (DLMF §§30.1, 30.5, 30.6,
 30.8, 30.11)
 
-This definitions file contains the objects of Chapter 30 whose DLMF definition involves the
-Ferrers functions `𝖯^m_ν(x)` (the project's `DLMF.Legendre.ferrersP`):
+This file contains the objects of DLMF Chapter 30 whose definition involves the Ferrers
+functions `𝖯^m_ν(x)` (the project's `DLMF.Legendre.ferrersP`, from `DLMF.Legendre.Basic`).
 
-* the coefficients `a^m_{n,k}(γ²)` of the Ferrers expansion 30.8.1, defined by the integral
-  30.8.2 for `k ≥ -R` and extended to `-N ≤ k < -R` by the forward recursion of §30.8(ii)
-  (`spheroidalCoeff`), the coefficients `a^{-m}_{n,k}(γ²)` of 30.8.6 (`spheroidalCoeffNeg`), the
-  recessive coefficients `a'^m_{n,k}(γ²)` of 30.8.9–30.8.10 (`spheroidalCoeffPrime`) and the sums
-  `A^{±m}_n(γ²)` of 30.11.4 (`spheroidalA`, `spheroidalANeg`);
-* the functions of the second kind `spheroidalQs n m x γ2 = 𝖰s^m_n(x, γ²)` (30.5.1) and
-  `spheroidalQsC n m z γ2 = 𝑄s^m_n(z, γ²)` (30.6.1);
-* the radial spheroidal functions `spheroidalRadial j n m z γ = S^{m(j)}_n(z, γ)` (30.11.3) and
-  the factors `K^m_n(γ)` of 30.11.10–30.11.11;
-* Flammer's normalization `d_{mn}(γ)` and functions `S^{(1)}_{mn}`, `S^{(2)}_{mn}` (30.1.1–30.1.2).
+## Main definitions
 
-**Import note.** `ferrersP` comes from the Legendre definitions file `DLMF.Legendre.Basic`
-(moved there from `DLMF.Legendre.Ferrers` on 2026-10-26).
+* `spheroidalCoeff`: the coefficients `a^m_{n,k}(γ²)` of the Ferrers expansion 30.8.1, given by
+  the integral 30.8.2 (`spheroidalCoeffMain`) for `k ≥ -R` and extended to `-N ≤ k < -R` by the
+  forward recursion of §30.8(ii).
+* `spheroidalCoeffNeg`: the coefficients `a^{-m}_{n,k}(γ²)` of 30.8.6.
+* `IsSpheroidalCoeffPrime`, `spheroidalCoeffPrime`: the recessive coefficients
+  `a'^m_{n,k}(γ²)` of 30.8.9–30.8.10.
+* `spheroidalA`, `spheroidalANeg`: the sums `A^{±m}_n(γ²)` of 30.11.4.
+* `IsSpheroidalQs`, `spheroidalQs`: the function of the second kind `𝖰s^m_n(x, γ²)` (30.5.1).
+* `spheroidalCutPlane`, `IsSpheroidalQsC`, `spheroidalQsC`: the function of the second kind of
+  complex argument `𝑄s^m_n(z, γ²)` on `ℂ ∖ (-∞, 1]` (30.6.1).
+* `spheroidalRadial`: the radial spheroidal functions `S^{m(j)}_n(z, γ)` (30.11.3).
+* `spheroidalK`: the factors `K^m_n(γ)` of 30.11.10–30.11.11.
+* `flammerD`, `flammerS1`, `flammerS2`: Flammer's normalization `d_{mn}(γ)` and functions
+  `S^{(1)}_{mn}`, `S^{(2)}_{mn}` (30.1.1–30.1.2).
 
-## Design notes (choices flagged)
+## Implementation notes
 
 * `a^m_{n,k}(γ²)` for `-N ≤ k < -R` (`N = ⌊(n+m)/2⌋`, `R = ⌊(n-m)/2⌋`) is
   `a^m_{n,-R} f_k / f_{-R}`, with `f` the forward solution `spheroidalFwd` (`f_{-N-1} = 0`,
   `f_{-N} = 1`); DLMF says that `𝖰s` does not exist when `f_{-R} = 0`, and then these values are
   junk `0`. These extended coefficients enter `A^m_n(γ²)` (the sum in 30.11.4 runs over
-  `2k ≥ -m - n`), which was confirmed numerically through the Wronskian 30.5.4.
+  `2k ≥ -m - n`), as is confirmed numerically through the Wronskian 30.5.4.
 * `𝖰s^m_n(x, γ²)` is defined by choice as the solution of 30.2.1 on `(-1, 1)` with the parity
   30.5.2 and the Wronskian 30.5.4 (it vanishes off `(-1, 1)`). These two properties determine it:
   a second such function differs by a multiple of `𝖯s`, which has the opposite parity. The
-  Meixner–Schäfke series 30.8.9 is a theorem. Existence is admitted
-  (`exists_isSpheroidalQs`).
+  Meixner–Schäfke series 30.8.9 is a theorem. Existence is stated in
+  `DLMF.Spheroidal.FerrersProperties`.
 * `𝑄s^m_n(z, γ²)` is defined by choice as the solution of 30.2.1 on `ℂ ∖ (-∞, 1]` whose boundary
   values from the upper half plane are those of 30.6.5 (upper signs); the lower signs are a
-  theorem. Existence and uniqueness are admitted (`existsUnique_isSpheroidalQsC`).
+  theorem. Existence and uniqueness are stated in `DLMF.Spheroidal.FerrersProperties`.
 * The radial functions take complex `z` and `γ`, with `γ²` real in DLMF; the coefficients are
   evaluated at `(γ^2).re`, and the theorems assume `(γ^2).im = 0`.
 -/

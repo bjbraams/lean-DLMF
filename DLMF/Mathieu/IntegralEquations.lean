@@ -14,15 +14,37 @@ public import DLMF.Mathieu.Properties
 
 The integral equations 28.10.1–28.10.8 with elementary kernels (`q = h²`, real `h`, so
 `q ≥ 0`; the notation `A^n_m`, `B^n_m` is that of §28.4) and 28.10.9–28.10.10 with the Bessel
-kernel `J₀` (Mathlib's `Complex.besselJ 0`; `J₀(2√w)` is entire in `w`, so the branch of the
-square root in 28.10.9 is immaterial — the principal one is used). All ten were checked
-numerically (`h = 1.3`, `z = 0.4`, `n ≤ 2`). §28.10(iii) is bibliographic.
+kernel `J₀` (Mathlib's `Complex.besselJ 0`). §28.10(iii) is bibliographic.
+
+## Main results
+
+* `isMathieuSolution_intervalIntegral_kernel`: the kernel criterion, an integral against a
+  kernel `K(z, t)` with `(∂_z² - 2q cos 2z) K = (∂_t² - 2q cos 2t) K` solves Mathieu's equation.
+* `eq_mul_mathieuCe_of_even`, `eq_mul_mathieuSe_of_odd`: even (odd) solutions with
+  `a = a_n(q)` (`a = b_n(q)`) are multiples of `ce_n` (`se_n`).
+* `deriv_mathieuCe_even_pi_div_two`, `mathieuCe_odd_pi_div_two`, `mathieuSe_even_pi_div_two`,
+  `deriv_mathieuSe_odd_pi_div_two`: values and derivatives at `π/2` (DLMF 28.2.21–28.2.22).
+* `integral_mathieuCe_even_quarter`, `integral_cos_mul_mathieuCe_odd_quarter`,
+  `integral_sin_mul_mathieuSe_odd_quarter`, `integral_sin_mul_cos_mul_mathieuSe_even_quarter`:
+  quarter-period Fourier integrals giving `A^n_0`, `A^n_1`, `B^n_1`, `B^n_2`.
+* `integral_cos_mathieuCe_even`, `integral_cosh_mathieuCe_even`: DLMF 28.10.1–28.10.2.
+* `integral_sin_mathieuCe_odd`, `integral_cos_cosh_mathieuCe_odd`: DLMF 28.10.3–28.10.4.
+* `integral_sinh_mathieuSe_odd`, `integral_sin_cos_mathieuSe_odd`: DLMF 28.10.5–28.10.6.
+* `integral_sin_sin_mathieuSe_even`, `integral_cos_sinh_mathieuSe_even`: DLMF 28.10.7–28.10.8.
+* `integral_besselJ_mathieuCe_even`, `integral_besselJ_mathieuCe`: the Bessel-kernel equations
+  DLMF 28.10.9–28.10.10.
+
+## Implementation notes
+
+`J₀(2√w)` is entire in `w`, so the branch of the square root in 28.10.9 is immaterial; the
+principal one is used. All ten equations were checked numerically (`h = 1.3`, `z = 0.4`,
+`n ≤ 2`).
 
 28.10.1–28.10.8 are proved by the kernel method: each kernel `K(z, t)` satisfies the PDE
 `K_zz - 2q cos 2z K = K_tt - 2q cos 2t K`, so two integrations by parts show that the integral
 `G(z)` solves Mathieu's equation with the eigenvalue of the integrand; parity and the value or
-derivative at `z = 0` or `π/2` identify `G` as a multiple of `ce_n` or `se_n`, and the constant is a
-quarter-period Fourier integral (`p1a2_quarter_*`) of §28.4.
+derivative at `z = 0` or `π/2` identify `G` as a multiple of `ce_n` or `se_n`, and the
+constant is a quarter-period Fourier integral of §28.4.
 -/
 
 @[expose] public noncomputable section
@@ -34,7 +56,7 @@ namespace DLMF.Mathieu
 
 /-- Differentiation under the integral sign for a jointly continuous kernel whose
 `z`-derivative is jointly continuous. -/
-lemma p1a2_hasDerivAt_integral {K K' : ℂ → ℝ → ℂ} {a b : ℝ}
+private lemma hasDerivAt_intervalIntegral_of_continuous_kernel {K K' : ℂ → ℝ → ℂ} {a b : ℝ}
     (hK : ∀ z t, HasDerivAt (fun z => K z t) (K' z t) z)
     (hcK : Continuous fun p : ℂ × ℝ => K p.1 p.2) (hcK' : Continuous fun p : ℂ × ℝ => K' p.1 p.2)
     (z₀ : ℂ) :
@@ -55,7 +77,7 @@ lemma p1a2_hasDerivAt_integral {K K' : ℂ → ℝ → ℂ} {a b : ℝ}
 `(∂_z² - 2q cos 2z) K = (∂_t² - 2q cos 2t) K` and `f` solves Mathieu's equation on the real line,
 with vanishing boundary form `[K_t f - K f']_α^β = 0`, then `z ↦ ∫_α^β K(z, t) f(t) dt` solves
 Mathieu's equation. -/
-theorem p1a2_isMathieuSolution_integral {a q : ℂ} {α β : ℝ} {K K1 K2 Kt Ktt : ℂ → ℝ → ℂ}
+theorem isMathieuSolution_intervalIntegral_kernel {a q : ℂ} {α β : ℝ} {K K1 K2 Kt Ktt : ℂ → ℝ → ℂ}
     {f f' : ℝ → ℂ}
     (hz1 : ∀ z t, HasDerivAt (fun z => K z t) (K1 z t) z)
     (hz2 : ∀ z t, HasDerivAt (fun z => K1 z t) (K2 z t) z)
@@ -73,12 +95,12 @@ theorem p1a2_isMathieuSolution_integral {a q : ℂ} {α β : ℝ} {K K1 K2 Kt Kt
   have hfc : Continuous f := continuous_iff_continuousAt.2 fun t => (hf t).continuousAt
   have hf'c : Continuous f' := continuous_iff_continuousAt.2 fun t => (hf' t).continuousAt
   have hG : ∀ z, HasDerivAt (fun z => ∫ t in α..β, K z t * f t) (∫ t in α..β, K1 z t * f t) z :=
-    p1a2_hasDerivAt_integral (K := fun z t => K z t * f t) (K' := fun z t => K1 z t * f t)
+    hasDerivAt_intervalIntegral_of_continuous_kernel (K := fun z t => K z t * f t) (K' := fun z t => K1 z t * f t)
       (fun z t => (hz1 z t).mul_const _) (hc.mul (hfc.comp continuous_snd))
       (hc1.mul (hfc.comp continuous_snd))
   have hG' : ∀ z, HasDerivAt (fun z => ∫ t in α..β, K1 z t * f t)
       (∫ t in α..β, K2 z t * f t) z :=
-    p1a2_hasDerivAt_integral (K := fun z t => K1 z t * f t) (K' := fun z t => K2 z t * f t)
+    hasDerivAt_intervalIntegral_of_continuous_kernel (K := fun z t => K1 z t * f t) (K' := fun z t => K2 z t * f t)
       (fun z t => (hz2 z t).mul_const _) (hc1.mul (hfc.comp continuous_snd))
       (hc2.mul (hfc.comp continuous_snd))
   have hd : deriv (fun z => ∫ t in α..β, K z t * f t) = fun z => ∫ t in α..β, K1 z t * f t :=
@@ -117,40 +139,40 @@ theorem p1a2_isMathieuSolution_integral {a q : ℂ} {α β : ℝ} {K K1 K2 Kt Kt
   linear_combination e
 
 /-- `ce_n` on the real line: derivative. -/
-theorem p1a2_hasDerivAt_ce (n : ℕ) (q : ℝ) (t : ℝ) :
+theorem hasDerivAt_mathieuCe_ofReal (n : ℕ) (q : ℝ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => mathieuCe n t q) (deriv (fun z => mathieuCe n z q) t) t :=
   ((isMathieuSolution_mathieuCe n q).differentiable t).hasDerivAt.comp_ofReal
 
 /-- `ce_n` on the real line: second derivative (Mathieu's equation). -/
-theorem p1a2_hasDerivAt_deriv_ce (n : ℕ) (q : ℝ) (t : ℝ) :
+theorem hasDerivAt_deriv_mathieuCe_ofReal (n : ℕ) (q : ℝ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => deriv (fun z => mathieuCe n z q) t)
       ((2 * q * Complex.cos (2 * (t : ℂ)) - mathieuA n q) * mathieuCe n t q) t :=
   ((isMathieuSolution_mathieuCe n q).hasDerivAt_deriv t).comp_ofReal
 
 /-- `se_n` on the real line: derivative. -/
-theorem p1a2_hasDerivAt_se (n : ℕ) (q : ℝ) (t : ℝ) :
+theorem hasDerivAt_mathieuSe_ofReal (n : ℕ) (q : ℝ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => mathieuSe n t q) (deriv (fun z => mathieuSe n z q) t) t :=
   ((isMathieuSolution_mathieuSe n q).differentiable t).hasDerivAt.comp_ofReal
 
 /-- `se_n` on the real line: second derivative (Mathieu's equation). -/
-theorem p1a2_hasDerivAt_deriv_se (n : ℕ) (q : ℝ) (t : ℝ) :
+theorem hasDerivAt_deriv_mathieuSe_ofReal (n : ℕ) (q : ℝ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => deriv (fun z => mathieuSe n z q) t)
       ((2 * q * Complex.cos (2 * (t : ℂ)) - mathieuB n q) * mathieuSe n t q) t :=
   ((isMathieuSolution_mathieuSe n q).hasDerivAt_deriv t).comp_ofReal
 
 /-- `ce_n'(0) = 0`. -/
-lemma p1a2_deriv_ce_zero (n : ℕ) (q : ℝ) : deriv (fun z => mathieuCe n z q) 0 = 0 := by
+private lemma deriv_mathieuCe_zero (n : ℕ) (q : ℝ) : deriv (fun z => mathieuCe n z q) 0 = 0 := by
   have h := (mathieuWI_spec (mathieuA n q) q)
   rw [show deriv (fun z => mathieuCe n z q) 0 =
       (mathieuCeZero n q : ℂ) * deriv (mathieuWI (mathieuA n q) q) 0 from
     ((h.1.differentiable 0).hasDerivAt.const_mul _).deriv, h.2.2, mul_zero]
 
 /-- `se_n(0) = 0`. -/
-lemma p1a2_se_zero (n : ℕ) (q : ℝ) : mathieuSe n 0 q = 0 := by
+private lemma mathieuSe_zero (n : ℕ) (q : ℝ) : mathieuSe n 0 q = 0 := by
   simp [mathieuSe, (mathieuWII_spec (mathieuB n q) q).2.1]
 
 /-- An even solution for `a = a_n(q)` is a multiple of `ce_n`. -/
-theorem p1a2_eq_mul_ce {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
+theorem eq_mul_mathieuCe_of_even {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
     (hG : IsMathieuSolution (mathieuA n q) q G) (hev : ∀ z, G (-z) = G z) (z : ℂ) :
     G z = G 0 / mathieuCe n 0 q * mathieuCe n z q := by
   have hd0 : deriv G 0 = 0 := by
@@ -164,7 +186,7 @@ theorem p1a2_eq_mul_ce {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
   field_simp
 
 /-- An odd solution for `a = b_n(q)` is a multiple of `se_n`. -/
-theorem p1a2_eq_mul_se {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
+theorem eq_mul_mathieuSe_of_odd {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
     (hG : IsMathieuSolution (mathieuB n q) q G) (hodd : ∀ z, G (-z) = -G z) (z : ℂ) :
     G z = deriv G 0 / deriv (fun z => mathieuSe n z q) 0 * mathieuSe n z q := by
   have h0 : G 0 = 0 := by
@@ -179,7 +201,7 @@ theorem p1a2_eq_mul_se {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
   field_simp
 
 /-- For an even `π`-periodic `g`, `∫₀^{2π} g = 4 ∫₀^{π/2} g`. -/
-theorem p1a2_integral_quarter {g : ℝ → ℂ} (hg : Continuous g) (hper : ∀ x, g (x + π) = g x)
+theorem integral_two_pi_eq_four_mul_integral_pi_div_two {g : ℝ → ℂ} (hg : Continuous g) (hper : ∀ x, g (x + π) = g x)
     (hev : ∀ x, g (-x) = g x) :
     ∫ x in (0 : ℝ)..2 * π, g x = 4 * ∫ x in (0 : ℝ)..π / 2, g x := by
   have hi : ∀ a b : ℝ, IntervalIntegrable g volume a b := fun a b => hg.intervalIntegrable a b
@@ -199,7 +221,7 @@ theorem p1a2_integral_quarter {g : ℝ → ℂ} (hg : Continuous g) (hper : ∀ 
   rw [h2]; ring
 
 /-- `ce_{2n}'(π/2) = 0` (DLMF 28.2.21). -/
-theorem p1a2_deriv_ce_even_half_pi (n : ℕ) (q : ℝ) :
+theorem deriv_mathieuCe_even_pi_div_two (n : ℕ) (q : ℝ) :
     deriv (fun z => mathieuCe (2 * n) z q) ((π / 2 : ℝ) : ℂ) = 0 := by
   have h := mathieuWI_spec (mathieuA (2 * n) q) q
   rw [show deriv (fun z => mathieuCe (2 * n) z q) ((π / 2 : ℝ) : ℂ) =
@@ -209,17 +231,17 @@ theorem p1a2_deriv_ce_even_half_pi (n : ℕ) (q : ℝ) :
   rw [deriv_mathieuWI_half_pi_mathieuA_even, mul_zero]
 
 /-- `t ↦ cos t` as a complex-valued function of real `t`. -/
-lemma p1a2_hasDerivAt_rcos (t : ℝ) :
+private lemma hasDerivAt_ofReal_cos (t : ℝ) :
     HasDerivAt (fun t : ℝ => ((Real.cos t : ℝ) : ℂ)) (-((Real.sin t : ℝ) : ℂ)) t := by
   simpa using (Real.hasDerivAt_cos t).ofReal_comp
 
 /-- `t ↦ sin t` as a complex-valued function of real `t`. -/
-lemma p1a2_hasDerivAt_rsin (t : ℝ) :
+private lemma hasDerivAt_ofReal_sin (t : ℝ) :
     HasDerivAt (fun t : ℝ => ((Real.sin t : ℝ) : ℂ)) ((Real.cos t : ℝ) : ℂ) t :=
   (Real.hasDerivAt_sin t).ofReal_comp
 
 /-- First and second derivatives of `x ↦ P(x) Φ(u(x))`. -/
-lemma p1a2_hasDerivAt_mul_comp {𝕜 : Type*} [NontriviallyNormedField 𝕜] [NormedAlgebra 𝕜 ℂ]
+private lemma hasDerivAt_mul_comp_second {𝕜 : Type*} [NontriviallyNormedField 𝕜] [NormedAlgebra 𝕜 ℂ]
     {P P1 P2 u u1 u2 : 𝕜 → ℂ} {Φ Φ1 Φ2 : ℂ → ℂ} {x : 𝕜}
     (hP : HasDerivAt P (P1 x) x) (hP1 : HasDerivAt P1 (P2 x) x)
     (hu : HasDerivAt u (u1 x) x) (hu1 : HasDerivAt u1 (u2 x) x)
@@ -234,7 +256,7 @@ lemma p1a2_hasDerivAt_mul_comp {𝕜 : Type*} [NontriviallyNormedField 𝕜] [No
   convert (hP1.mul h0).add (hP.mul (h1.mul hu1)) using 1
 
 /-- **Kernel criterion, product form** `K(z, t) = P(z, t) Φ(u(z, t))`. -/
-lemma p1a2_isMathieuSolution_kernel {a q : ℂ} {α β : ℝ} {f f' : ℝ → ℂ}
+private lemma isMathieuSolution_intervalIntegral_mul_comp_kernel {a q : ℂ} {α β : ℝ} {f f' : ℝ → ℂ}
     {P Pz Pzz Pt Ptt u uz uzz ut utt : ℂ → ℝ → ℂ} {Φ Φ1 Φ2 : ℂ → ℂ}
     (hPz : ∀ z t, HasDerivAt (fun z => P z t) (Pz z t) z)
     (hPzz : ∀ z t, HasDerivAt (fun z => Pz z t) (Pzz z t) z)
@@ -274,23 +296,23 @@ lemma p1a2_isMathieuSolution_kernel {a q : ℂ} {α β : ℝ} {f f' : ℝ → �
   have hutc : ∀ z, Continuous (u z) := fun z =>
     continuous_iff_continuousAt.2 fun t => (hut z t).continuousAt
   have hfc : Continuous f := continuous_iff_continuousAt.2 fun t => (hf t).continuousAt
-  refine ⟨?_, fun z => p1a2_hasDerivAt_integral (K := fun z t => P z t * Φ (u z t) * f t)
-    (fun z t => (((p1a2_hasDerivAt_mul_comp (P := fun z => P z t) (P1 := fun z => Pz z t)
+  refine ⟨?_, fun z => hasDerivAt_intervalIntegral_of_continuous_kernel (K := fun z t => P z t * Φ (u z t) * f t)
+    (fun z t => (((hasDerivAt_mul_comp_second (P := fun z => P z t) (P1 := fun z => Pz z t)
       (P2 := fun z => Pzz z t) (u := fun z => u z t) (u1 := fun z => uz z t)
       (u2 := fun z => uzz z t) (hPz z t) (hPzz z t) (huz z t) (huzz z t) hΦ hΦ1).1).mul_const
         (f t)))
     ((hcP.mul (hcΦ.comp hcu)).mul (hfc.comp continuous_snd))
     (((hcPz.mul (hcΦ.comp hcu)).add (hcP.mul ((hcΦ1.comp hcu).mul hcuz))).mul
       (hfc.comp continuous_snd)) z⟩
-  refine p1a2_isMathieuSolution_integral
-    (fun z t => (p1a2_hasDerivAt_mul_comp (P := fun z => P z t) (P1 := fun z => Pz z t)
+  refine isMathieuSolution_intervalIntegral_kernel
+    (fun z t => (hasDerivAt_mul_comp_second (P := fun z => P z t) (P1 := fun z => Pz z t)
       (P2 := fun z => Pzz z t) (u := fun z => u z t) (u1 := fun z => uz z t)
       (u2 := fun z => uzz z t) (hPz z t) (hPzz z t) (huz z t) (huzz z t) hΦ hΦ1).1)
-    (fun z t => (p1a2_hasDerivAt_mul_comp (P := fun z => P z t) (P1 := fun z => Pz z t)
+    (fun z t => (hasDerivAt_mul_comp_second (P := fun z => P z t) (P1 := fun z => Pz z t)
       (P2 := fun z => Pzz z t) (u := fun z => u z t) (u1 := fun z => uz z t)
       (u2 := fun z => uzz z t) (hPz z t) (hPzz z t) (huz z t) (huzz z t) hΦ hΦ1).2)
-    (fun z t => (p1a2_hasDerivAt_mul_comp (hPt z t) (hPtt z t) (hut z t) (hutt z t) hΦ hΦ1).1)
-    (fun z t => (p1a2_hasDerivAt_mul_comp (hPt z t) (hPtt z t) (hut z t) (hutt z t) hΦ hΦ1).2)
+    (fun z t => (hasDerivAt_mul_comp_second (hPt z t) (hPtt z t) (hut z t) (hutt z t) hΦ hΦ1).1)
+    (fun z t => (hasDerivAt_mul_comp_second (hPt z t) (hPtt z t) (hut z t) (hutt z t) hΦ hΦ1).2)
     (hcP.mul (hcΦ.comp hcu))
     ((hcPz.mul (hcΦ.comp hcu)).add (hcP.mul ((hcΦ1.comp hcu).mul hcuz)))
     (((hcPzz.mul (hcΦ.comp hcu)).add (hcPz.mul ((hcΦ1.comp hcu).mul hcuz))).add
@@ -303,43 +325,43 @@ lemma p1a2_isMathieuSolution_kernel {a q : ℂ} {α β : ℝ} {f f' : ℝ → �
     hf hf' hpde hbd
 
 /-- A solution vanishing together with its derivative at a point is zero. -/
-lemma p1a2_eq_zero_of_initial {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w) {z₀ : ℂ}
+private lemma isMathieuSolution_eq_zero_of_initial {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w) {z₀ : ℂ}
     (h0 : w z₀ = 0) (h1 : deriv w z₀ = 0) : w = fun _ => 0 := by
   have := hw.eq_of_initial (hw.const_mul 0) (z₀ := z₀) (by simp [h0])
     (by rw [show deriv (fun z => (0 : ℂ) * w z) z₀ = 0 by simp, h1])
   rw [this]; funext z; simp
 
 /-- `ce_n` and `ce_n'` do not vanish simultaneously. -/
-theorem p1a2_ce_or_deriv_ne_zero (n : ℕ) (q : ℝ) (z₀ : ℂ) (h0 : mathieuCe n z₀ q = 0)
+theorem mathieuCe_deriv_not_both_zero (n : ℕ) (q : ℝ) (z₀ : ℂ) (h0 : mathieuCe n z₀ q = 0)
     (h1 : deriv (fun z => mathieuCe n z q) z₀ = 0) : False := by
-  have := congrFun (p1a2_eq_zero_of_initial (isMathieuSolution_mathieuCe n q) h0 h1) 0
+  have := congrFun (isMathieuSolution_eq_zero_of_initial (isMathieuSolution_mathieuCe n q) h0 h1) 0
   rw [mathieuCe_zero] at this
   exact (mathieuCeZero_pos n q).ne' (by exact_mod_cast this)
 
 /-- `se_n` and `se_n'` do not vanish simultaneously. -/
-theorem p1a2_se_or_deriv_ne_zero (n : ℕ) (q : ℝ) (z₀ : ℂ) (h0 : mathieuSe n z₀ q = 0)
+theorem mathieuSe_deriv_not_both_zero (n : ℕ) (q : ℝ) (z₀ : ℂ) (h0 : mathieuSe n z₀ q = 0)
     (h1 : deriv (fun z => mathieuSe n z q) z₀ = 0) : False := by
-  have := p1a2_eq_zero_of_initial (isMathieuSolution_mathieuSe n q) h0 h1
+  have := isMathieuSolution_eq_zero_of_initial (isMathieuSolution_mathieuSe n q) h0 h1
   have h2 := deriv_mathieuSe_zero n q
   rw [this] at h2
   simp only [deriv_const] at h2
   exact (mathieuSeDerivZero_pos n q).ne' (by exact_mod_cast h2.symm)
 
 /-- Identification of the constant for an even solution, by a value. -/
-lemma p1a2_finish_val_ce {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
+private lemma two_div_pi_mul_eq_mathieuCe_of_value {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
     (hG : IsMathieuSolution (mathieuA n q) q G) (hev : ∀ z, G (-z) = G z) {z₀ A : ℂ}
     (hne : mathieuCe n z₀ q ≠ 0) (hval : 2 / π * G z₀ = A) (z : ℂ) :
     2 / π * G z = A / mathieuCe n z₀ q * mathieuCe n z q := by
-  have hrep := p1a2_eq_mul_ce hG hev
+  have hrep := eq_mul_mathieuCe_of_even hG hev
   rw [← hval, hrep z, hrep z₀]
   field_simp
 
 /-- Identification of the constant for an even solution, by a derivative. -/
-lemma p1a2_finish_der_ce {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
+private lemma two_div_pi_mul_eq_mathieuCe_of_deriv {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
     (hG : IsMathieuSolution (mathieuA n q) q G) (hev : ∀ z, G (-z) = G z) {z₀ A : ℂ}
     (hne : deriv (fun z => mathieuCe n z q) z₀ ≠ 0) (hval : 2 / π * deriv G z₀ = A) (z : ℂ) :
     2 / π * G z = A / deriv (fun z => mathieuCe n z q) z₀ * mathieuCe n z q := by
-  obtain ⟨c, hc⟩ : ∃ c, G = fun z => c * mathieuCe n z q := ⟨_, funext (p1a2_eq_mul_ce hG hev)⟩
+  obtain ⟨c, hc⟩ : ∃ c, G = fun z => c * mathieuCe n z q := ⟨_, funext (eq_mul_mathieuCe_of_even hG hev)⟩
   have hd : deriv G z₀ = c * deriv (fun z => mathieuCe n z q) z₀ := by
     rw [hc]
     exact (((isMathieuSolution_mathieuCe n q).differentiable z₀).hasDerivAt.const_mul _).deriv
@@ -347,11 +369,11 @@ lemma p1a2_finish_der_ce {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
   field_simp
 
 /-- Identification of the constant for an odd solution, by a value. -/
-lemma p1a2_finish_val_se {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
+private lemma two_div_pi_mul_eq_mathieuSe_of_value {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
     (hG : IsMathieuSolution (mathieuB n q) q G) (hodd : ∀ z, G (-z) = -G z) {z₀ A : ℂ}
     (hne : mathieuSe n z₀ q ≠ 0) (hval : 2 / π * G z₀ = A) (z : ℂ) :
     2 / π * G z = A / mathieuSe n z₀ q * mathieuSe n z q := by
-  have hrep := p1a2_eq_mul_se hG hodd
+  have hrep := eq_mul_mathieuSe_of_odd hG hodd
   have : deriv (fun z => mathieuSe n z q) 0 ≠ 0 := by
     rw [deriv_mathieuSe_zero]
     exact Complex.ofReal_ne_zero.mpr (mathieuSeDerivZero_pos n q).ne'
@@ -359,11 +381,11 @@ lemma p1a2_finish_val_se {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
   field_simp
 
 /-- Identification of the constant for an odd solution, by a derivative. -/
-lemma p1a2_finish_der_se {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
+private lemma two_div_pi_mul_eq_mathieuSe_of_deriv {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
     (hG : IsMathieuSolution (mathieuB n q) q G) (hodd : ∀ z, G (-z) = -G z) {z₀ A : ℂ}
     (hne : deriv (fun z => mathieuSe n z q) z₀ ≠ 0) (hval : 2 / π * deriv G z₀ = A) (z : ℂ) :
     2 / π * G z = A / deriv (fun z => mathieuSe n z q) z₀ * mathieuSe n z q := by
-  obtain ⟨c, hc⟩ : ∃ c, G = fun z => c * mathieuSe n z q := ⟨_, funext (p1a2_eq_mul_se hG hodd)⟩
+  obtain ⟨c, hc⟩ : ∃ c, G = fun z => c * mathieuSe n z q := ⟨_, funext (eq_mul_mathieuSe_of_odd hG hodd)⟩
   have hd : deriv G z₀ = c * deriv (fun z => mathieuSe n z q) z₀ := by
     rw [hc]
     exact (((isMathieuSolution_mathieuSe n q).differentiable z₀).hasDerivAt.const_mul _).deriv
@@ -371,11 +393,11 @@ lemma p1a2_finish_der_se {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
   field_simp
 
 /-- `∫₀^{π/2} ce_{2n} = (π/2) A^{2n}_0`. -/
-theorem p1a2_quarter_A0 (n : ℕ) (q : ℝ) :
+theorem integral_mathieuCe_even_quarter (n : ℕ) (q : ℝ) :
     ∫ t in (0 : ℝ)..π / 2, mathieuCe (2 * n) t q = π / 2 * mathieuFourierA (2 * n) 0 q := by
   rw [mathieuFourierA]
   simp only [↓reduceIte, Nat.cast_zero, zero_mul, Complex.cos_zero, mul_one]
-  rw [p1a2_integral_quarter (g := fun t : ℝ => mathieuCe (2 * n) t q)]
+  rw [integral_two_pi_eq_four_mul_integral_pi_div_two (g := fun t : ℝ => mathieuCe (2 * n) t q)]
   · have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
     field_simp; ring
   · exact (isMathieuSolution_mathieuCe _ _).differentiable.continuous.comp
@@ -384,12 +406,12 @@ theorem p1a2_quarter_A0 (n : ℕ) (q : ℝ) :
   · intro x; push_cast; exact mathieuCe_neg _ x _
 
 /-- `∫₀^{π/2} cos t ce_{2n+1}(t) dt = (π/4) A^{2n+1}_1`. -/
-theorem p1a2_quarter_A1 (n : ℕ) (q : ℝ) :
+theorem integral_cos_mul_mathieuCe_odd_quarter (n : ℕ) (q : ℝ) :
     ∫ t in (0 : ℝ)..π / 2, ((Real.cos t : ℝ) : ℂ) * mathieuCe (2 * n + 1) t q =
       π / 4 * mathieuFourierA (2 * n + 1) 1 q := by
   rw [mathieuFourierA]
   simp only [one_ne_zero, ↓reduceIte, Nat.cast_one, one_mul]
-  rw [p1a2_integral_quarter (g := fun t : ℝ => mathieuCe (2 * n + 1) t q * Complex.cos t)]
+  rw [integral_two_pi_eq_four_mul_integral_pi_div_two (g := fun t : ℝ => mathieuCe (2 * n + 1) t q * Complex.cos t)]
   · have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
     simp only [Complex.ofReal_cos, mul_comm (Complex.cos _)]
     field_simp
@@ -398,12 +420,12 @@ theorem p1a2_quarter_A1 (n : ℕ) (q : ℝ) :
   · intro x; push_cast; rw [mathieuCe_neg, Complex.cos_neg]
 
 /-- `∫₀^{π/2} sin t se_{2n+1}(t) dt = (π/4) B^{2n+1}_1`. -/
-theorem p1a2_quarter_B1 (n : ℕ) (q : ℝ) :
+theorem integral_sin_mul_mathieuSe_odd_quarter (n : ℕ) (q : ℝ) :
     ∫ t in (0 : ℝ)..π / 2, ((Real.sin t : ℝ) : ℂ) * mathieuSe (2 * n + 1) t q =
       π / 4 * mathieuFourierB (2 * n + 1) 1 q := by
   rw [mathieuFourierB]
   simp only [Nat.cast_one, one_mul]
-  rw [p1a2_integral_quarter (g := fun t : ℝ => mathieuSe (2 * n + 1) t q * Complex.sin t)]
+  rw [integral_two_pi_eq_four_mul_integral_pi_div_two (g := fun t : ℝ => mathieuSe (2 * n + 1) t q * Complex.sin t)]
   · have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
     simp only [Complex.ofReal_sin, mul_comm (Complex.sin _)]
     field_simp
@@ -412,7 +434,7 @@ theorem p1a2_quarter_B1 (n : ℕ) (q : ℝ) :
   · intro x; push_cast; rw [mathieuSe_neg, Complex.sin_neg]; ring
 
 /-- `∫₀^{π/2} sin t cos t se_{2n+2}(t) dt = (π/8) B^{2n+2}_2`. -/
-theorem p1a2_quarter_B2 (n : ℕ) (q : ℝ) :
+theorem integral_sin_mul_cos_mul_mathieuSe_even_quarter (n : ℕ) (q : ℝ) :
     ∫ t in (0 : ℝ)..π / 2, ((Real.sin t : ℝ) : ℂ) * ((Real.cos t : ℝ) : ℂ) *
         mathieuSe (2 * n + 2) t q = π / 8 * mathieuFourierB (2 * n + 2) 2 q := by
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
@@ -421,7 +443,7 @@ theorem p1a2_quarter_B2 (n : ℕ) (q : ℝ) :
     intro x; push_cast; rw [Complex.sin_two_mul]; ring
   rw [mathieuFourierB]
   simp_rw [e, intervalIntegral.integral_const_mul]
-  rw [p1a2_integral_quarter (g := fun t : ℝ => mathieuSe (2 * n + 2) t q *
+  rw [integral_two_pi_eq_four_mul_integral_pi_div_two (g := fun t : ℝ => mathieuSe (2 * n + 2) t q *
     (Complex.sin t * Complex.cos t))]
   · simp only [Complex.ofReal_sin, Complex.ofReal_cos]
     rw [show (∫ t in (0 : ℝ)..π / 2, Complex.sin t * Complex.cos t * mathieuSe (2 * n + 2) t q)
@@ -443,7 +465,7 @@ theorem integral_cos_mathieuCe_even (n : ℕ) (h : ℝ) (z : ℂ) :
   set H : ℂ := (h : ℂ) with hH
   have hQ : (((h ^ 2 : ℝ)) : ℂ) = H ^ 2 := by push_cast; rfl
   let u : ℂ → ℝ → ℂ := fun z t => 2 * H * Complex.cos z * Real.cos t
-  have hG := p1a2_isMathieuSolution_integral (α := 0) (β := π / 2)
+  have hG := isMathieuSolution_intervalIntegral_kernel (α := 0) (β := π / 2)
     (K := fun z t => Complex.cos (u z t))
     (K1 := fun z t => 2 * H * Complex.sin z * Real.cos t * Complex.sin (u z t))
     (K2 := fun z t => 2 * H * Complex.cos z * Real.cos t * Complex.sin (u z t) -
@@ -472,22 +494,22 @@ theorem integral_cos_mathieuCe_even (n : ℕ) (h : ℝ) (z : ℂ) :
       convert h1 using 1; ring)
     (fun z t => by
       have hu : HasDerivAt (fun t => u z t) (2 * H * Complex.cos z * -((Real.sin t : ℝ) : ℂ)) t :=
-        (p1a2_hasDerivAt_rcos t).const_mul _
+        (hasDerivAt_ofReal_cos t).const_mul _
       have h2 : HasDerivAt (fun t => Complex.cos (u z t))
           (-Complex.sin (u z t) * (2 * H * Complex.cos z * -((Real.sin t : ℝ) : ℂ))) t :=
         (Complex.hasDerivAt_cos _).comp t hu
       convert h2 using 1; ring)
     (fun z t => by
       have hu : HasDerivAt (fun t => u z t) (2 * H * Complex.cos z * -((Real.sin t : ℝ) : ℂ)) t :=
-        (p1a2_hasDerivAt_rcos t).const_mul _
+        (hasDerivAt_ofReal_cos t).const_mul _
       have h2 : HasDerivAt (fun t => Complex.sin (u z t))
           (Complex.cos (u z t) * (2 * H * Complex.cos z * -((Real.sin t : ℝ) : ℂ))) t :=
         (Complex.hasDerivAt_sin _).comp t hu
-      have h1 := ((p1a2_hasDerivAt_rsin t).const_mul (2 * H * Complex.cos z)).mul h2
+      have h1 := ((hasDerivAt_ofReal_sin t).const_mul (2 * H * Complex.cos z)).mul h2
       convert h1 using 1; ring)
     (by simp only [u]; fun_prop) (by simp only [u]; fun_prop) (by simp only [u]; fun_prop)
     (fun z => by simp only [u]; fun_prop)
-    (p1a2_hasDerivAt_ce _ _) (p1a2_hasDerivAt_deriv_ce _ _)
+    (hasDerivAt_mathieuCe_ofReal _ _) (hasDerivAt_deriv_mathieuCe_ofReal _ _)
     (fun z t => by
       simp only [u]
       rw [hQ, Complex.cos_two_mul, Complex.cos_two_mul, ← Complex.ofReal_cos]
@@ -499,17 +521,17 @@ theorem integral_cos_mathieuCe_even (n : ℕ) (h : ℝ) (z : ℂ) :
         Complex.cos z ^ 2) * e2)
     (fun z => by
       simp only [u, Real.sin_zero, Real.cos_pi_div_two, Real.sin_pi_div_two, Complex.ofReal_zero,
-        Complex.ofReal_one, mul_zero, zero_mul, Complex.sin_zero, p1a2_deriv_ce_zero]
-      rw [p1a2_deriv_ce_even_half_pi]; ring)
+        Complex.ofReal_one, mul_zero, zero_mul, Complex.sin_zero, deriv_mathieuCe_zero]
+      rw [deriv_mathieuCe_even_pi_div_two]; ring)
   set G := fun z => ∫ t in (0 : ℝ)..π / 2, Complex.cos (u z t) * mathieuCe (2 * n) t (h ^ 2)
     with hGdef
   have hev : ∀ z, G (-z) = G z := fun z => by simp only [hGdef, u, Complex.cos_neg]
-  have hrep := p1a2_eq_mul_ce hG hev
+  have hrep := eq_mul_mathieuCe_of_even hG hev
   have hhalf : G (π / 2) = π / 2 * mathieuFourierA (2 * n) 0 (h ^ 2) := by
     simp only [hGdef, u, Complex.cos_pi_div_two, mul_zero, zero_mul, Complex.cos_zero, one_mul]
     rw [mathieuFourierA]
     simp only [↓reduceIte, Nat.cast_zero, zero_mul, Complex.cos_zero, mul_one]
-    rw [p1a2_integral_quarter (g := fun t : ℝ => mathieuCe (2 * n) t (h ^ 2))]
+    rw [integral_two_pi_eq_four_mul_integral_pi_div_two (g := fun t : ℝ => mathieuCe (2 * n) t (h ^ 2))]
     · have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
       field_simp; ring
     · exact (isMathieuSolution_mathieuCe _ _).differentiable.continuous.comp
@@ -521,7 +543,7 @@ theorem integral_cos_mathieuCe_even (n : ℕ) (h : ℝ) (z : ℂ) :
     have hsol := isMathieuSolution_mathieuCe (2 * n) (h ^ 2)
     have := hsol.eq_of_initial (hsol.const_mul 0) (z₀ := π / 2) (by simp [h0]) (by
       rw [show deriv (fun z => (0 : ℂ) * mathieuCe (2 * n) z (h ^ 2)) (π / 2) = 0 by simp]
-      have := p1a2_deriv_ce_even_half_pi n (h ^ 2)
+      have := deriv_mathieuCe_even_pi_div_two n (h ^ 2)
       push_cast at this; exact this)
     have h00 := congrFun this 0
     simp only [zero_mul, mathieuCe_zero] at h00
@@ -538,19 +560,19 @@ theorem integral_cos_mathieuCe_even (n : ℕ) (h : ℝ) (z : ℂ) :
   field_simp
 
 /-- Constant factor: derivative facts. -/
-lemma p1a2_hd_one_z : ∀ (z : ℂ) (_t : ℝ), HasDerivAt (fun _ : ℂ => (1 : ℂ)) 0 z :=
+private lemma hasDerivAt_one_in_z : ∀ (z : ℂ) (_t : ℝ), HasDerivAt (fun _ : ℂ => (1 : ℂ)) 0 z :=
   fun _ _ => hasDerivAt_const _ _
 
 /-- Constant factor in `t`. -/
-lemma p1a2_hd_one_t : ∀ (_z : ℂ) (t : ℝ), HasDerivAt (fun _ : ℝ => (1 : ℂ)) 0 t :=
+private lemma hasDerivAt_one_in_t : ∀ (_z : ℂ) (t : ℝ), HasDerivAt (fun _ : ℝ => (1 : ℂ)) 0 t :=
   fun _ _ => hasDerivAt_const _ _
 
 /-- Zero factor in `z`. -/
-lemma p1a2_hd_zero_z : ∀ (z : ℂ) (_t : ℝ), HasDerivAt (fun _ : ℂ => (0 : ℂ)) 0 z :=
+private lemma hasDerivAt_zero_in_z : ∀ (z : ℂ) (_t : ℝ), HasDerivAt (fun _ : ℂ => (0 : ℂ)) 0 z :=
   fun _ _ => hasDerivAt_const _ _
 
 /-- Zero factor in `t`. -/
-lemma p1a2_hd_zero_t : ∀ (_z : ℂ) (t : ℝ), HasDerivAt (fun _ : ℝ => (0 : ℂ)) 0 t :=
+private lemma hasDerivAt_zero_in_t : ∀ (_z : ℂ) (t : ℝ), HasDerivAt (fun _ : ℝ => (0 : ℂ)) 0 t :=
   fun _ _ => hasDerivAt_const _ _
 
 /-- **DLMF 28.10.2**: `(2/π) ∫₀^{π/2} cosh(2h sin z sin t) ce_{2n}(t, h²) dt
@@ -563,7 +585,7 @@ theorem integral_cosh_mathieuCe_even (n : ℕ) (h : ℝ) (z : ℂ) :
         mathieuCe (2 * n) z (h ^ 2) := by
   set H : ℂ := (h : ℂ) with hH
   have hQ : (((h ^ 2 : ℝ)) : ℂ) = H ^ 2 := by push_cast; rfl
-  obtain ⟨hG, -⟩ := p1a2_isMathieuSolution_kernel (α := 0) (β := π / 2)
+  obtain ⟨hG, -⟩ := isMathieuSolution_intervalIntegral_mul_comp_kernel (α := 0) (β := π / 2)
     (P := fun _ _ => 1) (Pz := fun _ _ => 0) (Pzz := fun _ _ => 0) (Pt := fun _ _ => 0)
     (Ptt := fun _ _ => 0)
     (u := fun z t => 2 * H * Complex.sin z * Real.sin t)
@@ -575,15 +597,15 @@ theorem integral_cosh_mathieuCe_even (n : ℕ) (h : ℝ) (z : ℂ) :
     (f := fun t => mathieuCe (2 * n) t (h ^ 2))
     (f' := fun t => deriv (fun z => mathieuCe (2 * n) z (h ^ 2)) t)
     (a := mathieuA (2 * n) (h ^ 2)) (q := ((h ^ 2 : ℝ) : ℂ))
-    p1a2_hd_one_z p1a2_hd_zero_z p1a2_hd_one_t p1a2_hd_zero_t
+    hasDerivAt_one_in_z hasDerivAt_zero_in_z hasDerivAt_one_in_t hasDerivAt_zero_in_t
     (fun z t => ((Complex.hasDerivAt_sin z).const_mul _).mul_const _)
     (fun z t => ((Complex.hasDerivAt_cos z).const_mul _).mul_const _)
-    (fun z t => (p1a2_hasDerivAt_rsin t).const_mul _)
-    (fun z t => (p1a2_hasDerivAt_rcos t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_sin t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_cos t).const_mul _)
     Complex.hasDerivAt_cosh Complex.hasDerivAt_sinh Complex.continuous_cosh
     (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop)
     (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop)
-    (p1a2_hasDerivAt_ce _ _) (p1a2_hasDerivAt_deriv_ce _ _)
+    (hasDerivAt_mathieuCe_ofReal _ _) (hasDerivAt_deriv_mathieuCe_ofReal _ _)
     (fun z t => by
       rw [hQ, Complex.cos_two_mul, Complex.cos_two_mul, ← Complex.ofReal_cos]
       have e1 := Complex.sin_sq_add_cos_sq z
@@ -594,8 +616,8 @@ theorem integral_cosh_mathieuCe_even (n : ℕ) (h : ℝ) (z : ℂ) :
         (4 * H ^ 2 * Complex.cos z ^ 2 * Complex.cosh (2 * H * Complex.sin z * Real.sin t)) * e2)
     (fun z => by
       simp only [Real.sin_zero, Real.cos_pi_div_two, Complex.ofReal_zero, mul_zero,
-        Complex.sinh_zero, zero_mul, add_zero, p1a2_deriv_ce_even_half_pi, Complex.ofReal_zero,
-        p1a2_deriv_ce_zero])
+        Complex.sinh_zero, zero_mul, add_zero, deriv_mathieuCe_even_pi_div_two, Complex.ofReal_zero,
+        deriv_mathieuCe_zero])
   have hev : ∀ z, (fun z => ∫ t in (0 : ℝ)..π / 2, 1 * Complex.cosh (2 * H * Complex.sin z *
       Real.sin t) * mathieuCe (2 * n) t (h ^ 2)) (-z) = (fun z => ∫ t in (0 : ℝ)..π / 2,
       1 * Complex.cosh (2 * H * Complex.sin z * Real.sin t) * mathieuCe (2 * n) t (h ^ 2)) z := by
@@ -606,25 +628,25 @@ theorem integral_cosh_mathieuCe_even (n : ℕ) (h : ℝ) (z : ℂ) :
       -(2 * H * Complex.sin z * Real.sin t) by ring, Complex.cosh_neg]
   have hne : mathieuCe (2 * n) 0 (h ^ 2) ≠ 0 := by
     rw [mathieuCe_zero]; exact Complex.ofReal_ne_zero.mpr (mathieuCeZero_pos _ _).ne'
-  have := p1a2_finish_val_ce hG hev hne (A := mathieuFourierA (2 * n) 0 (h ^ 2)) (by
+  have := two_div_pi_mul_eq_mathieuCe_of_value hG hev hne (A := mathieuFourierA (2 * n) 0 (h ^ 2)) (by
     simp only [Complex.sin_zero, mul_zero, zero_mul, Complex.cosh_zero, one_mul]
-    rw [p1a2_quarter_A0]
+    rw [integral_mathieuCe_even_quarter]
     have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
     field_simp) z
   simpa only [one_mul] using this
 
 /-- `ce_{2n+1}(π/2) = 0` (DLMF 28.2.21). -/
-theorem p1a2_ce_odd_half_pi (n : ℕ) (q : ℝ) :
+theorem mathieuCe_odd_pi_div_two (n : ℕ) (q : ℝ) :
     mathieuCe (2 * n + 1) ((π / 2 : ℝ) : ℂ) q = 0 := by
   rw [mathieuCe]; push_cast; rw [mathieuWI_half_pi_mathieuA_odd, mul_zero]
 
 /-- `se_{2n+2}(π/2) = 0` (DLMF 28.2.22). -/
-theorem p1a2_se_even_half_pi (n : ℕ) (q : ℝ) :
+theorem mathieuSe_even_pi_div_two (n : ℕ) (q : ℝ) :
     mathieuSe (2 * n + 2) ((π / 2 : ℝ) : ℂ) q = 0 := by
   rw [mathieuSe]; push_cast; rw [mathieuWII_half_pi_mathieuB_even, mul_zero]
 
 /-- `se_{2n+1}'(π/2) = 0` (DLMF 28.2.22). -/
-theorem p1a2_deriv_se_odd_half_pi (n : ℕ) (q : ℝ) :
+theorem deriv_mathieuSe_odd_pi_div_two (n : ℕ) (q : ℝ) :
     deriv (fun z => mathieuSe (2 * n + 1) z q) ((π / 2 : ℝ) : ℂ) = 0 := by
   have h := mathieuWII_spec (mathieuB (2 * n + 1) q) q
   rw [show deriv (fun z => mathieuSe (2 * n + 1) z q) ((π / 2 : ℝ) : ℂ) =
@@ -645,7 +667,7 @@ theorem integral_sin_mathieuCe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
         mathieuCe (2 * n + 1) z (h ^ 2) := by
   set H : ℂ := (h : ℂ) with hH
   have hQ : (((h ^ 2 : ℝ)) : ℂ) = H ^ 2 := by push_cast; rfl
-  obtain ⟨hG, hder⟩ := p1a2_isMathieuSolution_kernel (α := 0) (β := π / 2)
+  obtain ⟨hG, hder⟩ := isMathieuSolution_intervalIntegral_mul_comp_kernel (α := 0) (β := π / 2)
     (P := fun _ _ => 1) (Pz := fun _ _ => 0) (Pzz := fun _ _ => 0) (Pt := fun _ _ => 0)
     (Ptt := fun _ _ => 0)
     (u := fun z t => 2 * H * Complex.cos z * Real.cos t)
@@ -657,15 +679,15 @@ theorem integral_sin_mathieuCe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
     (f := fun t => mathieuCe (2 * n + 1) t (h ^ 2))
     (f' := fun t => deriv (fun z => mathieuCe (2 * n + 1) z (h ^ 2)) t)
     (a := mathieuA (2 * n + 1) (h ^ 2)) (q := ((h ^ 2 : ℝ) : ℂ))
-    p1a2_hd_one_z p1a2_hd_zero_z p1a2_hd_one_t p1a2_hd_zero_t
+    hasDerivAt_one_in_z hasDerivAt_zero_in_z hasDerivAt_one_in_t hasDerivAt_zero_in_t
     (fun z t => ((Complex.hasDerivAt_cos z).const_mul _).mul_const _)
     (fun z t => ((Complex.hasDerivAt_sin z).neg.const_mul _).mul_const _)
-    (fun z t => (p1a2_hasDerivAt_rcos t).const_mul _)
-    (fun z t => (p1a2_hasDerivAt_rsin t).neg.const_mul _)
+    (fun z t => (hasDerivAt_ofReal_cos t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_sin t).neg.const_mul _)
     Complex.hasDerivAt_sin Complex.hasDerivAt_cos (by fun_prop)
     (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop)
     (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop)
-    (p1a2_hasDerivAt_ce _ _) (p1a2_hasDerivAt_deriv_ce _ _)
+    (hasDerivAt_mathieuCe_ofReal _ _) (hasDerivAt_deriv_mathieuCe_ofReal _ _)
     (fun z t => by
       rw [hQ, Complex.cos_two_mul, Complex.cos_two_mul, ← Complex.ofReal_cos]
       have e1 := Complex.sin_sq_add_cos_sq z
@@ -676,22 +698,22 @@ theorem integral_sin_mathieuCe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
         (4 * H ^ 2 * Complex.cos z ^ 2 * Complex.sin (2 * H * Complex.cos z * Real.cos t)) * e2)
     (fun z => by
       simp only [Real.sin_zero, Real.cos_pi_div_two, Complex.ofReal_zero, mul_zero, neg_zero,
-        Complex.sin_zero, zero_mul, add_zero, p1a2_ce_odd_half_pi, Complex.ofReal_zero,
-        p1a2_deriv_ce_zero])
+        Complex.sin_zero, zero_mul, add_zero, mathieuCe_odd_pi_div_two, Complex.ofReal_zero,
+        deriv_mathieuCe_zero])
   have hev : ∀ z, (fun z => ∫ t in (0 : ℝ)..π / 2, 1 * Complex.sin (2 * H * Complex.cos z *
       Real.cos t) * mathieuCe (2 * n + 1) t (h ^ 2)) (-z) = (fun z => ∫ t in (0 : ℝ)..π / 2,
       1 * Complex.sin (2 * H * Complex.cos z * Real.cos t) * mathieuCe (2 * n + 1) t (h ^ 2)) z :=
     fun z => by simp only [Complex.cos_neg]
   have hne : deriv (fun w => mathieuCe (2 * n + 1) w (h ^ 2)) (π / 2) ≠ 0 := fun h0 =>
-    p1a2_ce_or_deriv_ne_zero _ _ (π / 2) (by
-      have := p1a2_ce_odd_half_pi n (h ^ 2); push_cast at this; exact this) h0
-  have := p1a2_finish_der_ce hG hev hne (A := -(H * mathieuFourierA (2 * n + 1) 1 (h ^ 2))) (by
+    mathieuCe_deriv_not_both_zero _ _ (π / 2) (by
+      have := mathieuCe_odd_pi_div_two n (h ^ 2); push_cast at this; exact this) h0
+  have := two_div_pi_mul_eq_mathieuCe_of_deriv hG hev hne (A := -(H * mathieuFourierA (2 * n + 1) 1 (h ^ 2))) (by
     rw [(hder _).deriv, intervalIntegral.integral_congr (g := fun t : ℝ => (-2 * H) *
       (((Real.cos t : ℝ) : ℂ) * mathieuCe (2 * n + 1) t (h ^ 2))) (fun t _ => by
         simp only [Complex.cos_pi_div_two, mul_zero, zero_mul, Complex.cos_zero,
           Complex.sin_pi_div_two]
         ring)]
-    rw [intervalIntegral.integral_const_mul, p1a2_quarter_A1]
+    rw [intervalIntegral.integral_const_mul, integral_cos_mul_mathieuCe_odd_quarter]
     have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
     field_simp; ring) z
   rw [← neg_div]
@@ -707,7 +729,7 @@ theorem integral_cos_cosh_mathieuCe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
         mathieuCe (2 * n + 1) z (h ^ 2) := by
   set H : ℂ := (h : ℂ) with hH
   have hQ : (((h ^ 2 : ℝ)) : ℂ) = H ^ 2 := by push_cast; rfl
-  obtain ⟨hG, -⟩ := p1a2_isMathieuSolution_kernel (α := 0) (β := π / 2)
+  obtain ⟨hG, -⟩ := isMathieuSolution_intervalIntegral_mul_comp_kernel (α := 0) (β := π / 2)
     (P := fun z t => Complex.cos z * Real.cos t) (Pz := fun z t => -Complex.sin z * Real.cos t)
     (Pzz := fun z t => -Complex.cos z * Real.cos t)
     (Pt := fun z t => Complex.cos z * -((Real.sin t : ℝ) : ℂ))
@@ -723,16 +745,16 @@ theorem integral_cos_cosh_mathieuCe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
     (a := mathieuA (2 * n + 1) (h ^ 2)) (q := ((h ^ 2 : ℝ) : ℂ))
     (fun z t => (Complex.hasDerivAt_cos z).mul_const _)
     (fun z t => (Complex.hasDerivAt_sin z).neg.mul_const _)
-    (fun z t => (p1a2_hasDerivAt_rcos t).const_mul _)
-    (fun z t => (p1a2_hasDerivAt_rsin t).neg.const_mul _)
+    (fun z t => (hasDerivAt_ofReal_cos t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_sin t).neg.const_mul _)
     (fun z t => ((Complex.hasDerivAt_sin z).const_mul _).mul_const _)
     (fun z t => ((Complex.hasDerivAt_cos z).const_mul _).mul_const _)
-    (fun z t => (p1a2_hasDerivAt_rsin t).const_mul _)
-    (fun z t => (p1a2_hasDerivAt_rcos t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_sin t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_cos t).const_mul _)
     Complex.hasDerivAt_cosh Complex.hasDerivAt_sinh Complex.continuous_cosh
     (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop)
     (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop)
-    (p1a2_hasDerivAt_ce _ _) (p1a2_hasDerivAt_deriv_ce _ _)
+    (hasDerivAt_mathieuCe_ofReal _ _) (hasDerivAt_deriv_mathieuCe_ofReal _ _)
     (fun z t => by
       rw [hQ, Complex.cos_two_mul, Complex.cos_two_mul, ← Complex.ofReal_cos]
       have e1 := Complex.sin_sq_add_cos_sq z
@@ -744,7 +766,7 @@ theorem integral_cos_cosh_mathieuCe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
           Complex.cosh (2 * H * Complex.sin z * Real.sin t))) * e2)
     (fun z => by
       simp only [Real.sin_zero, Real.cos_pi_div_two, Complex.ofReal_zero, mul_zero, neg_zero,
-        Complex.sinh_zero, zero_mul, add_zero, p1a2_ce_odd_half_pi, p1a2_deriv_ce_zero])
+        Complex.sinh_zero, zero_mul, add_zero, mathieuCe_odd_pi_div_two, deriv_mathieuCe_zero])
   have hev : ∀ z, (fun z => ∫ t in (0 : ℝ)..π / 2, Complex.cos z * Real.cos t *
       Complex.cosh (2 * H * Complex.sin z * Real.sin t) * mathieuCe (2 * n + 1) t (h ^ 2)) (-z) =
       (fun z => ∫ t in (0 : ℝ)..π / 2, Complex.cos z * Real.cos t *
@@ -756,12 +778,12 @@ theorem integral_cos_cosh_mathieuCe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
       -(2 * H * Complex.sin z * Real.sin t) by ring, Complex.cosh_neg]
   have hne : mathieuCe (2 * n + 1) 0 (h ^ 2) ≠ 0 := by
     rw [mathieuCe_zero]; exact Complex.ofReal_ne_zero.mpr (mathieuCeZero_pos _ _).ne'
-  have := p1a2_finish_val_ce hG hev hne (A := mathieuFourierA (2 * n + 1) 1 (h ^ 2) / 2) (by
+  have := two_div_pi_mul_eq_mathieuCe_of_value hG hev hne (A := mathieuFourierA (2 * n + 1) 1 (h ^ 2) / 2) (by
     rw [intervalIntegral.integral_congr (g := fun t : ℝ =>
       ((Real.cos t : ℝ) : ℂ) * mathieuCe (2 * n + 1) t (h ^ 2)) (fun t _ => by
         simp only [Complex.cos_zero, Complex.sin_zero, mul_zero, zero_mul, Complex.cosh_zero]
         ring)]
-    rw [p1a2_quarter_A1]
+    rw [integral_cos_mul_mathieuCe_odd_quarter]
     have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
     field_simp; ring) z
   simpa only [div_div] using this
@@ -776,7 +798,7 @@ theorem integral_sinh_mathieuSe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
         deriv (fun w => mathieuSe (2 * n + 1) w (h ^ 2)) 0 * mathieuSe (2 * n + 1) z (h ^ 2) := by
   set H : ℂ := (h : ℂ) with hH
   have hQ : (((h ^ 2 : ℝ)) : ℂ) = H ^ 2 := by push_cast; rfl
-  obtain ⟨hG, hder⟩ := p1a2_isMathieuSolution_kernel (α := 0) (β := π / 2)
+  obtain ⟨hG, hder⟩ := isMathieuSolution_intervalIntegral_mul_comp_kernel (α := 0) (β := π / 2)
     (P := fun _ _ => 1) (Pz := fun _ _ => 0) (Pzz := fun _ _ => 0) (Pt := fun _ _ => 0)
     (Ptt := fun _ _ => 0)
     (u := fun z t => 2 * H * Complex.sin z * Real.sin t)
@@ -788,15 +810,15 @@ theorem integral_sinh_mathieuSe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
     (f := fun t => mathieuSe (2 * n + 1) t (h ^ 2))
     (f' := fun t => deriv (fun z => mathieuSe (2 * n + 1) z (h ^ 2)) t)
     (a := mathieuB (2 * n + 1) (h ^ 2)) (q := ((h ^ 2 : ℝ) : ℂ))
-    p1a2_hd_one_z p1a2_hd_zero_z p1a2_hd_one_t p1a2_hd_zero_t
+    hasDerivAt_one_in_z hasDerivAt_zero_in_z hasDerivAt_one_in_t hasDerivAt_zero_in_t
     (fun z t => ((Complex.hasDerivAt_sin z).const_mul _).mul_const _)
     (fun z t => ((Complex.hasDerivAt_cos z).const_mul _).mul_const _)
-    (fun z t => (p1a2_hasDerivAt_rsin t).const_mul _)
-    (fun z t => (p1a2_hasDerivAt_rcos t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_sin t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_cos t).const_mul _)
     Complex.hasDerivAt_sinh Complex.hasDerivAt_cosh Complex.continuous_sinh
     (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop)
     (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop)
-    (p1a2_hasDerivAt_se _ _) (p1a2_hasDerivAt_deriv_se _ _)
+    (hasDerivAt_mathieuSe_ofReal _ _) (hasDerivAt_deriv_mathieuSe_ofReal _ _)
     (fun z t => by
       rw [hQ, Complex.cos_two_mul, Complex.cos_two_mul, ← Complex.ofReal_cos]
       have e1 := Complex.sin_sq_add_cos_sq z
@@ -807,7 +829,7 @@ theorem integral_sinh_mathieuSe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
         (4 * H ^ 2 * Complex.cos z ^ 2 * Complex.sinh (2 * H * Complex.sin z * Real.sin t)) * e2)
     (fun z => by
       simp only [Real.sin_zero, Real.cos_pi_div_two, Complex.ofReal_zero, mul_zero,
-        Complex.sinh_zero, zero_mul, add_zero, p1a2_deriv_se_odd_half_pi, p1a2_se_zero])
+        Complex.sinh_zero, zero_mul, add_zero, deriv_mathieuSe_odd_pi_div_two, mathieuSe_zero])
   have hodd : ∀ z, (fun z => ∫ t in (0 : ℝ)..π / 2, 1 * Complex.sinh (2 * H * Complex.sin z *
       Real.sin t) * mathieuSe (2 * n + 1) t (h ^ 2)) (-z) = -(fun z => ∫ t in (0 : ℝ)..π / 2,
       1 * Complex.sinh (2 * H * Complex.sin z * Real.sin t) *
@@ -821,12 +843,12 @@ theorem integral_sinh_mathieuSe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
     ring
   have hne : deriv (fun w => mathieuSe (2 * n + 1) w (h ^ 2)) 0 ≠ 0 := by
     rw [deriv_mathieuSe_zero]; exact Complex.ofReal_ne_zero.mpr (mathieuSeDerivZero_pos _ _).ne'
-  have := p1a2_finish_der_se hG hodd hne (A := H * mathieuFourierB (2 * n + 1) 1 (h ^ 2)) (by
+  have := two_div_pi_mul_eq_mathieuSe_of_deriv hG hodd hne (A := H * mathieuFourierB (2 * n + 1) 1 (h ^ 2)) (by
     rw [(hder _).deriv, intervalIntegral.integral_congr (g := fun t : ℝ => (2 * H) *
       (((Real.sin t : ℝ) : ℂ) * mathieuSe (2 * n + 1) t (h ^ 2))) (fun t _ => by
         simp only [Complex.cos_zero, Complex.sin_zero, mul_zero, zero_mul, Complex.cosh_zero]
         ring)]
-    rw [intervalIntegral.integral_const_mul, p1a2_quarter_B1]
+    rw [intervalIntegral.integral_const_mul, integral_sin_mul_mathieuSe_odd_quarter]
     have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
     field_simp; ring) z
   simpa only [one_mul] using this
@@ -841,7 +863,7 @@ theorem integral_sin_cos_mathieuSe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
         mathieuSe (2 * n + 1) z (h ^ 2) := by
   set H : ℂ := (h : ℂ) with hH
   have hQ : (((h ^ 2 : ℝ)) : ℂ) = H ^ 2 := by push_cast; rfl
-  obtain ⟨hG, -⟩ := p1a2_isMathieuSolution_kernel (α := 0) (β := π / 2)
+  obtain ⟨hG, -⟩ := isMathieuSolution_intervalIntegral_mul_comp_kernel (α := 0) (β := π / 2)
     (P := fun z t => Complex.sin z * Real.sin t) (Pz := fun z t => Complex.cos z * Real.sin t)
     (Pzz := fun z t => -Complex.sin z * Real.sin t)
     (Pt := fun z t => Complex.sin z * Real.cos t)
@@ -857,16 +879,16 @@ theorem integral_sin_cos_mathieuSe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
     (a := mathieuB (2 * n + 1) (h ^ 2)) (q := ((h ^ 2 : ℝ) : ℂ))
     (fun z t => (Complex.hasDerivAt_sin z).mul_const _)
     (fun z t => (Complex.hasDerivAt_cos z).mul_const _)
-    (fun z t => (p1a2_hasDerivAt_rsin t).const_mul _)
-    (fun z t => (p1a2_hasDerivAt_rcos t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_sin t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_cos t).const_mul _)
     (fun z t => ((Complex.hasDerivAt_cos z).const_mul _).mul_const _)
     (fun z t => ((Complex.hasDerivAt_sin z).neg.const_mul _).mul_const _)
-    (fun z t => (p1a2_hasDerivAt_rcos t).const_mul _)
-    (fun z t => (p1a2_hasDerivAt_rsin t).neg.const_mul _)
+    (fun z t => (hasDerivAt_ofReal_cos t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_sin t).neg.const_mul _)
     Complex.hasDerivAt_cos (fun w => (Complex.hasDerivAt_sin w).neg) (by fun_prop)
     (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop)
     (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop)
-    (p1a2_hasDerivAt_se _ _) (p1a2_hasDerivAt_deriv_se _ _)
+    (hasDerivAt_mathieuSe_ofReal _ _) (hasDerivAt_deriv_mathieuSe_ofReal _ _)
     (fun z t => by
       rw [hQ, Complex.cos_two_mul, Complex.cos_two_mul, ← Complex.ofReal_cos]
       have e1 := Complex.sin_sq_add_cos_sq z
@@ -878,7 +900,7 @@ theorem integral_sin_cos_mathieuSe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
           Complex.cos (2 * H * Complex.cos z * Real.cos t))) * e2)
     (fun z => by
       simp only [Real.sin_zero, Real.cos_pi_div_two, Complex.ofReal_zero, mul_zero, neg_zero,
-        Complex.sin_zero, zero_mul, add_zero, p1a2_deriv_se_odd_half_pi, p1a2_se_zero])
+        Complex.sin_zero, zero_mul, add_zero, deriv_mathieuSe_odd_pi_div_two, mathieuSe_zero])
   have hodd : ∀ z, (fun z => ∫ t in (0 : ℝ)..π / 2, Complex.sin z * Real.sin t *
       Complex.cos (2 * H * Complex.cos z * Real.cos t) * mathieuSe (2 * n + 1) t (h ^ 2)) (-z) =
       -(fun z => ∫ t in (0 : ℝ)..π / 2, Complex.sin z * Real.sin t *
@@ -889,15 +911,15 @@ theorem integral_sin_cos_mathieuSe_odd (n : ℕ) (h : ℝ) (z : ℂ) :
     congr 1; funext t
     ring
   have hne : mathieuSe (2 * n + 1) (π / 2) (h ^ 2) ≠ 0 := fun h0 =>
-    p1a2_se_or_deriv_ne_zero _ _ (π / 2) h0 (by
-      have := p1a2_deriv_se_odd_half_pi n (h ^ 2); push_cast at this; exact this)
-  have := p1a2_finish_val_se hG hodd hne (A := mathieuFourierB (2 * n + 1) 1 (h ^ 2) / 2) (by
+    mathieuSe_deriv_not_both_zero _ _ (π / 2) h0 (by
+      have := deriv_mathieuSe_odd_pi_div_two n (h ^ 2); push_cast at this; exact this)
+  have := two_div_pi_mul_eq_mathieuSe_of_value hG hodd hne (A := mathieuFourierB (2 * n + 1) 1 (h ^ 2) / 2) (by
     rw [intervalIntegral.integral_congr (g := fun t : ℝ =>
       ((Real.sin t : ℝ) : ℂ) * mathieuSe (2 * n + 1) t (h ^ 2)) (fun t _ => by
         simp only [Complex.sin_pi_div_two, Complex.cos_pi_div_two, mul_zero, zero_mul,
           Complex.cos_zero]
         ring)]
-    rw [p1a2_quarter_B1]
+    rw [integral_sin_mul_mathieuSe_odd_quarter]
     have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
     field_simp; ring) z
   simpa only [div_div] using this
@@ -913,7 +935,7 @@ theorem integral_sin_sin_mathieuSe_even (n : ℕ) (h : ℝ) (z : ℂ) :
         mathieuSe (2 * n + 2) z (h ^ 2) := by
   set H : ℂ := (h : ℂ) with hH
   have hQ : (((h ^ 2 : ℝ)) : ℂ) = H ^ 2 := by push_cast; rfl
-  obtain ⟨hG, hder⟩ := p1a2_isMathieuSolution_kernel (α := 0) (β := π / 2)
+  obtain ⟨hG, hder⟩ := isMathieuSolution_intervalIntegral_mul_comp_kernel (α := 0) (β := π / 2)
     (P := fun z t => Complex.sin z * Real.sin t) (Pz := fun z t => Complex.cos z * Real.sin t)
     (Pzz := fun z t => -Complex.sin z * Real.sin t)
     (Pt := fun z t => Complex.sin z * Real.cos t)
@@ -929,16 +951,16 @@ theorem integral_sin_sin_mathieuSe_even (n : ℕ) (h : ℝ) (z : ℂ) :
     (a := mathieuB (2 * n + 2) (h ^ 2)) (q := ((h ^ 2 : ℝ) : ℂ))
     (fun z t => (Complex.hasDerivAt_sin z).mul_const _)
     (fun z t => (Complex.hasDerivAt_cos z).mul_const _)
-    (fun z t => (p1a2_hasDerivAt_rsin t).const_mul _)
-    (fun z t => (p1a2_hasDerivAt_rcos t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_sin t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_cos t).const_mul _)
     (fun z t => ((Complex.hasDerivAt_cos z).const_mul _).mul_const _)
     (fun z t => ((Complex.hasDerivAt_sin z).neg.const_mul _).mul_const _)
-    (fun z t => (p1a2_hasDerivAt_rcos t).const_mul _)
-    (fun z t => (p1a2_hasDerivAt_rsin t).neg.const_mul _)
+    (fun z t => (hasDerivAt_ofReal_cos t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_sin t).neg.const_mul _)
     Complex.hasDerivAt_sin Complex.hasDerivAt_cos (by fun_prop)
     (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop)
     (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop)
-    (p1a2_hasDerivAt_se _ _) (p1a2_hasDerivAt_deriv_se _ _)
+    (hasDerivAt_mathieuSe_ofReal _ _) (hasDerivAt_deriv_mathieuSe_ofReal _ _)
     (fun z t => by
       rw [hQ, Complex.cos_two_mul, Complex.cos_two_mul, ← Complex.ofReal_cos]
       have e1 := Complex.sin_sq_add_cos_sq z
@@ -950,7 +972,7 @@ theorem integral_sin_sin_mathieuSe_even (n : ℕ) (h : ℝ) (z : ℂ) :
           Complex.sin (2 * H * Complex.cos z * Real.cos t))) * e2)
     (fun z => by
       simp only [Real.sin_zero, Real.cos_pi_div_two, Complex.ofReal_zero, mul_zero, neg_zero,
-        Complex.sin_zero, zero_mul, add_zero, p1a2_se_even_half_pi, p1a2_se_zero])
+        Complex.sin_zero, zero_mul, add_zero, mathieuSe_even_pi_div_two, mathieuSe_zero])
   have hodd : ∀ z, (fun z => ∫ t in (0 : ℝ)..π / 2, Complex.sin z * Real.sin t *
       Complex.sin (2 * H * Complex.cos z * Real.cos t) * mathieuSe (2 * n + 2) t (h ^ 2)) (-z) =
       -(fun z => ∫ t in (0 : ℝ)..π / 2, Complex.sin z * Real.sin t *
@@ -961,9 +983,9 @@ theorem integral_sin_sin_mathieuSe_even (n : ℕ) (h : ℝ) (z : ℂ) :
     congr 1; funext t
     ring
   have hne : deriv (fun w => mathieuSe (2 * n + 2) w (h ^ 2)) (π / 2) ≠ 0 := fun h0 =>
-    p1a2_se_or_deriv_ne_zero _ _ (π / 2) (by
-      have := p1a2_se_even_half_pi n (h ^ 2); push_cast at this; exact this) h0
-  have := p1a2_finish_der_se hG hodd hne (A := -(H * mathieuFourierB (2 * n + 2) 2 (h ^ 2) / 2))
+    mathieuSe_deriv_not_both_zero _ _ (π / 2) (by
+      have := mathieuSe_even_pi_div_two n (h ^ 2); push_cast at this; exact this) h0
+  have := two_div_pi_mul_eq_mathieuSe_of_deriv hG hodd hne (A := -(H * mathieuFourierB (2 * n + 2) 2 (h ^ 2) / 2))
     (by
     rw [(hder _).deriv, intervalIntegral.integral_congr (g := fun t : ℝ => (-2 * H) *
       (((Real.sin t : ℝ) : ℂ) * ((Real.cos t : ℝ) : ℂ) * mathieuSe (2 * n + 2) t (h ^ 2)))
@@ -971,7 +993,7 @@ theorem integral_sin_sin_mathieuSe_even (n : ℕ) (h : ℝ) (z : ℂ) :
         simp only [Complex.sin_pi_div_two, Complex.cos_pi_div_two, mul_zero, zero_mul,
           Complex.cos_zero]
         ring)]
-    rw [intervalIntegral.integral_const_mul, p1a2_quarter_B2]
+    rw [intervalIntegral.integral_const_mul, integral_sin_mul_cos_mul_mathieuSe_even_quarter]
     have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
     field_simp; ring) z
   rw [this]
@@ -988,7 +1010,7 @@ theorem integral_cos_sinh_mathieuSe_even (n : ℕ) (h : ℝ) (z : ℂ) :
         mathieuSe (2 * n + 2) z (h ^ 2) := by
   set H : ℂ := (h : ℂ) with hH
   have hQ : (((h ^ 2 : ℝ)) : ℂ) = H ^ 2 := by push_cast; rfl
-  obtain ⟨hG, hder⟩ := p1a2_isMathieuSolution_kernel (α := 0) (β := π / 2)
+  obtain ⟨hG, hder⟩ := isMathieuSolution_intervalIntegral_mul_comp_kernel (α := 0) (β := π / 2)
     (P := fun z t => Complex.cos z * Real.cos t) (Pz := fun z t => -Complex.sin z * Real.cos t)
     (Pzz := fun z t => -Complex.cos z * Real.cos t)
     (Pt := fun z t => Complex.cos z * -((Real.sin t : ℝ) : ℂ))
@@ -1004,16 +1026,16 @@ theorem integral_cos_sinh_mathieuSe_even (n : ℕ) (h : ℝ) (z : ℂ) :
     (a := mathieuB (2 * n + 2) (h ^ 2)) (q := ((h ^ 2 : ℝ) : ℂ))
     (fun z t => (Complex.hasDerivAt_cos z).mul_const _)
     (fun z t => (Complex.hasDerivAt_sin z).neg.mul_const _)
-    (fun z t => (p1a2_hasDerivAt_rcos t).const_mul _)
-    (fun z t => (p1a2_hasDerivAt_rsin t).neg.const_mul _)
+    (fun z t => (hasDerivAt_ofReal_cos t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_sin t).neg.const_mul _)
     (fun z t => ((Complex.hasDerivAt_sin z).const_mul _).mul_const _)
     (fun z t => ((Complex.hasDerivAt_cos z).const_mul _).mul_const _)
-    (fun z t => (p1a2_hasDerivAt_rsin t).const_mul _)
-    (fun z t => (p1a2_hasDerivAt_rcos t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_sin t).const_mul _)
+    (fun z t => (hasDerivAt_ofReal_cos t).const_mul _)
     Complex.hasDerivAt_sinh Complex.hasDerivAt_cosh Complex.continuous_sinh
     (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop) (by fun_prop)
     (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop) (fun z => by fun_prop)
-    (p1a2_hasDerivAt_se _ _) (p1a2_hasDerivAt_deriv_se _ _)
+    (hasDerivAt_mathieuSe_ofReal _ _) (hasDerivAt_deriv_mathieuSe_ofReal _ _)
     (fun z t => by
       rw [hQ, Complex.cos_two_mul, Complex.cos_two_mul, ← Complex.ofReal_cos]
       have e1 := Complex.sin_sq_add_cos_sq z
@@ -1025,7 +1047,7 @@ theorem integral_cos_sinh_mathieuSe_even (n : ℕ) (h : ℝ) (z : ℂ) :
           Complex.sinh (2 * H * Complex.sin z * Real.sin t))) * e2)
     (fun z => by
       simp only [Real.sin_zero, Real.cos_pi_div_two, Complex.ofReal_zero, mul_zero, neg_zero,
-        Complex.sinh_zero, zero_mul, add_zero, p1a2_se_even_half_pi, p1a2_se_zero])
+        Complex.sinh_zero, zero_mul, add_zero, mathieuSe_even_pi_div_two, mathieuSe_zero])
   have hodd : ∀ z, (fun z => ∫ t in (0 : ℝ)..π / 2, Complex.cos z * Real.cos t *
       Complex.sinh (2 * H * Complex.sin z * Real.sin t) * mathieuSe (2 * n + 2) t (h ^ 2)) (-z) =
       -(fun z => ∫ t in (0 : ℝ)..π / 2, Complex.cos z * Real.cos t *
@@ -1039,14 +1061,14 @@ theorem integral_cos_sinh_mathieuSe_even (n : ℕ) (h : ℝ) (z : ℂ) :
     ring
   have hne : deriv (fun w => mathieuSe (2 * n + 2) w (h ^ 2)) 0 ≠ 0 := by
     rw [deriv_mathieuSe_zero]; exact Complex.ofReal_ne_zero.mpr (mathieuSeDerivZero_pos _ _).ne'
-  have := p1a2_finish_der_se hG hodd hne (A := H * mathieuFourierB (2 * n + 2) 2 (h ^ 2) / 2) (by
+  have := two_div_pi_mul_eq_mathieuSe_of_deriv hG hodd hne (A := H * mathieuFourierB (2 * n + 2) 2 (h ^ 2) / 2) (by
     rw [(hder _).deriv, intervalIntegral.integral_congr (g := fun t : ℝ => (2 * H) *
       (((Real.sin t : ℝ) : ℂ) * ((Real.cos t : ℝ) : ℂ) * mathieuSe (2 * n + 2) t (h ^ 2)))
       (fun t _ => by
         simp only [Complex.cos_zero, Complex.sin_zero, mul_zero, zero_mul, Complex.cosh_zero,
           Complex.sinh_zero, neg_zero]
         ring)]
-    rw [intervalIntegral.integral_const_mul, p1a2_quarter_B2]
+    rw [intervalIntegral.integral_const_mul, integral_sin_mul_cos_mul_mathieuSe_even_quarter]
     have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
     field_simp; ring) z
   simpa only [div_div] using this

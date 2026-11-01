@@ -39,7 +39,7 @@ public import DLMFMathlib.Analysis.Complex.SegmentPrimitive
 public import DLMFMathlib.Analysis.Complex.Sqrt
 public import DLMFMathlib.Analysis.Complex.StarPrimitive
 public import DLMFMathlib.Analysis.Complex.TaylorParameter
-public import DLMFMathlib.Analysis.Complex.TrigR4SeriesExtension
+public import DLMFMathlib.Analysis.Complex.TrigSeriesExtension
 public import DLMFMathlib.Analysis.Complex.TrigonometricProducts
 public import DLMFMathlib.Analysis.Complex.ZeroLocalization
 public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
@@ -65,9 +65,9 @@ public import DLMFMathlib.Analysis.ODE.LiouvilleGreenExpansion
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenFinite
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenReal
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenVolterra
-public import DLMFMathlib.Analysis.ODE.P1oEntireLinear
-public import DLMFMathlib.Analysis.ODE.P1oLinearGlobal
-public import DLMFMathlib.Analysis.ODE.P1oParamHolomorphic
+public import DLMFMathlib.Analysis.ODE.EntireLinear
+public import DLMFMathlib.Analysis.ODE.LinearGlobal
+public import DLMFMathlib.Analysis.ODE.ParamHolomorphic
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import DLMFMathlib.Analysis.ODE.SoninePolya
 public import DLMFMathlib.Analysis.ODE.SturmComparison
@@ -87,7 +87,7 @@ public import DLMFMathlib.MeasureTheory.Integral.Trigonometric
 public import DLMFMathlib.NumberTheory.BernoulliTaylor
 public import DLMFMathlib.NumberTheory.EulerNumbers
 public import DLMFMathlib.NumberTheory.EulerPolynomials
-public import DLMFMathlib.NumberTheory.T27aPrimeNumberTheorem
+public import DLMFMathlib.NumberTheory.PrimeNumberTheorem
 public import DLMFMathlib.RingTheory.Binomial
 public import DLMFMathlib.Topology.Order.ZeroEnumeration
 public import ToMathlib.Analysis.Complex.Carlson
@@ -101,11 +101,11 @@ public import DLMFMathlib.Analysis.Analytic.OfScalarsUnique
 public import DLMFMathlib.Analysis.Calculus.Deriv.Sign
 public import DLMFMathlib.Analysis.Complex.NonInteger
 public import DLMFMathlib.Analysis.Complex.SeparatingContour
-public import DLMFMathlib.Analysis.ODE.P2lSturmLiouville
-public import DLMFMathlib.Analysis.ODE.P2sGrowth
-public import DLMFMathlib.Analysis.ODE.P2sOscillation
-public import DLMFMathlib.Analysis.ODE.P2sSturmOsc
-public import DLMFMathlib.Analysis.ODE.P2sSturmSpectrum
+public import DLMFMathlib.Analysis.ODE.SturmLiouville
+public import DLMFMathlib.Analysis.ODE.SturmGrowth
+public import DLMFMathlib.Analysis.ODE.Oscillation
+public import DLMFMathlib.Analysis.ODE.SturmOscillation
+public import DLMFMathlib.Analysis.ODE.SturmSpectrum
 public import DLMFMathlib.Analysis.SpecialFunctions.Complex.ArgLog
 public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Values
 public import DLMFMathlib.Analysis.SpecialFunctions.ImproperIntegralsExtra
@@ -113,12 +113,12 @@ public import DLMFMathlib.Analysis.SpecialFunctions.Pow.ComplexReal
 public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.ComplexValues
 public import DLMFMathlib.Combinatorics.Enumerative.PentagonalBounds
-public import DLMFMathlib.Combinatorics.Q26bSurjections
-public import DLMFMathlib.Combinatorics.R26aFinpartition
-public import DLMFMathlib.Combinatorics.S26aQuadraticSeries
-public import DLMFMathlib.Combinatorics.S26aSeriesTransform
+public import DLMFMathlib.Combinatorics.Surjections
+public import DLMFMathlib.Combinatorics.Finpartition
+public import DLMFMathlib.Combinatorics.QuadraticSeries
+public import DLMFMathlib.Combinatorics.SeriesTransform
 public import DLMFMathlib.NumberTheory.LSeries.ZetaValues
-public import DLMFMathlib.NumberTheory.ModularForms.P3wJSurjective
+public import DLMFMathlib.NumberTheory.ModularForms.KleinJSurjective
 public import DLMFMathlib.RingTheory.PowerSeriesEvaluation
 public import DLMFMathlib.Topology.Order.Compact
 
@@ -158,26 +158,26 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.SpecificLimits.Pincherle`: divergence of sums with ratio limit outside the unit
   disc, and convergence of a continued fraction from a backward solution with such a ratio limit.
 * `DLMFMathlib.Analysis.Complex.FactorialSeries`: convergence and entireness of sparse factorial series.
-* `DLMFMathlib.Analysis.Complex.TrigR4SeriesExtension`: uniqueness of power-series coefficients on a ball,
+* `DLMFMathlib.Analysis.Complex.TrigSeriesExtension`: uniqueness of power-series coefficients on a ball,
   extension of a power-series identity to the full disc of holomorphy, and even/odd coefficient criteria.
 * `DLMFMathlib.Analysis.Complex.ParametricHolomorphy`: holomorphy of dominated parametric series and
   integrals in finite-dimensional complex parameters, and the continuous Osgood lemma.
 * `DLMFMathlib.Topology.Order.ZeroEnumeration`: unique zeros of strictly monotone functions and the
   enumeration of zeros separated by a sequence of points.
 * `DLMFMathlib.NumberTheory.EulerPolynomials`: Euler polynomials and Euler numbers.
-* `DLMFMathlib.Analysis.ODE.P1oEntireLinear`, `P1oLinearGlobal`, `P1oParamHolomorphic`: entire
+* `DLMFMathlib.Analysis.ODE.EntireLinear`, `P1oLinearGlobal`, `P1oParamHolomorphic`: entire
   solutions of linear second-order ODEs with entire coefficients, global solutions on ℝ for
   continuous coefficients, and holomorphic dependence on a linear parameter.
 * `DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic`: an entire 2π-periodic function is the sum of
   its Fourier series on all of ℂ; cosine and sine series and Parseval for even and odd functions.
-* `DLMFMathlib.Analysis.ODE.P2sSturmSpectrum`, `P2sGrowth`, `P2sOscillation`: spectra of real
+* `DLMFMathlib.Analysis.ODE.SturmSpectrum`, `P2sGrowth`, `P2sOscillation`: spectra of real
   Sturm–Liouville problems through entire boundary functions, energy estimates, and infinitely
   many zeros when the coefficient tends to +∞.
-* `DLMFMathlib.Analysis.ODE.P2lSturmLiouville`: separated Sturm–Liouville theory for
+* `DLMFMathlib.Analysis.ODE.SturmLiouville`: separated Sturm–Liouville theory for
   `w'' = (V - h) w` on `[0, L]` (spectrum, discreteness, parity, comparison, enumeration).
-* `DLMFMathlib.Analysis.ODE.P2sSturmOsc`: the Sturm oscillation theorem, Dirichlet and Neumann
+* `DLMFMathlib.Analysis.ODE.SturmOscillation`: the Sturm oscillation theorem, Dirichlet and Neumann
   eigenvalue counts and their interlacing, and the sign of eigenfunctions at the endpoint.
-* `DLMFMathlib.NumberTheory.T27aPrimeNumberTheorem`: the prime number theorem π(x) ~ x/log x,
+* `DLMFMathlib.NumberTheory.PrimeNumberTheorem`: the prime number theorem π(x) ~ x/log x,
   p_n ~ n log n, θ(x) ~ x, ψ(x) ~ x and primes in progressions, from TauCeti's prime ideal and
   Chebotarev theorems for ℚ.
 * `DLMFMathlib.Analysis.EulerMaclaurin`: the Euler–Maclaurin summation formula with remainder.
@@ -199,13 +199,13 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Analysis.ODE.SoninePolya`: the Sonine–Pólya theorem on relative maxima.
 * `DLMFMathlib.Analysis.ODE.Volterra`: the Volterra integral equation and Gronwall-type
   perturbation estimate for `u'' + ω² u = g u`.
-* `DLMFMathlib.Combinatorics.Q26bSurjections`: counting surjections `Fin n → Fin k` (k!·S(n, k)
+* `DLMFMathlib.Combinatorics.Surjections`: counting surjections `Fin n → Fin k` (k!·S(n, k)
   and the alternating sum), and quotients of maps by permutations, for the twelvefold way.
-* `DLMFMathlib.Combinatorics.R26aFinpartition`: finpartitions as fibres of surjections; surjections
+* `DLMFMathlib.Combinatorics.Finpartition`: finpartitions as fibres of surjections; surjections
   onto `Fin k` with a fibre-size condition number `k!` times the finpartitions with `k` parts.
-* `DLMFMathlib.Combinatorics.S26aQuadraticSeries`: the Catalan series and the solution of
+* `DLMFMathlib.Combinatorics.QuadraticSeries`: the Catalan series and the solution of
   `F = 1 + aXF + X^eF²` with its coefficients (Touchard, large Schröder numbers), binomial inversion.
-* `DLMFMathlib.Combinatorics.S26aSeriesTransform`: summing `Σ c_k x^{ek} (1 - bx)^{-(2k+1)}` by
+* `DLMFMathlib.Combinatorics.SeriesTransform`: summing `Σ c_k x^{ek} (1 - bx)^{-(2k+1)}` by
   diagonals; the central binomial series `Σ C(2k, k) y^k = 1/√(1 - 4y)`.
 * `DLMFMathlib.RingTheory.PowerSeriesEvaluation`: absolutely convergent evaluation of integer power
   series at a complex point, with its algebra (products, powers, `1 - X^k`, geometric series).

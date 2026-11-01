@@ -17,56 +17,72 @@ DLMF §19.27 gives approximations of `R_F`, `R_G`, `R_D`, `R_J` with real nonneg
 arguments when some arguments are much smaller than the others, with relative or absolute
 `O`-terms (from Carlson and Gustafson, SIAM J. Math. Anal. 25 (1994), with explicit bounds).
 
-## Reading of the `O`-terms
+## Main definitions
 
-DLMF writes, e.g., `R_F(x, y, z) = (1/(2√z)) ln(8z/(a + g)) (1 + O(a/z))` as `a/z → 0`. All
-formulas are homogeneous, so the limit is realized here by letting the **small arguments tend
-to `0` jointly** (through DLMF's domain: real, nonnegative, at most one of `x, y, z` zero, `p > 0`)
+* `ellAsymA`, `ellAsymB`, `ellAsymC`, `ellAsymF`, `ellAsymG`, `ellAsymH`: the means
+  `a, b, c, f, g, h` of DLMF 19.27.1.
+* `ellAsymPair`, `ellAsymTriple`: the approach sets for two or three small arguments.
+
+## Main results
+
+* `symEllIntRF_asymp_large_z`, `symEllIntRF_asymp_small_x`: DLMF 19.27.2, 19.27.3.
+* `symEllIntRF_isEquivalent_atTop`, `symEllIntRF_zero_isEquivalent`: the leading term of
+  19.27.2 as an asymptotic equivalence.
+* `symEllIntRG_asymp_large_z`, `symEllIntRG_asymp_small_x`, `symEllIntRG_zero_asymp`:
+  DLMF 19.27.4–19.27.6.
+* `symEllIntRD_asymp_large_z`, `symEllIntRD_asymp_small_z`, `symEllIntRD_asymp_large_x`,
+  `symEllIntRD_asymp_small_x`: DLMF 19.27.7–19.27.10 (19.27.8 corrected).
+* `symEllIntRJ_asymp_large_p`, `symEllIntRJ_small_p_bounds`: DLMF 19.27.11 and the corrected
+  19.27.12.
+* `symEllIntRJ_asymp_small_xy`, `symEllIntRJ_asymp_small_xp`, `symEllIntRJ_asymp_small_x`,
+  `symEllIntRJ_asymp_large_x`: DLMF 19.27.13–19.27.16.
+
+## Implementation notes
+
+**Reading of the `O`-terms.** DLMF writes, e.g.,
+`R_F(x, y, z) = (1/(2√z)) ln(8z/(a + g)) (1 + O(a/z))` as `a/z → 0`. All formulas are
+homogeneous, so the limit is realized here by letting the **small arguments tend to `0`
+jointly** (through DLMF's domain: real, nonnegative, at most one of `x, y, z` zero, `p > 0`)
 with the **large arguments fixed** and positive; the `O`-term is then a Mathlib
 `Asymptotics.IsBigO` along `𝓝[S] 0` (or `𝓝[>] 0`, `𝓝[≥] 0`). Uniformity in the fixed
 arguments, which Carlson–Gustafson's explicit bounds also provide, is not asserted. Every
-statement was checked numerically (mpmath, random directions of approach, 2026-10-25).
+statement was checked numerically (mpmath, random directions of approach).
 
-## Corrections
-
+**Corrections.**
 * **19.27.8.** DLMF: `R_D(x, y, z) = 3/√(xyz) - (6/(xy)) R_G(x, y, 0) (1 + O(z/g))`. The
   relative error of the bracket is of order `√(z/g)`, not `z/g`: numerically, for
   `x = 2, y = 3`, `(3/√(xyz) - R_D)/((6/(xy)) R_G(x, y, 0)) - 1 ≈ -1.2895 √(z/g)` for
   `z = 10⁻⁴, …, 10⁻¹⁰`. This agrees with Carlson–Gustafson (1994, (37)):
   `R_D = 3/√(xyz) - (6/(xy)) R_G(x, y, 0) + (6a√z/g³)(1 - (πθ/4)√(z/a))` with bounded `θ`. The
-  statement below has `O(√(z/g))`.
+  statement here has `O(√(z/g))`.
 * **19.27.12.** DLMF: `R_J(x, y, z, p) = (3/(2√(xyz))) (ln(4f/p) - 2)(1 + O(p/f))`. This fails
-  unless `x = y = z`: for `(x, y, z) = (1, 2, 3)` the difference `R_J - (3/(2√(xyz)))(ln(4f/p) - 2)`
-  tends to `-0.0381…`, not `0`, as `p → 0`. Carlson–Gustafson (1994, (42)) state
-  `R_J = (3/(2√(xyz))) (ln(4f/p) - 2 + r)` with `-ln(f/H) < r < (3p/(2(f - p))) ln(f/p)`, where
-  `H = 3/(x⁻¹ + y⁻¹ + z⁻¹)` is the harmonic mean (`r → 0` only when `f = H`). That bounded form
-  (with non-strict inequalities, checked numerically on 400 random triples and `0 < p < f`) is
-  acquired.
+  unless `x = y = z`: for `(x, y, z) = (1, 2, 3)` the difference
+  `R_J - (3/(2√(xyz)))(ln(4f/p) - 2)` tends to `-0.0381…`, not `0`, as `p → 0`.
+  Carlson–Gustafson (1994, (42)) state `R_J = (3/(2√(xyz))) (ln(4f/p) - 2 + r)` with
+  `-ln(f/H) < r < (3p/(2(f - p))) ln(f/p)`, where `H = 3/(x⁻¹ + y⁻¹ + z⁻¹)` is the harmonic mean
+  (`r → 0` only when `f = H`). That bounded form (with non-strict inequalities, checked
+  numerically on 400 random triples and `0 < p < f`) is the statement here.
 
-## Proved bridges from `lean-codes`
-
-Carlson's (9.2-10) and (8.3-16) (`Carlson.isEquivalent_carlsonRF_atTop`,
+**Proofs.** Carlson's (9.2-10) and (8.3-16) (`Carlson.isEquivalent_carlsonRF_atTop`,
 `Carlson.isEquivalent_carlsonRK_zero`) give the leading term of (19.27.2) as an asymptotic
-equivalence along rays (weaker than DLMF's relative `O(a/z)`): `symEllIntRF_isEquivalent_atTop`.
-The small-first-variable formula (19.27.3) follows by applying `R_F` duplication in the
-coordinate `t = √x`. All duplicated nodes are positive at `t = 0`, so the holomorphic Taylor
-remainder gives the stated `O(x)` error. The `R_G` counterpart (19.27.5) uses the same
-coordinate and the `R_G` duplication identity; its first derivative at the origin vanishes.
-The `R_D` formula (19.27.10) uses duplication and the elementary negative-total-parameter
-value (19.20.25) to evaluate the corresponding first derivative.
+equivalence along rays (weaker than DLMF's relative `O(a/z)`). The small-first-variable formula
+(19.27.3) follows by applying `R_F` duplication in the coordinate `t = √x`. All duplicated
+nodes are positive at `t = 0`, so the holomorphic Taylor remainder gives the stated `O(x)`
+error. The `R_G` counterpart (19.27.5) uses the same coordinate and the `R_G` duplication
+identity; its first derivative at the origin vanishes. The `R_D` formula (19.27.10) uses
+duplication and the elementary negative-total-parameter value (19.20.25) to evaluate the
+corresponding first derivative.
 
-## §19.27 prose
-
-* 19.27.i.p1: the notation (19.27.1), definitions `ellAsymA` … `ellAsymH`.
-* 19.27.ii.p1, iii.p1, iv.p1, v.p1: the standing assumptions, carried as hypotheses.
-* 19.27.vi.p1, vi.p2: commentary (bounds of Carlson–Gustafson; convergent but slowly converging
-  asymptotic series of Wong, Carlson–Gustafson, López; the `R_{-a}` analogue in Carlson (1985));
-  no further explicit formula.
+**Prose of §19.27.** The standing assumptions of 19.27.ii.p1, iii.p1, iv.p1 and v.p1 are
+carried as hypotheses. 19.27.vi.p1 and vi.p2 are commentary (bounds of Carlson–Gustafson;
+convergent but slowly converging asymptotic series of Wong, Carlson–Gustafson, López; the
+`R_{-a}` analogue in Carlson (1985)) with no further explicit formula.
 
 ## References
 
-* NIST DLMF §19.27; B. C. Carlson and J. L. Gustafson, *Asymptotic approximations for
-  symmetric elliptic integrals*, SIAM J. Math. Anal. 25 (1994) 288–303.
+* NIST DLMF §19.27.
+* B. C. Carlson and J. L. Gustafson, *Asymptotic approximations for symmetric elliptic
+  integrals*, SIAM J. Math. Anal. 25 (1994) 288–303.
 -/
 
 @[expose] public noncomputable section
@@ -130,7 +146,7 @@ private lemma hasDerivAt_carlsonRF_comp_common {f g h : ℂ → ℂ} {t k : ℂ}
   have hq : HasDerivAt (fun w => ![f w, g w, h w]) (fun _ : Fin 3 => k) t := by
     apply hasDerivAt_pi.mpr
     intro i; fin_cases i <;> assumption
-  have hp := ei19c_slit3 hfs hgs hhs
+  have hp := vec3_mem_carlsonRSlitDomain hfs hgs hhs
   have HS := symEllIntR_sum (fun _ : Fin 3 => (1 / 2 : ℂ)) hp (by
     apply Complex.Gamma_ne_zero_of_re_pos
     norm_num [Fin.sum_univ_three])
@@ -273,8 +289,8 @@ theorem symEllIntRF_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
   have HD' : HasDerivAt F (-((√(y * z))⁻¹ : ℂ)) 0 := by
     refine HD.congr_deriv ?_
     simp only [l, zero_pow (by norm_num : (2 : ℕ) ≠ 0), mul_zero, add_zero, zero_add]
-    rw [← ofReal_add, ← ofReal_add, ← ei19c_inv_cpow_half, ← ei19c_inv_cpow_half,
-      ← ei19c_inv_cpow_half, Carlson.ofReal_cpow_half hr.le, Carlson.ofReal_cpow_half hyr.le,
+    rw [← ofReal_add, ← ofReal_add, ← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half,
+      ← inv_cpow_half_eq_cpow_neg_half, Carlson.ofReal_cpow_half hr.le, Carlson.ofReal_cpow_half hyr.le,
       Carlson.ofReal_cpow_half hzr.le]
     rw [Real.sqrt_mul hy.le]
     change 2 * (-(k : ℂ) / 2 * _) = -((r : ℝ) : ℂ)⁻¹
@@ -370,7 +386,7 @@ theorem symEllIntRF_zero_isEquivalent {z : ℝ} (hz : 0 < z) :
     filter_upwards [self_mem_nhdsWithin] with y (hy : 0 < y)
     simp only [Pi.mul_apply]
     rw [symEllIntRF_comm_right, symEllIntRF_zero_left (ofReal_mem_slitPlane.mpr hz)
-      (ofReal_mem_slitPlane.mpr hy), symEllIntR_of_mem _ _ (ei19c_slit2
+      (ofReal_mem_slitPlane.mpr hy), symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain
         (ofReal_mem_slitPlane.mpr hz) (ofReal_mem_slitPlane.mpr hy))]
     simp only [Carlson.TwoVariable.carlsonRK, Carlson.TwoVariable.pair]
     push_cast
@@ -464,8 +480,8 @@ theorem symEllIntRG_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
   have HDF' : HasDerivAt RF (-(1 / (2 * (r : ℂ)))) 0 := by
     refine HDF.congr_deriv ?_
     simp only [l, zero_pow (by norm_num : (2 : ℕ) ≠ 0), mul_zero, add_zero, zero_add]
-    rw [← ofReal_add, ← ofReal_add, ← ei19c_inv_cpow_half, ← ei19c_inv_cpow_half,
-      ← ei19c_inv_cpow_half, Carlson.ofReal_cpow_half hr.le, Carlson.ofReal_cpow_half hyr.le,
+    rw [← ofReal_add, ← ofReal_add, ← inv_cpow_half_eq_cpow_neg_half, ← inv_cpow_half_eq_cpow_neg_half,
+      ← inv_cpow_half_eq_cpow_neg_half, Carlson.ofReal_cpow_half hr.le, Carlson.ofReal_cpow_half hyr.le,
       Carlson.ofReal_cpow_half hzr.le]
     have H := congrArg (fun a : ℝ => (a : ℂ)) hS
     push_cast at H
@@ -484,7 +500,7 @@ theorem symEllIntRG_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
     ring
   have HT := analyticAt_sub_linear_isBigO ha HD
   have hF (x : ℝ) (hx : 0 ≤ x) : F (√x : ℂ) = symEllIntRG x y z := by
-    have hdom : Ei19dPosDomain x y z := ⟨hx, hy.le, hz.le, fun _ => ⟨hy, hz⟩,
+    have hdom : CarlsonNonnegDomain x y z := ⟨hx, hy.le, hz.le, fun _ => ⟨hy, hz⟩,
       fun hh => False.elim (hy.ne' hh)⟩
     have hscale : (√x * √y + √y * √z + √z * √x : ℝ) = r + k * √x := by
       dsimp only [r, k]; ring
@@ -502,7 +518,7 @@ theorem symEllIntRG_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
         congr 1
         funext i; fin_cases i <;> simp [Real.sq_sqrt hx, ← ofReal_pow]
       all_goals first
-      | apply ei19c_slit3 <;> exact ofReal_mem_slitPlane.mpr (by positivity)
+      | apply vec3_mem_carlsonRSlitDomain <;> exact ofReal_mem_slitPlane.mpr (by positivity)
       | exact ofReal_mem_slitPlane.mpr (by positivity)
     dsimp only at H
     rw [hscale, hg, hf] at H
@@ -647,7 +663,7 @@ theorem symEllIntRD_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
       show (-(3 / 2) : ℂ) = (-1 / 2) + (-1) by norm_num,
       cpow_add _ _ (ofReal_ne_zero.mpr hzr.ne'), cpow_neg_one]
     simp only [cpow_neg]
-    rw [← ei19c_inv_cpow_half]
+    rw [← inv_cpow_half_eq_cpow_neg_half]
     rw [Carlson.ofReal_cpow_half hr.le, Carlson.ofReal_cpow_half hyr.le,
       Carlson.ofReal_cpow_half hzr.le]
     push_cast
@@ -683,7 +699,7 @@ theorem symEllIntRD_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
         congr 1
         funext i; fin_cases i <;> simp [Real.sq_sqrt hx, ← ofReal_pow]
       all_goals first
-      | apply ei19c_slit3 <;> exact ofReal_mem_slitPlane.mpr (by positivity)
+      | apply vec3_mem_carlsonRSlitDomain <;> exact ofReal_mem_slitPlane.mpr (by positivity)
       | exact ofReal_mem_slitPlane.mpr (by positivity)
     rw [hg] at H
     dsimp only [F, l]

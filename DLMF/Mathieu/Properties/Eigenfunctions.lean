@@ -10,11 +10,32 @@ public import DLMF.Mathieu.Properties.Spectra
 /-!
 # Periodicity and normalization of Mathieu eigenfunctions
 
-Periodicity, parity, normalization and orthogonality of the integer-order Mathieu
-eigenfunctions.
+This file treats the integer-order Mathieu functions `ce_n(z, q)`, `se_n(z, q)` for real `q`
+(DLMF §28.2(vi)): their relation to the basic solutions, periodicity and parity (Table 28.2.2),
+the values at `q = 0`, normalization and orthogonality, and the change of sign of `q`.
 
-Source references and common attribution are retained in
-`DLMF.Mathieu.Properties`.
+## Main results
+
+* `mathieuCe_div_mathieuCe_zero`, `mathieuSe_div_deriv_mathieuSe_zero`: `ce_n`, `se_n` as
+  multiples of `w_I`, `w_II` (DLMF 28.2.38, 28.2.39).
+* `mathieuCeZero_pos`, `mathieuSeDerivZero_pos`: the sign conventions `ce_n(0, q) > 0` and
+  `se_n'(0, q) > 0`.
+* `mathieuCe_neg`, `mathieuSe_neg`, `mathieuCe_even_add_pi`, `mathieuCe_odd_add_pi`,
+  `mathieuSe_odd_add_pi`, `mathieuSe_even_add_pi`: parity and (anti)periodicity
+  (Table 28.2.2).
+* `mathieuCe_zero_zero`, `mathieuCe_q_zero`, `mathieuSe_q_zero`: the values at `q = 0`
+  (DLMF 28.2.29).
+* `integral_mathieuCe_sq`, `integral_mathieuSe_sq`: the normalization 28.2.30.
+* `integral_mathieuCe_mul_mathieuCe`, `integral_mathieuSe_mul_mathieuSe`,
+  `integral_mathieuCe_mul_mathieuSe`: the orthogonality relations 28.2.31–28.2.33.
+* `mathieuCe_even_neg_q`, `mathieuCe_odd_neg_q`, `mathieuSe_odd_neg_q`, `mathieuSe_even_neg_q`:
+  the change of sign of `q` (DLMF 28.2.34–28.2.37).
+
+## Implementation notes
+
+DLMF does not define `se_0`, and the project's `se_0` is a junk value. Accordingly 28.2.33
+carries the hypothesis `n ≠ 0`: for `n = 0` it fails
+(`integral_mathieuCe_zero_mul_mathieuSe_zero_ne_zero`).
 -/
 
 @[expose] public noncomputable section
@@ -28,7 +49,7 @@ namespace DLMF.Mathieu
 /-! ### Eigenfunctions (§28.2(vi)) -/
 
 /-- `∫₀^{2π} |f|² > 0` for a continuous `f` that is nonzero just to the right of `0`. -/
-theorem m28a_integral_normSq_pos {f : ℂ → ℂ} (hf : Continuous f)
+theorem integral_norm_sq_pos_of_eventually_ne_zero {f : ℂ → ℂ} (hf : Continuous f)
     (h0 : ∀ᶠ x : ℝ in 𝓝[>] 0, f x ≠ 0) : 0 < ∫ x in (0 : ℝ)..2 * π, ‖f x‖ ^ 2 := by
   have hc : Continuous fun x : ℝ => ‖f x‖ ^ 2 := (hf.comp Complex.continuous_ofReal).norm.pow 2
   obtain ⟨u, hu, hsub0⟩ := mem_nhdsGT_iff_exists_Ioo_subset.mp h0
@@ -53,7 +74,7 @@ theorem mathieuCeZero_pos (n : ℕ) (q : ℝ) : 0 < mathieuCeZero n q := by
     (h.differentiable.continuous.comp Complex.continuous_ofReal).continuousAt.eventually_ne
       (by simp [h0])
   exact Real.sqrt_pos.mpr (div_pos Real.pi_pos
-    (m28a_integral_normSq_pos h.differentiable.continuous (nhdsWithin_le_nhds hev)))
+    (integral_norm_sq_pos_of_eventually_ne_zero h.differentiable.continuous (nhdsWithin_le_nhds hev)))
 
 /-- `se_n'(0, q) > 0` (the sign convention of `mathieuSe`, DLMF §28.2(vi)). -/
 theorem mathieuSeDerivZero_pos (n : ℕ) (q : ℝ) : 0 < mathieuSeDerivZero n q := by
@@ -65,7 +86,7 @@ theorem mathieuSeDerivZero_pos (n : ℕ) (q : ℝ) : 0 < mathieuSeDerivZero n q 
   have hev' : ∀ᶠ x : ℝ in 𝓝[>] 0, mathieuWII (mathieuB n q) q x ≠ 0 := by
     exact nhdsWithin_mono (0 : ℝ) (fun x (hx : x ∈ Ioi (0 : ℝ)) => ne_of_gt hx) hev
   exact Real.sqrt_pos.mpr (div_pos Real.pi_pos
-    (m28a_integral_normSq_pos h.differentiable.continuous hev'))
+    (integral_norm_sq_pos_of_eventually_ne_zero h.differentiable.continuous hev'))
 
 /-- **DLMF 28.2.38**: `ce_n(z, q) / ce_n(0, q) = w_I(z; a_n(q), q)`. -/
 @[dlmf 28.2.E38]
@@ -91,37 +112,37 @@ section Periodicity
 variable {a q : ℂ}
 
 /-- If `w_I'(π/2) = 0` then `w_I` has period `π`. -/
-theorem m28a_mathieuWI_periodic (h : deriv (mathieuWI a q) (π / 2) = 0) (z : ℂ) :
+theorem mathieuWI_add_pi_of_deriv_half_pi_eq_zero (h : deriv (mathieuWI a q) (π / 2) = 0) (z : ℂ) :
     mathieuWI a q (z + π) = mathieuWI a q z := by
   have hW := mathieuWI_wronskian a q (π / 2)
-  have e := m28a_mathieuWI_pi_sub a q (-z)
+  have e := mathieuWI_pi_sub a q (-z)
   rw [h] at e hW
   rw [show z + π = π - -z by ring, e, mathieuWI_neg]
   linear_combination mathieuWI a q z * hW
 
 /-- If `w_I(π/2) = 0` then `w_I` has antiperiod `π`. -/
-theorem m28a_mathieuWI_antiperiodic (h : mathieuWI a q (π / 2) = 0) (z : ℂ) :
+theorem mathieuWI_add_pi_of_half_pi_eq_zero (h : mathieuWI a q (π / 2) = 0) (z : ℂ) :
     mathieuWI a q (z + π) = -mathieuWI a q z := by
   have hW := mathieuWI_wronskian a q (π / 2)
-  have e := m28a_mathieuWI_pi_sub a q (-z)
+  have e := mathieuWI_pi_sub a q (-z)
   rw [h] at e hW
   rw [show z + π = π - -z by ring, e, mathieuWI_neg]
   linear_combination -(mathieuWI a q z) * hW
 
 /-- If `w_II'(π/2) = 0` then `w_II` has antiperiod `π`. -/
-theorem m28a_mathieuWII_antiperiodic (h : deriv (mathieuWII a q) (π / 2) = 0) (z : ℂ) :
+theorem mathieuWII_add_pi_of_deriv_half_pi_eq_zero (h : deriv (mathieuWII a q) (π / 2) = 0) (z : ℂ) :
     mathieuWII a q (z + π) = -mathieuWII a q z := by
   have hW := mathieuWI_wronskian a q (π / 2)
-  have e := m28a_mathieuWII_pi_sub a q (-z)
+  have e := mathieuWII_pi_sub a q (-z)
   rw [h] at e hW
   rw [show z + π = π - -z by ring, e, mathieuWII_neg]
   linear_combination -(mathieuWII a q z) * hW
 
 /-- If `w_II(π/2) = 0` then `w_II` has period `π`. -/
-theorem m28a_mathieuWII_periodic (h : mathieuWII a q (π / 2) = 0) (z : ℂ) :
+theorem mathieuWII_add_pi_of_half_pi_eq_zero (h : mathieuWII a q (π / 2) = 0) (z : ℂ) :
     mathieuWII a q (z + π) = mathieuWII a q z := by
   have hW := mathieuWI_wronskian a q (π / 2)
-  have e := m28a_mathieuWII_pi_sub a q (-z)
+  have e := mathieuWII_pi_sub a q (-z)
   rw [h] at e hW
   rw [show z + π = π - -z by ring, e, mathieuWII_neg]
   linear_combination mathieuWII a q z * hW
@@ -143,33 +164,33 @@ theorem mathieuSe_neg (n : ℕ) (z : ℂ) (q : ℝ) : mathieuSe n (-z) q = -math
 theorem mathieuCe_even_add_pi (n : ℕ) (z : ℂ) (q : ℝ) :
     mathieuCe (2 * n) (z + π) q = mathieuCe (2 * n) z q := by
   simp only [mathieuCe]
-  rw [m28a_mathieuWI_periodic (deriv_mathieuWI_half_pi_mathieuA_even n q)]
+  rw [mathieuWI_add_pi_of_deriv_half_pi_eq_zero (deriv_mathieuWI_half_pi_mathieuA_even n q)]
 
 /-- **Table 28.2.2**: `ce_{2n+1}(z, q)` has antiperiod `π`. -/
 @[dlmf 28.2.T2]
 theorem mathieuCe_odd_add_pi (n : ℕ) (z : ℂ) (q : ℝ) :
     mathieuCe (2 * n + 1) (z + π) q = -mathieuCe (2 * n + 1) z q := by
   simp only [mathieuCe]
-  rw [m28a_mathieuWI_antiperiodic (mathieuWI_half_pi_mathieuA_odd n q)]; ring
+  rw [mathieuWI_add_pi_of_half_pi_eq_zero (mathieuWI_half_pi_mathieuA_odd n q)]; ring
 
 /-- **Table 28.2.2**: `se_{2n+1}(z, q)` has antiperiod `π`. -/
 @[dlmf 28.2.T2]
 theorem mathieuSe_odd_add_pi (n : ℕ) (z : ℂ) (q : ℝ) :
     mathieuSe (2 * n + 1) (z + π) q = -mathieuSe (2 * n + 1) z q := by
   simp only [mathieuSe]
-  rw [m28a_mathieuWII_antiperiodic (deriv_mathieuWII_half_pi_mathieuB_odd n q)]; ring
+  rw [mathieuWII_add_pi_of_deriv_half_pi_eq_zero (deriv_mathieuWII_half_pi_mathieuB_odd n q)]; ring
 
 /-- **Table 28.2.2**: `se_{2n+2}(z, q)` has period `π`. -/
 @[dlmf 28.2.T2]
 theorem mathieuSe_even_add_pi (n : ℕ) (z : ℂ) (q : ℝ) :
     mathieuSe (2 * n + 2) (z + π) q = mathieuSe (2 * n + 2) z q := by
   simp only [mathieuSe]
-  rw [m28a_mathieuWII_periodic (mathieuWII_half_pi_mathieuB_even n q)]
+  rw [mathieuWII_add_pi_of_half_pi_eq_zero (mathieuWII_half_pi_mathieuB_even n q)]
 
 /-! ### Normalization and orthogonality helpers -/
 
 /-- Complex conjugation: `conj ∘ w ∘ conj` solves Mathieu's equation for `(conj a, conj q)`. -/
-lemma IsMathieuSolution.p1a1_conj {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w) :
+private lemma IsMathieuSolution.conj {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w) :
     IsMathieuSolution (conj a) (conj q) (conj ∘ w ∘ conj) := by
   refine ⟨fun z => ?_, fun z => ?_⟩
   · simpa using (h.differentiable (conj z)).conj_conj
@@ -180,67 +201,67 @@ lemma IsMathieuSolution.p1a1_conj {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSo
     simp only [Function.comp, map_mul, map_sub, map_ofNat, ← Complex.cos_conj, Complex.conj_conj]
 
 /-- `w_I(z; conj a, conj q) = conj (w_I(conj z; a, q))`. -/
-lemma p1a1_mathieuWI_conj (a q z : ℂ) :
+private lemma mathieuWI_conj (a q z : ℂ) :
     mathieuWI (conj a) (conj q) z = conj (mathieuWI a q (conj z)) := by
   obtain ⟨h, h0, h1⟩ := mathieuWI_spec a q
   obtain ⟨g, g0, g1⟩ := mathieuWI_spec (conj a) (conj q)
-  have key := g.eq_of_initial h.p1a1_conj (z₀ := 0) (by simp [g0, h0])
+  have key := g.eq_of_initial h.conj (z₀ := 0) (by simp [g0, h0])
     (by rw [deriv_conj_conj]; simp [g1, h1])
   exact congrFun key z
 
 /-- `w_II(z; conj a, conj q) = conj (w_II(conj z; a, q))`. -/
-lemma p1a1_mathieuWII_conj (a q z : ℂ) :
+private lemma mathieuWII_conj (a q z : ℂ) :
     mathieuWII (conj a) (conj q) z = conj (mathieuWII a q (conj z)) := by
   obtain ⟨h, h0, h1⟩ := mathieuWII_spec a q
   obtain ⟨g, g0, g1⟩ := mathieuWII_spec (conj a) (conj q)
-  have key := g.eq_of_initial h.p1a1_conj (z₀ := 0) (by simp [g0, h0])
+  have key := g.eq_of_initial h.conj (z₀ := 0) (by simp [g0, h0])
     (by rw [deriv_conj_conj]; simp [g1, h1])
   exact congrFun key z
 
 /-- `w_I(x; a, q)` is real for real `x`, `a`, `q`. -/
-theorem p1a1_mathieuWI_real (a q x : ℝ) : conj (mathieuWI a q x) = mathieuWI a q x := by
-  have := p1a1_mathieuWI_conj a q x
+theorem conj_mathieuWI_ofReal (a q x : ℝ) : conj (mathieuWI a q x) = mathieuWI a q x := by
+  have := mathieuWI_conj a q x
   simp only [Complex.conj_ofReal] at this
   exact this.symm
 
 /-- `w_II(x; a, q)` is real for real `x`, `a`, `q`. -/
-theorem p1a1_mathieuWII_real (a q x : ℝ) : conj (mathieuWII a q x) = mathieuWII a q x := by
-  have := p1a1_mathieuWII_conj a q x
+theorem conj_mathieuWII_ofReal (a q x : ℝ) : conj (mathieuWII a q x) = mathieuWII a q x := by
+  have := mathieuWII_conj a q x
   simp only [Complex.conj_ofReal] at this
   exact this.symm
 
 /-- `w_I'(x; a, q)` is real for real `x`, `a`, `q`. -/
-theorem p1a1_deriv_mathieuWI_real (a q x : ℝ) :
+theorem conj_deriv_mathieuWI_ofReal (a q x : ℝ) :
     conj (deriv (mathieuWI a q) x) = deriv (mathieuWI a q) x := by
   have e : mathieuWI (a : ℂ) q = conj ∘ mathieuWI (a : ℂ) q ∘ conj := by
-    funext z; have := p1a1_mathieuWI_conj a q z; simpa using this
+    funext z; have := mathieuWI_conj a q z; simpa using this
   conv_rhs => rw [e, deriv_conj_conj]
   simp
 
 /-- `w_II'(x; a, q)` is real for real `x`, `a`, `q`. -/
-theorem p1a1_deriv_mathieuWII_real (a q x : ℝ) :
+theorem conj_deriv_mathieuWII_ofReal (a q x : ℝ) :
     conj (deriv (mathieuWII a q) x) = deriv (mathieuWII a q) x := by
   have e : mathieuWII (a : ℂ) q = conj ∘ mathieuWII (a : ℂ) q ∘ conj := by
-    funext z; have := p1a1_mathieuWII_conj a q z; simpa using this
+    funext z; have := mathieuWII_conj a q z; simpa using this
   conv_rhs => rw [e, deriv_conj_conj]
   simp
 
 /-- A real complex number squared is its squared norm. -/
-lemma p1a1_sq_eq_norm_sq {z : ℂ} (h : conj z = z) : z ^ 2 = ((‖z‖ ^ 2 : ℝ) : ℂ) := by
+private lemma sq_eq_norm_sq_of_conj_eq {z : ℂ} (h : conj z = z) : z ^ 2 = ((‖z‖ ^ 2 : ℝ) : ℂ) := by
   obtain ⟨r, rfl⟩ := Complex.conj_eq_iff_real.mp h
   simp [Complex.norm_real, sq_abs]
 
 /-- `∫₀^{2π} ‖w_I(x; a, q)‖² > 0`. -/
-lemma p1a1_integral_normSq_mathieuWI_pos (a q : ℂ) :
+private lemma integral_norm_sq_mathieuWI_pos (a q : ℂ) :
     0 < ∫ x in (0 : ℝ)..2 * π, ‖mathieuWI a q x‖ ^ 2 := by
   obtain ⟨h, h0, -⟩ := mathieuWI_spec a q
   have hev : ∀ᶠ x : ℝ in 𝓝 0, mathieuWI a q x ≠ 0 :=
     (h.differentiable.continuous.comp Complex.continuous_ofReal).continuousAt.eventually_ne
       (by simp [h0])
-  exact m28a_integral_normSq_pos h.differentiable.continuous (nhdsWithin_le_nhds hev)
+  exact integral_norm_sq_pos_of_eventually_ne_zero h.differentiable.continuous (nhdsWithin_le_nhds hev)
 
 /-- `∫₀^{2π} ‖w_II(x; a, q)‖² > 0`. -/
-lemma p1a1_integral_normSq_mathieuWII_pos (a q : ℂ) :
+private lemma integral_norm_sq_mathieuWII_pos (a q : ℂ) :
     0 < ∫ x in (0 : ℝ)..2 * π, ‖mathieuWII a q x‖ ^ 2 := by
   obtain ⟨h, h0, h1⟩ := mathieuWII_spec a q
   have hd : HasDerivAt (fun x : ℝ => mathieuWII a q x) 1 0 := by
@@ -249,23 +270,23 @@ lemma p1a1_integral_normSq_mathieuWII_pos (a q : ℂ) :
   have hev := hd.eventually_ne (c := 0) one_ne_zero
   have hev' : ∀ᶠ x : ℝ in 𝓝[>] 0, mathieuWII a q x ≠ 0 :=
     nhdsWithin_mono (0 : ℝ) (fun x (hx : x ∈ Ioi (0 : ℝ)) => ne_of_gt hx) hev
-  exact m28a_integral_normSq_pos h.differentiable.continuous hev'
+  exact integral_norm_sq_pos_of_eventually_ne_zero h.differentiable.continuous hev'
 
 /-- `∫₀^{2π} (c f)² = π` when `f` is real on the real axis and `c = (π / ∫ ‖f‖²)^{1/2}`. -/
-theorem p1a1_integral_normalized_sq {f : ℂ → ℂ}
+theorem integral_normalized_sq_eq_pi {f : ℂ → ℂ}
     (hr : ∀ x : ℝ, conj (f x) = f x) (hpos : 0 < ∫ x in (0 : ℝ)..2 * π, ‖f x‖ ^ 2) :
     ∫ x in (0 : ℝ)..2 * π,
       ((Real.sqrt (π / ∫ x in (0 : ℝ)..2 * π, ‖f x‖ ^ 2) : ℂ) * f x) ^ 2 = π := by
   set I := ∫ x in (0 : ℝ)..2 * π, ‖f x‖ ^ 2
   have e : ∀ x : ℝ, ((Real.sqrt (π / I) : ℂ) * f x) ^ 2 =
       (((Real.sqrt (π / I)) ^ 2 * ‖f x‖ ^ 2 : ℝ) : ℂ) := by
-    intro x; rw [mul_pow, p1a1_sq_eq_norm_sq (hr x)]; push_cast; ring
+    intro x; rw [mul_pow, sq_eq_norm_sq_of_conj_eq (hr x)]; push_cast; ring
   simp_rw [e]
   rw [intervalIntegral.integral_ofReal, intervalIntegral.integral_const_mul,
     Real.sq_sqrt (div_pos Real.pi_pos hpos).le, div_mul_cancel₀ _ hpos.ne']
 
 /-- `∫₀^{2π} cos²(nx) dx = π`, `n ≠ 0`. -/
-theorem p1a1_integral_cos_sq {n : ℕ} (hn : n ≠ 0) :
+theorem integral_cos_natCast_mul_sq {n : ℕ} (hn : n ≠ 0) :
     ∫ x in (0 : ℝ)..2 * π, Real.cos (n * x) ^ 2 = π := by
   have hn' : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn
   rw [intervalIntegral.integral_comp_mul_left (fun x => Real.cos x ^ 2) hn', integral_cos_sq]
@@ -275,7 +296,7 @@ theorem p1a1_integral_cos_sq {n : ℕ} (hn : n ≠ 0) :
   rw [this]; simp; field_simp
 
 /-- `∫₀^{2π} sin²(nx) dx = π`, `n ≠ 0`. -/
-theorem p1a1_integral_sin_sq {n : ℕ} (hn : n ≠ 0) :
+theorem integral_sin_natCast_mul_sq {n : ℕ} (hn : n ≠ 0) :
     ∫ x in (0 : ℝ)..2 * π, Real.sin (n * x) ^ 2 = π := by
   have hn' : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn
   rw [intervalIntegral.integral_comp_mul_left (fun x => Real.sin x ^ 2) hn', integral_sin_sq]
@@ -285,31 +306,31 @@ theorem p1a1_integral_sin_sq {n : ℕ} (hn : n ≠ 0) :
   rw [this]; simp; field_simp
 
 /-- `‖cos(nx)‖² = cos²(nx)` for real `x`. -/
-theorem p1a1_norm_cos_sq (n : ℕ) (x : ℝ) :
+theorem norm_cos_natCast_mul_ofReal_sq (n : ℕ) (x : ℝ) :
     ‖Complex.cos (n * x)‖ ^ 2 = Real.cos (n * x) ^ 2 := by
   rw [← Complex.ofReal_natCast, ← Complex.ofReal_mul, ← Complex.ofReal_cos, Complex.norm_real,
     Real.norm_eq_abs, sq_abs]
 
 /-- `‖sin(nx)/n‖² = sin²(nx)/n²` for real `x`. -/
-theorem p1a1_norm_sin_div_sq {n : ℕ} (x : ℝ) :
+theorem norm_sin_natCast_mul_ofReal_div_sq {n : ℕ} (x : ℝ) :
     ‖Complex.sin (n * x) / n‖ ^ 2 = Real.sin (n * x) ^ 2 / (n : ℝ) ^ 2 := by
   rw [← Complex.ofReal_natCast, ← Complex.ofReal_mul, ← Complex.ofReal_sin, ← Complex.ofReal_div,
     Complex.norm_real, Real.norm_eq_abs, sq_abs, div_pow]
 
 /-- `w_I(z; n², 0) = cos nz`. -/
-theorem p1a1_mathieuWI_sq_q_zero (n : ℕ) :
+theorem mathieuWI_natCast_sq_q_zero (n : ℕ) :
     mathieuWI (((n : ℝ) ^ 2 : ℝ) : ℂ) ((0 : ℝ) : ℂ) = fun z => Complex.cos (n * z) := by
-  funext z; rw [Complex.ofReal_zero]; exact p1a1_mathieuWI_q_zero (by push_cast; ring) z
+  funext z; rw [Complex.ofReal_zero]; exact mathieuWI_q_zero (by push_cast; ring) z
 
 /-- `w_II(z; n², 0) = sin(nz)/n`, `n ≠ 0`. -/
-theorem p1a1_mathieuWII_sq_q_zero {n : ℕ} (hn : n ≠ 0) :
+theorem mathieuWII_natCast_sq_q_zero {n : ℕ} (hn : n ≠ 0) :
     mathieuWII (((n : ℝ) ^ 2 : ℝ) : ℂ) ((0 : ℝ) : ℂ) = fun z => Complex.sin (n * z) / n := by
   funext z; rw [Complex.ofReal_zero]
-  exact p1a1_mathieuWII_q_zero (by push_cast; ring) (Nat.cast_ne_zero.mpr hn) z
+  exact mathieuWII_q_zero (by push_cast; ring) (Nat.cast_ne_zero.mpr hn) z
 
 /-- **Orthogonality** (Sturm–Liouville): `2π`-periodic solutions of Mathieu's equation for
 distinct `a₁ ≠ a₂` (same `q`) are orthogonal on `[0, 2π]`. -/
-lemma p1a1_integral_mul_eq_zero {a₁ a₂ q : ℂ} {u v : ℂ → ℂ} (hu : IsMathieuSolution a₁ q u)
+private lemma integral_mul_eq_zero_of_two_pi_periodic {a₁ a₂ q : ℂ} {u v : ℂ → ℂ} (hu : IsMathieuSolution a₁ q u)
     (hv : IsMathieuSolution a₂ q v) (hup : ∀ z, u (z + 2 * π) = u z)
     (hvp : ∀ z, v (z + 2 * π) = v z) (hne : a₁ ≠ a₂) :
     ∫ x in (0 : ℝ)..2 * π, u x * v x = 0 := by
@@ -340,7 +361,7 @@ lemma p1a1_integral_mul_eq_zero {a₁ a₂ q : ℂ} {u v : ℂ → ℂ} (hu : Is
   · exact h
 
 /-- `ce_n(z, q)` has period `2π`. -/
-lemma p1a1_mathieuCe_add_two_pi (n : ℕ) (z : ℂ) (q : ℝ) :
+private lemma mathieuCe_add_two_pi (n : ℕ) (z : ℂ) (q : ℝ) :
     mathieuCe n (z + 2 * π) q = mathieuCe n z q := by
   rw [show z + 2 * π = z + π + π by ring]
   rcases Nat.even_or_odd' n with ⟨k, rfl | rfl⟩
@@ -348,7 +369,7 @@ lemma p1a1_mathieuCe_add_two_pi (n : ℕ) (z : ℂ) (q : ℝ) :
   · rw [mathieuCe_odd_add_pi, mathieuCe_odd_add_pi, neg_neg]
 
 /-- `se_n(z, q)`, `n ≥ 1`, has period `2π`. -/
-lemma p1a1_mathieuSe_add_two_pi {n : ℕ} (hn : n ≠ 0) (z : ℂ) (q : ℝ) :
+lemma mathieuSe_add_two_pi {n : ℕ} (hn : n ≠ 0) (z : ℂ) (q : ℝ) :
     mathieuSe n (z + 2 * π) q = mathieuSe n z q := by
   rw [show z + 2 * π = z + π + π by ring]
   rcases Nat.even_or_odd' n with ⟨k, rfl | rfl⟩
@@ -359,7 +380,7 @@ lemma p1a1_mathieuSe_add_two_pi {n : ℕ} (hn : n ≠ 0) (z : ℂ) (q : ℝ) :
 /-- **DLMF 28.2.29**: `ce_0(z, 0) = 1/√2`. -/
 @[dlmf 28.2.E29]
 theorem mathieuCe_zero_zero (z : ℂ) : mathieuCe 0 z 0 = 1 / Real.sqrt 2 := by
-  have e := p1a1_mathieuWI_sq_q_zero 0
+  have e := mathieuWI_natCast_sq_q_zero 0
   simp only [Nat.cast_zero, zero_mul, Complex.cos_zero] at e
   rw [mathieuCe, mathieuCeZero, mathieuA_zero 0]
   simp only [Nat.cast_zero] at e ⊢
@@ -372,17 +393,17 @@ theorem mathieuCe_zero_zero (z : ℂ) : mathieuCe 0 z 0 = 1 / Real.sqrt 2 := by
 @[dlmf 28.2.E29]
 theorem mathieuCe_q_zero {n : ℕ} (hn : n ≠ 0) (z : ℂ) :
     mathieuCe n z 0 = Complex.cos (n * z) := by
-  rw [mathieuCe, mathieuCeZero, mathieuA_zero n, p1a1_mathieuWI_sq_q_zero n]
-  simp only [p1a1_norm_cos_sq, p1a1_integral_cos_sq hn, div_self Real.pi_ne_zero,
+  rw [mathieuCe, mathieuCeZero, mathieuA_zero n, mathieuWI_natCast_sq_q_zero n]
+  simp only [norm_cos_natCast_mul_ofReal_sq, integral_cos_natCast_mul_sq hn, div_self Real.pi_ne_zero,
     Real.sqrt_one, Complex.ofReal_one, one_mul]
 
 /-- **DLMF 28.2.29**: `se_n(z, 0) = sin nz`, `n = 1, 2, 3, …`. -/
 @[dlmf 28.2.E29]
 theorem mathieuSe_q_zero {n : ℕ} (hn : n ≠ 0) (z : ℂ) :
     mathieuSe n z 0 = Complex.sin (n * z) := by
-  rw [mathieuSe, mathieuSeDerivZero, mathieuB_zero hn, p1a1_mathieuWII_sq_q_zero hn]
-  simp only [p1a1_norm_sin_div_sq]
-  rw [intervalIntegral.integral_div, p1a1_integral_sin_sq hn]
+  rw [mathieuSe, mathieuSeDerivZero, mathieuB_zero hn, mathieuWII_natCast_sq_q_zero hn]
+  simp only [norm_sin_natCast_mul_ofReal_div_sq]
+  rw [intervalIntegral.integral_div, integral_sin_natCast_mul_sq hn]
   have hn' : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn
   rw [show π / (π / (n : ℝ) ^ 2) = (n : ℝ) ^ 2 by field_simp, Real.sqrt_sq (Nat.cast_nonneg n)]
   have : (n : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hn
@@ -392,40 +413,41 @@ theorem mathieuSe_q_zero {n : ℕ} (hn : n ≠ 0) (z : ℂ) :
 @[dlmf 28.2.E30]
 theorem integral_mathieuCe_sq (n : ℕ) (q : ℝ) :
     ∫ x in (0 : ℝ)..2 * π, mathieuCe n x q ^ 2 = π := by
-  have := p1a1_integral_normalized_sq (f := mathieuWI (mathieuA n q) q)
-    (fun x => p1a1_mathieuWI_real _ _ x) (p1a1_integral_normSq_mathieuWI_pos _ _)
+  have := integral_normalized_sq_eq_pi (f := mathieuWI (mathieuA n q) q)
+    (fun x => conj_mathieuWI_ofReal _ _ x) (integral_norm_sq_mathieuWI_pos _ _)
   exact this
 
-/-- **Normalization** (DLMF 28.2.30): `∫₀^{2π} se_n(x, q)² dx = π`, `n ≥ 1` (real `q`). -/
+/-- **Normalization** (DLMF 28.2.30): `∫₀^{2π} se_n(x, q)² dx = π` (real `q`). DLMF has
+`n ≥ 1`; the junk value `se₀` is normalized by the same construction. -/
 @[dlmf 28.2.E30]
-theorem integral_mathieuSe_sq {n : ℕ} (hn : n ≠ 0) (q : ℝ) :
+theorem integral_mathieuSe_sq {n : ℕ} (q : ℝ) :
     ∫ x in (0 : ℝ)..2 * π, mathieuSe n x q ^ 2 = π := by
-  exact p1a1_integral_normalized_sq (f := mathieuWII (mathieuB n q) q)
-    (fun x => p1a1_mathieuWII_real _ _ x) (p1a1_integral_normSq_mathieuWII_pos _ _)
+  exact integral_normalized_sq_eq_pi (f := mathieuWII (mathieuB n q) q)
+    (fun x => conj_mathieuWII_ofReal _ _ x) (integral_norm_sq_mathieuWII_pos _ _)
 
 /-- **Orthogonality** (DLMF 28.2.31): `∫₀^{2π} ce_m ce_n = 0` for `m ≠ n` (real `q`). -/
 @[dlmf 28.2.E31]
 theorem integral_mathieuCe_mul_mathieuCe {m n : ℕ} (hmn : m ≠ n) (q : ℝ) :
     ∫ x in (0 : ℝ)..2 * π, mathieuCe m x q * mathieuCe n x q = 0 :=
-  p1a1_integral_mul_eq_zero (isMathieuSolution_mathieuCe m q) (isMathieuSolution_mathieuCe n q)
-    (fun z => p1a1_mathieuCe_add_two_pi m z q) (fun z => p1a1_mathieuCe_add_two_pi n z q)
-    (fun h => hmn (p1a1_mathieuA_injective q (by exact_mod_cast h)))
+  integral_mul_eq_zero_of_two_pi_periodic (isMathieuSolution_mathieuCe m q) (isMathieuSolution_mathieuCe n q)
+    (fun z => mathieuCe_add_two_pi m z q) (fun z => mathieuCe_add_two_pi n z q)
+    (fun h => hmn (mathieuA_injective q (by exact_mod_cast h)))
 
 /-- **Orthogonality** (DLMF 28.2.32): `∫₀^{2π} se_m se_n = 0` for `m ≠ n`, `m, n ≥ 1`. -/
 @[dlmf 28.2.E32]
 theorem integral_mathieuSe_mul_mathieuSe {m n : ℕ} (hm : m ≠ 0) (hn : n ≠ 0) (hmn : m ≠ n)
     (q : ℝ) : ∫ x in (0 : ℝ)..2 * π, mathieuSe m x q * mathieuSe n x q = 0 :=
-  p1a1_integral_mul_eq_zero (isMathieuSolution_mathieuSe m q) (isMathieuSolution_mathieuSe n q)
-    (fun z => p1a1_mathieuSe_add_two_pi hm z q) (fun z => p1a1_mathieuSe_add_two_pi hn z q)
-    (fun h => hmn (p1a1_mathieuB_injective hm hn q (by exact_mod_cast h)))
+  integral_mul_eq_zero_of_two_pi_periodic (isMathieuSolution_mathieuSe m q) (isMathieuSolution_mathieuSe n q)
+    (fun z => mathieuSe_add_two_pi hm z q) (fun z => mathieuSe_add_two_pi hn z q)
+    (fun h => hmn (eq_of_mathieuB_eq hm hn q (by exact_mod_cast h)))
 
 /-- **Counterexample** to DLMF 28.2.33 as stated for `n = 0` (where `se_0` is a junk value):
 at `q = 0`, `∫₀^{2π} ce_0 se_0 ≠ 0`, since `se_0(x, 0)` is a positive multiple of `x`. -/
-lemma p1a1_integral_mathieuCe_mul_mathieuSe_zero_ne :
+lemma integral_mathieuCe_zero_mul_mathieuSe_zero_ne_zero :
     ∫ x in (0 : ℝ)..2 * π, mathieuCe 0 x 0 * mathieuSe 0 x 0 ≠ 0 := by
   have hB : mathieuB 0 0 = 0 := by simp [mathieuB]
   have hse : ∀ x : ℂ, mathieuSe 0 x 0 = mathieuSeDerivZero 0 0 * x := by
-    intro x; rw [mathieuSe, hB]; push_cast; rw [p1a1_mathieuWII_zero_zero]
+    intro x; rw [mathieuSe, hB]; push_cast; rw [mathieuWII_zero_zero]
   simp_rw [mathieuCe_zero_zero, hse]
   have e : ∀ x : ℝ, (1 / (Real.sqrt 2 : ℂ)) * ((mathieuSeDerivZero 0 0 : ℂ) * (x : ℂ)) =
       ((1 / Real.sqrt 2 * mathieuSeDerivZero 0 0 * x : ℝ) : ℂ) := by
@@ -443,14 +465,14 @@ lemma p1a1_integral_mathieuCe_mul_mathieuSe_zero_ne :
 
 /-- **Orthogonality** (DLMF 28.2.33): `∫₀^{2π} ce_m se_n = 0` for `n ≥ 1`. The hypothesis
 `n ≠ 0` was added on 2026-10-26: DLMF does not define `se_0`, and for the junk value `n = 0`
-the statement fails (`p1a1_integral_mathieuCe_mul_mathieuSe_zero_ne`). -/
+the statement fails (`integral_mathieuCe_zero_mul_mathieuSe_zero_ne_zero`). -/
 @[dlmf 28.2.E33]
 theorem integral_mathieuCe_mul_mathieuSe (m n : ℕ) (hn : n ≠ 0) (q : ℝ) :
     ∫ x in (0 : ℝ)..2 * π, mathieuCe m x q * mathieuSe n x q = 0 := by
   set f : ℝ → ℂ := fun x => mathieuCe m x q * mathieuSe n x q
   have hp : Function.Periodic f (2 * π) := fun x => by
     simp only [f]; push_cast
-    rw [p1a1_mathieuCe_add_two_pi, p1a1_mathieuSe_add_two_pi hn]
+    rw [mathieuCe_add_two_pi, mathieuSe_add_two_pi hn]
   have hodd : ∀ x, f (-x) = -f x := fun x => by
     simp only [f]; push_cast; rw [mathieuCe_neg, mathieuSe_neg]; ring
   have h1 : ∫ x in (0 : ℝ)..2 * π, f x = ∫ x in (-π)..π, f x := by
@@ -469,7 +491,7 @@ theorem integral_mathieuCe_mul_mathieuSe (m n : ℕ) (hn : n ≠ 0) (q : ℝ) :
 /-- The normalization step of 28.2.34–28.2.37: if `G(z) = c F(π/2 - z)` with `F` continuous and
 `2π`-periodic and `(-1)ⁿ c > 0`, then the normalized `G` is `(-1)ⁿ` times the normalized
 `F(π/2 - ·)`. -/
-lemma p2s_neg_q_aux {F G : ℂ → ℂ} {c : ℝ} {n : ℕ} (hper : ∀ z, F (z + 2 * π) = F z)
+private lemma normalized_comp_pi_div_two_sub {F G : ℂ → ℂ} {c : ℝ} {n : ℕ} (hper : ∀ z, F (z + 2 * π) = F z)
     (hFG : ∀ z, G z = c * F (π / 2 - z)) (hs : 0 < (-1) ^ n * c) (z : ℂ) :
     (Real.sqrt (π / ∫ x in (0 : ℝ)..2 * π, ‖G x‖ ^ 2) : ℂ) * G z =
       (-1) ^ n * ((Real.sqrt (π / ∫ x in (0 : ℝ)..2 * π, ‖F x‖ ^ 2) : ℂ) * F (π / 2 - z)) := by
@@ -505,23 +527,23 @@ lemma p2s_neg_q_aux {F G : ℂ → ℂ} {c : ℝ} {n : ℕ} (hper : ∀ z, F (z 
 theorem mathieuCe_even_neg_q (n : ℕ) (z : ℂ) (q : ℝ) :
     mathieuCe (2 * n) z (-q) = (-1) ^ n * mathieuCe (2 * n) (π / 2 - z) q := by
   set a := mathieuA (2 * n) q
-  obtain ⟨α, hα, hσ⟩ := p2s_sign_A_even n q
+  obtain ⟨α, hα, hσ⟩ := mathieuWI_half_pi_mathieuA_even_sign n q
   have hA' := deriv_mathieuWI_half_pi_mathieuA_even n q
   obtain ⟨b, hb⟩ : ∃ b : ℝ, deriv (mathieuWII a q) (π / 2) = b :=
-    ⟨_, by rw [← p2s_hpi]; exact (p2s_WII_eq a q _).2⟩
+    ⟨_, by rw [← ofReal_pi_div_two]; exact (mathieuWII_ofReal_eq_sturmSolution a q _).2⟩
   have hW := mathieuWI_wronskian a q (π / 2)
   rw [hα, hA', hb] at hW
   have hαb : α * b = 1 := by exact_mod_cast (by linear_combination hW : (α : ℂ) * b = 1)
   have hK : ∀ z, mathieuWI a (-q) z = b * mathieuWI a q (π / 2 - z) := fun z => by
-    rw [← mathieuWI_neg, p1a1_mathieuWI_neg_q, hb, hA', show -z + π / 2 = π / 2 - z by ring]
+    rw [← mathieuWI_neg, mathieuWI_neg_q, hb, hA', show -z + π / 2 = π / 2 - z by ring]
     ring
   have hper : ∀ z, mathieuWI a q (z + 2 * π) = mathieuWI a q z := fun z => by
-    rw [show z + 2 * π = z + π + π by ring, m28a_mathieuWI_periodic hA',
-      m28a_mathieuWI_periodic hA']
+    rw [show z + 2 * π = z + π + π by ring, mathieuWI_add_pi_of_deriv_half_pi_eq_zero hA',
+      mathieuWI_add_pi_of_deriv_half_pi_eq_zero hA']
   have hs : 0 < (-1) ^ n * b := by
     rcases neg_one_pow_eq_or ℝ n with h | h <;> rw [h] at hσ ⊢ <;> nlinarith
   simp only [mathieuCe, mathieuCeZero, mathieuA_even_neg, Complex.ofReal_neg]
-  exact p2s_neg_q_aux hper hK hs z
+  exact normalized_comp_pi_div_two_sub hper hK hs z
 
 /-- **Change of sign of `q`** (DLMF 28.2.35):
 `ce_{2n+1}(z, -q) = (-1)ⁿ se_{2n+1}(π/2 - z, q)`. -/
@@ -529,24 +551,24 @@ theorem mathieuCe_even_neg_q (n : ℕ) (z : ℂ) (q : ℝ) :
 theorem mathieuCe_odd_neg_q (n : ℕ) (z : ℂ) (q : ℝ) :
     mathieuCe (2 * n + 1) z (-q) = (-1) ^ n * mathieuSe (2 * n + 1) (π / 2 - z) q := by
   set b := mathieuB (2 * n + 1) q
-  obtain ⟨β, hβ, hσ⟩ := p2s_sign_B_odd n q
+  obtain ⟨β, hβ, hσ⟩ := mathieuWII_half_pi_mathieuB_odd_sign n q
   have hB' := deriv_mathieuWII_half_pi_mathieuB_odd n q
   obtain ⟨α, hα⟩ : ∃ α : ℝ, deriv (mathieuWI b q) (π / 2) = α :=
-    ⟨_, by rw [← p2s_hpi]; exact (p2s_WI_eq b q _).2⟩
+    ⟨_, by rw [← ofReal_pi_div_two]; exact (mathieuWI_ofReal_eq_sturmSolution b q _).2⟩
   have hW := mathieuWI_wronskian b q (π / 2)
   rw [hβ, hB', hα] at hW
   have hαβ : -α * β = 1 := by exact_mod_cast (by linear_combination hW : -(α : ℂ) * β = 1)
   have hK : ∀ z, mathieuWI b (-q) z = ((-α : ℝ) : ℂ) * mathieuWII b q (π / 2 - z) := fun z => by
-    rw [← mathieuWI_neg, p1a1_mathieuWI_neg_q, hB', hα, show -z + π / 2 = π / 2 - z by ring]
+    rw [← mathieuWI_neg, mathieuWI_neg_q, hB', hα, show -z + π / 2 = π / 2 - z by ring]
     push_cast; ring
   have hper : ∀ z, mathieuWII b q (z + 2 * π) = mathieuWII b q z := fun z => by
-    rw [show z + 2 * π = z + π + π by ring, m28a_mathieuWII_antiperiodic hB',
-      m28a_mathieuWII_antiperiodic hB', neg_neg]
+    rw [show z + 2 * π = z + π + π by ring, mathieuWII_add_pi_of_deriv_half_pi_eq_zero hB',
+      mathieuWII_add_pi_of_deriv_half_pi_eq_zero hB', neg_neg]
   have hs : 0 < (-1) ^ n * -α := by
     rcases neg_one_pow_eq_or ℝ n with h | h <;> rw [h] at hσ ⊢ <;> nlinarith
   simp only [mathieuCe, mathieuCeZero, mathieuSe, mathieuSeDerivZero, mathieuA_odd_neg,
     Complex.ofReal_neg]
-  exact p2s_neg_q_aux hper hK hs z
+  exact normalized_comp_pi_div_two_sub hper hK hs z
 
 /-- **Change of sign of `q`** (DLMF 28.2.36):
 `se_{2n+1}(z, -q) = (-1)ⁿ ce_{2n+1}(π/2 - z, q)`. -/
@@ -556,26 +578,26 @@ theorem mathieuSe_odd_neg_q (n : ℕ) (z : ℂ) (q : ℝ) :
   set a := mathieuA (2 * n + 1) q
   have hba : mathieuB (2 * n + 1) (-q) = a := by
     have := mathieuA_odd_neg n (-q); rw [neg_neg] at this; exact this.symm
-  obtain ⟨α, hα, hσ⟩ := p2s_sign_A_odd n q
+  obtain ⟨α, hα, hσ⟩ := deriv_mathieuWI_half_pi_mathieuA_odd_sign n q
   have hA := mathieuWI_half_pi_mathieuA_odd n q
   obtain ⟨β, hβ⟩ : ∃ β : ℝ, mathieuWII a q (π / 2) = β :=
-    ⟨_, by rw [← p2s_hpi]; exact (p2s_WII_eq a q _).1⟩
+    ⟨_, by rw [← ofReal_pi_div_two]; exact (mathieuWII_ofReal_eq_sturmSolution a q _).1⟩
   have hW := mathieuWI_wronskian a q (π / 2)
   rw [hα, hA, hβ] at hW
   have hαβ : -α * β = 1 := by exact_mod_cast (by linear_combination hW : -(α : ℂ) * β = 1)
   have hK : ∀ z, mathieuWII a (-q) z = (β : ℂ) * mathieuWI a q (π / 2 - z) := fun z => by
     have := mathieuWII_neg a (-q) (-z)
     rw [neg_neg] at this
-    rw [this, p1a1_mathieuWII_neg_q, hA, hβ, show -z + π / 2 = π / 2 - z by ring]
+    rw [this, mathieuWII_neg_q, hA, hβ, show -z + π / 2 = π / 2 - z by ring]
     ring
   have hper : ∀ z, mathieuWI a q (z + 2 * π) = mathieuWI a q z := fun z => by
-    rw [show z + 2 * π = z + π + π by ring, m28a_mathieuWI_antiperiodic hA,
-      m28a_mathieuWI_antiperiodic hA, neg_neg]
+    rw [show z + 2 * π = z + π + π by ring, mathieuWI_add_pi_of_half_pi_eq_zero hA,
+      mathieuWI_add_pi_of_half_pi_eq_zero hA, neg_neg]
   have hs : 0 < (-1) ^ n * β := by
     rw [pow_succ] at hσ
     rcases neg_one_pow_eq_or ℝ n with h | h <;> rw [h] at hσ ⊢ <;> nlinarith
   simp only [mathieuCe, mathieuCeZero, mathieuSe, mathieuSeDerivZero, hba, Complex.ofReal_neg]
-  exact p2s_neg_q_aux hper hK hs z
+  exact normalized_comp_pi_div_two_sub hper hK hs z
 
 /-- **Change of sign of `q`** (DLMF 28.2.37):
 `se_{2n+2}(z, -q) = (-1)ⁿ se_{2n+2}(π/2 - z, q)`. -/
@@ -583,26 +605,26 @@ theorem mathieuSe_odd_neg_q (n : ℕ) (z : ℂ) (q : ℝ) :
 theorem mathieuSe_even_neg_q (n : ℕ) (z : ℂ) (q : ℝ) :
     mathieuSe (2 * n + 2) z (-q) = (-1) ^ n * mathieuSe (2 * n + 2) (π / 2 - z) q := by
   set b := mathieuB (2 * n + 2) q
-  obtain ⟨β, hβ, hσ⟩ := p2s_sign_B_even n q
+  obtain ⟨β, hβ, hσ⟩ := deriv_mathieuWII_half_pi_mathieuB_even_sign n q
   have hB := mathieuWII_half_pi_mathieuB_even n q
   obtain ⟨α, hα⟩ : ∃ α : ℝ, mathieuWI b q (π / 2) = α :=
-    ⟨_, by rw [← p2s_hpi]; exact (p2s_WI_eq b q _).1⟩
+    ⟨_, by rw [← ofReal_pi_div_two]; exact (mathieuWI_ofReal_eq_sturmSolution b q _).1⟩
   have hW := mathieuWI_wronskian b q (π / 2)
   rw [hα, hB, hβ] at hW
   have hαβ : α * β = 1 := by exact_mod_cast (by linear_combination hW : (α : ℂ) * β = 1)
   have hK : ∀ z, mathieuWII b (-q) z = ((-α : ℝ) : ℂ) * mathieuWII b q (π / 2 - z) := fun z => by
     have := mathieuWII_neg b (-q) (-z)
     rw [neg_neg] at this
-    rw [this, p1a1_mathieuWII_neg_q, hB, hα, show -z + π / 2 = π / 2 - z by ring]
+    rw [this, mathieuWII_neg_q, hB, hα, show -z + π / 2 = π / 2 - z by ring]
     push_cast; ring
   have hper : ∀ z, mathieuWII b q (z + 2 * π) = mathieuWII b q z := fun z => by
-    rw [show z + 2 * π = z + π + π by ring, m28a_mathieuWII_periodic hB,
-      m28a_mathieuWII_periodic hB]
+    rw [show z + 2 * π = z + π + π by ring, mathieuWII_add_pi_of_half_pi_eq_zero hB,
+      mathieuWII_add_pi_of_half_pi_eq_zero hB]
   have hs : 0 < (-1) ^ n * -α := by
     rw [pow_succ] at hσ
     rcases neg_one_pow_eq_or ℝ n with h | h <;> rw [h] at hσ ⊢ <;> nlinarith
   simp only [mathieuSe, mathieuSeDerivZero, mathieuB_even_neg, Complex.ofReal_neg]
-  exact p2s_neg_q_aux hper hK hs z
+  exact normalized_comp_pi_div_two_sub hper hK hs z
 
 end DLMF.Mathieu
 

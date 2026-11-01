@@ -14,12 +14,23 @@ public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 /-!
 # Singularities of linear second-order equations (DLMF §2.7(i), (ii), (iv))
 
-* §2.7(i): ordinary points, regular singularities, the Frobenius solutions 2.7.4–2.7.6.
-* §2.7(ii): the rank of a singularity, the formal solutions 2.7.8–2.7.11 at an irregular
-  singularity of rank 1 at infinity, the actual solutions 2.7.14–2.7.16, the connection
-  formulas with Stokes multipliers 2.7.17, the late-coefficient asymptotics 2.7.12–2.7.13
-  with 2.7.18, and Fabry's transformation 2.7.19.
-* §2.7(iv): the solution pairs of `w'' = w` (2.7.35–2.7.37).
+## Main results
+
+* `exists_unique_solution_of_ordinary`, `linearODERegularSingularAt_iff`: ordinary points and
+  regular singularities (§2.7(i)).
+* `frobenius_solutions`, `frobenius_log_solution`: the Frobenius solutions (DLMF 2.7.2–2.7.6).
+* `hasSingularityRank_zero_of_regularSingular`: a regular singularity has rank `0` (§2.7(ii)).
+* `characteristic_roots_eq_iff`: the characteristic equation 2.7.9.
+* `rankOne_exists_unique_solutions`: the solutions at an irregular singularity of rank 1 at
+  infinity (DLMF 2.7.7–2.7.11, 2.7.14–2.7.16).
+* `rankOne_stokes_multipliers`: connection formulas with Stokes multipliers (DLMF 2.7.17).
+* `rankOne_late_coefficients`: asymptotics of the late coefficients (DLMF 2.7.12–2.7.13,
+  2.7.18).
+* `fabry_transformation`, `fabry_coefficients`: Fabry's transformation (DLMF 2.7.19).
+* `eq_exp_combination`, `eq_cosh_sinh_combination`, `exp_div_exp_neg_tendsto`: the solution
+  pairs of `w'' = w` (DLMF 2.7.35–2.7.37, §2.7(iv)).
+
+## Implementation notes
 
 Solutions near an irregular singularity at infinity live on sectors of opening up to `3π`, so
 they are stated on the logarithmic plane (`IsLogPlaneSolOn`, `z = e^ζ`, `ph z = ℑζ`). The
@@ -85,10 +96,10 @@ theorem frobenius_solutions {f g : ℂ → ℂ} {z₀ : ℂ} {R : ℝ} (hR : 0 <
     (∀ z, ‖z - z₀‖ < R → Summable (fun s => frobeniusCoeff fs gs α₁ s * (z - z₀) ^ s) ∧
       Summable (fun s => frobeniusCoeff fs gs α₂ s * (z - z₀) ^ s)) ∧
     IsLinearODE2SolOn f g (fun z => (z - z₀) ^ α₁ *
-      ∑' s, frobeniusCoeff fs gs α₁ s * (z - z₀) ^ s) (g2b_slitDisc z₀ R) ∧
+      ∑' s, frobeniusCoeff fs gs α₁ s * (z - z₀) ^ s) (slitDisc z₀ R) ∧
     IsLinearODE2SolOn f g (fun z => (z - z₀) ^ α₂ *
-      ∑' s, frobeniusCoeff fs gs α₂ s * (z - z₀) ^ s) (g2b_slitDisc z₀ R) ∧
-    ¬ ∃ c : ℂ, ∀ z ∈ g2b_slitDisc z₀ R,
+      ∑' s, frobeniusCoeff fs gs α₂ s * (z - z₀) ^ s) (slitDisc z₀ R) ∧
+    ¬ ∃ c : ℂ, ∀ z ∈ slitDisc z₀ R,
       (z - z₀) ^ α₁ * ∑' s, frobeniusCoeff fs gs α₁ s * (z - z₀) ^ s =
         c * ((z - z₀) ^ α₂ * ∑' s, frobeniusCoeff fs gs α₂ s * (z - z₀) ^ s) := by
   sorry
@@ -105,13 +116,13 @@ theorem frobenius_log_solution {f g : ℂ → ℂ} {z₀ : ℂ} {R : ℝ} (hR : 
     {α₁ α₂ : ℂ} (h₁ : indicialPoly (fs 0) (gs 0) α₁ = 0) (h₂ : indicialPoly (fs 0) (gs 0) α₂ = 0)
     {N : ℕ} (hN : α₁ - α₂ = N) :
     let w₁ : ℂ → ℂ := fun z => (z - z₀) ^ α₁ * ∑' s, frobeniusCoeff fs gs α₁ s * (z - z₀) ^ s
-    IsLinearODE2SolOn f g w₁ (g2b_slitDisc z₀ R) ∧
+    IsLinearODE2SolOn f g w₁ (slitDisc z₀ R) ∧
     ∃ (b : ℕ → ℂ) (c : ℂ), (N = 0 → c = 1) ∧ (1 ≤ N → b 0 = 1) ∧
       (∀ z, ‖z - z₀‖ < R → Summable (fun s => b s * (z - z₀) ^ s)) ∧
       IsLinearODE2SolOn f g (fun z => (z - z₀) ^ α₂ *
           ∑' s, (if s = N then 0 else b s) * (z - z₀) ^ s + c * w₁ z * log (z - z₀))
-        (g2b_slitDisc z₀ R) ∧
-      ¬ ∃ d : ℂ, ∀ z ∈ g2b_slitDisc z₀ R, (z - z₀) ^ α₂ *
+        (slitDisc z₀ R) ∧
+      ¬ ∃ d : ℂ, ∀ z ∈ slitDisc z₀ R, (z - z₀) ^ α₂ *
           ∑' s, (if s = N then 0 else b s) * (z - z₀) ^ s + c * w₁ z * log (z - z₀) =
         d * w₁ z := by
   sorry
@@ -154,18 +165,18 @@ theorem rankOne_exists_unique_solutions {f g : ℂ → ℂ} {fs gs : ℕ → ℂ
     let μ₁ := rankOneExponent fs gs l₁
     let μ₂ := rankOneExponent fs gs l₂
     ∃ W₁ W₂ : ℂ → ℂ,
-      IsLogPlaneSolOn f g W₁ (g2b_logExterior a) ∧ IsLogPlaneSolOn f g W₂ (g2b_logExterior a) ∧
+      IsLogPlaneSolOn f g W₁ (logExterior a) ∧ IsLogPlaneSolOn f g W₂ (logExterior a) ∧
       (∀ δ : ℝ, 0 < δ → δ < π →
         HasAsymptoticExpansion (logSectorFilter (-(3 * π / 2) + δ) (3 * π / 2 - δ) c)
           (rankOneScale l₁ μ₁ c) (rankOneCoeff fs gs l₁) W₁ ∧
         HasAsymptoticExpansion (logSectorFilter (-(π / 2) + δ) (5 * π / 2 - δ) c)
           (rankOneScale l₂ μ₂ c) (rankOneCoeff fs gs l₂) W₂) ∧
-      (∀ δ : ℝ, 0 < δ → δ < π → ∀ V : ℂ → ℂ, IsLogPlaneSolOn f g V (g2b_logExterior a) →
+      (∀ δ : ℝ, 0 < δ → δ < π → ∀ V : ℂ → ℂ, IsLogPlaneSolOn f g V (logExterior a) →
         HasAsymptoticExpansion (logSectorFilter (-(3 * π / 2) + δ) (3 * π / 2 - δ) c)
-          (rankOneScale l₁ μ₁ c) (rankOneCoeff fs gs l₁) V → EqOn V W₁ (g2b_logExterior a)) ∧
-      (∀ δ : ℝ, 0 < δ → δ < π → ∀ V : ℂ → ℂ, IsLogPlaneSolOn f g V (g2b_logExterior a) →
+          (rankOneScale l₁ μ₁ c) (rankOneCoeff fs gs l₁) V → EqOn V W₁ (logExterior a)) ∧
+      (∀ δ : ℝ, 0 < δ → δ < π → ∀ V : ℂ → ℂ, IsLogPlaneSolOn f g V (logExterior a) →
         HasAsymptoticExpansion (logSectorFilter (-(π / 2) + δ) (5 * π / 2 - δ) c)
-          (rankOneScale l₂ μ₂ c) (rankOneCoeff fs gs l₂) V → EqOn V W₂ (g2b_logExterior a)) := by
+          (rankOneScale l₂ μ₂ c) (rankOneCoeff fs gs l₂) V → EqOn V W₂ (logExterior a)) := by
   sorry
 
 /-- DLMF 2.7.17: connection formulas with the **Stokes multipliers** `C₁, C₂`: the solutions
@@ -175,15 +186,15 @@ theorem rankOne_exists_unique_solutions {f g : ℂ → ℂ} {fs gs : ℕ → ℂ
 @[dlmf 2.7.E17]
 theorem rankOne_stokes_multipliers {f g : ℂ → ℂ} {fs gs : ℕ → ℂ} {a : ℝ} {l₁ l₂ : ℂ}
     (h : IsRankOneAtInfinity f g fs gs a l₁ l₂) {W₁ W₂ : ℂ → ℂ}
-    (hW₁ : IsLogPlaneSolOn f g W₁ (g2b_logExterior a))
-    (hW₂ : IsLogPlaneSolOn f g W₂ (g2b_logExterior a))
+    (hW₁ : IsLogPlaneSolOn f g W₁ (logExterior a))
+    (hW₂ : IsLogPlaneSolOn f g W₂ (logExterior a))
     (hE₁ : HasAsymptoticExpansion (logSectorFilter (-π) π (Complex.log (l₂ - l₁)))
       (rankOneScale l₁ (rankOneExponent fs gs l₁) (Complex.log (l₂ - l₁)))
       (rankOneCoeff fs gs l₁) W₁)
     (hE₂ : HasAsymptoticExpansion (logSectorFilter 0 (2 * π) (Complex.log (l₂ - l₁)))
       (rankOneScale l₂ (rankOneExponent fs gs l₂) (Complex.log (l₂ - l₁)))
       (rankOneCoeff fs gs l₂) W₂) :
-    ∃ C₁ C₂ : ℂ, ∀ ζ ∈ g2b_logExterior a,
+    ∃ C₁ C₂ : ℂ, ∀ ζ ∈ logExterior a,
       W₁ ζ = exp (2 * π * I * rankOneExponent fs gs l₁) * W₁ (ζ - 2 * π * I) + C₁ * W₂ ζ ∧
       W₂ ζ = exp (-(2 * π * I * rankOneExponent fs gs l₂)) * W₂ (ζ + 2 * π * I) + C₂ * W₁ ζ := by
   sorry
@@ -196,8 +207,8 @@ multipliers `C₁, C₂` of 2.7.17 and `Λ₁ = -i e^{(μ₂-μ₁)πi} C₁/(2�
 @[dlmf 2.7.E12, dlmf 2.7.E13, dlmf 2.7.E18]
 theorem rankOne_late_coefficients {f g : ℂ → ℂ} {fs gs : ℕ → ℂ} {a : ℝ} {l₁ l₂ : ℂ}
     (h : IsRankOneAtInfinity f g fs gs a l₁ l₂) {W₁ W₂ : ℂ → ℂ}
-    (hW₁ : IsLogPlaneSolOn f g W₁ (g2b_logExterior a))
-    (hW₂ : IsLogPlaneSolOn f g W₂ (g2b_logExterior a))
+    (hW₁ : IsLogPlaneSolOn f g W₁ (logExterior a))
+    (hW₂ : IsLogPlaneSolOn f g W₂ (logExterior a))
     (hE₁ : HasAsymptoticExpansion (logSectorFilter (-π) π (Complex.log (l₂ - l₁)))
       (rankOneScale l₁ (rankOneExponent fs gs l₁) (Complex.log (l₂ - l₁)))
       (rankOneCoeff fs gs l₁) W₁)
@@ -205,7 +216,7 @@ theorem rankOne_late_coefficients {f g : ℂ → ℂ} {fs gs : ℕ → ℂ} {a :
       (rankOneScale l₂ (rankOneExponent fs gs l₂) (Complex.log (l₂ - l₁)))
       (rankOneCoeff fs gs l₂) W₂)
     {C₁ C₂ : ℂ}
-    (hC : ∀ ζ ∈ g2b_logExterior a,
+    (hC : ∀ ζ ∈ logExterior a,
       W₁ ζ = exp (2 * π * I * rankOneExponent fs gs l₁) * W₁ (ζ - 2 * π * I) + C₁ * W₂ ζ ∧
       W₂ ζ = exp (-(2 * π * I * rankOneExponent fs gs l₂)) * W₂ (ζ + 2 * π * I) + C₂ * W₁ ζ)
     (J : ℕ) :

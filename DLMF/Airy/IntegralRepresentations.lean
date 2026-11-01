@@ -6,12 +6,36 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Airy.GeneralizedContours
+public import Carlson.Elliptic.Addition
 
 /-!
-# Airy integral representations, DLMF §9.5
+# Integral representations of Airy functions (DLMF §9.5)
 
-Statements acquired from the NIST DLMF, checked 2026-10-19.
-New statements are initially admitted; existing proved Airy results are retained.
+Contour integrals for `Ai` and `Bi`, the real oscillatory integrals, the cubic and Gaussian
+integrals and the Laplace-type integral for `Ai`, together with the Scorer integral for `Gi`.
+
+## Main definitions
+
+* `airyInt_kernel`, `airyInt_osc`: the Airy integrand and its oscillatory form for real `x`.
+* `airyInt_w`: an auxiliary ray integral.
+* `airyInt_sector`: the open sector `|arg z| < α`.
+
+## Main results
+
+* `airyAi_cos_integral`: `Ai(x) = π⁻¹ ∫₀^∞ cos(t³/3 + xt) dt` (DLMF 9.5.1).
+* `airyAi_neg_cos_integral`: DLMF 9.5.2.
+* `airyBi_real_integral`: DLMF 9.5.3.
+* `airyAi_contour_integral`, `airyBi_contour_integral`: DLMF 9.5.4, 9.5.5.
+* `airyAi_cubic_integral`: DLMF 9.5.6.
+* `airyAi_gaussian_cos_integral`: DLMF 9.5.7.
+* `airyAi_laplace_integral`: DLMF 9.5.8.
+* `scorerGi_sin_integral`: `Gi(x) = π⁻¹ ∫₀^∞ sin(t³/3 + xt) dt` (DLMF 9.12.19).
+* `contourIntegral_airy_eq_reidContour`: Airy contours are Reid contours with `p = 0`
+  rotated by `π`.
+
+## Implementation notes
+
+The oscillatory integrals are improper integrals, stated as limits of integrals over `[0, R]`.
 -/
 
 @[expose] public noncomputable section
@@ -740,21 +764,6 @@ theorem airyInt_eqOn_of_pos_real {U : Set ℂ} (hU : IsOpen U) (hUc : IsPreconne
     with r hr hrU
   exact heq r hr hrU
 
-/-- `Re z^{1/2} > 0` on the slit plane. -/
-theorem airyInt_re_sqrt_pos {z : ℂ} (hz : z ∈ slitPlane) : 0 < (z ^ (1 / 2 : ℂ)).re := by
-  have hz0 := slitPlane_ne_zero hz
-  rw [cpow_def_of_ne_zero hz0, exp_re]
-  refine mul_pos (Real.exp_pos _) (Real.cos_pos_of_mem_Ioo ⟨?_, ?_⟩)
-  all_goals
-    have h1 := neg_pi_lt_arg z
-    have h2 : arg z < π := lt_of_le_of_ne (arg_le_pi z) (mem_slitPlane_iff_arg.mp hz).1
-    simp [mul_im, log_re, log_im]
-    linarith [Real.pi_pos]
-
-
-/-- `x^{1/2}` for positive real `x`. -/
-theorem airyInt_ofReal_cpow_half {x : ℝ} (hx : 0 ≤ x) : (x : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt x : ℂ) := by
-  rw [Real.sqrt_eq_rpow, ofReal_cpow hx]; push_cast; ring_nf
 
 /-- `ζ(x) = (2/3) (√x)³` for positive real `x`. -/
 theorem airyInt_zeta_ofReal {x : ℝ} (hx : 0 ≤ x) :
@@ -1005,12 +1014,12 @@ theorem airyAi_gaussian_cos_integral {z : ℂ} (hz : z ∈ slitPlane) :
       exact ((((differentiableAt_id.cpow (differentiableAt_const _) hw).neg).mul
         (differentiableAt_const _)).cexp).mul (differentiableAt_const _)
     · set δ := (z0 ^ (1 / 2 : ℂ)).re / 2
-      have hδ : 0 < δ := half_pos (airyInt_re_sqrt_pos hz0)
+      have hδ : 0 < δ := half_pos (Carlson.re_cpow_half_pos hz0)
       have hc : ContinuousAt (fun w : ℂ => (w ^ (1 / 2 : ℂ)).re) z0 :=
         continuous_re.continuousAt.comp
           (differentiableAt_id.cpow (differentiableAt_const _) hz0).continuousAt
       refine ⟨(fun w : ℂ => (w ^ (1 / 2 : ℂ)).re) ⁻¹' Ioi δ,
-        hc.preimage_mem_nhds (Ioi_mem_nhds (half_lt_self (airyInt_re_sqrt_pos hz0))), fun t => Real.exp (-δ * t ^ 2),
+        hc.preimage_mem_nhds (Ioi_mem_nhds (half_lt_self (Carlson.re_cpow_half_pos hz0))), fun t => Real.exp (-δ * t ^ 2),
         (integrable_exp_neg_mul_sq hδ).integrableOn, Eventually.of_forall fun t w hw => ?_⟩
       refine (airyInt_norm_gauss_cos_le _ t).trans (Real.exp_le_exp.mpr ?_)
       have hw' : δ < (w ^ (1 / 2 : ℂ)).re := hw
@@ -1023,7 +1032,7 @@ theorem airyAi_gaussian_cos_integral {z : ℂ} (hz : z ∈ slitPlane) :
     one_mem_slitPlane differentiable_airyAi.differentiableOn hg
     (fun x hx _ => by
       rw [airyInt_gauss_real hx, airyInt_zeta_ofReal hx.le]
-      simp only [hΦ, airyInt_ofReal_cpow_half hx.le]) hz
+      simp only [hΦ, Carlson.ofReal_cpow_half hx.le]) hz
   exact h
 
 /-- `log (r e^{iθ}) = log r + iθ` for `r > 0`, `|θ| < π`. -/

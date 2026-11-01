@@ -14,16 +14,26 @@ public import Mathlib.Analysis.SpecialFunctions.Bessel
 # The Mellin-transform example of DLMF §2.5(i): `∫₀^∞ J_ν²(xt)/(1 + t) dt`
 
 For `ν > -½` and `x > 0` let `I(x) = ∫₀^∞ J_ν²(xt)/(1 + t) dt` (2.5.8), a Mellin convolution
-with `f(t) = 1/(1 + t)` and `h(t) = J_ν²(t)`. With `A = besselSqMellinKernel ν`,
-`aₙ = A(n)` and `bₙ = -A'(n)` (`Mellin.Basic`):
+with `f(t) = 1/(1 + t)` and `h(t) = J_ν²(t)`, with `A = besselSqMellinKernel ν`, `aₙ = A(n)` and
+`bₙ = -A'(n)` (`Mellin.Basic`).
 
-* 2.5.9: `𝓜f(1 - z) = π/sin(πz)` (proved);
-* 2.5.10: `𝓜h(z) = A(z) π/sin(πz)`, here in the equivalent form
-  `2^{z-1}Γ(ν + z/2)Γ(1 - z)/(Γ²(1 - z/2)Γ(1 + ν - z/2))`, valid also at `z = 0`, where the
-  printed form is `0 · ∞` (the DLMF form is derived for `sin(πz) ≠ 0`);
-* 2.5.11–2.5.13: residues at the double poles `z = n`;
-* 2.5.14: `|Γ(x + iy)| ∼ √(2π) e^{-π|y|/2} |y|^{x-1/2}` (pointwise forms proved from 5.11.9);
-* 2.5.15–2.5.16: the expansion of `I(x)` as `x → ∞`; `aₛ = bₛ = 0` for even `s ≥ 2` (proved).
+## Main results
+
+* `mellin_inv_one_add_one_sub`: `𝓜f(1 - z) = π/sin(πz)` (DLMF 2.5.9).
+* `mellin_besselJ_sq`, `mellin_besselJ_sq_eq_kernel`: `𝓜h(z) = A(z) π/sin(πz)` (DLMF 2.5.10).
+* `residueAt_besselSq`: residues at the double poles `z = n` (DLMF 2.5.11, corrected sign).
+* `besselSqMellinB_eq_digamma`: DLMF 2.5.13 in DLMF's form.
+* `besselSqMellinA_two_mul`, `besselSqMellinB_two_mul`: `aₛ = bₛ = 0` for even `s ≥ 2`.
+* `norm_Gamma_vertical_atTop`, `norm_Gamma_vertical_atBot`, `norm_Gamma_vertical_uniform`:
+  `|Γ(x + iy)| ∼ √(2π) e^{-π|y|/2} |y|^{x-1/2}` (DLMF 2.5.14, from 5.11.9).
+* `besselSq_integral_expansion`, `besselSq_integral_expansion_odd`: the expansion of `I(x)` as
+  `x → ∞` (DLMF 2.5.15–2.5.16, corrected sign).
+
+## Implementation notes
+
+`mellin_besselJ_sq` uses the equivalent form
+`2^{z-1}Γ(ν + z/2)Γ(1 - z)/(Γ²(1 - z/2)Γ(1 + ν - z/2))`, valid also at `z = 0`, where the
+printed form is `0 · ∞` (the DLMF form is derived for `sin(πz) ≠ 0`).
 
 **Erratum (signs in 2.5.11, 2.5.15, 2.5.16).** The residue of
 `x^{-z} 𝓜f(1 - z) 𝓜h(z) = x^{-z} A(z) π²/sin²(πz)` at `z = n` is
@@ -179,7 +189,7 @@ theorem besselSqMellinA_two_mul (ν : ℝ) (k : ℕ) : besselSqMellinA ν (2 * k
     simp
 
 /-- Helper: `z ↦ 1/Γ(w(z))` is differentiable when `w` is. -/
-private lemma g2a_differentiable_inv_Gamma {w : ℂ → ℂ} (hw : Differentiable ℂ w) :
+private lemma differentiable_inv_Gamma_comp {w : ℂ → ℂ} (hw : Differentiable ℂ w) :
     Differentiable ℂ fun z => (Complex.Gamma (w z))⁻¹ :=
   Complex.differentiable_one_div_Gamma.comp hw
 
@@ -200,7 +210,7 @@ theorem besselSqMellinB_two_mul {ν : ℝ} (hν : -1 / 2 < ν) (k : ℕ) :
     have h : (1 : ℂ) - p / 2 = -(k : ℂ) := by rw [hp]; push_cast; ring
     simp only [hu, h, Complex.Gamma_neg_nat_eq_zero, inv_zero]
   have hud : DifferentiableAt ℂ u p :=
-    (g2a_differentiable_inv_Gamma (by fun_prop)) p
+    (differentiable_inv_Gamma_comp (by fun_prop)) p
   have hΓ : DifferentiableAt ℂ (fun z : ℂ => Complex.Gamma (ν + z / 2)) p := by
     refine (Complex.differentiableAt_Gamma _ fun m hm => ?_).comp p (by fun_prop)
     have hre := congrArg Complex.re hm
@@ -210,8 +220,8 @@ theorem besselSqMellinB_two_mul {ν : ℝ} (hν : -1 / 2 < ν) (k : ℕ) :
   have hGd : DifferentiableAt ℂ G p := by
     have h2 : DifferentiableAt ℂ (fun z : ℂ => (2 : ℂ) ^ (z - 1)) p :=
       (differentiableAt_id.sub_const 1).const_cpow (Or.inl two_ne_zero)
-    exact ((h2.mul hΓ).mul ((g2a_differentiable_inv_Gamma (by fun_prop)) p)).mul
-      ((g2a_differentiable_inv_Gamma differentiable_id) p)
+    exact ((h2.mul hΓ).mul ((differentiable_inv_Gamma_comp (by fun_prop)) p)).mul
+      ((differentiable_inv_Gamma_comp differentiable_id) p)
   have hd := ((hud.hasDerivAt.pow 2).mul hGd.hasDerivAt).deriv
   unfold besselSqMellinB
   rw [hk]
@@ -265,7 +275,7 @@ theorem besselSq_integral_expansion {ν : ℝ} (hν : -1 / 2 < ν) (n : ℕ) {ε
 
 /-- Helper for 2.5.16: a sum over `1 ≤ s ≤ 2n` whose even terms vanish is a sum over the odd
 indices. -/
-private lemma g2a_sum_range_two_mul (g : ℕ → ℂ) (hg : ∀ k : ℕ, g (2 * k + 2) = 0) (n : ℕ) :
+private lemma sum_range_two_mul_eq_sum_odd (g : ℕ → ℂ) (hg : ∀ k : ℕ, g (2 * k + 2) = 0) (n : ℕ) :
     ∑ s ∈ range (2 * n), g (s + 1) = ∑ j ∈ range n, g (2 * j + 1) := by
   induction n with
   | zero => simp
@@ -287,7 +297,7 @@ theorem besselSq_integral_expansion_odd {ν : ℝ} (hν : -1 / 2 < ν) (n : ℕ)
       =O[atTop] fun x => x ^ (-(2 * n + 1 : ℝ) + ε) := by
   refine (besselSq_integral_expansion hν n hε0 hε1).congr_left fun x => ?_
   congr 1
-  refine g2a_sum_range_two_mul (fun s => (besselSqMellinA ν s * Real.log x +
+  refine sum_range_two_mul_eq_sum_odd (fun s => (besselSqMellinA ν s * Real.log x +
     besselSqMellinB ν s) * ((x : ℂ) ^ s)⁻¹) (fun k => ?_) n
   have ha := besselSqMellinA_two_mul ν (k + 1)
   have hb := besselSqMellinB_two_mul hν k

@@ -10,11 +10,23 @@ public import DLMF.QSeries.QBinomial
 public import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
 
 /-!
-# Triple product, Ramanujan `₁ψ₁`, basic hypergeometric series, `q`-beta (AAR §§10.4–10.12)
+# Triple product, Ramanujan's `₁ψ₁`, basic hypergeometric series and `q`-beta (AAR §§10.4–10.12)
 
-Mathlib has Jacobi theta functions, the Mellin transform, and the arithmetic theorems on
-sums of two and four squares. It does not have the Jacobi triple product as a `q`-Pochhammer
-identity, Ramanujan's `₁ψ₁`, or basic hypergeometric series `ᵣφₛ`.
+This file proves the Jacobi triple product as a `q`-Pochhammer identity, the product expansion
+of `jacobiTheta`, Ramanujan's `₁ψ₁` summation, Heine's transformation of `₂φ₁` and Jackson's
+`q`-beta integral. Mathlib has Jacobi theta functions but not these identities.
+
+## Main results
+
+* `finite_jtp`: the finite Jacobi triple product
+  `(q/z;q)_m (z;q)_m = ∑_{|n| ≤ m} [2m, m+n]_q (-1)ⁿ q^{n(n-1)/2} zⁿ`.
+* `jacobi_triple_product`: the Jacobi triple product (DLMF 17.8.1, AAR §10.4).
+* `jacobiTheta_eq_qPochhammer`: the product expansion of `jacobiTheta` (AAR §10.7).
+* `qPochhammerInt_natCast`, `qPochhammerInt_negSucc`: the integer-index shifted factorial
+  (AAR (10.5.2)).
+* `ramanujan_1psi1`: Ramanujan's `₁ψ₁` summation (AAR §10.5).
+* `heine_transformation`: Heine's transformation of `₂φ₁` (DLMF 17.6.6, AAR §10.10).
+* `q_beta_integral`: Jackson's `q`-beta integral (DLMF 5.18.12, AAR §10.8).
 -/
 
 @[expose] public section

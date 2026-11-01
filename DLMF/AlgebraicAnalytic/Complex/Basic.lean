@@ -19,7 +19,9 @@ Tau Ceti. Most notions of these sections are upstream: `Complex.re`, `Complex.im
 (the principal phase, with values in `(-π, π]`, the single-valued convention of DLMF §1.9(i)),
 `HasDerivAt`, `AnalyticAt`, `MeromorphicAt`, `analyticOrderAt`, `circleIntegral`, Tau Ceti's
 `TauCeti.Contour.IsPiecewiseC1On` (contours), `TauCeti.Contour.windingNumber`,
-`TauCeti.filledHull` and `TauCeti.Contour.residue` (residue at a pole). Defined here:
+`TauCeti.filledHull` and `TauCeti.Contour.residue` (residue at a pole).
+
+## Main definitions
 
 * `IsPhase z θ` (1.9.7): `θ` is a value of the multivalued phase `ph z`, `z = |z| e^{iθ}`.
 * `extAdd`, `extMul`, `extDiv` (1.9.36–1.9.39): the arithmetic conventions of the extended
@@ -31,9 +33,8 @@ Tau Ceti. Most notions of these sections are upstream: `Complex.re`, `Complex.im
 * `recipCoeff`, `logCoeff`, `powCoeff ν` (1.9.55–1.9.62): the coefficients of `1/f`, `ln f`
   and `f^ν` for a power series `f`, by the recurrences 1.9.56, 1.9.59, 1.9.62.
 * `contourIntegral` (1.9.28), `IsSimpleClosedContour`, `contourInterior`, `contourExterior`,
-  `IsPositivelyOriented`
-  (§1.9(iii)): simple closed contours, their interior and exterior domains (via Tau Ceti's
-  filled hull) and the positive (anticlockwise) sense.
+  `IsPositivelyOriented` (§1.9(iii)): simple closed contours, their interior and exterior
+  domains (via Tau Ceti's filled hull) and the positive (anticlockwise) sense.
 * `laurentCoeff` (1.10.7) and `residueAt` (§1.10(iii)): Laurent coefficients as circle integrals
   and the residue `a_{-1}` at an isolated singularity (also essential ones).
 * `ProdConvergesDLMF` (§1.10(ix)): DLMF's notion of convergence of `∏ (1 + a_n)` (partial

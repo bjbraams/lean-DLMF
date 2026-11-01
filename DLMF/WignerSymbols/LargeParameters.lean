@@ -8,14 +8,22 @@ module
 public import DLMF.WignerSymbols.Basic
 
 /-!
-# Approximations for large parameters: DLMF §34.8
+# The `6j` symbol for large parameters
+
+The approximation of DLMF §34.8 for the `6j` symbol `{j₁ j₂ j₃; j₂ j₁ l₃}`.
+
+## Main results
+
+* `wigner6j_large_parameters`: DLMF 34.8.1–34.8.2.
+
+## Implementation notes
 
 DLMF 34.8.1 is stated for `j₁, j₂, j₃ ≫ l₃ ≫ 1` with an `o(1)` remainder "as the parameters
-tend to infinity". It is acquired as an iterated limit: first the `jᵣ` tend to infinity with
+tend to infinity". It is formalized as an iterated limit: first the `jᵣ` tend to infinity with
 `l₃` fixed, then `l₃` tends to infinity, uniformly for `θ` (34.8.2, `largeParameterAngle`)
 bounded away from `0` and `π` (`sin θ ≥ δ`; near `θ = 0, π` the prefactor `(sin θ)^{-1/2}`
-is singular and the approximation is not uniform). The statement is checked numerically
-with exact `6j` values up to `j ≈ 1600` (see the ledger).
+is singular and the approximation is not uniform). The statement was checked numerically
+with exact `6j` values up to `j ≈ 1600`.
 -/
 
 @[expose] public noncomputable section

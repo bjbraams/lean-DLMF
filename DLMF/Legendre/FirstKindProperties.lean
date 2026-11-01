@@ -13,13 +13,25 @@ public import DLMF.OrthogonalPolynomials.Classical
 /-!
 # Legendre functions of the first kind (Temme §§8.1–8.2, DLMF §14.3)
 
-Canonical definitions are in `DLMF.Legendre.Basic`; this module develops their properties.
+Properties of `P_ν(z) = F(-ν, ν+1; 1; (1-z)/2)`, defined in `DLMF.Legendre.Basic` through the
+continuation `regularizedGaussHG` of `₂F₁` to the cut plane, so that it is analytic on
+`ℂ ∖ (-∞, -1]` for every complex `ν`.
 
-`P_ν(z) = F(-ν, ν+1; 1; (1-z)/2)` is defined through the continuation `regularizedGaussHG` of `₂F₁`
-to the cut plane, so it is analytic on `ℂ ∖ (-∞, -1]` for every complex `ν`. This file proves
-`P_ν(1) = 1`, the symmetry `P_{-ν-1} = P_ν`, agreement with the Legendre polynomials at integer
-degree, and Legendre's differential equation. The latter comes from the hypergeometric equation
-for `regularizedGaussHG` on the cut plane, which is the diagonal contiguous relation times `ab`.
+## Main results
+
+* `regularizedGaussHG_ode`: the hypergeometric equation DLMF 15.10.1 on the cut plane.
+* `legendreP_one`: `P_ν(1) = 1`.
+* `legendreP_neg_sub_one`: `P_{-ν-1} = P_ν` (DLMF 14.9.5).
+* `deriv_legendreP`, `iteratedDeriv_two_legendreP`: the first two derivatives through Gauss
+  functions.
+* `legendreP_ode`: Legendre's equation (DLMF 14.2.2 with `μ = 0`).
+* `legendreP_nat`: at integer degree `P_n` is the Legendre polynomial (DLMF 14.7.1 with
+  `μ = 0`).
+
+## Implementation notes
+
+The hypergeometric equation for `regularizedGaussHG` on the cut plane is the diagonal
+contiguous relation times `ab`.
 -/
 
 @[expose] public section

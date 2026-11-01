@@ -10,16 +10,36 @@ public import Mathlib.Analysis.SpecialFunctions.ArithmeticGeometricMean
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!
-# The arithmetic-geometric mean and Landen's transformations (Temme §12.1.2, DLMF §19.8)
+# The arithmetic-geometric mean and Landen's transformations
 
-Following Temme's proof of Theorem 12.1, the integral
-`agmIntegral a b = ∫₀^{π/2} (a² cos²θ + b² sin²θ)^{-1/2} dθ` equals
-`∫₀^∞ ((t²+a²)(t²+b²))^{-1/2} dt` (substitution `t = b tan θ`), and the substitution
-`u = (t - ab/t)/2` shows that this is invariant under `(a, b) ↦ ((a+b)/2, √(ab))`. Along
-Mathlib's AGM iteration `NNReal.agmSequences` the integral is therefore constant and squeezed
-between `(π/2)/aₙ` and `(π/2)/bₙ`, which gives Gauss's theorem `agmIntegral a b = π/(2 M(a,b))`.
-The same invariance with homogeneity gives the descending and ascending Landen
-transformations of `K`.
+This file proves Gauss's theorem expressing the complete elliptic integral of the first kind
+through the arithmetic-geometric mean, and the descending and ascending Landen transformations
+of `K` and `E` (Temme §12.1.2, DLMF §19.8).
+
+## Main definitions
+
+* `gaussLineIntegral`: the integral `∫₀^∞ ((t²+a²)(t²+b²))^{-1/2} dt`.
+* `agmIntegral`: the integral `∫₀^{π/2} (a² cos²θ + b² sin²θ)^{-1/2} dθ`.
+
+## Main results
+
+* `gaussLineIntegral_am_gm`, `agmIntegral_am_gm`: Gauss's invariance under
+  `(a, b) ↦ ((a+b)/2, √(ab))`.
+* `agmIntegral_eq_pi_div_two_div_agm`: `agmIntegral a b = π/(2 M(a,b))` (Temme Theorem 12.1,
+  DLMF 19.8.4).
+* `Real.compEllIntKm_eq_pi_div_agm`: `K(m) = π/(2 M(1, √(1-m)))` (DLMF 19.8.5).
+* `Real.compEllIntKm_landen_descending`, `Real.compEllIntEm_landen_descending`: the descending
+  Landen transformations (Temme (12.11), (12.14); DLMF 19.8.12).
+* `Real.compEllIntKm_landen_ascending`, `Real.compEllIntEm_landen_ascending`: the ascending
+  Landen transformations (Temme (12.12), (12.13)).
+
+## Implementation notes
+
+Following Temme's proof of Theorem 12.1, `agmIntegral a b` equals `gaussLineIntegral a b`
+(substitution `t = b tan θ`), and the substitution `u = (t - ab/t)/2` shows that this is
+invariant under the AGM step. Along Mathlib's AGM iteration `NNReal.agmSequences` the integral is
+therefore constant and squeezed between `(π/2)/aₙ` and `(π/2)/bₙ`. The same invariance with
+homogeneity gives the Landen transformations.
 -/
 
 @[expose] public section

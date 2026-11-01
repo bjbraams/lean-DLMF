@@ -10,9 +10,20 @@ public import DLMF.OrthogonalPolynomials.Differential
 /-!
 # Classical continued fractions (DLMF §18.13)
 
-Statements from NIST DLMF Chapter 18, each tagged with its equation number by `@[dlmf]`.
-Jacobi and Gegenbauer statements retain regularity hypotheses because the project's
-hypergeometric definitions do not implement continuation in singular parameters.
+The Chebyshev, Legendre, Laguerre and Hermite polynomials as denominators of continued
+fractions (DLMF §18.13), using Mathlib's generalized continued fractions and continuants.
+
+## Main definitions
+
+* `polynomialFraction`: a generalized continued fraction with zero integer part and prescribed
+  partial numerators and denominators.
+
+## Main results
+
+* `chebyshevT_continued_fraction`, `chebyshevU_continued_fraction`: DLMF 18.13.1 and 18.13.2.
+* `legendre_continued_fraction`: DLMF 18.13.3.
+* `laguerrePolyL_continued_fraction`: DLMF 18.13.4.
+* `hermitePolyH_continued_fraction`: DLMF 18.13.5.
 -/
 
 @[expose] public section

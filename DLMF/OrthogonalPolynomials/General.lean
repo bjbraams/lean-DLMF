@@ -13,12 +13,37 @@ public import TauCeti.Analysis.InnerProductSpace.PolynomialCompleteness
 /-!
 # General orthogonal polynomials (AAR Chapter 5)
 
-Chebyshev `T` orthogonality and Chebyshev–Gauss quadrature are in Mathlib
-(`Polynomial.Chebyshev.measureT`, `integral_eq_sumZeroes`). This file records the general
-three-term recurrence, Favard's theorem, Gauss quadrature, zeros, the Christoffel–Darboux
-kernel, and the missing orthogonality of Chebyshev `U`. Compact-support Parseval
-uses the Tau Ceti contributors’ polynomial completeness and weighted Hilbert-basis
-construction, followed by Mathlib’s Hilbert-basis Parseval identity.
+The general theory of polynomials orthogonal with respect to a Borel measure on `ℝ`
+(DLMF §18.2, AAR Chapter 5): the three-term recurrence, Favard's theorem, Gauss quadrature,
+zeros, the Christoffel–Darboux formula and Parseval's identity, and the orthogonality of the
+Chebyshev polynomials `U_n`. Chebyshev `T` orthogonality and Chebyshev–Gauss quadrature are in
+Mathlib (`Polynomial.Chebyshev.measureT`, `integral_eq_sumZeroes`).
+
+## Main definitions
+
+* `IsOrthogonalPolynomials`: a sequence of real polynomials of exact degrees, orthogonal with
+  respect to a Borel measure.
+* `IsOrthogonalPolynomials.basis`: the orthogonal polynomials as a basis of the polynomials.
+
+## Main results
+
+* `IsOrthogonalPolynomials.memLp_eval`, `IsOrthogonalPolynomials.integral_mul_eq_zero_of_degree_lt`:
+  polynomials are square integrable, and `p k` is orthogonal to all polynomials of lower
+  degree.
+* `three_term_recurrence`: the three-term recurrence (DLMF 18.2.10).
+* `favard`: Favard's theorem (DLMF §18.2(iv)).
+* `gauss_quadrature`: Gauss quadrature (DLMF §18.2(x)).
+* `orthogonal_polynomials_roots`: the degree-`n` polynomial has `n` distinct real zeros
+  (DLMF §18.2(vi)).
+* `christoffel_darboux`: the Christoffel–Darboux formula (DLMF 18.2.12).
+* `orthogonal_polynomials_parseval`: Parseval's identity (DLMF §18.2(viii)).
+* `integral_eval_U_mul_of_ne`, `integral_eval_U_mul_self`: orthogonality of Chebyshev `U` on
+  `[-1, 1]` with weight `√(1-x²)` (DLMF Table 18.3.1).
+
+## Implementation notes
+
+Parseval's identity for compactly supported measures uses Tau Ceti's polynomial completeness
+and weighted Hilbert-basis construction, followed by Mathlib's Hilbert-basis Parseval identity.
 -/
 
 @[expose] public section

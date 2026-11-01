@@ -12,15 +12,24 @@ public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 # Bernoulli numbers in the Taylor series of `cot`, `tan`, `z/sin z` and `z/(eᶻ-1)`
 
 Mathlib has the Bernoulli generating function as a formal power series and the values
-`ζ(2k) = (-1)^{k+1} 2^{2k-1} π^{2k} B₂ₖ/(2k)!`. Expanding each term `2z²/(z² - (n+1)²)` of the
-cotangent's partial fractions as a geometric series and interchanging the double sum gives
-`πz cot(πz) = 1 - 2 ∑ ζ(2k) z^{2k}` for `0 < ‖z‖ < 1` (Duverney (2.50)). The convergent Taylor
-series follow:
-* `hasSum_pi_mul_cot_bernoulli`: `πz cot(πz) = ∑ₖ (-1)ᵏ B₂ₖ (2πz)^{2k}/(2k)!` (DLMF 4.19.6);
-* `hasSum_pi_mul_tan_bernoulli`: `πz tan(πz)`, from `tan z = cot z - 2 cot 2z` (DLMF 4.19.3);
-* `hasSum_pi_mul_div_sin_bernoulli`: `πz/sin(πz)`, from `csc z = cot(z/2) - cot z` (DLMF 4.19.4);
-* `hasSum_bernoulli_mul_pow_div`: `z/(eᶻ - 1) = ∑ Bₙ zⁿ/n!` for `0 < ‖z‖ < 2π` (DLMF 24.2.1,
-  Duverney (2.46)), from the cotangent at `iz/(2π)`.
+`ζ(2k) = (-1)^{k+1} 2^{2k-1} π^{2k} B₂ₖ/(2k)!`. Expanding each term `2z²/(z² - (n+1)²)` of
+the cotangent's partial fractions as a geometric series and interchanging the double sum
+gives the convergent Taylor series of the cotangent and, from it, of `tan`, `z/sin z` and
+`z/(eᶻ-1)`.
+
+## Main results
+
+* `Complex.hasSum_one_div_nat_succ_pow`: `∑ₙ 1/(n+1)^k = ζ(k)` for natural `k > 1`.
+* `Complex.hasSum_pi_mul_cot_zeta`: `πz cot(πz) = 1 - 2 ∑ ζ(2k) z^{2k}` for `0 < ‖z‖ < 1`
+  (Duverney (2.50)).
+* `Complex.hasSum_pi_mul_cot_bernoulli`: `πz cot(πz) = ∑ₖ (-1)ᵏ B₂ₖ (2πz)^{2k}/(2k)!`
+  (DLMF 4.19.6).
+* `Complex.hasSum_pi_mul_tan_bernoulli`: `πz tan(πz)`, from `tan z = cot z - 2 cot 2z`
+  (DLMF 4.19.3).
+* `Complex.hasSum_pi_mul_div_sin_bernoulli`: `πz/sin(πz)`, from `csc z = cot(z/2) - cot z`
+  (DLMF 4.19.4).
+* `Complex.hasSum_bernoulli_mul_pow_div`: `z/(eᶻ - 1) = ∑ Bₙ zⁿ/n!` for `0 < ‖z‖ < 2π`
+  (DLMF 24.2.1, Duverney (2.46)), from the cotangent at `iz/(2π)`.
 -/
 
 @[expose] public section

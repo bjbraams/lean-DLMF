@@ -9,11 +9,20 @@ public import DLMF.Hypergeometric.Continuation
 public import DLMF.Gamma.MellinBarnes
 
 /-!
-# Barnes's integral for `₂F₁` (DLMF 15.6.6): the Euler-integral case
+# Barnes's integral for `₂F₁` (DLMF 15.6.6)
 
 Inserting the Mellin–Barnes integral for `(1+ut)^{-a}` (`DLMF.Gamma.Gamma_mul_one_add_cpow_neg`)
 into Euler's integral (DLMF 15.6.1) and integrating termwise with Fubini and the Beta integral
-gives Barnes's integral when `re (c - b) > 0`.
+gives Barnes's integral when `re (c - b) > 0`; analytic continuation in `c` removes the
+restriction.
+
+## Main results
+
+* `Gamma_mul_one_add_cpow_neg_barnes`: the Mellin–Barnes integral for `Γ(a)(1+v)^{-a}` in
+  Barnes's orientation.
+* `exists_norm_barnes_numerator_le`: exponential decay of the numerator of Barnes's integrand.
+* `barnes_integral_of_re_sub_pos`: Barnes's integral when `re (c - b) > 0`.
+* `barnes_integral_all`: Barnes's integral for all `c`.
 -/
 
 @[expose] public section

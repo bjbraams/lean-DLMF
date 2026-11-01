@@ -14,17 +14,44 @@ public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
 public import TauCeti.Analysis.SpecialFunctions.Erf
 
 /-!
-# Kummer's function `M(a,c,z) = ₁F₁(a;c;z)` (AAR §4.1)
+# Properties of Kummer's function
 
-Canonical definitions are in `DLMF.Confluent.Basic`; this module develops their properties.
+This file develops the basic properties of Kummer's function `M(a,c,z) = ₁F₁(a;c;z)`
+(AAR §4.1, DLMF §13.2): its relation to Mathlib's regularized series, the differential
+equation, Kummer's transformation, confluence from Gauss's function, Euler's integral, the
+error function, and parabolic zero-free regions (AAR §4.16).
 
-The series is entire in `z` (AAR: the confluent limit of `₂F₁`). Mathlib's
-`regularizedHGFun {a} {c}` is the regularized form `M(a,c,z)/Γ(c)`.
-Tricomi's `U` uses the connection formula off the integers and parameter limits
-at integers; `kummerU_zero` verifies the continuation at zero first parameter.
-`kummerUOnLog` retains the logarithmic argument needed for monodromy.
-The real restrictions of `erf` and `erfc` are identified with the Tau Ceti
-contributors’ real error functions, so their real-variable API can be reused.
+## Main results
+
+* `kummerM_eq_mul_regularizedHGFun`: `M(a,c,z) = Γ(c) 𝐌(a,c,z)` (DLMF 13.2.4).
+* `hasFPowerSeriesOnBall_kummerM`: Kummer's series has infinite radius of convergence.
+* `kummerM_ode`: the confluent hypergeometric equation `z y'' + (c-z) y' - a y = 0`
+  (DLMF 13.2.1).
+* `confluent_ode_unique`: entire solutions of the equation are determined by their value at
+  zero when `c` is not a nonpositive integer.
+* `kummerM_kummer_transform`: Kummer's transformation `M(a,c,z) = e^z M(c-a,c,-z)`
+  (DLMF 13.2.39).
+* `kummerM_self`: `M(a,a,z) = e^z` (DLMF 13.6.1).
+* `tendsto_ordinaryHypergeometric_div_atTop`: confluence,
+  `M(a,c,z) = lim_{b→∞} ₂F₁(a,b;c;z/b)`.
+* `kummerU_zero`: `U(0,b,z) = 1`, including integer second parameters.
+* `kummerM_eq_euler_integral`: Euler's integral for `M` (DLMF 13.4.1).
+* `erf_eq_integral`: `erf z = (2/√π) ∫_0^z e^{-t²} dt` (DLMF 7.2.1).
+* `erf_ofReal`, `erfc_ofReal`: on real arguments `erf` and `erfc` agree with TauCeti's real
+  functions.
+* `parab_partialSums`: the Saff–Varga theorem for partial sums (AAR Theorem 4.16.1).
+* `kummerM_ne_zero_of_mem_parabolicRegion`: the parabolic zero-free regions of AAR
+  Corollary 4.16.4.
+
+## Implementation notes
+
+The canonical definitions are in `DLMF.Confluent.Basic`. Mathlib's `regularizedHGFun {a} {c}`
+is the regularized form `M(a,c,z)/Γ(c)`. Identifying the real restrictions of `erf` and `erfc`
+with the Tau Ceti contributors' real error functions lets their real-variable API be reused.
+
+## References
+
+* G. E. Andrews, R. Askey, R. Roy, *Special Functions*, §§4.1, 4.16.
 -/
 
 @[expose] public section
@@ -71,11 +98,6 @@ theorem regularizedHGFun_eq_tsum (a b : Multiset ℂ) (z : ℂ) :
   unfold regularizedHGFun regularizedHGFunSeries
   rw [FormalMultilinearSeries.sum]
   simp_rw [FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul]
-
-/-- The regularized generalized hypergeometric function at `0` is its zeroth coefficient. -/
-theorem regularizedHGFun_zero (a b : Multiset ℂ) :
-    regularizedHGFun a b 0 = regularizedHGFunCoeff a b 0 :=
-  Complex.regularizedHGFun_zero
 
 /-- The coefficient comparison with Mathlib's regularized confluent series. -/
 theorem kummerMCoeff_eq_mul_regularizedHGFunCoeff {a c : ℂ}
@@ -196,7 +218,7 @@ theorem kummerM_kummer_transform {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
 /-- The confluent hypergeometric equation
 `z y'' + (c-z) y' - a y = 0` (AAR §4.1). -/
 @[dlmf 13.2.E1]
-theorem kummerM_ode {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : z ≠ 0) :
+theorem kummerM_ode {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
     z * iteratedDeriv 2 (kummerM a c) z + (c - z) * deriv (kummerM a c) z -
       a * kummerM a c z = 0 := by
   have h := (hasFPowerSeriesOnBall_kummerM (a := a) hc).ode_of_recurrence

@@ -10,4 +10,8 @@ public import DLMF.CoalescingSaddles.Basic.AuxiliaryData
 
 /-!
 # Canonical integrals and defining data for coalescing saddles
+
+Foundational definitions for DLMF Chapter 36: the canonical integrals with their phase
+functions and contours, and the auxiliary data (moments, series coefficients, approximate zero
+loci and the stationary-phase sum) used in §§36.7–36.11.
 -/

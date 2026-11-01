@@ -10,14 +10,31 @@ public import DLMFMathlib.Analysis.Complex.SeparatingContour
 public import Mathlib.MeasureTheory.Function.AbsolutelyContinuous
 
 /-!
-# Generalized hypergeometric integrals: DLMF §16.5
+# Integral representations of `ₚF_q` (DLMF §16.5)
 
-Barnes contours are specified by absolute continuity on finite pieces, their exact
-oriented tails, and separation of the two pole families into distinct components
-of the contour complement. This permits finite indentations for arbitrary upper
-parameters; positive-real-part upper parameters are not imposed. The logarithm
-sheet of `-z` is explicit. Inverse Laplace integrals assert convergence of both
-oscillatory tails, not absolute Bochner integrability where that would be false.
+## Main definitions
+
+* `GenBarnesSeparates`: separation of the upper-parameter poles from the nonnegative integers.
+* `GenVerticalBarnesContour`, `GenRightBarnesContour`: vertical and right-loop Barnes contours.
+* `genZeroLogSector`: approach to zero on a closed sector of the logarithmic cover.
+
+## Main results
+
+* `genBarnesContours_exist`: separating Barnes contours exist for nonsingular upper parameters.
+* `genHG_barnes_right`, `genHG_barnes_vertical`, `genHG_barnes_formal_asymptotic`: Barnes
+  integrals, DLMF 16.5.1.
+* `genHG_euler_integral`: the Euler integral, DLMF 16.5.2.
+* `genHG_laplace_integral`: the Laplace integral, DLMF 16.5.3.
+* `genHG_inverse_laplace`: the inverse Laplace integral, DLMF 16.5.4.
+
+## Implementation notes
+
+Barnes contours are specified by absolute continuity on finite pieces, their exact oriented
+tails, and separation of the two pole families into distinct components of the contour
+complement. This permits finite indentations for arbitrary upper parameters; positive real
+parts of the upper parameters are not imposed. The logarithm sheet of `-z` is explicit. Inverse
+Laplace integrals assert convergence of both oscillatory tails, not absolute Bochner
+integrability where that would be false.
 -/
 
 @[expose] public section

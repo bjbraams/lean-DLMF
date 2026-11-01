@@ -11,9 +11,18 @@ public import Mathlib.MeasureTheory.Measure.Lebesgue.Integral
 /-!
 # Reflection and integration on the positive half-line
 
-Splitting the real line into its two halves identifies the integral of a function
-with the positive-half integral of its reflected sum. Even extension also preserves
-membership in every `Lᵖ` space, by writing it as two reflected indicators.
+Splitting the real line into its two halves identifies the integral of a function with the
+positive-half integral of its reflected sum. Even extension also preserves membership in
+every `Lᵖ` space, by writing it as two reflected indicators.
+
+## Main results
+
+* `MeasureTheory.integral_eq_integral_Ioi_add_neg`: the integral over `ℝ` as the integral
+  over `(0, ∞)` of `f x + f (-x)`.
+* `MeasureTheory.MemLp.comp_abs`: even extension from the positive half-line preserves
+  `Lᵖ` membership.
+* `MeasureTheory.integral_comp_abs_eq_two_smul`: the integral of an even extension is twice
+  its positive-half integral, also for totalized Bochner integrals.
 -/
 
 @[expose] public noncomputable section
@@ -49,7 +58,7 @@ theorem MemLp.comp_abs {E : Type*} [NormedAddCommGroup E] {p : ℝ≥0∞} {f : 
 /-- The integral of an even extension is twice its positive-half integral, also
 for totalized Bochner integrals when the integrability condition fails. -/
 theorem integral_comp_abs_eq_two_smul {E : Type*} [NormedAddCommGroup E]
-    [NormedSpace ℝ E] [CompleteSpace E] (f : ℝ → E) :
+    [NormedSpace ℝ E] (f : ℝ → E) :
     (∫ t : ℝ, f |t|) = (2 : ℝ) • ∫ t in Ioi (0 : ℝ), f t := by
   have he : (∫ t in Ioi (0 : ℝ), f |t|) = ∫ t in Ioi (0 : ℝ), f t :=
     setIntegral_congr_fun measurableSet_Ioi fun t ht => by rw [abs_of_pos ht]

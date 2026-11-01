@@ -12,6 +12,19 @@ public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
 
 /-!
 # Pochhammer symbols and elementary finite-product identities
+
+## Main definitions
+
+* `poch`: the Pochhammer symbol `(a)_n`.
+
+## Main results
+
+* `poch_zero`, `poch_succ`: `(a)_0 = 1` and `(a)_{n+1} = (a)_n (a + n)`, DLMF 5.2.4.
+* `poch_neg_nat_eq_zero`: vanishing at negative integers, DLMF 5.2.7.
+* `poch_add`, `poch_add_eq_sum`: concatenation and the binomial theorem for rising factorials.
+* `sum_poch_neg_nat_div_factorial_mul_pow`: `∑ₖ (-n)ₖ yᵏ / k! = (1 - y)ⁿ`.
+* `poch_reflect`, `poch_one_sub_sub_mul`: reflection identities.
+* `poch_ne_zero_of_not_neg_nat`, `poch_ne_zero_of_le`: nonvanishing.
 -/
 
 @[expose] public noncomputable section

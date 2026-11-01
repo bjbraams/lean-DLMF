@@ -12,29 +12,39 @@ public import DLMF.Hypergeometric.Riemann
 /-!
 # Solutions via quadratures, integral equations and representations (DLMF §31.8, §31.10)
 
-* §31.8: finite-gap (Hermite–Darboux) solutions for half-odd-integer exponent parameters
-  (31.8.1): `w_± = √Ψ exp(±(iν/2) ∫ t^{m₁}(t-1)^{m₂}(t-a)^{m₃}/(Ψ √(t(t-1)(t-a))) dt)` (31.8.2),
-  with `Ψ` a polynomial solution of the third-order equation for products of solutions, of
-  degree `g` (31.8.3) in `λ = -4q`, and the examples 31.8.4–31.8.5. The square root and the
-  integral are represented by arbitrary analytic branches `S² = Ψ`, `G' = integrand` on an
-  open set, so no branch choice is imposed. The remarks on Hermite's Lamé solutions, the finite-gap
-  property, the limit at the gap ends and Kovacic's algorithm are not acquired.
-* §31.10(i) (Type I): the integral equation/representation 31.10.1–31.10.6, the kernel
-  equation in the variables 31.10.7 (31.10.8, **sign corrected**), its separable solutions
-  31.10.9, and the kernels of Examples 1 and 2 (31.10.10, 31.10.11).
-* §31.10(ii) (Type II): the double-integral representation 31.10.12–31.10.16, the kernel equation
-  in the variables 31.10.17 (**corrected**) and 31.10.18, its solutions 31.10.19 in cylinder
-  functions, the spherical form 31.10.20–31.10.21 and its separable solutions 31.10.22–31.10.23
-  (**corrected**).
+## Main results
 
-The integral theorems are stated for a single-valued branch `ρ` of the weight on an open set
-(any `ρ` with the logarithmic derivative of `t^{γ-1}(t-1)^{δ-1}(t-a)^{ε-1}`) and a `C¹` path in
-that set, with the boundary terms 31.10.5 (31.10.15–31.10.16) equal at the two ends; DLMF's
-Pochhammer-contour cases need continuation of the branches along the contour and are covered
-only in the example statements via `continuedPathIntegral`.
+* `heun_hermiteDarboux`: finite-gap (Hermite–Darboux) solutions for half-odd-integer exponent
+  parameters (31.8.1),
+  `w_± = √Ψ exp(±(iν/2) ∫ t^{m₁}(t-1)^{m₂}(t-a)^{m₃}/(Ψ √(t(t-1)(t-a))) dt)` (31.8.2), with `Ψ`
+  a polynomial solution of degree `g` in `λ = -4q` of the third-order equation for products of
+  solutions (31.8.3).
+* `heun_hermiteDarboux_example₁`, `heun_hermiteDarboux_example₂`: the examples 31.8.4–31.8.5.
+* `heun_integral_typeI`: the Type I integral equation and representation, DLMF 31.10.1–31.10.6.
+* `heun_kernel_typeI_angles`, `heun_kernel_typeI_separable`: the kernel equation in the
+  variables 31.10.7 (31.10.8, sign corrected) and its separable solutions 31.10.9.
+* `heun_kernel_example₁_pde`, `heun_integralEquation_example₁`, `heun_kernel_example₂_pde`:
+  the kernels of Examples 1 and 2 (31.10.10, 31.10.11).
+* `heun_integral_typeII`: the Type II double-integral representation, DLMF 31.10.12–31.10.16.
+* `heun_kernel_typeII_uvw`, `heun_kernel_typeII_cylinder`: the kernel equation in the variables
+  31.10.17 (corrected) and 31.10.18, and its solutions 31.10.19 in cylinder functions.
+* `heun_kernel_typeII_spherical`, `heun_kernel_typeII_separable`: the spherical form
+  31.10.20–31.10.21 and its separable solutions 31.10.22–31.10.23 (corrected).
 
-Source corrections (numerical evidence, mpmath, complex parameters; scripts in the agent's
-scratch directory):
+## Implementation notes
+
+In §31.8 the square root and the integral are represented by arbitrary analytic branches
+`S² = Ψ`, `G' = integrand` on an open set, so no branch choice is imposed. The remarks on
+Hermite's Lamé solutions, the finite-gap property, the limit at the gap ends and Kovacic's
+algorithm are not formalized.
+
+The integral theorems of §31.10 are stated for a single-valued branch `ρ` of the weight on an
+open set (any `ρ` with the logarithmic derivative of `t^{γ-1}(t-1)^{δ-1}(t-a)^{ε-1}`) and a `C¹`
+path in that set, with the boundary terms 31.10.5 (31.10.15–31.10.16) equal at the two ends.
+DLMF's Pochhammer-contour cases need continuation of the branches along the contour and are
+covered only in the example statements via `continuedPathIntegral`.
+
+Corrections to DLMF (numerical evidence with mpmath, complex parameters):
 
 * **31.10.8**: the coefficient of `∂𝒦/∂φ` is `(2δ - 1) cot φ - (2ε - 1) tan φ`, not
   `(1 - 2δ) cot φ - (1 - 2ε) tan φ`. Evidence: the verified kernel 31.10.10 (it satisfies
@@ -56,8 +66,10 @@ scratch directory):
   `z^{-α} Hl(1/a, q_m/a - α(β-ε) - (α/a)(β-δ); α, α-γ+1, α-β+1, δ; 1/z)` (31.3.10), not
   `z^{-α} Hl(1/a, q_m; …)` as printed: the printed function is not a solution of Heun's equation
   with accessory parameter `q_m` (ODE residual `2.9·10⁻³` at `z = 5 + 3i`). The representation
-  itself is not acquired (along the contour the kernel's `₂F₁(…; a/(zt))` must be continued
+  itself is not formalized (along the contour the kernel's `₂F₁(…; a/(zt))` must be continued
   beyond its disk of convergence); its kernel equation is `heun_kernel_example₂_pde`.
+
+Example 31.8.5 follows the correction of DLMF 1.0.7.
 -/
 
 @[expose] public section
@@ -109,7 +121,7 @@ theorem heun_hermiteDarboux (ha0 : a ≠ 0) (ha1 : a ≠ 1) (m : Fin 4 → ℕ)
 
 /-- Riccati form: if `w' = Λ w` and `Λ' + Λ² + pΛ + r = 0` on an open set, then `w` solves
 `w'' + p w' + r w = 0` there. -/
-lemma p2h_isLinearODE2On_of_riccati {p r w Λ Λ' : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+private lemma isLinearODE2On_of_riccati {p r w Λ Λ' : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hw : ∀ z ∈ U, HasDerivAt w (Λ z * w z) z) (hΛ : ∀ z ∈ U, HasDerivAt Λ (Λ' z) z)
     (hR : ∀ z ∈ U, r z + p z * Λ z + Λ z ^ 2 + Λ' z = 0) : IsLinearODE2On p r w U := by
   have h1 : IsLinearODE2On (fun z => p z + 2 * Λ z) 0 (fun _ => (1 : ℂ)) U := by
@@ -117,13 +129,13 @@ lemma p2h_isLinearODE2On_of_riccati {p r w Λ Λ' : ℂ → ℂ} {U : Set ℂ} (
     have : deriv (fun _ : ℂ => (1 : ℂ)) = fun _ => 0 := funext fun _ => deriv_const _ _
     rw [this]
     simpa using hasDerivAt_const z (0 : ℂ)
-  have h := p1h_isLinearODE2On_mul (p := p) (r := r) hU hw hΛ (fun z _ => rfl)
+  have h := isLinearODE2On_gauge_mul (p := p) (r := r) hU hw hΛ (fun z _ => rfl)
     (fun z hz => by rw [Pi.zero_apply]; linear_combination -(hR z hz)) h1
   simpa using h
 
 /-- Derivative of an analytic square root: if `S² = Ψ` near `z` and `S z ≠ 0`, then
 `S' = Ψ'/(2S)`. -/
-lemma p2h_hasDerivAt_sqrt {S Ψ : ℂ → ℂ} {Ψ' z : ℂ} {U : Set ℂ} (hU : IsOpen U) (hz : z ∈ U)
+private lemma hasDerivAt_of_sq_eq {S Ψ : ℂ → ℂ} {Ψ' z : ℂ} {U : Set ℂ} (hU : IsOpen U) (hz : z ∈ U)
     (hS : ∀ x ∈ U, S x ^ 2 = Ψ x) (hSa : AnalyticAt ℂ S z) (hΨ : HasDerivAt Ψ Ψ' z)
     (hS0 : S z ≠ 0) : HasDerivAt S (Ψ' / (2 * S z)) z := by
   have hd := hSa.differentiableAt.hasDerivAt
@@ -141,7 +153,7 @@ lemma p2h_hasDerivAt_sqrt {S Ψ : ℂ → ℂ} {Ψ' z : ℂ} {U : Set ℂ} (hU :
 `Ψ_{1,2} = z² + λz + a` and `ν² = (λ + a + 1)(λ² - 4a)`: the functions 31.8.2 solve Heun's
 equation with `q = -λ/4`, for any analytic branches on an open set. -/
 @[dlmf 31.8.E4, dlmf 31.8.E2]
-theorem heun_hermiteDarboux_example₁ (ha0 : a ≠ 0) (ha1 : a ≠ 1) {lam ν : ℂ}
+theorem heun_hermiteDarboux_example₁ {lam ν : ℂ}
     (hν : ν ^ 2 = (lam + a + 1) * (lam ^ 2 - 4 * a)) {U : Set ℂ} (hU : IsOpen U)
     (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a ∧ z ^ 2 + lam * z + a ≠ 0) {S R G : ℂ → ℂ}
     (hS : ∀ z ∈ U, S z ^ 2 = z ^ 2 + lam * z + a) (hR : ∀ z ∈ U, R z ^ 2 = z * (z - 1) * (z - a))
@@ -170,7 +182,7 @@ theorem heun_hermiteDarboux_example₁ (ha0 : a ≠ 0) (ha1 : a ≠ 1) {lam ν :
     refine ⟨h0, sub_ne_zero.2 h1, sub_ne_zero.2 h2, h3, fun h => hP0 ?_, fun h => h3 ?_⟩
     · rw [← hR z hz, h]; ring
     · rw [← hS z hz, h]; ring
-  refine p2h_isLinearODE2On_of_riccati
+  refine isLinearODE2On_of_riccati
     (Λ := fun z => (2 * z + lam) / (2 * (z ^ 2 + lam * z + a)) + c * z /
       ((z ^ 2 + lam * z + a) * R z))
     (Λ' := fun z => (2 * (z ^ 2 + lam * z + a) - (2 * z + lam) ^ 2) /
@@ -180,14 +192,14 @@ theorem heun_hermiteDarboux_example₁ (ha0 : a ≠ 0) (ha1 : a ≠ 1) {lam ν :
     (fun z hz => ?_) (fun z hz => ?_) (fun z hz => ?_)
   · obtain ⟨h0, h1, h2, h3, h4, h5⟩ := hfacts z hz
     have h3' : z * (z + lam) + a ≠ 0 := by convert h3 using 1; ring
-    have hSd := p2h_hasDerivAt_sqrt hU hz hS (hSa z hz) (hΨd z) h5
+    have hSd := hasDerivAt_of_sq_eq hU hz hS (hSa z hz) (hΨd z) h5
     have hEd := (((hG z hz).const_mul c)).cexp
     refine (hSd.mul hEd).congr_deriv ?_
     rw [← hS z hz]
     field_simp
   · obtain ⟨h0, h1, h2, h3, h4, h5⟩ := hfacts z hz
     have h3' : z * (z + lam) + a ≠ 0 := by convert h3 using 1; ring
-    have hRd := p2h_hasDerivAt_sqrt hU hz hR (hRa z hz) (hPd z) h4
+    have hRd := hasDerivAt_of_sq_eq hU hz hR (hRa z hz) (hPd z) h4
     have hP0 : z * (z - 1) * (z - a) ≠ 0 := by rw [← hR z hz]; exact pow_ne_zero _ h4
     have hAd := ((((hasDerivAt_id z).const_mul 2).add_const lam).div ((hΨd z).const_mul 2)
         (mul_ne_zero two_ne_zero h3))
@@ -228,7 +240,7 @@ theorem heun_hermiteDarboux_example₁ (ha0 : a ≠ 0) (ha1 : a ≠ 1) {lam ν :
 `ν² = (λ + 4a + 4)((λ + 3a + 3)² - 4a)`: the functions 31.8.2 (with `t^{m₁} = t^{-2}`) solve
 Heun's equation with `q = -λ/4`. -/
 @[dlmf 31.8.E5, dlmf 31.8.E2]
-theorem heun_hermiteDarboux_example₂ (ha0 : a ≠ 0) (ha1 : a ≠ 1) {lam ν : ℂ}
+theorem heun_hermiteDarboux_example₂ {lam ν : ℂ}
     (hν : ν ^ 2 = (lam + 4 * a + 4) * ((lam + 3 * a + 3) ^ 2 - 4 * a)) {U : Set ℂ}
     (hU : IsOpen U)
     (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a ∧ z ^ 2 + (lam + 3 * a + 3) * z + a ≠ 0)
@@ -270,7 +282,7 @@ theorem heun_hermiteDarboux_example₂ (ha0 : a ≠ 0) (ha1 : a ≠ 1) {lam ν :
       ((2 * z + μ) / z ^ 3 - 3 * (z ^ 2 + μ * z + a) / z ^ 4) z := fun z hz0 =>
     ((hQd z).div ((hasDerivAt_id z).pow 3) (pow_ne_zero 3 hz0)).congr_deriv (by
       simp only [id, Pi.pow_apply]; field_simp; ring)
-  refine p2h_isLinearODE2On_of_riccati
+  refine isLinearODE2On_of_riccati
     (Λ := fun z => ((2 * z + μ) / (2 * (z ^ 2 + μ * z + a)) - 3 / (2 * z)) + c * z /
       ((z ^ 2 + μ * z + a) * R z))
     (Λ' := fun z => ((2 * (z ^ 2 + μ * z + a) - (2 * z + μ) ^ 2) /
@@ -280,7 +292,7 @@ theorem heun_hermiteDarboux_example₂ (ha0 : a ≠ 0) (ha1 : a ≠ 1) {lam ν :
     (fun z hz => ?_) (fun z hz => ?_) (fun z hz => ?_)
   · obtain ⟨h0, h1, h2, h3, h4, h5⟩ := hfacts z hz
     have h3' : z * (z + μ) + a ≠ 0 := by convert h3 using 1; ring
-    have hSd := p2h_hasDerivAt_sqrt hU hz hS (hSa z hz) (hΨd z h0) h5
+    have hSd := hasDerivAt_of_sq_eq hU hz hS (hSa z hz) (hΨd z h0) h5
     have hEd := (((hG z hz).const_mul c)).cexp
     refine (hSd.mul hEd).congr_deriv ?_
     have hSz := hS z hz
@@ -290,7 +302,7 @@ theorem heun_hermiteDarboux_example₂ (ha0 : a ≠ 0) (ha1 : a ≠ 1) {lam ν :
     field_simp
   · obtain ⟨h0, h1, h2, h3, h4, h5⟩ := hfacts z hz
     have h3' : z * (z + μ) + a ≠ 0 := by convert h3 using 1; ring
-    have hRd := p2h_hasDerivAt_sqrt hU hz hR (hRa z hz) (hPd z) h4
+    have hRd := hasDerivAt_of_sq_eq hU hz hR (hRa z hz) (hPd z) h4
     have hP0 : z * (z - 1) * (z - a) ≠ 0 := by rw [← hR z hz]; exact pow_ne_zero _ h4
     have hAd := (((((hasDerivAt_id z).const_mul 2).add_const μ).div ((hQd z).const_mul 2)
         (mul_ne_zero two_ne_zero h3)).sub ((hasDerivAt_const z (3 : ℂ)).div
@@ -391,7 +403,7 @@ theorem heun_kernel_typeI_angles (hF : α + β + 1 = γ + δ + ε) (ha0 : a ≠ 
   sorry
 
 /-- Chain rule for `t ↦ C · u(cos² t)`: first and second derivatives. -/
-lemma p2h_deriv_cos_sq_comp {u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) (hu : ContDiffOn ℂ 2 u U)
+private lemma deriv_cos_sq_comp {u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) (hu : ContDiffOn ℂ 2 u U)
     (C : ℂ) {t : ℂ} (ht : Complex.cos t ^ 2 ∈ U) :
     deriv (fun t' => C * u (Complex.cos t' ^ 2)) t =
         C * (deriv u (Complex.cos t ^ 2) * (-2 * Complex.cos t * Complex.sin t)) ∧
@@ -421,7 +433,7 @@ lemma p2h_deriv_cos_sq_comp {u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) (hu 
   ring
 
 /-- The normalized Riemann equation with `a₁ = 0`, cleared of denominators. -/
-lemma p2h_riemann_poly {a₂ b₁ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0 : x ≠ 0) (hx1 : 1 - x ≠ 0)
+private lemma riemannNormalOperator_zero_cleared {a₂ b₁ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0 : x ≠ 0) (hx1 : 1 - x ≠ 0)
     (h : DLMF.Hypergeometric.riemannNormalOperator 0 a₂ b₁ b₂ c₁ c₂ u x = 0) :
     x * (1 - x) ^ 2 * deriv (deriv u) x +
       ((1 - a₂) * (1 - x) ^ 2 - (1 - b₁ - b₂) * x * (1 - x)) * deriv u x +
@@ -435,7 +447,7 @@ lemma p2h_riemann_poly {a₂ b₁ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0
     _ = 0 := by rw [h, mul_zero]
 
 /-- The normalized Riemann equation with `a₁ = b₁ = 0`, cleared of denominators. -/
-lemma p2h_riemann_poly₀ {a₂ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0 : x ≠ 0) (hx1 : 1 - x ≠ 0)
+private lemma riemannNormalOperator_zero_zero_cleared {a₂ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0 : x ≠ 0) (hx1 : 1 - x ≠ 0)
     (h : DLMF.Hypergeometric.riemannNormalOperator 0 a₂ 0 b₂ c₁ c₂ u x = 0) :
     x * (1 - x) * deriv (deriv u) x + ((1 - a₂) * (1 - x) - (1 - b₂) * x) * deriv u x -
       c₁ * c₂ * u x = 0 := by
@@ -471,8 +483,8 @@ theorem heun_kernel_typeI_separable (σ : ℂ) {f g : ℂ → ℂ}
   have eθ : (fun θ' => 𝒦 θ' φ) = fun θ' => g (Complex.cos φ ^ 2) * f (Complex.cos θ' ^ 2) :=
     funext fun _ => mul_comm _ _
   have eφ : 𝒦 θ = fun φ' => f (Complex.cos θ ^ 2) * g (Complex.cos φ' ^ 2) := rfl
-  obtain ⟨d1, d2⟩ := p2h_deriv_cos_sq_comp hUf hf.1 (g (Complex.cos φ ^ 2)) hθ
-  obtain ⟨e1, e2⟩ := p2h_deriv_cos_sq_comp hUg hg.1 (f (Complex.cos θ ^ 2)) hφ
+  obtain ⟨d1, d2⟩ := deriv_cos_sq_comp hUf hf.1 (g (Complex.cos φ ^ 2)) hθ
+  obtain ⟨e1, e2⟩ := deriv_cos_sq_comp hUg hg.1 (f (Complex.cos θ ^ 2)) hφ
   have hK : 𝒦 θ φ = f (Complex.cos θ ^ 2) * g (Complex.cos φ ^ 2) := rfl
   rw [eθ, eφ, d1, d2, e1, e2]
   beta_reduce
@@ -482,8 +494,8 @@ theorem heun_kernel_typeI_separable (σ : ℂ) {f g : ℂ → ℂ}
     rw [← hsc]; ring_nf; exact pow_ne_zero _ hs
   have hy1 : 1 - Complex.cos φ ^ 2 ≠ 0 := by
     rw [← hsc']; ring_nf; exact pow_ne_zero _ hs'
-  have Rf := p2h_riemann_poly (pow_ne_zero 2 hc) hx1 (hf.2 _ hθ)
-  have Rg := p2h_riemann_poly₀ (pow_ne_zero 2 hc') hy1 (hg.2 _ hφ)
+  have Rf := riemannNormalOperator_zero_cleared (pow_ne_zero 2 hc) hx1 (hf.2 _ hθ)
+  have Rg := riemannNormalOperator_zero_zero_cleared (pow_ne_zero 2 hc') hy1 (hg.2 _ hφ)
   have ht : Complex.tan θ * (-2 * Complex.cos θ * Complex.sin θ) = -2 * Complex.sin θ ^ 2 := by
     rw [Complex.tan_eq_sin_div_cos]; field_simp
   have hct : Complex.cot θ * (-2 * Complex.cos θ * Complex.sin θ) = -2 * Complex.cos θ ^ 2 := by
@@ -630,7 +642,7 @@ theorem heun_kernel_typeII_uvw (hF : α + β + 1 = γ + δ + ε) (ha0 : a ≠ 0)
 
 /-- A Bessel factor: if `𝒞` solves Bessel's equation of order `ν` near `xk`, then
 `F(y) = A y^ν 𝒞(yk)` satisfies `F'' + ((1-2ν)/x) F' = -k² F` at `x`. -/
-lemma p2h_bessel_factor {ν k x A : ℂ} {C : ℂ → ℂ} {S : Set ℂ} (hS : IsOpen S)
+private lemma deriv_bessel_factor {ν k x A : ℂ} {C : ℂ → ℂ} {S : Set ℂ} (hS : IsOpen S)
     (hC : IsLinearODE2On (fun y => 1 / y) (fun y => 1 - ν ^ 2 / y ^ 2) C S)
     (hx : x ∈ slitPlane) (hxS : x * k ∈ S) (hk : k ≠ 0) :
     deriv (deriv fun y => A * (y ^ ν * C (y * k))) x +
@@ -707,11 +719,11 @@ theorem heun_kernel_typeII_cylinder (σ₁ σ₂ : ℂ) {C₁ C₂ C₃ : ℂ �
   have eW : 𝒦 u v = fun y => (u ^ (1 - γ) * v ^ (1 - δ) * C₁ (u * k₁) * C₂ (v * k₂)) *
       (y ^ (1 - ε) * C₃ (y * (I * k₃))) := funext fun y => by
     rw [show y * (I * k₃) = I * y * k₃ by ring]; ring
-  have E1 := p2h_bessel_factor (A := v ^ (1 - δ) * w ^ (1 - ε) * C₂ (v * k₂) *
+  have E1 := deriv_bessel_factor (A := v ^ (1 - δ) * w ^ (1 - ε) * C₂ (v * k₂) *
       C₃ (I * w * k₃)) hS.1 h₁ hu.1 hu.2 (nz _ hσ₁)
-  have E2 := p2h_bessel_factor (A := u ^ (1 - γ) * w ^ (1 - ε) * C₁ (u * k₁) *
+  have E2 := deriv_bessel_factor (A := u ^ (1 - γ) * w ^ (1 - ε) * C₁ (u * k₁) *
       C₃ (I * w * k₃)) hS.2.1 h₂ hv.1 hv.2 (nz _ hσ₂)
-  have E3 := p2h_bessel_factor (A := u ^ (1 - γ) * v ^ (1 - δ) * C₁ (u * k₁) * C₂ (v * k₂))
+  have E3 := deriv_bessel_factor (A := u ^ (1 - γ) * v ^ (1 - δ) * C₁ (u * k₁) * C₂ (v * k₂))
     (k := I * k₃) hS.2.2 h₃ hw.1 (by rw [show w * (I * k₃) = I * w * k₃ by ring]; exact hw.2)
     (mul_ne_zero I_ne_zero (nz _ hσ₃))
   rw [show w * (I * k₃) = I * w * k₃ by ring] at E3
@@ -756,7 +768,7 @@ theorem heun_kernel_typeII_spherical {Ω : Set (ℂ × ℂ × ℂ)} (hΩ : IsOpe
   sorry
 
 /-- First and second derivatives of `r ↦ r^m C` on the slit plane. -/
-lemma p2h_deriv_cpow_mul {r : ℂ} (m C : ℂ) (hr : r ∈ slitPlane) :
+private lemma deriv_cpow_mul_const {r : ℂ} (m C : ℂ) (hr : r ∈ slitPlane) :
     deriv (fun r' => r' ^ m * C) r = m * r ^ (m - 1) * C ∧
       deriv (deriv fun r' => r' ^ m * C) r = m * (m - 1) * r ^ (m - 1 - 1) * C := by
   have hD : ∀ y ∈ slitPlane, HasDerivAt (fun r' => r' ^ m * C) (m * y ^ (m - 1) * C) y :=
@@ -772,7 +784,7 @@ lemma p2h_deriv_cpow_mul {r : ℂ} (m C : ℂ) (hr : r ∈ slitPlane) :
   ring
 
 /-- Chain rule for `t ↦ C · sin^q t · u(cos² t)`: first and second derivatives. -/
-lemma p2h_deriv_sin_cpow_cos_sq_comp {u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+private lemma deriv_sin_cpow_cos_sq_comp {u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hu : ContDiffOn ℂ 2 u U) (q C : ℂ) {t : ℂ} (ht : Complex.cos t ^ 2 ∈ U)
     (hs : Complex.sin t ∈ slitPlane) :
     deriv (fun t' => C * (Complex.sin t' ^ q * u (Complex.cos t' ^ 2))) t =
@@ -867,11 +879,11 @@ theorem heun_kernel_typeII_separable (hF : α + β + 1 = γ + δ + ε) {σ₁ σ
       (Complex.sin θ' ^ (2 * p) * f (Complex.cos θ' ^ 2)) := funext fun _ => by simp only [L]; ring
   have eΦ : L r θ = fun φ' => (r ^ m * Complex.sin θ ^ (2 * p) * f (Complex.cos θ ^ 2)) *
       g (Complex.cos φ' ^ 2) := rfl
-  obtain ⟨d1, d2⟩ := p2h_deriv_cpow_mul m (Complex.sin θ ^ (2 * p) *
+  obtain ⟨d1, d2⟩ := deriv_cpow_mul_const m (Complex.sin θ ^ (2 * p) *
       f (Complex.cos θ ^ 2) * g (Complex.cos φ ^ 2)) hr
-  obtain ⟨t1, t2⟩ := p2h_deriv_sin_cpow_cos_sq_comp hUf hf.1 (2 * p)
+  obtain ⟨t1, t2⟩ := deriv_sin_cpow_cos_sq_comp hUf hf.1 (2 * p)
     (r ^ m * g (Complex.cos φ ^ 2)) hθ.1 hθ.2
-  obtain ⟨e1, e2⟩ := p2h_deriv_cos_sq_comp hUg hg.1
+  obtain ⟨e1, e2⟩ := deriv_cos_sq_comp hUg hg.1
     (r ^ m * Complex.sin θ ^ (2 * p) * f (Complex.cos θ ^ 2)) hφ
   rw [eR, eΘ, eΦ, d1, d2, t1, t2, e1, e2]
   have hsc := Complex.sin_sq_add_cos_sq θ
@@ -880,8 +892,8 @@ theorem heun_kernel_typeII_separable (hF : α + β + 1 = γ + δ + ε) {σ₁ σ
     rw [← hsc]; ring_nf; exact pow_ne_zero _ hs
   have hy1 : 1 - Complex.cos φ ^ 2 ≠ 0 := by
     rw [← hsc']; ring_nf; exact pow_ne_zero _ hs'
-  have Rf := p2h_riemann_poly₀ (pow_ne_zero 2 hc0) hx1 (hf.2 _ hθ.1)
-  have Rg := p2h_riemann_poly₀ (pow_ne_zero 2 hc') hy1 (hg.2 _ hφ)
+  have Rf := riemannNormalOperator_zero_zero_cleared (pow_ne_zero 2 hc0) hx1 (hf.2 _ hθ.1)
+  have Rg := riemannNormalOperator_zero_zero_cleared (pow_ne_zero 2 hc') hy1 (hg.2 _ hφ)
   have er1 : r ^ (m - 1) = r ^ m / r := by rw [Complex.cpow_sub _ _ hr0, Complex.cpow_one]
   have er2 : r ^ (m - 1 - 1) = r ^ m / r ^ 2 := by
     rw [Complex.cpow_sub _ _ hr0, er1, Complex.cpow_one]; ring

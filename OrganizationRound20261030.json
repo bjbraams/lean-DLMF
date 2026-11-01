@@ -162,7 +162,7 @@
     "DLMF/Mathieu/Zeros.lean": {
       "DLMF.Mathieu.Basic": "DLMF.Mathieu.SpectralExistence"
     },
-    "DLMF/Mathieu/P2sBridge.lean": {
+    "DLMF/Mathieu/SturmBridge.lean": {
       "DLMF.Mathieu.Basic": "DLMF.Mathieu.SpectralExistence"
     },
     "DLMF/Mathieu/SmallQ.lean": {
@@ -306,7 +306,7 @@
     "DLMF/EllipticIntegrals/SymmetricRelations.lean": {
       "DLMF.Weierstrass.Basic": "DLMF.Weierstrass.EllipticFunctionsAndInvariants"
     },
-    "DLMF/JacobiElliptic/P3jEisenstein.lean": {
+    "DLMF/JacobiElliptic/EisensteinSeries.lean": {
       "DLMF.Weierstrass.Basic": "DLMF.Weierstrass.EllipticFunctionsAndInvariants"
     },
     "DLMF/Painleve/SolutionsDefs.lean": {
@@ -597,7 +597,7 @@
     "DLMF/Legendre/SecondKind.lean": {
       "DLMF.Legendre.Basic": "DLMF.Legendre.FirstKindProperties"
     },
-    "DLMF/Zeta/S25bHurwitzCore.lean": {
+    "DLMF/Zeta/HurwitzEulerMaclaurin.lean": {
       "DLMF.Hypergeometric.Basic": "DLMF.Hypergeometric.SeriesProperties"
     },
     "DLMF/Bessel/Basic.lean": {
@@ -914,7 +914,7 @@
     "DLMF/Bessel.lean": {
       "DLMF.Bessel.Basic": "DLMF.Bessel.RegularizedSeries"
     },
-    "DLMF/Coulomb/Energy/Q2eRegular.lean": {
+    "DLMF/Coulomb/Energy/RegularSolution.lean": {
       "DLMF.Bessel.Basic": "DLMF.Bessel.RegularizedSeries"
     },
     "DLMF/Hypergeometric/Clausen.lean": {
@@ -12242,7 +12242,7 @@
         "name": "DLMF.Spheroidal.p3lF_deriv",
         "oldHash": "1446141412",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.ParameterDependence"
+        "oldModule": "DLMF.Spheroidal.Spectrum.ParameterDependence"
       },
       {
         "name": "DLMF.Confluent.tendsto_ordinaryHypergeometric_div_atTop",
@@ -12428,7 +12428,7 @@
         "name": "DLMF.Spheroidal.p3l_mem_neg_ball",
         "oldHash": "1994366640",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.AsymptoticApproximations.exists_unique_solution_of_ordinary",
@@ -12464,7 +12464,7 @@
         "name": "DLMF.Spheroidal.p3lY_ode",
         "oldHash": "3894488575",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Painleve.painleveVI_rational_mobius",
@@ -12476,7 +12476,7 @@
         "name": "DLMF.Zeta.r25b_tendsto_emSeq_of_hasSum",
         "oldHash": "2100277793",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Hypergeometric.DougallAux.tsum_at_int_int",
@@ -12512,7 +12512,7 @@
         "name": "DLMF.Zeta.s25b_tendstoUniformlyOn_hzc",
         "oldHash": "2628452640",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Confluent.hasSum_deriv_kummerM",
@@ -12578,7 +12578,7 @@
         "name": "DLMF.Zeta.r25b_tendsto_emSeq",
         "oldHash": "2362350863",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Bessel.analyticAt_besselI",
@@ -12740,7 +12740,7 @@
         "name": "DLMF.Spheroidal.p3lY_zero_eq",
         "oldHash": "264175208",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.ParameterDependence"
+        "oldModule": "DLMF.Spheroidal.Spectrum.ParameterDependence"
       },
       {
         "name": "DLMF.Hypergeometric.eq_of_eqOn_re_pos",
@@ -12818,7 +12818,7 @@
         "name": "DLMF.Spheroidal.p3l_deriv_comp_neg",
         "oldHash": "942851506",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Bessel.tendsto_besselLargeOrderCorr",
@@ -12842,7 +12842,7 @@
         "name": "DLMF.Spheroidal.p3lY_deriv",
         "oldHash": "3814535339",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.ParameterDependence"
+        "oldModule": "DLMF.Spheroidal.Spectrum.ParameterDependence"
       },
       {
         "name": "DLMF.Hypergeometric.analyticOnNhd_regularizedGaussHGFun_b",
@@ -13028,7 +13028,7 @@
         "name": "DLMF.Spheroidal.p3l_wronskian",
         "oldHash": "1262583677",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Painleve.IsKdVOn.casesOn",
@@ -13058,7 +13058,7 @@
         "name": "DLMF.Bessel.p3m_hasSum_integral",
         "oldHash": "1276786501",
         "kind": "theorem",
-        "oldModule": "DLMF.Bessel.P3mGraf"
+        "oldModule": "DLMF.Bessel.GrafAddition"
       },
       {
         "name": "DLMF.Hypergeometric.starConvex_zero_cutPlane",
@@ -13142,13 +13142,13 @@
         "name": "DLMF.Zeta.r25b_tendstoUniformlyOn_emSeq",
         "oldHash": "2741267017",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Spheroidal.p3l_Y_mul_deriv_eq_zero",
         "oldHash": "2148840385",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Lame.IsLameSolutionOn.recOn",
@@ -13478,7 +13478,7 @@
         "name": "DLMF.Spheroidal.p3lSol_conj",
         "oldHash": "2447174095",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.AsymptoticApproximations.mellin_besselJ_sq",
@@ -13496,7 +13496,7 @@
         "name": "DLMF.Spheroidal.p3l_le_radius",
         "oldHash": "3058109877",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Bessel.differentiable_besselKMomentWronskian_besselI",
@@ -13556,7 +13556,7 @@
         "name": "DLMF.Spheroidal.p3lq_hasDerivAt",
         "oldHash": "150099105",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.Hypergeometric.logarithmic_second_terminating_fundamental",
@@ -13580,7 +13580,7 @@
         "name": "DLMF.Spheroidal.p3l_real_of_data",
         "oldHash": "1350950294",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.Bessel.tendsto_Gamma_mul_regularized0F1_mul",
@@ -13616,7 +13616,7 @@
         "name": "DLMF.Spheroidal.p3l_ode_normal",
         "oldHash": "2481154865",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Heun.p2h_riemann_poly",
@@ -13664,7 +13664,7 @@
         "name": "DLMF.Spheroidal.p3lSol_congr",
         "oldHash": "3830822315",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Bessel.hasDerivAt_besselK",
@@ -13754,7 +13754,7 @@
         "name": "DLMF.Zeta.r25b_integral_bernoulli_mul_step",
         "oldHash": "603592603",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Hypergeometric.analyticAt_expSubOneDiv",
@@ -14252,7 +14252,7 @@
         "name": "DLMF.Zeta.r25b_integral_eq_sum_bernoulliFun",
         "oldHash": "561281892",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Painleve.painleveIII_rational_mobius",
@@ -14522,7 +14522,7 @@
         "name": "DLMF.Spheroidal.p3lY_sol",
         "oldHash": "817117393",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Hypergeometric.hcub_integrableOn₂",
@@ -14672,7 +14672,7 @@
         "name": "DLMF.Spheroidal.p3l_norm_pos",
         "oldHash": "33541175",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.Gamma.tendsto_hermApprox",
@@ -14864,7 +14864,7 @@
         "name": "DLMF.Spheroidal.p3l_entire_of_ball",
         "oldHash": "1561469809",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Heun.p1h_hasFPowerSeriesOnBall",
@@ -14888,7 +14888,7 @@
         "name": "DLMF.Spheroidal.p3l_eq_zero_of_data",
         "oldHash": "3389284394",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Gamma.deriv_digamma_mul_recip_Gamma_sq",
@@ -15200,7 +15200,7 @@
         "name": "DLMF.Spheroidal.p3lp_hasDerivAt",
         "oldHash": "1349272144",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.Bessel.hasSum_neg_one_pow_besselJ_even",
@@ -15236,7 +15236,7 @@
         "name": "DLMF.Zeta.r25b_differentiableAt_emSeq_s",
         "oldHash": "3846006838",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Bessel.hasDerivAt_schlafli_ibp",
@@ -15284,13 +15284,13 @@
         "name": "DLMF.Spheroidal.p3l_continuousOn_FD",
         "oldHash": "1946808818",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.ParameterDependence"
+        "oldModule": "DLMF.Spheroidal.Spectrum.ParameterDependence"
       },
       {
         "name": "DLMF.Spheroidal.p3lY_hasDerivAt_aux",
         "oldHash": "2473486594",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Hypergeometric.logarithmic_connection_one_div_one_sub",
@@ -15404,7 +15404,7 @@
         "name": "DLMF.Spheroidal.p3lSol_lincomb",
         "oldHash": "446942206",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.Gamma.tendsto_Gamma_ratio_nat",
@@ -15590,7 +15590,7 @@
         "name": "DLMF.Spheroidal.p3lGp_differentiable",
         "oldHash": "2669811194",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.Hypergeometric.hypSV_cubic_psi_neg_one_third",
@@ -15884,7 +15884,7 @@
         "name": "DLMF.Spheroidal.p3l_hasSum_sh",
         "oldHash": "4241708081",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.AsymptoticApproximations.IsRankOneAtInfinity.hasSum_f",
@@ -15968,7 +15968,7 @@
         "name": "DLMF.Spheroidal.p3l_differentiable_FD",
         "oldHash": "2223971558",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.ParameterDependence"
+        "oldModule": "DLMF.Spheroidal.Spectrum.ParameterDependence"
       },
       {
         "name": "DLMF.Confluent.tendsto_whittakerM_div_Gamma",
@@ -15986,7 +15986,7 @@
         "name": "DLMF.Spheroidal.p3l_wronskian_real",
         "oldHash": "1524299696",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.Lame.IsLameWaveSolutionOn.mk",
@@ -16088,7 +16088,7 @@
         "name": "DLMF.Zeta.r25b_tendsto_cpow_nat",
         "oldHash": "1647910791",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Hypergeometric.contiguous_c_three",
@@ -16160,7 +16160,7 @@
         "name": "DLMF.Zeta.s25b_tendsto_hzc",
         "oldHash": "2002515835",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Hypergeometric.gaussOperator_mul_comp",
@@ -16292,7 +16292,7 @@
         "name": "DLMF.Spheroidal.p3lF_hasFPowerSeriesOnBall",
         "oldHash": "3044885121",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Hypergeometric.iteratedDeriv_two_cpow_mul",
@@ -16352,7 +16352,7 @@
         "name": "DLMF.Spheroidal.p3lP_contDiffAt",
         "oldHash": "1708127330",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Hypergeometric.zero_first_connection_one_base",
@@ -16466,7 +16466,7 @@
         "name": "DLMF.Spheroidal.p3l_eventuallyEq",
         "oldHash": "2721631680",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Painleve.painleveIII_of_sineGordon",
@@ -16502,7 +16502,7 @@
         "name": "DLMF.Spheroidal.p3l_wron_pos",
         "oldHash": "3085063094",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.Painleve.painleveIII_rational_const",
@@ -16580,7 +16580,7 @@
         "name": "DLMF.Spheroidal.p3lY_analyticOnNhd",
         "oldHash": "2936804934",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Hypergeometric.solutionWronskian_comp_recip",
@@ -16694,7 +16694,7 @@
         "name": "DLMF.Zeta.r25b_differentiableAt_poch",
         "oldHash": "753120469",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Hypergeometric.deriv_deriv_affine_cpow",
@@ -16772,7 +16772,7 @@
         "name": "DLMF.Spheroidal.p3lY_deriv_ofReal",
         "oldHash": "3592979321",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.ParameterDependence"
+        "oldModule": "DLMF.Spheroidal.Spectrum.ParameterDependence"
       },
       {
         "name": "DLMF.Confluent.iteratedDeriv_regularizedConfluent",
@@ -16790,7 +16790,7 @@
         "name": "DLMF.Zeta.s25b_differentiableAt_hzc",
         "oldHash": "3182415871",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Bessel.analyticAt_regularized0F1",
@@ -16868,7 +16868,7 @@
         "name": "DLMF.Zeta.r25b_limUnder_emSeq_eq",
         "oldHash": "2822476603",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Hypergeometric.logarithmic_connection_one_sub",
@@ -16904,7 +16904,7 @@
         "name": "DLMF.Zeta.s25b_hzc_eq_limUnder",
         "oldHash": "1077027557",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Hypergeometric.isPreconnected_connLens",
@@ -16994,7 +16994,7 @@
         "name": "DLMF.Spheroidal.p3lH_differentiable",
         "oldHash": "2505793590",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.ParameterDependence"
+        "oldModule": "DLMF.Spheroidal.Spectrum.ParameterDependence"
       },
       {
         "name": "DLMF.Bessel.hasSum_schlafli_radial",
@@ -17336,7 +17336,7 @@
         "name": "DLMF.Spheroidal.p3lF_analyticOnNhd",
         "oldHash": "3926313475",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Bessel.tendsto_Gamma_mul_regularized0F1",
@@ -17432,7 +17432,7 @@
         "name": "DLMF.Spheroidal.p3lQ_contDiffAt",
         "oldHash": "1782555407",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Bessel.tendsto_of_norm_le_cosh_mul_besselKKernel",
@@ -17468,7 +17468,7 @@
         "name": "DLMF.Spheroidal.p3l_hasSum_op",
         "oldHash": "1498744089",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.AsymptoticApproximations.difference_coincident_log",
@@ -17492,7 +17492,7 @@
         "name": "DLMF.Spheroidal.p3l_deriv_im",
         "oldHash": "1990879358",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.Painleve.painleveIII_exists_rational_iff",
@@ -17762,7 +17762,7 @@
         "name": "DLMF.Zeta.r25b_hasDerivAt_fam",
         "oldHash": "551291619",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Combinatorics.hasSum_pow_triangle_div_qPochhammer",
@@ -17882,7 +17882,7 @@
         "name": "DLMF.Zeta.r25b_hasDerivAt_cpow_shift",
         "oldHash": "3563950182",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Hypergeometric.dougall_bilateral",
@@ -18014,13 +18014,13 @@
         "name": "DLMF.Zeta.r25b_tendsto_emSeq_shift",
         "oldHash": "2202779317",
         "kind": "theorem",
-        "oldModule": "DLMF.Zeta.S25bHurwitzCore"
+        "oldModule": "DLMF.Zeta.HurwitzEulerMaclaurin"
       },
       {
         "name": "DLMF.Spheroidal.p3l_coeff_eq_zero_of_hasSum",
         "oldHash": "1094782091",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Heun.p1h_isOpen_ball_slit",
@@ -18032,7 +18032,7 @@
         "name": "DLMF.Spheroidal.p3lF_ode",
         "oldHash": "716781812",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Hypergeometric.conditional_convergence_on_circle",
@@ -18086,7 +18086,7 @@
         "name": "DLMF.Spheroidal.p3lGq_differentiable",
         "oldHash": "2386989531",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.Bessel.hasSum_besselJ_jacobiAnger",
@@ -18110,7 +18110,7 @@
         "name": "DLMF.Spheroidal.p3l_eq_ofScalars_coeff",
         "oldHash": "3192890890",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Hypergeometric.analyticOnNhd_regularizedGaussHGFun_c",
@@ -18182,7 +18182,7 @@
         "name": "DLMF.Spheroidal.p3l_exists_entire",
         "oldHash": "3361485835",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Bessel.differentiable_schlafli_order",
@@ -18266,7 +18266,7 @@
         "name": "DLMF.Spheroidal.p3l_unique",
         "oldHash": "3496941141",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.Hypergeometric.one_le_radius_of_le_gaussHGCoeff",
@@ -18434,7 +18434,7 @@
         "name": "DLMF.Spheroidal.p3l_data_of_parity",
         "oldHash": "3078370344",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.Painleve.IsKdVOn.eq",
@@ -18476,7 +18476,7 @@
         "name": "DLMF.Bessel.hasSum_besselJ_graf",
         "oldHash": "3080032118",
         "kind": "theorem",
-        "oldModule": "DLMF.Bessel.P3mGraf"
+        "oldModule": "DLMF.Bessel.GrafAddition"
       },
       {
         "name": "DLMF.Combinatorics.r26a_hasProd_one_sub",
@@ -18500,13 +18500,13 @@
         "name": "DLMF.Spheroidal.p3l_eqOn",
         "oldHash": "3362827730",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lSpectrum.EntireEigenfunctions"
+        "oldModule": "DLMF.Spheroidal.Spectrum.EntireEigenfunctions"
       },
       {
         "name": "DLMF.Spheroidal.p3l_exists_unit",
         "oldHash": "3216619268",
         "kind": "theorem",
-        "oldModule": "DLMF.Spheroidal.P3lParity"
+        "oldModule": "DLMF.Spheroidal.Parity"
       },
       {
         "name": "DLMF.Confluent.wronskian_regularized_kummerU_of_mem",
@@ -30015,7 +30015,7 @@
           "finalValidation": "source and full dependency snapshot unchanged"
         },
         {
-          "file": "DLMF/Coulomb/Energy/Q2eRegular.lean",
+          "file": "DLMF/Coulomb/Energy/RegularSolution.lean",
           "exitCode": 0,
           "sourceSHA256": "d671566ed54a8d4b0bbb2541c5986cde84135985d4b28618c9135ddc5ec44362",
           "finalValidation": "source and full dependency snapshot unchanged"
@@ -30519,7 +30519,7 @@
           "finalValidation": "source and full dependency snapshot unchanged"
         },
         {
-          "file": "DLMF/JacobiElliptic/P3jEisenstein.lean",
+          "file": "DLMF/JacobiElliptic/EisensteinSeries.lean",
           "exitCode": 0,
           "sourceSHA256": "859d32a1f88a550c4b6fe6d0716179c688d316caf7a848ad9c628ff107ad3b57",
           "finalValidation": "source and full dependency snapshot unchanged"
@@ -30591,7 +30591,7 @@
           "finalValidation": "source and full dependency snapshot unchanged"
         },
         {
-          "file": "DLMF/Lame/Polynomials/P2pBase.lean",
+          "file": "DLMF/Lame/Polynomials/Basis.lean",
           "exitCode": 0,
           "sourceSHA256": "087fc2ece0e22f8b880e3db9c6432bc437d2c3d84b20eac507b6d6c4b3b0844b",
           "finalValidation": "source and full dependency snapshot unchanged"
@@ -30783,7 +30783,7 @@
           "finalValidation": "source and full dependency snapshot unchanged"
         },
         {
-          "file": "DLMF/Mathieu/Modified/P2mCrossSeries.lean",
+          "file": "DLMF/Mathieu/Modified/CrossSeries.lean",
           "exitCode": 0,
           "sourceSHA256": "96c8e653b687177a3760cfc46a57f94407703e65dfa5bde45f58300b4488b455",
           "finalValidation": "source and full dependency snapshot unchanged"
@@ -30801,7 +30801,7 @@
           "finalValidation": "source and full dependency snapshot unchanged"
         },
         {
-          "file": "DLMF/Mathieu/P2sBridge.lean",
+          "file": "DLMF/Mathieu/SturmBridge.lean",
           "exitCode": 0,
           "sourceSHA256": "0f953a572786389a3deac1291454181acf39b4dafc8425f564fc113870ff59d0",
           "finalValidation": "source and full dependency snapshot unchanged"
@@ -31473,7 +31473,7 @@
           "finalValidation": "source and full dependency snapshot unchanged"
         },
         {
-          "file": "DLMF/Zeta/S25bHurwitzCore.lean",
+          "file": "DLMF/Zeta/HurwitzEulerMaclaurin.lean",
           "exitCode": 0,
           "sourceSHA256": "5752e86e12ecaab46f2805b066faeaaf0a3b4e14ebe91273503bdfe234d3d596",
           "finalValidation": "source and full dependency snapshot unchanged"
@@ -31784,7 +31784,7 @@
       "DLMF/Coulomb/Energy/Asymptotics.lean",
       "DLMF/Coulomb/Energy/Basic.lean",
       "DLMF/Coulomb/Energy/Properties.lean",
-      "DLMF/Coulomb/Energy/Q2eRegular.lean",
+      "DLMF/Coulomb/Energy/RegularSolution.lean",
       "DLMF/Coulomb/Energy/Recurrence.lean",
       "DLMF/Coulomb/Energy/Series.lean",
       "DLMF/Coulomb/RhoEtaAsymptotics.lean",
@@ -31868,7 +31868,7 @@
       "DLMF/JacobiElliptic/Derivatives/ThetaWronskians.lean",
       "DLMF/JacobiElliptic/Landen.lean",
       "DLMF/JacobiElliptic/ModulusInversion.lean",
-      "DLMF/JacobiElliptic/P3jEisenstein.lean",
+      "DLMF/JacobiElliptic/EisensteinSeries.lean",
       "DLMF/JacobiElliptic/PeriodsPolesZeros.lean",
       "DLMF/JacobiElliptic/QuarterPeriods.lean",
       "DLMF/Lame.lean",
@@ -31880,7 +31880,7 @@
       "DLMF/Lame/OtherSolutions.lean",
       "DLMF/Lame/Polynomials/Basic.lean",
       "DLMF/Lame/Polynomials/Orthogonality.lean",
-      "DLMF/Lame/Polynomials/P2pBase.lean",
+      "DLMF/Lame/Polynomials/Basis.lean",
       "DLMF/Lame/Polynomials/Series.lean",
       "DLMF/Lame/SpecialCases.lean",
       "DLMF/Legendre.lean",
@@ -31912,10 +31912,10 @@
       "DLMF/Mathieu/Modified/Basic/IntegralKernels.lean",
       "DLMF/Mathieu/Modified/BesselSeries.lean",
       "DLMF/Mathieu/Modified/Connection.lean",
-      "DLMF/Mathieu/Modified/P2mCrossSeries.lean",
+      "DLMF/Mathieu/Modified/CrossSeries.lean",
       "DLMF/Mathieu/Noninteger/Basic.lean",
       "DLMF/Mathieu/Noninteger/Properties.lean",
-      "DLMF/Mathieu/P2sBridge.lean",
+      "DLMF/Mathieu/SturmBridge.lean",
       "DLMF/Mathieu/Properties/BasicSolutions.lean",
       "DLMF/Mathieu/SmallQ.lean",
       "DLMF/Mathieu/SpectralExistence.lean",
@@ -32027,7 +32027,7 @@
       "DLMF/Weierstrass/Series.lean",
       "DLMF/WignerSymbols/SixJ.lean",
       "DLMF/WignerSymbols/ThreeJ.lean",
-      "DLMF/Zeta/S25bHurwitzCore.lean"
+      "DLMF/Zeta/HurwitzEulerMaclaurin.lean"
     ],
     "new": [
       "DLMF/Airy/Properties.lean",

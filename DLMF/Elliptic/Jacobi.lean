@@ -9,14 +9,33 @@ public import DLMF.Elliptic.Basic.Amplitude
 public import DLMF.Elliptic.Complete
 
 /-!
-# Incomplete elliptic integrals and Jacobi's elliptic functions (Temme §§12.2–12.3)
+# Jacobi's amplitude and elliptic functions: basic properties
 
-For a real parameter `m < 1` (`m = k²`), Legendre's incomplete integrals
-`F(φ|m) = ∫₀^φ (1 - m sin²θ)^{-1/2} dθ` and `E(φ|m) = ∫₀^φ (1 - m sin²θ)^{1/2} dθ` are odd
-and quasi-periodic, `F(φ + π|m) = F(φ|m) + 2K(m)`. Since `∂F/∂φ > 0` and `F(nπ|m) = 2nK(m)`,
-`φ ↦ F(φ|m)` is an order isomorphism of `ℝ`; its inverse is Jacobi's amplitude `am(u|m)`
-(Temme (12.21)–(12.22)), and `sn = sin ∘ am`, `cn = cos ∘ am`, `dn = (1 - m sn²)^{1/2}`. The
-inverse function theorem gives `am' = dn` and the derivatives of DLMF 22.13.1–22.13.3.
+For a real parameter `m < 1` (`m = k²`), `φ ↦ F(φ|m)` is an order isomorphism of `ℝ` whose inverse
+is Jacobi's amplitude `am(u|m)` (Temme §§12.2–12.3, (12.21)–(12.22)); `sn = sin ∘ am`,
+`cn = cos ∘ am` and `dn = (1 - m sn²)^{1/2}`. This file proves the inverse relations,
+derivatives, periodicity and special values.
+
+## Main results
+
+* `Real.incEllIntFm_jacobiAmm`, `Real.jacobiAmm_incEllIntFm`: `F(am(u|m)|m) = u` and
+  `am(F(φ|m)|m) = φ` (DLMF 22.16.11).
+* `Real.hasDerivAt_jacobiAmm`: `am' = dn` (DLMF §22.16(i)).
+* `Real.jacobiAmm_add_two_compEllIntKm`, `Real.jacobiAmm_zero_param`: `am(u + 2K|m) = am(u|m) + π`
+  and `am(u|0) = u` (DLMF 22.16.2, 22.16.4).
+* `Real.jacobiSnm_sq_add_jacobiCnm_sq`, `Real.mul_jacobiSnm_sq_add_jacobiDnm_sq`: DLMF 22.6.1.
+* `Real.hasDerivAt_jacobiSnm`, `Real.hasDerivAt_jacobiCnm`, `Real.hasDerivAt_jacobiDnm`:
+  derivatives (DLMF Table 22.13.1).
+* `Real.jacobi_add_two_compEllIntKm`, `Real.jacobiSnm_add_four_compEllIntKm`: half-period shifts
+  and periods (DLMF Tables 22.4.1, 22.4.3).
+* `Real.jacobi_compEllIntKm`, `jacobi_zero`: values at `u = K` and `u = 0` (DLMF Table 22.5.1).
+* `jacobi_neg`: `sn` is odd and `cn`, `dn` are even.
+* `jacobi_zero_param`: for `m = 0` the functions reduce to `sin`, `cos`, `1` (DLMF §22.5(ii)).
+
+## Implementation notes
+
+The derivatives follow from the inverse function theorem applied to `F(·|m)`, whose derivative
+is positive.
 -/
 
 @[expose] public section

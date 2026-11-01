@@ -10,11 +10,27 @@ public import DLMF.ExpIntegrals.TransformTools.LaplaceAndFourier
 /-!
 # Quadratic moments of exponential integrals
 
-Endpoint limits and integrability estimates for products and quadratic moments of exponential
-integrals.
+Squared and product integrals of `E₁`, `Ci` and `Si - π/2` over `(0, ∞)` (DLMF 6.14.4–6.14.7),
+by integration by parts and explicit antiderivatives, and the auxiliary-function sums used for
+DLMF §6.15, evaluated through Binet's formulas: the digamma kernel integral DLMF 5.9.15
+(`DLMF.Gamma.digamma_coth`) and Binet's second formula DLMF 5.9.10
+(`DLMF.Gamma.log_Gamma_binet_arctan`).
 
-Source references and common attribution are retained in
-`DLMF.ExpIntegrals.TransformTools`.
+## Main definitions
+
+* `eiTr_e`: the real `E₁`, through `Ein`, defined for all real `t`.
+* `eiTr_f`, `eiTr_g`: the real auxiliary functions `f(x)`, `g(x)` as Laplace integrals.
+* `eiTr_H`: the primitive of `cos t si(t) + sin t Ci(t)`, continuous at `0`.
+
+## Main results
+
+* `eiTr_integral_cosInt_sq`, `eiTr_integral_sinIntTail_sq`: `∫₀^∞ Ci² = ∫₀^∞ (Si - π/2)² = π/2`.
+* `eiTr_integral_cosInt_mul_sinIntTail`: `∫₀^∞ Ci(t) (Si(t) - π/2) dt = log 2`.
+* `eiTr_integral_e_sq`: `∫₀^∞ E₁(t)² dt = 2 log 2`.
+* `eiTr_hasSum_g`, `eiTr_hasSum_f`: alternating sums of the auxiliary functions as Fermi-type
+  integrals.
+* `eiTr_K_eq`, `eiTr_arctanK_eq`, `eiTr_integral_log_eq'`: evaluation of the resulting kernels
+  through Binet's formulas.
 -/
 
 @[expose] public noncomputable section

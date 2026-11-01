@@ -16,10 +16,17 @@ DLMF §1.15(ii) states that the Abel, Cesàro, general Cesàro and Borel methods
 regular: a convergent series is summable by each of them to its sum. Convergence of a series is
 convergence of its partial sums (`seriesPartialSum`), not Mathlib's unconditional `HasSum`.
 
-Proved: regularity of the Abel method (from Mathlib's Abel limit theorem
-`Complex.tendsto_tsum_powerSeries_nhdsWithin_lt`) and of the (C,1) method (from Mathlib's
-`Filter.Tendsto.cesaro_smul`). Admitted: regularity of the (C,α) and Borel methods, and the
-Tauberian theorems 1.15.54–1.15.57 (Littlewood's theorem and the Hardy–Littlewood theorem).
+## Main results
+
+* `hasAbelSum_of_tendsto`: regularity of the Abel method (DLMF 1.15.10–1.15.11), from Mathlib's
+  Abel limit theorem `Complex.tendsto_tsum_powerSeries_nhdsWithin_lt`.
+* `hasCesaroSum_of_tendsto`: regularity of the (C,1) method, from Mathlib's
+  `Filter.Tendsto.cesaro_smul`.
+* `hasCesaroSumOfOrder_of_tendsto`, `hasBorelSum_of_tendsto`: regularity of the (C,α) and
+  Borel methods.
+* `tendsto_of_hasAbelSum_of_lower_bound`: Littlewood's Tauberian theorem
+  (DLMF 1.15.54–1.15.55).
+* `tendsto_cesaro_of_abel_mean`: the Hardy–Littlewood Tauberian theorem (DLMF 1.15.56–1.15.57).
 -/
 
 @[expose] public noncomputable section

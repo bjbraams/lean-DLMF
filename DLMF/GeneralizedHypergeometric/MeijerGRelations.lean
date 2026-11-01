@@ -10,18 +10,42 @@ public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 
 /-!
-# Meijer G expansions, identities and differential equations (DLMF §§16.17–16.27)
+# Meijer G expansions, identities and differential equations (DLMF §§16.17–16.25)
 
-All G-function equalities retain actual convergence predicates and logarithmic arguments.
-The residue formula is regularized before Gamma factors are cancelled; lower denominator poles
-and repeated bottom poles are treated by regularized expansions and combined parameter limits.
-The ordinary hypergeometric identity excludes terminating upper poles only in its direct Gamma
-quotient form, with the terminating limits stated separately. Divergent-series Barnes values
-use the separate convergence predicate from `Basic`.
+## Main definitions
 
-The differential equation retains the integer parity exponent. Fundamental G-solutions require
-nonresonance; a normalized parameter-limit statement supplies resonant frames. Bibliographic,
-graphical, physical-application and numerical-software discussion is recorded in the ledger.
+* `meijerResidueCoeff`, `meijerResidueExpansionLog`: the residue expansion of DLMF 16.17.2–16.17.3.
+* `MeijerLogEquation`, `meijerFundamentalTerm`: the Meijer differential equation and its
+  G-solutions, DLMF 16.21.1–16.21.2.
+* `askeyGasperPolynomial`: the polynomial of the Askey–Gasper inequality.
+
+## Main results
+
+* `meijerG_regularized_residue_expansion`, `meijerG_ordinary_residue_expansion`,
+  `meijerG_coalescing_residue_limit`, `meijerG_residue_continuation`: the residue expansion,
+  DLMF 16.17.2.
+* `genHG_meijerG`, `genHG_meijerG_dual`, `genHG_meijerG_terminating_limit`,
+  `genBarnes_meijerG`: `ₚF_q` as a Meijer G function, DLMF 16.18.1.
+* `meijerG_inversion`, `meijerG_parameter_shift`, `meijerG_cancel_parameter`,
+  `meijerG_duplication`, `meijerG_log_derivative`, `meijerG_beta_convolution`:
+  DLMF 16.19.1–16.19.6.
+* `meijerG_log_ode`, `meijerG_equation_order`, `meijerG_singularities`: the differential
+  equation, DLMF §16.21.
+* `meijerG_fundamental_frame`, `meijerG_resonant_fundamental_limits`: fundamental systems,
+  DLMF 16.21.2.
+* `askey_gasper_dlmf`: the Askey–Gasper inequality, DLMF 16.23.1.
+* `intermediate_solution_instability`: the instability of intermediate solutions (DLMF §16.25).
+
+## Implementation notes
+
+All G-function equalities retain convergence predicates and logarithmic arguments. The residue
+formula is regularized before Gamma factors are cancelled; lower denominator poles and repeated
+bottom poles are treated by regularized expansions and combined parameter limits. The ordinary
+hypergeometric identity excludes terminating upper poles only in its direct Gamma quotient form,
+with the terminating limits stated separately. Barnes values of divergent series use the
+convergence predicate from `DLMF.GeneralizedHypergeometric.Basic`. The differential equation
+retains the integer parity exponent. Fundamental G-solutions require nonresonance; a normalized
+parameter-limit statement supplies resonant frames.
 -/
 
 @[expose] public noncomputable section
@@ -287,7 +311,7 @@ theorem meijerG_log_ode {P : MeijerGParameters} {w : ℂ} (h : MeijerGConvergesL
   sorry
 
 /-- Euler-operator product coefficients vanish above the number of factors. -/
-lemma ghbR4_meijerThetaCoeff_eq_zero (A : List ℂ) :
+private lemma meijerThetaCoeff_eq_zero_of_length_lt (A : List ℂ) :
     ∀ k, A.length < k → meijerThetaCoeff A k = 0 := by
   induction A with
   | nil => intro k hk; simp [meijerThetaCoeff]; omega
@@ -299,12 +323,12 @@ lemma ghbR4_meijerThetaCoeff_eq_zero (A : List ℂ) :
     simp [meijerThetaCoeff, h1, h2]
 
 /-- The top Euler-operator product coefficient is the monomial `X^length`. -/
-lemma ghbR4_meijerThetaCoeff_length (A : List ℂ) :
+private lemma meijerThetaCoeff_length (A : List ℂ) :
     meijerThetaCoeff A A.length = X ^ A.length := by
   induction A with
   | nil => simp [meijerThetaCoeff]
   | cons a A ih =>
-    have h1 := ghbR4_meijerThetaCoeff_eq_zero A (A.length + 1) (by omega)
+    have h1 := meijerThetaCoeff_eq_zero_of_length_lt A (A.length + 1) (by omega)
     simp [meijerThetaCoeff, h1, ih, pow_succ, mul_comm]
 
 /-- 16.21: meijerG equation order. -/
@@ -315,12 +339,12 @@ theorem meijerG_equation_order (P : MeijerGParameters) :
       if P.p<P.q then -(X:ℂ[X])^P.q else if P.q<P.p then
         C (meijerParity P)*X^(P.p+1) else (C (meijerParity P)*X-1)*X^P.p := by
   have hA : ∀ k, P.p < k → meijerThetaCoeff (P.a.map (·-1)) k = 0 := fun k hk =>
-    ghbR4_meijerThetaCoeff_eq_zero _ k (by simpa [MeijerGParameters.p] using hk)
+    meijerThetaCoeff_eq_zero_of_length_lt _ k (by simpa [MeijerGParameters.p] using hk)
   have hB : ∀ k, P.q < k → meijerThetaCoeff P.b k = 0 := fun k hk =>
-    ghbR4_meijerThetaCoeff_eq_zero _ k (by simpa [MeijerGParameters.q] using hk)
+    meijerThetaCoeff_eq_zero_of_length_lt _ k (by simpa [MeijerGParameters.q] using hk)
   have hA' : meijerThetaCoeff (P.a.map (·-1)) P.p = X ^ P.p := by
-    simpa [MeijerGParameters.p] using ghbR4_meijerThetaCoeff_length (P.a.map (·-1))
-  have hB' : meijerThetaCoeff P.b P.q = X ^ P.q := ghbR4_meijerThetaCoeff_length P.b
+    simpa [MeijerGParameters.p] using meijerThetaCoeff_length (P.a.map (·-1))
+  have hB' : meijerThetaCoeff P.b P.q = X ^ P.q := meijerThetaCoeff_length P.b
   refine ⟨fun k hk => ?_, ?_⟩
   · simp [meijerODECoeff, hA k (by omega), hB k (by omega)]
   · split_ifs with h1 h2
@@ -331,7 +355,7 @@ theorem meijerG_equation_order (P : MeijerGParameters) :
       simp [meijerODECoeff, hA', this ▸ hB']; ring
 
 /-- Each Euler-operator product coefficient is a constant multiple of `X^k`. -/
-lemma ghbR4_meijerThetaCoeff_monomial (A : List ℂ) :
+private lemma exists_meijerThetaCoeff_eq_C_mul_X_pow (A : List ℂ) :
     ∀ k, ∃ c : ℂ, meijerThetaCoeff A k = C c * X ^ k := by
   induction A with
   | nil => intro k; refine ⟨if k = 0 then 1 else 0, ?_⟩; by_cases hk : k = 0 <;> simp [meijerThetaCoeff, hk]
@@ -351,36 +375,36 @@ lemma ghbR4_meijerThetaCoeff_monomial (A : List ℂ) :
       ring
 
 /-- The integer parity sign squares to one. -/
-lemma ghbR4_meijerParity_sq (P : MeijerGParameters) : meijerParity P ^ 2 = 1 := by
+private lemma meijerParity_sq (P : MeijerGParameters) : meijerParity P ^ 2 = 1 := by
   unfold meijerParity
   rw [← zpow_natCast, ← zpow_mul]
   rw [mul_comm, zpow_mul]; norm_num
 
 /-- Each Meijer ODE coefficient has the form `ε u c₁ u^k - c₂ u^k`. -/
-lemma ghbR4_meijerODECoeff_form (P : MeijerGParameters) (k : ℕ) :
+private lemma exists_eval_meijerODECoeff_eq (P : MeijerGParameters) (k : ℕ) :
     ∃ c₁ c₂ : ℂ, ∀ u : ℂ, (meijerODECoeff P k).eval u =
       meijerParity P * u * c₁ * u ^ k - c₂ * u ^ k := by
-  obtain ⟨c₁, h₁⟩ := ghbR4_meijerThetaCoeff_monomial (P.a.map (·-1)) k
-  obtain ⟨c₂, h₂⟩ := ghbR4_meijerThetaCoeff_monomial P.b k
+  obtain ⟨c₁, h₁⟩ := exists_meijerThetaCoeff_eq_C_mul_X_pow (P.a.map (·-1)) k
+  obtain ⟨c₂, h₂⟩ := exists_meijerThetaCoeff_eq_C_mul_X_pow P.b k
   refine ⟨c₁, c₂, fun u => ?_⟩
   simp [meijerODECoeff, h₁, h₂]; ring
 
 /-- The integer parity sign is nonzero. -/
-lemma ghbR4_meijerParity_ne_zero (P : MeijerGParameters) : meijerParity P ≠ 0 := by
-  intro h; have := ghbR4_meijerParity_sq P; rw [h] at this; norm_num at this
+private lemma meijerParity_ne_zero (P : MeijerGParameters) : meijerParity P ≠ 0 := by
+  intro h; have := meijerParity_sq P; rw [h] at this; norm_num at this
 
 /-- For `p ≤ q` and `q > 0`, zero is a regular singular point of the Meijer equation. -/
-lemma ghbR4_regular_zero (P : MeijerGParameters) (hpq : P.p ≤ P.q) (hq : 0 < P.q) :
+private lemma meijerRegularSingularAt_zero (P : MeijerGParameters) (hpq : P.p ≤ P.q) (hq : 0 < P.q) :
     MeijerRegularSingularAt P 0 := by
   have hN : max P.p P.q = P.q := max_eq_right hpq
   obtain ⟨-, hord⟩ := meijerG_equation_order P
-  have hpar := ghbR4_meijerParity_ne_zero P
+  have hpar := meijerParity_ne_zero P
   refine ⟨by omega, ?_, ?_⟩
-  · obtain ⟨c₁, c₂, h⟩ := ghbR4_meijerODECoeff_form P (max P.p P.q)
+  · obtain ⟨c₁, c₂, h⟩ := exists_eval_meijerODECoeff_eq P (max P.p P.q)
     rw [h]; rw [hN]; simp [zero_pow hq.ne']
   · intro k hk
     rw [hN] at hk ⊢
-    obtain ⟨c₁, c₂, h⟩ := ghbR4_meijerODECoeff_form P k
+    obtain ⟨c₁, c₂, h⟩ := exists_eval_meijerODECoeff_eq P k
     rw [← hN, hord, hN]
     rcases lt_or_eq_of_le hpq with hlt | heq
     · refine ⟨fun u => -(meijerParity P * u * c₁ - c₂), by fun_prop, ?_⟩
@@ -407,7 +431,7 @@ lemma ghbR4_regular_zero (P : MeijerGParameters) (hpq : P.p ≤ P.q) (hq : 0 < P
 
 /-- For `p < q`, the dual Meijer G equation (the inversion `z ↦ 1/z`) has an irregular
 singularity at zero, i.e. the original equation is irregular at infinity. -/
-private lemma ghbR4_dual_irregular_zero {P : MeijerGParameters} (hpq : P.p ≤ P.q)
+private lemma meijerIrregularSingularAt_dual_zero {P : MeijerGParameters} (hpq : P.p ≤ P.q)
     (hq : 0 < P.q) (hlt : P.p < P.q) : MeijerIrregularSingularAt P.dual 0 := by
   have hdp : P.dual.p = P.q := by
     simp [MeijerGParameters.dual, MeijerGParameters.p, MeijerGParameters.q]
@@ -415,15 +439,15 @@ private lemma ghbR4_dual_irregular_zero {P : MeijerGParameters} (hpq : P.p ≤ P
     simp [MeijerGParameters.dual, MeijerGParameters.p, MeijerGParameters.q]
   have hN : max P.dual.p P.dual.q = P.q := by rw [hdp, hdq]; exact max_eq_left hpq
   obtain ⟨-, hordd⟩ := meijerG_equation_order P.dual
-  have hpard := ghbR4_meijerParity_ne_zero P.dual
+  have hpard := meijerParity_ne_zero P.dual
   refine ⟨?_, ?_⟩
-  · obtain ⟨c₁, c₂, h⟩ := ghbR4_meijerODECoeff_form P.dual (max P.dual.p P.dual.q)
+  · obtain ⟨c₁, c₂, h⟩ := exists_eval_meijerODECoeff_eq P.dual (max P.dual.p P.dual.q)
     rw [h, hN]; simp [zero_pow hq.ne']
   · rintro ⟨-, -, hk⟩
     obtain ⟨f, hf, hfeq⟩ := hk P.p (by rw [hN]; exact hlt)
-    obtain ⟨c, hc⟩ := ghbR4_meijerThetaCoeff_monomial (P.dual.a.map (·-1)) P.p
+    obtain ⟨c, hc⟩ := exists_meijerThetaCoeff_eq_C_mul_X_pow (P.dual.a.map (·-1)) P.p
     have hb : meijerThetaCoeff P.dual.b P.p = X ^ P.p := by
-      have := ghbR4_meijerThetaCoeff_length P.dual.b
+      have := meijerThetaCoeff_length P.dual.b
       simpa [MeijerGParameters.dual, MeijerGParameters.p] using this
     have hcN : meijerODECoeff P.dual (max P.dual.p P.dual.q) =
         C (meijerParity P.dual) * X ^ (P.q + 1) := by
@@ -438,7 +462,7 @@ private lemma ghbR4_dual_irregular_zero {P : MeijerGParameters} (hpq : P.p ≤ P
         eval_pow, hN]
       have hpow : u ^ (P.q - P.p) * u ^ P.p = u ^ P.q := by
         rw [← pow_add]; congr 1; omega
-      have hd2 : meijerParity P.dual ^ 2 = 1 := ghbR4_meijerParity_sq P.dual
+      have hd2 : meijerParity P.dual ^ 2 = 1 := meijerParity_sq P.dual
       field_simp
       linear_combination (u * c * meijerParity P.dual - 1) * u * hpow
     have ht : Tendsto (fun u : ℂ => ‖meijerParity P.dual * (c - f u)‖) (𝓝[≠] 0)
@@ -451,10 +475,10 @@ private lemma ghbR4_dual_irregular_zero {P : MeijerGParameters} (hpq : P.p ≤ P
 
 /-- For `p = q`, the Meijer G equation has a regular singularity at the parity point
 `(-1)^{p-m-n}`. -/
-private lemma ghbR4_regular_parity {P : MeijerGParameters} (hpq : P.p ≤ P.q)
+private lemma meijerRegularSingularAt_parity {P : MeijerGParameters} (hpq : P.p ≤ P.q)
     (hq : 0 < P.q) (heq : P.p = P.q) : MeijerRegularSingularAt P (meijerParity P) := by
-  have hpar := ghbR4_meijerParity_ne_zero P
-  have hsq := ghbR4_meijerParity_sq P
+  have hpar := meijerParity_ne_zero P
+  have hsq := meijerParity_sq P
   obtain ⟨-, hord⟩ := meijerG_equation_order P
   have hN : max P.p P.q = P.q := max_eq_right hpq
   have hcN : ∀ u, (meijerODECoeff P (max P.p P.q)).eval u =
@@ -496,12 +520,12 @@ theorem meijerG_singularities {P : MeijerGParameters} (hpq : P.p≤P.q) (hq : 0<
     simp [MeijerGParameters.dual, MeijerGParameters.p, MeijerGParameters.q]
   have hdq : P.dual.q = P.p := by
     simp [MeijerGParameters.dual, MeijerGParameters.p, MeijerGParameters.q]
-  have hsq := ghbR4_meijerParity_sq P
+  have hsq := meijerParity_sq P
   obtain ⟨-, hord⟩ := meijerG_equation_order P
-  refine ⟨ghbR4_regular_zero P hpq hq, fun hlt => ?_, fun heq => ⟨?_, ?_⟩, ?_⟩
-  · exact ghbR4_dual_irregular_zero hpq hq hlt
-  · exact ghbR4_regular_parity hpq hq heq
-  · exact ghbR4_regular_zero P.dual (by omega) (by omega)
+  refine ⟨meijerRegularSingularAt_zero P hpq hq, fun hlt => ?_, fun heq => ⟨?_, ?_⟩, ?_⟩
+  · exact meijerIrregularSingularAt_dual_zero hpq hq hlt
+  · exact meijerRegularSingularAt_parity hpq hq heq
+  · exact meijerRegularSingularAt_zero P.dual (by omega) (by omega)
   · intro z hz hzp
     rcases lt_or_eq_of_le hpq with hlt | heq
     · rw [hord]; simp [hlt, hz]

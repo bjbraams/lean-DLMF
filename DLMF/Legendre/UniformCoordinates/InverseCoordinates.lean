@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.UniformCoordinates.TurningPointMaps
+public import DLMF.AsymptoticApproximations.ODE.Basic
 
 /-!
 # Inverse uniform coordinates for Legendre functions
@@ -214,13 +215,9 @@ theorem legendreDegreeY_monotone {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
 def legendreDegreeAmplitude (α x : ℝ) : ℝ :=
   limUnder (𝓝[≠] x) (fun t : ℝ => ((legendreDegreeY α t-α^2)/(1-α^2-t^2))^(1/4:ℝ))
 
-/-- First positive crossing used in DLMF 2.8(iv). -/
-def besselEnvelopeCross (ν : ℝ) : ℝ :=
-  sInf {x : ℝ | 0 < x ∧ besselJ ν x+besselY ν x=0}
-
 /-- Exact Bessel envelopes from DLMF 2.8.33–34, used in 14.15. -/
 def legendreBesselEnvelope (second : Bool) (ν x : ℝ) : ℝ :=
-  if x ≤ besselEnvelopeCross ν then Real.sqrt 2*(if second then ‖besselY ν x‖ else (besselJ ν x).re) else Real.sqrt (‖besselJ ν x‖^2+‖besselY ν x‖^2)
+  if x ≤ AsymptoticApproximations.besselEnvCrit ν then Real.sqrt 2*(if second then ‖besselY ν x‖ else (besselJ ν x).re) else Real.sqrt (‖besselJ ν x‖^2+‖besselY ν x‖^2)
 
 /-- DLMF 14.15.23: the crossing point `X_c`, the largest positive root of `U(−c, x) = Ū(−c, x)`,
 that separates the two branches of the parabolic-cylinder envelopes. -/
@@ -888,7 +885,7 @@ theorem legBes_besselJ_small {ν : ℝ} (hν : 0 ≤ ν) :
     (analyticAt_regularized0F1 _ _).continuousAt.comp (by fun_prop)
   have hG0 : G 0 = ((Real.Gamma (ν + 1))⁻¹ : ℝ) := by
     simp only [G]
-    rw [show -(((0 : ℝ) : ℂ) ^ 2 / 4) = 0 by simp, DLMF.Confluent.regularizedHGFun_zero,
+    rw [show -(((0 : ℝ) : ℂ) ^ 2 / 4) = 0 by simp, Complex.regularizedHGFun_zero,
       regularizedHGFunCoeff_empty]
     push_cast
     rw [← Gamma_ofReal]; push_cast; simp
@@ -978,9 +975,9 @@ theorem legBes_small {ν : ℝ} (hν : 0 ≤ ν) :
 
 /-- Existence of the first positive Bessel crossing used by the envelopes. -/
 theorem besselEnvelopeCross_spec {ν : ℝ} (hν : 0 ≤ ν) :
-    0 < besselEnvelopeCross ν ∧
-      besselJ ν (besselEnvelopeCross ν)+DLMF.Bessel.besselY ν (besselEnvelopeCross ν)=0 ∧
-      ∀ x : ℝ, 0 < x → x < besselEnvelopeCross ν → besselJ ν x+DLMF.Bessel.besselY ν x ≠ 0 := by
+    0 < AsymptoticApproximations.besselEnvCrit ν ∧
+      besselJ ν (AsymptoticApproximations.besselEnvCrit ν)+DLMF.Bessel.besselY ν (AsymptoticApproximations.besselEnvCrit ν)=0 ∧
+      ∀ x : ℝ, 0 < x → x < AsymptoticApproximations.besselEnvCrit ν → besselJ ν x+DLMF.Bessel.besselY ν x ≠ 0 := by
   obtain ⟨ε, hε, hsmall⟩ := legBes_small hν
   set f : ℝ → ℝ := fun x => (besselJ ν x + besselY ν x).re with hf
   set Z := {x : ℝ | 0 < x ∧ besselJ ν x + besselY ν x = 0} with hZ

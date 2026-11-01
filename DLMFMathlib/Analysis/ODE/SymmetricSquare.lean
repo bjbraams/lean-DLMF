@@ -14,9 +14,23 @@ public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 If `f'' = q f` and `g'' = q g`, their product satisfies
 `(fg)''' = 4 q (fg)' + 2 q' fg`. This common calculation applies to both
 Airy and parabolic-cylinder functions, without assumptions specific to either family.
-
 Over `ℝ` and `ℂ`, the third-order Wronskian and Cramer formulas give decomposition
 in a fundamental system and uniqueness from an initial value and two derivatives.
+
+## Main definitions
+
+* `IsThirdOrderSolution`: a solution of `y''' = p y' + q y` together with its first two
+  derivatives.
+* `thirdOrderWronskian`: the Wronskian of three solution triples.
+
+## Main results
+
+* `product_third_deriv`, `product_isThirdOrderSolution`: products of solutions of `f'' = q f`
+  solve the symmetric-square equation.
+* `thirdOrderWronskian_const`: Wronskians are constant when there is no second-derivative
+  term.
+* `thirdOrder_decomp`, `thirdOrder_eq_of_initial`: decomposition in a fundamental system and
+  uniqueness from initial data.
 -/
 
 @[expose] public noncomputable section

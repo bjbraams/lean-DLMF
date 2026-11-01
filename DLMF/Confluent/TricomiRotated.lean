@@ -9,19 +9,43 @@ public import DLMF.Confluent.Asymptotics
 public import DLMFMathlib.Analysis.Complex.RotateRay
 
 /-!
-# Tricomi's function along rotated rays (Temme §7.2; DLMF 13.4.4, 13.7.3)
+# Tricomi's function along rotated rays
 
 For `re a > 0` and `|α| < π/2`, rotating the ray of integration in Tricomi's Laplace integral
-gives
+(DLMF 13.4.4) gives
 
 `U(a,b,z) = 1/Γ(a) · e^{iα} ∫₀^∞ e^{-z r e^{iα}} (r e^{iα})^{a-1} (1 + r e^{iα})^{b-a-1} dr`
 
-on the half-plane `re (z e^{iα}) > 0` (`kummerU_eq_tricomiRotated`). The rotation uses
-`Complex.integral_Ioi_eq_exp_mul_integral_Ioi_rotate` on the common half-plane and extends by
-analytic continuation. Watson's lemma in a sector then gives Tricomi's expansion as `z → ∞` in
-every rotated sector `δ |z| ≤ re (z e^{iα})` (`hasAsymptoticExpansion_kummerU_rotSector`).
-These sectors cover `|arg z| ≤ π - ε`, including the imaginary axis needed for the Coulomb
-and Fresnel functions.
+on the half-plane `re (z e^{iα}) > 0`. Watson's lemma in a sector then gives Tricomi's
+expansion as `z → ∞` in every rotated sector `δ |z| ≤ re (z e^{iα})` (DLMF 13.7.3,
+Temme §7.2).
+
+## Main definitions
+
+* `tricomiKernel`: the integrand of Tricomi's Laplace representation.
+* `tricomiRotated`: the rotated Laplace integral.
+* `rotSectorAtTop`: the filter `z → ∞` with `δ |z e^{iα}| ≤ re (z e^{iα})`.
+
+## Main results
+
+* `kummerU_eq_rotated_of_re_pos`: rotation of Tricomi's Laplace integral on the common
+  half-plane.
+* `kummerU_eq_tricomiRotated`: the rotated Laplace representation of `U` on the half-plane
+  `re (z e^{iα}) > 0`.
+* `differentiableOn_tricomiRotated`: the rotated integral is holomorphic on that half-plane.
+* `hasAsymptoticExpansion_kummerU_rotSector`: Tricomi's expansion in rotated sectors, for all
+  complex `a, b` (DLMF 13.7.3).
+
+## Implementation notes
+
+The rotation uses `Complex.integral_Ioi_eq_exp_mul_integral_Ioi_rotate` on the common
+half-plane and extends by analytic continuation. The rotated sectors cover
+`|arg z| ≤ π - ε`, including the imaginary axis needed for the Coulomb and Fresnel functions.
+
+## References
+
+* N. M. Temme, *Special Functions: An Introduction to the Classical Functions of Mathematical
+  Physics*, §7.2.
 -/
 
 @[expose] public section

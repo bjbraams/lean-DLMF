@@ -9,25 +9,45 @@ public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 public import DLMF.Bessel.Elementary
 public import DLMFMathlib.Analysis.ODE.SturmComparison
+public import ToMathlib.Analysis.SpecialFunctions.Pow
 
 /-!
 # Zeros of Bessel functions and the large-argument behaviour of `I_ν`
 
+Reality, infinitude, spacing and interlacing of the zeros of real Bessel functions
+(DLMF §10.21; Beals–Wong §9.2), and the leading large-argument behaviour of `I_ν`
+(DLMF 10.40.1).
+
+## Main definitions
+
+* `IsRealBesselSolution`: real solutions of Bessel's equation on `(0, ∞)` (real cylinder
+  functions).
+* `besselNormalDeriv`, `besselNormalCoeff`: the derivative and coefficient of the Liouville
+  normal form `u = √x y`, `u'' + (1 - (ν²-¼)/x²) u = 0`.
+
+## Main results
+
 * `besselJ_im_eq_zero_of_eq_zero`: for real `ν > -1` every zero of `J_ν` is real (DLMF 10.21(i)).
-  With `g = ₀F̃₁(ν+1; ·)` and `A = -α²/4`, the function `t ↦ t^{2ν+2}(B g(At²) g'(Bt²) -
-  A g'(At²) g(Bt²))` has derivative `2(B-A) t^{2ν+1} g(At²) g(Bt²)` (a Lommel identity), so for
-  `B = Ā` and `g(A) = 0` the positive integral `∫₀¹ t^{2ν+1} |g(At²)|² dt` forces `A = Ā`. The
-  case `A > 0` is excluded since `I_ν` is positive.
 * `besselI_sub_exp_isBigO`, `besselI_isEquivalent`: `I_ν(x) = eˣ/√(2πx) + O(eˣ x^{-3/2})`
-  (DLMF 10.40.1, leading term), from `I_ν(x) = c(x) 𝐌(ν+½, 2ν+1, 2x)` and DLMF 13.7.1.
-* `IsRealBesselSolution`: real solutions of Bessel's equation (real cylinder functions). Through
-  the Liouville normal form `u = √x y`, `u'' + (1 - (ν²-¼)/x²) u = 0`, Sturm comparison
-  (`DLMFMathlib.Analysis.ODE.SturmComparison`) gives Beals–Wong Thm 9.2.1: infinitely many positive
-  zeros (`infinite_zeros`), a zero in every `(a, a+π)` for `|ν| < ½` (`exists_zero_Ioo`), and
-  gaps larger than `π` for `|ν| > ½` (`pi_lt_sub`); with the corollaries for `J_ν`.
+  (DLMF 10.40.1, leading term).
+* `IsRealBesselSolution.infinite_zeros`, `IsRealBesselSolution.exists_zero_Ioo`,
+  `IsRealBesselSolution.pi_lt_sub`: Beals–Wong Thm 9.2.1: infinitely many positive zeros, a zero
+  in every `(a, a+π)` for `|ν| < ½`, and gaps larger than `π` for `|ν| > ½`.
+* `besselJ_exists_zero_Ioo`, `besselJ_pi_lt_sub`: the corollaries for `J_ν`.
 * `besselJ_succ_ne_zero_of_eq_zero`, `existsUnique_besselJ_succ_zero_between`,
   `existsUnique_besselJ_zero_between`: the positive zeros of `J_ν` and `J_{ν+1}` interlace
   strictly (DLMF 10.21.3).
+
+## Implementation notes
+
+* Reality of zeros: with `g = ₀F̃₁(ν+1; ·)` and `A = -α²/4`, the function
+  `t ↦ t^{2ν+2}(B g(At²) g'(Bt²) - A g'(At²) g(Bt²))` has derivative
+  `2(B-A) t^{2ν+1} g(At²) g(Bt²)` (a Lommel identity), so for `B = Ā` and `g(A) = 0` the positive
+  integral `∫₀¹ t^{2ν+1} |g(At²)|² dt` forces `A = Ā`. The case `A > 0` is excluded since `I_ν`
+  is positive.
+* The asymptotics of `I_ν` come from `I_ν(x) = c(x) 𝐌(ν+½, 2ν+1, 2x)` and DLMF 13.7.1.
+* The zero counts use Sturm comparison (`DLMFMathlib.Analysis.ODE.SturmComparison`) for the
+  Liouville normal form.
 -/
 @[expose] public section
 
@@ -132,7 +152,7 @@ theorem conj_eq_of_regularized0F1_eq_zero {c : ℝ} (hc : 0 < c) {A : ℂ}
     at hFTC
   -- positivity of the weighted integral
   have hg0 : g 0 ≠ 0 := by
-    rw [hgdef, DLMF.Confluent.regularizedHGFun_zero, regularizedHGFunCoeff_empty]
+    rw [hgdef, Complex.regularizedHGFun_zero, regularizedHGFunCoeff_empty]
     simp only [Nat.factorial_zero, Nat.cast_one, CharP.cast_eq_zero, add_zero, one_mul,
       one_div, ne_eq, inv_eq_zero]
     exact Complex.Gamma_ne_zero_of_re_pos (by simpa using hc)
@@ -206,11 +226,6 @@ end RealZeros
 
 section LargeI
 
-/-- A complex power of a positive real as an exponential. -/
-theorem ofReal_cpow_eq_exp_log {r : ℝ} (hr : 0 < r) (s : ℂ) :
-    (r : ℂ) ^ s = exp ((Real.log r : ℂ) * s) := by
-  rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hr.ne'), ofReal_log hr.le]
-
 /-- The leading term of `I_ν` from the leading term of `𝐌(ν+½, 2ν+1, 2x)`. -/
 theorem besselI_main_term {ν : ℂ} (hν : ∀ k : ℕ, 1 + 2 * ν ≠ -k) {x : ℝ} (hx : 0 < x) :
     ((x : ℂ) / 2) ^ ν * exp (-(x : ℂ)) * Gamma (2 * ν + 1) / Gamma (ν + 1) *
@@ -219,7 +234,7 @@ theorem besselI_main_term {ν : ℂ} (hν : ∀ k : ℕ, 1 + 2 * ν ≠ -k) {x :
       ((Real.exp x / Real.sqrt (2 * π * x) : ℝ) : ℂ) := by
   have hdup := Complex.Gamma_mul_Gamma_add_half (ν + 1 / 2)
   have h2 : (2 : ℂ) ^ (1 - 2 * (ν + 1 / 2)) = exp ((Real.log 2 : ℂ) * (-2 * ν)) := by
-    rw [← ofReal_cpow_eq_exp_log two_pos, ofReal_ofNat]
+    rw [← Complex.ofReal_cpow_eq_exp two_pos, ofReal_ofNat]
     congr 1
     ring
   rw [h2, show ν + 1 / 2 + 1 / 2 = ν + 1 by ring,
@@ -238,7 +253,7 @@ theorem besselI_main_term {ν : ℂ} (hν : ∀ k : ℕ, 1 + 2 * ν ≠ -k) {x :
   have hsq : Real.sqrt (2 * π * x) = Real.sqrt π * Real.exp (Real.log (2 * x) / 2) := by
     rw [show 2 * π * x = π * (2 * x) by ring, Real.sqrt_mul Real.pi_pos.le,
       Real.sqrt_eq_rpow (2 * x), Real.rpow_def_of_pos (by positivity), mul_one_div]
-  rw [hx2, ofReal_cpow_eq_exp_log (by positivity), ofReal_cpow_eq_exp_log (by positivity),
+  rw [hx2, Complex.ofReal_cpow_eq_exp (by positivity), Complex.ofReal_cpow_eq_exp (by positivity),
     Real.log_div hx.ne' two_ne_zero, Real.log_mul two_ne_zero hx.ne', hsq,
     Real.log_mul two_ne_zero hx.ne']
   set L2 := Real.log 2
@@ -290,8 +305,7 @@ theorem besselI_sub_exp_isBigO {ν : ℂ} (hν : ∀ k : ℕ, 1 + 2 * ν ≠ -k)
       fun x : ℝ => Real.exp x * x ^ (-(3 / 2) : ℝ) := by
   have ha : ∀ k : ℕ, ν + 1 / 2 ≠ -k := fun k h => hν (2 * k) (by
     push_cast; linear_combination 2 * h)
-  have hP := (DLMF.Confluent.regularizedHGFun_poincare_real (ν + 1 / 2) (2 * ν + 1) 1
-    ha).comp_tendsto (tendsto_id.const_mul_atTop (by norm_num : (0 : ℝ) < 2))
+  have hP := (DLMF.Confluent.regularizedHGFun_poincare_real (ν + 1 / 2) (2 * ν + 1) 1).comp_tendsto (tendsto_id.const_mul_atTop (by norm_num : (0 : ℝ) < 2))
   set c : ℝ → ℂ := fun x =>
     ((x : ℂ) / 2) ^ ν * exp (-(x : ℂ)) * Gamma (2 * ν + 1) / Gamma (ν + 1) with hc
   have hM := (isBigO_refl c atTop).mul hP

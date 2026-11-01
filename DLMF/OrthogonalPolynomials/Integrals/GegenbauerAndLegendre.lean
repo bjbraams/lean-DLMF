@@ -8,12 +8,26 @@ module
 public import DLMF.OrthogonalPolynomials.Integrals.AngularRepresentations
 
 /-!
-# Gegenbauer and Legendre product integrals
+# Laplace-type integrals for Gegenbauer, Legendre and Hermite polynomials
 
-Laplace representations and angular product formulas for Gegenbauer and Legendre polynomials.
+Laplace integral representations of the Gegenbauer, Legendre and Hermite polynomials
+(DLMF 18.10.4, 18.10.5, 18.10.7) and the Fourier integral for Hermite polynomials
+(DLMF 18.10.10), Hermite antiderivatives (DLMF 18.17.3–18.17.4), the Legendre product formula
+(DLMF 18.17.6) and the Laplace transform of Hermite functions (DLMF 18.17.35).
 
-Source references and common attribution are retained in
-`DLMF.OrthogonalPolynomials.Integrals`.
+## Main definitions
+
+* `gegenbauerLaplace`, `legendreLaplace`: the angular Laplace integrals.
+
+## Main results
+
+* `ultrasphPoly_laplace_integral`, `legendre_laplace_integral`: DLMF 18.10.4 and 18.10.5.
+* `hermitePolyH_laplace_integral`, `hermitePolyH_fourier_integral`: DLMF 18.10.7 and
+  18.10.10.
+* `hermitePolyH_integral`, `hermitePolyH_weighted_integral`: DLMF 18.17.3 and 18.17.4.
+* `legendre_product_integral`: DLMF 18.17.6.
+* `hermitePolyH_laplace_transform`: DLMF 18.17.35.
+* `integral_cexp_gauss`: `∫ e^{-xz} e^{-x²} dx = √π e^{z²/4}`.
 -/
 
 @[expose] public section

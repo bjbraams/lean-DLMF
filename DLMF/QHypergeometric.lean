@@ -22,6 +22,8 @@ public import DLMF.QHypergeometric.Transformations
 /-!
 # Basic hypergeometric and related functions (DLMF Chapter 17)
 
-The acquisition reuses existing project and upstream APIs; open proof obligations
-remain explicit. Source scope and branch conventions are tracked in the chapter ledger.
+This umbrella collects the DLMF Chapter 17 development of basic hypergeometric (`q`-)series:
+`q`-calculus, the general unilateral and bilateral series and their convergence, elementary
+and higher summations, transformations, `q`-Appell functions, Bailey pairs, constant-term
+identities and integrals.
 -/

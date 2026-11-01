@@ -13,6 +13,14 @@ public import Mathlib.Analysis.Fourier.AddCircle
 Mathlib's `HilbertBasis.hasSum_inner_mul_inner` gives the complex Parseval pairing.
 The interval version transports this identity through `AddCircle.liftIoc`, as in
 Mathlib's `hasSum_sq_fourierCoeffOn`.
+
+## Main results
+
+* `hasSum_fourierCoeff_mul_conj`: the products of the Fourier coefficients of two
+  square-integrable functions on the circle sum to their integral pairing (normalized Haar
+  measure).
+* `hasSum_fourierCoeffOn_mul_conj`: the same on an interval, with the pairing divided by the
+  interval length.
 -/
 
 @[expose] public noncomputable section

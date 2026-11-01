@@ -8,15 +8,41 @@ module
 public import DLMF.ExpIntegrals.TransformTools
 
 /-!
-# Zeros, transforms, sums and computational recurrences, DLMF §§6.13–6.18
+# Zeros, transforms, integrals, sums and recurrences (DLMF §§6.13–6.18)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+The zeros of `Ei`, `Ci` and `si` (DLMF §6.13), Laplace and other integrals of the exponential
+and trigonometric integrals (DLMF §6.14), sums of `Ci` and `si` at multiples of `π`
+(DLMF §6.15), and Acton's recurrences for computing the auxiliary integrals (DLMF §6.18).
 
-The transforms, integrals and sums of §§6.14–6.15 are proved with the helpers in
-`DLMF/ExpIntegrals/TransformTools.lean`; the sums use Binet's formulas DLMF 5.9.10 and
-5.9.15 from `DLMF/Gamma`.
+## Main definitions
+
+* `Real.expIntEiZero`: the unique real zero of `Ei` (DLMF 6.13.1).
+* `Real.cosIntZero`, `Real.sinIntTailZero`: the positive zeros of `Ci` and `si`, indexed from
+  zero.
+* `expIntActonA`, `expIntActonB`, `expIntActonC`: Acton's auxiliary integrals (DLMF 6.18.1).
+
+## Main results
+
+* `Real.expIntEi_unique_zero`: `Ei` has exactly one real zero (DLMF §6.13).
+* `Real.cosIntZero_spec`, `Real.cosIntZero_enumeration`, `Real.sinIntTailZero_spec`,
+  `Real.sinIntTailZero_enumeration`: the positive zeros of `Ci` and `si`, separated by the points
+  `(n + 1/2)π` and `nπ`.
+* `Real.trigonometric_integral_zero_asymptotics`: all-order expansions of the zeros with signed
+  next-term bounds (DLMF 6.13.2).
+* `expIntE1_laplace`, `cosInt_laplace`, `sinIntTail_laplace`: Laplace transforms
+  (DLMF 6.14.1–6.14.3).
+* `expIntE1_squared_integral`, `cosInt_fourier_integral`, `trigIntegral_squared_integrals`,
+  `trigIntegral_product_integral`: DLMF 6.14.4–6.14.7.
+* `trigIntegral_hasSum_1`, `trigIntegral_hasSum_2`, `trigIntegral_hasSum_3`,
+  `trigIntegral_hasSum_4`: DLMF 6.15.1–6.15.4.
+* `expIntActon_initial`, `expIntActon_recurrence`: Acton's initial values and recurrences
+  (DLMF §6.18(ii), 6.18.2).
+
+## Implementation notes
+
+The transforms, integrals and sums of §§6.14–6.15 use the results of
+`DLMF.ExpIntegrals.TransformTools`; the sums use Binet's formulas DLMF 5.9.10 and 5.9.15 from
+the Gamma area.
 -/
 
 @[expose] public noncomputable section

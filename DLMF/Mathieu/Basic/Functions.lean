@@ -9,6 +9,37 @@ public import DLMF.Mathieu.Basic.Spectral
 
 /-!
 # Normalized Mathieu functions and their Fourier coefficients
+
+The Mathieu functions `ce_n(z, q)`, `se_n(z, q)` of integer order for real `q` (DLMF §28.2(vi),
+Table 28.2.2), the second solutions `fe_n`, `ge_n` (DLMF §28.5) and the Fourier coefficients of
+`ce_n`, `se_n` (DLMF §28.4).
+
+## Main definitions
+
+* `mathieuCe n z q = ce_n(z, q)`, `mathieuSe n z q = se_n(z, q)`: the eigenfunctions for
+  `a_n(q)`, `b_n(q)`, normalized by DLMF 28.2.30.
+* `mathieuCeZero`, `mathieuSeDerivZero`: the positive normalizing factors `ce_n(0, q)` and
+  `se_n'(0, q)`.
+* `mathieuFe n z q = fe_n(z, q)`, `mathieuGe n z q = ge_n(z, q)`: the second solutions,
+  normalized by DLMF 28.5.5.
+* `mathieuFeC`, `mathieuGeS`, `mathieuFeF`, `mathieuGeG`: the factors `C_n(q)`, `S_n(q)` and the
+  periodic parts `f_n`, `g_n` of DLMF 28.5.1–28.5.4.
+* `mathieuFourierA n m q = A^n_m(q)`, `mathieuFourierB n m q = B^n_m(q)`: the Fourier
+  coefficients of `ce_n`, `se_n` (DLMF 28.4.1–28.4.4).
+
+## Implementation notes
+
+* DLMF fixes the sign of `ce_n`, `se_n` "by continuity" in `q` from `q = 0`. For real `q`,
+  `ce_n(0, q) ≠ 0` and `se_n'(0, q) ≠ 0` (an even, resp. odd, nontrivial solution cannot have
+  both initial data zero), so the continuity convention is equivalent to `ce_n(0, q) > 0` and
+  `se_n'(0, q) > 0`, which is the definition used here (`ce_n = c · w_I(·; a_n(q), q)` with
+  `c > 0`).
+* Similarly `fe_n'(0, q) > 0` and `ge_n(0, q) > 0`: DLMF fixes the signs of `C_n(q)`, `S_n(q)`
+  by `C_n f_n → sin nz`, `S_n g_n → cos nz` as `q → 0`. For `n = 0` the normalization 28.5.5
+  cannot hold at `q = 0` (there `f_0 = 0`); `fe_0(z, 0) = z` (DLMF 28.5.7) is used at `q = 0`.
+* For real `q` the Mathieu functions are real on the real axis; the normalizing integrals are
+  written with `‖·‖²`, which agrees with DLMF's squares there.
+* `mathieuSe 0 z q` is a junk value, since `b_0` is not defined.
 -/
 
 @[expose] public noncomputable section

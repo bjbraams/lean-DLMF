@@ -12,18 +12,44 @@ public import DLMF.Painleve.Rational
 /-!
 # Rational solutions of the Painlevé equations (DLMF §32.8)
 
-DLMF normalization (`DLMF.Painleve.Basic`). The rational solutions of `PII` are bridged to the
-Beals–Wong construction of `DLMF.Painleve.Rational` (`rationalPIIPair`), whose `PII(c)` is DLMF's
-`PII` with `α = -c`. The explicit solutions 32.8.1–32.8.4 and the Yablonskii–Vorob'ev
-polynomials 32.8.7 are proved by polynomial identities. The general statements 32.8.5–32.8.6
-(exactness of the recurrence, monicity, the rational solutions for every `n`) are proved from a
-bilinear invariant: `Q_n` and `Q_{n+1}` are monic with simple zeros and satisfy the Hirota
-equations `D_z²(Q_{n+1}·Q_n) = 0` and `(D_z³ - zD_z)(Q_n·Q_{n+1}) = (n+1)Q_nQ_{n+1}`
-(`p3b_YV`); divisibility follows by checking the numerator at the simple zeros of `Q_n`. The
-generating function 32.8.8 is a Cauchy product; the Wronskian form 32.8.9 is admitted. The
-special rational solutions of `PIII`–`PVI` (32.8.11–32.8.13, 32.8.16–32.8.18, 32.8.24–32.8.26,
-32.8.28–32.8.32) are proved on every open set avoiding the singular points; the
-classification statements ("rational solutions exist iff …") are admitted.
+Rational solutions of `PII`–`PVI` in the DLMF normalization (`DLMF.Painleve.Basic`): the
+Yablonskii–Vorob'ev polynomials and the rational solutions of `PII`, special rational
+solutions of `PIII`–`PVI`, and the classification of rational solutions.
+
+## Main results
+
+* `painleveII_exists_rational_int`: `PII` has rational solutions for every integer `α`
+  (DLMF §32.8(ii)).
+* `painleveII_rational_one`, `painleveII_rational_two`, `painleveII_rational_three`,
+  `painleveII_rational_four`: the explicit solutions DLMF 32.8.1–32.8.4.
+* `yablonskiiVorobievQ_recurrence`, `rationalPainleveII_isPainleveIIOn`,
+  `rationalPainleveII_isPainleveIIOn_int`: the Yablonskii–Vorob'ev recurrence and the rational
+  solutions DLMF 32.8.5–32.8.6.
+* `yablonskiiVorobievQ_two`, …, `yablonskiiVorobievQ_six`: the polynomials of DLMF 32.8.7.
+* `hasSum_yablonskiiVorobievP`, `yablonskiiVorobievTau_isPainleveIIOn`: the generating
+  function DLMF 32.8.8 and the Wronskian form DLMF 32.8.9–32.8.10.
+* `painleveIII_rational_const`, `painleveIII_rational_linear`, `painleveIII_rational_mobius`,
+  `painleveIII_exists_rational_iff`, `painleveIII_rational_form`: `PIII`
+  (DLMF 32.8.11–32.8.15).
+* `painleveIV_rational_inv`, `painleveIV_rational_neg_inv`, `painleveIV_rational_neg_two_mul`,
+  `painleveIV_rational_neg_two_thirds_mul`, `painleveIV_rational_form`,
+  `painleveIV_exists_rational_iff`: `PIV` (DLMF 32.8.16–32.8.23).
+* `painleveV_rational_linear`, `painleveV_rational_mobius`, `painleveV_rational_mobius'`,
+  `painleveV_exists_rational_iff`, `painleveV_rational_form`: `PV` (DLMF 32.8.24–32.8.27).
+* `painleveVI_rational_linear`, `painleveVI_rational_sq`, `painleveVI_rational_inv`,
+  `painleveVI_rational_inv_sq`, `painleveVI_rational_mobius`, `painleveVI_exists_rational`:
+  `PVI` (DLMF 32.8.28–32.8.33).
+
+## Implementation notes
+
+The rational solutions of `PII` are bridged to the Beals–Wong construction of
+`DLMF.Painleve.Rational` (`rationalPIIPair`), whose `PII(c)` is DLMF's `PII` with `α = -c`.
+The general statements 32.8.5–32.8.6 (exactness of the recurrence, monicity, the rational
+solutions for every `n`) rest on a bilinear invariant: `Q_n` and `Q_{n+1}` are monic with
+simple zeros and satisfy the Hirota equations `D_z²(Q_{n+1}·Q_n) = 0` and
+`(D_z³ - zD_z)(Q_n·Q_{n+1}) = (n+1)Q_nQ_{n+1}` (`yablonskiiVorobievQ_bilinear`); divisibility
+follows by checking the numerator at the simple zeros of `Q_n`. The special rational solutions
+of `PIII`–`PVI` hold on every open set avoiding the singular points.
 -/
 
 @[expose] public noncomputable section
@@ -36,14 +62,14 @@ namespace DLMF.Painleve
 /-! ## Bridge to Beals–Wong -/
 
 /-- The symmetry `w ↦ -w`, `α ↦ -α` of DLMF's `PII`. -/
-theorem b32_isPainleveIIOn_neg {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
+theorem isPainleveIIOn_neg {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
     (h : IsPainleveIIOn α w U) : IsPainleveIIOn (-α) (fun z => -w z) U := by
   rw [isPainleveIIOn_iff_isPIIOn] at h ⊢
   simpa using h.neg
 
 /-- A polynomial quotient `p/q` solves `PII` with parameter `α` on the regular set of `q`
 when the polynomial identity obtained by clearing `q³` holds. -/
-private lemma b32_isPainleveIIOn_rationalFn {p q : ℂ[X]} {α : ℂ}
+private lemma isPainleveIIOn_rationalFn_of_identity {p q : ℂ[X]} {α : ℂ}
     (H : (derivative (derivative p) * q - p * derivative (derivative q)) * q -
         2 * derivative q * (derivative p * q - p * derivative q) =
       2 * p ^ 3 + X * p * q ^ 2 + C α * q ^ 3) :
@@ -84,12 +110,12 @@ theorem painleveII_rational_one :
   have h := isPIIOn_recip (𝕜 := ℂ)
   have h' : IsPainleveIIOn (-1) (fun z : ℂ => z⁻¹) {z | z ≠ 0} :=
     isPainleveIIOn_iff_isPIIOn.mpr (by simpa using h)
-  simpa [neg_div, one_div] using b32_isPainleveIIOn_neg h'
+  simpa [neg_div, one_div] using isPainleveIIOn_neg h'
 
 /-! ## The Yablonskii–Vorob'ev polynomials (32.8.5–32.8.7) -/
 
 /-- Polynomial differentiation of explicit polynomials. -/
-local macro "b32_pd" : tactic =>
+local macro "poly_derivative_simp" : tactic =>
   `(tactic| (simp only [derivative_add, derivative_sub, derivative_mul, derivative_X_pow,
       derivative_X, derivative_ofNat, derivative_one, derivative_zero, derivative_neg, map_natCast,
       mul_one, zero_mul, mul_zero, add_zero, zero_add, sub_zero]) <;>
@@ -97,7 +123,7 @@ local macro "b32_pd" : tactic =>
 
 /-- One step of the recurrence 32.8.6: if `Q_{n+1} Q_{n-1}` equals the right-hand side then
 `yablonskiiVorobievQ (n + 2)` is that polynomial. -/
-private lemma b32_Q_step {n : ℕ} {R : ℂ[X]} (hn : yablonskiiVorobievQ n ≠ 0)
+private lemma yablonskiiVorobievQ_add_two_eq_of_mul {n : ℕ} {R : ℂ[X]} (hn : yablonskiiVorobievQ n ≠ 0)
     (h : X * yablonskiiVorobievQ (n + 1) ^ 2 +
         C 4 * (derivative (yablonskiiVorobievQ (n + 1))) ^ 2 -
         C 4 * yablonskiiVorobievQ (n + 1) * derivative (derivative (yablonskiiVorobievQ (n + 1))) =
@@ -106,46 +132,46 @@ private lemma b32_Q_step {n : ℕ} {R : ℂ[X]} (hn : yablonskiiVorobievQ n ≠ 
   rw [yablonskiiVorobievQ, h, mul_div_cancel_right₀ _ hn]
 
 /-- Identity under the stated parameter and domain assumptions: `(C 4 : ℂ[X]) = 4`. -/
-private lemma b32_C4 : (C 4 : ℂ[X]) = 4 := rfl
+private lemma C_four_eq : (C 4 : ℂ[X]) = 4 := rfl
 
 /-- DLMF 32.8.7: `Q₂(z) = z³ + 4`. -/
 @[dlmf 32.8.E7]
 theorem yablonskiiVorobievQ_two : yablonskiiVorobievQ 2 = X ^ 3 + 4 := by
-  apply b32_Q_step (n := 0) one_ne_zero
-  simp only [yablonskiiVorobievQ, derivative_X, derivative_one, b32_C4]
+  apply yablonskiiVorobievQ_add_two_eq_of_mul (n := 0) one_ne_zero
+  simp only [yablonskiiVorobievQ, derivative_X, derivative_one, C_four_eq]
   ring
 
 /-- DLMF 32.8.7: `Q₃(z) = z⁶ + 20z³ - 80`. -/
 @[dlmf 32.8.E7]
 theorem yablonskiiVorobievQ_three : yablonskiiVorobievQ 3 = X ^ 6 + 20 * X ^ 3 - 80 := by
-  apply b32_Q_step (n := 1) X_ne_zero
-  have h1 : derivative (X ^ 3 + 4 : ℂ[X]) = 3 * X ^ 2 := by b32_pd
-  have h2 : derivative (3 * X ^ 2 : ℂ[X]) = 6 * X := by b32_pd
-  rw [yablonskiiVorobievQ_two, h1, h2, b32_C4]
+  apply yablonskiiVorobievQ_add_two_eq_of_mul (n := 1) X_ne_zero
+  have h1 : derivative (X ^ 3 + 4 : ℂ[X]) = 3 * X ^ 2 := by poly_derivative_simp
+  have h2 : derivative (3 * X ^ 2 : ℂ[X]) = 6 * X := by poly_derivative_simp
+  rw [yablonskiiVorobievQ_two, h1, h2, C_four_eq]
   simp only [yablonskiiVorobievQ]
   ring
 
 /-- Nonvanishing under the stated hypotheses: `(X ^ 3 + 4 : ℂ[X]) ≠ 0`. -/
-private lemma b32_Q2_ne : (X ^ 3 + 4 : ℂ[X]) ≠ 0 := by
+private lemma yablonskiiVorobievQ_two_poly_ne_zero : (X ^ 3 + 4 : ℂ[X]) ≠ 0 := by
   intro h
   have := congrArg (eval 0) h
   simp at this
 
 /-- Nonvanishing under the stated hypotheses: `(X ^ 6 + 20 * X ^ 3 - 80 : ℂ[X]) ≠ 0`. -/
-private lemma b32_Q3_ne : (X ^ 6 + 20 * X ^ 3 - 80 : ℂ[X]) ≠ 0 := by
+private lemma yablonskiiVorobievQ_three_poly_ne_zero : (X ^ 6 + 20 * X ^ 3 - 80 : ℂ[X]) ≠ 0 := by
   intro h
   have := congrArg (eval 0) h
   norm_num at this
 
 /-- Nonvanishing under the stated hypotheses: `(X ^ 10 + 60 * X ^ 7 + 11200 * X : ℂ[X]) ≠ 0`. -/
-private lemma b32_Q4_ne : (X ^ 10 + 60 * X ^ 7 + 11200 * X : ℂ[X]) ≠ 0 := by
+private lemma yablonskiiVorobievQ_four_poly_ne_zero : (X ^ 10 + 60 * X ^ 7 + 11200 * X : ℂ[X]) ≠ 0 := by
   intro h
   have := congrArg (eval 1) h
   norm_num at this
 
 /-- Nonvanishing under the stated hypotheses: `(X ^ 15 + 140 * X ^ 12 + 2800 * X ^ 9 + 78400 * X ^
 6 - 3136000 * X ^ 3 - 6272000 : ℂ[X]) ≠ 0`. -/
-private lemma b32_Q5_ne : (X ^ 15 + 140 * X ^ 12 + 2800 * X ^ 9 + 78400 * X ^ 6 - 3136000 * X ^ 3 -
+private lemma yablonskiiVorobievQ_five_poly_ne_zero : (X ^ 15 + 140 * X ^ 12 + 2800 * X ^ 9 + 78400 * X ^ 6 - 3136000 * X ^ 3 -
     6272000 : ℂ[X]) ≠ 0 := by
   intro h
   have := congrArg (eval 0) h
@@ -155,10 +181,10 @@ private lemma b32_Q5_ne : (X ^ 15 + 140 * X ^ 12 + 2800 * X ^ 9 + 78400 * X ^ 6 
 @[dlmf 32.8.E7]
 theorem yablonskiiVorobievQ_four :
     yablonskiiVorobievQ 4 = X ^ 10 + 60 * X ^ 7 + 11200 * X := by
-  apply b32_Q_step (n := 2) (by rw [yablonskiiVorobievQ_two]; exact b32_Q2_ne)
-  have h1 : derivative (X ^ 6 + 20 * X ^ 3 - 80 : ℂ[X]) = 6 * X ^ 5 + 60 * X ^ 2 := by b32_pd
-  have h2 : derivative (6 * X ^ 5 + 60 * X ^ 2 : ℂ[X]) = 30 * X ^ 4 + 120 * X := by b32_pd
-  rw [yablonskiiVorobievQ_three, yablonskiiVorobievQ_two, h1, h2, b32_C4]
+  apply yablonskiiVorobievQ_add_two_eq_of_mul (n := 2) (by rw [yablonskiiVorobievQ_two]; exact yablonskiiVorobievQ_two_poly_ne_zero)
+  have h1 : derivative (X ^ 6 + 20 * X ^ 3 - 80 : ℂ[X]) = 6 * X ^ 5 + 60 * X ^ 2 := by poly_derivative_simp
+  have h2 : derivative (6 * X ^ 5 + 60 * X ^ 2 : ℂ[X]) = 30 * X ^ 4 + 120 * X := by poly_derivative_simp
+  rw [yablonskiiVorobievQ_three, yablonskiiVorobievQ_two, h1, h2, C_four_eq]
   ring
 
 /-- DLMF 32.8.7: `Q₅(z) = z¹⁵ + 140z¹² + 2800z⁹ + 78400z⁶ - 3136000z³ - 6272000`. -/
@@ -166,12 +192,12 @@ theorem yablonskiiVorobievQ_four :
 theorem yablonskiiVorobievQ_five :
     yablonskiiVorobievQ 5 = X ^ 15 + 140 * X ^ 12 + 2800 * X ^ 9 + 78400 * X ^ 6 -
       3136000 * X ^ 3 - 6272000 := by
-  apply b32_Q_step (n := 3) (by rw [yablonskiiVorobievQ_three]; exact b32_Q3_ne)
+  apply yablonskiiVorobievQ_add_two_eq_of_mul (n := 3) (by rw [yablonskiiVorobievQ_three]; exact yablonskiiVorobievQ_three_poly_ne_zero)
   have h1 : derivative (X ^ 10 + 60 * X ^ 7 + 11200 * X : ℂ[X]) =
-      10 * X ^ 9 + 420 * X ^ 6 + 11200 := by b32_pd
+      10 * X ^ 9 + 420 * X ^ 6 + 11200 := by poly_derivative_simp
   have h2 : derivative (10 * X ^ 9 + 420 * X ^ 6 + 11200 : ℂ[X]) =
-      90 * X ^ 8 + 2520 * X ^ 5 := by b32_pd
-  rw [yablonskiiVorobievQ_four, yablonskiiVorobievQ_three, h1, h2, b32_C4]
+      90 * X ^ 8 + 2520 * X ^ 5 := by poly_derivative_simp
+  rw [yablonskiiVorobievQ_four, yablonskiiVorobievQ_three, h1, h2, C_four_eq]
   ring
 
 /-- DLMF 32.8.7: `Q₆(z) = z²¹ + 280z¹⁸ + 18480z¹⁵ + 627200z¹² - 17248000z⁹ + 1448832000z⁶ +
@@ -180,29 +206,29 @@ theorem yablonskiiVorobievQ_five :
 theorem yablonskiiVorobievQ_six :
     yablonskiiVorobievQ 6 = X ^ 21 + 280 * X ^ 18 + 18480 * X ^ 15 + 627200 * X ^ 12 -
       17248000 * X ^ 9 + 1448832000 * X ^ 6 + 19317760000 * X ^ 3 - 38635520000 := by
-  apply b32_Q_step (n := 4) (by rw [yablonskiiVorobievQ_four]; exact b32_Q4_ne)
+  apply yablonskiiVorobievQ_add_two_eq_of_mul (n := 4) (by rw [yablonskiiVorobievQ_four]; exact yablonskiiVorobievQ_four_poly_ne_zero)
   have h1 : derivative (X ^ 15 + 140 * X ^ 12 + 2800 * X ^ 9 + 78400 * X ^ 6 -
       3136000 * X ^ 3 - 6272000 : ℂ[X]) =
       15 * X ^ 14 + 1680 * X ^ 11 + 25200 * X ^ 8 + 470400 * X ^ 5 - 9408000 * X ^ 2 := by
-    b32_pd
+    poly_derivative_simp
   have h2 : derivative (15 * X ^ 14 + 1680 * X ^ 11 + 25200 * X ^ 8 + 470400 * X ^ 5 -
       9408000 * X ^ 2 : ℂ[X]) =
       210 * X ^ 13 + 18480 * X ^ 10 + 201600 * X ^ 7 + 2352000 * X ^ 4 - 18816000 * X := by
-    b32_pd
-  rw [yablonskiiVorobievQ_five, yablonskiiVorobievQ_four, h1, h2, b32_C4]
+    poly_derivative_simp
+  rw [yablonskiiVorobievQ_five, yablonskiiVorobievQ_four, h1, h2, C_four_eq]
   ring
 
 /-! ## Explicit rational solutions of `PII` (32.8.1–32.8.4) -/
 
 /-- Equality on an open set transports DLMF's `PII`. -/
-theorem b32_congr {α : ℂ} {w w' : ℂ → ℂ} {U : Set ℂ} (h : IsPainleveIIOn α w U)
+theorem isPainleveIIOn_congr {α : ℂ} {w w' : ℂ → ℂ} {U : Set ℂ} (h : IsPainleveIIOn α w U)
     (hU : IsOpen U) (he : EqOn w w' U) : IsPainleveIIOn α w' U :=
   isPainleveIIOn_iff_isPIIOn.mpr ((isPainleveIIOn_iff_isPIIOn.mp h).congr hU he)
 
 /-- A difference of logarithmic derivatives `A₁/A - B₁/B` of polynomials (with `A₁` the
 derivative of `A`, `A₂` that of `A₁`, `A₃` that of `A₂`, similarly for `B`) solves `PII` where
 `AB ≠ 0`, given the polynomial identity obtained after clearing denominators. -/
-private lemma b32_isPainleveIIOn_logDeriv {A B A1 A2 A3 B1 B2 B3 : ℂ[X]} {α : ℂ}
+private lemma isPainleveIIOn_logDeriv_sub_of_identity {A B A1 A2 A3 B1 B2 B3 : ℂ[X]} {α : ℂ}
     (hA1 : derivative A = A1) (hA2 : derivative A1 = A2) (hA3 : derivative A2 = A3)
     (hB1 : derivative B = B1) (hB2 : derivative B1 = B2) (hB3 : derivative B2 = B3)
     (H : ((A3 * B + A2 * B1 - A1 * B2 - A * B3) * (A * B) -
@@ -223,18 +249,18 @@ private lemma b32_isPainleveIIOn_logDeriv {A B A1 A2 A3 B1 B2 B3 : ℂ[X]} {α :
   have e4 : derivative (derivative q) = A2 * B + 2 * A1 * B1 + A * B2 := by
     rw [e3]; simp only [derivative_mul, derivative_add, hA1, hA2, hB1, hB2]; ring
   have hp : p = A1 * B - A * B1 := by simp only [p, hA1, hB1]
-  have h := b32_isPainleveIIOn_rationalFn (p := p) (q := q) (α := α) (by
+  have h := isPainleveIIOn_rationalFn_of_identity (p := p) (q := q) (α := α) (by
     rw [e2, e4, e1, e3, hp]; exact H)
   have hdom : polynomialDomain q = {z | A.eval z ≠ 0 ∧ B.eval z ≠ 0} := by
     ext z; simp [polynomialDomain, q, eval_mul]
   rw [hdom] at h
-  refine b32_congr h (hdom ▸ isOpen_polynomialDomain q) fun z hz => ?_
+  refine isPainleveIIOn_congr h (hdom ▸ isOpen_polynomialDomain q) fun z hz => ?_
   obtain ⟨ha, hb⟩ := hz
   simp only [rationalFn, hp, q, eval_sub, eval_mul]
   field_simp
 
 /-- The indicated domain is open: `IsOpen {z : ℂ | P.eval z ≠ 0}`. -/
-private lemma b32_isOpen_ne_poly (P : ℂ[X]) : IsOpen {z : ℂ | P.eval z ≠ 0} :=
+private lemma isOpen_setOf_eval_ne_zero (P : ℂ[X]) : IsOpen {z : ℂ | P.eval z ≠ 0} :=
   isOpen_ne_fun P.continuous continuous_const
 
 /-- DLMF 32.8.2: `w(z; 2) = 1/z - 3z²/(z³ + 4)` solves `PII` with `α = 2` where
@@ -242,14 +268,14 @@ private lemma b32_isOpen_ne_poly (P : ℂ[X]) : IsOpen {z : ℂ | P.eval z ≠ 0
 @[dlmf 32.8.E2]
 theorem painleveII_rational_two :
     IsPainleveIIOn 2 (fun z => 1 / z - 3 * z ^ 2 / (z ^ 3 + 4)) {z | z ≠ 0 ∧ z ^ 3 + 4 ≠ 0} := by
-  have h := b32_isPainleveIIOn_logDeriv (α := 2) (A := X) (B := X ^ 3 + 4) (A1 := 1) (A2 := 0)
-    (A3 := 0) (B1 := 3 * X ^ 2) (B2 := 6 * X) (B3 := 6) (by b32_pd) (by b32_pd) (by b32_pd)
-    (by b32_pd) (by b32_pd) (by b32_pd) (by rw [show (C 2 : ℂ[X]) = 2 from rfl]; ring)
+  have h := isPainleveIIOn_logDeriv_sub_of_identity (α := 2) (A := X) (B := X ^ 3 + 4) (A1 := 1) (A2 := 0)
+    (A3 := 0) (B1 := 3 * X ^ 2) (B2 := 6 * X) (B3 := 6) (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp)
+    (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp) (by rw [show (C 2 : ℂ[X]) = 2 from rfl]; ring)
   have hs : {z : ℂ | (X : ℂ[X]).eval z ≠ 0 ∧ (X ^ 3 + 4 : ℂ[X]).eval z ≠ 0} =
       {z | z ≠ 0 ∧ z ^ 3 + 4 ≠ 0} := by ext z; simp
   rw [hs] at h
-  refine b32_congr h ?_ fun z _ => ?_
-  · rw [← hs]; exact (b32_isOpen_ne_poly _).inter (b32_isOpen_ne_poly _)
+  refine isPainleveIIOn_congr h ?_ fun z _ => ?_
+  · rw [← hs]; exact (isOpen_setOf_eval_ne_zero _).inter (isOpen_setOf_eval_ne_zero _)
   · simp
 
 /-- DLMF 32.8.3: `w(z; 3) = 3z²/(z³ + 4) - 6z²(z³ + 10)/(z⁶ + 20z³ - 80)` solves `PII` with
@@ -259,16 +285,16 @@ theorem painleveII_rational_three :
     IsPainleveIIOn 3 (fun z => 3 * z ^ 2 / (z ^ 3 + 4) -
         6 * z ^ 2 * (z ^ 3 + 10) / (z ^ 6 + 20 * z ^ 3 - 80))
       {z | z ^ 3 + 4 ≠ 0 ∧ z ^ 6 + 20 * z ^ 3 - 80 ≠ 0} := by
-  have h := b32_isPainleveIIOn_logDeriv (α := 3) (A := X ^ 3 + 4) (B := X ^ 6 + 20 * X ^ 3 - 80)
+  have h := isPainleveIIOn_logDeriv_sub_of_identity (α := 3) (A := X ^ 3 + 4) (B := X ^ 6 + 20 * X ^ 3 - 80)
     (A1 := 3 * X ^ 2) (A2 := 6 * X) (A3 := 6) (B1 := 6 * X ^ 5 + 60 * X ^ 2)
-    (B2 := 30 * X ^ 4 + 120 * X) (B3 := 120 * X ^ 3 + 120) (by b32_pd) (by b32_pd) (by b32_pd)
-    (by b32_pd) (by b32_pd) (by b32_pd) (by rw [show (C 3 : ℂ[X]) = 3 from rfl]; ring)
+    (B2 := 30 * X ^ 4 + 120 * X) (B3 := 120 * X ^ 3 + 120) (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp)
+    (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp) (by rw [show (C 3 : ℂ[X]) = 3 from rfl]; ring)
   have hs : {z : ℂ | (X ^ 3 + 4 : ℂ[X]).eval z ≠ 0 ∧
       (X ^ 6 + 20 * X ^ 3 - 80 : ℂ[X]).eval z ≠ 0} =
       {z | z ^ 3 + 4 ≠ 0 ∧ z ^ 6 + 20 * z ^ 3 - 80 ≠ 0} := by ext z; simp
   rw [hs] at h
-  refine b32_congr h ?_ fun z _ => ?_
-  · rw [← hs]; exact (b32_isOpen_ne_poly _).inter (b32_isOpen_ne_poly _)
+  refine isPainleveIIOn_congr h ?_ fun z _ => ?_
+  · rw [← hs]; exact (isOpen_setOf_eval_ne_zero _).inter (isOpen_setOf_eval_ne_zero _)
   · simp only [eval_add, eval_mul, eval_pow, eval_X, eval_ofNat, eval_sub]
     ring
 
@@ -279,12 +305,12 @@ theorem painleveII_rational_four :
     IsPainleveIIOn 4 (fun z => -1 / z + 6 * z ^ 2 * (z ^ 3 + 10) / (z ^ 6 + 20 * z ^ 3 - 80) -
         9 * z ^ 5 * (z ^ 3 + 40) / (z ^ 9 + 60 * z ^ 6 + 11200))
       {z | z ≠ 0 ∧ z ^ 6 + 20 * z ^ 3 - 80 ≠ 0 ∧ z ^ 9 + 60 * z ^ 6 + 11200 ≠ 0} := by
-  have h := b32_isPainleveIIOn_logDeriv (α := 4) (A := X ^ 6 + 20 * X ^ 3 - 80)
+  have h := isPainleveIIOn_logDeriv_sub_of_identity (α := 4) (A := X ^ 6 + 20 * X ^ 3 - 80)
     (B := X ^ 10 + 60 * X ^ 7 + 11200 * X)
     (A1 := 6 * X ^ 5 + 60 * X ^ 2) (A2 := 30 * X ^ 4 + 120 * X) (A3 := 120 * X ^ 3 + 120)
     (B1 := 10 * X ^ 9 + 420 * X ^ 6 + 11200) (B2 := 90 * X ^ 8 + 2520 * X ^ 5)
-    (B3 := 720 * X ^ 7 + 12600 * X ^ 4) (by b32_pd) (by b32_pd) (by b32_pd)
-    (by b32_pd) (by b32_pd) (by b32_pd) (by rw [show (C 4 : ℂ[X]) = 4 from rfl]; ring)
+    (B3 := 720 * X ^ 7 + 12600 * X ^ 4) (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp)
+    (by poly_derivative_simp) (by poly_derivative_simp) (by poly_derivative_simp) (by rw [show (C 4 : ℂ[X]) = 4 from rfl]; ring)
   have hs : {z : ℂ | (X ^ 6 + 20 * X ^ 3 - 80 : ℂ[X]).eval z ≠ 0 ∧
       (X ^ 10 + 60 * X ^ 7 + 11200 * X : ℂ[X]).eval z ≠ 0} =
       {z | z ≠ 0 ∧ z ^ 6 + 20 * z ^ 3 - 80 ≠ 0 ∧ z ^ 9 + 60 * z ^ 6 + 11200 ≠ 0} := by
@@ -294,8 +320,8 @@ theorem painleveII_rational_four :
     rw [this, mul_ne_zero_iff]
     tauto
   rw [hs] at h
-  refine b32_congr h ?_ fun z hz => ?_
-  · rw [← hs]; exact (b32_isOpen_ne_poly _).inter (b32_isOpen_ne_poly _)
+  refine isPainleveIIOn_congr h ?_ fun z hz => ?_
+  · rw [← hs]; exact (isOpen_setOf_eval_ne_zero _).inter (isOpen_setOf_eval_ne_zero _)
   · obtain ⟨h0, h1, h2⟩ := hz
     have h3 : z ^ 10 + 60 * z ^ 7 + 11200 * z ≠ 0 := by
       rw [show z ^ 10 + 60 * z ^ 7 + 11200 * z = z * (z ^ 9 + 60 * z ^ 6 + 11200) by ring]
@@ -309,7 +335,7 @@ theorem painleveII_rational_four :
 
 /-- A nonzero polynomial with only simple zeros divides every nonzero polynomial vanishing at
 its zeros. -/
-lemma p3b_dvd_of_simple {v N : ℂ[X]} (hv : v ≠ 0)
+private lemma dvd_of_roots_simple {v N : ℂ[X]} (hv : v ≠ 0)
     (hs : ∀ c, v.eval c = 0 → (derivative v).eval c ≠ 0) (hN0 : N ≠ 0)
     (h : ∀ c, v.eval c = 0 → N.eval c = 0) : v ∣ N := by
   classical
@@ -327,7 +353,7 @@ lemma p3b_dvd_of_simple {v N : ℂ[X]} (hv : v ≠ 0)
 
 /-- A nonzero solution `f` of the bilinear equation `D²(f·g) = 0` has only simple zeros
 away from the zeros of `g`. -/
-lemma p3b_simple_of_D2 {f g : ℂ[X]} (hf : f ≠ 0) {c : ℂ} (hg : g.eval c ≠ 0)
+private lemma eval_derivative_ne_zero_of_bilinear {f g : ℂ[X]} (hf : f ≠ 0) {c : ℂ} (hg : g.eval c ≠ 0)
     (hD : derivative (derivative f) * g - 2 * derivative f * derivative g +
       f * derivative (derivative g) = 0) (h0 : f.eval c = 0) :
     (derivative f).eval c ≠ 0 := by
@@ -362,7 +388,7 @@ lemma p3b_simple_of_D2 {f g : ℂ[X]} (hf : f ≠ 0) {c : ℂ} (hg : g.eval c �
   omega
 /-- The bilinear equations propagate through one step of the Yablonskii–Vorob'ev recurrence:
 with jets of `u`, `v`, `s` and `s v = z u² - 4 u u'' + 4 u'²`. -/
-lemma p3b_step {u u1 u2 u3 u4 u5 v v1 v2 v3 v4 s s1 s2 s3 : ℂ[X]} {α : ℂ}
+private lemma yablonskiiVorobiev_bilinear_step {u u1 u2 u3 u4 u5 v v1 v2 v3 v4 s s1 s2 s3 : ℂ[X]} {α : ℂ}
     (hu1 : derivative u = u1) (hu2 : derivative u1 = u2) (hu3 : derivative u2 = u3)
     (hu4 : derivative u3 = u4) (hu5 : derivative u4 = u5)
     (hv1 : derivative v = v1) (hv2 : derivative v1 = v2) (hv3 : derivative v2 = v3)
@@ -413,7 +439,7 @@ lemma p3b_step {u u1 u2 u3 u4 u5 v v1 v2 v3 v4 s s1 s2 s3 : ℂ[X]} {α : ℂ}
     exact sub_eq_zero.mp ((mul_eq_zero.mp h).resolve_left (pow_ne_zero 4 hv))
 
 /-- One step of the Yablonskii–Vorob'ev recurrence on the bilinear invariant. -/
-lemma p3b_step_full {u v : ℂ[X]} {α : ℂ} (hv : v.Monic) (hu : u.Monic)
+private lemma yablonskiiVorobiev_invariant_step {u v : ℂ[X]} {α : ℂ} (hv : v.Monic) (hu : u.Monic)
     (hsv : ∀ c, v.eval c = 0 → (derivative v).eval c ≠ 0)
     (hsu : ∀ c, u.eval c = 0 → (derivative u).eval c ≠ 0)
     (hD : derivative (derivative u) * v - 2 * derivative u * derivative v +
@@ -456,7 +482,7 @@ lemma p3b_step_full {u v : ℂ[X]} {α : ℂ} (hv : v.Monic) (hu : u.Monic)
     omega
   -- exactness: `v ∣ N`
   have hdvd : v ∣ N := by
-    refine p3b_dvd_of_simple hv.ne_zero hsv hNm.ne_zero fun c hc => ?_
+    refine dvd_of_roots_simple hv.ne_zero hsv hNm.ne_zero fun c hc => ?_
     have hD1 := congrArg derivative hD
     simp only [derivative_mul, derivative_add, derivative_sub, derivative_ofNat, derivative_zero,
       zero_mul, zero_add] at hD1
@@ -478,7 +504,7 @@ lemma p3b_step_full {u v : ℂ[X]} {α : ℂ} (hv : v.Monic) (hu : u.Monic)
     have : N = v * s := hs
     simp only [N, h4] at this
     linear_combination -this
-  obtain ⟨hD', hE'⟩ := p3b_step (u := u) (v := v) (s := s) rfl rfl rfl rfl rfl rfl rfl rfl rfl
+  obtain ⟨hD', hE'⟩ := yablonskiiVorobiev_bilinear_step (u := u) (v := v) (s := s) rfl rfl rfl rfl rfl rfl rfl rfl rfl
     rfl rfl rfl hv.ne_zero hR hD hE
   refine ⟨by rw [mul_comm]; exact hs.symm, hsm, fun c hc => ?_, hD', hE'⟩
   by_cases huc : u.eval c = 0
@@ -486,10 +512,10 @@ lemma p3b_step_full {u v : ℂ[X]} {α : ℂ} (hv : v.Monic) (hu : u.Monic)
     simp only [eval_mul, eval_add, eval_sub, eval_pow, eval_X, eval_ofNat, hc, huc] at e
     have : (derivative u).eval c ^ 2 = 0 := by linear_combination -e / 4
     exact absurd (pow_eq_zero_iff two_ne_zero |>.mp this) (hsu c huc)
-  · exact p3b_simple_of_D2 hsm.ne_zero huc hD' hc
+  · exact eval_derivative_ne_zero_of_bilinear hsm.ne_zero huc hD' hc
 
 /-- The bilinear invariant of the Yablonskii–Vorob'ev polynomials. -/
-lemma p3b_YV (n : ℕ) :
+private lemma yablonskiiVorobievQ_bilinear (n : ℕ) :
     (yablonskiiVorobievQ n).Monic ∧ (yablonskiiVorobievQ (n + 1)).Monic ∧
       (∀ c, (yablonskiiVorobievQ n).eval c = 0 →
         (derivative (yablonskiiVorobievQ n)).eval c ≠ 0) ∧
@@ -516,7 +542,7 @@ lemma p3b_YV (n : ℕ) :
     simp
   | succ n ih =>
     obtain ⟨hv, hu, hsv, hsu, hD, hE⟩ := ih
-    obtain ⟨-, hm, hs, hD', hE'⟩ := p3b_step_full hv hu hsv hsu hD hE
+    obtain ⟨-, hm, hs, hD', hE'⟩ := yablonskiiVorobiev_invariant_step hv hu hsv hsu hD hE
     have hQ : yablonskiiVorobievQ (n + 1 + 1) = (X * yablonskiiVorobievQ (n + 1) ^ 2 +
         C 4 * (derivative (yablonskiiVorobievQ (n + 1))) ^ 2 -
         C 4 * yablonskiiVorobievQ (n + 1) *
@@ -531,7 +557,7 @@ lemma p3b_YV (n : ℕ) :
 
 /-- DLMF 32.8.6: the division in the recurrence is exact, `Q_{n+1}Q_{n-1} = zQ_n² + 4(Q_n')² -
 4Q_nQ_n''` for `n ≥ 1` (here with `n + 1` in place of `n`), and every `Q_n` is monic.
-Proved from the bilinear invariant `p3b_YV`. -/
+Proved from the bilinear invariant `yablonskiiVorobievQ_bilinear`. -/
 @[dlmf 32.8.E6]
 theorem yablonskiiVorobievQ_recurrence (n : ℕ) :
     yablonskiiVorobievQ (n + 2) * yablonskiiVorobievQ n =
@@ -540,8 +566,8 @@ theorem yablonskiiVorobievQ_recurrence (n : ℕ) :
           C 4 * yablonskiiVorobievQ (n + 1) *
             derivative (derivative (yablonskiiVorobievQ (n + 1))) ∧
       (yablonskiiVorobievQ (n + 2)).Monic := by
-  obtain ⟨hv, hu, hsv, hsu, hD, hE⟩ := p3b_YV n
-  obtain ⟨h1, hm, -⟩ := p3b_step_full hv hu hsv hsu hD hE
+  obtain ⟨hv, hu, hsv, hsu, hD, hE⟩ := yablonskiiVorobievQ_bilinear n
+  obtain ⟨h1, hm, -⟩ := yablonskiiVorobiev_invariant_step hv hu hsv hsu hD hE
   have hQ : yablonskiiVorobievQ (n + 2) = (X * yablonskiiVorobievQ (n + 1) ^ 2 +
       C 4 * (derivative (yablonskiiVorobievQ (n + 1))) ^ 2 -
       C 4 * yablonskiiVorobievQ (n + 1) *
@@ -559,10 +585,10 @@ theorem rationalPainleveII_isPainleveIIOn (n : ℕ) (hn : 1 ≤ n) :
     IsPainleveIIOn (n : ℂ) (rationalPainleveII n)
       {z | (yablonskiiVorobievQ (n - 1)).eval z ≠ 0 ∧ (yablonskiiVorobievQ n).eval z ≠ 0} := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  obtain ⟨-, -, -, -, hD, hE⟩ := p3b_YV m
+  obtain ⟨-, -, -, -, hD, hE⟩ := yablonskiiVorobievQ_bilinear m
   set v := yablonskiiVorobievQ m
   set u := yablonskiiVorobievQ (m + 1)
-  have h := b32_isPainleveIIOn_logDeriv (α := (m : ℂ) + 1) (A := v) (B := u) rfl rfl rfl rfl rfl
+  have h := isPainleveIIOn_logDeriv_sub_of_identity (α := (m : ℂ) + 1) (A := v) (B := u) rfl rfl rfl rfl rfl
     rfl (by
       linear_combination (-3 * v * derivative v * u ^ 2 + 3 * u * derivative u * v ^ 2) * hD +
         (u ^ 2 * v ^ 2) * hE)
@@ -584,7 +610,7 @@ theorem rationalPainleveII_isPainleveIIOn_int (n : ℤ) :
         (yablonskiiVorobievQ n.natAbs).eval z ≠ 0} := by
   rcases lt_trichotomy n 0 with hn | rfl | hn
   · obtain ⟨m, rfl⟩ : ∃ m : ℕ, n = -((m : ℤ) + 1) := ⟨(-n - 1).toNat, by omega⟩
-    have h := b32_isPainleveIIOn_neg (rationalPainleveII_isPainleveIIOn (m + 1) (by omega))
+    have h := isPainleveIIOn_neg (rationalPainleveII_isPainleveIIOn (m + 1) (by omega))
     have habs : (-((m : ℤ) + 1)).natAbs = m + 1 := by omega
     rw [habs]
     convert h using 1
@@ -781,7 +807,7 @@ theorem painleveIV_rational_neg_inv {U : Set ℂ} (hU : IsOpen U) (h0 : ∀ z �
 
 /-- A linear function `w = cz` solves `PIV` with `α = 0` and `β = -2c²(1 + c)(2 + 3c)/…`;
 we only need the two cases of DLMF 32.8.17–32.8.18. -/
-private lemma b32_painleveIV_linear {c α β : ℂ} {U : Set ℂ} (hU : IsOpen U) (hc : c ≠ 0)
+private lemma isPainleveIVOn_const_mul {c α β : ℂ} {U : Set ℂ} (hU : IsOpen U) (hc : c ≠ 0)
     (h0 : ∀ z ∈ U, z ≠ 0)
     (H : ∀ z : ℂ, z ≠ 0 → (0 : ℂ) = painleveIVRhs α β z (c * z) c) :
     IsPainleveIVOn α β (fun z => c * z) U :=
@@ -794,7 +820,7 @@ private lemma b32_painleveIV_linear {c α β : ℂ} {U : Set ℂ} (hU : IsOpen U
 @[dlmf 32.8.E17]
 theorem painleveIV_rational_neg_two_mul {U : Set ℂ} (hU : IsOpen U) (h0 : ∀ z ∈ U, z ≠ 0) :
     IsPainleveIVOn 0 (-2) (fun z => -2 * z) U :=
-  b32_painleveIV_linear hU (by norm_num) h0 fun z hz => by
+  isPainleveIVOn_const_mul hU (by norm_num) h0 fun z hz => by
     simp only [painleveIVRhs]; field_simp; ring
 
 /-- DLMF 32.8.18: `w₃ = -(2/3)z` solves `PIV` with `(α, β) = (0, -2/9)` for `z ≠ 0`. -/
@@ -802,7 +828,7 @@ theorem painleveIV_rational_neg_two_mul {U : Set ℂ} (hU : IsOpen U) (h0 : ∀ 
 theorem painleveIV_rational_neg_two_thirds_mul {U : Set ℂ} (hU : IsOpen U)
     (h0 : ∀ z ∈ U, z ≠ 0) :
     IsPainleveIVOn 0 (-2 / 9) (fun z => -2 / 3 * z) U :=
-  b32_painleveIV_linear hU (by norm_num) h0 fun z hz => by
+  isPainleveIVOn_const_mul hU (by norm_num) h0 fun z hz => by
     simp only [painleveIVRhs]; field_simp; ring
 
 /-- DLMF 32.8.19–32.8.21: every rational solution of `PIV` belongs to one of three families,

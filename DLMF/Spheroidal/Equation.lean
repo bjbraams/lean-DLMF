@@ -11,16 +11,27 @@ public import DLMF.Legendre.ZeroTools
 /-!
 # The spheroidal differential equation (DLMF §30.2, §30.3(i), §30.12)
 
-Statement acquisition from NIST DLMF (version 1.2.8), checked 2026-10-26. Admitted statements
-are not completed proofs; see `DLMF30Acquisition.md`.
+This file proves the basic properties of the spheroidal equation 30.2.1: its singularities,
+its transformed forms, its special cases, the characterization of bounded solutions through
+the factor equation, and the reduction of the generalized equations.
 
-* §30.2(i): the singularities of 30.2.1 (regular at `±1` with exponents `±μ/2`, irregular of
-  rank 1 at `∞`), stated through the indicial equation at `z = 1`;
-* §30.2(ii): the Liouville normal form 30.2.2 under 30.2.3, and the form 30.2.4 in `ζ = γz`;
-* §30.2(iii): the special cases `γ = 0` (associated Legendre equation 14.2.2, spherical Bessel
-  equation 10.47.1) and `μ² = 1/4` (Mathieu's equation 28.2.1);
-* §30.3(i): `(1-z²)^{m/2} g(z)` solves 30.2.1 with `μ = m` iff `g` solves the factor equation;
-* §30.12: the generalized equations 30.12.1 and 30.12.2 reduce to 30.2.1 at `α = 0` (proved).
+## Main results
+
+* `spheroidal_indicial_exponents`, `spheroidal_irregular_infinity`: the regular singularity at
+  `z = 1` with exponents `±μ/2`, through the indicial equation, and the irregular singularity
+  of rank 1 at `∞` (§30.2(i)).
+* `isSpheroidalLiouvilleSolution_of_isSpheroidalSolutionOn`: the Liouville normal form 30.2.2
+  under 30.2.3.
+* `isSpheroidalZetaSolution_of_isSpheroidalSolutionOn`: the form 30.2.4 in `ζ = γz`.
+* `isSpheroidalSolutionReal_ferrersP`, `isSpheroidalZetaSolution_sphericalJ`: the case `γ = 0`
+  (the associated Legendre equation 14.2.2 and the spherical Bessel equation 10.47.1).
+* `spheroidalLiouville_coeff_mathieu`, `IsSpheroidalLiouvilleSolution.mathieu`: the case
+  `μ² = 1/4` (Mathieu's equation 28.2.1).
+* `isSpheroidalSolutionReal_iff_isSpheroidalFactor`, `exists_bounded_iff_mem_spheroidalSpectrum`:
+  `(1-z²)^{m/2} g(z)` solves 30.2.1 with `μ = m` iff `g` solves the factor equation, and bounded
+  solutions exist exactly on the spectrum (§30.3(i)).
+* `isGenSpheroidalSolutionOn_zero_iff`, `isSpheroidalSolutionOn₂_zero_iff`: the generalized
+  equations 30.12.1 and 30.12.2 reduce to 30.2.1 at `α = 0`.
 -/
 
 @[expose] public noncomputable section
@@ -34,7 +45,7 @@ namespace DLMF.Spheroidal
 
 /-- Identity under the stated parameter and domain assumptions: `z * ((n : ℂ) * z ^ (n - 1)) = n *
 z ^ n`. -/
-private lemma p1s_pow_deriv_aux (n : ℕ) (z : ℂ) :
+private lemma mul_natCast_mul_pow_sub_one (n : ℕ) (z : ℂ) :
     z * ((n : ℂ) * z ^ (n - 1)) = n * z ^ n := by
   rcases n with _ | n
   · simp
@@ -42,7 +53,7 @@ private lemma p1s_pow_deriv_aux (n : ℕ) (z : ℂ) :
 
 /-- Identity under the stated parameter and domain assumptions: `z ^ 2 * ((n : ℂ) * (((n - 1 : ℕ)
 : ℂ) * z ^ (n - 1 - 1))) = n * (n - 1) * z ^ n`. -/
-private lemma p1s_pow_deriv2_aux (n : ℕ) (z : ℂ) :
+private lemma sq_mul_natCast_mul_pow_sub_two (n : ℕ) (z : ℂ) :
     z ^ 2 * ((n : ℂ) * (((n - 1 : ℕ) : ℂ) * z ^ (n - 1 - 1))) = n * (n - 1) * z ^ n := by
   rcases n with _ | _ | n
   · simp
@@ -51,7 +62,7 @@ private lemma p1s_pow_deriv2_aux (n : ℕ) (z : ℂ) :
 
 /-- On an open set avoiding `±1`, a solution of 30.2.1 has a differentiable derivative, with
 `(1-z²) w'' = 2z w' - (λ + γ²(1-z²) - μ²/(1-z²)) w`. -/
-lemma p1s_hasDerivAt_deriv {lam γ2 μ : ℂ} {U : Set ℂ} {w : ℂ → ℂ} (hU : IsOpen U)
+private lemma isSpheroidalSolutionOn_hasDerivAt_deriv {lam γ2 μ : ℂ} {U : Set ℂ} {w : ℂ → ℂ} (hU : IsOpen U)
     (hU1 : ∀ z ∈ U, 1 - z ^ 2 ≠ 0) (hw : IsSpheroidalSolutionOn lam γ2 μ U w) {z : ℂ}
     (hz : z ∈ U) :
     HasDerivAt (deriv w) ((2 * z * deriv w z -
@@ -68,7 +79,7 @@ lemma p1s_hasDerivAt_deriv {lam γ2 μ : ℂ} {U : Set ℂ} {w : ℂ → ℂ} (h
   ring
 
 /-- Derivative of `(1-x²)^{m/2}` on `(-1, 1)`. -/
-theorem p1s_hasDerivAt_weight (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+theorem hasDerivAt_one_sub_sq_rpow_half (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     HasDerivAt (fun x : ℝ => (1 - x ^ 2) ^ ((m : ℝ) / 2))
       (-((m : ℝ) * x) / (1 - x ^ 2) * (1 - x ^ 2) ^ ((m : ℝ) / 2)) x := by
   have hpos : 0 < 1 - x ^ 2 := by nlinarith [hx.1, hx.2]
@@ -79,16 +90,16 @@ theorem p1s_hasDerivAt_weight (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) 
   field_simp
 
 /-- For entire `g`, the real part along `ℝ` has derivative `(g' x).re`. -/
-theorem p1s_hasDerivAt_re {g : ℂ → ℂ} (hg : Differentiable ℂ g) (x : ℝ) :
+theorem hasDerivAt_re_comp_ofReal {g : ℂ → ℂ} (hg : Differentiable ℂ g) (x : ℝ) :
     HasDerivAt (fun t : ℝ => (g t).re) (deriv g x).re x :=
   (hg x).hasDerivAt.real_of_complex
 
 /-- The derivative of an entire function is entire. -/
-theorem p1s_differentiable_deriv {g : ℂ → ℂ} (hg : Differentiable ℂ g) :
+theorem differentiable_deriv_of_differentiable {g : ℂ → ℂ} (hg : Differentiable ℂ g) :
     Differentiable ℂ (deriv g) := fun z => ((hg.analyticAt z).deriv).differentiableAt
 
 /-- An entire function real on `ℝ` has real derivative on `ℝ`. -/
-lemma p1s_deriv_im_eq_zero {g : ℂ → ℂ} (hg : Differentiable ℂ g)
+private lemma im_deriv_ofReal_eq_zero {g : ℂ → ℂ} (hg : Differentiable ℂ g)
     (hreal : ∀ x : ℝ, (g x).im = 0) (x : ℝ) : (deriv g x).im = 0 := by
   have h1 : HasDerivAt (fun t : ℝ => (g t).im) (deriv g x).im x := by
     have := (hg x).hasDerivAt
@@ -99,7 +110,7 @@ lemma p1s_deriv_im_eq_zero {g : ℂ → ℂ} (hg : Differentiable ℂ g)
   exact h1.unique h0
 
 /-- An entire function vanishing on `(-1, 1)` vanishes identically. -/
-theorem p1s_eq_zero_of_Ioo {F : ℂ → ℂ} (hF : Differentiable ℂ F)
+theorem eq_zero_of_eqOn_Ioo_neg_one_one {F : ℂ → ℂ} (hF : Differentiable ℂ F)
     (h0 : ∀ x ∈ Ioo (-1 : ℝ) 1, F x = 0) : ∀ z, F z = 0 := by
   have hA : AnalyticOnNhd ℂ F univ := fun z _ => hF.analyticAt z
   have hfr : ∃ᶠ z in 𝓝[≠] (0 : ℂ), F z = 0 := by
@@ -118,7 +129,7 @@ theorem p1s_eq_zero_of_Ioo {F : ℂ → ℂ} (hF : Differentiable ℂ F)
 
 /-- Identity under the stated parameter and domain assumptions: `IsSpheroidalSolutionOn lam γ2 m U
 (fun z => h z * g z)`. -/
-theorem p1s_isSpheroidalSolutionOn_mul_factor {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ}
+theorem isSpheroidalSolutionOn_mul_of_isSpheroidalFactor {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ}
     (hF : IsSpheroidalFactor m γ2 lam g) {U : Set ℂ} (hU : IsOpen U)
     (hU1 : ∀ z ∈ U, 1 - z ^ 2 ≠ 0) {h : ℂ → ℂ}
     (hh : ∀ z ∈ U, HasDerivAt h (-((m : ℂ) * z) / (1 - z ^ 2) * h z) z) :
@@ -229,7 +240,7 @@ theorem isSpheroidalLiouvilleSolution_of_isSpheroidalSolutionOn {lam γ2 μ : �
         (2 * Complex.sin t) ^ 2) t :=
     (Complex.hasDerivAt_cos t).div ((Complex.hasDerivAt_sin t).const_mul 2)
       (mul_ne_zero two_ne_zero (hs0 t ht))
-  have hW2 := (p1s_hasDerivAt_deriv hU' hU1 hw' (hTU' t ht)).comp t (Complex.hasDerivAt_cos t)
+  have hW2 := (isSpheroidalSolutionOn_hasDerivAt_deriv hU' hU1 hw' (hTU' t ht)).comp t (Complex.hasDerivAt_cos t)
   have hall := (hS t ht).mul ((hq.mul (hW t ht)).add (hW2.mul (Complex.hasDerivAt_sin t).neg))
   refine (hall.congr_of_eventuallyEq hev).congr_deriv ?_
   have hc : Complex.cos t ^ 2 = 1 - Complex.sin t ^ 2 := by
@@ -265,7 +276,7 @@ theorem isSpheroidalZetaSolution_of_isSpheroidalSolutionOn {lam μ γ : ℂ} {U 
         μ ^ 2 / (1 - (ζ / γ) ^ 2)) * w (ζ / γ)) / (1 - (ζ / γ) ^ 2)) * γ⁻¹)) ζ := by
     rintro ζ ⟨z, hz, rfl⟩
     have : γ * z / γ = z := by field_simp
-    have h1 := p1s_hasDerivAt_deriv hU hU1 hw hz
+    have h1 := isSpheroidalSolutionOn_hasDerivAt_deriv hU hU1 hw hz
     rw [← this] at h1
     rw [hD]
     exact (h1.comp (γ * z) (hlin _)).const_mul _
@@ -377,8 +388,8 @@ theorem isSpheroidalZetaSolution_sphericalJ (n : ℕ) (μ : ℂ) :
   have e : deriv (F 1) = F 2 := by
     funext w; exact (hF 1 w).deriv
   rw [e0, e] at hode
-  have a1 := p1s_pow_deriv_aux n z
-  have a2 := p1s_pow_deriv2_aux n z
+  have a1 := mul_natCast_mul_pow_sub_one n z
+  have a2 := sq_mul_natCast_mul_pow_sub_two n z
   have hF0 : regularizedHGFun (∅ : Multiset ℂ) {b} = F 0 := by simp [F]
   rw [hF0] at hode
   simp only [sub_zero, zero_mul, zero_div]
@@ -395,16 +406,16 @@ theorem isSpheroidalSolutionReal_iff_isSpheroidalFactor {m : ℕ} {γ2 lam : ℝ
     (hg : Differentiable ℂ g) (hreal : ∀ x : ℝ, (g x).im = 0) :
     IsSpheroidalSolutionReal lam γ2 m (fun x => (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re) ↔
       IsSpheroidalFactor m γ2 lam g := by
-  have hg1 := p1s_differentiable_deriv hg
+  have hg1 := differentiable_deriv_of_differentiable hg
   set h : ℝ → ℝ := fun x => (1 - x ^ 2) ^ ((m : ℝ) / 2)
   set G : ℝ → ℝ := fun x => (g x).re
   set G1 : ℝ → ℝ := fun x => (deriv g x).re
   set G2 : ℝ → ℝ := fun x => (deriv (deriv g) x).re
-  have hG : ∀ x, HasDerivAt G (G1 x) x := p1s_hasDerivAt_re hg
-  have hG1 : ∀ x, HasDerivAt G1 (G2 x) x := p1s_hasDerivAt_re hg1
+  have hG : ∀ x, HasDerivAt G (G1 x) x := hasDerivAt_re_comp_ofReal hg
+  have hG1 : ∀ x, HasDerivAt G1 (G2 x) x := hasDerivAt_re_comp_ofReal hg1
   have hf : ∀ x ∈ Ioo (-1 : ℝ) 1, HasDerivAt (fun x => h x * G x)
       (-((m : ℝ) * x) / (1 - x ^ 2) * h x * G x + h x * G1 x) x :=
-    fun x hx => (p1s_hasDerivAt_weight m hx).mul (hG x)
+    fun x hx => (hasDerivAt_one_sub_sq_rpow_half m hx).mul (hG x)
   -- the flux `(1-x²) f'` and its derivative
   have hev : ∀ x ∈ Ioo (-1 : ℝ) 1, (fun t => (1 - t ^ 2) * deriv (fun x => h x * G x) t) =ᶠ[𝓝 x]
       fun t => h t * ((1 - t ^ 2) * G1 t - m * t * G t) := by
@@ -423,7 +434,7 @@ theorem isSpheroidalSolutionReal_iff_isSpheroidalFactor {m : ℕ} {γ2 lam : ℝ
       simpa using ((hasDerivAt_pow 2 x).const_sub 1)
     have hl : HasDerivAt (fun t : ℝ => (m : ℝ) * t) m x := by
       simpa using (hasDerivAt_id x).const_mul (m : ℝ)
-    have := (p1s_hasDerivAt_weight m hx).mul ((hq.mul (hG1 x)).sub (hl.mul (hG x)))
+    have := (hasDerivAt_one_sub_sq_rpow_half m hx).mul ((hq.mul (hG1 x)).sub (hl.mul (hG x)))
     refine ((this.congr_of_eventuallyEq (hev x hx))).congr_deriv ?_
     have : 1 - x ^ 2 ≠ 0 := by nlinarith [hx.1, hx.2]
     simp only [Pi.mul_apply, Pi.sub_apply]
@@ -437,10 +448,10 @@ theorem isSpheroidalSolutionReal_iff_isSpheroidalFactor {m : ℕ} {γ2 lam : ℝ
     intro x
     have e0 : g x = (G x : ℂ) := Complex.ext (by simp [G]) (by simp [hreal])
     have e1 : deriv g x = (G1 x : ℂ) :=
-      Complex.ext (by simp [G1]) (by simp [p1s_deriv_im_eq_zero hg hreal])
+      Complex.ext (by simp [G1]) (by simp [im_deriv_ofReal_eq_zero hg hreal])
     have e2 : deriv (deriv g) x = (G2 x : ℂ) :=
-      Complex.ext (by simp [G2]) (by simp [p1s_deriv_im_eq_zero hg1
-        (p1s_deriv_im_eq_zero hg hreal)])
+      Complex.ext (by simp [G2]) (by simp [im_deriv_ofReal_eq_zero hg1
+        (im_deriv_ofReal_eq_zero hg hreal)])
     simp only [Φ, e0, e1, e2]
     push_cast; ring
   have key : ∀ x ∈ Ioo (-1 : ℝ) 1,
@@ -455,7 +466,7 @@ theorem isSpheroidalSolutionReal_iff_isSpheroidalFactor {m : ℕ} {γ2 lam : ℝ
     ring
   constructor
   · intro hs
-    refine ⟨hg, p1s_eq_zero_of_Ioo ?_ fun x hx => ?_⟩
+    refine ⟨hg, eq_zero_of_eqOn_Ioo_neg_one_one ?_ fun x hx => ?_⟩
     · exact ((((differentiable_const _).sub (differentiable_id.pow 2)).mul hg1.deriv) |>.sub
         (((differentiable_const _).mul differentiable_id).mul hg1)).add
         (((differentiable_const _).add ((differentiable_const _).mul

@@ -10,19 +10,37 @@ public import DLMFMathlib.Analysis.Complex.BarnesResidue
 public import TauCeti.Analysis.Contour.Residue.Basic
 
 /-!
-# Generalized hypergeometric asymptotics: DLMF §16.11
+# Asymptotic expansions of `ₚF_q` (DLMF §16.11)
 
-All powers are evaluated on a specified logarithm sheet. Thus the two formal
-exponential series at phases w±πi are not collapsed by principal argument reduction.
-Algebraic terms are Barnes residues, deduplicated at resonant poles; multiple poles
-automatically retain the logarithmic terms mentioned in the source. The printed
-coefficient recurrence is continued through repeated lower parameters by a specified
-limit. Formal E/H series are coefficient families, never asserted convergent except
-where DLMF explicitly claims convergence (p=q+1, |z|>1).
+## Main definitions
 
-The finite coefficient recurrence uses Mathlib continuity of finite sums and products
-and uniqueness of punctured limits. Residues are the proved pinned TauCeti API
-(authors and origin retained upstream).
+* `genAsymptoticKappa`, `genAsymptoticNu`: the exponential index `κ` and exponent `ν`,
+  DLMF 16.11.3.
+* `genAsymptoticCRaw`, `genAsymptoticC`, `genAsymptoticEkm`: the coefficients of the
+  exponential expansion, DLMF 16.11.4–16.11.5.
+* `genETermLog`, `genHTermLog`: the formal exponential and algebraic series, DLMF 16.11.1–16.11.2.
+* `genHResidueLog`, `genHTruncLog`: algebraic terms at arbitrary (possibly multiple) poles.
+
+## Main results
+
+* `genAsymptoticC_recurrence`, `genAsymptoticC_limit`: the coefficient recurrence and its
+  continuation to repeated lower parameters.
+* `genH_simple_residue`, `genH_resonant_log_polynomial`: algebraic terms as Barnes residues.
+* `genH_balanced_converges`: convergence of the algebraic series for `p = q + 1`, `|z| > 1`,
+  DLMF 16.11.6.
+* `genHG_equal_order_asymptotic`, `genHG_one_lower_asymptotic`,
+  `genHG_fewer_upper_asymptotic`: large-`z` expansions, DLMF 16.11.7–16.11.9.
+* `genHG_partial_large_parameter_asymptotic`, `genHG_all_large_parameter_asymptotic`:
+  large-parameter expansions, DLMF 16.11.10–16.11.11.
+
+## Implementation notes
+
+All powers are evaluated on a specified logarithm sheet, so the two formal exponential series at
+phases `w ± πi` are not collapsed by principal argument reduction. Algebraic terms are Barnes
+residues, deduplicated at resonant poles; multiple poles retain the logarithmic terms mentioned
+in DLMF. The coefficient recurrence is continued through repeated lower parameters by a
+specified limit. Formal `E` and `H` series are coefficient families, asserted convergent only
+where DLMF claims convergence (`p = q + 1`, `|z| > 1`). Residues use the TauCeti residue API.
 -/
 
 @[expose] public section
@@ -166,7 +184,7 @@ lemma genAsymptoticEkm_continuousAt {p q : ℕ} (a : Fin p → ℂ) (b : Fin q �
 
 /-- The raw finite recurrence is continuous at distinct augmented lower parameters. -/
 lemma genAsymptoticCRaw_continuousAt {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
-    (_hpq : p < q + 1) (hb : Function.Injective (genAsymptoticAugment b)) (k : ℕ) :
+    (hb : Function.Injective (genAsymptoticAugment b)) (k : ℕ) :
     ContinuousAt (fun c : Fin q → ℂ => genAsymptoticCRaw a c k) b := by
   induction k using Nat.strong_induction_on with
   | h k ih =>
@@ -184,10 +202,10 @@ lemma genAsymptoticCRaw_continuousAt {p q : ℕ} (a : Fin p → ℂ) (b : Fin q 
 /-- At distinct augmented lower parameters, the selected limiting coefficient equals
 the ordinary finite recurrence coefficient. -/
 lemma genAsymptoticC_eq_raw {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
-    (hpq : p < q + 1) (hb : Function.Injective (genAsymptoticAugment b)) (k : ℕ) :
+    (hb : Function.Injective (genAsymptoticAugment b)) (k : ℕ) :
     genAsymptoticC a b k = genAsymptoticCRaw a b k := by
   have he : genAsymptoticPerturb b 0 = b := by ext j; simp [genAsymptoticPerturb]
-  have hc := (genAsymptoticCRaw_continuousAt a b hpq hb k).comp_of_eq (show ContinuousAt
+  have hc := (genAsymptoticCRaw_continuousAt a b hb k).comp_of_eq (show ContinuousAt
     (fun ε : ℂ => genAsymptoticPerturb b ε) 0 by
       unfold genAsymptoticPerturb
       fun_prop) he
@@ -196,38 +214,38 @@ lemma genAsymptoticC_eq_raw {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
 
 /-- The complete printed recurrence on its nonsingular augmented-parameter domain. -/
 @[dlmf 16.11.E4]
-theorem genAsymptoticC_recurrence {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (hpq : p < q + 1)
+theorem genAsymptoticC_recurrence {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     (hb : Function.Injective (genAsymptoticAugment b)) :
     genAsymptoticC a b 0 = 1 ∧ ∀ k : ℕ, genAsymptoticC a b (k + 1) =
       -(∑ m ∈ range (k + 1), genAsymptoticC a b m * genAsymptoticEkm a b (k + 1) m) /
         ((k + 1 : ℂ) * (genAsymptoticKappa p q : ℂ) ^ genAsymptoticKappa p q) := by
   constructor
-  · rw [genAsymptoticC_eq_raw a b hpq hb, genAsymptoticCRaw]
+  · rw [genAsymptoticC_eq_raw a b hb, genAsymptoticCRaw]
   · intro k
-    simp only [genAsymptoticC_eq_raw a b hpq hb, genAsymptoticCRaw]
+    simp only [genAsymptoticC_eq_raw a b hb, genAsymptoticCRaw]
     congr 2
     exact Fin.sum_univ_eq_sum_range (fun m => genAsymptoticCRaw a b m *
       genAsymptoticEkm a b (k + 1) m) (k + 1)
 
 /-- Gamma is analytic away from its poles. -/
-lemma ghbR4_Gamma_analyticAt {c : ℂ} (hc : ∀ m : ℕ, c ≠ -m) : AnalyticAt ℂ Gamma c := by
+private lemma analyticAt_Gamma_of_ne_neg_nat {c : ℂ} (hc : ∀ m : ℕ, c ≠ -m) : AnalyticAt ℂ Gamma c := by
   have hU : IsOpen {s : ℂ | ∀ m : ℕ, s ≠ -m} := by
     simpa using barnesRes_isOpen_ne_sub_nat (0 : ℂ)
   exact DifferentiableOn.analyticAt (fun s hs => (differentiableAt_Gamma s hs).differentiableWithinAt)
     (hU.mem_nhds hc)
 
 /-- Local pole factor of Gamma at `-m`. -/
-noncomputable def ghbR4_GammaPoleFactor (m : ℕ) (x : ℂ) : ℂ :=
+noncomputable def gammaPoleFactor (m : ℕ) (x : ℂ) : ℂ :=
   Gamma (x + m + 1) / ∏ k ∈ range m, (x + k)
 
 /-- The pole factor is analytic at its pole. -/
-lemma ghbR4_GammaPoleFactor_analyticAt (m : ℕ) :
-    AnalyticAt ℂ (ghbR4_GammaPoleFactor m) (-m) := by
-  unfold ghbR4_GammaPoleFactor
+private lemma analyticAt_gammaPoleFactor (m : ℕ) :
+    AnalyticAt ℂ (gammaPoleFactor m) (-m) := by
+  unfold gammaPoleFactor
   apply AnalyticAt.div
   · have h1 : AnalyticAt ℂ Gamma ((-(m : ℂ)) + m + 1) := by
       rw [show (-(m : ℂ)) + m + 1 = 1 by ring]
-      exact ghbR4_Gamma_analyticAt (fun k hk => by
+      exact analyticAt_Gamma_of_ne_neg_nat (fun k hk => by
         have := congrArg Complex.re hk; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)])
     exact (h1.comp_of_eq (f := fun x : ℂ => x + m + 1) (by fun_prop) rfl :)
   · fun_prop
@@ -239,9 +257,9 @@ lemma ghbR4_GammaPoleFactor_analyticAt (m : ℕ) :
     exact absurd (by exact_mod_cast this : k = m) (by omega)
 
 /-- Value of the pole factor at `-m`: the Gamma residue `(-1)^m/m!`. -/
-lemma ghbR4_GammaPoleFactor_value (m : ℕ) :
-    ghbR4_GammaPoleFactor m (-m) = (-1) ^ m / m.factorial := by
-  unfold ghbR4_GammaPoleFactor
+private lemma gammaPoleFactor_neg_nat (m : ℕ) :
+    gammaPoleFactor m (-m) = (-1) ^ m / m.factorial := by
+  unfold gammaPoleFactor
   rw [show (-(m : ℂ)) + m + 1 = 1 by ring, Gamma_one]
   have : ∏ k ∈ range m, (-(m : ℂ) + k) = (-1) ^ m * m.factorial := by
     rw [← barnesRes_prod_sub_nat]; exact prod_congr rfl fun k _ => by ring
@@ -252,8 +270,8 @@ lemma ghbR4_GammaPoleFactor_value (m : ℕ) :
   linear_combination (-1) * h1
 
 /-- Near `-m`, Gamma is `(x+m)^(-1)` times the pole factor. -/
-lemma ghbR4_Gamma_eq_pole (m : ℕ) :
-    ∀ᶠ x in 𝓝[≠] (-(m : ℂ)), Gamma x = (x - (-(m : ℂ))) ^ (-1 : ℤ) * ghbR4_GammaPoleFactor m x := by
+private lemma Gamma_eq_zpow_mul_gammaPoleFactor (m : ℕ) :
+    ∀ᶠ x in 𝓝[≠] (-(m : ℂ)), Gamma x = (x - (-(m : ℂ))) ^ (-1 : ℤ) * gammaPoleFactor m x := by
   have hball' : ∀ᶠ x in 𝓝 (-(m : ℂ)), dist x (-(m : ℂ)) < 1 / 2 :=
     Metric.ball_mem_nhds _ (by norm_num)
   have hball : ∀ᶠ x in 𝓝 (-(m : ℂ)), ‖x - (-(m : ℂ))‖ < 1 / 2 :=
@@ -278,7 +296,7 @@ lemma ghbR4_Gamma_eq_pole (m : ℕ) :
         · omega
       linarith
   have hG := barnesRes_Gamma_add_nat_succ x m hnp
-  unfold ghbR4_GammaPoleFactor
+  unfold gammaPoleFactor
   rw [hG, prod_range_succ]
   have hxm : x + m ≠ 0 := hnp m le_rfl
   have hprod : ∏ k ∈ range m, (x + k) ≠ 0 :=
@@ -287,33 +305,33 @@ lemma ghbR4_Gamma_eq_pole (m : ℕ) :
   field_simp
 
 /-- Gamma with its possible simple pole at `c` removed. -/
-noncomputable def ghbR4_localGamma (c : ℂ) (x : ℂ) : ℂ := by
+noncomputable def poleRemovedGamma (c : ℂ) (x : ℂ) : ℂ := by
   classical
-  exact if h : ∃ m : ℕ, c = -m then ghbR4_GammaPoleFactor h.choose x else Gamma x
+  exact if h : ∃ m : ℕ, c = -m then gammaPoleFactor h.choose x else Gamma x
 
 /-- The pole exponent of Gamma at `c`. -/
-noncomputable def ghbR4_poleExp (c : ℂ) : ℕ := by
+noncomputable def gammaPoleOrder (c : ℂ) : ℕ := by
   classical
   exact if ∃ m : ℕ, c = -m then 1 else 0
 
 /-- The pole-removed Gamma function is analytic at its base point. -/
-lemma ghbR4_localGamma_analyticAt (c : ℂ) : AnalyticAt ℂ (ghbR4_localGamma c) c := by
+private lemma analyticAt_poleRemovedGamma (c : ℂ) : AnalyticAt ℂ (poleRemovedGamma c) c := by
   classical
-  unfold ghbR4_localGamma
+  unfold poleRemovedGamma
   split_ifs with h
-  · have := ghbR4_GammaPoleFactor_analyticAt h.choose
+  · have := analyticAt_gammaPoleFactor h.choose
     rwa [← h.choose_spec] at this
   · push Not at h
-    exact ghbR4_Gamma_analyticAt h
+    exact analyticAt_Gamma_of_ne_neg_nat h
 
 /-- Gamma times its local pole power is the pole-removed Gamma function. -/
-lemma ghbR4_localGamma_eq (c : ℂ) :
-    ∀ᶠ x in 𝓝[≠] c, Gamma x * (x - c) ^ ghbR4_poleExp c = ghbR4_localGamma c x := by
+private lemma Gamma_mul_pow_gammaPoleOrder_eq (c : ℂ) :
+    ∀ᶠ x in 𝓝[≠] c, Gamma x * (x - c) ^ gammaPoleOrder c = poleRemovedGamma c x := by
   classical
-  unfold ghbR4_localGamma ghbR4_poleExp
+  unfold poleRemovedGamma gammaPoleOrder
   split_ifs with h
   · have hc := h.choose_spec
-    have := ghbR4_Gamma_eq_pole h.choose
+    have := Gamma_eq_zpow_mul_gammaPoleFactor h.choose
     rw [← hc] at this
     filter_upwards [this, self_mem_nhdsWithin] with x hx hne
     have hne : x - c ≠ 0 := sub_ne_zero.mpr hne
@@ -322,72 +340,72 @@ lemma ghbR4_localGamma_eq (c : ℂ) :
   · exact Eventually.of_forall fun x => by simp
 
 /-- Value of the pole-removed Gamma function at a pole. -/
-lemma ghbR4_localGamma_pole_value (m : ℕ) :
-    ghbR4_localGamma (-(m : ℂ)) (-(m : ℂ)) = (-1) ^ m / m.factorial := by
+private lemma poleRemovedGamma_neg_nat (m : ℕ) :
+    poleRemovedGamma (-(m : ℂ)) (-(m : ℂ)) = (-1) ^ m / m.factorial := by
   classical
-  unfold ghbR4_localGamma
+  unfold poleRemovedGamma
   split_ifs with h
   · have hk : h.choose = m := by
       have := h.choose_spec
       exact_mod_cast (neg_inj.mp this).symm
-    rw [hk, ghbR4_GammaPoleFactor_value]
+    rw [hk, gammaPoleFactor_neg_nat]
   · exact absurd ⟨m, rfl⟩ h
 
 /-- Away from poles nothing is removed. -/
-lemma ghbR4_localGamma_of_not_pole {c : ℂ} (hc : ∀ m : ℕ, c ≠ -m) :
-    ghbR4_localGamma c = Gamma := by
+private lemma poleRemovedGamma_of_ne_neg_nat {c : ℂ} (hc : ∀ m : ℕ, c ≠ -m) :
+    poleRemovedGamma c = Gamma := by
   classical
-  unfold ghbR4_localGamma
+  unfold poleRemovedGamma
   funext x
   split_ifs with h
   · obtain ⟨m, hm⟩ := h; exact absurd hm (hc m)
   · rfl
 
 /-- The pole exponent vanishes away from poles. -/
-lemma ghbR4_poleExp_of_not_pole {c : ℂ} (hc : ∀ m : ℕ, c ≠ -m) : ghbR4_poleExp c = 0 := by
+private lemma gammaPoleOrder_of_ne_neg_nat {c : ℂ} (hc : ∀ m : ℕ, c ≠ -m) : gammaPoleOrder c = 0 := by
   classical
-  unfold ghbR4_poleExp
+  unfold gammaPoleOrder
   split_ifs with h
   · obtain ⟨m, hm⟩ := h; exact absurd hm (hc m)
   · rfl
 
 /-- The pole exponent is one at a pole. -/
-lemma ghbR4_poleExp_pole (m : ℕ) : ghbR4_poleExp (-(m : ℂ)) = 1 := by
+private lemma gammaPoleOrder_neg_nat (m : ℕ) : gammaPoleOrder (-(m : ℂ)) = 1 := by
   classical
-  unfold ghbR4_poleExp
+  unfold gammaPoleOrder
   split_ifs with h
   · rfl
   · exact absurd ⟨m, rfl⟩ h
 
 /-- Local factorization of a finite Gamma product near any point. -/
-lemma ghbR4_prod_Gamma_local {p : ℕ} (a : Fin p → ℂ) (s₀ : ℂ) :
-    ∀ᶠ s in 𝓝[≠] s₀, (∏ i, Gamma (a i + s)) * (s - s₀) ^ (∑ i, ghbR4_poleExp (a i + s₀)) =
-      ∏ i, ghbR4_localGamma (a i + s₀) (a i + s) := by
+private lemma prod_Gamma_mul_pow_eq_prod_poleRemovedGamma {p : ℕ} (a : Fin p → ℂ) (s₀ : ℂ) :
+    ∀ᶠ s in 𝓝[≠] s₀, (∏ i, Gamma (a i + s)) * (s - s₀) ^ (∑ i, gammaPoleOrder (a i + s₀)) =
+      ∏ i, poleRemovedGamma (a i + s₀) (a i + s) := by
   have hmap : ∀ i, Tendsto (fun s => a i + s) (𝓝[≠] s₀) (𝓝[≠] (a i + s₀)) := by
     intro i
     apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
     · exact ((continuous_const.add continuous_id).tendsto s₀).mono_left nhdsWithin_le_nhds
     · filter_upwards [self_mem_nhdsWithin] with s hs
       intro h; exact hs (add_left_cancel h)
-  have hall : ∀ᶠ s in 𝓝[≠] s₀, ∀ i, Gamma (a i + s) * (s - s₀) ^ ghbR4_poleExp (a i + s₀) =
-      ghbR4_localGamma (a i + s₀) (a i + s) := by
+  have hall : ∀ᶠ s in 𝓝[≠] s₀, ∀ i, Gamma (a i + s) * (s - s₀) ^ gammaPoleOrder (a i + s₀) =
+      poleRemovedGamma (a i + s₀) (a i + s) := by
     rw [eventually_all]
     intro i
-    filter_upwards [hmap i (ghbR4_localGamma_eq (a i + s₀))] with s hs
+    filter_upwards [hmap i (Gamma_mul_pow_gammaPoleOrder_eq (a i + s₀))] with s hs
     rw [← hs]; congr 2; ring
   filter_upwards [hall] with s hs
   rw [← prod_pow_eq_pow_sum, ← prod_mul_distrib]
   exact prod_congr rfl fun i _ => hs i
 
 /-- A shifted parameter Gamma product as a finite product. -/
-lemma ghbR4_genGamma_shift_params {p : ℕ} (a : Fin p → ℂ) (s : ℂ) :
+private lemma genGamma_genShift_genParams {p : ℕ} (a : Fin p → ℂ) (s : ℂ) :
     genGamma (genShift (genParams a) s) = ∏ i, Gamma (a i + s) := by
   simp [genGamma, genShift, genParams, List.map_ofFn, List.prod_ofFn, Function.comp_def]
 
 /-- The reciprocal lower Gamma block of the Barnes kernel is entire. -/
-lemma ghbR4_invGamma_shift_analyticAt {q : ℕ} (b : Fin q → ℂ) (s₀ : ℂ) :
+private lemma analyticAt_inv_genGamma_genShift {q : ℕ} (b : Fin q → ℂ) (s₀ : ℂ) :
     AnalyticAt ℂ (fun s => (genGamma (genShift (genParams b) s))⁻¹) s₀ := by
-  simp only [ghbR4_genGamma_shift_params, ← prod_inv_distrib]
+  simp only [genGamma_genShift_genParams, ← prod_inv_distrib]
   apply Finset.analyticAt_fun_prod
   intro i _
   have h : Differentiable ℂ (fun s : ℂ => (Gamma s)⁻¹) := by
@@ -395,45 +413,45 @@ lemma ghbR4_invGamma_shift_analyticAt {q : ℕ} (b : Fin q → ℂ) (s₀ : ℂ)
   exact (h.analyticAt (b i + s₀)).comp_of_eq (f := fun s => b i + s) (by fun_prop) rfl
 
 /-- The Barnes kernel near a point, after removing all Gamma poles from the upper block. -/
-lemma ghbR4_kernel_local {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (w s₀ : ℂ) :
+private lemma genBarnesKernelLog_eq_zpow_smul_poleRemoved {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (w s₀ : ℂ) :
     ∀ᶠ s in 𝓝[≠] s₀, genBarnesKernelLog (genParams a) (genParams b) w s =
-      (s - s₀) ^ (-((∑ i, ghbR4_poleExp (a i + s₀) : ℕ) : ℤ)) •
-        ((∏ i, ghbR4_localGamma (a i + s₀) (a i + s)) *
+      (s - s₀) ^ (-((∑ i, gammaPoleOrder (a i + s₀) : ℕ) : ℤ)) •
+        ((∏ i, poleRemovedGamma (a i + s₀) (a i + s)) *
           (genGamma (genShift (genParams b) s))⁻¹ * Gamma (-s) * Complex.exp (s * w)) := by
-  filter_upwards [ghbR4_prod_Gamma_local a s₀, self_mem_nhdsWithin] with s hs hne
+  filter_upwards [prod_Gamma_mul_pow_eq_prod_poleRemovedGamma a s₀, self_mem_nhdsWithin] with s hs hne
   have hne : s - s₀ ≠ 0 := sub_ne_zero.mpr hne
-  rw [← hs, genBarnesKernelLog, ghbR4_genGamma_shift_params, zpow_neg, zpow_natCast, smul_eq_mul]
+  rw [← hs, genBarnesKernelLog, genGamma_genShift_genParams, zpow_neg, zpow_natCast, smul_eq_mul]
   field_simp
 
 /-- Each vector parameter belongs to its multiset. -/
-lemma ghbR4_mem_genParams {p : ℕ} (a : Fin p → ℂ) (i : Fin p) : a i ∈ genParams a := by
+private lemma mem_genParams {p : ℕ} (a : Fin p → ℂ) (i : Fin p) : a i ∈ genParams a := by
   simp [genParams]
 
 /-- The reflected Gamma factor is regular at every upper pole. -/
-lemma ghbR4_Gamma_neg_analyticAt {p : ℕ} (a : Fin p → ℂ) (ha : GenDenRegular (genParams a))
+private lemma analyticAt_Gamma_neg_of_upper_pole {p : ℕ} (a : Fin p → ℂ) (ha : GenDenRegular (genParams a))
     (j : Fin p) (k : ℕ) : AnalyticAt ℂ (fun s => Gamma (-s)) (-a j - k) := by
   have hnp : ∀ m : ℕ, -(-a j - k) ≠ -m := by
     intro m h
-    apply ha (a j) (ghbR4_mem_genParams a j) (m + k)
+    apply ha (a j) (mem_genParams a j) (m + k)
     push_cast; linear_combination h
-  exact (ghbR4_Gamma_analyticAt hnp).comp_of_eq (f := fun s => -s) (by fun_prop) rfl
+  exact (analyticAt_Gamma_of_ne_neg_nat hnp).comp_of_eq (f := fun s => -s) (by fun_prop) rfl
 
 /-- The pole-removed Barnes kernel is analytic at an upper pole. -/
-lemma ghbR4_G_analyticAt {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (ha : GenDenRegular (genParams a))
+private lemma analyticAt_poleRemoved_barnesKernel {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (ha : GenDenRegular (genParams a))
     (j : Fin p) (k : ℕ) (w : ℂ) :
-    AnalyticAt ℂ (fun s => (∏ i, ghbR4_localGamma (a i + (-a j - k)) (a i + s)) *
+    AnalyticAt ℂ (fun s => (∏ i, poleRemovedGamma (a i + (-a j - k)) (a i + s)) *
       (genGamma (genShift (genParams b) s))⁻¹ * Gamma (-s) * Complex.exp (s * w)) (-a j - k) := by
-  have h1 : AnalyticAt ℂ (fun s => ∏ i, ghbR4_localGamma (a i + (-a j - k)) (a i + s)) (-a j - k) := by
+  have h1 : AnalyticAt ℂ (fun s => ∏ i, poleRemovedGamma (a i + (-a j - k)) (a i + s)) (-a j - k) := by
     apply Finset.analyticAt_fun_prod
     intro i _
-    exact (ghbR4_localGamma_analyticAt _).comp_of_eq (f := fun s => a i + s) (by fun_prop) rfl
-  exact ((h1.mul (ghbR4_invGamma_shift_analyticAt b _)).mul
-    (ghbR4_Gamma_neg_analyticAt a ha j k)).mul (by fun_prop)
+    exact (analyticAt_poleRemovedGamma _).comp_of_eq (f := fun s => a i + s) (by fun_prop) rfl
+  exact ((h1.mul (analyticAt_inv_genGamma_genShift b _)).mul
+    (analyticAt_Gamma_neg_of_upper_pole a ha j k)).mul (by fun_prop)
 
 /-- Gamma poles are simple. -/
-lemma ghbR4_poleExp_le_one (c : ℂ) : ghbR4_poleExp c ≤ 1 := by
+private lemma gammaPoleOrder_le_one (c : ℂ) : gammaPoleOrder c ≤ 1 := by
   classical
-  unfold ghbR4_poleExp; split_ifs <;> omega
+  unfold gammaPoleOrder; split_ifs <;> omega
 
 /-- The algebraic coefficients equal the corresponding simple Barnes residues. -/
 @[dlmf 16.11.E2]
@@ -449,20 +467,20 @@ theorem genH_simple_residue {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
     apply hdiff i j hij ((k : ℤ) - m)
     push_cast; linear_combination h
   have hj : a j + s₀ = -(k : ℂ) := by rw [hs₀]; ring
-  have hN : ∑ i, ghbR4_poleExp (a i + s₀) = 1 := by
-    rw [← Finset.add_sum_erase _ _ (Finset.mem_univ j), hj, ghbR4_poleExp_pole,
-      Finset.sum_eq_zero (fun i hi => ghbR4_poleExp_of_not_pole (hnp i (Finset.ne_of_mem_erase hi)))]
+  have hN : ∑ i, gammaPoleOrder (a i + s₀) = 1 := by
+    rw [← Finset.add_sum_erase _ _ (Finset.mem_univ j), hj, gammaPoleOrder_neg_nat,
+      Finset.sum_eq_zero (fun i hi => gammaPoleOrder_of_ne_neg_nat (hnp i (Finset.ne_of_mem_erase hi)))]
     rfl
-  have hloc := ghbR4_kernel_local a b w s₀
+  have hloc := genBarnesKernelLog_eq_zpow_smul_poleRemoved a b w s₀
   rw [hN] at hloc
   unfold genHResidueLog
   rw [TauCeti.Contour.residue_eq_of_eventuallyEq_zpow_smul (by norm_num)
-    (ghbR4_G_analyticAt a b ha j k w) hloc]
+    (analyticAt_poleRemoved_barnesKernel a b ha j k w) hloc]
   norm_num
   rw [← Finset.mul_prod_erase _ _ (Finset.mem_univ j)]
-  rw [hj, ghbR4_localGamma_pole_value]
+  rw [hj, poleRemovedGamma_neg_nat]
   rw [Finset.prod_congr rfl (fun i hi => by
-    rw [ghbR4_localGamma_of_not_pole (hnp i (Finset.ne_of_mem_erase hi))])]
+    rw [poleRemovedGamma_of_ne_neg_nat (hnp i (Finset.ne_of_mem_erase hi))])]
   unfold genHTermLog
   rw [add_comm (k : ℂ) (a j)]
   rw [Finset.prod_congr rfl (fun i _ => by rw [show a i + (-a j - k) = a i - a j - k by ring])]
@@ -477,24 +495,24 @@ theorem genH_resonant_log_polynomial {p q : ℕ} (a : Fin p → ℂ) (b : Fin q 
   classical
   obtain ⟨j, k, rfl⟩ := hs
   set s₀ := -a j - k with hs₀
-  set N := ∑ i, ghbR4_poleExp (a i + s₀) with hNdef
+  set N := ∑ i, gammaPoleOrder (a i + s₀) with hNdef
   have hj : a j + s₀ = -(k : ℂ) := by rw [hs₀]; ring
   have hN1 : 1 ≤ N := by
-    have := Finset.single_le_sum (f := fun i => ghbR4_poleExp (a i + s₀))
+    have := Finset.single_le_sum (f := fun i => gammaPoleOrder (a i + s₀))
       (fun _ _ => Nat.zero_le _) (Finset.mem_univ j)
-    simp only [hj, ghbR4_poleExp_pole] at this
+    simp only [hj, gammaPoleOrder_neg_nat] at this
     exact this
   have hNp : N ≤ p := by
-    calc N ≤ ∑ _i : Fin p, 1 := Finset.sum_le_sum fun i _ => ghbR4_poleExp_le_one _
+    calc N ≤ ∑ _i : Fin p, 1 := Finset.sum_le_sum fun i _ => gammaPoleOrder_le_one _
       _ = p := by simp
-  set G0 : ℂ → ℂ := fun s => (∏ i, ghbR4_localGamma (a i + s₀) (a i + s)) *
+  set G0 : ℂ → ℂ := fun s => (∏ i, poleRemovedGamma (a i + s₀) (a i + s)) *
       (genGamma (genShift (genParams b) s))⁻¹ * Gamma (-s) with hG0
   have hG0a : AnalyticAt ℂ G0 s₀ := by
-    have h1 : AnalyticAt ℂ (fun s => ∏ i, ghbR4_localGamma (a i + s₀) (a i + s)) s₀ := by
+    have h1 : AnalyticAt ℂ (fun s => ∏ i, poleRemovedGamma (a i + s₀) (a i + s)) s₀ := by
       apply Finset.analyticAt_fun_prod
       intro i _
-      exact (ghbR4_localGamma_analyticAt _).comp_of_eq (f := fun s => a i + s) (by fun_prop) rfl
-    exact (h1.mul (ghbR4_invGamma_shift_analyticAt b _)).mul (ghbR4_Gamma_neg_analyticAt a ha j k)
+      exact (analyticAt_poleRemovedGamma _).comp_of_eq (f := fun s => a i + s) (by fun_prop) rfl
+    exact (h1.mul (analyticAt_inv_genGamma_genShift b _)).mul (analyticAt_Gamma_neg_of_upper_pole a ha j k)
   set n := N - 1 with hn
   refine ⟨∑ i ∈ range (n + 1), Polynomial.C ((n.choose i : ℂ) * iteratedDeriv i G0 s₀ /
     n.factorial) * Polynomial.X ^ (n - i), ?_, ?_⟩
@@ -503,7 +521,7 @@ theorem genH_resonant_log_polynomial {p q : ℕ} (a : Fin p → ℂ) (b : Fin q 
     refine (Polynomial.natDegree_C_mul_X_pow_le _ _).trans ?_
     omega
   · intro w
-    have hloc := ghbR4_kernel_local a b w s₀
+    have hloc := genBarnesKernelLog_eq_zpow_smul_poleRemoved a b w s₀
     unfold genHResidueLog
     have hE : AnalyticAt ℂ (fun s : ℂ => Complex.exp (s * w)) s₀ := by fun_prop
     rw [TauCeti.Contour.residue_eq_of_eventuallyEq_zpow_smul (by omega) (hG0a.mul hE) hloc]
@@ -584,7 +602,7 @@ theorem genHG_partial_large_parameter_asymptotic {p : ℕ} (a : Fin (p + 1) → 
   sorry
 
 /-- The comparison product `∏_{k<n} (r/2+k)` dominates `(r/2)^n`. -/
-lemma ghbR4_P_ge {r : ℝ} (hr : 0 < r) (n : ℕ) :
+private lemma pow_le_prod_half_add {r : ℝ} (hr : 0 < r) (n : ℕ) :
     (r / 2) ^ n ≤ ∏ k ∈ range n, (r / 2 + k) := by
   calc (r / 2) ^ n = ∏ _k ∈ range n, (r / 2) := by rw [prod_const, card_range]
     _ ≤ _ := by
@@ -592,7 +610,7 @@ lemma ghbR4_P_ge {r : ℝ} (hr : 0 < r) (n : ℕ) :
       linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
 
 /-- Upper bound for a rising factorial at a large real shift. -/
-lemma ghbR4_poch_shift_le {x : ℂ} {r : ℝ} (hr : 0 < r) (hx : ‖x‖ ≤ r) (n : ℕ) :
+private lemma norm_poch_add_le {x : ℂ} {r : ℝ} (hr : 0 < r) (hx : ‖x‖ ≤ r) (n : ℕ) :
     ‖poch (x + r) n‖ ≤ 4 ^ n * ∏ k ∈ range n, (r / 2 + k) := by
   induction n with
   | zero => simp [poch_zero]
@@ -607,7 +625,7 @@ lemma ghbR4_poch_shift_le {x : ℂ} {r : ℝ} (hr : 0 < r) (hx : ‖x‖ ≤ r) 
       _ = _ := by ring
 
 /-- Lower bound for a rising factorial at a large real shift. -/
-lemma ghbR4_poch_shift_ge {y : ℂ} {r : ℝ} (hr : 0 < r) (hy : ‖y‖ ≤ r / 2) (n : ℕ) :
+private lemma prod_le_norm_poch_add {y : ℂ} {r : ℝ} (hr : 0 < r) (hy : ‖y‖ ≤ r / 2) (n : ℕ) :
     ∏ k ∈ range n, (r / 2 + k) ≤ ‖poch (y + r) n‖ := by
   induction n with
   | zero => simp [poch_zero]
@@ -624,7 +642,7 @@ lemma ghbR4_poch_shift_ge {y : ℂ} {r : ℝ} (hr : 0 < r) (hy : ‖y‖ ≤ r /
     exact mul_le_mul ih h1 (by positivity) (norm_nonneg _)
 
 /-- Upper bound for a shifted multiset rising-factorial product. -/
-lemma ghbR4_genPoch_shift_le {r : ℝ} (hr : 0 < r) (c : Multiset ℂ) (hc : ∀ x ∈ c, ‖x‖ ≤ r)
+private lemma norm_genPoch_genShift_le {r : ℝ} (hr : 0 < r) (c : Multiset ℂ) (hc : ∀ x ∈ c, ‖x‖ ≤ r)
     (n : ℕ) : ‖genPoch (genShift c r) n‖ ≤ (4 ^ n * ∏ k ∈ range n, (r / 2 + k)) ^ c.card := by
   induction c using Multiset.induction_on with
   | empty => simp [genPoch, genShift]
@@ -632,11 +650,11 @@ lemma ghbR4_genPoch_shift_le {r : ℝ} (hr : 0 < r) (c : Multiset ℂ) (hc : ∀
     simp only [genPoch, genShift, Multiset.map_cons, Multiset.prod_cons, Multiset.card_cons,
       pow_succ] at ih ⊢
     rw [norm_mul, mul_comm _ (4 ^ n * _)]
-    exact mul_le_mul (ghbR4_poch_shift_le hr (hc x (Multiset.mem_cons_self x c)) n)
+    exact mul_le_mul (norm_poch_add_le hr (hc x (Multiset.mem_cons_self x c)) n)
       (ih fun y hy => hc y (Multiset.mem_cons_of_mem hy)) (norm_nonneg _) (by positivity)
 
 /-- Lower bound for a shifted multiset rising-factorial product. -/
-lemma ghbR4_genPoch_shift_ge {r : ℝ} (hr : 0 < r) (c : Multiset ℂ) (hc : ∀ x ∈ c, ‖x‖ ≤ r / 2)
+private lemma le_norm_genPoch_genShift {r : ℝ} (hr : 0 < r) (c : Multiset ℂ) (hc : ∀ x ∈ c, ‖x‖ ≤ r / 2)
     (n : ℕ) : (∏ k ∈ range n, (r / 2 + k)) ^ c.card ≤ ‖genPoch (genShift c r) n‖ := by
   induction c using Multiset.induction_on with
   | empty => simp [genPoch, genShift]
@@ -644,19 +662,19 @@ lemma ghbR4_genPoch_shift_ge {r : ℝ} (hr : 0 < r) (c : Multiset ℂ) (hc : ∀
     simp only [genPoch, genShift, Multiset.map_cons, Multiset.prod_cons, Multiset.card_cons,
       pow_succ] at ih ⊢
     rw [norm_mul, mul_comm _ (∏ k ∈ range n, (r / 2 + k))]
-    exact mul_le_mul (ghbR4_poch_shift_ge hr (hc x (Multiset.mem_cons_self x c)) n)
+    exact mul_le_mul (prod_le_norm_poch_add hr (hc x (Multiset.mem_cons_self x c)) n)
       (ih fun y hy => hc y (Multiset.mem_cons_of_mem hy)) (by positivity) (norm_nonneg _)
 
 /-- Uniform coefficient bound for large common real shifts, p≤q. -/
-lemma ghbR4_genCoeff_shift_le {r : ℝ} (hr : 0 < r) (a b : Multiset ℂ) (hab : a.card ≤ b.card)
+private lemma norm_genCoeff_genShift_le {r : ℝ} (hr : 0 < r) (a b : Multiset ℂ) (hab : a.card ≤ b.card)
     (ha : ∀ x ∈ a, ‖x‖ ≤ r) (hb : ∀ x ∈ b, ‖x‖ ≤ r / 2) (n : ℕ) :
     ‖genCoeff (genShift a r) (genShift b r) n‖ ≤
       (4 ^ a.card * (2 / r) ^ (b.card - a.card)) ^ n / n.factorial := by
   set P := ∏ k ∈ range n, (r / 2 + k) with hP
   have hP0 : 0 < P := prod_pos fun k _ => by positivity
-  have hPge := ghbR4_P_ge hr n
-  have h1 := ghbR4_genPoch_shift_le hr a ha n
-  have h2 := ghbR4_genPoch_shift_ge hr b hb n
+  have hPge := pow_le_prod_half_add hr n
+  have h1 := norm_genPoch_genShift_le hr a ha n
+  have h2 := le_norm_genPoch_genShift hr b hb n
   have hf : (0 : ℝ) < n.factorial := by exact_mod_cast n.factorial_pos
   unfold genCoeff
   rw [norm_div, norm_mul, Complex.norm_natCast]
@@ -733,7 +751,7 @@ theorem genHG_all_large_parameter_asymptotic {p q : ℕ} (a : Fin p → ℂ) (b 
   have ht1 : t ≤ 1 := pow_le_one₀ (by positivity) (by rw [div_le_one hr0]; exact hr1)
   have hbound : ∀ n, ‖c (n + m)‖ ≤ (K * t) ^ m * (K ^ n / n.factorial) := by
     intro n
-    have hco := ghbR4_genCoeff_shift_le hr0 (genParams a) (genParams b) (by omega) ha hb (n + m)
+    have hco := norm_genCoeff_genShift_le hr0 (genParams a) (genParams b) (by omega) ha hb (n + m)
     rw [hca, hcb] at hco
     simp only [hc, norm_mul, norm_pow]
     have hKt : 4 ^ p * (2 / r) ^ (q - p) * ‖z‖ = K * t := by

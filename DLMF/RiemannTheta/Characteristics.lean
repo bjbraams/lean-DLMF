@@ -8,7 +8,28 @@ module
 public import DLMF.RiemannTheta.Scaled
 
 /-!
-# Riemann theta characteristics, examples and classical theta identities
+# Characteristics, examples and the genus-one case of Riemann theta functions
+
+This file proves the relation between theta functions with and without characteristics, the
+examples of DLMF 21.2.3–21.2.4 and 21.4.2–21.4.3, and the reduction for `g = 1` to the
+one-variable theta functions of DLMF §20.2.
+
+## Main results
+
+* `riemannThetaChar_eq`: `θ[α;β](z|Ω) = exp(2πi(½ α·Ω·α + α·[z+β])) θ(z + Ωα + β|Ω)`
+  (DLMF 21.2.6).
+* `riemannThetaChar_zero`: `θ[0;0](z|Ω) = θ(z|Ω)` (DLMF 21.2.7).
+* `summable_norm_riemannThetaCharTerm`: absolute convergence of the series with
+  characteristics.
+* `ncard_halfPeriodCharacteristics`: there are `2^{2g}` half-period characteristics.
+* `riemannMatrixExample_mem`, `riemannTheta_example`, `riemannThetaScaled_example`: the
+  example DLMF 21.2.3–21.2.4.
+* `riemannMatrixExample_eq_omegaOne`, `riemannMatrixOmegaTwo_mem`: the Riemann matrices of
+  DLMF 21.4.2–21.4.3.
+* `riemannTheta_fin_one`: `θ(z|Ω) = θ₃(πz|Ω)` for `g = 1` (DLMF 21.2.8).
+* `jacobiThetaOneTau_eq_riemannThetaChar`, `jacobiThetaTwoTau_eq_riemannThetaChar`,
+  `jacobiThetaThreeTau_eq_riemannThetaChar`, `jacobiThetaFourTau_eq_riemannThetaChar`: the
+  classical theta functions as theta functions with characteristics (DLMF 21.2.9–21.2.12).
 -/
 
 @[expose] public noncomputable section
@@ -45,7 +66,7 @@ theorem riemannMatrixExample_mem : riemannMatrixExample ∈ siegelUpperHalfSpace
 /-- Identity under the stated parameter and domain assumptions: `riemannThetaTerm z
 riemannMatrixExample n = cexp (-π * ((n 0 : ℂ) ^ 2 + (n 1 : ℂ) ^ 2)) * cexp (-I * π * (n 0 * n
 1 : ℂ)) * cexp (2 * π * I * (n 0 * z 0 + n 1 * z 1))`. -/
-lemma rth21_example_term (z : Fin 2 → ℂ) (n : Fin 2 → ℤ) :
+private lemma riemannThetaTerm_riemannMatrixExample (z : Fin 2 → ℂ) (n : Fin 2 → ℤ) :
     riemannThetaTerm z riemannMatrixExample n =
       cexp (-π * ((n 0 : ℂ) ^ 2 + (n 1 : ℂ) ^ 2)) * cexp (-I * π * (n 0 * n 1 : ℂ)) *
         cexp (2 * π * I * (n 0 * z 0 + n 1 * z 1)) := by
@@ -67,7 +88,7 @@ theorem riemannTheta_example (z₁ z₂ : ℂ) :
   have hs' := (finTwoArrowEquiv ℤ).symm.summable_iff.mpr hs
   refine (hs'.tsum_prod).trans ?_
   refine tsum_congr fun n₁ => tsum_congr fun n₂ => ?_
-  rw [Function.comp_apply, rth21_example_term]
+  rw [Function.comp_apply, riemannThetaTerm_riemannMatrixExample]
   simp
 
 /-- The scaled double series for the example (DLMF 21.2.4), `z_j = x_j + i y_j`. -/
@@ -120,7 +141,7 @@ theorem riemannMatrixOmegaTwo_mem : riemannMatrixOmegaTwo ∈ siegelUpperHalfSpa
 /-! ## Characteristics (DLMF §21.2(ii)) -/
 
 /-- Identity under the stated parameter and domain assumptions: `a ⬝ᵥ (Ω *ᵥ b) = b ⬝ᵥ (Ω *ᵥ a)`. -/
-theorem rth21_dot_mulVec_comm {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω) (a b : ι → ℂ) :
+theorem dotProduct_mulVec_comm {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω) (a b : ι → ℂ) :
     a ⬝ᵥ (Ω *ᵥ b) = b ⬝ᵥ (Ω *ᵥ a) := by
   rw [dotProduct_mulVec, ← mulVec_transpose, hΩ, dotProduct_comm]
 
@@ -137,7 +158,7 @@ theorem riemannThetaCharTerm_eq (α β : ι → ℝ) (z : ι → ℂ) {Ω : Matr
   have hz : (fun i => z i + (β i : ℂ)) = z + fun i => (β i : ℂ) := rfl
   rw [hv, hz]
   simp only [mulVec_add, dotProduct_add, add_dotProduct]
-  rw [rth21_dot_mulVec_comm hΩ (fun i => (α i : ℂ)) (fun i => (n i : ℂ))]
+  rw [dotProduct_mulVec_comm hΩ (fun i => (α i : ℂ)) (fun i => (n i : ℂ))]
   ring
 
 /-- `θ[α;β](z|Ω) = exp(2πi(½ α·Ω·α + α·[z+β])) θ(z + Ωα + β|Ω)` (DLMF 21.2.6).
@@ -212,7 +233,7 @@ open DLMF.Elliptic
 
 /-- Identity under the stated parameter and domain assumptions: `∑' n, f n = ∑' k : ℤ, f fun _ =>
 k`. -/
-lemma rth21_tsum_fin_one (f : (Fin 1 → ℤ) → ℂ) : ∑' n, f n = ∑' k : ℤ, f fun _ => k := by
+private lemma tsum_fin_one_int (f : (Fin 1 → ℤ) → ℂ) : ∑' n, f n = ∑' k : ℤ, f fun _ => k := by
   rw [← (Equiv.funUnique (Fin 1) ℤ).symm.tsum_eq]
   rfl
 
@@ -220,7 +241,7 @@ lemma rth21_tsum_fin_one (f : (Fin 1 → ℤ) → ℂ) : ∑' n, f n = ∑' k : 
 @[dlmf 21.2.E8]
 theorem riemannTheta_fin_one (z τ : ℂ) :
     riemannTheta ![z] !![τ] = jacobiThetaThreeTau (π * z) τ := by
-  rw [riemannTheta, rth21_tsum_fin_one, jacobiThetaThreeTau_eq_tsum]
+  rw [riemannTheta, tsum_fin_one_int, jacobiThetaThreeTau_eq_tsum]
   refine tsum_congr fun k => ?_
   simp only [riemannThetaTerm]
   congr 1
@@ -228,7 +249,7 @@ theorem riemannTheta_fin_one (z τ : ℂ) :
   ring
 
 /-- Characteristics in genus one reduce to a shifted `θ₃`. -/
-lemma rth21_char_fin_one (a b : ℝ) (z τ : ℂ) :
+private lemma riemannThetaChar_fin_one (a b : ℝ) (z τ : ℂ) :
     riemannThetaChar ![a] ![b] ![z] !![τ] =
       cexp (2 * π * I * ((1 / 2 : ℂ) * (a * (τ * a)) + a * (z + b))) *
         jacobiThetaThreeTau (π * (z + τ * a + b)) τ := by
@@ -244,7 +265,7 @@ lemma rth21_char_fin_one (a b : ℝ) (z τ : ℂ) :
 @[dlmf 21.2.E9]
 theorem jacobiThetaOneTau_eq_riemannThetaChar (z τ : ℂ) :
     jacobiThetaOneTau (π * z) τ = -riemannThetaChar ![1 / 2] ![1 / 2] ![z] !![τ] := by
-  rw [rth21_char_fin_one, jacobiThetaOneTau, jacobiThetaTwoTau]
+  rw [riemannThetaChar_fin_one, jacobiThetaOneTau, jacobiThetaTwoTau]
   push_cast
   congr 2
   · congr 1
@@ -256,7 +277,7 @@ theorem jacobiThetaOneTau_eq_riemannThetaChar (z τ : ℂ) :
 @[dlmf 21.2.E10]
 theorem jacobiThetaTwoTau_eq_riemannThetaChar (z τ : ℂ) :
     jacobiThetaTwoTau (π * z) τ = riemannThetaChar ![1 / 2] ![0] ![z] !![τ] := by
-  rw [rth21_char_fin_one, jacobiThetaTwoTau]
+  rw [riemannThetaChar_fin_one, jacobiThetaTwoTau]
   push_cast
   congr 1
   · congr 1
@@ -268,14 +289,14 @@ theorem jacobiThetaTwoTau_eq_riemannThetaChar (z τ : ℂ) :
 @[dlmf 21.2.E11]
 theorem jacobiThetaThreeTau_eq_riemannThetaChar (z τ : ℂ) :
     jacobiThetaThreeTau (π * z) τ = riemannThetaChar ![0] ![0] ![z] !![τ] := by
-  rw [rth21_char_fin_one]
+  rw [riemannThetaChar_fin_one]
   simp
 
 /-- `θ₄(πz|Ω) = θ[0;½](z|Ω)` for `g = 1` (DLMF 21.2.12). -/
 @[dlmf 21.2.E12]
 theorem jacobiThetaFourTau_eq_riemannThetaChar (z τ : ℂ) :
     jacobiThetaFourTau (π * z) τ = riemannThetaChar ![0] ![1 / 2] ![z] !![τ] := by
-  rw [rth21_char_fin_one, jacobiThetaFourTau]
+  rw [riemannThetaChar_fin_one, jacobiThetaFourTau]
   push_cast
   simp only [mul_zero, zero_mul, add_zero, Complex.exp_zero, one_mul]
   congr 1

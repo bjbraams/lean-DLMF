@@ -39,6 +39,25 @@ The complex addition theorem 14.28.1 for `Re z₁, Re z₂ > 0`, `z₁, z₂ ∉
   (`legQAdd_complex_coeff_eq`), with `P^m_ν = (ν-m+1)_{2m} P^{-m}_ν` for every degree
   (`legQAdd_associatedP_nat_eq`);
 * `legQAdd_associatedP_complex_addition`: 14.28.1 for every angle.
+
+## Main definitions
+
+* `legQAdd_sq`: the square-root branch `(z²-1)^{1/2}` of DLMF 14.28.1.
+* `legQAdd_D`: the domain `Re z > 0`, `z ∉ (0, 1]` of DLMF 14.28.1.
+* `legQAdd_Z`: the combined argument `z₁ z₂ - (z₁²-1)^{1/2} (z₂²-1)^{1/2} cos t`.
+
+## Main results
+
+* `legQAdd_coeff_eq_of_im`, `legQAdd_coeff_eq`: the Fourier coefficients of
+  `φ ↦ 𝖰_ν(cos θ₁ cos θ₂ + sin θ₁ sin θ₂ cos φ)` for non-real and for all regular `ν`.
+* `legQAdd_ferrersQ_addition`: the addition theorem for `𝖰_ν` (DLMF 14.18.3).
+* `legQAdd_one_add_mem_slitPlane`, `legQAdd_Z_mem`: the combined argument avoids the cut.
+* `legQAdd_extend`: the identity theorem on `D` from the points `cosh ξ`, `ξ > 0`.
+* `legQAdd_associatedP_nat_eq`: `P^m_ν(z) = (ν-m+1)_{2m} P^{-m}_ν(z)` for every complex degree.
+* `legQAdd_complex_coeff_eq`: the Fourier coefficients of the complex addition theorem on
+  `D × D`.
+* `legQAdd_associatedP_complex_addition`: the addition theorem for `P_ν` in the complex plane
+  (DLMF 14.28.1).
 -/
 
 @[expose] public noncomputable section

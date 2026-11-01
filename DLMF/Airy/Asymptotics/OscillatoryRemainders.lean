@@ -10,10 +10,30 @@ public import DLMF.Airy.Asymptotics.SectorRemainders
 /-!
 # Signed oscillatory Airy remainder bounds
 
-Signed estimates for the even and odd subseries of the oscillatory Airy expansions.
+Signed first-neglected-term bounds for the even and odd subseries of the real oscillatory
+expansions of `Ai`, `Bi`, `Ai'` and `Bi'` on the negative axis (DLMF §9.7(iii)). The remainders
+at `x e^{±iπ/3}` are written as Stieltjes integrals along rays, with nonnegative weights coming
+from binomial remainders.
 
-Source references and common attribution are retained in
-`DLMF.Airy.Asymptotics`.
+## Main definitions
+
+* `airyDer_d`, `airyDer_g`: binomial coefficients of `(1+t)^{1/6}` and the weight of its
+  remainder.
+* `airyDer_T`, `airyDer_L`: terms and ray Laplace integral of the `Ai'` expansion.
+
+## Main results
+
+* `airyDer_ray_ratio`: a ray Stieltjes remainder is a damped multiple of the first neglected
+  term.
+* `airyDer_ai_ratio`, `airyDer_aiDeriv_ratio`: the `Ai` and `Ai'` remainders on
+  `|arg z| ≤ π/3` are `(A + iB)` times the first neglected term with `0 ≤ A ≤ 1`.
+* `airyDer_airyAi_neg`, `airyDer_airyBi_neg`, `airyDer_airyAiDeriv_neg`,
+  `airyDer_airyBiDeriv_neg`: exact even/odd decompositions behind DLMF 9.7.9–9.7.12.
+* `airyDer_binom_rem`: the `(1+t)^{1/6}` binomial remainder in Stieltjes form.
+* `airyDer_osc_even`, `airyDer_osc_odd`, `airyDer_osc_even_deriv`, `airyDer_osc_odd_deriv`:
+  the signed bounds for the even and odd subseries.
+* `airy_oscillatory_real_error`: the signed first-neglected-term bound for each real
+  oscillatory subseries (DLMF §9.7(iii)).
 -/
 
 @[expose] public noncomputable section

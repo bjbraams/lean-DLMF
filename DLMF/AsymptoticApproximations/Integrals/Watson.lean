@@ -18,19 +18,31 @@ public import Mathlib.Analysis.MellinTransform
 
 The project's Watson lemma (`hasAsymptoticExpansion_integral_exp_smul`,
 `hasAsymptoticExpansion_integral_cexp_smul_sector`, in `DLMFMathlib`) has exponents in steps of
-`1`. DLMF's form 2.3.7–2.3.8 has exponents `(s + λ)/μ`, in steps of `1/μ`. This file first
-proves Watson's lemma for an arbitrary sequence of exponents `eₙ` with `ℜ eₙ > 0` (the proofs
-follow the project's, through its remainder bounds `isBigO_integral_exp_smul` and
-`isBigO_integral_cexp_smul_sector`), then the DLMF statements:
+`1`. DLMF's form 2.3.7–2.3.8 has exponents `(s + λ)/μ`, in steps of `1/μ`. This file proves
+Watson's lemma for an arbitrary sequence of exponents `eₙ` with `ℜ eₙ > 0`, then the DLMF
+statements.
 
-* 2.3.1, 2.3.7–2.3.8 (real `x`), and the `laplaceTransform` form of the Chapter 1 area;
-* 2.3.9 (logarithmic factor) and 2.3.10–2.3.12 (general kernel `f(xt)`, Mellin transform);
-* 2.4.1 (complex `z` in a sector, complex `λ`) and the rotation of §2.4(i);
-* §2.4(ii): the Laplace inversion 2.4.2–2.4.3, the inverse transform of an asymptotic
-  expansion 2.4.4–2.4.5, and Haar's method 2.4.6–2.4.9.
+## Main results
 
-Integrals that DLMF assumes "convergent for all sufficiently large `x`" are Lebesgue integrals
-here, with the hypothesis that `e^{-ct} q(t)` is integrable on `(0, ∞)` for some `c`.
+* `hasAsymptoticExpansion_integral_exp_smul_rpow_seq`,
+  `hasAsymptoticExpansion_integral_cexp_smul_cpow_seq`: Watson's lemma for a general sequence of
+  exponents, on the real line and in a sector.
+* `watson_lemma`, `watson_lemma_laplaceTransform`: DLMF 2.3.1, 2.3.7–2.3.8 for real `x`.
+* `watson_lemma_log`: a logarithmic factor (DLMF 2.3.9).
+* `watson_lemma_kernel`: a general kernel `f(xt)` with its Mellin transform
+  (DLMF 2.3.10–2.3.12).
+* `watson_lemma_sector`, `watson_lemma_rotate`: complex `z` in a sector, complex `λ`, and
+  rotation of the integration path (DLMF 2.4.1, §2.4(i)).
+* `laplace_inversion`, `inverseLaplace_of_hasAsymptoticExpansion`: Laplace inversion and the
+  inverse transform of an asymptotic expansion (DLMF 2.4.2–2.4.5).
+* `haar_sub`, `haar_isLittleO`, `haar_isLittleO_pow`: Haar's method (DLMF 2.4.6–2.4.9).
+
+## Implementation notes
+
+The proofs follow the project's, through its remainder bounds `isBigO_integral_exp_smul` and
+`isBigO_integral_cexp_smul_sector`. Integrals that DLMF assumes "convergent for all
+sufficiently large `x`" are Lebesgue integrals here, with the hypothesis that `e^{-ct} q(t)` is
+integrable on `(0, ∞)` for some `c`.
 -/
 
 @[expose] public noncomputable section
@@ -87,7 +99,7 @@ theorem hasAsymptoticExpansion_integral_exp_smul_rpow_seq {F : ℝ → E} {a : �
 
 /-- Identity under the stated parameter and domain assumptions: `(s + lam - mu) / mu = (s + lam) /
 mu - 1`. -/
-private lemma g2a_exp_eq {lam mu : ℝ} (hmu : 0 < mu) (s : ℝ) :
+private lemma add_sub_div_eq_div_sub_one {lam mu : ℝ} (hmu : 0 < mu) (s : ℝ) :
     (s + lam - mu) / mu = (s + lam) / mu - 1 := by
   field_simp
 
@@ -106,7 +118,7 @@ theorem watson_lemma {q : ℝ → E} {a : ℕ → E} {lam mu c : ℝ} (hlam : 0 
       (fun x => ∫ t in Ioi (0 : ℝ), Real.exp (-x * t) • q t) := by
   refine hasAsymptoticExpansion_integral_exp_smul_rpow_seq (e := fun s => ((s : ℝ) + lam) / mu)
     (fun n => by positivity) hint fun N => ?_
-  simpa only [g2a_exp_eq hmu] using hq N
+  simpa only [add_sub_div_eq_div_sub_one hmu] using hq N
 
 end Real
 
@@ -147,7 +159,7 @@ theorem watson_lemma_log {q : ℝ → ℝ} {a : ℕ → ℝ} {lam mu c : ℝ} (h
     (e := fun n => ((n : ℝ) + lam) / mu) (fun n => by positivity)
     (fun n => by push_cast; exact div_lt_div_of_pos_right (by linarith) hmu) hintlog
     (fun M => ?_) N
-  simpa only [g2a_exp_eq hmu, smul_eq_mul] using hq M
+  simpa only [add_sub_div_eq_div_sub_one hmu, smul_eq_mul] using hq M
 
 /-- DLMF 2.3.10–2.3.12: Watson's lemma for a general kernel. Let `q` satisfy 2.3.7 with
 `λ, μ > 0`, be locally integrable on `(0, ∞)` (DLMF: piecewise continuous) and satisfy
@@ -170,7 +182,7 @@ theorem watson_lemma_kernel {f q : ℝ → ℂ} {a : ℕ → ℂ} {lam mu A a' b
   refine hasAsymptoticExpansion_integral_kernel_mul_rpow_seq
     (e := fun n => ((n : ℝ) + lam) / mu) (fun n => by positivity)
     hA.le ha' hb hκ hfm hf hqi hqb (fun N => ?_)
-  simpa only [g2a_exp_eq hmu, Complex.real_smul] using hq N
+  simpa only [add_sub_div_eq_div_sub_one hmu, Complex.real_smul] using hq N
 
 section Sector
 

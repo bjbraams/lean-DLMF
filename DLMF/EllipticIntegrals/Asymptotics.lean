@@ -10,20 +10,40 @@ public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.Relations
 
 /-!
-# Asymptotic approximations (DLMF §19.12)
+# Asymptotic approximations of elliptic integrals (DLMF §19.12)
 
-* (19.12.1), (19.12.2): convergent logarithmic expansions of `K(k)` and `E(k)` about `k = 1`,
-  in powers of the complementary modulus `k' = (1 - k²)^{1/2}` (`jacobiComodulusk`, principal
-  square root), with the coefficients `d(m) = ψ(1 + m) - ψ(½ + m)` (19.12.3,
-  `compEllIntLogCoeff`) and the principal logarithm. Complex `k` are allowed, as in DLMF
-  (`0 < |k'| < 1`); we add `1 - k² ∈ ℂ \ (-∞, 0]`, i.e. `k` off DLMF's cuts `(-∞, -1] ∪ [1, ∞)`
-  of `K` and `E` (§19.2(ii)), where the integrals are not defined by DLMF. (For `E` the point
-  `k' = 0` is allowed.)
-* (19.12.4), (19.12.5): `Π(α², k)` as `k² → 1-` for real `α² < 1` and `α² > 1` (a Cauchy
-  principal value). DLMF's `f = g (1 + O(k'²)) + h` is stated as `f - h - g = O(k'² g)`
-  (equivalently). The limit `k² → 1-` is taken along real `k → 1-`.
-* (19.12.6), (19.12.7): `R_C(x, y)` as `x/y → 0` (`x ≥ 0`, `y > 0`) and as `y/x → 0`
-  (`x, y > 0`); the two-variable limits are filters on `ℝ × ℝ` (`Filter.comap` of the ratio).
+Logarithmic expansions of the complete integrals `K(k)` and `E(k)` about `k = 1`, the behaviour
+of `Π(α², k)` as `k² → 1-`, and the asymptotics of `R_C(x, y)` as the ratio of its arguments
+tends to `0` or `∞`.
+
+## Main definitions
+
+* `compEllIntLogCoeff`: the coefficients `d(m) = ψ(1 + m) - ψ(½ + m)` of DLMF 19.12.3.
+* `smallRatioFilter`, `largeRatioFilter`: the two-variable limits `x/y → 0` and `y/x → 0`
+  of DLMF 19.12.6 and 19.12.7.
+
+## Main results
+
+* `compEllIntLogCoeff_zero`, `compEllIntLogCoeff_succ`: `d(0) = 2 ln 2` and the recurrence
+  for `d(m)` (DLMF 19.12.3).
+* `compEllIntKk_hasSum_log`, `compEllIntEk_hasSum_log`: the logarithmic expansions of `K(k)`
+  and `E(k)` in powers of `k'` (DLMF 19.12.1, 19.12.2).
+* `compEllIntPik_isBigO_log`, `compEllIntPik_isBigO_log_of_one_lt`: `Π(α², k)` as `k² → 1-`
+  for real `α² < 1` and `α² > 1` (DLMF 19.12.4, 19.12.5).
+* `symEllIntRC_isBigO_small`, `symEllIntRC_isBigO_large`: `R_C(x, y)` as `x/y → 0` and as
+  `y/x → 0` (DLMF 19.12.6, 19.12.7).
+
+## Implementation notes
+
+* In 19.12.1 and 19.12.2, `k' = (1 - k²)^{1/2}` is `jacobiComodulusk` (principal square root)
+  and the logarithm is principal. Complex `k` are allowed, as in DLMF (`0 < |k'| < 1`); we add
+  `1 - k² ∈ ℂ \ (-∞, 0]`, that is, `k` off DLMF's cuts `(-∞, -1] ∪ [1, ∞)` of `K` and `E`
+  (§19.2(ii)), where DLMF does not define the integrals. For `E` the point `k' = 0` is allowed.
+* In 19.12.4 and 19.12.5 the limit `k² → 1-` is taken along real `k → 1-`, and for `α² > 1`
+  the integral `Π` is a Cauchy principal value. DLMF's `f = g (1 + O(k'²)) + h` is stated in
+  the equivalent form `f - h - g = O(k'² g)`.
+* The two-variable limits of 19.12.6 and 19.12.7 are filters on `ℝ × ℝ` (`Filter.comap` of
+  the ratio).
 
 ## References
 
@@ -128,16 +148,16 @@ theorem compEllIntPik_isBigO_log_of_one_lt {α2 : ℝ} (hα : 1 < α2) :
   sorry
 
 /-- The filter of DLMF 19.12.6: `x ≥ 0`, `y > 0`, `x/y → 0`. -/
-def ei19b_smallRatioFilter : Filter (ℝ × ℝ) :=
+def smallRatioFilter : Filter (ℝ × ℝ) :=
   comap (fun p : ℝ × ℝ => p.1 / p.2) (𝓝 0) ⊓ 𝓟 {p | 0 ≤ p.1 ∧ 0 < p.2}
 
 /-- The filter of DLMF 19.12.7: `x > 0`, `y > 0`, `y/x → 0`. -/
-def ei19b_largeRatioFilter : Filter (ℝ × ℝ) :=
+def largeRatioFilter : Filter (ℝ × ℝ) :=
   comap (fun p : ℝ × ℝ => p.2 / p.1) (𝓝 0) ⊓ 𝓟 {p | 0 < p.1 ∧ 0 < p.2}
 
 /-- `R_C(x, y) = y^{-1/2} arccos(√(x/y))/√(1 - x/y)` for `0 ≤ x < y` (Carlson's (6.9-15) and
 homogeneity; `x = 0` from 19.6.15). -/
-lemma ei19b_symEllIntRC_eq_arccos {x y : ℝ} (hx : 0 ≤ x) (hxy : x < y) :
+private lemma symEllIntRC_ofReal_eq_arccos {x y : ℝ} (hx : 0 ≤ x) (hxy : x < y) :
     symEllIntRC (x : ℂ) (y : ℂ) =
       (((Real.sqrt y)⁻¹ * (Real.arccos (Real.sqrt (x / y)) / Real.sqrt (1 - x / y)) : ℝ) : ℂ) := by
   have hy : 0 < y := lt_of_le_of_lt hx hxy
@@ -148,13 +168,13 @@ lemma ei19b_symEllIntRC_eq_arccos {x y : ℝ} (hx : 0 ≤ x) (hxy : x < y) :
     have ht1 : x / y < 1 := (div_lt_one hy).mpr hxy
     have e1 : x = Real.sqrt y ^ 2 * (x / y) := by rw [hyy]; field_simp
     have e2 : y = Real.sqrt y ^ 2 * 1 := by rw [hyy, mul_one]
-    have h := ei19b_symEllIntRC_scale hsy ht0 one_pos
+    have h := symEllIntRC_sq_mul_eq_carlsonRC hsy ht0 one_pos
     rw [← e1, ← e2] at h
     rw [h, show ((1 : ℝ) : ℂ) = ((1 : ℝ) : ℂ) from rfl, Carlson.TwoVariable.carlsonRC_of_lt ht0 ht1,
       div_one]
     push_cast
     ring
-  · have h := ei19b_symEllIntRC_zero_sq hsy
+  · have h := symEllIntRC_zero_ofReal_sq hsy
     rw [hyy] at h
     rw [ofReal_zero, h, zero_div, Real.sqrt_zero, Real.arccos_zero, sub_zero, Real.sqrt_one,
       div_one]
@@ -163,7 +183,7 @@ lemma ei19b_symEllIntRC_eq_arccos {x y : ℝ} (hx : 0 ≤ x) (hxy : x < y) :
 
 /-- The elementary estimate behind 19.12.6:
 `|arccos s/√(1 - s²) - π/2 + s| ≤ 3s²` for `0 ≤ s ≤ 1/2`. -/
-lemma ei19b_arccos_estimate {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1 / 2) :
+private lemma abs_arccos_div_sqrt_sub_le {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1 / 2) :
     |Real.arccos s / Real.sqrt (1 - s ^ 2) - π / 2 + s| ≤ 3 * s ^ 2 := by
   set r := Real.sqrt (1 - s ^ 2) with hr
   have hs2 : s ^ 2 ≤ 1 / 4 := by nlinarith
@@ -214,14 +234,14 @@ lemma ei19b_arccos_estimate {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1 / 2) :
 @[dlmf 19.12.E6]
 theorem symEllIntRC_isBigO_small :
     (fun p : ℝ × ℝ => symEllIntRC (p.1 : ℂ) (p.2 : ℂ) -
-        ((π / (2 * Real.sqrt p.2) - Real.sqrt p.1 / p.2 : ℝ) : ℂ)) =O[ei19b_smallRatioFilter]
+        ((π / (2 * Real.sqrt p.2) - Real.sqrt p.1 / p.2 : ℝ) : ℂ)) =O[smallRatioFilter]
       fun p : ℝ × ℝ => Real.sqrt p.1 / p.2 * Real.sqrt (p.1 / p.2) := by
-  have hev : ∀ᶠ p : ℝ × ℝ in ei19b_smallRatioFilter,
+  have hev : ∀ᶠ p : ℝ × ℝ in smallRatioFilter,
       p.1 / p.2 < 1 / 4 ∧ 0 ≤ p.1 ∧ 0 < p.2 := by
-    have h1 : ∀ᶠ p : ℝ × ℝ in ei19b_smallRatioFilter, p.1 / p.2 < 1 / 4 :=
+    have h1 : ∀ᶠ p : ℝ × ℝ in smallRatioFilter, p.1 / p.2 < 1 / 4 :=
       (tendsto_comap.eventually (eventually_lt_nhds (by norm_num : (0 : ℝ) < 1 / 4))).filter_mono
         inf_le_left
-    have h2 : ∀ᶠ p : ℝ × ℝ in ei19b_smallRatioFilter, 0 ≤ p.1 ∧ 0 < p.2 :=
+    have h2 : ∀ᶠ p : ℝ × ℝ in smallRatioFilter, 0 ≤ p.1 ∧ 0 < p.2 :=
       (eventually_principal.mpr fun p hp => hp).filter_mono inf_le_right
     exact h1.and h2
   refine IsBigO.of_bound 3 ?_
@@ -238,10 +258,10 @@ theorem symEllIntRC_isBigO_small :
   have hs1 : s ≤ 1 / 2 := by nlinarith
   have hsx : Real.sqrt x / y = s / Real.sqrt y := by
     rw [hs, Real.sqrt_div' _ hy.le, div_div, ← Real.sqrt_mul hy.le, Real.sqrt_mul_self hy.le]
-  rw [ei19b_symEllIntRC_eq_arccos hx hxy, ← ofReal_sub, Complex.norm_real, Real.norm_eq_abs,
+  rw [symEllIntRC_ofReal_eq_arccos hx hxy, ← ofReal_sub, Complex.norm_real, Real.norm_eq_abs,
     Real.norm_eq_abs, hsx, ← hs]
   rw [show 1 - x / y = 1 - s ^ 2 by rw [hs2]]
-  have he := ei19b_arccos_estimate hs0 hs1
+  have he := abs_arccos_div_sqrt_sub_le hs0 hs1
   rw [show (Real.sqrt y)⁻¹ * (Real.arccos s / Real.sqrt (1 - s ^ 2)) - (π / (2 * Real.sqrt y) -
       s / Real.sqrt y) = (Real.sqrt y)⁻¹ * (Real.arccos s / Real.sqrt (1 - s ^ 2) - π / 2 + s) by
     field_simp; ring, abs_mul, abs_of_pos (inv_pos.mpr hsy),
@@ -258,7 +278,7 @@ stated as `R_C(x, y) - M = O(M y²/x²)` with `M` the main term. -/
 theorem symEllIntRC_isBigO_large :
     (fun p : ℝ × ℝ => symEllIntRC (p.1 : ℂ) (p.2 : ℂ) -
         ((1 / (2 * Real.sqrt p.1) * ((1 + p.2 / (2 * p.1)) * Real.log (4 * p.1 / p.2) -
-          p.2 / (2 * p.1)) : ℝ) : ℂ)) =O[ei19b_largeRatioFilter]
+          p.2 / (2 * p.1)) : ℝ) : ℂ)) =O[largeRatioFilter]
       fun p : ℝ × ℝ => 1 / (2 * Real.sqrt p.1) * ((1 + p.2 / (2 * p.1)) *
         Real.log (4 * p.1 / p.2) - p.2 / (2 * p.1)) * (p.2 / p.1) ^ 2 := by
   sorry

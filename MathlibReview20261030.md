@@ -449,7 +449,7 @@ without copying definitions.
 There is one policy ambiguity worth resolving explicitly: the support-layer description
 in `AGENTS.md` says `DLMFMathlib` imports Mathlib and lean-codes only, while the general
 policy allows TauCeti throughout. The existing
-`DLMFMathlib/NumberTheory/T27aPrimeNumberTheorem.lean` directly imports TauCeti.
+`DLMFMathlib/NumberTheory/PrimeNumberTheorem.lean` directly imports TauCeti.
 Its reuse is mathematically appropriate; clarify the documented exception or intended
 support-layer rule rather than silently replacing that proof.
 

@@ -9,23 +9,44 @@ public import DLMF.ParabolicCylinder.Relations
 public import DLMF.Confluent.TricomiLaplace
 
 /-!
-# Tools for the cylinder Laplace integrals (DLMF 12.5.2–12.5.3)
+# Tools for the parabolic cylinder Laplace and Barnes integrals (DLMF 12.5.2–12.5.3, 12.5.8)
 
-The integral `pcfInt_F c p w = ∫₀^∞ t^{c-1} e^{-t} (w+2t)^p dt` is holomorphic in `w` on the
-slit plane (`pcfInt_differentiableOn`, by locally uniform domination). For real `x > 0` the
-Laplace integral of Kummer's `U` (`kummerU_laplace`) rescales to it (`pcfInt_laplace_scale`),
-giving DLMF 12.5.2–12.5.3 on the positive axis (`pcfInt_U_real_2`, `pcfInt_U_real_3`); the
-identity theorem (`pcfInt_eq_of_real`) then extends them to the right half-plane.
+This file supplies the analytic lemmas behind the integral representations DLMF 12.5.2–12.5.3
+and 12.5.8 of `U(a,z)` and the integrals DLMF 12.12.1–12.12.2.
+
+## Main definitions
+
+* `pcfInt_F`: the integral `∫₀^∞ t^{c-1} e^{-t} (w + 2t)^p dt` behind DLMF 12.5.2–12.5.3.
+* `pcfInt_B`: the Barnes integrand `Γ(t) Γ(1/2 + a - 2t) 2^t z^{2t}`, `t = c + iy`, of
+  DLMF 12.5.8.
+* `pcfInt_sector`: the sector `|arg z| < 3π/4` of DLMF 12.5.8.
+
+## Main results
+
+* `pcfInt_differentiableOn`: `pcfInt_F c p` is holomorphic on the slit plane.
+* `pcfInt_U_real_2`, `pcfInt_U_real_3`: DLMF 12.5.2–12.5.3 for real positive argument.
+* `pcfInt_eq_of_real`: the identity theorem on the right half-plane.
+* `pcfInt_integrand_1`, `pcfInt_integrand_2`, `pcfInt_laplace_two`: the integrands of
+  DLMF 12.12.1–12.12.2 as Laplace kernels of Kummer's `U`, and the value at `z = 2`.
+* `pcfInt_B_real`: DLMF 12.5.8 for real positive argument.
+* `pcfInt_norm_B_le`, `pcfInt_B_differentiableOn`: a uniform bound for the Barnes integrand
+  and holomorphy of the integral on the sector.
+* `pcfInt_B_integral`: DLMF 12.5.8, value and integrability.
+
+## Implementation notes
+
+`pcfInt_F` is holomorphic by locally uniform domination. For real `x > 0` the Laplace
+integral of Kummer's `U` (`kummerU_laplace`) rescales to it (`pcfInt_laplace_scale`), and the
+identity theorem extends DLMF 12.5.2–12.5.3 to the right half-plane.
 
 For DLMF 12.12.1–12.12.2 the substitution `x = t²/2` (`pcfInt_sq_half_subst`) turns the
-integrands into the Laplace kernel of `U(a/2+1/4, 1/2, x)` (`pcfInt_integrand_1`,
-`pcfInt_integrand_2`), whose transform is DLMF 13.10.7 (`laplace_kummerU_gauss`); at `z = 2`
-the resulting `₂F₁(-b,b;1/2;1/2)` is evaluated by DLMF 15.4.12 (`pcfInt_laplace_two`).
+integrands into the Laplace kernel of `U(a/2 + 1/4, 1/2, x)`, whose transform is DLMF 13.10.7
+(`laplace_kummerU_gauss`); at `z = 2` the resulting `₂F₁(-b, b; 1/2; 1/2)` is evaluated by
+DLMF 15.4.12.
 
 For DLMF 12.5.8 the Barnes integral of Kummer's `U` (DLMF 13.4.17, `kummerU_barnes`) and the
-duplication formula give the real case (`pcfInt_B_real`); a uniform bound for the integrand
-(`pcfInt_norm_B_le`) gives holomorphy on the sector `|arg z| < 3π/4` (`pcfInt_B_differentiableOn`)
-and the identity theorem the general case (`pcfInt_B_integral`).
+duplication formula give the real case; the uniform bound gives holomorphy on the sector and
+the identity theorem the general case.
 -/
 
 @[expose] public noncomputable section

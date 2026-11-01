@@ -9,7 +9,14 @@ public import DLMF.Hypergeometric.Basic.GaussCoefficients
 public import Mathlib.Data.Nat.Choose.Cast
 
 /-!
-# Defining coefficients and series for Appell F4
+# Defining coefficients and series for Appell's `F₄`
+
+## Main definitions
+
+* `appF4Coeff`: the coefficients `(a)_{m+n} (b)_{m+n} / ((c)_m (c')_n m! n!)`.
+* `appF4`: Appell's `F₄` (DLMF 16.13.4) as the sum of its double series, totalized outside
+  convergence.
+* `appF4Term`, `appF4E`, `appF4Fam`: auxiliary terms for the proof of Bailey's formula.
 -/
 
 @[expose] public noncomputable section

@@ -13,18 +13,28 @@ public import Mathlib.RingTheory.Polynomial.Pochhammer
 /-!
 # Asymptotics of integrals: definitions (DLMF §§2.3–2.4)
 
+## Main definitions
+
 * `variationalOperator a b f` (2.3.6): `𝒱_{a,b}(f) = ∫ₐᵇ |f'(t)| dt`.
-* `binomSeriesCoeff p β n` and `laplaceCoeff L₀ p q λ μ s` (2.3.16–2.3.18, 2.4.12–2.4.13):
-  the coefficients `bₛ` of Laplace's method, defined by the residue formula 2.3.18 in its
-  formal form `bₛ = μ⁻¹ [τˢ] Q(τ) P(τ)^{-(λ+s)/μ}`, where `p(t) - p(a) = (t-a)^μ P(t-a)` and
-  `q(t) = (t-a)^{λ-1} Q(t-a)`. The power `p₀^{-(λ+s)/μ}` is `exp(-(λ+s)/μ · L₀)` for a chosen
-  logarithm `L₀` of `p₀` (for `p₀ > 0` the real logarithm; in §2.4(iii) the branch with
-  `|θ + μω + ph p₀| ≤ ½π`, 2.4.13), and `(P/p₀)^β` is the binomial series.
+* `cbinom`, `binomSeriesCoeff p β n`: complex binomial coefficients and the coefficients of
+  the binomial series `(P/p₀)^β`.
+* `laplaceCoeff L₀ p q λ μ s` (2.3.16–2.3.18, 2.4.12–2.4.13): the coefficients `bₛ` of Laplace's
+  method, defined by the residue formula 2.3.18 in its formal form
+  `bₛ = μ⁻¹ [τˢ] Q(τ) P(τ)^{-(λ+s)/μ}`, where `p(t) - p(a) = (t-a)^μ P(t-a)` and
+  `q(t) = (t-a)^{λ-1} Q(t-a)`.
 * `bromwichPartial Q σ t η` (2.4.3, 2.4.6): the truncated inversion integral
   `(2πi)⁻¹ ∫_{σ-iη}^{σ+iη} e^{tz} Q(z) dz`.
 * `stationaryPhaseP p q s` (2.3.21): `Pₛ = ((1/p') d/dt)ˢ (q/p')`.
 * `bleisteinA`, `bleisteinB`, `bleisteinW`, `bleisteinF` (2.3.26, 2.3.27, 2.3.33): the
   quadratic change of variable of Bleistein's method and its comparison integrals.
+* `pathPow`, `polarScale`: powers along a path and the scale `z^{-ν} e^{-zp(a)}` in polar
+  coordinates.
+
+## Implementation notes
+
+In `laplaceCoeff` the power `p₀^{-(λ+s)/μ}` is `exp(-(λ+s)/μ · L₀)` for a chosen logarithm
+`L₀` of `p₀` (for `p₀ > 0` the real logarithm; in §2.4(iii) the branch with
+`|θ + μω + ph p₀| ≤ ½π`, 2.4.13).
 -/
 
 @[expose] public noncomputable section

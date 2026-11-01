@@ -9,27 +9,34 @@ public import DLMF.Coulomb.Basic.Functions
 public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 
 /-!
-# Coulomb functions in `ρ, η`: auxiliary definitions (DLMF §§33.4–33.13)
+# Coulomb functions in `ρ, η`: auxiliary definitions
 
-Definitions used by the statements of DLMF §§33.4–33.13, on top of the functions
-`F_ℓ`, `G_ℓ`, `H^±_ℓ`, `C_ℓ`, `σ_ℓ`, `θ_ℓ` of `DLMF.Coulomb.Basic` (namespace `DLMF.Confluent`).
+Definitions used by the statements of DLMF §§33.4–33.13, on top of the functions `F_ℓ`, `G_ℓ`,
+`H^±_ℓ`, `C_ℓ`, `σ_ℓ`, `θ_ℓ` of `DLMF.Coulomb.Basic.Functions` (namespace `DLMF.Confluent`).
+
+## Main definitions
 
 * `recurrenceR`, `recurrenceS`, `recurrenceT`: the coefficients `R_ℓ`, `S_ℓ`, `T_ℓ` of the
   recurrences (DLMF 33.4.1).
-* `phaseShift`: the Coulomb phase shift `σ_ℓ(η)` with DLMF's branch (zero at `η = 0`,
-  continuous in `η`), as `-γη + ∑_{n ≥ 1} (η/n - arctan(η/n)) + ∑_{k=1}^{ℓ} arctan(η/k)`.
-  The principal-branch `DLMF.Confluent.coulombSigma` differs from it by a multiple of `2π`.
+* `phaseShift`: the Coulomb phase shift `σ_ℓ(η)` with DLMF's branch, zero at `η = 0` and
+  continuous in `η` (DLMF 33.2.10).
 * `powerSeriesCoeff`: the coefficients `A_k^ℓ(η)` of the power series 33.6.1, by the
   recurrence 33.6.3 with `A_{ℓ+1}^ℓ = 1`, `A_{ℓ+2}^ℓ = η/(ℓ+1)`.
 * `besselSeriesCoeffA`, `besselSeriesCoeffB`: the coefficients `a_k` of 33.9.1 (recurrence
   33.9.2) and `b_k` of 33.9.3–33.9.4 (recurrence 33.9.5).
 * `largeRhoF`, `largeRhoG`, `largeRhoFHat`, `largeRhoGHat`: the amplitude functions
-  `f, g, f̂, ĝ` of DLMF 33.11.2–33.11.3, and `largeRhoTerm`: the terms
-  `(f_k, g_k, f̂_k, ĝ_k)` of the expansions 33.11.5–33.11.6 (recurrence 33.11.8–33.11.9).
-* `transitionX`, `transitionMu`, `transitionA`, `transitionB`: the variables and polynomials
-  of the transition-region expansions DLMF 33.12.1, 33.12.4–33.12.5.
+  `f, g, f̂, ĝ` of DLMF 33.11.2–33.11.3.
+* `largeRhoTerm`: the terms `(f_k, g_k, f̂_k, ĝ_k)` of the expansions 33.11.5–33.11.6
+  (recurrence 33.11.8–33.11.9).
+* `transitionX`, `transitionMu`, `transitionA`, `transitionB`: the variables and polynomials of
+  the transition-region expansions DLMF 33.12.1, 33.12.4–33.12.5.
 * `coulombWaveComplex`: the unnormalized regular solution
   `ρ^{ℓ+1} e^{-iρ} M(ℓ+1-iη, 2ℓ+2, 2iρ)` for complex `ℓ`, `η`, `ρ` (DLMF §33.13).
+
+## Implementation notes
+
+`phaseShift` is given as `-γη + ∑_{n ≥ 1} (η/n - arctan(η/n)) + ∑_{k=1}^{ℓ} arctan(η/k)`. The
+principal-branch `DLMF.Confluent.coulombSigma` differs from it by a multiple of `2π`.
 -/
 
 @[expose] public section

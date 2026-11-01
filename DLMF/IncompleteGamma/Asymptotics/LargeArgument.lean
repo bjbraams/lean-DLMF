@@ -14,12 +14,27 @@ public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
 public import DLMFMathlib.Analysis.Calculus.InverseSeries
 
 /-!
-# Large-argument incomplete Gamma expansions
+# Large-argument and large-parameter incomplete Gamma expansions (DLMF §8.11(i)–(iii))
 
-Large-argument expansions, coefficient bounds and normalized incomplete-Gamma ratios.
+## Main definitions
 
-Source references and common attribution are retained in
-`DLMF.IncompleteGamma.Asymptotics`.
+* `incGammaAsymptoticCoeff`, `incGammaAsymptoticRemainder`: the coefficients and the remainder
+  of the large-argument expansion, DLMF 8.11.1–8.11.2.
+* `incGammaLambdaPolynomial`: the polynomials `b_k(λ)` of DLMF 8.11.9.
+
+## Main results
+
+* `upperIncGamma_log_asymptotic`: the large-`z` expansion of `Γ(a, z)`, DLMF 8.11.3, with the
+  real remainder bound `incGammaAsymptoticRemainder_real_bound` (§8.11(i)).
+* `lowerIncGamma_large_parameter_hasSum`, `lowerIncGamma_large_parameter_asymptotic`:
+  DLMF 8.11.4.
+* `normIncGammaP_large_parameter_equivalent`: DLMF 8.11.5.
+* `lowerIncGamma_fixed_ratio_asymptotic`, `upperIncGamma_fixed_ratio_asymptotic`,
+  `upperIncGamma_negative_parameter_ratio_asymptotic`: expansions for `z = λa`,
+  DLMF 8.11.6–8.11.9.
+* `upperIncGamma_diagonal_asymptotic`: DLMF 8.11.12.
+
+See `DLMF.IncompleteGamma.Asymptotics` for the overview.
 -/
 
 @[expose] public noncomputable section

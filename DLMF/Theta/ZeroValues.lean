@@ -11,10 +11,22 @@ public import DLMF.Theta.Identities
 /-!
 # Theta functions: values at `z = 0` (DLMF §20.4)
 
-Values of `θⱼ` and their `z`-derivatives at `z = 0`, in the lattice form with `q = e^{iπτ}`,
-`q^{1/4} = e^{iπτ/4}` and `Im τ > 0`. Infinite products are stated with `HasProd` over
-`k : ℕ` with `n = k + 1`; the `q`-Pochhammer form uses the project's `qPochhammerInf`.
+Values of `θⱼ` and their `z`-derivatives at `z = 0`, in the lattice form with
+`q = e^{iπτ}`, `q^{1/4} = e^{iπτ/4}` and `Im τ > 0`.
+
+## Main results
+
+* `jacobiTheta_zero_values`: the vanishing values DLMF 20.4.1.
+* `jacobiTheta_iteratedDeriv_zero_values`: the vanishing higher derivatives DLMF 20.4.7.
+* `jacobiThetaOne_third_deriv_ratio`, `jacobiThetaTwo_second_deriv_ratio`,
+  `jacobiThetaThree_second_deriv_ratio`, `jacobiThetaFour_second_deriv_ratio`:
+  DLMF 20.4.8–20.4.11.
+* `jacobiTheta_deriv_ratio_sum`: DLMF 20.4.12.
+
+## Implementation notes
+
 The vanishing statements 20.4.1 and 20.4.7 follow from the parity of the theta functions.
+The product forms DLMF 20.4.2–20.4.6 are in `DLMF.Theta.Products`.
 -/
 
 @[expose] public section
@@ -29,7 +41,7 @@ namespace DLMF.Theta
 open DLMF.Elliptic DLMF.QSeries
 
 /-- Odd-order derivatives of an even function vanish at `0`. -/
-lemma th20_iteratedDeriv_even_zero {f : ℂ → ℂ} (hf : ∀ z, f (-z) = f z) {n : ℕ}
+private lemma iteratedDeriv_odd_zero_of_even {f : ℂ → ℂ} (hf : ∀ z, f (-z) = f z) {n : ℕ}
     (hn : Odd n) : iteratedDeriv n f 0 = 0 := by
   have h := iteratedDeriv_comp_neg n f 0
   simp only [hf, neg_zero, hn.neg_one_pow, smul_eq_mul, neg_one_mul] at h
@@ -38,7 +50,7 @@ lemma th20_iteratedDeriv_even_zero {f : ℂ → ℂ} (hf : ∀ z, f (-z) = f z) 
   exact CharZero.eq_neg_self_iff.mp h
 
 /-- Even-order derivatives of an odd function vanish at `0`. -/
-lemma th20_iteratedDeriv_odd_zero {f : ℂ → ℂ} (hf : ∀ z, f (-z) = -f z) {n : ℕ}
+private lemma iteratedDeriv_even_zero_of_odd {f : ℂ → ℂ} (hf : ∀ z, f (-z) = -f z) {n : ℕ}
     (hn : Even n) : iteratedDeriv n f 0 = 0 := by
   have h := iteratedDeriv_comp_neg n f 0
   simp only [hf, neg_zero, hn.neg_one_pow, one_smul] at h
@@ -53,11 +65,11 @@ theorem jacobiTheta_zero_values (τ : ℂ) :
       deriv (fun z => jacobiThetaFourTau z τ) 0 = 0 := by
   refine ⟨?_, ?_, ?_, ?_⟩
   · simpa using jacobiThetaOneTau_lattice_eq_zero τ 0 0
-  · simpa using th20_iteratedDeriv_even_zero (f := fun z => jacobiThetaTwoTau z τ)
+  · simpa using iteratedDeriv_odd_zero_of_even (f := fun z => jacobiThetaTwoTau z τ)
       (fun z => jacobiThetaTwoTau_neg z τ) (n := 1) odd_one
-  · simpa using th20_iteratedDeriv_even_zero (f := fun z => jacobiThetaThreeTau z τ)
+  · simpa using iteratedDeriv_odd_zero_of_even (f := fun z => jacobiThetaThreeTau z τ)
       (fun z => jacobiThetaThreeTau_neg z τ) (n := 1) odd_one
-  · simpa using th20_iteratedDeriv_even_zero (f := fun z => jacobiThetaFourTau z τ)
+  · simpa using iteratedDeriv_odd_zero_of_even (f := fun z => jacobiThetaFourTau z τ)
       (fun z => jacobiThetaFourTau_neg z τ) (n := 1) odd_one
 
 /-- DLMF 20.4.7: `θ₁''(0,q) = θ₂'''(0,q) = θ₃'''(0,q) = θ₄'''(0,q) = 0` (for every `τ`). -/
@@ -68,27 +80,27 @@ theorem jacobiTheta_iteratedDeriv_zero_values (τ : ℂ) :
       iteratedDeriv 3 (fun z => jacobiThetaThreeTau z τ) 0 = 0 ∧
       iteratedDeriv 3 (fun z => jacobiThetaFourTau z τ) 0 = 0 := by
   have h3 : Odd 3 := by decide
-  exact ⟨th20_iteratedDeriv_odd_zero (fun z => jacobiThetaOneTau_neg z τ) even_two,
-    th20_iteratedDeriv_even_zero (fun z => jacobiThetaTwoTau_neg z τ) h3,
-    th20_iteratedDeriv_even_zero (fun z => jacobiThetaThreeTau_neg z τ) h3,
-    th20_iteratedDeriv_even_zero (fun z => jacobiThetaFourTau_neg z τ) h3⟩
+  exact ⟨iteratedDeriv_even_zero_of_odd (fun z => jacobiThetaOneTau_neg z τ) even_two,
+    iteratedDeriv_odd_zero_of_even (fun z => jacobiThetaTwoTau_neg z τ) h3,
+    iteratedDeriv_odd_zero_of_even (fun z => jacobiThetaThreeTau_neg z τ) h3,
+    iteratedDeriv_odd_zero_of_even (fun z => jacobiThetaFourTau_neg z τ) h3⟩
 
 /-- `‖cos 2w‖ ≤ e^{2|Im w|}` (helper). -/
-lemma p20R1_norm_cos_two_le (w : ℂ) : ‖cos (2 * w)‖ ≤ Real.exp (2 * |w.im|) := by
-  obtain ⟨e1, e2⟩ := p20R1_norm_exp_two_I w
-  have h := th20_exp_add_inv w
+private lemma norm_cos_two_mul_le (w : ℂ) : ‖cos (2 * w)‖ ≤ Real.exp (2 * |w.im|) := by
+  obtain ⟨e1, e2⟩ := norm_exp_two_I_mul_le w
+  have h := exp_two_I_mul_add_inv w
   have : cos (2 * w) = (cexp (2 * I * w) + (cexp (2 * I * w))⁻¹) / 2 := by rw [h]; ring
   rw [this, norm_div]
   have : ‖(2 : ℂ)‖ = 2 := by norm_num
   rw [this]
   linarith [norm_add_le (cexp (2 * I * w)) (cexp (2 * I * w))⁻¹]
 
-/-- `p20R1_F` is even (helper). -/
-lemma p20R1_F_even (b Q w : ℂ) : p20R1_F b Q (-w) = p20R1_F b Q w := by
-  simp only [p20R1_F, mul_neg, cos_neg]
+/-- `thetaCosProduct` is even (helper). -/
+private lemma thetaCosProduct_neg (b Q w : ℂ) : thetaCosProduct b Q (-w) = thetaCosProduct b Q w := by
+  simp only [thetaCosProduct, mul_neg, cos_neg]
 
-/-- `p20R1_F` is entire (helper). -/
-lemma p20R1_F_differentiable {b Q : ℂ} (hQ : ‖Q‖ < 1) : Differentiable ℂ (p20R1_F b Q) := by
+/-- `thetaCosProduct` is entire (helper). -/
+private lemma differentiable_thetaCosProduct {b Q : ℂ} (hQ : ‖Q‖ < 1) : Differentiable ℂ (thetaCosProduct b Q) := by
   intro w₀
   set R := |w₀.im| + 1
   set U : Set ℂ := {w | |w.im| < R}
@@ -98,7 +110,7 @@ lemma p20R1_F_differentiable {b Q : ℂ} (hQ : ‖Q‖ < 1) : Differentiable ℂ
   have hQ0 : 0 ≤ ‖Q‖ := norm_nonneg _
   have hgb : ∀ k : ℕ, ∀ w ∈ U, ‖g k w‖ ≤ (2 * ‖b‖ * Real.exp (2 * R) + ‖b‖ ^ 2) * ‖Q‖ ^ k := by
     intro k w hw
-    have hc : ‖cos (2 * w)‖ ≤ Real.exp (2 * R) := (p20R1_norm_cos_two_le w).trans
+    have hc : ‖cos (2 * w)‖ ≤ Real.exp (2 * R) := (norm_cos_two_mul_le w).trans
       (Real.exp_le_exp.mpr (by have : |w.im| < R := hw; linarith))
     have hq : ‖Q‖ ^ k ≤ 1 := pow_le_one₀ hQ0 hQ.le
     have hq2 : (‖Q‖ ^ k) ^ 2 ≤ ‖Q‖ ^ k := by
@@ -116,16 +128,16 @@ lemma p20R1_F_differentiable {b Q : ℂ} (hQ : ‖Q‖ < 1) : Differentiable ℂ
     hloc.differentiableOn (.of_forall fun s => by
       simpa [Finset.prod_fn] using DifferentiableOn.finsetProd (fun _ _ => by
         simp only [hg]; fun_prop)) hU
-  have hFdef : p20R1_F b Q = fun w => ∏' k : ℕ, (1 + g k w) := by
-    funext w; simp only [p20R1_F, hg]; congr 1; funext k; ring
+  have hFdef : thetaCosProduct b Q = fun w => ∏' k : ℕ, (1 + g k w) := by
+    funext w; simp only [thetaCosProduct, hg]; congr 1; funext k; ring
   rw [hFdef]; exact (hdiff w₀ hw₀).differentiableAt (hU.mem_nhds hw₀)
 
-/-- `F''(0)/F(0) = 8 ∑ bQ^k/(1 - bQ^k)²` for `F = p20R1_F b Q` (helper for 20.4.8–20.4.11). -/
-lemma p20R1_F_second {b Q : ℂ} (hQ : ‖Q‖ < 1) (hb : ‖b‖ < 1) :
-    p20R1_F b Q 0 ≠ 0 ∧
+/-- `F''(0)/F(0) = 8 ∑ bQ^k/(1 - bQ^k)²` for `F = thetaCosProduct b Q` (helper for 20.4.8–20.4.11). -/
+private lemma hasSum_iteratedDeriv_two_thetaCosProduct_div {b Q : ℂ} (hQ : ‖Q‖ < 1) (hb : ‖b‖ < 1) :
+    thetaCosProduct b Q 0 ≠ 0 ∧
     HasSum (fun k : ℕ => 8 * (b * Q ^ k) / (1 - b * Q ^ k) ^ 2)
-      (iteratedDeriv 2 (p20R1_F b Q) 0 / p20R1_F b Q 0) := by
-  have hFd := p20R1_F_differentiable (b := b) hQ
+      (iteratedDeriv 2 (thetaCosProduct b Q) 0 / thetaCosProduct b Q 0) := by
+  have hFd := differentiable_thetaCosProduct (b := b) hQ
   set s := ‖b‖ with hsdef
   have hs0 : 0 ≤ s := norm_nonneg _
   set c := Real.log (2 / (1 + s)) / 2 with hc
@@ -150,8 +162,8 @@ lemma p20R1_F_second {b Q : ℂ} (hQ : ‖Q‖ < 1) (hb : ‖b‖ < 1) :
       (1 - 2 * (b * Q ^ k) * cos (2 * w) + (b * Q ^ k) ^ 2) := ⟨_, rfl⟩
   have hfne : ∀ k : ℕ, ∀ w ∈ U, 1 - 2 * (b * Q ^ k) * cos (2 * w) + (b * Q ^ k) ^ 2 ≠ 0 := by
     intro k w hw
-    rw [p20R1_factor]
-    obtain ⟨e1, e2⟩ := p20R1_norm_exp_two_I w
+    rw [one_sub_two_mul_cos_add_sq_eq_mul]
+    obtain ⟨e1, e2⟩ := norm_exp_two_I_mul_le w
     have h := hbw w hw
     refine mul_ne_zero (one_sub_ne_zero_of_norm_lt_one ?_) (one_sub_ne_zero_of_norm_lt_one ?_)
     · rw [norm_mul]; exact (mul_le_mul (hak k) e1 (norm_nonneg _) hs0).trans_lt h
@@ -159,10 +171,10 @@ lemma p20R1_F_second {b Q : ℂ} (hQ : ‖Q‖ < 1) (hb : ‖b‖ < 1) :
   have hTb : ∀ k : ℕ, ∀ w ∈ U, ‖T k w‖ ≤
       4 * Real.exp (2 * c) * (s * ‖Q‖ ^ k) / (1 - s * Real.exp (2 * c)) ^ 2 := by
     intro k w hw
-    have hq := (p20R1_bound_quot (x := b * Q ^ k) (z := w) (R := s) (ρ := s * Real.exp (2 * c))
+    have hq := (norm_div_one_sub_two_mul_cos_add_sq_le (x := b * Q ^ k) (z := w) (R := s) (ρ := s * Real.exp (2 * c))
       (hak k) (mul_le_mul_of_nonneg_left (hexp w hw) hs0) hbc).1
     have hsin : ‖sin (2 * w)‖ ≤ Real.exp (2 * c) := by
-      refine (p20R1_norm_sin_le _).trans (Real.exp_le_exp.mpr ?_)
+      refine (norm_sin_le_real_exp_abs_im _).trans (Real.exp_le_exp.mpr ?_)
       have : |w.im| < c := hw
       have him : (2 * w).im = 2 * w.im := by simp
       rw [him, abs_mul]; norm_num; linarith
@@ -185,22 +197,22 @@ lemma p20R1_F_second {b Q : ℂ} (hQ : ‖Q‖ < 1) (hb : ‖b‖ < 1) :
   have hSdiff : DifferentiableAt ℂ (fun w => ∑' k, T k w) 0 :=
     (differentiableOn_tsum_of_summable_norm hTs hTd hU hTb 0 h0U).differentiableAt
       (hU.mem_nhds h0U)
-  have hev : deriv (p20R1_F b Q) =ᶠ[𝓝 0] fun w => p20R1_F b Q w * ∑' k, T k w := by
+  have hev : deriv (thetaCosProduct b Q) =ᶠ[𝓝 0] fun w => thetaCosProduct b Q w * ∑' k, T k w := by
     filter_upwards [hU.mem_nhds h0U] with w hw
-    obtain ⟨hFw, -, hS1, -⟩ := p20R1_logDeriv_core hQ (hbw w hw)
-    have : ∑' k, T k w = logDeriv (p20R1_F b Q) w := by rw [hT]; exact hS1.tsum_eq
+    obtain ⟨hFw, -, hS1, -⟩ := thetaCosProduct_logDeriv hQ (hbw w hw)
+    have : ∑' k, T k w = logDeriv (thetaCosProduct b Q) w := by rw [hT]; exact hS1.tsum_eq
     rw [this, logDeriv_apply]
     field_simp
-  have hF'0 : deriv (p20R1_F b Q) 0 = 0 := by
-    have := th20_iteratedDeriv_even_zero (f := p20R1_F b Q) (fun w => p20R1_F_even b Q w)
+  have hF'0 : deriv (thetaCosProduct b Q) 0 = 0 := by
+    have := iteratedDeriv_odd_zero_of_even (f := thetaCosProduct b Q) (fun w => thetaCosProduct_neg b Q w)
       (n := 1) odd_one
     simpa using this
   have hS0 : ∑' k, T k 0 = 0 := by simp [hT]
-  have h2 : iteratedDeriv 2 (p20R1_F b Q) 0 = p20R1_F b Q 0 * deriv (fun w => ∑' k, T k w) 0 := by
+  have h2 : iteratedDeriv 2 (thetaCosProduct b Q) 0 = thetaCosProduct b Q 0 * deriv (fun w => ∑' k, T k w) 0 := by
     rw [iteratedDeriv_succ, iteratedDeriv_one, hev.deriv_eq, deriv_fun_mul (hFd 0) hSdiff, hF'0,
       hS0]
     ring
-  have hF0 : p20R1_F b Q 0 ≠ 0 := (p20R1_logDeriv_core hQ (hbw 0 h0U)).1
+  have hF0 : thetaCosProduct b Q 0 ≠ 0 := (thetaCosProduct_logDeriv hQ (hbw 0 h0U)).1
   refine ⟨hF0, ?_⟩
   rw [h2, mul_div_cancel_left₀ _ hF0]
   convert hSd using 1
@@ -222,29 +234,29 @@ lemma p20R1_F_second {b Q : ℂ} (hQ : ‖Q‖ < 1) (hb : ‖b‖ < 1) :
   field_simp
   ring
 
-/-- `p20R1_F` has differentiable first and second derivatives (helper). -/
-lemma p20R1_F_deriv_diff {b Q : ℂ} (hQ : ‖Q‖ < 1) :
-    Differentiable ℂ (deriv (p20R1_F b Q)) ∧ Differentiable ℂ (deriv (deriv (p20R1_F b Q))) := by
-  have h0 : ContDiff ℂ (⊤ : ℕ∞) (p20R1_F b Q) := (p20R1_F_differentiable hQ).contDiff
+/-- `thetaCosProduct` has differentiable first and second derivatives (helper). -/
+private lemma differentiable_deriv_thetaCosProduct {b Q : ℂ} (hQ : ‖Q‖ < 1) :
+    Differentiable ℂ (deriv (thetaCosProduct b Q)) ∧ Differentiable ℂ (deriv (deriv (thetaCosProduct b Q))) := by
+  have h0 : ContDiff ℂ (⊤ : ℕ∞) (thetaCosProduct b Q) := (differentiable_thetaCosProduct hQ).contDiff
   have h1 := (contDiff_infty_iff_deriv.mp h0).2
   have h2 := (contDiff_infty_iff_deriv.mp h1).2
   exact ⟨h1.differentiable (by simp), h2.differentiable (by simp)⟩
 
-/-- Product representation of the four theta functions through `p20R1_F` (helper). -/
-lemma p20R1_theta_eq_F {τ : ℂ} (hτ : 0 < τ.im) :
+/-- Product representation of the four theta functions through `thetaCosProduct` (helper). -/
+private lemma jacobiThetaTau_eq_thetaCosProduct {τ : ℂ} (hτ : 0 < τ.im) :
     (fun w => jacobiThetaOneTau w τ) = (fun w => (2 * cexp (π * I * τ / 4) *
       ∏' k : ℕ, (1 - cexp (π * I * τ) ^ (2 * (k + 1)))) * sin w *
-        p20R1_F (cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) w) ∧
+        thetaCosProduct (cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) w) ∧
     (fun w => jacobiThetaTwoTau w τ) = (fun w => (2 * cexp (π * I * τ / 4) *
       ∏' k : ℕ, (1 - cexp (π * I * τ) ^ (2 * (k + 1)))) * cos w *
-        p20R1_F (-cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) w) ∧
+        thetaCosProduct (-cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) w) ∧
     (fun w => jacobiThetaThreeTau w τ) = (fun w => (∏' k : ℕ, (1 - cexp (π * I * τ) ^ (2 * (k + 1)))) *
-        p20R1_F (-cexp (π * I * τ)) (cexp (π * I * τ) ^ 2) w) ∧
+        thetaCosProduct (-cexp (π * I * τ)) (cexp (π * I * τ) ^ 2) w) ∧
     (fun w => jacobiThetaFourTau w τ) = (fun w => (∏' k : ℕ, (1 - cexp (π * I * τ) ^ (2 * (k + 1)))) *
-        p20R1_F (cexp (π * I * τ)) (cexp (π * I * τ) ^ 2) w) := by
+        thetaCosProduct (cexp (π * I * τ)) (cexp (π * I * τ) ^ 2) w) := by
   set E := cexp (π * I * τ) with hE
-  have hQ : ‖E ^ 2‖ < 1 := th20_norm_nome_sq_lt_one hτ
-  obtain ⟨hPm, -⟩ := p20R1_P_mult_ne hτ
+  have hQ : ‖E ^ 2‖ < 1 := norm_nome_sq_lt_one hτ
+  obtain ⟨hPm, -⟩ := multipliable_one_sub_nome_pow_and_tprod_ne_zero hτ
   have hpow : ∀ k : ℕ, E ^ 2 * (E ^ 2) ^ k = E ^ (2 * (k + 1)) := fun k => by
     rw [← pow_mul, ← pow_add]; ring_nf
   have hpow4 : ∀ k : ℕ, E ^ (4 * (k + 1)) = (E ^ (2 * (k + 1))) ^ 2 := fun k => by
@@ -260,7 +272,7 @@ lemma p20R1_theta_eq_F {τ : ℂ} (hτ : 0 < τ.im) :
         ∏' k : ℕ, ((1 - E ^ (2 * (k + 1))) *
           (1 - 2 * (E ^ 2 * (E ^ 2) ^ k) * cos (2 * w) + (E ^ 2 * (E ^ 2) ^ k) ^ 2)) :=
       tprod_congr fun k => by rw [hpow, hpow4]
-    rw [hc, hPm.tprod_mul (p20R1_F_mult _ _ w hQ), p20R1_F]
+    rw [hc, hPm.tprod_mul (multipliable_thetaCosProduct_factor _ _ w hQ), thetaCosProduct]
     ring
   · rw [(jacobiThetaTwoTau_hasProd w hτ).2]
     have hc : ∏' k : ℕ, ((1 - E ^ (2 * (k + 1))) *
@@ -268,7 +280,7 @@ lemma p20R1_theta_eq_F {τ : ℂ} (hτ : 0 < τ.im) :
         ∏' k : ℕ, ((1 - E ^ (2 * (k + 1))) *
           (1 - 2 * (-E ^ 2 * (E ^ 2) ^ k) * cos (2 * w) + (-E ^ 2 * (E ^ 2) ^ k) ^ 2)) :=
       tprod_congr fun k => by rw [neg_mul, hpow, hpow4]; ring
-    rw [hc, hPm.tprod_mul (p20R1_F_mult _ _ w hQ), p20R1_F]
+    rw [hc, hPm.tprod_mul (multipliable_thetaCosProduct_factor _ _ w hQ), thetaCosProduct]
     ring
   · rw [(jacobiThetaThreeTau_hasProd w hτ).2]
     have hc : ∏' k : ℕ, ((1 - E ^ (2 * (k + 1))) *
@@ -276,32 +288,32 @@ lemma p20R1_theta_eq_F {τ : ℂ} (hτ : 0 < τ.im) :
         ∏' k : ℕ, ((1 - E ^ (2 * (k + 1))) *
           (1 - 2 * (-E * (E ^ 2) ^ k) * cos (2 * w) + (-E * (E ^ 2) ^ k) ^ 2)) :=
       tprod_congr fun k => by rw [neg_mul, hpo, hpo4]; ring
-    rw [hc, hPm.tprod_mul (p20R1_F_mult _ _ w hQ), p20R1_F]
+    rw [hc, hPm.tprod_mul (multipliable_thetaCosProduct_factor _ _ w hQ), thetaCosProduct]
   · rw [(jacobiThetaFourTau_hasProd w hτ).2]
     have hc : ∏' k : ℕ, ((1 - E ^ (2 * (k + 1))) *
         (1 - 2 * E ^ (2 * k + 1) * cos (2 * w) + E ^ (4 * k + 2))) =
         ∏' k : ℕ, ((1 - E ^ (2 * (k + 1))) *
           (1 - 2 * (E * (E ^ 2) ^ k) * cos (2 * w) + (E * (E ^ 2) ^ k) ^ 2)) :=
       tprod_congr fun k => by rw [hpo, hpo4]
-    rw [hc, hPm.tprod_mul (p20R1_F_mult _ _ w hQ), p20R1_F]
+    rw [hc, hPm.tprod_mul (multipliable_thetaCosProduct_factor _ _ w hQ), thetaCosProduct]
 
 /-- `θ₁⁽³⁾(0)/θ₁'(0) = -1 + 3 F''(0)/F(0)` (helper). -/
-lemma p20R1_ratio1 {τ : ℂ} (hτ : 0 < τ.im) :
+private lemma jacobiThetaOneTau_third_deriv_div_eq {τ : ℂ} (hτ : 0 < τ.im) :
     iteratedDeriv 3 (fun z => jacobiThetaOneTau z τ) 0 / jacobiThetaOneDerivNullTau τ =
-      -1 + 3 * (iteratedDeriv 2 (p20R1_F (cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2)) 0 /
-        p20R1_F (cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) 0) := by
+      -1 + 3 * (iteratedDeriv 2 (thetaCosProduct (cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2)) 0 /
+        thetaCosProduct (cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) 0) := by
   set E := cexp (π * I * τ) with hE
-  have hQ : ‖E ^ 2‖ < 1 := th20_norm_nome_sq_lt_one hτ
-  obtain ⟨hF0, hS⟩ := p20R1_F_second (b := E ^ 2) hQ hQ
-  obtain ⟨hd1, hd2⟩ := p20R1_F_deriv_diff (b := E ^ 2) hQ
-  have hFd := p20R1_F_differentiable (b := E ^ 2) hQ
-  obtain ⟨-, hPne⟩ := p20R1_P_mult_ne hτ
-  set F := p20R1_F (E ^ 2) (E ^ 2) with hF
+  have hQ : ‖E ^ 2‖ < 1 := norm_nome_sq_lt_one hτ
+  obtain ⟨hF0, hS⟩ := hasSum_iteratedDeriv_two_thetaCosProduct_div (b := E ^ 2) hQ hQ
+  obtain ⟨hd1, hd2⟩ := differentiable_deriv_thetaCosProduct (b := E ^ 2) hQ
+  have hFd := differentiable_thetaCosProduct (b := E ^ 2) hQ
+  obtain ⟨-, hPne⟩ := multipliable_one_sub_nome_pow_and_tprod_ne_zero hτ
+  set F := thetaCosProduct (E ^ 2) (E ^ 2) with hF
   set C := 2 * cexp (π * I * τ / 4) * ∏' k : ℕ, (1 - E ^ (2 * (k + 1))) with hC
   have hC0 : C ≠ 0 := mul_ne_zero (mul_ne_zero two_ne_zero (exp_ne_zero _)) hPne
-  have hfun := (p20R1_theta_eq_F hτ).1
+  have hfun := (jacobiThetaTau_eq_thetaCosProduct hτ).1
   have hF'0 : deriv F 0 = 0 := by
-    have := th20_iteratedDeriv_even_zero (f := F) (fun w => p20R1_F_even _ _ w) (n := 1) odd_one
+    have := iteratedDeriv_odd_zero_of_even (f := F) (fun w => thetaCosProduct_neg _ _ w) (n := 1) odd_one
     simpa using this
   have e1 : deriv (fun w => C * sin w * F w) =
       fun w => C * cos w * F w + C * sin w * deriv F w := by
@@ -331,23 +343,23 @@ lemma p20R1_ratio1 {τ : ℂ} (hτ : 0 < τ.im) :
   field_simp
 
 /-- `θ₂''(0)/θ₂(0) = -1 + F''(0)/F(0)` (helper). -/
-lemma p20R1_ratio2 {τ : ℂ} (hτ : 0 < τ.im) :
+private lemma jacobiThetaTwoTau_second_deriv_div_eq {τ : ℂ} (hτ : 0 < τ.im) :
     iteratedDeriv 2 (fun z => jacobiThetaTwoTau z τ) 0 / jacobiThetaTwoNullTau τ =
-      -1 + iteratedDeriv 2 (p20R1_F (-cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2)) 0 /
-        p20R1_F (-cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) 0 := by
+      -1 + iteratedDeriv 2 (thetaCosProduct (-cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2)) 0 /
+        thetaCosProduct (-cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) 0 := by
   set E := cexp (π * I * τ) with hE
-  have hQ : ‖E ^ 2‖ < 1 := th20_norm_nome_sq_lt_one hτ
+  have hQ : ‖E ^ 2‖ < 1 := norm_nome_sq_lt_one hτ
   have hb : ‖-E ^ 2‖ < 1 := by rwa [norm_neg]
-  obtain ⟨hF0, hS⟩ := p20R1_F_second (b := -E ^ 2) hQ hb
-  obtain ⟨hd1, -⟩ := p20R1_F_deriv_diff (b := -E ^ 2) hQ
-  have hFd := p20R1_F_differentiable (b := -E ^ 2) hQ
-  obtain ⟨-, hPne⟩ := p20R1_P_mult_ne hτ
-  set F := p20R1_F (-E ^ 2) (E ^ 2) with hF
+  obtain ⟨hF0, hS⟩ := hasSum_iteratedDeriv_two_thetaCosProduct_div (b := -E ^ 2) hQ hb
+  obtain ⟨hd1, -⟩ := differentiable_deriv_thetaCosProduct (b := -E ^ 2) hQ
+  have hFd := differentiable_thetaCosProduct (b := -E ^ 2) hQ
+  obtain ⟨-, hPne⟩ := multipliable_one_sub_nome_pow_and_tprod_ne_zero hτ
+  set F := thetaCosProduct (-E ^ 2) (E ^ 2) with hF
   set C := 2 * cexp (π * I * τ / 4) * ∏' k : ℕ, (1 - E ^ (2 * (k + 1))) with hC
   have hC0 : C ≠ 0 := mul_ne_zero (mul_ne_zero two_ne_zero (exp_ne_zero _)) hPne
-  have hfun := (p20R1_theta_eq_F hτ).2.1
+  have hfun := (jacobiThetaTau_eq_thetaCosProduct hτ).2.1
   have hF'0 : deriv F 0 = 0 := by
-    have := th20_iteratedDeriv_even_zero (f := F) (fun w => p20R1_F_even _ _ w) (n := 1) odd_one
+    have := iteratedDeriv_odd_zero_of_even (f := F) (fun w => thetaCosProduct_neg _ _ w) (n := 1) odd_one
     simpa using this
   have e1 : deriv (fun w => C * cos w * F w) =
       fun w => C * -sin w * F w + C * cos w * deriv F w := by
@@ -368,30 +380,30 @@ lemma p20R1_ratio2 {τ : ℂ} (hτ : 0 < τ.im) :
   field_simp
 
 /-- `θ''(0)/θ(0) = F''(0)/F(0)` for `θ₃`, `θ₄` (helper). -/
-lemma p20R1_ratio3 {τ : ℂ} (hτ : 0 < τ.im) :
+private lemma jacobiThetaThreeTau_second_deriv_div_eq {τ : ℂ} (hτ : 0 < τ.im) :
     iteratedDeriv 2 (fun z => jacobiThetaThreeTau z τ) 0 / jacobiThetaThreeNullTau τ =
-      iteratedDeriv 2 (p20R1_F (-cexp (π * I * τ)) (cexp (π * I * τ) ^ 2)) 0 /
-        p20R1_F (-cexp (π * I * τ)) (cexp (π * I * τ) ^ 2) 0 := by
-  obtain ⟨-, hPne⟩ := p20R1_P_mult_ne hτ
-  have hfun := (p20R1_theta_eq_F hτ).2.2.1
+      iteratedDeriv 2 (thetaCosProduct (-cexp (π * I * τ)) (cexp (π * I * τ) ^ 2)) 0 /
+        thetaCosProduct (-cexp (π * I * τ)) (cexp (π * I * τ) ^ 2) 0 := by
+  obtain ⟨-, hPne⟩ := multipliable_one_sub_nome_pow_and_tprod_ne_zero hτ
+  have hfun := (jacobiThetaTau_eq_thetaCosProduct hτ).2.2.1
   rw [jacobiThetaThreeNullTau, show jacobiThetaThreeTau 0 τ = (∏' k : ℕ, (1 - cexp (π * I * τ) ^ (2 * (k + 1)))) *
-    p20R1_F (-cexp (π * I * τ)) (cexp (π * I * τ) ^ 2) 0 from congrFun hfun 0, hfun,
+    thetaCosProduct (-cexp (π * I * τ)) (cexp (π * I * τ) ^ 2) 0 from congrFun hfun 0, hfun,
     iteratedDeriv_const_mul_field, mul_div_mul_left _ _ hPne]
 
 /-- `θ''(0)/θ(0) = F''(0)/F(0)` for `θ₃`, `θ₄` (helper). -/
-lemma p20R1_ratio4 {τ : ℂ} (hτ : 0 < τ.im) :
+private lemma jacobiThetaFourTau_second_deriv_div_eq {τ : ℂ} (hτ : 0 < τ.im) :
     iteratedDeriv 2 (fun z => jacobiThetaFourTau z τ) 0 / jacobiThetaFourNullTau τ =
-      iteratedDeriv 2 (p20R1_F (cexp (π * I * τ)) (cexp (π * I * τ) ^ 2)) 0 /
-        p20R1_F (cexp (π * I * τ)) (cexp (π * I * τ) ^ 2) 0 := by
-  obtain ⟨-, hPne⟩ := p20R1_P_mult_ne hτ
-  have hfun := (p20R1_theta_eq_F hτ).2.2.2
+      iteratedDeriv 2 (thetaCosProduct (cexp (π * I * τ)) (cexp (π * I * τ) ^ 2)) 0 /
+        thetaCosProduct (cexp (π * I * τ)) (cexp (π * I * τ) ^ 2) 0 := by
+  obtain ⟨-, hPne⟩ := multipliable_one_sub_nome_pow_and_tprod_ne_zero hτ
+  have hfun := (jacobiThetaTau_eq_thetaCosProduct hτ).2.2.2
   rw [jacobiThetaFourNullTau, show jacobiThetaFourTau 0 τ = (∏' k : ℕ, (1 - cexp (π * I * τ) ^ (2 * (k + 1)))) *
-    p20R1_F (cexp (π * I * τ)) (cexp (π * I * τ) ^ 2) 0 from congrFun hfun 0, hfun,
+    thetaCosProduct (cexp (π * I * τ)) (cexp (π * I * τ) ^ 2) 0 from congrFun hfun 0, hfun,
     iteratedDeriv_const_mul_field, mul_div_mul_left _ _ hPne]
 
 /-- Second derivative at `0` of a product of two functions with vanishing first derivatives
 there (helper). -/
-lemma p20R1_even_mul {f g : ℂ → ℂ} (hf : Differentiable ℂ f) (hg : Differentiable ℂ g)
+private lemma iteratedDeriv_two_mul_of_deriv_zero {f g : ℂ → ℂ} (hf : Differentiable ℂ f) (hg : Differentiable ℂ g)
     (hf' : Differentiable ℂ (deriv f)) (hg' : Differentiable ℂ (deriv g))
     (hf0 : deriv f 0 = 0) (hg0 : deriv g 0 = 0) :
     Differentiable ℂ (fun z => f z * g z) ∧ Differentiable ℂ (deriv (fun z => f z * g z)) ∧
@@ -409,17 +421,17 @@ lemma p20R1_even_mul {f g : ℂ → ℂ} (hf : Differentiable ℂ f) (hg : Diffe
     ((hf 0).hasDerivAt.mul (hg' 0).hasDerivAt))).trans ?_
   rw [hf0, hg0]; ring
 
-/-- Data of `p20R1_F` used for 20.4.12 (helper). -/
-lemma p20R1_F_data {b Q : ℂ} (hQ : ‖Q‖ < 1) :
-    Differentiable ℂ (p20R1_F b Q) ∧ Differentiable ℂ (deriv (p20R1_F b Q)) ∧
-      deriv (p20R1_F b Q) 0 = 0 :=
-  ⟨p20R1_F_differentiable hQ, (p20R1_F_deriv_diff hQ).1, by
-    have := th20_iteratedDeriv_even_zero (f := p20R1_F b Q) (fun w => p20R1_F_even _ _ w)
+/-- Data of `thetaCosProduct` used for 20.4.12 (helper). -/
+private lemma thetaCosProduct_deriv_zero_data {b Q : ℂ} (hQ : ‖Q‖ < 1) :
+    Differentiable ℂ (thetaCosProduct b Q) ∧ Differentiable ℂ (deriv (thetaCosProduct b Q)) ∧
+      deriv (thetaCosProduct b Q) 0 = 0 :=
+  ⟨differentiable_thetaCosProduct hQ, (differentiable_deriv_thetaCosProduct hQ).1, by
+    have := iteratedDeriv_odd_zero_of_even (f := thetaCosProduct b Q) (fun w => thetaCosProduct_neg _ _ w)
       (n := 1) odd_one
     simpa using this⟩
 
 /-- `sin z cos z ≠ 0` for `0 < ‖z‖ < 1` (helper). -/
-lemma p20R1_sin_cos_ne {z : ℂ} (h0 : z ≠ 0) (h1 : ‖z‖ < 1 / 2) : sin z * cos z ≠ 0 := by
+private lemma sin_mul_cos_ne_zero_of_norm_lt {z : ℂ} (h0 : z ≠ 0) (h1 : ‖z‖ < 1 / 2) : sin z * cos z ≠ 0 := by
   have hpi := Real.two_le_pi
   refine mul_ne_zero (fun hs => ?_) (fun hc => ?_)
   · obtain ⟨k, hk⟩ := sin_eq_zero_iff.mp hs
@@ -446,10 +458,10 @@ theorem jacobiThetaOne_third_deriv_ratio {τ : ℂ} (hτ : 0 < τ.im) :
     HasSum (fun k : ℕ => 24 * cexp (π * I * τ) ^ (2 * (k + 1)) /
         (1 - cexp (π * I * τ) ^ (2 * (k + 1))) ^ 2)
       (iteratedDeriv 3 (fun z => jacobiThetaOneTau z τ) 0 / jacobiThetaOneDerivNullTau τ + 1) := by
-  rw [p20R1_ratio1 hτ]
+  rw [jacobiThetaOneTau_third_deriv_div_eq hτ]
   set E := cexp (π * I * τ) with hE
-  have hQ : ‖E ^ 2‖ < 1 := th20_norm_nome_sq_lt_one hτ
-  obtain ⟨-, hS⟩ := p20R1_F_second (b := E ^ 2) hQ hQ
+  have hQ : ‖E ^ 2‖ < 1 := norm_nome_sq_lt_one hτ
+  obtain ⟨-, hS⟩ := hasSum_iteratedDeriv_two_thetaCosProduct_div (b := E ^ 2) hQ hQ
   rw [show ∀ x : ℂ, -1 + 3 * x + 1 = 3 * x from fun x => by ring]
   convert hS.mul_left 3 using 1
   funext k
@@ -462,11 +474,11 @@ theorem jacobiThetaTwo_second_deriv_ratio {τ : ℂ} (hτ : 0 < τ.im) :
     HasSum (fun k : ℕ => 8 * cexp (π * I * τ) ^ (2 * (k + 1)) /
         (1 + cexp (π * I * τ) ^ (2 * (k + 1))) ^ 2)
       (-1 - iteratedDeriv 2 (fun z => jacobiThetaTwoTau z τ) 0 / jacobiThetaTwoNullTau τ) := by
-  rw [p20R1_ratio2 hτ]
+  rw [jacobiThetaTwoTau_second_deriv_div_eq hτ]
   set E := cexp (π * I * τ) with hE
-  have hQ : ‖E ^ 2‖ < 1 := th20_norm_nome_sq_lt_one hτ
+  have hQ : ‖E ^ 2‖ < 1 := norm_nome_sq_lt_one hτ
   have hb : ‖-E ^ 2‖ < 1 := by rwa [norm_neg]
-  obtain ⟨-, hS⟩ := p20R1_F_second (b := -E ^ 2) hQ hb
+  obtain ⟨-, hS⟩ := hasSum_iteratedDeriv_two_thetaCosProduct_div (b := -E ^ 2) hQ hb
   rw [show ∀ x : ℂ, -1 - (-1 + x) = -x from fun x => by ring]
   convert hS.neg using 1
   funext k
@@ -480,12 +492,12 @@ theorem jacobiThetaThree_second_deriv_ratio {τ : ℂ} (hτ : 0 < τ.im) :
         (1 + cexp (π * I * τ) ^ (2 * k + 1)) ^ 2)
       (iteratedDeriv 2 (fun z => jacobiThetaThreeTau z τ) 0 / jacobiThetaThreeNullTau τ) := by
   set E := cexp (π * I * τ) with hE
-  have hQ : ‖E ^ 2‖ < 1 := th20_norm_nome_sq_lt_one hτ
-  have hb : ‖-E‖ < 1 := by rw [norm_neg]; exact th20_norm_nome_lt_one hτ
-  obtain ⟨hF0, hS⟩ := p20R1_F_second (b := -E) hQ hb
-  obtain ⟨-, hPne⟩ := p20R1_P_mult_ne hτ
-  have hfun := (p20R1_theta_eq_F hτ).2.2.1
-  rw [jacobiThetaThreeNullTau, show jacobiThetaThreeTau 0 τ = (∏' k : ℕ, (1 - E ^ (2 * (k + 1)))) * p20R1_F (-E) (E ^ 2) 0 from
+  have hQ : ‖E ^ 2‖ < 1 := norm_nome_sq_lt_one hτ
+  have hb : ‖-E‖ < 1 := by rw [norm_neg]; exact norm_nome_lt_one hτ
+  obtain ⟨hF0, hS⟩ := hasSum_iteratedDeriv_two_thetaCosProduct_div (b := -E) hQ hb
+  obtain ⟨-, hPne⟩ := multipliable_one_sub_nome_pow_and_tprod_ne_zero hτ
+  have hfun := (jacobiThetaTau_eq_thetaCosProduct hτ).2.2.1
+  rw [jacobiThetaThreeNullTau, show jacobiThetaThreeTau 0 τ = (∏' k : ℕ, (1 - E ^ (2 * (k + 1)))) * thetaCosProduct (-E) (E ^ 2) 0 from
     congrFun hfun 0, hfun, iteratedDeriv_const_mul_field, mul_div_mul_left _ _ hPne]
   convert hS using 1
   funext k
@@ -499,12 +511,12 @@ theorem jacobiThetaFour_second_deriv_ratio {τ : ℂ} (hτ : 0 < τ.im) :
         (1 - cexp (π * I * τ) ^ (2 * k + 1)) ^ 2)
       (iteratedDeriv 2 (fun z => jacobiThetaFourTau z τ) 0 / jacobiThetaFourNullTau τ) := by
   set E := cexp (π * I * τ) with hE
-  have hQ : ‖E ^ 2‖ < 1 := th20_norm_nome_sq_lt_one hτ
-  have hb : ‖E‖ < 1 := th20_norm_nome_lt_one hτ
-  obtain ⟨hF0, hS⟩ := p20R1_F_second (b := E) hQ hb
-  obtain ⟨-, hPne⟩ := p20R1_P_mult_ne hτ
-  have hfun := (p20R1_theta_eq_F hτ).2.2.2
-  rw [jacobiThetaFourNullTau, show jacobiThetaFourTau 0 τ = (∏' k : ℕ, (1 - E ^ (2 * (k + 1)))) * p20R1_F E (E ^ 2) 0 from
+  have hQ : ‖E ^ 2‖ < 1 := norm_nome_sq_lt_one hτ
+  have hb : ‖E‖ < 1 := norm_nome_lt_one hτ
+  obtain ⟨hF0, hS⟩ := hasSum_iteratedDeriv_two_thetaCosProduct_div (b := E) hQ hb
+  obtain ⟨-, hPne⟩ := multipliable_one_sub_nome_pow_and_tprod_ne_zero hτ
+  have hfun := (jacobiThetaTau_eq_thetaCosProduct hτ).2.2.2
+  rw [jacobiThetaFourNullTau, show jacobiThetaFourTau 0 τ = (∏' k : ℕ, (1 - E ^ (2 * (k + 1)))) * thetaCosProduct E (E ^ 2) 0 from
     congrFun hfun 0, hfun, iteratedDeriv_const_mul_field, mul_div_mul_left _ _ hPne]
   convert hS using 1
   funext k
@@ -518,27 +530,27 @@ theorem jacobiTheta_deriv_ratio_sum {τ : ℂ} (hτ : 0 < τ.im) :
       iteratedDeriv 2 (fun z => jacobiThetaThreeTau z τ) 0 / jacobiThetaThreeNullTau τ +
       iteratedDeriv 2 (fun z => jacobiThetaFourTau z τ) 0 / jacobiThetaFourNullTau τ := by
   set E := cexp (π * I * τ) with hE
-  have hQ : ‖E ^ 2‖ < 1 := th20_norm_nome_sq_lt_one hτ
-  have hE1 : ‖E‖ < 1 := th20_norm_nome_lt_one hτ
+  have hQ : ‖E ^ 2‖ < 1 := norm_nome_sq_lt_one hτ
+  have hE1 : ‖E‖ < 1 := norm_nome_lt_one hτ
   have hb2 : ‖-E ^ 2‖ < 1 := by rwa [norm_neg]
   have hb3 : ‖-E‖ < 1 := by rwa [norm_neg]
-  obtain ⟨n1, -⟩ := p20R1_F_second (b := E ^ 2) hQ hQ
-  obtain ⟨n2, -⟩ := p20R1_F_second (b := -E ^ 2) hQ hb2
-  obtain ⟨n3, -⟩ := p20R1_F_second (b := -E) hQ hb3
-  obtain ⟨n4, -⟩ := p20R1_F_second (b := E) hQ hE1
-  obtain ⟨d1, d1', z1⟩ := p20R1_F_data (b := E ^ 2) hQ
-  obtain ⟨d2, d2', z2⟩ := p20R1_F_data (b := -E ^ 2) hQ
-  obtain ⟨d3, d3', z3⟩ := p20R1_F_data (b := -E) hQ
-  obtain ⟨d4, d4', z4⟩ := p20R1_F_data (b := E) hQ
-  set F1 := p20R1_F (E ^ 2) (E ^ 2) with hF1
-  set F2 := p20R1_F (-E ^ 2) (E ^ 2) with hF2
-  set F3 := p20R1_F (-E) (E ^ 2) with hF3
-  set F4 := p20R1_F E (E ^ 2) with hF4
-  obtain ⟨-, hPne⟩ := p20R1_P_mult_ne hτ
+  obtain ⟨n1, -⟩ := hasSum_iteratedDeriv_two_thetaCosProduct_div (b := E ^ 2) hQ hQ
+  obtain ⟨n2, -⟩ := hasSum_iteratedDeriv_two_thetaCosProduct_div (b := -E ^ 2) hQ hb2
+  obtain ⟨n3, -⟩ := hasSum_iteratedDeriv_two_thetaCosProduct_div (b := -E) hQ hb3
+  obtain ⟨n4, -⟩ := hasSum_iteratedDeriv_two_thetaCosProduct_div (b := E) hQ hE1
+  obtain ⟨d1, d1', z1⟩ := thetaCosProduct_deriv_zero_data (b := E ^ 2) hQ
+  obtain ⟨d2, d2', z2⟩ := thetaCosProduct_deriv_zero_data (b := -E ^ 2) hQ
+  obtain ⟨d3, d3', z3⟩ := thetaCosProduct_deriv_zero_data (b := -E) hQ
+  obtain ⟨d4, d4', z4⟩ := thetaCosProduct_deriv_zero_data (b := E) hQ
+  set F1 := thetaCosProduct (E ^ 2) (E ^ 2) with hF1
+  set F2 := thetaCosProduct (-E ^ 2) (E ^ 2) with hF2
+  set F3 := thetaCosProduct (-E) (E ^ 2) with hF3
+  set F4 := thetaCosProduct E (E ^ 2) with hF4
+  obtain ⟨-, hPne⟩ := multipliable_one_sub_nome_pow_and_tprod_ne_zero hτ
   set P := ∏' k : ℕ, (1 - E ^ (2 * (k + 1))) with hP
   set C := 2 * cexp (π * I * τ / 4) * P with hC
   have hC0 : C ≠ 0 := mul_ne_zero (mul_ne_zero two_ne_zero (exp_ne_zero _)) hPne
-  obtain ⟨f1, f2, f3, f4⟩ := p20R1_theta_eq_F hτ
+  obtain ⟨f1, f2, f3, f4⟩ := jacobiThetaTau_eq_thetaCosProduct hτ
   obtain ⟨m2, m3, m4⟩ := jacobiThetaNullTau_ne_zero hτ
   set N := jacobiThetaTwoNullTau τ * jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ with hN
   have hN0 : N ≠ 0 := mul_ne_zero (mul_ne_zero m2 m3) m4
@@ -570,17 +582,17 @@ theorem jacobiTheta_deriv_ratio_sum {τ : ℂ} (hτ : 0 < τ.im) :
     · subst h0
       have hpunct : ∀ᶠ w in 𝓝[≠] (0 : ℂ), F1 (2 * w) - κ * G w = 0 := by
         filter_upwards [nhdsWithin_le_nhds hball, self_mem_nhdsWithin] with w hw hw0
-        rw [hrel w (p20R1_sin_cos_ne hw0 hw)]; ring
+        rw [hrel w (sin_mul_cos_ne_zero_of_norm_lt hw0 hw)]; ring
       have t1 : Tendsto (fun w => F1 (2 * w) - κ * G w) (𝓝[≠] (0 : ℂ))
           (𝓝 (F1 (2 * 0) - κ * G 0)) := (hcont.tendsto 0).mono_left nhdsWithin_le_nhds
       have t2 : Tendsto (fun w => F1 (2 * w) - κ * G w) (𝓝[≠] (0 : ℂ)) (𝓝 0) :=
         tendsto_const_nhds.congr' (EventuallyEq.symm hpunct)
       exact sub_eq_zero.mp (tendsto_nhds_unique t1 t2)
-    · exact hrel z (p20R1_sin_cos_ne h0 hz)
+    · exact hrel z (sin_mul_cos_ne_zero_of_norm_lt h0 hz)
   -- second derivatives
-  obtain ⟨g12, g12', g12z, g12d⟩ := p20R1_even_mul d1 d2 d1' d2' z1 z2
-  obtain ⟨g123, g123', g123z, g123d⟩ := p20R1_even_mul g12 d3 g12' d3' g12z z3
-  obtain ⟨-, -, -, g1234d⟩ := p20R1_even_mul g123 d4 g123' d4' g123z z4
+  obtain ⟨g12, g12', g12z, g12d⟩ := iteratedDeriv_two_mul_of_deriv_zero d1 d2 d1' d2' z1 z2
+  obtain ⟨g123, g123', g123z, g123d⟩ := iteratedDeriv_two_mul_of_deriv_zero g12 d3 g12' d3' g12z z3
+  obtain ⟨-, -, -, g1234d⟩ := iteratedDeriv_two_mul_of_deriv_zero g123 d4 g123' d4' g123z z4
   have hGd : iteratedDeriv 2 G 0 = ((iteratedDeriv 2 F1 0 * F2 0 + F1 0 * iteratedDeriv 2 F2 0) *
       F3 0 + F1 0 * F2 0 * iteratedDeriv 2 F3 0) * F4 0 +
       F1 0 * F2 0 * F3 0 * iteratedDeriv 2 F4 0 := by
@@ -607,7 +619,7 @@ theorem jacobiTheta_deriv_ratio_sum {τ : ℂ} (hτ : 0 < τ.im) :
   have hk1 : κ * (F2 0 * F3 0 * F4 0) = 1 := by
     have : F1 0 * (κ * (F2 0 * F3 0 * F4 0) - 1) = 0 := by linear_combination -hval
     exact sub_eq_zero.mp ((mul_eq_zero.mp this).resolve_left n1)
-  rw [p20R1_ratio1 hτ, p20R1_ratio2 hτ, p20R1_ratio3 hτ, p20R1_ratio4 hτ]
+  rw [jacobiThetaOneTau_third_deriv_div_eq hτ, jacobiThetaTwoTau_second_deriv_div_eq hτ, jacobiThetaThreeTau_second_deriv_div_eq hτ, jacobiThetaFourTau_second_deriv_div_eq hτ]
   rw [← hF1, ← hF2, ← hF3, ← hF4]
   set r1 := iteratedDeriv 2 F1 0 / F1 0 with hr1
   set r2 := iteratedDeriv 2 F2 0 / F2 0 with hr2

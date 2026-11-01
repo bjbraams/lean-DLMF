@@ -13,28 +13,36 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.NumberTheory.ZetaValues
 
 /-!
-# Bernoulli and Euler polynomials: definitions (DLMF §§24.1–24.2)
+# Bernoulli and Euler polynomials at complex arguments
 
 DLMF's Bernoulli numbers `Bₙ`, Bernoulli polynomials `Bₙ(x)`, Euler numbers `Eₙ` and Euler
-polynomials `Eₙ(x)` (§24.2) are, in this project,
+polynomials `Eₙ(x)` (DLMF §§24.1–24.2) are, in this project,
 
 * `bernoulli n : ℚ` (Mathlib; DLMF's convention `B₁ = -1/2`, not Mathlib's `bernoulli'`),
 * `Polynomial.bernoulli n : ℚ[X]` (Mathlib, DLMF 24.2.5),
-* `eulerNumber n : ℚ` (`DLMFMathlib.NumberTheory.EulerPolynomials`, `Eₙ = 2ⁿ Eₙ(1/2)`, DLMF 24.2.9),
-* `Polynomial.euler n : ℚ[X]` (`DLMFMathlib.NumberTheory.EulerPolynomials`, the Appell sequence of
-  the generating function 24.2.8).
+* `eulerNumber n : ℚ` (`DLMFMathlib.NumberTheory.EulerPolynomials`, `Eₙ = 2ⁿ Eₙ(1/2)`,
+  DLMF 24.2.9),
+* `Polynomial.euler n : ℚ[X]` (`DLMFMathlib.NumberTheory.EulerPolynomials`, the Appell sequence
+  of the generating function 24.2.8).
 
 Their real-variable forms are Mathlib's `bernoulliFun n : ℝ → ℝ` and the project's
-`eulerFun n : ℝ → ℝ`. No second definition is made here. This file adds
+`eulerFun n : ℝ → ℝ`; the periodic functions `B̃ₙ(x)`, `Ẽₙ(x)` of §24.2(iii) are DLMFMathlib's
+`periodicBernoulli` and `antiperiodicEuler`. This file adds the complex evaluations.
+
+## Main definitions
 
 * `bernoulliPolyB n x`, `eulerPolyE n x`: complex evaluation `x ↦ Bₙ(x)`, `x ↦ Eₙ(x)` (DLMF
-  §24.1: "`x` real or complex"), via `Polynomial.aeval`, with bridges to the real, rational and
-  polynomial forms;
-* `periodicBernoulli n x`, `antiperiodicEuler n x`: the periodic functions `B̃ₙ(x)`, `Ẽₙ(x)` of
-  §24.2(iii) (DLMF 24.2.11–24.2.12), with a bridge to Mathlib's `periodizedBernoulli`;
-* the Appell (binomial) property `b24a_appell_aeval` used for 24.2.5, 24.2.10, 24.4.12–13.
+  §24.1: "`x` real or complex"), via `Polynomial.aeval`.
 
-Helper declarations of this area carry the prefix `b24a_`.
+## Main results
+
+* `bernoulliPolyB_ofReal`, `eulerPolyE_ofReal`, `bernoulliPolyB_ratCast`, `eulerPolyE_ratCast`:
+  bridges to the real and rational forms.
+* `eulerNumber_def'`: `eulerNumber n = 2ⁿ Eₙ(1/2)` (DLMF 24.2.9).
+* `bernoulliPolyB_add`, `eulerPolyE_add`: the Appell property (DLMF 24.4.12, 24.4.13).
+* `hasDerivAt_bernoulliPolyB`, `hasDerivAt_eulerPolyE`: derivatives (DLMF 24.4.34, 24.4.35).
+* `periodicBernoulliB_eq_periodizedBernoulli`: bridge from `periodicBernoulli` to Mathlib's
+  `periodizedBernoulli`.
 -/
 
 @[expose] public section
@@ -59,33 +67,33 @@ evaluation of the project's `Polynomial.euler n` (DLMF 24.2.8). -/
 def eulerPolyE (n : ℕ) (x : ℂ) : ℂ := aeval x (Polynomial.euler n)
 
 /-- Complex evaluation of a rational polynomial at a real point is the real evaluation. -/
-theorem b24a_aeval_ofReal (p : ℚ[X]) (x : ℝ) :
+theorem aeval_ofReal_eq_eval_map (p : ℚ[X]) (x : ℝ) :
     aeval (x : ℂ) p = ((p.map (algebraMap ℚ ℝ)).eval x : ℝ) := by
   have h := Polynomial.aeval_algebraMap_apply (R := ℚ) (A := ℝ) (B := ℂ) x p
   rw [show (algebraMap ℝ ℂ) x = (x : ℂ) from rfl] at h
   rw [h, aeval_def, eval₂_eq_eval_map]; rfl
 
 /-- Complex evaluation of a rational polynomial at a rational point. -/
-lemma b24a_aeval_ratCast (p : ℚ[X]) (x : ℚ) : aeval (x : ℂ) p = ((p.eval x : ℚ) : ℂ) := by
+private lemma aeval_ratCast_eq_eval (p : ℚ[X]) (x : ℚ) : aeval (x : ℂ) p = ((p.eval x : ℚ) : ℂ) := by
   have h := Polynomial.aeval_algebraMap_apply (R := ℚ) (A := ℚ) (B := ℂ) x p
   rw [show (algebraMap ℚ ℂ) x = (x : ℂ) from rfl] at h
   rw [h, Polynomial.coe_aeval_eq_eval]; rfl
 
 /-- Real points: `bernoulliPolyB n x = bernoulliFun n x`. -/
 theorem bernoulliPolyB_ofReal (n : ℕ) (x : ℝ) :
-    bernoulliPolyB n x = (bernoulliFun n x : ℂ) := b24a_aeval_ofReal _ x
+    bernoulliPolyB n x = (bernoulliFun n x : ℂ) := aeval_ofReal_eq_eval_map _ x
 
 /-- Real points: `eulerPolyE n x = eulerFun n x`. -/
 theorem eulerPolyE_ofReal (n : ℕ) (x : ℝ) :
-    eulerPolyE n x = (eulerFun n x : ℂ) := b24a_aeval_ofReal _ x
+    eulerPolyE n x = (eulerFun n x : ℂ) := aeval_ofReal_eq_eval_map _ x
 
 /-- Rational points: `bernoulliPolyB n x = (Polynomial.bernoulli n).eval x`. -/
 theorem bernoulliPolyB_ratCast (n : ℕ) (x : ℚ) :
-    bernoulliPolyB n x = (((Polynomial.bernoulli n).eval x : ℚ) : ℂ) := b24a_aeval_ratCast _ x
+    bernoulliPolyB n x = (((Polynomial.bernoulli n).eval x : ℚ) : ℂ) := aeval_ratCast_eq_eval _ x
 
 /-- Rational points: `eulerPolyE n x = (Polynomial.euler n).eval x`. -/
 theorem eulerPolyE_ratCast (n : ℕ) (x : ℚ) :
-    eulerPolyE n x = (((Polynomial.euler n).eval x : ℚ) : ℂ) := b24a_aeval_ratCast _ x
+    eulerPolyE n x = (((Polynomial.euler n).eval x : ℚ) : ℂ) := aeval_ratCast_eq_eval _ x
 
 /-- `Bₙ(0) = Bₙ` for the complex wrapper. -/
 @[simp]
@@ -116,7 +124,7 @@ theorem eulerNumber_def' (n : ℕ) :
 /-! ### The Appell property -/
 
 /-- Iterated derivatives of an Appell sequence `Pₙ' = n Pₙ₋₁`. -/
-lemma b24a_iterate_derivative (P : ℕ → ℚ[X])
+private lemma iterate_derivative_appell (P : ℕ → ℚ[X])
     (hP : ∀ n, derivative (P (n + 1)) = ((n : ℚ[X]) + 1) * P n) (k m : ℕ) :
     derivative^[k] (P (m + k)) = ((m + k).descFactorial k : ℚ[X]) * P m := by
   induction k with
@@ -128,11 +136,11 @@ lemma b24a_iterate_derivative (P : ℕ → ℚ[X])
     push_cast; ring
 
 /-- Hasse derivatives of an Appell sequence. -/
-lemma b24a_hasseDeriv (P : ℕ → ℚ[X])
+private lemma hasseDeriv_appell (P : ℕ → ℚ[X])
     (hP : ∀ n, derivative (P (n + 1)) = ((n : ℚ[X]) + 1) * P n) (k m : ℕ) :
     hasseDeriv k (P (m + k)) = ((m + k).choose k : ℚ[X]) * P m := by
   have h := congrFun (factorial_smul_hasseDeriv (R := ℚ) (k := k)) (P (m + k))
-  rw [b24a_iterate_derivative P hP, Nat.descFactorial_eq_factorial_mul_choose] at h
+  rw [iterate_derivative_appell P hP, Nat.descFactorial_eq_factorial_mul_choose] at h
   simp only [LinearMap.smul_apply] at h
   have hk : (k ! : ℚ) ≠ 0 := by positivity
   apply smul_right_injective ℚ[X] hk
@@ -141,14 +149,14 @@ lemma b24a_hasseDeriv (P : ℕ → ℚ[X])
   push_cast; ring
 
 /-- High Hasse derivatives of an Appell sequence vanish. -/
-lemma b24a_hasseDeriv_eq_zero (P : ℕ → ℚ[X]) (h0 : P 0 = 1)
+private lemma hasseDeriv_appell_eq_zero_of_lt (P : ℕ → ℚ[X]) (h0 : P 0 = 1)
     (hP : ∀ n, derivative (P (n + 1)) = ((n : ℚ[X]) + 1) * P n) {k n : ℕ} (hk : n < k) :
     hasseDeriv k (P n) = 0 := by
   have h := congrFun (factorial_smul_hasseDeriv (R := ℚ) (k := k)) (P n)
   obtain ⟨j, rfl⟩ := Nat.exists_eq_add_of_lt hk
   have : derivative^[n + j + 1] (P n) = 0 := by
     rw [show n + j + 1 = (j + 1) + n by ring, Function.iterate_add_apply,
-      show P n = P (0 + n) by simp, b24a_iterate_derivative P hP, h0]
+      show P n = P (0 + n) by simp, iterate_derivative_appell P hP, h0]
     simp [Function.iterate_succ_apply]
   rw [this] at h
   simp only [LinearMap.smul_apply] at h
@@ -157,7 +165,7 @@ lemma b24a_hasseDeriv_eq_zero (P : ℕ → ℚ[X]) (h0 : P 0 = 1)
   exact (smul_eq_zero.mp h).resolve_left hk
 
 /-- The Appell (binomial) property `Pₙ(x+h) = ∑ₖ (n choose k) Pₖ(x) h^{n-k}` at complex points. -/
-lemma b24a_appell_aeval (P : ℕ → ℚ[X]) (h0 : P 0 = 1)
+private lemma aeval_add_appell (P : ℕ → ℚ[X]) (h0 : P 0 = 1)
     (hP : ∀ n, derivative (P (n + 1)) = ((n : ℚ[X]) + 1) * P n) (n : ℕ) (x h : ℂ) :
     aeval (x + h) (P n) =
       ∑ k ∈ range (n + 1), (n.choose k : ℂ) * aeval x (P k) * h ^ (n - k) := by
@@ -166,7 +174,7 @@ lemma b24a_appell_aeval (P : ℕ → ℚ[X]) (h0 : P 0 = 1)
     rw [Nat.lt_succ_iff, natDegree_le_iff_coeff_eq_zero]
     intro i hi
     have hi' : n < i := by exact_mod_cast hi
-    have := congrArg (fun p => p.coeff 0) (b24a_hasseDeriv_eq_zero P h0 hP hi')
+    have := congrArg (fun p => p.coeff 0) (hasseDeriv_appell_eq_zero_of_lt P h0 hP hi')
     simp only [hasseDeriv_coeff, zero_add, Nat.choose_self, Nat.cast_one, one_mul,
       coeff_zero] at this
     simp [Q, coeff_map, this]
@@ -177,17 +185,12 @@ lemma b24a_appell_aeval (P : ℕ → ℚ[X]) (h0 : P 0 = 1)
   have hk' : k ≤ n := Nat.lt_succ_iff.mp (mem_range.mp hk)
   rw [taylor_coeff, hasseDeriv_map]
   simp only [show n + 1 - 1 - k = n - k by omega]
-  rw [show P n = P (k + (n - k)) by rw [Nat.add_sub_cancel' hk'], b24a_hasseDeriv P hP,
+  rw [show P n = P (k + (n - k)) by rw [Nat.add_sub_cancel' hk'], hasseDeriv_appell P hP,
     Nat.add_sub_cancel' hk', Nat.choose_symm hk', aeval_def, eval₂_eq_eval_map]
   simp [Polynomial.map_mul]
 
-/-- The Bernoulli polynomials satisfy `Bₙ₊₁' = (n+1) Bₙ`. -/
-lemma b24a_derivative_bernoulli (n : ℕ) :
-    derivative (Polynomial.bernoulli (n + 1)) = ((n : ℚ[X]) + 1) * Polynomial.bernoulli n := by
-  rw [Polynomial.derivative_bernoulli_add_one]
-
 /-- The Euler polynomials satisfy `Eₙ₊₁' = (n+1) Eₙ`. -/
-lemma b24a_derivative_euler (n : ℕ) :
+private lemma derivative_polynomial_euler_succ (n : ℕ) :
     derivative (Polynomial.euler (n + 1)) = ((n : ℚ[X]) + 1) * Polynomial.euler n :=
   Polynomial.derivative_euler_succ n
 
@@ -196,14 +199,14 @@ lemma b24a_derivative_euler (n : ℕ) :
 theorem bernoulliPolyB_add (n : ℕ) (x h : ℂ) :
     bernoulliPolyB n (x + h) =
       ∑ k ∈ range (n + 1), (n.choose k : ℂ) * bernoulliPolyB k x * h ^ (n - k) :=
-  b24a_appell_aeval _ Polynomial.bernoulli_zero b24a_derivative_bernoulli n x h
+  aeval_add_appell _ Polynomial.bernoulli_zero Polynomial.derivative_bernoulli_add_one n x h
 
 /-- **DLMF 24.4.13**: Appell property of the complex Euler polynomials. -/
 @[dlmf 24.4.E13]
 theorem eulerPolyE_add (n : ℕ) (x h : ℂ) :
     eulerPolyE n (x + h) =
       ∑ k ∈ range (n + 1), (n.choose k : ℂ) * eulerPolyE k x * h ^ (n - k) :=
-  b24a_appell_aeval _ Polynomial.euler_zero b24a_derivative_euler n x h
+  aeval_add_appell _ Polynomial.euler_zero derivative_polynomial_euler_succ n x h
 
 /-- **Derivative of the Bernoulli polynomials** (DLMF 24.4.34), complex `x`, `n ≥ 1`:
 `d/dx Bₙ(x) = n Bₙ₋₁(x)`, written for `n + 1`. -/
@@ -211,7 +214,7 @@ theorem eulerPolyE_add (n : ℕ) (x h : ℂ) :
 theorem hasDerivAt_bernoulliPolyB (n : ℕ) (x : ℂ) :
     HasDerivAt (bernoulliPolyB (n + 1)) (((n : ℂ) + 1) * bernoulliPolyB n x) x := by
   have h := Polynomial.hasDerivAt_aeval (Polynomial.bernoulli (n + 1)) x
-  rw [b24a_derivative_bernoulli] at h
+  rw [Polynomial.derivative_bernoulli_add_one] at h
   simp only [map_mul, map_add, map_natCast, map_one] at h
   exact h
 
@@ -221,7 +224,7 @@ theorem hasDerivAt_bernoulliPolyB (n : ℕ) (x : ℂ) :
 theorem hasDerivAt_eulerPolyE (n : ℕ) (x : ℂ) :
     HasDerivAt (eulerPolyE (n + 1)) (((n : ℂ) + 1) * eulerPolyE n x) x := by
   have h := Polynomial.hasDerivAt_aeval (Polynomial.euler (n + 1)) x
-  rw [b24a_derivative_euler] at h
+  rw [derivative_polynomial_euler_succ] at h
   simp only [map_mul, map_add, map_natCast, map_one] at h
   exact h
 

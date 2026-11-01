@@ -13,13 +13,20 @@ public import TauCeti.MeasureTheory.Integral.ExpDecay
 # Bounds for the Gamma function on vertical lines
 
 From the product `|Γ(x)/Γ(x+iy)|² = ∏ₖ (1 + y²/(x+k)²)` (DLMF 5.8.3) and its exact values
-`sinh(πy)/(πy)` at `x = 1` and `cosh(πy)` at `x = 1/2` (DLMF 5.4.3–5.4.4) we obtain
+`sinh(πy)/(πy)` at `x = 1` and `cosh(πy)` at `x = 1/2` (DLMF 5.4.3–5.4.4) we obtain the
+estimates needed for Mellin–Barnes integrals.
 
-* `exists_norm_Gamma_le`: `|Γ(x+iy)| ≤ C (1+|y|)^K e^{-π|y|/2}` for fixed `x > 0`;
+## Main definitions
+
+* `gammaVertProd`: the product `∏ₖ (1 + y²/(x+k)²)` of DLMF 5.8.3.
+
+## Main results
+
+* `norm_Gamma_sq_eq`: `|Γ(x + iy)|² = Γ(x)² / ∏ₖ (1 + y²/(x + k)²)` for `x > 0`.
+* `gammaVertProd_one`, `gammaVertProd_half`: the values at `x = 1` and `x = 1/2`.
+* `exists_norm_Gamma_le`: `|Γ(x+iy)| ≤ C (1+|y|)^K e^{-π|y|/2}` for fixed `x > 0`.
 * `exists_norm_recip_Gamma_le`: `|1/Γ(x+iy)| ≤ C (1+|y|)^K e^{π|y|/2}`, uniformly for `x` in a
   bounded interval.
-
-These are the estimates needed for Mellin–Barnes integrals.
 -/
 
 @[expose] public section

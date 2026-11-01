@@ -63,6 +63,7 @@ theorem mul_exp_neg_mul_le_recip {δ : ℝ} (hδ : 0 < δ) (t : ℝ) :
   rw [← one_div, le_div_iff₀ hδ]
   nlinarith
 
+omit [CompleteSpace V] in
 /-- **The Laplace transform is holomorphic** on the half-plane of absolute convergence: if
 `e^{-ct} G(t)` is integrable on `(0, ∞)`, then `w ↦ ∫₀^∞ e^{-wt} G(t) dt` is complex
 differentiable on `re w > c`. -/
@@ -125,6 +126,7 @@ theorem differentiableOn_integral_cexp_neg_mul_smul {G : ℝ → V} {c : ℝ}
     have := ((hasDerivAt_id w).mul_const (t : ℂ)).neg.cexp
     simpa using this.smul_const (G t)
 
+omit [CompleteSpace V] in
 /-- A Laplace transform of a continuous function with `|G(t)| ≤ C t^k + D`, `k > -1`, on
 `(0, ∞)` is holomorphic on the right half-plane. -/
 theorem differentiableOn_integral_cexp_neg_mul_smul_of_le_rpow {G : ℝ → V} {C D k : ℝ}

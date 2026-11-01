@@ -8,13 +8,30 @@ module
 public import DLMF.IncompleteGamma.SineCosine.GammaRepresentations
 
 /-!
-# Spherical series for generalized sine and cosine integrals
+# Spherical series and auxiliary functions for generalized sine and cosine integrals
 
-Spherical-function expansions and complementary tail identities for generalized trigonometric
-integrals.
+Spherical Bessel expansions of the generalized sine and cosine integrals, and the generalized
+auxiliary functions `f(a,z)`, `g(a,z)` with their integral representations and asymptotic
+expansions (DLMF 8.21.16–8.21.27).
 
-Source references and common attribution are retained in
-`DLMF.IncompleteGamma.SineCosine`.
+## Main definitions
+
+* `genTrigAuxF`, `genTrigAuxG`: the generalized auxiliary functions of DLMF 8.21.18 and
+  8.21.19.
+
+## Main results
+
+* `genSinInt_spherical_series`, `genCosInt_spherical_series`: the spherical Bessel series
+  DLMF 8.21.16 and 8.21.17.
+* `genSinIntTail_aux`, `genCosIntTail_aux`: the upper integrals through the auxiliary
+  functions, DLMF 8.21.20 and 8.21.21.
+* `genTrigAuxF_oscillatory_integral`, `genTrigAuxG_oscillatory_integral`: DLMF 8.21.22 and
+  8.21.23.
+* `genTrigAuxF_laplace_integral`, `genTrigAuxG_laplace_integral`: DLMF 8.21.24 and 8.21.25.
+* `upperIncGammaOnLog_logSector_asymptotic`: the expansion of `e^{e^w} Γ(a, e^w)` on the
+  logarithmic sector `|im w| ≤ 3π/2 - δ`.
+* `genTrigAuxF_sector_asymptotic`, `genTrigAuxG_sector_asymptotic`: the asymptotic expansions
+  DLMF 8.21.26 and 8.21.27 on `|ph z| ≤ π - δ`.
 -/
 
 @[expose] public noncomputable section
@@ -253,7 +270,7 @@ theorem genSinInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n+1)) 
       rw [hHL w]; simp [he, poch_zero, ← sphSeries_mul_sphericalJ_zero])
     hpar z
   -- conclude
-  have hG := genSinInt_hasSum ha hz
+  have hG := genSinInt_hasSum (a := a) hz
   have hval : genSinInt a z = z^a * H z := by
     rw [hH, ← tsum_mul_left]
     refine hG.tsum_eq.symm.trans ?_
@@ -413,7 +430,7 @@ theorem genCosInt_spherical_series {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(2*n : �
     (sphSeries_bound_coeff_mul_sphericalJ c hc_r 0)
     hHd (fun w => by rw [hHL w]; simp)
     hpar z
-  have hG := genCosInt_hasSum ha hz
+  have hG := genCosInt_hasSum (a := a) hz
   have hval : genCosInt a z = z^a * H z := by
     rw [hH, ← tsum_mul_left]
     refine hG.tsum_eq.symm.trans ?_

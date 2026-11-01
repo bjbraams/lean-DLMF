@@ -11,10 +11,26 @@ public import Mathlib.Analysis.SpecialFunctions.Arsinh
 /-!
 # Gegenbauer and Jacobi representations and degree derivatives
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This file expresses Ferrers and associated Legendre functions through Gegenbauer and Jacobi
+functions (DLMF 14.3.21–14.3.23) and gives the degree derivative of `P^μ_ν(z)` outside the
+interval `(-1, 1)` (the associated case of DLMF 14.11.1).
+
+## Main definitions
+
+* `gegenbauerFunction`: the Gegenbauer function at regular parameters.
+* `jacobiFunction`: the Jacobi function, through the Gauss function on its cut plane.
+* `associatedDegreeA`: the degree-derivative series `A^μ_ν(z)`, convergent for `|1-z| < 2`.
+
+## Main results
+
+* `ferrersP_gegenbauer`, `associatedP_gegenbauer`: DLMF 14.3.21, 14.3.22.
+* `associatedP_jacobi`: DLMF 14.3.23, as a limit in the order.
+* `associatedP_degree_deriv`: DLMF 14.11.1 for `z ∉ (-∞, 1]` with `|1-z| < 2`.
+
+## Implementation notes
+
+Where a representation has removable gamma singularities at exceptional parameters, the
+statement uses the limit of the whole representation.
 -/
 
 @[expose] public noncomputable section

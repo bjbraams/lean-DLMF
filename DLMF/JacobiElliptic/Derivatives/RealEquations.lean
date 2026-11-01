@@ -10,10 +10,28 @@ public import DLMF.JacobiElliptic.Derivatives.ComplexEquations
 /-!
 # Real derivatives and differential equations of Jacobi functions
 
-The real-variable derivative table and its first- and second-order differential consequences.
+For real argument and real parameter `m = k² < 1`: the entries of Table 22.13.1 for the nine
+quotient functions `sd, cd, nd, dc, nc, sc, ns, ds, cs`, and their first- and second-order
+differential equations (DLMF 22.13.4–22.13.12 and 22.13.16–22.13.24), proved from the real
+`sn, cn, dn`.
 
-Source references and common attribution are retained in
-`DLMF.JacobiElliptic.Derivatives`.
+## Main results
+
+* `Real.hasDerivAt_jacobiSdm`, `Real.hasDerivAt_jacobiCdm`, `Real.hasDerivAt_jacobiNdm`,
+  `Real.hasDerivAt_jacobiDcm`, `Real.hasDerivAt_jacobiNcm`, `Real.hasDerivAt_jacobiScm`,
+  `Real.hasDerivAt_jacobiNsm`, `Real.hasDerivAt_jacobiDsm`, `Real.hasDerivAt_jacobiCsm`:
+  DLMF Table 22.13.1, real argument.
+* `Real.deriv_jacobiCdm_sq`, …, `Real.deriv_jacobiCsm_sq`: DLMF 22.13.4–22.13.12, real
+  argument.
+* `Real.iteratedDeriv_two_jacobiCdm`, …, `Real.iteratedDeriv_two_jacobiCsm`:
+  DLMF 22.13.16–22.13.24, real argument.
+
+## Implementation notes
+
+In the real forms `k'² = 1 - m`, and statements assume `cn u ≠ 0` or `sn u ≠ 0` where DLMF
+divides. The entries for `sn, cn, dn` themselves are `Real.hasDerivAt_jacobiSnm`,
+`Real.jacobiSnm_deriv_sq`, `Real.iteratedDeriv_two_jacobiSnm` and their companions in
+`DLMF.Elliptic.Jacobi` and `DLMF.Elliptic.JacobiIdentities`.
 -/
 
 @[expose] public section
@@ -43,7 +61,7 @@ open Real
 variable {m : ℝ}
 
 /-- `sn² + cn² = 1` and `m sn² + dn² = 1` at one point (helper). -/
-theorem je22b_identities (hm : m < 1) (u : ℝ) :
+theorem jacobiSnm_sq_add_jacobiCnm_sq_and (hm : m < 1) (u : ℝ) :
     Real.jacobiSnm u m ^ 2 + Real.jacobiCnm u m ^ 2 = 1 ∧
       m * Real.jacobiSnm u m ^ 2 + Real.jacobiDnm u m ^ 2 = 1 :=
   ⟨Real.jacobiSnm_sq_add_jacobiCnm_sq u m, Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm u⟩
@@ -55,7 +73,7 @@ theorem Real.hasDerivAt_jacobiSdm (hm : m < 1) (u : ℝ) :
     HasDerivAt (fun u => Real.jacobiSnm u m / Real.jacobiDnm u m)
       (Real.jacobiCnm u m / Real.jacobiDnm u m * (1 / Real.jacobiDnm u m)) u := by
   have hd := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   refine ((Real.hasDerivAt_jacobiSnm hm u).div (Real.hasDerivAt_jacobiDnm hm u) hd).congr_deriv ?_
   field_simp
   linear_combination (Real.jacobiCnm u m) * h2
@@ -66,7 +84,7 @@ theorem Real.hasDerivAt_jacobiCdm (hm : m < 1) (u : ℝ) :
     HasDerivAt (fun u => Real.jacobiCnm u m / Real.jacobiDnm u m)
       (-((1 - m) * (Real.jacobiSnm u m / Real.jacobiDnm u m) * (1 / Real.jacobiDnm u m))) u := by
   have hd := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   refine ((Real.hasDerivAt_jacobiCnm hm u).div (Real.hasDerivAt_jacobiDnm hm u) hd).congr_deriv ?_
   field_simp
   linear_combination -(Real.jacobiSnm u m) * h2 + m * Real.jacobiSnm u m * h1
@@ -87,7 +105,7 @@ theorem Real.hasDerivAt_jacobiNdm (hm : m < 1) (u : ℝ) :
 theorem Real.hasDerivAt_jacobiDcm (hm : m < 1) {u : ℝ} (hc : Real.jacobiCnm u m ≠ 0) :
     HasDerivAt (fun u => Real.jacobiDnm u m / Real.jacobiCnm u m)
       ((1 - m) * (Real.jacobiSnm u m / Real.jacobiCnm u m) * (1 / Real.jacobiCnm u m)) u := by
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   refine ((Real.hasDerivAt_jacobiDnm hm u).div (Real.hasDerivAt_jacobiCnm hm u) hc).congr_deriv ?_
   field_simp
   linear_combination (Real.jacobiSnm u m) * h2 - m * Real.jacobiSnm u m * h1
@@ -106,7 +124,7 @@ theorem Real.hasDerivAt_jacobiNcm (hm : m < 1) {u : ℝ} (hc : Real.jacobiCnm u 
 theorem Real.hasDerivAt_jacobiScm (hm : m < 1) {u : ℝ} (hc : Real.jacobiCnm u m ≠ 0) :
     HasDerivAt (fun u => Real.jacobiSnm u m / Real.jacobiCnm u m)
       (Real.jacobiDnm u m / Real.jacobiCnm u m * (1 / Real.jacobiCnm u m)) u := by
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   refine ((Real.hasDerivAt_jacobiSnm hm u).div (Real.hasDerivAt_jacobiCnm hm u) hc).congr_deriv ?_
   field_simp
   linear_combination (Real.jacobiDnm u m) * h1
@@ -126,7 +144,7 @@ theorem Real.hasDerivAt_jacobiNsm (hm : m < 1) {u : ℝ} (hs : Real.jacobiSnm u 
 theorem Real.hasDerivAt_jacobiDsm (hm : m < 1) {u : ℝ} (hs : Real.jacobiSnm u m ≠ 0) :
     HasDerivAt (fun u => Real.jacobiDnm u m / Real.jacobiSnm u m)
       (-(Real.jacobiCnm u m / Real.jacobiSnm u m * (1 / Real.jacobiSnm u m))) u := by
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   refine ((Real.hasDerivAt_jacobiDnm hm u).div (Real.hasDerivAt_jacobiSnm hm u) hs).congr_deriv ?_
   field_simp
   linear_combination -(Real.jacobiCnm u m) * h2
@@ -136,7 +154,7 @@ theorem Real.hasDerivAt_jacobiDsm (hm : m < 1) {u : ℝ} (hs : Real.jacobiSnm u 
 theorem Real.hasDerivAt_jacobiCsm (hm : m < 1) {u : ℝ} (hs : Real.jacobiSnm u m ≠ 0) :
     HasDerivAt (fun u => Real.jacobiCnm u m / Real.jacobiSnm u m)
       (-(1 / Real.jacobiSnm u m * (Real.jacobiDnm u m / Real.jacobiSnm u m))) u := by
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   refine ((Real.hasDerivAt_jacobiCnm hm u).div (Real.hasDerivAt_jacobiSnm hm u) hs).congr_deriv ?_
   field_simp
   linear_combination -(Real.jacobiDnm u m) * h1
@@ -151,7 +169,7 @@ theorem Real.deriv_jacobiCdm_sq (hm : m < 1) (u : ℝ) :
       (1 - (Real.jacobiCnm u m / Real.jacobiDnm u m) ^ 2) * (1 - m * (Real.jacobiCnm u m /
           Real.jacobiDnm u m) ^ 2) := by
   have hd := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   rw [(Real.hasDerivAt_jacobiCdm hm u).deriv]
   field_simp
   linear_combination (-(Real.jacobiCnm u m)^2*m + (Real.jacobiDnm u m)^2*m - m + 1) * h1 +
@@ -165,7 +183,7 @@ theorem Real.deriv_jacobiSdm_sq (hm : m < 1) (u : ℝ) :
       (1 - (1 - m) * (Real.jacobiSnm u m / Real.jacobiDnm u m) ^ 2) * (1 + m *
           (Real.jacobiSnm u m / Real.jacobiDnm u m) ^ 2) := by
   have hd := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   rw [(Real.hasDerivAt_jacobiSdm hm u).deriv]
   field_simp
   linear_combination (-(Real.jacobiDnm u m)^2*m + (Real.jacobiDnm u m)^2 -
@@ -179,7 +197,7 @@ theorem Real.deriv_jacobiNdm_sq (hm : m < 1) (u : ℝ) :
     deriv (fun u => 1 / Real.jacobiDnm u m) u ^ 2 =
       ((1 / Real.jacobiDnm u m) ^ 2 - 1) * (1 - (1 - m) * (1 / Real.jacobiDnm u m) ^ 2) := by
   have hd := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   rw [(Real.hasDerivAt_jacobiNdm hm u).deriv]
   field_simp
   linear_combination (-(Real.jacobiDnm u m)^2*m + m) * h1 + ((Real.jacobiCnm u m)^2*m +
@@ -192,7 +210,7 @@ theorem Real.deriv_jacobiDcm_sq (hm : m < 1) {u : ℝ} (hc : Real.jacobiCnm u m 
     deriv (fun u => Real.jacobiDnm u m / Real.jacobiCnm u m) u ^ 2 =
       ((Real.jacobiDnm u m / Real.jacobiCnm u m) ^ 2 - 1) * ((Real.jacobiDnm u m /
           Real.jacobiCnm u m) ^ 2 - m) := by
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   rw [(Real.hasDerivAt_jacobiDcm hm hc).deriv]
   field_simp
   linear_combination (-(Real.jacobiCnm u m)^2*m + (Real.jacobiDnm u m)^2*m - m + 1) * h1 +
@@ -204,7 +222,7 @@ for real parameter `m = k² < 1` (`k'² = 1 - m`), cn u ≠ 0. -/
 theorem Real.deriv_jacobiNcm_sq (hm : m < 1) {u : ℝ} (hc : Real.jacobiCnm u m ≠ 0) :
     deriv (fun u => 1 / Real.jacobiCnm u m) u ^ 2 =
       (m + (1 - m) * (1 / Real.jacobiCnm u m) ^ 2) * ((1 / Real.jacobiCnm u m) ^ 2 - 1) := by
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   rw [(Real.hasDerivAt_jacobiNcm hm hc).deriv]
   field_simp
   linear_combination ((Real.jacobiCnm u m)^2*m + (Real.jacobiDnm u m)^2 - m) * h1 + (1 -
@@ -217,7 +235,7 @@ theorem Real.deriv_jacobiScm_sq (hm : m < 1) {u : ℝ} (hc : Real.jacobiCnm u m 
     deriv (fun u => Real.jacobiSnm u m / Real.jacobiCnm u m) u ^ 2 =
       (1 + (Real.jacobiSnm u m / Real.jacobiCnm u m) ^ 2) * (1 + (1 - m) * (Real.jacobiSnm u m /
           Real.jacobiCnm u m) ^ 2) := by
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   rw [(Real.hasDerivAt_jacobiScm hm hc).deriv]
   field_simp
   linear_combination (-(Real.jacobiCnm u m)^2 + m*(Real.jacobiSnm u m)^2 - (Real.jacobiSnm u m)^2 -
@@ -229,7 +247,7 @@ for real parameter `m = k² < 1` (`k'² = 1 - m`), sn u ≠ 0. -/
 theorem Real.deriv_jacobiNsm_sq (hm : m < 1) {u : ℝ} (hs : Real.jacobiSnm u m ≠ 0) :
     deriv (fun u => 1 / Real.jacobiSnm u m) u ^ 2 =
       ((1 / Real.jacobiSnm u m) ^ 2 - m) * ((1 / Real.jacobiSnm u m) ^ 2 - 1) := by
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   rw [(Real.hasDerivAt_jacobiNsm hm hs).deriv]
   field_simp
   linear_combination (-m*(Real.jacobiSnm u m)^2 + 1) * h1 + ((Real.jacobiCnm u m)^2) * h2
@@ -241,7 +259,7 @@ theorem Real.deriv_jacobiDsm_sq (hm : m < 1) {u : ℝ} (hs : Real.jacobiSnm u m 
     deriv (fun u => Real.jacobiDnm u m / Real.jacobiSnm u m) u ^ 2 =
       ((Real.jacobiDnm u m / Real.jacobiSnm u m) ^ 2 - (1 - m)) * (m + (Real.jacobiDnm u m /
           Real.jacobiSnm u m) ^ 2) := by
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   rw [(Real.hasDerivAt_jacobiDsm hm hs).deriv]
   field_simp
   linear_combination (-(Real.jacobiDnm u m)^2*m + (Real.jacobiDnm u m)^2 -
@@ -255,7 +273,7 @@ theorem Real.deriv_jacobiCsm_sq (hm : m < 1) {u : ℝ} (hs : Real.jacobiSnm u m 
     deriv (fun u => Real.jacobiCnm u m / Real.jacobiSnm u m) u ^ 2 =
       (1 + (Real.jacobiCnm u m / Real.jacobiSnm u m) ^ 2) * ((1 - m) + (Real.jacobiCnm u m /
           Real.jacobiSnm u m) ^ 2) := by
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   rw [(Real.hasDerivAt_jacobiCsm hm hs).deriv]
   field_simp
   linear_combination (-(Real.jacobiCnm u m)^2 + m*(Real.jacobiSnm u m)^2 - (Real.jacobiSnm u m)^2 -
@@ -272,7 +290,7 @@ theorem Real.iteratedDeriv_two_jacobiCdm (hm : m < 1) (u : ℝ) :
       -(1 + m) * (Real.jacobiCnm u m / Real.jacobiDnm u m) + 2 * m * (Real.jacobiCnm u m /
           Real.jacobiDnm u m) ^ 3 := by
   have hd0 := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   have h' : HasDerivAt (fun v => -((1 - m) * (Real.jacobiSnm v m / Real.jacobiDnm v m) * (1 /
       Real.jacobiDnm v m))) _ u :=
     (((Real.hasDerivAt_jacobiSdm hm u).const_mul (1 - m)).mul (Real.hasDerivAt_jacobiNdm hm u)).neg
@@ -292,7 +310,7 @@ theorem Real.iteratedDeriv_two_jacobiSdm (hm : m < 1) (u : ℝ) :
       (m - (1 - m)) * (Real.jacobiSnm u m / Real.jacobiDnm u m) - 2 * m * (1 - m) *
           (Real.jacobiSnm u m / Real.jacobiDnm u m) ^ 3 := by
   have hd0 := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   have h' : HasDerivAt (fun v => (Real.jacobiCnm v m / Real.jacobiDnm v m) * (1 /
       Real.jacobiDnm v m)) _ u :=
     (Real.hasDerivAt_jacobiCdm hm u).mul (Real.hasDerivAt_jacobiNdm hm u)
@@ -310,7 +328,7 @@ theorem Real.iteratedDeriv_two_jacobiNdm (hm : m < 1) (u : ℝ) :
     iteratedDeriv 2 (fun u => 1 / Real.jacobiDnm u m) u =
       (1 + (1 - m)) * (1 / Real.jacobiDnm u m) - 2 * (1 - m) * (1 / Real.jacobiDnm u m) ^ 3 := by
   have hd0 := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   have h' : HasDerivAt (fun v => m * (Real.jacobiSnm v m / Real.jacobiDnm v m) *
       (Real.jacobiCnm v m / Real.jacobiDnm v m)) _ u :=
     ((Real.hasDerivAt_jacobiSdm hm u).const_mul m).mul (Real.hasDerivAt_jacobiCdm hm u)
@@ -329,7 +347,7 @@ theorem Real.iteratedDeriv_two_jacobiDcm (hm : m < 1) {u : ℝ} (hc : Real.jacob
       -(1 + m) * (Real.jacobiDnm u m / Real.jacobiCnm u m) + 2 * (Real.jacobiDnm u m /
           Real.jacobiCnm u m) ^ 3 := by
   have hd0 := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   have h' : HasDerivAt (fun v => (1 - m) * (Real.jacobiSnm v m / Real.jacobiCnm v m) * (1 /
       Real.jacobiCnm v m)) _ u :=
     ((Real.hasDerivAt_jacobiScm hm hc).const_mul (1 - m)).mul (Real.hasDerivAt_jacobiNcm hm hc)
@@ -348,7 +366,7 @@ theorem Real.iteratedDeriv_two_jacobiNcm (hm : m < 1) {u : ℝ} (hc : Real.jacob
     iteratedDeriv 2 (fun u => 1 / Real.jacobiCnm u m) u =
       (m - (1 - m)) * (1 / Real.jacobiCnm u m) + 2 * (1 - m) * (1 / Real.jacobiCnm u m) ^ 3 := by
   have hd0 := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   have h' : HasDerivAt (fun v => (Real.jacobiSnm v m / Real.jacobiCnm v m) * (Real.jacobiDnm v m /
       Real.jacobiCnm v m)) _ u :=
     (Real.hasDerivAt_jacobiScm hm hc).mul (Real.hasDerivAt_jacobiDcm hm hc)
@@ -369,7 +387,7 @@ theorem Real.iteratedDeriv_two_jacobiScm (hm : m < 1) {u : ℝ} (hc : Real.jacob
       (1 + (1 - m)) * (Real.jacobiSnm u m / Real.jacobiCnm u m) + 2 * (1 - m) *
           (Real.jacobiSnm u m / Real.jacobiCnm u m) ^ 3 := by
   have hd0 := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   have h' : HasDerivAt (fun v => (Real.jacobiDnm v m / Real.jacobiCnm v m) * (1 /
       Real.jacobiCnm v m)) _ u :=
     (Real.hasDerivAt_jacobiDcm hm hc).mul (Real.hasDerivAt_jacobiNcm hm hc)
@@ -389,7 +407,7 @@ theorem Real.iteratedDeriv_two_jacobiNsm (hm : m < 1) {u : ℝ} (hs : Real.jacob
     iteratedDeriv 2 (fun u => 1 / Real.jacobiSnm u m) u =
       -(1 + m) * (1 / Real.jacobiSnm u m) + 2 * (1 / Real.jacobiSnm u m) ^ 3 := by
   have hd0 := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   have h' : HasDerivAt (fun v => -((Real.jacobiDnm v m / Real.jacobiSnm v m) *
       (Real.jacobiCnm v m / Real.jacobiSnm v m))) _ u :=
     ((Real.hasDerivAt_jacobiDsm hm hs).mul (Real.hasDerivAt_jacobiCsm hm hs)).neg
@@ -410,7 +428,7 @@ theorem Real.iteratedDeriv_two_jacobiDsm (hm : m < 1) {u : ℝ} (hs : Real.jacob
       (m - (1 - m)) * (Real.jacobiDnm u m / Real.jacobiSnm u m) + 2 * (Real.jacobiDnm u m /
           Real.jacobiSnm u m) ^ 3 := by
   have hd0 := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   have h' : HasDerivAt (fun v => -((Real.jacobiCnm v m / Real.jacobiSnm v m) * (1 /
       Real.jacobiSnm v m))) _ u :=
     ((Real.hasDerivAt_jacobiCsm hm hs).mul (Real.hasDerivAt_jacobiNsm hm hs)).neg
@@ -431,7 +449,7 @@ theorem Real.iteratedDeriv_two_jacobiCsm (hm : m < 1) {u : ℝ} (hs : Real.jacob
       (1 + (1 - m)) * (Real.jacobiCnm u m / Real.jacobiSnm u m) + 2 * (Real.jacobiCnm u m /
           Real.jacobiSnm u m) ^ 3 := by
   have hd0 := (Real.jacobiDnm_pos hm u).ne'
-  obtain ⟨h1, h2⟩ := je22b_identities hm u
+  obtain ⟨h1, h2⟩ := jacobiSnm_sq_add_jacobiCnm_sq_and hm u
   have h' : HasDerivAt (fun v => -((1 / Real.jacobiSnm v m) * (Real.jacobiDnm v m /
       Real.jacobiSnm v m))) _ u :=
     ((Real.hasDerivAt_jacobiNsm hm hs).mul (Real.hasDerivAt_jacobiDsm hm hs)).neg

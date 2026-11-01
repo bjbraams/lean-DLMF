@@ -17,9 +17,18 @@ public import Mathlib.Data.Nat.Choose.Multinomial
 /-!
 # Gauss summation for regularized coefficients on the boundary
 
-At a singular denominator parameter, the zero initial coefficients are removed
-before applying the proved ordinary Gauss summation theorem. The reciprocal Gamma
-recurrence avoids division by a possibly vanishing numerator Pochhammer symbol.
+## Main results
+
+* `hasSum_regularizedGauss_one_of_nonpole`, `hasSum_regularizedGauss_one`: Gauss summation of
+  the regularized coefficients for every denominator parameter, including Gamma poles.
+* `tendsto_regularizedGaussHG_left_one`: the left boundary limit at `z = 1` of the continued
+  regularized Gauss function.
+
+## Implementation notes
+
+At a singular denominator parameter, the zero initial coefficients are removed before applying
+the ordinary Gauss summation theorem. The reciprocal Gamma recurrence avoids division by a
+possibly vanishing numerator Pochhammer symbol.
 -/
 
 @[expose] public section

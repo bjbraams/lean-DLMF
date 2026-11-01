@@ -10,19 +10,33 @@ public import Mathlib.RingTheory.RootsOfUnity.Complex
 public import Mathlib.RingTheory.RootsOfUnity.Lemmas
 
 /-!
-# Gauss's multiplication formula (AAR Theorem 1.5.2)
+# Gauss's multiplication formula (DLMF 5.5.6–5.5.7, AAR Theorem 1.5.2)
 
 Mathlib has Legendre's duplication formula `Gamma_mul_Gamma_add_half` (the case `m = 2`)
-but not the general Gauss multiplication formula. Andrews–Askey–Roy, Theorem 1.5.2:
+but not the general Gauss multiplication formula
 
 $$
 \Gamma(mz)=(2\pi)^{(1-m)/2}\, m^{mz-1/2}\prod_{k=0}^{m-1}\Gamma\bigl(z+k/m\bigr).
 $$
 
+## Main results
+
+* `prod_sin_pi_div`: `∏_{k=1}^{m-1} sin(π k / m) = m / 2^{m-1}`.
+* `prod_Gamma_div`: `∏_{k=1}^{m-1} Γ(k/m) = (2π)^{(m-1)/2} / √m`, DLMF 5.5.7.
+* `multiplicationGamma_eq_Gamma`: the Bohr–Mollerup form of the multiplication formula.
+* `Gamma_mul_nat_of_pos`: DLMF 5.5.6 for positive real arguments.
+* `Complex.Gamma_prod_add_div`, `Complex.Gamma_mul_nat`: DLMF 5.5.6 for complex arguments.
+* `Real.Gamma_prod_add_div`, `Real.Gamma_mul_nat`: DLMF 5.5.6 for real arguments.
+
+## Implementation notes
+
 The real-positive case is obtained from the Bohr–Mollerup theorem, after evaluating the
-constant via Euler's reflection formula and the sine product
-`∏_{k=1}^{m-1} sin(π k / m) = m / 2^{m-1}`. The identity is then extended to all complex
-arguments by analytic continuation of `1/Γ`.
+constant via Euler's reflection formula and the sine product. The identity is then extended to
+all complex arguments by analytic continuation of `1/Γ`.
+
+## References
+
+* G. E. Andrews, R. Askey, R. Roy, *Special Functions*, Theorem 1.5.2.
 -/
 
 @[expose] public section

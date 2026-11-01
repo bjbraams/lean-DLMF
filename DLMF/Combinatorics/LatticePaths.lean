@@ -9,23 +9,42 @@ public import DLMF.Combinatorics.Basic
 public import Mathlib.Combinatorics.Enumerative.Catalan.Basic
 public import Mathlib.Combinatorics.Enumerative.Schroder
 public import Mathlib.Data.Nat.Choose.Vandermonde
-public import DLMFMathlib.Combinatorics.S26aSeriesTransform
+public import DLMFMathlib.Combinatorics.SeriesTransform
 public import DLMF.Combinatorics.Catalan
 
 /-!
-# Other lattice path numbers (DLMF §26.6)
+# Other lattice path numbers
 
-DLMF defines the Delannoy number `D(m, n)`, the Motzkin number `M(n)`, the Narayana number
-`N(n, k)` and the Schröder number `r(n)` as numbers of lattice paths (§26.6(i)). Mathlib has the
-large Schröder numbers `Nat.largeSchroder` (`1, 2, 6, 22, 90, …`), which are DLMF's `r(n)`; the
-other three are defined here, by the recurrence 26.6.10 (Delannoy), by the recurrence 26.6.11
-(Motzkin), and by the explicit formula 26.6.3 (Narayana, with `N(n, 0) = 0`). The path counts
-in DLMF's definitions are acquired as theorems about `latticePaths`.
+The Delannoy, Motzkin, Narayana and Schröder numbers of DLMF §26.6, which DLMF defines as numbers
+of lattice paths (§26.6(i)). Mathlib has the large Schröder numbers `Nat.largeSchroder`
+(`1, 2, 6, 22, 90, …`), which are DLMF's `r(n)`; the other three are defined here, and the path
+counts in DLMF's definitions are theorems about `latticePaths`.
 
-The generating functions §26.6(ii) are stated for real arguments in explicit disks of
+## Main definitions
+
+* `delannoy`: the Delannoy number `D(m, n)`, by the recurrence 26.6.10.
+* `motzkin`: the Motzkin number `M(n)`, by the recurrence 26.6.11.
+* `narayana`: the Narayana number `N(n, k)`, by the explicit formula 26.6.3, with `N(n, 0) = 0`.
+
+## Main results
+
+* `card_latticePaths_eq_delannoy`, `card_latticePaths_above_eq_motzkin`,
+  `card_latticePaths_peaks_eq_narayana`, `card_latticePaths_above_eq_largeSchroder`: the lattice
+  path counts (DLMF §26.6(i)).
+* `delannoy_eq_sum`, `motzkin_eq_sum`, `narayana_eq`, `largeSchroder_eq_delannoy_sub`: explicit
+  formulas (DLMF 26.6.1–26.6.4).
+* `hasSum_delannoy`, `hasSum_delannoy_diag`, `hasSum_motzkin`, `hasSum_narayana`,
+  `hasSum_largeSchroder`: the generating functions (DLMF 26.6.5–26.6.9).
+* `delannoy_succ_succ`, `motzkin_eq`: the recurrences (DLMF 26.6.10, 26.6.11).
+* `catalan_eq_sum_narayana`, `motzkin_eq_sum_catalan`, `catalan_eq_sum_motzkin`: relations with
+  the Catalan numbers (DLMF 26.6.12–26.6.14).
+
+## Implementation notes
+
+The generating functions of §26.6(ii) are stated for real arguments in explicit disks of
 convergence (`3 - 2√2` is the radius for the central Delannoy and the Schröder numbers, `1/3`
 for the Motzkin numbers), and with "sufficiently small" bounds where DLMF gives none (26.6.5,
-26.6.8).
+26.6.8). DLMF 26.6.12 is stated for `n ≥ 1`: at `n = 0` the sum is empty while `C(0) = 1`.
 -/
 
 @[expose] public section
@@ -94,7 +113,7 @@ def narayana : ℕ → ℕ → ℕ
   | n, k + 1 => n.choose (k + 1) * n.choose k / n
 
 /-- The divisibility behind `narayana`: `n ∣ C(n, k+1) C(n, k)`. -/
-lemma c26a_dvd_choose_mul_choose (n k : ℕ) : n ∣ n.choose (k + 1) * n.choose k := by
+private lemma dvd_choose_succ_mul_choose (n k : ℕ) : n ∣ n.choose (k + 1) * n.choose k := by
   rcases n with _ | a
   · simp
   · -- `(a+2) C(a+1,k+1) C(a+1,k) = (a+1) C(a,k) C(a+2,k+1)`
@@ -116,7 +135,7 @@ lemma c26a_dvd_choose_mul_choose (n k : ℕ) : n ∣ n.choose (k + 1) * n.choose
 
 /-- DLMF 26.6.3: `n N(n, k) = C(n, k) C(n, k-1)` for `k ≥ 1`. -/
 theorem narayana_mul (n k : ℕ) : n * narayana n (k + 1) = n.choose (k + 1) * n.choose k := by
-  rw [narayana, Nat.mul_div_cancel' (c26a_dvd_choose_mul_choose n k)]
+  rw [narayana, Nat.mul_div_cancel' (dvd_choose_succ_mul_choose n k)]
 
 /-- DLMF 26.6.3: `N(n, k) = (1/n) C(n, k) C(n, k-1)`, `n, k ≥ 1`. -/
 @[dlmf 26.6.E3]
@@ -137,12 +156,12 @@ theorem card_latticePaths_eq_delannoy (m n : ℕ) :
     #(latticePaths {(1, 0), (0, 1), (1, 1)} m n) = delannoy m n := by
   have h0 : ((0 : ℕ), (0 : ℕ)) ∉ ({(1, 0), (0, 1), (1, 1)} : Finset (ℕ × ℕ)) := by decide
   have key := fun m n (hmn : (m, n) ≠ (0, 0)) =>
-    q26a_card_filter_latticePaths h0 (m := m) (n := n) hmn (fun _ => True)
+    card_filter_latticePaths h0 (m := m) (n := n) hmn (fun _ => True)
   simp only [filter_true] at key
   induction m generalizing n with
   | zero =>
     induction n with
-    | zero => simp [q26a_latticePaths_zero h0]
+    | zero => simp [latticePaths_zero_zero h0]
     | succ n ih =>
       rw [key 0 (n + 1) (by simp), show ({(1, 0), (0, 1), (1, 1)} : Finset (ℕ × ℕ)).filter
           (fun s => s.1 ≤ 0 ∧ s.2 ≤ n + 1) = {(0, 1)} by
@@ -171,7 +190,7 @@ theorem card_latticePaths_above_eq_motzkin (n : ℕ) :
   sorry
 
 /-- The number of occurrences of a step `(0, 1)` immediately followed by a step `(1, 0)`. -/
-def c26a_numPeaks (l : List (ℕ × ℕ)) : ℕ := (l.zip l.tail).count ((0, 1), (1, 0))
+def numPeaks (l : List (ℕ × ℕ)) : ℕ := (l.zip l.tail).count ((0, 1), (1, 0))
 
 /-- DLMF §26.6(i): `N(n, k)` is the number of lattice paths from `(0, 0)` to `(n, n)` with
 steps `(1, 0)`, `(0, 1)` that stay on or above `y = x` and have exactly `k` occurrences of a
@@ -179,7 +198,7 @@ step `(0, 1)` followed by a step `(1, 0)` (`n ≥ 1`; for `n = 0` the empty path
 occurrence and `N(0, 0) = 0` by convention). -/
 @[dlmf 26.6.i]
 theorem card_latticePaths_peaks_eq_narayana {n : ℕ} (hn : 1 ≤ n) (k : ℕ) :
-    #{l ∈ latticePaths unitSteps n n | StaysWeaklyAboveDiagonal l ∧ c26a_numPeaks l = k} =
+    #{l ∈ latticePaths unitSteps n n | StaysWeaklyAboveDiagonal l ∧ numPeaks l = k} =
       narayana n k := by
   sorry
 
@@ -195,7 +214,7 @@ theorem card_latticePaths_above_eq_largeSchroder (n : ℕ) :
 /-! ### Helpers (agent p26a) -/
 
 /-- A function satisfying the Delannoy boundary values and recurrence is `delannoy`. -/
-lemma q26a_eq_delannoy (f : ℕ → ℕ → ℕ) (h0 : ∀ n, f 0 n = 1) (h1 : ∀ m, f m 0 = 1)
+private lemma eq_delannoy_of_rec (f : ℕ → ℕ → ℕ) (h0 : ∀ n, f 0 n = 1) (h1 : ∀ m, f m 0 = 1)
     (hs : ∀ m n, f (m + 1) (n + 1) = f (m + 1) n + f m (n + 1) + f m n) (m n : ℕ) :
     f m n = delannoy m n := by
   induction m generalizing n with
@@ -206,10 +225,10 @@ lemma q26a_eq_delannoy (f : ℕ → ℕ → ℕ) (h0 : ∀ n, f 0 n = 1) (h1 : �
     | succ n ihn => rw [hs, delannoy_succ_succ, ihn, ih, ih]
 
 /-- DLMF 26.6.1, first form. -/
-lemma q26a_delannoy_eq_sum1 (m n : ℕ) :
+private lemma delannoy_eq_sum_choose_mul_choose (m n : ℕ) :
     delannoy m n = ∑ k ∈ range (n + 1), n.choose k * (m + n - k).choose n := by
   symm
-  apply q26a_eq_delannoy (fun m n => ∑ k ∈ range (n + 1), n.choose k * (m + n - k).choose n)
+  apply eq_delannoy_of_rec (fun m n => ∑ k ∈ range (n + 1), n.choose k * (m + n - k).choose n)
   · intro n
     rw [sum_eq_single 0]
     · simp
@@ -253,10 +272,10 @@ lemma q26a_delannoy_eq_sum1 (m n : ℕ) :
     ring
 
 /-- DLMF 26.6.1, second form. -/
-lemma q26a_delannoy_eq_sum2 (m n : ℕ) :
+private lemma delannoy_eq_sum_two_pow_mul_choose (m n : ℕ) :
     delannoy m n = ∑ k ∈ range (n + 1), 2 ^ k * m.choose k * n.choose k := by
   symm
-  apply q26a_eq_delannoy (fun m n => ∑ k ∈ range (n + 1), 2 ^ k * m.choose k * n.choose k)
+  apply eq_delannoy_of_rec (fun m n => ∑ k ∈ range (n + 1), 2 ^ k * m.choose k * n.choose k)
   · intro n
     rw [sum_eq_single 0]
     · simp
@@ -301,12 +320,12 @@ lemma q26a_delannoy_eq_sum2 (m n : ℕ) :
     omega
 
 /-- DLMF 26.6.12 as printed fails for `n = 0` (`C(0) = 1`, empty sum). -/
-lemma q26a_not_catalan_eq_sum_narayana :
+private lemma not_forall_catalan_eq_sum_narayana :
     ¬ ∀ n : ℕ, catalan n = ∑ k ∈ Icc 1 n, narayana n k := by
   intro h; simpa using h 0
 
 /-- DLMF 26.6.12 for `n ≥ 1`: `C(n) = ∑_{k=1}^{n} N(n, k)`. -/
-lemma q26a_catalan_eq_sum_narayana {n : ℕ} (hn : 1 ≤ n) :
+private lemma catalan_eq_sum_narayana_of_one_le {n : ℕ} (hn : 1 ≤ n) :
     catalan n = ∑ k ∈ Icc 1 n, narayana n k := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
   have hv : ∑ j ∈ range (m + 1), (m + 1).choose (j + 1) * (m + 1).choose j =
@@ -336,7 +355,7 @@ lemma q26a_catalan_eq_sum_narayana {n : ℕ} (hn : 1 ≤ n) :
 /-! ### Motzkin numbers via the Catalan series (agent p26a) -/
 
 /-- The Motzkin series satisfies `M = 1 + XM + X²M²`. -/
-lemma s26a_motzkinSeries_eq :
+private lemma motzkinSeries_eq :
     (PowerSeries.mk fun n => (motzkin n : ℚ)) =
       1 + PowerSeries.C 1 * PowerSeries.X * (PowerSeries.mk fun n => (motzkin n : ℚ)) +
         PowerSeries.X ^ 2 * (PowerSeries.mk fun n => (motzkin n : ℚ)) ^ 2 := by
@@ -357,34 +376,34 @@ lemma s26a_motzkinSeries_eq :
   simp
 
 /-- `M(n) = ∑_k C(n, 2k) C(k)`. -/
-lemma s26a_motzkin_eq_sum (n : ℕ) :
+private lemma motzkin_eq_sum_catalan_mul_choose (n : ℕ) :
     (motzkin n : ℚ) = ∑ k ∈ range (n + 1), (catalan k : ℚ) * n.choose (2 * k) := by
-  have := s26a_quad_unique 1 (by norm_num) s26a_motzkinSeries_eq
-    (s26a_quadSeries_eq 1 (by norm_num))
+  have := PowerSeries.eq_of_quadratic_eq 1 (by norm_num) motzkinSeries_eq
+    (PowerSeries.catalanQuadraticSeries_eq 1 (by norm_num))
   have h := congrArg (PowerSeries.coeff n) this
-  rw [s26a_coeff_quadSeries_two, PowerSeries.coeff_mk] at h
+  rw [PowerSeries.coeff_catalanQuadraticSeries_two, PowerSeries.coeff_mk] at h
   simpa using h
 
 /-- `C(n+1) = ∑_k C(n, k) M(k)`. -/
-lemma s26a_catalan_succ_eq_sum_motzkin (n : ℕ) :
+private lemma catalan_succ_eq_sum_choose_mul_motzkin (n : ℕ) :
     (catalan (n + 1) : ℚ) = ∑ k ∈ range (n + 1), (n.choose k : ℚ) * motzkin k := by
-  simp_rw [s26a_motzkin_eq_sum, mul_sum]
+  simp_rw [motzkin_eq_sum_catalan_mul_choose, mul_sum]
   have : ∀ k ∈ range (n + 1), ∑ j ∈ range (k + 1),
       (n.choose k : ℚ) * ((catalan j : ℚ) * k.choose (2 * j)) =
       ∑ j ∈ range (n + 1), (n.choose k : ℚ) * ((catalan j : ℚ) * k.choose (2 * j)) := by
     intro k hk
     refine sum_subset (range_subset_range.mpr (by simp at hk; omega)) fun j _ hj => ?_
     rw [Nat.choose_eq_zero_of_lt (n := k) (by simp at hj; omega)]; simp
-  rw [sum_congr rfl this, sum_comm, s26a_catalan_succ_eq_sum]
+  rw [sum_congr rfl this, sum_comm, catalan_succ_eq_sum_catalan_mul_choose_mul_two_pow]
   refine sum_congr rfl fun j _ => ?_
-  have h := s26a_sum_choose_mul_choose n (2 * j)
+  have h := Nat.sum_range_choose_mul_choose_eq n (2 * j)
   have h' : (∑ k ∈ range (n + 1), (n.choose k : ℚ) * k.choose (2 * j)) =
       n.choose (2 * j) * 2 ^ (n - 2 * j) := by exact_mod_cast h
   rw [mul_assoc, ← h', mul_sum]
   exact sum_congr rfl fun k _ => by ring
 
 /-- `∑_{j < 2N} f j = ∑_{k < N} (f (2k) + f (2k+1))`. -/
-lemma s26a_sum_range_two_mul {M : Type*} [AddCommMonoid M] (f : ℕ → M) (N : ℕ) :
+private lemma sum_range_two_mul_eq_sum_pairs {M : Type*} [AddCommMonoid M] (f : ℕ → M) (N : ℕ) :
     ∑ j ∈ range (2 * N), f j = ∑ k ∈ range N, (f (2 * k) + f (2 * k + 1)) := by
   induction N with
   | zero => simp
@@ -393,15 +412,15 @@ lemma s26a_sum_range_two_mul {M : Type*} [AddCommMonoid M] (f : ℕ → M) (N : 
       sum_range_succ, add_assoc]
 
 /-- `M(m) = ∑_j C(m, j) a_j` with `a_j = C(j/2)` for even `j`, `0` for odd `j`. -/
-lemma s26a_motzkin_eq_sum_even (m : ℕ) :
+private lemma motzkin_eq_sum_choose_mul_ite_even (m : ℕ) :
     (motzkin m : ℤ) = ∑ j ∈ range (m + 1),
       (m.choose j : ℤ) * (if Even j then (catalan (j / 2) : ℤ) else 0) := by
-  have h := s26a_motzkin_eq_sum m
+  have h := motzkin_eq_sum_catalan_mul_choose m
   have h' : (motzkin m : ℤ) = ∑ k ∈ range (m + 1), (catalan k : ℤ) * m.choose (2 * k) := by
     exact_mod_cast h
   rw [h', sum_subset (range_subset_range.mpr (by omega : m + 1 ≤ 2 * (m + 1)))
     (f := fun j => (m.choose j : ℤ) * (if Even j then (catalan (j / 2) : ℤ) else 0)),
-    s26a_sum_range_two_mul]
+    sum_range_two_mul_eq_sum_pairs]
   · refine sum_congr rfl fun k _ => ?_
     have h1 : ¬ Even (2 * k + 1) := by simp
     rw [ite_eq_left (even_two_mul k), ite_eq_right h1, Nat.mul_div_cancel_left k two_pos]; ring
@@ -409,12 +428,12 @@ lemma s26a_motzkin_eq_sum_even (m : ℕ) :
     rw [Nat.choose_eq_zero_of_lt (by simp at hj; omega)]; simp
 
 /-- DLMF 26.6.13 (helper): `M(n) = ∑_k (-1)^k C(n, k) C(n+1-k)`, by binomial inversion. -/
-lemma s26a_motzkin_eq_sum_catalan (n : ℕ) :
+private lemma motzkin_eq_alternating_sum_catalan (n : ℕ) :
     (motzkin n : ℤ) = ∑ k ∈ range (n + 1), (-1) ^ k * (n.choose k : ℤ) * catalan (n + 1 - k) := by
   have hb : ∀ m, (catalan (m + 1) : ℤ) =
       ∑ k ∈ range (m + 1), (m.choose k : ℤ) * motzkin k := fun m => by
-    exact_mod_cast s26a_catalan_succ_eq_sum_motzkin m
-  rw [s26a_binomial_inversion (fun k => (motzkin k : ℤ)) (fun k => (catalan (k + 1) : ℤ)) hb n,
+    exact_mod_cast catalan_succ_eq_sum_choose_mul_motzkin m
+  rw [Int.binomial_inversion (fun k => (motzkin k : ℤ)) (fun k => (catalan (k + 1) : ℤ)) hb n,
     ← sum_range_reflect]
   refine sum_congr rfl fun k hk => ?_
   simp only [mem_range] at hk
@@ -422,9 +441,9 @@ lemma s26a_motzkin_eq_sum_catalan (n : ℕ) :
     Nat.choose_symm (by omega), show n - k + 1 = n + 1 - k by omega]
 
 /-- `D(n, n) = ∑_k C(2k, k) C(n+k, 2k)`. -/
-lemma s26a_delannoy_diag_eq_sum (n : ℕ) :
+private lemma delannoy_diag_eq_sum (n : ℕ) :
     (delannoy n n : ℚ) = ∑ k ∈ range (n + 1), ((2 * k).choose k : ℚ) * (n + k).choose (2 * k) := by
-  rw [q26a_delannoy_eq_sum1, Nat.cast_sum, ← sum_range_reflect]
+  rw [delannoy_eq_sum_choose_mul_choose, Nat.cast_sum, ← sum_range_reflect]
   refine sum_congr rfl fun k hk => ?_
   simp only [mem_range] at hk
   have := Nat.choose_mul (n := n + k) (k := 2 * k) (s := k) (by omega)
@@ -435,12 +454,12 @@ lemma s26a_delannoy_diag_eq_sum (n : ℕ) :
   push_cast; ring
 
 /-- `√(P/(1-x)²) = √P/(1-x)` for `1 - x > 0`. -/
-lemma s26a_sqrt_div_sq {x : ℝ} (P : ℝ) (h : 0 < 1 - x) :
+private lemma sqrt_div_one_sub_sq {x : ℝ} (P : ℝ) (h : 0 < 1 - x) :
     Real.sqrt (P / (1 - x) ^ 2) = Real.sqrt P / (1 - x) := by
   rw [Real.sqrt_div' P (sq_nonneg _), Real.sqrt_sq h.le]
 
 /-- For `|x| < 3 - 2√2`: `4|x| < (1 - |x|)²`. -/
-lemma s26a_schroder_bound {x : ℝ} (hx : |x| < 3 - 2 * Real.sqrt 2) :
+private lemma four_mul_abs_lt_one_sub_abs_sq {x : ℝ} (hx : |x| < 3 - 2 * Real.sqrt 2) :
     4 * |x| < (1 - |x|) ^ 2 ∧ |x| < 1 := by
   have hs : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (by norm_num)
   have hs1 : 1 < Real.sqrt 2 := by
@@ -453,8 +472,8 @@ lemma s26a_schroder_bound {x : ℝ} (hx : |x| < 3 - 2 * Real.sqrt 2) :
   · linarith
 
 /-- `D(m, n) = D(n, m)`. -/
-lemma s26a_delannoy_comm (m n : ℕ) : delannoy m n = delannoy n m := by
-  rw [q26a_delannoy_eq_sum2, q26a_delannoy_eq_sum2,
+private lemma delannoy_comm (m n : ℕ) : delannoy m n = delannoy n m := by
+  rw [delannoy_eq_sum_two_pow_mul_choose, delannoy_eq_sum_two_pow_mul_choose,
     sum_subset (range_subset_range.mpr (by omega : n + 1 ≤ m + n + 1)),
     sum_subset (range_subset_range.mpr (by omega : m + 1 ≤ m + n + 1))]
   · exact sum_congr rfl fun k _ => by ring
@@ -464,7 +483,7 @@ lemma s26a_delannoy_comm (m n : ℕ) : delannoy m n = delannoy n m := by
     rw [Nat.choose_eq_zero_of_lt (n := n) (by simp at hk; omega)]; simp
 
 /-- Shifting a series by `k` places. -/
-lemma s26a_hasSum_shift {f : ℕ → ℝ} {a : ℝ} (hf : HasSum f a) (k : ℕ) :
+private lemma hasSum_ite_le_sub {f : ℕ → ℝ} {a : ℝ} (hf : HasSum f a) (k : ℕ) :
     HasSum (fun n => if k ≤ n then f (n - k) else 0) a := by
   rw [← hasSum_nat_add_iff' k]
   simp only [Nat.le_add_left, ite_true, Nat.add_sub_cancel]
@@ -472,12 +491,12 @@ lemma s26a_hasSum_shift {f : ℕ → ℝ} {a : ℝ} (hf : HasSum f a) (k : ℕ) 
   exact hf
 
 /-- The row generating function `∑_n D(m, n) tⁿ = (1+t)^m/(1-t)^{m+1}`. -/
-lemma s26a_hasSum_delannoy_row (m : ℕ) {t : ℝ} (ht : |t| < 1) :
+private lemma hasSum_delannoy_mul_pow (m : ℕ) {t : ℝ} (ht : |t| < 1) :
     HasSum (fun n => (delannoy m n : ℝ) * t ^ n) ((1 + t) ^ m / (1 - t) ^ (m + 1)) := by
   have hk : ∀ k ∈ range (m + 1), HasSum (fun n => if k ≤ n then
       (m.choose k : ℝ) * t ^ k * (((n - k + m).choose m : ℝ) * t ^ (n - k)) else 0)
       ((m.choose k : ℝ) * t ^ k * (1 / (1 - t) ^ (m + 1))) := fun k _ =>
-    s26a_hasSum_shift ((hasSum_choose_mul_geometric_of_norm_lt_one m (r := t)
+    hasSum_ite_le_sub ((hasSum_choose_mul_geometric_of_norm_lt_one m (r := t)
       (by rwa [Real.norm_eq_abs])).mul_left _) k
   have h := hasSum_sum hk
   rw [← sum_mul] at h
@@ -485,7 +504,7 @@ lemma s26a_hasSum_delannoy_row (m : ℕ) {t : ℝ} (ht : |t| < 1) :
     rw [add_comm, add_pow]; exact sum_congr rfl fun k _ => by rw [one_pow, mul_one, mul_comm]
   convert h using 1
   · ext n
-    rw [s26a_delannoy_comm, q26a_delannoy_eq_sum1, Nat.cast_sum, sum_mul]
+    rw [delannoy_comm, delannoy_eq_sum_choose_mul_choose, Nat.cast_sum, sum_mul]
     refine sum_congr rfl fun k hk => ?_
     simp only [mem_range] at hk
     split_ifs with h
@@ -502,14 +521,14 @@ lemma s26a_hasSum_delannoy_row (m : ℕ) {t : ℝ} (ht : |t| < 1) :
 theorem delannoy_eq_sum (m n : ℕ) :
     delannoy m n = ∑ k ∈ range (n + 1), n.choose k * (m + n - k).choose n ∧
       delannoy m n = ∑ k ∈ range (n + 1), 2 ^ k * m.choose k * n.choose k :=
-  ⟨q26a_delannoy_eq_sum1 m n, q26a_delannoy_eq_sum2 m n⟩
+  ⟨delannoy_eq_sum_choose_mul_choose m n, delannoy_eq_sum_two_pow_mul_choose m n⟩
 
 /-- DLMF 26.6.2: `M(n) = ∑_{k=0}^{n} (-1)^k/(n+2-k) · C(n, k) C(2n+2-2k, n+1-k)`. -/
 @[dlmf 26.6.E2]
 theorem motzkin_eq_sum (n : ℕ) :
     (motzkin n : ℚ) = ∑ k ∈ range (n + 1), (-1) ^ k / ((n + 2 - k : ℕ) : ℚ) *
       n.choose k * (2 * n + 2 - 2 * k).choose (n + 1 - k) := by
-  have h := congrArg (fun z : ℤ => (z : ℚ)) (s26a_motzkin_eq_sum_catalan n)
+  have h := congrArg (fun z : ℤ => (z : ℚ)) (motzkin_eq_alternating_sum_catalan n)
   push_cast at h
   rw [h]
   refine sum_congr rfl fun k hk => ?_
@@ -543,10 +562,10 @@ theorem largeSchroder_eq_delannoy_sub {n : ℕ} (hn : 1 ≤ n) :
     linear_combination h1' + h2'
   have hD1 : (delannoy (m + 1) (m + 1) : ℚ) =
       ∑ k ∈ range (m + 2), ((2 * k).choose k : ℚ) * (m + 1 + k).choose (2 * k) :=
-    s26a_delannoy_diag_eq_sum (m + 1)
+    delannoy_diag_eq_sum (m + 1)
   have hD2 : (delannoy (m + 1 + 1) m : ℚ) =
       ∑ k ∈ range (m + 2), ((2 * k).choose (k + 1) : ℚ) * (m + 1 + k).choose (2 * k) := by
-    rw [q26a_delannoy_eq_sum1, Nat.cast_sum, sum_range_succ' _ (m + 1), ← sum_range_reflect]
+    rw [delannoy_eq_sum_choose_mul_choose, Nat.cast_sum, sum_range_succ' _ (m + 1), ← sum_range_reflect]
     simp only [mul_zero, Nat.choose_zero_succ, Nat.cast_zero, zero_mul, add_zero]
     refine sum_congr rfl fun i hi => ?_
     simp only [mem_range] at hi
@@ -562,7 +581,7 @@ theorem largeSchroder_eq_delannoy_sub {n : ℕ} (hn : 1 ≤ n) :
     push_cast; rw [mul_comm, ← this']; ring
   have h : (Nat.largeSchroder (m + 1) : ℚ) =
       delannoy (m + 1) (m + 1) - delannoy (m + 1 + 1) m := by
-    rw [s26a_largeSchroder_eq_sum, hD1, hD2, ← sum_sub_distrib]
+    rw [Nat.largeSchroder_eq_sum_catalan_mul_choose, hD1, hD2, ← sum_sub_distrib]
     refine sum_congr rfl fun k _ => ?_
     rw [hcat]; ring
   exact_mod_cast h
@@ -590,13 +609,13 @@ theorem hasSum_delannoy {x y : ℝ} (h : |x| + |y| + |x * y| < 1) :
   have hrowa : ∀ m, HasSum (fun n => |(delannoy m n : ℝ) * x ^ m * y ^ n|)
       (|x| ^ m * ((1 + |y|) ^ m / (1 - |y|) ^ (m + 1))) := by
     intro m
-    have := (s26a_hasSum_delannoy_row m (t := |y|) (by rwa [abs_abs])).mul_left (|x| ^ m)
+    have := (hasSum_delannoy_mul_pow m (t := |y|) (by rwa [abs_abs])).mul_left (|x| ^ m)
     convert this using 1
     ext n; rw [abs_mul, abs_mul, abs_pow, abs_pow, Nat.abs_cast]; ring
   have hrow : ∀ m, HasSum (fun n => (delannoy m n : ℝ) * x ^ m * y ^ n)
       (x ^ m * ((1 + y) ^ m / (1 - y) ^ (m + 1))) := by
     intro m
-    have := (s26a_hasSum_delannoy_row m hy1).mul_left (x ^ m)
+    have := (hasSum_delannoy_mul_pow m hy1).mul_left (x ^ m)
     convert this using 1
     ext n; ring
   have hgeoa : HasSum (fun m => |x| ^ m * ((1 + |y|) ^ m / (1 - |y|) ^ (m + 1)))
@@ -633,7 +652,7 @@ theorem hasSum_delannoy {x y : ℝ} (h : |x| + |y| + |x * y| < 1) :
 @[dlmf 26.6.E6]
 theorem hasSum_delannoy_diag {x : ℝ} (hx : |x| < 3 - 2 * Real.sqrt 2) :
     HasSum (fun n : ℕ => (delannoy n n : ℝ) * x ^ n) (1 / Real.sqrt (1 - 6 * x + x ^ 2)) := by
-  obtain ⟨hb4, hx1⟩ := s26a_schroder_bound hx
+  obtain ⟨hb4, hx1⟩ := four_mul_abs_lt_one_sub_abs_sq hx
   have h1x : 0 < 1 - x := by have := le_abs_self x; linarith
   have h1a : 0 < 1 - |x| := by linarith
   have hle : 1 - |x| ≤ |1 - x| := by
@@ -644,22 +663,22 @@ theorem hasSum_delannoy_diag {x : ℝ} (hx : |x| < 3 - 2 * Real.sqrt 2) :
   have hy : |x ^ 1 / (1 - 1 * x) ^ 2| < 1 / 4 := by
     rw [one_mul, pow_one, abs_div, abs_pow, div_lt_iff₀ (by positivity)]
     nlinarith [abs_nonneg (1 - x)]
-  have hT := s26a_hasSum_transform (fun k => ((2 * k).choose k : ℝ)) le_rfl
+  have hT := Real.hasSum_quadraticTransform (fun k => ((2 * k).choose k : ℝ)) le_rfl
     (b := 1) (x := x) (by rwa [one_mul]) (by
       simpa [Nat.abs_cast] using
-        (s26a_hasSum_centralBinom hy').summable)
-    (s26a_hasSum_centralBinom hy)
+        (Real.hasSum_choose_two_mul_mul_pow hy').summable)
+    (Real.hasSum_choose_two_mul_mul_pow hy)
   convert hT using 1
   · ext n
     congr 1
-    have := congrArg (fun q : ℚ => (q : ℝ)) (s26a_delannoy_diag_eq_sum n)
+    have := congrArg (fun q : ℚ => (q : ℝ)) (delannoy_diag_eq_sum n)
     push_cast at this
     rw [this]
     refine sum_congr rfl fun k hk => ?_
     simp only [mem_range] at hk
     rw [ite_eq_left (by omega), one_pow, mul_one, show n - 1 * k + 2 * k = n + k by omega]
   · rw [one_mul, pow_one, show 1 - 4 * (x / (1 - x) ^ 2) = (1 - 6 * x + x ^ 2) / (1 - x) ^ 2 by
-      field_simp; ring, s26a_sqrt_div_sq _ h1x]
+      field_simp; ring, sqrt_div_one_sub_sq _ h1x]
     have hP : 0 < 1 - 6 * x + x ^ 2 := by
       have := le_abs_self x; have := neg_abs_le x
       nlinarith [sq_abs x]
@@ -688,7 +707,7 @@ theorem hasSum_motzkin {x : ℝ} (hx0 : x ≠ 0) (hx : |x| < 1 / 3) :
     rw [one_mul]; exact div_ne_zero (pow_ne_zero _ hx0) (pow_ne_zero _ h1x.ne')
   have hy0' : |x| ^ 2 / (1 - |1 * x|) ^ 2 ≠ 0 := by
     rw [one_mul]; exact div_ne_zero (pow_ne_zero _ hx0'.ne') (pow_ne_zero _ h1a.ne')
-  have hT := s26a_hasSum_transform (fun k => (catalan k : ℝ)) (by norm_num : 1 ≤ 2)
+  have hT := Real.hasSum_quadraticTransform (fun k => (catalan k : ℝ)) (by norm_num : 1 ≤ 2)
     (b := 1) (x := x) (by rw [one_mul]; linarith) (by
       simpa [Nat.abs_cast] using
         (hasSum_catalan_mul_pow hy0' hy').summable)
@@ -696,7 +715,7 @@ theorem hasSum_motzkin {x : ℝ} (hx0 : x ≠ 0) (hx : |x| < 1 / 3) :
   convert hT using 1
   · ext n
     congr 1
-    have := congrArg (fun q : ℚ => (q : ℝ)) (s26a_motzkin_eq_sum n)
+    have := congrArg (fun q : ℚ => (q : ℝ)) (motzkin_eq_sum_catalan_mul_choose n)
     push_cast at this
     rw [this]
     refine sum_congr rfl fun k _ => ?_
@@ -704,7 +723,7 @@ theorem hasSum_motzkin {x : ℝ} (hx0 : x ≠ 0) (hx : |x| < 1 / 3) :
     · rw [one_pow, mul_one, show n - 2 * k + 2 * k = n by omega]
     · rw [Nat.choose_eq_zero_of_lt (by omega)]; simp
   · rw [one_mul, show 1 - 4 * (x ^ 2 / (1 - x) ^ 2) = (1 - 2 * x - 3 * x ^ 2) / (1 - x) ^ 2 by
-      field_simp; ring, s26a_sqrt_div_sq _ h1x]
+      field_simp; ring, sqrt_div_one_sub_sq _ h1x]
     field_simp
 
 /-- A Catalan convolution term becomes a product of binomial coefficients after multiplication by
@@ -938,7 +957,7 @@ theorem hasSum_narayana_of_abs_lt {x y : ℝ} (hx0 : x ≠ 0)
   have hua0 : |x| ^ 2 * |y| / (1 - |(1 + y) * x|) ^ 2 ≠ 0 :=
     div_ne_zero (mul_ne_zero (pow_ne_zero _ (abs_ne_zero.mpr hx0)) (abs_ne_zero.mpr hy0))
       (pow_ne_zero _ hbasea.ne')
-  have hT := s26a_hasSum_transform (fun j => (catalan j : ℝ) * y ^ j)
+  have hT := Real.hasSum_quadraticTransform (fun j => (catalan j : ℝ) * y ^ j)
     (by norm_num : 1 ≤ 2) (b := 1 + y) (x := x) (by linarith) (by
       have h := (hasSum_catalan_mul_pow hua0 hua).summable
       convert h using 1
@@ -986,7 +1005,7 @@ theorem hasSum_narayana : ∃ δ > (0 : ℝ), ∀ x y : ℝ, x ≠ 0 → |x| < �
 theorem hasSum_largeSchroder {x : ℝ} (hx0 : x ≠ 0) (hx : |x| < 3 - 2 * Real.sqrt 2) :
     HasSum (fun n : ℕ => (Nat.largeSchroder n : ℝ) * x ^ n)
       ((1 - x - Real.sqrt (1 - 6 * x + x ^ 2)) / (2 * x)) := by
-  obtain ⟨hb4, hx1⟩ := s26a_schroder_bound hx
+  obtain ⟨hb4, hx1⟩ := four_mul_abs_lt_one_sub_abs_sq hx
   have h1x : 0 < 1 - x := by have := le_abs_self x; linarith
   have h1a : 0 < 1 - |x| := by linarith
   have hle : 1 - |x| ≤ |1 - x| := by
@@ -1002,7 +1021,7 @@ theorem hasSum_largeSchroder {x : ℝ} (hx0 : x ≠ 0) (hx : |x| < 3 - 2 * Real.
     rw [one_mul]; exact div_ne_zero (pow_ne_zero _ hx0) (pow_ne_zero _ h1x.ne')
   have hy0' : |x| ^ 1 / (1 - |1 * x|) ^ 2 ≠ 0 := by
     rw [one_mul]; exact div_ne_zero (pow_ne_zero _ hx0'.ne') (pow_ne_zero _ h1a.ne')
-  have hT := s26a_hasSum_transform (fun k => (catalan k : ℝ)) le_rfl
+  have hT := Real.hasSum_quadraticTransform (fun k => (catalan k : ℝ)) le_rfl
     (b := 1) (x := x) (by rwa [one_mul]) (by
       simpa [Nat.abs_cast] using
         (hasSum_catalan_mul_pow hy0' hy').summable)
@@ -1010,39 +1029,39 @@ theorem hasSum_largeSchroder {x : ℝ} (hx0 : x ≠ 0) (hx : |x| < 3 - 2 * Real.
   convert hT using 1
   · ext n
     congr 1
-    have := congrArg (fun q : ℚ => (q : ℝ)) (s26a_largeSchroder_eq_sum n)
+    have := congrArg (fun q : ℚ => (q : ℝ)) (Nat.largeSchroder_eq_sum_catalan_mul_choose n)
     push_cast at this
     rw [this]
     refine sum_congr rfl fun k hk => ?_
     simp only [mem_range] at hk
     rw [ite_eq_left (by omega), one_pow, mul_one, show n - 1 * k + 2 * k = n + k by omega]
   · rw [one_mul, pow_one, show 1 - 4 * (x / (1 - x) ^ 2) = (1 - 6 * x + x ^ 2) / (1 - x) ^ 2 by
-      field_simp; ring, s26a_sqrt_div_sq _ h1x]
+      field_simp; ring, sqrt_div_one_sub_sq _ h1x]
     field_simp
 
 /-! ### Identities (§26.6(iv)) -/
 
 /-- DLMF 26.6.12: `C(n) = ∑_{k=1}^{n} N(n, k)`, for `n ≥ 1`. Correction: DLMF prints no
 condition, but at `n = 0` the sum is empty while `C(0) = 1`
-(`q26a_not_catalan_eq_sum_narayana`). -/
+(`not_forall_catalan_eq_sum_narayana`). -/
 @[dlmf 26.6.E12]
 theorem catalan_eq_sum_narayana {n : ℕ} (hn : 1 ≤ n) :
     catalan n = ∑ k ∈ Icc 1 n, narayana n k :=
-  q26a_catalan_eq_sum_narayana hn
+  catalan_eq_sum_narayana_of_one_le hn
 
 /-- DLMF 26.6.13: `M(n) = ∑_{k=0}^{n} (-1)^k C(n, k) C(n+1-k)`. -/
 @[dlmf 26.6.E13]
 theorem motzkin_eq_sum_catalan (n : ℕ) :
     (motzkin n : ℤ) = ∑ k ∈ range (n + 1), (-1) ^ k * (n.choose k : ℤ) * catalan (n + 1 - k) :=
-  s26a_motzkin_eq_sum_catalan n
+  motzkin_eq_alternating_sum_catalan n
 
 /-- DLMF 26.6.14: `C(n) = ∑_{k=0}^{2n} (-1)^k C(2n, k) M(2n-k)`. -/
 @[dlmf 26.6.E14]
 theorem catalan_eq_sum_motzkin (n : ℕ) :
     (catalan n : ℤ) =
       ∑ k ∈ range (2 * n + 1), (-1) ^ k * ((2 * n).choose k : ℤ) * motzkin (2 * n - k) := by
-  have h := s26a_binomial_inversion (fun j => if Even j then (catalan (j / 2) : ℤ) else 0)
-    (fun k => (motzkin k : ℤ)) s26a_motzkin_eq_sum_even (2 * n)
+  have h := Int.binomial_inversion (fun j => if Even j then (catalan (j / 2) : ℤ) else 0)
+    (fun k => (motzkin k : ℤ)) motzkin_eq_sum_choose_mul_ite_even (2 * n)
   simp only [even_two_mul, ite_true, Nat.mul_div_cancel_left n two_pos] at h
   rw [h, ← sum_range_reflect]
   refine sum_congr rfl fun k hk => ?_

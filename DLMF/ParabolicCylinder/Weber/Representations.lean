@@ -8,13 +8,32 @@ module
 public import DLMF.ParabolicCylinder.Weber.Solutions
 
 /-!
-# Representations and transformations of Weber functions
+# Representations of the Weber function `W(a,x)`
 
-Further representations and transformations of the real Weber functions, including their
-normalization and parameter restrictions.
+This file proves further representations of the real Weber function `W(a,x)` of
+DLMF §12.14: the connection formulas with `U(ia, xe^{-iπ/4})`, the Maclaurin series, the case
+`a = 0` through Bessel functions, the exact amplitude and its large-argument expansion, and
+the modulus–phase representations.
 
-Source references and common attribution are retained in
-`DLMF.ParabolicCylinder.Weber`.
+## Main definitions
+
+* `pcfWAlpha`, `pcfWBeta`: the Maclaurin coefficients of the even and odd solutions.
+* `pcfWOmega`: the large-argument phase `x²/4 - a log x + π/4` plus half the Gamma phase
+  (DLMF 12.14.19).
+* `pcfWS`: the complex amplitude `s₁ + is₂` (DLMF 12.14.17–12.14.18).
+* `pcfWCoeff`: the coefficient `(1/2 + ia)_{2r}` (DLMF 12.14.22).
+* `pcfWF`, `pcfWTheta`, `pcfWG`, `pcfWPsi`: the moduli and phases of DLMF 12.14.37–12.14.38.
+
+## Main results
+
+* `pcfW_connection`: the connection formula DLMF 12.14.4, with its companion
+  `pcfW_connection_neg`.
+* `pcfWEven_series`, `pcfWOdd_series`: the Maclaurin series DLMF 12.14.9–12.14.12.
+* `pcfW_zero_bessel_1`, `pcfW_zero_bessel_2`: `W(0, ±x)` through `J_{±1/4}` (DLMF 12.14.13).
+* `pcfW_zero_bessel_deriv_1`, `pcfW_zero_bessel_deriv_2`: the derivatives (DLMF 12.14.14).
+* `pcfW_amplitude`: the amplitude representation DLMF 12.14.17–12.14.18.
+* `pcfWS_asymptotic`: the large-argument expansion DLMF 12.14.20–12.14.21, 12.14.23.
+* `pcfWF_phase`, `pcfWG_phase`: the modulus–phase representations DLMF 12.14.37–12.14.38.
 -/
 
 @[expose] public noncomputable section
@@ -679,7 +698,7 @@ Finset.range N, (-I)^r*pcfWCoeff a r/(2^r*(r.factorial:ℂ)*(x:ℂ)^(2*r))) =O[a
 @[dlmf 12.14.E20, dlmf 12.14.E21, dlmf 12.14.E23]
 theorem pcfWS_asymptotic (a : ℝ) (N : ℕ) :
     (fun x : ℝ => pcfWS a x-∑ r ∈ Finset.range N, (-I)^r*pcfWCoeff a r/(2^r*(r.factorial:ℂ)*(x:ℂ)^(2*r))) =O[atTop] (fun x : ℝ => (x:ℂ)^(-(2*N:ℤ))) := by
-  have hT : Tendsto (fun x : ℝ => (Real.log x : ℂ)) atTop (pcfSect_logWedge 0 0) := by
+  have hT : Tendsto (fun x : ℝ => (Real.log x : ℂ)) atTop (pcfLogWedge 0 0) := by
     refine tendsto_inf.mpr ⟨tendsto_comap_iff.mpr ?_, tendsto_principal.mpr
       (Eventually.of_forall fun x => by simp)⟩
     refine tendsto_id.congr' ?_

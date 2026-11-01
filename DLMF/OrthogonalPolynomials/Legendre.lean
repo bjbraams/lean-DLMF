@@ -833,7 +833,7 @@ theorem ultrasphPoly_bessel_generating_function {lam : ℝ} (hlam : 0 < lam)
   · funext n
     have hL := ultrasphPoly_laplace_integral hlam n θ
     have h1 : ultrasphPoly (lam : ℂ) n 1 = poch (2 * (lam : ℂ)) n / n.factorial :=
-      ultrasphPoly_at_one (by simp; linarith) n
+      ultrasphPoly_at_one n
     have hp : poch (2 * (lam : ℂ)) n ≠ 0 := poch_ne_zero_of_re_pos (by simp; linarith) n
     have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     have hC1 : ultrasphPoly (lam : ℂ) n 1 ≠ 0 := by rw [h1]; exact div_ne_zero hp hf
@@ -850,7 +850,7 @@ theorem ultrasphPoly_bessel_generating_function {lam : ℝ} (hlam : 0 < lam)
   · have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθ hθπ
     have hw : 0 < z * Real.sin θ := mul_pos hz hs
     have hP := besselJ_eq_poisson_integral (ν := (lam : ℂ) - 1 / 2) (x := z * Real.sin θ)
-      (by simp; linarith) hw
+      (by simp; linarith)
     rw [show (lam : ℂ) - 1 / 2 - 1 / 2 = (lam : ℂ) - 1 by ring,
       show (lam : ℂ) - 1 / 2 + 1 / 2 = lam by ring,
       integral_one_sub_sq_cpow_mul_exp_eq_integral_cos] at hP

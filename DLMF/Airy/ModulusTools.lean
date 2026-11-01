@@ -10,19 +10,34 @@ public import DLMF.Airy.Asymptotics
 /-!
 # Tools for the Airy modulus: Nicholson's integral
 
-* `airyMod_I k`: the moments `∫₀^∞ t^{k-1/2} e^{-t³/12} dt` in closed form, with the recurrence
-  `I_{k+3} = (4k+2) I_k` and the values of `I_0, I_1, I_2` through the duplication and
-  reflection formulas for `Γ`.
+Nicholson's integral for `Ai² + Bi²` and its companions on the whole complex plane, proved by
+comparing Taylor coefficients at `0`, together with the oscillatory expansions 9.7.9–9.7.12
+restricted to the positive real axis.
+
+## Main definitions
+
+* `airyMod_I`: the moments `∫₀^∞ t^{k-1/2} e^{-t³/12} dt` in closed form.
+
+## Main results
+
+* `airyMod_integral_I`, `airyMod_I_add_three`, `airyMod_I_zero`, `airyMod_I_one`,
+  `airyMod_I_two`: the moments, the recurrence `I_{k+3} = (4k+2) I_k` and the values of
+  `I_0, I_1, I_2` through the duplication and reflection formulas for `Γ`.
 * `airyMod_hasSum`: the Nicholson integral `∫₀^∞ e^{zt - t³/12} t^{-1/2} dt` is the power series
   `∑ I_k z^k / k!`.
 * `airyMod_iteratedDeriv_rec`: the Taylor recurrence of the product equation
   `w''' = 4 z w' + 2 w` (DLMF 9.11.1).
-* `airyMod_modulus_sq_exp_integral`: DLMF 9.11.4, `Ai(z)² + Bi(z)² =
-  π^{-3/2} ∫₀^∞ e^{zt - t³/12} t^{-1/2} dt` for all complex `z`, proved by comparing Taylor
-  coefficients at `0`.
-* The oscillatory expansions 9.7.9–9.7.12 restricted to the positive real axis
-  (`airyInt_osc_real`), the growth `Ai(-s), Bi(-s) = O(s^{-1/4})`, `Ai'(-s), Bi'(-s) = O(s^{1/4})`
-  and the leading terms of `Ai'(-s)`, `Bi'(-s)` with an `O(s^{-5/4})` error.
+* `airyMod_modulus_sq_exp_integral`: `Ai(z)² + Bi(z)² = π^{-3/2} ∫₀^∞ e^{zt - t³/12} t^{-1/2} dt`
+  for all complex `z` (DLMF 9.11.4).
+* `airyMod_derivModulus_sq_integral`, `airyMod_cross_integral`: the companion formulas for
+  `Ai'² + Bi'²` and `Ai Ai' + Bi Bi'`.
+* `airyInt_osc_real`: the oscillatory expansions 9.7.9–9.7.12 on the positive real axis.
+* `airyInt_ai_neg_isBigO`, `airyInt_bi_neg_isBigO`, `airyInt_aiDeriv_neg_isBigO`,
+  `airyInt_biDeriv_neg_isBigO`: `Ai(-s), Bi(-s) = O(s^{-1/4})` and
+  `Ai'(-s), Bi'(-s) = O(s^{1/4})`.
+* `airyInt_aiDeriv_neg_sub`, `airyInt_biDeriv_neg_sub`, `airyMod_ai_neg_sub`,
+  `airyMod_bi_neg_sub`: the leading oscillatory terms on the negative axis with explicit
+  error orders.
 -/
 
 @[expose] public noncomputable section

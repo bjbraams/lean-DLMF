@@ -8,13 +8,31 @@ module
 public import DLMF.Airy.Zeros.RealAndAi
 
 /-!
-# Complex zeros of the Airy Bi function
+# Complex zeros of the Airy function Bi
 
-Localization and asymptotic enumeration of the nonreal zeros of Bi and its derivative near model
-zeros.
+Localization and enumeration of the nonreal zeros of `Bi` and `Bi'` near model zeros, and the
+relations between zeros, phases and moduli of DLMF 9.9.1–9.9.5 together with the common
+parametrizations of the asymptotic expansions 9.9.6–9.9.13.
 
-Source references and common attribution are retained in
-`DLMF.Airy.Zeros`.
+## Main definitions
+
+* `airyZ_Z`, `airyZ_W`, `airyZ_Fbi`, `airyZ_Fbid`, `airyZ_ctr`: the variable `u = -2ζ`, the
+  normalized `Bi`, `Bi'` and the model zeros.
+
+## Main results
+
+* `airyBi_complex_zeros_sector`, `airyBi_infinite_complex_zeros`, `airyBiComplexZero_spec`,
+  `airyBiComplexZero_enumeration`: the complex zeros of `Bi`.
+* `airyBiDeriv_complex_zeros_sector`, `airyBiDeriv_infinite_complex_zeros`,
+  `airyBiDerivComplexZero_spec`, `airyBiDerivComplexZero_enumeration`: the complex zeros of
+  `Bi'`.
+* `airyAiZero_phase`, `airyBiZero_phase`: DLMF 9.9.1, 9.9.2.
+* `airyAiZero_value`, `airyBiZero_value`, `airyAiDerivZero_value`, `airyBiDerivZero_value`:
+  DLMF 9.9.3, 9.9.4.
+* `airyAiZeroContinuous_derivative_value`, `airyAiDerivZeroContinuous_derivative_value`:
+  DLMF 9.9.5.
+* `airy_zero_common_asymptotic_coefficients`, `exists_airy_zero_parametrizations`: the
+  functions `T`, `U`, `V`, `W` of DLMF 9.9.6–9.9.13.
 -/
 
 @[expose] public noncomputable section

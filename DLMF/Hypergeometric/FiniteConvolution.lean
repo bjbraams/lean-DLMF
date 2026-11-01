@@ -10,10 +10,21 @@ public import DLMF.Hypergeometric.Saalschutz
 /-!
 # Finite hypergeometric convolutions
 
-Chu–Vandermonde and finite binomial moments give a terminating `3F2`
-transformation without restrictions on its upper parameters. The analytic
-Cauchy-product helper uses the Mathlib contributors’ absolutely summable
-series API. These identities identify the Hahn generating-function coefficients.
+Chu–Vandermonde and finite binomial moments give a terminating `₃F₂` transformation without
+restrictions on its upper parameters, and Pfaff–Saalschütz gives Whipple's balanced terminating
+transformation in convolution form. These identities identify the coefficients of the Hahn and
+Wilson generating functions.
+
+## Main results
+
+* `hasSum_coefficient_convolution`: the Cauchy product of scalar series as a coefficient
+  convolution.
+* `poch_ratio_vandermonde`, `poch_binomial_moment`: Chu–Vandermonde and a binomial moment of
+  rising factorials.
+* `terminating_3F2_convolution`: a terminating `₃F₂` transformation.
+* `saalschutz_binomial_convolution`: Euler's transformation as a finite binomial convolution.
+* `wilson_inner_sum`, `balanced_inner_sum`: inner Pfaff–Saalschütz sums.
+* `balanced_4F3_convolution`: Whipple's balanced terminating transformation.
 -/
 
 @[expose] public section

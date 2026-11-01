@@ -10,13 +10,22 @@ public import DLMF.Core.Framework
 /-!
 # Lattice coefficients and convergence radii for theta power series
 
-The coefficients `thetaDelta`, `thetaAlpha`, `thetaBeta` and `thetaGamma` are the iterated
-lattice sums of DLMF 20.6.6–20.6.9, with the inner sum over the real lattice index.
-`thetaLatticeMinNorm` excludes the origin from the unshifted lattice; the shifted-lattice
-radii for `θ₂`, `θ₃` and `θ₄` use `thetaShiftedLatticeMinNorm`.
-The lemmas `thetaShiftedLatticeMinNorm_half_pos` and
-`thetaShiftedLatticeMinNorm_half_zero_pos` prove that these radii are positive in the
-upper half-plane; `thetaShiftedLatticeMinNorm_le` bounds them by any shifted lattice point.
+The coefficients of the theta power series of DLMF §20.6 and the radii of convergence of
+those series.
+
+## Main definitions
+
+* `thetaDelta`, `thetaAlpha`, `thetaBeta`, `thetaGamma`: the iterated lattice sums of
+  DLMF 20.6.6–20.6.9, with the inner sum over the real lattice index.
+* `thetaLatticeMinNorm`: the distance from the origin to the rest of the lattice.
+* `thetaShiftedLatticeMinNorm`: the distance from the origin to a shifted lattice, giving the
+  radii for `θ₂`, `θ₃` and `θ₄`.
+
+## Main results
+
+* `thetaShiftedLatticeMinNorm_half_pos`, `thetaShiftedLatticeMinNorm_half_zero_pos`: the
+  shifted-lattice radii are positive in the upper half-plane.
+* `thetaShiftedLatticeMinNorm_le`: the radius is bounded by any shifted lattice point.
 -/
 
 @[expose] public noncomputable section

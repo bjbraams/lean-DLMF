@@ -8,12 +8,41 @@ module
 public import DLMF.Combinatorics.Stirling.DefinitionsAndSeries
 
 /-!
-# Recurrences and identities for Stirling numbers
+# Stirling numbers: recurrences and identities (DLMF §26.8(iv))
 
-Recurrences, surjection counts and algebraic identities for the two kinds of Stirling numbers.
+## Main results
 
-Source references and common attribution are retained in
-`DLMF.Combinatorics.Stirling`.
+* `choose_mul_signedStirlingFirst`, `signedStirlingFirst_succ_succ_eq_sum`,
+  `signedStirlingFirst_add_succ`: DLMF 26.8.19–26.8.21.
+* `choose_mul_stirlingSecond`, `stirlingSecond_eq_sum_pow`, `stirlingSecond_succ_succ_eq_sum`,
+  `stirlingSecond_add_succ`: DLMF 26.8.23–26.8.26.
+* `signedStirlingFirst_sub_eq_sum`, `stirlingSecond_sub_eq_sum`: `s(n, n-k)` and `S(n, n-k)` in
+  terms of each other (DLMF 26.8.27, 26.8.33).
+* `sum_signedStirlingFirst`, `sum_neg_one_pow_mul_signedStirlingFirst`,
+  `sum_signedStirlingFirst_succ_mul_pow`: DLMF 26.8.28–26.8.30.
+* `hasSum_signedStirlingFirst_fwdDiff`, `not_forall_stirling_deriv_eq_fwdDiff_series`:
+  DLMF 26.8.31 for polynomials, and a counterexample to the printed statement.
+* `fwdDiff_one_apply`: the forward difference (DLMF 26.8.32).
+* `sum_pow_mul_X_pow_eq`, `sum_range_pow_eq_sum_stirlingSecond`: power sums (DLMF 26.8.34,
+  26.8.35).
+* `sum_neg_one_pow_mul_factorial_mul_stirlingSecond`: DLMF 26.8.36.
+* `hasSum_stirlingSecond_iteratedDeriv`: `Δ^k f(x)/k! = ∑_{n ≥ k} S(n, k) f^{(n)}(x)/n!` for
+  entire `f` (DLMF 26.8.37).
+* `stirlingMatrix_inv`, `sum_signedStirlingFirst_mul_stirlingSecond`,
+  `sum_signedStirlingFirst_mul_stirlingSecond'`: the Stirling matrices are mutually inverse
+  (DLMF 26.8.38, 26.8.39).
+
+## Implementation notes
+
+* 26.8.29 (`∑_{k=1}^n (-1)^{n-k} s(n,k) = n!`) fails for `n = 0`; it is stated for `1 ≤ n`.
+* 26.8.31 as printed ("when `f` is analytic for all `x` and the series converges") is false:
+  for `f(x) = sin(πx)` at `x = 0`, `k = 1` every `Δⁿf(0) = 0`, so the series converges to `0`,
+  but `f'(0) = π`. It is stated for polynomial `f` (where the series is finite), and the
+  counterexample is recorded as `not_forall_stirling_deriv_eq_fwdDiff_series`.
+
+## References
+
+* NIST DLMF §26.8.
 -/
 
 @[expose] public section
@@ -27,13 +56,13 @@ namespace DLMF.Combinatorics
 /-! ### Recurrence relations (§26.8(iv)) -/
 
 /-- The falling factorial evaluated (`smeval`) in a commutative ring, as `∑_k s(n,k) rᵏ`. -/
-lemma r26a_smeval_descPochhammer {R : Type*} [CommRing R] (n : ℕ) (r : R) :
+private lemma smeval_descPochhammer_eq_sum_signedStirlingFirst {R : Type*} [CommRing R] (n : ℕ) (r : R) :
     (descPochhammer ℤ n).smeval r = ∑ k ∈ range (n + 1), (signedStirlingFirst n k : R) * r ^ k := by
   rw [← aeval_eq_smeval, aeval_eq_sum_range' (n := n + 1) (by simp [descPochhammer_natDegree])]
   simp [coeff_descPochhammer, zsmul_eq_mul]
 
 /-- The double coefficient `[Yᵐ][Xʰ]` of `c · Xᵃ Yᵇ` in `ℤ[X][Y]`. -/
-lemma r26a_coeff_coeff (c : ℤ) (a b h m : ℕ) :
+private lemma coeff_coeff_intCast_mul_C_X_pow_mul_X_pow (c : ℤ) (a b h m : ℕ) :
     (((c : ℤ[X][X]) * (C X) ^ a * X ^ b).coeff m).coeff h =
       if a = h ∧ b = m then c else 0 := by
   rw [← C_pow, show ((c : ℤ[X][X])) = C (c : ℤ[X]) by simp, ← C_mul, coeff_C_mul_X_pow]
@@ -50,7 +79,7 @@ theorem choose_mul_signedStirlingFirst {n k h : ℕ} (hkn : k ≤ n) (hhk : h �
   obtain ⟨m, rfl⟩ : ∃ m, k = h + m := ⟨k - h, by omega⟩
   have hV := Ring.descPochhammer_smeval_add (R := ℤ[X][X]) (r := C X) (s := X) n (Commute.all _ _)
   have hφ := congrArg (fun p : ℤ[X][X] => (p.coeff m).coeff h) hV
-  simp only [r26a_smeval_descPochhammer, add_pow, mul_sum, sum_mul, finsetSum_coeff] at hφ
+  simp only [smeval_descPochhammer_eq_sum_signedStirlingFirst, add_pow, mul_sum, sum_mul, finsetSum_coeff] at hφ
   have hL : ∀ x ∈ range (n + 1), ∑ i ∈ range (x + 1),
       (((signedStirlingFirst n x : ℤ[X][X]) *
         (C X ^ i * X ^ (x - i) * (x.choose i : ℤ[X][X]))).coeff
@@ -64,7 +93,7 @@ theorem choose_mul_signedStirlingFirst {n k h : ℕ} (hkn : k ≤ n) (hhk : h �
       intro i hi
       rw [show (signedStirlingFirst n x : ℤ[X][X]) * (C X ^ i * X ^ (x - i) *
           (x.choose i : ℤ[X][X])) = (((x.choose i : ℤ) * signedStirlingFirst n x : ℤ) : ℤ[X][X]) *
-            C X ^ i * X ^ (x - i) by push_cast; ring, r26a_coeff_coeff]
+            C X ^ i * X ^ (x - i) by push_cast; ring, coeff_coeff_intCast_mul_C_X_pow_mul_X_pow]
       simp only [mem_range] at hi
       by_cases h1 : i = h
       · subst h1; by_cases h2 : x = i + m
@@ -87,7 +116,7 @@ theorem choose_mul_signedStirlingFirst {n k h : ℕ} (hkn : k ≤ n) (hhk : h �
       rw [show (n.choose x.1 : ℤ[X][X]) * ((signedStirlingFirst x.1 i : ℤ[X][X]) * C X ^ i *
           ((signedStirlingFirst x.2 x_1 : ℤ[X][X]) * X ^ x_1)) =
           (((n.choose x.1 : ℤ) * signedStirlingFirst x.1 i * signedStirlingFirst x.2 x_1 : ℤ) :
-            ℤ[X][X]) * C X ^ i * X ^ x_1 by push_cast; ring, r26a_coeff_coeff]
+            ℤ[X][X]) * C X ^ i * X ^ x_1 by push_cast; ring, coeff_coeff_intCast_mul_C_X_pow_mul_X_pow]
       rw [mem_antidiagonal] at hx
       rw [← Nat.choose_symm_of_eq_add hx.symm]
       by_cases h1 : x_1 = m <;> by_cases h2 : i = h <;> simp [h1, h2]
@@ -113,7 +142,7 @@ theorem choose_mul_signedStirlingFirst {n k h : ℕ} (hkn : k ≤ n) (hhk : h �
   · rw [signedStirlingFirst_eq_zero_of_lt (by omega : n - j < h), mul_zero, zero_mul]
 
 /-- DLMF 26.8.20 (range form): `s(n+1, k+1) = n! ∑_{j=0}^{n} (-1)^{n-j} s(j, k) / j!`. -/
-lemma c26a_signedStirlingFirst_succ_succ_eq_sum_range (n k : ℕ) :
+private lemma signedStirlingFirst_succ_succ_eq_sum_range (n k : ℕ) :
     (signedStirlingFirst (n + 1) (k + 1) : ℚ) =
       n.factorial *
         ∑ j ∈ range (n + 1), (-1 : ℚ) ^ (n - j) / j.factorial * signedStirlingFirst j k := by
@@ -140,7 +169,7 @@ lemma c26a_signedStirlingFirst_succ_succ_eq_sum_range (n k : ℕ) :
 theorem signedStirlingFirst_succ_succ_eq_sum (n k : ℕ) :
     (signedStirlingFirst (n + 1) (k + 1) : ℚ) =
       n.factorial * ∑ j ∈ Icc k n, (-1 : ℚ) ^ (n - j) / j.factorial * signedStirlingFirst j k := by
-  rw [c26a_signedStirlingFirst_succ_succ_eq_sum_range]
+  rw [signedStirlingFirst_succ_succ_eq_sum_range]
   congr 1
   symm
   apply sum_subset
@@ -161,15 +190,9 @@ theorem signedStirlingFirst_add_succ (n k : ℕ) :
       signedStirlingFirst_succ_succ, ih, show n + (k + 1) = n + k + 1 by omega]
     ring
 
-/-- DLMF 26.8.22: `S(n, k) = k S(n-1, k) + S(n-1, k-1)` (Mathlib
-`Nat.stirlingSecond_succ_succ`, written with `n + 1`, `k + 1`). -/
-@[dlmf 26.8.E22]
-theorem stirlingSecond_succ_succ' (n k : ℕ) :
-    Nat.stirlingSecond (n + 1) (k + 1) = (k + 1) * Nat.stirlingSecond n (k + 1) +
-      Nat.stirlingSecond n k := Nat.stirlingSecond_succ_succ n k
 
 /-- Surjections `ι → Fin h ⊕ Fin m` with prescribed preimage `J` of the right summand. -/
-lemma r26a_card_surj_sum_fiber {ι : Type*} [Fintype ι] [DecidableEq ι] (h m : ℕ)
+private lemma card_surjective_sum_preimage_isRight {ι : Type*} [Fintype ι] [DecidableEq ι] (h m : ℕ)
     (J : Finset ι) :
     #{f : ι → Fin h ⊕ Fin m | Function.Surjective f ∧ ({x | (f x).isRight} : Finset ι) = J} =
       #{g : {x // x ∉ J} → Fin h | Function.Surjective g} *
@@ -212,7 +235,7 @@ lemma r26a_card_surj_sum_fiber {ι : Type*} [Fintype ι] [DecidableEq ι] (h m :
         exact Sum.inl_getLeft _ _
 
 /-- The number of surjections depends only on the domain up to equivalence. -/
-lemma r26a_card_surj_dom_congr {ι ι' β : Type*} [Fintype ι] [DecidableEq ι] [Fintype ι']
+private lemma card_surjective_congr_left {ι ι' β : Type*} [Fintype ι] [DecidableEq ι] [Fintype ι']
     [DecidableEq ι'] [Fintype β] [DecidableEq β] (e : ι ≃ ι') :
     #{f : ι → β | Function.Surjective f} = #{f : ι' → β | Function.Surjective f} := by
   refine card_bij (fun f _ => f ∘ e.symm) ?_ ?_ ?_
@@ -226,11 +249,11 @@ lemma r26a_card_surj_dom_congr {ι ι' β : Type*} [Fintype ι] [DecidableEq ι]
     exact ⟨g ∘ e, by simpa using hg.comp e.surjective, by funext x; simp⟩
 
 /-- `#{surj Fin n → Fin (h+m)} = ∑_j C(n,j) #{surj Fin (n-j) → Fin h} #{surj Fin j → Fin m}`. -/
-lemma r26a_card_surj_add (n h m : ℕ) :
+private lemma card_surjective_fin_add (n h m : ℕ) :
     #{f : Fin n → Fin (h + m) | Function.Surjective f} =
       ∑ j ∈ range (n + 1), n.choose j * (#{f : Fin (n - j) → Fin h | Function.Surjective f} *
         #{f : Fin j → Fin m | Function.Surjective f}) := by
-  rw [q26b_card_surjective_congr (finSumFinEquiv (m := h) (n := m)).symm,
+  rw [Fintype.card_filter_surjective_congr (finSumFinEquiv (m := h) (n := m)).symm,
     card_eq_sum_card_fiberwise
       (f := fun f : Fin n → Fin h ⊕ Fin m => ({x | (f x).isRight} : Finset (Fin n)))
       (t := (univ : Finset (Fin n)).powerset) (fun f _ => by simp)]
@@ -240,11 +263,11 @@ lemma r26a_card_surj_add (n h m : ℕ) :
         #{f : Fin (n - #J) → Fin h | Function.Surjective f} *
           #{f : Fin #J → Fin m | Function.Surjective f} := by
     intro J _
-    rw [filter_filter, r26a_card_surj_sum_fiber]
+    rw [filter_filter, card_surjective_sum_preimage_isRight]
     congr 1
-    · apply r26a_card_surj_dom_congr
+    · apply card_surjective_congr_left
       exact Fintype.equivFinOfCardEq (by simp [Fintype.card_subtype_compl])
-    · apply r26a_card_surj_dom_congr
+    · apply card_surjective_congr_left
       exact Fintype.equivFinOfCardEq (by simp)
   rw [sum_congr rfl key, sum_powerset_apply_card
     (fun j => #{f : Fin (n - j) → Fin h | Function.Surjective f} *
@@ -259,8 +282,8 @@ theorem choose_mul_stirlingSecond {n k h : ℕ} (hkn : k ≤ n) (hhk : h ≤ k) 
       ∑ j ∈ Icc (k - h) (n - h), n.choose j * Nat.stirlingSecond (n - j) h *
         Nat.stirlingSecond j (k - h) := by
   obtain ⟨m, rfl⟩ : ∃ m, k = h + m := ⟨k - h, by omega⟩
-  have hA := r26a_card_surj_add n h m
-  simp only [q26b_card_surjective_fin] at hA
+  have hA := card_surjective_fin_add n h m
+  simp only [Fin.card_filter_surjective] at hA
   have hsub : ∑ j ∈ Icc (h + m - h) (n - h), n.choose j * Nat.stirlingSecond (n - j) h *
         Nat.stirlingSecond j (h + m - h) = ∑ j ∈ range (n + 1), n.choose j *
           Nat.stirlingSecond (n - j) h * Nat.stirlingSecond j m := by
@@ -301,7 +324,7 @@ theorem stirlingSecond_eq_sum_pow (n k : ℕ) :
       ring
 
 /-- DLMF 26.8.25 (range form). -/
-theorem c26a_stirlingSecond_succ_succ_eq_sum_range (n k : ℕ) :
+theorem stirlingSecond_succ_succ_eq_sum_range (n k : ℕ) :
     Nat.stirlingSecond (n + 1) (k + 1) =
       ∑ j ∈ range (n + 1), n.choose j * Nat.stirlingSecond j k := by
   induction n generalizing k with
@@ -331,7 +354,7 @@ theorem c26a_stirlingSecond_succ_succ_eq_sum_range (n k : ℕ) :
 @[dlmf 26.8.E25]
 theorem stirlingSecond_succ_succ_eq_sum (n k : ℕ) :
     Nat.stirlingSecond (n + 1) (k + 1) = ∑ j ∈ Icc k n, n.choose j * Nat.stirlingSecond j k := by
-  rw [c26a_stirlingSecond_succ_succ_eq_sum_range]
+  rw [stirlingSecond_succ_succ_eq_sum_range]
   symm
   apply sum_subset
   · intro j hj; simp only [mem_Icc] at hj; simp only [mem_range]; omega
@@ -353,13 +376,13 @@ theorem stirlingSecond_add_succ (n k : ℕ) :
 /-! ### Identities (§26.8(v)) -/
 
 /-- Dropping a vanishing `k = 0` term: `∑_{k=0}^n f k = ∑_{k=1}^n f k` when `f 0 = 0`. -/
-lemma c26a_sum_range_eq_sum_Icc {M : Type*} [AddCommMonoid M] (n : ℕ) {f : ℕ → M}
+private lemma sum_range_succ_eq_sum_Icc_of_zero {M : Type*} [AddCommMonoid M] (n : ℕ) {f : ℕ → M}
     (h : f 0 = 0) : ∑ k ∈ range (n + 1), f k = ∑ k ∈ Icc 1 n, f k := by
   rw [range_eq_Ico, sum_eq_sum_Ico_succ_bot (by omega), h, zero_add]
   rfl
 
 /-- `(-1)^{n-k} = (-1)^n (-1)^k` for `k ≤ n`. -/
-lemma c26a_neg_one_pow_sub {R : Type*} [Monoid R] [HasDistribNeg R] {n k : ℕ} (hk : k ≤ n) :
+private lemma neg_one_pow_sub_eq_mul {R : Type*} [Monoid R] [HasDistribNeg R] {n k : ℕ} (hk : k ≤ n) :
     (-1 : R) ^ (n - k) = (-1) ^ n * (-1) ^ k := by
   have : (-1 : R) ^ n = (-1) ^ (n - k) * (-1) ^ k := by rw [← pow_add, Nat.sub_add_cancel hk]
   rw [this, mul_assoc, ← pow_add, ← two_mul, pow_mul]; simp
@@ -381,10 +404,10 @@ theorem sum_signedStirlingFirst {n : ℕ} (hn : 1 < n) :
   rw [show (1 : ℤ) = ((1 : ℕ) : ℤ) by simp, descPochhammer_eval_coe_nat_of_lt hn] at h
   simp only [eval_finsetSum, eval_mul, eval_C, eval_pow, eval_X, Nat.cast_one, one_pow,
     mul_one, Int.cast_id] at h
-  rw [← c26a_sum_range_eq_sum_Icc n (signedStirlingFirst_zero_right (by omega)), h]
+  rw [← sum_range_succ_eq_sum_Icc_of_zero n (signedStirlingFirst_zero_right (by omega)), h]
 
 /-- The falling factorial at `-1`: `(-1)(-2)⋯(-n) = (-1)ⁿ n!`. -/
-lemma c26a_descPochhammer_eval_neg_one (n : ℕ) :
+private lemma descPochhammer_eval_neg_one (n : ℕ) :
     (descPochhammer ℤ n).eval (-1) = (-1) ^ n * (n.factorial : ℤ) := by
   have h := ascPochhammer_eval_neg_eq_descPochhammer (R := ℤ) (-1) n
   rw [neg_neg, ascPochhammer_eval_one] at h
@@ -396,15 +419,15 @@ condition):** for `n = 0` the printed sum is empty (`0 ≠ 0! = 1`). -/
 theorem sum_neg_one_pow_mul_signedStirlingFirst {n : ℕ} (hn : 1 ≤ n) :
     ∑ k ∈ Icc 1 n, (-1) ^ (n - k) * signedStirlingFirst n k = n.factorial := by
   have h := congrArg (Polynomial.eval (-1 : ℤ)) (descPochhammer_eq_sum ℤ n)
-  rw [c26a_descPochhammer_eval_neg_one] at h
+  rw [descPochhammer_eval_neg_one] at h
   simp only [eval_finsetSum, eval_mul, eval_C, eval_pow, eval_X, Int.cast_id] at h
-  rw [← c26a_sum_range_eq_sum_Icc n (by simp [signedStirlingFirst_zero_right hn])]
+  rw [← sum_range_succ_eq_sum_Icc_of_zero n (by simp [signedStirlingFirst_zero_right hn])]
   have h2 : ∑ k ∈ range (n + 1), (-1) ^ (n - k) * signedStirlingFirst n k =
       (-1) ^ n * ∑ k ∈ range (n + 1), signedStirlingFirst n k * (-1) ^ k := by
     rw [mul_sum]
     refine sum_congr rfl fun k hk => ?_
     have hk : k ≤ n := Nat.lt_succ_iff.mp (mem_range.mp hk)
-    rw [c26a_neg_one_pow_sub hk]; ring
+    rw [neg_one_pow_sub_eq_mul hk]; ring
   rw [h2, ← h, ← mul_assoc, ← pow_add, ← two_mul, pow_mul]; simp
 
 /-- DLMF 26.8.30: `∑_{j=k}^{n} s(n+1, j+1) n^{j-k} = s(n, k)`. -/
@@ -573,15 +596,15 @@ theorem sum_range_pow_eq_sum_stirlingSecond (n k : ℕ) :
 @[dlmf 26.8.E36]
 theorem sum_neg_one_pow_mul_factorial_mul_stirlingSecond (n : ℕ) :
     ∑ k ∈ range (n + 1), (-1) ^ (n - k) * (k.factorial : ℤ) * Nat.stirlingSecond n k = 1 := by
-  have h := congrArg (Polynomial.eval (-1 : ℤ)) (c26a_X_pow_eq_sum_descPochhammer n)
+  have h := congrArg (Polynomial.eval (-1 : ℤ)) (X_pow_eq_sum_stirlingSecond_mul_descPochhammer_int n)
   simp only [eval_pow, eval_X, eval_finsetSum, eval_mul, eval_C,
-    c26a_descPochhammer_eval_neg_one] at h
+    descPochhammer_eval_neg_one] at h
   have h2 : ∑ k ∈ range (n + 1), (-1) ^ (n - k) * (k.factorial : ℤ) * Nat.stirlingSecond n k =
       (-1) ^ n * ∑ k ∈ range (n + 1), (Nat.stirlingSecond n k : ℤ) * ((-1) ^ k * k.factorial) := by
     rw [mul_sum]
     refine sum_congr rfl fun k hk => ?_
     have hk : k ≤ n := Nat.lt_succ_iff.mp (mem_range.mp hk)
-    rw [c26a_neg_one_pow_sub hk]; ring
+    rw [neg_one_pow_sub_eq_mul hk]; ring
   rw [h2, ← h, ← pow_add, ← two_mul, pow_mul]; simp
 
 /-- DLMF 26.8.37: `Δ^k f(x) / k! = ∑_{n ≥ k} S(n, k) f^{(n)}(x) / n!` for an entire `f`
@@ -594,7 +617,7 @@ theorem hasSum_stirlingSecond_iteratedDeriv {f : ℂ → ℂ} (hf : Differentiab
   have hc : ∀ n, ∑ j ∈ range (k + 1), (-1 : ℂ) ^ (k - j) * (k.choose j : ℂ) * (j : ℂ) ^ n =
       k.factorial * Nat.stirlingSecond n k := by
     intro n
-    have := congrArg (Rat.cast : ℚ → ℂ) (q26a_sum_alt_choose_pow n k)
+    have := congrArg (Rat.cast : ℚ → ℂ) (sum_neg_one_pow_choose_mul_pow n k)
     push_cast at this
     exact this
   have hs := hasSum_sum (s := range (k + 1)) fun j _ =>
@@ -619,7 +642,7 @@ theorem hasSum_stirlingSecond_iteratedDeriv {f : ℂ → ℂ} (hf : Differentiab
 @[dlmf 26.8.E39]
 theorem sum_signedStirlingFirst_mul_stirlingSecond (n k : ℕ) :
     ∑ j ∈ Icc k n, signedStirlingFirst j k * Nat.stirlingSecond n j = if n = k then 1 else 0 := by
-  have h := congrArg (fun p : ℤ[X] => p.coeff k) (c26a_X_pow_eq_sum_descPochhammer n)
+  have h := congrArg (fun p : ℤ[X] => p.coeff k) (X_pow_eq_sum_stirlingSecond_mul_descPochhammer_int n)
   simp only [coeff_X_pow, finsetSum_coeff, coeff_C_mul, coeff_descPochhammer] at h
   rw [show (if n = k then (1 : ℤ) else 0) = if k = n then 1 else 0 by simp [eq_comm], h]
   apply sum_subset_zero_on_sdiff
@@ -632,18 +655,18 @@ theorem sum_signedStirlingFirst_mul_stirlingSecond (n k : ℕ) :
   · intro j _; ring
 
 /-- The matrices `(s(i, j))` and `(S(i, j))`, `0 ≤ i, j ≤ n`. -/
-def c26a_matS1 (n : ℕ) : Matrix (Fin (n + 1)) (Fin (n + 1)) ℤ :=
+def signedStirlingFirstMatrix (n : ℕ) : Matrix (Fin (n + 1)) (Fin (n + 1)) ℤ :=
   fun i j => signedStirlingFirst i j
 
 /-- The matrix of Stirling numbers of the second kind, `0 ≤ i, j ≤ n`. -/
-def c26a_matS2 (n : ℕ) : Matrix (Fin (n + 1)) (Fin (n + 1)) ℤ :=
+def stirlingSecondMatrix (n : ℕ) : Matrix (Fin (n + 1)) (Fin (n + 1)) ℤ :=
   fun i j => Nat.stirlingSecond i j
 
-/-- Identity under the stated parameter and domain assumptions: `c26a_matS2 n * c26a_matS1 n = 1`. -/
-lemma c26a_matS2_mul_matS1 (n : ℕ) : c26a_matS2 n * c26a_matS1 n = 1 := by
+/-- Identity under the stated parameter and domain assumptions: `stirlingSecondMatrix n * signedStirlingFirstMatrix n = 1`. -/
+private lemma stirlingSecondMatrix_mul_signedStirlingFirstMatrix (n : ℕ) : stirlingSecondMatrix n * signedStirlingFirstMatrix n = 1 := by
   ext a b
   have ha := a.isLt
-  simp only [Matrix.mul_apply, c26a_matS1, c26a_matS2, Matrix.one_apply, Fin.ext_iff]
+  simp only [Matrix.mul_apply, signedStirlingFirstMatrix, stirlingSecondMatrix, Matrix.one_apply, Fin.ext_iff]
   rw [← sum_signedStirlingFirst_mul_stirlingSecond a b]
   rw [Finset.sum_fin_eq_sum_range]
   symm
@@ -662,10 +685,10 @@ theorem sum_signedStirlingFirst_mul_stirlingSecond' (n k : ℕ) :
     ∑ j ∈ Icc k n, signedStirlingFirst n j * Nat.stirlingSecond j k = if n = k then 1 else 0 := by
   rcases lt_or_ge n k with hnk | hkn
   · rw [Finset.Icc_eq_empty (by omega)]; simp [hnk.ne]
-  have hm := congrFun (congrFun ((mul_eq_one_comm (a := c26a_matS2 n) (b := c26a_matS1 n)).mp
-    (c26a_matS2_mul_matS1 n))
+  have hm := congrFun (congrFun ((mul_eq_one_comm (a := stirlingSecondMatrix n) (b := signedStirlingFirstMatrix n)).mp
+    (stirlingSecondMatrix_mul_signedStirlingFirstMatrix n))
     ⟨n, by omega⟩) ⟨k, by omega⟩
-  simp only [Matrix.mul_apply, c26a_matS1, c26a_matS2, Matrix.one_apply, Fin.ext_iff] at hm
+  simp only [Matrix.mul_apply, signedStirlingFirstMatrix, stirlingSecondMatrix, Matrix.one_apply, Fin.ext_iff] at hm
   rw [← hm, Finset.sum_fin_eq_sum_range]
   apply sum_subset_zero_on_sdiff
   · intro j hj; simp only [mem_Icc] at hj; simp only [mem_range]; omega

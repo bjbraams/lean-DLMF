@@ -15,13 +15,21 @@ The Hermite function `u = e^{-x²/2} H_n` solves `u'' + (2n+1) u = x² u`. The V
 perturbation estimate `ODE.norm_sub_oscFree_le'` with `ω = √(2n+1)` and `g = x²` compares
 `u` with the free oscillation having the same data at `0`, and the data at `0` are known
 explicitly. This gives the leading term of the large-`n` expansion at fixed `x`
-(Beals–Wong, §13.1; Szegő, (8.22.8)) with an explicit error bound:
+(Beals–Wong, §13.1; Szegő, (8.22.8)) with an explicit error bound.
+
+## Main definitions
+
+* `u`, `u'`: the Hermite function `e^{-x²/2} H_n(x)` and its derivative.
+* `hermiteLambda`: the parity-dependent constant `λ_n` of DLMF 18.15.25.
+* `szegoConst`: Szegő's normalizing constant `Γ(n+1)/Γ(n/2+1)`.
+
+## Main results
 
 * `abs_hermite_div_lambda_sub_cos_le`, `hermite_div_lambda_isBigO`: DLMF 18.15.27 with
-  `M = 1`, `e^{-x²/2} H_n(x) / λ_n = cos (√(2n+1) x - nπ/2) + O(n^{-1/2})`, with the
-  parity-dependent constant `λ_n` of DLMF 18.15.25;
+  `M = 1`, `e^{-x²/2} H_n(x) / λ_n = cos (√(2n+1) x - nπ/2) + O(n^{-1/2})`.
 * `abs_hermite_scaled_sub_cos_le`, `hermite_scaled_isBigO`: Szegő's form with the constant
   `Γ(n+1)/Γ(n/2+1)`.
+* `hermitePolyHR_even_eval_zero`: `H_{2m}(0) = (-1)^m (2m)!/m!`.
 -/
 
 @[expose] public section

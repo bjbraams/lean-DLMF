@@ -16,21 +16,50 @@ Gauss and Landen transformations of the complete integrals (§19.22(i)), Bartky'
 transformation, the AGM algorithms (§19.22(ii); `M(a₀, g₀)` is Mathlib's `NNReal.agm`), and
 the incomplete transformations (§19.22(iii)).
 
-**Proved from `lean-codes`:** (19.22.1) from `Carlson.TwoVariable.carlsonRK_sq_eq`, (19.22.8)
-from `Carlson.TwoVariable.carlsonRK_sq_eq_inv_agm`, (19.22.22) from
-`Carlson.TwoVariable.carlsonRC_sq_eq`, and (19.22.18) for real positive `x, y, z` with
-`(z - x)(z - y) ≥ 0` (Landen/Gauss, `Carlson.carlsonRF_landen_explicit`) and for
-`x < z < y` (conjugate `z±`, `Carlson.carlsonRF_landen_conj`).
+## Main definitions
 
-**Branches.** `p±`, `z±` are defined with principal square roots as printed in (19.22.5),
-(19.22.16). The identities `p₊p₋ = pa`, `p₊² + p₋² = p² + xy` (19.22.6) hold for all complex
-values; the last two identities of (19.22.6), (19.22.17) involve `√((p²-x²)(p²-y²))` and are
-stated for real `p ≥ x, y > 0` (for complex arguments the printed square roots need a branch
-convention). The second equation of (19.22.23) is stated likewise for real positive data with
-`z ≥ x, y`.
+* `symEllIntPm`: `p±` of DLMF 19.22.5.
+* `agmA`, `agmG`: the AGM sequences `aₙ`, `gₙ` of §19.8(i), indexed from `a₀`, `g₀`.
+* `agmQ`: the sequence `Qₙ` of DLMF 19.22.11.
+* `agmP`, `agmQJ`: the sequences `pₙ, εₙ, Qₙ` of DLMF 19.22.13.
 
-Prose 19.22.iii.p2–p4 (ascending Landen versus descending Gauss; conjugate `z±` when `z` lies
-between `x` and `y`; caution on (19.22.23)) is commentary on the stated formulas.
+## Main results
+
+* `symEllIntRF_zero_sq`, `symEllIntRG_zero_sq`, `symEllIntRD_zero_sq`, `symEllIntRJ_zero_sq`:
+  quadratic transformations of the complete integrals (DLMF 19.22.1–19.22.5).
+* `symEllIntPm_mul_add`, `symEllIntPm_sub_real`: the identities of DLMF 19.22.6.
+* `symEllIntRJ_zero_sq_bartky`: Bartky's transformation (DLMF 19.22.7).
+* `symEllIntRF_zero_eq_inv_agm`, `symEllIntRG_zero_agm`, `symEllIntRD_zero_agm`,
+  `symEllIntRJ_zero_agm`, `symEllIntRJ_zero_agm_neg`: the AGM algorithms
+  (DLMF 19.22.8–19.22.15).
+* `agmQ_sign`, `tendsto_agmP`: sign and convergence statements of DLMF 19.22.11, 19.22.13.
+* `symEllIntRF_sq_landen`, `symEllIntRF_sq_landen_real`, `symEllIntRF_sq_landen_conj`: the
+  incomplete transformation of `R_F` (DLMF 19.22.16, 19.22.18).
+* `symEllIntPm_mul_add_z`: DLMF 19.22.17.
+* `symEllIntRD_sq_landen`, `symEllIntRJ_sq_landen`, `symEllIntRG_sq_landen`, `symEllIntRC_sq`:
+  DLMF 19.22.19–19.22.22.
+* `symEllIntPm_inverse`, `symEllIntPm_inverse_sub_real`: the inverse relations
+  (DLMF 19.22.23).
+
+## Implementation notes
+
+* (19.22.1) comes from `Carlson.TwoVariable.carlsonRK_sq_eq`, (19.22.8) from
+  `Carlson.TwoVariable.carlsonRK_sq_eq_inv_agm`, (19.22.22) from
+  `Carlson.TwoVariable.carlsonRC_sq_eq`, and (19.22.18) for real positive `x, y, z` with
+  `(z - x)(z - y) ≥ 0` (Landen/Gauss, `Carlson.carlsonRF_landen_explicit`) and for
+  `x < z < y` (conjugate `z±`, `Carlson.carlsonRF_landen_conj`), all in `lean-codes`.
+* **Branches.** `p±`, `z±` are defined with principal square roots as printed in (19.22.5),
+  (19.22.16). The identities `p₊p₋ = pa`, `p₊² + p₋² = p² + xy` (19.22.6) hold for all complex
+  values; the last two identities of (19.22.6), (19.22.17) involve `√((p²-x²)(p²-y²))` and are
+  stated for real `p ≥ x, y > 0` (for complex arguments the printed square roots need a branch
+  convention). The second equation of (19.22.23) is stated likewise for real positive data with
+  `z ≥ x, y`.
+* The prose 19.22.iii.p2–p4 (ascending Landen versus descending Gauss; conjugate `z±` when `z`
+  lies between `x` and `y`; caution on (19.22.23)) is commentary on the stated formulas.
+
+## References
+
+* NIST DLMF §19.22.
 -/
 
 @[expose] public noncomputable section
@@ -41,7 +70,7 @@ open scoped Real Topology NNReal
 namespace DLMF.EllipticIntegrals
 
 /-- Formula under the stated hypotheses: `x ^ 2 ∈ slitPlane`. -/
-lemma ei19c_sq_mem_slitPlane {x : ℂ} (hx : 0 < x.re) : x ^ 2 ∈ slitPlane := by
+private lemma sq_mem_slitPlane_of_zero_lt_re {x : ℂ} (hx : 0 < x.re) : x ^ 2 ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_cases h : x.im = 0
   · left; simp [pow_two, h]; positivity
@@ -52,21 +81,8 @@ lemma ei19c_sq_mem_slitPlane {x : ℂ} (hx : 0 < x.re) : x ^ 2 ∈ slitPlane := 
     · linarith
     · exact h h1
 
-/-- Formula under the stated hypotheses: `x * y ∈ slitPlane`. -/
-lemma ei19c_mul_mem_slitPlane {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) : x * y ∈ slitPlane := by
-  rw [mem_slitPlane_iff]
-  by_cases h : (x * y).im = 0
-  · left
-    simp only [mul_im] at h
-    simp only [mul_re]
-    have : y.re * (x.re * y.re - x.im * y.im) = x.re * (y.re ^ 2 + y.im ^ 2) := by
-      linear_combination (-y.im) * h
-    have h2 : 0 < x.re * (y.re ^ 2 + y.im ^ 2) := mul_pos hx (by nlinarith)
-    nlinarith
-  · exact Or.inr h
-
 /-- Estimate under the stated parameter and domain assumptions: `0 < ((x + y) / 2).re`. -/
-lemma ei19c_half_add_re_pos {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) : 0 < ((x + y) / 2).re := by
+private lemma re_half_add_pos {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) : 0 < ((x + y) / 2).re := by
   simp; linarith
 
 /-! ### §19.22(i) Complete integrals -/
@@ -75,34 +91,34 @@ lemma ei19c_half_add_re_pos {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) : 0 < ((
 @[dlmf 19.22.E1]
 theorem symEllIntRF_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
     symEllIntRF 0 (x ^ 2) (y ^ 2) = symEllIntRF 0 (x * y) (((x + y) / 2) ^ 2) := by
-  have ha := ei19c_half_add_re_pos hx hy
-  rw [symEllIntRF_zero_left (ei19c_sq_mem_slitPlane hx) (ei19c_sq_mem_slitPlane hy),
-    symEllIntRF_zero_left (ei19c_mul_mem_slitPlane hx hy) (ei19c_sq_mem_slitPlane ha),
-    symEllIntR_of_mem _ _ (ei19c_slit2 (ei19c_sq_mem_slitPlane hx) (ei19c_sq_mem_slitPlane hy)),
-    symEllIntR_of_mem _ _ (ei19c_slit2 (ei19c_mul_mem_slitPlane hx hy) (ei19c_sq_mem_slitPlane ha))]
+  have ha := re_half_add_pos hx hy
+  rw [symEllIntRF_zero_left (sq_mem_slitPlane_of_zero_lt_re hx) (sq_mem_slitPlane_of_zero_lt_re hy),
+    symEllIntRF_zero_left (Carlson.mul_mem_slitPlane_of_re_pos hx hy) (sq_mem_slitPlane_of_zero_lt_re ha),
+    symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain (sq_mem_slitPlane_of_zero_lt_re hx) (sq_mem_slitPlane_of_zero_lt_re hy)),
+    symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain (Carlson.mul_mem_slitPlane_of_re_pos hx hy) (sq_mem_slitPlane_of_zero_lt_re ha))]
   have h := Carlson.TwoVariable.carlsonRK_sq_eq x y hx hy
-  rw [Carlson.TwoVariable.carlsonRK_comm (ei19c_sq_mem_slitPlane ha)
-    (ei19c_mul_mem_slitPlane hx hy)] at h
+  rw [Carlson.TwoVariable.carlsonRK_comm (sq_mem_slitPlane_of_zero_lt_re ha)
+    (Carlson.mul_mem_slitPlane_of_re_pos hx hy)] at h
   unfold Carlson.TwoVariable.carlsonRK Carlson.TwoVariable.pair at h
   rw [show (-(1 / 2) : ℂ) = -1 / 2 by ring, h]
 
 /-- Round-1 helper: `R_G(0, y, z) = (π/4) R_E(y, z)` on the slit plane. -/
-theorem p19sR1_symEllIntRG_zero_eq_carlsonRE {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
+theorem symEllIntRG_zero_eq_carlsonRE {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     symEllIntRG 0 y z = (π / 4) * Carlson.carlsonRE y z := by
-  rw [(symEllIntRG_zero_left hy hz).1, symEllIntR_of_mem _ _ (ei19c_slit2 hy hz),
+  rw [(symEllIntRG_zero_left hy hz).1, symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz),
     Carlson.carlsonRE]
   congr 2; norm_num
 
 /-- Round-1 helper: `R_F(0, y, z) = (π/2) R_K(y, z)` on the slit plane. -/
-theorem p19sR1_symEllIntRF_zero_eq_carlsonRK {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
+theorem symEllIntRF_zero_eq_carlsonRK {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     symEllIntRF 0 y z = (π / 2) * Carlson.TwoVariable.carlsonRK y z := by
-  rw [symEllIntRF_zero_left hy hz, symEllIntR_of_mem _ _ (ei19c_slit2 hy hz),
+  rw [symEllIntRF_zero_left hy hz, symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz),
     Carlson.TwoVariable.carlsonRK]
   congr 2; norm_num
 
 /-- Identity under the stated parameter and domain assumptions: `Carlson.carlsonRE y z =
 Carlson.carlsonRE z y`. -/
-theorem p19sR1_carlsonRE_comm {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
+theorem carlsonRE_comm_of_mem_slitPlane {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     Carlson.carlsonRE y z = Carlson.carlsonRE z y := by
   unfold Carlson.carlsonRE Carlson.carlsonR
   rw [Carlson.TwoVariable.regCarlsonR_pair_swap _ _ _ hz hy]
@@ -112,15 +128,15 @@ theorem p19sR1_carlsonRE_comm {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ sli
 theorem symEllIntRG_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
     2 * symEllIntRG 0 (x ^ 2) (y ^ 2) =
       4 * symEllIntRG 0 (x * y) (((x + y) / 2) ^ 2) - x * y * symEllIntRF 0 (x * y) (((x + y) / 2) ^ 2) := by
-  have ha := ei19c_half_add_re_pos hx hy
-  have hx2 := ei19c_sq_mem_slitPlane hx
-  have hy2 := ei19c_sq_mem_slitPlane hy
-  have hxy := ei19c_mul_mem_slitPlane hx hy
-  have ha2 := ei19c_sq_mem_slitPlane ha
+  have ha := re_half_add_pos hx hy
+  have hx2 := sq_mem_slitPlane_of_zero_lt_re hx
+  have hy2 := sq_mem_slitPlane_of_zero_lt_re hy
+  have hxy := Carlson.mul_mem_slitPlane_of_re_pos hx hy
+  have ha2 := sq_mem_slitPlane_of_zero_lt_re ha
   have hF := symEllIntRF_zero_sq hx hy
-  rw [p19sR1_symEllIntRG_zero_eq_carlsonRE hx2 hy2, p19sR1_symEllIntRG_zero_eq_carlsonRE hxy ha2,
-    ← hF, p19sR1_symEllIntRF_zero_eq_carlsonRK hx2 hy2, Carlson.carlsonRE_sq_eq hx hy,
-    p19sR1_carlsonRE_comm ha2 hxy]
+  rw [symEllIntRG_zero_eq_carlsonRE hx2 hy2, symEllIntRG_zero_eq_carlsonRE hxy ha2,
+    ← hF, symEllIntRF_zero_eq_carlsonRK hx2 hy2, Carlson.carlsonRE_sq_eq hx hy,
+    carlsonRE_comm_of_mem_slitPlane ha2 hxy]
   ring
 
 /-- DLMF 19.22.3: `2y² R_D(0, x², y²) = (1/4)(y² - x²) R_D(0, xy, a²) + 3R_F(0, xy, a²)`. -/
@@ -129,11 +145,11 @@ theorem symEllIntRD_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
     2 * y ^ 2 * symEllIntRD 0 (x ^ 2) (y ^ 2) =
       (1 / 4) * (y ^ 2 - x ^ 2) * symEllIntRD 0 (x * y) (((x + y) / 2) ^ 2) +
         3 * symEllIntRF 0 (x * y) (((x + y) / 2) ^ 2) := by
-  have ha := ei19c_half_add_re_pos hx hy
-  have hx2 := ei19c_sq_mem_slitPlane hx
-  have hy2 := ei19c_sq_mem_slitPlane hy
-  have hxy := ei19c_mul_mem_slitPlane hx hy
-  have ha2 := ei19c_sq_mem_slitPlane ha
+  have ha := re_half_add_pos hx hy
+  have hx2 := sq_mem_slitPlane_of_zero_lt_re hx
+  have hy2 := sq_mem_slitPlane_of_zero_lt_re hy
+  have hxy := Carlson.mul_mem_slitPlane_of_re_pos hx hy
+  have ha2 := sq_mem_slitPlane_of_zero_lt_re ha
   have F1 := symEllIntRF_zero_sq hx hy
   by_cases hne : x ^ 2 - y ^ 2 = 0
   · have hxy' : x = y := by
@@ -174,8 +190,8 @@ theorem symEllIntRJ_zero_sq {x y p s : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (hp 
 theorem symEllIntPm_mul_add (x y p : ℂ) :
     symEllIntPm 1 x y p * symEllIntPm (-1) x y p = p * ((x + y) / 2) ∧
       symEllIntPm 1 x y p ^ 2 + symEllIntPm (-1) x y p ^ 2 = p ^ 2 + x * y := by
-  have h1 := ei19c_cpow_half_sq ((p + x) * (p + y))
-  have h2 := ei19c_cpow_half_sq ((p - x) * (p - y))
+  have h1 := cpow_half_mul_cpow_half ((p + x) * (p + y))
+  have h2 := cpow_half_mul_cpow_half ((p - x) * (p - y))
   unfold symEllIntPm
   constructor
   · linear_combination (1 / 4 : ℂ) * h1 - (1 / 4 : ℂ) * h2
@@ -232,8 +248,8 @@ theorem symEllIntRF_zero_eq_inv_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 
       ((NNReal.agm a₀ g₀ : ℝ) : ℂ)⁻¹ := by
   have hx : (0 : ℝ) < (((a₀ : ℝ) : ℂ)).re := by simpa using ha
   have hy : (0 : ℝ) < (((g₀ : ℝ) : ℂ)).re := by simpa using hg
-  rw [symEllIntRF_zero_left (ei19c_sq_mem_slitPlane hx) (ei19c_sq_mem_slitPlane hy),
-    symEllIntR_of_mem _ _ (ei19c_slit2 (ei19c_sq_mem_slitPlane hx) (ei19c_sq_mem_slitPlane hy)),
+  rw [symEllIntRF_zero_left (sq_mem_slitPlane_of_zero_lt_re hx) (sq_mem_slitPlane_of_zero_lt_re hy),
+    symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain (sq_mem_slitPlane_of_zero_lt_re hx) (sq_mem_slitPlane_of_zero_lt_re hy)),
     ← Carlson.TwoVariable.carlsonRK_sq_eq_inv_agm ha hg]
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   unfold Carlson.TwoVariable.carlsonRK Carlson.TwoVariable.pair
@@ -254,7 +270,7 @@ def agmG (a₀ g₀ : ℝ≥0) : ℕ → ℝ
 
 /-- Identity under the stated parameter and domain assumptions: `agmA a₀ g₀ (n + 1) = (agmA a₀ g₀
 n + agmG a₀ g₀ n) / 2`. -/
-lemma p19sR1_agmA_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
+lemma agmA_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
     agmA a₀ g₀ (n + 1) = (agmA a₀ g₀ n + agmG a₀ g₀ n) / 2 := by
   cases n with
   | zero => simp only [agmA, agmG, NNReal.agmSequences_zero]; push_cast; ring
@@ -265,7 +281,7 @@ lemma p19sR1_agmA_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
 
 /-- Identity under the stated parameter and domain assumptions: `agmG a₀ g₀ (n + 1) = Real.sqrt
 (agmA a₀ g₀ n * agmG a₀ g₀ n)`. -/
-lemma p19sR1_agmG_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
+lemma agmG_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
     agmG a₀ g₀ (n + 1) = Real.sqrt (agmA a₀ g₀ n * agmG a₀ g₀ n) := by
   cases n with
   | zero => simp only [agmA, agmG, NNReal.agmSequences_zero, Real.coe_sqrt, NNReal.coe_mul]
@@ -275,12 +291,12 @@ lemma p19sR1_agmG_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
     simp only [Real.coe_sqrt, NNReal.coe_mul, mul_comm]
 
 /-- The DLMF AGM sequences agree with lean-codes' `Carlson.agmSeq`. -/
-lemma p19sR1_agmSeq_eq (a₀ g₀ : ℝ≥0) (n : ℕ) :
+private lemma agmSeq_eq_agmA_agmG (a₀ g₀ : ℝ≥0) (n : ℕ) :
     Carlson.agmSeq a₀ g₀ n = (agmA a₀ g₀ n, agmG a₀ g₀ n) := by
   induction n with
   | zero => rfl
   | succ n ih =>
-    rw [Carlson.agmSeq_succ, ih, p19sR1_agmA_succ, p19sR1_agmG_succ]
+    rw [Carlson.agmSeq_succ, ih, agmA_succ, agmG_succ]
     rfl
 
 /-- DLMF 19.22.9: `(4/π) R_G(0, a₀², g₀²) = (1/M)(a₀² - ∑_{n≥0} 2^{n-1} cₙ²)
@@ -303,13 +319,13 @@ theorem symEllIntRG_zero_agm {a₀ g₀ : ℝ≥0} (hg : 0 < g₀) (hag : g₀ �
   have hK : Carlson.TwoVariable.carlsonRK (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) = (M : ℂ)⁻¹ :=
     Carlson.TwoVariable.carlsonRK_sq_eq_inv_agm (x := a₀) (y := g₀) (by exact_mod_cast ha) hg
   have hX : ∀ n, Carlson.agmX a₀ g₀ n = (agmA a₀ g₀ n : ℂ) := fun n => by
-    simp [Carlson.agmX, p19sR1_agmSeq_eq]
+    simp [Carlson.agmX, agmSeq_eq_agmA_agmG]
   have hY : ∀ n, Carlson.agmY a₀ g₀ n = (agmG a₀ g₀ n : ℂ) := fun n => by
-    simp [Carlson.agmY, p19sR1_agmSeq_eq]
+    simp [Carlson.agmY, agmSeq_eq_agmA_agmG]
   set RE := Carlson.carlsonRE (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) with hRE
   have hRG : (4 / π) * symEllIntRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) = RE := by
-    rw [p19sR1_symEllIntRG_zero_eq_carlsonRE (ei19c_sq_mem_slitPlane (by simpa using ha))
-      (ei19c_sq_mem_slitPlane (by simpa using hg'))]
+    rw [symEllIntRG_zero_eq_carlsonRE (sq_mem_slitPlane_of_zero_lt_re (by simpa using ha))
+      (sq_mem_slitPlane_of_zero_lt_re (by simpa using hg'))]
     have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
     rw [hRE]
     field_simp
@@ -344,8 +360,8 @@ theorem symEllIntRG_zero_agm {a₀ g₀ : ℝ≥0} (hg : 0 < g₀) (hag : g₀ �
   congr 1
   congr 1
   rw [← hsumR.sum_add_tsum_nat_add 2]
-  have hA1 := p19sR1_agmA_succ a₀ g₀ 0
-  have hG1 := p19sR1_agmG_succ a₀ g₀ 0
+  have hA1 := agmA_succ a₀ g₀ 0
+  have hG1 := agmG_succ a₀ g₀ 0
   have hG1sq : agmG a₀ g₀ 1 ^ 2 = agmA a₀ g₀ 0 * agmG a₀ g₀ 0 := by
     rw [hG1, Real.sq_sqrt (by simp only [agmA, agmG]; positivity)]
   have htail : ∀ n : ℕ, (2 : ℝ) ^ (((n + 2 : ℕ) : ℤ) - 1) *
@@ -365,7 +381,7 @@ def agmQ (a₀ g₀ : ℝ≥0) : ℕ → ℝ
   | n + 1 => (1 / 2) * agmQ a₀ g₀ n * (agmA a₀ g₀ n - agmG a₀ g₀ n) / (agmA a₀ g₀ n + agmG a₀ g₀ n)
 
 /-- Helper for 19.22.9/19.22.10 (any `a₀, g₀ > 0`): `∑ₙ 2^{n-1} cₙ² = a₀² - (4/π) M R_G(0, a₀², g₀²)`. -/
-lemma p19sR1_RG_agm_hasSum {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) :
+private lemma hasSum_agm_symEllIntRG {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) :
     HasSum (fun n : ℕ => (((2 : ℝ) ^ ((n : ℤ) - 1) *
       (agmA a₀ g₀ n ^ 2 - agmG a₀ g₀ n ^ 2) : ℝ) : ℂ))
       (((a₀ : ℝ) : ℂ) ^ 2 - (4 / π) * symEllIntRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) *
@@ -379,13 +395,13 @@ lemma p19sR1_RG_agm_hasSum {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g�
   have hK : Carlson.TwoVariable.carlsonRK (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) = (M : ℂ)⁻¹ :=
     Carlson.TwoVariable.carlsonRK_sq_eq_inv_agm (x := a₀) (y := g₀) ha₀ hg
   have hX : ∀ n, Carlson.agmX a₀ g₀ n = (agmA a₀ g₀ n : ℂ) := fun n => by
-    simp [Carlson.agmX, p19sR1_agmSeq_eq]
+    simp [Carlson.agmX, agmSeq_eq_agmA_agmG]
   have hY : ∀ n, Carlson.agmY a₀ g₀ n = (agmG a₀ g₀ n : ℂ) := fun n => by
-    simp [Carlson.agmY, p19sR1_agmSeq_eq]
+    simp [Carlson.agmY, agmSeq_eq_agmA_agmG]
   set RE := Carlson.carlsonRE (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) with hRE
   have hRG : (4 / π) * symEllIntRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) = RE := by
-    rw [p19sR1_symEllIntRG_zero_eq_carlsonRE (ei19c_sq_mem_slitPlane (by simpa using ha))
-      (ei19c_sq_mem_slitPlane (by simpa using hg'))]
+    rw [symEllIntRG_zero_eq_carlsonRE (sq_mem_slitPlane_of_zero_lt_re (by simpa using ha))
+      (sq_mem_slitPlane_of_zero_lt_re (by simpa using hg'))]
     have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
     rw [hRE]
     field_simp
@@ -406,7 +422,7 @@ lemma p19sR1_RG_agm_hasSum {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g�
     ring
 
 /-- Helper for 19.22.10: `Qₙ (a₀² - g₀²) = 2ⁿ cₙ²`. -/
-lemma p19sR1_agmQ_mul {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) (n : ℕ) :
+private lemma agmQ_mul {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) (n : ℕ) :
     agmQ a₀ g₀ n * ((a₀ : ℝ) ^ 2 - (g₀ : ℝ) ^ 2) =
       2 ^ n * (agmA a₀ g₀ n ^ 2 - agmG a₀ g₀ n ^ 2) := by
   have ha' : (0 : ℝ) < a₀ := ha₀
@@ -418,7 +434,7 @@ lemma p19sR1_agmQ_mul {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) (
     cases m with
     | zero => simp only [agmA, agmG]; linarith
     | succ m =>
-      have h := p19sR1_agmA_succ a₀ g₀ m
+      have h := agmA_succ a₀ g₀ m
       have hm := hnn m
       have hm' := hnn (m + 1)
       by_contra hc
@@ -426,7 +442,7 @@ lemma p19sR1_agmQ_mul {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) (
       rw [h0] at h
       -- then aₘ = gₘ = 0, impossible by induction from a₀ > 0
       have : ∀ k, 0 < agmA a₀ g₀ k + agmG a₀ g₀ k → 0 < agmA a₀ g₀ (k + 1) := fun k hk => by
-        rw [p19sR1_agmA_succ]; linarith
+        rw [agmA_succ]; linarith
       have hk : ∀ k, 0 < agmA a₀ g₀ k := by
         intro k
         induction k with
@@ -436,9 +452,9 @@ lemma p19sR1_agmQ_mul {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) (
   induction n with
   | zero => simp [agmQ, agmA, agmG]
   | succ n ih =>
-    have hA := p19sR1_agmA_succ a₀ g₀ n
+    have hA := agmA_succ a₀ g₀ n
     have hG : agmG a₀ g₀ (n + 1) ^ 2 = agmA a₀ g₀ n * agmG a₀ g₀ n := by
-      rw [p19sR1_agmG_succ, Real.sq_sqrt (mul_nonneg (hnn n).1 (hnn n).2)]
+      rw [agmG_succ, Real.sq_sqrt (mul_nonneg (hnn n).1 (hnn n).2)]
     have hp := (hpos n).ne'
     rw [agmQ, hG, hA]
     field_simp
@@ -456,8 +472,8 @@ theorem symEllIntRD_zero_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g�
   have hMpos : 0 < M := by
     have := NNReal.agm_pos (x := a₀) (y := g₀) ha hg
     exact_mod_cast this
-  have hy : (((g₀ : ℝ) : ℂ) ^ 2) ∈ slitPlane := ei19c_sq_mem_slitPlane (by simpa using hg')
-  have hz : (((a₀ : ℝ) : ℂ) ^ 2) ∈ slitPlane := ei19c_sq_mem_slitPlane (by simpa using ha')
+  have hy : (((g₀ : ℝ) : ℂ) ^ 2) ∈ slitPlane := sq_mem_slitPlane_of_zero_lt_re (by simpa using hg')
+  have hz : (((a₀ : ℝ) : ℂ) ^ 2) ∈ slitPlane := sq_mem_slitPlane_of_zero_lt_re (by simpa using ha')
   by_cases hag : a₀ = g₀
   · subst hag
     have hM : M = a₀ := by rw [hM_def, NNReal.agm_self]
@@ -485,11 +501,11 @@ theorem symEllIntRD_zero_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g�
       apply hag
       have : (a₀ : ℝ) = g₀ := by nlinarith [sq_nonneg ((a₀ : ℝ) - g₀), sq_nonneg ((a₀ : ℝ) + g₀)]
       exact_mod_cast this
-    have H := (p19sR1_RG_agm_hasSum ha hg).mul_left
+    have H := (hasSum_agm_symEllIntRG ha hg).mul_left
       (((3 * π / (4 * M * (a₀ : ℝ) ^ 2) * (2 / ((a₀ : ℝ) ^ 2 - (g₀ : ℝ) ^ 2)) : ℝ) : ℂ))
     convert H using 1
     · funext n
-      have hq := p19sR1_agmQ_mul ha hg n
+      have hq := agmQ_mul ha hg n
       have hq' : agmQ a₀ g₀ n = 2 * ((2 : ℝ) ^ ((n : ℤ) - 1) *
           (agmA a₀ g₀ n ^ 2 - agmG a₀ g₀ n ^ 2)) / ((a₀ : ℝ) ^ 2 - (g₀ : ℝ) ^ 2) := by
         rw [zpow_sub₀ two_ne_zero, zpow_natCast, zpow_one, eq_div_iff hc0, hq]
@@ -497,7 +513,7 @@ theorem symEllIntRD_zero_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g�
       rw [← ofReal_mul, hq']
       congr 1
       ring
-    · have h2 := p19sR1_two_mul_symEllIntRG (x := 0) (Or.inr rfl) hy hz
+    · have h2 := two_mul_symEllIntRG (x := 0) (Or.inr rfl) hy hz
       rw [zero_cpow (by norm_num), zero_mul, zero_mul, add_zero] at h2
       have hF := symEllIntRF_zero_eq_inv_agm ha hg
       have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
@@ -601,7 +617,7 @@ theorem symEllIntRJ_zero_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g�
 /-- Helper for 19.22.13: the Heron-type iteration `pₙ₊₁ = (pₙ² + aₙgₙ)/(2pₙ)` along a genuine
 AGM pair `(aₙ, gₙ)` converges to the common limit, via
 `pₙ₊₁² - aₙ₊₁² = (pₙ² - aₙ²)(pₙ² - gₙ²)/(4pₙ²)`. -/
-lemma p19sR1_tendsto_heron {a g p : ℕ → ℝ} {M : ℝ} (hM : 0 ≤ M) (hg : ∀ n, 0 < g n)
+private lemma tendsto_heron_of_agm {a g p : ℕ → ℝ} {M : ℝ} (hM : 0 ≤ M) (hg : ∀ n, 0 < g n)
     (hga : ∀ n, g n ≤ a n)
     (ha : ∀ n, a (n + 1) = (a n + g n) / 2) (hgs : ∀ n, g (n + 1) ^ 2 = a n * g n)
     (hp0 : 0 < p 0) (hp : ∀ n, p (n + 1) = (p n ^ 2 + a n * g n) / (2 * p n))
@@ -708,7 +724,7 @@ theorem tendsto_agmP {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g₀) {p₀
     refine this.congr fun n => ?_
     simp [agmA]
   rw [← tendsto_add_atTop_iff_nat 1]
-  exact p19sR1_tendsto_heron (a := fun n => agmA a₀ g₀ (n + 1)) (g := fun n => agmG a₀ g₀ (n + 1))
+  exact tendsto_heron_of_agm (a := fun n => agmA a₀ g₀ (n + 1)) (g := fun n => agmG a₀ g₀ (n + 1))
     (NNReal.coe_nonneg _) hG0 hGA hA hG hP1 (fun n => rfl) hlim
 
 /-- DLMF 19.22.14 with 19.22.15: the Cauchy principal value
@@ -769,9 +785,9 @@ theorem symEllIntRF_sq_landen_conj {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz :
     ofReal_mem_slitPlane.mpr (by positivity)
   have ha : 0 < Real.sqrt ((z + x) * (z + y)) := Real.sqrt_pos.mpr (by positivity)
   have h1 : (((Real.sqrt ((z + x) * (z + y)) : ℂ) + I * Real.sqrt ((z - x) * (y - z))) / 2) ^ 2
-      ∈ slitPlane := ei19c_sq_mem_slitPlane (by simp; positivity)
+      ∈ slitPlane := sq_mem_slitPlane_of_zero_lt_re (by simp; positivity)
   have h2 : (((Real.sqrt ((z + x) * (z + y)) : ℂ) - I * Real.sqrt ((z - x) * (y - z))) / 2) ^ 2
-      ∈ slitPlane := ei19c_sq_mem_slitPlane (by simp; positivity)
+      ∈ slitPlane := sq_mem_slitPlane_of_zero_lt_re (by simp; positivity)
   rw [symEllIntRF_eq_carlsonRF (hpos hx) (hpos hy) (hpos hz), h,
     symEllIntRF_eq_carlsonRF (hpos (by positivity)) h1 h2]
 
@@ -821,9 +837,9 @@ theorem symEllIntRG_sq_landen {x y z : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (hz 
 @[dlmf 19.22.E22]
 theorem symEllIntRC_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
     symEllIntRC (x ^ 2) (y ^ 2) = symEllIntRC (((x + y) / 2) ^ 2) ((x + y) / 2 * y) := by
-  have ha := ei19c_half_add_re_pos hx hy
-  rw [symEllIntRC_eq_carlsonRC (ei19c_sq_mem_slitPlane hx) (ei19c_sq_mem_slitPlane hy),
-    symEllIntRC_eq_carlsonRC (ei19c_sq_mem_slitPlane ha) (ei19c_mul_mem_slitPlane ha hy),
+  have ha := re_half_add_pos hx hy
+  rw [symEllIntRC_eq_carlsonRC (sq_mem_slitPlane_of_zero_lt_re hx) (sq_mem_slitPlane_of_zero_lt_re hy),
+    symEllIntRC_eq_carlsonRC (sq_mem_slitPlane_of_zero_lt_re ha) (Carlson.mul_mem_slitPlane_of_re_pos ha hy),
     Carlson.TwoVariable.carlsonRC_sq_eq x y hx hy]
 
 /-- DLMF 19.22.23 (first and third equations, all complex values with `a ≠ 0`):

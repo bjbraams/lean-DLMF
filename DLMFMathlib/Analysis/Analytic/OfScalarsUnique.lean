@@ -13,6 +13,11 @@ public import Mathlib.Analysis.Complex.Basic
 /-!
 # Scalar power series: uniqueness of coefficients and the exponential series
 
+Uniqueness of the coefficients of one-variable scalar power series, the exponential series in
+`ℂ` and `ℝ`, and a nonvanishing criterion for sums of nonnegative real series.
+
+## Main results
+
 * `FormalMultilinearSeries.eq_ofScalars_coeff`: a one-variable series is `ofScalars` of its
   coefficients;
 * `Complex.eq_zero_of_hasSum_mul_pow_ball`, `Complex.eq_of_hasSum_mul_pow_ball`: the

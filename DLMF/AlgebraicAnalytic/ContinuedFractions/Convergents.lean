@@ -10,16 +10,31 @@ public import DLMF.AlgebraicAnalytic.ContinuedFractions.Basic
 /-!
 # Convergents of continued fractions (DLMF §§1.12(ii)–1.12(iv))
 
-For `contFrac a b = b₀ + a₁/(b₁ + a₂/(b₂ + ⋯))` (DLMF indexing) with canonical numerators
-`A_n = (contFrac a b).nums n` and denominators `B_n = (contFrac a b).dens n`:
+For `contFrac a b = b₀ + a₁/(b₁ + a₂/(b₂ + ⋯))` (DLMF indexing), the canonical numerators
+`A_n = (contFrac a b).nums n` and denominators `B_n = (contFrac a b).dens n`, their recurrences
+and determinant formula, equivalence transformations, Euler's series fraction, the fractional
+transformation and the even and odd parts.
 
-* the recurrences 1.12.5–1.12.6 (with `A_{-1} = 1`, `B_{-1} = 0` as Mathlib's
-  `contsAux 0 = ⟨1, 0⟩`), the nested form 1.12.4 of `C_n = A_n/B_n`;
-* the determinant formula 1.12.7 and its consequences 1.12.8–1.12.14;
-* equivalence transformations 1.12.15–1.12.17, Euler's series fraction 1.12.18–1.12.19;
-* the fractional transformation 1.12.20–1.12.21;
-* the characterization 1.12.22 of sequences of convergents (finite-valued form);
-* even and odd parts 1.12.23–1.12.24.
+## Main results
+
+* `contFrac_contsAux_rec`, `contFrac_initial`: the recurrences 1.12.5–1.12.6 (with
+  `A_{-1} = 1`, `B_{-1} = 0` as Mathlib's `contsAux 0 = ⟨1, 0⟩`).
+* `contFrac_convs'_eq_convs`: the nested form of `C_n = A_n/B_n` (DLMF 1.12.4).
+* `contFrac_det`: the determinant formula (DLMF 1.12.7).
+* `contFrac_convs_sub`, `contFrac_convs_eq_sum`, `contFrac_a_eq`, `contFrac_a_eq_convs`,
+  `contFrac_b_eq`, `contFrac_b_eq_convs`, `contFrac_initial_elements`: DLMF 1.12.8–1.12.14.
+* `contFracEquiv_of_scale`, `contFracEquiv_unit_denominators`, `contFracEquiv_unit_numerators`:
+  equivalence transformations (DLMF 1.12.15–1.12.17).
+* `contFrac_euler_series`, `contFrac_power_series`: Euler's series fraction
+  (DLMF 1.12.18–1.12.19).
+* `contFracApprox_zero`, `contFracApprox_eq`, `contFracApprox_tendsto_infty`: the fractional
+  transformation (DLMF 1.12.20–1.12.21).
+* `exists_contFrac_convs_iff`: the characterization of sequences of convergents, finite-valued
+  form (DLMF 1.12.22).
+* `contFrac_evenPart_convs`, `exists_evenPart_iff`, `contFrac_oddPart_convs`,
+  `exists_oddPart_iff`: even and odd parts (DLMF 1.12.23–1.12.24, §1.12(iv)).
+
+## Implementation notes
 
 The approximants are the ratios `A_n/B_n` (Mathlib's `GenContFract.convs`); the nested fractions
 (`GenContFract.convs'`) agree with them when the nested denominators do not vanish (1.12.4).
@@ -217,7 +232,7 @@ theorem contFrac_convs_eq_sum (n : ℕ) (hB : ∀ k ≤ n, (contFrac a b).dens k
     ring
 
 /-- The determinant `A_{m+1}B_m - A_mB_{m+1}` does not vanish when `a_1, …, a_{m+1} ≠ 0`. -/
-lemma g1d_det_ne_zero (m : ℕ) (ha : ∀ k, 1 ≤ k → k ≤ m + 1 → a k ≠ 0) :
+private lemma nums_succ_mul_dens_sub_ne_zero (m : ℕ) (ha : ∀ k, 1 ≤ k → k ≤ m + 1 → a k ≠ 0) :
     (contFrac a b).nums (m + 1) * (contFrac a b).dens m -
         (contFrac a b).dens (m + 1) * (contFrac a b).nums m ≠ 0 := by
   rw [contFrac_det']
@@ -233,7 +248,7 @@ theorem contFrac_a_eq (m : ℕ) (ha : ∀ k, 1 ≤ k → k ≤ m + 1 → a k ≠
           (contFrac a b).nums (m + 2) * (contFrac a b).dens (m + 1)) /
         ((contFrac a b).nums (m + 1) * (contFrac a b).dens m -
           (contFrac a b).nums m * (contFrac a b).dens (m + 1)) := by
-  have hd := g1d_det_ne_zero a b m ha
+  have hd := nums_succ_mul_dens_sub_ne_zero a b m ha
   have h1 := contFrac_det' a b m
   have h2 := contFrac_det' a b (m + 1)
   rw [eq_div_iff (by intro h; apply hd; linear_combination h)]
@@ -249,7 +264,7 @@ theorem contFrac_b_eq (m : ℕ) (ha : ∀ k, 1 ≤ k → k ≤ m + 1 → a k ≠
           (contFrac a b).nums m * (contFrac a b).dens (m + 2)) /
         ((contFrac a b).nums (m + 1) * (contFrac a b).dens m -
           (contFrac a b).nums m * (contFrac a b).dens (m + 1)) := by
-  have hd := g1d_det_ne_zero a b m ha
+  have hd := nums_succ_mul_dens_sub_ne_zero a b m ha
   rw [eq_div_iff (by intro h; apply hd; linear_combination h), contFrac_nums_step,
     contFrac_dens_step]
   ring
@@ -263,7 +278,7 @@ theorem contFrac_a_eq_convs (m : ℕ) (ha : ∀ k, 1 ≤ k → k ≤ m + 1 → a
     a (m + 2) = (contFrac a b).dens (m + 2) / (contFrac a b).dens m *
       (((contFrac a b).convs (m + 1) - (contFrac a b).convs (m + 2)) /
         ((contFrac a b).convs (m + 1) - (contFrac a b).convs m)) := by
-  have hd := g1d_det_ne_zero a b m ha
+  have hd := nums_succ_mul_dens_sub_ne_zero a b m ha
   have hd' : (contFrac a b).nums (m + 1) * (contFrac a b).dens m -
       (contFrac a b).nums m * (contFrac a b).dens (m + 1) ≠ 0 := by
     intro h; apply hd; linear_combination h
@@ -280,7 +295,7 @@ theorem contFrac_b_eq_convs (m : ℕ) (ha : ∀ k, 1 ≤ k → k ≤ m + 1 → a
     b (m + 2) = (contFrac a b).dens (m + 2) / (contFrac a b).dens (m + 1) *
       (((contFrac a b).convs (m + 2) - (contFrac a b).convs m) /
         ((contFrac a b).convs (m + 1) - (contFrac a b).convs m)) := by
-  have hd := g1d_det_ne_zero a b m ha
+  have hd := nums_succ_mul_dens_sub_ne_zero a b m ha
   have hd' : (contFrac a b).nums (m + 1) * (contFrac a b).dens m -
       (contFrac a b).nums m * (contFrac a b).dens (m + 1) ≠ 0 := by
     intro h; apply hd; linear_combination h
@@ -358,7 +373,7 @@ theorem contFracEquiv_unit_denominators (hb : ∀ n, 1 ≤ n → b n ≠ 0) :
       field_simp [hb (n + 1) (by omega)]
 
 /-- The factors `d_n` of `contFracUnitFactor` do not vanish. -/
-lemma g1d_unitFactor_ne_zero (ha : ∀ n, 1 ≤ n → a n ≠ 0) (n : ℕ) : contFracUnitFactor a n ≠ 0 := by
+private lemma contFracUnitFactor_ne_zero (ha : ∀ n, 1 ≤ n → a n ≠ 0) (n : ℕ) : contFracUnitFactor a n ≠ 0 := by
   induction n with
   | zero => simp [contFracUnitFactor]
   | succ n ih =>
@@ -371,11 +386,11 @@ lemma g1d_unitFactor_ne_zero (ha : ∀ n, 1 ≤ n → a n ≠ 0) (n : ℕ) : con
 @[dlmf 1.12.E17]
 theorem contFracEquiv_unit_numerators (ha : ∀ n, 1 ≤ n → a n ≠ 0) :
     ContFracEquiv a b (fun _ => 1) (fun n => contFracUnitFactor a n * b n) := by
-  refine contFracEquiv_of_scale a b (contFracUnitFactor a) rfl (g1d_unitFactor_ne_zero a ha)
+  refine contFracEquiv_of_scale a b (contFracUnitFactor a) rfl (contFracUnitFactor_ne_zero a ha)
     (fun n hn => ?_) (fun n => rfl)
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
   have h1 := ha (m + 1) (by omega)
-  have h2 := g1d_unitFactor_ne_zero a ha m
+  have h2 := contFracUnitFactor_ne_zero a ha m
   simp only [contFracUnitFactor, Nat.add_sub_cancel]
   field_simp
 
@@ -457,7 +472,7 @@ theorem contFracApprox_zero (n : ℕ) : contFracApprox a b n 0 = (contFrac a b).
   simp [contFracApprox]
 
 /-- The continuants with index `≤ m` depend only on `b_0, …, b_m`. -/
-lemma g1d_conts_congr {b' : ℕ → K} (m : ℕ) (hb : ∀ k ≤ m, b k = b' k) :
+private lemma nums_dens_congr {b' : ℕ → K} (m : ℕ) (hb : ∀ k ≤ m, b k = b' k) :
     ∀ j ≤ m, (contFrac a b).nums j = (contFrac a b').nums j ∧
       (contFrac a b).dens j = (contFrac a b').dens j := by
   intro j
@@ -475,7 +490,7 @@ lemma g1d_conts_congr {b' : ℕ → K} (m : ℕ) (hb : ∀ k ≤ m, b k = b' k) 
 
 /-- The continuants of the fraction with `b_n` replaced by `b_n + w`:
 `⟨A_n + A_{n-1}w, B_n + B_{n-1}w⟩`. -/
-lemma g1d_conts_update (n : ℕ) (w : K) :
+private lemma contsAux_update_add (n : ℕ) (w : K) :
     (contFrac a (Function.update b n (b n + w))).contsAux (n + 1) =
       ⟨((contFrac a b).contsAux (n + 1)).a + ((contFrac a b).contsAux n).a * w,
         ((contFrac a b).contsAux (n + 1)).b + ((contFrac a b).contsAux n).b * w⟩ := by
@@ -485,7 +500,7 @@ lemma g1d_conts_update (n : ℕ) (w : K) :
       contFrac_dens_zero]
     simp
     ring
-  · have hc := g1d_conts_congr a b (b' := Function.update b (n + 2) (b (n + 2) + w)) (n + 1)
+  · have hc := nums_dens_congr a b (b' := Function.update b (n + 2) (b (n + 2) + w)) (n + 1)
       (fun k hk => by rw [Function.update_of_ne (by omega)])
     simp only [contFrac_contsAux_succ]
     rw [contFrac_nums_step, contFrac_dens_step, ← (hc (n + 1) le_rfl).1, ← (hc (n + 1) le_rfl).2,
@@ -502,7 +517,7 @@ theorem contFracApprox_eq (n : ℕ) (w : K)
       (((contFrac a b).contsAux (n + 1)).a + ((contFrac a b).contsAux n).a * w) /
         (((contFrac a b).contsAux (n + 1)).b + ((contFrac a b).contsAux n).b * w) := by
   rw [contFracApprox, (contFrac_convs'_eq_convs n a _ ht).1]
-  have h := g1d_conts_update a b n w
+  have h := contsAux_update_add a b n w
   simp only [contFrac_contsAux_succ] at h
   simp only [convs]
   rw [show (contFrac a (Function.update b n (b n + w))).nums n =

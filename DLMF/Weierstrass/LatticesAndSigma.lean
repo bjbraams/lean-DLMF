@@ -10,15 +10,43 @@ public import Mathlib.Analysis.SpecialFunctions.Elliptic.Weierstrass
 public import Mathlib.Analysis.Meromorphic.NormalForm
 public import Mathlib.Analysis.Calculus.LogDerivUniformlyOn
 public import Mathlib.Analysis.Normed.Module.Connected
-public import DLMFMathlib.NumberTheory.ModularForms.P3wJSurjective
+public import DLMFMathlib.NumberTheory.ModularForms.KleinJSurjective
 
 /-!
-# Weierstrass lattices and sigma products
+# Weierstrass lattices, zeta and sigma functions
 
-Lattices, half-periods, zeta and sigma definitions and the convergent Weierstrass sigma product.
+The period lattice `𝕃 = {2mω₁ + 2nω₃}` and its generators (DLMF §23.2(i)), and the Weierstrass
+functions `ζ` and `σ` defined by their lattice series and product (DLMF §23.2(ii)): convergence,
+parity, analyticity, zeros and poles, and the relations with `℘`.
 
-Source references and common attribution are retained in
-`DLMF.Weierstrass.Basic`.
+## Main definitions
+
+* `weierstrassSigmaFactor`: the Weierstrass factor of `σ` at a lattice point.
+
+## Main results
+
+* `mem_lattice_iff`, `span_two_ω₂_two_ω₃`, `span_two_ω₂_two_ω₁`: the lattice and alternative
+  generators (DLMF §23.2(i)).
+* `generators_iff`: DLMF 23.2.2–23.2.3, the criterion for `2χ₁, 2χ₃` to generate `𝕃`.
+* `hasSumLocallyUniformly_weierstrassZeta`, `multipliable_weierstrassSigma`: convergence of the
+  series for `ζ` and the product for `σ`.
+* `weierstrassZeta_neg`, `weierstrassSigma_neg`: `ζ` and `σ` are odd.
+* `differentiable_weierstrassSigma`, `weierstrassSigma_eq_zero_iff`,
+  `deriv_weierstrassSigma_ne_zero`: `σ` is entire with simple zeros exactly at the lattice points.
+* `hasDerivAt_weierstrassZeta`: DLMF 23.2.7, `℘ = -ζ'` off the lattice.
+* `weierstrassZeta_eq_deriv_div`: DLMF 23.2.8, `ζ = σ'/σ` off the lattice.
+* `analyticAt_weierstrassZeta_sub`, `analyticAt_weierstrassP_sub`: the poles of `ζ` are simple
+  with residue `1`, those of `℘` double with residue `0`.
+* `exists_weierstrassSigma_add_mem`: quasi-periodicity of `σ` along lattice vectors with an
+  unspecified constant.
+
+## Implementation notes
+
+At lattice points the summands of the `ζ` series take Lean's totalized values.
+
+## References
+
+Source references are collected in `DLMF.Weierstrass.Basic`.
 -/
 
 @[expose] public section
@@ -86,14 +114,14 @@ theorem span_two_ω₂_two_ω₁ :
         (Submodule.subset_span (by simp))
 
 /-- Integer coordinates with respect to `2ω₁, 2ω₃` are unique. -/
-lemma p23R1_int_coord_eq_zero {m n : ℤ} (h : (m : ℂ) * (2 * H.ω₁) + n * (2 * H.ω₃) = 0) :
+private lemma int_coords_eq_zero {m n : ℤ} (h : (m : ℂ) * (2 * H.ω₁) + n * (2 * H.ω₃) = 0) :
     m = 0 ∧ n = 0 := by
   have := LinearIndependent.pair_iff.mp H.linearIndependent_two_mul (m : ℝ) (n : ℝ)
     (by simpa [Complex.real_smul] using h)
   exact_mod_cast this
 
 /-- `ℑ((cω₁ + dω₃)/(aω₁ + bω₃)) = (ad - bc) ℑτ / |a + bτ|²`. -/
-lemma p23R1_im_div (a b c d : ℤ) :
+private lemma im_lattice_div_eq (a b c d : ℤ) :
     ((c * H.ω₁ + d * H.ω₃) / (a * H.ω₁ + b * H.ω₃)).im =
       ((a * d - b * c : ℤ) : ℝ) * H.tau.im / normSq (a + b * H.tau) := by
   have h1 := H.ω₁_ne_zero
@@ -119,7 +147,7 @@ theorem generators_iff (a b c d : ℤ) :
       0 < ((c * H.ω₁ + d * H.ω₃) / (a * H.ω₁ + b * H.ω₃)).im) ↔ a * d - b * c = 1 := by
   have hlat : H.lattice = Submodule.span ℤ {2 * H.ω₁, 2 * H.ω₃} := rfl
   have htau := H.tau_im_pos
-  rw [H.p23R1_im_div, hlat]
+  rw [H.im_lattice_div_eq, hlat]
   constructor
   · rintro ⟨hspan, hpos⟩
     have m1 : 2 * H.ω₁ ∈ Submodule.span ℤ {2 * (a * H.ω₁ + b * H.ω₃), 2 * (c * H.ω₁ + d * H.ω₃)} :=
@@ -129,9 +157,9 @@ theorem generators_iff (a b c d : ℤ) :
     obtain ⟨p, q, hpq⟩ := Submodule.mem_span_pair.mp m1
     obtain ⟨r, s, hrs⟩ := Submodule.mem_span_pair.mp m3
     simp only [zsmul_eq_mul] at hpq hrs
-    obtain ⟨e1, e2⟩ := H.p23R1_int_coord_eq_zero (m := p * a + q * c - 1) (n := p * b + q * d)
+    obtain ⟨e1, e2⟩ := H.int_coords_eq_zero (m := p * a + q * c - 1) (n := p * b + q * d)
       (by push_cast; linear_combination hpq)
-    obtain ⟨e3, e4⟩ := H.p23R1_int_coord_eq_zero (m := r * a + s * c) (n := r * b + s * d - 1)
+    obtain ⟨e3, e4⟩ := H.int_coords_eq_zero (m := r * a + s * c) (n := r * b + s * d - 1)
       (by push_cast; linear_combination hrs)
     have hdet : (p * s - q * r) * (a * d - b * c) = 1 := by
       linear_combination (r * b + s * d) * e1 + e4 - (r * a + s * c) * e2 + 0 * e3
@@ -179,21 +207,21 @@ end HalfPeriods
 /-! ### The functions `ζ` and `σ` (§23.2(ii)) -/
 
 /-- The summand of the zeta series is `z²/(w²(z - w))`. -/
-theorem wp23_zeta_summand (z w : ℂ) (hw : w ≠ 0) (hz : z ≠ w) :
+theorem weierstrassZeta_summand_eq (z w : ℂ) (hw : w ≠ 0) (hz : z ≠ w) :
     1 / (z - w) + 1 / w + z / w ^ 2 = z ^ 2 / (w ^ 2 * (z - w)) := by
   have : z - w ≠ 0 := sub_ne_zero.mpr hz
   field_simp
   ring
 
 /-- Locally uniform bound for the zeta summand: `‖z²/(w²(z-w))‖ ≤ 2r²‖w‖⁻³`. -/
-lemma wp23_zeta_bound (r : ℝ) (hr : 0 < r) (s : ℂ) (hs : ‖s‖ < r) (l : ℂ) (h : 2 * r ≤ ‖l‖) :
+private lemma norm_weierstrassZeta_summand_le (r : ℝ) (hr : 0 < r) (s : ℂ) (hs : ‖s‖ < r) (l : ℂ) (h : 2 * r ≤ ‖l‖) :
     ‖1 / (s - l) + 1 / l + s / l ^ 2‖ ≤ 2 * r ^ 2 * ‖l‖ ^ (-3 : ℝ) := by
   have hl : 0 < ‖l‖ := by linarith
   have hl0 : l ≠ 0 := norm_pos_iff.mp hl
   have hsl : s ≠ l := by rintro rfl; linarith
   have hsl' : ‖l‖ / 2 ≤ ‖s - l‖ := by
     rw [norm_sub_rev]; exact .trans (by linarith) (norm_sub_norm_le l s)
-  rw [wp23_zeta_summand s l hl0 hsl, norm_div, norm_mul, norm_pow, norm_pow,
+  rw [weierstrassZeta_summand_eq s l hl0 hsl, norm_div, norm_mul, norm_pow, norm_pow,
     Real.rpow_neg hl.le]
   have h1 : ‖s‖ ^ 2 ≤ r ^ 2 := pow_le_pow_left₀ (norm_nonneg _) hs.le 2
   calc ‖s‖ ^ 2 / (‖l‖ ^ 2 * ‖s - l‖) ≤ r ^ 2 / (‖l‖ ^ 2 * (‖l‖ / 2)) := by
@@ -241,15 +269,14 @@ theorem hasSumLocallyUniformly_weierstrassZeta (L : PeriodPair) :
     (fun _ _ ↦ (ZLattice.summable_norm_rpow _ _ (by simp; norm_num)).mul_left _) fun r hr ↦
     Filter.eventually_atTop.mpr ⟨2 * r, ?_⟩
   rintro _ h s hs l rfl
-  exact wp23_zeta_bound r hr s hs l h
+  exact norm_weierstrassZeta_summand_le r hr s hs l h
 
-section p23R1Sigma
-
+section Sigma
 open Filter Topology
 
 /-- The Weierstrass elementary factor bound: `‖(1 - u)e^{u + u²/2} - 1‖ ≤ 2‖u‖³` for
 `‖u‖ ≤ 1/2`. -/
-lemma p23R1_norm_elementary_factor_sub_one_le {u : ℂ} (hu : ‖u‖ ≤ 1 / 2) :
+private lemma norm_elementary_factor_sub_one_le {u : ℂ} (hu : ‖u‖ ≤ 1 / 2) :
     ‖(1 - u) * cexp (u + u ^ 2 / 2) - 1‖ ≤ 2 * ‖u‖ ^ 3 := by
   have hu1 : ‖-u‖ < 1 := by rw [norm_neg]; linarith
   have h1u : (1 : ℂ) - u ≠ 0 := by
@@ -283,18 +310,18 @@ lemma p23R1_norm_elementary_factor_sub_one_le {u : ℂ} (hu : ‖u‖ ≤ 1 / 2)
     _ ≤ 2 * ‖u‖ ^ 3 := by nlinarith [pow_nonneg (norm_nonneg u) 3]
 
 /-- The Weierstrass factor of `σ` at the lattice point `l`. -/
-noncomputable def p23R1_sigmaFactor (l z : ℂ) : ℂ := (1 - z / l) * cexp (z / l + z ^ 2 / (2 * l ^ 2))
+noncomputable def weierstrassSigmaFactor (l z : ℂ) : ℂ := (1 - z / l) * cexp (z / l + z ^ 2 / (2 * l ^ 2))
 
 /-- Bound for the Weierstrass factor of `σ` on `‖z‖ < r` when `‖l‖ ≥ 2r`. -/
-lemma p23R1_norm_sigmaFactor_sub_one_le {r : ℝ} {l z : ℂ} (hz : ‖z‖ < r) (hl : 2 * r ≤ ‖l‖) :
-    ‖p23R1_sigmaFactor l z - 1‖ ≤ 2 * r ^ 3 * ‖l‖ ^ (-3 : ℝ) := by
+private lemma norm_weierstrassSigmaFactor_sub_one_le {r : ℝ} {l z : ℂ} (hz : ‖z‖ < r) (hl : 2 * r ≤ ‖l‖) :
+    ‖weierstrassSigmaFactor l z - 1‖ ≤ 2 * r ^ 3 * ‖l‖ ^ (-3 : ℝ) := by
   have hr : 0 < r := lt_of_le_of_lt (norm_nonneg z) hz
   have hl0 : 0 < ‖l‖ := by linarith
   have hu : ‖z / l‖ ≤ 1 / 2 := by
     rw [norm_div, div_le_iff₀ hl0]; linarith
-  have h := p23R1_norm_elementary_factor_sub_one_le hu
-  have he : p23R1_sigmaFactor l z = (1 - z / l) * cexp (z / l + (z / l) ^ 2 / 2) := by
-    simp only [p23R1_sigmaFactor]; congr 3; ring
+  have h := norm_elementary_factor_sub_one_le hu
+  have he : weierstrassSigmaFactor l z = (1 - z / l) * cexp (z / l + (z / l) ^ 2 / 2) := by
+    simp only [weierstrassSigmaFactor]; congr 3; ring
   rw [he]
   refine h.trans ?_
   rw [norm_div, div_pow, Real.rpow_neg hl0.le, show (3 : ℝ) = ((3 : ℕ) : ℝ) by norm_num,
@@ -302,7 +329,7 @@ lemma p23R1_norm_sigmaFactor_sub_one_le {r : ℝ} {l z : ℂ} (hz : ‖z‖ < r)
   gcongr
 
 /-- All but finitely many lattice points have norm at least `R`. -/
-lemma p23R1_eventually_le_norm (L : PeriodPair) (R : ℝ) :
+private lemma eventually_le_norm_lattice (L : PeriodPair) (R : ℝ) :
     ∀ᶠ l : L.lattice in cofinite, R ≤ ‖(l : ℂ)‖ := by
   refine (isCompact_iff_finite.mp (isCompact_closedBall (0 : L.lattice) R)).subset ?_
   intro l hl
@@ -311,36 +338,36 @@ lemma p23R1_eventually_le_norm (L : PeriodPair) (R : ℝ) :
   exact (not_le.mp hl').le
 
 /-- The majorant `2r³‖l‖⁻³` is summable over the lattice. -/
-lemma p23R1_summable_bound (L : PeriodPair) (r : ℝ) :
+private lemma summable_mul_norm_zpow_neg_three (L : PeriodPair) (r : ℝ) :
     Summable fun l : L.lattice => 2 * r ^ 3 * ‖(l : ℂ)‖ ^ (-3 : ℝ) :=
   (ZLattice.summable_norm_rpow _ _ (by simp; norm_num)).mul_left _
 
 /-- The product for `σ` converges locally uniformly on every ball. -/
-lemma p23R1_hasProdLocallyUniformlyOn_sigma (L : PeriodPair) {r : ℝ} :
-    HasProdLocallyUniformlyOn (fun (l : L.lattice) z => p23R1_sigmaFactor l z)
-      (fun z => ∏' l : L.lattice, p23R1_sigmaFactor l z) (Metric.ball 0 r) := by
+private lemma hasProdLocallyUniformlyOn_weierstrassSigmaFactor (L : PeriodPair) {r : ℝ} :
+    HasProdLocallyUniformlyOn (fun (l : L.lattice) z => weierstrassSigmaFactor l z)
+      (fun z => ∏' l : L.lattice, weierstrassSigmaFactor l z) (Metric.ball 0 r) := by
   have h := Summable.hasProdLocallyUniformlyOn_one_add (f := fun (l : L.lattice) z =>
-      p23R1_sigmaFactor l z - 1) (K := Metric.ball (0 : ℂ) r) Metric.isOpen_ball
-    (p23R1_summable_bound L r) ?_ ?_
+      weierstrassSigmaFactor l z - 1) (K := Metric.ball (0 : ℂ) r) Metric.isOpen_ball
+    (summable_mul_norm_zpow_neg_three L r) ?_ ?_
   · simpa using h
-  · filter_upwards [p23R1_eventually_le_norm L (2 * r)] with l hl z hz
-    exact p23R1_norm_sigmaFactor_sub_one_le (by simpa using hz) hl
+  · filter_upwards [eventually_le_norm_lattice L (2 * r)] with l hl z hz
+    exact norm_weierstrassSigmaFactor_sub_one_le (by simpa using hz) hl
   · intro l
-    exact (by unfold p23R1_sigmaFactor; fun_prop : Continuous fun z : ℂ =>
-      p23R1_sigmaFactor l z - 1).continuousOn
+    exact (by unfold weierstrassSigmaFactor; fun_prop : Continuous fun z : ℂ =>
+      weierstrassSigmaFactor l z - 1).continuousOn
 
 /-- `∑ ‖E_l(z) - 1‖` converges for the Weierstrass factors `E_l` of `σ`. -/
-lemma p23R1_summable_norm_sigmaFactor (L : PeriodPair) (z : ℂ) :
-    Summable fun l : L.lattice => ‖p23R1_sigmaFactor l z - 1‖ := by
-  refine Summable.of_norm_bounded_eventually (p23R1_summable_bound L (‖z‖ + 1)) ?_
-  filter_upwards [p23R1_eventually_le_norm L (2 * (‖z‖ + 1))] with l hl
+private lemma summable_norm_weierstrassSigmaFactor_sub_one (L : PeriodPair) (z : ℂ) :
+    Summable fun l : L.lattice => ‖weierstrassSigmaFactor l z - 1‖ := by
+  refine Summable.of_norm_bounded_eventually (summable_mul_norm_zpow_neg_three L (‖z‖ + 1)) ?_
+  filter_upwards [eventually_le_norm_lattice L (2 * (‖z‖ + 1))] with l hl
   rw [norm_norm]
-  exact p23R1_norm_sigmaFactor_sub_one_le (by linarith) hl
+  exact norm_weierstrassSigmaFactor_sub_one_le (by linarith) hl
 
 /-- The Weierstrass factors of `σ` do not vanish off the lattice. -/
-lemma p23R1_sigmaFactor_ne_zero (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice)
-    (l : L.lattice) : p23R1_sigmaFactor l z ≠ 0 := by
-  unfold p23R1_sigmaFactor
+private lemma weierstrassSigmaFactor_ne_zero (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice)
+    (l : L.lattice) : weierstrassSigmaFactor l z ≠ 0 := by
+  unfold weierstrassSigmaFactor
   refine mul_ne_zero ?_ (Complex.exp_ne_zero _)
   by_cases hl : (l : ℂ) = 0
   · simp [hl]
@@ -353,13 +380,13 @@ lemma p23R1_sigmaFactor_ne_zero (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice
 
 /-- The logarithmic derivative of a Weierstrass factor of `σ` is a summand of `ζ` (the `l = 0`
 summand `1/z` of `ζ` is accounted for separately). -/
-lemma p23R1_logDeriv_sigmaFactor (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice)
+private lemma logDeriv_weierstrassSigmaFactor (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice)
     (l : L.lattice) :
-    logDeriv (p23R1_sigmaFactor l) x =
+    logDeriv (weierstrassSigmaFactor l) x =
       (1 / (x - l) + 1 / l + x / l ^ 2) - if (l : ℂ) = 0 then 1 / x else 0 := by
   by_cases hl : (l : ℂ) = 0
-  · have : p23R1_sigmaFactor l = fun _ => 1 := by
-      funext z; simp [p23R1_sigmaFactor, hl]
+  · have : weierstrassSigmaFactor l = fun _ => 1 := by
+      funext z; simp [weierstrassSigmaFactor, hl]
     rw [this]
     simp [hl, logDeriv]
   · have hxl : x - l ≠ 0 := sub_ne_zero.mpr fun h => hx (h ▸ l.2)
@@ -370,7 +397,7 @@ lemma p23R1_logDeriv_sigmaFactor (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattic
         ((hasDerivAt_pow 2 x).div_const (2 * (l : ℂ) ^ 2))
       convert this using 1; simp
     have hd := h1.fun_mul h2.cexp
-    have hf : p23R1_sigmaFactor l = fun z => (1 - z / l) * cexp (z / l + z ^ 2 / (2 * l ^ 2)) := rfl
+    have hf : weierstrassSigmaFactor l = fun z => (1 - z / l) * cexp (z / l + z ^ 2 / (2 * l ^ 2)) := rfl
     rw [logDeriv_apply, hf, hd.deriv]
     simp only [hl, ite_false, sub_zero]
     have he := Complex.exp_ne_zero (x / l + x ^ 2 / (2 * l ^ 2))
@@ -381,18 +408,17 @@ lemma p23R1_logDeriv_sigmaFactor (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattic
     field_simp
     ring
 
-end p23R1Sigma
-
+end Sigma
 /-- The double product for `σ` converges (unconditionally) for every `z` (DLMF §23.2(ii)). -/
 @[dlmf 23.2.ii]
 theorem multipliable_weierstrassSigma (L : PeriodPair) (z : ℂ) :
     Multipliable fun l : L.lattice ↦ (1 - z / l) * cexp (z / l + z ^ 2 / (2 * l ^ 2)) :=
-  ((p23R1_hasProdLocallyUniformlyOn_sigma L (r := ‖z‖ + 1)).hasProd
+  ((hasProdLocallyUniformlyOn_weierstrassSigmaFactor L (r := ‖z‖ + 1)).hasProd
     (by simp)).multipliable
 
 /-- Differentiability throughout the specified domain: `DifferentiableOn ℂ (fun z : ℂ ↦ 1 / (z -
 l) + 1 / l + z / l ^ 2) L.latticeᶜ`. -/
-lemma wp23_differentiableOn_zeta_summand (L : PeriodPair) (l : L.lattice) :
+private lemma differentiableOn_weierstrassZeta_summand (L : PeriodPair) (l : L.lattice) :
     DifferentiableOn ℂ (fun z : ℂ ↦ 1 / (z - l) + 1 / l + z / l ^ 2) L.latticeᶜ := by
   intro z hz
   have : z - l ≠ 0 := sub_ne_zero.mpr fun h => hz (h ▸ l.2)
@@ -406,7 +432,7 @@ theorem differentiableOn_weierstrassZeta (L : PeriodPair) :
     DifferentiableOn ℂ (weierstrassZeta L) L.latticeᶜ :=
   TendstoLocallyUniformlyOn.differentiableOn
     (hasSumLocallyUniformly_weierstrassZeta L).hasSumLocallyUniformlyOn
-    (.of_forall fun _ ↦ .fun_sum fun l _ ↦ wp23_differentiableOn_zeta_summand L l)
+    (.of_forall fun _ ↦ .fun_sum fun l _ ↦ differentiableOn_weierstrassZeta_summand L l)
     L.isClosed_lattice.isOpen_compl
 
 /-- DLMF 23.2.7: `℘(z) = -ζ'(z)` for `z ∉ 𝕃`. -/
@@ -421,7 +447,7 @@ theorem hasDerivAt_weierstrassZeta (L : PeriodPair) {z : ℂ} (hz : z ∉ L.latt
       (weierstrassZeta L) Filter.atTop L.latticeᶜ :=
     (hasSumLocallyUniformly_weierstrassZeta L).hasSumLocallyUniformlyOn
   have hD := (TendstoLocallyUniformlyOn.deriv hT (.of_forall fun s ↦ .fun_sum fun l _ ↦
-    wp23_differentiableOn_zeta_summand L l) hU).tendsto_at hz
+    differentiableOn_weierstrassZeta_summand L l) hU).tendsto_at hz
   have hS : HasSum (fun l : L.lattice ↦ -(1 / (z - l) ^ 2 - 1 / l ^ 2)) (-℘[L] z) :=
     (L.hasSum_weierstrassP z).neg
   refine (tendsto_nhds_unique hD ?_).symm
@@ -430,7 +456,7 @@ theorem hasDerivAt_weierstrassZeta (L : PeriodPair) {z : ℂ} (hz : z ∉ L.latt
   · refine hS'.congr' (Filter.Eventually.of_forall fun s => ?_)
     simp only [Function.comp_apply]
     rw [deriv_fun_sum fun l _ =>
-      (wp23_differentiableOn_zeta_summand L l).differentiableAt (hU.mem_nhds hz)]
+      (differentiableOn_weierstrassZeta_summand L l).differentiableAt (hU.mem_nhds hz)]
     refine Finset.sum_congr rfl fun l _ => ?_
     have hzl : z - l ≠ 0 := sub_ne_zero.mpr fun h => hz (h ▸ l.2)
     have : HasDerivAt (fun w : ℂ ↦ 1 / (w - l) + 1 / l + w / l ^ 2)
@@ -449,12 +475,12 @@ theorem differentiable_weierstrassSigma (L : PeriodPair) :
   intro z
   have hU : IsOpen (Metric.ball (0 : ℂ) (‖z‖ + 1)) := Metric.isOpen_ball
   have hz : z ∈ Metric.ball (0 : ℂ) (‖z‖ + 1) := by simp
-  have hd : DifferentiableOn ℂ (fun z => ∏' l : L.lattice, p23R1_sigmaFactor l z)
+  have hd : DifferentiableOn ℂ (fun z => ∏' l : L.lattice, weierstrassSigmaFactor l z)
       (Metric.ball 0 (‖z‖ + 1)) := by
-    refine (p23R1_hasProdLocallyUniformlyOn_sigma L).differentiableOn
+    refine (hasProdLocallyUniformlyOn_weierstrassSigmaFactor L).differentiableOn
       (.of_forall fun s => ?_) hU
     refine DifferentiableOn.fun_finsetProd fun l _ => ?_
-    exact (by unfold p23R1_sigmaFactor; fun_prop : Differentiable ℂ (p23R1_sigmaFactor l))
+    exact (by unfold weierstrassSigmaFactor; fun_prop : Differentiable ℂ (weierstrassSigmaFactor l))
       |>.differentiableOn
   exact (differentiableAt_id.mul (hd.differentiableAt (hU.mem_nhds hz)))
 
@@ -465,9 +491,9 @@ theorem weierstrassSigma_eq_zero_iff (L : PeriodPair) {z : ℂ} :
   refine ⟨fun h => ?_, weierstrassSigma_eq_zero_of_mem L⟩
   by_contra hz
   have hz0 : z ≠ 0 := fun h0 => hz (h0 ▸ zero_mem _)
-  have hne := tprod_one_add_ne_zero_of_summable (f := fun l : L.lattice => p23R1_sigmaFactor l z - 1)
-    (fun l => by simpa using p23R1_sigmaFactor_ne_zero L hz l)
-    (p23R1_summable_norm_sigmaFactor L z)
+  have hne := tprod_one_add_ne_zero_of_summable (f := fun l : L.lattice => weierstrassSigmaFactor l z - 1)
+    (fun l => by simpa using weierstrassSigmaFactor_ne_zero L hz l)
+    (summable_norm_weierstrassSigmaFactor_sub_one L z)
   simp only [add_sub_cancel] at hne
   exact mul_ne_zero hz0 hne h
 
@@ -479,37 +505,37 @@ theorem weierstrassZeta_eq_deriv_div (L : PeriodPair) {z : ℂ} (hz : z ∉ L.la
   set U := Metric.ball (0 : ℂ) (‖z‖ + 1)
   have hU : IsOpen U := Metric.isOpen_ball
   have hzU : z ∈ U := by simp [U]
-  have hfd : ∀ l : L.lattice, Differentiable ℂ (p23R1_sigmaFactor l) := fun l => by
-    unfold p23R1_sigmaFactor; fun_prop
-  have hprod := p23R1_hasProdLocallyUniformlyOn_sigma L (r := ‖z‖ + 1)
-  have hP0 : ∏' l : L.lattice, p23R1_sigmaFactor l z ≠ 0 := by
+  have hfd : ∀ l : L.lattice, Differentiable ℂ (weierstrassSigmaFactor l) := fun l => by
+    unfold weierstrassSigmaFactor; fun_prop
+  have hprod := hasProdLocallyUniformlyOn_weierstrassSigmaFactor L (r := ‖z‖ + 1)
+  have hP0 : ∏' l : L.lattice, weierstrassSigmaFactor l z ≠ 0 := by
     have := tprod_one_add_ne_zero_of_summable
-      (f := fun l : L.lattice => p23R1_sigmaFactor l z - 1)
-      (fun l => by simpa using p23R1_sigmaFactor_ne_zero L hz l)
-      (p23R1_summable_norm_sigmaFactor L z)
+      (f := fun l : L.lattice => weierstrassSigmaFactor l z - 1)
+      (fun l => by simpa using weierstrassSigmaFactor_ne_zero L hz l)
+      (summable_norm_weierstrassSigmaFactor_sub_one L z)
     simpa using this
   -- the zeta series and the log-derivative series
   have hζ : HasSum (fun l : L.lattice => 1 / (z - l) + 1 / l + z / l ^ 2) (weierstrassZeta L z) :=
     (hasSumLocallyUniformly_weierstrassZeta L).hasSum
-  have hlog : HasSum (fun l : L.lattice => logDeriv (p23R1_sigmaFactor l) z)
+  have hlog : HasSum (fun l : L.lattice => logDeriv (weierstrassSigmaFactor l) z)
       (weierstrassZeta L z - 1 / z) := by
     have h0 := hasSum_ite_eq (0 : L.lattice) (1 / z)
     convert hζ.sub h0 using 1
     funext l
-    rw [p23R1_logDeriv_sigmaFactor L hz l]
+    rw [logDeriv_weierstrassSigmaFactor L hz l]
     congr 1
     by_cases hl : l = 0
     · subst hl; simp
     · have : (l : ℂ) ≠ 0 := by simpa using hl
       simp [hl, this]
-  have hPd : DifferentiableOn ℂ (fun x => ∏' l : L.lattice, p23R1_sigmaFactor l x) U :=
+  have hPd : DifferentiableOn ℂ (fun x => ∏' l : L.lattice, weierstrassSigmaFactor l x) U :=
     hprod.differentiableOn (.of_forall fun s => DifferentiableOn.fun_finsetProd fun l _ =>
       (hfd l).differentiableOn) hU
-  have hLP := logDeriv_tprod_eq_tsum hU hzU (fun l => p23R1_sigmaFactor_ne_zero L hz l)
+  have hLP := logDeriv_tprod_eq_tsum hU hzU (fun l => weierstrassSigmaFactor_ne_zero L hz l)
     (fun l => (hfd l).differentiableOn) hlog.summable ⟨_, hprod⟩ hP0
-  have hσ : weierstrassSigma L = fun x => x * ∏' l : L.lattice, p23R1_sigmaFactor l x := rfl
+  have hσ : weierstrassSigma L = fun x => x * ∏' l : L.lattice, weierstrassSigmaFactor l x := rfl
   have hmul : logDeriv (weierstrassSigma L) z = logDeriv id z +
-      logDeriv (fun x => ∏' l : L.lattice, p23R1_sigmaFactor l x) z := by
+      logDeriv (fun x => ∏' l : L.lattice, weierstrassSigmaFactor l x) z := by
     rw [hσ]
     exact logDeriv_mul (f := id) z hz0 hP0 differentiableAt_id
       (hPd.differentiableAt (hU.mem_nhds hzU))
@@ -545,7 +571,7 @@ theorem analyticAt_weierstrassZeta_sub (L : PeriodPair) {w : ℂ} (hw : w ∈ L.
     have hlw : (l : ℂ) ≠ w := by
       rintro hl; rw [hl] at h; linarith [le_max_right (2 * r) (‖w‖ + 1)]
     simp only [hg, hlw, ite_false]
-    exact wp23_zeta_bound r hr s hs l ((le_max_left _ _).trans h)
+    exact norm_weierstrassZeta_summand_le r hr s hs l ((le_max_left _ _).trans h)
   have hdiff : DifferentiableOn ℂ (∑' l, g l ·) ((L.lattice : Set ℂ) \ {w})ᶜ := by
     refine TendstoLocallyUniformlyOn.differentiableOn hloc.hasSumLocallyUniformlyOn
       (.of_forall fun _ ↦ .fun_sum fun l _ ↦ ?_) hU
@@ -584,7 +610,7 @@ theorem analyticAt_weierstrassP_sub (L : PeriodPair) {w : ℂ} (hw : w ∈ L.lat
   exact (L.analyticAt_weierstrassPExcept w).sub analyticAt_const
 
 /-- The complement of a period lattice is preconnected. -/
-theorem wp23_isPreconnected_compl_lattice (L : PeriodPair) :
+theorem isPreconnected_compl_lattice (L : PeriodPair) :
     IsPreconnected (L.latticeᶜ : Set ℂ) := by
   have hc : (L.lattice : Set ℂ).Countable := by
     have : Countable L.lattice := L.latticeEquivProd.toEquiv.injective.countable
@@ -593,7 +619,7 @@ theorem wp23_isPreconnected_compl_lattice (L : PeriodPair) :
     hc).isPreconnected
 
 /-- `ζ(z + w) - ζ(z)` is independent of `z ∉ 𝕃` for `w ∈ 𝕃`. -/
-lemma wp23_zeta_add_sub_const (L : PeriodPair) {w : ℂ} (hw : w ∈ L.lattice) {z₁ z₂ : ℂ}
+lemma weierstrassZeta_add_sub_eq_of_mem (L : PeriodPair) {w : ℂ} (hw : w ∈ L.lattice) {z₁ z₂ : ℂ}
     (h₁ : z₁ ∉ L.lattice) (h₂ : z₂ ∉ L.lattice) :
     weierstrassZeta L (z₁ + w) - weierstrassZeta L z₁ =
       weierstrassZeta L (z₂ + w) - weierstrassZeta L z₂ := by
@@ -607,36 +633,36 @@ lemma wp23_zeta_add_sub_const (L : PeriodPair) {w : ℂ} (hw : w ∈ L.lattice) 
     have h2 := hasDerivAt_weierstrassZeta L hz
     convert h1.sub h2 using 1
     rw [L.weierstrassP_add_coe z ⟨w, hw⟩]; ring
-  refine hU.is_const_of_deriv_eq_zero (wp23_isPreconnected_compl_lattice L)
+  refine hU.is_const_of_deriv_eq_zero (isPreconnected_compl_lattice L)
     (fun z hz => (hD z hz).differentiableAt.differentiableWithinAt)
     (fun z hz => (hD z hz).deriv) h₁ h₂
 
 /-- `σ'(0) = 1`. -/
-theorem p23R1_hasDerivAt_weierstrassSigma_zero (L : PeriodPair) :
+theorem hasDerivAt_weierstrassSigma_zero (L : PeriodPair) :
     HasDerivAt (weierstrassSigma L) 1 0 := by
   have hU : IsOpen (Metric.ball (0 : ℂ) 1) := Metric.isOpen_ball
-  have hPd : DifferentiableOn ℂ (fun x => ∏' l : L.lattice, p23R1_sigmaFactor l x)
+  have hPd : DifferentiableOn ℂ (fun x => ∏' l : L.lattice, weierstrassSigmaFactor l x)
       (Metric.ball 0 1) :=
-    (p23R1_hasProdLocallyUniformlyOn_sigma L).differentiableOn
+    (hasProdLocallyUniformlyOn_weierstrassSigmaFactor L).differentiableOn
       (.of_forall fun s => DifferentiableOn.fun_finsetProd fun l _ =>
-        (by unfold p23R1_sigmaFactor; fun_prop : Differentiable ℂ (p23R1_sigmaFactor l))
+        (by unfold weierstrassSigmaFactor; fun_prop : Differentiable ℂ (weierstrassSigmaFactor l))
           |>.differentiableOn) hU
-  have hP0 : ∏' l : L.lattice, p23R1_sigmaFactor l 0 = 1 := by simp [p23R1_sigmaFactor]
+  have hP0 : ∏' l : L.lattice, weierstrassSigmaFactor l 0 = 1 := by simp [weierstrassSigmaFactor]
   have h := (hasDerivAt_id (0 : ℂ)).mul
     (hPd.differentiableAt (hU.mem_nhds (by simp))).hasDerivAt
-  have hσ : weierstrassSigma L = fun x => id x * ∏' l : L.lattice, p23R1_sigmaFactor l x := rfl
+  have hσ : weierstrassSigma L = fun x => id x * ∏' l : L.lattice, weierstrassSigmaFactor l x := rfl
   rw [hσ]
   convert h using 1
   simp [hP0]
 
 /-- `σ'(z) = ζ(z)σ(z)` off the lattice. -/
-lemma p23R1_deriv_weierstrassSigma_eq (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) :
+private lemma deriv_weierstrassSigma_eq_mul (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) :
     deriv (weierstrassSigma L) z = weierstrassZeta L z * weierstrassSigma L z := by
   have h := (weierstrassSigma_eq_zero_iff L).not.mpr hz
   rw [weierstrassZeta_eq_deriv_div L hz, div_mul_cancel₀ _ h]
 
 /-- Quasi-periodicity of `σ` along any lattice vector, with an unspecified nonzero constant. -/
-theorem p23R1_weierstrassSigma_add_mem (L : PeriodPair) {w : ℂ} (hw : w ∈ L.lattice) {z₀ : ℂ}
+theorem exists_weierstrassSigma_add_mem (L : PeriodPair) {w : ℂ} (hw : w ∈ L.lattice) {z₀ : ℂ}
     (hz₀ : z₀ ∉ L.lattice) : ∃ a : ℂ, a ≠ 0 ∧ ∀ z, weierstrassSigma L (z + w) =
       a * cexp ((weierstrassZeta L (z₀ + w) - weierstrassZeta L z₀) * z) * weierstrassSigma L z := by
   set c := weierstrassZeta L (z₀ + w) - weierstrassZeta L z₀ with hc
@@ -650,23 +676,23 @@ theorem p23R1_weierstrassSigma_add_mem (L : PeriodPair) {w : ℂ} (hw : w ∈ L.
   have hD : ∀ z ∈ (L.latticeᶜ : Set ℂ), HasDerivAt h 0 z := by
     intro z hz
     have hzc : weierstrassZeta L (z + w) = weierstrassZeta L z + c := by
-      have := wp23_zeta_add_sub_const L hw hz hz₀
+      have := weierstrassZeta_add_sub_eq_of_mem L hw hz hz₀
       rw [hc]; linear_combination this
     have h1 : HasDerivAt (fun z => weierstrassSigma L (z + w))
         ((weierstrassZeta L z + c) * weierstrassSigma L (z + w)) z := by
       have := (hσd (z + w)).hasDerivAt.comp_add_const z w
-      rwa [p23R1_deriv_weierstrassSigma_eq L (hshift z hz), hzc] at this
+      rwa [deriv_weierstrassSigma_eq_mul L (hshift z hz), hzc] at this
     have h2 : HasDerivAt (fun z => cexp (-(c * z))) (cexp (-(c * z)) * -c) z := by
       have := ((hasDerivAt_id z).const_mul c).neg.cexp
       simpa using this
     have h3 : HasDerivAt (weierstrassSigma L) (weierstrassZeta L z * weierstrassSigma L z) z := by
       have := (hσd z).hasDerivAt
-      rwa [p23R1_deriv_weierstrassSigma_eq L hz] at this
+      rwa [deriv_weierstrassSigma_eq_mul L hz] at this
     convert (h1.fun_mul h2).div h3 (hne z hz) using 1
     field_simp
     ring
   have hconst : ∀ z, z ∉ L.lattice → h z = h z₀ := fun z hz =>
-    hU.is_const_of_deriv_eq_zero (wp23_isPreconnected_compl_lattice L)
+    hU.is_const_of_deriv_eq_zero (isPreconnected_compl_lattice L)
       (fun y hy => (hD y hy).differentiableAt.differentiableWithinAt)
       (fun y hy => (hD y hy).deriv) hz hz₀
   refine ⟨h z₀, ?_, fun z => ?_⟩
@@ -687,7 +713,7 @@ theorem p23R1_weierstrassSigma_add_mem (L : PeriodPair) {w : ℂ} (hw : w ∈ L.
 theorem deriv_weierstrassSigma_ne_zero (L : PeriodPair) {z : ℂ} (hz : z ∈ L.lattice) :
     deriv (weierstrassSigma L) z ≠ 0 := by
   obtain ⟨z₀, hz₀⟩ : ∃ z₀, z₀ ∉ L.lattice := ⟨_, L.ω₁_div_two_notMem_lattice⟩
-  obtain ⟨a, ha, hfa⟩ := p23R1_weierstrassSigma_add_mem L hz hz₀
+  obtain ⟨a, ha, hfa⟩ := exists_weierstrassSigma_add_mem L hz hz₀
   set c := weierstrassZeta L (z₀ + z) - weierstrassZeta L z₀
   have h1 : HasDerivAt (fun y => weierstrassSigma L (y + z)) (deriv (weierstrassSigma L) z) 0 := by
     have := ((differentiable_weierstrassSigma L) (0 + z)).hasDerivAt.comp_add_const 0 z
@@ -695,7 +721,7 @@ theorem deriv_weierstrassSigma_ne_zero (L : PeriodPair) {z : ℂ} (hz : z ∈ L.
   have h2 : HasDerivAt (fun y => a * cexp (c * y) * weierstrassSigma L y) a 0 := by
     have he : HasDerivAt (fun y => cexp (c * y)) (cexp (c * 0) * c) 0 :=
       ((hasDerivAt_id (0 : ℂ)).const_mul c).cexp.congr_deriv (by simp)
-    convert ((he.const_mul a).mul (p23R1_hasDerivAt_weierstrassSigma_zero L)) using 1
+    convert ((he.const_mul a).mul (hasDerivAt_weierstrassSigma_zero L)) using 1
     simp [weierstrassSigma_eq_zero_of_mem L (zero_mem _)]
   rw [show (fun y => weierstrassSigma L (y + z)) = fun y => a * cexp (c * y) * weierstrassSigma L y
     from funext hfa] at h1

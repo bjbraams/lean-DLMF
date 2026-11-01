@@ -27,10 +27,32 @@ public import Mathlib.Tactic.NormNum.RealSqrt
 /-!
 # Painlevé equations and elementary Bäcklund maps in the DLMF normalization
 
-The solution predicates assert the existence of the required derivatives and the
-second-order equation on a domain. The six Painlevé families use the DLMF parameter
-normalizations. Elementary parameter and solution maps record the Bäcklund data;
-theorems proving that these maps transport solutions live in the theorem layer.
+The six Painlevé equations PI–PVI (DLMF §32.2) in the DLMF parameter normalizations, the
+equation `P'III`, and the Bäcklund maps `T^±` of PII (DLMF 32.7.2). That these maps transport
+solutions is shown in `DLMF.Painleve.BacklundDLMF`.
+
+## Main definitions
+
+* `IsODE2SolutionOn`: `w'' = F(z, w, w')` on `U` (DLMF 32.2.7).
+* `painleveIRhs`, `painleveIIRhs`, `painleveIIIRhs`, `painleveIVRhs`, `painleveVRhs`,
+  `painleveVIRhs`: the right-hand sides of DLMF 32.2.1–32.2.6, as functions of the jet
+  `(z, w, w')`.
+* `IsPainleveIOn`, `IsPainleveIIOn`, `IsPainleveIIIOn`, `IsPainleveIVOn`, `IsPainleveVOn`,
+  `IsPainleveVIOn`: solutions of PI–PVI on a set.
+* `painleveIIIPrimeRhs`, `IsPainleveIIIPrimeOn`: the equation `P'III` (DLMF 32.2.9).
+* `painleveIITPlus`, `painleveIITMinus`: the Bäcklund maps `T^±` of DLMF 32.7.2.
+
+## Main results
+
+* `isODE2SolutionOn_of_hasDerivAt`: a solution from an explicit first-order pair.
+
+## Implementation notes
+
+`IsODE2SolutionOn` requires genuine differentiability of `w` and of `w'` at every point of
+`U`, so totalized derivatives cannot make a nonsolution satisfy the equation; statements use
+it on open sets. For PIII–PVI and `P'III` the predicate also requires that `U` avoids the
+points where DLMF divides (`z = 0`, `z = 1`, `w = 0`, `w = 1`, `w = z`), so the totalized
+divisions `x / 0 = 0` never enter.
 -/
 
 @[expose] public noncomputable section

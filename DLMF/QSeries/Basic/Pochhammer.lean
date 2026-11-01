@@ -10,7 +10,15 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
 public import Mathlib.Topology.Algebra.InfiniteSum.Basic
 
 /-!
-# Shifted factorials, Jackson integrals and q-gamma definitions
+# Shifted factorials, Jackson integrals and `q`-gamma
+
+## Main definitions
+
+* `qPochhammer`: the finite `q`-Pochhammer symbol `(a;q)_n` (DLMF 17.2.1).
+* `qPochhammerInf`: the infinite `q`-Pochhammer symbol `(a;q)_∞` (DLMF 17.2.4).
+* `jacksonIntegral`: Jackson's `q`-integral `∫₀^a f(t) d_q t` (DLMF 17.2.46, AAR §10.1).
+* `qGamma`: the `q`-gamma function `Γ_q(x) = (q;q)_∞/(q^x;q)_∞ · (1-q)^{1-x}`
+  (DLMF 5.18.4, AAR §10.3).
 -/
 
 @[expose] public noncomputable section

@@ -20,12 +20,26 @@ public import TauCeti.MeasureTheory.Integral.Bochner.Basic
 /-!
 # Tables of integral transforms (DLMF §1.14(vii), Tables 1.14.1–1.14.5)
 
-The Laplace entries live in the imported `DLMF.AlgebraicAnalytic.Transforms.LaplaceTable`;
-the Fourier and Mellin entries are proved here. Each row of DLMF Tables 1.14.1
-(Fourier transforms, 1.14.1), 1.14.2 (Fourier cosine transforms,
-1.14.9), 1.14.3 (Fourier sine transforms, 1.14.10), 1.14.4 (Laplace transforms, 1.14.17) and
-1.14.5 (Mellin transforms, 1.14.32) is a theorem here, tagged with the table ID. All rows were
-checked numerically (mpmath) before acquisition.
+Each row of DLMF Tables 1.14.1 (Fourier transforms, 1.14.1), 1.14.2 (Fourier cosine transforms,
+1.14.9), 1.14.3 (Fourier sine transforms, 1.14.10) and 1.14.5 (Mellin transforms, 1.14.32) is a
+theorem here, tagged with the table ID. The Laplace entries of Table 1.14.4 (1.14.17) are in the
+imported `DLMF.AlgebraicAnalytic.Transforms.LaplaceTable`.
+
+## Main results
+
+* `fourierTransform_indicator`, `fourierTransform_exp_neg_abs`, `fourierTransform_gaussian`,
+  `tendsto_fourierTransform_sin_sq`, `tendsto_fourierTransform_cos_sq` and the other
+  `fourierTransform_*` rows: Table 1.14.1.
+* `fourierCosTransform_indicator`, `fourierCosTransform_inv_sq_add_sq`,
+  `fourierCosTransform_gaussian`, `fourierCosTransform_log_sub_log` and the other
+  `fourierCosTransform_*` rows: Table 1.14.2.
+* `tendsto_fourierSinTransform_inv`, `fourierSinTransform_exp_neg`,
+  `fourierSinTransform_mul_gaussian`, `tendsto_fourierSinTransform_arctan_abel` and the other
+  `fourierSinTransform_*` rows: Table 1.14.3.
+* `mellin_indicator_lt`, `mellin_inv_one_add`, `mellin_arctan`, `mellin_poisson_cos`,
+  `mellin_poisson_sin` and the other `mellin_*` rows: Table 1.14.5.
+
+## Implementation notes
 
 Where the transform integral converges only conditionally (rows 1.14.1.10–11, 1.14.2.8–9,
 1.14.3.2, 1.14.3.3, 1.14.3.5, 1.14.3.12, 1.14.3.14) the statement is the limit of the integrals
@@ -40,7 +54,7 @@ Parameters are complex where DLMF writes `ℜa > 0` or `|ph a| < …`; principal
 * 1.14.2.11: DLMF writes `ln((a² + t²)/(b² + t²))` with `ℜa, ℜb > 0`. With the principal logarithm
   of the quotient the entry is false for some complex `a`, `b` (e.g. `a = 1 + 10i`, `b = 1 - 10i`,
   `x = 0.7`: the integral is `-2.3288i`, the table value `2.3365i`); it holds for
-  `ln(a² + t²) - ln(b² + t²)`, which is what is acquired (the two agree for real `a, b > 0`).
+  `ln(a² + t²) - ln(b² + t²)`, which is the form stated (the two agree for real `a, b > 0`).
 * 1.14.4.15: DLMF's condition `ℜ(s + a) > 0` is insufficient (`cosh(at)` is even in `a`; for
   `a = 1`, `s = ½` the integral diverges); the correct condition `ℜs > |ℜa|` is used.
 * 1.14.4.16, 1.14.4.17: DLMF gives `ℜs > 0`, which suffices for real `a`; for complex `a` the
@@ -48,16 +62,6 @@ Parameters are complex where DLMF writes `ℜa > 0` or `|ph a| < …`; principal
 * 1.14.5.3: DLMF gives `ℜs > 1`; the integral converges and the formula holds for `ℜs > 0`
   (stated so, stronger than DLMF). 1.14.5.7 needs `s ≠ 0` in Lean (`π tan(0)/0` is junk `0`, the
   limit value is `π²/2`).
-
-Proved: the interval-indicator Fourier and cosine transforms (1.14.1.2, 1.14.2.2),
-the two-sided exponential Fourier transform (1.14.1.3, from
-`TauCeti.integral_exp_mul_I_mul_exp_neg_mul_abs`), the Gaussian Fourier transform (1.14.1.9),
-the Gaussian and exponential cosine and sine entries and their first moments, the Dirichlet
-sine integral (1.14.3.2, from `TauCeti.Contour.tendsto_integral_sin_mul_div_atTop`),
-the elementary Laplace entries (in `LaplaceTable`), and the
-Mellin transform of `1/(1+x)` (1.14.5.5). The latter specializes
-`DLMF.Gamma.mellin_one_add_cpow_neg` and Mathlib’s Gamma reflection formula. Weighted
-moment integrability uses TauCeti's `ExpDecay` and even-extension adapter; other rows are admitted.
 -/
 
 @[expose] public noncomputable section
@@ -157,7 +161,7 @@ theorem fourierTransform_mul_exp_neg_abs {a : ℝ} (ha : 0 < a) (x : ℝ) :
     refine (integrable_abs_mul_exp_neg_abs ha).mono' (by fun_prop) ?_
     exact Filter.Eventually.of_forall fun t => by
       simp [Real.norm_eq_abs, Complex.norm_exp]
-  have hi := integral_eq_integral_Ioi_add_neg (g1e_integrable_mul_cexp hf x)
+  have hi := integral_eq_integral_Ioi_add_neg (integrable_mul_cexp_I_mul hf x)
   have he (t : ℝ) (ht : 0 < t) :
       ((t * Real.exp (-a * |t|) : ℂ) * cexp (I * x * t) +
         ((-t) * Real.exp (-a * |-t|) : ℂ) * cexp (I * x * (-t))) =
@@ -188,7 +192,7 @@ theorem fourierTransform_abs_mul_exp_neg_abs {a : ℝ} (ha : 0 < a) (x : ℝ) :
   have hf : Integrable (fun t : ℝ => (|t| * Real.exp (-a * |t|) : ℂ)) := by
     refine (integrable_abs_mul_exp_neg_abs ha).mono' (by fun_prop) ?_
     exact Filter.Eventually.of_forall fun t => by simp [Complex.norm_exp]
-  have hi := integral_eq_integral_Ioi_add_neg (g1e_integrable_mul_cexp hf x)
+  have hi := integral_eq_integral_Ioi_add_neg (integrable_mul_cexp_I_mul hf x)
   have he (t : ℝ) (ht : 0 < t) :
       ((|t| * Real.exp (-a * |t|) : ℂ) * cexp (I * x * t) +
         (|-t| * Real.exp (-a * |-t|) : ℂ) * cexp (I * x * (-t))) =
@@ -341,13 +345,12 @@ theorem fourierCosTransform_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} :
 
 /-- DLMF Table 1.14.2, row 7: `e^{-at²} ↦ (2a)^{-1/2} e^{-x²/(4a)}`, `ℜa > 0`, principal power. -/
 @[dlmf 1.14.T2]
-theorem fourierCosTransform_gaussian {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx : 0 < x) :
+theorem fourierCosTransform_gaussian {a : ℂ} (ha : 0 < a.re) {x : ℝ} :
     fourierCosTransform (fun t => cexp (-a * t ^ 2)) x =
       (2 * a) ^ (-(1 / 2 : ℂ)) * cexp (-x ^ 2 / (4 * a)) := by
-  clear hx
   have hf : Integrable (fun t : ℝ => cexp (-a * t ^ 2)) := by
     simpa using integrable_cexp_quadratic ha 0 0
-  have hi := integral_eq_integral_Ioi_add_neg (g1e_integrable_mul_cexp hf x)
+  have hi := integral_eq_integral_Ioi_add_neg (integrable_mul_cexp_I_mul hf x)
   have he (t : ℝ) : cexp (-a * t ^ 2) * cexp (I * x * t) +
       cexp (-a * (-t) ^ 2) * cexp (I * x * (-t)) =
       2 * (cexp (-a * t ^ 2) * (Real.cos (x * t) : ℂ)) := by
@@ -505,7 +508,7 @@ theorem fourierSinTransform_mul_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} :
 /-- DLMF Table 1.14.3, row 11: `t e^{-at²} ↦ (2a)^{-3/2} x e^{-x²/(4a)}`, `|ph a| < ½π`
 (that is, `ℜa > 0`), principal power. -/
 @[dlmf 1.14.T3]
-theorem fourierSinTransform_mul_gaussian {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx : 0 < x) :
+theorem fourierSinTransform_mul_gaussian {a : ℂ} (ha : 0 < a.re) {x : ℝ} :
     fourierSinTransform (fun t => t * cexp (-a * t ^ 2)) x =
       (2 * a) ^ (-(3 / 2 : ℂ)) * x * cexp (-x ^ 2 / (4 * a)) := by
   have ha0 : a ≠ 0 := fun h => by simp [h] at ha
@@ -545,7 +548,7 @@ theorem fourierSinTransform_mul_gaussian {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx
     integral_const_mul] at hi
   simp only [ofReal_zero, zero_pow, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
     Complex.exp_zero, mul_zero, Complex.sin_zero, mul_zero, sub_zero] at hi
-  have hc := fourierCosTransform_gaussian ha hx
+  have hc := fourierCosTransform_gaussian ha (x := x)
   unfold fourierCosTransform at hc
   simp_rw [← ofReal_mul, ← ofReal_cos, ← ofReal_sin] at hi
   have hp : (2 * a) ^ (-(3 / 2 : ℂ)) = (2 * a) ^ (-(1 / 2 : ℂ)) / (2 * a) := by

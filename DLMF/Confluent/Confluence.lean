@@ -8,11 +8,22 @@ module
 public import DLMF.Confluent.KummerProperties
 
 /-!
-# Confluence with a shifted large parameter
+# Confluence of Gauss's function with a shifted large parameter
 
-The Gauss upper parameter may have a fixed complex shift while its real part tends
-to infinity. Mathlib's dominated convergence theorem for series passes the
-coefficient limit through the sum, using a fixed positive Gauss majorant.
+This file proves the confluence limit `₂F₁(a, d + t; c; z/t) → M(a,c,z)` as the real parameter
+`t` tends to infinity, with a fixed complex shift `d` of the large upper parameter.
+
+## Main results
+
+* `tendsto_ordinaryHypergeometric_add_div_atTop`: Gauss confluence with a fixed complex shift
+  of the large real upper parameter.
+* `norm_poch_add_div_pow_le`: a fixed positive shifted Pochhammer symbol majorizes the
+  normalized coefficients for all sufficiently large parameters.
+
+## Implementation notes
+
+Mathlib's dominated convergence theorem for series passes the coefficient limit through the
+sum, using a fixed positive Gauss majorant.
 -/
 
 @[expose] public section

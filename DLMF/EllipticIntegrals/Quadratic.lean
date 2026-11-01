@@ -12,19 +12,49 @@ public import DLMF.EllipticIntegrals.SymmetricQuadratic
 /-!
 # Quadratic transformations of Legendre's integrals (DLMF §19.8)
 
-* §19.8(i): Gauss's arithmetic-geometric mean. DLMF's sequences `aₙ, gₙ` (19.8.1) are
-  `agmSeqA`, `agmSeqG`, read off Mathlib's `NNReal.agmSequences` (which lists
-  `(g_{n+1}, a_{n+1})`); `M(a₀, g₀)` is Mathlib's `NNReal.agm`; `cₙ = √(aₙ² - gₙ²)` (19.8.2) is
-  `agmSeqC`. The recursion (19.8.1), the convergence to `M` and 19.8.3 are proved; 19.8.5 for
-  complex `k` with real `k² < 1` follows from the existing real
-  `DLMF.Elliptic.Real.compEllIntKm_eq_pi_div_agm`. The sequences `pₙ, εₙ, Qₙ` of 19.8.8 are
-  `agmPiSeq`. 19.8.6 is proved from `lean-codes`' `Carlson.hasSum_agmA_zero` and
-  `Carlson.carlsonRE_eq_agm` (Carlson, Exercises 9.5-3/9.5-4), with `E(k) = (π/2) R_E(1, k'²)`
-  and `K(k) = (π/2) R_K(1, k'²)` from 19.25.1, for all real `k² < 1`.
-* §19.8(ii)–(iii): Landen and Gauss transformations, for real `0 < k < 1` and real amplitudes
-  as in DLMF's notes; 19.8.12 for real `k² < 1` is proved from the existing real
+Gauss's arithmetic-geometric mean and its use for computing the complete integrals
+(§19.8(i)), and the Landen and Gauss transformations (§19.8(ii)–(iii)).
+
+## Main definitions
+
+* `agmSeqA`, `agmSeqG`: DLMF's arithmetic and geometric means `aₙ`, `gₙ` (DLMF 19.8.1).
+* `agmSeqC`: `cₙ = √(aₙ² - gₙ²)` (DLMF 19.8.2).
+* `agmPiSeq`, `agmPiEps`: the sequences `pₙ, εₙ, Qₙ` of DLMF 19.8.8.
+
+## Main results
+
+* `agmSeq_succ`, `tendsto_agmSeq`: the recursion 19.8.1 and convergence to `M(a₀, g₀)`.
+* `agmSeqC_succ`: DLMF 19.8.3.
+* `inv_agm_eq_integral`: `1/M(a₀, g₀)` as an integral (DLMF 19.8.4).
+* `compEllIntKk_eq_pi_div_agm`, `compEllIntEk_eq_agm`: `K` and `E` by the AGM
+  (DLMF 19.8.5, 19.8.6).
+* `compEllIntPik_eq_agm`, `compEllIntPik_eq_agm_of_one_lt`: `Π(α², k)` by the AGM
+  (DLMF 19.8.7, 19.8.9–19.8.10).
+* `landen_descending_amplitude`: the descending Landen modulus and amplitude (DLMF 19.8.11).
+* `compEllInt_landen_descending_ofReal`, `compEllInt_landen_descending`: the descending Landen
+  transformation of `K` and `E` for real and complex `k` (DLMF 19.8.12).
+* `incEllInt_landen_descending`, `incEllIntPik_landen_descending`: DLMF 19.8.13–19.8.15.
+* `incEllInt_landen_ascending`: the ascending Landen transformation (DLMF 19.8.16–19.8.17).
+* `incEllInt_gauss`, `incEllIntPik_gauss`: the descending Gauss transformation
+  (DLMF 19.8.18–19.8.21).
+
+## Implementation notes
+
+* The sequences `agmSeqA`, `agmSeqG` are read off Mathlib's `NNReal.agmSequences` (which lists
+  `(g_{n+1}, a_{n+1})`), and `M(a₀, g₀)` is Mathlib's `NNReal.agm`.
+* DLMF 19.8.5 for complex `k` with real `k² < 1` follows from the real
+  `DLMF.Elliptic.Real.compEllIntKm_eq_pi_div_agm`. DLMF 19.8.6 is proved from `lean-codes`'
+  `Carlson.hasSum_agmA_zero` and `Carlson.carlsonRE_eq_agm` (Carlson, Exercises 9.5-3/9.5-4),
+  with `E(k) = (π/2) R_E(1, k'²)` and `K(k) = (π/2) R_K(1, k'²)` from 19.25.1, for all real
+  `k² < 1`.
+* The Landen and Gauss transformations are stated for real `0 < k < 1` and real amplitudes, as
+  in DLMF's notes. DLMF 19.8.12 for real `k² < 1` comes from the real
   `Real.compEllIntKm_landen_descending` and `Real.compEllIntEm_landen_descending`, and for
   complex `k` with `1 - k² ∈ ℂ \ (-∞, 0]` from the real case by the identity theorem.
+
+## References
+
+* NIST DLMF §19.8.
 -/
 
 @[expose] public noncomputable section
@@ -80,14 +110,14 @@ theorem tendsto_agmSeq (a₀ g₀ : ℝ≥0) :
 
 /-- Estimate under the stated parameter and domain assumptions: `agmSeqG a₀ g₀ n ≤ agmSeqA a₀ g₀
 n`. -/
-lemma ei19a_agmSeqG_le_agmSeqA {a₀ g₀ : ℝ≥0} (h : g₀ ≤ a₀) (n : ℕ) :
+private lemma agmSeqG_le_agmSeqA {a₀ g₀ : ℝ≥0} (h : g₀ ≤ a₀) (n : ℕ) :
     agmSeqG a₀ g₀ n ≤ agmSeqA a₀ g₀ n := by
   cases n with
   | zero => exact h
   | succ n => exact NNReal.agmSequences_fst_le_snd n n
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < agmSeqA a₀ g₀ n`. -/
-lemma ei19a_agmSeqA_pos {a₀ g₀ : ℝ≥0} (h : 0 < a₀) (n : ℕ) : 0 < agmSeqA a₀ g₀ n := by
+private lemma agmSeqA_pos {a₀ g₀ : ℝ≥0} (h : 0 < a₀) (n : ℕ) : 0 < agmSeqA a₀ g₀ n := by
   induction n with
   | zero => exact h
   | succ n ih =>
@@ -99,8 +129,8 @@ lemma ei19a_agmSeqA_pos {a₀ g₀ : ℝ≥0} (h : 0 < a₀) (n : ℕ) : 0 < agm
 theorem agmSeqC_succ {a₀ g₀ : ℝ≥0} (hg : 0 < g₀) (h : g₀ ≤ a₀) (n : ℕ) :
     agmSeqC a₀ g₀ (n + 1) = ((agmSeqA a₀ g₀ n : ℝ) - agmSeqG a₀ g₀ n) / 2 ∧
       agmSeqC a₀ g₀ (n + 1) = agmSeqC a₀ g₀ n ^ 2 / (4 * agmSeqA a₀ g₀ (n + 1)) := by
-  have hle := ei19a_agmSeqG_le_agmSeqA h n
-  have hpos := ei19a_agmSeqA_pos (g₀ := g₀) (lt_of_lt_of_le hg h) n
+  have hle := agmSeqG_le_agmSeqA h n
+  have hpos := agmSeqA_pos (g₀ := g₀) (lt_of_lt_of_le hg h) n
   set a : ℝ := (agmSeqA a₀ g₀ n : ℝ) with ha
   set g : ℝ := (agmSeqG a₀ g₀ n : ℝ) with hgdef
   have hle' : g ≤ a := by exact_mod_cast hle
@@ -137,7 +167,7 @@ theorem inv_agm_eq_integral {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g₀
     rw [← ofReal_pow]; exact ofReal_mem_slitPlane.2 (by positivity)
   have hK := Carlson.TwoVariable.carlsonRK_sq_eq_inv_agm ha hg
   have hRF := symEllIntRF_zero_left hy hz
-  rw [symEllIntR_of_mem _ _ (ei19c_slit2 hy hz)] at hRF
+  rw [symEllIntR_of_mem _ _ (vec2_mem_carlsonRSlitDomain hy hz)] at hRF
   have hRK : Carlson.carlsonR (-(1 / 2)) ![1 / 2, 1 / 2] ![((a₀ : ℝ) : ℂ) ^ 2, ((g₀ : ℝ) : ℂ) ^ 2] =
       Carlson.TwoVariable.carlsonRK (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) := by
     unfold Carlson.TwoVariable.carlsonRK Carlson.TwoVariable.pair
@@ -176,7 +206,7 @@ theorem compEllIntKk_eq_pi_div_agm {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m 
   push_cast; rfl
 
 /-- Bridge between lean-codes' `Carlson.agmSeq` and DLMF's `agmSeqA`, `agmSeqG`. -/
-lemma p19lR1_agmSeq_eq (a₀ g₀ : ℝ≥0) (n : ℕ) :
+private lemma agmSeq_eq_agmSeqA_agmSeqG (a₀ g₀ : ℝ≥0) (n : ℕ) :
     Carlson.agmSeq a₀ g₀ n = ((agmSeqA a₀ g₀ n : ℝ), (agmSeqG a₀ g₀ n : ℝ)) := by
   induction n with
   | zero => rfl
@@ -186,7 +216,7 @@ lemma p19lR1_agmSeq_eq (a₀ g₀ : ℝ≥0) (n : ℕ) :
 
 /-- Identity under the stated parameter and domain assumptions: `agmSeqC a₀ g₀ (n + 1) ^ 2 =
 (agmSeqA a₀ g₀ (n + 1) : ℝ) ^ 2 - (agmSeqG a₀ g₀ (n + 1) : ℝ) ^ 2`. -/
-lemma p19lR1_agmSeqC_sq_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
+private lemma agmSeqC_sq_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
     agmSeqC a₀ g₀ (n + 1) ^ 2 =
       (agmSeqA a₀ g₀ (n + 1) : ℝ) ^ 2 - (agmSeqG a₀ g₀ (n + 1) : ℝ) ^ 2 := by
   have hle : agmSeqG a₀ g₀ (n + 1) ≤ agmSeqA a₀ g₀ (n + 1) :=
@@ -222,13 +252,13 @@ theorem compEllIntEk_eq_agm {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m < 1) :
   -- `E = (π/2) R_E(1, g₀²)` and `K = (π/2) R_K(1, g₀²)`
   have hE : compEllIntEk k = (π / 2) * Carlson.carlsonRE (((1 : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) := by
     rw [(compEllIntEk_eq_symEllInt hslit).1, ← hg2,
-      p19sR1_symEllIntRG_zero_eq_carlsonRE hg2s one_mem_slitPlane,
-      p19sR1_carlsonRE_comm hg2s one_mem_slitPlane]
+      symEllIntRG_zero_eq_carlsonRE hg2s one_mem_slitPlane,
+      carlsonRE_comm_of_mem_slitPlane hg2s one_mem_slitPlane]
     push_cast; ring_nf
   have hK : compEllIntKk k =
       (π / 2) * Carlson.TwoVariable.carlsonRK (((1 : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) := by
     rw [compEllIntKk_eq_symEllIntRF hslit, ← hg2,
-      p19sR1_symEllIntRF_zero_eq_carlsonRK hg2s one_mem_slitPlane,
+      symEllIntRF_zero_eq_carlsonRK hg2s one_mem_slitPlane,
       Carlson.TwoVariable.carlsonRK_comm hg2s one_mem_slitPlane]
     push_cast; rw [one_pow]
   have hRK : Carlson.TwoVariable.carlsonRK (((1 : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) =
@@ -240,7 +270,7 @@ theorem compEllIntEk_eq_agm {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m < 1) :
     exact_mod_cast NNReal.agm_pos one_pos (by exact_mod_cast hgpos)
   have hM0 : ((NNReal.agm 1 g₀ : ℝ) : ℂ) ≠ 0 := ofReal_ne_zero.2 hMpos.ne'
   have hseq : ∀ n, Carlson.agmSeq (1 : ℝ≥0) g₀ n =
-      ((agmSeqA 1 g₀ n : ℝ), (agmSeqG 1 g₀ n : ℝ)) := p19lR1_agmSeq_eq 1 g₀
+      ((agmSeqA 1 g₀ n : ℝ), (agmSeqG 1 g₀ n : ℝ)) := agmSeq_eq_agmSeqA_agmSeqG 1 g₀
   have hpi : (π : ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
   constructor
   · have h := Carlson.hasSum_agmA_zero (x := 1) (y := g₀) one_pos hgpos
@@ -277,7 +307,7 @@ theorem compEllIntEk_eq_agm {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m < 1) :
     simp only [hseq]
     have hc : ∀ n : ℕ, agmSeqC 1 g₀ (n + 2) ^ 2 =
         (agmSeqA 1 g₀ (n + 2) : ℝ) ^ 2 - (agmSeqG 1 g₀ (n + 2) : ℝ) ^ 2 :=
-      fun n => p19lR1_agmSeqC_sq_succ 1 g₀ (n + 1)
+      fun n => agmSeqC_sq_succ 1 g₀ (n + 1)
     simp only [hc]
     rw [Complex.ofReal_sub, Complex.ofReal_tsum]
     push_cast
@@ -325,7 +355,7 @@ theorem compEllIntPik_eq_agm_of_one_lt {k : ℂ} {m α2 : ℝ} (hk : k ^ 2 = m) 
 /-! ### §19.8(ii) Landen transformations -/
 
 /-- For real `k` with `k² ≤ 1`, the principal `k' = √(1 - k²)` is the real square root. -/
-lemma ei19a_jacobiComodulusk_ofReal {k : ℝ} (hk : k ^ 2 ≤ 1) :
+private lemma jacobiComodulusk_ofReal_of_sq_le {k : ℝ} (hk : k ^ 2 ≤ 1) :
     jacobiComodulusk k = (Real.sqrt (1 - k ^ 2) : ℂ) := by
   rw [jacobiComodulusk, Real.sqrt_eq_rpow, show (1 : ℂ) - (k : ℂ) ^ 2 = ((1 - k ^ 2 : ℝ) : ℂ) by
     push_cast; ring, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
@@ -376,7 +406,7 @@ theorem compEllInt_landen_descending_ofReal {k : ℝ} (hk : k ^ 2 < 1) :
   set s := Real.sqrt (1 - k ^ 2) with hs
   have hs0 : 0 < s := Real.sqrt_pos.mpr (by linarith)
   have hs1 : s ≤ 1 := Real.sqrt_le_one.mpr (by nlinarith [sq_nonneg k])
-  have hkp : kp = s := ei19a_jacobiComodulusk_ofReal hk.le
+  have hkp : kp = s := jacobiComodulusk_ofReal_of_sq_le hk.le
   have hk₁ : k₁ = (((1 - s) / (1 + s) : ℝ) : ℂ) := by
     simp only [k₁, hkp]; push_cast; rfl
   have hr : ((1 - s) / (1 + s)) ^ 2 ≤ 1 := by
@@ -394,20 +424,8 @@ theorem compEllInt_landen_descending_ofReal {k : ℝ} (hk : k ^ 2 < 1) :
   · rw [h1]; push_cast; ring
   · rw [h2]; push_cast; ring
 
-/-- The principal square root of a slit-plane number has positive real part. -/
-theorem p19lR1_cpow_half_re_pos {z : ℂ} (hz : z ∈ slitPlane) : 0 < (z ^ (1 / 2 : ℂ)).re := by
-  rw [cpow_def_of_ne_zero (slitPlane_ne_zero hz), exp_re]
-  refine mul_pos (Real.exp_pos _) (Real.cos_pos_of_mem_Ioo ?_)
-  have him : (log z * (1 / 2)).im = arg z / 2 := by
-    rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, mul_im, ofReal_re, ofReal_im,
-      log_im]; ring
-  rw [him]
-  have h1 := neg_pi_lt_arg z
-  have h2 : arg z < π := lt_of_le_of_ne (arg_le_pi z) (mem_slitPlane_iff_arg.1 hz).1
-  constructor <;> linarith
-
 /-- For `ℜ c > 0`, `1 - ((1 - c)/(1 + c))² = 4c/(1 + c)²` has positive real part. -/
-theorem p19lR1_landen_mem {c : ℂ} (hc : 0 < c.re) :
+theorem one_sub_landen_sq_mem_slitPlane {c : ℂ} (hc : 0 < c.re) :
     1 - ((1 - c) / (1 + c)) ^ 2 ∈ slitPlane := by
   have hc0 : c ≠ 0 := fun h => by simp [h] at hc
   have h1c : 1 + c ≠ 0 := fun h => by
@@ -438,20 +456,20 @@ theorem compEllInt_landen_descending {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
   intro kp k₁
   set U := {k : ℂ | 1 - k ^ 2 ∈ slitPlane} with hU
   have hD := differentiableOn_compEllIntKk_compEllIntEk
-  have hre : ∀ k ∈ U, 0 < (jacobiComodulusk k).re := fun k hk => p19lR1_cpow_half_re_pos hk
+  have hre : ∀ k ∈ U, 0 < (jacobiComodulusk k).re := fun k hk => Carlson.re_cpow_half_pos hk
   have hne : ∀ k ∈ U, 1 + jacobiComodulusk k ≠ 0 := fun k hk h => by
     have := congrArg re h; simp at this; linarith [hre k hk]
   have hc : DifferentiableOn ℂ jacobiComodulusk U := fun k hk =>
-    (p19lR1_comod_differentiableAt hk).differentiableWithinAt
+    (differentiableAt_jacobiComodulusk hk).differentiableWithinAt
   set φ : ℂ → ℂ := fun k => (1 - jacobiComodulusk k) / (1 + jacobiComodulusk k) with hφ
   have hφd : DifferentiableOn ℂ φ U :=
     ((differentiableOn_const 1).sub hc).div ((differentiableOn_const 1).add hc) hne
-  have hmaps : MapsTo φ U U := fun k hk => p19lR1_landen_mem (hre k hk)
+  have hmaps : MapsTo φ U U := fun k hk => one_sub_landen_sq_mem_slitPlane (hre k hk)
   constructor
-  · exact p19lR1_eqOn_U hD.1 (g := fun k => (1 + φ k) * compEllIntKk (φ k))
+  · exact eq_of_differentiableOn_of_eq_on_Ioo hD.1 (g := fun k => (1 + φ k) * compEllIntKk (φ k))
       (((differentiableOn_const 1).add hφd).mul (hD.1.comp hφd hmaps))
       (fun x h0 h1 => (compEllInt_landen_descending_ofReal (k := x) (by nlinarith)).1) hk
-  · exact p19lR1_eqOn_U hD.2
+  · exact eq_of_differentiableOn_of_eq_on_Ioo hD.2
       (g := fun k => (1 + jacobiComodulusk k) * compEllIntEk (φ k) -
         jacobiComodulusk k * compEllIntKk k)
       ((((differentiableOn_const 1).add hc).mul (hD.2.comp hφd hmaps)).sub (hc.mul hD.1))

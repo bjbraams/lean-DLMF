@@ -14,54 +14,62 @@ public import Mathlib.LinearAlgebra.Matrix.PosDef
 public import Mathlib.Topology.Algebra.Star.Real
 
 /-!
-# Functions of matrix argument: definitions (DLMF Chapter 35)
+# Functions of matrix argument: definitions
 
-This file holds the definitions of DLMF Chapter 35 (namespace `DLMF.MatrixArgument`).
+This file holds the definitions of DLMF Chapter 35 (namespace `DLMF.MatrixArgument`): the
+notation of §35.1, partitions and zonal polynomials (§35.4), the multivariate gamma and beta
+functions (§35.3), the Laplace transform and convolution (§35.2), and the Bessel and
+hypergeometric functions of matrix argument (§§35.5–35.8).
 
-## Notation of §35.1
+## Main definitions
+
+* `SymMatrix`, `posDefCone`, `matrixInterval`: the space `𝓢` of real symmetric matrices, the
+  cone `Ω` and the matrix interval `S < X < T` (DLMF §35.1).
+* `etr`, `leadingMinor`, `matrixSpectralNorm`: `etr X = exp(tr X)`, the leading principal minors
+  `|(X)_j|` and the spectral norm `‖T‖`.
+* `orthogonalHaar`: the normalized Haar measure `dH` on `O(m)`.
+* `HasIntegralOn`: integrability on a set of symmetric matrices together with the value of the
+  integral.
+* `partitions`, `partitionLength`, `partitionalShiftedFactorial`: partitions `κ`, their length
+  `ℓ(κ)` and `[a]_κ` (DLMF §35.4(i), 35.4.1).
+* `zonalPolynomialAtOne`, `zonalPolynomial`: `Z_κ(I)` and `Z_κ(T)` (DLMF 35.4.2, 35.4.3).
+* `multivariateGamma`, `multivariateGammaVec`, `multivariateBeta`: DLMF 35.3.4, 35.3.5, 35.3.7.
+* `laplaceTransform`, `matrixConvolution`: DLMF 35.2.1, 35.2.3.
+* `besselA`, `besselB`: the Bessel functions of matrix argument (DLMF 35.5.1–35.5.3).
+* `hypergeometricPFQ`: `pFq(a; b; T)` (DLMF 35.8.1), with the special cases `hyp0F0`, `hyp1F0`,
+  `hyp0F1`, `hyp1F1` (35.6.1), `hyp2F1` (35.7.1) and `hyp3F2`.
+* `kummerPsi`, `laguerreL`, `jacobiP`: DLMF 35.6.2, 35.6.3, 35.7.2.
+* `gaussPDEOperator`: the system of partial differential equations 35.7.9 for `₂F₁`.
+
+## Implementation notes
 
 * Matrices are `Matrix (Fin m) (Fin m) ℝ`. The space `𝓢` of real symmetric matrices is Tau
   Ceti's `selfAdjoint.submodule ℝ (Matrix (Fin m) (Fin m) ℝ)` (abbreviation `SymMatrix m`), and
   DLMF's `dX = ∏_{j ≤ k} dx_{j,k}` is Tau Ceti's `TauCeti.symmetricLebesgue m`, the push-forward
   of Lebesgue measure on the `m(m+1)/2` upper-triangular coordinates. With this normalization
   Tau Ceti proves `∫_Ω etr(-X) |X|^{a-(m+1)/2} dX = Γ_m(a)` (DLMF 35.3.1, real `a`).
-* `Ω` is `posDefCone m`, and DLMF's matrix interval `S < X < T` is `matrixInterval S T`.
-* `etr X = exp(tr X)` is `etr`; `|(X)_j|` is `leadingMinor X j`; the spectral norm `‖T‖` is
-  `matrixSpectralNorm T`.
 * The orthogonal group `O(m)` is Mathlib's `Matrix.orthogonalGroup (Fin m) ℝ`. It is compact
-  (`instCompactSpaceOrthogonalGroup`), and its normalized Haar measure `dH` is
-  `orthogonalHaar m`, the Haar measure giving the whole group mass `1`.
+  (`instCompactSpaceOrthogonalGroup`), and `orthogonalHaar m` is the Haar measure giving the
+  whole group mass `1`.
 * Integrals with a convergence claim use `HasIntegralOn s f I`: `f` is integrable on `s` for
   `dX` and its integral is `I`, so the Lean convention that a non-integrable function has
   integral `0` never enters a statement.
-
-## Partitions and zonal polynomials (§35.4)
-
 * A partition `κ = (k₁, …, k_m)` is a nonincreasing vector `κ : Fin m → ℕ` (DLMF's definition,
   with at most `m` nonzero parts); `partitions m k` is the finite set of partitions of weight
-  `|κ| = k`, and `partitionLength κ` is `ℓ(κ)`.
-* `partitionalShiftedFactorial a κ = [a]_κ = ∏_j (a - (j-1)/2)_{k_j}` (35.4.1), over any field.
-* `zonalPolynomialAtOne κ` is the right-hand side of 35.4.2, and `zonalPolynomial κ T` is the
-  defining integral 35.4.3 over `O(m)`, for every real matrix `T`. This is DLMF's own definition
-  (35.4.2–35.4.3), so it is honest; the properties of §35.4(ii) are theorems. The two factors
-  `|T|^{k_m}` and `∏_{j<m} |(HTH⁻¹)_j|^{k_j - k_{j+1}}` of 35.4.3 are combined as
-  `∏_{j=1}^{m} |(HTHᵀ)_j|^{k_j - k_{j+1}}` with `k_{m+1} = 0`, using `|HTHᵀ| = |T|`.
+  `|κ| = k`. `partitionalShiftedFactorial a κ = ∏_j (a - (j-1)/2)_{k_j}` is defined over any
+  field.
+* `zonalPolynomial κ T` is DLMF's own defining integral 35.4.3 over `O(m)`, for every real
+  matrix `T`; the properties of §35.4(ii) are theorems. The two factors `|T|^{k_m}` and
+  `∏_{j<m} |(HTH⁻¹)_j|^{k_j - k_{j+1}}` of 35.4.3 are combined as
+  `∏_{j=1}^{m} |(HTHᵀ)_j|^{k_j - k_{j+1}}` with `k_{m+1} = 0` (`nextPart`), using `|HTHᵀ| = |T|`.
 * DLMF's `Z_κ` is a function on `𝓢`. Where DLMF evaluates a function of matrix argument at a
   product such as `TX` with `X ∈ Ω`, meaning the function of the (real) eigenvalues of `TX`,
   the statements use the symmetric matrix `X^{1/2} T X^{1/2}` (`CFC.sqrt X * T * CFC.sqrt X`),
   which has the same eigenvalues.
-
-## Functions (§§35.3, 35.5–35.8)
-
-* `multivariateGamma m a` (35.3.4, the product formula; it is the meromorphic continuation of
-  the integral 35.3.1), `multivariateGammaVec m s` (35.3.5), `multivariateBeta m a b` (35.3.7).
-  Tau Ceti's real `TauCeti.multivariateGamma` agrees on real arguments.
-* `hypergeometricPFQ a b T` (35.8.1), the series over partitions with the Lean `tsum`
-  totalization in the weight `k`, and its special cases `hyp0F0`, `hyp1F0`, `hyp0F1`, `hyp1F1`
-  (35.6.1), `hyp2F1` (35.7.1), `hyp3F2`.
-* `besselA ν T` (35.5.1–35.5.2), `besselB ν T` (35.5.3), `kummerPsi a b T` (35.6.2),
-  `laguerreL γ ν T` (35.6.3), `jacobiP γ δ ν T` (35.7.2), `laplaceTransform f Z` (35.2.1) and
-  `matrixConvolution f₁ f₂ T` (35.2.3).
+* `multivariateGamma m a` is the product formula 35.3.4, the meromorphic continuation of the
+  integral 35.3.1; Tau Ceti's real `TauCeti.multivariateGamma` agrees on real arguments.
+* `hypergeometricPFQ a b T` is the series over partitions with the Lean `tsum` totalization in
+  the weight `k`.
 -/
 
 @[expose] public noncomputable section

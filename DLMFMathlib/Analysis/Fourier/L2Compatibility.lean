@@ -17,6 +17,14 @@ unitary Fourier transform on `L²`. The identification follows by testing agains
 Schwartz functions and using `Lp.fourier_toTemperedDistribution_eq`, followed by
 Mathlib's `ae_eq_of_integral_contDiff_smul_eq`. The pairing then specializes
 `Lp.inner_fourier_eq`.
+
+## Main results
+
+* `ae_fourier_eq_fourier_toLp`: on `L¹ ∩ L²` the Fourier integral agrees almost everywhere
+  with the unitary Fourier transform.
+* `memLp_fourier`: the Fourier integral of an integrable square-integrable function is
+  square integrable.
+* `integral_fourier_mul_conj_eq`: Parseval's pairing for Fourier integrals on `L¹ ∩ L²`.
 -/
 
 @[expose] public noncomputable section

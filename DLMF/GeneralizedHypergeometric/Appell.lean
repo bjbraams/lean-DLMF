@@ -13,13 +13,15 @@ public import DLMF.GeneralizedHypergeometric.Appell.HornDifferentialEquations
 /-!
 # Appell functions and Horn's double series (DLMF §§16.13–16.16)
 
-Acquired 2026-10-24. The ordinary double series are totalized outside convergence and at
-exceptional denominator parameters. Convergence, differentiation and integral representations
-therefore state their exact domains. Euler integrals provide analytic branches beyond the
-series domains. Transformation formulas are identities of germs at the origin, transported
-along compatible analytic continuations; no divergent totalized series is silently identified
-with a continued function. The infinity connection formula explicitly specifies continuation.
+This umbrella imports the Appell series `F₁`–`F₄` and Horn's `G₂`, `G₃`: their convergence and
+differential equations, Euler integral representations, reductions and transformations.
 
-The existing `appF4` and Bailey product theorem are reused. One-variable continuation uses the
-pinned TauCeti continuation API; the two-variable definition below is its direct domain extension.
+The ordinary double series are totalized outside convergence and at exceptional denominator
+parameters, so convergence, differentiation and integral representations state their exact
+domains. Euler integrals provide analytic branches beyond the series domains. Transformation
+formulas are identities of germs at the origin, transported along compatible analytic
+continuations; no divergent totalized series is identified with a continued function. The
+connection formula at infinity specifies its continuation explicitly. Two-variable continuation
+extends the TauCeti one-variable continuation API. `appF4` and Bailey's product formula come
+from `DLMF.Hypergeometric.AppellF4`.
 -/

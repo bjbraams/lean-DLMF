@@ -12,9 +12,23 @@ public import Mathlib.Analysis.SpecialFunctions.Integrals.Log
 # Kummer's Fourier expansion of `log Γ` (AAR §1.7)
 
 The cosine coefficients of `log Γ` on `(0,1)` are determined by Euler's reflection formula
-together with the Fourier series of `log(sin π x)`. The even part of `log Γ` on a symmetric
-subinterval of `(0,1)` is identified below, and `∫_0^1 log(sin π x) dx = -log 2` is recorded
-from Mathlib's `integral_log_sin_zero_pi`.
+together with the Fourier series of `log(sin π x)`. This file contains the ingredients: the
+logarithmic reflection formula, the even part of `log Γ` on a symmetric subinterval of `(0,1)`,
+and the integral of `log(sin π x)`.
+
+## Main results
+
+* `intervalIntegrable_log_Gamma`: `log Γ` is interval integrable between positive reals.
+* `log_Gamma_add_log_Gamma_one_sub`: `log Γ(x) + log Γ(1 - x) = log π - log sin(π x)` for
+  `0 < x < 1`.
+* `two_mul_integral_log_Gamma`: reflection identifies the even part of `log Γ` on a symmetric
+  subinterval of `(0,1)`.
+* `integral_log_sin_pi_zero_one`: `∫_0^1 log(sin π x) dx = -log 2`, from Mathlib's
+  `integral_log_sin_zero_pi`.
+
+## References
+
+* G. E. Andrews, R. Askey, R. Roy, *Special Functions*, §1.7.
 -/
 
 @[expose] public section

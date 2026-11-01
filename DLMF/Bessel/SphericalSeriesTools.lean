@@ -19,14 +19,24 @@ Series such as `C(z) = z ∑ₙ j_{2n}(πz²/2)` (DLMF 7.6.10) or `Si(z) = z ∑
 derivative of the `n`-th term is a difference `gₙ - gₙ₊₁`, so the differentiated series
 telescopes to `g₀`, which is the derivative of the left-hand side.
 
-This file provides
+## Main results
+
 * `sphSeries_hasSum_of_hasDerivAt`: the telescoping principle for entire terms that are
   bounded on balls by a summable sequence (termwise differentiation through
-  `hasSum_deriv_of_summable_norm`);
-* norm bounds and summability for the spherical Bessel functions `sphericalJ`, `sphericalI`;
-* the derivative and three-term recurrences of DLMF 10.51.1–10.51.2 for `sphericalJ`, valid for
-  all complex arguments (no division by `z`);
-* the elementary values `z j₀(z) = sin z` and `j₀(z) - z j₁(z) = cos z`.
+  `hasSum_deriv_of_summable_norm`).
+* `sphSeries_hasSum_of_euler`, `sphSeries_euler_hasSum`: the analogous principle for the Euler
+  operator `z ∂ + a`.
+* `sphSeries_norm_sphericalJ_le`, `sphSeries_norm_sphericalI_le`, `sphSeries_sphericalJ_bound`,
+  `sphSeries_sphericalI_bound`: norm bounds and summability for `sphericalJ` and `sphericalI`.
+* `sphSeries_sphericalJ_recurrence`, `sphSeries_hasDerivAt_sphericalJ_succ`: the three-term
+  recurrence and derivative of DLMF 10.51.1–10.51.2 for `sphericalJ`, valid for all complex
+  arguments (no division by `z`).
+* `sphSeries_sphericalI_recurrence`, `sphSeries_hasDerivAt_sphericalI_succ`: the same for
+  `sphericalI` (DLMF 10.51.4–10.51.5).
+* `sphSeries_mul_sphericalJ_zero`, `sphSeries_sphericalJ_zero_sub`: `z j₀(z) = sin z` and
+  `j₀(z) - z j₁(z) = cos z`; `sphSeries_mul_sphericalI_zero`, `sphSeries_sphericalI_zero_add`
+  give the hyperbolic analogues.
+* `sphSeries_sphericalJ_neg`: the parity `j_n(-z) = (-1)ⁿ j_n(z)`.
 -/
 
 @[expose] public noncomputable section

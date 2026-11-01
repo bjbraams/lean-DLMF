@@ -10,15 +10,23 @@ public import DLMF.Hypergeometric.Generalized
 /-!
 # Calculus of the generalized hypergeometric function (Duverney §§3.4–3.6)
 
-For Mathlib's regularized `𝐅(a; b; z) = ∑ ∏(aᵢ)ₙ zⁿ / (n! ∏ Γ(bⱼ+n))`, for all parameters:
-* `deriv_regularizedHGFun`: `𝐅'(a; b; z) = (∏ a) 𝐅(a+1; b+1; z)` inside the disc of convergence
-  (Duverney Thm 3.11);
+Results for Mathlib's regularized `𝐅(a; b; z) = ∑ ∏(aᵢ)ₙ zⁿ / (n! ∏ Γ(bⱼ+n))`, for all
+parameters.
+
+## Main results
+
+* `deriv_regularizedHGFun`: `𝐅'(a; b; z) = (∏ a) 𝐅(a+1; b+1; z)` inside the disc of
+  convergence, DLMF 16.3.1 (Duverney Thm 3.11).
 * `regularizedHGFun_contiguous`: `θ𝐅(i, a'; b) = i (𝐅(i+1, a'; b) - 𝐅(i, a'; b))`
-  (Duverney (3.40));
+  (Duverney (3.40)).
 * `coeff_eq_of_generalized_ode`: a power series solving the generalized hypergeometric equation
-  is a multiple of `𝐅` when no `bⱼ` is a nonpositive integer (Duverney Thm 3.8);
-* `regularized1F2_one_inhomogeneous_ode`: the exact reciprocal-Gamma forcing
-  for `₁F₂(1;b,c;z)`, from Mathlib's regularized coefficients, for every parameter.
+  is a multiple of `𝐅` when no `bⱼ` is a nonpositive integer (Duverney Thm 3.8).
+* `regularized1F2_one_inhomogeneous_ode`: the inhomogeneous equation for `₁F₂(1;b,c;z)` with
+  its reciprocal-Gamma forcing, for every parameter.
+
+## References
+
+* D. Duverney, *An Introduction to Hypergeometric Functions*, §§3.4–3.6.
 -/
 
 @[expose] public section
@@ -189,7 +197,7 @@ theorem regularized1F2_one_lower (b c z : ℂ) :
       ((n:ℂ)+c-1)*regularizedHGFunCoeff {1} {b,c} n := by
     rw [regularized1F2_one_coeff, regularized1F2_one_coeff]
     simp only [one_div, mul_inv]
-    rw [recip_Gamma_eq_mul_recip_Gamma_add_one (c-1+n)]
+    rw [Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (c-1+n)]
     rw [show c-1+n+1=c+n by ring]
     ring
   rw [hc]
@@ -207,7 +215,7 @@ theorem regularized1F2_one_shift (b c z : ℂ) :
       (b+n)*regularizedHGFunCoeff {1} {b,c} (n+1) := by
     rw [regularized1F2_one_coeff, regularized1F2_one_coeff]
     simp only [one_div, mul_inv]
-    rw [recip_Gamma_eq_mul_recip_Gamma_add_one (b+n)]
+    rw [Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (b+n)]
     push_cast
     rw [show b+n+1=b+(n+1) by ring, show c+1+n=c+(n+1) by ring]
     ring
@@ -229,7 +237,7 @@ theorem regularized1F2_one_shift (b c z : ℂ) :
       Multiset.insert_eq_cons, Multiset.map_cons, Multiset.prod_cons, ascPochhammer_zero,
       Polynomial.eval_one, Nat.factorial_zero, Nat.cast_zero, Nat.cast_one, add_zero, one_mul,
       one_div, mul_inv]
-    rw [recip_Gamma_eq_mul_recip_Gamma_add_one (b-1), sub_add_cancel]
+    rw [Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (b-1), sub_add_cancel]
     ring
   rw [h0] at he
   linear_combination -he+regularized1F2_one_lower b c z
@@ -281,8 +289,8 @@ theorem regularized1F2_one_inhomogeneous_ode (b c z : ℂ) :
       ascPochhammer_zero, Polynomial.eval_one, Nat.factorial_zero, Nat.cast_one,
       Nat.cast_zero, add_zero, one_mul]
     simp only [one_div, mul_inv]
-    rw [recip_Gamma_eq_mul_recip_Gamma_add_one (b-1),
-      recip_Gamma_eq_mul_recip_Gamma_add_one (c-1)]
+    rw [Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (b-1),
+      Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (c-1)]
     simp only [sub_add_cancel]
     ring
   change z^2*deriv (deriv F) z+(b+c-1)*z*deriv F z+((b-1)*(c-1)-z)*F z = _

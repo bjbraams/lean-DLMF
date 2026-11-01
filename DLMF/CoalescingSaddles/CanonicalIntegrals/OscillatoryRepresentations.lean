@@ -10,11 +10,28 @@ public import DLMF.CoalescingSaddles.CanonicalIntegrals.ContoursAndSymmetries
 /-!
 # Oscillatory representations of canonical saddle integrals
 
-Contour rotation identifies the convergent definitions with oscillatory integrals and one-
-dimensional umbilic representations.
+Contour rotation identifies the absolutely convergent definitions of the canonical integrals and
+diffraction catastrophes of DLMF §36.2 with the oscillatory improper integrals of DLMF, and
+yields the one-dimensional umbilic representations and the Bessel-function special cases.
 
-Source references and common attribution are retained in
-`DLMF.CoalescingSaddles.CanonicalIntegrals`.
+## Main results
+
+* `hasIntegralWholeLine_cuspoidIntegral`: `∫_{-∞}^{∞} exp(iΦ_K(t; x)) dt` converges to `Ψ_K(x)`
+  (DLMF 36.2.4).
+* `hasIteratedIntegral_hyperbolicUmbilicIntegral`, `hasIteratedIntegral_ellipticUmbilicIntegral`:
+  the umbilic integrals as iterated improper integrals (DLMF 36.2.5).
+* `hasIntegralWholeLine_cuspoidDiffraction`, `hasIteratedIntegral_hyperbolicUmbilicDiffraction`,
+  `hasIteratedIntegral_ellipticUmbilicDiffraction`: the diffraction catastrophes for `k > 0`
+  (DLMF 36.2.10, 36.2.11).
+* `ellipticUmbilicIntegral_eq_contour`, `ellipticUmbilicIntegral_eq_airy`: single-integral
+  representations of `Ψ^{(E)}` (DLMF 36.2.6, 36.2.7).
+* `hyperbolicUmbilicIntegral_eq_contour`, `hyperbolicUmbilicIntegral_eq_airy`: single-integral
+  representations of `Ψ^{(H)}` (DLMF 36.2.8, 36.2.9).
+* `hasIntegralWholeLine_pearcey`: the Pearcey integral as an improper integral (DLMF 36.2.14).
+* `cuspoidIntegral_two_zero_left`: `Ψ₂(0, y)` in terms of `J_{±1/4}` (DLMF 36.2.19).
+* `ellipticUmbilicIntegral_z_zero`: `Ψ^{(E)}(x, y, 0)` in terms of `Ai` and `Bi` (DLMF 36.2.20).
+* `ellipticUmbilicIntegral_axis`, `hyperbolicUmbilicIntegral_axis`: the umbilic integrals on
+  the `z`-axis (DLMF 36.2.28, 36.2.29).
 -/
 
 @[expose] public noncomputable section
@@ -30,26 +47,26 @@ namespace DLMF.CoalescingSaddles
 /-! #### Contour rotation for the cuspoids (36.2.4, 36.2.10) -/
 
 /-- Powers of a point `R e^{iy}` on a circle. -/
-lemma q2s_pow_exp (R y : ℝ) (j : ℕ) :
+private lemma ofReal_mul_exp_pow (R y : ℝ) (j : ℕ) :
     ((R : ℂ) * exp (y * I)) ^ j = ((R ^ j : ℝ) : ℂ) * exp (((j * y : ℝ) : ℂ) * I) := by
   rw [mul_pow, ← exp_nat_mul]; push_cast; ring_nf
 
 /-- `Im (R e^{iy})^j = R^j sin(jy)`. -/
-lemma q2s_im_pow_exp (R y : ℝ) (j : ℕ) :
+private lemma im_ofReal_mul_exp_pow (R y : ℝ) (j : ℕ) :
     (((R : ℂ) * exp (y * I)) ^ j).im = R ^ j * Real.sin (j * y) := by
-  rw [q2s_pow_exp, im_ofReal_mul, exp_ofReal_mul_I_im]
+  rw [ofReal_mul_exp_pow, im_ofReal_mul, exp_ofReal_mul_I_im]
 
 /-- Lower bound for `Im Φ_K` on the circle of radius `R`, `y ≥ 0`. -/
-lemma q2s_im_potential_arc (K : ℕ) (x : Fin K → ℝ) {R y : ℝ} (hR : 0 ≤ R) (hy : 0 ≤ y) :
+private lemma le_im_cuspoidPotential_arc (K : ℕ) (x : Fin K → ℝ) {R y : ℝ} (hR : 0 ≤ R) (hy : 0 ≤ y) :
     R ^ (K + 2) * Real.sin (((K + 2 : ℕ) : ℝ) * y) -
         ((K + 2 : ℕ) : ℝ) * y * ((∑ m, |x m|) * (1 + R ^ K)) ≤
       (cuspoidPotential K ((R : ℂ) * exp (y * I)) x).im := by
-  rw [cuspoidPotential, add_im, im_sum, q2s_im_pow_exp]
+  rw [cuspoidPotential, add_im, im_sum, im_ofReal_mul_exp_pow]
   have hterm : ∀ m : Fin K, -(((K + 2 : ℕ) : ℝ) * y * (|x m| * (1 + R ^ K))) ≤
       (((x m : ℝ) : ℂ) * ((R : ℂ) * exp (y * I)) ^ ((m : ℕ) + 1)).im := by
     intro m
-    rw [im_ofReal_mul, q2s_im_pow_exp]
-    have h3 := s36a_pow_le_one_add R hR (show (m : ℕ) + 1 ≤ K from m.isLt)
+    rw [im_ofReal_mul, im_ofReal_mul_exp_pow]
+    have h3 := pow_le_one_add_pow R hR (show (m : ℕ) + 1 ≤ K from m.isLt)
     have hs : |Real.sin (((m : ℕ) + 1 : ℕ) * y)| ≤ ((K + 2 : ℕ) : ℝ) * y := by
       refine Real.abs_sin_le_abs.trans ?_
       rw [abs_of_nonneg (by positivity)]
@@ -69,16 +86,16 @@ lemma q2s_im_potential_arc (K : ℕ) (x : Fin K → ℝ) {R y : ℝ} (hR : 0 ≤
   linarith
 
 /-- Lower bound `Im Φ_K(R e^{iy}) ≥ (R²/π) y` on the arc `0 ≤ y ≤ π/(2(K+2))` for large `R`. -/
-lemma q2s_im_potential_arc_ge (K : ℕ) (x : Fin K → ℝ) {R y : ℝ} (hR : 1 ≤ R)
+private lemma mul_le_im_cuspoidPotential_arc (K : ℕ) (x : Fin K → ℝ) {R y : ℝ} (hR : 1 ≤ R)
     (hRC : 2 * π * (∑ m, |x m|) ≤ R ^ 2) (hy : 0 ≤ y) (hyθ : y ≤ cuspoidAngle K) :
     R ^ 2 / π * y ≤ (cuspoidPotential K ((R : ℂ) * exp (y * I)) x).im := by
-  have h := q2s_im_potential_arc K x (by linarith : (0 : ℝ) ≤ R) hy
+  have h := le_im_cuspoidPotential_arc K x (by linarith : (0 : ℝ) ≤ R) hy
   set C := ∑ m, |x m|
   set n : ℝ := ((K + 2 : ℕ) : ℝ) with hn
   have hn2 : 2 ≤ n := by rw [hn]; push_cast; linarith [(K.cast_nonneg : (0 : ℝ) ≤ K)]
   have hpi := Real.pi_pos
   have hny : n * y ≤ π / 2 := by
-    have := s36a_angle_mul K
+    have := add_two_mul_cuspoidAngle K
     rw [hn]; push_cast
     calc ((K : ℝ) + 2) * y ≤ ((K : ℝ) + 2) * cuspoidAngle K := by
           gcongr
@@ -112,7 +129,7 @@ lemma q2s_im_potential_arc_ge (K : ℕ) (x : Fin K → ℝ) {R y : ℝ} (hR : 1 
   linarith
 
 /-- Jordan-type bound for the arc `0 ≤ arg t ≤ π/(2(K+2))`, `|t| = R`, phase `κ > 0`. -/
-lemma q2s_arc_bound (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) {R : ℝ} (hR : 1 ≤ R)
+private lemma norm_integral_cuspoidPotential_arc_le (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) {R : ℝ} (hR : 1 ≤ R)
     (hRC : 2 * π * (∑ m, |x m|) ≤ R ^ 2) :
     ‖∫ y in (0 : ℝ)..cuspoidAngle K, I * R * exp (y * I) *
         exp (I * κ * cuspoidPotential K ((R : ℂ) * exp (y * I)) x)‖ ≤ π / (κ * R) := by
@@ -132,7 +149,7 @@ lemma q2s_arc_bound (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) {R :
         -κ * (cuspoidPotential K ((R : ℂ) * exp (y * I)) x).im := by
       simp [mul_re, mul_im]
     rw [hre]
-    have := q2s_im_potential_arc_ge K x hR hRC hy.1.le hy.2
+    have := mul_le_im_cuspoidPotential_arc K x hR hRC hy.1.le hy.2
     rw [ha]; nlinarith
   calc _ ≤ ∫ y in (0 : ℝ)..cuspoidAngle K, R * Real.exp (-(a * y)) :=
         intervalIntegral.norm_integral_le_of_norm_le hθ
@@ -143,21 +160,21 @@ lemma q2s_arc_bound (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) {R :
     _ = π / (κ * R) := by rw [ha]; field_simp
 
 /-- An entire function has an entire primitive. -/
-private lemma q2s_exists_primitive {f : ℂ → ℂ} (hf : Differentiable ℂ f) :
+private lemma exists_hasDerivAt_primitive {f : ℂ → ℂ} (hf : Differentiable ℂ f) :
     ∃ G : ℂ → ℂ, ∀ t, HasDerivAt G (f t) t := by
   obtain ⟨g, hg⟩ := hf.isExactOn_univ
   exact ⟨g, fun t => hg t (mem_univ t)⟩
 
 /-- The right tail: `∫₀^R exp(iκΦ_K(t; x)) dt` tends to the integral over the rotated ray
 `arg t = π/(2(K+2))` (Cauchy's theorem on the sector and the Jordan-type arc bound). -/
-lemma q2s_tendsto_right (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) :
+private lemma tendsto_intervalIntegral_cuspoidPotential_atTop (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) :
     Tendsto (fun R : ℝ => ∫ t in (0 : ℝ)..R, exp (I * κ * cuspoidPotential K t x)) atTop
       (𝓝 (∫ r in Ioi (0 : ℝ), cuspoidContourDir K r *
         exp (I * κ * cuspoidPotential K (cuspoidContour K r) x))) := by
   set f : ℂ → ℂ := fun w => exp (I * κ * cuspoidPotential K w x) with hf
   have hfc : Continuous f := by
     rw [hf]; exact continuous_exp.comp (continuous_const.mul (continuous_cuspoidPotential K x))
-  obtain ⟨G, hG⟩ := q2s_exists_primitive (f := f) (by rw [hf]; unfold cuspoidPotential; fun_prop)
+  obtain ⟨G, hG⟩ := exists_hasDerivAt_primitive (f := f) (by rw [hf]; unfold cuspoidPotential; fun_prop)
   set u := exp ((cuspoidAngle K : ℂ) * I) with hu
   have hsplit : ∀ R : ℝ, ∫ t in (0 : ℝ)..R, f t =
       (∫ r in (0 : ℝ)..R, u * f (r * u)) -
@@ -174,7 +191,7 @@ lemma q2s_tendsto_right (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) 
       exp (I * κ * cuspoidPotential K (cuspoidContour K r) x)) (fun r : ℝ => u * f (r * u))
       (Ioi 0) := by
     intro r hr
-    simp only [hf, cuspoidContour, s36a_dir_of_nonneg K (le_of_lt hr), hu]
+    simp only [hf, cuspoidContour, cuspoidContourDir_of_nonneg K (le_of_lt hr), hu]
   have hint : IntegrableOn (fun r : ℝ => u * f (r * u)) (Ioi 0) :=
     hint0.congr_fun heq measurableSet_Ioi
   have hseg := intervalIntegral_tendsto_integral_Ioi 0 hint tendsto_id
@@ -186,7 +203,7 @@ lemma q2s_tendsto_right (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) 
     filter_upwards [eventually_ge_atTop 1, eventually_ge_atTop (2 * π * (∑ m, |x m|) + 1)]
       with R hR hR'
     have hCs : 0 ≤ ∑ m, |x m| := Finset.sum_nonneg fun m _ => abs_nonneg (x m)
-    have hb := q2s_arc_bound K x hκ hR (by nlinarith [Real.pi_pos])
+    have hb := norm_integral_cuspoidPotential_arc_le K x hκ hR (by nlinarith [Real.pi_pos])
     calc _ ≤ π / (κ * R) := by simpa only [hf] using hb
       _ = π / κ * R⁻¹ := by field_simp
   have := hseg.sub harc
@@ -196,13 +213,13 @@ lemma q2s_tendsto_right (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) 
   rw [hsplit R]
 
 /-- Conjugation commutes with interval integrals. -/
-lemma q2s_intervalIntegral_conj (f : ℝ → ℂ) (a b : ℝ) :
+private lemma intervalIntegral_conj_eq_conj_intervalIntegral (f : ℝ → ℂ) (a b : ℝ) :
     ∫ t in a..b, conj (f t) = conj (∫ t in a..b, f t) := by
   simp only [intervalIntegral, map_sub, integral_conj]
 
 /-- The left tail: `∫_R^0 exp(iκΦ_K(t; x)) dt` tends, as `R → -∞`, to the integral over the
 rotated left ray of the contour of `cuspoidIntegral`. -/
-lemma q2s_tendsto_left (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) :
+private lemma tendsto_intervalIntegral_cuspoidPotential_atBot (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) :
     Tendsto (fun R : ℝ => ∫ t in R..0, exp (I * κ * cuspoidPotential K t x)) atBot
       (𝓝 (∫ r in Iic (0 : ℝ), cuspoidContourDir K r *
         exp (I * κ * cuspoidPotential K (cuspoidContour K r) x))) := by
@@ -221,51 +238,51 @@ lemma q2s_tendsto_left (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) :
   refine Tendsto.comp (g := fun S : ℝ => ∫ t in (0 : ℝ)..S,
     exp (I * κ * cuspoidPotential K (-(t : ℂ)) x)) ?_ tendsto_neg_atBot_atTop
   by_cases hK : Even K
-  · have h := q2s_tendsto_right K (fun m => (-1) ^ ((m : ℕ) + 1) * x m) hκ
-    simp_rw [s36a_potential_neg_even hK]
+  · have h := tendsto_intervalIntegral_cuspoidPotential_atTop K (fun m => (-1) ^ ((m : ℕ) + 1) * x m) hκ
+    simp_rw [cuspoidPotential_neg_of_even hK]
     convert h using 2
     refine setIntegral_congr_fun measurableSet_Ioi fun r _ => ?_
-    simp only [cuspoidContour, s36a_dir_of_even hK, ofReal_neg, neg_mul]
-    rw [s36a_potential_neg_even hK]
-  · have h := q2s_tendsto_right K (fun m => (-1) ^ (m : ℕ) * x m) hκ
+    simp only [cuspoidContour, cuspoidContourDir_of_even hK, ofReal_neg, neg_mul]
+    rw [cuspoidPotential_neg_of_even hK]
+  · have h := tendsto_intervalIntegral_cuspoidPotential_atTop K (fun m => (-1) ^ (m : ℕ) * x m) hκ
     have h' := ((continuous_conj).tendsto _).comp h
     rw [Function.comp_def] at h'
     have hfun : ∀ S : ℝ, ∫ t in (0 : ℝ)..S, exp (I * κ * cuspoidPotential K (-(t : ℂ)) x) =
         conj (∫ t in (0 : ℝ)..S, exp (I * κ *
           cuspoidPotential K (t : ℂ) (fun m => (-1) ^ (m : ℕ) * x m))) := by
       intro S
-      rw [← q2s_intervalIntegral_conj]
+      rw [← intervalIntegral_conj_eq_conj_intervalIntegral]
       refine intervalIntegral.integral_congr fun t _ => ?_
       rw [← exp_conj, map_mul, map_mul, conj_I, conj_ofReal, conj_cuspoidPotential, conj_ofReal,
-        s36a_potential_neg_odd hK]
+        cuspoidPotential_neg_of_odd hK]
       ring_nf
     simp_rw [hfun]
     convert h' using 2
     rw [← integral_conj]
     refine setIntegral_congr_fun measurableSet_Ioi fun r (hr : 0 < r) => ?_
     have hd : conj (cuspoidContourDir K r) = cuspoidContourDir K (-r) := by
-      rw [s36a_dir_of_nonneg K hr.le, s36a_dir_of_odd_neg hK (by linarith), ← exp_conj]
+      rw [cuspoidContourDir_of_nonneg K hr.le, cuspoidContourDir_of_odd_of_neg hK (by linarith), ← exp_conj]
       congr 1; simp [conj_ofReal]
     rw [map_mul, ← exp_conj, map_mul, map_mul, conj_I, conj_ofReal, conj_cuspoidPotential, hd]
     have hc : conj (cuspoidContour K r) = -cuspoidContour K (-r) := by
       rw [cuspoidContour, map_mul, conj_ofReal, hd, cuspoidContour]; push_cast; ring
     have hx : (fun m : Fin K => (-1 : ℝ) ^ (m : ℕ) * ((-1) ^ (m : ℕ) * x m)) = x := by
       funext m; rw [← mul_assoc, ← mul_pow]; simp
-    rw [hc, s36a_potential_neg_odd hK, hx]
+    rw [hc, cuspoidPotential_neg_of_odd hK, hx]
     ring_nf
 
 /-- The improper real integral `∫ exp(iκΦ_K(t; x)) dt` converges (both tails) to the
 rotated-contour integral, for every phase `κ > 0`. -/
-lemma q2s_hasIntegralWholeLine (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) :
+private lemma hasIntegralWholeLine_exp_cuspoidPotential (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) :
     HasIntegralWholeLine (fun t : ℝ => exp (I * κ * cuspoidPotential K t x))
       (∫ r : ℝ, cuspoidContourDir K r *
         exp (I * κ * cuspoidPotential K (cuspoidContour K r) x)) := by
   have hint := integrable_cuspoidIntegrand K x hκ
-  refine ⟨_, _, q2s_tendsto_left K x hκ, q2s_tendsto_right K x hκ, ?_⟩
+  refine ⟨_, _, tendsto_intervalIntegral_cuspoidPotential_atBot K x hκ, tendsto_intervalIntegral_cuspoidPotential_atTop K x hκ, ?_⟩
   exact intervalIntegral.integral_Iic_add_Ioi hint.integrableOn hint.integrableOn
 
 /-- A constant factor passes through an improper whole-line integral. -/
-lemma q2s_hasIntegralWholeLine_const_mul {f : ℝ → ℂ} {v : ℂ} (c : ℂ)
+private lemma hasIntegralWholeLine_const_mul {f : ℝ → ℂ} {v : ℂ} (c : ℂ)
     (h : HasIntegralWholeLine f v) : HasIntegralWholeLine (fun t => c * f t) (c * v) := by
   obtain ⟨u, w, hu, hw, huw⟩ := h
   refine ⟨c * u, c * w, ?_, ?_, by rw [← huw]; ring⟩
@@ -282,7 +299,7 @@ to the rotated-contour integral `Ψ_K(x)` (DLMF 36.2.4; contour rotation, Jordan
 theorem hasIntegralWholeLine_cuspoidIntegral (K : ℕ) (x : Fin K → ℝ) :
     HasIntegralWholeLine (fun t : ℝ => exp (I * cuspoidPotential K t x))
       (cuspoidIntegral K x) := by
-  simpa [cuspoidIntegral] using q2s_hasIntegralWholeLine K x one_pos
+  simpa [cuspoidIntegral] using hasIntegralWholeLine_exp_cuspoidPotential K x one_pos
 
 /-- DLMF 36.2.5 for `U = H` as an iterated improper integral: for each real `t` the inner
 `s`-integral converges, and the outer `t`-integral of the result converges to `Ψ^{(H)}(x)`. -/
@@ -323,7 +340,7 @@ theorem hasIteratedIntegral_ellipticUmbilicIntegral (x y z : ℝ) :
 theorem hasIntegralWholeLine_cuspoidDiffraction (K : ℕ) (x : Fin K → ℝ) {k : ℝ} (hk : 0 < k) :
     HasIntegralWholeLine (fun t : ℝ => (Real.sqrt k : ℂ) * exp (I * k * cuspoidPotential K t x))
       (cuspoidDiffraction K x k) :=
-  q2s_hasIntegralWholeLine_const_mul _ (q2s_hasIntegralWholeLine K x hk)
+  hasIntegralWholeLine_const_mul _ (hasIntegralWholeLine_exp_cuspoidPotential K x hk)
 
 /-- DLMF 36.2.11 (`U = H`): `k ∫∫ exp(ikΦ^{(H)}) ds dt` as an iterated improper integral
 converges to `Ψ^{(H)}(x; k)` for `k > 0`. -/
@@ -346,13 +363,13 @@ theorem hasIteratedIntegral_ellipticUmbilicDiffraction (x y z : ℝ) {k : ℝ} (
 /-! ### The fold with a complex coefficient; Fubini for the hyperbolic umbilic -/
 
 /-- `Im t³ = |r|³` on the cubic V-contour `t = cuspoidContour 1 r`. -/
-lemma q2s_im_cube_contour (r : ℝ) : (cuspoidContour 1 r ^ 3).im = |r| ^ 3 := by
+private lemma im_cuspoidContour_one_pow_three (r : ℝ) : (cuspoidContour 1 r ^ 3).im = |r| ^ 3 := by
   have h := cuspoidContour_pow 1 r
   norm_num at h
   rw [h, I_mul_im, ← ofReal_pow, ofReal_re]
 
 /-- Elementary bound `B a² + A a ≤ a³ - a²/2 + (B + 1)³ + A²/2` for `a, A, B ≥ 0`. -/
-lemma q2s_cubic_ineq {a A B : ℝ} (ha : 0 ≤ a) (hB : 0 ≤ B) :
+private lemma mul_sq_add_mul_le_cube_bound {a A B : ℝ} (ha : 0 ≤ a) (hB : 0 ≤ B) :
     B * a ^ 2 + A * a ≤ a ^ 3 - a ^ 2 / 2 + (B + 1) ^ 3 + A ^ 2 / 2 := by
   have h1 : A * a ≤ a ^ 2 / 2 + A ^ 2 / 2 := by nlinarith [sq_nonneg (A - a)]
   have h2 : 0 ≤ a ^ 2 * (a - (B + 1)) + (B + 1) ^ 3 := by
@@ -366,7 +383,7 @@ lemma q2s_cubic_ineq {a A B : ℝ} (ha : 0 ≤ a) (hB : 0 ≤ B) :
   nlinarith
 
 /-- `Im(c t) ≥ -‖c‖ |r|` on the cubic V-contour. -/
-lemma q2s_im_mul_contour_ge (c : ℂ) (r : ℝ) :
+private lemma neg_norm_mul_le_im_mul_cuspoidContour_one (c : ℂ) (r : ℝ) :
     -(‖c‖ * |r|) ≤ (c * cuspoidContour 1 r).im := by
   have := neg_abs_le (c * cuspoidContour 1 r).im
   have h2 := abs_im_le_norm (c * cuspoidContour 1 r)
@@ -374,7 +391,7 @@ lemma q2s_im_mul_contour_ge (c : ℂ) (r : ℝ) :
   linarith
 
 /-- Gaussian bound for the cubic integrand with a complex linear coefficient. -/
-lemma q2s_norm_fold_le (c : ℂ) (r : ℝ) :
+private lemma norm_foldContourIntegrand_le (c : ℂ) (r : ℝ) :
     ‖cuspoidContourDir 1 r * exp (I * (cuspoidContour 1 r ^ 3 + c * cuspoidContour 1 r))‖ ≤
       Real.exp (1 + ‖c‖ ^ 2 / 2) * Real.exp (-(1 / 2) * r ^ 2) := by
   rw [norm_mul, norm_cuspoidContourDir, one_mul, norm_exp, ← Real.exp_add]
@@ -382,14 +399,14 @@ lemma q2s_norm_fold_le (c : ℂ) (r : ℝ) :
   have hre : (I * (cuspoidContour 1 r ^ 3 + c * cuspoidContour 1 r)).re =
       -((cuspoidContour 1 r ^ 3).im + (c * cuspoidContour 1 r).im) := by
     simp [mul_re, add_im]
-  rw [hre, q2s_im_cube_contour]
-  have h1 := q2s_im_mul_contour_ge c r
-  have h2 := q2s_cubic_ineq (A := ‖c‖) (abs_nonneg r) (le_refl (0 : ℝ))
+  rw [hre, im_cuspoidContour_one_pow_three]
+  have h1 := neg_norm_mul_le_im_mul_cuspoidContour_one c r
+  have h2 := mul_sq_add_mul_le_cube_bound (A := ‖c‖) (abs_nonneg r) (le_refl (0 : ℝ))
   rw [sq_abs] at h2
   nlinarith
 
 /-- Measurability of the cubic integrand with complex linear coefficient. -/
-lemma q2s_measurable_fold (c : ℂ) :
+private lemma measurable_foldContourIntegrand (c : ℂ) :
     Measurable fun r : ℝ =>
       cuspoidContourDir 1 r * exp (I * (cuspoidContour 1 r ^ 3 + c * cuspoidContour 1 r)) :=
   (measurable_cuspoidContourDir 1).mul (measurable_exp.comp (measurable_const.mul
@@ -397,17 +414,17 @@ lemma q2s_measurable_fold (c : ℂ) :
       (measurable_const.mul (measurable_cuspoidContour 1)))))
 
 /-- Integrability of the cubic integrand with complex linear coefficient. -/
-lemma q2s_integrable_fold (c : ℂ) :
+private lemma integrable_foldContourIntegrand (c : ℂ) :
     Integrable fun r : ℝ =>
       cuspoidContourDir 1 r * exp (I * (cuspoidContour 1 r ^ 3 + c * cuspoidContour 1 r)) :=
   Integrable.mono' ((integrable_exp_neg_mul_sq (by norm_num : (0 : ℝ) < 1 / 2)).const_mul _)
-    (q2s_measurable_fold c).aestronglyMeasurable
-    (ae_of_all _ fun r => by simpa using q2s_norm_fold_le c r)
+    (measurable_foldContourIntegrand c).aestronglyMeasurable
+    (ae_of_all _ fun r => by simpa using norm_foldContourIntegrand_le c r)
 
 /-- The fold integral with a complex linear coefficient:
 `∫ exp(i(t³ + ct)) dt = (2π/3^{1/3}) Ai(c/3^{1/3})` over the cubic V-contour (36.2.13 for
 complex `c`). -/
-lemma q2s_fold_airy (c : ℂ) :
+private lemma integral_foldContourIntegrand_eq_airyAi (c : ℂ) :
     ∫ r : ℝ, cuspoidContourDir 1 r *
         exp (I * (cuspoidContour 1 r ^ 3 + c * cuspoidContour 1 r)) =
       2 * π / (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) *
@@ -425,7 +442,7 @@ lemma q2s_fold_airy (c : ℂ) :
   set Kf : ℂ → ℂ := fun t => exp (t ^ 3 / 3 - w * t) with hKf
   set F : ℝ → ℂ := fun r => cuspoidContourDir 1 r *
     exp (I * (cuspoidContour 1 r ^ 3 + c * cuspoidContour 1 r)) with hF
-  have hint : Integrable F := q2s_integrable_fold c
+  have hint : Integrable F := integrable_foldContourIntegrand c
   set u : ℂ := exp (((π / 6 : ℝ) : ℂ) * I) with hu
   have hu3 : u ^ 3 = I := DLMF.Airy.airyInt_exp_sixth_cube
   have hθ : (cuspoidAngle 1 : ℂ) = ((π / 6 : ℝ) : ℂ) := by
@@ -445,7 +462,7 @@ lemma q2s_fold_airy (c : ℂ) :
     have h1 : ∀ r ∈ Ioi (0 : ℝ), F r = I * g (a * r) := by
       intro r hr
       simp only [hF, hg, hKf]
-      rw [cuspoidContour, s36a_dir_of_nonneg 1 (le_of_lt hr), hθ, hv, ← hu]
+      rw [cuspoidContour, cuspoidContourDir_of_nonneg 1 (le_of_lt hr), hθ, hv, ← hu]
       have e : I * (((r : ℂ) * u) ^ 3 + c * ((r : ℂ) * u)) =
           (((a * r : ℝ) : ℂ) * (-I * u)) ^ 3 / 3 - w * (((a * r : ℝ) : ℂ) * (-I * u)) := by
         push_cast
@@ -468,7 +485,7 @@ lemma q2s_fold_airy (c : ℂ) :
     have h1 : ∀ r ∈ Ioi (0 : ℝ), F (-r) = -I * g' (a * r) := by
       intro r hr
       simp only [hF, hg', hKf]
-      rw [cuspoidContour, s36a_dir_of_odd_neg (by decide : ¬ Even 1)
+      rw [cuspoidContour, cuspoidContourDir_of_odd_of_neg (by decide : ¬ Even 1)
         (by linarith [hr.out] : -r < 0), hm, hv']
       have e : I * ((((-r : ℝ) : ℂ) * (-I * u ^ 2)) ^ 3 + c * (((-r : ℝ) : ℂ) * (-I * u ^ 2)))
           = (((a * r : ℝ) : ℂ) * u ^ 2) ^ 3 / 3 - w * (((a * r : ℝ) : ℂ) * u ^ 2) := by
@@ -481,7 +498,7 @@ lemma q2s_fold_airy (c : ℂ) :
       integral_comp_mul_left_Ioi g' 0 ha, mul_zero, hg', DLMF.Airy.rayIntegral, Complex.real_smul]
     ring
   -- the Airy contour integral as two rays
-  obtain ⟨G, hG⟩ := q2s_exists_primitive (f := Kf) (by rw [hKf]; fun_prop)
+  obtain ⟨G, hG⟩ := exists_hasDerivAt_primitive (f := Kf) (by rw [hKf]; fun_prop)
   have hKc : Continuous Kf := by rw [hKf]; fun_prop
   have hcont := DLMF.Airy.airyInt_contourIntegral_eq_rays hG hKc (-π / 3) (π / 3)
     (DLMF.Airy.airyInt_integrableOn_ray w (DLMF.Airy.airyInt_exp_three_mul _ (-1)
@@ -500,12 +517,12 @@ lemma q2s_fold_airy (c : ℂ) :
   linear_combination (A - B) * I_sq
 
 /-- `Im(c t) ≥ -|c| |r|` on the cubic V-contour, real `c`. -/
-lemma q2s_im_lin_contour_ge (c : ℝ) (r : ℝ) :
+private lemma neg_abs_mul_le_im_ofReal_mul_cuspoidContour_one (c : ℝ) (r : ℝ) :
     -(|c| * |r|) ≤ ((c : ℂ) * cuspoidContour 1 r).im := by
-  simpa using q2s_im_mul_contour_ge (c : ℂ) r
+  simpa using neg_norm_mul_le_im_mul_cuspoidContour_one (c : ℂ) r
 
 /-- Gaussian bound for the hyperbolic umbilic integrand on the product of V-contours. -/
-lemma q2s_norm_hyperbolic_le (x y z : ℝ) (p : ℝ × ℝ) :
+private lemma norm_hyperbolicUmbilicContourIntegrand_le (x y z : ℝ) (p : ℝ × ℝ) :
     ‖cuspoidContourDir 1 p.1 * cuspoidContourDir 1 p.2 *
         exp (I * hyperbolicUmbilicPotential (cuspoidContour 1 p.1) (cuspoidContour 1 p.2) x y z)‖
       ≤ Real.exp (2 * (|z| / 2 + 1) ^ 3 + x ^ 2 / 2 + y ^ 2 / 2) *
@@ -521,9 +538,9 @@ lemma q2s_norm_hyperbolic_le (x y z : ℝ) (p : ℝ × ℝ) :
     simp only [hyperbolicUmbilicPotential, mul_re, I_re, I_im, add_im, zero_mul, one_mul,
       zero_sub]
     ring_nf
-  rw [hre, q2s_im_cube_contour, q2s_im_cube_contour]
-  have h1 := q2s_im_lin_contour_ge x p.1
-  have h2 := q2s_im_lin_contour_ge y p.2
+  rw [hre, im_cuspoidContour_one_pow_three, im_cuspoidContour_one_pow_three]
+  have h1 := neg_abs_mul_le_im_ofReal_mul_cuspoidContour_one x p.1
+  have h2 := neg_abs_mul_le_im_ofReal_mul_cuspoidContour_one y p.2
   have h3 : -(|z| * (|p.1| * |p.2|)) ≤ ((z : ℂ) * (σ * τ)).im := by
     have := neg_abs_le ((z : ℂ) * (σ * τ)).im
     have h := abs_im_le_norm ((z : ℂ) * (σ * τ))
@@ -533,8 +550,8 @@ lemma q2s_norm_hyperbolic_le (x y z : ℝ) (p : ℝ × ℝ) :
   have h4 : |z| * (|p.1| * |p.2|) ≤ |z| / 2 * |p.1| ^ 2 + |z| / 2 * |p.2| ^ 2 := by
     nlinarith [sq_nonneg (|p.1| - |p.2|), abs_nonneg z]
   have hB : 0 ≤ |z| / 2 := by positivity
-  have c1 := q2s_cubic_ineq (A := |x|) (abs_nonneg p.1) hB
-  have c2 := q2s_cubic_ineq (A := |y|) (abs_nonneg p.2) hB
+  have c1 := mul_sq_add_mul_le_cube_bound (A := |x|) (abs_nonneg p.1) hB
+  have c2 := mul_sq_add_mul_le_cube_bound (A := |y|) (abs_nonneg p.2) hB
   rw [sq_abs] at c1 c2
   rw [sq_abs p.1, sq_abs p.2] at h4
   have hx2 : |x| ^ 2 = x ^ 2 := sq_abs x
@@ -543,7 +560,7 @@ lemma q2s_norm_hyperbolic_le (x y z : ℝ) (p : ℝ × ℝ) :
   nlinarith
 
 /-- Measurability of the hyperbolic umbilic integrand. -/
-lemma q2s_measurable_hyperbolic (x y z : ℝ) :
+private lemma measurable_hyperbolicUmbilicContourIntegrand (x y z : ℝ) :
     Measurable fun p : ℝ × ℝ => cuspoidContourDir 1 p.1 * cuspoidContourDir 1 p.2 *
       exp (I * hyperbolicUmbilicPotential (cuspoidContour 1 p.1) (cuspoidContour 1 p.2) x y z) := by
   have h1 : Measurable fun p : ℝ × ℝ => cuspoidContour 1 p.1 :=
@@ -559,7 +576,7 @@ lemma q2s_measurable_hyperbolic (x y z : ℝ) :
     (measurable_const.mul h1)
 
 /-- The integrand of `hyperbolicUmbilicIntegral` is integrable on `ℝ²`. -/
-lemma q2s_integrable_hyperbolic (x y z : ℝ) :
+private lemma integrable_hyperbolicUmbilicContourIntegrand (x y z : ℝ) :
     Integrable (fun p : ℝ × ℝ => cuspoidContourDir 1 p.1 * cuspoidContourDir 1 p.2 *
       exp (I * hyperbolicUmbilicPotential (cuspoidContour 1 p.1) (cuspoidContour 1 p.2) x y z))
       (volume : Measure (ℝ × ℝ)) := by
@@ -569,8 +586,8 @@ lemma q2s_integrable_hyperbolic (x y z : ℝ) :
       (volume : Measure (ℝ × ℝ)) := by
     rw [Measure.volume_eq_prod]; exact hg.mul_prod hg
   exact Integrable.mono' (hprod.const_mul _)
-    (q2s_measurable_hyperbolic x y z).aestronglyMeasurable
-    (ae_of_all _ fun p => q2s_norm_hyperbolic_le x y z p)
+    (measurable_hyperbolicUmbilicContourIntegrand x y z).aestronglyMeasurable
+    (ae_of_all _ fun p => norm_hyperbolicUmbilicContourIntegrand_le x y z p)
 
 /-! ### One-dimensional representations of the umbilic integrals (§36.2(i)) -/
 
@@ -617,7 +634,7 @@ theorem hyperbolicUmbilicIntegral_eq_contour (x y z : ℝ) :
 /-- Integrating out the inner variable of `Ψ^{(H)}` with the fold-Airy formula:
 `Ψ^{(H)}(x) = (2π/3^{1/3}) ∫ d(r) exp(i(t³ + xt)) Ai((zt + y)/3^{1/3}) dr`, `t = t(r)` on the
 cubic V-contour, the integrand being integrable. -/
-private lemma q2s_hyperbolic_fold (x y z : ℝ) :
+private lemma hyperbolicUmbilicIntegral_eq_fold_airy (x y z : ℝ) :
     Integrable (fun r : ℝ => cuspoidContourDir 1 r *
       (exp (I * (cuspoidContour 1 r ^ 3 + x * cuspoidContour 1 r)) *
         DLMF.Airy.airyAi ((z * cuspoidContour 1 r + y) / (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ)))) ∧
@@ -630,7 +647,7 @@ private lemma q2s_hyperbolic_fold (x y z : ℝ) :
   set h0 : ℂ → ℂ := fun s => exp (I * (s ^ 3 + x * s)) * DLMF.Airy.airyAi ((z * s + y) / a)
     with hh0
   set f : ℝ → ℂ := fun r => cuspoidContourDir 1 r * h0 (cuspoidContour 1 r) with hf
-  have hint := q2s_integrable_hyperbolic x y z
+  have hint := integrable_hyperbolicUmbilicContourIntegrand x y z
   have hinner : ∀ r : ℝ, ∫ q : ℝ, cuspoidContourDir 1 r * cuspoidContourDir 1 q *
       exp (I * hyperbolicUmbilicPotential (cuspoidContour 1 r) (cuspoidContour 1 q) x y z) =
       2 * π / a * f r := by
@@ -645,7 +662,7 @@ private lemma q2s_hyperbolic_fold (x y z : ℝ) :
       congr 2
       unfold hyperbolicUmbilicPotential; ring
     simp_rw [e]
-    rw [integral_const_mul, q2s_fold_airy, hf, hh0]
+    rw [integral_const_mul, integral_foldContourIntegrand_eq_airyAi, hf, hh0]
     simp only
     ring
   have hval : hyperbolicUmbilicIntegral x y z = 2 * π / a * ∫ r, f r := by
@@ -683,7 +700,7 @@ theorem hyperbolicUmbilicIntegral_eq_airy (x y z : ℝ) :
   set h0 : ℂ → ℂ := fun s => exp (I * (s ^ 3 + x * s)) * DLMF.Airy.airyAi ((z * s + y) / a)
     with hh0
   set f : ℝ → ℂ := fun r => cuspoidContourDir 1 r * h0 (cuspoidContour 1 r) with hf
-  obtain ⟨hfint, hval⟩ := q2s_hyperbolic_fold x y z
+  obtain ⟨hfint, hval⟩ := hyperbolicUmbilicIntegral_eq_fold_airy x y z
   change Integrable f at hfint
   change hyperbolicUmbilicIntegral x y z = 2 * π / a * ∫ r, f r at hval
   have hθ : (cuspoidAngle 1 : ℂ) = ((π / 6 : ℝ) : ℂ) := by
@@ -694,11 +711,11 @@ theorem hyperbolicUmbilicIntegral_eq_airy (x y z : ℝ) :
   have hR : ∫ r in Ioi (0 : ℝ), f r = DLMF.Airy.rayIntegral h0 (π / 6) 0 := by
     rw [DLMF.Airy.rayIntegral]
     refine setIntegral_congr_fun measurableSet_Ioi fun r (hr : 0 < r) => ?_
-    simp only [hf, cuspoidContour, s36a_dir_of_nonneg 1 hr.le, hθ]
+    simp only [hf, cuspoidContour, cuspoidContourDir_of_nonneg 1 hr.le, hθ]
   have hneg : ∀ r : ℝ, 0 < r → f (-r) =
       -(exp (((5 * π / 6 : ℝ) : ℂ) * I) * h0 ((r : ℂ) * exp (((5 * π / 6 : ℝ) : ℂ) * I))) := by
     intro r hr
-    simp only [hf, cuspoidContour, s36a_dir_of_odd_neg (by decide : ¬ Even 1)
+    simp only [hf, cuspoidContour, cuspoidContourDir_of_odd_of_neg (by decide : ¬ Even 1)
       (by linarith : -r < 0), h56]
     push_cast
     ring_nf
@@ -710,13 +727,13 @@ theorem hyperbolicUmbilicIntegral_eq_airy (x y z : ℝ) :
   have hray1 : IntegrableOn (fun t : ℝ => exp (((π / 6 : ℝ) : ℂ) * I) *
       h0 ((t : ℂ) * exp (((π / 6 : ℝ) : ℂ) * I))) (Ioi 0) := by
     refine hfint.integrableOn.congr_fun (fun r (hr : 0 < r) => ?_) measurableSet_Ioi
-    simp only [hf, cuspoidContour, s36a_dir_of_nonneg 1 hr.le, hθ]
+    simp only [hf, cuspoidContour, cuspoidContourDir_of_nonneg 1 hr.le, hθ]
   have hray2 : IntegrableOn (fun t : ℝ => exp (((5 * π / 6 : ℝ) : ℂ) * I) *
       h0 ((t : ℂ) * exp (((5 * π / 6 : ℝ) : ℂ) * I))) (Ioi 0) := by
     have := (hfint.comp_neg.integrableOn (s := Ioi 0)).neg
     refine this.congr_fun (fun r (hr : 0 < r) => ?_) measurableSet_Ioi
     rw [Pi.neg_apply, hneg r hr, neg_neg]
-  obtain ⟨G, hG⟩ := q2s_exists_primitive (f := h0) (by
+  obtain ⟨G, hG⟩ := exists_hasDerivAt_primitive (f := h0) (by
     rw [hh0]
     exact (by fun_prop : Differentiable ℂ fun s : ℂ => exp (I * (s ^ 3 + x * s))).mul
       (DLMF.Airy.differentiable_airyAi.comp (by fun_prop)))
@@ -747,7 +764,7 @@ theorem hasIntegralWholeLine_pearcey (x₂ x₁ : ℝ) :
 
 /-- The moments of `exp(iΦ_K(t; 0)) = exp(i t^{K+2})` over the rotated contour:
 `∫ d(r) t(r)^p exp(i t(r)^{K+2}) dr = (e^{iθ(p+1)} + (-1)^p d(-1)^{p+1}) Γ((p+1)/(K+2))/(K+2)`. -/
-theorem q2s_moment_at_zero (K p : ℕ) :
+theorem integral_cuspoidContour_moment_zero (K p : ℕ) :
     ∫ r : ℝ, cuspoidContourDir K r * cuspoidContour K r ^ p *
         exp (I * cuspoidPotential K (cuspoidContour K r) 0) =
       (exp ((cuspoidAngle K : ℂ) * I) ^ (p + 1) + (-1) ^ p * cuspoidContourDir K (-1) ^ (p + 1)) *
@@ -789,7 +806,7 @@ theorem q2s_moment_at_zero (K p : ℕ) :
       rw [show Real.exp 1 * (|r| ^ p * Real.exp (-1 * r ^ 2)) =
         |r| ^ p * Real.exp (1 + -1 * r ^ 2) by rw [Real.exp_add]; ring]
       gcongr
-      have := s36a_pow_ge_sq_sub_one K (abs_nonneg r)
+      have := sq_sub_one_le_pow_add_two K (abs_nonneg r)
       rw [sq_abs] at this
       linarith
   rw [← intervalIntegral.integral_Iic_add_Ioi hint.integrableOn hint.integrableOn (b := 0)]
@@ -798,7 +815,7 @@ theorem q2s_moment_at_zero (K p : ℕ) :
       exp ((cuspoidAngle K : ℂ) * I) ^ (p + 1) * G := by
     rw [← hGi, ← integral_const_mul]
     refine setIntegral_congr_fun measurableSet_Ioi fun r (hr : 0 < r) => ?_
-    rw [hf, cuspoidContour, s36a_dir_of_nonneg K hr.le, abs_of_pos hr]
+    rw [hf, cuspoidContour, cuspoidContourDir_of_nonneg K hr.le, abs_of_pos hr]
     push_cast; ring
   have hL : ∫ r in Iic (0 : ℝ), cuspoidContourDir K r * cuspoidContour K r ^ p *
       exp (I * cuspoidPotential K (cuspoidContour K r) 0) =
@@ -808,23 +825,23 @@ theorem q2s_moment_at_zero (K p : ℕ) :
     rw [neg_zero] at this
     rw [← this, ← hGi, ← integral_const_mul]
     refine setIntegral_congr_fun measurableSet_Ioi fun r (hr : 0 < r) => ?_
-    rw [hf, cuspoidContour, s36a_dir_neg (neg_neg_of_pos hr), abs_neg, abs_of_pos hr]
+    rw [hf, cuspoidContour, cuspoidContourDir_of_neg (neg_neg_of_pos hr), abs_neg, abs_of_pos hr]
     push_cast; ring
   rw [hL, hR]; ring
 
 /-- `I^p` as an exponential. -/
-theorem q2s_I_pow (p : ℕ) : I ^ p = exp (((p * (π / 2) : ℝ) : ℂ) * I) := by
+theorem I_pow_eq_exp_mul_pi_div_two (p : ℕ) : I ^ p = exp (((p * (π / 2) : ℝ) : ℂ) * I) := by
   conv_lhs => rw [← exp_pi_div_two_mul_I]
   rw [← exp_nat_mul]; congr 1; push_cast; ring
 
 /-- `(-I)^p` as an exponential. -/
-theorem q2s_negI_pow (p : ℕ) : (-1 : ℂ) ^ p * I ^ p = exp (-(((p * (π / 2) : ℝ) : ℂ) * I)) := by
+theorem neg_one_pow_mul_I_pow_eq_exp (p : ℕ) : (-1 : ℂ) ^ p * I ^ p = exp (-(((p * (π / 2) : ℝ) : ℂ) * I)) := by
   rw [← mul_pow, show (-1 : ℂ) * I = -I by ring]
   conv_lhs => rw [← exp_neg_pi_div_two_mul_I]
   rw [← exp_nat_mul]; congr 1; push_cast; ring
 
 /-- `(e^{±iθ})^{p+1}` with `θ = π/(2(K+2))`. -/
-theorem q2s_exp_angle_pow (K p : ℕ) (σ : ℝ) : exp ((σ * cuspoidAngle K : ℝ) * I) ^ (p + 1) =
+theorem exp_mul_cuspoidAngle_pow_succ (K p : ℕ) (σ : ℝ) : exp ((σ * cuspoidAngle K : ℝ) * I) ^ (p + 1) =
     exp ((σ * ((p + 1) * (π / (2 * ((K : ℝ) + 2)))) : ℝ) * I) := by
   rw [← exp_nat_mul]; congr 1; unfold cuspoidAngle; push_cast; ring
 
@@ -841,7 +858,7 @@ theorem cuspoidIntegral_two_zero_left {y : ℝ} (hy : y ≠ 0) :
 
 /-- A ray integral of the elliptic umbilic integrand at `z = 0` as an Airy ray integral:
 for `d = i e^{iθ}` and `β³ = 3/2`, `∫₀^∞ d exp(i((rd)³ + c rd)/2) dr = (i/β) P_θ(c/(2β))`. -/
-lemma q2s_E_ray (θ : ℝ) {d : ℂ} (hd : d = I * exp (θ * I)) (c : ℂ) {β : ℝ} (hβ : 0 < β)
+private lemma integral_ellipticUmbilic_ray_eq_rayIntegral (θ : ℝ) {d : ℂ} (hd : d = I * exp (θ * I)) (c : ℂ) {β : ℝ} (hβ : 0 < β)
     (hβ3 : (β : ℂ) ^ 3 = 3 / 2) :
     ∫ r in Ioi (0 : ℝ), d * exp (I * (((r : ℂ) * d) ^ 3 / 2 + c / 2 * ((r : ℂ) * d))) =
       I * (β⁻¹ : ℝ) * DLMF.Airy.rayIntegral
@@ -868,7 +885,7 @@ lemma q2s_E_ray (θ : ℝ) {d : ℂ} (hd : d = I * exp (θ * I)) (c : ℂ) {β :
 
 /-- The three Airy ray integrals `P_θ(w) = ∫₀^∞ e^{iθ} exp((te^{iθ})³/3 - w t e^{iθ}) dt` at
 `θ = -π/3, π/3, π` give `Ai` and `Bi` (DLMF 9.5.4, 9.5.5). -/
-lemma q2s_airy_rays (w : ℂ) :
+private lemma airyAi_airyBi_eq_rayIntegral (w : ℂ) :
     2 * π * I * DLMF.Airy.airyAi w =
         DLMF.Airy.rayIntegral (fun t => exp (t ^ 3 / 3 - w * t)) (π / 3) 0 -
           DLMF.Airy.rayIntegral (fun t => exp (t ^ 3 / 3 - w * t)) (-π / 3) 0 ∧
@@ -877,7 +894,7 @@ lemma q2s_airy_rays (w : ℂ) :
           DLMF.Airy.rayIntegral (fun t => exp (t ^ 3 / 3 - w * t)) (-π / 3) 0 -
           2 * DLMF.Airy.rayIntegral (fun t => exp (t ^ 3 / 3 - w * t)) π 0 := by
   set Kf : ℂ → ℂ := fun t => exp (t ^ 3 / 3 - w * t) with hKf
-  obtain ⟨G, hG⟩ := q2s_exists_primitive (f := Kf) (by rw [hKf]; fun_prop)
+  obtain ⟨G, hG⟩ := exists_hasDerivAt_primitive (f := Kf) (by rw [hKf]; fun_prop)
   have hKc : Continuous Kf := by rw [hKf]; fun_prop
   have i1 := DLMF.Airy.airyInt_integrableOn_ray w (DLMF.Airy.airyInt_exp_three_mul (-π / 3) (-1)
     (by push_cast; ring))
@@ -897,7 +914,7 @@ lemma q2s_airy_rays (w : ℂ) :
 
 /-- The constant `β = 12^{1/3}/2` of 36.2.20: `β > 0`, `β³ = 3/2`, `12^{1/3} = 2β` and
 `(2/3)^{2/3} = β⁻²`. -/
-private lemma q2s_E_beta {β : ℝ} (hβdef : β = (12 : ℝ) ^ (1 / 3 : ℝ) / 2) :
+private lemma ellipticUmbilic_beta_props {β : ℝ} (hβdef : β = (12 : ℝ) ^ (1 / 3 : ℝ) / 2) :
     0 < β ∧ (β : ℂ) ^ 3 = 3 / 2 ∧ (((12 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) = 2 * β ∧
       (((2 / 3 : ℝ) ^ (2 / 3 : ℝ) : ℝ) : ℂ) = ((β⁻¹ : ℝ) : ℂ) ^ 2 := by
   have hβ : 0 < β := by rw [hβdef]; positivity
@@ -916,10 +933,10 @@ private lemma q2s_E_beta {β : ℝ} (hβdef : β = (12 : ℝ) ^ (1 / 3 : ℝ) / 
   rw [this]; push_cast; ring
 
 /-- The elliptic umbilic ray directions as `ρ_j = i e^{iθ_j}` with `θ = (-π/3, π/3, π)`. -/
-private lemma q2s_E_rayDir (j : Fin 3) :
+private lemma ellipticUmbilicRayDir_eq_I_mul_exp (j : Fin 3) :
     ellipticUmbilicRayDir j = I * exp ((((![-π / 3, π / 3, π] : Fin 3 → ℝ) j : ℝ) : ℂ) * I) := by
   have hs3 : Real.sin (π / 3) = Real.sqrt 3 / 2 := Real.sin_pi_div_three
-  rw [s36a_rayDir_eq', exp_mul_I, ← ofReal_cos, ← ofReal_sin]
+  rw [ellipticUmbilicRayDir_eq, exp_mul_I, ← ofReal_cos, ← ofReal_sin]
   fin_cases j
   · simp only [Fin.zero_eta, Matrix.cons_val_zero, Real.cos_neg, Real.sin_neg,
       Real.cos_pi_div_three, neg_div]
@@ -930,7 +947,7 @@ private lemma q2s_E_rayDir (j : Fin 3) :
 
 /-- At `z = 0` each quadrant integral of `Ψ^{(E)}` factorizes into two Airy ray integrals
 `P_θ(w) = ∫₀^∞ e^{iθ} exp((te^{iθ})³/3 - w t e^{iθ}) dt` at `w = (x ∓ iy)/(2β)`. -/
-private lemma q2s_E_quadrant_z_zero (x y : ℝ) {β : ℝ} (hβ : 0 < β) (hβ3 : (β : ℂ) ^ 3 = 3 / 2)
+private lemma ellipticUmbilicQuadrant_z_zero (x y : ℝ) {β : ℝ} (hβ : 0 < β) (hβ3 : (β : ℂ) ^ 3 = 3 / 2)
     (j k : Fin 3) :
     ellipticUmbilicQuadrant 1 x y 0 j k =
       (I * (β⁻¹ : ℝ) * DLMF.Airy.rayIntegral
@@ -960,7 +977,7 @@ private lemma q2s_E_quadrant_z_zero (x y : ℝ) {β : ℝ} (hβ : 0 < β) (hβ3 
     all_goals (try simp only [hc, hc'])
     all_goals ring
   rw [hfac, Measure.volume_eq_prod, setIntegral_prod_mul f g, hf, hg,
-    q2s_E_ray _ (q2s_E_rayDir j) c hβ hβ3, q2s_E_ray _ (q2s_E_rayDir k) c' hβ hβ3]
+    integral_ellipticUmbilic_ray_eq_rayIntegral _ (ellipticUmbilicRayDir_eq_I_mul_exp j) c hβ hβ3, integral_ellipticUmbilic_ray_eq_rayIntegral _ (ellipticUmbilicRayDir_eq_I_mul_exp k) c' hβ hβ3]
 
 /-- DLMF 36.2.20:
 `Ψ^{(E)}(x, y, 0) = 2π²(2/3)^{2/3} Re(Ai((x + iy)/12^{1/3}) Bi((x - iy)/12^{1/3}))`. -/
@@ -970,7 +987,7 @@ theorem ellipticUmbilicIntegral_z_zero (x y : ℝ) :
       ((DLMF.Airy.airyAi ((x + I * y) / (((12 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ)) *
         DLMF.Airy.airyBi ((x - I * y) / (((12 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ))).re : ℂ) := by
   set β : ℝ := (12 : ℝ) ^ (1 / 3 : ℝ) / 2 with hβdef
-  obtain ⟨hβ, hβ3, h2β, hβ2⟩ := q2s_E_beta hβdef
+  obtain ⟨hβ, hβ3, h2β, hβ2⟩ := ellipticUmbilic_beta_props hβdef
   set θ : Fin 3 → ℝ := ![-π / 3, π / 3, π] with hθ
   set c : ℂ := (x : ℂ) - I * y with hc
   set c' : ℂ := (x : ℂ) + I * y with hc'
@@ -978,7 +995,7 @@ theorem ellipticUmbilicIntegral_z_zero (x y : ℝ) :
     DLMF.Airy.rayIntegral (fun s => exp (s ^ 3 / 3 - w * s)) t 0 with hP
   have hQ : ∀ j k, ellipticUmbilicQuadrant 1 x y 0 j k =
       (I * (β⁻¹ : ℝ) * P (θ j) (c / (2 * β))) * (I * (β⁻¹ : ℝ) * P (θ k) (c' / (2 * β))) :=
-    q2s_E_quadrant_z_zero x y hβ hβ3
+    ellipticUmbilicQuadrant_z_zero x y hβ hβ3
   have hw : conj ((x + I * y) / (((12 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ)) =
       (x - I * y) / (((12 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) := by
     simp [map_div₀, conj_ofReal]
@@ -991,15 +1008,15 @@ theorem ellipticUmbilicIntegral_z_zero (x y : ℝ) :
   rw [hre, map_mul, ← DLMF.Airy.airyAi_conj, ← DLMF.Airy.airyBi_conj, hw, hw', h2β, hβ2,
     ← hc, ← hc']
   have hA : 2 * π * I * DLMF.Airy.airyAi (c / (2 * β)) =
-      P (π / 3) (c / (2 * β)) - P (-π / 3) (c / (2 * β)) := (q2s_airy_rays _).1
+      P (π / 3) (c / (2 * β)) - P (-π / 3) (c / (2 * β)) := (airyAi_airyBi_eq_rayIntegral _).1
   have hB : 2 * π * DLMF.Airy.airyBi (c / (2 * β)) =
       P (π / 3) (c / (2 * β)) + P (-π / 3) (c / (2 * β)) - 2 * P π (c / (2 * β)) :=
-    (q2s_airy_rays _).2
+    (airyAi_airyBi_eq_rayIntegral _).2
   have hA' : 2 * π * I * DLMF.Airy.airyAi (c' / (2 * β)) =
-      P (π / 3) (c' / (2 * β)) - P (-π / 3) (c' / (2 * β)) := (q2s_airy_rays _).1
+      P (π / 3) (c' / (2 * β)) - P (-π / 3) (c' / (2 * β)) := (airyAi_airyBi_eq_rayIntegral _).1
   have hB' : 2 * π * DLMF.Airy.airyBi (c' / (2 * β)) =
       P (π / 3) (c' / (2 * β)) + P (-π / 3) (c' / (2 * β)) - 2 * P π (c' / (2 * β)) :=
-    (q2s_airy_rays _).2
+    (airyAi_airyBi_eq_rayIntegral _).2
   clear_value P
   have e00 : ellipticUmbilicCycle 0 0 = -1 := rfl
   have e01 : ellipticUmbilicCycle 0 1 = 0 := rfl

@@ -9,15 +9,37 @@ public import DLMF.CoalescingSaddles.Basic.AuxiliaryData
 public import DLMF.CoalescingSaddles.CanonicalIntegrals
 
 /-!
-# Leading-order asymptotics of the canonical integrals: DLMF §36.11
+# Leading-order asymptotics of the canonical integrals
 
-* 36.11.1–36.11.2: the stationary-phase approximation of `Ψ_K(x)` far from the origin, away
-  from the bifurcation set. DLMF does not say along which path `x → ∞`; we state it along the
-  scaling rays of §36.6, `x(k) = (x₁k^{γ₁}, …, x_Kk^{γ_K})` (`cuspoidScaledCoords`) with
-  `k → ∞`, for `x ∉` bifurcation set: on this ray `Ψ_K(x(k)) = k^{1/(K+2)} ∫ exp(ikΦ_K(τ; x)) dτ`,
-  and 36.11.2 is the stationary-phase theorem for the large parameter `k`. Each term of the sum is
-  of exact order `k^{1/(K+2) - 1/2}`, so DLMF's factors `1 + o(1)` amount to an `o` of that order.
-* 36.11.3–36.11.8: asymptotics along symmetry lines, stated with `Asymptotics.IsLittleO`.
+This file proves the leading-order asymptotics of the canonical integrals of DLMF §36.11: the
+stationary-phase approximation of the cuspoid integrals `Ψ_K(x)` far from the origin (DLMF
+36.11.1–36.11.2) and the asymptotics along symmetry lines (DLMF 36.11.3–36.11.8), stated with
+`Asymptotics.IsLittleO`.
+
+## Main results
+
+* `cuspoidIntegral_sub_stationaryPhaseSum_isLittleO`: the stationary-phase approximation along
+  scaling rays away from the bifurcation set (DLMF 36.11.2).
+* `cuspoidIntegral_two_zero_atTop`, `cuspoidIntegral_two_zero_atBot`: the Pearcey integral on
+  the symmetry line `x = 0` (DLMF 36.11.3).
+* `cuspoidIntegral_three_x_atTop`, `cuspoidIntegral_three_x_atBot`: the swallowtail integral on
+  the `x`-axis (DLMF 36.11.4).
+* `cuspoidIntegral_three_y_conj`, `cuspoidIntegral_three_y_atTop`: the swallowtail integral on
+  the `y`-axis (DLMF 36.11.5).
+* `cuspoidIntegral_three_z_atTop`, `cuspoidIntegral_three_z_atBot`: the swallowtail integral on
+  the `z`-axis (DLMF 36.11.6).
+* `ellipticUmbilicIntegral_z_atTop`, `ellipticUmbilicIntegral_z_atBot`: the elliptic umbilic
+  integral on the `z`-axis (DLMF 36.11.7, corrected for `z → -∞`).
+* `hyperbolicUmbilicIntegral_z_atTop`, `hyperbolicUmbilicIntegral_z_atBot`: the hyperbolic
+  umbilic integral on the `z`-axis (DLMF 36.11.8, corrected for `z → -∞`).
+
+## Implementation notes
+
+DLMF does not say along which path `x → ∞` in 36.11.2; we state it along the scaling rays of
+§36.6, `x(k) = (x₁k^{γ₁}, …, x_Kk^{γ_K})` (`cuspoidScaledCoords`) with `k → ∞`, for `x` off
+the bifurcation set. On this ray `Ψ_K(x(k)) = k^{1/(K+2)} ∫ exp(ikΦ_K(τ; x)) dτ`, and 36.11.2 is
+the stationary-phase theorem for the large parameter `k`. Each term of the sum is of exact order
+`k^{1/(K+2) - 1/2}`, so DLMF's factors `1 + o(1)` amount to an `o` of that order.
 
 **Corrections (36.11.7, 36.11.8).** DLMF states both formulas for `z → ±∞`. They hold for
 `z → +∞` only. By 36.2.24, `Ψ^{(U)}(0, 0, -z) = conj Ψ^{(U)}(0, 0, z)`, and conjugating the printed
@@ -28,19 +50,15 @@ that is `(π/|z|)(i sign z + √3 e^{4iz³/27})` and `(2π/|z|)(1 - i sign z e^{
 quadrature confirms this: `Ψ^{(E)}(0, 0, -6) = 0.75621 - 1.01820i` against the printed
 `-0.75656 - 0.02351i` and the corrected `0.75656 - 1.02369i`; `Ψ^{(H)}(0, 0, -12) =
 0.80126 + 0.11760i` against the printed `-0.24548 + 0.11846i` and the corrected
-`0.80172 + 0.11846i`. The `z → -∞` statements below are the corrected forms, derived from the
+`0.80172 + 0.11846i`. The `z → -∞` statements are the corrected forms, derived from the
 `z → +∞` statements and 36.2.24.
 
 **36.11.6.** DLMF's `z → +∞` remainder `o(1)` is weaker than the size `|z|^{-1/3}` of the leading
 term; we state the stronger `o(|z|^{-1/3})` (stronger than DLMF), which numerical quadrature
 supports (relative error `3·10⁻⁵` at `z = 20` and `9·10⁻⁷` at `z = 60`).
 
-Other numerical checks: 36.11.2 for `K = 1, 2, 3` at points with one to three real critical
-points, 36.11.3–36.11.5 and 36.11.6 (`z → -∞`) at moderate arguments; relative errors decrease as
-the argument grows.
-
-**Proofs.** 36.11.3 for `y → +∞` (`cuspoidIntegral_two_zero_atTop`) is proved by the scaling
-`t = u/√y` and dominated convergence to a complex Gaussian integral. 36.11.6 for `z → +∞`
+36.11.3 for `y → +∞` (`cuspoidIntegral_two_zero_atTop`) is proved by the scaling `t = u/√y` and
+dominated convergence to a complex Gaussian integral. 36.11.6 for `z → +∞`
 (`cuspoidIntegral_three_z_atTop`) is proved by splitting `Ψ₃(0, 0, z) = 2 Re ∫_0^∞`, the
 scaling `r = u/z^{1/3}`, dominated convergence to `∫_0^∞ e^{iπ/10} exp(i(ue^{iπ/10})³) du`, and
 rotation of that ray to the angle `π/6` (the `θ`-derivative of the ray integral vanishes), where
@@ -75,27 +93,26 @@ With `t = u/√y` the Pearcey integral on the line `x = 0` is `y^{-1/2}` times
 `∫ e^{iπ/8} exp(-u⁴/y² + i e^{iπ/4} u²) du`; the integrand is dominated by `exp(-u²/√2)`, and
 the limit is a complex Gaussian integral. -/
 
-section q2t
-
+section CanonicalIntegrals
 open MeasureTheory Set
 
 /-- The Pearcey integrand on the symmetry line after the scaling `t = u/√y`. -/
-def q2t_pearceyScaled (y u : ℝ) : ℂ :=
+def pearceySymmetryLineScaled (y u : ℝ) : ℂ :=
   exp (((π / 8 : ℝ) : ℂ) * I) *
     exp (-((u ^ 4 / y ^ 2 : ℝ) : ℂ) + I * exp (((π / 4 : ℝ) : ℂ) * I) * (u : ℂ) ^ 2)
 
 /-- The Pearcey contour angle is `π/8`. -/
-lemma q2t_cuspoidAngle_two : cuspoidAngle 2 = π / 8 := by
+private lemma cuspoidAngle_two : cuspoidAngle 2 = π / 8 := by
   unfold cuspoidAngle; norm_num
 
 /-- On the symmetry line `x = 0` the Pearcey contour integrand is `e^{iπ/8} exp(-r⁴ + i e^{iπ/4} y
 r²)`. -/
-lemma q2t_pearcey_integrand (y r : ℝ) :
+private lemma cuspoidIntegrand_two_symmetryLine (y r : ℝ) :
     cuspoidContourDir 2 r * exp (I * cuspoidPotential 2 (cuspoidContour 2 r) ![0, y]) =
       exp (((π / 8 : ℝ) : ℂ) * I) * exp (-((r ^ 4 : ℝ) : ℂ) +
         I * exp (((π / 4 : ℝ) : ℂ) * I) * ((y * r ^ 2 : ℝ) : ℂ)) := by
   have hd : cuspoidContourDir 2 r = exp (((π / 8 : ℝ) : ℂ) * I) := by
-    rw [s36a_dir_of_even (by decide), q2t_cuspoidAngle_two]
+    rw [cuspoidContourDir_of_even (by decide), cuspoidAngle_two]
   rw [hd, cuspoidPotential_two]
   congr 2
   have h4 := cuspoidContour_pow 2 r
@@ -107,18 +124,18 @@ lemma q2t_pearcey_integrand (y r : ℝ) :
   push_cast
   linear_combination ((r : ℂ) ^ 4) * I_sq
 
-/-- For `y > 0`, the substitution `t = u/√y` gives `Ψ₂(0, y) = y^{-1/2} ∫ q2t_pearceyScaled y u du`.
+/-- For `y > 0`, the substitution `t = u/√y` gives `Ψ₂(0, y) = y^{-1/2} ∫ pearceySymmetryLineScaled y u du`.
 -/
-lemma q2t_pearcey_scale {y : ℝ} (hy : 0 < y) :
+private lemma cuspoidIntegral_two_symmetryLine_eq_scaled {y : ℝ} (hy : 0 < y) :
     cuspoidIntegral 2 ![0, y] =
-      ((1 / Real.sqrt y : ℝ) : ℂ) * ∫ u : ℝ, q2t_pearceyScaled y u := by
+      ((1 / Real.sqrt y : ℝ) : ℂ) * ∫ u : ℝ, pearceySymmetryLineScaled y u := by
   have hs : 0 < Real.sqrt y := Real.sqrt_pos.mpr hy
   have hss : Real.sqrt y ^ 2 = y := Real.sq_sqrt hy.le
   set g : ℝ → ℂ := fun r => exp (((π / 8 : ℝ) : ℂ) * I) * exp (-((r ^ 4 : ℝ) : ℂ) +
     I * exp (((π / 4 : ℝ) : ℂ) * I) * ((y * r ^ 2 : ℝ) : ℂ)) with hg
   have h1 : cuspoidIntegral 2 ![0, y] = ∫ r, g r := by
-    unfold cuspoidIntegral; simp only [q2t_pearcey_integrand, hg]
-  have h2 : (fun u : ℝ => q2t_pearceyScaled y u) = fun u => g (u / Real.sqrt y) := by
+    unfold cuspoidIntegral; simp only [cuspoidIntegrand_two_symmetryLine, hg]
+  have h2 : (fun u : ℝ => pearceySymmetryLineScaled y u) = fun u => g (u / Real.sqrt y) := by
     funext u
     have h4 : Real.sqrt y ^ 4 = y ^ 2 := by
       calc Real.sqrt y ^ 4 = (Real.sqrt y ^ 2) ^ 2 := by ring
@@ -126,15 +143,15 @@ lemma q2t_pearcey_scale {y : ℝ} (hy : 0 < y) :
     have e1 : (u / Real.sqrt y) ^ 4 = u ^ 4 / y ^ 2 := by rw [div_pow, h4]
     have e2 : y * (u / Real.sqrt y) ^ 2 = u ^ 2 := by
       rw [div_pow, hss]; field_simp
-    simp only [q2t_pearceyScaled, hg, e1, e2]
+    simp only [pearceySymmetryLineScaled, hg, e1, e2]
     push_cast; ring_nf
   rw [h1, h2, Measure.integral_comp_div, abs_of_pos hs, Complex.real_smul, ← mul_assoc,
     ← ofReal_mul, one_div_mul_cancel hs.ne', ofReal_one, one_mul]
 
 /-- The scaled Pearcey integrand is bounded by the Gaussian `exp(-(√2/2) u²)`. -/
-lemma q2t_norm_pearceyScaled_le (y u : ℝ) :
-    ‖q2t_pearceyScaled y u‖ ≤ Real.exp (-(Real.sqrt 2 / 2) * u ^ 2) := by
-  rw [q2t_pearceyScaled, norm_mul, norm_exp_ofReal_mul_I, one_mul, norm_exp]
+private lemma norm_pearceySymmetryLineScaled_le (y u : ℝ) :
+    ‖pearceySymmetryLineScaled y u‖ ≤ Real.exp (-(Real.sqrt 2 / 2) * u ^ 2) := by
+  rw [pearceySymmetryLineScaled, norm_mul, norm_exp_ofReal_mul_I, one_mul, norm_exp]
   refine Real.exp_le_exp.mpr ?_
   have hre : (I * exp (((π / 4 : ℝ) : ℂ) * I)).re = -(Real.sqrt 2 / 2) := by
     rw [exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_four, Real.sin_pi_div_four]
@@ -149,27 +166,27 @@ lemma q2t_norm_pearceyScaled_le (y u : ℝ) :
 
 /-- As `y → ∞` the scaled Pearcey integral tends to the Gaussian integral `∫ e^{iπ/8} exp(i e^{iπ/4}
 u²) du` (dominated convergence). -/
-lemma q2t_tendsto_pearceyScaled :
-    Tendsto (fun y : ℝ => ∫ u : ℝ, q2t_pearceyScaled y u) atTop
+private lemma tendsto_integral_pearceySymmetryLineScaled :
+    Tendsto (fun y : ℝ => ∫ u : ℝ, pearceySymmetryLineScaled y u) atTop
       (𝓝 (∫ u : ℝ, exp (((π / 8 : ℝ) : ℂ) * I) *
         exp (I * exp (((π / 4 : ℝ) : ℂ) * I) * (u : ℂ) ^ 2))) := by
   refine tendsto_integral_filter_of_dominated_convergence
     (fun u => Real.exp (-(Real.sqrt 2 / 2) * u ^ 2)) (Eventually.of_forall fun y => ?_)
-    (Eventually.of_forall fun y => ae_of_all _ fun u => q2t_norm_pearceyScaled_le y u)
+    (Eventually.of_forall fun y => ae_of_all _ fun u => norm_pearceySymmetryLineScaled_le y u)
     (integrable_exp_neg_mul_sq (by positivity)) (ae_of_all _ fun u => ?_)
-  · unfold q2t_pearceyScaled; fun_prop
+  · unfold pearceySymmetryLineScaled; fun_prop
   · have h0 : Tendsto (fun y : ℝ => u ^ 4 / y ^ 2) atTop (𝓝 0) :=
       tendsto_const_nhds.div_atTop (tendsto_pow_atTop two_ne_zero)
-    have h1 : Tendsto (fun y : ℝ => q2t_pearceyScaled y u) atTop
+    have h1 : Tendsto (fun y : ℝ => pearceySymmetryLineScaled y u) atTop
         (𝓝 (exp (((π / 8 : ℝ) : ℂ) * I) * exp (-((0 : ℝ) : ℂ) +
           I * exp (((π / 4 : ℝ) : ℂ) * I) * (u : ℂ) ^ 2))) := by
-      unfold q2t_pearceyScaled
+      unfold pearceySymmetryLineScaled
       exact tendsto_const_nhds.mul (((continuous_ofReal.tendsto 0).comp h0).neg.add
         tendsto_const_nhds).cexp
     simpa using h1
 
 /-- The Fresnel-type limit: `∫ e^{iπ/8} exp(i e^{iπ/4} u²) du = √π e^{iπ/4}`. -/
-lemma q2t_pearcey_limit :
+private lemma integral_pearceyGaussianLimit :
     ∫ u : ℝ, exp (((π / 8 : ℝ) : ℂ) * I) * exp (I * exp (((π / 4 : ℝ) : ℂ) * I) * (u : ℂ) ^ 2) =
       (Real.sqrt π : ℂ) * exp (I * π / 4) := by
   set b : ℂ := exp (-(((π / 4 : ℝ) : ℂ) * I)) with hb
@@ -196,28 +213,28 @@ lemma q2t_pearcey_limit :
   congr 1; push_cast; ring
 
 /-- The cubic ray integrand `e^{iθ} exp(i (r e^{iθ})³)`. -/
-def q2t_cubicRay (θ r : ℝ) : ℂ :=
+def cubicRayIntegrand (θ r : ℝ) : ℂ :=
   exp ((θ : ℂ) * I) * exp (I * ((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3)
 
 /-- Its `θ`-derivative `i e^{iθ} exp(i (r e^{iθ})³) (1 + 3i (r e^{iθ})³)`. -/
-def q2t_cubicRayDeriv (θ r : ℝ) : ℂ :=
+def cubicRayIntegrandDeriv (θ r : ℝ) : ℂ :=
   I * exp ((θ : ℂ) * I) * exp (I * ((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3) *
     (1 + 3 * I * ((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3)
 
-/-- The cubic ray integrand has `θ`-derivative `q2t_cubicRayDeriv θ r`. -/
-lemma q2t_hasDerivAt_cubicRay (θ r : ℝ) :
-    HasDerivAt (fun θ => q2t_cubicRay θ r) (q2t_cubicRayDeriv θ r) θ := by
+/-- The cubic ray integrand has `θ`-derivative `cubicRayIntegrandDeriv θ r`. -/
+private lemma hasDerivAt_cubicRayIntegrand (θ r : ℝ) :
+    HasDerivAt (fun θ => cubicRayIntegrand θ r) (cubicRayIntegrandDeriv θ r) θ := by
   have hE : HasDerivAt (fun θ : ℝ => exp ((θ : ℂ) * I)) (exp ((θ : ℂ) * I) * I) θ := by
     have := ((hasDerivAt_id (θ : ℂ)).mul_const I).cexp.comp_ofReal
     simpa using this
   have h2 := ((((hE.const_mul (r : ℂ)).pow 3).const_mul I).cexp)
   have h := hE.mul h2
-  unfold q2t_cubicRay q2t_cubicRayDeriv
+  unfold cubicRayIntegrand cubicRayIntegrandDeriv
   convert h using 1
   simp only [Pi.pow_apply]; push_cast; ring
 
 /-- `Re (i (r e^{iθ})³) = -r³ sin 3θ`. -/
-lemma q2t_cubicRay_re (θ r : ℝ) :
+private lemma re_I_mul_ofReal_mul_exp_cube (θ r : ℝ) :
     (I * ((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3).re = -(r ^ 3 * Real.sin (3 * θ)) := by
   have : ((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3 = ((r ^ 3 : ℝ) : ℂ) * exp (((3 * θ : ℝ) : ℂ) * I) := by
     rw [mul_pow, ← exp_nat_mul]; push_cast; ring_nf
@@ -226,38 +243,38 @@ lemma q2t_cubicRay_re (θ r : ℝ) :
   ring
 
 /-- For `π/12 ≤ θ ≤ π/4`, `sin 3θ ≥ √2/2`. -/
-lemma q2t_sin_three_ge {θ : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) :
+private lemma sqrt_two_div_two_le_sin_three_mul {θ : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) :
     Real.sqrt 2 / 2 ≤ Real.sin (3 * θ) := by
   rw [← Real.cos_pi_div_four, ← Real.cos_sub_pi_div_two, ← Real.cos_abs (3 * θ - π / 2)]
   apply Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg _) (by linarith [Real.pi_pos])
   rw [abs_le]; constructor <;> linarith
 
 /-- For `π/12 ≤ θ ≤ π/4` and `r ≥ 0`, `‖exp(i (r e^{iθ})³)‖ ≤ exp(-(√2/2) r³)`. -/
-lemma q2t_norm_exp_cubic_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) (hr : 0 ≤ r) :
+private lemma norm_exp_I_mul_cube_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) (hr : 0 ≤ r) :
     ‖exp (I * ((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3)‖ ≤ Real.exp (-(Real.sqrt 2 / 2) * r ^ 3) := by
-  rw [norm_exp, q2t_cubicRay_re]
+  rw [norm_exp, re_I_mul_ofReal_mul_exp_cube]
   refine Real.exp_le_exp.mpr ?_
-  have := q2t_sin_three_ge h1 h2
+  have := sqrt_two_div_two_le_sin_three_mul h1 h2
   have := pow_nonneg hr 3
   nlinarith
 
 /-- `‖(r e^{iθ})³‖ = r³` for `r ≥ 0`. -/
-lemma q2t_norm_cube (θ r : ℝ) (hr : 0 ≤ r) : ‖((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3‖ = r ^ 3 := by
+private lemma norm_ofReal_mul_exp_cube (θ r : ℝ) (hr : 0 ≤ r) : ‖((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3‖ = r ^ 3 := by
   rw [norm_pow, norm_mul, norm_exp_ofReal_mul_I, mul_one, Complex.norm_real, Real.norm_eq_abs,
     abs_of_nonneg hr]
 
 /-- Uniform bound `(1 + 3r³) exp(-(√2/2) r³)` on the `θ`-derivative of the cubic ray integrand for
 `π/12 ≤ θ ≤ π/4`. -/
-lemma q2t_norm_cubicRayDeriv_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) (hr : 0 ≤ r) :
-    ‖q2t_cubicRayDeriv θ r‖ ≤ (1 + 3 * r ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * r ^ 3) := by
-  unfold q2t_cubicRayDeriv
+private lemma norm_cubicRayIntegrandDeriv_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) (hr : 0 ≤ r) :
+    ‖cubicRayIntegrandDeriv θ r‖ ≤ (1 + 3 * r ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * r ^ 3) := by
+  unfold cubicRayIntegrandDeriv
   rw [norm_mul, norm_mul, norm_mul, norm_I, norm_exp_ofReal_mul_I, one_mul, one_mul, mul_comm]
-  refine mul_le_mul ?_ (q2t_norm_exp_cubic_le h1 h2 hr) (norm_nonneg _) (by positivity)
+  refine mul_le_mul ?_ (norm_exp_I_mul_cube_le h1 h2 hr) (norm_nonneg _) (by positivity)
   refine (norm_add_le _ _).trans ?_
-  rw [norm_one, norm_mul, norm_mul, norm_I, q2t_norm_cube θ r hr]; simp
+  rw [norm_one, norm_mul, norm_mul, norm_I, norm_ofReal_mul_exp_cube θ r hr]; simp
 
 /-- The dominating function `(1 + 3r³) exp(-(√2/2) r³)` is integrable on `(0, ∞)`. -/
-lemma q2t_integrableOn_cubic_bound :
+private lemma integrableOn_cubic_dominating :
     IntegrableOn (fun r : ℝ => (1 + 3 * r ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * r ^ 3))
       (Ioi 0) := by
   have h0 := integrableOn_rpow_mul_exp_neg_mul_rpow (s := 0) (p := 3) (b := Real.sqrt 2 / 2)
@@ -272,27 +289,27 @@ lemma q2t_integrableOn_cubic_bound :
 
 /-- `∫_0^∞ ∂_θ(e^{iθ} exp(i(re^{iθ})³)) dr = 0`: the integrand is `i ∂_r(r e^{iθ} exp(i(re^{iθ})³))`
 and the boundary terms vanish. -/
-lemma q2t_integral_cubicRayDeriv {θ : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) :
-    ∫ r in Ioi (0 : ℝ), q2t_cubicRayDeriv θ r = 0 := by
+private lemma integral_cubicRayIntegrandDeriv_eq_zero {θ : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) :
+    ∫ r in Ioi (0 : ℝ), cubicRayIntegrandDeriv θ r = 0 := by
   set E : ℂ := exp ((θ : ℂ) * I)
   set k : ℝ → ℂ := fun r => (r : ℂ) * E * exp (I * ((r : ℂ) * E) ^ 3) with hk
-  have hd : ∀ r : ℝ, HasDerivAt k ((-I) * q2t_cubicRayDeriv θ r) r := by
+  have hd : ∀ r : ℝ, HasDerivAt k ((-I) * cubicRayIntegrandDeriv θ r) r := by
     intro r
     have h := (((hasDerivAt_id (r : ℂ)).mul_const E).mul
       ((((hasDerivAt_id (r : ℂ)).mul_const E).pow 3).const_mul I).cexp).comp_ofReal
     convert h using 1
     · funext y; simp [hk]
-    unfold q2t_cubicRayDeriv
+    unfold cubicRayIntegrandDeriv
     simp only [id]
     push_cast
     linear_combination (-(E * exp (I * ((r : ℂ) * E) ^ 3)) *
       (1 + 3 * I * ((r : ℂ) * E) ^ 3)) * I_sq
-  have hint : IntegrableOn (fun r => (-I) * q2t_cubicRayDeriv θ r) (Ioi 0) := by
-    refine (q2t_integrableOn_cubic_bound.mono' ?_ ?_).const_mul (-I)
-    · exact (by unfold q2t_cubicRayDeriv; fun_prop : Continuous fun r => q2t_cubicRayDeriv θ r)
+  have hint : IntegrableOn (fun r => (-I) * cubicRayIntegrandDeriv θ r) (Ioi 0) := by
+    refine (integrableOn_cubic_dominating.mono' ?_ ?_).const_mul (-I)
+    · exact (by unfold cubicRayIntegrandDeriv; fun_prop : Continuous fun r => cubicRayIntegrandDeriv θ r)
         |>.aestronglyMeasurable
     · exact ae_restrict_of_forall_mem measurableSet_Ioi fun r hr =>
-        q2t_norm_cubicRayDeriv_le h1 h2 (le_of_lt hr)
+        norm_cubicRayIntegrandDeriv_le h1 h2 (le_of_lt hr)
   have htend : Tendsto k atTop (𝓝 0) := by
     set c := Real.sqrt 2 / 2
     have hc : 0 < c := by positivity
@@ -304,7 +321,7 @@ lemma q2t_integral_cubicRayDeriv {θ : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ �
     rw [hk]; simp only
     rw [norm_mul, norm_mul, norm_exp_ofReal_mul_I, mul_one, Complex.norm_real, Real.norm_eq_abs,
       abs_of_nonneg (by linarith)]
-    have hb := q2t_norm_exp_cubic_le h1 h2 (by linarith : (0 : ℝ) ≤ r)
+    have hb := norm_exp_I_mul_cube_le h1 h2 (by linarith : (0 : ℝ) ≤ r)
     have hr3 : r ≤ r ^ 3 := by
       nlinarith [mul_nonneg (mul_nonneg (by linarith : (0 : ℝ) ≤ r)
         (by linarith : (0 : ℝ) ≤ r - 1)) (by linarith : (0 : ℝ) ≤ r + 1)]
@@ -324,152 +341,152 @@ lemma q2t_integral_cubicRayDeriv {θ : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ �
   exact this
 
 /-- Uniform bound `(1 + 3r³) exp(-(√2/2) r³)` on the cubic ray integrand for `π/12 ≤ θ ≤ π/4`. -/
-lemma q2t_norm_cubicRay_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) (hr : 0 ≤ r) :
-    ‖q2t_cubicRay θ r‖ ≤ (1 + 3 * r ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * r ^ 3) := by
-  unfold q2t_cubicRay
+private lemma norm_cubicRayIntegrand_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) (hr : 0 ≤ r) :
+    ‖cubicRayIntegrand θ r‖ ≤ (1 + 3 * r ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * r ^ 3) := by
+  unfold cubicRayIntegrand
   rw [norm_mul, norm_exp_ofReal_mul_I, one_mul]
-  refine (q2t_norm_exp_cubic_le h1 h2 hr).trans ?_
+  refine (norm_exp_I_mul_cube_le h1 h2 hr).trans ?_
   have := pow_nonneg hr 3
   exact le_mul_of_one_le_left (by positivity) (by linarith)
 
 /-- The cubic ray integral `G(θ) = ∫_0^∞ e^{iθ} exp(i(re^{iθ})³) dr`. -/
-def q2t_cubicG (θ : ℝ) : ℂ := ∫ r in Ioi (0 : ℝ), q2t_cubicRay θ r
+def cubicRayIntegral (θ : ℝ) : ℂ := ∫ r in Ioi (0 : ℝ), cubicRayIntegrand θ r
 
 /-- The cubic ray integral `G(θ)` has derivative `0` for `π/10 ≤ θ ≤ π/6` (Cauchy's theorem in
 differential form). -/
-lemma q2t_hasDerivAt_cubicG {θ₀ : ℝ} (h1 : π / 10 ≤ θ₀) (h2 : θ₀ ≤ π / 6) :
-    HasDerivAt q2t_cubicG 0 θ₀ := by
+private lemma hasDerivAt_cubicRayIntegral_zero {θ₀ : ℝ} (h1 : π / 10 ≤ θ₀) (h2 : θ₀ ≤ π / 6) :
+    HasDerivAt cubicRayIntegral 0 θ₀ := by
   have hpi := Real.pi_pos
   have hball : ∀ θ ∈ Metric.ball θ₀ (π / 60), π / 12 ≤ θ ∧ θ ≤ π / 4 := by
     intro θ hθ
     rw [Metric.mem_ball, Real.dist_eq, abs_lt] at hθ
     constructor <;> linarith [hθ.1, hθ.2]
-  have hcont : ∀ θ, Continuous fun r => q2t_cubicRay θ r := fun θ => by
-    unfold q2t_cubicRay; fun_prop
-  have hcont' : ∀ θ, Continuous fun r => q2t_cubicRayDeriv θ r := fun θ => by
-    unfold q2t_cubicRayDeriv; fun_prop
+  have hcont : ∀ θ, Continuous fun r => cubicRayIntegrand θ r := fun θ => by
+    unfold cubicRayIntegrand; fun_prop
+  have hcont' : ∀ θ, Continuous fun r => cubicRayIntegrandDeriv θ r := fun θ => by
+    unfold cubicRayIntegrandDeriv; fun_prop
   have h0 := hball θ₀ (Metric.mem_ball_self (by positivity))
-  have hint : Integrable (fun r => q2t_cubicRay θ₀ r) (volume.restrict (Ioi 0)) :=
-    q2t_integrableOn_cubic_bound.mono' (hcont θ₀).aestronglyMeasurable
+  have hint : Integrable (fun r => cubicRayIntegrand θ₀ r) (volume.restrict (Ioi 0)) :=
+    integrableOn_cubic_dominating.mono' (hcont θ₀).aestronglyMeasurable
       (ae_restrict_of_forall_mem measurableSet_Ioi fun r hr =>
-        q2t_norm_cubicRay_le h0.1 h0.2 (le_of_lt hr))
+        norm_cubicRayIntegrand_le h0.1 h0.2 (le_of_lt hr))
   have h := hasDerivAt_integral_of_dominated_loc_of_deriv_le (μ := volume.restrict (Ioi 0))
-    (F := fun θ r => q2t_cubicRay θ r) (F' := fun θ r => q2t_cubicRayDeriv θ r) (x₀ := θ₀)
+    (F := fun θ r => cubicRayIntegrand θ r) (F' := fun θ r => cubicRayIntegrandDeriv θ r) (x₀ := θ₀)
     (bound := fun r => (1 + 3 * r ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * r ^ 3))
     (s := Metric.ball θ₀ (π / 60)) (Metric.ball_mem_nhds _ (by positivity))
     (Eventually.of_forall fun θ => (hcont θ).aestronglyMeasurable) hint
     (hcont' θ₀).aestronglyMeasurable
     (ae_restrict_of_forall_mem measurableSet_Ioi fun r hr θ hθ =>
-      q2t_norm_cubicRayDeriv_le (hball θ hθ).1 (hball θ hθ).2 (le_of_lt hr))
-    q2t_integrableOn_cubic_bound
-    (ae_of_all _ fun r θ _ => q2t_hasDerivAt_cubicRay θ r)
+      norm_cubicRayIntegrandDeriv_le (hball θ hθ).1 (hball θ hθ).2 (le_of_lt hr))
+    integrableOn_cubic_dominating
+    (ae_of_all _ fun r θ _ => hasDerivAt_cubicRayIntegrand θ r)
   have h2' := h.2
-  rw [q2t_integral_cubicRayDeriv h0.1 h0.2] at h2'
+  rw [integral_cubicRayIntegrandDeriv_eq_zero h0.1 h0.2] at h2'
   exact h2'
 
 /-- The cubic ray integral `G(θ)` is constant on `[π/10, π/6]`. -/
-lemma q2t_cubicG_eq {θ : ℝ} (h1 : π / 10 ≤ θ) (h2 : θ ≤ π / 6) :
-    q2t_cubicG θ = q2t_cubicG (π / 10) := by
+private lemma cubicRayIntegral_eq_pi_div_ten {θ : ℝ} (h1 : π / 10 ≤ θ) (h2 : θ ≤ π / 6) :
+    cubicRayIntegral θ = cubicRayIntegral (π / 10) := by
   have hle : π / 10 ≤ π / 6 := by linarith [Real.pi_pos]
-  refine constant_of_has_deriv_right_zero (f := q2t_cubicG) (a := π / 10) (b := π / 6)
-    (fun x hx => (q2t_hasDerivAt_cubicG hx.1 hx.2).continuousAt.continuousWithinAt)
-    (fun x hx => (q2t_hasDerivAt_cubicG hx.1 hx.2.le).hasDerivWithinAt) θ ⟨h1, h2⟩
+  refine constant_of_has_deriv_right_zero (f := cubicRayIntegral) (a := π / 10) (b := π / 6)
+    (fun x hx => (hasDerivAt_cubicRayIntegral_zero hx.1 hx.2).continuousAt.continuousWithinAt)
+    (fun x hx => (hasDerivAt_cubicRayIntegral_zero hx.1 hx.2.le).hasDerivWithinAt) θ ⟨h1, h2⟩
 
 /-- On the ray `θ = π/6`, `G(π/6) = e^{iπ/6} Γ(4/3)`. -/
-lemma q2t_cubicG_pi_div_six :
-    q2t_cubicG (π / 6) = exp (((π / 6 : ℝ) : ℂ) * I) * (Real.Gamma (1 / 3 + 1) : ℂ) := by
+private lemma cubicRayIntegral_pi_div_six :
+    cubicRayIntegral (π / 6) = exp (((π / 6 : ℝ) : ℂ) * I) * (Real.Gamma (1 / 3 + 1) : ℂ) := by
   have hE : exp (((π / 6 : ℝ) : ℂ) * I) ^ 3 = I := by
     rw [← exp_nat_mul, show ((3 : ℕ) : ℂ) * (((π / 6 : ℝ) : ℂ) * I) = ((π / 2 : ℝ) : ℂ) * I by
       push_cast; ring, exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_two,
       Real.sin_pi_div_two]
     simp
-  have hpt : ∀ r : ℝ, q2t_cubicRay (π / 6) r =
+  have hpt : ∀ r : ℝ, cubicRayIntegrand (π / 6) r =
       exp (((π / 6 : ℝ) : ℂ) * I) * ((Real.exp (-r ^ 3) : ℝ) : ℂ) := by
     intro r
-    unfold q2t_cubicRay
+    unfold cubicRayIntegrand
     rw [mul_pow, hE, ofReal_exp]
     congr 2
     push_cast
     linear_combination (r : ℂ) ^ 3 * I_sq
-  unfold q2t_cubicG
+  unfold cubicRayIntegral
   simp_rw [hpt]
-  rw [integral_const_mul, integral_complex_ofReal, s36a_integral_exp_neg_pow 3 (by norm_num)]
+  rw [integral_const_mul, integral_complex_ofReal, integral_Ioi_exp_neg_pow 3 (by norm_num)]
   push_cast; ring_nf
 
 /-- The swallowtail contour angle is `π/10`. -/
-lemma q2t_cuspoidAngle_three : cuspoidAngle 3 = π / 10 := by
+private lemma cuspoidAngle_three : cuspoidAngle 3 = π / 10 := by
   unfold cuspoidAngle; norm_num
 
 /-- The swallowtail potential on the `z`-axis is `t⁵ + z t³`. -/
-lemma q2t_swallow_pot (z : ℝ) (t : ℂ) :
+private lemma cuspoidPotential_three_zAxis (z : ℝ) (t : ℂ) :
     cuspoidPotential 3 t ![0, 0, z] = t ^ 5 + (z : ℂ) * t ^ 3 := by
   simp [cuspoidPotential, Fin.sum_univ_three]
 
 /-- The swallowtail integrand on the `z`-axis. -/
-def q2t_swF (z r : ℝ) : ℂ :=
+def swallowtailZAxisIntegrand (z r : ℝ) : ℂ :=
   cuspoidContourDir 3 r * exp (I * cuspoidPotential 3 (cuspoidContour 3 r) ![0, 0, z])
 
 /-- For `r ≥ 0` the swallowtail integrand on the `z`-axis is `e^{iπ/10} exp(i((r e^{iπ/10})⁵ + z (r
 e^{iπ/10})³))`. -/
-lemma q2t_swF_nonneg (z : ℝ) {r : ℝ} (hr : 0 ≤ r) :
-    q2t_swF z r = exp (((π / 10 : ℝ) : ℂ) * I) * exp (I * (((r : ℂ) *
+private lemma swallowtailZAxisIntegrand_of_nonneg (z : ℝ) {r : ℝ} (hr : 0 ≤ r) :
+    swallowtailZAxisIntegrand z r = exp (((π / 10 : ℝ) : ℂ) * I) * exp (I * (((r : ℂ) *
       exp (((π / 10 : ℝ) : ℂ) * I)) ^ 5 + (z : ℂ) *
         ((r : ℂ) * exp (((π / 10 : ℝ) : ℂ) * I)) ^ 3)) := by
-  unfold q2t_swF cuspoidContour
-  rw [s36a_dir_of_nonneg 3 hr, q2t_cuspoidAngle_three, q2t_swallow_pot]
+  unfold swallowtailZAxisIntegrand cuspoidContour
+  rw [cuspoidContourDir_of_nonneg 3 hr, cuspoidAngle_three, cuspoidPotential_three_zAxis]
 
 /-- On the negative half line the swallowtail integrand is the complex conjugate of its mirror
 value. -/
-lemma q2t_swF_neg (z : ℝ) {s : ℝ} (hs : 0 < s) :
-    q2t_swF z (-s) = (starRingEnd ℂ) (q2t_swF z s) := by
+private lemma swallowtailZAxisIntegrand_neg (z : ℝ) {s : ℝ} (hs : 0 < s) :
+    swallowtailZAxisIntegrand z (-s) = (starRingEnd ℂ) (swallowtailZAxisIntegrand z s) := by
   have hn : ¬ Even 3 := by decide
-  unfold q2t_swF cuspoidContour
-  rw [s36a_dir_of_odd_neg hn (by linarith : -s < 0), s36a_dir_of_nonneg 3 hs.le,
-    q2t_cuspoidAngle_three, q2t_swallow_pot, q2t_swallow_pot, map_mul, ← exp_conj, ← exp_conj]
+  unfold swallowtailZAxisIntegrand cuspoidContour
+  rw [cuspoidContourDir_of_odd_of_neg hn (by linarith : -s < 0), cuspoidContourDir_of_nonneg 3 hs.le,
+    cuspoidAngle_three, cuspoidPotential_three_zAxis, cuspoidPotential_three_zAxis, map_mul, ← exp_conj, ← exp_conj]
   congr 2
   · simp only [map_mul, conj_I, conj_ofReal]; ring
   · simp only [map_mul, map_add, map_pow, conj_I, conj_ofReal, ← exp_conj]
     push_cast
     ring_nf
 
-/-- On the `z`-axis, `Ψ₃(0, 0, z) = 2 Re ∫_0^∞ q2t_swF z r dr`. -/
-lemma q2t_swallow_split (z : ℝ) :
+/-- On the `z`-axis, `Ψ₃(0, 0, z) = 2 Re ∫_0^∞ swallowtailZAxisIntegrand z r dr`. -/
+private lemma cuspoidIntegral_three_zAxis_eq_two_re (z : ℝ) :
     cuspoidIntegral 3 ![0, 0, z] =
-      (((2 * (∫ r in Ioi (0 : ℝ), q2t_swF z r).re : ℝ)) : ℂ) := by
-  have hint : Integrable (q2t_swF z) := integrable_cuspoidIntegral_integrand 3 ![0, 0, z]
+      (((2 * (∫ r in Ioi (0 : ℝ), swallowtailZAxisIntegrand z r).re : ℝ)) : ℂ) := by
+  have hint : Integrable (swallowtailZAxisIntegrand z) := integrable_cuspoidIntegral_integrand 3 ![0, 0, z]
   have h := integral_add_compl (s := Ioi (0 : ℝ)) measurableSet_Ioi hint
   rw [compl_Ioi] at h
-  have hc : ∫ r in Iic (0 : ℝ), q2t_swF z r =
-      (starRingEnd ℂ) (∫ r in Ioi (0 : ℝ), q2t_swF z r) := by
+  have hc : ∫ r in Iic (0 : ℝ), swallowtailZAxisIntegrand z r =
+      (starRingEnd ℂ) (∫ r in Ioi (0 : ℝ), swallowtailZAxisIntegrand z r) := by
     rw [← integral_conj, show Iic (0 : ℝ) = Iic (-0) by simp,
-      ← integral_comp_neg_Ioi (0 : ℝ) (q2t_swF z)]
+      ← integral_comp_neg_Ioi (0 : ℝ) (swallowtailZAxisIntegrand z)]
     exact setIntegral_congr_fun measurableSet_Ioi fun r (hr : r ∈ Ioi 0) =>
-      q2t_swF_neg z (mem_Ioi.mp hr)
-  have : cuspoidIntegral 3 ![0, 0, z] = ∫ r, q2t_swF z r := rfl
+      swallowtailZAxisIntegrand_neg z (mem_Ioi.mp hr)
+  have : cuspoidIntegral 3 ![0, 0, z] = ∫ r, swallowtailZAxisIntegrand z r := rfl
   rw [this, ← h, hc, add_conj]
 
 /-- The swallowtail integrand after the scaling `r = u/s`, `z = s³`. -/
-def q2t_swScaled (s u : ℝ) : ℂ :=
+def swallowtailZAxisScaled (s u : ℝ) : ℂ :=
   exp (((π / 10 : ℝ) : ℂ) * I) *
     exp (-((u ^ 5 / s ^ 5 : ℝ) : ℂ) + I * ((u : ℂ) * exp (((π / 10 : ℝ) : ℂ) * I)) ^ 3)
 
 /-- `(e^{iπ/10})⁵ = i`. -/
-lemma q2t_exp_pi_div_ten_pow_five : exp (((π / 10 : ℝ) : ℂ) * I) ^ 5 = I := by
+private lemma exp_pi_div_ten_mul_I_pow_five : exp (((π / 10 : ℝ) : ℂ) * I) ^ 5 = I := by
   rw [← exp_nat_mul, show ((5 : ℕ) : ℂ) * (((π / 10 : ℝ) : ℂ) * I) = ((π / 2 : ℝ) : ℂ) * I by
     push_cast; ring, exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_two,
     Real.sin_pi_div_two]
   simp
 
 /-- Under `r = u/s` and `z = s³` the swallowtail integrand becomes the scaled integrand
-`q2t_swScaled s u`. -/
-lemma q2t_swF_scale {s u : ℝ} (hs : 0 < s) (hu : 0 ≤ u) :
-    q2t_swF (s ^ 3) (s⁻¹ * u) = q2t_swScaled s u := by
-  rw [q2t_swF_nonneg _ (by positivity)]
-  unfold q2t_swScaled
+`swallowtailZAxisScaled s u`. -/
+private lemma swallowtailZAxisIntegrand_scale {s u : ℝ} (hs : 0 < s) (hu : 0 ≤ u) :
+    swallowtailZAxisIntegrand (s ^ 3) (s⁻¹ * u) = swallowtailZAxisScaled s u := by
+  rw [swallowtailZAxisIntegrand_of_nonneg _ (by positivity)]
+  unfold swallowtailZAxisScaled
   set E : ℂ := exp (((π / 10 : ℝ) : ℂ) * I)
   have hs' : (s : ℂ) ≠ 0 := ofReal_ne_zero.mpr hs.ne'
   have h5 : (((s⁻¹ * u : ℝ) : ℂ) * E) ^ 5 = ((u ^ 5 / s ^ 5 : ℝ) : ℂ) * I := by
-    rw [mul_pow, q2t_exp_pi_div_ten_pow_five]; push_cast; field_simp
+    rw [mul_pow, exp_pi_div_ten_mul_I_pow_five]; push_cast; field_simp
   have h3 : (((s ^ 3 : ℝ) : ℝ) : ℂ) * (((s⁻¹ * u : ℝ) : ℂ) * E) ^ 3 = ((u : ℂ) * E) ^ 3 := by
     push_cast; rw [mul_pow, mul_pow, mul_pow]; field_simp
   congr 2
@@ -477,15 +494,15 @@ lemma q2t_swF_scale {s u : ℝ} (hs : 0 < s) (hu : 0 ≤ u) :
   linear_combination ((u ^ 5 / s ^ 5 : ℝ) : ℂ) * I_sq
 
 /-- The scaled swallowtail integrand is bounded by `(1 + 3u³) exp(-(√2/2) u³)` for `u ≥ 0`. -/
-lemma q2t_norm_swScaled_le {s u : ℝ} (hs : 0 < s) (hu : 0 ≤ u) :
-    ‖q2t_swScaled s u‖ ≤ (1 + 3 * u ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * u ^ 3) := by
+private lemma norm_swallowtailZAxisScaled_le {s u : ℝ} (hs : 0 < s) (hu : 0 ≤ u) :
+    ‖swallowtailZAxisScaled s u‖ ≤ (1 + 3 * u ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * u ^ 3) := by
   have hpi := Real.pi_pos
   have h1 : π / 12 ≤ π / 10 := by linarith
   have h2 : π / 10 ≤ π / 4 := by linarith
-  unfold q2t_swScaled
+  unfold swallowtailZAxisScaled
   rw [norm_mul, norm_exp_ofReal_mul_I, one_mul, norm_exp, add_re, neg_re, ofReal_re,
-    q2t_cubicRay_re]
-  have hsin := q2t_sin_three_ge h1 h2
+    re_I_mul_ofReal_mul_exp_cube]
+  have hsin := sqrt_two_div_two_le_sin_three_mul h1 h2
   have hu3 := pow_nonneg hu 3
   have h5 : 0 ≤ u ^ 5 / s ^ 5 := by positivity
   calc Real.exp (-(u ^ 5 / s ^ 5) + -(u ^ 3 * Real.sin (3 * (π / 10))))
@@ -493,30 +510,30 @@ lemma q2t_norm_swScaled_le {s u : ℝ} (hs : 0 < s) (hu : 0 ≤ u) :
     _ ≤ _ := le_mul_of_one_le_left (by positivity) (by linarith)
 
 /-- As `s → ∞` the scaled swallowtail integral tends to the cubic ray integral `G(π/10)`. -/
-lemma q2t_tendsto_swScaled :
-    Tendsto (fun s : ℝ => ∫ u in Ioi (0 : ℝ), q2t_swScaled s u) atTop
-      (𝓝 (q2t_cubicG (π / 10))) := by
-  unfold q2t_cubicG
+private lemma tendsto_integral_swallowtailZAxisScaled :
+    Tendsto (fun s : ℝ => ∫ u in Ioi (0 : ℝ), swallowtailZAxisScaled s u) atTop
+      (𝓝 (cubicRayIntegral (π / 10))) := by
+  unfold cubicRayIntegral
   refine tendsto_integral_filter_of_dominated_convergence
     (fun u => (1 + 3 * u ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * u ^ 3))
-    (Eventually.of_forall fun s => ?_) ?_ q2t_integrableOn_cubic_bound
+    (Eventually.of_forall fun s => ?_) ?_ integrableOn_cubic_dominating
     (ae_of_all _ fun u => ?_)
-  · exact (by unfold q2t_swScaled; fun_prop : Continuous fun u => q2t_swScaled s u)
+  · exact (by unfold swallowtailZAxisScaled; fun_prop : Continuous fun u => swallowtailZAxisScaled s u)
       |>.aestronglyMeasurable
   · filter_upwards [eventually_gt_atTop 0] with s hs
     exact ae_restrict_of_forall_mem measurableSet_Ioi fun u hu =>
-      q2t_norm_swScaled_le hs (le_of_lt hu)
+      norm_swallowtailZAxisScaled_le hs (le_of_lt hu)
   · have h0 : Tendsto (fun s : ℝ => u ^ 5 / s ^ 5) atTop (𝓝 0) :=
       tendsto_const_nhds.div_atTop (tendsto_pow_atTop (by norm_num))
     have h1 := (tendsto_const_nhds (x := exp (((π / 10 : ℝ) : ℂ) * I))).mul
       (((continuous_ofReal.tendsto 0).comp h0).neg.add
         (tendsto_const_nhds (x := I * ((u : ℂ) * exp (((π / 10 : ℝ) : ℂ) * I)) ^ 3))).cexp
-    simpa [q2t_swScaled, q2t_cubicRay, Function.comp_def] using h1
+    simpa [swallowtailZAxisScaled, cubicRayIntegrand, Function.comp_def] using h1
 
 /-- `Re G(π/10) = Γ(1/3)/(2√3)`. -/
-lemma q2t_re_cubicG : (q2t_cubicG (π / 10)).re = Real.Gamma (1 / 3) / (2 * Real.sqrt 3) := by
+private lemma re_cubicRayIntegral_pi_div_ten : (cubicRayIntegral (π / 10)).re = Real.Gamma (1 / 3) / (2 * Real.sqrt 3) := by
   have hpi := Real.pi_pos
-  rw [← q2t_cubicG_eq (θ := π / 6) (by linarith) le_rfl, q2t_cubicG_pi_div_six,
+  rw [← cubicRayIntegral_eq_pi_div_ten (θ := π / 6) (by linarith) le_rfl, cubicRayIntegral_pi_div_six,
     show (1 / 3 : ℝ) + 1 = 1 / 3 + 1 from rfl, Real.Gamma_add_one (by norm_num),
     exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_six]
   simp only [mul_re, add_re, add_im, ofReal_re, ofReal_im, I_re, I_im, mul_im]
@@ -526,8 +543,7 @@ lemma q2t_re_cubicG : (q2t_cubicG (π / 10)).re = Real.Gamma (1 / 3) / (2 * Real
   ring_nf
   rw [h3]; ring
 
-end q2t
-
+end CanonicalIntegrals
 /-! ### Asymptotics along symmetry lines -/
 
 /-- The Pearcey integral on the symmetry line `x = 0`, `y → +∞` (DLMF 36.11.3):
@@ -539,8 +555,8 @@ theorem cuspoidIntegral_two_zero_atTop :
       (fun y : ℝ => Real.sqrt (π / y)) := by
   set L : ℂ := ∫ u : ℝ, exp (((π / 8 : ℝ) : ℂ) * I) *
     exp (I * exp (((π / 4 : ℝ) : ℂ) * I) * (u : ℂ) ^ 2) with hL
-  have hT : Tendsto (fun y : ℝ => (∫ u : ℝ, q2t_pearceyScaled y u) - L) atTop (𝓝 0) := by
-    have := q2t_tendsto_pearceyScaled.sub_const L
+  have hT : Tendsto (fun y : ℝ => (∫ u : ℝ, pearceySymmetryLineScaled y u) - L) atTop (𝓝 0) := by
+    have := tendsto_integral_pearceySymmetryLineScaled.sub_const L
     rwa [← hL, sub_self] at this
   have h1 := (isLittleO_one_iff ℝ).mpr hT
   have hpi : 0 < Real.sqrt π := Real.sqrt_pos.mpr Real.pi_pos
@@ -553,8 +569,8 @@ theorem cuspoidIntegral_two_zero_atTop :
     field_simp; rfl
   refine ((h1.mul_isBigO h2).congr' ?_ (Eventually.of_forall fun y => one_mul _))
   filter_upwards [eventually_gt_atTop 0] with y hy
-  have hLv : L = (Real.sqrt π : ℂ) * exp (I * π / 4) := q2t_pearcey_limit
-  rw [q2t_pearcey_scale hy, hLv, Real.sqrt_div' π hy.le]
+  have hLv : L = (Real.sqrt π : ℂ) * exp (I * π / 4) := integral_pearceyGaussianLimit
+  rw [cuspoidIntegral_two_symmetryLine_eq_scaled hy, hLv, Real.sqrt_div' π hy.le]
   push_cast; ring
 
 /-- The Pearcey integral on the symmetry line `x = 0`, `y → -∞` (DLMF 36.11.3):
@@ -619,7 +635,7 @@ theorem cuspoidIntegral_three_z_atTop :
       (fun z : ℝ => |z| ^ (-(1 / 3 : ℝ))) := by
   rw [isLittleO_iff]
   intro c hc
-  have hT := q2t_tendsto_swScaled.comp (tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 3))
+  have hT := tendsto_integral_swallowtailZAxisScaled.comp (tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 3))
   have hev := (Metric.tendsto_nhds.mp hT) (c / 2) (by positivity)
   filter_upwards [hev, eventually_gt_atTop 0] with z hz hz0
   simp only [Function.comp_apply, dist_eq_norm] at hz
@@ -627,22 +643,22 @@ theorem cuspoidIntegral_three_z_atTop :
   have hs : 0 < s := Real.rpow_pos_of_pos hz0 _
   have hs3 : s ^ 3 = z := by
     rw [hsdef, ← Real.rpow_natCast, ← Real.rpow_mul hz0.le]; norm_num
-  set H := ∫ u in Set.Ioi (0 : ℝ), q2t_swScaled s u
-  set G := q2t_cubicG (π / 10)
-  have hI : ∫ r in Set.Ioi (0 : ℝ), q2t_swF z r = ((s⁻¹ : ℝ) : ℂ) * H := by
-    have h := MeasureTheory.integral_comp_mul_left_Ioi' (q2t_swF z) 0 (inv_pos.mpr hs)
+  set H := ∫ u in Set.Ioi (0 : ℝ), swallowtailZAxisScaled s u
+  set G := cubicRayIntegral (π / 10)
+  have hI : ∫ r in Set.Ioi (0 : ℝ), swallowtailZAxisIntegrand z r = ((s⁻¹ : ℝ) : ℂ) * H := by
+    have h := MeasureTheory.integral_comp_mul_left_Ioi' (swallowtailZAxisIntegrand z) 0 (inv_pos.mpr hs)
     rw [mul_zero] at h
     rw [← h, Complex.real_smul]
     congr 1
     refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi fun u (hu : 0 < u) => ?_
-    rw [← hs3]; exact q2t_swF_scale hs hu.le
+    rw [← hs3]; exact swallowtailZAxisIntegrand_scale hs hu.le
   have habs : |z| = z := abs_of_pos hz0
-  rw [q2t_swallow_split, hI, habs, ← hsdef, Real.rpow_neg hz0.le, ← hsdef, ← ofReal_sub,
+  rw [cuspoidIntegral_three_zAxis_eq_two_re, hI, habs, ← hsdef, Real.rpow_neg hz0.le, ← hsdef, ← ofReal_sub,
     norm_real, Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hs)]
   have hre : (((s⁻¹ : ℝ) : ℂ) * H).re = s⁻¹ * H.re := by
     rw [re_ofReal_mul]
   have hL : Real.Gamma (1 / 3) / (s * Real.sqrt 3) = 2 * (s⁻¹ * G.re) := by
-    rw [q2t_re_cubicG]; field_simp
+    rw [re_cubicRayIntegral_pi_div_ten]; field_simp
   rw [hre, hL, ← mul_sub, ← mul_sub, abs_mul, abs_two, abs_mul, abs_of_pos (inv_pos.mpr hs)]
   have hHG : |H.re - G.re| ≤ ‖H - G‖ := by
     rw [← sub_re]; exact abs_re_le_norm _

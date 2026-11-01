@@ -18,6 +18,23 @@ which gives a three-term recurrence for its coefficients. The coefficients are t
 identified with any sequence satisfying the same recurrence and initial values; this is used
 for the Gegenbauer, Meixner–Pollaczek and Pollaczek polynomials. For `‖u z‖, ‖z / u‖ < 1`
 the coefficient series sums to `(1 - u z)^{-a} (1 - z/u)^{-b}`.
+
+## Main definitions
+
+* `binomSeries`: the formal binomial series `(1 - X)^{-λ} = ∑ (λ)_n / n! Xⁿ`.
+* `binomProductSeries`: the product `G_a(uX) G_b(X/u)` of two rescaled binomial series.
+
+## Main results
+
+* `coeff_binomSeries`, `one_sub_X_mul_derivative_binomSeries`: coefficients and the
+  differential equation `(1 - X) G' = λ G`.
+* `binomSeries_mul`: `G_λ G_μ = G_{λ+μ}` (Chu–Vandermonde).
+* `summable_norm_poch_div_factorial_mul_pow`: absolute convergence in the open unit disk.
+* `binomProductSeries_ode`, `coeff_binomProductSeries_recurrence`: the differential equation
+  of the product and the three-term recurrence of its coefficients.
+* `eq_coeff_binomProductSeries`, `coeff_binomProductSeries`: identification of the
+  coefficients by their recurrence, and their explicit form.
+* `hasSum_coeff_binomProductSeries_mul_pow`: the analytic sum of the product series.
 -/
 
 @[expose] public section

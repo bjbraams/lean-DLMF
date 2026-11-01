@@ -8,7 +8,17 @@ module
 public import DLMF.QSeries.Basic.Pochhammer
 
 /-!
-# Integer shifted factorials and basic q-series
+# Integer shifted factorials and basic `q`-series
+
+## Main definitions
+
+* `qPochhammerInt`: the integer-index `q`-Pochhammer symbol (AAR (10.5.2)).
+* `basicHG`: the basic hypergeometric series `ᵣφₛ` with `r = s + 1` (AAR §10.9).
+* `qGegenbauer`: the Laurent form of the `q`-ultraspherical polynomials (DLMF 18.28.13,
+  AAR (10.11.1)).
+* `TripleProduct.tri`, `TripleProduct.term`: the exponent `n(n-1)/2` as an integer and the
+  summand `(-1)ⁿ q^{n(n-1)/2} zⁿ` of the triple product.
+* `TripleProduct.dprod`: the bound `∏_{j<k} (1 - r^{j+1})⁻¹` for `‖[n k]_q‖`, `r = ‖q‖`.
 -/
 
 @[expose] public noncomputable section

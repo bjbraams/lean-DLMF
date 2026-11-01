@@ -11,21 +11,27 @@ public import DLMF.Hypergeometric.Saalschutz
 public import Mathlib.Data.Nat.Choose.Cast
 
 /-!
-# Appell's function F₄ and Bailey's product formula
+# Appell's function `F₄` and Bailey's product formula (DLMF 16.16.6)
 
-Canonical function definitions are imported from the focused Basic layer.
+Bailey's product formula `₂F₁(a,b;c;X) ₂F₁(a,b;c';Y) = F₄(a,b;c,c';X(1-Y),Y(1-X))` for
+`c + c' = a + b + 1`, `Re c, Re c' > 0` and small `X`, `Y`. The coefficients `appF4Coeff` and the
+totalized double-series function `appF4` (DLMF 16.13.4) are defined in
+`DLMF.Hypergeometric.Basic.AppellF4`.
 
-We define the coefficients `appF4Coeff` and the totalized double-series function `appF4` of
-Appell's fourth function (DLMF 16.13.4), and prove Bailey's product formula
-`₂F₁(a,b;c;X) ₂F₁(a,b;c';Y) = F₄(a,b;c,c';X(1-Y),Y(1-X))` for `c + c' = a + b + 1`,
-`Re c, Re c' > 0` and small `X`, `Y` (`appF4_bailey`, `appF4_eq_mul`).
+## Main results
+
+* `appF4_coeff`: Bailey's coefficient identity.
+* `appF4Coeff_norm_le`: a geometric bound for the `F₄` coefficients.
+* `appF4_bailey`, `appF4_eq_mul`: Bailey's product formula.
+
+## Implementation notes
 
 The proof expands `X^m (1-X)^n` and `Y^n (1-Y)^m` binomially and compares coefficients of
-`X^M Y^N` in an absolutely summable four-index family. The coefficient identity
-(`appF4_coeff`) reduces, after a Chu–Vandermonde summation (`appF4_inner`), to the
-Pfaff–Saalschütz convolution `regularized_saalschutz_convolution`; the balancing condition
-`c + c' = a + b + 1` is what makes the inner `₃F₂` Saalschützian. Absolute convergence uses
-the crude bound `|(a)_{m+n}(b)_{m+n}/((c)_m(c')_n m!n!)| ≤ Q^{m+n}` (`appF4Coeff_norm_le`).
+`X^M Y^N` in an absolutely summable four-index family. The coefficient identity reduces, after a
+Chu–Vandermonde summation (`appF4_inner`), to the Pfaff–Saalschütz convolution
+`regularized_saalschutz_convolution`; the balancing condition `c + c' = a + b + 1` makes the
+inner `₃F₂` Saalschützian. Absolute convergence uses the crude bound
+`|(a)_{m+n}(b)_{m+n}/((c)_m(c')_n m!n!)| ≤ Q^{m+n}`.
 -/
 
 @[expose] public section

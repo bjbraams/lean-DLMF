@@ -9,11 +9,27 @@ public import DLMF.Bessel.SphericalSeriesTools
 public import DLMF.ErrorFunctions.Relations
 
 /-!
-# Power and spherical Bessel series, DLMF §7.6
+# Power series and series of spherical Bessel functions (DLMF §7.6)
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-New theorem statements are initially admitted and are not completed proofs.
+Power series of `erf`, `w` and the Fresnel integrals, and expansions of `erf` and the Fresnel
+integrals in modified and ordinary spherical Bessel functions.
+
+## Main definitions
+
+* `fresnelAlternateSeries`: the auxiliary series of DLMF 7.6.5 and 7.6.7.
+
+## Main results
+
+* `hasSum_erf_complex`, `hasSum_erf_scaled`: the power series of `erf` (DLMF 7.6.1, 7.6.2).
+* `hasSum_faddeevaW`: the power series of `w(z)` (DLMF 7.6.3).
+* `fresnelCosInt_alternate_series`, `fresnelSinInt_alternate_series`: DLMF 7.6.5, 7.6.7.
+* `erf_spherical_series`: `erf` in modified spherical Bessel functions (DLMF 7.6.8).
+* `erfCheb_hasSum`, `erf_chebyshev_spherical_series`: the Chebyshev–spherical Bessel series of
+  DLMF 7.6.9, the first valid for all complex `b` (stronger than DLMF).
+* `fresnelCosInt_spherical_series`, `fresnelSinInt_spherical_series`: DLMF 7.6.10, 7.6.11.
+
+The power series of `C(z)` and `S(z)` (DLMF 7.6.4, 7.6.6) are in
+`DLMF.ErrorFunctions.AnalyticProperties`.
 -/
 
 @[expose] public noncomputable section

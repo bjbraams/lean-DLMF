@@ -7,7 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.AlgebraicAnalytic.Complex.Basic
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
-public import DLMFMathlib.Analysis.Complex.TrigR4SeriesExtension
+public import DLMFMathlib.Analysis.Complex.TrigSeriesExtension
 public import Mathlib.Analysis.Analytic.Order
 public import Mathlib.Analysis.Calculus.LogDeriv
 public import Mathlib.Analysis.Complex.CauchyIntegral
@@ -35,7 +35,33 @@ upstream items (Taylor's theorem, the identity theorem, the maximum-modulus prin
 lemma on discs, removable singularities, Rouché's theorem on discs, …) are recorded as
 `dlmf_upstream` pointers in `DLMF.AlgebraicAnalytic.Complex.MathlibCoverage`.
 
-Conventions.
+## Main results
+
+* `hasSum_exp_series`: the exponential series (DLMF 1.10.2).
+* `hasSum_laurentSeries`: Laurent's theorem (DLMF 1.10.6–1.10.7).
+* `removable_iff_laurentCoeff_neg_eq_zero`, `meromorphicOrderAt_eq_neg_iff_laurentCoeff`,
+  `residueAt_eq_residue`, `picard_great`: singularities and residues (§1.10(iii)).
+* `IsSimpleClosedContour.residue_theorem`, `IsSimpleClosedContour.argument_principle`,
+  `IsSimpleClosedContour.argumentPrinciple_mul_id`, `IsSimpleClosedContour.rouche`:
+  DLMF 1.10.8–1.10.10 and Rouché's theorem (§1.10(iv)).
+* `harmonic_eqOn_of_isMaxOn`, `harmonic_exists_mem_frontier_isMaxOn`: the maximum principle for
+  harmonic functions (§1.10(v)).
+* `schwarz_lemma`, `schwarz_lemma_eq_iff`: Schwarz's lemma (DLMF 1.10.11).
+* `sqrt_branch_slitPlane`, `sqrt_branch_compl_Ici`, `not_exists_sqrt_branch_punctured`,
+  `differentiableOn_one_sub_cpow_mul_one_add_cpow`: branches in cut planes (§1.10(vi)).
+* `lagrange_inversion`, `lagrange_burmann`, `extendedInversion`, `extendedInversion_comp`:
+  inversion theorems (DLMF 1.10.12–1.10.17).
+* `differentiableOn_intervalIntegral_param`, `differentiableOn_improperIntegral_param`,
+  `tendstoUniformlyOn_integral_of_norm_le`: analyticity of integrals (DLMF 1.10.18–1.10.19,
+  §1.10(viii)).
+* `prodConvergesDLMF_iff_log`, `prodConvergesDLMF_norm_iff`, `prod_mtest_log`, `prod_mtest`,
+  `differentiableOn_of_tendstoUniformlyOn_prod`, `tendsto_logDeriv_prod`: infinite products
+  (§1.10(ix), 1.10.20–1.10.24).
+* `weierstrass_product`, `mittag_leffler`: DLMF 1.10.22, 1.10.25.
+* `coeff_eq_circleIntegral`: DLMF 1.10.26–1.10.27.
+
+## Implementation notes
+
 * Contours, interiors and the positive sense are those of `DLMF.AlgebraicAnalytic.Complex.Basic`
   (simple closed piecewise `C¹` contours, Tau Ceti's filled hull and winding number).
 * The residue is `residueAt f z₀`, the Laurent coefficient `a_{-1}` defined by a circle integral,
@@ -45,17 +71,6 @@ Conventions.
   (Weierstrass products, Mittag-Leffler series); DLMF's convergence of infinite products is
   `ProdConvergesDLMF`.
 * Logarithms and powers are principal (`Complex.log`, `cpow`).
-
-Proved here: the exponential series 1.10.2 (from Mathlib), Schwarz's inequalities 1.10.11 (from
-Mathlib's Schwarz lemma), the analyticity of a locally uniform limit of products 1.10.23 (from
-Mathlib), the analyticity of the branches of `√z` and `(1 - z)^α (1 + z)^β` in the cut planes of
-§1.10(vi). The logarithmic-derivative limit 1.10.24 uses Mathlib’s
-`TendstoLocallyUniformlyOn.deriv` and `logDeriv_fun_prod`. The improper-integral
-holomorphy statements and the integral M-test use the project’s dominated-holomorphy theorem,
-Mathlib’s locally uniform limit theorem and `MeasureTheory.tendsto_integral_Ioi_zero`.
-Schwarz’s equality case uses Mathlib’s affine-map characterization via divided slopes.
-The coefficient circle-integral formula compares scalar coefficients with Mathlib’s
-Cauchy power series on a smaller disk.
 -/
 
 @[expose] public noncomputable section
@@ -138,7 +153,7 @@ described in the positive sense, then `(2πi)⁻¹ ∫_C f(z) dz` is the sum of 
 within `C`. (Tau Ceti's `TauCeti.Contour.classicalResidueTheorem_nullHomologous` is the homology
 form for meromorphic `f`.) -/
 @[dlmf 1.10.E8]
-theorem IsSimpleClosedContour.residueTheorem {γ : ℝ → ℂ} {a b : ℝ} {f : ℂ → ℂ} {S : Finset ℂ}
+theorem IsSimpleClosedContour.residue_theorem {γ : ℝ → ℂ} {a b : ℝ} {f : ℂ → ℂ} {S : Finset ℂ}
     (hγ : IsSimpleClosedContour γ a b) (hpos : IsPositivelyOriented γ a b)
     (hS : ↑S ⊆ contourInterior γ a b)
     (hc : ContinuousOn f ((contourInterior γ a b ∪ γ '' Icc a b) \ ↑S))
@@ -153,7 +168,7 @@ positive sense, then `N - P = (2πi)⁻¹ ∫_C f'(z)/f(z) dz = (2π)⁻¹ Δ_C(
 `N - P = ∑_{s ∈ S} ord_s f` counts zeros and poles with multiplicity and `Δ_C(ph f)` is the
 change of any continuous phase `θ(t)` of `f(γ(t))` along `C`. -/
 @[dlmf 1.10.E9]
-theorem IsSimpleClosedContour.argumentPrinciple {γ : ℝ → ℂ} {a b : ℝ} {f : ℂ → ℂ}
+theorem IsSimpleClosedContour.argument_principle {γ : ℝ → ℂ} {a b : ℝ} {f : ℂ → ℂ}
     {S : Finset ℂ} (hγ : IsSimpleClosedContour γ a b) (hpos : IsPositivelyOriented γ a b)
     (hS : ↑S ⊆ contourInterior γ a b)
     (hf : ∀ z ∈ (contourInterior γ a b ∪ γ '' Icc a b) \ ↑S, AnalyticAt ℂ f z ∧ f z ≠ 0)
@@ -370,7 +385,7 @@ theorem differentiableOn_one_sub_cpow_mul_one_add_cpow (α β : ℂ) :
 with `F(w₀) = z₀`, and `F(w) = z₀ + ∑_{n ≥ 1} Fₙ (w - w₀)ⁿ` near `w₀`, where `n Fₙ` is the
 residue of `1/(f(z) - f(z₀))ⁿ` at `z₀`. Uniqueness is local: `F(f(z)) = z` near `z₀`. -/
 @[dlmf 1.10.E12, dlmf 1.10.E13]
-theorem lagrangeInversion {f : ℂ → ℂ} {z₀ : ℂ} (hf : AnalyticAt ℂ f z₀) (hd : deriv f z₀ ≠ 0) :
+theorem lagrange_inversion {f : ℂ → ℂ} {z₀ : ℂ} (hf : AnalyticAt ℂ f z₀) (hd : deriv f z₀ ≠ 0) :
     ∃ F : ℂ → ℂ, AnalyticAt ℂ F (f z₀) ∧ F (f z₀) = z₀ ∧
       (∀ᶠ w in 𝓝 (f z₀), f (F w) = w) ∧ (∀ᶠ z in 𝓝 z₀, F (f z) = z) ∧
       ∀ᶠ w in 𝓝 (f z₀), HasSum (fun n : ℕ =>
@@ -382,7 +397,7 @@ theorem lagrangeInversion {f : ℂ → ℂ} {z₀ : ℂ} (hf : AnalyticAt ℂ f 
 `g(F(w)) = g(z₀) + ∑_{n ≥ 1} Gₙ (w - w₀)ⁿ` near `w₀`, where `n Gₙ` is the residue of
 `g'(z)/(f(z) - f(z₀))ⁿ` at `z₀`. -/
 @[dlmf 1.10.E14]
-theorem lagrangeBurmann {f g F : ℂ → ℂ} {z₀ : ℂ} (hf : AnalyticAt ℂ f z₀) (hd : deriv f z₀ ≠ 0)
+theorem lagrange_burmann {f g F : ℂ → ℂ} {z₀ : ℂ} (hf : AnalyticAt ℂ f z₀) (hd : deriv f z₀ ≠ 0)
     (hg : AnalyticAt ℂ g z₀) (hF : AnalyticAt ℂ F (f z₀)) (hF₀ : F (f z₀) = z₀)
     (hFinv : ∀ᶠ w in 𝓝 (f z₀), f (F w) = w) :
     ∀ᶠ w in 𝓝 (f z₀), HasSum (fun n : ℕ =>
@@ -682,7 +697,7 @@ theorem prod_mtest {a : ℕ → ℂ → ℂ} {D : Set ℂ} (hD : IsOpen D)
 `P(z) = ∏ (1 - z/zₙ) e^{z/zₙ}` (an absolutely convergent product) is an entire function whose
 zeros are exactly the points `zₙ`. -/
 @[dlmf 1.10.E22]
-theorem weierstrassProduct {zs : ℕ → ℂ} (hz : ∀ n, zs n ≠ 0)
+theorem weierstrass_product {zs : ℕ → ℂ} (hz : ∀ n, zs n ≠ 0)
     (hs : Summable (fun n => ‖zs n‖⁻¹ ^ 2)) :
     (∀ z, Multipliable (fun n => (1 - z / zs n) * exp (z / zs n))) ∧
       Differentiable ℂ (fun z => ∏' n, (1 - z / zs n) * exp (z / zs n)) ∧
@@ -736,7 +751,7 @@ for simple poles at the `zₙ` of residue `aₙ` (removable when `aₙ = 0`). Th
 `zₙ ≠ 0` and `|zₙ| → ∞` are implicit in DLMF: without the latter the `zₙ` may accumulate at a
 finite point, which is then a non-isolated singularity. -/
 @[dlmf 1.10.E25]
-theorem mittagLeffler {a zs : ℕ → ℂ} (hinj : Function.Injective zs) (hz : ∀ n, zs n ≠ 0)
+theorem mittag_leffler {a zs : ℕ → ℂ} (hinj : Function.Injective zs) (hz : ∀ n, zs n ≠ 0)
     (hlim : Tendsto (fun n => ‖zs n‖) atTop atTop) (hs : Summable (fun n => ‖a n / zs n ^ 2‖)) :
     DifferentiableOn ℂ (fun z => ∑' n, a n * (1 / (z - zs n) + 1 / zs n)) (range zs)ᶜ ∧
       ∀ n, residueAt (fun z => ∑' k, a k * (1 / (z - zs k) + 1 / zs k)) (zs n) = a n ∧

@@ -11,10 +11,28 @@ public import DLMF.Legendre.Laplace
 /-!
 # Ferrers and associated Legendre connection formulas
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+The connection formulas DLMF 14.9.1–14.9.17 between Ferrers functions and between associated
+Legendre functions, including the negative-integer-order formulas and Whipple's formulas.
+
+## Main results
+
+* `ferrers_connection_1`, `ferrers_connection_2`: DLMF 14.9.1–14.9.2.
+* `ferrersP_negative_integer_order`, `ferrersQ_negative_integer_order`: DLMF 14.9.3–14.9.4.
+* `ferrers_connection_5`, …, `ferrers_connection_10`: DLMF 14.9.5–14.9.10.
+* `associated_connection_11`, `associated_connection_12`, `associated_connection_14`,
+  `associated_connection_15`: DLMF 14.9.11, 14.9.12, 14.9.14 and 14.9.15.
+* `associatedP_negative_integer_order`: DLMF 14.9.13.
+* `associated_connection_16`, `associated_connection_17`: Whipple's formulas DLMF 14.9.16–14.9.17.
+* `associatedP_neg_euler`, `associatedP_neg_eq_quadratic`: the hypergeometric forms DLMF 14.3.15
+  and 14.3.18 (for `Re z > 0`).
+* `regularizedGaussHG_quadratic_half_sum`: the regularized quadratic transformation 15.8.17 near
+  the origin, for all parameters.
+
+## Implementation notes
+
+Whipple's formulas are stated on the principal sheet in the right half-plane, which fixes their
+inherited branches; they are proved on the real ray `t > 1` (`olverQ_whipple_real`,
+`associatedP_whipple_real`) and extended by the identity principle `eq_of_eqOn_Ioo_re_pos`.
 -/
 
 @[expose] public noncomputable section

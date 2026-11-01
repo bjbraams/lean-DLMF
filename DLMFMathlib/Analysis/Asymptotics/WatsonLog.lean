@@ -14,6 +14,16 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Deriv
 The logarithmic exponential moment is the order derivative of the Gamma integral.
 Absolute convergence follows from Mathlib's Mellin differentiation criterion; a positive
 dilation gives its exact dependence on the Laplace parameter.
+
+## Main results
+
+* `integral_exp_neg_mul_rpow_sub_one_mul_log`: the logarithmic exponential moment equals
+  `x⁻ˢ (Γ'(s) - log x Γ(s))`.
+* `integral_exp_neg_mul_sum_rpow_mul_log`: term-by-term integration of a finite logarithmic
+  power expansion.
+* `isBigO_integral_exp_mul_log`, `isBigO_log_gamma_term`: order estimates for logarithmically
+  weighted Laplace integrals.
+* `isBigO_integral_exp_mul_log_sub_sum`: Watson's lemma with a logarithmic factor.
 -/
 
 @[expose] public noncomputable section

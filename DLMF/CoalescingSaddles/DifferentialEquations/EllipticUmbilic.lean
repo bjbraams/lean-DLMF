@@ -8,13 +8,31 @@ module
 public import DLMF.CoalescingSaddles.DifferentialEquations.HyperbolicUmbilic
 
 /-!
-# Differential identities for the elliptic umbilic
+# Differential equations for the umbilic integrals
 
-Polynomial-weight estimates and parameter derivatives give the differential equations of the
-elliptic umbilic.
+This file proves the partial differential equations of DLMF §36.10 for the elliptic and
+hyperbolic umbilic canonical integrals (36.10.11–36.10.18). The elliptic umbilic equations are
+proved on the 2-cycle of `ellipticUmbilicIntegral` in the coordinates `a = s + it`,
+`b = s - it`, with weighted moments `ellipticUmbilicWeightedIntegral` and integration by parts
+along each ray (the boundary terms cancel over the cycle). The hyperbolic umbilic equations use
+the moments of `DLMF.CoalescingSaddles.DifferentialEquations.HyperbolicUmbilic`.
 
-Source references and common attribution are retained in
-`DLMF.CoalescingSaddles.DifferentialEquations`.
+## Main definitions
+
+* `ellipticUmbilicWeightedIntegral`: the moment `(i/2) ∑ ε_{jk} ∫_{ρ_j × ρ_k} W exp(iΦ^{(E)}) da db`
+  of `Ψ^{(E)}` with a polynomially bounded weight `W(a, b)` (`IsPolyBounded`).
+* `ellipticUmbilicPotentialDerivA`, `ellipticUmbilicPotentialDerivB`: the partial derivatives
+  of the elliptic umbilic potential in `a` and `b`.
+
+## Main results
+
+* `ellipticUmbilicIntegral_pde_xy`, `ellipticUmbilicIntegral_pde_xx_yy`: the elliptic umbilic
+  equations (DLMF 36.10.13, 36.10.14, with 36.10.11–36.10.12).
+* `hyperbolicUmbilicIntegral_pde_x`, `hyperbolicUmbilicIntegral_pde_y`: the hyperbolic umbilic
+  equations (DLMF 36.10.15, 36.10.16, with 36.10.11–36.10.12).
+* `ellipticUmbilicIntegral_pde_z`: `i ∂Ψ^{(E)}/∂z = ∂²Ψ^{(E)}/∂x² + ∂²Ψ^{(E)}/∂y²`
+  (DLMF 36.10.17).
+* `hyperbolicUmbilicIntegral_pde_z`: `i ∂Ψ^{(H)}/∂z = ∂²Ψ^{(H)}/∂x∂y` (DLMF 36.10.18).
 -/
 
 @[expose] public noncomputable section
@@ -29,43 +47,43 @@ namespace DLMF.CoalescingSaddles
 
 The elliptic umbilic integral is an integral over the 2-cycle `∑ ε_{jk} ρ_j × ρ_k` in the
 coordinates `a = s + it`, `b = s - it` (`ellipticUmbilicIntegral`). For a continuous,
-polynomially bounded weight `W(a, b)`, `q2t_EM W` is the corresponding moment. On `ρ_j × ρ_k`
+polynomially bounded weight `W(a, b)`, `ellipticUmbilicWeightedIntegral W` is the corresponding moment. On `ρ_j × ρ_k`
 the integrand is bounded by `A e^{-r} e^{-q}` uniformly for bounded parameters, so the moments
-may be differentiated under the integral sign (`q2t_hasDerivAt_EM`), and integration by parts
+may be differentiated under the integral sign (`hasDerivAt_ellipticUmbilicWeightedIntegral_line`), and integration by parts
 along a ray in `a` (or `b`) leaves a boundary term at `a = 0` (or `b = 0`) independent of `j`
-(or `k`); these cancel because the columns (rows) of `ε` sum to zero (`q2t_EM_Wa`,
-`q2t_EM_Wb`). -/
+(or `k`); these cancel because the columns (rows) of `ε` sum to zero (`ellipticUmbilicWeightedIntegral_derivA`,
+`ellipticUmbilicWeightedIntegral_derivB`). -/
 
 /-- A weight `W(a, b)` that is continuous and polynomially bounded. -/
-def Q2tPolyBdd (W : ℂ → ℂ → ℂ) : Prop :=
+def IsPolyBounded (W : ℂ → ℂ → ℂ) : Prop :=
   Continuous (fun p : ℂ × ℂ => W p.1 p.2) ∧
     ∃ C : ℝ, 0 ≤ C ∧ ∃ N : ℕ, ∀ a b, ‖W a b‖ ≤ C * (1 + ‖a‖ + ‖b‖) ^ N
 
 /-- Constant weights are polynomially bounded. -/
-lemma q2t_polyBdd_const (c : ℂ) : Q2tPolyBdd fun _ _ => c :=
+private lemma isPolyBounded_const (c : ℂ) : IsPolyBounded fun _ _ => c :=
   ⟨continuous_const, ‖c‖, norm_nonneg _, 0, fun a b => by simp⟩
 
 /-- The weight `(a, b) ↦ a` is polynomially bounded. -/
-lemma q2t_polyBdd_fst : Q2tPolyBdd fun a _ => a :=
+private lemma isPolyBounded_fst : IsPolyBounded fun a _ => a :=
   ⟨continuous_fst, 1, zero_le_one, 1, fun a b => by
     simp only [pow_one, one_mul]; linarith [norm_nonneg b]⟩
 
 /-- The weight `(a, b) ↦ b` is polynomially bounded. -/
-lemma q2t_polyBdd_snd : Q2tPolyBdd fun _ b => b :=
+private lemma isPolyBounded_snd : IsPolyBounded fun _ b => b :=
   ⟨continuous_snd, 1, zero_le_one, 1, fun a b => by
     simp only [pow_one, one_mul]; linarith [norm_nonneg a]⟩
 
 /-- `1 ≤ 1 + ‖a‖ + ‖b‖`. -/
-lemma q2t_one_le_base (a b : ℂ) : 1 ≤ 1 + ‖a‖ + ‖b‖ := by
+private lemma one_le_one_add_norm_add_norm (a b : ℂ) : 1 ≤ 1 + ‖a‖ + ‖b‖ := by
   linarith [norm_nonneg a, norm_nonneg b]
 
 /-- Sums of polynomially bounded weights are polynomially bounded. -/
-lemma q2t_polyBdd_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : Q2tPolyBdd W₁) (h₂ : Q2tPolyBdd W₂) :
-    Q2tPolyBdd fun a b => W₁ a b + W₂ a b := by
+private lemma isPolyBounded_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : IsPolyBounded W₁) (h₂ : IsPolyBounded W₂) :
+    IsPolyBounded fun a b => W₁ a b + W₂ a b := by
   obtain ⟨c₁, C₁, hC₁, N₁, hb₁⟩ := h₁
   obtain ⟨c₂, C₂, hC₂, N₂, hb₂⟩ := h₂
   refine ⟨c₁.add c₂, C₁ + C₂, by positivity, N₁ + N₂, fun a b => ?_⟩
-  have h1 := q2t_one_le_base a b
+  have h1 := one_le_one_add_norm_add_norm a b
   have e1 : (1 + ‖a‖ + ‖b‖) ^ N₁ ≤ (1 + ‖a‖ + ‖b‖) ^ (N₁ + N₂) :=
     pow_le_pow_right₀ h1 (by omega)
   have e2 : (1 + ‖a‖ + ‖b‖) ^ N₂ ≤ (1 + ‖a‖ + ‖b‖) ^ (N₁ + N₂) :=
@@ -77,8 +95,8 @@ lemma q2t_polyBdd_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : Q2tPolyBdd W₁)
     _ = (C₁ + C₂) * (1 + ‖a‖ + ‖b‖) ^ (N₁ + N₂) := by ring
 
 /-- Products of polynomially bounded weights are polynomially bounded. -/
-lemma q2t_polyBdd_mul {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : Q2tPolyBdd W₁) (h₂ : Q2tPolyBdd W₂) :
-    Q2tPolyBdd fun a b => W₁ a b * W₂ a b := by
+private lemma isPolyBounded_mul {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : IsPolyBounded W₁) (h₂ : IsPolyBounded W₂) :
+    IsPolyBounded fun a b => W₁ a b * W₂ a b := by
   obtain ⟨c₁, C₁, hC₁, N₁, hb₁⟩ := h₁
   obtain ⟨c₂, C₂, hC₂, N₂, hb₂⟩ := h₂
   refine ⟨c₁.mul c₂, C₁ * C₂, by positivity, N₁ + N₂, fun a b => ?_⟩
@@ -88,26 +106,26 @@ lemma q2t_polyBdd_mul {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : Q2tPolyBdd W₁)
     _ = _ := by ring
 
 /-- The elliptic umbilic ray directions have modulus `1`. -/
-lemma q2t_norm_rayDir (j : Fin 3) : ‖ellipticUmbilicRayDir j‖ = 1 := by
+private lemma norm_ellipticUmbilicRayDir (j : Fin 3) : ‖ellipticUmbilicRayDir j‖ = 1 := by
   rw [ellipticUmbilicRayDir]; exact norm_exp_ofReal_mul_I _
 
 /-- The elliptic umbilic ray directions are nonzero. -/
-lemma q2t_rayDir_ne_zero (j : Fin 3) : ellipticUmbilicRayDir j ≠ 0 := by
-  intro h; have := q2t_norm_rayDir j; rw [h, norm_zero] at this; exact zero_ne_one this
+private lemma ellipticUmbilicRayDir_ne_zero (j : Fin 3) : ellipticUmbilicRayDir j ≠ 0 := by
+  intro h; have := norm_ellipticUmbilicRayDir j; rw [h, norm_zero] at this; exact zero_ne_one this
 
 /-- The phase of the elliptic umbilic integrand on a product of rays. -/
-lemma q2t_re_phase_le (x y z : ℝ) {C : ℝ} (hC : |x| + |y| + |z| ≤ C) (j k : Fin 3)
+private lemma re_I_mul_ellipticUmbilicPotentialAB_rays_le (x y z : ℝ) {C : ℝ} (hC : |x| + |y| + |z| ≤ C) (j k : Fin 3)
     {r q : ℝ} (hr : 0 ≤ r) (hq : 0 ≤ q) :
     (I * ellipticUmbilicPotentialAB ((r : ℂ) * ellipticUmbilicRayDir j)
       ((q : ℂ) * ellipticUmbilicRayDir k) x y z).re ≤
       -(r ^ 3 + q ^ 3) / 2 + C * (r * q + r + q) := by
   set ej := ellipticUmbilicRayDir j
   set ek := ellipticUmbilicRayDir k
-  have hej : ‖ej‖ = 1 := q2t_norm_rayDir j
-  have hek : ‖ek‖ = 1 := q2t_norm_rayDir k
+  have hej : ‖ej‖ = 1 := norm_ellipticUmbilicRayDir j
+  have hek : ‖ek‖ = 1 := norm_ellipticUmbilicRayDir k
   rw [ellipticUmbilicPotentialAB_eq]
-  have hc : ((r : ℂ) * ej) ^ 3 = (r : ℂ) ^ 3 * I := by rw [mul_pow, s36a_rayDir_cube]
-  have hd : ((q : ℂ) * ek) ^ 3 = (q : ℂ) ^ 3 * I := by rw [mul_pow, s36a_rayDir_cube]
+  have hc : ((r : ℂ) * ej) ^ 3 = (r : ℂ) ^ 3 * I := by rw [mul_pow, ellipticUmbilicRayDir_pow_three]
+  have hd : ((q : ℂ) * ek) ^ 3 = (q : ℂ) ^ 3 * I := by rw [mul_pow, ellipticUmbilicRayDir_pow_three]
   set R := (z : ℂ) * ((r : ℂ) * ej) * ((q : ℂ) * ek) + (x - I * y) / 2 * ((r : ℂ) * ej) +
     (x + I * y) / 2 * ((q : ℂ) * ek) with hR
   have hsplit : I * ((((r : ℂ) * ej) ^ 3 + ((q : ℂ) * ek) ^ 3) / 2 + (z : ℂ) * ((r : ℂ) * ej) *
@@ -145,7 +163,7 @@ lemma q2t_re_phase_le (x y z : ℝ) {C : ℝ} (hC : |x| + |y| + |z| ≤ C) (j k 
   nlinarith
 
 /-- The cubic decay of the integrand beats any polynomial and the quadratic phase terms. -/
-lemma q2t_cubic_poly_le {C : ℝ} (hC : 0 ≤ C) {r q : ℝ} (hr : 0 ≤ r) (hq : 0 ≤ q) :
+private lemma cubic_decay_add_linear_le {C : ℝ} (hC : 0 ≤ C) {r q : ℝ} (hr : 0 ≤ r) (hq : 0 ≤ q) :
     -(r ^ 3 + q ^ 3) / 2 + C * (r * q + r + q) + 2 * (r + q) + 1 ≤
       256 * (C + 2) ^ 3 + 16 * (C + 2) ^ 2 + 1 := by
   set u := r + q with hu
@@ -176,7 +194,7 @@ lemma q2t_cubic_poly_le {C : ℝ} (hC : 0 ≤ C) {r q : ℝ} (hr : 0 ≤ r) (hq 
     nlinarith [pow_pos (by linarith : (0 : ℝ) < D) 3, sq_nonneg D]
 
 /-- Polynomial weights times the elliptic umbilic decay are bounded by `A e^{-r} e^{-q}`. -/
-lemma q2t_poly_exp_le {C : ℝ} (hC : 0 ≤ C) (N : ℕ) {r q : ℝ} (hr : 0 ≤ r) (hq : 0 ≤ q) :
+private lemma pow_mul_exp_ellipticUmbilic_decay_le {C : ℝ} (hC : 0 ≤ C) (N : ℕ) {r q : ℝ} (hr : 0 ≤ r) (hq : 0 ≤ q) :
     (1 + r + q) ^ N * Real.exp (-(r ^ 3 + q ^ 3) / 2 + C * (r * q + r + q)) ≤
       (N.factorial * Real.exp (256 * (C + 2) ^ 3 + 16 * (C + 2) ^ 2 + 1)) *
         Real.exp (-r) * Real.exp (-q) := by
@@ -184,7 +202,7 @@ lemma q2t_poly_exp_le {C : ℝ} (hC : 0 ≤ C) (N : ℕ) {r q : ℝ} (hr : 0 ≤
     have := Real.pow_div_factorial_le_exp (1 + r + q) (by positivity) N
     rw [div_le_iff₀ (by positivity)] at this
     linarith
-  have hpoly := q2t_cubic_poly_le hC hr hq
+  have hpoly := cubic_decay_add_linear_le hC hr hq
   calc (1 + r + q) ^ N * Real.exp (-(r ^ 3 + q ^ 3) / 2 + C * (r * q + r + q))
       ≤ (N.factorial * Real.exp (1 + r + q)) *
           Real.exp (-(r ^ 3 + q ^ 3) / 2 + C * (r * q + r + q)) :=
@@ -198,62 +216,62 @@ lemma q2t_poly_exp_le {C : ℝ} (hC : 0 ≤ C) (N : ℕ) {r q : ℝ} (hr : 0 ≤
 
 /-- The weighted integrand `e_j e_k W(a, b) exp(iΦ^{(E)})` on the product of rays `ρ_j × ρ_k`,
 `a = r e_j`, `b = q e_k`. -/
-def q2t_integrand (W : ℂ → ℂ → ℂ) (x y z : ℝ) (j k : Fin 3) (p : ℝ × ℝ) : ℂ :=
+def ellipticUmbilicWeightedIntegrand (W : ℂ → ℂ → ℂ) (x y z : ℝ) (j k : Fin 3) (p : ℝ × ℝ) : ℂ :=
   ellipticUmbilicRayDir j * ellipticUmbilicRayDir k *
     W ((p.1 : ℂ) * ellipticUmbilicRayDir j) ((p.2 : ℂ) * ellipticUmbilicRayDir k) *
     exp (I * ellipticUmbilicPotentialAB ((p.1 : ℂ) * ellipticUmbilicRayDir j)
       ((p.2 : ℂ) * ellipticUmbilicRayDir k) x y z)
 
 /-- The weighted quadrant integral `∫_{ρ_j × ρ_k} W exp(iΦ^{(E)}) da db`. -/
-def q2t_quad (W : ℂ → ℂ → ℂ) (x y z : ℝ) (j k : Fin 3) : ℂ :=
-  ∫ p : ℝ × ℝ in Ioi 0 ×ˢ Ioi 0, q2t_integrand W x y z j k p
+def ellipticUmbilicWeightedQuadrant (W : ℂ → ℂ → ℂ) (x y z : ℝ) (j k : Fin 3) : ℂ :=
+  ∫ p : ℝ × ℝ in Ioi 0 ×ˢ Ioi 0, ellipticUmbilicWeightedIntegrand W x y z j k p
 
 /-- The weighted elliptic umbilic integral `(i/2) ∑ ε_{jk} ∫_{ρ_j × ρ_k} W exp(iΦ^{(E)}) da db`,
 the moment of `Ψ^{(E)}` with weight `W(a, b)`. -/
-def q2t_EM (W : ℂ → ℂ → ℂ) (x y z : ℝ) : ℂ :=
-  I / 2 * ∑ j : Fin 3, ∑ k : Fin 3, (ellipticUmbilicCycle j k : ℂ) * q2t_quad W x y z j k
+def ellipticUmbilicWeightedIntegral (W : ℂ → ℂ → ℂ) (x y z : ℝ) : ℂ :=
+  I / 2 * ∑ j : Fin 3, ∑ k : Fin 3, (ellipticUmbilicCycle j k : ℂ) * ellipticUmbilicWeightedQuadrant W x y z j k
 
 /-- With weight `1` the weighted elliptic umbilic integral is `Ψ^{(E)}`. -/
-lemma q2t_EM_one (x y z : ℝ) : q2t_EM (fun _ _ => 1) x y z = ellipticUmbilicIntegral x y z := by
-  simp [q2t_EM, q2t_quad, q2t_integrand, ellipticUmbilicIntegral, ellipticUmbilicQuadrant]
+private lemma ellipticUmbilicWeightedIntegral_one (x y z : ℝ) : ellipticUmbilicWeightedIntegral (fun _ _ => 1) x y z = ellipticUmbilicIntegral x y z := by
+  simp [ellipticUmbilicWeightedIntegral, ellipticUmbilicWeightedQuadrant, ellipticUmbilicWeightedIntegrand, ellipticUmbilicIntegral, ellipticUmbilicQuadrant]
 
 /-- The elliptic umbilic potential on the product of rays `ρ_j × ρ_k` is continuous. -/
-lemma q2t_continuous_potential (x y z : ℝ) (j k : Fin 3) :
+private lemma continuous_ellipticUmbilicPotentialAB_rays (x y z : ℝ) (j k : Fin 3) :
     Continuous fun p : ℝ × ℝ => ellipticUmbilicPotentialAB ((p.1 : ℂ) * ellipticUmbilicRayDir j)
       ((p.2 : ℂ) * ellipticUmbilicRayDir k) x y z := by
   simp only [ellipticUmbilicPotentialAB_eq]; fun_prop
 
 /-- The weighted integrand on `ρ_j × ρ_k` is continuous. -/
-lemma q2t_continuous_integrand {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) (j k : Fin 3) :
-    Continuous (q2t_integrand W x y z j k) := by
+private lemma continuous_ellipticUmbilicWeightedIntegrand {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (x y z : ℝ) (j k : Fin 3) :
+    Continuous (ellipticUmbilicWeightedIntegrand W x y z j k) := by
   have h1 : Continuous fun p : ℝ × ℝ =>
       W ((p.1 : ℂ) * ellipticUmbilicRayDir j) ((p.2 : ℂ) * ellipticUmbilicRayDir k) :=
     hW.1.comp (by fun_prop : Continuous fun p : ℝ × ℝ =>
       ((p.1 : ℂ) * ellipticUmbilicRayDir j, (p.2 : ℂ) * ellipticUmbilicRayDir k))
-  have h2 := q2t_continuous_potential x y z j k
-  unfold q2t_integrand
+  have h2 := continuous_ellipticUmbilicPotentialAB_rays x y z j k
+  unfold ellipticUmbilicWeightedIntegrand
   exact (continuous_const.mul h1).mul (continuous_exp.comp (continuous_const.mul h2))
 
 /-- Uniform bound `A e^{-r} e^{-q}` for the weighted integrand, for `|x| + |y| + |z| ≤ C`. -/
-lemma q2t_norm_integrand_le {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) {C : ℝ} (hC : 0 ≤ C) :
+private lemma norm_ellipticUmbilicWeightedIntegrand_le {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) {C : ℝ} (hC : 0 ≤ C) :
     ∃ A : ℝ, ∀ x y z : ℝ, |x| + |y| + |z| ≤ C → ∀ (j k : Fin 3) (p : ℝ × ℝ), 0 ≤ p.1 → 0 ≤ p.2 →
-      ‖q2t_integrand W x y z j k p‖ ≤ A * Real.exp (-p.1) * Real.exp (-p.2) := by
+      ‖ellipticUmbilicWeightedIntegrand W x y z j k p‖ ≤ A * Real.exp (-p.1) * Real.exp (-p.2) := by
   obtain ⟨-, CW, hCW, N, hb⟩ := hW
   refine ⟨CW * (N.factorial * Real.exp (256 * (C + 2) ^ 3 + 16 * (C + 2) ^ 2 + 1)),
     fun x y z hxyz j k p hr hq => ?_⟩
   have hn1 : ‖(p.1 : ℂ) * ellipticUmbilicRayDir j‖ = p.1 := by
-    rw [norm_mul, q2t_norm_rayDir, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hr, mul_one]
+    rw [norm_mul, norm_ellipticUmbilicRayDir, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hr, mul_one]
   have hn2 : ‖(p.2 : ℂ) * ellipticUmbilicRayDir k‖ = p.2 := by
-    rw [norm_mul, q2t_norm_rayDir, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hq, mul_one]
+    rw [norm_mul, norm_ellipticUmbilicRayDir, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hq, mul_one]
   have hWb := hb ((p.1 : ℂ) * ellipticUmbilicRayDir j) ((p.2 : ℂ) * ellipticUmbilicRayDir k)
   rw [hn1, hn2] at hWb
   have hE : ‖exp (I * ellipticUmbilicPotentialAB ((p.1 : ℂ) * ellipticUmbilicRayDir j)
       ((p.2 : ℂ) * ellipticUmbilicRayDir k) x y z)‖ ≤
       Real.exp (-(p.1 ^ 3 + p.2 ^ 3) / 2 + C * (p.1 * p.2 + p.1 + p.2)) := by
-    rw [norm_exp]; exact Real.exp_le_exp.mpr (q2t_re_phase_le x y z hxyz j k hr hq)
-  have hP := q2t_poly_exp_le hC N hr hq
-  unfold q2t_integrand
-  rw [norm_mul, norm_mul, norm_mul, q2t_norm_rayDir, q2t_norm_rayDir, one_mul, one_mul]
+    rw [norm_exp]; exact Real.exp_le_exp.mpr (re_I_mul_ellipticUmbilicPotentialAB_rays_le x y z hxyz j k hr hq)
+  have hP := pow_mul_exp_ellipticUmbilic_decay_le hC N hr hq
+  unfold ellipticUmbilicWeightedIntegrand
+  rw [norm_mul, norm_mul, norm_mul, norm_ellipticUmbilicRayDir, norm_ellipticUmbilicRayDir, one_mul, one_mul]
   calc _ ≤ (CW * (1 + p.1 + p.2) ^ N) *
         Real.exp (-(p.1 ^ 3 + p.2 ^ 3) / 2 + C * (p.1 * p.2 + p.1 + p.2)) :=
         mul_le_mul hWb hE (norm_nonneg _) (by positivity)
@@ -264,7 +282,7 @@ lemma q2t_norm_integrand_le {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) {C : �
     _ = _ := by ring
 
 /-- `A e^{-p₁} e^{-p₂}` is integrable on the open positive quadrant. -/
-lemma q2t_integrableOn_exp_prod (A : ℝ) :
+private lemma integrableOn_mul_exp_neg_mul_exp_neg_quadrant (A : ℝ) :
     IntegrableOn (fun p : ℝ × ℝ => A * Real.exp (-p.1) * Real.exp (-p.2)) (Ioi 0 ×ˢ Ioi 0) := by
   have h1 : IntegrableOn (fun r : ℝ => Real.exp (-r)) (Ioi 0) := by
     simpa using exp_neg_integrableOn_Ioi 0 (b := 1) one_pos
@@ -272,71 +290,71 @@ lemma q2t_integrableOn_exp_prod (A : ℝ) :
   exact (h1.const_mul A).mul_prod h1
 
 /-- The weighted integrand is integrable on the positive quadrant. -/
-lemma q2t_integrableOn {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) (j k : Fin 3) :
-    IntegrableOn (q2t_integrand W x y z j k) (Ioi 0 ×ˢ Ioi 0) := by
-  obtain ⟨A, hA⟩ := q2t_norm_integrand_le hW (C := |x| + |y| + |z|) (by positivity)
-  refine (q2t_integrableOn_exp_prod A).mono'
-    (q2t_continuous_integrand hW x y z j k).aestronglyMeasurable ?_
+private lemma integrableOn_ellipticUmbilicWeightedIntegrand {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (x y z : ℝ) (j k : Fin 3) :
+    IntegrableOn (ellipticUmbilicWeightedIntegrand W x y z j k) (Ioi 0 ×ˢ Ioi 0) := by
+  obtain ⟨A, hA⟩ := norm_ellipticUmbilicWeightedIntegrand_le hW (C := |x| + |y| + |z|) (by positivity)
+  refine (integrableOn_mul_exp_neg_mul_exp_neg_quadrant A).mono'
+    (continuous_ellipticUmbilicWeightedIntegrand hW x y z j k).aestronglyMeasurable ?_
   refine ae_restrict_of_forall_mem (measurableSet_Ioi.prod measurableSet_Ioi) fun p hp => ?_
   exact hA x y z le_rfl j k p (le_of_lt hp.1) (le_of_lt hp.2)
 
 /-- The quadrant integral is additive in the weight. -/
-lemma q2t_quad_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : Q2tPolyBdd W₁) (h₂ : Q2tPolyBdd W₂)
+private lemma ellipticUmbilicWeightedQuadrant_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : IsPolyBounded W₁) (h₂ : IsPolyBounded W₂)
     (x y z : ℝ) (j k : Fin 3) :
-    q2t_quad (fun a b => W₁ a b + W₂ a b) x y z j k =
-      q2t_quad W₁ x y z j k + q2t_quad W₂ x y z j k := by
-  unfold q2t_quad
-  rw [← integral_add (q2t_integrableOn h₁ x y z j k) (q2t_integrableOn h₂ x y z j k)]
-  congr 1; funext p; unfold q2t_integrand; ring
+    ellipticUmbilicWeightedQuadrant (fun a b => W₁ a b + W₂ a b) x y z j k =
+      ellipticUmbilicWeightedQuadrant W₁ x y z j k + ellipticUmbilicWeightedQuadrant W₂ x y z j k := by
+  unfold ellipticUmbilicWeightedQuadrant
+  rw [← integral_add (integrableOn_ellipticUmbilicWeightedIntegrand h₁ x y z j k) (integrableOn_ellipticUmbilicWeightedIntegrand h₂ x y z j k)]
+  congr 1; funext p; unfold ellipticUmbilicWeightedIntegrand; ring
 
 /-- The quadrant integral is homogeneous in the weight. -/
-lemma q2t_quad_const_mul (c : ℂ) (W : ℂ → ℂ → ℂ) (x y z : ℝ) (j k : Fin 3) :
-    q2t_quad (fun a b => c * W a b) x y z j k = c * q2t_quad W x y z j k := by
-  unfold q2t_quad
+private lemma ellipticUmbilicWeightedQuadrant_const_mul (c : ℂ) (W : ℂ → ℂ → ℂ) (x y z : ℝ) (j k : Fin 3) :
+    ellipticUmbilicWeightedQuadrant (fun a b => c * W a b) x y z j k = c * ellipticUmbilicWeightedQuadrant W x y z j k := by
+  unfold ellipticUmbilicWeightedQuadrant
   rw [← integral_const_mul]
-  congr 1; funext p; unfold q2t_integrand; ring
+  congr 1; funext p; unfold ellipticUmbilicWeightedIntegrand; ring
 
 /-- The weighted elliptic umbilic integral is additive in the weight. -/
-lemma q2t_EM_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : Q2tPolyBdd W₁) (h₂ : Q2tPolyBdd W₂) (x y z : ℝ) :
-    q2t_EM (fun a b => W₁ a b + W₂ a b) x y z = q2t_EM W₁ x y z + q2t_EM W₂ x y z := by
-  simp only [q2t_EM, q2t_quad_add h₁ h₂, mul_add, Finset.sum_add_distrib]
+private lemma ellipticUmbilicWeightedIntegral_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : IsPolyBounded W₁) (h₂ : IsPolyBounded W₂) (x y z : ℝ) :
+    ellipticUmbilicWeightedIntegral (fun a b => W₁ a b + W₂ a b) x y z = ellipticUmbilicWeightedIntegral W₁ x y z + ellipticUmbilicWeightedIntegral W₂ x y z := by
+  simp only [ellipticUmbilicWeightedIntegral, ellipticUmbilicWeightedQuadrant_add h₁ h₂, mul_add, Finset.sum_add_distrib]
 
 /-- The weighted elliptic umbilic integral is homogeneous in the weight. -/
-lemma q2t_EM_const_mul (c : ℂ) (W : ℂ → ℂ → ℂ) (x y z : ℝ) :
-    q2t_EM (fun a b => c * W a b) x y z = c * q2t_EM W x y z := by
-  simp only [q2t_EM, q2t_quad_const_mul, Finset.mul_sum]
+private lemma ellipticUmbilicWeightedIntegral_const_mul (c : ℂ) (W : ℂ → ℂ → ℂ) (x y z : ℝ) :
+    ellipticUmbilicWeightedIntegral (fun a b => c * W a b) x y z = c * ellipticUmbilicWeightedIntegral W x y z := by
+  simp only [ellipticUmbilicWeightedIntegral, ellipticUmbilicWeightedQuadrant_const_mul, Finset.mul_sum]
   congr 1; ext j; congr 1; ext k; ring
 
 /-- The `w`-derivative of the elliptic umbilic potential along `x = x₀ + w dx`, etc. -/
-def q2t_L (dx dy dz : ℝ) (a b : ℂ) : ℂ :=
+def ellipticUmbilicPotentialSlope (dx dy dz : ℝ) (a b : ℂ) : ℂ :=
   dz * a * b + (dx - I * dy) / 2 * a + (dx + I * dy) / 2 * b
 
-/-- The linear form `q2t_L dx dy dz` is polynomially bounded. -/
-lemma q2t_polyBdd_L (dx dy dz : ℝ) : Q2tPolyBdd (q2t_L dx dy dz) := by
-  unfold q2t_L
-  refine q2t_polyBdd_add (q2t_polyBdd_add ?_ ?_) ?_
-  · exact q2t_polyBdd_mul (q2t_polyBdd_mul (q2t_polyBdd_const _) q2t_polyBdd_fst) q2t_polyBdd_snd
-  · exact q2t_polyBdd_mul (q2t_polyBdd_const _) q2t_polyBdd_fst
-  · exact q2t_polyBdd_mul (q2t_polyBdd_const _) q2t_polyBdd_snd
+/-- The linear form `ellipticUmbilicPotentialSlope dx dy dz` is polynomially bounded. -/
+private lemma isPolyBounded_ellipticUmbilicPotentialSlope (dx dy dz : ℝ) : IsPolyBounded (ellipticUmbilicPotentialSlope dx dy dz) := by
+  unfold ellipticUmbilicPotentialSlope
+  refine isPolyBounded_add (isPolyBounded_add ?_ ?_) ?_
+  · exact isPolyBounded_mul (isPolyBounded_mul (isPolyBounded_const _) isPolyBounded_fst) isPolyBounded_snd
+  · exact isPolyBounded_mul (isPolyBounded_const _) isPolyBounded_fst
+  · exact isPolyBounded_mul (isPolyBounded_const _) isPolyBounded_snd
 
-/-- `Φ^{(E)}` is affine along the line `(x₀, y₀, z₀) + w (dx, dy, dz)` with slope `q2t_L dx dy dz`.
+/-- `Φ^{(E)}` is affine along the line `(x₀, y₀, z₀) + w (dx, dy, dz)` with slope `ellipticUmbilicPotentialSlope dx dy dz`.
 -/
-lemma q2t_potential_affine (a b : ℂ) (x₀ y₀ z₀ dx dy dz w : ℝ) :
+private lemma ellipticUmbilicPotentialAB_add_mul (a b : ℂ) (x₀ y₀ z₀ dx dy dz w : ℝ) :
     ellipticUmbilicPotentialAB a b (x₀ + w * dx) (y₀ + w * dy) (z₀ + w * dz) =
-      ellipticUmbilicPotentialAB a b x₀ y₀ z₀ + (w : ℂ) * q2t_L dx dy dz a b := by
-  rw [ellipticUmbilicPotentialAB_eq, ellipticUmbilicPotentialAB_eq, q2t_L]; push_cast; ring
+      ellipticUmbilicPotentialAB a b x₀ y₀ z₀ + (w : ℂ) * ellipticUmbilicPotentialSlope dx dy dz a b := by
+  rw [ellipticUmbilicPotentialAB_eq, ellipticUmbilicPotentialAB_eq, ellipticUmbilicPotentialSlope]; push_cast; ring
 
 /-- Differentiation under the integral sign along an affine path in the parameters. -/
-lemma q2t_hasDerivAt_quad {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x₀ y₀ z₀ dx dy dz w₀ : ℝ)
+private lemma hasDerivAt_ellipticUmbilicWeightedQuadrant_line {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (x₀ y₀ z₀ dx dy dz w₀ : ℝ)
     (j k : Fin 3) :
-    HasDerivAt (fun w : ℝ => q2t_quad W (x₀ + w * dx) (y₀ + w * dy) (z₀ + w * dz) j k)
-      (q2t_quad (fun a b => W a b * (I * q2t_L dx dy dz a b))
+    HasDerivAt (fun w : ℝ => ellipticUmbilicWeightedQuadrant W (x₀ + w * dx) (y₀ + w * dy) (z₀ + w * dz) j k)
+      (ellipticUmbilicWeightedQuadrant (fun a b => W a b * (I * ellipticUmbilicPotentialSlope dx dy dz a b))
         (x₀ + w₀ * dx) (y₀ + w₀ * dy) (z₀ + w₀ * dz) j k) w₀ := by
-  have hW' : Q2tPolyBdd fun a b => W a b * (I * q2t_L dx dy dz a b) :=
-    q2t_polyBdd_mul hW (q2t_polyBdd_mul (q2t_polyBdd_const I) (q2t_polyBdd_L dx dy dz))
+  have hW' : IsPolyBounded fun a b => W a b * (I * ellipticUmbilicPotentialSlope dx dy dz a b) :=
+    isPolyBounded_mul hW (isPolyBounded_mul (isPolyBounded_const I) (isPolyBounded_ellipticUmbilicPotentialSlope dx dy dz))
   set C := |x₀| + |y₀| + |z₀| + (|w₀| + 1) * (|dx| + |dy| + |dz|) with hCdef
   have hC : 0 ≤ C := by positivity
-  obtain ⟨A, hA⟩ := q2t_norm_integrand_le hW' hC
+  obtain ⟨A, hA⟩ := norm_ellipticUmbilicWeightedIntegrand_le hW' hC
   have hball : ∀ w ∈ Metric.ball w₀ 1,
       |x₀ + w * dx| + |y₀ + w * dy| + |z₀ + w * dz| ≤ C := by
     intro w hw
@@ -352,76 +370,76 @@ lemma q2t_hasDerivAt_quad {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x₀ y�
   have hmeas : MeasurableSet (Ioi (0 : ℝ) ×ˢ Ioi (0 : ℝ)) :=
     measurableSet_Ioi.prod measurableSet_Ioi
   refine (hasDerivAt_integral_of_dominated_loc_of_deriv_le (Metric.ball_mem_nhds w₀ one_pos)
-    (F := fun w p => q2t_integrand W (x₀ + w * dx) (y₀ + w * dy) (z₀ + w * dz) j k p)
-    (F' := fun w p => q2t_integrand (fun a b => W a b * (I * q2t_L dx dy dz a b))
+    (F := fun w p => ellipticUmbilicWeightedIntegrand W (x₀ + w * dx) (y₀ + w * dy) (z₀ + w * dz) j k p)
+    (F' := fun w p => ellipticUmbilicWeightedIntegrand (fun a b => W a b * (I * ellipticUmbilicPotentialSlope dx dy dz a b))
       (x₀ + w * dx) (y₀ + w * dy) (z₀ + w * dz) j k p)
     (bound := fun p => A * Real.exp (-p.1) * Real.exp (-p.2))
     (Eventually.of_forall fun w =>
-      (q2t_continuous_integrand hW _ _ _ j k).aestronglyMeasurable)
-    (q2t_integrableOn hW _ _ _ j k)
-    (q2t_continuous_integrand hW' _ _ _ j k).aestronglyMeasurable
+      (continuous_ellipticUmbilicWeightedIntegrand hW _ _ _ j k).aestronglyMeasurable)
+    (integrableOn_ellipticUmbilicWeightedIntegrand hW _ _ _ j k)
+    (continuous_ellipticUmbilicWeightedIntegrand hW' _ _ _ j k).aestronglyMeasurable
     (ae_restrict_of_forall_mem hmeas fun p hp w hw =>
       hA _ _ _ (hball w hw) j k p (le_of_lt hp.1) (le_of_lt hp.2))
-    (q2t_integrableOn_exp_prod A) (ae_of_all _ fun p w _ => ?_)).2
+    (integrableOn_mul_exp_neg_mul_exp_neg_quadrant A) (ae_of_all _ fun p w _ => ?_)).2
   -- pointwise derivative
   set a : ℂ := (p.1 : ℂ) * ellipticUmbilicRayDir j
   set b : ℂ := (p.2 : ℂ) * ellipticUmbilicRayDir k
   set c : ℂ := ellipticUmbilicRayDir j * ellipticUmbilicRayDir k * W a b
   set P₀ := ellipticUmbilicPotentialAB a b x₀ y₀ z₀
-  set L := q2t_L dx dy dz a b
-  have hfun : (fun w : ℝ => q2t_integrand W (x₀ + w * dx) (y₀ + w * dy) (z₀ + w * dz) j k p) =
+  set L := ellipticUmbilicPotentialSlope dx dy dz a b
+  have hfun : (fun w : ℝ => ellipticUmbilicWeightedIntegrand W (x₀ + w * dx) (y₀ + w * dy) (z₀ + w * dz) j k p) =
       fun w : ℝ => c * exp (I * (P₀ + (w : ℂ) * L)) := by
-    funext w; simp only [q2t_integrand, q2t_potential_affine]; rfl
-  have hval : q2t_integrand (fun a b => W a b * (I * q2t_L dx dy dz a b))
+    funext w; simp only [ellipticUmbilicWeightedIntegrand, ellipticUmbilicPotentialAB_add_mul]; rfl
+  have hval : ellipticUmbilicWeightedIntegrand (fun a b => W a b * (I * ellipticUmbilicPotentialSlope dx dy dz a b))
       (x₀ + w * dx) (y₀ + w * dy) (z₀ + w * dz) j k p =
       c * (exp (I * (P₀ + id (w : ℂ) * L)) * (I * (1 * L))) := by
-    simp only [q2t_integrand, q2t_potential_affine]
+    simp only [ellipticUmbilicWeightedIntegrand, ellipticUmbilicPotentialAB_add_mul]
     simp only [c, P₀, L, a, b, id]; ring
   rw [hfun, hval]
   exact ((((hasDerivAt_id (w : ℂ)).mul_const L).const_add P₀).const_mul I).cexp.const_mul c
     |>.comp_ofReal
 
 /-- Differentiation of the weighted elliptic umbilic integral along an affine path. -/
-lemma q2t_hasDerivAt_EM {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x₀ y₀ z₀ dx dy dz w₀ : ℝ) :
-    HasDerivAt (fun w : ℝ => q2t_EM W (x₀ + w * dx) (y₀ + w * dy) (z₀ + w * dz))
-      (q2t_EM (fun a b => W a b * (I * q2t_L dx dy dz a b))
+private lemma hasDerivAt_ellipticUmbilicWeightedIntegral_line {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (x₀ y₀ z₀ dx dy dz w₀ : ℝ) :
+    HasDerivAt (fun w : ℝ => ellipticUmbilicWeightedIntegral W (x₀ + w * dx) (y₀ + w * dy) (z₀ + w * dz))
+      (ellipticUmbilicWeightedIntegral (fun a b => W a b * (I * ellipticUmbilicPotentialSlope dx dy dz a b))
         (x₀ + w₀ * dx) (y₀ + w₀ * dy) (z₀ + w₀ * dz)) w₀ := by
-  unfold q2t_EM
+  unfold ellipticUmbilicWeightedIntegral
   refine HasDerivAt.const_mul _ (HasDerivAt.fun_sum fun j _ => HasDerivAt.fun_sum fun k _ => ?_)
-  exact (q2t_hasDerivAt_quad hW x₀ y₀ z₀ dx dy dz w₀ j k).const_mul _
+  exact (hasDerivAt_ellipticUmbilicWeightedQuadrant_line hW x₀ y₀ z₀ dx dy dz w₀ j k).const_mul _
 
 /-- Differentiation under the integral sign in `x` for the weighted elliptic umbilic integral. -/
-lemma q2t_hasDerivAt_EM_x {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) :
-    HasDerivAt (fun s : ℝ => q2t_EM W s y z)
-      (q2t_EM (fun a b => W a b * (I * q2t_L 1 0 0 a b)) x y z) x := by
-  have h := q2t_hasDerivAt_EM hW 0 y z 1 0 0 x
+private lemma hasDerivAt_ellipticUmbilicWeightedIntegral_x {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (x y z : ℝ) :
+    HasDerivAt (fun s : ℝ => ellipticUmbilicWeightedIntegral W s y z)
+      (ellipticUmbilicWeightedIntegral (fun a b => W a b * (I * ellipticUmbilicPotentialSlope 1 0 0 a b)) x y z) x := by
+  have h := hasDerivAt_ellipticUmbilicWeightedIntegral_line hW 0 y z 1 0 0 x
   simp only [zero_add, mul_one, mul_zero, add_zero] at h
   exact h
 
 /-- Differentiation under the integral sign in `y` for the weighted elliptic umbilic integral. -/
-lemma q2t_hasDerivAt_EM_y {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) :
-    HasDerivAt (fun t : ℝ => q2t_EM W x t z)
-      (q2t_EM (fun a b => W a b * (I * q2t_L 0 1 0 a b)) x y z) y := by
-  have h := q2t_hasDerivAt_EM hW x 0 z 0 1 0 y
+private lemma hasDerivAt_ellipticUmbilicWeightedIntegral_y {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (x y z : ℝ) :
+    HasDerivAt (fun t : ℝ => ellipticUmbilicWeightedIntegral W x t z)
+      (ellipticUmbilicWeightedIntegral (fun a b => W a b * (I * ellipticUmbilicPotentialSlope 0 1 0 a b)) x y z) y := by
+  have h := hasDerivAt_ellipticUmbilicWeightedIntegral_line hW x 0 z 0 1 0 y
   simp only [zero_add, mul_one, mul_zero, add_zero] at h
   exact h
 
 /-- Differentiation under the integral sign in `z` for the weighted elliptic umbilic integral. -/
-lemma q2t_hasDerivAt_EM_z {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) :
-    HasDerivAt (fun w : ℝ => q2t_EM W x y w)
-      (q2t_EM (fun a b => W a b * (I * q2t_L 0 0 1 a b)) x y z) z := by
-  have h := q2t_hasDerivAt_EM hW x y 0 0 0 1 z
+private lemma hasDerivAt_ellipticUmbilicWeightedIntegral_z {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (x y z : ℝ) :
+    HasDerivAt (fun w : ℝ => ellipticUmbilicWeightedIntegral W x y w)
+      (ellipticUmbilicWeightedIntegral (fun a b => W a b * (I * ellipticUmbilicPotentialSlope 0 0 1 a b)) x y z) z := by
+  have h := hasDerivAt_ellipticUmbilicWeightedIntegral_line hW x y 0 0 0 1 z
   simp only [zero_add, mul_one, mul_zero, add_zero] at h
   exact h
 
-/-- Multiplying a polynomially bounded weight by `i q2t_L dx dy dz` keeps it polynomially bounded.
+/-- Multiplying a polynomially bounded weight by `i ellipticUmbilicPotentialSlope dx dy dz` keeps it polynomially bounded.
 -/
-lemma q2t_polyBdd_mulL {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (dx dy dz : ℝ) :
-    Q2tPolyBdd fun a b => W a b * (I * q2t_L dx dy dz a b) :=
-  q2t_polyBdd_mul hW (q2t_polyBdd_mul (q2t_polyBdd_const I) (q2t_polyBdd_L dx dy dz))
+private lemma isPolyBounded_mul_I_mul_slope {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (dx dy dz : ℝ) :
+    IsPolyBounded fun a b => W a b * (I * ellipticUmbilicPotentialSlope dx dy dz a b) :=
+  isPolyBounded_mul hW (isPolyBounded_mul (isPolyBounded_const I) (isPolyBounded_ellipticUmbilicPotentialSlope dx dy dz))
 
 /-- Integration by parts along a ray `r ↦ r e`, `r > 0`, for `exp(iP)` decaying at infinity. -/
-lemma q2t_ray_ibp {P P' : ℂ → ℂ} (hP : ∀ u, HasDerivAt P (P' u) u) (e : ℂ)
+private lemma integral_Ioi_ray_deriv_mul_exp {P P' : ℂ → ℂ} (hP : ∀ u, HasDerivAt P (P' u) u) (e : ℂ)
     (hint : IntegrableOn (fun r : ℝ => e * P' ((r : ℂ) * e) * exp (I * P ((r : ℂ) * e))) (Ioi 0))
     (htend : Tendsto (fun r : ℝ => exp (I * P ((r : ℂ) * e))) atTop (𝓝 0)) :
     ∫ r in Ioi (0 : ℝ), e * P' ((r : ℂ) * e) * exp (I * P ((r : ℂ) * e)) = I * exp (I * P 0) := by
@@ -441,48 +459,48 @@ lemma q2t_ray_ibp {P P' : ℂ → ℂ} (hP : ∀ u, HasDerivAt P (P' u) u) (e : 
   rw [h]; simp
 
 /-- Slices of the weighted integrand are integrable. -/
-lemma q2t_integrableOn_slice_fst {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) (j k : Fin 3)
+private lemma integrableOn_ellipticUmbilicWeightedIntegrand_fst {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (x y z : ℝ) (j k : Fin 3)
     {q : ℝ} (hq : 0 ≤ q) :
-    IntegrableOn (fun r : ℝ => q2t_integrand W x y z j k (r, q)) (Ioi 0) := by
-  obtain ⟨A, hA⟩ := q2t_norm_integrand_le hW (C := |x| + |y| + |z|) (by positivity)
+    IntegrableOn (fun r : ℝ => ellipticUmbilicWeightedIntegrand W x y z j k (r, q)) (Ioi 0) := by
+  obtain ⟨A, hA⟩ := norm_ellipticUmbilicWeightedIntegrand_le hW (C := |x| + |y| + |z|) (by positivity)
   have h1 : IntegrableOn (fun r : ℝ => A * Real.exp (-q) * Real.exp (-r)) (Ioi 0) := by
     have := (exp_neg_integrableOn_Ioi 0 (b := 1) one_pos).const_mul (A * Real.exp (-q))
     simp only [neg_mul, one_mul] at this; exact this
-  refine h1.mono' ((q2t_continuous_integrand hW x y z j k).comp
+  refine h1.mono' ((continuous_ellipticUmbilicWeightedIntegrand hW x y z j k).comp
     (by fun_prop : Continuous fun r : ℝ => (r, q))).aestronglyMeasurable ?_
   refine ae_restrict_of_forall_mem measurableSet_Ioi fun r hr => ?_
   have := hA x y z le_rfl j k (r, q) (le_of_lt hr) hq
   simp only at this; linarith
 
 /-- For fixed `r ≥ 0` the weighted integrand is integrable in the second ray variable. -/
-lemma q2t_integrableOn_slice_snd {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) (j k : Fin 3)
+private lemma integrableOn_ellipticUmbilicWeightedIntegrand_snd {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (x y z : ℝ) (j k : Fin 3)
     {r : ℝ} (hr : 0 ≤ r) :
-    IntegrableOn (fun q : ℝ => q2t_integrand W x y z j k (r, q)) (Ioi 0) := by
-  obtain ⟨A, hA⟩ := q2t_norm_integrand_le hW (C := |x| + |y| + |z|) (by positivity)
+    IntegrableOn (fun q : ℝ => ellipticUmbilicWeightedIntegrand W x y z j k (r, q)) (Ioi 0) := by
+  obtain ⟨A, hA⟩ := norm_ellipticUmbilicWeightedIntegrand_le hW (C := |x| + |y| + |z|) (by positivity)
   have h1 : IntegrableOn (fun q : ℝ => A * Real.exp (-r) * Real.exp (-q)) (Ioi 0) := by
     have := (exp_neg_integrableOn_Ioi 0 (b := 1) one_pos).const_mul (A * Real.exp (-r))
     simp only [neg_mul, one_mul] at this; exact this
-  refine h1.mono' ((q2t_continuous_integrand hW x y z j k).comp
+  refine h1.mono' ((continuous_ellipticUmbilicWeightedIntegrand hW x y z j k).comp
     (by fun_prop : Continuous fun q : ℝ => (r, q))).aestronglyMeasurable ?_
   refine ae_restrict_of_forall_mem measurableSet_Ioi fun q hq => ?_
   exact hA x y z le_rfl j k (r, q) hr (le_of_lt hq)
 
 /-- `exp(iΦ^{(E)})` decays along each ray. -/
-lemma q2t_norm_exp_le (x y z : ℝ) (j k : Fin 3) :
+private lemma norm_exp_I_mul_ellipticUmbilicPotentialAB_rays_le (x y z : ℝ) (j k : Fin 3) :
     ∃ A : ℝ, ∀ r q : ℝ, 0 ≤ r → 0 ≤ q →
       ‖exp (I * ellipticUmbilicPotentialAB ((r : ℂ) * ellipticUmbilicRayDir j)
         ((q : ℂ) * ellipticUmbilicRayDir k) x y z)‖ ≤ A * Real.exp (-r) * Real.exp (-q) := by
-  obtain ⟨A, hA⟩ := q2t_norm_integrand_le (q2t_polyBdd_const 1) (C := |x| + |y| + |z|)
+  obtain ⟨A, hA⟩ := norm_ellipticUmbilicWeightedIntegrand_le (isPolyBounded_const 1) (C := |x| + |y| + |z|)
     (by positivity)
   refine ⟨A, fun r q hr hq => ?_⟩
   have := hA x y z le_rfl j k (r, q) hr hq
-  simpa [q2t_integrand, norm_mul, q2t_norm_rayDir] using this
+  simpa [ellipticUmbilicWeightedIntegrand, norm_mul, norm_ellipticUmbilicRayDir] using this
 
 /-- For fixed `q ≥ 0` the phase factor `exp(iΦ^{(E)})` tends to `0` along the first ray. -/
-lemma q2t_tendsto_exp_fst (x y z : ℝ) (j k : Fin 3) {q : ℝ} (hq : 0 ≤ q) :
+private lemma tendsto_exp_I_mul_ellipticUmbilicPotentialAB_fst (x y z : ℝ) (j k : Fin 3) {q : ℝ} (hq : 0 ≤ q) :
     Tendsto (fun r : ℝ => exp (I * ellipticUmbilicPotentialAB ((r : ℂ) * ellipticUmbilicRayDir j)
       ((q : ℂ) * ellipticUmbilicRayDir k) x y z)) atTop (𝓝 0) := by
-  obtain ⟨A, hA⟩ := q2t_norm_exp_le x y z j k
+  obtain ⟨A, hA⟩ := norm_exp_I_mul_ellipticUmbilicPotentialAB_rays_le x y z j k
   have h0 : Tendsto (fun r : ℝ => A * Real.exp (-q) * Real.exp (-r)) atTop (𝓝 0) := by
     simpa using Real.tendsto_exp_neg_atTop_nhds_zero.const_mul (A * Real.exp (-q))
   refine squeeze_zero_norm' ?_ h0
@@ -490,10 +508,10 @@ lemma q2t_tendsto_exp_fst (x y z : ℝ) (j k : Fin 3) {q : ℝ} (hq : 0 ≤ q) :
   have := hA r q hr hq; linarith
 
 /-- For fixed `r ≥ 0` the phase factor `exp(iΦ^{(E)})` tends to `0` along the second ray. -/
-lemma q2t_tendsto_exp_snd (x y z : ℝ) (j k : Fin 3) {r : ℝ} (hr : 0 ≤ r) :
+private lemma tendsto_exp_I_mul_ellipticUmbilicPotentialAB_snd (x y z : ℝ) (j k : Fin 3) {r : ℝ} (hr : 0 ≤ r) :
     Tendsto (fun q : ℝ => exp (I * ellipticUmbilicPotentialAB ((r : ℂ) * ellipticUmbilicRayDir j)
       ((q : ℂ) * ellipticUmbilicRayDir k) x y z)) atTop (𝓝 0) := by
-  obtain ⟨A, hA⟩ := q2t_norm_exp_le x y z j k
+  obtain ⟨A, hA⟩ := norm_exp_I_mul_ellipticUmbilicPotentialAB_rays_le x y z j k
   have h0 : Tendsto (fun q : ℝ => A * Real.exp (-r) * Real.exp (-q)) atTop (𝓝 0) := by
     simpa using Real.tendsto_exp_neg_atTop_nhds_zero.const_mul (A * Real.exp (-r))
   refine squeeze_zero_norm' ?_ h0
@@ -501,37 +519,37 @@ lemma q2t_tendsto_exp_snd (x y z : ℝ) (j k : Fin 3) {r : ℝ} (hr : 0 ≤ r) :
   exact hA r q hr hq
 
 /-- Polynomial boundedness transfers along pointwise equality of weights. -/
-lemma q2t_polyBdd_congr {W W' : ℂ → ℂ → ℂ} (h : Q2tPolyBdd W) (e : ∀ a b, W a b = W' a b) :
-    Q2tPolyBdd W' := by
+private lemma isPolyBounded_congr {W W' : ℂ → ℂ → ℂ} (h : IsPolyBounded W) (e : ∀ a b, W a b = W' a b) :
+    IsPolyBounded W' := by
   have : W = W' := funext fun a => funext fun b => e a b
   exact this ▸ h
 
 /-- `∂Φ^{(E)}/∂a = 3a²/2 + zb + (x - iy)/2`. -/
-def q2t_Wa (x y z : ℝ) (a b : ℂ) : ℂ := 3 * a ^ 2 / 2 + z * b + (x - I * y) / 2
+def ellipticUmbilicPotentialDerivA (x y z : ℝ) (a b : ℂ) : ℂ := 3 * a ^ 2 / 2 + z * b + (x - I * y) / 2
 
 /-- `∂Φ^{(E)}/∂b = 3b²/2 + za + (x + iy)/2`. -/
-def q2t_Wb (x y z : ℝ) (a b : ℂ) : ℂ := 3 * b ^ 2 / 2 + z * a + (x + I * y) / 2
+def ellipticUmbilicPotentialDerivB (x y z : ℝ) (a b : ℂ) : ℂ := 3 * b ^ 2 / 2 + z * a + (x + I * y) / 2
 
 /-- The weight `∂Φ^{(E)}/∂a` is polynomially bounded. -/
-lemma q2t_polyBdd_Wa (x y z : ℝ) : Q2tPolyBdd (q2t_Wa x y z) := by
-  refine q2t_polyBdd_congr (q2t_polyBdd_add (q2t_polyBdd_add (q2t_polyBdd_mul
-    (q2t_polyBdd_const (3 / 2)) (q2t_polyBdd_mul q2t_polyBdd_fst q2t_polyBdd_fst))
-    (q2t_polyBdd_mul (q2t_polyBdd_const (z : ℂ)) q2t_polyBdd_snd))
-    (q2t_polyBdd_const (((x : ℂ) - I * y) / 2))) fun a b => ?_
-  simp only [q2t_Wa]; ring
+private lemma isPolyBounded_ellipticUmbilicPotentialDerivA (x y z : ℝ) : IsPolyBounded (ellipticUmbilicPotentialDerivA x y z) := by
+  refine isPolyBounded_congr (isPolyBounded_add (isPolyBounded_add (isPolyBounded_mul
+    (isPolyBounded_const (3 / 2)) (isPolyBounded_mul isPolyBounded_fst isPolyBounded_fst))
+    (isPolyBounded_mul (isPolyBounded_const (z : ℂ)) isPolyBounded_snd))
+    (isPolyBounded_const (((x : ℂ) - I * y) / 2))) fun a b => ?_
+  simp only [ellipticUmbilicPotentialDerivA]; ring
 
 /-- The weight `∂Φ^{(E)}/∂b` is polynomially bounded. -/
-lemma q2t_polyBdd_Wb (x y z : ℝ) : Q2tPolyBdd (q2t_Wb x y z) := by
-  refine q2t_polyBdd_congr (q2t_polyBdd_add (q2t_polyBdd_add (q2t_polyBdd_mul
-    (q2t_polyBdd_const (3 / 2)) (q2t_polyBdd_mul q2t_polyBdd_snd q2t_polyBdd_snd))
-    (q2t_polyBdd_mul (q2t_polyBdd_const (z : ℂ)) q2t_polyBdd_fst))
-    (q2t_polyBdd_const (((x : ℂ) + I * y) / 2))) fun a b => ?_
-  simp only [q2t_Wb]; ring
+private lemma isPolyBounded_ellipticUmbilicPotentialDerivB (x y z : ℝ) : IsPolyBounded (ellipticUmbilicPotentialDerivB x y z) := by
+  refine isPolyBounded_congr (isPolyBounded_add (isPolyBounded_add (isPolyBounded_mul
+    (isPolyBounded_const (3 / 2)) (isPolyBounded_mul isPolyBounded_snd isPolyBounded_snd))
+    (isPolyBounded_mul (isPolyBounded_const (z : ℂ)) isPolyBounded_fst))
+    (isPolyBounded_const (((x : ℂ) + I * y) / 2))) fun a b => ?_
+  simp only [ellipticUmbilicPotentialDerivB]; ring
 
-/-- The `a`-derivative of `Φ^{(E)}` is `q2t_Wa`. -/
-lemma q2t_hasDerivAt_potential_a (x y z : ℝ) (b u : ℂ) :
-    HasDerivAt (fun u => ellipticUmbilicPotentialAB u b x y z) (q2t_Wa x y z u b) u := by
-  simp only [ellipticUmbilicPotentialAB_eq, q2t_Wa]
+/-- The `a`-derivative of `Φ^{(E)}` is `ellipticUmbilicPotentialDerivA`. -/
+private lemma hasDerivAt_ellipticUmbilicPotentialAB_fst (x y z : ℝ) (b u : ℂ) :
+    HasDerivAt (fun u => ellipticUmbilicPotentialAB u b x y z) (ellipticUmbilicPotentialDerivA x y z u b) u := by
+  simp only [ellipticUmbilicPotentialAB_eq, ellipticUmbilicPotentialDerivA]
   have h := ((((hasDerivAt_pow 3 u).add_const (b ^ 3)).div_const 2).add
     (((hasDerivAt_id u).const_mul ((z : ℂ))).mul_const b)).add
     (((hasDerivAt_id u).const_mul (((x : ℂ) - I * y) / 2)).add_const (((x : ℂ) + I * y) / 2 * b))
@@ -539,10 +557,10 @@ lemma q2t_hasDerivAt_potential_a (x y z : ℝ) (b u : ℂ) :
   · funext v; simp only [Pi.add_apply, id]; ring
   · push_cast; ring
 
-/-- The `b`-derivative of `Φ^{(E)}` is `q2t_Wb`. -/
-lemma q2t_hasDerivAt_potential_b (x y z : ℝ) (a u : ℂ) :
-    HasDerivAt (fun u => ellipticUmbilicPotentialAB a u x y z) (q2t_Wb x y z a u) u := by
-  simp only [ellipticUmbilicPotentialAB_eq, q2t_Wb]
+/-- The `b`-derivative of `Φ^{(E)}` is `ellipticUmbilicPotentialDerivB`. -/
+private lemma hasDerivAt_ellipticUmbilicPotentialAB_snd (x y z : ℝ) (a u : ℂ) :
+    HasDerivAt (fun u => ellipticUmbilicPotentialAB a u x y z) (ellipticUmbilicPotentialDerivB x y z a u) u := by
+  simp only [ellipticUmbilicPotentialAB_eq, ellipticUmbilicPotentialDerivB]
   have h := ((((hasDerivAt_pow 3 u).const_add (a ^ 3)).div_const 2).add
     (((hasDerivAt_id u).const_mul ((z : ℂ) * a)))).add
     (((hasDerivAt_id u).const_mul (((x : ℂ) + I * y) / 2)).const_add (((x : ℂ) - I * y) / 2 * a))
@@ -551,123 +569,123 @@ lemma q2t_hasDerivAt_potential_b (x y z : ℝ) (a u : ℂ) :
   · push_cast; ring
 
 /-- The weighted integrand is integrable for the product of the restricted measures. -/
-lemma q2t_integrable_prod {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) (j k : Fin 3) :
-    Integrable (q2t_integrand W x y z j k)
+private lemma integrable_ellipticUmbilicWeightedIntegrand_prod {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (x y z : ℝ) (j k : Fin 3) :
+    Integrable (ellipticUmbilicWeightedIntegrand W x y z j k)
       ((volume.restrict (Ioi (0 : ℝ))).prod (volume.restrict (Ioi (0 : ℝ)))) := by
-  have h := q2t_integrableOn hW x y z j k
+  have h := integrableOn_ellipticUmbilicWeightedIntegrand hW x y z j k
   rwa [IntegrableOn, Measure.volume_eq_prod, ← Measure.prod_restrict] at h
 
 /-- Integration by parts in `a`: the quadrant integral of `∂Φ/∂a` is independent of `j`. -/
-lemma q2t_quad_Wa (x y z : ℝ) (j k : Fin 3) :
-    q2t_quad (q2t_Wa x y z) x y z j k = ∫ q in Ioi (0 : ℝ),
+private lemma ellipticUmbilicWeightedQuadrant_derivA (x y z : ℝ) (j k : Fin 3) :
+    ellipticUmbilicWeightedQuadrant (ellipticUmbilicPotentialDerivA x y z) x y z j k = ∫ q in Ioi (0 : ℝ),
       ellipticUmbilicRayDir k * (I * exp (I * ellipticUmbilicPotentialAB 0
         ((q : ℂ) * ellipticUmbilicRayDir k) x y z)) := by
-  unfold q2t_quad
+  unfold ellipticUmbilicWeightedQuadrant
   rw [Measure.volume_eq_prod, ← Measure.prod_restrict,
-    integral_prod_symm _ (q2t_integrable_prod (q2t_polyBdd_Wa x y z) x y z j k)]
+    integral_prod_symm _ (integrable_ellipticUmbilicWeightedIntegrand_prod (isPolyBounded_ellipticUmbilicPotentialDerivA x y z) x y z j k)]
   refine setIntegral_congr_fun measurableSet_Ioi fun q hq => ?_
   set ej := ellipticUmbilicRayDir j
   set ek := ellipticUmbilicRayDir k
   set P : ℂ → ℂ := fun u => ellipticUmbilicPotentialAB u ((q : ℂ) * ek) x y z
-  set P' : ℂ → ℂ := fun u => q2t_Wa x y z u ((q : ℂ) * ek)
-  have hfun : (fun r : ℝ => q2t_integrand (q2t_Wa x y z) x y z j k (r, q)) =
+  set P' : ℂ → ℂ := fun u => ellipticUmbilicPotentialDerivA x y z u ((q : ℂ) * ek)
+  have hfun : (fun r : ℝ => ellipticUmbilicWeightedIntegrand (ellipticUmbilicPotentialDerivA x y z) x y z j k (r, q)) =
       fun r : ℝ => ek * (ej * P' ((r : ℂ) * ej) * exp (I * P ((r : ℂ) * ej))) := by
-    funext r; simp only [q2t_integrand, P, P', ej, ek]; ring
+    funext r; simp only [ellipticUmbilicWeightedIntegrand, P, P', ej, ek]; ring
   rw [hfun, integral_const_mul]
   have hint : IntegrableOn (fun r : ℝ => ej * P' ((r : ℂ) * ej) * exp (I * P ((r : ℂ) * ej)))
       (Ioi 0) := by
-    have h := (q2t_integrableOn_slice_fst (q2t_polyBdd_Wa x y z) x y z j k
+    have h := (integrableOn_ellipticUmbilicWeightedIntegrand_fst (isPolyBounded_ellipticUmbilicPotentialDerivA x y z) x y z j k
       (le_of_lt (mem_Ioi.mp hq))).const_mul ek⁻¹
     refine IntegrableOn.congr_fun h (fun r _ => ?_) measurableSet_Ioi
-    have hek : ek ≠ 0 := q2t_rayDir_ne_zero k
-    simp only [q2t_integrand, P, P', ej, ek] at hek ⊢
+    have hek : ek ≠ 0 := ellipticUmbilicRayDir_ne_zero k
+    simp only [ellipticUmbilicWeightedIntegrand, P, P', ej, ek] at hek ⊢
     field_simp
-  rw [q2t_ray_ibp (fun u => q2t_hasDerivAt_potential_a x y z _ u) ej hint
-    (q2t_tendsto_exp_fst x y z j k (le_of_lt (mem_Ioi.mp hq)))]
+  rw [integral_Ioi_ray_deriv_mul_exp (fun u => hasDerivAt_ellipticUmbilicPotentialAB_fst x y z _ u) ej hint
+    (tendsto_exp_I_mul_ellipticUmbilicPotentialAB_fst x y z j k (le_of_lt (mem_Ioi.mp hq)))]
 
 /-- Integration by parts in `b`: the quadrant integral of `∂Φ/∂b` is independent of `k`. -/
-lemma q2t_quad_Wb (x y z : ℝ) (j k : Fin 3) :
-    q2t_quad (q2t_Wb x y z) x y z j k = ∫ r in Ioi (0 : ℝ),
+private lemma ellipticUmbilicWeightedQuadrant_derivB (x y z : ℝ) (j k : Fin 3) :
+    ellipticUmbilicWeightedQuadrant (ellipticUmbilicPotentialDerivB x y z) x y z j k = ∫ r in Ioi (0 : ℝ),
       ellipticUmbilicRayDir j * (I * exp (I * ellipticUmbilicPotentialAB
         ((r : ℂ) * ellipticUmbilicRayDir j) 0 x y z)) := by
-  unfold q2t_quad
+  unfold ellipticUmbilicWeightedQuadrant
   rw [Measure.volume_eq_prod, ← Measure.prod_restrict,
-    integral_prod _ (q2t_integrable_prod (q2t_polyBdd_Wb x y z) x y z j k)]
+    integral_prod _ (integrable_ellipticUmbilicWeightedIntegrand_prod (isPolyBounded_ellipticUmbilicPotentialDerivB x y z) x y z j k)]
   refine setIntegral_congr_fun measurableSet_Ioi fun r hr => ?_
   set ej := ellipticUmbilicRayDir j
   set ek := ellipticUmbilicRayDir k
   set P : ℂ → ℂ := fun u => ellipticUmbilicPotentialAB ((r : ℂ) * ej) u x y z
-  set P' : ℂ → ℂ := fun u => q2t_Wb x y z ((r : ℂ) * ej) u
-  have hfun : (fun q : ℝ => q2t_integrand (q2t_Wb x y z) x y z j k (r, q)) =
+  set P' : ℂ → ℂ := fun u => ellipticUmbilicPotentialDerivB x y z ((r : ℂ) * ej) u
+  have hfun : (fun q : ℝ => ellipticUmbilicWeightedIntegrand (ellipticUmbilicPotentialDerivB x y z) x y z j k (r, q)) =
       fun q : ℝ => ej * (ek * P' ((q : ℂ) * ek) * exp (I * P ((q : ℂ) * ek))) := by
-    funext q; simp only [q2t_integrand, P, P', ej, ek]; ring
+    funext q; simp only [ellipticUmbilicWeightedIntegrand, P, P', ej, ek]; ring
   rw [hfun, integral_const_mul]
   have hint : IntegrableOn (fun q : ℝ => ek * P' ((q : ℂ) * ek) * exp (I * P ((q : ℂ) * ek)))
       (Ioi 0) := by
-    have h := (q2t_integrableOn_slice_snd (q2t_polyBdd_Wb x y z) x y z j k
+    have h := (integrableOn_ellipticUmbilicWeightedIntegrand_snd (isPolyBounded_ellipticUmbilicPotentialDerivB x y z) x y z j k
       (le_of_lt (mem_Ioi.mp hr))).const_mul ej⁻¹
     refine IntegrableOn.congr_fun h (fun q _ => ?_) measurableSet_Ioi
-    have hej : ej ≠ 0 := q2t_rayDir_ne_zero j
-    simp only [q2t_integrand, P, P', ej, ek] at hej ⊢
+    have hej : ej ≠ 0 := ellipticUmbilicRayDir_ne_zero j
+    simp only [ellipticUmbilicWeightedIntegrand, P, P', ej, ek] at hej ⊢
     field_simp
-  rw [q2t_ray_ibp (fun u => q2t_hasDerivAt_potential_b x y z _ u) ek hint
-    (q2t_tendsto_exp_snd x y z j k (le_of_lt (mem_Ioi.mp hr)))]
+  rw [integral_Ioi_ray_deriv_mul_exp (fun u => hasDerivAt_ellipticUmbilicPotentialAB_snd x y z _ u) ek hint
+    (tendsto_exp_I_mul_ellipticUmbilicPotentialAB_snd x y z j k (le_of_lt (mem_Ioi.mp hr)))]
 
 /-- `∫_{cycle} (∂Φ^{(E)}/∂a) exp(iΦ^{(E)}) = 0`: the boundary terms cancel since the columns of
 `ε` sum to zero. -/
-lemma q2t_EM_Wa (x y z : ℝ) : q2t_EM (q2t_Wa x y z) x y z = 0 := by
-  simp only [q2t_EM, q2t_quad_Wa, Fin.sum_univ_three]
+private lemma ellipticUmbilicWeightedIntegral_derivA (x y z : ℝ) : ellipticUmbilicWeightedIntegral (ellipticUmbilicPotentialDerivA x y z) x y z = 0 := by
+  simp only [ellipticUmbilicWeightedIntegral, ellipticUmbilicWeightedQuadrant_derivA, Fin.sum_univ_three]
   simp [ellipticUmbilicCycle]
   ring
 
 /-- `∫_{cycle} (∂Φ^{(E)}/∂b) exp(iΦ^{(E)}) = 0` (the rows of `ε` sum to zero). -/
-lemma q2t_EM_Wb (x y z : ℝ) : q2t_EM (q2t_Wb x y z) x y z = 0 := by
-  simp only [q2t_EM, q2t_quad_Wb, Fin.sum_univ_three]
+private lemma ellipticUmbilicWeightedIntegral_derivB (x y z : ℝ) : ellipticUmbilicWeightedIntegral (ellipticUmbilicPotentialDerivB x y z) x y z = 0 := by
+  simp only [ellipticUmbilicWeightedIntegral, ellipticUmbilicWeightedQuadrant_derivB, Fin.sum_univ_three]
   simp [ellipticUmbilicCycle]
 
-/-- The `x`-derivative of the weighted elliptic umbilic integral multiplies the weight by `i q2t_L 1
+/-- The `x`-derivative of the weighted elliptic umbilic integral multiplies the weight by `i ellipticUmbilicPotentialSlope 1
 0 0`. -/
-lemma q2t_deriv_EM_x {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (y z : ℝ) :
-    deriv (fun s : ℝ => q2t_EM W s y z) =
-      fun x => q2t_EM (fun a b => W a b * (I * q2t_L 1 0 0 a b)) x y z :=
-  funext fun x => (q2t_hasDerivAt_EM_x hW x y z).deriv
+private lemma deriv_ellipticUmbilicWeightedIntegral_x {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (y z : ℝ) :
+    deriv (fun s : ℝ => ellipticUmbilicWeightedIntegral W s y z) =
+      fun x => ellipticUmbilicWeightedIntegral (fun a b => W a b * (I * ellipticUmbilicPotentialSlope 1 0 0 a b)) x y z :=
+  funext fun x => (hasDerivAt_ellipticUmbilicWeightedIntegral_x hW x y z).deriv
 
-/-- The `y`-derivative of the weighted elliptic umbilic integral multiplies the weight by `i q2t_L 0
+/-- The `y`-derivative of the weighted elliptic umbilic integral multiplies the weight by `i ellipticUmbilicPotentialSlope 0
 1 0`. -/
-lemma q2t_deriv_EM_y {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x z : ℝ) :
-    deriv (fun t : ℝ => q2t_EM W x t z) =
-      fun y => q2t_EM (fun a b => W a b * (I * q2t_L 0 1 0 a b)) x y z :=
-  funext fun y => (q2t_hasDerivAt_EM_y hW x y z).deriv
+private lemma deriv_ellipticUmbilicWeightedIntegral_y {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (x z : ℝ) :
+    deriv (fun t : ℝ => ellipticUmbilicWeightedIntegral W x t z) =
+      fun y => ellipticUmbilicWeightedIntegral (fun a b => W a b * (I * ellipticUmbilicPotentialSlope 0 1 0 a b)) x y z :=
+  funext fun y => (hasDerivAt_ellipticUmbilicWeightedIntegral_y hW x y z).deriv
 
-/-- The `z`-derivative of the weighted elliptic umbilic integral multiplies the weight by `i q2t_L 0
+/-- The `z`-derivative of the weighted elliptic umbilic integral multiplies the weight by `i ellipticUmbilicPotentialSlope 0
 0 1`. -/
-lemma q2t_deriv_EM_z {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y : ℝ) :
-    deriv (fun w : ℝ => q2t_EM W x y w) =
-      fun z => q2t_EM (fun a b => W a b * (I * q2t_L 0 0 1 a b)) x y z :=
-  funext fun z => (q2t_hasDerivAt_EM_z hW x y z).deriv
+private lemma deriv_ellipticUmbilicWeightedIntegral_z {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (x y : ℝ) :
+    deriv (fun w : ℝ => ellipticUmbilicWeightedIntegral W x y w) =
+      fun z => ellipticUmbilicWeightedIntegral (fun a b => W a b * (I * ellipticUmbilicPotentialSlope 0 0 1 a b)) x y z :=
+  funext fun z => (hasDerivAt_ellipticUmbilicWeightedIntegral_z hW x y z).deriv
 
 /-- The weighted elliptic umbilic integral depends only on the weight's values. -/
-lemma q2t_EM_congr {W W' : ℂ → ℂ → ℂ} (e : ∀ a b, W a b = W' a b) (x y z : ℝ) :
-    q2t_EM W x y z = q2t_EM W' x y z := by
+private lemma ellipticUmbilicWeightedIntegral_congr {W W' : ℂ → ℂ → ℂ} (e : ∀ a b, W a b = W' a b) (x y z : ℝ) :
+    ellipticUmbilicWeightedIntegral W x y z = ellipticUmbilicWeightedIntegral W' x y z := by
   have : W = W' := funext fun a => funext fun b => e a b
   rw [this]
 
 /-- Scalar multiples of polynomially bounded weights are polynomially bounded. -/
-lemma q2t_polyBdd_cmul {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (c : ℂ) :
-    Q2tPolyBdd fun a b => c * W a b := q2t_polyBdd_mul (q2t_polyBdd_const c) hW
+private lemma isPolyBounded_const_mul {W : ℂ → ℂ → ℂ} (hW : IsPolyBounded W) (c : ℂ) :
+    IsPolyBounded fun a b => c * W a b := isPolyBounded_mul (isPolyBounded_const c) hW
 
 /-- The combination `i(∂Φ/∂a - ∂Φ/∂b) = ∂Φ/∂t` integrates to zero. -/
-lemma q2t_EM_Wt (x y z : ℝ) :
-    q2t_EM (fun a b => I * q2t_Wa x y z a b + (-I) * q2t_Wb x y z a b) x y z = 0 := by
-  rw [q2t_EM_add (q2t_polyBdd_cmul (q2t_polyBdd_Wa x y z) _)
-    (q2t_polyBdd_cmul (q2t_polyBdd_Wb x y z) _), q2t_EM_const_mul, q2t_EM_const_mul,
-    q2t_EM_Wa, q2t_EM_Wb]
+private lemma ellipticUmbilicWeightedIntegral_derivT (x y z : ℝ) :
+    ellipticUmbilicWeightedIntegral (fun a b => I * ellipticUmbilicPotentialDerivA x y z a b + (-I) * ellipticUmbilicPotentialDerivB x y z a b) x y z = 0 := by
+  rw [ellipticUmbilicWeightedIntegral_add (isPolyBounded_const_mul (isPolyBounded_ellipticUmbilicPotentialDerivA x y z) _)
+    (isPolyBounded_const_mul (isPolyBounded_ellipticUmbilicPotentialDerivB x y z) _), ellipticUmbilicWeightedIntegral_const_mul, ellipticUmbilicWeightedIntegral_const_mul,
+    ellipticUmbilicWeightedIntegral_derivA, ellipticUmbilicWeightedIntegral_derivB]
   ring
 
 /-- The combination `∂Φ/∂a + ∂Φ/∂b = ∂Φ/∂s` integrates to zero. -/
-lemma q2t_EM_Ws (x y z : ℝ) :
-    q2t_EM (fun a b => q2t_Wa x y z a b + q2t_Wb x y z a b) x y z = 0 := by
-  rw [q2t_EM_add (q2t_polyBdd_Wa x y z) (q2t_polyBdd_Wb x y z), q2t_EM_Wa, q2t_EM_Wb]
+private lemma ellipticUmbilicWeightedIntegral_derivS (x y z : ℝ) :
+    ellipticUmbilicWeightedIntegral (fun a b => ellipticUmbilicPotentialDerivA x y z a b + ellipticUmbilicPotentialDerivB x y z a b) x y z = 0 := by
+  rw [ellipticUmbilicWeightedIntegral_add (isPolyBounded_ellipticUmbilicPotentialDerivA x y z) (isPolyBounded_ellipticUmbilicPotentialDerivB x y z), ellipticUmbilicWeightedIntegral_derivA, ellipticUmbilicWeightedIntegral_derivB]
   ring
 
 /-! ### §36.10(iii)–(iv): umbilics
@@ -686,20 +704,20 @@ theorem ellipticUmbilicIntegral_pde_xy (x y z : ℝ) :
     6 * deriv (fun s => deriv (fun t => ellipticUmbilicIntegral s t z) y) x -
       2 * I * z * deriv (fun t => ellipticUmbilicIntegral x t z) y +
       y * ellipticUmbilicIntegral x y z = 0 := by
-  have h1 := q2t_polyBdd_const (1 : ℂ)
-  have hy := q2t_polyBdd_mulL h1 0 1 0
-  have hyx := q2t_polyBdd_mulL hy 1 0 0
-  simp only [← q2t_EM_one, q2t_deriv_EM_y h1, q2t_deriv_EM_x hy]
-  have e := q2t_EM_add (q2t_polyBdd_cmul hyx 6)
-    (q2t_polyBdd_add (q2t_polyBdd_cmul hy (-(2 * I * z))) (q2t_polyBdd_cmul h1 y)) x y z
-  rw [q2t_EM_const_mul 6 (fun a b => 1 * (I * q2t_L 0 1 0 a b) * (I * q2t_L 1 0 0 a b)),
-    q2t_EM_add (q2t_polyBdd_cmul hy _) (q2t_polyBdd_cmul h1 _),
-    q2t_EM_const_mul (-(2 * I * z)) (fun a b => 1 * (I * q2t_L 0 1 0 a b)),
-    q2t_EM_const_mul (y : ℂ) (fun _ _ => 1)] at e
-  rw [q2t_EM_congr (W' := fun a b => I * q2t_Wa x y z a b + (-I) * q2t_Wb x y z a b)
-    (fun a b => ?_), q2t_EM_Wt] at e
+  have h1 := isPolyBounded_const (1 : ℂ)
+  have hy := isPolyBounded_mul_I_mul_slope h1 0 1 0
+  have hyx := isPolyBounded_mul_I_mul_slope hy 1 0 0
+  simp only [← ellipticUmbilicWeightedIntegral_one, deriv_ellipticUmbilicWeightedIntegral_y h1, deriv_ellipticUmbilicWeightedIntegral_x hy]
+  have e := ellipticUmbilicWeightedIntegral_add (isPolyBounded_const_mul hyx 6)
+    (isPolyBounded_add (isPolyBounded_const_mul hy (-(2 * I * z))) (isPolyBounded_const_mul h1 y)) x y z
+  rw [ellipticUmbilicWeightedIntegral_const_mul 6 (fun a b => 1 * (I * ellipticUmbilicPotentialSlope 0 1 0 a b) * (I * ellipticUmbilicPotentialSlope 1 0 0 a b)),
+    ellipticUmbilicWeightedIntegral_add (isPolyBounded_const_mul hy _) (isPolyBounded_const_mul h1 _),
+    ellipticUmbilicWeightedIntegral_const_mul (-(2 * I * z)) (fun a b => 1 * (I * ellipticUmbilicPotentialSlope 0 1 0 a b)),
+    ellipticUmbilicWeightedIntegral_const_mul (y : ℂ) (fun _ _ => 1)] at e
+  rw [ellipticUmbilicWeightedIntegral_congr (W' := fun a b => I * ellipticUmbilicPotentialDerivA x y z a b + (-I) * ellipticUmbilicPotentialDerivB x y z a b)
+    (fun a b => ?_), ellipticUmbilicWeightedIntegral_derivT] at e
   · linear_combination -e
-  · simp only [q2t_L, q2t_Wa, q2t_Wb]; push_cast
+  · simp only [ellipticUmbilicPotentialSlope, ellipticUmbilicPotentialDerivA, ellipticUmbilicPotentialDerivB]; push_cast
     linear_combination (-(3 / 2) * (a ^ 2 - b ^ 2) * I + z * (a - b) * I + y) * I_sq
 
 /-- The elliptic umbilic equation from `Φ_s^{(E)}` (DLMF 36.10.14, and 36.10.11–36.10.12):
@@ -711,28 +729,28 @@ theorem ellipticUmbilicIntegral_pde_xx_yy (x y z : ℝ) :
         iteratedDeriv 2 (fun t => ellipticUmbilicIntegral x t z) y) +
       2 * I * z * deriv (fun s => ellipticUmbilicIntegral s y z) x -
       x * ellipticUmbilicIntegral x y z = 0 := by
-  have h1 := q2t_polyBdd_const (1 : ℂ)
-  have hx := q2t_polyBdd_mulL h1 1 0 0
-  have hy := q2t_polyBdd_mulL h1 0 1 0
-  have hxx := q2t_polyBdd_mulL hx 1 0 0
-  have hyy := q2t_polyBdd_mulL hy 0 1 0
-  simp only [← q2t_EM_one, iteratedDeriv_succ, iteratedDeriv_zero, q2t_deriv_EM_x h1,
-    q2t_deriv_EM_y h1, q2t_deriv_EM_x hx, q2t_deriv_EM_y hy]
-  have e := q2t_EM_add (q2t_polyBdd_cmul hxx 3)
-    (q2t_polyBdd_add (q2t_polyBdd_cmul hyy (-3))
-      (q2t_polyBdd_add (q2t_polyBdd_cmul hx (2 * I * z)) (q2t_polyBdd_cmul h1 (-x)))) x y z
-  rw [q2t_EM_const_mul 3 (fun a b => 1 * (I * q2t_L 1 0 0 a b) * (I * q2t_L 1 0 0 a b)),
-    q2t_EM_add (q2t_polyBdd_cmul hyy _)
-      (q2t_polyBdd_add (q2t_polyBdd_cmul hx _) (q2t_polyBdd_cmul h1 _)),
-    q2t_EM_const_mul (-3) (fun a b => 1 * (I * q2t_L 0 1 0 a b) * (I * q2t_L 0 1 0 a b)),
-    q2t_EM_add (q2t_polyBdd_cmul hx _) (q2t_polyBdd_cmul h1 _),
-    q2t_EM_const_mul (2 * I * z) (fun a b => 1 * (I * q2t_L 1 0 0 a b)),
-    q2t_EM_const_mul (-(x : ℂ)) (fun _ _ => 1)] at e
-  rw [q2t_EM_congr (W' := fun a b => (-1) * (q2t_Wa x y z a b + q2t_Wb x y z a b))
-    (fun a b => ?_), q2t_EM_const_mul (-1) (fun a b => q2t_Wa x y z a b + q2t_Wb x y z a b),
-    q2t_EM_Ws] at e
+  have h1 := isPolyBounded_const (1 : ℂ)
+  have hx := isPolyBounded_mul_I_mul_slope h1 1 0 0
+  have hy := isPolyBounded_mul_I_mul_slope h1 0 1 0
+  have hxx := isPolyBounded_mul_I_mul_slope hx 1 0 0
+  have hyy := isPolyBounded_mul_I_mul_slope hy 0 1 0
+  simp only [← ellipticUmbilicWeightedIntegral_one, iteratedDeriv_succ, iteratedDeriv_zero, deriv_ellipticUmbilicWeightedIntegral_x h1,
+    deriv_ellipticUmbilicWeightedIntegral_y h1, deriv_ellipticUmbilicWeightedIntegral_x hx, deriv_ellipticUmbilicWeightedIntegral_y hy]
+  have e := ellipticUmbilicWeightedIntegral_add (isPolyBounded_const_mul hxx 3)
+    (isPolyBounded_add (isPolyBounded_const_mul hyy (-3))
+      (isPolyBounded_add (isPolyBounded_const_mul hx (2 * I * z)) (isPolyBounded_const_mul h1 (-x)))) x y z
+  rw [ellipticUmbilicWeightedIntegral_const_mul 3 (fun a b => 1 * (I * ellipticUmbilicPotentialSlope 1 0 0 a b) * (I * ellipticUmbilicPotentialSlope 1 0 0 a b)),
+    ellipticUmbilicWeightedIntegral_add (isPolyBounded_const_mul hyy _)
+      (isPolyBounded_add (isPolyBounded_const_mul hx _) (isPolyBounded_const_mul h1 _)),
+    ellipticUmbilicWeightedIntegral_const_mul (-3) (fun a b => 1 * (I * ellipticUmbilicPotentialSlope 0 1 0 a b) * (I * ellipticUmbilicPotentialSlope 0 1 0 a b)),
+    ellipticUmbilicWeightedIntegral_add (isPolyBounded_const_mul hx _) (isPolyBounded_const_mul h1 _),
+    ellipticUmbilicWeightedIntegral_const_mul (2 * I * z) (fun a b => 1 * (I * ellipticUmbilicPotentialSlope 1 0 0 a b)),
+    ellipticUmbilicWeightedIntegral_const_mul (-(x : ℂ)) (fun _ _ => 1)] at e
+  rw [ellipticUmbilicWeightedIntegral_congr (W' := fun a b => (-1) * (ellipticUmbilicPotentialDerivA x y z a b + ellipticUmbilicPotentialDerivB x y z a b))
+    (fun a b => ?_), ellipticUmbilicWeightedIntegral_const_mul (-1) (fun a b => ellipticUmbilicPotentialDerivA x y z a b + ellipticUmbilicPotentialDerivB x y z a b),
+    ellipticUmbilicWeightedIntegral_derivS] at e
   · linear_combination -e
-  · simp only [q2t_L, q2t_Wa, q2t_Wb]; push_cast
+  · simp only [ellipticUmbilicPotentialSlope, ellipticUmbilicPotentialDerivA, ellipticUmbilicPotentialDerivB]; push_cast
     linear_combination (-(3 / 4) * (a - b) ^ 2 * I ^ 2 + 3 * (a ^ 2 + b ^ 2) / 2 + z * (a + b)) *
       I_sq
 
@@ -744,10 +762,10 @@ theorem hyperbolicUmbilicIntegral_pde_x (x y z : ℝ) :
       I * z * deriv (fun t => hyperbolicUmbilicIntegral x t z) y -
       x * hyperbolicUmbilicIntegral x y z = 0 := by
   simp only [hyperbolicUmbilicIntegral_eq_moment, iteratedDeriv_succ, iteratedDeriv_zero,
-    s36b_deriv_hyperbolicUmbilicMoment_x, s36b_deriv_hyperbolicUmbilicMoment_y]
+    deriv_hyperbolicUmbilicMoment_x, deriv_hyperbolicUmbilicMoment_y]
   rw [(((hasDerivAt_hyperbolicUmbilicMoment_x x y z 1 0).const_mul I)).deriv]
   simp only [Nat.reduceAdd, zero_add]
-  linear_combination (-1 : ℂ) * s36b_hyperbolic_moment_rel_s x y z +
+  linear_combination (-1 : ℂ) * hyperbolicUmbilicMoment_relation_s x y z +
     (3 * hyperbolicUmbilicMoment x y z 2 0 + (z : ℂ) * hyperbolicUmbilicMoment x y z 0 1) * I_sq
 
 /-- The hyperbolic umbilic equation from `Φ_t^{(H)}` (DLMF 36.10.16, and 36.10.11–36.10.12):
@@ -758,10 +776,10 @@ theorem hyperbolicUmbilicIntegral_pde_y (x y z : ℝ) :
       I * z * deriv (fun s => hyperbolicUmbilicIntegral s y z) x -
       y * hyperbolicUmbilicIntegral x y z = 0 := by
   simp only [hyperbolicUmbilicIntegral_eq_moment, iteratedDeriv_succ, iteratedDeriv_zero,
-    s36b_deriv_hyperbolicUmbilicMoment_x, s36b_deriv_hyperbolicUmbilicMoment_y]
+    deriv_hyperbolicUmbilicMoment_x, deriv_hyperbolicUmbilicMoment_y]
   rw [(((hasDerivAt_hyperbolicUmbilicMoment_y x y z 0 1).const_mul I)).deriv]
   simp only [Nat.reduceAdd, zero_add]
-  linear_combination (-1 : ℂ) * s36b_hyperbolic_moment_rel_t x y z +
+  linear_combination (-1 : ℂ) * hyperbolicUmbilicMoment_relation_t x y z +
     (3 * hyperbolicUmbilicMoment x y z 0 2 + (z : ℂ) * hyperbolicUmbilicMoment x y z 1 0) * I_sq
 
 /-- The `z`-derivative of the elliptic umbilic integral (DLMF 36.10.17):
@@ -771,14 +789,14 @@ theorem ellipticUmbilicIntegral_pde_z (x y z : ℝ) :
     I * deriv (fun w => ellipticUmbilicIntegral x y w) z =
       iteratedDeriv 2 (fun s => ellipticUmbilicIntegral s y z) x +
         iteratedDeriv 2 (fun t => ellipticUmbilicIntegral x t z) y := by
-  have h1 := q2t_polyBdd_const (1 : ℂ)
-  simp only [← q2t_EM_one, iteratedDeriv_succ, iteratedDeriv_zero, q2t_deriv_EM_x h1,
-    q2t_deriv_EM_y h1, q2t_deriv_EM_z h1, q2t_deriv_EM_x (q2t_polyBdd_mulL h1 1 0 0),
-    q2t_deriv_EM_y (q2t_polyBdd_mulL h1 0 1 0)]
-  rw [← q2t_EM_const_mul, ← q2t_EM_add (q2t_polyBdd_mulL (q2t_polyBdd_mulL h1 1 0 0) 1 0 0)
-    (q2t_polyBdd_mulL (q2t_polyBdd_mulL h1 0 1 0) 0 1 0)]
-  refine q2t_EM_congr (fun a b => ?_) x y z
-  simp only [q2t_L]; push_cast
+  have h1 := isPolyBounded_const (1 : ℂ)
+  simp only [← ellipticUmbilicWeightedIntegral_one, iteratedDeriv_succ, iteratedDeriv_zero, deriv_ellipticUmbilicWeightedIntegral_x h1,
+    deriv_ellipticUmbilicWeightedIntegral_y h1, deriv_ellipticUmbilicWeightedIntegral_z h1, deriv_ellipticUmbilicWeightedIntegral_x (isPolyBounded_mul_I_mul_slope h1 1 0 0),
+    deriv_ellipticUmbilicWeightedIntegral_y (isPolyBounded_mul_I_mul_slope h1 0 1 0)]
+  rw [← ellipticUmbilicWeightedIntegral_const_mul, ← ellipticUmbilicWeightedIntegral_add (isPolyBounded_mul_I_mul_slope (isPolyBounded_mul_I_mul_slope h1 1 0 0) 1 0 0)
+    (isPolyBounded_mul_I_mul_slope (isPolyBounded_mul_I_mul_slope h1 0 1 0) 0 1 0)]
+  refine ellipticUmbilicWeightedIntegral_congr (fun a b => ?_) x y z
+  simp only [ellipticUmbilicPotentialSlope]; push_cast
   linear_combination (-I ^ 2 * (a - b) ^ 2 / 4) * I_sq
 
 /-- The `z`-derivative of the hyperbolic umbilic integral (DLMF 36.10.18):

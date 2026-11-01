@@ -13,7 +13,9 @@ public import Mathlib.Analysis.PSeriesComplex
 /-!
 # Two facts about the Riemann zeta function
 
-* `riemannZeta_six`: `ζ(6) = π⁶/945`;
+## Main results
+
+* `riemannZeta_six`: `ζ(6) = π⁶/945`, from Mathlib's `riemannZeta_two_mul_nat`.
 * `hasSum_neg_one_pow_div_nat_add_one_cpow`: the alternating (Dirichlet eta) series
   `∑ (-1)ⁿ (n+1)^{-s}` converges to `(1 - 2^{1-s}) ζ(s)` for `Re s > 1`.
 -/

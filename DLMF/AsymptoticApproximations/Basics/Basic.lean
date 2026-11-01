@@ -18,16 +18,17 @@ scales of §2.1(v) are the project's `Asymptotics.IsAsymptoticScale`, and the ex
 respect to a scale with constant coefficients are `Asymptotics.HasAsymptoticExpansion`
 (`DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion`).
 
-This file adds the specific forms of DLMF §2.1(iii)–(v):
+## Main definitions
 
-* `HasPoincareExpansion 𝐗 a f` (2.1.13–2.1.14): `f(x) ~ ∑ aₛ x⁻ˢ` as `x → ∞` in `𝐗`;
-* `HasPoincareExpansionAt 𝐗 c a f` (2.1.16): `f(x) ~ ∑ aₛ (x - c)ˢ` as `x → c` in `𝐗`;
+* `HasPoincareExpansion 𝐗 a f` (2.1.13–2.1.14): `f(x) ~ ∑ aₛ x⁻ˢ` as `x → ∞` in `𝐗`.
+* `HasPoincareExpansionAt 𝐗 c a f` (2.1.16): `f(x) ~ ∑ aₛ (x - c)ˢ` as `x → c` in `𝐗`.
 * `HasUniformPoincareExpansion 𝐔 𝐗 a f` (2.1.18): the expansion holds uniformly in a
-  parameter `u ∈ 𝐔`, with coefficients `aₛ(u)`;
+  parameter `u ∈ 𝐔`, with coefficients `aₛ(u)`.
 * `HasGeneralizedAsymptoticExpansion l φ fs f` (2.1.19–2.1.21): `f ~ ∑ fₛ; {φₛ}` along `l`.
-
-For §2.2 it also defines `lagrangeReversionCoeff`, the coefficients `Fₛ` of Lagrange's formula
-2.2.8 for the reversion of `f(x) ~ x + f₀ + f₁x⁻¹ + ⋯`.
+* `poincareRemainder`: the remainder of a Poincaré expansion.
+* `rittSector`, `rittClosedSector`: the sectors of Ritt's theorem (§2.1(ii)).
+* `lagrangeReversionCoeff`: the coefficients `Fₛ` of Lagrange's formula 2.2.8 for the reversion
+  of `f(x) ~ x + f₀ + f₁x⁻¹ + ⋯`.
 -/
 
 @[expose] public noncomputable section

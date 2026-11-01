@@ -12,6 +12,23 @@ public import Mathlib.NumberTheory.TsumDivisorsAntidiagonal
 /-!
 # Inversion formulas (DLMF §27.5)
 
+The Dirichlet product of arithmetic functions and the Möbius inversion formulas of DLMF §27.5.
+
+## Main results
+
+* `dirichletProduct_apply_hasSum`: the Dirichlet series of a Dirichlet product (DLMF 27.5.1).
+* `isUnit_iff_apply_one_ne_zero`, `one_apply_eq_floor`, `isMultiplicative_mul_inv`: units and
+  identity of the ring of arithmetic functions, and closure of the multiplicative functions.
+* `sum_divisors_moebius`: `∑_{d∣n} μ(d) = ⌊1/n⌋` (DLMF 27.5.2).
+* `moebius_inversion`: the Möbius inversion formula (DLMF 27.5.3).
+* `sum_totient_and_inverse`, `sum_vonMangoldt_and_inverse`: DLMF 27.5.4 and 27.5.5.
+* `moebius_inversion_floor`: inversion for sums over `n ≤ x` (DLMF 27.5.6).
+* `moebius_inversion_series`, `moebius_inversion_series_symm`: inversion for series
+  (DLMF 27.5.7).
+* `moebius_inversion_prod`: multiplicative Möbius inversion (DLMF 27.5.8).
+
+## Implementation notes
+
 The Dirichlet product (27.5.1) is the multiplication of Mathlib's `ArithmeticFunction` ring,
 and on plain sequences `LSeries.convolution` (`f ⍟ g`); `LSeriesHasSum.convolution` is the
 statement that `F(s)G(s)` generates `f ⍟ g`. The Möbius inversion formulas 27.5.3 and 27.5.8
@@ -55,24 +72,24 @@ theorem one_apply_eq_floor {n : ℕ} (hn : 0 < n) :
   rw [floor_one_div hn, one_apply]
 
 /-- The multiplicative function with prescribed values `h(p^e)` at prime powers. -/
-def q27_multOfPrimePow {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) : ArithmeticFunction R :=
+def multiplicativeOfPrimePow {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) : ArithmeticFunction R :=
   ⟨fun n ↦ if n = 0 then 0 else ∏ p ∈ n.primeFactors, h (p ^ n.factorization p), by simp⟩
 
-/-- Value of `q27_multOfPrimePow` at `n ≠ 0`. -/
-lemma q27_multOfPrimePow_apply {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) {n : ℕ}
-    (hn : n ≠ 0) : q27_multOfPrimePow h n = ∏ p ∈ n.primeFactors, h (p ^ n.factorization p) := by
-  simp [q27_multOfPrimePow, hn]
+/-- Value of `multiplicativeOfPrimePow` at `n ≠ 0`. -/
+private lemma multiplicativeOfPrimePow_apply {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) {n : ℕ}
+    (hn : n ≠ 0) : multiplicativeOfPrimePow h n = ∏ p ∈ n.primeFactors, h (p ^ n.factorization p) := by
+  simp [multiplicativeOfPrimePow, hn]
 
-/-- `q27_multOfPrimePow h` is multiplicative. -/
-lemma q27_isMultiplicative_multOfPrimePow {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) :
-    (q27_multOfPrimePow h).IsMultiplicative := by
-  refine ⟨by simp [q27_multOfPrimePow_apply], fun {m n} hmn ↦ ?_⟩
+/-- `multiplicativeOfPrimePow h` is multiplicative. -/
+private lemma isMultiplicative_multiplicativeOfPrimePow {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) :
+    (multiplicativeOfPrimePow h).IsMultiplicative := by
+  refine ⟨by simp [multiplicativeOfPrimePow_apply], fun {m n} hmn ↦ ?_⟩
   rcases eq_or_ne m 0 with rfl | hm
   · simp
   rcases eq_or_ne n 0 with rfl | hn
   · simp
-  rw [q27_multOfPrimePow_apply h (mul_ne_zero hm hn), q27_multOfPrimePow_apply h hm,
-    q27_multOfPrimePow_apply h hn, Nat.Coprime.primeFactors_mul hmn,
+  rw [multiplicativeOfPrimePow_apply h (mul_ne_zero hm hn), multiplicativeOfPrimePow_apply h hm,
+    multiplicativeOfPrimePow_apply h hn, Nat.Coprime.primeFactors_mul hmn,
     prod_union hmn.disjoint_primeFactors, Nat.factorization_mul hm hn]
   congr 1
   · refine prod_congr rfl fun p hp ↦ ?_
@@ -87,10 +104,10 @@ lemma q27_isMultiplicative_multOfPrimePow {R : Type*} [CommMonoidWithZero R] (h 
     rw [Finsupp.add_apply, h0, zero_add]
 
 /-- The Dirichlet inverse of a multiplicative function is multiplicative. -/
-lemma q27_isMultiplicative_of_mul_eq_one {f h : ArithmeticFunction ℂ}
+private lemma isMultiplicative_of_mul_eq_one {f h : ArithmeticFunction ℂ}
     (hf : f.IsMultiplicative) (hh : f * h = 1) : h.IsMultiplicative := by
-  set g := q27_multOfPrimePow (fun n ↦ h n) with hgdef
-  have hg : g.IsMultiplicative := q27_isMultiplicative_multOfPrimePow _
+  set g := multiplicativeOfPrimePow (fun n ↦ h n) with hgdef
+  have hg : g.IsMultiplicative := isMultiplicative_multiplicativeOfPrimePow _
   have hgpp : ∀ p e, p.Prime → g (p ^ e) = h (p ^ e) := by
     intro p e hp
     rcases e with _ | e
@@ -99,12 +116,12 @@ lemma q27_isMultiplicative_of_mul_eq_one {f h : ArithmeticFunction ℂ}
       simp only [mul_apply, Nat.divisorsAntidiagonal_one, sum_singleton, one_one,
         hf.map_one, one_mul] at this
       exact this.symm
-    rw [hgdef, q27_multOfPrimePow_apply _ (pow_ne_zero _ hp.ne_zero), Nat.primeFactors_prime_pow
+    rw [hgdef, multiplicativeOfPrimePow_apply _ (pow_ne_zero _ hp.ne_zero), Nat.primeFactors_prime_pow
       (Nat.succ_ne_zero e) hp, prod_singleton, Nat.factorization_pow_self hp]
   have hfg : f * g = 1 := by
     refine (IsMultiplicative.eq_iff_eq_on_prime_powers _ (hf.mul hg) _
       isMultiplicative_one).mpr fun p e hp ↦ ?_
-    rw [← hh, q27_mul_apply_prime_pow _ _ hp, q27_mul_apply_prime_pow _ _ hp]
+    rw [← hh, arithmeticFunction_mul_apply_prime_pow _ _ hp, arithmeticFunction_mul_apply_prime_pow _ _ hp]
     exact sum_congr rfl fun i _ ↦ by rw [hgpp p _ hp]
   have : h = g := by
     calc h = h * (f * g) := by rw [hfg, mul_one]
@@ -118,7 +135,7 @@ inverses. -/
 theorem isMultiplicative_mul_inv {f g : ArithmeticFunction ℂ} (hf : f.IsMultiplicative)
     (hg : g.IsMultiplicative) :
     (f * g).IsMultiplicative ∧ ∀ h : ArithmeticFunction ℂ, f * h = 1 → h.IsMultiplicative := by
-  exact ⟨hf.mul hg, fun h hh ↦ q27_isMultiplicative_of_mul_eq_one hf hh⟩
+  exact ⟨hf.mul hg, fun h hh ↦ isMultiplicative_of_mul_eq_one hf hh⟩
 
 /-- DLMF 27.5.2: `∑_{d∣n} μ(d) = ⌊1/n⌋`. -/
 @[dlmf 27.5.E2]
@@ -163,7 +180,7 @@ theorem sum_vonMangoldt_and_inverse {n : ℕ} (hn : 0 < n) :
     (fun m _ ↦ vonMangoldt_sum.symm) n hn
 
 /-- `∑_{n≤N} ∑_{m≤N/n} c(n,m) = ∑_{k≤N} ∑_{ab=k} c(a,b)`. -/
-lemma q27_sum_Icc_sum_Icc_div {R : Type*} [AddCommMonoid R] (c : ℕ → ℕ → R) (N : ℕ) :
+private lemma sum_Icc_sum_Icc_div_eq_sum_divisorsAntidiagonal {R : Type*} [AddCommMonoid R] (c : ℕ → ℕ → R) (N : ℕ) :
     ∑ n ∈ Icc 1 N, ∑ m ∈ Icc 1 (N / n), c n m =
       ∑ k ∈ Icc 1 N, ∑ x ∈ k.divisorsAntidiagonal, c x.1 x.2 := by
   have hP : ∀ k ∈ Icc 1 N, k.divisorsAntidiagonal =
@@ -206,14 +223,14 @@ lemma q27_sum_Icc_sum_Icc_div {R : Type*} [AddCommMonoid R] (c : ℕ → ℕ →
 
 
 /-- `∑_{d∣k} μ(d) = [k = 1]` in `ℂ`. -/
-theorem q27_sum_divisors_moebius_eq_ite (k : ℕ) :
+theorem sum_divisors_moebius_eq_ite (k : ℕ) :
     ∑ d ∈ k.divisors, (μ d : ℂ) = if k = 1 then 1 else 0 := by
   have := congrArg (fun F : ArithmeticFunction ℤ ↦ ((F k : ℤ) : ℂ)) coe_zeta_mul_moebius
   simp only [coe_zeta_mul_apply, one_apply, Int.cast_sum] at this
   rw [this]; split_ifs <;> simp
 
 /-- DLMF 27.5.6 (proof). -/
-lemma q27_moebius_inversion_floor (F G : ℝ → ℂ) :
+private lemma moebius_inversion_floor_iff (F G : ℝ → ℂ) :
     (∀ x : ℝ, 1 ≤ x → G x = ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, F (x / n)) ↔
       ∀ x : ℝ, 1 ≤ x → F x = ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, (μ n : ℂ) * G (x / n) := by
   have hdiv : ∀ x : ℝ, 1 ≤ x → ∀ n ∈ Icc 1 ⌊x⌋₊, 1 ≤ x / n ∧ ⌊x / n⌋₊ = ⌊x⌋₊ / n := by
@@ -239,11 +256,11 @@ lemma q27_moebius_inversion_floor (F G : ℝ → ℂ) :
       refine sum_congr rfl fun n hn ↦ ?_
       rw [H _ (hdiv x hx n hn).1, (hdiv x hx n hn).2, mul_sum]
       exact sum_congr rfl fun m _ ↦ by rw [hxk]
-    rw [e1, q27_sum_Icc_sum_Icc_div (fun n m ↦ (μ n : ℂ) * F (x / ((n * m : ℕ) : ℝ)))]
+    rw [e1, sum_Icc_sum_Icc_div_eq_sum_divisorsAntidiagonal (fun n m ↦ (μ n : ℂ) * F (x / ((n * m : ℕ) : ℝ)))]
     have e2 : ∀ k ∈ Icc 1 ⌊x⌋₊, ∑ y ∈ k.divisorsAntidiagonal,
         (μ y.1 : ℂ) * F (x / ((y.1 * y.2 : ℕ) : ℝ)) = (if k = 1 then 1 else 0) * F (x / k) := by
       intro k _
-      rw [← q27_sum_divisors_moebius_eq_ite, sum_mul,
+      rw [← sum_divisors_moebius_eq_ite, sum_mul,
         ← Nat.sum_divisorsAntidiagonal (fun a _ ↦ (μ a : ℂ) * F (x / k))]
       refine sum_congr rfl fun y hy ↦ ?_
       rw [(Nat.mem_divisorsAntidiagonal.mp hy).1]
@@ -254,11 +271,11 @@ lemma q27_moebius_inversion_floor (F G : ℝ → ℂ) :
       refine sum_congr rfl fun n hn ↦ ?_
       rw [H _ (hdiv x hx n hn).1, (hdiv x hx n hn).2]
       exact sum_congr rfl fun m _ ↦ by rw [hxk]
-    rw [e1, q27_sum_Icc_sum_Icc_div (fun n m ↦ (μ m : ℂ) * G (x / ((n * m : ℕ) : ℝ)))]
+    rw [e1, sum_Icc_sum_Icc_div_eq_sum_divisorsAntidiagonal (fun n m ↦ (μ m : ℂ) * G (x / ((n * m : ℕ) : ℝ)))]
     have e2 : ∀ k ∈ Icc 1 ⌊x⌋₊, ∑ y ∈ k.divisorsAntidiagonal,
         (μ y.2 : ℂ) * G (x / ((y.1 * y.2 : ℕ) : ℝ)) = (if k = 1 then 1 else 0) * G (x / k) := by
       intro k _
-      rw [← q27_sum_divisors_moebius_eq_ite, sum_mul,
+      rw [← sum_divisors_moebius_eq_ite, sum_mul,
         ← Nat.sum_divisorsAntidiagonal' (fun _ b ↦ (μ b : ℂ) * G (x / k))]
       refine sum_congr rfl fun y hy ↦ ?_
       rw [(Nat.mem_divisorsAntidiagonal.mp hy).1]
@@ -270,15 +287,15 @@ lemma q27_moebius_inversion_floor (F G : ℝ → ℂ) :
 theorem moebius_inversion_floor (F G : ℝ → ℂ) :
     (∀ x : ℝ, 1 ≤ x → G x = ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, F (x / n)) ↔
       ∀ x : ℝ, 1 ≤ x → F x = ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, (μ n : ℂ) * G (x / n) :=
-  q27_moebius_inversion_floor F G
+  moebius_inversion_floor_iff F G
 
 /-- Reindex a sum over `ℕ+` by `n ↦ n + 1`. -/
-theorem q27_hasSum_pnat_iff {g : ℕ+ → ℂ} {a : ℂ} :
+theorem hasSum_pnat_iff_succPNat {g : ℕ+ → ℂ} {a : ℂ} :
     HasSum g a ↔ HasSum (fun n : ℕ ↦ g n.succPNat) a :=
   (Equiv.pnatEquivNat.symm.hasSum_iff (f := g)).symm
 
 /-- Diagonal summation over `ℕ+ × ℕ+`: `∑_{a,b} c(a,b) = ∑_n ∑_{ab=n} c(a,b)`. -/
-theorem q27_hasSum_divisorsAntidiagonal {c : ℕ+ × ℕ+ → ℂ} {T : ℂ} (h : HasSum c T) :
+theorem hasSum_sum_divisorsAntidiagonal_of_hasSum {c : ℕ+ × ℕ+ → ℂ} {T : ℂ} (h : HasSum c T) :
     HasSum (fun n : ℕ+ ↦ ∑ x ∈ (n : ℕ).divisorsAntidiagonal,
       if h : 0 < x.1 ∧ 0 < x.2 then c (⟨x.1, h.1⟩, ⟨x.2, h.2⟩) else 0) T := by
   have h1 := (sigmaAntidiagonalEquivProd.hasSum_iff (f := c)).mpr h
@@ -302,7 +319,7 @@ theorem q27_hasSum_divisorsAntidiagonal {c : ℕ+ × ℕ+ → ℂ} {T : ℂ} (h 
 
 /-- Absolute convergence of `∑_{a,b} w(a,b) H(abx)/(ab)^s` from `∑ d(n)|H(nx)|/n^σ < ∞`,
 `|w| ≤ 1`. -/
-lemma q27_summable_div_cpow (H : ℝ → ℂ) (s : ℂ) (x : ℝ)
+private lemma summable_mul_div_cpow_pnat_prod (H : ℝ → ℂ) (s : ℂ) (x : ℝ)
     (hH : Summable fun n : ℕ ↦ (σ 0 (n + 1) : ℝ) * ‖H ((n + 1) * x)‖ / (n + 1 : ℝ) ^ s.re)
     (w : ℕ+ × ℕ+ → ℂ) (hw : ∀ c, ‖w c‖ ≤ 1) :
     Summable fun c : ℕ+ × ℕ+ ↦
@@ -341,11 +358,11 @@ lemma q27_summable_div_cpow (H : ℝ → ℂ) (s : ℂ) (x : ℝ)
   ring
 
 /-- Diagonal summation of a Möbius-weighted double series collapses to the `n = 1` term. -/
-lemma q27_hasSum_diag_moebius (H : ℝ → ℂ) (s : ℂ) (x : ℝ) (sel : ℕ × ℕ → ℕ)
+private lemma eq_of_hasSum_moebius_pnat_prod (H : ℝ → ℂ) (s : ℂ) (x : ℝ) (sel : ℕ × ℕ → ℕ)
     (hsel : ∀ n : ℕ, ∑ y ∈ n.divisorsAntidiagonal, (μ (sel y) : ℂ) = if n = 1 then 1 else 0)
     {T : ℂ} (h : HasSum (fun c : ℕ+ × ℕ+ ↦ (μ (sel (c.1, c.2)) : ℂ) *
       H (((c.1 * c.2 : ℕ) : ℝ) * x) / ((c.1 * c.2 : ℕ) : ℂ) ^ s) T) : T = H x := by
-  have h2 := q27_hasSum_divisorsAntidiagonal h
+  have h2 := hasSum_sum_divisorsAntidiagonal_of_hasSum h
   have h3 : HasSum (fun n : ℕ+ ↦ if n = 1 then H x else 0) (H x) := hasSum_ite_eq 1 (H x)
   refine h2.unique ?_
   convert h3 using 2 with n
@@ -366,14 +383,14 @@ lemma q27_hasSum_diag_moebius (H : ℝ → ℂ) (s : ℂ) (x : ℝ) (sel : ℕ �
           simp [h1, h1']
 
 /-- `n^s ≠ 0` for `n ≥ 1`. -/
-lemma q27_natCast_cpow_ne_zero {n : ℕ} (hn : 0 < n) (s : ℂ) : (n : ℂ) ^ s ≠ 0 := by
+private lemma natCast_cpow_ne_zero_of_pos {n : ℕ} (hn : 0 < n) (s : ℂ) : (n : ℂ) ^ s ≠ 0 := by
   intro h
   have := Complex.norm_natCast_cpow_of_pos hn s
   rw [h, norm_zero] at this
   exact (Real.rpow_pos_of_pos (Nat.cast_pos.mpr hn) _).ne this
 
 /-- DLMF 27.5.7, forward direction (proof). -/
-lemma q27_moebius_inversion_series (F G : ℝ → ℂ) (s : ℂ)
+private lemma hasSum_moebius_inversion_series (F G : ℝ → ℂ) (s : ℂ)
     (hF : ∀ x : ℝ, 0 < x →
       Summable fun n : ℕ ↦ (σ 0 (n + 1) : ℝ) * ‖F ((n + 1) * x)‖ / (n + 1 : ℝ) ^ s.re)
     (hG : ∀ x : ℝ, 0 < x →
@@ -381,37 +398,37 @@ lemma q27_moebius_inversion_series (F G : ℝ → ℂ) (s : ℂ)
     ∀ x : ℝ, 0 < x →
       HasSum (fun m : ℕ ↦ (μ (m + 1) : ℂ) * G ((m + 1) * x) / ((m + 1 : ℕ) : ℂ) ^ s) (F x) := by
   intro x hx
-  have hsum := q27_summable_div_cpow F s x (hF x hx) (fun c ↦ (μ (c.1 : ℕ) : ℂ))
+  have hsum := summable_mul_div_cpow_pnat_prod F s x (hF x hx) (fun c ↦ (μ (c.1 : ℕ) : ℂ))
     (fun c ↦ by rw [Complex.norm_intCast]; exact_mod_cast abs_moebius_le_one)
   have hT := hsum.hasSum
-  have hTF := q27_hasSum_diag_moebius F s x Prod.fst (fun n ↦ by
-    rw [Nat.sum_divisorsAntidiagonal (fun a _ ↦ (μ a : ℂ)), q27_sum_divisors_moebius_eq_ite]) hT
+  have hTF := eq_of_hasSum_moebius_pnat_prod F s x Prod.fst (fun n ↦ by
+    rw [Nat.sum_divisorsAntidiagonal (fun a _ ↦ (μ a : ℂ)), sum_divisors_moebius_eq_ite]) hT
   have hrow : ∀ a : ℕ+, HasSum (fun b : ℕ+ ↦ (μ (a : ℕ) : ℂ) *
       F ((((a, b).1 * (a, b).2 : ℕ) : ℝ) * x) / (((a, b).1 * (a, b).2 : ℕ) : ℂ) ^ s)
       ((μ (a : ℕ) : ℂ) * G ((a : ℝ) * x) / ((a : ℕ) : ℂ) ^ s) := by
     intro a
     have ha : (0 : ℝ) < (a : ℝ) * x := mul_pos (by exact_mod_cast a.pos) hx
-    have h1 := (q27_hasSum_pnat_iff (g := fun b : ℕ+ ↦
+    have h1 := (hasSum_pnat_iff_succPNat (g := fun b : ℕ+ ↦
       F (((b : ℕ) : ℝ) * ((a : ℝ) * x)) / ((b : ℕ) : ℂ) ^ s)).mpr (by
         convert hG _ ha using 2 with m
         simp)
     have h2 := h1.mul_left ((μ (a : ℕ) : ℂ) / ((a : ℕ) : ℂ) ^ s)
-    have ha0 : ((a : ℕ) : ℂ) ^ s ≠ 0 := q27_natCast_cpow_ne_zero a.pos s
+    have ha0 : ((a : ℕ) : ℂ) ^ s ≠ 0 := natCast_cpow_ne_zero_of_pos a.pos s
     convert h2 using 1
     · funext b
-      have hb0 : ((b : ℕ) : ℂ) ^ s ≠ 0 := q27_natCast_cpow_ne_zero b.pos s
+      have hb0 : ((b : ℕ) : ℂ) ^ s ≠ 0 := natCast_cpow_ne_zero_of_pos b.pos s
       simp only
       rw [show (((a : ℕ) * (b : ℕ) : ℕ) : ℝ) * x = ((b : ℕ) : ℝ) * ((a : ℝ) * x) by push_cast; ring,
         Nat.cast_mul (α := ℂ), Complex.natCast_mul_natCast_cpow]
       field_simp
     · field_simp
   have h1 := hT.prod_fiberwise hrow
-  rw [hTF, q27_hasSum_pnat_iff] at h1
+  rw [hTF, hasSum_pnat_iff_succPNat] at h1
   convert h1 using 2 with m
   simp
 
 /-- DLMF 27.5.7, backward direction (proof). -/
-lemma q27_moebius_inversion_series_symm (F G : ℝ → ℂ) (s : ℂ)
+private lemma hasSum_moebius_inversion_series_symm (F G : ℝ → ℂ) (s : ℂ)
     (hG : ∀ x : ℝ, 0 < x →
       Summable fun n : ℕ ↦ (σ 0 (n + 1) : ℝ) * ‖G ((n + 1) * x)‖ / (n + 1 : ℝ) ^ s.re)
     (hF : ∀ x : ℝ, 0 < x →
@@ -419,32 +436,32 @@ lemma q27_moebius_inversion_series_symm (F G : ℝ → ℂ) (s : ℂ)
     ∀ x : ℝ, 0 < x →
       HasSum (fun m : ℕ ↦ F ((m + 1) * x) / ((m + 1 : ℕ) : ℂ) ^ s) (G x) := by
   intro x hx
-  have hsum := q27_summable_div_cpow G s x (hG x hx) (fun c ↦ (μ (c.2 : ℕ) : ℂ))
+  have hsum := summable_mul_div_cpow_pnat_prod G s x (hG x hx) (fun c ↦ (μ (c.2 : ℕ) : ℂ))
     (fun c ↦ by rw [Complex.norm_intCast]; exact_mod_cast abs_moebius_le_one)
   have hT := hsum.hasSum
-  have hTG := q27_hasSum_diag_moebius G s x Prod.snd (fun n ↦ by
-    rw [Nat.sum_divisorsAntidiagonal' (fun _ b ↦ (μ b : ℂ)), q27_sum_divisors_moebius_eq_ite]) hT
+  have hTG := eq_of_hasSum_moebius_pnat_prod G s x Prod.snd (fun n ↦ by
+    rw [Nat.sum_divisorsAntidiagonal' (fun _ b ↦ (μ b : ℂ)), sum_divisors_moebius_eq_ite]) hT
   have hrow : ∀ a : ℕ+, HasSum (fun b : ℕ+ ↦ (μ ((a, b).2 : ℕ) : ℂ) *
       G ((((a, b).1 * (a, b).2 : ℕ) : ℝ) * x) / (((a, b).1 * (a, b).2 : ℕ) : ℂ) ^ s)
       (F ((a : ℝ) * x) / ((a : ℕ) : ℂ) ^ s) := by
     intro a
     have ha : (0 : ℝ) < (a : ℝ) * x := mul_pos (by exact_mod_cast a.pos) hx
-    have h1 := (q27_hasSum_pnat_iff (g := fun b : ℕ+ ↦
+    have h1 := (hasSum_pnat_iff_succPNat (g := fun b : ℕ+ ↦
       (μ (b : ℕ) : ℂ) * G (((b : ℕ) : ℝ) * ((a : ℝ) * x)) / ((b : ℕ) : ℂ) ^ s)).mpr (by
         convert hF _ ha using 2 with m
         simp)
     have h2 := h1.mul_left (1 / ((a : ℕ) : ℂ) ^ s)
-    have ha0 : ((a : ℕ) : ℂ) ^ s ≠ 0 := q27_natCast_cpow_ne_zero a.pos s
+    have ha0 : ((a : ℕ) : ℂ) ^ s ≠ 0 := natCast_cpow_ne_zero_of_pos a.pos s
     convert h2 using 1
     · funext b
-      have hb0 : ((b : ℕ) : ℂ) ^ s ≠ 0 := q27_natCast_cpow_ne_zero b.pos s
+      have hb0 : ((b : ℕ) : ℂ) ^ s ≠ 0 := natCast_cpow_ne_zero_of_pos b.pos s
       simp only
       rw [show (((a : ℕ) * (b : ℕ) : ℕ) : ℝ) * x = ((b : ℕ) : ℝ) * ((a : ℝ) * x) by push_cast; ring,
         Nat.cast_mul (α := ℂ), Complex.natCast_mul_natCast_cpow]
       field_simp
     · field_simp
   have h1 := hT.prod_fiberwise hrow
-  rw [hTG, q27_hasSum_pnat_iff] at h1
+  rw [hTG, hasSum_pnat_iff_succPNat] at h1
   convert h1 using 2 with m
   simp
 
@@ -459,7 +476,7 @@ theorem moebius_inversion_series (F G : ℝ → ℂ) (s : ℂ)
       HasSum (fun m : ℕ ↦ F ((m + 1) * x) / ((m + 1 : ℕ) : ℂ) ^ s) (G x)) :
     ∀ x : ℝ, 0 < x →
       HasSum (fun m : ℕ ↦ (μ (m + 1) : ℂ) * G ((m + 1) * x) / ((m + 1 : ℕ) : ℂ) ^ s) (F x) :=
-  q27_moebius_inversion_series F G s hF hG
+  hasSum_moebius_inversion_series F G s hF hG
 
 /-- DLMF 27.5.7, backward direction: if `F(x) = ∑_{m≥1} μ(m) G(mx)/m^s` for all `x > 0`, with
 `∑_n d(n) |G(nx)| n^{-ℜs} < ∞`, then `G(x) = ∑_{m≥1} F(mx)/m^s`. -/
@@ -471,7 +488,7 @@ theorem moebius_inversion_series_symm (F G : ℝ → ℂ) (s : ℂ)
       HasSum (fun m : ℕ ↦ (μ (m + 1) : ℂ) * G ((m + 1) * x) / ((m + 1 : ℕ) : ℂ) ^ s) (F x)) :
     ∀ x : ℝ, 0 < x →
       HasSum (fun m : ℕ ↦ F ((m + 1) * x) / ((m + 1 : ℕ) : ℂ) ^ s) (G x) :=
-  q27_moebius_inversion_series_symm F G s hG hF
+  hasSum_moebius_inversion_series_symm F G s hG hF
 
 /-- DLMF 27.5.8, multiplicative Möbius inversion:
 `g(n) = ∏_{d∣n} f(d) ⟺ f(n) = ∏_{d∣n} g(n/d)^{μ(d)}`, for nonvanishing `f`, `g`. -/

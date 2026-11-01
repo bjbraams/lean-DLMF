@@ -10,10 +10,33 @@ public import DLMF.Painleve.Basic
 /-!
 # Bäcklund transformations for Painlevé II
 
-Beals–Wong Theorem 15.4.2, Proposition 15.4.3, and Corollary 15.4.4.
-The proofs differentiate the transformations directly; no existence of a
-fundamental solution of the compatible matrix system is assumed. Formulas
-are asserted on open sets where their denominators do not vanish.
+The Bäcklund transformations of Painlevé II, `u'' = 2u³ + xu - c`: the reflection
+`c ↦ 1 - c` and the shifts `c ↦ c ± 1` (Beals–Wong Theorem 15.4.2, Proposition 15.4.3 and
+Corollary 15.4.4).
+
+## Main definitions
+
+* `backlundDenom`, `backlundCorrection`, `backlundReflect`: the reflection taking `PII(c)` to
+  `PII(1 - c)` (Beals–Wong (15.4.22)) and its ingredients.
+* `backlundDown`, `backlundUp`: the shifts from `c` to `c - 1` and `c + 1` (Beals–Wong (15.4.23),
+  (15.4.24)).
+* `backlundUpJet`: the upward transformation as a rational operation on first-order jets.
+
+## Main results
+
+* `IsPIIOn.reflect`: the reflection maps solutions to solutions on open sets avoiding the
+  zeros of the denominator.
+* `IsPIIOn.backlundReflect_involutive`: the reflection is an involution (Proposition 15.4.3).
+* `IsPIIOn.exists_backlundDenom_ne_zero`: for `c ≠ 1/2` the denominator does not vanish
+  identically on a nonempty open set.
+* `IsPIIOn.shift_down`, `IsPIIOn.shift_up`: the shifts map solutions to solutions.
+* `IsPIIOn.backlundUp_down`, `IsPIIOn.backlundDown_up`: the shifts are mutually inverse.
+
+## Implementation notes
+
+The transformations are differentiated directly; no existence of a fundamental solution of
+the compatible matrix system is assumed. Formulas are asserted on open sets where their
+denominators do not vanish.
 -/
 
 @[expose] public noncomputable section
@@ -135,14 +158,14 @@ theorem backlundUp_eq (c : 𝕜) (u : 𝕜 → 𝕜) (x : 𝕜) :
   congr 1 <;> ring
 
 /-- The downward parameter shift takes solutions to solutions. -/
-theorem IsPIIOn.shiftDown {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
+theorem IsPIIOn.shift_down {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
     (h : IsPIIOn c u s) (hs : IsOpen s) (hD : ∀ x ∈ s, backlundDenom u x ≠ 0) :
     IsPIIOn (c - 1) (backlundDown c u) s := by
   change IsPIIOn (c - 1) (fun x => -backlundReflect c u x) s
   simpa only [neg_sub] using (h.reflect hs hD).neg
 
 /-- The upward parameter shift takes solutions to solutions. -/
-theorem IsPIIOn.shiftUp {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
+theorem IsPIIOn.shift_up {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
     (h : IsPIIOn c u s) (hs : IsOpen s)
     (hD : ∀ x ∈ s, backlundDenom (fun x => -u x) x ≠ 0) :
     IsPIIOn (c + 1) (backlundUp c u) s := by

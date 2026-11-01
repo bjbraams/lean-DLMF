@@ -12,16 +12,22 @@ public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 /-!
 # Transcendental equations (DLMF §2.2)
 
-* 2.2.1–2.2.2: if `f` is continuous and strictly increasing on `[a, ∞)` with `f(x) ∼ x`, the
-  equation `f(x) = y` has a unique root `x(y) > a` for `y > f(a)`, and `x(y) ∼ y`.
-* 2.2.3–2.2.6: the example `t² - ln t = y`.
-* 2.2.7–2.2.8: Lagrange's formula for the reversion of `f(x) ∼ x + f₀ + f₁x⁻¹ + ⋯`
-  (coefficients `lagrangeReversionCoeff`, checked symbolically against the reversion of the
-  series through `F₃`). The project's general asymptotic inversion theorem is
-  `Asymptotics.HasAsymptoticPowerSeries.inversion`.
+Asymptotic solution of transcendental equations and Lagrange's reversion formula.
 
-The square-root asymptotics use Mathlib’s `Asymptotics.IsEquivalent.rpow` and
-`Real.isLittleO_log_id_atTop`.
+## Main results
+
+* `existsUnique_root_of_isEquivalent`, `root_isEquivalent`: if `f` is continuous and strictly
+  increasing on `[a, ∞)` with `f(x) ∼ x`, the equation `f(x) = y` has a unique root `x(y) > a`
+  for `y > f(a)`, and `x(y) ∼ y` (DLMF 2.2.1–2.2.2).
+* `existsUnique_sq_sub_log_eq`, `sq_sub_log_root_isEquivalent`, `sq_sub_log_root_sq`,
+  `sq_sub_log_root_second`: the example `t² - ln t = y` (DLMF 2.2.3–2.2.6).
+* `lagrange_reversion`: Lagrange's formula for the reversion of `f(x) ∼ x + f₀ + f₁x⁻¹ + ⋯`
+  with the coefficients `lagrangeReversionCoeff` (DLMF 2.2.7–2.2.8).
+
+## Implementation notes
+
+The project's general asymptotic inversion theorem is
+`Asymptotics.HasAsymptoticPowerSeries.inversion`.
 -/
 
 @[expose] public noncomputable section

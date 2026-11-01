@@ -12,12 +12,17 @@ public import Mathlib.Tactic.ContinuousFunctionalCalculus
 /-!
 # Truncated continued fractions for the Mathieu eigenvalues (DLMF 28.6.16–28.6.19)
 
-Two auxiliary definitions used to state the continued-fraction equations 28.6.16–28.6.19:
+Two auxiliary definitions used to state the continued-fraction equations DLMF 28.6.16–28.6.19
+for the characteristic values of Mathieu's equation.
 
-* `mathieuCFTail q a s N = q²/(s₀ - a - q²/(s₁ - a - ⋯ - q²/(s_{N-1} - a)))`, the `N`-th
-  truncation of the infinite continued fraction on the right-hand sides;
-* `mathieuCFHead q a e₀ c s k`, the finite continued fraction on the left-hand sides, built from
+## Main definitions
+
+* `mathieuCFTail q a s N = q²/(s₀ - a - q²/(s₁ - a - ⋯ - q²/(s_{N-1} - a)))`: the `N`-th
+  truncation of the infinite continued fraction on the right-hand sides.
+* `mathieuCFHead q a e₀ c s k`: the finite continued fraction on the left-hand sides, built from
   the innermost term `E₀ = e₀` by `E_{k+1} = a - s_k - c_k q²/E_k`.
+
+## Implementation notes
 
 Divisions are Lean's totalized division; the statements using these definitions carry the
 needed nonvanishing hypotheses.

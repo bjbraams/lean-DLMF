@@ -11,11 +11,19 @@ public import DLMF.OrthogonalPolynomials.Series
 # Generating functions: the ultraspherical example (DLMF §1.10(xi))
 
 DLMF 1.10.28–1.10.29 illustrate generating functions with the ultraspherical (Gegenbauer)
-polynomials `C_n^{(λ)}(x)` (`DLMF.OrthogonalPolynomials.ultrasphPoly`). The generating function
-1.10.28 is DLMF 18.12.4 (`DLMF.OrthogonalPolynomials.ultrasphPoly_generating_function`); the
-`x`-derivative 1.10.29 is proved here from 18.12.4 and the derivative formula 18.9.19
-(`DLMF.OrthogonalPolynomials.ultrasphPoly_derivative`). The domain is that of the
-Chapter 18 statements: real `x ∈ [-1, 1]`, `ℜλ > -½`, `|z| < 1`, principal powers.
+polynomials `C_n^{(λ)}(x)` (`DLMF.OrthogonalPolynomials.ultrasphPoly`).
+
+## Main results
+
+* `ultrasph_generatingFunction`: `(1 - 2xz + z²)^{-λ} = ∑ C_n^{(λ)}(x) zⁿ` (DLMF 1.10.28), which
+  is DLMF 18.12.4 (`DLMF.OrthogonalPolynomials.ultrasphPoly_generating_function`).
+* `ultrasph_generatingFunction_deriv`: the `x`-derivative (DLMF 1.10.29), from 18.12.4 and the
+  derivative formula 18.9.19 (`DLMF.OrthogonalPolynomials.ultrasphPoly_derivative`).
+
+## Implementation notes
+
+The domain is that of the Chapter 18 statements: real `x ∈ [-1, 1]`, `ℜλ > -½`, `|z| < 1`,
+principal powers.
 -/
 
 @[expose] public noncomputable section

@@ -12,10 +12,46 @@ public import DLMF.Legendre.SpecialValues
 /-!
 # Legendre Fourier series, generating functions and continued fractions
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This file treats the Fourier series of Ferrers functions (DLMF §14.13), the explicit forms of
+Legendre functions of the second kind of integer degree (DLMF 14.7.2–14.7.7), the generating
+functions (DLMF 14.7.19–14.7.22) and the continued fractions (DLMF §14.14). The Fourier series
+converge conditionally for `Re μ < 1/2`, by Dirichlet's test and Abel's theorem, and absolutely
+only for `Re μ < 0`. Helper names carry the prefixes `legFour_` and `legFS_`.
+
+## Main definitions
+
+* `legFS_coef`: the Fourier coefficient `Γ(ν+μ+k+1)/Γ(ν+k+3/2) · (μ+1/2)_k/k!` of DLMF 14.13.1
+  and 14.13.2.
+* `legendrePCFNum`, `legendrePCFDen`: the partial numerators and denominators of the continued
+  fraction for `P^μ_ν(x)` (DLMF 14.14.2).
+* `legendreQCFNum`, `legendreQCFDen`: the partial numerators and denominators of the continued
+  fraction for `Q^μ_ν(x)` (DLMF 14.14.4).
+
+## Main results
+
+* `ferrersP_fourier_series`, `ferrersQ_fourier_series`: DLMF 14.13.1, 14.13.2.
+* `ferrersP_nat_fourier`, `ferrersQ_nat_fourier`: DLMF 14.13.3, 14.13.4.
+* `ferrersP_fourier_absolute`, `ferrersQ_fourier_absolute`, `ferrersP_fourier_not_absolute`,
+  `ferrersQ_fourier_not_absolute`: absolute convergence for `Re μ < 0` and its failure for
+  `Re μ ≥ 0` (when `θ ≠ π/2`).
+* `ferrersPQ_fourier_hypergeometric`: the unnumbered hypergeometric Fourier representation in
+  DLMF §14.13.
+* `ferrersQ_nat_logarithm`, `legendreQPoly_explicit`, `legendreQPoly_convolution`,
+  `legendreQPoly_initial`: DLMF 14.7.2–14.7.5.
+* `olverQ_nat_normalization`, `associatedQ_nat_logarithm`: DLMF 14.7.6, 14.7.7.
+* `ferrersP_generating`, `associatedP_generating_complex`: DLMF 14.7.19.
+* `ferrersQ_generating`, `associatedP_exterior_generating`, `associatedQ_generating`:
+  DLMF 14.7.20–14.7.22.
+* `associatedP_continued_fraction`, `associatedQ_continued_fraction`: DLMF 14.14.1, 14.14.3.
+
+## Implementation notes
+
+DLMF 14.14.1 contains an error: the continued fraction converges to
+`½(x²-1)^{1/2} (ν+μ)(ν-μ+1) P^{-μ}_ν(x)/P^{1-μ}_ν(x)`, the ratio for the minimal solution of the
+order recurrence, and `associatedP_continued_fraction` proves this corrected statement. A
+vanishing partial numerator terminates the fraction at the same value, so no hypothesis on the
+partial numerators is needed (stronger than DLMF). In
+`associatedP_exterior_generating` the exterior square root is normalized at infinity.
 -/
 
 @[expose] public noncomputable section
@@ -747,7 +783,7 @@ W_{n−1}(z)`, with principal logarithms. -/
 @[dlmf 14.7.E7]
 theorem associatedQ_nat_logarithm (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedQ n 0 z=1/2*associatedP n 0 z*(log (z+1)-log (z-1))-(legendreQPoly n).eval z := by
-  rw [associatedQ_zero_order _ hz, associatedP_zero_order _ hz, legendreQ_nat n hz, legendreQ_zero hz,
+  rw [associatedQ_zero_order _, associatedP_zero_order _ hz, legendreQ_nat n hz, legendreQ_zero hz,
     log_add_one_sub_log_sub_one hz]
   ring
 
@@ -805,8 +841,8 @@ theorem ferrersQ_generating {x h : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) (hh : |h| < 
     have hl0 := hl h hhr
     rw [mul_comm]
     congr 1
-    rw [show (1-2*x*h+h^2:ℂ) = ((1-2*x*h+h^2:ℝ):ℂ) by push_cast; ring, legSer_cpow_half hq0.le,
-      show (1-x^2:ℂ) = ((1-x^2:ℝ):ℂ) by push_cast; ring, legSer_cpow_half hx2.le,
+    rw [show (1-2*x*h+h^2:ℂ) = ((1-2*x*h+h^2:ℝ):ℂ) by push_cast; ring, Carlson.ofReal_cpow_half hq0.le,
+      show (1-x^2:ℂ) = ((1-x^2:ℝ):ℂ) by push_cast; ring, Carlson.ofReal_cpow_half hx2.le,
       show ((1+x)/(1-x):ℂ) = (((1+x)/(1-x):ℝ):ℂ) by push_cast; ring,
       ← Complex.ofReal_log (div_pos (by linarith [hx.1]) (by linarith [hx.2])).le,
       show (x:ℂ) - h + ((√(1-2*x*h+h^2):ℝ):ℂ) = ((x - h + √(1-2*x*h+h^2) : ℝ) : ℂ) by push_cast; ring,
@@ -864,8 +900,8 @@ theorem associatedQ_generating {x h : ℝ} (hx : 1 < x) (hh : |h| < x-Real.sqrt 
     have hl0 := hl h hhr
     rw [mul_comm]
     congr 1
-    rw [show (1-2*x*h+h^2:ℂ) = ((1-2*x*h+h^2:ℝ):ℂ) by push_cast; ring, legSer_cpow_half hq0.le,
-      show (x^2-1:ℂ) = ((x^2-1:ℝ):ℂ) by push_cast; ring, legSer_cpow_half hx2.le,
+    rw [show (1-2*x*h+h^2:ℂ) = ((1-2*x*h+h^2:ℝ):ℂ) by push_cast; ring, Carlson.ofReal_cpow_half hq0.le,
+      show (x^2-1:ℂ) = ((x^2-1:ℝ):ℂ) by push_cast; ring, Carlson.ofReal_cpow_half hx2.le,
       show (x:ℂ) + 1 = ((x+1:ℝ):ℂ) by push_cast; ring,
       show (x:ℂ) - 1 = ((x-1:ℝ):ℂ) by push_cast; ring,
       ← Complex.ofReal_log (by linarith), ← Complex.ofReal_log (by linarith),
@@ -1167,7 +1203,7 @@ theorem legFS_wP_eq (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
   have ht : ‖(((x-1)/(x+1) : ℝ) : ℂ)‖ < 1 := by
     obtain ⟨h0, h1⟩ := legFS_pfaff_arg_bounds hx
     rw [Complex.norm_real, Real.norm_of_nonneg h0.le]; exact h1
-  have e9 := associated_hypergeometric_9 ν (μ+k-1) hz
+  have e9 := associated_hypergeometric_9 ν (μ+k-1) (z := (x:ℂ))
   rw [show -(μ+(k:ℂ)-1) = 1-μ-k by ring, show μ+(k:ℂ)-1+1 = μ+k by ring] at e9
   rw [legFS_wP, e9, regularizedGaussHG_symm _ _ _ hcut, regularizedGaussHG_pfaff _ _ _ hcut,
     legFS_pfaff_arg hx, regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ ht]
@@ -1286,7 +1322,7 @@ Pfaff's transformation and the Tannery limit `legFS_tannery`, `-w_k/(a_{k+1}w_{k
 vanishing partial numerator terminates the fraction at the same value. The hypothesis `hterm`
 is not needed (stronger than DLMF). -/
 @[dlmf 14.14.E1 "source erratum: the limit is the minimal-solution ratio (ν+μ)(ν-μ+1)P^{-μ}/P^{1-μ}"]
-theorem associatedP_continued_fraction (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (hnz : associatedP ν (1-μ) x ≠ 0) (hterm : ∀ k : ℕ, legendrePCFNum ν μ x (k+1) ≠ 0 ∨ legendrePCFDen μ x k ≠ 0) :
+theorem associatedP_continued_fraction (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (hnz : associatedP ν (1-μ) x ≠ 0) :
     HasContinuedFraction (legendrePCFNum ν μ x) (legendrePCFDen μ x) (Real.sqrt (x^2-1)/2*((ν+μ)*(ν-μ+1))*associatedP ν (-μ) x/associatedP ν (1-μ) x) := by
   -- the hypothesis `hterm` is not needed (stronger than DLMF)
   have hw0 : legFS_wP ν μ x 0 ≠ 0 := by simpa [legFS_wP] using hnz
@@ -1318,7 +1354,7 @@ limit `legFS_tannery`, `-w_k/(a_{k+1}w_{k+2}) → ζ^{-2} > 1`, so Pincherle's c
 fraction at the same value. The hypotheses `hr` and `hterm` are not needed (stronger than
 DLMF). -/
 @[dlmf 14.14.E3]
-theorem associatedQ_continued_fraction {ν μ : ℂ} (hne : ν ≠ μ) {x : ℝ} (hx : 1 < x) (hr : LegendreQRegular (ν-1) μ) (hnz : associatedQ (ν-1) μ x ≠ 0) (hterm : ∀ k : ℕ, legendreQCFNum ν μ (k+1) ≠ 0 ∨ legendreQCFDen ν x k ≠ 0) :
+theorem associatedQ_continued_fraction {ν μ : ℂ} (hne : ν ≠ μ) {x : ℝ} (hx : 1 < x) (hnz : associatedQ (ν-1) μ x ≠ 0) :
     HasContinuedFraction (legendreQCFNum ν μ) (legendreQCFDen ν x) ((ν-μ)*associatedQ ν μ x/associatedQ (ν-1) μ x) := by
   -- the hypotheses `hr` and `hterm` are not needed (stronger than DLMF)
   have hz := legInt_one_lt_mem hx

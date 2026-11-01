@@ -8,12 +8,17 @@ module
 public import DLMF.Legendre.Associated
 
 /-!
-# Elementary tests of the DLMF left-cut zero rule
+# An elementary test of the DLMF left-cut zero rule
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+DLMF §14.27 describes zeros of `P^μ_ν(z)` on the two sides of the cut `(-∞,-1]`. This file
+checks that rule on a terminating case, degree `ν = 1` and order `μ = -1/2`, where
+`P^{-1/2}_1(z)` has a closed form.
+
+## Main results
+
+* `associatedP_one_neg_half`: the closed form of `P^{-1/2}_1(z)` for `z - 1` in the slit plane.
+* `dlmf_14_27_no_boundary_zero`: `P^{-1/2}_1` has no boundary zero on either side of the cut
+  at any `x < -1`.
 -/
 
 @[expose] public noncomputable section

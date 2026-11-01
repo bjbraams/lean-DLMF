@@ -10,13 +10,19 @@ public import DLMF.Legendre.Associated
 /-!
 # Shared tools for addition theorems and spherical harmonics
 
-Helper results used by the spherical-harmonic and Legendre addition-theorem files:
+This file contains helper results used by the spherical-harmonic and Legendre addition-theorem
+files.
 
-* conjugation symmetry of the regularized Gauss function `𝐅(a,b;c;z)` on the whole cut plane
-  (identity theorem, from the disk case `DLMF.Legendre.regularizedGaussHG_conj`);
-* real polynomials and parity of derivatives of even functions under conjugation;
-* the principal-branch value of the Legendre branch power `(z²-1)^{m/2}` on the positive
-  imaginary axis, used for the oblate spheroidal harmonics of DLMF 14.30(i).
+## Main results
+
+* `addTools_conj_regularizedGaussHG`: conjugation symmetry of the regularized Gauss function
+  `𝐅(a,b;c;z)` on the whole cut plane, by the identity theorem from the disk case
+  `DLMF.Legendre.regularizedGaussHG_conj`.
+* `addTools_conj_eval_map_ofReal`, `addTools_iteratedDeriv_even_neg`: real polynomials commute
+  with conjugation, and derivatives of even functions have parity `(-1)^k`.
+* `addTools_legendreBranchPower_I_mul`: the principal-branch value of the Legendre branch power
+  `(z²-1)^{m/2}` on the positive imaginary axis, used for the oblate spheroidal harmonics of
+  DLMF §14.30(i).
 -/
 
 @[expose] public noncomputable section

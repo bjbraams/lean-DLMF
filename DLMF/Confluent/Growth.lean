@@ -10,10 +10,26 @@ public import DLMF.Confluent.IntegralRepresentations
 /-!
 # Growth of the regularized Kummer function on a ray
 
-Euler's integral bounds the exponential factor by the positive part of the real
-part of the ray direction. Parameter recurrences extend this bound to arbitrary
-parameters, including poles of the unregularized denominator parameter.
-The integral estimates use Mathlib's interval integral inequalities and FTC.
+This file bounds the regularized Kummer function `𝐌(a,b,z)` on rays from the origin and uses
+the bound for the Laplace transform of `𝐌` in its full half-plane of convergence.
+
+## Main results
+
+* `regularizedConfluent_euler_growth`: Euler's integral gives an exponential bound in the
+  positive-parameter region.
+* `regularizedConfluent_lower_denominator`: lowering the denominator parameter of `𝐌`.
+* `regularizedConfluent_ray_growth`: `𝐌` has polynomial times exponential growth on every
+  positive ray, for arbitrary complex parameters.
+* `laplace_regularizedHGFun_integrable`: absolute convergence of the Laplace transform of `𝐌`
+  in its full half-plane, including all exceptional denominator parameters.
+* `differentiableOn_laplace_regularizedHGFun`: holomorphy of the Laplace transform in the
+  Laplace variable on that half-plane.
+
+## Implementation notes
+
+Euler's integral bounds the exponential factor by the positive part of the real part of the
+ray direction. Parameter recurrences extend this bound to arbitrary parameters, including poles
+of the unregularized denominator parameter.
 -/
 
 @[expose] public section

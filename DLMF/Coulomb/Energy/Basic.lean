@@ -9,15 +9,16 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 public import DLMF.Confluent.Basic
 
 /-!
-# Coulomb functions in the variables `r`, `ε`: definitions (DLMF §§33.14–33.20)
+# Coulomb functions in the variables `r`, `ε`: definitions
 
 DLMF §33.14 reparametrizes the Coulomb wave equation as
 `w'' + (ε + 2/r - ℓ(ℓ+1)/r²) w = 0` (33.14.1) with `r = -ηρ`, `ε = 1/η²`, and defines the
 regular solution `f(ε,ℓ;r)`, the irregular solution `h(ε,ℓ;r)` and their energy-normalized forms
 `s(ε,ℓ;r)`, `c(ε,ℓ;r)`. All of them are real functions of real `ε`, `r` and `ℓ ∈ ℕ`
-(except `s`, `c`, which become imaginary when `A(ε,ℓ) < 0`).
+(except `s`, `c`, which become imaginary when `A(ε,ℓ) < 0`). This file gives the
+definitions of DLMF §§33.14–33.20.
 
-## Definitions and conventions
+## Main definitions
 
 * `coulombKappa ε r`: the quantity `κ` of 33.14.6, with the upper sign `κ = i ε^{-1/2}` for
   `ε > 0` (DLMF: the sign is immaterial). For `ε < 0` the sign follows the sign of `r`

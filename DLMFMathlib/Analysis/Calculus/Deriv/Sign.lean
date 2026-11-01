@@ -18,6 +18,17 @@ the sign of the derivative at a zero next to an interval of positivity, nonnegat
 the endpoints of such an interval, and constancy of sign of a nonvanishing continuous
 function on an order-connected set. Also the derivative of the real part of a complex
 curve and `x ↦ x²` as a map of `𝓝[<] 1` to itself.
+
+## Main results
+
+* `HasDerivAt.nonneg_of_eq_zero_of_pos_Ioo`, `HasDerivAt.nonpos_of_eq_zero_of_pos_Ioo`: the sign
+  of the derivative at a zero next to an interval of positivity.
+* `ContinuousAt.nonneg_of_pos_Ioo_left`, `ContinuousAt.nonneg_of_pos_Ioo_right`: nonnegativity at
+  the endpoints of an interval of positivity.
+* `ContinuousOn.pos_or_neg_of_ne_zero`: a continuous function without zeros on an
+  order-connected set has constant sign.
+* `HasDerivAt.complex_re`: the derivative of the real part of a complex curve.
+* `tendsto_sq_nhdsLT_one`: squaring maps `𝓝[<] 1` to itself.
 -/
 
 @[expose] public section

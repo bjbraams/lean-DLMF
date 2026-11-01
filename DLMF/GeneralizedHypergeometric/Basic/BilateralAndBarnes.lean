@@ -9,6 +9,19 @@ public import DLMF.GeneralizedHypergeometric.Basic.PrincipalContinuation
 
 /-!
 # Bilateral series and logarithmic Barnes integrals
+
+## Main definitions
+
+* `genIntPoch`: the rising factorial at an integer index.
+* `genBilateralCoeff`, `genBilateralHG`: the bilateral series, DLMF 16.4.16, totalized outside
+  its convergence regime.
+* `genBarnesKernelLog`: the Mellin–Barnes kernel on the logarithm sheet `w = Log(-z)`.
+* `GenHasBarnesValueLog`, `genBarnesHGLog`: convergence of a Barnes contour integral and its
+  (totalized) value.
+
+## Implementation notes
+
+Every use of `genBarnesHGLog` asserts convergence separately with `GenHasBarnesValueLog`.
 -/
 
 @[expose] public noncomputable section

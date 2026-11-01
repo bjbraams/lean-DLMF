@@ -11,18 +11,25 @@ public import DLMF.Airy.Framework
 /-!
 # Combinatorics and orthogonal polynomials (DLMF §32.14, §32.15)
 
-§32.14: the Baik–Deift–Johansson theorem: the length `ℓ_N(π)` of the longest increasing
-subsequence of a uniformly random permutation, centred by `2√N` and scaled by `N^{1/6}`,
-converges in distribution to the Tracy–Widom distribution `F(s)` of 32.14.2, built from the
-Hastings–McLeod solution of `PII` with `α = 0` (32.14.3–32.14.4). The random-matrix
-interpretation of `F` (Gaussian Unitary Ensemble, §32.14 second paragraph) is not formalized.
+The Baik–Deift–Johansson theorem on longest increasing subsequences (DLMF §32.14) and the
+Painlevé equations satisfied by the recurrence coefficients of orthogonal polynomials for the
+weight `exp(-ξ⁴/4 - zξ²)` (DLMF §32.15).
 
-§32.15: for the weight `exp(-ξ⁴/4 - zξ²)` of 32.15.1 the squared recurrence coefficients
-`u_n = a_n²` (`freudRecurrenceSq`, Hankel-determinant form) satisfy the discrete equation
-32.15.3 and, as functions of `z`, `PIV` with `α = -n/2`, `β = -n²/2`. Both were checked
-numerically (moments by quadrature, `n ≤ 3`, residuals below `10⁻³⁹`).
+## Main results
 
-All statements are admitted.
+* `longestIncreasing_tracyWidom`: the length `ℓ_N(π)` of the longest increasing subsequence of
+  a uniformly random permutation, centred by `2√N` and scaled by `N^{1/6}`, converges in
+  distribution to the Tracy–Widom distribution `F(s)` of DLMF 32.14.2, built from the
+  Hastings–McLeod solution of `PII` with `α = 0` (DLMF 32.14.1, 32.14.3–32.14.4).
+* `freudRecurrenceSq_discretePainleveI`: the squared recurrence coefficients `u_n = a_n²`
+  (`freudRecurrenceSq`, Hankel-determinant form) satisfy the discrete equation DLMF 32.15.3.
+* `freudRecurrenceSq_painleveIV`: as functions of `z`, the `u_n` satisfy `PIV` with
+  `α = -n/2`, `β = -n²/2`.
+
+## Implementation notes
+
+The random-matrix interpretation of `F` (Gaussian Unitary Ensemble, second paragraph of
+§32.14) is not included.
 -/
 
 @[expose] public noncomputable section

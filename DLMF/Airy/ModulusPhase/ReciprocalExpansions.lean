@@ -8,13 +8,28 @@ module
 public import DLMF.Airy.ModulusPhase.Nicholson
 
 /-!
-# Reciprocal Airy modulus expansions
+# Monotonicity and asymptotic expansions of Airy moduli
 
-Weighted Nicholson functions and reciprocal expansions prepare the integration of the Airy phase
-derivatives.
+A weighted Nicholson function gives the monotonicity properties of DLMF §9.8(iii), and
+reciprocal expansions and termwise integration give the expansions of `M²` and `N²` at `-∞`
+(DLMF 9.8.20, 9.8.21) with the signed error bounds of DLMF §9.8(iv).
 
-Source references and common attribution are retained in
-`DLMF.Airy.ModulusPhase`.
+## Main definitions
+
+* `airyMod_wG`: the weighted Nicholson function.
+
+## Main results
+
+* `airyMod_wG_scaling`: `π^{3/2} s^{-1/2} N(-s)² = G(s^{-3})`.
+* `airy_weighted_modulus_monotone`, `airy_weighted_derivModulus_monotone`,
+  `airy_modulus_product_monotone`, `airy_phase_deriv_monotone`,
+  `airy_derivPhase_deriv_monotone`, `airy_phase_monotone`, `airy_derivPhase_monotone`:
+  the monotonicity properties of DLMF §9.8(iii).
+* `airyMod_expansion_of_deriv`, `airyMod_integrand_expansion`: termwise integration and
+  reciprocal expansions at infinity.
+* `airyModulus_asymptotic`, `airyDerivModulus_asymptotic`: DLMF 9.8.20, 9.8.21.
+* `airyModulus_error`, `airyPhase_error`, `airyDerivModulus_error`, `airyDerivPhase_error`:
+  signed first-neglected-term bounds (DLMF §9.8(iv)).
 -/
 
 @[expose] public noncomputable section
@@ -866,7 +881,7 @@ theorem airyDerivModulus_asymptotic :
   · simpa using step N
 
 /-- Signed first-neglected-term bounds, DLMF §9.8(iv). -/
-theorem airyModulus_error {x : ℝ} (hx : x < 0) {N : ℕ} (hN : 0 ≤ N) :
+theorem airyModulus_error {x : ℝ} (hx : x < 0) {N : ℕ} :
     |(airyModulus x ^ 2) - ((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusSum false N x| ≤ |((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusCoeff N * x ^ (-(3 * N : ℤ))| ∧
       0 ≤ ((airyModulus x ^ 2) - ((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusSum false N x) * (((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusCoeff N * x ^ (-(3 * N : ℤ))) :=
   airyMod_sq_error_bound hx N

@@ -13,13 +13,26 @@ public import Mathlib.Analysis.SpecialFunctions.NonIntegrable
 /-!
 # Divergent integrals and the Stieltjes transform (DLMF §2.6(i)–(ii))
 
-* §2.6(i): the integral `S(x) = ∫₀^∞ (1+t)^{-1/3}/(x+t) dt` (2.6.1), the binomial expansion
-  2.6.2, the divergence of the termwise integrals 2.6.3, the Beta integral 2.6.4 and its
-  generalized value 2.6.5, the failure of the naive expansion 2.6.6 and the correct
-  expansion 2.6.7.
-* §2.6(ii): the distributional identities 2.6.17 (`0 < α < 1`) and 2.6.20 (`α = 1`), the
-  limits 2.6.23–2.6.26 for the test functions `φ_ε` of 2.6.22, and the expansions with exact
-  remainder 2.6.27–2.6.30 of the Stieltjes transform.
+The example `S(x) = ∫₀^∞ (1+t)^{-1/3}/(x+t) dt` of DLMF §2.6(i) and the distributional
+derivation of the asymptotic expansion of a Stieltjes transform (§2.6(ii)).
+
+## Main results
+
+* `one_add_rpow_neg_third_hasSum`, `not_integrableOn_rpow_div_add`: the binomial expansion
+  2.6.2 and the divergence of the termwise integrals 2.6.3.
+* `integral_rpow_div_add_cpow`, `gamma_two_thirds_sub_mul_gamma`: the Beta integral 2.6.4 and
+  its generalized value 2.6.5.
+* `not_stieltjesCubeRootExample_naive`, `stieltjesCubeRootExample_expansion`: the failure of the
+  naive expansion 2.6.6 and the correct expansion 2.6.7.
+* `functionPairing_eq_of_lt_one`, `functionPairing_eq_of_eq_one`: the distributional
+  identities 2.6.17 (`0 < α < 1`) and 2.6.20 (`α = 1`).
+* `tendsto_powPairing_stieltjesTestFunction`, `tendsto_logPowPairing_stieltjesTestFunction`,
+  `tendsto_functionPairing_stieltjesTestFunction`,
+  `tendsto_remainderPairing_stieltjesTestFunction`: the limits 2.6.23–2.6.26.
+* `stieltjesTransform_eq_of_lt_one`, `stieltjesTransform_eq_of_eq_one`: the expansions with
+  exact remainder 2.6.27–2.6.30.
+
+## Implementation notes
 
 The Mellin transform of `f` and its analytic continuation (DLMF §2.5(ii)) enter through a
 function `M` that is holomorphic on the right half-plane minus the poles `k + α` and agrees
@@ -106,7 +119,7 @@ theorem integral_rpow_div_add_cpow {x : ℝ} (hx : 0 < x) {α β : ℂ} (hα : 0
     push_cast
     field_simp
   rw [setIntegral_congr_fun measurableSet_Ioi hpt, integral_const_mul,
-    DLMF.Gamma.beta_on_Ioi hα hβ] at hsub
+    DLMF.Gamma.beta_on_Ioi] at hsub
   have hB := Complex.Gamma_mul_Gamma_eq_betaIntegral hα hβ
   have hG : Complex.Gamma (α + β) ≠ 0 := by
     apply Complex.Gamma_ne_zero_of_re_pos; simp; linarith
@@ -146,7 +159,7 @@ in the form: for every `n`, the remainder after the terms with `s < n` in the fi
 `|ph x| ≤ π - δ`; the real case is formalized.) -/
 @[dlmf 2.6.E7, dlmf 2.6.E1]
 theorem stieltjesCubeRootExample_expansion (n : ℕ) :
-    (fun x : ℝ => stieltjesCubeRootExample x - ((g2b_naiveSum n x - g2b_missingSum n x : ℝ) : ℂ))
+    (fun x : ℝ => stieltjesCubeRootExample x - ((stieltjesCubeRootNaiveSum n x - stieltjesCubeRootMissingSum n x : ℝ) : ℂ))
       =O[atTop] (fun x : ℝ => x ^ (-(n : ℝ) - 1 / 3)) := by
   sorry
 
@@ -155,7 +168,7 @@ theorem stieltjesCubeRootExample_expansion (n : ℕ) :
 the remainder is not `O(x^{-4/3})` (the missing term `-(3/2) x^{-1}` of 2.6.7 dominates). -/
 @[dlmf 2.6.E6]
 theorem not_stieltjesCubeRootExample_naive :
-    ¬ (fun x : ℝ => stieltjesCubeRootExample x - ((g2b_naiveSum 2 x : ℝ) : ℂ))
+    ¬ (fun x : ℝ => stieltjesCubeRootExample x - ((stieltjesCubeRootNaiveSum 2 x : ℝ) : ℂ))
       =O[atTop] (fun x : ℝ => x ^ (-(1 : ℝ) - 1 / 3)) := by
   sorry
 

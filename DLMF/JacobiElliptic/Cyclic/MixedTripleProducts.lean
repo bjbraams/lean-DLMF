@@ -10,10 +10,18 @@ public import DLMF.JacobiElliptic.Cyclic.TripleProducts
 /-!
 # Mixed cyclic products of Jacobian elliptic functions
 
-Mixed sn, cn and dn triple-product identities with their regularity and denominator hypotheses.
+The rank-four three-point cyclic identities DLMF 22.9.22 and 22.9.23, mixing `sn`, `cn` and
+`dn`, stated at points where the functions are finite.
 
-Source references and common attribution are retained in
-`DLMF.JacobiElliptic.Cyclic`.
+## Main results
+
+* `jacobi_cyclic_scdd_three`: DLMF 22.9.22.
+* `jacobi_cyclic_sdcc_three`: DLMF 22.9.23, corrected.
+
+## Implementation notes
+
+**Correction.** In DLMF 22.9.23 the right-hand side repeats `s_{2,3}^{(4)} d_{2,3}^{(4)}`; the
+numerically correct last summand is `s_{3,3}^{(4)} d_{3,3}^{(4)}`, which is the form stated.
 -/
 
 @[expose] public section
@@ -40,15 +48,15 @@ theorem jacobi_cyclic_scdd_three {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z :
             (jacobiCyclicKappa k ^ 2 + k ^ 2 - 1) / (1 - jacobiCyclicKappa k ^ 2) *
               (jacobiCyclicS 2 1 3 z k * jacobiCyclicC 2 1 3 z k + jacobiCyclicS 2 2 3 z k *
                 jacobiCyclicC 2 2 3 z k + jacobiCyclicS 2 3 3 z k * jacobiCyclicC 2 3 3 z k) := by
-  have V := p22R1_cyc23_vals hk z hreg2
-  have W := p22R1_third_vals hk
+  have V := jacobiCyclicArg_two_three_values hk z hreg2
+  have W := jacobiSnCnDnk_two_mul_compEllIntKk_div_three hk
   simp only at V W
   obtain ⟨hn, hD, e1, e2, e3, e4, e5, e6, e7, e8, e9⟩ := V
   obtain ⟨hna, -, hsa, -, -, -, -, E1, E2⟩ := W
   obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
   obtain ⟨ha1, ha2⟩ := jacobi_sq_sum hk hna
-  have hκ := p22R1_kappa_ne hk
-  have hk0 : k ≠ 0 := p22R1_k_ne hk
+  have hκ := jacobiDnk_two_mul_compEllIntKk_div_three_ne_zero hk
+  have hk0 : k ≠ 0 := ne_zero_of_mem_jacobiModulusDomain hk
   simp only [jacobiCyclicKappa, e1, e2, e3, e4, e5, e6, e7, e8, e9]
   generalize jacobiSnk z k = s at *
   generalize jacobiCnk z k = c at *
@@ -325,15 +333,15 @@ theorem jacobi_cyclic_sdcc_three {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z :
             jacobiCyclicKappa k ^ 2 / (1 - jacobiCyclicKappa k ^ 2) * (jacobiCyclicS 4 1 3 z k *
               jacobiCyclicD 4 1 3 z k + jacobiCyclicS 4 2 3 z k * jacobiCyclicD 4 2 3 z k +
                 jacobiCyclicS 4 3 3 z k * jacobiCyclicD 4 3 3 z k) := by
-  have V := p22R1_cyc43_vals hk z hreg4
-  have W := p22R1_third_vals hk
+  have V := jacobiCyclicArg_four_three_values hk z hreg4
+  have W := jacobiSnCnDnk_two_mul_compEllIntKk_div_three hk
   simp only at V W
   obtain ⟨hn, hD, e1, e2, e3, e4, e5, e6, e7, e8, e9⟩ := V
   obtain ⟨hna, -, hsa, -, -, -, -, E1, E2⟩ := W
   obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
   obtain ⟨ha1, ha2⟩ := jacobi_sq_sum hk hna
-  have hκ := p22R1_kappa_ne hk
-  have hk0 : k ≠ 0 := p22R1_k_ne hk
+  have hκ := jacobiDnk_two_mul_compEllIntKk_div_three_ne_zero hk
+  have hk0 : k ≠ 0 := ne_zero_of_mem_jacobiModulusDomain hk
   simp only [jacobiCyclicKappa, e1, e2, e3, e4, e5, e6, e7, e8, e9]
   generalize jacobiSnk z k = s at *
   generalize jacobiCnk z k = c at *

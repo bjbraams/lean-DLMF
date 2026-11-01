@@ -14,18 +14,12 @@ public import DLMF.QSeries.QExponential
 public import DLMF.QSeries.Saalschutz
 
 /-!
-# `q`-series (AAR Chapter 10)
+# `q`-series (AAR Chapter 10; Duverney Chapter 10)
 
-Mathlib has Jacobi theta functions, the Mellin transform, and the arithmetic theorems on
-sums of two and four squares, but not `q`-Pochhammer symbols, `q`-gamma, the `q`-binomial
-theorem, Ramanujan's `₁ψ₁`, or basic hypergeometric series.
-
-Following Duverney, *An Introduction to Hypergeometric Functions*, Chapter 10, this area also
-has Gaussian `q`-binomial coefficients and Cauchy's finite `q`-binomial theorem (`QBinomial`),
-the `q`-derivative and the `q`-fundamental theorem for Jackson's integral (`QCalculus`),
-Heine's second and third transformations, the `q`-Gauss and `q`-Chu–Vandermonde summations
-(`Heine`), and Euler's two `q`-exponential identities (`QExponential`).
-
-`Saalschutz` proves the terminating `q`-Pfaff–Saalschütz sum for all `q`, as a polynomial
-identity and in the quotient form used for Bailey's lemma (`DLMF.Bailey`).
+This area develops `q`-Pochhammer symbols, the `q`-gamma function, the `q`-binomial theorem,
+the Jacobi triple product, Ramanujan's `₁ψ₁` and basic hypergeometric series (AAR Chapter 10),
+together with Gaussian `q`-binomial coefficients, the `q`-derivative and Jackson integral,
+Heine's transformations, Euler's `q`-exponential identities and the terminating
+`q`-Pfaff–Saalschütz sum (Duverney Chapter 10). Mathlib has Jacobi theta functions but none
+of these `q`-analogues.
 -/

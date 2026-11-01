@@ -11,29 +11,50 @@ public import DLMFMathlib.Analysis.Complex.BarnesResidue
 /-!
 # Contour tools for the parabolic cylinder integrals (DLMF 12.5.5–12.5.7)
 
-* Vertical lines `t = c + iy`, `c > 0`: a Gaussian majorant `pcfCt_dom` for
-  `e^{-zt+t²/2} t^p`, locally uniform in `z` and `p` (`pcfCt_vert_le`), and the shifted
-  Gaussian integral `∫ e^{-wt+t²/2} dy = √(2π) e^{-w²/2}` (`pcfCt_gauss_vertical`).
-* DLMF 12.5.6 in integral form (`pcfCt_vertical`): for `re a > -1/2`, Euler's integral
-  `Γ(a+1/2) t^{-a-1/2} = ∫₀^∞ s^{a-1/2} e^{-ts} ds` (complex scale, `integral_cpow_mul_cexp_neg_mul_Ioi`),
-  Fubini and the Gaussian reduce the vertical integral to DLMF 12.5.1 (`pcfU_eq_integral`);
-  holomorphy in `a` (`pcfCt_vertical_differentiable`) and the identity theorem give all `a`.
-* The horizontal lines `t = x ± ic` of DLMF 12.5.7 are the vertical lines rotated by `±π/2`
-  (`pcfCt_horizontal_upper`, `pcfCt_horizontal_lower`).
-* The Hankel loop of DLMF 12.5.5: in the variable `w = log t` the loop integrand is the entire
-  function `pcfCt_F`, and the circle part `pcfCt_C` at radius `r` is its integral over the
-  segment `log r + iθ`, `|θ| ≤ π`. Cauchy's theorem on the rectangle between two radii gives
-  `pcfCt_C r₂ - pcfCt_C r₁ = κ(a) ∫_{r₁}^{r₂} t^{a-1/2} e^{-t²/2-zt} dt` (`pcfCt_C_sub`), with
-  the jump `κ(a) = e^{-iπ(a-1/2)} - e^{iπ(a-1/2)}`. For `re a > -1/2` the circle shrinks to zero
-  (`pcfCt_loop_limit_of_re`), and DLMF 12.5.1 with the reflection formula
-  (`pcfCt_kappa_Gamma`) gives the value; holomorphy in `a` of the tail and of the circle part
-  extends it to all `a` (`pcfCt_loop_value`).
-* The kernel of DLMF 12.12.3 (`pcfCt_kernel`): for `0 < re μ < 2`, `x > 0`, `σ ≥ 0`,
-  `∫₀^∞ t^{μ-1} cos(tσ + π/2 - πμ/2)/(x²+t²) dt = (π/2) x^{μ-2} e^{-xσ}`. In `w = log t` the
-  two exponential halves are integrals of `pcfCt_Phi` over the lines `Im w = 0` and `Im w = π`;
-  the vertical-shift residue lemma `Complex.barnesRes_vertical_shift` (after rotating by `i`)
-  relates them through the residue at `w = log x + iπ/2` (`pcfCt_kernel_shift`).
+This file supplies the contour-integral lemmas behind the representations DLMF 12.5.5–12.5.7
+of `U(a,z)` (vertical lines, horizontal lines and the Hankel loop) and the kernel of
+DLMF 12.12.3.
+
+## Main definitions
+
+* `pcfCt_dom`: a Gaussian majorant for `e^{-zt+t²/2} t^p` on vertical lines `t = c + iy`.
+* `pcfCt_F`, `pcfCt_C`, `pcfCt_kappa`: the Hankel-loop integrand in `w = log t`, the circle
+  part of the loop and the jump of `t^{a-1/2}` across the negative axis.
+* `pcfCt_Phi`: the kernel of the Stieltjes–Fourier integral of DLMF 12.12.3 in `w = log t`.
+
+## Main results
+
+* `pcfCt_vert_le`, `pcfCt_gauss_vertical`: the Gaussian majorant, locally uniform in `z` and
+  `p`, and the shifted Gaussian integral `∫ e^{-wt+t²/2} dy = √(2π) e^{-w²/2}`.
+* `pcfCt_vertical`: DLMF 12.5.6 in integral form, for all parameters.
+* `pcfCt_horizontal_upper`, `pcfCt_horizontal_lower`: the horizontal lines `t = x ± ic` of
+  DLMF 12.5.7.
+* `pcfCt_C_sub`: Cauchy's theorem on the logarithmic rectangle,
+  `pcfCt_C r₂ - pcfCt_C r₁ = κ(a) ∫_{r₁}^{r₂} t^{a-1/2} e^{-t²/2-zt} dt`.
+* `pcfCt_loop_value`: the value of the completed Hankel loop of DLMF 12.5.5, for all `a`.
+* `pcfCt_kernel`: for `0 < re μ < 2`, `x > 0`, `σ ≥ 0`,
+  `∫₀^∞ t^{μ-1} cos(tσ + π/2 - πμ/2)/(x² + t²) dt = (π/2) x^{μ-2} e^{-xσ}`.
 * `pcfCt_U_decay`: `|e^{-t²/4} U(a,t)| ≤ M e^{-t}` on the real line, locally uniformly in `a`.
+
+## Implementation notes
+
+For `re a > -1/2`, Euler's integral `Γ(a+1/2) t^{-a-1/2} = ∫₀^∞ s^{a-1/2} e^{-ts} ds` (complex
+scale, `integral_cpow_mul_cexp_neg_mul_Ioi`), Fubini and the Gaussian reduce the vertical
+integral to DLMF 12.5.1 (`pcfU_eq_integral`); holomorphy in `a`
+(`pcfCt_vertical_differentiable`) and the identity theorem give all `a`. The horizontal lines
+are the vertical lines rotated by `±π/2`.
+
+For the Hankel loop, the integrand in the variable `w = log t` is the entire function
+`pcfCt_F`, and the circle part `pcfCt_C` at radius `r` is its integral over the segment
+`log r + iθ`, `|θ| ≤ π`; the jump is `κ(a) = e^{-iπ(a-1/2)} - e^{iπ(a-1/2)}`. For
+`re a > -1/2` the circle shrinks to zero (`pcfCt_loop_limit_of_re`), and DLMF 12.5.1 with the
+reflection formula (`pcfCt_kappa_Gamma`) gives the value; holomorphy in `a` of the tail and of
+the circle part extends it to all `a`.
+
+For the kernel of DLMF 12.12.3, the two exponential halves are, in `w = log t`, integrals of
+`pcfCt_Phi` over the lines `Im w = 0` and `Im w = π`; the vertical-shift residue lemma
+`Complex.barnesRes_vertical_shift` (after rotating by `i`) relates them through the residue
+at `w = log x + iπ/2` (`pcfCt_kernel_shift`).
 -/
 
 @[expose] public noncomputable section

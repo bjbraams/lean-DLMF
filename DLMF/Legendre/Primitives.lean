@@ -10,10 +10,28 @@ public import DLMF.Legendre.AssociatedRecurrences
 /-!
 # Indefinite Ferrers integrals as derivative identities
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+This file states the indefinite integrals of Ferrers functions in DLMF 14.17.1–14.17.4 as
+derivative identities on `(-1, 1)`: each closed-form primitive has the integrand as its
+derivative. The formulas apply to either Ferrers solution `𝖯` or `𝖰`, selected by a Boolean.
+
+## Main definitions
+
+* `ferrersSolution`: `𝖰^μ_ν` if `second` is true and `𝖯^μ_ν` otherwise.
+* `ferrersProductPrimitive`: the closed-form primitives of DLMF 14.17.3 and 14.17.4.
+
+## Main results
+
+* `ferrersSolution_order_raise`, `ferrersSolution_recurrence_1`: order raising and the
+  three-term order recurrence for either Ferrers solution.
+* `ferrersSolution_deriv_degree`, `ferrersSolution_deriv_degree_succ`: derivative relations
+  in the degree.
+* `ferrers_primitive_1`, `ferrers_primitive_2`: DLMF 14.17.1, 14.17.2.
+* `ferrers_product_primitive_3`, `ferrers_product_primitive_4`: DLMF 14.17.3, 14.17.4.
+
+## Implementation notes
+
+When `𝖰` occurs, the hypotheses exclude the parameters where `ν + μ` (or `ν + μ ± 1`) is a
+negative integer.
 -/
 
 @[expose] public noncomputable section

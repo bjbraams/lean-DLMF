@@ -11,8 +11,8 @@ public import DLMF.Legendre.UniformCoordinates.InverseCoordinates
 /-!
 # Coordinate changes and envelopes for Legendre uniform approximations
 
-Statement acquisition from NIST DLMF, checked 2026-10-19. Graphical results and
-application notes are excluded. Existing Mathlib results are referenced, not reproved.
-Theorem statements were initially admitted; remaining `sorry` declarations are
-not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation.
+The auxiliary parameters, implicitly defined coordinates (`η`, `y`, `ζ`) and envelope functions
+of the uniform asymptotic approximations of DLMF §14.15: turning-point coordinate maps in
+`TurningPointMaps`, and the inverse coordinates, amplitudes and envelopes in
+`InverseCoordinates`.
 -/

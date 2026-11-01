@@ -7,13 +7,31 @@ module
 
 public import DLMF.Confluent.Recurrence
 public import Mathlib.Analysis.Complex.TaylorSeries
+public import ToMathlib.Analysis.SpecialFunctions.Pow
 
 /-!
 # Taylor expansions after a fractional linear change of variable
 
-The map `w ↦ x / (1 - w)` converts first-parameter contiguous relations into
-ordinary Taylor derivatives. Mathlib's complex Taylor theorem supplies convergence
-on the unit disk, without an exchange of hypergeometric double series.
+This file proves expansions of Kummer's and Tricomi's functions in their first parameter, in
+the disk coordinate `w` of the map `w ↦ x / (1 - w)`, which converts first-parameter
+contiguous relations into ordinary Taylor derivatives.
+
+## Main results
+
+* `mobius_taylor`: a contiguous differential relation yields a convergent Taylor expansion on
+  the unit disk.
+* `kummerM_mobius_taylor`, `kummerU_mobius_taylor`: first-parameter expansions of `M` and `U`
+  in the disk coordinate.
+* `kummerM_exp_mobius_taylor`, `kummerU_exp_mobius_taylor`: the exponentially weighted
+  expansions.
+* `of_mobius_taylor`: undoing the fractional linear coordinate, including its principal power
+  prefactor.
+
+## Implementation notes
+
+Mathlib's complex Taylor theorem supplies convergence on the unit disk, without an exchange of
+hypergeometric double series. The coefficient recurrence permits zeros, so terminating cases
+are included.
 -/
 
 @[expose] public section
@@ -26,15 +44,10 @@ noncomputable section
 
 namespace DLMF.Confluent
 
-/-- The denominator of the fractional linear map has positive real part on the unit disk. -/
-theorem re_one_sub_pos_of_norm_lt_one {w : ℂ} (hw : ‖w‖ < 1) : 0 < (1 - w).re := by
-  simp only [sub_re, one_re]
-  linarith [re_le_norm w]
-
 /-- A right-half-plane center stays on the principal branch under the disk map. -/
 theorem div_one_sub_mem_slitPlane {x w : ℂ} (hx : 0 < x.re) (hw : ‖w‖ < 1) :
     x / (1 - w) ∈ slitPlane := by
-  have hr := re_one_sub_pos_of_norm_lt_one hw
+  have hr := Complex.re_one_sub_pos hw
   have hd : 1 - w ≠ 0 := by intro h; simp [h] at hr
   rw [mem_slitPlane_iff]
   by_contra! h
@@ -58,7 +71,7 @@ theorem mobius_taylor (F : ℕ → ℂ → ℂ) (C : ℕ → ℂ) (s x : ℂ)
   let G : ℕ → ℂ → ℂ := fun n w => C n * (1 - w) ^ (-s - n) * F n (x / (1 - w))
   have hG (n : ℕ) (w : ℂ) (hw : ‖w‖ < 1) :
       HasDerivAt (G n) (G (n + 1) w) w := by
-    have hr := re_one_sub_pos_of_norm_lt_one hw
+    have hr := Complex.re_one_sub_pos hw
     have hd : 1 - w ≠ 0 := by intro h; simp [h] at hr
     have hp := ((hasDerivAt_id w).const_sub 1).cpow_const
       (c := -s - n) (Or.inl hr : 1 - w ∈ slitPlane)

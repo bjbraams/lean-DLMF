@@ -8,12 +8,28 @@ module
 public import DLMF.Gamma.BetaFunction.Cosine
 
 /-!
-# Cauchy vertical Beta integral
+# Cauchy's vertical Beta integral (DLMF 5.12.8)
 
-The vertical-line Beta integral, including convergence and evaluation.
+The integral `(1/2π) ∫ (w + it)^{-a} (z - it)^{-b} dt` over the real line: convergence, the
+evaluation for `Re a > 0`, `Re b > 1` by Fubini and Fourier inversion, and the extension by
+analytic continuation in `b`.
 
-Source references and common attribution are retained in
-`DLMF.Gamma.BetaFunction`.
+## Main definitions
+
+* `vbF`: the integrand of Cauchy's vertical Beta integral.
+* `vbR`: the right-hand side of DLMF 5.12.8.
+
+## Main results
+
+* `beta_vertical`: Cauchy's vertical Beta integral (DLMF 5.12.8).
+* `vb_eq_base`, `vb_eq_of_re_pos`: the case `Re a > 0`, `Re b > 1`, and its continuation in `b`.
+* `vb_differentiableOn_b`: the integral is holomorphic in `b` on `Re (a + b) > 1`.
+
+## Implementation notes
+
+`1/B(a, b)` is written as `Γ(a + b)/(Γ(a)Γ(b))`, because Mathlib's `betaIntegral a b` is the
+literal integral, which is `0` when `Re a ≤ 0` or `Re b ≤ 0`, while the identity holds for all
+`a, b` with `Re (a + b) > 1`.
 -/
 
 @[expose] public section

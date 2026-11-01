@@ -13,9 +13,9 @@ public import DLMF.EllipticIntegrals.Expansions
 public import DLMF.EllipticIntegrals.Inequalities
 public import DLMF.EllipticIntegrals.LegendreIdentities
 public import DLMF.EllipticIntegrals.Legendre
-public import DLMF.EllipticIntegrals.P19sR1Bounds
-public import DLMF.EllipticIntegrals.P19sR1Connection
-public import DLMF.EllipticIntegrals.P19sR1Legendre
+public import DLMF.EllipticIntegrals.SymmetricBounds
+public import DLMF.EllipticIntegrals.SymmetricLegendreConnection
+public import DLMF.EllipticIntegrals.LegendreSymmetricForms
 public import DLMF.EllipticIntegrals.Quadratic
 public import DLMF.EllipticIntegrals.Reduction
 public import DLMF.EllipticIntegrals.Relations
@@ -37,9 +37,10 @@ public import DLMF.EllipticIntegrals.SymmetricSpecialCases
 public import DLMF.EllipticIntegrals.SymmetricNodeDerivatives
 
 /-!
-# Elliptic integrals (DLMF Chapter 19)
+# Elliptic integrals
 
-Mathlib has no elliptic integrals. This area follows DLMF Chapter 19 for complex arguments:
+Legendre's and Carlson's elliptic integrals of complex arguments, following DLMF Chapter 19.
+Mathlib has no elliptic integrals.
 
 * Legendre's integrals (§§19.1–19.14): `incEllIntFk`, `incEllIntEk`, `incEllIntDk`,
   `incEllIntPik`, the complete `compEllIntEk`, `compEllIntDk`, `compEllIntPik` (with the existing
@@ -52,6 +53,6 @@ Mathlib has no elliptic integrals. This area follows DLMF Chapter 19 for complex
   `R_{-a}(b; z)`, in `DLMF.EllipticIntegrals.Symmetric`, bridged to the `lean-codes` Carlson
   library.
 
-The real integrals, AGM and Landen theory of the older `DLMF.Elliptic` area remain in place and
-carry their own `@[dlmf]` tags.
+The real integrals, AGM and Landen theory are in the separate `DLMF.Elliptic` area and carry
+their own `@[dlmf]` tags.
 -/

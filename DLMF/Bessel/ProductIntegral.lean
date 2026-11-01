@@ -16,14 +16,27 @@ public import Mathlib.Algebra.Order.Ring.Star
 For `ℜ(μ+ν) > -1`,
 `J_μ(z) J_ν(z) = (2/π) ∫₀^{π/2} J_{μ+ν}(2z cos θ) cos((μ-ν)θ) dθ`.
 
-## Method
+## Main definitions
+
+* `cosBetaValue`: the right-hand side of the cosine Beta integral DLMF 5.12.5.
+
+## Main results
 
 * `integral_cos_cpow_mul_cos`: the cosine Beta integral DLMF 5.12.5 for complex parameters,
   `∫₀^{π/2} cos^{a-1} t cos(bt) dt = π Γ(a) 2^{-a} / (Γ((a+b+1)/2) Γ((a-b+1)/2))`, `ℜ a > 0`.
-  The real case is `DLMF.Gamma.integral_cos_rpow_mul_cos`. It is extended to complex `b`
-  (entire in `b`) and then to complex `a` (holomorphic on `ℜ a > 0`) by the identity theorem.
-* Expanding `J_{μ+ν}(2z cos θ)` in its series and integrating termwise (dominated convergence)
-  gives the product series DLMF 10.8.3 (`besselJ_mul_besselJ`).
+* `besselJ_mul_besselJ_eq_integral`: the product integral (DLMF 10.9.26).
+* `hasSum_neg_one_pow_besselJ_odd`, `hasSum_neg_one_pow_besselJ_even`: `sin x` and `cos x` as
+  series of `J_n(x)` (DLMF 10.12.2–10.12.3 at `θ = π/2`).
+* `hasSum_besselJ_products_integral`: Neumann-type series of Bessel products with half-integer
+  offsets, summed under the product integral.
+
+## Implementation notes
+
+The real case of the cosine Beta integral is `DLMF.Gamma.integral_cos_rpow_mul_cos`. It is
+extended to complex `b` (entire in `b`) and then to complex `a` (holomorphic on `ℜ a > 0`) by the
+identity theorem. Expanding `J_{μ+ν}(2z cos θ)` in its series and integrating termwise (dominated
+convergence) gives the product series DLMF 10.8.3 (`besselJ_mul_besselJ`, in
+`DLMF.Bessel.WeberSeries`).
 -/
 
 @[expose] public section

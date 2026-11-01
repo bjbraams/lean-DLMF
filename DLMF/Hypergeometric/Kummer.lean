@@ -8,16 +8,35 @@ module
 public import DLMF.Hypergeometric.Solutions
 
 /-!
-# Kummer's representations and connections (DLMF §15.10(ii))
+# Kummer's solutions and connection formulas (DLMF §15.10(ii))
 
-E11 is already the Euler/Pfaff family in `Transformations` and
-`FurtherTransformations`. E12–E16 give the remaining representations, on
-overlaps of series disks. Explicit upper-half-plane hypotheses fix the phases
-in E15–E16 and in connections involving infinity. Separate charts avoid
-assigning analytic-continuation values to divergent Mathlib series.
-E17–E18/E21–E22 are in `Solutions`. E19–E20/E25–E26 use the left chart;
-E23–E24/E27–E28 use the chart at infinity. E29–E36 mix all three centers;
-their series charts have no common open domain and need global continuation.
+## Main definitions
+
+* `kummerFive`, `kummerSix`: Kummer's fifth and sixth solutions on the chart at infinity,
+  DLMF 15.10.15–15.10.16.
+* `kummerFiveLeft`, `kummerSixLeft`: second charts overlapping the disk at zero.
+
+## Main results
+
+* `zero_second_representations`, `one_first_representations`, `one_second_representations`,
+  `kummer_five_representations`, `kummer_six_representations`: Kummer's representations
+  DLMF 15.10.12–15.10.16.
+* `kummer_five_left_connection_zero`, `kummer_six_left_connection_zero`: DLMF 15.10.19–15.10.20.
+* `kummer_five_connection_one`, `kummer_six_connection_one`: DLMF 15.10.23–15.10.24.
+* `zero_first_connection_left`, `zero_second_connection_left`: DLMF 15.10.25–15.10.26.
+* `one_first_connection_infinity`, `one_second_connection_infinity`: DLMF 15.10.27–15.10.28.
+
+## Implementation notes
+
+15.10.11 is the Euler and Pfaff family in `DLMF.Hypergeometric.Transformations` and
+`DLMF.Hypergeometric.FurtherTransformations`; 15.10.17–15.10.18 and 15.10.21–15.10.22 are in
+`DLMF.Hypergeometric.Solutions`. The representations hold on overlaps of series disks. Explicit
+upper-half-plane hypotheses fix the phases in 15.10.15–15.10.16 and in connections involving
+infinity. Separate charts avoid assigning analytic-continuation values to divergent Mathlib
+series: 15.10.19–15.10.20 and 15.10.25–15.10.26 use the left chart, and 15.10.23–15.10.24 and
+15.10.27–15.10.28 use the chart at infinity. 15.10.29–15.10.36 mix all three centers; their
+series charts have no common open domain and need global continuation, so they are not
+included.
 -/
 
 @[expose] public section
@@ -433,7 +452,7 @@ Real.pi * I) * Gamma (c - 1) * Gamma (a - b + 1) / (Gamma a * Gamma (c - b)) * z
 c z`. -/
 @[dlmf 15.10.E19]
 theorem kummer_five_left_connection_zero {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
-    (_he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
+    (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : ‖z‖ < 1) (hw : 1 < ‖1 - z‖) (hi : 0 < z.im) :
     kummerFiveLeft a b c z =
       Gamma (1 - c) * Gamma (a - b + 1) / (Gamma (a - c + 1) * Gamma (1 - b)) * ₂F₁ a b c z + exp ((c - 1) *
@@ -480,7 +499,7 @@ Real.pi * I) * Gamma (c - 1) * Gamma (b - a + 1) / (Gamma b * Gamma (c - a)) * z
 c z`. -/
 @[dlmf 15.10.E20]
 theorem kummer_six_left_connection_zero {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
-    (_he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
+    (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : ‖z‖ < 1) (hw : 1 < ‖1 - z‖) (hi : 0 < z.im) :
     kummerSixLeft a b c z =
       Gamma (1 - c) * Gamma (b - a + 1) / (Gamma (b - c + 1) * Gamma (1 - a)) * ₂F₁ a b c z + exp ((c - 1) *
@@ -488,8 +507,7 @@ theorem kummer_six_left_connection_zero {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠
         by
   have hab' : ∀ k : ℤ, b - a ≠ (k : ℂ) := fun k h => hab (-k) (by
     push_cast; linear_combination -h)
-  have h := kummer_five_left_connection_zero (a := b) (b := a) (c := c) hc
-    (fun k h => _he k (by linear_combination h)) hab' hz hw hi
+  have h := kummer_five_left_connection_zero (a := b) (b := a) (c := c) hc hab' hz hw hi
   have hz2 : zeroSecond b a c z = zeroSecond a b c z := by
     simp only [zeroSecond]
     rw [ordinaryHypergeometric_symm]
@@ -529,7 +547,7 @@ Real.pi * I) * Gamma (a - b + 1) * Gamma (c - a - b) / (Gamma (1 - b) * Gamma (c
 oneFirst a b c z + exp ((c - b) * Real.pi * I) * Gamma (a - b + 1) * Gamma (a + b - c) /
 (Gamma a * Gamma (a - c + 1)) * oneSecond a b c z`. -/
 @[dlmf 15.10.E23]
-theorem kummer_five_connection_one {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ (k : ℂ))
+theorem kummer_five_connection_one {a b c z : ℂ}
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : 1 < ‖z‖) (hw : ‖1 - z‖ < 1) (hi : 0 < z.im) :
     kummerFive a b c z =
@@ -580,7 +598,7 @@ Real.pi * I) * Gamma (b - a + 1) * Gamma (c - a - b) / (Gamma (1 - a) * Gamma (c
 oneFirst a b c z + exp ((c - a) * Real.pi * I) * Gamma (b - a + 1) * Gamma (a + b - c) /
 (Gamma b * Gamma (b - c + 1)) * oneSecond a b c z`. -/
 @[dlmf 15.10.E24]
-theorem kummer_six_connection_one {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ (k : ℂ))
+theorem kummer_six_connection_one {a b c z : ℂ}
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : 1 < ‖z‖) (hw : ‖1 - z‖ < 1) (hi : 0 < z.im) :
     kummerSix a b c z =
@@ -589,7 +607,7 @@ theorem kummer_six_connection_one {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ (k :
         Gamma (b - c + 1)) * oneSecond a b c z := by
   have hab' : ∀ k : ℤ, b - a ≠ (k : ℂ) := fun k h => hab (-k) (by
     push_cast; linear_combination -h)
-  have h := kummer_five_connection_one (a := b) (b := a) (c := c) _hc
+  have h := kummer_five_connection_one (a := b) (b := a) (c := c)
     (fun k h => he k (by linear_combination h)) hab' hz hw hi
   have h1 : oneFirst b a c z = oneFirst a b c z := by
     simp only [oneFirst]

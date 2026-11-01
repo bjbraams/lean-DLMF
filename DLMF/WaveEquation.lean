@@ -11,5 +11,5 @@ public import DLMF.WaveEquation.Helmholtz
 # Separating the wave equation (Temme Chapter 10)
 
 Separated solutions of the Helmholtz equation in cylindrical and spherical coordinates, in
-Cartesian form, and the heat-conduction modes of a cooled cylinder. There are no admissions.
+Cartesian form, and the heat-conduction modes of a cooled cylinder.
 -/

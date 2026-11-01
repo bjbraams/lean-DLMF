@@ -12,9 +12,9 @@ public import Mathlib.NumberTheory.ModularForms.JacobiTheta.TwoVariable
 /-!
 # DLMF Chapters 19–20 results already in Mathlib 4.35.0-rc2
 
-The `dlmf_upstream` commands below are checked pointers to Mathlib declarations,
-deliberately not duplicate local theorems. The project's `θ₁, …, θ₄` in DLMF normalization
-are defined from `jacobiTheta₂` in `DLMF.Elliptic.Theta` and carry their own `@[dlmf]` tags.
+The `dlmf_upstream` commands below are checked pointers to Mathlib declarations, deliberately
+not duplicate local theorems. The project's `θ₁, …, θ₄` in DLMF normalization are defined from
+`jacobiTheta₂` in `DLMF.Elliptic.Basic.Theta` and carry their own `@[dlmf]` tags.
 -/
 
 -- DLMF 19.8.1 and §19.8(i): Gauss's arithmetic-geometric mean.

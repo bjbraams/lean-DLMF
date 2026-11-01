@@ -8,13 +8,26 @@ module
 public import DLMF.Hypergeometric.Solutions.Logarithmic
 
 /-!
-# Connection formulas on intersecting Gauss disks
+# Connection formulas on intersecting Gauss disks (DLMF 15.10.17–15.10.22)
 
-The connected lens of the origin and unit-point disks supports the fundamental connection
-identities.
+The connection formulas between the local solutions at `0` and at `1` hold on the lens where
+the two series disks overlap.
 
-Source references and common attribution are retained in
-`DLMF.Hypergeometric.Solutions`.
+## Main definitions
+
+* `connLens`: the overlap of the series disks at `0` and at `1`.
+
+## Main results
+
+* `exists_connection_one`: on the lens, `₂F₁(a,b;c;z)` is a combination of the two local
+  solutions at `z = 1`.
+* `one_first_connection_zero`, `one_second_connection_zero`: DLMF 15.10.17–15.10.18.
+* `zero_first_connection_one`, `zero_second_connection_one`: DLMF 15.10.21–15.10.22.
+
+## Implementation notes
+
+The formulas are first proved in a parameter region where every limit is available and then
+extended through a regularized form (`connLhs`, `connRhs`) that is entire in each parameter.
 -/
 
 @[expose] public section
@@ -177,7 +190,6 @@ theorem exists_connection_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
       (analyticAt_oneSecond hw.2 (one_sub_mem_slitPlane_of_mem_connLens hw))]
     have h1 : gaussOperator a b c (₂F₁ a b c) w = 0 := by
       have := ordinaryHypergeometric_ode (a := a) (b := b) hc hw.1
-        (ne_zero_of_mem_connLens hw) (ne_one_of_mem_connLens hw)
       simpa [gaussOperator] using this
     rw [h1, one_first_ode hC hw.2,
       one_second_ode hS hw.2 (one_sub_mem_slitPlane_of_mem_connLens hw)]

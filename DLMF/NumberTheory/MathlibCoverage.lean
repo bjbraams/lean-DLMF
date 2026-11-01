@@ -45,6 +45,8 @@ monoid homomorphisms `ZMod n →* R` extended by zero. Mathlib's `ModularForm.di
 /- §27.2: Euclid's theorem, Euler–Fermat. -/
 dlmf_upstream 27.2.i Nat.exists_infinite_primes
   "exact: there are infinitely many primes"
+dlmf_upstream 27.2.i Nat.infinite_setOf_prime
+  "exact: the set of primes is infinite"
 dlmf_upstream 27.2.i Nat.factorization_prod_pow_eq_self
   "exact: n = ∏ p^{a_p} (27.2.1), as a Finsupp product"
 dlmf_upstream 27.2.E8 Nat.ModEq.pow_totient
@@ -135,6 +137,8 @@ dlmf_upstream 27.12 Nat.IsCarmichael
   "exact: Carmichael numbers (Korselt's criterion)"
 dlmf_upstream 27.12 Nat.bertrand
   "partial: Bertrand's postulate (a Chebyshev-type estimate, not in DLMF)"
+dlmf_upstream 27.12 Nat.Prime.of_mersenne
+  "exact: if 2^p - 1 is prime then p is prime"
 
 /- §27.13: Lagrange and Fermat. -/
 dlmf_upstream 27.13.iii Nat.sum_four_squares

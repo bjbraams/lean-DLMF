@@ -15,24 +15,48 @@ public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 /-!
 # Special function solutions of the Painlevé equations (DLMF §32.10)
 
-DLMF normalization (`DLMF.Painleve.Basic`). For each of `PII`–`PVI`, the Riccati equation of
-§32.10 (the case `n = 0` of the parameter conditions 32.10.11, 32.10.15, 32.10.23, 32.10.28)
-is proved to imply the Painlevé equation. The Airy solutions 32.10.4–32.10.6 of `PII` are
-proved, bridging to the Beals–Wong construction of `DLMF.Painleve.Airy` (`airyPII`, with the
-cube-root scale `k = -2^{-1/3}`, `k³ = -1/2`); existence for every `α = n + 1/2` (32.10.2) is
-the Airy hierarchy `airyPIIHierarchy`. The `α = 5/2` member 32.10.7 and the Wronskian formula
-32.10.8–32.10.9 are admitted. The Hermite solutions 32.10.20–32.10.21 and the error-function
-solutions 32.10.16, 32.10.22 of `PIV` are proved. The Bessel, parabolic cylinder and
-hypergeometric solutions of the Riccati equations (32.10.13–32.10.14, 32.10.18–32.10.19,
-32.10.30–32.10.31) are proved from the linear ODEs of `J_ν`, `Y_ν`, `U`, `V` and `₂F₁`; the
-Whittaker solution 32.10.26–32.10.27 and Picard's solution 32.10.32–32.10.34 are admitted
-(the special-function solutions were verified numerically with mpmath, residuals about
-`10⁻³⁰`).
+This file treats the special function solutions of `PII`–`PVI` in the DLMF normalization of
+`DLMF.Painleve.Basic`. For each equation, the Riccati equation of §32.10 (the case `n = 0` of
+the parameter conditions 32.10.11, 32.10.15, 32.10.23, 32.10.28) implies the Painlevé
+equation, and the linear special functions (Airy, Bessel, parabolic cylinder, Hermite, error,
+Whittaker and hypergeometric functions) solve the Riccati equations.
 
-**Source correction.** DLMF introduces the Riccati equation 32.10.29 of `PVI` with "If `n = 1`";
-it is the case `n = 0` of 32.10.28, i.e. `a + b + c + d = 1` (verified symbolically: the
-Riccati equation implies `PVI` exactly when `(1 - a - b - c)² = d² = 1 - 2δ`). The statement
-`painleveVI_of_riccati` uses `δ = (1 - (1 - a - b - c)²)/2`.
+## Main results
+
+* `painleveII_of_riccati`: the Riccati equation `εw' = w² + z/2` implies `PII` with
+  `α = ε/2` (DLMF 32.10.3).
+* `painleveII_airy`, `painleveII_airy_three_halves`: the Airy solutions of `PII`
+  (DLMF 32.10.4–32.10.6).
+* `painleveII_exists_airy`: Airy-type solutions exist for every `α = n + 1/2` (DLMF 32.10.2).
+* `painleveII_three_halves`, `painleveII_five_halves`: the members `α = 3/2, 5/2` in Riccati
+  form (DLMF 32.10.6, 32.10.7).
+* `painleveII_airy_wronskian`: the Wronskian formula (DLMF 32.10.8–32.10.9).
+* `painleveII_neg`: `w ↦ -w` maps parameter `α` to `-α` (DLMF 32.10.10).
+* `painleveIII_of_riccati`, `painleveIII_bessel_riccati`: Riccati and Bessel solutions of
+  `PIII` (DLMF 32.10.11–32.10.14).
+* `painleveIV_of_riccati`, `painleveIV_pcf_riccati`: Riccati and parabolic cylinder solutions
+  of `PIV` (DLMF 32.10.15, 32.10.17–32.10.19).
+* `painleveIV_hermite`, `painleveIV_hermite'`: Hermite solutions (DLMF 32.10.20–32.10.21).
+* `painleveIV_erfc_plus`, `painleveIV_erfc_minus`: error-function solutions
+  (DLMF 32.10.16, 32.10.22).
+* `painleveV_of_riccati`, `painleveV_whittaker_riccati`: Riccati and Whittaker solutions of
+  `PV` (DLMF 32.10.23, 32.10.25–32.10.27).
+* `painleveVI_of_riccati`, `painleveVI_hypergeometric_riccati`: Riccati and hypergeometric
+  solutions of `PVI` (DLMF 32.10.28–32.10.31).
+* `painleveVI_picard`: Picard's solution of `PVI` (DLMF 32.10.32–32.10.34).
+
+## Implementation notes
+
+The Airy solutions of `PII` are bridged to the Beals–Wong construction of
+`DLMF.Painleve.Airy` (`airyPII`, with the cube-root scale `k = -2^{-1/3}`, `k³ = -1/2`); the
+existence statement for `α = n + 1/2` is the Airy hierarchy `airyPIIHierarchy`. The Bessel,
+parabolic cylinder and hypergeometric solutions of the Riccati equations come from the linear
+ODEs of `J_ν`, `Y_ν`, `U`, `V` and `₂F₁`.
+
+DLMF introduces the Riccati equation 32.10.29 of `PVI` with "If `n = 1`"; it is the case
+`n = 0` of 32.10.28, i.e. `a + b + c + d = 1` (the Riccati equation implies `PVI` exactly
+when `(1 - a - b - c)² = d² = 1 - 2δ`). The statement `painleveVI_of_riccati` uses
+`δ = (1 - (1 - a - b - c)²)/2`.
 
 The phrase "expressible in terms of special functions" (32.10.1 and the "iff" of 32.10.2,
 32.10.11, 32.10.15–32.10.16, 32.10.23–32.10.24, 32.10.28) is not formalized; the existence
@@ -49,13 +73,13 @@ namespace DLMF.Painleve
 
 /-- The logarithmic derivative `φ₁/φ` of a solution of `φ'' = Pφ' + Qφ` satisfies the
 Riccati equation `(φ₁/φ)' = P (φ₁/φ) + Q - (φ₁/φ)²`. -/
-private lemma b32_hasDerivAt_logDeriv {φ φ1 P Q : ℂ → ℂ} {z : ℂ} (hφ : HasDerivAt φ (φ1 z) z)
+private lemma hasDerivAt_div_riccati {φ φ1 P Q : ℂ → ℂ} {z : ℂ} (hφ : HasDerivAt φ (φ1 z) z)
     (hφ1 : HasDerivAt φ1 (P z * φ1 z + Q z * φ z) z) (h0 : φ z ≠ 0) :
     HasDerivAt (fun z => φ1 z / φ z) (P z * (φ1 z / φ z) + Q z - (φ1 z / φ z) ^ 2) z :=
   (hφ1.div hφ h0).congr_deriv (by field_simp)
 
 /-- Identity under the stated parameter and domain assumptions: `ε ^ 2 = 1`. -/
-private lemma b32_sq_eq_one {ε : ℂ} (hε : ε = 1 ∨ ε = -1) : ε ^ 2 = 1 := by
+private lemma sq_eq_one_of_eq_one_or_eq_neg_one {ε : ℂ} (hε : ε = 1 ∨ ε = -1) : ε ^ 2 = 1 := by
   rcases hε with h | h <;> simp [h]
 
 /-! ## `PII` (§32.10(ii)) -/
@@ -66,14 +90,14 @@ set, then `w` solves `PII` with `α = ε/2`. -/
 theorem painleveII_of_riccati {ε : ℂ} (hε : ε = 1 ∨ ε = -1) {w : ℂ → ℂ} {U : Set ℂ}
     (hU : IsOpen U) (hw : ∀ z ∈ U, HasDerivAt w (ε * (w z ^ 2 + z / 2)) z) :
     IsPainleveIIOn (ε / 2) w U := by
-  have hε2 := b32_sq_eq_one hε
+  have hε2 := sq_eq_one_of_eq_one_or_eq_neg_one hε
   refine isODE2SolutionOn_of_hasDerivAt hU hw fun z hz => ?_
   refine ((((hw z hz).pow 2).add ((hasDerivAt_id z).div_const 2)).const_mul ε).congr_deriv ?_
   simp only [painleveIIRhs, Nat.cast_ofNat]
   linear_combination (2 * w z ^ 3 + z * w z) * hε2
 
 /-- The DLMF cube-root scale `k = -2^{-1/3}` of 32.10.5 satisfies `k³ = -1/2`. -/
-private lemma b32_airy_scale : (-(2 : ℂ) ^ (-1 / 3 : ℂ)) ^ 3 = -1 / 2 := by
+private lemma neg_two_cpow_neg_third_cube : (-(2 : ℂ) ^ (-1 / 3 : ℂ)) ^ 3 = -1 / 2 := by
   have h : ((2 : ℂ) ^ (-1 / 3 : ℂ)) ^ 3 = 2 ^ (-1 : ℂ) := by
     rw [← cpow_nat_mul]; norm_num
   rw [neg_pow, h, cpow_neg_one]
@@ -90,7 +114,7 @@ theorem painleveII_airy {ε : ℂ} (hε : ε = 1 ∨ ε = -1) (C₁ C₂ : ℂ) 
       {z | C₁ * airyAi (-(2 : ℂ) ^ (-1 / 3 : ℂ) * z) +
           C₂ * airyBi (-(2 : ℂ) ^ (-1 / 3 : ℂ) * z) ≠ 0} := by
   set k : ℂ := -(2 : ℂ) ^ (-1 / 3 : ℂ)
-  have hk : k ^ 3 = -1 / 2 := b32_airy_scale
+  have hk : k ^ 3 = -1 / 2 := neg_two_cpow_neg_third_cube
   have h := isPIIOn_airyPII hk C₁ C₂
   have hS : IsOpen {z | airySeed k C₁ C₂ z ≠ 0} :=
     isOpen_ne_fun (continuous_iff_continuousAt.mpr fun z =>
@@ -100,14 +124,14 @@ theorem painleveII_airy {ε : ℂ} (hε : ε = 1 ∨ ε = -1) (C₁ C₂ : ℂ) 
   rcases hε with rfl | rfl
   · have h0 : IsPainleveIIOn (-1 / 2) (airyPII k C₁ C₂) {z | airySeed k C₁ C₂ z ≠ 0} :=
       isPainleveIIOn_iff_isPIIOn.mpr (by convert h using 1; norm_num)
-    have h' := b32_isPainleveIIOn_neg h0
+    have h' := isPainleveIIOn_neg h0
     rw [show (1 : ℂ) / 2 = -(-1 / 2) by norm_num]
-    refine b32_congr h' hS fun z _ => ?_
+    refine isPainleveIIOn_congr h' hS fun z _ => ?_
     simp only [hd, airyPII, airySeed]
     ring
   · have h0 : IsPainleveIIOn (-1 / 2) (airyPII k C₁ C₂) {z | airySeed k C₁ C₂ z ≠ 0} :=
       isPainleveIIOn_iff_isPIIOn.mpr (by convert h using 1; norm_num)
-    refine b32_congr h0 hS fun z _ => ?_
+    refine isPainleveIIOn_congr h0 hS fun z _ => ?_
     simp only [hd, airyPII, airySeed]
     ring
 
@@ -119,7 +143,7 @@ notion of a solution expressible in terms of Airy functions and is not formalize
 @[dlmf 32.10.E2]
 theorem painleveII_exists_airy (n : ℤ) :
     ∃ (w : ℂ → ℂ) (U : Set ℂ), IsOpen U ∧ U.Nonempty ∧ IsPainleveIIOn ((n : ℂ) + 1 / 2) w U := by
-  obtain ⟨s, hs, hne, h⟩ := exists_open_isPIIOn_airyPIIHierarchy b32_airy_scale (-n - 1)
+  obtain ⟨s, hs, hne, h⟩ := exists_open_isPIIOn_airyPIIHierarchy neg_two_cpow_neg_third_cube (-n - 1)
   refine ⟨airyPIIHierarchy (-(2 : ℂ) ^ (-1 / 3 : ℂ)) 1 0 (-n - 1), s, hs, hne,
       isPainleveIIOn_iff_isPIIOn.mpr ?_⟩
   convert h using 2
@@ -127,11 +151,11 @@ theorem painleveII_exists_airy (n : ℤ) :
   ring
 
 /-- The Riccati equation `Φ' = -Φ² - z/2` of `Φ = φ'/φ` for the Airy combination of 32.10.5. -/
-private lemma b32_hasDerivAt_airyPhi (C₁ C₂ : ℂ) {z : ℂ}
+private lemma hasDerivAt_airyPII_neg_two_cpow (C₁ C₂ : ℂ) {z : ℂ}
     (hz : airySeed (-(2 : ℂ) ^ (-1 / 3 : ℂ)) C₁ C₂ z ≠ 0) :
     HasDerivAt (airyPII (-(2 : ℂ) ^ (-1 / 3 : ℂ)) C₁ C₂)
       (-airyPII (-(2 : ℂ) ^ (-1 / 3 : ℂ)) C₁ C₂ z ^ 2 - z / 2) z :=
-  hasDerivAt_airyPII b32_airy_scale C₁ C₂ hz
+  hasDerivAt_airyPII neg_two_cpow_neg_third_cube C₁ C₂ hz
 
 /-- DLMF 32.10.6 in Riccati form: if `Φ' = -Φ² - z/2` on an open set (as for `Φ = φ'/φ` with
 `φ` from 32.10.5), then `w = Φ - 1/(2Φ² + z)` solves `PII` with `α = 3/2` where
@@ -253,10 +277,10 @@ theorem painleveII_airy_three_halves (C₁ C₂ : ℂ) :
     (hasDerivAt_airySeed k C₁ C₂ z).continuousAt
   have hS : IsOpen {z | airySeed k C₁ C₂ z ≠ 0} := isOpen_ne_fun hF continuous_const
   have hc : ContinuousOn (fun z => 2 * airyPII k C₁ C₂ z ^ 2 + z) {z | airySeed k C₁ C₂ z ≠ 0} :=
-    fun z hz => ((((b32_hasDerivAt_airyPhi C₁ C₂ hz).pow 2).const_mul 2).add
+    fun z hz => ((((hasDerivAt_airyPII_neg_two_cpow C₁ C₂ hz).pow 2).const_mul 2).add
       (hasDerivAt_id z)).continuousAt.continuousWithinAt
   have hU := hc.isOpen_inter_preimage hS (isOpen_compl_singleton (x := (0 : ℂ)))
-  exact painleveII_three_halves hU (fun z hz => b32_hasDerivAt_airyPhi C₁ C₂ hz.1)
+  exact painleveII_three_halves hU (fun z hz => hasDerivAt_airyPII_neg_two_cpow C₁ C₂ hz.1)
     fun z hz => hz.2
 
 /-- DLMF 32.10.8–32.10.9: for `n = 1, 2, …` and `φ` as in 32.10.5, with the Wronskians
@@ -278,7 +302,7 @@ of `PII` with parameter `α` to solutions with parameter `-α`. -/
 @[dlmf 32.10.E10]
 theorem painleveII_neg {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ} (h : IsPainleveIIOn α w U) :
     IsPainleveIIOn (-α) (fun z => -w z) U :=
-  b32_isPainleveIIOn_neg h
+  isPainleveIIOn_neg h
 
 /-! ## `PIII` (§32.10(iii)) -/
 
@@ -309,7 +333,7 @@ theorem painleveIII_of_riccati {ε₁ ε₂ α β : ℂ} (h₁ : ε₁ = 1 ∨ �
   all_goals (subst hβ; field_simp; ring)
 
 /-- At `z`, the function `(fun z : ℂ => z ^ a)` has derivative `(a * z ^ a / z)`. -/
-private lemma p3b_hasDerivAt_cpow {a z : ℂ} (hz : z ∈ slitPlane) :
+private lemma hasDerivAt_cpow_of_mem_slitPlane {a z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (fun z : ℂ => z ^ a) (a * z ^ a / z) z := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   refine (hasDerivAt_id z |>.cpow_const (c := a) (by simpa using hz)).congr_deriv ?_
@@ -319,14 +343,14 @@ private lemma p3b_hasDerivAt_cpow {a z : ℂ} (hz : z ∈ slitPlane) :
 
 /-- A function differentiable on the slit plane has `deriv f` with derivative
 `deriv (deriv f)` there. -/
-private lemma p3b_hasDerivAt_deriv_slit {f : ℂ → ℂ}
+private lemma hasDerivAt_deriv_of_slitPlane {f : ℂ → ℂ}
     (hf : ∀ ζ ∈ slitPlane, DifferentiableAt ℂ f ζ) {ζ : ℂ} (hζ : ζ ∈ slitPlane) :
     HasDerivAt (deriv f) (deriv (deriv f) ζ) ζ :=
   (((DifferentiableOn.deriv (fun x hx => (hf x hx).differentiableWithinAt)
     isOpen_slitPlane) ζ hζ).differentiableAt (isOpen_slitPlane.mem_nhds hζ)).hasDerivAt
 
 /-- A function differentiable on an open set has a differentiable `deriv` there. -/
-private lemma p3b_hasDerivAt_deriv_open {f : ℂ → ℂ} {V : Set ℂ} (hV : IsOpen V)
+private lemma hasDerivAt_deriv_of_isOpen {f : ℂ → ℂ} {V : Set ℂ} (hV : IsOpen V)
     (hf : ∀ ζ ∈ V, DifferentiableAt ℂ f ζ) {ζ : ℂ} (hζ : ζ ∈ V) :
     HasDerivAt (deriv f) (deriv (deriv f) ζ) ζ :=
   (((DifferentiableOn.deriv (fun x hx => (hf x hx).differentiableWithinAt) hV) ζ
@@ -366,8 +390,8 @@ theorem painleveIII_bessel_riccati {ε₁ ε₂ α C₁ C₂ : ℂ} (h₁ : ε�
     ((hJd ζ hζ).hasDerivAt.const_mul C₁).add ((hYd ζ hζ).hasDerivAt.const_mul C₂)
   have hB1d : ∀ ζ ∈ slitPlane, HasDerivAt B1
       (C₁ * deriv (deriv J) ζ + C₂ * deriv (deriv Y) ζ) ζ := fun ζ hζ =>
-    ((p3b_hasDerivAt_deriv_slit hJd hζ).const_mul C₁).add
-      ((p3b_hasDerivAt_deriv_slit hYd hζ).const_mul C₂)
+    ((hasDerivAt_deriv_of_slitPlane hJd hζ).const_mul C₁).add
+      ((hasDerivAt_deriv_of_slitPlane hYd hζ).const_mul C₂)
   have hode : ∀ ζ ∈ slitPlane, ζ ^ 2 * (C₁ * deriv (deriv J) ζ + C₂ * deriv (deriv Y) ζ) +
       ζ * B1 ζ + (ζ ^ 2 - ν ^ 2) * B ζ = 0 := fun ζ hζ => by
     have hj := DLMF.Bessel.besselJ_ode (ν := ν) hζ
@@ -383,16 +407,16 @@ theorem painleveIII_bessel_riccati {ε₁ ε₂ α C₁ C₂ : ℂ} (h₁ : ε�
   have hzV : z ∈ V := ⟨hUs hz, hζ z hz⟩
   set φ1 : ℂ → ℂ := fun x => ν * x ^ ν / x * B (c * x) + x ^ ν * (B1 (c * x) * c) with hφ1
   have hφd : ∀ x ∈ V, HasDerivAt φ (φ1 x) x := fun x hx => by
-    have := (p3b_hasDerivAt_cpow (a := ν) hx.1).mul ((hBd _ hx.2).comp x (hlin x))
+    have := (hasDerivAt_cpow_of_mem_slitPlane (a := ν) hx.1).mul ((hBd _ hx.2).comp x (hlin x))
     exact this.congr_deriv (by simp only [hφ1, Function.comp])
   have hev : (fun x => -ε₁ * deriv φ x / φ x) =ᶠ[𝓝 z] fun x => -ε₁ * φ1 x / φ x := by
     filter_upwards [hVo.mem_nhds hzV] with x hx
     rw [(hφd x hx).deriv]
   have hz0 : z ≠ 0 := slitPlane_ne_zero (hUs hz)
   have hs0 : z ^ ν ≠ 0 := by rw [cpow_def_of_ne_zero hz0]; exact exp_ne_zero _
-  have hφ1d := (((p3b_hasDerivAt_cpow (a := ν) (hUs hz)).const_mul ν).div (hasDerivAt_id z)
+  have hφ1d := (((hasDerivAt_cpow_of_mem_slitPlane (a := ν) (hUs hz)).const_mul ν).div (hasDerivAt_id z)
     hz0).mul ((hBd _ (hζ z hz)).comp z (hlin z)) |>.add
-    ((p3b_hasDerivAt_cpow (a := ν) (hUs hz)).mul (((hB1d _ (hζ z hz)).comp z (hlin z)).mul_const c))
+    ((hasDerivAt_cpow_of_mem_slitPlane (a := ν) (hUs hz)).mul (((hB1d _ (hζ z hz)).comp z (hlin z)).mul_const c))
   refine ((((hφ1d.const_mul (-ε₁)).div (hφd z hzV) hφ0)).congr_of_eventuallyEq hev).congr_deriv ?_
   rw [(hφd z hzV).deriv]
   have hO := hode _ (hζ z hz)
@@ -485,7 +509,7 @@ theorem painleveIV_pcf_riccati {ε α C₁ C₂ : ℂ} (hε : ε = 1 ∨ ε = -1
       16 * Y (r * z) * Y1 (r * z) * ε ^ 2 * r * z - 16 * Y1 (r * z) ^ 2 * ε) * he2
 
 /-- The Hermite differential equation `H_n'' = 2zH_n' - 2nH_n` over `ℂ`. -/
-private lemma b32_hermite_ode (n : ℕ) :
+private lemma hermitePolyH_ode (n : ℕ) :
     let H : ℂ[X] := (hermitePolyH n).map (Int.castRingHom ℂ)
     derivative (derivative H) = 2 * X * derivative H - C (2 * n : ℂ) * H := by
   intro H
@@ -517,7 +541,7 @@ theorem painleveIV_hermite (m : ℕ) (hm : 1 ≤ m) :
     (fun z hz => div_ne_zero (neg_ne_zero.mpr hz.2) hz.1) (fun z hz => ?_)
   · convert h using 1
     push_cast; ring
-  · have hode := congrArg (eval z) (b32_hermite_ode k)
+  · have hode := congrArg (eval z) (hermitePolyH_ode k)
     simp only [eval_sub, eval_mul, eval_X, eval_C, eval_ofNat] at hode
     change (derivative (derivative H)).eval z =
       2 * z * (derivative H).eval z - 2 * (k : ℂ) * H.eval z at hode
@@ -552,7 +576,7 @@ theorem painleveIV_hermite' (m : ℕ) :
     (w := fun z => -2 * z + (derivative H).eval z / H.eval z)
     (fun z hz => hz.2) (fun z hz => ?_)
   · convert h using 1 <;> first | rfl | ring
-  · have hode := congrArg (eval z) (b32_hermite_ode m)
+  · have hode := congrArg (eval z) (hermitePolyH_ode m)
     simp only [eval_sub, eval_mul, eval_X, eval_C, eval_ofNat] at hode
     change (derivative (derivative H)).eval z =
       2 * z * (derivative H).eval z - 2 * (m : ℂ) * H.eval z at hode
@@ -719,7 +743,7 @@ theorem painleveV_whittaker_riccati {a b ε₃ C₁ C₂ : ℂ} (hε : ε₃ = 1
   set ψ1 : ℂ → ℂ := fun x => b * T x / (ε₃ * x) * ε₃ * K (ε₃ * x) +
     T x * (K1 (ε₃ * x) * ε₃) with hψ1
   have hTd : ∀ x ∈ V, HasDerivAt T (b * T x / (ε₃ * x) * ε₃) x := fun x hx =>
-    (p3b_hasDerivAt_cpow (a := b) hx).comp x (hlin x)
+    (hasDerivAt_cpow_of_mem_slitPlane (a := b) hx).comp x (hlin x)
   have hφd : ∀ x ∈ V, HasDerivAt φ (ψ1 x) x := fun x hx => by
     have h1 : HasDerivAt (fun x => T x * K (ε₃ * x)) (ψ1 x) x :=
       ((hTd x hx).mul ((hKd _ hx).comp x (hlin x))).congr_deriv
@@ -823,18 +847,18 @@ theorem painleveVI_hypergeometric_riccati {a b c C₁ C₂ : ℂ} (ha : a ≠ 0)
     ζ ^ (1 - b - c) * deriv G ζ) with hφ1
   have hφd : ∀ ζ ∈ Ω, HasDerivAt φ (φ1 ζ) ζ := fun ζ hζ => by
     have := ((hFd ζ hζ).hasDerivAt.const_mul C₁).add
-      (((p3b_hasDerivAt_cpow (a := 1 - b - c) hζ.2).const_mul C₂).mul (hGd ζ hζ).hasDerivAt)
+      (((hasDerivAt_cpow_of_mem_slitPlane (a := 1 - b - c) hζ.2).const_mul C₂).mul (hGd ζ hζ).hasDerivAt)
     exact this.congr_deriv (by simp only [hφ1]; ring)
   have hζ00 : ζ0 ≠ 0 := slitPlane_ne_zero hzs
   have hζ01 : ζ0 ≠ 1 := hne1 _ hζΩ
-  have hoF := DLMF.Hypergeometric.ordinaryHypergeometric_ode (a := b) (b := -a) hbc hzn hζ00 hζ01
+  have hoF := DLMF.Hypergeometric.ordinaryHypergeometric_ode (a := b) (b := -a) hbc hzn
   have hoG := DLMF.Hypergeometric.ordinaryHypergeometric_ode (a := 1 - a - b - c) (b := 1 - c)
-    hbc' hzn hζ00 hζ01
+    hbc' hzn
   simp only [iteratedDeriv_succ, iteratedDeriv_zero] at hoF hoG
-  have hsd := p3b_hasDerivAt_cpow (a := 1 - b - c) hzs
+  have hsd := hasDerivAt_cpow_of_mem_slitPlane (a := 1 - b - c) hzs
   have hA := ((hsd.const_mul (1 - b - c)).div (hasDerivAt_id ζ0) hζ00).mul (hGd ζ0 hζΩ).hasDerivAt
-  have hB := hsd.mul (p3b_hasDerivAt_deriv_open hΩo hGd hζΩ)
-  have hφ1raw := ((p3b_hasDerivAt_deriv_open hΩo hFd hζΩ).const_mul C₁).add
+  have hB := hsd.mul (hasDerivAt_deriv_of_isOpen hΩo hGd hζΩ)
+  have hφ1raw := ((hasDerivAt_deriv_of_isOpen hΩo hFd hζΩ).const_mul C₁).add
     ((hA.add hB).const_mul C₂)
   have hφ1d : HasDerivAt φ1 (-((b + c) - (b - a + 1) * ζ0) / (ζ0 * (1 - ζ0)) * φ1 ζ0 +
       (-a * b) / (ζ0 * (1 - ζ0)) * φ ζ0) ζ0 := by
@@ -888,7 +912,7 @@ theorem painleveVI_hypergeometric_riccati {a b c C₁ C₂ : ℂ} (ha : a ≠ 0)
   ring
 
 /-- A holomorphic function that is real-valued near a point has zero derivative there. -/
-lemma p3b_deriv_eq_zero_of_im_eq_zero {r : ℂ → ℂ} {d z₀ : ℂ} (hr : HasDerivAt r d z₀)
+private lemma deriv_eq_zero_of_im_eq_zero {r : ℂ → ℂ} {d z₀ : ℂ} (hr : HasDerivAt r d z₀)
     (him : ∀ᶠ z in 𝓝 z₀, (r z).im = 0) : d = 0 := by
   have key : ∀ c : ℂ, c ≠ 0 → (d * c).im = 0 := by
     intro c hc
@@ -913,7 +937,7 @@ lemma p3b_deriv_eq_zero_of_im_eq_zero {r : ℂ → ℂ} {d z₀ : ℂ} (hr : Has
   exact Complex.ext h2 h1
 
 /-- The stated relation follows from the given hypotheses: `False`. -/
-lemma p3b_ratio_not_real {ψ₁ ψ₂ : ℂ → ℂ} {z₀ : ℂ} (h₁ : DifferentiableAt ℂ ψ₁ z₀)
+private lemma false_of_ratio_im_eq_zero {ψ₁ ψ₂ : ℂ → ℂ} {z₀ : ℂ} (h₁ : DifferentiableAt ℂ ψ₁ z₀)
     (h₂ : DifferentiableAt ℂ ψ₂ z₀) (hne : ψ₂ z₀ ≠ 0)
     (hW : ψ₁ z₀ * deriv ψ₂ z₀ - ψ₂ z₀ * deriv ψ₁ z₀ ≠ 0)
     (him : ∀ᶠ z in 𝓝 z₀, (ψ₁ z * (starRingEnd ℂ) (ψ₂ z)).im = 0) : False := by
@@ -921,7 +945,7 @@ lemma p3b_ratio_not_real {ψ₁ ψ₂ : ℂ → ℂ} {z₀ : ℂ} (h₁ : Differ
       ((deriv ψ₁ z₀ * ψ₂ z₀ - ψ₁ z₀ * deriv ψ₂ z₀) / ψ₂ z₀ ^ 2) z₀ :=
     h₁.hasDerivAt.div h₂.hasDerivAt hne
   have hev : ∀ᶠ z in 𝓝 z₀, ψ₂ z ≠ 0 := h₂.continuousAt.eventually_ne hne
-  have h0 := p3b_deriv_eq_zero_of_im_eq_zero hd (by
+  have h0 := deriv_eq_zero_of_im_eq_zero hd (by
     filter_upwards [him, hev] with z hz hz2
     have hn : (Complex.normSq (ψ₂ z) : ℂ) ≠ 0 := by
       exact_mod_cast (Complex.normSq_pos.2 hz2).ne'
@@ -935,7 +959,7 @@ lemma p3b_ratio_not_real {ψ₁ ψ₂ : ℂ → ℂ} {z₀ : ℂ} (h₁ : Differ
   · exact hne (pow_eq_zero_iff two_ne_zero |>.1 h0)
 
 /-- An entire function with two `ℝ`-independent periods is bounded. -/
-lemma p3b_bounded_of_periods {f : ℂ → ℂ} {ω₁ ω₂ : ℂ} (hf : Continuous f)
+private lemma isBounded_range_of_two_periods {f : ℂ → ℂ} {ω₁ ω₂ : ℂ} (hf : Continuous f)
     (hD : (ω₁ * (starRingEnd ℂ) ω₂).im ≠ 0)
     (h1 : Function.Periodic f ω₁) (h2 : Function.Periodic f ω₂) :
     Bornology.IsBounded (range f) := by
@@ -968,7 +992,7 @@ lemma p3b_bounded_of_periods {f : ℂ → ℂ} {ω₁ ω₂ : ℂ} (hf : Continu
 entire, while its periods `2φ₁(z)`, `2φ₂(z)` are `ℝ`-independent at some `z ∈ U` (their ratio
 is holomorphic with nonzero derivative, so it is not real-valued on an open set). By
 Liouville `Λ(·, z)` is then constant, equal to `Λ(0, z) = 0`, contradicting `w(z) ≠ 0`. -/
-lemma p3b_painleveVI_picard_hyp_false {Λ : ℂ → ℂ → ℂ} {φ₁ φ₂ : ℂ → ℂ} {C₁ C₂ : ℂ}
+private lemma not_painleveVI_picard_original_hyp {Λ : ℂ → ℂ → ℂ} {φ₁ φ₂ : ℂ → ℂ} {C₁ C₂ : ℂ}
     {U : Set ℂ}
     (hU : IsOpen U) (hΛ : ∀ z ∈ U, ∀ u, DifferentiableAt ℂ (Function.uncurry Λ) (u, z))
     (hΛ0 : ∀ z ∈ U, Λ 0 z = 0)
@@ -989,14 +1013,14 @@ lemma p3b_painleveVI_picard_hyp_false {Λ : ℂ → ℂ → ℂ} {φ₁ φ₂ : 
     by_cases h2 : φ₂ z₀ = 0
     · have h1 : φ₁ z₀ ≠ 0 := by
         intro h1; apply hind z₀ hz₀; simp [h1, h2]
-      refine p3b_ratio_not_real (ψ₁ := φ₂) (ψ₂ := φ₁) (hdiff z₀ hz₀).2 (hdiff z₀ hz₀).1 h1
+      refine false_of_ratio_im_eq_zero (ψ₁ := φ₂) (ψ₂ := φ₁) (hdiff z₀ hz₀).2 (hdiff z₀ hz₀).1 h1
         ?_ ?_
       · intro h; apply hind z₀ hz₀; linear_combination -h
       · filter_upwards [hev] with z hz
         have : φ₂ z * (starRingEnd ℂ) (φ₁ z) =
             (starRingEnd ℂ) (φ₁ z * (starRingEnd ℂ) (φ₂ z)) := by simp [mul_comm]
         rw [this, Complex.conj_im, hz, neg_zero]
-    · exact p3b_ratio_not_real (hdiff z₀ hz₀).1 (hdiff z₀ hz₀).2 h2 (hind z₀ hz₀) hev
+    · exact false_of_ratio_im_eq_zero (hdiff z₀ hz₀).1 (hdiff z₀ hz₀).2 h2 (hind z₀ hz₀) hev
   have hfd : Differentiable ℂ (fun u => Λ u z) := fun u => by
     have h : DifferentiableAt ℂ (fun u : ℂ => (u, z)) u :=
       differentiableAt_id.prodMk (differentiableAt_const z)
@@ -1008,7 +1032,7 @@ lemma p3b_painleveVI_picard_hyp_false {Λ : ℂ → ℂ → ℂ} {φ₁ φ₂ : 
       simp only [map_mul, map_ofNat]; push_cast; ring
     rw [this, Complex.im_ofReal_mul]
     exact mul_ne_zero (by norm_num) hD
-  have hb := p3b_bounded_of_periods hfd.continuous hD2 (fun u => (hper z hz u).1)
+  have hb := isBounded_range_of_two_periods hfd.continuous hD2 (fun u => (hper z hz u).1)
     (fun u => (hper z hz u).2)
   have hc := hfd.apply_eq_apply_of_bounded hb (C₁ * φ₁ z + C₂ * φ₂ z) 0
   apply hw z hz
@@ -1061,7 +1085,7 @@ theorem picard_hypotheses_nonempty {z : ℂ} (h0 : z ≠ 0) (h1 : z ≠ 1) :
   · rw [← hHL]; exact H.halfPeriod_notMem hj
   · rw [← hHL]; exact H.two_mul_halfPeriod_mem hj
   · rw [← h2, ← h3, DLMF.Weierstrass.weierstrassPInvariants_eq,
-      DLMF.Weierstrass.wp23_weierstrassP_eq_of_lattice_eq L H.periodPair hHL.symm]
+      DLMF.Weierstrass.weierstrassP_eq_of_lattice_eq L H.periodPair hHL.symm]
     exact hej
 
 /-- **Picard's solution of `PVI`** (DLMF 32.10.32–32.10.34). For `z ∉ {0, 1}` let
@@ -1076,7 +1100,7 @@ the open set `U`, provided `w` stays away from the poles of `Λ` and from `{0, 1
 not formalized.)
 
 Restated on 2026-10-27 with user approval: the earlier formulation required `Λ(·, z)` to be
-entire, which made its hypotheses contradictory (`p3b_painleveVI_picard_hyp_false`). -/
+entire, which made its hypotheses contradictory (`not_painleveVI_picard_original_hyp`). -/
 @[dlmf 32.10.E32, dlmf 32.10.E33, dlmf 32.10.E34]
 theorem painleveVI_picard {φ₁ φ₂ ω₀ : ℂ → ℂ} {C₁ C₂ : ℂ} {U : Set ℂ} (hU : IsOpen U)
     (h0 : ∀ z ∈ U, z ≠ 0) (h1 : ∀ z ∈ U, z ≠ 1)
