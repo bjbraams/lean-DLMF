@@ -18,6 +18,7 @@ public import DLMF.Struve.AsymptoticTools
 public import DLMF.Struve.TurningTools
 public import DLMF.Struve.BarnesTools
 public import DLMF.Struve.LargeOrderTools
+public import DLMF.Struve.RelativeBounds
 
 /-!
 # Struve, Lommel and Anger–Weber functions

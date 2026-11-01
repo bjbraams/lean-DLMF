@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "date": "2026-10-30",
   "baseCommit": "3989f9ed5aaac53a742d6ba239deeb32708c9b60",
+  "integrationHead": "560b9475f35bbc6e4f5296631298859825091f7f",
   "review": "MathlibReview20261030.md",
   "reviewInventory": "MathlibReviewInventory20261030.json",
   "scope": "First implementation round: false formulations, hypothesis simplification, shared APIs, predicate capitalization and repeated proof families.",
@@ -4881,12 +4882,2064 @@
     "after": 1552
   },
   "validation": {
-    "status": "pending"
+    "status": "passed",
+    "fullBuild": {
+      "command": "lake build > /tmp/DLMF-build.log 2>&1",
+      "exitCode": 0,
+      "lastLine": "Build completed successfully (14924 jobs)."
+    },
+    "strictLean": {
+      "files": 281,
+      "allPass": true,
+      "flags": [
+        "-DautoImplicit=false",
+        "-DrelaxedAutoImplicit=false"
+      ],
+      "sourceHashesVerified": true
+    },
+    "compiledAudit": {
+      "explicitNamedDeclarations": 26256,
+      "sourceKinds": {
+        "theorem": 17853,
+        "def": 3349,
+        "lemma": 4932,
+        "inductive": 7,
+        "structure": 55,
+        "abbrev": 52,
+        "instance": 8
+      },
+      "unmatchedSource": [],
+      "missingDocstrings": [],
+      "nameOnlyDocstrings": [],
+      "structureFields": 205,
+      "missingStructureFieldDocs": [],
+      "nonstandardAxioms": [],
+      "sourceTheoremsDependingOnAdmissions": 1654,
+      "lowercasePredicateDefinitions": []
+    },
+    "importSurvey": {
+      "command": "python3 scripts/import_survey.py --baseline scripts/import_baseline.json",
+      "exitCode": 0,
+      "newTwoWayAreaPairs": 0,
+      "output": "46 areas, 1047 modules, 377 cross-area import lines (DLMF.Core excluded), 155 area edges\n\nTwo-way area pairs (16):\n  BernoulliEuler <-> Combinatorics: DLMF.BernoulliEuler.Generalizations.HigherOrder -> DLMF.Combinatorics.Stirling; DLMF.Combinatorics.Permutations.CyclesAndExcedances -> DLMF.BernoulliEuler.Explicit\n  Bessel <-> Confluent: DLMF.Bessel.Asymptotics -> DLMF.Confluent.Relations; DLMF.Confluent.IntegralRepresentations.EulerAndBessel -> DLMF.Bessel.Modified\n  Bessel <-> Struve: DLMF.Bessel.YIntegralRep -> DLMF.Struve.Properties; DLMF.Struve.AngerWeber.IntegralAndSeries -> DLMF.Bessel.Schlafli\n  Confluent <-> Coulomb: DLMF.Confluent.Coulomb -> DLMF.Coulomb.Basic; DLMF.Coulomb.Basic.Functions -> DLMF.Confluent.Basic.Tricomi\n  Confluent <-> ErrorFunctions: DLMF.Confluent.Zeros.RealZeros -> DLMF.ErrorFunctions.ZeroTools; DLMF.ErrorFunctions.AnalyticProperties -> DLMF.Confluent.FresnelAsymptotics\n  Confluent <-> Hypergeometric: DLMF.Confluent.Asymptotics.LargeArgument -> DLMF.Hypergeometric.Asymptotics; DLMF.Hypergeometric.GeneralizedContinuity -> DLMF.Confluent.Regularized\n  Confluent <-> OrthogonalPolynomials: DLMF.Confluent.LargeA -> DLMF.OrthogonalPolynomials.Classical; DLMF.OrthogonalPolynomials.Basic.Definitions -> DLMF.Confluent.Basic.KummerM\n  Confluent <-> ParabolicCylinder: DLMF.Confluent.ParabolicCylinder.EquationAndIntegrals -> DLMF.ParabolicCylinder.Basic.Functions; DLMF.ParabolicCylinder.Basic.Functions -> DLMF.Confluent.Basic.KummerM\n  ErrorFunctions <-> IncompleteGamma: DLMF.ErrorFunctions.BoundsAsymptotics.ContinuedFractions -> DLMF.IncompleteGamma.FractionTools; DLMF.IncompleteGamma.SpecialValues -> DLMF.ErrorFunctions.AnalyticProperties\n  ErrorFunctions <-> ParabolicCylinder: DLMF.ErrorFunctions.Repeated -> DLMF.ParabolicCylinder.ElementaryProperties; DLMF.ParabolicCylinder.Relations -> DLMF.ErrorFunctions.Repeated\n  ExpIntegrals <-> IncompleteGamma: DLMF.ExpIntegrals.Asymptotics -> DLMF.IncompleteGamma.ExpIntegralAsymptotics; DLMF.IncompleteGamma.ContinuedProperties -> DLMF.ExpIntegrals.AnalyticProperties\n  Gamma <-> Hypergeometric: DLMF.Gamma.Asymptotics.Stirling -> DLMF.Hypergeometric.SeriesProperties; DLMF.Hypergeometric.Asymptotics -> DLMF.Gamma.Asymptotics\n  GeneralizedHypergeometric <-> QHypergeometric: DLMF.GeneralizedHypergeometric.UnitArgument -> DLMF.QHypergeometric.HigherSummations; DLMF.QHypergeometric.Convergence -> DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties\n  JacobiElliptic <-> Theta: DLMF.JacobiElliptic.QuarterPeriods -> DLMF.Theta.Identities; DLMF.Theta.Relations -> DLMF.JacobiElliptic.AnalyticProperties\n  JacobiElliptic <-> Weierstrass: DLMF.JacobiElliptic.P3jEisenstein -> DLMF.Weierstrass.EllipticFunctionsAndInvariants; DLMF.Weierstrass.ModularFunctions -> DLMF.JacobiElliptic.AnalyticProperties\n  Legendre <-> SphericalHarmonics: DLMF.Legendre.Harmonics -> DLMF.SphericalHarmonics.AdditionTools; DLMF.SphericalHarmonics.AdditionTools -> DLMF.Legendre.Associated\n\nStrongly connected groups of areas (4):\n  19: Airy, BernoulliEuler, Bessel, Combinatorics, Confluent, Constants, Coulomb, Elementary, ErrorFunctions, ExpIntegrals, Gamma, Hypergeometric, IncompleteGamma, OrthogonalPolynomials, ParabolicCylinder, Selberg, Statistical, Struve, Zeta\n  4: EllipticIntegrals, JacobiElliptic, Theta, Weierstrass\n  2: GeneralizedHypergeometric, QHypergeometric\n  2: Legendre, SphericalHarmonics\n\nFoundational files importing non-foundational DLMF modules (0):\n\n0 new item(s) relative to scripts/import_baseline.json\n\nMissing project imports (0):\n\nFile-import cycles (0):\n"
+    },
+    "fileLengths": {
+      "command": "python3 scripts/check_file_lengths.py",
+      "exitCode": 0,
+      "output": "All 1206 Lean source files are at most 1500 lines.\n"
+    },
+    "documentation": {
+      "checkedLinks": 13353,
+      "issues": []
+    },
+    "ledgerIdempotence": {
+      "checked": 25,
+      "changed": []
+    },
+    "errataPDF": {
+      "command": "latexmk -g -interaction=nonstopmode -halt-on-error DLMFErrata.tex",
+      "directory": "reports",
+      "exitCode": 0
+    },
+    "entryModules": [
+      "DLMF",
+      "DLMF.Basic",
+      "DLMFMathlib"
+    ]
   },
+  "compiledAudit": {
+    "explicitNamedDeclarations": 26256,
+    "sourceKinds": {
+      "theorem": 17853,
+      "def": 3349,
+      "lemma": 4932,
+      "inductive": 7,
+      "structure": 55,
+      "abbrev": 52,
+      "instance": 8
+    },
+    "unmatchedSource": [],
+    "missingDocstrings": [],
+    "nameOnlyDocstrings": [],
+    "structureFields": 205,
+    "missingStructureFieldDocs": [],
+    "nonstandardAxioms": [],
+    "sourceTheoremsDependingOnAdmissions": 1654,
+    "lowercasePredicateDefinitions": []
+  },
+  "strictChecks": [
+    {
+      "file": "DLMF.lean",
+      "exitCode": 0,
+      "seconds": 4.41,
+      "sha256": "e8f641c0a9a6403217681eed835e03276dd0525a32f0aa67b594105ab5914b06",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF.lean.log"
+    },
+    {
+      "file": "DLMF/Airy/Asymptotics/SectorRemainders.lean",
+      "exitCode": 0,
+      "seconds": 34.7,
+      "sha256": "0e3106dcc83ecbfbe7ec9e9cfdbe84bd90c9d4776324030511903f32ae57e9f9",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Airy_Asymptotics_SectorRemainders.lean.log"
+    },
+    {
+      "file": "DLMF/Airy/Framework.lean",
+      "exitCode": 0,
+      "seconds": 3.13,
+      "sha256": "655cfe0cc9bc3ccf9292d035673ad187df030cf2ddf3e8df33aceaba4bad383c",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Airy_Framework.lean.log"
+    },
+    {
+      "file": "DLMF/Airy/Generalized.lean",
+      "exitCode": 0,
+      "seconds": 16.0,
+      "sha256": "473ea92a7062823296ff59d8537695dcc1948e93ee6d579196744a240494c6b1",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Airy_Generalized.lean.log"
+    },
+    {
+      "file": "DLMF/Airy/Incomplete.lean",
+      "exitCode": 0,
+      "seconds": 4.79,
+      "sha256": "bbd38c1316c8162f69724af65e4a6dde420883ece4d77962d8048872c018bf14",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Airy_Incomplete.lean.log"
+    },
+    {
+      "file": "DLMF/Airy/IntegralTools.lean",
+      "exitCode": 0,
+      "seconds": 7.36,
+      "sha256": "abc0e39093807b584cdfc846a74a4aceccf91e1e5e88aaf5608207af18a0fc4f",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Airy_IntegralTools.lean.log"
+    },
+    {
+      "file": "DLMF/Airy/Integrals/HalfLineLaplace.lean",
+      "exitCode": 0,
+      "seconds": 20.29,
+      "sha256": "5466b880d1faf2de6383b232625d7bd7a128239118c468672e7c97a00771209e",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Airy_Integrals_HalfLineLaplace.lean.log"
+    },
+    {
+      "file": "DLMF/Airy/ModulusPhase/Representations.lean",
+      "exitCode": 0,
+      "seconds": 16.71,
+      "sha256": "6258e57751f97afe1b4185b0b3b5b8ace68b98f3e5df683ff0911d629866323c",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Airy_ModulusPhase_Representations.lean.log"
+    },
+    {
+      "file": "DLMF/Airy/Products.lean",
+      "exitCode": 0,
+      "seconds": 10.77,
+      "sha256": "fa8bc432c7cf6d0191bc81eaa86ee48bcac90fefbe47121020eeb0503c705e1a",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Airy_Products.lean.log"
+    },
+    {
+      "file": "DLMF/Airy/Scorer/Representations.lean",
+      "exitCode": 0,
+      "seconds": 16.62,
+      "sha256": "b374edb0f2fbdb2b6303ce6baf55ebbeac6a62ac602b5a3edd9fba9b683aa234",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Airy_Scorer_Representations.lean.log"
+    },
+    {
+      "file": "DLMF/Airy/ScorerAsymptotics.lean",
+      "exitCode": 0,
+      "seconds": 15.45,
+      "sha256": "853a67ca49d268b2a0067af66d00a619ab959a33b8c893257ccf334b94a30882",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Airy_ScorerAsymptotics.lean.log"
+    },
+    {
+      "file": "DLMF/Airy/SquareTools.lean",
+      "exitCode": 0,
+      "seconds": 10.52,
+      "sha256": "b7583d645ceb91143dfa2642c6c5d805a8a631abfe87a918b4878e72c7e0f263",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Airy_SquareTools.lean.log"
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "exitCode": 0,
+      "seconds": 9.79,
+      "sha256": "2bff9526ba872d59380ffbe92e0d07fa17c5e893a7bb5df6764b98545b1ab62d",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AlgebraicAnalytic_Calculus_SeveralVariables.lean.log"
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "exitCode": 0,
+      "seconds": 9.96,
+      "sha256": "72e5d40d28d6f25efad4eb23445e956d2fd2a6eff9dcb70cf6879c4ae407465a",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AlgebraicAnalytic_Complex_Calculus.lean.log"
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "exitCode": 0,
+      "seconds": 5.25,
+      "sha256": "a9c98356ff5d4c762a9badff0950e04e4a0ba8c896938e2de558654dcf9df609",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AlgebraicAnalytic_Complex_Functions.lean.log"
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/ODE/Basic.lean",
+      "exitCode": 0,
+      "seconds": 2.6,
+      "sha256": "0693ac44c639defbb123169985d2f8fcb702aac2595331c7fe26d98ad25c29c5",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AlgebraicAnalytic_ODE_Basic.lean.log"
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/ODE/SecondOrder.lean",
+      "exitCode": 0,
+      "seconds": 4.12,
+      "sha256": "d5d168085c4563b96d274659863213fa6f17cca85323c234b962265693df3d6b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AlgebraicAnalytic_ODE_SecondOrder.lean.log"
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Summability/Basic.lean",
+      "exitCode": 0,
+      "seconds": 3.24,
+      "sha256": "be8043ddb3986d68257b0c17d3a3ccf3d327b2ea96afcbed6eac9c68e6e455aa",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AlgebraicAnalytic_Summability_Basic.lean.log"
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Summability/Series.lean",
+      "exitCode": 0,
+      "seconds": 2.68,
+      "sha256": "3eac63ce28c082afa3024731b54d797123a6e5c50ad973eeb1d544127b13881e",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AlgebraicAnalytic_Summability_Series.lean.log"
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "exitCode": 0,
+      "seconds": 5.3,
+      "sha256": "639d597fa67f63a1206ccc0838354ad1df9682c92cc2a3ec9f636574cc476e00",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AlgebraicAnalytic_Transforms_Laplace.lean.log"
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "exitCode": 0,
+      "seconds": 6.62,
+      "sha256": "b7f440231c50444e4f18baeaabb090632f297cdc7ee07da29d5edf20e4be4544",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AlgebraicAnalytic_Transforms_Tables.lean.log"
+    },
+    {
+      "file": "DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean",
+      "exitCode": 0,
+      "seconds": 4.77,
+      "sha256": "a77c88e6a9f0c6c51b605b49564d90e9919a29d0f031647331a4fdb2e1c1afb5",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AsymptoticApproximations_Distributional_FractionalIntegrals.lean.log"
+    },
+    {
+      "file": "DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean",
+      "exitCode": 0,
+      "seconds": 4.55,
+      "sha256": "6228888ad028cf1cfbf1f60f71241dbbe669f29dd72972ec26891d65c708c6cf",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AsymptoticApproximations_Distributional_Stieltjes.lean.log"
+    },
+    {
+      "file": "DLMF/AsymptoticApproximations/Integrals/Watson.lean",
+      "exitCode": 0,
+      "seconds": 4.69,
+      "sha256": "9200c042c4d0cad207548676251b4cbdba465155b7e62c1c21bc911513b82962",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AsymptoticApproximations_Integrals_Watson.lean.log"
+    },
+    {
+      "file": "DLMF/AsymptoticApproximations/ODE/Basic.lean",
+      "exitCode": 0,
+      "seconds": 3.2,
+      "sha256": "efc0627974f61446640f997f2426a485a55c8a09b8885b1c317bd46a7e99183a",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AsymptoticApproximations_ODE_Basic.lean.log"
+    },
+    {
+      "file": "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+      "exitCode": 0,
+      "seconds": 4.34,
+      "sha256": "9b64af5ff2230f7e4224c6bb2e11284edb332d55e46e3774f1275c6978073e78",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AsymptoticApproximations_ODE_LiouvilleGreen.lean.log"
+    },
+    {
+      "file": "DLMF/AsymptoticApproximations/ODE/Parameter.lean",
+      "exitCode": 0,
+      "seconds": 4.38,
+      "sha256": "05b972854c30cf16bc5b7fec4cf9bc0c2c46350e94f9fe21c1537f9cb7b73b15",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AsymptoticApproximations_ODE_Parameter.lean.log"
+    },
+    {
+      "file": "DLMF/AsymptoticApproximations/ODE/Singularities.lean",
+      "exitCode": 0,
+      "seconds": 3.68,
+      "sha256": "08fa7058d26688fb08c480b3380dcf6c670ef31d1f94f9791dc94a6caa2b51f3",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AsymptoticApproximations_ODE_Singularities.lean.log"
+    },
+    {
+      "file": "DLMF/AsymptoticApproximations/Sums/Darboux.lean",
+      "exitCode": 0,
+      "seconds": 3.36,
+      "sha256": "1ba1c5d8716f6d66ff403bd5d477d2df483840da8ac65b4a8a40e5ff40a66eeb",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AsymptoticApproximations_Sums_Darboux.lean.log"
+    },
+    {
+      "file": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+      "exitCode": 0,
+      "seconds": 3.66,
+      "sha256": "c3ca50218dfa3bcb6787ac8e0d626bfc49f189518f5a54c8d4dc2dcc15c9a258",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_AsymptoticApproximations_Sums_PowerSums.lean.log"
+    },
+    {
+      "file": "DLMF/Basic.lean",
+      "exitCode": 0,
+      "seconds": 2.74,
+      "sha256": "759968f6d0e92dbf63ecfdda7e3beed75d4119ae1d87ffae1ff50f3c973abfd4",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Basic.lean.log"
+    },
+    {
+      "file": "DLMF/BernoulliEuler/Basic.lean",
+      "exitCode": 0,
+      "seconds": 3.51,
+      "sha256": "8ac93c5db7569739245fea8567317fdffd8e7c5e5566e60a8eb3b04772f3a2b2",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_BernoulliEuler_Basic.lean.log"
+    },
+    {
+      "file": "DLMF/BernoulliEuler/GeneratingFunctions.lean",
+      "exitCode": 0,
+      "seconds": 9.7,
+      "sha256": "e5edba0fa0c90e763da80c84ef4a21e82c29298a8e13980ea44c6cc4de04e4c9",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_BernoulliEuler_GeneratingFunctions.lean.log"
+    },
+    {
+      "file": "DLMF/BernoulliEuler/IntegralsSums.lean",
+      "exitCode": 0,
+      "seconds": 30.05,
+      "sha256": "cffa86b8c5ea74194939afe3435fb023477a065eabaa5fe9d6e99657211d12f1",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_BernoulliEuler_IntegralsSums.lean.log"
+    },
+    {
+      "file": "DLMF/Bessel/Asymptotics.lean",
+      "exitCode": 0,
+      "seconds": 7.08,
+      "sha256": "f9bb4ef1b48a91d5cb17f3d3faf445f34cbeb10c6872987208331ce0e09b320b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Bessel_Asymptotics.lean.log"
+    },
+    {
+      "file": "DLMF/Bessel/SecondKind.lean",
+      "exitCode": 0,
+      "seconds": 8.71,
+      "sha256": "d4dca5fa6f1628ddcba0a37aa36b61494576bcc7d274df88f3b67f6884ade433",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Bessel_SecondKind.lean.log"
+    },
+    {
+      "file": "DLMF/Bessel/WeberSeries.lean",
+      "exitCode": 0,
+      "seconds": 12.27,
+      "sha256": "f1bf0ccfa5ac9b66ce67f0a6264a03d1f311b74d5bdecd88640e700e6f860763",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Bessel_WeberSeries.lean.log"
+    },
+    {
+      "file": "DLMF/CoalescingSaddles/DifferentialEquations/EllipticUmbilic.lean",
+      "exitCode": 0,
+      "seconds": 11.52,
+      "sha256": "2362e55d948298934a2876530753cbe18082c7e309398d17d1e6799a10029c0b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_CoalescingSaddles_DifferentialEquations_EllipticUmbilic.lean.log"
+    },
+    {
+      "file": "DLMF/Combinatorics/Basic.lean",
+      "exitCode": 0,
+      "seconds": 4.55,
+      "sha256": "e30fcc75240a6f3e229a93384a5e45da074ca3b1fc1237437a4b9a7a3302776f",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Combinatorics_Basic.lean.log"
+    },
+    {
+      "file": "DLMF/Combinatorics/PlanePartitions/BoxFormula.lean",
+      "exitCode": 0,
+      "seconds": 24.54,
+      "sha256": "5db291d89f701aca5026602c38bd094d86cb4caa88e3787cd6200e4189d1abf6",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Combinatorics_PlanePartitions_BoxFormula.lean.log"
+    },
+    {
+      "file": "DLMF/Combinatorics/S26aStaircase.lean",
+      "exitCode": 0,
+      "seconds": 3.78,
+      "sha256": "36e23c0c87baa68b27fc2a152f6c528d900203a1b3edc6d05d2d76db0cb229d1",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Combinatorics_S26aStaircase.lean.log"
+    },
+    {
+      "file": "DLMF/Combinatorics/TwelvefoldWay.lean",
+      "exitCode": 0,
+      "seconds": 5.66,
+      "sha256": "6f4f101fa0590fec520f9ef2f028ac7d824b55f05cb6dc88a04600ca8a114809",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Combinatorics_TwelvefoldWay.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/BasicProperties/Continuity.lean",
+      "exitCode": 0,
+      "seconds": 7.28,
+      "sha256": "5524b45044ee815ece8fb97004e34b88de16a61b168ba32dd67f7482a76656e7",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_BasicProperties_Continuity.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/BasicProperties/Wronskians.lean",
+      "exitCode": 0,
+      "seconds": 6.55,
+      "sha256": "7ba2579d7d7316d81feaea10833852ef69e9af509e0a7ad2b8bf5d01cd7eefe7",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_BasicProperties_Wronskians.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/ConnectionWronskians.lean",
+      "exitCode": 0,
+      "seconds": 7.06,
+      "sha256": "f766901cf30d2320edfa5bffca3bd1b1831e7c3bb904e0d600bc8d7fb0a8a3d0",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_ConnectionWronskians.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/ContinuedFractions.lean",
+      "exitCode": 0,
+      "seconds": 13.28,
+      "sha256": "3fb3c32f5bba03e4666e7f18ae44a462378c2fb39c4995d879f5e82bb1f1e0d2",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_ContinuedFractions.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/CoulombIrregular.lean",
+      "exitCode": 0,
+      "seconds": 6.24,
+      "sha256": "e00ce35e01a9c44a2060fcbee541f1e9699cd1e64e8e55fd41830ba17ccddf35",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_CoulombIrregular.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/ErrorFunctions.lean",
+      "exitCode": 0,
+      "seconds": 4.55,
+      "sha256": "4bf18bbb90f784b22230d18f0b254ac01b1758ede7d8f049cef75c9b97f11d3b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_ErrorFunctions.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/ExpIntegral.lean",
+      "exitCode": 0,
+      "seconds": 6.38,
+      "sha256": "48558b2d7bc700871d1115b850a9ee9f66692936fe1067c9b113dbcd3d68cfdf",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_ExpIntegral.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/FresnelAsymptotics.lean",
+      "exitCode": 0,
+      "seconds": 4.64,
+      "sha256": "c55dfa57ee11a3b992c0f3911b63983e5b774afeff300fec655cede1d6fb4dc8",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_FresnelAsymptotics.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/IntegralRepresentations/BarnesAndConnections.lean",
+      "exitCode": 0,
+      "seconds": 18.0,
+      "sha256": "ef91b9de56ddd9359559b7074b6e685b5a27b1c5c920425b8feff5d5837245f8",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_IntegralRepresentations_BarnesAndConnections.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/Integrals/Laplace.lean",
+      "exitCode": 0,
+      "seconds": 9.6,
+      "sha256": "e3f10572cd2ada7d4674da0cc9c20692863030980e5d6953f0a14a67f0880ed7",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_Integrals_Laplace.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/KummerDecay.lean",
+      "exitCode": 0,
+      "seconds": 8.72,
+      "sha256": "40fe512cce9e9121ddc3f082389be36a60e36325ba1330a87217c492a5d5f16d",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_KummerDecay.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/KummerProperties.lean",
+      "exitCode": 0,
+      "seconds": 10.52,
+      "sha256": "f437f292817a4d705ad72f623ab650f3940e60bda2e00b029e35a9c83953947a",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_KummerProperties.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/ParabolicCylinder/EquationAndIntegrals.lean",
+      "exitCode": 0,
+      "seconds": 11.27,
+      "sha256": "13f830b56be0883022c74f15df218e1a786760142ecb1df91b7c42ff1f088865",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_ParabolicCylinder_EquationAndIntegrals.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/ParabolicCylinder/WronskiansAndConnections.lean",
+      "exitCode": 0,
+      "seconds": 12.24,
+      "sha256": "a85a17e4db4eb2f057ed5fee8e3abaa181edd4cebc436813774e92b1bd7e54b5",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_ParabolicCylinder_WronskiansAndConnections.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/ProductsAddition.lean",
+      "exitCode": 0,
+      "seconds": 88.37,
+      "sha256": "e6b93363d9ac8c2a72336ade180dc81391811d6ececd2b28dcd3e66d285334c0",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_ProductsAddition.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/Recurrence.lean",
+      "exitCode": 0,
+      "seconds": 2.81,
+      "sha256": "c3f6f7aeb65ad16fe713c060424309a47bf83773abed840ce1f3b14cdccaf21e",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_Recurrence.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/Recurrence/Contiguous.lean",
+      "exitCode": 0,
+      "seconds": 8.62,
+      "sha256": "47dc7b9837dde14cd2d620f3c0a3d72786decd8c54ee2de74fa372b25d231f06",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_Recurrence_Contiguous.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/Recurrence/Derivatives.lean",
+      "exitCode": 0,
+      "seconds": 12.13,
+      "sha256": "bc7f913237c7a966fdd7f1684d2a7b7d98cdb28b24b89d646e8a12c10c21713e",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_Recurrence_Derivatives.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/Relations.lean",
+      "exitCode": 0,
+      "seconds": 14.17,
+      "sha256": "ab2ad79757ec5ff8749d07f1804153e5e249e1f0ea7d24d70e9cd1a557f28505",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_Relations.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/Whittaker.lean",
+      "exitCode": 0,
+      "seconds": 10.04,
+      "sha256": "afb7fb9b31a332cdd14b41f0eecf86a76836b21f85a685909ac5d09724ac9076",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_Whittaker.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/ZeroTools.lean",
+      "exitCode": 0,
+      "seconds": 13.61,
+      "sha256": "2a2320eb7b184bab25f0f7846e96787f5882f5a4c099f2ac7bf9c05706bbcf72",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_ZeroTools.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/Zeros/ComplexZeros.lean",
+      "exitCode": 0,
+      "seconds": 27.41,
+      "sha256": "662b9ea0935f860bae43dbfa55dbb432f284214992dba3deef1b10a8046315f4",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_Zeros_ComplexZeros.lean.log"
+    },
+    {
+      "file": "DLMF/Confluent/Zeros/RealZeros.lean",
+      "exitCode": 0,
+      "seconds": 11.59,
+      "sha256": "8a10bcdf02170a3db48a4d8f2663f061e689f362374c4a7ccc4d4df7a49840d6",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Confluent_Zeros_RealZeros.lean.log"
+    },
+    {
+      "file": "DLMF/Core/Framework.lean",
+      "exitCode": 0,
+      "seconds": 3.18,
+      "sha256": "8d44fc8150e37acd23f77e1cfe23746f1f68946764b6a7ba9159c46423081e35",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Core_Framework.lean.log"
+    },
+    {
+      "file": "DLMF/Elementary/Hyperbolic/Integrals.lean",
+      "exitCode": 0,
+      "seconds": 11.65,
+      "sha256": "9e31f3bc1b848a024d00c15ab6ed86e954aeb35cefdf76541d79e9e4e12ed279",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Elementary_Hyperbolic_Integrals.lean.log"
+    },
+    {
+      "file": "DLMF/Elementary/Hyperbolic/InverseBranches.lean",
+      "exitCode": 0,
+      "seconds": 16.75,
+      "sha256": "364c821d93491f4adb14584e97f4dc389edc8ae67b2d2d431eaa1cdc065a9616",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Elementary_Hyperbolic_InverseBranches.lean.log"
+    },
+    {
+      "file": "DLMF/Elementary/Hyperbolic/Products.lean",
+      "exitCode": 0,
+      "seconds": 9.15,
+      "sha256": "ecb149d34592316c541d290d235ae6e2d46f858e3b22f3903870348fc447485a",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Elementary_Hyperbolic_Products.lean.log"
+    },
+    {
+      "file": "DLMF/Elementary/LogExpAnalysis.lean",
+      "exitCode": 0,
+      "seconds": 13.14,
+      "sha256": "a4cd3e966db61c9fd42a76f252b36b57a4cd2b6d8c1e42d19b1ac0e433317b7b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Elementary_LogExpAnalysis.lean.log"
+    },
+    {
+      "file": "DLMF/Elementary/LogExpBasic.lean",
+      "exitCode": 0,
+      "seconds": 5.08,
+      "sha256": "89c9618136570d939b32a6a33d119e096d044cc0b2dcef731f88627e058448e0",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Elementary_LogExpBasic.lean.log"
+    },
+    {
+      "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "exitCode": 0,
+      "seconds": 21.66,
+      "sha256": "1fc5bd5f57d8e0d66bbfeaefd25bafc2fe96a4d996bd59de0801f21a1eb91449",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Elementary_Trigonometric_DirectIdentities.lean.log"
+    },
+    {
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "exitCode": 0,
+      "seconds": 27.46,
+      "sha256": "c4364c4da5de64320d4b66a4a224cf0ee709fbc0469d5e28c107fada7b68b48c",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Elementary_Trigonometric_InverseIdentities.lean.log"
+    },
+    {
+      "file": "DLMF/Elementary/Trigonometric/ValuesAndIntegrals.lean",
+      "exitCode": 0,
+      "seconds": 41.47,
+      "sha256": "20c4561b35dcbc80fc5786dea57c0b3d9bd214d4c972c6986dca6257a6c8cb08",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Elementary_Trigonometric_ValuesAndIntegrals.lean.log"
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/Basic.lean",
+      "exitCode": 0,
+      "seconds": 2.44,
+      "sha256": "2911ad0f16bc1ec147312b79a9a52d14fd82a6f7176e8e06659c8ff91967e50e",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_Basic.lean.log"
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/Basic/Symmetric.lean",
+      "exitCode": 0,
+      "seconds": 2.64,
+      "sha256": "3363bb84d3f53b8bdc037ed0fa8ef1700fb45642ed2cb1a8edd5b18fdbd9f5df",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_Basic_Symmetric.lean.log"
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/Derivatives.lean",
+      "exitCode": 0,
+      "seconds": 12.59,
+      "sha256": "ceb9868a4c0253a1a7183291c64cc28e1d878630e2e7ef0f753c84758b5ca51b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_Derivatives.lean.log"
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/P19sR1Connection.lean",
+      "exitCode": 0,
+      "seconds": 6.68,
+      "sha256": "ed7fcdb3d3e8b78abd26855f8b2fecd47c1d979a60498c585a79886226cdbec4",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_P19sR1Connection.lean.log"
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/P19sR1Legendre.lean",
+      "exitCode": 0,
+      "seconds": 8.12,
+      "sha256": "2ef4d177c30c9268dbd6eb474bb17190ac7eb4ab808d0e44c07c9e12fb4e32c3",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_P19sR1Legendre.lean.log"
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SpecialCases.lean",
+      "exitCode": 0,
+      "seconds": 10.18,
+      "sha256": "e81b4ad06eacf18388489a3c1f1063c8b6941cf0f3d7df3f095b358a38dce25d",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_SpecialCases.lean.log"
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/Symmetric.lean",
+      "exitCode": 0,
+      "seconds": 6.4,
+      "sha256": "7088506d8f60dcda5d61eea08a64bf10e148fa634aa9be64e436b087e8739a45",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_Symmetric.lean.log"
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "exitCode": 0,
+      "seconds": 9.9,
+      "sha256": "8fcc96f8c719404a6861aa3e0708598abdbb03a25c6fb9494bf82870b145942b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_SymmetricAddition.lean.log"
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+      "exitCode": 0,
+      "seconds": 9.72,
+      "sha256": "c37c938f7d7a268b81147259c8f56fd2b46135ffeb295df7e50432e1803c33be",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_SymmetricInequalities.lean.log"
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegrals.lean",
+      "exitCode": 0,
+      "seconds": 3.17,
+      "sha256": "f200232cac1fc7b71ade82135cbdb41418337f39c640407a9ed646bf9d21bf83",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_SymmetricIntegrals.lean.log"
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricReduction.lean",
+      "exitCode": 0,
+      "seconds": 25.43,
+      "sha256": "a694bd5543963ec179aeba00d634eaabac37d9e0423ccbb193676333c22a29ab",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_SymmetricReduction.lean.log"
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricSeries.lean",
+      "exitCode": 0,
+      "seconds": 4.8,
+      "sha256": "1478d06903ee07750f6900aaa152913a08e1b33a9c7c1e6dc74d20cdb59b1674",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_SymmetricSeries.lean.log"
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricSpecialCases.lean",
+      "exitCode": 0,
+      "seconds": 6.8,
+      "sha256": "f1a00fd804ce548e2510dbcd5af5af9d6861fd902a51009795f89de1d51206b7",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_EllipticIntegrals_SymmetricSpecialCases.lean.log"
+    },
+    {
+      "file": "DLMF/ErrorFunctions/AnalyticProperties.lean",
+      "exitCode": 0,
+      "seconds": 8.05,
+      "sha256": "079292406e9df737d60800ff0e400f09f19806bb9dc8e90c57d3dfbeb33d10a7",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ErrorFunctions_AnalyticProperties.lean.log"
+    },
+    {
+      "file": "DLMF/ErrorFunctions/Integrals/GaussianAndCauchy.lean",
+      "exitCode": 0,
+      "seconds": 15.78,
+      "sha256": "030987a2b4604e0e8c10074d2765db226209162203f693280400b7e6351880f5",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ErrorFunctions_Integrals_GaussianAndCauchy.lean.log"
+    },
+    {
+      "file": "DLMF/ErrorFunctions/Relations.lean",
+      "exitCode": 0,
+      "seconds": 12.96,
+      "sha256": "b4e5fb22b3d58149136dec4b61c2cdf8b968e82e2af291227a3d1f9e2b5cf587",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ErrorFunctions_Relations.lean.log"
+    },
+    {
+      "file": "DLMF/ErrorFunctions/Repeated.lean",
+      "exitCode": 0,
+      "seconds": 13.88,
+      "sha256": "313729a678692d3180fdb380fc0670d15317e9e2d68b94387665c3512e121352",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ErrorFunctions_Repeated.lean.log"
+    },
+    {
+      "file": "DLMF/ErrorFunctions/Series.lean",
+      "exitCode": 0,
+      "seconds": 9.48,
+      "sha256": "109bc3265ed8039ca1f46198337fa58525262acda3ca8f3f8a4afcf15a822e3f",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ErrorFunctions_Series.lean.log"
+    },
+    {
+      "file": "DLMF/ErrorFunctions/Voigt.lean",
+      "exitCode": 0,
+      "seconds": 9.78,
+      "sha256": "628e161a549a9d07b390c6d4e80ac5b3dc0c6e0e8ca59ff95d07fd9a53c1a3a3",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ErrorFunctions_Voigt.lean.log"
+    },
+    {
+      "file": "DLMF/ExpIntegrals/AnalyticProperties.lean",
+      "exitCode": 0,
+      "seconds": 11.2,
+      "sha256": "4db71404cea9bc8d4aee3bb9faefca77e1a326d3e2b9656bbf4788ad6cc0ba5d",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ExpIntegrals_AnalyticProperties.lean.log"
+    },
+    {
+      "file": "DLMF/ExpIntegrals/Asymptotics.lean",
+      "exitCode": 0,
+      "seconds": 11.68,
+      "sha256": "b661fffbc3aceb4e426b8a6c9564ce0a4faf6038635d07c62f406abf538a0a6d",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ExpIntegrals_Asymptotics.lean.log"
+    },
+    {
+      "file": "DLMF/ExpIntegrals/Expansions.lean",
+      "exitCode": 0,
+      "seconds": 10.43,
+      "sha256": "a52828f2f56f0563e171b722c1ab6d651d309d0bc3dde72b5a4bb647fca90486",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ExpIntegrals_Expansions.lean.log"
+    },
+    {
+      "file": "DLMF/Gamma/Dirichlet.lean",
+      "exitCode": 0,
+      "seconds": 3.32,
+      "sha256": "9c7f3957ae03244300fdff6747322c02092729a8f71fea8687e910438163c535",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Gamma_Dirichlet.lean.log"
+    },
+    {
+      "file": "DLMF/Gamma/Products.lean",
+      "exitCode": 0,
+      "seconds": 6.76,
+      "sha256": "1624bd0f2d0c9b0bf0d0c445b7ae1649cde945d3707667d8b478850da83f5374",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Gamma_Products.lean.log"
+    },
+    {
+      "file": "DLMF/Gamma/SpecialValues.lean",
+      "exitCode": 0,
+      "seconds": 8.87,
+      "sha256": "c5966b66e92e888e6ea4c9c1e9c6121c78194a3d5880597784a2a3621cdbdb77",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Gamma_SpecialValues.lean.log"
+    },
+    {
+      "file": "DLMF/Gamma/VerticalBounds.lean",
+      "exitCode": 0,
+      "seconds": 6.18,
+      "sha256": "3bfb8acc3aeb104531de0249522d61be199e7b02d869411b4653b2fd34c20bc5",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Gamma_VerticalBounds.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/AnalyticProperties.lean",
+      "exitCode": 0,
+      "seconds": 6.91,
+      "sha256": "7e955f8ae192169f5d1be551d917f9a5164aee20aab4d43f608f225ccccbef2c",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_AnalyticProperties.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Appell/Basic/EulerBranches.lean",
+      "exitCode": 0,
+      "seconds": 4.02,
+      "sha256": "a8a95d9296b46c0566526e7d867495a5c4d57b7bd36424fd47c5535a8a54669b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_Appell_Basic_EulerBranches.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+      "exitCode": 0,
+      "seconds": 22.23,
+      "sha256": "edb370a83e49f96c34a29b6a85544c3ccd2897e3524f4f82f4e03a0b97004537",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_Appell_EulerIntegrals.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Appell/SeriesAndDifferentialEquations.lean",
+      "exitCode": 0,
+      "seconds": 18.56,
+      "sha256": "466c667c07721c7f487a2ab9a3385fb8209f2c802503e6f039da7500ad21a588",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_Appell_SeriesAndDifferentialEquations.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Asymptotics.lean",
+      "exitCode": 0,
+      "seconds": 7.88,
+      "sha256": "87e41a9db9b9f8bc2dc3d8a3a5a435d1d9dd9cecefd09c6aa8393c30c7acd89d",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_Asymptotics.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Basic/BilateralAndBarnes.lean",
+      "exitCode": 0,
+      "seconds": 3.17,
+      "sha256": "b66c993a1019a53ea538d03a057e28be09bd71b1ce8d12df2d3168ac4fd71516",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_Basic_BilateralAndBarnes.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean",
+      "exitCode": 0,
+      "seconds": 3.21,
+      "sha256": "f76bf6bbcf4ba309c0740963da580aac48e26f8aa3105adbe7a2cac028490b41",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_Basic_ParametersAndSeries.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Derivatives.lean",
+      "exitCode": 0,
+      "seconds": 4.38,
+      "sha256": "7276c93e0d4a01327fc12a89448169acf34ecb6112c089cd86603e3ee2d7759d",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_Derivatives.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/DifferentialEquations.lean",
+      "exitCode": 0,
+      "seconds": 6.33,
+      "sha256": "16e3150ddb7b5631390776fd90b5f89c79a846eb1a0701d6a18801d1eb366268",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_DifferentialEquations.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Integrals.lean",
+      "exitCode": 0,
+      "seconds": 2.8,
+      "sha256": "01638b86ab8b78963f737be79229074ad750bdf3ae960585edb5e9ab2cec10d4",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_Integrals.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/MeijerG.lean",
+      "exitCode": 0,
+      "seconds": 2.82,
+      "sha256": "2682e3c3d019aa74535331eec95d7ce49297dfc8abf4013ff0cdef1e7b765af7",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_MeijerG.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/MeijerGRelations.lean",
+      "exitCode": 0,
+      "seconds": 4.15,
+      "sha256": "3d910447350f77df855b403a60b9e08edcb48d61e14917bebc03c92736b5ad44",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_MeijerGRelations.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/ParameterAndSeriesProperties.lean",
+      "exitCode": 0,
+      "seconds": 5.05,
+      "sha256": "c489ef8e6a55b221ce891da5cf5397cd59fed568aa3821a1617d232d7b5a1c15",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_ParameterAndSeriesProperties.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/Transformations.lean",
+      "exitCode": 0,
+      "seconds": 3.91,
+      "sha256": "4e834e2cb4929d423d4180a5d484f66a733f2ac8d617fa201d970e6436ed6dd3",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_Transformations.lean.log"
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "exitCode": 0,
+      "seconds": 11.04,
+      "sha256": "21da5060f2e0afa76afafab0f82b3f15cd6f8200bfc46fe0470eef0c10100633",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_GeneralizedHypergeometric_UnitArgument.lean.log"
+    },
+    {
+      "file": "DLMF/Heun/Confluent.lean",
+      "exitCode": 0,
+      "seconds": 9.82,
+      "sha256": "6647b03dce0b9f01062c7ecbb784e1244fff7763d28b259c56d3e087be80ee1d",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Heun_Confluent.lean.log"
+    },
+    {
+      "file": "DLMF/Heun/DoublyPeriodic.lean",
+      "exitCode": 0,
+      "seconds": 20.37,
+      "sha256": "804b59a036704d162800a352bdce09210801c32a47bd0db800016bb1f593542c",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Heun_DoublyPeriodic.lean.log"
+    },
+    {
+      "file": "DLMF/Heun/Equation.lean",
+      "exitCode": 0,
+      "seconds": 13.51,
+      "sha256": "0552f74ff6ef3cd56a8af271aa20ef4180f589fe6442d68a5b8242a30165d575",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Heun_Equation.lean.log"
+    },
+    {
+      "file": "DLMF/Heun/Integral.lean",
+      "exitCode": 0,
+      "seconds": 16.37,
+      "sha256": "9cc34598e03ab4dcfc96c057a7791e931c49bfb806a6d49a0b015492972a3363",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Heun_Integral.lean.log"
+    },
+    {
+      "file": "DLMF/Hypergeometric/AppellF4.lean",
+      "exitCode": 0,
+      "seconds": 22.24,
+      "sha256": "21a812fdbf606586d9437583c89fdd32cdc1cd39007ed0eaf07630134fa0e61f",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Hypergeometric_AppellF4.lean.log"
+    },
+    {
+      "file": "DLMF/Hypergeometric/ArgumentContinuation.lean",
+      "exitCode": 0,
+      "seconds": 4.34,
+      "sha256": "04fb39f1a32c1f8a8cb226e2b126c29210bdf5b96531c3caaeef6533b69b0965",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Hypergeometric_ArgumentContinuation.lean.log"
+    },
+    {
+      "file": "DLMF/Hypergeometric/ConnectionFormulas.lean",
+      "exitCode": 0,
+      "seconds": 44.65,
+      "sha256": "f2defc087b1301726b040eb58ad96f038e2602d66ddebb063e0d4306ce5e9ac6",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Hypergeometric_ConnectionFormulas.lean.log"
+    },
+    {
+      "file": "DLMF/Hypergeometric/Derivatives.lean",
+      "exitCode": 0,
+      "seconds": 14.91,
+      "sha256": "a2fd0ceee5524f0b9c1cb5019bebb0edb5fae53dfa6f8f5c0e9177607249c018",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Hypergeometric_Derivatives.lean.log"
+    },
+    {
+      "file": "DLMF/Hypergeometric/Kummer.lean",
+      "exitCode": 0,
+      "seconds": 7.15,
+      "sha256": "248093db2277e0cbf65d26aa96211992aac5419c0d21d212c8a3f093878f21c5",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Hypergeometric_Kummer.lean.log"
+    },
+    {
+      "file": "DLMF/Hypergeometric/SeriesProperties.lean",
+      "exitCode": 0,
+      "seconds": 5.41,
+      "sha256": "67608446d22cfb41f5fe62dc409b08eb683253d3908daa4618a23da3d43ff07e",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Hypergeometric_SeriesProperties.lean.log"
+    },
+    {
+      "file": "DLMF/IncompleteGamma/Beta.lean",
+      "exitCode": 0,
+      "seconds": 13.24,
+      "sha256": "d59027c2b914b8b1996061fb4b447f9e6ae034562be28ee0bae75673c8b57cea",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_IncompleteGamma_Beta.lean.log"
+    },
+    {
+      "file": "DLMF/IncompleteGamma/BetaAsymptotics.lean",
+      "exitCode": 0,
+      "seconds": 14.88,
+      "sha256": "2ef3cf06566179a3eaaeb0b8a2ec2fa804465703800b06ef700dac69230499b8",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_IncompleteGamma_BetaAsymptotics.lean.log"
+    },
+    {
+      "file": "DLMF/IncompleteGamma/BoundsFractions.lean",
+      "exitCode": 0,
+      "seconds": 9.45,
+      "sha256": "4808233a05225ca735b19103d1ff38e029610bc99cb0a3e647f82085874a3bcf",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_IncompleteGamma_BoundsFractions.lean.log"
+    },
+    {
+      "file": "DLMF/IncompleteGamma/ContinuedProperties.lean",
+      "exitCode": 0,
+      "seconds": 6.99,
+      "sha256": "0aa34a55b1adaedc7efb829d418e9bd497ccc0962ae7243c339db0cf671ed2b5",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_IncompleteGamma_ContinuedProperties.lean.log"
+    },
+    {
+      "file": "DLMF/IncompleteGamma/Representations/LowerBarnes.lean",
+      "exitCode": 0,
+      "seconds": 12.48,
+      "sha256": "7d44ab9caf78a159264f6b441015d53aaacf39bd47b37c6e1497a69aa4cf2860",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_IncompleteGamma_Representations_LowerBarnes.lean.log"
+    },
+    {
+      "file": "DLMF/IncompleteGamma/SeriesRecurrences.lean",
+      "exitCode": 0,
+      "seconds": 14.23,
+      "sha256": "a5d856738768a0c75b168ab407dcaddf95febcd4995be898c30aebdf1a8761f9",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_IncompleteGamma_SeriesRecurrences.lean.log"
+    },
+    {
+      "file": "DLMF/IncompleteGamma/SpecialValues.lean",
+      "exitCode": 0,
+      "seconds": 6.59,
+      "sha256": "191dcb69479e7a44bc539d6346f5e8912059e85dcd05549ae99be36299fffca8",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_IncompleteGamma_SpecialValues.lean.log"
+    },
+    {
+      "file": "DLMF/IncompleteGamma/UniformAsymptotics.lean",
+      "exitCode": 0,
+      "seconds": 11.94,
+      "sha256": "e6a26bb2166fbcbda6b31117a27dadddc29be9d3fb738711a5e730ad48b60541",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_IncompleteGamma_UniformAsymptotics.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/Addition.lean",
+      "exitCode": 0,
+      "seconds": 3.26,
+      "sha256": "ada7def477e295d83956fca5fddb3f4552ae72f515c5894f58122f2ed4fa2811",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_Addition.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/Addition/SymmetricAndThreePoint.lean",
+      "exitCode": 0,
+      "seconds": 36.85,
+      "sha256": "d622e9c0fd447776095c63e28bf74760364de0858427cf30867b806856212de5",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_Addition_SymmetricAndThreePoint.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/Addition/ThetaAndQuotients.lean",
+      "exitCode": 0,
+      "seconds": 8.28,
+      "sha256": "8b49ec376c369722fe7f355fc49e062b641099be6ee7d871b3e06c1a779bfc08",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_Addition_ThetaAndQuotients.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/AnalyticProperties.lean",
+      "exitCode": 0,
+      "seconds": 4.95,
+      "sha256": "1b5fbe3694fc1a41268d3bef5ffc2f03044c4e835da39422f40108448b8f7310",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_AnalyticProperties.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/Basic/Definitions.lean",
+      "exitCode": 0,
+      "seconds": 2.73,
+      "sha256": "21a65c2d7cd5105e504cea552337561cfee3a9176952bac450cf836f0b204f51",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_Basic_Definitions.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/Cyclic/MixedTripleProducts.lean",
+      "exitCode": 0,
+      "seconds": 137.26,
+      "sha256": "7d90d90f41b392bf2e76febbfcc15d0563867a4429e7431d5d7ccf23df7492c5",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_Cyclic_MixedTripleProducts.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/Cyclic/QuarterPeriodAndThreePoint.lean",
+      "exitCode": 0,
+      "seconds": 44.93,
+      "sha256": "bcb46abfd97e36b8569ac6eabcfec3f78fdf5bd2d85dd1371fcae94aa2c45427",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_Cyclic_QuarterPeriodAndThreePoint.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/Cyclic/TripleProducts.lean",
+      "exitCode": 0,
+      "seconds": 41.33,
+      "sha256": "807a7ef1f451d35c752e9c4a7888866af2104238ac3f3db8405e7ff84baefd62",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_Cyclic_TripleProducts.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/ElementaryIdentities.lean",
+      "exitCode": 0,
+      "seconds": 13.34,
+      "sha256": "c6a19ad89e38e3c39e1121f8ab42e608c9f9045bbecc34c35a059ab480dc23f7",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_ElementaryIdentities.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/Inverse.lean",
+      "exitCode": 0,
+      "seconds": 20.19,
+      "sha256": "dd2203edb6ef982907217c3598dd3f0ca15524f8e4c15e7ea6b4d82d2929de1c",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_Inverse.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/Landen.lean",
+      "exitCode": 0,
+      "seconds": 2.97,
+      "sha256": "1f478280bb7a961ba8b67e2920ee5b793b7e01971e54c0cc7ca8838e12c9f941",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_Landen.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/P3jEisenstein.lean",
+      "exitCode": 0,
+      "seconds": 11.24,
+      "sha256": "66ed9ba88833386710994b170cf97a3fbbb9ad5533ba1f080c10908026214521",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_P3jEisenstein.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/P3jJacobiODE.lean",
+      "exitCode": 0,
+      "seconds": 4.7,
+      "sha256": "823c19a9a53fbb96cacc885cfb1388c06c074d251afa30bf4bfde60a8502f09f",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_P3jJacobiODE.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/PeriodsPolesZeros.lean",
+      "exitCode": 0,
+      "seconds": 13.58,
+      "sha256": "4bbe4016b38832fc2670859d80bf3cf96daa29b90ca635ccc683a377fffad68a",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_PeriodsPolesZeros.lean.log"
+    },
+    {
+      "file": "DLMF/JacobiElliptic/SpecialValues/RealAndHalfPeriods.lean",
+      "exitCode": 0,
+      "seconds": 17.47,
+      "sha256": "55ac3f93c586c7fff996b00f4776106637052f292b33054338951dc2f6bf3710",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_JacobiElliptic_SpecialValues_RealAndHalfPeriods.lean.log"
+    },
+    {
+      "file": "DLMF/Lame/DifferentialEquations.lean",
+      "exitCode": 0,
+      "seconds": 11.14,
+      "sha256": "61ceac423af42b060c03cccb22dad7de07ee13856304bf7d4313baa5f65f8be2",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Lame_DifferentialEquations.lean.log"
+    },
+    {
+      "file": "DLMF/Lame/Eigenvalues.lean",
+      "exitCode": 0,
+      "seconds": 9.8,
+      "sha256": "30774f81357d73d4d440b41a035297d958dde1c6e7a0a04605e297866415e16a",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Lame_Eigenvalues.lean.log"
+    },
+    {
+      "file": "DLMF/Lame/P3lWeierstrass.lean",
+      "exitCode": 0,
+      "seconds": 5.85,
+      "sha256": "ba20867ad5c154b784e6f8da28a4afd6160c706ec112720bb9d4e7573de20e27",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Lame_P3lWeierstrass.lean.log"
+    },
+    {
+      "file": "DLMF/Lame/Polynomials/P2pEigen.lean",
+      "exitCode": 0,
+      "seconds": 4.43,
+      "sha256": "a1f082ac67fc94a41c1b73c6b717bac17ec6904dd01efb85e8a7bc9a23a2c5ff",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Lame_Polynomials_P2pEigen.lean.log"
+    },
+    {
+      "file": "DLMF/Lame/Polynomials/P2pODE.lean",
+      "exitCode": 0,
+      "seconds": 17.3,
+      "sha256": "48db79f40b265276719cfd2b64e05c4ea1bb7c12bad23c28572e47cb27062065",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Lame_Polynomials_P2pODE.lean.log"
+    },
+    {
+      "file": "DLMF/Lame/Polynomials/P3lZeros.lean",
+      "exitCode": 0,
+      "seconds": 11.86,
+      "sha256": "25af3df9c36884e025d4477140b17fd38c69f9b8a8ae965c2f472e9418324fa5",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Lame_Polynomials_P3lZeros.lean.log"
+    },
+    {
+      "file": "DLMF/Lame/SpecialCases.lean",
+      "exitCode": 0,
+      "seconds": 10.57,
+      "sha256": "0fd73a526d2646528914fed6b5b2e712dd977c5666bd2720a8dd3c8a5962c2f2",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Lame_SpecialCases.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/Associated/BoundaryAndConnections.lean",
+      "exitCode": 0,
+      "seconds": 9.56,
+      "sha256": "24594d6976a346f35a9d8ca28cc9003f5d9cd7a677df5c570376d143c4368803",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_Associated_BoundaryAndConnections.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/Associated/ConjugationAndValues.lean",
+      "exitCode": 0,
+      "seconds": 11.78,
+      "sha256": "d0bf559b1741c5b4f57bcf6919544829072c771435de1ec4a4082a2ba2115f50",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_Associated_ConjugationAndValues.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/Associated/Wronskians.lean",
+      "exitCode": 0,
+      "seconds": 8.41,
+      "sha256": "ba8da303dc96a9f3a4a4b04998140d541b702a3811f1a4088dc179a6e238554d",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_Associated_Wronskians.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/AssociatedRecurrences.lean",
+      "exitCode": 0,
+      "seconds": 16.79,
+      "sha256": "a38f3aa4a58a30eacb0dbd27d993859ff76860f4dbd8cbd1ab35d2dca335a165",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_AssociatedRecurrences.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/BoundaryAsymptotics.lean",
+      "exitCode": 0,
+      "seconds": 10.79,
+      "sha256": "f3f991d308c17788b9fa9155a66736ca21fc4867db48a6d9255bfd14cc8b01ad",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_BoundaryAsymptotics.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/Conical.lean",
+      "exitCode": 0,
+      "seconds": 17.69,
+      "sha256": "8e056f44137dbb2b89412a3a2913d5601a1dd9995c85bd4a723006a5d2f9b650",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_Conical.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/FirstKindProperties.lean",
+      "exitCode": 0,
+      "seconds": 3.57,
+      "sha256": "c523ad250bb87199c406ea56abfe2de95ac86a7d78ee80a733009aa5cdeb20d3",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_FirstKindProperties.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/Harmonics.lean",
+      "exitCode": 0,
+      "seconds": 13.49,
+      "sha256": "b2ab84805b70d4fbb1b58255dd27f3f5c7ebb26d645c80e908f3cc44c6bafef8",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_Harmonics.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/IntegerTheory.lean",
+      "exitCode": 0,
+      "seconds": 5.26,
+      "sha256": "74471bc335ec5a2887bc80f1a630f6a2007c330631da0a02f048899f9cddc5ed",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_IntegerTheory.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/IntegralRepresentations/Ferrers.lean",
+      "exitCode": 0,
+      "seconds": 17.89,
+      "sha256": "c4a7d8107ad4ff093e463fcf23c73b55f108fcf2e03cbdbaac41265adc956c82",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_IntegralRepresentations_Ferrers.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/LocalTheory.lean",
+      "exitCode": 0,
+      "seconds": 5.21,
+      "sha256": "e8fc2806561b9495701f8e284b1c4091383018159c92938392e3e8e925eae848",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_LocalTheory.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/RelatedFunctions.lean",
+      "exitCode": 0,
+      "seconds": 7.08,
+      "sha256": "4f0f92f53d4684d131893d9015d95b72bf9356a96a98cb73fba05bd5238c4751",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_RelatedFunctions.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/Series.lean",
+      "exitCode": 0,
+      "seconds": 24.11,
+      "sha256": "a9e42342de54830cf7b11562283c570f1ab32ce21f20a406c8f721752c4dab1d",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_Series.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/Singularities.lean",
+      "exitCode": 0,
+      "seconds": 12.54,
+      "sha256": "67728bc390678422b024fe54d66b553332a503fad1df20329586fcc7f5bdb88c",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_Singularities.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/SpecialValues.lean",
+      "exitCode": 0,
+      "seconds": 42.71,
+      "sha256": "a8a6d1c90f67564b9dc055d7027faa6f5d0f4d2e966778ac10bf826c79f14360",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_SpecialValues.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/Sums.lean",
+      "exitCode": 0,
+      "seconds": 13.29,
+      "sha256": "841b4adcf1ca8b1877de44fe0649fca814a36a8fed4078f43c95a8f1912d4ca3",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_Sums.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/ZeroCounts.lean",
+      "exitCode": 0,
+      "seconds": 6.09,
+      "sha256": "281e272549ccba1afd162b15d32e4b9c6d1499b9bedfab3c680a1cb2abe0f827",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_ZeroCounts.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/ZeroTools.lean",
+      "exitCode": 0,
+      "seconds": 15.58,
+      "sha256": "39c30202450e2b7ff5e0c58ca02f05ea027a0ebe0d7a1c2e3ec119b4ca5224a6",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_ZeroTools.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/Zeros/Exterior.lean",
+      "exitCode": 0,
+      "seconds": 26.82,
+      "sha256": "46d80af9fb549d3fd731a2e1f5e32dff311f1f795cebf4ee4f3cae9bc0395084",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_Zeros_Exterior.lean.log"
+    },
+    {
+      "file": "DLMF/Legendre/Zeros/FerrersAndReal.lean",
+      "exitCode": 0,
+      "seconds": 13.49,
+      "sha256": "1291e79b4f7c4764978a9bafecbc1aad0786eda4f72744230e3b09b502439a7b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Legendre_Zeros_FerrersAndReal.lean.log"
+    },
+    {
+      "file": "DLMF/Mathieu/Hill/Floquet.lean",
+      "exitCode": 0,
+      "seconds": 10.52,
+      "sha256": "38c073469fddbc257acb2e99b7e4df6eff8c83792317b57ee5108f574fa57f1b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_Hill_Floquet.lean.log"
+    },
+    {
+      "file": "DLMF/Mathieu/Modified/P2mCrossSeries.lean",
+      "exitCode": 0,
+      "seconds": 11.31,
+      "sha256": "19491ce57cea460254936333e361ed9333ae8b8a023ccfafc7f8cd7ee237c255",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_Modified_P2mCrossSeries.lean.log"
+    },
+    {
+      "file": "DLMF/Mathieu/Modified/P2mRadial/IntegerCrossProducts.lean",
+      "exitCode": 0,
+      "seconds": 6.66,
+      "sha256": "f64bb0a89a2b0874e7efacb4436cd7bbe531270696b9bf1e704f6e95a79ad8dc",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_Modified_P2mRadial_IntegerCrossProducts.lean.log"
+    },
+    {
+      "file": "DLMF/Mathieu/Modified/P2mRadial/SeriesEquation.lean",
+      "exitCode": 0,
+      "seconds": 8.26,
+      "sha256": "fb2e8b80c148cd689e752410f57777c0048ae84d2533851073786ffd691f482a",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_Modified_P2mRadial_SeriesEquation.lean.log"
+    },
+    {
+      "file": "DLMF/Mathieu/P2sBridge.lean",
+      "exitCode": 0,
+      "seconds": 4.71,
+      "sha256": "1b140bd70541d7adea860c74d74e947f856cf2c224b2ee922027827e1111d70c",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_P2sBridge.lean.log"
+    },
+    {
+      "file": "DLMF/Mathieu/P3qJacobi.lean",
+      "exitCode": 0,
+      "seconds": 5.79,
+      "sha256": "d553d96b41d9c9a0af8d04ee972118d2ead9146c9859ef8d5349b1e4d78ce8c4",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_P3qJacobi.lean.log"
+    },
+    {
+      "file": "DLMF/Mathieu/P3qSpectrum.lean",
+      "exitCode": 0,
+      "seconds": 8.88,
+      "sha256": "55a81083d1e2cf93d334eb08efe8a3e8a66daef186c9c711585cdb0f5b522994",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_P3qSpectrum.lean.log"
+    },
+    {
+      "file": "DLMF/Mathieu/P3qVector.lean",
+      "exitCode": 0,
+      "seconds": 11.09,
+      "sha256": "8cbe9825a2661cf4ab80fe708e931cd81b7422e8c90ebda11bca4d59ab813a7b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_P3qVector.lean.log"
+    },
+    {
+      "file": "DLMF/Mathieu/Properties/BasicSolutions.lean",
+      "exitCode": 0,
+      "seconds": 9.94,
+      "sha256": "e27bd63172ea08d470479df80760790c2ff750982b67b4aed37c7211bcae136b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_Properties_BasicSolutions.lean.log"
+    },
+    {
+      "file": "DLMF/Mathieu/SecondSolutions.lean",
+      "exitCode": 0,
+      "seconds": 11.67,
+      "sha256": "a7ca9ae11b808fdc11e2acb1f5c7105bafcb5df1409870b430b4fc67a28826df",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_SecondSolutions.lean.log"
+    },
+    {
+      "file": "DLMF/Mathieu/SmallQ.lean",
+      "exitCode": 0,
+      "seconds": 27.07,
+      "sha256": "e414294db5e6a6bb27c6a2582063804c3f6611e1387d46e82d04fca51daf99ba",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Mathieu_SmallQ.lean.log"
+    },
+    {
+      "file": "DLMF/MatrixArgument/Q2mMatrixIntegrals.lean",
+      "exitCode": 0,
+      "seconds": 3.15,
+      "sha256": "9dd3274b1fe11582fce8c0d666b5d532e622028f61c3ed16d227adba03a05fb0",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_MatrixArgument_Q2mMatrixIntegrals.lean.log"
+    },
+    {
+      "file": "DLMF/MatrixArgument/Zonal.lean",
+      "exitCode": 0,
+      "seconds": 7.71,
+      "sha256": "2bcc100f6871701e4b21578bf377f9e31327d15e47211a1334ce4e588d04d8f4",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_MatrixArgument_Zonal.lean.log"
+    },
+    {
+      "file": "DLMF/NumberTheory/Additive.lean",
+      "exitCode": 0,
+      "seconds": 6.74,
+      "sha256": "09fb306f7acdc675e212f701ca98bed809c543180a67f0762b48e81dac22e5f0",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_NumberTheory_Additive.lean.log"
+    },
+    {
+      "file": "DLMF/NumberTheory/Characters.lean",
+      "exitCode": 0,
+      "seconds": 8.56,
+      "sha256": "05423151c644521495e6fa0dd0002255cb49d7ec134753d1db002f069ad40678",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_NumberTheory_Characters.lean.log"
+    },
+    {
+      "file": "DLMF/NumberTheory/DivisorSums.lean",
+      "exitCode": 0,
+      "seconds": 6.55,
+      "sha256": "1c0394d2e62425729b317a47626a020355eb61cecf45c53f7b1f70bd7e3b337a",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_NumberTheory_DivisorSums.lean.log"
+    },
+    {
+      "file": "DLMF/NumberTheory/Functions.lean",
+      "exitCode": 0,
+      "seconds": 9.04,
+      "sha256": "2c09e884b12d8dd7a147375464716dbba1638b6cd00754da3ca19d8bf1f73c41",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_NumberTheory_Functions.lean.log"
+    },
+    {
+      "file": "DLMF/NumberTheory/Partitions.lean",
+      "exitCode": 0,
+      "seconds": 17.93,
+      "sha256": "dcd3766a7ee184c87427772e1c52512991fcfdb4c1bf4ffbc1f7f2c3f360f76a",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_NumberTheory_Partitions.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/BoundsZeros/PointwiseAndZeroBounds.lean",
+      "exitCode": 0,
+      "seconds": 20.19,
+      "sha256": "65f48060558d33c82c6b11255d37db68421311713c21b2580e2c918f207e3c9d",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_BoundsZeros_PointwiseAndZeroBounds.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/Classical.lean",
+      "exitCode": 0,
+      "seconds": 11.27,
+      "sha256": "d89f0ecea34313560487752debf770670ef1ce70facf09204302270043f030da",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_Classical.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/Differential/ChebyshevAndShifts.lean",
+      "exitCode": 0,
+      "seconds": 24.89,
+      "sha256": "1415da4ebe2ce9fd37b56ec113e3e5c16353c4fa90e4bf61548e319dfaaf255f",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_Differential_ChebyshevAndShifts.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/Differential/ClassicalEquations.lean",
+      "exitCode": 0,
+      "seconds": 25.78,
+      "sha256": "6c56e820fdab2f6cd8b0ec9bba9e59599185e6dcd90328ad65d7fa5cf8cde4d7",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_Differential_ClassicalEquations.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/DiscreteRodrigues.lean",
+      "exitCode": 0,
+      "seconds": 3.73,
+      "sha256": "b425bd13be8bab0492cff197fb6a1e7f5baeb94005711a3df18d4e73fb91852b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_DiscreteRodrigues.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/Explicit.lean",
+      "exitCode": 0,
+      "seconds": 9.9,
+      "sha256": "75be784e12706fe96d53fea7370bd658f39ff8a5897dc8105f8a9bdb03634544",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_Explicit.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/Hahn/CharlierAndConnections.lean",
+      "exitCode": 0,
+      "seconds": 28.92,
+      "sha256": "8c415f854e609916fc12bfaa5fbbf8bdfe0934dfa88e6acff754d9002a8ca210",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_Hahn_CharlierAndConnections.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/Hahn/HahnAndMeixner.lean",
+      "exitCode": 0,
+      "seconds": 14.58,
+      "sha256": "c4b09acf0425290b8fc25a72ff253ff02d07e82e413322dfda069f06546277fc",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_Hahn_HahnAndMeixner.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/Integrals/ConvolutionsAndFourier.lean",
+      "exitCode": 0,
+      "seconds": 17.35,
+      "sha256": "66c02c11380d8a8cf7a3c61ffbca17d824908b2adca8baa6c8a811fc098d22dc",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_Integrals_ConvolutionsAndFourier.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/Integrals/DoubleLaplaceAndGaussian.lean",
+      "exitCode": 0,
+      "seconds": 37.79,
+      "sha256": "12c37532d232331065abee799ef5c91adb17f75e758a6afb9c3810341c3e082a",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_Integrals_DoubleLaplaceAndGaussian.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/Integrals/LaguerreAndHermite.lean",
+      "exitCode": 0,
+      "seconds": 24.8,
+      "sha256": "4b99809fabd6ba1c7a8cf1ce19e6bb399b727dda190523da13f95700e3e721a4",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_Integrals_LaguerreAndHermite.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/JacobiDiscriminant.lean",
+      "exitCode": 0,
+      "seconds": 6.06,
+      "sha256": "65e4d7f35b340004ca0744639c119ea3ccc8babd8e8a9bc80b523a60804a0e97",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_JacobiDiscriminant.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/LegendreSingular.lean",
+      "exitCode": 0,
+      "seconds": 4.76,
+      "sha256": "5b37b97f8345bf2b1de952cfdf34fa22595acd30f50cd59256b436758dcfcda2",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_LegendreSingular.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/Multivariate.lean",
+      "exitCode": 0,
+      "seconds": 7.2,
+      "sha256": "4e9a5d542ef56da5185cc6aa926acada936ad7d44d27133bb39ba23cd8611f3b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_Multivariate.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+      "exitCode": 0,
+      "seconds": 8.0,
+      "sha256": "d00af8bcc2a94ce1a0309ac94dfea8850850bf4ef2cc232ea7a7388a4fa05b71",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_QFamilies_BasicIdentities.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/QFamilies/ClassicalLimits.lean",
+      "exitCode": 0,
+      "seconds": 29.28,
+      "sha256": "fdde1feecc3422752cee9e4832af539f8790c8567ed17101ec407dc0ab19cca2",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_QFamilies_ClassicalLimits.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/Topics.lean",
+      "exitCode": 0,
+      "seconds": 15.04,
+      "sha256": "2c7d3431c3a025ddb79c0a16f2fe695a6fcc88f521a5da66578a358e3f1c587e",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_Topics.lean.log"
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/Wilson.lean",
+      "exitCode": 0,
+      "seconds": 62.33,
+      "sha256": "d03db32eb6b84b412ef0f3016b3528c5236e1e4516069681449052a6a174907e",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_OrthogonalPolynomials_Wilson.lean.log"
+    },
+    {
+      "file": "DLMF/Painleve/BacklundDLMF/FourthAndFifth.lean",
+      "exitCode": 0,
+      "seconds": 84.35,
+      "sha256": "f6b048a3db64bc13d2192450261b784a658795ee94537092b87ecd7ae4d7947f",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Painleve_BacklundDLMF_FourthAndFifth.lean.log"
+    },
+    {
+      "file": "DLMF/Painleve/BacklundDLMF/SecondAndThird.lean",
+      "exitCode": 0,
+      "seconds": 91.68,
+      "sha256": "cce963f53d35cc4390d391405496adbe1afe4ef5a5d0a8afd08ebb26e4c97508",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Painleve_BacklundDLMF_SecondAndThird.lean.log"
+    },
+    {
+      "file": "DLMF/Painleve/BacklundDLMF/Sixth.lean",
+      "exitCode": 0,
+      "seconds": 257.07,
+      "sha256": "f4dd6047e543826e0699ceb1e7b6b02ea2ed00ba8e7b6cff75ff42ace8f245aa",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Painleve_BacklundDLMF_Sixth.lean.log"
+    },
+    {
+      "file": "DLMF/Painleve/Basic/Equations.lean",
+      "exitCode": 0,
+      "seconds": 3.4,
+      "sha256": "3677f490d4b0a9c2aab3aafcee0541863a0b5a8e53d8bb9df879e28953358f39",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Painleve_Basic_Equations.lean.log"
+    },
+    {
+      "file": "DLMF/Painleve/Isomonodromy.lean",
+      "exitCode": 0,
+      "seconds": 20.01,
+      "sha256": "cf81cc8ad7e1afe08561e618881a6dc6981187406e756cb14647faa6e457e9db",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Painleve_Isomonodromy.lean.log"
+    },
+    {
+      "file": "DLMF/Painleve/SpecialSolutions.lean",
+      "exitCode": 0,
+      "seconds": 20.85,
+      "sha256": "8223026d12bdaf2aec2c64bcae498fff468d4d0dfe21b914488a58700f61d194",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Painleve_SpecialSolutions.lean.log"
+    },
+    {
+      "file": "DLMF/ParabolicCylinder/AsymptoticsZeros.lean",
+      "exitCode": 0,
+      "seconds": 11.04,
+      "sha256": "9fe28e61b279f5bda5b6f9f85c186df302c9f91f9b610c5000ddae5c004728f2",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ParabolicCylinder_AsymptoticsZeros.lean.log"
+    },
+    {
+      "file": "DLMF/ParabolicCylinder/ContourTools.lean",
+      "exitCode": 0,
+      "seconds": 13.93,
+      "sha256": "023ed8bba2597a45eca6d95268e15d7b21a6204a1d48a368ea17e075c5c9ea4b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ParabolicCylinder_ContourTools.lean.log"
+    },
+    {
+      "file": "DLMF/ParabolicCylinder/ElementaryProperties.lean",
+      "exitCode": 0,
+      "seconds": 14.53,
+      "sha256": "082e42e8cb536c58c78de70f5ffc02eb827f10c9c5ff88671b24d0cd359dc030",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ParabolicCylinder_ElementaryProperties.lean.log"
+    },
+    {
+      "file": "DLMF/ParabolicCylinder/SectorAsymptotics.lean",
+      "exitCode": 0,
+      "seconds": 11.59,
+      "sha256": "7e39aafaa3df649adccba80703bc39af2dbe32d106705c47d85b76ef6467ce9f",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ParabolicCylinder_SectorAsymptotics.lean.log"
+    },
+    {
+      "file": "DLMF/ParabolicCylinder/TurningPoint.lean",
+      "exitCode": 0,
+      "seconds": 4.05,
+      "sha256": "f5365768ac2a8e4069c28fd72c1eaa7edc39db13a5fcb1cf168ad86904a3ec2f",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ParabolicCylinder_TurningPoint.lean.log"
+    },
+    {
+      "file": "DLMF/ParabolicCylinder/Uniform/PhasesAndPolynomials.lean",
+      "exitCode": 0,
+      "seconds": 11.91,
+      "sha256": "4998d1fedd0979ededbf7ed50f80a2d5ebe33dd213a69b6d2d59592cb414cdb8",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ParabolicCylinder_Uniform_PhasesAndPolynomials.lean.log"
+    },
+    {
+      "file": "DLMF/ParabolicCylinder/UniformLG.lean",
+      "exitCode": 0,
+      "seconds": 23.83,
+      "sha256": "a1655b8266bbdb3adfac0c1d29d96d8b010fdb8c3acda680ee060de5377c2d65",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ParabolicCylinder_UniformLG.lean.log"
+    },
+    {
+      "file": "DLMF/ParabolicCylinder/UniformLG2/ExpansionAlgebra.lean",
+      "exitCode": 0,
+      "seconds": 7.69,
+      "sha256": "0e4045ad6d266cbdc5f0b2ac54d4802acc44dc872684f764617537de2e591b3b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ParabolicCylinder_UniformLG2_ExpansionAlgebra.lean.log"
+    },
+    {
+      "file": "DLMF/ParabolicCylinder/UniformLG2/PositiveParameterEstimates.lean",
+      "exitCode": 0,
+      "seconds": 10.37,
+      "sha256": "616b57b70f742895a5558770bb0dfa44e64cf64dcf6e1a487f5e8ffdddb774fb",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_ParabolicCylinder_UniformLG2_PositiveParameterEstimates.lean.log"
+    },
+    {
+      "file": "DLMF/QHypergeometric/Appell.lean",
+      "exitCode": 0,
+      "seconds": 19.8,
+      "sha256": "4e589426ae5184ba8063e3e37447829b2ec00f67fb31295462c6548069dcda51",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_QHypergeometric_Appell.lean.log"
+    },
+    {
+      "file": "DLMF/QHypergeometric/Basic/Series.lean",
+      "exitCode": 0,
+      "seconds": 2.8,
+      "sha256": "a679b57262f269476eacd13b52d18ea0fd2ba115c6238c7f5ffcbb6be370cbb8",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_QHypergeometric_Basic_Series.lean.log"
+    },
+    {
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "exitCode": 0,
+      "seconds": 16.41,
+      "sha256": "76305580f4945b3581d0c9f11bab8a8a6c33d595acd44747e36d344b7d7df8d8",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_QHypergeometric_BasicSummations.lean.log"
+    },
+    {
+      "file": "DLMF/QHypergeometric/BilateralSummations.lean",
+      "exitCode": 0,
+      "seconds": 4.17,
+      "sha256": "f20cf9ba6e5a8c3a2a78d38f0dfcbb87f5ed72002cd6106f0ac5b1e26f611206",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_QHypergeometric_BilateralSummations.lean.log"
+    },
+    {
+      "file": "DLMF/QHypergeometric/BilateralTransformations.lean",
+      "exitCode": 0,
+      "seconds": 4.02,
+      "sha256": "13cc6c15c0331c9bdd3adaf4870112acb73634893475fcdaced9d875ccaef8ac",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_QHypergeometric_BilateralTransformations.lean.log"
+    },
+    {
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "exitCode": 0,
+      "seconds": 10.65,
+      "sha256": "d4733bd6f76f6dd3336af1c3cb5a08ca96bd6b35cf654a30885346b4977f1d04",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_QHypergeometric_Calculus.lean.log"
+    },
+    {
+      "file": "DLMF/QHypergeometric/Convergence.lean",
+      "exitCode": 0,
+      "seconds": 10.59,
+      "sha256": "b746c961716fdf956789215df2741e6dff16ea60cd343ab7694ccbaf8f28c700",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_QHypergeometric_Convergence.lean.log"
+    },
+    {
+      "file": "DLMF/QHypergeometric/Elementary.lean",
+      "exitCode": 0,
+      "seconds": 13.37,
+      "sha256": "7352904f57c9ca7dfea9bf9c07d9e4c7c2a344a2adc06ae9f09b62fc64032048",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_QHypergeometric_Elementary.lean.log"
+    },
+    {
+      "file": "DLMF/QHypergeometric/HigherSummations.lean",
+      "exitCode": 0,
+      "seconds": 14.15,
+      "sha256": "6e682a844ce653286bb6772b22270f7e59e82cea771fd7abdd2eb7e4c448dcdd",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_QHypergeometric_HigherSummations.lean.log"
+    },
+    {
+      "file": "DLMF/QHypergeometric/Integrals.lean",
+      "exitCode": 0,
+      "seconds": 3.25,
+      "sha256": "c3016f9fabf00e751d52da7165853614a0dad89510cc78c2cc9195f2aca3b781",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_QHypergeometric_Integrals.lean.log"
+    },
+    {
+      "file": "DLMF/QHypergeometric/Transformations.lean",
+      "exitCode": 0,
+      "seconds": 4.82,
+      "sha256": "a6c9a6dd6472f1708c92e1b72086fe0deaa3350c375189a1f27c766a561287ef",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_QHypergeometric_Transformations.lean.log"
+    },
+    {
+      "file": "DLMF/RiemannTheta/Basic/Definitions.lean",
+      "exitCode": 0,
+      "seconds": 3.01,
+      "sha256": "8918d8ae54d4bcf68f291725d8190011b21f5ee85e16bbf94dcd2eb9b1addbdd",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_RiemannTheta_Basic_Definitions.lean.log"
+    },
+    {
+      "file": "DLMF/RiemannTheta/Convergence.lean",
+      "exitCode": 0,
+      "seconds": 4.47,
+      "sha256": "97fca15cf675d77ef826d056b8fcf9f8254f0a9781d7e1cd74947b2a9cca9ee4",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_RiemannTheta_Convergence.lean.log"
+    },
+    {
+      "file": "DLMF/RiemannTheta/Products.lean",
+      "exitCode": 0,
+      "seconds": 10.12,
+      "sha256": "d647924b5cf6a364672961278fb81bfd59179db981b58f55b9b5bd1f89a4a006",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_RiemannTheta_Products.lean.log"
+    },
+    {
+      "file": "DLMF/Selberg/Applications.lean",
+      "exitCode": 0,
+      "seconds": 4.91,
+      "sha256": "797c052568d62f56b0363dbbf586db65593c30be8d045dd6bd9fef3a3b5c57c8",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Selberg_Applications.lean.log"
+    },
+    {
+      "file": "DLMF/Spheroidal/Angular.lean",
+      "exitCode": 0,
+      "seconds": 16.17,
+      "sha256": "416ace5b7946315ffe8af5acd8daa1dc9454717c03fe553a3043d09c359e2eeb",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Spheroidal_Angular.lean.log"
+    },
+    {
+      "file": "DLMF/Spheroidal/Basic/Ferrers.lean",
+      "exitCode": 0,
+      "seconds": 3.64,
+      "sha256": "86da5250c129a9f1870d43f77dc71f7e781b62c6d37441ea1da448419228444c",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Spheroidal_Basic_Ferrers.lean.log"
+    },
+    {
+      "file": "DLMF/Spheroidal/Existence.lean",
+      "exitCode": 0,
+      "seconds": 3.62,
+      "sha256": "e6aa8b8403307890fa269d2ee15b32662438dabb9553581373febf09ddc64ea1",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Spheroidal_Existence.lean.log"
+    },
+    {
+      "file": "DLMF/Spheroidal/P3lParity.lean",
+      "exitCode": 0,
+      "seconds": 5.3,
+      "sha256": "a486e8d87a3fef3561c42675d18e1b8f464970ccb7a19503d0c367c8a05db38c",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Spheroidal_P3lParity.lean.log"
+    },
+    {
+      "file": "DLMF/Spheroidal/P3lSpectrum/EntireEigenfunctions.lean",
+      "exitCode": 0,
+      "seconds": 15.35,
+      "sha256": "c4e86c3103f264d1a1a5b57ebca13096080298ca4e3c1555a7334487b6fd7190",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Spheroidal_P3lSpectrum_EntireEigenfunctions.lean.log"
+    },
+    {
+      "file": "DLMF/Spheroidal/P3lSpectrum/ParameterDependence.lean",
+      "exitCode": 0,
+      "seconds": 13.73,
+      "sha256": "e8f2f9ea6b67b0292c01e3bcb944e1ae5755e9e19a4e7dbb73df167991e84ce3",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Spheroidal_P3lSpectrum_ParameterDependence.lean.log"
+    },
+    {
+      "file": "DLMF/Struve/AngerWeber/LommelConnections.lean",
+      "exitCode": 0,
+      "seconds": 11.38,
+      "sha256": "2d42f29c89a165d2d1796c9685e0e9fc3d754414d74fffda71cb05a8c0d2f027",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Struve_AngerWeber_LommelConnections.lean.log"
+    },
+    {
+      "file": "DLMF/Struve/Asymptotics/ScaledExpansions.lean",
+      "exitCode": 0,
+      "seconds": 26.73,
+      "sha256": "ac2155dd439055617fa8578532576ece8cfec25708f41249026c63ef0241fee6",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Struve_Asymptotics_ScaledExpansions.lean.log"
+    },
+    {
+      "file": "DLMF/Struve/Basic/Functions.lean",
+      "exitCode": 0,
+      "seconds": 3.04,
+      "sha256": "869584ce5d1f3ab1d66e5fbd91ce03a9813778fa2a180b32992505f5eff39381",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Struve_Basic_Functions.lean.log"
+    },
+    {
+      "file": "DLMF/Struve/LargeOrderTools.lean",
+      "exitCode": 0,
+      "seconds": 6.32,
+      "sha256": "fee9c5551bf3bbdf2cd53ee938bf357b5ddbd683a49d6619485b87d1561ac70e",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Struve_LargeOrderTools.lean.log"
+    },
+    {
+      "file": "DLMF/Struve/Lommel.lean",
+      "exitCode": 0,
+      "seconds": 27.8,
+      "sha256": "24b96d915667c260b89b6b5a4d50641b1f76f4baa2de5c0904f95932ce0d35d3",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Struve_Lommel.lean.log"
+    },
+    {
+      "file": "DLMF/Struve/Representations/BarnesAndSonine.lean",
+      "exitCode": 0,
+      "seconds": 13.22,
+      "sha256": "f09d25a97f36c97acb16f806c364c5615df560168fd86e1203f0c7b2e7c019d9",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Struve_Representations_BarnesAndSonine.lean.log"
+    },
+    {
+      "file": "DLMF/Struve/SeriesAndEquations.lean",
+      "exitCode": 0,
+      "seconds": 9.51,
+      "sha256": "9ab5072ae52a229ab62ad92563c0fc65fa37db1e9a252f607f5d618114735729",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Struve_SeriesAndEquations.lean.log"
+    },
+    {
+      "file": "DLMF/Theta/Basic.lean",
+      "exitCode": 0,
+      "seconds": 2.49,
+      "sha256": "2635b23ce4773ba575acf7f99e57b39af2c8110b16ec12f305792e5f815ca87b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Theta_Basic.lean.log"
+    },
+    {
+      "file": "DLMF/Theta/Basic/PowerSeries.lean",
+      "exitCode": 0,
+      "seconds": 2.94,
+      "sha256": "21237b8de1a35cd2669ea61029a220a0f42b3879bd3f2f9cee40ad2e14881d26",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Theta_Basic_PowerSeries.lean.log"
+    },
+    {
+      "file": "DLMF/Theta/PowerSeries.lean",
+      "exitCode": 0,
+      "seconds": 10.33,
+      "sha256": "3d01c8c8cfdda1620a30b168a645ac789f08420f60003244d255d84a5ea90dcb",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Theta_PowerSeries.lean.log"
+    },
+    {
+      "file": "DLMF/Theta/Products/LogDerivativesAndDoubleProducts.lean",
+      "exitCode": 0,
+      "seconds": 11.42,
+      "sha256": "9163d3ee22068c52b9f6961305a6a988e4e26824ccd7316caebcbcab4978cb09",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Theta_Products_LogDerivativesAndDoubleProducts.lean.log"
+    },
+    {
+      "file": "DLMF/Zeta/IntegerArguments.lean",
+      "exitCode": 0,
+      "seconds": 10.29,
+      "sha256": "9671c1a7beda843735e2faf9b13598b39518246f42ccd5ec7a2739abda1581f3",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Zeta_IntegerArguments.lean.log"
+    },
+    {
+      "file": "DLMF/Zeta/IntegralReps/ElementaryKernels.lean",
+      "exitCode": 0,
+      "seconds": 13.63,
+      "sha256": "c5a06f781518c3d5325d1e1cf82db5d90644c21893aaf9c917fed08ab7b490ae",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Zeta_IntegralReps_ElementaryKernels.lean.log"
+    },
+    {
+      "file": "DLMF/Zeta/Lerch.lean",
+      "exitCode": 0,
+      "seconds": 4.48,
+      "sha256": "7584d3ce1762d4a12da07681a9df0c489e88de48c9d2108091c898537adf7028",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Zeta_Lerch.lean.log"
+    },
+    {
+      "file": "DLMF/Zeta/Polylog.lean",
+      "exitCode": 0,
+      "seconds": 12.99,
+      "sha256": "33e8b64d1e9c854b327e1447134bcc289a0d5375e30885d40a625fd7f14a96c8",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Zeta_Polylog.lean.log"
+    },
+    {
+      "file": "DLMF/Zeta/Q25bLerchContinuation.lean",
+      "exitCode": 0,
+      "seconds": 4.98,
+      "sha256": "427363e5bfd76438c045c743a00e72813830972ca3f4df64030476e05f9de43c",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Zeta_Q25bLerchContinuation.lean.log"
+    },
+    {
+      "file": "DLMF/Zeta/Riemann.lean",
+      "exitCode": 0,
+      "seconds": 13.97,
+      "sha256": "2a1ebdac25606afa2473b9f59087e6838e0e21b83dc3392cffbf5702b3a24344",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMF_Zeta_Riemann.lean.log"
+    },
+    {
+      "file": "DLMFMathlib.lean",
+      "exitCode": 0,
+      "seconds": 3.15,
+      "sha256": "dbf0096964aa50e86b3d60730a1b6f895156241a2e9f485fc4e4abd083328ec9",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Asymptotics/IntegralComparison.lean",
+      "exitCode": 0,
+      "seconds": 4.45,
+      "sha256": "47c2961deb4f1b3952a72c4683f495c36919adb26ec147aa82b9d15e8b7e3b4e",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_Asymptotics_IntegralComparison.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonSector.lean",
+      "exitCode": 0,
+      "seconds": 8.1,
+      "sha256": "5db73fc6488840e17b3fe99c5a4e3550c16c1f7616326a8392040eec1ea52c44",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_Asymptotics_WatsonSector.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Analysis/BooleSummation.lean",
+      "exitCode": 0,
+      "seconds": 4.79,
+      "sha256": "68093b0c18a9b40d589ede7e19173883d3a87b9ce7b2617ddc972f251b7968ef",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_BooleSummation.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Calculus/DifferentialOperators.lean",
+      "exitCode": 0,
+      "seconds": 2.23,
+      "sha256": "4644514c513852e914dd7da4b0cd793821e894377de404009fe46be2e9f07218",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_Calculus_DifferentialOperators.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "exitCode": 0,
+      "seconds": 5.11,
+      "sha256": "2acbadb2ad7de6e4729ec13655281c7843187ea613fdfe5bb705cb040697d7ec",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_Complex_ParametricHolomorphy.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Complex/SegmentPrimitive.lean",
+      "exitCode": 0,
+      "seconds": 3.05,
+      "sha256": "4da5b20bc2dcfa840cfb5c62db5888f204c68f90b63d43a799e4e9e33c997ad8",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_Complex_SegmentPrimitive.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Complex/SeparatingContour.lean",
+      "exitCode": 0,
+      "seconds": 3.08,
+      "sha256": "0529e0c9ee503fc18081fe9f6b7dc7e548edc66f8f8e88c050b63d3384f94385",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_Complex_SeparatingContour.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Analysis/EulerMaclaurin.lean",
+      "exitCode": 0,
+      "seconds": 4.51,
+      "sha256": "be702d804823747be41eec6204b448b1ce109ed178d71a4aa558c53ce281b523",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_EulerMaclaurin.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Analysis/ODE/P2lSturmLiouville.lean",
+      "exitCode": 0,
+      "seconds": 6.12,
+      "sha256": "c1c9e6ebce2a496fd4aab5e51217670ff14b8d4cf58d4208665f35d12989f6fb",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_ODE_P2lSturmLiouville.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Analysis/ODE/P2sSturmOsc.lean",
+      "exitCode": 0,
+      "seconds": 6.26,
+      "sha256": "29d7de726d301f4811da1f85733fe229f596bf3a49d9f823956d55eaee23d7e5",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_ODE_P2sSturmOsc.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Analysis/ODE/Singularities.lean",
+      "exitCode": 0,
+      "seconds": 3.9,
+      "sha256": "c174dfe2be247dfacab95de4ac0ca2d2e7c0c9ce93ef5b0d9d8f49f4e442d5fd",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_ODE_Singularities.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Analysis/ODE/Wronskian.lean",
+      "exitCode": 0,
+      "seconds": 2.19,
+      "sha256": "9e62e6da45310aebd5a57c8c0766ff32b9b6e751760f5db3337b24829cca80ce",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_ODE_Wronskian.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Analysis/SpecialFunctions/Pow/ComplexReal.lean",
+      "exitCode": 0,
+      "seconds": 2.69,
+      "sha256": "b29f36d1ea587b42b4534641989e4a852c4e8af82a1f289f257cd78f1ab98dbb",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Analysis_SpecialFunctions_Pow_ComplexReal.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/Combinatorics/Q26bSurjections.lean",
+      "exitCode": 0,
+      "seconds": 2.27,
+      "sha256": "6162dc9da72c9291dffa3e26c591f1803b7e6001ac3df4cff5bec1d61b038a4a",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_Combinatorics_Q26bSurjections.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/MeasureTheory/Integral/HalfLine.lean",
+      "exitCode": 0,
+      "seconds": 2.42,
+      "sha256": "92c365f74bf734ec95e81b2014398df35087169b8ddd254a9915f5c85e3f2a40",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_MeasureTheory_Integral_HalfLine.lean.log"
+    },
+    {
+      "file": "DLMFMathlib/RingTheory/PowerSeriesEvaluation.lean",
+      "exitCode": 0,
+      "seconds": 2.42,
+      "sha256": "0c35c4369b1c5b98d679a9b4ca8250a8b04d69cd1ac4a29f9bba054a9edd761b",
+      "log": "/tmp/DLMF-cleanup-20261030/strict/DLMFMathlib_RingTheory_PowerSeriesEvaluation.lean.log"
+    }
+  ],
   "sourceAudit": {
     "libraryFiles": 1204,
     "allLeanFiles": 1206,
-    "libraryLines": 539825,
+    "libraryLines": 539837,
     "declarationKinds": {
       "theorem": 17853,
       "def": 3349,
@@ -4901,18 +6954,7 @@
       "scripts/DumpDLMF.lean"
     ],
     "missingModuleDoc": [],
-    "missingModuleTitle": [
-      "DLMF/AlgebraicAnalytic.lean",
-      "DLMF/AsymptoticApproximations.lean",
-      "DLMF/Bessel/Generating.lean",
-      "DLMF/Bessel/Sonine.lean",
-      "DLMF/CoalescingSaddles.lean",
-      "DLMF/Coulomb.lean",
-      "DLMF/GeneralizedHypergeometric/MathlibCoverage.lean",
-      "DLMF/MatrixArgument.lean",
-      "DLMF/Painleve.lean",
-      "DLMF/WignerSymbols.lean"
-    ],
+    "missingModuleTitle": [],
     "moduleDocAfterDeclarations": [],
     "filesOver1000": [
       {
@@ -5517,7 +7559,7 @@
       "DLMFMathlib/NumberTheory/T27aPrimeNumberTheorem.lean"
     ],
     "publicRoundPrefixed": 4936,
-    "linesOver100": 4413,
+    "linesOver100": 4407,
     "repeatedEightLineFragmentGroups": 483,
     "lowDetailLargeModuleDocs": [
       {
@@ -6736,5 +8778,14 @@
         "lines": 627
       }
     ]
+  },
+  "apiMigrationNotes": [
+    "Unqualified names in apiRenames are contextual replacements. Structure fields named wronskian are retained; wronskianC keeps its distinct spectral convention."
+  ],
+  "auditPrograms": {
+    "CompiledReview.lean": "import DLMF\nimport DLMFMathlib\nimport Lean\n\nopen Lean Meta\nset_option maxRecDepth 100000\nset_option maxHeartbeats 0\n\nprivate def projectModule (mod : Name) : Bool :=\n  mod.getRoot == `DLMF || mod.getRoot == `DLMFMathlib\n\nprivate def upstreamModule (mod : Name) : Bool :=\n  [`Mathlib, `TauCeti, `ToMathlib, `Carlson, `Pochhammer, `Dirichlet].contains mod.getRoot\n\nprivate def constKind : ConstantInfo → String\n  | .thmInfo _ => \"theorem\"\n  | .defnInfo _ => \"def\"\n  | .opaqueInfo _ => \"opaque\"\n  | .inductInfo _ => \"inductive\"\n  | .ctorInfo _ => \"constructor\"\n  | _ => \"other\"\n\nprivate partial def unusedPairs (ty value : Expr) (idx : Nat := 0) : Array (Nat × Name × BinderInfo) :=\n  match ty.consumeMData, value.consumeMData with\n  | .forallE n _ b bi, .lam _ _ v _ =>\n    let here := if !b.hasLooseBVar 0 && !v.hasLooseBVar 0 then #[(idx,n,bi)] else #[]\n    here ++ unusedPairs b v (idx+1)\n  | _, _ => #[]\n\n#eval show CoreM Unit from do\n  let env := (← getEnv).setExporting false\n  let all := env.constants.toList\n  let mut upstream : Std.HashMap UInt64 (Array (Name × Expr × Name)) := {}\n  for (n, ci) in all do\n    let some mi := env.getModuleIdxFor? n | continue\n    let mod := env.header.moduleNames[mi.toNat]!\n    unless upstreamModule mod && ci.isTheorem do continue\n    upstream := upstream.insert ci.type.hash\n      ((upstream[ci.type.hash]?).getD #[] |>.push (n,ci.type,mod))\n  let mut rows : Array Json := #[]\n  let mut fields : Array Json := #[]\n  let mut defs : Std.HashMap UInt64 (Array (Name × Expr × Expr)) := {}\n  let mut defDuplicates : Array Json := #[]\n  let mut hypotheses : Array Json := #[]\n  for (n, ci) in all do\n    let some mi := env.getModuleIdxFor? n | continue\n    let mod := env.header.moduleNames[mi.toNat]!\n    unless projectModule mod do continue\n    let some r ← findDeclarationRanges? n | continue\n    let doc ← findDocString? env n\n    let user := (privateToUserName? n).getD n\n    let axs ← if ci.isTheorem then collectAxioms n else pure #[]\n    let isPrivate := (privateToUserName? n).isSome\n    let ms := ((upstream[ci.type.hash]?).getD #[]).filterMap fun (un,ty,md) =>\n      if ci.type == ty then some <| Json.mkObj [(\"name\",toJson un.toString),(\"module\",toJson md.toString)] else none\n    let (resultSort, isProof) ← (do\n      let ip ← isProp ci.type\n      let rs ← forallTelescope ci.type fun _ body => do\n        let body ← whnf body\n        return match body with\n        | .sort l => if l == Level.zero then \"Prop\" else \"Sort\"\n        | _ => \"data\"\n      return (rs,ip)).run'\n    rows := rows.push <| Json.mkObj [\n      (\"name\",toJson n.toString),(\"userName\",toJson user.toString),(\"module\",toJson mod.toString),\n      (\"private\",toJson isPrivate),(\"kind\",toJson (constKind ci)),(\"resultSort\",toJson resultSort),\n      (\"isProof\",toJson isProof),(\"line\",toJson r.range.pos.line),(\"endLine\",toJson r.range.endPos.line),\n      (\"column\",toJson r.range.pos.column),(\"doc\",toJson doc),(\"typeHash\",toJson ci.type.hash),\n      (\"axioms\",toJson (axs.toList.map Name.toString)),(\"upstreamMatches\",toJson ms)]\n    if let some si := getStructureInfo? env n then\n      for fi in si.fieldInfo do\n        if fi.subobject?.isSome then continue\n        let fd ← findDocString? env fi.projFn\n        let fr ← findDeclarationRanges? fi.projFn\n        let fci := env.find? fi.projFn\n        let fclass ← match fci with\n          | none => pure \"unknown\"\n          | some fc => (do\n            if ← isProp fc.type then return \"proof\"\n            forallTelescope fc.type fun _ body => do\n              let body ← whnf body\n              return match body with\n              | .sort .zero => \"predicate\"\n              | .sort _ => \"type\"\n              | _ => \"data\").run'\n        fields := fields.push <| Json.mkObj [\n          (\"structure\",toJson user.toString),(\"field\",toJson fi.fieldName.toString),\n          (\"projection\",toJson fi.projFn.toString),(\"module\",toJson mod.toString),\n          (\"line\",toJson (fr.map (·.range.pos.line))), (\"doc\",toJson fd),(\"class\",toJson fclass)]\n    if !isPrivate then\n      if let .defnInfo d := ci then\n        let possible := (defs[d.value.hash]?).getD #[]\n        for (dn,dt,dv) in possible do\n          if ci.type == dt && d.value == dv then\n            defDuplicates := defDuplicates.push <| Json.mkObj [(\"name\",toJson n.toString),(\"other\",toJson dn.toString)]\n        defs := defs.insert d.value.hash (possible.push (n,ci.type,d.value))\n    unless ci.isTheorem && !axs.contains `sorryAx do continue\n    let some val := ci.value? (allowOpaque := true) | continue\n    let us := unusedPairs ci.type val\n    if us.isEmpty then continue\n    let hs ← (forallTelescope ci.type fun xs _ => do\n      let mut hs : Array Json := #[]\n      for (i,bname,bi) in us do\n        if i >= xs.size then continue\n        let dom ← inferType xs[i]!\n        let prop ← isProp dom\n        let pp ← ppExpr dom\n        hs := hs.push <| Json.mkObj [\n          (\"name\",toJson n.toString),(\"userName\",toJson user.toString),\n          (\"module\",toJson mod.toString),(\"line\",toJson r.range.pos.line),\n          (\"private\",toJson isPrivate),(\"index\",toJson i),(\"binder\",toJson bname.toString),\n          (\"isProp\",toJson prop),(\"isInstance\",toJson bi.isInstImplicit),\n          (\"type\",toJson pp.pretty)]\n      return hs).run'\n    hypotheses := hypotheses ++ hs\n  IO.FS.writeFile \"/tmp/DLMF-cleanup-20261030/compiled.json\" (toJson rows).compress\n  IO.FS.writeFile \"/tmp/DLMF-cleanup-20261030/fields.json\" (toJson fields).compress\n  IO.FS.writeFile \"/tmp/DLMF-cleanup-20261030/identical-definitions.json\" (toJson defDuplicates).compress\n  IO.FS.writeFile \"/tmp/DLMF-cleanup-20261030/unused-binders.json\" (toJson hypotheses).compress\n  IO.println s!\"rows={rows.size}; fields={fields.size}; exact definitions={defDuplicates.size}; unused binders={hypotheses.size}\"\n",
+    "match_audit.py": "from pathlib import Path\nimport json,re,collections\np=Path('/tmp/DLMF-cleanup-20261030')\nsource=json.loads((p/'source.json').read_text());compiled=json.loads((p/'compiled.json').read_text())\nidx=collections.defaultdict(list)\nfor c in compiled:\n key=(c['module'],c['userName'].split('.')[-1]);idx[key].append(c)\nmatched=[];unmatched=[]\nfor d in source['declarations']:\n if not (d['file'].startswith(('DLMF/','DLMFMathlib/')) or d['file'] in ['DLMF.lean','DLMFMathlib.lean']):continue\n mod=d['file'][:-5].replace('/','.')\n dn=d['name'].removeprefix('_root_.')\n candidates=[c for c in idx[(mod,dn.split('.')[-1])] if c['userName']==dn or c['userName'].endswith('.'+dn)]\n if not candidates:\n  unmatched.append({k:d[k] for k in ['name','file','line','kind']});continue\n c=min(candidates,key=lambda c:abs(c['line']+1-d['line']))\n if abs(c['line']+1-d['line'])>50:\n  unmatched.append(dict(file=d['file'],line=d['line'],name=d['name'],candidate=c));continue\n matched.append(dict(d,compiledName=c['name'],fullName=c['userName'],formalDocstring=c['doc'],axioms=c['axioms']))\n(p/'matched-source.json').write_text(json.dumps(matched,ensure_ascii=False))\n(p/'unmatched-source.json').write_text(json.dumps(unmatched,ensure_ascii=False,indent=2))\nfields=json.loads((p/'fields.json').read_text())\nnonstandard=[dict(name=d['fullName'],axioms=d['axioms']) for d in matched if set(d['axioms'])-{'propext','Classical.choice','Quot.sound','sorryAx'}]\nmissingdocs=[d['fullName'] for d in matched if not d['formalDocstring']]\ndef norm(s):return re.sub(r'[\\W_]+','',s).lower()\nnameonly=[d['fullName'] for d in matched if norm(d['formalDocstring'] or '') in [norm(d['name']),norm(d['fullName'])]]\nsummary=dict(explicitNamedDeclarations=len(matched),sourceKinds=dict(collections.Counter(d['kind'] for d in matched)),unmatchedSource=unmatched,missingDocstrings=missingdocs,nameOnlyDocstrings=nameonly,structureFields=len(fields),missingStructureFieldDocs=[f for f in fields if not f['doc']],nonstandardAxioms=nonstandard,sourceTheoremsDependingOnAdmissions=sum(d['kind'] in ['theorem','lemma'] and 'sorryAx' in d['axioms'] for d in matched),lowercasePredicateDefinitions=[c['userName'] for c in compiled if c['kind']=='def' and c['resultSort']=='Prop' and c['userName'].split('.')[-1][0].islower() and c['name'] in {d['compiledName'] for d in matched}])\n(p/'compiled-summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\\n')\nprint(json.dumps({k:v for k,v in summary.items() if k!='unmatchedSource'},ensure_ascii=False,indent=2));print('Unmatched',len(unmatched))\n",
+    "strict_check.py": "from pathlib import Path\nimport concurrent.futures as cf,hashlib,json,subprocess,time\nout=Path('/tmp/DLMF-cleanup-20261030'); logs=out/'strict';logs.mkdir(exist_ok=True)\nfiles=set(subprocess.check_output(['git','diff','--name-only','--diff-filter=ACMRT','3989f9ed5aaac53a742d6ba239deeb32708c9b60'],text=True).splitlines())\nfiles.update(subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True).splitlines())\nfiles=sorted(f for f in files if f.endswith('.lean') and Path(f).is_file())\n(out/'strict-files.json').write_text(json.dumps(files,indent=2)+'\\n')\ndef check(f):\n t=time.monotonic();log=logs/(f.replace('/','_')+'.log')\n with log.open('w') as dest:\n  r=subprocess.run(['lake','env','lean','-DautoImplicit=false','-DrelaxedAutoImplicit=false',f],stdout=dest,stderr=subprocess.STDOUT)\n return dict(file=f,exitCode=r.returncode,seconds=round(time.monotonic()-t,2),sha256=hashlib.sha256(Path(f).read_bytes()).hexdigest(),log=str(log))\nresults=[]\nwith cf.ThreadPoolExecutor(max_workers=4) as pool:\n for r in pool.map(check,files):\n  results.append(r);(out/'strict-results.json').write_text(json.dumps(results,indent=2)+'\\n')\n  if r['exitCode'] or len(results)%25==0:print(len(results),'/',len(files),r['file'],r['exitCode'],flush=True)\nprint('Checked',len(results),'failures',sum(r['exitCode']!=0 for r in results),flush=True)\nraise SystemExit(any(r['exitCode'] for r in results))\n",
+    "check_documentation.py": "from pathlib import Path\nimport re,json\nps=[Path('DEFINITIONS.md'),Path('DEFINITIONS2.md'),*Path('.').glob('DLMF*Acquisition.md'),Path('MathlibReview20261030.md')]\nlengths={};bad=[];n=0\nfor p in ps:\n for m in re.finditer(r'\\]\\(([^)\\s]+\\.lean)(?:#L(\\d+))?\\)',p.read_text()):\n  if '://' in m[1]:continue\n  f=Path(m[1]);n+=1\n  if not f.is_file():bad.append(dict(document=str(p),file=str(f),reason='missing'));continue\n  if m[2]:\n   if f not in lengths:lengths[f]=len(f.read_text().splitlines())\n   if not 0<int(m[2])<=lengths[f]:bad.append(dict(document=str(p),file=str(f),line=int(m[2]),length=lengths[f]))\nx=dict(checkedLinks=n,issues=bad);Path('/tmp/DLMF-cleanup-20261030/documentation-links.json').write_text(json.dumps(x,indent=2)+'\\n');print(json.dumps(x,indent=2));raise SystemExit(bool(bad))\n"
   }
 }

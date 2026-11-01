@@ -1,0 +1,2533 @@
+{
+  "format": 1,
+  "date": "2026-10-30",
+  "round": "parallel-distribution-elliptic-qseries-zeta-and-struve-proofs",
+  "baseCommit": "560b9475f35bbc6e4f5296631298859825091f7f",
+  "startedAtUTC": "2026-10-30 20:20:12 UTC",
+  "finishedAtUTC": "2026-11-01 06:34:33 UTC",
+  "baseline": {
+    "previousCleanup": "ReviewCleanup20261030.json",
+    "directAdmissions": 1552
+  },
+  "admissions": {
+    "before": 1552,
+    "after": 1482,
+    "removed": 70,
+    "byArea": {
+      "AlgebraicAnalytic": {
+        "before": 206,
+        "after": 180
+      },
+      "AsymptoticApproximations": {
+        "before": 104,
+        "after": 99
+      },
+      "EllipticIntegrals": {
+        "before": 167,
+        "after": 142
+      },
+      "GeneralizedHypergeometric": {
+        "before": 95,
+        "after": 93
+      },
+      "MatrixArgument": {
+        "before": 36,
+        "after": 35
+      },
+      "OrthogonalPolynomials": {
+        "before": 25,
+        "after": 24
+      },
+      "QHypergeometric": {
+        "before": 90,
+        "after": 85
+      },
+      "Struve": {
+        "before": 10,
+        "after": 8
+      },
+      "Zeta": {
+        "before": 45,
+        "after": 42
+      }
+    }
+  },
+  "completed": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.iterate_primitive_eq_integral",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+      "line": 349,
+      "proofLines": 29,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.4.31 (repeated integrals): applying `g ↦ (x ↦ ∫ₐˣ g)` `n + 1` times to `f` gives\n`(1/n!) ∫ₐᵇ (b - x)ⁿ f(x) dx` at `b`. Stated for `f` continuous (DLMF: continuous or piecewise\ncontinuous)."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.hasDerivAt_improper_integral_of_tendstoUniformlyOn",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "line": 428,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.5.23–1.5.24 (Leibniz's rule for infinite integrals, `d = +∞`): suppose `f` and\n`∂f/∂x` are continuous on `[a, b] × [c, ∞)`, `∫_c^∞ f(x, y) dy` converges to `I(x)` for\n`x ∈ [a, b]`, and `∫_c^∞ ∂f/∂x dy` converges to `J(x)` uniformly on `[a, b]` (1.5.23, stated\nas uniform convergence of `∫_c^R` as `R → ∞`, which is equivalent to the uniform smallness of\nthe tails). The partial derivative is required to exist for interior `x` and all `y ≥ c`;\ncontinuity of a totalized derivative alone does not assert this. Then `I' = J` on `(a, b)`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.setIntegral_normalDomain_fst",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "line": 457,
+      "proofLines": 28,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.5.30–1.5.32: for `f` continuous on `D = {a ≤ x ≤ b, φ₁(x) ≤ y ≤ φ₂(x)}` with\n`φ₁ ≤ φ₂` continuous, `∬_D f dA = ∫ₐᵇ (∫_{φ₁(x)}^{φ₂(x)} f(x, y) dy) dx`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.setIntegral_normalDomain_snd",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "line": 494,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.5.33–1.5.34: for `f` continuous on `D = {c ≤ y ≤ d, ψ₁(y) ≤ x ≤ ψ₂(y)}` with\n`ψ₁ ≤ ψ₂` continuous, `∬_D f dA = ∫_c^d (∫_{ψ₁(y)}^{ψ₂(y)} f(x, y) dx) dy`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.setIntegral_normalDomain_three",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "line": 546,
+      "proofLines": 58,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.5.37: triple integrals over `{a ≤ x ≤ b, φ₁(x) ≤ y ≤ φ₂(x), ψ₁(x, y) ≤ z ≤ ψ₂(x, y)}`\nare repeated integrals, for `f` continuous on the region and continuous bounds."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.not_exists_sqrt_branch_punctured",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "line": 300,
+      "proofLines": 49,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF §1.10(vi): `z = 0` is a branch point of `√z`: there is no continuous branch of `√z` in\nany punctured neighbourhood of `0`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.prodConvergesDLMF_norm_iff",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "line": 544,
+      "proofLines": 52,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF §1.10(ix): the product `∏_{n ≥ 1} (1 + aₙ)` converges absolutely (that is,\n`∏ (1 + |aₙ|)` converges) iff `∑_{n ≥ 1} |aₙ|` converges."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.prod_mtest",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "line": 615,
+      "proofLines": 59,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF §1.10(ix) (`M`-test for products, second form): the conclusion of 1.10.20–1.10.21 holds\nif instead `|aₙ(z)| ≤ Mₙ` for all `n` and `z ∈ D`, with `∑ Mₙ < ∞`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_gaussian_integral_of_growth",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/DiracDelta.lean",
+      "line": 117,
+      "proofLines": 44,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.17.6 under DLMF's hypotheses: `φ` continuous at `a`, locally integrable, and\n`∫ e^{-n(x-a)²} φ(x) dx` absolutely convergent for some (hence all larger) `n`; this covers\n`φ(x) = O(e^{αx²})`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourier_inversion_dlmf",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/DiracDelta.lean",
+      "line": 183,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.17.8 (Fourier inversion in the normalization of 1.14.1, 1.14.4):\n`(2π)⁻¹ ∫ e^{-iat} (∫ φ(x) e^{itx} dx) dt = φ(a)` for `φ` integrable, continuous, with\nintegrable Fourier transform."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dirichletKernel_eq",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/DiracDelta.lean",
+      "line": 342,
+      "proofLines": 37,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.17.20 (closed form): `(2π)⁻¹ Σ_{k=-n}^{n} e^{ikθ} = sin((n+½)θ) / (2π sin(θ/2))`\nwhen `sin(θ/2) ≠ 0`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.delta_not_regular",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 225,
+      "proofLines": 27,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "§1.16(iii): the Dirac delta distribution is singular: it is not `Λ_f` for any locally\nintegrable `f`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.iteratedLineDerivOp_ofFun_apply",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 313,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.16.27: the distributional derivative `D^k f` of a locally integrable function on\n`ℝⁿ` acts by `⟨D^k f, φ⟩ = (-1)^{|k|} ∫ f(x) φ^{(k)}(x) dx`. Here the multi-index `k` is\ngiven as the list `m : Fin r → ℝⁿ` of its `r = |k|` coordinate directions, `D^k` is Mathlib's\niterated directional derivative `∂^{m}` on `𝓓'` and `φ^{(k)} = ∂^{m} φ`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dlmfFourierSchwartz_polyDiffOp",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 627,
+      "proofLines": 16,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.16.33: `𝓕(P(𝐃)φ)(𝐱) = P(-𝐱) 𝓕φ(𝐱)` on Schwartz space."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dlmfFourierSchwartz_polyMul",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 648,
+      "proofLines": 38,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.16.34: `𝓕(Pφ)(𝐱) = P(𝐃) 𝓕φ(𝐱)` on Schwartz space."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dlmfFourierTempered_polyDiffOp",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 692,
+      "proofLines": 33,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.16.36: `⟨𝓕(P(𝐃)u), φ⟩ = ⟨P₋ 𝓕(u), φ⟩ = ⟨𝓕(u), P₋φ⟩` for a tempered\ndistribution `u`, `P₋(𝐱) = P(-𝐱)`, derivatives in the sense of distributions."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dlmfFourierTempered_polyMul",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 733,
+      "proofLines": 27,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.16.37: `⟨𝓕(Pu), φ⟩ = ⟨P(𝐃) 𝓕(u), φ⟩` for a tempered distribution `u`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dlmfFourierTempered_one",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 780,
+      "proofLines": 26,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.16.41–1.16.43: `⟨𝓕(1), φ⟩ = √(2π) φ(0)`, that is `𝓕(1) = √(2π) δ` (1.16.42),\nconventionally `(2π)^{-1} ∫ e^{ixt} dt = δ(x)` (1.16.43)."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.deriv_signTempered",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 811,
+      "proofLines": 44,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The tempered form of DLMF 1.16.45: `sign' = 2δ`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dlmfFourierTempered_deriv",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 891,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The one-variable case of DLMF 1.16.36 with `P(𝐃) = d/dx`, `P₋(x) = -ix`:\n`𝓕(u') = (x/i) 𝓕(u)` for a tempered distribution `u` on the line."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.discr_eq_prod_roots",
+      "file": "DLMF/AlgebraicAnalytic/Polynomials/Zeros.lean",
+      "line": 247,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.11.9: the discriminant of `f = a_n ∏ (z - z_j)` is\n`D = a_n^{2n-2} ∏_{j<k} (z_j - z_k)²` (Mathlib's `Polynomial.discr`; the cases `n = 2, 3` are\nMathlib's `Polynomial.discr_of_degree_eq_two` and `Cubic.discr_eq_prod_three_roots`). This adapter combines Tau Ceti’s\n`TauCeti.discr_C_mul` and `Polynomial.discr_prod_X_sub_C`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.hermiteFunction_eigen",
+      "file": "DLMF/AlgebraicAnalytic/Spectral/Theory.lean",
+      "line": 374,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.18.41–1.18.42: the Hermite functions satisfy\n`-φₙ'' + x² φₙ = (2n + 1) φₙ`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.hermiteFunction_hilbertBasis",
+      "file": "DLMF/AlgebraicAnalytic/Spectral/Theory.lean",
+      "line": 388,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.18.42–1.18.43: the Hermite functions are an orthonormal basis of `L²(ℝ)`; hence\n`f = Σₙ (∫ φₙ(y) f(y) dy) φₙ` in `L²` for `f ∈ L²(ℝ)` (1.18.43, convergence as in §1.18(ii))."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fractionalDerivative_half_deriv_ne",
+      "file": "DLMF/AlgebraicAnalytic/Summability/Fractional.lean",
+      "line": 142,
+      "proofLines": 33,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF §1.15(vii), after 1.15.53: `D^{1/2} D ≠ D^{3/2}`. For `f = 1`, `D^{1/2}(f') = 0` while\n`D^{3/2} f(1) = 1/Γ(-1/2) = -1/(2√π) ≠ 0`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_integral_halfPlanePoissonKernel_tail",
+      "file": "DLMF/AlgebraicAnalytic/Summability/Integrals.lean",
+      "line": 112,
+      "proofLines": 40,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.15.35: `∫_{|x| ≥ δ} P(x, y) dx → 0` as `y → 0+`, for `δ > 0`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.differentiableOn_poissonCauchyIntegral",
+      "file": "DLMF/AlgebraicAnalytic/Summability/Integrals.lean",
+      "line": 257,
+      "proofLines": 43,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF §1.15(v), after 1.15.39: for real absolutely integrable `f`, `Φ` (1.15.39) is analytic in\nthe upper half-plane."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.fabry_transformation",
+      "file": "DLMF/AsymptoticApproximations/ODE/Singularities.lean",
+      "line": 228,
+      "proofLines": 33,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 2.7.19 (Fabry's transformation): if `w` solves 2.7.1 on an open set `U`, then\n`W(t) = e^{f₀ t²/2} w(t²)` (that is, `w = e^{-f₀ z/2} W`, `t = z^{1/2}`) solves\n`W'' + F(t) W' + G(t) W = 0` with `F(t) = 2t (f(t²) - f₀) - 1/t` and\n`G(t) = 4t² (g(t²) - f₀ f(t²)/2 + f₀²/4)`, on `{t ≠ 0 : t² ∈ U}`."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.fabry_coefficients",
+      "file": "DLMF/AsymptoticApproximations/ODE/Singularities.lean",
+      "line": 276,
+      "proofLines": 23,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 2.7.ii (Fabry's transformation, the dichotomy): if `f₀² = 4g₀`, the coefficients of\nthe transformed equation of 2.7.19 have the expansions\n`t F(t) = (2f₁ - 1) + ∑_{s≥1} 2 f_{s+1} t^{-2s}` and\n`G(t) = ∑_{s≥0} 4 (g_{s+1} - f₀ f_{s+1}/2) t^{-2s}`, so its characteristic equation is\n`λ² + 4(g₁ - f₀f₁/2) = 0`: either `g₁ ≠ f₀f₁/2` and the roots are unequal, or `t F(t)` and\n`t² G(t)` are power series in `t⁻¹` and `t = ∞` is a regular singularity.\nThe variable `t` is nonzero, as in Fabry’s transformation; the totalized value at zero\ndoes not satisfy these series identities."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.cosRationalCoeff_explicit",
+      "file": "DLMF/AsymptoticApproximations/Remainders/Stokes.lean",
+      "line": 53,
+      "proofLines": 50,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 2.11.3: `q₁(t) = -2t/(t²+1)²`, `q₂(t) = 24(t³-t)/(t²+1)⁴`,\n`q₃(t) = -240(3t⁵-10t³+3t)/(t²+1)⁶`."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.stokesC_continuous_tendsto",
+      "file": "DLMF/AsymptoticApproximations/Remainders/Stokes.lean",
+      "line": 297,
+      "proofLines": 39,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 2.11.16 (branch): `c` is continuous on `(-π, 3π)` and `c(θ) ∼ π - θ` as `θ → π`."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.stokesC_re_sign",
+      "file": "DLMF/AsymptoticApproximations/Remainders/Stokes.lean",
+      "line": 355,
+      "proofLines": 36,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF §2.11(iv): `c(θ)` lies in the right half-plane for `-π < θ < π` and in the left\nhalf-plane for `π < θ < 3π`; hence `erfc((ρ/2)^{1/2} c(θ))` is exponentially small in the first\ncase and exponentially close to `2` in the second."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRD_add_symEllIntRD",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 563,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.26.7: `R_D(x + λ, y + λ, z + λ) + R_D(x + μ, y + μ, z + μ)\n= R_D(x, y, z) - 3/√(z (z + λ)(z + μ))`, with `λ, μ` as in (19.26.1)–(19.26.2) and `z > 0`\n(`R_D`'s third argument is nonzero)."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRG_add_symEllIntRG",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 664,
+      "proofLines": 31,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.26.8: `2R_G(x + λ, …) + 2R_G(x + μ, …) = 2R_G(x, y, z) + λ R_F(x + λ, …)\n+ μ R_F(x + μ, …) + √(λ + μ + x + y + z)`, with `λ, μ` as in (19.26.1)–(19.26.2)."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRC_addition_theta",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 775,
+      "proofLines": 34,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.26.13: `R_C(α², α² - θ) + R_C(β², β² - θ) = R_C(σ², σ² - θ)`,\n`σ = (αβ + θ)/(α + β)`, where `0 < γ² - θ < γ²` for `γ = α, β, σ`, except that `σ² - θ` can be\n`0`. **Corrected**: we also assume `α, β > 0` (DLMF's conditions do not fix the signs of `α, β`;\nthe identity fails for `α = -2, β = 3, θ = 3/2`)."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRD_duplication",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 1021,
+      "proofLines": 14,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.26.20: `R_D(x, y, z) = 2 R_D(x + λ, y + λ, z + λ) + 3/(√z (z + λ))`, `λ` as in\n(19.26.19), under the standing assumptions with `z > 0`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRG_duplication",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 1117,
+      "proofLines": 28,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.26.21: `2 R_G(x, y, z) = 4 R_G(x + λ, y + λ, z + λ) - λ R_F(x, y, z) - √x - √y - √z`,\n`λ` as in (19.26.19), under the standing assumptions."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRC_sq_eq",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 1262,
+      "proofLines": 46,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.26.26: `R_C(x², y²) = R_C(a², a y)`, `a = (x + y)/2`, for\n`x = 0` or `ℜ x > 0`, and `ℜ y > 0`. The first squared argument must avoid the negative\nreal cut; a nonzero purely imaginary `x` is outside this domain."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRF_asymp_small_x",
+      "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+      "line": 238,
+      "proofLines": 81,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.27.3: `R_F(x, y, z) = R_F(0, y, z) - (1/√h)(√(x/h) + O(x/h))` as `x/h → 0`: for\nfixed `y, z > 0`, as `x → 0+`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRG_asymp_small_x",
+      "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+      "line": 402,
+      "proofLines": 131,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.27.5: `R_G(x, y, z) = R_G(0, y, z) + √x O(√(x/h))` as `x/h → 0`: for fixed\n`y, z > 0`, as `x → 0+`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRD_asymp_small_x",
+      "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+      "line": 582,
+      "proofLines": 137,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.27.10: `R_D(x, y, z) = R_D(0, y, z) - (3√x/(hz))(1 + O(√(x/h)))` as `x/h → 0`: for\nfixed `y, z > 0`, as `x → 0+`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.wave_symEllIntR",
+      "file": "DLMF/EllipticIntegrals/SymmetricDerivatives.lean",
+      "line": 483,
+      "proofLines": 28,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.18.15: `W = R_{-a}(½, ½; t + r, t - r)`, `r = √(x² + y²)`, satisfies the wave\nequation `W_tt = W_xx + W_yy`, for real `t > r > 0`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.laplace_symEllIntR",
+      "file": "DLMF/EllipticIntegrals/SymmetricDerivatives.lean",
+      "line": 572,
+      "proofLines": 28,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.18.17: `U = R_{-a}(½, ½; z + iρ, z - iρ)`, `ρ = √(x² + y²)`, satisfies Laplace's\nequation `U_xx + U_yy + U_zz = 0`, for real `x, y, z` with `ρ > 0`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRJ_zero_bounds",
+      "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+      "line": 203,
+      "proofLines": 70,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.24.4: `(2/√p) (2yz + yp + zp)^{-1/2} ≤ (4/(3π)) R_J(0, y, z, p) ≤ (y z p²)^{-3/8}`\nfor `y, z, p > 0`; the case `p = z` gives bounds for `R_D(0, y, z)` (19.24.i.p2)."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.ellipsePerimeter_eq_symEllIntRG",
+      "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+      "line": 350,
+      "proofLines": 47,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.24.7: the perimeter of an ellipse with semiaxes `a, b`,\n`L(a, b) = 8 R_G(0, a², b²)`, with `L` the arc-length integral `ellipsePerimeter` of §19.9(i)\n(`DLMF.EllipticIntegrals.ellipsePerimeter`). Valid for all real `a, b` (both sides depend on\n`a², b²` only)."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntR_two_eq_integral_trig",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegrals.lean",
+      "line": 62,
+      "proofLines": 47,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.23.8 (`n = 2`): `R_{-a}(b₁, b₂; z₁, z₂) = 2/B(b₁, b₂) ∫₀^{π/2}\n(z₁ cos² θ + z₂ sin² θ)^{-a} (cos θ)^{2b₁-1} (sin θ)^{2b₂-1} dθ`, for `b₁, b₂ > 0`,\n`ℜ z₁, ℜ z₂ > 0`. The exponent `a` is any complex number (`R_{-a}` is Carlson's continuation in\n`a`; both sides are entire in `a`)."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRF_zero_eq_integral_trig",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegrals.lean",
+      "line": 119,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.23.1: `R_F(0, y, z) = ∫₀^{π/2} (y cos² θ + z sin² θ)^{-1/2} dθ`, for `ℜ y > 0`,\n`ℜ z > 0` (19.23.p1)."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRG_zero_eq_integral_trig",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegrals.lean",
+      "line": 138,
+      "proofLines": 15,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.23.2: `R_G(0, y, z) = (1/2) ∫₀^{π/2} (y cos² θ + z sin² θ)^{1/2} dθ`, for `ℜ y > 0`,\n`ℜ z > 0` (19.23.p1)."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRD_zero_eq_integral_trig",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegrals.lean",
+      "line": 159,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.23.3: `R_D(0, y, z) = 3 ∫₀^{π/2} (y cos² θ + z sin² θ)^{-3/2} sin² θ dθ`, for\n`ℜ y > 0`, `ℜ z > 0` (19.23.p1)."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.integral_Ioi_symEllIntRD",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+      "line": 141,
+      "proofLines": 25,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.28.5: `∫_z^∞ R_D(x, y, t) dt = 6 R_F(x, y, z)` for `x, y, z > 0`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.integral_symEllIntRD_interp",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+      "line": 171,
+      "proofLines": 109,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.28.6: `∫₀¹ R_D(x, y, v² z + (1 - v²) p) dv = R_J(x, y, z, p)` for\n`x, y, z, p > 0`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntPm_inverse_sub_real",
+      "file": "DLMF/EllipticIntegrals/SymmetricQuadratic.lean",
+      "line": 841,
+      "proofLines": 19,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.22.23 (second equation), real case `x ≥ y > 0`, `z ≥ x`:\n`x - y = (2/a) √((a² - z₊²)(a² - z₋²))`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntR_two_eq_ordinaryHypergeometric",
+      "file": "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+      "line": 907,
+      "proofLines": 34,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.25.43: `R_{-a}(b₁, b₂; z₁, z₂) = z₂^{-a} ₂F₁(a, b₁; b₁ + b₂; 1 - z₁/z₂)`, for\n`z₁, z₂ ∈ ℂ \\ (-∞, 0]` with `|1 - z₁/z₂| < 1` and `arg z₁ - arg z₂ ∈ (-π, π)` (so that\n`z₂^{-a}` and the homogeneity of `R` match the principal branches), `b₁ + b₂ ∉ {0, -1, …}`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRF_lemniscatic",
+      "file": "DLMF/EllipticIntegrals/SymmetricSpecialCases.lean",
+      "line": 265,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.20.3 (general lemniscatic case), **domain-restricted** to real `x, y > 0`:\n`R_F(x, a, y) = R_{-1/4}(3/4, 1/2; a², xy)`, `a = (x + y)/2`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRF_lemniscatic_complex",
+      "file": "DLMF/EllipticIntegrals/SymmetricSpecialCases.lean",
+      "line": 284,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.20.3, corrected complex form: `R_F(x, a, y) = R_{-1 / 4}(3 / 4, 1/2; a², xy)`, `a = (x + y)/2`, for complex\n`x, y` with `ℜ x > 0` and `ℜ y > 0`. **Corrected from the printed DLMF formula**: DLMF states it\nunder the 19.16(i) constraints only, but it fails there, e.g. at `x = -1 + i`, `y = -1 + 2i` the\ntwo sides differ by a factor `±i` (independent mpmath check, 2026-10-25)."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRD_lemniscatic",
+      "file": "DLMF/EllipticIntegrals/SymmetricSpecialCases.lean",
+      "line": 725,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.20.23 (general lemniscatic case), **domain-restricted** to real `x, y > 0`:\n`R_D(x, y, a) = R_{-3/4}(5/4, 1/2; a², xy)`, `a = (x + y)/2`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRD_lemniscatic_complex",
+      "file": "DLMF/EllipticIntegrals/SymmetricSpecialCases.lean",
+      "line": 741,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.20.23, corrected complex form: `R_D(x, y, a) = R_{-3 / 4}(5 / 4, 1/2; a², xy)`, `a = (x + y)/2`, for complex\n`x, y` with `ℜ x > 0` and `ℜ y > 0`. **Corrected from the printed DLMF formula**: DLMF states it\nunder the 19.16(i) constraints only, but it fails there, e.g. at `x = -1 + i`, `y = -1 + 2i` the\ntwo sides differ by a factor `±i` (independent mpmath check, 2026-10-25)."
+    },
+    {
+      "name": "DLMF.Hypergeometric.genHG_3F2_unit_recurrence",
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "line": 768,
+      "proofLines": 49,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The contiguous unity recurrence with convergence of every displayed series."
+    },
+    {
+      "name": "DLMF.Hypergeometric.genHG_3F2_unit_recurrence_two",
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "line": 826,
+      "proofLines": 55,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The second unity recurrence, with the full common convergence half-space."
+    },
+    {
+      "name": "DLMF.MatrixArgument.laplaceTransform_integrableOn_analyticOnNhd",
+      "file": "DLMF/MatrixArgument/GammaBeta.lean",
+      "line": 131,
+      "proofLines": 44,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 35.2 (paragraph after 35.2.1): if `|f(X)| < etr(-X₀X)` on `Ω` for some `X₀ ∈ Ω`, the\nLaplace transform 35.2.1 converges absolutely for every complex symmetric `𝐙` with\n`ℜ𝐙 > X₀`, and `g(𝐙)` is a holomorphic function of the independent entries `z_{j,k}`\n(`j ≤ k`) on that region. Measurability of `f` is an added (implicit) hypothesis."
+    },
+    {
+      "name": "DLMF.OrthogonalPolynomials.qLaguerre_orthogonal",
+      "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+      "line": 758,
+      "proofLines": 24,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Identity under the stated parameter and domain assumptions: `∫ x : ℝ in Set.Ioi 0, qLaguerre α\nq m x * qLaguerre α q n x * (Real.rpow x α : ℂ) / qPochhammerInf (-x) q = 0`."
+    },
+    {
+      "name": "DLMF.QHypergeometric.one_phi_one_sum",
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "line": 825,
+      "proofLines": 41,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The `1φ1` summation `1φ1(a;c;q,c/a) = (c/a;q)_∞/(c;q)_∞` (DLMF 17.5.E5)."
+    },
+    {
+      "name": "DLMF.QHypergeometric.jackson_classical_limit",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 1347,
+      "proofLines": 19,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "As `q → 1⁻`, the Jackson integral of a continuous function tends to its Riemann integral (DLMF\n17.2.E47)."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPsi_analytic_annulus",
+      "file": "DLMF/QHypergeometric/Convergence.lean",
+      "line": 1284,
+      "proofLines": 49,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Bilateral series are analytic on their actual open annulus, including valid lower zeros."
+    },
+    {
+      "name": "DLMF.QHypergeometric.q_karlsson_minton",
+      "file": "DLMF/QHypergeometric/HigherSummations.lean",
+      "line": 1011,
+      "proofLines": 37,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The cleared finite product includes b=0 without a spurious0 times infinity."
+    },
+    {
+      "name": "DLMF.QHypergeometric.q_karlsson_minton_zero_corrected",
+      "file": "DLMF/QHypergeometric/HigherSummations.lean",
+      "line": 1057,
+      "proofLines": 24,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The primary-source argument is q^(−Σm)/a; the printed extra q is disproved below."
+    },
+    {
+      "name": "DLMF.Struve.lommelCapital_terminates",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 1353,
+      "proofLines": 25,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 11.9.9: when `μ + ν` or `μ - ν` is a positive odd integer, the capital Lommel\nfunction is its finite inverse-power expansion, including removable exceptional parameters."
+    },
+    {
+      "name": "DLMF.Struve.struveH_relative_bound",
+      "file": "DLMF/Struve/RelativeBounds.lean",
+      "line": 96,
+      "proofLines": 58,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 11.4.14–11.4.15, with the exponential subtraction corrected: the relative error of\n`H_ν(z)` is bounded by `(2/3) * (exp (‖z‖² / (4d)) - 1)`. Any positive lower bound `d` for\n`‖ν + 3/2 + n‖` suffices; it need not be the attained minimum."
+    },
+    {
+      "name": "DLMF.Zeta.hasSum_multiple_sum_riemannZeta",
+      "file": "DLMF/Zeta/IntegerArguments.lean",
+      "line": 175,
+      "proofLines": 45,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 25.6.5: for `k ≥ 1`,\n`ζ(k+1) = (1/k!) ∑_{n₁,…,n_k ≥ 1} 1/(n₁⋯n_k (n₁ + ⋯ + n_k))`, stated as the (absolutely\nconvergent) sum of the `k`-fold series being `k! ζ(k+1)`; the summation variables are\n`nᵢ + 1`, `nᵢ : ℕ`."
+    },
+    {
+      "name": "DLMF.Zeta.iteratedDeriv_two_riemannZeta_zero",
+      "file": "DLMF/Zeta/IntegerArguments.lean",
+      "line": 578,
+      "proofLines": 87,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 25.6.12: `ζ''(0) = -½ (ln 2π)² + ½ γ² - π²/24 + γ₁`, with the Stieltjes constant `γ₁`\nof 25.2.5."
+    },
+    {
+      "name": "DLMF.Zeta.hasSum_riemannZeta_two_mul_div_odd_even",
+      "file": "DLMF/Zeta/Sums.lean",
+      "line": 1366,
+      "proofLines": 103,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 25.8.10: `∑_{k≥1} ζ(2k)/((2k+1)(2k+2) 2^{2k}) = ¼ - (7/(4π²)) ζ(3)`."
+    }
+  ],
+  "downstreamNewlyIndependent": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.integral_normalDomain_swap",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "line": 511
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dlmfFourierTempered_deriv_sign",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 859
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dlmfFourierTempered_deriv_sign'",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 906
+    }
+  ],
+  "newDeclarations": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.hasDerivAt_integral_fixed_limits",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "line": 371,
+      "private": false,
+      "kind": "lemma",
+      "doc": "A continuous partial derivative on a compact rectangle may be integrated under the\nintegral sign. The derivative is assumed to exist for interior parameter values."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.isCompact_normalDomain_fst",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "line": 449,
+      "private": false,
+      "kind": "lemma",
+      "doc": "A planar region between two continuous graphs over a compact interval is compact."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.polyOp_apply_eigenfunctional",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 356,
+      "private": false,
+      "kind": "lemma",
+      "doc": "A linear functional on which each operator acts by a scalar evaluates the polynomial in\nthose operators by substituting the same scalars."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dlmfFourierSchwartz_lineDeriv",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 391,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The DLMF Fourier transform sends a directional derivative to multiplication by\n`-I * inner x v`. This specializes Mathlib’s `SchwartzMap.fourierInv_lineDerivOp_eq`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dlmfFourierSchwartz_dlmfD",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 412,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The DLMF differential operator `D_j = (1 / I) ∂_j` transforms to multiplication by `-x_j`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.polyEval_hasTemperateGrowth",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 427,
+      "private": false,
+      "kind": "lemma",
+      "doc": "A complex polynomial in the real coordinate functions has temperate growth."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.polyOp_intertwine",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 454,
+      "private": false,
+      "kind": "lemma",
+      "doc": "A linear map intertwining two families of operators also intertwines every polynomial\nin those families, preserving the fixed order in `polyOp`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.lineDeriv_dlmfFourierSchwartz",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 484,
+      "private": false,
+      "kind": "lemma",
+      "doc": "A directional derivative of the DLMF Fourier transform corresponds to multiplying the\noriginal Schwartz function by `I * inner x v`, including DLMF’s frequency normalization."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.polyOp_pairing",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 507,
+      "private": false,
+      "kind": "lemma",
+      "doc": "A bilinear pairing transposes a polynomial in operators to the corresponding polynomial\nin their adjoints, provided the latter commute."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.schwartz_lineDeriv_comm",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 542,
+      "private": false,
+      "kind": "lemma",
+      "doc": "Directional derivatives of smooth Schwartz functions commute. The proof adapts\nTau Ceti’s `TestFunction.lineDerivOp_comm`, using Mathlib’s symmetric second derivative."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dlmfD_commute",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 552,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The coordinate differential operators `D_i` and `D_j` commute on Schwartz space."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.temperedPolyDiffOp_apply",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 561,
+      "private": false,
+      "kind": "lemma",
+      "doc": "Applying a polynomial differential operator to a tempered distribution transfers the\noperators to the test function with a minus sign on each coordinate derivative."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.coordinate_hasTemperateGrowth",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 581,
+      "private": false,
+      "kind": "lemma",
+      "doc": "A real coordinate function, viewed as complex valued, has temperate growth."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.polyOp_coordinateMul_apply",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 590,
+      "private": false,
+      "kind": "lemma",
+      "doc": "A polynomial in coordinate multiplication operators acts pointwise as the corresponding\npolynomial function, with a common complex scale factor on the coordinates."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dlmfD_dlmfFourierSchwartz",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 605,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The DLMF operator `D_j` applied to a Fourier transform is the transform of multiplication\nby the original coordinate `x_j`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.dlmfFourierSchwartz_deriv",
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "line": 881,
+      "private": false,
+      "kind": "lemma",
+      "doc": "In DLMF's normalization, differentiating a Schwartz Fourier transform corresponds to\nmultiplication of the original function by `I * x`. This specializes Mathlib's\n`SchwartzMap.lineDerivOp_fourierInv_eq` and accounts for the frequency rescaling."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.hermiteFunction_eq_ofReal",
+      "file": "DLMF/AlgebraicAnalytic/Spectral/Theory.lean",
+      "line": 353,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The DLMF normalized Hermite function agrees with Tau Ceti's real Hermite function."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.stokesQuotient_re_nonneg",
+      "file": "DLMF/AsymptoticApproximations/Remainders/Stokes.lean",
+      "line": 253,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The normalized square of the Stokes coordinate lies in the closed right half-plane."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.stokesQuotient_tendsto",
+      "file": "DLMF/AsymptoticApproximations/Remainders/Stokes.lean",
+      "line": 266,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The normalized square of the Stokes coordinate tends to one at the transition.\nUses `Complex.exp_sub_sum_range_succ_isLittleO_pow`, Mathlib’s exponential remainder."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.hasDerivAt_carlsonRF_right",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 375,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The canonical node derivative expressed using the continued Carlson `R_F`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.hasDerivAt_symEllIntRF_right_real",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 384,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The real final-variable derivative of `R_F` also holds when its first variable is zero."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.hasDerivAt_carlsonRF_translate_right",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 416,
+      "private": false,
+      "kind": "lemma",
+      "doc": "A variable common translation and a variable final coordinate separate in the derivative\nof `R_F`. The two contributions are the diagonal derivative and `-R_D/6`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRD_add_of_nonneg",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 486,
+      "private": false,
+      "kind": "lemma",
+      "doc": "Differentiation of the first-kind addition theorem gives the third-kind addition\nformula, including a possible zero first argument."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.rg_addition_root_algebra",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 584,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Polynomial identity behind the square-root correction in second-kind addition."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRG_add_of_nonneg",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 595,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The second-kind addition theorem when its final two arguments are positive."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRD_duplication_of_nonneg",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 948,
+      "private": false,
+      "kind": "lemma",
+      "doc": "Differentiating duplication of `R_F` gives duplication of `R_D`, including a zero first\nargument. The other two arguments are positive."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRG_duplication_of_nonneg",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 1042,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The real duplication formula for `R_G` with the last two arguments positive."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.analyticAt_sub_linear_isBigO",
+      "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+      "line": 80,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The quadratic Taylor remainder of a holomorphic function at the origin."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.hasDerivAt_carlsonR_comp_common",
+      "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+      "line": 91,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The chain rule for a continued R-function along a path with equal node derivatives."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.hasDerivAt_carlsonRF_comp_common",
+      "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+      "line": 125,
+      "private": true,
+      "kind": "lemma",
+      "doc": "When all three node derivatives agree, the first-kind derivative is elementary."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.sqrt_product_duplication_boundary",
+      "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+      "line": 150,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The product of square roots at the duplication boundary factors into two elementary\nsymmetric expressions."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRF_duplication_sqrt",
+      "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+      "line": 163,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Duplication expresses `R_F` at a nonnegative first argument through positive nodes that\nare polynomial in its square root."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.deriv2_comp_sqrt_sq_add",
+      "file": "DLMF/EllipticIntegrals/SymmetricDerivatives.lean",
+      "line": 402,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The second derivative of a radial profile along one Cartesian coordinate."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.sum_deriv2_comp_sqrt_sq_add",
+      "file": "DLMF/EllipticIntegrals/SymmetricDerivatives.lean",
+      "line": 445,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Summing the Cartesian second derivatives of a radial profile gives its radial Laplacian."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.contDiffAt_of_eqOn_analytic_comp_affine",
+      "file": "DLMF/EllipticIntegrals/SymmetricDerivatives.lean",
+      "line": 469,
+      "private": true,
+      "kind": "lemma",
+      "doc": "A real affine line through a holomorphic node function has a smooth local profile."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.ellipsePerimeter_eq_four_mul_quarter",
+      "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+      "line": 330,
+      "private": false,
+      "kind": "lemma",
+      "doc": "Reflection symmetry and period `π` reduce the ellipse perimeter to one quadrant."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRD_real_nonneg",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+      "line": 97,
+      "private": false,
+      "kind": "lemma",
+      "doc": "For positive real nodes, `R_D` is real and nonnegative, as a positive Carlson average."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.tendsto_symEllIntRF_atTop",
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+      "line": 118,
+      "private": false,
+      "kind": "lemma",
+      "doc": "With fixed positive first two nodes, the Carlson asymptotic formula implies `R_F → 0`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.integral_cpow_arithmetic_progression_quadratic",
+      "file": "DLMF/EllipticIntegrals/SymmetricSpecialCases.lean",
+      "line": 64,
+      "private": false,
+      "kind": "lemma",
+      "doc": "Squaring the translated radial variable gives the quadratic integral substitution\nfor three arguments in arithmetic progression."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntR_arithmetic_progression_quadratic_ofReal",
+      "file": "DLMF/EllipticIntegrals/SymmetricSpecialCases.lean",
+      "line": 128,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The quadratic transformation of a three-node R-function at its middle argument,\nfor positive real arguments and positive real exponent."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.analyticAt_symEllIntR_comp",
+      "file": "DLMF/EllipticIntegrals/SymmetricSpecialCases.lean",
+      "line": 160,
+      "private": false,
+      "kind": "lemma",
+      "doc": "Composing `R` with an analytic node map is analytic whenever the nodes stay on their\nprincipal slit branches at the base point."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntR_arithmetic_progression_quadratic",
+      "file": "DLMF/EllipticIntegrals/SymmetricSpecialCases.lean",
+      "line": 174,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The arithmetic-progression quadratic transformation continues to all pairs of nodes\nin the open right half-plane."
+    },
+    {
+      "name": "DLMF.Hypergeometric.genCoeff_mul_pow_tendsto_zero",
+      "file": "DLMF/GeneralizedHypergeometric/AnalyticProperties.lean",
+      "line": 163,
+      "private": false,
+      "kind": "theorem",
+      "doc": "Balanced hypergeometric coefficients still tend to zero after multiplication by a\npower `n^k` when the real excess exceeds `k - 1`. Terminating series need no excess bound."
+    },
+    {
+      "name": "DLMF.Hypergeometric.genCoeff_tendsto_zero",
+      "file": "DLMF/GeneralizedHypergeometric/AnalyticProperties.lean",
+      "line": 193,
+      "private": false,
+      "kind": "theorem",
+      "doc": "Coefficients of a balanced hypergeometric series tend to zero when the real excess\nexceeds `-1`. Terminating upper parameters need no excess condition."
+    },
+    {
+      "name": "DLMF.Hypergeometric.genCoeff_summable_of_terminates",
+      "file": "DLMF/GeneralizedHypergeometric/AnalyticProperties.lean",
+      "line": 259,
+      "private": false,
+      "kind": "lemma",
+      "doc": "Terminating upper parameters give a finitely supported sequence of coefficients,\nindependently of lower-parameter regularity."
+    },
+    {
+      "name": "DLMF.Hypergeometric.genHG_one_hasSum_of_summable",
+      "file": "DLMF/GeneralizedHypergeometric/AnalyticProperties.lean",
+      "line": 270,
+      "private": false,
+      "kind": "lemma",
+      "doc": "At unity, any summable ordinary coefficient sequence has the declared principal value\nas its sum. This uses only the endpoint normalization, not existence of continuation."
+    },
+    {
+      "name": "DLMF.Hypergeometric.hasSum_gen3F2_one",
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "line": 658,
+      "private": true,
+      "kind": "lemma",
+      "doc": "A balanced three-over-two unit series sums to the declared value throughout its\nabsolute-convergence region, including every terminating upper-parameter case."
+    },
+    {
+      "name": "DLMF.Hypergeometric.gen3F2_contiguous_two_coeff_succ",
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "line": 671,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Consecutive coefficients of the second unity recurrence form an exact telescope."
+    },
+    {
+      "name": "DLMF.Hypergeometric.gen3F2_coeff_lower_add_one",
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "line": 699,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Raising one regular lower parameter gives a linear relation between coefficients."
+    },
+    {
+      "name": "DLMF.Hypergeometric.gen3F2_contiguous_coeff",
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "line": 718,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The first unit recurrence is an exact difference of adjacent weighted coefficients."
+    },
+    {
+      "name": "DLMF.Hypergeometric.gen3F2_boundary_tendsto_zero",
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "line": 746,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The weighted boundary coefficient in the first unit recurrence tends to zero."
+    },
+    {
+      "name": "DLMF.OrthogonalPolynomials.qLaguerre_norm_poch_ge_one",
+      "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+      "line": 487,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Every factor in a finite shifted factorial with negative real parameter is at least one."
+    },
+    {
+      "name": "DLMF.OrthogonalPolynomials.qLaguerre_norm_inf_ge_pow",
+      "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+      "line": 498,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The reciprocal q-exponential weight is bounded by every inverse polynomial at infinity."
+    },
+    {
+      "name": "DLMF.OrthogonalPolynomials.qLaguerre_integrable_weight",
+      "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+      "line": 524,
+      "private": true,
+      "kind": "lemma",
+      "doc": "All positive-half-line power moments of the q-Laguerre weight converge."
+    },
+    {
+      "name": "DLMF.OrthogonalPolynomials.qLaguerreMoment",
+      "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+      "line": 557,
+      "private": true,
+      "kind": "def",
+      "doc": "The power moments used only in the q-Laguerre orthogonality argument."
+    },
+    {
+      "name": "DLMF.OrthogonalPolynomials.qLaguerre_moment_step",
+      "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+      "line": 561,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Scaling the positive variable by q gives the q-Laguerre moment recurrence."
+    },
+    {
+      "name": "DLMF.OrthogonalPolynomials.qLaguerre_moment_nat",
+      "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+      "line": 603,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Iterating the moment recurrence produces a finite q-shifted factorial."
+    },
+    {
+      "name": "DLMF.OrthogonalPolynomials.qLaguerre_finite_monomial_expansion",
+      "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+      "line": 628,
+      "private": true,
+      "kind": "lemma",
+      "doc": "A terminating q-Laguerre sum has a finite expansion in monomials, for arbitrary complex parameters."
+    },
+    {
+      "name": "DLMF.OrthogonalPolynomials.qLaguerre_monomial_orthogonality",
+      "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+      "line": 645,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Every monomial times a q-Laguerre polynomial is integrable against its weight;\nthe moment vanishes when the monomial degree is below the polynomial degree."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qGauss_newton_identity",
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "line": 690,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Terminating q-Chu values determine the entire reciprocal-parameter q-Gauss identity."
+    },
+    {
+      "name": "DLMF.QHypergeometric.jackson_error_bound",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 1266,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Uniform continuity controls the error of the geometric Riemann sum defining Jackson's\nintegral; the maximum interval width is `|a| (1-q)`."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPsi_analyticAt_of_summable_radius",
+      "file": "DLMF/QHypergeometric/Convergence.lean",
+      "line": 1236,
+      "private": true,
+      "kind": "lemma",
+      "doc": "A scalar power series is analytic strictly inside any positive radius where it converges."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPsi_negative_analyticAt",
+      "file": "DLMF/QHypergeometric/Convergence.lean",
+      "line": 1259,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The negative-index half of a bilateral q-series is a power series in the reciprocal\nvariable throughout the interior convergence disk, including zero lower parameters."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qMintonFactor",
+      "file": "DLMF/QHypergeometric/HigherSummations.lean",
+      "line": 848,
+      "private": true,
+      "kind": "def",
+      "doc": "The finite parameter-shift factors occurring in the q-Karlsson–Minton identities."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qMintonFactor_hasSum_zero",
+      "file": "DLMF/QHypergeometric/HigherSummations.lean",
+      "line": 853,
+      "private": true,
+      "kind": "lemma",
+      "doc": "A polynomial of total degree at most `N` annihilates the q-binomial series at\n`az = q⁻ᴺ` when each factor is a finite q-shifted factorial."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qMintonFactor_ratio",
+      "file": "DLMF/QHypergeometric/HigherSummations.lean",
+      "line": 901,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Moving integer parameter shifts between the upper and lower q-factorials."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qMinton_gauss_base",
+      "file": "DLMF/QHypergeometric/HigherSummations.lean",
+      "line": 925,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The base case of Karlsson–Minton is q-Gauss, including the regular upper parameter zero."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qMintonFactor_hasSum_gauss",
+      "file": "DLMF/QHypergeometric/HigherSummations.lean",
+      "line": 958,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Multiplication of the finite parameter polynomial by one more linear factor uses\nq-binomial annihilation, reducing Karlsson–Minton to its q-Gauss base case."
+    },
+    {
+      "name": "DLMF.Struve.lommelCapital_add_two",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 1299,
+      "private": false,
+      "kind": "theorem",
+      "doc": "The two-step degree recurrence extends across all removable parameter singularities."
+    },
+    {
+      "name": "DLMF.Struve.lommelFinite_add_two",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 1320,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The finite Lommel polynomials satisfy the same degree-two recurrence as `S`."
+    },
+    {
+      "name": "DLMF.Struve.pow_le_norm_poch_of_forall",
+      "file": "DLMF/Struve/RelativeBounds.lean",
+      "line": 22,
+      "private": true,
+      "kind": "lemma",
+      "doc": "A lower bound on each linear factor bounds the norm of a Pochhammer product."
+    },
+    {
+      "name": "DLMF.Struve.factorial_le_norm_poch_three_halves",
+      "file": "DLMF/Struve/RelativeBounds.lean",
+      "line": 30,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The rising half-integer product exceeds three halves times the factorial."
+    },
+    {
+      "name": "DLMF.Struve.struveCoeff_normalized",
+      "file": "DLMF/Struve/RelativeBounds.lean",
+      "line": 46,
+      "private": false,
+      "kind": "lemma",
+      "doc": "Gamma normalization expresses the ordinary Struve coefficients as Pochhammer quotients."
+    },
+    {
+      "name": "DLMF.Struve.norm_struve_term_le",
+      "file": "DLMF/Struve/RelativeBounds.lean",
+      "line": 63,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Each nonconstant normalized Struve-series term is bounded by an exponential term."
+    },
+    {
+      "name": "DLMF.Struve.norm_struve_term_two_lt",
+      "file": "DLMF/Struve/RelativeBounds.lean",
+      "line": 76,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The quadratic normalized coefficient gives a strict comparison with the exponential majorant."
+    },
+    {
+      "name": "DLMF.Zeta.integral_quadratic_mul_cot_pi",
+      "file": "DLMF/Zeta/CotangentMoments.lean",
+      "line": 24,
+      "private": false,
+      "kind": "theorem",
+      "doc": "The quadratic cotangent moment occurring after twice integrating the even-zeta series."
+    },
+    {
+      "name": "DLMF.Zeta.z25a_logInvolution",
+      "file": "DLMF/Zeta/IntegerArguments.lean",
+      "line": 53,
+      "private": true,
+      "kind": "def",
+      "doc": "The decreasing logarithmic involution that exchanges the two zeta integral kernels."
+    },
+    {
+      "name": "DLMF.Zeta.z25a_logInvolution_properties",
+      "file": "DLMF/Zeta/IntegerArguments.lean",
+      "line": 56,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Positivity, involutivity, and the Jacobian of the logarithmic involution."
+    },
+    {
+      "name": "DLMF.Zeta.z25a_integral_logInvolution",
+      "file": "DLMF/Zeta/IntegerArguments.lean",
+      "line": 81,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Powers of the logarithmic involution integrate to the corresponding zeta value."
+    },
+    {
+      "name": "DLMF.Zeta.z25a_hasSum_fin_power",
+      "file": "DLMF/Zeta/IntegerArguments.lean",
+      "line": 137,
+      "private": true,
+      "kind": "lemma",
+      "doc": "A finite power of a nonnegative convergent series is the sum over all finite tuples."
+    },
+    {
+      "name": "DLMF.Zeta.z25a_integral_tuple",
+      "file": "DLMF/Zeta/IntegerArguments.lean",
+      "line": 152,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The product logarithmic series has an elementary exponential integral at each tuple."
+    },
+    {
+      "name": "DLMF.Zeta.z25a_Gamma_second_one",
+      "file": "DLMF/Zeta/IntegerArguments.lean",
+      "line": 503,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The second derivative of Gamma at one, obtained from the digamma value and slope."
+    },
+    {
+      "name": "DLMF.Zeta.z25a_second_mul",
+      "file": "DLMF/Zeta/IntegerArguments.lean",
+      "line": 521,
+      "private": true,
+      "kind": "lemma",
+      "doc": "The second-order Leibniz rule, in a form suited to the regular factors at zero."
+    },
+    {
+      "name": "DLMF.Zeta.z25a_regularized_reflection",
+      "file": "DLMF/Zeta/IntegerArguments.lean",
+      "line": 530,
+      "private": true,
+      "kind": "lemma",
+      "doc": "Multiplying the reflection equation by its vanishing variable removes the zeta pole;\nthe resulting identity holds on a full neighborhood of zero."
+    },
+    {
+      "name": "TestFunction.iteratedLineDerivOp_comm",
+      "file": "DLMFMathlib/Analysis/Distribution/IteratedLineDeriv.lean",
+      "line": 28,
+      "private": false,
+      "kind": "lemma",
+      "doc": "A directional derivative commutes with any finite list of directional derivatives of a\nsmooth test function."
+    },
+    {
+      "name": "Distribution.iteratedLineDerivOp_apply",
+      "file": "DLMFMathlib/Analysis/Distribution/IteratedLineDeriv.lean",
+      "line": 44,
+      "private": false,
+      "kind": "lemma",
+      "doc": "Moving a list of directional derivatives from a distribution to a test function gives\none minus sign for each derivative."
+    },
+    {
+      "name": "MeasureTheory.integral_Ioo_eq_integral_cos_sq",
+      "file": "DLMFMathlib/MeasureTheory/Integral/Trigonometric.lean",
+      "line": 29,
+      "private": false,
+      "kind": "lemma",
+      "doc": "The substitution `u = cos² θ` on a quarter period. The open intervals omit both\nlimiting endpoints, so no endpoint regularity of the integrand is needed."
+    },
+    {
+      "name": "IsCompact.setOf_mem_Icc",
+      "file": "DLMFMathlib/Topology/Order/Compact.lean",
+      "line": 28,
+      "private": false,
+      "kind": "theorem",
+      "doc": "The region between two continuous real-valued graphs over a compact base is compact.\nThe conclusion allows the two bounds to coincide."
+    }
+  ],
+  "changedLeanFiles": [
+    {
+      "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+      "sha256": "1feffca6744fa7abb0c848f63f56da25a926ffa19b3a801a94414e7da556edb3",
+      "lines": 474
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+      "sha256": "508994450bc5b12160f21fe65f5f1fde4355ccccfbcdcbff86cc80b4b7c61a0c",
+      "lines": 663
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "sha256": "88824d1a9ada19e85cd7e05c91177ea8113cb06cfd03e256e58e3d7d9073fa11",
+      "lines": 776
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Distributions/DiracDelta.lean",
+      "sha256": "4f6d17dab7e6b71a076b4bad7f075225d3d6047d9241c7a56e0823c0816fce9d",
+      "lines": 447
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+      "sha256": "2b2664af56dcd92c1fe804ac8c89634af0c75219d76703890492b0faa44a9259",
+      "lines": 931
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/ODE/SecondOrder.lean",
+      "sha256": "31ca64ec07f942147db21bf5a493d5e250f70d27656258ad57017bdc54353188",
+      "lines": 371
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Polynomials/Zeros.lean",
+      "sha256": "9f6893aec7b0872802bba97ba875054c899ac4bcf7f641f578f87cf6ecca7cf5",
+      "lines": 526
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Spectral/Theory.lean",
+      "sha256": "df92d3d1b13ba4e13605b73f83dff22ad82b2d1ded6db6a40726d24ebe51eaca",
+      "lines": 674
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Summability/Fractional.lean",
+      "sha256": "0a5c805ad11983207977ee3e4c37bbdecd34103b54e25e9f82f05d785ac4b423",
+      "lines": 179
+    },
+    {
+      "file": "DLMF/AlgebraicAnalytic/Summability/Integrals.lean",
+      "sha256": "888318f3978c4911d5d3df3d1c005fed8a4b654906940fb6b44463163cac2451",
+      "lines": 339
+    },
+    {
+      "file": "DLMF/AsymptoticApproximations/ODE/Singularities.lean",
+      "sha256": "bb053bdd167703a827aeb48a37241fe401943374bb413c4c64361ef94cb7e168",
+      "lines": 380
+    },
+    {
+      "file": "DLMF/AsymptoticApproximations/Remainders/Stokes.lean",
+      "sha256": "88874ff994119e3d49858114db255993e1c1cc9da6794472dff6b6906efcb553",
+      "lines": 497
+    },
+    {
+      "file": "DLMF/EllipticIntegrals.lean",
+      "sha256": "46533f167cb2fad01f9a4c15a75b93a6e0f66b1caa7a0f424d81e4f2281392d4",
+      "lines": 57
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "sha256": "58e4a1274fa675f345c3191b39be66330dbc0a23a40864d20e5953fdd6d0b15b",
+      "lines": 1351
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+      "sha256": "bb4dd79c071b3526903324dc67f173b74873e4dc305593421f9d9bcd58126dbc",
+      "lines": 801
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricDerivatives.lean",
+      "sha256": "87054b24a5be8eca8ff250fa68be0b5e66d8639cff3f00d5fbe0bb213bb95e34",
+      "lines": 608
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+      "sha256": "68b1fa111e5c9f2b7efe2808d1627c1a9234de05c39cee930d6daeef13b1740a",
+      "lines": 744
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegrals.lean",
+      "sha256": "6ee910db76773a618a5534fbe928f1ecdb74b68a038144fcb0b64377d6a4612f",
+      "lines": 274
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+      "sha256": "9cf249627e0482ebaf91015e258babb122fe7d0ad804dfbe51f62de1d5369799",
+      "lines": 324
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricNodeDerivatives.lean",
+      "sha256": "4ae3f413792ffbedbf872581e48330ae1058c153f0df12029ada6c2847ddaeb9",
+      "lines": 84
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricQuadratic.lean",
+      "sha256": "032a7266f69613a746446246620651f403839702f22882e9e6c825e46de2ba8c",
+      "lines": 865
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+      "sha256": "e88c7c9137896e0bcdc340125b5cdf344dcd81679b6d24f796be6aa5172ac129",
+      "lines": 1052
+    },
+    {
+      "file": "DLMF/EllipticIntegrals/SymmetricSpecialCases.lean",
+      "sha256": "ee0378db331d89dfd20058b1dee4e8a5c518300fbbabbf0a627d5fb270063616",
+      "lines": 806
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/AnalyticProperties.lean",
+      "sha256": "cfb892451b825097cd26088d5e12ed29d20e6f5284a4eb3aaadc17249947ef96",
+      "lines": 879
+    },
+    {
+      "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+      "sha256": "23c7a7ecf25ddfd1b8d1f8e78781c08aafa416b91af37e6211b044fec00badf0",
+      "lines": 996
+    },
+    {
+      "file": "DLMF/MatrixArgument/GammaBeta.lean",
+      "sha256": "a757ca78a07ce0e5c2d4a9e5f7048807b0783fc26ef92338edf129423c3cc1d8",
+      "lines": 1500
+    },
+    {
+      "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+      "sha256": "7dde5f64ecc93d4d1c43f9cbbd69597cbaf1b79a4a38a54ae6f79634a37289aa",
+      "lines": 1113
+    },
+    {
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "sha256": "4cb0e3858fc3dc499cde51ccbaa4b277ca41adf25fe040da37fec6988ff10a7b",
+      "lines": 1463
+    },
+    {
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "sha256": "64718ad35e56ad0b2397c6fb6b0fe0dbf886f95cdabb11b4ffbc10b566efd5ad",
+      "lines": 1427
+    },
+    {
+      "file": "DLMF/QHypergeometric/Convergence.lean",
+      "sha256": "b1ad4fe92302269307a3837dc6efa806588fa736dac0f2e6838e0c76d536b274",
+      "lines": 1351
+    },
+    {
+      "file": "DLMF/QHypergeometric/HigherSummations.lean",
+      "sha256": "152d2edfc2291ee626d3c56c660ace29f81413e1b05a02f85670d347d408f4f2",
+      "lines": 1215
+    },
+    {
+      "file": "DLMF/Struve.lean",
+      "sha256": "163b426ebd44eb171ce4b54f0ba9e5a91607082184ccb95c93f3ceaf595f139f",
+      "lines": 29
+    },
+    {
+      "file": "DLMF/Struve/Lommel.lean",
+      "sha256": "a78296c7c33865f7bb813a8552aa12b4c46290f7cec05782f3a5a652be9f439d",
+      "lines": 1382
+    },
+    {
+      "file": "DLMF/Struve/Properties.lean",
+      "sha256": "7c7deb3ba3d7db45a938ce6a4d74b73bc9465f1e011a74924bccc676572bbd42",
+      "lines": 1217
+    },
+    {
+      "file": "DLMF/Struve/RelativeBounds.lean",
+      "sha256": "dca7b7783b205b06ebd87150976d816e9fb65e3874226bb8c1d544340d606a1b",
+      "lines": 158
+    },
+    {
+      "file": "DLMF/Zeta.lean",
+      "sha256": "f8ad5a07e3d82e7c1371e133407a43b10346272d0b669abb41813736fae75216",
+      "lines": 37
+    },
+    {
+      "file": "DLMF/Zeta/CotangentMoments.lean",
+      "sha256": "bdad303e6573040bef9ff7b60240bde1e6c4b06e66afb88d286d889e5d4fe006",
+      "lines": 156
+    },
+    {
+      "file": "DLMF/Zeta/IntegerArguments.lean",
+      "sha256": "b59133efa15373260a7cdb8ad0801c00a3bd127314a223ad938be9e10f29c8b6",
+      "lines": 1047
+    },
+    {
+      "file": "DLMF/Zeta/Sums.lean",
+      "sha256": "f837860591bfc8b50e41c42fed1c56a96d6c7bee177c93af48929a33304f514f",
+      "lines": 1474
+    },
+    {
+      "file": "DLMFMathlib.lean",
+      "sha256": "ba49252950cc5608997db4589d91df0c775333d245037c79e8216e5ad93a9506",
+      "lines": 213
+    },
+    {
+      "file": "DLMFMathlib/Analysis/Distribution/IteratedLineDeriv.lean",
+      "sha256": "a382c9c4b46d7d08a57c9469c11f993cb13a3b37b25f45b93d3d81c5a97e8ae8",
+      "lines": 56
+    },
+    {
+      "file": "DLMFMathlib/MeasureTheory/Integral/Trigonometric.lean",
+      "sha256": "1b09c00818e47832424cf271ec07068178e3f0f77295bf203adf01ad5e94ee6c",
+      "lines": 59
+    },
+    {
+      "file": "DLMFMathlib/Topology/Order/Compact.lean",
+      "sha256": "c259689516e3d7ee578912421e20060f22730ba405adda6fb5bbf536f5b0701a",
+      "lines": 66
+    }
+  ],
+  "correctedFormulations": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.isLinODE2SolOn_param_analytic",
+      "change": "Require IsPreconnected D; initial data cannot propagate between disconnected spatial components.",
+      "status": "admitted",
+      "classification": "formalization correction; DLMF uses connected domains",
+      "source": "https://dlmf.nist.gov/1.13.ii"
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.fabry_coefficients",
+      "change": "Require t≠0, as in the Fabry transformation; exterior radius may be negative.",
+      "status": "proved",
+      "classification": "formalization correction"
+    }
+  ],
+  "simplifiedHypotheses": [
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRC_addition_theta",
+      "removed": [
+        "hβ₂",
+        "hσ₁",
+        "hσ₂"
+      ],
+      "reason": "Derived inequalities from positive α, β and θ constraints."
+    },
+    {
+      "name": "DLMF.Struve.struveH_relative_bound",
+      "removed": [
+        "hν",
+        "hatt"
+      ],
+      "reason": "Positive distance bound excludes the poles; any positive lower bound works, without attainment."
+    }
+  ],
+  "sharedAPIs": [
+    "TestFunction.iteratedLineDerivOp_comm",
+    "Distribution.iteratedLineDerivOp_apply",
+    "MeasureTheory.integral_Ioo_eq_integral_cos_sq",
+    "IsCompact.setOf_mem_Icc",
+    "DLMF.Hypergeometric.genCoeff_mul_pow_tendsto_zero",
+    "DLMF.Hypergeometric.genHG_one_hasSum_of_summable",
+    "DLMF.Struve.lommelCapital_add_two"
+  ],
+  "moves": [
+    {
+      "declarations": [
+        "DLMF.EllipticIntegrals.ei19c_eventuallyEq",
+        "DLMF.EllipticIntegrals.ei19c_hasDerivAt_update",
+        "DLMF.EllipticIntegrals.hasDerivAt_symEllIntR_update",
+        "DLMF.EllipticIntegrals.hasDerivAt_symEllIntRF_right"
+      ],
+      "source": "DLMF/EllipticIntegrals/SymmetricDerivatives.lean",
+      "destination": "DLMF/EllipticIntegrals/SymmetricNodeDerivatives.lean",
+      "preservation": "Names, statements and proof bodies unchanged; avoids duplicate derivative development and a cycle."
+    },
+    {
+      "declarations": [
+        "DLMF.Struve.struveH_relative_bound"
+      ],
+      "source": "DLMF/Struve/Properties.lean",
+      "destination": "DLMF/Struve/RelativeBounds.lean"
+    }
+  ],
+  "counterexamples": [
+    {
+      "name": "ODEParameterCounterexample.counterexample",
+      "source": "/-\nIndependent counterexample to parameter analyticity propagated from an initial point across a\ndisconnected spatial domain. This file imports definitions only, not the admitted theorem.\n-/\nimport DLMF.AlgebraicAnalytic.ODE.Basic\nimport Mathlib.Analysis.Complex.RealDeriv\n\nopen Complex Filter Set\nopen scoped Topology\n\nnamespace ODEParameterCounterexample\n\n/-- The two open half-planes, without their common boundary. -/\ndef domain : Set ℂ := {z | z.re ≠ 0}\n\n/-- Constant in the spatial variable on each component, with a conjugate parameter on the right. -/\nnoncomputable def solution (u z : ℂ) : ℂ := if z.re < 0 then 0 else star u\n\n/-- The spatial domain is open. -/\nlemma domain_isOpen : IsOpen domain := isOpen_ne.preimage continuous_re\n\n/-- Every spatial germ of the solution family is constant. -/\nlemma solution_locally_constant (u z : ℂ) (hz : z ∈ domain) :\n    solution u =ᶠ[𝓝 z] fun _ => solution u z := by\n  by_cases hn : z.re < 0\n  · filter_upwards [(isOpen_lt continuous_re continuous_const).mem_nhds hn] with y hy\n    simp [solution, hn, hy]\n  · have hp : 0 < z.re := lt_of_le_of_ne (not_lt.mp hn) (Ne.symm hz)\n    filter_upwards [(isOpen_lt continuous_const continuous_re).mem_nhds hp] with y hy\n    simp [solution, hn, not_lt.mpr hy.le]\n\n/-- All spatial first derivatives vanish. -/\nlemma solution_deriv_zero (u z : ℂ) (hz : z ∈ domain) : deriv (solution u) z = 0 := by\n  exact ((hasDerivAt_const z (solution u z)).congr_of_eventuallyEq\n    (solution_locally_constant u z hz)).deriv\n\n/-- The family solves the zero-coefficient homogeneous second-order equation on the domain. -/\nlemma solution_solves (u : ℂ) :\n    DLMF.AlgebraicAnalytic.IsLinODE2SolOn 0 0 0 (solution u) domain := by\n  intro z hz\n  refine ⟨((hasDerivAt_const z (solution u z)).congr_of_eventuallyEq\n    (solution_locally_constant u z hz)).differentiableAt, ?_⟩\n  have hd : deriv (solution u) =ᶠ[𝓝 z] fun _ => 0 := by\n    filter_upwards [domain_isOpen.mem_nhds hz] with y hy using solution_deriv_zero u y hy\n  simpa using (hasDerivAt_const z (0 : ℂ)).congr_of_eventuallyEq hd\n\n/-- Conjugation has no complex derivative at zero, since its real derivative sends `1` to `1`\nbut `I` to `-I`. -/\nlemma conjugation_not_differentiable : ¬ DifferentiableAt ℂ (star : ℂ → ℂ) 0 := by\n  intro h\n  have hr := h.hasDerivAt.complexToReal_fderiv.unique Complex.conjCLE.hasFDerivAt\n  have h1 := congrArg (fun L : ℂ →L[ℝ] ℂ => L 1) hr\n  have hI := congrArg (fun L : ℂ →L[ℝ] ℂ => L I) hr\n  simp only [smul_apply, one_apply_eq_self, smul_eq_mul,\n    mul_one, Complex.conjCLE_apply, map_one] at h1\n  rw [h1] at hI\n  have him := congrArg Complex.im hI\n  norm_num at him\n\n/-- All the old spatial and initial-data assumptions hold, while parameter holomorphy fails on\nthe second spatial component. The coefficient maps are the constant zero maps. -/\ntheorem counterexample :\n    IsOpen domain ∧ (-1 : ℂ) ∈ domain ∧ (1 : ℂ) ∈ domain ∧\n      (∀ u, DLMF.AlgebraicAnalytic.IsLinODE2SolOn 0 0 0 (solution u) domain) ∧\n      Differentiable ℂ (fun u => solution u (-1)) ∧\n      Differentiable ℂ (fun u => deriv (solution u) (-1)) ∧\n      ¬ DifferentiableOn ℂ (fun u => solution u 1) univ := by\n  refine ⟨domain_isOpen, by norm_num [domain], by norm_num [domain], solution_solves,\n    ?_, ?_, ?_⟩\n  · simpa [solution] using (differentiable_const (0 : ℂ))\n  · have h : (fun u => deriv (solution u) (-1)) = fun _ : ℂ => 0 :=\n      funext fun u => solution_deriv_zero u (-1) (by norm_num [domain])\n    rw [h]\n    exact differentiable_const _\n  · intro h\n    apply conjugation_not_differentiable\n    have hh := (differentiableOn_univ.mp h) 0\n    norm_num [solution] at hh\n    exact hh\n\nend ODEParameterCounterexample\n\n#print axioms ODEParameterCounterexample.counterexample\n",
+      "sourceSha256": "295a03493553971649f93b10d6a21850acdac74303eb8e71c85f3f6b55c61569",
+      "strictCommand": "lake env lean -DautoImplicit=false -DrelaxedAutoImplicit=false /tmp/DLMF-proof-round-20261030g/analysis/ODEParameterCounterexample.lean",
+      "audit": "/tmp/DLMF-proof-round-20261030g/analysis/ODEParameterCounterexample.lean:55:13: warning: This simp argument is unused:\n  Complex.conjCLE_apply\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [smul_apply, one_apply_eq_self, smul_eq_mul, mul_one, map_one] at h1\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-proof-round-20261030g/analysis/ODEParameterCounterexample.lean:55:36: warning: This simp argument is unused:\n  map_one\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [smul_apply, one_apply_eq_self, smul_eq_mul, mul_one, Complex.conjCLE_apply] at h1\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-proof-round-20261030g/analysis/ODEParameterCounterexample.lean:70:4: warning: `simp` already closes the goal\n\nHint: Use `simp` instead of `simpa`:\n  [apply] simp [solution]\n\nNote: This linter can be disabled with `set_option linter.unnecessarySimpa false`\n'ODEParameterCounterexample.counterexample' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+    },
+    {
+      "name": "fabry_coefficients_zero_counterexample",
+      "source": "import Mathlib.Analysis.Complex.Basic\nimport Mathlib.Topology.Algebra.InfiniteSum.NatInt\n\n/-!\n# The excluded zero argument in Fabry's coefficient identities\n\nThis independent example uses zero functions and zero coefficient sequences, with exterior\nradius -1. The old hypotheses allowed t=0, where the first claimed sum is -1 rather than 0.\nThe admitted Fabry coefficient theorem is neither imported nor invoked.\n-/\n\n\nopen Complex\n\n/-- Zero coefficients satisfy the exterior expansions at radius -1, but at t=0 the\nfirst Fabry identity would assert that a series of sum -1 has sum zero. -/\ntheorem fabry_coefficients_zero_counterexample :\n    (∀ z : ℂ, (-1 : ℝ) < ‖z‖ → HasSum (fun s : ℕ => (0 : ℂ) * z⁻¹ ^ s) 0) ∧\n      (0 : ℂ) ^ 2 = 4 * 0 ∧\n      (-1 : ℝ) < ‖(0 : ℂ) ^ 2‖ ∧\n      ¬HasSum (fun s : ℕ =>\n        (if s = 0 then 2 * (0 : ℂ) - 1 else 2 * 0) * ((0 : ℂ)⁻¹ ^ 2) ^ s)\n        ((0 : ℂ) * (2 * 0 * (0 - 0) - 1 / 0)) := by\n  refine ⟨fun z hz => by simp, by norm_num, by norm_num, ?_⟩\n  intro h\n  have hm : HasSum (fun s : ℕ =>\n      (if s = 0 then 2 * (0 : ℂ) - 1 else 2 * 0) * ((0 : ℂ)⁻¹ ^ 2) ^ s) (-1) := by\n    convert! hasSum_ite_eq (0 : ℕ) (-1 : ℂ) using 1\n    ext s\n    by_cases hs : s = 0 <;> simp [hs]\n  have he := hm.unique h\n  norm_num at he\n\n#print axioms fabry_coefficients_zero_counterexample\n",
+      "sourceSha256": "59a9128f9d0cb7e1c447a6d230ae5bbe7e0dbdb3cd72070819bb376be1473641",
+      "strictCommand": "lake env lean -DautoImplicit=false -DrelaxedAutoImplicit=false /tmp/DLMF-proof-round-20261030g/analysis/FabryZeroCounterexample.lean",
+      "audit": "'fabry_coefficients_zero_counterexample' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+    }
+  ],
+  "validation": {
+    "fullBuild": {
+      "command": "lake build > /tmp/DLMF-build.log 2>&1",
+      "exitCode": 0,
+      "jobs": 15006
+    },
+    "strict": {
+      "files": 43,
+      "options": [
+        "autoImplicit=false",
+        "relaxedAutoImplicit=false"
+      ],
+      "allPassed": true,
+      "entryModuleChecksPassed": true
+    },
+    "compiledAudit": {
+      "explicitNamedDeclarations": 26344,
+      "sourceKinds": {
+        "theorem": 17858,
+        "def": 3352,
+        "lemma": 5012,
+        "inductive": 7,
+        "structure": 55,
+        "abbrev": 52,
+        "instance": 8
+      },
+      "unmatchedSource": [],
+      "missingDocstrings": [],
+      "nameOnlyDocstrings": [],
+      "structureFields": 205,
+      "missingStructureFieldDocs": [],
+      "nonstandardAxioms": [],
+      "sourceTheoremsDependingOnAdmissions": 1581,
+      "lowercasePredicateDefinitions": []
+    },
+    "sourceSummary": {
+      "libraryFiles": 1210,
+      "allLeanFiles": 1212,
+      "declarationKinds": {
+        "theorem": 17858,
+        "def": 3352,
+        "lemma": 5012,
+        "inductive": 7,
+        "structure": 55,
+        "abbrev": 52,
+        "instance": 8
+      },
+      "directAdmissions": 1482,
+      "filesOver1500": []
+    },
+    "importSurvey": "46 areas, 1050 modules, 379 cross-area import lines (DLMF.Core excluded), 156 area edges\n\nTwo-way area pairs (16):\n  BernoulliEuler <-> Combinatorics: DLMF.BernoulliEuler.Generalizations.HigherOrder -> DLMF.Combinatorics.Stirling; DLMF.Combinatorics.Permutations.CyclesAndExcedances -> DLMF.BernoulliEuler.Explicit\n  Bessel <-> Confluent: DLMF.Bessel.Asymptotics -> DLMF.Confluent.Relations; DLMF.Confluent.IntegralRepresentations.EulerAndBessel -> DLMF.Bessel.Modified\n  Bessel <-> Struve: DLMF.Bessel.YIntegralRep -> DLMF.Struve.Properties; DLMF.Struve.AngerWeber.IntegralAndSeries -> DLMF.Bessel.Schlafli\n  Confluent <-> Coulomb: DLMF.Confluent.Coulomb -> DLMF.Coulomb.Basic; DLMF.Coulomb.Basic.Functions -> DLMF.Confluent.Basic.Tricomi\n  Confluent <-> ErrorFunctions: DLMF.Confluent.Zeros.RealZeros -> DLMF.ErrorFunctions.ZeroTools; DLMF.ErrorFunctions.AnalyticProperties -> DLMF.Confluent.FresnelAsymptotics\n  Confluent <-> Hypergeometric: DLMF.Confluent.Asymptotics.LargeArgument -> DLMF.Hypergeometric.Asymptotics; DLMF.Hypergeometric.GeneralizedContinuity -> DLMF.Confluent.Regularized\n  Confluent <-> OrthogonalPolynomials: DLMF.Confluent.LargeA -> DLMF.OrthogonalPolynomials.Classical; DLMF.OrthogonalPolynomials.Basic.Definitions -> DLMF.Confluent.Basic.KummerM\n  Confluent <-> ParabolicCylinder: DLMF.Confluent.ParabolicCylinder.EquationAndIntegrals -> DLMF.ParabolicCylinder.Basic.Functions; DLMF.ParabolicCylinder.Basic.Functions -> DLMF.Confluent.Basic.KummerM\n  ErrorFunctions <-> IncompleteGamma: DLMF.ErrorFunctions.BoundsAsymptotics.ContinuedFractions -> DLMF.IncompleteGamma.FractionTools; DLMF.IncompleteGamma.SpecialValues -> DLMF.ErrorFunctions.AnalyticProperties\n  ErrorFunctions <-> ParabolicCylinder: DLMF.ErrorFunctions.Repeated -> DLMF.ParabolicCylinder.ElementaryProperties; DLMF.ParabolicCylinder.Relations -> DLMF.ErrorFunctions.Repeated\n  ExpIntegrals <-> IncompleteGamma: DLMF.ExpIntegrals.Asymptotics -> DLMF.IncompleteGamma.ExpIntegralAsymptotics; DLMF.IncompleteGamma.ContinuedProperties -> DLMF.ExpIntegrals.AnalyticProperties\n  Gamma <-> Hypergeometric: DLMF.Gamma.Asymptotics.Stirling -> DLMF.Hypergeometric.SeriesProperties; DLMF.Hypergeometric.Asymptotics -> DLMF.Gamma.Asymptotics\n  GeneralizedHypergeometric <-> QHypergeometric: DLMF.GeneralizedHypergeometric.UnitArgument -> DLMF.QHypergeometric.HigherSummations; DLMF.QHypergeometric.Convergence -> DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties\n  JacobiElliptic <-> Theta: DLMF.JacobiElliptic.QuarterPeriods -> DLMF.Theta.Identities; DLMF.Theta.Relations -> DLMF.JacobiElliptic.AnalyticProperties\n  JacobiElliptic <-> Weierstrass: DLMF.JacobiElliptic.P3jEisenstein -> DLMF.Weierstrass.EllipticFunctionsAndInvariants; DLMF.Weierstrass.ModularFunctions -> DLMF.JacobiElliptic.AnalyticProperties\n  Legendre <-> SphericalHarmonics: DLMF.Legendre.Harmonics -> DLMF.SphericalHarmonics.AdditionTools; DLMF.SphericalHarmonics.AdditionTools -> DLMF.Legendre.Associated\n\nStrongly connected groups of areas (3):\n  21: Airy, BernoulliEuler, Bessel, Combinatorics, Confluent, Constants, Coulomb, Elementary, ErrorFunctions, ExpIntegrals, Gamma, GeneralizedHypergeometric, Hypergeometric, IncompleteGamma, OrthogonalPolynomials, ParabolicCylinder, QHypergeometric, Selberg, Statistical, Struve, Zeta\n  4: EllipticIntegrals, JacobiElliptic, Theta, Weierstrass\n  2: Legendre, SphericalHarmonics\n\nFoundational files importing non-foundational DLMF modules (0):\n\nMissing project imports (0):\n\nFile-import cycles (0):\n",
+    "documentationLinks": {
+      "checkedLinks": 12426,
+      "issues": []
+    },
+    "ledgerRegenerationIdempotent": {
+      "exitCode": 0,
+      "files": 25,
+      "unchanged": true,
+      "changed": []
+    },
+    "errataPDF": {
+      "command": "latexmk -g -interaction=nonstopmode -halt-on-error DLMFErrata.tex",
+      "engine": "LuaLaTeX",
+      "exitCode": 0,
+      "pages": 55,
+      "sha256": "a6bd1a7fbccbf7285d7de645ddc84cf4e7dec34b5fb8e857f5f9ff362680f212",
+      "sandboxFailure": "Initial sandboxed run had no writable LuaLaTeX font cache; approved retry passed."
+    },
+    "entryModules": [
+      "DLMF.lean",
+      "DLMF/Basic.lean",
+      "DLMFMathlib.lean"
+    ],
+    "gitDiffCheck": "passed"
+  },
+  "reproduction": {
+    "programs": {
+      "CompiledReview.lean": "import DLMF\nimport DLMFMathlib\nimport Lean\n\nopen Lean Meta\nset_option maxRecDepth 100000\nset_option maxHeartbeats 0\n\nprivate def projectModule (mod : Name) : Bool :=\n  mod.getRoot == `DLMF || mod.getRoot == `DLMFMathlib\n\nprivate def upstreamModule (mod : Name) : Bool :=\n  [`Mathlib, `TauCeti, `ToMathlib, `Carlson, `Pochhammer, `Dirichlet].contains mod.getRoot\n\nprivate def constKind : ConstantInfo → String\n  | .thmInfo _ => \"theorem\"\n  | .defnInfo _ => \"def\"\n  | .opaqueInfo _ => \"opaque\"\n  | .inductInfo _ => \"inductive\"\n  | .ctorInfo _ => \"constructor\"\n  | _ => \"other\"\n\nprivate partial def unusedPairs (ty value : Expr) (idx : Nat := 0) : Array (Nat × Name × BinderInfo) :=\n  match ty.consumeMData, value.consumeMData with\n  | .forallE n _ b bi, .lam _ _ v _ =>\n    let here := if !b.hasLooseBVar 0 && !v.hasLooseBVar 0 then #[(idx,n,bi)] else #[]\n    here ++ unusedPairs b v (idx+1)\n  | _, _ => #[]\n\n#eval show CoreM Unit from do\n  let env := (← getEnv).setExporting false\n  let all := env.constants.toList\n  let mut upstream : Std.HashMap UInt64 (Array (Name × Expr × Name)) := {}\n  for (n, ci) in all do\n    let some mi := env.getModuleIdxFor? n | continue\n    let mod := env.header.moduleNames[mi.toNat]!\n    unless upstreamModule mod && ci.isTheorem do continue\n    upstream := upstream.insert ci.type.hash\n      ((upstream[ci.type.hash]?).getD #[] |>.push (n,ci.type,mod))\n  let mut rows : Array Json := #[]\n  let mut fields : Array Json := #[]\n  let mut defs : Std.HashMap UInt64 (Array (Name × Expr × Expr)) := {}\n  let mut defDuplicates : Array Json := #[]\n  let mut hypotheses : Array Json := #[]\n  for (n, ci) in all do\n    let some mi := env.getModuleIdxFor? n | continue\n    let mod := env.header.moduleNames[mi.toNat]!\n    unless projectModule mod do continue\n    let some r ← findDeclarationRanges? n | continue\n    let doc ← findDocString? env n\n    let user := (privateToUserName? n).getD n\n    let axs ← if ci.isTheorem then collectAxioms n else pure #[]\n    let isPrivate := (privateToUserName? n).isSome\n    let ms := ((upstream[ci.type.hash]?).getD #[]).filterMap fun (un,ty,md) =>\n      if ci.type == ty then some <| Json.mkObj [(\"name\",toJson un.toString),(\"module\",toJson md.toString)] else none\n    let (resultSort, isProof) ← (do\n      let ip ← isProp ci.type\n      let rs ← forallTelescope ci.type fun _ body => do\n        let body ← whnf body\n        return match body with\n        | .sort l => if l == Level.zero then \"Prop\" else \"Sort\"\n        | _ => \"data\"\n      return (rs,ip)).run'\n    rows := rows.push <| Json.mkObj [\n      (\"name\",toJson n.toString),(\"userName\",toJson user.toString),(\"module\",toJson mod.toString),\n      (\"private\",toJson isPrivate),(\"kind\",toJson (constKind ci)),(\"resultSort\",toJson resultSort),\n      (\"isProof\",toJson isProof),(\"line\",toJson r.range.pos.line),(\"endLine\",toJson r.range.endPos.line),\n      (\"column\",toJson r.range.pos.column),(\"doc\",toJson doc),(\"typeHash\",toJson ci.type.hash),\n      (\"axioms\",toJson (axs.toList.map Name.toString)),(\"upstreamMatches\",toJson ms)]\n    if let some si := getStructureInfo? env n then\n      for fi in si.fieldInfo do\n        if fi.subobject?.isSome then continue\n        let fd ← findDocString? env fi.projFn\n        let fr ← findDeclarationRanges? fi.projFn\n        let fci := env.find? fi.projFn\n        let fclass ← match fci with\n          | none => pure \"unknown\"\n          | some fc => (do\n            if ← isProp fc.type then return \"proof\"\n            forallTelescope fc.type fun _ body => do\n              let body ← whnf body\n              return match body with\n              | .sort .zero => \"predicate\"\n              | .sort _ => \"type\"\n              | _ => \"data\").run'\n        fields := fields.push <| Json.mkObj [\n          (\"structure\",toJson user.toString),(\"field\",toJson fi.fieldName.toString),\n          (\"projection\",toJson fi.projFn.toString),(\"module\",toJson mod.toString),\n          (\"line\",toJson (fr.map (·.range.pos.line))), (\"doc\",toJson fd),(\"class\",toJson fclass)]\n    if !isPrivate then\n      if let .defnInfo d := ci then\n        let possible := (defs[d.value.hash]?).getD #[]\n        for (dn,dt,dv) in possible do\n          if ci.type == dt && d.value == dv then\n            defDuplicates := defDuplicates.push <| Json.mkObj [(\"name\",toJson n.toString),(\"other\",toJson dn.toString)]\n        defs := defs.insert d.value.hash (possible.push (n,ci.type,d.value))\n    unless ci.isTheorem && !axs.contains `sorryAx do continue\n    let some val := ci.value? (allowOpaque := true) | continue\n    let us := unusedPairs ci.type val\n    if us.isEmpty then continue\n    let hs ← (forallTelescope ci.type fun xs _ => do\n      let mut hs : Array Json := #[]\n      for (i,bname,bi) in us do\n        if i >= xs.size then continue\n        let dom ← inferType xs[i]!\n        let prop ← isProp dom\n        let pp ← ppExpr dom\n        hs := hs.push <| Json.mkObj [\n          (\"name\",toJson n.toString),(\"userName\",toJson user.toString),\n          (\"module\",toJson mod.toString),(\"line\",toJson r.range.pos.line),\n          (\"private\",toJson isPrivate),(\"index\",toJson i),(\"binder\",toJson bname.toString),\n          (\"isProp\",toJson prop),(\"isInstance\",toJson bi.isInstImplicit),\n          (\"type\",toJson pp.pretty)]\n      return hs).run'\n    hypotheses := hypotheses ++ hs\n  IO.FS.writeFile \"/tmp/DLMF-proof-round-20261030g/compiled.json\" (toJson rows).compress\n  IO.FS.writeFile \"/tmp/DLMF-proof-round-20261030g/fields.json\" (toJson fields).compress\n  IO.FS.writeFile \"/tmp/DLMF-proof-round-20261030g/identical-definitions.json\" (toJson defDuplicates).compress\n  IO.FS.writeFile \"/tmp/DLMF-proof-round-20261030g/unused-binders.json\" (toJson hypotheses).compress\n  IO.println s!\"rows={rows.size}; fields={fields.size}; exact definitions={defDuplicates.size}; unused binders={hypotheses.size}\"\n",
+      "scan_source.py": "from pathlib import Path\nfrom collections import Counter,defaultdict\nimport json,re,hashlib,subprocess\nOUT=Path('/tmp/DLMF-proof-round-20261030g');ns={}\nexec('import collections\\nimport hashlib\\nimport json\\nfrom pathlib import Path\\nimport re\\nimport subprocess\\n\\nroot = Path(\\'/ufs/braams/lean-DLMF\\')\\npaths = [root / p for p in subprocess.check_output(\\n    [\\'rg\\', \\'--files\\', \\'-g\\', \\'*.lean\\', \\'-g\\', \\'!.lake/**\\'], cwd=root, text=True).splitlines()]\\n\\ndef mask_comments(s):\\n    pieces=[];pos=0\\n    token=re.compile(r\\'/-|--|\"(?:\\\\\\\\.|[^\"\\\\\\\\])*\"\\')\\n    block=re.compile(r\\'/-|-/\\')\\n    while (m:=token.search(s,pos)):\\n        pieces.append(s[pos:m.start()])\\n        if m[0]==\\'/-\\':\\n            depth=1;end=m.end()\\n            while depth:\\n                n=block.search(s,end)\\n                if n is None:end=len(s);break\\n                depth+=1 if n[0]==\\'/-\\' else -1\\n                end=n.end()\\n        elif m[0]==\\'--\\':\\n            end=s.find(\\'\\\\n\\',m.end())\\n            if end<0:end=len(s)\\n        else:end=m.end()\\n        pieces.append(re.sub(r\\'[^\\\\n]\\',\\' \\',s[m.start():end]))\\n        pos=end\\n    pieces.append(s[pos:])\\n    return \\'\\'.join(pieces)\\n\\ndecl_re = re.compile(r\\'^(?:@\\\\[[^\\\\n]*?\\\\]\\\\s*)*(?P<mods>(?:(?:private|protected|public|noncomputable|unsafe|partial|local|scoped)\\\\s+)*)\\'\\n                     r\\'(?P<kind>theorem|lemma|def|abbrev|structure|class|inductive|instance|opaque|axiom)\\\\s+\\'\\n                     r\\'(?P<name>[^\\\\s\\\\[\\\\(\\\\{:=]+)\\', re.M)\\ncommand_re = re.compile(r\\'^(?:@\\\\[|namespace\\\\s|end\\\\b|section\\\\b|variable\\\\b|open\\\\b|set_option\\\\b|\\'\\n                        r\\'attribute\\\\b|#|(?:public )?import\\\\b|(?:private |public |protected |noncomputable )*\\'\\n                        r\\'(?:theorem|lemma|def|abbrev|structure|class|inductive|instance|opaque|axiom)\\\\s)\\', re.M)\\nfiles, decls = [], []\\nfor p in sorted(paths):\\n    s = p.read_text()\\n    m = mask_comments(s)\\n    rel = str(p.relative_to(root))\\n    n = len(s.splitlines())\\n    files.append(dict(file=rel, lines=n, module_doc=\\'/-!\\' in s,\\n                      long_lines=[i for i,l in enumerate(s.splitlines(),1) if len(l)>100],\\n                      imports=re.findall(r\\'^(?:(?:public|meta)\\\\s+)*import\\\\s+(\\\\S+)\\',m,re.M)))\\n    for match in decl_re.finditer(m):\\n        nxt = command_re.search(m, match.end())\\n        e = nxt.start() if nxt else len(m)\\n        body = m[match.start():e].rstrip()\\n        raw = s[match.start():match.start()+len(body)]\\n        line = m.count(\\'\\\\n\\',0,match.start())+1\\n        proof = re.search(r\\':=\\\\s*by\\\\b\\',body)\\n        proof_line = line + body[:proof.end()].count(\\'\\\\n\\') if proof else None\\n        end_line = line+body.count(\\'\\\\n\\')\\n        stmt = body[:proof.start()] if proof else body.split(\\':=\\',1)[0]\\n        # Text comparison is only a candidate generator, not an equivalence check.\\n        stmt = stmt[match.end()-match.start():]\\n        normalized_stmt = re.sub(r\\'\\\\s+\\',\\'\\',stmt)\\n        normalized_body = re.sub(r\\'\\\\s+\\',\\'\\',body[proof.end():]) if proof else \\'\\'\\n        decls.append(dict(file=rel,line=line,endLine=end_line,kind=match[\\'kind\\'],name=match[\\'name\\'],\\n                          private=\\'private\\' in match[\\'mods\\'],\\n                          proofLines=end_line-proof_line+1 if proof_line else 0,\\n                          admitted=bool(re.search(r\\'\\\\bsorry\\\\b\\',body)),\\n                          stmt=normalized_stmt,proof=normalized_body,\\n                          text=raw))\\n\\n',ns)\nfiles=ns['files'];decls=ns['decls'];mask=ns['mask_comments'];byfile=defaultdict(list)\nfor d in decls:byfile[d['file']].append(d)\nfor f in files:\n p=Path(f['file']);raw=p.read_text();m=mask(raw);lines=raw.splitlines()\n f['sha256']=hashlib.sha256(raw.encode()).hexdigest();f['moduleKeyword']=bool(re.search(r'^module(?:\\s|$)',m,re.M))\n f['maxLineLength']=max(map(len,lines),default=0);f['trailingWhitespaceLines']=[i for i,l in enumerate(lines,1) if l.rstrip()!=l]\n doc=re.search(r'/-!(.*?)-/',raw,re.S);f['moduleDoc']=doc[1].strip() if doc else None\n f['moduleDocWords']=len(f['moduleDoc'].split()) if doc else 0\n f['moduleDocTitle']=bool(doc and re.search(r'^\\s*#\\s+\\S',doc[1],re.M))\n first=next(iter(byfile[f['file']]),None);f['moduleDocBeforeDeclarations']=bool(doc and (first is None or raw.count('\\n',0,doc.start())+1<first['line']))\n f['roundNamed']=bool(re.search(r'/[PQRST]\\d[a-z0-9]',f['file']))\n f['declarations']=len(byfile[f['file']]);f['publicDeclarations']=sum(not d['private'] for d in byfile[f['file']]);f['admissions']=sum(d['admitted'] for d in byfile[f['file']])\n f['publicSections']=len(re.findall(r'^(?:@\\[expose\\]\\s+)?public\\s+(?:noncomputable\\s+)?section',m,re.M))\n f['linesOver100']=len(f['long_lines'])\n f['hasNamedMainResults']=bool(f['moduleDoc'] and re.search(r'\\b(Main (?:results|statements|definitions)|`[^`]+`)',f['moduleDoc']))\n f['rawDefinitionsOutsideBasic']=[{'name':d['name'],'line':d['line'],'kind':d['kind']} for d in byfile[f['file']] if d['kind'] in ['def','abbrev','structure','inductive','class'] and not d['private'] and '/Basic/' not in f['file'] and not f['file'].endswith('/Basic.lean')]\n f['broadTacticImports']=[i for i in f['imports'] if i.startswith('Mathlib.Tactic.')]\n f['library']=f['file'].startswith(('DLMF/','DLMFMathlib/')) or f['file'] in ['DLMF.lean','DLMFMathlib.lean']\nround_pat=re.compile(r'^(?:[a-z]{1,5}\\d+[A-Za-z0-9]*_|[a-z]+R\\d+_)')\nfor d in decls:\n d['roundPrefixed']=bool(round_pat.match(d['name'].split('.')[-1]))\n# Exact source-normalized proof fragments; candidates only, no claim of semantic equivalence.\nfragments=defaultdict(list)\nfor f,ds in byfile.items():\n for d in ds:\n  if d['admitted'] or not d['proof'] or d['proofLines']<8:continue\n  raw=d['text'];m=mask(raw);p=re.search(r':=\\s*by\\b',m)\n  if not p:continue\n  body=m[p.end():].splitlines();base=d['line']+m[:p.end()].count('\\n')\n  kept=[(base+i,re.sub(r'\\s+',' ',l.strip())) for i,l in enumerate(body) if l.strip()]\n  for i in range(len(kept)-7):\n   text='\\n'.join(t for _,t in kept[i:i+8])\n   if len(text)<180:continue\n   fragments[(f,text)].append({'name':d['name'],'line':kept[i][0]})\nrepeats=[]\nfor (f,fragment),hits in fragments.items():\n if len({h['name'] for h in hits})<2:continue\n repeats.append({'file':f,'fragment':fragment,'occurrences':hits,'proofCount':len({h['name'] for h in hits})})\nrepeats.sort(key=lambda x:(-x['proofCount'],-len(x['fragment']),x['file']))\n# Suppress windows which overlap an already selected window in the same proofs.\nselected=[];covered=set()\nfor r in repeats:\n sig=[(r['file'],h['name'],h['line']+j) for h in r['occurrences'] for j in range(8)]\n if sum(t in covered for t in sig)>len(sig)//2:continue\n selected.append(r);covered.update(sig)\n(OUT/'source.json').write_text(json.dumps({'files':files,'declarations':decls},ensure_ascii=False))\n(OUT/'repeated-fragments.json').write_text(json.dumps(selected,ensure_ascii=False,indent=2)+'\\n')\nlib=[f for f in files if f['library']];lds=[d for d in decls if d['file'] in {f['file'] for f in lib}]\nsummary={'libraryFiles':len(lib),'allLeanFiles':len(files),'libraryLines':sum(f['lines'] for f in lib),'declarationKinds':dict(Counter(d['kind'] for d in lds)),'directAdmissions':sum(d['admitted'] for d in lds),'missingModuleKeyword':[f['file'] for f in files if not f['moduleKeyword']],'missingModuleDoc':[f['file'] for f in files if not f['module_doc']],'missingModuleTitle':[f['file'] for f in lib if not f['moduleDocTitle']],'moduleDocAfterDeclarations':[f['file'] for f in lib if not f['moduleDocBeforeDeclarations']],'filesOver1000':[{k:f[k] for k in ['file','lines']} for f in sorted(lib,key=lambda f:-f['lines']) if f['lines']>1000],'filesOver1500':[f['file'] for f in lib if f['lines']>1500],'longProofsOver60':sum(d['proofLines']>60 and not d['admitted'] for d in lds),'longProofsOver100':sum(d['proofLines']>100 and not d['admitted'] for d in lds),'roundNamedFiles':[f['file'] for f in lib if f['roundNamed']],'publicRoundPrefixed':sum(d['roundPrefixed'] and not d['private'] for d in lds),'linesOver100':sum(f['linesOver100'] for f in lib),'repeatedEightLineFragmentGroups':len(selected),'lowDetailLargeModuleDocs':[{'file':f['file'],'words':f['moduleDocWords'],'lines':f['lines']} for f in lib if f['lines']>500 and f['moduleDocWords']<50]}\n(OUT/'source-summary.json').write_text(json.dumps(summary,indent=2)+'\\n');print(json.dumps(summary,indent=2))\n",
+      "match_audit.py": "from pathlib import Path\nimport json,re,collections\np=Path('/tmp/DLMF-proof-round-20261030g')\nsource=json.loads((p/'source.json').read_text());compiled=json.loads((p/'compiled.json').read_text())\nidx=collections.defaultdict(list)\nfor c in compiled:\n key=(c['module'],c['userName'].split('.')[-1]);idx[key].append(c)\nmatched=[];unmatched=[]\nfor d in source['declarations']:\n if not (d['file'].startswith(('DLMF/','DLMFMathlib/')) or d['file'] in ['DLMF.lean','DLMFMathlib.lean']):continue\n mod=d['file'][:-5].replace('/','.')\n dn=d['name'].removeprefix('_root_.')\n candidates=[c for c in idx[(mod,dn.split('.')[-1])] if c['userName']==dn or c['userName'].endswith('.'+dn)]\n if not candidates:\n  unmatched.append({k:d[k] for k in ['name','file','line','kind']});continue\n c=min(candidates,key=lambda c:abs(c['line']+1-d['line']))\n if abs(c['line']+1-d['line'])>50:\n  unmatched.append(dict(file=d['file'],line=d['line'],name=d['name'],candidate=c));continue\n matched.append(dict(d,compiledName=c['name'],fullName=c['userName'],formalDocstring=c['doc'],axioms=c['axioms']))\n(p/'matched-source.json').write_text(json.dumps(matched,ensure_ascii=False))\n(p/'unmatched-source.json').write_text(json.dumps(unmatched,ensure_ascii=False,indent=2))\nfields=json.loads((p/'fields.json').read_text())\nnonstandard=[dict(name=d['fullName'],axioms=d['axioms']) for d in matched if set(d['axioms'])-{'propext','Classical.choice','Quot.sound','sorryAx'}]\nmissingdocs=[d['fullName'] for d in matched if not d['formalDocstring']]\ndef norm(s):return re.sub(r'[\\W_]+','',s).lower()\nnameonly=[d['fullName'] for d in matched if norm(d['formalDocstring'] or '') in [norm(d['name']),norm(d['fullName'])]]\nsummary=dict(explicitNamedDeclarations=len(matched),sourceKinds=dict(collections.Counter(d['kind'] for d in matched)),unmatchedSource=unmatched,missingDocstrings=missingdocs,nameOnlyDocstrings=nameonly,structureFields=len(fields),missingStructureFieldDocs=[f for f in fields if not f['doc']],nonstandardAxioms=nonstandard,sourceTheoremsDependingOnAdmissions=sum(d['kind'] in ['theorem','lemma'] and 'sorryAx' in d['axioms'] for d in matched),lowercasePredicateDefinitions=[c['userName'] for c in compiled if c['kind']=='def' and c['resultSort']=='Prop' and c['userName'].split('.')[-1][0].islower() and c['name'] in {d['compiledName'] for d in matched}])\n(p/'compiled-summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\\n')\nprint(json.dumps({k:v for k,v in summary.items() if k!='unmatchedSource'},ensure_ascii=False,indent=2));print('Unmatched',len(unmatched))\n",
+      "strict_files.py": "from pathlib import Path\nimport subprocess,json,hashlib,concurrent.futures\nout=Path('/tmp/DLMF-proof-round-20261030g');logdir=out/'strict';logdir.mkdir(exist_ok=True)\nprevious=json.loads((out/'strict-results.json').read_text()) if (out/'strict-results.json').exists() else {}\nfiles=sorted(set(subprocess.check_output(['git','diff','--name-only','560b9475f35bbc6e4f5296631298859825091f7f'],text=True).splitlines()+subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True).splitlines()))\nfiles=sorted(set([f for f in files if f.endswith('.lean') and Path(f).exists()]+['DLMF.lean','DLMF/Basic.lean','DLMFMathlib.lean']))\ndef run(f):\n h=hashlib.sha256(Path(f).read_bytes()).hexdigest()\n if f in previous and previous[f]['sha256']==h and previous[f]['exitCode']==0:return f,previous[f]\n log=logdir/(f.replace('/','__')+'.log')\n with log.open('w') as o:r=subprocess.run(['lake','env','lean','-DautoImplicit=false','-DrelaxedAutoImplicit=false',f],stdout=o,stderr=subprocess.STDOUT)\n return f,dict(sha256=h,exitCode=r.returncode,log=str(log),unchangedDuringCheck=hashlib.sha256(Path(f).read_bytes()).hexdigest()==h)\nwith concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:\n for f,r in pool.map(run,files):\n  previous[f]=r\n  (out/'strict-results.json').write_text(json.dumps(previous,indent=2)+'\\n')\n  print(f,r['exitCode'],flush=True)\nassert all(previous[f]['exitCode']==0 and previous[f].get('unchangedDuringCheck',True) for f in files)\n",
+      "refresh_links.py": "from pathlib import Path\nimport json,re,collections,difflib,subprocess\nb=Path('/tmp/DLMF-proof-round-20261030g')\nold=json.loads(Path('/tmp/DLMF-cleanup-20261030/matched-source.json').read_text())\nnew=json.loads((b/'matched-source.json').read_text())\nbyname={d['fullName']:d for d in new};oldloc=collections.defaultdict(list)\nfor d in old:oldloc[(d['file'],d['line'])].append(d['fullName'])\nchanges=[];diffs={}\ndef shifted(path,line):\n if path not in diffs:\n  try:before=subprocess.check_output(['git','show','560b9475f35bbc6e4f5296631298859825091f7f:'+path],stderr=subprocess.DEVNULL,text=True).splitlines()\n  except subprocess.CalledProcessError:return line\n  after=Path(path).read_text().splitlines() if Path(path).exists() else []\n  diffs[path]=difflib.SequenceMatcher(a=before,b=after,autojunk=False).get_opcodes()\n for tag,a,c,d,e in diffs[path]:\n  if a<=line-1<c:return d+min(line-1-a,max(0,e-d-1))+1\n return line\npat=re.compile(r'\\[([^\\]\\n]+)\\]\\(((?:DLMF|DLMFMathlib)[^)#]*\\.lean)#L(\\d+)\\)')\nfor path in [Path('DEFINITIONS.md'),Path('DEFINITIONS2.md')]:\n s=path.read_text()\n def sub(m):\n  label,file,line=m[1],m[2],int(m[3]);target=None\n  # An explicitly named link is authoritative even if an older line anchor was stale.\n  target=byname.get(label.strip('`'))\n  if target is None:\n   near=re.search(r'`([^`]+)`\\s*\\($',s[max(0,m.start()-300):m.start()])\n   target=byname.get(near[1]) if near else None\n  if target is None:\n   candidates=oldloc.get((file,line),[]) or oldloc.get((file,line-1),[]) or oldloc.get((file,line+1),[])\n   for name in candidates:\n    if name in byname:target=byname[name];break\n  if target:dest,ln=target['file'],target['line']\n  else:dest,ln=file,shifted(file,line)\n  result=f'[{label}]({dest}#L{ln})'\n  if result!=m[0]:changes.append(dict(document=str(path),old=m[0],new=result))\n  return result\n path.write_text(pat.sub(sub,s))\n(b/'catalogue-link-updates.json').write_text(json.dumps(changes,ensure_ascii=False,indent=2)+'\\n')\n# Acquisition ledgers' untagged declarations also use the compiled, fully qualified mapping.\nidx=collections.defaultdict(list)\nfor r in new:idx[r['fullName']].append(r);idx[r['fullName'].split('.')[-1]].append(r)\ntags=json.loads((b/'dlmf-tags.json').read_text())['entries'];tagidx={t['decl']:t for t in tags if t['project']=='lean-DLMF' and t.get('line')}\nfor path in Path('.').glob('DLMF*Acquisition.md'):\n s=path.read_text()\n def fix(m):\n  label,file,line=m[1].strip('`'),m[2],int(m[3]);cand=idx.get(label,[])\n  exact=[r for r in cand if r['fullName']==label];local=[r for r in cand if r['file']==file]\n  if len(exact)==1:r=exact[0]\n  elif local:r=min(local,key=lambda r:abs(r['line']-line))\n  elif len(cand)==1:r=cand[0]\n  else:return m[0]\n  t=tagidx.get(r['fullName']);dest,ln=(t['file'],t['line']) if t else (r['file'],r['line'])\n  result=f'[{m[1]}]({dest}#L{ln})'\n  if result!=m[0]:changes.append(dict(document=str(path),old=m[0],new=result))\n  return result\n path.write_text(pat.sub(fix,s))\n(b/'all-source-link-updates.json').write_text(json.dumps(changes,ensure_ascii=False,indent=2)+'\\n')\nissues=[];count=0\nfor p in [Path('DEFINITIONS.md'),Path('DEFINITIONS2.md'),Path('REVIEW.md')]+list(Path('.').glob('DLMF*Acquisition.md')):\n for m in pat.finditer(p.read_text()):\n  count+=1;f=Path(m[2]);ln=int(m[3])\n  if not f.exists() or not 1<=ln<=len(f.read_text().splitlines()):issues.append(dict(document=str(p),link=m[0]))\n(b/'documentation-links.json').write_text(json.dumps(dict(checkedLinks=count,issues=issues),indent=2)+'\\n')\nassert not issues,issues\nprint('Links checked',count,'updated',len(changes))\n",
+      "scripts/dlmf_ledgers.py": "#!/usr/bin/env python3\n\"\"\"Regenerate the declaration links and statuses of the DLMF acquisition ledgers.\n\nUsage (from the project root, after `lake build` and scripts/DumpDLMF.lean):\n\n    python3 scripts/dlmf_ledgers.py dlmf-tags.json [--dry] LEDGER.md ...\n\nThe tag dump written by scripts/DumpDLMF.lean is the source of truth for every declaration\ncarrying an `@[dlmf]` attribute: its location and its status from the compiled axiom audit.\nLinked declarations without a DLMF tag fall back to a source scan (location, and an explicit\n`sorry` in the declaration body for the status). For each ledger the script\n\n* rewrites every link `[name](file.lean#Ln) (status)` to the current file and line, and the\n  status to `proved`, `admitted`, or `proved from admissions` (a proof without `sorry` of its\n  own that depends on admitted lemmas; known only for tagged declarations), keeping the\n  `definition`/`defined` labels;\n* appends to each equation line `- [ID](https://dlmf.nist.gov/ID): ...` the project\n  declarations tagged `ID` that the line does not yet mention, and Mathlib or TauCeti\n  declarations tagged `ID` as upstream pointers;\n* inserts a line for each tagged ID of the ledger's chapters that has no line yet, after the\n  last line of the same section;\n* rewrites the module admission counts (`- [Mod](DLMF/...lean): N admissions.` and the\n  `N definitions, M statements, P proved, A admitted.` inventory lines);\n* reports links whose declaration is missing, and links whose declaration carries DLMF tags\n  none of which is the line's ID.\nProse is never changed.\n\"\"\"\nimport collections\nimport json\nimport os\nimport re\nimport sys\n\nDECL = re.compile(r'^(?:@\\[[^\\]]*\\]\\s*)?(?:(?:private|protected|noncomputable|nonrec|partial)\\s+)*'\n                  r'(theorem|lemma|def|abbrev|instance|structure|inductive|class)\\s+([^\\s(:{\\[]+)', re.M)\nLINK = re.compile(r'\\[(`?)([^\\]`]+)`?\\]\\(([^)#]*\\.lean)(?:#L(\\d+))?\\) '\n                  r'\\((admitted|proved|proved from admissions|definition|defined|nonstandard axioms)\\)')\nEQLINE = re.compile(r'^- \\[(\\d+\\.\\d+(?:\\.(?:[ETF]\\d+(?:_\\d+)*|[ivx]+))?)\\]\\(https://dlmf\\.nist\\.gov/\\1\\):')\n\n\ndef strip_comments(s):\n    s = re.sub(r'/-.*?-/', lambda m: '\\n' * m.group(0).count('\\n'), s, flags=re.S)\n    return re.sub(r'--[^\\n]*', '', s)\n\n\ndef scan_source(roots):\n    \"\"\"Declarations by written and qualified names, with locations and admission flags.\"\"\"\n    idx = collections.defaultdict(list)\n    admitted = collections.Counter()\n    stats = {}\n    for root in roots:\n        for dp, _, fs in os.walk(root):\n            for f in fs:\n                if not f.endswith('.lean'):\n                    continue\n                p = os.path.normpath(os.path.join(dp, f))\n                s = strip_comments(open(p).read())\n                ms = list(DECL.finditer(s))\n                scopes = iter(re.finditer(\n                    r'^(?:@\\[[^\\n]*\\][ \\t]*)?(?:(?:public|noncomputable)[ \\t]+)*'\n                    r'(namespace[ \\t]+(\\S+)|section(?:[ \\t]+\\S+)?|end(?:[ \\t]+\\S+)?)[ \\t]*$',\n                    s, re.M))\n                scope = next(scopes, None)\n                namespace = ''\n                parents = []\n                nd = nt = 0\n                for i, m in enumerate(ms):\n                    while scope is not None and scope.start() < m.start():\n                        command, opened = scope.group(1), scope.group(2)\n                        if command.startswith('namespace '):\n                            parents.append(namespace)\n                            namespace = (opened.removeprefix('_root_.')\n                                         if opened.startswith('_root_.') else\n                                         '.'.join(filter(None, [namespace, opened])))\n                        elif command.startswith('section'):\n                            parents.append(namespace)\n                        elif parents:\n                            namespace = parents.pop()\n                        scope = next(scopes, None)\n                    body = s[m.end(): ms[i + 1].start() if i + 1 < len(ms) else len(s)]\n                    sor = bool(re.search(r'\\bsorry\\b', body))\n                    admitted[p] += sor\n                    nd += m.group(1) in ('def', 'abbrev')\n                    nt += m.group(1) in ('theorem', 'lemma')\n                    name = m.group(2)\n                    record = (p, s.count('\\n', 0, m.start()) + 1, m.group(1), sor)\n                    idx[name].append(record)\n                    qualified = (name.removeprefix('_root_.') if name.startswith('_root_.')\n                                 else '.'.join(filter(None, [namespace, name])))\n                    if qualified != name:\n                        idx[qualified].append(record)\n                stats[p] = (nd, nt)\n    return idx, admitted, stats\n\n\ndef theorem_status(e):\n    \"\"\"Ledger label for the status of a dumped theorem.\"\"\"\n    if e['status'] == 'admitted' and e.get('sorryDirect') is False:\n        return 'proved from admissions'\n    return {'nonstandard': 'nonstandard axioms'}.get(e['status'], e['status'])\n\n\ndef suffixes(name):\n    parts = name.split('.')\n    return ['.'.join(parts[i:]) for i in range(len(parts))]\n\n\ndef main():\n    args = [a for a in sys.argv[1:] if a != '--dry']\n    dry = '--dry' in sys.argv\n    dump = json.load(open(args[0]))\n    ledgers = args[1:]\n    entries = dump['entries']\n    by_decl = collections.defaultdict(list)\n    by_suffix = collections.defaultdict(list)\n    by_id = collections.defaultdict(list)\n    for e in entries:\n        by_decl[e['decl']].append(e)\n        for s in suffixes(e['decl']):\n            by_suffix[s].append(e)\n        by_id[e['dlmf']].append(e)\n    src, admitted, stats = scan_source(['DLMF', 'DLMFMathlib'])\n\n    def resolve(name, path):\n        \"\"\"Dump entry or source record for a linked name, preferring the linked file.\"\"\"\n        # An untagged declaration's exact name takes precedence over another declaration's\n        # tagged suffix: e.g. Statistical.incBeta is distinct from Statistical.Real.incBeta.\n        if name.startswith(('DLMF.', 'DLMFMathlib.')) and name not in by_decl:\n            recs = src.get(name, [])\n            hit = [r for r in recs if r[0] == path] or recs\n            if len(hit) == 1:\n                return 'src', hit[0]\n        for key in suffixes(name):\n            cands = by_decl.get(key) or by_suffix.get(key) or []\n            cands = list({c['decl']: c for c in cands}.values())\n            if cands:\n                hit = [c for c in cands if os.path.normpath(c['file']) == path] or cands\n                if len(hit) == 1 or len({c['file'] for c in hit}) == 1:\n                    return 'dump', hit[0]\n            recs = src.get(key)\n            if recs:\n                hit = [r for r in recs if r[0] == path] or recs\n                return 'src', hit[0]\n        return None, None\n\n    for ledger in ledgers:\n        base = os.path.dirname(ledger)\n        rel = lambda p: os.path.relpath(p, base or '.')\n        text = open(ledger).read()\n        full_names = '`DLMF.' in text\n        chapters = {m.split('.')[0] for m in re.findall(r'^- \\[(\\d+\\.\\d+\\.[^\\]]+)\\]', text, re.M)}\n        stat = collections.Counter()\n        report = []\n\n        def label(name):\n            if full_names:\n                return f'`{name}`'\n            parts = name.split('.')\n            return '.'.join(parts[2:]) if parts[0] == 'DLMF' and len(parts) > 2 else name\n\n        def deflabel():\n            return 'defined' if '(defined)' in text else 'definition'\n\n        def fmt(e):\n            st = theorem_status(e) if e['kind'] == 'theorem' else deflabel()\n            return f\"[{label(e['decl'])}]({rel(e['file'])}#L{e['line']}) ({st})\"\n\n        def relink(m, line_id=None):\n            bt, name, path, _, status = m.groups()\n            path_n = os.path.normpath(os.path.join(base, path))\n            kind, rec = resolve(name, path_n)\n            if kind is None:\n                stat['missing'] += 1\n                report.append(f'missing declaration: {name} ({path})')\n                return m.group(0), None\n            if kind == 'dump':\n                file, line, decl = os.path.normpath(rec['file']), rec['line'], rec['decl']\n                new = status if status in ('definition', 'defined') else theorem_status(rec)\n                stat['from dump'] += 1\n                if line_id and line_id not in {e['dlmf'] for e in by_decl[decl]}:\n                    report.append(f'{line_id}: {decl} is tagged '\n                                  f'{sorted({e[\"dlmf\"] for e in by_decl[decl]})}')\n            else:\n                file, line, k, sor = rec\n                decl = name\n                new = status if status in ('definition', 'defined') else ('admitted' if sor else 'proved')\n                stat['from source'] += 1\n            if new != status:\n                stat[f'{status} -> {new}'] += 1\n            if os.path.normpath(file) != path_n:\n                stat['moved'] += 1\n            return f'[{bt}{name}{bt}]({rel(file)}#L{line}) ({new})', decl\n\n        out = []\n        seen_ids = set()\n        # Lines sharing an ID: what any of them mentions counts for all, and missing\n        # declarations are appended to the last of them only.\n        lines_in = text.split('\\n')\n        id_text = collections.defaultdict(str)\n        last_line = {}\n        for k, l in enumerate(lines_in):\n            em0 = EQLINE.match(l)\n            if em0:\n                id_text[em0.group(1)] += l + '\\n'\n                last_line[em0.group(1)] = k\n        for k, line in enumerate(lines_in):\n            em = EQLINE.match(line)\n            if not em:\n                out.append(LINK.sub(lambda m: relink(m)[0], line))\n                continue\n            lid = em.group(1)\n            seen_ids.add(lid)\n            linked = set()\n\n            def rep(m):\n                s, decl = relink(m, lid)\n                if decl:\n                    linked.add(decl)\n                return s\n            line = LINK.sub(rep, line)\n            if last_line[lid] != k:\n                out.append(line)\n                continue\n            all_text = id_text[lid]\n            for m in LINK.finditer(all_text):\n                linked.add(m.group(2))\n            linked_suffix = {s for d in linked for s in suffixes(d)}\n            extra = []\n            for e in by_id.get(lid, []):\n                if (e['decl'] in linked or e['decl'] in linked_suffix\n                        or label(e['decl']).strip('`') in all_text):\n                    continue\n                if e['project'] == 'lean-DLMF':\n                    extra.append(fmt(e))\n                    stat['appended'] += 1\n                elif e['docUrl'] or e['sourceUrl']:\n                    if e['decl'] in all_text:\n                        continue\n                    extra.append(f\"{e['project']}: [`{e['decl']}`]({e['docUrl'] or e['sourceUrl']})\")\n                    stat['upstream pointers'] += 1\n            if extra:\n                body = line[:-1] if line.endswith('.') else line\n                line = body + '; ' + '; '.join(extra) + '.'\n            out.append(line)\n\n        # Tagged IDs of this ledger's chapters that have no line yet.\n        missing_ids = sorted({i for i in by_id if i.split('.')[0] in chapters and i not in seen_ids\n                              and any(e['project'] == 'lean-DLMF' for e in by_id[i])},\n                             key=lambda i: [int(x) if x.isdigit() else x\n                                            for x in re.split(r'[.ETF]', i) if x])\n        for lid in missing_ids:\n            sec = '.'.join(lid.split('.')[:2]) + '.'\n            pos = max((k for k, l in enumerate(out) if l.startswith(f'- [{sec}')), default=None)\n            if pos is None:\n                report.append(f'no section for new ID {lid}')\n                continue\n            items = '; '.join(fmt(e) for e in by_id[lid] if e['project'] == 'lean-DLMF')\n            out.insert(pos + 1, f'- [{lid}](https://dlmf.nist.gov/{lid}): {items}.')\n            stat['new lines'] += 1\n        text = '\\n'.join(out)\n\n        # Module counts.\n        def r1(m):\n            p = os.path.normpath(os.path.join(base, m.group(2)))\n            return m.group(0) if p not in stats else f'- [{m.group(1)}]({m.group(2)}): {admitted[p]} admissions.'\n        text = re.sub(r'^- \\[(\\w+)\\]\\(([^)]+\\.lean)\\): \\d+ admissions\\.', r1, text, flags=re.M)\n\n        def r2(m):\n            p = os.path.normpath(os.path.join(base, m.group(2)))\n            if p not in stats:\n                return m.group(0)\n            d, n = stats[p]\n            a = admitted[p]\n            return f'- [{m.group(1)}]({m.group(2)}): {d} definitions, {n} statements, {n - a} proved, {a} admitted.'\n        text = re.sub(r'^- \\[([^\\]]+\\.lean)\\]\\(([^)]+\\.lean)\\): \\d+ definitions, \\d+ statements, '\n                      r'\\d+ proved, \\d+ admitted\\.', r2, text, flags=re.M)\n\n        print(f'{ledger}: {dict(stat)}')\n        for r in report:\n            print('  ' + r)\n        if not dry:\n            open(ledger, 'w').write(text)\n\n\nif __name__ == '__main__':\n    main()\n"
+    },
+    "integrationHistory": [
+      {
+        "file": "DLMF/AlgebraicAnalytic/Distributions/DiracDelta.lean",
+        "declaration": "DLMF.AlgebraicAnalytic.dirichletKernel_eq",
+        "originalSha256": "371ade46e4930a7103263557bbb3fff329568cc19228b805ec608744e449f890",
+        "newSha256": "70f36f538b0dce74e031d849d63df47c998f3f581e3429160fe3fd0441bf49a7",
+        "staged": "analysis/DiracDelta.lean"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+        "declaration": "DLMF.EllipticIntegrals.symEllIntR_two_eq_ordinaryHypergeometric",
+        "originalSha256": "6295771d0b3dafe4fc6dfb6e02b24489de461599e123dfd95da2f9a0f4332e69",
+        "newSha256": "e88c7c9137896e0bcdc340125b5cdf344dcd81679b6d24f796be6aa5172ac129",
+        "staged": "elliptic/SymmetricRelations.lean"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+        "declarations": [
+          "DLMF.AlgebraicAnalytic.iteratedLineDerivOp_ofFun_apply",
+          "DLMF.AlgebraicAnalytic.dlmfFourierTempered_one"
+        ],
+        "originalSha256": "dac3bbb7b62435b773910539007787a097d2938655fa64b258d1db87b2855a18",
+        "newSha256": "dc74019c8c77d999e69f9cba4d141e891774f616604809225c735585f909a20e",
+        "staged": "analysis/Theory.lean"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Distributions/DiracDelta.lean",
+        "declarations": [
+          "DLMF.AlgebraicAnalytic.fourier_inversion_dlmf",
+          "DLMF.AlgebraicAnalytic.tendsto_gaussian_integral_of_growth"
+        ],
+        "originalSha256": "70f36f538b0dce74e031d849d63df47c998f3f581e3429160fe3fd0441bf49a7",
+        "newSha256": "4f6d17dab7e6b71a076b4bad7f075225d3d6047d9241c7a56e0823c0816fce9d",
+        "staged": "analysis/DiracDelta3.lean"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricQuadratic.lean",
+        "declarations": [
+          "DLMF.EllipticIntegrals.symEllIntPm_inverse_sub_real"
+        ],
+        "originalSha256": "b9f0c6727faed74f4400324d2b7437d2060035f325701573fc39b57e70650116",
+        "newSha256": "032a7266f69613a746446246620651f403839702f22882e9e6c825e46de2ba8c",
+        "staged": "elliptic/SymmetricQuadratic.lean"
+      },
+      {
+        "file": "DLMF/QHypergeometric/HigherSummations.lean",
+        "declarations": [
+          "DLMF.QHypergeometric.q_karlsson_minton_zero_corrected"
+        ],
+        "originalSha256": "6e682a844ce653286bb6772b22270f7e59e82cea771fd7abdd2eb7e4c448dcdd",
+        "newSha256": "13f0240012a54c1f40ce6f41fedf1eddbd17c4317f0ba61beecd7ac0f2541b2c",
+        "staged": "discrete/HigherSummations.lean"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Distribution/IteratedLineDeriv.lean",
+        "declarations": [
+          "TestFunction.iteratedLineDerivOp_comm",
+          "Distribution.iteratedLineDerivOp_apply"
+        ],
+        "originalSha256": null,
+        "newSha256": "a382c9c4b46d7d08a57c9469c11f993cb13a3b37b25f45b93d3d81c5a97e8ae8"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricIntegrals.lean",
+        "declarations": [
+          "symEllIntR_two_eq_integral_trig",
+          "symEllIntRF_zero_eq_integral_trig",
+          "symEllIntRG_zero_eq_integral_trig",
+          "symEllIntRD_zero_eq_integral_trig"
+        ],
+        "originalSha256": "f200232cac1fc7b71ade82135cbdb41418337f39c640407a9ed646bf9d21bf83",
+        "newSha256": "6ee910db76773a618a5534fbe928f1ecdb74b68a038144fcb0b64377d6a4612f",
+        "staged": "root/SymmetricIntegralsFinal.lean"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+        "declarations": [
+          "symEllIntRC_addition_theta",
+          "symEllIntRC_sq_eq"
+        ],
+        "originalSha256": "8fcc96f8c719404a6861aa3e0708598abdbb03a25c6fb9494bf82870b145942b",
+        "newSha256": "720c3bedcd4c6cc720e9f2b54772b7d06fa8a66ee3354a49edff078227aa9ffe",
+        "staged": "elliptic/SymmetricAddition.lean"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+        "declarations": [
+          "integral_Ioi_symEllIntRD"
+        ],
+        "originalSha256": "879ca7e4adbe51f0c2f85efd93a89555fe60d0f90ccf60531de597f72466dec1",
+        "newSha256": "3bfa27325fcf3834b1862e4deb436effec93f89400701e234676a8037584318a",
+        "staged": "elliptic/SymmetricIntegralsOfIntegrals.lean"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Summability/Fractional.lean",
+        "declarations": [
+          "fractionalDerivative_half_deriv_ne"
+        ],
+        "originalSha256": "120e99c40a06a49b7a389b485eaf3688dbb9c1cf3360ec9b6ba58ebc45378f5f",
+        "newSha256": "0a5c805ad11983207977ee3e4c37bbdecd34103b54e25e9f82f05d785ac4b423",
+        "staged": "analysis/Fractional.lean"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+        "declarations": [
+          "prod_mtest",
+          "prodConvergesDLMF_norm_iff"
+        ],
+        "originalSha256": "a9c98356ff5d4c762a9badff0950e04e4a0ba8c896938e2de558654dcf9df609",
+        "newSha256": "3c5c5a9dac212b8f045681c0e169a3833bb2c9c4578aac24bf0b8322204749c9",
+        "staged": "analysis/Functions2.lean"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Polynomials/Zeros.lean",
+        "declarations": [
+          "discr_eq_prod_roots"
+        ],
+        "originalSha256": "84529f3e32e42a3e0cfb4b161c7f62a481a1d6c98fc1be26a1699548114c3c81",
+        "newSha256": "9f6893aec7b0872802bba97ba875054c899ac4bcf7f641f578f87cf6ecca7cf5",
+        "staged": "analysis/Zeros.lean"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Remainders/Stokes.lean",
+        "declarations": [
+          "cosRationalCoeff_explicit"
+        ],
+        "originalSha256": "08ae94eeb2777e2702efdb6850d56bb97a03677acf7562af010112740795359c",
+        "newSha256": "efe431849acb8e3a19682fa8798086046d075e8b18555d988465deea28620e89",
+        "staged": "analysis/Stokes.lean"
+      },
+      {
+        "file": "DLMF/QHypergeometric/Convergence.lean",
+        "declarations": [
+          "qPsi_analytic_annulus"
+        ],
+        "originalSha256": "b746c961716fdf956789215df2741e6dff16ea60cd343ab7694ccbaf8f28c700",
+        "newSha256": "b1ad4fe92302269307a3837dc6efa806588fa736dac0f2e6838e0c76d536b274",
+        "staged": "discrete/Convergence.lean"
+      },
+      {
+        "file": "DLMF/QHypergeometric/HigherSummations.lean",
+        "declarations": [
+          "q_karlsson_minton"
+        ],
+        "originalSha256": "13f0240012a54c1f40ce6f41fedf1eddbd17c4317f0ba61beecd7ac0f2541b2c",
+        "newSha256": "152d2edfc2291ee626d3c56c660ace29f81413e1b05a02f85670d347d408f4f2",
+        "staged": "discrete/HigherSummations.lean"
+      },
+      {
+        "file": "DLMF/GeneralizedHypergeometric/AnalyticProperties.lean",
+        "declarations": [],
+        "originalSha256": "7e955f8ae192169f5d1be551d917f9a5164aee20aab4d43f608f225ccccbef2c",
+        "newSha256": "1ff4a0effdb445bd4df71e7e22e768aa3c6757372e9571b05c20f92d6c79fda5",
+        "staged": "root/AnalyticProperties.lean"
+      },
+      {
+        "file": "DLMFMathlib/MeasureTheory/Integral/Trigonometric.lean",
+        "declarations": [
+          "MeasureTheory.integral_Ioo_eq_integral_cos_sq"
+        ],
+        "originalSha256": null,
+        "newSha256": "1b09c00818e47832424cf271ec07068178e3f0f77295bf203adf01ad5e94ee6c"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/ODE/SecondOrder.lean",
+        "correctedDeclaration": "DLMF.AlgebraicAnalytic.isLinODE2SolOn_param_analytic",
+        "change": "Add domain preconnectedness; confirmed independent disconnected-domain counterexample."
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+        "staged": "analysis/Theory5.lean",
+        "originalSha256": "dc74019c8c77d999e69f9cba4d141e891774f616604809225c735585f909a20e",
+        "newSha256": "cf50247a4e3444fdf276fe9d42e6611cc1fc508b48f17ee2a861ef089c1654f2",
+        "declarations": [
+          "deriv_signTempered",
+          "dlmfFourierTempered_deriv",
+          "dlmfFourierSchwartz_polyDiffOp",
+          "dlmfFourierSchwartz_polyMul",
+          "dlmfFourierTempered_polyDiffOp",
+          "dlmfFourierTempered_polyMul"
+        ]
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricDerivatives.lean",
+        "staged": "root/SymmetricDerivativesFinal.lean",
+        "originalSha256": "462de4715fe5d926191c775beafb91af9608c5d4443467cc817290301fe8029e",
+        "newSha256": "c538eeb3e7396efd75e4fe5ea43160d7454105689ffb626eb4ae9fb955191c2c",
+        "declarations": [
+          "wave_symEllIntR",
+          "laplace_symEllIntR"
+        ]
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricSpecialCases.lean",
+        "staged": "elliptic/SymmetricSpecialCases.lean",
+        "originalSha256": "f1a00fd804ce548e2510dbcd5af5af9d6861fd902a51009795f89de1d51206b7",
+        "newSha256": "ee0378db331d89dfd20058b1dee4e8a5c518300fbbabbf0a627d5fb270063616",
+        "declarations": [
+          "symEllIntRF_lemniscatic",
+          "symEllIntRF_lemniscatic_complex",
+          "symEllIntRD_lemniscatic",
+          "symEllIntRD_lemniscatic_complex"
+        ]
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricIntegralsOfIntegrals.lean",
+        "staged": "elliptic/SymmetricIntegralsOfIntegrals.lean",
+        "originalSha256": "3bfa27325fcf3834b1862e4deb436effec93f89400701e234676a8037584318a",
+        "newSha256": "9cf249627e0482ebaf91015e258babb122fe7d0ad804dfbe51f62de1d5369799",
+        "declarations": [
+          "integral_symEllIntRD_interp"
+        ]
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+        "staged": "elliptic/SymmetricInequalities.lean",
+        "originalSha256": "c37c938f7d7a268b81147259c8f56fd2b46135ffeb295df7e50432e1803c33be",
+        "newSha256": "a0499b3dc579250f6d53f899ab93d5d4f4bb7304e8d7383f993e2fafaefa9937",
+        "declarations": [
+          "ellipsePerimeter_eq_symEllIntRG"
+        ]
+      },
+      {
+        "file": "DLMF/QHypergeometric/Calculus.lean",
+        "staged": "discrete/Calculus.lean",
+        "originalSha256": "d4733bd6f76f6dd3336af1c3cb5a08ca96bd6b35cf654a30885346b4977f1d04",
+        "newSha256": "64718ad35e56ad0b2397c6fb6b0fe0dbf886f95cdabb11b4ffbc10b566efd5ad",
+        "declarations": [
+          "jackson_classical_limit"
+        ]
+      },
+      {
+        "file": "DLMF/QHypergeometric/BasicSummations.lean",
+        "staged": "discrete/BasicSummations.lean",
+        "originalSha256": "76305580f4945b3581d0c9f11bab8a8a6c33d595acd44747e36d344b7d7df8d8",
+        "newSha256": "4cb0e3858fc3dc499cde51ccbaa4b277ca41adf25fe040da37fec6988ff10a7b",
+        "declarations": [
+          "one_phi_one_sum"
+        ]
+      },
+      {
+        "file": "DLMF/MatrixArgument/GammaBeta.lean",
+        "staged": "discrete/GammaBeta.lean",
+        "originalSha256": "1a7101aca3a5511e77b19ff79d4f9c944f63016ffe4f68a6140daec59241c8f4",
+        "newSha256": "a757ca78a07ce0e5c2d4a9e5f7048807b0783fc26ef92338edf129423c3cc1d8",
+        "declarations": [
+          "laplaceTransform_integrableOn_analyticOnNhd"
+        ]
+      },
+      {
+        "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+        "staged": "root/UnitArgument.lean",
+        "originalSha256": "21da5060f2e0afa76afafab0f82b3f15cd6f8200bfc46fe0470eef0c10100633",
+        "newSha256": "6f7c244a893cbf3aac9bda23adb552a80425aa861813ece701a2eb15b6507961",
+        "declarations": [
+          "genHG_3F2_unit_recurrence_two"
+        ]
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+        "staged": "analysis/SeveralVariables.lean",
+        "originalSha256": "2bff9526ba872d59380ffbe92e0d07fa17c5e893a7bb5df6764b98545b1ab62d",
+        "newSha256": "6a5d051bf60263324b305e74eb6df5de682bdf8577bcdbb6629a894b314f1198",
+        "declarations": [
+          "hasDerivAt_improper_integral_of_tendstoUniformlyOn"
+        ]
+      },
+      {
+        "file": "DLMF/GeneralizedHypergeometric/AnalyticProperties.lean",
+        "originalSha256": "1ff4a0effdb445bd4df71e7e22e768aa3c6757372e9571b05c20f92d6c79fda5",
+        "newSha256": "cfb892451b825097cd26088d5e12ed29d20e6f5284a4eb3aaadc17249947ef96",
+        "helpers": [
+          "DLMF.Hypergeometric.genCoeff_mul_pow_tendsto_zero"
+        ]
+      },
+      {
+        "file": "DLMF/GeneralizedHypergeometric/UnitArgument.lean",
+        "staged": "root/UnitArgumentFirst.lean",
+        "originalSha256": "6f7c244a893cbf3aac9bda23adb552a80425aa861813ece701a2eb15b6507961",
+        "newSha256": "23c7a7ecf25ddfd1b8d1f8e78781c08aafa416b91af37e6211b044fec00badf0",
+        "declarations": [
+          "DLMF.Hypergeometric.genHG_3F2_unit_recurrence"
+        ]
+      },
+      {
+        "file": "DLMFMathlib/Topology/Order/Compact.lean",
+        "staged": "analysis/DLMFMathlib/Topology/Order/Compact.lean",
+        "originalSha256": null,
+        "newSha256": "c259689516e3d7ee578912421e20060f22730ba405adda6fb5bbf536f5b0701a",
+        "declarations": []
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricNodeDerivatives.lean",
+        "staged": "elliptic/SymmetricNodeDerivatives.lean",
+        "originalSha256": null,
+        "newSha256": "4ae3f413792ffbedbf872581e48330ae1058c153f0df12029ada6c2847ddaeb9",
+        "declarations": []
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Remainders/Stokes.lean",
+        "staged": "analysis/Stokes2.lean",
+        "originalSha256": "efe431849acb8e3a19682fa8798086046d075e8b18555d988465deea28620e89",
+        "newSha256": "a7cfae1ee85ff288d587940c8c891fb760543fe8a7084c211e47f38411c0fb60",
+        "declarations": [
+          "DLMF.AsymptoticApproximations.stokesC_re_sign"
+        ]
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricDerivatives.lean",
+        "staged": "elliptic/SymmetricDerivatives.lean",
+        "originalSha256": "c538eeb3e7396efd75e4fe5ea43160d7454105689ffb626eb4ae9fb955191c2c",
+        "newSha256": "87054b24a5be8eca8ff250fa68be0b5e66d8639cff3f00d5fbe0bb213bb95e34",
+        "move": "four declarations to SymmetricNodeDerivatives unchanged"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean",
+        "staged": "analysis/SeveralVariables6.lean",
+        "originalSha256": "6a5d051bf60263324b305e74eb6df5de682bdf8577bcdbb6629a894b314f1198",
+        "newSha256": "508994450bc5b12160f21fe65f5f1fde4355ccccfbcdcbff86cc80b4b7c61a0c",
+        "declarations": [
+          "setIntegral_normalDomain_fst",
+          "setIntegral_normalDomain_snd",
+          "setIntegral_normalDomain_three"
+        ]
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+        "staged": "elliptic/SymmetricAddition.lean",
+        "originalSha256": "720c3bedcd4c6cc720e9f2b54772b7d06fa8a66ee3354a49edff078227aa9ffe",
+        "newSha256": "4cd8adaa40a9be0571959c346cecd1ac914bb8b06e197b636aacef9be84288f8",
+        "declarations": [
+          "symEllIntRD_duplication",
+          "symEllIntRG_duplication"
+        ]
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+        "staged": "elliptic/SymmetricInequalities.lean",
+        "originalSha256": "a0499b3dc579250f6d53f899ab93d5d4f4bb7304e8d7383f993e2fafaefa9937",
+        "newSha256": "68b1fa111e5c9f2b7efe2808d1627c1a9234de05c39cee930d6daeef13b1740a",
+        "declarations": [
+          "symEllIntRJ_zero_bounds"
+        ]
+      },
+      {
+        "file": "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean",
+        "staged": "discrete/QBasicIdentities.lean",
+        "originalSha256": "d00af8bcc2a94ce1a0309ac94dfea8850850bf4ef2cc232ea7a7388a4fa05b71",
+        "newSha256": "7dde5f64ecc93d4d1c43f9cbbd69597cbaf1b79a4a38a54ae6f79634a37289aa",
+        "declarations": [
+          "qLaguerre_orthogonal"
+        ]
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Remainders/Stokes.lean",
+        "staged": "analysis/Stokes3.lean",
+        "originalSha256": "a7cfae1ee85ff288d587940c8c891fb760543fe8a7084c211e47f38411c0fb60",
+        "newSha256": "88874ff994119e3d49858114db255993e1c1cc9da6794472dff6b6906efcb553",
+        "declarations": [
+          "DLMF.AsymptoticApproximations.stokesC_continuous_tendsto"
+        ]
+      },
+      {
+        "file": "DLMF/Struve/Properties.lean",
+        "originalSha256": "987e8c311d26ca3ede88b6b6834291c94d114fd90640c7dcf0b1147bdf86f5b8",
+        "newSha256": "7c7deb3ba3d7db45a938ce6a4d74b73bc9465f1e011a74924bccc676572bbd42",
+        "move": "relative bound to dedicated theorem module"
+      },
+      {
+        "file": "DLMF/Struve/RelativeBounds.lean",
+        "originalSha256": null,
+        "newSha256": "dca7b7783b205b06ebd87150976d816e9fb65e3874226bb8c1d544340d606a1b",
+        "staged": "root/RelativeBounds.lean",
+        "declarations": [
+          "DLMF.Struve.struveH_relative_bound"
+        ],
+        "hypothesesRemoved": [
+          "hν: derivable from positive distance bound",
+          "hatt: bound need not be attained"
+        ]
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+        "staged": "elliptic/SymmetricAdditionNext.lean",
+        "originalSha256": "4cd8adaa40a9be0571959c346cecd1ac914bb8b06e197b636aacef9be84288f8",
+        "newSha256": "58e4a1274fa675f345c3191b39be66330dbc0a23a40864d20e5953fdd6d0b15b",
+        "declarations": [
+          "symEllIntRD_add_symEllIntRD",
+          "symEllIntRG_add_symEllIntRG"
+        ]
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/ODE/Singularities.lean",
+        "staged": "analysis/Singularities.lean",
+        "originalSha256": "08fa7058d26688fb08c480b3380dcf6c670ef31d1f94f9791dc94a6caa2b51f3",
+        "newSha256": "bb053bdd167703a827aeb48a37241fe401943374bb413c4c64361ef94cb7e168",
+        "declarations": [
+          "fabry_transformation",
+          "fabry_coefficients"
+        ]
+      },
+      {
+        "file": "DLMF/Zeta/IntegerArguments.lean",
+        "staged": "discrete/IntegerArguments.lean",
+        "originalSha256": "9671c1a7beda843735e2faf9b13598b39518246f42ccd5ec7a2739abda1581f3",
+        "newSha256": "9cd6e9e0c81a1331baa848ac5d86746b6cf963a1a29ea8833aa97768114277ac",
+        "declarations": [
+          "iteratedDeriv_two_riemannZeta_zero"
+        ]
+      },
+      {
+        "file": "DLMF/Struve/Lommel.lean",
+        "staged": "root/LommelStage.lean",
+        "originalSha256": "24b96d915667c260b89b6b5a4d50641b1f76f4baa2de5c0904f95932ce0d35d3",
+        "newSha256": "a78296c7c33865f7bb813a8552aa12b4c46290f7cec05782f3a5a652be9f439d",
+        "declarations": [
+          "lommelCapital_terminates"
+        ]
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+        "staged": "elliptic/SymmetricAsymptotics.lean",
+        "originalSha256": "6aee31d119d05058363a1812709fdac81bb68546f04a27e68a706af622dd40b0",
+        "newSha256": "528af5f7e0b1c79a3269f5a7df21dff3cccb5140e3d2f826b72950aee4ea6608",
+        "declarations": [
+          "symEllIntRF_asymp_small_x"
+        ]
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+        "staged": "analysis/Functions3.lean",
+        "originalSha256": "3c5c5a9dac212b8f045681c0e169a3833bb2c9c4578aac24bf0b8322204749c9",
+        "newSha256": "88824d1a9ada19e85cd7e05c91177ea8113cb06cfd03e256e58e3d7d9073fa11",
+        "declarations": [
+          "not_exists_sqrt_branch_punctured"
+        ]
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Spectral/Theory.lean",
+        "staged": "analysis/SpectralTheory.lean",
+        "originalSha256": "a2bf2907644460367debb8e5d0eb932255c66e2ba952f9eeb9bff56cff2d32b4",
+        "newSha256": "df92d3d1b13ba4e13605b73f83dff22ad82b2d1ded6db6a40726d24ebe51eaca",
+        "declarations": [
+          "hermiteFunction_eigen",
+          "hermiteFunction_hilbertBasis"
+        ]
+      },
+      {
+        "file": "DLMF/Zeta/IntegerArguments.lean",
+        "staged": "discrete/IntegerArguments.lean",
+        "originalSha256": "9cd6e9e0c81a1331baa848ac5d86746b6cf963a1a29ea8833aa97768114277ac",
+        "newSha256": "b59133efa15373260a7cdb8ad0801c00a3bd127314a223ad938be9e10f29c8b6",
+        "declarations": [
+          "hasSum_multiple_sum_riemannZeta"
+        ]
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Distributions/Theory.lean",
+        "staged": "analysis/Theory6.lean",
+        "originalSha256": "cf50247a4e3444fdf276fe9d42e6611cc1fc508b48f17ee2a861ef089c1654f2",
+        "newSha256": "2b2664af56dcd92c1fe804ac8c89634af0c75219d76703890492b0faa44a9259",
+        "declarations": [
+          "delta_not_regular"
+        ]
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+        "staged": "analysis/OneVariable.lean",
+        "originalSha256": "40cae9b3b545625f2788e6c79213e9e682760e519f4c53d664976505b665efef",
+        "newSha256": "1feffca6744fa7abb0c848f63f56da25a926ffa19b3a801a94414e7da556edb3",
+        "declarations": [
+          "iterate_primitive_eq_integral"
+        ]
+      },
+      {
+        "file": "DLMF/Zeta/CotangentMoments.lean",
+        "staged": "discrete/CotangentMoments.lean",
+        "originalSha256": null,
+        "newSha256": "bdad303e6573040bef9ff7b60240bde1e6c4b06e66afb88d286d889e5d4fe006",
+        "declarations": []
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Summability/Integrals.lean",
+        "staged": "analysis/Integrals2.lean",
+        "originalSha256": "c965991e11079ad96650d118520ab1a3a7d5ce6caf9eec10516dbca901d7fa14",
+        "newSha256": "888318f3978c4911d5d3df3d1c005fed8a4b654906940fb6b44463163cac2451",
+        "declarations": [
+          "differentiableOn_poissonCauchyIntegral",
+          "tendsto_integral_halfPlanePoissonKernel_tail"
+        ]
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean",
+        "staged": "elliptic/SymmetricAsymptoticsRD.lean",
+        "originalSha256": "528af5f7e0b1c79a3269f5a7df21dff3cccb5140e3d2f826b72950aee4ea6608",
+        "newSha256": "bb4dd79c071b3526903324dc67f173b74873e4dc305593421f9d9bcd58126dbc",
+        "declarations": [
+          "symEllIntRG_asymp_small_x",
+          "symEllIntRD_asymp_small_x"
+        ]
+      },
+      {
+        "file": "DLMF/Zeta/Sums.lean",
+        "staged": "discrete/Sums.lean",
+        "originalSha256": "f5f06a54c411f37e0c178a4a0b921b7c5abf8d28182f6b647a8be9fc9c1f0bd6",
+        "newSha256": "f837860591bfc8b50e41c42fed1c56a96d6c7bee177c93af48929a33304f514f",
+        "declarations": [
+          "hasSum_riemannZeta_two_mul_div_odd_even"
+        ]
+      }
+    ]
+  },
+  "proofWorkFinishedAtUTC": "2026-10-30 22:58:07 UTC",
+  "proofWorkElapsedSeconds": 9476,
+  "validationCompletionNote": "Lean proof work and builds finished on 2026-10-30; PDF font-cache approval and final documentation validation completed on 2026-11-01.",
+  "maintenance": {
+    "ledgerResolver": "Resolve exact qualified source declarations before tagged suffix matches; distinguishes continued incomplete Beta functions from the Real declarations.",
+    "sourceFiles": [
+      {
+        "file": "scripts/dlmf_ledgers.py",
+        "sha256": "eeea8f4cfcc09790491e950d1fd3ff4c046a6125aede16efc1bae3508777dd15"
+      }
+    ],
+    "regressionNames": [
+      "DLMF.Statistical.incBeta",
+      "DLMF.Statistical.normIncBetaI",
+      "DLMF.Statistical.Real.incBeta",
+      "DLMF.Statistical.Real.normIncBetaI"
+    ],
+    "qualifiedNamesCheckedAgainstLean": 25415,
+    "qualifiedNameMismatches": 0
+  }
+}

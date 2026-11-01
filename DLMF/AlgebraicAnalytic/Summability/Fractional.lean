@@ -7,6 +7,8 @@ module
 
 public import DLMF.AlgebraicAnalytic.Summability.Basic
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
+public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 
 /-!
 # Fractional integrals and derivatives (DLMF §1.15(vi)–(vii))
@@ -141,6 +143,37 @@ theorem fractionalDerivative_fractionalDerivative_cpow {α β μ : ℂ} (hα : 0
 theorem fractionalDerivative_half_deriv_ne :
     fractionalDerivative (1 / 2) (deriv fun _ : ℝ => (1 : ℂ)) 1 ≠
       fractionalDerivative (3 / 2) (fun _ : ℝ => (1 : ℂ)) 1 := by
-  sorry
+  have hzero : fractionalDerivative (1 / 2) (deriv fun _ : ℝ => (1 : ℂ)) 1 = 0 := by
+    have hz (α : ℂ) : fractionalIntegral α (fun _ : ℝ => (0 : ℂ)) = fun _ => 0 := by
+      funext x
+      simp [fractionalIntegral]
+    simp only [deriv_const', fractionalDerivative]
+    rw [hz]
+    exact iteratedDeriv_fun_const_zero
+  have horder : fractionalDerivativeOrder (3 / 2) = 2 := by
+    norm_num [fractionalDerivativeOrder]
+    exact (Nat.floor_eq_iff (by norm_num)).mpr (by norm_num)
+  have hhalf : ((2 : ℕ) : ℂ) - 3 / 2 = 1 / 2 := by norm_num
+  have hI : fractionalIntegral (1 / 2) (fun _ : ℝ => (1 : ℂ)) =ᶠ[𝓝 (1 : ℝ)]
+      (fun x : ℝ => (Complex.Gamma (3 / 2))⁻¹ * (x : ℂ) ^ (1 / 2 : ℂ)) := by
+    filter_upwards [Ioi_mem_nhds (by norm_num : (0 : ℝ) < 1)] with x hx
+    have h := fractionalIntegral_cpow (α := 1 / 2) (μ := 0) (by norm_num) (by norm_num) hx
+    norm_num at h
+    convert h using 1 <;> norm_num
+  have hD : deriv (fun x : ℝ => (x : ℂ) ^ (1 / 2 : ℂ)) =ᶠ[𝓝 (1 : ℝ)]
+      (fun x : ℝ => (1 / 2 : ℂ) * (x : ℂ) ^ (-(1 / 2) : ℂ)) := by
+    filter_upwards [Ioi_mem_nhds (by norm_num : (0 : ℝ) < 1)] with x hx
+    rw [Complex.deriv_ofReal_cpow_const hx.ne' (by norm_num)]
+    norm_num
+  have hDD : iteratedDeriv 2 (fun x : ℝ => (x : ℂ) ^ (1 / 2 : ℂ)) 1 = -(1 / 4 : ℂ) := by
+    rw [iteratedDeriv_succ, iteratedDeriv_one,
+      hD.deriv_eq]
+    have h := (hasDerivAt_ofReal_cpow_const (x := (1 : ℝ)) (by norm_num)
+      (r := -(1 / 2 : ℂ)) (by norm_num)).const_mul (1 / 2 : ℂ)
+    convert h.deriv using 1 <;> norm_num
+  rw [hzero, fractionalDerivative, horder, hhalf, hI.iteratedDeriv_eq,
+    iteratedDeriv_const_mul_field, hDD]
+  exact Ne.symm (mul_ne_zero (inv_ne_zero (Complex.Gamma_ne_zero_of_re_pos
+    (s := (3 / 2 : ℂ)) (by norm_num))) (by norm_num))
 
 end DLMF.AlgebraicAnalytic

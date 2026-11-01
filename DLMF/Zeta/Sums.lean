@@ -9,6 +9,7 @@ public import DLMF.Gamma.SeriesExpansions
 public import DLMFMathlib.NumberTheory.BernoulliTaylor
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Log
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.EulerSineProd
+public import DLMF.Zeta.CotangentMoments
 public import DLMF.Zeta.Riemann
 
 /-!
@@ -1367,6 +1368,107 @@ theorem hasSum_riemannZeta_two_mul_div_odd_even :
     HasSum (fun k : ℕ => riemannZeta (2 * (k + 1)) /
         ((2 * (k + 1) + 1) * (2 * (k + 1) + 2) * 2 ^ (2 * (k + 1))))
       (1 / 4 - 7 / (4 * π ^ 2) * riemannZeta 3) := by
-  sorry
+  set F : ℕ → ℝ → ℂ := fun k x => riemannZeta (2 * (k + 1)) *
+    (((1 / 2 - x) * x ^ (2 * (k + 1)) : ℝ) : ℂ)
+  set f : ℝ → ℂ := fun x => (((1 / 2 - x) / 2 -
+    π / 2 * ((x / 2 - x ^ 2) * Real.cot (π * x)) : ℝ) : ℂ)
+  have hlim : ∀ x : ℝ, 0 < x → x ≤ 1 / 2 → HasSum (fun k => F k x) (f x) := by
+    intro x hx0 hx1
+    have hz : ‖(x : ℂ)‖ < 1 := by rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hx0]; linarith
+    have hz0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx0.ne'
+    have h := (hasSum_nat_add_iff' 1).mpr (hasSum_riemannZeta_two_mul_mul_pow hz hz0)
+    simp only [range_one, sum_singleton, Nat.cast_zero, mul_zero, pow_zero, mul_one,
+      riemannZeta_zero] at h
+    have h' := h.mul_right (((1 / 2 - x : ℝ) : ℂ))
+    convert h' using 1
+    · funext k; simp only [F]; push_cast; ring
+    · simp only [f]
+      rw [show (π : ℂ) * x = ((π * x : ℝ) : ℂ) by push_cast; ring, ← Complex.ofReal_cot]
+      push_cast; ring
+  have hzb : ∀ k : ℕ, ‖riemannZeta (2 * (k + 1))‖ ≤ 2 := by
+    intro k
+    have h := DLMF.Gamma.norm_riemannZeta_add_two_sub_one_le (2 * k)
+    have e : ((2 * k : ℕ) : ℂ) + 2 = 2 * ((k : ℂ) + 1) := by push_cast; ring
+    rw [e] at h
+    have h1 : (1 / 2 : ℝ) ^ (2 * k) ≤ 1 := pow_le_one₀ (by norm_num) (by norm_num)
+    have := norm_sub_norm_le (riemannZeta (2 * ((k : ℂ) + 1))) 1
+    simp at this
+    linarith
+  have hFb : ∀ k : ℕ, ∀ x ∈ Set.uIoc (0 : ℝ) (1 / 2),
+      ‖F k x‖ ≤ 2 * (1 / 4 : ℝ) ^ (k + 1) := by
+    intro k x hx
+    rw [Set.uIoc_of_le (by norm_num)] at hx
+    have hx0 := hx.1
+    have hx1 := hx.2
+    simp only [F, norm_mul, norm_pow, Complex.norm_real, Real.norm_eq_abs]
+    rw [abs_of_nonneg (by linarith : 0 ≤ 1 / 2 - x), abs_of_pos hx.1]
+    have hpow : x ^ (2 * (k + 1)) ≤ (1 / 4 : ℝ) ^ (k + 1) := by
+      rw [pow_mul, show (1 / 4 : ℝ) = (1 / 2) ^ 2 by norm_num]
+      exact pow_le_pow_left₀ (by positivity) (pow_le_pow_left₀ hx.1.le hx.2 2) _
+    have hprod : (1 / 2 - x) * x ^ (2 * (k + 1)) ≤ (1 / 4 : ℝ) ^ (k + 1) := by
+      exact (mul_le_mul_of_nonneg_right (by linarith : 1 / 2 - x ≤ 1) (by positivity)).trans
+        (by simpa using hpow)
+    exact mul_le_mul (hzb k) hprod (by positivity) (by norm_num)
+  have hbs : Summable (fun k : ℕ => 2 * (1 / 4 : ℝ) ^ (k + 1)) :=
+    ((summable_geometric_of_lt_one (by norm_num) (by norm_num)).comp_injective
+      (add_left_injective 1)).mul_left 2
+  have hI := intervalIntegral.hasSum_integral_of_dominated_convergence (μ := MeasureTheory.volume)
+    (a := 0) (b := 1 / 2) (fun k _ => 2 * (1 / 4 : ℝ) ^ (k + 1))
+    (fun k => (by fun_prop : Continuous (F k)).aestronglyMeasurable)
+    (fun k => MeasureTheory.ae_of_all _ (hFb k))
+    (MeasureTheory.ae_of_all _ fun _ _ => hbs) intervalIntegrable_const
+    (MeasureTheory.ae_of_all _ fun x hx => by
+      rw [Set.uIoc_of_le (by norm_num)] at hx; exact hlim x hx.1 hx.2)
+  have hFk : ∀ k : ℕ, ∫ x in (0 : ℝ)..(1 / 2), F k x =
+      riemannZeta (2 * (k + 1)) /
+        (4 * ((2 * (k + 1) + 1) * (2 * (k + 1) + 2) * 2 ^ (2 * (k + 1)))) := by
+    intro k
+    simp only [F]
+    rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_ofReal]
+    have he : (fun x : ℝ => (1 / 2 - x) * x ^ (2 * (k + 1))) =
+        fun x => (1 / 2) * x ^ (2 * (k + 1)) - x ^ (2 * (k + 1) + 1) := by funext x; ring
+    rw [he, intervalIntegral.integral_sub
+      ((by fun_prop : Continuous fun x : ℝ => (1 / 2) * x ^ (2 * (k + 1))).intervalIntegrable _ _)
+      ((by fun_prop : Continuous fun x : ℝ => x ^ (2 * (k + 1) + 1)).intervalIntegrable _ _),
+      intervalIntegral.integral_const_mul, integral_pow, integral_pow]
+    push_cast
+    have h2 : (2 : ℂ) ≠ 0 := two_ne_zero
+    have h3 : (2 * ((k : ℂ) + 1) + 1) ≠ 0 := by exact_mod_cast (show 2 * (k + 1) + 1 ≠ 0 by omega)
+    have h4 : (2 * ((k : ℂ) + 1) + 1 + 1) ≠ 0 := by exact_mod_cast (show 2 * (k + 1) + 1 + 1 ≠ 0 by omega)
+    simp only [zero_pow (by omega : 2 * (k + 1) + 1 ≠ 0), sub_zero,
+      zero_pow (by omega : 2 * (k + 1) + 1 + 1 ≠ 0)]
+    simp only [div_pow, one_pow, pow_succ]
+    have hk2 : (k : ℂ) + 2 ≠ 0 := by exact_mod_cast (show k + 2 ≠ 0 by omega)
+    field_simp [hk2]
+    ring_nf
+    field_simp [show (2 : ℂ) + k ≠ 0 by simpa [add_comm] using hk2]
+    ring
+  have hcot := integral_quadratic_mul_cot_pi (fun x hx => r25a_pi_mul_cot_bound hx.1 hx.2)
+  have hfI : ∫ x in (0 : ℝ)..(1 / 2), f x =
+      1 / 16 - 7 / (16 * π ^ 2) * riemannZeta 3 := by
+    simp only [f]
+    rw [intervalIntegral.integral_ofReal,
+      intervalIntegral.integral_sub
+        ((by fun_prop : Continuous fun x : ℝ => (1 / 2 - x) / 2).intervalIntegrable _ _)
+        (hcot.1.const_mul (π / 2)),
+      intervalIntegral.integral_const_mul]
+    push_cast
+    rw [← intervalIntegral.integral_ofReal
+      (f := fun x : ℝ => (x / 2 - x ^ 2) * Real.cot (π * x)), hcot.2]
+    have he : (∫ x in (0 : ℝ)..(1 / 2), (1 / 2 - x) / 2) = 1 / 16 := by
+      rw [intervalIntegral.integral_div, intervalIntegral.integral_sub
+        (f := fun _ : ℝ => 1 / 2) (g := fun x : ℝ => x) intervalIntegrable_const
+        (continuous_id.intervalIntegrable _ _), integral_id]
+      norm_num
+    rw [he]
+    push_cast
+    have hp : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+    field_simp
+    ring
+  simp only [hFk, hfI] at hI
+  have h4 := hI.mul_left 4
+  convert h4 using 1
+  · funext k; field_simp
+  · ring
 
 end DLMF.Zeta

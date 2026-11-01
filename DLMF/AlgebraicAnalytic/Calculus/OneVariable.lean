@@ -11,6 +11,7 @@ public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 public import Mathlib.Analysis.Convex.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.MeanValue
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.Topology.EMetricSpace.BoundedVariation
 
@@ -349,7 +350,35 @@ continuous). -/
 theorem iterate_primitive_eq_integral {f : ℝ → ℝ} (hf : Continuous f) (a b : ℝ) (n : ℕ) :
     (fun g : ℝ → ℝ => fun x => ∫ t in a..x, g t)^[n + 1] f b =
       (1 / (n ! : ℝ)) * ∫ x in a..b, (b - x) ^ n * f x := by
-  sorry
+  induction n generalizing f with
+  | zero => simp
+  | succ n ih =>
+    let F : ℝ → ℝ := fun x => ∫ t in a..x, f t
+    have hF (x : ℝ) : HasDerivAt F (f x) x :=
+      intervalIntegral.integral_hasDerivAt_right (hf.intervalIntegrable a x)
+        hf.aestronglyMeasurable.stronglyMeasurableAtFilter hf.continuousAt
+    have hcF : Continuous F := continuous_iff_continuousAt.mpr (fun x => (hF x).continuousAt)
+    have hu (x : ℝ) : HasDerivAt (fun x : ℝ => (b - x) ^ (n + 1))
+        (-((n + 1 : ℕ) : ℝ) * (b - x) ^ n) x := by
+      convert! ((hasDerivAt_id x).const_sub b).pow (n + 1) using 1 <;> simp <;> ring
+    have hcU : Continuous (fun x : ℝ => -((n + 1 : ℕ) : ℝ) * (b - x) ^ n) := by fun_prop
+    have hbyp := intervalIntegral.integral_mul_deriv_eq_deriv_mul
+      (fun x hx => hu x) (fun x hx => hF x)
+      (hcU.intervalIntegrable a b) (hf.intervalIntegrable a b)
+    simp only [sub_self, zero_pow (Nat.succ_ne_zero n), zero_mul, F,
+      intervalIntegral.integral_same, mul_zero, sub_zero, zero_sub] at hbyp
+    have he : (∫ x in a..b, (b - x) ^ (n + 1) * f x) =
+        (n + 1 : ℝ) * ∫ x in a..b, (b - x) ^ n * F x := by
+      rw [show (fun x => -((n + 1 : ℕ) : ℝ) * (b - x) ^ n * ∫ t in a..x, f t) =
+        fun x => -((n + 1 : ℕ) : ℝ) * ((b - x) ^ n * F x) by funext x; dsimp [F]; ring,
+        intervalIntegral.integral_const_mul] at hbyp
+      push_cast at hbyp
+      linear_combination hbyp
+    rw [Function.iterate_succ_apply, ih hcF]
+    rw [he, Nat.factorial_succ]
+    push_cast
+    field_simp
+
 
 /-- DLMF 1.4.34: if `f` is continuous on `[a, b]` and continuously differentiable on `(a, b)`
 with `∫ₐᵇ ‖f'‖ < ∞`, then its total variation on `[a, b]` is `∫ₐᵇ ‖f'(x)‖ dx`. Stated for

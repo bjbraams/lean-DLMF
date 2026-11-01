@@ -6,7 +6,10 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.Calculus.Basic
+public import DLMFMathlib.Topology.Order.Compact
 public import Mathlib.Analysis.Calculus.Deriv.Pi
+public import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
+public import Mathlib.Analysis.Calculus.UniformLimitsDeriv
 public import Mathlib.Analysis.Calculus.Deriv.Prod
 public import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
@@ -363,6 +366,40 @@ theorem isLocalMax_of_hessian_negDef {f : ℝ × ℝ → ℝ} {a b : ℝ} (hf : 
 
 /-! ### §1.5(iv) Leibniz's theorem for differentiation of integrals -/
 
+/-- A continuous partial derivative on a compact rectangle may be integrated under the
+integral sign. The derivative is assumed to exist for interior parameter values. -/
+lemma hasDerivAt_integral_fixed_limits {f : ℝ × ℝ → ℝ} {a b c d : ℝ} (hcd : c ≤ d)
+    (hf : ContinuousOn f (Icc a b ×ˢ Icc c d))
+    (hfx : ContinuousOn (fun q => deriv (fun t => f (t, q.2)) q.1) (Icc a b ×ˢ Icc c d))
+    (hdf : ∀ q ∈ Ioo a b ×ˢ Icc c d, DifferentiableAt ℝ (fun t => f (t, q.2)) q.1)
+    {x : ℝ} (hx : x ∈ Ioo a b) :
+    HasDerivAt (fun x => ∫ y in c..d, f (x, y))
+      (∫ y in c..d, deriv (fun t => f (t, y)) x) x := by
+  have hfSlice (u : ℝ) (hu : u ∈ Icc a b) : ContinuousOn (fun y => f (u, y)) (Icc c d) :=
+    hf.comp (continuous_const.prodMk continuous_id).continuousOn (fun y hy => ⟨hu, hy⟩)
+  have hfxSlice (u : ℝ) (hu : u ∈ Icc a b) :
+      ContinuousOn (fun y => deriv (fun t => f (t, y)) u) (Icc c d) :=
+    hfx.comp (continuous_const.prodMk continuous_id).continuousOn (fun y hy => ⟨hu, hy⟩)
+  obtain ⟨C, hC⟩ := (isCompact_Icc.prod isCompact_Icc).exists_bound_of_continuousOn hfx
+  apply (intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_deriv_le
+    (F := fun u y => f (u, y)) (F' := fun u y => deriv (fun t => f (t, y)) u)
+    (bound := fun _ => C) (s := Ioo a b) (Ioo_mem_nhds hx.1 hx.2) ?_ ?_ ?_ ?_
+    intervalIntegrable_const ?_).2
+  · filter_upwards [Icc_mem_nhds hx.1 hx.2] with u hu
+    have hm : AEStronglyMeasurable (fun y => f (u, y)) (volume.restrict (Icc c d)) :=
+      (hfSlice u hu).aestronglyMeasurable measurableSet_Icc
+    exact hm.mono_set (by rw [uIoc_of_le hcd]; exact Ioc_subset_Icc_self)
+  · exact ContinuousOn.intervalIntegrable_of_Icc hcd (hfSlice x (Ioo_subset_Icc_self hx))
+  · have hm : AEStronglyMeasurable (fun y => deriv (fun t => f (t, y)) x)
+        (volume.restrict (Icc c d)) :=
+      (hfxSlice x (Ioo_subset_Icc_self hx)).aestronglyMeasurable measurableSet_Icc
+    exact hm.mono_set (by rw [uIoc_of_le hcd]; exact Ioc_subset_Icc_self)
+  · filter_upwards [] with y hy u hu
+    apply hC (u, y)
+    exact ⟨Ioo_subset_Icc_self hu, by simpa only [uIcc_of_le hcd] using uIoc_subset_uIcc hy⟩
+  · filter_upwards [] with y hy u hu
+    exact (hdf (u, y) ⟨hu, by simpa only [uIcc_of_le hcd] using uIoc_subset_uIcc hy⟩).hasDerivAt
+
 /-- DLMF 1.5.22 (Leibniz's rule with variable limits): if `f` and `∂f/∂x` are continuous on
 `[a, b] × [c, d]`, with the partial derivative existing for interior `x`, and `α`, `β`
 are continuously differentiable on `[a, b]` with values in
@@ -398,9 +435,22 @@ theorem hasDerivAt_improper_integral_of_tendstoUniformlyOn {f : ℝ × ℝ → �
       (Icc a b))
     {x : ℝ} (hx : x ∈ Ioo a b) :
     HasDerivAt I (J x) x := by
-  sorry
+  apply hasDerivAt_of_tendstoUniformlyOn isOpen_Ioo
+    (hJ.mono Ioo_subset_Icc_self) ?_ (fun u hu => hI u (Ioo_subset_Icc_self hu)) hx
+  filter_upwards [eventually_ge_atTop c] with R hR u hu
+  exact hasDerivAt_integral_fixed_limits hR
+    (hf.mono fun q hq => ⟨hq.1, hq.2.1⟩)
+    (hfx.mono fun q hq => ⟨hq.1, hq.2.1⟩)
+    (fun q hq => hdf q ⟨hq.1, hq.2.1⟩) hu
 
 /-! ### §1.5(v) Multiple integrals -/
+
+/-- A planar region between two continuous graphs over a compact interval is compact. -/
+lemma isCompact_normalDomain_fst {φ₁ φ₂ : ℝ → ℝ} {a b : ℝ}
+    (hφ₁ : ContinuousOn φ₁ (Icc a b)) (hφ₂ : ContinuousOn φ₂ (Icc a b))
+    (hφ : ∀ x ∈ Icc a b, φ₁ x ≤ φ₂ x) :
+    IsCompact {q : ℝ × ℝ | q.1 ∈ Icc a b ∧ q.2 ∈ Icc (φ₁ q.1) (φ₂ q.1)} := by
+  exact isCompact_Icc.setOf_mem_Icc hφ₁ hφ₂ hφ
 
 /-- DLMF 1.5.30–1.5.32: for `f` continuous on `D = {a ≤ x ≤ b, φ₁(x) ≤ y ≤ φ₂(x)}` with
 `φ₁ ≤ φ₂` continuous, `∬_D f dA = ∫ₐᵇ (∫_{φ₁(x)}^{φ₂(x)} f(x, y) dy) dx`. -/
@@ -411,7 +461,33 @@ theorem setIntegral_normalDomain_fst {f : ℝ × ℝ → ℝ} {φ₁ φ₂ : ℝ
     (hf : ContinuousOn f {q | q.1 ∈ Icc a b ∧ q.2 ∈ Icc (φ₁ q.1) (φ₂ q.1)}) :
     ∫ q in {q : ℝ × ℝ | q.1 ∈ Icc a b ∧ q.2 ∈ Icc (φ₁ q.1) (φ₂ q.1)}, f q =
       ∫ x in a..b, ∫ y in φ₁ x..φ₂ x, f (x, y) := by
-  sorry
+  let S : Set (ℝ × ℝ) := {q | q.1 ∈ Icc a b ∧ q.2 ∈ Icc (φ₁ q.1) (φ₂ q.1)}
+  have hc : IsCompact S := isCompact_normalDomain_fst hφ₁ hφ₂ hφ
+  have hm : MeasurableSet S := hc.measurableSet
+  have hi : Integrable (S.indicator f) := (integrable_indicator_iff hm).mpr
+    (hf.integrableOn_compact hc)
+  have hslice (x : ℝ) : (∫ y : ℝ, S.indicator f (x, y)) =
+      (Icc a b).indicator (fun x => ∫ y in Icc (φ₁ x) (φ₂ x), f (x, y)) x := by
+    by_cases hx : x ∈ Icc a b
+    · rw [Set.indicator_of_mem hx]
+      rw [← integral_indicator measurableSet_Icc]
+      congr 1
+      funext y
+      simp only [mem_Icc] at hx
+      simp [S, Set.indicator, hx]
+    · have hx' : ¬ (a ≤ x ∧ x ≤ b) := hx
+      simp [S, Set.indicator, hx']
+  rw [← integral_indicator hm]
+  change (∫ q, S.indicator f q) = _
+  rw [Measure.volume_eq_prod, integral_prod _ hi]
+  simp_rw [hslice]
+  rw [integral_indicator measurableSet_Icc, integral_Icc_eq_integral_Ioc,
+    ← intervalIntegral.integral_of_le hab]
+  apply intervalIntegral.integral_congr
+  intro x hx
+  rw [uIcc_of_le hab] at hx
+  change (∫ y in Icc (φ₁ x) (φ₂ x), f (x, y)) = ∫ y in φ₁ x..φ₂ x, f (x, y)
+  rw [integral_Icc_eq_integral_Ioc, intervalIntegral.integral_of_le (hφ x hx)]
 
 /-- DLMF 1.5.33–1.5.34: for `f` continuous on `D = {c ≤ y ≤ d, ψ₁(y) ≤ x ≤ ψ₂(y)}` with
 `ψ₁ ≤ ψ₂` continuous, `∬_D f dA = ∫_c^d (∫_{ψ₁(y)}^{ψ₂(y)} f(x, y) dx) dy`. -/
@@ -422,7 +498,13 @@ theorem setIntegral_normalDomain_snd {f : ℝ × ℝ → ℝ} {ψ₁ ψ₂ : ℝ
     (hf : ContinuousOn f {q | q.2 ∈ Icc c d ∧ q.1 ∈ Icc (ψ₁ q.2) (ψ₂ q.2)}) :
     ∫ q in {q : ℝ × ℝ | q.2 ∈ Icc c d ∧ q.1 ∈ Icc (ψ₁ q.2) (ψ₂ q.2)}, f q =
       ∫ y in c..d, ∫ x in ψ₁ y..ψ₂ y, f (x, y) := by
-  sorry
+  have hswap := (Measure.measurePreserving_swap (μ := (volume : Measure ℝ))
+    (ν := (volume : Measure ℝ))).setIntegral_preimage_emb
+      MeasurableEquiv.prodComm.measurableEmbedding f
+      {q : ℝ × ℝ | q.2 ∈ Icc c d ∧ q.1 ∈ Icc (ψ₁ q.2) (ψ₂ q.2)}
+  rw [Measure.volume_eq_prod, ← hswap]
+  exact setIntegral_normalDomain_fst hcd hψ₁ hψ₂ hψ
+    (hf.comp continuous_swap.continuousOn (fun q hq => hq))
 
 /-- DLMF 1.5.35 (change of order of integration): if the domain `D` has both forms 1.5.30 and
 1.5.33 and `f` is continuous on `D`, the two repeated integrals agree. -/
@@ -474,7 +556,63 @@ theorem setIntegral_normalDomain_three {f : ℝ × ℝ × ℝ → ℝ} {φ₁ φ
     ∫ q in {q : ℝ × ℝ × ℝ | q.1 ∈ Icc a b ∧ q.2.1 ∈ Icc (φ₁ q.1) (φ₂ q.1) ∧
         q.2.2 ∈ Icc (ψ₁ (q.1, q.2.1)) (ψ₂ (q.1, q.2.1))}, f q =
       ∫ x in a..b, ∫ y in φ₁ x..φ₂ x, ∫ z in ψ₁ (x, y)..ψ₂ (x, y), f (x, y, z) := by
-  sorry
+  let K : Set (ℝ × ℝ) := {p | p.1 ∈ Icc a b ∧ p.2 ∈ Icc (φ₁ p.1) (φ₂ p.1)}
+  let S : Set (ℝ × ℝ × ℝ) := {q | q.1 ∈ Icc a b ∧ q.2.1 ∈ Icc (φ₁ q.1) (φ₂ q.1) ∧
+    q.2.2 ∈ Icc (ψ₁ (q.1, q.2.1)) (ψ₂ (q.1, q.2.1))}
+  have hK : IsCompact K := isCompact_normalDomain_fst hφ₁ hφ₂ hφ
+  have hS : IsCompact S := by
+    have hc := hK.setOf_mem_Icc hψ₁ hψ₂ hψ
+    convert hc.image (Homeomorph.prodAssoc ℝ ℝ ℝ).continuous using 1
+    symm
+    ext q
+    constructor
+    · rintro ⟨⟨⟨x, y⟩, z⟩, ⟨hp, hz⟩, rfl⟩
+      exact ⟨hp.1, hp.2, hz⟩
+    · rintro ⟨hx, hy, hz⟩
+      exact ⟨((q.1, q.2.1), q.2.2), ⟨⟨hx, hy⟩, hz⟩, rfl⟩
+  have hm : MeasurableSet S := hS.measurableSet
+  have hi : Integrable (S.indicator f) := (integrable_indicator_iff hm).mpr
+    (hf.integrableOn_compact hS)
+  have hslice (x : ℝ) : (∫ y : ℝ, ∫ z : ℝ, S.indicator f (x, y, z)) =
+      (Icc a b).indicator (fun x => ∫ y in Icc (φ₁ x) (φ₂ x),
+        ∫ z in Icc (ψ₁ (x, y)) (ψ₂ (x, y)), f (x, y, z)) x := by
+    by_cases hx : x ∈ Icc a b
+    · rw [Set.indicator_of_mem hx, ← integral_indicator measurableSet_Icc]
+      apply integral_congr_ae
+      filter_upwards [] with y
+      by_cases hy : y ∈ Icc (φ₁ x) (φ₂ x)
+      · rw [Set.indicator_of_mem hy, ← integral_indicator measurableSet_Icc]
+        congr 1
+        funext z
+        simp only [mem_Icc] at hx hy
+        simp [S, Set.indicator, hx, hy]
+      · have hy' : ¬ (φ₁ x ≤ y ∧ y ≤ φ₂ x) := hy
+        simp [S, Set.indicator, hy']
+    · have hx' : ¬ (a ≤ x ∧ x ≤ b) := hx
+      simp [S, Set.indicator, hx']
+  rw [← integral_indicator hm]
+  change (∫ q, S.indicator f q) = _
+  rw [Measure.volume_eq_prod, integral_prod _ hi]
+  have hfub : (∫ x : ℝ, ∫ p : ℝ × ℝ, S.indicator f (x, p)) =
+      ∫ x : ℝ, ∫ y : ℝ, ∫ z : ℝ, S.indicator f (x, y, z) := by
+    apply integral_congr_ae
+    filter_upwards [hi.prod_right_ae] with x hx
+    exact integral_prod _ hx
+  rw [hfub]
+  simp_rw [hslice]
+  rw [integral_indicator measurableSet_Icc, integral_Icc_eq_integral_Ioc,
+    ← intervalIntegral.integral_of_le hab]
+  apply intervalIntegral.integral_congr
+  intro x hx
+  rw [uIcc_of_le hab] at hx
+  change (∫ y in Icc (φ₁ x) (φ₂ x), ∫ z in Icc (ψ₁ (x, y)) (ψ₂ (x, y)), f (x, y, z)) = _
+  rw [integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le (hφ x hx)]
+  apply intervalIntegral.integral_congr
+  intro y hy
+  rw [uIcc_of_le (hφ x hx)] at hy
+  change (∫ z in Icc (ψ₁ (x, y)) (ψ₂ (x, y)), f (x, y, z)) =
+    ∫ z in ψ₁ (x, y)..ψ₂ (x, y), f (x, y, z)
+  rw [integral_Icc_eq_integral_Ioc, intervalIntegral.integral_of_le (hψ (x, y) ⟨hx, hy⟩)]
 
 /-! ### §1.5(vi) Jacobians and change of variables -/
 

@@ -128,39 +128,39 @@ IntegralReps 20, IntegerArguments 13, Sums 7, Asymptotics 1, Zeros 4), plus 10 n
 
 ## [§25.6 Integer Arguments](https://dlmf.nist.gov/25.6)
 
-- [25.6.E1](https://dlmf.nist.gov/25.6.E1): [`DLMF.Zeta.riemannZeta_six`](DLMF/Zeta/IntegerArguments.lean#L45) (proved); Mathlib: [`riemannZeta_zero`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_zero#doc); Mathlib: [`riemannZeta_two`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_two#doc). ζ(0), ζ(2) in Mathlib (pointers in DLMF/Core/UpstreamElementary.lean); ζ(4) is Mathlib’s riemannZeta_four; ζ(6) is proved here from riemannZeta_two_mul_nat.
+- [25.6.E1](https://dlmf.nist.gov/25.6.E1): [`DLMF.Zeta.riemannZeta_six`](DLMF/Zeta/IntegerArguments.lean#L44) (proved); Mathlib: [`riemannZeta_zero`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_zero#doc); Mathlib: [`riemannZeta_two`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_two#doc). ζ(0), ζ(2) in Mathlib (pointers in DLMF/Core/UpstreamElementary.lean); ζ(4) is Mathlib’s riemannZeta_four; ζ(6) is proved here from riemannZeta_two_mul_nat.
 - [25.6.E2](https://dlmf.nist.gov/25.6.E2): Mathlib: [`riemannZeta_two_mul_nat`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_two_mul_nat#doc). n ≥ 1, with (-1)^{n+1} B_{2n} in place of |B_{2n}|; pointer in DLMF/Core/UpstreamElementary.lean.
 - [25.6.E3](https://dlmf.nist.gov/25.6.E3): Mathlib: [`riemannZeta_neg_nat_eq_bernoulli`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_neg_nat_eq_bernoulli#doc). Stronger: also n = 0; pointer in DLMF/Core/UpstreamElementary.lean.
 - [25.6.E4](https://dlmf.nist.gov/25.6.E4): Mathlib: [`riemannZeta_neg_two_mul_nat_add_one`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_neg_two_mul_nat_add_one#doc). Exact, as ζ(-2(n+1)) = 0, n ≥ 0.
-- [25.6.E5](https://dlmf.nist.gov/25.6.E5): [`DLMF.Zeta.hasSum_multiple_sum_riemannZeta`](DLMF/Zeta/IntegerArguments.lean#L53) (admitted). k ≥ 1; the k-fold sum (over Fin k → ℕ, n_i + 1) has sum k! ζ(k+1).
-- [25.6.E6](https://dlmf.nist.gov/25.6.E6): [`DLMF.Zeta.riemannZeta_two_mul_add_one_eq_integral`](DLMF/Zeta/IntegerArguments.lean#L136) (proved). k ≥ 1; interval integrability of B_{2k+1}(t) cot(πt) included.
-- [25.6.E7](https://dlmf.nist.gov/25.6.E7): [`DLMF.Zeta.riemannZeta_two_eq_double_integral`](DLMF/Zeta/IntegerArguments.lean#L267) (proved). Integrability on the unit square included; iterated interval integrals.
-- [25.6.E8](https://dlmf.nist.gov/25.6.E8): [`DLMF.Zeta.hasSum_riemannZeta_two_central_binom`](DLMF/Zeta/IntegerArguments.lean#L306) (proved). Series from k = 1 written with k + 1, k : ℕ.
-- [25.6.E9](https://dlmf.nist.gov/25.6.E9): [`DLMF.Zeta.hasSum_riemannZeta_three_central_binom`](DLMF/Zeta/IntegerArguments.lean#L325) (admitted). As 25.6.8.
-- [25.6.E10](https://dlmf.nist.gov/25.6.E10): [`DLMF.Zeta.hasSum_riemannZeta_four_central_binom`](DLMF/Zeta/IntegerArguments.lean#L332) (admitted). As 25.6.8.
+- [25.6.E5](https://dlmf.nist.gov/25.6.E5): [`DLMF.Zeta.hasSum_multiple_sum_riemannZeta`](DLMF/Zeta/IntegerArguments.lean#L171) (proved). k ≥ 1; the k-fold sum (over Fin k → ℕ, n_i + 1) has sum k! ζ(k+1).
+- [25.6.E6](https://dlmf.nist.gov/25.6.E6): [`DLMF.Zeta.riemannZeta_two_mul_add_one_eq_integral`](DLMF/Zeta/IntegerArguments.lean#L297) (proved). k ≥ 1; interval integrability of B_{2k+1}(t) cot(πt) included.
+- [25.6.E7](https://dlmf.nist.gov/25.6.E7): [`DLMF.Zeta.riemannZeta_two_eq_double_integral`](DLMF/Zeta/IntegerArguments.lean#L428) (proved). Integrability on the unit square included; iterated interval integrals.
+- [25.6.E8](https://dlmf.nist.gov/25.6.E8): [`DLMF.Zeta.hasSum_riemannZeta_two_central_binom`](DLMF/Zeta/IntegerArguments.lean#L467) (proved). Series from k = 1 written with k + 1, k : ℕ.
+- [25.6.E9](https://dlmf.nist.gov/25.6.E9): [`DLMF.Zeta.hasSum_riemannZeta_three_central_binom`](DLMF/Zeta/IntegerArguments.lean#L486) (admitted). As 25.6.8.
+- [25.6.E10](https://dlmf.nist.gov/25.6.E10): [`DLMF.Zeta.hasSum_riemannZeta_four_central_binom`](DLMF/Zeta/IntegerArguments.lean#L493) (admitted). As 25.6.8.
 - [25.6.E11](https://dlmf.nist.gov/25.6.E11): Mathlib: [`deriv_riemannZeta_zero`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=deriv_riemannZeta_zero#doc). Exact.
-- [25.6.E12](https://dlmf.nist.gov/25.6.E12): [`DLMF.Zeta.iteratedDeriv_two_riemannZeta_zero`](DLMF/Zeta/IntegerArguments.lean#L341) (admitted). γ₁ = stieltjesConstant 1.
-- [25.6.E13](https://dlmf.nist.gov/25.6.E13): [`DLMF.Zeta.iteratedDeriv_riemannZeta_neg_two_mul`](DLMF/Zeta/IntegerArguments.lean#L354) (proved). n ≥ 1, all k ≥ 0; proved from 25.4.5 at s = 2n+1 (inherits that admission).
-- [25.6.E14](https://dlmf.nist.gov/25.6.E14): [`DLMF.Zeta.iteratedDeriv_riemannZeta_one_sub_two_mul`](DLMF/Zeta/IntegerArguments.lean#L389) (proved). n ≥ 1, all k ≥ 0; proved from 25.4.5 at s = 2n.
-- [25.6.E15](https://dlmf.nist.gov/25.6.E15): [`DLMF.Zeta.deriv_riemannZeta_two_mul`](DLMF/Zeta/IntegerArguments.lean#L424) (proved). n ≥ 1; ψ = Complex.digamma.
-- [25.6.E16](https://dlmf.nist.gov/25.6.E16): [`DLMF.Zeta.riemannZeta_two_mul_recursion`](DLMF/Zeta/IntegerArguments.lean#L548) (proved). n ≥ 2.
-- [25.6.E17](https://dlmf.nist.gov/25.6.E17): [`DLMF.Zeta.riemannZeta_four_mul_add_two_recursion`](DLMF/Zeta/IntegerArguments.lean#L597) (proved). n ≥ 1.
-- [25.6.E18](https://dlmf.nist.gov/25.6.E18): [`DLMF.Zeta.riemannZeta_four_mul_recursion`](DLMF/Zeta/IntegerArguments.lean#L606) (proved). n ≥ 1.
-- [25.6.E19](https://dlmf.nist.gov/25.6.E19): [`DLMF.Zeta.riemannZeta_two_mul_recursion_two`](DLMF/Zeta/IntegerArguments.lean#L627) (proved). m, n ≥ 0, m + n ≥ 1.
-- [25.6.E20](https://dlmf.nist.gov/25.6.E20): [`DLMF.Zeta.riemannZeta_two_mul_recursion_pow_two`](DLMF/Zeta/IntegerArguments.lean#L702) (proved). n ≥ 2.
+- [25.6.E12](https://dlmf.nist.gov/25.6.E12): [`DLMF.Zeta.iteratedDeriv_two_riemannZeta_zero`](DLMF/Zeta/IntegerArguments.lean#L576) (proved). γ₁ = stieltjesConstant 1.
+- [25.6.E13](https://dlmf.nist.gov/25.6.E13): [`DLMF.Zeta.iteratedDeriv_riemannZeta_neg_two_mul`](DLMF/Zeta/IntegerArguments.lean#L674) (proved). n ≥ 1, all k ≥ 0; proved from 25.4.5 at s = 2n+1 (inherits that admission).
+- [25.6.E14](https://dlmf.nist.gov/25.6.E14): [`DLMF.Zeta.iteratedDeriv_riemannZeta_one_sub_two_mul`](DLMF/Zeta/IntegerArguments.lean#L709) (proved). n ≥ 1, all k ≥ 0; proved from 25.4.5 at s = 2n.
+- [25.6.E15](https://dlmf.nist.gov/25.6.E15): [`DLMF.Zeta.deriv_riemannZeta_two_mul`](DLMF/Zeta/IntegerArguments.lean#L744) (proved). n ≥ 1; ψ = Complex.digamma.
+- [25.6.E16](https://dlmf.nist.gov/25.6.E16): [`DLMF.Zeta.riemannZeta_two_mul_recursion`](DLMF/Zeta/IntegerArguments.lean#L868) (proved). n ≥ 2.
+- [25.6.E17](https://dlmf.nist.gov/25.6.E17): [`DLMF.Zeta.riemannZeta_four_mul_add_two_recursion`](DLMF/Zeta/IntegerArguments.lean#L917) (proved). n ≥ 1.
+- [25.6.E18](https://dlmf.nist.gov/25.6.E18): [`DLMF.Zeta.riemannZeta_four_mul_recursion`](DLMF/Zeta/IntegerArguments.lean#L926) (proved). n ≥ 1.
+- [25.6.E19](https://dlmf.nist.gov/25.6.E19): [`DLMF.Zeta.riemannZeta_two_mul_recursion_two`](DLMF/Zeta/IntegerArguments.lean#L947) (proved). m, n ≥ 0, m + n ≥ 1.
+- [25.6.E20](https://dlmf.nist.gov/25.6.E20): [`DLMF.Zeta.riemannZeta_two_mul_recursion_pow_two`](DLMF/Zeta/IntegerArguments.lean#L1022) (proved). n ≥ 2.
 
 ## [§25.8 Sums](https://dlmf.nist.gov/25.8)
 
-- [25.8.E1](https://dlmf.nist.gov/25.8.E1): [`DLMF.Zeta.hasSum_riemannZeta_sub_one`](DLMF/Zeta/Sums.lean#L64) (proved). As HasSum over k + 2, k : ℕ.
-- [25.8.E2](https://dlmf.nist.gov/25.8.E2): [`DLMF.Zeta.hasSum_Gamma_mul_riemannZeta_sub_one`](DLMF/Zeta/Sums.lean#L609) (proved). s ∉ {1, 0, -1, -2, …}.
-- [25.8.E3](https://dlmf.nist.gov/25.8.E3): [`DLMF.Zeta.hasSum_pochhammer_mul_riemannZeta`](DLMF/Zeta/Sums.lean#L628) (proved). s ≠ 1; the Lean statement also excludes s = 0, -1, -2, … where the printed series contains the 0·∞ term (s)_{1-s} ζ(1) (Lean's totalized ζ(1) would give a wrong value; the printed formula holds there only as a limit).
-- [25.8.E4](https://dlmf.nist.gov/25.8.E4): [`DLMF.Zeta.hasSum_neg_one_pow_riemannZeta_mul_sub_one`](DLMF/Zeta/Sums.lean#L859) (proved). n ≥ 2; principal logarithm of the positive real product.
-- [25.8.E5](https://dlmf.nist.gov/25.8.E5): [`DLMF.Zeta.hasSum_riemannZeta_mul_pow`](DLMF/Zeta/Sums.lean#L904) (proved). |z| < 1; proved from the project's ψ(1+z) series (5.7.4).
-- [25.8.E6](https://dlmf.nist.gov/25.8.E6): [`DLMF.Zeta.hasSum_riemannZeta_two_mul_mul_pow`](DLMF/Zeta/Sums.lean#L921) (proved). 0 < |z| < 1 (z = 0 is a removable 0·∞ form with Lean's cot 0 = 0); proved from the project's cotangent series.
-- [25.8.E7](https://dlmf.nist.gov/25.8.E7): [`DLMF.Zeta.hasSum_riemannZeta_div_mul_pow`](DLMF/Zeta/Sums.lean#L936) (proved). |z| < 1, principal logarithm (equals DLMF's ln Γ on the disk); proved from the project's ln Γ(1+z) series (5.7.3) and Mathlib's -log(1-z) series.
-- [25.8.E8](https://dlmf.nist.gov/25.8.E8): [`DLMF.Zeta.hasSum_riemannZeta_two_mul_div_mul_pow`](DLMF/Zeta/Sums.lean#L1160) (proved). |z| < 1, principal logarithm (|ph(πz/sin πz)| < 1.65 on the disk, checked numerically).
-- [25.8.E9](https://dlmf.nist.gov/25.8.E9): [`DLMF.Zeta.hasSum_riemannZeta_two_mul_div_odd`](DLMF/Zeta/Sums.lean#L1275) (proved). Exact value.
-- [25.8.E10](https://dlmf.nist.gov/25.8.E10): [`DLMF.Zeta.hasSum_riemannZeta_two_mul_div_odd_even`](DLMF/Zeta/Sums.lean#L1364) (admitted). Exact value.
+- [25.8.E1](https://dlmf.nist.gov/25.8.E1): [`DLMF.Zeta.hasSum_riemannZeta_sub_one`](DLMF/Zeta/Sums.lean#L65) (proved). As HasSum over k + 2, k : ℕ.
+- [25.8.E2](https://dlmf.nist.gov/25.8.E2): [`DLMF.Zeta.hasSum_Gamma_mul_riemannZeta_sub_one`](DLMF/Zeta/Sums.lean#L610) (proved). s ∉ {1, 0, -1, -2, …}.
+- [25.8.E3](https://dlmf.nist.gov/25.8.E3): [`DLMF.Zeta.hasSum_pochhammer_mul_riemannZeta`](DLMF/Zeta/Sums.lean#L629) (proved). s ≠ 1; the Lean statement also excludes s = 0, -1, -2, … where the printed series contains the 0·∞ term (s)_{1-s} ζ(1) (Lean's totalized ζ(1) would give a wrong value; the printed formula holds there only as a limit).
+- [25.8.E4](https://dlmf.nist.gov/25.8.E4): [`DLMF.Zeta.hasSum_neg_one_pow_riemannZeta_mul_sub_one`](DLMF/Zeta/Sums.lean#L860) (proved). n ≥ 2; principal logarithm of the positive real product.
+- [25.8.E5](https://dlmf.nist.gov/25.8.E5): [`DLMF.Zeta.hasSum_riemannZeta_mul_pow`](DLMF/Zeta/Sums.lean#L905) (proved). |z| < 1; proved from the project's ψ(1+z) series (5.7.4).
+- [25.8.E6](https://dlmf.nist.gov/25.8.E6): [`DLMF.Zeta.hasSum_riemannZeta_two_mul_mul_pow`](DLMF/Zeta/Sums.lean#L922) (proved). 0 < |z| < 1 (z = 0 is a removable 0·∞ form with Lean's cot 0 = 0); proved from the project's cotangent series.
+- [25.8.E7](https://dlmf.nist.gov/25.8.E7): [`DLMF.Zeta.hasSum_riemannZeta_div_mul_pow`](DLMF/Zeta/Sums.lean#L937) (proved). |z| < 1, principal logarithm (equals DLMF's ln Γ on the disk); proved from the project's ln Γ(1+z) series (5.7.3) and Mathlib's -log(1-z) series.
+- [25.8.E8](https://dlmf.nist.gov/25.8.E8): [`DLMF.Zeta.hasSum_riemannZeta_two_mul_div_mul_pow`](DLMF/Zeta/Sums.lean#L1161) (proved). |z| < 1, principal logarithm (|ph(πz/sin πz)| < 1.65 on the disk, checked numerically).
+- [25.8.E9](https://dlmf.nist.gov/25.8.E9): [`DLMF.Zeta.hasSum_riemannZeta_two_mul_div_odd`](DLMF/Zeta/Sums.lean#L1276) (proved). Exact value.
+- [25.8.E10](https://dlmf.nist.gov/25.8.E10): [`DLMF.Zeta.hasSum_riemannZeta_two_mul_div_odd_even`](DLMF/Zeta/Sums.lean#L1365) (proved). Exact value.
 
 ## [§25.9 Asymptotic Approximations](https://dlmf.nist.gov/25.9)
 

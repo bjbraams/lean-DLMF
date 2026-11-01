@@ -546,13 +546,6 @@ theorem lommelCapital_asymptotic (μ ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
     (fun z : ℂ => lommelCapital μ ν z-z^(μ-1)*∑ k ∈ Finset.range N, (-1)^k*lommelA (-μ) ν k*z^(-(2*k:ℤ))) =O[sector (π-δ)] (fun z : ℂ => z^(μ-1-2*N)) := by
   sorry
 
-/-- Formula under the stated hypotheses: `lommelCapital μ ν z = z^(μ-1)*∑ k ∈ Finset.range (n+1),
-(-1)^k*lommelA (-μ) ν k*z^(-(2*k:ℤ))`. -/
-@[dlmf 11.9.E9]
-theorem lommelCapital_terminates {μ ν : ℂ} (n : ℕ) (h : μ+ν=2*n+1 ∨ μ-ν=2*n+1) {z : ℂ} (hz : z ∈ slitPlane) :
-    lommelCapital μ ν z = z^(μ-1)*∑ k ∈ Finset.range (n+1), (-1)^k*lommelA (-μ) ν k*z^(-(2*k:ℤ)) := by
-  sorry
-
 /-- Shifting the degree by two preserves the regular Lommel parameter domain. -/
 theorem LommelRegular.add_two {μ ν : ℂ} (h : LommelRegular μ ν) :
     LommelRegular (μ + 2) ν := by
@@ -1302,4 +1295,88 @@ theorem lommelCapital_ode (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
       (f:=fun m : ℂ => m-1) (x:=μ) (by fun_prop)).tendsto.mono_left nhdsWithin_le_nhds
   simpa only [iteratedDeriv_succ,iteratedDeriv_zero] using tendsto_nhds_unique (hl.congr' hode) hr
 
+/-- The two-step degree recurrence extends across all removable parameter singularities. -/
+theorem lommelCapital_add_two (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+    lommelCapital (μ + 2) ν z = z ^ (μ + 1) - ((μ + 1) ^ 2 - ν ^ 2) * lommelCapital μ ν z := by
+  have hshift : Tendsto (fun m : ℂ => m + 2) (𝓝[≠] μ) (𝓝[≠] (μ + 2)) := by
+    apply tendsto_nhdsWithin_iff.mpr
+    constructor
+    · exact (continuousAt_id.add continuousAt_const).tendsto.mono_left nhdsWithin_le_nhds
+    · filter_upwards [self_mem_nhdsWithin] with m hm
+      simpa only [Set.mem_compl_iff, Set.mem_singleton_iff, add_left_inj] using hm
+  have hl := (lommelCapital_parameter_limit (μ + 2) ν hz).comp hshift
+  have hp : Tendsto (fun m : ℂ => z ^ (m + 1)) (𝓝[≠] μ) (𝓝 (z ^ (μ + 1))) :=
+    ((continuousAt_const_cpow (slitPlane_ne_zero hz)).comp
+      (f := fun m : ℂ => m + 1) (x := μ) (by fun_prop)).tendsto.mono_left nhdsWithin_le_nhds
+  have hc : Tendsto (fun m : ℂ => (m + 1) ^ 2 - ν ^ 2) (𝓝[≠] μ)
+      (𝓝 ((μ + 1) ^ 2 - ν ^ 2)) := by
+    exact (by fun_prop : ContinuousAt (fun m : ℂ => (m + 1) ^ 2 - ν ^ 2) μ).tendsto.mono_left nhdsWithin_le_nhds
+  have hr := hp.sub (hc.mul (lommelCapital_parameter_limit μ ν hz))
+  apply tendsto_nhds_unique hl
+  apply hr.congr'
+  filter_upwards [lommel_eventually_regular μ ν] with m hm
+  exact (lommelCapitalRegular_add_two hm hz).symm
+/-- The finite Lommel polynomials satisfy the same degree-two recurrence as `S`. -/
+private lemma lommelFinite_add_two (μ ν : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
+    z ^ (μ + 1) * ∑ k ∈ Finset.range (n + 2),
+      (-1) ^ k * lommelA (-(μ + 2)) ν k * z ^ (-(2 * k : ℤ)) =
+    z ^ (μ + 1) - ((μ + 1) ^ 2 - ν ^ 2) * z ^ (μ - 1) *
+      ∑ k ∈ Finset.range (n + 1), (-1) ^ k * lommelA (-μ) ν k * z ^ (-(2 * k : ℤ)) := by
+  have hpow : z ^ (μ + 1) * z ^ (-2 : ℤ) = z ^ (μ - 1) := by
+    rw [← cpow_intCast, ← cpow_add _ _ hz]
+    congr 1
+    norm_num
+    ring
+  have hA (k : ℕ) : lommelA (-(μ + 2)) ν (k + 1) =
+      ((μ + 1) ^ 2 - ν ^ 2) * lommelA (-μ) ν k := by
+    rw [lommelA_add_two]
+    congr 2 <;> ring
+  have hterm (k : ℕ) : z ^ (μ + 1) * ((-1) ^ (k + 1) *
+      lommelA (-(μ + 2)) ν (k + 1) * z ^ (-(2 * (k + 1) : ℤ))) =
+      -((μ + 1) ^ 2 - ν ^ 2) * z ^ (μ - 1) *
+        ((-1) ^ k * lommelA (-μ) ν k * z ^ (-(2 * k : ℤ))) := by
+    rw [hA, pow_succ, show -(2 * (k + 1) : ℤ) = -2 + -(2 * k : ℤ) by ring,
+      zpow_add₀ hz]
+    calc _ = -((μ + 1) ^ 2 - ν ^ 2) * (z ^ (μ + 1) * z ^ (-2 : ℤ)) *
+        ((-1) ^ k * lommelA (-μ) ν k * z ^ (-(2 * k : ℤ))) := by ring
+      _ = _ := by rw [hpow]
+  rw [show n + 2 = n + 1 + 1 by omega, Finset.sum_range_succ', mul_add,
+    Finset.mul_sum]
+  push_cast
+  simp_rw [hterm]
+  rw [← Finset.mul_sum]
+  simp [lommelA]
+  ring
+
+/-- DLMF 11.9.9: when `μ + ν` or `μ - ν` is a positive odd integer, the capital Lommel
+function is its finite inverse-power expansion, including removable exceptional parameters. -/
+@[dlmf 11.9.E9]
+theorem lommelCapital_terminates {μ ν : ℂ} (n : ℕ)
+    (h : μ + ν = 2 * n + 1 ∨ μ - ν = 2 * n + 1) {z : ℂ} (hz : z ∈ slitPlane) :
+    lommelCapital μ ν z = z ^ (μ - 1) * ∑ k ∈ Finset.range (n + 1),
+      (-1) ^ k * lommelA (-μ) ν k * z ^ (-(2 * k : ℤ)) := by
+  have H (v : ℂ) (N : ℕ) : lommelCapital (v + 2 * N + 1) v z =
+      z ^ (v + 2 * N) * ∑ k ∈ Finset.range (N + 1),
+        (-1) ^ k * lommelA (-(v + 2 * N + 1)) v k * z ^ (-(2 * k : ℤ)) := by
+    induction N with
+    | zero =>
+      have hr := lommelCapital_add_two (v - 1) v hz
+      convert hr using 1 <;> simp [lommelA]; ring
+    | succ N ih =>
+      have hr := lommelCapital_add_two (v + 2 * N + 1) v hz
+      have hp := lommelFinite_add_two (v + 2 * N + 1) v N (slitPlane_ne_zero hz)
+      have harg : v + 2 * ((N + 1 : ℕ) : ℂ) + 1 = (v + 2 * N + 1) + 2 := by push_cast; ring
+      rw [harg, hr, ih]
+      convert hp.symm using 1 <;> congr 1 <;> push_cast <;> ring
+  rcases h with h | h
+  · have hμ : μ = -ν + 2 * n + 1 := by linear_combination h
+    rw [← lommelCapital_neg_order μ ν hz, hμ]
+    have hA (k : ℕ) : lommelA (-(-ν + 2 * n + 1)) (-ν) k =
+        lommelA (-(-ν + 2 * n + 1)) ν k := by simp [lommelA]
+    have HH := H (-ν) n
+    simp_rw [hA] at HH
+    convert HH using 1; congr 1; ring
+  · have hμ : μ = ν + 2 * n + 1 := by linear_combination h
+    rw [hμ]
+    convert H ν n using 1; congr 1; ring
 end DLMF.Struve

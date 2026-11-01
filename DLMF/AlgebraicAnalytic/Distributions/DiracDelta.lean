@@ -6,7 +6,10 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.Distributions.Basic
+public import DLMF.AlgebraicAnalytic.Transforms.Fourier
 public import Mathlib.MeasureTheory.Integral.PeakFunction
+public import Mathlib.Algebra.BigOperators.Group.Finset.Interval
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Complex
 public import DLMF.Airy.Properties
 public import DLMF.Coulomb.Energy.Basic
 public import DLMF.Legendre.Harmonics
@@ -116,7 +119,49 @@ theorem tendsto_gaussian_integral_of_growth {φ : ℝ → ℂ} {a : ℝ} (n₀ :
     (hφ : Integrable fun x => (Real.exp (-(n₀ * (x - a) ^ 2)) : ℂ) * φ x)
     (hloc : LocallyIntegrable φ) (ha : ContinuousAt φ a) :
     Tendsto (fun n : ℕ => ∫ x, gaussianDeltaSeq n (x - a) * φ x) atTop (𝓝 (φ a)) := by
-  sorry
+  let ψ : ℝ → ℂ := fun x => (Real.exp (-(n₀ * (x - a) ^ 2)) : ℂ) * φ x
+  have hψ : ContinuousAt ψ a := by
+    exact (by fun_prop : Continuous fun x : ℝ =>
+      (Real.exp (-(n₀ * (x - a) ^ 2)) : ℂ)).continuousAt.mul ha
+  have hbase := tendsto_gaussian_integral (φ := ψ) hφ hψ
+  have hn : Tendsto (fun n : ℕ => (n : ℝ)) atTop atTop := tendsto_natCast_atTop_atTop
+  have hdiv : Tendsto (fun n : ℕ => (n₀ : ℝ) / n) atTop (𝓝 0) :=
+    tendsto_const_nhds.div_atTop hn
+  have hratio : Tendsto (fun n : ℕ => Real.sqrt ((n + n₀ : ℝ) / n)) atTop (𝓝 1) := by
+    have hlim : Tendsto (fun n : ℕ => ((n : ℝ) + n₀) / n) atTop (𝓝 1) := by
+      have h := tendsto_const_nhds.add hdiv (a := (1 : ℝ))
+      simp only [add_zero] at h
+      refine h.congr' ?_
+      filter_upwards [eventually_ge_atTop 1] with n hn
+      have hn0 : (n : ℝ) ≠ 0 := by positivity
+      field_simp
+    convert hlim.sqrt using 1
+    norm_num
+  have hmul := ((Complex.continuous_ofReal.tendsto 1).comp hratio).mul hbase
+  simp only [ψ, sub_self, zero_pow two_ne_zero, mul_zero, neg_zero, Real.exp_zero, ofReal_one,
+    one_mul] at hmul
+  rw [← tendsto_add_atTop_iff_nat n₀]
+  refine hmul.congr' ?_
+  filter_upwards [eventually_ge_atTop 1] with n hn
+  rw [← integral_const_mul]
+  apply integral_congr_ae
+  filter_upwards [] with x
+  have hn0 : (n : ℝ) ≠ 0 := by positivity
+  have he : Real.exp (-(((n : ℝ) + n₀) * (x - a) ^ 2)) =
+      Real.exp (-((n : ℝ) * (x - a) ^ 2)) * Real.exp (-(n₀ * (x - a) ^ 2)) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  have hs : Real.sqrt (((n : ℝ) + n₀) / n) * Real.sqrt ((n : ℝ) / Real.pi) =
+      Real.sqrt (((n : ℝ) + n₀) / Real.pi) := by
+    rw [← Real.sqrt_mul (by positivity)]
+    congr 1
+    field_simp
+  simp only [gaussianDeltaSeq, Nat.cast_add, ψ, he, Function.comp_apply]
+  have hsc := congrArg (fun t : ℝ => (t : ℂ)) hs
+  simp only [ofReal_mul] at hsc ⊢
+  linear_combination (↑(Real.exp (-((n : ℝ) * (x - a) ^ 2))) *
+    ↑(Real.exp (-(n₀ * (x - a) ^ 2))) * φ x) * hsc
 
 /-- DLMF 1.17.7: for `φ` piecewise continuous with one-sided limits `φ(a±)` at `a`, and the
 Gaussian integrals absolutely convergent for large `n`,
@@ -140,7 +185,23 @@ theorem fourier_inversion_dlmf {φ : ℝ → ℂ} (hφ : Integrable φ) (hc : Co
     (hF : Integrable fun t : ℝ => ∫ x, φ x * exp (I * t * x)) (a : ℝ) :
     (1 / (2 * Real.pi) : ℂ) * ∫ t : ℝ, exp (-(I * a * t)) * ∫ x, φ x * exp (I * t * x) =
       φ a := by
-  sorry
+  have hFT : Integrable (fourierTransform φ) := hF.const_mul _
+  have hi := (fourierTransform_inversion hc hφ hFT a).symm
+  simp only [fourierTransform] at hi
+  simp_rw [mul_assoc] at hi
+  rw [integral_const_mul] at hi
+  have hnorm : (((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) *
+      ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ)) = (1 / (2 * Real.pi) : ℂ) := by
+    rw [← mul_inv, ← pow_two, ← ofReal_pow, Real.sq_sqrt (by positivity)]
+    push_cast
+    ring
+  rw [← mul_assoc, hnorm] at hi
+  convert hi using 1
+  congr 1
+  apply integral_congr_ae
+  filter_upwards [] with t
+  rw [mul_comm (cexp _)]
+  congr 2 <;> ring
 
 /-- DLMF 1.17.10: `(2π)⁻¹ ∫ e^{-t²/(4n)} e^{i(x-a)t} dt = √(n/π) e^{-n(x-a)²}` for `n > 0`. -/
 @[dlmf 1.17.E10]
@@ -282,7 +343,42 @@ when `sin(θ/2) ≠ 0`. -/
 theorem dirichletKernel_eq {θ : ℝ} (hθ : Real.sin (θ / 2) ≠ 0) (n : ℕ) :
     dirichletKernel n θ =
       ((Real.sin ((n + 1 / 2) * θ) / (2 * Real.pi * Real.sin (θ / 2)) : ℝ) : ℂ) := by
-  sorry
+  have hsum (n : ℕ) :
+      (Real.sin (θ / 2) : ℂ) *
+          (∑ k ∈ Finset.Icc (-(n : ℤ)) n, exp (I * k * θ)) =
+        (Real.sin ((n + 1 / 2) * θ) : ℂ) := by
+    induction n with
+    | zero => simp; congr 1; ring
+    | succ n ih =>
+      rw [Nat.cast_succ, Finset.sum_Icc_succ_eq_add_endpoints]
+      have he : exp (I * ((n : ℤ) + 1) * θ) + exp (I * (-((n : ℤ) + 1)) * θ) =
+          (2 * Real.cos (((n : ℝ) + 1) * θ) : ℝ) := by
+        have h₁ : I * (((n : ℤ) + 1) : ℂ) * θ = (((n : ℝ) + 1) * θ : ℝ) * I := by
+          push_cast; ring
+        have h₂ : I * ((-((n : ℤ) + 1)) : ℂ) * θ = -((((n : ℝ) + 1) * θ : ℝ) : ℂ) * I := by
+          push_cast; ring
+        rw [h₁, h₂, exp_mul_I, exp_mul_I, cos_neg, sin_neg]
+        simp only [← ofReal_cos, ← ofReal_sin]
+        push_cast
+        ring
+      simp only [Int.cast_add, Int.cast_one, Int.cast_neg, Int.cast_natCast, Nat.cast_add,
+        Nat.cast_one] at he ⊢
+      rw [he, mul_add, ih]
+      have hs := Real.sin_sub_sin (((n : ℝ) + 1 + 1 / 2) * θ)
+        (((n : ℝ) + 1 / 2) * θ)
+      rw [show ((((n : ℝ) + 1 + 1 / 2) * θ - ((n : ℝ) + 1 / 2) * θ) / 2) = θ / 2 by ring,
+        show ((((n : ℝ) + 1 + 1 / 2) * θ + ((n : ℝ) + 1 / 2) * θ) / 2) =
+          ((n : ℝ) + 1) * θ by ring] at hs
+      exact_mod_cast (by linarith : Real.sin (θ / 2) *
+        (2 * Real.cos (((n : ℝ) + 1) * θ)) + Real.sin (((n : ℝ) + 1 / 2) * θ) =
+          Real.sin (((n : ℝ) + 1 + 1 / 2) * θ))
+  have hθ' : (Real.sin (θ / 2) : ℂ) ≠ 0 := ofReal_ne_zero.mpr hθ
+  have hsum' : (∑ k ∈ Finset.Icc (-(n : ℤ)) n, exp (I * k * θ)) =
+      (Real.sin ((n + 1 / 2) * θ) : ℂ) / Real.sin (θ / 2) :=
+    (eq_div_iff hθ').mpr (by simpa only [mul_comm] using hsum n)
+  rw [dirichletKernel, hsum']
+  push_cast
+  ring
 
 /-- DLMF 1.17.18–1.17.21: `lim_{n→∞} ∫_{-π}^{π} δₙ(x - a) φ(x) dx = φ(a)` with the Dirichlet
 kernel `δₙ` (1.17.20), the meaning of the formal `2π`-periodic series

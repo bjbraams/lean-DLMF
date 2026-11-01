@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.GeneralizedHypergeometric.AnalyticProperties
 public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 public import DLMF.Hypergeometric.Identities
 public import DLMF.Hypergeometric.Saalschutz
@@ -652,6 +653,117 @@ theorem genHG_3F2_unit_transformation (a b c d e : ℂ)
       genHG {a, d - b, d - c} {d, d + e - b - c} 1 := by
   sorry
 
+/-- A balanced three-over-two unit series sums to the declared value throughout its
+absolute-convergence region, including every terminating upper-parameter case. -/
+private lemma hasSum_gen3F2_one {a b c d e : ℂ} (hb : GenDenRegular {d, e})
+    (hconv : 0 < (d + e - a - b - c).re ∨ GenTerminates {a, b, c}) :
+    HasSum (genCoeff {a, b, c} {d, e}) (genHG {a, b, c} {d, e} 1) := by
+  rcases hconv with hconv | ha
+  · apply genHG_one_hasSum (by simp) hb
+    have hE : genExcess {a, b, c} {d, e} = d + e - a - b - c := by
+      simp only [genExcess, Multiset.insert_eq_cons, Multiset.sum_cons, Multiset.sum_singleton]
+      ring
+    rw [hE]
+    exact hconv
+  · exact genHG_one_hasSum_of_summable hb (genCoeff_summable_of_terminates ha)
+
+/-- Consecutive coefficients of the second unity recurrence form an exact telescope. -/
+private lemma gen3F2_contiguous_two_coeff_succ (a b c d e : ℂ)
+    (hb : GenDenRegular {d, d + 1, e, e + 1}) (n : ℕ) :
+    genCoeff {a, b, c} {d, e} (n + 1) -
+      c * (e - a) / (d * e) * genCoeff {a, b + 1, c + 1} {d + 1, e + 1} (n + 1) -
+      (d - c) / d * genCoeff {a, b + 1, c} {d + 1, e} (n + 1) =
+      a * c / (d * e) * (genCoeff {a + 1, b + 1, c + 1} {d + 1, e + 1} (n + 1) -
+        genCoeff {a + 1, b + 1, c + 1} {d + 1, e + 1} n) := by
+  have hd : d ≠ 0 := by simpa using hb d (by simp) 0
+  have he : e ≠ 0 := by simpa using hb e (by simp) 0
+  have hdP : poch (d + 1) n ≠ 0 := poch_ne_zero_of_not_neg_nat (hb (d + 1) (by simp)) n
+  have heP : poch (e + 1) n ≠ 0 := poch_ne_zero_of_not_neg_nat (hb (e + 1) (by simp)) n
+  have hdn : d + 1 + n ≠ 0 := by
+    intro hx
+    exact hb (d + 1) (by simp) n (by linear_combination hx)
+  have hen : e + 1 + n ≠ 0 := by
+    intro hx
+    exact hb (e + 1) (by simp) n (by linear_combination hx)
+  have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
+  have hn : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast n.succ_ne_zero
+  simp only [genCoeff, genPoch, Multiset.insert_eq_cons, Multiset.map_cons,
+    Multiset.map_singleton, Multiset.prod_cons, Multiset.prod_singleton]
+  simp only [poch_succ_left a n, poch_succ_left b n, poch_succ_left c n,
+    poch_succ_left d n, poch_succ_left e n]
+  simp only [poch_succ, Nat.factorial_succ, Nat.cast_mul, Nat.cast_succ]
+  field_simp [hd, he, hdP, heP, hdn, hen, hf, hn]
+  ring
+
+/-- Raising one regular lower parameter gives a linear relation between coefficients. -/
+private lemma gen3F2_coeff_lower_add_one (a b c d e : ℂ) (hb : GenDenRegular {d, e}) (n : ℕ) :
+    (d + n) * genCoeff {a, b, c} {d + 1, e} n = d * genCoeff {a, b, c} {d, e} n := by
+  have hd : d ≠ 0 := by simpa using hb d (by simp) 0
+  have hdn : d + n ≠ 0 := by
+    intro hx
+    exact hb d (by simp) n (by linear_combination hx)
+  have hdP : poch d n ≠ 0 := poch_ne_zero_of_not_neg_nat (hb d (by simp)) n
+  have heP : poch e n ≠ 0 := poch_ne_zero_of_not_neg_nat (hb e (by simp)) n
+  have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
+  have hp : poch (d + 1) n = poch d n * (d + n) / d := by
+    apply (eq_div_iff hd).2
+    rw [← poch_succ, poch_succ_left]
+    ring
+  simp only [genCoeff, genPoch, Multiset.insert_eq_cons, Multiset.map_cons,
+    Multiset.map_singleton, Multiset.prod_cons, Multiset.prod_singleton]
+  rw [hp]
+  field_simp [hd, hdn, hdP, heP, hf]
+
+/-- The first unit recurrence is an exact difference of adjacent weighted coefficients. -/
+private lemma gen3F2_contiguous_coeff (a b c d e : ℂ)
+    (hb : GenDenRegular {d - 1, d, d + 1, e}) (n : ℕ) :
+    (a - d) * (b - d) * (c - d) *
+      (genCoeff {a, b, c} {d + 1, e} n - genCoeff {a, b, c} {d, e} n) +
+      a * b * c * genCoeff {a, b, c} {d, e} n -
+      d * (d - 1) * (a + b + c - d - e + 1) *
+        (genCoeff {a, b, c} {d, e} n - genCoeff {a, b, c} {d - 1, e} n) =
+      d * ((n + 1) * (e + n) * genCoeff {a, b, c} {d, e} (n + 1) -
+        n * (e + n - 1) * genCoeff {a, b, c} {d, e} n) := by
+  have hb0 : GenDenRegular {d, e} := by
+    intro z hz
+    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton] at hz ⊢; tauto)
+  have hbm : GenDenRegular {d - 1, e} := by
+    intro z hz
+    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton] at hz ⊢; tauto)
+  have hRaise := gen3F2_coeff_lower_add_one a b c d e hb0 n
+  have hLower := gen3F2_coeff_lower_add_one a b c (d - 1) e hbm n
+  rw [show d - 1 + 1 = d by ring] at hLower
+  have hSucc := ghbR4_genCoeff_succ (a := {a, b, c}) hb0 n
+  simp only [Multiset.insert_eq_cons, Multiset.map_cons, Multiset.map_singleton,
+    Multiset.prod_cons, Multiset.prod_singleton] at hSucc
+  have hdn : d + (n : ℂ) ≠ 0 := by
+    intro hx
+    exact hb d (by simp) n (by linear_combination hx)
+  apply mul_left_cancel₀ hdn
+  linear_combination (a - d) * (b - d) * (c - d) * hRaise +
+    - (d + n) * d * (a + b + c - d - e + 1) * hLower - d * hSucc
+/-- The weighted boundary coefficient in the first unit recurrence tends to zero. -/
+private lemma gen3F2_boundary_tendsto_zero (a b c d e : ℂ) (hb : GenDenRegular {d, e})
+    (hconv : 1 < (d + e - a - b - c).re ∨ GenTerminates {a, b, c}) :
+    Tendsto (fun n : ℕ => d * n * (e + n - 1) * genCoeff {a, b, c} {d, e} n)
+      atTop (𝓝 0) := by
+  have hw := genCoeff_mul_pow_tendsto_zero (a := {a, b, c}) (b := {d, e}) (by simp) hb 2
+    (by
+      simpa only [genExcess, Multiset.insert_eq_cons, Multiset.sum_cons, Multiset.sum_singleton,
+        Nat.cast_ofNat, show (2 : ℝ) - 1 = 1 by norm_num,
+        show d + e - (a + (b + c)) = d + e - a - b - c by ring] using hconv)
+  have hr : Tendsto (fun n : ℕ => d * (1 + (e - 1) / (n : ℂ))) atTop (𝓝 d) := by
+    simpa using ((tendsto_const_nhds : Tendsto (fun _ : ℕ => (1 : ℂ)) atTop (𝓝 1)).add
+      (tendsto_const_div_atTop_nhds_zero_nat (e - 1))).const_mul d
+  have hm := hr.mul hw
+  rw [mul_zero] at hm
+  apply hm.congr'
+  filter_upwards [eventually_gt_atTop 0] with n hn
+  have hn0 : (n : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
+  field_simp
+  ring
+
+
 /-- The contiguous unity recurrence with convergence of every displayed series. -/
 @[dlmf 16.4.E12]
 theorem genHG_3F2_unit_recurrence (a b c d e : ℂ) (hb : GenDenRegular {d - 1, d, d + 1, e})
@@ -661,7 +773,54 @@ theorem genHG_3F2_unit_recurrence (a b c d e : ℂ) (hb : GenDenRegular {d - 1, 
       a * b * c * genHG {a, b, c} {d, e} 1 =
     d * (d - 1) * (a + b + c - d - e + 1) *
       (genHG {a, b, c} {d, e} 1 - genHG {a, b, c} {d - 1, e} 1) := by
-  sorry
+  have hb0 : GenDenRegular {d, e} := by
+    intro z hz
+    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton] at hz ⊢; tauto)
+  have hbp : GenDenRegular {d + 1, e} := by
+    intro z hz
+    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton] at hz ⊢; tauto)
+  have hbm : GenDenRegular {d - 1, e} := by
+    intro z hz
+    exact hb z (by simp only [Multiset.insert_eq_cons, Multiset.mem_cons, Multiset.mem_singleton] at hz ⊢; tauto)
+  have hc0 : 0 < (d + e - a - b - c).re ∨ GenTerminates {a, b, c} := by
+    rcases hconv with h | h
+    · exact Or.inl (by linarith)
+    · exact Or.inr h
+  have hcp : 0 < (d + 1 + e - a - b - c).re ∨ GenTerminates {a, b, c} := by
+    rcases hconv with h | h
+    · exact Or.inl (by simp only [add_re, sub_re, one_re] at h ⊢; linarith)
+    · exact Or.inr h
+  have hcm : 0 < (d - 1 + e - a - b - c).re ∨ GenTerminates {a, b, c} := by
+    rcases hconv with h | h
+    · exact Or.inl (by simp only [add_re, sub_re, one_re] at h ⊢; linarith)
+    · exact Or.inr h
+  let P := (a - d) * (b - d) * (c - d)
+  let Q := d * (d - 1) * (a + b + c - d - e + 1)
+  let C := fun n => P * (genCoeff {a, b, c} {d + 1, e} n - genCoeff {a, b, c} {d, e} n) +
+    a * b * c * genCoeff {a, b, c} {d, e} n -
+    Q * (genCoeff {a, b, c} {d, e} n - genCoeff {a, b, c} {d - 1, e} n)
+  let U := fun n : ℕ => d * n * (e + n - 1) * genCoeff {a, b, c} {d, e} n
+  have h0 := hasSum_gen3F2_one hb0 hc0
+  have hp := hasSum_gen3F2_one hbp hcp
+  have hm := hasSum_gen3F2_one hbm hcm
+  have hC := (((hp.sub h0).mul_left P).add (h0.mul_left (a * b * c))).sub
+    ((h0.sub hm).mul_left Q)
+  change HasSum C _ at hC
+  have hsum (N : ℕ) : ∑ n ∈ range N, C n = U N := by
+    induction N with
+    | zero => simp [U]
+    | succ N ih =>
+      rw [sum_range_succ, ih]
+      have h := gen3F2_contiguous_coeff a b c d e hb N
+      change C N = _ at h
+      rw [h]
+      dsimp [U]
+      push_cast
+      ring
+  have hlim := hC.tendsto_sum_nat
+  simp_rw [hsum] at hlim
+  have heq := tendsto_nhds_unique hlim (gen3F2_boundary_tendsto_zero a b c d e hb0 hconv)
+  exact sub_eq_zero.mp heq
 
 /-- The second unity recurrence, with the full common convergence half-space. -/
 @[dlmf 16.4.E13]
@@ -670,7 +829,60 @@ theorem genHG_3F2_unit_recurrence_two (a b c d e : ℂ) (hb : GenDenRegular {d, 
     genHG {a, b, c} {d, e} 1 = c * (e - a) / (d * e) *
       genHG {a, b + 1, c + 1} {d + 1, e + 1} 1 +
       (d - c) / d * genHG {a, b + 1, c} {d + 1, e} 1 := by
-  sorry
+  have hbparts : (∀ n : ℕ, d ≠ -n) ∧ (∀ n : ℕ, d + 1 ≠ -n) ∧
+      (∀ n : ℕ, e ≠ -n) ∧ (∀ n : ℕ, e + 1 ≠ -n) := by
+    simpa [GenDenRegular] using hb
+  have hb0 : GenDenRegular {d, e} := by
+    simpa [GenDenRegular] using And.intro hbparts.1 hbparts.2.2.1
+  have hb1 : GenDenRegular {d + 1, e + 1} := by
+    simpa [GenDenRegular] using And.intro hbparts.2.1 hbparts.2.2.2
+  have hb2 : GenDenRegular {d + 1, e} := by
+    simpa [GenDenRegular] using And.intro hbparts.2.1 hbparts.2.2.1
+  have h0 := hasSum_gen3F2_one hb0 (Or.inl hconv)
+  have h1 := hasSum_gen3F2_one (a := a) (b := b + 1) (c := c + 1) hb1
+    (Or.inl (by
+      convert hconv using 1
+      congr 1
+      ring))
+  have h2 := hasSum_gen3F2_one (a := a) (b := b + 1) (c := c) hb2
+    (Or.inl (by
+      convert hconv using 1
+      congr 1
+      ring))
+  let C : ℕ → ℂ := fun n => genCoeff {a, b, c} {d, e} n -
+    c * (e - a) / (d * e) * genCoeff {a, b + 1, c + 1} {d + 1, e + 1} n -
+    (d - c) / d * genCoeff {a, b + 1, c} {d + 1, e} n
+  let V : ℕ → ℂ := fun n => a * c / (d * e) *
+    genCoeff {a + 1, b + 1, c + 1} {d + 1, e + 1} n
+  have hC : HasSum C (genHG {a, b, c} {d, e} 1 - c * (e - a) / (d * e) *
+      genHG {a, b + 1, c + 1} {d + 1, e + 1} 1 -
+      (d - c) / d * genHG {a, b + 1, c} {d + 1, e} 1) :=
+    (h0.sub (h1.mul_left _)).sub (h2.mul_left _)
+  have hsum (N : ℕ) : ∑ n ∈ range (N + 1), C n = V N := by
+    induction N with
+    | zero =>
+      simp [C, V, genCoeff, genPoch, poch_zero]
+      have hd : d ≠ 0 := by simpa using hbparts.1 0
+      have he : e ≠ 0 := by simpa using hbparts.2.2.1 0
+      field_simp [hd, he]
+      ring
+    | succ N ih =>
+      rw [sum_range_succ, ih]
+      dsimp only [C, V]
+      rw [gen3F2_contiguous_two_coeff_succ a b c d e hb N]
+      ring
+  have hv0 := genCoeff_tendsto_zero (a := {a + 1, b + 1, c + 1})
+    (b := {d + 1, e + 1}) (by simp) hb1 (Or.inl (by
+      simp only [genExcess, Multiset.insert_eq_cons, Multiset.sum_cons,
+        Multiset.sum_singleton, add_re, sub_re, one_re]
+      simp only [add_re, sub_re] at hconv
+      linarith))
+  have hv : Tendsto V atTop (𝓝 0) := by
+    simpa only [mul_zero] using hv0.const_mul (a * c / (d * e))
+  have hc := (tendsto_add_atTop_iff_nat 1).mpr hC.tendsto_sum_nat
+  simp_rw [hsum] at hc
+  have heq := tendsto_nhds_unique hc hv
+  linear_combination heq
 
 /-- The balanced terminating 4F3 transformation. -/
 @[dlmf 16.4.E14]

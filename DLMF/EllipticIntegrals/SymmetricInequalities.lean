@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import Carlson.Elliptic.Applications
 public import Carlson.Elliptic.CapacityBound
 public import Carlson.Elliptic.LegendreStandard
 public import Carlson.Mean.Capacity
@@ -45,6 +46,14 @@ bounds are Jensen bounds before and after Euler transformation. The `R_F`–`R_C
 (19.24.15) compare the real integral kernels using strict arithmetic–geometric mean
 inequalities and `lean-codes`' `integral_lt_integral_of_ae_lt`. The complete `R_G` bounds
 in (19.24.2) use `Carlson.carlsonRE_eq_compEllIntEk` and the bounds for `E(k)` from §19.9.
+
+The complete `R_J` bounds (19.24.4) use the three-node R-average: order monotonicity gives
+the upper bound, and Euler transformation followed by Jensen gives the lower bound.
+
+The perimeter identity (19.24.7) uses the proved positive-semiaxis formula
+`Carlson.ellipse_perimeter` from `lean-codes` and checks the degenerate semiaxes directly.
+Reflection and periodicity reduce the full arc-length integral to a quadrant for every
+real pair of semiaxes.
 
 ## References
 
@@ -196,7 +205,75 @@ theorem symEllIntRJ_zero_bounds {y z p : ℝ} (hy : 0 < y) (hz : 0 < z) (hp : 0 
     2 / √p * (2 * y * z + y * p + z * p) ^ (-1 / 2 : ℝ) ≤
         4 / (3 * π) * (symEllIntRJ 0 y z p).re ∧
       4 / (3 * π) * (symEllIntRJ 0 y z p).re ≤ (y * z * p ^ 2) ^ (-3 / 8 : ℝ) := by
-  sorry
+  let b : Fin 3 → ℝ := ![1 / 2, 1 / 2, 1]
+  let v : Fin 3 → ℝ := ![y, z, p]
+  have hb : b ∈ ProbabilityTheory.mvRealBetaDomain := by
+    intro i; fin_cases i <;> norm_num [b]
+  have hv : ∀ i, 0 < v i := by intro i; fin_cases i <;> assumption
+  have he : 4 / (3 * π) * (symEllIntRJ 0 y z p).re = Carlson.carlsonRReal (-3 / 2) b v := by
+    rw [symEllIntRJ_zero_left (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)
+      (ofReal_mem_slitPlane.mpr hp), symEllIntR_of_mem _ _
+      (ei19c_slit3 (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz) (ofReal_mem_slitPlane.mpr hp))]
+    have H := Carlson.ofReal_carlsonRReal (-3 / 2) hb hv
+    have hnodes : (fun i => ((![y,z,p] : Fin 3 → ℝ) i : ℂ)) = ![(y:ℂ),z,p] := by
+      funext i; fin_cases i <;> rfl
+    norm_num only [b, v, ofReal_neg, ofReal_div, ofReal_one, ofReal_ofNat] at H
+    have hparams : (fun i => ((![1/2,1/2,1] : Fin 3 → ℝ) i : ℂ)) = ![1/2,1/2,1] := by
+      funext i; fin_cases i <;> norm_num
+    rw [hparams] at H
+    rw [neg_div, ← hnodes, ← H]
+    simp only [mul_re, div_ofNat_re, ofReal_re, ofReal_im, mul_zero, sub_zero]
+    norm_num
+    field_simp
+    rfl
+  rw [he]
+  constructor
+  · rw [Carlson.carlsonRReal_euler (-3/2) hb hv]
+    have hsum : -(∑ i, b i) - (-3/2:ℝ) = -1/2 := by norm_num [b, Fin.sum_univ_succ]
+    rw [hsum]
+    have H := (Carlson.carlsonRReal_bounds_of_nonpos (by norm_num : (-1/2:ℝ) ≤ 0)
+      hb (fun i => inv_pos.mpr (hv i))).1
+    have hf : (∏ i, v i ^ (-b i)) = (√y * √z * p)⁻¹ := by
+      simp only [b, v, Fin.prod_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons,
+        Real.rpow_neg (le_of_lt hy), Real.rpow_neg (le_of_lt hz), Real.rpow_neg (le_of_lt hp),
+        ← Real.sqrt_eq_rpow, Real.rpow_one, mul_inv_rev]
+      ring
+    have hs : (∑ i, (b i / ∑ j, b j) * (v i)⁻¹) =
+        (2*y*z+y*p+z*p)/(4*y*z*p) := by
+      norm_num [b, v, Fin.sum_univ_succ]
+      field_simp
+      ring
+    rw [hf]
+    refine le_trans ?_ (mul_le_mul_of_nonneg_left H (by positivity))
+    rw [hs]
+    have ht : 0 < 2*y*z+y*p+z*p := by positivity
+    have heq : 2 / √p * (2*y*z+y*p+z*p) ^ (-1/2:ℝ) =
+        (√y*√z*p)⁻¹ * ((2*y*z+y*p+z*p)/(4*y*z*p)) ^ (-1/2:ℝ) := by
+      rw [Real.div_rpow ht.le (by positivity)]
+      rw [show (-1/2:ℝ) = -(1/2) by ring, Real.rpow_neg ht.le,
+        Real.rpow_neg (by positivity : 0 ≤ 4*y*z*p)]
+      simp only [← Real.sqrt_eq_rpow]
+      rw [Real.sqrt_mul (by positivity : 0 ≤ 4*y*z), Real.sqrt_mul (by positivity : 0 ≤ 4*y),
+        Real.sqrt_mul (by norm_num : (0:ℝ) ≤ 4)]
+      norm_num
+      field_simp
+      nlinarith [Real.sq_sqrt hp.le]
+    exact heq.le
+  · have hm := Carlson.monotone_carlsonMeanReal hb hv
+      (show -(∑ i, b i) ≤ (-3/2:ℝ) by norm_num [b, Fin.sum_univ_succ])
+    dsimp only at hm
+    rw [Carlson.carlsonMeanReal_neg_sum hb hv] at hm
+    have H := Real.rpow_le_rpow_of_nonpos (Real.exp_pos _) hm (by norm_num : (-3/2:ℝ) ≤ 0)
+    rw [Carlson.carlsonMeanReal_rpow (by norm_num : (-3/2:ℝ) ≠ 0) hb hv] at H
+    refine H.trans_eq ?_
+    rw [← Real.exp_mul, Real.rpow_def_of_pos (by positivity : 0 < y*z*p^2)]
+    congr 1
+    simp only [b, v, Fin.sum_univ_succ, Matrix.cons_val_zero, Matrix.cons_val_succ,
+      Matrix.cons_val_fin_one, Real.log_mul hy.ne' hz.ne',
+      Real.log_mul (mul_pos hy hz).ne' (pow_ne_zero 2 hp.ne'), Real.log_pow]
+    norm_num
+    ring
 
 /-- DLMF 19.24.5 with 19.24.6: for `a₀ ≥ g₀ > 0` and the AGM sequences
 `a_{n+1} = (aₙ + gₙ)/2`, `g_{n+1} = √(aₙ gₙ)` (19.24.6, §19.8(i)),
@@ -249,6 +326,23 @@ theorem symEllIntRF_zero_agm_bounds {a g : ℕ → ℝ} (hg0 : 0 < g 0) (hag : g
   exact ⟨inv_anti₀ (by exact_mod_cast NNReal.agm_pos ha₀ hg₀) hbounds.2,
     inv_anti₀ (hpos n).2 hbounds.1⟩
 
+/-- Reflection symmetry and period `π` reduce the ellipse perimeter to one quadrant. -/
+lemma ellipsePerimeter_eq_four_mul_quarter (a b : ℝ) :
+    ellipsePerimeter a b = 4 * ∫ t in (0 : ℝ)..(π / 2),
+      Real.sqrt (a ^ 2 * Real.sin t ^ 2 + b ^ 2 * Real.cos t ^ 2) := by
+  let f : ℝ → ℝ := fun t => Real.sqrt (a ^ 2 * Real.sin t ^ 2 + b ^ 2 * Real.cos t ^ 2)
+  have hf : Continuous f := by fun_prop
+  have hp : Function.Periodic f π := by intro t; simp [f, Real.sin_add_pi, Real.cos_add_pi]
+  have hs : ∀ t, f (π - t) = f t := by intro t; simp [f, Real.sin_pi_sub, Real.cos_pi_sub]
+  have H := hp.intervalIntegral_add_zsmul_eq 2 0 (fun t u => hf.intervalIntegrable t u)
+  norm_num only [zero_add, zsmul_eq_mul, Int.cast_ofNat] at H
+  have Hq := intervalIntegral.integral_comp_sub_left f (a := 0) (b := π / 2) π
+  simp only [hs, sub_zero, show π - π / 2 = π / 2 by ring] at Hq
+  change (∫ t in (0 : ℝ)..(2 * π), f t) = 4 * ∫ t in (0 : ℝ)..(π / 2), f t
+  rw [H, ← intervalIntegral.integral_add_adjacent_intervals (b := π / 2)
+    (hf.intervalIntegrable _ _) (hf.intervalIntegrable _ _), ← Hq]
+  ring
+
 /-- DLMF 19.24.7: the perimeter of an ellipse with semiaxes `a, b`,
 `L(a, b) = 8 R_G(0, a², b²)`, with `L` the arc-length integral `ellipsePerimeter` of §19.9(i)
 (`DLMF.EllipticIntegrals.ellipsePerimeter`). Valid for all real `a, b` (both sides depend on
@@ -256,7 +350,53 @@ theorem symEllIntRF_zero_agm_bounds {a g : ℕ → ℝ} (hg0 : 0 < g 0) (hag : g
 @[dlmf 19.24.E7]
 theorem ellipsePerimeter_eq_symEllIntRG (a b : ℝ) :
     (ellipsePerimeter a b : ℂ) = 8 * symEllIntRG 0 ((a ^ 2 : ℝ) : ℂ) ((b ^ 2 : ℝ) : ℂ) := by
-  sorry
+  rw [ellipsePerimeter_eq_four_mul_quarter]
+  have hcos (b : ℝ) : (∫ t in (0 : ℝ)..(π / 2),
+      Real.sqrt (b ^ 2 * Real.cos t ^ 2)) = |b| := by
+    have he : (∫ t in (0 : ℝ)..(π / 2), Real.sqrt (b ^ 2 * Real.cos t ^ 2)) =
+        ∫ t in (0 : ℝ)..(π / 2), |b| * Real.cos t := by
+      refine intervalIntegral.integral_congr fun t ht => ?_
+      have ht' := uIcc_of_le (show (0 : ℝ) ≤ π / 2 by positivity) ▸ ht
+      have hc : 0 ≤ Real.cos t := Real.cos_nonneg_of_mem_Icc ⟨by linarith [ht'.1, Real.pi_pos], ht'.2⟩
+      rw [Real.sqrt_mul (sq_nonneg b), Real.sqrt_sq_eq_abs, Real.sqrt_sq_eq_abs, abs_of_nonneg hc]
+    rw [he, intervalIntegral.integral_const_mul, integral_cos]
+    simp
+  have hsin (a : ℝ) : (∫ t in (0 : ℝ)..(π / 2),
+      Real.sqrt (a ^ 2 * Real.sin t ^ 2)) = |a| := by
+    have he : (∫ t in (0 : ℝ)..(π / 2), Real.sqrt (a ^ 2 * Real.sin t ^ 2)) =
+        ∫ t in (0 : ℝ)..(π / 2), |a| * Real.sin t := by
+      refine intervalIntegral.integral_congr fun t ht => ?_
+      have ht' := uIcc_of_le (show (0 : ℝ) ≤ π / 2 by positivity) ▸ ht
+      have hs : 0 ≤ Real.sin t := Real.sin_nonneg_of_nonneg_of_le_pi ht'.1 (by linarith [ht'.2, Real.pi_pos])
+      rw [Real.sqrt_mul (sq_nonneg a), Real.sqrt_sq_eq_abs, Real.sqrt_sq_eq_abs, abs_of_nonneg hs]
+    rw [he, intervalIntegral.integral_const_mul, integral_sin]
+    simp
+  by_cases ha : a = 0
+  · subst a
+    simp only [zero_pow two_ne_zero, zero_mul, zero_add, ofReal_zero]
+    rw [hcos]
+    by_cases hb : b = 0
+    · subst b
+      simp [symEllIntRG]
+    · rw [(symEllIntRG_zero_self (y := (1 : ℂ)) one_mem_slitPlane
+        (ofReal_mem_slitPlane.mpr (sq_pos_of_ne_zero hb))).2,
+        Carlson.ofReal_cpow_half (sq_nonneg b), Real.sqrt_sq_eq_abs]
+      push_cast; ring
+  by_cases hb : b = 0
+  · subst b
+    simp only [zero_pow two_ne_zero, zero_mul, add_zero, ofReal_zero]
+    rw [hsin, symEllIntRG_comm_right,
+      (symEllIntRG_zero_self (y := (1 : ℂ)) one_mem_slitPlane
+        (ofReal_mem_slitPlane.mpr (sq_pos_of_ne_zero ha))).2,
+      Carlson.ofReal_cpow_half (sq_nonneg a), Real.sqrt_sq_eq_abs]
+    push_cast; ring
+  have H := Carlson.ellipse_perimeter (abs_pos.mpr ha) (abs_pos.mpr hb)
+  simp only [sq_abs, ← Real.sqrt_eq_rpow] at H
+  rw [p19sR1_symEllIntRG_zero_eq_carlsonRE (ofReal_mem_slitPlane.mpr (sq_pos_of_ne_zero ha))
+    (ofReal_mem_slitPlane.mpr (sq_pos_of_ne_zero hb))]
+  rw [H]
+  ring
+
 
 /-- DLMF 19.24.8: for `x, y > 0`, `x ≠ y`,
 `R_F(x, y, 0) R_G(x, y, 0) > π²/8` and `R_F(x, y, 0) + 2 R_G(x, y, 0) > π`. -/

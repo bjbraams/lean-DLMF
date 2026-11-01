@@ -43,6 +43,7 @@ public import DLMFMathlib.Analysis.Complex.TrigR4SeriesExtension
 public import DLMFMathlib.Analysis.Complex.TrigonometricProducts
 public import DLMFMathlib.Analysis.Complex.ZeroLocalization
 public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
+public import DLMFMathlib.Analysis.Distribution.IteratedLineDeriv
 public import DLMFMathlib.Analysis.EulerMaclaurin
 public import DLMFMathlib.Analysis.Fourier.AddCircle
 public import DLMFMathlib.Analysis.Fourier.GaussianSeries
@@ -82,6 +83,7 @@ public import DLMFMathlib.Analysis.SpecificLimits.Oscillation
 public import DLMFMathlib.Analysis.SpecificLimits.Pincherle
 public import DLMFMathlib.MeasureTheory.Function.L2Space
 public import DLMFMathlib.MeasureTheory.Integral.HalfLine
+public import DLMFMathlib.MeasureTheory.Integral.Trigonometric
 public import DLMFMathlib.NumberTheory.BernoulliTaylor
 public import DLMFMathlib.NumberTheory.EulerNumbers
 public import DLMFMathlib.NumberTheory.EulerPolynomials
@@ -118,6 +120,7 @@ public import DLMFMathlib.Combinatorics.S26aSeriesTransform
 public import DLMFMathlib.NumberTheory.LSeries.ZetaValues
 public import DLMFMathlib.NumberTheory.ModularForms.P3wJSurjective
 public import DLMFMathlib.RingTheory.PowerSeriesEvaluation
+public import DLMFMathlib.Topology.Order.Compact
 
 /-!
 # Supporting results for Mathlib

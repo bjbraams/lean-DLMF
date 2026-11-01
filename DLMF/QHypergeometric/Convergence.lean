@@ -1232,12 +1232,107 @@ theorem qPochhammerInf_analytic {q : ℂ} (hq : ‖q‖<1) :
       funext fun z => zero_phi_zero hq z] at h
     exact h
 
+/-- A scalar power series is analytic strictly inside any positive radius where it converges. -/
+private lemma qPsi_analyticAt_of_summable_radius (c : ℕ → ℂ) {r : ℝ} (hr : 0 < r)
+    (hs : Summable (fun n : ℕ => c n * (r : ℂ) ^ n)) {w : ℂ} (hw : ‖w‖ < r) :
+    AnalyticAt ℂ (fun z : ℂ => ∑' n : ℕ, c n * z ^ n) w := by
+  let P := FormalMultilinearSeries.ofScalars ℂ c
+  let R : ℝ≥0 := ⟨r, hr.le⟩
+  have hR : (R : ℝ≥0∞) ≤ P.radius := by
+    apply FormalMultilinearSeries.le_radius_of_tendsto (r := R)
+    have hlim := hs.tendsto_atTop_zero.norm
+    simp only [norm_mul, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr] at hlim
+    convert hlim using 1
+    ext n
+    simp only [P, FormalMultilinearSeries.ofScalars_norm]
+    congr 1
+  have hpos : 0 < P.radius := lt_of_lt_of_le (by exact_mod_cast hr) hR
+  have hmem : w ∈ Metric.eball 0 P.radius := by
+    apply mem_eball_zero_iff.mpr
+    exact lt_of_lt_of_le (by exact_mod_cast hw) hR
+  have hA := (P.hasFPowerSeriesOnBall hpos).analyticAt_of_mem hmem
+  change AnalyticAt ℂ (FormalMultilinearSeries.ofScalarsSum c) w at hA
+  simpa only [FormalMultilinearSeries.ofScalarsSum_eq_tsum, smul_eq_mul] using hA
+
+/-- The negative-index half of a bilateral q-series is a power series in the reciprocal
+variable throughout the interior convergence disk, including zero lower parameters. -/
+private lemma qPsi_negative_analyticAt {a b : List ℂ} {q : ℂ}
+    (hq0 : q ≠ 0) (hq : ‖q‖ < 1) (hab : QBilateralRegular a b q)
+    (ha : a.prod ≠ 0) (hr : a.length ≤ b.length) {w : ℂ}
+    (hw : ‖b.prod / a.prod‖ * ‖w‖ < 1) :
+    AnalyticAt ℂ (fun v : ℂ => ∑' n : ℕ, qPsiTerm a b q 1 (-(n : ℤ)) * v ^ n) w := by
+  let B := ‖b.prod / a.prod‖
+  obtain ⟨r, hr0, hwr, hBr⟩ : ∃ r : ℝ, 0 < r ∧ ‖w‖ < r ∧ B * r < 1 := by
+    by_cases hB : B = 0
+    · exact ⟨‖w‖ + 1, by positivity, by linarith, by simp [hB]⟩
+    · have hBpos : 0 < B := lt_of_le_of_ne (norm_nonneg _) (Ne.symm hB)
+      have hwr : ‖w‖ < 1 / B := (lt_div_iff₀ hBpos).mpr (by simpa [B, mul_comm] using hw)
+      obtain ⟨r, hrw, hrB⟩ := exists_between hwr
+      exact ⟨r, (norm_nonneg w).trans_lt hrw, hrw,
+        by rw [mul_comm, ← lt_div_iff₀ hBpos]; exact hrB⟩
+  apply qPsi_analyticAt_of_summable_radius _ hr0 ?_ hwr
+  have hs := qaR4_qPsiTerm_neg_summable hq0 hq hab ha
+    (inv_ne_zero (show (r : ℂ) ≠ 0 by exact_mod_cast hr0.ne')) hr
+    (show ‖b.prod / (a.prod * (r : ℂ)⁻¹)‖ < 1 by
+      rw [div_mul_eq_div_div, div_inv_eq_mul, norm_mul, Complex.norm_of_nonneg hr0.le]
+      exact hBr)
+  convert hs using 1
+  funext n
+  simp [qPsiTerm, zpow_neg, zpow_natCast]
+
 /-- Bilateral series are analytic on their actual open annulus, including valid lower zeros. -/
 theorem qPsi_analytic_annulus {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hab : QBilateralRegular a b q) (ha : a.prod≠0) (hr : a.length≤b.length) :
     AnalyticOnNhd ℂ (qPsi a b q)
       {z | z≠0 ∧ ‖b.prod/(a.prod*z)‖<1 ∧ (a.length=b.length → ‖z‖<1)} := by
-  sorry
+  intro z hz
+  let c : ℕ → ℂ := fun n => qPsiTerm a b q 1 (-(n : ℤ))
+  let F : ℂ → ℂ := fun w => ∑' n : ℕ, c n * w ^ n
+  have hneg : AnalyticAt ℂ F z⁻¹ := by
+    apply qPsi_negative_analyticAt hq0 hq hab ha hr
+    simpa [div_mul_eq_div_div, div_eq_mul_inv, norm_mul, mul_assoc, mul_left_comm, mul_comm] using hz.2.1
+  have hpos : AnalyticAt ℂ (qPhi (q :: a) b q) z := by
+    by_cases heq : a.length = b.length
+    · exact qPhi_analytic_disc hq0 hq hab.1 (by simp; omega) z (hz.2.2 heq)
+    · exact qPhi_analytic_entire hq0 hq hab.1 (by simp; omega) z (mem_univ z)
+  have hA : AnalyticAt ℂ (fun v : ℂ => qPhi (q :: a) b q v + F v⁻¹ - c 0) z :=
+    (hpos.add (hneg.comp (analyticAt_id.inv hz.1))).sub analyticAt_const
+  apply hA.congr
+  have hev0 : ∀ᶠ v : ℂ in 𝓝 z, v ≠ 0 := eventually_ne_nhds hz.1
+  have hevi : ∀ᶠ v : ℂ in 𝓝 z, ‖b.prod / (a.prod * v)‖ < 1 :=
+    ((continuousAt_const.div (continuousAt_const.mul continuousAt_id)
+      (mul_ne_zero ha hz.1)).norm.tendsto).eventually (Iio_mem_nhds hz.2.1)
+  have hevo : ∀ᶠ v : ℂ in 𝓝 z, a.length = b.length → ‖v‖ < 1 := by
+    by_cases heq : a.length = b.length
+    · filter_upwards [continuousAt_id.norm.tendsto.eventually (Iio_mem_nhds (hz.2.2 heq))]
+        with v hv using fun _ => hv
+    · exact Filter.Eventually.of_forall fun _ h => (heq h).elim
+  filter_upwards [hev0, hevi, hevo] with v hv0 hvi hvo
+  have hs := qaR4_qPsiTerm_neg_summable hq0 hq hab ha hv0 hr hvi
+  have hsplit := qPsi_split_indices hq0 hq hab ha hv0 hr hvi hvo
+  have hshift := Summable.sum_add_tsum_nat_add 1 hs
+  simp only [sum_range_one] at hshift
+  have hF : F v⁻¹ = ∑' n : ℕ, qPsiTerm a b q v (-(n : ℤ)) := by
+    apply tsum_congr
+    intro n
+    simp [c, qPsiTerm, zpow_neg, zpow_natCast]
+  have hzero : qPsiTerm a b q v (-((0 : ℕ) : ℤ)) = c 0 := by
+    simp [c, qPsiTerm]
+  rw [hzero, ← hF] at hshift
+  rw [hsplit]
+  have hpositive : (∑' n : ℕ, qPsiTerm a b q v n) = qPhi (q :: a) b q v := by
+    unfold qPhi
+    exact tsum_congr fun n => qaR4_qPsiTerm_natCast hq n
+  rw [hpositive]
+  have hnegative : (∑' n : ℕ, qPsiTerm a b q v (-(n : ℤ) - 1)) =
+      ∑' n : ℕ, qPsiTerm a b q v (-((n + 1 : ℕ) : ℤ)) := by
+    apply tsum_congr
+    intro n
+    congr 1
+    push_cast
+    ring
+  rw [hnegative]
+  linear_combination -hshift
 
 /-- A holomorphic RHS germ continues the actual unilateral-series germ inside its domain.
 This is a direct adapter of TauCeti's proved germ continuation API. -/

@@ -6,6 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.MatrixArgument.Basic
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
+public import TauCeti.Analysis.Matrix.Sqrt
+public import TauCeti.Analysis.Complex.CauchyIntegralPolydisc
 public import TauCeti.Analysis.SpecialFunctions.MultivariateGamma.Basic
 public import TauCeti.MeasureTheory.Measure.SymmetricMatrix.Cholesky
 public import TauCeti.LinearAlgebra.Matrix.Triangular
@@ -16,10 +19,10 @@ public import TauCeti.Analysis.SpecialFunctions.MultivariateGamma.Integral
 # Laplace transform, multivariate gamma and beta functions (DLMF §§35.2–35.3)
 
 * §35.2: absolute convergence and analyticity of the Laplace transform 35.2.1
-  (`laplaceTransform_integrableOn_analyticOnNhd`), the inversion formula 35.2.2
-  (`laplaceTransform_inversion`, **corrected** by the factor `2^{m(m-1)/2}`, see below), both
-  admitted, and the convolution theorem 35.2.3 (`laplaceTransform_matrixConvolution`, proved by
-  Fubini and translation invariance of `dX`).
+  (`laplaceTransform_integrableOn_analyticOnNhd`, proved using locally dominated integration
+  and TauCeti's finite-dimensional analyticity), the inversion formula 35.2.2
+  (`laplaceTransform_inversion`, admitted with the corrected factor `2^{m(m-1)/2}`), and 35.2.3
+  (`laplaceTransform_matrixConvolution`, proved by Fubini and translation invariance of `dX`).
 * §35.3: the integrals 35.3.1–35.3.3 and 35.3.8 for `Γ_m`, `Γ_m(s₁, …, s_m)` and `B_m` for
   complex parameters (proved by the Cholesky substitution of Tau Ceti and Fubini; for real `a`
   the integral 35.3.1 is Tau Ceti's `TauCeti.integral_posDef_multivariateGamma`, recorded as an
@@ -120,6 +123,7 @@ lemma q2m_integrable_lap {m : ℕ} {f : Matrix (Fin m) (Fin m) ℝ → ℂ}
             Matrix.trace_neg, Matrix.trace_add]
           ring_nf
 
+open scoped MatrixOrder in
 /-- DLMF 35.2 (paragraph after 35.2.1): if `|f(X)| < etr(-X₀X)` on `Ω` for some `X₀ ∈ Ω`, the
 Laplace transform 35.2.1 converges absolutely for every complex symmetric `𝐙` with
 `ℜ𝐙 > X₀`, and `g(𝐙)` is a holomorphic function of the independent entries `z_{j,k}`
@@ -137,7 +141,49 @@ theorem laplaceTransform_integrableOn_analyticOnNhd {m : ℕ} (f : Matrix (Fin m
         (posDefCone m) (TauCeti.symmetricLebesgue m)) ∧
     AnalyticOnNhd ℂ (fun z => laplaceTransform f (complexSymmetricOfCoords z))
       {z | ((complexSymmetricOfCoords z).map Complex.re - X₀).PosDef} := by
-  sorry
+  constructor
+  · intro Z _ hZ; exact q2m_integrable_lap hf hX₀ hbound hZ
+  · let R := fun z : TauCeti.upperTriangle m → ℂ =>
+      (TauCeti.symmetricCoordinates m).symm (fun ij => (z ij).re) - ⟨X₀, hX₀.isHermitian⟩
+    have hR z : (R z : Matrix (Fin m) (Fin m) ℝ) = (complexSymmetricOfCoords z).map Complex.re - X₀ := by
+      ext i j; by_cases hij : i ≤ j
+      · simp [R, complexSymmetricOfCoords, hij, TauCeti.coe_symmetricCoordinates_symm_apply_of_le m _ hij]
+      · simp [R, complexSymmetricOfCoords, hij,
+          TauCeti.coe_symmetricCoordinates_symm_apply_of_ge m _ (le_of_not_ge hij)]
+    have hC : Continuous R := ((TauCeti.symmetricCoordinates m).symm.continuous.comp
+      (continuous_pi fun ij => Complex.continuous_re.comp (continuous_apply ij))).sub continuous_const
+    have hU : IsOpen {z | ((complexSymmetricOfCoords z).map Complex.re - X₀).PosDef} := by
+      have h := (TauCeti.isOpen_setOfPred_posDefMatrix m).preimage hC
+      change IsOpen {z | (R z : Matrix (Fin m) (Fin m) ℝ).PosDef} at h
+      simpa only [hR] using h
+    refine DifferentiableOn.analyticOnNhd_of_finiteDimensional ?_ hU
+    change DifferentiableOn ℂ (fun z => ∫ X : SymMatrix m,
+      Complex.exp (-(complexSymmetricOfCoords z * (X : Matrix (Fin m) (Fin m) ℝ).map
+        (fun x : ℝ => (x : ℂ))).trace) * f X ∂((TauCeti.symmetricLebesgue m).restrict (posDefCone m))) _
+    apply Complex.differentiableOn_integral_of_locally_dominated hU
+    · intro z _; exact (q2m_continuous_lapKernel _).aestronglyMeasurable.mul hf
+    · refine Filter.Eventually.of_forall fun X => Differentiable.differentiableOn ?_
+      dsimp [complexSymmetricOfCoords, Matrix.trace, Matrix.diag, Matrix.mul_apply]
+      apply Differentiable.mul_const; apply Differentiable.cexp; apply Differentiable.neg
+      apply Differentiable.fun_sum; intro i _; apply Differentiable.fun_sum; intro j _
+      split_ifs <;> fun_prop
+    · intro z hz
+      have hg := hX₀.integrableOn_posDef_det_rpow_mul_exp_neg_trace_mul
+        (a := ((m : ℝ) + 1) / 2) (by linarith)
+      simp only [sub_self, Real.rpow_zero, one_mul] at hg
+      refine ⟨_, hU.mem_nhds hz, _, hg, ?_⟩
+      filter_upwards [ae_restrict_mem (TauCeti.measurableSet_posDefMatrix m)] with X hX y hy
+      have hY : ((complexSymmetricOfCoords y).map Complex.re).PosDef := by
+        have h := hy.add hX₀; convert h using 1; abel
+      have htrace : 0 ≤ ((complexSymmetricOfCoords y).map Complex.re *
+          (X : Matrix (Fin m) (Fin m) ℝ)).trace := by
+        rw [← hX.posSemidef.trace_sqrt_mul_mul_sqrt]
+        have hsq := (Matrix.LE.le.posSemidef (CFC.sqrt_nonneg (X : Matrix (Fin m) (Fin m) ℝ))).isHermitian
+        simpa only [hsq.eq] using (hY.posSemidef.mul_mul_conjTranspose_same
+          (CFC.sqrt (X : Matrix (Fin m) (Fin m) ℝ))).trace_nonneg
+      rw [norm_mul, q2m_norm_lapKernel, etr, Matrix.trace_neg]
+      apply (mul_le_of_le_one_left (norm_nonneg _) (Real.exp_le_one_iff.mpr (neg_nonpos.mpr htrace))).trans
+      simpa only [etr, Matrix.trace_neg] using (hbound X hX).le
 
 /-- DLMF 35.2.2 (**corrected**): the inversion formula. Let `f` satisfy the bound of
 35.2 with `X₀ ∈ Ω`, let `U ∈ 𝓢` with `U > X₀`, and suppose `V ↦ g(U + iV)` is integrable over

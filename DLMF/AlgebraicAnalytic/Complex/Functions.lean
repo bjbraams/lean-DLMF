@@ -16,6 +16,9 @@ public import Mathlib.Analysis.Complex.Schwarz
 public import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
 public import Mathlib.Analysis.Meromorphic.Order
 public import Mathlib.Analysis.Normed.Algebra.Exponential
+public import Mathlib.Analysis.SpecialFunctions.Log.Summable
+public import Mathlib.Topology.ContinuousMap.Bounded.Normed
+public import Mathlib.Topology.Connected.TotallyDisconnected
 public import Mathlib.Analysis.SpecialFunctions.Exponential
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
@@ -297,7 +300,55 @@ any punctured neighbourhood of `0`. -/
 @[dlmf 1.10.vi]
 theorem not_exists_sqrt_branch_punctured {ε : ℝ} (hε : 0 < ε) :
     ¬ ∃ g : ℂ → ℂ, ContinuousOn g (ball 0 ε \ {0}) ∧ ∀ z ∈ ball (0 : ℂ) ε \ {0}, g z ^ 2 = z := by
-  sorry
+  rintro ⟨g, hg, hgsq⟩
+  let r : ℝ := ε / 2
+  have hr : 0 < r := by dsimp [r]; positivity
+  have hrε : r < ε := by dsimp [r]; linarith
+  let p : ℝ → ℂ := fun t => (r : ℂ) * exp ((2 * t : ℝ) * I)
+  have hp (t : ℝ) : p t ∈ ball (0 : ℂ) ε \ {0} := by
+    have hnorm : ‖p t‖ = r := by
+      dsimp [p]
+      rw [norm_mul, norm_exp]
+      simp [abs_of_pos hr]
+    constructor
+    · simpa [mem_ball, dist_zero_right, hnorm] using hrε
+    · simpa only [mem_singleton_iff] using
+        (norm_pos_iff.mp (hnorm ▸ hr))
+  let v : ℝ → ℂ := fun t => g (p t) * exp (-((t : ℂ) * I))
+  have hc : Continuous v := by
+    have hgp : Continuous (fun t => g (p t)) := by
+      rw [← continuousOn_univ]
+      exact hg.comp (by dsimp [p]; fun_prop) (fun t ht => hp t)
+    exact hgp.mul (by fun_prop)
+  have hvsq (t : ℝ) : v t ^ 2 = r := by
+    dsimp [v]
+    rw [mul_pow, hgsq _ (hp t), ← exp_nat_mul]
+    dsimp [p]
+    rw [mul_assoc, ← exp_add]
+    have he : (2 * t : ℝ) * (I : ℂ) + 2 * -((t : ℂ) * I) = 0 := by
+      push_cast
+      ring
+    rw [he, exp_zero, mul_one]
+  have hv0 : v 0 = g r := by simp [v, p]
+  have hvend : v Real.pi = -g r := by
+    have he : exp ((2 * Real.pi : ℝ) * (I : ℂ)) = 1 := by
+      push_cast
+      rw [show (2 : ℂ) * Real.pi * I = (2 * Real.pi) * I by ring, exp_two_pi_mul_I]
+    have he' : exp (-((Real.pi : ℂ) * I)) = -1 := by rw [exp_neg, exp_pi_mul_I]; norm_num
+    simp [v, p, he, he']
+  have hmaps : MapsTo v univ ({g r, -g r} : Set ℂ) := by
+    intro t ht
+    have hs : v t ^ 2 = (g r) ^ 2 := by rw [hvsq, ← hv0, hvsq]
+    simpa only [mem_insert_iff, mem_singleton_iff] using sq_eq_sq_iff_eq_or_eq_neg.mp hs
+  have hconst := isPreconnected_univ.constant_of_mapsTo
+    (Set.toFinite ({g r, -g r} : Set ℂ)).isDiscrete hc.continuousOn hmaps
+    (mem_univ (0 : ℝ)) (mem_univ Real.pi)
+  rw [hv0, hvend] at hconst
+  have hz : g r = 0 := by linear_combination (1 / 2 : ℂ) * hconst
+  have hs := hvsq 0
+  rw [hv0, hz, zero_pow (by decide)] at hs
+  exact hr.ne' (Complex.ofReal_eq_zero.mp hs.symm)
+
 
 /-- DLMF §1.10(vi), example: for `α`, `β ∈ ℂ`, `F(z) = (1 - z)^α (1 + z)^β` with principal values
 is analytic (a branch of `F`) in the plane cut along `[1, ∞)` and `(-∞, -1]`. -/
@@ -493,7 +544,57 @@ theorem prodConvergesDLMF_iff_log {a : ℕ → ℂ} (ha : ∀ n ≥ 1, a n ≠ -
 @[dlmf 1.10.ix]
 theorem prodConvergesDLMF_norm_iff {a : ℕ → ℂ} :
     ProdConvergesDLMF (fun n => (‖a n‖ : ℂ)) ↔ Summable (fun n => ‖a (n + 1)‖) := by
-  sorry
+  have hnorm (n : ℕ) : ‖1 + (‖a n‖ : ℂ)‖ = 1 + ‖a n‖ := by
+    rw [← ofReal_one, ← ofReal_add, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_nonneg (by positivity)]
+  have hshift (k n : ℕ) :
+      (∏ i ∈ Finset.range (n + 1), (1 + (‖a (i + k)‖ : ℂ))) =
+        ∏ i ∈ Finset.Icc k (n + k), (1 + (‖a i‖ : ℂ)) := by
+    rw [← Nat.Ico_zero_eq_range,
+      Finset.prod_Ico_add' (fun i => (1 + (‖a i‖ : ℂ))) 0 (n + 1) k, zero_add,
+      show n + 1 + k = (n + k) + 1 by omega, Finset.Ico_add_one_right_eq_Icc]
+  constructor
+  · rintro ⟨k, hk, p, hp, hconv⟩
+    obtain ⟨B, hB⟩ := hconv.norm.bddAbove_range
+    have hsum : Summable (fun n : ℕ => ‖a (n + k)‖) := by
+      refine summable_of_sum_range_le (fun n => norm_nonneg _) (c := B) fun n => ?_
+      have hprod (m : ℕ) :
+          (∑ i ∈ Finset.range m, ‖a (i + k)‖) ≤
+            ∏ i ∈ Finset.range m, (1 + ‖a (i + k)‖) := by
+        have hstrong (m : ℕ) :
+            1 + (∑ i ∈ Finset.range m, ‖a (i + k)‖) ≤
+              ∏ i ∈ Finset.range m, (1 + ‖a (i + k)‖) := by
+          induction m with
+          | zero => simp
+          | succ m ih =>
+            rw [Finset.sum_range_succ, Finset.prod_range_succ]
+            have hs0 : 0 ≤ ∑ i ∈ Finset.range m, ‖a (i + k)‖ :=
+              Finset.sum_nonneg fun i _ => norm_nonneg _
+            nlinarith [norm_nonneg (a (m + k))]
+        linarith [hstrong m]
+      have hbound := hB ⟨n + k, rfl⟩
+      change ‖∏ i ∈ Finset.Icc k (n + k), (1 + (‖a i‖ : ℂ))‖ ≤ B at hbound
+      rw [← hshift k n, norm_prod] at hbound
+      simp_rw [hnorm] at hbound
+      refine (Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_mono (by omega))
+        (fun i _ _ => norm_nonneg (a (i + k)))).trans ((hprod (n + 1)).trans hbound)
+    exact (summable_nat_add_iff (f := fun n => ‖a n‖) 1).mpr
+      ((summable_nat_add_iff (f := fun n => ‖a n‖) k).mp hsum)
+  · intro hs
+    have hsc : Summable (fun n : ℕ => ‖(‖a (n + 1)‖ : ℂ)‖) := by simpa using hs
+    have hprod := multipliable_one_add_of_summable hsc
+    refine ⟨1, le_rfl, ∏' n : ℕ, (1 + (‖a (n + 1)‖ : ℂ)),
+      tprod_one_add_ne_zero_of_summable (fun n => ?_) hsc, ?_⟩
+    · intro hn
+      have hn0 := hnorm (n + 1)
+      rw [hn, norm_zero] at hn0
+      have : 0 ≤ ‖a (n + 1)‖ := norm_nonneg _
+      linarith
+    · have hlim := hprod.hasProd.tendsto_prod_nat
+      refine hlim.congr' ?_
+      filter_upwards [eventually_ge_atTop 1] with n hn
+      obtain ⟨m, rfl⟩ := Nat.exists_eq_add_of_le hn
+      simpa only [add_comm 1 m] using hshift 1 m
 
 /-- DLMF 1.10.20–1.10.21 (`M`-test for products): let `aₙ` be analytic in the domain `D`; if
 `|ln(1 + aₙ(z))| ≤ Mₙ` for `n ≥ N` and `z ∈ D` and `∑ Mₙ < ∞`, then `∏_{n ≥ 1} (1 + aₙ(z))`
@@ -518,7 +619,64 @@ theorem prod_mtest {a : ℕ → ℂ → ℂ} {D : Set ℂ} (hD : IsOpen D)
     ∃ p : ℂ → ℂ, DifferentiableOn ℂ p D ∧
       TendstoUniformlyOn (fun m z => ∏ n ∈ Finset.Icc 1 m, (1 + a n z)) p atTop D ∧
       ∀ z ∈ D, p z = 0 → ∃ n ≥ 1, 1 + a n z = 0 := by
-  sorry
+  classical
+  let p : ℂ → ℂ := fun z => ∏' n : ℕ, (1 + a (n + 1) z)
+  by_cases hne : D.Nonempty
+  · letI : Nonempty D := hne.to_subtype
+    have hM0 (n : ℕ) : 0 ≤ M n := by
+      obtain ⟨z, hz⟩ := hne
+      exact (norm_nonneg (a n z)).trans (hM n z hz)
+    let A (n : ℕ) : BoundedContinuousFunction D ℂ :=
+      BoundedContinuousFunction.ofNormedAddCommGroup (fun z => a (n + 1) z)
+        (continuousOn_iff_continuous_domRestrict.mp (ha (n + 1)).continuousOn)
+        (M (n + 1)) (fun z => hM (n + 1) z z.2)
+    have hAapply (n : ℕ) (z : D) : A n z = a (n + 1) z := rfl
+    have hAnorm : Summable (fun n => ‖A n‖) := by
+      apply ((summable_nat_add_iff 1).mpr hs).of_nonneg_of_le (fun n => norm_nonneg _)
+      intro n
+      exact (BoundedContinuousFunction.norm_le (hM0 (n + 1))).mpr
+        (fun z => hM (n + 1) z z.2)
+    have hAP := multipliable_one_add_of_summable hAnorm
+    have hAu := BoundedContinuousFunction.tendsto_iff_tendstoUniformly.mp
+      hAP.hasProd.tendsto_prod_nat
+    have hprod (n : ℕ) (z : ℂ) :
+        (∏ i ∈ Finset.range n, (1 + a (i + 1) z)) =
+          ∏ i ∈ Finset.Icc 1 n, (1 + a i z) := by
+      rw [← Nat.Ico_zero_eq_range,
+        Finset.prod_Ico_add' (fun i => (1 + a i z)) 0 n 1, zero_add,
+        Finset.Ico_add_one_right_eq_Icc]
+    have hpoint (z : ℂ) (hz : z ∈ D) :
+        Tendsto (fun n => ∏ i ∈ Finset.range n, (1 + a (i + 1) z)) atTop (𝓝 (p z)) := by
+      apply (multipliable_one_add_of_summable ?_).hasProd.tendsto_prod_nat
+      exact ((summable_nat_add_iff 1).mpr hs).of_nonneg_of_le (fun n => norm_nonneg _)
+        (fun n => hM (n + 1) z hz)
+    have hPeq (z : D) : (∏' n : ℕ, (1 + A n)) z = p z := by
+      apply tendsto_nhds_unique (hAu.tendsto_at z)
+      simpa only [BoundedContinuousFunction.prod_apply, BoundedContinuousFunction.add_apply,
+        BoundedContinuousFunction.coe_one, Pi.one_apply, hAapply] using hpoint z z.2
+    have hu : TendstoUniformlyOn (fun n z => ∏ i ∈ Finset.Icc 1 n, (1 + a i z)) p atTop D := by
+      rw [tendstoUniformlyOn_iff_tendstoUniformly_comp_coe]
+      convert hAu using 1
+      · ext n z
+        simp only [BoundedContinuousFunction.prod_apply, BoundedContinuousFunction.add_apply,
+          BoundedContinuousFunction.coe_one, Pi.one_apply, hAapply]
+        exact (hprod n z).symm
+      · ext z
+        exact (hPeq z).symm
+    refine ⟨p, ?_, hu, ?_⟩
+    · refine hu.tendstoLocallyUniformlyOn.differentiableOn
+        (Eventually.of_forall fun n => ?_) hD
+      exact DifferentiableOn.fun_finsetProd fun i _ => (ha i).const_add 1
+    · intro z hz hp
+      by_contra! hnone
+      have hnonzero := tprod_one_add_ne_zero_of_summable
+        (fun n => hnone (n + 1) (by omega))
+        (((summable_nat_add_iff 1).mpr hs).of_nonneg_of_le (fun n => norm_nonneg _)
+          (fun n => hM (n + 1) z hz))
+      exact hnonzero hp
+  · have hD0 : D = ∅ := Set.not_nonempty_iff_eq_empty.mp hne
+    subst D
+    exact ⟨p, differentiableOn_empty, tendstoUniformlyOn_empty, by simp⟩
 
 /-- DLMF 1.10.22 (Weierstrass product): if `zₙ ≠ 0` and `∑ |zₙ|⁻²` converges, then
 `P(z) = ∏ (1 - z/zₙ) e^{z/zₙ}` (an absolutely convergent product) is an entire function whose

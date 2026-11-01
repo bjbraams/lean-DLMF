@@ -34,6 +34,7 @@ public import DLMF.EllipticIntegrals.SymmetricReduction
 public import DLMF.EllipticIntegrals.SymmetricRelations
 public import DLMF.EllipticIntegrals.SymmetricSeries
 public import DLMF.EllipticIntegrals.SymmetricSpecialCases
+public import DLMF.EllipticIntegrals.SymmetricNodeDerivatives
 
 /-!
 # Elliptic integrals (DLMF Chapter 19)

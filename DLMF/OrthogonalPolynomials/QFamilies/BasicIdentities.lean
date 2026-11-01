@@ -9,6 +9,7 @@ public import DLMF.OrthogonalPolynomials.GegenbauerSeries
 public import DLMF.OrthogonalPolynomials.QOrthogonalityTools
 public import DLMF.OrthogonalPolynomials.Wilson
 public import DLMF.QSeries.Identities
+public import DLMF.QHypergeometric.BasicSummations
 public import TauCeti.Probability.Distributions.LogNormal.Basic
 
 /-!
@@ -482,13 +483,305 @@ theorem littleQJacobi_orthogonal {a b q : ℝ} (hq : 0 < q) (hq1 : q < 1)
     funext y
     ring
 
+/-- Every factor in a finite shifted factorial with negative real parameter is at least one. -/
+private lemma qLaguerre_norm_poch_ge_one {q x : ℝ} (hq : 0 < q) (hx : 0 ≤ x) (n : ℕ) :
+    1 ≤ ‖qPochhammer (-(x : ℂ)) q n‖ := by
+  rw [qPochhammer_eq_prod, norm_prod]
+  apply Finset.one_le_prod₀
+  intro j _
+  have hj : 0 ≤ 1 + x * q ^ j := by positivity
+  rw [show 1 - (-(x : ℂ)) * (q : ℂ) ^ j = ((1 + x * q ^ j : ℝ) : ℂ) by push_cast; ring,
+    Complex.norm_of_nonneg hj]
+  nlinarith [pow_nonneg hq.le j]
+
+/-- The reciprocal q-exponential weight is bounded by every inverse polynomial at infinity. -/
+private lemma qLaguerre_norm_inf_ge_pow {q x : ℝ} (hq : 0 < q) (hq1 : q < 1)
+    (hx : 0 ≤ x) (N : ℕ) : x ^ N * q ^ N.choose 2 ≤ ‖qPochhammerInf (-(x : ℂ)) q‖ := by
+  have hqc : ‖(q : ℂ)‖ < 1 := by simpa [Complex.norm_real, abs_of_pos hq]
+  have hbase (y : ℝ) (hy : 0 ≤ y) : 1 ≤ ‖qPochhammerInf (-(y : ℂ)) q‖ :=
+    ge_of_tendsto (tendsto_qPochhammer (w := -(y : ℂ)) hqc).norm
+      (Filter.Eventually.of_forall fun n => qLaguerre_norm_poch_ge_one hq hy n)
+  have hfinite (n : ℕ) : x ^ n * q ^ n.choose 2 ≤ ‖qPochhammer (-(x : ℂ)) q n‖ := by
+    induction n with
+    | zero => simp
+    | succ n ih =>
+      have hf : x * q ^ n ≤ ‖1 - (-(x : ℂ)) * (q : ℂ) ^ n‖ := by
+        rw [show 1 - (-(x : ℂ)) * (q : ℂ) ^ n = ((1 + x * q ^ n : ℝ) : ℂ) by push_cast; ring,
+          Complex.norm_of_nonneg (by positivity : 0 ≤ 1 + x * q ^ n)]
+        linarith
+      rw [qPochhammer_succ, norm_mul]
+      calc x ^ (n + 1) * q ^ (n + 1).choose 2 = (x ^ n * q ^ n.choose 2) * (x * q ^ n) := by
+             rw [Nat.choose_succ_succ, Nat.choose_one_right, pow_add, pow_succ]; ring
+           _ ≤ _ := mul_le_mul ih hf (by positivity) (norm_nonneg _)
+  rw [qPochhammerInf_mul_qPochhammer hqc N, norm_mul]
+  refine (hfinite N).trans (le_mul_of_one_le_right (norm_nonneg _) ?_)
+  convert hbase (x * q ^ N) (by positivity) using 1
+  congr 2
+  push_cast
+  ring
+
+/-- All positive-half-line power moments of the q-Laguerre weight converge. -/
+private lemma qLaguerre_integrable_weight {q r : ℝ} (hq : 0 < q) (hq1 : q < 1) (hr : -1 < r) :
+    IntegrableOn (fun x : ℝ => ((x ^ r : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q) (Set.Ioi 0) := by
+  have hqc : ‖(q : ℂ)‖ < 1 := by simpa [Complex.norm_real, abs_of_pos hq]
+  have hP : Continuous (fun x : ℝ => qPochhammerInf (-(x : ℂ)) q) :=
+    (continuousOn_univ.mp (DLMF.QHypergeometric.qPochhammerInf_analytic hqc).continuousOn).comp
+      Complex.continuous_ofReal.neg
+  have hm : Measurable (fun x : ℝ => ((x ^ r : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q) :=
+    (Complex.continuous_ofReal.measurable.comp (measurable_id.pow_const r)).div hP.measurable
+  obtain ⟨N, hN⟩ := exists_nat_gt (r + 1)
+  have h0 : IntegrableOn (fun x : ℝ => ((x ^ r : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q) (Set.Ioc 0 1) := by
+    refine Integrable.mono' (g := fun x : ℝ => x ^ r) ?_ hm.aestronglyMeasurable ?_
+    · change IntegrableOn (fun x : ℝ => x ^ r) (Set.Ioc 0 1)
+      rw [integrableOn_Ioc_iff_integrableOn_Ioo]
+      exact (intervalIntegral.integrableOn_Ioo_rpow_iff zero_lt_one).mpr hr
+    · filter_upwards [ae_restrict_mem measurableSet_Ioc] with x hx
+      rw [norm_div, Complex.norm_of_nonneg (Real.rpow_nonneg hx.1.le _)]
+      exact div_le_self (Real.rpow_nonneg hx.1.le _) (by
+        simpa using qLaguerre_norm_inf_ge_pow hq hq1 hx.1.le 0)
+  have h1 : IntegrableOn (fun x : ℝ => ((x ^ r : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q) (Set.Ioi 1) := by
+    refine ((integrableOn_Ioi_rpow_of_lt (by exact_mod_cast (by linarith : r - (N : ℝ) < -1))
+      zero_lt_one).const_mul (q ^ N.choose 2)⁻¹).mono' hm.aestronglyMeasurable ?_
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx
+    have hx0 : 0 < x := lt_trans zero_lt_one hx
+    have hden := qLaguerre_norm_inf_ge_pow hq hq1 hx0.le N
+    have hpos : 0 < x ^ N * q ^ N.choose 2 := by positivity
+    rw [norm_div, Complex.norm_of_nonneg (Real.rpow_nonneg hx0.le _)]
+    calc x ^ r / ‖qPochhammerInf (-(x : ℂ)) q‖ ≤ x ^ r / (x ^ N * q ^ N.choose 2) :=
+           div_le_div_of_nonneg_left (Real.rpow_nonneg hx0.le _) hpos hden
+         _ = _ := by rw [Real.rpow_sub hx0, Real.rpow_natCast]; ring
+  have h := h0.union h1
+  rwa [Set.Ioc_union_Ioi_eq_Ioi (by norm_num : (0 : ℝ) ≤ 1)] at h
+
+/-- The power moments used only in the q-Laguerre orthogonality argument. -/
+private def qLaguerreMoment (q r : ℝ) : ℂ :=
+  ∫ x : ℝ in Set.Ioi 0, ((x ^ r : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q
+
+/-- Scaling the positive variable by q gives the q-Laguerre moment recurrence. -/
+private lemma qLaguerre_moment_step {q r : ℝ} (hq : 0 < q) (hq1 : q < 1) (hr : -1 < r) :
+    ((q ^ (r + 1) : ℝ) : ℂ) * (qLaguerreMoment q (r + 1) + qLaguerreMoment q r) =
+      qLaguerreMoment q r := by
+  have hqc : ‖(q : ℂ)‖ < 1 := by simpa [Complex.norm_real, abs_of_pos hq]
+  have he : ∀ x : ℝ, 0 < x →
+      (((q * x) ^ r : ℝ) : ℂ) / qPochhammerInf (-((q * x : ℝ) : ℂ)) q =
+        ((q ^ r : ℝ) : ℂ) * (((x ^ r : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q +
+          ((x ^ (r + 1) : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q) := by
+    intro x hx
+    have htail : qPochhammerInf (-((q * x : ℝ) : ℂ)) q ≠ 0 := by
+      apply norm_ne_zero_iff.mp
+      have h := qLaguerre_norm_inf_ge_pow hq hq1 (le_of_lt (mul_pos hq hx)) 0
+      norm_num at h
+      push_cast
+      linarith
+    have h1x : 1 + (x : ℂ) ≠ 0 := by exact_mod_cast (by positivity : (1 : ℝ) + x ≠ 0)
+    have hp := qPochhammerInf_shift (a := -(x : ℂ)) hqc
+    rw [show (-(x : ℂ)) * (q : ℂ) = -((q * x : ℝ) : ℂ) by push_cast; ring,
+      show 1 - (-(x : ℂ)) = 1 + (x : ℂ) by ring] at hp
+    rw [Real.mul_rpow hq.le hx.le, Real.rpow_add hx, Real.rpow_one, hp]
+    push_cast
+    field_simp
+  have hs := integral_comp_mul_left_Ioi
+    (fun x : ℝ => ((x ^ r : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q) 0 hq
+  simp only [mul_zero, Complex.real_smul] at hs
+  have hv : (∫ x : ℝ in Set.Ioi 0,
+      (((q * x) ^ r : ℝ) : ℂ) / qPochhammerInf (-((q * x : ℝ) : ℂ)) q) =
+      ((q ^ r : ℝ) : ℂ) * (qLaguerreMoment q r + qLaguerreMoment q (r + 1)) := by
+    rw [setIntegral_congr_fun measurableSet_Ioi (fun x hx => he x hx), integral_const_mul,
+      integral_add (qLaguerre_integrable_weight hq hq1 hr)
+        (qLaguerre_integrable_weight hq hq1 (by linarith : -1 < r + 1))]
+    rfl
+  rw [hv] at hs
+  change ((q ^ r : ℝ) : ℂ) * (qLaguerreMoment q r + qLaguerreMoment q (r + 1)) =
+    ((q⁻¹ : ℝ) : ℂ) * qLaguerreMoment q r at hs
+  have hqpow : (q : ℂ) * ((q ^ r : ℝ) : ℂ) = ((q ^ (r + 1) : ℝ) : ℂ) := by
+    rw [Real.rpow_add hq, Real.rpow_one, Complex.ofReal_mul]; ring
+  calc _ = (q : ℂ) * (((q ^ r : ℝ) : ℂ) * (qLaguerreMoment q r + qLaguerreMoment q (r + 1))) := by rw [← hqpow]; ring
+       _ = (q : ℂ) * ((q⁻¹ : ℝ) : ℂ) * qLaguerreMoment q r := by rw [hs]; ring
+       _ = _ := by rw [← Complex.ofReal_mul, mul_inv_cancel₀ hq.ne', Complex.ofReal_one, one_mul]
+
+/-- Iterating the moment recurrence produces a finite q-shifted factorial. -/
+private lemma qLaguerre_moment_nat {q r : ℝ} (hq : 0 < q) (hq1 : q < 1) (hr : -1 < r) (k : ℕ) :
+    qLaguerreMoment q (r + k) = qLaguerreMoment q r *
+      qPochhammer ((q ^ (r + 1) : ℝ) : ℂ) q k /
+        (((q ^ (r + 1) : ℝ) : ℂ) ^ k * (q : ℂ) ^ k.choose 2) := by
+  have hq0 : (q : ℂ) ≠ 0 := by exact_mod_cast hq.ne'
+  have hv0 : ((q ^ (r + 1) : ℝ) : ℂ) ≠ 0 := by exact_mod_cast (Real.rpow_pos_of_pos hq (r + 1)).ne'
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    have hs := qLaguerre_moment_step hq hq1 (r := r + k) (by have := Nat.cast_nonneg (α := ℝ) k; linarith)
+    have he : ((q ^ (r + (k : ℝ) + 1) : ℝ) : ℂ) = ((q ^ (r + 1) : ℝ) : ℂ) * (q : ℂ) ^ k := by
+      rw [show r + (k : ℝ) + 1 = (r + 1) + k by ring, Real.rpow_add hq,
+        Real.rpow_natCast, Complex.ofReal_mul, Complex.ofReal_pow]
+    rw [he, show r + (k : ℝ) + 1 = r + (k + 1 : ℕ) by push_cast; ring] at hs
+    have hstep : qLaguerreMoment q (r + (k + 1 : ℕ)) =
+        (1 - ((q ^ (r + 1) : ℝ) : ℂ) * (q : ℂ) ^ k) * qLaguerreMoment q (r + k) /
+          (((q ^ (r + 1) : ℝ) : ℂ) * (q : ℂ) ^ k) := by
+      apply (eq_div_iff (mul_ne_zero hv0 (pow_ne_zero _ hq0))).mpr
+      linear_combination hs
+    rw [hstep, ih, qPochhammer_succ, Nat.choose_succ_succ, Nat.choose_one_right,
+      pow_add, pow_succ]
+    field_simp
+    ring
+
+/-- A terminating q-Laguerre sum has a finite expansion in monomials, for arbitrary complex parameters. -/
+private lemma qLaguerre_finite_monomial_expansion (α q : ℂ) (n : ℕ) :
+    ∃ c : ℕ → ℂ, ∀ x : ℂ, qLaguerre α q n x = ∑ k ∈ Finset.range (n + 1), c k * x ^ k := by
+  refine ⟨fun k => qPochhammer (q ^ (α + 1)) q n / qPochhammer q q n *
+    (qPochhammer (q⁻¹ ^ n) q k / (qPochhammer (q ^ (α + 1)) q k * qPochhammer q q k)) *
+      ((-1 : ℂ) ^ k * q ^ (k * (k - 1) / 2)) * (-q ^ (n + α + 1)) ^ k, ?_⟩
+  intro x
+  unfold qLaguerre terminatingBasicHG
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil,
+    List.length_cons, List.length_nil, mul_one]
+  norm_num
+  rw [show -(x * q ^ (n + α + 1)) = x * (-q ^ (n + α + 1)) by ring, mul_pow]
+  ring
+
+/-- Every monomial times a q-Laguerre polynomial is integrable against its weight;
+the moment vanishes when the monomial degree is below the polynomial degree. -/
+private lemma qLaguerre_monomial_orthogonality {α q : ℝ} (hα : -1 < α)
+    (hq : 0 < q) (hq1 : q < 1) (i d : ℕ) :
+    IntegrableOn (fun x : ℝ => (x : ℂ) ^ i * qLaguerre α q d x *
+      (((x ^ α : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q)) (Set.Ioi 0) ∧
+    (i < d → (∫ x : ℝ in Set.Ioi 0, (x : ℂ) ^ i * qLaguerre α q d x *
+      (((x ^ α : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q)) = 0) := by
+  have hqc : ‖(q : ℂ)‖ < 1 := by simpa [Complex.norm_real, abs_of_pos hq]
+  have hq0 : (q : ℂ) ≠ 0 := by exact_mod_cast hq.ne'
+  let v : ℂ := (q ^ (α + 1) : ℝ)
+  let w (x : ℝ) : ℂ := ((x ^ α : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q
+  let c (n k : ℕ) : ℂ := qPochhammer v q n / qPochhammer q q n *
+    (qPochhammer ((q : ℂ)⁻¹ ^ n) q k / (qPochhammer v q k * qPochhammer q q k)) *
+      (q : ℂ) ^ k.choose 2 * (v * (q : ℂ) ^ n) ^ k
+  have hv0 : v ≠ 0 := by dsimp [v]; exact_mod_cast (Real.rpow_pos_of_pos hq (α + 1)).ne'
+  have hvnorm : ‖v‖ < 1 := by
+    dsimp [v]
+    rw [Complex.norm_of_nonneg (Real.rpow_nonneg hq.le _)]
+    exact Real.rpow_lt_one hq.le hq1 (by linarith)
+  have hreg : DLMF.QHypergeometric.QDenominatorRegular [v] q := by
+    intro a ha j
+    simp only [List.mem_singleton] at ha; subst a
+    intro he
+    have h := norm_mul_pow_lt_one hvnorm hqc j
+    simp [he] at h
+  have hvk (k : ℕ) : qPochhammer v q k ≠ 0 :=
+    DLMF.QHypergeometric.qaR4_reg_poch_ne hqc hreg k
+  have hpow (i : ℕ) : ((q ^ (α + (i : ℝ) + 1) : ℝ) : ℂ) = v * (q : ℂ) ^ i := by
+    rw [show α + (i : ℝ) + 1 = (α + 1) + i by ring, Real.rpow_add hq,
+      Real.rpow_natCast, Complex.ofReal_mul, Complex.ofReal_pow]
+  have hpoly (d : ℕ) (x : ℂ) : qLaguerre α q d x =
+      ∑ k ∈ Finset.range (d + 1), c d k * x ^ k := by
+    have he : (q : ℂ) ^ ((d : ℂ) + (α : ℂ) + 1) = v * (q : ℂ) ^ d := by
+      rw [show (d : ℂ) + (α : ℂ) + 1 = ((α + 1 : ℝ) : ℂ) + (d : ℂ) by push_cast; ring,
+        Complex.cpow_add _ _ hq0, Complex.cpow_natCast, ← Complex.ofReal_cpow hq.le]
+    unfold qLaguerre terminatingBasicHG
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil,
+      List.length_cons, List.length_nil, mul_one]
+    norm_num
+    have hv : (q : ℂ) ^ ((α : ℂ) + 1) = v := by
+      dsimp [v]
+      simpa only [Complex.ofReal_add, Complex.ofReal_one] using
+        (Complex.ofReal_cpow hq.le (α + 1)).symm
+    rw [he, neg_pow (x * (v * (q : ℂ) ^ d)) k, mul_pow x (v * (q : ℂ) ^ d) k,
+      ← Nat.choose_two_right, hv]
+    dsimp [c]
+    simp only [inv_pow]
+    have hsign : (-1 : ℂ) ^ k * (-1) ^ k = 1 := by rw [← mul_pow]; norm_num
+    linear_combination (qPochhammer v q d / qPochhammer q q d *
+      (qPochhammer ((q : ℂ) ^ d)⁻¹ q k / (qPochhammer v q k * qPochhammer q q k)) *
+        (q : ℂ) ^ k.choose 2 * (v * (q : ℂ) ^ d) ^ k * x ^ k) * hsign
+  have hfun (k : ℕ) : Set.EqOn (fun x : ℝ => (x : ℂ) ^ k * w x)
+      (fun x => ((x ^ (α + k) : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q) (Set.Ioi 0) := by
+    intro x hx
+    dsimp [w]
+    rw [Real.rpow_add hx, Real.rpow_natCast]
+    push_cast
+    ring
+  have hi (k : ℕ) : IntegrableOn (fun x : ℝ => (x : ℂ) ^ k * w x) (Set.Ioi 0) :=
+    (qLaguerre_integrable_weight hq hq1 (r := α + k)
+      (by have := Nat.cast_nonneg (α := ℝ) k; linarith)).congr_fun (hfun k).symm measurableSet_Ioi
+  have hI (i k : ℕ) : (∫ x : ℝ in Set.Ioi 0, (x : ℂ) ^ (i + k) * w x) =
+      qLaguerreMoment q (α + i) * qPochhammer (v * (q : ℂ) ^ i) q k /
+        ((v * (q : ℂ) ^ i) ^ k * (q : ℂ) ^ k.choose 2) := by
+    rw [setIntegral_congr_fun measurableSet_Ioi (hfun (i + k))]
+    change qLaguerreMoment q (α + ((i + k : ℕ) : ℝ)) = _
+    rw [show α + ((i + k : ℕ) : ℝ) = (α + i) + k by push_cast; ring,
+      qLaguerre_moment_nat hq hq1 (by have := Nat.cast_nonneg (α := ℝ) i; linarith), hpow]
+  have hterm (i d k : ℕ) : IntegrableOn (fun x : ℝ => c d k * ((x : ℂ) ^ (i + k) * w x)) (Set.Ioi 0) :=
+    (hi (i + k)).const_mul _
+  have hsum (i d : ℕ) : (fun x : ℝ => (x : ℂ) ^ i * qLaguerre α q d x * w x) =
+      fun x : ℝ => ∑ k ∈ Finset.range (d + 1), c d k * ((x : ℂ) ^ (i + k) * w x) := by
+    funext x
+    rw [hpoly, Finset.mul_sum, Finset.sum_mul]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [pow_add]; ring
+  have hiP (i d : ℕ) : IntegrableOn (fun x : ℝ => (x : ℂ) ^ i * qLaguerre α q d x * w x) (Set.Ioi 0) := by
+    rw [hsum]; exact integrable_finsetSum _ (fun k _ => hterm i d k)
+  have hIP {i d : ℕ} (hid : i < d) :
+      (∫ x : ℝ in Set.Ioi 0, (x : ℂ) ^ i * qLaguerre α q d x * w x) = 0 := by
+    have hA : v * (q : ℂ) ^ i ≠ 0 := mul_ne_zero hv0 (pow_ne_zero _ hq0)
+    have harg : v * (q : ℂ) ^ d / (v * (q : ℂ) ^ i) = (q : ℂ) ^ (d - i) := by
+      rw [show (q : ℂ) ^ d = (q : ℂ) ^ i * (q : ℂ) ^ (d - i) by rw [← pow_add]; congr 1; omega]
+      field_simp
+    have hchu := DLMF.QHypergeometric.q_chu_vandermonde_first hA hq0 hqc d
+      (show DLMF.QHypergeometric.QDenominatorRegularThrough [v] q d by
+        simpa [DLMF.QHypergeometric.QDenominatorRegularThrough,
+          DLMF.QHypergeometric.qPochhammerList] using hvk d)
+    have hzero : qPochhammer (v / (v * (q : ℂ) ^ i)) q d = 0 := by
+      rw [show v / (v * (q : ℂ) ^ i) = ((q : ℂ) ^ i)⁻¹ by field_simp]
+      exact DLMF.QSeries.qPochhammer_recip_pow_eq_zero hq0 hid
+    rw [hzero, zero_div, harg, DLMF.QHypergeometric.qaR4_qPhi_swap21,
+      DLMF.QHypergeometric.qPhi_terminates (a := [v * (q : ℂ) ^ i]) (b := [v]) hq0 hqc d
+      (by simpa [DLMF.QHypergeometric.QDenominatorRegularThrough,
+        DLMF.QHypergeometric.qPochhammerList] using hvk d)] at hchu
+    simp only [DLMF.QHypergeometric.qPhiPartial, DLMF.QHypergeometric.qaR4_phi21_term,
+      zpow_neg, zpow_natCast] at hchu
+    rw [hsum, integral_finsetSum _ (fun k _ => hterm i d k)]
+    simp_rw [integral_const_mul, hI]
+    rw [← mul_zero (qPochhammer v q d / qPochhammer q q d * qLaguerreMoment q (α + i)), ← hchu,
+      Finset.mul_sum]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    have he : (v * (q : ℂ) ^ d) ^ k = (v * (q : ℂ) ^ i) ^ k * ((q : ℂ) ^ (d - i)) ^ k := by
+      rw [← mul_pow, mul_assoc, ← pow_add, show i + (d - i) = d by omega]
+    dsimp [c]
+    rw [he]
+    field_simp
+    ring
+  refine ⟨hiP i d, fun hid => hIP hid⟩
+
 /-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in Set.Ioi 0, qLaguerre α
 q m x * qLaguerre α q n x * (Real.rpow x α : ℂ) / qPochhammerInf (-x) q = 0`. -/
 @[dlmf 18.27.E16]
 theorem qLaguerre_orthogonal {α q : ℝ} (hα : -1 < α) (hq : 0 < q) (hq1 : q < 1) {m n : ℕ} (hmn : m ≠ n) :
     ∫ x : ℝ in Set.Ioi 0, qLaguerre α q m x * qLaguerre α q n x *
       (Real.rpow x α : ℂ) / qPochhammerInf (-x) q = 0 := by
-  sorry
+  let w (x : ℝ) : ℂ := ((x ^ α : ℝ) : ℂ) / qPochhammerInf (-(x : ℂ)) q
+  have hlt {a b : ℕ} (hab : a < b) :
+      (∫ x : ℝ in Set.Ioi 0, qLaguerre α q a x * qLaguerre α q b x * w x) = 0 := by
+    obtain ⟨c, hc⟩ := qLaguerre_finite_monomial_expansion (α : ℂ) q a
+    have he : (fun x : ℝ => qLaguerre α q a x * qLaguerre α q b x * w x) =
+        fun x : ℝ => ∑ k ∈ Finset.range (a + 1), c k * ((x : ℂ) ^ k * qLaguerre α q b x * w x) := by
+      funext x
+      rw [hc, Finset.sum_mul, Finset.sum_mul]
+      exact Finset.sum_congr rfl fun k _ => by ring
+    rw [he, integral_finsetSum _ (fun k _ =>
+      (qLaguerre_monomial_orthogonality hα hq hq1 k b).1.const_mul (c k))]
+    refine Finset.sum_eq_zero fun k hk => ?_
+    rw [integral_const_mul, (qLaguerre_monomial_orthogonality hα hq hq1 k b).2
+      (by have := Finset.mem_range.mp hk; omega), mul_zero]
+  have hsym : (∫ x : ℝ in Set.Ioi 0, qLaguerre α q m x * qLaguerre α q n x * w x) = 0 := by
+    rcases lt_or_gt_of_ne hmn with h | h
+    · exact hlt h
+    · rw [← hlt h]; exact integral_congr_ae (Filter.Eventually.of_forall fun x => by ring)
+  convert hsym using 1
+  congr 1
+  funext x
+  dsimp [w]
+  ring
 
 /-- A triangular-number identity for the exponents of the lognormal moments. -/
 private lemma twice_choose_two_add (k : ℕ) : 2 * k.choose 2 + k = k ^ 2 := by

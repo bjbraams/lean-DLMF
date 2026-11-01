@@ -290,9 +290,11 @@ theorem isFundamentalPair_tfae (hD : IsOpen D) (hsc : IsSimplyConnected D)
 `z` for fixed `u` and in `u` for fixed `z`, and let `w(u, ·)` solve
 `w'' + f(u, z) w' + g(u, z) w = 0` on `D` for each `u ∈ U`. If `w` and `∂w/∂z` are analytic in
 `u` at a fixed `z₀ ∈ D`, then at each `z ∈ D` the functions `w`, `∂w/∂z` and `∂²w/∂z²` are
-analytic in `u`. -/
+analytic in `u`. The domain `D` must be connected: initial data at `z₀` impose no
+constraint on solutions on a different component. Its nonemptiness follows from `z₀ ∈ D`. -/
 @[dlmf 1.13.E7, dlmf 1.13.ii]
 theorem isLinODE2SolOn_param_analytic {U : Set ℂ} (hU : IsOpen U) (hD : IsOpen D)
+    (hDc : IsPreconnected D)
     {F G w : ℂ → ℂ → ℂ} (hF : ContinuousOn (Function.uncurry F) (U ×ˢ D))
     (hG : ContinuousOn (Function.uncurry G) (U ×ˢ D))
     (hFz : ∀ u ∈ U, DifferentiableOn ℂ (F u) D) (hGz : ∀ u ∈ U, DifferentiableOn ℂ (G u) D)

@@ -24,6 +24,7 @@ public import DLMF.Zeta.Q25bLerchContinuation
 public import DLMF.Zeta.Lerch
 public import DLMF.Zeta.DirichletL
 public import DLMF.Zeta.MathlibCoverageB
+public import DLMF.Zeta.CotangentMoments
 
 /-!
 # Zeta and related functions (DLMF Chapter 25)

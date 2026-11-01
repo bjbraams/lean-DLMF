@@ -843,6 +843,23 @@ theorem symEllIntPm_inverse_sub_real {x y z : ℝ} (hy : 0 < y) (hxy : y ≤ x) 
     let zp : ℝ := (Real.sqrt ((z + x) * (z + y)) + Real.sqrt ((z - x) * (z - y))) / 2
     let zm : ℝ := (Real.sqrt ((z + x) * (z + y)) - Real.sqrt ((z - x) * (z - y))) / 2
     x - y = 2 / ((x + y) / 2) * Real.sqrt ((((x + y) / 2) ^ 2 - zp ^ 2) * (((x + y) / 2) ^ 2 - zm ^ 2)) := by
-  sorry
+  dsimp only
+  let A := Real.sqrt ((z + x) * (z + y))
+  let B := Real.sqrt ((z - x) * (z - y))
+  let a := (x + y) / 2
+  have hA : A ^ 2 = (z + x) * (z + y) := Real.sq_sqrt (by
+    have hx : 0 < x := hy.trans_le hxy
+    have hz : 0 < z := hx.trans_le hzx
+    positivity)
+  have hB : B ^ 2 = (z - x) * (z - y) := Real.sq_sqrt (mul_nonneg
+    (sub_nonneg.mpr hzx) (sub_nonneg.mpr (hxy.trans hzx)))
+  have ha : 0 < a := by dsimp [a]; linarith
+  have hprod : (a ^ 2 - ((A + B) / 2) ^ 2) * (a ^ 2 - ((A - B) / 2) ^ 2) =
+      (a * (x - y) / 2) ^ 2 := by
+    calc _ = a ^ 4 - a ^ 2 * (A ^ 2 + B ^ 2) / 2 + (A ^ 2 - B ^ 2) ^ 2 / 16 := by ring
+      _ = _ := by rw [hA, hB]; dsimp [a]; ring
+  change x - y = 2 / a * Real.sqrt ((a ^ 2 - ((A + B) / 2) ^ 2) * (a ^ 2 - ((A - B) / 2) ^ 2))
+  rw [hprod, Real.sqrt_sq (by positivity)]
+  field_simp
 
 end DLMF.EllipticIntegrals

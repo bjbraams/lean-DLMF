@@ -242,12 +242,22 @@ theorem isRoot_reverse_inv_iff (f : K[X]) {x : K} (hx : x ≠ 0) :
 
 /-- DLMF 1.11.9: the discriminant of `f = a_n ∏ (z - z_j)` is
 `D = a_n^{2n-2} ∏_{j<k} (z_j - z_k)²` (Mathlib's `Polynomial.discr`; the cases `n = 2, 3` are
-Mathlib's `Polynomial.discr_of_degree_eq_two` and `Cubic.discr_eq_prod_three_roots`). -/
+Mathlib's `Polynomial.discr_of_degree_eq_two` and `Cubic.discr_eq_prod_three_roots`). This adapter combines Tau Ceti’s
+`TauCeti.discr_C_mul` and `Polynomial.discr_prod_X_sub_C`. -/
 @[dlmf 1.11.E9]
 theorem discr_eq_prod_roots {n : ℕ} (a : K) (ha : a ≠ 0) (z : Fin n → K) :
     (C a * ∏ j, (X - C (z j))).discr =
       a ^ (2 * n - 2) * ∏ j, ∏ k with j < k, (z j - z k) ^ 2 := by
-  sorry
+  rw [TauCeti.discr_C_mul a ha,
+    natDegree_prod_of_monic _ _ (fun i _ => monic_X_sub_C (z i)), discr_prod_X_sub_C]
+  simp only [natDegree_X_sub_C, Finset.sum_const, Finset.card_univ,
+    Fintype.card_fin, smul_eq_mul, mul_one]
+  congr 1
+  apply Finset.prod_congr rfl
+  intro i _
+  congr 1
+  ext j
+  simp
 
 /-! ## §1.11(iii) Polynomials of degrees two, three and four -/
 
@@ -265,7 +275,6 @@ theorem quadratic_roots_sum_prod {a b c s : K} (ha : a ≠ 0) (h2 : (2 : K) ≠ 
     ring
   · field_simp
     linear_combination hs
-
 
 /-- DLMF §1.11(iii): the substitution `z = w - a/3` reduces `z³ + az² + bz + c` to
 `w³ + pw + q` with `p = (3b - a²)/3`, `q = (2a³ - 9ab + 27c)/27`; so the roots of `f` are those
@@ -410,7 +419,6 @@ theorem ferrari {p q r θ₁ θ₂ θ₃ s₁ s₂ s₃ : ℂ}
   linear_combination (x ^ 2 / 2 - (s₁ ^ 2 + s₂ ^ 2 + s₃ ^ 2 + 2 * p - 4 * p) / 16) * hG0 +
     1 / 4 * hG1 + x * hG2
 
-
 /-! ## §1.11(iv) Roots of unity and of other constants -/
 
 /-- DLMF §1.11(iv): the roots of `z^n + 1 = 0` are `e^{πi/n}, e^{3πi/n}, …, e^{(2n-1)πi/n}`.
@@ -483,7 +491,6 @@ theorem pow_eq_iff {n : ℕ} (hn : n ≠ 0) (a b : ℝ) (z : ℂ) :
   · rintro ⟨k, -, rfl⟩
     exact hwn k
 
-
 /-! ## §1.11(v) Stable polynomials -/
 
 /-- DLMF 1.11.25: `D₁ = a₁`. -/
@@ -503,7 +510,6 @@ theorem hurwitzDet_three (f : ℝ[X]) :
     hurwitzDet f 3 = Matrix.det !![f.coeff 1, f.coeff 3, f.coeff 5; f.coeff 0, f.coeff 2,
       f.coeff 4; 0, f.coeff 1, f.coeff 3] := by
   simp [hurwitzDet, hurwitzMatrix, coeffInt, Matrix.det_fin_three]
-
 
 /-- DLMF §1.11(v), **Hurwitz criterion**: a real polynomial `f` of degree `n` (`a_n ≠ 0`) is
 stable iff `a₀ ≠ 0`, `D_{2k} > 0` for `k = 1, …, ⌊n/2⌋` (that is, `2k ≤ n`), and

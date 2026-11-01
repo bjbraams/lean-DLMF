@@ -444,12 +444,6 @@ theorem one_phi_zero_upper_zero {q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) :
   rw [one_phi_zero hq hz]
   simp [qPochhammerInf]
 
-/-- The `1φ1` summation `1φ1(a;c;q,c/a) = (c/a;q)_∞/(c;q)_∞` (DLMF 17.5.E5). -/
-@[dlmf 17.5.E5]
-theorem one_phi_one_sum {a c q : ℂ} (ha : a≠0) (hq : ‖q‖<1) (hc : QDenominatorRegular [c] q) :
-    qPhi [a] [c] q (c/a)=qPochhammerInf (c/a) q/qPochhammerInf c q := by
-  sorry
-
 /-- The product quotient is analytic on its regular set, by Mathlib analytic composition/division. -/
 theorem one_phi_zero_continuation_analytic {a q : ℂ} (hq : ‖q‖<1) :
     AnalyticOnNhd ℂ (qOnePhiZeroContinuation a q) {z | qPochhammerInf z q≠0} := by
@@ -692,12 +686,15 @@ private lemma qGauss_analytic_product {a c q : ℂ} (hq : ‖q‖ < 1)
     hc c (by simp) n (sub_eq_zero.mp he).symm)
     (qPochhammerInf_ne_zero_of_norm_lt_one hw' hq)
 
-/-- Terminating q-Chu values accumulate at zero and determine the analytic q-Gauss identity. -/
-private lemma qGauss_nonzero {a b c q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
-    (ha : a ≠ 0) (hb : b ≠ 0) (hc0 : c ≠ 0) (hz : ‖c‖ < ‖a * b‖)
-    (hc : QDenominatorRegular [c] q) :
-    qPhi [a,b] [c] q (c/(a*b)) =
-      qPochhammerListInf [c/a,c/b] q / qPochhammerListInf [c,c/(a*b)] q := by
+/-- Terminating q-Chu values determine the entire reciprocal-parameter q-Gauss identity. -/
+private lemma qGauss_newton_identity {a c q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
+    (ha : a ≠ 0) (hc0 : c ≠ 0) (hc : QDenominatorRegular [c] q) :
+    EqOn (fun w : ℂ => ∑' n : ℕ,
+      (qPochhammer a q n / (qPochhammer c q n * qPochhammer q q n) * (c / a) ^ n) *
+        ∏ j ∈ range n, (w - q ^ j))
+      (fun w => qPochhammerInf (c / a) q * qPochhammerInf (c * w) q /
+        (qPochhammerInf c q * qPochhammerInf (c / a * w) q))
+      (Metric.ball 0 ‖c / a‖⁻¹) := by
   let F : ℂ → ℂ := fun w => ∑' n : ℕ,
     (qPochhammer a q n / (qPochhammer c q n * qPochhammer q q n) * (c / a) ^ n) *
       ∏ j ∈ range n, (w - q ^ j)
@@ -743,13 +740,22 @@ private lemma qGauss_nonzero {a b c q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
   have heq := hF.eqOn_of_preconnected_of_frequently_eq hG
     (convex_ball (0 : ℂ) ‖c / a‖⁻¹).isPreconnected (by simpa using hR)
     (hpunct.frequently hev.frequently)
+  exact heq
+
+/-- Terminating q-Chu values accumulate at zero and determine the analytic q-Gauss identity. -/
+private lemma qGauss_nonzero {a b c q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
+    (ha : a ≠ 0) (hb : b ≠ 0) (hc0 : c ≠ 0) (hz : ‖c‖ < ‖a * b‖)
+    (hc : QDenominatorRegular [c] q) :
+    qPhi [a,b] [c] q (c/(a*b)) =
+      qPochhammerListInf [c/a,c/b] q / qPochhammerListInf [c,c/(a*b)] q := by
+  have heq := qGauss_newton_identity hq0 hq ha hc0 hc
   have hw : b⁻¹ ∈ Metric.ball 0 ‖c / a‖⁻¹ := by
     simp only [Metric.mem_ball, dist_zero_right, norm_inv, norm_div, norm_mul] at hz ⊢
     rw [inv_lt_inv₀ (norm_pos_iff.mpr hb) (div_pos (norm_pos_iff.mpr hc0)
       (norm_pos_iff.mpr ha))]
     exact (div_lt_iff₀ (norm_pos_iff.mpr ha)).mpr (by simpa [mul_comm] using hz)
   have h := heq hw
-  dsimp only [F, G] at h
+  dsimp only at h
   rw [qGauss_newton_eq_phi (inv_ne_zero hb), inv_inv] at h
   simpa only [qPochhammerListInf, List.map_cons, List.map_nil, List.prod_cons,
     List.prod_nil, mul_one, show c * b⁻¹ = c / b by ring,
@@ -814,6 +820,52 @@ theorem q_gauss {a b c q : ℂ} (hq : ‖q‖<1) (hz : ‖c‖<‖a*b‖)
   · subst hq0
     exact qGauss_zero_base ha hb hz hc
   exact qGauss_nonzero hq0 hq ha hb hc0 hz hc
+
+/-- The `1φ1` summation `1φ1(a;c;q,c/a) = (c/a;q)_∞/(c;q)_∞` (DLMF 17.5.E5). -/
+@[dlmf 17.5.E5]
+theorem one_phi_one_sum {a c q : ℂ} (ha : a ≠ 0) (hq : ‖q‖ < 1)
+    (hc : QDenominatorRegular [c] q) :
+    qPhi [a] [c] q (c / a) = qPochhammerInf (c / a) q / qPochhammerInf c q := by
+  by_cases hc0 : c = 0
+  · subst c
+    simp [qPhi_zero, qPochhammerInf]
+  by_cases hq0 : q = 0
+  · subst q
+    have h1c : 1 - c ≠ 0 := qaR4_reg_one_sub_ne hc
+    have hsum : qPhi [a] [c] 0 (c / a) =
+        qPhiTerm [a] [c] 0 (c / a) 0 + qPhiTerm [a] [c] 0 (c / a) 1 := by
+      unfold qPhi
+      rw [tsum_eq_sum (s := range 2)]
+      · simp [sum_range_succ]
+      · intro n hn
+        have hn2 : 0 < n.choose 2 := Nat.choose_pos (by simp only [Finset.mem_range, not_lt] at hn; omega)
+        simp [qPhiTerm, qPhiExponent, qPochhammerList, qTri_nat,
+          zpow_natCast, zero_pow hn2.ne']
+    rw [hsum]
+    norm_num [qPhiTerm, qPhiExponent, qPochhammerList, DLMF.QSeries.TripleProduct.tri,
+      qPochhammer_one, DLMF.QSeries.TripleProduct.qPochhammerInf_zero_right]
+    field_simp
+    ring
+  have he := qGauss_newton_identity hq0 hq ha hc0 hc
+    (show (0 : ℂ) ∈ Metric.ball 0 ‖c / a‖⁻¹ by
+      simp only [Metric.mem_ball, dist_self]
+      exact inv_pos.mpr (norm_pos_iff.mpr (div_ne_zero hc0 ha)))
+  have hzero : qPochhammerInf (0 : ℂ) q = 1 := by simp [qPochhammerInf]
+  simp only [mul_zero, hzero, mul_one] at he
+  rw [← he]
+  unfold qPhi
+  apply tsum_congr
+  intro n
+  have hp : (∏ j ∈ range n, ((0 : ℂ) - q ^ j)) = (-1) ^ n * q ^ n.choose 2 := by
+    simp only [zero_sub, prod_neg, card_range]
+    rw [Finset.prod_pow_eq_pow_sum (range n) (fun j => j) q, sum_range_id,
+      Nat.choose_two_right]
+  rw [hp]
+  simp only [qPhiTerm, qPhiExponent, qPochhammerList, List.map_cons, List.map_nil,
+    List.prod_cons, List.prod_nil, List.length_cons, List.length_nil, mul_one]
+  norm_num
+  rw [qTri_nat, zpow_natCast]
+  ring
 
 /-- The cancelled product form retains b=±q^(-m) whenever the left series is regular. -/
 @[dlmf 17.6.E4]

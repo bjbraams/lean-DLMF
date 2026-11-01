@@ -44,7 +44,7 @@ def strip_comments(s):
 
 
 def scan_source(roots):
-    """Declarations by name (as written) with file, line, kind and explicit-sorry flag."""
+    """Declarations by written and qualified names, with locations and admission flags."""
     idx = collections.defaultdict(list)
     admitted = collections.Counter()
     stats = {}
@@ -56,14 +56,39 @@ def scan_source(roots):
                 p = os.path.normpath(os.path.join(dp, f))
                 s = strip_comments(open(p).read())
                 ms = list(DECL.finditer(s))
+                scopes = iter(re.finditer(
+                    r'^(?:@\[[^\n]*\][ \t]*)?(?:(?:public|noncomputable)[ \t]+)*'
+                    r'(namespace[ \t]+(\S+)|section(?:[ \t]+\S+)?|end(?:[ \t]+\S+)?)[ \t]*$',
+                    s, re.M))
+                scope = next(scopes, None)
+                namespace = ''
+                parents = []
                 nd = nt = 0
                 for i, m in enumerate(ms):
+                    while scope is not None and scope.start() < m.start():
+                        command, opened = scope.group(1), scope.group(2)
+                        if command.startswith('namespace '):
+                            parents.append(namespace)
+                            namespace = (opened.removeprefix('_root_.')
+                                         if opened.startswith('_root_.') else
+                                         '.'.join(filter(None, [namespace, opened])))
+                        elif command.startswith('section'):
+                            parents.append(namespace)
+                        elif parents:
+                            namespace = parents.pop()
+                        scope = next(scopes, None)
                     body = s[m.end(): ms[i + 1].start() if i + 1 < len(ms) else len(s)]
                     sor = bool(re.search(r'\bsorry\b', body))
                     admitted[p] += sor
                     nd += m.group(1) in ('def', 'abbrev')
                     nt += m.group(1) in ('theorem', 'lemma')
-                    idx[m.group(2)].append((p, s.count('\n', 0, m.start()) + 1, m.group(1), sor))
+                    name = m.group(2)
+                    record = (p, s.count('\n', 0, m.start()) + 1, m.group(1), sor)
+                    idx[name].append(record)
+                    qualified = (name.removeprefix('_root_.') if name.startswith('_root_.')
+                                 else '.'.join(filter(None, [namespace, name])))
+                    if qualified != name:
+                        idx[qualified].append(record)
                 stats[p] = (nd, nt)
     return idx, admitted, stats
 
@@ -98,6 +123,13 @@ def main():
 
     def resolve(name, path):
         """Dump entry or source record for a linked name, preferring the linked file."""
+        # An untagged declaration's exact name takes precedence over another declaration's
+        # tagged suffix: e.g. Statistical.incBeta is distinct from Statistical.Real.incBeta.
+        if name.startswith(('DLMF.', 'DLMFMathlib.')) and name not in by_decl:
+            recs = src.get(name, [])
+            hit = [r for r in recs if r[0] == path] or recs
+            if len(hit) == 1:
+                return 'src', hit[0]
         for key in suffixes(name):
             cands = by_decl.get(key) or by_suffix.get(key) or []
             cands = list({c['decl']: c for c in cands}.values())

@@ -9,6 +9,8 @@ public import DLMF.BernoulliEuler.IntegralsSums
 public import DLMF.Core.Upstream
 public import DLMF.Hypergeometric.Clausen
 public import DLMF.Polylog.Dilog
+public import DLMF.Gamma.Polygamma
+public import DLMF.Zeta.IntegralReps.ElementaryKernels
 public import DLMF.Zeta.Reflection
 public import DLMF.Zeta.Riemann
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
@@ -47,6 +49,125 @@ theorem riemannZeta_six : riemannZeta 6 = π ^ 6 / 945 := by
   norm_num [hb, Nat.factorial] at h
   rw [h]; ring
 
+/-- The decreasing logarithmic involution that exchanges the two zeta integral kernels. -/
+private def z25a_logInvolution (t : ℝ) : ℝ := -Real.log (1 - Real.exp (-t))
+
+/-- Positivity, involutivity, and the Jacobian of the logarithmic involution. -/
+private lemma z25a_logInvolution_properties {t : ℝ} (ht : 0 < t) :
+    0 < z25a_logInvolution t ∧
+      z25a_logInvolution (z25a_logInvolution t) = t ∧
+      HasDerivAt z25a_logInvolution
+        (-(Real.exp (z25a_logInvolution t) - 1)) t := by
+  have he : 0 < Real.exp (-t) := Real.exp_pos _
+  have he1 : Real.exp (-t) < 1 := Real.exp_lt_one_iff.mpr (by linarith)
+  have h1 : 0 < 1 - Real.exp (-t) := by linarith
+  have hφ : 0 < z25a_logInvolution t := by
+    dsimp [z25a_logInvolution]
+    exact neg_pos.mpr (Real.log_neg h1 (by linarith))
+  have hinv : z25a_logInvolution (z25a_logInvolution t) = t := by
+    dsimp [z25a_logInvolution]
+    rw [neg_neg, Real.exp_log h1, sub_sub_cancel, Real.log_exp, neg_neg]
+  refine ⟨hφ, hinv, ?_⟩
+  have hd := (((hasDerivAt_const t (1 : ℝ)).sub
+    ((hasDerivAt_id t).neg.exp)).log h1.ne').neg
+  convert hd using 1
+  · funext x; rfl
+  · dsimp [z25a_logInvolution]
+    rw [Real.exp_neg, Real.exp_log h1]
+    field_simp
+    ring
+
+/-- Powers of the logarithmic involution integrate to the corresponding zeta value. -/
+private lemma z25a_integral_logInvolution {k : ℕ} (hk : 1 ≤ k) :
+    IntegrableOn (fun t : ℝ => z25a_logInvolution t ^ k) (Ioi 0) ∧
+      (∫ t in Ioi (0 : ℝ), (z25a_logInvolution t ^ k : ℂ)) =
+        k ! * riemannZeta (k + 1) := by
+  let g : ℝ → ℂ := fun t => (t : ℂ) ^ k / (cexp t - 1)
+  have hφ : z25a_logInvolution '' Set.Ioi 0 = Set.Ioi 0 := by
+    ext t
+    constructor
+    · rintro ⟨u, hu, rfl⟩
+      exact (z25a_logInvolution_properties hu).1
+    · intro ht
+      exact ⟨z25a_logInvolution t, (z25a_logInvolution_properties ht).1,
+        (z25a_logInvolution_properties ht).2.1⟩
+  have hinj : InjOn z25a_logInvolution (Ioi 0) := by
+    intro a ha b hb hab
+    have h := congrArg z25a_logInvolution hab
+    simpa [(z25a_logInvolution_properties ha).2.1,
+      (z25a_logInvolution_properties hb).2.1] using h
+  have hd : ∀ t ∈ Ioi (0 : ℝ), HasDerivWithinAt z25a_logInvolution
+      (-(Real.exp (z25a_logInvolution t) - 1)) (Ioi 0) t :=
+    fun t ht => (z25a_logInvolution_properties ht).2.2.hasDerivWithinAt
+  have hcomp : ∀ t ∈ Ioi (0 : ℝ),
+      |-(Real.exp (z25a_logInvolution t) - 1)| • g (z25a_logInvolution t) =
+        (z25a_logInvolution t ^ k : ℂ) := by
+    intro t ht
+    have hp : 0 < Real.exp (z25a_logInvolution t) - 1 := by
+      exact sub_pos.mpr (Real.one_lt_exp_iff.mpr (z25a_logInvolution_properties ht).1)
+    rw [abs_neg, abs_of_pos hp]
+    dsimp [g]
+    rw [ofReal_sub, ofReal_exp, ofReal_one]
+    exact mul_div_cancel₀ _ (by exact_mod_cast hp.ne')
+  have hs : (1 : ℝ) < ((k : ℂ) + 1).re := by simp; exact_mod_cast hk
+  have hker := riemannZeta_eq_integral_exp_sub_one hs
+  have hgi : IntegrableOn g (Ioi 0) := by
+    simpa only [g, add_sub_cancel_right, cpow_natCast] using hker.1
+  have hval : ∫ t in Ioi (0 : ℝ), g t = k ! * riemannZeta (k + 1) := by
+    have hγ : Gamma ((k : ℂ) + 1) = (k ! : ℂ) := Gamma_nat_eq_factorial k
+    have h := hker.2
+    change riemannZeta ((k : ℂ) + 1) = _ at h
+    simp only [add_sub_cancel_right, cpow_natCast] at h
+    rw [h, hγ]
+    dsimp [g]
+    field_simp [show (k ! : ℂ) ≠ 0 by exact_mod_cast k.factorial_ne_zero]
+  have hI := (integrableOn_image_iff_integrableOn_abs_deriv_smul
+    measurableSet_Ioi hd hinj g).mp (by rwa [hφ])
+  have hI' : IntegrableOn (fun t : ℝ => (z25a_logInvolution t ^ k : ℂ)) (Ioi 0) :=
+    hI.congr (ae_restrict_of_forall_mem measurableSet_Ioi hcomp)
+  refine ⟨?_, ?_⟩
+  · convert hI'.re using 1
+    funext t
+    simp [← ofReal_pow]
+  · have h := integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi hd hinj g
+    rw [hφ, hval, setIntegral_congr_fun measurableSet_Ioi hcomp] at h
+    exact h.symm
+
+/-- A finite power of a nonnegative convergent series is the sum over all finite tuples. -/
+private lemma z25a_hasSum_fin_power {a : ℕ → ℝ} {s : ℝ} (ha : HasSum a s)
+    (hpos : ∀ n, 0 ≤ a n) (k : ℕ) :
+    HasSum (fun n : Fin k → ℕ => ∏ i, a (n i)) (s ^ k) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    have h := ha.mul ih (ha.summable.mul_of_nonneg ih.summable hpos
+      (fun n => prod_nonneg fun i _ => hpos (n i)))
+    rw [← (Fin.consEquiv fun _ : Fin (k + 1) => ℕ).hasSum_iff]
+    convert h using 1
+    · funext n
+      simp [Fin.prod_univ_succ, Fin.consEquiv]
+    · rw [pow_succ]; ring
+
+/-- The product logarithmic series has an elementary exponential integral at each tuple. -/
+private lemma z25a_integral_tuple {k : ℕ} (hk : 1 ≤ k) (n : Fin k → ℕ) :
+    (∫ t in Ioi (0 : ℝ), ∏ i, Real.exp (-((n i : ℝ) + 1) * t) / ((n i : ℝ) + 1)) =
+      1 / ((∏ i, ((n i : ℝ) + 1)) * ∑ i, ((n i : ℝ) + 1)) := by
+  let p : ℝ := ∏ i, ((n i : ℝ) + 1)
+  let s : ℝ := ∑ i, ((n i : ℝ) + 1)
+  have hs : 0 < s := by
+    have : Nonempty (Fin k) := Fin.pos_iff_nonempty.mp hk
+    exact sum_pos (fun i _ => by positivity) univ_nonempty
+  have hf : (fun t : ℝ => ∏ i, Real.exp (-((n i : ℝ) + 1) * t) / ((n i : ℝ) + 1)) =
+      fun t => Real.exp (-s * t) / p := by
+    funext t
+    rw [prod_div_distrib, ← Real.exp_sum]
+    congr 2
+    simp only [s, sum_mul, sum_neg_distrib, neg_mul]
+  rw [hf, integral_div, integral_exp_mul_Ioi (neg_neg_of_pos hs)]
+  simp only [mul_zero, Real.exp_zero, neg_div_neg_eq]
+  dsimp [p, s]
+  ring
+
 /-- DLMF 25.6.5: for `k ≥ 1`,
 `ζ(k+1) = (1/k!) ∑_{n₁,…,n_k ≥ 1} 1/(n₁⋯n_k (n₁ + ⋯ + n_k))`, stated as the (absolutely
 convergent) sum of the `k`-fold series being `k! ζ(k+1)`; the summation variables are
@@ -56,7 +177,50 @@ theorem hasSum_multiple_sum_riemannZeta {k : ℕ} (hk : 1 ≤ k) :
     HasSum (fun n : Fin k → ℕ =>
         (1 : ℂ) / ((∏ i, ((n i : ℂ) + 1)) * ∑ i, ((n i : ℂ) + 1)))
       (k ! * riemannZeta (k + 1)) := by
-  sorry
+  let F : (Fin k → ℕ) → ℝ → ℝ := fun n t =>
+    ∏ i, Real.exp (-((n i : ℝ) + 1) * t) / ((n i : ℝ) + 1)
+  have hFpos : ∀ n t, 0 ≤ F n t := fun n t => prod_nonneg fun i _ => by positivity
+  have hsum : ∀ t ∈ Ioi (0 : ℝ), HasSum (fun n => F n t) (z25a_logInvolution t ^ k) := by
+    intro t ht
+    have hlog := Real.hasSum_pow_div_log_of_abs_lt_one
+      (x := Real.exp (-t)) (by
+        rw [abs_of_pos (Real.exp_pos _)]
+        exact Real.exp_lt_one_iff.mpr (by linarith [show 0 < t from ht]))
+    have hbase : HasSum (fun j : ℕ => Real.exp (-((j : ℝ) + 1) * t) / ((j : ℝ) + 1))
+        (z25a_logInvolution t) := by
+      convert hlog using 1
+      funext j
+      rw [show -((j : ℝ) + 1) * t = ((j + 1 : ℕ) : ℝ) * (-t) by push_cast; ring,
+        Real.exp_nat_mul]
+      rfl
+    exact z25a_hasSum_fin_power hbase (fun j => by positivity) k
+  have hI := z25a_integral_logInvolution hk
+  have hB : IntegrableOn (fun t : ℝ => ∑' n : Fin k → ℕ, F n t) (Ioi 0) := by
+    refine hI.1.congr ?_
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+    exact (hsum t ht).tsum_eq.symm
+  have hs := MeasureTheory.hasSum_integral_of_dominated_convergence (μ := volume.restrict (Ioi 0)) F
+    (fun n => (by fun_prop : Continuous (F n)).aestronglyMeasurable)
+    (fun n => ae_of_all _ fun t => by rw [Real.norm_eq_abs, abs_of_nonneg (hFpos n t)])
+    (by
+      filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+      exact (hsum t ht).summable)
+    hB (by
+      filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+      exact hsum t ht)
+  have hsC := Complex.ofRealCLM.hasSum hs
+  have hval : Complex.ofRealCLM (∫ t in Ioi (0 : ℝ), z25a_logInvolution t ^ k) =
+      k ! * riemannZeta (k + 1) := by
+    rw [Complex.ofRealCLM_apply, ← integral_complex_ofReal]
+    simpa only [ofReal_pow] using hI.2
+  rw [hval] at hsC
+  refine hsC.congr_fun fun n => ?_
+  rw [show (fun t => F n t) = fun t : ℝ =>
+      ∏ i, Real.exp (-((n i : ℝ) + 1) * t) / ((n i : ℝ) + 1) from rfl,
+    z25a_integral_tuple hk n]
+  simp only [Complex.ofRealCLM_apply]
+  push_cast
+  rfl
 
 /-- `sin(2πnt) cot(πt) = ∑_{j<n} (cos(2π(j+1)t) + cos(2πjt))` where `sin(πt) ≠ 0`. -/
 lemma r25a_sin_mul_cot {t : ℝ} (ht : Real.sin (π * t) ≠ 0) (n : ℕ) :
@@ -335,13 +499,172 @@ theorem hasSum_riemannZeta_four_central_binom :
 
 /-! ### §25.6(ii) Derivative values -/
 
+/-- The second derivative of Gamma at one, obtained from the digamma value and slope. -/
+private lemma z25a_Gamma_second_one :
+    iteratedDeriv 2 Gamma 1 = (Real.eulerMascheroniConstant : ℂ) ^ 2 + π ^ 2 / 6 := by
+  have hreg : ∀ m : ℕ, (1 : ℂ) ≠ -(m : ℂ) := by
+    intro m h; have := congrArg re h; simp at this; linarith [Nat.cast_nonneg (α := ℝ) m]
+  have hψ : deriv digamma 1 = π ^ 2 / 6 := by
+    have h := DLMF.Gamma.polygamma_one 1 (by norm_num)
+    norm_num [DLMF.Gamma.polygamma, iteratedDeriv_one, riemannZeta_two] at h ⊢
+    exact h
+  have heq : deriv Gamma =ᶠ[𝓝 (1 : ℂ)] fun z => digamma z * Gamma z := by
+    filter_upwards [DLMF.Gamma.isOpen_not_neg_nat.mem_nhds hreg] with z hz
+    simp only [digamma_def, logDeriv_apply]
+    exact (div_mul_cancel₀ _ (Gamma_ne_zero hz)).symm
+  rw [show (2 : ℕ) = 1 + 1 by rfl, iteratedDeriv_succ, iteratedDeriv_one, heq.deriv_eq]
+  rw [deriv_fun_mul (DLMF.Gamma.analyticAt_digamma hreg).differentiableAt
+    (differentiableAt_Gamma 1 hreg), hψ, Gamma_one, digamma_one, hasDerivAt_Gamma_one.deriv]
+  ring
+
+/-- The second-order Leibniz rule, in a form suited to the regular factors at zero. -/
+private lemma z25a_second_mul {f g : ℂ → ℂ}
+    (hf : ContDiffAt ℂ 2 f 0) (hg : ContDiffAt ℂ 2 g 0) :
+    iteratedDeriv 2 (fun z => f z * g z) 0 =
+      f 0 * iteratedDeriv 2 g 0 + 2 * deriv f 0 * deriv g 0 + iteratedDeriv 2 f 0 * g 0 := by
+  rw [iteratedDeriv_fun_mul hf hg]
+  norm_num [sum_range_succ, iteratedDeriv_zero, iteratedDeriv_one]
+
+/-- Multiplying the reflection equation by its vanishing variable removes the zeta pole;
+the resulting identity holds on a full neighborhood of zero. -/
+private lemma z25a_regularized_reflection :
+    (fun z : ℂ => z * riemannZeta z) =ᶠ[𝓝 0] fun z =>
+      (π : ℂ)⁻¹ * (sin ((π / 2 : ℂ) * z) *
+        (exp ((Real.log (2 * π) : ℂ) * z) * Gamma (1 - z) *
+          (z * s25a_zetaReg (1 - z) - 1))) := by
+  let L : ℂ := Real.log (2 * π)
+  let A : ℂ → ℂ := fun z => exp (L * z)
+  let B : ℂ → ℂ := fun z => Gamma (1 - z)
+  let G : ℂ → ℂ := fun z => s25a_zetaReg (1 - z)
+  let K : ℂ → ℂ := fun z => z * G z - 1
+  let F : ℂ → ℂ := fun z => A z * B z * K z
+  let S : ℂ → ℂ := fun z => sin ((π / 2 : ℂ) * z)
+  change (fun z : ℂ => z * riemannZeta z) =ᶠ[𝓝 0]
+    fun z => (π : ℂ)⁻¹ * (S z * F z)
+  filter_upwards [Metric.ball_mem_nhds (0 : ℂ) (by norm_num : (0 : ℝ) < 1 / 2)] with z hz
+  have hzN : ∀ n : ℕ, z ≠ n + 1 := by
+    intro n h
+    have hn : (1 : ℝ) ≤ ‖(n : ℂ) + 1‖ := by
+      rw [← ofReal_natCast, ← ofReal_one, ← ofReal_add, norm_real, Real.norm_eq_abs,
+        abs_of_nonneg (by positivity)]
+      linarith [Nat.cast_nonneg (α := ℝ) n]
+    rw [Metric.mem_ball, dist_zero_right, h] at hz
+    linarith
+  by_cases hz0 : z = 0
+  · subst z; simp [S]
+  have hz1 : 1 - z ≠ (1 : ℂ) := by intro h; apply hz0; linear_combination -h
+  have hZ := riemannZeta_eq_reflection hz0 hzN
+  have hgreg : G z = riemannZeta (1 - z) + z⁻¹ := by
+    dsimp [G, s25a_zetaReg]
+    rw [Function.update_of_ne hz1]
+    rw [show 1 - z - 1 = -z by ring, one_div, inv_neg, sub_neg_eq_add]
+  have hp : (2 * π : ℂ) ^ (z - 1) = A z / (2 * π) := by
+    have hπ : (2 * π : ℂ) ≠ 0 := by simp [Real.pi_ne_zero]
+    rw [cpow_def_of_ne_zero hπ,
+      show log (2 * π : ℂ) = (Real.log (2 * π) : ℂ) by
+        rw [← ofReal_ofNat, ← ofReal_mul, ofReal_log (by positivity)], mul_sub,
+      exp_sub, mul_one, ← ofReal_exp, Real.exp_log (by positivity)]
+    simp [A, L]
+  rw [hZ, hp, show (π : ℂ) * z / 2 = (π / 2) * z by ring]
+  dsimp [F, B, K]
+  rw [hgreg]
+  have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
+  dsimp [S]
+  field_simp
+  ring
+
 /-- DLMF 25.6.12: `ζ''(0) = -½ (ln 2π)² + ½ γ² - π²/24 + γ₁`, with the Stieltjes constant `γ₁`
 of 25.2.5. -/
 @[dlmf 25.6.E12]
 theorem iteratedDeriv_two_riemannZeta_zero :
     iteratedDeriv 2 riemannZeta 0 = -(1 / 2) * (Real.log (2 * π) : ℂ) ^ 2 +
       1 / 2 * (Real.eulerMascheroniConstant : ℂ) ^ 2 - π ^ 2 / 24 + stieltjesConstant 1 := by
-  sorry
+  let L : ℂ := Real.log (2 * π)
+  let γ : ℂ := Real.eulerMascheroniConstant
+  let γ₁ : ℂ := stieltjesConstant 1
+  let A : ℂ → ℂ := fun z => exp (L * z)
+  let B : ℂ → ℂ := fun z => Gamma (1 - z)
+  let G : ℂ → ℂ := fun z => s25a_zetaReg (1 - z)
+  let K : ℂ → ℂ := fun z => z * G z - 1
+  let F : ℂ → ℂ := fun z => A z * B z * K z
+  let S : ℂ → ℂ := fun z => sin ((π / 2 : ℂ) * z)
+  have hreg : ∀ m : ℕ, (1 : ℂ) ≠ -(m : ℂ) := by
+    intro m h; have := congrArg re h; simp at this; linarith [Nat.cast_nonneg (α := ℝ) m]
+  have hA : AnalyticAt ℂ A 0 := by dsimp [A]; fun_prop
+  have hB : AnalyticAt ℂ B 0 := by
+    exact (DLMF.Gamma.analyticAt_Gamma hreg).comp_of_eq
+      (by fun_prop : AnalyticAt ℂ (fun z : ℂ => 1 - z) 0) (by simp)
+  have hG : AnalyticAt ℂ G 0 := by
+    exact (s25a_differentiable_zetaReg.analyticAt 1).comp_of_eq
+      (by fun_prop : AnalyticAt ℂ (fun z : ℂ => 1 - z) 0) (by simp)
+  have hK : AnalyticAt ℂ K 0 := (analyticAt_id.mul hG).sub analyticAt_const
+  have hF : AnalyticAt ℂ F 0 := (hA.mul hB).mul hK
+  have hS : AnalyticAt ℂ S 0 := by dsimp [S]; fun_prop
+  have hG0 : G 0 = γ := by simp [G, γ, s25a_zetaReg]
+  have hG1 : deriv G 0 = γ₁ := by
+    have h := congrFun (iteratedDeriv_comp_const_sub (n := 1)
+      (f := s25a_zetaReg) (s := 1)) 0
+    rw [sub_zero, s25a_iteratedDeriv_zetaReg_one] at h
+    simpa [G, γ₁, iteratedDeriv_one] using h
+  have hA0 : A 0 = 1 := by simp [A]
+  have hA1 : deriv A 0 = L := by
+    simpa [A] using congrFun (iteratedDeriv_cexp_const_mul 1 L) 0
+  have hA2 : iteratedDeriv 2 A 0 = L ^ 2 := by
+    simp [A]
+  have hB0 : B 0 = 1 := by simp [B]
+  have hB1 : deriv B 0 = γ := by
+    have h := congrFun (iteratedDeriv_comp_const_sub (n := 1) (f := Gamma) (s := 1)) 0
+    simpa [B, γ, iteratedDeriv_one, hasDerivAt_Gamma_one.deriv] using h
+  have hB2 : iteratedDeriv 2 B 0 = γ ^ 2 + π ^ 2 / 6 := by
+    have h := congrFun (iteratedDeriv_comp_const_sub (n := 2) (f := Gamma) (s := 1)) 0
+    simpa [B, γ, z25a_Gamma_second_one] using h
+  have hK0 : K 0 = -1 := by simp [K]
+  have hK1 : deriv K 0 = γ := by
+    dsimp [K]
+    rw [deriv_fun_sub (by fun_prop) (by fun_prop), deriv_fun_mul (by fun_prop)
+      hG.differentiableAt]
+    simp [hG0]
+  have hK2 : iteratedDeriv 2 K 0 = 2 * γ₁ := by
+    dsimp [K]
+    rw [iteratedDeriv_fun_sub (f := fun z : ℂ => z * G z) (g := fun _ : ℂ => 1)
+      (analyticAt_id.mul hG).contDiffAt (by fun_prop),
+      z25a_second_mul (by fun_prop) hG.contDiffAt]
+    simp [iteratedDeriv_fun_id, iteratedDeriv_const, hG1]
+  have hF0 : F 0 = -1 := by simp [F, hA0, hB0, hK0]
+  have hF2 : iteratedDeriv 2 F 0 = -L ^ 2 + γ ^ 2 - π ^ 2 / 6 + 2 * γ₁ := by
+    dsimp [F]
+    rw [z25a_second_mul (f := fun z => A z * B z) (hA.mul hB).contDiffAt hK.contDiffAt,
+      z25a_second_mul hA.contDiffAt hB.contDiffAt,
+      deriv_fun_mul hA.differentiableAt hB.differentiableAt]
+    rw [hA0, hA1, hA2, hB0, hB1, hB2, hK0, hK1, hK2]
+    ring
+  have hS0 : S 0 = 0 := by simp [S]
+  have hS1 : deriv S 0 = π / 2 := by
+    simpa [S] using (((hasDerivAt_id (0 : ℂ)).const_mul (π / 2 : ℂ)).csin).deriv
+  have hS2 : iteratedDeriv 2 S 0 = 0 := by
+    rw [show S = fun z => sin ((π / 2 : ℂ) * z) from rfl,
+      iteratedDeriv_comp_const_mul Complex.contDiff_sin]
+    norm_num
+  have hS3 : iteratedDeriv 3 S 0 = -(π / 2 : ℂ) ^ 3 := by
+    rw [show S = fun z => sin ((π / 2 : ℂ) * z) from rfl,
+      iteratedDeriv_comp_const_mul Complex.contDiff_sin]
+    norm_num [show 3 = 2 * 1 + 1 by omega, Complex.iteratedDeriv_odd_sin]
+  have hζ : AnalyticAt ℂ riemannZeta 0 :=
+    analyticOn_riemannZeta 0 (by norm_num)
+  have heq : (fun z : ℂ => z * riemannZeta z) =ᶠ[𝓝 0]
+      fun z => (π : ℂ)⁻¹ * (S z * F z) := z25a_regularized_reflection
+  have h3 := heq.iteratedDeriv_eq 3
+  rw [iteratedDeriv_fun_mul (by fun_prop) hζ.contDiffAt,
+    iteratedDeriv_const_mul_field,
+    iteratedDeriv_fun_mul hS.contDiffAt hF.contDiffAt] at h3
+  norm_num [sum_range_succ, iteratedDeriv_fun_id, iteratedDeriv_zero,
+    iteratedDeriv_one, hS0, hS1, hS2, hS3, hF0] at h3
+  rw [hF2] at h3
+  dsimp [L, γ, γ₁] at h3
+  have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
+  field_simp at h3
+  field_simp
+  linear_combination h3 / 3
 
 /-- Identity under the stated parameter and domain assumptions: `cos (n * π) = (-1) ^ n`. -/
 private lemma z25a_cos_nat_mul_pi (n : ℕ) : cos (n * π) = (-1) ^ n := by

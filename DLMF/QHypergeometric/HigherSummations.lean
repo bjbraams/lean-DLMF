@@ -7,6 +7,7 @@ module
 
 public import DLMF.Bailey
 public import DLMF.QHypergeometric.Convergence
+public import DLMF.QHypergeometric.BasicSummations
 
 /-!
 # Higher basic summations (DLMF §17.7)
@@ -843,23 +844,243 @@ theorem nonterminating_eight_phi_seven {a b c d e f q : ℂ} (hq0 : q≠0) (hq :
         qPochhammerListInf [a*q/c,a*q/d,a*q/e,a*q/f,b*c/a,b*d/a,b*e/a,b*f/a] q := by
   sorry
 
+/-- The finite parameter-shift factors occurring in the q-Karlsson–Minton identities. -/
+private def qMintonFactor (p : List (ℂ × ℕ)) (q w : ℂ) : ℂ :=
+  (p.map fun x => qPochhammer (x.1 * w) q x.2).prod
+
+/-- A polynomial of total degree at most `N` annihilates the q-binomial series at
+`az = q⁻ᴺ` when each factor is a finite q-shifted factorial. -/
+private lemma qMintonFactor_hasSum_zero {a q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
+    (p : List (ℂ × ℕ)) {N : ℕ} (hN : qMintonWeight p ≤ N) {z : ℂ}
+    (hz : ‖z‖ < 1) (haz : a * z = q ^ (-(N : ℤ))) :
+    HasSum (fun n : ℕ => qPochhammer a q n / qPochhammer q q n *
+      qMintonFactor p q (q ^ n) * z ^ n) 0 := by
+  induction p generalizing N z with
+  | nil =>
+    have hv : qPochhammerInf (a * z) q = 0 := by
+      rw [haz, qPochhammerInf_mul_qPochhammer hq (N + 1)]
+      have hzero : qPochhammer (q ^ (-(N : ℤ))) q (N + 1) = 0 := by
+        simpa only [zpow_neg, zpow_natCast] using
+          qPochhammer_recip_pow_eq_zero hq0 (Nat.lt_succ_self N)
+      rw [hzero, zero_mul]
+    have hs := summable_q_binomial_series (a := a) hq hz
+    have hval := q_binomial_theorem (a := a) hq hz
+    rw [hv, zero_div] at hval
+    simpa [qMintonFactor, ← hval] using hs.hasSum
+  | cons x p ih =>
+    rcases x with ⟨x, m⟩
+    have hdeg : m + qMintonWeight p ≤ N := by simpa [qMintonWeight] using hN
+    have hsum : ∀ i ∈ range (m + 1), HasSum (fun n : ℕ =>
+        (qBinom q m i * (-1) ^ i * q ^ i.choose 2 * x ^ i) *
+        (qPochhammer a q n / qPochhammer q q n * qMintonFactor p q (q ^ n) *
+          (z * q ^ i) ^ n)) 0 := by
+      intro i hi
+      have him : i ≤ m := Nat.lt_succ_iff.mp (mem_range.mp hi)
+      have hiN : i ≤ N := by omega
+      have hzi : ‖z * q ^ i‖ < 1 := by
+        rw [norm_mul, norm_pow]
+        exact (mul_le_of_le_one_right (norm_nonneg z)
+          (pow_le_one₀ (norm_nonneg q) hq.le)).trans_lt hz
+      have hai : a * (z * q ^ i) = q ^ (-((N - i : ℕ) : ℤ)) := by
+        rw [← mul_assoc, haz, ← zpow_natCast, ← zpow_add₀ hq0]
+        congr 1
+        omega
+      simpa only [mul_zero] using (ih (N := N - i) (by omega) hzi hai).mul_left
+        (qBinom q m i * (-1) ^ i * q ^ i.choose 2 * x ^ i)
+    have hs := hasSum_sum hsum
+    simp only [sum_const_zero] at hs
+    convert hs using 1
+    funext n
+    simp only [qMintonFactor, List.map_cons, List.prod_cons] at *
+    rw [qPochhammer_eq_sum_qBinom (x * q ^ n) q m, ← mul_assoc, mul_sum, sum_mul, sum_mul]
+    refine sum_congr rfl fun i _ => ?_
+    rw [mul_pow, mul_pow, ← pow_mul, ← pow_mul, Nat.mul_comm n i]
+    ring
+
+/-- Moving integer parameter shifts between the upper and lower q-factorials. -/
+private lemma qMintonFactor_ratio {q : ℂ} (hq : ‖q‖ < 1) (p : List (ℂ × ℕ))
+    (hd : QDenominatorRegular (qMintonLower p) q) (n : ℕ) :
+    qPochhammerList (qMintonUpper p q) q n / qPochhammerList (qMintonLower p) q n =
+      qMintonFactor p q (q ^ n) / qMintonFactor p q 1 := by
+  induction p with
+  | nil => simp [qMintonUpper, qMintonLower, qPochhammerList, qMintonFactor]
+  | cons x p ih =>
+    rcases x with ⟨x, m⟩
+    have hx : ∀ j : ℕ, x * q ^ j ≠ 1 := fun j => hd x (by simp [qMintonLower]) j
+    have hxn := qPochhammer_ne_zero_of_factors hq (fun j h => hx j (sub_eq_zero.mp h).symm) n
+    have hxm := qPochhammer_ne_zero_of_factors hq (fun j h => hx j (sub_eq_zero.mp h).symm) m
+    have hp : QDenominatorRegular (qMintonLower p) q := fun b hb =>
+      hd b (by simp [qMintonLower] at hb ⊢; exact Or.inr hb)
+    simp only [qMintonUpper, qMintonLower, qPochhammerList, qMintonFactor,
+      List.map_cons, List.prod_cons, mul_one] at ih ⊢
+    rw [mul_div_mul_comm, ih hp]
+    have hr : qPochhammer (x * q ^ m) q n / qPochhammer x q n =
+        qPochhammer (x * q ^ n) q m / qPochhammer x q m := by
+      apply (div_eq_div_iff hxn hxm).mpr
+      rw [mul_comm _ (qPochhammer x q m), ← qPochhammer_add,
+        mul_comm _ (qPochhammer x q n), ← qPochhammer_add, Nat.add_comm]
+    rw [hr, mul_div_mul_comm]
+
+/-- The base case of Karlsson–Minton is q-Gauss, including the regular upper parameter zero. -/
+private lemma qMinton_gauss_base {a b q z : ℂ} (ha : a ≠ 0) (hq0 : q ≠ 0)
+    (hq : ‖q‖ < 1) (hd : QDenominatorRegular [b * q] q) (hz : ‖z‖ < 1) (haz : a * z = q) :
+    HasSum (qPhiTerm [a, b] [b * q] q z)
+      (qPochhammerListInf [q, b * q / a] q / qPochhammerListInf [b * q, q / a] q) := by
+  have hez : z = q / a := (eq_div_iff ha).mpr (by rw [mul_comm]; exact haz)
+  subst z
+  have hs := qPhi_hasSum (a := [a, b]) (b := [b * q]) hq0 hq hd (by simp) (fun _ => hz)
+  by_cases hb : b = 0
+  · subst b
+    have he : qPhi [a, 0] [0] q (q / a) = qPochhammerInf q q / qPochhammerInf (q / a) q := by
+      rw [qPhi]
+      calc
+        (∑' n : ℕ, qPhiTerm [a, 0] [0] q (q / a) n) =
+            ∑' n : ℕ, qPochhammer a q n / qPochhammer q q n * (q / a) ^ n := by
+          apply tsum_congr
+          intro n
+          simp [qPhiTerm, qPhiExponent, qPochhammerList]
+        _ = _ := by
+          rw [← q_binomial_theorem hq hz, show a * (q / a) = q by field_simp]
+    simpa [he, qPochhammerListInf, qPochhammerInf] using hs
+  · have hnorm : ‖b * q‖ < ‖a * b‖ := by
+      rw [norm_div, div_lt_one₀ (norm_pos_iff.mpr ha)] at hz
+      simp only [norm_mul]
+      nlinarith [norm_pos_iff.mpr hb]
+    have he := q_gauss (a := a) (b := b) (c := b * q) hq hnorm hd
+    have e1 : b * q / (a * b) = q / a := by field_simp
+    have e2 : b * q / b = q := by field_simp
+    rw [e1, e2] at he
+    rw [he] at hs
+    simpa [qPochhammerListInf, mul_comm, mul_left_comm, mul_assoc] using hs
+
+/-- Multiplication of the finite parameter polynomial by one more linear factor uses
+q-binomial annihilation, reducing Karlsson–Minton to its q-Gauss base case. -/
+private lemma qMintonFactor_hasSum_gauss {a b q : ℂ} (ha : a ≠ 0) (hq0 : q ≠ 0)
+    (hq : ‖q‖ < 1) (hd : QDenominatorRegular [b * q] q) (p : List (ℂ × ℕ))
+    {z : ℂ} (hz : ‖z‖ < 1) (haz : a * z = q ^ (1 - (qMintonWeight p : ℤ))) :
+    HasSum (fun n : ℕ => qPhiTerm [a, b] [b * q] q z n * qMintonFactor p q (q ^ n))
+      ((p.map (fun x => (range x.2).prod (fun j => b - x.1 * q ^ j))).prod *
+        (qPochhammerListInf [q, b * q / a] q / qPochhammerListInf [b * q, q / a] q)) := by
+  induction p generalizing z with
+  | nil =>
+    simpa [qMintonFactor] using qMinton_gauss_base ha hq0 hq hd hz
+      (by simpa [qMintonWeight] using haz)
+  | cons x p ih =>
+    rcases x with ⟨x, m⟩
+    induction m generalizing z with
+    | zero =>
+      simpa [qMintonFactor, qMintonWeight] using ih hz (by simpa [qMintonWeight] using haz)
+    | succ m ihm =>
+      have hzq : ‖z * q‖ < 1 := by
+        rw [norm_mul]
+        exact (mul_le_of_le_one_right (norm_nonneg z) hq.le).trans_lt hz
+      have ha0 : a * z = q ^ (-(qMintonWeight ((x, m) :: p) : ℤ)) := by
+        convert haz using 1
+        simp [qMintonWeight]
+        congr 1
+        ring
+      have haq : a * (z * q) = q ^ (1 - (qMintonWeight ((x, m) :: p) : ℤ)) := by
+        rw [← mul_assoc, ha0]
+        calc
+          q ^ (-(qMintonWeight ((x, m) :: p) : ℤ)) * q =
+              q ^ (-(qMintonWeight ((x, m) :: p) : ℤ)) * q ^ (1 : ℤ) := by rw [zpow_one]
+          _ = _ := by rw [← zpow_add₀ hq0]; congr 1; ring
+      have hrec := ihm hzq haq
+      have hzero := qMintonFactor_hasSum_zero hq0 hq ((x, m) :: p) le_rfl hz ha0
+      have hs := (hrec.mul_left (b - x * q ^ m)).add (hzero.mul_left (1 - b))
+      simp only [mul_zero, add_zero] at hs
+      convert hs using 1
+      · funext n
+        simp only [qMintonFactor, List.map_cons, List.prod_cons, qPochhammer_succ]
+        rw [qaR4_phi21_term, qaR4_phi21_term, mul_pow]
+        have hbrel : qPochhammer b q n * (1 - b * q ^ n) = (1 - b) * qPochhammer (b * q) q n := by
+          rw [← qPochhammer_succ, qPochhammer_succ']
+        have hB := qaR4_reg_poch_ne hq hd n
+        have hQ := qPochhammer_self_ne_zero hq n
+        generalize qPochhammer a q n = A
+        generalize qPochhammer b q n = B at hbrel ⊢
+        generalize qPochhammer (b * q) q n = C at hbrel hB ⊢
+        generalize qPochhammer (x * q ^ n) q m = X
+        generalize (List.map (fun x => qPochhammer (x.1 * q ^ n) q x.2) p).prod = P
+        field_simp
+        linear_combination A * X * P * z ^ n * hbrel
+      · simp only [List.map_cons, List.prod_cons, prod_range_succ]
+        ring
+
 /-- The cleared finite product includes b=0 without a spurious0 times infinity. -/
 @[dlmf 17.7.E18]
-theorem q_karlsson_minton {a b q : ℂ} (ha : a≠0) (hq0 : q≠0) (hq : ‖q‖<1) (p : List (ℂ × ℕ))
-    (hz : ‖a⁻¹*q^(1-(qMintonWeight p:ℤ))‖<1)
-    (hd : QDenominatorRegular (b*q::qMintonLower p) q) :
-    qPhi (a::b::qMintonUpper p q) (b*q::qMintonLower p) q (a⁻¹*q^(1-(qMintonWeight p:ℤ)))=
-      qPochhammerListInf [q,b*q/a] q/qPochhammerListInf [b*q,q/a] q*
-      (p.map (fun x => (range x.2).prod (fun j => b-x.1*q^j))).prod/
+theorem q_karlsson_minton {a b q : ℂ} (ha : a ≠ 0) (hq0 : q ≠ 0) (hq : ‖q‖ < 1) (p : List (ℂ × ℕ))
+    (hz : ‖a⁻¹ * q ^ (1 - (qMintonWeight p : ℤ))‖ < 1)
+    (hd : QDenominatorRegular (b * q :: qMintonLower p) q) :
+    qPhi (a :: b :: qMintonUpper p q) (b * q :: qMintonLower p) q (a⁻¹ * q ^ (1 - (qMintonWeight p : ℤ))) =
+      qPochhammerListInf [q, b * q / a] q / qPochhammerListInf [b * q, q / a] q *
+      (p.map (fun x => (range x.2).prod (fun j => b - x.1 * q ^ j))).prod /
         (p.map fun x => qPochhammer x.1 q x.2).prod := by
-  sorry
+  let z := a⁻¹ * q ^ (1 - (qMintonWeight p : ℤ))
+  have hreg : QDenominatorRegular [b * q] q := fun c hc =>
+    hd c (by simp only [List.mem_singleton] at hc; simp [hc])
+  have hp : QDenominatorRegular (qMintonLower p) q := fun c hc => hd c (by simp [hc])
+  have hs := qMintonFactor_hasSum_gauss ha hq0 hq hreg p hz
+    (show a * z = q ^ (1 - (qMintonWeight p : ℤ)) by dsimp [z]; field_simp)
+  have hs' := hs.mul_right (qMintonFactor p q 1)⁻¹
+  have he : qPhiTerm (a :: b :: qMintonUpper p q) (b * q :: qMintonLower p) q z =
+      fun n : ℕ => (qPhiTerm [a, b] [b * q] q z n * qMintonFactor p q (q ^ n)) *
+        (qMintonFactor p q 1)⁻¹ := by
+    funext n
+    have hexp : qPhiExponent (a :: b :: qMintonUpper p q) (b * q :: qMintonLower p) = 0 := by
+      simp [qPhiExponent, qMintonUpper, qMintonLower]
+      ring
+    rw [qPhiTerm, hexp, zpow_zero, mul_one, qaR4_phi21_term]
+    rw [show qPochhammerList (a :: b :: qMintonUpper p q) q n =
+        qPochhammer a q n * qPochhammer b q n * qPochhammerList (qMintonUpper p q) q n by
+      simp [qPochhammerList]; ring]
+    rw [show qPochhammerList (b * q :: qMintonLower p) q n =
+        qPochhammer (b * q) q n * qPochhammerList (qMintonLower p) q n by
+      simp [qPochhammerList]]
+    rw [show qPochhammer a q n * qPochhammer b q n * qPochhammerList (qMintonUpper p q) q n /
+        (qPochhammer (b * q) q n * qPochhammerList (qMintonLower p) q n * qPochhammer q q n) * z ^ n =
+        (qPochhammer a q n * qPochhammer b q n /
+          (qPochhammer (b * q) q n * qPochhammer q q n) * z ^ n) *
+          (qPochhammerList (qMintonUpper p q) q n / qPochhammerList (qMintonLower p) q n) by ring,
+      qMintonFactor_ratio hq p hp n]
+    ring
+  have hsum := (he.symm ▸ hs').tsum_eq
+  change qPhi (a :: b :: qMintonUpper p q) (b * q :: qMintonLower p) q z = _
+  rw [show qPhi (a :: b :: qMintonUpper p q) (b * q :: qMintonLower p) q z =
+    (p.map (fun x => (range x.2).prod (fun j => b - x.1 * q ^ j))).prod *
+      (qPochhammerListInf [q, b * q / a] q / qPochhammerListInf [b * q, q / a] q) *
+        (qMintonFactor p q 1)⁻¹ from hsum]
+  simp only [qMintonFactor, mul_one]
+  ring
 
 /-- The primary-source argument is q^(−Σm)/a; the printed extra q is disproved below. -/
 @[dlmf 17.7.E19]
-theorem q_karlsson_minton_zero_corrected {a q : ℂ} (ha : a≠0) (hq0 : q≠0) (hq : ‖q‖<1) (p : List (ℂ × ℕ))
-    (hz : ‖a⁻¹*q^(-(qMintonWeight p:ℤ))‖<1) (hd : QDenominatorRegular (qMintonLower p) q) :
-    qPhi (a::qMintonUpper p q) (qMintonLower p) q (a⁻¹*q^(-(qMintonWeight p:ℤ)))=0 := by
-  sorry
+theorem q_karlsson_minton_zero_corrected {a q : ℂ} (ha : a ≠ 0) (hq0 : q ≠ 0) (hq : ‖q‖ < 1) (p : List (ℂ × ℕ))
+    (hz : ‖a⁻¹ * q ^ (-(qMintonWeight p : ℤ))‖ < 1) (hd : QDenominatorRegular (qMintonLower p) q) :
+    qPhi (a :: qMintonUpper p q) (qMintonLower p) q (a⁻¹ * q ^ (-(qMintonWeight p : ℤ))) = 0 := by
+  let z := a⁻¹ * q ^ (-(qMintonWeight p : ℤ))
+  have hs := qMintonFactor_hasSum_zero hq0 hq p le_rfl hz
+    (show a * z = q ^ (-(qMintonWeight p : ℤ)) by dsimp [z]; field_simp)
+  have hs' := hs.mul_right (qMintonFactor p q 1)⁻¹
+  rw [zero_mul] at hs'
+  have he : qPhiTerm (a :: qMintonUpper p q) (qMintonLower p) q z =
+      fun n : ℕ => (qPochhammer a q n / qPochhammer q q n *
+        qMintonFactor p q (q ^ n) * z ^ n) * (qMintonFactor p q 1)⁻¹ := by
+    funext n
+    have hexp : qPhiExponent (a :: qMintonUpper p q) (qMintonLower p) = 0 := by
+      simp [qPhiExponent, qMintonUpper, qMintonLower]
+      ring
+    simp only [qPhiTerm, hexp, zpow_zero, mul_one]
+    rw [show qPochhammerList (a :: qMintonUpper p q) q n =
+      qPochhammer a q n * qPochhammerList (qMintonUpper p q) q n by
+      simp [qPochhammerList]]
+    rw [show qPochhammer a q n * qPochhammerList (qMintonUpper p q) q n /
+        (qPochhammerList (qMintonLower p) q n * qPochhammer q q n) =
+      qPochhammer a q n / qPochhammer q q n *
+        (qPochhammerList (qMintonUpper p q) q n / qPochhammerList (qMintonLower p) q n) by ring,
+      qMintonFactor_ratio hq p hd n]
+    ring
+  exact (he.symm ▸ hs').tsum_eq
 
 /-- Gosper's bibasic summation of a finite series in the two bases `p` and `q` (DLMF 17.7.E20). -/
 @[dlmf 17.7.E20]

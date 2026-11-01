@@ -20,6 +20,11 @@ Cauchy principal values). Homogeneity is stated for real `λ > 0` (for complex `
 `symEllIntR_mul`). "`= ∞`" is formalized as non-integrability of the defining integrand,
 "`→ +∞`" as `Tendsto … atTop` of the (real) value.
 
+The lemniscatic formulas follow from a quadratic transformation of `R` at three arguments
+in arithmetic progression. Its real form uses the exact positive-ray substitution
+`u = t² + (x + y)t`; the complex form uses the proved separate identity theorem
+`Carlson.TwoVariable.eqOn_rightHalfPlane₂_of_real` from `lean-codes`.
+
 Decimal values of the lemniscate constants (19.20.2), (19.20.22) are excluded: numerical.
 
 **Domain corrections.** The lemniscatic cases (19.20.3), (19.20.23) are stated for real positive
@@ -53,6 +58,157 @@ lemma ei19c_symEllIntR_smul {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ)
     {z : ι → ℂ} (hz : z ∈ Carlson.carlsonRSlitDomain) :
     symEllIntR a b (fun i => (l : ℂ) * z i) = (l : ℂ) ^ (-a) * symEllIntR a b z :=
   symEllIntR_mul a b hz (ofReal_mem_slitPlane.mpr hl) fun i => ei19c_arg_ofReal_add hl (hz i)
+
+/-- Squaring the translated radial variable gives the quadratic integral substitution
+for three arguments in arithmetic progression. -/
+lemma integral_cpow_arithmetic_progression_quadratic {x y a : ℝ} (hx : 0 < x) (hy : 0 < y) :
+    let m := (x + y) / 2
+    (∫ u in Ioi (0 : ℝ), (((u + m ^ 2 : ℝ) : ℂ) ^ (((-(a + 1) / 2 : ℝ) : ℂ)) *
+      ((u + x * y : ℝ) : ℂ) ^ ((-1 / 2 : ℝ) : ℂ))) =
+    2 * ∫ t in Ioi (0 : ℝ), ((t + x : ℝ) : ℂ) ^ ((-1 / 2 : ℝ) : ℂ) *
+      ((t + y : ℝ) : ℂ) ^ ((-1 / 2 : ℝ) : ℂ) * ((t + m : ℝ) : ℂ) ^ ((-a : ℝ) : ℂ) := by
+  intro m
+  have hm : 0 < m := by dsimp only [m]; positivity
+  let g : ℝ → ℝ := fun t => t ^ 2 + 2 * m * t
+  have hmono : StrictMonoOn g (Ioi 0) := by
+    intro s hs t ht hst
+    change 0 < s at hs
+    change 0 < t at ht
+    dsimp only [g]
+    nlinarith
+  have himg : g '' Ioi 0 = Ioi 0 := by
+    ext u
+    constructor
+    · rintro ⟨t, ht, rfl⟩
+      change 0 < g t
+      change 0 < t at ht
+      dsimp only [g]
+      positivity
+    · intro hu
+      change 0 < u at hu
+      let t := Real.sqrt (u + m ^ 2) - m
+      have hsq : Real.sqrt (u + m ^ 2) ^ 2 = u + m ^ 2 := Real.sq_sqrt (by positivity)
+      have ht : 0 < t := by dsimp only [t]; nlinarith [Real.sqrt_nonneg (u + m ^ 2)]
+      refine ⟨t, ht, ?_⟩
+      dsimp only [g, t]
+      nlinarith
+  let G : ℝ → ℂ := fun u => ((u + m ^ 2 : ℝ) : ℂ) ^ (((-(a + 1) / 2 : ℝ) : ℂ)) *
+      ((u + x * y : ℝ) : ℂ) ^ ((-1 / 2 : ℝ) : ℂ)
+  have H := integral_image_eq_integral_abs_deriv_smul (s := Ioi (0 : ℝ)) measurableSet_Ioi
+    (f := g) (f' := fun t => 2 * (t + m))
+    (fun t _ => ((((hasDerivAt_id t).pow 2).add ((hasDerivAt_id t).const_mul (2 * m))).hasDerivWithinAt).congr_deriv (by simp; ring))
+    hmono.injOn G
+  rw [himg] at H
+  change (∫ u in Ioi (0 : ℝ), G u) = _
+  rw [H, ← integral_const_mul]
+  refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
+  change 0 < t at ht
+  have htx : 0 < t + x := by linarith
+  have hty : 0 < t + y := by linarith
+  have htm : 0 < t + m := by linarith
+  have e1 : g t + m ^ 2 = (t + m) ^ 2 := by dsimp only [g]; ring
+  have e2 : g t + x * y = (t + x) * (t + y) := by dsimp only [g, m]; ring
+  simp only [G, e1, e2, abs_of_pos (by positivity : 0 < 2 * (t + m)), Complex.real_smul]
+  rw [← ofReal_cpow (sq_nonneg _) _, ← ofReal_cpow (mul_nonneg htx.le hty.le) _,
+    ← ofReal_cpow htx.le _, ← ofReal_cpow hty.le _, ← ofReal_cpow htm.le _]
+  have Hreal : (2 * (t + m)) *
+      (((t + m) ^ 2) ^ (-(a + 1) / 2) * ((t + x) * (t + y)) ^ (-1 / 2 : ℝ)) =
+      2 * ((t + x) ^ (-1 / 2 : ℝ) * (t + y) ^ (-1 / 2 : ℝ) * (t + m) ^ (-a)) := by
+    rw [Real.mul_rpow htx.le hty.le, ← Real.rpow_natCast_mul htm.le]
+    norm_num only [Nat.cast_ofNat]
+    rw [show (2 : ℝ) * (-(a + 1) / 2) = -a - 1 by ring]
+    have he : (t + m) * (t + m) ^ (-a - 1) = (t + m) ^ (-a) := by
+      calc _ = (t + m) ^ (1 + (-a - 1)) := by rw [Real.rpow_add htm, Real.rpow_one]
+        _ = _ := by congr 1; ring
+    linear_combination (2 * (t + x) ^ (-(1 / 2) : ℝ) * (t + y) ^ (-(1 / 2) : ℝ)) * he
+  exact_mod_cast Hreal
+
+/-- The quadratic transformation of a three-node R-function at its middle argument,
+for positive real arguments and positive real exponent. -/
+lemma symEllIntR_arithmetic_progression_quadratic_ofReal {x y a : ℝ} (hx : 0 < x) (hy : 0 < y) (ha : 0 < a) :
+    symEllIntR (a : ℂ) ![1 / 2, 1 / 2, (a : ℂ)] ![(x : ℂ), y, ((x + y) / 2 : ℝ)] =
+      symEllIntR ((a / 2 : ℝ) : ℂ) ![(((a + 1) / 2 : ℝ) : ℂ), 1 / 2]
+        ![((((x + y) / 2) ^ 2 : ℝ) : ℂ), ((x * y : ℝ) : ℂ)] := by
+  let m := (x + y) / 2
+  have hm : 0 < m := by dsimp only [m]; positivity
+  have hleft := symEllIntR_eq_integral (a := (a : ℂ)) (a' := 1)
+    (b := ![1 / 2, 1 / 2, (a : ℂ)])
+    (show 0 < (a : ℂ).re from ha) (by norm_num)
+    (by simp [Fin.sum_univ_three]; ring) (ei19c_slit3
+      (ofReal_mem_slitPlane.mpr hx) (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hm))
+  have hright := symEllIntR_eq_integral (a := ((a / 2 : ℝ) : ℂ)) (a' := 1)
+    (b := ![(((a + 1) / 2 : ℝ) : ℂ), 1 / 2])
+    (by simp; positivity) (by norm_num)
+    (by simp [Fin.sum_univ_two]; ring) (ei19c_slit2
+      (ofReal_mem_slitPlane.mpr (sq_pos_of_pos hm)) (ofReal_mem_slitPlane.mpr (mul_pos hx hy)))
+  rw [hleft, hright, Complex.betaIntegral_eval_one_right (show 0 < (a : ℂ).re from ha),
+    Complex.betaIntegral_eval_one_right (by simp; positivity)]
+  simp only [one_div, inv_inv, sub_self, cpow_zero, one_mul, Fin.prod_univ_three, Fin.prod_univ_two,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons]
+  have H := integral_cpow_arithmetic_progression_quadratic (a := a) hx hy
+  change (∫ u in Ioi (0 : ℝ), ((u + m ^ 2 : ℝ) : ℂ) ^ (((-(a + 1) / 2 : ℝ) : ℂ)) *
+      ((u + x * y : ℝ) : ℂ) ^ ((-1 / 2 : ℝ) : ℂ)) =
+    2 * ∫ t in Ioi (0 : ℝ), ((t + x : ℝ) : ℂ) ^ ((-1 / 2 : ℝ) : ℂ) *
+      ((t + y : ℝ) : ℂ) ^ ((-1 / 2 : ℝ) : ℂ) * ((t + m : ℝ) : ℂ) ^ ((-a : ℝ) : ℂ) at H
+  push_cast at H ⊢
+  norm_num only [neg_div] at H ⊢
+  rw [H]
+  ring
+
+/-- Composing `R` with an analytic node map is analytic whenever the nodes stay on their
+principal slit branches at the base point. -/
+lemma analyticAt_symEllIntR_comp {n : ℕ} (a : ℂ) (b : Fin n → ℂ)
+    {f : ℂ → Fin n → ℂ} {w : ℂ} (hf : AnalyticAt ℂ f w)
+    (hw : f w ∈ Carlson.carlsonRSlitDomain) :
+    AnalyticAt ℂ (fun v => symEllIntR a b (f v)) w := by
+  have H : AnalyticAt ℂ (fun v => Carlson.carlsonR (-a) b (f v)) w := by
+    unfold Carlson.carlsonR
+    exact analyticAt_const.mul (Carlson.analyticAt_regCarlsonR_comp
+      analyticAt_const analyticAt_const hf hw)
+  apply H.congr
+  filter_upwards [hf.continuousAt.eventually (Carlson.isOpen_carlsonRSlitDomain.mem_nhds hw)] with v hv
+  exact (symEllIntR_of_mem a b hv).symm
+
+/-- The arithmetic-progression quadratic transformation continues to all pairs of nodes
+in the open right half-plane. -/
+lemma symEllIntR_arithmetic_progression_quadratic {a : ℝ} (ha : 0 < a) {x y : ℂ}
+    (hx : 0 < x.re) (hy : 0 < y.re) :
+    symEllIntR (a : ℂ) ![1 / 2, 1 / 2, (a : ℂ)] ![x, y, (x + y) / 2] =
+      symEllIntR ((a / 2 : ℝ) : ℂ) ![(((a + 1) / 2 : ℝ) : ℂ), 1 / 2]
+        ![((x + y) / 2) ^ 2, x * y] := by
+  have hm (X Y : ℂ) (hX : 0 < X.re) (hY : 0 < Y.re) : 0 < ((X + Y) / 2).re := by
+    simp only [div_ofNat_re, add_re]; linarith
+  apply Carlson.TwoVariable.eqOn_rightHalfPlane₂_of_real
+    (F := fun X Y => symEllIntR (a : ℂ) ![1 / 2, 1 / 2, (a : ℂ)] ![X, Y, (X + Y) / 2])
+    (G := fun X Y => symEllIntR ((a / 2 : ℝ) : ℂ) ![(((a + 1) / 2 : ℝ) : ℂ), 1 / 2]
+      ![((X + Y) / 2) ^ 2, X * Y]) ?_ ?_ ?_ ?_ ?_ hx hy
+  · intro Y hY X hX
+    apply analyticAt_symEllIntR_comp
+    · apply analyticAt_pi_iff.mpr
+      intro i; fin_cases i <;> dsimp <;> fun_prop
+    · exact ei19c_slit3 (Or.inl hX) (Or.inl hY) (Or.inl (hm X Y hX hY))
+  · intro Y hY X hX
+    apply analyticAt_symEllIntR_comp
+    · apply analyticAt_pi_iff.mpr
+      intro i; fin_cases i <;> dsimp <;> fun_prop
+    · exact ei19c_slit2 (by simpa only [pow_two] using
+        Carlson.mul_mem_slitPlane_of_re_pos (hm X Y hX hY) (hm X Y hX hY))
+        (Carlson.mul_mem_slitPlane_of_re_pos hX hY)
+  · intro X hX Y hY
+    apply analyticAt_symEllIntR_comp
+    · apply analyticAt_pi_iff.mpr
+      intro i; fin_cases i <;> dsimp <;> fun_prop
+    · exact ei19c_slit3 (Or.inl hX) (Or.inl hY) (Or.inl (hm X Y hX hY))
+  · intro X hX Y hY
+    apply analyticAt_symEllIntR_comp
+    · apply analyticAt_pi_iff.mpr
+      intro i; fin_cases i <;> dsimp <;> fun_prop
+    · exact ei19c_slit2 (by simpa only [pow_two] using
+        Carlson.mul_mem_slitPlane_of_re_pos (hm X Y hX hY) (hm X Y hX hY))
+        (Carlson.mul_mem_slitPlane_of_re_pos hX hY)
+  · intro X Y hY hYX
+    have H := symEllIntR_arithmetic_progression_quadratic_ofReal (hY.trans hYX) hY ha
+    simpa only [ofReal_pow, ofReal_div, ofReal_add, ofReal_ofNat, ofReal_mul] using H
 
 /-! ### §19.20(i) `R_F` -/
 
@@ -110,7 +266,16 @@ theorem lemniscate_first_symEllIntRF :
 theorem symEllIntRF_lemniscatic {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
     symEllIntRF x ((x + y) / 2 : ℝ) y =
       symEllIntR (1 / 4) ![3 / 4, 1 / 2] ![((((x + y) / 2) ^ 2 : ℝ) : ℂ), ((x * y : ℝ) : ℂ)] := by
-  sorry
+  have hm : 0 < (x + y) / 2 := by positivity
+  rw [symEllIntRF_comm_right, symEllIntRF_eq_symEllIntR (ofReal_mem_slitPlane.mpr hx)
+    (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hm)]
+  have H := symEllIntR_arithmetic_progression_quadratic_ofReal (a := 1 / 2) hx hy (by norm_num)
+  norm_num at H
+  have hb : (![1 / 2, 1 / 2, 1 / 2] : Fin 3 → ℂ) = fun _ => 1 / 2 := by
+    funext i; fin_cases i <;> rfl
+  rw [hb] at H
+  convert H using 1 <;> norm_num
+
 
 /-- DLMF 19.20.3, corrected complex form: `R_F(x, a, y) = R_{-1 / 4}(3 / 4, 1/2; a², xy)`, `a = (x + y)/2`, for complex
 `x, y` with `ℜ x > 0` and `ℜ y > 0`. **Corrected from the printed DLMF formula**: DLMF states it
@@ -120,7 +285,15 @@ two sides differ by a factor `±i` (independent mpmath check, 2026-10-25). -/
 theorem symEllIntRF_lemniscatic_complex {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
     symEllIntRF x ((x + y) / 2) y =
       symEllIntR (1 / 4) ![3 / 4, 1 / 2] ![((x + y) / 2) ^ 2, x * y] := by
-  sorry
+  have hm : 0 < ((x + y) / 2).re := by simp only [div_ofNat_re, add_re]; linarith
+  rw [symEllIntRF_comm_right, symEllIntRF_eq_symEllIntR (Or.inl hx) (Or.inl hy) (Or.inl hm)]
+  have H := symEllIntR_arithmetic_progression_quadratic (a := 1 / 2) (by norm_num) hx hy
+  norm_num at H
+  have hb : (![1 / 2, 1 / 2, 1 / 2] : Fin 3 → ℂ) = fun _ => 1 / 2 := by
+    funext i; fin_cases i <;> rfl
+  rw [hb] at H
+  exact H
+
 
 /-! ### §19.20(ii) `R_G` -/
 
@@ -553,7 +726,13 @@ theorem lemniscate_second_symEllIntRD :
 theorem symEllIntRD_lemniscatic {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
     symEllIntRD x y ((x + y) / 2 : ℝ) =
       symEllIntR (3 / 4) ![5 / 4, 1 / 2] ![((((x + y) / 2) ^ 2 : ℝ) : ℂ), ((x * y : ℝ) : ℂ)] := by
-  sorry
+  have hm : 0 < (x + y) / 2 := by positivity
+  rw [symEllIntRD_eq_symEllIntR (ofReal_mem_slitPlane.mpr hx)
+    (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hm)]
+  have H := symEllIntR_arithmetic_progression_quadratic_ofReal (a := 3 / 2) hx hy (by norm_num)
+  norm_num at H
+  convert H using 1 <;> norm_num
+
 
 /-- DLMF 19.20.23, corrected complex form: `R_D(x, y, a) = R_{-3 / 4}(5 / 4, 1/2; a², xy)`, `a = (x + y)/2`, for complex
 `x, y` with `ℜ x > 0` and `ℜ y > 0`. **Corrected from the printed DLMF formula**: DLMF states it
@@ -563,7 +742,12 @@ two sides differ by a factor `±i` (independent mpmath check, 2026-10-25). -/
 theorem symEllIntRD_lemniscatic_complex {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
     symEllIntRD x y ((x + y) / 2) =
       symEllIntR (3 / 4) ![5 / 4, 1 / 2] ![((x + y) / 2) ^ 2, x * y] := by
-  sorry
+  have hm : 0 < ((x + y) / 2).re := by simp only [div_ofNat_re, add_re]; linarith
+  rw [symEllIntRD_eq_symEllIntR (Or.inl hx) (Or.inl hy) (Or.inl hm)]
+  have H := symEllIntR_arithmetic_progression_quadratic (a := 3 / 2) (by norm_num) hx hy
+  norm_num at H
+  exact H
+
 
 /-! ### §19.20(v) `R_{-a}(𝐛; 𝐳)` -/
 

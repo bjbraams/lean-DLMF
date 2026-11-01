@@ -4903,10 +4903,10 @@ sources are the proved Gamma/confluent core described above. In-file ordering
 may require relocating declarations or importing a small bridge module to avoid
 using a later admission.
 
-- [DLMF/IncompleteGamma/Basic.lean](DLMF/IncompleteGamma/Basic.lean): [`normIncGammaPContinued_eq`](DLMF/IncompleteGamma/Basic.lean#L53), [`normIncGammaQContinued_eq`](DLMF/IncompleteGamma/Basic.lean#L59).
-- [DLMF/IncompleteGamma/SpecialValues.lean](DLMF/IncompleteGamma/SpecialValues.lean): [`scIncGamma_zero`](DLMF/IncompleteGamma/SpecialValues.lean#L38), [`scIncGamma_regularized_pair`](DLMF/IncompleteGamma/SpecialValues.lean#L116), [`lowerIncGamma_kummerM_pair`](DLMF/IncompleteGamma/SpecialValues.lean#L110), [`upperIncGamma_one_minus_nat`](DLMF/IncompleteGamma/SpecialValues.lean#L86), [`lowerIncGamma_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L62), [`upperIncGamma_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L68), [`normIncGammaPContinued_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L74), [`normIncGammaQContinued_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L80).
-- [DLMF/IncompleteGamma/SeriesRecurrences.lean](DLMF/IncompleteGamma/SeriesRecurrences.lean): [`scIncGamma_hasSum_exponential`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L27), [`scIncGamma_hasSum_alternating`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L33), [`upperIncGamma_hasSum_alternating`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L45), [`upperIncGamma_hasSum_exponential`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L51), [`incompleteGamma_threeTerm`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L75), [`scIncGamma_recurrence`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L81).
-- [DLMF/IncompleteGamma/ExponentialIntegral.lean](DLMF/IncompleteGamma/ExponentialIntegral.lean): [`genExpIntE_scaled_derivative`](DLMF/IncompleteGamma/ExponentialIntegral.lean#L95), [`genExpIntE_laplace_complex`](DLMF/IncompleteGamma/ExponentialIntegral.lean#L41).
+- [DLMF/IncompleteGamma/Basic.lean](DLMF/IncompleteGamma/Basic.lean): [`normIncGammaPContinued_eq`](DLMF/IncompleteGamma/ContinuedProperties.lean#L30), [`normIncGammaQContinued_eq`](DLMF/IncompleteGamma/ContinuedProperties.lean#L40).
+- [DLMF/IncompleteGamma/SpecialValues.lean](DLMF/IncompleteGamma/SpecialValues.lean): [`scIncGamma_zero`](DLMF/IncompleteGamma/SpecialValues.lean#L49), [`scIncGamma_regularized_pair`](DLMF/IncompleteGamma/SpecialValues.lean#L253), [`lowerIncGamma_kummerM_pair`](DLMF/IncompleteGamma/SpecialValues.lean#L240), [`upperIncGamma_one_minus_nat`](DLMF/IncompleteGamma/SpecialValues.lean#L122), [`lowerIncGamma_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L84), [`upperIncGamma_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L95), [`normIncGammaPContinued_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L106), [`normIncGammaQContinued_nat_succ_expPartialSum`](DLMF/IncompleteGamma/SpecialValues.lean#L114).
+- [DLMF/IncompleteGamma/SeriesRecurrences.lean](DLMF/IncompleteGamma/SeriesRecurrences.lean): [`scIncGamma_hasSum_exponential`](DLMF/IncompleteGamma/ContinuedProperties.lean#L49), [`scIncGamma_hasSum_alternating`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L29), [`upperIncGamma_hasSum_alternating`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L220), [`upperIncGamma_hasSum_exponential`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L241), [`incompleteGamma_threeTerm`](DLMF/IncompleteGamma/SeriesRecurrences.lean#L783), [`scIncGamma_recurrence`](DLMF/IncompleteGamma/ContinuedProperties.lean#L63).
+- [DLMF/IncompleteGamma/ExponentialIntegral.lean](DLMF/IncompleteGamma/ExponentialIntegral.lean): [`genExpIntE_scaled_derivative`](DLMF/IncompleteGamma/ExponentialIntegral.lean#L438), [`genExpIntE_laplace_complex`](DLMF/IncompleteGamma/ExponentialIntegral.lean#L49).
 
 For `scIncGamma_hasSum_exponential`, construct the genuine `HasSum` from the
 regularized confluent series rather than treating the old `tsum` identity as
@@ -9677,3 +9677,74 @@ The Jacobi file decreases from 1,242 to 1,107 lines, and Mathieu `SmallQ` from 1
 hypergeometric logarithmic connection proofs, the larger Jacobi coefficient certificates,
 and the unprocessed hypothesis and development-prefix naming candidates. The review's
 other long-proof and duplicate candidates are not claimed to be resolved by this batch.
+
+Validation for this cleanup: the full build passes all 14,924 jobs, and all 281 changed
+Lean files pass direct checks with both implicit-variable options disabled. The compiled
+audit matches all 26,256 explicit named declarations and all 205 directly declared fields:
+no missing or name-only docstrings, no remaining lowercase predicate definitions from the
+flagged group, and no nonstandard axiom dependencies beyond the existing admissions.
+The direct admission count is 1,552. All 13,353 checked catalogue/ledger/review source links
+resolve, and acquisition-ledger regeneration is idempotent. The import survey reports no
+new two-way area pairs, no forbidden foundational dependencies, no missing modules and no
+file-import cycles. Every Lean file respects the 1,500-line limit. The errata PDF rebuilds
+successfully with the reports' LuaLaTeX configuration.
+
+## Parallel proof round after the review cleanup (2026-10-30)
+
+The subsequent parallel proof round removes **70 direct admissions**, reducing the
+cleanup baseline from **1,552 to 1,482**. The complete declaration inventory, source
+hashes, axiom results and reproduction programs are in
+[ProofRound20261030g.json](ProofRound20261030g.json). Its completed targets have no `sorryAx`
+dependency; the compiled audit also records downstream theorems that become independent
+without changing their proofs.
+
+The work covers Fourier transforms of distributions and polynomial differential operators,
+the derivative of the sign distribution, the nonregularity of Dirac delta, Gaussian
+regularization, infinite products and the discriminant product formula. Calculus additions
+include repeated primitives, differentiation of improper parameter integrals, normal-domain
+integration in two and three dimensions, the Cauchy integral and a Poisson-kernel tail limit.
+TauCeti supplies the Hermite oscillator equation and Hilbert basis after an explicit
+normalization equality. Fabry's transformation and coefficient identities, the Stokes
+transition limit and sign, and its first exact coefficient values are proved.
+
+Later chapters gain both unit-argument contiguous hypergeometric recurrences, q-Karlsson–Minton
+summations, an annular bilateral-series analyticity result, the one-phi-one sum, the Jackson
+integral limit, q-Laguerre orthogonality and matrix Laplace-transform analyticity. The elliptic
+proofs cover integral representations, the wave and Laplace equations, lemniscatic formulas,
+addition and duplication, third-kind bounds, an interpolation integral, the ellipse perimeter
+and endpoint-inclusive small-argument asymptotics. The Struve relative-error bound and
+terminating Lommel expansion are proved, as are the multiple-series zeta formula and the
+second zeta derivative at zero and the even-zeta summation 25.8.10.
+
+Two acquired domains needed correction. Parameter analyticity for an ODE now requires a
+connected spatial domain (`IsPreconnected D`); the corrected theorem remains admitted.
+Fabry's coefficient identities now require `t ≠ 0`, and the corrected identities are proved.
+Independent Lean counterexamples, importing no corresponding admitted theorem, are embedded
+in the manifest. These are formalization corrections, recorded in category (c) of
+[the errata report](reports/DLMFErrata.tex). The Struve bound needs only a positive lower
+bound on the parameter distances; redundant non-pole and minimum-attainment hypotheses
+have been removed. Three derived inequalities have likewise been removed from the
+symmetric elementary addition theorem.
+
+Shared APIs now cover iterated distribution derivatives, the cosine-squared substitution,
+compact regions between continuous graphs, polynomially weighted hypergeometric coefficient
+decay, and endpoint normalization independent of analytic-continuation existence. Four
+canonical node-derivative declarations move unchanged into `SymmetricNodeDerivatives`,
+avoiding a duplicate proof and an import cycle. A dedicated `RelativeBounds` module contains
+the Struve estimate. The q-Laguerre proof uses a separate monomial orthogonality lemma; the
+elliptic families share node-chain rules, root algebra and duplication coordinates.
+
+Validation: the full project build passes **15,006 jobs**,
+and all **43 changed Lean files** pass direct checks with
+both implicit-variable options disabled. The compiled audit matches
+**26,344 named declarations** and
+all **205 directly declared fields**;
+docstrings are present and informative, and no new nonstandard axioms are introduced.
+All Lean sources respect the 1,500-line limit. The import survey reports no new two-way
+area pairs, forbidden foundational imports, missing modules or file-import cycles.
+Catalogue and acquisition-ledger links are refreshed, ledger regeneration is idempotent,
+and the errata PDF rebuilds successfully.
+
+The ledger resolver now distinguishes exact qualified source names from tagged suffixes,
+so the continued incomplete-beta functions keep their own links rather than being redirected
+to the similarly named `Real` functions. All 25 ledgers regenerate idempotently.

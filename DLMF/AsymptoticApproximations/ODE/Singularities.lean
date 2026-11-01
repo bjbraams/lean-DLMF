@@ -7,6 +7,7 @@ module
 
 public import DLMF.AsymptoticApproximations.ODE.Basic
 public import DLMFMathlib.Analysis.ODE.Singularities
+public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 
@@ -230,24 +231,80 @@ theorem fabry_transformation {f g w : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     IsLinearODE2SolOn (fun t => 2 * t * (f (t ^ 2) - f₀) - 1 / t)
       (fun t => 4 * t ^ 2 * (g (t ^ 2) - f₀ * f (t ^ 2) / 2 + f₀ ^ 2 / 4))
       (fun t => exp (f₀ * t ^ 2 / 2) * w (t ^ 2)) {t : ℂ | t ≠ 0 ∧ t ^ 2 ∈ U} := by
-  sorry
+  have hT : IsOpen {t : ℂ | t ≠ 0 ∧ t ^ 2 ∈ U} :=
+    isOpen_ne_fun continuous_id continuous_const |>.inter
+      (hU.preimage (by fun_prop))
+  have hs (t : ℂ) : HasDerivAt (fun t : ℂ => t ^ 2) (2 * t) t := by
+    convert! (hasDerivAt_id t).pow 2 using 1 <;> simp
+  have he (t : ℂ) : HasDerivAt (fun t : ℂ => exp (f₀ * t ^ 2 / 2))
+      (exp (f₀ * t ^ 2 / 2) * (f₀ * t)) t := by
+    convert (((hs t).const_mul f₀).div_const 2).cexp using 1 <;> ring
+  unfold IsLinearODE2SolOn at hw ⊢
+  refine DLMF.Painleve.isODE2SolutionOn_of_hasDerivAt hT
+    (v := fun t => exp (f₀ * t ^ 2 / 2) *
+      (f₀ * t * w (t ^ 2) + 2 * t * deriv w (t ^ 2))) ?_ ?_
+  · intro t ht
+    have hwt : HasDerivAt (fun s : ℂ => w (s ^ 2))
+        (deriv w (t ^ 2) * (2 * t)) t :=
+      (hw.hasDerivAt (z := t ^ 2) ht.2).comp (h := fun s : ℂ => s ^ 2) t (hs t)
+    refine ((he t).mul hwt).congr_deriv ?_
+    ring
+  · intro t ht
+    have hwt : HasDerivAt (fun s : ℂ => w (s ^ 2))
+        (deriv w (t ^ 2) * (2 * t)) t :=
+      (hw.hasDerivAt (z := t ^ 2) ht.2).comp (h := fun s : ℂ => s ^ 2) t (hs t)
+    have hw't : HasDerivAt (fun s : ℂ => deriv w (s ^ 2))
+        (-(f (t ^ 2) * deriv w (t ^ 2) + g (t ^ 2) * w (t ^ 2)) * (2 * t)) t :=
+      (hw.hasDerivAt_deriv (t ^ 2) ht.2).comp (h := fun s : ℂ => s ^ 2) t (hs t)
+    have hlinear (c : ℂ) : HasDerivAt (fun t : ℂ => c * t) c t := by
+      simpa using (hasDerivAt_id t).const_mul c
+    refine ((he t).mul (((hlinear f₀).mul hwt).add
+      ((hlinear 2).mul hw't))).congr_deriv ?_
+    simp only [Pi.mul_apply, Pi.add_apply]
+    field_simp [ht.1]
+    ring
+
 
 /-- DLMF 2.7.ii (Fabry's transformation, the dichotomy): if `f₀² = 4g₀`, the coefficients of
 the transformed equation of 2.7.19 have the expansions
 `t F(t) = (2f₁ - 1) + ∑_{s≥1} 2 f_{s+1} t^{-2s}` and
 `G(t) = ∑_{s≥0} 4 (g_{s+1} - f₀ f_{s+1}/2) t^{-2s}`, so its characteristic equation is
 `λ² + 4(g₁ - f₀f₁/2) = 0`: either `g₁ ≠ f₀f₁/2` and the roots are unequal, or `t F(t)` and
-`t² G(t)` are power series in `t⁻¹` and `t = ∞` is a regular singularity. -/
+`t² G(t)` are power series in `t⁻¹` and `t = ∞` is a regular singularity.
+The variable `t` is nonzero, as in Fabry’s transformation; the totalized value at zero
+does not satisfy these series identities. -/
 @[dlmf 2.7.ii]
 theorem fabry_coefficients {f g : ℂ → ℂ} {fs gs : ℕ → ℂ} {a : ℝ}
     (hf : ∀ z : ℂ, a < ‖z‖ → HasSum (fun s => fs s * z⁻¹ ^ s) (f z))
     (hg : ∀ z : ℂ, a < ‖z‖ → HasSum (fun s => gs s * z⁻¹ ^ s) (g z))
-    (h0 : fs 0 ^ 2 = 4 * gs 0) {t : ℂ} (ht : a < ‖t ^ 2‖) :
+    (h0 : fs 0 ^ 2 = 4 * gs 0) {t : ℂ} (ht : a < ‖t ^ 2‖) (ht0 : t ≠ 0) :
     HasSum (fun s => (if s = 0 then 2 * fs 1 - 1 else 2 * fs (s + 1)) * (t⁻¹ ^ 2) ^ s)
         (t * (2 * t * (f (t ^ 2) - fs 0) - 1 / t)) ∧
       HasSum (fun s => 4 * (gs (s + 1) - fs 0 * fs (s + 1) / 2) * (t⁻¹ ^ 2) ^ s)
         (4 * t ^ 2 * (g (t ^ 2) - fs 0 * f (t ^ 2) / 2 + fs 0 ^ 2 / 4)) := by
-  sorry
+  have htail (c : ℕ → ℂ) (v : ℂ)
+      (hc : HasSum (fun s => c s * (t ^ 2)⁻¹ ^ s) v) :
+      HasSum (fun s => c (s + 1) * (t⁻¹ ^ 2) ^ s) (t ^ 2 * (v - c 0)) := by
+    have hs := ((hasSum_nat_add_iff' 1).mpr hc).mul_left (t ^ 2)
+    simp only [Finset.sum_range_one, pow_zero, mul_one] at hs
+    convert! hs using 1
+    ext s
+    rw [pow_succ ((t ^ 2)⁻¹) s, inv_pow]
+    field_simp
+  have hfs := htail fs (f (t ^ 2)) (hf _ ht)
+  have hgs := htail gs (g (t ^ 2)) (hg _ ht)
+  constructor
+  · have hs := (hfs.mul_left 2).sub (hasSum_ite_eq (0 : ℕ) (1 : ℂ))
+    convert! hs using 1
+    · ext s
+      by_cases hs0 : s = 0 <;> simp [hs0] <;> ring
+    · field_simp
+  · have hs := (hgs.sub (hfs.mul_left (fs 0 / 2))).mul_left 4
+    convert! hs using 1
+    · ext s
+      ring
+    · linear_combination -(t ^ 2) * h0
+
 
 /-! ### §2.7(iv) Numerically satisfactory solutions -/
 

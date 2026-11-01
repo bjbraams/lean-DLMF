@@ -910,7 +910,39 @@ theorem symEllIntR_two_eq_ordinaryHypergeometric (a b₁ b₂ : ℂ) (hb : ∀ n
     (harg : arg z₁ - arg z₂ ∈ Ioo (-π) π) :
     symEllIntR a ![b₁, b₂] ![z₁, z₂] = z₂ ^ (-a) * ordinaryHypergeometric a b₁ (b₁ + b₂)
         (1 - z₁ / z₂) := by
-  sorry
+  have h₂ : z₂ ≠ 0 := slitPlane_ne_zero hz₂
+  have h₁ : z₁ ≠ 0 := slitPlane_ne_zero hz₁
+  have hdivarg : arg (z₁ / z₂) = arg z₁ - arg z₂ := by
+    rw [div_eq_mul_inv, arg_mul h₁ (inv_ne_zero h₂)]
+    · rw [arg_inv, ite_eq_right (mem_slitPlane_iff_arg.mp hz₂).1]
+      ring
+    · rw [arg_inv, ite_eq_right (mem_slitPlane_iff_arg.mp hz₂).1]
+      change -π < arg z₁ + -arg z₂ ∧ arg z₁ + -arg z₂ ≤ π
+      simpa only [sub_eq_add_neg] using And.intro harg.1 harg.2.le
+  have hdiv : z₁ / z₂ ∈ slitPlane := by
+    apply mem_slitPlane_iff.mpr
+    left
+    have hr := (abs_re_le_norm (1 - z₁ / z₂)).trans_lt hz
+    simp only [sub_re, one_re] at hr
+    linarith [le_abs_self (1 - (z₁ / z₂).re)]
+  rw [ordinaryHypergeometric_eq_symEllIntR a b₁ (b₁ + b₂) hb hz]
+  simp only [show b₁ + b₂ - b₁ = b₂ by ring, sub_sub_cancel]
+  have hnodes : (![z₁, z₂] : Fin 2 → ℂ) = fun i => z₂ * ![z₁ / z₂, 1] i := by
+    funext i
+    fin_cases i
+    · exact (mul_div_cancel₀ z₁ h₂).symm
+    · simp
+  rw [hnodes, symEllIntR_mul a _ (ei19c_slit2 hdiv one_mem_slitPlane) hz₂]
+  intro i
+  fin_cases i
+  · change arg z₂ + arg (z₁ / z₂) ∈ Ioo (-π) π
+    rw [hdivarg, show arg z₂ + (arg z₁ - arg z₂) = arg z₁ by ring]
+    exact ⟨neg_pi_lt_arg z₁,
+      lt_of_le_of_ne (arg_le_pi z₁) (mem_slitPlane_iff_arg.mp hz₁).1⟩
+  · change arg z₂ + arg 1 ∈ Ioo (-π) π
+    rw [arg_one, add_zero]
+    exact ⟨neg_pi_lt_arg z₂,
+      lt_of_le_of_ne (arg_le_pi z₂) (mem_slitPlane_iff_arg.mp hz₂).1⟩
 
 /-! ### Round-1 helpers: the lemniscate constants -/
 

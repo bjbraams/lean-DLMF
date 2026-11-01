@@ -7,6 +7,7 @@ module
 
 public import DLMF.EllipticIntegrals.SymmetricSpecialCases
 public import Carlson.R.EulerPoisson
+public import DLMF.EllipticIntegrals.SymmetricNodeDerivatives
 
 /-!
 # Symmetric elliptic integrals: derivatives and differential equations (DLMF §19.18)
@@ -16,6 +17,8 @@ the Euler–Poisson system (19.18.12), (19.18.13) of `R_{-a}(𝐛; 𝐳)` on the
 corresponding statements (19.18.1), (19.18.2), (19.18.6), (19.18.7), (19.18.9), (19.18.10) for
 `R_F`, `R_G`, and the second-order equations (19.18.14)–(19.18.17) of the complete case
 `R_{-a}(½, ½; z₁, z₂)`.
+The wave and Laplace equations follow by the radial Laplacian chain rule from the
+Euler–Poisson–Darboux and axial-potential equations, respectively.
 
 Partial derivatives are `Dirichlet.carlsonPartialDeriv j F z = d/dw F(z with zⱼ := w)` at
 `w = zⱼ` (from `lean-codes`); `𝐛 + 𝐞ⱼ` is `Dirichlet.addDirichletUnit b j`. The sum of the three
@@ -33,44 +36,6 @@ open scoped Real Topology
 namespace DLMF.EllipticIntegrals
 
 variable {ι : Type*} [Fintype ι]
-
-/-- Identity under the stated parameter and domain assumptions: `symEllIntR a b =ᶠ[𝓝 z]
-Carlson.carlsonR (-a) b`. -/
-lemma ei19c_eventuallyEq (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
-    (hz : z ∈ Carlson.carlsonRSlitDomain) :
-    symEllIntR a b =ᶠ[𝓝 z] Carlson.carlsonR (-a) b := by
-  filter_upwards [Carlson.isOpen_carlsonRSlitDomain.mem_nhds hz] with w hw
-  exact symEllIntR_of_mem _ _ hw
-
-open scoped Classical in
-/-- At `(z j)`, the function `(fun w => symEllIntR a b (Function.update z j w))` has derivative
-`(Gamma (∑ i, b i) * (-a * b j * Carlson.regCarlsonR (-a - 1) (Dirichlet.addDirichletUnit b j)
-z))`. -/
-lemma ei19c_hasDerivAt_update (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
-    (hz : z ∈ Carlson.carlsonRSlitDomain) (j : ι) :
-    HasDerivAt (fun w => symEllIntR a b (Function.update z j w))
-      (Gamma (∑ i, b i) * (-a * b j *
-        Carlson.regCarlsonR (-a - 1) (Dirichlet.addDirichletUnit b j) z)) (z j) := by
-  have hc : Tendsto (Function.update z j) (𝓝 (z j)) (𝓝 z) := by
-    have := ((continuous_const (y := z)).update j continuous_id).tendsto (z j)
-    simpa using this
-  have hev := hc.eventually (ei19c_eventuallyEq a b hz)
-  have h := (Carlson.hasDerivAt_regCarlsonR_update (-a) b hz j).const_mul (Gamma (∑ i, b i))
-  exact h.congr_of_eventuallyEq hev
-
-open scoped Classical in
-/-- DLMF 19.18.4: `∂ⱼ R_{-a}(𝐛; 𝐳) = -a wⱼ R_{-a-1}(𝐛 + 𝐞ⱼ; 𝐳)`, `wⱼ = bⱼ/∑ bₖ` (19.18.3),
-for slit-plane nodes and `∑ bₖ ≠ 0`. -/
-@[dlmf 19.18.E4, dlmf 19.18.E3]
-theorem hasDerivAt_symEllIntR_update (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
-    (hz : z ∈ Carlson.carlsonRSlitDomain) (j : ι) (hb : ∑ i, b i ≠ 0) :
-    HasDerivAt (fun w => symEllIntR a b (Function.update z j w))
-      (-a * (b j / ∑ i, b i) * symEllIntR (a + 1) (Dirichlet.addDirichletUnit b j) z) (z j) := by
-  refine (ei19c_hasDerivAt_update a b hz j).congr_deriv ?_
-  rw [symEllIntR_of_mem _ _ hz]
-  unfold Carlson.carlsonR
-  rw [Dirichlet.sum_addDirichletUnit, Complex.Gamma_add_one _ hb, show -(a + 1) = -a - 1 by ring]
-  field_simp
 
 /-- DLMF 19.18.8: `∑ⱼ ∂ⱼ R_{-a}(𝐛; 𝐳) = -a R_{-a-1}(𝐛; 𝐳)`, as the derivative along the diagonal
 translation `s ↦ 𝐳 + s𝟏` at `s = x` (slit-plane nodes `x + zⱼ`; all complex `a, 𝐛`). -/
@@ -231,24 +196,6 @@ lemma ei19c_RGVec_eventuallyEq {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlsonRS
     symEllIntRGVec =ᶠ[𝓝 v] symEllIntR (-1 / 2) (fun _ : Fin 3 => 1 / 2) := by
   filter_upwards [Carlson.isOpen_carlsonRSlitDomain.mem_nhds hv] with w hw
   rw [symEllIntRGVec, symEllIntRG_eq_symEllIntR (hw 0) (hw 1) (hw 2), ei19c_vec3]
-
-/-- DLMF 19.18.1: `∂R_F(x, y, z)/∂z = -(1/6) R_D(x, y, z)` (slit-plane variables). -/
-@[dlmf 19.18.E1]
-theorem hasDerivAt_symEllIntRF_right {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
-    (hz : z ∈ slitPlane) :
-    HasDerivAt (fun w => symEllIntRF x y w) (-(1 / 6) * symEllIntRD x y z) z := by
-  have h := hasDerivAt_symEllIntR_update (1 / 2) (fun _ : Fin 3 => 1 / 2) (ei19c_slit3 hx hy hz) 2
-    (by simp)
-  refine (h.congr_of_eventuallyEq ?_).congr_deriv ?_
-  · filter_upwards [isOpen_slitPlane.mem_nhds hz] with w hw
-    rw [symEllIntRF_eq_symEllIntR hx hy hw]
-    congr 1; funext i; fin_cases i <;> simp [Function.update]
-  · have hb : Dirichlet.addDirichletUnit (fun _ : Fin 3 => (1 / 2 : ℂ)) 2 = ![1 / 2, 1 / 2, 3 / 2] := by
-      unfold Dirichlet.addDirichletUnit
-      funext i; fin_cases i <;> simp [Function.update]; norm_num
-    rw [hb, show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num, ← symEllIntRD_eq_symEllIntR hx hy hz]
-    simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-    ring
 
 /-- DLMF 19.18.2: `d/dx R_G(x + a, x + b, x + c) = (1/2) R_F(x + a, x + b, x + c)`
 (`x + a, x + b, x + c ∈ ℂ \ (-∞, 0]`). -/
@@ -451,6 +398,86 @@ theorem eulerPoissonDarboux_symEllIntR (a : ℂ) {x y : ℝ} (hxy : |y| < x) (hy
     4 * SeveralComplexVariables.partialDeriv 0
       (SeveralComplexVariables.partialDeriv 1 (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])) p * hyinv
 
+/-- The second derivative of a radial profile along one Cartesian coordinate. -/
+private lemma deriv2_comp_sqrt_sq_add {f : ℝ → ℂ} {x y : ℝ} (hr : 0 < x ^ 2 + y ^ 2)
+    (hf : ContDiffAt ℝ 2 f (Real.sqrt (x ^ 2 + y ^ 2))) :
+    deriv (fun s => deriv (fun q => f (Real.sqrt (q ^ 2 + y ^ 2))) s) x =
+      ((y ^ 2 / Real.sqrt (x ^ 2 + y ^ 2) ^ 3 : ℝ) : ℂ) * deriv f (Real.sqrt (x ^ 2 + y ^ 2)) +
+      ((x ^ 2 / Real.sqrt (x ^ 2 + y ^ 2) ^ 2 : ℝ) : ℂ) *
+        deriv (deriv f) (Real.sqrt (x ^ 2 + y ^ 2)) := by
+  let r := Real.sqrt (x ^ 2 + y ^ 2)
+  have hr0 : 0 < r := Real.sqrt_pos.mpr hr
+  have hsq : r ^ 2 = x ^ 2 + y ^ 2 := Real.sq_sqrt hr.le
+  have hu (s : ℝ) (hs : 0 < s ^ 2 + y ^ 2) :
+      HasDerivAt (fun q => Real.sqrt (q ^ 2 + y ^ 2)) (s / Real.sqrt (s ^ 2 + y ^ 2)) s := by
+    convert (((hasDerivAt_id s).pow 2).add_const (y ^ 2)).sqrt hs.ne' using 1
+    · funext q; rfl
+    · simp only [id_eq, Pi.pow_apply, Nat.cast_ofNat, Nat.reduceSub, pow_one, mul_one]
+      field_simp
+  have hp : HasDerivAt (fun s => s / Real.sqrt (s ^ 2 + y ^ 2)) (y ^ 2 / r ^ 3) x := by
+    convert (hasDerivAt_id x).div (hu x hr) hr0.ne' using 1
+    · funext q; rfl
+    · change y ^ 2 / r ^ 3 = (1 * r - x * (x / r)) / r ^ 2
+      field_simp
+      nlinarith
+  have hpath : Tendsto (fun s : ℝ => Real.sqrt (s ^ 2 + y ^ 2)) (𝓝 x) (𝓝 r) := by
+    exact (Real.continuous_sqrt.comp ((continuous_id.pow 2).add continuous_const)).tendsto x
+  have hpos : ∀ᶠ s : ℝ in 𝓝 x, 0 < s ^ 2 + y ^ 2 :=
+    (show ContinuousAt (fun s : ℝ => s ^ 2 + y ^ 2) x by fun_prop).eventually_const_lt hr
+  have he : (fun s => deriv (fun q => f (Real.sqrt (q ^ 2 + y ^ 2))) s) =ᶠ[𝓝 x]
+      fun s => (s / Real.sqrt (s ^ 2 + y ^ 2)) • deriv f (Real.sqrt (s ^ 2 + y ^ 2)) := by
+    filter_upwards [hpos,
+      hpath.eventually (hf.eventually (by norm_num))] with s hs hfs
+    exact ((hfs.differentiableAt (by norm_num)).hasDerivAt.scomp s (hu s hs)).deriv
+  rw [he.deriv_eq]
+  have hd : DifferentiableAt ℝ (deriv f) r :=
+    (hf.derivWithin (m := 1) (by norm_num)).differentiableAt (by norm_num)
+  change DifferentiableAt ℝ (deriv f) (Real.sqrt (x ^ 2 + y ^ 2)) at hd
+  have H := (hp.smul (hd.hasDerivAt.scomp x (hu x hr))).deriv
+  change deriv (fun s => (s / Real.sqrt (s ^ 2 + y ^ 2)) •
+      deriv f (Real.sqrt (s ^ 2 + y ^ 2))) x =
+    (x / r) • ((x / r) • deriv (deriv f) r) + (y ^ 2 / r ^ 3) • deriv f r at H
+  rw [H]
+  simp only [Complex.real_smul, ofReal_div, ofReal_pow]
+  ring
+
+/-- Summing the Cartesian second derivatives of a radial profile gives its radial Laplacian. -/
+private lemma sum_deriv2_comp_sqrt_sq_add {f : ℝ → ℂ} {x y : ℝ} (hr : 0 < x ^ 2 + y ^ 2)
+    (hf : ContDiffAt ℝ 2 f (Real.sqrt (x ^ 2 + y ^ 2))) :
+    deriv (fun s => deriv (fun q => f (Real.sqrt (q ^ 2 + y ^ 2))) s) x +
+      deriv (fun s => deriv (fun q => f (Real.sqrt (x ^ 2 + q ^ 2))) s) y =
+    deriv (deriv f) (Real.sqrt (x ^ 2 + y ^ 2)) +
+      (1 / Real.sqrt (x ^ 2 + y ^ 2) : ℂ) * deriv f (Real.sqrt (x ^ 2 + y ^ 2)) := by
+  have hfun : (fun q => f (Real.sqrt (x ^ 2 + q ^ 2))) =
+      fun q => f (Real.sqrt (q ^ 2 + x ^ 2)) := by funext q; rw [add_comm]
+  rw [deriv2_comp_sqrt_sq_add hr hf, hfun,
+    deriv2_comp_sqrt_sq_add (by linarith : 0 < y ^ 2 + x ^ 2) (by simpa only [add_comm] using hf)]
+  simp only [add_comm (y ^ 2) (x ^ 2)]
+  let r := Real.sqrt (x ^ 2 + y ^ 2)
+  have hr0 : 0 < r := Real.sqrt_pos.mpr hr
+  have hsq : r ^ 2 = x ^ 2 + y ^ 2 := Real.sq_sqrt hr.le
+  have h1 : y ^ 2 / r ^ 3 + x ^ 2 / r ^ 3 = 1 / r := by field_simp; nlinarith
+  have h2 : x ^ 2 / r ^ 2 + y ^ 2 / r ^ 2 = 1 := by field_simp; nlinarith
+  have H1 := congrArg (fun a : ℝ => (a : ℂ)) h1
+  have H2 := congrArg (fun a : ℝ => (a : ℂ)) h2
+  simp only [ofReal_add, ofReal_div, ofReal_one] at H1 H2
+  simp only [ofReal_div]
+  change _ = deriv (deriv f) r + (1 / (r : ℂ)) * deriv f r
+  linear_combination (deriv f r) * H1 + (deriv (deriv f) r) * H2
+
+/-- A real affine line through a holomorphic node function has a smooth local profile. -/
+private lemma contDiffAt_of_eqOn_analytic_comp_affine [DecidableEq ι] {H G : (ι → ℂ) → ℂ} {U : Set (ι → ℂ)}
+    (hH : AnalyticOnNhd ℂ H U) (hU : IsOpen U) (hGH : EqOn G H U)
+    {c d : ι → ℂ} {r : ℝ} (hr : c + (r : ℂ) • d ∈ U) :
+    ContDiffAt ℝ 2 (fun t : ℝ => G (c + (t : ℂ) • d)) r := by
+  have hpath : ContDiff ℝ 2 (fun t : ℝ => c + (t : ℂ) • d) :=
+    contDiff_const.add (Complex.ofRealCLM.contDiff.smul contDiff_const)
+  have HH : ContDiffAt ℝ 2 H (c + (r : ℂ) • d) :=
+    (hH _ hr).contDiffAt.restrict_scalars ℝ
+  apply (HH.comp r hpath.contDiffAt).congr_of_eventuallyEq
+  filter_upwards [hpath.continuous.continuousAt.eventually (hU.mem_nhds hr)] with s hs
+  exact hGH hs
+
 /-- DLMF 19.18.15: `W = R_{-a}(½, ½; t + r, t - r)`, `r = √(x² + y²)`, satisfies the wave
 equation `W_tt = W_xx + W_yy`, for real `t > r > 0`. -/
 @[dlmf 19.18.E15]
@@ -461,7 +488,34 @@ theorem wave_symEllIntR (a : ℂ) {t x y : ℝ} (hr : 0 < x ^ 2 + y ^ 2)
         ![(t + Real.sqrt (x ^ 2 + y ^ 2) : ℝ), (t - Real.sqrt (x ^ 2 + y ^ 2) : ℝ)]
     deriv (fun s => deriv (fun r => W r x y) s) t =
       deriv (fun s => deriv (fun r => W t r y) s) x + deriv (fun s => deriv (fun r => W t x r) s) y := by
-  sorry
+  intro W
+  let r := Real.sqrt (x ^ 2 + y ^ 2)
+  let w : ℝ → ℝ → ℂ := fun t r => symEllIntR a ![1 / 2, 1 / 2] ![((t + r : ℝ) : ℂ), ((t - r : ℝ) : ℂ)]
+  have hr0 : 0 < r := Real.sqrt_pos.mpr hr
+  have hH := p19sR1_analyticOnNhd_carlsonR (-a) (![1 / 2, 1 / 2] : Fin 2 → ℂ)
+  have hU := Carlson.isOpen_carlsonRSlitDomain (ι := Fin 2)
+  have hGH : EqOn (symEllIntR a ![1 / 2, 1 / 2]) (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])
+      Carlson.carlsonRSlitDomain := fun z hz => symEllIntR_of_mem _ _ hz
+  have he (s : ℝ) : (![((t + s : ℝ) : ℂ), ((t - s : ℝ) : ℂ)] : Fin 2 → ℂ) =
+      ![(t : ℂ), t] + (s : ℂ) • ![1, -1] := by
+    funext i; fin_cases i <;> simp; ring
+  have hp : ![(t : ℂ), t] + (r : ℂ) • ![1, -1] ∈ Carlson.carlsonRSlitDomain := by
+    rw [← he r]
+    exact ei19c_slit2 (ofReal_mem_slitPlane.mpr (by linarith))
+      (ofReal_mem_slitPlane.mpr (by linarith))
+  have hf : ContDiffAt ℝ 2 (w t) r := by
+    have H := contDiffAt_of_eqOn_analytic_comp_affine hH hU hGH hp
+    convert H using 1
+    funext s
+    exact congrArg (symEllIntR a ![1 / 2, 1 / 2]) (he s)
+  have Hrad := sum_deriv2_comp_sqrt_sq_add hr hf
+  have Hep := eulerPoissonDarboux_symEllIntR a (x := t) (y := r)
+    (by simpa only [abs_of_pos hr0] using ht) hr0.ne'
+  change deriv (fun s => deriv (fun q => w q r) s) t =
+    deriv (fun s => deriv (fun q => w t (Real.sqrt (q ^ 2 + y ^ 2))) s) x +
+      deriv (fun s => deriv (fun q => w t (Real.sqrt (x ^ 2 + q ^ 2))) s) y
+  exact Hep.trans Hrad.symm
+
 
 /-- DLMF 19.18.16: `u = R_{-a}(½, ½; x + iy, x - iy)` satisfies the equation of axially
 symmetric potential theory `u_xx + u_yy + (1/y) u_y = 0`, for real `x`, `y ≠ 0`. -/
@@ -522,6 +576,33 @@ theorem laplace_symEllIntR (a : ℂ) {x y z : ℝ} (hρ : 0 < x ^ 2 + y ^ 2) :
         ![z + Real.sqrt (x ^ 2 + y ^ 2) * I, z - Real.sqrt (x ^ 2 + y ^ 2) * I]
     deriv (fun s => deriv (fun r => U r y z) s) x + deriv (fun s => deriv (fun r => U x r z) s) y +
       deriv (fun s => deriv (fun r => U x y r) s) z = 0 := by
-  sorry
+  intro U
+  let r := Real.sqrt (x ^ 2 + y ^ 2)
+  let u : ℝ → ℝ → ℂ := fun z r => symEllIntR a ![1 / 2, 1 / 2]
+    ![(z : ℂ) + r * I, z - r * I]
+  have hr0 : 0 < r := Real.sqrt_pos.mpr hρ
+  have hH := p19sR1_analyticOnNhd_carlsonR (-a) (![1 / 2, 1 / 2] : Fin 2 → ℂ)
+  have hO := Carlson.isOpen_carlsonRSlitDomain (ι := Fin 2)
+  have hGH : EqOn (symEllIntR a ![1 / 2, 1 / 2]) (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])
+      Carlson.carlsonRSlitDomain := fun z hz => symEllIntR_of_mem _ _ hz
+  have he (s : ℝ) : (![(z : ℂ) + s * I, z - s * I] : Fin 2 → ℂ) =
+      ![(z : ℂ), z] + (s : ℂ) • ![I, -I] := by
+    funext i; fin_cases i <;> simp; ring
+  have hp : ![(z : ℂ), z] + (r : ℂ) • ![I, -I] ∈ Carlson.carlsonRSlitDomain := by
+    rw [← he r]
+    intro i; fin_cases i <;> refine mem_slitPlane_iff.mpr (Or.inr ?_) <;> simp [hr0.ne']
+  have hf : ContDiffAt ℝ 2 (u z) r := by
+    have H := contDiffAt_of_eqOn_analytic_comp_affine hH hO hGH hp
+    convert H using 1
+    funext s
+    exact congrArg (symEllIntR a ![1 / 2, 1 / 2]) (he s)
+  have Hrad := sum_deriv2_comp_sqrt_sq_add hρ hf
+  have Hax := axialPotential_symEllIntR a (x := z) (y := r) hr0.ne'
+  change deriv (fun s => deriv (fun q => u z (Real.sqrt (q ^ 2 + y ^ 2))) s) x +
+    deriv (fun s => deriv (fun q => u z (Real.sqrt (x ^ 2 + q ^ 2))) s) y +
+    deriv (fun s => deriv (fun q => u q r) s) z = 0
+  rw [Hrad]
+  linear_combination Hax
+
 
 end DLMF.EllipticIntegrals

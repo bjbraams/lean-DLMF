@@ -20,7 +20,7 @@
 % entry counts
 \newcommand{\NumA}{139}
 \newcommand{\NumB}{29}
-\newcommand{\NumC}{63}
+\newcommand{\NumC}{65}
 \newcommand{\NumOut}{3}
 
 \begin{document}
@@ -586,7 +586,9 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
     |\vartheta|<\frac{2}{3}\left(\exp\left(\frac{\tfrac{1}{4}|z|^{2}}{|\nu_{0}+\tfrac{3}{2}|}\right)-1\right).
   \end{equation*}
 \item[Evidence] $\nu=1000$, $z=\iu y$ with $y^2/4=|\nu+\tfrac32|$ gives $|\vartheta|>0.93$.
-\item[Lean] \lean{struveH_relative_bound} (\file{DLMF/Struve/Properties.lean}), admitted.
+\item[Lean] \lean{struveH_relative_bound} (\file{DLMF/Struve/RelativeBounds.lean}), proved
+  on 2026-10-30. The bound is valid for any positive lower bound on the displayed distances;
+  neither an attained minimum nor a separate non-pole hypothesis is needed.
 \item[Found] 2026-10-20 (\file{REVIEW.md}, ``Project-wide admission triage and statement
   corrections'').
 \end{fields}
@@ -821,7 +823,7 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
   \end{equation*}
 \item[Evidence] exact counterexample $r=0$, $q=1/2$, $a=2$, $M=0$: the printed value is $1/2$, not $0$.
 \item[Lean] \lean{karlsson_printed_counter} (proved), \lean{q_karlsson_minton_zero_corrected}
-  (admitted) (\file{DLMF/QHypergeometric/HigherSummations.lean}).
+  (proved on 2026-10-30) (\file{DLMF/QHypergeometric/HigherSummations.lean}).
 \item[Found] 2026-10-24 (\file{DLMF17Acquisition.md}, ``Domains and source corrections'').
 \end{fields}
 
@@ -996,7 +998,8 @@ for \deq{19.20.3} and $-\iu$ for \deq{19.20.23}; at $x=-2+2\iu$, $y=1.5-1.5\iu$ 
 $0.945+0.328\iu$ and $-0.541+0.841\iu$; no failure at 85 random points with $\Re x,\Re y>0$.
 \item[Lean] \lean{symEllIntRF_lemniscatic}, \lean{symEllIntRD_lemniscatic} (real $x,y>0$) and
 \lean{symEllIntRF_lemniscatic_complex}, \lean{symEllIntRD_lemniscatic_complex}
-($\Re x,\Re y>0$) (\file{DLMF/EllipticIntegrals/SymmetricSpecialCases.lean}), admitted.
+($\Re x,\Re y>0$) (\file{DLMF/EllipticIntegrals/SymmetricSpecialCases.lean}), all proved
+on 2026-10-30 by a real quadratic substitution and branch-preserving analytic continuation.
 The acquisition first described the failure as a factor $-\iu$ for all complex arguments; the
 verifier showed that the factor varies and that the formulas hold in the right half-planes,
 and the complex forms were added.
@@ -2822,13 +2825,35 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   An explicit derivative-existence hypothesis, or a theorem deriving it from the
   existing assumptions, is needed before applying the classical Leibniz theorem.
 \item[Status] Corrected on 2026-10-30 by requiring the partial derivative to exist at
-  every interior parameter and every integration variable in the stated domain. Both
-  corrected theorems remain admitted. This is a project-hypothesis correction, not a
+  every interior parameter and every integration variable in the stated domain. The
+  variable-limit theorem remains admitted, while the improper-integral theorem was proved
+  on the same date by compact-rectangle domination and uniform convergence of derivatives.
+  This is a project-hypothesis correction, not a
   DLMF erratum or a formal counterexample to the former full statements.
 \item[Lean] \lean{hasDerivAt_integral_variable_limits},
   \lean{hasDerivAt_improper_integral_of_tendstoUniformlyOn}
-  (\file{DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean}), admitted.
+  (\file{DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean}); the former remains admitted
+  and the latter is proved.
 \item[Found] 2026-10-30 (\file{ProofRound20261030.json}).
+\end{fields}
+
+\entry{\dlink{1.13.ii}{\S1.13(ii)}, connected spatial domains for parameter dependence}
+\begin{fields}
+\item[Note] DLMF states parameter analyticity on domains $U,D$. A domain is connected;
+  an arbitrary open set in Lean need not be. Initial data at one spatial point cannot
+  control solutions on a different connected component.
+\item[Evidence] A Lean-checked counterexample uses $D=\{z:\Re z\ne0\}$,
+  initial point $z_0=-1$, $U=\mathbb C$, and equation $w''=0$.
+  Set $w(u,z)=0$ for $\Re z<0$ and $w(u,z)=\overline u$ for $\Re z>0$.
+  Every spatial solution is locally constant and both initial-data maps are analytic,
+  but $u\mapsto w(u,1)$ is conjugation and is not complex differentiable at zero.
+  The check imports the ODE definitions, not the admitted parameter-dependence theorem.
+\item[Lean] \lean{isLinODE2SolOn_param_analytic}
+  (\file{DLMF/AlgebraicAnalytic/ODE/SecondOrder.lean}) now also requires
+  \lean{IsPreconnected D}. The corrected statement remains admitted.
+  This corrects the formalization, not DLMF. The independent counterexample and
+  its axiom audit are recorded in \file{ProofRound20261030g.json}.
+\item[Found] 2026-10-30.
 \end{fields}
 
 \entry{\deq{1.10.24}}
@@ -2934,6 +2959,24 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   2026-10-30 by retaining unboundedness of $|\xi|$ at both endpoints. The corrected
   theorem remains admitted. The counterexample to the former interface is analytical.
 \item[Found] 2026-10-29 (\file{ProofRound20261029.json}); source scope rechecked 2026-10-30.
+\end{fields}
+
+\entry{\dlink{2.7.ii}{\S2.7(ii)}, the nonzero variable in Fabry's coefficient formulas}
+\begin{fields}
+\item[Note] Fabry's change of variable uses $z=t^2$ and $1/t$ near infinity.
+  The Lean exterior-series assumption $a<|t^2|$, with unrestricted real $a$,
+  also allowed $t=0$ when $a<0$. The transformed identities do not hold there
+  under the totalized convention $0^{-1}=0$.
+\item[Evidence] An independent Lean counterexample takes $a=-1$, $t=0$,
+  $f=g=0$ and all original coefficients zero. The acquired hypotheses hold, but
+  the first asserted series has constant coefficient $-1$ and sum $-1$,
+  whereas its asserted value is zero.
+\item[Lean] \lean{fabry_coefficients}
+  (\file{DLMF/AsymptoticApproximations/ODE/Singularities.lean}) now requires
+  $t\ne0$ and is proved, as is \lean{fabry_transformation}. This corrects the
+  acquired Lean domain, not DLMF. The independent check imports only Mathlib;
+  its source and axiom audit are recorded in \file{ProofRound20261030g.json}.
+\item[Found] 2026-10-30.
 \end{fields}
 
 \subsection{Totalization, removable points and nonvanishing hypotheses}
@@ -3110,7 +3153,8 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   This is therefore not a counterexample within DLMF's stated function domain.
 \item[Lean] \lean{symEllIntRC_sq_eq}
   (\file{DLMF/EllipticIntegrals/SymmetricAddition.lean}), corrected on 2026-10-30
-  to require $x=0$ or $\Re x>0$; it remains admitted.
+  to require $x=0$ or $\Re x>0$; the corrected identity, including $x=0$,
+  was proved on the same date.
   The strict-half-plane variant \lean{symEllIntRC_sq}
   (\file{DLMF/EllipticIntegrals/SymmetricQuadratic.lean}) is proved.
 \item[Found] 2026-10-30; analytical counterexample to the Lean extension, not yet formalized.

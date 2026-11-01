@@ -8,6 +8,7 @@ module
 
 public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 public import Mathlib.Algebra.Order.Ring.Star
+public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 
 /-!
@@ -157,6 +158,44 @@ lemma ghbR4_norm_genCoeff_tendsto {a b : Multiset ℂ} (h : a.card = b.card + 1)
 lemma ghbR4_not_neg_of_not_terminates {a : Multiset ℂ} (ha : ¬GenTerminates a) :
     ∀ x ∈ a, ∀ k : ℕ, x ≠ -k := fun x hx k hxk => ha ⟨x, hx, k, hxk⟩
 
+/-- Balanced hypergeometric coefficients still tend to zero after multiplication by a
+power `n^k` when the real excess exceeds `k - 1`. Terminating series need no excess bound. -/
+theorem genCoeff_mul_pow_tendsto_zero {a b : Multiset ℂ} (h : a.card = b.card + 1)
+    (hb : GenDenRegular b) (k : ℕ)
+    (hγ : (k : ℝ) - 1 < (genExcess a b).re ∨ GenTerminates a) :
+    Tendsto (fun n => genCoeff a b n * (n : ℂ) ^ k) atTop (𝓝 0) := by
+  by_cases ha : GenTerminates a
+  · obtain ⟨x, hx, m, rfl⟩ := ha
+    apply tendsto_const_nhds.congr'
+    filter_upwards [eventually_gt_atTop m] with n hn
+    unfold genCoeff genPoch
+    rw [Multiset.prod_eq_zero (Multiset.mem_map.mpr ⟨_, hx, poch_neg_nat_eq_zero hn⟩),
+      zero_div, zero_mul]
+  · obtain ⟨L, _, ht⟩ := ghbR4_norm_genCoeff_tendsto h
+      (ghbR4_not_neg_of_not_terminates ha) hb
+    have he : 0 < (genExcess a b).re + 1 - (k : ℝ) := by
+      have hγ := hγ.resolve_right ha
+      linarith
+    have hp := (tendsto_rpow_neg_atTop he).comp tendsto_natCast_atTop_atTop
+    have hm := ht.mul hp
+    rw [mul_zero] at hm
+    rw [tendsto_zero_iff_norm_tendsto_zero]
+    apply hm.congr'
+    filter_upwards [eventually_gt_atTop 0] with n hn
+    have hn' : (0 : ℝ) < n := Nat.cast_pos.mpr hn
+    simp only [Function.comp_apply, norm_mul, norm_pow, Complex.norm_natCast]
+    rw [mul_assoc, ← Real.rpow_add hn']
+    rw [show (genExcess a b).re + 1 + -((genExcess a b).re + 1 - (k : ℝ)) = (k : ℝ) by ring,
+      Real.rpow_natCast]
+
+/-- Coefficients of a balanced hypergeometric series tend to zero when the real excess
+exceeds `-1`. Terminating upper parameters need no excess condition. -/
+theorem genCoeff_tendsto_zero {a b : Multiset ℂ} (h : a.card = b.card + 1) (hb : GenDenRegular b)
+    (hγ : -1 < (genExcess a b).re ∨ GenTerminates a) :
+    Tendsto (genCoeff a b) atTop (𝓝 0) := by
+  simpa only [pow_zero, mul_one] using
+    genCoeff_mul_pow_tendsto_zero h hb 0 (by simpa only [Nat.cast_zero, zero_sub] using hγ)
+
 /-- The balanced nonterminating coefficients are absolutely summable iff `Re γ > 0`. -/
 lemma ghbR4_summable_norm_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
     (hb : GenDenRegular b) (ha : ¬GenTerminates a) :
@@ -215,25 +254,36 @@ theorem genHG_unit_conditional {a b : Multiset ℂ} (h : a.card = b.card + 1)
     (hγ : -1 < (genExcess a b).re) : GenSeriesConvergesTo a b z (genHG a b z) := by
   sorry
 
+/-- Terminating upper parameters give a finitely supported sequence of coefficients,
+independently of lower-parameter regularity. -/
+lemma genCoeff_summable_of_terminates {a b : Multiset ℂ} (ha : GenTerminates a) :
+    Summable (genCoeff a b) := by
+  obtain ⟨x, hx, m, rfl⟩ := ha
+  apply summable_of_ne_finset_zero (s := range (m + 1))
+  intro n hn
+  have hmn : m < n := by simp only [Finset.mem_range, not_lt] at hn; omega
+  unfold genCoeff genPoch
+  rw [Multiset.prod_eq_zero (Multiset.mem_map.mpr ⟨_, hx, poch_neg_nat_eq_zero hmn⟩), zero_div]
+
+/-- At unity, any summable ordinary coefficient sequence has the declared principal value
+as its sum. This uses only the endpoint normalization, not existence of continuation. -/
+lemma genHG_one_hasSum_of_summable {a b : Multiset ℂ} (hb : GenDenRegular b)
+    (hs : Summable (genCoeff a b)) : HasSum (genCoeff a b) (genHG a b 1) := by
+  convert hs.hasSum using 1
+  rw [genHG, ghbR4_genRegularizedHG_one, regularizedHGFun_eq_tsum', ← tsum_mul_left]
+  congr 1
+  funext n
+  rw [genCoeff_eq_gamma_mul_regularized hb, one_pow, mul_one]
+
 /-- Positive excess gives absolute convergence to the declared endpoint value. -/
 theorem genHG_one_hasSum {a b : Multiset ℂ} (h : a.card = b.card + 1)
     (hb : GenDenRegular b) (hγ : 0 < (genExcess a b).re) :
     HasSum (fun n : ℕ => genCoeff a b n) (genHG a b 1) := by
   have hs : Summable (fun n : ℕ => genCoeff a b n) := by
     by_cases ha : GenTerminates a
-    · obtain ⟨x, hx, m, rfl⟩ := ha
-      apply summable_of_ne_finset_zero (s := range (m + 1))
-      intro n hn
-      have hmn : m < n := by simp only [Finset.mem_range, not_lt] at hn; omega
-      unfold genCoeff genPoch
-      rw [Multiset.prod_eq_zero (Multiset.mem_map.mpr ⟨_, hx, poch_neg_nat_eq_zero hmn⟩),
-        zero_div]
+    · exact genCoeff_summable_of_terminates ha
     · exact Summable.of_norm ((ghbR4_summable_norm_iff h hb ha).mpr hγ)
-  convert hs.hasSum using 1
-  rw [genHG, ghbR4_genRegularizedHG_one, regularizedHGFun_eq_tsum', ← tsum_mul_left]
-  congr 1
-  funext n
-  rw [genCoeff_eq_gamma_mul_regularized hb, one_pow, mul_one]
+  exact genHG_one_hasSum_of_summable hb hs
 
 /-- At real excess at most minus one, no point of the unit circle converges in the nonterminating case. -/
 theorem genHG_unit_diverges {a b : Multiset ℂ} (h : a.card = b.card + 1)

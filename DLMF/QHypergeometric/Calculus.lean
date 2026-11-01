@@ -1261,13 +1261,111 @@ theorem jacksonBetween_additivity (q a b c : ℂ) (f : ℂ → ℂ) :
     jacksonBetween q a c f=jacksonBetween q a b f+jacksonBetween q b c f := by
   simp only [jacksonBetween]; ring
 
+/-- Uniform continuity controls the error of the geometric Riemann sum defining Jackson's
+integral; the maximum interval width is `|a| (1-q)`. -/
+private lemma jackson_error_bound {f : ℝ → ℂ} {a q ε : ℝ}
+    (hf : ContinuousOn f (uIcc 0 a)) (hq0 : 0 < q) (hq1 : q < 1)
+    (hmod : ∀ x ∈ uIcc 0 a, ∀ y ∈ uIcc 0 a,
+      dist x y ≤ |a| * (1 - q) → ‖f x - f y‖ ≤ ε) :
+    ‖jacksonIntegral (q : ℂ) (a : ℂ) (fun z => f z.re) - ∫ x in 0..a, f x‖ ≤ ε * |a| := by
+  have hp (n : ℕ) : 0 ≤ q ^ n ∧ q ^ n ≤ 1 :=
+    ⟨pow_nonneg hq0.le n, pow_le_one₀ hq0.le hq1.le⟩
+  have hm (n : ℕ) : a * q ^ n ∈ uIcc 0 a := by
+    rcases le_total 0 a with ha | ha
+    · rw [uIcc_of_le ha]; exact ⟨by nlinarith [(hp n).1], by nlinarith [(hp n).2]⟩
+    · rw [uIcc_of_ge ha]; exact ⟨by nlinarith [(hp n).2], by nlinarith [(hp n).1]⟩
+  have hsub (n : ℕ) : uIcc (a * q ^ (n + 1)) (a * q ^ n) ⊆ uIcc 0 a :=
+    uIcc_subset_uIcc (hm (n + 1)) (hm n)
+  have hi (n : ℕ) : IntervalIntegrable f volume (a * q ^ (n + 1)) (a * q ^ n) :=
+    hf.intervalIntegrable.mono_set (hsub n)
+  have hw (n : ℕ) : |a * q ^ n - a * q ^ (n + 1)| = |a| * (1 - q) * q ^ n := by
+    rw [show a * q ^ n - a * q ^ (n + 1) = a * (1 - q) * q ^ n by rw [pow_succ]; ring,
+      abs_mul, abs_mul, abs_of_pos (sub_pos.mpr hq1), abs_of_nonneg (hp n).1]
+  obtain ⟨B, hB⟩ := isCompact_uIcc.exists_bound_of_continuousOn hf
+  have hv (n : ℕ) : ‖∫ x in 0..a * q ^ n, f x‖ ≤ B * |a| * q ^ n := by
+    have h := intervalIntegral.norm_integral_le_of_norm_le_const (a := 0) (b := a * q ^ n)
+      (fun x hx => hB x (uIcc_subset_uIcc_left (hm n) (uIoc_subset_uIcc hx)))
+    simpa [abs_mul, abs_of_nonneg (hp n).1, mul_assoc] using h
+  have hlim : Tendsto (fun n : ℕ => ∫ x in 0..a * q ^ n, f x) atTop (𝓝 0) :=
+    squeeze_zero_norm hv (by simpa using
+      (tendsto_pow_atTop_nhds_zero_of_lt_one hq0.le hq1).const_mul (B * |a|))
+  have hI : Summable (fun n : ℕ => ∫ x in a * q ^ (n + 1)..a * q ^ n, f x) := by
+    apply Summable.of_norm_bounded ((summable_geometric_of_lt_one hq0.le hq1).mul_left
+      (B * |a| * (1 - q)))
+    intro n
+    simpa [hw, mul_assoc] using intervalIntegral.norm_integral_le_of_norm_le_const
+      (a := a * q ^ (n + 1)) (b := a * q ^ n)
+      (fun x hx => hB x (hsub n (uIoc_subset_uIcc hx)))
+  have hsI : HasSum (fun n : ℕ => ∫ x in a * q ^ (n + 1)..a * q ^ n, f x) (∫ x in 0..a, f x) := by
+    apply hI.hasSum_iff_tendsto_nat.mpr
+    have he (n : ℕ) : (∫ x in a * q ^ (n + 1)..a * q ^ n, f x) =
+        (∫ x in 0..a * q ^ n, f x) - ∫ x in 0..a * q ^ (n + 1), f x := by
+      have h := intervalIntegral.integral_add_adjacent_intervals
+        (hf.intervalIntegrable.mono_set (uIcc_subset_uIcc_left (hm (n + 1)))) (hi n)
+      linear_combination h
+    simp_rw [he, sum_range_sub']
+    simpa using tendsto_const_nhds.sub hlim
+  have hJ : Summable (fun n : ℕ => f (a * q ^ n) * (q : ℂ) ^ n) := by
+    apply Summable.of_norm_bounded ((summable_geometric_of_lt_one hq0.le hq1).mul_left B)
+    intro n
+    simpa [norm_mul, norm_pow, Complex.norm_of_nonneg hq0.le, abs_of_pos hq0] using
+      mul_le_mul_of_nonneg_right (hB _ (hm n)) (hp n).1
+  have hsJ : HasSum (fun n : ℕ => ((a * (1 - q) * q ^ n : ℝ) : ℂ) * f (a * q ^ n))
+      (jacksonIntegral (q : ℂ) (a : ℂ) (fun z => f z.re)) := by
+    convert hJ.hasSum.mul_left ((a : ℂ) * (1 - q)) using 1
+    · ext n; push_cast; ring
+    · simp [jacksonIntegral, ← Complex.ofReal_pow]
+  have hg := (hasSum_geometric_of_lt_one hq0.le hq1).mul_left (ε * |a| * (1 - q))
+  have hgv : HasSum (fun n : ℕ => ε * |a| * (1 - q) * q ^ n) (ε * |a|) := by
+    convert hg using 1
+    field_simp
+  apply (hsJ.sub hsI).norm_le_of_bounded hgv
+  intro n
+  have he : ((a * (1 - q) * q ^ n : ℝ) : ℂ) * f (a * q ^ n) - (∫ x in a * q ^ (n + 1)..a * q ^ n, f x) =
+      ∫ x in a * q ^ (n + 1)..a * q ^ n, f (a * q ^ n) - f x := by
+    rw [intervalIntegral.integral_sub intervalIntegrable_const (hi n), intervalIntegral.integral_const]
+    push_cast
+    rw [real_smul]
+    congr 1
+    push_cast
+    rw [pow_succ]
+    ring
+  rw [he]
+  have hb : ∀ x ∈ uIoc (a * q ^ (n + 1)) (a * q ^ n), ‖f (a * q ^ n) - f x‖ ≤ ε := by
+    intro x hx
+    have hx' := uIoc_subset_uIcc hx
+    apply hmod _ (hm n) x (hsub n hx')
+    have hd := Real.dist_right_le_of_mem_uIcc hx'
+    rw [dist_comm]
+    apply hd.trans
+    rw [Real.dist_eq, abs_sub_comm, hw]
+    exact mul_le_of_le_one_right (by positivity) (hp n).2
+  simpa [hw, mul_assoc] using intervalIntegral.norm_integral_le_of_norm_le_const hb
+
 /-- As `q → 1⁻`, the Jackson integral of a continuous function tends to its Riemann integral (DLMF
 17.2.E47). -/
 @[dlmf 17.2.E47]
 theorem jackson_classical_limit {f : ℝ → ℂ} {a : ℝ} (hf : ContinuousOn f (uIcc 0 a)) :
-    Tendsto (fun q : ℝ => jacksonIntegral (q:ℂ) (a:ℂ) (fun z => f z.re))
+    Tendsto (fun q : ℝ => jacksonIntegral (q : ℂ) (a : ℂ) (fun z => f z.re))
       (𝓝[<] 1) (𝓝 (∫ x : ℝ in 0..a, f x)) := by
-  sorry
+  rw [Metric.tendsto_nhds]
+  intro ε hε
+  let η := ε / (|a| + 1)
+  have hη : 0 < η := div_pos hε (by positivity)
+  obtain ⟨δ, hδ, hmod⟩ := Metric.uniformContinuousOn_iff.mp
+    (isCompact_uIcc.uniformContinuousOn_of_continuous hf) η hη
+  have ht : Tendsto (fun q : ℝ => |a| * (1 - q)) (𝓝[<] 1) (𝓝 0) := by
+    have hc : Continuous (fun q : ℝ => |a| * (1 - q)) := by fun_prop
+    simpa using (hc.tendsto 1).mono_left nhdsWithin_le_nhds
+  filter_upwards [Ioo_mem_nhdsLT (by norm_num : (0 : ℝ) < 1), ht.eventually (Iio_mem_nhds hδ)]
+    with q hq hmesh
+  rw [dist_eq_norm]
+  apply lt_of_le_of_lt (jackson_error_bound (ε := η) hf hq.1 hq.2 ?_) ?_
+  · intro x hx y hy hxy
+    simpa only [dist_eq_norm] using (hmod x hx y hy (hxy.trans_lt hmesh)).le
+  · dsimp [η]
+    rw [div_mul_eq_mul_div, div_lt_iff₀ (by positivity : (0 : ℝ) < |a| + 1)]
+    nlinarith [abs_nonneg a]
 
 /-- For an absolutely summable bilateral Jackson series, the integrals `∫_0^(q^(-n)) f d_q t` tend
 to the bilateral Jackson integral (DLMF 17.2.E48). -/

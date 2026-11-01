@@ -7,6 +7,8 @@ module
 
 public import DLMF.EllipticIntegrals.Symmetric
 public import Carlson.Elliptic.Asymptotic
+public import DLMF.EllipticIntegrals.SymmetricAddition
+public import DLMF.EllipticIntegrals.SymmetricSpecialCases
 
 /-!
 # Asymptotic approximations of the symmetric elliptic integrals (DLMF §19.27)
@@ -46,6 +48,12 @@ statement was checked numerically (mpmath, random directions of approach, 2026-1
 Carlson's (9.2-10) and (8.3-16) (`Carlson.isEquivalent_carlsonRF_atTop`,
 `Carlson.isEquivalent_carlsonRK_zero`) give the leading term of (19.27.2) as an asymptotic
 equivalence along rays (weaker than DLMF's relative `O(a/z)`): `symEllIntRF_isEquivalent_atTop`.
+The small-first-variable formula (19.27.3) follows by applying `R_F` duplication in the
+coordinate `t = √x`. All duplicated nodes are positive at `t = 0`, so the holomorphic Taylor
+remainder gives the stated `O(x)` error. The `R_G` counterpart (19.27.5) uses the same
+coordinate and the `R_G` duplication identity; its first derivative at the origin vanishes.
+The `R_D` formula (19.27.10) uses duplication and the elementary negative-total-parameter
+value (19.20.25) to evaluate the corresponding first derivative.
 
 ## §19.27 prose
 
@@ -67,6 +75,117 @@ open Complex Set Filter Asymptotics
 open scoped Real Topology
 
 namespace DLMF.EllipticIntegrals
+
+/-- The quadratic Taylor remainder of a holomorphic function at the origin. -/
+private lemma analyticAt_sub_linear_isBigO {f : ℂ → ℂ} {d : ℂ}
+    (ha : AnalyticAt ℂ f 0) (hd : HasDerivAt f d 0) :
+    (fun t : ℂ => f t - f 0 - d * t) =O[𝓝 0] fun t : ℂ => ‖t‖ ^ 2 := by
+  obtain ⟨p, hp⟩ := ha
+  have H := hp.isBigO_sub_partialSum_pow 2
+  have h0 : p.coeff 0 = f 0 := hp.coeff_zero _
+  have h1 : p.coeff 1 = d := hp.hasDerivAt.unique hd
+  simpa [FormalMultilinearSeries.partialSum, Finset.sum_range_succ,
+    FormalMultilinearSeries.apply_eq_prod_smul_coeff, h0, h1, smul_eq_mul, sub_add_eq_sub_sub, mul_comm] using H
+
+/-- The chain rule for a continued R-function along a path with equal node derivatives. -/
+private lemma hasDerivAt_carlsonR_comp_common {ι : Type*} [Fintype ι]
+    (a : ℂ) (b : ι → ℂ) {q : ℂ → ι → ℂ} {t k : ℂ}
+    (hq : HasDerivAt q (fun _ => k) t) (hp : q t ∈ Carlson.carlsonRSlitDomain) :
+    HasDerivAt (fun w => Carlson.carlsonR a b (q w))
+      (k * a * Carlson.carlsonR (a - 1) b (q t)) t := by
+  let F := Carlson.carlsonR a b
+  let v : ι → ℂ := fun _ => 1
+  have hF : DifferentiableAt ℂ F (q t) :=
+    (analyticAt_const.mul (Carlson.analyticOnNhd_regCarlsonR a b (q t) hp)).differentiableAt
+  have hv : HasDerivAt (fun w : ℂ => fun i => w + q t i) v 0 := by
+    apply hasDerivAt_pi.mpr
+    intro i
+    simpa [v] using (hasDerivAt_id (0 : ℂ)).add_const (q t i)
+  have HV := hF.hasFDerivAt.comp_hasDerivAt_of_eq 0 hv (by funext i; simp)
+  have HD := (Carlson.hasDerivAt_regCarlsonR_translate a b (q t)
+    (x := 0) (by simpa using hp)).const_mul (Gamma (∑ i, b i))
+  have HD' : HasDerivAt (fun w => F (fun i => w + q t i))
+      (a * Carlson.carlsonR (a - 1) b (q t)) 0 := by
+    convert HD using 1
+    · rfl
+    · unfold Carlson.carlsonR
+      simp only [zero_add]
+      ring
+  have HL : (fderiv ℂ F (q t)) v = a * Carlson.carlsonR (a - 1) b (q t) := HV.unique HD'
+  have hq' : HasDerivAt q (k • v) t := by
+    convert hq using 1
+    funext i
+    simp [v, smul_eq_mul]
+  have HC := hF.hasFDerivAt.comp_hasDerivAt t hq'
+  change HasDerivAt _ ((fderiv ℂ F (q t)) (k • v)) t at HC
+  rw [map_smul, HL] at HC
+  convert HC using 1 <;> first | rfl | simp [smul_eq_mul, mul_assoc]
+
+/-- When all three node derivatives agree, the first-kind derivative is elementary. -/
+private lemma hasDerivAt_carlsonRF_comp_common {f g h : ℂ → ℂ} {t k : ℂ}
+    (hf : HasDerivAt f k t) (hg : HasDerivAt g k t) (hh : HasDerivAt h k t)
+    (hfs : f t ∈ slitPlane) (hgs : g t ∈ slitPlane) (hhs : h t ∈ slitPlane) :
+    HasDerivAt (fun w => Carlson.carlsonRF (f w) (g w) (h w))
+      (-k / 2 * ((f t) ^ (-1 / 2 : ℂ) * (g t) ^ (-1 / 2 : ℂ) * (h t) ^ (-1 / 2 : ℂ))) t := by
+  have hq : HasDerivAt (fun w => ![f w, g w, h w]) (fun _ : Fin 3 => k) t := by
+    apply hasDerivAt_pi.mpr
+    intro i; fin_cases i <;> assumption
+  have hp := ei19c_slit3 hfs hgs hhs
+  have HS := symEllIntR_sum (fun _ : Fin 3 => (1 / 2 : ℂ)) hp (by
+    apply Complex.Gamma_ne_zero_of_re_pos
+    norm_num [Fin.sum_univ_three])
+  rw [symEllIntR_of_mem _ _ hp] at HS
+  norm_num [Fin.sum_univ_three] at HS
+  have H := hasDerivAt_carlsonR_comp_common (-1 / 2) (fun _ : Fin 3 => 1 / 2) hq hp
+  change HasDerivAt (fun w => Carlson.carlsonRF (f w) (g w) (h w)) _ t at H
+  refine H.congr_deriv ?_
+  rw [show (-1 / 2 : ℂ) - 1 = -(3 / 2) by norm_num, HS]
+  simp only [Fin.prod_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons]
+  simp only [neg_div]
+  ring
+
+/-- The product of square roots at the duplication boundary factors into two elementary
+symmetric expressions. -/
+private lemma sqrt_product_duplication_boundary {y z : ℝ} (hy : 0 ≤ y) (hz : 0 ≤ z) :
+    √(√y * √z) * √(y + √y * √z) * √(z + √y * √z) =
+      (√y * √z) * (√y + √z) := by
+  have hy' : y + √y * √z = √y * (√y + √z) := by nlinarith [Real.sq_sqrt hy]
+  have hz' : z + √y * √z = √z * (√y + √z) := by nlinarith [Real.sq_sqrt hz]
+  rw [hy', hz', Real.sqrt_mul (Real.sqrt_nonneg y),
+    Real.sqrt_mul (Real.sqrt_nonneg y), Real.sqrt_mul (Real.sqrt_nonneg z)]
+  calc _ = √(√y) ^ 2 * √(√z) ^ 2 * √(√y + √z) ^ 2 := by ring
+       _ = _ := by rw [Real.sq_sqrt (Real.sqrt_nonneg y),
+                     Real.sq_sqrt (Real.sqrt_nonneg z), Real.sq_sqrt (by positivity)]
+
+/-- Duplication expresses `R_F` at a nonnegative first argument through positive nodes that
+are polynomial in its square root. -/
+private lemma symEllIntRF_duplication_sqrt {x y z : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z) :
+    let l := √y * √z + (√y + √z) * √x
+    symEllIntRF x y z = 2 * Carlson.carlsonRF (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) := by
+  let l := √y * √z + (√y + √z) * √x
+  have hl : 0 < l := by dsimp only [l]; positivity
+  have hs : symEllIntDupLambda x y z = (l : ℂ) := by
+    unfold symEllIntDupLambda
+    rw [Carlson.ofReal_cpow_half hx, Carlson.ofReal_cpow_half hy.le, Carlson.ofReal_cpow_half hz.le]
+    dsimp only [l]
+    push_cast
+    ring
+  have H : symEllIntRF x y z = 2 * symEllIntRF (x + l : ℝ) (y + l : ℝ) (z + l : ℝ) := by
+    by_cases hx0 : x = 0
+    · subst x
+      have H := symEllIntRF_duplication_zero (ofReal_mem_slitPlane.mpr hy)
+        (ofReal_mem_slitPlane.mpr hz)
+      simp only [ofReal_zero] at hs
+      rw [hs] at H
+      simpa only [ofReal_zero, zero_add, ← ofReal_add] using H
+    · have H := symEllIntRF_duplication
+        (ofReal_mem_slitPlane.mpr (lt_of_le_of_ne hx (Ne.symm hx0)))
+        (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hz)
+      rw [hs] at H
+      simpa only [← ofReal_add] using H
+  rw [H, symEllIntRF_eq_carlsonRF (ofReal_mem_slitPlane.mpr (by linarith))
+    (ofReal_mem_slitPlane.mpr (by linarith)) (ofReal_mem_slitPlane.mpr (by linarith))]
 
 /-! ### Notation (19.27.1) -/
 
@@ -121,7 +240,86 @@ theorem symEllIntRF_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
     (fun x : ℝ => symEllIntRF x y z - symEllIntRF 0 y z +
         ((√(x / ellAsymH y z) / √(ellAsymH y z) : ℝ) : ℂ)) =O[𝓝[≥] 0]
       (fun x : ℝ => ((x / ellAsymH y z / √(ellAsymH y z) : ℝ) : ℂ)) := by
-  sorry
+  let r := √y * √z
+  let k := √y + √z
+  let l : ℂ → ℂ := fun t => (r : ℂ) + (k : ℂ) * t
+  let F : ℂ → ℂ := fun t => 2 * Carlson.carlsonRF (t ^ 2 + l t) ((y : ℂ) + l t) ((z : ℂ) + l t)
+  have hr : 0 < r := by dsimp only [r]; positivity
+  have hk : 0 < k := by dsimp only [k]; positivity
+  have hyr : 0 < y + r := by positivity
+  have hzr : 0 < z + r := by positivity
+  have hnodes : l 0 ∈ slitPlane ∧ (y : ℂ) + l 0 ∈ slitPlane ∧ (z : ℂ) + l 0 ∈ slitPlane := by
+    dsimp only [l]
+    simp only [mul_zero, add_zero, ← ofReal_add]
+    exact ⟨ofReal_mem_slitPlane.mpr hr, ofReal_mem_slitPlane.mpr hyr, ofReal_mem_slitPlane.mpr hzr⟩
+  have ha : AnalyticAt ℂ F 0 := by
+    apply analyticAt_const.mul
+    apply Carlson.analyticAt_carlsonRF_comp
+    · exact (analyticAt_id.pow 2).add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))
+    · exact analyticAt_const.add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))
+    · exact analyticAt_const.add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))
+    · simpa using hnodes.1
+    · exact hnodes.2.1
+    · exact hnodes.2.2
+  have hl : HasDerivAt l (k : ℂ) 0 := by
+    simpa [l] using ((hasDerivAt_id (0 : ℂ)).const_mul (k : ℂ)).const_add (r : ℂ)
+  have hfirst : HasDerivAt (fun t : ℂ => t ^ 2 + l t) (k : ℂ) 0 := by
+    have H := ((hasDerivAt_id (0 : ℂ)).pow 2).add hl
+    convert H using 1 <;> first | rfl | simp
+  have HD := (hasDerivAt_carlsonRF_comp_common hfirst (hl.const_add (y : ℂ))
+    (hl.const_add (z : ℂ)) (by simpa using hnodes.1) hnodes.2.1 hnodes.2.2).const_mul (2 : ℂ)
+  have hS : √r * √(y + r) * √(z + r) = r * k :=
+    sqrt_product_duplication_boundary hy.le hz.le
+  have HD' : HasDerivAt F (-((√(y * z))⁻¹ : ℂ)) 0 := by
+    refine HD.congr_deriv ?_
+    simp only [l, zero_pow (by norm_num : (2 : ℕ) ≠ 0), mul_zero, add_zero, zero_add]
+    rw [← ofReal_add, ← ofReal_add, ← ei19c_inv_cpow_half, ← ei19c_inv_cpow_half,
+      ← ei19c_inv_cpow_half, Carlson.ofReal_cpow_half hr.le, Carlson.ofReal_cpow_half hyr.le,
+      Carlson.ofReal_cpow_half hzr.le]
+    rw [Real.sqrt_mul hy.le]
+    change 2 * (-(k : ℂ) / 2 * _) = -((r : ℝ) : ℂ)⁻¹
+    have H := congrArg (fun a : ℝ => (a : ℂ)) hS
+    push_cast at H
+    calc _ = -(k : ℂ) * ((√r : ℂ) * √(y + r) * √(z + r))⁻¹ := by
+               simp only [mul_inv_rev]; ring
+         _ = -(k : ℂ) * ((r : ℂ) * k)⁻¹ := by rw [H]
+         _ = _ := by
+           field_simp [ofReal_ne_zero.mpr hk.ne', ofReal_ne_zero.mpr hr.ne']
+  have H := analyticAt_sub_linear_isBigO ha HD'
+  have hF (x : ℝ) (hx : 0 ≤ x) : F (√x : ℂ) = symEllIntRF x y z := by
+    have H := symEllIntRF_duplication_sqrt hx hy hz
+    dsimp only [F, l, r, k]
+    rw [← ofReal_pow, Real.sq_sqrt hx]
+    simpa only [ofReal_add, ofReal_mul] using H.symm
+  have hlim : Tendsto (fun x : ℝ => (√x : ℂ)) (𝓝[≥] 0) (𝓝 0) := by
+    have H : Tendsto (fun x : ℝ => (√x : ℂ)) (𝓝 (0 : ℝ)) (𝓝 (0 : ℂ)) := by
+      simpa only [Function.comp_def, Real.sqrt_zero, ofReal_zero] using
+        ((continuous_ofReal.comp Real.continuous_sqrt).tendsto (0 : ℝ))
+    exact H.mono_left nhdsWithin_le_nhds
+  have HH := H.comp_tendsto hlim
+  have he0 : F 0 = symEllIntRF 0 y z := by simpa using hF 0 le_rfl
+  have he : (fun x : ℝ => F (√x : ℂ) - F 0 - (-((√(y*z))⁻¹ : ℂ)) * (√x : ℂ))
+      =ᶠ[𝓝[≥] 0] fun x : ℝ => symEllIntRF x y z - symEllIntRF 0 y z +
+        ((√(x / ellAsymH y z) / √(ellAsymH y z) : ℝ) : ℂ) := by
+    filter_upwards [self_mem_nhdsWithin] with x hx
+    rw [hF x hx, he0]
+    have hh : 0 < ellAsymH y z := by dsimp only [ellAsymH]; positivity
+    have hcor : √(x / ellAsymH y z) / √(ellAsymH y z) = √x / ellAsymH y z := by
+      rw [Real.sqrt_div hx, div_div, ← pow_two, Real.sq_sqrt hh.le]
+    rw [hcor]
+    simp only [ellAsymH, ofReal_div]
+    ring
+  refine (HH.congr' he Filter.EventuallyEq.rfl).trans ?_
+  apply IsBigO.of_bound (√(ellAsymH y z) * ellAsymH y z)
+  filter_upwards [self_mem_nhdsWithin] with x hx
+  dsimp only [Function.comp_apply]
+  rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+  have hh : 0 < ellAsymH y z := by dsimp only [ellAsymH]; positivity
+  have hhS := Real.sqrt_pos.mpr hh
+  rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _), Real.sq_sqrt hx,
+    Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (div_nonneg (div_nonneg hx hh.le) hhS.le)]
+  apply le_of_eq
+  field_simp
 
 /-- Bridge (proved, from `lean-codes` (9.2-10)): for fixed `x, y > 0`,
 `R_F(x, y, z) ∼ (1/(2√z)) ln(8z/(a + g))` as `z → ∞`, the leading term of (19.27.2) as an
@@ -205,7 +403,137 @@ theorem symEllIntRG_asymp_large_z {z : ℝ} (hz : 0 < z) :
 theorem symEllIntRG_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
     (fun x : ℝ => symEllIntRG x y z - symEllIntRG 0 y z) =O[𝓝[≥] 0]
       (fun x : ℝ => ((√x * √(x / ellAsymH y z) : ℝ) : ℂ)) := by
-  sorry
+  let r := √y * √z
+  let k := √y + √z
+  let l : ℂ → ℂ := fun t => (r : ℂ) + (k : ℂ) * t
+  let q : ℂ → Fin 3 → ℂ := fun t => ![t ^ 2 + l t, (y : ℂ) + l t, (z : ℂ) + l t]
+  let RF : ℂ → ℂ := fun t => Carlson.carlsonRF (q t 0) (q t 1) (q t 2)
+  let RG : ℂ → ℂ := fun t => Carlson.carlsonR (1 / 2) (fun _ : Fin 3 => 1 / 2) (q t)
+  let F : ℂ → ℂ := fun t => 2 * RG t - l t * RF t - (t + √y + √z) / 2
+  have hr : 0 < r := by dsimp only [r]; positivity
+  have hk : 0 < k := by dsimp only [k]; positivity
+  have hyr : 0 < y + r := by positivity
+  have hzr : 0 < z + r := by positivity
+  have hp : q 0 ∈ Carlson.carlsonRSlitDomain := by
+    intro i
+    fin_cases i
+    · simpa [q, l] using ofReal_mem_slitPlane.mpr hr
+    · simpa [q, l, ← ofReal_add] using ofReal_mem_slitPlane.mpr hyr
+    · simpa [q, l, ← ofReal_add] using ofReal_mem_slitPlane.mpr hzr
+  have hl : HasDerivAt l (k : ℂ) 0 := by
+    simpa [l] using ((hasDerivAt_id (0 : ℂ)).const_mul (k : ℂ)).const_add (r : ℂ)
+  have hfirst : HasDerivAt (fun t : ℂ => t ^ 2 + l t) (k : ℂ) 0 := by
+    convert ((hasDerivAt_id (0 : ℂ)).pow 2).add hl using 1 <;> first | rfl | simp
+  have hq : HasDerivAt q (fun _ => (k : ℂ)) 0 := by
+    apply hasDerivAt_pi.mpr
+    intro i; fin_cases i
+    · exact hfirst
+    · exact hl.const_add (y : ℂ)
+    · exact hl.const_add (z : ℂ)
+  have haRF : AnalyticAt ℂ RF 0 := by
+    apply Carlson.analyticAt_carlsonRF_comp
+    · exact (analyticAt_id.pow 2).add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))
+    · exact analyticAt_const.add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))
+    · exact analyticAt_const.add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))
+    · exact hp 0
+    · exact hp 1
+    · exact hp 2
+  have haRG : AnalyticAt ℂ RG 0 := by
+    unfold RG Carlson.carlsonR
+    apply analyticAt_const.mul
+    apply Carlson.analyticAt_regCarlsonR_comp analyticAt_const analyticAt_const
+    · apply analyticAt_pi_iff.mpr
+      intro i; fin_cases i
+      · exact (analyticAt_id.pow 2).add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))
+      · exact analyticAt_const.add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))
+      · exact analyticAt_const.add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))
+    · exact hp
+  have ha : AnalyticAt ℂ F 0 := by
+    apply ((analyticAt_const.mul haRG).sub
+      ((analyticAt_const.add (analyticAt_const.mul analyticAt_id)).mul haRF)).sub
+    exact ((analyticAt_id.add analyticAt_const).add analyticAt_const).div_const
+  have HDG := hasDerivAt_carlsonR_comp_common (1 / 2) (fun _ : Fin 3 => 1 / 2) hq hp
+  have HDG' : HasDerivAt RG ((k : ℂ) / 2 * RF 0) 0 := by
+    convert HDG using 1
+    norm_num [RF, Carlson.carlsonRF, q, mul_assoc]
+    ring
+  have HDF := hasDerivAt_carlsonRF_comp_common hfirst (hl.const_add (y : ℂ))
+    (hl.const_add (z : ℂ)) (hp 0) (hp 1) (hp 2)
+  have hS : √r * √(y + r) * √(z + r) = r * k :=
+    sqrt_product_duplication_boundary hy.le hz.le
+  have HDF' : HasDerivAt RF (-(1 / (2 * (r : ℂ)))) 0 := by
+    refine HDF.congr_deriv ?_
+    simp only [l, zero_pow (by norm_num : (2 : ℕ) ≠ 0), mul_zero, add_zero, zero_add]
+    rw [← ofReal_add, ← ofReal_add, ← ei19c_inv_cpow_half, ← ei19c_inv_cpow_half,
+      ← ei19c_inv_cpow_half, Carlson.ofReal_cpow_half hr.le, Carlson.ofReal_cpow_half hyr.le,
+      Carlson.ofReal_cpow_half hzr.le]
+    have H := congrArg (fun a : ℝ => (a : ℂ)) hS
+    push_cast at H
+    calc _ = -(k : ℂ) / 2 * ((√r : ℂ) * √(y + r) * √(z + r))⁻¹ := by
+               simp only [mul_inv_rev]; ring
+         _ = -(k : ℂ) / 2 * ((r : ℂ) * k)⁻¹ := by rw [H]
+         _ = _ := by field_simp [ofReal_ne_zero.mpr hk.ne', ofReal_ne_zero.mpr hr.ne']
+  have HD : HasDerivAt F 0 0 := by
+    have H := ((HDG'.const_mul 2).sub (hl.mul HDF')).sub
+      ((((hasDerivAt_id (0 : ℂ)).add_const ((√y : ℝ) : ℂ)).add_const ((√z : ℝ) : ℂ)).div_const 2)
+    change HasDerivAt F _ 0 at H
+    refine H.congr_deriv ?_
+    dsimp only [l]
+    simp only [mul_zero, add_zero]
+    field_simp [ofReal_ne_zero.mpr hr.ne']
+    ring
+  have HT := analyticAt_sub_linear_isBigO ha HD
+  have hF (x : ℝ) (hx : 0 ≤ x) : F (√x : ℂ) = symEllIntRG x y z := by
+    have hdom : Ei19dPosDomain x y z := ⟨hx, hy.le, hz.le, fun _ => ⟨hy, hz⟩,
+      fun hh => False.elim (hy.ne' hh)⟩
+    have hscale : (√x * √y + √y * √z + √z * √x : ℝ) = r + k * √x := by
+      dsimp only [r, k]; ring
+    have H := symEllIntRG_duplication hdom
+    have hf : symEllIntRF x y z = 2 * RF (√x : ℂ) := by
+      have H := symEllIntRF_duplication_sqrt hx hy hz
+      dsimp only [RF, q, l, r, k]
+      rw [← ofReal_pow, Real.sq_sqrt hx]
+      simpa only [ofReal_add, ofReal_mul, Matrix.cons_val_zero, Matrix.cons_val_one,
+        Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons] using H
+    have hg : symEllIntRG (x + (r + k * √x) : ℝ) (y + (r + k * √x) : ℝ)
+        (z + (r + k * √x) : ℝ) = RG (√x : ℂ) := by
+      rw [symEllIntRG_eq_symEllIntR, symEllIntR_of_mem]
+      · simp only [RG, q, l, neg_div, neg_neg]
+        congr 1
+        funext i; fin_cases i <;> simp [Real.sq_sqrt hx, ← ofReal_pow]
+      all_goals first
+      | apply ei19c_slit3 <;> exact ofReal_mem_slitPlane.mpr (by positivity)
+      | exact ofReal_mem_slitPlane.mpr (by positivity)
+    dsimp only at H
+    rw [hscale, hg, hf] at H
+    dsimp only [F, l]
+    push_cast at H ⊢
+    linear_combination (-1 / 2 : ℂ) * H
+  have hlim : Tendsto (fun x : ℝ => (√x : ℂ)) (𝓝[≥] 0) (𝓝 0) := by
+    have H : Tendsto (fun x : ℝ => (√x : ℂ)) (𝓝 (0 : ℝ)) (𝓝 (0 : ℂ)) := by
+      simpa only [Function.comp_def, Real.sqrt_zero, ofReal_zero] using
+        ((continuous_ofReal.comp Real.continuous_sqrt).tendsto (0 : ℝ))
+    exact H.mono_left nhdsWithin_le_nhds
+  have HH := HT.comp_tendsto hlim
+  have h0 : F 0 = symEllIntRG 0 y z := by simpa using hF 0 le_rfl
+  have he : (fun x : ℝ => F (√x : ℂ) - F 0 - 0 * (√x : ℂ)) =ᶠ[𝓝[≥] 0]
+      fun x : ℝ => symEllIntRG x y z - symEllIntRG 0 y z := by
+    filter_upwards [self_mem_nhdsWithin] with x hx
+    rw [hF x hx, h0]; ring
+  refine (HH.congr' he Filter.EventuallyEq.rfl).trans ?_
+  apply IsBigO.of_bound (√(ellAsymH y z))
+  filter_upwards [self_mem_nhdsWithin] with x hx
+  have hh : 0 < ellAsymH y z := by dsimp only [ellAsymH]; positivity
+  have hhS := Real.sqrt_pos.mpr hh
+  dsimp only [Function.comp_apply]
+  rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _), Complex.norm_real, Real.norm_eq_abs,
+    abs_of_nonneg (Real.sqrt_nonneg _), Real.sq_sqrt hx,
+    Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+  rw [Real.sqrt_div hx]
+  apply le_of_eq
+  field_simp
+  nlinarith [Real.sq_sqrt hx]
+
 
 /-- DLMF 19.27.6: `R_G(0, y, z) = √z/2 + (y/(8√z))(ln(16z/y) - 1)(1 + O(y/z))` as `y/z → 0`:
 for fixed `z > 0`, as `y → 0+`. -/
@@ -256,7 +584,143 @@ theorem symEllIntRD_asymp_small_x {y z : ℝ} (hy : 0 < y) (hz : 0 < z) :
     (fun x : ℝ => symEllIntRD x y z - symEllIntRD 0 y z +
         ((3 * √x / (ellAsymH y z * z) : ℝ) : ℂ)) =O[𝓝[≥] 0]
       (fun x : ℝ => ((3 * √x / (ellAsymH y z * z) * √(x / ellAsymH y z) : ℝ) : ℂ)) := by
-  sorry
+  let r := √y * √z
+  let k := √y + √z
+  let l : ℂ → ℂ := fun t => (r : ℂ) + (k : ℂ) * t
+  let b : Fin 3 → ℂ := ![1 / 2, 1 / 2, 3 / 2]
+  let q : ℂ → Fin 3 → ℂ := fun t => ![t ^ 2 + l t, (y : ℂ) + l t, (z : ℂ) + l t]
+  let G : ℂ → ℂ := fun t => Carlson.carlsonR (-3 / 2) b (q t)
+  let F : ℂ → ℂ := fun t => 2 * G t + (3 / (√z : ℂ)) * ((z : ℂ) + l t)⁻¹
+  have hr : 0 < r := by dsimp only [r]; positivity
+  have hk : 0 < k := by dsimp only [k]; positivity
+  have hyr : 0 < y + r := by positivity
+  have hzr : 0 < z + r := by positivity
+  have hp : q 0 ∈ Carlson.carlsonRSlitDomain := by
+    intro i
+    fin_cases i
+    · simpa [q, l] using ofReal_mem_slitPlane.mpr hr
+    · simpa [q, l, ← ofReal_add] using ofReal_mem_slitPlane.mpr hyr
+    · simpa [q, l, ← ofReal_add] using ofReal_mem_slitPlane.mpr hzr
+  have hl : HasDerivAt l (k : ℂ) 0 := by
+    simpa [l] using ((hasDerivAt_id (0 : ℂ)).const_mul (k : ℂ)).const_add (r : ℂ)
+  have hfirst : HasDerivAt (fun t : ℂ => t ^ 2 + l t) (k : ℂ) 0 := by
+    convert ((hasDerivAt_id (0 : ℂ)).pow 2).add hl using 1 <;> first | rfl | simp
+  have hq : HasDerivAt q (fun _ => (k : ℂ)) 0 := by
+    apply hasDerivAt_pi.mpr
+    intro i; fin_cases i
+    · exact hfirst
+    · exact hl.const_add (y : ℂ)
+    · exact hl.const_add (z : ℂ)
+  have haG : AnalyticAt ℂ G 0 := by
+    unfold G Carlson.carlsonR
+    apply analyticAt_const.mul
+    apply Carlson.analyticAt_regCarlsonR_comp analyticAt_const analyticAt_const
+    · apply analyticAt_pi_iff.mpr
+      intro i; fin_cases i
+      · exact (analyticAt_id.pow 2).add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))
+      · exact analyticAt_const.add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))
+      · exact analyticAt_const.add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))
+    · exact hp
+  have hzne : (z : ℂ) + l 0 ≠ 0 := by
+    simp only [l, mul_zero, add_zero, ← ofReal_add]
+    exact ofReal_ne_zero.mpr hzr.ne'
+  have ha : AnalyticAt ℂ F 0 := by
+    apply (analyticAt_const.mul haG).add
+    apply analyticAt_const.mul
+    exact (analyticAt_const.add (analyticAt_const.add (analyticAt_const.mul analyticAt_id))).inv hzne
+  have hS : √r * √(y + r) * √(z + r) = r * k :=
+    sqrt_product_duplication_boundary hy.le hz.le
+  have hb : ∑ i, b i = 5 / 2 := by norm_num [b, Fin.sum_univ_three]
+  have HB := symEllIntR_sum b hp (by
+    apply Complex.Gamma_ne_zero_of_re_pos
+    rw [hb]
+    norm_num)
+  rw [symEllIntR_of_mem _ _ hp, hb] at HB
+  have HG := hasDerivAt_carlsonR_comp_common (-3 / 2) b hq hp
+  have HG' : HasDerivAt G (-(3 / (2 * (r : ℂ) * ((z : ℂ) + r)))) 0 := by
+    refine HG.congr_deriv ?_
+    rw [show (-3 / 2 : ℂ) - 1 = -(5 / 2) by norm_num, HB]
+    simp only [b, q, l, zero_pow (by norm_num : (2 : ℕ) ≠ 0), mul_zero, add_zero, zero_add,
+      Fin.prod_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+      Matrix.head_cons, Matrix.tail_cons]
+    rw [← ofReal_add, ← ofReal_add,
+      show (-(3 / 2) : ℂ) = (-1 / 2) + (-1) by norm_num,
+      cpow_add _ _ (ofReal_ne_zero.mpr hzr.ne'), cpow_neg_one]
+    simp only [cpow_neg]
+    rw [← ei19c_inv_cpow_half]
+    rw [Carlson.ofReal_cpow_half hr.le, Carlson.ofReal_cpow_half hyr.le,
+      Carlson.ofReal_cpow_half hzr.le]
+    push_cast
+    have HS := congrArg (fun a : ℝ => (a : ℂ)) hS
+    push_cast at HS
+    calc _ = -(3 / 2 : ℂ) * k * ((√r : ℂ) * √(y + r) * √(z + r))⁻¹ * ((z : ℂ) + r)⁻¹ := by
+               simp only [mul_inv_rev]; ring
+         _ = _ := by rw [HS]; field_simp [ofReal_ne_zero.mpr hr.ne', ofReal_ne_zero.mpr hk.ne']
+  have HD : HasDerivAt F (-(3 / ((r : ℂ) * z))) 0 := by
+    have H := (HG'.const_mul 2).add (((hl.const_add (z : ℂ)).inv hzne).const_mul (3 / (√z : ℂ)))
+    change HasDerivAt F _ 0 at H
+    refine H.congr_deriv ?_
+    simp only [l, mul_zero, add_zero]
+    have hK : (k : ℂ) * (√z : ℂ) = (z : ℂ) + r := by
+      have HE : k * √z = z + r := by dsimp only [k, r]; nlinarith [Real.sq_sqrt hz.le]
+      exact_mod_cast HE
+    have hsz : (√z : ℂ) ^ 2 = z := by exact_mod_cast Real.sq_sqrt hz.le
+    have hZC : (z : ℂ) + r ≠ 0 := by exact_mod_cast hzr.ne'
+    field_simp [ofReal_ne_zero.mpr hr.ne', ofReal_ne_zero.mpr hz.ne',
+      ofReal_ne_zero.mpr (Real.sqrt_pos.mpr hz).ne', hZC]
+    linear_combination (-(r : ℂ) * (√z : ℂ)) * hK + ((r : ℂ) * k) * hsz
+  have HT := analyticAt_sub_linear_isBigO ha HD
+  have hF (x : ℝ) (hx : 0 ≤ x) : F (√x : ℂ) = symEllIntRD x y z := by
+    have hscale : (√x * √y + √y * √z + √z * √x : ℝ) = r + k * √x := by
+      dsimp only [r, k]; ring
+    have H := symEllIntRD_duplication_of_nonneg hx hy hz
+    dsimp only at H
+    rw [hscale] at H
+    have hg : symEllIntRD (x + (r + k * √x) : ℝ) (y + (r + k * √x) : ℝ)
+        (z + (r + k * √x) : ℝ) = G (√x : ℂ) := by
+      rw [symEllIntRD_eq_symEllIntR, symEllIntR_of_mem]
+      · simp only [G, b, q, l, neg_div]
+        congr 1
+        funext i; fin_cases i <;> simp [Real.sq_sqrt hx, ← ofReal_pow]
+      all_goals first
+      | apply ei19c_slit3 <;> exact ofReal_mem_slitPlane.mpr (by positivity)
+      | exact ofReal_mem_slitPlane.mpr (by positivity)
+    rw [hg] at H
+    dsimp only [F, l]
+    push_cast at H ⊢
+    rw [H]
+    field_simp
+  have hlim : Tendsto (fun x : ℝ => (√x : ℂ)) (𝓝[≥] 0) (𝓝 0) := by
+    have H : Tendsto (fun x : ℝ => (√x : ℂ)) (𝓝 (0 : ℝ)) (𝓝 (0 : ℂ)) := by
+      simpa only [Function.comp_def, Real.sqrt_zero, ofReal_zero] using
+        ((continuous_ofReal.comp Real.continuous_sqrt).tendsto (0 : ℝ))
+    exact H.mono_left nhdsWithin_le_nhds
+  have HH := HT.comp_tendsto hlim
+  have h0 : F 0 = symEllIntRD 0 y z := by simpa using hF 0 le_rfl
+  have he : (fun x : ℝ => F (√x : ℂ) - F 0 - (-(3 / ((r : ℂ) * z))) * (√x : ℂ)) =ᶠ[𝓝[≥] 0]
+      fun x : ℝ => symEllIntRD x y z - symEllIntRD 0 y z + ((3 * √x / (ellAsymH y z * z) : ℝ) : ℂ) := by
+    filter_upwards [self_mem_nhdsWithin] with x hx
+    rw [hF x hx, h0]
+    simp only [ellAsymH, Real.sqrt_mul hy.le, ofReal_div, ofReal_mul, ofReal_ofNat]
+    dsimp only [r]
+    push_cast
+    ring
+  refine (HH.congr' he Filter.EventuallyEq.rfl).trans ?_
+  have hh : 0 < ellAsymH y z := by dsimp only [ellAsymH]; positivity
+  have hC : 0 < 3 / (ellAsymH y z * z * √(ellAsymH y z)) := by positivity
+  have HId : (fun x : ℝ => ‖(√x : ℂ)‖ ^ 2) =O[𝓝[≥] 0]
+      fun x : ℝ => ((3 * √x / (ellAsymH y z * z) * √(x / ellAsymH y z) : ℝ) : ℂ) := by
+    apply IsBigO.of_bound ((3 / (ellAsymH y z * z * √(ellAsymH y z)))⁻¹)
+    filter_upwards [self_mem_nhdsWithin] with x hx
+    rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _), Complex.norm_real, Real.norm_eq_abs,
+      abs_of_nonneg (Real.sqrt_nonneg _), Real.sq_sqrt hx,
+      Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    rw [Real.sqrt_div hx]
+    apply le_of_eq
+    field_simp
+    nlinarith [Real.sq_sqrt hx]
+  exact HId
+
 
 /-! ### §19.27(v) `R_J` -/
 

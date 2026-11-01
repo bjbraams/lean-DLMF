@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Struve.SeriesAndEquations
+public import DLMF.Struve.RelativeBounds
 public import DLMF.Struve.Poisson
 public import DLMF.Bessel.NeumannSeries
 
@@ -484,16 +485,6 @@ theorem struveH_nonneg {ν x : ℝ} (hν : 1/2 ≤ ν) (hx : 0 < x) :
   refine ⟨mul_nonneg (div_nonneg (by positivity) (mul_nonneg (Real.sqrt_nonneg _)
     (Real.Gamma_pos_of_pos (by linarith)).le)) ?_, rfl⟩
   exact integral_rpow_mul_sin_nonneg (by linarith) hx
-
-/-- Relative-error bound, with minimum distance to reciprocal-gamma zeros explicit.
-DLMF 11.4.15 prints `2/3 * exp(|z|^2/(4|ν₀+3/2|) - 1)`, which is false: at `ν = 1000`,
-`z = i*y` with `y^2/4 = |ν+3/2|` the error exceeds `0.93 > 2/3`. The bound proved by the
-termwise estimate `(3/2)_n ≥ (3/2) n!` is `2/3 * (exp(|z|^2/(4|ν₀+3/2|)) - 1)`, stated here
-(corrected 2026-10-20). -/
-@[dlmf 11.4.E14, dlmf 11.4.E15]
-theorem struveH_relative_bound {ν z : ℂ} (hν : ∀ n : ℕ, ν+3/2 ≠ -n) (hz : z ≠ 0) (d : ℝ) (hd : 0 < d) (hmin : ∀ n : ℕ, d ≤ ‖ν+3/2+n‖) (hatt : ∃ n : ℕ, d = ‖ν+3/2+n‖) :
-    ∃ θ : ℂ, struveH ν z = 2*(z/2)^(ν+1)/(Real.sqrt π*Gamma (ν+3/2))*(1+θ) ∧ ‖θ‖ < 2/3*(Real.exp (‖z‖^2/(4*d))-1) := by
-  sorry
 
 /-- struveH bessel series 18. The hypothesis `hν'` excludes `ν + 1/2 ∈ -ℕ`, where DLMF's
 term with `2k+2ν+1 = 0` is a removable quotient but the totalized Lean term is `0`

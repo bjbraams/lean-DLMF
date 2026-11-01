@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.Summability.Basic
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 
 /-!
 # Summability of integrals and of Fourier integrals (DLMF §1.15(iv)–(v))
@@ -111,7 +112,45 @@ theorem integral_halfPlanePoissonKernel {y : ℝ} (hy : 0 < y) :
 @[dlmf 1.15.E35]
 theorem tendsto_integral_halfPlanePoissonKernel_tail {δ : ℝ} (hδ : 0 < δ) :
     Tendsto (fun y => ∫ x in {x : ℝ | δ ≤ |x|}, halfPlanePoissonKernel x y) (𝓝[>] 0) (𝓝 0) := by
-  sorry
+  let S : Set ℝ := {x : ℝ | δ ≤ |x|}
+  let C : ℝ := (1 + δ ^ 2) / δ ^ 2
+  have hC : 0 < C := by dsimp [C]; positivity
+  have hrec (x : ℝ) (hx : x ∈ S) :
+      1 / x ^ 2 ≤ C * (1 + x ^ 2)⁻¹ := by
+    have hxδ : δ ^ 2 ≤ x ^ 2 := by
+      have hh : δ ≤ |x| := hx
+      nlinarith [sq_abs x]
+    have hxpos : 0 < x ^ 2 := lt_of_lt_of_le (sq_pos_of_pos hδ) hxδ
+    rw [← div_eq_mul_inv, div_le_div_iff₀ hxpos (by positivity)]
+    dsimp [C]
+    rw [div_mul_eq_mul_div, le_div_iff₀ (sq_pos_of_pos hδ)]
+    nlinarith
+  have hg : Integrable (fun x : ℝ => (1 + x ^ 2)⁻¹) (volume.restrict S) :=
+    integrable_inv_one_add_sq.integrableOn
+  have hbound (y : ℝ) (hy : 0 < y) :
+      ‖∫ x in S, halfPlanePoissonKernel x y‖ ≤
+        (2 * y * C) * ∫ x in S, (1 + x ^ 2)⁻¹ := by
+    rw [← integral_const_mul]
+    refine norm_integral_le_of_norm_le (hg.const_mul _) ?_
+    filter_upwards [ae_restrict_mem (by dsimp [S]; measurability)] with x hx
+    have hxpos : 0 < x ^ 2 := by
+      have hh : δ ≤ |x| := hx
+      have : 0 < |x| := hδ.trans_le hh
+      nlinarith [sq_abs x]
+    have hden : 0 < x ^ 2 + y ^ 2 := by positivity
+    rw [halfPlanePoissonKernel, Real.norm_eq_abs, abs_of_pos (by positivity)]
+    calc
+      2 * y / (x ^ 2 + y ^ 2) ≤ 2 * y / x ^ 2 :=
+        div_le_div_of_nonneg_left (by positivity) hxpos (by nlinarith [sq_nonneg y])
+      _ ≤ 2 * y * (C * (1 + x ^ 2)⁻¹) := by
+        simpa only [div_eq_mul_inv, one_div, one_mul] using
+          mul_le_mul_of_nonneg_left (hrec x hx) (by positivity : 0 ≤ 2 * y)
+      _ = 2 * y * C * (1 + x ^ 2)⁻¹ := by ring
+  have hlim : Tendsto (fun y : ℝ => (2 * y * C) * ∫ x in S, (1 + x ^ 2)⁻¹)
+      (𝓝[>] 0) (𝓝 0) := by
+    have ht : ContinuousAt (fun y : ℝ => (2 * y * C) * ∫ x in S, (1 + x ^ 2)⁻¹) 0 := by fun_prop
+    simpa using ht.tendsto.mono_left nhdsWithin_le_nhds
+  exact squeeze_zero_norm' (by filter_upwards [self_mem_nhdsWithin] with y hy using hbound y hy) hlim
 
 /-- DLMF 1.15.37: for `f` absolutely integrable and `y > 0`, the Abel mean 1.15.36 of the
 Fourier integral is the Poisson integral `h(x, y) = (1/2π) ∫ f(t) P(x - t, y) dt`. -/
@@ -218,7 +257,48 @@ the upper half-plane. -/
 @[dlmf 1.15.v]
 theorem differentiableOn_poissonCauchyIntegral {f : ℝ → ℝ} (hf : Integrable f) :
     DifferentiableOn ℂ (poissonCauchyIntegral fun t => (f t : ℂ)) {z : ℂ | 0 < z.im} := by
-  sorry
+  have hne (z : ℂ) (hz : 0 < z.im) (t : ℝ) : z - t ≠ 0 := by
+    intro he
+    have hi := congrArg Complex.im he
+    simp at hi
+    exact hz.ne' hi
+  have hI : DifferentiableOn ℂ (fun z : ℂ => ∫ t : ℝ, (f t : ℂ) / (z - t))
+      {z : ℂ | 0 < z.im} := by
+    apply Complex.differentiableOn_integral_of_locally_dominated
+      (isOpen_lt continuous_const Complex.continuous_im)
+    · intro z hz
+      simp_rw [div_eq_mul_inv]
+      exact (Complex.continuous_ofReal.comp_aestronglyMeasurable hf.aestronglyMeasurable).mul
+        ((by fun_prop : Continuous (fun t : ℝ => z - (t : ℂ))).inv₀ (hne z hz)).aestronglyMeasurable
+    · filter_upwards [] with t z hz
+      exact (differentiableAt_const (f t : ℂ)).div
+        (differentiableAt_id.sub_const (t : ℂ)) (hne z hz t) |>.differentiableWithinAt
+    · intro z hz
+      refine ⟨{w : ℂ | z.im / 2 < w.im},
+        (isOpen_lt continuous_const Complex.continuous_im).mem_nhds (by simpa using half_lt_self hz),
+        fun t => (z.im / 2)⁻¹ * ‖f t‖, hf.norm.const_mul _, ?_⟩
+      filter_upwards [] with t w hw
+      have hw0 : 0 < w.im := lt_trans (half_pos hz) hw
+      have hn : z.im / 2 ≤ ‖w - (t : ℂ)‖ := by
+        have hb := Complex.abs_im_le_norm (w - (t : ℂ))
+        simp only [Complex.sub_im, Complex.ofReal_im, sub_zero, abs_of_pos hw0] at hb
+        exact hw.le.trans hb
+      rw [norm_div, Complex.norm_real, div_eq_inv_mul]
+      exact mul_le_mul_of_nonneg_right
+        ((inv_le_inv₀ (norm_pos_iff.mpr (hne w hw0 t)) (half_pos hz)).mpr hn)
+        (norm_nonneg _)
+  have heq : poissonCauchyIntegral (fun t => (f t : ℂ)) =
+      fun z => (I / Real.pi) * ∫ t : ℝ, (f t : ℂ) / (z - t) := by
+    funext z
+    unfold poissonCauchyIntegral
+    congr 1
+    apply integral_congr_ae
+    filter_upwards [] with t
+    congr 1
+    push_cast
+    linear_combination Complex.re_add_im z
+  rw [heq]
+  exact hI.const_mul _
 
 /-- DLMF §1.15(v), after 1.15.40, **corrected sign**: for real absolutely integrable `f`, for
 almost every `x`, `ℑΦ(x + iy) → -ℋ(f)(x)` as `y → 0+`, with DLMF's Hilbert transform 1.14.41.

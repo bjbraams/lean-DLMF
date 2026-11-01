@@ -12,6 +12,9 @@ public import Mathlib.Analysis.SpecialFunctions.Bernstein
 public import Mathlib.Analysis.SpecialFunctions.Bessel
 public import Mathlib.MeasureTheory.Function.L2Space
 public import DLMFMathlib.MeasureTheory.Function.L2Space
+public import TauCeti.Analysis.SpecialFunctions.Hermite.Function.Oscillator
+public import TauCeti.Analysis.SpecialFunctions.Hermite.Function.HilbertBasis
+public import Mathlib.Analysis.Complex.RealDeriv
 
 /-!
 # Linear second-order differential operators and eigenfunction expansions (DLMF §1.18)
@@ -30,6 +33,9 @@ facts of §1.18(i)–(ii) are Mathlib's (`HilbertBasis`, `lp`, `MeasureTheory.L2
   the Sokhotski–Plemelj formula 1.18.54, the Hankel and Fourier integral theorems
   1.18.56–1.18.59, and Simon's bound-state theorem (§1.18(viii));
 * §1.18(ix): spectra of self-adjoint operators, deficiency indices, Weyl's alternative.
+
+The Hermite oscillator equation and Hilbert basis use the proved TauCeti Hermite-function
+APIs, after `hermiteFunction_eq_ofReal` verifies the DLMF normalization exactly.
 
 DLMF's `⟨u, v⟩` is linear in `u`, Mathlib's `⟪u, v⟫` in `v`: DLMF's `⟨f, φₙ⟩` is `⟪φₙ, f⟫`.
 -/
@@ -343,12 +349,39 @@ theorem expEigenfunction_hilbertBasis :
 
 /-! ### Hermite's equation on `ℝ` -/
 
+/-- The DLMF normalized Hermite function agrees with Tau Ceti's real Hermite function. -/
+lemma hermiteFunction_eq_ofReal (n : ℕ) :
+    hermiteFunction n = fun x : ℝ => (TauCeti.hermiteFunction n x : ℂ) := by
+  ext x
+  have hnorm : Real.sqrt (Real.sqrt Real.pi * 2 ^ n * n.factorial) =
+      Real.sqrt 2 ^ n * Real.sqrt (n.factorial * Real.sqrt Real.pi) := by
+    apply (sq_eq_sq₀ (Real.sqrt_nonneg _) (by positivity)).mp
+    rw [Real.sq_sqrt (by positivity), mul_pow, Real.sq_sqrt (by positivity)]
+    have hs : (Real.sqrt 2 ^ n) ^ 2 = (2 : ℝ) ^ n := by
+      rw [← pow_mul, Nat.mul_comm n 2, pow_mul, Real.sq_sqrt (by positivity)]
+    rw [hs]
+    ring
+  simp only [hermiteFunction, TauCeti.hermiteFunction_def, hnorm]
+  congr 1
+  simp only [Polynomial.aeval_def, Polynomial.eval_map]
+  rw [show -(x ^ 2 / 2) = -x ^ 2 / 2 by ring]
+  rw [mul_comm x (Real.sqrt 2)]
+  field_simp
+  rw [show Int.castRingHom ℝ = algebraMap ℤ ℝ from Subsingleton.elim _ _]
+
 /-- DLMF 1.18.41–1.18.42: the Hermite functions satisfy
 `-φₙ'' + x² φₙ = (2n + 1) φₙ`. -/
 @[dlmf 1.18.E41, dlmf 1.18.E42]
 theorem hermiteFunction_eigen (n : ℕ) (x : ℝ) :
     hermiteOp (hermiteFunction n) x = (2 * n + 1 : ℂ) * hermiteFunction n x := by
-  sorry
+  have hd : deriv (fun x : ℝ => (TauCeti.hermiteFunction n x : ℂ)) =
+      fun x : ℝ => ((deriv (TauCeti.hermiteFunction n) x : ℝ) : ℂ) := by
+    funext y
+    exact ((TauCeti.hasDerivAt_hermiteFunction n y).differentiableAt.hasDerivAt.ofReal_comp).deriv
+  rw [hermiteOp, schrodingerOp, hermiteFunction_eq_ofReal, hd,
+    (TauCeti.hasDerivAt_deriv_hermiteFunction n x).ofReal_comp.deriv]
+  push_cast
+  ring
 
 /-- DLMF 1.18.42–1.18.43: the Hermite functions are an orthonormal basis of `L²(ℝ)`; hence
 `f = Σₙ (∫ φₙ(y) f(y) dy) φₙ` in `L²` for `f ∈ L²(ℝ)` (1.18.43, convergence as in §1.18(ii)). -/
@@ -356,7 +389,9 @@ theorem hermiteFunction_eigen (n : ℕ) (x : ℝ) :
 theorem hermiteFunction_hilbertBasis :
     ∃ b : HilbertBasis ℕ ℂ (Lp ℂ 2 (volume : Measure ℝ)),
       ∀ n, (b n : ℝ → ℂ) =ᵐ[volume] hermiteFunction n := by
-  sorry
+  refine ⟨TauCeti.hermiteHilbertBasis ℂ, fun n => ?_⟩
+  rw [congrFun (TauCeti.coe_hermiteHilbertBasis ℂ) n]
+  simpa [hermiteFunction_eq_ofReal] using TauCeti.coeFn_hermiteFunctionLp (𝕜 := ℂ) n
 
 /-! ## §1.18(vi), §1.18(viii): continuous and mixed spectra -/
 

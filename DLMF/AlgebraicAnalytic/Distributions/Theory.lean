@@ -6,6 +6,10 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.Distributions.Basic
+public import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+public import DLMFMathlib.Analysis.Distribution.IteratedLineDeriv
+public import Mathlib.Analysis.Distribution.AEEqOfIntegralContDiff
+public import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 
 /-!
 # Distributions (DLMF §1.16)
@@ -221,7 +225,32 @@ integrable `f`. -/
 @[dlmf 1.16.iii]
 theorem delta_not_regular :
     ¬ ∃ f : ℝ → ℝ, LocallyIntegrable f volume ∧ lineDistrib f = Distribution.delta 0 := by
-  sorry
+  rintro ⟨f, hf, he⟩
+  have hz : ∀ᵐ x : ℝ, x ∈ ({0}ᶜ : Set ℝ) → f x = 0 := by
+    refine isClosed_singleton.isOpen_compl.ae_eq_zero_of_integral_contDiff_smul_eq_zero
+      (hf.locallyIntegrableOn _) ?_
+    intro g hgd hgc hgs
+    let φ : 𝓓((⊤ : TopologicalSpace.Opens ℝ), ℝ) :=
+      ⟨g, hgd, hgc, subset_univ _⟩
+    have hg0 : g 0 = 0 := image_eq_zero_of_notMem_tsupport
+      (fun h => hgs h (mem_singleton 0))
+    have hh := congrArg (fun T : 𝓓'((⊤ : TopologicalSpace.Opens ℝ), ℝ) => T φ) he
+    rw [lineDistrib, Distribution.ofFun_apply (hf.locallyIntegrableOn _),
+      Distribution.delta_apply] at hh
+    simpa [φ, hg0] using hh
+  have hfae : f =ᵐ[volume] 0 := by
+    have hne : ∀ᵐ x : ℝ ∂volume, x ≠ 0 := by simp [ae_iff]
+    filter_upwards [hz, hne] with x hx hx0
+    exact hx hx0
+  have hzdis : lineDistrib f = 0 := by
+    rw [lineDistrib, Distribution.ofFun_congr_ae (by simpa using hfae), Distribution.ofFun_zero]
+  obtain ⟨g, hgs, hgc, hgd, -, hg0⟩ :=
+    exists_contDiff_tsupport_subset (n := (⊤ : ℕ∞))
+      (s := (univ : Set ℝ)) (x := 0) (Filter.univ_mem)
+  let φ : 𝓓((⊤ : TopologicalSpace.Opens ℝ), ℝ) := ⟨g, hgd, hgc, hgs⟩
+  have hh := congrArg (fun T : 𝓓'((⊤ : TopologicalSpace.Opens ℝ), ℝ) => T φ)
+    (he.symm.trans hzdis)
+  simpa [Distribution.delta_apply, φ, hg0] using hh
 
 /-! ## §1.16(iv): jumps and the distributions `x₊^α` -/
 
@@ -288,7 +317,9 @@ theorem iteratedLineDerivOp_ofFun_apply {n r : ℕ} (f : EuclideanSpace ℝ (Fin
     (∂^{m} (Distribution.ofFun ⊤ f volume ⊤ :
         𝓓'((⊤ : TopologicalSpace.Opens (EuclideanSpace ℝ (Fin n))), ℝ))) φ =
       (-1 : ℝ) ^ r * ∫ x, f x * (∂^{m} φ) x := by
-  sorry
+  rw [Distribution.iteratedLineDerivOp_apply,
+    Distribution.ofFun_apply (hf.locallyIntegrableOn _)]
+  simp only [smul_eq_mul, mul_comm]
 
 /-! ## §1.16(vii): the DLMF Fourier transform -/
 
@@ -320,19 +351,341 @@ theorem dlmfFourierSchwartz_apply (φ : 𝓢(E, ℂ)) (x : E) :
 
 end Fourier
 
+/-- A linear functional on which each operator acts by a scalar evaluates the polynomial in
+those operators by substituting the same scalars. -/
+lemma polyOp_apply_eigenfunctional {V : Type*} [AddCommGroup V] [Module ℂ V] {n : ℕ}
+    (L : V →ₗ[ℂ] ℂ) (D : Fin n → Module.End ℂ V) (g : Fin n → ℂ)
+    (hL : ∀ j φ, L (D j φ) = g j * L φ) (P : MvPolynomial (Fin n) ℂ) (φ : V) :
+    L (polyOp P D φ) = MvPolynomial.eval g P * L φ := by
+  have hp (j : Fin n) (k : ℕ) (φ : V) : L ((D j ^ k) φ) = g j ^ k * L φ := by
+    induction k with
+    | zero => simp
+    | succ k ih =>
+      rw [pow_succ', Module.End.mul_apply, hL, pow_succ]
+      rw [ih]
+      ring
+  have hl (α : Fin n → ℕ) (l : List (Fin n)) (φ : V) :
+      L ((l.map (fun j => D j ^ α j)).prod φ) =
+        (l.map (fun j => g j ^ α j)).prod * L φ := by
+    induction l generalizing φ with
+    | nil => simp
+    | cons j l ih =>
+      simp only [List.map_cons, List.prod_cons, Module.End.mul_apply]
+      rw [hp, ih]
+      ring
+  have hmono (α : Fin n →₀ ℕ) :
+      L ((List.ofFn (fun j => D j ^ α j)).prod φ) = (∏ j, g j ^ α j) * L φ := by
+    simpa only [List.map_ofFn, Function.comp_def, List.prod_ofFn, id_eq] using
+      hl α (List.ofFn id) φ
+  rw [polyOp, LinearMap.sum_apply, map_sum, MvPolynomial.eval_eq', Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro α hα
+  rw [LinearMap.smul_apply, map_smul, smul_eq_mul, hmono]
+  ring
+
+section General
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [MeasurableSpace E] [BorelSpace E]
+/-- The DLMF Fourier transform sends a directional derivative to multiplication by
+`-I * inner x v`. This specializes Mathlib’s `SchwartzMap.fourierInv_lineDerivOp_eq`. -/
+lemma dlmfFourierSchwartz_lineDeriv (φ : 𝓢(E, ℂ)) (v : E) :
+    dlmfFourierSchwartz (∂_{v} φ) =
+      SchwartzMap.smulLeftCLM ℂ (fun x : E => -I * (inner ℝ x v : ℂ))
+        (dlmfFourierSchwartz φ) := by
+  have hg : (fun x : E => -I * (inner ℝ x v : ℂ)).HasTemperateGrowth := by fun_prop
+  have hi : (fun x : E => inner ℝ x v).HasTemperateGrowth := by fun_prop
+  simp only [dlmfFourierSchwartz, smul_apply, ContinuousLinearMap.comp_apply,
+    FourierTransform.fourierInvCLM_apply, SchwartzMap.fourierInv_lineDerivOp_eq,
+    map_smul]
+  ext x
+  simp only [SchwartzMap.compCLMOfContinuousLinearEquiv_apply, Function.comp_apply,
+    SchwartzMap.smulLeftCLM_apply hg, SchwartzMap.smulLeftCLM_apply hi,
+    smul_apply, Complex.real_smul, smul_eq_mul]
+  simp only [scaleEquiv, ContinuousLinearEquiv.equivOfInverse_apply,
+    smul_apply, ContinuousLinearMap.id_apply, inner_smul_left]
+  simp only [starRingEnd_apply, star_trivial]
+  push_cast
+  field_simp
+end General
+
+/-- The DLMF differential operator `D_j = (1 / I) ∂_j` transforms to multiplication by `-x_j`. -/
+lemma dlmfFourierSchwartz_dlmfD {n : ℕ} (j : Fin n)
+    (φ : 𝓢(EuclideanSpace ℝ (Fin n), ℂ)) (x : EuclideanSpace ℝ (Fin n)) :
+    dlmfFourierSchwartz (dlmfD j φ) x = -(x j : ℂ) * dlmfFourierSchwartz φ x := by
+  have hg : (fun x : EuclideanSpace ℝ (Fin n) =>
+      -I * (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)).HasTemperateGrowth := by fun_prop
+  simp only [dlmfD, LinearMap.smul_apply, ContinuousLinearMap.coe_coe,
+    LineDeriv.lineDerivOpCLM_apply, map_smul, smul_apply]
+  rw [dlmfFourierSchwartz_lineDeriv]
+  rw [SchwartzMap.smulLeftCLM_apply hg]
+  simp only [smul_eq_mul, EuclideanSpace.inner_single_right, one_mul]
+  simp only [starRingEnd_apply, star_trivial]
+  linear_combination ((x j : ℂ) * dlmfFourierSchwartz φ x) * I_sq
+
+
+/-- A complex polynomial in the real coordinate functions has temperate growth. -/
+lemma polyEval_hasTemperateGrowth {n : ℕ} (P : MvPolynomial (Fin n) ℂ) :
+    (polyEval P).HasTemperateGrowth := by
+  have hall (Q : MvPolynomial (Fin n) ℂ) : (polyEval Q).HasTemperateGrowth := by
+    induction Q using MvPolynomial.induction_on with
+    | C c =>
+      convert Function.HasTemperateGrowth.const (E := EuclideanSpace ℝ (Fin n)) c using 1
+      ext y
+      simp [polyEval]
+    | add p q hp hq =>
+      convert hp.add hq using 1
+      ext y
+      simp [polyEval]
+    | mul_X p j hp =>
+      have hx : (fun x : EuclideanSpace ℝ (Fin n) => (x j : ℂ)).HasTemperateGrowth := by
+        have hi : (fun x : EuclideanSpace ℝ (Fin n) =>
+            (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)).HasTemperateGrowth := by fun_prop
+        convert hi using 1
+        ext y
+        simp [EuclideanSpace.inner_single_right]
+      convert hp.mul hx using 1
+      ext y
+      simp [polyEval]
+  exact hall P
+
+
+/-- A linear map intertwining two families of operators also intertwines every polynomial
+in those families, preserving the fixed order in `polyOp`. -/
+lemma polyOp_intertwine {V W : Type*} [AddCommGroup V] [Module ℂ V]
+    [AddCommGroup W] [Module ℂ W] {n : ℕ}
+    (L : V →ₗ[ℂ] W) (D : Fin n → Module.End ℂ V) (T : Fin n → Module.End ℂ W)
+    (hL : ∀ j φ, L (D j φ) = T j (L φ)) (P : MvPolynomial (Fin n) ℂ) (φ : V) :
+    L (polyOp P D φ) = polyOp P T (L φ) := by
+  have hp (j : Fin n) (k : ℕ) (φ : V) : L ((D j ^ k) φ) = (T j ^ k) (L φ) := by
+    induction k with
+    | zero => simp
+    | succ k ih =>
+      rw [pow_succ', Module.End.mul_apply, hL, ih, pow_succ', Module.End.mul_apply]
+  have hl (α : Fin n → ℕ) (l : List (Fin n)) (φ : V) :
+      L ((l.map (fun j => D j ^ α j)).prod φ) =
+        (l.map (fun j => T j ^ α j)).prod (L φ) := by
+    induction l generalizing φ with
+    | nil => simp
+    | cons j l ih =>
+      simp only [List.map_cons, List.prod_cons, Module.End.mul_apply]
+      rw [hp, ih]
+  have hmono (α : Fin n →₀ ℕ) :
+      L ((List.ofFn (fun j => D j ^ α j)).prod φ) =
+        (List.ofFn (fun j => T j ^ α j)).prod (L φ) := by
+    simpa only [List.map_ofFn, Function.comp_def, id_eq] using hl α (List.ofFn id) φ
+  simp only [polyOp, LinearMap.sum_apply, map_sum, LinearMap.smul_apply, map_smul, hmono]
+
+
+section General
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [MeasurableSpace E] [BorelSpace E]
+/-- A directional derivative of the DLMF Fourier transform corresponds to multiplying the
+original Schwartz function by `I * inner x v`, including DLMF’s frequency normalization. -/
+lemma lineDeriv_dlmfFourierSchwartz (φ : 𝓢(E, ℂ)) (v : E) :
+    ∂_{v} (dlmfFourierSchwartz φ) =
+      dlmfFourierSchwartz (SchwartzMap.smulLeftCLM ℂ
+        (fun x : E => I * (inner ℝ x v : ℂ)) φ) := by
+  simp only [dlmfFourierSchwartz, smul_apply, ContinuousLinearMap.comp_apply,
+    FourierTransform.fourierInvCLM_apply]
+  rw [LineDeriv.lineDerivOp_smul, SchwartzMap.lineDerivOp_compCLMOfContinuousLinearEquiv,
+    SchwartzMap.lineDerivOp_fourierInv_eq]
+  congr 3
+  ext x
+  have h₁ : (fun y : E => inner ℝ y ((scaleEquiv (2 * Real.pi)⁻¹ (by positivity)) v)).HasTemperateGrowth := by fun_prop
+  have h₂ : (fun x : E => I * (inner ℝ x v : ℂ)).HasTemperateGrowth := by fun_prop
+  simp only [smul_apply]
+  rw [SchwartzMap.smulLeftCLM_apply h₁, SchwartzMap.smulLeftCLM_apply h₂]
+  simp only [Complex.real_smul, smul_eq_mul]
+  simp only [scaleEquiv, ContinuousLinearEquiv.equivOfInverse_apply,
+    smul_apply, ContinuousLinearMap.id_apply, inner_smul_right]
+  push_cast
+  field_simp
+end General
+
+/-- A bilinear pairing transposes a polynomial in operators to the corresponding polynomial
+in their adjoints, provided the latter commute. -/
+lemma polyOp_pairing {V W : Type*} [AddCommGroup V] [Module ℂ V]
+    [AddCommGroup W] [Module ℂ W] {n : ℕ}
+    (B : V →ₗ[ℂ] W →ₗ[ℂ] ℂ) (D : Fin n → Module.End ℂ V)
+    (T : Fin n → Module.End ℂ W) (hT : ∀ i j, Commute (T i) (T j))
+    (hB : ∀ j v w, B (D j v) w = B v (T j w)) (P : MvPolynomial (Fin n) ℂ)
+    (v : V) (w : W) : B (polyOp P D v) w = B v (polyOp P T w) := by
+  have hp (j : Fin n) (k : ℕ) (v : V) (w : W) :
+      B ((D j ^ k) v) w = B v ((T j ^ k) w) := by
+    induction k generalizing v with
+    | zero => simp
+    | succ k ih =>
+      rw [pow_succ, Module.End.mul_apply, ih, hB, pow_succ', Module.End.mul_apply]
+  have hl (α : Fin n → ℕ) (l : List (Fin n)) (v : V) (w : W) :
+      B ((l.map (fun j => D j ^ α j)).prod v) w =
+        B v ((l.map (fun j => T j ^ α j)).prod w) := by
+    induction l generalizing v w with
+    | nil => simp
+    | cons j l ih =>
+      simp only [List.map_cons, List.prod_cons, Module.End.mul_apply]
+      rw [hp, ih]
+      have hc : Commute (T j ^ α j) (l.map (fun k => T k ^ α k)).prod := by
+        apply Commute.list_prod_right
+        intro t ht
+        obtain ⟨k, hk, rfl⟩ := List.mem_map.mp ht
+        exact (hT j k).pow_pow _ _
+      exact congrArg (fun A : Module.End ℂ W => B v (A w)) hc.eq.symm
+  have hmono (α : Fin n →₀ ℕ) :
+      B ((List.ofFn (fun j => D j ^ α j)).prod v) w =
+        B v ((List.ofFn (fun j => T j ^ α j)).prod w) := by
+    simpa only [List.map_ofFn, Function.comp_def, id_eq] using hl α (List.ofFn id) v w
+  simp only [polyOp, LinearMap.sum_apply, map_sum, LinearMap.smul_apply, map_smul,
+    smul_eq_mul, hmono]
+
+/-- Directional derivatives of smooth Schwartz functions commute. The proof adapts
+Tau Ceti’s `TestFunction.lineDerivOp_comm`, using Mathlib’s symmetric second derivative. -/
+lemma schwartz_lineDeriv_comm {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (φ : 𝓢(E, ℂ)) (v w : E) : ∂_{v} (∂_{w} φ) = ∂_{w} (∂_{v} φ) := by
+  ext x
+  have hd : DifferentiableAt ℝ (fderiv ℝ (φ : E → ℂ)) x :=
+    (φ.smooth ⊤ |>.fderiv_right (m := 1) (by simp)).differentiable one_ne_zero x
+  change fderiv ℝ (fun y => fderiv ℝ (φ : E → ℂ) y w) x v =
+    fderiv ℝ (fun y => fderiv ℝ (φ : E → ℂ) y v) x w
+  simpa [fderiv_clm_apply hd (differentiableAt_const _)] using
+    ((φ.smooth ⊤ |>.contDiffAt (x := x)).isSymmSndFDerivAt (by simp)).eq v w
+/-- The coordinate differential operators `D_i` and `D_j` commute on Schwartz space. -/
+lemma dlmfD_commute {n : ℕ} (i j : Fin n) : Commute (dlmfD i) (dlmfD j) := by
+  ext φ
+  simp only [Module.End.mul_apply, dlmfD, LinearMap.smul_apply,
+    ContinuousLinearMap.coe_coe, LineDeriv.lineDerivOpCLM_apply,
+    LineDeriv.lineDerivOp_smul]
+  rw [schwartz_lineDeriv_comm]
+
+/-- Applying a polynomial differential operator to a tempered distribution transfers the
+operators to the test function with a minus sign on each coordinate derivative. -/
+lemma temperedPolyDiffOp_apply {n : ℕ} (P : MvPolynomial (Fin n) ℂ)
+    (u : 𝓢'(EuclideanSpace ℝ (Fin n), ℂ)) (φ : 𝓢(EuclideanSpace ℝ (Fin n), ℂ)) :
+    temperedPolyDiffOp P u φ = u (polyOp P (fun j => -dlmfD j) φ) := by
+  let B : 𝓢'(EuclideanSpace ℝ (Fin n), ℂ) →ₗ[ℂ]
+      𝓢(EuclideanSpace ℝ (Fin n), ℂ) →ₗ[ℂ] ℂ :=
+    { toFun := fun v => v.toLinearMap
+      map_add' := by intros; rfl
+      map_smul' := by intros; rfl }
+  have hB (j : Fin n) (v : 𝓢'(EuclideanSpace ℝ (Fin n), ℂ))
+      (ψ : 𝓢(EuclideanSpace ℝ (Fin n), ℂ)) :
+      B (temperedD j v) ψ = B v ((-dlmfD j) ψ) := by
+    change (-I) * v (-∂_{EuclideanSpace.single j (1 : ℝ)} ψ) =
+      v (-((-I) • ∂_{EuclideanSpace.single j (1 : ℝ)} ψ))
+    simp only [map_neg, map_smul, smul_eq_mul]
+    ring
+  exact polyOp_pairing B temperedD (fun j => -dlmfD j)
+    (fun i j => by
+      change (-dlmfD i) * (-dlmfD j) = (-dlmfD j) * (-dlmfD i)
+      simpa only [neg_mul_neg] using (dlmfD_commute i j).eq) hB P u φ
+/-- A real coordinate function, viewed as complex valued, has temperate growth. -/
+lemma coordinate_hasTemperateGrowth {n : ℕ} (j : Fin n) :
+    (fun x : EuclideanSpace ℝ (Fin n) => (x j : ℂ)).HasTemperateGrowth := by
+  have hi : (fun x : EuclideanSpace ℝ (Fin n) =>
+      (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)).HasTemperateGrowth := by fun_prop
+  convert hi using 1
+  ext y
+  simp [EuclideanSpace.inner_single_right]
+/-- A polynomial in coordinate multiplication operators acts pointwise as the corresponding
+polynomial function, with a common complex scale factor on the coordinates. -/
+lemma polyOp_coordinateMul_apply {n : ℕ} (c : ℂ) (P : MvPolynomial (Fin n) ℂ)
+    (φ : 𝓢(EuclideanSpace ℝ (Fin n), ℂ)) (x : EuclideanSpace ℝ (Fin n)) :
+    polyOp P (fun j => (SchwartzMap.smulLeftCLM ℂ
+      (fun y : EuclideanSpace ℝ (Fin n) => c * (y j : ℂ))).toLinearMap) φ x =
+      MvPolynomial.eval (fun j => c * (x j : ℂ)) P * φ x := by
+  exact polyOp_apply_eigenfunctional (TemperedDistribution.delta x).toLinearMap
+    _ (fun j => c * (x j : ℂ)) (fun j ψ => by
+      have hg : (fun y : EuclideanSpace ℝ (Fin n) => c * (y j : ℂ)).HasTemperateGrowth :=
+        (Function.HasTemperateGrowth.const (E := EuclideanSpace ℝ (Fin n)) c).mul
+          (coordinate_hasTemperateGrowth j)
+      change (SchwartzMap.smulLeftCLM ℂ _ ψ) x = _
+      rw [SchwartzMap.smulLeftCLM_apply hg]
+      rfl) P φ
+/-- The DLMF operator `D_j` applied to a Fourier transform is the transform of multiplication
+by the original coordinate `x_j`. -/
+lemma dlmfD_dlmfFourierSchwartz {n : ℕ} (j : Fin n)
+    (φ : 𝓢(EuclideanSpace ℝ (Fin n), ℂ)) :
+    dlmfD j (dlmfFourierSchwartz φ) =
+      dlmfFourierSchwartz (SchwartzMap.smulLeftCLM ℂ
+        (fun x : EuclideanSpace ℝ (Fin n) => (x j : ℂ)) φ) := by
+  change (-I) • (∂_{EuclideanSpace.single j (1 : ℝ)} (dlmfFourierSchwartz φ)) = _
+  rw [lineDeriv_dlmfFourierSchwartz]
+  have hg : (fun x : EuclideanSpace ℝ (Fin n) =>
+      I * (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)).HasTemperateGrowth := by fun_prop
+  have he : SchwartzMap.smulLeftCLM ℂ
+      (fun x : EuclideanSpace ℝ (Fin n) => I * (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)) φ =
+      I • SchwartzMap.smulLeftCLM ℂ (fun x : EuclideanSpace ℝ (Fin n) => (x j : ℂ)) φ := by
+    ext x
+    rw [SchwartzMap.smulLeftCLM_apply hg]
+    simp only [smul_apply]
+    rw [SchwartzMap.smulLeftCLM_apply (coordinate_hasTemperateGrowth j)]
+    simp [EuclideanSpace.inner_single_right, smul_eq_mul, mul_assoc]
+  rw [he, map_smul, smul_smul]
+  simp
+
+
 /-- DLMF 1.16.33: `𝓕(P(𝐃)φ)(𝐱) = P(-𝐱) 𝓕φ(𝐱)` on Schwartz space. -/
 @[dlmf 1.16.E33]
 theorem dlmfFourierSchwartz_polyDiffOp {n : ℕ} (P : MvPolynomial (Fin n) ℂ)
     (φ : 𝓢(EuclideanSpace ℝ (Fin n), ℂ)) :
     dlmfFourierSchwartz (polyDiffOp P φ) = polyMul (polyNeg P) (dlmfFourierSchwartz φ) := by
-  sorry
+  ext x
+  let L : 𝓢(EuclideanSpace ℝ (Fin n), ℂ) →ₗ[ℂ] ℂ :=
+    (TemperedDistribution.delta x).toLinearMap.comp dlmfFourierSchwartz.toLinearMap
+  have h := polyOp_apply_eigenfunctional L dlmfD (fun j => -(x j : ℂ))
+    (fun j φ => dlmfFourierSchwartz_dlmfD j φ x) P φ
+  have hg := polyEval_hasTemperateGrowth (polyNeg P)
+  rw [polyMul, SchwartzMap.smulLeftCLM_apply hg]
+  change L (polyOp P dlmfD φ) = polyEval (polyNeg P) x * dlmfFourierSchwartz φ x
+  rw [h]
+  congr 1
+  have he : (MvPolynomial.eval (fun j => (x j : ℂ))).comp MvPolynomial.C =
+      RingHom.id ℂ := by
+    ext c
+    simp
+  simp [polyEval, polyNeg, he]
 
 /-- DLMF 1.16.34: `𝓕(Pφ)(𝐱) = P(𝐃) 𝓕φ(𝐱)` on Schwartz space. -/
 @[dlmf 1.16.E34]
 theorem dlmfFourierSchwartz_polyMul {n : ℕ} (P : MvPolynomial (Fin n) ℂ)
     (φ : 𝓢(EuclideanSpace ℝ (Fin n), ℂ)) :
     dlmfFourierSchwartz (polyMul P φ) = polyDiffOp P (dlmfFourierSchwartz φ) := by
-  sorry
+  let X (j : Fin n) : Module.End ℂ 𝓢(EuclideanSpace ℝ (Fin n), ℂ) :=
+    (SchwartzMap.smulLeftCLM ℂ (fun x : EuclideanSpace ℝ (Fin n) => (x j : ℂ))).toLinearMap
+  have hxg (j : Fin n) : (fun x : EuclideanSpace ℝ (Fin n) => (x j : ℂ)).HasTemperateGrowth := by
+    have hi : (fun x : EuclideanSpace ℝ (Fin n) =>
+        (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)).HasTemperateGrowth := by fun_prop
+    convert hi using 1
+    ext y
+    simp [EuclideanSpace.inner_single_right]
+  have hX (j : Fin n) (ψ : 𝓢(EuclideanSpace ℝ (Fin n), ℂ)) :
+      dlmfFourierSchwartz (X j ψ) = dlmfD j (dlmfFourierSchwartz ψ) := by
+    change _ = (-I) • (∂_{EuclideanSpace.single j (1 : ℝ)} (dlmfFourierSchwartz ψ))
+    rw [lineDeriv_dlmfFourierSchwartz]
+    have hg : (fun x : EuclideanSpace ℝ (Fin n) =>
+        I * (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)).HasTemperateGrowth := by fun_prop
+    have he : SchwartzMap.smulLeftCLM ℂ
+        (fun x : EuclideanSpace ℝ (Fin n) => I * (inner ℝ x (EuclideanSpace.single j (1 : ℝ)) : ℂ)) ψ =
+        I • X j ψ := by
+      ext x
+      rw [SchwartzMap.smulLeftCLM_apply hg]
+      change _ = I * (SchwartzMap.smulLeftCLM ℂ
+        (fun x : EuclideanSpace ℝ (Fin n) => (x j : ℂ)) ψ) x
+      rw [SchwartzMap.smulLeftCLM_apply (hxg j)]
+      simp [EuclideanSpace.inner_single_right, smul_eq_mul, mul_assoc]
+    rw [he, map_smul, smul_smul]
+    simp
+  have hpX : polyOp P X φ = polyMul P φ := by
+    ext x
+    let L : 𝓢(EuclideanSpace ℝ (Fin n), ℂ) →ₗ[ℂ] ℂ := (TemperedDistribution.delta x).toLinearMap
+    have h := polyOp_apply_eigenfunctional L X (fun j => (x j : ℂ)) (fun j ψ => by
+      change (SchwartzMap.smulLeftCLM ℂ (fun x : EuclideanSpace ℝ (Fin n) => (x j : ℂ)) ψ) x = _
+      rw [SchwartzMap.smulLeftCLM_apply (hxg j)]
+      rfl) P φ
+    have hpg := polyEval_hasTemperateGrowth P
+    rw [polyMul, SchwartzMap.smulLeftCLM_apply hpg]
+    exact h
+  rw [← hpX]
+  exact polyOp_intertwine dlmfFourierSchwartz.toLinearMap X dlmfD hX P φ
 
 /-- DLMF 1.16.36: `⟨𝓕(P(𝐃)u), φ⟩ = ⟨P₋ 𝓕(u), φ⟩ = ⟨𝓕(u), P₋φ⟩` for a tempered
 distribution `u`, `P₋(𝐱) = P(-𝐱)`, derivatives in the sense of distributions. -/
@@ -343,7 +696,38 @@ theorem dlmfFourierTempered_polyDiffOp {n : ℕ} (P : MvPolynomial (Fin n) ℂ)
         temperedPolyMul (polyNeg P) (dlmfFourierTempered u) φ ∧
       temperedPolyMul (polyNeg P) (dlmfFourierTempered u) φ =
         dlmfFourierTempered u (polyMul (polyNeg P) φ) := by
-  sorry
+  let X (j : Fin n) : Module.End ℂ 𝓢(EuclideanSpace ℝ (Fin n), ℂ) :=
+    (SchwartzMap.smulLeftCLM ℂ (fun x : EuclideanSpace ℝ (Fin n) => -(x j : ℂ))).toLinearMap
+  have hX (j : Fin n) (ψ : 𝓢(EuclideanSpace ℝ (Fin n), ℂ)) :
+      dlmfFourierSchwartz (X j ψ) = (-dlmfD j) (dlmfFourierSchwartz ψ) := by
+    have hg := coordinate_hasTemperateGrowth j
+    have he : X j ψ = -(SchwartzMap.smulLeftCLM ℂ
+        (fun x : EuclideanSpace ℝ (Fin n) => (x j : ℂ)) ψ) := by
+      change SchwartzMap.smulLeftCLM ℂ
+        (fun x : EuclideanSpace ℝ (Fin n) => -(x j : ℂ)) ψ = _
+      rw [SchwartzMap.smulLeftCLM_fun_neg hg]
+      rfl
+    rw [he, map_neg]
+    exact congrArg Neg.neg (dlmfD_dlmfFourierSchwartz j ψ).symm
+  have hpoly : polyOp P X φ = polyMul (polyNeg P) φ := by
+    ext x
+    have h := polyOp_coordinateMul_apply (-1) P φ x
+    have hg := polyEval_hasTemperateGrowth (polyNeg P)
+    rw [polyMul, SchwartzMap.smulLeftCLM_apply hg]
+    change polyOp P X φ x = polyEval (polyNeg P) x * φ x
+    have he : (MvPolynomial.eval (fun j => (x j : ℂ))).comp MvPolynomial.C =
+        RingHom.id ℂ := by ext c; simp
+    have heval : MvPolynomial.eval (fun j => -(x j : ℂ)) P = polyEval (polyNeg P) x := by
+      simp [polyEval, polyNeg, he]
+    simpa only [X, neg_one_mul, heval] using h
+  have hi := polyOp_intertwine dlmfFourierSchwartz.toLinearMap X (fun j => -dlmfD j) hX P φ
+  change dlmfFourierSchwartz (polyOp P X φ) =
+    polyOp P (fun j => -dlmfD j) (dlmfFourierSchwartz φ) at hi
+  constructor
+  · change temperedPolyDiffOp P u (dlmfFourierSchwartz φ) =
+      u (dlmfFourierSchwartz (polyMul (polyNeg P) φ))
+    rw [temperedPolyDiffOp_apply, ← hi, hpoly]
+  · rfl
 
 /-- DLMF 1.16.37: `⟨𝓕(Pu), φ⟩ = ⟨P(𝐃) 𝓕(u), φ⟩` for a tempered distribution `u`. -/
 @[dlmf 1.16.E37]
@@ -351,7 +735,32 @@ theorem dlmfFourierTempered_polyMul {n : ℕ} (P : MvPolynomial (Fin n) ℂ)
     (u : 𝓢'(EuclideanSpace ℝ (Fin n), ℂ)) :
     dlmfFourierTempered (temperedPolyMul P u) =
       temperedPolyDiffOp P (dlmfFourierTempered u) := by
-  sorry
+  let X (j : Fin n) : Module.End ℂ 𝓢(EuclideanSpace ℝ (Fin n), ℂ) :=
+    (SchwartzMap.smulLeftCLM ℂ (fun x : EuclideanSpace ℝ (Fin n) => (x j : ℂ))).toLinearMap
+  have hX (j : Fin n) (ψ : 𝓢(EuclideanSpace ℝ (Fin n), ℂ)) :
+      dlmfFourierSchwartz ((-dlmfD j) ψ) = X j (dlmfFourierSchwartz ψ) := by
+    ext x
+    change dlmfFourierSchwartz (-(dlmfD j ψ)) x =
+      (SchwartzMap.smulLeftCLM ℂ (fun x : EuclideanSpace ℝ (Fin n) => (x j : ℂ))
+        (dlmfFourierSchwartz ψ)) x
+    rw [map_neg, neg_apply, dlmfFourierSchwartz_dlmfD,
+      SchwartzMap.smulLeftCLM_apply (coordinate_hasTemperateGrowth j)]
+    simp [smul_eq_mul]
+  have hpoly (φ : 𝓢(EuclideanSpace ℝ (Fin n), ℂ)) : polyOp P X φ = polyMul P φ := by
+    ext x
+    have h := polyOp_coordinateMul_apply 1 P φ x
+    rw [polyMul, SchwartzMap.smulLeftCLM_apply (polyEval_hasTemperateGrowth P)]
+    simpa only [X, one_mul, polyEval, smul_eq_mul] using h
+  ext φ
+  change u (polyMul P (dlmfFourierSchwartz φ)) =
+    temperedPolyDiffOp P (dlmfFourierTempered u) φ
+  rw [temperedPolyDiffOp_apply]
+  change u (polyMul P (dlmfFourierSchwartz φ)) =
+    u (dlmfFourierSchwartz (polyOp P (fun j => -dlmfD j) φ))
+  have hi := polyOp_intertwine dlmfFourierSchwartz.toLinearMap (fun j => -dlmfD j) X hX P φ
+  change dlmfFourierSchwartz (polyOp P (fun j => -dlmfD j) φ) =
+    polyOp P X (dlmfFourierSchwartz φ) at hi
+  rw [hi, hpoly]
 
 /-! ## §1.16(viii): Fourier transforms of special distributions -/
 
@@ -372,13 +781,79 @@ conventionally `(2π)^{-1} ∫ e^{ixt} dt = δ(x)` (1.16.43). -/
 theorem dlmfFourierTempered_one :
     dlmfFourierTempered (volume.toTemperedDistribution : 𝓢'(ℝ, ℂ)) =
       (Real.sqrt (2 * Real.pi) : ℂ) • TemperedDistribution.delta 0 := by
-  sorry
+  ext φ
+  have hF : ∫ t : ℝ, (𝓕⁻ φ) t = φ 0 := by
+    have h := congrArg (fun ψ : 𝓢(ℝ, ℂ) => ψ 0)
+      (FourierTransform.fourier_fourierInv_eq (F := 𝓢(ℝ, ℂ)) φ)
+    change (𝓕 (𝓕⁻ φ : 𝓢(ℝ, ℂ)) : 𝓢(ℝ, ℂ)) 0 = φ 0 at h
+    rw [SchwartzMap.fourier_coe, Real.fourier_eq] at h
+    simpa using h
+  change (∫ t : ℝ, dlmfFourierSchwartz φ t) =
+    (Real.sqrt (2 * Real.pi) : ℂ) * φ 0
+  simp only [dlmfFourierSchwartz, smul_apply, ContinuousLinearMap.comp_apply,
+    SchwartzMap.compCLMOfContinuousLinearEquiv_apply, Function.comp_apply,
+    FourierTransform.fourierInvCLM_apply, scaleEquiv,
+    ContinuousLinearEquiv.equivOfInverse_apply, smul_apply, ContinuousLinearMap.id_apply,
+    smul_eq_mul, Module.finrank_self, Nat.cast_one]
+  rw [integral_const_mul, Measure.integral_comp_mul_left, hF]
+  simp only [inv_inv, abs_of_pos (by positivity : 0 < 2 * Real.pi), Complex.real_smul]
+  have hc : (2 * Real.pi) ^ (-(1 : ℝ) / 2) * (2 * Real.pi) =
+      Real.sqrt (2 * Real.pi) := by
+    rw [show -(1 : ℝ) / 2 = -(1 / 2) by ring, Real.rpow_neg (by positivity),
+      ← Real.sqrt_eq_rpow]
+    have hs := Real.sq_sqrt (show 0 ≤ 2 * Real.pi by positivity)
+    have hn : Real.sqrt (2 * Real.pi) ≠ 0 := by positivity
+    field_simp
+    nlinarith
+  rw [← mul_assoc, ← ofReal_mul, hc]
 
 /-- The tempered form of DLMF 1.16.45: `sign' = 2δ`. -/
 @[dlmf 1.16.E45]
 theorem deriv_signTempered :
     TemperedDistribution.derivCLM ℂ signTempered = (2 : ℂ) • TemperedDistribution.delta 0 := by
-  sorry
+  have hmeas : Measurable (fun x : ℝ => (Real.sign x : ℂ)) := by
+    have hs : Measurable Real.sign := by
+      unfold Real.sign
+      exact (measurable_const.ite measurableSet_Iio
+        (measurable_const.ite measurableSet_Ioi measurable_const))
+    exact Complex.continuous_ofReal.measurable.comp hs
+  have hmem : MemLp (fun x : ℝ => (Real.sign x : ℂ)) ⊤ volume :=
+    memLp_top_of_bound hmeas.aestronglyMeasurable 1 (Eventually.of_forall fun x => by
+      rcases Real.sign_apply_eq x with h | h | h <;> rw [h] <;> norm_num)
+  have happ (ψ : 𝓢(ℝ, ℂ)) : signTempered ψ = ∫ x, ψ x * (Real.sign x : ℂ) := by
+    rw [signTempered, boundedTempered, dite_eq_left hmem, Lp.toTemperedDistribution_apply]
+    apply integral_congr_ae
+    filter_upwards [hmem.coeFn_toLp] with x hx
+    simp only [hx, smul_eq_mul]
+  ext φ
+  rw [TemperedDistribution.derivCLM_apply_apply, happ]
+  simp only [neg_apply, SchwartzMap.derivCLM_apply,
+    smul_apply, TemperedDistribution.delta_apply, smul_eq_mul]
+  have hderiv : Integrable (deriv ⇑φ) := by
+    have h := (SchwartzMap.derivCLM ℂ ℂ φ).integrable (μ := (volume : Measure ℝ))
+    exact h.congr (Eventually.of_forall fun x => SchwartzMap.derivCLM_apply ℂ φ x)
+  have hIoi : ∫ x in Ioi (0 : ℝ), deriv ⇑φ x = -φ 0 := by
+    simpa only [zero_sub] using integral_Ioi_of_hasDerivAt_of_tendsto
+      φ.continuous.continuousWithinAt (fun x _ => φ.differentiableAt.hasDerivAt)
+      hderiv.integrableOn (φ.tendsto_cocompact.mono_left atTop_le_cocompact)
+  have hfull : ∫ x, deriv ⇑φ x = 0 :=
+    integral_eq_zero_of_hasDerivAt_of_integrable
+      (fun x => φ.differentiableAt.hasDerivAt) hderiv φ.integrable
+  have he : (fun x : ℝ => -deriv ⇑φ x * (Real.sign x : ℂ)) =ᵐ[volume]
+      fun x => -(2 : ℂ) * ((Ioi 0).indicator (deriv ⇑φ) x) + deriv ⇑φ x := by
+    filter_upwards [(compl_mem_ae_iff.mpr (measure_singleton 0) : ({0}ᶜ : Set ℝ) ∈ ae volume)]
+      with x hx
+    have hx0 : x ≠ 0 := hx
+    rcases hx0.lt_or_gt with hn | hp
+    · have hxmem : x ∉ Ioi (0 : ℝ) := not_lt.mpr hn.le
+      simp [Real.sign_of_neg hn, hxmem]
+    · have hxmem : x ∈ Ioi (0 : ℝ) := hp
+      simp [Real.sign_of_pos hp, hxmem]
+      ring
+  rw [integral_congr_ae he, integral_add
+      ((hderiv.indicator measurableSet_Ioi).const_mul _) hderiv,
+    integral_const_mul, integral_indicator measurableSet_Ioi, hIoi, hfull]
+  ring
 
 /-- DLMF 1.16.46: `𝓕(sign') = 𝓕(2H') = 2𝓕(δ) = √(2/π)`. -/
 @[dlmf 1.16.E46]
@@ -400,12 +875,32 @@ theorem dlmfFourierTempered_deriv_sign :
   push_cast
   ring
 
+/-- In DLMF's normalization, differentiating a Schwartz Fourier transform corresponds to
+multiplication of the original function by `I * x`. This specializes Mathlib's
+`SchwartzMap.lineDerivOp_fourierInv_eq` and accounts for the frequency rescaling. -/
+lemma dlmfFourierSchwartz_deriv (φ : 𝓢(ℝ, ℂ)) :
+    SchwartzMap.derivCLM ℂ ℂ (dlmfFourierSchwartz φ) =
+      dlmfFourierSchwartz (SchwartzMap.smulLeftCLM ℂ (fun x : ℝ => I * x) φ) := by
+  have hd : SchwartzMap.derivCLM ℂ ℂ (dlmfFourierSchwartz φ) =
+      ∂_{(1 : ℝ)} (dlmfFourierSchwartz φ) := by ext x; rfl
+  rw [hd]
+  simpa only [Real.inner_apply, mul_one] using lineDeriv_dlmfFourierSchwartz φ (1 : ℝ)
+
 /-- The one-variable case of DLMF 1.16.36 with `P(𝐃) = d/dx`, `P₋(x) = -ix`:
 `𝓕(u') = (x/i) 𝓕(u)` for a tempered distribution `u` on the line. -/
 theorem dlmfFourierTempered_deriv (u : 𝓢'(ℝ, ℂ)) :
     dlmfFourierTempered (TemperedDistribution.derivCLM ℂ u) =
       TemperedDistribution.smulLeftCLM ℂ (fun x : ℝ => -I * x) (dlmfFourierTempered u) := by
-  sorry
+  ext φ
+  change u (-SchwartzMap.derivCLM ℂ ℂ (dlmfFourierSchwartz φ)) =
+    u (dlmfFourierSchwartz (SchwartzMap.smulLeftCLM ℂ (fun x : ℝ => -I * x) φ))
+  rw [dlmfFourierSchwartz_deriv]
+  have hg : (fun x : ℝ => I * (x : ℂ)).HasTemperateGrowth := by fun_prop
+  have he : (fun x : ℝ => -I * (x : ℂ)) = fun x : ℝ => -(I * (x : ℂ)) := by
+    funext x
+    ring
+  rw [he, SchwartzMap.smulLeftCLM_fun_neg hg]
+  simp only [neg_apply, map_neg]
 
 /-- DLMF 1.16.47: `𝓕(sign') = (x/i) 𝓕(sign)`. -/
 @[dlmf 1.16.E47]

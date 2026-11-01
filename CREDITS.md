@@ -1737,3 +1737,62 @@ Shared Wronskians, weighted differential operators and periodic Bernoulli/Euler
 functions consolidate existing project constructions. The Jacobi shift compositions
 and the finite-support Mathieu residual lemmas organize the existing exact proofs;
 the special-function normalizations and trial-vector coefficients are retained.
+
+## Fourier, special-function and integration proofs (2026-10-30, round g)
+
+The distribution and Schwartz-space Fourier proofs specialize Mathlib's inverse Fourier
+transform identities and explicitly account for the DLMF normalization. The iterated
+line-derivative API in `DLMFMathlib.Analysis.Distribution.IteratedLineDeriv` adapts the
+proved TauCeti test-function derivative commutation argument, with arbitrary real normed
+source and target spaces. Polynomial differential operators use shared evaluation,
+intertwining and pairing lemmas; the sign-distribution derivative uses Mathlib's improper
+fundamental theorem of calculus. Differentiation of an improper parameter integral uses
+Mathlib's dominated differentiation and uniform derivative-limit theorems. Integration
+over normal planar and spatial domains uses Mathlib's Fubini theorem and measure-preserving
+coordinate permutations; a single compact-region lemma treats coincident graph bounds.
+The discriminant product formula reuses `TauCeti.discr_C_mul` and Mathlib's
+`Polynomial.discr_prod_X_sub_C`.
+
+The symmetric elliptic integral proofs use the proved `lean-codes` APIs
+`Dirichlet.Average.TwoNode`, `Dirichlet.Average.Merge`, `Carlson.R.SlitDeriv`,
+`Carlson.R.IntegralExercises`, `Carlson.Elliptic.Asymptotic`, `Carlson.Mean.Real`,
+`Carlson.Elliptic.Applications`, and `Carlson.TwoVariable.R.ElementaryValues`.
+The lemniscatic formulas first use a real quadratic substitution, then Carlson's
+separate-variable identity principle on the right half-planes. Elliptic duplication and
+addition formulas reuse the canonical node derivative and the first-kind identities,
+with separate checks at zero arguments. The ellipse perimeter proof retains degenerate
+and negative semiaxes. The general cosine-squared integral substitution is isolated in
+`DLMFMathlib.MeasureTheory.Integral.Trigonometric`.
+
+The q-series proofs reuse the proved local q-binomial, q-Gauss and terminating q-Chu
+summations. The q-Laguerre orthogonality proof derives its own integrable moments from
+q-product bounds and a scaling recurrence. The Jackson limit uses uniform continuity and
+exact geometric partitions of the integration interval, with both orientations retained.
+Matrix Laplace-transform analyticity uses the local dominated holomorphy API and the
+proved TauCeti matrix square-root and finite-dimensional complex analyticity results.
+The unit-argument contiguous hypergeometric recurrences use exact coefficient telescopes
+and the existing Gamma-ratio asymptotics; their endpoint normalization does not assume
+existence of hypergeometric analytic continuation.
+
+The Hermite oscillator equation and Hilbert basis adopt
+`TauCeti.Analysis.SpecialFunctions.Hermite.Function.Oscillator` and
+`TauCeti.Analysis.SpecialFunctions.Hermite.Function.HilbertBasis` after an explicit
+normalization equality. The square-root branch obstruction uses Mathlib's constancy of a
+continuous map from a connected space into a discrete finite set. The Stokes transition
+limit uses Mathlib's exponential Taylor remainder. The corrected Struve relative bound
+uses the proved regularized series, Gamma recurrence and Mathlib's exponential series;
+strictness comes from the quadratic coefficient. The terminating Lommel formula extends
+the proved degree recurrence through removable parameter singularities using the existing
+parameter-limit API. The exact value of the second zeta derivative at zero follows from
+the proved reflection equation, regular part at one and digamma/polygamma values.
+
+The multiple-series formula for `k! ζ(k+1)` combines Mathlib's positive logarithmic series,
+finite products of sums, and one-dimensional Jacobian theorem. Its logarithmic involution
+transforms the already proved Mellin integral for zeta. The small-first-variable elliptic
+asymptotics use the proved duplication formulas in the coordinate `sqrt x` and Mathlib's
+analytic Taylor remainder; their common node derivative, root product and first-kind
+parametrization are shared helpers. The Poisson-kernel tail bound uses exact domination by
+an integrable rational kernel.
+The final even-zeta summation uses the proved Bernoulli-cotangent representation of ζ(3),
+reflection and cotangent duplication for a quadratic moment, and dominated integration
+of the existing generating series. That moment is isolated in `DLMF.Zeta.CotangentMoments`.

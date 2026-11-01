@@ -15,8 +15,8 @@ umbrella module `DLMF/<Area>.lean` describes what Mathlib already provides and w
 area adds. Statements taken from the DLMF record their equation numbers with Mathlib's
 `@[dlmf]` cross-reference attribute.
 
-`DLMF.lean` imports all areas. The current library has 1,204 Lean files, including
-111 general supporting modules and the two library root entry points. Large topic modules
+`DLMF.lean` imports all areas. The current library has 1,210 Lean files, including
+114 general supporting modules and the two library root entry points. Large topic modules
 are split into mathematical subtopics; the former file remains as a small import umbrella.
 For example, `Gamma/IntegralRepresentations.lean` now imports the Hankel, Prym, Binet and
 moment modules below `Gamma/IntegralRepresentations/`.
@@ -36,8 +36,12 @@ findings, remaining review candidates and reproducible audit programs. The subse
 [implementation round](REVIEW.md#review-cleanup-statement-corrections-and-shared-apis-2026-10-30)
 corrects false formulations, removes redundant assumptions and consolidates shared APIs;
 its [manifest](ReviewCleanup20261030.json) records migrations and validation.
-As of this round the project has 1,552 direct admissions. The corrected multivariate
-elliptic mean expansion is proved; the other corrected statements remain explicit obligations.
+The cleanup snapshot records 1,552 direct admissions. The subsequent
+[parallel proof round](REVIEW.md#parallel-proof-round-after-the-review-cleanup-2026-10-30)
+removes 70 of them, leaving 1,482; its [manifest](ProofRound20261030g.json) lists
+the completed theorems, upstream reuse, formulation corrections and validation. Newly proved
+corrected formulas include the lemniscatic elliptic integrals, the symmetric elementary
+addition formula, q-Karlsson–Minton vanishing and the Struve relative-error bound.
 
 For a view of the organized foundations, use `import DLMF.Basic`. It imports all
 60 area and subarea `Basic.lean` entry points. Each is a small foundational file or
@@ -71,7 +75,7 @@ umbrellas (2026-10-30):
 - [Coulomb](DLMF/Coulomb.lean): 15 files.
 - [Elementary](DLMF/Elementary.lean): 23 files.
 - [Elliptic](DLMF/Elliptic.lean): 13 files.
-- [EllipticIntegrals](DLMF/EllipticIntegrals.lean): 34 files.
+- [EllipticIntegrals](DLMF/EllipticIntegrals.lean): 35 files.
 - [ErrorFunctions](DLMF/ErrorFunctions.lean): 20 files.
 - [ExpIntegrals](DLMF/ExpIntegrals.lean): 11 files.
 - [Gamma](DLMF/Gamma.lean): 49 files.
@@ -96,12 +100,12 @@ umbrellas (2026-10-30):
 - [SphericalHarmonics](DLMF/SphericalHarmonics.lean): 5 files.
 - [Spheroidal](DLMF/Spheroidal.lean): 17 files.
 - [Statistical](DLMF/Statistical.lean): 6 files.
-- [Struve](DLMF/Struve.lean): 30 files.
+- [Struve](DLMF/Struve.lean): 31 files.
 - [Theta](DLMF/Theta.lean): 14 files.
 - [WaveEquation](DLMF/WaveEquation.lean): 1 file.
 - [Weierstrass](DLMF/Weierstrass.lean): 18 files.
 - [WignerSymbols](DLMF/WignerSymbols.lean): 7 files.
-- [Zeta](DLMF/Zeta.lean): 23 files.
+- [Zeta](DLMF/Zeta.lean): 24 files.
 
 The single-file areas [Bailey](DLMF/Bailey.lean) and [Partitions](DLMF/Partitions.lean)
 retain their entry modules. Supporting-source areas include `Constants`, `Polylog`,

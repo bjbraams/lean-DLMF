@@ -8,6 +8,7 @@ module
 public import DLMF.AsymptoticApproximations.Remainders.Basic
 public import DLMF.AsymptoticApproximations.ODE.Basic
 public import DLMF.ExpIntegrals.Asymptotics
+public import Mathlib.Analysis.SpecialFunctions.Exp
 
 /-!
 # Remainder terms; Stokes phenomenon (DLMF §2.11)
@@ -54,7 +55,55 @@ theorem cosRationalCoeff_explicit (t : ℝ) :
     cosRationalCoeff 1 t = -(2 * t) / (t ^ 2 + 1) ^ 2 ∧
       cosRationalCoeff 2 t = 24 * (t ^ 3 - t) / (t ^ 2 + 1) ^ 4 ∧
       cosRationalCoeff 3 t = -(240 * (3 * t ^ 5 - 10 * t ^ 3 + 3 * t)) / (t ^ 2 + 1) ^ 6 := by
-  sorry
+  have hden (x : ℝ) : x ^ 2 + 1 ≠ 0 := by positivity
+  have h₁ (x : ℝ) : HasDerivAt (fun t : ℝ => (t ^ 2 + 1)⁻¹)
+      (-(2 * x) / (x ^ 2 + 1) ^ 2) x := by
+    convert! (((hasDerivAt_id x).pow 2).add_const 1).inv (hden x) using 1 <;>
+      simp only [id_eq, Pi.pow_apply, Pi.inv_apply] <;> ring
+  have h₂ (x : ℝ) : HasDerivAt (fun t : ℝ => -(2 * t) / (t ^ 2 + 1) ^ 2)
+      ((6 * x ^ 2 - 2) / (x ^ 2 + 1) ^ 3) x := by
+    convert! (((hasDerivAt_id x).const_mul 2).neg).div
+      ((((hasDerivAt_id x).pow 2).add_const 1).pow 2) (pow_ne_zero 2 (hden x)) using 1
+    simp only [id_eq, Pi.pow_apply, Pi.neg_apply, Pi.sub_apply]
+    field_simp [hden x]
+    ring
+  have h₃ (x : ℝ) : HasDerivAt (fun t : ℝ => (6 * t ^ 2 - 2) / (t ^ 2 + 1) ^ 3)
+      (-(24 * (x ^ 3 - x)) / (x ^ 2 + 1) ^ 4) x := by
+    convert! ((((hasDerivAt_id x).pow 2).const_mul 6).sub_const 2).div
+      ((((hasDerivAt_id x).pow 2).add_const 1).pow 3) (pow_ne_zero 3 (hden x)) using 1
+    simp only [id_eq, Pi.pow_apply, Pi.neg_apply, Pi.sub_apply]
+    field_simp [hden x]
+    ring
+  have h₄ (x : ℝ) : HasDerivAt (fun t : ℝ => -(24 * (t ^ 3 - t)) / (t ^ 2 + 1) ^ 4)
+      ((120 * x ^ 4 - 240 * x ^ 2 + 24) / (x ^ 2 + 1) ^ 5) x := by
+    convert! (((((hasDerivAt_id x).pow 3).sub (hasDerivAt_id x)).const_mul 24).neg).div
+      ((((hasDerivAt_id x).pow 2).add_const 1).pow 4) (pow_ne_zero 4 (hden x)) using 1
+    simp only [id_eq, Pi.pow_apply, Pi.neg_apply, Pi.sub_apply]
+    field_simp [hden x]
+    ring
+  have h₅ (x : ℝ) : HasDerivAt
+      (fun t : ℝ => (120 * t ^ 4 - 240 * t ^ 2 + 24) / (t ^ 2 + 1) ^ 5)
+      (-(240 * (3 * x ^ 5 - 10 * x ^ 3 + 3 * x)) / (x ^ 2 + 1) ^ 6) x := by
+    convert! (((((hasDerivAt_id x).pow 4).const_mul 120).sub
+      (((hasDerivAt_id x).pow 2).const_mul 240)).add_const 24).div
+      ((((hasDerivAt_id x).pow 2).add_const 1).pow 5) (pow_ne_zero 5 (hden x)) using 1
+    simp only [id_eq, Pi.pow_apply, Pi.neg_apply, Pi.sub_apply]
+    field_simp [hden x]
+    ring
+  have hd₁ : deriv (fun t : ℝ => (t ^ 2 + 1)⁻¹) =
+      fun t : ℝ => -(2 * t) / (t ^ 2 + 1) ^ 2 := funext fun x => (h₁ x).deriv
+  have hd₂ : deriv (fun t : ℝ => -(2 * t) / (t ^ 2 + 1) ^ 2) =
+      fun t : ℝ => (6 * t ^ 2 - 2) / (t ^ 2 + 1) ^ 3 := funext fun x => (h₂ x).deriv
+  have hd₃ : deriv (fun t : ℝ => (6 * t ^ 2 - 2) / (t ^ 2 + 1) ^ 3) =
+      fun t : ℝ => -(24 * (t ^ 3 - t)) / (t ^ 2 + 1) ^ 4 := funext fun x => (h₃ x).deriv
+  have hd₄ : deriv (fun t : ℝ => -(24 * (t ^ 3 - t)) / (t ^ 2 + 1) ^ 4) =
+      fun t : ℝ => (120 * t ^ 4 - 240 * t ^ 2 + 24) / (t ^ 2 + 1) ^ 5 :=
+    funext fun x => (h₄ x).deriv
+  simp only [cosRationalCoeff, one_div]
+  norm_num only [Nat.reduceAdd, Nat.reduceMul, Nat.reduceSub]
+  simp only [iteratedDeriv_succ, iteratedDeriv_zero, hd₁, hd₂, hd₃, hd₄, (h₅ t).deriv]
+  norm_num
+  ring
 
 /-! ### §2.11(ii) Connection formulas -/
 
@@ -200,12 +249,94 @@ theorem stokesC_sq (θ : ℝ) : stokesC θ ^ 2 = 2 * (1 + exp (I * θ) + I * (θ
       Complex.cpow_nat_inv_pow _ (by norm_num)]
     field_simp
 
+/-- The normalized square of the Stokes coordinate lies in the closed right half-plane. -/
+lemma stokesQuotient_re_nonneg (θ : ℝ) :
+    0 ≤ (2 * (1 + exp (I * θ) + I * (θ - π)) / ((π - θ : ℝ) : ℂ) ^ 2).re := by
+  rw [← ofReal_pow, div_ofReal_re]
+  have he : exp (I * θ) = (Real.cos θ : ℂ) + (Real.sin θ : ℂ) * I := by
+    rw [mul_comm I (θ : ℂ), exp_mul_I, ← ofReal_cos, ← ofReal_sin]
+  have hn : 0 ≤ (2 * (1 + exp (I * θ) + I * (θ - π))).re := by
+    simp [he]
+    change 0 ≤ 1 + Real.cos θ
+    linarith [Real.neg_one_le_cos θ]
+  exact div_nonneg hn (sq_nonneg _)
+
+/-- The normalized square of the Stokes coordinate tends to one at the transition.
+Uses `Complex.exp_sub_sum_range_succ_isLittleO_pow`, Mathlib’s exponential remainder. -/
+lemma stokesQuotient_tendsto :
+    Tendsto (fun θ : ℝ => 2 * (1 + exp (I * θ) + I * (θ - π)) /
+      ((π - θ : ℝ) : ℂ) ^ 2) (𝓝[≠] π) (𝓝 1) := by
+  let z : ℝ → ℂ := fun θ => I * (θ - π)
+  have hz : Tendsto z (𝓝[≠] π) (𝓝 0) := by
+    have h : ContinuousAt z π := by fun_prop
+    simpa [z] using h.tendsto.mono_left nhdsWithin_le_nhds
+  have hr := (Complex.exp_sub_sum_range_succ_isLittleO_pow 2).comp_tendsto hz
+  have hlim := hr.tendsto_div_nhds_zero
+  have hlim' := tendsto_const_nhds.add (hlim.const_mul 2) (a := (1 : ℂ))
+  simp only [mul_zero, add_zero] at hlim'
+  refine hlim'.congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with θ hθ
+  have hθne : θ ≠ π := hθ
+  have hden : ((π - θ : ℝ) : ℂ) ≠ 0 := ofReal_ne_zero.mpr (sub_ne_zero.mpr (Ne.symm hθne))
+  have hexp : exp (I * θ) = -exp (I * (θ - π)) := by
+    rw [show I * (θ : ℂ) = I * (θ - π) + π * I by ring, exp_add, exp_pi_mul_I]
+    ring
+  simp only [Function.comp_def, z]
+  norm_num [Finset.sum_range_succ]
+  rw [hexp]
+  have hzsq : (I * (θ - π : ℂ)) ^ 2 = -(((π - θ : ℝ) : ℂ) ^ 2) := by
+    push_cast
+    rw [mul_pow, I_sq]
+    ring
+  simp only [hzsq]
+  push_cast at hden ⊢
+  field_simp
+  ring
+
 /-- DLMF 2.11.16 (branch): `c` is continuous on `(-π, 3π)` and `c(θ) ∼ π - θ` as `θ → π`. -/
 @[dlmf 2.11.E16]
 theorem stokesC_continuous_tendsto :
     ContinuousOn stokesC (Ioo (-π) (3 * π)) ∧
       Tendsto (fun θ : ℝ => stokesC θ / ((π - θ : ℝ) : ℂ)) (𝓝[≠] π) (𝓝 1) := by
-  sorry
+  let q : ℝ → ℂ := fun θ => 2 * (1 + exp (I * θ) + I * (θ - π)) /
+    ((π - θ : ℝ) : ℂ) ^ 2
+  have hroot : Tendsto (fun θ => q θ ^ (1 / 2 : ℂ)) (𝓝[≠] π) (𝓝 1) := by
+    have hc := Complex.continuousAt_cpow_const_of_re_pos
+      (z := (1 : ℂ)) (w := (1 / 2 : ℂ)) (Or.inl (by norm_num)) (by norm_num)
+    simpa [q, Function.comp_def] using hc.tendsto.comp stokesQuotient_tendsto
+  constructor
+  · intro θ hθ
+    suffices hc : ContinuousAt stokesC θ from hc.continuousWithinAt
+    by_cases hθπ : θ = π
+    · subst θ
+      apply continuousAt_iff_punctured_nhds.mpr
+      have hf : Tendsto (fun θ : ℝ => ((π - θ : ℝ) : ℂ)) (𝓝[≠] π) (𝓝 0) := by
+        have hc : ContinuousAt (fun θ : ℝ => ((π - θ : ℝ) : ℂ)) π := by fun_prop
+        simpa using hc.tendsto.mono_left nhdsWithin_le_nhds
+      have heq : stokesC = fun θ : ℝ => ((π - θ : ℝ) : ℂ) * q θ ^ (1 / 2 : ℂ) := rfl
+      rw [heq]
+      simpa using hf.mul hroot
+    · have hden : ((π - θ : ℝ) : ℂ) ≠ 0 :=
+        ofReal_ne_zero.mpr (sub_ne_zero.mpr (Ne.symm hθπ))
+      have hcq : ContinuousAt q θ := by
+        dsimp [q]
+        apply ContinuousAt.div
+        · fun_prop
+        · fun_prop
+        · exact pow_ne_zero 2 hden
+      exact (by fun_prop : ContinuousAt (fun θ : ℝ => ((π - θ : ℝ) : ℂ)) θ).mul
+        ((Complex.continuousAt_cpow_const_of_re_pos (z := q θ) (w := (1 / 2 : ℂ))
+          (Or.inl (stokesQuotient_re_nonneg θ))
+          (by norm_num : 0 < (1 / 2 : ℂ).re)).comp hcq)
+  · refine hroot.congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with θ hθ
+    have hden : ((π - θ : ℝ) : ℂ) ≠ 0 :=
+      ofReal_ne_zero.mpr (sub_ne_zero.mpr (Ne.symm hθ))
+    change q θ ^ (1 / 2 : ℂ) = _
+    rw [stokesC]
+    change q θ ^ (1 / 2 : ℂ) = ((π - θ : ℝ) : ℂ) * q θ ^ (1 / 2 : ℂ) / ((π - θ : ℝ) : ℂ)
+    field_simp
+
 
 /-- DLMF 2.11.18: `h₀(θ, α) = e^{iα(π-θ)}/(1 + e^{-iθ}) - i/c(θ)` (from 2.11.17 with
 `a₀ = 1`). -/
@@ -224,7 +355,41 @@ case and exponentially close to `2` in the second. -/
 @[dlmf 2.11.iv]
 theorem stokesC_re_sign :
     (∀ θ ∈ Ioo (-π) π, 0 < (stokesC θ).re) ∧ ∀ θ ∈ Ioo π (3 * π), (stokesC θ).re < 0 := by
-  sorry
+  have hsqrt (θ : ℝ) (hne : θ ≠ π) :
+      0 < ((2 * (1 + exp (I * θ) + I * (θ - π)) /
+        ((π - θ : ℝ) : ℂ) ^ 2) ^ (1 / 2 : ℂ)).re := by
+    let q : ℂ := 2 * (1 + exp (I * θ) + I * (θ - π)) / ((π - θ : ℝ) : ℂ) ^ 2
+    have he : exp (I * θ) = (Real.cos θ : ℂ) + (Real.sin θ : ℂ) * I := by
+      rw [mul_comm I (θ : ℂ), exp_mul_I, ← ofReal_cos, ← ofReal_sin]
+    have hnum : 2 * (1 + exp (I * θ) + I * (θ - π)) ≠ 0 := by
+      intro hz
+      have hr := congrArg Complex.re hz
+      have hi := congrArg Complex.im hz
+      simp [he] at hr hi
+      change 1 + Real.cos θ = 0 at hr
+      change Real.sin θ + (θ - π) = 0 at hi
+      have hc : Real.cos θ = -1 := by linarith
+      have hs : Real.sin θ = 0 := by
+        have h := Real.sin_sq_add_cos_sq θ
+        rw [hc] at h
+        nlinarith [sq_nonneg (Real.sin θ)]
+      apply hne
+      linarith
+    have hden : ((π - θ : ℝ) : ℂ) ≠ 0 := ofReal_ne_zero.mpr (sub_ne_zero.mpr (Ne.symm hne))
+    have hq0 : q ≠ 0 := div_ne_zero hnum (pow_ne_zero 2 hden)
+    have hqr : 0 ≤ q.re := stokesQuotient_re_nonneg θ
+    change 0 < (q ^ (1 / 2 : ℂ)).re
+    rw [show (1 / 2 : ℂ) = 2⁻¹ by norm_num, cpow_inv_two_re, Real.sqrt_pos]
+    exact div_pos (add_pos_of_pos_of_nonneg (norm_pos_iff.mpr hq0) hqr) (by norm_num)
+  constructor
+  · intro θ hθ
+    have hpos := hsqrt θ hθ.2.ne
+    simpa only [stokesC, mul_re, ofReal_re, ofReal_im, zero_mul, sub_zero] using
+      mul_pos (sub_pos.mpr hθ.2) hpos
+  · intro θ hθ
+    have hpos := hsqrt θ hθ.1.ne'
+    simpa only [stokesC, mul_re, ofReal_re, ofReal_im, zero_mul, sub_zero] using
+      mul_neg_of_neg_of_pos (sub_neg.mpr hθ.1) hpos
 
 /-! ### §2.11(v) Re-expansion of the remainders of 2.7.14 -/
 
