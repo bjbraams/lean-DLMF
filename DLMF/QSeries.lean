@@ -11,6 +11,7 @@ public import DLMF.QSeries.Pochhammer
 public import DLMF.QSeries.QBinomial
 public import DLMF.QSeries.QCalculus
 public import DLMF.QSeries.QExponential
+public import DLMF.QSeries.RamanujanPsi
 public import DLMF.QSeries.Saalschutz
 
 /-!

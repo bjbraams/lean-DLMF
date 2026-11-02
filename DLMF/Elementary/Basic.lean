@@ -22,6 +22,6 @@ principal inverse hyperbolic functions (§§4.28, 4.37).
 
 ## Implementation notes
 
-The Lambert W function stays in `DLMF.Elementary.LambertW.BranchesAndCalculus`, because its
-definition depends on the existence of the normalized branch family, which is not yet proved.
+The Lambert W function is defined in `DLMF.Elementary.LambertW.BranchesAndCalculus`, from the
+branch family constructed in `DLMF.Elementary.LambertW.BranchConstruction`.
 -/

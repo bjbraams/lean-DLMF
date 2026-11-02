@@ -1018,11 +1018,11 @@ Traversal: all §§4.1–4.48 checked; matching headings are §4.2, §4.14,
 ### §4.13 Lambert W -Function
 
 - **Lambert branch, Wright omega, tree function and coefficient families**, [DLMF 4.13](https://dlmf.nist.gov/4.13):
-  The actual branch-family auxiliaries include `DLMF.Elementary.lambertWLower`, `DLMF.Elementary.wrightOmega`, `DLMF.Elementary.treeT`, `DLMF.Elementary.lambertXi`, `DLMF.Elementary.lambertDerivPolynomial`, `DLMF.Elementary.lambertC`, `DLMF.Elementary.lambertD`, `DLMF.Elementary.lambertWOver`, and `DLMF.Elementary.lambertAsymptoticTerm` ([source](DLMF/Elementary/LambertW/BranchesAndCalculus.lean#L485)). They cover the lower-bank continuation, Wright ω, principal tree T, logarithmic branch variable ξₖ, derivative polynomials, both branch-point coefficient recurrences, the removable W₀(z)/z value, and large-argument series terms. The general branch existence specification remains admitted; a selected value is not by itself a proved inverse/analytic branch.
+  The actual branch-family auxiliaries include `DLMF.Elementary.lambertWLower`, `DLMF.Elementary.wrightOmega`, `DLMF.Elementary.treeT`, `DLMF.Elementary.lambertXi`, `DLMF.Elementary.lambertDerivPolynomial`, `DLMF.Elementary.lambertC`, `DLMF.Elementary.lambertD`, `DLMF.Elementary.lambertWOver`, and `DLMF.Elementary.lambertAsymptoticTerm` ([source](DLMF/Elementary/LambertW/BranchesAndCalculus.lean#L508)). They cover the lower-bank continuation, Wright ω, principal tree T, logarithmic branch variable ξₖ, derivative polynomials, both branch-point coefficient recurrences, the removable W₀(z)/z value, and large-argument series terms. The general branch existence specification remains admitted; a selected value is not by itself a proved inverse/analytic branch.
 
   [DLMF 4.13.E4_2](https://dlmf.nist.gov/4.13.E4_2):
   Derivative polynomials, given by their full recurrence (4.13.4_2).
-  `DLMF.Elementary.lambertDerivPolynomial` ([definition](DLMF/Elementary/LambertW/BranchesAndCalculus.lean#L457)).
+  `DLMF.Elementary.lambertDerivPolynomial` ([definition](DLMF/Elementary/LambertW/BranchesAndCalculus.lean#L480)).
 
 <!-- retained entry 30 -->
 - **Lambert integer branches Wₖ and upper/lower cut values**,
@@ -4404,7 +4404,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.6 Special Cases
 
 - **The Legendre square-root factor Δ**, [DLMF 19.6.iv](https://dlmf.nist.gov/19.6.iv):
-  Δ(φ,k)=√(1−k²sin²φ) has several existing implementations: `DLMF.EllipticIntegrals.ellDelta` ([source](DLMF/EllipticIntegrals/SpecialCases.lean#L202)), `DLMF.EllipticIntegrals.ellDeltaComplex` ([source](DLMF/EllipticIntegrals/Derivatives.lean#L414)), and the real `DLMF.EllipticIntegrals.ellDeltaReal` ([source](DLMF/EllipticIntegrals/Addition.lean#L73)). The first takes a real angle and complex modulus, the second complex arguments, and the last real arguments. Principal complex and nonnegative real roots should not be silently identified outside their domains.
+  Δ(φ,k)=√(1−k²sin²φ) has several existing implementations: `DLMF.EllipticIntegrals.ellDelta` ([source](DLMF/EllipticIntegrals/SpecialCases.lean#L202)), `DLMF.EllipticIntegrals.ellDeltaComplex` ([source](DLMF/EllipticIntegrals/Derivatives.lean#L414)), and the real `DLMF.EllipticIntegrals.ellDeltaReal` ([source](DLMF/EllipticIntegrals/Addition.lean#L74)). The first takes a real angle and complex modulus, the second complex arguments, and the last real arguments. Principal complex and nonnegative real roots should not be silently identified outside their domains.
 
 ### §19.7 Connection Formulas
 
@@ -4442,7 +4442,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.11 Addition Theorems
 
 - **Addition-angle sine and cosine**, [DLMF 19.11.E4](https://dlmf.nist.gov/19.11.E4):
-  Besides Δ, the right sides specifying sin ψ and cos ψ are `DLMF.EllipticIntegrals.additionSin`, `DLMF.EllipticIntegrals.additionCos` ([source](DLMF/EllipticIntegrals/Addition.lean#L81)); their duplication specializations are `DLMF.EllipticIntegrals.duplicationSin`, `DLMF.EllipticIntegrals.duplicationCos` ([source](DLMF/EllipticIntegrals/Addition.lean#L515)). The selected angle and the γ,δ parameters remain quantified/local expressions; these sine/cosine functions alone do not choose a global inverse-sine branch.
+  Besides Δ, the right sides specifying sin ψ and cos ψ are `DLMF.EllipticIntegrals.additionSin`, `DLMF.EllipticIntegrals.additionCos` ([source](DLMF/EllipticIntegrals/Addition.lean#L82)); their duplication specializations are `DLMF.EllipticIntegrals.duplicationSin`, `DLMF.EllipticIntegrals.duplicationCos` ([source](DLMF/EllipticIntegrals/Addition.lean#L567)). The selected angle and the γ,δ parameters remain quantified/local expressions; these sine/cosine functions alone do not choose a global inverse-sine branch.
 
 ### §19.12 Asymptotic Approximations
 
@@ -4452,7 +4452,7 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.14 Reduction of General Elliptic Integrals
 
 - **Legendre reduction auxiliary U**, [DLMF 19.14.E6](https://dlmf.nist.gov/19.14.E6):
-  The explicit root expression is `DLMF.EllipticIntegrals.ei19b_redU`, with its admissibility package `DLMF.EllipticIntegrals.QuadraticProductReductionHyp` ([source](DLMF/EllipticIntegrals/Reduction.lean#L165)). The later `DLMF.EllipticIntegrals.ellRedQuadU` of §19.29 gives another actual formulation of this biquadratic reduction parameter.
+  The explicit root expression is `DLMF.EllipticIntegrals.ei19b_redU`, with its admissibility package `DLMF.EllipticIntegrals.QuadraticProductReductionHyp` ([source](DLMF/EllipticIntegrals/Reduction.lean#L175)). The later `DLMF.EllipticIntegrals.ellRedQuadU` of §19.29 gives another actual formulation of this biquadratic reduction parameter.
 
 ### §19.16 Definitions
 
@@ -5035,7 +5035,7 @@ Traversal: all §§23.1–23.24 checked; matching sections are §23.2 and §23.1
 ### §23.6 Relations to Other Functions
 
 - **Weierstrass/Jacobi moduli and alternate lattices**, [DLMF 23.6.E16](https://dlmf.nist.gov/23.6.E16):
-  k²=(e₂−e₃)/(e₁−e₃), k′²=(e₁−e₂)/(e₁−e₃); the actual theta-based abbreviations are `DLMF.Weierstrass.HalfPeriods.modulus`, `DLMF.Weierstrass.HalfPeriods.comodulus`, `DLMF.Weierstrass.HalfPeriods.quarterK` ([source](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L188)). Their bridge theorems fix branches via τ rather than choosing an arbitrary root of the displayed ratio. The three lattices L₁,L₂,L₃ in 23.6.27–29 use explicit `PeriodPair` constructions in the relation statements. The inverse elliptic-integral variable w in 23.6.36 depends on its path and square-root determination; no single path-independent local inverse function is defined.
+  k²=(e₂−e₃)/(e₁−e₃), k′²=(e₁−e₂)/(e₁−e₃); the actual theta-based abbreviations are `DLMF.Weierstrass.HalfPeriods.modulus`, `DLMF.Weierstrass.HalfPeriods.comodulus`, `DLMF.Weierstrass.HalfPeriods.quarterK` ([source](DLMF/Weierstrass/Relations/JacobiIdentities.lean#L189)). Their bridge theorems fix branches via τ rather than choosing an arbitrary root of the displayed ratio. The three lattices L₁,L₂,L₃ in 23.6.27–29 use explicit `PeriodPair` constructions in the relation statements. The inverse elliptic-integral variable w in 23.6.36 depends on its path and square-root determination; no single path-independent local inverse function is defined.
 
 ### §23.9 Laurent and Other Power Series
 
@@ -6741,7 +6741,7 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
   Their algebraic form ξ^ρ(ξ−1)^σ(ξ−k⁻²)^τP(ξ), ρ,σ,τ∈{0,½}, carries branches
   inherited from sn,cn,dn; arbitrary independent principal powers do not give
   the same global function. `DLMF.Lame.lamePolyEk_algebraic_form`
-  ([source](DLMF/Lame/Polynomials/Series.lean#L642)) expresses the polynomial
+  ([source](DLMF/Lame/Polynomials/Series.lean#L644)) expresses the polynomial
   factor with these Jacobi prefactors. The polynomial and its ordered zero
   tuple are existential data, rather than a second chosen function or root list.
 
@@ -6764,7 +6764,7 @@ Names below are in `DLMF.Lame`; the prefix `Real` is nested in that namespace.
   g(t)=∏ₚtₚ^(ρ+¼)|tₚ−1|^(σ+¼)(k⁻²−tₚ)^(τ+¼)∏_{q<r}(tᵣ−t_q), on
   R={0≤t₁≤⋯≤t_m≤1≤t_(m+1)≤⋯≤t_n≤k⁻²}. These are explicit local expressions
   in `DLMF.Lame.lamePolyEk_zeros_maximize`
-  ([source](DLMF/Lame/Polynomials/Series.lean#L658)), with no independent
+  ([source](DLMF/Lame/Polynomials/Series.lean#L660)), with no independent
   global definitions. The equilibrium equations characterize the zero tuple
   through reciprocal-distance sums; they introduce no additional function.
 
@@ -7035,7 +7035,7 @@ Traversal: all §§30.1–30.18 checked; matching headings are §§30.3(i),
   or Ps′(0). The real angular wrapper is intended on [−1,1]. The g_k of its
   power expansion are Taylor-coefficient expressions of the chosen entire
   factor in `DLMF.Spheroidal.hasSum_spheroidalPs`
-  ([source](DLMF/Spheroidal/Angular.lean#L659)), without a second independent
+  ([source](DLMF/Spheroidal/Angular.lean#L552)), without a second independent
   coefficient family definition. `DLMF.Spheroidal.spheroidalExpansionCoeff`
   ([source](DLMF/Spheroidal/Basic/EquationAndSpectralData.lean#L225)) is the normalized projection c_n
   of 30.4.8. The general expansion theorem is in L², with stronger pointwise
@@ -7218,7 +7218,7 @@ Traversal: all §§30.1–30.18 checked; matching headings are §§30.3(i),
   z≠0 for j=1 and |z|>1 for j=2,3,4, with principal-power analyticity
   restrictions in the equation theorems. The integral formula 30.11.12 is
   `DLMF.Spheroidal.spheroidalRadial_one_integral`
-  ([source](DLMF/Spheroidal/Radial.lean#L228)), a representation of this
+  ([source](DLMF/Spheroidal/Radial.lean#L580)), a representation of this
   series-defined function, without a second named integral construction.
 
   [DLMF 30.11.E10](https://dlmf.nist.gov/30.11.E10):

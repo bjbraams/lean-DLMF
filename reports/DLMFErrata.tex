@@ -19,7 +19,7 @@
 
 % entry counts
 \newcommand{\NumA}{139}
-\newcommand{\NumB}{29}
+\newcommand{\NumB}{30}
 \newcommand{\NumC}{65}
 \newcommand{\NumOut}{3}
 
@@ -2810,6 +2810,22 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   (\lean{picard_hypotheses_nonempty}, proved).
 \item[Lean] \lean{painleveVI_picard} (\file{DLMF/Painleve/SpecialSolutions.lean}), admitted.
 \item[Found] 2026-10-26 (proof round 3 for Chapters 20--32).
+\end{fields}
+
+\entry{\deq{33.6.5}}
+\begin{fields}
+\item[Defect] The Lean statements of the logarithmic series of $H^\pm_\ell$ omitted the
+  condition $\eta\ne0$. At $\eta=0$ the factor $1/\Gamma(-\ell\pm\iu\eta)$ vanishes and the
+  finite sum has poles $1/(1-a)_k$; DLMF's formula holds there only as a limit. In Lean
+  $\Gamma(-\ell)=0$ and $1/0=0$, so the right-hand side is $0$, while at $\ell=0$, $\eta=0$,
+  $\rho=1$ the left-hand series is $-1.41490814849881+1.17177533820071\,\iu$ (mpmath).
+\item[Fix] The hypothesis $\eta\ne0$. A pole-free form valid for all real $\eta$, with
+  $1/\Gamma$ moved inside and the factor $\Gamma(-\ell\mp\iu\eta)/\Gamma(-\ell\pm\iu\eta)$
+  rewritten by the reflection formula, is a candidate for a separate theorem. User decision,
+  2026-11-02.
+\item[Lean] \lean{hasSum_coulombHPlus_log}, \lean{hasSum_coulombHMinus_log}
+  (\file{DLMF/Coulomb/RhoEtaSeries.lean}), admitted.
+\item[Found] 2026-11-02 (proof round of 2026-11-02).
 \end{fields}
 
 \section{(c) Formalization notes}\label{sec:c}

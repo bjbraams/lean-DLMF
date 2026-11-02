@@ -698,18 +698,21 @@ def lambertBranchValue (k : ℤ) (z : ℂ) : ℂ :=
   else if k = 0 then (lambertRealUpper z.re : ℂ) else (lambertRealLower z.re : ℂ)
 
 /-- The real part of `log z + 2πik`. -/
-lemma re_log_add_two_pi_mul_I_mul (k : ℤ) (z : ℂ) : (Complex.log z + 2 * π * I * k).re = Real.log ‖z‖ := by
+lemma re_log_add_two_pi_mul_I_mul (k : ℤ) (z : ℂ) :
+    (Complex.log z + 2 * π * I * k).re = Real.log ‖z‖ := by
   simp [Complex.log_re]
 
 /-- The imaginary part of `log z + 2πik`. -/
-lemma im_log_add_two_pi_mul_I_mul (k : ℤ) (z : ℂ) : (Complex.log z + 2 * π * I * k).im = arg z + 2 * π * k := by
+lemma im_log_add_two_pi_mul_I_mul (k : ℤ) (z : ℂ) :
+    (Complex.log z + 2 * π * I * k).im = arg z + 2 * π * k := by
   simp [Complex.log_im]
 
 /-- Outside `lambertOmegaDomain` the argument lies on `[-1/e, 0)` and `k ∈ {0, -1}`. -/
 lemma of_log_add_not_mem_lambertOmegaDomain {k : ℤ} {z : ℂ} (hz : z ≠ 0)
     (h : Complex.log z + 2 * π * I * k ∉ lambertOmegaDomain) :
     z.im = 0 ∧ z.re < 0 ∧ -Real.exp (-1) ≤ z.re ∧ (k = 0 ∨ k = -1) := by
-  simp only [lambertOmegaDomain, mem_ofPred_eq, not_or, not_lt, not_not, re_log_add_two_pi_mul_I_mul,
+  simp only [lambertOmegaDomain, mem_ofPred_eq, not_or, not_lt, not_not,
+    re_log_add_two_pi_mul_I_mul,
     im_log_add_two_pi_mul_I_mul] at h
   obtain ⟨hre, him⟩ := h
   have hn : 0 < ‖z‖ := norm_pos_iff.mpr hz
@@ -906,8 +909,10 @@ lemma lambertBranchValue_zero_ofReal {x : ℝ} (hx : -Real.exp (-1) ≤ x) (hx0 
   have hnot : ∀ k : ℤ, k = 0 ∨ k = -1 →
       Complex.log x + 2 * π * I * k ∉ lambertOmegaDomain := by
     intro k hk
-    simp only [lambertOmegaDomain, mem_ofPred_eq, not_or, not_lt, not_not, re_log_add_two_pi_mul_I_mul,
-      im_log_add_two_pi_mul_I_mul, arg_ofReal_of_neg hx0, Complex.norm_real, Real.norm_eq_abs, abs_of_neg hx0]
+    simp only [lambertOmegaDomain, mem_ofPred_eq, not_or, not_lt, not_not,
+      re_log_add_two_pi_mul_I_mul,
+      im_log_add_two_pi_mul_I_mul, arg_ofReal_of_neg hx0, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_neg hx0]
     refine ⟨by rw [Real.log_le_iff_le_exp (by linarith)]; linarith, ?_⟩
     rcases hk with rfl | rfl
     · simp [abs_of_pos Real.pi_pos]

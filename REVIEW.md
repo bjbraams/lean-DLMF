@@ -10016,3 +10016,50 @@ These are rows of `reports/RenameMap20261101.tsv` as well.
   `Real.continuous_jacobiSnm`, `…Cnm`, `…Dnm` and `Real.jacobiSnm_zero` in
   `Elliptic.Basic.Jacobi`), and the wrapper `OrthogonalPolynomials.deriv_kummerM_regular` of
   `Confluent.deriv_kummerM` (DLMF 13.3.15).
+
+## Project-wide proof round (2026-11-02)
+
+Ten agents with disjoint directories, prioritized by leverage (admitted declarations on which
+otherwise proved results depend) and by how recently an area was acquired; the older areas (Airy,
+Legendre, IncompleteGamma, PCF, Struve, Confluent and others, about 175 admissions after fourteen
+rounds) and AAR-only items were deferred. Source admissions: 1,482 → 1,409. No statement was
+changed except 33.6.5 below; all new theorems use only the standard axioms.
+
+- AlgebraicAnalytic 180 → 167: Laurent's theorem 1.10.6 and the §1.10(iii) consequences,
+  `IsSimpleClosedContour.rouche` (via the new `DLMFMathlib.Analysis.Complex.RoucheFilledHull`,
+  Rouché on TauCeti's filled hull), second-order ODE existence on simply connected domains (TauCeti's
+  Riemann map and the new `DLMFMathlib.Analysis.ODE.BallLinear`) and 1.13.8, kernel integrals
+  1.15.12–13, 1.15.16, two summability results. New `DLMFMathlib.Analysis.Complex.LaurentAnnulus`.
+- AsymptoticApproximations 99 → 89, CoalescingSaddles 35 → 33: 2.6.40, 2.5.48–49, the Bleistein
+  transform 2.3.24, rotated Watson, Liouville transformation 2.8.1–4, 2.11.10, §2.9(i), 36.9.1–2.
+- Elementary 45 → 34: `exists_lambertBranchFamily` proved by an explicit construction (new
+  `Elementary/LambertW/BranchConstruction.lean`, Mathlib-only: the inverse of `w ↦ w + log w`
+  on the slit plane, real inverses on the cut), freeing the Lambert W results that depended only on
+  it; 4.13 special values and asymptotics, 4.34.8–14.
+- EllipticIntegrals 142 → 134: 19.11.1–2, 19.14.4–6 and 19.14.8 (freeing 19.14.7, 9, 10),
+  19.29.19 (with a stronger form without the integrability hypothesis), 19.29.23, two 19.20.8 cases.
+- Mathieu 140 → 139: `mathieuNormalSegment_real` (§28.12(i)), freeing results on stability and on
+  the modified functions; new `Noninteger/RealContinuation.lean`, and `Noninteger/ExpSeries.lean`
+  split unchanged from `Properties.lean`.
+- QHypergeometric 85 → 81, QSeries 1 → 0: Ramanujan's 1ψ1 sum (new `QSeries/RamanujanPsi.lean`,
+  Ismail's proof), 17.8.2, 17.13.3–4. GeneralizedHypergeometric unchanged: the cut-plane continuation
+  `genPrincipalContinuation_exists` is the main blocker (estimated 2,000 lines).
+- Coulomb 49 → 42: 33.14.7, 33.14.15 (hydrogen orthonormality), 33.16.2, 33.16.5, 33.16.7.
+  Wigner and matrix argument unchanged (blockers: Whipple 4F3, Zeilberger certificates, 35.4.6).
+- Weierstrass 35 → 27: 23.12.1–4, 23.6.27–29, §23.5(ii) `IsRectangular.e_two_g₃`.
+- Combinatorics 36 → 33, Partitions 3 → 1: Ramanujan congruences mod 5 and 7 (new
+  `NumberTheory/RamanujanCongruences.lean`), 26.10.8 via Gauss's identity (new
+  `Combinatorics/PartitionIdentities/GaussIdentity.lean`), 26.9.10, 26.14.4.
+- Spheroidal 33 → 31, Lamé 41 → 40: 30.5.1 (with a stronger form), 30.11.3, §29.6(i)
+  `lameEck_even_fourierA_eq_zero` (moved unchanged to `Lame/Polynomials/Series.lean`).
+
+Statement correction (user decision): `hasSum_coulombHPlus_log` and `hasSum_coulombHMinus_log`
+(33.6.5) gained the hypothesis `η ≠ 0`; at `η = 0` Lean's right-hand side is `0` while the series is
+not (mpmath). Recorded in `reports/DLMFErrata.tex` (b). A pole-free form valid for all real `η` is a
+candidate for the next Coulomb round.
+
+Next-round leads: the residue at a double pole (unlocks three Chapter 2 residues); the Laurent and
+Darboux items of Chapter 2 now that Laurent's theorem is proved; θ₃² as a Lambert series from 1ψ1
+(sums of squares 27.13); cot-series Liouville infrastructure (Jacobi Fourier series 22.11, partial
+fractions 22.12); the Jordan curve theorem for the argument principle; Lambert W into the
+foundational layer (its construction is now Mathlib-only); the pfq continuation.

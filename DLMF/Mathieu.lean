@@ -17,6 +17,8 @@ public import DLMF.Mathieu.Zeros
 public import DLMF.Mathieu.IntegralEquations
 public import DLMF.Mathieu.Expansions
 public import DLMF.Mathieu.Noninteger.Basic
+public import DLMF.Mathieu.Noninteger.ExpSeries
+public import DLMF.Mathieu.Noninteger.RealContinuation
 public import DLMF.Mathieu.Noninteger.Properties
 public import DLMF.Mathieu.Noninteger.Fourier
 public import DLMF.Mathieu.Noninteger.Expansions

@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Elementary.LambertW.BranchConstruction
 public import DLMF.Elementary.LambertW.BranchesAndCalculus
 public import DLMF.Elementary.LambertW.Series
 

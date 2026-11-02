@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Combinatorics.PartitionIdentities.RestrictedProducts
+public import DLMF.Combinatorics.PartitionIdentities.GaussIdentity
 public import DLMF.Combinatorics.PartitionIdentities.StaircaseAndPentagonal
 public import DLMF.Combinatorics.PartitionIdentities.RogersRamanujan
 

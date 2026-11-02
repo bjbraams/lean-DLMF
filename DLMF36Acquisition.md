@@ -375,15 +375,15 @@ declarations:
 
 ## [§36.9 Integral Identities](https://dlmf.nist.gov/36.9)
 
-- [36.9.E1](https://dlmf.nist.gov/36.9.E1): [`DLMF.CoalescingSaddles.normSq_cuspoidIntegral_one_eq_integral`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L54) (admitted)
-- [36.9.E2](https://dlmf.nist.gov/36.9.E2): [`DLMF.CoalescingSaddles.airyAi_sq_eq_integral`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L63) (admitted)
-- [36.9.E3](https://dlmf.nist.gov/36.9.E3): [`DLMF.CoalescingSaddles.normSq_cuspoidIntegral_one_eq_improper`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L72) (admitted)
-- [36.9.E4](https://dlmf.nist.gov/36.9.E4): [`DLMF.CoalescingSaddles.normSq_cuspoidIntegral_two_eq_integral`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L81) (admitted)
-- [36.9.E5](https://dlmf.nist.gov/36.9.E5): [`DLMF.CoalescingSaddles.normSq_cuspoidIntegral_two_eq_integral_cos`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L95) (admitted)
-- [36.9.E6](https://dlmf.nist.gov/36.9.E6): [`DLMF.CoalescingSaddles.normSq_cuspoidIntegral_three_eq_integral`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L105) (admitted)
-- [36.9.E7](https://dlmf.nist.gov/36.9.E7): [`DLMF.CoalescingSaddles.normSq_cuspoidIntegral_three_eq_integral_re`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L118) (admitted)
-- [36.9.E8](https://dlmf.nist.gov/36.9.E8): [`DLMF.CoalescingSaddles.normSq_hyperbolicUmbilicIntegral_eq_integral`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L131) (admitted)
-- [36.9.E9](https://dlmf.nist.gov/36.9.E9): [`DLMF.CoalescingSaddles.normSq_ellipticUmbilicIntegral_eq_integral`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L144) (admitted)
+- [36.9.E1](https://dlmf.nist.gov/36.9.E1): [`DLMF.CoalescingSaddles.normSq_cuspoidIntegral_one_eq_integral`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L56) (proved)
+- [36.9.E2](https://dlmf.nist.gov/36.9.E2): [`DLMF.CoalescingSaddles.airyAi_sq_eq_integral`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L107) (proved)
+- [36.9.E3](https://dlmf.nist.gov/36.9.E3): [`DLMF.CoalescingSaddles.normSq_cuspoidIntegral_one_eq_improper`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L117) (admitted)
+- [36.9.E4](https://dlmf.nist.gov/36.9.E4): [`DLMF.CoalescingSaddles.normSq_cuspoidIntegral_two_eq_integral`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L126) (admitted)
+- [36.9.E5](https://dlmf.nist.gov/36.9.E5): [`DLMF.CoalescingSaddles.normSq_cuspoidIntegral_two_eq_integral_cos`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L140) (admitted)
+- [36.9.E6](https://dlmf.nist.gov/36.9.E6): [`DLMF.CoalescingSaddles.normSq_cuspoidIntegral_three_eq_integral`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L150) (admitted)
+- [36.9.E7](https://dlmf.nist.gov/36.9.E7): [`DLMF.CoalescingSaddles.normSq_cuspoidIntegral_three_eq_integral_re`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L163) (admitted)
+- [36.9.E8](https://dlmf.nist.gov/36.9.E8): [`DLMF.CoalescingSaddles.normSq_hyperbolicUmbilicIntegral_eq_integral`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L176) (admitted)
+- [36.9.E9](https://dlmf.nist.gov/36.9.E9): [`DLMF.CoalescingSaddles.normSq_ellipticUmbilicIntegral_eq_integral`](DLMF/CoalescingSaddles/IntegralIdentities.lean#L189) (admitted)
 
 ## [§36.10 Differential Equations](https://dlmf.nist.gov/36.10)
 

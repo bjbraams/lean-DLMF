@@ -118,9 +118,9 @@ Quadratic 11). Twenty-two existing real-variable declarations in `DLMF/Elliptic/
 - [19.2.E17](https://dlmf.nist.gov/19.2.E17): [`DLMF.EllipticIntegrals.symEllIntRC_eq_integral`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L500) (proved); [`DLMF.EllipticIntegrals.symEllIntRC_eq_cauchyPV`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L508) (proved). R_C is ACQ19C's `symEllIntRC` (Symmetric.lean); 19.2.17 proved for the ordinary integral and for the PV (y < 0) form.
 - [19.2.E18](https://dlmf.nist.gov/19.2.E18): [`DLMF.EllipticIntegrals.symEllIntRC_of_lt`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L564) (proved).
 - [19.2.E19](https://dlmf.nist.gov/19.2.E19): [`DLMF.EllipticIntegrals.symEllIntRC_of_gt`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L594) (proved).
-- [19.2.E20](https://dlmf.nist.gov/19.2.E20): [`DLMF.EllipticIntegrals.symEllIntRC_of_neg`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L803) (proved).
-- [19.2.E21](https://dlmf.nist.gov/19.2.E21): [`DLMF.EllipticIntegrals.symEllIntRC_eq_integral_segment`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L837) (admitted).
-- [19.2.E22](https://dlmf.nist.gov/19.2.E22): [`DLMF.EllipticIntegrals.symEllIntRC_eq_integral_RC`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L845) (admitted).
+- [19.2.E20](https://dlmf.nist.gov/19.2.E20): [`DLMF.EllipticIntegrals.symEllIntRC_of_neg`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L820) (proved).
+- [19.2.E21](https://dlmf.nist.gov/19.2.E21): [`DLMF.EllipticIntegrals.symEllIntRC_eq_integral_segment`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L854) (admitted).
+- [19.2.E22](https://dlmf.nist.gov/19.2.E22): [`DLMF.EllipticIntegrals.symEllIntRC_eq_integral_RC`](DLMF/EllipticIntegrals/LegendreIdentities.lean#L862) (admitted).
 
 ## [§19.4 Derivatives and Differential Equations](https://dlmf.nist.gov/19.4)
 
@@ -308,24 +308,24 @@ Analytical prose:
 
 ## [§19.11 Addition Theorems](https://dlmf.nist.gov/19.11)
 
-- [19.11.E1](https://dlmf.nist.gov/19.11.E1): [`DLMF.EllipticIntegrals.incEllIntFk_add`](DLMF/EllipticIntegrals/Addition.lean#L179) (admitted).
-- [19.11.E2](https://dlmf.nist.gov/19.11.E2): [`DLMF.EllipticIntegrals.incEllIntEk_add`](DLMF/EllipticIntegrals/Addition.lean#L188) (admitted).
-- [19.11.E3](https://dlmf.nist.gov/19.11.E3): [`DLMF.EllipticIntegrals.addition_sin_sq_add_cos_sq`](DLMF/EllipticIntegrals/Addition.lean#L87) (proved); [`DLMF.EllipticIntegrals.incEllIntFk_add`](DLMF/EllipticIntegrals/Addition.lean#L179) (admitted); [`DLMF.EllipticIntegrals.incEllIntEk_add`](DLMF/EllipticIntegrals/Addition.lean#L188) (admitted).
-- [19.11.E4](https://dlmf.nist.gov/19.11.E4): [`DLMF.EllipticIntegrals.addition_sin_sq_add_cos_sq`](DLMF/EllipticIntegrals/Addition.lean#L87) (proved); [`DLMF.EllipticIntegrals.addition_tan_half`](DLMF/EllipticIntegrals/Addition.lean#L119) (proved).
-- [19.11.E5](https://dlmf.nist.gov/19.11.E5): [`DLMF.EllipticIntegrals.incEllIntPik_add`](DLMF/EllipticIntegrals/Addition.lean#L198) (admitted).
-- [19.11.E6](https://dlmf.nist.gov/19.11.E6): [`DLMF.EllipticIntegrals.incEllIntPik_add`](DLMF/EllipticIntegrals/Addition.lean#L198) (admitted).
-- [19.11.E6_5](https://dlmf.nist.gov/19.11.E6_5): [`DLMF.EllipticIntegrals.symEllIntRC_addition_eq_arctan`](DLMF/EllipticIntegrals/Addition.lean#L213) (admitted).
-- [19.11.E7](https://dlmf.nist.gov/19.11.E7): [`DLMF.EllipticIntegrals.incEllIntFk_eq_compEllIntKk_sub`](DLMF/EllipticIntegrals/Addition.lean#L457) (proved).
-- [19.11.E8](https://dlmf.nist.gov/19.11.E8): [`DLMF.EllipticIntegrals.incEllIntEk_eq_compEllIntEk_sub`](DLMF/EllipticIntegrals/Addition.lean#L475) (proved).
-- [19.11.E9](https://dlmf.nist.gov/19.11.E9): [`DLMF.EllipticIntegrals.incEllIntFk_eq_compEllIntKk_sub`](DLMF/EllipticIntegrals/Addition.lean#L457) (proved); [`DLMF.EllipticIntegrals.incEllIntEk_eq_compEllIntEk_sub`](DLMF/EllipticIntegrals/Addition.lean#L475) (proved).
-- [19.11.E10](https://dlmf.nist.gov/19.11.E10): [`DLMF.EllipticIntegrals.incEllIntPik_eq_compEllIntPik_sub`](DLMF/EllipticIntegrals/Addition.lean#L493) (admitted).
-- [19.11.E11](https://dlmf.nist.gov/19.11.E11): [`DLMF.EllipticIntegrals.incEllIntPik_eq_compEllIntPik_sub`](DLMF/EllipticIntegrals/Addition.lean#L493) (admitted).
+- [19.11.E1](https://dlmf.nist.gov/19.11.E1): [`DLMF.EllipticIntegrals.incEllIntFk_add`](DLMF/EllipticIntegrals/Addition.lean#L215) (proved).
+- [19.11.E2](https://dlmf.nist.gov/19.11.E2): [`DLMF.EllipticIntegrals.incEllIntEk_add`](DLMF/EllipticIntegrals/Addition.lean#L228) (proved).
+- [19.11.E3](https://dlmf.nist.gov/19.11.E3): [`DLMF.EllipticIntegrals.addition_sin_sq_add_cos_sq`](DLMF/EllipticIntegrals/Addition.lean#L88) (proved); [`DLMF.EllipticIntegrals.incEllIntFk_add`](DLMF/EllipticIntegrals/Addition.lean#L215) (proved); [`DLMF.EllipticIntegrals.incEllIntEk_add`](DLMF/EllipticIntegrals/Addition.lean#L228) (proved).
+- [19.11.E4](https://dlmf.nist.gov/19.11.E4): [`DLMF.EllipticIntegrals.addition_sin_sq_add_cos_sq`](DLMF/EllipticIntegrals/Addition.lean#L88) (proved); [`DLMF.EllipticIntegrals.addition_tan_half`](DLMF/EllipticIntegrals/Addition.lean#L120) (proved).
+- [19.11.E5](https://dlmf.nist.gov/19.11.E5): [`DLMF.EllipticIntegrals.incEllIntPik_add`](DLMF/EllipticIntegrals/Addition.lean#L250) (admitted).
+- [19.11.E6](https://dlmf.nist.gov/19.11.E6): [`DLMF.EllipticIntegrals.incEllIntPik_add`](DLMF/EllipticIntegrals/Addition.lean#L250) (admitted).
+- [19.11.E6_5](https://dlmf.nist.gov/19.11.E6_5): [`DLMF.EllipticIntegrals.symEllIntRC_addition_eq_arctan`](DLMF/EllipticIntegrals/Addition.lean#L265) (admitted).
+- [19.11.E7](https://dlmf.nist.gov/19.11.E7): [`DLMF.EllipticIntegrals.incEllIntFk_eq_compEllIntKk_sub`](DLMF/EllipticIntegrals/Addition.lean#L509) (proved).
+- [19.11.E8](https://dlmf.nist.gov/19.11.E8): [`DLMF.EllipticIntegrals.incEllIntEk_eq_compEllIntEk_sub`](DLMF/EllipticIntegrals/Addition.lean#L527) (proved).
+- [19.11.E9](https://dlmf.nist.gov/19.11.E9): [`DLMF.EllipticIntegrals.incEllIntFk_eq_compEllIntKk_sub`](DLMF/EllipticIntegrals/Addition.lean#L509) (proved); [`DLMF.EllipticIntegrals.incEllIntEk_eq_compEllIntEk_sub`](DLMF/EllipticIntegrals/Addition.lean#L527) (proved).
+- [19.11.E10](https://dlmf.nist.gov/19.11.E10): [`DLMF.EllipticIntegrals.incEllIntPik_eq_compEllIntPik_sub`](DLMF/EllipticIntegrals/Addition.lean#L545) (admitted).
+- [19.11.E11](https://dlmf.nist.gov/19.11.E11): [`DLMF.EllipticIntegrals.incEllIntPik_eq_compEllIntPik_sub`](DLMF/EllipticIntegrals/Addition.lean#L545) (admitted).
 - [19.11.E12](https://dlmf.nist.gov/19.11.E12): [`DLMF.EllipticIntegrals.incEllIntFk_duplication`](DLMF/EllipticIntegrals/Addition.lean#L515) (proved from the admitted incEllIntFk_add (19.11.1)).
 - [19.11.E13](https://dlmf.nist.gov/19.11.E13): [`DLMF.EllipticIntegrals.incEllIntEk_duplication`](DLMF/EllipticIntegrals/Addition.lean#L526) (proved from the admitted incEllIntEk_add (19.11.2)).
 - [19.11.E14](https://dlmf.nist.gov/19.11.E14): [`DLMF.EllipticIntegrals.incEllIntFk_duplication`](DLMF/EllipticIntegrals/Addition.lean#L515) (proved from the admitted incEllIntFk_add (19.11.1)); [`DLMF.EllipticIntegrals.incEllIntEk_duplication`](DLMF/EllipticIntegrals/Addition.lean#L526) (proved from the admitted incEllIntEk_add (19.11.2)).
-- [19.11.E15](https://dlmf.nist.gov/19.11.E15): [`DLMF.EllipticIntegrals.duplication_half_angle`](DLMF/EllipticIntegrals/Addition.lean#L576) (proved).
-- [19.11.E16](https://dlmf.nist.gov/19.11.E16): [`DLMF.EllipticIntegrals.incEllIntPik_duplication`](DLMF/EllipticIntegrals/Addition.lean#L647) (admitted).
-- [19.11.E17](https://dlmf.nist.gov/19.11.E17): [`DLMF.EllipticIntegrals.incEllIntPik_duplication`](DLMF/EllipticIntegrals/Addition.lean#L647) (admitted).
+- [19.11.E15](https://dlmf.nist.gov/19.11.E15): [`DLMF.EllipticIntegrals.duplication_half_angle`](DLMF/EllipticIntegrals/Addition.lean#L628) (proved).
+- [19.11.E16](https://dlmf.nist.gov/19.11.E16): [`DLMF.EllipticIntegrals.incEllIntPik_duplication`](DLMF/EllipticIntegrals/Addition.lean#L699) (admitted).
+- [19.11.E17](https://dlmf.nist.gov/19.11.E17): [`DLMF.EllipticIntegrals.incEllIntPik_duplication`](DLMF/EllipticIntegrals/Addition.lean#L699) (admitted).
 
 Analytical prose:
 
@@ -366,14 +366,14 @@ Analytical prose:
 
 ## [§19.14 Reduction of General Elliptic Integrals](https://dlmf.nist.gov/19.14)
 
-- [19.14.E1](https://dlmf.nist.gov/19.14.E1): [`DLMF.EllipticIntegrals.integral_inv_sqrt_cube_sub_one`](DLMF/EllipticIntegrals/Reduction.lean#L60) (admitted).
-- [19.14.E2](https://dlmf.nist.gov/19.14.E2): [`DLMF.EllipticIntegrals.integral_inv_sqrt_one_sub_cube`](DLMF/EllipticIntegrals/Reduction.lean#L70) (admitted).
-- [19.14.E3](https://dlmf.nist.gov/19.14.E3): [`DLMF.EllipticIntegrals.integral_inv_sqrt_one_add_pow_four`](DLMF/EllipticIntegrals/Reduction.lean#L117) (proved).
-- [19.14.E4](https://dlmf.nist.gov/19.14.E4): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics`](DLMF/EllipticIntegrals/Reduction.lean#L181) (admitted).
-- [19.14.E5](https://dlmf.nist.gov/19.14.E5): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics`](DLMF/EllipticIntegrals/Reduction.lean#L181) (admitted).
-- [19.14.E6](https://dlmf.nist.gov/19.14.E6): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics`](DLMF/EllipticIntegrals/Reduction.lean#L181) (admitted).
+- [19.14.E1](https://dlmf.nist.gov/19.14.E1): [`DLMF.EllipticIntegrals.integral_inv_sqrt_cube_sub_one`](DLMF/EllipticIntegrals/Reduction.lean#L70) (admitted).
+- [19.14.E2](https://dlmf.nist.gov/19.14.E2): [`DLMF.EllipticIntegrals.integral_inv_sqrt_one_sub_cube`](DLMF/EllipticIntegrals/Reduction.lean#L80) (admitted).
+- [19.14.E3](https://dlmf.nist.gov/19.14.E3): [`DLMF.EllipticIntegrals.integral_inv_sqrt_one_add_pow_four`](DLMF/EllipticIntegrals/Reduction.lean#L127) (proved).
+- [19.14.E4](https://dlmf.nist.gov/19.14.E4): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics`](DLMF/EllipticIntegrals/Reduction.lean#L690) (proved).
+- [19.14.E5](https://dlmf.nist.gov/19.14.E5): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics`](DLMF/EllipticIntegrals/Reduction.lean#L690) (proved).
+- [19.14.E6](https://dlmf.nist.gov/19.14.E6): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics`](DLMF/EllipticIntegrals/Reduction.lean#L690) (proved).
 - [19.14.E7](https://dlmf.nist.gov/19.14.E7): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics_zero`](DLMF/EllipticIntegrals/Reduction.lean#L191) (proved from the admitted integral_inv_sqrt_two_quadratics (19.14.4)).
-- [19.14.E8](https://dlmf.nist.gov/19.14.E8): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics_infty`](DLMF/EllipticIntegrals/Reduction.lean#L235) (admitted).
+- [19.14.E8](https://dlmf.nist.gov/19.14.E8): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics_infty`](DLMF/EllipticIntegrals/Reduction.lean#L779) (proved).
 - [19.14.E9](https://dlmf.nist.gov/19.14.E9): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics_left`](DLMF/EllipticIntegrals/Reduction.lean#L227) (proved from the admitted integral_inv_sqrt_two_quadratics (19.14.4)).
 - [19.14.E10](https://dlmf.nist.gov/19.14.E10): [`DLMF.EllipticIntegrals.integral_inv_sqrt_two_quadratics_right`](DLMF/EllipticIntegrals/Reduction.lean#L253) (proved from the admitted integral_inv_sqrt_two_quadratics (19.14.4)).
 
@@ -504,25 +504,25 @@ Prose:
 - [19.20.E5](https://dlmf.nist.gov/19.20.E5): [`DLMF.EllipticIntegrals.two_mul_symEllIntRG_self_right`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L426) (proved).
 - [19.20.E6](https://dlmf.nist.gov/19.20.E6): [`DLMF.EllipticIntegrals.symEllIntRJ_self`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L439) (proved); [`DLMF.EllipticIntegrals.symEllIntRJ_smul`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L450) (proved); [`DLMF.EllipticIntegrals.symEllIntRJ_self_right`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L465) (proved); [`DLMF.EllipticIntegrals.not_integrableOn_symEllIntRJ_zero_zero`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L469) (proved); [`DLMF.EllipticIntegrals.symEllIntRJ_self_self_self`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L476) (proved); [`DLMF.EllipticIntegrals.symEllIntRJ_self_self_self_eq`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L487) (proved). R_J(x,x,x,x), scaling and R_J(x,y,z,z) = R_D(x,y,z) proved; ∞ case as non-integrability (admitted).
 - [19.20.E7](https://dlmf.nist.gov/19.20.E7): [`DLMF.EllipticIntegrals.tendsto_symEllIntRJ_zero`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L497) (admitted).
-- [19.20.E8](https://dlmf.nist.gov/19.20.E8): [`DLMF.EllipticIntegrals.symEllIntRJ_self_right`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L465) (proved); [`DLMF.EllipticIntegrals.symEllIntRJ_zero_self_self`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L504) (proved); [`DLMF.EllipticIntegrals.symEllIntRJ_zero_self_self_neg`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L550) (admitted); [`DLMF.EllipticIntegrals.symEllIntRJ_self_right_eq`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L557) (proved); [`DLMF.EllipticIntegrals.symEllIntRJ_self_right_eq_of_neg`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L565) (admitted).
-- [19.20.E9](https://dlmf.nist.gov/19.20.E9): [`DLMF.EllipticIntegrals.symEllIntRJ_zero_sqrt`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L571) (admitted).
-- [19.20.E10](https://dlmf.nist.gov/19.20.E10): [`DLMF.EllipticIntegrals.tendsto_symEllIntRJ_zero_left`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L581) (admitted).
-- [19.20.E11](https://dlmf.nist.gov/19.20.E11): [`DLMF.EllipticIntegrals.symEllIntRJ_zero_asymptotic`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L593) (admitted).
-- [19.20.E12](https://dlmf.nist.gov/19.20.E12): [`DLMF.EllipticIntegrals.tendsto_mul_symEllIntRJ`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L601) (admitted).
-- [19.20.E13](https://dlmf.nist.gov/19.20.E13): [`DLMF.EllipticIntegrals.symEllIntRJ_special_p`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L609) (admitted).
-- [19.20.E14](https://dlmf.nist.gov/19.20.E14): [`DLMF.EllipticIntegrals.symEllIntRJ_principalValue`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L621) (admitted).
-- [19.20.E15](https://dlmf.nist.gov/19.20.E15): [`DLMF.EllipticIntegrals.symEllIntRJ_principalValue`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L621) (admitted).
-- [19.20.E16](https://dlmf.nist.gov/19.20.E16): [`DLMF.EllipticIntegrals.symEllIntRJ_principalValue_p`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L635) (proved).
-- [19.20.E17](https://dlmf.nist.gov/19.20.E17): [`DLMF.EllipticIntegrals.symEllIntRJ_principalValue_complete`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L646) (admitted).
-- [19.20.E18](https://dlmf.nist.gov/19.20.E18): [`DLMF.EllipticIntegrals.symEllIntRD_self`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L657) (proved); [`DLMF.EllipticIntegrals.symEllIntRD_smul`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L662) (proved); [`DLMF.EllipticIntegrals.symEllIntRD_zero_self`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L669) (proved); [`DLMF.EllipticIntegrals.not_integrableOn_symEllIntRD_zero_zero`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L678) (proved).
-- [19.20.E19](https://dlmf.nist.gov/19.20.E19): [`DLMF.EllipticIntegrals.symEllIntRD_isEquivalent_zero`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L684) (admitted).
-- [19.20.E20](https://dlmf.nist.gov/19.20.E20): [`DLMF.EllipticIntegrals.symEllIntRD_self_right`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L692) (proved).
-- [19.20.E21](https://dlmf.nist.gov/19.20.E21): [`DLMF.EllipticIntegrals.symEllIntRD_self_left`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L708) (proved).
-- [19.20.E22](https://dlmf.nist.gov/19.20.E22): [`DLMF.EllipticIntegrals.lemniscate_second_symEllIntRD`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L715) (proved). Exact identity only; the decimal value is excluded: numerical.
-- [19.20.E23](https://dlmf.nist.gov/19.20.E23): [`DLMF.EllipticIntegrals.symEllIntRD_lemniscatic`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L749) (proved). **Corrected** (domain): stated for real x, y > 0, and for Re x, Re y > 0 by `symEllIntRD_lemniscatic_complex`, as 19.20.E3; [`DLMF.EllipticIntegrals.symEllIntRD_lemniscatic_complex`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L763) (proved).
-- [19.20.E24](https://dlmf.nist.gov/19.20.E24): [`DLMF.EllipticIntegrals.symEllIntR_zero`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L780) (proved); [`DLMF.EllipticIntegrals.symEllIntR_neg_natCast`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L791) (proved). R_0 = 1 proved; the R_{-n} polynomial form admitted.
-- [19.20.E25](https://dlmf.nist.gov/19.20.E25): [`DLMF.EllipticIntegrals.symEllIntR_sum`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L807) (proved).
-- [19.20.E26](https://dlmf.nist.gov/19.20.E26): [`DLMF.EllipticIntegrals.symEllIntR_euler`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L820) (proved). Euler's integral, via lean-codes `Carlson.R.EulerTransform`.
+- [19.20.E8](https://dlmf.nist.gov/19.20.E8): [`DLMF.EllipticIntegrals.symEllIntRJ_self_right`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L465) (proved); [`DLMF.EllipticIntegrals.symEllIntRJ_zero_self_self`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L504) (proved); [`DLMF.EllipticIntegrals.symEllIntRJ_zero_self_self_neg`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L669) (proved); [`DLMF.EllipticIntegrals.symEllIntRJ_self_right_eq`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L693) (proved); [`DLMF.EllipticIntegrals.symEllIntRJ_self_right_eq_of_neg`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L701) (proved).
+- [19.20.E9](https://dlmf.nist.gov/19.20.E9): [`DLMF.EllipticIntegrals.symEllIntRJ_zero_sqrt`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L707) (admitted).
+- [19.20.E10](https://dlmf.nist.gov/19.20.E10): [`DLMF.EllipticIntegrals.tendsto_symEllIntRJ_zero_left`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L717) (admitted).
+- [19.20.E11](https://dlmf.nist.gov/19.20.E11): [`DLMF.EllipticIntegrals.symEllIntRJ_zero_asymptotic`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L729) (admitted).
+- [19.20.E12](https://dlmf.nist.gov/19.20.E12): [`DLMF.EllipticIntegrals.tendsto_mul_symEllIntRJ`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L737) (admitted).
+- [19.20.E13](https://dlmf.nist.gov/19.20.E13): [`DLMF.EllipticIntegrals.symEllIntRJ_special_p`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L745) (admitted).
+- [19.20.E14](https://dlmf.nist.gov/19.20.E14): [`DLMF.EllipticIntegrals.symEllIntRJ_principalValue`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L757) (admitted).
+- [19.20.E15](https://dlmf.nist.gov/19.20.E15): [`DLMF.EllipticIntegrals.symEllIntRJ_principalValue`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L757) (admitted).
+- [19.20.E16](https://dlmf.nist.gov/19.20.E16): [`DLMF.EllipticIntegrals.symEllIntRJ_principalValue_p`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L771) (proved).
+- [19.20.E17](https://dlmf.nist.gov/19.20.E17): [`DLMF.EllipticIntegrals.symEllIntRJ_principalValue_complete`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L782) (admitted).
+- [19.20.E18](https://dlmf.nist.gov/19.20.E18): [`DLMF.EllipticIntegrals.symEllIntRD_self`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L793) (proved); [`DLMF.EllipticIntegrals.symEllIntRD_smul`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L798) (proved); [`DLMF.EllipticIntegrals.symEllIntRD_zero_self`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L805) (proved); [`DLMF.EllipticIntegrals.not_integrableOn_symEllIntRD_zero_zero`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L814) (proved).
+- [19.20.E19](https://dlmf.nist.gov/19.20.E19): [`DLMF.EllipticIntegrals.symEllIntRD_isEquivalent_zero`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L820) (admitted).
+- [19.20.E20](https://dlmf.nist.gov/19.20.E20): [`DLMF.EllipticIntegrals.symEllIntRD_self_right`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L828) (proved).
+- [19.20.E21](https://dlmf.nist.gov/19.20.E21): [`DLMF.EllipticIntegrals.symEllIntRD_self_left`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L844) (proved).
+- [19.20.E22](https://dlmf.nist.gov/19.20.E22): [`DLMF.EllipticIntegrals.lemniscate_second_symEllIntRD`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L851) (proved). Exact identity only; the decimal value is excluded: numerical.
+- [19.20.E23](https://dlmf.nist.gov/19.20.E23): [`DLMF.EllipticIntegrals.symEllIntRD_lemniscatic`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L885) (proved). **Corrected** (domain): stated for real x, y > 0, and for Re x, Re y > 0 by `symEllIntRD_lemniscatic_complex`, as 19.20.E3; [`DLMF.EllipticIntegrals.symEllIntRD_lemniscatic_complex`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L899) (proved).
+- [19.20.E24](https://dlmf.nist.gov/19.20.E24): [`DLMF.EllipticIntegrals.symEllIntR_zero`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L916) (proved); [`DLMF.EllipticIntegrals.symEllIntR_neg_natCast`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L927) (proved). R_0 = 1 proved; the R_{-n} polynomial form admitted.
+- [19.20.E25](https://dlmf.nist.gov/19.20.E25): [`DLMF.EllipticIntegrals.symEllIntR_sum`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L943) (proved).
+- [19.20.E26](https://dlmf.nist.gov/19.20.E26): [`DLMF.EllipticIntegrals.symEllIntR_euler`](DLMF/EllipticIntegrals/SymmetricSpecialCases.lean#L956) (proved). Euler's integral, via lean-codes `Carlson.R.EulerTransform`.
 Prose:
 
 - [19.20.i.p1](https://dlmf.nist.gov/19.20#i.p1), [19.20.i.p2](https://dlmf.nist.gov/19.20#i.p2), [19.20.ii.p1](https://dlmf.nist.gov/19.20#ii.p1), [19.20.iii.p1](https://dlmf.nist.gov/19.20#iii.p1), [19.20.iii.p2](https://dlmf.nist.gov/19.20#iii.p2), [19.20.iv.p1](https://dlmf.nist.gov/19.20#iv.p1), [19.20.iv.p2](https://dlmf.nist.gov/19.20#iv.p2), [19.20.v.p1](https://dlmf.nist.gov/19.20#v.p1): introduce the special cases; their conditions are in the docstrings. Decimal values of the lemniscate constants (19.20.2, 19.20.22) are excluded: numerical.
@@ -875,19 +875,19 @@ cases; the degenerate case of 19.29.iii.p1).
 - [19.29.E16](https://dlmf.nist.gov/19.29.E16): [`DLMF.EllipticIntegrals.ellRedI_cubic_recurrence`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L569) (proved).
 - [19.29.E17](https://dlmf.nist.gov/19.29.E17): [`DLMF.EllipticIntegrals.ellRedS3`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L564) (definition).
 - [19.29.E18](https://dlmf.nist.gov/19.29.E18): [`DLMF.EllipticIntegrals.ellRedI_recurrence`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L538) (proved).
-- [19.29.E19](https://dlmf.nist.gov/19.29.E19): [`DLMF.EllipticIntegrals.ellRed_quad_first`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L712) (admitted); [`DLMF.EllipticIntegrals.ellRed_quad_first_of_pos`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L735) (proved).
-- [19.29.E20](https://dlmf.nist.gov/19.29.E20): [`DLMF.EllipticIntegrals.ellRed_quad_second`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L786) (admitted).
-- [19.29.E21](https://dlmf.nist.gov/19.29.E21): [`DLMF.EllipticIntegrals.ellRed_quad_third`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L799) (admitted).
-- [19.29.E22](https://dlmf.nist.gov/19.29.E22): [`DLMF.EllipticIntegrals.ellRedQuadU`](DLMF/EllipticIntegrals/Reduction.lean#L155) (definition).
-- [19.29.E23](https://dlmf.nist.gov/19.29.E23): [`DLMF.EllipticIntegrals.ellRed_quad_infinite`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L831) (admitted).
-- [19.29.E24](https://dlmf.nist.gov/19.29.E24): [`DLMF.EllipticIntegrals.ellRedQuadRF`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L850) (definition); [`DLMF.EllipticIntegrals.ellRed_two_quadratics`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L860) (admitted).
-- [19.29.E25](https://dlmf.nist.gov/19.29.E25): [`DLMF.EllipticIntegrals.ellRedQuadS`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L840) (definition); [`DLMF.EllipticIntegrals.ellRedQuadD`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L846) (definition); [`DLMF.EllipticIntegrals.ellRedQuadRF`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L850) (definition).
-- [19.29.E26](https://dlmf.nist.gov/19.29.E26): [`DLMF.EllipticIntegrals.ellRedQuadS_linear_mul`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L884) (proved); [`DLMF.EllipticIntegrals.ellRed_linear_linear_quadratic`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L888) (proved from the admitted 19.29.E24).
+- [19.29.E19](https://dlmf.nist.gov/19.29.E19): [`DLMF.EllipticIntegrals.ellRed_quad_first`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L712) (proved); [`DLMF.EllipticIntegrals.ellRed_quad_first_of_pos`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L723) (proved).
+- [19.29.E20](https://dlmf.nist.gov/19.29.E20): [`DLMF.EllipticIntegrals.ellRed_quad_second`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L734) (admitted).
+- [19.29.E21](https://dlmf.nist.gov/19.29.E21): [`DLMF.EllipticIntegrals.ellRed_quad_third`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L747) (admitted).
+- [19.29.E22](https://dlmf.nist.gov/19.29.E22): [`DLMF.EllipticIntegrals.ellRedQuadU`](DLMF/EllipticIntegrals/Reduction.lean#L165) (definition).
+- [19.29.E23](https://dlmf.nist.gov/19.29.E23): [`DLMF.EllipticIntegrals.ellRed_quad_infinite`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L779) (proved).
+- [19.29.E24](https://dlmf.nist.gov/19.29.E24): [`DLMF.EllipticIntegrals.ellRedQuadRF`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L806) (definition); [`DLMF.EllipticIntegrals.ellRed_two_quadratics`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L816) (admitted).
+- [19.29.E25](https://dlmf.nist.gov/19.29.E25): [`DLMF.EllipticIntegrals.ellRedQuadS`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L796) (definition); [`DLMF.EllipticIntegrals.ellRedQuadD`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L802) (definition); [`DLMF.EllipticIntegrals.ellRedQuadRF`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L806) (definition).
+- [19.29.E26](https://dlmf.nist.gov/19.29.E26): [`DLMF.EllipticIntegrals.ellRedQuadS_linear_mul`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L840) (proved); [`DLMF.EllipticIntegrals.ellRed_linear_linear_quadratic`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L888) (proved from the admitted 19.29.E24).
 - [19.29.E27](https://dlmf.nist.gov/19.29.E27): [`DLMF.EllipticIntegrals.ellRed_linear_quadratic`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L920) (proved from the admitted 19.29.E24).
-- [19.29.E28](https://dlmf.nist.gov/19.29.E28): [`DLMF.EllipticIntegrals.ellRed_cube_difference`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L952) (admitted).
-- [19.29.E29](https://dlmf.nist.gov/19.29.E29): [`DLMF.EllipticIntegrals.ellRed_cube_difference`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L952) (admitted).
-- [19.29.E30](https://dlmf.nist.gov/19.29.E30): [`DLMF.EllipticIntegrals.ellRed_biquadratic`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L978) (admitted).
-- [19.29.E31](https://dlmf.nist.gov/19.29.E31): [`DLMF.EllipticIntegrals.ellRedBiquadU`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L972) (definition).
+- [19.29.E28](https://dlmf.nist.gov/19.29.E28): [`DLMF.EllipticIntegrals.ellRed_cube_difference`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L908) (admitted).
+- [19.29.E29](https://dlmf.nist.gov/19.29.E29): [`DLMF.EllipticIntegrals.ellRed_cube_difference`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L908) (admitted).
+- [19.29.E30](https://dlmf.nist.gov/19.29.E30): [`DLMF.EllipticIntegrals.ellRed_biquadratic`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L934) (admitted).
+- [19.29.E31](https://dlmf.nist.gov/19.29.E31): [`DLMF.EllipticIntegrals.ellRedBiquadU`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L928) (definition).
 - [19.29.E32](https://dlmf.nist.gov/19.29.E32): [`DLMF.EllipticIntegrals.ellRed_quartic_plus`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L980) (proved from the admitted 19.29.E30).
 - [19.29.E33](https://dlmf.nist.gov/19.29.E33): [`DLMF.EllipticIntegrals.ellRed_quartic_plus`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L980) (proved from the admitted 19.29.E30).
 
@@ -908,7 +908,7 @@ cases; the degenerate case of 19.29.iii.p1).
 - [19.29.iii.p1](https://dlmf.nist.gov/19.29#iii.p1): (19.29.19)–(19.29.23) and the degenerate case `U = 0`: `DLMF.EllipticIntegrals.ellRed_quad_degenerate` (admitted; checked numerically with `Q₁ = t² - 1`, `Q₂ = 4 - t²`).
 - [19.29.iii.p2](https://dlmf.nist.gov/19.29#iii.p2), [19.29.iii.p3](https://dlmf.nist.gov/19.29#iii.p3), [19.29.iii.p4](https://dlmf.nist.gov/19.29#iii.p4): (19.29.24)–(19.29.33); the parenthetical remark on when the `R_F` variables are real and nonnegative is recorded in the docstring of `ellRedQuadRF` (complex `V` is allowed), not as a theorem.
 - [19.29.ii](https://dlmf.nist.gov/19.29.ii): [`DLMF.EllipticIntegrals.ellRedI_reduction`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L471) (admitted).
-- [19.29.iii](https://dlmf.nist.gov/19.29.iii): [`DLMF.EllipticIntegrals.ellRed_quad_degenerate`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L814) (admitted).
+- [19.29.iii](https://dlmf.nist.gov/19.29.iii): [`DLMF.EllipticIntegrals.ellRed_quad_degenerate`](DLMF/EllipticIntegrals/SymmetricReduction.lean#L762) (admitted).
 
 ### Corrections and added hypotheses (§19.27–19.29)
 

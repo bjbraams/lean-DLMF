@@ -31,6 +31,8 @@ public import DLMFMathlib.Analysis.Complex.GeometricNewtonSeries
 public import DLMFMathlib.Analysis.Complex.LagrangeBurmann
 public import DLMFMathlib.Analysis.Complex.MellinBarnesSeries
 public import DLMFMathlib.Analysis.Complex.ParameterContinuity
+public import DLMFMathlib.Analysis.Complex.RoucheFilledHull
+public import DLMFMathlib.Analysis.Complex.LaurentAnnulus
 public import DLMFMathlib.Analysis.Complex.ParameterLimits
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMFMathlib.Analysis.Complex.PowerSeriesOperations
@@ -69,6 +71,7 @@ public import DLMFMathlib.Analysis.ODE.LiouvilleGreenVolterra
 public import DLMFMathlib.Analysis.ODE.EntireLinear
 public import DLMFMathlib.Analysis.ODE.LinearGlobal
 public import DLMFMathlib.Analysis.ODE.ParamHolomorphic
+public import DLMFMathlib.Analysis.ODE.BallLinear
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import DLMFMathlib.Analysis.ODE.SoninePolya
 public import DLMFMathlib.Analysis.ODE.SturmComparison
@@ -168,12 +171,12 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.Topology.Order.ZeroEnumeration`: unique zeros of strictly monotone functions and the
   enumeration of zeros separated by a sequence of points.
 * `DLMFMathlib.NumberTheory.EulerPolynomials`: Euler polynomials and Euler numbers.
-* `DLMFMathlib.Analysis.ODE.EntireLinear`, `P1oLinearGlobal`, `P1oParamHolomorphic`: entire
+* `DLMFMathlib.Analysis.ODE.EntireLinear`, `LinearGlobal`, `ParamHolomorphic`: entire
   solutions of linear second-order ODEs with entire coefficients, global solutions on ℝ for
   continuous coefficients, and holomorphic dependence on a linear parameter.
 * `DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic`: an entire 2π-periodic function is the sum of
   its Fourier series on all of ℂ; cosine and sine series and Parseval for even and odd functions.
-* `DLMFMathlib.Analysis.ODE.SturmSpectrum`, `P2sGrowth`, `P2sOscillation`: spectra of real
+* `DLMFMathlib.Analysis.ODE.SturmSpectrum`, `SturmGrowth`, `SturmOscillation`: spectra of real
   Sturm–Liouville problems through entire boundary functions, energy estimates, and infinitely
   many zeros when the coefficient tends to +∞.
 * `DLMFMathlib.Analysis.ODE.SturmLiouville`: separated Sturm–Liouville theory for
@@ -213,4 +216,15 @@ the namespaces of the Mathlib APIs they extend. These modules do not import `DLM
 * `DLMFMathlib.RingTheory.PowerSeriesEvaluation`: absolutely convergent evaluation of integer power
   series at a complex point, with its algebra (products, powers, `1 - X^k`, geometric series).
 * `DLMFMathlib.RingTheory.Binomial`: falling-factorial and shifted binomial coefficient identities.
+* `DLMFMathlib.Analysis.ODE.BallLinear`: solutions on a ball of linear second-order ODEs with
+  holomorphic coefficients.
+* `DLMFMathlib.Analysis.Complex.RoucheFilledHull`: Rouché's theorem on the filled hull of a
+  compact set.
+* `DLMFMathlib.Analysis.Complex.LaurentAnnulus`: the Cauchy formula on an annulus and the
+  expansion of the inner integral (Laurent's theorem).
+* `DLMFMathlib.Analysis.Analytic.OfScalarsDeriv`: derivatives of scalar power series and ODEs
+  from coefficient recurrences.
+* `DLMFMathlib.Analysis.Complex.ParameterContinuity`: continuity and analyticity in parameters of
+  slopes and dominated series.
+* `DLMFMathlib.Analysis.SpecialFunctions.Gamma.Bounds`: bounds for `1/Γ(a + n)`.
 -/

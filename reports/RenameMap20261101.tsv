@@ -5326,3 +5326,5 @@ declaration	DLMF.JacobiElliptic.jacobiThetaOneTau_zero	DLMF.JacobiElliptic.jacob
 declaration	DLMF.Lame.continuous_jacobiSnm	DLMF.Elliptic.Real.continuous_jacobiSnm	removed duplicate; target added to DLMF.Elliptic.Basic.Jacobi
 declaration	DLMF.Lame.continuous_jacobiDnm	DLMF.Elliptic.Real.continuous_jacobiDnm	removed duplicate; target added to DLMF.Elliptic.Basic.Jacobi
 declaration	DLMF.OrthogonalPolynomials.deriv_kummerM_regular	DLMF.Confluent.deriv_kummerM	removed wrapper
+statement	DLMF.Coulomb.hasSum_coulombHPlus_log	DLMF.Coulomb.hasSum_coulombHPlus_log	hypothesis η ≠ 0 added (false at η = 0 in Lean's totalized form)
+statement	DLMF.Coulomb.hasSum_coulombHMinus_log	DLMF.Coulomb.hasSum_coulombHMinus_log	hypothesis η ≠ 0 added (false at η = 0 in Lean's totalized form)

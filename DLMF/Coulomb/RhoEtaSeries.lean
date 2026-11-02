@@ -27,7 +27,7 @@ functions `I_k`, `J_k`, with the asymptotic form of `G_ℓ` in functions `K_k` (
   (DLMF 33.6.1–33.6.2).
 * `powerSeriesCoeff_eq_hyp2F1`: `A_k^ℓ` as a terminating `₂F₁` (DLMF 33.6.4).
 * `hasSum_coulombHPlus_log`, `hasSum_coulombHMinus_log`: the logarithmic series of `H^±_ℓ`
-  (DLMF 33.6.5).
+  (DLMF 33.6.5), for `η ≠ 0`.
 * `besselSeriesCoeffA_initial`, `besselSeriesCoeffA_recurrence`: the coefficients `a_k`
   (DLMF 33.9.2).
 * `hasSum_coulombF_sphericalJ`: `F_ℓ(η,ρ) = ρ ∑_{k ≥ 0} a_k j_{ℓ+k}(ρ)` (DLMF 33.9.1).
@@ -404,10 +404,11 @@ theorem powerSeriesCoeff_eq_hyp2F1 (ℓ : ℕ) (η : ℝ) {k : ℕ} (hk : ℓ + 
 /-- **The logarithmic series of `H^+_ℓ`** (DLMF 33.6.5, upper signs), `ρ > 0`, with
 `a = 1 + ℓ + iη`, `z = -2iρ`:
 `H^+_ℓ = e^{iθ_ℓ}/((2ℓ+1)! Γ(-ℓ+iη)) (∑_{k ≥ 0} … - ∑_{k=1}^{2ℓ+1} …)`, stated as the sum of
-the convergent series. -/
+the convergent series. The formula needs `η ≠ 0`: at `η = 0` it holds only as a limit, since
+`1/Γ(-ℓ)` vanishes while the finite sum has poles. -/
 @[dlmf 33.6.E5]
-theorem hasSum_coulombHPlus_log (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) {a z : ℂ}
-    (ha : a = 1 + ℓ + I * η) (hz : z = -2 * I * ρ) :
+theorem hasSum_coulombHPlus_log (ℓ : ℕ) (η : ℝ) (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ)
+    {a z : ℂ} (ha : a = 1 + ℓ + I * η) (hz : z = -2 * I * ρ) :
     HasSum (fun k : ℕ => poch a k / (poch (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
         (log z + Complex.digamma (a + k) - Complex.digamma (1 + k) -
           Complex.digamma (2 * ℓ + 2 + k)))
@@ -418,10 +419,10 @@ theorem hasSum_coulombHPlus_log (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ)
   sorry
 
 /-- **The logarithmic series of `H^-_ℓ`** (DLMF 33.6.5, lower signs), `ρ > 0`, with
-`a = 1 + ℓ - iη`, `z = 2iρ`. -/
+`a = 1 + ℓ - iη`, `z = 2iρ`, for `η ≠ 0`. -/
 @[dlmf 33.6.E5]
-theorem hasSum_coulombHMinus_log (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) {a z : ℂ}
-    (ha : a = 1 + ℓ - I * η) (hz : z = 2 * I * ρ) :
+theorem hasSum_coulombHMinus_log (ℓ : ℕ) (η : ℝ) (hη : η ≠ 0) {ρ : ℝ} (hρ : 0 < ρ)
+    {a z : ℂ} (ha : a = 1 + ℓ - I * η) (hz : z = 2 * I * ρ) :
     HasSum (fun k : ℕ => poch a k / (poch (2 * (ℓ : ℂ) + 2) k * k !) * z ^ (a + k) *
         (log z + Complex.digamma (a + k) - Complex.digamma (1 + k) -
           Complex.digamma (2 * ℓ + 2 + k)))
